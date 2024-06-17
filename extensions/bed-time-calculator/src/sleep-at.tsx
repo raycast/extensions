@@ -14,12 +14,10 @@ export default function Command(props: LaunchProps<{ arguments: Values }>) {
   >([]);
   const [error, setError] = useState<string | null>(null);
 
-  // Get the sleepAtTime argument from props
-  const { sleepAtTime } = props.arguments;
-
   useEffect(() => {
+    const { sleepAtTime } = props.arguments;
     calculateWakeUpTimes(sleepAtTime);
-  }, [sleepAtTime]);
+  }, [props.arguments]);
 
   function calculateWakeUpTimes(time: string) {
     const timePattern = /^(0?\d|1\d|2[0-3]):([0-5]\d)$/; // Regex for HH:MM format allowing optional leading zero
@@ -63,7 +61,7 @@ export default function Command(props: LaunchProps<{ arguments: Values }>) {
 
   return (
     <Form>
-      <Form.TextField id="sleepAtTime" title="Sleep At Time (HH:MM)" defaultValue={sleepAtTime} />
+      <Form.Description text={`Sleep At Time: ${props.arguments.sleepAtTime}`} />
       {error && <Form.Description text={error} />}
       <Form.Separator />
       <Form.Description text="Recommended Wake Up Times:" />
