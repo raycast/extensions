@@ -84,7 +84,7 @@
     {
       "name": "glue-jobs",
       "title": "Glue Jobs",
-      "description": "Find and open a Glue job run",
+      "description": "List Glue Jobs and view details",
       "mode": "view"
     },
     {

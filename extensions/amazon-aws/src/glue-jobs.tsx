@@ -33,21 +33,8 @@ function GlueFunction({ func: glueJobName }: { func: string }) {
       actions={
         <ActionPanel>
           <AwsAction.Console url={resourceToConsoleLink(glueJobName, "AWS::Glue::JobRuns")} />
-          <Action.OpenInBrowser
-            icon={Icon.Document}
-            title="Open CloudWatch Log Group"
-            url={resourceToConsoleLink(`/aws/lambda/${glueJobName}`, "AWS::Logs::LogGroup")}
-            shortcut={{ modifiers: ["cmd"], key: "l" }}
-          />
-          <Action.Push
-            title={"View Log Streams"}
-            icon={Icon.Eye}
-            shortcut={{ modifiers: ["opt"], key: "l" }}
-            target={<CloudwatchLogStreams logGroupName={`/aws/lambda/${glueJobName}`}></CloudwatchLogStreams>}
-          />
           <ActionPanel.Section title={"Copy"}>
-            <Action.CopyToClipboard title="Copy Function ARN" content={glueJobName} />
-            <Action.CopyToClipboard title="Copy Function Name" content={glueJobName || ""} />
+            <Action.CopyToClipboard title="Copy Job Name" content={glueJobName || ""} />
           </ActionPanel.Section>
         </ActionPanel>
       }

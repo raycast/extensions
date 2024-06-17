@@ -29,7 +29,8 @@ function createSsoLoginUri(uri: string): string {
     typeof process.env.AWS_SSO_ACCOUNT_ID !== "undefined" &&
     typeof process.env.AWS_SSO_ROLE_NAME !== "undefined" &&
     typeof process.env.AWS_SSO_START_URL !== "undefined"
-  )
+  ) {
     sso_login_uri = `${process.env.AWS_SSO_START_URL}/console?account_id=${encodeURI(process.env.AWS_SSO_ACCOUNT_ID)}&role_name=${encodeURI(process.env.AWS_SSO_ROLE_NAME)}&destination=`;
+  }
   return `${normalizeUrl(sso_login_uri + encodeURIComponent(uri))}`;
 }
