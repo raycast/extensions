@@ -1,6 +1,6 @@
 # Changelog
 
-## [Jira Server Support] - {PR_MERGE_DATE}
+## [Jira Server Support] - 2024-06-17
 
 - Now supports both Jira Server and Jira Cloud instances.
 - Updated time logging UI/UX for faster/more Raycast-like user experience.
