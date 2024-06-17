@@ -39,7 +39,6 @@ export function PopiconGrid() {
       isLoading={status === "pending"}
       searchBarPlaceholder="Search icons..."
       inset={Grid.Inset.Large}
-      navigationTitle={`Popicons${selectedIconId ? ` - ${selectedIconId}` : ""}`}
       onSelectionChange={setSelectedIconId}
       columns={getColumnAmount(preferences.iconPreviewSize)}
       searchBarAccessory={
