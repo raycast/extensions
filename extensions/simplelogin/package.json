@@ -70,7 +70,7 @@
           "label": "Prefill Alias Description",
           "description": "Prefill the alias description based on the hostname of the currently active tab in your browser.",
           "type": "checkbox",
-          "default": true,
+          "default": false,
           "required": false
         }
       ]
