@@ -1,5 +1,10 @@
 # Copy Path Changelog
 
+## [Copy Window Title] - 2024-06-06
+
+- Copy the title of the current window when no path or URL is detected
+- Copy tab title of the current browser window when copying the URL of the browser tab
+
 ## [Update Icon] - 2024-05-26
 
 - Update the extension's icon

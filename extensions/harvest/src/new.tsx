@@ -24,7 +24,7 @@ export default function Command({
   onSave = async () => {
     return;
   },
-  viewDate = new Date(),
+  viewDate,
   entry,
 }: {
   onSave: () => Promise<void>;
@@ -35,11 +35,10 @@ export default function Command({
   const { data: company, error } = useCompany();
   const { data: projects } = useMyProjects();
   const [projectId, setProjectId] = useState<string | null>(entry?.project.id.toString() ?? null);
-  // const [tasks, setTasks] = useState<HarvestTaskAssignment[]>([]);
   const [taskId, setTaskId] = useState<string | null>(entry?.task.id.toString() ?? null);
   const [notes, setNotes] = useState<string>(entry?.notes ?? "");
   const [hours, setHours] = useState<string>(formatHours(entry?.hours?.toFixed(2), company));
-  const [spentDate, setSpentDate] = useState<Date | null>(viewDate);
+  const [spentDate, setSpentDate] = useState<Date>(viewDate ?? new Date());
   const { showClient = false } = getPreferenceValues<{ showClient?: boolean }>();
 
   useEffect(() => {

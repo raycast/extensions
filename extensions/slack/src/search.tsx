@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
+import { ActionPanel, Icon, Image, List } from "@raycast/api";
 
 import { CacheProvider, onApiError, useChannels, useGroups, useUsers } from "./shared/client";
 import { UpdatesModal } from "./shared/UpdatesModal";
-import { openChannel, openChat } from "./shared/utils";
+import { OpenChannelInSlack, OpenChatInSlack, useSlackApp } from "./shared/OpenInSlack";
 
 export default function Command() {
   return (
@@ -15,6 +15,7 @@ export default function Command() {
 }
 
 function SlackList() {
+  const { isAppInstalled, isLoading } = useSlackApp();
   const { data: users, error: usersError, isValidating: isValidatingUsers } = useUsers();
   const { data: channels, error: channelsError, isValidating: isValidatingChannels } = useChannels();
   const { data: groups, error: groupsError, isValidating: isValidatingGroups } = useGroups();
@@ -31,16 +32,16 @@ function SlackList() {
   }
 
   return (
-    <List isLoading={isValidatingUsers || isValidatingGroups || isValidatingChannels}>
+    <List isLoading={isValidatingUsers || isValidatingGroups || isValidatingChannels || isLoading}>
       <List.Section title="Users">
-        {users?.map(({ name, id, teamId, icon }) => (
+        {users?.map(({ name, id: userId, teamId: workspaceId, icon, conversationId }) => (
           <List.Item
-            key={id}
+            key={userId}
             title={name}
             icon={icon ? { source: icon, mask: Image.Mask.Circle } : Icon.Person}
             actions={
               <ActionPanel>
-                <Action title="Open in Slack" onAction={() => openChat(teamId, id)} />
+                <OpenChatInSlack {...{ workspaceId, userId, isAppInstalled, conversationId }} />
               </ActionPanel>
             }
           />
@@ -48,14 +49,14 @@ function SlackList() {
       </List.Section>
 
       <List.Section title="Channels">
-        {channels?.map(({ name, id, teamId, icon }) => (
+        {channels?.map(({ name, id: channelId, teamId: workspaceId, icon }) => (
           <List.Item
-            key={id}
+            key={channelId}
             title={name}
             icon={icon}
             actions={
               <ActionPanel>
-                <Action title="Open in Slack" onAction={() => openChannel(teamId, id)} />
+                <OpenChannelInSlack {...{ workspaceId, channelId, isAppInstalled }} />
               </ActionPanel>
             }
           />
@@ -63,14 +64,14 @@ function SlackList() {
       </List.Section>
 
       <List.Section title="Groups">
-        {groups?.map(({ name, id, teamId, icon }) => (
+        {groups?.map(({ name, id: channelId, teamId: workspaceId, icon }) => (
           <List.Item
-            key={id}
+            key={channelId}
             title={name}
             icon={icon}
             actions={
               <ActionPanel>
-                <Action title="Open in Slack" onAction={() => openChannel(teamId, id)} />
+                <OpenChannelInSlack {...{ workspaceId, channelId, isAppInstalled }} />
               </ActionPanel>
             }
           />

@@ -1,4 +1,4 @@
-import { getPreferenceValues, LocalStorage, updateCommandMetadata } from "@raycast/api";
+import { captureException, getPreferenceValues, LocalStorage, updateCommandMetadata } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { addDays } from "date-fns/addDays";
 import { addWeeks } from "date-fns/addWeeks";
@@ -8,6 +8,7 @@ import { sendPushNotificationWithNtfy } from "./utils/sendPushNotificationWithNt
 import { sanitizeTopicForNotification } from "./utils/sanitizeTopicForNotification";
 import { SimpleReminderPreferences } from "./types/preferences";
 import { Frequency } from "./types/frequency";
+import { buildException } from "./utils/buildException";
 
 export default async function Command() {
   const { mobileNotificationNtfy, mobileNotificationNtfyTopic } = getPreferenceValues<SimpleReminderPreferences>();
@@ -20,7 +21,7 @@ export default async function Command() {
       const cleanTopic = sanitizeTopicForNotification(reminder.topic);
 
       await sendPushNotificationToMacOS(cleanTopic);
-      if (mobileNotificationNtfy) {
+      if (mobileNotificationNtfy && mobileNotificationNtfyTopic) {
         await sendPushNotificationWithNtfy(mobileNotificationNtfyTopic, cleanTopic);
       }
 
@@ -43,7 +44,11 @@ function isReminderInThePast(reminder: Reminder) {
 }
 
 function sendPushNotificationToMacOS(cleanTopic: string) {
-  return runAppleScript(`display notification "${cleanTopic}" with title "Simple Reminder" sound name "default"`);
+  try {
+    return runAppleScript(`display notification "${cleanTopic}" with title "Simple Reminder" sound name "default"`);
+  } catch (error) {
+    captureException(buildException(error as Error, "Error sending push notification to macOS"));
+  }
 }
 
 function updateReminderDateForRecurrence(reminder: Reminder) {

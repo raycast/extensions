@@ -1,4 +1,9 @@
-import { getChromiumBrowserPath, getFocusFinderPath, getWebkitBrowserPath } from "./applescript-utils";
+import {
+  getChromiumBrowserPath,
+  getFocusFinderPath,
+  getFocusWindowTitle,
+  getWebkitBrowserPath,
+} from "./applescript-utils";
 import {
   Application,
   Clipboard,
@@ -8,7 +13,7 @@ import {
   updateCommandMetadata,
 } from "@raycast/api";
 import { chromiumBrowserNames, webkitBrowserNames } from "./constants";
-import { copyUrlContent, multiPathSeparator, showCopyTip, showLastCopy } from "../types/preferences";
+import { copyUrlContent, multiPathSeparator, showCopyTip, showLastCopy, showTabTitle } from "../types/preferences";
 import parseUrl from "parse-url";
 
 export const copyFinderPath = async () => {
@@ -57,10 +62,10 @@ export const copyUrl = async (frontmostApp: Application) => {
     url = await getChromiumBrowserPath(frontmostApp.name);
   }
 
+  const windowTitle = await getFocusWindowTitle();
   if (url === "") {
-    const finderPath = await getFocusFinderPath();
-    await Clipboard.copy(finderPath);
-    await showSuccessHUD("🗂️ " + finderPath);
+    await Clipboard.copy(windowTitle);
+    await showSuccessHUD("🖥️ " + windowTitle);
   } else {
     // handle url
     const parsedUrl = parseUrl(url);
@@ -81,6 +86,9 @@ export const copyUrl = async (frontmostApp: Application) => {
       default: {
         break;
       }
+    }
+    if (showTabTitle) {
+      copyContent = `${windowTitle}\n${copyContent}`;
     }
     await Clipboard.copy(copyContent);
     await showSuccessHUD("🔗 " + copyContent);

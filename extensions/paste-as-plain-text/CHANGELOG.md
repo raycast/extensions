@@ -1,5 +1,14 @@
 # Paste as Plain text Changelog
 
+## [Paste as File] - 2024-06-17
+
+-  Paste as File, extract file path from the clipboard and paste it as file
+-  Auto fetch title from URL when pasting as Markdown Link and Markdown Image
+
+## [Function Optimisation] - 2024-06-06
+
+-  Update Paste as Number: Now all the numbers will be extracted and stitched together for display
+
 ## [Fix Hotkey Error] - 2024-05-27
 
 -  Fix the problem of using hotkeys to invoke commands

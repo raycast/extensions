@@ -1,6 +1,11 @@
 # Mute microphone Changelog
 
+## [Bugfix] - 2024-05-31
+
+- Fix menu bar icon behaviour
+
 ## [Bugfix] - 2024-05-28
+
 - Fix the case where the toggle command opens Raycast
 
 ## [Improvements] - 2024-05-28

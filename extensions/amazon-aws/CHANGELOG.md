@@ -1,5 +1,21 @@
 # Amazon AWS Changelog
 
+## [Console command] - 2024-06-17
+
+- Adds shortcut login for SSO profiles
+
+## [SQS, CFN, DDB, CW Logs commands] - 2024-06-14
+
+- Native raycast pagination support for DDB, SQS, CFN and CW logs commands
+- Typeahead search for SQS and CW logs command
+- Extra metadata and new icon for CW logs command
+
+## [Improvements] - 2024-06-06
+
+- Adds sort descending and consistent read functionalities to DDB queries
+- Saves the query projection expression in between form renders
+- Improved toast error handling for SQS, DDB and CFN command actions
+
 ## [DynamoDB command] - 2024-05-30
 
 - Adds UpdateItem, DeleteItem and Query functionalities for the tables

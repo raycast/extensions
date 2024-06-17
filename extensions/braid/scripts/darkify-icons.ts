@@ -1,4 +1,5 @@
 import fs from "fs/promises";
+import { load } from "cheerio";
 
 (async () => {
   const icons = await fs.readdir("./braid-icons");
@@ -8,15 +9,33 @@ import fs from "fs/promises";
     await fs.mkdir("./assets/icons");
   }
 
-  for (const icon of icons) {
-    const iconSvgLight = await fs.readFile(`./braid-icons/${icon}`, "utf-8");
+  // Todo - Fix icon message filled
+  // Todo - Setup this script to automatically run on change of icon folder
 
-    let iconSvgDark = iconSvgLight
-      .replace(/<path (.*)(fill="#.{3,6}" ?)(.*)\/>/g, `<path $1$3/>`)
-      .replace(/<(path|circle|rect) /g, `<$1 fill="#ffffff" `);
-    if (icon.includes("message")) {
-      iconSvgDark = iconSvgLight.replace(/stroke:.*;/g, `stroke: #ffffff;`);
-    }
+  for (const icon of icons) {
+    const iconContent = await fs.readFile(`./braid-icons/${icon}`, "utf-8");
+
+    const $ = load(iconContent);
+    $("svg *").each((i, el) => {
+      const $el = $(el);
+
+      // Update existing color attributes for dark mode
+      ["stroke", "fill"].forEach((attr) => {
+        const color = $el.attr(attr);
+        const replaceColors = ["#000"];
+        if (color && replaceColors.includes(color)) {
+          $el.attr(attr, "#ffffff");
+        }
+      });
+
+      // Add fill attributes
+      if (["path", "rect", "circle"].includes(el.tagName) && !$el.attr("fill")) {
+        $el.attr("fill", "#ffffff");
+      }
+    });
+
+    const iconSvgLight = load(iconContent).html();
+    const iconSvgDark = $.html();
 
     await Promise.all([
       fs.writeFile(`./assets/icons/${icon.replace(".svg", "")}-light.svg`, iconSvgLight),

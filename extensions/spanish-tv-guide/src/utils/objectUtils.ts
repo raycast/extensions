@@ -1,3 +1,5 @@
 import { isEmpty, isNull } from "lodash";
 
-export { isEmpty, isNull };
+type Maybe<T> = T | undefined | null;
+
+export { isEmpty, isNull, type Maybe };
