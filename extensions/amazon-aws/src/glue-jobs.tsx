@@ -2,7 +2,6 @@ import { GlueClient, ListJobsCommand } from "@aws-sdk/client-glue";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import CloudwatchLogStreams from "./components/cloudwatch/CloudwatchLogStreams";
 import { isReadyToFetch, resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
 
