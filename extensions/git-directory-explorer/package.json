@@ -37,7 +37,7 @@
           "name": "terminalApp",
           "title": "Terminal App",
           "type": "appPicker",
-          "default": "com.apple.terminal",
+          "default": "com.apple.Terminal",
           "required": true,
           "label": "Preferred Terminal App",
           "description": "Select your preferred terminal app"
