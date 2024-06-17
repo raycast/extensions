@@ -6,7 +6,7 @@ import { isReadyToFetch, resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
 
 export default function GlueJobs() {
-  const { data: functions, error, isLoading, revalidate } = useCachedPromise(fetchJobs);
+  const { data: glueJobs, error, isLoading, revalidate } = useCachedPromise(fetchJobs);
 
   return (
     <List
@@ -17,13 +17,13 @@ export default function GlueJobs() {
       {error ? (
         <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
       ) : (
-        functions?.map((func) => <GlueFunction key={func} func={func} />)
+        glueJobs?.map((job) => <GlueJob key={job} job={job} />)
       )}
     </List>
   );
 }
 
-function GlueFunction({ func: glueJobName }: { func: string }) {
+function GlueJob({ job: glueJobName }: { job: string }) {
   return (
     <List.Item
       key={glueJobName}
