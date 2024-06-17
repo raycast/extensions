@@ -1,7 +1,16 @@
-import { Action, ActionPanel, Icon, Form, showToast, Toast, getPreferenceValues, getFrontmostApplication } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  Form,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  getFrontmostApplication,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import { useFetch, useForm } from "@raycast/utils";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { chromiumBrowserNames, getChromiumBrowserPath, getWebkitBrowserPath, webkitBrowserNames } from "./utils";
 
 interface Preferences {
@@ -28,22 +37,26 @@ interface ApiResponse {
 
 const fetchLink = async (preferences: Preferences, values: FormValues, ownerIDValue: number | undefined) => {
   try {
-    const response = await axios.post(`${preferences.LinkwardenUrl}/api/v1/links`, {
-      name: values.name,
-      url: values.url,
-      description: values.description,
-      type: "url",
-      tags: values.tagPicker.map(tag => ({ name: tag })),
-      collection: {
-        name: "Unorganized",
-        ownerId: ownerIDValue
-      }
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': `__Secure-next-auth.session-token=${preferences.LinkwardenApiKey}`
-      }
-    });
+    const response = await axios.post(
+      `${preferences.LinkwardenUrl}/api/v1/links`,
+      {
+        name: values.name,
+        url: values.url,
+        description: values.description,
+        type: "url",
+        tags: values.tagPicker.map((tag) => ({ name: tag })),
+        collection: {
+          name: "Unorganized",
+          ownerId: ownerIDValue,
+        },
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: `__Secure-next-auth.session-token=${preferences.LinkwardenApiKey}`,
+        },
+      },
+    );
 
     if (response.status !== 200) {
       throw new Error("Failed to post link");
@@ -54,7 +67,7 @@ const fetchLink = async (preferences: Preferences, values: FormValues, ownerIDVa
       title: "Link posted successfully",
     });
   } catch (error) {
-    const axiosError = error as any; // or use AxiosError if you have imported it from 'axios'
+    const axiosError = error as AxiosError;
     console.error("Error posting link:", axiosError);
     if (axiosError.response) {
       const status = axiosError.response.status;
@@ -85,19 +98,16 @@ const fetchLink = async (preferences: Preferences, values: FormValues, ownerIDVa
       });
     }
   }
-}
+};
 
 export default () => {
   const preferences = getPreferenceValues<Preferences>();
 
-  const [browserPath, setBrowserPath] = useState('');
-
-  const [frontmostApp, setFrontmostApp] = useState<any>(null);
+  const [browserPath, setBrowserPath] = useState("");
 
   const fetchBrowserPath = async () => {
     try {
       const app = await getFrontmostApplication();
-      setFrontmostApp(app);
 
       let path = "";
       if (webkitBrowserNames.includes(app.name)) {
@@ -125,17 +135,19 @@ export default () => {
     fetchBrowserPath();
   }, []);
 
-
-  const { isLoading, data }: { isLoading: boolean, data: ApiResponse | undefined } = useFetch<ApiResponse>(`${preferences.LinkwardenUrl}/api/v1/tags`, {
-    headers: {
-      'Cookie': `__Secure-next-auth.session-token=${preferences.LinkwardenApiKey}`
+  const { data }: { data: ApiResponse | undefined } = useFetch<ApiResponse>(
+    `${preferences.LinkwardenUrl}/api/v1/tags`,
+    {
+      headers: {
+        Cookie: `__Secure-next-auth.session-token=${preferences.LinkwardenApiKey}`,
+      },
+      keepPreviousData: true,
     },
-    keepPreviousData: true
-  });
+  );
 
   const dataArray = Array.isArray(data?.response) ? data.response : [];
 
-  const firstOwnerID = dataArray.find(tag => tag.ownerId);
+  const firstOwnerID = dataArray.find((tag) => tag.ownerId);
 
   const ownerIDValue = firstOwnerID?.ownerId;
 
@@ -151,19 +163,24 @@ export default () => {
       }
 
       await fetchLink(preferences, values, ownerIDValue);
-    }
+    },
   });
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={Icon.PlusSquare} title="Add the website" shortcut={{ modifiers: ["cmd"], key: "s" }} onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            icon={Icon.PlusSquare}
+            title="Add the Website"
+            shortcut={{ modifiers: ["cmd"], key: "s" }}
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >
       <Form.TextField id="url" value={browserPath} title="URL" />
-      <Form.TextField id='name' title="Name" placeholder="Keep default name" autoFocus />
+      <Form.TextField id="name" title="Name" placeholder="Keep default name" autoFocus />
       <Form.TagPicker {...itemProps.tagPicker} title="Tag Picker">
         {dataArray.map((tag) => (
           <Form.TagPicker.Item value={tag.name} title={tag.name} key={tag.id} />
@@ -172,4 +189,4 @@ export default () => {
       <Form.TextArea title="Description" id="description" placeholder="A super website..." />
     </Form>
   );
-}
+};

@@ -26,12 +26,15 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState("");
 
-  const { isLoading, data, revalidate } = useFetch<ApiResponse>(`${preferences.LinkwardenUrl}/api/v1/links?sort=0&searchQueryString=${searchText}&searchByName=true&searchByUrl=true&searchByDescription=true&searchByTags=true&searchByTextContent=true`, {
-    headers: {
-      'Cookie': `__Secure-next-auth.session-token=${preferences.LinkwardenApiKey}`
+  const { isLoading, data, revalidate } = useFetch<ApiResponse>(
+    `${preferences.LinkwardenUrl}/api/v1/links?sort=0&searchQueryString=${searchText}&searchByName=true&searchByUrl=true&searchByDescription=true&searchByTags=true&searchByTextContent=true`,
+    {
+      headers: {
+        Cookie: `__Secure-next-auth.session-token=${preferences.LinkwardenApiKey}`,
+      },
+      keepPreviousData: true,
     },
-    keepPreviousData: true
-  });
+  );
 
   const dataArray = Array.isArray(data?.response) ? data.response : [];
 
@@ -39,8 +42,8 @@ export default function Command() {
     try {
       await axios.delete(`${preferences.LinkwardenUrl}/api/v1/links/${id}`, {
         headers: {
-          'Cookie': `__Secure-next-auth.session-token=${preferences.LinkwardenApiKey}`
-        }
+          Cookie: `__Secure-next-auth.session-token=${preferences.LinkwardenApiKey}`,
+        },
       });
 
       showToast({
