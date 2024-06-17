@@ -1,4 +1,4 @@
-import { MatchFixture, TeamDetailData } from "../types/team-detail";
+import type { MatchFixture, TeamDetailData } from "@/types/team-detail";
 import { useTeamDetail } from "./useTeamDetail";
 
 export type Data = TeamDetailData & {

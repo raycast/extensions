@@ -1,6 +1,6 @@
-import { useCachedPromise } from "@raycast/utils";
 import fetch from "cross-fetch";
-import { MatchFixture, TeamDetailData } from "../types/team-detail";
+import { useCachedPromise } from "@raycast/utils";
+import type { MatchFixture, TeamDetailData } from "@/types/team-detail";
 
 // Extend TeamDetailData
 export type Data = TeamDetailData & {
@@ -25,7 +25,7 @@ export function useTeamDetail(teamId: string) {
     [teamId],
     {
       initialData: {},
-    }
+    },
   );
 
   return { data, error, isLoading };
