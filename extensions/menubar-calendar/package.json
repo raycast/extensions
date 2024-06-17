@@ -2,12 +2,19 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "menubar-calendar",
   "title": "Menubar Calendar",
-  "description": "Show calendar in the menu bar",
+  "description": "Show calendar and reminders in the menu bar.",
   "icon": "calendar-icon.png",
   "author": "koinzhang",
   "license": "MIT",
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Productivity",
+    "System"
+  ],
   "keywords": [
     "calendar",
+    "reminders",
     "date",
     "ical",
     "cal",
@@ -21,9 +28,9 @@
       "name": "index",
       "title": "Menubar Calendar",
       "subtitle": "Calendar",
-      "description": "Show calendar in the menu bar",
+      "description": "Show calendar and reminders in the menu bar.",
       "mode": "menu-bar",
-      "interval": "1h",
+      "interval": "10m",
       "preferences": [
         {
           "title": "Week Start",
@@ -131,6 +138,32 @@
           "default": true
         },
         {
+          "name": "remindersView",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Upcoming",
+              "value": "upcoming"
+            },
+            {
+              "title": "All",
+              "value": "all"
+            }
+          ],
+          "default": "today",
+          "required": false,
+          "title": "Reminders View",
+          "description": "Choose which reminder view you want to see in your menu bar."
+        },
+        {
           "title": "Extra Items",
           "name": "showCalendar",
           "label": "Show Calendar",
@@ -153,16 +186,18 @@
           "type": "checkbox",
           "description": "Show Settings in the menu bar item",
           "required": false,
-          "default": false
+          "default": true
         }
       ]
     }
   ],
   "dependencies": {
+    "date-fns": "^3.6.0",
     "@raycast/api": "^1.76.0",
     "calendar": "^0.1.1",
     "unicode-text-decorator": "^0.1.1",
-    "weeknumber": "^1.2.1"
+    "weeknumber": "^1.2.1",
+    "@raycast/utils": "^1.16.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
