@@ -3,7 +3,6 @@ import { URL } from "node:url";
 import { useRef } from "react";
 import urljoin from "url-join";
 
-import { Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 import type { MDNResponse } from "@/types";
@@ -29,13 +28,7 @@ export const useSearch = (query: string, locale: string) => {
     {
       keepPreviousData: true,
       abortable,
-      onError: (err) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: `Could not load MDN results`,
-          message: String(err),
-        });
-      },
+      failureToastOptions: { title: "Could not load MDN results" },
     },
   );
 
