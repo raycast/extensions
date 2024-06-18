@@ -52,7 +52,7 @@ const initialScreen = `
 
 Do you already have installed the Crisp plugin? This extension works by installing a Crisp plugin on each website you want to control from Raycast.
 
-- [No, install the Crisp plugin](https://crisp.chat/en/integrations/urn:tommaso.de.rossi:raycast:0/)
+- [No, install the Crisp plugin](https://app.crisp.chat/initiate/plugin/f5ca7711-02b2-4f5b-bc39-216554c642b7/)
 
 - [Yes, let me login](https://crispyraycast.com/login/)
 
