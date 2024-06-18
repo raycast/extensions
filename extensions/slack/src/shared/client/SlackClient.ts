@@ -58,7 +58,7 @@ export class SlackClient {
   public static async getUsers(): Promise<User[]> {
     const [slackMembers, dmConversations] = await Promise.all([
       SlackClient.getSlackMembers(),
-      SlackClient.getConversations("im"),
+      SlackClient.getConversations(["im"]),
     ]);
 
     const users =
@@ -112,7 +112,7 @@ export class SlackClient {
   }
 
   private static async getConversations(
-    type: "public_channel" | "private_channel" | "mpim" | "im",
+    type: ("public_channel" | "private_channel" | "mpim" | "im")[],
   ): Promise<SlackConversation[]> {
     const slackWebClient = getSlackWebClient();
 
@@ -123,7 +123,7 @@ export class SlackClient {
       try {
         const response = await slackWebClient.conversations.list({
           exclude_archived: true,
-          types: type,
+          types: type.join(","),
           limit: 1000,
           cursor,
         });
@@ -138,15 +138,10 @@ export class SlackClient {
   }
 
   public static async getChannels(): Promise<Channel[]> {
-    const [publicChannels, privateChannels] = await Promise.all([
-      SlackClient.getConversations("public_channel"),
-      SlackClient.getConversations("private_channel"),
-    ]);
+    const channels = await SlackClient.getConversations(["public_channel", "private_channel"]);
 
-    const publicAndPrivateChannels = [...publicChannels, ...privateChannels];
-
-    const channels: Channel[] =
-      publicAndPrivateChannels
+    return (
+      channels
         .map(({ id, name, shared_team_ids, internal_team_ids, context_team_id, is_private }) => {
           const teamIds = [
             ...(internal_team_ids ?? []),
@@ -157,15 +152,14 @@ export class SlackClient {
           return { id, name, teamId, icon: is_private ? "channel-private.png" : "channel-public.png" };
         })
         .filter((i): i is Channel => !!(i.id?.trim() && i.name?.trim() && i.teamId.trim()))
-        .sort((a, b) => sortNames(a.name, b.name)) ?? [];
-
-    return channels;
+        .sort((a, b) => sortNames(a.name, b.name)) ?? []
+    );
   }
 
   public static async getGroups(): Promise<Group[]> {
     const users = await SlackClient.getUsers();
 
-    const conversations = await SlackClient.getConversations("mpim");
+    const conversations = await SlackClient.getConversations(["mpim"]);
 
     const groups: Group[] =
       conversations
