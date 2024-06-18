@@ -2,37 +2,42 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ratio-calculator",
   "title": "Ratio Calculator",
-  "description": "A calculator for quickly calculating ratios/proportions. Replace multiple values on one side with variables such as x or y. Example syntax: \"1:2 = x:4\" outputs \"x = 2\"",
-  "icon": "icon.png",
-  "author": "justiniscoding",
-  "categories": [
-    "Data"
-  ],
+  "description": "Calculation tools for the Golden Ratio, Silver Ratio, and other proportions",
+  "icon": "monchfun.png",
+  "author": "yang_monch",
   "license": "MIT",
   "commands": [
     {
-      "name": "calculate-ratio",
-      "title": "Calculate Ratio",
-      "description": "Calculates equivalent ratios",
+      "name": "golden-ratio",
+      "title": "Golden ratio",
+      "subtitle": "Golden ratio calculation",
+      "description": "Golden ratio calculation",
+      "mode": "view"
+    },{
+      "name": "silver-ratio",
+      "title": "Silver ratio",
+      "subtitle": "Silver ratio calculation",
+      "description": "Silver ratio calculation",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.59.0"
+    "@raycast/api": "^1.76.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }
