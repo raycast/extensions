@@ -1,5 +1,9 @@
 # Image Modification Changelog
 
+## [Bug Fix] - 2024-06-14
+
+- Fixed a bug where the "Flip Images Vertically" command flipped the images horizontally
+
 ## [WebP Hotfix] - 2024-01-29
 
 - Fixed some commands (e.g. convert) looking for WebP binaries in the wrong location
