@@ -32,7 +32,7 @@
     },
     {
       "name": "wake-up-at",
-      "title": "Wake up At",
+      "title": "Wake Up At",
       "description": "I know when I'll wake up and want to know when I should fall asleep",
       "mode": "view",
       "arguments": [
