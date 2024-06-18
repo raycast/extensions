@@ -258,10 +258,10 @@ export default function RaycastMonkeyTypeTheme() {
                     }}
                   />
                   <List.Item.Detail.Metadata.Label
-                      title="Theme Appearance"
-                      text={theme.appearance == "light" ? "Light" : "Dark"}
-                      icon={theme.appearance == "light" ? Icon.Sun : Icon.Moon}
-                    />
+                    title="Theme Appearance"
+                    text={theme.appearance == "light" ? "Light" : "Dark"}
+                    icon={theme.appearance == "light" ? Icon.Sun : Icon.Moon}
+                  />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label
                     title="Background Color"
