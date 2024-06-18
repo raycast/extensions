@@ -178,6 +178,15 @@ export default function RaycastMonkeyTypeTheme() {
           actions={
             <ActionPanel>
               <Action
+                title="Add Theme to Raycast"
+                icon={Icon.RaycastLogoNeg}
+                onAction={async () => {
+                  if (!(await validateIdentity(theme.name))) return;
+                  open(theme.appearance == "light" ? theme["ray.so.add.light.url"] : theme["ray.so.add.dark.url"]);
+                  closeMainWindow();
+                }}
+              />
+              <Action
                 title="Add Light Appearance to Raycast"
                 icon={Icon.Sun}
                 onAction={async () => {
@@ -248,11 +257,11 @@ export default function RaycastMonkeyTypeTheme() {
                       source: getImageUrl(theme.name),
                     }}
                   />
-                  {/* <List.Item.Detail.Metadata.Label
+                  <List.Item.Detail.Metadata.Label
                       title="Theme Appearance"
                       text={theme.appearance == "light" ? "Light" : "Dark"}
                       icon={theme.appearance == "light" ? Icon.Sun : Icon.Moon}
-                    /> */}
+                    />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label
                     title="Background Color"
