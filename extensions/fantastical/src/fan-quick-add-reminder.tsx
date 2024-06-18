@@ -1,14 +1,13 @@
 import { getPreferenceValues, open, showHUD, showToast, Toast } from "@raycast/api";
 import defaultBrowserId from "default-browser-id";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import { getName } from "./getName";
-import { Preferences } from "./helpers";
 
-interface Arguments {
-  add: string;
-}
+// This code will run a script to add the event to Fantastical
+// It will first check if Fantastical is installed
+// If it is not installed, it will show a toast
 
-export default async (props: { arguments: Arguments }) => {
+export default async (props: { arguments: Arguments.FanQuickAddEvent }) => {
   const args = props.arguments;
   const name = await getName();
   const defaultBrowser = await defaultBrowserId();
@@ -17,17 +16,19 @@ export default async (props: { arguments: Arguments }) => {
     const escapedAdd = args.add.replace(/"/g, '\\"');
     await runAppleScript(`
         tell application "${name}" 
-          parse sentence "TODO ${escapedAdd}" with add immediately
+          parse sentence "${escapedAdd}" with add immediately
         end tell`);
+
     const optionsSuccess: Toast.Options = {
       style: Toast.Style.Success,
-      title: "Reminder added",
-      message: "Your reminder has been added to Fantastical.",
+      title: "Event added",
+      message: "Your event has been added to Fantastical.",
     };
+
     // Will check if extension's hide preference is set
     // If true, it will show a HUD, else it will show a toast
     if (preferences.hideOnAdd) {
-      showHUD(`Reminder added`);
+      showHUD(`Event added`);
     } else {
       showToast(optionsSuccess);
     }
@@ -43,6 +44,7 @@ export default async (props: { arguments: Arguments }) => {
         },
       },
     };
+
     showToast(options);
   }
 };

@@ -1,18 +1,13 @@
 import { getPreferenceValues, open, showHUD, showToast, Toast } from "@raycast/api";
 import defaultBrowserId from "default-browser-id";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import { getName } from "./getName";
-import { Preferences } from "./helpers";
-
-interface Arguments {
-  add: string;
-}
 
 // This code will run a script to add the event to Fantastical
 // It will first check if Fantastical is installed
 // If it is not installed, it will show a toast
 
-export default async (props: { arguments: Arguments }) => {
+export default async (props: { arguments: Arguments.FanQuickAddEvent }) => {
   const args = props.arguments;
   const name = await getName();
   const defaultBrowser = await defaultBrowserId();
