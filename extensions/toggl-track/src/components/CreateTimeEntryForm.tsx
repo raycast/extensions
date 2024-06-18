@@ -35,6 +35,7 @@ function CreateTimeEntryForm({
     return tasks.find((task) => task.id === initialValues?.task_id);
   });
   const [selectedTags, setSelectedTags] = useState<string[]>(initialValues?.tags || []);
+  const [billable, setBillable] = useState(initialValues?.billable || false);
 
   async function handleSubmit(values: { description: string; billable?: boolean }) {
     const workspaceId = selectedProject?.workspace_id || me?.default_workspace_id;
@@ -194,6 +195,8 @@ function CreateTimeEntryForm({
             <Form.TagPicker.Item key={tag.id} value={tag.name.toString()} title={tag.name} />
           ))}
       </Form.TagPicker>
+
+      <Form.Checkbox id="billable" label="Billable" value={billable} onChange={setBillable} />
     </Form>
   );
 }

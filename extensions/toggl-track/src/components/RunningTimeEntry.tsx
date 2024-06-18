@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, showToast, Toast, Color } from "@raycast/api";
 import dayjs from "dayjs";
 
 import { stopTimeEntry, TimeEntry, TimeEntryMetaData } from "@/api";
@@ -44,7 +44,10 @@ function RunningTimeEntry({
           (runningTimeEntry.project_name ?? "") +
           dayjs.duration(dayjs(currentTime).diff(runningTimeEntry.start), "milliseconds").format("HH:mm:ss")
         }
-        accessories={[...runningTimeEntry.tags.map((tag) => ({ tag })), { text: runningTimeEntry.billable ? "$" : "" }]}
+        accessories={[
+          ...runningTimeEntry.tags.map((tag) => ({ tag })),
+          { tag: { value: runningTimeEntry.billable ? "$" : undefined, color: Color.Magenta } },
+        ]}
         icon={{ source: Icon.Circle, tintColor: runningTimeEntry.project_color }}
         actions={
           <ActionPanel>
