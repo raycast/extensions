@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pip",
   "title": "PiP",
-  "description": "Watch HTML5 video in Picture in Picture mode",
+  "description": "Watch video in Picture in Picture mode",
   "icon": "pip-icon.png",
   "author": "koinzhang",
   "license": "MIT",
@@ -16,13 +16,14 @@
     "picture-in-picture",
     "video",
     "html5",
-    "picture"
+    "picture",
+    "iina"
   ],
   "commands": [
     {
       "name": "toggle-pip",
       "title": "Toggle PiP",
-      "description": "Toggle HTML5 video in Picture in Picture mode",
+      "description": "Toggle video in Picture in Picture mode",
       "mode": "no-view"
     }
   ],

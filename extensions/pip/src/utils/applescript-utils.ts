@@ -81,3 +81,22 @@ export const pipBrowserVideo = async (browser: string) => {
   }
   return retChromium;
 };
+
+const scriptIina = () => `
+tell application "IINA"
+	activate
+	tell application "System Events"
+		keystroke "p" using {control down, command down}
+	end tell
+end tell
+`;
+
+export const pipIina = async () => {
+  try {
+    return await runAppleScript(scriptIina());
+  } catch (e) {
+    captureException(e);
+    console.error(e);
+    return String(e);
+  }
+};
