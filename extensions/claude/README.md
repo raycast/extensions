@@ -70,7 +70,8 @@ All preferences properties list that can be customize through `Raycast Settings 
 
 | Properties               | Label                  | Value                               | Required | Default | Description                                                                                                      |
 | ------------------------ | ---------------------- | ----------------------------------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
-| `apiKey`                 | API Key                | `string`                            | `true`   | `empty` | Your personal Anthropic API key                                                                                   |
+| `apiKey`                 | API Key                | `string`                            | `true`   | `empty` | Your personal Anthropic API key |
+| `useStream`              | Stream Respones        | `boolean`                           | `true`   | `true`  | Stream responses from Claude in real-time |                                                                         
 | `isAutoLoadText`         | Auto-load              | `boolean`                           | `false`  | `false` | Load selected text from your frontmost application to the `question bar` or `full text input form` automatically |
 | `isAutoFullInput`        | Use Full Text Input    | `boolean`                           | `false`  | `false` | Switch to `full text input form` from `question bar` automatically whenever you want to ask or type a question   |
 ---
