@@ -10,13 +10,13 @@
     {
       "name": "golden-ratio",
       "title": "Golden Ratio",
-      "description": "",
+      "description": "Enter the numbers to calculate the golden ratio",
       "mode": "view"
     },
     {
       "name": "silver-ratio",
       "title": "Silver Ratio",
-      "description": "",
+      "description": "Enter the numbers to calculate the silver ratio",
       "mode": "view"
     }
   ],
