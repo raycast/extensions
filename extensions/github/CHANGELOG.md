@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Fix copy commit hash action] - 2024-06-17
+
+- Fixes an issue where the copy commit hash action incorrectly copied the commit message instead of the commit hash.
+
 ## [Add sections to "My Issues Menu Bar" command] - 2024-06-14
 
 - Added filterable sections to issues menu bar, very similar to PR menu bar.

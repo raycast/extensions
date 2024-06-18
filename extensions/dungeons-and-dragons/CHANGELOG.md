@@ -1,5 +1,8 @@
 # Dungeons & Dragons Changelog
 
+## [Linting fixes] - 2024-06-13
+- Fixing linting errors
+
 ## [Initial Version] - 2024-05-29
 
 - Adds the following commands in the Dungeons & Dragons Extension:

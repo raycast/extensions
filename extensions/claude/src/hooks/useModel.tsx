@@ -9,7 +9,8 @@ export const DEFAULT_MODEL: Model = {
   name: "Haiku",
   prompt: "You are a helpful assistant.",
   option: "claude-3-haiku-20240307",
-  temperature: 1,
+  temperature: "1",
+  max_tokens: "4096",
   pinned: false,
 };
 

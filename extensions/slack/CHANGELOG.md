@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Performance] - 2024-06-08
+
+- Improve performance when fetching users and channels in large workspace
+
 ## [Improvements and Fixes] - 2024-06-14
 
 - Adds action to open in browser apart from slack app
