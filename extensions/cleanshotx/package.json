@@ -9,7 +9,8 @@
     "thomaslombart",
     "lukaszmtw",
     "erics118",
-    "mlnchk"
+    "mlnchk",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "commands": [
@@ -262,7 +263,7 @@
       "title": "Restore Recently Closed",
       "subtitle": "CleanShot X",
       "description": "Restore Recently Closed Overlay",
-      "icon": "capture-previous-area.png",
+      "icon": "restore.png",
       "mode": "no-view"
     },
     {

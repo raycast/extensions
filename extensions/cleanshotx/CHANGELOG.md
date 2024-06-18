@@ -1,5 +1,9 @@
 # Cleanshot X Changelog
 
+## [Fix icons] - 2024-06-17
+- Fix incorrect icon for restore-recently-closed command
+- Update icon for extension
+
 ## [Add new commands and icons] - 2024-05-14
 - Add open settings command
 - Add open all uploads command to open https://cleanshot.cloud/ in browser
