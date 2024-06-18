@@ -8,7 +8,7 @@ const hasHttps = (url: string) => url.startsWith("https://");
 const headers = {
   Authorization: "Bearer " + apiKey,
   "Content-Type": "application/json",
-  "user-agent": `${extensionName}/${commandName}`,
+  "user-agent": `raycast/${extensionName}/${commandName}`,
 };
 
 export const getAllWorkspaces = async () => {
