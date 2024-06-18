@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-06-18
 
 - CodePipeline: Adds action to retry failed stage, stop ongoing execution and toggle stage transition
 - Secrets Manager: Retrieves secret value in a new Detail navigation and adds extra metadata
