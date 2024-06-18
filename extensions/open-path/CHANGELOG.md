@@ -1,6 +1,6 @@
 # Open Path Changelog
 
-## [Update Command Metadata] - {PR_MERGE_DATE}
+## [Update Command Metadata] - 2024-06-18
 
 -  Fix the problem of not updating the command metadata
 
