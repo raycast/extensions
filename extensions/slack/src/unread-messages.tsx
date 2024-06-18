@@ -1,16 +1,8 @@
-import { Action, ActionPanel, Icon, Image, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { isEqual } from "lodash";
 import { useEffect, useState } from "react";
 
-import {
-  Message,
-  onApiError,
-  SlackClient,
-  useChannels,
-  useGroups,
-  useUnreadConversations,
-  useUsers,
-} from "./shared/client";
+import { Message, onApiError, SlackClient, useAllChannels, useUnreadConversations, useUsers } from "./shared/client";
 import { UpdatesModal } from "./shared/UpdatesModal";
 import { withSlackClient } from "./shared/withSlackClient";
 import { timeDifference } from "./shared/utils";
@@ -30,9 +22,12 @@ function UnreadMessagesOverview() {
   const [selectedConversations, setSelectedConversations] = useState<string[]>();
 
   const { isAppInstalled, isLoading } = useSlackApp();
-  const { data: users, isLoading: isLoadingUsers, error: usersError } = useUsers();
-  const { data: channels, isLoading: isLoadingChannels, error: channelsError } = useChannels();
-  const { data: groups, isLoading: isLoadingGroups, error: groupsError } = useGroups();
+  const { data, isLoading: isLoadingChannels, error: channelsError } = useAllChannels();
+
+  const users = data?.users ?? [];
+  const channels = data?.channels ?? [];
+  const groups = data?.groups ?? [];
+
   const {
     data: unreadConversations,
     error: unreadConversationsError,
@@ -45,7 +40,7 @@ function UnreadMessagesOverview() {
     let conversations = item ? (JSON.parse(item as string) as string[]).sort() : [];
 
     // unselect conversations that don't exist anymore
-    if (users && channels && groups && !usersError && !channelsError && !groupsError) {
+    if (users && channels && groups && !channelsError) {
       conversations = conversations.filter(
         (id: string) =>
           !!users.find((user) => user.conversationId === id) ||
@@ -78,7 +73,7 @@ function UnreadMessagesOverview() {
     return () => clearInterval(interval);
   }, [selectedConversations]);
 
-  if (usersError && channelsError && groupsError && unreadConversationsError) {
+  if (channelsError && unreadConversationsError) {
     onApiError({ exitExtension: true });
   }
 
@@ -104,16 +99,7 @@ function UnreadMessagesOverview() {
   };
 
   return (
-    <List
-      isLoading={
-        !selectedConversations ||
-        isLoadingUnreadConversations ||
-        isLoadingUsers ||
-        isLoadingChannels ||
-        isLoadingGroups ||
-        isLoading
-      }
-    >
+    <List isLoading={!selectedConversations || isLoadingUnreadConversations || isLoadingChannels || isLoading}>
       {selectedConversations && selectedConversations.length === 0 && (
         <List.EmptyView
           icon={Icon.Gear}
@@ -238,9 +224,11 @@ function UnreadMessagesConversation({
 
 function Configuration() {
   const [selectedConversations, setSelectedConversations] = useState<string[]>([]);
-  const { data: users, isLoading: isLoadingUsers, error: usersError } = useUsers();
-  const { data: channels, isLoading: isLoadingChannels, error: channelsError } = useChannels();
-  const { data: groups, isLoading: isLoadingGroups, error: groupsError } = useGroups();
+  const { data, isLoading: isLoadingChannels, error: channelsError } = useAllChannels();
+
+  const users = data?.users ?? [];
+  const channels = data?.channels ?? [];
+  const groups = data?.groups ?? [];
 
   useEffect(() => {
     LocalStorage.getItem(conversationsStorageKey).then((item) => {
@@ -270,83 +258,42 @@ function Configuration() {
     }
   };
 
-  if (usersError && channelsError && groupsError) {
+  if (channelsError) {
     onApiError({ exitExtension: true });
   }
 
+  const sections = [
+    { title: "Direct Messages", conversations: users.filter(({ conversationId }) => !!conversationId) },
+    { title: "Channels", conversations: channels },
+    { title: "Groups", conversations: groups },
+  ];
+
   return (
-    <List
-      navigationTitle="Unread Messages — Configuration"
-      isLoading={!selectedConversations || isLoadingUsers || isLoadingChannels || isLoadingGroups}
-    >
-      <List.Section title="Direct Messages">
-        {users
-          ?.filter(({ conversationId }) => !!conversationId)
-          .map(({ name, conversationId, icon }) => {
-            const isConversationSelected = selectedConversations.includes(conversationId!);
+    <List navigationTitle="Unread Messages — Configuration" isLoading={!selectedConversations || isLoadingChannels}>
+      {sections.map(({ title, conversations }) => (
+        <List.Section key={title} title={title}>
+          {conversations?.map(({ name, id, icon }) => {
+            const isConversationSelected = selectedConversations.includes(id);
             return (
               <List.Item
-                key={conversationId}
+                key={id}
                 title={name}
-                icon={isConversationSelected ? Icon.Checkmark : Icon.Circle}
+                icon={isConversationSelected ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.Circle}
                 accessories={[{ icon: { source: icon, mask: Image.Mask.Circle } }]}
                 actions={
                   <ActionPanel>
                     <Action
                       icon={Icon.Eye}
                       title={isConversationSelected ? "Unselect" : "Observe Conversation"}
-                      onAction={() => toggleConversation(conversationId!)}
+                      onAction={() => toggleConversation(id)}
                     />
                   </ActionPanel>
                 }
               />
             );
           })}
-      </List.Section>
-      <List.Section title="Channels">
-        {channels?.map(({ name, id, icon }) => {
-          const isConversationSelected = selectedConversations.includes(id);
-          return (
-            <List.Item
-              key={id}
-              title={name}
-              icon={isConversationSelected ? Icon.Checkmark : Icon.Circle}
-              accessories={[{ icon }]}
-              actions={
-                <ActionPanel>
-                  <Action
-                    icon={Icon.Eye}
-                    title={isConversationSelected ? "Unselect" : "Observe Conversation"}
-                    onAction={() => toggleConversation(id)}
-                  />
-                </ActionPanel>
-              }
-            />
-          );
-        })}
-      </List.Section>
-      <List.Section title="Groups">
-        {groups?.map(({ name, id, icon }) => {
-          const isConversationSelected = selectedConversations.includes(id);
-          return (
-            <List.Item
-              key={id}
-              title={name}
-              icon={isConversationSelected ? Icon.Checkmark : Icon.Circle}
-              accessories={[{ icon }]}
-              actions={
-                <ActionPanel>
-                  <Action
-                    icon={Icon.Eye}
-                    title={isConversationSelected ? "Unselect" : "Observe Conversation"}
-                    onAction={() => toggleConversation(id)}
-                  />
-                </ActionPanel>
-              }
-            />
-          );
-        })}
-      </List.Section>
+        </List.Section>
+      ))}
     </List>
   );
 }

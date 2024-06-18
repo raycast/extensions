@@ -1,6 +1,6 @@
 import { ActionPanel, Action, Icon, Image, List } from "@raycast/api";
 
-import { User, onApiError, useChannels, useGroups, useUsers } from "./shared/client";
+import { User, onApiError, useAllChannels } from "./shared/client";
 import { UpdatesModal } from "./shared/UpdatesModal";
 import { withSlackClient } from "./shared/withSlackClient";
 import { useFrecencySorting } from "@raycast/utils";
@@ -16,24 +16,18 @@ function Search() {
 
 function SlackList() {
   const { isAppInstalled, isLoading } = useSlackApp();
-  const { data: users, isLoading: isLoadingUsers, error: usersError } = useUsers();
-  const { data: channels, isLoading: isLoadingChannels, error: channelsError } = useChannels();
-  const { data: groups, isLoading: isLoadingGroups, error: groupsError } = useGroups();
+  const { data, isLoading: isLoadingChannels, error: channelsError } = useAllChannels();
 
-  if (usersError && channelsError && groupsError) {
+  const channels = [...(data?.users ?? []), ...(data?.channels ?? []), ...(data?.groups ?? [])];
+
+  if (channelsError) {
     onApiError({ exitExtension: true });
   }
 
-  const {
-    data: recents,
-    visitItem,
-    resetRanking,
-  } = useFrecencySorting([...(users ?? []), ...(channels ?? []), ...(groups ?? [])], {
-    key: (item) => item.id,
-  });
+  const { data: recents, visitItem, resetRanking } = useFrecencySorting(channels, { key: (item) => item.id });
 
   return (
-    <List isLoading={isLoadingUsers || isLoadingChannels || isLoadingGroups || isLoading}>
+    <List isLoading={isLoading || isLoadingChannels}>
       {recents.map((item) => {
         const isUser = item.id.startsWith("U");
 
@@ -62,13 +56,13 @@ function SlackList() {
             />
           );
         } else {
-          const { id: channelId, name, icon, teamId: workspaceId } = item as User;
+          const { id: channelId, name, icon, teamId: workspaceId } = item;
 
           return (
             <List.Item
               key={channelId}
               title={name}
-              icon={isUser ? (icon ? { source: icon, mask: Image.Mask.Circle } : Icon.Person) : icon}
+              icon={icon}
               actions={
                 <ActionPanel>
                   <OpenChannelInSlack
