@@ -2,7 +2,7 @@
  * These types have been copied over from official dub SDK: https://d.to/sdk
  */
 
-import { TagSchema } from ".";
+import { TagSchema } from "@/types";
 
 export type LinkSchema = {
   /**

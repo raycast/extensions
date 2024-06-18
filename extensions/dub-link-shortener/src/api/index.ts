@@ -1,7 +1,7 @@
 import axios from "axios";
-import { BASE_API_URL } from "../utils/constants";
-import { apiKey, commandName, extensionName } from "../utils/env";
-import { DeleteLinkResponseBody, LinkSchema, TagSchema, WorkspaceId, WorkspaceSchema } from "../types";
+import { BASE_API_URL } from "@utils/constants";
+import { apiKey, commandName, extensionName } from "@utils/env";
+import { DeleteLinkResponseBody, LinkSchema, TagSchema, WorkspaceId, WorkspaceSchema } from "@/types";
 import { captureException } from "@raycast/api";
 
 const hasHttps = (url: string) => url.startsWith("https://");

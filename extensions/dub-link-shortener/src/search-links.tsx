@@ -6,18 +6,18 @@ import {
   Color,
   confirmAlert,
   Icon,
+  Image,
   List,
   showToast,
   Toast,
 } from "@raycast/api";
-import { useShortLinks } from "./hooks/use-short-links";
-import { useWorkspaces } from "./hooks/use-workspaces";
+import { useShortLinks } from "@hooks/use-short-links";
+import { useWorkspaces } from "@hooks/use-workspaces";
 import { useState } from "react";
-import { DUB_CO_URL } from "./utils/constants";
-import { deleteShortLink, getAllShortLinks } from "./api";
+import { DUB_CO_URL } from "@utils/constants";
+import { deleteShortLink, getAllShortLinks } from "@/api";
 import { MutatePromise, showFailureToast } from "@raycast/utils";
-import { WorkspaceAccessory } from "./components/workspace-accessory";
-import { LinkSchema } from "./types";
+import { LinkSchema } from "@/types";
 
 export default function SearchLinks() {
   const [workspaceId, setWorkspaceId] = useState<string>("");
@@ -26,7 +26,6 @@ export default function SearchLinks() {
     shortLinks,
     error: linksError,
     isLoading: isLoadingLinks,
-    revalidate,
     mutate,
   } = useShortLinks({ workspaceId, workspacesError });
 
@@ -39,7 +38,24 @@ export default function SearchLinks() {
       searchBarPlaceholder={"Search links by domain, url, key, comments, tags..."}
       filtering
       searchBarAccessory={
-        <WorkspaceAccessory {...{ setWorkspaceId, revalidate, workspaces, isLoading: isLoadingWorkspaces }} />
+        <List.Dropdown
+          tooltip="Select Workspace"
+          placeholder="Select Workspace"
+          storeValue
+          filtering
+          isLoading={isLoadingWorkspaces}
+          onChange={setWorkspaceId}
+        >
+          {(workspaces ?? []).map((w) => (
+            <List.Dropdown.Item
+              key={w.id}
+              title={w.name}
+              value={w.id}
+              keywords={[w.id, w.name, w.slug]}
+              icon={{ source: w.logo ?? "command-icon.png", mask: Image.Mask.Circle }}
+            />
+          ))}
+        </List.Dropdown>
       }
     >
       {(workspacesError || linksError) && (

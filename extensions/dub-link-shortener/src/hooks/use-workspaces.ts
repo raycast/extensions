@@ -1,6 +1,6 @@
 import { useCachedPromise } from "@raycast/utils";
-import { getAllTags, getAllWorkspaces } from "../api";
-import { WorkspaceSchema } from "../types";
+import { getAllTags, getAllWorkspaces } from "@/api";
+import { WorkspaceSchema } from "@/types";
 
 export const useWorkspaces = () => {
   const {

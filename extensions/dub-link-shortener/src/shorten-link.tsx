@@ -13,10 +13,10 @@ import {
   useNavigation,
   LaunchProps,
 } from "@raycast/api";
-import { useWorkspaces } from "./hooks/use-workspaces";
+import { useWorkspaces } from "@hooks/use-workspaces";
 import { FormValidation, showFailureToast, useCachedPromise, useCachedState, useForm } from "@raycast/utils";
-import { createShortLink } from "./api";
-import { fetchLink, isEmpty } from "./utils/clipboard";
+import { createShortLink } from "@/api";
+import { fetchLink, isEmpty } from "@utils/clipboard";
 
 interface ShortLinkFormValues {
   workspaceId: string;

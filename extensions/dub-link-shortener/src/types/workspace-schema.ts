@@ -1,7 +1,7 @@
 /**
  * These types have been copied over from official dub SDK: https://d.to/sdk
  */
-import { TagSchema } from "./tag-schema";
+import { TagSchema } from "@/types";
 
 export type Users = {
   /**
