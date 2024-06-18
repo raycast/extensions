@@ -1,11 +1,11 @@
 import { Action, ActionPanel, Color, Icon, Image, List, LocalStorage, showToast, Toast } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { isEqual } from "lodash";
 import { useEffect, useState } from "react";
+import * as emoji from "node-emoji";
 
 import { Message, SlackClient, useChannels, User, useUnreadConversations } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
-import { timeDifference } from "./shared/utils";
+import { handleError, timeDifference } from "./shared/utils";
 import { OpenChannelInSlack, useSlackApp } from "./shared/OpenInSlack";
 
 const conversationsStorageKey = "$unread-messages$selected-conversations";
@@ -70,7 +70,7 @@ function UnreadMessages() {
       }
     } catch (error) {
       if (actionTriggeredManually) {
-        await showFailureToast(error, { title: "Could not mark conversation as read" });
+        await handleError(error, "Could not mark conversation as read");
       }
     }
   };
@@ -196,7 +196,7 @@ function UnreadMessagesConversation({
             icon={{ source: user?.icon ?? Icon.Person, mask: Image.Mask.Circle }}
             title={user?.name ?? ""}
             subtitle={timeDifference(new Date(message.receivedAt))}
-            detail={<List.Item.Detail markdown={message.message} />}
+            detail={<List.Item.Detail markdown={emoji.emojify(message.message)} />}
           />
         );
       })}
@@ -243,23 +243,46 @@ function Configuration({ data, refreshConversations }: ConfigurationProps) {
   };
 
   const sections = [
-    { title: "Direct Messages", conversations: users?.filter(({ conversationId }) => !!conversationId) },
     { title: "Channels", conversations: channels },
     { title: "Groups", conversations: groups },
   ];
 
   return (
     <List navigationTitle="Unread Messages — Configuration">
+      <List.Section title="Direct Messages">
+        {users?.map(({ name, icon, conversationId }) => {
+          if (!conversationId) return;
+          const isConversationSelected = selectedConversations.includes(conversationId);
+          return (
+            <List.Item
+              key={conversationId}
+              title={name}
+              icon={isConversationSelected ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.Circle}
+              accessories={[{ icon: { source: icon, mask: Image.Mask.Circle } }]}
+              actions={
+                <ActionPanel>
+                  <Action
+                    icon={Icon.Eye}
+                    title={isConversationSelected ? "Unselect" : "Observe Conversation"}
+                    onAction={() => toggleConversation(conversationId)}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
+      </List.Section>
+
       {sections.map(({ title, conversations }) => (
         <List.Section key={title} title={title}>
-          {conversations?.map(({ name, id, icon }) => {
+          {conversations?.map(({ id, name, icon }) => {
             const isConversationSelected = selectedConversations.includes(id);
             return (
               <List.Item
                 key={id}
                 title={name}
                 icon={isConversationSelected ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.Circle}
-                accessories={[{ icon: { source: icon, mask: Image.Mask.Circle } }]}
+                accessories={[{ icon }]}
                 actions={
                   <ActionPanel>
                     <Action

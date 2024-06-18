@@ -83,16 +83,12 @@ export class SlackClient {
 
     let cursor: string | undefined;
     do {
-      try {
-        const response = await slackWebClient.users.list({
-          limit: 1000,
-          cursor,
-        });
-        slackMembers.push(...(response.members ?? []));
-        cursor = response.response_metadata?.next_cursor;
-      } catch (e) {
-        break;
-      }
+      const response = await slackWebClient.users.list({
+        limit: 1000,
+        cursor,
+      });
+      slackMembers.push(...(response.members ?? []));
+      cursor = response.response_metadata?.next_cursor;
     } while (cursor);
 
     return slackMembers;
@@ -107,18 +103,14 @@ export class SlackClient {
 
     let cursor: string | undefined;
     do {
-      try {
-        const response = await slackWebClient.conversations.list({
-          exclude_archived: true,
-          types: type.join(","),
-          limit: 1000,
-          cursor,
-        });
-        conversations.push(...(response.channels ?? []));
-        cursor = response.response_metadata?.next_cursor;
-      } catch (e) {
-        break;
-      }
+      const response = await slackWebClient.conversations.list({
+        exclude_archived: true,
+        types: type.join(","),
+        limit: 1000,
+        cursor,
+      });
+      conversations.push(...(response.channels ?? []));
+      cursor = response.response_metadata?.next_cursor;
     } while (cursor);
 
     return conversations;

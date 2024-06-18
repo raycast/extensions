@@ -1,10 +1,12 @@
 # Slack Changelog
 
-### [OAuth and Recents in Search] - 2024-06-18
+### [OAuth + Many Improvements] - 2024-06-18
 
-- **Added OAuth Support:** Users can now log in using OAuth for a more secure and streamlined authentication process.
-- **Improved Search Functionality:** Recently opened channels will now appear at the top of the search results, making it easier to find what you need quickly.
-- Improve `Set Presence` and `Set Snooze` icons and performance
+- **Added OAuth Support:** Users can now log in using OAuth, making it a more secure and streamlined authentication process.
+- **Improved Search Functionality:** Recently opened channels now appear at the top of search results, making it easier to find what you need quickly.
+- **Enhanced Icons:** The `Set Presence` and `Set Snooze` icons have been improved, along with their performance.
+- **Emojis for Unread Messages:** Emojis are now displayed when viewing unread messages.
+- **Better Error Handling:** The scopes error screen has been removed in favor of failure toasts, providing clearer error messages.
 
 ## [Improvements and Fixes] - 2024-06-14
 
