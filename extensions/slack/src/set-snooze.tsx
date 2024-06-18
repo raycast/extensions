@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Color, Form, Icon, Toast, closeMainWindow, showToast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { formatDistance } from "date-fns";
 
-import { SlackClient, onApiError } from "./shared/client";
+import { SlackClient } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
 
 function SetSnooze() {
@@ -29,8 +29,8 @@ function SetSnooze() {
                 }
 
                 await mutate();
-              } catch {
-                await onApiError();
+              } catch (error) {
+                await showFailureToast(error, { title: "Could not set snooze" });
               }
             }}
           />

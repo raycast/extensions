@@ -1,28 +1,15 @@
 import { ActionPanel, Action, Icon, Image, List } from "@raycast/api";
 
-import { User, onApiError, useAllChannels } from "./shared/client";
-import { UpdatesModal } from "./shared/UpdatesModal";
+import { User, useChannels } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
 import { useFrecencySorting } from "@raycast/utils";
 import { OpenChannelInSlack, OpenChatInSlack, useSlackApp } from "./shared/OpenInSlack";
 
 function Search() {
-  return (
-    <UpdatesModal>
-      <SlackList />
-    </UpdatesModal>
-  );
-}
-
-function SlackList() {
   const { isAppInstalled, isLoading } = useSlackApp();
-  const { data, isLoading: isLoadingChannels, error: channelsError } = useAllChannels();
+  const { data, isLoading: isLoadingChannels } = useChannels();
 
-  const channels = [...(data?.users ?? []), ...(data?.channels ?? []), ...(data?.groups ?? [])];
-
-  if (channelsError) {
-    onApiError({ exitExtension: true });
-  }
+  const channels = data?.flat();
 
   const { data: recents, visitItem, resetRanking } = useFrecencySorting(channels, { key: (item) => item.id });
 

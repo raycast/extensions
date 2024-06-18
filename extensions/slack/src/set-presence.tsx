@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Form, Icon, Toast, closeMainWindow, showToast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 
-import { SlackClient, onApiError } from "./shared/client";
+import { SlackClient } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
 
 function SetPresence() {
@@ -40,8 +40,8 @@ function SetPresence() {
                 }
 
                 await mutate();
-              } catch {
-                await onApiError();
+              } catch (error) {
+                await showFailureToast(error, { title: "Could not set presence" });
               }
             }}
           />

@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Color, Icon, Image, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { isEqual } from "lodash";
 import { useEffect, useState } from "react";
 
-import { Message, onApiError, SlackClient, useAllChannels, useUnreadConversations, useUsers } from "./shared/client";
-import { UpdatesModal } from "./shared/UpdatesModal";
+import { Message, SlackClient, useChannels, User, useUnreadConversations } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
 import { timeDifference } from "./shared/utils";
 import { OpenChannelInSlack, useSlackApp } from "./shared/OpenInSlack";
@@ -11,26 +11,15 @@ import { OpenChannelInSlack, useSlackApp } from "./shared/OpenInSlack";
 const conversationsStorageKey = "$unread-messages$selected-conversations";
 
 function UnreadMessages() {
-  return (
-    <UpdatesModal>
-      <UnreadMessagesOverview />
-    </UpdatesModal>
-  );
-}
-
-function UnreadMessagesOverview() {
   const [selectedConversations, setSelectedConversations] = useState<string[]>();
 
   const { isAppInstalled, isLoading } = useSlackApp();
-  const { data, isLoading: isLoadingChannels, error: channelsError } = useAllChannels();
+  const { data, isLoading: isLoadingChannels, error: channelsError } = useChannels();
 
-  const users = data?.users ?? [];
-  const channels = data?.channels ?? [];
-  const groups = data?.groups ?? [];
+  const [users, channels, groups] = data ?? [];
 
   const {
     data: unreadConversations,
-    error: unreadConversationsError,
     isLoading: isLoadingUnreadConversations,
     mutate,
   } = useUnreadConversations(selectedConversations);
@@ -56,26 +45,14 @@ function UnreadMessagesOverview() {
     }
   };
 
+  const refreshConversations = async () => {
+    await setConversations();
+    await mutate();
+  };
+
   useEffect(() => {
     setConversations();
   }, []);
-
-  useEffect(() => {
-    // needed to update selectedConversations after returning from configuration view
-    const interval = setInterval(
-      setConversations,
-      !selectedConversations || selectedConversations.length < 5
-        ? 500
-        : selectedConversations.length < 10
-          ? 10000
-          : 30000,
-    );
-    return () => clearInterval(interval);
-  }, [selectedConversations]);
-
-  if (channelsError && unreadConversationsError) {
-    onApiError({ exitExtension: true });
-  }
 
   const markConversationAsRead = async (conversationId: string, actionTriggeredManually?: boolean): Promise<void> => {
     try {
@@ -91,9 +68,9 @@ function UnreadMessagesOverview() {
           title: `Marked as read`,
         });
       }
-    } catch {
+    } catch (error) {
       if (actionTriggeredManually) {
-        onApiError();
+        await showFailureToast(error, { title: "Could not mark conversation as read" });
       }
     }
   };
@@ -105,7 +82,11 @@ function UnreadMessagesOverview() {
           icon={Icon.Gear}
           actions={
             <ActionPanel>
-              <Action.Push icon={Icon.Gear} title="Configure" target={<Configuration />} />
+              <Action.Push
+                icon={Icon.Gear}
+                title="Configure"
+                target={<Configuration data={data} refreshConversations={refreshConversations} />}
+              />
             </ActionPanel>
           }
           title="Select Conversations"
@@ -119,7 +100,11 @@ function UnreadMessagesOverview() {
           <List.EmptyView
             actions={
               <ActionPanel>
-                <Action.Push icon={Icon.Gear} title="Configure" target={<Configuration />} />
+                <Action.Push
+                  icon={Icon.Gear}
+                  title="Configure"
+                  target={<Configuration data={data} refreshConversations={refreshConversations} />}
+                />
               </ActionPanel>
             }
             title="No Unread Messages Found"
@@ -171,6 +156,7 @@ function UnreadMessagesOverview() {
                         <UnreadMessagesConversation
                           conversationName={conversation?.name ?? ""}
                           messageHistory={unreadConversation.messageHistory}
+                          users={users}
                         />
                       }
                     />
@@ -178,7 +164,7 @@ function UnreadMessagesOverview() {
                       title="Configure Command"
                       icon={Icon.Gear}
                       shortcut={{ modifiers: ["opt"], key: "c" }}
-                      target={<Configuration />}
+                      target={<Configuration data={data} refreshConversations={refreshConversations} />}
                     />
                   </ActionPanel>
                 }
@@ -194,18 +180,14 @@ function UnreadMessagesOverview() {
 function UnreadMessagesConversation({
   conversationName,
   messageHistory,
+  users,
 }: {
   conversationName: string;
   messageHistory: Message[];
+  users?: User[];
 }) {
-  const { data: users, error: usersError, isLoading: isLoadingUsers } = useUsers();
-
-  if (usersError) {
-    onApiError({ exitExtension: true });
-  }
-
   return (
-    <List navigationTitle={`Unread Messages — ${conversationName}`} isLoading={isLoadingUsers} isShowingDetail>
+    <List navigationTitle={`Unread Messages — ${conversationName}`} isShowingDetail>
       {messageHistory.map((message, index) => {
         const user = users?.find((u) => u.id === message.senderId);
         return (
@@ -222,13 +204,14 @@ function UnreadMessagesConversation({
   );
 }
 
-function Configuration() {
-  const [selectedConversations, setSelectedConversations] = useState<string[]>([]);
-  const { data, isLoading: isLoadingChannels, error: channelsError } = useAllChannels();
+type ConfigurationProps = {
+  data: ReturnType<typeof useChannels>["data"];
+  refreshConversations: () => void;
+};
 
-  const users = data?.users ?? [];
-  const channels = data?.channels ?? [];
-  const groups = data?.groups ?? [];
+function Configuration({ data, refreshConversations }: ConfigurationProps) {
+  const [selectedConversations, setSelectedConversations] = useState<string[]>([]);
+  const [users, channels, groups] = data ?? [];
 
   useEffect(() => {
     LocalStorage.getItem(conversationsStorageKey).then((item) => {
@@ -255,21 +238,18 @@ function Configuration() {
     if (updatedSelectedConversations) {
       setSelectedConversations(updatedSelectedConversations);
       LocalStorage.setItem(conversationsStorageKey, JSON.stringify(updatedSelectedConversations));
+      refreshConversations();
     }
   };
 
-  if (channelsError) {
-    onApiError({ exitExtension: true });
-  }
-
   const sections = [
-    { title: "Direct Messages", conversations: users.filter(({ conversationId }) => !!conversationId) },
+    { title: "Direct Messages", conversations: users?.filter(({ conversationId }) => !!conversationId) },
     { title: "Channels", conversations: channels },
     { title: "Groups", conversations: groups },
   ];
 
   return (
-    <List navigationTitle="Unread Messages — Configuration" isLoading={!selectedConversations || isLoadingChannels}>
+    <List navigationTitle="Unread Messages — Configuration">
       {sections.map(({ title, conversations }) => (
         <List.Section key={title} title={title}>
           {conversations?.map(({ name, id, icon }) => {

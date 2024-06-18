@@ -29,7 +29,7 @@ export interface SlackMember {
   is_workflow_bot?: boolean;
 }
 
-const accessToken = getPreferenceValues<{ accessToken: string }>().accessToken;
+const { accessToken } = getPreferenceValues<{ accessToken: string }>();
 let slackWebClient: WebClient | null = null;
 
 export const slack = OAuthService.slack({

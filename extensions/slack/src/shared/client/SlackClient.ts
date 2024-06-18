@@ -1,4 +1,3 @@
-import { popToRoot, showToast, Toast } from "@raycast/api";
 import { SlackConversation, SlackMember, getSlackWebClient } from "./WebClient";
 
 interface Item {
@@ -40,18 +39,6 @@ const sortNames = (a: string, b: string) => {
     return 1;
   }
   return 0;
-};
-
-export const onApiError = async (props?: { exitExtension: boolean }): Promise<void> => {
-  await showToast({
-    style: Toast.Style.Failure,
-    title: "Slack API Error",
-    message: "Try again after checking your Slack token and permission scopes.",
-  });
-
-  if (props?.exitExtension) {
-    await popToRoot({ clearSearchBar: true });
-  }
 };
 
 export class SlackClient {
