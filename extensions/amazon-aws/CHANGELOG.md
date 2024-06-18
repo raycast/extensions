@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Console command] - {PR_MERGE_DATE}
+
+- [Frecency sorting](https://developers.raycast.com/utilities/react-hooks/usefrecencysorting) so that most/recent used service console links appear at the top of search
+
 ## [Improvements] - 2024-06-18
 
 - CodePipeline: Adds action to retry failed stage, stop ongoing execution and toggle stage transition

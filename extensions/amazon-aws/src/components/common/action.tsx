@@ -2,14 +2,15 @@ import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import { getEnumKeysExcludingCurrent } from "../../util";
 
 export class AwsAction {
-  public static Console = ({ url }: { url: string }) => (
+  public static Console = ({ url, onAction }: { url: string; onAction?: () => void }) => (
     <ActionPanel.Section title="Console">
-      <Action.OpenInBrowser key="openConsoleLink" title="Open in Browser" url={url} />
+      <Action.OpenInBrowser key="openConsoleLink" title="Open in Browser" url={url} onOpen={() => onAction?.()} />
       <Action.CopyToClipboard
         key="copyConsoleLink"
         title="Copy Link"
         content={url}
         shortcut={Keyboard.Shortcut.Common.Copy}
+        onCopy={() => onAction?.()}
       />
     </ActionPanel.Section>
   );
