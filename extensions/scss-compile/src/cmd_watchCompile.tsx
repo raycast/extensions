@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Color, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
 import {
   CompileConfig,
   CompileResult,
@@ -162,18 +162,50 @@ export default function Command() {
                     icon={Icon.PlusCircle}
                     shortcut={{ modifiers: ["cmd"], key: "e" }}
                     onAction={() => {
-                      push(
-                        <CompilForm
-                          FormAction={WatchCompileAction}
-                          show_watchOption={true}
-                          restore_prevConfig={false}
-                          pop_callBack={() => {
-                            set_needReload(true);
-                          }}
-                          prefill_config={config}
-                          delete_prefill={true}
-                        />,
-                      );
+                      if (config.watchCompile) {
+                        confirmAlert({
+                          title: "Watching SCSS File",
+                          message: "Do you wish to pause the watch?",
+                          icon: Icon.Warning,
+                        }).then((terminate) => {
+                          if (terminate) {
+                            showToast({ title: "Pausing...", style: Toast.Style.Animated });
+                            exec_pause(config).then(() => {
+                              delayOperation(500).then(() => {
+                                showToast({ title: "Paused !", style: Toast.Style.Success });
+                                update_LocalConfig_watch(config, { ...config, watchCompile: false }).then(() => {
+                                  push(
+                                    <CompilForm
+                                      FormAction={WatchCompileAction}
+                                      show_watchOption={true}
+                                      restore_prevConfig={false}
+                                      pop_callBack={() => {
+                                        set_needReload(true);
+                                      }}
+                                      prefill_config={{ ...config, watchCompile: false }}
+                                      delete_prefill={true}
+                                    />,
+                                  );
+                                  set_needReload(true);
+                                });
+                              });
+                            });
+                          }
+                        });
+                      } else {
+                        push(
+                          <CompilForm
+                            FormAction={WatchCompileAction}
+                            show_watchOption={true}
+                            restore_prevConfig={false}
+                            pop_callBack={() => {
+                              set_needReload(true);
+                            }}
+                            prefill_config={config}
+                            delete_prefill={true}
+                          />,
+                        );
+                      }
                     }}
                   />
                   <Action

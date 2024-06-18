@@ -38,10 +38,10 @@ export function WatchCompileAction(props: {
                     showToast({ title: "Watching ...", style: Toast.Style.Animated });
                     exec_watch(cur_config)
                       .then(() => {
-                        showToast({ title: "Success !", style: Toast.Style.Animated });
+                        showToast({ title: "Success !", style: Toast.Style.Success });
                       })
                       .catch(() => {
-                        showToast({ title: "Failed !", style: Toast.Style.Animated });
+                        showToast({ title: "Failed !", style: Toast.Style.Failure });
                       });
                   });
                 }
