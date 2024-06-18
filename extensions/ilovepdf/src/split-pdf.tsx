@@ -5,25 +5,22 @@ import {
   showToast,
   getPreferenceValues,
   Toast,
-  closeMainWindow,
-  open,
   openExtensionPreferences,
 } from "@raycast/api";
 import ILovePDFApi from "@ilovepdf/ilovepdf-nodejs";
 import SplitTask from "@ilovepdf/ilovepdf-js-core/tasks/SplitTask";
 import ILovePDFFile from "@ilovepdf/ilovepdf-nodejs/ILovePDFFile";
 import { useState } from "react";
-import { runAppleScript } from "@raycast/utils";
 import fs from "fs";
 import path from "path";
-import { getFilePath, MaxInt32 } from "./common/utils";
+import { chooseDownloadLocation, getFilePath, handleOpenNow } from "./common/utils";
 import filetype from "magic-bytes.js";
+import { Status } from "./common/types";
 
 type Values = {
   files: string[];
 };
 
-type Status = "init" | "success" | "failure";
 type SplitModes = "ranges" | "fixed_range" | "remove_pages";
 
 const {
@@ -71,24 +68,19 @@ export default function Command() {
     let destinationFile = getFilePath(directory, `${fileName}_split.pdf`);
 
     if (askBeforeDownload) {
-      try {
-        const script = `set file2save to POSIX path of (choose file name with prompt "Save the Document as" default location "${directory}" default name "${path.basename(destinationFile)}")`;
-        destinationFile = await runAppleScript(script, { timeout: MaxInt32 });
-      } catch (e) {
-        console.log(e);
-        const error = e as { message: string; stderr: string };
-        setIsLoading(false);
-        if (error.stderr.includes("User cancelled")) {
-          toast.hide();
-          setStatus("init");
-          return;
-        }
-        toast.style = Toast.Style.Failure;
-        toast.title = "failure";
-        toast.message = `An error happened during selecting the saving directory.  Reason ${error.message}`;
-        setStatus("failure");
+      const finalName = await chooseDownloadLocation(
+        destinationFile,
+        "Save The Document As",
+        setIsLoading,
+        setStatus,
+        toast,
+      );
+      if (finalName == undefined) {
+        return;
       }
+      destinationFile = finalName;
     }
+
     const instance = new ILovePDFApi(publicKey, secretKey);
     const task = instance.newTask("split") as SplitTask;
 
@@ -122,17 +114,7 @@ export default function Command() {
       return;
     }
 
-    if (openNow) {
-      await closeMainWindow();
-      open(destinationFile);
-    } else {
-      toast.primaryAction = {
-        title: "Open File",
-        onAction: () => {
-          open(destinationFile);
-        },
-      };
-    }
+    await handleOpenNow(openNow, destinationFile, toast);
   }
 
   return (

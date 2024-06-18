@@ -5,7 +5,6 @@ import {
   showToast,
   getPreferenceValues,
   Toast,
-  closeMainWindow,
   open,
   openExtensionPreferences,
 } from "@raycast/api";
@@ -15,15 +14,13 @@ import ILovePDFFile from "@ilovepdf/ilovepdf-nodejs/ILovePDFFile";
 import { useState } from "react";
 import fs from "fs";
 import path from "path";
-import { getFilePath, MaxInt32, validateFileType } from "./common/utils";
-import { runAppleScript } from "@raycast/utils";
+import { chooseDownloadLocation, getFilePath, handleOpenNow, validateFileType } from "./common/utils";
+import { Status } from "./common/types";
 
 type Values = {
   files: string[];
   mode: "pages" | "extract";
 };
-
-type Status = "init" | "success" | "failure";
 
 const {
   APIPublicKey: publicKey,
@@ -68,23 +65,17 @@ export default function Command() {
         addedFilesPromises.push(task.addFile(iLovePdfFile));
       }
       if (askBeforeDownload) {
-        try {
-          const script = `set file2save to POSIX path of (choose file name with prompt "Save the images as" default location "${path.dirname(destinationFile)}" default name "${path.basename(destinationFile)}")`;
-          destinationFile = await runAppleScript(script, { timeout: MaxInt32 });
-        } catch (e) {
-          console.log(e);
-          const error = e as { message: string; stderr: string };
-          setIsLoading(false);
-          if (error.stderr.includes("User cancelled")) {
-            toast.hide();
-            setStatus("init");
-            return;
-          }
-          toast.style = Toast.Style.Failure;
-          toast.title = "failure";
-          toast.message = `An error happened during selecting the saving directory. Reason ${error.message}`;
-          setStatus("failure");
+        const finalName = await chooseDownloadLocation(
+          destinationFile,
+          "Save The Images As",
+          setIsLoading,
+          setStatus,
+          toast,
+        );
+        if (finalName == undefined) {
+          return;
         }
+        destinationFile = finalName;
       }
       setDestinationFilePath(destinationFile);
 
@@ -108,17 +99,7 @@ export default function Command() {
       return;
     }
 
-    if (openNow) {
-      await closeMainWindow();
-      open(destinationFile);
-    } else {
-      toast.primaryAction = {
-        title: "Open File",
-        onAction: () => {
-          open(destinationFile);
-        },
-      };
-    }
+    await handleOpenNow(openNow, destinationFile, toast);
   }
 
   return (
