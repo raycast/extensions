@@ -6,7 +6,7 @@ import { formatDistanceToNow } from "date-fns";
 import { fetch, Headers } from "undici";
 import { createClient } from "./generated/client";
 
-import useSWR, { Cache as SwrCache, SWRConfig } from "swr";
+import useSWR, { SWRConfig } from "swr";
 import { getSupabaseWithSession, supabaseRef } from "./supabase-raycast";
 
 // required to make Hono client work
@@ -16,32 +16,22 @@ const backendUrl = "https://crispyraycast.com";
 
 const cache = new Cache();
 
-const swrCache: SwrCache = {
-  delete(key) {
-    const keys = JSON.parse(cache.get("keys") || "[]");
-    keys.splice(keys.indexOf(key), 1);
-
-    cache.remove(key);
-    cache.set("keys", JSON.stringify(keys));
-  },
-  get(key) {
-    return JSON.parse(cache.get(key) || "null");
-  },
-  set(key, value) {
-    const keys = JSON.parse(cache.get("keys") || "[]");
-    keys.push(key);
-    cache.set(key, JSON.stringify(value));
-    cache.set("keys", JSON.stringify(keys));
-  },
-  keys() {
-    const keys = JSON.parse(cache.get("keys") || "[]");
-    return keys;
-  },
-};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const swrCache = new Map<string, any>(JSON.parse(cache.get("swr") || "[]"));
 
 export default function Wrapper() {
   return (
-    <SWRConfig value={{ provider: () => swrCache }}>
+    <SWRConfig
+      value={{
+        provider: () => swrCache,
+        onSuccess() {
+          setTimeout(() => cache.set("swr", JSON.stringify([...swrCache])));
+        },
+        onError(error) {
+          showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: error.message });
+        },
+      }}
+    >
       <Command />
     </SWRConfig>
   );
@@ -65,31 +55,23 @@ export function Command() {
     data,
     isLoading: isFetching,
     isValidating,
-  } = useSWR(
-    sessionData?.session ? ["conversations"] : null,
-    async () => {
-      const session = sessionData?.session;
-      if (!session) {
-        throw new Error("No session");
-      }
-      const client = createClient({ supabaseRef, session, url: backendUrl, fetch });
-      const res = await client.api.v1.conversations.$get({});
-      if (res.status === 401) {
-        await LocalStorage.removeItem("session");
-        mutate();
-      }
-      if (!res.ok) {
-        throw new Error(await res.text());
-      }
+  } = useSWR(sessionData?.session ? ["conversations"] : null, async () => {
+    const session = sessionData?.session;
+    if (!session) {
+      throw new Error("No session");
+    }
+    const client = createClient({ supabaseRef, session, url: backendUrl, fetch });
+    const res = await client.api.v1.conversations.$get({});
+    if (res.status === 401) {
+      await LocalStorage.removeItem("session");
+      mutate();
+    }
+    if (!res.ok) {
+      throw new Error(await res.text());
+    }
 
-      return res.json();
-    },
-    {
-      onError(error) {
-        showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: error.message });
-      },
-    },
-  );
+    return res.json();
+  });
 
   const isLoading = isLoggingIn || isFetching || isValidating;
 
@@ -99,13 +81,7 @@ export function Command() {
   const allDomains = new Set(data?.conversations?.map((x) => x.site?.domain) || []);
 
   return (
-    <List
-      throttle
-      searchBarPlaceholder="Search conversations"
-      // searchBarAccessory={<>{user && <SearchBarAccessory onTeamChange={onTeamChange} />}</>}
-
-      isLoading={isLoading}
-    >
+    <List throttle searchBarPlaceholder="Search conversations" isLoading={isLoading}>
       {data?.conversations?.map((x, i) => {
         const { conversation, site } = x;
         const timeAgo = formatDistanceToNow(new Date(conversation.updated_at), {
