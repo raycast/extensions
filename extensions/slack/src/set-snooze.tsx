@@ -1,27 +1,16 @@
-import { Action, ActionPanel, Detail, Form, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Color, Form, Icon, Toast, closeMainWindow, showToast } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { formatDistance } from "date-fns";
-import { useEffect, useState } from "react";
 
-import { SlackClient, SnoozeStatus, onApiError } from "./shared/client";
+import { SlackClient, onApiError } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
 
 function SetSnooze() {
-  const [snoozeStatus, setSnoozeStatus] = useState<SnoozeStatus>();
-
-  const updateSnoozeStatus = () => {
-    SlackClient.getSnoozeStatus()
-      .then(setSnoozeStatus)
-      .catch(() => onApiError({ exitExtension: true }));
-  };
-
-  useEffect(updateSnoozeStatus, []);
-
-  if (!snoozeStatus) {
-    return <Detail isLoading={true} />;
-  }
+  const { data: snoozeStatus, isLoading, mutate } = useCachedPromise(SlackClient.getSnoozeStatus);
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -31,14 +20,15 @@ function SetSnooze() {
                 if (snooze.startsWith("activate-for-")) {
                   const minutes = parseInt(snooze.replace("activate-for-", ""));
                   await SlackClient.setSnooze(minutes);
-                  await showHUD(`Activated`);
+                  await closeMainWindow();
+                  await showToast({ style: Toast.Style.Success, title: "Activated" });
                 } else {
                   await SlackClient.endSnooze();
-                  await showHUD(`Deactivated`);
+                  await closeMainWindow();
+                  await showToast({ style: Toast.Style.Success, title: "Deactivated" });
                 }
 
-                setSnoozeStatus(undefined);
-                updateSnoozeStatus();
+                await mutate();
               } catch {
                 await onApiError();
               }
@@ -50,17 +40,23 @@ function SetSnooze() {
       <Form.Description
         title="Current status"
         text={
-          snoozeStatus.snoozeEnd
+          snoozeStatus?.snoozeEnd
             ? `Activated (for ${formatDistance(new Date(), snoozeStatus.snoozeEnd)})`
             : "Deactivated"
         }
       />
       <Form.Separator />
-      <Form.Dropdown id="snooze" title="Set Snooze" defaultValue={snoozeStatus.snoozeEnd ? "deactivate" : undefined}>
-        {snoozeStatus.snoozeEnd && <Form.Dropdown.Item value="deactivate" title="Deactivate" icon="❌" />}
-        <Form.Dropdown.Item value="activate-for-30" title="Activate for 30 minutes" icon="⏲️" />
-        <Form.Dropdown.Item value="activate-for-60" title="Activate for 1 hour" icon="⏲️" />
-        <Form.Dropdown.Item value="activate-for-120" title="Activate for 2 hours" icon="⏲️" />
+      <Form.Dropdown id="snooze" title="Set Snooze" defaultValue={snoozeStatus?.snoozeEnd ? "deactivate" : undefined}>
+        {snoozeStatus?.snoozeEnd && (
+          <Form.Dropdown.Item
+            value="deactivate"
+            title="Deactivate"
+            icon={{ source: Icon.Xmark, tintColor: Color.Red }}
+          />
+        )}
+        <Form.Dropdown.Item value="activate-for-30" title="Activate for 30 minutes" icon={Icon.Clock} />
+        <Form.Dropdown.Item value="activate-for-60" title="Activate for 1 hour" icon={Icon.Clock} />
+        <Form.Dropdown.Item value="activate-for-120" title="Activate for 2 hours" icon={Icon.Clock} />
       </Form.Dropdown>
     </Form>
   );
