@@ -9,13 +9,13 @@
   "commands": [
     {
       "name": "golden-ratio",
-      "title": "Golden ratio",
+      "title": "Golden Ratio",
       "subtitle": "Golden ratio calculation",
       "description": "Golden ratio calculation",
       "mode": "view"
     },{
       "name": "silver-ratio",
-      "title": "Silver ratio",
+      "title": "Silver Ratio",
       "subtitle": "Silver ratio calculation",
       "description": "Silver ratio calculation",
       "mode": "view"

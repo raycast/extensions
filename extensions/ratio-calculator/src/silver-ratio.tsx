@@ -30,11 +30,7 @@ export default function SilverRatioCommand() {
   };
 
   return (
-    <List
-      searchBarPlaceholder="Enter a number"
-      onSearchTextChange={setInputNumber}
-      throttle
-    >
+    <List searchBarPlaceholder="Enter a number" onSearchTextChange={setInputNumber} throttle>
       {smallerNumber && largerNumber ? (
         <>
           <List.Item
