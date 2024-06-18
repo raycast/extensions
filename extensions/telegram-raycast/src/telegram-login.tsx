@@ -69,9 +69,8 @@ function RequestPhoneCode({
     });
 
     try {
-      
       const { body } = await got.post("https://telray-proxy.up.railway.app/send-code", {
-        // @ts-ignore
+        //@ts-expect-error refactoring this code according to types breaks it
         json: {
           phoneNumber: phoneNumber,
         },
@@ -118,7 +117,7 @@ function SendPhoneCode() {
 
     try {
       const { body } = await got.post("https://telray-proxy.up.railway.app/start-client", {
-        // @ts-ignore
+        // @ts-expect-error refactoring this code according to types breaks it
         json: {
           phoneNumber: await LocalStorage.getItem("phone"),
           password: values.password || "",
