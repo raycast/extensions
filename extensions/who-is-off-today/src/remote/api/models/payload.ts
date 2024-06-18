@@ -1,3 +1,3 @@
 export interface Payload<T> {
-  data: T;
+    data: T;
 }
