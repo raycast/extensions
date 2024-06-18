@@ -24,7 +24,7 @@ export default function SilverRatioCommand() {
     calculateSilverRatio();
   }, [inputNumber]);
 
-  const handleCopyToClipboard = (value) => {
+  const handleCopyToClipboard = (value: string) => {
     Clipboard.copy(value);
     showToast(Toast.Style.Success, "Copied to clipboard", value);
   };
