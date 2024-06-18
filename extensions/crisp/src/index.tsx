@@ -1,4 +1,6 @@
-import { Action, ActionPanel, Cache, Color, Detail, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Cache, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import ColorHash from "color-hash";
+
 import { formatDistanceToNow } from "date-fns";
 
 import { fetch, Headers } from "undici";
@@ -10,7 +12,7 @@ import { getSupabaseWithSession, supabaseRef } from "./supabase-raycast";
 // required to make Hono client work
 globalThis.Headers = Headers;
 
-const backendUrl = "http://localhost:8045";
+const backendUrl = process.env.CRISP_BACKEND_URL || "https://crispyraycast.com";
 
 const cache = new Cache();
 
@@ -46,13 +48,14 @@ export default function Wrapper() {
 }
 
 const initialScreen = `
-# Do you already have installed the Crisp plugin?
+# Welcome to Crispy Raycast
 
-Crisp Raycast extension requires installing the Crisp plugin to use the Crisp API.
+Do you already have installed the Crisp plugin? This extension works by installing a Crisp plugin on each website you want to control from Raycast.
 
-- [Yes, let me login](https://crispyraycast.com/login)
+- [No, install the Crisp plugin](https://crisp.chat/en/integrations/urn:tommaso.de.rossi:raycast:0/)
 
-- [No, install it](https://crisp.chat/en/integrations/urn:tommaso.de.rossi:raycast:0/)
+- [Yes, let me login](https://crispyraycast.com/login/)
+
 
 `;
 
@@ -62,24 +65,33 @@ export function Command() {
     data,
     isLoading: isFetching,
     isValidating,
-  } = useSWR(sessionData?.session ? ["conversations"] : null, async () => {
-    const session = sessionData?.session;
-    if (!session) {
-      throw new Error("No session");
-    }
-    const client = createClient({ supabaseRef, session, url: backendUrl, fetch });
-    const res = await client.api.v1.conversations.$get({});
-    if (!res.ok) {
-      throw new Error(await res.text());
-    }
+  } = useSWR(
+    sessionData?.session ? ["conversations"] : null,
+    async () => {
+      const session = sessionData?.session;
+      if (!session) {
+        throw new Error("No session");
+      }
+      const client = createClient({ supabaseRef, session, url: backendUrl, fetch });
+      const res = await client.api.v1.conversations.$get({});
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
 
-    return res.json();
-  });
+      return res.json();
+    },
+    {
+      onError(error) {
+        showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: error.message });
+      },
+    },
+  );
   const isLoading = isLoggingIn || isFetching || isValidating;
 
   if (!data?.conversations && !sessionData?.session && !isLoading) {
     return <Detail markdown={initialScreen} />;
   }
+  const allDomains = new Set(data?.conversations?.map((x) => x.site?.domain) || []);
 
   return (
     <List
@@ -105,27 +117,33 @@ export function Command() {
           }
         })();
         const country = conversation.meta.device.geolocation.country;
-
+        const segments = conversation.meta.segments.filter((x) => x !== "chat");
+        const domainColor = getStringColor(site?.domain || "");
         return (
           <List.Item
             key={i}
             title={getFlagEmoji(country) + "  " + email}
             subtitle={conversation?.last_message || ""}
             icon={icon}
-            keywords={[email, site?.domain || "", conversation.last_message]}
+            keywords={[
+              email,
+              site?.domain || "",
+              conversation.last_message,
+              conversation.meta.nickname,
+              ...segments,
+            ].filter(isTruthy)}
             accessories={[
               {
                 text: timeAgo,
                 tooltip: new Date(conversation.updated_at).toLocaleString(),
               },
-              {
-                tag: site?.domain,
-                icon: site?.logo ? { source: "boxicon-git-branch.svg", tintColor: Color.SecondaryText } : null,
+              allDomains.size > 1 && {
+                tag: { value: site?.domain, color: domainColor },
               },
               // {
               //   icon: { source: getFlagEmoji(country) },
               // },
-            ]}
+            ].filter(isTruthy)}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser
@@ -143,4 +161,14 @@ export function Command() {
 
 function getFlagEmoji(countryCode: string) {
   return countryCode.toUpperCase().replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
+}
+
+const colorHash = new ColorHash({ lightness: 0.6, saturation: 0.2 });
+function getStringColor(text: string) {
+  return colorHash.hex(text);
+}
+
+// like Boolean but with typescript guard
+function isTruthy<T>(x: T | undefined | null | false): x is T {
+  return !!x;
 }

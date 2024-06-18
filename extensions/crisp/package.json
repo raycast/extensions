@@ -23,6 +23,7 @@
     "@raycast/api": "^1.76.0",
     "@raycast/utils": "^1.16.0",
     "@supabase/supabase-js": "^2.43.4",
+    "color-hash": "^2.0.2",
     "date-fns": "^3.6.0",
     "hono": "^4.4.6",
     "swr": "^2.2.5",
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
+    "@types/color-hash": "^2.0.0",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
     "eslint": "^8.51.0",
@@ -38,6 +40,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
+    "dev:locally": "CRISP_BACKEND_URL=http://localhost:8045 ray develop",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
