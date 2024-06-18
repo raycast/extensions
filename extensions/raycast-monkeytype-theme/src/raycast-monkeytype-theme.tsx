@@ -149,6 +149,88 @@ export default function RaycastMonkeyTypeTheme() {
     return true;
   }
 
+  const renderThemeActions = (theme: Theme) => {
+    const addLightAction = (
+      <Action
+        title="Add Light Appearance to Raycast"
+        icon={Icon.Sun}
+        onAction={async () => {
+          if (!(await validateIdentity(theme.name))) return;
+          open(theme["ray.so.add.light.url"]);
+          closeMainWindow();
+        }}
+        shortcut={{ modifiers: ["cmd"], key: "l" }}
+      />
+    );
+
+    const addDarkAction = (
+      <Action
+        title="Add Dark Appearance to Raycast"
+        icon={Icon.Moon}
+        onAction={async () => {
+          if (!(await validateIdentity(theme.name))) return;
+          open(theme["ray.so.add.dark.url"]);
+          closeMainWindow();
+        }}
+        shortcut={{ modifiers: ["cmd"], key: "d" }}
+      />
+    );
+
+    const browserLightAction = (
+      <Action.OpenInBrowser
+        title="Open Light Appearance in Browser"
+        icon={Icon.AppWindow}
+        url={theme["ray.so.light.url"]}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+      />
+    );
+
+    const browserDarkAction = (
+      <Action.OpenInBrowser
+        title="Open Dark Appearance in Browser"
+        icon={Icon.AppWindow}
+        url={theme["ray.so.dark.url"]}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      />
+    );
+
+    const copyLightAction = (
+      <Action.CopyToClipboard
+        title="Copy Light Theme URL to Share"
+        icon={Icon.Link}
+        content={theme["ray.so.light.url"]}
+      />
+    );
+
+    const copyDarkAction = (
+      <Action.CopyToClipboard
+        title="Copy Dark Theme URL to Share"
+        icon={Icon.Link}
+        content={theme["ray.so.dark.url"]}
+      />
+    );
+
+    return theme.appearance == "light" ? (
+      <>
+        {addLightAction}
+        {addDarkAction}
+        {browserLightAction}
+        {browserDarkAction}
+        {copyLightAction}
+        {copyDarkAction}
+      </>
+    ) : (
+      <>
+        {addDarkAction}
+        {addLightAction}
+        {browserDarkAction}
+        {browserLightAction}
+        {copyDarkAction}
+        {copyLightAction}
+      </>
+    );
+  };
+
   return (
     <List
       isShowingDetail
@@ -177,57 +259,7 @@ export default function RaycastMonkeyTypeTheme() {
           // ]}
           actions={
             <ActionPanel>
-              <Action
-                title="Add Theme to Raycast"
-                icon={Icon.RaycastLogoNeg}
-                onAction={async () => {
-                  if (!(await validateIdentity(theme.name))) return;
-                  open(theme.appearance == "light" ? theme["ray.so.add.light.url"] : theme["ray.so.add.dark.url"]);
-                  closeMainWindow();
-                }}
-              />
-              <Action
-                title="Add Light Appearance to Raycast"
-                icon={Icon.Sun}
-                onAction={async () => {
-                  if (!(await validateIdentity(theme.name))) return;
-                  open(theme["ray.so.add.light.url"]);
-                  closeMainWindow();
-                }}
-                shortcut={{ modifiers: ["cmd"], key: "l" }}
-              />
-              <Action
-                title="Add Dark Appearance to Raycast"
-                icon={Icon.Moon}
-                onAction={async () => {
-                  if (!(await validateIdentity(theme.name))) return;
-                  open(theme["ray.so.add.dark.url"]);
-                  closeMainWindow();
-                }}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
-              />
-              <Action.OpenInBrowser
-                title="Open Light Appearance in Browser"
-                icon={Icon.AppWindow}
-                url={theme["ray.so.light.url"]}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
-              />
-              <Action.OpenInBrowser
-                title="Open Dark Appearance in Browser"
-                icon={Icon.AppWindow}
-                url={theme["ray.so.dark.url"]}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-              />
-              <Action.CopyToClipboard
-                title="Copy Light Theme URL to Share"
-                icon={Icon.Link}
-                content={theme["ray.so.light.url"]}
-              />
-              <Action.CopyToClipboard
-                title="Copy Dark Theme URL to Share"
-                icon={Icon.Link}
-                content={theme["ray.so.dark.url"]}
-              />
+              {renderThemeActions(theme)}
               <Action
                 title="Install Random Theme"
                 icon={Icon.Stars}
