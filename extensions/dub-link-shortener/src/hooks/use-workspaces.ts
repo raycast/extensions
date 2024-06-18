@@ -1,11 +1,10 @@
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { getAllTags, getAllWorkspaces } from "../api";
-import { captureException } from "@raycast/api";
+import { WorkspaceSchema } from "../types";
 
 export const useWorkspaces = () => {
   const {
     data: workspaces,
-    revalidate,
     isLoading,
     error,
   } = useCachedPromise(
@@ -14,20 +13,16 @@ export const useWorkspaces = () => {
       return await Promise.all(
         workspaces.map(async (w) => {
           const tags = await getAllTags({ workspaceId: w.id });
-          return { ...w, tags };
+          return { ...w, tags } as WorkspaceSchema;
         }),
       );
     },
     [],
     {
       initialData: [],
-      onError: async (err) => {
-        captureException(err);
-        await showFailureToast(err, { title: "❗ Failed to fetch workspaces" });
-        throw err;
-      },
+      failureToastOptions: { title: "❗ Failed to fetch workspaces" },
     },
   );
 
-  return { workspaces, revalidate, isLoading: (!workspaces && !error) || isLoading, error };
+  return { workspaces, isLoading: (!workspaces && !error) || isLoading, error };
 };

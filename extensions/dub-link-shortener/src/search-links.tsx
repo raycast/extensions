@@ -14,14 +14,21 @@ import { useShortLinks } from "./hooks/use-short-links";
 import { useWorkspaces } from "./hooks/use-workspaces";
 import { useState } from "react";
 import { DUB_CO_URL } from "./utils/constants";
-import { deleteShortLink } from "./api";
-import { showFailureToast } from "@raycast/utils";
+import { deleteShortLink, getAllShortLinks } from "./api";
+import { MutatePromise, showFailureToast } from "@raycast/utils";
 import { WorkspaceAccessory } from "./components/workspace-accessory";
+import { LinkSchema } from "./types";
 
 export default function SearchLinks() {
   const [workspaceId, setWorkspaceId] = useState<string>("");
   const { workspaces, isLoading: isLoadingWorkspaces, error: workspacesError } = useWorkspaces();
-  const { shortLinks, error: linksError, isLoading: isLoadingLinks, revalidate } = useShortLinks({ workspaceId });
+  const {
+    shortLinks,
+    error: linksError,
+    isLoading: isLoadingLinks,
+    revalidate,
+    mutate,
+  } = useShortLinks({ workspaceId, workspacesError });
 
   return (
     <List
@@ -35,17 +42,10 @@ export default function SearchLinks() {
         <WorkspaceAccessory {...{ setWorkspaceId, revalidate, workspaces, isLoading: isLoadingWorkspaces }} />
       }
     >
-      {workspacesError && (
+      {(workspacesError || linksError) && (
         <List.EmptyView
-          title={workspacesError.name}
-          description={workspacesError.message}
-          icon={{ source: Icon.Warning, tintColor: Color.Red }}
-        />
-      )}
-      {linksError && (
-        <List.EmptyView
-          title={linksError.name}
-          description={linksError.message}
+          title={workspacesError ? "Failed to fetch workspaces" : "Failed to fetch short links"}
+          description={workspacesError?.message ?? linksError?.message}
           icon={{ source: Icon.Warning, tintColor: Color.Red }}
         />
       )}
@@ -162,7 +162,7 @@ export default function SearchLinks() {
                   icon={Icon.Trash}
                   title={"Delete Link"}
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
-                  onAction={() => deleteLink(id, workspaceId, revalidate)}
+                  onAction={() => deleteLink(id, workspaceId, mutate)}
                 />
                 <ActionPanel.Section>
                   <Action.OpenInBrowser
@@ -180,7 +180,7 @@ export default function SearchLinks() {
   );
 }
 
-const deleteLink = (linkId: string, workspaceId: string, revalidate: () => void) =>
+const deleteLink = (linkId: string, workspaceId: string, mutate: MutatePromise<LinkSchema[]>) =>
   confirmAlert({
     title: "Delete Link",
     message: "Are you sure you want to delete this link?",
@@ -190,17 +190,20 @@ const deleteLink = (linkId: string, workspaceId: string, revalidate: () => void)
       onAction: async () => {
         const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting link..." });
         deleteShortLink({ linkId, workspaceId })
-          .then(({ id }) => {
+          .then(async ({ id }) => {
             toast.style = Toast.Style.Success;
             toast.title = "✅ Link deleted";
             toast.message = `with id ${id}`;
-            revalidate();
+            await mutate(getAllShortLinks({ workspaceId }), {
+              optimisticUpdate: (data) => data.filter((l) => l.id !== id),
+              shouldRevalidateAfter: true,
+            });
           })
           .catch(async (err) => {
             captureException(err);
             await showFailureToast(err, {
               title: "❗ Failed to delete link",
-              primaryAction: { title: "Retry", onAction: () => deleteLink(linkId, workspaceId, revalidate) },
+              primaryAction: { title: "Retry", onAction: () => deleteLink(linkId, workspaceId, mutate) },
             });
           });
       },
