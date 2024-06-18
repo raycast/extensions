@@ -78,7 +78,7 @@ const actions = [
   "cascade-all",
 ] as const;
 
-type Action = (typeof actions)[number];
+type RectangleAction = (typeof actions)[number];
 
 const commandGroups = {
   halves: {
@@ -451,7 +451,7 @@ export default function Command() {
   );
 }
 
-export const buildCommand = (action: Action) => async () => {
+export const buildCommand = (action: RectangleAction) => async () => {
   const url = `rectangle://execute-action?name=${action}`;
 
   try {
