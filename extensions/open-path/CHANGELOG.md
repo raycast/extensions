@@ -1,5 +1,9 @@
 # Open Path Changelog
 
+## [Update Command Metadata] - {PR_MERGE_DATE}
+
+-  Fix the problem of not updating the command metadata
+
 ## [Fix Hotkey Error] - 2024-05-27
 
 -  Fix the problem of using hotkeys to invoke commands
