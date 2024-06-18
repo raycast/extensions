@@ -1,8 +1,8 @@
 # Slack Status Change
 
-## [Improve AI prompt]
+## [Improve AI prompt] - 2024-06-18
 
-- adjusted the AI prompt to improve chance of valid JSON response
+- Adjusted the AI prompt to improve chance of valid JSON response
 
 ## [Fix Slack icon] - 2024-04-26
 
