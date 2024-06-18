@@ -2,11 +2,11 @@ import {
   Action,
   ActionPanel,
   Alert,
-  captureException,
   Color,
   confirmAlert,
   Icon,
   Image,
+  Keyboard,
   List,
   showToast,
   Toast,
@@ -15,7 +15,7 @@ import { useShortLinks } from "@hooks/use-short-links";
 import { useWorkspaces } from "@hooks/use-workspaces";
 import { useState } from "react";
 import { DUB_CO_URL } from "@utils/constants";
-import { deleteShortLink, getAllShortLinks } from "@/api";
+import { deleteShortLink } from "@/api";
 import { MutatePromise, showFailureToast } from "@raycast/utils";
 import { LinkSchema } from "@/types";
 
@@ -175,15 +175,15 @@ export default function SearchLinks() {
                 <Action.CopyToClipboard title={"Copy Link"} content={shortLink} />
                 <Action.OpenInBrowser title={"Open Link"} url={shortLink} />
                 <Action
-                  icon={Icon.Trash}
+                  icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   title={"Delete Link"}
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                   onAction={() => deleteLink(id, workspaceId, mutate)}
                 />
                 <ActionPanel.Section>
                   <Action.OpenInBrowser
                     title="Go to Dub.co"
-                    shortcut={{ modifiers: ["cmd"], key: "g" }}
+                    shortcut={Keyboard.Shortcut.Common.Open}
                     url={DUB_CO_URL}
                   />
                 </ActionPanel.Section>
@@ -205,23 +205,22 @@ const deleteLink = (linkId: string, workspaceId: string, mutate: MutatePromise<L
       style: Alert.ActionStyle.Destructive,
       onAction: async () => {
         const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting link..." });
-        deleteShortLink({ linkId, workspaceId })
-          .then(async ({ id }) => {
-            toast.style = Toast.Style.Success;
-            toast.title = "✅ Link deleted";
-            toast.message = `with id ${id}`;
-            await mutate(getAllShortLinks({ workspaceId }), {
-              optimisticUpdate: (data) => data.filter((l) => l.id !== id),
-              shouldRevalidateAfter: true,
-            });
-          })
-          .catch(async (err) => {
-            captureException(err);
-            await showFailureToast(err, {
-              title: "❗ Failed to delete link",
-              primaryAction: { title: "Retry", onAction: () => deleteLink(linkId, workspaceId, mutate) },
-            });
-          });
+        await mutate(
+          deleteShortLink({ linkId, workspaceId })
+            .then(async ({ id }) => {
+              toast.style = Toast.Style.Success;
+              toast.title = "✅ Link deleted";
+              toast.message = `with id ${id}`;
+            })
+            .catch(async (err) => {
+              await showFailureToast(err, {
+                title: "❗ Failed to delete link",
+                primaryAction: { title: "Retry", onAction: () => deleteLink(linkId, workspaceId, mutate) },
+              });
+              throw err;
+            }),
+          { optimisticUpdate: (data) => data?.filter((l) => l.id !== linkId) },
+        );
       },
     },
   });
