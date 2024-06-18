@@ -197,7 +197,7 @@ export async function exec_watch(conf: CompileConfig): Promise<CompileResult> {
             : "";
   const compile_options = compile_option_outputStyle + " " + compile_option_sourceMap;
   const compile_execPath = getPref_sassCompilerPath();
-  const compile_cmd: string = `${compile_execPath} --watch ${compile_options} "${compile_scssPath}" "${compile_cssPath}"`;
+  const compile_cmd: string = `${compile_execPath} --watch ${compile_options} "${compile_scssPath}" "${compile_cssPath}" >>/dev/null 2>&1 &`;
   if (getPref_deleteCSS()) {
     exec(`/bin/rm -rf "${compile_cssPath}"`);
     await delayOperation(100);
@@ -215,29 +215,35 @@ export async function exec_watch(conf: CompileConfig): Promise<CompileResult> {
       }
     });
 
-    // Add background process
-    let watch_process_success = false;
-    const watch_process = spawn(compile_cmd, {
+    // Add background process of `SASS WATCH`
+    spawn(compile_cmd, {
       shell: "/bin/zsh",
       env: { ...process.env, PATH: "/opt/homebrew/bin" },
       detached: true,
     });
 
-    // Resolve when receiving "certain" data stdout
-    watch_process.stdout.on("data", (data) => {
-      if (data.toString().includes("Sass is watching for change")) {
-        watch_process_success = true;
-        resolve({ success: true, message: "" });
-      }
-    });
-
     // Kill watch process if it did not "resolve" in time
     setTimeout(() => {
-      if (!watch_process_success) {
-        watch_process.kill("SIGTERM");
-        reject({ success: false, message: "Cannot Watch" });
-      }
-    }, 5000);
+      let found_any = false;
+      let found_pid = "";
+      exec(
+        `/bin/ps aux | /usr/bin/grep "sass --watch" | /usr/bin/grep "${compile_scssPath}" | /usr/bin/grep "${compile_cssPath}" | /usr/bin/grep -v "grep" | /usr/bin/grep -v "awk" | /usr/bin/awk '{printf "%s ","|" ; printf "%s ", $2; printf "%s ","|" ; for (i=11; i<=NF; i++) printf "%s ", $i; print "|"}'`,
+        async (error, stdout) => {
+          stdout.split("\n").forEach((item) => {
+            const pid = item.split("| ")[1];
+            if (pid != undefined && pid.length != 0) {
+              found_any = true;
+              found_pid = pid;
+            }
+          });
+          if (found_any) {
+            resolve({ success: true, message: `[PID=${found_pid}]` });
+          } else {
+            resolve({ success: false, message: "No Process Found" });
+          }
+        },
+      );
+    }, 1000);
   });
 }
 
