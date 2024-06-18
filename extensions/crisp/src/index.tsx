@@ -105,7 +105,7 @@ export function Command() {
         const { conversation, site } = x;
         const timeAgo = formatDistanceToNow(new Date(conversation.updated_at), {
           addSuffix: true,
-        });
+        }).replace("about ", "");
         const email = conversation?.meta.email || "visitor";
 
         const icon = (() => {
@@ -119,10 +119,11 @@ export function Command() {
         const country = conversation.meta.device.geolocation.country;
         const segments = conversation.meta.segments.filter((x) => x !== "chat");
         const domainColor = getStringColor(site?.domain || "");
+        const nickname = conversation.meta.nickname || "visitor";
         return (
           <List.Item
             key={i}
-            title={getFlagEmoji(country) + "  " + email}
+            title={getFlagEmoji(country) + "  " + nickname}
             subtitle={conversation?.last_message || ""}
             icon={icon}
             keywords={[
