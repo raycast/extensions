@@ -140,8 +140,32 @@ export default function Command() {
                       }}
                     />
                   )}
+                  <Action
+                    title="Compile All"
+                    icon={Icon.CheckCircle}
+                    shortcut={{ modifiers: ["shift"], key: "enter" }}
+                    onAction={() => {
+                      showToast({ title: `Compiling All...`, style: Toast.Style.Animated });
+                      getAll_LocalConfig_watch().then((config_s) => {
+                        Promise.all(
+                          config_s.map((config) => {
+                            exec_compile(config);
+                          }),
+                        )
+                          .then(() => {
+                            return delayOperation(1000);
+                          })
+                          .then(() => {
+                            showToast({ title: `All Compiled !`, style: Toast.Style.Success });
+                          })
+                          .catch(() => {
+                            showToast({ title: `Compile Failed !`, style: Toast.Style.Failure });
+                          });
+                      });
+                    }}
+                  />
                 </ActionPanel.Section>
-                <ActionPanel.Section>
+                <ActionPanel.Section title="Add/Edit/Duplicate Config">
                   <Action.Push
                     title="Add Configuration"
                     icon={Icon.PlusCircle}
@@ -228,7 +252,7 @@ export default function Command() {
                     }}
                   />
                 </ActionPanel.Section>
-                <ActionPanel.Section>
+                <ActionPanel.Section title="Remove Config">
                   <Action
                     title="Remove Configuration"
                     icon={Icon.MinusCircle}
@@ -270,7 +294,7 @@ export default function Command() {
                     }}
                   />
                 </ActionPanel.Section>
-                <ActionPanel.Section>
+                <ActionPanel.Section title="Open/Reveal Files">
                   <ActionPanel.Submenu
                     title="Open File..."
                     icon={Icon.Code}
