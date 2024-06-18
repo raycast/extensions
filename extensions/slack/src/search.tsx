@@ -1,4 +1,6 @@
-import { ActionPanel, Action, Icon, Image, List } from "@raycast/api";
+// This filename is kept as `search.tsx` to avoid users losing their keywords and aliases
+// even though it's actually something to switch to channels.
+import { ActionPanel, Action, Icon, List } from "@raycast/api";
 
 import { User, useChannels } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
@@ -24,7 +26,7 @@ function Search() {
             <List.Item
               key={userId}
               title={name}
-              icon={icon ? { source: icon, mask: Image.Mask.Circle } : Icon.Person}
+              icon={icon}
               actions={
                 <ActionPanel>
                   <OpenChatInSlack

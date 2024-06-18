@@ -1,10 +1,11 @@
+import { Icon, Image } from "@raycast/api";
 import { SlackConversation, SlackMember, getSlackWebClient } from "./WebClient";
 
 interface Item {
   id: string;
   teamId: string;
   name: string;
-  icon: string;
+  icon: Image.ImageLike;
 }
 
 export interface User extends Item {
@@ -65,13 +66,13 @@ export class SlackClient {
           return {
             id,
             name: displayName,
-            icon: profile?.image_24,
+            icon: profile?.image_24 ? { source: profile?.image_24, mask: Image.Mask.Circle } : Icon.Person,
             teamId: team_id,
             username,
             conversationId: conversation?.id,
-          };
+          } as User;
         })
-        .filter((i): i is User => !!(i.id?.trim() && i.name?.trim() && i.teamId?.trim()))
+        .filter((i) => !!(i.id?.trim() && i.name?.trim() && i.teamId?.trim()))
         .sort((a, b) => sortNames(a.name, b.name)) ?? [];
 
     return users;
@@ -128,9 +129,9 @@ export class SlackClient {
             ...(context_team_id ? [context_team_id] : []),
           ];
           const teamId = teamIds.length > 0 ? teamIds[0] : "";
-          return { id, name, teamId, icon: is_private ? "channel-private.png" : "channel-public.png" };
+          return { id, name, teamId, icon: is_private ? "channel-private.png" : "channel-public.png" } as Channel;
         })
-        .filter((i): i is Channel => !!(i.id?.trim() && i.name?.trim() && i.teamId.trim()))
+        .filter((i) => !!(i.id?.trim() && i.name?.trim() && i.teamId.trim()))
         .sort((a, b) => sortNames(a.name, b.name)) ?? []
     );
   }
@@ -152,9 +153,9 @@ export class SlackClient {
             .filter((x) => !!x)
             .join(", ");
 
-          return { id, name: displayName, teamId, icon: "channel-private.png" };
+          return { id, name: displayName, teamId, icon: "channel-private.png" } as Group;
         })
-        .filter((i): i is Group => !!(i.id?.trim() && i.name?.trim() && i.teamId.trim()))
+        .filter((i) => !!(i.id?.trim() && i.name?.trim() && i.teamId.trim()))
         .sort((a, b) => sortNames(a.name, b.name)) ?? [];
 
     return groups;
