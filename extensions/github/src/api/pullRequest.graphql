@@ -23,16 +23,25 @@ fragment PullRequestFields on PullRequest {
   author {
     ...AuthorFields
   }
-  comments(first: 0) {
+  comments(first: 10) {
     totalCount
+    nodes {
+      body
+      createdAt
+      id
+      reactions(first: 50) {
+        nodes {
+          content
+          id
+        }
+      }
+      author {
+        ...AuthorFields
+      }
+    }
   }
   reviewThreads(first: 100) {
     totalCount
-    nodes {
-      comments(first: 0) {
-        totalCount
-      }
-    }
   }
   reviews(first: 100) {
     totalCount
@@ -109,8 +118,22 @@ fragment PullRequestDetailsFields on PullRequest {
   author {
     ...AuthorFields
   }
-  comments(first: 0) {
+  comments(first: 10) {
     totalCount
+    nodes {
+      body
+      createdAt
+      id
+      reactions(first: 50) {
+        nodes {
+          content
+          id
+        }
+      }
+      author {
+        ...AuthorFields
+      }
+    }
   }
   reviewRequests(first: 50) {
     totalCount

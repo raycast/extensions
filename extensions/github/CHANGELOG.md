@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Add "Show Pull Request Comments"] - 2024-06-18
+
+- adds ability to view pull request comments
+
 ## [Fix copy commit hash action] - 2024-06-17
 
 - Fixes an issue where the copy commit hash action incorrectly copied the commit message instead of the commit hash.

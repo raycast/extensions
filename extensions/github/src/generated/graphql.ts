@@ -6384,6 +6384,10 @@ export type Enterprise = AnnouncementBanner &
     organizations: OrganizationConnection;
     /** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
     ownerInfo?: Maybe<EnterpriseOwnerInfo>;
+    /** The raw content of the enterprise README. */
+    readme?: Maybe<Scalars["String"]>;
+    /** The content of the enterprise README as HTML. */
+    readmeHTML: Scalars["HTML"];
     /** The HTTP path for this enterprise. */
     resourcePath: Scalars["URI"];
     /** The URL-friendly identifier for the enterprise. */
@@ -31837,15 +31841,28 @@ export type PullRequestFieldsFragment = {
     | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
     | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
     | null;
-  comments: { __typename?: "IssueCommentConnection"; totalCount: number };
-  reviewThreads: {
-    __typename?: "PullRequestReviewThreadConnection";
+  comments: {
+    __typename?: "IssueCommentConnection";
     totalCount: number;
     nodes?: Array<{
-      __typename?: "PullRequestReviewThread";
-      comments: { __typename?: "PullRequestReviewCommentConnection"; totalCount: number };
+      __typename?: "IssueComment";
+      body: string;
+      createdAt: any;
+      id: string;
+      reactions: {
+        __typename?: "ReactionConnection";
+        nodes?: Array<{ __typename?: "Reaction"; content: ReactionContent; id: string } | null> | null;
+      };
+      author?:
+        | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
+        | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
+        | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
+        | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
+        | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
+        | null;
     } | null> | null;
   };
+  reviewThreads: { __typename?: "PullRequestReviewThreadConnection"; totalCount: number };
   reviews?: {
     __typename?: "PullRequestReviewConnection";
     totalCount: number;
@@ -31949,15 +31966,41 @@ export type SearchPullRequestsQuery = {
                   isViewer: boolean;
                 }
               | null;
-            comments: { __typename?: "IssueCommentConnection"; totalCount: number };
-            reviewThreads: {
-              __typename?: "PullRequestReviewThreadConnection";
+            comments: {
+              __typename?: "IssueCommentConnection";
               totalCount: number;
               nodes?: Array<{
-                __typename?: "PullRequestReviewThread";
-                comments: { __typename?: "PullRequestReviewCommentConnection"; totalCount: number };
+                __typename?: "IssueComment";
+                body: string;
+                createdAt: any;
+                id: string;
+                reactions: {
+                  __typename?: "ReactionConnection";
+                  nodes?: Array<{ __typename?: "Reaction"; content: ReactionContent; id: string } | null> | null;
+                };
+                author?:
+                  | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
+                  | {
+                      __typename?: "EnterpriseUserAccount";
+                      id: string;
+                      login: string;
+                      name?: string | null;
+                      avatarUrl: any;
+                    }
+                  | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
+                  | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
+                  | {
+                      __typename?: "User";
+                      id: string;
+                      avatarUrl: any;
+                      name?: string | null;
+                      login: string;
+                      isViewer: boolean;
+                    }
+                  | null;
               } | null> | null;
             };
+            reviewThreads: { __typename?: "PullRequestReviewThreadConnection"; totalCount: number };
             reviews?: {
               __typename?: "PullRequestReviewConnection";
               totalCount: number;
@@ -32047,7 +32090,27 @@ export type PullRequestDetailsFieldsFragment = {
     | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
     | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
     | null;
-  comments: { __typename?: "IssueCommentConnection"; totalCount: number };
+  comments: {
+    __typename?: "IssueCommentConnection";
+    totalCount: number;
+    nodes?: Array<{
+      __typename?: "IssueComment";
+      body: string;
+      createdAt: any;
+      id: string;
+      reactions: {
+        __typename?: "ReactionConnection";
+        nodes?: Array<{ __typename?: "Reaction"; content: ReactionContent; id: string } | null> | null;
+      };
+      author?:
+        | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
+        | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
+        | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
+        | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
+        | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
+        | null;
+    } | null> | null;
+  };
   reviewRequests?: {
     __typename?: "ReviewRequestConnection";
     totalCount: number;
@@ -32306,7 +32369,40 @@ export type PullRequestDetailsQuery = {
           | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
           | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
           | null;
-        comments: { __typename?: "IssueCommentConnection"; totalCount: number };
+        comments: {
+          __typename?: "IssueCommentConnection";
+          totalCount: number;
+          nodes?: Array<{
+            __typename?: "IssueComment";
+            body: string;
+            createdAt: any;
+            id: string;
+            reactions: {
+              __typename?: "ReactionConnection";
+              nodes?: Array<{ __typename?: "Reaction"; content: ReactionContent; id: string } | null> | null;
+            };
+            author?:
+              | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
+              | {
+                  __typename?: "EnterpriseUserAccount";
+                  id: string;
+                  login: string;
+                  name?: string | null;
+                  avatarUrl: any;
+                }
+              | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
+              | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
+              | {
+                  __typename?: "User";
+                  id: string;
+                  avatarUrl: any;
+                  name?: string | null;
+                  login: string;
+                  isViewer: boolean;
+                }
+              | null;
+          } | null> | null;
+        };
         reviewRequests?: {
           __typename?: "ReviewRequestConnection";
           totalCount: number;
@@ -32995,15 +33091,35 @@ export type InitPullRequestMutation = {
         | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
         | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
         | null;
-      comments: { __typename?: "IssueCommentConnection"; totalCount: number };
-      reviewThreads: {
-        __typename?: "PullRequestReviewThreadConnection";
+      comments: {
+        __typename?: "IssueCommentConnection";
         totalCount: number;
         nodes?: Array<{
-          __typename?: "PullRequestReviewThread";
-          comments: { __typename?: "PullRequestReviewCommentConnection"; totalCount: number };
+          __typename?: "IssueComment";
+          body: string;
+          createdAt: any;
+          id: string;
+          reactions: {
+            __typename?: "ReactionConnection";
+            nodes?: Array<{ __typename?: "Reaction"; content: ReactionContent; id: string } | null> | null;
+          };
+          author?:
+            | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
+            | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
+            | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
+            | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
+            | {
+                __typename?: "User";
+                id: string;
+                avatarUrl: any;
+                name?: string | null;
+                login: string;
+                isViewer: boolean;
+              }
+            | null;
         } | null> | null;
       };
+      reviewThreads: { __typename?: "PullRequestReviewThreadConnection"; totalCount: number };
       reviews?: {
         __typename?: "PullRequestReviewConnection";
         totalCount: number;
@@ -33823,16 +33939,25 @@ export const PullRequestFieldsFragmentDoc = gql`
     author {
       ...AuthorFields
     }
-    comments(first: 0) {
+    comments(first: 10) {
       totalCount
+      nodes {
+        body
+        createdAt
+        id
+        reactions(first: 50) {
+          nodes {
+            content
+            id
+          }
+        }
+        author {
+          ...AuthorFields
+        }
+      }
     }
     reviewThreads(first: 100) {
       totalCount
-      nodes {
-        comments(first: 0) {
-          totalCount
-        }
-      }
     }
     reviews(first: 100) {
       totalCount
@@ -33903,8 +34028,22 @@ export const PullRequestDetailsFieldsFragmentDoc = gql`
     author {
       ...AuthorFields
     }
-    comments(first: 0) {
+    comments(first: 10) {
       totalCount
+      nodes {
+        body
+        createdAt
+        id
+        reactions(first: 50) {
+          nodes {
+            content
+            id
+          }
+        }
+        author {
+          ...AuthorFields
+        }
+      }
     }
     reviewRequests(first: 50) {
       totalCount

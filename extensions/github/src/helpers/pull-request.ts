@@ -131,3 +131,36 @@ export function getReviewDecision(reviewDecision?: PullRequestReviewDecision | n
       return null;
   }
 }
+
+export function getEmojiFromReactionContent(content: string) {
+  switch (content) {
+    case "THUMBS_UP":
+      return "👍";
+    case "THUMBS_DOWN":
+      return "👎";
+    case "LAUGH":
+      return "👎";
+    case "CONFUSED":
+      return "😕";
+    case "HEART":
+      return "❤️";
+    case "HOORAY":
+      return "🎉";
+    case "ROCKET":
+      return "🚀";
+    case "EYES":
+      return "👀";
+    default:
+      return "";
+  }
+}
+
+export function getReducedReactions(reactions: { content: string; id: string }[]) {
+  return reactions.reduce(
+    (acc, { content }) => {
+      acc[content] = (acc[content] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+}
