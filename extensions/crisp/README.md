@@ -1,3 +1,9 @@
 # Crisp
 
-Manage Crisp conversations quickly, all websites conversations in one place.
+Manage Crisp conversations quickly with all websites conversations in one place.
+
+## Screenshots:
+
+![screenshot](media/mutli-website-view.jpeg)
+
+https://github.com/raycast/extensions/assets/31321188/298ff688-e582-409f-abd6-379639546f4d

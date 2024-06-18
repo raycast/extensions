@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Cache, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Cache, Color, Detail, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import ColorHash from "color-hash";
 
 import { formatDistanceToNow } from "date-fns";
@@ -60,7 +60,7 @@ Do you already have installed the Crisp plugin? This extension works by installi
 `;
 
 export function Command() {
-  const { data: sessionData, isLoading: isLoggingIn } = useSWR(["supabase"], () => getSupabaseWithSession());
+  const { data: sessionData, isLoading: isLoggingIn, mutate } = useSWR(["supabase"], () => getSupabaseWithSession());
   const {
     data,
     isLoading: isFetching,
@@ -74,6 +74,10 @@ export function Command() {
       }
       const client = createClient({ supabaseRef, session, url: backendUrl, fetch });
       const res = await client.api.v1.conversations.$get({});
+      if (res.status === 401) {
+        await LocalStorage.removeItem("session");
+        mutate();
+      }
       if (!res.ok) {
         throw new Error(await res.text());
       }
@@ -86,6 +90,7 @@ export function Command() {
       },
     },
   );
+
   const isLoading = isLoggingIn || isFetching || isValidating;
 
   if (!data?.conversations && !sessionData?.session && !isLoading) {
