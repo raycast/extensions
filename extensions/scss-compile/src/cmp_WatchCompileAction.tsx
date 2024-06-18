@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Toast, showToast, useNavigation } from "@raycast/api";
-import { CompileConfig, add_LocalConfig_watch, remove_LocalConfig_watch } from "./util_compile";
+import { CompileConfig, add_LocalConfig_watch, exec_watch, remove_LocalConfig_watch } from "./util_compile";
 import { Dispatch } from "react";
+import { delayOperation } from "./util_other";
 
 // Action for the watch compile form
 export function WatchCompileAction(props: {
@@ -22,7 +23,7 @@ export function WatchCompileAction(props: {
             cssPath: values.cssPath[0] == null ? "" : values.cssPath[0],
             outputStyle: values.outputStyle,
             sourceMap: values.sourceMap,
-            watchCompile: false,
+            watchCompile: values.watchCompile == "true",
           };
           if (props.delete_prefill == true && props.prefill_config != undefined) {
             remove_LocalConfig_watch(props.prefill_config).then(() => {
@@ -31,6 +32,18 @@ export function WatchCompileAction(props: {
                   showToast({ title: "⚙️\tConfiguration Saved (updated existing config)", style: Toast.Style.Success });
                 } else {
                   showToast({ title: "⚙️\tConfiguration Saved", style: Toast.Style.Success });
+                }
+                if (cur_config.watchCompile) {
+                  delayOperation(500).then(() => {
+                    showToast({ title: "Watching ...", style: Toast.Style.Animated });
+                    exec_watch(cur_config)
+                      .then(() => {
+                        showToast({ title: "Success !", style: Toast.Style.Animated });
+                      })
+                      .catch(() => {
+                        showToast({ title: "Failed !", style: Toast.Style.Animated });
+                      });
+                  });
                 }
                 if (props.pop_callBack != undefined) {
                   props.pop_callBack();
@@ -44,6 +57,9 @@ export function WatchCompileAction(props: {
                 showToast({ title: "⚙️\tConfiguration Saved (updated existing config)", style: Toast.Style.Success });
               } else {
                 showToast({ title: "⚙️\tConfiguration Saved", style: Toast.Style.Success });
+              }
+              if (cur_config.watchCompile) {
+                exec_watch(cur_config);
               }
               if (props.pop_callBack != undefined) {
                 props.pop_callBack();
