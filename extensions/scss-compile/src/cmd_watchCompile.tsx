@@ -202,8 +202,16 @@ export default function Command() {
                     icon={Icon.MinusCircle}
                     shortcut={{ modifiers: ["ctrl"], key: "x" }}
                     onAction={() => {
-                      remove_LocalConfig_watch(config).then(() => {
-                        set_needReload(true);
+                      if (config.watchCompile) {
+                        showToast({ title: "Pausing...", style: Toast.Style.Animated });
+                      }
+                      exec_pause(config).then(() => {
+                        remove_LocalConfig_watch(config).then(() => {
+                          delayOperation(500).then(() => {
+                            showToast({ title: "Removed !", style: Toast.Style.Success });
+                            set_needReload(true);
+                          });
+                        });
                       });
                     }}
                   />
@@ -212,8 +220,20 @@ export default function Command() {
                     icon={Icon.MinusCircle}
                     shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
                     onAction={() => {
-                      removeAll_LocalConfigs_watch().then(() => {
-                        set_needReload(true);
+                      getAll_LocalConfig_watch().then((config_s) => {
+                        showToast({ title: "Pausing All...", style: Toast.Style.Animated });
+                        Promise.all(
+                          config_s.map((config) => {
+                            return exec_pause(config);
+                          }),
+                        ).then(() => {
+                          removeAll_LocalConfigs_watch().then(() => {
+                            delayOperation(2000).then(() => {
+                              showToast({ title: "Removed All!", style: Toast.Style.Success });
+                              set_needReload(true);
+                            });
+                          });
+                        });
                       });
                     }}
                   />
