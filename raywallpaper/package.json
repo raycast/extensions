@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raywallpaper",
+  "title": "RayWallpaper",
+  "description": "Allows you to select a wallpaper from a folder in the Finder.",
+  "icon": "command-icon.png",
+  "author": "antonio-23",
+  "owner": "ant-dev",
+  "categories": [
+    "System",
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "raywallpaper",
+      "title": "Set Wallpaper",
+      "description": "Allows you to select a wallpaper from a folder in the Finder.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "gridSize",
+          "title": "Grid Size",
+          "description": "Grid size of the wallpaper picker",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "1",
+              "value": "1"
+            },
+            {
+              "title": "2",
+              "value": "2"
+            },
+            {
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            },
+            {
+              "title": "7",
+              "value": "7"
+            },
+            {
+              "title": "8",
+              "value": "8"
+            }
+          ],
+          "default": "4",
+          "required": false
+        },
+        {
+          "name": "wallpaperTitle",
+          "type": "checkbox",
+          "label": "Show Wallpaper Titles",
+          "title": "Shows Wallpaper Titles",
+          "description": "Shows the wallpaper titles in the picker",
+          "required": false,
+          "defaultValue": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.76.0",
+    "@raycast/utils": "^1.13.2",
+    "braces": "^3.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
