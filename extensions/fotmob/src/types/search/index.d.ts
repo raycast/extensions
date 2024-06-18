@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import type { List } from "@raycast/api";
 
 // Common
 export type SearchSuggestResponse<Option> = {
@@ -29,12 +29,17 @@ export type MatchSuggestOption = {
 };
 
 export type MatchSuggestPayload = {
-  matchDate: string;
-  id: string;
-  homeTeamId: string;
-  awayTeamId: string;
-  homeName: string;
   awayName: string;
+  awayTeamId: string;
+  awayScore?: number;
+  homeName: string;
+  homeTeamId: string;
+  homeScore?: number;
+  matchDate: string;
+  leagueId: number;
+  leagueName: string;
+  id: string;
+  statusId: number;
 };
 
 // Teams Suggestions
@@ -62,6 +67,8 @@ export type PlayerSuggestPayload = {
   id: string;
   newsLanguages: string[];
   isCoach: boolean;
+  teamId?: number;
+  teamName?: string;
 };
 
 // Convenience

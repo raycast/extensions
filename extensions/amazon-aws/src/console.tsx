@@ -1,23 +1,37 @@
-import { ActionPanel, List } from "@raycast/api";
-import { readFile } from "fs/promises";
+import { ActionPanel, List, Image } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { AWS_URL_BASE } from "./constants";
+import { readFile } from "fs/promises";
 import { AwsAction } from "./components/common/action";
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { AWS_URL_BASE } from "./constants";
 
 export default function Console() {
-  const { data: services, isLoading } = useCachedPromise(loadJSON);
+  const { data: services, isLoading, revalidate } = useCachedPromise(loadJSON);
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter services by name...">
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter services by name..."
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+    >
       {services?.map((service) => (
         <List.Item
           key={service.uid}
           title={service.title}
           subtitle={service.subtitle}
-          icon={service.icon.path}
+          icon={{ source: service.icon.path, mask: Image.Mask.RoundedRectangle }}
+          keywords={service.match.split(" ")}
           actions={
             <ActionPanel>
-              <AwsAction.Console url={`${AWS_URL_BASE}${service.arg}`} />
+              <AwsAction.Console
+                url={
+                  typeof process.env.AWS_SSO_ACCOUNT_ID !== "undefined" &&
+                  typeof process.env.AWS_SSO_ROLE_NAME !== "undefined" &&
+                  typeof process.env.AWS_SSO_START_URL !== "undefined"
+                    ? `${normalizeUrl(process.env.AWS_SSO_START_URL)}console?account_id=${encodeURI(process.env.AWS_SSO_ACCOUNT_ID)}&role_name=${encodeURI(process.env.AWS_SSO_ROLE_NAME)}&destination=${encodeURI(AWS_URL_BASE + service.arg)}`
+                    : `${AWS_URL_BASE}${service.arg}`
+                }
+              />
             </ActionPanel>
           }
         />
@@ -32,6 +46,7 @@ type AWSService = {
   subtitle: string;
   arg: string;
   icon: AWSIcon;
+  match: string;
 };
 
 type AWSIcon = {
@@ -47,4 +62,11 @@ async function loadJSON() {
     .sort((a, b) => (a.title > b.title ? 1 : b.title > a.title ? -1 : 0));
 
   return services;
+}
+
+function normalizeUrl(url: string): string {
+  if (url.endsWith("/")) {
+    return url;
+  }
+  return `${url}/`;
 }

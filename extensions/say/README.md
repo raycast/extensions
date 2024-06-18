@@ -36,6 +36,9 @@ launchCommand({
   arguments: {
     content: "Hello, world!",
   },
+  context: {
+    voice: "Cellos",
+  },
 });
 ```
 

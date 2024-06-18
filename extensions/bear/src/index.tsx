@@ -72,7 +72,7 @@ export default function SearchNotes(props: LaunchProps<{ arguments: SearchNotesA
           actions={
             <ActionPanel>
               <Action
-                title="Create new note"
+                title="Create New Note"
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
                 onAction={() => createBasicNote(searchQuery)}
               />
