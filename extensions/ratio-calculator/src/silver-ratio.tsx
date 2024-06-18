@@ -9,7 +9,7 @@ export default function SilverRatioCommand() {
   useEffect(() => {
     const calculateSilverRatio = () => {
       const delta = 1.41421356237; // Silver ratio (1 + sqrt(2))
-      let number = parseFloat(inputNumber);
+      const number = parseFloat(inputNumber);
 
       if (isNaN(number) || number <= 0) {
         setSmallerNumber("");
@@ -26,12 +26,12 @@ export default function SilverRatioCommand() {
 
   const handleCopyToClipboard = (value) => {
     Clipboard.copy(value);
-    showToast(Toast.Style.Success, "已复制到剪贴板", value);
+    showToast(Toast.Style.Success, "Copied to clipboard", value);
   };
 
   return (
     <List
-      searchBarPlaceholder="输入一个数值"
+      searchBarPlaceholder="Enter a number"
       onSearchTextChange={setInputNumber}
       throttle
     >
@@ -39,27 +39,27 @@ export default function SilverRatioCommand() {
         <>
           <List.Item
             icon={Icon.ChevronUpSmall}
-            title="较小的数值"
+            title="Smaller Number"
             subtitle={smallerNumber}
             actions={
               <ActionPanel>
-                <Action title="复制较小的数值" onAction={() => handleCopyToClipboard(smallerNumber)} />
+                <Action title="Copy Smaller Number" onAction={() => handleCopyToClipboard(smallerNumber)} />
               </ActionPanel>
             }
           />
           <List.Item
             icon={Icon.ChevronDownSmall}
-            title="较大的数值"
+            title="Larger Number"
             subtitle={largerNumber}
             actions={
               <ActionPanel>
-                <Action title="复制较大的数值" onAction={() => handleCopyToClipboard(largerNumber)} />
+                <Action title="Copy Larger Number" onAction={() => handleCopyToClipboard(largerNumber)} />
               </ActionPanel>
             }
           />
         </>
       ) : (
-        <List.Item title="请输入一个大于零的数值" />
+        <List.Item title="Please enter a number greater than zero" />
       )}
     </List>
   );
