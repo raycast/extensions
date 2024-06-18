@@ -12,7 +12,7 @@ import { getSupabaseWithSession, supabaseRef } from "./supabase-raycast";
 // required to make Hono client work
 globalThis.Headers = Headers;
 
-const backendUrl = process.env.CRISP_BACKEND_URL || "https://crispyraycast.com";
+const backendUrl = "https://crispyraycast.com";
 
 const cache = new Cache();
 
