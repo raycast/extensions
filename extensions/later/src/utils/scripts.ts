@@ -17,9 +17,22 @@ export const Scripts = {
 		if not application "Arc" is running then
 			return ""
 		end if
-		set currentURL to URL of active tab of window 1
-		set currentTitle to title of active tab of window 1
-		return (currentURL & "${splitter}" & currentTitle)
+		activate
+		 tell application "System Events" to tell process "Arc"
+		    set frontmost to true
+		    set the_title to name of windows's item 1
+		    set the_title to (do shell script "echo " & quoted form of the_title & " | tr '[' ' '")
+		    set the_title to (do shell script "echo " & quoted form of the_title & " | tr ']' ' '")
+	    	end tell
+
+		    tell application "System Events"
+		    keystroke "l" using command down
+		    keystroke "c" using command down
+		    key code 53 
+			end tell
+			delay 0.5
+			set activeTabURL to the clipboard
+  		return (activeTabURL & "${splitter}" & the_title)
 	end tell 
   `,
   safari: `tell application "Safari"
@@ -47,7 +60,8 @@ end tell`,
 		    tell application "System Events"
 		    keystroke "l" using command down
 		    keystroke "c" using command down
-			end tell
+		    key code 53 
+		    end tell
 			delay 0.5
 			set activeTabURL to the clipboard
   		return (activeTabURL & "${splitter}" & the_title)
