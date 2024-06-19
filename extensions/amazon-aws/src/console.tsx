@@ -64,5 +64,5 @@ type AWSIcon = {
 
 async function loadJSON() {
   const file = await readFile(`${__dirname}/assets/aws-services.json`, "utf8");
-  return (JSON.parse(file).items as AWSService[]).filter((service) => !!service.title);
+  return (JSON.parse(file).items as AWSService[]).filter((service) => !!service.title && !!service.id);
 }
