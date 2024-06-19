@@ -94,7 +94,24 @@ export default function Command() {
                             });
                           })
                           .catch((result: CompileResult) => {
-                            showToast({ title: `Compile Failed: ${result.message} !`, style: Toast.Style.Failure });
+                            showToast({
+                              title: `Failed !`,
+                              style: Toast.Style.Failure,
+                              primaryAction: {
+                                title: `View Error`,
+                                shortcut: { modifiers: ["cmd"], key: "1" },
+                                onAction: () => {
+                                  open(config.cssPath);
+                                },
+                              },
+                              secondaryAction: {
+                                title: `Edit SCSS File`,
+                                shortcut: { modifiers: ["cmd"], key: "2" },
+                                onAction: () => {
+                                  open(config.scssPath);
+                                },
+                              },
+                            });
                           });
                       } else {
                         alertConfig_delete(config).then(() => {

@@ -160,14 +160,14 @@ export async function exec_compile(conf: CompileConfig): Promise<CompileResult> 
     exec(
       compile_cmd,
       { shell: "/bin/zsh", env: { ...process.env, PATH: "/opt/homebrew/bin" } },
-      async (error, stdout) => {
+      async (error, stdout, stderr) => {
         if (error == null || error == undefined) {
           resolve({ success: true, message: stdout });
         } else {
           if (stdout.includes("no such file or directory")) {
             reject({ success: false, message: "File Not Found" });
           } else {
-            reject({ success: false, message: "Unknown Error" });
+            reject({ success: false, message: `${stderr}` });
           }
         }
       },
