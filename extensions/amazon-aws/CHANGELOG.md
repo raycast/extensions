@@ -3,6 +3,7 @@
 ## [Console command] - {PR_MERGE_DATE}
 
 - [Frecency sorting](https://developers.raycast.com/utilities/react-hooks/usefrecencysorting) so that most/recent used service console links appear at the top of search
+- Fixed issue where console links were improperly generated: [#13032](https://github.com/raycast/extensions/issues/13032)
 
 ## [Improvements] - 2024-06-18
 

@@ -4,6 +4,7 @@ import { readFile } from "fs/promises";
 import { AwsAction } from "./components/common/action";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { AWS_URL_BASE } from "./constants";
+import { normalizeUrl } from './util';
 
 export default function Console() {
   const { data: services, isLoading, revalidate } = useCachedPromise(loadJSON);
@@ -33,10 +34,8 @@ export default function Console() {
             <ActionPanel>
               <AwsAction.Console
                 url={
-                  typeof process.env.AWS_SSO_ACCOUNT_ID !== "undefined" &&
-                  typeof process.env.AWS_SSO_ROLE_NAME !== "undefined" &&
-                  typeof process.env.AWS_SSO_START_URL !== "undefined"
-                    ? `${normalizeUrl(process.env.AWS_SSO_START_URL)}console?account_id=${encodeURI(process.env.AWS_SSO_ACCOUNT_ID)}&role_name=${encodeURI(process.env.AWS_SSO_ROLE_NAME)}&destination=${encodeURI(AWS_URL_BASE + service.arg)}`
+                  process.env.AWS_SSO_ACCOUNT_ID && process.env.AWS_SSO_ROLE_NAME && process.env.AWS_SSO_START_URL
+                    ? `${normalizeUrl(process.env.AWS_SSO_START_URL!)}console?account_id=${encodeURI(process.env.AWS_SSO_ACCOUNT_ID!)}&role_name=${encodeURI(process.env.AWS_SSO_ROLE_NAME!)}&destination=${encodeURI(AWS_URL_BASE + service.arg)}`
                     : `${AWS_URL_BASE}${service.arg}`
                 }
                 onAction={() => visitItem(service)}
@@ -66,11 +65,4 @@ type AWSIcon = {
 async function loadJSON() {
   const file = await readFile(`${__dirname}/assets/aws-services.json`, "utf8");
   return (JSON.parse(file).items as AWSService[]).filter((service) => !!service.title);
-}
-
-function normalizeUrl(url: string): string {
-  if (url.endsWith("/")) {
-    return url;
-  }
-  return `${url}/`;
 }
