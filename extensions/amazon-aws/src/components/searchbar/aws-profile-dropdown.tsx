@@ -40,12 +40,19 @@ export default function AWSProfileDropdown({ onProfileSelected }: Props) {
     }
 
     if (selectedProfile) {
-      process.env.AWS_REGION = profileOptions.find((profile) => profile.name === selectedProfile)?.region;
-      process.env.AWS_SSO_START_URL = profileOptions.find((profile) => profile.name === selectedProfile)?.sso_start_url;
-      process.env.AWS_SSO_ACCOUNT_ID = profileOptions.find(
-        (profile) => profile.name === selectedProfile,
-      )?.sso_account_id;
-      process.env.AWS_SSO_ROLE_NAME = profileOptions.find((profile) => profile.name === selectedProfile)?.sso_role_name;
+      const profile = profileOptions.find((profile) => profile.name === selectedProfile);
+      if (profile?.region) {
+        process.env.AWS_REGION = profile.region;
+      }
+      if (profile?.sso_start_url) {
+        process.env.AWS_SSO_START_URL = profile.sso_start_url;
+      }
+      if (profile?.sso_account_id) {
+        process.env.AWS_SSO_ACCOUNT_ID = profile.sso_account_id;
+      }
+      if (profile?.sso_role_name) {
+        process.env.AWS_SSO_ROLE_NAME = profile.sso_role_name;
+      }
     }
 
     if (!vaultSessions?.includes(selectedProfile || "")) {

@@ -1,6 +1,6 @@
-import { Action, closeMainWindow, getApplications, getPreferenceValues, Icon } from "@raycast/api";
-import { FunctionComponent, ReactNode, useEffect, useState } from "react";
-import { runAppleScript } from "run-applescript";
+import { Action, closeMainWindow, getApplications, getPreferenceValues } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
+import { useEffect, useState } from "react";
 import { buildScriptEnsuringSlackIsRunning } from "./utils";
 
 export const useSlackApp = () => {
@@ -36,11 +36,13 @@ export const OpenChatInSlack = ({
   userId,
   isAppInstalled,
   conversationId,
+  onAction,
 }: {
   workspaceId: string;
   userId: string;
   isAppInstalled: boolean;
   conversationId?: string;
+  onAction?: () => Promise<void>;
 }) => {
   const { closeRightSidebar } = getPreferenceValues<{ closeRightSidebar: boolean }>();
 
@@ -50,15 +52,16 @@ export const OpenChatInSlack = ({
         <Action.Open
           title={"Open in Slack"}
           target={`slack://user?team=${workspaceId}&id=${userId}`}
-          icon={Icon.AppWindowSidebarLeft}
+          icon={{ fileIcon: "/Applications/Slack.app" }}
           application="Slack"
           onOpen={async () => {
+            await onAction?.();
             await closeMainWindow();
             if (closeRightSidebar) {
               await runAppleScript(
                 buildScriptEnsuringSlackIsRunning(
-                  `tell application "System Events" to tell process "Slack" to key code 47 using {command down}`
-                )
+                  `tell application "System Events" to tell process "Slack" to key code 47 using {command down}`,
+                ),
               );
             }
           }}
@@ -79,12 +82,12 @@ export const OpenChannelInSlack = ({
   workspaceId,
   channelId,
   isAppInstalled,
-  onActionAddon,
+  onAction,
 }: {
   workspaceId: string;
   channelId: string;
   isAppInstalled: boolean;
-  onActionAddon?: () => Promise<void>;
+  onAction?: () => Promise<void>;
 }) => {
   return (
     <>
@@ -93,10 +96,10 @@ export const OpenChannelInSlack = ({
           title={"Open in Slack"}
           target={`slack://channel?team=${workspaceId}&id=${channelId}`}
           onOpen={async () => {
-            await onActionAddon?.();
+            await onAction?.();
             await closeMainWindow();
           }}
-          icon={Icon.AppWindowSidebarLeft}
+          icon={{ fileIcon: "/Applications/Slack.app" }}
           application="Slack"
         />
       )}
@@ -104,7 +107,7 @@ export const OpenChannelInSlack = ({
         url={`https://app.slack.com/client/${workspaceId}/${channelId}`}
         title={"Open in Browser"}
         onOpen={async () => {
-          await onActionAddon?.();
+          await onAction?.();
           await closeMainWindow();
         }}
       />

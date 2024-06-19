@@ -1,4 +1,7 @@
-import formatDistance from "date-fns/formatDistance";
+import { open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { CodedError, ErrorCode } from "@slack/web-api";
+import { formatDistance } from "date-fns";
 
 const timeDifference = (date: Date): string => {
   const now = new Date();
@@ -37,4 +40,34 @@ const buildScriptEnsuringSlackIsRunning = (commandsToRunAfterSlackIsRunning: str
     end tell`;
 };
 
-export { timeDifference, buildScriptEnsuringSlackIsRunning };
+const isCodedError = (error: unknown): error is CodedError => {
+  return typeof error === "object" && error !== null && "code" in error && "message" in error;
+};
+
+const handleError = async (error: CodedError | Error | unknown, title?: string) => {
+  if (isCodedError(error)) {
+    if (error.code === ErrorCode.RateLimitedError) {
+      return showFailureToast(error, {
+        title: "You've been rate-limited.",
+        message: "Please try again in a few seconds/minutes.",
+      });
+    }
+
+    if (error.message.includes("missing_scope")) {
+      return showFailureToast(error, {
+        title: "Missing Scopes",
+        message: "Please make sure your Slack app has all of the required scopes.",
+        primaryAction: {
+          title: "Open Slack Apps",
+          onAction: () => {
+            open("https://api.slack.com/apps");
+          },
+        },
+      });
+    }
+  }
+
+  return showFailureToast(error, { title: title ?? "Something unexpected happened" });
+};
+
+export { timeDifference, buildScriptEnsuringSlackIsRunning, handleError };

@@ -906,7 +906,7 @@
 /extensions/octopus-energy                                          @mike182uk
 /extensions/odesli                                                  @anned20
 /extensions/odin                                                    @aamoussa97
-/extensions/office-quotes                                           @braydoncoyer @sandypockets
+/extensions/office-quotes                                           @braydoncoyer @sandypockets @xmok
 /extensions/office2pdf                                              @ARui-tw
 /extensions/ohdear                                                  @andreaselia @pernielsentikaer @Hodglim
 /extensions/ohmyzsh-git-alias                                       @yufeikang
@@ -1000,6 +1000,7 @@
 /extensions/pinboard                                                @fe9lix
 /extensions/ping                                                    @stevensd2m
 /extensions/pins                                                    @SKaplanOfficial @pernielsentikaer
+/extensions/pip                                                     @koinzhang
 /extensions/pipe-commands                                           @pomdtr @gasolin @pernielsentikaer
 /extensions/pipedrive                                               @ahpatel
 /extensions/pitchfork                                               @koayon
@@ -1072,7 +1073,7 @@
 /extensions/radix                                                   @peduarte @emlez
 /extensions/railway                                                 @coffee-cup @nagauta
 /extensions/rain-radars                                             @danieldbird @koinzhang
-/extensions/raindrop-io                                             @lardissone @ShubhamVerma1811 @pernielsentikaer @sh-cho
+/extensions/raindrop-io                                             @lardissone @ShubhamVerma1811 @pernielsentikaer @sh-cho @tdkn
 /extensions/ramda-documentation                                     @jbroomer
 /extensions/random-color                                            @srcrip
 /extensions/random-data-generator                                   @loris @Calvein @pernielsentikaer @vimtor @j3lte @stefanmatar
@@ -1097,6 +1098,7 @@
 /extensions/raycast-icons                                           @PitNikola @peduarte
 /extensions/raycast-lighting-node-search                            @bufo24 @Djo1e
 /extensions/raycast-link-lock                                       @EvanZhouDev @pernielsentikaer
+/extensions/raycast-monkeytype-theme                                @ridemountainpig
 /extensions/raycast-nrm                                             @lihaizhong
 /extensions/raycast-ollama                                          @MassimilianoPasquini97
 /extensions/raycast-svg64                                           @EvanZhouDev
@@ -1196,7 +1198,7 @@
 /extensions/search-hexpm                                            @jordelver
 /extensions/search-hookmark                                         @QIanGua
 /extensions/search-joplin-notes                                     @wisdom-plus
-/extensions/search-mdn                                              @krzysztofzuraw @OBQun @k8scat @j3lte
+/extensions/search-mdn                                              @krzysztofzuraw @OBQun @k8scat @j3lte @jfkisafk
 /extensions/search-notion                                           @sadanand-singh @erikjs14
 /extensions/search-npm                                              @mrmartineau @reloadedhead @TimonVS @luisFilipePT @LunaticMuch @jomifepe @j3lte
 /extensions/search-private-npm-packages                             @HsiuCL
@@ -1244,7 +1246,7 @@
 /extensions/sips                                                    @SKaplanOfficial @arronhunt @nakaakist @JUSTIVE @patomos
 /extensions/sitespeakai                                             @hermanschutte
 /extensions/sketch                                                  @aesign
-/extensions/slack                                                   @momme-rtf @Elliot67 @jfkisafk
+/extensions/slack                                                   @momme-rtf @Elliot67 @jfkisafk @thomaslombart
 /extensions/slack-status                                            @PitNikola @johnhampton @thomaspaulmann @pernielsentikaer @ramsaysewell
 /extensions/sleep-timer                                             @dtmzr @ThatNerdSquared @pernielsentikaer
 /extensions/slugify                                                 @unreadablename
