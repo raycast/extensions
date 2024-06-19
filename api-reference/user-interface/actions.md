@@ -336,6 +336,7 @@ export default function Command() {
 | :--- | :--- | :--- | :--- |
 | icon | The icon displayed for the Action. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
 | shortcut | The keyboard shortcut for the Action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
+| style | Defines the visual style of the Action. | <code>[Alert.ActionStyle](../feedback/alert.md#alert.actionstyle)</code> | [Action.Style.Regular](actions.md#action.style) |
 | title | The title displayed for the Action. | <code>string</code> | `"Submit Form"` |
 | onSubmit | Callback when the Form was submitted. The handler receives a the values object containing the user input. | <code>(input: [Form.Values](form.md#form.values)) => boolean \| void \| Promise&lt;boolean \| void></code> | - |
 
