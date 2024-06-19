@@ -37,16 +37,46 @@
           "placeholder": "Tab",
           "required": false,
           "data": [
-            { "title": "General", "value": "general"},
-            { "title": "Wallpaper", "value": "wallpaper"},
-            { "title": "Shortcuts", "value": "shortcuts"},
-            { "title": "Quick Access", "value": "quickaccess"},
-            { "title": "Recording", "value": "recording"},
-            { "title": "Screenshots", "value": "screenshots"},
-            { "title": "Annotate", "value": "annotate"},
-            { "title": "Cloud", "value": "cloud"},
-            { "title": "Advanced", "value": "advanced"},
-            { "title": "About", "value": "about"}
+            {
+              "title": "General",
+              "value": "general"
+            },
+            {
+              "title": "Wallpaper",
+              "value": "wallpaper"
+            },
+            {
+              "title": "Shortcuts",
+              "value": "shortcuts"
+            },
+            {
+              "title": "Quick Access",
+              "value": "quickaccess"
+            },
+            {
+              "title": "Recording",
+              "value": "recording"
+            },
+            {
+              "title": "Screenshots",
+              "value": "screenshots"
+            },
+            {
+              "title": "Annotate",
+              "value": "annotate"
+            },
+            {
+              "title": "Cloud",
+              "value": "cloud"
+            },
+            {
+              "title": "Advanced",
+              "value": "advanced"
+            },
+            {
+              "title": "About",
+              "value": "about"
+            }
           ]
         }
       ]
@@ -82,11 +112,26 @@
           "placeholder": "Action",
           "required": false,
           "data": [
-            { "title": "Copy", "value": "copy"},
-            { "title": "Save", "value": "save"},
-            { "title": "Annotate", "value": "annotate"},
-            { "title": "Upload", "value": "upload"},
-            { "title": "Pin", "value": "pin"}
+            {
+              "title": "Copy",
+              "value": "copy"
+            },
+            {
+              "title": "Save",
+              "value": "save"
+            },
+            {
+              "title": "Annotate",
+              "value": "annotate"
+            },
+            {
+              "title": "Upload",
+              "value": "upload"
+            },
+            {
+              "title": "Pin",
+              "value": "pin"
+            }
           ]
         }
       ]
@@ -105,11 +150,26 @@
           "placeholder": "Action",
           "required": false,
           "data": [
-            { "title": "Copy", "value": "copy"},
-            { "title": "Save", "value": "save"},
-            { "title": "Annotate", "value": "annotate"},
-            { "title": "Upload", "value": "upload"},
-            { "title": "Pin", "value": "pin"}
+            {
+              "title": "Copy",
+              "value": "copy"
+            },
+            {
+              "title": "Save",
+              "value": "save"
+            },
+            {
+              "title": "Annotate",
+              "value": "annotate"
+            },
+            {
+              "title": "Upload",
+              "value": "upload"
+            },
+            {
+              "title": "Pin",
+              "value": "pin"
+            }
           ]
         }
       ]
@@ -128,11 +188,26 @@
           "placeholder": "Action",
           "required": false,
           "data": [
-            { "title": "Copy", "value": "copy"},
-            { "title": "Save", "value": "save"},
-            { "title": "Annotate", "value": "annotate"},
-            { "title": "Upload", "value": "upload"},
-            { "title": "Pin", "value": "pin"}
+            {
+              "title": "Copy",
+              "value": "copy"
+            },
+            {
+              "title": "Save",
+              "value": "save"
+            },
+            {
+              "title": "Annotate",
+              "value": "annotate"
+            },
+            {
+              "title": "Upload",
+              "value": "upload"
+            },
+            {
+              "title": "Pin",
+              "value": "pin"
+            }
           ]
         }
       ]
@@ -151,11 +226,26 @@
           "placeholder": "Action",
           "required": false,
           "data": [
-            { "title": "Copy", "value": "copy"},
-            { "title": "Save", "value": "save"},
-            { "title": "Annotate", "value": "annotate"},
-            { "title": "Upload", "value": "upload"},
-            { "title": "Pin", "value": "pin"}
+            {
+              "title": "Copy",
+              "value": "copy"
+            },
+            {
+              "title": "Save",
+              "value": "save"
+            },
+            {
+              "title": "Annotate",
+              "value": "annotate"
+            },
+            {
+              "title": "Upload",
+              "value": "upload"
+            },
+            {
+              "title": "Pin",
+              "value": "pin"
+            }
           ]
         }
       ]
@@ -174,11 +264,26 @@
           "placeholder": "Action",
           "required": false,
           "data": [
-            { "title": "Copy", "value": "copy"},
-            { "title": "Save", "value": "save"},
-            { "title": "Annotate", "value": "annotate"},
-            { "title": "Upload", "value": "upload"},
-            { "title": "Pin", "value": "pin"}
+            {
+              "title": "Copy",
+              "value": "copy"
+            },
+            {
+              "title": "Save",
+              "value": "save"
+            },
+            {
+              "title": "Annotate",
+              "value": "annotate"
+            },
+            {
+              "title": "Upload",
+              "value": "upload"
+            },
+            {
+              "title": "Pin",
+              "value": "pin"
+            }
           ]
         }
       ]
@@ -297,6 +402,14 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "capture-area-raycast-aichat",
+      "title": "Send Captured Area to AI Chat",
+      "description": "Capture an area of the screen and send it to Raycast's AI Chat",
+      "icon": "capture-area-ai-chat.png",
+      "mode": "no-view",
+      "subtitle": "CleanShot X"
     }
   ],
   "categories": [
