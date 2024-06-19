@@ -1,3 +1,5 @@
+import { Application } from "@raycast/api";
+
 export interface ShellHistory {
   command: string;
   timestamp: number | undefined;
@@ -14,3 +16,8 @@ export const shellTags = [
   { title: Shell.ZSH, value: Shell.ZSH, icon: "zsh.png" },
   { title: Shell.BASH, value: Shell.BASH, icon: "bash.png" },
 ];
+
+export interface Terminal {
+  application: Application;
+  supportInput: boolean;
+}

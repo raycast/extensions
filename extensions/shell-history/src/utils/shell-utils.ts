@@ -1,9 +1,9 @@
-import { Shell, ShellHistory } from "../types/types";
+import { Shell, ShellHistory, Terminal } from "../types/types";
 import path from "path";
 import os from "os";
 import readLastLines from "read-last-lines";
 import { maxLines, removeDuplicates } from "../types/preferences";
-import { Application, captureException, open, showHUD } from "@raycast/api";
+import { captureException, open, showHUD } from "@raycast/api";
 import { ITERM2, TERMINAL } from "./constants";
 import { runAppleScript } from "@raycast/utils";
 import shellQuote from "shell-quote";
@@ -61,11 +61,11 @@ function removeArrayDuplicates(history: ShellHistory[]) {
   });
 }
 
-export const runShellCommand = async (command: string, terminal: Application) => {
+export const runShellCommand = async (command: string, terminal: Terminal) => {
   let ret;
   try {
     const script = runCommandInTerminalScript(command, terminal);
-    await open(terminal.path);
+    await open(terminal.application.path);
     ret = await runAppleScript(script);
   } catch (e) {
     captureException(e);
@@ -74,30 +74,50 @@ export const runShellCommand = async (command: string, terminal: Application) =>
   if (ret) {
     await showHUD(`🚨 ${ret}`);
   } else {
-    await showHUD(`🚀 Run '${command}' executed in ${terminal.name}`);
+    if (terminal.supportInput) {
+      await showHUD(`🚀 Run '${command}' executed in ${terminal.application.name}`);
+    } else {
+      await showHUD(`📟 Open ${terminal.application.name}`);
+    }
   }
 };
 
-function runCommandInTerminalScript(command: string, terminal: Application) {
+function runCommandInTerminalScript(command: string, terminal: Terminal) {
   let script: string;
-  switch (terminal.path) {
+  switch (terminal.application.path) {
     case TERMINAL:
       script = `
-        tell application "${terminal.name}"
-          do script "${command}"
-          activate
-        end tell
+try
+	tell application "${terminal.application.name}"
+		activate
+		if (count of windows) is 0 then
+			do script "${command}"
+		else
+			do script "${command}" in window 1
+		end if
+	end tell
+	return ""
+on error errMsg
+	return errMsg
+end try
       `;
       break;
     case ITERM2:
       script = `
-        tell application "${terminal.name}"
-          create window with default profile
-          tell the current session of current window
-            write text "${command}"
-          end tell
-          activate
-        end tell
+tell application "${terminal.application.name}"
+	activate
+	try
+		set currentWindow to current window
+		tell current session of currentWindow
+			write text "${command}"
+		end tell
+	on error
+		create window with default profile
+		tell current session of current window
+			write text "${command}"
+		end tell
+	end try
+end tell
       `;
       break;
     default:

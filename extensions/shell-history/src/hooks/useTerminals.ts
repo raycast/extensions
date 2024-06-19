@@ -1,11 +1,11 @@
 import { usePromise } from "@raycast/utils";
-import { Application } from "@raycast/api";
 import { getTerminals } from "../utils/constants";
+import { Terminal } from "../types/types";
 
 export const useTerminals = () => {
   return usePromise(
     () => async () => {
-      let _terminals: Application[] = [];
+      let _terminals: Terminal[] = [];
       try {
         _terminals = await getTerminals();
       } catch (e) {
