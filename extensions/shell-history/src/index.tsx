@@ -33,7 +33,7 @@ export default function Index() {
         return (
           shell.length > 0 &&
           (shell[0].shell === shellTag || shellTag === shellTags[0].value) && (
-            <List.Section key={shell[0].shell + shellIndex} title={shell[0].shell}>
+            <List.Section key={shell[0].shell + shellIndex} title={shell[0].shell} subtitle={shell.length.toString()}>
               {shell.map((history, index) => {
                 const date = history.timestamp ? new Date(history.timestamp) : undefined;
                 const cliTool = extractCliTool(history.command);

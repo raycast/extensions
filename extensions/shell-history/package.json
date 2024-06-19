@@ -33,7 +33,7 @@
           "title": "Max Lines",
           "description": "The maximum number of lines to display",
           "type": "dropdown",
-          "default": "300",
+          "default": "500",
           "required": false,
           "data": [
             {
@@ -51,6 +51,14 @@
             {
               "title": "1000",
               "value": "1000"
+            },
+            {
+              "title": "3000",
+              "value": "3000"
+            },
+            {
+              "title": "5000",
+              "value": "5000"
             }
           ]
         },
