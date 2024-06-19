@@ -2,7 +2,8 @@
 
 ## [Search Messages command] - 2024-06-19
 
-Add a new command to search through your Slack's workspace messages.
+- Add a new command to search through your Slack's workspace messages.
+- ⚠️ The previous `Search` command is renamed as `Switch to Channel` to differentiate from `Search Messages`
 
 ## [OAuth + Many Improvements] - 2024-06-18
 
