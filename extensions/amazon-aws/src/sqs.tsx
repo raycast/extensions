@@ -56,7 +56,6 @@ export default function SQS() {
       )}
       {uniqBy(queues || [], (queue) => queue.queueUrl)
         .sort((a, b) => a.queueUrl.localeCompare(b.queueUrl))
-
         .map((queue) => (
           <List.Item
             key={queue.queueKey}

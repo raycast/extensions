@@ -1,5 +1,9 @@
 # Apple Notes Changelog
 
+## [View Selected Note command] - 2024-06-17
+
+Add a new command allowing users to see the currently selected note from within Raycast. This can be handy if you want to open note backlinks for example.
+
 ## [Change AI model for notes] - 2024-05-23
 
 Now, creating an AI note will use GPT-4o instead of GPT-4. 
