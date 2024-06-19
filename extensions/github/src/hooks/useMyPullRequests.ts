@@ -27,7 +27,7 @@ export function useMyPullRequests(repository: string | null) {
 
       const repositoryFilter = repository ? `repo:${repository}` : "";
 
-      const includeTeamReviewRequests = getPreferenceValues().includeTeamReviewRequests;
+      const { includeTeamReviewRequests } = getPreferenceValues<Preferences>();
       const reviewRequestedQuery = includeTeamReviewRequests ? "review-requested" : "user-review-requested";
 
       const results = await Promise.all(
