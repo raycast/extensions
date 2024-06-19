@@ -42,6 +42,11 @@ fragment PullRequestFields on PullRequest {
   }
   reviewThreads(first: 100) {
     totalCount
+    nodes {
+      comments(first: 100) {
+        totalCount
+      }
+    }
   }
   reviews(first: 100) {
     totalCount

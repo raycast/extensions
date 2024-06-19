@@ -20,7 +20,8 @@ export const PullRequestComments = ({ pullRequest, viewer, mutateList }: PullReq
     <List isShowingDetail>
       {pullRequest.comments.nodes ? (
         pullRequest.comments.nodes
-          .sort((a, b) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf())
+          .filter((c) => c !== null)
+          .sort((a, b) => new Date(b!.createdAt).valueOf() - new Date(a!.createdAt).valueOf())
           .map((comment) => {
             if (!comment) {
               return null;

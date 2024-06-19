@@ -5,6 +5,7 @@ import {
   PullRequestDetailsFieldsFragment,
   PullRequestFieldsFragment,
   PullRequestReviewDecision,
+  ReactionContent,
   StatusState,
 } from "../generated/graphql";
 
@@ -154,13 +155,25 @@ export function getEmojiFromReactionContent(content: string) {
       return "";
   }
 }
-
-export function getReducedReactions(reactions: { content: string; id: string }[]) {
-  return reactions.reduce(
-    (acc, { content }) => {
-      acc[content] = (acc[content] || 0) + 1;
-      return acc;
-    },
-    {} as Record<string, number>,
-  );
+// __typename?: "Reaction" | undefined;   content: ReactionContent;   id: string;
+export function getReducedReactions(
+  reactions?:
+    | null
+    | (null | {
+        ___typename?: "Reaction";
+        content: ReactionContent;
+        id: string;
+      })[],
+) {
+  return reactions
+    ? reactions.reduce(
+        (acc, curr) => {
+          if (curr?.content) {
+            acc[curr.content] = (acc[curr.content] || 0) + 1;
+          }
+          return acc;
+        },
+        {} as Record<string, number>,
+      )
+    : {};
 }

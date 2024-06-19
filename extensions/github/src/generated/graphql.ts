@@ -31862,7 +31862,14 @@ export type PullRequestFieldsFragment = {
         | null;
     } | null> | null;
   };
-  reviewThreads: { __typename?: "PullRequestReviewThreadConnection"; totalCount: number };
+  reviewThreads: {
+    __typename?: "PullRequestReviewThreadConnection";
+    totalCount: number;
+    nodes?: Array<{
+      __typename?: "PullRequestReviewThread";
+      comments: { __typename?: "PullRequestReviewCommentConnection"; totalCount: number };
+    } | null> | null;
+  };
   reviews?: {
     __typename?: "PullRequestReviewConnection";
     totalCount: number;
@@ -32000,7 +32007,14 @@ export type SearchPullRequestsQuery = {
                   | null;
               } | null> | null;
             };
-            reviewThreads: { __typename?: "PullRequestReviewThreadConnection"; totalCount: number };
+            reviewThreads: {
+              __typename?: "PullRequestReviewThreadConnection";
+              totalCount: number;
+              nodes?: Array<{
+                __typename?: "PullRequestReviewThread";
+                comments: { __typename?: "PullRequestReviewCommentConnection"; totalCount: number };
+              } | null> | null;
+            };
             reviews?: {
               __typename?: "PullRequestReviewConnection";
               totalCount: number;
@@ -33119,7 +33133,14 @@ export type InitPullRequestMutation = {
             | null;
         } | null> | null;
       };
-      reviewThreads: { __typename?: "PullRequestReviewThreadConnection"; totalCount: number };
+      reviewThreads: {
+        __typename?: "PullRequestReviewThreadConnection";
+        totalCount: number;
+        nodes?: Array<{
+          __typename?: "PullRequestReviewThread";
+          comments: { __typename?: "PullRequestReviewCommentConnection"; totalCount: number };
+        } | null> | null;
+      };
       reviews?: {
         __typename?: "PullRequestReviewConnection";
         totalCount: number;
@@ -33958,6 +33979,11 @@ export const PullRequestFieldsFragmentDoc = gql`
     }
     reviewThreads(first: 100) {
       totalCount
+      nodes {
+        comments(first: 100) {
+          totalCount
+        }
+      }
     }
     reviews(first: 100) {
       totalCount
