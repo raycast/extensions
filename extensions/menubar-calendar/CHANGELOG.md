@@ -1,5 +1,5 @@
 # Menubar Calendar Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2024-06-19
 
 - Show calendar in the menu bar
