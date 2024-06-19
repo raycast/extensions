@@ -93,7 +93,7 @@ export default function Command() {
                               showToast({ title: `Success !`, style: Toast.Style.Success });
                             });
                           })
-                          .catch((result: CompileResult) => {
+                          .catch(() => {
                             showToast({
                               title: `Failed !`,
                               style: Toast.Style.Failure,
