@@ -1,3 +1,3 @@
-# Natural language Discord timestamps
+# Natural Language Discord Timestamps
 
-Converts the time or time range provided via natural language into Discord timestamps that display the time in the viewers timezone.
+Converts the time provided via natural language into Discord timestamps that display the time in the viewers timezone.
