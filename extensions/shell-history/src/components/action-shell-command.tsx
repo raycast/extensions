@@ -12,13 +12,14 @@ import {
 } from "@raycast/api";
 import React from "react";
 import { ActionOpenPreferences } from "./action-open-preferences";
-import { PrimaryAction, primaryAction, secondaryAction } from "../types/preferences";
+import { PrimaryAction, primaryAction } from "../types/preferences";
 import { useTerminals } from "../hooks/useTerminals";
 import { bashHistoryFilePath, runShellCommand, zshHistoryFilePath } from "../utils/shell-utils";
 import { Shell, ShellHistory } from "../types/types";
 import { MutatePromise } from "@raycast/utils/dist/types";
 import KeyEquivalent = Keyboard.KeyEquivalent;
 import ActionStyle = Alert.ActionStyle;
+import { useFrontmostApp } from "../hooks/useFrontmostApp";
 
 export function ActionShellCommand(props: {
   shell: Shell;
@@ -28,11 +29,24 @@ export function ActionShellCommand(props: {
 }) {
   const { shell, shellCommand, cliTool, mutate } = props;
   const { data } = useTerminals();
+  const frontmostApps = useFrontmostApp();
+  const pasteAppActionTitle = () => {
+    if (frontmostApps && frontmostApps.data && frontmostApps.data.length > 0) {
+      return "Paste to " + frontmostApps.data[0].name;
+    }
+    return "Paste to Frontmost App";
+  };
+  const pasteAppActionIcon = () => {
+    if (frontmostApps && frontmostApps.data && frontmostApps.data.length > 0) {
+      return { fileIcon: frontmostApps.data[0].path };
+    }
+    return Icon.AppWindow;
+  };
   return (
     <ActionPanel>
       <Action
-        title={primaryAction}
-        icon={primaryAction === PrimaryAction.PASTE ? Icon.AppWindow : Icon.Clipboard}
+        title={primaryAction === PrimaryAction.PASTE ? pasteAppActionTitle() : "Copy to Clipboard"}
+        icon={primaryAction === PrimaryAction.PASTE ? pasteAppActionIcon() : Icon.Clipboard}
         onAction={async () => {
           if (primaryAction === PrimaryAction.PASTE) {
             await Clipboard.paste(shellCommand);
@@ -44,8 +58,8 @@ export function ActionShellCommand(props: {
         }}
       />
       <Action
-        title={secondaryAction}
-        icon={primaryAction === PrimaryAction.PASTE ? Icon.Clipboard : Icon.AppWindow}
+        title={primaryAction === PrimaryAction.PASTE ? "Copy to Clipboard" : pasteAppActionTitle()}
+        icon={primaryAction === PrimaryAction.PASTE ? Icon.Clipboard : pasteAppActionIcon()}
         onAction={async () => {
           if (primaryAction === PrimaryAction.PASTE) {
             await Clipboard.copy(shellCommand);

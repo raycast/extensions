@@ -12,4 +12,3 @@ export enum PrimaryAction {
   PASTE = "Paste",
   Copy = "Copy",
 }
-export const secondaryAction = primaryAction === PrimaryAction.PASTE ? PrimaryAction.Copy : PrimaryAction.PASTE;
