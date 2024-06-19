@@ -1,5 +1,10 @@
 # Claude Changelog
 
+## [Update] - 2024-06-19
+
+- Fix: Set default values for max tokens when undefined to avoid migration issues
+- Fix: Changed default value of stream responses from `false` to `true`
+
 ## [Update] - 2024-06-15
 
 - Feature: Added option to stream responses
