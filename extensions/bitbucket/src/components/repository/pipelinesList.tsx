@@ -28,7 +28,7 @@ export function PipelinesList(props: { repo: Repository; pageNumber: number }): 
           name: (pipeline.name as string) || "",
           uuid: pipeline.uuid as string,
           buildNumber: pipeline.build_number.toString() as string,
-          state: (pipeline.state?.result?.name || pipeline.state?.stage?.name || "") as string,
+          state: (pipeline.state?.name == "IN_PROGRESS" ? "IN_PROGRESS" : null || pipeline.state?.result?.name || pipeline.state?.stage?.name || "") as string,
           avatarCreatorUrl: (pipeline.creator?.links?.avatar?.href as string) || "",
           triggerName: (pipeline.trigger?.name as string) || "",
           commitMessage: (pipeline.target?.commit?.message).split("\n")[0] || "",
