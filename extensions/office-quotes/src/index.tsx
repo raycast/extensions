@@ -2,13 +2,12 @@ import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { DescriptionPane } from "./DescriptionPane";
 import { shuffle } from "./shuffle";
-import { useCachedState } from "@raycast/utils";
 import { Quote } from "./types";
 import rawQuotes from "./data/quotes.json";
 
 export default function main() {
   const [isLoading, setIsLoading] = useState(true);
-  const [quotes, setQuotes] = useCachedState<Quote[]>("quotes", shuffle(rawQuotes));
+  const [quotes, setQuotes] = useState<Quote[]>([]);
 
   useEffect(() => {
     function initialShuffle() {
