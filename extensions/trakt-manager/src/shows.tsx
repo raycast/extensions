@@ -122,9 +122,9 @@ function SearchCommand() {
         setPage={setPage}
         watchlistActionTitle="Add to Watchlist"
         watchlistAction={onAddShowToWatchlist}
-        watchlistIcon={Icon.Bookmark}
+        watchlistActionIcon={Icon.Bookmark}
         watchlistActionShortcut={Keyboard.Shortcut.Common.Edit}
-        addToHistoryAction={onAddShowToHistory}
+        historyAction={onAddShowToHistory}
       />
     </Grid>
   );

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Grid, Icon, Image, Keyboard, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon, Image, Keyboard } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { SetStateAction } from "react";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "../lib/helper";
@@ -7,20 +7,26 @@ import { Seasons } from "./seasons";
 export const ShowGrid = ({
   shows,
   watchlistActionTitle,
-  watchlistIcon,
+  watchlistActionIcon,
   watchlistActionShortcut,
   watchlistAction,
-  addToHistoryAction,
+  historyActionTitle,
+  historyActionIcon,
+  historyActionShortcut,
+  historyAction,
   page,
   totalPages,
   setPage,
 }: {
   shows: TraktShowList | undefined;
-  watchlistActionTitle: string;
-  watchlistIcon: Image.ImageLike;
-  watchlistActionShortcut: Keyboard.Shortcut;
-  watchlistAction: (traktId: number) => void;
-  addToHistoryAction: (movieId: number) => void;
+  watchlistActionTitle?: string;
+  watchlistActionIcon?: Image.ImageLike;
+  watchlistActionShortcut?: Keyboard.Shortcut;
+  watchlistAction?: (traktId: number) => void;
+  historyActionTitle?: string;
+  historyActionIcon?: Image.ImageLike;
+  historyActionShortcut?: Keyboard.Shortcut;
+  historyAction?: (movieId: number) => void;
   page: number;
   totalPages: number;
   setPage: (value: SetStateAction<number>) => void;
@@ -63,24 +69,22 @@ export const ShowGrid = ({
                     />
                   }
                 />
-                <Action
-                  icon={watchlistIcon}
-                  title={watchlistActionTitle}
-                  shortcut={watchlistActionShortcut}
-                  onAction={() => watchlistAction(show.show.ids.trakt)}
-                />
-                <Action
-                  icon={Icon.Clock}
-                  title="Add to History"
-                  shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
-                  onAction={() => addToHistoryAction(show.show.ids.trakt)}
-                />
-                <Action
-                  icon={Icon.Cog}
-                  title="Open Extension Preferences"
-                  onAction={openExtensionPreferences}
-                  shortcut={Keyboard.Shortcut.Common.Pin}
-                />
+                {watchlistAction && watchlistActionTitle && watchlistActionIcon && watchlistActionShortcut && (
+                  <Action
+                    icon={watchlistActionIcon}
+                    title={watchlistActionTitle}
+                    shortcut={watchlistActionShortcut}
+                    onAction={() => watchlistAction(show.show.ids.trakt)}
+                  />
+                )}
+                {historyAction && historyActionTitle && historyActionIcon && historyActionShortcut && (
+                  <Action
+                    icon={historyActionIcon}
+                    title={historyActionTitle}
+                    shortcut={historyActionShortcut}
+                    onAction={() => historyAction(show.show.ids.trakt)}
+                  />
+                )}
               </ActionPanel.Section>
               <ActionPanel.Section>
                 {page === totalPages ? null : (

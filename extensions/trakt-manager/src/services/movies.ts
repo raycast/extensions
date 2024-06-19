@@ -27,7 +27,7 @@ export const searchMovies = async (query: string, page: number, signal: AbortSig
 
 export const getWatchlistMovies = async (page: number, signal: AbortSignal | undefined = undefined) => {
   const tokens = await oauthClient.getTokens();
-  const response = await fetch(`${TRAKT_API_URL}/sync/watchlist/movies/added?page=${page}&limit=10&fields=title`, {
+  const response = await fetch(`${TRAKT_API_URL}/sync/watchlist/movies/added?page=${page}&limit=10`, {
     headers: {
       "Content-Type": "application/json; charset=utf-8",
       "trakt-api-version": "2",
@@ -131,6 +131,68 @@ export const checkInMovie = async (movieId: number, signal: AbortSignal | undefi
 export const addMovieToHistory = async (movieId: number, signal: AbortSignal | undefined = undefined) => {
   const tokens = await oauthClient.getTokens();
   const response = await fetch(`${TRAKT_API_URL}/sync/history`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "trakt-api-version": "2",
+      "trakt-api-key": TRAKT_CLIENT_ID,
+      Authorization: `Bearer ${tokens?.accessToken}`,
+    },
+    body: JSON.stringify({
+      movies: [
+        {
+          ids: {
+            trakt: movieId,
+          },
+        },
+      ],
+    }),
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+};
+
+export const getHistoryMovies = async (page: number, signal: AbortSignal | undefined = undefined) => {
+  const tokens = await oauthClient.getTokens();
+  const response = await fetch(`${TRAKT_API_URL}/sync/watched/movies`, {
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "trakt-api-version": "2",
+      "trakt-api-key": TRAKT_CLIENT_ID,
+      Authorization: `Bearer ${tokens?.accessToken}`,
+    },
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+
+  const result = (await response.json()) as TraktMovieList;
+  result.sort((a, b) => {
+    const dateA = new Date(a.last_watched_at || 0);
+    const dateB = new Date(b.last_watched_at || 0);
+    return dateB.getTime() - dateA.getTime();
+  });
+
+  const pageSize = 10;
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const pageResult = result.slice(startIndex, endIndex) as TraktMovieList;
+
+  pageResult.page = page;
+  pageResult.total_pages = Math.floor(result.length / pageSize);
+  pageResult.total_results = result.length;
+
+  return pageResult;
+};
+
+export const removeMovieFromHistory = async (movieId: number, signal: AbortSignal | undefined = undefined) => {
+  const tokens = await oauthClient.getTokens();
+  const response = await fetch(`${TRAKT_API_URL}/sync/history/remove`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

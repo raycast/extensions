@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { setMaxListeners } from "events";
 import { AbortError } from "node-fetch";
 import { useEffect, useRef, useState } from "react";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "../lib/helper";
-import { addSeasonToHistory, getSeasons } from "../services/shows";
+import { getSeasons } from "../services/shows";
 import { getTMDBSeasonDetails } from "../services/tmdb";
 import { Episodes } from "./episodes";
 
@@ -56,25 +57,6 @@ export const Seasons = ({
     })();
   }, []);
 
-  const onAddSeasonToHistory = async (seasonId: number) => {
-    setIsLoading(true);
-    try {
-      await addSeasonToHistory(seasonId, abortable.current?.signal);
-      showToast({
-        title: "Season added to history",
-        style: Toast.Style.Success,
-      });
-    } catch (e) {
-      if (!(e instanceof AbortError)) {
-        showToast({
-          title: "Error adding season to history",
-          style: Toast.Style.Failure,
-        });
-      }
-    }
-    setIsLoading(false);
-  };
-
   return (
     <Grid isLoading={isLoading} aspectRatio="9/16" fit={Grid.Fit.Fill} searchBarPlaceholder="Search for seasons">
       {seasons &&
@@ -88,8 +70,16 @@ export const Seasons = ({
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
-                    <Action.OpenInBrowser title="Open in Trakt" url={getTraktUrl("season", slug, season.number)} />
-                    <Action.OpenInBrowser title="Open in IMDb" url={getIMDbUrl(imdbId, season.number)} />
+                    <Action.OpenInBrowser
+                      icon={getFavicon("https://trakt.tv")}
+                      title="Open in Trakt"
+                      url={getTraktUrl("season", slug, season.number)}
+                    />
+                    <Action.OpenInBrowser
+                      icon={getFavicon("https://www.imdb.com")}
+                      title="Open in IMDb"
+                      url={getIMDbUrl(imdbId, season.number)}
+                    />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
                     <Action.Push
@@ -97,12 +87,6 @@ export const Seasons = ({
                       title="Episodes"
                       shortcut={Keyboard.Shortcut.Common.Open}
                       target={<Episodes traktId={traktId} tmdbId={tmdbId} seasonNumber={season.number} slug={slug} />}
-                    />
-                    <Action
-                      icon={Icon.Clock}
-                      title="Add to History"
-                      shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
-                      onAction={() => onAddSeasonToHistory(season.ids.trakt)}
                     />
                   </ActionPanel.Section>
                 </ActionPanel>

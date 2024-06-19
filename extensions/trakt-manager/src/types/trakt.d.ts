@@ -1,6 +1,9 @@
 declare type TraktMovieList = Array<{
   type: string;
   score: number;
+  plays?: number;
+  last_watched_at?: string;
+  last_updated_at?: string;
   movie: {
     title: string;
     year?: number;
@@ -23,6 +26,9 @@ declare type TraktMovieListItem = ArrayElementType<TraktMovieList>;
 declare type TraktShowList = Array<{
   type: string;
   score: number;
+  plays?: number;
+  last_watched_at?: string;
+  last_updated_at?: string;
   show: {
     title: string;
     year?: number;
@@ -73,7 +79,6 @@ declare type TraktEpisodeList = Array<{
     tvdb: number;
     imdb: string;
     tmdb: number;
-    tvrage: number;
   };
   number_abs?: number;
   overview?: string;

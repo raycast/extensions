@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Grid, Icon, Keyboard, Toast, openExtensionPreferences, showToast } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { setMaxListeners } from "events";
 import { AbortError } from "node-fetch";
@@ -123,12 +123,6 @@ const OnDeckCommand = () => {
                     onAction={() =>
                       onCheckInNextEpisode(show.show.progress?.next_episode?.ids.trakt, show.show.ids.trakt)
                     }
-                  />
-                  <Action
-                    icon={Icon.Cog}
-                    title="Open Extension Preferences"
-                    onAction={openExtensionPreferences}
-                    shortcut={Keyboard.Shortcut.Common.Pin}
                   />
                 </ActionPanel.Section>
               </ActionPanel>

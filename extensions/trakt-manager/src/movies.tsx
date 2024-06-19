@@ -142,9 +142,9 @@ function SearchCommand() {
         checkInAction={onCheckInMovie}
         watchlistActionTitle={"Add to Watchlist"}
         watchlistAction={onAddMovieToWatchlist}
-        watchlistIcon={Icon.Bookmark}
+        watchlistActionIcon={Icon.Bookmark}
         watchlistActionShortcut={Keyboard.Shortcut.Common.Edit}
-        addToHistoryAction={onAddMovieToHistory}
+        historyAction={onAddMovieToHistory}
       />
     </Grid>
   );

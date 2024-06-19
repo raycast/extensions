@@ -5,11 +5,11 @@ import { useEffect, useRef, useState } from "react";
 import { MovieGrid } from "./components/movie-grid";
 import { ShowGrid } from "./components/show-grid";
 import { View } from "./components/view";
-import { addMovieToHistory, checkInMovie, getWatchlistMovies, removeMovieFromWatchlist } from "./services/movies";
-import { addShowToHistory, getWatchlistShows, removeShowFromWatchlist } from "./services/shows";
+import { getHistoryMovies, removeMovieFromHistory } from "./services/movies";
+import { getHistoryShows, removeShowFromHistory } from "./services/shows";
 import { getTMDBMovieDetails, getTMDBShowDetails } from "./services/tmdb";
 
-const WatchlistCommand = () => {
+const HistoryCommand = () => {
   const abortable = useRef<AbortController>();
   const [movies, setMovies] = useState<TraktMovieList | undefined>();
   const [shows, setShows] = useState<TraktShowList | undefined>();
@@ -26,11 +26,12 @@ const WatchlistCommand = () => {
       setIsLoading(true);
       if (mediaType === "show") {
         try {
-          const showWatchlist = await getWatchlistShows(page, abortable.current?.signal);
+          const showWatchlist = await getHistoryShows(page, abortable.current?.signal);
           setShows(showWatchlist);
           setPage(showWatchlist.page);
           setTotalPages(showWatchlist.total_pages);
 
+          setMaxListeners(showWatchlist.length, abortable.current?.signal);
           const showsWithImages = (await Promise.all(
             showWatchlist.map(async (movie) => {
               movie.show.details = await getTMDBShowDetails(movie.show.ids.tmdb, abortable.current?.signal);
@@ -42,18 +43,19 @@ const WatchlistCommand = () => {
         } catch (e) {
           if (!(e instanceof AbortError)) {
             showToast({
-              title: "Error loading shows",
+              title: "Error loading episodes",
               style: Toast.Style.Failure,
             });
           }
         }
       } else {
         try {
-          const movieWatchlist = await getWatchlistMovies(page, abortable.current?.signal);
+          const movieWatchlist = await getHistoryMovies(page, abortable.current?.signal);
           setMovies(movieWatchlist);
           setPage(movieWatchlist.page);
           setTotalPages(movieWatchlist.total_pages);
 
+          setMaxListeners(movieWatchlist.length, abortable.current?.signal);
           const moviesWithImages = (await Promise.all(
             movieWatchlist.map(async (movie) => {
               movie.movie.details = await getTMDBMovieDetails(movie.movie.ids.tmdb, abortable.current?.signal);
@@ -80,18 +82,18 @@ const WatchlistCommand = () => {
     })();
   }, [x, mediaType, page]);
 
-  const onRemoveMovieFromWatchlist = async (movieId: number) => {
+  const onRemoveMovieFromHistory = async (movieId: number) => {
     setIsLoading(true);
     try {
-      await removeMovieFromWatchlist(movieId, abortable.current?.signal);
+      await removeMovieFromHistory(movieId, abortable.current?.signal);
       showToast({
-        title: "Movie removed from watchlist",
+        title: "Movie removed from history",
         style: Toast.Style.Success,
       });
     } catch (e) {
       if (!(e instanceof AbortError)) {
         showToast({
-          title: "Error removing movie from watchlist",
+          title: "Error removing movie from history",
           style: Toast.Style.Failure,
         });
       }
@@ -100,82 +102,24 @@ const WatchlistCommand = () => {
     forceRerender((value) => value + 1);
   };
 
-  const onRemoveShowFromWatchlist = async (showId: number) => {
+  const onRemoveShowFromHistory = async (showId: number) => {
     setIsLoading(true);
     try {
-      await removeShowFromWatchlist(showId, abortable.current?.signal);
+      await removeShowFromHistory(showId, abortable.current?.signal);
       showToast({
-        title: "Show removed from watchlist",
+        title: "Show removed from history",
         style: Toast.Style.Success,
       });
     } catch (e) {
       if (!(e instanceof AbortError)) {
         showToast({
-          title: "Error removing show from watchlist",
+          title: "Error removing show from history",
           style: Toast.Style.Failure,
         });
       }
     }
     setIsLoading(false);
     forceRerender((value) => value + 1);
-  };
-
-  const onCheckInMovie = async (movieId: number) => {
-    setIsLoading(true);
-    try {
-      await checkInMovie(movieId, abortable.current?.signal);
-      showToast({
-        title: "Movie checked in",
-        style: Toast.Style.Success,
-      });
-    } catch (e) {
-      if (!(e instanceof AbortError)) {
-        showToast({
-          title: "Error checking in movie",
-          style: Toast.Style.Failure,
-        });
-      }
-    }
-    setIsLoading(false);
-    forceRerender((value) => value + 1);
-  };
-
-  const onAddMovieToHistory = async (movieId: number) => {
-    setIsLoading(true);
-    try {
-      await addMovieToHistory(movieId, abortable.current?.signal);
-      showToast({
-        title: "Movie added to history",
-        style: Toast.Style.Success,
-      });
-    } catch (e) {
-      if (!(e instanceof AbortError)) {
-        showToast({
-          title: "Error adding movie to history",
-          style: Toast.Style.Failure,
-        });
-      }
-    }
-    setIsLoading(false);
-  };
-
-  const onAddShowToHistory = async (showId: number) => {
-    setIsLoading(true);
-    try {
-      await addShowToHistory(showId, abortable.current?.signal);
-      showToast({
-        title: "Show added to history",
-        style: Toast.Style.Success,
-      });
-    } catch (e) {
-      if (!(e instanceof AbortError)) {
-        showToast({
-          title: "Error adding show to history",
-          style: Toast.Style.Failure,
-        });
-      }
-    }
-    setIsLoading(false);
   };
 
   const onMediaTypeChange = (newValue: string) => {
@@ -189,7 +133,7 @@ const WatchlistCommand = () => {
       isLoading={isLoading}
       aspectRatio="9/16"
       fit={Grid.Fit.Fill}
-      searchBarPlaceholder="Search watchlist"
+      searchBarPlaceholder="Search history"
       searchBarAccessory={
         <Grid.Dropdown onChange={onMediaTypeChange} tooltip="Media Type">
           <Grid.Dropdown.Item value="movie" title="Movies" />
@@ -199,34 +143,31 @@ const WatchlistCommand = () => {
     >
       {mediaType === "movie" && (
         <>
-          <Grid.EmptyView title="No movies in your watchlist" />
+          <Grid.EmptyView title="No movies in your history" />
           <MovieGrid
             movies={movies}
             page={page}
             totalPages={totalPages}
             setPage={setPage}
-            checkInAction={onCheckInMovie}
-            watchlistActionTitle="Remove from Watchlist"
-            watchlistAction={onRemoveMovieFromWatchlist}
-            watchlistActionIcon={Icon.Trash}
-            watchlistActionShortcut={Keyboard.Shortcut.Common.Remove}
-            historyAction={onAddMovieToHistory}
+            historyActionTitle="Remove from History"
+            historyActionIcon={Icon.Trash}
+            historyActionShortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+            historyAction={onRemoveMovieFromHistory}
           />
         </>
       )}
       {mediaType === "show" && (
         <>
-          <Grid.EmptyView title="No shows in your watchlist" />
+          <Grid.EmptyView title="No shows in your history" />
           <ShowGrid
             shows={shows}
             page={page}
             totalPages={totalPages}
             setPage={setPage}
-            watchlistActionTitle="Remove from Watchlist"
-            watchlistAction={onRemoveShowFromWatchlist}
-            watchlistActionIcon={Icon.Trash}
-            watchlistActionShortcut={Keyboard.Shortcut.Common.Remove}
-            historyAction={onAddShowToHistory}
+            historyActionTitle="Remove from History"
+            historyActionIcon={Icon.Trash}
+            historyActionShortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+            historyAction={onRemoveShowFromHistory}
           />
         </>
       )}
@@ -237,7 +178,7 @@ const WatchlistCommand = () => {
 export default function Command() {
   return (
     <View>
-      <WatchlistCommand />
+      <HistoryCommand />
     </View>
   );
 }

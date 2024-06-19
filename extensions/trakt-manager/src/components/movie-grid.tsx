@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Grid, Icon, Image, Keyboard, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon, Image, Keyboard } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { SetStateAction } from "react";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "../lib/helper";
@@ -6,22 +6,28 @@ import { getIMDbUrl, getPosterUrl, getTraktUrl } from "../lib/helper";
 export const MovieGrid = ({
   movies,
   watchlistActionTitle,
-  watchlistIcon,
+  watchlistActionIcon,
   watchlistActionShortcut,
   watchlistAction,
   checkInAction,
-  addToHistoryAction,
+  historyActionTitle,
+  historyActionIcon,
+  historyActionShortcut,
+  historyAction,
   page,
   totalPages,
   setPage,
 }: {
   movies: TraktMovieList | undefined;
-  watchlistActionTitle: string;
-  watchlistIcon: Image.ImageLike;
-  watchlistActionShortcut: Keyboard.Shortcut;
-  watchlistAction: (movieId: number) => void;
-  checkInAction: (movieId: number) => void;
-  addToHistoryAction: (movieId: number) => void;
+  watchlistActionTitle?: string;
+  watchlistActionIcon?: Image.ImageLike;
+  watchlistActionShortcut?: Keyboard.Shortcut;
+  watchlistAction?: (movieId: number) => void;
+  checkInAction?: (movieId: number) => void;
+  historyActionTitle?: string;
+  historyActionIcon?: Image.ImageLike;
+  historyActionShortcut?: Keyboard.Shortcut;
+  historyAction?: (movieId: number) => void;
   page: number;
   totalPages: number;
   setPage: (value: SetStateAction<number>) => void;
@@ -51,30 +57,30 @@ export const MovieGrid = ({
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>
-                <Action
-                  icon={watchlistIcon}
-                  title={watchlistActionTitle}
-                  shortcut={watchlistActionShortcut}
-                  onAction={() => watchlistAction(movie.movie.ids.trakt)}
-                />
-                <Action
-                  icon={Icon.Checkmark}
-                  title="Check-in Movie"
-                  shortcut={Keyboard.Shortcut.Common.Duplicate}
-                  onAction={() => checkInAction(movie.movie.ids.trakt)}
-                />
-                <Action
-                  icon={Icon.Clock}
-                  title="Add to History"
-                  shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
-                  onAction={() => addToHistoryAction(movie.movie.ids.trakt)}
-                />
-                <Action
-                  icon={Icon.Cog}
-                  title="Open Extension Preferences"
-                  onAction={openExtensionPreferences}
-                  shortcut={Keyboard.Shortcut.Common.Pin}
-                />
+                {watchlistAction && watchlistActionTitle && watchlistActionIcon && watchlistActionShortcut && (
+                  <Action
+                    icon={watchlistActionIcon}
+                    title={watchlistActionTitle}
+                    shortcut={watchlistActionShortcut}
+                    onAction={() => watchlistAction(movie.movie.ids.trakt)}
+                  />
+                )}
+                {checkInAction && (
+                  <Action
+                    icon={Icon.Checkmark}
+                    title="Check-in Movie"
+                    shortcut={Keyboard.Shortcut.Common.Duplicate}
+                    onAction={() => checkInAction(movie.movie.ids.trakt)}
+                  />
+                )}
+                {historyAction && historyActionTitle && historyActionIcon && historyActionShortcut && (
+                  <Action
+                    icon={historyActionIcon}
+                    title={historyActionTitle}
+                    shortcut={historyActionShortcut}
+                    onAction={() => historyAction(movie.movie.ids.trakt)}
+                  />
+                )}
               </ActionPanel.Section>
               <ActionPanel.Section>
                 {page === totalPages ? null : (

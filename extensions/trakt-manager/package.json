@@ -26,7 +26,7 @@
       "name": "watchlist",
       "title": "Watchlist",
       "subtitle": "Trakt Manager",
-      "description": "Lists moives & shows that are in your watchlist",
+      "description": "Lists movies and shows that are in your watchlist",
       "mode": "view"
     },
     {
@@ -34,6 +34,13 @@
       "title": "Up Next",
       "subtitle": "Trakt Manager",
       "description": "Lists shows that are up next",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "subtitle": "Trakt Manager",
+      "description": "Lists movies and shows that are in your history",
       "mode": "view"
     },
     {

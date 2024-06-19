@@ -301,36 +301,44 @@ export const addShowToHistory = async (showId: number, signal: AbortSignal | und
   }
 };
 
-export const addSeasonToHistory = async (seasonId: number, signal: AbortSignal | undefined = undefined) => {
+export const getHistoryShows = async (page: number, signal: AbortSignal | undefined = undefined) => {
   const tokens = await oauthClient.getTokens();
-  const response = await fetch(`${TRAKT_API_URL}/sync/history`, {
-    method: "POST",
+  const response = await fetch(`${TRAKT_API_URL}/sync/watched/shows?extended=noseasons`, {
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": "application/json; charset=utf-8",
       "trakt-api-version": "2",
       "trakt-api-key": TRAKT_CLIENT_ID,
       Authorization: `Bearer ${tokens?.accessToken}`,
     },
-    body: JSON.stringify({
-      seasons: [
-        {
-          ids: {
-            trakt: seasonId,
-          },
-        },
-      ],
-    }),
     signal,
   });
 
   if (!response.ok) {
     throw new Error(response.statusText);
   }
+
+  const result = (await response.json()) as TraktShowList;
+  result.sort((a, b) => {
+    const dateA = new Date(a.last_watched_at || 0);
+    const dateB = new Date(b.last_watched_at || 0);
+    return dateB.getTime() - dateA.getTime();
+  });
+
+  const pageSize = 10;
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const pageResult = result.slice(startIndex, endIndex) as TraktShowList;
+
+  pageResult.page = page;
+  pageResult.total_pages = Math.floor(result.length / pageSize);
+  pageResult.total_results = result.length;
+
+  return pageResult;
 };
 
-export const addEpisodeToHistory = async (episodeId: number, signal: AbortSignal | undefined = undefined) => {
+export const removeShowFromHistory = async (showId: number, signal: AbortSignal | undefined = undefined) => {
   const tokens = await oauthClient.getTokens();
-  const response = await fetch(`${TRAKT_API_URL}/sync/history`, {
+  const response = await fetch(`${TRAKT_API_URL}/sync/history/remove`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -339,10 +347,10 @@ export const addEpisodeToHistory = async (episodeId: number, signal: AbortSignal
       Authorization: `Bearer ${tokens?.accessToken}`,
     },
     body: JSON.stringify({
-      episodes: [
+      shows: [
         {
           ids: {
-            trakt: episodeId,
+            trakt: showId,
           },
         },
       ],

@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { setMaxListeners } from "events";
 import { AbortError } from "node-fetch";
 import { useEffect, useRef, useState } from "react";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "../lib/helper";
-import { addEpisodeToHistory, checkInEpisode, getEpisodes } from "../services/shows";
+import { checkInEpisode, getEpisodes } from "../services/shows";
 import { getTMDBEpisodeDetails } from "../services/tmdb";
 
 const formatter = new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short", day: "2-digit" });
@@ -81,25 +82,6 @@ export const Episodes = ({
     setIsLoading(false);
   };
 
-  const onAddEpisodeToHistory = async (episodeId: number) => {
-    setIsLoading(true);
-    try {
-      await addEpisodeToHistory(episodeId, abortable.current?.signal);
-      showToast({
-        title: "Episode added to history",
-        style: Toast.Style.Success,
-      });
-    } catch (e) {
-      if (!(e instanceof AbortError)) {
-        showToast({
-          title: "Error adding episode to history",
-          style: Toast.Style.Failure,
-        });
-      }
-    }
-    setIsLoading(false);
-  };
-
   return (
     <Grid
       isLoading={isLoading}
@@ -120,10 +102,15 @@ export const Episodes = ({
                 <ActionPanel>
                   <ActionPanel.Section>
                     <Action.OpenInBrowser
+                      icon={getFavicon("https://trakt.tv")}
                       title="Open in Trakt"
                       url={getTraktUrl("episode", slug, seasonNumber, episode.number)}
                     />
-                    <Action.OpenInBrowser title="Open in IMDb" url={getIMDbUrl(episode.ids.imdb)} />
+                    <Action.OpenInBrowser
+                      icon={getFavicon("https://www.imdb.com")}
+                      title="Open in IMDb"
+                      url={getIMDbUrl(episode.ids.imdb)}
+                    />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
                     <Action
@@ -131,12 +118,6 @@ export const Episodes = ({
                       title="Check-in Episode"
                       shortcut={Keyboard.Shortcut.Common.Edit}
                       onAction={() => onCheckInEpisode(episode.ids.trakt)}
-                    />
-                    <Action
-                      icon={Icon.Clock}
-                      title="Add to History"
-                      shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
-                      onAction={() => onAddEpisodeToHistory(episode.ids.trakt)}
                     />
                   </ActionPanel.Section>
                 </ActionPanel>
