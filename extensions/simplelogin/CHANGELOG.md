@@ -3,7 +3,7 @@
 ## [Enable Alias Description Prefill Based on Active Browser Tab URL] - {PR_MERGE_DATE}
 * Added a new preference option: "Prefill Alias Description".
 * When enabled, the default alias description will be automatically populated using the hostname of the active browser tab.
-* (Side Note) Bump Raycast API packag version
+* (Side Note) Bump Raycast API package version
 
 ## [Updates to List Aliases & Create Random Alias commands] - 2024-06-05
 - Update List Aliases command to cache previously fetched aliases so that aliases can be viewed before refetch
