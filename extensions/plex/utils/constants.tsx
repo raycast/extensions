@@ -1,9 +1,9 @@
-import { ActionPanel, getPreferenceValues } from "@raycast/api";
-import React from "react";
+import { getPreferenceValues } from "@raycast/api";
 
-const plexBaseUrl = getPreferenceValues().plexBaseUrl;
+const preferences = getPreferenceValues<Preferences>();
+const plexBaseUrl = preferences.plexBaseUrl;
 
-export const plex_token = getPreferenceValues().plexToken;
+export const plex_token = preferences.plexToken;
 
 export const ENDPOINTS = {
   librarySections: `${plexBaseUrl}/library/sections/`,
