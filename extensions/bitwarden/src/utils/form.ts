@@ -14,10 +14,10 @@ export const CustomValidations = {
   },
 };
 
-export const stringifyBooleanItemProps = (
+export const stringifyBooleanItemProps = <TValue extends string>(
   itemProps: Form.ItemProps<boolean>,
-  trueValue: string,
-  falseValue: string
+  trueValue: TValue,
+  falseValue: TValue
 ): Form.ItemProps<string> => ({
   ...itemProps,
   defaultValue: itemProps.value ? trueValue : falseValue,

@@ -1,7 +1,7 @@
 import { Form, Detail } from "@raycast/api";
 import useOneTimePasswordHistoryWarning from "~/utils/hooks/useOneTimePasswordHistoryWarning";
 import usePasswordGenerator, { UsePasswordGeneratorResult } from "~/utils/hooks/usePasswordGenerator";
-import { PasswordGeneratorOptions } from "~/types/passwords";
+import { PasswordGeneratorOptions, PasswordType } from "~/types/passwords";
 import FormActionPanel from "~/components/generatePassword/ActionPanel";
 import { BitwardenProvider } from "~/context/bitwarden";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
@@ -9,6 +9,7 @@ import { useForm } from "@raycast/utils";
 import { useEffect } from "react";
 import { useCliVersion } from "~/utils/hooks/useCliVersion";
 import { CustomValidations, stringifyBooleanItemProps } from "~/utils/form";
+import { capitalize } from "~/utils/strings";
 
 const FormSpace = () => <Form.Description text="" />;
 
@@ -26,6 +27,8 @@ function GeneratePasswordForm() {
   if (!generator.options) return <Detail isLoading />;
   return <GeneratePasswordFormContent generator={generator} />;
 }
+
+const passwordTypeOptions: PasswordType[] = ["password", "passphrase"];
 
 function GeneratePasswordFormContent({ generator }: { generator: UsePasswordGeneratorResult }) {
   const { options, password, isGenerating, regeneratePassword } = generator;
@@ -57,12 +60,13 @@ function GeneratePasswordFormContent({ generator }: { generator: UsePasswordGene
       <FormSpace />
       <Form.Separator />
       <Form.Dropdown
-        {...stringifyBooleanItemProps(itemProps.passphrase, "passphrase", "password")}
+        {...stringifyBooleanItemProps<PasswordType>(itemProps.passphrase, "passphrase", "password")}
         title="Type"
         autoFocus
       >
-        <Form.Dropdown.Item value="password" title="Password" />
-        <Form.Dropdown.Item value="passphrase" title="Passphrase" />
+        {passwordTypeOptions.map((type) => (
+          <Form.Dropdown.Item key={type} value={type} title={capitalize(type)} />
+        ))}
       </Form.Dropdown>
       {values.passphrase ? (
         <>

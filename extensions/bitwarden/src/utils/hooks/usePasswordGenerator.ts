@@ -59,6 +59,14 @@ function usePasswordGenerator() {
   const [{ options, ...state }, dispatch] = useReducer(passwordReducer, initialPasswordGeneratorState);
   const { abortControllerRef, renew: renewAbortController, abort: abortPreviousGenerate } = useAbortController();
 
+  const restoreStoredOptions = async () => {
+    const newOptions = await getPasswordGeneratorOptions();
+    dispatch({ type: "setOptions", options: newOptions });
+    await generatePassword(newOptions);
+  };
+
+  useEffect(() => void restoreStoredOptions(), []);
+
   const generatePassword = async (passwordOptions = options) => {
     try {
       if (state.isGenerating) abortPreviousGenerate();
@@ -74,22 +82,6 @@ function usePasswordGenerator() {
     }
   };
 
-  const regeneratePassword = async (newOptions?: PasswordGeneratorOptions) => {
-    if (newOptions) {
-      await setOptions(newOptions);
-    } else {
-      await generatePassword(newOptions);
-    }
-  };
-
-  const setOption = async <Option extends keyof PasswordGeneratorOptions>(
-    option: Option,
-    value: PasswordGeneratorOptions[Option]
-  ) => {
-    if (!options || options[option] === value) return;
-    await setOptions({ ...options, [option]: value });
-  };
-
   const setOptions = async (newOptions: PasswordGeneratorOptions) => {
     dispatch({ type: "setOptions", options: newOptions });
     const preparedOptions = prepareOptions(newOptions);
@@ -99,17 +91,15 @@ function usePasswordGenerator() {
     ]);
   };
 
-  const restoreStoredOptions = async () => {
-    const newOptions = await getPasswordGeneratorOptions();
-    dispatch({ type: "setOptions", options: newOptions });
-    await generatePassword(newOptions);
+  const regeneratePassword = async (newOptions?: PasswordGeneratorOptions) => {
+    if (newOptions) {
+      await setOptions(newOptions);
+    } else {
+      await generatePassword();
+    }
   };
 
-  useEffect(() => {
-    void restoreStoredOptions();
-  }, []);
-
-  return { ...state, regeneratePassword, options, setOption };
+  return { ...state, regeneratePassword, options };
 }
 
 export default usePasswordGenerator;
