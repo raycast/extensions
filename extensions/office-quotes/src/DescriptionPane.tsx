@@ -10,7 +10,7 @@ interface Props {
 
 export function DescriptionPane({ quote, quotes, index }: Props) {
   const markdown = `
-${quote.quote}
+${quote.content}
 
 - ${quote.character}
 
@@ -33,7 +33,7 @@ Season: ${quote.season || "N/A"} / Episode: ${quote.episode || "N/A"}
               />
             )}
           </ActionPanel.Section>
-          <Action.CopyToClipboard content={quote.quote} shortcut={{ modifiers: ["cmd"], key: "." }} />
+          <Action.CopyToClipboard content={quote.content} shortcut={{ modifiers: ["cmd"], key: "." }} />
         </ActionPanel>
       }
     />

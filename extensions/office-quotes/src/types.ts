@@ -1,6 +1,6 @@
 export type Quote = {
   character: string;
-  quote: string;
+  content: string;
   season?: string;
   episode?: string;
 };

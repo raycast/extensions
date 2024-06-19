@@ -7,12 +7,14 @@ import { Quote } from "./types";
 import rawQuotes from "./data/quotes.json";
 
 export default function main() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [quotes, setQuotes] = useCachedState<Quote[]>("quotes", shuffle(rawQuotes));
 
   useEffect(() => {
     function initialShuffle() {
+      setIsLoading(true);
       setQuotes(shuffle(rawQuotes));
+      setIsLoading(false);
     }
     initialShuffle();
   }, []);
@@ -21,12 +23,12 @@ export default function main() {
     <List isLoading={isLoading}>
       {quotes.map((quote, index) => (
         <List.Item
-          title={quote.quote}
-          key={quote.quote}
+          title={quote.content}
+          key={quote.content}
           accessories={[{ text: quote.character }, { icon: Icon.Person }]}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard content={quote.quote} shortcut={{ modifiers: ["cmd"], key: "." }} />
+              <Action.CopyToClipboard content={quote.content} shortcut={{ modifiers: ["cmd"], key: "." }} />
               <Action.Push
                 title="View Details"
                 icon={Icon.Text}
