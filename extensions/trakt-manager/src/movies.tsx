@@ -141,9 +141,12 @@ function SearchCommand() {
         setPage={setPage}
         checkInAction={onCheckInMovie}
         watchlistActionTitle={"Add to Watchlist"}
-        watchlistAction={onAddMovieToWatchlist}
         watchlistActionIcon={Icon.Bookmark}
         watchlistActionShortcut={Keyboard.Shortcut.Common.Edit}
+        watchlistAction={onAddMovieToWatchlist}
+        historyActionTitle="Add to History"
+        historyActionIcon={Icon.Clock}
+        historyActionShortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
         historyAction={onAddMovieToHistory}
       />
     </Grid>

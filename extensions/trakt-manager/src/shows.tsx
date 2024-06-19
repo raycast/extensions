@@ -124,6 +124,9 @@ function SearchCommand() {
         watchlistAction={onAddShowToWatchlist}
         watchlistActionIcon={Icon.Bookmark}
         watchlistActionShortcut={Keyboard.Shortcut.Common.Edit}
+        historyActionTitle="Add to History"
+        historyActionIcon={Icon.Clock}
+        historyActionShortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
         historyAction={onAddShowToHistory}
       />
     </Grid>

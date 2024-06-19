@@ -151,7 +151,7 @@ const HistoryCommand = () => {
             setPage={setPage}
             historyActionTitle="Remove from History"
             historyActionIcon={Icon.Trash}
-            historyActionShortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+            historyActionShortcut={Keyboard.Shortcut.Common.Remove}
             historyAction={onRemoveMovieFromHistory}
           />
         </>
@@ -166,7 +166,7 @@ const HistoryCommand = () => {
             setPage={setPage}
             historyActionTitle="Remove from History"
             historyActionIcon={Icon.Trash}
-            historyActionShortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+            historyActionShortcut={Keyboard.Shortcut.Common.Remove}
             historyAction={onRemoveShowFromHistory}
           />
         </>

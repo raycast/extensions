@@ -5,8 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { MovieGrid } from "./components/movie-grid";
 import { ShowGrid } from "./components/show-grid";
 import { View } from "./components/view";
-import { addMovieToHistory, checkInMovie, getWatchlistMovies, removeMovieFromWatchlist } from "./services/movies";
-import { addShowToHistory, getWatchlistShows, removeShowFromWatchlist } from "./services/shows";
+import { checkInMovie, getWatchlistMovies, removeMovieFromWatchlist } from "./services/movies";
+import { getWatchlistShows, removeShowFromWatchlist } from "./services/shows";
 import { getTMDBMovieDetails, getTMDBShowDetails } from "./services/tmdb";
 
 const WatchlistCommand = () => {
@@ -140,44 +140,6 @@ const WatchlistCommand = () => {
     forceRerender((value) => value + 1);
   };
 
-  const onAddMovieToHistory = async (movieId: number) => {
-    setIsLoading(true);
-    try {
-      await addMovieToHistory(movieId, abortable.current?.signal);
-      showToast({
-        title: "Movie added to history",
-        style: Toast.Style.Success,
-      });
-    } catch (e) {
-      if (!(e instanceof AbortError)) {
-        showToast({
-          title: "Error adding movie to history",
-          style: Toast.Style.Failure,
-        });
-      }
-    }
-    setIsLoading(false);
-  };
-
-  const onAddShowToHistory = async (showId: number) => {
-    setIsLoading(true);
-    try {
-      await addShowToHistory(showId, abortable.current?.signal);
-      showToast({
-        title: "Show added to history",
-        style: Toast.Style.Success,
-      });
-    } catch (e) {
-      if (!(e instanceof AbortError)) {
-        showToast({
-          title: "Error adding show to history",
-          style: Toast.Style.Failure,
-        });
-      }
-    }
-    setIsLoading(false);
-  };
-
   const onMediaTypeChange = (newValue: string) => {
     setMediaType(newValue);
     setPage(1);
@@ -210,7 +172,6 @@ const WatchlistCommand = () => {
             watchlistAction={onRemoveMovieFromWatchlist}
             watchlistActionIcon={Icon.Trash}
             watchlistActionShortcut={Keyboard.Shortcut.Common.Remove}
-            historyAction={onAddMovieToHistory}
           />
         </>
       )}
@@ -226,7 +187,6 @@ const WatchlistCommand = () => {
             watchlistAction={onRemoveShowFromWatchlist}
             watchlistActionIcon={Icon.Trash}
             watchlistActionShortcut={Keyboard.Shortcut.Common.Remove}
-            historyAction={onAddShowToHistory}
           />
         </>
       )}
