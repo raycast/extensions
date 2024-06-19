@@ -2,14 +2,15 @@ import { Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
 import { setMaxListeners } from "events";
 import { AbortError } from "node-fetch";
 import { useEffect, useRef, useState } from "react";
+import { AuthProvider, useAuth } from "./components/auth";
 import { MovieGrid } from "./components/movie-grid";
 import { ShowGrid } from "./components/show-grid";
-import { View } from "./components/view";
 import { checkInMovie, getWatchlistMovies, removeMovieFromWatchlist } from "./services/movies";
 import { getWatchlistShows, removeShowFromWatchlist } from "./services/shows";
 import { getTMDBMovieDetails, getTMDBShowDetails } from "./services/tmdb";
 
 const WatchlistCommand = () => {
+  const { isAuthenticated } = useAuth();
   const abortable = useRef<AbortController>();
   const [movies, setMovies] = useState<TraktMovieList | undefined>();
   const [shows, setShows] = useState<TraktShowList | undefined>();
@@ -21,6 +22,13 @@ const WatchlistCommand = () => {
 
   useEffect(() => {
     (async () => {
+      if (!isAuthenticated) {
+        return;
+      }
+
+      if (abortable.current) {
+        abortable.current.abort();
+      }
       abortable.current = new AbortController();
       setMaxListeners(20, abortable.current?.signal);
       setIsLoading(true);
@@ -78,7 +86,7 @@ const WatchlistCommand = () => {
         }
       };
     })();
-  }, [x, mediaType, page]);
+  }, [isAuthenticated, x, mediaType, page]);
 
   const onRemoveMovieFromWatchlist = async (movieId: number) => {
     setIsLoading(true);
@@ -196,8 +204,8 @@ const WatchlistCommand = () => {
 
 export default function Command() {
   return (
-    <View>
+    <AuthProvider>
       <WatchlistCommand />
-    </View>
+    </AuthProvider>
   );
 }

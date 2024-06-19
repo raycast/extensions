@@ -3,13 +3,14 @@ import { getFavicon } from "@raycast/utils";
 import { setMaxListeners } from "events";
 import { AbortError } from "node-fetch";
 import { useEffect, useRef, useState } from "react";
+import { AuthProvider, useAuth } from "./components/auth";
 import { Seasons } from "./components/seasons";
-import { View } from "./components/view";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/helper";
 import { checkInEpisode, getUpNextShows, updateShowProgress } from "./services/shows";
 import { getTMDBShowDetails } from "./services/tmdb";
 
 const OnDeckCommand = () => {
+  const { isAuthenticated } = useAuth();
   const abortable = useRef<AbortController>();
   const [isLoading, setIsLoading] = useState(false);
   const [shows, setShows] = useState<TraktUpNextShowList | undefined>();
@@ -17,6 +18,13 @@ const OnDeckCommand = () => {
 
   useEffect(() => {
     (async () => {
+      if (!isAuthenticated) {
+        return;
+      }
+
+      if (abortable.current) {
+        abortable.current.abort();
+      }
       abortable.current = new AbortController();
       setMaxListeners(100, abortable.current?.signal);
       setIsLoading(true);
@@ -48,7 +56,7 @@ const OnDeckCommand = () => {
         }
       };
     })();
-  }, [x]);
+  }, [isAuthenticated, x]);
 
   const onCheckInNextEpisode = async (episodeId: number | undefined, showId: number) => {
     if (episodeId) {
@@ -135,8 +143,8 @@ const OnDeckCommand = () => {
 
 export default function Command() {
   return (
-    <View>
+    <AuthProvider>
       <OnDeckCommand />
-    </View>
+    </AuthProvider>
   );
 }

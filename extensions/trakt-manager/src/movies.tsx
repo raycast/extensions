@@ -2,12 +2,13 @@ import { Grid, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { setMaxListeners } from "events";
 import { AbortError } from "node-fetch";
 import { useEffect, useRef, useState } from "react";
+import { AuthProvider, useAuth } from "./components/auth";
 import { MovieGrid } from "./components/movie-grid";
-import { View } from "./components/view";
 import { addMovieToHistory, addMovieToWatchlist, checkInMovie, searchMovies } from "./services/movies";
 import { getTMDBMovieDetails } from "./services/tmdb";
 
 function SearchCommand() {
+  const { isAuthenticated } = useAuth();
   const abortable = useRef<AbortController>();
   const [searchText, setSearchText] = useState<string | undefined>();
   const [movies, setMovies] = useState<TraktMovieList | undefined>();
@@ -16,15 +17,11 @@ function SearchCommand() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    return () => {
-      if (abortable.current) {
-        abortable.current.abort();
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     (async () => {
+      if (!isAuthenticated) {
+        return;
+      }
+
       if (abortable.current) {
         abortable.current.abort();
       }
@@ -57,9 +54,14 @@ function SearchCommand() {
           }
         }
         setIsLoading(false);
+        return () => {
+          if (abortable.current) {
+            abortable.current.abort();
+          }
+        };
       }
     })();
-  }, [searchText, page]);
+  }, [isAuthenticated, searchText, page]);
 
   const onAddMovieToWatchlist = async (movieId: number) => {
     setIsLoading(true);
@@ -155,8 +157,8 @@ function SearchCommand() {
 
 export default function Command() {
   return (
-    <View>
+    <AuthProvider>
       <SearchCommand />
-    </View>
+    </AuthProvider>
   );
 }

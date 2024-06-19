@@ -2,12 +2,13 @@ import { Grid, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { setMaxListeners } from "events";
 import { AbortError } from "node-fetch";
 import { useEffect, useRef, useState } from "react";
+import { AuthProvider, useAuth } from "./components/auth";
 import { ShowGrid } from "./components/show-grid";
-import { View } from "./components/view";
 import { addShowToHistory, addShowToWatchlist, searchShows } from "./services/shows";
 import { getTMDBShowDetails } from "./services/tmdb";
 
 function SearchCommand() {
+  const { isAuthenticated } = useAuth();
   const abortable = useRef<AbortController>();
   const [searchText, setSearchText] = useState<string | undefined>();
   const [shows, setShows] = useState<TraktShowList | undefined>();
@@ -16,15 +17,11 @@ function SearchCommand() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    return () => {
-      if (abortable.current) {
-        abortable.current.abort();
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     (async () => {
+      if (!isAuthenticated) {
+        return;
+      }
+
       if (abortable.current) {
         abortable.current.abort();
       }
@@ -57,9 +54,14 @@ function SearchCommand() {
           }
         }
         setIsLoading(false);
+        return () => {
+          if (abortable.current) {
+            abortable.current.abort();
+          }
+        };
       }
     })();
-  }, [searchText, page]);
+  }, [isAuthenticated, searchText, page]);
 
   const onAddShowToWatchlist = async (showId: number) => {
     setIsLoading(true);
@@ -135,8 +137,8 @@ function SearchCommand() {
 
 export default function Command() {
   return (
-    <View>
+    <AuthProvider>
       <SearchCommand />
-    </View>
+    </AuthProvider>
   );
 }

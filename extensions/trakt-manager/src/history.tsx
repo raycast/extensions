@@ -2,14 +2,15 @@ import { Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
 import { setMaxListeners } from "events";
 import { AbortError } from "node-fetch";
 import { useEffect, useRef, useState } from "react";
+import { AuthProvider, useAuth } from "./components/auth";
 import { MovieGrid } from "./components/movie-grid";
 import { ShowGrid } from "./components/show-grid";
-import { View } from "./components/view";
 import { getHistoryMovies, removeMovieFromHistory } from "./services/movies";
 import { getHistoryShows, removeShowFromHistory } from "./services/shows";
 import { getTMDBMovieDetails, getTMDBShowDetails } from "./services/tmdb";
 
 const HistoryCommand = () => {
+  const { isAuthenticated } = useAuth();
   const abortable = useRef<AbortController>();
   const [movies, setMovies] = useState<TraktMovieList | undefined>();
   const [shows, setShows] = useState<TraktShowList | undefined>();
@@ -21,6 +22,13 @@ const HistoryCommand = () => {
 
   useEffect(() => {
     (async () => {
+      if (!isAuthenticated) {
+        return;
+      }
+
+      if (abortable.current) {
+        abortable.current.abort();
+      }
       abortable.current = new AbortController();
       setMaxListeners(20, abortable.current?.signal);
       setIsLoading(true);
@@ -80,7 +88,7 @@ const HistoryCommand = () => {
         }
       };
     })();
-  }, [x, mediaType, page]);
+  }, [isAuthenticated, x, mediaType, page]);
 
   const onRemoveMovieFromHistory = async (movieId: number) => {
     setIsLoading(true);
@@ -177,8 +185,8 @@ const HistoryCommand = () => {
 
 export default function Command() {
   return (
-    <View>
+    <AuthProvider>
       <HistoryCommand />
-    </View>
+    </AuthProvider>
   );
 }
