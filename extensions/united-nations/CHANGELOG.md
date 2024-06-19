@@ -1,5 +1,9 @@
 # United Nations Extension
 
+## [Enhancement with Raycast Pro] - 2024-06-18
+
+- Add AI-summarized UN News for Text-to-Speech
+
 ## [Initial Version] - 2024-06-09
 
 - View UN Documents

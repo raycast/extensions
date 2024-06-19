@@ -1,4 +1,4 @@
-import { ActionPanel, List } from "@raycast/api";
+import { ActionPanel, List, Image } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { readFile } from "fs/promises";
 import { AwsAction } from "./components/common/action";
@@ -19,7 +19,7 @@ export default function Console() {
           key={service.uid}
           title={service.title}
           subtitle={service.subtitle}
-          icon={service.icon.path}
+          icon={{ source: service.icon.path, mask: Image.Mask.RoundedRectangle }}
           keywords={service.match.split(" ")}
           actions={
             <ActionPanel>

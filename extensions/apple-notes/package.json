@@ -89,6 +89,13 @@
       "subtitle": "Apple Notes",
       "description": "Add some text to an Apple note.",
       "mode": "view"
+    },
+    {
+      "name": "view-selected-note",
+      "title": "View Selected Note",
+      "subtitle": "Apple Notes",
+      "description": "View the currently selected note in Raycast.",
+      "mode": "view"
     }
   ],
   "preferences": [

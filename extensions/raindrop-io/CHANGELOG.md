@@ -1,5 +1,9 @@
 # Raindrop.io Extension Changelog
 
+## [Enhancements] - 2024-06-07
+
+- Added ability to save currently opened browser tab.
+
 ## [Fixed a typo] - 2024-05-02
 
 ## [Enhancements] - 2024-01-25

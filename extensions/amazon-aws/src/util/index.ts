@@ -97,3 +97,11 @@ export const formatBytes = (bytes: number) => {
 
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 };
+
+const getEnumKeys = <T extends object>(enumType: T): (keyof T)[] => {
+  return Object.keys(enumType).filter((key) => isNaN(Number(key))) as (keyof T)[];
+};
+
+export const getEnumKeysExcludingCurrent = <T extends object>(enumType: T, currentValue: T[keyof T]): (keyof T)[] => {
+  return getEnumKeys(enumType).filter((key) => enumType[key] !== currentValue);
+};
