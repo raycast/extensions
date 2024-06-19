@@ -5,8 +5,7 @@ import { Preferences, TagsResponse } from "../types";
 export function useTags() {
   const preferences: Preferences = getPreferenceValues();
 
-  const url = `https://api.raindrop.io/rest/v1/tags`;
-  const { isLoading, data, revalidate } = useFetch<TagsResponse>(url, {
+  return useFetch<TagsResponse>("https://api.raindrop.io/rest/v1/tags", {
     headers: {
       Authorization: `Bearer ${preferences.token}`,
     },
@@ -15,6 +14,4 @@ export function useTags() {
       showToast(Toast.Style.Failure, "Cannot fetch tags");
     },
   });
-
-  return { isLoading, data, revalidate };
 }
