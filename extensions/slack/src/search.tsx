@@ -1,82 +1,76 @@
-import { ActionPanel, Icon, Image, List } from "@raycast/api";
+import { ActionPanel, Action, Icon, Image, List } from "@raycast/api";
 
-import { CacheProvider, onApiError, useChannels, useGroups, useUsers } from "./shared/client";
-import { UpdatesModal } from "./shared/UpdatesModal";
+import { User, useChannels } from "./shared/client";
+import { withSlackClient } from "./shared/withSlackClient";
+import { useFrecencySorting } from "@raycast/utils";
 import { OpenChannelInSlack, OpenChatInSlack, useSlackApp } from "./shared/OpenInSlack";
 
-export default function Command() {
-  return (
-    <CacheProvider>
-      <UpdatesModal>
-        <SlackList />
-      </UpdatesModal>
-    </CacheProvider>
-  );
-}
-
-function SlackList() {
+function Search() {
   const { isAppInstalled, isLoading } = useSlackApp();
-  const { data: users, error: usersError, isValidating: isValidatingUsers } = useUsers();
-  const { data: channels, error: channelsError, isValidating: isValidatingChannels } = useChannels();
-  const { data: groups, error: groupsError, isValidating: isValidatingGroups } = useGroups();
+  const { data, isLoading: isLoadingChannels } = useChannels();
 
-  if (
-    usersError &&
-    channelsError &&
-    groupsError &&
-    !isValidatingUsers &&
-    !isValidatingChannels &&
-    !isValidatingGroups
-  ) {
-    onApiError({ exitExtension: true });
-  }
+  const channels = data?.flat();
+
+  const { data: recents, visitItem, resetRanking } = useFrecencySorting(channels, { key: (item) => item.id });
 
   return (
-    <List isLoading={isValidatingUsers || isValidatingGroups || isValidatingChannels || isLoading}>
-      <List.Section title="Users">
-        {users?.map(({ name, id: userId, teamId: workspaceId, icon, conversationId }) => (
-          <List.Item
-            key={userId}
-            title={name}
-            icon={icon ? { source: icon, mask: Image.Mask.Circle } : Icon.Person}
-            actions={
-              <ActionPanel>
-                <OpenChatInSlack {...{ workspaceId, userId, isAppInstalled, conversationId }} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+    <List isLoading={isLoading || isLoadingChannels}>
+      {recents.map((item) => {
+        const isUser = item.id.startsWith("U");
 
-      <List.Section title="Channels">
-        {channels?.map(({ name, id: channelId, teamId: workspaceId, icon }) => (
-          <List.Item
-            key={channelId}
-            title={name}
-            icon={icon}
-            actions={
-              <ActionPanel>
-                <OpenChannelInSlack {...{ workspaceId, channelId, isAppInstalled }} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+        if (isUser) {
+          const { id: userId, name, icon, teamId: workspaceId, conversationId } = item as User;
+          return (
+            <List.Item
+              key={userId}
+              title={name}
+              icon={icon ? { source: icon, mask: Image.Mask.Circle } : Icon.Person}
+              actions={
+                <ActionPanel>
+                  <OpenChatInSlack
+                    {...{ workspaceId, userId, isAppInstalled, conversationId, onAction: () => visitItem(item) }}
+                  />
 
-      <List.Section title="Groups">
-        {groups?.map(({ name, id: channelId, teamId: workspaceId, icon }) => (
-          <List.Item
-            key={channelId}
-            title={name}
-            icon={icon}
-            actions={
-              <ActionPanel>
-                <OpenChannelInSlack {...{ workspaceId, channelId, isAppInstalled }} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+                  <ActionPanel.Section>
+                    <Action
+                      icon={Icon.ArrowCounterClockwise}
+                      title="Reset Ranking"
+                      onAction={() => resetRanking(item)}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          );
+        } else {
+          const { id: channelId, name, icon, teamId: workspaceId } = item;
+
+          return (
+            <List.Item
+              key={channelId}
+              title={name}
+              icon={icon}
+              actions={
+                <ActionPanel>
+                  <OpenChannelInSlack
+                    {...{ workspaceId, channelId, isAppInstalled, onAction: () => visitItem(item) }}
+                  />
+
+                  <ActionPanel.Section>
+                    <Action
+                      icon={Icon.ArrowCounterClockwise}
+                      title="Reset Ranking"
+                      onAction={() => resetRanking(item)}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          );
+        }
+      })}
     </List>
   );
 }
+
+export default withSlackClient(Search);
