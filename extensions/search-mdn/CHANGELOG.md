@@ -1,6 +1,6 @@
 # Changelog
 
-## Updated - {PR_MERGE_DATE}
+## Updated - 2024-06-19
 
 - Updated the command icon and snapshots
 - Updated dependencies and removed critical security vulnerabilities
