@@ -16,7 +16,6 @@ type SvgProps = {
   color?: string;
   strokeColor?: string;
   strokeWidth?: number;
-  // textYOffset?: boolean;
 };
 
 type SvgItem = {
@@ -79,7 +78,7 @@ const generateSvgGrid = (
 };
 
 const encodeSvgToBase64 = (svg: string): string => {
-  return `data:image/svg+xml;base64,${btoa(decodeURIComponent(encodeURIComponent(svg)))}`;
+  return `data:image/svg+xml;base64,${btoa(svg)}`;
 };
 
 const createSvgItems = (rawSvgStrings: string[], paddedSvgStrings: string[]): SvgItem[] => {
@@ -104,13 +103,15 @@ export default function Command() {
   const [baseSize, setBaseSize] = useState<BaseSize>(8);
   const [isMulticolored, setIsMulticolored] = useState<boolean>(true);
 
-  // Define the data-generating function using useCallback
-  const fetchSvgItems = useCallback((): Promise<SvgItem[]> => {
-    const { raw, padded } = generateSvgGrid(baseSize, gridScale, isMulticolored);
-    return Promise.resolve(createSvgItems(raw, padded));
-  }, [baseSize, isMulticolored]);
+  const fetchSvgItems = useCallback(
+    (baseSize: BaseSize, gridScale: number[], isMulticolored: boolean): Promise<SvgItem[]> => {
+      const { raw, padded } = generateSvgGrid(baseSize, gridScale, isMulticolored);
+      return Promise.resolve(createSvgItems(raw, padded));
+    },
+    [],
+  );
 
-  const { isLoading, data } = usePromise(fetchSvgItems, []);
+  const { isLoading, data, revalidate } = usePromise(() => fetchSvgItems(baseSize, gridScale, isMulticolored), []);
 
   return (
     <Grid
@@ -120,7 +121,10 @@ export default function Command() {
           tooltip="Select base grid size"
           storeValue={true}
           defaultValue={String(baseSize)}
-          onChange={(newValue) => setBaseSize(Number(newValue) as BaseSize)}
+          onChange={(newValue) => {
+            setBaseSize(Number(newValue) as BaseSize);
+            revalidate();
+          }}
         >
           <Grid.Dropdown.Section title="Grid Sizes">
             <Grid.Dropdown.Item title="8 Point Grid" value="8" key="8" />
@@ -140,7 +144,10 @@ export default function Command() {
               <Action
                 shortcut={{ modifiers: ["cmd"], key: "t" }}
                 title={`Switch to ${isMulticolored ? "Monocolored" : "Multicolored"}`}
-                onAction={() => setIsMulticolored((prev) => !prev)}
+                onAction={() => {
+                  setIsMulticolored((prev) => !prev);
+                  revalidate();
+                }}
               />
             </ActionPanel>
           }
