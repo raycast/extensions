@@ -84,17 +84,23 @@ export default function Command() {
                     title="Compile"
                     icon={Icon.CheckCircle}
                     onAction={() => {
-                      showToast({ title: `Compiling...`, style: Toast.Style.Animated });
-                      exec_compile(config)
-                        .then(() => {
-                          delayOperation(500).then(() => {
-                            set_LocalConfig_prev(config);
-                            showToast({ title: `Success !`, style: Toast.Style.Success });
+                      if (checkFile_exist(config.scssPath)) {
+                        showToast({ title: `Compiling...`, style: Toast.Style.Animated });
+                        exec_compile(config)
+                          .then(() => {
+                            delayOperation(500).then(() => {
+                              set_LocalConfig_prev(config);
+                              showToast({ title: `Success !`, style: Toast.Style.Success });
+                            });
+                          })
+                          .catch((result: CompileResult) => {
+                            showToast({ title: `Compile Failed: ${result.message} !`, style: Toast.Style.Failure });
                           });
-                        })
-                        .catch((result: CompileResult) => {
-                          showToast({ title: `Compile Failed: ${result.message} !`, style: Toast.Style.Failure });
+                      } else {
+                        alertConfig_delete(config).then(() => {
+                          set_needReload(true);
                         });
+                      }
                     }}
                   />
                   {!config.watchCompile ? (
@@ -102,21 +108,27 @@ export default function Command() {
                       title="Watch"
                       icon={Icon.CheckCircle}
                       onAction={() => {
-                        showToast({ title: `Watching...`, style: Toast.Style.Animated });
-                        exec_watch(config).then(() => {
-                          delayOperation(500)
-                            .then(() => {
-                              update_LocalConfig_watch(config, { ...config, watchCompile: true }).then(() => {
-                                set_needReload(true);
+                        if (checkFile_exist(config.scssPath)) {
+                          showToast({ title: `Watching...`, style: Toast.Style.Animated });
+                          exec_watch(config).then(() => {
+                            delayOperation(500)
+                              .then(() => {
+                                update_LocalConfig_watch(config, { ...config, watchCompile: true }).then(() => {
+                                  set_needReload(true);
+                                });
+                                delayOperation(500).then(() => {
+                                  showToast({ title: `Watched !`, style: Toast.Style.Success });
+                                });
+                              })
+                              .catch(() => {
+                                showToast({ title: `Failed !`, style: Toast.Style.Failure });
                               });
-                              delayOperation(500).then(() => {
-                                showToast({ title: `Watched !`, style: Toast.Style.Success });
-                              });
-                            })
-                            .catch(() => {
-                              showToast({ title: `Failed !`, style: Toast.Style.Failure });
-                            });
-                        });
+                          });
+                        } else {
+                          alertConfig_delete(config).then(() => {
+                            set_needReload(true);
+                          });
+                        }
                       }}
                     />
                   ) : (
@@ -319,9 +331,13 @@ export default function Command() {
                       onAction={() => {
                         if (checkFile_exist(config.cssPath)) {
                           open(config.cssPath);
-                        } else {
+                        } else if (!checkFile_exist(config.cssPath) && checkFile_exist(config.scssPath)) {
                           alertConfig_compile(config).then(() => {
                             open(config.cssPath);
+                          });
+                        } else {
+                          alertConfig_delete(config).then(() => {
+                            set_needReload(true);
                           });
                         }
                       }}
@@ -351,9 +367,13 @@ export default function Command() {
                       onAction={() => {
                         if (checkFile_exist(config.cssPath)) {
                           showInFinder(config.cssPath);
-                        } else {
+                        } else if (!checkFile_exist(config.cssPath) && checkFile_exist(config.scssPath)) {
                           alertConfig_compile(config).then(() => {
                             showInFinder(config.cssPath);
+                          });
+                        } else {
+                          alertConfig_delete(config).then(() => {
+                            set_needReload(true);
                           });
                         }
                       }}
