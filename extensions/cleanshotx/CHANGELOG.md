@@ -2,7 +2,7 @@
 
 ## [Add new command] - 2024-06-19
 
-- Add new command to capture area and send toRaycast AI Chat
+- Add new command to capture area and send to Raycast AI Chat
 
 ## [Fix icons] - 2024-06-17
 
