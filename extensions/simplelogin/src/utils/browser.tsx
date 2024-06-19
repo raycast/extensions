@@ -3,15 +3,16 @@
  */
 import { runAppleScript } from "@raycast/utils";
 
-const CHROMIUM_BROWSERS = ["Google Chrome", "Opera", "Brave Browser", "Microsoft Edge", "Vivaldi"];
+const CHROMIUM_BROWSERS_REGEX = /Chrome|Opera|Brave|Edge|Vivaldi/i;
+const WEBKIT_BROWSERS_REGEX = /Safari|Orion/i;
 
 export default async (): Promise<string | undefined> => {
   const browser = await getFrontmostApp();
   let url: string | undefined;
 
-  if (browser.match(/Safari/i)) {
-    url = await getSafariURL();
-  } else if (CHROMIUM_BROWSERS.some((b) => browser.startsWith(b))) {
+  if (browser.match(WEBKIT_BROWSERS_REGEX)) {
+    url = await getWebKitURL(browser);
+  } else if (browser.match(CHROMIUM_BROWSERS_REGEX)) {
     url = await getChromiumURL(browser);
   } else if (browser.match(/Arc/i)) {
     url = await getArcURL();
@@ -38,9 +39,9 @@ const getFrontmostApp = () => {
   `);
 };
 
-const getSafariURL = () => {
+const getWebKitURL = (browser: string) => {
   return runAppleScript(`
-    tell application "Safari" to get URL of front document
+    tell application "${browser}" to get URL of front document
   `);
 };
 
