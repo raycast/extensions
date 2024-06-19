@@ -16,7 +16,7 @@ type SvgProps = {
   color?: string;
   strokeColor?: string;
   strokeWidth?: number;
-  textYOffset?: boolean;
+  // textYOffset?: boolean;
 };
 
 type SvgItem = {
@@ -30,7 +30,6 @@ const createSvgString = ({
   size,
   strokeWidth = size <= 24 ? 1 : 4,
   x = 0,
-  textYOffset,
   y = 0,
   padding = 0,
   color = "pink",
@@ -63,7 +62,6 @@ const generateSvgGrid = (
       size: baseSize * scale,
       color: setBoxColor(index),
       strokeColor: setStrokeColor(index),
-      textYOffset: false,
     }),
   );
 
@@ -74,7 +72,6 @@ const generateSvgGrid = (
       padding: size * 0.3,
       color: setBoxColor(index),
       strokeColor: setStrokeColor(index),
-      textYOffset: true,
     });
   });
 
