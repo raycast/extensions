@@ -1,5 +1,9 @@
 # raycast-ollama Changelog
 
+## [BugFix] - 2024-06-19
+
+- Fixed Error `keep alive, error missing unit in duration`: unit is now required for negative or zero duration time. Use -1s for persistent model on memory or 0s for free up memory immediately.
+
 ## [Improvement] - 2024-06-03
 
 - **Command 'Manage Models'**: Support for multiple configured Ollama Server, manage and use models from different server.
