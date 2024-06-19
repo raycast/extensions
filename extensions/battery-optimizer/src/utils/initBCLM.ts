@@ -2,11 +2,23 @@ import { execSync } from "node:child_process";
 import { confirmAlert, open } from "@raycast/api";
 import { preferences } from "./getPreference";
 
+interface ExecSyncError extends Error {
+  stdout: Buffer;
+  stderr: Buffer;
+}
+
 // Function to check if a command exists
 const commandExists = (command: string): boolean => {
   try {
-    return execSync(`which ${command}`).toString().trim().length > 0;
-  } catch (e) {
+    const PATH = "/usr/gnu/bin:/usr/local/bin:/bin:/usr/bin:.:/opt/homebrew/bin";
+    const shellResult = execSync(`zsh -l -c 'export PATH="$PATH:${PATH}" && which ${command}'`).toString().trim();
+    return !shellResult.includes("not found");
+  } catch (e: unknown) {
+    if (e instanceof Error && "stdout" in e) {
+      const execError = e as ExecSyncError;
+      console.error("commandExists stdout:", execError.stdout.toString());
+      console.error("commandExists stderr:", execError.stderr.toString());
+    }
     return false;
   }
 };
@@ -49,13 +61,20 @@ export async function confirmAlertBrew(): Promise<boolean> {
 export const bclmPath = () => {
   try {
     if (commandExists("bclm")) {
-      return execSync(`zsh -l -c 'which bclm'`).toString().trim();
+      const PATH = "/usr/gnu/bin:/usr/local/bin:/bin:/usr/bin:.:/opt/homebrew/bin";
+      return execSync(`zsh -l -c 'export PATH="$PATH:${PATH}" && which bclm'`).toString().trim();
     } else if (preferences.customBCLMPath) {
       return preferences.customBCLMPath;
     } else {
       throw new Error("The bclm executable was not found, and no custom path is set.");
     }
   } catch (e) {
+    if (e instanceof Error && "stdout" in e) {
+      const execError = e as ExecSyncError;
+      throw new Error(
+        "commandExists stdout:" + execError.stdout.toString() + "\ncommandExists stderr:" + execError.stderr.toString(),
+      );
+    }
     throw new Error("The bclm executable was not found, and no custom path is set.");
   }
 };
