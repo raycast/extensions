@@ -4,11 +4,12 @@ import { Preferences, BookmarksParams, BookmarksResponse } from "../types";
 
 export function useBookmarks({ collection, search = "" }: BookmarksParams) {
   const preferences: Preferences = getPreferenceValues();
+  const url = new URL(`https://api.raindrop.io/rest/v1/raindrops/${collection}`);
 
-  const url = `https://api.raindrop.io/rest/v1/raindrops/${collection}?sort=-created&search=${
-    encodeURIComponent(search) ?? ""
-  }`;
-  const { isLoading, data, revalidate } = useFetch<BookmarksResponse>(url, {
+  url.searchParams.set("sort", "-created");
+  url.searchParams.set("search", search);
+
+  return useFetch<BookmarksResponse>(url.href, {
     headers: {
       Authorization: `Bearer ${preferences.token}`,
     },
@@ -17,6 +18,4 @@ export function useBookmarks({ collection, search = "" }: BookmarksParams) {
       showToast(Toast.Style.Failure, "Cannot search bookmark");
     },
   });
-
-  return { isLoading, data, revalidate };
 }

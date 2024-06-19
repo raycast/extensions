@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Image, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { isEqual } from "lodash";
 import { useEffect, useState } from "react";
 import * as emoji from "node-emoji";

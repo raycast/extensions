@@ -1,5 +1,11 @@
 # Amazon AWS Changelog
 
+## [Improvements] - 2024-06-18
+
+- CodePipeline: Adds action to retry failed stage, stop ongoing execution and toggle stage transition
+- Secrets Manager: Retrieves secret value in a new Detail navigation and adds extra metadata
+- Cloudformation: Improves the resource switch action
+
 ## [Console command] - 2024-06-17
 
 - Adds shortcut login for SSO profiles

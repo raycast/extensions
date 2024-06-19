@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Fix copy commit hash action] - 2024-06-17
+
+- Fixes an issue where the copy commit hash action incorrectly copied the commit message instead of the commit hash.
+
 ## ["Create Pull Request" command] - 2024-06-03
 
 - Added typeahead search for branch selection in Create PR command.

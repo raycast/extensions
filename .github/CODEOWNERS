@@ -94,6 +94,7 @@
 /extensions/beancount-mate                                          @iwfan
 /extensions/bear                                                    @hmarr @lucaschultz @diokhan @ron-myers @juanbanchero @thomaslombart
 /extensions/beat-per-minute                                         @pernielsentikaer
+/extensions/bed-time-calculator                                     @khlebobul
 /extensions/beeminder                                               @vivgui
 /extensions/berlin-public-transportation                            @arjanski
 /extensions/better-uptime                                           @andreaselia
@@ -122,7 +123,7 @@
 /extensions/bluesky                                                 @dkapila @peduarte
 /extensions/bmrks                                                   @raunofreiberg @peduarte @not-first
 /extensions/bmw                                                     @aesign
-/extensions/bob                                                     @ViGeng @natsustan
+/extensions/bob                                                     @ViGeng @natsustan @xxxbrian
 /extensions/bonk-price                                              @AnishDe12020
 /extensions/bookstack                                               @vipii
 /extensions/bored                                                   @BossElijah
@@ -196,7 +197,7 @@
 /extensions/clash                                                   @ciiiii
 /extensions/claude                                                  @florisdobber
 /extensions/clean-keyboard                                          @ike-gg
-/extensions/cleanshotx                                              @Aayush9029 @thomaslombart @lukaszmtw @erics118 @mlnchk
+/extensions/cleanshotx                                              @Aayush9029 @thomaslombart @lukaszmtw @erics118 @mlnchk @pernielsentikaer
 /extensions/clear-clipboard                                         @d3caf
 /extensions/clickup                                                 @Ali-Parandeh @aesadde @JoltCode
 /extensions/clipboard-editor                                        @pomdtr
@@ -262,7 +263,7 @@
 /extensions/corcel                                                  @AkinAguda
 /extensions/cosmic-bookmarks                                        @kemiljk
 /extensions/counter                                                 @EvanZhouDev @pernielsentikaer
-/extensions/country-lookup                                          @pernielsentikaer
+/extensions/country-lookup                                          @pernielsentikaer @j3lte
 /extensions/covert-color                                            @YFAnt
 /extensions/cpf-cnpj-generator                                      @gstvds
 /extensions/craftdocs                                               @kudrykv @mafredri @0x77dev
@@ -462,7 +463,7 @@
 /extensions/footy-report                                            @thuoe
 /extensions/fork-repositories                                       @sxn
 /extensions/format-graphql                                          @tngranados
-/extensions/fotmob                                                  @sonla58
+/extensions/fotmob                                                  @sonla58 @j3lte
 /extensions/foundry-cast-cli                                        @merklefruit
 /extensions/framer-motion                                           @madebyankur
 /extensions/frankerfacez                                            @davidchalifoux
@@ -999,6 +1000,7 @@
 /extensions/pinboard                                                @fe9lix
 /extensions/ping                                                    @stevensd2m
 /extensions/pins                                                    @SKaplanOfficial @pernielsentikaer
+/extensions/pip                                                     @koinzhang
 /extensions/pipe-commands                                           @pomdtr @gasolin @pernielsentikaer
 /extensions/pipedrive                                               @ahpatel
 /extensions/pitchfork                                               @koayon
@@ -1071,7 +1073,7 @@
 /extensions/radix                                                   @peduarte @emlez
 /extensions/railway                                                 @coffee-cup @nagauta
 /extensions/rain-radars                                             @danieldbird @koinzhang
-/extensions/raindrop-io                                             @lardissone @ShubhamVerma1811 @pernielsentikaer @sh-cho
+/extensions/raindrop-io                                             @lardissone @ShubhamVerma1811 @pernielsentikaer @sh-cho @tdkn
 /extensions/ramda-documentation                                     @jbroomer
 /extensions/random-color                                            @srcrip
 /extensions/random-data-generator                                   @loris @Calvein @pernielsentikaer @vimtor @j3lte @stefanmatar
@@ -1195,7 +1197,7 @@
 /extensions/search-hexpm                                            @jordelver
 /extensions/search-hookmark                                         @QIanGua
 /extensions/search-joplin-notes                                     @wisdom-plus
-/extensions/search-mdn                                              @krzysztofzuraw @OBQun @k8scat @j3lte
+/extensions/search-mdn                                              @krzysztofzuraw @OBQun @k8scat @j3lte @jfkisafk
 /extensions/search-notion                                           @sadanand-singh @erikjs14
 /extensions/search-npm                                              @mrmartineau @reloadedhead @TimonVS @luisFilipePT @LunaticMuch @jomifepe @j3lte
 /extensions/search-private-npm-packages                             @HsiuCL
@@ -1240,11 +1242,11 @@
 /extensions/single-disk-eject                                       @johndturn
 /extensions/single-focus                                            @Mmehdi06 @LitoMore
 /extensions/sip                                                     @jamesjlyons
-/extensions/sips                                                    @SKaplanOfficial @arronhunt @nakaakist
+/extensions/sips                                                    @SKaplanOfficial @arronhunt @nakaakist @JUSTIVE @patomos
 /extensions/sitespeakai                                             @hermanschutte
 /extensions/sketch                                                  @aesign
 /extensions/slack                                                   @momme-rtf @Elliot67 @jfkisafk
-/extensions/slack-status                                            @PitNikola @johnhampton @thomaspaulmann @pernielsentikaer
+/extensions/slack-status                                            @PitNikola @johnhampton @thomaspaulmann @pernielsentikaer @ramsaysewell
 /extensions/sleep-timer                                             @dtmzr @ThatNerdSquared @pernielsentikaer
 /extensions/slugify                                                 @unreadablename
 /extensions/sm-ms                                                   @koinzhang
