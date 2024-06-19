@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { format } from "date-fns";
 import { useState } from "react";
@@ -46,6 +46,7 @@ function Search() {
     <Action
       title="From Me Only"
       icon={Icon.Person}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
       onAction={() => setQuery(query ? `from:me ${query}` : "from:me ")}
     />
   );
@@ -94,12 +95,16 @@ function Search() {
                 {m.permalink ? <Action.OpenInBrowser url={m.permalink} title="Open Message" /> : null}
 
                 <ActionPanel.Section>
-                  <ActionPanel.Submenu title="Sort By" icon={Icon.ArrowUp}>
+                  <ActionPanel.Submenu
+                    title="Sort By"
+                    icon={Icon.ArrowUp}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                  >
                     {sortOptions.map((s) => (
                       <Action
                         key={s.sort}
                         autoFocus={sortType === s.sort}
-                        icon={sortType === s.sort ? Icon.CheckCircle : undefined}
+                        icon={sortType === s.sort ? { source: Icon.CheckCircle, tintColor: Color.Green } : undefined}
                         title={s.title}
                         onAction={() => setSortType(s.sort)}
                       />

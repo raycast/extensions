@@ -1,5 +1,5 @@
-// This filename is kept as `search.tsx` to avoid users losing their keywords and aliases
-// even though it's actually something to switch to channels.
+// This filename should be named `switch-to-channel.tsx` or something similar
+// but it's kept as `search.tsx` as changing the command's name will cause users to lose their keywords and aliases
 import { ActionPanel, Action, Icon, List } from "@raycast/api";
 
 import { User, useChannels } from "./shared/client";
