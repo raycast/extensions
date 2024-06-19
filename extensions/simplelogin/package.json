@@ -62,7 +62,18 @@
       "title": "Create Random Alias",
       "subtitle": "SimpleLogin",
       "description": "Shield your inbox with a new email alias.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Prefill Alias Description",
+          "name": "prefill_alias_note",
+          "label": "Prefill Alias Description",
+          "description": "Prefill the alias description based on the hostname of the currently active tab in your browser.",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "list_alias",
@@ -73,7 +84,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.74.0",
+    "@raycast/api": "^1.76.0",
     "@raycast/utils": "^1.15.0",
     "axios": "^1.2.2",
     "moment": "^2.29.4"
