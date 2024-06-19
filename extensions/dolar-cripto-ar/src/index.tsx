@@ -1,12 +1,13 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MenuBarExtra, showToast, Toast } from "@raycast/api";
 import { useCachedState, useCachedPromise } from "@raycast/utils";
 import useRates from "./hooks/useRates";
 import { fetchDollarRates, fetchBtcPrice, fetchEthPrice } from "./api";
 
 export default function Command() {
-  const [selectedCurrency, setSelectedCurrency] = useCachedState<string>("selected-currency", "Blue");
+  const [selectedCurrency, setSelectedCurrency] = useCachedState<string>("selected-currency", "");
   const { dollar, crypto } = useRates();
+  const [initialFetchDone, setInitialFetchDone] = useState(false);
 
   const dollarAbortControllerRef = useRef<AbortController | null>(null);
   const btcAbortControllerRef = useRef<AbortController | null>(null);
@@ -120,6 +121,15 @@ export default function Command() {
     initialData: null,
   });
 
+  useEffect(() => {
+    if (dollarData && btcData && ethData) {
+      setInitialFetchDone(true);
+      if (!selectedCurrency) {
+        setSelectedCurrency("Blue");
+      }
+    }
+  }, [dollarData, btcData, ethData]);
+
   const blueDollarPrice = dollarData?.blue?.ask;
   const mepDollarPrice = dollarData?.mep?.al30["24hs"]?.price;
   const cclDollarPrice = dollarData?.ccl?.al30["24hs"]?.price;
@@ -131,6 +141,10 @@ export default function Command() {
   };
 
   const getTitle = () => {
+    if (!initialFetchDone || !selectedCurrency) {
+      return "Cargando...";
+    }
+
     if (selectedCurrency === "Blue" && blueDollarPrice !== undefined) {
       return formatPrice(blueDollarPrice);
     }
