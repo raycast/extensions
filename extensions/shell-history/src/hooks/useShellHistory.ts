@@ -7,6 +7,7 @@ export const useShellHistory = () => {
     () => async () => {
       let _zshShellHistory: ShellHistory[] = [];
       let _bashShellHistory: ShellHistory[] = [];
+      let _fishShellHistory: ShellHistory[] = [];
       try {
         _zshShellHistory = await getShellHistoryFromFiles(Shell.ZSH);
       } catch (e) {
@@ -17,7 +18,12 @@ export const useShellHistory = () => {
       } catch (e) {
         console.error(`${Shell.BASH} ${String(e)}`);
       }
-      const finalShellHistory = [_zshShellHistory, _bashShellHistory];
+      try {
+        _fishShellHistory = await getShellHistoryFromFiles(Shell.FISH);
+      } catch (e) {
+        console.error(`${Shell.BASH} ${String(e)}`);
+      }
+      const finalShellHistory = [_zshShellHistory, _bashShellHistory, _fishShellHistory];
       return { data: finalShellHistory };
     },
     [],

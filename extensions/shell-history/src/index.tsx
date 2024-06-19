@@ -3,7 +3,7 @@ import { Icon, List } from "@raycast/api";
 import { useShellHistory } from "./hooks/useShellHistory";
 import { Shell, shellTags } from "./types/types";
 import { ActionShellCommand } from "./components/action-shell-command";
-import { extractCliTool } from "./utils/shell-utils";
+import { extractCliTool, isEmpty } from "./utils/shell-utils";
 
 export default function Index() {
   const [shellTag, setShellTag] = useState<string>(shellTags[0].value);
@@ -51,14 +51,16 @@ export default function Index() {
                           }
                         : {},
                       {
-                        tag: cliTool,
-                        icon: "cliTool.png",
-                        tooltip: cliTool,
+                        tag: isEmpty(cliTool?.value) ? history.command : cliTool?.value,
+                        icon: cliTool?.icon,
+                        tooltip: cliTool
+                          ? `${cliTool.type}: ${isEmpty(cliTool?.value) ? history.command : cliTool?.value}`
+                          : "",
                       },
                       {
                         tag: history.shell,
                         icon: history.shell === Shell.ZSH ? "zsh.png" : "bash.png",
-                        tooltip: history.shell,
+                        tooltip: "Shell: " + history.shell,
                       },
                     ]}
                     actions={

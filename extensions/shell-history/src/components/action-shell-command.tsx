@@ -15,7 +15,7 @@ import { ActionOpenPreferences } from "./action-open-preferences";
 import { PrimaryAction, primaryAction } from "../types/preferences";
 import { useTerminals } from "../hooks/useTerminals";
 import { bashHistoryFilePath, runShellCommand, zshHistoryFilePath } from "../utils/shell-utils";
-import { Shell, ShellHistory } from "../types/types";
+import { CliTool, Shell, ShellHistory } from "../types/types";
 import { MutatePromise } from "@raycast/utils/dist/types";
 import KeyEquivalent = Keyboard.KeyEquivalent;
 import ActionStyle = Alert.ActionStyle;
@@ -24,7 +24,7 @@ import { useFrontmostApp } from "../hooks/useFrontmostApp";
 export function ActionShellCommand(props: {
   shell: Shell;
   shellCommand: string;
-  cliTool: string;
+  cliTool: CliTool | undefined;
   mutate: MutatePromise<ShellHistory[][]>;
 }) {
   const { shell, shellCommand, cliTool, mutate } = props;
@@ -76,8 +76,8 @@ export function ActionShellCommand(props: {
           icon={Icon.Terminal}
           shortcut={{ modifiers: ["ctrl"], key: "c" }}
           onAction={async () => {
-            await Clipboard.copy(cliTool);
-            await showHUD(`📋 ${cliTool}`);
+            await Clipboard.copy(cliTool?.value || "");
+            await showHUD(`📋 ${cliTool?.value}`);
           }}
         />
         <Action.CreateSnippet

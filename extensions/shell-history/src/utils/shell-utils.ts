@@ -1,34 +1,52 @@
-import { Shell, ShellHistory, Terminal } from "../types/types";
+import { CliToolType, Shell, ShellHistory, Terminal } from "../types/types";
 import path from "path";
 import os from "os";
 import readLastLines from "read-last-lines";
 import { maxLines, removeDuplicates } from "../types/preferences";
-import { captureException, open, showHUD } from "@raycast/api";
+import { captureException, Icon, open, showHUD } from "@raycast/api";
 import { ITERM2, TERMINAL } from "./constants";
 import { runAppleScript } from "@raycast/utils";
 import shellQuote from "shell-quote";
 
+export const isEmpty = (string: string | null | undefined) => {
+  return !(string != null && String(string).length > 0);
+};
+
 export const zshHistoryFilePath = path.join(os.homedir(), ".zsh_history");
 export const bashHistoryFilePath = path.join(os.homedir(), ".bash_history");
+export const fishHistoryFilePath = path.join(os.homedir(), ".local/share/fish/fish_history");
 
 export const getShellHistoryFromFiles = async (shell: Shell, maxLineCount: number = parseInt(maxLines, 10)) => {
   let shellHistoryFilePath;
-  if (shell === Shell.ZSH) {
-    shellHistoryFilePath = zshHistoryFilePath;
-  } else {
-    shellHistoryFilePath = bashHistoryFilePath;
-  }
 
-  const lines = await readLastLines.read(shellHistoryFilePath, maxLineCount);
-  const shellHistoryArray = parseShellHistory(lines, shell);
-  return removeDuplicates ? removeArrayDuplicates(shellHistoryArray.reverse()) : shellHistoryArray.reverse();
+  switch (shell) {
+    case Shell.ZSH:
+      shellHistoryFilePath = zshHistoryFilePath;
+      break;
+    case Shell.BASH:
+      shellHistoryFilePath = bashHistoryFilePath;
+      break;
+    case Shell.FISH:
+      shellHistoryFilePath = fishHistoryFilePath;
+      break;
+    default:
+      shellHistoryFilePath = "";
+  }
+  if (shell === Shell.ZSH || shell === Shell.BASH) {
+    const commands = await readLastLines.read(shellHistoryFilePath, maxLineCount);
+    const shellHistoryArray = parseShellHistory(commands, shell);
+    return removeDuplicates ? removeArrayDuplicates(shellHistoryArray.reverse()) : shellHistoryArray.reverse();
+  } else {
+    const commands = await readLastLines.read(shellHistoryFilePath, maxLineCount * 2);
+    return parseFishShellHistory(commands, shell);
+  }
 };
 
 function parseShellHistory(content: string, shell: Shell): ShellHistory[] {
-  const lines = content.split("\n").filter((line) => line.trim() !== "");
   const history: ShellHistory[] = [];
+  const commands = content.split("\n").filter((line) => line.trim() !== "");
 
-  lines.forEach((line) => {
+  commands.forEach((line) => {
     const match = line.match(/^:\s*(\d+):\d+;(.*)$/);
     if (match) {
       const [, timestamp, command] = match;
@@ -45,6 +63,32 @@ function parseShellHistory(content: string, shell: Shell): ShellHistory[] {
       });
     }
   });
+
+  return history;
+}
+
+function parseFishShellHistory(content: string, shell: Shell): ShellHistory[] {
+  const history: ShellHistory[] = [];
+
+  const entries = content.trim().split(/(?=- cmd:)/);
+
+  for (const entry of entries) {
+    const cmdMatch = /- cmd: (.+)/.exec(entry);
+    const whenMatch = /when: (\d+)/.exec(entry);
+
+    if (cmdMatch && whenMatch) {
+      const command = cmdMatch[1].trim();
+      const timestamp = parseInt(whenMatch[1], 10) * 1000;
+
+      const commandHistory = {
+        command: command,
+        timestamp: timestamp,
+        shell: shell,
+      };
+
+      history.push(commandHistory);
+    }
+  }
 
   return history;
 }
@@ -127,23 +171,23 @@ end tell
   return script;
 }
 
-export function extractCliTool(command: string): string {
+export function extractCliTool(command: string) {
   try {
     const parsedEntries = shellQuote.parse(command);
     if (parsedEntries.length > 0) {
       const shellCommand = parsedEntries[0];
       if (typeof shellCommand === "string") {
-        return shellCommand;
+        return { type: CliToolType.COMMAND, value: shellCommand, icon: Icon.Stars };
       } else if ("op" in shellCommand) {
-        return shellCommand.op;
+        return { type: CliToolType.OP, value: shellCommand.op, icon: Icon.PlusMinusDivideMultiply };
       } else if ("comment" in shellCommand) {
-        return shellCommand.comment;
+        return { type: CliToolType.COMMENT, value: shellCommand.comment, icon: Icon.Hashtag };
       } else {
-        return "";
+        return undefined;
       }
     }
   } catch (e) {
     console.error(e);
   }
-  return "";
+  return undefined;
 }

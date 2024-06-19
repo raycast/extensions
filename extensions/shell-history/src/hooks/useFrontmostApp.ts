@@ -1,8 +1,8 @@
 import { Application, getFrontmostApplication } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 
 export const useFrontmostApp = () => {
-  return usePromise(
+  return useCachedPromise(
     () => async () => {
       const apps: Application[] = [];
       try {
