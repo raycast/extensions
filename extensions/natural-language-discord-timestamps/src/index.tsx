@@ -42,11 +42,9 @@ export default function Command() {
 
   return (
     <List onSearchTextChange={setInput} searchBarPlaceholder="Enter a date and/or time">
-      <List.Section title="Options" subtitle={options.length.toString()}>
-        {options.map((option) => (
-          <ListItem key={option.displayText} option={option} />
-        ))}
-      </List.Section>
+      {options.map((option) => (
+        <ListItem key={option.displayText} option={option} />
+      ))}
     </List>
   );
 }
@@ -58,9 +56,8 @@ function ListItem({ option }: { option: Option }) {
       accessories={[{ text: option.timestamp }]}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
-            <Action.CopyToClipboard title="Copy timestamp" content={option.timestamp} />
-          </ActionPanel.Section>
+          <Action.CopyToClipboard title="Copy timestamp" content={option.timestamp} />
+          <Action.CopyToClipboard title="Copy time display text" content={option.displayText} />
         </ActionPanel>
       }
     />
