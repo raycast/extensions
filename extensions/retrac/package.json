@@ -18,7 +18,7 @@
     {
       "name": "add-item",
       "title": "Add Item",
-      "subtitle": "Add a new item to your inventory.",
+      "subtitle": "Retrac",
       "description": "Add a new item to your inventory on Retrac.",
       "mode": "view",
       "arguments": [
@@ -41,8 +41,8 @@
     },
     {
       "name": "search-items",
-      "title": "Search Items",
-      "subtitle": "Browse items in your inventory",
+      "title": "Search Inventory Items",
+      "subtitle": "Retrac",
       "description": "Browse items in your inventory on Retrac.",
       "mode": "view"
     }
