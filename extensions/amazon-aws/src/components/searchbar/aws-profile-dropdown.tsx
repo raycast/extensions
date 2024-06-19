@@ -2,7 +2,6 @@ import { Icon, List, getPreferenceValues } from "@raycast/api";
 import { useEffect } from "react";
 import { loadSharedConfigFiles, loadSsoSessionData } from "@aws-sdk/shared-ini-file-loader";
 import { useCachedPromise, useCachedState, useExec } from "@raycast/utils";
-import { isEmpty } from '../../util';
 
 interface Preferences {
   useAWSVault: boolean;

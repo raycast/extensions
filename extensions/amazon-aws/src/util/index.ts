@@ -111,4 +111,4 @@ export const normalizeUrl = (url: string) => {
     return url;
   }
   return `${url}/`;
-}
+};

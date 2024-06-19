@@ -4,7 +4,7 @@ import { readFile } from "fs/promises";
 import { AwsAction } from "./components/common/action";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { AWS_URL_BASE } from "./constants";
-import { normalizeUrl } from './util';
+import { normalizeUrl } from "./util";
 
 export default function Console() {
   const { data: services, isLoading, revalidate } = useCachedPromise(loadJSON);
