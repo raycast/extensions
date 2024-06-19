@@ -95,7 +95,7 @@ export function FormModel(props: props): JSX.Element {
 
   function ValidationKeepAlive(values?: string): string | undefined {
     if (!values) return "The item is required";
-    if (!values.match(/(?:^-1$)|(?:^[0-9]+[m-s]{0,1}$)/g)) return "Wrong Format";
+    if (!values.match(/^-{0,1}(?:[0-9]+(?:\.{0,1}[0-9]+){0,1}(?:h|m|s|ms|us|ns){1})$/g)) return "Wrong Format";
   }
 
   function ValidationKeepAliveMain(values?: string): string | undefined {
@@ -118,10 +118,12 @@ export function FormModel(props: props): JSX.Element {
   const InfoEmbeddingCheckbox = "Use a different model for embedding when you want to add a large file in context.";
   const InfoVisionCheckbox = "Use a different model for vision when you multimodal cababilities is required.";
   const InfoKeepAlive = `How many the model need to stay in memory, by default 5 minutes. Can be configured as follow:
-- 0, memory is free when inference is done.
-- -1, model remains on memory permanently.
-- 5 or 5s, memory is free after 5 seconds of idle.
-- 5m, memory is free after 5 minutes of idle.`;
+- 0s, memory is free when inference is done.
+- -1s, model remains on memory permanently.
+- 5s, memory is free after 5 seconds of idle.
+- 5m, memory is free after 5 minutes of idle.
+- 5h, memory is free after 5 hours of idle.
+- 5.5h, memory is free after 5 hours and 30 minutes of idle.`;
 
   const ActionView = (
     <ActionPanel>
