@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-06-20
 
 - PRs: Add an option to omit team review requests from query results
 - Updated dependencies and removed high-security vulnerabilities
