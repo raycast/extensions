@@ -17,11 +17,6 @@ interface ApiResponse {
   response: Link[];
 }
 
-interface Preferences {
-  LinkwardenUrl: string;
-  LinkwardenApiKey: string;
-}
-
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState("");
