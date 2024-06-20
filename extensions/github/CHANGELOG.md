@@ -1,5 +1,10 @@
 # GitHub Changelog
 
+## [Improvements] - 2024-06-20
+
+- PRs: Add an option to omit team review requests from query results
+- Updated dependencies and removed high-security vulnerabilities
+
 ## [Fix copy commit hash action] - 2024-06-17
 
 - Fixes an issue where the copy commit hash action incorrectly copied the commit message instead of the commit hash.
