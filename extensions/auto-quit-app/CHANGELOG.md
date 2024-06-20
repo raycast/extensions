@@ -1,6 +1,6 @@
 # Auto Quit App Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2024-06-20
 
 - Fix the bug that accidentally quit the safari web app
 
