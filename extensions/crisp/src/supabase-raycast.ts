@@ -35,11 +35,14 @@ export async function getSupabaseWithSession() {
 
   if (session) {
     const { data, error } = await supabase.auth.setSession(session);
+    if (error) {
+      return { session: null, user: null, error };
+    }
     await LocalStorage.setItem("session", JSON.stringify(data.session));
     // console.log("saved session", session);
     return { session, user: data.user, error };
   } else {
-    return null;
+    return { session: null, user: null, error: null };
   }
 }
 

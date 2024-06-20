@@ -56,7 +56,7 @@ export function Command() {
     isLoading: isFetching,
     isValidating,
   } = useSWR(sessionData?.session ? ["conversations"] : null, async () => {
-    const session = sessionData?.session;
+    const { session } = await getSupabaseWithSession();
     if (!session) {
       throw new Error("No session");
     }
