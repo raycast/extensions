@@ -1,6 +1,6 @@
 # Crisp
 
-Manage Crisp conversations quickly with all websites conversations in one place.
+Manage Crisp conversations quickly with all websites conversations in one place. https://crispyraycast.com
 
 ## Screenshots:
 
