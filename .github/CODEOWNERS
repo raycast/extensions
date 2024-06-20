@@ -418,7 +418,7 @@
 /extensions/facetime                                                @ron-myers
 /extensions/fake-financial-data                                     @andre-rd-rodrigues @farisaziz12
 /extensions/fake-swedish-personal-number                            @Corey-Maler
-/extensions/fantastical                                             @devahschaefers @xilopaint
+/extensions/fantastical                                             @devahschaefers @xilopaint @ramsaysewell @pernielsentikaer
 /extensions/fantasy-premier-league-rankings                         @hwb15 @niall-maloney
 /extensions/farcaster                                               @artivilla
 /extensions/fastmail-masked-email                                   @PhotonQuantum @klaaspieter @mike182uk
@@ -572,6 +572,7 @@
 /extensions/holodex                                                 @uetchy @hcy1251
 /extensions/holopin                                                 @timoransky @pernielsentikaer
 /extensions/homeassistant                                           @tonka3000 @altrdev @rspeicher @amuelli @xilopaint
+/extensions/homepage                                                @bgiovand
 /extensions/homey                                                   @DominicVonk
 /extensions/hoogle                                                  @waj
 /extensions/horoscope                                               @xmok
@@ -731,6 +732,7 @@
 /extensions/linguee                                                 @geekdada
 /extensions/link-cleaner                                            @MisakiCoca
 /extensions/linkding                                                @InteractiveNinja
+/extensions/linkwarden                                              @leodbrs
 /extensions/linux-command                                           @jaywcjlove
 /extensions/list-randomizer                                         @quuu
 /extensions/literal                                                 @OkanBilal
@@ -1129,6 +1131,7 @@
 /extensions/recent-excel                                            @aradbm
 /extensions/recents                                                 @GastroGeek @kgrhartlage
 /extensions/reclaim-ai                                              @lightbody @ajohnson1200 @gunrein
+/extensions/rectangle                                               @crickford
 /extensions/recurly                                                 @kudrykv
 /extensions/reddit-search                                           @ewlcheng
 /extensions/redis                                                   @k8scat

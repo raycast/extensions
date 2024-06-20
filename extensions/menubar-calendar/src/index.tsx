@@ -1,4 +1,4 @@
-import { Color, Icon, MenuBarExtra, Toast, confirmAlert, openCommandPreferences, showToast } from "@raycast/api";
+import { Color, Icon, MenuBarExtra, Toast, confirmAlert, openCommandPreferences, showToast, open } from "@raycast/api";
 import { calData, calDateTitle, calFirstColumn, calWeekTitle } from "./utils/calendar-utils";
 import { CALENDAR_APP, REMINDERS_APP, SETTINGS_APP } from "./utils/constans";
 import {
@@ -140,21 +140,25 @@ export default function Command() {
                 icon={reminder.isCompleted ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
                 key={reminder.id}
                 title={truncate(addPriorityToTitle(reminder.title, reminder.priority))}
-                onAction={async () => {
-                  try {
-                    await toggleCompletionStatus(reminder.id);
-                    await mutate();
-                    await showToast({
-                      style: Toast.Style.Success,
-                      title: reminder.isCompleted ? "Marked reminder as incomplete" : "Completed Reminder",
-                      message: reminder.title,
-                    });
-                  } catch (error) {
-                    await showToast({
-                      style: Toast.Style.Failure,
-                      title: `Unable to mark reminder as ${reminder.isCompleted ? "incomplete" : "complete"}`,
-                      message: reminder.title,
-                    });
+                onAction={async (itemActionEvent) => {
+                  if (itemActionEvent.type === "left-click") {
+                    try {
+                      await toggleCompletionStatus(reminder.id);
+                      await mutate();
+                      await showToast({
+                        style: Toast.Style.Success,
+                        title: reminder.isCompleted ? "Marked reminder as incomplete" : "Completed Reminder",
+                        message: reminder.title,
+                      });
+                    } catch (error) {
+                      await showToast({
+                        style: Toast.Style.Failure,
+                        title: `Unable to mark reminder as ${reminder.isCompleted ? "incomplete" : "complete"}`,
+                        message: reminder.title,
+                      });
+                    }
+                  } else {
+                    await open(reminder.openUrl, "com.apple.reminders");
                   }
                 }}
                 alternate={

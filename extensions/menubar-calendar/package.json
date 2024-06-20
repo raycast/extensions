@@ -193,7 +193,7 @@
   ],
   "dependencies": {
     "date-fns": "^3.6.0",
-    "@raycast/api": "^1.76.0",
+    "@raycast/api": "^1.77.0",
     "calendar": "^0.1.1",
     "unicode-text-decorator": "^0.1.1",
     "weeknumber": "^1.2.1",

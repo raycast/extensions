@@ -1,5 +1,9 @@
 # raycast-ollama Changelog
 
+## [BugFix] - 2024-06-20
+
+- Fixed Error `keep alive, error missing unit in duration` on **Command 'Create Custom Command'**.
+
 ## [BugFix] - 2024-06-19
 
 - Fixed Error `keep alive, error missing unit in duration`: unit is now required for negative or zero duration time. Use -1s for persistent model on memory or 0s for free up memory immediately.
