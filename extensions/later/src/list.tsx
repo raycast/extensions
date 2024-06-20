@@ -1,4 +1,4 @@
-import { List, LocalStorage } from "@raycast/api";
+import { Alert, List, LocalStorage, confirmAlert } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { Links } from "./types/common";
 import ReadListItem from "./components/ReadListItem";
@@ -42,10 +42,19 @@ const list = () => {
       if (!links || links.length === 0) {
         return;
       }
-      const new_links = links.filter((link) => link.url !== url);
-      setLinks(new_links);
+      if (
+        await confirmAlert({
+          title: "Do you want to delete this link?",
+          primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+        })
+      ) {
+        const new_links = links.filter((link) => link.url !== url);
+        setLinks(new_links);
 
-      await update_link_handler(JSON.stringify(new_links));
+        await update_link_handler(JSON.stringify(new_links));
+      } else {
+        return;
+      }
     },
     [links],
   );

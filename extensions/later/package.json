@@ -31,12 +31,19 @@
       "subtitle": "Read Later",
       "description": "Added link manually",
       "mode": "view"
+    },
+    {
+      "name": "preferences",
+      "title": "Preferences",
+      "subtitle": "Read Later",
+      "description": "Read Later Preferences",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.76.0",
+    "@raycast/utils": "^1.16.0",
     "dayjs": "^1.11.11",
-    "default-browser": "^5.2.1",
     "lodash": "^4.17.21",
     "run-applescript": "^7.0.0"
   },

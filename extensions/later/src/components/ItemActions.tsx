@@ -1,16 +1,24 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { ListItem } from "../types/common";
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, LocalStorage } from "@raycast/api";
+import { open_link_handler } from "../utils/handler";
+import { Browser } from "../common/config";
 
 const ItemActions: React.FC<ListItem> = (props) => {
+  const open_link_to_browser = useCallback(async () => {
+    const browser = (await LocalStorage.getItem("links_to")) ?? "chrome";
+    const browser_name = Browser.find((item) => item.id === browser)?.name ?? "Google Chrome";
+    open_link_handler({ url: props.url, browser_name: browser_name });
+  }, []);
+
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action.OpenInBrowser
+        <Action
           shortcut={{ modifiers: ["cmd"], key: "." }}
           icon={Icon.Globe}
           title="Open in Browser"
-          url={props.url}
+          onAction={open_link_to_browser}
         />
       </ActionPanel.Section>
       <ActionPanel.Section>
