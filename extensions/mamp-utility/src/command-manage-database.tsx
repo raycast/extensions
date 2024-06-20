@@ -14,9 +14,10 @@ import {
 import { create_database, delete_database, export_database, get_databases, import_database } from "./utils-db";
 import { useEffect, useState } from "react";
 import { getCurrentFormattedTime } from "./utils-time";
-import { get_pref_apachePort } from "./utils-preference";
+import { get_pref_apachePort, get_pref_mamp_path } from "./utils-preference";
 import { sort_db } from "./utils-db";
 import { system_db } from "./utils-db";
+import { open } from "@raycast/api";
 
 /**
  * React functional component that renders a list of databases.
@@ -35,11 +36,41 @@ import { system_db } from "./utils-db";
  */
 export default function Command() {
   const [dbs, set_DBs] = useState<string[]>([]);
+  const [error, set_error] = useState<boolean>(false);
+  const [isLoading, set_isLoading] = useState<boolean>(false);
+
+  setTimeout(() => {
+    if (dbs.length == 0) {
+      set_isLoading(false);
+      set_error(true);
+    } else {
+      set_isLoading(false);
+    }
+  }, 1000);
+
   useEffect(() => {
-    get_databases(set_DBs);
+    get_databases(set_DBs, set_isLoading, set_error);
   }, []);
+
   return (
-    <List isLoading={dbs.length == 0}>
+    <List isLoading={isLoading}>
+      {error && (
+        <List.EmptyView
+          title="Failed to Fetch Database"
+          description="Please make sure you have started the MAMP instance."
+          icon={Icon.Warning}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Open MAMP"
+                onAction={() => {
+                  open(get_pref_mamp_path());
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
       {dbs
         .sort((a, b) => {
           return sort_db(a, b);

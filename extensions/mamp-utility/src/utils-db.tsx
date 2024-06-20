@@ -23,7 +23,11 @@ export function sort_db(db_a: string, db_b: string): number {
   }
 }
 
-export async function get_databases(set_dbList: Dispatch<SetStateAction<string[]>>): Promise<boolean> {
+export async function get_databases(
+  set_dbList: Dispatch<SetStateAction<string[]>>,
+  set_isLoading: Dispatch<SetStateAction<boolean>>,
+  set_error: Dispatch<SetStateAction<boolean>>
+): Promise<boolean> {
   try {
     // Configure your MySQL connection settings
     const connection = mysql.createConnection({
@@ -38,14 +42,20 @@ export async function get_databases(set_dbList: Dispatch<SetStateAction<string[]
     // Establish connection and retrive the databases
     connection.connect((err: Error) => {
       if (err) {
-        return console.error("[MYSQL] error connecting: " + err.stack);
+        // return console.error("[MYSQL] error connecting: " + err.stack);
+        set_isLoading(false);
+        set_error(true);
+        return false;
       }
     });
 
     connection.query("SHOW DATABASES;", (err, result: { Database: string }[]) => {
       if (err instanceof Error) {
         connection.end();
-        return console.error("[MYSQL] error connecting: " + err.stack);
+        set_isLoading(false);
+        set_error(true);
+        // console.error("[MYSQL] error connecting: " + err.stack)
+        return false;
       } else {
         const temp_dbs: string[] = [];
         for (let i: number = 0; i < result.length; i++) {
@@ -53,6 +63,7 @@ export async function get_databases(set_dbList: Dispatch<SetStateAction<string[]
           const _Database_: string = _RoWDataPacket_["Database"];
           temp_dbs.push(_Database_);
         }
+        set_isLoading(false);
         set_dbList(temp_dbs);
         connection.end();
       }
@@ -62,6 +73,8 @@ export async function get_databases(set_dbList: Dispatch<SetStateAction<string[]
   } catch (error) {
     if (error instanceof Error) {
       console.error("[ERROR] get_database: ", error.message);
+      set_isLoading(false);
+      set_error(true);
     }
     return false;
   }

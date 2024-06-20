@@ -16,3 +16,7 @@ export function get_pref_apachePort(): string {
 export function get_pref_nginxPort(): string {
   return prefernce.pref_nginxPort;
 }
+
+export function get_pref_mamp_path(): string {
+  return prefernce.pref_mamp.path;
+}

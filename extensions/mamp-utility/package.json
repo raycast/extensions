@@ -42,6 +42,14 @@
   ],
   "preferences": [
     {
+        "type":"appPicker",
+        "name": "pref_mamp",
+        "title": "MAMP/MAMP Pro",
+        "description": "The MAMP you are using (MAMP/MAMP Pro)",
+        "default": "/Applications/MAMP PRO.app",
+        "required": true
+      },
+    {
       "type": "directory",
       "name": "pref_siteFolder",
       "title": "Site Folder",
