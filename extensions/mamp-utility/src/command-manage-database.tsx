@@ -37,7 +37,7 @@ import { open } from "@raycast/api";
 export default function Command() {
   const [dbs, set_DBs] = useState<string[]>([]);
   const [error, set_error] = useState<boolean>(false);
-  const [isLoading, set_isLoading] = useState<boolean>(false);
+  const [isLoading, set_isLoading] = useState<boolean>(true);
 
   setTimeout(() => {
     if (dbs.length == 0) {
