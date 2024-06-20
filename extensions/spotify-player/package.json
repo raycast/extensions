@@ -409,7 +409,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.75.1",
-    "@raycast/utils": "^1.16.0",
+    "@raycast/utils": "^1.16.1",
     "node-fetch": "^3.3.2",
     "oazapfts": "^4.10.0"
   },
