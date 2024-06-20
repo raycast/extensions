@@ -1,6 +1,6 @@
 # Menubar Calendar Changelog
 
-## [Open in Reminders] - {PR_MERGE_DATE}
+## [Open in Reminders] - 2024-06-20
 
 - Right-click on the reminder to open it in Reminder
 
