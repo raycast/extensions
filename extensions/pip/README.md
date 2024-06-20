@@ -2,7 +2,6 @@
 
 Watch video in Picture in Picture mode
 
-
 - ✨ Support **Safari**, **Chrome**, **Edge** and other Chromium, Webkit-based browsers
 
 - ✨ Support **IINA**. This is achieved by simulating the pressing of shortcut keys
@@ -13,10 +12,11 @@ Watch video in Picture in Picture mode
 
 **Note**
 
-To use this extension in browsers, you need to turn on Developer Mode and tick the box in Developer: Allow JavaScript from Apple Events.
+- To use this extension in browsers, you need to turn on Developer Mode and tick the box in Developer: Allow JavaScript from Apple Events.
 
-Also, when you call this command repeatedly, you need to make sure that you have manually clicked on the video element in the browser page before each call (this is a limitation from Chromium)
+- To use PiP just run the Toggle Pip command when you're watching to an HTML5/IINA video (Note: You need to interact with the video once. If it's autoplaying just pause and play again)
 
+- Also, when you call this command repeatedly, you need to make sure that you have manually clicked on the video element in the browser page before each run (this is a limitation from browsers)
 
 ✨ **How to Allow JavaScript from Apple Events** ✨
 
