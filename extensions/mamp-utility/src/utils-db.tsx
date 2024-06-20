@@ -42,7 +42,6 @@ export async function get_databases(
     // Establish connection and retrive the databases
     connection.connect((err: Error) => {
       if (err) {
-        // return console.error("[MYSQL] error connecting: " + err.stack);
         set_isLoading(false);
         set_error(true);
         return false;
@@ -54,7 +53,6 @@ export async function get_databases(
         connection.end();
         set_isLoading(false);
         set_error(true);
-        // console.error("[MYSQL] error connecting: " + err.stack)
         return false;
       } else {
         const temp_dbs: string[] = [];
@@ -72,7 +70,6 @@ export async function get_databases(
     return true;
   } catch (error) {
     if (error instanceof Error) {
-      console.error("[ERROR] get_database: ", error.message);
       set_isLoading(false);
       set_error(true);
     }
