@@ -1,14 +1,14 @@
 import {
-  ActionPanel,
-  clearSearchBar,
-  Icon,
-  List,
   Action,
-  showToast,
-  Toast,
+  ActionPanel,
+  Alert,
+  clearSearchBar,
   Color,
   confirmAlert,
-  Alert,
+  Icon,
+  List,
+  showToast,
+  Toast,
 } from "@raycast/api";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
@@ -19,16 +19,19 @@ import { removeTimeEntry } from "@/api/timeEntries";
 import TimeEntryForm from "@/components/CreateTimeEntryForm";
 import RunningTimeEntry from "@/components/RunningTimeEntry";
 import { ExtensionContextProvider } from "@/context/ExtensionContext";
+import { generateTimeEntryAccessories } from "@/helpers/accessories";
 import { formatSeconds } from "@/helpers/formatSeconds";
-import { useTimeEntries, useRunningTimeEntry } from "@/hooks";
+import { Verb, withToast } from "@/helpers/withToast";
+import { useRunningTimeEntry, useTimeEntries, useWorkspaces } from "@/hooks";
 
 dayjs.extend(duration);
 
 function ListView() {
+  const { workspaces, isLoadingWorkspaces } = useWorkspaces();
   const { timeEntries, isLoadingTimeEntries, revalidateTimeEntries, mutateTimeEntries } = useTimeEntries();
   const { runningTimeEntry, isLoadingRunningTimeEntry, revalidateRunningTimeEntry } = useRunningTimeEntry();
 
-  const isLoading = isLoadingTimeEntries || isLoadingRunningTimeEntry;
+  const isLoading = isLoadingTimeEntries || isLoadingRunningTimeEntry || isLoadingWorkspaces;
 
   const timeEntriesWithUniqueProjectAndDescription = timeEntries.reduce<typeof timeEntries>((acc, timeEntry) => {
     if (
@@ -73,7 +76,12 @@ function ListView() {
       navigationTitle={isLoading ? undefined : `Today: ${formatSeconds(totalDurationToday)}`}
     >
       {runningTimeEntry && (
-        <RunningTimeEntry {...{ runningTimeEntry, revalidateRunningTimeEntry, revalidateTimeEntries }} />
+        <RunningTimeEntry
+          runningTimeEntry={runningTimeEntry}
+          revalidateRunningTimeEntry={revalidateRunningTimeEntry}
+          revalidateTimeEntries={revalidateRunningTimeEntry}
+          workspaces={workspaces}
+        />
       )}
       <List.Section title="Actions">
         <List.Item
@@ -105,10 +113,7 @@ function ListView() {
               keywords={[timeEntry.description, timeEntry.project_name || "", timeEntry.client_name || ""]}
               title={timeEntry.description || "No description"}
               subtitle={(timeEntry.client_name ? timeEntry.client_name + " | " : "") + (timeEntry.project_name ?? "")}
-              accessories={[
-                ...timeEntry.tags.map((tag) => ({ tag })),
-                { tag: { value: timeEntry.billable ? "$" : undefined, color: Color.Magenta } },
-              ]}
+              accessories={generateTimeEntryAccessories(timeEntry, workspaces)}
               icon={{ source: Icon.Circle, tintColor: timeEntry.project_color }}
               actions={
                 <ActionPanel>
@@ -147,21 +152,14 @@ function ListView() {
                           primaryAction: {
                             title: "Delete",
                             style: Alert.ActionStyle.Destructive,
-                            onAction: async () => {
-                              const toast = await showToast({
-                                style: Toast.Style.Animated,
-                                title: "Deleting time entry",
+                            onAction: () => {
+                              withToast({
+                                noun: "Time Entry",
+                                verb: Verb.Delete,
+                                action: async () => {
+                                  await mutateTimeEntries(removeTimeEntry(timeEntry.workspace_id, timeEntry.id));
+                                },
                               });
-                              try {
-                                await mutateTimeEntries(removeTimeEntry(timeEntry.workspace_id, timeEntry.id));
-
-                                toast.style = Toast.Style.Success;
-                                toast.title = "Successfully deleted time entry 🎉";
-                              } catch (error) {
-                                toast.style = Toast.Style.Failure;
-                                toast.title = "Failed to delete time entry 😥";
-                                toast.message = error instanceof Error ? error.message : undefined;
-                              }
                             },
                           },
                         });

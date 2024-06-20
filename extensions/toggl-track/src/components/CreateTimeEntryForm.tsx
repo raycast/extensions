@@ -24,7 +24,7 @@ function CreateTimeEntryForm({
   const { tasks, isLoadingTasks } = useTasks();
   const { tags, isLoadingTags } = useTags();
 
-  const [selectedWorkspace, setSelectedWorkspace] = useCachedState("defaultWorspace", workspaces.at(0)?.id);
+  const [selectedWorkspace, setSelectedWorkspace] = useCachedState("defaultWorkspace", workspaces.at(0)?.id);
   const [selectedClient, setSelectedClient] = useState<Client | undefined>(() => {
     return clients.find((client) => client.name === initialValues?.client_name);
   });
