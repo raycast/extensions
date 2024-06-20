@@ -1,9 +1,22 @@
 # Amazon AWS Changelog
 
+
 ## [GlueJobs command] - {PR_MERGE_DATE}
 
 - Added Glue Jobs command to list Glue Jobs
 - Changed AwsAction.Console component, to create sso shortcut login links, if possible
+
+## [Console command] - 2024-06-19
+
+- [Frecency sorting](https://developers.raycast.com/utilities/react-hooks/usefrecencysorting) so that most/recent used service console links appear at the top of search
+- Fixed issue where console links were improperly generated: [#13032](https://github.com/raycast/extensions/issues/13032)
+
+## [Improvements] - 2024-06-18
+
+- CodePipeline: Adds action to retry failed stage, stop ongoing execution and toggle stage transition
+- Secrets Manager: Retrieves secret value in a new Detail navigation and adds extra metadata
+- Cloudformation: Improves the resource switch action
+
 
 ## [Console command] - 2024-06-17
 

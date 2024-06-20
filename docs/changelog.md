@@ -1,10 +1,20 @@
 # Changelog
 
+## 1.77.0 - 2024-06-19
+
+### ✨ New
+
+- Updated React version to 18.3.1 to prepare for the next major version of React. This shouldn't impact any extensions but let us know if you find any unexpected behaviour.
+
+### 🐞 Fixes
+
+- **Menu Bar Extra**: fixed an issue where `Submenu` icons changed appearance based on Raycast's appearance, instead of the system's.
+
 ## 1.76.0 - 2024-06-05
 
 ### 💎 Improvements
 
-- Some companies requires all package.json’s names to be name-spaced (eg. `@foo/bar`). However, Raycast only understands names that *aren’t* name-spaced. This prevented some people from creating internal extensions. In order to workaround this issue, you can now use the `@workaround` namespace in extension names (eg. `@workaround/bar`).
+- Some companies requires all package.json’s names to be name-spaced (eg. `@foo/bar`). However, Raycast only understands names that _aren’t_ name-spaced. This prevented some people from creating internal extensions. In order to workaround this issue, you can now use the `@workaround` namespace in extension names (eg. `@workaround/bar`).
 
 ### 🐞 Fixes
 

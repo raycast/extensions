@@ -15,7 +15,7 @@ import {
 import { MutatePromise } from "@raycast/utils";
 import { Profile } from "@slack/web-api/dist/response/UsersProfileGetResponse";
 import { durationTitleMap } from "./durations";
-import { getCodeForEmoji, getEmojiForCode } from "./emojis";
+import { getEmojiForCode } from "./emojis";
 import { StatusForm } from "./form";
 import { useSlack } from "./slack";
 import { SlackStatusPreset } from "./types";
@@ -69,14 +69,21 @@ export function SetStatusWithAIAction(props: { statusText: string; mutate: Mutat
             const answer = await AI.ask(
               `You help a Slack user set their status.
               
-              Respond with the following JSON for the Slack status:
-              {
-                "text": <string for status text, should be short and sweet, no punctuation at the end, e.g. "Working out", "Listening to Drake's new album", "Coffe break">,
-                "emoji": <string for single emoji matching the text of the status>,
-                "duration": <optional integer for duration of status in seconds, only include if user specified duration or end of status in their description>
-              }
+              **Respond with a JSON object with the following attributes:**
+              - "text": a string value for status text, should be short and sweet, with no punctuation, e.g. "Working out", "Listening to Drake's new album", "Coffe break". It should not include the status duration for example "Working out" instead of "Working out for 2 hours" or "Working out until tomorrow".
+              - "emoji": a Slack-compatible string for single emoji matching the text of the status. Emojis should be in the form: :<emoji identifier>:
 
-              Current time of users status: ${new Date().toLocaleTimeString()}. User's description of their status: ${
+              **If the user has specified a time or the end of status in their description then add the following attribute:**
+              - "duration": an integer representing the duration of the status in seconds
+
+              Rules:
+              - Response should be a string without any template quotes for formatting.
+              - all strings should use double quotation marks and should have .trim() applied
+              - all emojis should be in form :<emoji identifier>:
+              - all attributes should be wrapped with double quotation marks
+              - all spaces and carriage returns should be removed from the resulting string
+
+              Current time of user's status: ${new Date().toLocaleTimeString()}. User's description of their status: ${
                 props.statusText
               }. 
 
@@ -91,7 +98,7 @@ export function SetStatusWithAIAction(props: { statusText: string; mutate: Mutat
             }
 
             const profile: Profile = {
-              status_emoji: getCodeForEmoji(parsedAnswer.emoji),
+              status_emoji: getEmojiForCode(parsedAnswer.emoji),
               status_text: parsedAnswer.text,
               status_expiration:
                 parsedAnswer.duration && typeof parsedAnswer.duration === "number"

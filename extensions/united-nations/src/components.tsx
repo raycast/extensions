@@ -1,6 +1,19 @@
 import { useEffect, useState } from "react";
 import { setTimeout } from "timers/promises";
-import { Action, ActionPanel, Detail, Icon, List, getPreferenceValues } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  AI,
+  Detail,
+  Icon,
+  List,
+  Toast,
+  confirmAlert,
+  environment,
+  getPreferenceValues,
+  open,
+  showToast,
+} from "@raycast/api";
 import { checkIfSayIsRunning, killRunningSay } from "mac-say";
 import { fetchUnNewsDetail, fetchUnPressDetail } from "./api.js";
 import { textToSpeech, useVoice } from "./utils.js";
@@ -17,14 +30,54 @@ export const PlayTextToSpeech = ({
 }) => {
   const voice = useVoice(languageCode);
   if (!languageCode) return null;
+
+  const isProEnhanced = environment.canAccess(AI);
+  const { hideUnsupportedProFeatures, newsSummerizeLength } = getPreferenceValues<Preferences>();
+  const content = [description, textContent ?? ""].join("\n");
+
   return (
-    <Action
-      icon={Icon.SpeechBubbleActive}
-      title="Play Text to Speech"
-      onAction={() => {
-        textToSpeech([description, textContent ?? ""].join("\n"), voice);
-      }}
-    />
+    <>
+      <Action
+        icon={Icon.SpeechBubbleActive}
+        title="Play Text-to-Speech"
+        onAction={() => {
+          textToSpeech(content, voice);
+        }}
+      />
+      {(isProEnhanced || !hideUnsupportedProFeatures) && (
+        <Action
+          icon={Icon.Stars}
+          title="Play AI-Summarized"
+          shortcut={{ modifiers: ["opt"], key: "enter" }}
+          onAction={async () => {
+            if (!isProEnhanced) {
+              const confirmed = await confirmAlert({
+                title: "Pro Feature Required",
+                message:
+                  "This feature requires Raycast Pro subscription. Do you want to open Raycast Pro page? (You can hide this Pro feature in preferences)",
+              });
+              if (confirmed) open("https://raycast.com/pro");
+              return;
+            }
+
+            const toast = await showToast({
+              title: "",
+              message: "Summarizing with AI...",
+              style: Toast.Style.Animated,
+            });
+            const languageName = new Intl.DisplayNames(["en"], { type: "language" }).of(languageCode.slice(0, 2));
+            const summary = await AI.ask(
+              [
+                `Use ${languageName} language to summarize the text below in ${newsSummerizeLength} words:`,
+                content,
+              ].join("\n"),
+            );
+            toast.hide();
+            textToSpeech(summary, voice);
+          }}
+        />
+      )}
+    </>
   );
 };
 
@@ -43,7 +96,9 @@ export const StopTextToSpeech = () => {
   }, []);
 
   if (!isPlaying) return null;
-  return <Action icon={Icon.Stop} title="Stop Text-to-Speech" onAction={killRunningSay} />;
+  return (
+    <Action icon={Icon.Stop} style={Action.Style.Destructive} title="Stop Text-to-Speech" onAction={killRunningSay} />
+  );
 };
 
 export const NewsDetail = ({ news }: { news: UnNews }) => {
