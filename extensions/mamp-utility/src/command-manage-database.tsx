@@ -1,23 +1,17 @@
 import {
-	Action,
-	ActionPanel,
-	Alert,
-	Color,
-	Form,
-	Icon,
-	List,
-	Toast,
-	confirmAlert,
-	showToast,
-	useNavigation,
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  Form,
+  Icon,
+  List,
+  Toast,
+  confirmAlert,
+  showToast,
+  useNavigation,
 } from "@raycast/api";
-import {
-	create_database,
-	delete_database,
-	export_database,
-	get_databases,
-	import_database,
-} from "./utils-db";
+import { create_database, delete_database, export_database, get_databases, import_database } from "./utils-db";
 import { useEffect, useState } from "react";
 import { getCurrentFormattedTime } from "./utils-time";
 import { get_pref_apachePort } from "./utils-preference";
@@ -40,21 +34,21 @@ import { system_db } from "./utils-db";
  * @note This function assumes the existence of 'get_databases' and 'sort_db' functions.
  */
 export default function Command() {
-	const [dbs, set_DBs] = useState<string[]>([]);
-	useEffect(() => {
-		get_databases(set_DBs);
-	}, []);
-	return (
-		<List isLoading={dbs.length == 0}>
-			{dbs
-				.sort((a, b) => {
-					return sort_db(a, b);
-				})
-				?.map((db) => {
-					return <ListDB key={db} db={db}></ListDB>;
-				})}
-		</List>
-	);
+  const [dbs, set_DBs] = useState<string[]>([]);
+  useEffect(() => {
+    get_databases(set_DBs);
+  }, []);
+  return (
+    <List isLoading={dbs.length == 0}>
+      {dbs
+        .sort((a, b) => {
+          return sort_db(a, b);
+        })
+        ?.map((db) => {
+          return <ListDB key={db} db={db}></ListDB>;
+        })}
+    </List>
+  );
 }
 
 /**
@@ -70,71 +64,63 @@ export default function Command() {
  *     - a text field for entering the database name with the following properties:
  * */
 function FormCreateDB() {
-	return (
-		<Form
-			enableDrafts={false}
-			navigationTitle={"Create Database"}
-			isLoading={true}
-			actions={
-				<ActionPanel>
-					<Action.SubmitForm
-						title="Submit"
-						onSubmit={(data) => {
-							create_database(data.db_name);
-						}}
-					/>
-				</ActionPanel>
-			}
-		>
-			<Form.TextField
-				id={"db_name"}
-				autoFocus={true}
-				title={"Database Name"}
-				defaultValue={`${getCurrentFormattedTime()}_`}
-			/>
-		</Form>
-	);
+  return (
+    <Form
+      enableDrafts={false}
+      navigationTitle={"Create Database"}
+      isLoading={true}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Submit"
+            onSubmit={(data) => {
+              create_database(data.db_name);
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField
+        id={"db_name"}
+        autoFocus={true}
+        title={"Database Name"}
+        defaultValue={`${getCurrentFormattedTime()}_`}
+      />
+    </Form>
+  );
 }
 function FormImportDB(props: { db: string }) {
-	// let cp_text: string | undefined = "";
-	// Clipboard.readText().then((data: string | undefined) => {
-	// 	cp_text = data;
-	// 	return;
-	// });
-	return (
-		<Form
-			enableDrafts={false}
-			navigationTitle={"Import Database"}
-			isLoading={true}
-			actions={
-				<ActionPanel>
-					<Action.SubmitForm
-						title="Submit"
-						onSubmit={(data) => {
-							import_database(data.db_name, data.path);
-						}}
-					/>
-				</ActionPanel>
-			}
-		>
-			<Form.TextField
-				id={"db_name"}
-				title={"Database Name"}
-				value={props.db}
-			/>
-			{/* <Form.TextField
+  // let cp_text: string | undefined = "";
+  // Clipboard.readText().then((data: string | undefined) => {
+  // 	cp_text = data;
+  // 	return;
+  // });
+  return (
+    <Form
+      enableDrafts={false}
+      navigationTitle={"Import Database"}
+      isLoading={true}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Submit"
+            onSubmit={(data) => {
+              import_database(data.db_name, data.path);
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id={"db_name"} title={"Database Name"} value={props.db} />
+      {/* <Form.TextField
                 id          ={"path"}
                 autoFocus   ={true}
                 title       ={"Importing File \n(PATH)"}
                 value       ={cp_text==undefined?"":cp_text}
             /> */}
-			<Form.FilePicker
-				id={"path"}
-				autoFocus={true}
-				title={"Importing File \n(PATH)"}
-			/>
-		</Form>
-	);
+      <Form.FilePicker id={"path"} autoFocus={true} title={"Importing File \n(PATH)"} />
+    </Form>
+  );
 }
 
 /**
@@ -143,92 +129,88 @@ function FormImportDB(props: { db: string }) {
  * @returns JSX element representing the Action Panel component with sections for Clipboard, Create/Delete, and Export/Import actions.
  */
 function ListDB_Actions(props: { db: string }) {
-	const { push } = useNavigation();
-	const db = props.db;
-	return (
-		<ActionPanel>
-			<Action.OpenInBrowser
-				title="Open in phpMyAdmin"
-				url={
-					"http://localhost:" +
-					get_pref_apachePort() +
-					"/phpMyAdmin5/"
-				}
-			></Action.OpenInBrowser>
-			<ActionPanel.Section title="Database Operation">
-				<Action
-					title="Create Database"
-					icon={Icon.PlusCircle}
-					shortcut={{ modifiers: ["cmd"], key: "n" }}
-					onAction={() => {
-						push(<FormCreateDB />);
-					}}
-				/>
-				<Action
-					title="Delete Database"
-					icon={Icon.MinusCircle}
-					shortcut={{ modifiers: ["ctrl"], key: "x" }}
-					onAction={async () => {
-						confirmAlert({
-							title: `Confirm DELETE database \n [ ${db} ]`,
-							icon: Icon.Warning,
-							primaryAction: {
-								title: "Confirm",
-								style: Alert.ActionStyle.Destructive,
-								onAction: () => {
-									delete_database(db);
-								},
-							},
-						});
-					}}
-				/>
-				<Action
-					title="Export Database"
-					icon={Icon.ArrowRightCircle}
-					onAction={() => {
-						showToast({
-							title: "Exporting...",
-							style: Toast.Style.Animated,
-						});
-						export_database(db);
-					}}
-					shortcut={{ modifiers: ["cmd"], key: "s" }}
-				/>
-				{/* <Action
+  const { push } = useNavigation();
+  const db = props.db;
+  return (
+    <ActionPanel>
+      <Action.OpenInBrowser
+        title="Open in phpMyAdmin"
+        url={"http://localhost:" + get_pref_apachePort() + "/phpMyAdmin5/"}
+      ></Action.OpenInBrowser>
+      <ActionPanel.Section title="Database Operation">
+        <Action
+          title="Create Database"
+          icon={Icon.PlusCircle}
+          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          onAction={() => {
+            push(<FormCreateDB />);
+          }}
+        />
+        <Action
+          title="Delete Database"
+          icon={Icon.MinusCircle}
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+          onAction={async () => {
+            confirmAlert({
+              title: `Confirm DELETE database \n [ ${db} ]`,
+              icon: Icon.Warning,
+              primaryAction: {
+                title: "Confirm",
+                style: Alert.ActionStyle.Destructive,
+                onAction: () => {
+                  delete_database(db);
+                },
+              },
+            });
+          }}
+        />
+        <Action
+          title="Export Database"
+          icon={Icon.ArrowRightCircle}
+          onAction={() => {
+            showToast({
+              title: "Exporting...",
+              style: Toast.Style.Animated,
+            });
+            export_database(db);
+          }}
+          shortcut={{ modifiers: ["cmd"], key: "s" }}
+        />
+        {/* <Action
                     title="Export Database (and Reveal in Finder)"
                     icon={Icon.ArrowRightCircle}
                     onAction={()=>{export_database(db, true);}}
                     shortcut={{modifiers:["cmd", "ctrl"], key:"s"}}
                 /> */}
-				<Action
-					title="Import Database"
-					icon={Icon.ArrowRightCircle}
-					shortcut={{ modifiers: ["cmd"], key: "i" }}
-					onAction={() => {
-						push(<FormImportDB db={db} />);
-					}}
-				/>
-				{/* <Action
+        <Action
+          title="Import Database"
+          icon={Icon.ArrowRightCircle}
+          shortcut={{ modifiers: ["cmd"], key: "i" }}
+          onAction={() => {
+            push(<FormImportDB db={db} />);
+          }}
+        />
+        {/* <Action
                     title="Import Database (and Reveal in phpMyAdmin)"
                     icon={Icon.ArrowRightCircle}
                     onAction={()=>{}}
                     shortcut={{modifiers:["cmd", "ctrl"], key:"i"}}
                 /> */}
-			</ActionPanel.Section>
-			<ActionPanel.Section title="Clipboard Operation">
-				<Action.CopyToClipboard
-					title="Copy 'settings.php' Configuration"
-					content={`$databases['default']['default'] = array (\n\t'driver' => 'mysql',\n\t'database' => '${db}',\n\t'username' => 'root',\n\t'password' => 'root',\n\t'prefix' => '',\n\t'host' => '127.0.0.1',\n\t'port' => '8889',\n\t'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',\n\t'unix_socket' => '/Applications/MAMP/tmp/mysql/mysql.sock',\n);\n$settings['trusted_host_patterns'] = array();`}
-					shortcut={{ modifiers: ["cmd"], key: "c" }}
-				/>
-				<Action.CopyToClipboard
-					title="Copy Database Name"
-					content={db}
-					shortcut={{ modifiers: ["cmd", "ctrl"], key: "c" }}
-				/>
-			</ActionPanel.Section>
-		</ActionPanel>
-	);
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Clipboard Operation">
+        <Action.CopyToClipboard
+          title="Copy 'settings.php' Configuration"
+          content={`$databases['default']['default'] = array (\n\t'driver' => 'mysql',\n\t'database' => '${db}',\n\t'username' => 'root',\n\t'password' => 'root',\n\t'prefix' => '',\n\t'host' => '127.0.0.1',\n\t'port' => '8889',\n\t'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',\n\t'unix_socket' => '/Applications/MAMP/tmp/mysql/mysql.sock',\n);\n$settings['trusted_host_patterns'] = array();`}
+          shortcut={{ modifiers: ["cmd"], key: "c" }}
+        />
+        <Action.CopyToClipboard
+          title="Copy Database Name"
+          content={db}
+          shortcut={{ modifiers: ["cmd", "ctrl"], key: "c" }}
+        />
+      </ActionPanel.Section>
+    </ActionPanel>
+  );
 }
 
 /**
@@ -243,24 +225,22 @@ function ListDB_Actions(props: { db: string }) {
  *  - actions: rendered using the ListDB_Actions component with the 'db' value passed as a prop
  */
 function ListDB(props: { db: string }) {
-	const db = props.db;
+  const db = props.db;
 
-	return (
-		<List.Item
-			key={db}
-			title={db}
-			icon={system_db.includes(db) ? Icon.MemoryChip : Icon.Person}
-			accessories={[
-				{
-					tag: {
-						value: system_db.includes(db) ? "system" : "user",
-						color: system_db.includes(db)
-							? Color.Purple
-							: Color.Green,
-					},
-				},
-			]}
-			actions={<ListDB_Actions db={db} />}
-		/>
-	);
+  return (
+    <List.Item
+      key={db}
+      title={db}
+      icon={system_db.includes(db) ? Icon.MemoryChip : Icon.Person}
+      accessories={[
+        {
+          tag: {
+            value: system_db.includes(db) ? "system" : "user",
+            color: system_db.includes(db) ? Color.Purple : Color.Green,
+          },
+        },
+      ]}
+      actions={<ListDB_Actions db={db} />}
+    />
+  );
 }
