@@ -41,7 +41,7 @@
       "type": "dropdown",
       "required": false,
       "title": "Build",
-      "default": "Code",
+      "default": "Zed",
       "description": "Select which build of Zed to use",
       "data": [
         {

@@ -2,10 +2,10 @@ import fs from "fs";
 import { homedir } from "os";
 import { useSQL } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
-import { getZedDbName, type ZedBuild } from "./zed";
+import { getZedDbName } from "./zed";
 
-const preferences: Record<string, string> = getPreferenceValues();
-const zedBuild: ZedBuild = preferences.build as ZedBuild;
+const preferences = getPreferenceValues<Preferences>();
+const zedBuild = preferences.build;
 
 export interface ZedEntry {
   uri: string;
