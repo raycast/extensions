@@ -151,17 +151,30 @@ function ListDB_Actions(props: { db: string }) {
           icon={Icon.MinusCircle}
           shortcut={{ modifiers: ["ctrl"], key: "x" }}
           onAction={async () => {
-            confirmAlert({
-              title: `Confirm DELETE database \n [ ${db} ]`,
-              icon: Icon.Warning,
-              primaryAction: {
-                title: "Confirm",
-                style: Alert.ActionStyle.Destructive,
-                onAction: () => {
-                  delete_database(db);
+            if (system_db.includes(db)) {
+              confirmAlert({
+                title: `Detected System Database  \n [ ${db} ]`,
+                message: `Deletion may cause issue, please do it manually.`,
+                icon: Icon.Warning,
+                primaryAction: {
+                  title: "Abort",
+                  style: Alert.ActionStyle.Destructive,
+                  onAction: () => {},
                 },
-              },
-            });
+              });
+            } else {
+              confirmAlert({
+                title: `Confirm Delete Database \n [ ${db} ]`,
+                icon: Icon.Trash,
+                primaryAction: {
+                  title: "Confirm",
+                  style: Alert.ActionStyle.Destructive,
+                  onAction: () => {
+                    delete_database(db);
+                  },
+                },
+              });
+            }
           }}
         />
         <Action
