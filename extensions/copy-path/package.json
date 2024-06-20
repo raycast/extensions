@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "copy-path",
   "title": "Copy Path",
-  "description": "Copy the path of the current Finder open folder, the path of the selected file or the URL of the current browser tab.",
+  "description": "Copy the path of the open folder, selected file or the URL of the current browser tab.",
   "icon": "copy-path.png",
   "author": "koinzhang",
   "categories": [
@@ -19,7 +19,7 @@
     {
       "name": "copy-path",
       "title": "Copy Path or URL",
-      "description": "Copy the path of the current Finder open folder, the path of the selected file or the URL of the current browser tab.",
+      "description": "Copy the path of the open folder, selected file or the URL of the current browser tab.",
       "mode": "no-view"
     }
   ],

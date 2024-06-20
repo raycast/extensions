@@ -1,8 +1,9 @@
 import {
   getChromiumBrowserPath,
-  getFirefoxBrowserPath,
+  copyFirefoxBrowserPath,
   getFocusFinderPath,
   getFocusWindowTitle,
+  copySafariWebAppPath,
   getWebkitBrowserPath,
 } from "./applescript-utils";
 import {
@@ -22,7 +23,7 @@ export const copyFinderPath = async () => {
   const finderPath = await getFocusFinderPath();
   const finalPath = finderPath.endsWith("/") && finderPath.length !== 1 ? finderPath.slice(0, -1) : finderPath;
   await Clipboard.copy(finalPath);
-  await showSuccessHUD("📋 " + finalPath);
+  await showSuccessHUD("📂 " + finalPath);
   await customUpdateCommandMetadata(finalPath);
 };
 
@@ -47,7 +48,7 @@ export const copyPath = async () => {
 
       const output = filePaths.join(multiPathSeparator);
       await Clipboard.copy(output);
-      await showSuccessHUD("📋 " + (filePaths.length > 1 ? filePaths[0] + "..." : filePaths[0]));
+      await showSuccessHUD(filePaths.length > 1 ? "📑 " + filePaths[0] + "..." : "📄 " + filePaths[0]);
       await customUpdateCommandMetadata(output);
     }
   } catch (e) {
@@ -58,27 +59,37 @@ export const copyPath = async () => {
 export const copyUrl = async (frontmostApp: Application) => {
   // get browser web page url
   let url = "";
+  let shouldCopy = true; // if it has copied in copy***Path, then do not copy again
+  let copyContent: string;
   if (webkitBrowserNames.includes(frontmostApp.name)) {
     url = await getWebkitBrowserPath(frontmostApp.name);
   } else if (chromiumBrowserNames.includes(frontmostApp.name)) {
     url = await getChromiumBrowserPath(frontmostApp.name);
   } else if (frontmostApp.name.toLowerCase().includes("firefox")) {
-    url = await getFirefoxBrowserPath(frontmostApp.name);
+    url = await copyFirefoxBrowserPath(frontmostApp.name);
+    shouldCopy = false;
+  } else if (frontmostApp.bundleId?.startsWith("com.apple.Safari.WebApp")) {
+    url = await copySafariWebAppPath(frontmostApp.name);
+    shouldCopy = false;
   }
 
-  const windowTitle = await getFocusWindowTitle();
   if (url === "") {
-    await Clipboard.copy(windowTitle);
+    const windowTitle = await getFocusWindowTitle();
+    copyContent = windowTitle;
     await showSuccessHUD("🖥️ " + windowTitle);
   } else {
     // handle url
-    let copyContent = parseURL(url);
+    copyContent = parseURL(url);
     if (showTabTitle) {
+      const windowTitle = await getFocusWindowTitle();
       copyContent = `${windowTitle}\n${copyContent}`;
     }
-    await Clipboard.copy(copyContent);
     await showSuccessHUD("🔗 " + copyContent);
     await customUpdateCommandMetadata(copyContent);
+  }
+
+  if (shouldCopy) {
+    await Clipboard.copy(copyContent);
   }
 };
 
