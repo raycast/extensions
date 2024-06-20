@@ -13,12 +13,14 @@
     {
       "name": "search",
       "title": "Search Linkwarden",
+      "subtitle": "Linkwarden",
       "description": "Search your Linkwarden Bookmarks",
       "mode": "view"
     },
     {
       "name": "add",
       "title": "Add Website to Linkwarden",
+      "subtitle": "Linkwarden",
       "description": "Add a new bookmark to Linkwarden",
       "mode": "view"
     }
