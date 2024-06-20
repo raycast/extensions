@@ -1,3 +1,3 @@
 # Linkwarden Changelog
 
-## [Initial Version] - 2024-03-04
+## [Initial Version] - {PR_MERGE_DATE}
