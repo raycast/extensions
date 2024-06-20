@@ -1,7 +1,7 @@
 import { ActionPanel, Clipboard, Icon, Form, showToast, Action, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 
-import { useVisibleDatabasePropIds, useRecentPages, useRelations, useUsers } from "../../hooks";
+import { useVisibleDatabasePropIds, useRecentPages, useRelations, useUsers, useDatabaseProperties } from "../../hooks";
 import {
   patchPage,
   DatabaseProperty,
@@ -25,16 +25,21 @@ export type CreatePageFormValues = {
 
 interface EditPagePropertiesFormParams {
   page: Page;
-  databaseProperties: WritableDatabaseProperty[];
+  parentDatabaseId: string;
+  databaseProperties?: WritableDatabaseProperty[];
   mutate: () => Promise<void>;
 }
 
 export function EditPagePropertiesForm({
-  page: { id, title, parent_database_id, properties },
-  databaseProperties,
+  page: { id, title, properties },
+  parentDatabaseId,
+  databaseProperties: optionalDatabaseProperties,
   mutate,
 }: EditPagePropertiesFormParams) {
-  const { visiblePropIds, setVisiblePropIds } = useVisibleDatabasePropIds(parent_database_id || "__no_id__");
+  const { data: databaseProperties } = optionalDatabaseProperties
+    ? { data: optionalDatabaseProperties }
+    : useDatabaseProperties(parentDatabaseId);
+  const { visiblePropIds, setVisiblePropIds } = useVisibleDatabasePropIds(parentDatabaseId || "__no_id__");
   const { data: users } = useUsers();
   const { data: relationPages, isLoading: isLoadingRelationPages } = useRelations(databaseProperties);
   const { setRecentPage } = useRecentPages();

@@ -156,12 +156,19 @@ export function PageListItem({
           <ActionPanel.Section title={title}>
             {...OpenPageActions}
             {kanbanStatusAction}
-            {databaseProperties && (
+            {page.parent_database_id && (
               <Action.Push
                 title="Edit Property"
                 icon={Icon.Pencil}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-                target={<EditPagePropertiesForm page={page} databaseProperties={databaseProperties} mutate={mutate} />}
+                target={
+                  <EditPagePropertiesForm
+                    page={page}
+                    parentDatabaseId={page.parent_database_id}
+                    databaseProperties={databaseProperties}
+                    mutate={mutate}
+                  />
+                }
               />
             )}
           </ActionPanel.Section>
