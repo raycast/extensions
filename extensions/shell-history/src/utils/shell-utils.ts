@@ -108,9 +108,13 @@ function removeArrayDuplicates(history: ShellHistory[]) {
 export const runShellCommand = async (command: string, terminal: Terminal) => {
   let ret;
   try {
-    const script = runCommandInTerminalScript(command, terminal);
     await open(terminal.application.path);
-    ret = await runAppleScript(script);
+    if (terminal.supportInput) {
+      const script = runCommandInTerminalScript(command, terminal);
+      ret = await runAppleScript(script);
+    } else {
+      ret = await runAppleScript(pressDownEnterScript(command, terminal));
+    }
   } catch (e) {
     captureException(e);
     ret = e;
@@ -118,11 +122,7 @@ export const runShellCommand = async (command: string, terminal: Terminal) => {
   if (ret) {
     await showHUD(`🚨 ${ret}`);
   } else {
-    if (terminal.supportInput) {
-      await showHUD(`🚀 Run '${command}' executed in ${terminal.application.name}`);
-    } else {
-      await showHUD(`📟 Open ${terminal.application.name}`);
-    }
+    await showHUD(`🚀 Run '${command}' in ${terminal.application.name}`);
   }
 };
 
@@ -169,6 +169,19 @@ end tell
       break;
   }
   return script;
+}
+
+function pressDownEnterScript(command: string, term: Terminal) {
+  return `
+tell application "${term.application.name}"
+  activate
+  delay 0.5
+  tell application "System Events"
+    keystroke "${command}" 
+    key code 36
+  end tell
+end tell
+  `;
 }
 
 export function extractCliTool(command: string) {

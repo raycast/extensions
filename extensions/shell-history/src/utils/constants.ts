@@ -4,10 +4,12 @@ import { Terminal } from "../types/types";
 export const TERMINAL = "/System/Applications/Utilities/Terminal.app";
 export const ITERM2 = "/Applications/iTerm.app";
 export const WARP = "/Applications/Warp.app";
+export const HYPER = "/Applications/Hyper.app";
 const terminalPath = [
   { path: TERMINAL, supportInput: true },
   { path: ITERM2, supportInput: true },
   { path: WARP, supportInput: false },
+  { path: HYPER, supportInput: false },
 ];
 
 export const getTerminals = async () => {

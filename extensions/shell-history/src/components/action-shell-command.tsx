@@ -91,9 +91,7 @@ export function ActionShellCommand(props: {
           return (
             <Action
               key={terminal.application.path}
-              title={
-                terminal.supportInput ? `Run in ${terminal.application.name}` : `Open ${terminal.application.name}`
-              }
+              title={`Run in ${terminal.application.name}`}
               icon={{ fileIcon: terminal.application.path }}
               shortcut={{ modifiers: ["ctrl"], key: `${index + 1}` as KeyEquivalent }}
               onAction={async () => {
