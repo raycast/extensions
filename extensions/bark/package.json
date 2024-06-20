@@ -23,6 +23,7 @@
     {
       "name": "send-message-to-bark",
       "title": "Send Message with Details",
+      "subtitle": "Bark",
       "description": "Send messages with details to Bark via Raycast",
       "mode": "view",
       "preferences": [
@@ -47,6 +48,7 @@
     {
       "name": "quick-send-message-to-bark",
       "title": "Send Message",
+      "subtitle": "Bark",
       "description": "Quickly send the text to Bark via Raycast",
       "mode": "no-view",
       "arguments": [
