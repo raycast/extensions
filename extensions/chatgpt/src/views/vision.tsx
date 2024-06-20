@@ -62,7 +62,7 @@ export function VisionView(props: AskImageProps) {
       if (!data) {
         await showToast({ style: Toast.Style.Failure, title: "Error" });
         setLoading(false);
-        setResponse("## ⚠️ No data found. Please try again.");
+        setResponse("## ⚠️ Data couldn't load. Check image selection or clipboard and try again.");
         return;
       }
       imageUrl = bufferToDataUrl(`image/${data.type}`, data.data);
