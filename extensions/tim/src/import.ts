@@ -1,11 +1,12 @@
 import path from "path";
-import { Alert, confirmAlert, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
+import { Alert, captureException, confirmAlert, getSelectedFinderItems, showHUD, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 import { hasData, importData, installedWrapper, openTaskManager } from "./lib/tim";
 
 export default installedWrapper(async () => {
   try {
-    showToast({
+    await showToast({
       title: "Importing data…",
       style: Toast.Style.Animated,
     });
@@ -43,17 +44,10 @@ export default installedWrapper(async () => {
     }
 
     await importData(file.path);
-    showToast({
-      title: "Success",
-      message: "File imported",
-      style: Toast.Style.Success,
-    });
-    openTaskManager();
+    await showHUD("File imported", { clearRootSearch: true });
+    await openTaskManager();
   } catch (error) {
-    showToast({
-      title: "Error",
-      message: "No file selected in Finder",
-      style: Toast.Style.Failure,
-    });
+    captureException(error);
+    await showFailureToast(error, { title: "Failed to import data" });
   }
 });
