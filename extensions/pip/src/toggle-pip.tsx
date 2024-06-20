@@ -12,14 +12,15 @@ import {
 export default async () => {
   await closeMainWindow();
   const pipApp = await getPipApp();
-  if (pipApp) {
-    if (pipApp.path === IINA) {
+  if (pipApp.supportApp) {
+    const supportApp = pipApp.supportApp;
+    if (supportApp.path === IINA) {
       await pipIina();
     } else {
-      const retTogglePip = await pipBrowserVideo(pipApp.name);
+      const retTogglePip = await pipBrowserVideo(supportApp.name);
       if (retTogglePip) {
         await showToast({
-          title: `Failed to toggle ${pipApp.name} in PiP`,
+          title: `Failed to toggle ${supportApp.name} in PiP`,
           message: retTogglePip,
           style: Toast.Style.Failure,
         });
@@ -39,6 +40,10 @@ export default async () => {
       }
     }
   } else {
-    await showToast({ title: `The frontmost app is not a browser`, style: Toast.Style.Failure });
+    if (pipApp.frontmostApp) {
+      await showToast({ title: `The frontmost app is ${pipApp.frontmostApp.name}`, style: Toast.Style.Failure });
+    } else {
+      await showToast({ title: "Unable to get the frontmost app", style: Toast.Style.Failure });
+    }
   }
 };
