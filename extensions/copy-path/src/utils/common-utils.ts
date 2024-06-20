@@ -13,6 +13,8 @@ import {
   getSelectedFinderItems,
   PopToRootType,
   showHUD,
+  showToast,
+  Toast,
   updateCommandMetadata,
 } from "@raycast/api";
 import { chromiumBrowserNames, webkitBrowserNames } from "./constants";
@@ -112,6 +114,12 @@ const parseURL = (url: string) => {
     console.error(e);
   }
   return url;
+};
+
+export const showLoadingHUD = async (title: string) => {
+  if (showCopyTip) {
+    await showToast({ title: title, style: Toast.Style.Animated });
+  }
 };
 
 export const showSuccessHUD = async (
