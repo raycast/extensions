@@ -13,7 +13,7 @@
     {
       "name": "services",
       "icon": "services.png",
-      "title": "Services",
+      "title": "Show Services",
       "subtitle": "Homepage",
       "description": "Show your services",
       "mode": "view",
@@ -25,7 +25,7 @@
     {
       "name": "bookmarks",
       "icon": "bookmarks.png",
-      "title": "Bookmarks",
+      "title": "Show Bookmarks",
       "subtitle": "Homepage",
       "description": "Show your bookmarks",
       "mode": "view",
