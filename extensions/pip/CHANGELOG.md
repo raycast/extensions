@@ -1,6 +1,6 @@
 # PiP Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2024-06-20
 
 - Fixed the issue that the extension crashed when the IINA app was not installed
 
