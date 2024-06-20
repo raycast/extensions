@@ -9,6 +9,7 @@ import {
   Grid,
   ActionPanel,
 } from "@raycast/api";
+import { checkRectangleInstallation } from "./utils/checkInstall";
 
 // source of truth, taken from https://github.com/rxhanson/Rectangle?tab=readme-ov-file#execute-an-action-by-url
 const actions = [
@@ -420,6 +421,8 @@ const commandGroups = {
 // ] as const satisfies typeof actions;
 
 export default function Command() {
+  checkRectangleInstallation();
+
   return (
     <Grid inset={Grid.Inset.Medium} searchBarPlaceholder="Find a Rectangle action">
       {Object.values(commandGroups).map((group) => (
@@ -453,6 +456,8 @@ export default function Command() {
 
 export const buildCommand = (action: RectangleAction) => async () => {
   const url = `rectangle://execute-action?name=${action}`;
+
+  await checkRectangleInstallation();
 
   try {
     await getFrontmostApplication();
