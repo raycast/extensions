@@ -93,14 +93,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.76.0",
+    "@raycast/api": "^1.77.0",
     "@raycast/utils": "^1.16.0",
     "read-last-lines": "^1.8.0",
     "shell-quote": "^1.8.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.14.2",
+    "@types/node": "20.14.6",
     "@types/react": "18.3.3",
     "@types/shell-quote": "^1.7.5",
     "eslint": "^8.57.0",
