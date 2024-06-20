@@ -1,4 +1,4 @@
-# recent excel Changelog
+# Recent Excel Changelog
 
 ## [Better search and filter] - 2024-06-04
 
