@@ -43,6 +43,6 @@ Refreshes the cache from API.
 
 ## Powered by
 
-![Trakt](https://trakt.tv/assets/branding/logos/wide/pixels/trakt-wide-red-black-eb9e7093a42b12fd46f65ea6ca9ef118462b657847842f427dc1b553c309df2f.png)
-
-![TMDB](https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_2-d537fb228cf3ded904ef09b136fe3fec72548ebc1fea3fbbd1ad9e36364db38b.svg)
+<img src="https://trakt.tv/assets/branding/logos/wide/pixels/trakt-wide-red-black-eb9e7093a42b12fd46f65ea6ca9ef118462b657847842f427dc1b553c309df2f.png" alt="Trakt" width="400"/>
+<br />
+<img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_2-d537fb228cf3ded904ef09b136fe3fec72548ebc1fea3fbbd1ad9e36364db38b.svg" alt="TMDB" width="400"/>
