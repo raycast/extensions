@@ -77,16 +77,39 @@ const generateSvgGrid = (
   return { raw: rawSvgString, padded: raycastSvgPreview };
 };
 
-const encodeSvgToBase64 = (svg: string): string => {
-  return `data:image/svg+xml;base64,${btoa(svg)}`;
+const generateCombinedSvgString = (svgItems: SvgItem[], spacing: number): string => {
+  let currentX = 0;
+  const svgContent = svgItems
+    .map((item) => {
+      const width = parseInt((item.rawSvg.match(/width="(\d+)"/) || [])[1], 10);
+      const result = `<g transform="translate(${currentX}, 0)">${item.rawSvg
+        .replace(/<svg xmlns="http:\/\/www.w3.org\/2000\/svg"[^>]*>/, "")
+        .replace(/<\/svg>/, "")}</g>`;
+      currentX += width + spacing;
+      return result;
+    })
+    .join("");
+
+  const totalWidth = currentX;
+  const totalHeight = Math.max(
+    ...svgItems.map((item) => parseInt((item.rawSvg.match(/height="(\d+)"/) || [])[1] || "0", 10)),
+  );
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${totalWidth}" height="${totalHeight}">${svgContent}</svg>`;
 };
 
 const createSvgItems = (rawSvgStrings: string[], paddedSvgStrings: string[]): SvgItem[] => {
-  return rawSvgStrings.map((svg, index) => ({
+  const rawItems = rawSvgStrings.map((svg, index) => ({
     id: index,
     rawSvg: svg,
     previewSvg: encodeSvgToBase64(paddedSvgStrings[index]),
   }));
+  const combinedSvg = generateCombinedSvgString(rawItems, 40);
+  return [...rawItems, { id: rawItems.length, rawSvg: combinedSvg, previewSvg: encodeSvgToBase64(combinedSvg) }];
+};
+
+const encodeSvgToBase64 = (svg: string): string => {
+  return `data:image/svg+xml;base64,${btoa(svg)}`;
 };
 
 const copySvgToClipboard = async (svg: string): Promise<void> => {
@@ -96,6 +119,17 @@ const copySvgToClipboard = async (svg: string): Promise<void> => {
   } catch (error) {
     console.error("Failed to copy SVG:", error);
     showHUD("Failed to copy SVG");
+  }
+};
+
+const copyCombinedSvgToClipboard = async (svgItems: SvgItem[], spacing: number): Promise<void> => {
+  try {
+    const combinedSvg = generateCombinedSvgString(svgItems, spacing);
+    await Clipboard.copy(combinedSvg);
+    showHUD("Combined SVG copied to clipboard!");
+  } catch (error) {
+    console.error("Failed to copy combined SVG:", error);
+    showHUD("Failed to copy combined SVG");
   }
 };
 
@@ -114,7 +148,6 @@ export default function Command() {
 
   const { isLoading, data, revalidate } = usePromise(() => fetchSvgItems(baseSize, gridScale, isMulticolored));
 
-  // Use useEffect to trigger revalidation when baseSize or isMulticolored changes
   useEffect(() => {
     revalidate();
   }, [baseSize, isMulticolored]);
@@ -146,6 +179,11 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action title="Copy SVG" onAction={() => copySvgToClipboard(item.rawSvg)} />
+              <Action
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                title="Copy All SVGs"
+                onAction={() => copyCombinedSvgToClipboard(data!.slice(0, -1), baseSize * gridScale[5])}
+              />
               <Action
                 shortcut={{ modifiers: ["cmd"], key: "t" }}
                 title={`Switch to ${isMulticolored ? "Monocolored" : "Multicolored"}`}
