@@ -5,6 +5,7 @@ import {
   PullRequestDetailsFieldsFragment,
   PullRequestFieldsFragment,
   PullRequestReviewDecision,
+  ReactionContent,
   StatusState,
 } from "../generated/graphql";
 
@@ -130,4 +131,49 @@ export function getReviewDecision(reviewDecision?: PullRequestReviewDecision | n
     default:
       return null;
   }
+}
+
+export function getEmojiFromReactionContent(content: string) {
+  switch (content) {
+    case "THUMBS_UP":
+      return "👍";
+    case "THUMBS_DOWN":
+      return "👎";
+    case "LAUGH":
+      return "👎";
+    case "CONFUSED":
+      return "😕";
+    case "HEART":
+      return "❤️";
+    case "HOORAY":
+      return "🎉";
+    case "ROCKET":
+      return "🚀";
+    case "EYES":
+      return "👀";
+    default:
+      return "";
+  }
+}
+// __typename?: "Reaction" | undefined;   content: ReactionContent;   id: string;
+export function getReducedReactions(
+  reactions?:
+    | null
+    | (null | {
+        ___typename?: "Reaction";
+        content: ReactionContent;
+        id: string;
+      })[],
+) {
+  return reactions
+    ? reactions.reduce(
+        (acc, curr) => {
+          if (curr?.content) {
+            acc[curr.content] = (acc[curr.content] || 0) + 1;
+          }
+          return acc;
+        },
+        {} as Record<string, number>,
+      )
+    : {};
 }

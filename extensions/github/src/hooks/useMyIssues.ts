@@ -5,6 +5,7 @@ import { uniqBy } from "lodash";
 import { getGitHubClient } from "../api/githubClient";
 import { IssueFieldsFragment } from "../generated/graphql";
 import { pluralize } from "../helpers";
+import { IssueSection, SectionType } from "../helpers/menu-bar";
 
 export function useMyIssues(repository: string | null) {
   const { github } = getGitHubClient();
@@ -40,11 +41,11 @@ export function useMyIssues(repository: string | null) {
     "id",
   );
 
-  const sections = [
-    { title: "Created", issues: created },
-    { title: "Assigned", issues: assigned },
-    { title: "Mentioned", issues: mentioned },
-    { title: "Recently Closed", issues: recentlyClosed },
+  const sections: IssueSection[] = [
+    { type: SectionType.Open, issues: created },
+    { type: SectionType.Assigned, issues: assigned },
+    { type: SectionType.Mentioned, issues: mentioned },
+    { type: SectionType.RecentlyClosed, issues: recentlyClosed },
   ]
     .filter((section) => section.issues && section.issues.length > 0)
     .map((section) => {

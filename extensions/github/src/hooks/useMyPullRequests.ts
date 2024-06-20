@@ -5,6 +5,7 @@ import { uniqBy } from "lodash";
 import { getGitHubClient } from "../api/githubClient";
 import { PullRequestFieldsFragment } from "../generated/graphql";
 import { pluralize } from "../helpers";
+import { PullRequestSection } from "../helpers/menu-bar";
 
 export enum SectionType {
   Open = "Open",
@@ -71,13 +72,14 @@ export function useMyPullRequests(repository: string | null) {
   );
 
   const prIds: string[] = [];
+
   function getPullRequestsWithoutDuplicates(pullRequests: PullRequestFieldsFragment[] | undefined) {
     const filteredPullRequests = pullRequests?.filter((pr) => !prIds.includes(pr.id));
     prIds.push(...(filteredPullRequests?.map((pr) => pr.id) ?? []));
     return filteredPullRequests;
   }
 
-  const sections = [
+  const sections: PullRequestSection[] = [
     { type: SectionType.Open, pullRequests: created },
     { type: SectionType.Assigned, pullRequests: assigned },
     { type: SectionType.Mentioned, pullRequests: mentioned },

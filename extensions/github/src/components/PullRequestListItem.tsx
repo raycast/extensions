@@ -14,6 +14,7 @@ import {
 import { useMyPullRequests } from "../hooks/useMyPullRequests";
 
 import PullRequestActions from "./PullRequestActions";
+import PullRequestComments from "./PullRequestComments";
 import PullRequestDetail from "./PullRequestDetail";
 
 type PullRequestListItemProps = {
@@ -82,6 +83,13 @@ export default function PullRequestListItem({ pullRequest, viewer, mutateList }:
             icon={Icon.Sidebar}
             target={<PullRequestDetail initialPullRequest={pullRequest} viewer={viewer} mutateList={mutateList} />}
           />
+          {numberOfComments > 0 && (
+            <Action.Push
+              title="Show Comments"
+              icon={Icon.Message}
+              target={<PullRequestComments viewer={viewer} mutateList={mutateList} pullRequest={pullRequest} />}
+            />
+          )}
         </PullRequestActions>
       }
     />
