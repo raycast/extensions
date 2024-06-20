@@ -13,11 +13,6 @@ import { useFetch, useForm } from "@raycast/utils";
 import axios, { AxiosError } from "axios";
 import { chromiumBrowserNames, getChromiumBrowserPath, getWebkitBrowserPath, webkitBrowserNames } from "./utils";
 
-interface Preferences {
-  LinkwardenUrl: string;
-  LinkwardenApiKey: string;
-}
-
 interface FormValues {
   name: string;
   url: string;
