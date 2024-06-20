@@ -1,6 +1,6 @@
 import { getPreferenceValues, open, showHUD, showToast, Toast } from "@raycast/api";
-import defaultBrowserId from "default-browser-id";
 import { runAppleScript } from "@raycast/utils";
+import defaultBrowserId from "default-browser-id";
 import { getName } from "./getName";
 
 // This code will run a script to add the event to Fantastical
