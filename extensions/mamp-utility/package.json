@@ -58,6 +58,14 @@
       "required": true
     },
     {
+        "type":"appPicker",
+        "name": "pref_openWith",
+        "title": "Open Site With...",
+        "description": "Open the website with your preferred application",
+        "default": "/Applications/Visual Studio Code.app",
+        "required": true
+      },
+    {
       "type": "textfield",
       "name": "pref_mysqlPort",
       "description": "The MySQL Port (can be found in \"Port & User\")",

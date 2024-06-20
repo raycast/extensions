@@ -1,9 +1,9 @@
 import untildify from "untildify";
 import { ActionPanel, Action, List, Color, Icon, Detail, useNavigation } from "@raycast/api";
-import { get_FolderPaths, open_File_InVSCode, open_Folder_InVSCode } from "./utils-open";
+import { get_FolderPaths, open_File_InVSCode } from "./utils-open";
 import { getFiles } from "./utils-file";
-import { get_pref_siteFolder } from "./utils-preference";
-
+import { get_pref_openWith_name, get_pref_openWith_path, get_pref_siteFolder } from "./utils-preference";
+import { open } from "@raycast/api";
 /**
  * Function to render an action panel for a file item, providing various actions like opening the file, navigating within folders, and performing other file-related tasks.
  * Parameters:
@@ -16,22 +16,13 @@ function ListFile_Item_Action(props: { file: { file: string; path: string; lastM
   return (
     <ActionPanel>
       <ActionPanel.Section title="Open">
-        <Action.Push title="Open File" icon={Icon.ArrowDown} target={<ListFiles _path_={props.file.path} />} />
-
+        <Action.Push title="Open File/Folder" icon={Icon.ArrowDown} target={<ListFiles _path_={props.file.path} />} />
         <Action
-          title="Open in VS Code - 1"
-          icon={Icon.CodeBlock}
-          shortcut={{ modifiers: ["cmd"], key: "enter" }}
-          onAction={() => {
-            open_Folder_InVSCode(props.file.path);
-          }}
-        />
-        <Action
-          title="Open in VS Code - 2"
+          title={`Open with ${get_pref_openWith_name()}`}
           icon={Icon.CodeBlock}
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={() => {
-            open_Folder_InVSCode(props.file.path);
+            open(props.file.path, get_pref_openWith_path());
           }}
         />
       </ActionPanel.Section>

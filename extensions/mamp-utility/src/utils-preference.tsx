@@ -18,5 +18,13 @@ export function get_pref_nginxPort(): string {
 }
 
 export function get_pref_mamp_path(): string {
-  return prefernce.pref_mamp.path;
+  return prefernce.pref_mamp!.path;
+}
+export function get_pref_openWith_name(): string {
+  console.log(prefernce.pref_openWith);
+  return prefernce.pref_openWith!.name;
+}
+export function get_pref_openWith_path(): string {
+  console.log(prefernce.pref_openWith);
+  return prefernce.pref_openWith!.path;
 }
