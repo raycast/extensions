@@ -30,7 +30,7 @@ manage mikr.us server
 
 # Preferences
 
-All preferences properties list that can be customize through `Raycast Settings > Extensions > Jose`
+All preferences properties list that can be customize through `Raycast Settings > Extensions > Mikr.Us`
 
 | Properties                   | Label                          | Value       | Required | Default    | Description                                                                                          |
 | ---------------------------- | ------------------------------ | ----------- | -------- | ---------- | ---------------------------------------------------------------------------------------------------- |
