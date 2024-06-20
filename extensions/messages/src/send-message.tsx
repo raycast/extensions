@@ -83,21 +83,21 @@ export default function Command({
       if (result === "Success") {
         const name = getName(correspondingContact);
 
-          await showToast({
-            style: Toast.Style.Success,
-            title: `Sent Message to ${name}`,
-            message: values.text,
-            primaryAction: {
-              title: `Open Chat with ${name}`,
-              onAction() {
-                open(`imessage://${values.address.replace(/\s/g, "")}`);
-              },
-            },
-          });
-
         if (shouldCloseMainWindow) {
           await showHUD(`Sent Message to ${name}`, { clearRootSearch: true });
         }
+
+        await showToast({
+          style: Toast.Style.Success,
+          title: `Sent Message to ${name}`,
+          message: values.text,
+          primaryAction: {
+            title: `Open Chat with ${name}`,
+            onAction() {
+              open(`imessage://${values.address.replace(/\s/g, "")}`);
+            },
+          },
+        });
 
         reset({ text: "" });
       } else {
