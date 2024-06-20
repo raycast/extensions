@@ -25,10 +25,9 @@
     {
       "type": "checkbox",
       "name": "hideOnAdd",
-      "title": "Hide Raycast on add",
-      "label": "Hide",
+      "label": "Hide Raycast on add",
       "description": "Hide the Raycast window after running a quick add command",
-      "default": false,
+      "default": true,
       "required": false
     }
   ],

@@ -28,7 +28,7 @@ export default async (props: { arguments: Arguments.FanQuickAddEvent }) => {
     // Will check if extension's hide preference is set
     // If true, it will show a HUD, else it will show a toast
     if (preferences.hideOnAdd) {
-      showHUD(`Event added`);
+      showHUD(`Event added`, { clearRootSearch: true });
     } else {
       showToast(optionsSuccess);
     }
