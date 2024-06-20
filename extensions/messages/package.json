@@ -18,22 +18,12 @@
       "mode": "view",
       "preferences": [
         {
-          "type": "dropdown",
-          "description": "Successful message feedback",
-          "default": "toast",
-          "data": [
-            {
-              "title": "HUD",
-              "value": "hud"
-            },
-            {
-              "title": "Inline toast",
-              "value": "toast"
-            }
-          ],
-          "title": "Successful message feedback",
-          "name": "actionOnSendMessage",
-          "required": true
+        "name": "shouldCloseMainWindow",
+        "type": "checkbox",
+        "label": "Close window immediately",
+        "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+        "default": true,
+        "required": false
         }
       ]
     }

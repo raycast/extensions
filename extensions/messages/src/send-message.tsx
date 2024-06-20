@@ -46,7 +46,7 @@ export default function Command({
   draftValues: Values;
   launchContext: { contactId: string; address: string; text: string };
 }>) {
-  const { actionOnSendMessage } = getPreferenceValues<{ actionOnSendMessage: "toast" | "hud" }>();
+  const { shouldCloseMainWindow } = getPreferenceValues<{ shouldCloseMainWindow: boolean }>();
   const { data: contacts, isLoading } = useCachedPromise(async () => {
     const contacts = await fetchAllContacts();
     return contacts as Contact[];
@@ -83,7 +83,6 @@ export default function Command({
       if (result === "Success") {
         const name = getName(correspondingContact);
 
-        if (actionOnSendMessage === "toast") {
           await showToast({
             style: Toast.Style.Success,
             title: `Sent Message to ${name}`,
@@ -95,7 +94,8 @@ export default function Command({
               },
             },
           });
-        } else if (actionOnSendMessage === "hud") {
+
+        if (shouldCloseMainWindow) {
           await showHUD(`Sent Message to ${name}`, { clearRootSearch: true });
         }
 
