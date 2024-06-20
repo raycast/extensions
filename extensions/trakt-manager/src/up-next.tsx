@@ -3,11 +3,11 @@ import { getFavicon } from "@raycast/utils";
 import { setMaxListeners } from "events";
 import { AbortError } from "node-fetch";
 import { useEffect, useRef, useState } from "react";
+import { checkInEpisode, getUpNextShows, updateShowProgress } from "./api/shows";
+import { getTMDBShowDetails } from "./api/tmdb";
 import { AuthProvider, useAuth } from "./components/auth";
 import { Seasons } from "./components/seasons";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/helper";
-import { checkInEpisode, getUpNextShows, updateShowProgress } from "./services/shows";
-import { getTMDBShowDetails } from "./services/tmdb";
 
 const OnDeckCommand = () => {
   const { isAuthenticated } = useAuth();

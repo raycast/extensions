@@ -17,6 +17,11 @@ export const searchMovies = async (query: string, page: number, signal: AbortSig
     },
   );
 
+  if (!response.ok) {
+    console.error("searchMovies:", await response.text());
+    throw new Error(response.statusText);
+  }
+
   const result = (await response.json()) as TraktMovieList;
   result.page = Number(response.headers.get("X-Pagination-Page")) ?? 1;
   result.total_pages = Number(response.headers.get("X-Pagination-Page-Count")) ?? 1;
@@ -38,6 +43,7 @@ export const getWatchlistMovies = async (page: number, signal: AbortSignal | und
   });
 
   if (!response.ok) {
+    console.error("getWatchlistMovies:", await response.text());
     throw new Error(response.statusText);
   }
 
@@ -72,6 +78,7 @@ export const addMovieToWatchlist = async (movieId: number, signal: AbortSignal |
   });
 
   if (!response.ok) {
+    console.error("addMovieToWatchlist:", await response.text());
     throw new Error(response.statusText);
   }
 };
@@ -99,6 +106,7 @@ export const removeMovieFromWatchlist = async (movieId: number, signal: AbortSig
   });
 
   if (!response.ok) {
+    console.error("removeMovieFromWatchlist:", await response.text());
     throw new Error(response.statusText);
   }
 };
@@ -124,6 +132,7 @@ export const checkInMovie = async (movieId: number, signal: AbortSignal | undefi
   });
 
   if (!response.ok) {
+    console.error("checkInMovie:", await response.text());
     throw new Error(response.statusText);
   }
 };
@@ -151,6 +160,7 @@ export const addMovieToHistory = async (movieId: number, signal: AbortSignal | u
   });
 
   if (!response.ok) {
+    console.error("addMovieToHistory:", await response.text());
     throw new Error(response.statusText);
   }
 };
@@ -168,6 +178,7 @@ export const getHistoryMovies = async (page: number, signal: AbortSignal | undef
   });
 
   if (!response.ok) {
+    console.error("getHistoryMovies:", await response.text());
     throw new Error(response.statusText);
   }
 
@@ -213,6 +224,7 @@ export const removeMovieFromHistory = async (movieId: number, signal: AbortSigna
   });
 
   if (!response.ok) {
+    console.error("removeMovieFromHistory:", await response.text());
     throw new Error(response.statusText);
   }
 };

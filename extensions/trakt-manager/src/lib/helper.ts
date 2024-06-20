@@ -1,20 +1,23 @@
 import { environment } from "@raycast/api";
-import { readFile, writeFile } from "fs/promises";
+import { appendFile, readFile } from "fs/promises";
 import { existsSync } from "node:fs";
 import { unlink } from "node:fs/promises";
 import path from "path";
 import { IMDB_APP_URL, TMDB_IMG_URL, TRAKT_APP_URL } from "./constants";
 
 export const setFileCache = async (key: string, content: string) => {
-  const filePath = path.join(`${environment.supportPath}`, `${key}.json`);
+  const filePath = path.join(`${environment.supportPath}`, `${key}.txt`);
+  if (content && !content.endsWith("\n")) {
+    content += "\n";
+  }
   if (existsSync(filePath)) {
     await unlink(filePath);
   }
-  await writeFile(filePath, content);
+  await appendFile(filePath, content);
 };
 
 export const getFileCache = async (key: string) => {
-  const filePath = path.join(`${environment.supportPath}`, `${key}.json`);
+  const filePath = path.join(`${environment.supportPath}`, `${key}.txt`);
   if (!existsSync(filePath)) {
     return undefined;
   }

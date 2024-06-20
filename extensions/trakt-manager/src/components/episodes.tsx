@@ -3,9 +3,9 @@ import { getFavicon } from "@raycast/utils";
 import { setMaxListeners } from "events";
 import { AbortError } from "node-fetch";
 import { useEffect, useRef, useState } from "react";
+import { checkInEpisode, getEpisodes } from "../api/shows";
+import { getTMDBEpisodeDetails } from "../api/tmdb";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "../lib/helper";
-import { checkInEpisode, getEpisodes } from "../services/shows";
-import { getTMDBEpisodeDetails } from "../services/tmdb";
 
 const formatter = new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short", day: "2-digit" });
 

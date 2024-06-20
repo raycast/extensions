@@ -40,3 +40,9 @@ Refreshes the cache from API.
 
 > [!NOTE]
 > This command also runs in the background every 6 hours to keep the cache up to date.
+
+## Powered by
+
+![Trakt](https://trakt.tv/assets/branding/logos/wide/pixels/trakt-wide-red-black-eb9e7093a42b12fd46f65ea6ca9ef118462b657847842f427dc1b553c309df2f.png)
+
+![TMDB](https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_2-d537fb228cf3ded904ef09b136fe3fec72548ebc1fea3fbbd1ad9e36364db38b.svg)

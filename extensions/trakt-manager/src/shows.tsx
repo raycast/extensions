@@ -2,10 +2,10 @@ import { Grid, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { setMaxListeners } from "events";
 import { AbortError } from "node-fetch";
 import { useEffect, useRef, useState } from "react";
+import { addShowToHistory, addShowToWatchlist, searchShows } from "./api/shows";
+import { getTMDBShowDetails } from "./api/tmdb";
 import { AuthProvider, useAuth } from "./components/auth";
 import { ShowGrid } from "./components/show-grid";
-import { addShowToHistory, addShowToWatchlist, searchShows } from "./services/shows";
-import { getTMDBShowDetails } from "./services/tmdb";
 
 function SearchCommand() {
   const { isAuthenticated } = useAuth();

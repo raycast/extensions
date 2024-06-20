@@ -2,10 +2,10 @@ import { Grid, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { setMaxListeners } from "events";
 import { AbortError } from "node-fetch";
 import { useEffect, useRef, useState } from "react";
+import { addMovieToHistory, addMovieToWatchlist, checkInMovie, searchMovies } from "./api/movies";
+import { getTMDBMovieDetails } from "./api/tmdb";
 import { AuthProvider, useAuth } from "./components/auth";
 import { MovieGrid } from "./components/movie-grid";
-import { addMovieToHistory, addMovieToWatchlist, checkInMovie, searchMovies } from "./services/movies";
-import { getTMDBMovieDetails } from "./services/tmdb";
 
 function SearchCommand() {
   const { isAuthenticated } = useAuth();

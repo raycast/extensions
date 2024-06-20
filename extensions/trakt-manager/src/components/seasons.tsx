@@ -3,9 +3,9 @@ import { getFavicon } from "@raycast/utils";
 import { setMaxListeners } from "events";
 import { AbortError } from "node-fetch";
 import { useEffect, useRef, useState } from "react";
+import { getSeasons } from "../api/shows";
+import { getTMDBSeasonDetails } from "../api/tmdb";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "../lib/helper";
-import { getSeasons } from "../services/shows";
-import { getTMDBSeasonDetails } from "../services/tmdb";
 import { Episodes } from "./episodes";
 
 export const Seasons = ({

@@ -19,6 +19,7 @@ export const searchShows = async (query: string, page: number, signal: AbortSign
   );
 
   if (!response.ok) {
+    console.error("searchShows:", await response.text());
     throw new Error(response.statusText);
   }
 
@@ -43,6 +44,7 @@ export const getWatchlistShows = async (page: number, signal: AbortSignal | unde
   });
 
   if (!response.ok) {
+    console.error("getWatchlistShows:", await response.text());
     throw new Error(response.statusText);
   }
 
@@ -67,6 +69,7 @@ export const getSeasons = async (traktId: number, signal: AbortSignal | undefine
   });
 
   if (!response.ok) {
+    console.error("getSeasons:", await response.text());
     throw new Error(response.statusText);
   }
 
@@ -90,6 +93,7 @@ export const getEpisodes = async (
   });
 
   if (!response.ok) {
+    console.error("getEpisodes:", await response.text());
     throw new Error(response.statusText);
   }
 
@@ -119,6 +123,7 @@ export const addShowToWatchlist = async (showId: number, signal: AbortSignal | u
   });
 
   if (!response.ok) {
+    console.error("addShowToWatchlist:", await response.text());
     throw new Error(response.statusText);
   }
 };
@@ -146,6 +151,7 @@ export const removeShowFromWatchlist = async (showId: number, signal: AbortSigna
   });
 
   if (!response.ok) {
+    console.error("removeShowFromWatchlist:", await response.text());
     throw new Error(response.statusText);
   }
 };
@@ -171,6 +177,7 @@ export const checkInEpisode = async (episodeId: number, signal: AbortSignal | un
   });
 
   if (!response.ok) {
+    console.error("checkInEpisode:", await response.text());
     throw new Error(response.statusText);
   }
 };
@@ -201,6 +208,7 @@ export const getUpNextShows = async (signal: AbortSignal | undefined = undefined
   });
 
   if (!response.ok) {
+    console.error("getUpNextShows:", await response.text());
     throw new Error(response.statusText);
   }
 
@@ -223,6 +231,7 @@ export const getUpNextShows = async (signal: AbortSignal | undefined = undefined
   const showResponses = await Promise.all(showPromises);
   for (const { res, traktId } of showResponses) {
     if (!res.ok) {
+      console.error("getUpNextShows:", await response.text());
       throw new Error(res.statusText);
     }
 
@@ -263,6 +272,7 @@ export const updateShowProgress = async (
       );
 
       if (!response.ok) {
+        console.error("updateShowProgress:", await response.text());
         throw new Error(response.statusText);
       }
 
@@ -297,6 +307,7 @@ export const addShowToHistory = async (showId: number, signal: AbortSignal | und
   });
 
   if (!response.ok) {
+    console.error("addShowToHistory:", await response.text());
     throw new Error(response.statusText);
   }
 };
@@ -314,6 +325,7 @@ export const getHistoryShows = async (page: number, signal: AbortSignal | undefi
   });
 
   if (!response.ok) {
+    console.error("getHistoryShows:", await response.text());
     throw new Error(response.statusText);
   }
 
@@ -359,6 +371,7 @@ export const removeShowFromHistory = async (showId: number, signal: AbortSignal 
   });
 
   if (!response.ok) {
+    console.error("removeShowFromHistory:", await response.text());
     throw new Error(response.statusText);
   }
 };

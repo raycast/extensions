@@ -1,6 +1,6 @@
 import { OAuth } from "@raycast/api";
 import fetch from "node-fetch";
-import { TRAKT_APP_URL, TRAKT_CLIENT_ID } from "./constants";
+import { TRAKT_APP_URL, TRAKT_CLIENT_ID, TRAKT_REDIRECT_URI } from "./constants";
 
 export const oauthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
@@ -24,34 +24,39 @@ export const authorize = async () => {
     endpoint: `${TRAKT_APP_URL}/oauth/authorize`,
     clientId: TRAKT_CLIENT_ID,
     scope: "",
+    extraParameters: {
+      redirect_uri: TRAKT_REDIRECT_URI,
+    },
   });
 
   const { authorizationCode } = await oauthClient.authorize(authRequest);
 
   const params = new URLSearchParams();
-  params.append("client_id", TRAKT_CLIENT_ID);
   params.append("code", authorizationCode);
-  params.append("code_verifier", authRequest.codeVerifier);
+  params.append("client_id", TRAKT_CLIENT_ID);
+  params.append("redirect_uri", TRAKT_REDIRECT_URI);
   params.append("grant_type", "authorization_code");
-  params.append("redirect_uri", authRequest.redirectURI);
+  params.append("code_verifier", authRequest.codeVerifier);
 
-  const tokenResponse = await fetch(`${TRAKT_APP_URL}/oauth/token`, {
+  const response = await fetch(`${TRAKT_APP_URL}/oauth/token`, {
     method: "POST",
     body: params,
   });
 
-  if (!tokenResponse.ok) {
-    throw new Error(tokenResponse.statusText);
+  if (!response.ok) {
+    console.error("authorize:", await response.text());
+    throw new Error(response.statusText);
   }
 
-  const tokens = (await tokenResponse.json()) as OAuth.TokenResponse;
+  const tokens = (await response.json()) as OAuth.TokenResponse;
   await oauthClient.setTokens(tokens);
 };
 
 export const refreshTokens = async (refreshToken: string) => {
   const params = new URLSearchParams();
-  params.append("client_id", TRAKT_CLIENT_ID);
   params.append("refresh_token", refreshToken);
+  params.append("client_id", TRAKT_CLIENT_ID);
+  params.append("redirect_uri", TRAKT_REDIRECT_URI);
   params.append("grant_type", "refresh_token");
 
   const response = await fetch(`${TRAKT_APP_URL}/oauth/token`, {
@@ -60,6 +65,7 @@ export const refreshTokens = async (refreshToken: string) => {
   });
 
   if (!response.ok) {
+    console.error("refreshTokens:", await response.text());
     throw new Error(response.statusText);
   }
 

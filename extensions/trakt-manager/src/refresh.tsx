@@ -1,6 +1,6 @@
 import { LocalStorage, Toast, showToast } from "@raycast/api";
+import { getUpNextShows } from "./api/shows";
 import { authorize } from "./lib/oauth";
-import { getUpNextShows } from "./services/shows";
 
 export default async function Command() {
   try {

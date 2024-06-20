@@ -2,12 +2,12 @@ import { Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
 import { setMaxListeners } from "events";
 import { AbortError } from "node-fetch";
 import { useEffect, useRef, useState } from "react";
+import { checkInMovie, getWatchlistMovies, removeMovieFromWatchlist } from "./api/movies";
+import { getWatchlistShows, removeShowFromWatchlist } from "./api/shows";
+import { getTMDBMovieDetails, getTMDBShowDetails } from "./api/tmdb";
 import { AuthProvider, useAuth } from "./components/auth";
 import { MovieGrid } from "./components/movie-grid";
 import { ShowGrid } from "./components/show-grid";
-import { checkInMovie, getWatchlistMovies, removeMovieFromWatchlist } from "./services/movies";
-import { getWatchlistShows, removeShowFromWatchlist } from "./services/shows";
-import { getTMDBMovieDetails, getTMDBShowDetails } from "./services/tmdb";
 
 const WatchlistCommand = () => {
   const { isAuthenticated } = useAuth();
