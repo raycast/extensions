@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Add time to Schedule Task action] - {PR_MERGE_DATE}
+## [Add time to Schedule Task action] - 2024-01-25
 
 It's now possible to specify a time when scheduling a task from the list item.
 

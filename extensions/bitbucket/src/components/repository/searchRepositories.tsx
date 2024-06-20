@@ -21,7 +21,7 @@ const SearchListLazy: React.FC = () => {
   const [query, setQuery] = useState("");
   const { data, error, isLoading, isValidating } = useSWR<Schema.Repository[]>(
     `/repositories?query=${query}`,
-    getRepositoriesLazy
+    getRepositoriesLazy,
   );
 
   useEffect(() => {
@@ -42,9 +42,7 @@ const SearchListLazy: React.FC = () => {
       throttle
     >
       <List.Section title="Repositories" subtitle={data?.length.toString()}>
-        {data?.map(toRepository).map((repo: Repository) => (
-          <SearchListItem key={repo.uuid} repo={repo} />
-        ))}
+        {data?.map(toRepository).map((repo: Repository) => <SearchListItem key={repo.uuid} repo={repo} />)}
       </List.Section>
     </List>
   );

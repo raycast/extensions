@@ -1,10 +1,40 @@
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { Cache } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import bplist from "bplist-parser";
 import { Voice, getVoices } from "mac-say";
 import { minRate, maxRate } from "./constants.js";
-import { SpeechPlist } from "./types.js";
+import { systemDefault } from "./constants.js";
+import { ParsedSaySettings, SpeechPlist, StoredSaySettings } from "./types.js";
+
+const cache = new Cache();
+
+export const getCache = (key: string): string => JSON.parse(cache.get(key) ?? `"${systemDefault}"`);
+
+export const useSaySettings = () => {
+  const [voice, setVoice] = useCachedState<string>("voice", systemDefault);
+  const [rate, setRate] = useCachedState<string>("rate", systemDefault);
+  const [device, setAudioDevice] = useCachedState<string>("audioDevice", systemDefault);
+  return { voice, rate, device, setVoice, setRate, setAudioDevice };
+};
+
+export const getSaySettings = () => {
+  const voice = getCache("voice");
+  const rate = getCache("rate");
+  const audioDevice = getCache("audioDevice");
+  return { voice, rate, audioDevice };
+};
+
+export const parseSaySettings = (settings: StoredSaySettings): ParsedSaySettings => {
+  const { voice, rate, audioDevice } = settings;
+  return {
+    voice: voice === systemDefault ? undefined : voice,
+    rate: rate === systemDefault ? undefined : parseInt(rate, 10),
+    audioDevice: audioDevice === systemDefault ? undefined : audioDevice,
+  };
+};
 
 export const getSortedVoices = async () => {
   const orignalVoices = await getVoices();
@@ -19,6 +49,7 @@ export const getSortedVoices = async () => {
 };
 
 export const languageCodeToEmojiFlag = (languageCode: string) => {
+  if (languageCode === "ar_001") return undefined;
   if (languageCode === "en-scotland") return "🏴󠁧󠁢󠁳󠁣󠁴󠁿";
   const codePoints = languageCode
     .slice(-2)

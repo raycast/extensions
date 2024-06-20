@@ -9,8 +9,21 @@
     "pantajoe"
   ],
   "categories": [
+    "Developer Tools",
     "Productivity",
     "System"
+  ],
+  "keywords": [
+    "clipboard",
+    "paste",
+    "text",
+    "format",
+    "paste as url",
+    "paste as file",
+    "paste as json",
+    "paste as number",
+    "paste as markdown link",
+    "paste as markdown image"
   ],
   "license": "MIT",
   "preferences": [
@@ -20,7 +33,7 @@
       "name": "trimStart",
       "type": "checkbox",
       "description": "Trim spaces in front of plain text",
-      "default": false,
+      "default": true,
       "required": false
     },
     {
@@ -28,7 +41,7 @@
       "name": "trimEnd",
       "type": "checkbox",
       "description": "Trim spaces at the end of plain text",
-      "default": false,
+      "default": true,
       "required": false
     },
     {
@@ -38,6 +51,15 @@
       "description": "Replace all line breaks with spaces",
       "default": false,
       "required": false
+    },
+    {
+      "title": "Actions When Pasting",
+      "name": "autoFetchTitle",
+      "label": "Auto Fetch Title",
+      "type": "checkbox",
+      "description": "Auto fetch title from URL when pasting as Markdown Link and Markdown Image",
+      "required": false,
+      "default": true
     },
     {
       "title": "Actions After Pasting",
@@ -63,15 +85,19 @@
           "description": "Paste text from the clipboard as any format you want.",
           "placeholder": "Plain Text",
           "required": false,
-          "default": "Plain Text",
+          "default": "",
           "data": [
-            {
-              "title": "JSON",
-              "value": "JSON"
-            },
             {
               "title": "URL",
               "value": "URL"
+            },
+            {
+              "title": "File",
+              "value": "File"
+            },
+            {
+              "title": "JSON",
+              "value": "JSON"
             },
             {
               "title": "Number",
@@ -91,18 +117,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.75.1",
+    "@raycast/api": "^1.76.0",
+    "axios": "^1.7.2",
+    "cheerio": "^1.0.0-rc.12",
+    "fs-extra": "^11.2.0",
     "validator": "^13.12.0"
   },
   "devDependencies": {
-    "@types/node": "~20.12.12",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "~20.14.2",
     "@types/react": "^18.3.3",
     "@types/validator": "^13.11.10",
-    "@typescript-eslint/eslint-plugin": "^7.10.0",
-    "@typescript-eslint/parser": "^7.10.0",
+    "@typescript-eslint/eslint-plugin": "^7.13.0",
+    "@typescript-eslint/parser": "^7.13.0",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.2.5",
+    "prettier": "^3.3.2",
     "typescript": "^5.4.5"
   },
   "scripts": {

@@ -1,5 +1,9 @@
 # Trello Changelog
 
+## [Update] - 2024-06-04
+
+Fix scope in auth URL in read me and update dependencies
+
 ## [Update] - 2024-03-30
 
 Fix scope in auth URL and update dependencies

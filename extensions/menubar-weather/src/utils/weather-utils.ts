@@ -1,8 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences } from "../types/preferences";
-import { isEmpty } from "./common-utils";
-import { getOpenMeteoLocation, getOpenMeteoWeather } from "./axios-utils";
 import { Daily, GeoLocation } from "../types/types";
+import { getOpenMeteoLocation, getOpenMeteoWeather } from "./axios-utils";
+import { isEmpty } from "./common-utils";
 import { weatherDescriptions } from "./icon-utils";
 
 export const {
@@ -11,8 +11,8 @@ export const {
   tempUnits,
   windSpeedUnits,
   precipitationUnits,
-  longitude,
   latitude,
+  longitude,
   tempType,
   menuUVI,
   menuPressure,
@@ -54,19 +54,19 @@ export async function getGeoLocation() {
 export async function getCurWeather() {
   let weatherData;
   let geoLocation;
-  if (!isEmptyLonLat()) {
-    weatherData = await getOpenMeteoWeather(longitude, latitude);
+  if (!isEmptyLatLon()) {
+    weatherData = await getOpenMeteoWeather(latitude, longitude);
     geoLocation = undefined;
   } else {
     geoLocation = await getGeoLocation();
-    weatherData = await getOpenMeteoWeather(geoLocation.longitude.toString(), geoLocation.latitude.toString());
+    weatherData = await getOpenMeteoWeather(geoLocation.latitude.toString(), geoLocation.longitude.toString());
   }
 
   return { weather: weatherData, geoLocation: geoLocation };
 }
 
-export function isEmptyLonLat() {
-  return isEmpty(longitude) || isEmpty(latitude);
+export function isEmptyLatLon() {
+  return isEmpty(latitude) || isEmpty(longitude);
 }
 
 /*

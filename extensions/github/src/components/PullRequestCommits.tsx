@@ -85,7 +85,7 @@ export default function PullRequestCommits({ pullRequest }: PullRequestCommitsPr
                   />
 
                   <Action.CopyToClipboard
-                    content={commit.message}
+                    content={commit.oid}
                     title="Copy Commit Hash"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                   />

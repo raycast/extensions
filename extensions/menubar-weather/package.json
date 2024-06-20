@@ -48,19 +48,19 @@
       "placeholder": "City name. For example, New York"
     },
     {
-      "name": "longitude",
+      "name": "latitude",
       "type": "textfield",
-      "title": "Longitude",
-      "description": "Longitude. If you need more precise weather data, please fill in the latitude and longitude",
+      "title": "Latitude",
+      "description": "Latitude. If you need more precise weather data, please fill in the latitude and longitude",
       "required": false,
       "default": "",
       "placeholder": "0.00"
     },
     {
-      "name": "latitude",
+      "name": "longitude",
       "type": "textfield",
-      "title": "Latitude",
-      "description": "Latitude. If you need more precise weather data, please fill in the latitude and longitude",
+      "title": "Longitude",
+      "description": "Longitude. If you need more precise weather data, please fill in the latitude and longitude",
       "required": false,
       "default": "",
       "placeholder": "0.00"

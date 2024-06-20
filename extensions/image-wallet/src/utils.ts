@@ -1,4 +1,4 @@
-import { environment, getPreferenceValues } from "@raycast/api";
+import { Toast, environment, getPreferenceValues, showToast } from "@raycast/api";
 import { runJxa } from "run-jxa";
 
 import { basename, extname } from "path";
@@ -20,13 +20,26 @@ function getWalletPath() {
 
 export function fetchPocketNames(): string[] {
   return readdirSync(walletPath).filter((item) => {
+    if (item.startsWith(".")) return;
+
     const filePath = `${walletPath}/${item}`;
-    const fileStats = lstatSync(filePath);
-    const fileExt = extname(filePath);
-    const fileName = basename(filePath, fileExt);
+    let fileStats;
+
+    try {
+      readdirSync(filePath);
+      fileStats = lstatSync(filePath);
+    } catch (e) {
+      if (getPreferenceValues<Preferences>().suppressReadErrors) return;
+      showToast({
+        style: Toast.Style.Failure,
+        title: `${filePath} could not be read`,
+        message: "Suppress this error in extension preferences.",
+      });
+
+      return;
+    }
 
     if (!fileStats.isDirectory()) return;
-    if (fileName.startsWith(".")) return;
 
     return item;
   });
@@ -54,13 +67,28 @@ async function loadPocketCards(dir: string): Promise<Card[]> {
 
   await Promise.all(
     items.map(async (item) => {
+      if (item.startsWith(".")) return;
+
       const filePath = `${dir}/${item}`;
-      const fileStats = lstatSync(filePath);
+      let fileStats;
+
+      try {
+        fileStats = lstatSync(filePath);
+      } catch (e) {
+        if (getPreferenceValues<Preferences>().suppressReadErrors) return;
+        showToast({
+          style: Toast.Style.Failure,
+          title: `${filePath} could not be read`,
+          message: "Suppress this error in extension preferences.",
+        });
+
+        return [];
+      }
+
       const fileExt = extname(filePath).toLowerCase();
       const fileName = basename(filePath, fileExt);
 
       if (fileStats.isDirectory()) return;
-      if (fileName.startsWith(".")) return;
 
       const videoExts = [".mov", ".mp4", ".m4v", ".mts", ".3gp", ".m2ts", ".m2v", ".mpeg", ".mpg", ".mts", ".vob"];
       const imageExts = [

@@ -1,5 +1,11 @@
 # Raycast PM2
 
+## [Bugfixes & Chore]
+
+- Fix API command
+- Add [`raycast-pm2`](https://github.com/LitoMore/raycast-pm2) example to readme
+- Bump dependencies
+
 ## [Enhancement] - 2024-05-28
 
 - Handle installation errors

@@ -25,7 +25,7 @@
   ],
   "preferences": [
     {
-      "title": "Tips",
+      "title": "Advanced",
       "name": "showCopyTip",
       "type": "checkbox",
       "required": false,
@@ -34,21 +34,20 @@
       "default": true
     },
     {
-      "name": "showErrorTip",
-      "type": "checkbox",
-      "required": false,
-      "label": "Show Error Tip",
-      "description": "Display a prompt when copying fails.",
-      "default": true
-    },
-    {
-      "title": "Advanced",
       "name": "showLastCopy",
       "type": "checkbox",
       "required": false,
       "label": "Show Last Copy",
       "description": "Show the path or URL of the most recent copy in the subtitle of the command.",
       "default": true
+    },
+    {
+      "name": "showTabTitle",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show Tab Title",
+      "description": "Show the tab title of the browser when copying the URL of the current browser tab.",
+      "default": false
     },
     {
       "name": "multiPathSeparator",

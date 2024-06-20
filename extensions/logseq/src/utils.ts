@@ -82,6 +82,12 @@ const buildJournalPath = (graphPath: string) => {
   );
 };
 
+export const getWorkflowStyle = async (): Promise<string> => {
+  return await parseLogseqConfig()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .then((v: any) => v["preferred-workflow"]);
+};
+
 export const getTodayJournalPath = () => {
   return buildJournalPath(getUserConfiguredGraphPath());
 };
