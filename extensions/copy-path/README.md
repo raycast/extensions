@@ -15,8 +15,7 @@ Copy path of the selected file or the current Finder window.
 
 Copy the URL of the current tab of the browser
 
-- Need to keep the browser window at the top and get focus
 - Support Safari, Chrome, Arc, Edge, Brave, Vivaldi, Opera, Orion, SigmaOS and Yandex Browser.
-- Firefox browser is not supported at the moment (because it doesn't support AppleScript).
+- Firefox browser is supported by a hack method, which is not as stable as other browsers.
 
 🌟🌟To make it easier and faster to use, it is recommended to set shortcut keys for the extension

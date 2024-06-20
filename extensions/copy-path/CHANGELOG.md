@@ -1,5 +1,9 @@
 # Copy Path Changelog
 
+## [Support Firefox] - {PR_MERGE_DATE}
+
+- Support copy url from Firefox browser
+
 ## [Copy Window Title] - 2024-06-06
 
 - Copy the title of the current window when no path or URL is detected

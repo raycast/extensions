@@ -1,11 +1,13 @@
 import {
   getChromiumBrowserPath,
+  getFirefoxBrowserPath,
   getFocusFinderPath,
   getFocusWindowTitle,
   getWebkitBrowserPath,
 } from "./applescript-utils";
 import {
   Application,
+  captureException,
   Clipboard,
   getSelectedFinderItems,
   PopToRootType,
@@ -60,6 +62,8 @@ export const copyUrl = async (frontmostApp: Application) => {
     url = await getWebkitBrowserPath(frontmostApp.name);
   } else if (chromiumBrowserNames.includes(frontmostApp.name)) {
     url = await getChromiumBrowserPath(frontmostApp.name);
+  } else if (frontmostApp.name.toLowerCase().includes("firefox")) {
+    url = await getFirefoxBrowserPath(frontmostApp.name);
   }
 
   const windowTitle = await getFocusWindowTitle();
@@ -68,25 +72,7 @@ export const copyUrl = async (frontmostApp: Application) => {
     await showSuccessHUD("🖥️ " + windowTitle);
   } else {
     // handle url
-    const parsedUrl = parseUrl(url);
-    let copyContent = url;
-    switch (copyUrlContent) {
-      case "Protocol://host/pathname": {
-        copyContent = parsedUrl.protocol + "://" + parsedUrl.resource + parsedUrl.pathname;
-        break;
-      }
-      case "Protocol://host": {
-        copyContent = parsedUrl.protocol + "://" + parsedUrl.resource;
-        break;
-      }
-      case "Host": {
-        copyContent = parsedUrl.resource;
-        break;
-      }
-      default: {
-        break;
-      }
-    }
+    let copyContent = parseURL(url);
     if (showTabTitle) {
       copyContent = `${windowTitle}\n${copyContent}`;
     }
@@ -94,6 +80,27 @@ export const copyUrl = async (frontmostApp: Application) => {
     await showSuccessHUD("🔗 " + copyContent);
     await customUpdateCommandMetadata(copyContent);
   }
+};
+
+const parseURL = (url: string) => {
+  try {
+    const parsedUrl = parseUrl(url);
+    switch (copyUrlContent) {
+      case "Protocol://host/pathname": {
+        return parsedUrl.protocol + "://" + parsedUrl.resource + parsedUrl.pathname;
+      }
+      case "Protocol://host": {
+        return parsedUrl.protocol + "://" + parsedUrl.resource;
+      }
+      case "Host": {
+        return parsedUrl.resource;
+      }
+    }
+  } catch (e) {
+    captureException(e);
+    console.error(e);
+  }
+  return url;
 };
 
 export const showSuccessHUD = async (

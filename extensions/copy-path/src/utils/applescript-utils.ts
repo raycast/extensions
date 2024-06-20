@@ -78,3 +78,25 @@ export const getChromiumBrowserPath = async (app: string) => {
     return "";
   }
 };
+
+// firefox browser
+export const scriptFirefoxBrowserPath = (app: string) => `
+tell application "${app}"
+  activate
+  tell application "System Events"
+    keystroke "l" using command down
+    keystroke "c" using command down
+    key code 53
+  end tell
+  delay 0.1
+  set activeTabURL to the clipboard
+  return (activeTabURL)
+end tell`;
+
+export const getFirefoxBrowserPath = async (app: string) => {
+  try {
+    return await runAppleScript(scriptFirefoxBrowserPath(app));
+  } catch (e) {
+    return "";
+  }
+};
