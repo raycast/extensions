@@ -22,7 +22,7 @@
   "commands": [
     {
       "name": "send-message-to-bark",
-      "title": "Send Message With Details",
+      "title": "Send Message with Details",
       "description": "Send messages with details to Bark via Raycast",
       "mode": "view",
       "preferences": [
