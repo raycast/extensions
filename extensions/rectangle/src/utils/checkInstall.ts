@@ -5,8 +5,16 @@ async function isRectangleInstalled() {
   return applications.some(({ bundleId }) => bundleId === "com.knollsoft.Rectangle");
 }
 
-export async function checkRectangleInstallation() {
-  if (!(await isRectangleInstalled())) {
+/**
+ * Ensures that Rectangle is installed.
+ *
+ * If Rectangle is not installed, displays a toast notification prompting the user to download it from rectangleapp.com.
+ *
+ * @returns {boolean} Whether Rectangle installation was detected.
+ */
+export async function ensureRectangleIsInstalled(): Promise<boolean> {
+  const isInstalled = await isRectangleInstalled();
+  if (!isInstalled) {
     const options: Toast.Options = {
       style: Toast.Style.Failure,
       title: "Rectangle is not installed.",
@@ -22,4 +30,5 @@ export async function checkRectangleInstallation() {
 
     await showToast(options);
   }
+  return isInstalled;
 }
