@@ -66,13 +66,6 @@ export async function fetchDatabaseProperties(databaseId: string) {
     propertyNames.forEach((name) => {
       const property = database.properties[name];
       if (isWritableProperty(property)) {
-        if (property.type == "select")
-          property.select.options.unshift({
-            id: "_select_null_",
-            name: "No Selection",
-            color: "default",
-          });
-
         databaseProperties.push(property);
       }
     });

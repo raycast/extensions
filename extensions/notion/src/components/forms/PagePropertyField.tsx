@@ -30,6 +30,12 @@ export function createConvertToFieldFunc(
       case "status":
         return (
           <Form.Dropdown {...itemPropsFor<typeof property.type>(property)}>
+            {property.type == "select" &&
+              createMapOptionsFunc(Form.Dropdown.Item)({
+                id: "_select_null_",
+                name: "No Selection",
+                color: "default",
+              })}
             {getPropertyConfig(property, [property.type])?.options.map(createMapOptionsFunc(Form.Dropdown.Item))}
           </Form.Dropdown>
         );
@@ -49,8 +55,6 @@ export function createConvertToFieldFunc(
           </Form.TagPicker>
         );
       }
-      case "formula":
-        return null;
       default:
         return (
           <Form.TextField
@@ -90,8 +94,6 @@ export type FieldProps<T extends DatabaseProperty["type"]> = ReturnType<
         ? boolean
         : T extends "multi_select" | "relation" | "people"
           ? string[]
-          : T extends "formula"
-            ? null
-            : string;
+          : string;
   }>
 >["itemProps"][string];
