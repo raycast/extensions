@@ -43,12 +43,12 @@ type PageListItemProps = {
   mutate: () => Promise<void>;
   users?: User[];
   icon?: Image.ImageLike;
-  customActions?: JSX.Element[];
+  kanbanStatusAction?: JSX.Element;
 };
 
 export function PageListItem({
   page,
-  customActions,
+  kanbanStatusAction,
   databaseProperties,
   databaseView,
   setRecentPage,
@@ -155,7 +155,7 @@ export function PageListItem({
         <ActionPanel>
           <ActionPanel.Section title={title}>
             {...OpenPageActions}
-            {...customActions || []}
+            {kanbanStatusAction}
             {databaseProperties && (
               <Action.Push
                 title="Edit Property"

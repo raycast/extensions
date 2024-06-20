@@ -11,7 +11,7 @@ import {
 import type { DatabaseView } from "../utils/types";
 
 import { PageListItem } from "./PageListItem";
-import { ActionEditPageProperty } from "./actions";
+import { ActionKanbanStatus } from "./actions";
 
 type DatabaseViewProps = {
   databaseId: string;
@@ -187,18 +187,18 @@ export function DatabaseView(props: DatabaseViewProps) {
             setRecentPage={setRecentPage}
             removeRecentPage={removeRecentPage}
             users={users}
-            customActions={[
-              <ActionEditPageProperty
-                key={`kanban-section-${ds.id}-page-${p.id}-custom-edit-status-action`}
-                databaseProperty={statusProperty}
-                options={customOptions}
-                pageId={p.id}
-                pageProperty={p.properties[propertyId]}
-                icon="./icon/kanban_status_started.png"
-                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-                mutate={mutate}
-              />,
-            ]}
+            kanbanStatusAction={
+              customOptions && (
+                <ActionKanbanStatus
+                  key={`kanban-section-${ds.id}-page-${p.id}-custom-edit-status-action`}
+                  pageId={p.id}
+                  databaseProperty={statusProperty}
+                  pageProperty={p.properties[propertyId]}
+                  statusOptions={customOptions}
+                  mutate={mutate}
+                />
+              )
+            }
             databaseView={databaseView}
             databaseProperties={databaseProperties}
             setDatabaseView={setDatabaseView}
