@@ -7,7 +7,7 @@ import {
   notionColorToTintColor,
   patchPage,
   PageProperty,
-  DatabaseProperty,
+  WritableDatabaseProperty,
   PropertyConfig,
   getPropertyConfig,
 } from "../../utils/notion";
@@ -25,7 +25,7 @@ export function ActionEditPageProperty({
   icon,
   options,
 }: {
-  databaseProperty: DatabaseProperty;
+  databaseProperty: WritableDatabaseProperty;
   pageId: string;
   pageProperty?: PageProperty;
   mutate: () => Promise<void>;

@@ -8,10 +8,9 @@ import { handleError, isNotNullOrUndefined, pageMapper } from "../global";
 import { getNotionClient } from "../oauth";
 import { formValueToPropertyValue } from "../page/property";
 
-import { DatabaseProperty } from "./property";
+import { WritableDatabaseProperty } from "./property";
 
-export { getPropertyConfig, type PropertyConfig } from "./property";
-export type { DatabaseProperty };
+export * from "./property";
 
 export async function fetchDatabase(pageId: string, silent: boolean = true) {
   try {
@@ -61,7 +60,7 @@ export async function fetchDatabaseProperties(databaseId: string) {
     const database = await notion.databases.retrieve({ database_id: databaseId });
     const propertyNames = Object.keys(database.properties).reverse();
 
-    const databaseProperties: DatabaseProperty[] = [];
+    const databaseProperties: WritableDatabaseProperty[] = [];
 
     propertyNames.forEach((name) => {
       const property = database.properties[name];
@@ -131,7 +130,7 @@ export async function createDatabasePage(values: Form.Values) {
     }
 
     Object.keys(props).forEach((formId) => {
-      const type = formId.match(/(?<=property::).*(?=::)/g)?.[0] as DatabaseProperty["type"] | null;
+      const type = formId.match(/(?<=property::).*(?=::)/g)?.[0] as WritableDatabaseProperty["type"] | null;
       if (!type) return;
       const propId = formId.match(new RegExp("(?<=property::" + type + "::).*", "g"))?.[0];
       const value = values[formId];

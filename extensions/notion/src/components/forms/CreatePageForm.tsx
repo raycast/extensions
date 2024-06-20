@@ -23,7 +23,7 @@ import {
   useRelations,
   useUsers,
 } from "../../hooks";
-import { createDatabasePage, DatabaseProperty } from "../../utils/notion";
+import { createDatabasePage, DatabaseProperty, WritableDatabaseProperty } from "../../utils/notion";
 import { handleOnOpenPage } from "../../utils/openPage";
 import { ActionSetVisibleProperties } from "../actions";
 import { ActionSetOrderProperties } from "../actions";
@@ -170,7 +170,7 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
     });
   }
 
-  function itemPropsFor<T extends DatabaseProperty["type"]>(property: DatabaseProperty) {
+  function itemPropsFor<T extends WritableDatabaseProperty["type"]>(property: WritableDatabaseProperty) {
     const id = createPropertyId(property);
     return {
       ...(itemProps[id] as FieldProps<T>),

@@ -5,7 +5,7 @@ import {
   notionColorToTintColor,
   getPageIcon,
   Page,
-  DatabaseProperty,
+  WritableDatabaseProperty,
   User,
   PropertyConfig,
   getPropertyConfig,
@@ -13,11 +13,11 @@ import {
 } from "../../utils/notion";
 
 export function createConvertToFieldFunc(
-  itemPropsFor: <T extends WritablePropertyTypes>(property: DatabaseProperty) => FieldProps<T>,
+  itemPropsFor: <T extends WritablePropertyTypes>(property: WritableDatabaseProperty) => FieldProps<T>,
   relationPages: Record<string, Page[]> | undefined,
   users: User[],
 ) {
-  return (property: DatabaseProperty) => {
+  return (property: WritableDatabaseProperty) => {
     let placeholder = property.type.replace(/_/g, " ");
     placeholder = placeholder.charAt(0).toUpperCase() + placeholder.slice(1);
 
@@ -86,7 +86,7 @@ function createMapOptionsFunc(Tag: typeof Form.Dropdown.Item | typeof Form.TagPi
   };
 }
 
-export type FieldProps<T extends DatabaseProperty["type"]> = ReturnType<
+export type FieldProps<T extends WritableDatabaseProperty["type"]> = ReturnType<
   typeof useForm<{
     [k: string]: T extends "date"
       ? Date | null

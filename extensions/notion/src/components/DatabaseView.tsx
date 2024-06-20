@@ -4,7 +4,7 @@ import {
   notionColorToTintColor,
   getPropertyConfig,
   Page,
-  DatabaseProperty,
+  WritableDatabaseProperty,
   PropertyConfig,
   User,
 } from "../utils/notion";
@@ -16,7 +16,7 @@ import { ActionEditPageProperty } from "./actions";
 type DatabaseViewProps = {
   databaseId: string;
   databasePages: Page[];
-  databaseProperties: DatabaseProperty[];
+  databaseProperties: WritableDatabaseProperty[];
   databaseView?: DatabaseView;
   setDatabaseView?: (view: DatabaseView) => Promise<void>;
   setRecentPage: (page: Page) => Promise<void>;

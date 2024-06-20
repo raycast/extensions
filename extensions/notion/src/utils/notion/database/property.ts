@@ -2,12 +2,12 @@ import type { DatabaseObjectResponse } from "@notionhq/client/build/src/api-endp
 
 import type { WritablePropertyTypes } from "..";
 
-type AllDatabaseProperty = DatabaseObjectResponse["properties"][string];
-export type DatabaseProperty = Extract<AllDatabaseProperty, { type: WritablePropertyTypes }>;
+export type DatabaseProperty = DatabaseObjectResponse["properties"][string];
+export type WritableDatabaseProperty = Extract<DatabaseProperty, { type: WritablePropertyTypes }>;
 
 type ObjectValues<T> = T[keyof T];
 export type PropertyConfig<T extends WritablePropertyTypes = WritablePropertyTypes> = {
-  [T in DatabaseProperty as T["type"]]: ObjectValues<Omit<T, keyof DatabaseProperty>>;
+  [T in WritableDatabaseProperty as T["type"]]: ObjectValues<Omit<T, keyof WritableDatabaseProperty>>;
 }[T];
 export function getPropertyConfig<T extends WritablePropertyTypes>(
   property: DatabaseProperty,

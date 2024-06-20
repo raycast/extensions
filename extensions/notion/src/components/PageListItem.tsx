@@ -14,7 +14,7 @@ import {
 import { format, formatDistanceToNow } from "date-fns";
 
 import {
-  DatabaseProperty,
+  WritableDatabaseProperty,
   deleteDatabase,
   deletePage,
   getPageIcon,
@@ -36,7 +36,7 @@ import { EditPagePropertiesForm } from "./forms/EditPagePropertiesForm";
 type PageListItemProps = {
   page: Page;
   databaseView?: DatabaseView;
-  databaseProperties?: DatabaseProperty[];
+  databaseProperties?: WritableDatabaseProperty[];
   setDatabaseView?: (databaseView: DatabaseView) => Promise<void>;
   setRecentPage: (page: Page) => Promise<void>;
   removeRecentPage: (id: string) => Promise<void>;
@@ -91,7 +91,7 @@ export function PageListItem({
   }
 
   const visiblePropertiesIds: string[] =
-    databaseProperties?.filter((dp: DatabaseProperty) => databaseView?.properties?.[dp.id]).map((dp) => dp.id) || [];
+    databaseProperties?.filter((dp) => databaseView?.properties?.[dp.id]).map((dp) => dp.id) || [];
 
   const title = page.title ? page.title : "Untitled";
 

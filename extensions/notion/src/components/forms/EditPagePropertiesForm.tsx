@@ -5,6 +5,7 @@ import { useVisibleDatabasePropIds, useRecentPages, useRelations, useUsers } fro
 import {
   patchPage,
   DatabaseProperty,
+  WritableDatabaseProperty,
   Page,
   WritablePageProperty,
   propertyValueToFormValue,
@@ -24,7 +25,7 @@ export type CreatePageFormValues = {
 
 interface EditPagePropertiesFormParams {
   page: Page;
-  databaseProperties: DatabaseProperty[];
+  databaseProperties: WritableDatabaseProperty[];
   mutate: () => Promise<void>;
 }
 
@@ -97,7 +98,7 @@ export function EditPagePropertiesForm({
     return 0;
   }
 
-  function itemPropsFor<T extends DatabaseProperty["type"]>(dbProperty: DatabaseProperty) {
+  function itemPropsFor<T extends WritableDatabaseProperty["type"]>(dbProperty: WritableDatabaseProperty) {
     const value = propertyValueToFormValue<T>(properties[dbProperty.name] as WritablePageProperty);
     return {
       title: dbProperty.name,
