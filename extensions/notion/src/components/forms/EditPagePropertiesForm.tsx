@@ -80,7 +80,7 @@ export function EditPagePropertiesForm({
   }
 
   function filterProperties(dp: DatabaseProperty) {
-    return dp.type != "title" && dp.type != "formula" && (!visiblePropIds || visiblePropIds.includes(dp.id));
+    return dp.type != "title" && (!visiblePropIds || visiblePropIds.includes(dp.id));
   }
 
   function sortProperties(a: DatabaseProperty, b: DatabaseProperty) {

@@ -56,16 +56,13 @@ type Quicklink = Action.CreateQuicklink.Props["quicklink"];
 
 const createPropertyId = (property: DatabaseProperty) => "property::" + property.type + "::" + property.id;
 
-const NON_EDITABLE_PROPETY_TYPES = ["formula"];
-const filterNoEditableProperties = (dp: DatabaseProperty) => !NON_EDITABLE_PROPETY_TYPES.includes(dp.type);
-
 export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFormProps) {
   const preferences = getPreferenceValues<CreatePageFormPreferences>();
   const defaultValues = launchContext?.defaults ?? defaults;
   const initialDatabaseId = defaultValues?.database;
 
   const [databaseId, setDatabaseId] = useState<string | null>(initialDatabaseId ? initialDatabaseId : null);
-  const { data: databaseProperties } = useDatabaseProperties(databaseId, filterNoEditableProperties);
+  const { data: databaseProperties } = useDatabaseProperties(databaseId);
   const { visiblePropIds, setVisiblePropIds } = useVisibleDatabasePropIds(
     databaseId || "__no_id__",
     launchContext?.visiblePropIds,
@@ -80,7 +77,6 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
   const initialValues: Partial<CreatePageFormValues> = { database: databaseId ?? undefined };
   const validation: Parameters<typeof useForm<CreatePageFormValues>>[0]["validation"] = {};
   for (const { id, type } of databaseProperties) {
-    if (NON_EDITABLE_PROPETY_TYPES.includes(type)) continue;
     const key = "property::" + type + "::" + id;
     if (type == "title") validation[key] = FormValidation.Required;
     let value = defaultValues?.[key];

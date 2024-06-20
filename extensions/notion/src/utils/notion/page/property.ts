@@ -52,8 +52,6 @@ export function formValueToPropertyValue(
         type,
         value.map((id) => ({ id })),
       );
-    case "formula":
-      return;
     case "checkbox":
       return formattedProperty(type, value);
     default:
@@ -86,8 +84,6 @@ export function propertyValueToFormValue(
     case "relation":
     case "people":
       return getPropertyValue(property)?.map((opt) => opt.id);
-    case "formula":
-      return;
     case "number":
       return getPropertyValue(property)?.toString();
     default:

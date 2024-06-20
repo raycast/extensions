@@ -13,7 +13,7 @@ export * from "./user";
 export type NotionObject = UnwrapArray<UnwrapPromise<ReturnType<Client["search"]>>["results"]>;
 
 // prettier-ignore
-export const writablePropertyTypes = ["title", "number", "rich_text", "url", "email", "phone_number", "date", "checkbox", "select", "multi_select", "formula", "people", "relation", "status"] as const
+export const writablePropertyTypes = ["title", "number", "rich_text", "url", "email", "phone_number", "date", "checkbox", "select", "multi_select", "people", "relation", "status"] as const
 export type WritablePropertyTypes = (typeof writablePropertyTypes)[number];
 export function isWritableProperty<T extends { type: PageProperty["type"] }>(
   property: T,
