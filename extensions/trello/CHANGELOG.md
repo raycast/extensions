@@ -1,5 +1,9 @@
 # Trello Changelog
 
+## [Update] - 2024-06-20
+
+Update dependencies and case of read me to show up in Raycast store.
+
 ## [Update] - 2024-06-04
 
 Fix scope in auth URL in read me and update dependencies
