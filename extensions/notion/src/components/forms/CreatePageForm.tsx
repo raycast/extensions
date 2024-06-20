@@ -175,7 +175,6 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
     return {
       ...(itemProps[id] as FieldProps<T>),
       title: property.name,
-      key: id,
       id,
     };
   }

@@ -107,7 +107,6 @@ export function EditPagePropertiesForm({
     const value = propertyValueToFormValue<T>(properties[dbProperty.name] as WritablePageProperty);
     return {
       title: dbProperty.name,
-      key: dbProperty.id,
       id: dbProperty.id,
       defaultValue: value === null ? undefined : value,
     };

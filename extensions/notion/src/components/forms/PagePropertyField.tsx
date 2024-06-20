@@ -23,13 +23,15 @@ export function createConvertToFieldFunc(
 
     switch (property.type) {
       case "date":
-        return <Form.DatePicker {...itemPropsFor<typeof property.type>(property)} />;
+        return <Form.DatePicker key={property.id} {...itemPropsFor<typeof property.type>(property)} />;
       case "checkbox":
-        return <Form.Checkbox {...itemPropsFor<typeof property.type>(property)} label={placeholder} />;
+        return (
+          <Form.Checkbox key={property.id} {...itemPropsFor<typeof property.type>(property)} label={placeholder} />
+        );
       case "select":
       case "status":
         return (
-          <Form.Dropdown {...itemPropsFor<typeof property.type>(property)}>
+          <Form.Dropdown key={property.id} {...itemPropsFor<typeof property.type>(property)}>
             {property.type == "select" &&
               createMapOptionsFunc(Form.Dropdown.Item)({
                 id: "_select_null_",
@@ -50,7 +52,7 @@ export function createConvertToFieldFunc(
           if (relationId) options = relationPages[relationId];
         }
         return (
-          <Form.TagPicker placeholder={placeholder} {...itemPropsFor<typeof property.type>(property)}>
+          <Form.TagPicker key={property.id} placeholder={placeholder} {...itemPropsFor<typeof property.type>(property)}>
             {options?.map(createMapOptionsFunc(Form.TagPicker.Item))}
           </Form.TagPicker>
         );
@@ -58,6 +60,7 @@ export function createConvertToFieldFunc(
       default:
         return (
           <Form.TextField
+            key={property.id}
             info="Supports a single line of inline Markdown"
             placeholder={placeholder}
             {...itemPropsFor<typeof property.type>(property)}
