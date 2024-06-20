@@ -10,7 +10,7 @@ export default function Server() {
   const [searchText, setSearchText] = useState<string>("");
   const [selectedServerId, setSelectedServerId] = useState<string | null>(null);
   const { push } = useNavigation();
-  let collectionsServers: ServerHookType = uS
+  const collectionsServers: ServerHookType = uS
 
   useEffect(() => {
     if (searchText != "" && searchText.length > 1) {

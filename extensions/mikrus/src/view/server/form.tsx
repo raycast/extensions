@@ -8,7 +8,7 @@ export const ServerForm = (props: { server?: ServerType; use: { servers: ServerH
 
   const { handleSubmit, itemProps } = useForm<ServerType>({
     onSubmit: async (server: ServerType) => {
-      let updatedItem: ServerType = { ...server };
+      const updatedItem: ServerType = { ...server };
 
       const items = use.servers.data.filter((x: ServerType) => x.server_id === updatedItem.server_id);
       const item = items[0]

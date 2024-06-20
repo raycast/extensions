@@ -15,7 +15,7 @@
   "commands": [
     {
       "name": "server",
-      "title": "MikrUs - servers list",
+      "title": "MikrUs - Servers List",
       "subtitle": "List servers",
       "description": "Collection on servers",
       "mode": "view"

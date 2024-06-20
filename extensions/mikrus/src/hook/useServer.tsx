@@ -37,7 +37,7 @@ export function useServer(): ServerHookType {
   }, [setData, data]);
 
   const update = useCallback(async (item: ServerType) => {
-    setData((prev: any) => {
+    setData((prev) => {
       return prev.map((v: ServerType) => {
         if (v.server_id === item.server_id) {
           return item;
@@ -99,6 +99,7 @@ async function apiServerLoadDetail(server: ServerType): Promise<ServerType> {
     method: "POST",
     body: formdata,
   })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   .then(async (response: any) => response.json())
   .catch((err) => {
     console.log(err)
@@ -108,6 +109,7 @@ async function apiServerLoadDetail(server: ServerType): Promise<ServerType> {
     method: "POST",
     body: formdata,
   })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   .then(async (response: any) => response.json())
   .catch((err) => {
     console.log(err)
@@ -117,6 +119,7 @@ async function apiServerLoadDetail(server: ServerType): Promise<ServerType> {
     method: "POST",
     body: formdata,
   })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   .then(async (response: any) => response.json())
   .catch((err) => {
     console.log(err)
@@ -126,6 +129,7 @@ async function apiServerLoadDetail(server: ServerType): Promise<ServerType> {
     method: "POST",
     body: formdata,
   })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   .then(async (response: any) => response.json())
   .catch((err) => {
     console.log(err)
@@ -147,6 +151,7 @@ async function apiServerLoadDetail(server: ServerType): Promise<ServerType> {
   return server
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function apiLoadCollection(setData: any, oldData: ServerType[]) {
   const formdata = new FormData();
   formdata.append("srv", GetDefaultServer());
@@ -156,14 +161,15 @@ async function apiLoadCollection(setData: any, oldData: ServerType[]) {
     method: "POST",
     body: formdata,
   })
-  .then(async (response: any) => response.json())
+  .then(async (response) => response.json())
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   .then(async (res: any) => {
     if (res.error) {
       console.log(res)
       return
     }
 
-    const newRes: ServerType[] = res.map((item: any) => {
+    const newRes: ServerType[] = res.map((item: ServerType) => {
       const existing = oldData.find((x: ServerType) => x.server_id === item.server_id);
       return {
         ...item,
@@ -187,7 +193,8 @@ async function apiRestart(server: ServerType) {
     method: "POST",
     body: formdata,
   })
-  .then(async (response: any) => response.json())
+  .then(async (response) => response.json())
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   .then(async (res: any) => {
     if (res.error) {
       console.log(res)
@@ -208,7 +215,8 @@ async function apiAmfetamine(server: ServerType) {
     method: "POST",
     body: formdata,
   })
-  .then(async (response: any) => response.json())
+  .then(async (response) => response.json())
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   .then(async (res: any) => {
     if (res.error) {
       console.log(res)
