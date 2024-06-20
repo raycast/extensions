@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Icon, List } from "@raycast/api";
 import { useShellHistory } from "./hooks/useShellHistory";
-import { Shell, shellTags } from "./types/types";
+import { shellTags } from "./types/types";
 import { ActionShellCommand } from "./components/action-shell-command";
-import { extractCliTool, isEmpty } from "./utils/shell-utils";
+import { extractCliTool, getShellIcon, isEmpty } from "./utils/shell-utils";
 
 export default function Index() {
   const [shellTag, setShellTag] = useState<string>(shellTags[0].value);
@@ -59,7 +59,7 @@ export default function Index() {
                       },
                       {
                         tag: history.shell,
-                        icon: history.shell === Shell.ZSH ? "zsh.png" : "bash.png",
+                        icon: getShellIcon(history.shell),
                         tooltip: "Shell: " + history.shell,
                       },
                     ]}

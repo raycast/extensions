@@ -14,7 +14,7 @@ import React from "react";
 import { ActionOpenPreferences } from "./action-open-preferences";
 import { PrimaryAction, primaryAction } from "../types/preferences";
 import { useTerminals } from "../hooks/useTerminals";
-import { bashHistoryFilePath, runShellCommand, zshHistoryFilePath } from "../utils/shell-utils";
+import { bashHistoryFilePath, getShellIcon, runShellCommand, zshHistoryFilePath } from "../utils/shell-utils";
 import { CliTool, Shell, ShellHistory } from "../types/types";
 import { MutatePromise } from "@raycast/utils/dist/types";
 import KeyEquivalent = Keyboard.KeyEquivalent;
@@ -108,11 +108,11 @@ export function ActionShellCommand(props: {
           shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
           onAction={async () => {
             await confirmAlert({
-              icon: shell === Shell.ZSH ? "zsh.png" : "bash.png",
+              icon: getShellIcon(shell),
               title: `Clear ${shell} History`,
               message: `Clearing ${shell} history cannot be undone!`,
               primaryAction: {
-                title: "Clear",
+                title: "Confirm",
                 style: ActionStyle.Destructive,
                 onAction: async () => {
                   if (shell === Shell.ZSH) {

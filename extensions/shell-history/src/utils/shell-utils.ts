@@ -16,6 +16,18 @@ export const zshHistoryFilePath = path.join(os.homedir(), ".zsh_history");
 export const bashHistoryFilePath = path.join(os.homedir(), ".bash_history");
 export const fishHistoryFilePath = path.join(os.homedir(), ".local/share/fish/fish_history");
 
+export const getShellIcon = (shell: Shell) => {
+  switch (shell) {
+    case Shell.ZSH:
+      return "zsh.png";
+    case Shell.BASH:
+      return "bash.png";
+    case Shell.FISH:
+      return "fish.png";
+    default:
+      return "shell-history-icon.png";
+  }
+};
 export const getShellHistoryFromFiles = async (shell: Shell, maxLineCount: number = parseInt(maxLines, 10)) => {
   let shellHistoryFilePath;
 
@@ -38,7 +50,7 @@ export const getShellHistoryFromFiles = async (shell: Shell, maxLineCount: numbe
     return removeDuplicates ? removeArrayDuplicates(shellHistoryArray.reverse()) : shellHistoryArray.reverse();
   } else {
     const commands = await readLastLines.read(shellHistoryFilePath, maxLineCount * 2);
-    return parseFishShellHistory(commands, shell);
+    return parseFishShellHistory(commands, shell).reverse();
   }
 };
 
