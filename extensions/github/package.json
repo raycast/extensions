@@ -221,6 +221,31 @@
           "label": "Show Count",
           "title": "Appearance",
           "default": true
+        },
+        {
+          "name": "sortQuery",
+          "type": "dropdown",
+          "required": false,
+          "default": "sort:updated-desc",
+          "title": "Sort By",
+          "description": "Sorts the Issues",
+          "data": [
+            { "title": "Newest", "value": "sort:created-desc" },
+            { "title": "Oldest", "value": "sort:created-asc" },
+            { "title": "Most Commented", "value": "sort:comments-desc" },
+            { "title": "Least Commented", "value": "sort:comments-asc" },
+            { "title": "Recently Updated", "value": "sort:updated-desc" },
+            { "title": "Least Recently Updated", "value": "sort:updated-asc" },
+            { "title": "Best Match", "value": "sort:relevance-desc" },
+            { "title": "👍", "value": "sort:reactions-+1-desc" },
+            { "title": "👎", "value": "sort:reactions--1-desc" },
+            { "title": "😄", "value": "sort:reactions-smile-desc" },
+            { "title": "🎉", "value": "sort:reactions-tada-desc" },
+            { "title": "🙁", "value": "sort:reactions-thinking_face-desc" },
+            { "title": "❤️", "value": "sort:reactions-heart-desc" },
+            { "title": "🚀", "value": "sort:reactions-rocket-desc" },
+            { "title": "👀", "value": "sort:reactions-eyes-desc" }
+          ]
         }
       ]
     },
@@ -345,6 +370,31 @@
           "default": false,
           "label": "Recently Closed",
           "description": "Includes pull request you recently closed in the icon counter."
+        },
+        {
+          "name": "sortQuery",
+          "type": "dropdown",
+          "required": false,
+          "default": "sort:updated-desc",
+          "title": "Sort By",
+          "description": "Sorts the Pull Requests per section",
+          "data": [
+            { "title": "Newest", "value": "sort:created-desc" },
+            { "title": "Oldest", "value": "sort:created-asc" },
+            { "title": "Most Commented", "value": "sort:comments-desc" },
+            { "title": "Least Commented", "value": "sort:comments-asc" },
+            { "title": "Recently Updated", "value": "sort:updated-desc" },
+            { "title": "Least Recently Updated", "value": "sort:updated-asc" },
+            { "title": "Best Match", "value": "sort:relevance-desc" },
+            { "title": "👍", "value": "sort:reactions-+1-desc" },
+            { "title": "👎", "value": "sort:reactions--1-desc" },
+            { "title": "😄", "value": "sort:reactions-smile-desc" },
+            { "title": "🎉", "value": "sort:reactions-tada-desc" },
+            { "title": "🙁", "value": "sort:reactions-thinking_face-desc" },
+            { "title": "❤️", "value": "sort:reactions-heart-desc" },
+            { "title": "🚀", "value": "sort:reactions-rocket-desc" },
+            { "title": "👀", "value": "sort:reactions-eyes-desc" }
+          ]
         }
       ]
     }
@@ -408,6 +458,7 @@
     "@graphql-codegen/typescript": "^4.0.7",
     "@graphql-codegen/typescript-graphql-request": "^6.2.0",
     "@graphql-codegen/typescript-operations": "^4.2.1",
+    "@parcel/watcher": "^2.4.1",
     "@raycast/eslint-config": "^1.0.8",
     "@types/lodash": "^4.17.5",
     "@types/node": "^20.14.5",

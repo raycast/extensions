@@ -1,5 +1,6 @@
 import { Color } from "@raycast/api";
 
+import { commands } from "../../package.json";
 import { IssueDetailFieldsFragment, IssueFieldsFragment, IssueStateReason } from "../generated/graphql";
 
 import { getGitHubUser } from "./users";
@@ -31,3 +32,13 @@ export function getIssueStatus(issue: IssueFieldsFragment | IssueDetailFieldsFra
 export function getIssueAuthor(issue: IssueFieldsFragment | IssueDetailFieldsFragment) {
   return getGitHubUser(issue.author);
 }
+
+const SORT_TYPE_PREFERENCE = commands
+  .find(({ name }) => name === "my-issues-menu")!
+  .preferences!.find(({ name }) => name === "sortQuery")! as {
+  default: string;
+  data: { title: string; value: string }[];
+};
+
+export const ISSUE_SORT_TYPES_TO_QUERIES = SORT_TYPE_PREFERENCE.data;
+export const ISSUE_DEFAULT_SORT_QUERY = SORT_TYPE_PREFERENCE.default;

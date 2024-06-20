@@ -42,7 +42,7 @@ function getPullRequestStatusIcon(pr: PullRequestFieldsFragment): Icon | string 
 
 function MyPullRequestsMenu() {
   const preferences = getPreferenceValues<Preferences.MyPullRequestsMenu>();
-  const { data: sections, isLoading } = useMyPullRequests(null);
+  const { data: sections, isLoading } = useMyPullRequests(null, preferences.sortQuery);
 
   function displayTitle() {
     if (displayTitlePreference() !== true) {

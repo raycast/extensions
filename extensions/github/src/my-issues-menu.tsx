@@ -26,7 +26,8 @@ function getMaxIssuesPreference(): number {
 }
 
 function MyIssuesMenu() {
-  const { data: sections, isLoading } = useMyIssues(null);
+  const { sortQuery } = getPreferenceValues<Preferences.MyIssuesMenu>();
+  const { data: sections, isLoading } = useMyIssues(null, sortQuery);
 
   const issuesCount = sections?.reduce((acc, section) => acc + section.issues.length, 0);
 

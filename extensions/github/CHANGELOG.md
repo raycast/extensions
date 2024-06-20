@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Sort Actions] - {PR_MERGE_DATE}
+
+- Adds an action to sort the PRs, issues, discussions and repos
+
 ## [Improvements] - 2024-06-20
 
 - PRs: Add an option to omit team review requests from query results

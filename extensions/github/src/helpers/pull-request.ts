@@ -1,6 +1,7 @@
 import { Color, Icon, List } from "@raycast/api";
 import { uniqBy } from "lodash";
 
+import { commands } from "../../package.json";
 import {
   PullRequestDetailsFieldsFragment,
   PullRequestFieldsFragment,
@@ -131,3 +132,13 @@ export function getReviewDecision(reviewDecision?: PullRequestReviewDecision | n
       return null;
   }
 }
+
+const SORT_TYPE_PREFERENCE = commands
+  .find(({ name }) => name === "my-pull-requests-menu")!
+  .preferences!.find(({ name }) => name === "sortQuery")! as {
+  default: string;
+  data: { title: string; value: string }[];
+};
+
+export const PR_SORT_TYPES_TO_QUERIES = SORT_TYPE_PREFERENCE.data;
+export const PR_DEFAULT_SORT_QUERY = SORT_TYPE_PREFERENCE.default;

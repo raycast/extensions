@@ -6,11 +6,11 @@ import { getGitHubClient } from "../api/githubClient";
 import { IssueFieldsFragment } from "../generated/graphql";
 import { pluralize } from "../helpers";
 
-export function useMyIssues(repository: string | null) {
+export function useMyIssues(repository: string | null, sortQuery: string) {
   const { github } = getGitHubClient();
 
   const { data, ...rest } = useCachedPromise(
-    async (repository) => {
+    async (repository, sortTxt) => {
       const numberOfDays = 60;
       const twoWeeksAgo = format(subDays(Date.now(), numberOfDays), "yyyy-MM-dd");
       const updatedFilter = `updated:>${twoWeeksAgo}`;
@@ -19,18 +19,20 @@ export function useMyIssues(repository: string | null) {
 
       const results = await Promise.all(
         [
-          `is:issue author:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,
-          `is:issue author:@me archived:false is:closed ${updatedFilter} ${repositoryFilter}`,
-          `is:issue assignee:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,
-          `is:issue assignee:@me archived:false is:closed ${updatedFilter} ${repositoryFilter}`,
-          `is:issue mentions:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,
-          `is:issue mentions:@me archived:false is:closed ${updatedFilter} ${repositoryFilter}`,
-        ].map((query) => github.searchIssues({ query, numberOfItems: 20 })),
+          `is:issue author:@me archived:false is:open`,
+          `is:issue author:@me archived:false is:closed`,
+          `is:issue assignee:@me archived:false is:open`,
+          `is:issue assignee:@me archived:false is:closed`,
+          `is:issue mentions:@me archived:false is:open`,
+          `is:issue mentions:@me archived:false is:closed`,
+        ].map((query) =>
+          github.searchIssues({ query: `${query} ${sortTxt} ${updatedFilter} ${repositoryFilter}`, numberOfItems: 20 }),
+        ),
       );
 
       return results.map((result) => result.search.nodes as IssueFieldsFragment[]);
     },
-    [repository],
+    [repository, sortQuery],
   );
 
   const [created, createdClosed, assigned, assignedClosed, mentioned, mentionedClosed] = data ?? [];
