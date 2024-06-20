@@ -1,5 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
-import { compareDesc, format, subDays } from "date-fns";
+import { format, subDays } from "date-fns";
 import { uniqBy } from "lodash";
 
 import { getGitHubClient } from "../api/githubClient";
@@ -50,8 +50,6 @@ export function useMyIssues(repository: string | null, sortQuery: string) {
   ]
     .filter((section) => section.issues && section.issues.length > 0)
     .map((section) => {
-      section.issues?.sort((a, b) => compareDesc(new Date(a.updatedAt), new Date(b.updatedAt)));
-
       const subtitle = pluralize(section.issues?.length ?? 0, "issue", { withNumber: true });
 
       return { ...section, subtitle };
