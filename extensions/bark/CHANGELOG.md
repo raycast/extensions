@@ -1,6 +1,6 @@
 # Bark Changelog
 
-## [Command Optimisation] - {PR_MERGE_DATE}
+## [Command Optimisation] - 2024-06-20
 
 - Command optimisation for faster message sending
 
