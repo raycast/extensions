@@ -166,16 +166,21 @@ export function VisionView(props: AskImageProps) {
         )
       }
       metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Separator />
-          {imageMeta.size && <Detail.Metadata.Label title="Size" text={toUnit(imageMeta.size)} />}
-          {imageMeta.width && <Detail.Metadata.Label title="Width" text={String(imageMeta.width)} />}
-          {imageMeta.height && <Detail.Metadata.Label title="Height" text={String(imageMeta.height)} />}
-
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Culmulative Tokens" text={cumulative_tokens.toString()} />
-          <Detail.Metadata.Label title="Culmulative Cost" text={cumulative_cost.toFixed(4) + " ¢"} />
-        </Detail.Metadata>
+        imageMeta.size || imageMeta.width || imageMeta.height ? (
+          <Detail.Metadata>
+            {imageMeta.size || imageMeta.width || (imageMeta.height && <Detail.Metadata.Separator />)}
+            {imageMeta.size && <Detail.Metadata.Label title="Size" text={toUnit(imageMeta.size)} />}
+            {imageMeta.width && <Detail.Metadata.Label title="Width" text={String(imageMeta.width)} />}
+            {imageMeta.height && <Detail.Metadata.Label title="Height" text={String(imageMeta.height)} />}
+            {cumulative_tokens > 0 && (
+              <>
+                <Detail.Metadata.Separator />
+                <Detail.Metadata.Label title="Culmulative Tokens" text={cumulative_tokens.toString()} />
+                <Detail.Metadata.Label title="Culmulative Cost" text={cumulative_cost.toFixed(4) + " ¢"} />
+              </>
+            )}
+          </Detail.Metadata>
+        ) : null
       }
     />
   );
