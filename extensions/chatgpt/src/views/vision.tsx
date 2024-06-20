@@ -175,8 +175,8 @@ export function VisionView(props: AskImageProps) {
             {cumulative_tokens > 0 && (
               <>
                 <Detail.Metadata.Separator />
-                <Detail.Metadata.Label title="Culmulative Tokens" text={cumulative_tokens.toString()} />
-                <Detail.Metadata.Label title="Culmulative Cost" text={cumulative_cost.toFixed(4) + " ¢"} />
+                <Detail.Metadata.Label title="Cumulative Tokens" text={cumulative_tokens.toString()} />
+                <Detail.Metadata.Label title="Cumulative Cost" text={cumulative_cost.toFixed(4) + " ¢"} />
               </>
             )}
           </Detail.Metadata>
