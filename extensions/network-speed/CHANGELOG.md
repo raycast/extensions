@@ -1,6 +1,6 @@
 # Network Speed Changelog
 
-## [Time cost] - {PR_MERGE_DATE}
+## [Time cost] - 2024-06-20
 
 - Show the time cost of the network speed test
 
