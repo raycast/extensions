@@ -10,53 +10,39 @@ export default function Server() {
   const [searchText, setSearchText] = useState<string>("");
   const [selectedServerId, setSelectedServerId] = useState<string | null>(null);
   const { push } = useNavigation();
-  const collectionsServers: ServerHookType = uS
+  const collectionsServers: ServerHookType = uS;
 
   useEffect(() => {
     if (searchText != "" && searchText.length > 1) {
-      collectionsServers.data = uS.data.filter((x: ServerType) => x.server_name.includes(searchText))
+      collectionsServers.data = uS.data.filter((x: ServerType) => x.server_name.includes(searchText));
     } else {
-      collectionsServers.data = uS.data
+      collectionsServers.data = uS.data;
     }
   }, [searchText]);
   useEffect(() => {
     const selected = collectionsServers.data.find((x: ServerType) => x.server_id === selectedServerId);
     if (selected) {
-      uS.detail(selected)
-      collectionsServers.data = uS.data
+      uS.detail(selected);
+      collectionsServers.data = uS.data;
     }
   }, [selectedServerId]);
 
   const getActionList = (
     <ActionPanel>
-      <Action
-        title={"Reload Servers"}
-        icon={Icon.Download}
-        onAction={() => uS.reload()}
-      />
+      <Action title={"Reload Servers"} icon={Icon.Download} onAction={() => uS.reload()} />
     </ActionPanel>
-  )
+  );
   const getActionItem = (server: ServerType) => (
     <ActionPanel>
       <Action
-          title={"Change"}
-          shortcut={{ modifiers: ["cmd"], key: "e" }}
-          icon={Icon.Pencil}
-          onAction={() => push(<ServerForm server={server} use={{ servers: collectionsServers }} />)}
-        />
-      <Action
-        title={"Restart"}
-        onAction={() => uS.itemRestart(server)}
+        title={"Change"}
+        shortcut={{ modifiers: ["cmd"], key: "e" }}
+        icon={Icon.Pencil}
+        onAction={() => push(<ServerForm server={server} use={{ servers: collectionsServers }} />)}
       />
-      <Action
-        title={"Amfetamine"}
-        onAction={() => uS.itemAmfetamine(server)}
-      />
-      <Action
-        title={"Reload Servers"}
-        icon={Icon.Download}
-        onAction={() => uS.reload()}
-      />
+      <Action title={"Restart"} onAction={() => uS.itemRestart(server)} />
+      <Action title={"Amfetamine"} onAction={() => uS.itemAmfetamine(server)} />
+      <Action title={"Reload Servers"} icon={Icon.Download} onAction={() => uS.reload()} />
     </ActionPanel>
   );
 
@@ -67,18 +53,14 @@ export default function Server() {
       filtering={false}
       throttle={false}
       selectedItemId={selectedServerId || undefined}
-      onSelectionChange={(id) => setSelectedServerId(id) }
+      onSelectionChange={(id) => setSelectedServerId(id)}
       searchBarPlaceholder="Search server..."
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      actions={getActionList} 
+      actions={getActionList}
     >
       {collectionsServers.data.length === 0 ? (
-        <List.EmptyView 
-          title="No servers" 
-          description="Reload servers" 
-          icon={Icon.Stars} 
-        />
+        <List.EmptyView title="No servers" description="Reload servers" icon={Icon.Stars} />
       ) : (
         <ServerListView
           key="servers"

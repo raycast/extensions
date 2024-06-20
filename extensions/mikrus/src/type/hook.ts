@@ -2,7 +2,7 @@ export interface BaseHookType<T> {
   data: T;
   isLoading: boolean;
 }
-  
+
 export type HookType<T> = BaseHookType<T[]>;
 
 export type PromiseFunctionNoArgType = () => Promise<void>;

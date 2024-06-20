@@ -53,4 +53,4 @@ export type ServerHookType = HookType<ServerType> & {
   detail: PromiseFunctionWithOneArgType<ServerType>;
   itemRestart: PromiseFunctionWithOneArgType<ServerType>;
   itemAmfetamine: PromiseFunctionWithOneArgType<ServerType>;
-}
+};

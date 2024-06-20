@@ -8,7 +8,7 @@ export function useServer(): ServerHookType {
   const [data, setData] = useState<ServerType[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
 
-  const localStorageName = "servers"
+  const localStorageName = "servers";
 
   useEffect(() => {
     (async () => {
@@ -16,7 +16,7 @@ export function useServer(): ServerHookType {
       if (stored) {
         setData((previous) => [...previous, ...JSON.parse(stored)]);
       } else {
-        await apiLoadCollection(setData, data)
+        await apiLoadCollection(setData, data);
       }
 
       setLoading(false);
@@ -28,7 +28,7 @@ export function useServer(): ServerHookType {
   }, [data]);
 
   const reload = useCallback(async () => {
-    await apiLoadCollection(setData, data)
+    await apiLoadCollection(setData, data);
 
     await showToast({
       title: "Server data realoaded!",
@@ -36,57 +36,69 @@ export function useServer(): ServerHookType {
     });
   }, [setData, data]);
 
-  const update = useCallback(async (item: ServerType) => {
-    setData((prev) => {
-      return prev.map((v: ServerType) => {
-        if (v.server_id === item.server_id) {
-          return item;
-        }
+  const update = useCallback(
+    async (item: ServerType) => {
+      setData((prev) => {
+        return prev.map((v: ServerType) => {
+          if (v.server_id === item.server_id) {
+            return item;
+          }
 
-        return v;
+          return v;
+        });
       });
-    });
 
-    await showToast({
-      title: "Server updated!",
-      style: Toast.Style.Success,
-    });
-  }, [setData, data]);
-
-  const detail = useCallback(async (server: ServerType) => {
-    const d = await apiServerLoadDetail(server)
-
-    setData((prev) => {
-      return prev.map((x) => {
-        if (x.server_id === d.server_id) {
-          return d;
-        }
-        return x;
+      await showToast({
+        title: "Server updated!",
+        style: Toast.Style.Success,
       });
-    });
-  }, [setData, data]);
+    },
+    [setData, data],
+  );
 
-  const itemRestart = useCallback(async (server: ServerType) => {
-    await apiRestart(server)
+  const detail = useCallback(
+    async (server: ServerType) => {
+      const d = await apiServerLoadDetail(server);
 
-    await showToast({
-      title: "Server restarted!",
-      style: Toast.Style.Success,
-    });
-  }, [setData, data]);
+      setData((prev) => {
+        return prev.map((x) => {
+          if (x.server_id === d.server_id) {
+            return d;
+          }
+          return x;
+        });
+      });
+    },
+    [setData, data],
+  );
 
-  const itemAmfetamine = useCallback(async (server: ServerType) => {
-    await apiAmfetamine(server)
+  const itemRestart = useCallback(
+    async (server: ServerType) => {
+      await apiRestart(server);
 
-    await showToast({
-      title: "Server amfetamine!",
-      style: Toast.Style.Success,
-    });
-  }, [setData, data]);
+      await showToast({
+        title: "Server restarted!",
+        style: Toast.Style.Success,
+      });
+    },
+    [setData, data],
+  );
+
+  const itemAmfetamine = useCallback(
+    async (server: ServerType) => {
+      await apiAmfetamine(server);
+
+      await showToast({
+        title: "Server amfetamine!",
+        style: Toast.Style.Success,
+      });
+    },
+    [setData, data],
+  );
 
   return useMemo(
     () => ({ data, isLoading, reload, update, detail, itemRestart, itemAmfetamine }),
-    [data, isLoading, reload, update, detail, itemRestart, itemAmfetamine]
+    [data, isLoading, reload, update, detail, itemRestart, itemAmfetamine],
   );
 }
 
@@ -99,56 +111,56 @@ async function apiServerLoadDetail(server: ServerType): Promise<ServerType> {
     method: "POST",
     body: formdata,
   })
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  .then(async (response: any) => response.json())
-  .catch((err) => {
-    console.log(err)
-  });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .then(async (response: any) => response.json())
+    .catch((err) => {
+      console.log(err);
+    });
 
   const logs = await fetch("https://api.mikr.us/logs", {
     method: "POST",
     body: formdata,
   })
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  .then(async (response: any) => response.json())
-  .catch((err) => {
-    console.log(err)
-  });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .then(async (response: any) => response.json())
+    .catch((err) => {
+      console.log(err);
+    });
 
   const ports = await fetch("https://api.mikr.us/porty", {
     method: "POST",
     body: formdata,
   })
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  .then(async (response: any) => response.json())
-  .catch((err) => {
-    console.log(err)
-  });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .then(async (response: any) => response.json())
+    .catch((err) => {
+      console.log(err);
+    });
 
   const clouds = await fetch("https://api.mikr.us/cloud", {
     method: "POST",
     body: formdata,
   })
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  .then(async (response: any) => response.json())
-  .catch((err) => {
-    console.log(err)
-  });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .then(async (response: any) => response.json())
+    .catch((err) => {
+      console.log(err);
+    });
 
   if (!info.error) {
-    server.info = info
+    server.info = info;
   }
   if (!logs.error) {
-    server.logs = logs
+    server.logs = logs;
   }
   if (!ports.error) {
-    server.ports = ports
+    server.ports = ports;
   }
   if (!clouds.error) {
-    server.clouds = clouds
+    server.clouds = clouds;
   }
 
-  return server
+  return server;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -161,27 +173,27 @@ async function apiLoadCollection(setData: any, oldData: ServerType[]) {
     method: "POST",
     body: formdata,
   })
-  .then(async (response) => response.json())
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  .then(async (res: any) => {
-    if (res.error) {
-      console.log(res)
-      return
-    }
+    .then(async (response) => response.json())
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .then(async (res: any) => {
+      if (res.error) {
+        console.log(res);
+        return;
+      }
 
-    const newRes: ServerType[] = res.map((item: ServerType) => {
-      const existing = oldData.find((x: ServerType) => x.server_id === item.server_id);
-      return {
-        ...item,
-        apiKey: existing?.apiKey
-      };
+      const newRes: ServerType[] = res.map((item: ServerType) => {
+        const existing = oldData.find((x: ServerType) => x.server_id === item.server_id);
+        return {
+          ...item,
+          apiKey: existing?.apiKey,
+        };
+      });
+
+      setData(newRes);
+    })
+    .catch((err) => {
+      console.log(err);
     });
-
-    setData(newRes);
-  })
-  .catch((err) => {
-    console.log(err)
-  });
 }
 
 async function apiRestart(server: ServerType) {
@@ -193,17 +205,17 @@ async function apiRestart(server: ServerType) {
     method: "POST",
     body: formdata,
   })
-  .then(async (response) => response.json())
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  .then(async (res: any) => {
-    if (res.error) {
-      console.log(res)
-      return
-    }
-  })
-  .catch((err) => {
-    console.log(err)
-  });
+    .then(async (response) => response.json())
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .then(async (res: any) => {
+      if (res.error) {
+        console.log(res);
+        return;
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 }
 
 async function apiAmfetamine(server: ServerType) {
@@ -215,15 +227,15 @@ async function apiAmfetamine(server: ServerType) {
     method: "POST",
     body: formdata,
   })
-  .then(async (response) => response.json())
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  .then(async (res: any) => {
-    if (res.error) {
-      console.log(res)
-      return
-    }
-  })
-  .catch((err) => {
-    console.log(err)
-  });
+    .then(async (response) => response.json())
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .then(async (res: any) => {
+      if (res.error) {
+        console.log(res);
+        return;
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 }

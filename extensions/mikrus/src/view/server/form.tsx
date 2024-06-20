@@ -11,7 +11,7 @@ export const ServerForm = (props: { server?: ServerType; use: { servers: ServerH
       const updatedItem: ServerType = { ...server };
 
       const items = use.servers.data.filter((x: ServerType) => x.server_id === updatedItem.server_id);
-      const item = items[0]
+      const item = items[0];
       item.apiKey = updatedItem.apiKey;
 
       if (props.server) {

@@ -14,7 +14,12 @@ export const ServerListView = ({
 }) => (
   <List.Section title={title} subtitle={servers.length.toLocaleString()}>
     {servers.map((server: ServerType) => (
-      <ServerListItem key={server.server_id} server={server} selectedServer={selectedServer} actionPanel={actionPanel} />
+      <ServerListItem
+        key={server.server_id}
+        server={server}
+        selectedServer={selectedServer}
+        actionPanel={actionPanel}
+      />
     ))}
   </List.Section>
 );
@@ -42,19 +47,24 @@ export const ServerListItem = ({
 
 const ModelDetailView = (props: { server: ServerType; markdown?: string | null | undefined }) => {
   const { server } = props;
-  let markdown = ""
+  let markdown = "";
   if (server.clouds && server.clouds.length > 0) {
-    markdown += `*Clouds*\n\n`
-    {server.clouds?.map((x: ServerCloudType) => (
-      markdown += `***${x.srvID}***\n\n Port: ${x.port_nr}\n Expires: ${x.expires}\n\nSize: ${x.size}\n Disk: ${x.disk_used}/${x.disk_total}\n CPU percent: ${x.cpu_percent}\n RAM used: ${x.ram_used}/${x.ram_total}\n\n`
-    ))}
+    markdown += `*Clouds*\n\n`;
+    {
+      server.clouds?.map(
+        (x: ServerCloudType) =>
+          (markdown += `***${x.srvID}***\n\n Port: ${x.port_nr}\n Expires: ${x.expires}\n\nSize: ${x.size}\n Disk: ${x.disk_used}/${x.disk_total}\n CPU percent: ${x.cpu_percent}\n RAM used: ${x.ram_used}/${x.ram_total}\n\n`),
+      );
+    }
   }
-  markdown += `-------------------\n\n`
-  markdown += `*Logs*\n\n`
-  {server.logs?.map((x: ServerLogType) => (
-    markdown += `***${x.task}***\n\n ${x.when_created} - ${x.when_done}\n\n ${x.output}\n`
-  ))}
-  
+  markdown += `-------------------\n\n`;
+  markdown += `*Logs*\n\n`;
+  {
+    server.logs?.map(
+      (x: ServerLogType) => (markdown += `***${x.task}***\n\n ${x.when_created} - ${x.when_done}\n\n ${x.output}\n`),
+    );
+  }
+
   return (
     <List.Item.Detail
       markdown={markdown}
@@ -68,11 +78,17 @@ const ModelDetailView = (props: { server: ServerType; markdown?: string | null |
           <List.Item.Detail.Metadata.Label title="Ram" text={server.info?.param_ram} />
           <List.Item.Detail.Metadata.Label title="Disk" text={server.info?.param_disk} />
           <List.Item.Detail.Metadata.Label title="Last login panel" text={server.info?.lastlog_panel} />
-          <List.Item.Detail.Metadata.Label title="Pro activated" text={server.info ? server.info?.mikrus_pro === "nie" ? "no" : "YES" : ""} />
+          <List.Item.Detail.Metadata.Label
+            title="Pro activated"
+            text={server.info ? (server.info?.mikrus_pro === "nie" ? "no" : "YES") : ""}
+          />
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title="Ports" text={server.ports?.join(', ')} />
+          <List.Item.Detail.Metadata.Label title="Ports" text={server.ports?.join(", ")} />
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title="Api" text={server.apiKey ? server.apiKey.substring(0,5) + "..." : ""} />
+          <List.Item.Detail.Metadata.Label
+            title="Api"
+            text={server.apiKey ? server.apiKey.substring(0, 5) + "..." : ""}
+          />
         </List.Item.Detail.Metadata>
       }
     />
