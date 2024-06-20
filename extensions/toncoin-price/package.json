@@ -3,7 +3,7 @@
   "name": "toncoin-price",
   "title": "Toncoin (TON) Price",
   "description": "Keep an eye on Toncoin (TON) cryptocurrency price directly from your system menu bar",
-  "icon": "command-icon.svg",
+  "icon": "command-icon.png",
   "author": "arthurn",
   "categories": [
     "Finance"
