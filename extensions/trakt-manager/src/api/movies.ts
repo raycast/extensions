@@ -1,9 +1,9 @@
 import fetch from "node-fetch";
 import { TRAKT_API_URL, TRAKT_CLIENT_ID } from "../lib/constants";
-import { oauthClient } from "../lib/oauth";
+import { oauthProvider } from "../lib/oauth";
 
 export const searchMovies = async (query: string, page: number, signal: AbortSignal | undefined = undefined) => {
-  const tokens = await oauthClient.getTokens();
+  const accessToken = await oauthProvider.authorize();
   const response = await fetch(
     `${TRAKT_API_URL}/search/movie?query=${encodeURIComponent(query)}&page=${page}&limit=10&fields=title`,
     {
@@ -11,7 +11,7 @@ export const searchMovies = async (query: string, page: number, signal: AbortSig
         "Content-Type": "application/json; charset=utf-8",
         "trakt-api-version": "2",
         "trakt-api-key": TRAKT_CLIENT_ID,
-        Authorization: `Bearer ${tokens?.accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       signal,
     },
@@ -31,13 +31,13 @@ export const searchMovies = async (query: string, page: number, signal: AbortSig
 };
 
 export const getWatchlistMovies = async (page: number, signal: AbortSignal | undefined = undefined) => {
-  const tokens = await oauthClient.getTokens();
+  const accessToken = await oauthProvider.authorize();
   const response = await fetch(`${TRAKT_API_URL}/sync/watchlist/movies/added?page=${page}&limit=10`, {
     headers: {
       "Content-Type": "application/json; charset=utf-8",
       "trakt-api-version": "2",
       "trakt-api-key": TRAKT_CLIENT_ID,
-      Authorization: `Bearer ${tokens?.accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
     signal,
   });
@@ -56,14 +56,14 @@ export const getWatchlistMovies = async (page: number, signal: AbortSignal | und
 };
 
 export const addMovieToWatchlist = async (movieId: number, signal: AbortSignal | undefined = undefined) => {
-  const tokens = await oauthClient.getTokens();
+  const accessToken = await oauthProvider.authorize();
   const response = await fetch(`${TRAKT_API_URL}/sync/watchlist`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "trakt-api-version": "2",
       "trakt-api-key": TRAKT_CLIENT_ID,
-      Authorization: `Bearer ${tokens?.accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({
       movies: [
@@ -84,14 +84,14 @@ export const addMovieToWatchlist = async (movieId: number, signal: AbortSignal |
 };
 
 export const removeMovieFromWatchlist = async (movieId: number, signal: AbortSignal | undefined = undefined) => {
-  const tokens = await oauthClient.getTokens();
+  const accessToken = await oauthProvider.authorize();
   const response = await fetch(`${TRAKT_API_URL}/sync/watchlist/remove`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "trakt-api-version": "2",
       "trakt-api-key": TRAKT_CLIENT_ID,
-      Authorization: `Bearer ${tokens?.accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({
       movies: [
@@ -112,14 +112,14 @@ export const removeMovieFromWatchlist = async (movieId: number, signal: AbortSig
 };
 
 export const checkInMovie = async (movieId: number, signal: AbortSignal | undefined = undefined) => {
-  const tokens = await oauthClient.getTokens();
+  const accessToken = await oauthProvider.authorize();
   const response = await fetch(`${TRAKT_API_URL}/checkin`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "trakt-api-version": "2",
       "trakt-api-key": TRAKT_CLIENT_ID,
-      Authorization: `Bearer ${tokens?.accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({
       movie: {
@@ -138,14 +138,14 @@ export const checkInMovie = async (movieId: number, signal: AbortSignal | undefi
 };
 
 export const addMovieToHistory = async (movieId: number, signal: AbortSignal | undefined = undefined) => {
-  const tokens = await oauthClient.getTokens();
+  const accessToken = await oauthProvider.authorize();
   const response = await fetch(`${TRAKT_API_URL}/sync/history`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "trakt-api-version": "2",
       "trakt-api-key": TRAKT_CLIENT_ID,
-      Authorization: `Bearer ${tokens?.accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({
       movies: [
@@ -166,13 +166,13 @@ export const addMovieToHistory = async (movieId: number, signal: AbortSignal | u
 };
 
 export const getHistoryMovies = async (page: number, signal: AbortSignal | undefined = undefined) => {
-  const tokens = await oauthClient.getTokens();
+  const accessToken = await oauthProvider.authorize();
   const response = await fetch(`${TRAKT_API_URL}/sync/watched/movies`, {
     headers: {
       "Content-Type": "application/json; charset=utf-8",
       "trakt-api-version": "2",
       "trakt-api-key": TRAKT_CLIENT_ID,
-      Authorization: `Bearer ${tokens?.accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
     signal,
   });
@@ -202,14 +202,14 @@ export const getHistoryMovies = async (page: number, signal: AbortSignal | undef
 };
 
 export const removeMovieFromHistory = async (movieId: number, signal: AbortSignal | undefined = undefined) => {
-  const tokens = await oauthClient.getTokens();
+  const accessToken = await oauthProvider.authorize();
   const response = await fetch(`${TRAKT_API_URL}/sync/history/remove`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "trakt-api-version": "2",
       "trakt-api-key": TRAKT_CLIENT_ID,
-      Authorization: `Bearer ${tokens?.accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({
       movies: [

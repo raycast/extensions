@@ -4,11 +4,10 @@ import { AbortError } from "node-fetch";
 import { useEffect, useRef, useState } from "react";
 import { addMovieToHistory, addMovieToWatchlist, checkInMovie, searchMovies } from "./api/movies";
 import { getTMDBMovieDetails } from "./api/tmdb";
-import { AuthProvider, useAuth } from "./components/auth";
 import { MovieGrid } from "./components/movie-grid";
+import { APP_MAX_LISTENERS } from "./lib/constants";
 
-function SearchCommand() {
-  const { isAuthenticated } = useAuth();
+export default function Command() {
   const abortable = useRef<AbortController>();
   const [searchText, setSearchText] = useState<string | undefined>();
   const [movies, setMovies] = useState<TraktMovieList | undefined>();
@@ -18,15 +17,11 @@ function SearchCommand() {
 
   useEffect(() => {
     (async () => {
-      if (!isAuthenticated) {
-        return;
-      }
-
       if (abortable.current) {
         abortable.current.abort();
       }
       abortable.current = new AbortController();
-      setMaxListeners(20, abortable.current?.signal);
+      setMaxListeners(APP_MAX_LISTENERS, abortable.current?.signal);
       if (!searchText) {
         setMovies(undefined);
       } else {
@@ -61,7 +56,7 @@ function SearchCommand() {
         };
       }
     })();
-  }, [isAuthenticated, searchText, page]);
+  }, [searchText, page]);
 
   const onAddMovieToWatchlist = async (movieId: number) => {
     setIsLoading(true);
@@ -152,13 +147,5 @@ function SearchCommand() {
         historyAction={onAddMovieToHistory}
       />
     </Grid>
-  );
-}
-
-export default function Command() {
-  return (
-    <AuthProvider>
-      <SearchCommand />
-    </AuthProvider>
   );
 }

@@ -4,11 +4,10 @@ import { AbortError } from "node-fetch";
 import { useEffect, useRef, useState } from "react";
 import { addShowToHistory, addShowToWatchlist, searchShows } from "./api/shows";
 import { getTMDBShowDetails } from "./api/tmdb";
-import { AuthProvider, useAuth } from "./components/auth";
 import { ShowGrid } from "./components/show-grid";
+import { APP_MAX_LISTENERS } from "./lib/constants";
 
-function SearchCommand() {
-  const { isAuthenticated } = useAuth();
+export default function Command() {
   const abortable = useRef<AbortController>();
   const [searchText, setSearchText] = useState<string | undefined>();
   const [shows, setShows] = useState<TraktShowList | undefined>();
@@ -18,15 +17,11 @@ function SearchCommand() {
 
   useEffect(() => {
     (async () => {
-      if (!isAuthenticated) {
-        return;
-      }
-
       if (abortable.current) {
         abortable.current.abort();
       }
       abortable.current = new AbortController();
-      setMaxListeners(20, abortable.current?.signal);
+      setMaxListeners(APP_MAX_LISTENERS, abortable.current?.signal);
       if (!searchText) {
         setShows(undefined);
       } else {
@@ -61,7 +56,7 @@ function SearchCommand() {
         };
       }
     })();
-  }, [isAuthenticated, searchText, page]);
+  }, [searchText, page]);
 
   const onAddShowToWatchlist = async (showId: number) => {
     setIsLoading(true);
@@ -132,13 +127,5 @@ function SearchCommand() {
         historyAction={onAddShowToHistory}
       />
     </Grid>
-  );
-}
-
-export default function Command() {
-  return (
-    <AuthProvider>
-      <SearchCommand />
-    </AuthProvider>
   );
 }

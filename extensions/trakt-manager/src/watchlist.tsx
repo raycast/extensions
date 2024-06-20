@@ -5,12 +5,11 @@ import { useEffect, useRef, useState } from "react";
 import { checkInMovie, getWatchlistMovies, removeMovieFromWatchlist } from "./api/movies";
 import { getWatchlistShows, removeShowFromWatchlist } from "./api/shows";
 import { getTMDBMovieDetails, getTMDBShowDetails } from "./api/tmdb";
-import { AuthProvider, useAuth } from "./components/auth";
 import { MovieGrid } from "./components/movie-grid";
 import { ShowGrid } from "./components/show-grid";
+import { APP_MAX_LISTENERS } from "./lib/constants";
 
-const WatchlistCommand = () => {
-  const { isAuthenticated } = useAuth();
+export default function Command() {
   const abortable = useRef<AbortController>();
   const [movies, setMovies] = useState<TraktMovieList | undefined>();
   const [shows, setShows] = useState<TraktShowList | undefined>();
@@ -22,15 +21,11 @@ const WatchlistCommand = () => {
 
   useEffect(() => {
     (async () => {
-      if (!isAuthenticated) {
-        return;
-      }
-
       if (abortable.current) {
         abortable.current.abort();
       }
       abortable.current = new AbortController();
-      setMaxListeners(20, abortable.current?.signal);
+      setMaxListeners(APP_MAX_LISTENERS, abortable.current?.signal);
       setIsLoading(true);
       if (mediaType === "show") {
         try {
@@ -86,7 +81,7 @@ const WatchlistCommand = () => {
         }
       };
     })();
-  }, [isAuthenticated, x, mediaType, page]);
+  }, [x, mediaType, page]);
 
   const onRemoveMovieFromWatchlist = async (movieId: number) => {
     setIsLoading(true);
@@ -199,13 +194,5 @@ const WatchlistCommand = () => {
         </>
       )}
     </Grid>
-  );
-};
-
-export default function Command() {
-  return (
-    <AuthProvider>
-      <WatchlistCommand />
-    </AuthProvider>
   );
 }

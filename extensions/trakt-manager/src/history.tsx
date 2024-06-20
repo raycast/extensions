@@ -5,12 +5,11 @@ import { useEffect, useRef, useState } from "react";
 import { getHistoryMovies, removeMovieFromHistory } from "./api/movies";
 import { getHistoryShows, removeShowFromHistory } from "./api/shows";
 import { getTMDBMovieDetails, getTMDBShowDetails } from "./api/tmdb";
-import { AuthProvider, useAuth } from "./components/auth";
 import { MovieGrid } from "./components/movie-grid";
 import { ShowGrid } from "./components/show-grid";
+import { APP_MAX_LISTENERS } from "./lib/constants";
 
-const HistoryCommand = () => {
-  const { isAuthenticated } = useAuth();
+export default function Command() {
   const abortable = useRef<AbortController>();
   const [movies, setMovies] = useState<TraktMovieList | undefined>();
   const [shows, setShows] = useState<TraktShowList | undefined>();
@@ -22,15 +21,11 @@ const HistoryCommand = () => {
 
   useEffect(() => {
     (async () => {
-      if (!isAuthenticated) {
-        return;
-      }
-
       if (abortable.current) {
         abortable.current.abort();
       }
       abortable.current = new AbortController();
-      setMaxListeners(20, abortable.current?.signal);
+      setMaxListeners(APP_MAX_LISTENERS, abortable.current?.signal);
       setIsLoading(true);
       if (mediaType === "show") {
         try {
@@ -88,7 +83,7 @@ const HistoryCommand = () => {
         }
       };
     })();
-  }, [isAuthenticated, x, mediaType, page]);
+  }, [x, mediaType, page]);
 
   const onRemoveMovieFromHistory = async (movieId: number) => {
     setIsLoading(true);
@@ -180,13 +175,5 @@ const HistoryCommand = () => {
         </>
       )}
     </Grid>
-  );
-};
-
-export default function Command() {
-  return (
-    <AuthProvider>
-      <HistoryCommand />
-    </AuthProvider>
   );
 }

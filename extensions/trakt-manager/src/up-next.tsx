@@ -5,12 +5,11 @@ import { AbortError } from "node-fetch";
 import { useEffect, useRef, useState } from "react";
 import { checkInEpisode, getUpNextShows, updateShowProgress } from "./api/shows";
 import { getTMDBShowDetails } from "./api/tmdb";
-import { AuthProvider, useAuth } from "./components/auth";
 import { Seasons } from "./components/seasons";
+import { APP_MAX_LISTENERS } from "./lib/constants";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/helper";
 
-const OnDeckCommand = () => {
-  const { isAuthenticated } = useAuth();
+export default function Command() {
   const abortable = useRef<AbortController>();
   const [isLoading, setIsLoading] = useState(false);
   const [shows, setShows] = useState<TraktUpNextShowList | undefined>();
@@ -18,17 +17,12 @@ const OnDeckCommand = () => {
 
   useEffect(() => {
     (async () => {
-      if (!isAuthenticated) {
-        return;
-      }
-
       if (abortable.current) {
         abortable.current.abort();
       }
       abortable.current = new AbortController();
-      setMaxListeners(100, abortable.current?.signal);
+      setMaxListeners(APP_MAX_LISTENERS, abortable.current?.signal);
       setIsLoading(true);
-
       try {
         const shows = await getUpNextShows(abortable.current?.signal);
         setShows(shows);
@@ -56,7 +50,7 @@ const OnDeckCommand = () => {
         }
       };
     })();
-  }, [isAuthenticated, x]);
+  }, [x]);
 
   const onCheckInNextEpisode = async (episodeId: number | undefined, showId: number) => {
     if (episodeId) {
@@ -138,13 +132,5 @@ const OnDeckCommand = () => {
           />
         ))}
     </Grid>
-  );
-};
-
-export default function Command() {
-  return (
-    <AuthProvider>
-      <OnDeckCommand />
-    </AuthProvider>
   );
 }
