@@ -1,12 +1,9 @@
 import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
-import useUAPI from "./lib/useUAPI";
-import { EmailAccount, EmailAccountWithDiskInformation } from "./lib/types";
-// import { uapi } from "./lib/uapi";
+import { useListEmailAccounts, useListEmailAccountsWithDiskInfo } from "./lib/hooks";
 
 export default function EmailAccounts() {
-    const { isLoading, data } = useUAPI<EmailAccount[]>("Email", "list_pops", { skip_main: 1 });
-    // const { isLoading, data } = uapi.email.list();
-
+    const { isLoading, data } = useListEmailAccounts();
+    
     return <List isLoading={isLoading}>
         {data?.map(account => <List.Item key={account.email} title={account.email} icon={Icon.Envelope} subtitle={account.login} accessories={[
             { tag: { value: "INCOMING", color: account.suspended_incoming ? Color.Red : Color.Green } },
@@ -21,7 +18,7 @@ function ViewEmailAccountDiskInformation({ emailAccount }: { emailAccount: strin
     const email = emailAccount.split("@")[0];
     const domain = emailAccount.split("@")[1];
 
-    const { isLoading, data } = useUAPI<EmailAccountWithDiskInformation[]>("Email", "list_pops_with_disk", { email, domain, maxaccounts: 1, novalidate: 1 });
+    const { isLoading, data } = useListEmailAccountsWithDiskInfo(email, domain);
     const account = data && data[0];
 
     const markdown = !account ? undefined : `User: ${account.user} \n\n Domain: ${account.domain} \n\n Email: ${account.email} \n\n---\n\n Disk Used: ${account.humandiskused} of ${account.humandiskquota} (${account.diskusedpercent20}%)`;

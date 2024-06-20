@@ -5,6 +5,19 @@ export type AccountDomains = {
     addon_domains: string[];
 }
 
+export type DNSZoneRecord = {
+    line_index: number;
+} & ({
+    type: "control" | "comment";
+    text_b64: string;
+} | {
+    type: "record";
+    data_b64: string[];
+    dname_b64: string;
+    record_type: string;
+    ttl: number;
+});
+
 export type EmailAccount = {
     email: string;
     login: string;
