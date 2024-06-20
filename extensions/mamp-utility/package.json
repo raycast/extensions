@@ -1,26 +1,41 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mamp-utility",
+  "title": "MAMP Utility",
+  "description": "Search and organize your MAMP hosted website.",
+  "icon": "mamp.png",
+  "author": "SuoweiHu",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
   "commands": [
     {
       "name": "command-manage-site",
       "title": "Manage Website",
+      "subtitle": "MAMP",
       "description": "Search MAMP's websites (by default are in 'site' folder)",
       "mode": "view"
     },
     {
       "name": "command-manage-database",
       "title": "Manage Database",
+      "subtitle": "MAMP",
       "description": "Manage MAMP's database using list view (by default on port 8889)",
       "mode": "view"
     },
     {
       "name": "command-open-phpmyadmin",
       "title": "Open PhpMyAdmin",
+      "subtitle": "MAMP",
       "description": "Open MAMP's phpMyAdmin in browser",
       "mode": "no-view"
     },
     {
       "name": "command-open-site-folder",
       "title": "Open Site Folder",
+      "subtitle": "MAMP",
       "description": "Open MAMP's site folder in finder",
       "mode": "no-view"
     }
@@ -59,17 +74,6 @@
       "required": true
     }
   ],
-  "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "mamp-utility",
-  "title": "MAMP Utility",
-  "description": "Search and organize your MAMP hosted website.",
-  "icon": "mamp.png",
-  "author": "SuoweiHu",
-  "categories": [
-    "Productivity",
-    "System"
-  ],
-  "license": "MIT",
   "dependencies": {
     "@raycast/api": "^1.74.0",
     "@raycast/utils": "github:raycast/utils",

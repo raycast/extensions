@@ -1,6 +1,9 @@
 import path from "path";
-import { open, showHUD } from "@raycast/api";
+import { open, showToast, Toast } from "@raycast/api";
 import { exec } from "child_process";
+import { promisify } from "util";
+
+const execPromise = promisify(exec);
 
 export async function open_Url_InChrome(
 	_url_: string,
@@ -11,19 +14,25 @@ export async function open_Url_InChrome(
 
 export async function open_Folder_InVSCode(_path_: string) {
 	try {
-		await exec(`code --new-window "${_path_}"`);
-		await showHUD("SUCCESS");
+		await execPromise(`code --new-window "${_path_}"`);
+		await showToast({ title: "Opened folder" });
 	} catch {
-		await showHUD("FAILURE");
+		await showToast({
+			style: Toast.Style.Failure,
+			title: "Failed to open folder",
+		});
 	}
 }
 
 export async function open_Folder_InFinder(_path_: string) {
 	try {
-		await exec(`open "${_path_}"`);
-		await showHUD("SUCCESS");
+		await execPromise(`open "${_path_}"`);
+		await showToast({ title: "Opened site folder" });
 	} catch {
-		await showHUD("FAILURE");
+		await showToast({
+			style: Toast.Style.Failure,
+			title: "Failed to open site folder",
+		});
 	}
 }
 
@@ -32,11 +41,14 @@ export async function open_File_InVSCode(
 	_folder_path_: string
 ) {
 	try {
-		await exec(`code --new-window "${_folder_path_}"`);
-		await exec(`code --reuse-window --goto "${_file_path_}"`);
-		await showHUD("SUCCESS");
+		await execPromise(`code --new-window "${_folder_path_}"`);
+		await execPromise(`code --reuse-window --goto "${_file_path_}"`);
+		await showToast({ title: "Opened file" });
 	} catch {
-		await showHUD("FAILURE");
+		await showToast({
+			style: Toast.Style.Failure,
+			title: "Failed to open file",
+		});
 	}
 }
 
