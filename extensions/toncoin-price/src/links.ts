@@ -29,6 +29,7 @@ export const dexLinks = {
         title: "DeDust",
         subtitle: "TON/USDT",
         url: "https://dedust.io/swap/USDT/TON",
+        icon: "../assets/icons/dedust.png",
       },
       {
         title: "STON.fi",
