@@ -9,7 +9,8 @@
   "contributors": [
     "shubham",
     "pernielsentikaer",
-    "sh-cho"
+    "sh-cho",
+    "tdkn"
   ],
   "license": "MIT",
   "commands": [
@@ -32,6 +33,13 @@
       "title": "Add Bookmarks",
       "subtitle": "Raindrop.io",
       "description": "Add bookmarks to Raindrop",
+      "mode": "view"
+    },
+    {
+      "name": "save_browser_tab",
+      "title": "Save Browser Tab",
+      "subtitle": "Raindrop.io",
+      "description": "Save the current browser tab to Raindrop",
       "mode": "view"
     }
   ],
@@ -108,20 +116,25 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.3",
+    "@raycast/api": "^1.74.0",
     "@raycast/utils": "^1.5.2",
     "node-fetch": "^3.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "^18.15.12",
-    "@types/react": "18.0.37",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
     "eslint": "8.38.0",
+    "prettier": "^3.2.5",
+    "react": "^18.2.0",
     "react-devtools": "^4.27.5",
     "typescript": "5.0.4"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

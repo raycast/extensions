@@ -68,13 +68,13 @@
       "description": "Stream responses from Claude in real-time",
       "type": "checkbox",
       "title": "Stream Responses",
-      "default": false,
+      "default": true,
       "required": true
     },
     {
       "name": "isAutoLoad",
       "label": "Enable auto-load selected text",
-      "description": "Load selected text from your frontmost application to the question bar automatically",
+      "description": "Load selected text from your front most application to the question bar automatically",
       "type": "checkbox",
       "title": "Auto-load",
       "default": false,

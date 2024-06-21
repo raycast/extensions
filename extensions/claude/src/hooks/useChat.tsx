@@ -2,7 +2,7 @@ import { getPreferenceValues, clearSearchBar, showToast, Toast } from "@raycast/
 import { useCallback, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Chat, ChatHook, Model } from "../type";
-import { chatTransfomer } from "../utils";
+import { chatTransformer } from "../utils";
 import { useAnthropic } from "./useAnthropic";
 import { useHistory } from "./useHistory";
 
@@ -46,8 +46,8 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
           model: model.option,
           temperature: Number(model.temperature),
           system: model.prompt,
-          max_tokens: Number(model.max_tokens),
-          messages: [...chatTransfomer(data), { role: "user", content: question }],
+          max_tokens: Number(model.max_tokens) || 4096,
+          messages: [...chatTransformer(data), { role: "user", content: question }],
         })
         .on("text", (res) => {
           chat.answer += res;
@@ -75,8 +75,8 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
           model: model.option,
           temperature: Number(model.temperature),
           system: model.prompt,
-          max_tokens: Number(model.max_tokens),
-          messages: [...chatTransfomer(data), { role: "user", content: question }],
+          max_tokens: Number(model.max_tokens) || 4096,
+          messages: [...chatTransformer(data), { role: "user", content: question }],
         })
         .then(async (res) => {
           if ("content" in res) {
