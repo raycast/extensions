@@ -117,6 +117,7 @@ export function CaskActionPanel(props: {
 export function FormulaActionPanel(props: {
   formula: Formula;
   showDetails: boolean;
+  isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
 }): JSX.Element {
   const formula = props.formula;
@@ -129,7 +130,7 @@ export function FormulaActionPanel(props: {
             <Action.Push
               title="Show Details"
               icon={Icon.Document}
-              target={<FormulaInfo formula={formula} onAction={props.onAction} />}
+              target={<FormulaInfo formula={formula} isInstalled={props.isInstalled} onAction={props.onAction} />}
             />
           )}
           <Action.ShowInFinder path={brewInstallPath(formula)} />
@@ -170,7 +171,7 @@ export function FormulaActionPanel(props: {
             <Action.Push
               title="Show Details"
               icon={Icon.Document}
-              target={<FormulaInfo formula={formula} onAction={props.onAction} />}
+              target={<FormulaInfo formula={formula} isInstalled={props.isInstalled} onAction={props.onAction} />}
             />
           )}
           <Actions.FormulaInstallAction formula={formula} onAction={props.onAction} />

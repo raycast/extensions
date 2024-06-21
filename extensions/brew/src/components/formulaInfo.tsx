@@ -2,24 +2,26 @@ import { Detail, useNavigation } from "@raycast/api";
 import { FormulaActionPanel } from "./actionPanels";
 import { Formula, brewIsInstalled, brewPrefix } from "../brew";
 
-export function FormulaInfo(props: { formula: Formula; onAction: (result: boolean) => void }): JSX.Element {
+export function FormulaInfo(props: {
+  formula: Formula;
+  isInstalled: (name: string) => boolean;
+  onAction: (result: boolean) => void;
+}): JSX.Element {
   const { pop } = useNavigation();
-  const { formula } = props;
-
   return (
     <Detail
-      markdown={formatInfo(formula)}
-      navigationTitle={`Formula: ${formula.name}`}
+      markdown={formatInfo(props.formula, props.isInstalled)}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Link title="Homepage" text={formula.homepage} target={formula.homepage} />
-          <Detail.Metadata.Label title="License" text={formula.license} />
+          <Detail.Metadata.Link title="Homepage" text={props.formula.homepage} target={props.formula.homepage} />
+          <Detail.Metadata.Label title="License" text={props.formula.license} />
         </Detail.Metadata>
       }
       actions={
         <FormulaActionPanel
-          formula={formula}
+          formula={props.formula}
           showDetails={false}
+          isInstalled={props.isInstalled}
           onAction={(result) => {
             pop();
             props.onAction(result);
@@ -32,14 +34,14 @@ export function FormulaInfo(props: { formula: Formula; onAction: (result: boolea
 
 /// Private
 
-function formatInfo(formula: Formula): string {
+function formatInfo(formula: Formula, isInstalled: (name: string) => boolean): string {
   return `
 # ${formula.name}
 ${formula.desc}
 
 ${formatVersions(formula)}
 
-${formatDependencies(formula)}
+${formatDependencies(formula, isInstalled)}
 
 ${formatConflicts(formula)}
 
@@ -71,18 +73,30 @@ Stable: ${versions.stable} ${status ? `(${status.join(", ")})` : ""}
   return markdown;
 }
 
-function formatDependencies(formula: Formula): string {
+function formatDependencies(formula: Formula, isInstalled: (name: string) => boolean): string {
   let markdown = "";
 
   if (formula.dependencies.length > 0) {
+    const dependencies = formula.dependencies
+      .map((dep) => {
+        return isInstalled(dep) ? `__${dep}__` : `${dep}`;
+      })
+      .join(", ");
+
     markdown += `
-Required: ${formula.dependencies.join(", ")}
+Required: ${dependencies}
     `;
   }
 
   if (formula.build_dependencies.length > 0) {
+    const build_dependencies = formula.build_dependencies
+      .map((dep) => {
+        return isInstalled(dep) ? `__${dep}__` : `${dep}`;
+      })
+      .join(", ");
+
     markdown += `
-Build: ${formula.build_dependencies.join(", ")}
+Build: ${build_dependencies}
     `;
   }
 

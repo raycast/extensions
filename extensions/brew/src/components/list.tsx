@@ -10,6 +10,7 @@ export interface FormulaListProps {
   searchBarPlaceholder: string;
   searchBarAccessory?: JSX.Element;
   onSearchTextChange?: (q: string) => void;
+  isInstalled: (name: string) => boolean;
   onAction: () => void;
 }
 
@@ -25,7 +26,12 @@ export function FormulaList(props: FormulaListProps): JSX.Element {
     >
       <List.Section title="Formulae">
         {formulae.map((formula) => (
-          <FormulaListItem key={`formula-${formula.name}`} formula={formula} onAction={props.onAction} />
+          <FormulaListItem
+            key={`formula-${formula.name}`}
+            formula={formula}
+            isInstalled={props.isInstalled}
+            onAction={props.onAction}
+          />
         ))}
         {formulae.isTruncated() && <MoreListItem />}
       </List.Section>
@@ -39,7 +45,11 @@ export function FormulaList(props: FormulaListProps): JSX.Element {
   );
 }
 
-export function FormulaListItem(props: { formula: Formula; onAction: () => void }): JSX.Element {
+export function FormulaListItem(props: {
+  formula: Formula;
+  isInstalled: (name: string) => boolean;
+  onAction: () => void;
+}): JSX.Element {
   const formula = props.formula;
   let version = formula.versions.stable;
   let tintColor = Color.SecondaryText;
@@ -59,7 +69,14 @@ export function FormulaListItem(props: { formula: Formula; onAction: () => void 
       subtitle={formula.desc}
       accessories={[{ text: version }]}
       icon={tooltip ? { value: icon, tooltip } : icon}
-      actions={<FormulaActionPanel formula={formula} showDetails={true} onAction={props.onAction} />}
+      actions={
+        <FormulaActionPanel
+          formula={formula}
+          showDetails={true}
+          isInstalled={props.isInstalled}
+          onAction={props.onAction}
+        />
+      }
     />
   );
 }
