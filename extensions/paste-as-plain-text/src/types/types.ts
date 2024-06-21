@@ -6,9 +6,10 @@ interface Preferences {
   autoFetchTitle: boolean;
   cleanLineBreaks: boolean;
   replaceClipboard: boolean;
+  showTips: boolean;
 }
 
-export const { trimStart, trimEnd, autoFetchTitle, cleanLineBreaks, replaceClipboard } =
+export const { trimStart, trimEnd, autoFetchTitle, cleanLineBreaks, replaceClipboard, showTips } =
   getPreferenceValues<Preferences>();
 
 export enum PasteFormat {

@@ -1,5 +1,5 @@
-import { cleanLineBreaks, trimEnd, trimStart } from "../types/types";
-import { Cache } from "@raycast/api";
+import { cleanLineBreaks, showTips, trimEnd, trimStart } from "../types/types";
+import { Cache, showHUD } from "@raycast/api";
 import axios from "axios";
 import cheerio from "cheerio";
 
@@ -94,3 +94,9 @@ export async function fetchTitle(url: string) {
     return "";
   }
 }
+
+export const showCustomHUD = (title: string) => {
+  if (showTips) {
+    return showHUD(title);
+  }
+};
