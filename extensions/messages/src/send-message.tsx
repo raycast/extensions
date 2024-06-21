@@ -1,6 +1,7 @@
 import {
   Action,
-  ActionPanel, closeMainWindow,
+  ActionPanel,
+  closeMainWindow,
   environment,
   Form,
   getPreferenceValues,
@@ -8,7 +9,7 @@ import {
   LaunchProps,
   open,
   showToast,
-  Toast
+  Toast,
 } from "@raycast/api";
 import { useForm, runAppleScript, useCachedPromise, FormValidation, getAvatarIcon } from "@raycast/utils";
 import { useEffect, useMemo } from "react";
@@ -83,7 +84,7 @@ export default function Command({
         const name = getName(correspondingContact);
 
         if (shouldCloseMainWindow) {
-          await closeMainWindow({ clearRootSearch: true })
+          await closeMainWindow({ clearRootSearch: true });
         }
 
         await showToast({
