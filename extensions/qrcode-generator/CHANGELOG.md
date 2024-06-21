@@ -1,6 +1,6 @@
 # QR Code Generator Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-06-21
 
 - Optimized the code
 - Added screenshots
