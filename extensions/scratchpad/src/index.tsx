@@ -11,15 +11,35 @@ import {
 import { useEffect, useState } from "react";
 
 import { getValidApplicationsForScratchFile } from "./utils/utils";
+import { FormValidation, useForm } from "@raycast/utils";
+import { ScratchPadCreationFormValues } from "./types/applicationInfo";
 
 export default function Command() {
-  const [fileNamePrefixError, setFileNamePrefixError] = useState<string | undefined>(undefined);
   const [applicationsList, setApplicationsList] = useState<Application[]>([]);
-  const [defaultEditorBundleId, setDefaultEditorBundleId] = useState<string | undefined>(undefined);
-  const [lastUsedScratchpadFolder, setLastUsedScratchpadFolder] = useState<string[] | undefined>(undefined);
   const [hasInitDataLoaded, setHasInitDataLoaded] = useState<boolean>(false);
-  const [folderSelectionError, setFolderSelectionError] = useState<string | undefined>(undefined);
-  const [defaultAppPickerError, setDefaultAppPickerError] = useState<string | undefined>(undefined);
+
+  const { handleSubmit, itemProps: formDetails, setValue } = useForm<ScratchPadCreationFormValues>({
+    onSubmit: async function (values: ScratchPadCreationFormValues): Promise<void | boolean> {
+      const { folders, fileNamePrefix, fileType, applicationBundleId } = values;
+      const folder = folders![0];
+     
+      await processSubmitAction(folder, fileNamePrefix!, fileType!, applicationBundleId!);
+    },
+    validation: {
+      fileType: FormValidation.Required,
+      fileNamePrefix: FormValidation.Required,
+      applicationBundleId: FormValidation.Required,
+      folders: (folders: string[] | undefined) => {
+        if (!folders) {
+          return "Folder path is required";
+        }
+        const folder = folders[0];
+        if (isEmpty(folder) || !isFolderSelectionValid(folder)) {
+          return "Folder path is not valid";
+        }
+      },
+    },
+  });
 
   useEffect(() => {
     (async () => {
@@ -35,15 +55,15 @@ export default function Command() {
         lastUsedEditorBundleId && installedApplications.find((app) => app.bundleId === lastUsedEditorBundleId)
           ? lastUsedEditorBundleId
           : firstApplication;
-      setDefaultEditorBundleId(defaultEditor);
-      if (!defaultEditor) {
-        setDefaultAppPickerError("No default application found. Please Install an editor and try again.");
-      }
 
       const lastUsedFolder = await getLastUsedScratchpadFolder();
       const desktopPath = getDesktopPath();
       const lastUsedScratchpadFolder = lastUsedFolder ? [lastUsedFolder] : [desktopPath];
-      setLastUsedScratchpadFolder(lastUsedScratchpadFolder);
+
+      setValue("applicationBundleId", defaultEditor);
+      setValue("folders", lastUsedScratchpadFolder);
+      setValue("fileNamePrefix", "scratch_");
+
       setHasInitDataLoaded(true);
     })();
   }, []);
@@ -56,25 +76,11 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create Scratchpad File"
-            onSubmit={async (values) => {
-              const { folders, fileNamePrefix, fileType, applicationBundleId } = values;
-              const folder = folders[0];
-              const folderSelectionError =
-                isEmpty(folder) || !isFolderSelectionValid(folder) ? "folder path is not valid" : undefined;
-              setFolderSelectionError(folderSelectionError);
-              if (folderSelectionError) {
-                // abort if there is some folder selection related error
-                return;
-              }
-              await processSubmitAction(folder, fileNamePrefix, fileType, applicationBundleId);
-            }}
-          />
+          <Action.SubmitForm title="Create Scratchpad File" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="fileType" title="FileType">
+      <Form.Dropdown title="FileType" {...formDetails.fileType}>
         {fileTypes.map((entry) => (
           <Form.Dropdown.Item
             value={entry.extension}
@@ -85,41 +91,17 @@ export default function Command() {
       </Form.Dropdown>
 
       <Form.FilePicker
-        id="folders"
         title="Folder"
         allowMultipleSelection={false}
         canChooseFiles={false}
         canChooseDirectories={true}
-        defaultValue={lastUsedScratchpadFolder}
         storeValue={true}
-        error={folderSelectionError}
-        onBlur={(event) => {
-          const folderSelectionError =
-            isEmpty(event.target.value) || !isFolderSelectionValid(event.target.value![0])
-              ? "folder path is not valid"
-              : undefined;
-          setFolderSelectionError(folderSelectionError);
-        }}
+        {...formDetails.folders}
       />
 
-      <Form.TextField
-        id="fileNamePrefix"
-        title="File Name Prefix"
-        placeholder="Enter File Name Prefix"
-        error={fileNamePrefixError}
-        onBlur={(event) => {
-          const namePrefixErr = isEmpty(event.target.value) ? "File Name Prefix should not be empty." : undefined;
-          setFileNamePrefixError(namePrefixErr);
-        }}
-        defaultValue="scratch_"
-      />
+      <Form.TextField title="File Name Prefix" placeholder="Enter File Name Prefix" {...formDetails.fileNamePrefix} />
 
-      <Form.Dropdown
-        id="applicationBundleId"
-        title="Application"
-        defaultValue={defaultEditorBundleId}
-        error={defaultAppPickerError}
-      >
+      <Form.Dropdown title="Application" {...formDetails.applicationBundleId}>
         {applicationsList.map((entry) => (
           <Form.Dropdown.Item value={entry.bundleId!} title={entry.name} key={entry.bundleId} />
         ))}
