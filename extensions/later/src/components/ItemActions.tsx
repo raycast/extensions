@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { ListItem } from "../types/common";
-import { Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, getPreferenceValues } from "@raycast/api";
 import { open_link_handler } from "../utils/handler";
 import { Browser } from "../common/config";
 import { PreferenceValue } from "../types/validate";
@@ -31,8 +31,9 @@ const ItemActions: React.FC<ListItem> = (props) => {
           onAction={() => props.update(props.url)}
         />
         <Action
-          shortcut={{ modifiers: ["cmd"], key: "d" }}
+          shortcut={Keyboard.Shortcut.Common.Remove}
           icon={Icon.Trash}
+          style={Action.Style.Destructive}
           title="Delete"
           onAction={() => props.delete(props.url)}
         />

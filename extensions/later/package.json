@@ -75,7 +75,7 @@
   "commands": [
     {
       "name": "later",
-      "title": "Later - Read It Later",
+      "title": "Add to List",
       "subtitle": "Read Later",
       "description": "Get your active tab and add it to your list",
       "mode": "no-view"
