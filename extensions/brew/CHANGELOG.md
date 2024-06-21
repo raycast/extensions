@@ -1,5 +1,11 @@
 # Brew Changelog
 
+## [Improvements] - 2024-06-14
+
+- Updated dependencies
+- Updated screenshots
+- Added formula/cask name to the detail view
+
 ## [Bug Fix] - 2024-05-14
 
 - Remove deprecated `--ignore-pinned` upgrade flag.

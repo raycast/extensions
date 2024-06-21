@@ -5,7 +5,7 @@ import { partition } from "lodash";
 import { useMemo, useState } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
-import NotificationListItem from "./components/NotificationListItem";
+import NotificationListItem, { Notification } from "./components/NotificationListItem";
 import RepositoriesDropdown from "./components/RepositoryDropdown";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
@@ -30,7 +30,7 @@ function Notifications() {
 
   const notifications = useMemo(() => {
     if (selectedRepository) {
-      return data?.filter((notification) => notification.repository.full_name === selectedRepository);
+      return data?.filter((notification: Notification) => notification.repository.full_name === selectedRepository);
     }
 
     return data;

@@ -44,6 +44,20 @@
       "subtitle": "iLovePDF",
       "description": "Converts Word File to PDF using iLovePDF API.",
       "mode": "view"
+    },
+    {
+      "name": "extract-text",
+      "title": "Extract Text from PDF",
+      "subtitle": "iLovePDF",
+      "description": "Extracts Text from PDF using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "split-pdf",
+      "title": "Split PDF",
+      "subtitle": "iLovePDF",
+      "description": "Split a PDF file using iLovePDF API.",
+      "mode": "view"
     }
   ],
   "preferences": [

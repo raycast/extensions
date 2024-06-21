@@ -3,7 +3,7 @@
     "name": "IconAI",
     "displayName": "AI",
     "url": "https://seek-oss.github.io/braid-design-system/components/IconAI",
-    "keywords": ["ai", "gpt", "transformer", "artificial", "smart"],
+    "keywords": ["ai", "gpt", "transformer", "artificial", "smart", "sparkles"],
     "svgPath": {
       "light": "./assets/icons/AI-light.svg",
       "dark": "./assets/icons/AI-dark.svg"
@@ -593,7 +593,7 @@
     "name": "IconPromote",
     "displayName": "Promote",
     "url": "https://seek-oss.github.io/braid-design-system/components/IconPromote",
-    "keywords": ["promote", "announcement", "stars", "highlight", "alert"],
+    "keywords": ["promote", "announcement", "highlight", "alert", "megaphone"],
     "svgPath": {
       "light": "./assets/icons/promote-light.svg",
       "dark": "./assets/icons/promote-dark.svg"

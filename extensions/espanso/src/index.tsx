@@ -32,6 +32,7 @@ export default function Command() {
           ...getMatches(packageFilesDirectory, { packagePath: true }),
           ...getMatches(matchFilesDirectory),
         ];
+
         const sortedMatches = sortMatches(combinedMatches);
 
         const categoriesSet = new Set<string>();
