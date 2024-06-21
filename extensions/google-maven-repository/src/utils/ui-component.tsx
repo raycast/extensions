@@ -1,7 +1,9 @@
-import { artifactModel } from "../model/packages-model";
+import { artifactModel } from "../types/packages-model";
 import { ArtifactTag } from "./google-maven-utils";
 import { Action, ActionPanel, List } from "@raycast/api";
 import { googleMavenRepository } from "./constans";
+import { isEmpty } from "./common-utils";
+import { getAvatarIcon } from "@raycast/utils";
 
 export function ArtifactList(props: {
   artifactName: string[];
@@ -18,8 +20,13 @@ export function ArtifactList(props: {
           return (
             <List.Item
               key={artifactIndex + artifact.content}
-              title={artifact.content}
-              icon={"icon_maven.png"}
+              title={artifact.group + ":" + artifact.artifact + ":" + artifact.version}
+              icon={getAvatarIcon(artifact.artifact, { gradient: true })}
+              accessories={
+                !isEmpty(artifact.date)
+                  ? [{ date: new Date(artifact.date), tooltip: "Updated: " + new Date(artifact.date).toLocaleString() }]
+                  : undefined
+              }
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard content={artifact.content} />

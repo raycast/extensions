@@ -413,7 +413,7 @@ export default {
       title: "Text Transform",
     },
     {
-      url: "https://tailwindcss.com/docs/text-decoration-underline-offset",
+      url: "https://tailwindcss.com/docs/text-underline-offset",
       title: "Text Underline Offset",
     },
     {

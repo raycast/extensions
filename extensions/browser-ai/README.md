@@ -1,4 +1,4 @@
-# Browser AI
+# Browser AI Companion
 
 Use the best models and Raycast Browser Extension to extend your browsing.
 
@@ -12,6 +12,7 @@ Use the best models and Raycast Browser Extension to extend your browsing.
 - Inspect Websites
 - Explain Articles
 - Change Tone of Text
+- Ask websites
 
 ## How to Use
 

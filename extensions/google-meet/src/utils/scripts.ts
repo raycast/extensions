@@ -36,24 +36,11 @@ export function getOpenedUrlsScript(browserName: SupportedBrowsers): string {
 export function getOpenedUrlForArc() {
   return `
     tell application "Arc"
-      activate
-      delay 1
-
-      tell application "System Events"
-        keystroke "l" using {command down}
-        delay 1
-        keystroke "c" using {command down}
-        delay 1
-        key code 53
+      tell front window
+        set activeTabURL to URL of active tab
+        return activeTabURL
       end tell
-
     end tell
-
-    delay 0.5
-
-    set copiedURL to do shell script "pbpaste"
-
-    return copiedURL
   `;
 }
 

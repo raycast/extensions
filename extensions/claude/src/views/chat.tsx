@@ -78,14 +78,13 @@ export const ChatView = ({
   ) : (
     <List.Section title="Results" subtitle={data.length.toLocaleString()}>
       {sortedChats.map((sortedChat, i) => {
-        const markdown = `**${sortedChat.question}**\n\n${sortedChat.answer}`;
         return (
           <List.Item
             id={sortedChat.id}
             key={sortedChat.id}
             accessories={[{ text: `#${use.chats.data.length - i}` }]}
             title={sortedChat.question}
-            detail={sortedChat.answer && <AnswerDetailView chat={sortedChat} markdown={markdown} />}
+            detail={sortedChat.answer && <AnswerDetailView chat={sortedChat} streamData={use.chats.streamData} />}
             actions={use.chats.isLoading ? undefined : getActionPanel(sortedChat)}
           />
         );

@@ -1,13 +1,13 @@
-import { ActionPanel, List, Action, showToast, Toast, Icon } from "@raycast/api";
-import { useFavorite } from "../../services/useFavorite";
+import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
+import { useFavorite } from "@/hooks/useFavorite";
+import { launchTeamCommand } from "@/utils/launcher/launchTeamDetailCommand";
 import {
   buildLeagueDetailUrl,
   buildLeagueLogoUrl,
   buildPlayerDetailUrl,
   buildPlayerImageUrl,
   buildTeamLogoUrl,
-} from "../../utils/url-builder";
-import { launchTeamCommand } from "../../utils/launcher/launchTeamDetailCommand";
+} from "@/utils/url-builder";
 
 export default function FavoriteView() {
   const favoriteService = useFavorite();
@@ -20,7 +20,6 @@ export default function FavoriteView() {
             key={team.id}
             icon={buildTeamLogoUrl(team.id)}
             title={team.name}
-            subtitle={`ID: ${team.id}`}
             accessories={[
               {
                 icon: buildLeagueLogoUrl(team.leagueId, "dark"),
@@ -35,6 +34,12 @@ export default function FavoriteView() {
                     launchTeamCommand(team.id);
                   }}
                 />
+                <Action.CopyToClipboard
+                  icon={Icon.Clipboard}
+                  title={`Copy ID (${team.id})`}
+                  content={team.id}
+                  shortcut={{ modifiers: ["cmd"], key: "." }}
+                />
                 <Action
                   icon={Icon.StarDisabled}
                   title="Remove From Favorite"
@@ -45,6 +50,7 @@ export default function FavoriteView() {
                       title: "Removed from favorite",
                     });
                   }}
+                  shortcut={{ modifiers: ["cmd"], key: "d" }}
                 />
               </ActionPanel>
             }
@@ -57,7 +63,6 @@ export default function FavoriteView() {
             key={league.id}
             icon={buildLeagueLogoUrl(league.id)}
             title={league.name}
-            subtitle={`ID: ${league.id}`}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser
@@ -65,10 +70,17 @@ export default function FavoriteView() {
                   title="Show Detail In Browser"
                   url={buildLeagueDetailUrl(league.id)}
                 />
+                <Action.CopyToClipboard
+                  icon={Icon.Clipboard}
+                  title={`Copy ID (${league.id})`}
+                  content={league.id}
+                  shortcut={{ modifiers: ["cmd"], key: "." }}
+                />
                 <Action
                   icon={Icon.StarDisabled}
                   title="Remove From Favorite"
                   onAction={() => favoriteService.removeItems("league", league.id)}
+                  shortcut={{ modifiers: ["cmd"], key: "d" }}
                 />
               </ActionPanel>
             }
@@ -81,7 +93,6 @@ export default function FavoriteView() {
             key={player.id}
             icon={buildPlayerImageUrl(player.id)}
             title={player.name}
-            subtitle={`ID: ${player.id}`}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser
@@ -89,10 +100,17 @@ export default function FavoriteView() {
                   title="Show Detail In Browser"
                   url={buildPlayerDetailUrl(player.id)}
                 />
+                <Action.CopyToClipboard
+                  icon={Icon.Clipboard}
+                  title={`Copy ID (${player.id})`}
+                  content={player.id}
+                  shortcut={{ modifiers: ["cmd"], key: "." }}
+                />
                 <Action
                   icon={Icon.StarDisabled}
                   title="Remove From Favorite"
                   onAction={() => favoriteService.removeItems("player", player.id)}
+                  shortcut={{ modifiers: ["cmd"], key: "d" }}
                 />
               </ActionPanel>
             }

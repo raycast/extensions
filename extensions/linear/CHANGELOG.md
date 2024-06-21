@@ -1,5 +1,18 @@
 # Linear Changelog
 
+## [Improved Notifications] - 2024-06-14
+
+- Added support for all types of notifications, ensuring that "Unknown Notification" no longer appear.
+
+## [Project Improvements] - 2024-06-11
+
+- Added support for all the latest Linear icons.
+- Introduced a new "See Project Updates" action.
+
+## [Action Shortcut] - 2024-06-10
+
+- Added a new shortcut in the Search Projects command: Press Cmd + Enter to open a project in Linear.
+
 ## [Improvements] - 2024-05-30
 
 - Added preference to hide redundant (Done, Canceled, Duplicate) issues across all searches

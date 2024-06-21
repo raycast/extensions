@@ -1,5 +1,10 @@
 # Font Awesome Changelog
 
+## [Added fuzzy search and icon style and family selection] - 2024-06-02
+
+- Search command now uses Font Awesome's official graphql APIs to support fuzzy search. It is now faster, more accurate and shows similar icons to your query.
+- Added support for switching between different icon families and styles.
+
 ## [Added action] - 2023-06-26
 
 - Added "Copy FA Class" action which copies Font Awesome classes, e.g. "fa-brands fa-chrome".

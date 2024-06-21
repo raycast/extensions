@@ -54,6 +54,7 @@ export async function ensureCLI() {
       await afs.rm(cli);
       throw Error("Could not chmod speedtest cli");
     }
+
     return cli;
   }
 }

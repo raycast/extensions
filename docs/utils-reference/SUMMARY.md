@@ -12,6 +12,7 @@
   - [OAuthService](utils-reference/oauth/OAuthService.md)
   - [withAccessToken](utils-reference/oauth/withAccessToken.md)
   - [getAccessToken](utils-reference/oauth/getAccessToken.md)
+  - [Getting a Google client ID](utils-reference/oauth/getting-google-client-id.md)
 - [React hooks](utils-reference/react-hooks/README.md)
   - [useCachedState](utils-reference/react-hooks/useCachedState.md)
   - [usePromise](utils-reference/react-hooks/usePromise.md)

@@ -1,5 +1,9 @@
 # Simple Reminder Changelog
 
+## [Improved developer experience] - 2024-06-17
+
+- Add clearer error messages for the extension maintainers/contributors to better debug and assess errors in production 
+
 ## [Reminder Menu Bar] - 2024-05-16
 
 - Fix Reminder length not being cut off if topic length is greater than 30

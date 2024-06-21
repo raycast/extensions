@@ -1,8 +1,9 @@
-import { showFailureToast, useForm } from "@raycast/utils";
+import { useForm } from "@raycast/utils";
 import {
   Action,
   ActionPanel,
   Alert,
+  captureException,
   Color,
   confirmAlert,
   Form,
@@ -10,10 +11,12 @@ import {
   showToast,
   Toast,
   useNavigation,
+  Clipboard,
 } from "@raycast/api";
 import { DeleteItemCommand, DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { Table } from "../../dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
+import { getErrorMessage } from "../../util";
 
 interface DeleteItemFormValues {
   hashKey: string;
@@ -26,8 +29,14 @@ interface DeleteItemFormValues {
   expressionAttributeValues: string;
 }
 
-export const DeleteItemForm = ({ table }: { table: Table }) => {
-  const { pop } = useNavigation();
+export const DeleteItemForm = ({
+  table,
+  retryInitValues,
+}: {
+  table: Table;
+  retryInitValues?: DeleteItemFormValues;
+}) => {
+  const { pop, push } = useNavigation();
   const hasRangeKey = table.KeySchema?.some((k) => k.KeyType === "RANGE");
   const tablePrimaryKey = table.keys[`${table.TableName}`];
   const { values, handleSubmit, itemProps } = useForm<DeleteItemFormValues>({
@@ -40,9 +49,12 @@ export const DeleteItemForm = ({ table }: { table: Table }) => {
           title: "Delete",
           style: Alert.ActionStyle.Destructive,
           onAction: async () => {
-            await showToast({ style: Toast.Style.Animated, title: "Deleting item..." });
-            try {
-              const { ConsumedCapacity } = await new DynamoDBClient({}).send(
+            const toast = await showToast({
+              style: Toast.Style.Animated,
+              title: `❗Deleting item in ${table.TableName}`,
+            });
+            new DynamoDBClient({})
+              .send(
                 new DeleteItemCommand({
                   TableName: table.TableName,
                   ReturnConsumedCapacity: "TOTAL",
@@ -62,17 +74,34 @@ export const DeleteItemForm = ({ table }: { table: Table }) => {
                     ExpressionAttributeValues: marshall(JSON.parse(values.expressionAttributeValues)),
                   }),
                 }),
-              );
-              await showToast({
-                style: Toast.Style.Success,
-                title: "✅ Item deleted",
-                message: `Consumed capacity: ${ConsumedCapacity?.CapacityUnits}`,
-              });
-            } catch (error) {
-              await showFailureToast(error, { title: "Failed to delete item" });
-            } finally {
-              pop();
-            }
+              )
+              .then(({ ConsumedCapacity }) => {
+                toast.style = Toast.Style.Success;
+                toast.title = "✅ Item deleted";
+                toast.message = `Consumed capacity: ${ConsumedCapacity?.CapacityUnits}`;
+              })
+              .catch((err) => {
+                captureException(err);
+                toast.style = Toast.Style.Failure;
+                toast.title = "Failed to delete item";
+                toast.message = getErrorMessage(err);
+                toast.primaryAction = {
+                  title: "Retry",
+                  shortcut: { modifiers: ["cmd"], key: "r" },
+                  onAction: () => {
+                    push(<DeleteItemForm table={table} retryInitValues={values} />);
+                    toast.hide();
+                  },
+                };
+                toast.secondaryAction = {
+                  title: "Copy Error",
+                  onAction: () => {
+                    Clipboard.copy(getErrorMessage(err));
+                    toast.hide();
+                  },
+                };
+              })
+              .finally(pop);
           },
         },
       }),
@@ -128,7 +157,7 @@ export const DeleteItemForm = ({ table }: { table: Table }) => {
         }
       },
     },
-    initialValues: {
+    initialValues: retryInitValues || {
       useConditionExpression: false,
       useExpressionAttributeNames: false,
       useExpressionAttributeValues: false,
@@ -148,8 +177,8 @@ export const DeleteItemForm = ({ table }: { table: Table }) => {
       }
       navigationTitle={"Delete Item"}
     >
-      <Form.Description title={"Caution"} text={"❗ This action cannot be undone."} />
-      <Form.Description title={"Table ARN"} text={table.TableArn || ""} />
+      <Form.Description title={"❗"} text={"This action cannot be undone."} />
+      <Form.Description title={"Table Name"} text={`${table.TableName}`} />
       <Form.Separator />
       <Form.TextField {...itemProps.hashKey} placeholder="hash key for item..." title={tablePrimaryKey.hashKey.name} />
       {hasRangeKey && (
