@@ -1,4 +1,4 @@
-import { Clipboard, closeMainWindow, updateCommandMetadata } from "@raycast/api";
+import { Clipboard, closeMainWindow, Toast, updateCommandMetadata } from "@raycast/api";
 import { extractNumber, extractUrl, fetchTitle, isEmpty, showCustomHUD, transform } from "./common-utils";
 import { autoFetchTitle, PasteFormat, replaceClipboard } from "../types/types";
 import { isJSON, isURL } from "validator";
@@ -9,7 +9,7 @@ export async function pasteAs(advancedPasteFormat: string) {
   await closeMainWindow();
   const clipboardText = await Clipboard.readText();
   if (!clipboardText || isEmpty(clipboardText)) {
-    await showCustomHUD("🚨 No content in clipboard");
+    await showCustomHUD({ title: "No content in clipboard", style: Toast.Style.Failure });
     return;
   }
 
@@ -110,7 +110,7 @@ export async function pasteAs(advancedPasteFormat: string) {
     }
   }
 
-  await showCustomHUD(`${realPasteFormatIcon} Paste as ${realPasteFormat}`);
+  await showCustomHUD({ title: `${realPasteFormatIcon} Paste as ${realPasteFormat}` });
   await updateCommandMetadata({
     subtitle: isEmpty(advancedPasteFormat) ? PasteFormat.PLAIN_TEXT : advancedPasteFormat,
   });
