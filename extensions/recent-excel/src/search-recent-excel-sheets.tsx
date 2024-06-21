@@ -17,60 +17,12 @@ const resolveDirectory = (dir: string): string => {
   return dir;
 };
 
-// The following is running with DFS-like traversing, reaching JS limit easily, converted to find
-// import fs from "fs/promises";
-// const getExcelFilesInDirectory = async (directory: string): Promise<ExcelFile[]> => {
-//   const excelFiles: ExcelFile[] = [];
-
-//   const traverseDirectory = async (currentDir: string) => {
-//     try {
-//       const files = await fs.readdir(currentDir);
-
-//       await Promise.all(
-//         files.map(async (file) => {
-//           const filePath = path.join(currentDir, file);
-
-//           try {
-//             const stats = await fs.stat(filePath);
-
-//             if (stats.isDirectory()) {
-//               await traverseDirectory(filePath);
-//             } else if (
-//               file.toLowerCase().endsWith(".xls") ||
-//               file.toLowerCase().endsWith(".xlsx") ||
-//               file.toLowerCase().endsWith(".xlsm")
-//             ) {
-//               excelFiles.push({ path: filePath, lastModified: stats.mtime });
-//             }
-//           } catch (error) {
-//             if (error instanceof Error && error.message.includes("ENOENT")) {
-//               // File or directory does not exist, skip it silently
-//             } else {
-//               console.error(`Error accessing file: ${filePath}`, error);
-//             }
-//           }
-//         }),
-//       );
-//     } catch (error) {
-//       if (error instanceof Error && error.message.includes("ENOENT")) {
-//         // Directory does not exist, skip it silently
-//       } else {
-//         console.error(`Error accessing directory: ${currentDir}`, error);
-//       }
-//     }
-//   };
-
-//   const resolvedDirectory = resolveDirectory(directory);
-//   await traverseDirectory(resolvedDirectory);
-//   return excelFiles;
-// };
-
 const getExcelFilesInDirectoryUsingFind = async (directory: string): Promise<ExcelFile[]> => {
   const execAsync = promisify(exec);
 
   try {
     const { stdout, stderr } = await execAsync(
-      `find "${directory}" -type f \\( -name "*.xls" -o -name "*.xlsx" -o -name "*.xlsm" \\) -print -quit | head -n 200 | xargs -I{} stat -f "%N,%m" "{}"`,
+      `find "${directory}" -type f \\( -name "*.xls" -o -name "*.xlsx" -o -name "*.xlsm" \\) | head -n 200 | xargs -I{} stat -f "%N,%m" "{}"`,
       { maxBuffer: 1024 * 1024 * 10 },
     );
 
