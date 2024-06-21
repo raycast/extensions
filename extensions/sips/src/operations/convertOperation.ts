@@ -57,7 +57,7 @@ export default async function convert(sourcePaths: string[], desiredType: string
     if (desiredType === "WEBP") {
       // Input Format -> WebP
       const [, cwebpPath] = await getWebPBinaryPath();
-      execSync(`${cwebpPath} "${item}" -o "${newPath}"`);
+      execSync(`${cwebpPath} "${item}" -lossless -o "${newPath}"`);
     } else if (originalType.toLowerCase() == "svg") {
       // SVG -> NSBitmapImageRep -> Desired Format
       convertSVG(desiredType, item, newPath);

@@ -80,7 +80,7 @@ export default function AddText({ note }: { note: Note }) {
         <Form.Dropdown.Item value="replace" title="Replace" />
         <Form.Dropdown.Item value="replace_all" title="Replace All" />
       </Form.Dropdown>
-      <Form.TextArea id="text" title="Text" placeholder="Text to add to note ..." />
+      <Form.TextArea id="text" title="Text" placeholder="Text to add to note" />
       <Form.Separator />
       <Form.TextField id="tags" title="Tags" placeholder="comma,separated,tags" />
       <Form.Dropdown id="header" title="Append To Header">

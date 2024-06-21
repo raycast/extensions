@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "browser-ai",
-  "title": "Browser AI",
-  "description": "Use the best models from Perplexity & OpenRouter and Raycast Browser Extension to extend your browsing.",
-  "icon": "logo.png",
+  "title": "Browser AI Companion",
+  "description": "Use the best models with Raycast Browser Extension to extend your browsing experience.",
+  "icon": "icon.png",
   "author": "lin",
   "contributors": [],
   "categories": [
@@ -165,6 +165,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "ray publish",
+    "pull": "ray pull-contributions"
   }
 }

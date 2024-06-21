@@ -18,12 +18,11 @@ import {
   cancelBooking,
   formatDateTime,
   formatTime,
+  updateBooking,
   useBookings,
-  useCurrentUser,
 } from "./services/cal.com";
 
 export default function viewBookings() {
-  const { data: user, error: userError } = useCurrentUser();
   const { data: items, isLoading, error, revalidate } = useBookings();
   const [isShowingDetail, setIsShowingDetail] = useCachedState("show-details", false);
 
@@ -35,14 +34,21 @@ export default function viewBookings() {
       primaryAction: { onAction: openCommandPreferences, title: "Open Preferences" },
     });
   }
-  if (userError) {
-    showToast({
-      title: "Unable to load your username",
-      message: "Check your API key",
-      style: Toast.Style.Failure,
-      primaryAction: { onAction: openCommandPreferences, title: "Open Preferences" },
-    });
-  }
+
+  const handleUpdateBookingStatus = async (bookingId: number, status: string) => {
+    const data = { status };
+    try {
+      await updateBooking(bookingId, data);
+      revalidate();
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Booking Status Updated",
+        message: `Booking status has been successfully updated to ${status.toLowerCase()}`,
+      });
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to update booking status" });
+    }
+  };
 
   return (
     <List isLoading={isLoading} isShowingDetail={isShowingDetail}>
@@ -69,12 +75,43 @@ export default function viewBookings() {
                 icon={!isShowingDetail ? Icon.Eye : Icon.EyeDisabled}
                 onAction={() => setIsShowingDetail(!isShowingDetail)}
               />
-              <Action.OpenInBrowser title="Open in Browser" url={`https://cal.com/${user?.username}/${item.uid}`} />
+              <Action.OpenInBrowser title="Open Booking in Browser" url={`https://cal.com/booking/${item.uid}`} />
+              <ActionPanel.Submenu title="Update Status" icon={Icon.Pencil} shortcut={{ modifiers: ["cmd"], key: "s" }}>
+                <Action
+                  title="Accept"
+                  icon={Icon.CheckCircle}
+                  onAction={async () => {
+                    handleUpdateBookingStatus(item.id, "ACCEPTED");
+                    revalidate();
+                  }}
+                />
+                <Action
+                  title="Reject"
+                  icon={Icon.XMarkCircle}
+                  onAction={async () => {
+                    handleUpdateBookingStatus(item.id, "REJECTED");
+                    revalidate();
+                  }}
+                />
+                <Action
+                  title="Pending"
+                  icon={Icon.Clock}
+                  onAction={async () => {
+                    handleUpdateBookingStatus(item.id, "PENDING");
+                    revalidate();
+                  }}
+                />
+              </ActionPanel.Submenu>
               <Action.Push
                 title="Cancel Booking"
                 icon={Icon.XMarkCircle}
                 shortcut={{ modifiers: ["cmd"], key: "c" }}
                 target={<CancelBooking bookingId={item.id} revalidate={revalidate} />}
+              />
+              <Action.OpenInBrowser
+                title="Open All Bookings in Browser"
+                url="https://app.cal.com/bookings/upcoming"
+                shortcut={{ modifiers: ["cmd"], key: "b" }}
               />
             </ActionPanel>
           }
