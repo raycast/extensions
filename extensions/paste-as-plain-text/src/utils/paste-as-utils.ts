@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 
 export async function pasteAs(advancedPasteFormat: string) {
   await closeMainWindow();
+  await showCustomHUD({ title: "Pasting...", style: Toast.Style.Animated });
   const clipboardText = await Clipboard.readText();
   if (!clipboardText || isEmpty(clipboardText)) {
     await showCustomHUD({ title: "No content in clipboard", style: Toast.Style.Failure });
