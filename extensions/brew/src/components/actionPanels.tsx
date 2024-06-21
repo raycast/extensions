@@ -31,6 +31,7 @@ export function CaskActionPanel(props: {
               target={<CaskInfo cask={cask} isInstalled={props.isInstalled} onAction={props.onAction} />}
             />
           )}
+          {cask.outdated && <Actions.FormulaUpgradeAction formula={cask} onAction={props.onAction} />}
           <Action.ShowInFinder path={brewInstallPath(cask)} />
         </ActionPanel.Section>
         <ActionPanel.Section>
@@ -54,7 +55,6 @@ export function CaskActionPanel(props: {
         </ActionPanel.Section>
 
         <ActionPanel.Section>
-          {cask.outdated && <Actions.FormulaUpgradeAction formula={cask} onAction={props.onAction} />}
           <Action.CopyToClipboard
             title="Copy Cask Name"
             content={cask.token}
@@ -134,6 +134,7 @@ export function FormulaActionPanel(props: {
               target={<FormulaInfo formula={formula} isInstalled={props.isInstalled} onAction={props.onAction} />}
             />
           )}
+          {formula.outdated && <Actions.FormulaUpgradeAction formula={formula} onAction={props.onAction} />}
           <Action.ShowInFinder path={brewInstallPath(formula)} />
           <Actions.FormulaPinAction formula={formula} onAction={props.onAction} />
         </ActionPanel.Section>
@@ -156,9 +157,6 @@ export function FormulaActionPanel(props: {
               runCommandInTerminal(brewUninstallCommand(formula));
             }}
           />
-        </ActionPanel.Section>
-        <ActionPanel.Section>
-          {formula.outdated && <Actions.FormulaUpgradeAction formula={formula} onAction={props.onAction} />}
         </ActionPanel.Section>
       </ActionPanel>
     );
