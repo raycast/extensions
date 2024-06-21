@@ -30,9 +30,9 @@ export default async function Command() {
     if (preferences.accessToken) {
       headers.append("Authorization", `Bearer ${preferences.accessToken}`);
     }
-    let URL = `https://api.u301.com/v2/shorten?url=${encodeURIComponent(selectedText)}`
+    let URL = `https://api.u301.com/v2/shorten?url=${encodeURIComponent(selectedText)}`;
     if (preferences.domainName) {
-      URL += `&domain=${preferences.domainName}`
+      URL += `&domain=${preferences.domainName}`;
     }
     const res = await fetch(URL, {
       headers,
