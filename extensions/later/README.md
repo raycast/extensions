@@ -11,6 +11,5 @@ Read your tabs later
 
 # Screenshot
 
-![screenshot2](./metadata/screenshot-02.png)
 ![screenshot3](./metadata/screenshot-03.png)
 ![screenshot4](./metadata/screenshot-04.png)
