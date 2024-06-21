@@ -59,9 +59,9 @@ export default function CodePipeline() {
             <ActionPanel>
               <AwsAction.Console url={resourceToConsoleLink(pipeline.name, "AWS::CodePipeline::Pipeline")} />
               <ActionPanel.Section title={"Pipeline Actions"}>
-                <ToggleStageTransitionAction {...{ pipeline, mutate, isLoading, stages: pipeline.stages }} />
-                <RetryStageExecutionAction {...{ pipeline, mutate, isLoading, stages: pipeline.stages }} />
-                <StopExecutionAction {...{ pipeline, mutate, isLoading, stages: pipeline.stages }} />
+                <ToggleStageTransitionAction {...{ pipeline, mutate, isLoading }} />
+                <RetryStageExecutionAction {...{ pipeline, mutate, isLoading }} />
+                <StopExecutionAction {...{ pipeline, mutate, isLoading }} />
                 <Action.CopyToClipboard title="Copy Pipeline Name" content={pipeline.name || ""} />
                 {pipeline.executions.length > 0 && pipeline.executions[0].pipelineExecutionId && (
                   <Action.CopyToClipboard
