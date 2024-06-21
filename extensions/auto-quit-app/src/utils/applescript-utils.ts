@@ -4,12 +4,14 @@ import { Application, getFrontmostApplication } from "@raycast/api";
 export async function scriptQuitAppsWithoutWindow(apps: Application[]) {
   for (let i = 0; i < apps.length; i++) {
     try {
-      const appName = apps[i].path.split("/").pop()?.replace(".app", "");
-      const hasWindow = await scriptGetAppWindow(appName);
-      const isRunning = await scriptIsRunning(appName);
-      const isFrontmost = await IsFrontmostApp(appName);
-      if (!hasWindow && isRunning && !isFrontmost) {
-        const script = `tell application "${appName}"
+      const appName = apps[i].name;
+      if (
+        (await scriptIsRunning(appName)) &&
+        !(await IsFrontmostApp(appName)) &&
+        !(await scriptGetAppWindow(appName))
+      ) {
+        const script = `
+tell application "${appName}"
    quit
 end tell`;
         await runAppleScript(script);
@@ -23,14 +25,12 @@ end tell`;
 export async function scriptQuitApps(apps: Application[]) {
   for (let i = 0; i < apps.length; i++) {
     try {
-      const appName = apps[i].path.split("/").pop()?.replace(".app", "");
-
+      const appName = apps[i].name;
       const isRunning = await scriptIsRunning(appName);
       if (isRunning) {
         const script = `tell application "${appName}"
    quit
 end tell`;
-
         await runAppleScript(script);
       }
     } catch (e) {
@@ -63,20 +63,16 @@ end if`;
     return false;
   }
 }
+
 async function scriptGetAppWindow(appName: string | undefined) {
   const script = `set appName to "${appName}"
-tell application "System Events"
-    if not (exists process appName) then
-        return false
-    end if
-    set appProcess to first process whose name is appName
-    set appWindows to windows of appProcess
-    if length of appWindows is 0 then
-        return false
-    else
-        return true
-    end if
-end tell
+if application appName is running then
+  tell application "System Events" to tell process appName
+    set windowCount to count of (get every window)
+    return windowCount > 0
+  end tell
+  return false
+end if
 `;
   try {
     const hasWindow = await runAppleScript(script);

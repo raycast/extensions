@@ -5,14 +5,14 @@ export function ActionOpenPreferences() {
     <ActionPanel.Section>
       <Action
         icon={Icon.Gear}
-        title="Open Command Preferences"
-        shortcut={{ modifiers: ["cmd"], key: "," }}
+        title="Configure Command"
+        shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
         onAction={openCommandPreferences}
       />
       <Action
         icon={Icon.Gear}
-        title="Open Extension Preferences"
-        shortcut={{ modifiers: ["ctrl", "cmd"], key: "," }}
+        title="Configure Extension"
+        shortcut={{ modifiers: ["opt", "cmd"], key: "," }}
         onAction={openExtensionPreferences}
       />
     </ActionPanel.Section>

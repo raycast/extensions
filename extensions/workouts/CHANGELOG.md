@@ -1,5 +1,9 @@
 # Workouts Changelog
 
+## [Analyze workout] - 2024-05-09
+
+- Add "Analyze workout" command to get a detailed analysis and suggestions for a specific workout.
+- Add weekly stats to the menu bar
 
 ## [Refresh interval update] - 2024-05-09
 

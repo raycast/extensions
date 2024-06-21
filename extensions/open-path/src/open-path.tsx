@@ -17,6 +17,9 @@ export default async (props: LaunchProps<{ arguments: OpenInArguments }>) => {
   const openIn_ = getArgument(props.arguments.openIn, `OpenIn`);
   const openIn = isEmpty(openIn_) ? OpenIn.FINDER : openIn_;
 
+  // Update metadata
+  await updateCommandMetadata({ subtitle: validator.isEmpty(openIn) ? OpenIn.FINDER : openIn });
+
   const frontmostApp = await getFrontmostApplication();
   if (openIn === OpenIn.TERMINAL && frontmostApp.name === "Finder") {
     const finderPath = await getFinderPath();
@@ -70,7 +73,4 @@ export default async (props: LaunchProps<{ arguments: OpenInArguments }>) => {
 
   // Open Url or Search Text
   await urlPathAction(path);
-
-  // Update metadata
-  await updateCommandMetadata({ subtitle: validator.isEmpty(openIn) ? OpenIn.FINDER : openIn });
 };

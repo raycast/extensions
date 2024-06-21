@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Cache, Icon, launchCommand, LaunchType, List } from "@raycast/api";
+import { Action, ActionPanel, Cache, launchCommand, LaunchType, List } from "@raycast/api";
 import React, { useEffect, useState } from "react";
-import { Program, ServiceId, serviceIds } from "../types";
+import { preferences } from "../preferences";
+import { Program, ServiceId } from "../types";
 import { getFormattedDate } from "../utils";
 import { ProgramDetail } from "./ProgramDetail";
 import { SearchBarDropdown } from "./ServiceSelectSearchBar";
@@ -10,6 +11,7 @@ const cache = new Cache();
 type Props = {
   customFilters?: ((program: Program) => boolean)[];
   canSelectAll?: boolean;
+  targetServiceIds?: ServiceId[];
 };
 
 export function ProgramList({ customFilters = [], canSelectAll = false }: Props): React.JSX.Element {
@@ -46,25 +48,25 @@ export function ProgramList({ customFilters = [], canSelectAll = false }: Props)
         programs
           .filter((p) => new Date(p.end_time) > new Date())
           .filter((p) => customFilters.every((f) => f(p)))
-          .map((p) => (
-            <List.Item
-              key={`${p.service.id}:${p.id}`} // When "all" is selected, ids might duplicate, so use "service" as a prefix.
-              icon={{
-                source: Icon.Document,
-              }}
-              title={p.title}
-              accessories={[
-                {
-                  text: `${getFormattedDate(new Date(p.start_time), "MM-DD")} ${getFormattedDate(new Date(p.start_time), "HH:mm")}~${getFormattedDate(new Date(p.end_time), "HH:mm")}`,
-                },
-              ]}
-              actions={
-                <ActionPanel title={p.title}>
-                  <Action.Push title="Show Detail" target={<ProgramDetail program={p} />} />
-                </ActionPanel>
-              }
-            />
-          ))
+          .map((p) => {
+            return (
+              <List.Item
+                key={`${p.service.id}:${p.id}`} // When "all" is selected, ids might duplicate, so use "service" as a prefix.
+                icon={{ source: `https:${p.service.logo_s.url}` }}
+                title={p.title}
+                accessories={[
+                  {
+                    text: `${getFormattedDate(new Date(p.start_time), "MM-DD")} ${getFormattedDate(new Date(p.start_time), "HH:mm")}~${getFormattedDate(new Date(p.end_time), "HH:mm")}`,
+                  },
+                ]}
+                actions={
+                  <ActionPanel title={p.title}>
+                    <Action.Push title="Show Detail" target={<ProgramDetail program={p} />} />
+                  </ActionPanel>
+                }
+              />
+            );
+          })
       )}
     </List>
   );
@@ -72,7 +74,7 @@ export function ProgramList({ customFilters = [], canSelectAll = false }: Props)
 
 function getProgramsFromCache(serviceId: ServiceId): Program[] {
   if (serviceId === "all") {
-    const allPrograms = serviceIds.flatMap((sid) => JSON.parse(cache.get(sid) ?? "[]")) as Program[];
+    const allPrograms = preferences.services.flatMap((sid) => JSON.parse(cache.get(sid) ?? "[]")) as Program[];
     return allPrograms.sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
   }
 

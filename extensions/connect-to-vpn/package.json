@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "rasmusbe",
   "contributors": [
-    "sato11"
+    "sato11",
+    "stonerl"
   ],
   "license": "MIT",
   "commands": [
@@ -16,6 +17,43 @@
       "subtitle": "VPN",
       "description": "Shortcut to your Network Preferences",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "hideInvalidDevices",
+      "title": "Filter Non-VPN Services",
+      "description": "Tick this to hide non-VPN services from the list.",
+      "label": "Hide non-VPN services",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "sortBy",
+      "title": "Sort By",
+      "description": "Choose how to sort the services",
+      "type": "dropdown",
+      "required": false,
+      "default": "ascService",
+      "data": [
+        {
+          "title": "Ascending by Name",
+          "value": "ascService"
+        },
+        {
+          "title": "Descending by Name",
+          "value": "descService"
+        },
+        {
+          "title": "Ascending by Type",
+          "value": "ascType"
+        },
+        {
+          "title": "Descending by Type",
+          "value": "descType"
+        }
+      ]
     }
   ],
   "dependencies": {
