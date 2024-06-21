@@ -2,10 +2,10 @@ import { Color, Detail } from "@raycast/api";
 
 export function Dependencies(props: {
   title: string;
-  dependencies: string[];
+  dependencies: string[] | undefined;
   isInstalled: (name: string) => boolean;
 }): JSX.Element {
-  if (props.dependencies.length == 0) {
+  if (!props.dependencies || props.dependencies.length == 0) {
     return null;
   }
   return (

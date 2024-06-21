@@ -37,7 +37,12 @@ export function FormulaList(props: FormulaListProps): JSX.Element {
       </List.Section>
       <List.Section title="Casks">
         {props.casks.map((cask) => (
-          <CaskListItem key={`cask-${cask.token}`} cask={cask} onAction={props.onAction} />
+          <CaskListItem
+            key={`cask-${cask.token}`}
+            cask={cask}
+            isInstalled={props.isInstalled}
+            onAction={props.onAction}
+          />
         ))}
         {casks.isTruncated() && <MoreListItem />}
       </List.Section>
@@ -81,7 +86,11 @@ export function FormulaListItem(props: {
   );
 }
 
-export function CaskListItem(props: { cask: Cask; onAction: () => void }): JSX.Element {
+export function CaskListItem(props: {
+  cask: Cask;
+  isInstalled: (name: string) => boolean;
+  onAction: () => void;
+}): JSX.Element {
   const cask = props.cask;
   let version = cask.version;
   let tintColor = Color.SecondaryText;
@@ -101,7 +110,9 @@ export function CaskListItem(props: { cask: Cask; onAction: () => void }): JSX.E
       subtitle={cask.desc}
       accessories={[{ text: version }]}
       icon={tooltip ? { value: icon, tooltip } : icon}
-      actions={<CaskActionPanel cask={cask} showDetails={true} onAction={props.onAction} />}
+      actions={
+        <CaskActionPanel cask={cask} showDetails={true} isInstalled={props.isInstalled} onAction={props.onAction} />
+      }
     />
   );
 }

@@ -1,8 +1,13 @@
 import { Detail, useNavigation } from "@raycast/api";
 import { CaskActionPanel } from "./actionPanels";
 import { Cask, brewName } from "../brew";
+import { Dependencies } from "./dependencies";
 
-export function CaskInfo(props: { cask: Cask; onAction: (result: boolean) => void }): JSX.Element {
+export function CaskInfo(props: {
+  cask: Cask;
+  isInstalled: (name: string) => boolean;
+  onAction: (result: boolean) => void;
+}): JSX.Element {
   const { pop } = useNavigation();
   const { cask } = props;
 
@@ -10,10 +15,25 @@ export function CaskInfo(props: { cask: Cask; onAction: (result: boolean) => voi
     <Detail
       markdown={formatInfo(cask)}
       navigationTitle={`Cask Info: ${brewName(cask)}`}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Link title="Homepage" text={cask.homepage} target={cask.homepage} />
+          <Detail.Metadata.Label title="Tap" text={cask.tap} />
+          <CaskVersion cask={cask} />
+          <CaskDependencies cask={cask} />
+          <Dependencies
+            title="Conflicts With"
+            dependencies={cask.conflicts_with?.cask}
+            isInstalled={props.isInstalled}
+          />
+          <Detail.Metadata.Label title="Auto Updates" text={cask.auto_updates ? "Yes" : "No"} />
+        </Detail.Metadata>
+      }
       actions={
         <CaskActionPanel
           cask={cask}
           showDetails={false}
+          isInstalled={props.isInstalled}
           onAction={(result) => {
             pop();
             props.onAction(result);
@@ -26,81 +46,43 @@ export function CaskInfo(props: { cask: Cask; onAction: (result: boolean) => voi
 
 /// Private
 
+function CaskDependencies(props: { cask: Cask }): JSX.Element {
+  const macos = props.cask.depends_on.macos;
+
+  if (!macos) {
+    return null;
+  }
+
+  return (
+    <Detail.Metadata.TagList title="macOS Version">
+      {Object.keys(macos).map((key) => {
+        const values = macos[key];
+        if (values) {
+          return <Detail.Metadata.TagList.Item key={key} text={`${key} ${values.join(", ")}`} />;
+        }
+      })}
+    </Detail.Metadata.TagList>
+  );
+}
+
+function CaskVersion(props: { cask: Cask }): JSX.Element {
+  let version = "";
+  if (props.cask.installed) {
+    version = `${props.cask.installed} (installed)`;
+  } else {
+    version = props.cask.version;
+  }
+  if (version) {
+    return <Detail.Metadata.Label title="Version" text={version} />;
+  }
+}
+
 function formatInfo(cask: Cask): string {
   return `
 # ${brewName(cask)}
 ${cask.desc}
 
-[${cask.homepage}](${cask.homepage})
-
-${formatTokenAndTap(cask)}
-
-${formatVersion(cask)}
-
-${formatDependencies(cask)}
-
-${formatConflicts(cask)}
-
 ${formatCaveats(cask)}
-  `;
-}
-
-function formatTokenAndTap(cask: Cask): string {
-  return `
-#### Cask
-${cask.token}
-
-Tap: ${cask.tap}
-  `;
-}
-
-function formatVersion(cask: Cask): string {
-  if (!cask.version) {
-    return "";
-  }
-
-  let version = cask.version;
-  if (cask.installed) {
-    version = `${cask.installed} (installed)`;
-  }
-
-  return `
-#### Version
-
-${version}
-
-#### Auto Updates
-
-${cask.auto_updates ?? false}
-  `;
-}
-
-function formatDependencies(cask: Cask): string {
-  if (!cask.depends_on.macos) {
-    return "";
-  }
-
-  let markdown = "";
-  for (const key in cask.depends_on.macos) {
-    const values = cask.depends_on.macos[key];
-    if (!values) {
-      continue;
-    }
-    markdown += `macOS ${key} ${values.join(", ")}`;
-  }
-
-  return `#### Dependencies
-${markdown}
-    `;
-}
-
-function formatConflicts(cask: Cask): string {
-  if (!cask.conflicts_with || !cask.conflicts_with.cask) {
-    return "";
-  }
-
-  return `#### Conflicts With
-${cask.conflicts_with.cask.join(", ")}
   `;
 }
 

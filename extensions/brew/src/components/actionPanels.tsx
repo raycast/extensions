@@ -15,6 +15,7 @@ import { runCommandInTerminal, terminalName } from "./runInTerminal";
 export function CaskActionPanel(props: {
   cask: Cask;
   showDetails: boolean;
+  isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
 }): JSX.Element {
   const cask = props.cask;
@@ -27,7 +28,7 @@ export function CaskActionPanel(props: {
             <Action.Push
               title="Show Details"
               icon={Icon.Document}
-              target={<CaskInfo cask={cask} onAction={props.onAction} />}
+              target={<CaskInfo cask={cask} isInstalled={props.isInstalled} onAction={props.onAction} />}
             />
           )}
           <Action.ShowInFinder path={brewInstallPath(cask)} />
@@ -73,7 +74,7 @@ export function CaskActionPanel(props: {
             <Action.Push
               title="Show Details"
               icon={Icon.Document}
-              target={<CaskInfo cask={cask} onAction={props.onAction} />}
+              target={<CaskInfo cask={cask} isInstalled={props.isInstalled} onAction={props.onAction} />}
             />
           )}
           <Actions.FormulaInstallAction formula={cask} onAction={props.onAction} />

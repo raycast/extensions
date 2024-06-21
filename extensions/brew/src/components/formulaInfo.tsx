@@ -26,6 +26,7 @@ export function FormulaInfo(props: {
             isInstalled={props.isInstalled}
           />
           <Dependencies title="Conflicts With" dependencies={formula.conflicts_with} isInstalled={props.isInstalled} />
+          {formula.pinned && <Detail.Metadata.Label title="Pinned" text="Yes" />}
           {formula.keg_only && <Detail.Metadata.Label title="Keg Only" text="Yes" />}
         </Detail.Metadata>
       }
