@@ -7,7 +7,6 @@ import {
   Icon,
   LaunchProps,
   open,
-  showHUD,
   showToast,
   Toast
 } from "@raycast/api";
