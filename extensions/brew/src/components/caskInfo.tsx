@@ -3,13 +3,16 @@ import { CaskActionPanel } from "./actionPanels";
 import { Cask, brewName } from "../brew";
 import { Dependencies } from "./dependencies";
 
-export function CaskInfo(props: {
+export function CaskInfo({
+  cask,
+  isInstalled,
+  onAction,
+}: {
   cask: Cask;
   isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
 }): JSX.Element {
   const { pop } = useNavigation();
-  const { cask } = props;
 
   return (
     <Detail
@@ -21,11 +24,7 @@ export function CaskInfo(props: {
           <Detail.Metadata.Label title="Tap" text={cask.tap} />
           <CaskVersion cask={cask} />
           <CaskDependencies cask={cask} />
-          <Dependencies
-            title="Conflicts With"
-            dependencies={cask.conflicts_with?.cask}
-            isInstalled={props.isInstalled}
-          />
+          <Dependencies title="Conflicts With" dependencies={cask.conflicts_with?.cask} isInstalled={isInstalled} />
           <Detail.Metadata.Label title="Auto Updates" text={cask.auto_updates ? "Yes" : "No"} />
         </Detail.Metadata>
       }
@@ -33,10 +32,10 @@ export function CaskInfo(props: {
         <CaskActionPanel
           cask={cask}
           showDetails={false}
-          isInstalled={props.isInstalled}
+          isInstalled={isInstalled}
           onAction={(result) => {
             pop();
-            props.onAction(result);
+            onAction(result);
           }}
         />
       }
@@ -46,8 +45,8 @@ export function CaskInfo(props: {
 
 /// Private
 
-function CaskDependencies(props: { cask: Cask }): JSX.Element {
-  const macos = props.cask.depends_on.macos;
+function CaskDependencies({ cask }: { cask: Cask }) {
+  const macos = cask.depends_on?.macos;
 
   if (!macos) {
     return null;
@@ -65,16 +64,9 @@ function CaskDependencies(props: { cask: Cask }): JSX.Element {
   );
 }
 
-function CaskVersion(props: { cask: Cask }): JSX.Element {
-  let version = "";
-  if (props.cask.installed) {
-    version = `${props.cask.installed} (installed)`;
-  } else {
-    version = props.cask.version;
-  }
-  if (version) {
-    return <Detail.Metadata.Label title="Version" text={version} />;
-  }
+function CaskVersion({ cask }: { cask: Cask }) {
+  const version = cask.installed ? `${cask.installed} (installed)` : cask.version;
+  return version ? <Detail.Metadata.Label title="Version" text={version} /> : null;
 }
 
 function formatInfo(cask: Cask): string {
@@ -87,19 +79,10 @@ ${formatCaveats(cask)}
 }
 
 function formatCaveats(cask: Cask): string {
-  let caveats = "";
-
   if (cask.caveats) {
-    caveats += `
+    return `#### Caveats
 ${cask.caveats}
     `;
   }
-
-  if (caveats) {
-    return `#### Caveats
-${caveats}
-    `;
-  } else {
-    return "";
-  }
+  return "";
 }

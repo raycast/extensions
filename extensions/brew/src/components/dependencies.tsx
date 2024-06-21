@@ -4,7 +4,7 @@ export function Dependencies(props: {
   title: string;
   dependencies: string[] | undefined;
   isInstalled: (name: string) => boolean;
-}): JSX.Element {
+}) {
   if (!props.dependencies || props.dependencies.length == 0) {
     return null;
   }
