@@ -45,6 +45,15 @@
       "required": false,
       "default": "",
       "placeholder": "Leave empty to use as an anonymous user"
+    },
+    {
+      "name": "domainName",
+      "title": "Custom Domain Name",
+      "description": "Domain for shortened URL, API Key required if you want to use your own custom domain",
+      "type": "textfield",
+      "required": false,
+      "default": "u301.co",
+      "placeholder": "Leave empty to use default domain"
     }
   ],
   "dependencies": {

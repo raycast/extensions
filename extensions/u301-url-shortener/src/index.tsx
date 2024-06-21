@@ -30,7 +30,11 @@ export default async function Command() {
     if (preferences.accessToken) {
       headers.append("Authorization", `Bearer ${preferences.accessToken}`);
     }
-    const res = await fetch(`https://api.u301.com/v2/shorten?url=${encodeURIComponent(selectedText)}`, {
+    let URL = `https://api.u301.com/v2/shorten?url=${encodeURIComponent(selectedText)}`
+    if (preferences.domainName) {
+      URL += `&domain=${preferences.domainName}`
+    }
+    const res = await fetch(URL, {
       headers,
     });
     const { shortened, message = "Failed to shorten" } = (await res.json()) as { shortened: string; message?: string };
