@@ -3,8 +3,7 @@ export type ApplicationInfo = {
   bundleId: string;
 };
 
-
-export  interface ScratchPadCreationFormValues {
+export interface ScratchPadCreationFormValues {
   fileType?: string;
   folders?: string[];
   fileNamePrefix?: string;

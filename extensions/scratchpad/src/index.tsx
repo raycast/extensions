@@ -18,11 +18,15 @@ export default function Command() {
   const [applicationsList, setApplicationsList] = useState<Application[]>([]);
   const [hasInitDataLoaded, setHasInitDataLoaded] = useState<boolean>(false);
 
-  const { handleSubmit, itemProps: formDetails, setValue } = useForm<ScratchPadCreationFormValues>({
+  const {
+    handleSubmit,
+    itemProps: formDetails,
+    setValue,
+  } = useForm<ScratchPadCreationFormValues>({
     onSubmit: async function (values: ScratchPadCreationFormValues): Promise<void | boolean> {
       const { folders, fileNamePrefix, fileType, applicationBundleId } = values;
       const folder = folders![0];
-     
+
       await processSubmitAction(folder, fileNamePrefix!, fileType!, applicationBundleId!);
     },
     validation: {

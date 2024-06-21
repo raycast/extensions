@@ -4,7 +4,6 @@ import { homedir } from "os";
 import { getApplications, Application, open, showToast, Toast, LocalStorage } from "@raycast/api";
 import { editorBundleIds } from "../constants";
 
-
 export const getDefaultHomeDir = () => {
   return `${homedir()}/Desktop/Scratchpad`;
 };
@@ -100,4 +99,3 @@ export const processSubmitAction = async (
   await createScratchPadFile(folderPath, filePrefix, fileType, application);
   await storeLastUsedEditorId(application);
 };
-
