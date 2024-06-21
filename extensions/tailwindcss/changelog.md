@@ -1,6 +1,6 @@
 # Tailwind CSS Changelog
 
-## [Update Documentation] - 2024-06-21
+## [Update documentation] - 2024-06-21
 - Updated Tailwind CSS documentation links
 
 ## [Fixed sorting] - 2023-10-16
