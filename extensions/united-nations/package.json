@@ -41,6 +41,12 @@
       "title": "UN Press",
       "description": "Meetings Coverage and Press Releases",
       "mode": "view"
+    },
+    {
+      "name": "un-site-index",
+      "title": "UN Site Index",
+      "description": "Site Index of United Nations.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -73,11 +79,11 @@
           "title": "Русский"
         },
         {
-          "value": "pt",
+          "value": "es",
           "title": "Español"
         },
         {
-          "value": "es",
+          "value": "pt",
           "title": "Português"
         },
         {
@@ -91,6 +97,40 @@
         {
           "value": "ur",
           "title": "Urdu اردو"
+        }
+      ]
+    },
+    {
+      "type": "dropdown",
+      "title": "Site Index Language",
+      "name": "siteIndexLanguageCode",
+      "description": "Display launage for UN Site Index.",
+      "required": true,
+      "default": "en",
+      "data": [
+        {
+          "value": "ar",
+          "title": "العربية"
+        },
+        {
+          "value": "zh",
+          "title": "中文"
+        },
+        {
+          "value": "en",
+          "title": "English"
+        },
+        {
+          "value": "fr",
+          "title": "Français"
+        },
+        {
+          "value": "ru",
+          "title": "Русский"
+        },
+        {
+          "value": "es",
+          "title": "Español"
         }
       ]
     },

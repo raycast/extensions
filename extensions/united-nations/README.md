@@ -8,20 +8,27 @@ Peace, dignity and equality on a healthy planet.
 
 ## Features
 
-- View UN Documents
-- View UN News
-- View UN Press
+- Explore UN Documents
+- Explore UN News
+- Explore UN Press
+- Explore UN Site Index
 - Text-to-Speech (requires [Say extension](https://raycast.com/litomore/say))
 
 ## Pro Enhanced Features
 
 - AI-summarized UN News for Text-to-Speech
 
+## Languages Support
+
+| Command        | Lanuages                                                                             |
+| -------------- | ------------------------------------------------------------------------------------ |
+| UN Documents   | English                                                                              |
+| UN Press       | English                                                                              |
+| UN News        | Arabic, Chinese, English, French, Russian, Spanish, Portuguese, Swahili, Hindi, Urdu |
+| UN Site Index  | Arabic, Chinese, English, French, Russian, Spanish                                   |
+| Text-to-Speech | Arabic, Chinese, English, French, Russian, Spanish, Poruguese, Hindi                 |
+
 ## Configurations
-
-The UN News command suppport Arabic, Chinese, English, French, Russian, Spanish, Portuguese, Swahili, Hindi and Urdu languages.
-
-Text-to-Speech feature suppports Arabic, Chinese, English, French, Russian, Spanish, Poruguese, and Hindi languages.
 
 You can switch text-to-speech languages from the [Configure Say](https://raycast.com/litomore/say) command. We recommend using Siri voices for the best experience.
 

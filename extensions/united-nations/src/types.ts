@@ -77,3 +77,7 @@ export type Internationalization = {
   viewByTopic: string;
   newsType: Record<NewsAll | NewsRegion | NewsTopic, string>;
 };
+
+export type SiteIndexItem = { title: string; link: string };
+
+export type SiteIndex = Record<string, SiteIndexItem[]>;
