@@ -1,6 +1,7 @@
-import { Detail, useNavigation } from "@raycast/api";
+import { Color, Detail, useNavigation } from "@raycast/api";
 import { FormulaActionPanel } from "./actionPanels";
 import { Formula, brewIsInstalled, brewPrefix } from "../brew";
+import { Dependencies } from "./dependencies";
 
 export function FormulaInfo(props: {
   formula: Formula;
@@ -8,13 +9,24 @@ export function FormulaInfo(props: {
   onAction: (result: boolean) => void;
 }): JSX.Element {
   const { pop } = useNavigation();
+  const formula = props.formula;
   return (
     <Detail
-      markdown={formatInfo(props.formula, props.isInstalled)}
+      markdown={formatInfo(formula, props.isInstalled)}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Link title="Homepage" text={props.formula.homepage} target={props.formula.homepage} />
-          <Detail.Metadata.Label title="License" text={props.formula.license} />
+          <Detail.Metadata.Link title="Homepage" text={formula.homepage} target={formula.homepage} />
+          <Detail.Metadata.Label title="License" text={formula.license} />
+          <Detail.Metadata.Label title="Versions" text={formatVersions(formula)} />
+          {formula.versions.head && <Detail.Metadata.Label title="" text={formula.versions.head} />}
+          <Dependencies title="Dependencies" dependencies={formula.dependencies} isInstalled={props.isInstalled} />
+          <Dependencies
+            title="Build Dependencies"
+            dependencies={formula.build_dependencies}
+            isInstalled={props.isInstalled}
+          />
+          <Dependencies title="Conflicts With" dependencies={formula.conflicts_with} isInstalled={props.isInstalled} />
+          {formula.keg_only && <Detail.Metadata.Label title="Keg Only" text="Yes" />}
         </Detail.Metadata>
       }
       actions={
@@ -39,12 +51,6 @@ function formatInfo(formula: Formula, isInstalled: (name: string) => boolean): s
 # ${formula.name}
 ${formula.desc}
 
-${formatVersions(formula)}
-
-${formatDependencies(formula, isInstalled)}
-
-${formatConflicts(formula)}
-
 ${formatCaveats(formula)}
   `;
 }
@@ -61,62 +67,7 @@ function formatVersions(formula: Formula): string {
   if (formula.installed.first()?.installed_as_dependency) {
     status.push("dependency");
   }
-  let markdown = `
-#### Versions
-Stable: ${versions.stable} ${status ? `(${status.join(", ")})` : ""}
-
-`;
-  if (versions.head) {
-    markdown += versions.head;
-  }
-
-  return markdown;
-}
-
-function formatDependencies(formula: Formula, isInstalled: (name: string) => boolean): string {
-  let markdown = "";
-
-  if (formula.dependencies.length > 0) {
-    const dependencies = formula.dependencies
-      .map((dep) => {
-        return isInstalled(dep) ? `__${dep}__` : `${dep}`;
-      })
-      .join(", ");
-
-    markdown += `
-Required: ${dependencies}
-    `;
-  }
-
-  if (formula.build_dependencies.length > 0) {
-    const build_dependencies = formula.build_dependencies
-      .map((dep) => {
-        return isInstalled(dep) ? `__${dep}__` : `${dep}`;
-      })
-      .join(", ");
-
-    markdown += `
-Build: ${build_dependencies}
-    `;
-  }
-
-  if (markdown) {
-    return `#### Dependencies
-${markdown}
-    `;
-  } else {
-    return "";
-  }
-}
-
-function formatConflicts(formula: Formula): string {
-  if (!formula.conflicts_with || formula.conflicts_with.length == 0) {
-    return "";
-  }
-
-  return `#### Conflicts With
- ${formula.conflicts_with.join(", ")}
-  `;
+  return `${versions.stable} ${status ? `(${status.join(", ")})` : ""}`;
 }
 
 function formatCaveats(formula: Formula): string {
