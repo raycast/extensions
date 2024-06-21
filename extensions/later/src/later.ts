@@ -1,14 +1,17 @@
-import { LocalStorage, closeMainWindow, showToast } from "@raycast/api";
+import { closeMainWindow, getPreferenceValues, showToast } from "@raycast/api";
 import { Scripts, expression } from "./utils/scripts";
 import { runAppleScript } from "run-applescript";
 import { add_link_handler } from "./utils/handler";
 import { splitter } from "./common/config";
+import { PreferenceValue } from "./types/validate";
 
 const later = async () => {
   const regex = new RegExp(expression);
+  const preference = getPreferenceValues<PreferenceValue>();
+
   await closeMainWindow();
   try {
-    const browser = (await LocalStorage.getItem("links_from")) ?? "chrome";
+    const browser = preference.links_from ?? "chrome";
 
     const script = Scripts[browser as keyof typeof Scripts];
 

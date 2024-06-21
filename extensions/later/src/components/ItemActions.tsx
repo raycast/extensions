@@ -1,12 +1,14 @@
 import React, { useCallback } from "react";
 import { ListItem } from "../types/common";
-import { Action, ActionPanel, Icon, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
 import { open_link_handler } from "../utils/handler";
 import { Browser } from "../common/config";
+import { PreferenceValue } from "../types/validate";
 
 const ItemActions: React.FC<ListItem> = (props) => {
-  const open_link_to_browser = useCallback(async () => {
-    const browser = (await LocalStorage.getItem("links_to")) ?? "chrome";
+  const open_link_to_browser = useCallback(() => {
+    const preferences = getPreferenceValues<PreferenceValue>();
+    const browser = preferences.links_to ?? "chrome";
     const browser_name = Browser.find((item) => item.id === browser)?.name ?? "Google Chrome";
     open_link_handler({ url: props.url, browser_name: browser_name });
   }, []);

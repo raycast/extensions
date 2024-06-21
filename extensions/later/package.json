@@ -9,6 +9,68 @@
     "Productivity",
     "Other"
   ],
+  "preferences": [
+    {
+      "name": "links_from",
+      "title": "Save Links From",
+      "type": "dropdown",
+      "description": "Choose your browser to save links from",
+      "required": true,
+      "default": "chrome",
+      "data": [
+        {
+          "title": "Google Chrome",
+          "value": "chrome"
+        },
+        {
+          "title": "Safari",
+          "value": "safari"
+        },
+        {
+          "title": "Firefox",
+          "value": "firefox"
+        },
+        {
+          "title": "Microsoft Edge",
+          "value": "edge"
+        },
+        {
+          "title": "Arc",
+          "value": "arc"
+        }
+      ]
+    },
+    {
+      "name": "links_to",
+      "title": "Open Links On",
+      "type": "dropdown",
+      "description": "Choose your browser to open links on",
+      "required": true,
+      "default": "chrome",
+      "data": [
+        {
+          "title": "Google Chrome",
+          "value": "chrome"
+        },
+        {
+          "title": "Safari",
+          "value": "safari"
+        },
+        {
+          "title": "Firefox",
+          "value": "firefox"
+        },
+        {
+          "title": "Microsoft Edge",
+          "value": "edge"
+        },
+        {
+          "title": "Arc",
+          "value": "arc"
+        }
+      ]
+    }
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -30,13 +92,6 @@
       "title": "Create Link",
       "subtitle": "Read Later",
       "description": "Added link manually",
-      "mode": "view"
-    },
-    {
-      "name": "preferences",
-      "title": "Preferences",
-      "subtitle": "Read Later",
-      "description": "Read Later Preferences",
       "mode": "view"
     }
   ],
