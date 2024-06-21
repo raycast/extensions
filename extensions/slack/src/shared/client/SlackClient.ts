@@ -257,4 +257,14 @@ export class SlackClient {
 
     await slackWebClient.conversations.mark({ channel: conversationId, ts: `${new Date().getTime() / 1000}` });
   }
+
+  public static async getMe() {
+    const slackWebClient = getSlackWebClient();
+
+    const authResponse = await slackWebClient.auth.test();
+
+    const id = authResponse.user_id;
+    const username = authResponse.user;
+    return { id, username };
+  }
 }

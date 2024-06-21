@@ -18,7 +18,7 @@
   "commands": [
     {
       "name": "search",
-      "title": "Switch to Channel",
+      "title": "Open Channel",
       "subtitle": "Slack",
       "keywords": [
         "search"

@@ -33,6 +33,16 @@ function Search() {
                     {...{ workspaceId, userId, isAppInstalled, conversationId, onAction: () => visitItem(item) }}
                   />
 
+                  <Action.CreateQuicklink
+                    quicklink={{
+                      name: `Open Chat with ${name}`,
+                      ...(isAppInstalled
+                        ? { link: `slack://user?team=${workspaceId}&id=${userId}`, application: "Slack" }
+                        : { link: `https://app.slack.com/client/${workspaceId}/${conversationId}` }),
+                    }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                  />
+
                   <ActionPanel.Section>
                     <Action
                       icon={Icon.ArrowCounterClockwise}
@@ -56,6 +66,16 @@ function Search() {
                 <ActionPanel>
                   <OpenChannelInSlack
                     {...{ workspaceId, channelId, isAppInstalled, onAction: () => visitItem(item) }}
+                  />
+
+                  <Action.CreateQuicklink
+                    quicklink={{
+                      name: `Open #${name} Channel`,
+                      ...(isAppInstalled
+                        ? { link: `slack://channel?team=${workspaceId}&id=${channelId}`, application: "Slack" }
+                        : { link: `https://app.slack.com/client/${workspaceId}/${channelId}` }),
+                    }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
                   />
 
                   <ActionPanel.Section>
