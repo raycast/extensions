@@ -1,12 +1,15 @@
 import { Icon, Color, getPreferenceValues } from "@raycast/api";
-import { default as data } from "./alias.json";
+import aliases from "./alias.json";
 import { Alias, AliasType } from "./types";
 
 export const preferences = getPreferenceValues();
 
-export function getData() {
-  return data as Alias[];
+export function getAliases() {
+  return aliases as Alias[];
 }
+
+export const maxRecent = Number(preferences.MaxRecent);
+export const maxFavs = Number(preferences.MaxFavorites);
 
 export function typeColor(type: AliasType) {
   if (preferences.colors == "all") {

@@ -1,77 +1,78 @@
-import { Action, ActionPanel, List, Keyboard, Cache, showToast, Toast, Icon } from "@raycast/api";
+import { Action, ActionPanel, List, Keyboard, Cache, showToast, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { getData, typeColor, iconStar } from "./utils";
+import { getAliases, typeColor, iconStar, maxRecent, maxFavs } from "./utils";
 import { Alias } from "./types";
 import CommandDetail from "./command-detail";
 
 const cache = new Cache();
 
 export default function Command() {
-  const { isLoading, data, revalidate } = useCachedPromise(async () => {
+  interface Data {
+    aliases: Alias[];
+    favorites: Alias[];
+    recent: Alias[];
+  }
+
+  const fetchData = async (): Promise<Data> => {
     const response = JSON.parse(cache.get("data") || "{}");
-    const { aliases = getData() } = response;
-    return { aliases };
+    const { aliases = getAliases() } = response;
+    const reversed: Alias[] = aliases.slice().reverse();
+    const favorites = reversed.filter((alias) => alias.fav).slice(0, maxFavs);
+    const recent = reversed.filter((alias) => alias.recent).slice(0, maxRecent);
+
+    return { aliases, favorites, recent };
+  };
+
+  const { isLoading, data, revalidate } = useCachedPromise(fetchData, [], {
+    initialData: { aliases: [], favorites: [], recent: [] },
   });
 
-  const aliases: Alias[] = data?.aliases || [];
-  const favorites: Alias[] = aliases?.filter((alias: Alias) => alias.fav) || [];
-  const recent: Alias[] = aliases?.filter((alias: Alias) => alias.recent) || [];
-  const hasRecent = recent?.length > 0 || false;
+  const saveAliases = async ({ aliases }: { aliases: Alias[] }) => {
+    if (!aliases?.length) return;
 
-  const saveCache = async ({ data, title, message }: { data: Alias[] | []; title?: string; message?: string }) => {
-    if (!data || !data.length || data.some((a) => typeof a !== "object")) {
-      await showToast({
-        title: "Error saving",
-        message: "Invalid data provided to saveCache",
-        style: Toast.Style.Failure,
-      });
-      return;
-    }
-
-    cache.set("data", JSON.stringify({ aliases: data }));
-    if (title && message) await showToast({ title, message });
+    cache.set("data", JSON.stringify({ aliases }));
     revalidate();
   };
 
   const handleFav = (alias: Alias) => {
-    const data = aliases?.map((a) => {
+    const aliases = data.aliases.map((a: Alias) => {
       return a.name === alias.name ? { ...a, fav: !a.fav, recent: !a.fav ? false : a.recent } : a;
     });
 
-    const options = alias.fav
-      ? {
-          title: "Favorite removed",
-          message: alias.name + " has been removed from favorites",
-        }
-      : {
-          title: "Favorite added",
-          message: alias.name + " has been added to favorites",
-        };
-
-    saveCache({ data, ...options });
+    saveAliases({ aliases }).then(() => {
+      showToast(
+        alias.fav
+          ? { title: "Favorite removed", message: alias.name + " has been removed from favorites" }
+          : { title: "Favorite added", message: alias.name + " has been added to favorites" },
+      );
+    });
   };
 
   const addRecent = (alias: Alias) => {
-    const data = aliases?.map((a) => {
+    const aliases = data.aliases.map((a: Alias) => {
       // Set as recent only if alias is not a favorite
       const recent = a.fav ? a.recent : true;
       return a.name === alias.name ? { ...a, recent } : a;
     });
 
-    saveCache({ data });
+    saveAliases({ aliases });
   };
 
   const removeRecent = (alias: Alias) => {
-    const data = aliases?.map((a) => {
+    const aliases = data.aliases.map((a) => {
       return a.name === alias.name ? { ...a, recent: false } : a;
     });
 
-    saveCache({ data, title: "Recent removed", message: alias.name + " has been removed from recent" });
+    saveAliases({ aliases }).then(() =>
+      showToast({ title: "Recent removed", message: alias.name + " has been removed from recent" }),
+    );
   };
 
   const clearRecent = () => {
-    const data = aliases?.map((alias) => ({ ...alias, recent: false }));
-    saveCache({ data, title: "All recent removed" });
+    const aliases = data.aliases.map((alias) => ({ ...alias, recent: false }));
+    saveAliases({ aliases }).then(() =>
+      showToast({ title: "All recent removed", message: "All recent commands have been removed" }),
+    );
   };
 
   const Item = ({ alias }: { alias: Alias }) => {
@@ -132,7 +133,7 @@ export default function Command() {
             shortcut={Keyboard.Shortcut.Common.Remove}
           />
         )}
-        {hasRecent && (
+        {data.recent.length && (
           <Action
             icon={Icon.XMarkCircle}
             title="Clear All Recent"
@@ -147,19 +148,19 @@ export default function Command() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search command, description or alias">
       <List.Section title="Favorites">
-        {favorites.map((alias) => (
+        {data.favorites.map((alias) => (
           <Item key={alias.name} alias={alias} />
         ))}
       </List.Section>
 
       <List.Section title="Recently Used">
-        {recent.map((alias) => (
+        {data.recent.map((alias) => (
           <Item key={alias.name} alias={alias} />
         ))}
       </List.Section>
 
       <List.Section title="Commands">
-        {aliases.map((alias) => (
+        {data.aliases.map((alias) => (
           <Item key={alias.name} alias={alias} />
         ))}
       </List.Section>

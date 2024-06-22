@@ -44,11 +44,15 @@
     },
     {
       "name": "MaxRecent",
-      "description": "Maximum number of recent aliases to remember",
+      "description": "Maximum number of recent aliases to show",
       "type": "dropdown",
       "required": false,
       "title": "Total recent to show",
       "data": [
+        {
+          "title": "None",
+          "value": "0"
+        },
         {
           "title": "1",
           "value": "1"
@@ -82,11 +86,15 @@
     },
     {
       "name": "MaxFavorites",
-      "description": "Maximum number of favorites aliases to remember",
+      "description": "Save as many as you want and show the amount you choose here",
       "type": "dropdown",
       "required": false,
       "title": "Total favorites to show",
       "data": [
+        {
+          "title": "None",
+          "value": "0"
+        },
         {
           "title": "1",
           "value": "1"
