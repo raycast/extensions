@@ -6,7 +6,7 @@ Watch video in Picture in Picture or Fullscreen mode.
 
 **Toggle Picture in Picture** is inspired by [PiPifier](https://apps.apple.com/cn/app/pipifier/id1160374471?l=en-GB&mt=12) that lets you use every HTML5 video in Picture in Picture mode.
 
-**Toggle Full Screen** is inspired by [Fullifier](https://apps.apple.com/cn/app/fullifier/id1532642909?l=en-GB) that lets you play every HTML5 (thats about every web video) video in the native macOS fullscreen video player.
+**Toggle Full Screen** is inspired by [Fullifier](https://apps.apple.com/cn/app/fullifier/id1532642909?l=en-GB) that lets you play every HTML5 (thats about every web video) video in the native browser fullscreen video player.
 
 ## Supported Apps
 
@@ -22,9 +22,11 @@ Watch video in Picture in Picture or Fullscreen mode.
 
 - To use this extension in browsers, you need to turn on Developer Mode and tick the box in Developer: Allow JavaScript from Apple Events.
 
-- To use PiP just run the Toggle Pip command when you're watching to an HTML5/IINA video (Note: You need to interact with the video once. If it's autoplaying just pause and play again)
+- ~~To use PiP just run the Toggle Pip command when you're watching to an HTML5/IINA video (Note: You need to interact with the video once. If it's autoplaying just pause and play again)~~
 
-- Also, when you call this command repeatedly, you need to make sure that you have manually clicked on the video element in the browser page before each run (this is a limitation from browsers)
+- ~~Also, when you call this command repeatedly, you need to make sure that you have manually clicked on the video element in the browser page before each run (this is a limitation from browsers)~~
+
+- I solved the above two problems by a hacker way to simulate pressing the keyboard (F1 by default) in a Chromium based browser for automated picture-in-picture or full screen mode. If there is a conflict with the keystrokes, please select another keystroke or No Simulate in the extension settings.
 
 ✨ **How to Allow JavaScript from Apple Events** ✨
 
