@@ -19,6 +19,11 @@ export default function IssueListItem({ issue, mutate }: IssueListItemProps) {
 
   const keywords = [issue.key, issue.fields.status.name, issue.fields.issuetype.name];
 
+  const match = issue.key.match(/\d+/);
+  if (match) {
+    keywords.push(match[0]);
+  }
+
   if (issue.fields.priority) {
     keywords.push(issue.fields.priority.name);
   }
