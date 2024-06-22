@@ -4,5 +4,5 @@ import { handleVideoAction } from "./utils/video-utils";
 
 export default async () => {
   await closeMainWindow();
-  await handleVideoAction(VideoActionType.Pip);
+  await handleVideoAction(VideoActionType.Fullscreen);
 };

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pip",
   "title": "PiP",
-  "description": "Watch video in Picture in Picture mode",
+  "description": "Watch video in Picture in Picture or Fullscreen mode",
   "icon": "pip-icon.png",
   "author": "koinzhang",
   "license": "MIT",
@@ -14,21 +14,29 @@
   "keywords": [
     "pip",
     "picture-in-picture",
+    "fullscreen",
     "video",
     "html5",
+    "player",
     "picture",
     "iina"
   ],
   "commands": [
     {
       "name": "toggle-pip",
-      "title": "Toggle PiP",
+      "title": "Toggle Picture in Picture",
       "description": "Toggle video in Picture in Picture mode",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-full-screen",
+      "title": "Toggle Full Screen",
+      "description": "Toggle video in fullscreen mode",
       "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.0",
+    "@raycast/api": "^1.77.1",
     "@raycast/utils": "^1.16.0"
   },
   "devDependencies": {
