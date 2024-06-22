@@ -5,6 +5,9 @@
   "description": "Quickly Open any Folder in an Application",
   "icon": "folder-icon.png",
   "author": "thecarlo",
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
