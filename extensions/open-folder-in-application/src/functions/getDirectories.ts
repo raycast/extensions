@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import path from "path";
+
 import { getFilteredDirectories } from "./getFilteredDirectories";
 
 export const getDirectories = (dir: string, excludedFolders: string[], excludedSystemFolders: string[]): string[] => {
@@ -23,9 +24,8 @@ export const getDirectories = (dir: string, excludedFolders: string[], excludedS
       ) {
         return acc.concat(filePath, getDirectories(filePath, excludedFolders, excludedSystemFolders));
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      console.error(`Error accessing ${filePath}: ${error.message}`);
+    } catch (_) {
+      console.error(`Error accessing ${filePath}`);
     }
 
     return acc;

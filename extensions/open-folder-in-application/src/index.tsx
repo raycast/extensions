@@ -51,7 +51,7 @@ export default function Command() {
       {folders.map((folder) => (
         <List.Item
           key={`${folder}`}
-          title={folder.replace(`${homeDir}`, "")}
+          title={folder.replace(homeDir, "")}
           actions={
             <ActionPanel>
               <Action.OpenWith path={folder} />

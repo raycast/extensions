@@ -1,5 +1,6 @@
-import { cacheDuration } from "@constants/cacheDuration";
 import * as fs from "fs";
+
+import { cacheDuration } from "@constants/cacheDuration";
 import { CacheEntry } from "@interfaces/cacheEntry";
 
 const cache: { [key: string]: CacheEntry } = {};
