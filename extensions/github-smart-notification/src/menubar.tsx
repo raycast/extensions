@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { toHtmlUrl } from "./lib/github";
 import { execAsync } from "./lib/util";
 export default function Command() {
-  const [state, setState] = useCachedState<Notification[] | undefined>("notifications", [], {
+  const [state, setState] = useCachedState<Notification[] | undefined>("notifications", undefined, {
     cacheNamespace: `${environment.extensionName}`,
   });
   const [configState] = useCachedState<Configuration[]>("config", [], {
@@ -16,14 +16,15 @@ export default function Command() {
   useEffect(() => {
     async function update() {
       const n: Notification[] = await fetchNotifications(configState);
-      console.log(n.map((n) => n.repository.owner.avatar_url));
+      // console.log(n.map((n) => n.repository.owner.avatar_url));
+      console.log(n.length)
       setState(n);
     }
     update();
   }, []);
   return (
-    <MenuBarExtra icon="command-icon.png" tooltip="Your Pull Requests">
-      <MenuBarExtra.Section title="notifications">
+    <MenuBarExtra icon="command-icon.png" tooltip="Your Pull Requests" isLoading={state===undefined}>
+      <MenuBarExtra.Section title={state!==undefined ? "notifications": "notifications loading"}>
         {state?.map((s) => (
           <MenuBarExtra.Item
             title={s.repository.full_name + "\n" + s.subject.title}
