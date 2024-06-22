@@ -10,15 +10,15 @@ export default function Command() {
 
   const excludedFolders = ["node_modules", "dist"];
 
-  const excludedSystemFolders = [path.resolve(os.homedir(), "Library"), path.resolve(os.homedir(), "Pictures")];
-
   const homeDir = os.homedir();
+
+  const excludedSystemFolders = [path.resolve(homeDir, "Library"), path.resolve(homeDir, "Pictures")];
 
   useEffect(() => {
     if (searchText) {
       const searchFolders = async () => {
         try {
-          const baseDir = path.resolve(os.homedir());
+          const baseDir = path.resolve(homeDir);
 
           const allFolders = await getFolders(baseDir, excludedFolders, excludedSystemFolders);
 
