@@ -248,7 +248,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           <Action.SubmitForm onSubmit={handleSubmit} title="Create Issue" />
         </ActionPanel>
       }
-      isLoading={isLoadingTeams}
+      isLoading={isLoadingTeams || props.isLoading}
     >
       <Form.Dropdown
         title="Team"

@@ -24,7 +24,7 @@ export async function getTeams(queryStr: string = "") {
   const { data } = await graphQLClient.rawRequest<{ teams: { nodes: TeamResult[] } }, Record<string, unknown>>(
     `
       query($queryStr: String!) {
-        teams(filter: {name: {contains: $queryStr}}) {
+        teams(filter: {name: {containsIgnoreCase: $queryStr}}) {
           nodes {
             id
             name
