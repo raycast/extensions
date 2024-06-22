@@ -58,7 +58,7 @@ export default function NotificationsView() {
                 shortcut={Keyboard.Shortcut.Common.Open}
               />
               <Action
-                title="Mark As Read"
+                title="Mark as Read"
                 onAction={() =>
                   markAsRead(s).then(() => {
                     // update notifications state

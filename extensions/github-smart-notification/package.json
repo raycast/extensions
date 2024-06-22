@@ -67,7 +67,7 @@
   "preferences": [
     {
       "name": "ghCommandPath",
-      "title": "gh command binary PATH",
+      "title": "gh Command Binary PATH",
       "description": "Installed Path of gh command",
       "type": "textfield",
       "required": false,
@@ -75,11 +75,11 @@
     },
     {
       "name": "autoReadMergedPr",
-      "title": "automatically read merged PR",
+      "title": "Options",
       "description": "if true, merged PR will be read",
       "default": true,
       "type": "checkbox",
-      "label": "checkbox",
+      "label": "Automatically mark merged PRs as read",
       "required": true
     }
   ]
