@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, Keyboard, List, environment } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Keyboard, List, confirmAlert, environment } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { Configuration, removeConfig } from "../lib/configurations";
 import ConfigurationFormView from "./configurationForm.view";
@@ -46,9 +46,11 @@ export default function ConfigurationsView() {
               <Action
                 title="Delete"
                 style={Action.Style.Destructive}
+                icon={Icon.Trash}
                 shortcut={Keyboard.Shortcut.Common.Remove}
-                onAction={() => {
-                  setConfig(removeConfig(s, configState));
+                onAction={async () => {
+                  await confirmAlert({title:"Are you sure?"}) ?
+                  setConfig(removeConfig(s, configState)) : void 0
                 }}
               ></Action>
             </ActionPanel>
