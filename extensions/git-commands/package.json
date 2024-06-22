@@ -21,26 +21,21 @@
   ],
   "preferences": [
     {
-      "name": "colors",
+      "name": "IconPinColored",
       "title": "Colors",
-      "description": "Alias with colors according to the impact the command produces.",
+      "type": "checkbox",
       "required": false,
-      "type": "dropdown",
-      "data": [
-        {
-          "title": "All colors available",
-          "value": "all"
-        },
-        {
-          "title": "Favorite icon in yellow",
-          "value": "favorite"
-        },
-        {
-          "title": "No colors",
-          "value": "no"
-        }
-      ],
-      "default": "all"
+      "label": "Pin icon in yellow",
+      "description": "If it is active, it shows the pinned alias icon in yellow, otherwise in gray",
+      "default": true
+    },
+    {
+      "name": "ShowTypeIcon",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show type dot icon",
+      "description": "Show a dot icon with colors according to the impact the command produces",
+      "default": true
     },
     {
       "name": "MaxRecent",
@@ -85,11 +80,11 @@
       "default": "3"
     },
     {
-      "name": "MaxFavorites",
+      "name": "MaxPins",
       "description": "Save as many as you want and show the amount you choose here",
       "type": "dropdown",
       "required": false,
-      "title": "Total favorites to show",
+      "title": "Total pinned to show",
       "data": [
         {
           "title": "None",
