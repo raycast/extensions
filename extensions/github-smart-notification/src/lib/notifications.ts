@@ -36,7 +36,7 @@ export const fetchNotifications = async (c: Configuration[]): Promise<Notificati
 
 export const filter = async (n: Notification[], c: Configuration[]): Promise<Notification[]> => {
   // extract read target from configuration
-  const readList = n
+  const autReadListOnRuleIsMatched = n
     .map((n) => {
       const index = c.findIndex((f) => isRuleMatched(f, n));
       return index === -1 ? undefined : n;
@@ -44,10 +44,10 @@ export const filter = async (n: Notification[], c: Configuration[]): Promise<Not
     .filter((f): f is Notification => f !== undefined);
 
   // extract read target from AutoClose
-  const mergedPrAutoReadList = await extractMergedPrAutoReadList(n);
-  console.log(`[autoReadMergedPr]${mergedPrAutoReadList.length}`);
-  console.log(`[autoReadConfig]${readList.length}`);
-  const target = readList.concat(mergedPrAutoReadList);
+  const autoReadListOnPrIsMerged = await extractMergedPrAutoReadList(n);
+  console.log(`[Automatically read : PR is merged]${autoReadListOnPrIsMerged.length}`);
+  console.log(`[Automatically read : Rule is matched]${autReadListOnRuleIsMatched.length}`);
+  const target = autReadListOnRuleIsMatched.concat(autoReadListOnPrIsMerged);
   const tasks = target.map((t) => markAsRead(t));
   await Promise.all(tasks);
   // // remove mark target notification
