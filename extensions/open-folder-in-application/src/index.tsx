@@ -12,6 +12,8 @@ export default function Command() {
 
   const excludedSystemFolders = [path.resolve(os.homedir(), "Library"), path.resolve(os.homedir(), "Pictures")];
 
+  const homeDir = os.homedir();
+
   useEffect(() => {
     if (searchText) {
       const searchFolders = async () => {
@@ -49,10 +51,12 @@ export default function Command() {
       {folders.map((folder) => (
         <List.Item
           key={`${folder}`}
-          title={folder}
+          title={folder.replace(`${homeDir}`, "")}
           actions={
             <ActionPanel>
               <Action.OpenWith path={folder} />
+
+              <Action.CopyToClipboard content={folder} title="Copy Folder Path to Clipboard" />
             </ActionPanel>
           }
         />
