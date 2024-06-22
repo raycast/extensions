@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState } from "react";
 import {
   Clipboard,
   Form,
@@ -104,24 +104,17 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
   const { push } = useNavigation();
   const { autofocusField, copyToastAction } = getPreferenceValues<Preferences.CreateIssue>();
 
-  const { teams, isLoadingTeams } = useTeams();
+  const [teamQuery, setTeamQuery] = useState<string>("");
+  const { teams, isLoadingTeams } = useTeams(teamQuery);
   const hasMoreThanOneTeam = teams && teams.length > 1;
 
-  const { handleSubmit, itemProps, values, setValue, focus, reset, setValidationError } = useForm<CreateIssueValues>({
+  const { handleSubmit, itemProps, values, focus, reset } = useForm<CreateIssueValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
 
-      const teamId = hasMoreThanOneTeam ? values.teamId : teams?.[0]?.id;
-
-      if (!teamId) {
-        // that should never happen
-        setValidationError("teamId", "The team is required.");
-        return false;
-      }
-
       try {
         const payload: CreateIssuePayload = {
-          teamId,
+          teamId: values.teamId,
           title: values.title,
           description: values.description || "",
           stateId: values.stateId,
@@ -196,7 +189,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       }
     },
     validation: {
-      teamId: hasMoreThanOneTeam ? FormValidation.Required : undefined,
+      teamId: FormValidation.Required,
       title: FormValidation.Required,
       stateId: FormValidation.Required,
       priority: FormValidation.Required,
@@ -218,18 +211,13 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
     },
   });
 
-  const { states } = useStates(values.teamId);
-  const { labels } = useLabels(values.teamId);
-  const { cycles } = useCycles(values.teamId);
-  const { issues } = useIssues(getLastCreatedIssues);
-  const { projects } = useProjects(values.teamId);
+  const execute = hasMoreThanOneTeam && !!values.teamId && values.teamId.trim().length > 0;
+  const { states } = useStates(values.teamId, { execute });
+  const { labels } = useLabels(values.teamId, { execute });
+  const { cycles } = useCycles(values.teamId, { execute });
+  const { issues } = useIssues(getLastCreatedIssues, [], { execute });
+  const { projects } = useProjects(values.teamId, { execute });
   const { milestones } = useMilestones(values.projectId, { execute: !!values.projectId });
-
-  useEffect(() => {
-    if (teams?.length === 1) {
-      setValue("teamId", teams[0].id);
-    }
-  }, [teams]);
 
   const team = teams?.find((team) => team.id === values.teamId);
 
@@ -262,24 +250,19 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       }
       isLoading={isLoadingTeams}
     >
-      {hasMoreThanOneTeam ? (
-        <>
-          <Form.Dropdown title="Team" storeValue {...itemProps.teamId}>
-            {teams.map((team) => {
-              return (
-                <Form.Dropdown.Item
-                  title={team.name}
-                  value={team.id}
-                  key={team.id}
-                  keywords={[team.key]}
-                  icon={getTeamIcon(team)}
-                />
-              );
-            })}
-          </Form.Dropdown>
-          <Form.Separator />
-        </>
-      ) : null}
+      <Form.Dropdown
+        title="Team"
+        storeValue
+        {...itemProps.teamId}
+        isLoading={isLoadingTeams}
+        throttle
+        onSearchTextChange={setTeamQuery}
+      >
+        {teams?.map((team) => (
+          <Form.Dropdown.Item title={team.name} value={team.id} key={team.id} icon={getTeamIcon(team)} />
+        ))}
+      </Form.Dropdown>
+      <Form.Separator />
 
       <Form.TextField
         title="Title"

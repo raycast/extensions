@@ -1,5 +1,5 @@
 import { Cycle, Organization, Project, Team } from "@linear/sdk";
-import { getLinearClient } from "../api/linearClient";
+import { getLinearClient } from "./linearClient";
 
 export type TeamResult = Pick<
   Team,
@@ -19,12 +19,12 @@ export type TeamResult = Pick<
   projects: { nodes: Project["id"][] };
 };
 
-export async function getTeams() {
+export async function getTeams(queryStr: string = "") {
   const { graphQLClient } = getLinearClient();
   const { data } = await graphQLClient.rawRequest<{ teams: { nodes: TeamResult[] } }, Record<string, unknown>>(
     `
-      query {
-        teams {
+      query($queryStr: String!) {
+        teams(filter: {name: {contains: $queryStr}}) {
           nodes {
             id
             name
@@ -50,6 +50,7 @@ export async function getTeams() {
         }
       }
     `,
+    { queryStr },
   );
 
   return data?.teams.nodes;

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState } from "react";
 import { Form, ActionPanel, Action, Icon, Toast, useNavigation, showToast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
@@ -42,10 +42,11 @@ export default function EditIssueForm(props: EditIssueFormProps) {
 
   const { issue, isLoadingIssue, mutateDetail } = useIssueDetail(props.issue);
 
-  const { teams, isLoadingTeams } = useTeams();
+  const [teamQuery, setTeamQuery] = useState<string>("");
+  const { teams, isLoadingTeams } = useTeams(teamQuery);
   const hasMoreThanOneTeam = teams && teams.length > 1;
 
-  const { handleSubmit, itemProps, values, setValue } = useForm<CreateIssueValues>({
+  const { handleSubmit, itemProps, values } = useForm<CreateIssueValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Editing issue" });
 
@@ -91,7 +92,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
       }
     },
     validation: {
-      teamId: hasMoreThanOneTeam ? FormValidation.Required : undefined,
+      teamId: FormValidation.Required,
       title: FormValidation.Required,
       stateId: FormValidation.Required,
       priority: FormValidation.Required,
@@ -113,19 +114,13 @@ export default function EditIssueForm(props: EditIssueFormProps) {
     },
   });
 
-  // The issue's detail (for description and due date) isn't returned
-  // immediately, so the fields need to be properly updated once it's done
-  useEffect(() => {
-    setValue("description", issue.description || "");
-    setValue("dueDate", issue.dueDate ? new Date(issue.dueDate) : null);
-  }, [issue]);
-
-  const { states } = useStates(values.teamId);
-  const { labels } = useLabels(values.teamId);
-  const { cycles } = useCycles(values.teamId);
-  const { issues } = useIssues(getLastCreatedIssues);
-  const { projects } = useProjects(values.teamId);
-  const { milestones } = useMilestones(values.projectId);
+  const execute = hasMoreThanOneTeam && !!values.teamId && values.teamId.trim().length > 0;
+  const { states } = useStates(values.teamId, { execute });
+  const { labels } = useLabels(values.teamId, { execute });
+  const { cycles } = useCycles(values.teamId, { execute });
+  const { issues } = useIssues(getLastCreatedIssues, [], { execute });
+  const { projects } = useProjects(values.teamId, { execute });
+  const { milestones } = useMilestones(values.projectId, { execute: !!values.projectId });
 
   const team = teams?.find((team) => team.id === values.teamId);
 
@@ -157,16 +152,18 @@ export default function EditIssueForm(props: EditIssueFormProps) {
       }
       isLoading={isLoadingTeams || isLoadingIssue}
     >
-      {hasMoreThanOneTeam ? (
-        <>
-          <Form.Dropdown title="Team" {...itemProps.teamId}>
-            {teams.map((team) => {
-              return <Form.Dropdown.Item title={team.name} value={team.id} key={team.id} icon={getTeamIcon(team)} />;
-            })}
-          </Form.Dropdown>
-          <Form.Separator />
-        </>
-      ) : null}
+      <Form.Dropdown
+        title="Team"
+        {...itemProps.teamId}
+        isLoading={isLoadingTeams}
+        throttle
+        onSearchTextChange={setTeamQuery}
+      >
+        {teams?.map((team) => {
+          return <Form.Dropdown.Item title={team.name} value={team.id} key={team.id} icon={getTeamIcon(team)} />;
+        })}
+      </Form.Dropdown>
+      <Form.Separator />
 
       <Form.TextField title="Title" placeholder="Issue title" autoFocus {...itemProps.title} />
 

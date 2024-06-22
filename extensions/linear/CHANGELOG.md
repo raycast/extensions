@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- [#10856](https://github.com/raycast/extensions/issues/10856): Typeahead search for teams while creating/editing issues and in active cycles command
+
 ## [Improved Notifications] - 2024-06-14
 
 - Added support for all types of notifications, ensuring that "Unknown Notification" no longer appear.
