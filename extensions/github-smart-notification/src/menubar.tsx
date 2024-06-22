@@ -17,14 +17,14 @@ export default function Command() {
     async function update() {
       const n: Notification[] = await fetchNotifications(configState);
       // console.log(n.map((n) => n.repository.owner.avatar_url));
-      console.log(n.length)
+      console.log(n.length);
       setState(n);
     }
     update();
   }, []);
   return (
-    <MenuBarExtra icon="command-icon.png" tooltip="Your Pull Requests" isLoading={state===undefined}>
-      <MenuBarExtra.Section title={state!==undefined ? "notifications": "notifications loading"}>
+    <MenuBarExtra icon="command-icon.png" tooltip="Your Pull Requests" isLoading={state === undefined}>
+      <MenuBarExtra.Section title={state !== undefined ? "notifications" : "notifications loading"}>
         {state?.map((s) => (
           <MenuBarExtra.Item
             title={s.repository.full_name + "\n" + s.subject.title}

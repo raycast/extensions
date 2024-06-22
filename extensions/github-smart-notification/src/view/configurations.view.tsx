@@ -49,8 +49,7 @@ export default function ConfigurationsView() {
                 icon={Icon.Trash}
                 shortcut={Keyboard.Shortcut.Common.Remove}
                 onAction={async () => {
-                  await confirmAlert({title:"Are you sure?"}) ?
-                  setConfig(removeConfig(s, configState)) : void 0
+                  (await confirmAlert({ title: "Are you sure?" })) ? setConfig(removeConfig(s, configState)) : void 0;
                 }}
               ></Action>
             </ActionPanel>
