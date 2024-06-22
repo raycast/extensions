@@ -42,7 +42,7 @@
   "preferences": [
     {
       "title": "Google Cloud CLI Path",
-      "name": "gcloud-path",
+      "name": "gcloudPath",
       "required": true,
       "type": "textfield",
       "description": "Path to the Google Cloud CLI",
