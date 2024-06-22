@@ -156,19 +156,19 @@ export default function Command() {
       searchBarPlaceholder="Search command, description or alias"
       isShowingDetail={showDetails}
     >
-      <List.Section title={`Pinned ${data.pins.length > maxPins ? `(${data.pins.length})` : ""}`}>
+      <List.Section title="Pinned" subtitle={data.pins.length > maxPins ? `${data.pins.length}` : ""}>
         {data.pins.slice(0, maxPins).map((alias) => (
           <Item key={alias.name} alias={alias} hidePin />
         ))}
       </List.Section>
 
-      <List.Section title={`Recent ${data.recent.length > maxRecent ? `(${data.recent.length})` : ""}`}>
+      <List.Section title="Recent" subtitle={data.recent.length > maxRecent ? `${data.recent.length}` : ""}>
         {data.recent.slice(0, maxRecent).map((alias) => (
           <Item key={alias.name} alias={alias} />
         ))}
       </List.Section>
 
-      <List.Section title={`All aliases (${data.aliases.length})`}>
+      <List.Section title="All aliases" subtitle={`${data.aliases.length}`}>
         {data.aliases.map((alias) => (
           <Item key={alias.name} alias={alias} />
         ))}
