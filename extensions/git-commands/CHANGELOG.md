@@ -1,5 +1,9 @@
 # Git Commands Changelog
 
+## [Improvements and fixes] - 2024-06-22
+
+- You can now correctly limit the total of favorites or recents with the extension preferences.
+
 ## [Favorites and Recent feature] - 2024-06-11
 
 - Save favorites.
