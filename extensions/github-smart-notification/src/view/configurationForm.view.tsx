@@ -108,7 +108,6 @@ export default function ConfigurationFormView() {
         <Form.TagPicker.Item value="subscribed" title="subscribed" />
         <Form.TagPicker.Item value="team_mention" title="team_mention" />
       </Form.TagPicker>
-      <Form.Checkbox id="actOnPrMerged" label="Mark as Read/Done if type:PullRequest is Closed" defaultValue={false} />
     </Form>
   );
 }
