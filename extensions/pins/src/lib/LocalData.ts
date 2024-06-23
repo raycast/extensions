@@ -326,17 +326,10 @@ export const useLocalData = () => {
   const [localData, setLocalData] = useCachedState<LocalDataObject>("--local-data", dummyData());
   const [loadingLocalData, setLoadingLocalData] = useState(true);
 
-  const preferences = getPreferenceValues<ExtensionPreferences & { showPinShortcut: boolean }>();
-
   useEffect(() => {
     const getLocalData = async () => {
       const newData = dummyData();
       newData.recentApplications = await getRecentApplications();
-
-      if (!preferences.showPinShortcut) {
-        // Skip costly operations if the user doesn't want the pin shortcut
-        return { ...localData, recentApplications: newData.recentApplications };
-      }
 
       const app = newData.recentApplications[0];
       newData.currentApplication = { name: app.name, path: app.path, bundleId: app.bundleId || "" };
