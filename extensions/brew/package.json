@@ -9,7 +9,8 @@
     "mathieudutour",
     "urwrstkn8mare",
     "ashokbaruaakas",
-    "millerapps"
+    "millerapps",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "icon": "icon.png",
@@ -122,7 +123,6 @@
     "@raycast/utils": "^1.13.4",
     "@types/stream-json": "^1.7.2",
     "node-fetch": "^2.6.7",
-    "run-applescript": "^6.0.0",
     "stream-chain": "^2.2.5",
     "stream-json": "^1.7.4"
   },

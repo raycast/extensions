@@ -19,7 +19,8 @@
     "nagauta",
     "vineus",
     "stelo",
-    "srikirank"
+    "srikirank",
+    "b0lle"
   ],
   "categories": [
     "Developer Tools",
@@ -64,8 +65,8 @@
     },
     {
       "name": "codepipeline",
-      "title": "CodePipeline Pipelines",
-      "description": "Find and open a pipeline",
+      "title": "CodePipeline",
+      "description": "Find and manage a pipeline, it's executions and stages",
       "mode": "view"
     },
     {

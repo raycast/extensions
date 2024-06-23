@@ -13,6 +13,7 @@ function gopass(args: string[]): Promise<string> {
           "/usr/local/bin", // gpg
           "/usr/local/MacGPG2/bin", // gpg
           "/opt/homebrew/bin", // homebrew on macOS Apple Silicon
+          "/run/current-system/sw/bin", // Nix
         ].join(":"),
       },
     });

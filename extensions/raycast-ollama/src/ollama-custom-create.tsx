@@ -3,6 +3,8 @@ import { FormValidation, useForm, usePromise } from "@raycast/utils";
 import { Creativity } from "./lib/enum";
 import { GetModelsName } from "./lib/ui/function";
 import * as React from "react";
+import { ValidationKeepAlive } from "./lib/ui/valitadion";
+import { InfoKeepAlive } from "./lib/ui/info";
 
 const p = getPreferenceValues<Preferences>();
 if (!p.ollamaCertificateValidation) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
@@ -32,7 +34,7 @@ export default function Command(): JSX.Element {
       model: FormValidation.Required,
       prompt: FormValidation.Required,
       creativity: FormValidation.Required,
-      keep_alive: ValidationKeepAlive,
+      keep_alive: (value) => ValidationKeepAlive(CheckboxAdvanced, value),
     },
   });
 
@@ -52,17 +54,6 @@ Following tag are supported:
 - {selection}: Add selected text or clipboard to the prompt.
 - {broswer-tab}: Add current browser tab text to the prompt. Use {broser-tab format="markdown|html|text"} if you need a differente format from markdown. Raycast Browser Extention is required.
 - {image}: Add image on clipboard to the prompt. A model with vision capability is required.`;
-  const InfoKeepAlive = `How many the model need to stay in memory, by default 5 minutes. Can be configured as follow:
-- 0, memory is free when inference is done.
-- -1, model remains on memory permanently.
-- 5 or 5s, memory is free after 5 seconds of idle.
-- 5m, memory is free after 5 minutes of idle.`;
-
-  function ValidationKeepAlive(values?: string): string | undefined {
-    if (!CheckboxAdvanced) return;
-    if (!values) return "The item is required";
-    if (!values.match(/(?:^-1$)|(?:^[0-9]+[m-s]{0,1}$)/g)) return "Wrong Format";
-  }
 
   const ActionView = (
     <ActionPanel>

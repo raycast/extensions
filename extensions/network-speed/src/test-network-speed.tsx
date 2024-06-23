@@ -7,7 +7,8 @@ import { ActionOpenNetworkSpeed } from "./components/action-open-network-speed";
 
 export default function Command() {
   const { testSequentially } = getPreferenceValues<Preferences>();
-  const { networkSpeedInfo, networkSpeed, networkSpeedLoading, loading } = checkNetworkSpeed(0, testSequentially);
+  const { networkSpeedInfo, networkSpeed, networkSpeedLoading, testTime, loading } =
+    checkNetworkSpeed(testSequentially);
 
   return (
     <List searchBarPlaceholder="Search network speed info" filtering={false}>
@@ -23,7 +24,7 @@ export default function Command() {
       />
 
       {!loading && (
-        <>
+        <List.Section title={"Time Cost"} subtitle={testTime + "s"}>
           <List.Item
             title={{ value: "Downlink", tooltip: "Downlink Capacity" }}
             icon={{ source: Icon.Download, tintColor: Color.Blue }}
@@ -92,7 +93,7 @@ export default function Command() {
               }
             />
           )}
-        </>
+        </List.Section>
       )}
     </List>
   );

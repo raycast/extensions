@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
 import RepositoriesDropdown from "./components/RepositoryDropdown";
-import { WorkflowRunListItem } from "./components/WorkflowRunListItem";
+import { WorkflowRun, WorkflowRunListItem } from "./components/WorkflowRunListItem";
 import { withGitHubClient } from "./helpers/withGithubClient";
 
 export type WorkflowRunsResponse = Endpoints["GET /repos/{owner}/{repo}/actions/runs"]["response"];
@@ -38,7 +38,7 @@ function WorkflowRuns() {
       }
     >
       {workflowRuns && workflowRuns.length > 0
-        ? workflowRuns.map((workflowRun) => {
+        ? workflowRuns.map((workflowRun: WorkflowRun) => {
             return (
               <WorkflowRunListItem
                 key={workflowRun.id}

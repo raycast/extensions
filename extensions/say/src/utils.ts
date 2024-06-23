@@ -49,6 +49,7 @@ export const getSortedVoices = async () => {
 };
 
 export const languageCodeToEmojiFlag = (languageCode: string) => {
+  if (languageCode === "ar_001") return undefined;
   if (languageCode === "en-scotland") return "🏴󠁧󠁢󠁳󠁣󠁴󠁿";
   const codePoints = languageCode
     .slice(-2)

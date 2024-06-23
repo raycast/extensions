@@ -5,6 +5,8 @@ import { CommandAnswer } from "../../../settings/enum";
 import { GetOllamaServerByName, SetSettingsCommandAnswer } from "../../../settings/settings";
 import { SettingsCommandAnswer } from "../../../settings/types";
 import { GetModelsName } from "../../function";
+import { InfoKeepAlive } from "../../info";
+import { ValidationKeepAlive } from "../../valitadion";
 
 interface props {
   setShow: React.Dispatch<React.SetStateAction<boolean>>;
@@ -35,24 +37,12 @@ export function EditModel(props: props): JSX.Element {
     validation: {
       server: FormValidation.Required,
       model: FormValidation.Required,
-      keep_alive: ValidationKeepAlive,
+      keep_alive: (value) => ValidationKeepAlive(CheckboxAdvanced, value),
     },
   });
 
   const [CheckboxAdvanced, SetCheckboxAdvanced]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
     React.useState(props.keep_alive ? true : false);
-
-  const InfoKeepAlive = `How many the model need to stay in memory, by default 5 minutes. Can be configured as follow:
-- 0, memory is free when inference is done.
-- -1, model remains on memory permanently.
-- 5 or 5s, memory is free after 5 seconds of idle.
-- 5m, memory is free after 5 minutes of idle.`;
-
-  function ValidationKeepAlive(values?: string): string | undefined {
-    if (!CheckboxAdvanced) return;
-    if (!values) return "The item is required";
-    if (!values.match(/(?:^-1$)|(?:^[0-9]+[m-s]{0,1}$)/g)) return "Wrong Format";
-  }
 
   const ActionView = (
     <ActionPanel>

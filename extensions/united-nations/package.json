@@ -1,0 +1,170 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "united-nations",
+  "title": "United Nations",
+  "type": "module",
+  "description": "Peace, dignity and equality on a healthy planet.",
+  "icon": "united-nations-icon.png",
+  "author": "litomore",
+  "crossExtensions": [
+    "litomore/say"
+  ],
+  "categories": [
+    "Data",
+    "Media",
+    "News",
+    "Web"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "un-documents",
+      "title": "UN Documents",
+      "description": "General Assembly documents issued at United Nations Headquarters.",
+      "mode": "view"
+    },
+    {
+      "name": "un-news",
+      "title": "UN News",
+      "description": "Global perspective Human stories.",
+      "mode": "view"
+    },
+    {
+      "name": "un-press",
+      "title": "UN Press",
+      "description": "Meetings Coverage and Press Releases",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "dropdown",
+      "title": "UN News Language",
+      "name": "newsLanguageCode",
+      "description": "Display launage for UN News.",
+      "required": true,
+      "default": "en",
+      "data": [
+        {
+          "value": "ar",
+          "title": "العربية"
+        },
+        {
+          "value": "zh",
+          "title": "中文"
+        },
+        {
+          "value": "en",
+          "title": "English"
+        },
+        {
+          "value": "fr",
+          "title": "Français"
+        },
+        {
+          "value": "ru",
+          "title": "Русский"
+        },
+        {
+          "value": "pt",
+          "title": "Español"
+        },
+        {
+          "value": "es",
+          "title": "Português"
+        },
+        {
+          "value": "sw",
+          "title": "Kiswahili"
+        },
+        {
+          "value": "hi",
+          "title": "Hindi हिंदी"
+        },
+        {
+          "value": "ur",
+          "title": "Urdu اردو"
+        }
+      ]
+    },
+    {
+      "type": "dropdown",
+      "title": "[Raycast Pro] UN News AI-summerize length",
+      "name": "newsSummerizeLength",
+      "description": "AI-summerize word length for UN News. (Raycast Pro required)",
+      "required": false,
+      "default": "100",
+      "data": [
+        {
+          "value": "50",
+          "title": "50 words"
+        },
+        {
+          "value": "100",
+          "title": "100 words"
+        },
+        {
+          "value": "200",
+          "title": "200 words"
+        },
+        {
+          "value": "300",
+          "title": "300 words"
+        },
+        {
+          "value": "400",
+          "title": "400 words"
+        },
+        {
+          "value": "500",
+          "title": "500 words"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "title": "Detect System Voice Settings for Text-to-Speech",
+      "label": "Enable",
+      "name": "detechSystemVoiceSettings",
+      "description": "Enable this option to detect available voices on your system for text-to-speech. (Siri voices are not included)",
+      "required": false,
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "title": "Hide Unsupported Raycast Pro Features",
+      "label": "Enable",
+      "name": "hideUnsupportedProFeatures",
+      "description": "Enable this option to hide unsupported Raycast Pro features.",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.76.0",
+    "@raycast/utils": "^1.15.0",
+    "cheerio": "^1.0.0-rc.12",
+    "execa": "^9.2.0",
+    "fast-xml-parser": "^4.4.0",
+    "got": "^14.3.0",
+    "mac-say": "^0.2.8",
+    "raycast-cross-extension": "^0.2.2",
+    "turndown": "^7.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.12.5",
+    "@types/react": "^18.2.75",
+    "@types/turndown": "^5.0.4",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.4"
+  }
+}

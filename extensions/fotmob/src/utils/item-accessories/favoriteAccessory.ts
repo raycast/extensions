@@ -1,5 +1,6 @@
-import { Icon, List } from "@raycast/api";
-import { getItem } from "../../storages";
+import type { List } from "@raycast/api";
+import { Icon } from "@raycast/api";
+import { getItem } from "@/storages";
 
 type ItemType = "team" | "player" | "league";
 
