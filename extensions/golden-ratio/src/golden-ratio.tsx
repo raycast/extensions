@@ -57,7 +57,7 @@ export default function GoldenRatioCommand() {
           <List.Item
             icon={Icon.ChevronUpSmall}
             title="Short Side"
-            subtitle={shortSide}
+            accessories={[{ text: shortSide }]}
             actions={
               <ActionPanel>
                 <Action title="Copy Short Side" onAction={() => handleCopyToClipboard([shortSide])} />
@@ -67,7 +67,7 @@ export default function GoldenRatioCommand() {
           <List.Item
             icon={Icon.ChevronDownSmall}
             title="Long Side"
-            subtitle={longSide}
+            accessories={[{ text: longSide }]}
             actions={
               <ActionPanel>
                 <Action title="Copy Long Side" onAction={() => handleCopyToClipboard([longSide])} />
@@ -77,7 +77,7 @@ export default function GoldenRatioCommand() {
           <List.Item
             icon={Icon.Plus}
             title="Total"
-            subtitle={`Short Side: ${part1}, Long Side: ${part2}`}
+            accessories={[{ text: `Short: ${part1}, Long: ${part2}` }]}
             actions={
               <ActionPanel>
                 <Action title="Copy Total" onAction={() => handleCopyToClipboard([part1, part2, inputNumber])} />
@@ -87,7 +87,7 @@ export default function GoldenRatioCommand() {
           <List.Item
             icon={Icon.Code}
             title="SVG Rectangle"
-            subtitle="Click to copy SVG code"
+            accessories={[{ text: "Click to copy SVG code" }]}
             actions={
               <ActionPanel>
                 <Action title="Copy SVG" onAction={() => handleCopyToClipboard([svgCode])} />
@@ -96,7 +96,11 @@ export default function GoldenRatioCommand() {
           />
         </>
       ) : (
-        <List.Item title="Please enter a number greater than zero" />
+        <List.EmptyView
+          icon={Icon.Text}
+          title="No Results"
+          description="Please enter a non-zero number."
+        />
       )}
     </List>
   );

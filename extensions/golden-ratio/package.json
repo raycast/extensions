@@ -1,21 +1,22 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "golden-ratio",
-  "title": "Golden Ratio",
+  "name": "monchtool",
+  "title": "MonchTool",
   "description": "Gold ratio and silver ratio calculation tool",
   "icon": "monchfun.png",
   "author": "yang_monch",
+  "categories": ["Design Tools", "Productivity"],
   "license": "MIT",
   "commands": [
     {
       "name": "golden-ratio",
-      "title": "Golden Ratio",
+      "title": "Calculate Golden Ratio",
       "description": "Enter the numbers to calculate the golden ratio",
       "mode": "view"
     },
     {
       "name": "silver-ratio",
-      "title": "Silver Ratio",
+      "title": "Calculate Silver Ratio",
       "description": "Enter the numbers to calculate the silver ratio",
       "mode": "view"
     }
