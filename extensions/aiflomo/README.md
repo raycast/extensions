@@ -11,10 +11,10 @@ Raycast extension for sending <AI>MEMOs to flomo.
 ## Features
 
 ### Write Memo
-![Write Memo](./metadata/write-memo-without-ai.png)
+![Write Memo](metadata/write-memo-without-ai.png)
 
 ### Summarize File to Memo with AI
-![Summarize File to Memo](./metadata/file-to-memo-ai-1.png)
+![Summarize File to Memo](metadata/file-to-memo-ai-1.png)
 
 ### Summarize Website to Memo with AI
-![Summarize Website to Memo](./metadata/website-to-memo-ai-1.png)
+![Summarize Website to Memo](metadata/website-to-memo-ai-1.png)
