@@ -37,6 +37,12 @@
       "mode": "view"
     },
     {
+      "name": "un-photos",
+      "title": "UN Photos",
+      "description": "United Nations Photo Gallery.",
+      "mode": "view"
+    },
+    {
       "name": "un-press",
       "title": "UN Press",
       "description": "Meetings Coverage and Press Releases",
@@ -188,7 +194,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.76.0",
+    "@raycast/api": "^1.77.1",
     "@raycast/utils": "^1.15.0",
     "cheerio": "^1.0.0-rc.12",
     "execa": "^9.2.0",

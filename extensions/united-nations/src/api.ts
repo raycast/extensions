@@ -4,7 +4,7 @@ import { XMLParser } from "fast-xml-parser";
 import got from "got";
 import TurndownService from "turndown";
 import { newsFeedUrlDict } from "./constants.js";
-import { NewsType, SiteIndex, UnDocument, UnPress, UnNews, LanguageCode } from "./types.js";
+import { NewsType, SiteIndex, UnDocument, UnPhoto, UnPress, UnNews, LanguageCode } from "./types.js";
 
 export const fetchUnDocuments = async () => {
   const xml = await got("https://undocs.org/rss/gadocs.xml").text();
@@ -90,7 +90,6 @@ export const fetchUnPressDetail = async (link: string) => {
 };
 
 export const fetchSiteIndex = async (languageCode: LanguageCode) => {
-  console.log(`https://www.un.org/${languageCode}/site-index`);
   const html = await got(`https://www.un.org/${languageCode}/site-index`).text();
   const $ = load(html);
   $("style").remove();
@@ -132,4 +131,27 @@ export const fetchSiteIndex = async (languageCode: LanguageCode) => {
     }
   }
   return siteIndex;
+};
+
+export const fetchUnPhotos = async (page: number) => {
+  const html = await got(
+    `https://media.un.org/photo/en/latest-photos?${new URLSearchParams({ page: String(page) }).toString()}`,
+  ).text();
+  const $ = load(html);
+  $("style").remove();
+  $("script").remove();
+  const gallery = $(".view-content .media-asset");
+  const photos: UnPhoto[] = [];
+  gallery.each((_, el) => {
+    const card = $(el);
+    const thumbImage = card.find("img").attr("src") as string;
+    const sourceImage = card.find(".ajax-popup-link").attr("data-mfp-src") as string;
+    const pageUrl = card.find(".ajax-popup-link").attr("href") as string;
+    const title = card.find(".h5").text();
+    const datetime = card.find("time").text();
+    if (thumbImage && sourceImage && pageUrl && title && datetime) {
+      photos.push({ thumbImage, sourceImage, pageUrl: "https://media.un.org" + pageUrl, title, datetime });
+    }
+  });
+  return photos;
 };

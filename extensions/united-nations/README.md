@@ -10,6 +10,7 @@ Peace, dignity and equality on a healthy planet.
 
 - Explore UN Documents
 - Explore UN News
+- Explore UN Photos
 - Explore UN Press
 - Explore UN Site Index
 - Text-to-Speech (requires [Say extension](https://raycast.com/litomore/say))

@@ -5,6 +5,7 @@
 - Fix language settings of Spanish and Portuguese
 - Enhance display visuals of Arabic copies
 - Add UN Site Index command (Arabic, Chinese, English, French, Russian, Spanish)
+- Add UN Photos
 
 ## [Enhancement with Raycast Pro] - 2024-06-18
 

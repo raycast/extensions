@@ -22,6 +22,14 @@ export type UnPress = {
   creator: string;
 };
 
+export type UnPhoto = {
+  thumbImage: string;
+  sourceImage: string;
+  pageUrl: string;
+  title: string;
+  datetime: string;
+};
+
 export enum LanguageCode {
   Arabic = "ar",
   Chinese = "zh",
