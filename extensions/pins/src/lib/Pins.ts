@@ -34,7 +34,7 @@ import { Group } from "./Groups";
 import { PLApplicator } from "placeholders-toolkit";
 import PinsPlaceholders from "./placeholders";
 import { getStorage, setStorage } from "./storage";
-import { FileRef } from "./LocalData";
+import { FileRef, TrackRef } from "./LocalData";
 
 /**
  * A pin object.
@@ -246,6 +246,7 @@ export const openPin = async (
       }
       await setStorage(StorageKey.LAST_OPENED_PIN, pin.id);
     } else {
+      // Convert LocalData objects to strings
       const filteredContext = objectFromNonNullableEntriesOfObject(context || {});
       if (filteredContext["selectedFiles"]) {
         filteredContext["selectedFiles"] = Object.values(filteredContext["selectedFiles"])
@@ -255,6 +256,17 @@ export const openPin = async (
 
       if (filteredContext["currentDirectory"]) {
         filteredContext["currentDirectory"] = (filteredContext["currentDirectory"] as FileRef).path;
+      }
+
+      if (filteredContext["currentTrack"]) {
+        const track = filteredContext["currentTrack"] as TrackRef;
+        if (track.name.length > 0) {
+          filteredContext["currentTrack"] = `${(filteredContext["currentTrack"] as TrackRef).name} by ${
+            (filteredContext["currentTrack"] as TrackRef).artist
+          }`;
+        } else {
+          filteredContext["currentTrack"] = undefined;
+        }
       }
 
       const targetRaw = pin.url.startsWith("~") ? pin.url.replace("~", os.homedir()) : pin.url;
