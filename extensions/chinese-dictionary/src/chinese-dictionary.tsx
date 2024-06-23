@@ -1,3 +1,3 @@
-import { Main } from './components/Main'
+import { Main } from "./components/Main";
 
-export default Main
+export default Main;
