@@ -1,12 +1,19 @@
 import { useState, useEffect, useCallback } from "react";
-import { LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import {
+  LocalStorage,
+  Toast,
+  getPreferenceValues,
+  showToast,
+} from "@raycast/api";
 import got from "got";
 import { ExtensionPreferences } from "../types/extension-preferences";
 import { Response } from "../types/response";
 
 export function useGetDeckNames() {
   const [deckNames, setDeckNames] = useState<string[]>([]);
-  const [selectedDeckName, setSelectedDeckName] = useState<string | undefined>(undefined);
+  const [selectedDeckName, setSelectedDeckName] = useState<string | undefined>(
+    undefined,
+  );
   const [isDeckNamesFetched, setIsDeckNamesFetched] = useState(false);
   const preferences = getPreferenceValues<ExtensionPreferences>();
 
@@ -31,7 +38,8 @@ export function useGetDeckNames() {
           console.log("Deck names:", data);
           setDeckNames(data);
 
-          const storedDeckName = await LocalStorage.getItem<string>("selectedDeckName");
+          const storedDeckName =
+            await LocalStorage.getItem<string>("selectedDeckName");
           if (storedDeckName && data.includes(storedDeckName)) {
             setSelectedDeckName(storedDeckName);
           } else if (data.length > 0) {
@@ -46,12 +54,16 @@ export function useGetDeckNames() {
           return;
         } catch (error) {
           attempt++;
-          console.error(`Attempt ${attempt}: Error fetching deck names:`, error);
+          console.error(
+            `Attempt ${attempt}: Error fetching deck names:`,
+            error,
+          );
 
           if (attempt >= retryCount) {
             showToast({
               style: Toast.Style.Failure,
-              title: "Connection not established: Please check connection String",
+              title:
+                "Connection not established: Please check connection String",
             });
             break;
           }
@@ -71,5 +83,11 @@ export function useGetDeckNames() {
     }
   }, [selectedDeckName]);
 
-  return { deckNames, selectedDeckName, setSelectedDeckName, isDeckNamesFetched, refetch: fetchDeckNames };
+  return {
+    deckNames,
+    selectedDeckName,
+    setSelectedDeckName,
+    isDeckNamesFetched,
+    refetch: fetchDeckNames,
+  };
 }

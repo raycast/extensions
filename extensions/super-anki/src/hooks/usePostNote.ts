@@ -6,7 +6,11 @@ interface Preferences {
   server_url: string;
 }
 
-export function usePostNote(selectedDeckName: string, frontContent: string, backContent: string) {
+export function usePostNote(
+  selectedDeckName: string,
+  frontContent: string,
+  backContent: string,
+) {
   const preferences = getPreferenceValues<Preferences>();
 
   async function handleSubmit(values: { front: string; back: string }) {
@@ -24,23 +28,26 @@ export function usePostNote(selectedDeckName: string, frontContent: string, back
     });
 
     try {
-      const { body }: { body: Response } = await got.post(preferences.server_url, {
-        json: {
-          action: "addNote",
-          version: 6,
-          params: {
-            note: {
-              deckName: selectedDeckName,
-              modelName: "Basic",
-              fields: {
-                Front: frontContent,
-                Back: backContent,
+      const { body }: { body: Response } = await got.post(
+        preferences.server_url,
+        {
+          json: {
+            action: "addNote",
+            version: 6,
+            params: {
+              note: {
+                deckName: selectedDeckName,
+                modelName: "Basic",
+                fields: {
+                  Front: frontContent,
+                  Back: backContent,
+                },
               },
             },
           },
+          responseType: "json",
         },
-        responseType: "json",
-      });
+      );
 
       if (body.error) {
         if (body.error.includes("duplicate")) {

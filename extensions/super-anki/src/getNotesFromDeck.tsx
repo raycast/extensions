@@ -5,7 +5,10 @@ import { useEffect, useState } from "react";
 import { useFetchNotesInfo } from "./hooks/useGetNotesInfos";
 import { NoteInfo } from "./types/note-info";
 
-function DeckDropdown(props: { deckNames: string[]; onDeckNameChange: (newValue: string) => void }) {
+function DeckDropdown(props: {
+  deckNames: string[];
+  onDeckNameChange: (newValue: string) => void;
+}) {
   const { deckNames, onDeckNameChange } = props;
   return (
     <List.Dropdown
@@ -48,7 +51,12 @@ export default function Command() {
       isShowingDetail
       navigationTitle="Search Decks"
       searchBarPlaceholder="Search your favorite deck"
-      searchBarAccessory={<DeckDropdown deckNames={deckNames} onDeckNameChange={onDeckNameChange} />}
+      searchBarAccessory={
+        <DeckDropdown
+          deckNames={deckNames}
+          onDeckNameChange={onDeckNameChange}
+        />
+      }
     >
       {notes.map((note: NoteInfo, index: number) => (
         <List.Item

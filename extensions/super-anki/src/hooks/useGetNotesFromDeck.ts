@@ -14,20 +14,23 @@ export function useFetchNoteIds(selectedDeckName: string) {
       let attempt = 0;
       while (attempt < retryCount) {
         try {
-          console.log(`Attempt ${attempt + 1}: Fetching note IDs for deck: ${selectedDeckName}`);
+          console.log(
+            `Attempt ${attempt + 1}: Fetching note IDs for deck: ${selectedDeckName}`,
+          );
 
-          const { body: findNotesBody }: { body: NoteIdsResponse } = await got.post({
-            url: preferences.server_url,
-            json: {
-              action: "findNotes",
-              version: 6,
-              params: {
-                query: `deck:${selectedDeckName}`,
+          const { body: findNotesBody }: { body: NoteIdsResponse } =
+            await got.post({
+              url: preferences.server_url,
+              json: {
+                action: "findNotes",
+                version: 6,
+                params: {
+                  query: `deck:${selectedDeckName}`,
+                },
               },
-            },
-            responseType: "json",
-            timeout: 5000, // Set timeout for the request
-          });
+              responseType: "json",
+              timeout: 5000, // Set timeout for the request
+            });
 
           if (!findNotesBody || findNotesBody.error) {
             throw new Error(findNotesBody?.error || "Failed to fetch note IDs");
@@ -46,7 +49,8 @@ export function useFetchNoteIds(selectedDeckName: string) {
           if (attempt >= retryCount) {
             showToast({
               style: Toast.Style.Failure,
-              title: "Connection not established: Please check connection String",
+              title:
+                "Connection not established: Please check connection String",
             });
             break; // Exit the loop after max retries
           }

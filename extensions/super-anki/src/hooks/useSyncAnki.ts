@@ -32,12 +32,16 @@ export function useSyncAnki() {
           return;
         } catch (error) {
           attempt++;
-          console.error(`Attempt ${attempt}: Error fetching deck names:`, error);
+          console.error(
+            `Attempt ${attempt}: Error fetching deck names:`,
+            error,
+          );
 
           if (attempt >= retryCount) {
             showToast({
               style: Toast.Style.Failure,
-              title: "Connection not established: Please check connection String",
+              title:
+                "Connection not established: Please check connection String",
             });
             break;
           }
@@ -53,5 +57,3 @@ export function useSyncAnki() {
 
   return { fetchSyncAnki };
 }
-
-

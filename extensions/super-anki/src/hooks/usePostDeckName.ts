@@ -16,16 +16,19 @@ export function usePostDeckName() {
     });
 
     try {
-      const { body }: { body: Response } = await got.post(preferences.server_url, {
-        json: {
-          action: "createDeck",
-          version: 6,
-          params: {
-            deck: selectedDeckName,
+      const { body }: { body: Response } = await got.post(
+        preferences.server_url,
+        {
+          json: {
+            action: "createDeck",
+            version: 6,
+            params: {
+              deck: selectedDeckName,
+            },
           },
+          responseType: "json",
         },
-        responseType: "json",
-      });
+      );
 
       if (body.error) {
         if (body.error.includes("duplicate")) {

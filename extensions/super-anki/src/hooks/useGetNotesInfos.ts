@@ -62,7 +62,8 @@ export function useFetchNotesInfo(noteIds: number[]) {
           if (attempt >= retryCount) {
             showToast({
               style: Toast.Style.Failure,
-              title: "Connection not established: Please check connection String",
+              title:
+                "Connection not established: Please check connection String",
               message: err.message,
             });
           }
