@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import { BASE_API_URL } from "@utils/constants";
 import { apiKey, commandName, extensionName } from "@utils/env";
 import { DeleteLinkResponseBody, LinkSchema, TagSchema, WorkspaceId, WorkspaceSchema } from "@/types";
@@ -11,17 +11,17 @@ const headers = {
   "user-agent": `raycast/${extensionName}/${commandName}`,
 };
 
-export const getAllWorkspaces = async () => {
-  return await axios({
-    method: "GET",
-    url: `${BASE_API_URL}/workspaces`,
-    headers,
-  })
-    .then(({ data }) => data as WorkspaceSchema[])
+export const callApi = async <T>(config: AxiosRequestConfig) => {
+  return await axios({ ...config, headers })
+    .then(({ data }) => data as T)
     .catch(({ response }) => {
       captureException(new Error(JSON.stringify(response.data.error)));
       throw new Error(response.data.error.message);
     });
+};
+
+export const getAllWorkspaces = async () => {
+  return await callApi<WorkspaceSchema[]>({ method: "GET", url: `${BASE_API_URL}/workspaces` });
 };
 
 export const createShortLink = async ({
@@ -33,55 +33,24 @@ export const createShortLink = async ({
   comments,
 }: { originalUrl: string; key?: string; domain?: string; tagIds?: string[]; comments?: string } & WorkspaceId) => {
   const url = hasHttps(originalUrl) ? originalUrl : `https://${originalUrl}`;
-
-  return await axios({
+  return await callApi<LinkSchema>({
     method: "POST",
     url: `${BASE_API_URL}/links?workspaceId=${workspaceId}`,
-    headers,
     data: { domain, url, key, tagIds, comments },
-  })
-    .then(({ data }) => data as LinkSchema)
-    .catch(({ response }) => {
-      captureException(new Error(JSON.stringify(response.data.error)));
-      throw new Error(response.data.error.message);
-    });
+  });
 };
 
 export const getAllShortLinks = async ({ workspaceId }: WorkspaceId) => {
-  return await axios({
-    method: "GET",
-    url: `${BASE_API_URL}/links?workspaceId=${workspaceId}`,
-    headers,
-  })
-    .then(({ data }) => data as LinkSchema[])
-    .catch(({ response }) => {
-      captureException(new Error(JSON.stringify(response.data.error)));
-      throw new Error(response.data.error.message);
-    });
+  return await callApi<LinkSchema[]>({ method: "GET", url: `${BASE_API_URL}/links?workspaceId=${workspaceId}` });
 };
 
 export const deleteShortLink = async ({ linkId, workspaceId }: { linkId: string } & WorkspaceId) => {
-  return await axios({
+  return await callApi<DeleteLinkResponseBody>({
     method: "DELETE",
     url: `${BASE_API_URL}/links/${linkId}?workspaceId=${workspaceId}`,
-    headers,
-  })
-    .then(({ data }) => data as DeleteLinkResponseBody)
-    .catch(({ response }) => {
-      captureException(new Error(JSON.stringify(response.data.error)));
-      throw new Error(response.data.error.message);
-    });
+  });
 };
 
 export const getAllTags = async ({ workspaceId }: WorkspaceId) => {
-  return await axios({
-    method: "GET",
-    url: `${BASE_API_URL}/tags?workspaceId=${workspaceId}`,
-    headers,
-  })
-    .then(({ data }) => data as TagSchema[])
-    .catch(({ response }) => {
-      captureException(new Error(JSON.stringify(response.data.error)));
-      throw new Error(response.data.error.message);
-    });
+  return await callApi<TagSchema[]>({ method: "GET", url: `${BASE_API_URL}/tags?workspaceId=${workspaceId}` });
 };
