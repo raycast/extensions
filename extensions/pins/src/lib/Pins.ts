@@ -252,6 +252,11 @@ export const openPin = async (
           .map((file: FileRef) => file.path)
           .join(", ");
       }
+
+      if (filteredContext["currentDirectory"]) {
+        filteredContext["currentDirectory"] = (filteredContext["currentDirectory"] as FileRef).path;
+      }
+
       const targetRaw = pin.url.startsWith("~") ? pin.url.replace("~", os.homedir()) : pin.url;
       const target = await PLApplicator.bulkApply(targetRaw, {
         context: filteredContext,
