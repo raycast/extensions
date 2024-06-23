@@ -1,0 +1,41 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "image-merge",
+  "title": "Image Merge",
+  "description": "Quickly merge images to one image using imagemagick",
+  "icon": "icon.png",
+  "author": "warapitiya",
+  "categories": ["Developer Tools", "Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "vertical",
+      "title": "Merge Images Vertically",
+      "description": "Merge more 2 or more images vertically",
+      "mode": "no-view"
+    },
+    {
+      "name": "horizontal",
+      "title": "Merge Images Horizontally",
+      "description": "Merge more 2 or more images horizontal",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "latest"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "18.18.4",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
