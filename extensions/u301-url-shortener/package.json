@@ -11,32 +11,21 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Shorten URL",
+      "name": "shorten-clipboard",
+      "title": "Shorten URL Using Clipboard",
+      "subtitle": "U301.com",
+      "description": "Shorten URLs in Clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "shorten-selected-text",
+      "title": "Shorten URL Using Selected Text",
       "subtitle": "U301.com",
       "description": "Shorten selected URL to u301.com",
       "mode": "no-view"
     }
   ],
   "preferences": [
-    {
-      "name": "clipboard",
-      "title": "Shortened URL",
-      "description": "Copy to Clipboard or Paste to Current Window",
-      "type": "dropdown",
-      "required": true,
-      "default": "clipboard",
-      "data": [
-        {
-          "title": "Copy to Clipboard",
-          "value": "clipboard"
-        },
-        {
-          "title": "Paste to Current Window",
-          "value": "paste"
-        }
-      ]
-    },
     {
       "name": "accessToken",
       "title": "API Key",
@@ -58,6 +47,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.74.0",
+    "@raycast/utils": "^1.16.1",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {

@@ -1,6 +1,6 @@
 # U301 URL Shortener
 
-Shorten the selected URL to u301.com.
+Shorten URLs to u301.com.
 
 ## FAQ
 
