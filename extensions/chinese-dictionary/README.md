@@ -16,6 +16,11 @@ This is a Raycast extension that explains text using a Chinese dictionary.
 
 When sending messages, I often try to avoid making my language too straightforward by using words that I don’t commonly use, such as “kindly request.” However, I’m sometimes unsure about the proper usage of these words, so I need to consult a dictionary. Since I don’t want to open a browser, I hope to use Raycast to look up words in the dictionary.
 
+## Installation
+
+> [!IMPORTANT]  
+> You need to apply for an API key from the Educational [Educational Encyclopedia](https://pedia.cloud.edu.tw/Home/OpenAPI) first.
+
 ## Features
 
 ### Word or Idiom Translation
