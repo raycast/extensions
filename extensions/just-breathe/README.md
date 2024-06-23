@@ -14,7 +14,7 @@ It's important to take a short break and clear your head before returning to you
 
 1. Breathe in for a count of 4, visualizing one side of a square.
 2. Hold your breath for a count of 4, visualizing the second side of the square.
-3. Breathe out for a count of 4, visualizing the third side.  
+3. Breathe out for a count of 4, visualizing the third side.
 4. Fourth side - Hold your breath again for a count of 4, completing the square.
 
 Such cycles should be repeated for 1-3 minutes, but preferably 4-5 minutes. This technique is designed to help you relax after a long day, or before/after a challenging task or conversation.

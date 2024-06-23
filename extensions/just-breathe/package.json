@@ -14,7 +14,7 @@
     {
       "name": "start-breathing",
       "title": "Start Breathing",
-      "description": "Show a circle to help you calm down",
+      "description": "Show a square to help you calm down",
       "mode": "view"
     }
   ],
