@@ -11,6 +11,8 @@ export function GetSectionItems({ sectionId, sectionName }: { sectionId: string;
   const [searchText, setSearchText] = useState("");
   const [filteredList, filterList] = useState([]);
 
+  // TODO: Search functionality still not working fix it.
+
   const endpoint = `${ENDPOINTS.librarySections}${sectionId}/all`;
 
   const { data, isLoading } = useFetch(endpoint, {
@@ -29,10 +31,11 @@ export function GetSectionItems({ sectionId, sectionName }: { sectionId: string;
         ),
       );
     }
-  }, [searchText, data]);
+  }, [searchText, filteredList, data]);
 
   return (
     <Grid
+      isLoading={isLoading}
       throttle
       columns={5}
       aspectRatio="2/3"

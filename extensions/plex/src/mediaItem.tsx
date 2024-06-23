@@ -4,14 +4,6 @@ import calculateTime from "../utils/timeCalculator";
 import thumbLinks from "../utils/thumbLinks";
 
 export function MediaItem({ item }: { item: SectionItemsApiResponse["MediaContainer"]["Metadata"] }) {
-  const markdown = `
-    # ${item.title}
-    
-    ![](${thumbLinks({ thumb: item.thumb })})
-    
-    Pikachu that can generate powerful electricity have cheek sacs that are extra soft and super stretchy.
-    `;
-
   return (
     <Detail
       markdown={
