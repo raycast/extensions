@@ -16,7 +16,7 @@ export default function CloudWatch() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search log group by name (case-sensitive)..."
+      searchBarPlaceholder="Search log group by name prefix (length > 2)..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
       onSearchTextChange={setPrefixQuery}
       isShowingDetail={!isLoading && !error && (logGroups || []).length > 0 && isDetailsEnabled}

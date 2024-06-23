@@ -88,12 +88,43 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "ask-selected-image",
+      "title": "Ask Selected Image",
+      "description": "Template with a plain detail view",
+      "mode": "view",
+      "icon": "vision.png",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "required": false,
+          "placeholder": "What is it?"
+        }
+      ]
+    },
+    {
+      "name": "ask-clipboard-image",
+      "title": "Ask Clipboard Image",
+      "description": "Template with a plain detail view",
+      "mode": "view",
+      "icon": "vision.png",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "required": false,
+          "placeholder": "What is it?"
+        }
+      ]
     }
   ],
   "keywords": [
     "chat",
     "gpt",
-    "openai"
+    "openai",
+    "vision"
   ],
   "preferences": [
     {
@@ -271,13 +302,16 @@
     }
   ],
   "dependencies": {
+    "@nem035/gpt-3-encoder": "^1.1.7",
     "@raycast/api": "^1.72.1",
     "@raycast/utils": "^1.14.1",
     "@types/uuid": "^9.0.0",
     "cross-fetch": "^4.0.0",
     "csv-parse": "^5.5.3",
+    "image-meta": "^0.2.0",
     "openai": "^4.40.0",
     "proxy-agent": "^6.3.1",
+    "run-applescript": "^7.0.0",
     "say": "^0.16.0",
     "uuid": "^9.0.0",
     "youtube-transcript": "^1.2.1"
@@ -295,6 +329,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "pull": "ray pull-contributions"
   }
 }

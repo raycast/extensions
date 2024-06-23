@@ -1,6 +1,9 @@
 import fs from "fs";
 import path from "path";
 import filetype from "magic-bytes.js";
+import { closeMainWindow, open, Toast } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
+import { Status } from "./types";
 
 export const getFilePath = (directory: string, filename: string): string => {
   const files = fs.readdirSync(directory);
@@ -27,4 +30,46 @@ export const validateFileType = (filepath: string, expectedType: string): boolea
   }
   const type = types[0].typename || types[0].extension;
   return type == expectedType;
+};
+
+export const chooseDownloadLocation = async (
+  destinationFile: string,
+  promptMessage: string,
+  setIsLoading: (loading: boolean) => void,
+  setStatus: (status: Status) => void,
+  toast: Toast,
+) => {
+  try {
+    const script = `set file2save to POSIX path of (choose file name with prompt "${promptMessage}" default location "${path.dirname(destinationFile)}" default name "${path.basename(destinationFile)}")`;
+    destinationFile = await runAppleScript(script, { timeout: MaxInt32 });
+  } catch (e) {
+    console.log(e);
+    const error = e as { message: string; stderr: string };
+    setIsLoading(false);
+    if (error.stderr.includes("User cancelled")) {
+      toast.hide();
+      setStatus("init");
+      return;
+    }
+    toast.style = Toast.Style.Failure;
+    toast.title = "failure";
+    toast.message = `An error happened during selecting the saving directory. Reason ${error.message}`;
+    setStatus("failure");
+    return;
+  }
+  return destinationFile;
+};
+
+export const handleOpenNow = async (openNow: boolean, destinationFile: string, toast: Toast) => {
+  if (openNow) {
+    await closeMainWindow();
+    open(destinationFile);
+  } else {
+    toast.primaryAction = {
+      title: "Open File",
+      onAction: () => {
+        open(destinationFile);
+      },
+    };
+  }
 };

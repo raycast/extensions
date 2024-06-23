@@ -54,13 +54,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.60.1",
-    "@raycast/utils": "^1.10.0",
+    "@raycast/api": "^1.76.0",
+    "@raycast/utils": "^1.16.0",
     "axios": "^1.5.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "18.18.4",
+    "@types/node": "^20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",

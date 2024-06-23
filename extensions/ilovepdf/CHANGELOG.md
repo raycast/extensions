@@ -1,5 +1,7 @@
 # iLovePDF Changelog
 
+## [Refactor Ask Before Download and Open Now] - 2024-06-17
+
 ## [Add Extract Text from PDF Command] - 2024-06-16
 
 ## [Add Split PDF Command] - 2024-06-08

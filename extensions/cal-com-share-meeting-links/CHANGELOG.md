@@ -1,5 +1,10 @@
 # Cal.com Share Meeting Links Changelog
 
+## [Update & bug fix] - 2024-06-20
+
+- Adds action to open upcoming bookings in browser
+- Bug fix for open booking link
+
 ## [Updated] - 2024-06-12
 
 - Adds submenu to View Bookings command to enable you to update a booking's status

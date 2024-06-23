@@ -80,7 +80,7 @@ function UnreadNotifications() {
 
       await mutate(openAndMarkNotificationAsRead(), {
         optimisticUpdate(data) {
-          return data?.filter((n) => n.id !== notification.id) ?? [];
+          return data?.filter((n: Notification) => n.id !== notification.id) ?? [];
         },
       });
     } catch {
@@ -92,7 +92,7 @@ function UnreadNotifications() {
     try {
       await mutate(octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) }), {
         optimisticUpdate(data) {
-          return data?.filter((n) => n.id !== notification.id) ?? [];
+          return data?.filter((n: Notification) => n.id !== notification.id) ?? [];
         },
       });
     } catch {
@@ -119,7 +119,7 @@ function UnreadNotifications() {
 
       <MenuBarExtra.Section>
         {hasUnread ? (
-          data.map((notification, index) => {
+          data.map((notification: Notification, index: number) => {
             const icon = iconsData?.[index];
             const title = notification.subject.title;
             const updatedAt = new Date(notification.updated_at);

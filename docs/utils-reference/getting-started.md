@@ -16,6 +16,10 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.16.1
+
+- Fixed an issue where `bodyEncoding` wasn't properly used in OAuthService.
+
 ### v1.16.0
 
 - Add a `failureToastOptions` prop to `useFetch`, `useCachedPromise`, and `usePromise` to make it possible to customize the error displayed instead of a generic "Failed to fetch latest data".
