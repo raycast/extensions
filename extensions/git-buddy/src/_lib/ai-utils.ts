@@ -40,6 +40,11 @@ export async function fetchAIContent(options: FetchAIContentOptions) {
   try {
     const repoPath = await getRepoPath();
     const gitDiff = await getGitDiff({ diffType, repoPath, targetBranch });
+
+    if (!gitDiff) {
+      throw new Error("Git diff is empty.");
+    }
+
     const aiModel = await getAIModel(aiModelName);
     const aiContent = await AI.ask(`${aiPrompt}${gitDiff}`, { model: aiModel, creativity: CREATIVITY_LEVEL });
     const branchName = await getCurrentBranchName(repoPath);

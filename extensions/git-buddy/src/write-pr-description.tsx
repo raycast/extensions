@@ -62,7 +62,8 @@ export default function Command(props: LaunchProps<{ launchContext: LaunchContex
       setDescription(cleanedDescription);
       setBranchName(branchName);
     } catch (error) {
-      setError(ERROR_MESSAGE);
+      const errorMessage = (error as Error).message || ERROR_MESSAGE;
+      setError(errorMessage);
     }
   }
 
