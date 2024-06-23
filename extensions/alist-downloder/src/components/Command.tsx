@@ -1,100 +1,10 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  getPreferenceValues,
-  showToast,
-  Toast,
-  Clipboard,
-  Form,
-  useNavigation,
-} from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, Clipboard, useNavigation, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
-import axios from "axios";
-import { promisify } from "util";
-import { exec } from "child_process";
-import fs from "fs";
-import { join } from "path";
-import { homedir } from "os";
-
-interface Preferences {
-  username: string;
-  password: string;
-  host: string;
-  downloadCommand: string;
-}
-
-interface AlistItem {
-  name: string;
-  size: number;
-  is_dir: boolean;
-  sign?: string;
-}
-
-interface APIResponse {
-  data: {
-    content: AlistItem[];
-  };
-}
-
-const asyncExec = promisify(exec);
-
-class DownloadCMD {
-  command: string;
-  url: string;
-  filename: string;
-
-  constructor(cmdTemplate: string, url: string, filename: string) {
-    this.command = cmdTemplate.replace("{url}", url).replace("{filename}", filename);
-    this.url = url;
-    this.filename = filename;
-  }
-
-  async execute(): Promise<boolean> {
-    try {
-      const { stdout, stderr } = await asyncExec(this.command);
-      console.log("Command output:", stdout);
-      if (stderr) {
-        console.error("Command error output:", stderr);
-      }
-      return false;
-    } catch (error) {
-      console.error("Error executing download command:", error);
-      return true;
-    }
-  }
-}
-
-const preferences = getPreferenceValues<Preferences>();
-const HOST = preferences.host;
-const AUTH_URL = `${HOST}/api/auth/login`;
-const API_BASE_URL = `${HOST}/api/fs`;
-const CMD = preferences.downloadCommand;
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const fetchToken = async (username: string, password: string) => {
-  const response = await axios.post(AUTH_URL, { username, password });
-  return response.data.data.token;
-};
-
-const fetchData = async (token: string, path: string) => {
-  const response = await axios.post<APIResponse>(
-    `${API_BASE_URL}/list`,
-    { path, password: "", page: 1, per_page: 0, refresh: false },
-    { headers: { Authorization: token, "Content-Type": "application/json" } },
-  );
-  return response.data.data.content;
-};
-
-const fetchFileDetails = async (token: string, path: string) => {
-  const response = await axios.post(
-    `${API_BASE_URL}/get`,
-    { path, password: "", page: 1, per_page: 0, refresh: false },
-    { headers: { Authorization: token, "Content-Type": "application/json" } },
-  );
-  return response.data.data;
-};
+import { fetchToken, fetchData, fetchFileDetails, searchFiles } from "../utils/api";
+import { makeUnique, DownloadCMD } from "../utils/helpers";
+import { DownloadForm, displayFileSize } from "./DownloadForm";
+import { HOST, CMD } from "../preferences";
+import { AlistItem } from "../utils/types";
 
 export default function Command() {
   const [items, setItems] = useState<AlistItem[]>([]);
@@ -109,7 +19,7 @@ export default function Command() {
   useEffect(() => {
     const initTokenAndData = async () => {
       try {
-        const fetchedToken = await fetchToken(preferences.username, preferences.password);
+        const fetchedToken = await fetchToken();
         setToken(fetchedToken);
         const data = await fetchData(fetchedToken, pathStack[pathStack.length - 1]);
         setItems(data);
@@ -131,13 +41,18 @@ export default function Command() {
 
   const applyFilter = (data: AlistItem[], filterFiles: boolean) => {
     const filtered = filterFiles ? data.filter((item) => !item.is_dir) : data;
-    setFilteredItems(filtered);
+    setFilteredItems(makeUnique(filtered));
   };
 
   const fetchDownloadLink = async (item: AlistItem) => {
-    const currentPath = pathStack[pathStack.length - 1];
-    const fileDetails = await fetchFileDetails(token!, `${currentPath}/${item.name}`);
-    return `${HOST}/d/${encodeURIComponent(item.name)}?sign=${fileDetails.sign}`;
+    if (item.parent) {
+      const fileDetails = await fetchFileDetails(token!, `${item.parent}/${item.name}`);
+      return `${HOST}/d/${encodeURIComponent(item.name)}?sign=${fileDetails.sign}`;
+    } else {
+      const currentPath = pathStack[pathStack.length - 1];
+      const fileDetails = await fetchFileDetails(token!, `${currentPath}/${item.name}`);
+      return `${HOST}/d/${encodeURIComponent(item.name)}?sign=${fileDetails.sign}`;
+    }
   };
 
   const handleDownloadLinkCopy = async (item: AlistItem) => {
@@ -229,11 +144,21 @@ export default function Command() {
     setFilteredItems(sortedItems);
   };
 
+  const handleSearch = async (text: string) => {
+    setSearchText(text);
+    if (text === "") {
+      applyFilter(items, onlyFiles);
+    } else {
+      const searchedItems = await searchFiles(token!, text, pathStack[pathStack.length - 1]);
+      applyFilter(searchedItems, onlyFiles);
+    }
+  };
+
   return (
-    <List isLoading={loading} searchText={searchText} onSearchTextChange={setSearchText} filtering={true}>
+    <List isLoading={loading} searchText={searchText} onSearchTextChange={handleSearch}>
       {filteredItems.map((item) => (
         <List.Item
-          key={item.name}
+          key={item.hash}
           title={item.name}
           accessories={[{ text: item.is_dir ? "Directory" : displayFileSize(item) }]}
           actions={
@@ -243,101 +168,71 @@ export default function Command() {
                 <Action
                   title="Open Directory"
                   onAction={() => handleNavigateToDirectory(`${pathStack[pathStack.length - 1]}/${item.name}`)}
+                  icon={{ source: Icon.Folder }}
                 />
               )}
-              <Action title="Copy Download Link" onAction={() => handleDownloadLinkCopy(item)} />
+              <Action
+                title="Copy Download Link"
+                onAction={() => handleDownloadLinkCopy(item)}
+                icon={{ source: Icon.Link }}
+              />
               <Action
                 title="Copy Download Command"
                 onAction={() => handleCopyDownloadCommand(item)}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                icon={{ source: Icon.Code }}
               />
-              <Action title="Go Back" onAction={handleNavigateBack} shortcut={{ modifiers: ["shift"], key: "enter" }} />
-              <Action title="Show Only Files" onAction={toggleOnlyFiles} shortcut={{ modifiers: ["cmd"], key: "f" }} />
+              {pathStack.length > 1 && (
+                <Action
+                  title="Go Back"
+                  onAction={handleNavigateBack}
+                  shortcut={{ modifiers: ["shift"], key: "enter" }}
+                  icon={{ source: Icon.ArrowLeft }}
+                />
+              )}
+              <Action
+                title="Show Only Files"
+                onAction={toggleOnlyFiles}
+                shortcut={{ modifiers: ["cmd"], key: "f" }}
+                icon={{ source: Icon.Filter }}
+              />
               <Action
                 title="Refresh"
                 onAction={() => fetchItemsForPath(pathStack[pathStack.length - 1])}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                icon={{ source: Icon.Redo }}
               />
               <Action.OpenInBrowser url={HOST} shortcut={{ modifiers: ["cmd"], key: "o" }} />
               <Action
                 title="Order by Size Ascending"
                 onAction={() => handleOrderItemsBySize(true)}
                 shortcut={{ modifiers: ["ctrl"], key: "a" }}
+                icon={{ source: Icon.ArrowUp }}
               />
               <Action
                 title="Order by Size Descending"
                 onAction={() => handleOrderItemsBySize(false)}
                 shortcut={{ modifiers: ["ctrl"], key: "z" }}
+                icon={{ source: Icon.ArrowDown }}
+              />
+              <Action
+                title="Copy Token"
+                onAction={() => {
+                  Clipboard.copy(token!);
+                  showToast(Toast.Style.Success, "Token copied to clipboard");
+                }}
+                shortcut={{ modifiers: ["cmd"], key: "t" }}
+                icon={{ source: Icon.Key }}
+              />
+              <Action.CopyToClipboard
+                title="Copy Filename"
+                content={item.name}
+                shortcut={{ modifiers: ["cmd"], key: "c" }}
               />
             </ActionPanel>
           }
         />
       ))}
     </List>
-  );
-}
-
-interface DownloadFormProps {
-  item: AlistItem;
-  token: string;
-  path: string;
-}
-
-function displayFileSize(item: AlistItem) {
-  if (item.size < 1024) {
-    return `${item.size} B`;
-  } else if (item.size < 1024 * 1024) {
-    return `${(item.size / 1024).toFixed(2)} KB`;
-  } else if (item.size < 1024 * 1024 * 1024) {
-    return `${(item.size / (1024 * 1024)).toFixed(2)} MB`;
-  } else {
-    return `${(item.size / (1024 * 1024 * 1024)).toFixed(2)} GB`;
-  }
-}
-
-function DownloadForm({ item, token, path }: DownloadFormProps) {
-  const [filename, setFilename] = useState<string>(item.name);
-  const { pop } = useNavigation();
-
-  const handleSubmit = async (values: { folders: string[] }) => {
-    const destination = values.folders[0];
-    if (!fs.existsSync(destination) || !fs.lstatSync(destination).isDirectory()) {
-      showToast(Toast.Style.Failure, "Invalid Destination", "Selected destination directory does not exist.");
-      return false;
-    }
-
-    const fileDetails = await fetchFileDetails(token, `${path}/${item.name}`);
-    const downloadLink = `${HOST}/d/${encodeURIComponent(item.name)}?sign=${fileDetails.sign}`;
-
-    const downloadPath = join(destination, filename);
-    const command = new DownloadCMD(CMD, downloadLink, downloadPath);
-    showToast(Toast.Style.Animated, "Executing download command...");
-    const isFailed = await command.execute();
-    isFailed
-      ? showToast(Toast.Style.Failure, "Failed to download file", "Check the console for more information.")
-      : showToast(Toast.Style.Success, "File downloaded successfully");
-    await sleep(1000);
-    pop();
-  };
-
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Download" onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.Description text={`Downloading ${item.name}`} />
-      <Form.TextField id="filename" title="Filename" placeholder="Filename" value={filename} onChange={setFilename} />
-      <Form.FilePicker
-        id="folders"
-        title="Folder"
-        defaultValue={[`${homedir()}/Downloads`]}
-        allowMultipleSelection={false}
-        canChooseDirectories
-        canChooseFiles={false}
-      />
-    </Form>
   );
 }
