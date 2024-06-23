@@ -1,0 +1,120 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aiflomo",
+  "title": "aiflomo",
+  "description": "Send MEMOs to flomo, maybe after using AI summary text and browser information.",
+  "icon": "command-icon.png",
+  "author": "lixianwei",
+  "categories": [
+    "Productivity",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "write-memo",
+      "title": "Write MEMO",
+      "subtitle": "Without AI",
+      "description": "Write MEMOs to flomo using api",
+      "mode": "view"
+    },
+    {
+      "name": "file-to-memo-ai",
+      "title": "Summary File to MEMO with AI",
+      "subtitle": "File",
+      "description": "Write MEMOs to flomo using api with AI summary text",
+      "mode": "view"
+    },
+    {
+      "name": "website-to-memo-ai",
+      "title": "Summary Website MEMO with AI",
+      "subtitle": "Website",
+      "description": "Write MEMOs to flomo using api with AI summary text",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "api",
+      "title": "Flomo API URL",
+      "description": "Your Flomo API URL",
+      "type": "textfield",
+      "default": "https://flomoapp.com/xxx/xxx",
+      "required": true
+    },
+    {
+      "name": "defaultTags",
+      "title": "Default tags",
+      "description": "The default tags that comes with each MEMO — separated by space",
+      "type": "textfield",
+      "default": "#raycast",
+      "required": true
+    },
+    {
+      "name": "defaultPrompt",
+      "title": "Default prompt",
+      "description": "The default prompt that summary by ai",
+      "type": "textfield",
+      "default": "Please return the detailed notes you carefully wrote after reading the text carefully.",
+      "required": true
+    },
+    {
+      "name": "defaultModel",
+      "title": "Default model",
+      "description": "The default ai model",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "openai-gpt-3.5-turbo",
+          "value": "openai-gpt-3.5-turbo"
+        },
+        {
+          "title": "openai-gpt-4o",
+          "value": "openai-gpt-4o"
+        },
+        {
+          "title": "openai-gpt-4-turbo",
+          "value": "openai-gpt-4-turbo"
+        },
+        {
+          "title": "openai-gpt-4",
+          "value": "openai-gpt-4"
+        },
+        {
+          "title": "anthropic-claude-haiku",
+          "value": "anthropic-claude-haiku"
+        },
+        {
+          "title": "anthropic-claude-sonnet",
+          "value": "anthropic-claude-sonnet"
+        },
+        {
+          "title": "anthropic-claude-opus",
+          "value": "anthropic-claude-opus"
+        }
+      ],
+      "default": "anthropic-claude-opus",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.77.0",
+    "@raycast/utils": "^1.16.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
