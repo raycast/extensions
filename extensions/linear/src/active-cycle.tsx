@@ -7,7 +7,6 @@ import useIssues from "./hooks/useIssues";
 import useTeams from "./hooks/useTeams";
 import usePriorities from "./hooks/usePriorities";
 import useMe from "./hooks/useMe";
-import useUsers from "./hooks/useUsers";
 
 import { getTeamIcon } from "./helpers/teams";
 
@@ -22,7 +21,6 @@ function ActiveCycle() {
 
   const { priorities, isLoadingPriorities } = usePriorities();
   const { me, isLoadingMe } = useMe();
-  const { users, isLoadingUsers } = useUsers();
 
   const cycleId = useMemo(() => {
     return teams?.find((team) => team.id === selectedTeam)?.activeCycle?.id;
@@ -48,7 +46,7 @@ function ActiveCycle() {
           ))}
         </List.Dropdown>
       }
-      isLoading={isLoadingIssues || isLoadingTeams || isLoadingPriorities || isLoadingMe || isLoadingUsers}
+      isLoading={isLoadingIssues || isLoadingTeams || isLoadingPriorities || isLoadingMe}
       searchBarPlaceholder="Filter by ID, title, status, assignee or priority"
       filtering={{ keepSectionOrder: true }}
     >
@@ -61,15 +59,7 @@ function ActiveCycle() {
               <ActionPanel>
                 <Action.Push
                   title="Create Issue"
-                  target={
-                    <CreateIssueForm
-                      cycleId={cycleId}
-                      teamId={selectedTeam}
-                      priorities={priorities}
-                      users={users}
-                      me={me}
-                    />
-                  }
+                  target={<CreateIssueForm cycleId={cycleId} teamId={selectedTeam} priorities={priorities} me={me} />}
                 />
               </ActionPanel>
             ),
@@ -77,7 +67,7 @@ function ActiveCycle() {
             {}),
         }}
       />
-      <StateIssueList issues={issues} mutateList={mutateList} priorities={priorities} users={users} me={me} />
+      <StateIssueList issues={issues} mutateList={mutateList} priorities={priorities} me={me} />
     </List>
   );
 }

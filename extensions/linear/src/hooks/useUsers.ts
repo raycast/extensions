@@ -1,15 +1,17 @@
 import { getLinearClient } from "../api/linearClient";
 import { useCachedPromise } from "@raycast/utils";
 
-export default function useUsers() {
+export default function useUsers(query: string = "") {
   const { linearClient } = getLinearClient();
 
   const { data, error, isLoading } = useCachedPromise(
-    async () => {
-      const users = await linearClient.users();
+    async (contains: string) => {
+      const users = await linearClient.users(
+        contains.trim().length > 0 ? { filter: { name: { containsIgnoreCase: contains } } } : undefined,
+      );
       return users.nodes;
     },
-    [],
+    [query],
     { initialData: [] },
   );
 

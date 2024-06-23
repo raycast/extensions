@@ -36,6 +36,7 @@ import { getTeamIcon } from "../helpers/teams";
 
 import IssueDetail from "./IssueDetail";
 import { getMilestoneIcon } from "../helpers/milestones";
+import useUsers from "../hooks/useUsers";
 
 type CreateIssueFormProps = {
   assigneeId?: string;
@@ -45,7 +46,6 @@ type CreateIssueFormProps = {
   milestoneId?: string;
   parentId?: string;
   priorities: IssuePriorityValue[] | undefined;
-  users: User[] | undefined;
   me: User | undefined;
   isLoading?: boolean;
   draftValues?: CreateIssueValues;
@@ -108,6 +108,9 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
   const { teams, isLoadingTeams } = useTeams(teamQuery);
   const hasMoreThanOneTeam = teams && teams.length > 1;
 
+  const [userQuery, setUserQuery] = useState<string>("");
+  const { users, isLoadingUsers } = useUsers(userQuery);
+
   const { handleSubmit, itemProps, values, focus, reset } = useForm<CreateIssueValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
@@ -139,7 +142,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
             title: "Open Issue",
             shortcut: { modifiers: ["cmd", "shift"], key: "o" },
             onAction: async () => {
-              push(<IssueDetail issue={issue} priorities={props.priorities} users={props.users} me={props.me} />);
+              push(<IssueDetail issue={issue} priorities={props.priorities} me={props.me} />);
               await toast.hide();
             },
           };
@@ -233,7 +236,6 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
 
   const hasStates = states && states.length > 0;
   const hasPriorities = props.priorities && props.priorities.length > 0;
-  const hasUsers = props.users && props.users.length > 0;
   const hasLabels = labels && labels.length > 0;
   const hasCycles = cycles && cycles.length > 0;
   const hasProjects = projects && projects.length > 0;
@@ -248,7 +250,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           <Action.SubmitForm onSubmit={handleSubmit} title="Create Issue" />
         </ActionPanel>
       }
-      isLoading={isLoadingTeams || props.isLoading}
+      isLoading={isLoadingTeams || isLoadingUsers || props.isLoading}
     >
       <Form.Dropdown
         title="Team"
@@ -303,15 +305,20 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           : null}
       </Form.Dropdown>
 
-      {hasUsers ? (
-        <Form.Dropdown title="Assignee" storeValue {...itemProps.assigneeId}>
-          <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
+      <Form.Dropdown
+        title="Assignee"
+        storeValue
+        {...itemProps.assigneeId}
+        isLoading={isLoadingUsers}
+        throttle
+        onSearchTextChange={setUserQuery}
+      >
+        <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
 
-          {props.users?.map((user) => {
-            return <Form.Dropdown.Item title={user.name} value={user.id} key={user.id} icon={getUserIcon(user)} />;
-          })}
-        </Form.Dropdown>
-      ) : null}
+        {users?.map((user) => {
+          return <Form.Dropdown.Item title={user.name} value={user.id} key={user.id} icon={getUserIcon(user)} />;
+        })}
+      </Form.Dropdown>
 
       <Form.TagPicker title="Labels" placeholder="Add label" {...itemProps.labelIds}>
         {hasLabels

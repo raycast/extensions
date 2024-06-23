@@ -3,6 +3,7 @@
 ## [Fixes] - {PR_MERGE_DATE}
 
 - [#10856](https://github.com/raycast/extensions/issues/10856): Typeahead search for teams while creating/editing issues and in active cycles command
+- [#8704](https://github.com/raycast/extensions/issues/8704): Assignees missing from Linear issue creation
 
 ## [Improved Notifications] - 2024-06-14
 

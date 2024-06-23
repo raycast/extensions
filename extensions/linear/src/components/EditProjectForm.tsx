@@ -12,6 +12,7 @@ import { getUserIcon } from "../helpers/users";
 import { projectStatuses, projectStatusIcon, projectStatusText } from "../helpers/projects";
 import { getErrorMessage } from "../helpers/errors";
 import { CreateProjectValues } from "./CreateProjectForm";
+import { useState } from "react";
 
 type EditProjectProps = {
   project: ProjectResult;
@@ -25,6 +26,9 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
 
   const { teams, isLoadingTeams } = useTeams();
   const { users, isLoadingUsers } = useUsers();
+
+  const [leadQuery, setLeadQuery] = useState<string>("");
+  const { users: leads, isLoadingUsers: isLoadingLeads } = useUsers(leadQuery);
 
   const { handleSubmit, itemProps } = useForm<CreateProjectValues>({
     async onSubmit(values) {
@@ -74,7 +78,7 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
 
   return (
     <Form
-      isLoading={isLoadingTeams || isLoadingUsers}
+      isLoading={isLoadingTeams || isLoadingUsers || isLoadingLeads}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Edit Project" onSubmit={handleSubmit} />
@@ -110,15 +114,19 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
         ))}
       </Form.Dropdown>
 
-      {users && users.length > 0 ? (
-        <Form.Dropdown title="Lead" {...itemProps.leadId}>
-          <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
+      <Form.Dropdown
+        title="Lead"
+        {...itemProps.leadId}
+        throttle
+        onSearchTextChange={setLeadQuery}
+        isLoading={isLoadingLeads}
+      >
+        <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
 
-          {users?.map((user) => {
-            return <Form.Dropdown.Item title={user.name} value={user.id} key={user.id} icon={getUserIcon(user)} />;
-          })}
-        </Form.Dropdown>
-      ) : null}
+        {leads?.map((user) => {
+          return <Form.Dropdown.Item title={user.name} value={user.id} key={user.id} icon={getUserIcon(user)} />;
+        })}
+      </Form.Dropdown>
 
       {users && users.length > 0 ? (
         <Form.TagPicker title="Members" placeholder="Add members" {...itemProps.memberIds}>

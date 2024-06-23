@@ -19,12 +19,12 @@ export type TeamResult = Pick<
   projects: { nodes: Project["id"][] };
 };
 
-export async function getTeams(queryStr: string = "") {
+export async function getTeams(query: string = "") {
   const { graphQLClient } = getLinearClient();
   const { data } = await graphQLClient.rawRequest<{ teams: { nodes: TeamResult[] } }, Record<string, unknown>>(
     `
-      query($queryStr: String!) {
-        teams(filter: {name: {containsIgnoreCase: $queryStr}}) {
+      query($query: String!) {
+        teams(filter: {name: {containsIgnoreCase: $query}}) {
           nodes {
             id
             name
@@ -50,7 +50,7 @@ export async function getTeams(queryStr: string = "") {
         }
       }
     `,
-    { queryStr },
+    { query },
   );
 
   return data?.teams.nodes;

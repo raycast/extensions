@@ -10,6 +10,7 @@ import { getUserIcon } from "../helpers/users";
 import { projectStatuses, projectStatusIcon, projectStatusText } from "../helpers/projects";
 import { getErrorMessage } from "../helpers/errors";
 import { isLinearInstalled } from "../helpers/isLinearInstalled";
+import { useState } from "react";
 
 export type CreateProjectValues = {
   teamIds: string[];
@@ -27,6 +28,9 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
 
   const { teams, isLoadingTeams } = useTeams();
   const { users, isLoadingUsers } = useUsers();
+
+  const [leadQuery, setLeadQuery] = useState<string>("");
+  const { users: leads, isLoadingUsers: isLoadingLeads } = useUsers(leadQuery);
 
   const { handleSubmit, itemProps, focus, reset } = useForm<CreateProjectValues>({
     async onSubmit(values) {
@@ -93,8 +97,8 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
 
   return (
     <Form
-      enableDrafts={true}
-      isLoading={isLoadingTeams || isLoadingUsers}
+      enableDrafts
+      isLoading={isLoadingTeams || isLoadingUsers || isLoadingLeads}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Project" onSubmit={handleSubmit} />
@@ -130,15 +134,20 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
         ))}
       </Form.Dropdown>
 
-      {users && users.length > 0 ? (
-        <Form.Dropdown title="Lead" storeValue {...itemProps.leadId}>
-          <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
+      <Form.Dropdown
+        title="Lead"
+        storeValue
+        {...itemProps.leadId}
+        throttle
+        onSearchTextChange={setLeadQuery}
+        isLoading={isLoadingLeads}
+      >
+        <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
 
-          {users?.map((user) => {
-            return <Form.Dropdown.Item title={user.name} value={user.id} key={user.id} icon={getUserIcon(user)} />;
-          })}
-        </Form.Dropdown>
-      ) : null}
+        {leads?.map((user) => {
+          return <Form.Dropdown.Item title={user.name} value={user.id} key={user.id} icon={getUserIcon(user)} />;
+        })}
+      </Form.Dropdown>
 
       {users && users.length > 0 ? (
         <Form.TagPicker title="Members" placeholder="Add members" {...itemProps.memberIds}>

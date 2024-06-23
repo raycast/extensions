@@ -27,13 +27,13 @@ import { MutatePromise } from "@raycast/utils";
 import { CreateIssueValues } from "./CreateIssueForm";
 import useMilestones from "../hooks/useMilestones";
 import { getMilestoneIcon } from "../helpers/milestones";
+import useUsers from "../hooks/useUsers";
 
 type EditIssueFormProps = {
   issue: IssueResult;
   mutateList?: MutatePromise<IssueResult[] | undefined>;
   mutateSubIssues?: MutatePromise<IssueResult[] | undefined>;
   priorities: IssuePriorityValue[] | undefined;
-  users: User[] | undefined;
   me: User | undefined;
 };
 
@@ -45,6 +45,9 @@ export default function EditIssueForm(props: EditIssueFormProps) {
   const [teamQuery, setTeamQuery] = useState<string>("");
   const { teams, isLoadingTeams } = useTeams(teamQuery);
   const hasMoreThanOneTeam = teams && teams.length > 1;
+
+  const [userQuery, setUserQuery] = useState<string>("");
+  const { users, isLoadingUsers } = useUsers(userQuery);
 
   const { handleSubmit, itemProps, values } = useForm<CreateIssueValues>({
     async onSubmit(values) {
@@ -136,7 +139,6 @@ export default function EditIssueForm(props: EditIssueFormProps) {
 
   const hasStates = states && states.length > 0;
   const hasPriorities = props.priorities && props.priorities.length > 0;
-  const hasUsers = props.users && props.users.length > 0;
   const hasLabels = labels && labels.length > 0;
   const hasCycles = cycles && cycles.length > 0;
   const hasProjects = projects && projects.length > 0;
@@ -150,7 +152,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
           <Action.SubmitForm onSubmit={handleSubmit} title="Edit Issue" />
         </ActionPanel>
       }
-      isLoading={isLoadingTeams || isLoadingIssue}
+      isLoading={isLoadingTeams || isLoadingIssue || isLoadingUsers}
     >
       <Form.Dropdown
         title="Team"
@@ -198,15 +200,19 @@ export default function EditIssueForm(props: EditIssueFormProps) {
           : null}
       </Form.Dropdown>
 
-      {hasUsers ? (
-        <Form.Dropdown title="Assignee" {...itemProps.assigneeId}>
-          <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
+      <Form.Dropdown
+        title="Assignee"
+        {...itemProps.assigneeId}
+        throttle
+        onSearchTextChange={setUserQuery}
+        isLoading={isLoadingUsers}
+      >
+        <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
 
-          {props.users?.map((user) => {
-            return <Form.Dropdown.Item title={user.name} value={user.id} key={user.id} icon={getUserIcon(user)} />;
-          })}
-        </Form.Dropdown>
-      ) : null}
+        {users?.map((user) => {
+          return <Form.Dropdown.Item title={user.name} value={user.id} key={user.id} icon={getUserIcon(user)} />;
+        })}
+      </Form.Dropdown>
 
       <Form.TagPicker title="Labels" {...itemProps.labelIds} placeholder="Add label">
         {hasLabels

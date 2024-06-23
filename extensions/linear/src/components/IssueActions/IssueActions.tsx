@@ -27,6 +27,8 @@ import IssueAttachments from "../IssueAttachments";
 import CreateSubIssues from "../CreateSubIssues";
 import MilestoneSubmenu from "./MilestoneSubmenu";
 import OpenInLinear from "../OpenInLinear";
+import { useState } from "react";
+import useUsers from "../../hooks/useUsers";
 
 type IssueActionsProps = {
   issue: IssueResult;
@@ -36,7 +38,6 @@ type IssueActionsProps = {
   showAttachmentsAction?: boolean;
   attachments?: Attachment[];
   priorities: IssuePriorityValue[] | undefined;
-  users: User[] | undefined;
   me: User | undefined;
 };
 
@@ -58,7 +59,6 @@ export default function IssueActions({
   showAttachmentsAction,
   attachments,
   priorities,
-  users,
   me,
 }: IssueActionsProps) {
   const { pop } = useNavigation();
@@ -360,6 +360,9 @@ export default function IssueActions({
     }
   }
 
+  const [userQuery, setUserQuery] = useState<string>("");
+  const { users, isLoadingUsers } = useUsers(userQuery);
+
   return (
     <>
       <OpenInLinear title="Open Issue" url={issue.url} />
@@ -372,7 +375,6 @@ export default function IssueActions({
           target={
             <EditIssueForm
               priorities={priorities}
-              users={users}
               me={me}
               issue={issue}
               mutateList={mutateList}
@@ -401,23 +403,24 @@ export default function IssueActions({
           </ActionPanel.Submenu>
         ) : null}
 
-        {users && users.length > 0 ? (
-          <ActionPanel.Submenu
-            icon={Icon.AddPerson}
-            title="Assign To"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-          >
-            {users.map((user) => (
-              <Action
-                key={user.id}
-                autoFocus={user.id === issue.assignee?.id}
-                title={`${user.displayName} (${user.email})`}
-                icon={getUserIcon(user)}
-                onAction={() => setAssignee(user)}
-              />
-            ))}
-          </ActionPanel.Submenu>
-        ) : null}
+        <ActionPanel.Submenu
+          icon={Icon.AddPerson}
+          title="Assign To"
+          shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+          isLoading={isLoadingUsers}
+          throttle
+          onSearchTextChange={setUserQuery}
+        >
+          {users?.map((user) => (
+            <Action
+              key={user.id}
+              autoFocus={user.id === issue.assignee?.id}
+              title={`${user.displayName} (${user.email})`}
+              icon={getUserIcon(user)}
+              onAction={() => setAssignee(user)}
+            />
+          ))}
+        </ActionPanel.Submenu>
 
         {me ? (
           <Action
