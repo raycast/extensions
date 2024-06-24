@@ -82,8 +82,8 @@
       "mode": "view"
     },
     {
-      "name": "glue-jobs",
-      "title": "Glue Jobs",
+      "name": "glue",
+      "title": "Glue",
       "description": "List Glue Jobs and view details",
       "mode": "view"
     },

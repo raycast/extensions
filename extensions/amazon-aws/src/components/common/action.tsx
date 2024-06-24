@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
-import { getEnumKeysExcludingCurrent } from "../../util";
+import { getEnumKeysExcludingCurrent, normalizeUrl } from "../../util";
 
 export class AwsAction {
   public static Console = ({ url, onAction }: { url: string; onAction?: () => void }) => (
@@ -64,5 +64,5 @@ function createSsoLoginUri(uri: string): string {
   ) {
     sso_login_uri = `${process.env.AWS_SSO_START_URL}/console?account_id=${encodeURI(process.env.AWS_SSO_ACCOUNT_ID)}&role_name=${encodeURI(process.env.AWS_SSO_ROLE_NAME)}&destination=`;
   }
-  return `${normalizeUrl(sso_login_uri + encodeURIComponent(uri))}`;
+  return `${normalizeUrl(sso_login_uri) + encodeURIComponent(uri)}`;
 }

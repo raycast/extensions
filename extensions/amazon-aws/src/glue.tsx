@@ -1,18 +1,18 @@
 import { GlueClient, ListJobsCommand } from "@aws-sdk/client-glue";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Image } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { isReadyToFetch, resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
 
-export default function GlueJobs() {
-  const { data: glueJobs, error, isLoading, revalidate } = useCachedPromise(fetchJobs);
+export default function Glue() {
+  const { data: glueJobs, error, isLoading, mutate } = useCachedPromise(fetchJobs);
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Filter Jobs by name..."
-      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={mutate} />}
     >
       {error ? (
         <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
@@ -27,7 +27,7 @@ function GlueJob({ job: glueJobName }: { job: string }) {
   return (
     <List.Item
       key={glueJobName}
-      icon={"aws-icons/glue.png"}
+      icon={{ source: "aws-icons/glue.png", mask: Image.Mask.RoundedRectangle }}
       title={glueJobName || ""}
       actions={
         <ActionPanel>
@@ -37,7 +37,6 @@ function GlueJob({ job: glueJobName }: { job: string }) {
           </ActionPanel.Section>
         </ActionPanel>
       }
-      accessories={[{ text: glueJobName || "" }]}
     />
   );
 }
