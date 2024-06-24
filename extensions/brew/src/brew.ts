@@ -277,7 +277,7 @@ export async function brewSearch(
         return (
           cask.token.toLowerCase().includes(target) ||
           cask.name.some((name) => name.toLowerCase().includes(target)) ||
-          cask.desc?.toLowerCase().includes(target) 
+          cask.desc?.toLowerCase().includes(target)
         );
       })
       .sort((lhs, rhs) => {
