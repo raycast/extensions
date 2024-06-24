@@ -23,6 +23,7 @@ Peace, dignity and equality on a healthy planet.
 | Command        | Lanuages                                                                             |
 | -------------- | ------------------------------------------------------------------------------------ |
 | UN Documents   | English                                                                              |
+| UN Photos      | English                                                                              |
 | UN Press       | English                                                                              |
 | UN News        | Arabic, Chinese, English, French, Russian, Spanish, Portuguese, Swahili, Hindi, Urdu |
 | UN Site Index  | Arabic, Chinese, English, French, Russian, Spanish                                   |
