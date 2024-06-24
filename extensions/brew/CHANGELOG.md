@@ -2,7 +2,7 @@
 
 ## [Improvements] - 2024-06-24
 
-- Improve search accuracy (now includes the cask names)
+- Search now includes cask names
 
 ## [Improvements] - 2024-06-24
 
