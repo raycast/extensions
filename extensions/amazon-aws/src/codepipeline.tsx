@@ -1,4 +1,9 @@
-import { PipelineExecutionStatus } from "@aws-sdk/client-codepipeline";
+import {
+  PipelineExecutionStatus,
+  PipelineExecutionSummary,
+  PipelineSummary,
+  StageState,
+} from "@aws-sdk/client-codepipeline";
 import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { resourceToConsoleLink } from "./util";
@@ -8,8 +13,18 @@ import { ToggleStageTransitionAction } from "./components/codepipeline/toggle-st
 import { RetryStageExecutionAction } from "./components/codepipeline/retry-stage-execution-action";
 import { StopExecutionAction } from "./components/codepipeline/stop-execution-action";
 
+export type PipelineStage = StageState & {
+  nextStage?: StageState;
+};
+
+export type Pipeline = PipelineSummary & {
+  pipelineKey: string;
+  executions: PipelineExecutionSummary[];
+  stages: PipelineStage[];
+};
+
 export default function CodePipeline() {
-  const { pipelines, error, isLoading, revalidate, pagination } = usePipelines();
+  const { pipelines, error, isLoading, mutate, pagination } = usePipelines();
 
   return (
     <List
@@ -17,7 +32,7 @@ export default function CodePipeline() {
       filtering
       pagination={pagination}
       searchBarPlaceholder="Filter pipelines by name, executionId..."
-      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={mutate} />}
     >
       {error && (
         <List.EmptyView
@@ -37,36 +52,23 @@ export default function CodePipeline() {
             pipeline.name || "",
             pipeline.pipelineType || "",
             pipeline.executionMode || "",
-            ...(pipeline.executions || []).map((e) => e.pipelineExecutionId || ""),
+            ...pipeline.executions.map((e) => e.pipelineExecutionId || ""),
           ]}
           icon={{ source: "aws-icons/cp.png", mask: Image.Mask.RoundedRectangle }}
           actions={
             <ActionPanel>
               <AwsAction.Console url={resourceToConsoleLink(pipeline.name, "AWS::CodePipeline::Pipeline")} />
               <ActionPanel.Section title={"Pipeline Actions"}>
-                <ToggleStageTransitionAction
-                  pipelineName={pipeline.name!}
-                  revalidatePipeline={revalidate}
-                  isLoading={isLoading}
-                  stages={pipeline.stages}
-                />
-                <RetryStageExecutionAction
-                  pipelineName={pipeline.name!}
-                  revalidatePipeline={revalidate}
-                  isLoading={isLoading}
-                  stages={pipeline.stages}
-                />
-                <StopExecutionAction
-                  pipelineName={pipeline.name!}
-                  revalidatePipeline={revalidate}
-                  executions={pipeline.executions}
-                  isLoading={isLoading}
-                />
+                <ToggleStageTransitionAction {...{ pipeline, mutate, isLoading }} />
+                <RetryStageExecutionAction {...{ pipeline, mutate, isLoading }} />
+                <StopExecutionAction {...{ pipeline, mutate, isLoading }} />
                 <Action.CopyToClipboard title="Copy Pipeline Name" content={pipeline.name || ""} />
-                <Action.CopyToClipboard
-                  title="Copy Latest Execution ID"
-                  content={pipeline.executions?.[0].pipelineExecutionId || ""}
-                />
+                {pipeline.executions.length > 0 && pipeline.executions[0].pipelineExecutionId && (
+                  <Action.CopyToClipboard
+                    title="Copy Latest Execution ID"
+                    content={pipeline.executions[0].pipelineExecutionId}
+                  />
+                )}
               </ActionPanel.Section>
             </ActionPanel>
           }
@@ -82,8 +84,8 @@ export default function CodePipeline() {
               tooltip: "Execution Mode",
             },
             { date: pipeline.updated, icon: Icon.Calendar, tooltip: "Last Updated" },
-            pipeline.executions?.[0].status
-              ? { icon: statusToIconMap[pipeline.executions?.[0].status], tooltip: pipeline.executions?.[0].status }
+            pipeline.executions.length > 0 && pipeline.executions[0].status
+              ? { icon: statusToIconMap[pipeline.executions[0].status], tooltip: pipeline.executions[0].status }
               : { icon: { source: Icon.CircleProgress, tintColor: Color.Blue }, tooltip: "NotStarted" },
           ]}
         />

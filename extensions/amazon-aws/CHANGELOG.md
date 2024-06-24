@@ -1,5 +1,10 @@
 # Amazon AWS Changelog
 
+## [Fixes] - 2024-06-24
+
+- Fixed [the issue](https://github.com/raycast/extensions/issues/13088) when codepipeline(s) are rendered with no executions.
+- Adds mutate optimization for toggling stage transition.
+
 ## [Console command] - 2024-06-19
 
 - [Frecency sorting](https://developers.raycast.com/utilities/react-hooks/usefrecencysorting) so that most/recent used service console links appear at the top of search
