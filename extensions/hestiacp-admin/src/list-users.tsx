@@ -34,7 +34,7 @@ export default function ListUsers() {
         </ActionPanel>} />)}</List.Section>}
         {!isLoading && <List.Section title="Actions">
             <List.Item title="Add User" icon={Icon.AddPerson} actions={<ActionPanel>
-                <Action.Push title="Add User" icon={Icon.AddPerson} target={<AddUser onUserAdded={revalidate} />} />
+                <Action.Push title="Add User" icon={Icon.AddPerson} target={<AddUser onUserAdded={() => revalidate?.()} />} />
             </ActionPanel>} />
         </List.Section>}
     </List>
@@ -79,7 +79,7 @@ export function ViewUserLogs({ user }: ViewUserLogsProps) {
     </List.Dropdown>}>
         <List.Section title={filteredLogs && logs && `${Object.keys(filteredLogs).length} of ${Object.keys(logs).length} lines`}>
             {filteredLogs && Object.entries(filteredLogs)
-            .sort(([keyA], [keyB]) => keyB - keyA) // we reverse so latest log is at top
+            .sort(([keyA], [keyB]) => Number(keyB) - Number(keyA)) // we reverse so latest log is at top
             .map(([line, data]) => <List.Item key={line} title={line} detail={<ListItemDetailComponent data={data} />} accessories={[
                 { date: new Date(data.DATE) },
                 { tag: data.CATEGORY }
@@ -99,7 +99,7 @@ export function ViewUserAuthLog({ user }: ViewUserAuthLogProps) {
 
     return <List navigationTitle="View User Auth Log" isLoading={isLoading} isShowingDetail>
         {authLog && Object.entries(authLog)
-        .sort(([keyA], [keyB]) => keyB - keyA) // we reverse so latest log is at top
+        .sort(([keyA], [keyB]) => Number(keyB) - Number(keyA)) // we reverse so latest log is at top
         .map(([line, data]) => <List.Item key={line} title={line} detail={<List.Item.Detail markdown={data.USER_AGENT} metadata={<List.Item.Detail.Metadata>
             {Object.entries(data).map(([key, val]) => {
                 if (val==="success") return <List.Item.Detail.Metadata.TagList key={key} title={key}>

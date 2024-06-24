@@ -1,32 +1,22 @@
 import { Action, ActionPanel, Alert, Color, Detail, Form, Icon, List, confirmAlert, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { FormValidation, getFavicon, useForm } from "@raycast/utils";
-import { addWebDomain, deleteWebDomain, getUserIPs, getWebDomainAccesslog, getWebDomainErrorlog, getWebDomainSSL, getWebDomains, suspendWebDomain, suspendWebDomains, unsuspendWebDomain, unsuspendWebDomains } from "../api";
+import { addWebDomain, deleteWebDomain, getUserIPs, getWebDomainAccesslog, getWebDomainErrorlog, getWebDomainSSL, getWebDomains, suspendWebDomain, suspendWebDomains, unsuspendWebDomain, unsuspendWebDomains } from "../utils/hestia";
 import { AddWebDomainFormValues, ListWebDomainAccesslogResponse, ListWebDomainErrorlogResponse, ListWebDomainSSLResponse, ListWebDomainsResponse } from "../types/web-domains";
 import ListItemDetailComponent from "./ListItemDetailComponent";
 import { ListUserIPsResponse } from "../types";
+import useHestia from "../utils/hooks/useHestia";
 
 type ListWebDomainsComponentProps = {
     user: string;
 }
 export default function ListWebDomainsComponent({ user }: ListWebDomainsComponentProps) {
-    const [isLoading, setIsLoading] = useState(true);
-    const [domains, setDomains] = useState<ListWebDomainsResponse>();
+    const { isLoading: isFetching, data: domains } = getWebDomains(user);
+    
+    const { isLoading: isSuspending } = useHestia<Record<string, never>>("v-suspend-web-domain", "Suspending Web Domain", { body: [user] })
+    
 
-    const getFromApi = async () => {
-        const response = await getWebDomains(user);
-        if (!("error" in response)) {
-            await showToast({
-                title: "SUCCESS",
-                message: `Fetched ${Object.keys(response).length} web domains`
-            })
-            setDomains(response)
-        };
-        setIsLoading(false);
-    }
-    useEffect(() => {
-        getFromApi();
-    }, []);
+    const isLoading = isFetching;
 
     async function suspendDomain(domain: string) {
         setIsLoading(true);

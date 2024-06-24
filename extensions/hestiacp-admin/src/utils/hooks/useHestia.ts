@@ -9,7 +9,8 @@ export default function useHestia<T>(cmd: string, animatedToastMessage = "", opt
     const API_URL = new URL('api/', HOSTNAME);
     const API_METHOD = "POST";
 
-    const body = options?.body || undefined;
+    const { body = undefined, execute = true } = options || {};
+    
     // we need to pass args like { arg1: first, arg2: second }
     const args = body?.reduce((acc, cur, index) => {
       acc[`arg${index + 1}`] = cur;
@@ -19,7 +20,6 @@ export default function useHestia<T>(cmd: string, animatedToastMessage = "", opt
     if (body) args[`arg${body.length+1}`] = "json";
     else args["arg1"] = "json";
 
-    const { execute = true } = options || {};
     const { data, isLoading, revalidate, error } = useFetch(API_URL.toString(), {
         method: API_METHOD,
         body: JSON.stringify({
