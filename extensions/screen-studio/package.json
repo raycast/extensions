@@ -80,19 +80,19 @@
     },
     {
       "name": "export-to-file",
-      "title": "Export recording to file",
+      "title": "Export Recording To File",
       "description": "Use deafult settings to export recording to file",
       "mode": "no-view"
     },
     {
       "name": "export-to-clipboard",
-      "title": "Export recording to clipboard",
+      "title": "Export Recording To Clipboard",
       "description": "Use deafult settings to export recording to clipboard",
       "mode": "no-view"
     },
     {
       "name": "copy-project",
-      "title": "Copy project to clipboard",
+      "title": "Copy Project To Clipboard",
       "description": "The project will be compressed into ZIP format and copied to the clipboard.",
       "mode": "no-view"
     }
