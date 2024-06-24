@@ -3,7 +3,7 @@ import { useState } from "react";
 import useInterval from "use-interval";
 
 const FRAMES_COUNT = 16;
-const FRAME_DELAY = 1000; // 1 секунда задержки
+const FRAME_DELAY = 1000; 
 
 export default function Command() {
   const [frameIndex, setFrameIndex] = useState(0);
@@ -15,8 +15,7 @@ export default function Command() {
   const frame = getFrame(frameIndex);
 
   const text = `
-Starting square breathing 🪷\n
-Such cycles should be repeated for 1-3 minutes, but preferably 4-5 minutes. This technique is designed to help you relax after a long day, or before/after a challenging task or conversation.
+🪷 Square breathing cycles should be repeated for 1-3 minutes, but preferably 4-5 minutes, to help you relax after a long day or before/after a challenging task or conversation.
 `;
 
   return <Detail markdown={`\`\`\`\n${frame}\n\`\`\`\n${text}`} />;
