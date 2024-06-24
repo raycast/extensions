@@ -66,6 +66,15 @@ export default function Command() {
     startShortening();
   }, []);
 
+  const getIcon = (item: Result) => {
+    if (item.status === "shortened") {
+      return Icon.CheckCircle;
+    } else if (item.status === "error") {
+      return Icon.Info;
+    }
+    return Icon.Link;
+  };
+
   return (
     <List isLoading={isLoading}>
       <List.Section title="URLs">
@@ -79,14 +88,14 @@ export default function Command() {
                 />
               </ActionPanel>
             }
-            icon={Icon.Link}
+            icon={getIcon(item)}
             key={index}
             subtitle={item.status === "shortened" ? item.url : item.errorMessage}
             title={item.status === "shortened" ? item.shortened : item.url}
           />
         ))}
       </List.Section>
-      <List.EmptyView icon={Icon.Clipboard} title="Your clipboard does not contain a URL." />
+      {!isLoading && <List.EmptyView icon={Icon.Clipboard} title="Your clipboard does not contain a URL." />}
     </List>
   );
 }
