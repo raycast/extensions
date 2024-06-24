@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ensureCLI } from "./cli";
 import { SpeedtestResultDefaultValue, runSpeedTest } from "./speedtest";
-import { SpeedtestResult, ResultProgress } from "./speedtest.types";
+import { ResultProgress, SpeedtestResult } from "./speedtest.types";
 
 export function useSpeedtest(): {
   result: SpeedtestResult;
@@ -67,8 +67,9 @@ export function useSpeedtest(): {
   return { result, error, isLoading, resultProgress, revalidate };
 }
 
-export const useDetailedView = (): [boolean, () => void] => {
+export const useDetailedView = (): [boolean, () => void, () => void] => {
   const [isDetailedViewEnabled, setIsDetailedViewEnabled] = useState(false);
-  const toggleIsDetailedViewEnabled = () => setIsDetailedViewEnabled((s) => !s);
-  return [isDetailedViewEnabled, toggleIsDetailedViewEnabled];
+  const showDetails = () => setIsDetailedViewEnabled(true);
+  const hideDetails = () => setIsDetailedViewEnabled(false);
+  return [isDetailedViewEnabled, showDetails, hideDetails];
 };
