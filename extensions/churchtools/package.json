@@ -26,7 +26,7 @@
       "name": "instanceUrl",
       "type": "textfield",
       "required": true,
-      "placeholder": "https://test.church.tools"
+      "placeholder": "test.church.tools"
     },
     {
       "title": "Login Token",
