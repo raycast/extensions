@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Image } from "@raycast/api";
+import { ActionPanel, Action, List, Image, Icon } from "@raycast/api";
 import { useState } from "react";
 import { useSearch } from "./hooks/useSearch";
 import { DomainObjectType } from "./schemas/DomainObjectSchema";
@@ -48,12 +48,36 @@ function DomainObjectListItem({ domainObject }: { domainObject: DomainObjectType
       } else {
         icon = getAvatarIcon(domainObject.title);
       }
+      break;
+    case "wiki_page":
+      icon = Icon.Book;
+      break;
+    case "song":
+      icon = Icon.Music;
+      break;
+  }
+
+  let subtitle = "";
+
+  switch (domainObject.domainType) {
+    case "person":
+      subtitle = "Person";
+      break;
+    case "group":
+      subtitle = "Group";
+      break;
+    case "wiki_page":
+      subtitle = "Wiki Page";
+      break;
+    case "song":
+      subtitle = "Song";
+      break;
   }
 
   return (
     <List.Item
       title={domainObject.title}
-      subtitle={domainObject.infos.join(", ")}
+      subtitle={subtitle}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

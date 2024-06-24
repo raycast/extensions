@@ -6,7 +6,7 @@ const domainTypesToSearch = ["person", "group", "wiki_page", "song"].map((t) => 
 
 export const useSearch = (query: string) => {
   const { data, isLoading } = useCTFetch(`/search?query=${query}&${domainTypesToSearch}`, {
-    execute: query.length > 3,
+    execute: query !== "",
   });
 
   const domainObjects = z.array(DomainObjectSchema).safeParse(data)?.data ?? [];
