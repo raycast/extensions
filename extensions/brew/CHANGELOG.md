@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Improvements] - 2024-06-21
+## [Improvements] - {PR_MERGE_DATE}
 
 - Move formula and cask info to the metadata panel
 - Dependencies are displayed green if installed
