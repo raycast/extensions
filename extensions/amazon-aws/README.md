@@ -6,5 +6,5 @@
 - Easily switch between account profiles (supports aws-vault and aws-sso)
 - Zero configuration required
 - Quick access to all services in the AWS Console
-- Quick drill-down to ECS Services, ECS Service Tasks, ECS Task Definitions, ECS Task Containers and ECS Task Containers Logs
+- Quick drill-down to ECS Services, ECS Service Tasks, ECS Task Definitions, ECS Task Containers, ECS Task Containers Logs and Glue Jobs
 - Quick access to Lambda Logs
