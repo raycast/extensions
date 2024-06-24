@@ -1,16 +1,16 @@
-import { Icon } from "@raycast/api";
+import { Color, Icon } from "@raycast/api";
 import { SpeedTestResultPrettyNames } from "./speedtest.types";
 
-export type ResultViewIconsListKeys = "result" | "ping" | "download" | "upload" | "interface" | "server";
-export type HeaderIcon = { [K in ResultViewIconsListKeys]: { source: Icon } };
+export type ResultViewIconsListKeys = "interface" | "server" | "ping" | "download" | "upload" | "result";
+export type HeaderIcon = { [K in ResultViewIconsListKeys]: { source: Icon; tintColor: Color } };
 
 export const icons: HeaderIcon = {
-  download: { source: Icon.Download },
-  upload: { source: Icon.Upload },
-  interface: { source: Icon.Globe },
-  server: { source: Icon.HardDrive },
-  ping: { source: Icon.StackedBars2 },
-  result: { source: Icon.Link },
+  interface: { source: Icon.Globe, tintColor: Color.Blue },
+  server: { source: Icon.HardDrive, tintColor: Color.Blue },
+  ping: { source: Icon.StackedBars2, tintColor: Color.Blue },
+  download: { source: Icon.Download, tintColor: Color.Blue },
+  upload: { source: Icon.Upload, tintColor: Color.Blue },
+  result: { source: Icon.Link, tintColor: Color.Blue },
 };
 
 export const speedTestResultPrettyNames: SpeedTestResultPrettyNames = {
@@ -19,10 +19,10 @@ export const speedTestResultPrettyNames: SpeedTestResultPrettyNames = {
   bandwidth: "Bandwidth",
   bytes: "Bytes",
   elapsed: "Elapsed",
-  high: "High",
+  high: "High Latency",
   iqm: "IQM",
   jitter: "Jitter",
-  low: "Low",
+  low: "Low Latency",
   latency: "Latency",
   internalIp: "Internal IP",
   name: "Name",

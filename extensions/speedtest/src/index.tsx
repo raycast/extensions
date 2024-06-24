@@ -1,4 +1,4 @@
-import { Icon, List, Toast, showToast } from "@raycast/api";
+import { Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { ListBandwidthItem } from "./components/bandwidth/component";
 import { ActivitySpeedQualityBandwidth } from "./components/bandwidth/thresholds";
 import { ISPListItem } from "./components/isp";
@@ -25,8 +25,8 @@ export default function SpeedtestList() {
   const title = isLoading ? "Speedtest running" : "";
   const summaryAction = <CopySummaryAction result={result} />;
   const restartAction = <RestartAction isLoading={isLoading} revalidate={revalidate} />;
-  const showDetailsAction = () => <ShowDetailsAction showDetails={showDetailedView} />;
-  const hideDetailsAction = () => <HideDetailsAction hideDetails={hideDetailedView} />;
+  const showDetailsAction = <ShowDetailsAction showDetails={showDetailedView} />;
+  const hideDetailsAction = <HideDetailsAction hideDetails={hideDetailedView} />;
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder={title} isShowingDetail={isDetailedViewEnabled}>
@@ -42,8 +42,8 @@ export default function SpeedtestList() {
               isLoading={isLoading}
               restart={restartAction}
               isDetailedViewEnabled={isDetailedViewEnabled}
-              showViewAction={showDetailsAction()}
-              hideViewAction={hideDetailsAction()}
+              showViewAction={showDetailsAction}
+              hideViewAction={hideDetailsAction}
             />
           </ISPListItem>
 
@@ -55,8 +55,8 @@ export default function SpeedtestList() {
               isLoading={isLoading}
               restart={restartAction}
               isDetailedViewEnabled={isDetailedViewEnabled}
-              showViewAction={showDetailsAction()}
-              hideViewAction={hideDetailsAction()}
+              showViewAction={showDetailsAction}
+              hideViewAction={hideDetailsAction}
             />
           </ServerListItem>
 
@@ -68,8 +68,8 @@ export default function SpeedtestList() {
               isLoading={isLoading}
               restart={restartAction}
               isDetailedViewEnabled={isDetailedViewEnabled}
-              showViewAction={showDetailsAction()}
-              hideViewAction={hideDetailsAction()}
+              showViewAction={showDetailsAction}
+              hideViewAction={hideDetailsAction}
             />
           </PingListItem>
 
@@ -86,8 +86,8 @@ export default function SpeedtestList() {
               isLoading={isLoading}
               restart={restartAction}
               isDetailedViewEnabled={isDetailedViewEnabled}
-              showViewAction={showDetailsAction()}
-              hideViewAction={hideDetailsAction()}
+              showViewAction={showDetailsAction}
+              hideViewAction={hideDetailsAction}
             />
           </SpeedListItem>
 
@@ -104,8 +104,8 @@ export default function SpeedtestList() {
               isLoading={isLoading}
               restart={restartAction}
               isDetailedViewEnabled={isDetailedViewEnabled}
-              showViewAction={showDetailsAction()}
-              hideViewAction={hideDetailsAction()}
+              showViewAction={showDetailsAction}
+              hideViewAction={hideDetailsAction}
             />
           </SpeedListItem>
 
@@ -113,22 +113,60 @@ export default function SpeedtestList() {
             speed={{ download: result.download, upload: result.upload }}
             activity={ActivitySpeedQualityBandwidth.voiceCall}
             title="Voice Call"
-            icon={Icon.Phone}
+            icon={{ source: Icon.Phone, tintColor: Color.Blue }}
             isLoading={isLoading}
+            actions={
+              <ListItemActions
+                url={result.result.url}
+                sectionClipboard={{ ...result, download: result.download, upload: result.upload }}
+                summary={summaryAction}
+                isLoading={isLoading}
+                restart={restartAction}
+                isDetailedViewEnabled={isDetailedViewEnabled}
+                showViewAction={showDetailsAction}
+                hideViewAction={hideDetailsAction}
+              />
+            }
           />
+
           <ListBandwidthItem
             speed={{ download: result.download, upload: result.upload }}
             activity={ActivitySpeedQualityBandwidth.videoCall}
             title="Video Call"
-            icon={Icon.Video}
+            icon={{ source: Icon.Video, tintColor: Color.Blue }}
             isLoading={isLoading}
+            actions={
+              <ListItemActions
+                url={result.result.url}
+                sectionClipboard={{ ...result, download: result.download, upload: result.upload }}
+                summary={summaryAction}
+                isLoading={isLoading}
+                restart={restartAction}
+                isDetailedViewEnabled={isDetailedViewEnabled}
+                showViewAction={showDetailsAction}
+                hideViewAction={hideDetailsAction}
+              />
+            }
           />
+
           <ListBandwidthItem
             speed={{ download: result.download, upload: result.upload }}
             activity={ActivitySpeedQualityBandwidth.stream}
             title="Streaming"
-            icon={Icon.Livestream}
+            icon={{ source: Icon.Livestream, tintColor: Color.Blue }}
             isLoading={isLoading}
+            actions={
+              <ListItemActions
+                url={result.result.url}
+                sectionClipboard={{ ...result, download: result.download, upload: result.upload }}
+                summary={summaryAction}
+                isLoading={isLoading}
+                restart={restartAction}
+                isDetailedViewEnabled={isDetailedViewEnabled}
+                showViewAction={showDetailsAction}
+                hideViewAction={hideDetailsAction}
+              />
+            }
           />
 
           <ResultListItem speedtestResult={result} isLoading={isLoading}>
@@ -139,8 +177,8 @@ export default function SpeedtestList() {
               isLoading={isLoading}
               restart={restartAction}
               isDetailedViewEnabled={isDetailedViewEnabled}
-              showViewAction={showDetailsAction()}
-              hideViewAction={hideDetailsAction()}
+              showViewAction={showDetailsAction}
+              hideViewAction={hideDetailsAction}
             />
           </ResultListItem>
         </List.Section>

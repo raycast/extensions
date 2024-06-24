@@ -1,4 +1,4 @@
-import { Icon, List } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { icons } from "../lib/speedtest-pretty-names";
 import {
   SpeedtestResult,
@@ -19,22 +19,24 @@ type ListItemMetadataProps = {
 type FlatMetadata = {
   title: string;
   value: string;
-  icon?: { source: Icon };
+  icon?: { source: Icon; tintColor: Color };
   isSeparator?: boolean;
 };
 
 const getFlatMetadata = (data: MetadataValue): FlatMetadata[] => {
   const items: FlatMetadata[] = [];
 
-  Object.entries(data).forEach((keyValuePair) => {
+  Object.entries(data).forEach((keyValuePair, index) => {
     const [key, value] = keyValuePair as [SpeedtestResultKeys, SpeedtestResultValueType];
     if (isObject(value)) {
-      const separatorItem: FlatMetadata = {
-        isSeparator: true,
-        title: "",
-        value: "",
-      };
-      items.push(separatorItem);
+      if (index > 0) {
+        const separatorItem: FlatMetadata = {
+          isSeparator: true,
+          title: "",
+          value: "",
+        };
+        items.push(separatorItem);
+      }
 
       const titleItem: FlatMetadata = { title: getPrettyName(key), value: "" };
       if (isResultViewIconsListKey(key)) {
