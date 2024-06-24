@@ -18,7 +18,7 @@ export function uniqueArray(items?: string[]): string[] {
 export async function shortenURL(url: string) {
   const preferences = getPreferenceValues();
   const headers = new Headers({
-    "Content-Type": "application/json",
+    Accept: "application/json",
   });
   if (preferences.accessToken) {
     headers.append("Authorization", `Bearer ${preferences.accessToken}`);
