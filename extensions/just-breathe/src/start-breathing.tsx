@@ -3,7 +3,7 @@ import { useState } from "react";
 import useInterval from "use-interval";
 
 const FRAMES_COUNT = 16;
-const FRAME_DELAY = 1000; 
+const FRAME_DELAY = 1000;
 
 export default function Command() {
   const [frameIndex, setFrameIndex] = useState(0);
