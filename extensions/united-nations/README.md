@@ -2,7 +2,6 @@
 
 Peace, dignity and equality on a healthy planet.
 
-[![united-nations-badge]][united-nations-link]
 [![raycast-cross-extension-badge]][raycast-cross-extension-link]
 [![raycast-pro-enhanced-badge]][raycast-pro-enhanced-link]
 
@@ -41,8 +40,12 @@ See [CONTRIBUTING.md](https://github.com/raycast/extensions/blob/main/extensions
 
 MIT
 
-[united-nations-badge]: https://img.shields.io/badge/United%20Nations-009EDB?logo=unitednations&logoColor=fff&style=flat-square
-[united-nations-link]: https://www.un.org
+The MIT license grant is not for United Nations' resources, which inculde databases, treaty collection, web links, emblem, maps, multimedias.
+United Nations reserves all copyright rights in and to all United Nations trademarks.
+
+- [Terms and conditions of use of United Nations websites](https://www.un.org/en/about-us/terms-of-use)
+- [UN Photo Usage Guidelines](https://media.un.org/photo/en/guidelines)
+
 [raycast-cross-extension-badge]: https://shields.io/badge/Raycast-Cross--Extension-eee?labelColor=FF6363&logo=raycast&logoColor=fff&style=flat-square
 [raycast-cross-extension-link]: https://github.com/LitoMore/raycast-cross-extension-conventions
 [raycast-pro-enhanced-badge]: https://shields.io/badge/Raycast-Pro_Enhanced-eee?labelColor=FF6363&logo=raycast&logoColor=fff&style=flat-square
