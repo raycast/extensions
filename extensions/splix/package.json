@@ -19,7 +19,7 @@
       "mode": "view"
     },
     {
-      "name": "new-note",
+      "name": "add-note",
       "title": "New Note",
       "subtitle": "Splix",
       "description": "Opens a new note in Splix",
