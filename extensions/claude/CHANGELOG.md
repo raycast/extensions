@@ -1,5 +1,9 @@
 # Claude Changelog
 
+## [Update] - 2024-06-24
+
+- Feature: Added Sonnet 3.5 model
+
 ## [Update] - 2024-06-19
 
 - Fix: Set default values for max tokens when undefined to avoid migration issues
