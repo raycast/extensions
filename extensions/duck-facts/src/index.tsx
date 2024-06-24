@@ -14,7 +14,7 @@ export default function Command() {
 
   const model_settings = {
     model: AI.Model["OpenAI_GPT3.5-turbo"],
-    creativity: "medium" as const,
+    creativity: "high" as const,
   };
 
   const fetchData = async () => {
