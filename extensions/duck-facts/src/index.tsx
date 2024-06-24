@@ -43,7 +43,7 @@ export default function Command() {
 
   return (
     <Detail
-      markdown={isLoading ? "Loading..." : answer || "No suggestions generated"}
+      markdown={isLoading ? "Generating..." : answer || "No suggestions generated"}
       actions={
         <ActionPanel>
           <Action title="Regenerate Suggestions" onAction={fetchData} />
