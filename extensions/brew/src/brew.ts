@@ -274,7 +274,11 @@ export async function brewSearch(
 
     casks = casks
       ?.filter((cask) => {
-        return cask.token.toLowerCase().includes(target) || cask.desc?.toLowerCase().includes(target);
+        return (
+          cask.token.toLowerCase().includes(target) ||
+          cask.name.some((name) => name.toLowerCase().includes(target)) ||
+          cask.desc?.toLowerCase().includes(target)
+        );
       })
       .sort((lhs, rhs) => {
         return brewCompare(lhs.token, rhs.token, target);
