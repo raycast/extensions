@@ -1,11 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  showToast,
-  Toast,
-  Icon
-} from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { readdir, readFile } from "fs/promises";
 import { join } from "path";
@@ -24,7 +17,7 @@ const HERD_CONFIG_PATH = join(homedir(), "Library", "Application Support", "Herd
 
 async function getHerdConfig(): Promise<HerdConfig> {
   try {
-    const configData = await readFile(HERD_CONFIG_PATH, 'utf8');
+    const configData = await readFile(HERD_CONFIG_PATH, "utf8");
     const config = JSON.parse(configData);
     if (Array.isArray(config.paths)) {
       return { paths: config.paths };
@@ -41,8 +34,8 @@ async function getSites(paths: string[]): Promise<Site[]> {
     try {
       const files = await readdir(path, { withFileTypes: true });
       return files
-        .filter(file => file.isDirectory())
-        .map(dir => ({
+        .filter((file) => file.isDirectory())
+        .map((dir) => ({
           name: dir.name,
           path: join(path, dir.name),
         }));
@@ -96,13 +89,8 @@ export default function Command() {
                 target={site.path}
                 application="/Applications/Visual Studio Code.app"
               />
-              <Action.OpenInBrowser
-                title="Open in Browser"
-                url={`http://${site.name}.test`}
-              />
-              <Action.ShowInFinder
-                path={site.path}
-              />
+              <Action.OpenInBrowser title="Open in Browser" url={`http://${site.name}.test`} />
+              <Action.ShowInFinder path={site.path} />
             </ActionPanel>
           }
         />
