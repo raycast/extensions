@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { spawn } from "child_process";
 import { NetworkSpeed } from "../types/type";
 import { extractSpeedLoadingInfo, getNetSpeed } from "../utils/common-util";
+import { Cache } from "@raycast/api";
+import { CacheKey } from "../utils/constants";
 
 export const checkNetworkSpeed = (testSequentially = false) => {
   const [timeCost, setTimeCost] = useState<string>("");
@@ -11,6 +13,12 @@ export const checkNetworkSpeed = (testSequentially = false) => {
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
+    const cache = new Cache();
+    const cacheStr = cache.get(CacheKey.TIME_COST);
+    if (cacheStr && parseInt(cacheStr) > 20) {
+      setNetworkSpeedLoading(`Takes about ${cacheStr} seconds`);
+    }
+
     const args = testSequentially ? "-s" : "";
     const startTimestamp = Date.now();
     const result = spawn("networkQuality", [args], { shell: true });
@@ -19,9 +27,7 @@ export const checkNetworkSpeed = (testSequentially = false) => {
       const dataString = String(data);
       const testTime = (Date.now() - startTimestamp) / 1000;
       setTimeCost(testTime.toFixed(0));
-      console.log(startTimestamp);
-      console.log(testTime);
-      console.log(testTime.toFixed(0));
+      cache.set(CacheKey.TIME_COST, testTime.toFixed(0));
       if (dataString.includes("SUMMARY")) {
         // Done, get final speed results
         setNetworkSpeed(getNetSpeed(testSequentially, dataString));
