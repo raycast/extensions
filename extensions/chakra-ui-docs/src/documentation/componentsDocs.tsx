@@ -1,5 +1,5 @@
 export default {
-  Layout: [
+  "Layout": [
     {
       url: "https://chakra-ui.com/docs/components/aspect-ratio",
       title: "Aspect Ratio",
@@ -26,7 +26,7 @@ export default {
     },
     {
       url: "https://chakra-ui.com/docs/components/simple-grid",
-      title: "Simple Grid",
+      title: "SimpleGrid",
     },
     {
       url: "https://chakra-ui.com/docs/components/stack",
@@ -37,7 +37,7 @@ export default {
       title: "Wrap",
     },
   ],
-  Forms: [
+  "Forms": [
     {
       url: "https://chakra-ui.com/docs/components/button",
       title: "Button",
@@ -52,7 +52,7 @@ export default {
     },
     {
       url: "https://chakra-ui.com/docs/components/form-control",
-      title: "From Control",
+      title: "Form Control",
     },
     {
       url: "https://chakra-ui.com/docs/components/icon-button",
@@ -101,8 +101,16 @@ export default {
       title: "Badge",
     },
     {
+      url: "https://chakra-ui.com/docs/components/card",
+      title: "Card",
+    },
+    {
       url: "https://chakra-ui.com/docs/components/code",
       title: "Code",
+    },
+    {
+      url: "https://chakra-ui.com/docs/components/divider",
+      title: "Divider",
     },
     {
       url: "https://chakra-ui.com/docs/components/kbd",
@@ -125,7 +133,7 @@ export default {
       title: "Tag",
     },
   ],
-  Feedback: [
+  "Feedback": [
     {
       url: "https://chakra-ui.com/docs/components/alert",
       title: "Alert",
@@ -151,7 +159,7 @@ export default {
       title: "Toast",
     },
   ],
-  Typography: [
+  "Typography": [
     {
       url: "https://chakra-ui.com/docs/components/text",
       title: "Text",
@@ -165,7 +173,7 @@ export default {
       title: "Highlight",
     },
   ],
-  Overlay: [
+  "Overlay": [
     {
       url: "https://chakra-ui.com/docs/components/alert-dialog",
       title: "Alert Dialog",
@@ -173,6 +181,10 @@ export default {
     {
       url: "https://chakra-ui.com/docs/components/drawer",
       title: "Drawer",
+    },
+    {
+      url: "https://chakra-ui.com/docs/components/menu",
+      title: "Menu",
     },
     {
       url: "https://chakra-ui.com/docs/components/modal",
@@ -187,7 +199,7 @@ export default {
       title: "Tooltip",
     },
   ],
-  Disclosure: [
+  "Disclosure": [
     {
       url: "https://chakra-ui.com/docs/components/accordion",
       title: "Accordion",
@@ -201,7 +213,7 @@ export default {
       title: "Visually Hidden",
     },
   ],
-  Navigation: [
+  "Navigation": [
     {
       url: "https://chakra-ui.com/docs/components/breadcrumb",
       title: "Breadcrumb",
@@ -212,14 +224,18 @@ export default {
     },
     {
       url: "https://chakra-ui.com/docs/components/link-overlay",
-      title: "Link Overlay",
+      title: "LinkOverlay",
     },
     {
       url: "https://chakra-ui.com/docs/components/skip-nav",
       title: "SkipNav",
     },
+    {
+      url: "https://chakra-ui.com/docs/components/stepper",
+      title: "StepperNew",
+    },
   ],
-  "Media And Icons": [
+  "Media and icons": [
     {
       url: "https://chakra-ui.com/docs/components/avatar",
       title: "Avatar",
@@ -233,7 +249,7 @@ export default {
       title: "Image",
     },
   ],
-  Other: [
+  "Other": [
     {
       url: "https://chakra-ui.com/docs/components/close-button",
       title: "Close Button",
