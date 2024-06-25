@@ -15,8 +15,9 @@ export const callApi = async <T>(config: AxiosRequestConfig) => {
   return await axios({ ...config, headers })
     .then(({ data }) => data as T)
     .catch(({ response }) => {
-      captureException(new Error(JSON.stringify(response.data.error)));
-      throw new Error(response.data.error.message);
+      const err = new Error(response?.data?.error?.message ?? "Unknown error");
+      captureException(err);
+      throw err;
     });
 };
 
