@@ -11,10 +11,24 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "convert",
       "title": "Convert Bech32 Address",
       "description": "Convert Bech32 address",
-      "mode": "view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "address",
+          "placeholder": "Bech32 address",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "prefix",
+          "placeholder": "Desired prefix",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
