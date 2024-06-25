@@ -10,6 +10,7 @@ export const linear = OAuthService.linear({
       accessToken: token,
       headers: {
         "public-file-urls-expire-in": "60",
+        "linear-raycast-extension": "true",
       },
     });
   },
