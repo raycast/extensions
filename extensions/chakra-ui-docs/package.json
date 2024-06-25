@@ -65,6 +65,7 @@
     "cheerio": "^1.0.0-rc.12",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.2",
     "react-devtools": "^5.2.0",
     "typescript": "^5.5.2"
   },
