@@ -47,7 +47,7 @@ export default function Command() {
   };
 
   return (
-    <Grid columns={8} filtering={false}>
+    <Grid columns={8}>
       {game.board.map((row, i) => {
         return row.map((item, j) => {
           const type = item.state;
