@@ -1,12 +1,12 @@
 import { showHUD, updateCommandMetadata } from "@raycast/api";
-import { stickiesWindowsCount } from "./applescript-utils";
+import { getStickiesNotesCount } from "./stickies-utils";
 
 export const showStickiesNotRunningHUD = async () => {
   await showHUD("📝 Stickies is not running");
 };
 
 export const updateStickiesWindowsCount = async () => {
-  const windowCount = await stickiesWindowsCount();
+  const windowCount = await getStickiesNotesCount();
   const subtitle = windowCount === 0 ? "Stickies" : `${windowCount} Stickies`;
   await updateCommandMetadata({ subtitle: subtitle });
 };
