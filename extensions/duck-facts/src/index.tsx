@@ -8,7 +8,7 @@ export default function Command() {
 
   const prompt = `
   Generate a fact about ducks. Use internet wherever possible.
-  Do not say before or after the fact.
+  Do not say something before the fact.
   Do not say "Fact: " or "Here is a fact: " or anything like that. Just give me the fact.
   `;
 
