@@ -49,21 +49,7 @@ const scrapeComponents = async (): Promise<Section> => {
 };
 
 const generateFile = (sections: Section): void => {
-  let content = "export default {\n";
-
-  for (const [section, components] of Object.entries(sections)) {
-    content += `  "${section}": [\n`;
-    for (const component of components) {
-      content += `    {\n`;
-      content += `      url: "${component.url}",\n`;
-      content += `      title: "${component.title}",\n`;
-      content += `    },\n`;
-    }
-    content += `  ],\n`;
-  }
-
-  content += "};\n";
-
+  const content = `export default ${JSON.stringify(sections, null, 2)};`;
   fs.writeFileSync("./src/documentation/componentsDocs.tsx", content);
 };
 

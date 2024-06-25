@@ -73,6 +73,6 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
-    "doc:update-component": "npx tsx utils/updateComponentsDoc.ts"
+    "doc:update-component": "npx tsx utils/updateComponentsDoc.ts && ray lint --fix"
   }
 }

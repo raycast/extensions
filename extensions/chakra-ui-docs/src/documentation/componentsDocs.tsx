@@ -1,5 +1,5 @@
 export default {
-  "Layout": [
+  Layout: [
     {
       url: "https://chakra-ui.com/docs/components/aspect-ratio",
       title: "Aspect Ratio",
@@ -37,7 +37,7 @@ export default {
       title: "Wrap",
     },
   ],
-  "Forms": [
+  Forms: [
     {
       url: "https://chakra-ui.com/docs/components/button",
       title: "Button",
@@ -133,7 +133,7 @@ export default {
       title: "Tag",
     },
   ],
-  "Feedback": [
+  Feedback: [
     {
       url: "https://chakra-ui.com/docs/components/alert",
       title: "Alert",
@@ -159,7 +159,7 @@ export default {
       title: "Toast",
     },
   ],
-  "Typography": [
+  Typography: [
     {
       url: "https://chakra-ui.com/docs/components/text",
       title: "Text",
@@ -173,7 +173,7 @@ export default {
       title: "Highlight",
     },
   ],
-  "Overlay": [
+  Overlay: [
     {
       url: "https://chakra-ui.com/docs/components/alert-dialog",
       title: "Alert Dialog",
@@ -199,7 +199,7 @@ export default {
       title: "Tooltip",
     },
   ],
-  "Disclosure": [
+  Disclosure: [
     {
       url: "https://chakra-ui.com/docs/components/accordion",
       title: "Accordion",
@@ -213,7 +213,7 @@ export default {
       title: "Visually Hidden",
     },
   ],
-  "Navigation": [
+  Navigation: [
     {
       url: "https://chakra-ui.com/docs/components/breadcrumb",
       title: "Breadcrumb",
@@ -249,7 +249,7 @@ export default {
       title: "Image",
     },
   ],
-  "Other": [
+  Other: [
     {
       url: "https://chakra-ui.com/docs/components/close-button",
       title: "Close Button",
