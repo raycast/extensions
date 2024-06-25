@@ -1,6 +1,6 @@
 import { open } from "@raycast/api";
 
-const SIZE: number = 8;
+export const SIZE: number = 8;
 const BOMB_COUNT: number = 8;
 const TOTAL_SQUARES = 64;
 
@@ -23,7 +23,6 @@ export default class Game {
   actual_board: Cell[][];
 
   constructor(board?: Cell[][], actual_board?: Cell[][]) {
-    // if board or actual board is provided use those, if not, use empty array
     this.board = board ? board : [];
     this.actual_board = actual_board ? actual_board : [];
   }
@@ -36,15 +35,18 @@ export default class Game {
     for (let i = 0; i < SIZE; i++) {
       this.board[i] = [];
       this.actual_board[i] = [];
+
       for (let j = 0; j < SIZE; j++) {
         const actual_cell: Cell = {
           state: CellState.Grey,
           revealed: false,
         };
+
         const player_cell: Cell = {
           state: CellState.Grey,
           revealed: false,
         };
+
         this.actual_board[i].push(actual_cell);
         this.board[i].push(player_cell);
       }
@@ -59,7 +61,7 @@ export default class Game {
       } while (this.actual_board[rand_row][rand_col].state === CellState.Bomb);
 
       this.actual_board[rand_row][rand_col].state = CellState.Bomb;
-      console.log("Placing mine at:", rand_row, rand_col);
+      console.log("placing mine at:", rand_row, rand_col);
     }
 
     return this;
@@ -121,8 +123,6 @@ export default class Game {
     console.log(actual_cell.state);
 
     if (actual_cell.state === CellState.Bomb) {
-      // you lose if it's a bomb
-      console.log("twas a bomb!!");
       return this.lose();
     }
 
