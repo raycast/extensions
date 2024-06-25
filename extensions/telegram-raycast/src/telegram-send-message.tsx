@@ -13,6 +13,7 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import { TelegramClient, Api } from "telegram";
 import { StringSession } from "telegram/sessions";
+import { useEffect } from "react";
 
 interface Contact {
   id: string;
@@ -23,14 +24,28 @@ interface Contact {
 }
 
 export default function Command() {
-  const { data: contacts, isLoading } = useCachedPromise(async () => {
+  const { data: contacts } = useCachedPromise(async () => {
     const contacts = await LocalStorage.getItem<string>("contacts");
     return contacts ? JSON.parse(contacts) : [];
   });
 
+  useEffect(() => {
+    async function checkLogin() {
+      const savedSession: string = (await LocalStorage.getItem("savedSession")) || "";
+      if (!savedSession) {
+        await launchCommand({
+          name: "telegram-login",
+          type: LaunchType.UserInitiated,
+          context: { message: "Log in to begin" },
+        });
+      }
+    }
+    checkLogin();
+  }, []);
+
   return (
     <Form
-      isLoading={isLoading}
+      isLoading={contacts === undefined}
       actions={
         <ActionPanel>
           <SendMessage />

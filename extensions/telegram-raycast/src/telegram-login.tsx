@@ -15,6 +15,8 @@ import { TelegramClient, Api } from "telegram";
 import { StringSession } from "telegram/sessions";
 import got from "got";
 
+const URL = "https://telray-proxy.up.railway.app";
+
 interface Contact {
   id: string;
   firstName: string;
@@ -69,7 +71,7 @@ function RequestPhoneCode({
     });
 
     try {
-      const { body } = await got.post("https://telray-proxy.up.railway.app/send-code", {
+      const { body } = await got.post(`${URL}/send-code`, {
         //@ts-expect-error refactoring this code according to types breaks it
         json: {
           phoneNumber: phoneNumber,
@@ -116,7 +118,7 @@ function SendPhoneCode() {
     });
 
     try {
-      const { body } = await got.post("https://telray-proxy.up.railway.app/start-client", {
+      const { body } = await got.post(`${URL}/start-client`, {
         // @ts-expect-error refactoring this code according to types breaks it
         json: {
           phoneNumber: await LocalStorage.getItem("phone"),
