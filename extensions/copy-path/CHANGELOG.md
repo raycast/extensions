@@ -1,6 +1,6 @@
 # Copy Path Changelog
 
-## [Support More Browsers] - {PR_MERGE_DATE}
+## [Support More Browsers] - 2024-06-25
 
 - Support Safari Web App and Firefox browser by using an alternative method
 
