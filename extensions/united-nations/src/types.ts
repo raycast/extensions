@@ -22,6 +22,14 @@ export type UnPress = {
   creator: string;
 };
 
+export type UnPhoto = {
+  thumbImage: string;
+  sourceImage: string;
+  pageUrl: string;
+  title: string;
+  datetime: string;
+};
+
 export enum LanguageCode {
   Arabic = "ar",
   Chinese = "zh",
@@ -77,3 +85,7 @@ export type Internationalization = {
   viewByTopic: string;
   newsType: Record<NewsAll | NewsRegion | NewsTopic, string>;
 };
+
+export type SiteIndexItem = { title: string; link: string };
+
+export type SiteIndex = Record<string, SiteIndexItem[]>;
