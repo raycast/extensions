@@ -3,6 +3,7 @@
   "name": "open-laravel-herd-site",
   "title": "Open Laravel Herd Site",
   "description": "Lists all your Laravel Herd sites and allows you to open them in Visual Studio Code, Finder or your browser.",
+  "categories": ["Development", "Productivity"],
   "icon": "icon.png",
   "author": "medienbaecker",
   "license": "MIT",
@@ -10,7 +11,7 @@
     {
       "name": "open-site",
       "title": "Open Laravel Herd Site",
-      "description": "",
+      "description": "Lists all your Laravel Herd sites and allows you to open them in Visual Studio Code, Finder or your browser.",
       "mode": "view"
     }
   ],
