@@ -1,6 +1,6 @@
 # Stickies Changelog
 
-## [Fix Bug] - {PR_MERGE_DATE}
+## [Fix Bug] - 2024-06-25
 
 - Fix the problem that Toggle Stickies Window occasionally creates a new window.
 
