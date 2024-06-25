@@ -31,7 +31,7 @@ export type Data = {
   lists: List[];
 };
 
-export function useData() {
+export function useReminders() {
   return useCachedPromise(() => {
     return getData() as Promise<Data>;
   });
