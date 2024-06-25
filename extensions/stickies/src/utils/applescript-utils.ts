@@ -7,52 +7,6 @@ export const isStickiesRunning = () => {
   return shellRet.output ? shellRet.stdout.toString() != "" : false;
 };
 
-const scriptStickiesWindowsCount = `
-tell application "System Events"
-  tell process "Stickies"
-    set windowCount to count of (get every window)
-    return windowCount
-  end tell
-end tell
-`;
-
-export async function stickiesWindowsCount() {
-  try {
-    if (isStickiesRunning()) {
-      const count = await runAppleScript(scriptStickiesWindowsCount);
-      return parseInt(count);
-    }
-  } catch (e) {
-    captureException(e);
-    console.error(e);
-  }
-  return 0;
-}
-
-const scriptStickiesWindowList = `
-tell application "System Events"
-  tell process "Stickies"
-    set windowList to {}
-    repeat with w in (get every window)
-      set end of windowList to name of w
-    end repeat
-    return windowList
-  end tell
-end tell`;
-
-export async function stickiesWindowList() {
-  try {
-    if (isStickiesRunning()) {
-      const list = await runAppleScript(scriptStickiesWindowList);
-      return list.split(",");
-    }
-  } catch (e) {
-    captureException(e);
-    console.error(e);
-  }
-  return undefined;
-}
-
 const scriptQuitStickies = `
 tell application "Stickies"
     quit

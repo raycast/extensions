@@ -3,12 +3,12 @@ import {
   isStickiesRunning,
   newStickiesNote,
   showStickiesWindows,
-  stickiesWindowsCount,
   toggleStickiesWindows,
 } from "./utils/applescript-utils";
 import { STICKIES_PATH } from "./utils/constants";
 import { autoOpen } from "./types/preference";
 import { showStickiesNotRunningHUD } from "./utils/common-utils";
+import { getStickiesNotesCount } from "./utils/stickies-utils";
 
 export default async () => {
   try {
@@ -16,7 +16,7 @@ export default async () => {
       await closeMainWindow();
       const stickiesRunning = isStickiesRunning();
       if (stickiesRunning) {
-        const windowCount = await stickiesWindowsCount();
+        const windowCount = await getStickiesNotesCount();
         if (windowCount > 0) {
           await toggleStickiesWindows();
         } else {
