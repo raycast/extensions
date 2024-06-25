@@ -1,14 +1,8 @@
 import { LaunchProps, getSelectedText } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
+import { EUDIC_SCRIPT_COMMAND } from "../constatnts";
 
 export type CommandProps = LaunchProps<{ arguments: { word?: string } }>;
-
-export const EUDIC_SCRIPT_COMMAND = {
-  DIC: "show dic with word",
-  CG: "show cg with word",
-  WIKI: "show wiki with word",
-  SPEAK: "speak word with word",
-} as const;
 
 export type EudicScriptCommand = (typeof EUDIC_SCRIPT_COMMAND)[keyof typeof EUDIC_SCRIPT_COMMAND];
 
