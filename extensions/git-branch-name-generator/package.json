@@ -2,9 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "git-branch-name-generator",
   "title": "Git Branch Name Generator",
+  "version": "0.1.0",
   "description": "Convert a string into a branch name",
   "icon": "command-icon.png",
   "author": "mbonner",
+  "contributors": [
+    "devjiwonchoi"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -12,8 +16,16 @@
   "commands": [
     {
       "name": "index",
-      "title": "Generate Git Branch Name",
+      "title": "New Branch Name",
+      "subtitle": "Git Branch Name Generator",
       "description": "Generate a git branch name using an opinionated structure",
+      "mode": "view"
+    },
+    {
+      "name": "random",
+      "title": "Random Branch Name",
+      "subtitle": "Git Branch Name Generator",
+      "description": "Generate a random git branch name",
       "mode": "view"
     }
   ],

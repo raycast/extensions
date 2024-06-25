@@ -1,56 +1,73 @@
-import { Action, ActionPanel, Clipboard, Form, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
-import { useForm } from "@raycast/utils";
+import { Form, ActionPanel, Action, showToast, Clipboard } from "@raycast/api";
 
 type Values = {
-  branch_name: string;
-  type_of_branch: string;
+  branchType: string;
+  prefix: string;
+  description: string;
+  snakeCase: boolean;
+  prefixDate: boolean;
 };
 
+function slugify(content: string, separator: string) {
+  return content.toLowerCase().replaceAll(" ", separator);
+}
+
 export default function Command() {
-  const { handleSubmit, itemProps } = useForm<Values>({
-    async onSubmit(values) {
-      const branchType = values.type_of_branch ? `${values.type_of_branch}/` : "";
-      const branchNameAsSlug = values.branch_name
-        ? values.branch_name
-            .toLowerCase()
-            // replace all but 0-9, a-z and / with a dash
-            .replace(/[^0-9a-z/]/g, "-")
-            // replace multiple dashes with a single dash
-            .replace(/[-]+/g, "-")
-            // trim dashes from the beginning
-            .replace(/^-+/, "")
-            // trim dashes from the end
-            .replace(/-+$/, "")
-            // only take the first 100 characters
-            .substring(0, 100)
-        : "";
-      const fullBranchName = `${branchType}${branchNameAsSlug}`;
-      Clipboard.copy(fullBranchName);
-      await showHUD(`Copied to clipboard: ${fullBranchName}`);
-      popToRoot({ clearSearchBar: true });
-    },
-    validation: {
-      branch_name: (value) => {
-        if (!value) return "Please enter a branch name";
-      },
-    },
-  });
+  const handleSubmit = ({ branchType, prefix, description, snakeCase, prefixDate }: Values) => {
+    const separator = snakeCase ? "_" : "-";
+    const date = prefixDate ? `${new Date().toISOString().split("T")[0]}${separator}` : "";
+    let content = `${date}${prefix}${branchType}${description}`;
+
+    if (snakeCase && content.includes("-")) {
+      content = content.replaceAll("-", "_");
+    }
+
+    const branchName = slugify(content, separator);
+    Clipboard.copy(branchName);
+    showToast({ title: branchName, message: "Copied to your clipboard!" });
+  };
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Branch Name to Clipboard" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown title="Type of Branch" {...itemProps.type_of_branch}>
-        <Form.Dropdown.Item value="" title="" />
-        <Form.Dropdown.Item value="bug" title="Bug" />
-        <Form.Dropdown.Item value="chore" title="Chore" />
-        <Form.Dropdown.Item value="feature" title="Feature" />
+      <Form.Dropdown id="branchType" title="Branch Type" storeValue>
+        <Form.Dropdown.Item value="" title="-" />
+        <Form.Dropdown.Item value="fix/" title="fix (bugs or issues)" />
+        <Form.Dropdown.Item value="feat/" title="feat (add new features)" />
+        <Form.Dropdown.Item value="refactor/" title="refactor (improve efficiency)" />
+        <Form.Dropdown.Item value="chore/" title="chore (non-production changes)" />
+        <Form.Dropdown.Item value="docs/" title="docs (add or modify documentation)" />
       </Form.Dropdown>
-      <Form.TextField title="Branch name" placeholder="Change the photo" {...itemProps.branch_name} />
+      <Form.TextField id="description" title="Description" placeholder="Description of this branch" storeValue />
+      <Form.TextField
+        id="prefix"
+        title="Prefix"
+        placeholder="Add a custom prefix for the branch: (e.g. jiwon)"
+        storeValue
+      />
+      <Form.Checkbox
+        id="snakeCase"
+        title="Use `snake_case`"
+        label="Use `snake_case` instead of `kebab-case`"
+        storeValue
+      />
+      <Form.Checkbox
+        id="prefixDate"
+        title="Prefix Date"
+        label="Add today's date as a prefix (e.g. 2024-06-05-)"
+        storeValue
+      />
+      <Form.Checkbox
+        id="includeGitCommand"
+        title="Copy Git Command"
+        label="Include `git checkout -b` when copying to clipboard"
+        storeValue
+      />
     </Form>
   );
 }
