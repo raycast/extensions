@@ -8,7 +8,7 @@ You need three values for the extension to work:
 - Your Trello username, found in a few places, including the _Profile and visibility_ tab of Trello settings.
 - A personal access token to authenticate API calls to Trello. This is slightly complex, but you won't need to do it often.
 
-You should be able to follow this link to login and get the personal access token - GET https://trello.com/1/authorize?expiration=never&name=RayCastTrelloExtension&scope=read&response_type=token&key=13f8c59607ba6d82531d3db5f46999c1
+You should be able to follow this link to login and get the personal access token - GET "https://trello.com/1/authorize?expiration=never&name=RayCastTrelloExtension&scope=read,write&response_type=token&key=13f8c59607ba6d82531d3db5f46999c1"
 
 ## Commands
 

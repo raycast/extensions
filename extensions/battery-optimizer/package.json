@@ -8,6 +8,9 @@
     "System"
   ],
   "author": "Qetesh",
+  "contributors": [
+    "vatsalsanjay"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -31,6 +34,13 @@
   ],
   "preferences": [
     {
+      "name": "customBCLMPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom BCLM Executable Path",
+      "description": "Set this if your BCLM executable is in a non-standard location. Find by running `which bclm` in the terminal."
+    },
+    {
       "name": "add_system_service",
       "description": "Persistence through system services",
       "type": "checkbox",
@@ -43,7 +53,8 @@
     "@raycast/api": "^1.74.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8"
+    "@raycast/eslint-config": "^1.0.8",
+    "prettier": "^3.2.5"
   },
   "scripts": {
     "build": "ray build -e dist",

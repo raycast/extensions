@@ -121,6 +121,10 @@ interface CalBookingResp {
   }[];
 }
 
+export interface updateBookingContent {
+  status: string;
+}
+
 export interface CancelBookingProps {
   bookingId: number;
   revalidate: () => void;
@@ -166,6 +170,14 @@ export function useBookings() {
     );
     return sortedBookings;
   }, []);
+}
+
+export function updateBooking(bookingId: number, data: updateBookingContent) {
+  return calAPI({
+    method: "PATCH",
+    url: `/bookings/${bookingId}`,
+    data,
+  });
 }
 
 export function cancelBooking(bookingId: number, reason: string) {
