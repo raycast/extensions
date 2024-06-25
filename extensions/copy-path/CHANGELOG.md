@@ -2,7 +2,7 @@
 
 ## [Support More Browsers] - {PR_MERGE_DATE}
 
-- Support Safari Web App and Firefox browser by a hacker method
+- Support Safari Web App and Firefox browser by using an alternative method
 
 ## [Copy Window Title] - 2024-06-06
 
