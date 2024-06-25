@@ -1,6 +1,6 @@
 # Network Speed Changelog
 
-## [Update Loading View] - {PR_MERGE_DATE}
+## [Update Loading View] - 2024-06-25
 
 - Update loading view
 
