@@ -15,7 +15,8 @@
   ],
   "keywords": [
     "sound",
-    "manager"
+    "manager",
+    "bluetooth"
   ],
   "license": "MIT",
   "commands": [
