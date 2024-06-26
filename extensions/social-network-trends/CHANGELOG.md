@@ -1,5 +1,10 @@
 # Social Network Trends Changelog
 
+## [Show Trend on Menubar Title] - {PR_MERGE_DATE}
+
+- Show the first trend on the menu bar title
+- Data loading performance optimisation
+
 ## [Minor Updates] - 2023-10-04
 
 - Some minor updates to stay consistent with Raycast's latest version
