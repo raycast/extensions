@@ -13,7 +13,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "view",
+      "name": "index",
       "title": "Show Network Services",
       "subtitle": "VPN",
       "description": "Shortcut to your Network Preferences",
