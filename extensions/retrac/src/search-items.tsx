@@ -19,7 +19,6 @@ function SearchItems() {
 
   const { mutateAsync: deleteItem, isLoading: isDeleting } = useDeleteItem();
 
-
   async function confirmAndDelete(item: Item, deleteItem: (itemId: string) => Promise<AxiosResponse>) {
     if (
       await confirmAlert({

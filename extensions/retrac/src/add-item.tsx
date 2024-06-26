@@ -25,7 +25,12 @@ interface ItemFormValues {
 function AddItem(
   props: LaunchProps<{ arguments: { sku?: string; description?: string; quantity?: number; cost?: number } }>,
 ) {
-  const { sku: argumentSku, description: argumentDescription, quantity: argumentQuantity, cost: argumentCost } = props.arguments;
+  const {
+    sku: argumentSku,
+    description: argumentDescription,
+    quantity: argumentQuantity,
+    cost: argumentCost,
+  } = props.arguments;
   const { mutate: addItem, isLoading } = useCreateItem();
 
   const { handleSubmit, itemProps, reset } = useForm<ItemFormValues>({
@@ -87,26 +92,10 @@ function AddItem(
       }
     >
       <Form.Description text="Add a new item to your inventory." />
-      <Form.TextField
-        {...itemProps.sku}
-        title="Item Code"
-        placeholder="Enter SKU/ItemCode"
-      />
-      <Form.TextField
-        {...itemProps.description}
-        title="Description"
-        placeholder="Enter item description"
-      />
-      <Form.TextField
-        {...itemProps.quantity}
-        title="Quantity"
-        placeholder="Enter quantity"
-      />
-      <Form.TextField
-        {...itemProps.cost}
-        title="Cost"
-        placeholder="Enter cost"
-      />
+      <Form.TextField {...itemProps.sku} title="Item Code" placeholder="Enter SKU/ItemCode" />
+      <Form.TextField {...itemProps.description} title="Description" placeholder="Enter item description" />
+      <Form.TextField {...itemProps.quantity} title="Quantity" placeholder="Enter quantity" />
+      <Form.TextField {...itemProps.cost} title="Cost" placeholder="Enter cost" />
     </Form>
   );
 }
