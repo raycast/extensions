@@ -1,5 +1,5 @@
-import { Detail, LaunchProps, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import { useFetch, useLocalStorage } from "@raycast/utils";
+import { Action, ActionPanel, Detail, Icon, LaunchProps, LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
 type Color = {
@@ -30,28 +30,22 @@ type Social = {
 }
 type Brand = {
     domain: string;
-title: string;
-description: string;
-colors: Color[];
-logos: Logo[];
-backdrops: Backdrop[];
-socials: Social[];
-verified: boolean;
+    title: string;
+    description: string;
+    slogan: string;
+    colors: Color[];
+    logos: Logo[];
+    backdrops: Backdrop[];
+    socials: Social[];
+    verified: boolean;
 };
 type Response = {
     status: "ok";
     brand: Brand;
 }
-
-function getGroupedLogos(brand: Brand) {
-        const groupedLogos = brand.logos.reduce((acc, logo) => {
-        if (!acc[logo.group]) {
-            acc[logo.group] = [];
-        }
-        acc[logo.group].push(logo);
-        return acc;
-        }, {} as { [key: string]: Logo[] });
-        return groupedLogos;
+type BrandInStorage = Brand & {
+    created_on: string;
+    updated_on: string;
 }
 
 export default function RetrieveBrand(props: LaunchProps<{ arguments: Arguments.RetrieveBrand }>) {
@@ -59,57 +53,58 @@ export default function RetrieveBrand(props: LaunchProps<{ arguments: Arguments.
     const { api_token } = getPreferenceValues<Preferences>();
 
     const [brand, setBrand] = useState<Brand>();
-    const [groupedLogos, setGroupedLogos] = useState<{ [key: string]: Logo[] }>();
     
-    const { value: brands, setValue: setBrands, isLoading: isFetchingLocal } = useLocalStorage<Brand[]>("brands", []);
-
-    const { isLoading: isFetching, revalidate } = useFetch<Response>(`https://api.brand.dev/v1/brand/retrieve?domain=${domain}`, {
+    const [isGetting, setIsGetting] = useState(true);
+    const [isSetting, setIsSetting] = useState(false);
+    
+    const { error, isLoading: isFetching, revalidate } = useFetch<Response>(`https://api.brand.dev/v1/brand/retrieve?domain=${domain}`, {
         headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${api_token}`
         },
-        // mapResult(result: Response) {
-        //     const { brand } = result;
-        //     const groupedLogos = brand.logos.reduce((acc, logo) => {
-        //         if (!acc[logo.group]) {
-        //           acc[logo.group] = [];
-        //         }
-        //         acc[logo.group].push(logo);
-        //         return acc;
-        //       }, {} as { [key: string]: Logo[] });
-
-        //     return {
-        //         data: {...result.brand, groupedLogos}
-        //     }
-        // },
         async onData(data) {
-            await showToast(Toast.Style.Animated, "Fetched! Generating...");
-            const newBrands = brands?.map((brand) => (brand.domain === domain ? { ...data.brand } : brand)) ?? [];
+            const toast = await showToast(Toast.Style.Animated, "Fetched! Generating...");
+            const newBrand: BrandInStorage = {...data.brand, created_on: new Date().toISOString(), updated_on: new Date().toISOString() };
+            const brands = await getFromStorage();
+            const index = brands.findIndex(brand => brand.domain === domain);
+            index!==-1 ? brands[index] = newBrand : brands.push(newBrand);
             setBrand(data.brand);
-            setGroupedLogos(getGroupedLogos(data.brand));
-            await setBrands(newBrands);
+            setIsSetting(true);
+            await LocalStorage.setItem("brands", JSON.stringify(brands));
+            setIsSetting(false);
+            toast.style = Toast.Style.Success;
+            toast.title = "Generated!";
         },
         execute: false
     });
 
-    const isLoading = isFetchingLocal || isFetching;
+    async function getFromStorage() {
+        const localBrands = await LocalStorage.getItem<string>("brands") || "[]";
+        const parsedBrands: BrandInStorage[] = await JSON.parse(localBrands);
+        return parsedBrands;
+    }
+
+    const isLoading = isGetting || isSetting || isFetching;
     useEffect(() => {
-        showToast(Toast.Style.Animated, "Checking Local Storage...");
-        if (!isFetchingLocal) {
-            console.log(brands);
+        async function checkLocalOrFetch() {
+            const toast = await showToast(Toast.Style.Animated, "Checking Local Storage...");
+            const brands = await getFromStorage();
             const brandInStorage = brands?.find(brand => brand.domain===domain);
+            setIsGetting(false);
             if (brandInStorage) {
-                showToast(Toast.Style.Animated, "Found Locally! Generating...");
+                toast.title = "Found Locally! Generating...";
                 setBrand(brandInStorage);
-                setGroupedLogos(getGroupedLogos(brandInStorage));
+                toast.style = Toast.Style.Success;
+                toast.title = "Generated!";
             } else {
-                showToast(Toast.Style.Animated, "Not Found Locally! Fetching...");
+                toast.title = "Not Found Locally! Fetching...";
                 revalidate();
             }
         }
-    }, [isFetchingLocal]);
+        checkLocalOrFetch();
+    }, []);
 
-      const markdown = !brand ? "Generating..." : `![](${brand.logos[0].url})
+      const markdown = error ? `${error.message}` : !brand ? "Generating..." : `![](${brand.logos[0].url})
     
 ${brand.title} \n\n [${brand.domain}](${brand.domain})
 
@@ -119,9 +114,11 @@ ${brand.description}
 
 ---
 
-## Grouped Logos
+## Logos
 
-${groupedLogos && Object.entries(groupedLogos).map(([group, logos]) => `Group ${group}: ${logos.map(logo => `![${logo.url}](${logo.url})`)}`)}`;
+${brand.logos.map(logo => `![${logo.url}](${logo.url})`)}`;
     
-return <Detail isLoading={isLoading} markdown={markdown} />
+return <Detail isLoading={isLoading} markdown={markdown} actions={<ActionPanel>
+    {brand && <Action title="Fetch Latest" icon={Icon.Redo} onAction={revalidate} />}
+</ActionPanel>} />
 }
