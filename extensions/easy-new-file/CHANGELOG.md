@@ -1,6 +1,6 @@
 # Easy New File Changelog
 
-## [Any File Type] - {PR_MERGE_DATE}
+## [Any File Type] - 2024-06-26
 
 - Now you can create any file type with the New File Now command.
 
