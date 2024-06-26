@@ -1,10 +1,11 @@
 import * as crypto from 'crypto-js'
 
 export function convertWordArrayToUint8Array(wordArray: crypto.lib.WordArray): Uint8Array {
-	let len = wordArray.words.length,
-		u8_array = new Uint8Array(len << 2),
-		offset = 0, word, i
-	;
+	const len = wordArray.words.length
+	const u8_array = new Uint8Array(len << 2)
+	let offset = 0
+	let word
+	let i
 	for (i=0; i<len; i++) {
 		word = wordArray.words[i];
 		u8_array[offset++] = word >> 24;

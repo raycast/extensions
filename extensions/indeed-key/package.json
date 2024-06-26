@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "copy-otp",
-      "title": "otp-code",
+      "title": "Copy OTP-Code",
       "description": "generate OTP code and copy to clipboard",
       "mode": "no-view"
     }
