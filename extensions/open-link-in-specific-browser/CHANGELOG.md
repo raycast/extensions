@@ -1,6 +1,6 @@
 # Open Link in Specific Browser Changelog
 
-## [Optimise Performance] - {PR_MERGE_DATE}
+## [Optimise Performance] - 2024-06-26
 
 - Automatically detect the URL of the current tab of the browser which is in focus if no URL is detected
 - Optimising the operational performance of extensions
