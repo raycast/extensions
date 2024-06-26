@@ -2,24 +2,25 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "groundhog-day",
   "title": "Groundhog Day",
-  "description": "",
+  "description": "Free, accurate, and portable data on prognosticating groundhogs and their yearly predictions",
   "icon": "groundhog.png",
   "author": "xmok",
   "categories": [
-    "Data"
+    "Data",
+    "Fun"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "groundhogs",
       "title": "Groundhogs",
-      "description": "",
+      "description": "View Groundhogs and their Predictions",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.74.1",
-    "@raycast/utils": "^1.15.0"
+    "@raycast/api": "^1.77.3",
+    "@raycast/utils": "^1.16.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
