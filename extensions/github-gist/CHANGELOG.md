@@ -1,5 +1,10 @@
 # GitHub Gist Changelog
 
+## [Refactor Command] - {PR_MERGE_DATE}
+
+- Simplify the code and improve performance
+- Support saving gist as snippets
+
 ## [Add Copy Raw Link action] - 2023-11-09
 
 - Add action to copy the raw link of the gist file
@@ -17,7 +22,7 @@
 
 - Updated dependencies
 
-## [Optimize extension] - 2022-09-30 
+## [Optimize extension] - 2022-09-30
 
 - Optimize Search Gists command loading speed
 

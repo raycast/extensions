@@ -1,5 +1,8 @@
 import { Octokit } from "@octokit/core";
-import { isEmpty, preference } from "./utils";
+import { formatBytes, isEmpty } from "./utils";
+import fetch from "node-fetch";
+import { personalAccessTokens } from "../types/preferences";
+import { Icon } from "@raycast/api";
 
 export interface GistFile {
   filename: string;
@@ -10,6 +13,8 @@ export interface GistItem {
   filename: string;
   language: string;
   raw_url: string;
+  size: string;
+  type?: string;
 }
 export interface Gist {
   gist_id: string;
@@ -18,25 +23,34 @@ export interface Gist {
   file: GistItem[];
 }
 
-export enum GITHUB_GISTS {
+export enum GithubGistTag {
   MY_GISTS = "My Gists",
   STARRED = "Starred Gists",
-  ALL_GISTS = "All Public Gists",
+  ALL_GISTS = "Public Gists",
 }
-export const githubGists = Object.values(GITHUB_GISTS);
+export const githubGistTags = [
+  { title: GithubGistTag.MY_GISTS, value: GithubGistTag.MY_GISTS, icon: Icon.Person },
+  { title: GithubGistTag.STARRED, value: GithubGistTag.STARRED, icon: Icon.Stars },
+  { title: GithubGistTag.ALL_GISTS, value: GithubGistTag.ALL_GISTS, icon: Icon.TwoPeople },
+];
 
-export const octokit = new Octokit({ auth: `${preference.personalAccessTokens}` });
+export const octokit = new Octokit({
+  auth: `${personalAccessTokens}`,
+  request: {
+    fetch: fetch,
+  },
+});
 
-export async function requestGist(route: string, page: number, perPage: number) {
+export async function requestGist(tag: string, page: number, perPage: number) {
   const response = await (async () => {
-    switch (route) {
-      case GITHUB_GISTS.MY_GISTS: {
+    switch (tag) {
+      case GithubGistTag.MY_GISTS: {
         return await octokit.request(`GET /gists`, { page: page, per_page: perPage });
       }
-      case GITHUB_GISTS.ALL_GISTS: {
+      case GithubGistTag.ALL_GISTS: {
         return await octokit.request(`GET /gists/public`, { page: page, per_page: perPage });
       }
-      case GITHUB_GISTS.STARRED: {
+      case GithubGistTag.STARRED: {
         return await octokit.request(`GET /gists/starred`, { page: page, per_page: perPage });
       }
       default: {
@@ -58,6 +72,8 @@ export async function requestGist(route: string, page: number, perPage: number) 
           filename: String(value.filename),
           language: String(value.language),
           raw_url: String(value.raw_url),
+          size: formatBytes(value.size),
+          type: value.type,
         });
       }
     }

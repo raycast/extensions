@@ -1,5 +1,5 @@
 import { Form } from "@raycast/api";
-import React, { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { GistFile } from "../util/gist-utils";
 
 export function GistFileForm(props: {
