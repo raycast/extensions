@@ -13,17 +13,22 @@ const TWO_HOURS_IN_MS = 2 * 60 * 60 * 1000;
 const MAX_TOPIC_LENGTH = 30;
 
 function getDateTimeStringForMenuBarTitle(date: Date): string {
+  if (!date || !(date instanceof Date)) return "";
+
   try {
     if (date.getTime() - new Date().getTime() < TWO_HOURS_IN_MS)
-      return formatDistance(date, new Date().toLocaleString(), { addSuffix: true });
+      return formatDistance(date, new Date(), { addSuffix: true });
     return date.toLocaleString();
   } catch (error) {
     captureException(
       buildException(error as Error, "Error getting date time string for menu bar title", {
-        date: date,
+        date,
+        type: typeof date,
+        localizedDate: date.toLocaleString(),
       }),
     );
   }
+
   return "";
 }
 
