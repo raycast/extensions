@@ -1,72 +1,57 @@
 import { Action, ActionPanel, Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
-import { setMaxListeners } from "events";
-import { AbortError } from "node-fetch";
-import { useEffect, useRef, useState } from "react";
-import { getSeasons } from "../api/shows";
-import { getTMDBSeasonDetails } from "../api/tmdb";
+import { useEffect } from "react";
+import { useSeasonDetails } from "../hooks/useSeasonDetails";
+import { useSeasons } from "../hooks/useSeasons";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "../lib/helper";
 import { Episodes } from "./episodes";
 
 export const Seasons = ({
-  traktId,
+  showId,
   tmdbId,
   slug,
   imdbId,
 }: {
-  traktId: number;
+  showId: number;
   tmdbId: number;
   slug: string;
   imdbId: string;
 }) => {
-  const abortable = useRef<AbortController>();
-  const [seasons, setSeasons] = useState<TraktSeasonList | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
+  const { seasons, error } = useSeasons(showId);
+  const { details: seasonDetails, error: detailsError } = useSeasonDetails(tmdbId, seasons);
 
   useEffect(() => {
-    (async () => {
-      abortable.current = new AbortController();
-      setMaxListeners(20, abortable.current?.signal);
-      setIsLoading(true);
-      try {
-        const seasons = await getSeasons(traktId, abortable.current?.signal);
-        setSeasons(seasons);
+    if (error) {
+      showToast({
+        title: error.message,
+        style: Toast.Style.Failure,
+      });
+    }
+  }, [error]);
 
-        const showsWithImages = (await Promise.all(
-          seasons.map(async (season) => {
-            season.details = await getTMDBSeasonDetails(tmdbId, season.number, abortable.current?.signal);
-            return season;
-          }),
-        )) as TraktSeasonList;
+  useEffect(() => {
+    if (detailsError) {
+      showToast({
+        title: detailsError.message,
+        style: Toast.Style.Failure,
+      });
+    }
+  }, [detailsError]);
 
-        setSeasons(showsWithImages);
-      } catch (e) {
-        if (!(e instanceof AbortError)) {
-          showToast({
-            title: "Error getting seasons",
-            style: Toast.Style.Failure,
-          });
-        }
-      }
-      setIsLoading(false);
-      return () => {
-        if (abortable.current) {
-          abortable.current.abort();
-        }
-      };
-    })();
-  }, []);
+  const isLoading = !seasons || !seasonDetails.size || !!error || !!detailsError;
 
   return (
     <Grid isLoading={isLoading} aspectRatio="9/16" fit={Grid.Fit.Fill} searchBarPlaceholder="Search for seasons">
       {seasons &&
         seasons.map((season) => {
+          const details = seasonDetails.get(season.ids.trakt);
+
           return (
             <Grid.Item
               key={season.ids.trakt}
               title={season.title}
-              subtitle={new Date(season.first_aired).getFullYear().toString()}
-              content={getPosterUrl(season.details?.poster_path, "poster.png")}
+              subtitle={season.first_aired ? new Date(season.first_aired).getFullYear().toString() : "Not Aired"}
+              content={getPosterUrl(details?.poster_path, "poster.png")}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
@@ -86,7 +71,7 @@ export const Seasons = ({
                       icon={Icon.Switch}
                       title="Episodes"
                       shortcut={Keyboard.Shortcut.Common.Open}
-                      target={<Episodes traktId={traktId} tmdbId={tmdbId} seasonNumber={season.number} slug={slug} />}
+                      target={<Episodes showId={showId} tmdbId={tmdbId} seasonNumber={season.number} slug={slug} />}
                     />
                   </ActionPanel.Section>
                 </ActionPanel>

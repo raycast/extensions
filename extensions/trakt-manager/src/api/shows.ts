@@ -77,12 +77,12 @@ export const getSeasons = async (traktId: number, signal: AbortSignal | undefine
 };
 
 export const getEpisodes = async (
-  traktId: number,
+  showId: number,
   seasonNumber: number,
   signal: AbortSignal | undefined = undefined,
 ) => {
   const accessToken = await oauthProvider.authorize();
-  const response = await fetch(`${TRAKT_API_URL}/shows/${traktId}/seasons/${seasonNumber}?extended=full`, {
+  const response = await fetch(`${TRAKT_API_URL}/shows/${showId}/seasons/${seasonNumber}?extended=full`, {
     headers: {
       "Content-Type": "application/json",
       "trakt-api-version": "2",
@@ -182,18 +182,25 @@ export const checkInEpisode = async (episodeId: number, signal: AbortSignal | un
   }
 };
 
-const setShowProgress = (showProgress: TraktShowProgress, show: TraktUpNextShowListItem) => {
-  if (showProgress.reset_at && new Date(showProgress.reset_at).getTime() > new Date(show.last_updated_at).getTime()) {
+const setShowProgress = (showProgress: TraktShowProgress, show: TraktShowListItem) => {
+  if (
+    showProgress.reset_at &&
+    show.last_updated_at &&
+    new Date(showProgress.reset_at).getTime() > new Date(show.last_updated_at).getTime()
+  ) {
     show.show.progress = undefined;
   } else {
     show.show.progress = showProgress.aired > showProgress.completed ? showProgress : undefined;
   }
 };
 
-export const getUpNextShows = async (signal: AbortSignal | undefined = undefined): Promise<TraktUpNextShowList> => {
+export const getUpNextShows = async (
+  signal: AbortSignal | undefined = undefined,
+  page: number = 1,
+): Promise<TraktShowList> => {
   const upNextShowsCache = await LocalStorage.getItem<string>("upNextShows");
   if (upNextShowsCache) {
-    return JSON.parse(upNextShowsCache) as TraktUpNextShowList;
+    return JSON.parse(upNextShowsCache) as TraktShowList;
   }
 
   const accessToken = await oauthProvider.authorize();
@@ -212,7 +219,7 @@ export const getUpNextShows = async (signal: AbortSignal | undefined = undefined
     throw new Error(response.statusText);
   }
 
-  const result = (await response.json()) as TraktUpNextShowList;
+  const result = (await response.json()) as TraktShowList;
   const showPromises = result.map((show) =>
     fetch(
       `${TRAKT_API_URL}/shows/${show.show.ids.trakt}/progress/watched?hidden=false&specials=false&count_specials=false`,
@@ -242,8 +249,14 @@ export const getUpNextShows = async (signal: AbortSignal | undefined = undefined
     }
   }
 
-  const upNextShows = result.filter((show) => show.show.progress);
+  const pageSize = 10;
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+
+  const upNextShows = result.filter((show) => show.show.progress).slice(startIndex, endIndex) as TraktShowList;
   await LocalStorage.setItem("upNextShows", JSON.stringify(upNextShows));
+  upNextShows.total_pages = Math.floor(upNextShows.length / pageSize);
+  upNextShows.total_results = upNextShows.length;
   return upNextShows;
 };
 
@@ -253,7 +266,7 @@ export const updateShowProgress = async (
 ): Promise<void> => {
   const upNextShowsCache = await LocalStorage.getItem<string>("upNextShows");
   if (upNextShowsCache) {
-    const upNextShows = JSON.parse(upNextShowsCache) as TraktUpNextShowList;
+    const upNextShows = JSON.parse(upNextShowsCache) as TraktShowList;
     const show = upNextShows.find((s) => s.show.ids.trakt === showId);
 
     if (show) {
@@ -281,6 +294,41 @@ export const updateShowProgress = async (
       const upNextShowsFiltered = upNextShows.filter((show) => show.show.progress);
       await LocalStorage.setItem("upNextShows", JSON.stringify(upNextShowsFiltered));
     }
+  }
+};
+
+export const addNewShowProgress = async (
+  show: TraktShowListItem,
+  signal: AbortSignal | undefined = undefined,
+): Promise<void> => {
+  const upNextShowsCache = await LocalStorage.getItem<string>("upNextShows");
+  if (upNextShowsCache) {
+    const accessToken = await oauthProvider.authorize();
+    const response = await fetch(
+      `${TRAKT_API_URL}/shows/${show.show.ids.trakt}/progress/watched?hidden=false&specials=false&count_specials=false`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "trakt-api-version": "2",
+          "trakt-api-key": TRAKT_CLIENT_ID,
+          Authorization: `Bearer ${accessToken}`,
+        },
+        signal,
+      },
+    );
+
+    if (!response.ok) {
+      console.error("updateShowProgress:", await response.text());
+      throw new Error(response.statusText);
+    }
+
+    const showProgress = (await response.json()) as TraktShowProgress;
+    setShowProgress(showProgress, show);
+
+    const upNextShows = JSON.parse(upNextShowsCache) as TraktShowList;
+    upNextShows.push(show);
+    const upNextShowsFiltered = upNextShows.filter((show) => show.show.progress);
+    await LocalStorage.setItem("upNextShows", JSON.stringify(upNextShowsFiltered));
   }
 };
 

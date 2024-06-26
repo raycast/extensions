@@ -1,86 +1,67 @@
 import { Action, ActionPanel, Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
-import { setMaxListeners } from "events";
-import { AbortError } from "node-fetch";
-import { useEffect, useRef, useState } from "react";
-import { checkInEpisode, getEpisodes } from "../api/shows";
-import { getTMDBEpisodeDetails } from "../api/tmdb";
+import { useCallback, useEffect, useState } from "react";
+import { useEpisodeDetails } from "../hooks/useEpisodeDetails";
+import { useEpisodes } from "../hooks/useEpisodes";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "../lib/helper";
 
 const formatter = new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short", day: "2-digit" });
 
 export const Episodes = ({
-  traktId,
+  showId,
   tmdbId,
   seasonNumber,
   slug,
 }: {
-  traktId: number;
+  showId: number;
   tmdbId: number;
   seasonNumber: number;
   slug: string;
 }) => {
-  const abortable = useRef<AbortController>();
-  const [episodes, setEpisodes] = useState<TraktEpisodeList | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
+  const { episodes, checkInEpisodeMutation, error, success } = useEpisodes(showId, seasonNumber);
+  const { details: episodeDetails, error: detailsError } = useEpisodeDetails(tmdbId, seasonNumber, episodes);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const handleAction = useCallback(
+    async (episode: TraktEpisodeListItem, action: (episode: TraktEpisodeListItem) => Promise<void>) => {
+      setActionLoading(true);
+      try {
+        await action(episode);
+      } finally {
+        setActionLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
-    (async () => {
-      abortable.current = new AbortController();
-      setMaxListeners(30, abortable.current?.signal);
-      setIsLoading(true);
-      try {
-        const episodes = await getEpisodes(traktId, seasonNumber, abortable.current?.signal);
-        setEpisodes(episodes);
-
-        const showsWithImages = (await Promise.all(
-          episodes.map(async (episode) => {
-            episode.details = await getTMDBEpisodeDetails(
-              tmdbId,
-              seasonNumber,
-              episode.number,
-              abortable.current?.signal,
-            );
-            return episode;
-          }),
-        )) as TraktEpisodeList;
-
-        setEpisodes(showsWithImages);
-      } catch (e) {
-        if (!(e instanceof AbortError)) {
-          showToast({
-            title: "Error getting episodes",
-            style: Toast.Style.Failure,
-          });
-        }
-      }
-      setIsLoading(false);
-      return () => {
-        if (abortable.current) {
-          abortable.current.abort();
-        }
-      };
-    })();
-  }, []);
-
-  const onCheckInEpisode = async (episodeId: number) => {
-    setIsLoading(true);
-    try {
-      await checkInEpisode(episodeId, abortable.current?.signal);
+    if (success) {
       showToast({
-        title: "Episode checked in",
-        style: Toast.Style.Success,
+        title: success,
+        style: Toast.Style.Failure,
       });
-    } catch (e) {
-      if (!(e instanceof AbortError)) {
-        showToast({
-          title: "Error checking in episode",
-          style: Toast.Style.Failure,
-        });
-      }
     }
-    setIsLoading(false);
-  };
+  }, [success]);
+
+  useEffect(() => {
+    if (error) {
+      showToast({
+        title: error.message,
+        style: Toast.Style.Failure,
+      });
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (detailsError) {
+      showToast({
+        title: detailsError.message,
+        style: Toast.Style.Failure,
+      });
+    }
+  }, [detailsError]);
+
+  const isLoading = !episodes || !episodeDetails.size || actionLoading || !!error || !!detailsError;
 
   return (
     <Grid
@@ -92,12 +73,14 @@ export const Episodes = ({
     >
       {episodes &&
         episodes.map((episode) => {
+          const details = episodeDetails.get(episode.ids.trakt);
+
           return (
             <Grid.Item
               key={episode.ids.trakt}
               title={`${episode.number}. ${episode.title}`}
               subtitle={formatter.format(new Date(episode.first_aired))}
-              content={getPosterUrl(episode.details?.still_path, "episode.png")}
+              content={getPosterUrl(details?.still_path, "episode.png")}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
@@ -117,7 +100,7 @@ export const Episodes = ({
                       icon={Icon.Checkmark}
                       title="Check-in Episode"
                       shortcut={Keyboard.Shortcut.Common.Edit}
-                      onAction={() => onCheckInEpisode(episode.ids.trakt)}
+                      onAction={() => handleAction(episode, checkInEpisodeMutation)}
                     />
                   </ActionPanel.Section>
                 </ActionPanel>

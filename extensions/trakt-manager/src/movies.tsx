@@ -1,125 +1,70 @@
 import { Grid, Icon, Keyboard, showToast, Toast } from "@raycast/api";
-import { setMaxListeners } from "events";
-import { AbortError } from "node-fetch";
-import { useEffect, useRef, useState } from "react";
-import { addMovieToHistory, addMovieToWatchlist, checkInMovie, searchMovies } from "./api/movies";
-import { getTMDBMovieDetails } from "./api/tmdb";
-import { MovieGrid } from "./components/movie-grid";
-import { APP_MAX_LISTENERS } from "./lib/constants";
+import { useCallback, useEffect, useState } from "react";
+import { MovieGridItems } from "./components/movie-grid";
+import { useMovieDetails } from "./hooks/useMovieDetails";
+import { useMovies } from "./hooks/useMovies";
 
 export default function Command() {
-  const abortable = useRef<AbortController>();
-  const [searchText, setSearchText] = useState<string | undefined>();
-  const [movies, setMovies] = useState<TraktMovieList | undefined>();
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+  const [searchText, setSearchText] = useState<string | undefined>();
+  const [actionLoading, setActionLoading] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      if (abortable.current) {
-        abortable.current.abort();
-      }
-      abortable.current = new AbortController();
-      setMaxListeners(APP_MAX_LISTENERS, abortable.current?.signal);
-      if (!searchText) {
-        setMovies(undefined);
-      } else {
-        setIsLoading(true);
-        try {
-          const movies = await searchMovies(searchText, page, abortable.current.signal);
-          setMovies(movies);
-          setPage(movies.page);
-          setTotalPages(movies.total_pages);
+  const {
+    movies,
+    addMovieToWatchlistMutation,
+    checkInMovieMutation,
+    addMovieToHistoryMutation,
+    error,
+    success,
+    totalPages,
+  } = useMovies(searchText, page);
+  const { details: movieDetails, error: detailsError } = useMovieDetails(movies);
 
-          const moviesWithImages = (await Promise.all(
-            movies.map(async (movie) => {
-              movie.movie.details = await getTMDBMovieDetails(movie.movie.ids.tmdb, abortable.current?.signal);
-              return movie;
-            }),
-          )) as TraktMovieList;
-
-          setMovies(moviesWithImages);
-        } catch (e) {
-          if (!(e instanceof AbortError)) {
-            showToast({
-              title: "Error searching movies",
-              style: Toast.Style.Failure,
-            });
-          }
-        }
-        setIsLoading(false);
-        return () => {
-          if (abortable.current) {
-            abortable.current.abort();
-          }
-        };
-      }
-    })();
-  }, [searchText, page]);
-
-  const onAddMovieToWatchlist = async (movieId: number) => {
-    setIsLoading(true);
-    try {
-      await addMovieToWatchlist(movieId, abortable.current?.signal);
-      showToast({
-        title: "Movie added to watchlist",
-        style: Toast.Style.Success,
-      });
-    } catch (e) {
-      if (!(e instanceof AbortError)) {
-        showToast({
-          title: "Error adding movie to watchlist",
-          style: Toast.Style.Failure,
-        });
-      }
-    }
-    setIsLoading(false);
-  };
-
-  const onCheckInMovie = async (movieId: number) => {
-    setIsLoading(true);
-    try {
-      await checkInMovie(movieId, abortable.current?.signal);
-      showToast({
-        title: "Movie checked in",
-        style: Toast.Style.Success,
-      });
-    } catch (e) {
-      if (!(e instanceof AbortError)) {
-        showToast({
-          title: "Error checking in movie",
-          style: Toast.Style.Failure,
-        });
-      }
-    }
-    setIsLoading(false);
-  };
-
-  const onAddMovieToHistory = async (movieId: number) => {
-    setIsLoading(true);
-    try {
-      await addMovieToHistory(movieId, abortable.current?.signal);
-      showToast({
-        title: "Movie added to history",
-        style: Toast.Style.Success,
-      });
-    } catch (e) {
-      if (!(e instanceof AbortError)) {
-        showToast({
-          title: "Error adding movie to history",
-          style: Toast.Style.Failure,
-        });
-      }
-    }
-    setIsLoading(false);
-  };
-
-  const onSearchTextChange = (text: string): void => {
+  const onSearchTextChange = useCallback((text: string): void => {
     setSearchText(text);
     setPage(1);
-    setTotalPages(1);
-  };
+  }, []);
+
+  const handleAction = useCallback(
+    async (movie: TraktMovieListItem, action: (movie: TraktMovieListItem) => Promise<void>) => {
+      setActionLoading(true);
+      try {
+        await action(movie);
+      } finally {
+        setActionLoading(false);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (error) {
+      showToast({
+        title: error.message,
+        style: Toast.Style.Failure,
+      });
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (detailsError) {
+      showToast({
+        title: detailsError.message,
+        style: Toast.Style.Failure,
+      });
+    }
+  }, [detailsError]);
+
+  useEffect(() => {
+    if (success) {
+      showToast({
+        title: success,
+        style: Toast.Style.Success,
+      });
+    }
+  }, [success]);
+
+  const isLoading = !!searchText && (!movies || !movieDetails.size || actionLoading) && !error && !detailsError;
 
   return (
     <Grid
@@ -131,20 +76,24 @@ export default function Command() {
       throttle={true}
     >
       <Grid.EmptyView title="Search for movies" />
-      <MovieGrid
+      <MovieGridItems
         movies={movies}
+        movieDetails={movieDetails}
         page={page}
         totalPages={totalPages}
         setPage={setPage}
-        checkInAction={onCheckInMovie}
-        watchlistActionTitle={"Add to Watchlist"}
-        watchlistActionIcon={Icon.Bookmark}
-        watchlistActionShortcut={Keyboard.Shortcut.Common.Edit}
-        watchlistAction={onAddMovieToWatchlist}
-        historyActionTitle="Add to History"
-        historyActionIcon={Icon.Clock}
-        historyActionShortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
-        historyAction={onAddMovieToHistory}
+        primaryActionTitle="Add to Watchlist"
+        primaryActionIcon={Icon.Bookmark}
+        primaryActionShortcut={Keyboard.Shortcut.Common.Edit}
+        primaryAction={(movie) => handleAction(movie, addMovieToWatchlistMutation)}
+        secondaryActionTitle="Check-in Movie"
+        secondaryActionIcon={Icon.Checkmark}
+        secondaryActionShortcut={Keyboard.Shortcut.Common.Duplicate}
+        secondaryAction={(movie) => handleAction(movie, checkInMovieMutation)}
+        tertiaryActionTitle="Add to History"
+        tertiaryActionIcon={Icon.Clock}
+        tertiaryActionShortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+        tertiaryAction={(movie) => handleAction(movie, addMovieToHistoryMutation)}
       />
     </Grid>
   );

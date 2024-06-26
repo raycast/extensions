@@ -1,106 +1,70 @@
 import { Grid, Icon, Keyboard, showToast, Toast } from "@raycast/api";
-import { setMaxListeners } from "events";
-import { AbortError } from "node-fetch";
-import { useEffect, useRef, useState } from "react";
-import { addShowToHistory, addShowToWatchlist, searchShows } from "./api/shows";
-import { getTMDBShowDetails } from "./api/tmdb";
-import { ShowGrid } from "./components/show-grid";
-import { APP_MAX_LISTENERS } from "./lib/constants";
+import { useCallback, useEffect, useState } from "react";
+import { ShowGridItems } from "./components/show-grid";
+import { useShowDetails } from "./hooks/useShowDetails";
+import { useShows } from "./hooks/useShows";
 
 export default function Command() {
-  const abortable = useRef<AbortController>();
-  const [searchText, setSearchText] = useState<string | undefined>();
-  const [shows, setShows] = useState<TraktShowList | undefined>();
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+  const [searchText, setSearchText] = useState<string | undefined>();
+  const [actionLoading, setActionLoading] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      if (abortable.current) {
-        abortable.current.abort();
-      }
-      abortable.current = new AbortController();
-      setMaxListeners(APP_MAX_LISTENERS, abortable.current?.signal);
-      if (!searchText) {
-        setShows(undefined);
-      } else {
-        setIsLoading(true);
-        try {
-          const shows = await searchShows(searchText, page, abortable.current.signal);
-          setShows(shows);
-          setPage(shows.page);
-          setTotalPages(shows.total_pages);
+  const {
+    shows,
+    addShowToWatchlistMutation,
+    addShowToHistoryMutation,
+    checkInFirstEpisodeMutation,
+    error,
+    success,
+    totalPages,
+  } = useShows(searchText, page);
+  const { details: showDetails, error: detailsError } = useShowDetails(shows);
 
-          const showsWithImages = (await Promise.all(
-            shows.map(async (movie) => {
-              movie.show.details = await getTMDBShowDetails(movie.show.ids.tmdb, abortable.current?.signal);
-              return movie;
-            }),
-          )) as TraktShowList;
-
-          setShows(showsWithImages);
-        } catch (e) {
-          if (!(e instanceof AbortError)) {
-            showToast({
-              title: "Error searching shows",
-              style: Toast.Style.Failure,
-            });
-          }
-        }
-        setIsLoading(false);
-        return () => {
-          if (abortable.current) {
-            abortable.current.abort();
-          }
-        };
-      }
-    })();
-  }, [searchText, page]);
-
-  const onAddShowToWatchlist = async (showId: number) => {
-    setIsLoading(true);
-    try {
-      await addShowToWatchlist(showId, abortable.current?.signal);
-      showToast({
-        title: "Show added to watchlist",
-        style: Toast.Style.Success,
-      });
-    } catch (e) {
-      if (!(e instanceof AbortError)) {
-        showToast({
-          title: "Error adding show to watchlist",
-          style: Toast.Style.Failure,
-        });
-      }
-    }
-    setIsLoading(false);
-  };
-
-  const onAddShowToHistory = async (showId: number) => {
-    setIsLoading(true);
-    try {
-      await addShowToHistory(showId, abortable.current?.signal);
-      showToast({
-        title: "Show added to history",
-        style: Toast.Style.Success,
-      });
-    } catch (e) {
-      if (!(e instanceof AbortError)) {
-        showToast({
-          title: "Error adding show to history",
-          style: Toast.Style.Failure,
-        });
-      }
-    }
-    setIsLoading(false);
-  };
-
-  const onSearchTextChange = (text: string): void => {
+  const onSearchTextChange = useCallback((text: string): void => {
     setSearchText(text);
     setPage(1);
-    setTotalPages(1);
-  };
+  }, []);
+
+  const handleAction = useCallback(
+    async (show: TraktShowListItem, action: (show: TraktShowListItem) => Promise<void>) => {
+      setActionLoading(true);
+      try {
+        await action(show);
+      } finally {
+        setActionLoading(false);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (error) {
+      showToast({
+        title: error.message,
+        style: Toast.Style.Failure,
+      });
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (detailsError) {
+      showToast({
+        title: detailsError.message,
+        style: Toast.Style.Failure,
+      });
+    }
+  }, [detailsError]);
+
+  useEffect(() => {
+    if (success) {
+      showToast({
+        title: success,
+        style: Toast.Style.Success,
+      });
+    }
+  }, [success]);
+
+  const isLoading = !!searchText && (!shows || !showDetails.size || actionLoading) && !error && !detailsError;
 
   return (
     <Grid
@@ -112,19 +76,25 @@ export default function Command() {
       throttle={true}
     >
       <Grid.EmptyView title="Search for shows" />
-      <ShowGrid
+      <ShowGridItems
         shows={shows}
+        showDetails={showDetails}
+        subtitle={(show) => show.show.year?.toString() || ""}
         page={page}
         totalPages={totalPages}
         setPage={setPage}
-        watchlistActionTitle="Add to Watchlist"
-        watchlistAction={onAddShowToWatchlist}
-        watchlistActionIcon={Icon.Bookmark}
-        watchlistActionShortcut={Keyboard.Shortcut.Common.Edit}
-        historyActionTitle="Add to History"
-        historyActionIcon={Icon.Clock}
-        historyActionShortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
-        historyAction={onAddShowToHistory}
+        primaryActionTitle="Add to Watchlist"
+        primaryActionIcon={Icon.Bookmark}
+        primaryActionShortcut={Keyboard.Shortcut.Common.Edit}
+        primaryAction={(show) => handleAction(show, addShowToWatchlistMutation)}
+        secondaryActionTitle="Add to History"
+        secondaryActionIcon={Icon.Clock}
+        secondaryActionShortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+        secondaryAction={(show) => handleAction(show, addShowToHistoryMutation)}
+        tertiaryActionTitle="Check-in first episode"
+        tertiaryActionIcon={Icon.Checkmark}
+        tertiaryActionShortcut={Keyboard.Shortcut.Common.Duplicate}
+        tertiaryAction={(show) => handleAction(show, checkInFirstEpisodeMutation)}
       />
     </Grid>
   );

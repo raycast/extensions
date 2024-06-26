@@ -1,79 +1,55 @@
-import { Action, ActionPanel, Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
-import { getFavicon } from "@raycast/utils";
-import { setMaxListeners } from "events";
-import { AbortError } from "node-fetch";
-import { useEffect, useRef, useState } from "react";
-import { checkInEpisode, getUpNextShows, updateShowProgress } from "./api/shows";
-import { getTMDBShowDetails } from "./api/tmdb";
-import { Seasons } from "./components/seasons";
-import { APP_MAX_LISTENERS } from "./lib/constants";
-import { getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/helper";
+import { Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
+import { useCallback, useEffect, useState } from "react";
+import { ShowGridItems } from "./components/show-grid";
+import { useShowDetails } from "./hooks/useShowDetails";
+import { useUpNextShows } from "./hooks/useUpNextShows";
 
 export default function Command() {
-  const abortable = useRef<AbortController>();
-  const [isLoading, setIsLoading] = useState(false);
-  const [shows, setShows] = useState<TraktUpNextShowList | undefined>();
-  const [x, forceRerender] = useState(0);
+  const [page, setPage] = useState(1);
+  const { shows, totalPages, checkInNextEpisodeMutation, error, success } = useUpNextShows(page);
+  const { details: showDetails, error: detailsError } = useShowDetails(shows);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const handleAction = useCallback(
+    async (show: TraktShowListItem, action: (show: TraktShowListItem) => Promise<void>) => {
+      setActionLoading(true);
+      try {
+        await action(show);
+      } finally {
+        setActionLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
-    (async () => {
-      if (abortable.current) {
-        abortable.current.abort();
-      }
-      abortable.current = new AbortController();
-      setMaxListeners(APP_MAX_LISTENERS, abortable.current?.signal);
-      setIsLoading(true);
-      try {
-        const shows = await getUpNextShows(abortable.current?.signal);
-        setShows(shows);
-
-        const showsWithImages = (await Promise.all(
-          shows.map(async (show) => {
-            show.show.details = await getTMDBShowDetails(show.show.ids.tmdb, abortable.current?.signal);
-            return show;
-          }),
-        )) as TraktUpNextShowList;
-
-        setShows(showsWithImages);
-      } catch (e) {
-        if (!(e instanceof AbortError)) {
-          showToast({
-            title: "Error getting on deck shows",
-            style: Toast.Style.Failure,
-          });
-        }
-      }
-      setIsLoading(false);
-      return () => {
-        if (abortable.current) {
-          abortable.current.abort();
-        }
-      };
-    })();
-  }, [x]);
-
-  const onCheckInNextEpisode = async (episodeId: number | undefined, showId: number) => {
-    if (episodeId) {
-      setIsLoading(true);
-      try {
-        await checkInEpisode(episodeId, abortable.current?.signal);
-        await updateShowProgress(showId, abortable.current?.signal);
-        showToast({
-          title: "Episode checked in",
-          style: Toast.Style.Success,
-        });
-      } catch (e) {
-        if (!(e instanceof AbortError)) {
-          showToast({
-            title: "Error checking in episode",
-            style: Toast.Style.Failure,
-          });
-        }
-      }
-      setIsLoading(false);
-      forceRerender((value) => value + 1);
+    if (error) {
+      showToast({
+        title: error.message,
+        style: Toast.Style.Failure,
+      });
     }
-  };
+  }, [error]);
+
+  useEffect(() => {
+    if (detailsError) {
+      showToast({
+        title: detailsError.message,
+        style: Toast.Style.Failure,
+      });
+    }
+  }, [detailsError]);
+
+  useEffect(() => {
+    if (success) {
+      showToast({
+        title: success,
+        style: Toast.Style.Success,
+      });
+    }
+  }, [success]);
+
+  const isLoading = ((!shows || !showDetails.size) && !error && !detailsError) || actionLoading;
 
   return (
     <Grid
@@ -83,54 +59,20 @@ export default function Command() {
       searchBarPlaceholder="Search for shows that are up next"
       throttle={true}
     >
-      {shows &&
-        shows.map((show) => (
-          <Grid.Item
-            title={show.show.title}
-            subtitle={`${show.show.progress?.next_episode?.season}x${show.show.progress?.next_episode?.number.toString().padStart(2, "0")}`}
-            content={getPosterUrl(show.show.details?.poster_path, "poster.png")}
-            key={show.show.ids.trakt}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section>
-                  <Action.OpenInBrowser
-                    icon={getFavicon("https://trakt.tv")}
-                    title="Open in Trakt"
-                    url={getTraktUrl("shows", show.show.ids.slug)}
-                  />
-                  <Action.OpenInBrowser
-                    icon={getFavicon("https://www.imdb.com")}
-                    title="Open in IMDb"
-                    url={getIMDbUrl(show.show.ids.imdb)}
-                  />
-                </ActionPanel.Section>
-                <ActionPanel.Section>
-                  <Action.Push
-                    icon={Icon.Switch}
-                    title="Seasons"
-                    shortcut={Keyboard.Shortcut.Common.Open}
-                    target={
-                      <Seasons
-                        traktId={show.show.ids.trakt}
-                        tmdbId={show.show.ids.tmdb}
-                        slug={show.show.ids.slug}
-                        imdbId={show.show.ids.imdb}
-                      />
-                    }
-                  />
-                  <Action
-                    icon={Icon.Checkmark}
-                    title={"Check-in Next Episode"}
-                    shortcut={Keyboard.Shortcut.Common.Edit}
-                    onAction={() =>
-                      onCheckInNextEpisode(show.show.progress?.next_episode?.ids.trakt, show.show.ids.trakt)
-                    }
-                  />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        ))}
+      <ShowGridItems
+        shows={shows}
+        showDetails={showDetails}
+        subtitle={(show) =>
+          `${show.show.progress?.next_episode?.season}x${show.show.progress?.next_episode?.number.toString().padStart(2, "0")}`
+        }
+        page={page}
+        totalPages={totalPages}
+        setPage={setPage}
+        primaryActionTitle="Check-in Next Episode"
+        primaryActionIcon={Icon.Checkmark}
+        primaryActionShortcut={Keyboard.Shortcut.Common.Edit}
+        primaryAction={(show) => handleAction(show, checkInNextEpisodeMutation)}
+      />
     </Grid>
   );
 }

@@ -7,7 +7,6 @@ declare type TraktMovieList = Array<{
   movie: {
     title: string;
     year?: number;
-    details?: TMDBMovieDetails;
     ids: {
       trakt: number;
       slug: string;
@@ -32,7 +31,7 @@ declare type TraktShowList = Array<{
   show: {
     title: string;
     year?: number;
-    details?: TMDBShowDetails;
+    progress?: TraktShowProgress;
     ids: {
       trakt: number;
       slug: string;
@@ -62,10 +61,9 @@ declare type TraktSeasonList = Array<{
   aired_episodes: number;
   title: string;
   overview?: string;
-  first_aired: string;
+  first_aired?: string;
   udpated_at: string;
   network: string;
-  details?: TMDBSeasonDetails;
 }>;
 
 declare type TraktSeasonListItem = ArrayElementType<TraktSeasonList>;
@@ -90,31 +88,9 @@ declare type TraktEpisodeList = Array<{
   available_translations: Array<string>;
   runtime: number;
   episode_type: string;
-  details?: TMDBEpisodeDetails;
 }>;
 
 declare type TraktEpisodeListItem = ArrayElementType<TraktEpisodeList>;
-
-declare type TraktUpNextShowList = Array<{
-  plays: number;
-  last_watched_at: string;
-  last_updated_at: string;
-  show: {
-    title: string;
-    year: number;
-    details?: TMDBShowDetails;
-    progress?: TraktShowProgress;
-    ids: {
-      trakt: number;
-      slug: string;
-      tvdb: number;
-      imdb: string;
-      tmdb: number;
-    };
-  };
-}>;
-
-declare type TraktUpNextShowListItem = ArrayElementType<TraktUpNextShowList>;
 
 declare type TraktShowProgress = {
   aired: number;
