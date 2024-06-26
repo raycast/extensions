@@ -11,7 +11,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "shorten-clipboard",
+      "name": "index",
       "title": "Shorten URL Using Clipboard",
       "subtitle": "U301.com",
       "description": "Shorten URLs in Clipboard",
