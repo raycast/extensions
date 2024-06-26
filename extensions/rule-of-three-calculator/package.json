@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rule-of-three-calculator",
+  "title": "Rule of Three Calculator",
+  "description": "Simplify your calculations with the Rule of Three Calculator Raycast extension. Quickly determine proportional values by entering known quantities and letting the extension do the math for you. Ideal for anyone needing fast, accurate calculations in business, science, or everyday tasks.",
+  "icon": "command_icon.png",
+  "author": "luarmr",
+  "contributors": ["r22"],
+  "categories": [
+    "Data",
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Rule of Three",
+      "subtitle": "Calculator",
+      "description": "Enter the known values to calculate the proportional result using the Rule of Three. Input the first pair of related quantities and one additional value to find the missing fourth value effortlessly",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.76.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
