@@ -68,6 +68,10 @@ function CreateTimeEntryForm({
     }
   }
 
+  const isWorkspacePremium = useMemo(() => {
+    return workspaces.find((workspace) => workspace.id === selectedWorkspace)?.premium;
+  }, [workspaces, selectedWorkspace]);
+
   const filteredClients = useMemo(() => {
     if (selectedProject) return clients.filter((client) => !client.archived && client.id === selectedProject.client_id);
     else return clients.filter((client) => !client.archived && client.wid === selectedWorkspace);
@@ -196,7 +200,7 @@ function CreateTimeEntryForm({
           ))}
       </Form.TagPicker>
 
-      <Form.Checkbox id="billable" label="Billable" value={billable} onChange={setBillable} />
+      {isWorkspacePremium && <Form.Checkbox id="billable" label="Billable" value={billable} onChange={setBillable} />}
     </Form>
   );
 }
