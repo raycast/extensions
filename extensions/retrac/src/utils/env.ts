@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export const apiKey = getPreferenceValues<Preferences>().apiKey;
+const preferences = getPreferenceValues<Preferences>();
 
-export const projectSlug = getPreferenceValues<Preferences>().projectSlug;
+export const apiKey = preferences.apiKey;
+export const projectSlug = preferences.projectSlug;

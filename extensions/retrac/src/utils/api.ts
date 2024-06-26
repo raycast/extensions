@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 // import { apiKey } from "../hooks/hooks";
 // import { Item } from "../types/types";
 import { useMutation, useQuery, useQueryClient } from "react-query";
@@ -39,8 +39,8 @@ export const useDeleteItem = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (itemId: string) => {
-      const response = await deleteItem(itemId);
-      return response.data as DomainResponse;
+      const response: AxiosResponse = await deleteItem(itemId);
+      return response;
     },
     onSuccess: () => queryClient.invalidateQueries("allItems"),
   });
@@ -73,7 +73,7 @@ const getAllItems = async () => {
   });
 };
 
-const deleteItem = async (itemId: string) => {
+const deleteItem = async (itemId: string): Promise<AxiosResponse> => {
   return axios({
     method: "DELETE",
     url: `${BASE_API_URL}/${itemId}?projectSlug=${projectSlug}`,

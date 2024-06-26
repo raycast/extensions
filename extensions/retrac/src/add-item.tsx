@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, Icon, LaunchProps, LaunchType, showToast, Toast } from "@raycast/api";
-import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { useForm, FormValidation } from "@raycast/utils";
 import { useCreateItem } from "./utils/api"; // You will need to implement this API call
 
 const queryClient = new QueryClient();
@@ -15,46 +15,67 @@ export default function AddItemWrapper(
   );
 }
 
+interface ItemFormValues {
+  sku: string;
+  description?: string;
+  quantity?: string;
+  cost?: string;
+}
+
 function AddItem(
   props: LaunchProps<{ arguments: { sku?: string; description?: string; quantity?: number; cost?: number } }>,
 ) {
-  const {
-    sku: argumentSku,
-    description: argumentDescription,
-    quantity: argumentQuantity,
-    cost: argumentCost,
-  } = props.arguments;
-  const [sku, setSku] = useState<string>(argumentSku ?? "");
-  const [description, setDescription] = useState<string | undefined>(argumentDescription);
-  const [quantity, setQuantity] = useState<number | undefined>(argumentQuantity);
-  const [cost, setCost] = useState<number | undefined>(argumentCost);
+  const { sku: argumentSku, description: argumentDescription, quantity: argumentQuantity, cost: argumentCost } = props.arguments;
   const { mutate: addItem, isLoading } = useCreateItem();
 
-  async function handleSubmit() {
-    addItem(
-      { sku, description, quantity, cost },
-      {
-        onSuccess: async () => {
-          setSku("");
-          setDescription("");
-          setQuantity(undefined);
-          setCost(undefined);
-          showToast({
-            title: "Item added successfully",
-            message: "The item has been added to your inventory.",
-            style: Toast.Style.Success,
-          });
+  const { handleSubmit, itemProps, reset } = useForm<ItemFormValues>({
+    onSubmit: async (values) => {
+      addItem(
+        {
+          ...values,
+          quantity: values.quantity ? parseInt(values.quantity, 10) : undefined,
+          cost: values.cost ? parseFloat(values.cost) : undefined,
         },
-        onError: () => {
-          showToast({
-            title: "Failed to add item",
-            message: "There was an error adding the item to your inventory.",
-            style: Toast.Style.Failure,
-          });
+        {
+          onSuccess: async () => {
+            reset();
+            showToast({
+              title: "Item added successfully",
+              message: "The item has been added to your inventory.",
+              style: Toast.Style.Success,
+            });
+          },
+          onError: () => {
+            showToast({
+              title: "Failed to add item",
+              message: "There was an error adding the item to your inventory.",
+              style: Toast.Style.Failure,
+            });
+          },
         },
+      );
+    },
+    validation: {
+      sku: FormValidation.Required,
+      description: FormValidation.Required,
+      quantity: (value) => {
+        if (value && (isNaN(parseInt(value, 10)) || parseInt(value, 10) <= 0)) {
+          return "Quantity must be a positive number";
+        }
       },
-    );
-  }
+      cost: (value) => {
+        if (value && (isNaN(parseFloat(value)) || parseFloat(value) <= 0)) {
+          return "Cost must be a positive number";
+        }
+      },
+    },
+    initialValues: {
+      sku: argumentSku || "",
+      description: argumentDescription || "",
+      quantity: argumentQuantity?.toString() || "",
+      cost: argumentCost?.toString() || "",
+    },
+  });
 
   return (
     <Form
@@ -67,32 +88,24 @@ function AddItem(
     >
       <Form.Description text="Add a new item to your inventory." />
       <Form.TextField
-        id="sku"
+        {...itemProps.sku}
         title="Item Code"
         placeholder="Enter SKU/ItemCode"
-        value={sku}
-        onChange={(newValue) => setSku(newValue)}
       />
       <Form.TextField
-        id="description"
+        {...itemProps.description}
         title="Description"
         placeholder="Enter item description"
-        value={description}
-        onChange={(newValue) => setDescription(newValue)}
       />
       <Form.TextField
-        id="quantity"
+        {...itemProps.quantity}
         title="Quantity"
         placeholder="Enter quantity"
-        value={quantity !== undefined ? quantity.toString() : ""}
-        onChange={(newValue) => setQuantity(newValue ? parseInt(newValue, 10) : undefined)}
       />
       <Form.TextField
-        id="cost"
+        {...itemProps.cost}
         title="Cost"
         placeholder="Enter cost"
-        value={cost !== undefined ? cost.toString() : ""}
-        onChange={(newValue) => setCost(newValue ? parseFloat(newValue) : undefined)}
       />
     </Form>
   );

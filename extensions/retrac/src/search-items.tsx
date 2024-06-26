@@ -1,8 +1,10 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ActionGoRetrac } from "./components/action-go-retrac";
 import { ListEmptyView } from "./components/list-empty-view";
 import { useDeleteItem, useGetAllItems } from "./utils/api";
+import { Item } from "./utils/types";
+import { AxiosResponse } from "axios";
 
 const queryClient = new QueryClient();
 export default function SearchItemsWrapper() {
@@ -15,7 +17,29 @@ export default function SearchItemsWrapper() {
 function SearchItems() {
   const { data: allItems, isLoading } = useGetAllItems();
 
-  const { mutate: deleteItem, isLoading: isDeleting } = useDeleteItem();
+  const { mutateAsync: deleteItem, isLoading: isDeleting } = useDeleteItem();
+
+
+  async function confirmAndDelete(item: Item, deleteItem: (itemId: string) => Promise<AxiosResponse>) {
+    if (
+      await confirmAlert({
+        title: `Delete '${item.sku}'?`,
+        message: `id: ${item.id}`,
+        primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+      })
+    ) {
+      try {
+        const response = await deleteItem(item.id);
+        if (response.status === 200) {
+          await showToast(Toast.Style.Success, "Deleted item");
+        } else {
+          await showToast(Toast.Style.Failure, "Failed to delete item");
+        }
+      } catch (error) {
+        await showToast(Toast.Style.Failure, "Failed to delete item");
+      }
+    }
+  }
 
   return (
     <List
@@ -64,8 +88,9 @@ function SearchItems() {
                 <Action
                   icon={Icon.Trash}
                   title={"Delete Item"}
+                  style={Action.Style.Destructive}
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
-                  onAction={() => deleteItem(value.id)}
+                  onAction={() => confirmAndDelete(value, deleteItem)}
                 />
                 <ActionGoRetrac />
               </ActionPanel>
