@@ -10,10 +10,13 @@ export interface TripsProps {
   searchArrival: boolean;
 }
 
+const formatter = Intl.DateTimeFormat("en-NL", {
+  timeStyle: "short",
+  timeZone: "Europe/Amsterdam"
+});
+
 export function Trips(props: TripsProps) {
   const { isLoading, data } = useTripSearch(props.fromStation, props.toStation, props.date, props.searchArrival);
-
-  console.log("Trips props", props);
 
   return <List
     isLoading={isLoading}
@@ -23,24 +26,33 @@ export function Trips(props: TripsProps) {
   </List>;
 }
 
+function getTripTime(trip: Trip): [string, string] {
+  if (trip.legs.length === 1) {
+    const start = new Date(Date.parse((trip.legs[0].origin.actualDateTime ?? trip.legs[0].origin.plannedDateTime)!));
+    const end = new Date(Date.parse((trip.legs[0].destination.actualDateTime ?? trip.legs[0].destination.plannedDateTime)!));
+    return [formatter.format(start), formatter.format(end)];
+  }
+
+  const start = new Date(Date.parse((trip.legs[0].origin.actualDateTime ?? trip.legs[0].origin.plannedDateTime)!));
+  const end = new Date(Date.parse((trip.legs[trip.legs.length - 1].destination.actualDateTime ?? trip.legs[trip.legs.length - 1].destination.plannedDateTime)!));
+  return [formatter.format(start), formatter.format(end)];
+}
+
 function renderTripRow(trip: Trip) {
   const fromStationName: string | undefined = trip.legs[0].origin.name;
   const toStationName: string | undefined = trip.legs.length === 1 ? trip.legs[0].destination.name : trip.legs[trip.legs.length - 1].destination.name;
+  const tripTime = getTripTime(trip);
   const transfers: number | undefined = trip.legs.length > 1 ? trip.legs.length - 1 : undefined;
   const products: string[] = [];
   const accessories: Accessory[] = [];
+
+  console.log("trip time range", tripTime);
 
   trip.legs.forEach((l, idx, arr) => {
     if (l.product !== undefined) {
       products.push(l.product.shortCategoryName!);
     }
   });
-
-  // if (trip.legs.length > 0 && trip.legs[0].origin.actualDateTime !== undefined) {
-  //   accessories.push({
-  //     text: { value: trip.legs[0].origin.actualDateTime!.toTimeString() }
-  //   });
-  // }
 
   if (transfers !== undefined) {
     accessories.push({
@@ -72,6 +84,14 @@ function renderTripRow(trip: Trip) {
         break;
     }
   }
+
+  accessories.push({
+    text: {
+      value: `${tripTime[0]} - ${tripTime[1]}`,
+      color: Color.PrimaryText
+    }
+  });
+
 
   if (trip.plannedDurationInMinutes !== undefined) {
     accessories.push({

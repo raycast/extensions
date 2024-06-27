@@ -15,18 +15,6 @@
       "title": "Find a train",
       "description": "Zoek een trein/Find a train",
       "mode": "view"
-    },
-    {
-      "name": "station",
-      "title": "Search a station",
-      "description": "Search a station",
-      "mode": "view"
-    },
-    {
-      "name": "user-routes",
-      "title": "Your favorite routes",
-      "description": "List of your favorite routes",
-      "mode": "view"
     }
   ],
   "preferences": [

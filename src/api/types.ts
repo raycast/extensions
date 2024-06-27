@@ -4059,7 +4059,7 @@ export interface TripOriginDestination {
    * @type {Date}
    * @memberof TripOriginDestination
    */
-  plannedDateTime?: Date;
+  plannedDateTime?: string;
   /**
    *
    * @type {number}
@@ -4071,7 +4071,7 @@ export interface TripOriginDestination {
    * @type {Date}
    * @memberof TripOriginDestination
    */
-  actualDateTime?: Date;
+  actualDateTime?: string;
   /**
    *
    * @type {string}

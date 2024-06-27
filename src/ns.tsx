@@ -53,7 +53,7 @@ export default function Command() {
         <Form.Dropdown.Item key="departure" value="departure" title="Departure" />
         <Form.Dropdown.Item key="arrival" value="arrival" title="Arrival" />
       </Form.Dropdown>
-      <Form.DatePicker id="when" title="Date" defaultValue={new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes() + 20)} />
+      <Form.DatePicker id="when" title="Date" defaultValue={new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes())} />
     </Form>
   );
 }
