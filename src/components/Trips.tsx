@@ -46,8 +46,6 @@ function renderTripRow(trip: Trip) {
   const products: string[] = [];
   const accessories: Accessory[] = [];
 
-  console.log("trip time range", tripTime);
-
   trip.legs.forEach((l, idx, arr) => {
     if (l.product !== undefined) {
       products.push(l.product.shortCategoryName!);
@@ -111,11 +109,6 @@ function renderTripRow(trip: Trip) {
       key={trip.uid}
       title={`${fromStationName} - ${toStationName}`}
       accessories={accessories}
-      actions={
-        <ActionPanel>
-          <Action title="Add to Favorite" onAction={() => console.log(`${trip} selected`)} />
-        </ActionPanel>
-      }
     />
   );
 }

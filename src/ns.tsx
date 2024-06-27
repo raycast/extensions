@@ -29,7 +29,6 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Search a trips" onSubmit={searchTrips} />
-          <Action.SubmitForm title="Add to favorite" />
         </ActionPanel>
       }
     >
