@@ -49,12 +49,6 @@
       "mode": "no-view"
     },
     {
-      "name": "toggle-speaker-notes",
-      "title": "Toggle Speaker Notes",
-      "description": "Show/hide speaker notes",
-      "mode": "no-view"
-    },
-    {
       "name": "toggle-recording-area-cover",
       "title": "Toggle Recording Area Cover",
       "description": "Turn on/off recording area cover",
