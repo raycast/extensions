@@ -1,6 +1,8 @@
 # Jira Changelog
 
-## [Fix] 2024-06-17
+## [Added keyword to search] - 2024-06-27
+
+## [Fix] - 2024-06-17
 
 - Fixed an issue where adding a port to the URL was not possible
 
