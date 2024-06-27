@@ -69,7 +69,7 @@ export default function PackageList() {
     <List
       searchText={searchTerm}
       isLoading={isLoading}
-      searchBarPlaceholder={`Search packages, like "promises"…`}
+      searchBarPlaceholder={`Search packages, like "fastapi"…`}
       onSearchTextChange={setSearchTerm}
     >
       {searchTerm ? (

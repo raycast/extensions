@@ -17,7 +17,7 @@ import {
   removeItemFromFavorites,
 } from '../utils/favorite-storage'
 import Favorites from '../favorites'
-import { PyPIPackage } from '../model/pypiSearch.model'
+import type { PyPIPackage } from '../model/pypiSearch.model'
 
 interface PackageListItemProps {
   result: PyPIPackage

@@ -4,11 +4,9 @@
   "title": "Search PyPI Packages",
   "description": "Search for PyPI package information",
   "subtitle": "pypi",
-  "icon": "command-icon.png",
+  "icon": "icon.png",
   "author": "patrick91",
-  "contributors": [
-    "patrick91"
-  ],
+  "contributors": [],
   "license": "MIT",
   "categories": [
     "Developer Tools"
