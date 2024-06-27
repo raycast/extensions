@@ -15,7 +15,7 @@ import { IssuePriorityValue, User } from "@linear/sdk";
 
 import { getLastCreatedIssues, IssueResult } from "../api/getIssues";
 import { createIssue, CreateIssuePayload } from "../api/createIssue";
-import { createAttachment } from "../api/attachments";
+import { attachLinkUrl, createAttachment } from "../api/attachments";
 
 import useLabels from "../hooks/useLabels";
 import useStates from "../hooks/useStates";
@@ -37,6 +37,7 @@ import { getTeamIcon } from "../helpers/teams";
 import IssueDetail from "./IssueDetail";
 import { getMilestoneIcon } from "../helpers/milestones";
 import useUsers from "../hooks/useUsers";
+import { getLinksFromNewLines } from "../helpers/links";
 
 type CreateIssueFormProps = {
   assigneeId?: string;
@@ -67,6 +68,7 @@ export type CreateIssueValues = {
   milestoneId: string;
   parentId: string;
   attachments: string[];
+  links: string;
 };
 
 function getCopyToastAction(copyToastAction: Preferences.CreateIssue["copyToastAction"], issue: IssueResult) {
@@ -160,9 +162,31 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
             dueDate: null,
             parentId: "",
             attachments: [],
+            links: "",
           });
 
           hasMoreThanOneTeam && autofocusField ? focus(autofocusField) : focus("title");
+
+          const links = getLinksFromNewLines(values.links);
+          if (links.length > 0) {
+            const linkWord = links.length === 1 ? "link" : "links";
+            try {
+              toast.message = `Attaching ${linkWord}…`;
+              await Promise.all(
+                links.map((link) =>
+                  attachLinkUrl({
+                    issueId: issue.id,
+                    url: link,
+                  }),
+                ),
+              );
+              toast.message = `Successfully attached ${linkWord}`;
+            } catch (error) {
+              toast.style = Toast.Style.Failure;
+              toast.title = `Failed attaching ${linkWord}`;
+              toast.message = getErrorMessage(error);
+            }
+          }
 
           if (values.attachments.length > 0) {
             const attachmentWord = values.attachments.length === 1 ? "attachment" : "attachments";
@@ -211,6 +235,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       projectId: props.draftValues?.projectId || props.projectId,
       milestoneId: props.draftValues?.milestoneId || props.milestoneId,
       parentId: props.draftValues?.parentId || props.parentId,
+      links: props.draftValues?.links || "",
     },
   });
 
@@ -431,6 +456,11 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       <Form.Separator />
 
       <Form.FilePicker title="Attachment" {...itemProps.attachments} />
+      <Form.TextArea
+        title={"Links"}
+        placeholder={"https://a.com\nhttps://b.com\nNew link(s) on separate line(s)"}
+        {...itemProps.links}
+      />
     </Form>
   );
 }

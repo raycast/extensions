@@ -29,6 +29,7 @@ import MilestoneSubmenu from "./MilestoneSubmenu";
 import OpenInLinear from "../OpenInLinear";
 import { useState } from "react";
 import useUsers from "../../hooks/useUsers";
+import { IssueAttachmentsForm } from "../IssueAttachmentsForm";
 
 type IssueActionsProps = {
   issue: IssueResult;
@@ -504,6 +505,13 @@ export default function IssueActions({
             shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "l" }}
           />
         ) : null}
+
+        <Action.Push
+          title="Add Attachments"
+          icon={Icon.NewDocument}
+          target={<IssueAttachmentsForm issue={issue} />}
+          shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "a" }}
+        />
 
         <Action.Push
           title="Add Comment"
