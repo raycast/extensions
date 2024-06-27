@@ -68,7 +68,8 @@
     "install": "^0.13.0",
     "jimp": "^0.22.12",
     "node-screenshots": "^0.2.0",
-    "npm": "^10.8.1"
+    "npm": "^10.8.1",
+    "prettier": "^3.3.2"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",
