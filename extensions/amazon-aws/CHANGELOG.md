@@ -1,5 +1,11 @@
 # Amazon AWS Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Reverts back to rendering all pipelines at once. We can add wait later if this causes issues
+- Optimized the mutation for pipeline actions even further.
+- Reduced AWS calls during initial rendering. Also revalidates the list in pipeline action sub-menus every time it is opened.
+
 ## [Fixes] - 2024-06-24
 
 - Fixed [the issue](https://github.com/raycast/extensions/issues/13088) when codepipeline(s) are rendered with no executions.
