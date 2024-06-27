@@ -1,6 +1,6 @@
 # Social Network Trends Changelog
 
-## [Show Trend on Menubar Title] - {PR_MERGE_DATE}
+## [Show Trend on Menubar Title] - 2024-06-27
 
 - Show the first trend on the menu bar title
 - Data loading performance optimisation
