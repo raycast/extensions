@@ -6,3 +6,20 @@ export const API_HEADERS = {
     Authorization: `Bearer ${API_PAT}`,
     "Content-Type": "application/json"
 }
+
+export const ACLs = {
+    abuse: "Receive AUP/ToS Notifications",
+    alerts: "Receive Maintenance Notifications",
+    billing: "Manage Billing",
+    dns: "Manage DNS",
+    firewall: "Manage Firewall",
+    loadbalancer: "Manage Load Balancers",
+    manage_users: "Manage Users",
+    objstore: "Manage Object Storage",
+    provisioning: "Deploy New Servers",
+    subscriptions: "Manage Servers",
+    subscriptions_view: "View Servers",
+    support: "Create Support Tickets",
+    upgrade: "Upgrade Existing Servers",
+    vke: "Manage Vultr Kubernetes Engines"
+}

@@ -1,18 +1,4 @@
-type ACL = "manage_users"
-      | "subscriptions_view"
-      | "subscriptions"
-      | "billing"
-      | "support"
-      | "provisioning"
-      | "dns"
-      | "abuse"
-      | "upgrade"
-      | "firewall"
-      | "alerts"
-      | "objstore"
-      | "loadbalancer"
-      | "vke"
-      | "vcr";
+import { ACL } from ".";
 
 export type Account = {
     balance: number;

@@ -3,7 +3,7 @@
   "name": "vultr",
   "title": "Vultr",
   "description": "",
-  "icon": "command-icon.png",
+  "icon": "vultr.png",
   "author": "xmok",
   "categories": [
     "Applications",
@@ -30,6 +30,12 @@
     {
       "name": "billing-history",
       "title": "Billing History",
+      "description": "",
+      "mode": "view"
+    },
+    {
+      "name": "users",
+      "title": "Users",
       "description": "",
       "mode": "view"
     }
