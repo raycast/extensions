@@ -6,15 +6,21 @@ import {
   Cache,
   getPreferenceValues,
   Icon as RaycastIcon,
+  showToast,
+  Toast,
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { createGlobalState } from 'react-hooks-global-state';
 import Service, { Icon, Set } from './service';
-import { toDataURI, toSvg, toURL } from './utils';
+import { copyToClipboard, toDataURI, toSvg, toURL } from './utils';
+import { iconColorEnum, primaryActionEnum } from './types/perferenceValues';
+import { promises } from 'dns';
 
 const { primaryAction } = getPreferenceValues<{
-  primaryAction: 'paste' | 'copy' | 'pasteName';
+  primaryAction: primaryActionEnum;
 }>();
+
+const { iconColor } = getPreferenceValues<{ iconColor: iconColorEnum }>();
 
 const service = new Service();
 const cache = new Cache({
@@ -151,12 +157,31 @@ function Command() {
           .slice(itemsPerPage * page, itemsPerPage * (page + 1))
           .map((icon) => {
             const { id, body, width, height } = icon;
-            const svgIcon = toSvg(body, width, height);
+            const svgIcon = toSvg(body, width, height, iconColor);
             const dataURIIcon = toDataURI(svgIcon);
 
-            const paste = <Action.Paste title="Paste SVG" content={svgIcon} />;
+            const paste = (
+              <Action.Paste title="Paste SVG String" content={svgIcon} />
+            );
             const copy = (
-              <Action.CopyToClipboard title="Copy SVG" content={svgIcon} />
+              <Action.CopyToClipboard
+                title="Copy SVG String"
+                content={svgIcon}
+              />
+            );
+            const copyFile = (
+              <Action
+                title="Copy SVG File"
+                icon={RaycastIcon.Clipboard}
+                onAction={async () => {
+                  await copyToClipboard(svgIcon, id);
+                  await showToast({
+                    title: 'Copied to clipboard',
+                    message: 'The SVG file has been copied to the clipboard.',
+                    style: Toast.Style.Success,
+                  });
+                }}
+              />
             );
             const pasteName = activeSetId && (
               <Action.Paste
@@ -176,24 +201,36 @@ function Command() {
                 title={id}
                 actions={
                   <ActionPanel>
-                    {primaryAction === 'paste' && (
+                    {primaryAction === primaryActionEnum.paste && (
                       <>
                         {paste}
                         {copy}
+                        {copyFile}
                         {pasteName}
                       </>
                     )}
-                    {primaryAction === 'copy' && (
+                    {primaryAction === primaryActionEnum.copy && (
                       <>
                         {copy}
                         {paste}
+                        {copyFile}
+                        {pasteName}
                       </>
                     )}
-                    {primaryAction === 'pasteName' && (
+                    {primaryAction === primaryActionEnum.pasteName && (
                       <>
                         {pasteName}
                         {paste}
                         {copy}
+                        {copyFile}
+                      </>
+                    )}
+                    {primaryAction === primaryActionEnum.copyFile && (
+                      <>
+                        {copyFile}
+                        {copy}
+                        {paste}
+                        {pasteName}
                       </>
                     )}
                     {activeSetId && (
