@@ -3,6 +3,7 @@
 ## [Refactor Command] - {PR_MERGE_DATE}
 
 - Simplify the code and improve performance
+- Use useForm to optimise performance
 - Support saving gist as snippets
 
 ## [Add Copy Raw Link action] - 2023-11-09

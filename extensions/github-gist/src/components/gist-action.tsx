@@ -18,8 +18,8 @@ export function GistAction(props: {
   return (
     <>
       <Action
-        title={primaryAction === "copy" ? "Copy to Clipboard" : "Paste to " + fronstmostApp.name}
-        icon={primaryAction === "copy" ? Icon.Clipboard : { fileIcon: fronstmostApp.path }}
+        title={primaryAction === "copy" ? "Copy to Clipboard" : "Paste to " + fronstmostApp?.name}
+        icon={primaryAction === "copy" ? Icon.Clipboard : { fileIcon: fronstmostApp?.path }}
         onAction={async () => {
           if (primaryAction === "copy") {
             await Clipboard.copy(gistFileContent);
@@ -31,8 +31,8 @@ export function GistAction(props: {
         }}
       />
       <Action
-        title={primaryAction === "copy" ? "Paste to " + fronstmostApp.name : "Copy to Clipboard"}
-        icon={primaryAction === "copy" ? { fileIcon: fronstmostApp.path } : Icon.Clipboard}
+        title={primaryAction === "copy" ? "Paste to " + fronstmostApp?.name : "Copy to Clipboard"}
+        icon={primaryAction === "copy" ? { fileIcon: fronstmostApp?.path } : Icon.Clipboard}
         onAction={async () => {
           if (primaryAction === "copy") {
             await Clipboard.paste(gistFileContent);
@@ -57,46 +57,17 @@ export function GistAction(props: {
                     onAction={async () => {
                       const response = await starGist(gist.gist_id);
                       if (response.status == 204) {
-                        await showToast(Toast.Style.Success, "Star gist success!");
+                        await showToast(Toast.Style.Success, "Gist Stared");
                       } else {
-                        await showToast(Toast.Style.Failure, "Star gist failure.");
+                        await showToast(Toast.Style.Failure, "Failed to Star Gist");
                       }
                     }}
-                  />
-                  <Action.Push
-                    title={"Create Gist"}
-                    icon={Icon.Plus}
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
-                    target={<CreateGist gist={undefined} gistMutate={gistMutate} />}
                   />
                   <Action.Push
                     title={"Edit Gist"}
                     icon={Icon.Pencil}
                     shortcut={{ modifiers: ["cmd"], key: "e" }}
                     target={<CreateGist gist={gist} gistMutate={gistMutate} />}
-                  />
-                  <Action
-                    title={"Delete Gist"}
-                    icon={Icon.Trash}
-                    style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                    onAction={async () => {
-                      await alertDialog(
-                        Icon.Trash,
-                        "Delete Gist",
-                        "Are you sure you want to delete this gist?",
-                        "Confirm",
-                        async () => {
-                          const response = await deleteGist(gist.gist_id);
-                          if (response.status == 204) {
-                            await showToast(Toast.Style.Success, "Delete gist success!");
-                            await gistMutate();
-                          } else {
-                            await showToast(Toast.Style.Failure, "Delete gist failure.");
-                          }
-                        },
-                      );
-                    }}
                   />
                 </>
               );
@@ -110,9 +81,9 @@ export function GistAction(props: {
                   onAction={async () => {
                     const response = await starGist(gist.gist_id);
                     if (response.status == 204) {
-                      await showToast(Toast.Style.Success, "Star gist success!");
+                      await showToast(Toast.Style.Success, "Gist Stared");
                     } else {
-                      await showToast(Toast.Style.Failure, "Star gist failure.");
+                      await showToast(Toast.Style.Failure, "Failed to Star Gist");
                     }
                   }}
                 />
@@ -122,15 +93,15 @@ export function GistAction(props: {
               return (
                 <Action
                   title={"Unstar Gist"}
-                  icon={Icon.Circle}
+                  icon={Icon.StarDisabled}
                   shortcut={{ modifiers: ["cmd"], key: "u" }}
                   onAction={async () => {
                     const response = await unStarGist(gist.gist_id);
                     if (response.status == 204) {
-                      await showToast(Toast.Style.Success, "Unstar gist success!");
+                      await showToast(Toast.Style.Success, "Gist Unstared");
                       await gistMutate();
                     } else {
-                      await showToast(Toast.Style.Failure, "Unstar gist failure.");
+                      await showToast(Toast.Style.Failure, "Failed to Unstar Gist");
                     }
                   }}
                 />
@@ -140,21 +111,47 @@ export function GistAction(props: {
               break;
           }
         })()}
-
+        <Action.Push
+          title={"Create Gist"}
+          icon={Icon.PlusTopRightSquare}
+          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          target={<CreateGist gist={undefined} gistMutate={gistMutate} />}
+        />
         <Action
           title={"Clone Gist"}
-          icon={Icon.Download}
+          icon={Icon.SaveDocument}
           shortcut={{ modifiers: ["cmd"], key: "g" }}
           onAction={async () => {
             await open("x-github-client://openRepo/" + gist.html_url);
             await showHUD("Clone Gist");
           }}
         />
-        <Action.CreateSnippet
-          icon={Icon.Snippets}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-          snippet={{ name: gistFileName, text: gistFileContent }}
-        />
+
+        {tag === GithubGistTag.MY_GISTS && (
+          <Action
+            title={"Delete Gist"}
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            shortcut={{ modifiers: ["ctrl"], key: "x" }}
+            onAction={async () => {
+              await alertDialog(
+                Icon.Trash,
+                "Delete Gist",
+                "Are you sure you want to delete this gist?",
+                "Confirm",
+                async () => {
+                  const response = await deleteGist(gist.gist_id);
+                  if (response.status == 204) {
+                    await showToast(Toast.Style.Success, "Gist Deleted");
+                    await gistMutate();
+                  } else {
+                    await showToast(Toast.Style.Failure, "Failed to Delete Gist");
+                  }
+                },
+              );
+            }}
+          />
+        )}
       </ActionPanel.Section>
 
       <ActionPanel.Section>
@@ -175,6 +172,11 @@ export function GistAction(props: {
           icon={Icon.Globe}
           shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
           url={gist.html_url}
+        />
+        <Action.CreateSnippet
+          icon={Icon.Snippets}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+          snippet={{ name: gistFileName, text: gistFileContent }}
         />
         <Action.OpenInBrowser
           title={"Open in Ray.so"}

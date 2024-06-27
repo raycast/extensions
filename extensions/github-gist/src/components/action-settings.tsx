@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, openCommandPreferences, openExtensionPreferences } from "@raycast/api";
 
-export function ActionOpenPreferences(props: { command: boolean }) {
+export function ActionSettings(props: { command: boolean }) {
   const { command } = props;
   return (
     <ActionPanel.Section>

@@ -2,7 +2,7 @@ import { Octokit } from "@octokit/core";
 import { formatBytes, isEmpty } from "./utils";
 import fetch from "node-fetch";
 import { personalAccessTokens } from "../types/preferences";
-import { Icon } from "@raycast/api";
+import { Clipboard, Icon, open, showToast, Toast } from "@raycast/api";
 
 export interface GistFile {
   filename: string;
@@ -126,24 +126,78 @@ export async function updateGist(gistId: string, description: string, oldFileNam
   });
 }
 
-export function checkGistFileContent(gistFiles: GistFile[]) {
-  const isValid = { valid: true, contentIndex: "" };
-  gistFiles.forEach((value, index) => {
-    if (isEmpty(value.content)) {
-      isValid.valid = false;
-      isValid.contentIndex = isValid.contentIndex + " " + (index + 1);
-    }
+export function validateGistFileName(files: GistFile[]) {
+  const filenameCounts = new Map<string, number>();
+
+  files.forEach((file) => {
+    const count = filenameCounts.get(file.filename) || 0;
+    filenameCounts.set(file.filename, count + 1);
   });
-  return isValid;
+
+  return files.map((file) => {
+    const count = filenameCounts.get(file.filename);
+    return {
+      error: count && count > 1 ? "Content must have unique filename" : undefined,
+    };
+  });
 }
-export function checkGistFileName(gistFiles: GistFile[]) {
-  const nameSet = new Set();
-  const nameList = [];
-  gistFiles.forEach((value) => {
-    if (!isEmpty(value.filename)) {
-      nameSet.add(value.filename);
-      nameList.push(value.filename);
-    }
+
+export function validateGistFileContents(files: GistFile[]) {
+  return files.map((file) => {
+    return {
+      error: !file.content.trim() ? "Content cannot be empty" : undefined,
+    };
   });
-  return nameSet.size === nameList.length;
+}
+
+export async function updateOrCreateGists(
+  isEdit: boolean,
+  gist: Gist,
+  description: string,
+  isPublic: string,
+  gistFiles: GistFile[],
+  oldGistFiles: string[],
+  gistMutate: () => void,
+) {
+  const toast = await showToast(Toast.Style.Animated, isEdit ? "Updating" : "Creating");
+  try {
+    let response;
+    if (isEdit) {
+      response = await updateGist(gist.gist_id, description, oldGistFiles, gistFiles);
+    } else {
+      response = await createGist(description, isPublic === "true", gistFiles);
+    }
+    if (response.status === 201 || response.status === 200) {
+      const options: Toast.Options = {
+        title: "Gist " + (isEdit ? "Updated" : "Created"),
+        primaryAction: {
+          title: "Copy Gist Link",
+          shortcut: { modifiers: ["shift", "cmd"], key: "l" },
+          onAction: (toast) => {
+            Clipboard.copy(String(response.data.html_url));
+            toast.title = "Link Copied to Clipboard";
+          },
+        },
+        secondaryAction: {
+          title: "Open in Browser",
+          shortcut: { modifiers: ["shift", "cmd"], key: "o" },
+          onAction: (toast) => {
+            open(String(response.data.html_url));
+            toast.hide();
+          },
+        },
+      };
+      toast.style = Toast.Style.Success;
+      toast.title = options.title;
+      toast.primaryAction = options.primaryAction;
+      toast.secondaryAction = options.secondaryAction;
+      gistMutate();
+    } else {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to " + (isEdit ? "Update" : "Create");
+    }
+  } catch (error) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Failed to " + (isEdit ? "Update" : "Create");
+  }
 }

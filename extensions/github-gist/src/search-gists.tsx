@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { GithubGistTag, githubGistTags } from "./util/gist-utils";
 import { formatGistContentDetail } from "./util/utils";
 import { GistAction } from "./components/gist-action";
-import { ActionOpenPreferences } from "./components/action-open-preferences";
+import { ActionSettings } from "./components/action-settings";
 import { useGists } from "./hooks/useGists";
 import { rememberTag, showDetail } from "./types/preferences";
 import { useGistContent } from "./hooks/useGistContent";
@@ -77,8 +77,8 @@ export default function main() {
                   key={"gistFile" + gistIndex + gistFileIndex}
                   icon={{ source: Icon.CodeBlock, tintColor: Color.SecondaryText }}
                   title={{
-                    value: gistFile.filename,
-                    tooltip: `${gistFile.filename}
+                    value: gistFile?.filename,
+                    tooltip: `${gistFile?.filename}
 Size: ${gistFile.size}`,
                   }}
                   accessories={[
@@ -103,7 +103,7 @@ Size: ${gistFile.size}`,
                         gistMutate={gistMutate}
                         fronstmostApp={frontmostApp}
                       />
-                      <ActionOpenPreferences command={true} />
+                      <ActionSettings command={true} />
                     </ActionPanel>
                   }
                 />
