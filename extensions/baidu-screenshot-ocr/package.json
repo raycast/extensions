@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "baidu-screenshot-ocr",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "Baidu-Screenshot-OCR",
-  "title": "baidu-scrennshot-ocr",
+  "title": "Baidu-Scrennshot-Ocr",
   "icon": "ocr.png",
   "type": "module",
   "main": "index.js",
@@ -14,7 +14,7 @@
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
-  "author": "zhcf1ess",
+  "author": "zhsama",
   "license": "MIT",
   "categories": [
     "Applications"
@@ -27,7 +27,7 @@
   "commands": [
     {
       "name": "baidu-ocr",
-      "title": "baidu-ocr",
+      "title": "Baidu-Ocr",
       "subtitle": "Baidu Screenshot OCR",
       "description": "Use Baidu OCR API to Screenshot OCR.",
       "mode": "no-view",
@@ -77,7 +77,7 @@
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
     "@types/screenshot-desktop": "^1.12.3",
-    "@zhsama/eslint-config": "^1.0.3",
+    "@raycast/eslint-config": "^1.0.8",
     "commitlint": "^19.3.0",
     "eslint-plugin-markdown": "^5.0.0",
     "husky": "^9.0.11",
