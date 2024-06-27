@@ -1,4 +1,4 @@
-import { open, getPreferenceValues, Grid, ActionPanel, Action } from "@raycast/api";
+import { Action, ActionPanel, Grid, getPreferenceValues, open } from "@raycast/api";
 
 const preferences = getPreferenceValues<Preferences.FileSpeedDial>();
 
@@ -38,7 +38,7 @@ export default function Command() {
       {Array.from(files, ([key, value]) => (
         <Grid.Item
           key={key.valueOf()}
-          title={`| ${key + 1} | value.substring(value.lastIndexOf('/') + 1, value.length)`}
+          title={`| ${key + 1} | ${value.substring(value.lastIndexOf('/') + 1, value.length)}`}
           content={
             //source: `https://api.iconify.design/material-symbols-light/counter-${key + 1}.svg`
             { fileIcon: value }
