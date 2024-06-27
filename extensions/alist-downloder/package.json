@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "alist-downloder",
-  "title": "alist-downloder",
-  "description": "mini alist downloader in raycast",
+  "title": "AList Downloder",
+  "description": "Mini AList downloader in Raycast",
   "icon": "logo.png",
   "author": "SGGb0nd",
   "categories": ["Web", "Applications", "Productivity"],
@@ -10,8 +10,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "alist",
-      "description": "Fetch and display items from Alist",
+      "title": "AList",
+      "description": "Fetch and display items from AList",
       "mode": "view",
       "arguments": [],
       "preferences": [
