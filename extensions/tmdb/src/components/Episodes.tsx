@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Grid, Icon, showToast, Toast, List, Color } from "@raycast/api";
+import { ActionPanel, Action, Icon, showToast, Toast, List } from "@raycast/api";
 import { moviedb } from "../api";
 import { SimpleEpisode } from "moviedb-promise";
 import { useCachedPromise } from "@raycast/utils";
