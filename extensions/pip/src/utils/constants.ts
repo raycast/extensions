@@ -7,3 +7,8 @@ export const NEED_ALLOW_JAVA_SCRIPT_TIP_MESSAGE =
   "You must enable 'Allow JavaScript from Apple Events' in the Developer section of Settings.";
 
 export const IINA = "/Applications/IINA.app";
+
+export enum VideoActionType {
+  Fullscreen = "fullscreen",
+  Pip = "pip",
+}
