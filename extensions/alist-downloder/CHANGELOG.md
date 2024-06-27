@@ -1,3 +1,3 @@
-# alist-ui Changelog
+# AList Downloader
 
-## [Initial Version] - 2024-06-21
+## [Initial Version] - {PR_MERGE_DATE}
