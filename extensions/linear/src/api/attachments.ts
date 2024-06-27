@@ -1,7 +1,7 @@
 import { readFile } from "fs/promises";
 import path from "path";
 import { UploadFile } from "@linear/sdk";
-import { getLinearClient } from './linearClient';
+import { getLinearClient } from "./linearClient";
 import { fileTypeFromFile } from "file-type";
 
 export async function uploadFile(filePath: string) {
