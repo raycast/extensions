@@ -100,6 +100,7 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
       <Form.Separator />
       <Form.TextField {...itemProps.url} placeholder="https://dub.co" title="Original URL" />
       <Form.TextField {...itemProps.key} placeholder="(Optional)" title="URL Key" />
+      {/* todo: Add commands to create/manage tags in the workspace */}
       <Form.TagPicker {...itemProps.tagIds} title="Tags">
         {workspaces
           .find((w) => w.id === values.workspaceId)

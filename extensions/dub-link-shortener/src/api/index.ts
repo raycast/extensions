@@ -11,6 +11,10 @@ const headers = {
   "user-agent": `raycast/${extensionName}/${commandName}`,
 };
 
+/**
+ * todo: Replace with SDK https://d.to/sdk once it is stable
+ * see: https://github.com/dubinc/dub-node/blob/765e170c45a361de3ae62e0d19571ceca4a3f0f4/README.md#maturity
+ */
 export const callApi = async <T>(config: AxiosRequestConfig) => {
   return await axios({ ...config, headers })
     .then(({ data }) => data as T)
@@ -52,6 +56,9 @@ export const deleteShortLink = async ({ linkId, workspaceId }: { linkId: string 
   });
 };
 
+/**
+ * todo: Add commands and api(s) to create/manage tags in the workspace.
+ */
 export const getAllTags = async ({ workspaceId }: WorkspaceId) => {
   return await callApi<TagSchema[]>({ method: "GET", url: `${BASE_API_URL}/tags?workspaceId=${workspaceId}` });
 };
