@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Call Trovu shortcut",
+      "title": "Call Trovu Shortcut",
       "description": "Send a query to trovu.net",
       "mode": "view"
     }

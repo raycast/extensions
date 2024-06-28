@@ -164,6 +164,7 @@ export default class Env {
   }
 
   setToLocalStorage() {
+    /* eslint-disable no-undef */
     if (typeof localStorage === 'undefined') {
       return;
     }
@@ -176,15 +177,18 @@ export default class Env {
       localStorage.setItem('country', this.country);
       localStorage.removeItem('github');
     }
+    /* eslint-enable no-undef */
   }
 
   getFromLocalStorage() {
+    /* eslint-disable no-undef */
     if (typeof localStorage === 'undefined') {
       return;
     }
     this.language ||= localStorage.getItem('language');
     this.country ||= localStorage.getItem('country');
     this.github ||= localStorage.getItem('github');
+    /* eslint-enable no-undef */
   }
 
   static setBoolParams(params) {
@@ -330,6 +334,7 @@ export default class Env {
    * @return {string} navigatorLanguage - The browser's value of navigator.language.
    */
   getNavigatorLanguage() {
+    // eslint-disable-next-line no-undef
     const languageStr = navigator.language;
     return languageStr;
   }
@@ -368,6 +373,7 @@ export default class Env {
         break;
       case 'node': {
         // eslint-disable-next-line no-undef
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const fs = require('fs');
         url = './dist/public/data.json';
         text = fs.readFileSync(url, 'utf8');
@@ -395,6 +401,7 @@ export default class Env {
     if (typeof window === 'undefined') {
       return '';
     }
+    // eslint-disable-next-line no-undef
     const hash = window.location.hash.substr(1);
     return hash;
   }
@@ -415,16 +422,19 @@ export default class Env {
   }
 
   isRunningStandalone() {
+    /* eslint-disable no-undef */
     return (
       window.navigator.standalone ||
       window.matchMedia('(display-mode: standalone)').matches
     );
+    /* eslint-enable no-undef */
   }
   async getFetch() {
     // Can't work with this.context here
     // as rollup seems not able to handle it.
     if (typeof fetch !== 'undefined') {
       // Browser and Node
+      // eslint-disable-next-line no-undef
       return fetch.bind(window);
     } else {
       // Raycast
