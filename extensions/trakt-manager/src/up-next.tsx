@@ -1,9 +1,11 @@
 import { Icon, Keyboard, Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { setMaxListeners } from "node:events";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getUpNextShows } from "./api/shows";
 import { ShowGrid } from "./components/show-grid";
 import { useShowMutations } from "./hooks/useShowMutations";
+import { APP_MAX_LISTENERS } from "./lib/constants";
 
 export default function Command() {
   const abortable = useRef<AbortController>();
@@ -16,6 +18,8 @@ export default function Command() {
     revalidate,
   } = useCachedPromise(
     async () => {
+      abortable.current = new AbortController();
+      setMaxListeners(APP_MAX_LISTENERS, abortable.current?.signal);
       return await getUpNextShows(abortable.current?.signal);
     },
     [],

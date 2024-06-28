@@ -1,7 +1,9 @@
 import { Grid, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { setMaxListeners } from "node:events";
 import { useRef } from "react";
 import { getSeasons } from "../api/shows";
+import { APP_MAX_LISTENERS } from "../lib/constants";
 import { SeasonGridItem } from "./season-grid-item";
 
 export const SeasonGrid = ({
@@ -18,8 +20,9 @@ export const SeasonGrid = ({
   const abortable = useRef<AbortController>();
   const { isLoading, data: seasons } = useCachedPromise(
     async (showId: number) => {
-      const seasons = await getSeasons(showId, abortable.current?.signal);
-      return seasons;
+      abortable.current = new AbortController();
+      setMaxListeners(APP_MAX_LISTENERS, abortable.current?.signal);
+      return await getSeasons(showId, abortable.current?.signal);
     },
     [showId],
     {

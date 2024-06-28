@@ -23,13 +23,11 @@ export const searchMovies = async (query: string, page: number, signal: AbortSig
   }
 
   const result = (await response.json()) as TraktMovieList;
-  const slicedResult = result.slice(0, 10) as TraktMovieList;
+  result.page = Number(response.headers.get("X-Pagination-Page")) ?? 1;
+  result.total_pages = Number(response.headers.get("X-Pagination-Page-Count")) ?? 1;
+  result.total_results = Number(response.headers.get("X-Pagination-Item-Count")) ?? result.length;
 
-  slicedResult.page = Number(response.headers.get("X-Pagination-Page")) ?? 1;
-  slicedResult.total_pages = Number(response.headers.get("X-Pagination-Page-Count")) ?? 1;
-  slicedResult.total_results = Number(response.headers.get("X-Pagination-Item-Count")) ?? result.length;
-
-  return slicedResult as TraktMovieList;
+  return result;
 };
 
 export const getWatchlistMovies = async (page: number, signal: AbortSignal | undefined = undefined) => {

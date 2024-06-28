@@ -2,7 +2,7 @@ import { AbortError } from "node-fetch";
 import { MutableRefObject, useCallback, useState } from "react";
 import { checkInEpisode } from "../api/shows";
 
-export function useEpisodeMutations(abortable: MutableRefObject<AbortController | undefined>) {
+export const useEpisodeMutations = (abortable: MutableRefObject<AbortController | undefined>) => {
   const [error, setError] = useState<Error | undefined>();
   const [success, setSuccess] = useState<string | undefined>();
 
@@ -22,4 +22,4 @@ export function useEpisodeMutations(abortable: MutableRefObject<AbortController 
     error,
     success,
   };
-}
+};

@@ -1,8 +1,10 @@
 import { Grid, Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { setMaxListeners } from "node:events";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getEpisodes } from "../api/shows";
 import { useEpisodeMutations } from "../hooks/useEpisodeMutations";
+import { APP_MAX_LISTENERS } from "../lib/constants";
 import { EpisodeGridItem } from "./episode-grid-item";
 
 export const EpisodeGrid = ({
@@ -20,8 +22,9 @@ export const EpisodeGrid = ({
   const [actionLoading, setActionLoading] = useState(false);
   const { isLoading, data: episodes } = useCachedPromise(
     async (showId: number, seasonNumber: number) => {
-      const episodes = await getEpisodes(showId, seasonNumber);
-      return episodes;
+      abortable.current = new AbortController();
+      setMaxListeners(APP_MAX_LISTENERS, abortable.current?.signal);
+      return await getEpisodes(showId, seasonNumber, abortable.current?.signal);
     },
     [showId, seasonNumber],
     {

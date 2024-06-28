@@ -8,7 +8,7 @@ import {
   removeMovieFromWatchlist,
 } from "../api/movies";
 
-export function useMovieMutations(abortable: MutableRefObject<AbortController | undefined>) {
+export const useMovieMutations = (abortable: MutableRefObject<AbortController | undefined>) => {
   const [error, setError] = useState<Error | undefined>();
   const [success, setSuccess] = useState<string | undefined>();
 
@@ -45,7 +45,7 @@ export function useMovieMutations(abortable: MutableRefObject<AbortController | 
     }
   }, []);
 
-  const removeMovieFromHistoryMutation = async (movie: TraktMovieListItem) => {
+  const removeMovieFromHistoryMutation = useCallback(async (movie: TraktMovieListItem) => {
     try {
       await removeMovieFromHistory(movie.movie.ids.trakt, abortable.current?.signal);
       setSuccess("Movie removed from history");
@@ -54,9 +54,9 @@ export function useMovieMutations(abortable: MutableRefObject<AbortController | 
         setError(e as Error);
       }
     }
-  };
+  }, []);
 
-  const removeMovieFromWatchlistMutation = async (movie: TraktMovieListItem) => {
+  const removeMovieFromWatchlistMutation = useCallback(async (movie: TraktMovieListItem) => {
     try {
       await removeMovieFromWatchlist(movie.movie.ids.trakt, abortable.current?.signal);
       setSuccess("Movie removed from watchlist");
@@ -65,7 +65,7 @@ export function useMovieMutations(abortable: MutableRefObject<AbortController | 
         setError(e as Error);
       }
     }
-  };
+  }, []);
 
   return {
     addMovieToWatchlistMutation,
@@ -76,4 +76,4 @@ export function useMovieMutations(abortable: MutableRefObject<AbortController | 
     error,
     success,
   };
-}
+};

@@ -6,4 +6,4 @@ export const TMDB_API_URL = "https://api.themoviedb.org/3";
 export const TMDB_IMG_URL = "https://image.tmdb.org/t/p/w500";
 export const TMDB_BEARER_TOKEN =
   "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI1ZmY0MGZhYWMzNmQ1YWJhYThiNzlhMTYwMTBiOGI5ZCIsInN1YiI6IjY2NTc0NGY5ZDQwOGJhNjhhODVlZmEyZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.6VjIbfDQcksSy_YD6NjAZwaphebaaRxJ2t4zbKFPEbM";
-export const APP_MAX_LISTENERS = 20;
+export const APP_MAX_LISTENERS = 100;

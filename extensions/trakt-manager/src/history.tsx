@@ -1,6 +1,7 @@
 import { Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { PaginationOptions } from "@raycast/utils/dist/types";
+import { setMaxListeners } from "node:events";
 import { setTimeout } from "node:timers/promises";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getHistoryMovies } from "./api/movies";
@@ -9,6 +10,7 @@ import { MovieGrid } from "./components/movie-grid";
 import { ShowGrid } from "./components/show-grid";
 import { useMovieMutations } from "./hooks/useMovieMutations";
 import { useShowMutations } from "./hooks/useShowMutations";
+import { APP_MAX_LISTENERS } from "./lib/constants";
 
 export default function Command() {
   const abortable = useRef<AbortController>();
@@ -27,6 +29,8 @@ export default function Command() {
       if (mediaType === "show") {
         return { data: [], hasMore: false };
       }
+      abortable.current = new AbortController();
+      setMaxListeners(APP_MAX_LISTENERS, abortable.current?.signal);
       const pagedMovies = await getHistoryMovies(options.page + 1, abortable.current?.signal);
       return { data: pagedMovies, hasMore: options.page < pagedMovies.total_pages };
     },
@@ -54,6 +58,8 @@ export default function Command() {
       if (mediaType === "movie") {
         return { data: [], hasMore: false };
       }
+      abortable.current = new AbortController();
+      setMaxListeners(APP_MAX_LISTENERS, abortable.current?.signal);
       const pagedShows = await getHistoryShows(options.page + 1, abortable.current?.signal);
       return { data: pagedShows, hasMore: options.page < pagedShows.total_pages };
     },

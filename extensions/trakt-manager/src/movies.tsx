@@ -1,11 +1,13 @@
 import { Icon, Keyboard, Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { PaginationOptions } from "@raycast/utils/dist/types";
+import { setMaxListeners } from "node:events";
 import { setTimeout } from "node:timers/promises";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { searchMovies } from "./api/movies";
 import { MovieGrid } from "./components/movie-grid";
 import { useMovieMutations } from "./hooks/useMovieMutations";
+import { APP_MAX_LISTENERS } from "./lib/constants";
 
 export default function Command() {
   const abortable = useRef<AbortController>();
@@ -23,6 +25,8 @@ export default function Command() {
         return { data: [], hasMore: false };
       }
       await setTimeout(200);
+      abortable.current = new AbortController();
+      setMaxListeners(APP_MAX_LISTENERS, abortable.current?.signal);
       const pagedMovies = await searchMovies(searchText, options.page + 1, abortable.current?.signal);
       return { data: pagedMovies, hasMore: options.page < pagedMovies.total_pages };
     },

@@ -212,10 +212,7 @@ const setShowProgress = (showProgress: TraktShowProgress, show: TraktShowListIte
   }
 };
 
-export const getUpNextShows = async (
-  signal: AbortSignal | undefined = undefined,
-  page: number = 1,
-): Promise<TraktShowList> => {
+export const getUpNextShows = async (signal: AbortSignal | undefined = undefined): Promise<TraktShowList> => {
   const upNextShowsCache = await LocalStorage.getItem<string>("upNextShows");
   if (upNextShowsCache) {
     return JSON.parse(upNextShowsCache) as TraktShowList;
@@ -270,14 +267,8 @@ export const getUpNextShows = async (
     }
   }
 
-  const pageSize = 10;
-  const startIndex = (page - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-
-  const upNextShows = result.filter((show) => show.show.progress).slice(startIndex, endIndex) as TraktShowList;
+  const upNextShows = result.filter((show) => show.show.progress) as TraktShowList;
   await LocalStorage.setItem("upNextShows", JSON.stringify(upNextShows));
-  upNextShows.total_pages = Math.floor(upNextShows.length / pageSize);
-  upNextShows.total_results = upNextShows.length;
   return upNextShows;
 };
 
