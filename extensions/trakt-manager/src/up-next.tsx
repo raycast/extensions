@@ -1,20 +1,43 @@
-import { Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
-import { ShowGridItems } from "./components/show-grid";
-import { useShowDetails } from "./hooks/useShowDetails";
-import { useUpNextShows } from "./hooks/useUpNextShows";
+import { Icon, Keyboard, Toast, showToast } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { getUpNextShows } from "./api/shows";
+import { ShowGrid } from "./components/show-grid";
+import { useShowMutations } from "./hooks/useShowMutations";
 
 export default function Command() {
-  const [page, setPage] = useState(1);
-  const { shows, totalPages, checkInNextEpisodeMutation, error, success } = useUpNextShows(page);
-  const { details: showDetails, error: detailsError } = useShowDetails(shows);
+  const abortable = useRef<AbortController>();
   const [actionLoading, setActionLoading] = useState(false);
+  const { checkInNextEpisodeMutation, error, success } = useShowMutations(abortable);
+  const {
+    isLoading,
+    data: shows,
+    pagination,
+    revalidate,
+  } = useCachedPromise(
+    async () => {
+      return await getUpNextShows(abortable.current?.signal);
+    },
+    [],
+    {
+      initialData: undefined,
+      keepPreviousData: true,
+      abortable,
+      onError(error) {
+        showToast({
+          title: error.message,
+          style: Toast.Style.Failure,
+        });
+      },
+    },
+  );
 
   const handleAction = useCallback(
     async (show: TraktShowListItem, action: (show: TraktShowListItem) => Promise<void>) => {
       setActionLoading(true);
       try {
         await action(show);
+        revalidate();
       } finally {
         setActionLoading(false);
       }
@@ -32,15 +55,6 @@ export default function Command() {
   }, [error]);
 
   useEffect(() => {
-    if (detailsError) {
-      showToast({
-        title: detailsError.message,
-        style: Toast.Style.Failure,
-      });
-    }
-  }, [detailsError]);
-
-  useEffect(() => {
     if (success) {
       showToast({
         title: success,
@@ -49,30 +63,20 @@ export default function Command() {
     }
   }, [success]);
 
-  const isLoading = ((!shows || !showDetails.size) && !error && !detailsError) || actionLoading;
-
   return (
-    <Grid
-      isLoading={isLoading}
-      aspectRatio="9/16"
-      fit={Grid.Fit.Fill}
+    <ShowGrid
+      isLoading={isLoading || actionLoading}
+      emptyViewTitle="No up next shows"
       searchBarPlaceholder="Search for shows that are up next"
-      throttle={true}
-    >
-      <ShowGridItems
-        shows={shows}
-        showDetails={showDetails}
-        subtitle={(show) =>
-          `${show.show.progress?.next_episode?.season}x${show.show.progress?.next_episode?.number.toString().padStart(2, "0")}`
-        }
-        page={page}
-        totalPages={totalPages}
-        setPage={setPage}
-        primaryActionTitle="Check-in Next Episode"
-        primaryActionIcon={Icon.Checkmark}
-        primaryActionShortcut={Keyboard.Shortcut.Common.Edit}
-        primaryAction={(show) => handleAction(show, checkInNextEpisodeMutation)}
-      />
-    </Grid>
+      pagination={pagination}
+      shows={shows as TraktShowList}
+      subtitle={(show) =>
+        `${show.show.progress?.next_episode?.season}x${show.show.progress?.next_episode?.number.toString().padStart(2, "0")}`
+      }
+      primaryActionTitle="Check-in Next Episode"
+      primaryActionIcon={Icon.Checkmark}
+      primaryActionShortcut={Keyboard.Shortcut.Common.Edit}
+      primaryAction={(show) => handleAction(show, checkInNextEpisodeMutation)}
+    />
   );
 }

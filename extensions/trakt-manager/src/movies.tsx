@@ -1,28 +1,49 @@
-import { Grid, Icon, Keyboard, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
-import { MovieGridItems } from "./components/movie-grid";
-import { useMovieDetails } from "./hooks/useMovieDetails";
-import { useMovies } from "./hooks/useMovies";
+import { Icon, Keyboard, Toast, showToast } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { PaginationOptions } from "@raycast/utils/dist/types";
+import { setTimeout } from "node:timers/promises";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { searchMovies } from "./api/movies";
+import { MovieGrid } from "./components/movie-grid";
+import { useMovieMutations } from "./hooks/useMovieMutations";
 
 export default function Command() {
-  const [page, setPage] = useState(1);
-  const [searchText, setSearchText] = useState<string | undefined>();
+  const abortable = useRef<AbortController>();
+  const [searchText, setSearchText] = useState<string>("");
   const [actionLoading, setActionLoading] = useState(false);
-
+  const { addMovieToWatchlistMutation, checkInMovieMutation, addMovieToHistoryMutation, error, success } =
+    useMovieMutations(abortable);
   const {
-    movies,
-    addMovieToWatchlistMutation,
-    checkInMovieMutation,
-    addMovieToHistoryMutation,
-    error,
-    success,
-    totalPages,
-  } = useMovies(searchText, page);
-  const { details: movieDetails, error: detailsError } = useMovieDetails(movies);
+    isLoading,
+    data: movies,
+    pagination,
+  } = useCachedPromise(
+    (searchText: string) => async (options: PaginationOptions) => {
+      if (!searchText) {
+        return { data: [], hasMore: false };
+      }
+      await setTimeout(200);
+      const pagedMovies = await searchMovies(searchText, options.page + 1, abortable.current?.signal);
+      return { data: pagedMovies, hasMore: options.page < pagedMovies.total_pages };
+    },
+    [searchText],
+    {
+      initialData: undefined,
+      keepPreviousData: true,
+      abortable,
+      onError(error) {
+        showToast({
+          title: error.message,
+          style: Toast.Style.Failure,
+        });
+      },
+    },
+  );
 
-  const onSearchTextChange = useCallback((text: string): void => {
+  const handleSearchTextChange = useCallback((text: string): void => {
+    abortable.current?.abort();
+    abortable.current = new AbortController();
     setSearchText(text);
-    setPage(1);
   }, []);
 
   const handleAction = useCallback(
@@ -47,15 +68,6 @@ export default function Command() {
   }, [error]);
 
   useEffect(() => {
-    if (detailsError) {
-      showToast({
-        title: detailsError.message,
-        style: Toast.Style.Failure,
-      });
-    }
-  }, [detailsError]);
-
-  useEffect(() => {
     if (success) {
       showToast({
         title: success,
@@ -64,37 +76,27 @@ export default function Command() {
     }
   }, [success]);
 
-  const isLoading = !!searchText && (!movies || !movieDetails.size || actionLoading) && !error && !detailsError;
-
   return (
-    <Grid
-      isLoading={isLoading}
-      aspectRatio="9/16"
-      fit={Grid.Fit.Fill}
+    <MovieGrid
+      isLoading={isLoading || actionLoading}
+      emptyViewTitle="Search for movies"
       searchBarPlaceholder="Search for movies"
-      onSearchTextChange={onSearchTextChange}
+      onSearchTextChange={handleSearchTextChange}
       throttle={true}
-    >
-      <Grid.EmptyView title="Search for movies" />
-      <MovieGridItems
-        movies={movies}
-        movieDetails={movieDetails}
-        page={page}
-        totalPages={totalPages}
-        setPage={setPage}
-        primaryActionTitle="Add to Watchlist"
-        primaryActionIcon={Icon.Bookmark}
-        primaryActionShortcut={Keyboard.Shortcut.Common.Edit}
-        primaryAction={(movie) => handleAction(movie, addMovieToWatchlistMutation)}
-        secondaryActionTitle="Check-in Movie"
-        secondaryActionIcon={Icon.Checkmark}
-        secondaryActionShortcut={Keyboard.Shortcut.Common.Duplicate}
-        secondaryAction={(movie) => handleAction(movie, checkInMovieMutation)}
-        tertiaryActionTitle="Add to History"
-        tertiaryActionIcon={Icon.Clock}
-        tertiaryActionShortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
-        tertiaryAction={(movie) => handleAction(movie, addMovieToHistoryMutation)}
-      />
-    </Grid>
+      pagination={pagination}
+      movies={movies as TraktMovieList}
+      primaryActionTitle="Add to Watchlist"
+      primaryActionIcon={Icon.Bookmark}
+      primaryActionShortcut={Keyboard.Shortcut.Common.Edit}
+      primaryAction={(movie) => handleAction(movie, addMovieToWatchlistMutation)}
+      secondaryActionTitle="Check-in Movie"
+      secondaryActionIcon={Icon.Checkmark}
+      secondaryActionShortcut={Keyboard.Shortcut.Common.Duplicate}
+      secondaryAction={(movie) => handleAction(movie, checkInMovieMutation)}
+      tertiaryActionTitle="Add to History"
+      tertiaryActionIcon={Icon.Clock}
+      tertiaryActionShortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+      tertiaryAction={(movie) => handleAction(movie, addMovieToHistoryMutation)}
+    />
   );
 }

@@ -1,28 +1,49 @@
-import { Grid, Icon, Keyboard, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
-import { ShowGridItems } from "./components/show-grid";
-import { useShowDetails } from "./hooks/useShowDetails";
-import { useShows } from "./hooks/useShows";
+import { Icon, Keyboard, Toast, showToast } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { PaginationOptions } from "@raycast/utils/dist/types";
+import { setTimeout } from "node:timers/promises";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { searchShows } from "./api/shows";
+import { ShowGrid } from "./components/show-grid";
+import { useShowMutations } from "./hooks/useShowMutations";
 
 export default function Command() {
-  const [page, setPage] = useState(1);
-  const [searchText, setSearchText] = useState<string | undefined>();
+  const abortable = useRef<AbortController>();
+  const [searchText, setSearchText] = useState<string>("");
   const [actionLoading, setActionLoading] = useState(false);
-
+  const { addShowToWatchlistMutation, addShowToHistoryMutation, checkInFirstEpisodeMutation, error, success } =
+    useShowMutations(abortable);
   const {
-    shows,
-    addShowToWatchlistMutation,
-    addShowToHistoryMutation,
-    checkInFirstEpisodeMutation,
-    error,
-    success,
-    totalPages,
-  } = useShows(searchText, page);
-  const { details: showDetails, error: detailsError } = useShowDetails(shows);
+    isLoading,
+    data: shows,
+    pagination,
+  } = useCachedPromise(
+    (searchText: string) => async (options: PaginationOptions) => {
+      if (!searchText) {
+        return { data: [], hasMore: false };
+      }
+      await setTimeout(200);
+      const pagedShows = await searchShows(searchText, options.page + 1, abortable.current?.signal);
+      return { data: pagedShows, hasMore: options.page < pagedShows.total_pages };
+    },
+    [searchText],
+    {
+      initialData: undefined,
+      keepPreviousData: true,
+      abortable,
+      onError(error) {
+        showToast({
+          title: error.message,
+          style: Toast.Style.Failure,
+        });
+      },
+    },
+  );
 
-  const onSearchTextChange = useCallback((text: string): void => {
+  const handleSearchTextChange = useCallback((text: string): void => {
+    abortable.current?.abort();
+    abortable.current = new AbortController();
     setSearchText(text);
-    setPage(1);
   }, []);
 
   const handleAction = useCallback(
@@ -47,15 +68,6 @@ export default function Command() {
   }, [error]);
 
   useEffect(() => {
-    if (detailsError) {
-      showToast({
-        title: detailsError.message,
-        style: Toast.Style.Failure,
-      });
-    }
-  }, [detailsError]);
-
-  useEffect(() => {
     if (success) {
       showToast({
         title: success,
@@ -64,38 +76,28 @@ export default function Command() {
     }
   }, [success]);
 
-  const isLoading = !!searchText && (!shows || !showDetails.size || actionLoading) && !error && !detailsError;
-
   return (
-    <Grid
-      isLoading={isLoading}
-      aspectRatio="9/16"
-      fit={Grid.Fit.Fill}
+    <ShowGrid
+      isLoading={isLoading || actionLoading}
       searchBarPlaceholder="Search for shows"
-      onSearchTextChange={onSearchTextChange}
+      onSearchTextChange={handleSearchTextChange}
       throttle={true}
-    >
-      <Grid.EmptyView title="Search for shows" />
-      <ShowGridItems
-        shows={shows}
-        showDetails={showDetails}
-        subtitle={(show) => show.show.year?.toString() || ""}
-        page={page}
-        totalPages={totalPages}
-        setPage={setPage}
-        primaryActionTitle="Add to Watchlist"
-        primaryActionIcon={Icon.Bookmark}
-        primaryActionShortcut={Keyboard.Shortcut.Common.Edit}
-        primaryAction={(show) => handleAction(show, addShowToWatchlistMutation)}
-        secondaryActionTitle="Add to History"
-        secondaryActionIcon={Icon.Clock}
-        secondaryActionShortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
-        secondaryAction={(show) => handleAction(show, addShowToHistoryMutation)}
-        tertiaryActionTitle="Check-in first episode"
-        tertiaryActionIcon={Icon.Checkmark}
-        tertiaryActionShortcut={Keyboard.Shortcut.Common.Duplicate}
-        tertiaryAction={(show) => handleAction(show, checkInFirstEpisodeMutation)}
-      />
-    </Grid>
+      pagination={pagination}
+      emptyViewTitle="Search for shows"
+      shows={shows as TraktShowList}
+      subtitle={(show) => show.show.year?.toString() || ""}
+      primaryActionTitle="Add to Watchlist"
+      primaryActionIcon={Icon.Bookmark}
+      primaryActionShortcut={Keyboard.Shortcut.Common.Edit}
+      primaryAction={(show) => handleAction(show, addShowToWatchlistMutation)}
+      secondaryActionTitle="Add to History"
+      secondaryActionIcon={Icon.Clock}
+      secondaryActionShortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+      secondaryAction={(show) => handleAction(show, addShowToHistoryMutation)}
+      tertiaryActionTitle="Check-in first episode"
+      tertiaryActionIcon={Icon.Checkmark}
+      tertiaryActionShortcut={Keyboard.Shortcut.Common.Duplicate}
+      tertiaryAction={(show) => handleAction(show, checkInFirstEpisodeMutation)}
+    />
   );
 }

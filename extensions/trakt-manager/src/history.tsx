@@ -1,40 +1,88 @@
 import { Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
-import { MovieGridItems } from "./components/movie-grid";
-import { ShowGridItems } from "./components/show-grid";
-import { useHistoryMovies } from "./hooks/useHistoryMovies";
-import { useHistoryShows } from "./hooks/useHistoryShows";
-import { useMovieDetails } from "./hooks/useMovieDetails";
-import { useShowDetails } from "./hooks/useShowDetails";
+import { useCachedPromise } from "@raycast/utils";
+import { PaginationOptions } from "@raycast/utils/dist/types";
+import { setTimeout } from "node:timers/promises";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { getHistoryMovies } from "./api/movies";
+import { getHistoryShows } from "./api/shows";
+import { MovieGrid } from "./components/movie-grid";
+import { ShowGrid } from "./components/show-grid";
+import { useMovieMutations } from "./hooks/useMovieMutations";
+import { useShowMutations } from "./hooks/useShowMutations";
 
 export default function Command() {
-  const [page, setPage] = useState(1);
+  const abortable = useRef<AbortController>();
   const [mediaType, setMediaType] = useState<MediaType>("movie");
   const [actionLoading, setActionLoading] = useState(false);
-
+  const { removeMovieFromHistoryMutation, error: movieError, success: movieSuccess } = useMovieMutations(abortable);
+  const { removeShowFromHistoryMutation, error: showError, success: showSuccess } = useShowMutations(abortable);
   const {
-    movies,
-    totalPages: totalMoviePages,
-    removeMovieFromHistoryMutation,
-    error: movieError,
-    success: movieSuccess,
-  } = useHistoryMovies(page, mediaType === "movie");
-  const { details: movieDetails, error: movieDetailsError } = useMovieDetails(movies);
-
+    isLoading: isMovieLoading,
+    data: movies,
+    pagination: moviePagination,
+    revalidate: revalidateMovie,
+  } = useCachedPromise(
+    (mediaType: MediaType) => async (options: PaginationOptions) => {
+      await setTimeout(200);
+      if (mediaType === "show") {
+        return { data: [], hasMore: false };
+      }
+      const pagedMovies = await getHistoryMovies(options.page + 1, abortable.current?.signal);
+      return { data: pagedMovies, hasMore: options.page < pagedMovies.total_pages };
+    },
+    [mediaType],
+    {
+      initialData: undefined,
+      keepPreviousData: true,
+      abortable,
+      onError(error) {
+        showToast({
+          title: error.message,
+          style: Toast.Style.Failure,
+        });
+      },
+    },
+  );
   const {
-    shows,
-    totalPages: totalShowPages,
-    removeShowFromHistoryMutation,
-    error: showError,
-    success: showSuccess,
-  } = useHistoryShows(page, mediaType === "show");
-  const { details: showDetails, error: showDetailsError } = useShowDetails(shows);
+    isLoading: isShowsLoading,
+    data: shows,
+    pagination: showPagination,
+    revalidate: revalidateShow,
+  } = useCachedPromise(
+    (mediaType: MediaType) => async (options: PaginationOptions) => {
+      await setTimeout(200);
+      if (mediaType === "movie") {
+        return { data: [], hasMore: false };
+      }
+      const pagedShows = await getHistoryShows(options.page + 1, abortable.current?.signal);
+      return { data: pagedShows, hasMore: options.page < pagedShows.total_pages };
+    },
+    [mediaType],
+    {
+      initialData: undefined,
+      keepPreviousData: true,
+      abortable,
+      onError(error) {
+        showToast({
+          title: error.message,
+          style: Toast.Style.Failure,
+        });
+      },
+    },
+  );
+
+  const onMediaTypeChange = (newValue: string) => {
+    abortable.current?.abort();
+    abortable.current = new AbortController();
+    setMediaType(newValue as MediaType);
+  };
 
   const handleMovieAction = useCallback(
     async (movie: TraktMovieListItem, action: (movie: TraktMovieListItem) => Promise<void>) => {
       setActionLoading(true);
       try {
         await action(movie);
+        revalidateMovie();
       } finally {
         setActionLoading(false);
       }
@@ -47,6 +95,7 @@ export default function Command() {
       setActionLoading(true);
       try {
         await action(show);
+        revalidateShow();
       } finally {
         setActionLoading(false);
       }
@@ -64,13 +113,13 @@ export default function Command() {
   }, [movieError]);
 
   useEffect(() => {
-    if (movieDetailsError) {
+    if (movieSuccess) {
       showToast({
-        title: movieDetailsError.message,
-        style: Toast.Style.Failure,
+        title: movieSuccess,
+        style: Toast.Style.Success,
       });
     }
-  }, [movieDetailsError]);
+  }, [movieSuccess]);
 
   useEffect(() => {
     if (showError) {
@@ -82,24 +131,6 @@ export default function Command() {
   }, [showError]);
 
   useEffect(() => {
-    if (showDetailsError) {
-      showToast({
-        title: showDetailsError.message,
-        style: Toast.Style.Failure,
-      });
-    }
-  }, [showDetailsError]);
-
-  useEffect(() => {
-    if (movieSuccess) {
-      showToast({
-        title: movieSuccess,
-        style: Toast.Style.Success,
-      });
-    }
-  }, [movieSuccess]);
-
-  useEffect(() => {
     if (showSuccess) {
       showToast({
         title: showSuccess,
@@ -108,23 +139,10 @@ export default function Command() {
     }
   }, [showSuccess]);
 
-  const isLoading =
-    actionLoading ||
-    (mediaType === "movie"
-      ? !(movies && movieDetails.size) && !(movieError || movieDetailsError)
-      : !(shows && showDetails.size) && !(showError || showDetailsError));
-  const totalPages = mediaType === "movie" ? totalMoviePages : totalShowPages;
-
-  const onMediaTypeChange = (newValue: string) => {
-    setMediaType(newValue as MediaType);
-    setPage(1);
-  };
-
-  return (
-    <Grid
-      isLoading={isLoading}
-      aspectRatio="9/16"
-      fit={Grid.Fit.Fill}
+  return mediaType === "movie" ? (
+    <MovieGrid
+      isLoading={isMovieLoading || actionLoading}
+      emptyViewTitle="No movies in your history"
       searchBarPlaceholder="Search history"
       searchBarAccessory={
         <Grid.Dropdown onChange={onMediaTypeChange} tooltip="Media Type">
@@ -132,40 +150,31 @@ export default function Command() {
           <Grid.Dropdown.Item value="show" title="Shows" />
         </Grid.Dropdown>
       }
-    >
-      {mediaType === "movie" && (
-        <>
-          <Grid.EmptyView title="No movies in your history" />
-          <MovieGridItems
-            movies={movies}
-            movieDetails={movieDetails}
-            page={page}
-            totalPages={totalPages}
-            setPage={setPage}
-            primaryActionTitle="Remove from History"
-            primaryActionIcon={Icon.Trash}
-            primaryActionShortcut={Keyboard.Shortcut.Common.Remove}
-            primaryAction={(movie) => handleMovieAction(movie, removeMovieFromHistoryMutation)}
-          />
-        </>
-      )}
-      {mediaType === "show" && (
-        <>
-          <Grid.EmptyView title="No shows in your history" />
-          <ShowGridItems
-            shows={shows}
-            showDetails={showDetails}
-            subtitle={(show) => show.show.year?.toString() || ""}
-            page={page}
-            totalPages={totalPages}
-            setPage={setPage}
-            primaryActionTitle="Remove from History"
-            primaryActionIcon={Icon.Trash}
-            primaryActionShortcut={Keyboard.Shortcut.Common.Remove}
-            primaryAction={(show) => handleShowAction(show, removeShowFromHistoryMutation)}
-          />
-        </>
-      )}
-    </Grid>
+      pagination={moviePagination}
+      movies={movies as TraktMovieList}
+      primaryActionTitle="Remove from history"
+      primaryActionIcon={Icon.Trash}
+      primaryActionShortcut={Keyboard.Shortcut.Common.Remove}
+      primaryAction={(movie) => handleMovieAction(movie, removeMovieFromHistoryMutation)}
+    />
+  ) : (
+    <ShowGrid
+      isLoading={isShowsLoading || actionLoading}
+      emptyViewTitle="No shows in your history"
+      searchBarPlaceholder="Search history"
+      searchBarAccessory={
+        <Grid.Dropdown onChange={onMediaTypeChange} tooltip="Media Type">
+          <Grid.Dropdown.Item value="movie" title="Movies" />
+          <Grid.Dropdown.Item value="show" title="Shows" />
+        </Grid.Dropdown>
+      }
+      pagination={showPagination}
+      shows={shows as TraktShowList}
+      subtitle={(show) => show.show.year?.toString() || ""}
+      primaryActionTitle="Remove from history"
+      primaryActionIcon={Icon.Trash}
+      primaryActionShortcut={Keyboard.Shortcut.Common.Remove}
+      primaryAction={(show) => handleShowAction(show, removeShowFromHistoryMutation)}
+    />
   );
 }

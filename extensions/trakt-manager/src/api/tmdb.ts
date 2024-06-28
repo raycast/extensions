@@ -9,7 +9,10 @@ export const getTMDBMovieDetails = async (tmdbId: number, signal: AbortSignal | 
     return movie;
   }
 
-  const response = await fetch(`${TMDB_API_URL}/movie/${tmdbId}`, {
+  const url = `${TMDB_API_URL}/movie/${tmdbId}`;
+  console.log(url);
+
+  const response = await fetch(url, {
     headers: {
       Authorization: `Bearer ${TMDB_BEARER_TOKEN}`,
     },
@@ -33,7 +36,10 @@ export const getTMDBShowDetails = async (tmdbId: number, signal: AbortSignal | u
     return show;
   }
 
-  const response = await fetch(`${TMDB_API_URL}/tv/${tmdbId}`, {
+  const url = `${TMDB_API_URL}/tv/${tmdbId}`;
+  console.log(url);
+
+  const response = await fetch(url, {
     headers: {
       Authorization: `Bearer ${TMDB_BEARER_TOKEN}`,
     },
@@ -57,7 +63,10 @@ export const getTMDBSeasonDetails = async (tmdbId: number, seasonNumber: number,
     return season;
   }
 
-  const response = await fetch(`${TMDB_API_URL}/tv/${tmdbId}/season/${seasonNumber}`, {
+  const url = `${TMDB_API_URL}/tv/${tmdbId}/season/${seasonNumber}`;
+  console.log(url);
+
+  const response = await fetch(url, {
     headers: {
       Authorization: `Bearer ${TMDB_BEARER_TOKEN}`,
     },
@@ -86,7 +95,10 @@ export const getTMDBEpisodeDetails = async (
     return episode;
   }
 
-  const response = await fetch(`${TMDB_API_URL}/tv/${tmdbId}/season/${seasonNumber}/episode/${episodeNumber}`, {
+  const url = `${TMDB_API_URL}/tv/${tmdbId}/season/${seasonNumber}/episode/${episodeNumber}`;
+  console.log(url);
+
+  const response = await fetch(url, {
     headers: {
       Authorization: `Bearer ${TMDB_BEARER_TOKEN}`,
     },

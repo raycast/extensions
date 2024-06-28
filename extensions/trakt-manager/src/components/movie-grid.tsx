@@ -1,11 +1,15 @@
-import { Action, ActionPanel, Grid, Icon, Image, Keyboard } from "@raycast/api";
-import { getFavicon } from "@raycast/utils";
-import { SetStateAction } from "react";
-import { getIMDbUrl, getPosterUrl, getTraktUrl } from "../lib/helper";
+import { Grid, Image, Keyboard } from "@raycast/api";
+import { MovieGridItem } from "./movie-grid-item";
 
-export const MovieGridItems = ({
+export const MovieGrid = ({
+  isLoading,
+  searchBarPlaceholder,
+  onSearchTextChange,
+  searchBarAccessory,
+  throttle,
+  emptyViewTitle,
+  pagination,
   movies,
-  movieDetails,
   primaryActionTitle,
   primaryActionIcon,
   primaryActionShortcut,
@@ -18,12 +22,15 @@ export const MovieGridItems = ({
   tertiaryActionIcon,
   tertiaryActionShortcut,
   tertiaryAction,
-  page,
-  totalPages,
-  setPage,
 }: {
+  isLoading: Grid.Props["isLoading"];
+  searchBarPlaceholder: Grid.Props["searchBarPlaceholder"];
+  onSearchTextChange?: (text: string) => void;
+  searchBarAccessory?: Grid.Props["searchBarAccessory"];
+  throttle?: Grid.Props["throttle"];
+  emptyViewTitle?: Grid.EmptyView.Props["title"];
   movies: TraktMovieList | undefined;
-  movieDetails: Map<number, TMDBMovieDetails | undefined>;
+  pagination?: Grid.Props["pagination"];
   primaryActionTitle?: string;
   primaryActionIcon?: Image.ImageLike;
   primaryActionShortcut?: Keyboard.Shortcut;
@@ -36,86 +43,37 @@ export const MovieGridItems = ({
   tertiaryActionIcon?: Image.ImageLike;
   tertiaryActionShortcut?: Keyboard.Shortcut;
   tertiaryAction?: (movie: TraktMovieListItem) => void;
-  page: number;
-  totalPages: number;
-  setPage: (value: SetStateAction<number>) => void;
 }) => {
-  if (!movies) return null;
-
   return (
-    <>
-      {movies.map((movie) => {
-        const details = movieDetails.get(movie.movie.ids.trakt);
-
-        return (
-          <Grid.Item
-            key={movie.movie.ids.trakt}
-            title={movie.movie.title}
-            subtitle={movie.movie.year?.toString() || ""}
-            content={getPosterUrl(details?.poster_path, "poster.png")}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section>
-                  <Action.OpenInBrowser
-                    icon={getFavicon("https://trakt.tv")}
-                    title="Open in Trakt"
-                    url={getTraktUrl("movie", movie.movie.ids.slug)}
-                  />
-                  <Action.OpenInBrowser
-                    icon={getFavicon("https://www.imdb.com")}
-                    title="Open in IMDb"
-                    url={getIMDbUrl(movie.movie.ids.imdb)}
-                  />
-                </ActionPanel.Section>
-                <ActionPanel.Section>
-                  {primaryAction && primaryActionTitle && primaryActionIcon && primaryActionShortcut && (
-                    <Action
-                      icon={primaryActionIcon}
-                      title={primaryActionTitle}
-                      shortcut={primaryActionShortcut}
-                      onAction={() => primaryAction(movie)}
-                    />
-                  )}
-                  {secondaryAction && secondaryActionTitle && secondaryActionIcon && secondaryActionShortcut && (
-                    <Action
-                      icon={Icon.Checkmark}
-                      title={secondaryActionTitle}
-                      shortcut={secondaryActionShortcut}
-                      onAction={() => secondaryAction(movie)}
-                    />
-                  )}
-                  {tertiaryAction && tertiaryActionTitle && tertiaryActionIcon && tertiaryActionShortcut && (
-                    <Action
-                      icon={tertiaryActionIcon}
-                      title={tertiaryActionTitle}
-                      shortcut={tertiaryActionShortcut}
-                      onAction={() => tertiaryAction(movie)}
-                    />
-                  )}
-                </ActionPanel.Section>
-                <ActionPanel.Section>
-                  {page === totalPages ? null : (
-                    <Action
-                      icon={Icon.ArrowRight}
-                      title="Next Page"
-                      shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
-                      onAction={() => setPage((page) => (page + 1 > totalPages ? totalPages : page + 1))}
-                    />
-                  )}
-                  {page > 1 ? (
-                    <Action
-                      icon={Icon.ArrowLeft}
-                      title="Previous Page"
-                      shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
-                      onAction={() => setPage((page) => (page - 1 < 1 ? 1 : page - 1))}
-                    />
-                  ) : null}
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        );
-      })}
-    </>
+    <Grid
+      isLoading={isLoading}
+      aspectRatio="9/16"
+      fit={Grid.Fit.Fill}
+      searchBarPlaceholder={searchBarPlaceholder}
+      onSearchTextChange={onSearchTextChange}
+      searchBarAccessory={searchBarAccessory}
+      throttle={throttle}
+      pagination={pagination}
+    >
+      <Grid.EmptyView title={emptyViewTitle} />
+      {movies?.map((movie, index) => (
+        <MovieGridItem
+          key={`${movie.movie.ids.trakt}-${index}`}
+          movie={movie}
+          primaryActionTitle={primaryActionTitle}
+          primaryActionIcon={primaryActionIcon}
+          primaryActionShortcut={primaryActionShortcut}
+          primaryAction={primaryAction}
+          secondaryActionTitle={secondaryActionTitle}
+          secondaryActionIcon={secondaryActionIcon}
+          secondaryActionShortcut={secondaryActionShortcut}
+          secondaryAction={secondaryAction}
+          tertiaryActionTitle={tertiaryActionTitle}
+          tertiaryActionIcon={tertiaryActionIcon}
+          tertiaryActionShortcut={tertiaryActionShortcut}
+          tertiaryAction={tertiaryAction}
+        />
+      ))}
+    </Grid>
   );
 };

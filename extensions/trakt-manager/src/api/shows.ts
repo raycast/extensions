@@ -4,19 +4,19 @@ import { TRAKT_API_URL, TRAKT_CLIENT_ID } from "../lib/constants";
 import { oauthProvider } from "../lib/oauth";
 
 export const searchShows = async (query: string, page: number, signal: AbortSignal | undefined = undefined) => {
+  const url = `${TRAKT_API_URL}/search/show?query=${encodeURIComponent(query)}&page=${page}&limit=10&fields=title`;
+  console.log("searchShows:", url);
+
   const accessToken = await oauthProvider.authorize();
-  const response = await fetch(
-    `${TRAKT_API_URL}/search/show?query=${encodeURIComponent(query)}&page=${page}&limit=10&fields=title`,
-    {
-      headers: {
-        "Content-Type": "application/json",
-        "trakt-api-version": "2",
-        "trakt-api-key": TRAKT_CLIENT_ID,
-        Authorization: `Bearer ${accessToken}`,
-      },
-      signal,
+  const response = await fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+      "trakt-api-version": "2",
+      "trakt-api-key": TRAKT_CLIENT_ID,
+      Authorization: `Bearer ${accessToken}`,
     },
-  );
+    signal,
+  });
 
   if (!response.ok) {
     console.error("searchShows:", await response.text());
@@ -32,8 +32,11 @@ export const searchShows = async (query: string, page: number, signal: AbortSign
 };
 
 export const getWatchlistShows = async (page: number, signal: AbortSignal | undefined = undefined) => {
+  const url = `${TRAKT_API_URL}/sync/watchlist/shows/added?page=${page}&limit=10&fields=title`;
+  console.log("getWatchlistShows:", url);
+
   const accessToken = await oauthProvider.authorize();
-  const response = await fetch(`${TRAKT_API_URL}/sync/watchlist/shows/added?page=${page}&limit=10&fields=title`, {
+  const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json; charset=utf-8",
       "trakt-api-version": "2",
@@ -57,8 +60,11 @@ export const getWatchlistShows = async (page: number, signal: AbortSignal | unde
 };
 
 export const getSeasons = async (traktId: number, signal: AbortSignal | undefined = undefined) => {
+  const url = `${TRAKT_API_URL}/shows/${traktId}/seasons?extended=full`;
+  console.log("getSeasons:", url);
+
   const accessToken = await oauthProvider.authorize();
-  const response = await fetch(`${TRAKT_API_URL}/shows/${traktId}/seasons?extended=full`, {
+  const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
       "trakt-api-version": "2",
@@ -81,8 +87,11 @@ export const getEpisodes = async (
   seasonNumber: number,
   signal: AbortSignal | undefined = undefined,
 ) => {
+  const url = `${TRAKT_API_URL}/shows/${showId}/seasons/${seasonNumber}?extended=full`;
+  console.log("getEpisodes:", url);
+
   const accessToken = await oauthProvider.authorize();
-  const response = await fetch(`${TRAKT_API_URL}/shows/${showId}/seasons/${seasonNumber}?extended=full`, {
+  const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
       "trakt-api-version": "2",
@@ -101,8 +110,11 @@ export const getEpisodes = async (
 };
 
 export const addShowToWatchlist = async (showId: number, signal: AbortSignal | undefined = undefined) => {
+  const url = `${TRAKT_API_URL}/sync/watchlist`;
+  console.log("addShowToWatchlist:", url);
+
   const accessToken = await oauthProvider.authorize();
-  const response = await fetch(`${TRAKT_API_URL}/sync/watchlist`, {
+  const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -129,8 +141,11 @@ export const addShowToWatchlist = async (showId: number, signal: AbortSignal | u
 };
 
 export const removeShowFromWatchlist = async (showId: number, signal: AbortSignal | undefined = undefined) => {
+  const url = `${TRAKT_API_URL}/sync/watchlist/remove`;
+  console.log("removeShowFromWatchlist:", url);
+
   const accessToken = await oauthProvider.authorize();
-  const response = await fetch(`${TRAKT_API_URL}/sync/watchlist/remove`, {
+  const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -157,8 +172,11 @@ export const removeShowFromWatchlist = async (showId: number, signal: AbortSigna
 };
 
 export const checkInEpisode = async (episodeId: number, signal: AbortSignal | undefined = undefined) => {
+  const url = `${TRAKT_API_URL}/checkin`;
+  console.log("checkInEpisode:", url);
+
   const accessToken = await oauthProvider.authorize();
-  const response = await fetch(`${TRAKT_API_URL}/checkin`, {
+  const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -203,8 +221,11 @@ export const getUpNextShows = async (
     return JSON.parse(upNextShowsCache) as TraktShowList;
   }
 
+  const url = `${TRAKT_API_URL}/sync/watched/shows?extended=noseasons`;
+  console.log("getUpNextShows:", url);
+
   const accessToken = await oauthProvider.authorize();
-  const response = await fetch(`${TRAKT_API_URL}/sync/watched/shows?extended=noseasons`, {
+  const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
       "trakt-api-version": "2",
@@ -220,20 +241,20 @@ export const getUpNextShows = async (
   }
 
   const result = (await response.json()) as TraktShowList;
-  const showPromises = result.map((show) =>
-    fetch(
-      `${TRAKT_API_URL}/shows/${show.show.ids.trakt}/progress/watched?hidden=false&specials=false&count_specials=false`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "trakt-api-version": "2",
-          "trakt-api-key": TRAKT_CLIENT_ID,
-          Authorization: `Bearer ${accessToken}`,
-        },
-        signal,
+  const showPromises = result.map((show) => {
+    const progressUrl = `${TRAKT_API_URL}/shows/${show.show.ids.trakt}/progress/watched?hidden=false&specials=false&count_specials=false`;
+    console.log("getUpNextShowProgress:", progressUrl);
+
+    return fetch(progressUrl, {
+      headers: {
+        "Content-Type": "application/json",
+        "trakt-api-version": "2",
+        "trakt-api-key": TRAKT_CLIENT_ID,
+        Authorization: `Bearer ${accessToken}`,
       },
-    ).then((res) => ({ res, traktId: show.show.ids.trakt })),
-  );
+      signal,
+    }).then((res) => ({ res, traktId: show.show.ids.trakt }));
+  });
 
   const showResponses = await Promise.all(showPromises);
   for (const { res, traktId } of showResponses) {
@@ -270,19 +291,19 @@ export const updateShowProgress = async (
     const show = upNextShows.find((s) => s.show.ids.trakt === showId);
 
     if (show) {
+      const url = `${TRAKT_API_URL}/shows/${showId}/progress/watched?hidden=false&specials=false&count_specials=false`;
+      console.log("updateShowProgress:", url);
+
       const accessToken = await oauthProvider.authorize();
-      const response = await fetch(
-        `${TRAKT_API_URL}/shows/${showId}/progress/watched?hidden=false&specials=false&count_specials=false`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "trakt-api-version": "2",
-            "trakt-api-key": TRAKT_CLIENT_ID,
-            Authorization: `Bearer ${accessToken}`,
-          },
-          signal,
+      const response = await fetch(url, {
+        headers: {
+          "Content-Type": "application/json",
+          "trakt-api-version": "2",
+          "trakt-api-key": TRAKT_CLIENT_ID,
+          Authorization: `Bearer ${accessToken}`,
         },
-      );
+        signal,
+      });
 
       if (!response.ok) {
         console.error("updateShowProgress:", await response.text());
@@ -303,19 +324,19 @@ export const addNewShowProgress = async (
 ): Promise<void> => {
   const upNextShowsCache = await LocalStorage.getItem<string>("upNextShows");
   if (upNextShowsCache) {
+    const url = `${TRAKT_API_URL}/shows/${show.show.ids.trakt}/progress/watched?hidden=false&specials=false&count_specials=false`;
+    console.log("addNewShowProgress:", url);
+
     const accessToken = await oauthProvider.authorize();
-    const response = await fetch(
-      `${TRAKT_API_URL}/shows/${show.show.ids.trakt}/progress/watched?hidden=false&specials=false&count_specials=false`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "trakt-api-version": "2",
-          "trakt-api-key": TRAKT_CLIENT_ID,
-          Authorization: `Bearer ${accessToken}`,
-        },
-        signal,
+    const response = await fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "trakt-api-version": "2",
+        "trakt-api-key": TRAKT_CLIENT_ID,
+        Authorization: `Bearer ${accessToken}`,
       },
-    );
+      signal,
+    });
 
     if (!response.ok) {
       console.error("updateShowProgress:", await response.text());
@@ -333,8 +354,11 @@ export const addNewShowProgress = async (
 };
 
 export const addShowToHistory = async (showId: number, signal: AbortSignal | undefined = undefined) => {
+  const url = `${TRAKT_API_URL}/sync/history`;
+  console.log("addShowToHistory:", url);
+
   const accessToken = await oauthProvider.authorize();
-  const response = await fetch(`${TRAKT_API_URL}/sync/history`, {
+  const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -361,8 +385,11 @@ export const addShowToHistory = async (showId: number, signal: AbortSignal | und
 };
 
 export const getHistoryShows = async (page: number, signal: AbortSignal | undefined = undefined) => {
+  const url = `${TRAKT_API_URL}/sync/watched/shows?extended=noseasons`;
+  console.log("getHistoryShows:", url);
+
   const accessToken = await oauthProvider.authorize();
-  const response = await fetch(`${TRAKT_API_URL}/sync/watched/shows?extended=noseasons`, {
+  const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json; charset=utf-8",
       "trakt-api-version": "2",
@@ -397,8 +424,11 @@ export const getHistoryShows = async (page: number, signal: AbortSignal | undefi
 };
 
 export const removeShowFromHistory = async (showId: number, signal: AbortSignal | undefined = undefined) => {
+  const url = `${TRAKT_API_URL}/sync/history/remove`;
+  console.log("removeShowFromHistory:", url);
+
   const accessToken = await oauthProvider.authorize();
-  const response = await fetch(`${TRAKT_API_URL}/sync/history/remove`, {
+  const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
