@@ -38,7 +38,7 @@ export default function Command() {
       {Array.from(directories, ([key, value]) => (
         <Grid.Item
           key={key.valueOf()}
-          title={`| ${key} | ${value.substring(value.lastIndexOf('/') + 1, value.length)}`}
+          title={`| ${key} | ${value.substring(value.lastIndexOf("/") + 1, value.length)}`}
           content={{ fileIcon: value }}
           actions={
             <ActionPanel>
