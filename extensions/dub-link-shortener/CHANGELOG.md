@@ -1,6 +1,6 @@
 # Dub Link Shortener Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-06-28
 
 - Search Links: Improved the UX, added metadata and a workspace selection accessory
 - Shorten Links: Added form options for workspace, tags, domain and improved UX
