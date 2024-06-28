@@ -5,6 +5,9 @@
   "description": "Displays interesting facts about ducks.",
   "icon": "extension-icon.png",
   "author": "validate",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -15,8 +18,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.1",
-    "@raycast/utils": "^1.16.1"
+    "@raycast/api": "^1.77.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
