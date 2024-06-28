@@ -1,5 +1,5 @@
 /** @module Helper */
-import pkg from '../../../package.json';
+import pkg from "../../../package.json";
 
 /** Helper methods. */
 
@@ -29,7 +29,7 @@ export default class Helper {
    * @return {string} str   - The escaped string.
    */
   static escapeRegExp(str) {
-    return str.replace(/([.*+?^=!:${}()|[\]/\\])/g, '\\$1');
+    return str.replace(/([.*+?^=!:${}()|[\]/\\])/g, "\\$1");
   }
 
   /**
@@ -41,25 +41,19 @@ export default class Helper {
    */
   static async fetchAsync(url, env) {
     const response = await env.fetch(url, {
-      cache: env.reload ? 'reload' : 'force-cache',
+      cache: env.reload ? "reload" : "force-cache",
     });
     if (response.status != 200) {
-      env.logger.info(
-        `Problem fetching via ${env.reload ? 'reload' : 'cache'} ${url}: ${
-          response.status
-        }`,
-      );
+      env.logger.info(`Problem fetching via ${env.reload ? "reload" : "cache"} ${url}: ${response.status}`);
       return null;
     }
-    env.logger.success(
-      `Success fetching via ${env.reload ? 'reload' : 'cache'} ${url}`,
-    );
+    env.logger.success(`Success fetching via ${env.reload ? "reload" : "cache"} ${url}`);
     const text = await response.text();
     return text;
   }
 
   static logVersion() {
-    console.log('Trovu running version', this.getVersion());
+    console.log("Trovu running version", this.getVersion());
   }
 
   static getVersion() {

@@ -1,4 +1,4 @@
-import QueryParser from './QueryParser.js';
+import QueryParser from "./QueryParser.js";
 
 export default class SuggestionsGetter {
   constructor(env) {
@@ -91,7 +91,7 @@ export default class SuggestionsGetter {
         }
         delete shortcut.includes;
         delete shortcut.tests;
-        if (query == '') {
+        if (query == "") {
           if (shortcut.showOnHome && shortcut.reachable) {
             matches.showOnHome.push(shortcut);
             continue;
@@ -100,10 +100,7 @@ export default class SuggestionsGetter {
         if (filters.namespace && filters.namespace != shortcut.namespace) {
           continue;
         }
-        if (
-          filters.tag &&
-          (!shortcut.tags || !shortcut.tags.includes(filters.tag))
-        ) {
+        if (filters.tag && (!shortcut.tags || !shortcut.tags.includes(filters.tag))) {
           continue;
         }
         if (filters.url && !shortcut.url.includes(filters.url)) {
@@ -171,18 +168,18 @@ export default class SuggestionsGetter {
 
   getRegExpAndFilters(query) {
     const filters = {};
-    const queryParts = query.split(' ');
+    const queryParts = query.split(" ");
     const remainingQueryParts = [];
     for (const part of queryParts) {
-      if (part.startsWith('ns:')) {
+      if (part.startsWith("ns:")) {
         filters.namespace = part.slice(3);
         continue;
       }
-      if (part.startsWith('tag:')) {
+      if (part.startsWith("tag:")) {
         filters.tag = part.slice(4);
         continue;
       }
-      if (part.startsWith('url:')) {
+      if (part.startsWith("url:")) {
         filters.url = part.slice(4);
         continue;
       }
@@ -195,8 +192,8 @@ export default class SuggestionsGetter {
       }
       remainingQueryParts.push(part);
     }
-    const remainingQuery = remainingQueryParts.join(' ');
-    const regexp = new RegExp(remainingQuery, 'i');
+    const remainingQuery = remainingQueryParts.join(" ");
+    const regexp = new RegExp(remainingQuery, "i");
     return [regexp, filters];
   }
 

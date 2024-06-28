@@ -1,6 +1,6 @@
 /** @module QueryParser */
-import Helper from './Helper.js';
-import countriesList from 'countries-list';
+import Helper from "./Helper.js";
+import countriesList from "countries-list";
 
 /** Parse a query. */
 
@@ -14,22 +14,17 @@ export default class QueryParser {
    */
   static parse(query) {
     const env = {};
-    env.query = query || '';
+    env.query = query || "";
     env.query = env.query.trim();
     Object.assign(env, QueryParser.setFlagsFromQuery(env));
 
-    [env.keyword, env.argumentString] = this.getKeywordAndArgumentString(
-      env.query,
-    );
+    [env.keyword, env.argumentString] = this.getKeywordAndArgumentString(env.query);
     env.keyword = env.keyword.toLowerCase();
     env.args = this.getArguments(env.argumentString);
 
     [env.extraNamespaceName, env.keyword] = this.getExtraNamespace(env.keyword);
     if (env.extraNamespaceName) {
-      const languageOrCountry =
-        this.getLanguageAndCountryFromExtraNamespaceName(
-          env.extraNamespaceName,
-        );
+      const languageOrCountry = this.getLanguageAndCountryFromExtraNamespaceName(env.extraNamespaceName);
       Object.assign(env, languageOrCountry);
     }
 
@@ -48,13 +43,13 @@ export default class QueryParser {
   static getKeywordAndArgumentString(query) {
     let keyword, argumentString;
 
-    [keyword, argumentString] = Helper.splitKeepRemainder(query, ' ', 2);
+    [keyword, argumentString] = Helper.splitKeepRemainder(query, " ", 2);
 
-    if (typeof keyword === 'undefined') {
-      keyword = '';
+    if (typeof keyword === "undefined") {
+      keyword = "";
     }
-    if (typeof argumentString === 'undefined') {
-      argumentString = '';
+    if (typeof argumentString === "undefined") {
+      argumentString = "";
     }
 
     return [keyword, argumentString];
@@ -70,7 +65,7 @@ export default class QueryParser {
   static getArguments(argumentString) {
     let args;
     if (argumentString) {
-      args = argumentString.split(',');
+      args = argumentString.split(",");
     } else {
       args = [];
     }
@@ -93,20 +88,12 @@ export default class QueryParser {
     //   but don't split up country namespace names.
     let extraNamespaceName;
     if (keyword.match(/.\./)) {
-      [extraNamespaceName, keyword] = Helper.splitKeepRemainder(
-        keyword,
-        '.',
-        2,
-      );
+      [extraNamespaceName, keyword] = Helper.splitKeepRemainder(keyword, ".", 2);
       // If extraNamespace started with a dot, it will be empty
       // so let's split it again, and add the dot.
-      if (extraNamespaceName == '') {
-        [extraNamespaceName, keyword] = Helper.splitKeepRemainder(
-          keyword,
-          '.',
-          2,
-        );
-        extraNamespaceName = '.' + extraNamespaceName;
+      if (extraNamespaceName == "") {
+        [extraNamespaceName, keyword] = Helper.splitKeepRemainder(keyword, ".", 2);
+        extraNamespaceName = "." + extraNamespaceName;
       }
     }
 
@@ -125,9 +112,7 @@ export default class QueryParser {
 
     if (extraNamespaceName in countriesList.languages) {
       env.language = extraNamespaceName;
-    } else if (
-      extraNamespaceName.substring(1).toUpperCase() in countriesList.countries
-    ) {
+    } else if (extraNamespaceName.substring(1).toUpperCase() in countriesList.countries) {
       env.country = extraNamespaceName.substring(1);
     }
 
@@ -139,12 +124,12 @@ export default class QueryParser {
       // Check for debug.
       if (env.query.match(/^debug:/)) {
         env.debug = true;
-        env.query = env.query.replace(/^debug:/, '');
+        env.query = env.query.replace(/^debug:/, "");
       }
       // Check for reload.
       if (env.query.match(/^reload:/) || env.query.match(/^reload$/)) {
         env.reload = true;
-        env.query = env.query.replace(/^reload(:?)/, '');
+        env.query = env.query.replace(/^reload(:?)/, "");
       }
     }
     return env;
