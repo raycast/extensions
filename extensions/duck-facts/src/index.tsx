@@ -1,10 +1,9 @@
 import { Detail, Action, ActionPanel, AI, showToast, Toast, environment, popToRoot } from "@raycast/api";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 
 export default function Command() {
   const [answer, setAnswer] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
-  const hasRunEffect = useRef(false);
 
   if (!environment.canAccess(AI)) {
     popToRoot();
@@ -44,19 +43,16 @@ export default function Command() {
   };
 
   useEffect(() => {
-    if (!hasRunEffect.current) {
-      fetchData();
-      hasRunEffect.current = true;
-    }
+    fetchData();
   }, []);
 
   return (
     <Detail
       isLoading={isLoading}
-      markdown={isLoading ? "Generating..." : answer || "No suggestions generated"}
+      markdown={isLoading ? "Generating..." : answer || "No duck fact found"}
       actions={
         <ActionPanel>
-          <Action title="Regenerate Suggestions" onAction={fetchData} />
+          <Action title="New Fact" icon="duck.svg" onAction={fetchData} />
         </ActionPanel>
       }
     />
