@@ -1,11 +1,16 @@
 import { getPreferenceValues } from "@raycast/api";
 
 interface Preferences {
-  personalAccessTokens: string;
+  "access-token": string;
   perPage: string;
-  rememberTag: boolean;
-  showDetail: boolean;
+  "remember-tag": boolean;
+  detail: boolean;
   primaryAction: string;
 }
-export const { personalAccessTokens, perPage, rememberTag, showDetail, primaryAction } =
-  getPreferenceValues<Preferences>();
+export const {
+  "access-token": personalAccessTokens,
+  perPage,
+  "remember-tag": rememberTag,
+  detail: showDetail,
+  primaryAction,
+} = getPreferenceValues<Preferences>();

@@ -18,7 +18,7 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "personalAccessTokens",
+      "name": "access-token",
       "type": "password",
       "required": true,
       "title": "Personal access tokens",
@@ -60,7 +60,7 @@
           ]
         },
         {
-          "name": "rememberTag",
+          "name": "remember-tag",
           "type": "checkbox",
           "required": false,
           "title": "Preferences",
@@ -69,7 +69,7 @@
           "default": false
         },
         {
-          "name": "showDetail",
+          "name": "detail",
           "type": "checkbox",
           "required": false,
           "label": "Show Gist Content",
