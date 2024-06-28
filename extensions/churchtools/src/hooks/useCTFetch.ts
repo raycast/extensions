@@ -3,7 +3,7 @@ import { ArgumentTypes } from "../types/ArgumentTypes";
 import { getPreferenceValues } from "@raycast/api";
 
 export const useCTFetch = (apiPath: string, args?: ArgumentTypes<typeof useFetch>[1]) => {
-  const { loginToken, instanceUrl } = getPreferenceValues();
+  const { loginToken, instanceUrl } = getPreferenceValues<Preferences>();
 
   const apiUrl = `https://${instanceUrl}/api${apiPath}`;
 
