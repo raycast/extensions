@@ -2,22 +2,25 @@ import {
   AI,
   Action,
   ActionPanel,
+  Alert,
   Icon,
   Keyboard,
   Toast,
   clearSearchBar,
   confirmAlert,
+  environment,
   showToast,
   useNavigation,
 } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { Profile } from "@slack/web-api/dist/response/UsersProfileGetResponse";
 import { durationTitleMap } from "./durations";
-import { getCodeForEmoji, getEmojiForCode } from "./emojis";
+import { getEmojiForCode } from "./emojis";
 import { StatusForm } from "./form";
 import { useSlack } from "./slack";
 import { SlackStatusPreset } from "./types";
-import { showToastWithPromise } from "./utils";
+import { setStatusToPreset, showToastWithPromise } from "./utils";
+import { nanoid } from "nanoid";
 
 // Status Actions
 
@@ -66,14 +69,21 @@ export function SetStatusWithAIAction(props: { statusText: string; mutate: Mutat
             const answer = await AI.ask(
               `You help a Slack user set their status.
               
-              Respond with the following JSON for the Slack status:
-              {
-                "text": <string for status text, should be short and sweet, no punctuation at the end, e.g. "Working out", "Listening to Drake's new album", "Coffe break">,
-                "emoji": <string for single emoji matching the text of the status>,
-                "duration": <optional integer for duration of status in seconds, only include if user specified duration or end of status in their description>
-              }
+              **Respond with a JSON object with the following attributes:**
+              - "text": a string value for status text, should be short and sweet, with no punctuation, e.g. "Working out", "Listening to Drake's new album", "Coffe break". It should not include the status duration for example "Working out" instead of "Working out for 2 hours" or "Working out until tomorrow".
+              - "emoji": a Slack-compatible string for single emoji matching the text of the status. Emojis should be in the form: :<emoji identifier>:
 
-              Current time of users status: ${new Date().toLocaleTimeString()}. User's description of their status: ${
+              **If the user has specified a time or the end of status in their description then add the following attribute:**
+              - "duration": an integer representing the duration of the status in seconds
+
+              Rules:
+              - Response should be a string without any template quotes for formatting.
+              - all strings should use double quotation marks and should have .trim() applied
+              - all emojis should be in form :<emoji identifier>:
+              - all attributes should be wrapped with double quotation marks
+              - all spaces and carriage returns should be removed from the resulting string
+
+              Current time of user's status: ${new Date().toLocaleTimeString()}. User's description of their status: ${
                 props.statusText
               }. 
 
@@ -88,7 +98,7 @@ export function SetStatusWithAIAction(props: { statusText: string; mutate: Mutat
             }
 
             const profile: Profile = {
-              status_emoji: getCodeForEmoji(parsedAnswer.emoji),
+              status_emoji: getEmojiForCode(parsedAnswer.emoji),
               status_text: parsedAnswer.text,
               status_expiration:
                 parsedAnswer.duration && typeof parsedAnswer.duration === "number"
@@ -132,38 +142,10 @@ export function SetStatusAction(props: { preset: SlackStatusPreset; mutate: Muta
       title="Set Status"
       icon={Icon.Pencil}
       onAction={async () => {
-        showToastWithPromise(
-          async () => {
-            let expiration = 0;
-            if (props.preset.defaultDuration > 0) {
-              const expirationDate = new Date();
-              expirationDate.setMinutes(expirationDate.getMinutes() + props.preset.defaultDuration);
-              expiration = Math.floor(expirationDate.getTime() / 1000);
-            }
-
-            const profile: Profile = {
-              status_emoji: props.preset.emojiCode,
-              status_text: props.preset.title,
-              status_expiration: expiration,
-            };
-
-            await props.mutate(
-              slack.users.profile.set({
-                profile: JSON.stringify(profile),
-              }),
-              {
-                optimisticUpdate() {
-                  return profile;
-                },
-              },
-            );
-          },
-          {
-            loading: "Setting status...",
-            success: "Set status",
-            error: "Failed setting status",
-          },
-        );
+        setStatusToPreset({
+          ...props,
+          slack,
+        });
       }}
     />
   );
@@ -300,6 +282,7 @@ export function CreateStatusPresetAction(props: { onCreate: (preset: SlackStatus
               title: values.statusText,
               emojiCode: values.emoji,
               defaultDuration: parseInt(values.duration),
+              id: nanoid(),
             });
 
             pop();
@@ -316,6 +299,32 @@ export function CreateStatusPresetAction(props: { onCreate: (preset: SlackStatus
   );
 }
 
+function createLink(preset: SlackStatusPreset) {
+  const protocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
+  const contextPreset = encodeURIComponent(JSON.stringify({ presetId: preset.id }));
+  return `${protocol}extensions/petr/${environment.extensionName}/setStatus?context=${contextPreset}`;
+}
+
+export function CreateQuicklinkPresetAction(props: { preset: SlackStatusPreset }) {
+  const link = createLink(props.preset);
+
+  return (
+    <Action.CreateQuicklink
+      title="Create Quicklink"
+      quicklink={{ link: link, name: props.preset.title }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+    />
+  );
+}
+
+export function CopyDeeplinkPresetAction(props: { preset: SlackStatusPreset }) {
+  const link = createLink(props.preset);
+
+  return (
+    <Action.CopyToClipboard title="Copy Deeplink" content={link} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
+  );
+}
+
 export function DeleteStatusPresetAction(props: { onDelete: () => void }) {
   return (
     <Action
@@ -329,6 +338,10 @@ export function DeleteStatusPresetAction(props: { onDelete: () => void }) {
           title: "Delete preset?",
           message: "Are you sure you want to delete this preset permanently?",
           rememberUserChoice: true,
+          primaryAction: {
+            title: "Confirm",
+            style: Alert.ActionStyle.Destructive,
+          },
         });
 
         if (!confirmed) {
@@ -366,6 +379,7 @@ export function EditStatusPresetAction(props: {
               title: values.statusText,
               emojiCode: values.emoji,
               defaultDuration: parseInt(values.duration),
+              id: props.preset.id ?? nanoid(),
             });
 
             pop();

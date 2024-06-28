@@ -19,10 +19,16 @@
   ],
  "preferences": [{
     "name": "folderPath",
-    "description": "Select the folder where snippets are located.",
+    "description": "Select the primary folder where snippets are located.",
     "type": "directory",
     "required": true,
-    "title": "Select Snippet Folder"
+    "title": "Select Primary Snippet Folder"
+  }, {
+    "name": "secondaryFolderPaths",
+    "description": "Comma separated list of additional paths where snippets are located.\nExample: ~/Desktop/snippets,~/Documents/othersnippets",
+    "type": "textfield",
+    "required": false,
+    "title": "Select Secondary Snippet Folders"
   }, {
     "name": "primaryAction",
     "description": "Primary action.",

@@ -21,7 +21,15 @@
     "lin",
     "marcotf",
     "qeude",
-    "nesl247"
+    "nesl247",
+    "xilopaint",
+    "antonengelhardt",
+    "johanthorell",
+    "dennis_zoma",
+    "litomore",
+    "dmitrii_mitrofanov",
+    "j3lte",
+    "stelo"
   ],
   "categories": [
     "Developer Tools",
@@ -48,16 +56,14 @@
       "mode": "view"
     },
     {
-      "name": "created-issues",
-      "title": "Created Issues",
-      "description": "List issues created by you.",
-      "mode": "view"
-    },
-    {
-      "name": "open-issues",
-      "title": "Open Issues",
-      "description": "List issues assigned to you or mentioning you.",
-      "mode": "view"
+      "name": "my-issues",
+      "title": "My Issues",
+      "description": "List issues created by you, assigned to you or mentioning you.",
+      "mode": "view",
+      "keywords": [
+        "open issues",
+        "created issues"
+      ]
     },
     {
       "name": "search-issues",
@@ -160,6 +166,14 @@
           "description": "Show the menu bar extra even when you don't have any unread notifications.",
           "default": true,
           "required": false
+        },
+        {
+          "type": "checkbox",
+          "label": "Show unread count",
+          "name": "showUnreadCount",
+          "description": "Show the unread count in the menu bar.",
+          "default": true,
+          "required": false
         }
       ]
     },
@@ -176,10 +190,19 @@
       "mode": "view"
     },
     {
-      "name": "open-issues-menu",
-      "title": "Open Issues Menu Bar",
-      "description": "Display Open Issues in the Menu Bar",
+      "name": "my-projects",
+      "title": "My Projects",
+      "description": "Show your Projects",
+      "mode": "view"
+    },
+    {
+      "name": "my-issues-menu",
+      "title": "My Issues Menu Bar",
+      "description": "Display My Issues in the Menu Bar",
       "mode": "menu-bar",
+      "keywords": [
+        "open issues"
+      ],
       "interval": "15m",
       "preferences": [
         {
@@ -202,9 +225,9 @@
       ]
     },
     {
-      "name": "open-pull-request-menu",
+      "name": "my-pull-requests-menu",
       "title": "My Pull Requests Menu Bar",
-      "description": "Display My Pull Request in the Menu Bar",
+      "description": "Display My Pull Requests in the Menu Bar",
       "mode": "menu-bar",
       "interval": "15m",
       "preferences": [
@@ -212,7 +235,7 @@
           "name": "includeOpen",
           "type": "checkbox",
           "required": false,
-          "title": "Categories To Display",
+          "title": "Categories to Display",
           "default": true,
           "label": "Opened",
           "description": "Includes pull request you opened in the menu list."
@@ -332,7 +355,7 @@
       "type": "password",
       "required": false,
       "title": "GitHub Token",
-      "description": "Your GitHub's personal access token. Required scopes: notifications repo read:org read:user read:project.",
+      "description": "Your GitHub's personal access token. Required scopes: notifications repo project read:org read:user.",
       "link": "https://github.com/settings/tokens",
       "placeholder": "Enter your personal access token"
     },
@@ -351,40 +374,59 @@
       "title": "Number of search results",
       "description": "For searching repositories, issues, discussions or pull requests, this is the number of results to request. Less will be faster.",
       "placeholder": "50"
+    },
+    {
+      "type": "checkbox",
+      "title": "Actions",
+      "label": "Open PRs in browser by default",
+      "name": "isOpenInBrowser",
+      "description": "If checked, pull requests will be opened in the browser by default instead of viewing them within Raycast.",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "includeTeamReviewRequests",
+      "type": "checkbox",
+      "required": false,
+      "title": "Advanced",
+      "default": true,
+      "label": "PRs include team review requets",
+      "description": "Include PRs where your team's review was requested as well as your own."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
-    "@raycast/utils": "^1.12.4",
-    "date-fns": "^2.30.0",
-    "graphql-request": "^5.1.0",
+    "@raycast/api": "^1.76.1",
+    "@raycast/utils": "^1.16.0",
+    "date-fns": "^3.6.0",
+    "graphql-request": "^6.1.0",
     "lodash": "^4.17.21",
     "node-fetch": "^3.3.2",
-    "octokit": "^2.1.0"
+    "octokit": "^4.0.2"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "^3.2.2",
-    "@graphql-codegen/typescript": "^3.0.2",
-    "@graphql-codegen/typescript-graphql-request": "^4.5.9",
-    "@graphql-codegen/typescript-operations": "^3.0.2",
+    "@graphql-codegen/cli": "^5.0.2",
+    "@graphql-codegen/typescript": "^4.0.7",
+    "@graphql-codegen/typescript-graphql-request": "^6.2.0",
+    "@graphql-codegen/typescript-operations": "^4.2.1",
     "@raycast/eslint-config": "^1.0.8",
-    "@types/lodash": "^4.14.201",
-    "@types/node": "^20.9.0",
-    "@types/react": "^18.2.37",
+    "@types/lodash": "^4.17.5",
+    "@types/node": "^20.14.5",
+    "@types/react": "^18.3.3",
     "concurrently": "^8.2.2",
-    "dotenv": "^16.3.1",
-    "eslint": "^8.53.0",
-    "eslint-plugin-import": "^2.29.0",
-    "graphql": "^16.8.1",
-    "prettier": "^3.1.0",
-    "react": "^18.2.0",
-    "typescript": "^5.2.2"
+    "dotenv": "^16.4.5",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.1",
+    "graphql": "^16.8.2",
+    "prettier": "^3.3.2",
+    "react": "^18.3.1",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "concurrently \"ray develop\" \"yarn generate --watch\"",
-    "format": "ray lint --fix",
+    "dev": "concurrently \"ray develop\" \"npm run generate -- --watch\"",
+    "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
     "generate": "graphql-codegen --config codegen.ts"
   }
 }

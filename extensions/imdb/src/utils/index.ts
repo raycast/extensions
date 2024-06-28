@@ -1,25 +1,3 @@
-import { SearchResponse, ItemBase } from '../types';
-
-export const parseResponse = async (
-  res: Response
-): Promise<ItemBase[] | null> => {
-  const payload = (await res.json()) as SearchResponse;
-
-  if (!res.ok && 'Error' in payload) {
-    throw Error(payload.Error);
-  } else if (!res.ok) {
-    throw Error(res.statusText);
-  } else if ('Search' in payload) {
-    const filtered = payload.Search.filter(
-      (title) => title.imdbID?.includes('tt') && title.Type !== 'game'
-    );
-
-    return filtered;
-  } else {
-    return null;
-  }
-};
-
 export const processSeasons = (count?: string) => {
   if (count === 'N/A') {
     return 'N/A';
@@ -29,3 +7,10 @@ export const processSeasons = (count?: string) => {
     return `${count} seasons`;
   }
 };
+
+const typeToTitleMap: Record<string, string | undefined> = {
+  movie: 'Movie',
+  series: 'Series',
+  game: 'Game',
+};
+export const mapTypeToTitle = (type: string) => typeToTitleMap[type] ?? type;

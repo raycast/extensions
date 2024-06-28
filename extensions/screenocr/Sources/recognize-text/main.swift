@@ -28,32 +28,67 @@ if let index = languagesIndex, index + 1 < args.count {
     LANGUAGES = ["en-US"]
 }
 
-func captureScreen() -> CGImage? {
+func captureScreen(keepImage: Bool = false) -> CGImage? {
     let screenRect = NSScreen.main?.frame ?? .zero
-    let imageRef = CGWindowListCreateImage(screenRect, .optionOnScreenOnly, kCGNullWindowID, .bestResolution)
+    let imageRef = CGWindowListCreateImage(
+        screenRect, .optionOnScreenOnly, kCGNullWindowID, .bestResolution)
+
+    if keepImage, let imageRef = imageRef {
+        let image = NSImage(cgImage: imageRef, size: NSZeroSize)
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.writeObjects([image])
+    }
+
     return imageRef
 }
 
-func captureSelectedArea() -> CGImage? {
+func randomPngPath() -> String {
+    let tempDir = NSTemporaryDirectory()
+    let uuid = UUID().uuidString
+    return "\(tempDir)/\(uuid).png"
+}
+
+func captureSelectedArea(keepImage: Bool = false) -> CGImage? {
+    let filePath = randomPngPath()
     let task = Process()
     task.launchPath = "/usr/sbin/screencapture"
-    task.arguments = ["-i", "-c"]
+    task.arguments = ["-i", keepImage ? "-c" : filePath]
     task.launch()
     task.waitUntilExit()
 
-    guard let pasteboard = NSPasteboard.general.pasteboardItems?.first,
-          let fileType = pasteboard.types.first,
-          let data = pasteboard.data(forType: fileType),
-          let image = NSImage(data: data)
-    else {
-        fputs("Error: failed to capture selected area\n", stderr)
-        return nil
+    var image: NSImage?
+    if keepImage {
+        guard let pasteboard = NSPasteboard.general.pasteboardItems?.first,
+            let fileType = pasteboard.types.first,
+            let data = pasteboard.data(forType: fileType)
+        else {
+            fputs("Error: failed to capture selected area\n", stderr)
+            return nil
+        }
+        image = NSImage(data: data)
+    } else {
+        guard let imgData = try? Data(contentsOf: URL(fileURLWithPath: filePath)),
+            let img = NSImage(data: imgData)
+        else {
+            fputs("Error: failed to load image from file\n", stderr)
+            return nil
+        }
+        image = img
     }
 
     var proposedRect = NSRect.zero
-    guard let imgRef = image.cgImage(forProposedRect: &proposedRect, context: nil, hints: nil) else {
+    guard let imgRef = image?.cgImage(forProposedRect: &proposedRect, context: nil, hints: nil) else {
         fputs("Error: failed to convert NSImage to CGImage for captured area\n", stderr)
         return nil
+    }
+
+    // Delete the file after use if keepImage is false
+    if !keepImage {
+        do {
+            try FileManager.default.removeItem(atPath: filePath)
+        } catch {
+            fputs("Error: failed to delete temporary file\n", stderr)
+        }
     }
 
     return imgRef
@@ -62,12 +97,13 @@ func captureSelectedArea() -> CGImage? {
 func main() -> Int32 {
     let args = CommandLine.arguments
     let fullscreen = args.contains("--fullscreen")
+    let keepImage = args.contains("--keepImage")
     let imgRef: CGImage?
 
     if fullscreen {
-        imgRef = captureScreen()
+        imgRef = captureScreen(keepImage: keepImage)
     } else {
-        imgRef = captureSelectedArea()
+        imgRef = captureSelectedArea(keepImage: keepImage)
     }
 
     guard let capturedImage = imgRef else {

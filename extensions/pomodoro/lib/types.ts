@@ -36,9 +36,11 @@ export type IntervalType = "focus" | "short-break" | "long-break";
 type Part = {
   startedAt: number;
   pausedAt?: number;
+  endAt?: number;
 };
 
 export type Interval = {
+  id: number;
   parts: Part[];
   length: number;
   type: IntervalType;

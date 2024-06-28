@@ -6,6 +6,7 @@
   "icon": "bring-icon.png",
   "author": "amuelli",
   "contributors": [
+    "ilian",
     "xilopaint"
   ],
   "categories": [
@@ -34,7 +35,8 @@
       "name": "index",
       "title": "Add Items to List",
       "description": "Add items to a Bring! list",
-      "mode": "view"
+      "mode": "view",
+      "keywords": ["shopping", "bring", "groceries"]
     }
   ],
   "dependencies": {
@@ -47,7 +49,7 @@
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
+    "prettier": "^3.2.5",
     "typescript": "^5.2.2"
   },
   "scripts": {

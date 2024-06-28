@@ -6,6 +6,9 @@
   "description": "Weather forecast via wttr.in",
   "icon": "weather.png",
   "author": "tonka3000",
+  "contributors": [
+    "xilopaint"
+  ],
   "license": "MIT",
   "commands": [
     {

@@ -1,16 +1,18 @@
-import { MenuBarExtra, Icon, launchCommand, LaunchType, Image, Color } from "@raycast/api";
+import { MenuBarExtra, Icon, Image, Color } from "@raycast/api";
 import { useState } from "react";
 import { FocusText, LongBreakText, ShortBreakText } from "../lib/constants";
 import {
   createInterval,
   getCurrentInterval,
   resetInterval,
+  restartInterval,
   pauseInterval,
   continueInterval,
   isPaused,
   duration,
   preferences,
   progress,
+  endOfInterval,
 } from "../lib/intervals";
 import { secondsToTime } from "../lib/secondsToTime";
 import { Interval, IntervalType } from "../lib/types";
@@ -25,15 +27,7 @@ export default function TogglePomodoroTimer() {
   const [currentInterval, setCurrentInterval] = useState<Interval | undefined>(getCurrentInterval());
 
   if (currentInterval && progress(currentInterval) >= 100) {
-    try {
-      launchCommand({
-        name: "pomodoro-control-timer",
-        type: LaunchType.UserInitiated,
-        context: { currentInterval },
-      });
-    } catch (error) {
-      console.error(error);
-    }
+    endOfInterval(currentInterval);
   }
 
   function onStart(type: IntervalType) {
@@ -51,6 +45,11 @@ export default function TogglePomodoroTimer() {
   function onReset() {
     resetInterval();
     setCurrentInterval(undefined);
+  }
+
+  function onRestart() {
+    restartInterval();
+    setCurrentInterval(getCurrentInterval());
   }
 
   let icon: Image.ImageLike;
@@ -90,6 +89,12 @@ export default function TogglePomodoroTimer() {
             icon={Icon.Stop}
             onAction={onReset}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
+          />
+          <MenuBarExtra.Item
+            title="Restart Current"
+            icon={Icon.Repeat}
+            onAction={onRestart}
+            shortcut={{ modifiers: ["cmd"], key: "t" }}
           />
         </>
       ) : (

@@ -1,4 +1,4 @@
-import { List, Grid, getPreferenceValues } from "@raycast/api";
+import { Grid, List, getPreferenceValues } from "@raycast/api";
 import { Preferences } from "../lib/types";
 
 const { view } = getPreferenceValues<Preferences>();

@@ -1,4 +1,4 @@
-import { Youtrack } from "youtrack-rest-client";
+import { WorkItemType, Youtrack } from "youtrack-rest-client";
 
 export interface Issue {
   id: string;
@@ -27,6 +27,7 @@ export interface IssueExtended extends Issue {
   reporter: User | undefined;
   updater: User | undefined;
   tags?: IssueTag[];
+  workItemTypes?: WorkItemType[];
 }
 
 export interface IssueTag {
@@ -39,4 +40,11 @@ export interface User {
   name: string;
   fullName: string;
   avatarUrl?: string;
+}
+
+export interface WorkItemSubmit {
+  date: Date;
+  time: string;
+  workTypeId: string;
+  comment: string;
 }

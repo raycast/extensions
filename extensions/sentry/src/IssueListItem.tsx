@@ -7,7 +7,7 @@ import { MutatePromise } from "@raycast/utils";
 export type IssueListItemProps = {
   issue: Issue;
   organization?: Organization;
-  mutateList: MutatePromise<Issue[] | undefined>;
+  mutateList: MutatePromise<Issue[]>;
 };
 
 export function IssueListItem(props: IssueListItemProps) {

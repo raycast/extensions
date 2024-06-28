@@ -19,6 +19,7 @@
 - [Publish an Extension](basics/publish-an-extension.md)
 - [Debug an Extension](basics/debug-an-extension.md)
 - [Install an Extension](basics/install-an-extension.md)
+- [Review an Extension in a Pull Request](basics/review-pullrequest.md)
 
 ## Teams
 
@@ -53,6 +54,7 @@
 ## API Reference
 
 - [AI](api-reference/ai.md)
+- [Browser Extension](api-reference/browser-extension.md)
 - [Cache](api-reference/cache.md)
 - [Command](api-reference/command.md)
 - [Clipboard](api-reference/clipboard.md)

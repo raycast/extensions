@@ -190,10 +190,9 @@ export const addTask = async (data: {
     set result to ""
     tell application "TickTick"
       set result to add task to list "${projectId}" title "${title}" description "${description}"${
-      dueDate ? ` due date "${dueDate}"` : ""
-    } from "raycast" ${isAllDay ? "with" : "without"} allday
+      dueDate ? ` due date "${dueDate}" is allday ${isAllDay}` : ""
+    } from "raycast"
     end tell
-
   `)) as string;
     if (result === "missing value") {
       return false;

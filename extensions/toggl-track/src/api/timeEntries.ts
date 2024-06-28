@@ -1,5 +1,5 @@
-import type { ToggleItem } from "./types";
-import { get, post, patch } from "./togglClient";
+import { get, post, patch } from "@/api/togglClient";
+import type { ToggleItem } from "@/api/types";
 
 export async function getMyTimeEntries<Meta extends boolean = false>({
   startDate,
@@ -26,7 +26,7 @@ type CreateTimeEntryParameters = {
   description: string;
   tags: string[];
   taskId?: number;
-  billable: boolean;
+  billable?: boolean;
 };
 export function createTimeEntry({
   projectId,

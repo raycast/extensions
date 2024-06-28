@@ -1,5 +1,14 @@
 # TidyRead - Streamline Your Daily Reading Changelog
 
+## [Import sources by opml file] - 2024-03-15
+- feat: import sources by opml file
+- feat: Manage Sources Command add Show RSS Detail Action
+- feat: add delete all digests action
+- chore: change CATEGORIES const
+- fix: solve getting wrong today's digest bug
+- fix: solve rss link invalid bug
+- fix: trying to fix surrogate pairs error
+
 ## [Support Categorized Digest And Fix Some Edge Case Bugs] - 2024-01-30
 - feat: digest can be categorized by tags
 - feat: export digest as markdown file

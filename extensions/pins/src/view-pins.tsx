@@ -34,6 +34,7 @@ import {
   addExpirationDateAccessory,
   addFrequencyAccessory,
   addLastOpenedAccessory,
+  addLinksAccessory,
   addTagAccessories,
   addTextFragmentAccessory,
 } from "./lib/accessories";
@@ -127,6 +128,7 @@ export default function ViewPinsCommand(args: { launchContext?: { pinID?: number
     }
   }
 
+  const allPins = pins;
   const maxTimesOpened = Math.max(...pins.map((pin) => pin.timesOpened || 0));
 
   /**
@@ -138,12 +140,13 @@ export default function ViewPinsCommand(args: { launchContext?: { pinID?: number
     return sortPins(pins, groups).map((pin, index) => {
       // Add accessories based on the user's preferences
       const accessories: List.Item.Accessory[] = [];
-      if (preferences.showLastOpened) addLastOpenedAccessory(pin, accessories, getLastOpenedPin(pins)?.id);
+      if (preferences.showLastOpened) addLastOpenedAccessory(pin, accessories, getLastOpenedPin(allPins)?.id);
       if (preferences.showCreationDate) addCreationDateAccessory(pin, accessories);
       if (preferences.showExpiration) addExpirationDateAccessory(pin, accessories);
       if (preferences.showApplication) addApplicationAccessory(pin, accessories);
       if (preferences.showExecutionVisibility) addExecutionVisibilityAccessory(pin, accessories);
       if (preferences.showFragment) addTextFragmentAccessory(pin, accessories);
+      if (preferences.showLinkCount) addLinksAccessory(pin, accessories, allPins, groups);
       if (preferences.showFrequency) addFrequencyAccessory(pin, accessories, maxTimesOpened);
       if (preferences.showTags) addTagAccessories(pin, accessories);
 
@@ -168,6 +171,8 @@ export default function ViewPinsCommand(args: { launchContext?: { pinID?: number
                   onAction={async () => {
                     await getRecentApplications();
                     await openPin(pin, preferences, localData as unknown as { [key: string]: unknown });
+                    await revalidatePins();
+                    await revalidateGroups();
                   }}
                 />
 
@@ -184,32 +189,81 @@ export default function ViewPinsCommand(args: { launchContext?: { pinID?: number
                   target={<PinForm pin={{ ...pin, name: pin.name + " Copy", id: -1 }} setPins={setPins} pins={pins} />}
                 />
 
-                {index > 0 &&
-                (group?.sortStrategy == "manual" ||
-                  (!group?.sortStrategy && preferences.defaultSortStrategy == "manual") ||
-                  (group?.name == undefined && preferences.defaultSortStrategy == "manual")) ? (
-                  <Action
-                    title="Move Up"
-                    icon={Icon.ArrowUp}
-                    shortcut={Keyboard.Shortcut.Common.MoveUp}
-                    onAction={async () => {
-                      await movePin(pin, Direction.UP, setPins);
-                    }}
-                  />
-                ) : null}
-                {index < pins.length - 1 &&
-                (group?.sortStrategy == "manual" ||
-                  (!group?.sortStrategy && preferences.defaultSortStrategy == "manual") ||
-                  (group?.name == undefined && preferences.defaultSortStrategy == "manual")) ? (
-                  <Action
-                    title="Move Down"
-                    icon={Icon.ArrowDown}
-                    shortcut={Keyboard.Shortcut.Common.MoveDown}
-                    onAction={async () => {
-                      await movePin(pin, Direction.DOWN, setPins);
-                    }}
-                  />
-                ) : null}
+                <ActionPanel.Submenu title="Move Pin..." icon={Icon.ChevronUpDown}>
+                  {index > 0 &&
+                  (group?.sortStrategy == "manual" ||
+                    (!group?.sortStrategy && preferences.defaultSortStrategy == "manual") ||
+                    (group?.name == undefined && preferences.defaultSortStrategy == "manual")) ? (
+                    <Action
+                      title="Move Up"
+                      icon={Icon.ArrowUp}
+                      shortcut={Keyboard.Shortcut.Common.MoveUp}
+                      onAction={async () => {
+                        await movePin(pin, Direction.UP, setPins);
+                      }}
+                    />
+                  ) : null}
+                  {index < pins.length - 1 &&
+                  (group?.sortStrategy == "manual" ||
+                    (!group?.sortStrategy && preferences.defaultSortStrategy == "manual") ||
+                    (group?.name == undefined && preferences.defaultSortStrategy == "manual")) ? (
+                    <Action
+                      title="Move Down"
+                      icon={Icon.ArrowDown}
+                      shortcut={Keyboard.Shortcut.Common.MoveDown}
+                      onAction={async () => {
+                        await movePin(pin, Direction.DOWN, setPins);
+                      }}
+                    />
+                  ) : null}
+                  <ActionPanel.Section title="Between Groups">
+                    {groups
+                      .filter((g) => g.name !== pin.group)
+                      .map((group) => (
+                        <Action
+                          title={`Move to ${group.name}`}
+                          key={group.id}
+                          icon={Icon.ChevronRight}
+                          onAction={async () => {
+                            const pins = [...allPins];
+                            const groupPins = pins.filter((p) => p.group == group.name);
+                            const pinIndex = pins.findIndex((p) => p.id == pin.id);
+                            if (groupPins.length == 0 || pinIndex == -1) return;
+
+                            pins.splice(pinIndex, 1);
+                            pin.group = group.name;
+                            const groupStart = pins.findIndex((p) => p.id == groupPins[0].id);
+                            const targetIndex = groupStart + groupPins.length;
+                            const newPins = [...pins.slice(0, targetIndex), pin, ...pins.slice(targetIndex)];
+
+                            await setStorage(StorageKey.LOCAL_PINS, newPins);
+                            await revalidatePins();
+                          }}
+                        />
+                      ))}
+                    <Action
+                      title="Move to Other"
+                      key="Other"
+                      icon={Icon.ChevronRight}
+                      onAction={async () => {
+                        const pins = [...allPins];
+                        const groupPins = pins.filter((p) => p.group == "None");
+                        const pinIndex = pins.findIndex((p) => p.id == pin.id);
+                        if (groupPins.length == 0 || pinIndex == -1) return;
+
+                        pins.splice(pinIndex, 1);
+                        pin.group = "None";
+                        const groupStart = pins.findIndex((p) => p.id == groupPins[0].id);
+                        const targetIndex = groupStart + groupPins.length;
+                        const newPins = [...pins.slice(0, targetIndex), pin, ...pins.slice(targetIndex)];
+
+                        await setStorage(StorageKey.LOCAL_PINS, newPins);
+                        await revalidatePins();
+                      }}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel.Submenu>
+
                 <DeletePinAction pin={pin} setPins={setPins} />
                 <Action
                   title="Delete All Pins (Keep Groups)"
@@ -272,6 +326,7 @@ export default function ViewPinsCommand(args: { launchContext?: { pinID?: number
                 title={`${tag} (${tagCounts[tag]} ${pluralize("pin", tagCounts[tag])})`}
                 value={tag}
                 icon={Icon.Tag}
+                key={tag}
               />
             ))}
           </List.Dropdown>

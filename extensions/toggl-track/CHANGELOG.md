@@ -1,6 +1,23 @@
 # Toggl Track Changelog
 
-## [Enhancements]
+## [Enhancements] - 2024-05-27
+
+- Prettier sort imports
+- Absolute paths in imports
+
+## [Enhancements] - 2024-05-17
+
+- Add ability to prefill form of new entry with actual selected entry
+
+## [Bug Fixes] - 2024-03-25
+
+- Fix time entries refresh
+
+## [Enhancements] - 2024-03-06
+
+- Add workspace and project fields to time entry form.
+
+## [Enhancements] - 2024-02-27
 
 - Show tags, project, and client on time entries.
 

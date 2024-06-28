@@ -11,9 +11,10 @@ import {
   pauseInterval,
   preferences,
   resetInterval,
+  restartInterval,
 } from "../lib/intervals";
 import { FocusText, ShortBreakText, LongBreakText } from "../lib/constants";
-import { GiphyResponse, Quote } from "../lib/types";
+import { GiphyResponse, Interval, Quote } from "../lib/types";
 
 const createAction = (action: () => void) => () => {
   action();
@@ -65,6 +66,15 @@ const ActionsList = () => {
             actions={
               <ActionPanel>
                 <Action onAction={createAction(resetInterval)} title={"Reset"} />
+              </ActionPanel>
+            }
+          />
+          <List.Item
+            title="Restart Current"
+            icon={Icon.Repeat}
+            actions={
+              <ActionPanel>
+                <Action onAction={createAction(restartInterval)} title={"Restart Current"} />
               </ActionPanel>
             }
           />
@@ -203,6 +213,6 @@ const EndOfInterval = () => {
   );
 };
 
-export default function Command(props: { launchContext?: { currentInterval: string } }) {
+export default function Command(props: { launchContext?: { currentInterval?: Interval } }) {
   return props.launchContext?.currentInterval ? <EndOfInterval /> : <ActionsList />;
 }

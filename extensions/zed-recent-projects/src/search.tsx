@@ -1,10 +1,11 @@
-import { ComponentType, createContext, useContext, useEffect, useState } from "react";
+import { ComponentType, createContext, useContext } from "react";
 import { List, Action, Application, getApplications, getPreferenceValues, Detail, Icon } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { existsSync } from "fs";
 import { URL } from "url";
 import { getEntry } from "./lib/entry";
 import { getZedBundleId, ZedBuild } from "./lib/zed";
-import { useZedEntries } from "./hooks/useZedEntries";
+import { useZedRecentWorkspaces } from "./lib/zedEntries";
 import { usePinnedEntries } from "./hooks/usePinnedEntries";
 import { EntryItem } from "./components/EntryItem";
 
@@ -17,21 +18,19 @@ const ZedContext = createContext<{
   zed: undefined,
 });
 
+function exists(p: string) {
+  try {
+    return existsSync(new URL(p));
+  } catch {
+    return false;
+  }
+}
+
 export const withZed = <P extends object>(Component: ComponentType<P>) => {
   return (props: P) => {
-    const [zed, setZed] = useState<Application>();
-    const [isLoading, setIsloading] = useState(true);
-
-    useEffect(() => {
-      getApplications()
-        .then((apps) => {
-          const zedApp = apps.find((a) => a.bundleId === getZedBundleId(zedBuild));
-          if (zedApp) {
-            setZed(zedApp);
-          }
-        })
-        .finally(() => setIsloading(false));
-    }, []);
+    const { data: zed, isLoading } = usePromise(async () =>
+      (await getApplications()).find((a) => a.bundleId === getZedBundleId(zedBuild))
+    );
 
     if (!zed) {
       return <Detail isLoading={isLoading} markdown={isLoading ? "" : `No Zed app detected`} />;
@@ -48,27 +47,31 @@ export const withZed = <P extends object>(Component: ComponentType<P>) => {
 export function Command() {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const zed = useContext(ZedContext).zed!;
-  const { entries, setEntry } = useZedEntries();
+  const { entries, isLoading, error } = useZedRecentWorkspaces();
   const { pinnedEntries, pinEntry, unpinEntry, moveUp, moveDown } = usePinnedEntries();
 
   const pinned = Object.values(pinnedEntries)
-    .filter((e) => existsSync(new URL(e.uri)))
+    .filter((e) => exists(e.uri))
     .sort((a, b) => a.order - b.order);
 
   return (
-    <List>
+    <List isLoading={isLoading}>
+      <List.EmptyView
+        title="No Recent Projects"
+        description={error ? "Check that Zed is up-to-date" : undefined}
+        icon="no-view.png"
+      />
       <List.Section title="Pinned Projects">
         {pinned.map((e) => {
           const entry = getEntry(e.uri);
+
+          if (!entry) {
+            return null;
+          }
+
           return (
             <EntryItem key={entry.uri} entry={entry} icon={entry.path && { fileIcon: entry.path }}>
-              <Action.Open
-                title="Open in Zed"
-                onOpen={() => setEntry(entry.uri, true)}
-                target={entry.path}
-                application={zed}
-                icon={{ fileIcon: zed.path }}
-              />
+              <Action.Open title="Open in Zed" target={entry.path} application={zed} icon={{ fileIcon: zed.path }} />
               <Action.ShowInFinder path={entry.path} />
               <Action
                 title="Unpin Entry"
@@ -99,19 +102,18 @@ export function Command() {
 
       <List.Section title="Recent Projects">
         {Object.values(entries)
-          .filter((e) => !pinnedEntries[e.uri] && existsSync(new URL(e.uri)))
+          .filter((e) => !pinnedEntries[e.uri] && exists(e.uri))
           .sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0))
           .map((e) => {
             const entry = getEntry(e.uri);
+
+            if (!entry) {
+              return null;
+            }
+
             return (
               <EntryItem key={entry.uri} entry={entry} icon={entry.path && { fileIcon: entry.path }}>
-                <Action.Open
-                  title="Open in Zed"
-                  onOpen={() => setEntry(entry.uri, true)}
-                  target={entry.path}
-                  application={zed}
-                  icon={{ fileIcon: zed.path }}
-                />
+                <Action.Open title="Open in Zed" target={entry.path} application={zed} icon={{ fileIcon: zed.path }} />
                 <Action.ShowInFinder path={entry.path} />
                 <Action
                   title="Pin Entry"

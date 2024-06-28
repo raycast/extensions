@@ -1,11 +1,12 @@
 import { runAppleScript } from "run-applescript";
-import { environment, getSelectedFinderItems } from "@raycast/api";
+import { environment, getSelectedFinderItems, Icon, showHUD, showToast, Toast } from "@raycast/api";
 import fse from "fs-extra";
 import { homedir } from "os";
-import { buildFileName } from "../new-file-here";
+import { buildFileName } from "../new-file-with-template";
 import { imgExt } from "./constants";
-import { TemplateType } from "../types/file-type";
+import { allFileTypes, FileType, TemplateType } from "../types/file-type";
 import fileUrl from "file-url";
+import { showTips } from "../types/preferences";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
@@ -90,3 +91,66 @@ export function getDetail(template: TemplateType) {
     return `<img src="${fileUrl(`${environment.assetsPath}/file-icon.png`)}" alt="${template.name}" height="190" />`;
   }
 }
+
+function getFileDetails(fileName: string): { baseName: string; extension: string } {
+  // 查找最后一个点的索引
+  const lastDotIndex = fileName.lastIndexOf(".");
+
+  // 如果存在点，提取点之前和点之后的字符串
+  if (lastDotIndex !== -1) {
+    const baseName = fileName.substring(0, lastDotIndex);
+    const extension = fileName.substring(lastDotIndex + 1);
+    return { baseName, extension };
+  }
+
+  // 如果没有点，返回整个字符串作为baseName，extension为空字符串
+  return { baseName: fileName, extension: fileName };
+}
+
+function findFileTypeByExtension(fileExt: string): FileType | undefined {
+  return allFileTypes.find((fileType) => fileType.extension === fileExt);
+}
+
+export function getNewFileType(fileName: string): FileType {
+  const { baseName, extension } = getFileDetails(fileName);
+  const fileType = findFileTypeByExtension(extension.toLowerCase());
+  if (fileType) {
+    if (isEmpty(baseName)) {
+      return fileType;
+    }
+    const newFileType = { ...fileType };
+    if (baseName !== fileType.extension) {
+      newFileType.name = baseName;
+    }
+    return newFileType;
+  } else {
+    return {
+      name: baseName,
+      extension: extension,
+      languageId: extension,
+      keywords: [extension],
+      icon: Icon.Document,
+      inputContent: false,
+    };
+  }
+}
+
+export const showCustomHUD = (options: Toast.Options) => {
+  if (options.style && options.style === Toast.Style.Failure) {
+    // failure should always show toast
+    return showToast(options);
+  } else if (showTips) {
+    // success or animated should show HUD
+    if (options.style && options.style === Toast.Style.Animated) {
+      return showToast(options);
+    } else {
+      return showHUD(options.title);
+    }
+  }
+};
+export const showCustomToast = (options: Toast.Options) => {
+  if (options.style && options.style === Toast.Style.Failure) {
+    return showToast(options);
+  }
+  if (showTips) return showToast(options);
+};

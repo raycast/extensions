@@ -13,6 +13,7 @@ export const DEFAULT_MODEL: Model = {
   option: "gpt-3.5-turbo",
   temperature: "1",
   pinned: false,
+  vision: false,
 };
 
 export function useModel(): ModelHook {
@@ -21,15 +22,30 @@ export function useModel(): ModelHook {
   const [isFetching, setFetching] = useState<boolean>(true);
   const gpt = useChatGPT();
   const proxy = useProxy();
-  const { useAzure } = getConfiguration();
+  const { useAzure, isCustomModel } = getConfiguration();
   const [option, setOption] = useState<Model["option"][]>(["gpt-3.5-turbo", "gpt-3.5-turbo-0301"]);
 
   useEffect(() => {
+    if (isCustomModel) {
+      // If choose to use custom model, we don't need to fetch models from the API
+      setFetching(false);
+      return;
+    }
     if (!useAzure) {
       gpt.models
         .list({ httpAgent: proxy })
         .then((res) => {
-          const models = res.data;
+          let models = res.data;
+          // some provider return text/plain content type
+          // and the sdk `defaultParseResponse` simply return `text`
+          if (models.length === 0) {
+            try {
+              const body = JSON.parse((res as unknown as { body: string }).body);
+              models = body.data;
+            } catch (e) {
+              // ignore try to parse it
+            }
+          }
           setOption(models.filter((m) => m.id.startsWith("gpt")).map((x) => x.id));
         })
         .catch(async (err) => {

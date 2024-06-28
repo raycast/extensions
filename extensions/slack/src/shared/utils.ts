@@ -1,26 +1,7 @@
-import { closeMainWindow, getPreferenceValues, open } from "@raycast/api";
-import formatDistance from "date-fns/formatDistance";
-import { runAppleScript } from "run-applescript";
-
-// https://api.slack.com/reference/deep-linking
-const openChat = (workspaceId: string, userId: string) => {
-  const { closeRightSidebar } = getPreferenceValues<{ closeRightSidebar: boolean }>();
-
-  open(`slack://user?team=${workspaceId}&id=${userId}`);
-  closeMainWindow();
-  if (closeRightSidebar) {
-    runAppleScript(
-      buildScriptEnsuringSlackIsRunning(`
-        tell application "System Events" to tell process "Slack" to key code 47 using {command down}
-      `)
-    );
-  }
-};
-
-const openChannel = (workspaceId: string, channelId: string) => {
-  open(`slack://channel?team=${workspaceId}&id=${channelId}`);
-  closeMainWindow();
-};
+import { open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { CodedError, ErrorCode } from "@slack/web-api";
+import { formatDistance } from "date-fns";
 
 const timeDifference = (date: Date): string => {
   const now = new Date();
@@ -59,4 +40,34 @@ const buildScriptEnsuringSlackIsRunning = (commandsToRunAfterSlackIsRunning: str
     end tell`;
 };
 
-export { openChat, openChannel, timeDifference, buildScriptEnsuringSlackIsRunning };
+const isCodedError = (error: unknown): error is CodedError => {
+  return typeof error === "object" && error !== null && "code" in error && "message" in error;
+};
+
+const handleError = async (error: CodedError | Error | unknown, title?: string) => {
+  if (isCodedError(error)) {
+    if (error.code === ErrorCode.RateLimitedError) {
+      return showFailureToast(error, {
+        title: "You've been rate-limited.",
+        message: "Please try again in a few seconds/minutes.",
+      });
+    }
+
+    if (error.message.includes("missing_scope")) {
+      return showFailureToast(error, {
+        title: "Missing Scopes",
+        message: "Please make sure your Slack app has all of the required scopes.",
+        primaryAction: {
+          title: "Open Slack Apps",
+          onAction: () => {
+            open("https://api.slack.com/apps");
+          },
+        },
+      });
+    }
+  }
+
+  return showFailureToast(error, { title: title ?? "Something unexpected happened" });
+};
+
+export { timeDifference, buildScriptEnsuringSlackIsRunning, handleError };

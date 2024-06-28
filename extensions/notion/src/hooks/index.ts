@@ -1,5 +1,6 @@
 import { LocalStorage, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
 
 import {
   fetchDatabaseProperties,
@@ -46,17 +47,45 @@ export function useDatabases() {
   return { ...value, data: value.data ?? [] };
 }
 
-export function useDatabaseProperties(databaseId: string | null) {
-  const value = useCachedPromise((id) => fetchDatabaseProperties(id), [databaseId], { execute: !!databaseId });
+export function useDatabaseProperties(databaseId: string | null, filter?: (value: DatabaseProperty) => boolean) {
+  const value = useCachedPromise(
+    (id): Promise<DatabaseProperty[]> =>
+      fetchDatabaseProperties(id).then((databaseProperties) => {
+        if (databaseProperties && filter) {
+          return databaseProperties.filter(filter);
+        }
+        return databaseProperties;
+      }),
+    [databaseId],
+    { execute: !!databaseId },
+  );
 
   return { ...value, data: value.data ?? [] };
 }
 
+export function useVisibleDatabasePropIds(
+  databaseId: string,
+  quicklinkProps?: string[],
+): {
+  visiblePropIds?: string[];
+  isLoading: boolean;
+  setVisiblePropIds: (value: string[]) => Promise<void> | void;
+} {
+  if (quicklinkProps) {
+    const [visiblePropIds, setVisiblePropIds] = useState(quicklinkProps);
+    return { visiblePropIds, isLoading: false, setVisiblePropIds };
+  } else {
+    const { data, isLoading, setDatabaseView } = useDatabasesView(databaseId);
+    const setVisiblePropIds = (props?: string[]) => setDatabaseView({ ...data, create_properties: props });
+    return { visiblePropIds: data.create_properties, isLoading, setVisiblePropIds };
+  }
+}
+
 export function useDatabasesView(databaseId: string) {
   const { data, isLoading, mutate } = useCachedPromise(async () => {
-    const data = await LocalStorage.getItem("DATABASES_VIEWS");
+    const data = await LocalStorage.getItem<string>("DATABASES_VIEWS");
 
-    if (!data || typeof data !== "string") return {};
+    if (!data) return {};
 
     return JSON.parse(data) as { [databaseId: string]: DatabaseView | undefined };
   });
@@ -70,9 +99,8 @@ export function useDatabasesView(databaseId: string) {
   }
 
   return {
-    data: data?.[databaseId],
+    data: data?.[databaseId] || {},
     isLoading,
-    mutate,
     setDatabaseView,
   };
 }
@@ -182,7 +210,7 @@ export function useRecentPages() {
 }
 
 export function useSearchPages(query: string) {
-  return useCachedPromise((query) => search(query), [query], {
+  return useCachedPromise(search, [query], {
     keepPreviousData: true,
   });
 }

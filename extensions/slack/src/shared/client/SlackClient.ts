@@ -1,5 +1,4 @@
-import { popToRoot, showToast, Toast } from "@raycast/api";
-import { SlackConversation, SlackMember, slackWebClient } from "./WebClient";
+import { SlackConversation, SlackMember, getSlackWebClient } from "./WebClient";
 
 interface Item {
   id: string;
@@ -42,51 +41,24 @@ const sortNames = (a: string, b: string) => {
   return 0;
 };
 
-export const onApiError = async (props?: { exitExtension: boolean }): Promise<void> => {
-  await showToast({
-    style: Toast.Style.Failure,
-    title: "Slack API Error",
-    message: "Try again after checking your Slack token and permission scopes.",
-  });
-
-  if (props?.exitExtension) {
-    await popToRoot({ clearSearchBar: true });
-  }
-};
-
 export class SlackClient {
   public static async getUsers(): Promise<User[]> {
-    const slackMembers: SlackMember[] = [];
-
-    let cursor: string | undefined;
-    do {
-      try {
-        const response = await slackWebClient.users.list({
-          limit: 1000,
-          cursor,
-        });
-        slackMembers.push(...(response.members ?? []));
-        cursor = response.response_metadata?.next_cursor;
-      } catch (e) {
-        break;
-      }
-    } while (cursor);
-
-    const dmConversations = await SlackClient.getConversations("im");
+    const [slackMembers, dmConversations] = await Promise.all([
+      SlackClient.getSlackMembers(),
+      SlackClient.getConversations(["im"]),
+    ]);
 
     const users =
       slackMembers
-        ?.filter(
-          ({ is_bot, is_workflow_bot, deleted, id }) => !is_bot && !is_workflow_bot && !deleted && id !== "USLACKBOT"
+        .filter(
+          ({ is_bot, is_workflow_bot, deleted, id }) => !is_bot && !is_workflow_bot && !deleted && id !== "USLACKBOT",
         )
         .map(({ id, name: username, profile, team_id }) => {
           const firstName = profile?.first_name ?? "";
           const lastName = profile?.last_name ?? "";
           const name = `${firstName} ${lastName}`;
 
-          const [displayName] = [name, profile?.display_name, profile?.real_name].filter(
-            (x): x is string => !!x?.trim()
-          );
+          const displayName = [name, profile?.display_name, profile?.real_name].find((x): x is string => !!x?.trim());
 
           const conversation = dmConversations.find((c) => c.user === id);
 
@@ -102,42 +74,54 @@ export class SlackClient {
         .filter((i): i is User => !!(i.id?.trim() && i.name?.trim() && i.teamId?.trim()))
         .sort((a, b) => sortNames(a.name, b.name)) ?? [];
 
-    return users ?? [];
+    return users;
+  }
+
+  private static async getSlackMembers(): Promise<SlackMember[]> {
+    const slackWebClient = getSlackWebClient();
+    const slackMembers: SlackMember[] = [];
+
+    let cursor: string | undefined;
+    do {
+      const response = await slackWebClient.users.list({
+        limit: 1000,
+        cursor,
+      });
+      slackMembers.push(...(response.members ?? []));
+      cursor = response.response_metadata?.next_cursor;
+    } while (cursor);
+
+    return slackMembers;
   }
 
   private static async getConversations(
-    type: "public_channel" | "private_channel" | "mpim" | "im"
+    type: ("public_channel" | "private_channel" | "mpim" | "im")[],
   ): Promise<SlackConversation[]> {
+    const slackWebClient = getSlackWebClient();
+
     const conversations: SlackConversation[] = [];
 
     let cursor: string | undefined;
     do {
-      try {
-        const response = await slackWebClient.conversations.list({
-          exclude_archived: true,
-          types: type,
-          limit: 1000,
-          cursor,
-        });
-        conversations.push(...(response.channels ?? []));
-        cursor = response.response_metadata?.next_cursor;
-      } catch (e) {
-        break;
-      }
+      const response = await slackWebClient.conversations.list({
+        exclude_archived: true,
+        types: type.join(","),
+        limit: 1000,
+        cursor,
+      });
+      conversations.push(...(response.channels ?? []));
+      cursor = response.response_metadata?.next_cursor;
     } while (cursor);
 
     return conversations;
   }
 
   public static async getChannels(): Promise<Channel[]> {
-    const publicChannels = await SlackClient.getConversations("public_channel");
-    const privateChannels = await SlackClient.getConversations("private_channel");
+    const channels = await SlackClient.getConversations(["public_channel", "private_channel"]);
 
-    const publicAndPrivateChannels = [...publicChannels, ...privateChannels];
-
-    const channels: Channel[] =
-      publicAndPrivateChannels
-        ?.map(({ id, name, shared_team_ids, internal_team_ids, context_team_id, is_private }) => {
+    return (
+      channels
+        .map(({ id, name, shared_team_ids, internal_team_ids, context_team_id, is_private }) => {
           const teamIds = [
             ...(internal_team_ids ?? []),
             ...(shared_team_ids ?? []),
@@ -147,19 +131,18 @@ export class SlackClient {
           return { id, name, teamId, icon: is_private ? "channel-private.png" : "channel-public.png" };
         })
         .filter((i): i is Channel => !!(i.id?.trim() && i.name?.trim() && i.teamId.trim()))
-        .sort((a, b) => sortNames(a.name, b.name)) ?? [];
-
-    return channels ?? [];
+        .sort((a, b) => sortNames(a.name, b.name)) ?? []
+    );
   }
 
   public static async getGroups(): Promise<Group[]> {
     const users = await SlackClient.getUsers();
 
-    const conversations = await SlackClient.getConversations("mpim");
+    const conversations = await SlackClient.getConversations(["mpim"]);
 
     const groups: Group[] =
       conversations
-        ?.map(({ id, name, shared_team_ids, internal_team_ids }) => {
+        .map(({ id, name, shared_team_ids, internal_team_ids }) => {
           const teamIds = [...(internal_team_ids ?? []), ...(shared_team_ids ?? [])];
           const teamId = teamIds.length > 0 ? teamIds[0] : "";
 
@@ -174,11 +157,13 @@ export class SlackClient {
         .filter((i): i is Group => !!(i.id?.trim() && i.name?.trim() && i.teamId.trim()))
         .sort((a, b) => sortNames(a.name, b.name)) ?? [];
 
-    return groups ?? [];
+    return groups;
   }
 
   public static async getPresence(): Promise<PresenceStatus> {
-    const presence = await slackWebClient.users.getPresence();
+    const slackWebClient = getSlackWebClient();
+
+    const presence = await slackWebClient.users.getPresence({});
 
     if (presence.manual_away) {
       return "forced-offline";
@@ -188,11 +173,15 @@ export class SlackClient {
   }
 
   public static async setPresence(status: "away" | "auto"): Promise<void> {
+    const slackWebClient = getSlackWebClient();
+
     await slackWebClient.users.setPresence({ presence: status });
   }
 
   public static async getSnoozeStatus(): Promise<SnoozeStatus> {
-    const dndInfo = await slackWebClient.dnd.info();
+    const slackWebClient = getSlackWebClient();
+
+    const dndInfo = await slackWebClient.dnd.info({});
     const snooze_endtime = (dndInfo as unknown as { snooze_endtime: number | undefined }).snooze_endtime;
 
     const nextDndEnd = dndInfo.next_dnd_end_ts ? new Date(dndInfo.next_dnd_end_ts * 1000) : undefined;
@@ -201,14 +190,20 @@ export class SlackClient {
   }
 
   public static async setSnooze(minutes: number): Promise<void> {
+    const slackWebClient = getSlackWebClient();
+
     await slackWebClient.dnd.setSnooze({ num_minutes: minutes });
   }
 
   public static async endSnooze(): Promise<void> {
-    await slackWebClient.dnd.endSnooze();
+    const slackWebClient = getSlackWebClient();
+
+    await slackWebClient.dnd.endSnooze({});
   }
 
   public static async getUnreadConversations(conversationIds: string[]): Promise<UnreadChannelInfo[]> {
+    const slackWebClient = getSlackWebClient();
+
     if (conversationIds.length > 30) {
       throw new Error("Too many conversations");
     }
@@ -218,7 +213,7 @@ export class SlackClient {
     }
 
     const conversationInfos = await Promise.all(
-      conversationIds.map((id) => slackWebClient.conversations.info({ channel: id }))
+      conversationIds.map((id) => slackWebClient.conversations.info({ channel: id })),
     );
 
     const conversationHistories = await Promise.all(
@@ -229,8 +224,8 @@ export class SlackClient {
             parseFloat(conversationInfo.channel!.last_read || "0") !== 0
               ? conversationInfo.channel!.last_read
               : undefined,
-        })
-      )
+        }),
+      ),
     );
 
     const unreadConversations = conversationHistories
@@ -250,13 +245,15 @@ export class SlackClient {
       .filter((channel): channel is UnreadChannelInfo => !!channel.messageHistory && channel.messageHistory.length > 0)
       .sort(
         (a, b) =>
-          new Date(b.messageHistory[0].receivedAt).getTime() - new Date(a.messageHistory[0].receivedAt).getTime()
+          new Date(b.messageHistory[0].receivedAt).getTime() - new Date(a.messageHistory[0].receivedAt).getTime(),
       );
 
     return unreadConversations;
   }
 
   public static async markAsRead(conversationId: string): Promise<void> {
+    const slackWebClient = getSlackWebClient();
+
     await slackWebClient.conversations.mark({ channel: conversationId, ts: `${new Date().getTime() / 1000}` });
   }
 }

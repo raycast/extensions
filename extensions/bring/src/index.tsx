@@ -1,32 +1,42 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import { Grid, Icon, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { BringAPI, BringCustomItem, BringList, Translations, BringListInfo } from "./lib/bringAPI";
 import { getIconPlaceholder, getImageUrl, getLocaleForListFromSettings } from "./lib/helpers";
 import { Item, ItemsGrid, Section } from "./components/ItemsGrid";
 import { getOrCreateCustomSection, getSectionsFromData, getListData, getTranslationsData } from "./lib/bringService";
 
 export default function Command() {
-  const bringApiRef = useRef<Promise<BringAPI> | null>(null);
+  const bringApiRef = useRef(new BringAPI());
   const [selectedList, setSelectedList] = useCachedState<BringListInfo | undefined>("selectedList");
   const [locale, setLocale] = useCachedState<string | undefined>("locale");
   const [search, setSearch] = useState<string>("");
 
   const { data: lists = [], isLoading: isLoadingLists } = useCachedPromise(async () => {
     const bringApi = await getBringApi();
-
     const { lists } = await bringApi.getLists();
-    // if there is only one list, use it
-    if (lists.length === 1) {
-      setSelectedList(lists[0]);
-    }
-
     return lists;
   });
 
+  const DropdownComponent = () => {
+    return (
+      <Grid.Dropdown
+        tooltip="Select list"
+        storeValue={true}
+        defaultValue={selectedList?.listUuid}
+        onChange={(selectedUuid) => setSelectedList(lists.find((list) => list.listUuid === selectedUuid))}
+        isLoading={isLoadingLists}
+      >
+        {lists.map((list) => (
+          <Grid.Dropdown.Item icon={Icon.Receipt} key={list.listUuid} value={list.listUuid} title={list.name} />
+        ))}
+      </Grid.Dropdown>
+    );
+  };
+
   const {
     data: [listDetail, customItems],
-    isLoading: isLoadingList,
+    isLoading: isLoadingItems,
     mutate,
   } = useCachedPromise(
     async (selectedList?: BringListInfo) => {
@@ -58,13 +68,9 @@ export default function Command() {
   );
 
   async function getBringApi(): Promise<BringAPI> {
-    if (!bringApiRef.current) {
-      const bringApi = new BringAPI();
-      const { email, password } = getPreferenceValues<ExtensionPreferences>();
-      bringApiRef.current = bringApi.login(email, password);
-    }
-
-    return await bringApiRef.current;
+    const { email, password } = getPreferenceValues<ExtensionPreferences>();
+    await bringApiRef.current.login(email, password);
+    return bringApiRef.current;
   }
 
   function addToList(list: BringListInfo): (item: Item, specification?: string) => Promise<void> {
@@ -119,43 +125,34 @@ export default function Command() {
     };
   }
 
+  useEffect(() => {
+    if (!selectedList && lists.length > 0) {
+      setSelectedList(lists[0]);
+    }
+  }, [lists, selectedList, setSelectedList]);
+
+  const sections = useMemo(() => {
+    const sections = getSectionsFromData(catalog, listDetail, customItems, translations);
+    return addNewItemToSectionBasedOnSearch(sections, search, translations);
+  }, [catalog, listDetail, customItems, translations, search]);
+
   if (!selectedList) {
+    return <Grid isLoading={true}></Grid>;
+  } else {
     return (
-      <List isLoading={isLoadingLists} navigationTitle="Choose a List to Add Items to">
-        {lists.map((list) => (
-          <List.Item
-            key={list.listUuid}
-            title={list.name}
-            actions={
-              <ActionPanel>
-                <Action title="Select List" onAction={() => setSelectedList(list)} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List>
+      <ItemsGrid
+        list={selectedList}
+        sections={sections}
+        searchText={search}
+        isLoading={isLoadingLists || isLoadingItems}
+        showAddedItemsOnTop={search.length === 0}
+        onSearchTextChange={setSearch}
+        onAddAction={addToList(selectedList)}
+        onRemoveAction={removeFromList(selectedList)}
+        DropdownComponent={DropdownComponent}
+      />
     );
   }
-
-  let sections = getSectionsFromData(catalog, listDetail, customItems, translations);
-  sections = addNewItemToSectionBasedOnSearch(sections, search, translations);
-
-  return (
-    <ItemsGrid
-      list={selectedList}
-      sections={sections}
-      searchText={search}
-      isLoading={isLoadingList}
-      showAddedItemsOnTop={search.length === 0}
-      canSwitchList={lists.length > 1}
-      onSearchTextChange={setSearch}
-      onAddAction={addToList(selectedList)}
-      onRemoveAction={removeFromList(selectedList)}
-      onResetList={() => {
-        setSelectedList(undefined);
-      }}
-    />
-  );
 }
 
 function addNewItemToSectionBasedOnSearch(sections: Section[], search: string, translations?: Translations): Section[] {

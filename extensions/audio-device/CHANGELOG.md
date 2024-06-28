@@ -1,5 +1,13 @@
 # Audio Device Changelog
 
+## [Update] - 2024-06-26
+
+- Added keywords for better discovery
+
+## [Update] - 2024-05-06
+
+- Added the option to hide/show a device
+
 ## [Update] - 2024-02-05
 
 - Added green tint color for icon of current input/output device

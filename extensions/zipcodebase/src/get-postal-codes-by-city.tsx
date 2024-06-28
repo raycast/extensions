@@ -3,17 +3,16 @@ import { ErrorResponse, GetPostalCodesByCityResponse } from "./utils/types";
 import ErrorComponent from "./components/ErrorComponent";
 import { useEffect, useState } from "react";
 import { getPostalCodesByCity } from "./utils/api";
-import { DEFAULT_LIMIT } from "./utils/constants";
 
 export default function GetPostalCodesByCity(props: LaunchProps<{ arguments: Arguments.GetPostalCodesByCity }>) {
-  const { city, country, limit } = props.arguments;
+  const { city, country, state_name } = props.arguments;
 
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<ErrorResponse | GetPostalCodesByCityResponse>();
 
   async function getFromApi() {
     setIsLoading(true);
-    const response = await getPostalCodesByCity(city, country, limit || DEFAULT_LIMIT);
+    const response = await getPostalCodesByCity(city, country, state_name);
     if ("results" in response) {
       showToast({
         title: "SUCCESS",
@@ -33,7 +32,7 @@ export default function GetPostalCodesByCity(props: LaunchProps<{ arguments: Arg
   ) : (
     <List isLoading={isLoading}>
       {data && Object.keys(data.results).length > 0 ? (
-        <List.Section title={`city: ${data.query.city} | country: ${data.query.country}`}>
+        <List.Section title={`city: ${data.query.city} | country: ${data.query.country} | state: ${data.query.state}`}>
           {data.results.map((result) => (
             <List.Item
               key={result}
@@ -52,7 +51,7 @@ export default function GetPostalCodesByCity(props: LaunchProps<{ arguments: Arg
           ))}
         </List.Section>
       ) : (
-        <List.EmptyView title="No Results" description={`city: ${city} | country: ${country}`} />
+        <List.EmptyView title="No Results" description={`city: ${city} | country: ${country} | state: ${state_name}`} />
       )}
     </List>
   );

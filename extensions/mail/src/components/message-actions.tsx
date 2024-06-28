@@ -20,9 +20,10 @@ import {
   moveMessageToJunk,
   moveMessageToTrash,
   deleteMessage,
+  moveMessageToArchive,
 } from "../scripts/messages";
 import { saveAllAttachments, saveAttachment } from "../scripts/attachments";
-import { isJunkMailbox, isTrashMailbox } from "../utils/mailbox";
+import { isArchiveMailbox, isJunkMailbox, isTrashMailbox } from "../utils/mailbox";
 import { MailIcon, OutgoingMessageIcon } from "../utils/presets";
 
 const { primaryAction }: Preferences = getPreferenceValues();
@@ -157,6 +158,25 @@ export const MessageActions = (props: MessageActionsProps) => {
               }}
             />
           </>
+        )}
+
+        {!isArchiveMailbox(mailbox) && (
+          <Action
+            title={"Move to Archive"}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+            icon={MailIcon.Archive}
+            onAction={async () => {
+              const action = async () => {
+                await moveMessageToArchive(message, account, mailbox);
+                if (inMessageView) navigation.pop();
+              };
+
+              const actionPayload = { account, message };
+              const invokeAction = onAction ? () => onAction(action, actionPayload) : action;
+
+              invokeAction();
+            }}
+          />
         )}
 
         {!isJunkMailbox(mailbox) && (

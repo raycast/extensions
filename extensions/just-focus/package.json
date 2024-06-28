@@ -5,6 +5,9 @@
   "description": "Control Just Focus via Raycast.",
   "icon": "extension-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "jiengup"
+  ],
   "categories": [
     "Applications",
     "Productivity"

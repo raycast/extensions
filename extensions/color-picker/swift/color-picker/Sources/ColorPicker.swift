@@ -2,20 +2,22 @@ import AppKit
 import RaycastSwiftMacros
 
 struct Color: Encodable {
-  let red: Int
-  let blue: Int
-  let green: Int
-  let alpha: Int
+  let red: Float
+  let blue: Float
+  let green: Float
+  let alpha: Float
+  let colorSpace: String
 }
 
 @raycast func pickColor() async -> Color? {
   let colorSampler = NSColorSampler()
-  guard let color = await colorSampler.sample() else { return nil }
+  guard let color = await colorSampler.sample()?.usingColorSpace(.displayP3) else { return nil }
 
   return Color(
-    red: lroundf(Float(color.redComponent) * 0xFF),
-    blue: lroundf(Float(color.blueComponent) * 0xFF),
-    green: lroundf(Float(color.greenComponent) * 0xFF),
-    alpha: lroundf(Float(color.alphaComponent) * 0xFF)
+    red: Float(color.redComponent),
+    blue: Float(color.blueComponent),
+    green: Float(color.greenComponent),
+    alpha: Float(color.alphaComponent),
+    colorSpace: "p3"
   )
 }

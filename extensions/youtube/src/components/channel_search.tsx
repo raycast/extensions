@@ -1,13 +1,13 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useCachedState } from "@raycast/utils";
+import { useEffect, useState } from "react";
 import { Preferences } from "../lib/types";
 import { getErrorMessage } from "../lib/utils";
-import { Channel, searchChannels, getChannels, useRefresher } from "../lib/youtubeapi";
+import { Channel, getChannels, searchChannels, useRefresher } from "../lib/youtubeapi";
 import { ChannelItem } from "./channel";
+import { FilterDropdown } from "./dropdown";
 import { ListOrGrid, ListOrGridEmptyView, ListOrGridSection } from "./listgrid";
 import { getPinnedChannels, getRecentChannels } from "./recent_channels";
-import { FilterDropdown } from "./dropdown";
-import { useCachedState } from "@raycast/utils";
 
 export function SearchChannelList({ searchQuery }: { searchQuery?: string | undefined }) {
   const { griditemsize, showRecentChannels } = getPreferenceValues<Preferences>();

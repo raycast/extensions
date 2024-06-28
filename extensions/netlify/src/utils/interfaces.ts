@@ -90,6 +90,7 @@ export interface Directory {
 }
 
 export interface Domain {
+  id: string;
   account_name: string;
   account_slug: string;
   created_at: string;
@@ -101,6 +102,35 @@ export interface Domain {
   };
   name: string;
   updated_at: string;
+}
+
+export interface DNSRecord {
+  hostname: string;
+  type: string;
+  ttl: number;
+  priority: number | null;
+  weight: number | null;
+  port: number | null;
+  flag: number | null;
+  tag: string | null;
+  id: string;
+  site_id: string | null;
+  dns_zone_id: string;
+  // errors: [],
+  managed: boolean;
+  value: string;
+}
+
+export interface CreateDNSRecord {
+  type: string;
+  hostname: string;
+  value: string;
+  ttl: number | null;
+  priority: number | null;
+  weight: number | null;
+  port: number | null;
+  flag: number | null;
+  tag: string | null;
 }
 
 export interface DomainSearch {
@@ -150,11 +180,6 @@ export interface Member {
   pending?: boolean;
   role: Role;
   site_access: 'all' | 'selected' | 'none';
-}
-
-export interface Preferences {
-  token: string;
-  scanPath?: string;
 }
 
 export interface Reviewer {

@@ -11,95 +11,17 @@ import {
   LaunchType,
   showToast,
 } from "@raycast/api";
-import { useHistory } from "./history";
-import { getFormattedColor } from "./utils";
-import { HistoryItem } from "./types";
-import { EditTitle } from "./components/edit-title";
 import { showFailureToast } from "@raycast/utils";
+import { useHistory } from "./history";
+import { getFormattedColor, getPreviewColor } from "./utils";
+import { HistoryItem } from "./types";
+import { EditTitle } from "./components/EditTitle";
+import CopyAsSubmenu from "./components/CopyAsSubmenu";
 
 const preferences: Preferences.OrganizeColors = getPreferenceValues();
 
 export default function Command() {
-  const { history, remove, clear, edit } = useHistory();
-
-  function Actions({
-    formattedColor,
-    historyItem,
-    onEdit,
-  }: {
-    formattedColor: string | undefined;
-    historyItem: HistoryItem;
-    onEdit: (item: HistoryItem) => Promise<void>;
-  }) {
-    const color = formattedColor ?? "";
-    return (
-      <ActionPanel>
-        <ActionPanel.Section>
-          {preferences.primaryAction === "copy" ? (
-            <>
-              <Action.CopyToClipboard content={color} />
-              <Action.Paste content={color} />
-            </>
-          ) : (
-            <>
-              <Action.Paste content={color} />
-              <Action.CopyToClipboard content={color} />
-            </>
-          )}
-          <Action.Push
-            target={<EditTitle item={historyItem} onEdit={onEdit} />}
-            title="Edit Title"
-            icon={Icon.Pencil}
-            shortcut={Keyboard.Shortcut.Common.Edit}
-          />
-        </ActionPanel.Section>
-        <ActionPanel.Section>
-          <Action
-            icon={Icon.Trash}
-            title="Delete Color"
-            style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["ctrl"], key: "x" }}
-            onAction={async () => {
-              const confirmed = await confirmAlert({
-                title: "Delete Color",
-                message: "Do you want to delete the color from your history?",
-                primaryAction: {
-                  title: "Delete",
-                  style: Alert.ActionStyle.Destructive,
-                },
-              });
-
-              if (confirmed) {
-                remove(historyItem.color);
-                await showToast({ title: "Deleted color" });
-              }
-            }}
-          />
-          <Action
-            icon={Icon.Trash}
-            title="Delete All Colors"
-            style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
-            onAction={async () => {
-              const confirmed = await confirmAlert({
-                title: "Delete All Colors",
-                message: "Do you want to delete all colors from your history?",
-                primaryAction: {
-                  title: "Delete All",
-                  style: Alert.ActionStyle.Destructive,
-                },
-              });
-
-              if (confirmed) {
-                clear();
-                await showToast({ title: "Deleted all colors" });
-              }
-            }}
-          />
-        </ActionPanel.Section>
-      </ActionPanel>
-    );
-  }
+  const { history } = useHistory();
 
   return (
     <Grid>
@@ -129,31 +51,99 @@ export default function Command() {
         }
       />
       {history?.map((historyItem) => {
-        const formattedColor = getFormattedColor(historyItem.color) || "";
+        const formattedColor = getFormattedColor(historyItem.color);
+        const previewColor = getPreviewColor(historyItem.color);
+        const color = { light: previewColor, dark: previewColor, adjustContrast: false };
+
         return (
           <Grid.Item
             key={formattedColor}
-            content={{
-              color: { light: formattedColor, dark: formattedColor, adjustContrast: false },
-              tooltip: historyItem.title,
-            }}
+            content={historyItem.title ? { value: { color }, tooltip: historyItem.title } : { color }}
             title={`${formattedColor} ${historyItem.title ?? ""}`}
             subtitle={new Date(historyItem.date).toLocaleString(undefined, {
               dateStyle: "medium",
               timeStyle: "short",
             })}
-            actions={
-              <Actions
-                formattedColor={formattedColor}
-                historyItem={historyItem}
-                onEdit={async (editedHistoryItem) => {
-                  edit(editedHistoryItem);
-                }}
-              />
-            }
+            actions={<Actions historyItem={historyItem} />}
           />
         );
       })}
     </Grid>
+  );
+}
+
+function Actions({ historyItem }: { historyItem: HistoryItem }) {
+  const { remove, clear, edit } = useHistory();
+
+  const color = historyItem.color;
+  const formattedColor = getFormattedColor(color);
+  return (
+    <ActionPanel>
+      <ActionPanel.Section>
+        {preferences.primaryAction === "copy" ? (
+          <>
+            <Action.CopyToClipboard content={formattedColor} />
+            <Action.Paste content={formattedColor} />
+          </>
+        ) : (
+          <>
+            <Action.Paste content={formattedColor} />
+            <Action.CopyToClipboard content={formattedColor} />
+          </>
+        )}
+        <CopyAsSubmenu color={color} />
+        <Action.Push
+          target={<EditTitle item={historyItem} onEdit={edit} />}
+          title="Edit Title"
+          icon={Icon.Pencil}
+          shortcut={Keyboard.Shortcut.Common.Edit}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action
+          icon={Icon.Trash}
+          title="Delete Color"
+          style={Action.Style.Destructive}
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+          onAction={async () => {
+            const confirmed = await confirmAlert({
+              title: "Delete Color",
+              message: "Do you want to delete the color from your history?",
+              rememberUserChoice: true,
+              primaryAction: {
+                title: "Delete",
+                style: Alert.ActionStyle.Destructive,
+              },
+            });
+
+            if (confirmed) {
+              remove(historyItem.color);
+              await showToast({ title: "Deleted color" });
+            }
+          }}
+        />
+        <Action
+          icon={Icon.Trash}
+          title="Delete All Colors"
+          style={Action.Style.Destructive}
+          shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+          onAction={async () => {
+            const confirmed = await confirmAlert({
+              title: "Delete All Colors",
+              message: "Do you want to delete all colors from your history?",
+              primaryAction: {
+                title: "Delete All",
+                style: Alert.ActionStyle.Destructive,
+              },
+            });
+
+            if (confirmed) {
+              clear();
+              await showToast({ title: "Deleted all colors" });
+            }
+          }}
+        />
+      </ActionPanel.Section>
+    </ActionPanel>
   );
 }

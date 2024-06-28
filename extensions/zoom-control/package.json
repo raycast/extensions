@@ -6,7 +6,8 @@
   "icon": "zoom-control.png",
   "author": "prashantv",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "jack_casica"
   ],
   "categories": [
     "Communication"
@@ -91,6 +92,15 @@
       "title": "Toggle Video",
       "subtitle": "Zoom",
       "description": "Toggles video in current Zoom meeting",
+      "mode": "no-view"
+    },
+    {
+      "icon": "zoom-chat.png",
+      "name": "chat-toggle",
+      "title": "Toggle Chat",
+      "subtitle": "Zoom",
+      "description": "Toggles chat in current Zoom meeting",
+      "disabledByDefault": true,
       "mode": "no-view"
     }
   ],

@@ -1,5 +1,15 @@
 # Asana Changelog
 
+## [Added Copy Task Formatted URL command] - 2024-03-27
+
+- Added a new task command - "Copy Task Formatted URL"
+
+## [Add option to add or remove task projects and change due date] - 2024-03-01
+
+- Added the ability to add or remove projects from tasks
+- Added the ability to change the due date of tasks
+- Fix empty state flickering when loading tasks
+
 ## [Use OAuth utils] - 2024-02-01
 
 - Use new OAuth utils

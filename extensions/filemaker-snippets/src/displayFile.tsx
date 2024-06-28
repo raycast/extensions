@@ -36,7 +36,7 @@ export function DisplayFile({
             )
           ) : (
             <Action.OpenInBrowser
-              url={`fmp://${file.host}/${file.fileName}`}
+              url={`fmp://${file.host}/${encodeURIComponent(file.fileName)}`}
               title="Launch File"
               icon={Icon.ArrowNe}
               onOpen={() => visitItem(file)}

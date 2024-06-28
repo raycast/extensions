@@ -13,26 +13,23 @@
   "commands": [
     {
       "name": "search",
-      "title": "Search Note",
+      "title": "Search Notes",
       "subtitle": "Splix",
-      "description": "Search for a note in Splix",
+      "description": "Search for notes in Splix",
       "mode": "view"
     },
     {
       "name": "add-note",
-      "title": "Add Note",
+      "title": "New Note",
       "subtitle": "Splix",
-      "description": "Adds a note to Splix",
-      "mode": "view"
+      "description": "Opens a new note in Splix",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.65.0",
     "@raycast/utils": "^1.10.1",
-    "@supabase/supabase-js": "^2.39.3",
-    "node-fetch": "^3.3.2",
-    "remark-slate": "^1.8.6",
-    "zod": "^3.22.4"
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

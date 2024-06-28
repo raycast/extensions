@@ -5,7 +5,7 @@ import type { Snippet, State } from "./types";
 import SnippetContent from "./components/SnippetContent";
 import CustomActionPanel from "./components/CustomActionPanel";
 import { storeLastCopied, clearUnusedSnippets, orderSnippets } from "./utils/LocalStorageHelper";
-import { loadAllSnippets } from "./utils/SnippetsLoader";
+import { expandHomeDirectory, loadAllSnippets } from "./utils/SnippetsLoader";
 
 export default function Command() {
   const [state, setState] = useState<State>({ snippets: [], isLoading: true });
@@ -33,12 +33,28 @@ export default function Command() {
     try {
       const preferences = await getPreferenceValues();
       const path = preferences["folderPath"];
+      const allPathsTmp = preferences["secondaryFolderPaths"]
+        ? [path, ...preferences["secondaryFolderPaths"].split(",")]
+        : [path];
+      const allPaths = Array.from(new Set(allPathsTmp.map(expandHomeDirectory)));
 
-      const { snippets, errors } = await loadAllSnippets(path);
+      const snippetsPromises = allPaths.map(loadAllSnippets);
+      const snippetsArrays = await Promise.all(snippetsPromises);
+      const snippets = snippetsArrays.flatMap(({ snippets }) => snippets);
+      const errors = snippetsArrays.flatMap(({ errors }) => errors);
+
       const folders = Array.from(
         new Set(
           snippets.map((i) => {
             return i.folder;
+          })
+        )
+      );
+
+      const tags = Array.from(
+        new Set(
+          snippets.flatMap((i) => {
+            return i.content.tags ?? [];
           })
         )
       );
@@ -51,7 +67,8 @@ export default function Command() {
         snippets: orderedSnippets,
         filteredSnippets: orderedSnippets,
         folders: folders,
-        rootPath: path,
+        tags: tags,
+        paths: allPaths,
         errors: errors,
       }));
     } catch (err) {
@@ -69,18 +86,35 @@ export default function Command() {
 
   // Handle filter folder
   useEffect(() => {
-    if (state.selectedFolder && state.selectedFolder != "all") {
-      if (state.snippets) {
-        const res = state.snippets.filter((snippet) => {
-          return snippet.folder == state.selectedFolder;
-        });
+    if (state.selectedFilter && state.selectedFilter != "all") {
+      const handleFilterByFolder = (snippet: Snippet, filterValue: string) => {
+        return snippet.folder == filterValue;
+      };
+      const handleFilterByTags = (snippet: Snippet, filterValue: string) => {
+        return snippet.content.tags?.includes(filterValue);
+      };
 
+      if (state.snippets) {
+        let handleFilterMethod = (_: Snippet) => true;
+        if (state.selectedFilter.startsWith("folder:")) {
+          const filterValue = state.selectedFilter.substring("folder:".length);
+          handleFilterMethod = (snippet: Snippet) => {
+            return handleFilterByFolder(snippet, filterValue);
+          };
+        } else if (state.selectedFilter.startsWith("tag:")) {
+          const filterValue = state.selectedFilter.substring("tag:".length);
+          handleFilterMethod = (snippet: Snippet) => {
+            return handleFilterByTags(snippet, filterValue);
+          };
+        }
+
+        const res = state.snippets.filter(handleFilterMethod);
         setState((previous) => ({ ...previous, filteredSnippets: res }));
       }
     } else {
       setState((previous) => ({ ...previous, filteredSnippets: state.snippets }));
     }
-  }, [state.selectedFolder]);
+  }, [state.selectedFilter]);
 
   if (state.errors && state.errors.length != 0) {
     const options: Toast.Options = {
@@ -101,14 +135,24 @@ export default function Command() {
           tooltip="Filter on folder"
           storeValue={true}
           onChange={(newValue) => {
-            setState((previous) => ({ ...previous, selectedFolder: newValue }));
+            setState((previous) => ({ ...previous, selectedFilter: newValue }));
           }}
         >
           <List.Dropdown.Item title="All" value="all" />
-          {state.folders &&
-            state.folders.map((i) => {
-              return <List.Dropdown.Item title={i} value={i} key={i} />;
-            })}
+          {state.folders && state.folders.length != 1 && (
+            <List.Dropdown.Section title="Folders">
+              {state.folders.map((i) => {
+                return <List.Dropdown.Item title={i} value={`folder:${i}`} key={i} />;
+              })}
+            </List.Dropdown.Section>
+          )}
+          {state.tags && state.tags.length != 1 && (
+            <List.Dropdown.Section title="Tags">
+              {state.tags.map((i) => {
+                return <List.Dropdown.Item title={i} value={`tag:${i}`} key={i} />;
+              })}
+            </List.Dropdown.Section>
+          )}
         </List.Dropdown>
       }
     >
@@ -130,7 +174,7 @@ export default function Command() {
                     snippet={i}
                     primaryAction={state.primaryAction ?? ""}
                     reloadSnippets={fetchData}
-                    rootPath={state.rootPath ?? ""}
+                    paths={state.paths ?? []}
                   />
                 </>
               }

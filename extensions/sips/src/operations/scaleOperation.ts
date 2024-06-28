@@ -5,12 +5,13 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-05 23:05:46
- * Last modified  : 2023-07-06 15:48:36
+ * Last modified  : 2024-06-26 21:37:46
  */
 
 import { execSync } from "child_process";
 
 import {
+  execSIPSCommandOnAVIF,
   execSIPSCommandOnSVG,
   execSIPSCommandOnWebP,
   getDestinationPaths,
@@ -25,7 +26,7 @@ import {
  * @returns A promise that resolves when the operation is complete.
  */
 export default async function scale(sourcePaths: string[], scaleFactor: number) {
-  const newPaths = getDestinationPaths(sourcePaths);
+  const newPaths = await getDestinationPaths(sourcePaths);
   const resultPaths: string[] = [];
 
   for (const imagePath of sourcePaths) {
@@ -40,23 +41,31 @@ export default async function scale(sourcePaths: string[], scaleFactor: number) 
       resultPaths.push(
         await execSIPSCommandOnWebP(
           `sips --resampleHeightWidth ${oldHeight * scaleFactor} ${oldWidth * scaleFactor}`,
-          imagePath
-        )
+          imagePath,
+        ),
       );
     } else if (imagePath.toLowerCase().endsWith("svg")) {
       // Convert to PNG, scale, and restore to SVG
       resultPaths.push(
         await execSIPSCommandOnSVG(
           `sips --resampleHeightWidth ${oldHeight * scaleFactor} ${oldWidth * scaleFactor}`,
-          imagePath
-        )
+          imagePath,
+        ),
+      );
+    } else if (imagePath.toLowerCase().endsWith("avif")) {
+      // Convert to PNG, scale, and restore to AVIF
+      resultPaths.push(
+        await execSIPSCommandOnAVIF(
+          `sips --resampleHeightWidth ${oldHeight * scaleFactor} ${oldWidth * scaleFactor}`,
+          imagePath,
+        ),
       );
     } else {
       // File is a normal image type
       const newPath = newPaths[sourcePaths.indexOf(imagePath)];
       resultPaths.push(newPath);
       execSync(
-        `sips --resampleHeightWidth ${oldHeight * scaleFactor} ${oldWidth * scaleFactor} -o "${newPath}" "${imagePath}"`
+        `sips --resampleHeightWidth ${oldHeight * scaleFactor} ${oldWidth * scaleFactor} -o "${newPath}" "${imagePath}"`,
       );
     }
   }

@@ -1,31 +1,37 @@
-import { showToast, Toast, open } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
-import { getName } from "./getName";
+import { getPreferenceValues, open, showHUD, showToast, Toast } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import defaultBrowserId from "default-browser-id";
-
-interface Arguments {
-  add: string;
-} //
+import { getName } from "./getName";
 
 // This code will run a script to add the event to Fantastical
 // It will first check if Fantastical is installed
 // If it is not installed, it will show a toast
 
-export default async (props: { arguments: Arguments }) => {
+export default async (props: { arguments: Arguments.FanQuickAddEvent }) => {
   const args = props.arguments;
   const name = await getName();
   const defaultBrowser = await defaultBrowserId();
+  const preferences = getPreferenceValues<Preferences>();
   if (name !== undefined) {
+    const escapedAdd = args.add.replace(/"/g, '\\"');
     await runAppleScript(`
         tell application "${name}" 
-            \n parse sentence "${args.add}" with add immediately\n
+          parse sentence "${escapedAdd}" with add immediately
         end tell`);
+
     const optionsSuccess: Toast.Options = {
       style: Toast.Style.Success,
       title: "Event added",
       message: "Your event has been added to Fantastical.",
     };
-    showToast(optionsSuccess);
+
+    // Will check if extension's hide preference is set
+    // If true, it will show a HUD, else it will show a toast
+    if (preferences.hideOnAdd) {
+      showHUD(`Event added`, { clearRootSearch: true });
+    } else {
+      showToast(optionsSuccess);
+    }
   } else {
     const options: Toast.Options = {
       style: Toast.Style.Failure,

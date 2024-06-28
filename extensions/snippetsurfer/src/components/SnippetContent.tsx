@@ -12,8 +12,10 @@ const SnippetContent = ({ snippet }: { snippet: Snippet }) => {
       .map((d) => `> ${d}`)
       .join("\n");
 
+    const tags = snippet.content?.tags ?? [];
+    const tagsStr = tags.map((tag) => `\`${tag}\``).join(" ");
     return `### ${title} - ${folder}
-
+${tagsStr}
 ${descriptionTxt}
 
 ${content}

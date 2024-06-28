@@ -9,7 +9,14 @@
     "mike182uk",
     "FezVrasta",
     "rcruzper",
-    "thomas"
+    "thomas",
+    "arthur_fontaine",
+    "pernielsentikaer"
+  ],
+  "keywords": [
+    "sound",
+    "manager",
+    "bluetooth"
   ],
   "license": "MIT",
   "commands": [

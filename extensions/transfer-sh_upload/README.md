@@ -1,5 +1,7 @@
 # Transfer.sh Uploader
 
+**IMPORTANT: The default transfer.sh instance has a self signed certificate and will most likely not work on your machine. You can use https://transfer.wireway.ch or try to self host it, or allow self signed certificates.**
+
 Allows you to upload files to a transfer.sh instance either the public or a self-hosted version.
 
 The URL to the Instance will be set at the begining and can be changed anytime in the settings.

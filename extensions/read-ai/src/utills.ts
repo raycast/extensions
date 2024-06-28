@@ -8,6 +8,14 @@ import { showToast, Toast } from "@raycast/api";
 export const execAsync = util.promisify(exec);
 export const identifierFilePath = path.join(os.tmpdir(), "raycast-tts-identifier.txt");
 
+export function parseSpeed(speed: string) {
+  const speedValue = parseFloat(speed);
+  if (speedValue < 0.25 || speedValue > 4) {
+    throw new Error("Invalid speed value. Please enter a value between 0.25 and 4.");
+  }
+  return speedValue;
+}
+
 export async function cleanupTmpDir() {
   const tmpdirPath = os.tmpdir();
 

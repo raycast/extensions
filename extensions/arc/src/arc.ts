@@ -1,5 +1,6 @@
 import { runAppleScript } from "@raycast/utils";
 import { Space, Tab } from "./types";
+import { findSpaceInSpaces } from "./utils";
 
 // Tabs
 
@@ -124,7 +125,7 @@ export async function reloadTab(tab: Tab) {
   await runAppleScriptActionOnTab(tab, "reload");
 }
 
-export async function makeNewTab(url: string) {
+export async function makeNewTab(url: string, space?: string) {
   await runAppleScript(`
     tell application "Arc"
       if (count of windows) is 0 then
@@ -132,6 +133,7 @@ export async function makeNewTab(url: string) {
       end if
 
       tell front window
+        ${space ? `tell space "${space}" to focus` : ""}
         make new tab with properties {URL:"${url}"}
       end tell
 
@@ -140,11 +142,23 @@ export async function makeNewTab(url: string) {
   `);
 }
 
+export async function getValidatedSpaceTitle(spaceId: string | undefined) {
+  if (spaceId) {
+    const spaces = await getSpaces();
+    if (spaces) {
+      return findSpaceInSpaces(spaceId, spaces);
+    }
+  }
+
+  return undefined;
+}
+
 // Windows
 
 export type MakeNewWindowOptions = {
   incognito?: boolean;
   url?: string;
+  space?: string;
 };
 
 export async function makeNewWindow(options: MakeNewWindowOptions = {}): Promise<void> {
@@ -153,6 +167,7 @@ export async function makeNewWindow(options: MakeNewWindowOptions = {}): Promise
       make new window with properties {incognito:${options.incognito ?? false}}
       activate
 
+      ${options.space ? `tell front window to tell space "${options.space}" to focus` : ""}
       ${options.url ? `tell front window to make new tab with properties {URL:"${options.url}"}` : ""}
     end tell
   `);
@@ -179,7 +194,6 @@ export async function makeNewLittleArcWindow(url: string) {
   await runAppleScript(`
     tell application "Arc"
       make new tab with properties {URL:"${url}"}
-
       activate
     end tell
   `);
