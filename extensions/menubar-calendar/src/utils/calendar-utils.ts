@@ -4,10 +4,10 @@ import utd from "unicode-text-decorator";
 import { Calendar } from "calendar";
 import { largeCalendar, showWeekNumber, WeekStart, weekStart } from "../types/preferences";
 import { captureException } from "@raycast/api";
+import { formatMonthDateWithWeek, formatYearDateWithWeek } from "./common-utils";
 
 const calThinSpace = replaceWithThinSpace(" ");
 const calFourPerEmSpaceDivider = replaceWithFourPerEmSpace(" ");
-const CalSpace = " ";
 
 const CalTitleStartPadding = largeCalendar
   ? calThinSpace.repeat(7) + calFourPerEmSpaceDivider.repeat(1)
@@ -39,7 +39,7 @@ export const calMenubarTitle = getCalMenubarTitle();
 
 function getCalMenubarTitle(): string {
   try {
-    return macDateFormat();
+    return formatMonthDateWithWeek(new Date());
   } catch (e) {
     captureException(e);
     console.error(e);
@@ -47,15 +47,8 @@ function getCalMenubarTitle(): string {
   }
 }
 
-function macDateFormat() {
-  const date = new Date();
-  const monthShort = new Intl.DateTimeFormat("en-US", { month: "short" }).format(date);
-  const weekDayShort = new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(date);
-  return CalSpace + weekDayShort + CalSpace + monthShort + CalSpace + curDay;
-}
-
 // Calendar date title: Sat Jun 15 2024
-export const calDateTitle = utd.decorate(getCalDateTitle(curYear, curMonth), "sans_serif");
+export const calDateTitle = utd.decorate(getCalDateTitle(curYear, curMonth, curDay), "sans_serif");
 
 function getCalDateTitle(year: number, month: number, day: number = 1): string {
   try {
@@ -63,18 +56,7 @@ function getCalDateTitle(year: number, month: number, day: number = 1): string {
       throw new Error("Invalid month. Month must be between 1 and 12.");
     }
     const date = new Date(year, month, day);
-    const monthShort = new Intl.DateTimeFormat("en-US", { month: "short" }).format(date);
-    const weekDayShort = new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(new Date());
-    return utd.decorate(
-      weekDayShort +
-        calFourPerEmSpaceDivider.repeat(2) +
-        monthShort +
-        calFourPerEmSpaceDivider.repeat(2) +
-        curDay +
-        calFourPerEmSpaceDivider.repeat(2) +
-        curYear,
-      "bold_sans_serif",
-    );
+    return utd.decorate(formatYearDateWithWeek(date), "bold_sans_serif");
   } catch (e) {
     captureException(e);
     console.error(e);
@@ -172,7 +154,7 @@ export function replaceWithBoldSansSerif(input: string): string {
   return utd.decorate(addUnderlineToDigits(input), "bold_sans_serif");
 }
 
-function replaceWithFourPerEmSpace(input: string): string {
+export function replaceWithFourPerEmSpace(input: string): string {
   const fourPerEmSpace = "\u2005";
   return input.replace(/\s/g, fourPerEmSpace);
 }

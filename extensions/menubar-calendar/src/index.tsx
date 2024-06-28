@@ -7,6 +7,7 @@ import {
   largeCalendar,
   remindersView,
   showCalendar,
+  showEventsInMenubar,
   showReminders,
   showSettings,
   showWeekNumber,
@@ -18,13 +19,24 @@ import {
   menubarIcon,
   menubarTitle,
   openApp,
+  truncate,
+  truncateMenubarTitle,
+  truncateSubtitle,
 } from "./utils/common-utils";
 import { Fragment, useMemo } from "react";
 import { Reminder, useReminders } from "./hooks/useReminders";
-import { addPriorityToTitle, isOverdue, isToday, isTomorrow, truncate } from "./utils/reminders-utils";
+import { addPriorityToTitle, isOverdue, isToday, isTomorrow } from "./utils/reminders-utils";
 import { deleteReminder as apiDeleteReminder, toggleCompletionStatus } from "swift:../swift/AppleReminders";
 import { CalendarEvent, useCalendar } from "./hooks/useCalendar";
-import { formatTimestamp, getCalendarIcon, timeStampIsThreeDay, timeStampIsToday } from "./utils/calendar-events-utils";
+import {
+  findFirstEventWithinNHours,
+  formatEventTimeMultiItemSubtitle,
+  formatEventTimeMultiSection,
+  getCalendarIcon,
+  timeStampIsThreeDay,
+  timeStampIsToday,
+} from "./utils/calendar-events-utils";
+import { format } from "date-fns";
 
 export default function Command() {
   const calList = calData();
@@ -127,8 +139,37 @@ export default function Command() {
     return allCalendarEvents.sort((a, b) => a.startDate - b.startDate);
   }, [calendars]);
 
+  const eventMenubatTitle = useMemo(() => {
+    const event = findFirstEventWithinNHours(calendarEventSections, Number(showEventsInMenubar));
+    if (event.event === null) {
+      return "";
+    } else {
+      return "  " + truncateMenubarTitle(event.event.title) + "  • in " + event.timeUntilEvent;
+    }
+  }, [calendarEventSections]);
+
+  const groupEventsByDay = (events: CalendarEvent[]): Record<string, CalendarEvent[]> => {
+    return events.reduce(
+      (groups, event) => {
+        const startDate = new Date(event.startDate);
+        const dayKey = format(startDate, "yyyy-MM-dd");
+
+        if (!groups[dayKey]) {
+          groups[dayKey] = [];
+        }
+        groups[dayKey].push(event);
+
+        return groups;
+      },
+      {} as Record<string, CalendarEvent[]>,
+    );
+  };
+  const groupedEvents = useMemo(() => {
+    return groupEventsByDay(calendarEventSections);
+  }, [calendarEventSections]);
+
   return (
-    <MenuBarExtra isLoading={isLoading} title={menubarTitle()} icon={menubarIcon()}>
+    <MenuBarExtra isLoading={isLoading} title={menubarTitle() + eventMenubatTitle} icon={menubarIcon()}>
       <MenuBarExtra.Item title={calDateTitle} onAction={highlightCalendar ? () => {} : undefined} />
       <MenuBarExtra.Item title={calWeekTitle()} onAction={highlightCalendar ? () => {} : undefined} />
       {calList.map((calRow, index) => (
@@ -150,20 +191,40 @@ export default function Command() {
         </Fragment>
       ))}
 
-      {calendarEventSections?.map((event, index) => {
+      {Object.keys(groupedEvents).map((dayKey) => {
         return (
           <MenuBarExtra.Section
-            key={event.openUrl}
-            title={truncate(formatTimestamp(event.startDate, event.endDate, event.isAllDay))}
+            key={dayKey}
+            title={truncate(formatEventTimeMultiSection(groupedEvents[dayKey][0].startDate))}
           >
-            <MenuBarExtra.Item
-              key={event.openUrl + index}
-              icon={getCalendarIcon(event.status, event.color)}
-              title={truncate(event.title)}
-              onAction={async () => {
-                await open(event.openUrl, "com.apple.iCal");
-              }}
-            />
+            {groupedEvents[dayKey].map((event, index) => (
+              <MenuBarExtra.Item
+                key={event.openUrl + index}
+                icon={getCalendarIcon(event.status, event.color)}
+                title={truncate(event.title.replace(/\\n/g, " "))}
+                subtitle={truncateSubtitle(
+                  event.title.replace(/\\n/g, " "),
+                  formatEventTimeMultiItemSubtitle(event.startDate, event.endDate, event.isAllDay),
+                )}
+                onAction={async () => {
+                  await open(event.openUrl, "com.apple.iCal");
+                }}
+                alternate={
+                  <MenuBarExtra.Item
+                    key={event.openUrl + index}
+                    icon={getCalendarIcon(event.status, event.color)}
+                    title={truncate(formatEventTimeMultiItemSubtitle(event.startDate, event.endDate, event.isAllDay))}
+                    subtitle={truncateSubtitle(
+                      formatEventTimeMultiItemSubtitle(event.startDate, event.endDate, event.isAllDay),
+                      event.title.replace(/\\n/g, " "),
+                    )}
+                    onAction={async () => {
+                      await open(event.openUrl, "com.apple.iCal");
+                    }}
+                  />
+                }
+              />
+            ))}
           </MenuBarExtra.Section>
         );
       })}
