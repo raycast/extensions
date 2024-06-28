@@ -169,7 +169,7 @@ export default function viewBookings() {
                   {item.attendees.map((a, i) => (
                     <List.Item.Detail.Metadata.Label
                       key={i}
-                      title={`Attendee.${i + 1}`}
+                      title={`Attendee #${i + 1}`}
                       text={a.name ? `${a.name} (${a.email})` : a.email}
                     />
                   ))}
