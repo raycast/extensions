@@ -5,6 +5,7 @@
 ### Enhancements
 
 - `Notes` command allows you to see all of your existing notes
+- `Add Note` is now a subcommand within `Notes`
 
 ### Other
 

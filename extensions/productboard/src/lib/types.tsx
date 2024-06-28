@@ -66,4 +66,7 @@ export type ErrorResponse =
       ok: false;
       errors: { source: string }[];
     }
-  | { message: string };
+  | { message: string }
+  | {
+      error: string;
+    };

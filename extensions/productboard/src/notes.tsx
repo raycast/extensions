@@ -1,12 +1,13 @@
-import { Action, ActionPanel, Color, Icon, LaunchType, List, launchCommand } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import useProductboard from "./lib/hooks/useProductboard";
 import { Note } from "./lib/types";
 import { getFavicon } from "@raycast/utils";
 import { useState } from "react";
+import AddNote from "./lib/components/AddNote";
 
 export default function Notes() {
   const [isShowingDetail, setIsShowingDetail] = useState(false);
-  const { isLoading, data: notes, pagination } = useProductboard<Note>("notes");
+  const { isLoading, data: notes, pagination, revalidate } = useProductboard<Note>("notes");
 
   return (
     <List isLoading={isLoading} pagination={pagination} isShowingDetail={isShowingDetail}>
@@ -54,15 +55,11 @@ export default function Notes() {
                   url={note.displayUrl}
                 />
                 <ActionPanel.Section>
-                  <Action
+                  <Action.Push
                     title="Add Note"
+                    shortcut={{ modifiers: ["cmd"], key: "n" }}
                     icon={Icon.Plus}
-                    onAction={() =>
-                      launchCommand({
-                        name: "index",
-                        type: LaunchType.UserInitiated,
-                      })
-                    }
+                    target={<AddNote onNoteAdded={revalidate} />}
                   />
                 </ActionPanel.Section>
               </ActionPanel>

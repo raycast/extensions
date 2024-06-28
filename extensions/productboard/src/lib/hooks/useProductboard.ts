@@ -3,7 +3,7 @@ import { API_HEADERS, API_URL, DEFAULT_PAGE_LIMIT } from "../constants";
 import { ErrorResponse, PageMeta } from "../types";
 
 export default function useProductboard<T>(endpoint: string) {
-  const { isLoading, error, data, pagination } = useFetch(
+  const { isLoading, error, data, pagination, revalidate } = useFetch(
     (options) =>
       API_URL +
       endpoint +
@@ -15,7 +15,8 @@ export default function useProductboard<T>(endpoint: string) {
         if (!response.ok) {
           const result = (await response.json()) as ErrorResponse;
           if ("message" in result) throw new Error(result.message);
-          else throw new Error(result.errors[0].source);
+          if ("error" in result) throw new Error(result.error);
+          throw new Error(result.errors[0].source);
         } else {
           const result = (await response.json()) as { data: T[] } & PageMeta;
           return result;
@@ -31,5 +32,5 @@ export default function useProductboard<T>(endpoint: string) {
       initialData: [],
     },
   );
-  return { isLoading, error, data, pagination };
+  return { isLoading, error, data, pagination, revalidate };
 }

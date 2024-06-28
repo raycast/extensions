@@ -1,13 +1,27 @@
 import got from "got";
 import showdown from "showdown";
 import EmailValidator from "email-validator";
-import { Form, popToRoot, ActionPanel, showToast, Toast, getPreferenceValues, Action, Clipboard } from "@raycast/api";
-import { AddNote, POSTResponse } from "./lib/types";
+import {
+  Form,
+  popToRoot,
+  ActionPanel,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  Action,
+  Clipboard,
+  useNavigation,
+} from "@raycast/api";
+import { type AddNote, POSTResponse } from "../types";
 import { FormValidation, useForm } from "@raycast/utils";
-import { API_HEADERS, API_URL } from "./lib/constants";
+import { API_HEADERS, API_URL } from "../constants";
 
-export default function Command() {
-  const preferences = getPreferenceValues<Preferences.Index>();
+type AddNoteProps = {
+  onNoteAdded: () => void;
+};
+export default function AddNote({ onNoteAdded }: AddNoteProps) {
+  const { pop } = useNavigation();
+  const preferences = getPreferenceValues<Preferences.Notes>();
 
   const { itemProps, handleSubmit } = useForm<AddNote>({
     async onSubmit(values) {
@@ -34,6 +48,8 @@ export default function Command() {
         toast.style = Toast.Style.Success;
         toast.title = "Note created";
         toast.message = "Copied link to clipboard";
+        onNoteAdded();
+        pop();
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed pushing note";
@@ -58,6 +74,7 @@ export default function Command() {
 
   return (
     <Form
+      navigationTitle="Notes / Add"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Note" onSubmit={handleSubmit} />
