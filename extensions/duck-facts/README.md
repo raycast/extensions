@@ -53,7 +53,6 @@ To set up the project for development:
 ## Dependencies
 
 - @raycast/api: ^1.77.1
-- @raycast/utils: ^1.16.1
 
 ## License
 
