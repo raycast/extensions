@@ -1,5 +1,9 @@
 # Lorem Ipsum Changelog
 
+## [New Feature] - 2023-01-02
+
+- Add command to generate paragraphs wrapped in <p> tags.
+
 ## [New PRO Feature] - 2023-11-21
 
 - Added Generate with AI command.

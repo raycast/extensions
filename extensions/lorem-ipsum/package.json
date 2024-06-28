@@ -8,7 +8,8 @@
   "license": "MIT",
   "contributors": [
     "GastroGeek",
-    "enkia"
+    "enkia",
+    "jimgroome"
   ],
   "categories": [
     "Data",
@@ -26,6 +27,21 @@
     "ipsum"
   ],
   "commands": [
+    {
+      "name": "html-paragraphs",
+      "title": "Generate HTML Paragraphs",
+      "subtitle": "Lorem Ipsum",
+      "description": "Generate random paragraphs as HTML and copy them to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfLoremIpsumsToGenerate",
+          "type": "text",
+          "required": false,
+          "placeholder": "1"
+        }
+      ]
+    },
     {
       "name": "paragraphs",
       "title": "Generate Paragraphs",
