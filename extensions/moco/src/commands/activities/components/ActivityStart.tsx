@@ -84,7 +84,7 @@ export const ActivityStart: React.FC<ActivityStartProps> = ({ task, projectID })
         onChange={dropDescriptionErrorIfNeeded}
         onBlur={(event) => {
           if (event.target.value?.length == 0) {
-            setDescriptionError("The field should't be empty!");
+            setDescriptionError("The field shouldn't be empty!");
           } else {
             dropDescriptionErrorIfNeeded();
           }
