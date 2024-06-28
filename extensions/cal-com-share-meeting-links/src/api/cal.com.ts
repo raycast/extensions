@@ -187,9 +187,9 @@ export function cancelBooking(bookingId: number, reason: string) {
 }
 
 export function formatDateTime(date: string) {
-  return moment(date).format("Do MMM HH:mm");
+  return moment(date).format("Do MMM HH:mm a");
 }
 
 export function formatTime(date: string) {
-  return moment(date).format("HH:mm");
+  return moment(date).format("HH:mm a");
 }

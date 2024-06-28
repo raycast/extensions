@@ -52,7 +52,6 @@ export default function viewBookings() {
           key={item.id}
           icon={getIconForStatus(item.status)}
           title={item.title}
-          subtitle={!isShowingDetail ? formatDateTime(item.startTime) + " - " + formatTime(item.endTime) : undefined}
           actions={
             <ActionPanel>
               <Action
@@ -61,6 +60,14 @@ export default function viewBookings() {
                 onAction={() => setIsShowingDetail(!isShowingDetail)}
               />
               <Action.OpenInBrowser title="Open Booking in Browser" url={`https://cal.com/booking/${item.uid}`} />
+              {item.metadata && (item.metadata["videoCallUrl"] as string | undefined) && (
+                <Action.OpenInBrowser
+                  title="Open Video Call"
+                  url={item.metadata["videoCallUrl"] as string}
+                  icon={Icon.Video}
+                  shortcut={{ modifiers: ["cmd"], key: "v" }}
+                />
+              )}
               <ActionPanel.Submenu title="Update Status" icon={Icon.Pencil} shortcut={{ modifiers: ["cmd"], key: "s" }}>
                 <Action
                   title="Accept"
@@ -91,18 +98,81 @@ export default function viewBookings() {
               />
             </ActionPanel>
           }
+          accessories={[
+            ...(isShowingDetail
+              ? []
+              : [
+                  ...(item.metadata && (item.metadata["videoCallUrl"] as string | undefined)
+                    ? [
+                        {
+                          icon: { source: Icon.Video, tintColor: Color.Yellow },
+                          tooltip: "Video Call",
+                        },
+                      ]
+                    : []),
+                  ...(item.responses?.location?.optionValue
+                    ? [
+                        {
+                          icon: { source: Icon.Pin, tintColor: Color.Yellow },
+                          tooltip: "In Person",
+                        },
+                      ]
+                    : []),
+                  {
+                    date: new Date(item.startTime),
+                    icon: { source: Icon.Calendar, tintColor: Color.Blue },
+                    tooltip: `${formatDateTime(item.startTime) + " - " + formatTime(item.endTime)}`,
+                  },
+                ]),
+            {
+              icon: Icon.TwoPeople,
+              tag: { value: String(item.attendees.length), color: Color.Magenta },
+              tooltip: "Attendees",
+            },
+          ]}
           detail={
             <List.Item.Detail
               markdown={item.description ? item.description : undefined}
               metadata={
                 <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.Label title="Title" text={item.title} />
                   <List.Item.Detail.Metadata.Label
                     title="Status"
                     text={item.status.charAt(0).toUpperCase() + item.status.slice(1).toLowerCase()}
                     icon={getIconForStatus(item.status)}
                   />
-                  <List.Item.Detail.Metadata.Label title="Start" text={formatDateTime(item.startTime)} />
-                  <List.Item.Detail.Metadata.Label title="End" text={formatDateTime(item.endTime)} />
+                  <List.Item.Detail.Metadata.Label
+                    title="Start"
+                    text={formatDateTime(item.startTime)}
+                    icon={{ source: Icon.Calendar, tintColor: Color.Blue }}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="End"
+                    text={formatDateTime(item.endTime)}
+                    icon={{ source: Icon.Calendar, tintColor: Color.Blue }}
+                  />
+                  {item.metadata && (item.metadata["videoCallUrl"] as string | undefined) && (
+                    <List.Item.Detail.Metadata.Link
+                      title="Video Call"
+                      target={item.metadata["videoCallUrl"] as string}
+                      text={"Link"}
+                    />
+                  )}
+                  {item.responses?.location?.optionValue && (
+                    <List.Item.Detail.Metadata.Label
+                      title={"Location"}
+                      icon={{ source: Icon.Pin, tintColor: Color.Yellow }}
+                      text={item.responses?.location?.optionValue}
+                    />
+                  )}
+                  <List.Item.Detail.Metadata.Separator />
+                  {item.attendees.map((a, i) => (
+                    <List.Item.Detail.Metadata.Label
+                      key={i}
+                      title={`Attendee.${i + 1}`}
+                      text={a.name ? `${a.name} (${a.email})` : a.email}
+                    />
+                  ))}
                 </List.Item.Detail.Metadata>
               }
             />
