@@ -1,10 +1,19 @@
-import { Detail, Action, ActionPanel, AI, showToast, Toast } from "@raycast/api";
+import { Detail, Action, ActionPanel, AI, showToast, Toast, environment, popToRoot } from "@raycast/api";
 import { useEffect, useState, useRef } from "react";
 
 export default function Command() {
   const [answer, setAnswer] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const hasRunEffect = useRef(false);
+
+  if (!environment.canAccess(AI)) {
+    popToRoot();
+    showToast({
+      style: Toast.Style.Failure,
+      title: "This command requires a PRO subscription.",
+    });
+    return;
+  }
 
   const prompt = `
   Generate a fact about ducks. Use internet wherever possible.
@@ -43,6 +52,7 @@ export default function Command() {
 
   return (
     <Detail
+      isLoading={isLoading}
       markdown={isLoading ? "Generating..." : answer || "No suggestions generated"}
       actions={
         <ActionPanel>
