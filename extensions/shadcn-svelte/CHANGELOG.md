@@ -1,3 +1,3 @@
 # Shadcn/Svelte Changelog
 
-## [Initial Version] - 2024-06-23
+## [Initial Version] - {PR_MERGE_DATE}
