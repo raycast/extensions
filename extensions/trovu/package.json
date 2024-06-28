@@ -5,7 +5,6 @@
   "description": "Search 1000+ websites in a command-line way, with curated and personal shortcuts, organized by namespaces, allowing multiple and typed arguments, with full privacy.",
   "icon": "command-icon.png",
   "author": "jorges",
-  "owner": "trovu",
   "access": "public",
   "categories": [
     "Web"
