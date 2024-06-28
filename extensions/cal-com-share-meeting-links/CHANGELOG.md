@@ -1,5 +1,10 @@
 # Cal.com Share Meeting Links Changelog
 
+## [Visual refresh and Improvements] - {PR_MERGE_DATE}
+
+- Visual refresh for "View Bookings" and "Share Meeting Links" commands
+- Using optimistic updates during mutation and updated dependencies
+
 ## [Update & bug fix] - 2024-06-20
 
 - Adds action to open upcoming bookings in browser
