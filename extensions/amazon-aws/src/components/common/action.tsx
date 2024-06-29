@@ -4,7 +4,12 @@ import { getEnumKeysExcludingCurrent } from "../../util";
 export class AwsAction {
   public static Console = ({ url, onAction }: { url: string; onAction?: () => void }) => (
     <ActionPanel.Section title="Console">
-      <Action.OpenInBrowser key="openConsoleLink" title="Open in Browser" url={createSsoLoginUri(url)} />
+      <Action.OpenInBrowser
+        key="openConsoleLink"
+        title="Open in Browser"
+        url={createSsoLoginUri(url)}
+        onOpen={() => onAction?.()}
+      />
       <Action.CopyToClipboard
         key="copyConsoleLink"
         title="Copy Link"
@@ -64,10 +69,12 @@ function createSsoLoginUri(uri: string): string {
   if (process.env.AWS_SSO_ACCOUNT_ID && process.env.AWS_SSO_ROLE_NAME && process.env.AWS_SSO_START_URL) {
     if (process.env.AWS_SSO_START_URL!.endsWith("start")) {
       sso_start_url = process.env.AWS_SSO_START_URL! + "/#";
-    } else if (process.env.AWS_SSO_START_URL!.endsWith("/")) {
+    } else if (process.env.AWS_SSO_START_URL!.endsWith("start/")) {
       sso_start_url = process.env.AWS_SSO_START_URL! + "#";
-    } else {
+    } else if (process.env.AWS_SSO_START_URL!.endsWith("start/#")) {
       sso_start_url = process.env.AWS_SSO_START_URL!;
+    } else {
+      return uri;
     }
     return `${sso_start_url}/console?account_id=${encodeURI(process.env.AWS_SSO_ACCOUNT_ID!)}&role_name=${encodeURI(process.env.AWS_SSO_ROLE_NAME!)}&destination=${encodeURIComponent(uri)}`;
   }
