@@ -1,5 +1,9 @@
 # Jira Changelog
 
+## [Fix] 2024-06-17
+
+- Fixed an issue where adding a port to the URL was not possible
+
 ## [The custom fields can be render as required] - 2024-05-16
 
 - Fixed an issue where the custom fields were not recognized as required, even though the API suggested they were.

@@ -2,7 +2,6 @@ import {
   Action,
   ActionPanel,
   Clipboard,
-  getPreferenceValues,
   Icon,
   List,
   LocalStorage,
@@ -20,11 +19,10 @@ import { showHiddenFiles } from "./utils/hide-files-utils";
 import { LocalStorageKey } from "./utils/constants";
 import { alertDialog, getHiddenFiles, refreshNumber } from "./hooks/hooks";
 import { ListEmptyView } from "./components/list-empty-view";
-import { Preferences } from "./types/preferences";
+import { rememberTag } from "./types/preferences";
 import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
 
 export default function Command() {
-  const { rememberTag } = getPreferenceValues<Preferences>();
   const [tag, setTag] = useState<string>("");
   const [refresh, setRefresh] = useState<number>(0);
 

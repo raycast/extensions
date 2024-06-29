@@ -1,4 +1,4 @@
-import { launchCommand } from "@raycast/api";
+import { LaunchOptions } from "raycast-cross-extension";
 
 type DuplicateAlias = {
   title: string;
@@ -41,8 +41,6 @@ export type JsDelivrNpmResponse = {
   }>;
   links: Record<string, string>;
 };
-
-export type LaunchOptions = Parameters<typeof launchCommand>[0];
 
 export type LaunchContext = {
   launchFromExtensionTitle?: string;

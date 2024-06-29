@@ -28,6 +28,14 @@
           "default": false,
           "title": "Options",
           "label": "Hide Raycast after copy"
+        },
+        {
+          "name": "storePasswordLength",
+          "description": "Persist the last password length between runs.",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Store password length"
         }
       ]
     }

@@ -1,0 +1,117 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pip",
+  "title": "PiP",
+  "description": "Watch video in Picture in Picture or Full Screen mode",
+  "icon": "pip-icon.png",
+  "author": "koinzhang",
+  "license": "MIT",
+  "categories": [
+    "Media",
+    "Productivity",
+    "Web"
+  ],
+  "keywords": [
+    "pip",
+    "picture-in-picture",
+    "fullscreen",
+    "video",
+    "native",
+    "html5",
+    "player",
+    "picture",
+    "piPifier",
+    "fullifier",
+    "iina"
+  ],
+  "commands": [
+    {
+      "name": "toggle-pip",
+      "title": "Toggle Picture in Picture",
+      "description": "Watch video in Picture in Picture mode",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-full-screen",
+      "title": "Toggle Full Screen",
+      "description": "Watch video in browser's native Full Screen mode",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "Simulate Keyboard Shortcut",
+      "name": "simulateKeyboard",
+      "description": "Simulate pressing the keyboard in a Chromium-based browser to automate picture-in-picture or full-screen mode. If there is a conflict with the keystrokes, please select another keystroke or No Simulate.",
+      "type": "dropdown",
+      "default": "key code 122",
+      "required": false,
+      "data": [
+        {
+          "title": "No Simulate",
+          "value": ""
+        },
+        {
+          "title": "F1",
+          "value": "key code 122"
+        },
+        {
+          "title": "F2",
+          "value": "key code 120"
+        },
+        {
+          "title": "F3",
+          "value": "key code 99"
+        },
+        {
+          "title": "F4",
+          "value": "key code 118"
+        },
+        {
+          "title": "F5",
+          "value": "key code 95"
+        },
+        {
+          "title": "F6",
+          "value": "key code 97"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "Z",
+          "value": "z"
+        },
+        {
+          "title": "X",
+          "value": "x"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.77.1",
+    "@raycast/utils": "^1.16.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.14.6",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,4 +1,4 @@
-import { League, Player, Team } from "./types";
+import type { League, Player, Team } from "./types";
 
 export type Schema = {
   favoriteTeams: Team[];

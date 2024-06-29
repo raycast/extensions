@@ -1,4 +1,4 @@
-export const finderName = "Finder";
+export const finderBundleId = "com.apple.finder";
 
 export const webkitBrowserNames = ["Safari", "Safari Technology Preview", "Orion"];
 

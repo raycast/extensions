@@ -1,10 +1,4 @@
-import {
-  GetQueueAttributesCommand,
-  ListQueuesCommand,
-  PurgeQueueCommand,
-  QueueAttributeName,
-  SQSClient,
-} from "@aws-sdk/client-sqs";
+import { PurgeQueueCommand, QueueAttributeName, SQSClient } from "@aws-sdk/client-sqs";
 import {
   Action,
   ActionPanel,
@@ -18,27 +12,36 @@ import {
   Toast,
   Clipboard,
 } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedState } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { getErrorMessage, isReadyToFetch, resourceToConsoleLink } from "./util";
+import { getErrorMessage, resourceToConsoleLink, uniqBy } from "./util";
 import { AwsAction } from "./components/common/action";
 import { SendMessageForm } from "./components/sqs/send-message-form";
+import { useQueues } from "./hooks/use-sqs";
+import { useState } from "react";
 
 export interface Queue {
   queueUrl: string;
+  queueKey: string;
   attributes?: Partial<Record<QueueAttributeName, string>>;
 }
 
 export default function SQS() {
-  const [isDetailsEnabled, setDetailsEnabled] = useCachedState<boolean>("aws-sqs-details-enabled", false);
-  const { data: queues, error, isLoading, revalidate } = useCachedPromise(fetchQueues);
+  const [prefixQuery, setPrefixQuery] = useState<string>("");
+  const [isDetailsEnabled, setDetailsEnabled] = useCachedState<boolean>("show-details", false, {
+    cacheNamespace: "aws-sqs",
+  });
+  const { queues, error, isLoading, revalidate, pagination } = useQueues(prefixQuery);
 
   return (
     <List
       isLoading={isLoading}
       filtering
-      isShowingDetail={queues && queues.length > 0 && isDetailsEnabled}
-      searchBarPlaceholder="Filter queues by name..."
+      throttle
+      pagination={pagination}
+      onSearchTextChange={setPrefixQuery}
+      isShowingDetail={!isLoading && !error && (queues || []).length > 0 && isDetailsEnabled}
+      searchBarPlaceholder="Search queues by name prefix (>2 characters)..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
     >
       {error && (
@@ -51,14 +54,13 @@ export default function SQS() {
       {!error && queues?.length === 0 && (
         <List.EmptyView title="No queues found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
-      {(queues || [])
+      {uniqBy(queues || [], (queue) => queue.queueUrl)
         .sort((a, b) => a.queueUrl.localeCompare(b.queueUrl))
         .map((queue) => (
           <List.Item
-            key={queue.attributes?.QueueArn}
+            key={queue.queueKey}
             title={queue.attributes?.QueueArn?.split(":").pop() || ""}
             icon={"aws-icons/sqs/queue.png"}
-            keywords={[queue.attributes?.QueueArn?.split(":").pop() || ""]}
             detail={
               <List.Item.Detail
                 markdown={
@@ -187,35 +189,8 @@ export default function SQS() {
   );
 }
 
-const fetchQueues = async (token?: string, aggQueues?: Queue[]): Promise<Queue[]> => {
-  if (!isReadyToFetch()) return [];
-  const { NextToken, QueueUrls } = await new SQSClient({}).send(new ListQueuesCommand({ NextToken: token }));
-  const queuesPromised = (QueueUrls ?? []).map(async (url) => {
-    const attributes = await fetchQueueAttributes(url);
-    return { queueUrl: url, attributes };
-  });
-
-  const queues = await Promise.all(queuesPromised);
-  if (NextToken) {
-    return fetchQueues(NextToken, [...(aggQueues || []), ...(queues || [])]);
-  }
-
-  return queues;
-};
-
-const fetchQueueAttributes = async (queueUrl: string) => {
-  const { Attributes } = await new SQSClient({}).send(
-    new GetQueueAttributesCommand({
-      QueueUrl: queueUrl,
-      AttributeNames: ["All"],
-    }),
-  );
-
-  return Attributes;
-};
-
-const purgeQueue = async (queue: Queue, revalidate: () => void) => {
-  confirmAlert({
+const purgeQueue = async (queue: Queue, revalidate: () => void) =>
+  await confirmAlert({
     icon: { source: Icon.Trash, tintColor: Color.Red },
     title: "Are you sure you want to purge the queue?",
     message: "This action cannot be undone.",
@@ -250,4 +225,3 @@ const purgeQueue = async (queue: Queue, revalidate: () => void) => {
       },
     },
   });
-};
