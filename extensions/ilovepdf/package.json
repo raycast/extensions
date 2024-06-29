@@ -65,6 +65,13 @@
       "subtitle": "iLovePDF",
       "description": "Converts an HTML page to PDF using iLovePDF API.",
       "mode": "view"
+    },
+    {
+      "name": "rotate-pdf",
+      "title": "Rotate PDF",
+      "subtitle": "iLovePDF",
+      "description": "Rotate a PDF using iLovePDF API.",
+      "mode": "view"
     }
   ],
   "preferences": [

@@ -1,5 +1,7 @@
 # iLovePDF Changelog
 
+## [Add Rotate PDF Command] - 2024-06-30
+
 ## [Add Convert HTML Page to PDF] - 2024-06-23
 
 ## [Refactor Ask Before Download and Open Now] - 2024-06-17
