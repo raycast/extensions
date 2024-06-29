@@ -35,8 +35,8 @@ export type EmailAccountWithDiskInformation = EmailAccount & {
     user: string;
     has_suspended: 0 | 1;
     mtime: number,
-    _diskused: string;
-    diskused: string;
+    _diskused: string | 0;
+    diskused: string | 0;
     txtdiskquota: string;
     diskusedpercent: number;
     domain: string;

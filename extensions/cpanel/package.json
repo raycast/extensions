@@ -3,7 +3,7 @@
   "name": "cpanel",
   "title": "cPanel",
   "description": "",
-  "icon": "command-icon.png",
+  "icon": "cpanel.png",
   "author": "xmok",
   "categories": [
     "Applications"

@@ -1,3 +1,3 @@
 # cPanel Changelog
 
-## [Initial Version] - 2024-05-19
+## [Initial Version] - {PR_MERGE_DATE}

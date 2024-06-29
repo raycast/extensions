@@ -25,12 +25,12 @@ function ViewEmailAccountDiskInformation({ emailAccount }: { emailAccount: strin
     
     return <Detail isLoading={isLoading} markdown={markdown} metadata={!account ? undefined : <Detail.Metadata>
         <Detail.Metadata.Label title="Disk Quota (bytes)" text={account._diskquota} />
-        <Detail.Metadata.Label title="Disk Used (bytes)" text={account._diskused} />
+        <Detail.Metadata.Label title="Disk Used (bytes)" text={account._diskused.toString()} />
         <Detail.Metadata.Label title="Disk Used (float)" text={`${account.diskusedpercent_float}`} />
         <Detail.Metadata.Separator />
         
         <Detail.Metadata.Label title="Disk Quota (MB)" text={account.diskquota} />
-        <Detail.Metadata.Label title="Disk Used (MB)" text={account.diskused} />
+        <Detail.Metadata.Label title="Disk Used (MB)" text={account.diskused.toString()} />
         <Detail.Metadata.Label title="Disk Used (percent)" text={`${account.diskusedpercent}%`} />
         
         <Detail.Metadata.Separator />
