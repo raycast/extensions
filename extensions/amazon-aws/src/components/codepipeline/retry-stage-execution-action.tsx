@@ -4,20 +4,19 @@ import {
   RetryStageExecutionCommand,
   StageExecutionStatus,
   StageRetryMode,
-  StageState,
 } from "@aws-sdk/client-codepipeline";
 import { getErrorMessage } from "../../util";
+import { Pipeline, PipelineStage } from "../../codepipeline";
+import { MutatePromise } from "@raycast/utils";
 
 export const RetryStageExecutionAction = ({
-  pipelineName,
-  revalidatePipeline,
+  pipeline,
   isLoading,
-  stages,
+  mutate,
 }: {
-  pipelineName: string;
-  revalidatePipeline: () => void;
+  pipeline: Pipeline;
   isLoading: boolean;
-  stages?: StageState[];
+  mutate: MutatePromise<Pipeline[]>;
 }) => {
   return (
     <ActionPanel.Submenu
@@ -27,11 +26,12 @@ export const RetryStageExecutionAction = ({
       isLoading={isLoading}
       filtering
     >
-      {(stages ?? [])
+      {pipeline.stages
+        .filter((s) => !!s.latestExecution)
         .filter(
           (s) =>
-            s.latestExecution?.status === StageExecutionStatus.Failed ||
-            s.latestExecution?.status === StageExecutionStatus.Stopped,
+            s.latestExecution!.status === StageExecutionStatus.Failed ||
+            s.latestExecution!.status === StageExecutionStatus.Stopped,
         )
         .flatMap((s) => [
           { ...s, retryMode: StageRetryMode.ALL_ACTIONS },
@@ -39,7 +39,7 @@ export const RetryStageExecutionAction = ({
         ])
         .map((s) => (
           <Action
-            key={`${s.retryMode}-${pipelineName}-${s.stageName}`}
+            key={`${s.retryMode}-${pipeline.name}-${s.stageName}`}
             icon={{
               source: s.retryMode === StageRetryMode.ALL_ACTIONS ? Icon.Patch : Icon.BandAid,
               tintColor: Color.Orange,
@@ -49,7 +49,7 @@ export const RetryStageExecutionAction = ({
                 ? `${s.stageName}: All actions`
                 : `${s.stageName}: Failed actions`
             }
-            onAction={() => retryStageExecution(pipelineName, s, revalidatePipeline)}
+            onAction={() => retryStageExecution(pipeline.name!, s, mutate)}
           />
         ))}
     </ActionPanel.Submenu>
@@ -58,44 +58,44 @@ export const RetryStageExecutionAction = ({
 
 const retryStageExecution = async (
   pipelineName: string,
-  s: { retryMode: StageRetryMode; stageName?: string; latestExecution?: { pipelineExecutionId?: string } },
-  revalidatePipeline: () => void,
+  stage: PipelineStage & { retryMode: StageRetryMode },
+  mutate: MutatePromise<Pipeline[]>,
 ) => {
   await confirmAlert({
     title: "Are you sure?",
     icon: {
-      source: s.retryMode === StageRetryMode.ALL_ACTIONS ? Icon.Patch : Icon.BandAid,
+      source: stage.retryMode === StageRetryMode.ALL_ACTIONS ? Icon.Patch : Icon.BandAid,
       tintColor: Color.Orange,
     },
-    message: `Retry ${s.retryMode === StageRetryMode.ALL_ACTIONS ? "all actions" : "failed actions"} in ${s.stageName}?`,
+    message: `Retry ${stage.retryMode === StageRetryMode.ALL_ACTIONS ? "all actions" : "failed actions"} in ${stage.stageName}?`,
     primaryAction: {
       title: "Retry",
       onAction: async () => {
         const toast = await showToast(
           Toast.Style.Animated,
-          `Retrying ${s.retryMode === StageRetryMode.ALL_ACTIONS ? "all actions" : "failed actions"} in ${s.stageName}`,
+          `Retrying ${stage.retryMode === StageRetryMode.ALL_ACTIONS ? "all actions" : "failed actions"} in ${stage.stageName}`,
         );
         new CodePipelineClient({})
           .send(
             new RetryStageExecutionCommand({
               pipelineName,
-              pipelineExecutionId: s.latestExecution!.pipelineExecutionId,
-              stageName: s.stageName,
-              retryMode: s.retryMode,
+              pipelineExecutionId: stage.latestExecution!.pipelineExecutionId,
+              stageName: stage.stageName,
+              retryMode: stage.retryMode,
             }),
           )
           .then(({ pipelineExecutionId }) => {
             toast.style = Toast.Style.Success;
-            toast.title = `✅ Retried ${s.retryMode === StageRetryMode.ALL_ACTIONS ? "all actions" : "failed actions"} in ${s.stageName}`;
+            toast.title = `✅ Retried ${stage.retryMode === StageRetryMode.ALL_ACTIONS ? "all actions" : "failed actions"} in ${stage.stageName}`;
             toast.message = `Execution ID: ${pipelineExecutionId}`;
           })
           .catch((err) => {
             captureException(err);
             toast.style = Toast.Style.Failure;
-            toast.title = `❌ Failed to retry ${s.retryMode === StageRetryMode.ALL_ACTIONS ? "all actions" : "failed actions"} in ${s.stageName}`;
+            toast.title = `❌ Failed to retry ${stage.retryMode === StageRetryMode.ALL_ACTIONS ? "all actions" : "failed actions"} in ${stage.stageName}`;
             toast.message = getErrorMessage(err);
           })
-          .finally(revalidatePipeline);
+          .finally(mutate);
       },
     },
   });

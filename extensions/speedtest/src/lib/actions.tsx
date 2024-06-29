@@ -1,26 +1,57 @@
-import { Action, Color, Icon } from "@raycast/api";
+import { Action, Alert, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
 import * as afs from "fs/promises";
 import { speedtestCLIDirectory } from "../lib/cli";
+import { ClipboardData, SpeedtestResult } from "./speedtest.types";
 import { pingToString, speedToString } from "./utils";
-import { SpeedtestResult, ClipboardData } from "./speedtest.types";
 
-export const ToggleDetailedViewAction = ({ setDetailedView }: { setDetailedView: () => void }) => {
-  return <Action title="Toggle Details" onAction={setDetailedView} icon={Icon.AppWindowSidebarLeft} />;
+export const ShowDetailsAction = ({ showDetails }: { showDetails: () => void }) => {
+  return <Action title="Show Details" onAction={showDetails} icon={Icon.Eye} />;
+};
+
+export const HideDetailsAction = ({ hideDetails }: { hideDetails: () => void }) => {
+  return <Action title="Hide Details" onAction={hideDetails} icon={Icon.EyeDisabled} />;
 };
 
 export function ClearCacheAction(props: { isLoading: boolean }) {
   if (props.isLoading) {
     return null;
   }
-  const handle = async () => {
-    try {
-      const d = speedtestCLIDirectory();
-      await afs.rm(d, { recursive: true });
-    } catch (error) {
-      // ignore
+
+  const onClearCache = async () => {
+    const isConfirmed = await confirmAlert({
+      title: "Clear the CLI Cache?",
+      icon: Icon.Trash,
+      message: "This action cannot be undone.",
+      primaryAction: {
+        title: "Clear Cache",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (isConfirmed) {
+      try {
+        const dir = speedtestCLIDirectory();
+        await afs.rm(dir, { recursive: true });
+        await showToast({ style: Toast.Style.Success, title: "Cache cleared successfully" });
+      } catch (error) {
+        if (error instanceof Error) {
+          await showToast({ style: Toast.Style.Failure, title: "Failed to clear cache", message: error.message });
+        } else {
+          await showToast({ style: Toast.Style.Failure, title: "Failed to clear cache" });
+        }
+      }
     }
   };
-  return <Action title="Clear CLI Cache" icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} onAction={handle} />;
+
+  return (
+    <Action
+      title="Clear CLI Cache"
+      icon={Icon.XMarkCircle}
+      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+      style={Action.Style.Destructive}
+      onAction={onClearCache}
+    />
+  );
 }
 
 export function CopySummaryAction(props: { result: SpeedtestResult }): JSX.Element {

@@ -29,6 +29,8 @@ export default async ({ github, context }: API) => {
     return;
   }
 
+  const expectations = "We're currently experiencing high demand and limited capacity. As a result, extension reviews might take longer than usual to get the initial review. Please expect an initial review within 5-10 business days."; 
+
   const codeowners = await getCodeOwners({ github, context });
 
   const sender = context.payload.sender.login;
@@ -68,7 +70,7 @@ export default async ({ github, context }: API) => {
       await comment({
         github,
         context,
-        comment: `Congratulations on your new Raycast extension! :rocket:\n\nWe have a lower capacity at the moment, and extension reviews might take longer than usually to get the initial review. Once the PR is approved and merged, the extension will be available on our Store.\n\nSorry for the inconvenience`,
+        comment: `Congratulations on your new Raycast extension! :rocket:\n\n${expectations}\n\nOnce the PR is approved and merged, the extension will be available on our Store.\n\nSorry for the inconvenience`,
       });
       return;
     }
@@ -87,7 +89,7 @@ export default async ({ github, context }: API) => {
         context,
         comment: `Thank you for your ${isFirstContribution ? "first " : ""} contribution! :tada:
 
-This is especially helpful since there were no maintainers for this extension :pray:`,
+This is especially helpful since there were no maintainers for this extension :pray:\n\n${expectations}`,
       });
     }
 
@@ -97,6 +99,12 @@ This is especially helpful since there were no maintainers for this extension :p
         owner: context.repo.owner,
         repo: context.repo.repo,
         labels: ["OP is author"],
+      });
+
+      await comment({
+        github,
+        context,
+        comment: `Thank you for the update! :tada:\n\n${expectations}`,
       });
       return;
     }
@@ -117,7 +125,7 @@ This is especially helpful since there were no maintainers for this extension :p
 
 🔔 ${[...new Set(owners.filter((x) => x !== sender))]
         .map((x) => `@${x}`)
-        .join(" ")} you might want to have a look.\n\nYou can use [this guide](https://developers.raycast.com/basics/review-pullrequest) to learn how to check out the Pull Request locally in order to test it.`,
+        .join(" ")} you might want to have a look.\n\nYou can use [this guide](https://developers.raycast.com/basics/review-pullrequest) to learn how to check out the Pull Request locally in order to test it.\n\n${expectations}`,
     });
 
     return;

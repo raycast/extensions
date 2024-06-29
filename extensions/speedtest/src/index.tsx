@@ -1,18 +1,18 @@
-import { Icon, List, Toast, showToast } from "@raycast/api";
+import { Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { ListBandwidthItem } from "./components/bandwidth/component";
 import { ActivitySpeedQualityBandwidth } from "./components/bandwidth/thresholds";
 import { ISPListItem } from "./components/isp";
 import { ListItemActions } from "./components/list-item-actions";
 import { PingListItem } from "./components/ping";
+import { ResultListItem } from "./components/result";
 import { ServerListItem } from "./components/server";
 import { SpeedListItem } from "./components/speed";
-import { ResultListItem } from "./components/result";
-import { CopySummaryAction, RestartAction, ToggleDetailedViewAction } from "./lib/actions";
+import { CopySummaryAction, HideDetailsAction, RestartAction, ShowDetailsAction } from "./lib/actions";
 import { useDetailedView, useSpeedtest } from "./lib/hooks";
 
 export default function SpeedtestList() {
   const { result, error, isLoading, resultProgress, revalidate } = useSpeedtest();
-  const [isDetailedViewEnabled, toggleIsDetailedViewEnabled] = useDetailedView();
+  const [isDetailedViewEnabled, showDetailedView, hideDetailedView] = useDetailedView();
 
   if (error || result.error) {
     showToast({
@@ -25,14 +25,15 @@ export default function SpeedtestList() {
   const title = isLoading ? "Speedtest running" : "";
   const summaryAction = <CopySummaryAction result={result} />;
   const restartAction = <RestartAction isLoading={isLoading} revalidate={revalidate} />;
-  const toggleDetailsAction = <ToggleDetailedViewAction setDetailedView={toggleIsDetailedViewEnabled} />;
+  const showDetailsAction = <ShowDetailsAction showDetails={showDetailedView} />;
+  const hideDetailsAction = <HideDetailsAction hideDetails={hideDetailedView} />;
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder={title} isShowingDetail={isDetailedViewEnabled}>
       {result.error ? (
         <List.EmptyView icon={Icon.LevelMeter} title={result.error} />
       ) : (
-        <>
+        <List.Section title="Speedtest by Ookla">
           <ISPListItem isp={result.interface} name={result.isp}>
             <ListItemActions
               url={result.result.url}
@@ -40,7 +41,9 @@ export default function SpeedtestList() {
               summary={summaryAction}
               isLoading={isLoading}
               restart={restartAction}
-              toggleViewAction={toggleDetailsAction}
+              isDetailedViewEnabled={isDetailedViewEnabled}
+              showViewAction={showDetailsAction}
+              hideViewAction={hideDetailsAction}
             />
           </ISPListItem>
 
@@ -51,7 +54,9 @@ export default function SpeedtestList() {
               summary={summaryAction}
               isLoading={isLoading}
               restart={restartAction}
-              toggleViewAction={toggleDetailsAction}
+              isDetailedViewEnabled={isDetailedViewEnabled}
+              showViewAction={showDetailsAction}
+              hideViewAction={hideDetailsAction}
             />
           </ServerListItem>
 
@@ -62,7 +67,9 @@ export default function SpeedtestList() {
               summary={summaryAction}
               isLoading={isLoading}
               restart={restartAction}
-              toggleViewAction={toggleDetailsAction}
+              isDetailedViewEnabled={isDetailedViewEnabled}
+              showViewAction={showDetailsAction}
+              hideViewAction={hideDetailsAction}
             />
           </PingListItem>
 
@@ -78,7 +85,9 @@ export default function SpeedtestList() {
               summary={summaryAction}
               isLoading={isLoading}
               restart={restartAction}
-              toggleViewAction={toggleDetailsAction}
+              isDetailedViewEnabled={isDetailedViewEnabled}
+              showViewAction={showDetailsAction}
+              hideViewAction={hideDetailsAction}
             />
           </SpeedListItem>
 
@@ -94,7 +103,9 @@ export default function SpeedtestList() {
               summary={summaryAction}
               isLoading={isLoading}
               restart={restartAction}
-              toggleViewAction={toggleDetailsAction}
+              isDetailedViewEnabled={isDetailedViewEnabled}
+              showViewAction={showDetailsAction}
+              hideViewAction={hideDetailsAction}
             />
           </SpeedListItem>
 
@@ -102,22 +113,60 @@ export default function SpeedtestList() {
             speed={{ download: result.download, upload: result.upload }}
             activity={ActivitySpeedQualityBandwidth.voiceCall}
             title="Voice Call"
-            icon={Icon.Phone}
+            icon={{ source: Icon.Phone, tintColor: Color.Blue }}
             isLoading={isLoading}
+            actions={
+              <ListItemActions
+                url={result.result.url}
+                sectionClipboard={{ ...result, download: result.download, upload: result.upload }}
+                summary={summaryAction}
+                isLoading={isLoading}
+                restart={restartAction}
+                isDetailedViewEnabled={isDetailedViewEnabled}
+                showViewAction={showDetailsAction}
+                hideViewAction={hideDetailsAction}
+              />
+            }
           />
+
           <ListBandwidthItem
             speed={{ download: result.download, upload: result.upload }}
             activity={ActivitySpeedQualityBandwidth.videoCall}
             title="Video Call"
-            icon={Icon.Video}
+            icon={{ source: Icon.Video, tintColor: Color.Blue }}
             isLoading={isLoading}
+            actions={
+              <ListItemActions
+                url={result.result.url}
+                sectionClipboard={{ ...result, download: result.download, upload: result.upload }}
+                summary={summaryAction}
+                isLoading={isLoading}
+                restart={restartAction}
+                isDetailedViewEnabled={isDetailedViewEnabled}
+                showViewAction={showDetailsAction}
+                hideViewAction={hideDetailsAction}
+              />
+            }
           />
+
           <ListBandwidthItem
             speed={{ download: result.download, upload: result.upload }}
             activity={ActivitySpeedQualityBandwidth.stream}
             title="Streaming"
-            icon={Icon.GameController}
+            icon={{ source: Icon.Livestream, tintColor: Color.Blue }}
             isLoading={isLoading}
+            actions={
+              <ListItemActions
+                url={result.result.url}
+                sectionClipboard={{ ...result, download: result.download, upload: result.upload }}
+                summary={summaryAction}
+                isLoading={isLoading}
+                restart={restartAction}
+                isDetailedViewEnabled={isDetailedViewEnabled}
+                showViewAction={showDetailsAction}
+                hideViewAction={hideDetailsAction}
+              />
+            }
           />
 
           <ResultListItem speedtestResult={result} isLoading={isLoading}>
@@ -127,10 +176,12 @@ export default function SpeedtestList() {
               summary={summaryAction}
               isLoading={isLoading}
               restart={restartAction}
-              toggleViewAction={toggleDetailsAction}
+              isDetailedViewEnabled={isDetailedViewEnabled}
+              showViewAction={showDetailsAction}
+              hideViewAction={hideDetailsAction}
             />
           </ResultListItem>
-        </>
+        </List.Section>
       )}
     </List>
   );

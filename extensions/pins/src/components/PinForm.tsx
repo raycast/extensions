@@ -293,8 +293,8 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
             ? (values.url as string).startsWith("/") || (values.url as string).startsWith("~")
               ? { fileIcon: values.url as string }
               : (values.url as string).match(/^[a-zA-Z0-9]*?:.*/g)
-              ? getFavicon(values.url as string)
-              : Icon.Terminal
+                ? getFavicon(values.url as string)
+                : Icon.Terminal
             : iconMap["Minus"];
 
           return (
@@ -306,8 +306,8 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
                 icon in iconMap
                   ? { source: iconMap[icon], tintColor: values.iconColor as string }
                   : icon == "Favicon / File Icon"
-                  ? urlIcon
-                  : iconMap["Minus"]
+                    ? urlIcon
+                    : iconMap["Minus"]
               }
             />
           );
@@ -340,16 +340,20 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
           title="Open With"
           id="openWithField"
           info="The application to open the pin with"
-          defaultValue={pin ? pin.application : undefined}
-          value={values.application ? (values.application as string) : undefined}
+          value={values.application ? (values.application as string) : "None"}
           onChange={(value) => {
             setValues({ ...values, application: value });
           }}
         >
           <Form.Dropdown.Item key="None" title="None" value="None" icon={Icon.Minus} />
-          {applications.map((app) => {
+          {applications.map((app, idx) => {
             return (
-              <Form.Dropdown.Item key={app.name} title={app.name} value={app.path} icon={{ fileIcon: app.path }} />
+              <Form.Dropdown.Item
+                key={`app.name${idx}`}
+                title={app.name}
+                value={app.path}
+                icon={{ fileIcon: app.path }}
+              />
             );
           })}
         </Form.Dropdown>
