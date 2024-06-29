@@ -17,10 +17,25 @@
       "mode": "view"
     },
     {
-      "name": "index",
-      "title": "Create SVG Rectangle",
+      "name": "custom-rectangle",
+      "title": "Create SVG rectangle using pixels",
+      "mode": "view",
       "description": "Create SVG Rectangle based on pixel values.",
-      "mode": "view"
+      "arguments": [
+        {
+          "name": "width",
+          "type": "text",
+          "placeholder": "300",
+          "required": true
+        },
+        {
+          "name": "height",
+          "type": "text",
+
+          "placeholder": "200",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {

@@ -104,8 +104,8 @@ const createSvgItems = (rawSvgStrings: string[], paddedSvgStrings: string[]): Sv
     rawSvg: svg,
     previewSvg: encodeSvgToBase64(paddedSvgStrings[index]),
   }));
-  const combinedSvg = generateCombinedSvgString(rawItems, 40);
-  return [...rawItems, { id: rawItems.length, rawSvg: combinedSvg, previewSvg: encodeSvgToBase64(combinedSvg) }];
+  generateCombinedSvgString(rawItems, 40);
+  return rawItems; // Remove the combined SVG item from rendering
 };
 
 const encodeSvgToBase64 = (svg: string): string => {
@@ -182,7 +182,7 @@ export default function Command() {
               <Action
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                 title="Copy All SVGs"
-                onAction={() => copyCombinedSvgToClipboard(data!.slice(0, -1), baseSize * gridScale[5])}
+                onAction={() => copyCombinedSvgToClipboard(data!, baseSize * gridScale[5])}
               />
               <Action
                 shortcut={{ modifiers: ["cmd"], key: "t" }}
