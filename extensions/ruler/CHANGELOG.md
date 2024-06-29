@@ -1,5 +1,11 @@
 # Ruler Changelog
 
+## [Improvements] - 2024-06-29
+
+- Remove drag to measure feature and replaced it with click to measure.
+- Added measured distance to the tooltip.
+- Press ESC to reset Ruler
+
 ## [Improvements] - 2024-05-17
 
 - Added coordinates

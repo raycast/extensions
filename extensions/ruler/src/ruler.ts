@@ -12,7 +12,7 @@ export default async function command() {
     }
 
     await Clipboard.copy(distance);
-    await showToast({ style: Toast.Style.Success, title: "Copied distance to clipboard" });
+    await showToast({ style: Toast.Style.Success, title: `Distance of ${distance} successfully copied to clipboard` });
   } catch (e) {
     await showToast({ style: Toast.Style.Failure, title: "Failed to calculate distance" });
   }
