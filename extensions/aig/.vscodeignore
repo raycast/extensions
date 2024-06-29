@@ -1,0 +1,4 @@
+.aig
+.backup
+node_modules
+dist

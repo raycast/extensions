@@ -1,0 +1,74 @@
+{
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"name": "aig",
+	"title": "AiG",
+	"version": "0.1",
+	"description": "AiG is integration AI Agents into software development",
+	"license": "MIT",
+	"keywords": [
+		"aig",
+		"ai",
+		"llm"
+	],
+	"categories": [
+		"Developer Tools",
+		"Productivity"
+	],
+	"access": "private",
+	"icon": "icons/main.png",
+	"author": "petrhrabina",
+	"commands": [
+		{
+			"name": "menu",
+			"title": "Menu",
+			"description": "Main menu for AiG",
+			"mode": "menu-bar",
+			"icon": "icons/status/info.png",
+			"interval": "1m"
+		},
+		{
+			"name": "extractor",
+			"title": "Extractor",
+			"description": "Extract data",
+			"icon": "icons/status/danger.png",
+			"mode": "no-view"
+		},
+		{
+			"name": "ai",
+			"title": "AI Worker",
+			"description": "AiG call AI Worker",
+			"icon": "icons/status/warning.png",
+			"mode": "view"
+		}
+	],
+	"dependencies": {
+		"@raycast/api": "^1.77.3",
+		"@raycast/utils": "^1.15.0",
+		"colorjs.io": "^0.4.5",
+		"raycast-cross-extension": "^0.1.0"
+	},
+	"devDependencies": {
+		"@jest/types": "^29.6.3",
+		"@raycast/eslint-config": "^1.0.8",
+		"@types/jest": "^29.5.12",
+		"@types/node": "^20.10.1",
+		"@types/react": "^18.2.39",
+		"eslint": "^8.54.0",
+		"eslint-formatter-stylish": "^8.40.0",
+		"jest": "^29.7.0",
+		"prettier": "^3.1.0",
+		"react": "^18.2.0",
+		"ts-jest": "^29.1.5",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.3.2"
+	},
+	"scripts": {
+		"start": "npm run lint:fix && npm run test && npm run dev",
+		"build": "ray build -e dist",
+		"dev": "ray develop",
+		"lint": "ray lint",
+		"lint:fix": "ray lint --fix",
+		"publish": "npx @raycast/api@latest publish",
+		"test": "jest"
+	}
+}

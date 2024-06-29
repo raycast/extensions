@@ -1,0 +1,28 @@
+{
+	"$schema": "https://json.schemastore.org/tsconfig",
+	"include": ["src/**/*", "raycast-env.d.ts", "__tests__"],
+	"compilerOptions": {
+		"lib": ["ES2023"],
+		"module": "commonjs",
+		"target": "ES2022",
+		"strict": true,
+		"isolatedModules": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"jsx": "react-jsx",
+		"resolveJsonModule": true,
+		"baseUrl": ".",
+		"paths": {
+			"components/*": ["./src/components/*"],
+			"services/*": ["./src/services/*"],
+			"models/*": ["./src/models/*"],
+			"providers/*": ["./src/providers/*"],
+			"utils/*": ["./src/utils/*"],
+			"tests/*": ["./__tests__/*"],
+			"mocks/*": ["./__tests__/mocks/*"],
+			"interfaces/*": ["./src/interfaces/*"],
+			"types/*": ["./src/types/*"]
+		}
+	}
+}
