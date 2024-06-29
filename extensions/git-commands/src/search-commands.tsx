@@ -55,8 +55,8 @@ export default function Command() {
     saveAliases(aliases).then(() => {
       showToast(
         alias.pin
-          ? { title: "Unpin", message: alias.name + " is now pinned" }
-          : { title: "Pinned", message: alias.name + " is no longer pinned" },
+          ? { title: "Unpin", message: alias.name + " is no longer pinned" }
+          : { title: "Pinned", message: alias.name + " is now pinned" },
       );
     });
   };
@@ -78,6 +78,15 @@ export default function Command() {
     );
   };
 
+  const commandKeywords = (command: string) =>
+    command
+      .replace(/[^a-zA-Z0-9- ]/g, " ")
+      .replace(/\bgit\b/g, "")
+      .replace(/--/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .split(" ");
+
   const Item = ({ alias, hidePin }: { alias: Alias; hidePin?: boolean }) => {
     const { name, command, type, description, pin = false, recent = false } = alias;
 
@@ -94,7 +103,7 @@ export default function Command() {
         title={name}
         subtitle={{ value: command, tooltip: command }}
         detail={<List.Item.Detail markdown={detail} />}
-        keywords={[description, command]}
+        keywords={[command, ...commandKeywords(command)]}
         accessories={[
           ...(pin && !hidePin
             ? [{ icon: { source: Icon.Tack, ...(isPinColored && { tintColor: Color.Yellow }) } }]
@@ -143,7 +152,7 @@ export default function Command() {
                 shortcut={Keyboard.Shortcut.Common.RemoveAll}
               />
             )}
-            <Action icon={Icon.Gear} title="CahcColors in Preferences" onAction={openCommandPreferences} />
+            <Action icon={Icon.Gear} title="Change Colors in Preferences" onAction={openCommandPreferences} />
           </ActionPanel>
         }
       />
@@ -151,11 +160,7 @@ export default function Command() {
   };
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search command, description or alias"
-      isShowingDetail={showDetails}
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search commands or aliases" isShowingDetail={showDetails}>
       <List.Section title="Pinned" subtitle={data.pins.length > maxPins ? `${data.pins.length}` : ""}>
         {data.pins.slice(0, maxPins).map((alias) => (
           <Item key={alias.name} alias={alias} hidePin />
