@@ -78,15 +78,16 @@ export default function Command() {
     );
   };
 
-  const commandKeywords = (command: string) =>
-    command
+  const toKeyword = (word: string) => {
+    const clean = word
       .replace(/[^a-zA-Z0-9- ]/g, " ")
-      .replace(/\bgit\b/g, "")
-      .replace(/--/g, " ")
       .replace(/\s+/g, " ")
-      .trim()
-      .split(" ");
+      .trim();
 
+    if (!clean) return [];
+
+    return [...new Set([clean, clean.replace(/--/g, "")])];
+  };
   const Item = ({ alias, hidePin }: { alias: Alias; hidePin?: boolean }) => {
     const { name, command, type, description, pin = false, recent = false } = alias;
 
@@ -103,7 +104,7 @@ export default function Command() {
         title={name}
         subtitle={{ value: command, tooltip: command }}
         detail={<List.Item.Detail markdown={detail} />}
-        keywords={[command, ...commandKeywords(command)]}
+        keywords={[...description.split(" "), ...command.split(" ").map(toKeyword).flat()]}
         accessories={[
           ...(pin && !hidePin
             ? [{ icon: { source: Icon.Tack, ...(isPinColored && { tintColor: Color.Yellow }) } }]
