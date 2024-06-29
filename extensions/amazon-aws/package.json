@@ -154,7 +154,7 @@
     "@aws-sdk/client-ec2": "^3.216.0",
     "@aws-sdk/client-ecr": "^3.216.0",
     "@aws-sdk/client-ecs": "^3.216.0",
-    "@aws-sdk/client-glue": "^3.599.0",
+    "@aws-sdk/client-glue": "^3.607.0",
     "@aws-sdk/client-lambda": "^3.216.0",
     "@aws-sdk/client-s3": "^3.216.0",
     "@aws-sdk/client-secrets-manager": "^3.226.0",
