@@ -160,7 +160,11 @@ export default function Command() {
   };
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search commands or aliases" isShowingDetail={showDetails}>
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search command, description or alias"
+      isShowingDetail={showDetails}
+    >
       <List.Section title="Pinned" subtitle={data.pins.length > maxPins ? `${data.pins.length}` : ""}>
         {data.pins.slice(0, maxPins).map((alias) => (
           <Item key={alias.name} alias={alias} hidePin />
