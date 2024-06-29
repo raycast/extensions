@@ -12,8 +12,7 @@ export enum Shell {
   FISH = "Fish",
 }
 
-export const shellTags = [
-  { title: "All", value: "All", icon: Icon.Tag },
+export const allShellTags = [
   { title: Shell.ZSH, value: Shell.ZSH, icon: "zsh.png" },
   { title: Shell.BASH, value: Shell.BASH, icon: "bash.png" },
   { title: Shell.FISH, value: Shell.FISH, icon: "fish.png" },

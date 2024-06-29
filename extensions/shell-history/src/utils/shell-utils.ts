@@ -3,7 +3,7 @@ import path from "path";
 import os from "os";
 import readLastLines from "read-last-lines";
 import { maxLines, removeDuplicates } from "../types/preferences";
-import { captureException, Icon, open, showHUD } from "@raycast/api";
+import { captureException, Icon, open, showHUD, trash } from "@raycast/api";
 import { ITERM2, TERMINAL } from "./constants";
 import { runAppleScript } from "@raycast/utils";
 import shellQuote from "shell-quote";
@@ -15,6 +15,16 @@ export const isEmpty = (string: string | null | undefined) => {
 export const zshHistoryFilePath = path.join(os.homedir(), ".zsh_history");
 export const bashHistoryFilePath = path.join(os.homedir(), ".bash_history");
 export const fishHistoryFilePath = path.join(os.homedir(), ".local/share/fish/fish_history");
+
+export async function clearShellHistory(shell: Shell) {
+  if (shell === Shell.ZSH) {
+    await trash(zshHistoryFilePath);
+  } else if (shell === Shell.BASH) {
+    await trash(bashHistoryFilePath);
+  } else if (shell === Shell.FISH) {
+    await trash(fishHistoryFilePath);
+  }
+}
 
 export const getShellIcon = (shell: Shell) => {
   switch (shell) {
@@ -29,51 +39,74 @@ export const getShellIcon = (shell: Shell) => {
   }
 };
 export const getShellHistoryFromFiles = async (shell: Shell, maxLineCount: number = parseInt(maxLines, 10)) => {
-  let shellHistoryFilePath;
-
+  let history: ShellHistory[] = [];
   switch (shell) {
-    case Shell.ZSH:
-      shellHistoryFilePath = zshHistoryFilePath;
+    case Shell.ZSH: {
+      const commands = await readLastLines.read(zshHistoryFilePath, maxLineCount);
+      history = parseZshShellHistory(commands, shell);
       break;
-    case Shell.BASH:
-      shellHistoryFilePath = bashHistoryFilePath;
+    }
+    case Shell.BASH: {
+      const commands = await readLastLines.read(bashHistoryFilePath, maxLineCount);
+      history = parseBashShellHistory(commands, shell);
       break;
-    case Shell.FISH:
-      shellHistoryFilePath = fishHistoryFilePath;
+    }
+    case Shell.FISH: {
+      const commands = await readLastLines.read(fishHistoryFilePath, maxLineCount * 2);
+      history = parseFishShellHistory(commands, shell).reverse();
       break;
+    }
     default:
-      shellHistoryFilePath = "";
+      break;
   }
-  if (shell === Shell.ZSH || shell === Shell.BASH) {
-    const commands = await readLastLines.read(shellHistoryFilePath, maxLineCount);
-    const shellHistoryArray = parseShellHistory(commands, shell);
-    return removeDuplicates ? removeArrayDuplicates(shellHistoryArray.reverse()) : shellHistoryArray.reverse();
-  } else {
-    const commands = await readLastLines.read(shellHistoryFilePath, maxLineCount * 2);
-    return parseFishShellHistory(commands, shell).reverse();
-  }
+  return removeDuplicates ? removeArrayDuplicates(history.reverse()) : history.reverse();
 };
 
-function parseShellHistory(content: string, shell: Shell): ShellHistory[] {
+function parseZshShellHistory(content: string, shell: Shell): ShellHistory[] {
+  const history: ShellHistory[] = [];
+  let commandBuffer: string = "";
+  let timestamp: number | undefined = undefined;
+
+  const lines = content.split("\n").filter((line) => line.trim() !== "");
+  lines.forEach((line) => {
+    const match = line.match(/^:\s*(\d+):\d+;(.*)$/);
+
+    if (match) {
+      if (commandBuffer) {
+        history.push({
+          command: commandBuffer.trim(),
+          timestamp: timestamp,
+          shell: shell,
+        });
+      }
+      timestamp = parseInt(match[1], 10) * 1000;
+      commandBuffer = match[2];
+    } else {
+      commandBuffer += "\n" + line;
+    }
+  });
+
+  if (commandBuffer) {
+    history.push({
+      command: commandBuffer.trim(),
+      timestamp: timestamp,
+      shell: shell,
+    });
+  }
+
+  return history;
+}
+
+function parseBashShellHistory(content: string, shell: Shell): ShellHistory[] {
   const history: ShellHistory[] = [];
   const commands = content.split("\n").filter((line) => line.trim() !== "");
 
   commands.forEach((line) => {
-    const match = line.match(/^:\s*(\d+):\d+;(.*)$/);
-    if (match) {
-      const [, timestamp, command] = match;
-      history.push({
-        command: command.trim(),
-        timestamp: parseInt(timestamp, 10) * 1000,
-        shell: shell,
-      });
-    } else {
-      history.push({
-        command: line.trim(),
-        timestamp: undefined,
-        shell: shell,
-      });
-    }
+    history.push({
+      command: line.trim(),
+      timestamp: undefined,
+      shell: shell,
+    });
   });
 
   return history;
@@ -102,7 +135,7 @@ function parseFishShellHistory(content: string, shell: Shell): ShellHistory[] {
     }
   }
 
-  return history;
+  return removeDuplicates ? removeArrayDuplicates(history.reverse()) : history.reverse();
 }
 
 function removeArrayDuplicates(history: ShellHistory[]) {
@@ -197,22 +230,32 @@ end tell
 }
 
 export function extractCliTool(command: string) {
+  let firstCli = undefined;
   try {
     const parsedEntries = shellQuote.parse(command);
     if (parsedEntries.length > 0) {
       const shellCommand = parsedEntries[0];
       if (typeof shellCommand === "string") {
-        return { type: CliToolType.COMMAND, value: shellCommand, icon: Icon.Stars };
+        firstCli = { type: CliToolType.COMMAND, value: shellCommand, icon: Icon.Stars };
       } else if ("op" in shellCommand) {
-        return { type: CliToolType.OP, value: shellCommand.op, icon: Icon.PlusMinusDivideMultiply };
+        firstCli = { type: CliToolType.OP, value: shellCommand.op, icon: Icon.PlusMinusDivideMultiply };
       } else if ("comment" in shellCommand) {
-        return { type: CliToolType.COMMENT, value: shellCommand.comment, icon: Icon.Hashtag };
-      } else {
-        return undefined;
+        firstCli = { type: CliToolType.COMMENT, value: shellCommand.comment, icon: Icon.Hashtag };
       }
     }
+    return { cli: parsedEntries, firstCli: firstCli };
   } catch (e) {
     console.error(e);
   }
-  return undefined;
+  return { cli: [], firstCli: firstCli };
+}
+
+export function parseCli(command: string) {
+  try {
+    const parsedEntries = shellQuote.parse(command);
+    return parsedEntries;
+  } catch (e) {
+    console.error(e);
+  }
+  return [];
 }
