@@ -18,6 +18,13 @@
       "subtitle": "View all media in your Plex Media Server",
       "description": "Show all media in your Plex Media Server",
       "mode": "view"
+    },
+    {
+      "name": "sessions",
+      "title": "Active Sessions",
+      "subtitle": "View all active sessions in your Plex Media Server",
+      "description": "Show all active sessions in your Plex Media Server",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -26,7 +33,7 @@
       "type": "textfield",
       "required": true,
       "title": "Plex Media Server URL",
-      "description": "The URL of your Plex Media Server.",
+      "description": "The URL of your Plex Media Server with the port number",
       "placeholder": "http(s)://yourdomain.com or http(s)://192.168.1.5:324000"
     },
     {

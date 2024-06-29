@@ -1,5 +1,14 @@
 # Brew Changelog
 
+## [Improvements] - 2024-06-24
+
+- Search now includes cask names
+
+## [Improvements] - 2024-06-24
+
+- Move formula and cask info to the metadata panel
+- Dependencies are displayed green if installed
+
 ## [Improvements] - 2024-06-14
 
 - Updated dependencies

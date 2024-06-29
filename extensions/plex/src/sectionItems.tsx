@@ -1,11 +1,18 @@
-import { ActionPanel, List, Action } from "@raycast/api";
+import { ActionPanel, Action, Grid } from "@raycast/api";
 import { useFetch, Response } from "@raycast/utils";
 import React from "react";
+import { useState, useEffect } from "react";
 import { ENDPOINTS, plex_token } from "../utils/constants";
 import { SectionItemsApiResponse } from "../types/types";
-import calculateTime from "../utils/timeCalculator";
+import thumbLinks from "../utils/thumbLinks";
+import { MediaItem } from "./mediaItem";
 
-export function GetSectionItems({ sectionId }: { sectionId: string }) {
+export function GetSectionItems({ sectionId, sectionName }: { sectionId: string; sectionName: string }) {
+  const [searchText, setSearchText] = useState("");
+  const [filteredList, filterList] = useState([]);
+
+  // TODO: Search functionality still not working fix it.
+
   const endpoint = `${ENDPOINTS.librarySections}${sectionId}/all`;
 
   const { data, isLoading } = useFetch(endpoint, {
@@ -15,68 +22,46 @@ export function GetSectionItems({ sectionId }: { sectionId: string }) {
     keepPreviousData: true,
   });
 
+  useEffect(() => {
+    if (Array.isArray(data)) {
+      filterList(
+        data.filter(
+          (item: SectionItemsApiResponse["MediaContainer"]["Metadata"]) =>
+            Array.isArray(item.title) && item.title.some((keyword: string) => keyword.includes(searchText)),
+        ),
+      );
+    }
+  }, [searchText, filteredList, data]);
+
   return (
-    <List isShowingDetail isLoading={isLoading} searchBarPlaceholder="Search..." throttle>
+    <Grid
+      isLoading={isLoading}
+      throttle
+      columns={5}
+      aspectRatio="2/3"
+      inset={Grid.Inset.Large}
+      filtering={false}
+      fit={Grid.Fit.Fill}
+      onSearchTextChange={setSearchText}
+      navigationTitle={sectionName}
+      searchBarPlaceholder={"Search " + sectionName}
+    >
       {Array.isArray(data) &&
         data.map((item: SectionItemsApiResponse["MediaContainer"]["Metadata"]) => (
-          <SectionItem key={item.title} sectionItem={item} />
-        ))}
-    </List>
-  );
-}
-
-function SectionItem({ sectionItem }: { sectionItem: SectionItemsApiResponse["MediaContainer"]["Metadata"] }) {
-  const markdown = `
-|Title| ${sectionItem.title} |
-|--|--|
-| Summary | ${sectionItem.summary} |
-
-`;
-
-  return (
-    <List.Item
-      icon={"🍿"}
-      title={sectionItem.title}
-      subtitle={sectionItem.year.toString()}
-      detail={
-        <List.Item.Detail
-          markdown={markdown}
-          metadata={
-            <List.Item.Detail.Metadata>
-              {sectionItem.year && <List.Item.Detail.Metadata.Label title="Year" text={sectionItem.year.toString()} />}
-
-              {sectionItem.tagline && <List.Item.Detail.Metadata.Label title="Tagline" text={sectionItem.tagline} />}
-
-              {sectionItem.contentRating && (
-                <List.Item.Detail.Metadata.Label title="Content Rating" text={sectionItem.contentRating} />
-              )}
-
-              {sectionItem.rating && (
-                <List.Item.Detail.Metadata.Label title="Rating" text={sectionItem.rating.toString()} />
-              )}
-
-              {sectionItem.audienceRating && (
-                <List.Item.Detail.Metadata.Label title="Audience Rating" text={sectionItem.audienceRating.toString()} />
-              )}
-
-              {sectionItem.studio && <List.Item.Detail.Metadata.Label title="Studio" text={sectionItem.studio} />}
-
-              {sectionItem.duration && (
-                <List.Item.Detail.Metadata.Label title="Duration" text={calculateTime(sectionItem.duration)} />
-              )}
-            </List.Item.Detail.Metadata>
-          }
-        />
-      }
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open in IMDB"
-            url={"https://www.imdb.com/find/?q=" + sectionItem.title.toString()}
+          <Grid.Item
+            key={item.guid}
+            content={{
+              source: thumbLinks({ thumb: item.thumb }),
+            }}
+            title={item.title}
+            actions={
+              <ActionPanel>
+                <Action.Push title="Show Details" target={<MediaItem item={item} />} />
+              </ActionPanel>
+            }
           />
-        </ActionPanel>
-      }
-    />
+        ))}
+    </Grid>
   );
 }
 

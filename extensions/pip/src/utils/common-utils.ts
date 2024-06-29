@@ -15,7 +15,7 @@ export const isNotEmpty = (string: string | null | undefined) => {
   return !isEmpty(string);
 };
 
-export const getPipApp = async () => {
+export const getApps = async () => {
   const browsers: Application[] = [];
   try {
     const browsers_ = await getApplications(TEST_URL);

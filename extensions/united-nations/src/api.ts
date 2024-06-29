@@ -4,7 +4,7 @@ import { XMLParser } from "fast-xml-parser";
 import got from "got";
 import TurndownService from "turndown";
 import { newsFeedUrlDict } from "./constants.js";
-import { NewsType, UnDocument, UnPress, UnNews } from "./types.js";
+import { NewsType, SiteIndex, UnDocument, UnPhoto, UnPress, UnNews, LanguageCode } from "./types.js";
 
 export const fetchUnDocuments = async () => {
   const xml = await got("https://undocs.org/rss/gadocs.xml").text();
@@ -87,4 +87,71 @@ export const fetchUnNewsDetail = async (link: string) => {
 
 export const fetchUnPressDetail = async (link: string) => {
   return fetchDetail(link, ".block-field-block-node-press-body");
+};
+
+export const fetchSiteIndex = async (languageCode: LanguageCode) => {
+  const html = await got(`https://www.un.org/${languageCode}/site-index`).text();
+  const $ = load(html);
+  $("style").remove();
+  $("script").remove();
+  $(".Site-Index-TopNav").remove();
+  const siteIndex: SiteIndex = {};
+
+  if (languageCode === "ar") {
+    const selector = ".panel-collapse";
+    const menu = $(selector + " ul li").get();
+    let currentCategory = "";
+    for (const el of menu) {
+      const element = $(el);
+      if (element.text().at(0) !== currentCategory) {
+        currentCategory = element.text().trim().at(0) as string;
+        siteIndex[currentCategory] = [];
+      }
+      const title = element.text().trim();
+      const link = element.find("a").attr("href") as string;
+      if (title && link) siteIndex[currentCategory].push({ title, link });
+      siteIndex[currentCategory].push();
+    }
+    return siteIndex;
+  }
+
+  const selector = ".field-type-text-with-summary .field-items";
+  const menu = $(["h2", "ul li"].map((tag) => `${selector} ${tag}`).join(",")).get();
+  let currentCategory = "";
+  for (const el of menu) {
+    const element = $(el);
+    // @ts-expect-error: The element has `tagName` property
+    if (el.tagName === "h2") {
+      currentCategory = element.text().trim();
+      siteIndex[currentCategory] = [];
+    } else {
+      const title = element.text().trim();
+      const link = element.find("a").attr("href") as string;
+      if (title && link) siteIndex[currentCategory].push({ title, link });
+    }
+  }
+  return siteIndex;
+};
+
+export const fetchUnPhotos = async (page: number) => {
+  const html = await got(
+    `https://media.un.org/photo/en/latest-photos?${new URLSearchParams({ page: String(page) }).toString()}`,
+  ).text();
+  const $ = load(html);
+  $("style").remove();
+  $("script").remove();
+  const gallery = $(".view-content .media-asset");
+  const photos: UnPhoto[] = [];
+  gallery.each((_, el) => {
+    const card = $(el);
+    const thumbImage = card.find("img").attr("src") as string;
+    const sourceImage = card.find(".ajax-popup-link").attr("data-mfp-src") as string;
+    const pageUrl = card.find(".ajax-popup-link").attr("href") as string;
+    const title = card.find(".h5").text();
+    const datetime = card.find("time").text();
+    if (thumbImage && sourceImage && pageUrl && title && datetime) {
+      photos.push({ thumbImage, sourceImage, pageUrl: "https://media.un.org" + pageUrl, title, datetime });
+    }
+  });
+  return photos;
 };
