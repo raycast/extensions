@@ -67,6 +67,23 @@
       "description": "Your telegram bot api hash",
       "type": "textfield",
       "required": true
+    },
+    {
+      "name": "phone_number",
+      "title": "Phone Number",
+      "placeholder": "+1234567890",
+      "description": "Your telegram phone number",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "password",
+      "title": "Password",
+      "placeholder": "password",
+      "description": "Your telegram 2FA password",
+      "type": "password",
+      "default": "",
+      "required": false
     }
   ],
   "dependencies": {

@@ -6,13 +6,19 @@ import {
   Detail,
   Form,
   getPreferenceValues,
+  launchCommand,
+  LaunchType,
   LocalStorage,
+  openExtensionPreferences,
   PreferenceValues,
+  showHUD,
+  Toast,
   useNavigation,
 } from "@raycast/api";
 import { getSession, returnClient } from "./utils/tgClient";
 import { ClientContext } from "./contexts/clientContext";
 import { setTimeout } from "timers/promises";
+import Preferences from "./preferences";
 
 let loginClient: TelegramClient;
 let sessionKey: string;
@@ -21,15 +27,18 @@ let sessionKey: string;
 })();
 
 export default function LoginForm() {
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [password, setPassword] = useState("");
   const [phoneCode, setPhoneCode] = useState("");
-  const [isCodeSent, setIsCodeSent] = useState(false);
-  const { api_id, api_hash } = getPreferenceValues<PreferenceValues>();
+  const {
+    api_id: apiId,
+    api_hash: apiHash,
+    phone_number: phoneNumber,
+    password,
+  } = getPreferenceValues<PreferenceValues>();
   const [isLoading, setIsLoading] = useState(true);
   const { setGlobalClient } = useContext(ClientContext);
-  const [loggedIn, setLoggedIn] = useState(api_id && api_hash && sessionKey);
+  const [loggedIn, setLoggedIn] = useState(apiId && apiHash && sessionKey);
   const { pop } = useNavigation();
+  const [openPreferences, setOpenPreferences] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -46,6 +55,22 @@ export default function LoginForm() {
     })();
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      if (loginClient) {
+        await sendCodeHandler();
+      }
+    })();
+  }, [loginClient]);
+
+  useEffect(() => {
+    if (loggedIn) {
+      setTimeout(3000).then(() => {
+        pop();
+      });
+    }
+  }, [loggedIn]);
+
   if (isLoading) {
     return <Form isLoading />;
   }
@@ -56,12 +81,11 @@ export default function LoginForm() {
       await loginClient.connect();
       await loginClient.sendCode(
         {
-          apiId: parseInt(api_id),
-          apiHash: api_hash,
+          apiId: parseInt(apiId),
+          apiHash: apiHash,
         },
         phoneNumber
       );
-      setIsCodeSent(true);
     } catch (error) {
       console.error("Error sending code: ", error);
       // You can set an error state here to show the error message on the UI
@@ -72,22 +96,29 @@ export default function LoginForm() {
 
   async function clientStartHandler(): Promise<void> {
     try {
+      setIsLoading(true);
       await loginClient.start({
         phoneNumber,
         password: userAuthParamCallback(password),
         phoneCode: userAuthParamCallback(phoneCode),
         onError: (err) => {
           console.log(err);
+          throw new Error(err.message);
         },
       });
       await LocalStorage.setItem("session", JSON.stringify(loginClient.session.save()));
       await loginClient.sendMessage("me", { message: "You're successfully logged in! Taking you back to homepage" });
-      await setTimeout(3000);
-      pop();
       setLoggedIn(true);
-    } catch (error) {
-      console.error("Error starting client: ", error);
+    } catch (e) {
+      const error = e as Error;
+      if (error.message.includes("Password is empty")) {
+        await showHUD("Password is empty, redirecting you to preferences");
+        console.log("coming here");
+        setOpenPreferences(true);
+      }
       // You can set an error state here to show the error message on the UI
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -98,21 +129,14 @@ export default function LoginForm() {
       });
     };
   }
+  if (openPreferences) {
+    const message = "2FA enabled. Please open the extension preferences to input password";
+    return <Preferences message={message}></Preferences>;
+  }
   return (
     <>
       {loggedIn ? (
         <Detail markdown={`You're successfully logged in!`} />
-      ) : !isCodeSent ? (
-        <Form
-          actions={
-            <ActionPanel>
-              <Action.SubmitForm onSubmit={sendCodeHandler} />
-            </ActionPanel>
-          }
-        >
-          <Form.TextField id="phoneNumber" title="phoneNumber" value={phoneNumber} onChange={setPhoneNumber} />
-          <Form.PasswordField id="password" title="password" value={password} onChange={setPassword} />
-        </Form>
       ) : (
         <Form
           actions={
@@ -121,7 +145,7 @@ export default function LoginForm() {
             </ActionPanel>
           }
         >
-          <Form.TextField id="phoneCode" title="phoneCode" value={phoneCode} onChange={setPhoneCode} />
+          <Form.TextField id="phoneCode" title="Phone Code" value={phoneCode} onChange={setPhoneCode} />
         </Form>
       )}
     </>
