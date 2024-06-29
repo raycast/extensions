@@ -16,8 +16,6 @@ export default function Command() {
   useEffect(() => {
     async function update() {
       const n: Notification[] = await fetchNotifications(configState);
-      // console.log(n.map((n) => n.repository.owner.avatar_url));
-      console.log(n.length);
       setState(n);
     }
     update();
@@ -28,6 +26,7 @@ export default function Command() {
         {state?.map((s) => (
           <MenuBarExtra.Item
             title={s.repository.full_name + "\n" + s.subject.title}
+            subtitle={s.subject.type + "/" + s.reason}
             key={s.id}
             icon={s.repository.owner.avatar_url ?? "command-icon.png"}
             onAction={() => toHtmlUrl(s).then((url) => execAsync(`open ${url}`))}
