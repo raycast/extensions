@@ -20,7 +20,6 @@
 - Secrets Manager: Retrieves secret value in a new Detail navigation and adds extra metadata
 - Cloudformation: Improves the resource switch action
 
-
 ## [Console command] - 2024-06-17
 
 - Adds shortcut login for SSO profiles
