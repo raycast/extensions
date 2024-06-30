@@ -501,7 +501,7 @@ export default function IssueActions({
           <Action.Push
             title="Show Issue Links"
             icon={Icon.Link}
-            target={<IssueAttachments attachments={attachments ?? []} />}
+            target={<IssueAttachments attachments={attachments ?? []} issue={issue} />}
             shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "l" }}
           />
         ) : null}
