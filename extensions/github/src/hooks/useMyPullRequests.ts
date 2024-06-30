@@ -1,3 +1,4 @@
+import { getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { compareDesc, format, subDays } from "date-fns";
 import { uniqBy } from "lodash";
@@ -26,6 +27,9 @@ export function useMyPullRequests(repository: string | null) {
 
       const repositoryFilter = repository ? `repo:${repository}` : "";
 
+      const { includeTeamReviewRequests } = getPreferenceValues<Preferences>();
+      const reviewRequestedQuery = includeTeamReviewRequests ? "review-requested" : "user-review-requested";
+
       const results = await Promise.all(
         [
           `is:pr author:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,
@@ -34,8 +38,8 @@ export function useMyPullRequests(repository: string | null) {
           `is:pr assignee:@me archived:false is:closed ${updatedFilter} ${repositoryFilter}`,
           `is:pr mentions:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,
           `is:pr mentions:@me archived:false is:closed ${updatedFilter} ${repositoryFilter}`,
-          `is:pr review-requested:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,
-          `is:pr review-requested:@me archived:false is:closed ${updatedFilter} ${repositoryFilter}`,
+          `is:pr ${reviewRequestedQuery}:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,
+          `is:pr ${reviewRequestedQuery}:@me archived:false is:closed ${updatedFilter} ${repositoryFilter}`,
           `is:pr reviewed-by:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,
           `is:pr reviewed-by:@me archived:false is:closed ${updatedFilter} ${repositoryFilter}`,
         ].map((query) => github.searchPullRequests({ query, numberOfItems: 20 })),

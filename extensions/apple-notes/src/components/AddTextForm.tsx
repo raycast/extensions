@@ -19,10 +19,6 @@ export default function AddTextForm({ draftValues, noteId }: AddTextFormProps) {
   const { data, isLoading, permissionView } = useNotes();
   const { pop } = useNavigation();
 
-  if (permissionView) {
-    return permissionView;
-  }
-
   const { itemProps, handleSubmit, reset } = useForm<AddTextFormValues>({
     async onSubmit(values) {
       const noteTitle =
@@ -55,6 +51,10 @@ export default function AddTextForm({ draftValues, noteId }: AddTextFormProps) {
       text: FormValidation.Required,
     },
   });
+
+  if (permissionView) {
+    return permissionView;
+  }
 
   return (
     <Form

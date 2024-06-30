@@ -71,6 +71,7 @@ export interface Services {
       digits: number;
       encrypted_seed: string;
       issuer: string;
+      key_derivation_iterations: number | undefined;
       logo: string;
       name: string;
       original_name: string;

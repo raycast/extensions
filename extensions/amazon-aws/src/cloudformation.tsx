@@ -9,7 +9,6 @@ import {
   List,
   showToast,
   Toast,
-  useNavigation,
   Clipboard,
 } from "@raycast/api";
 import {
@@ -24,18 +23,24 @@ import { getErrorMessage, resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
 import { useExports, useStackResources, useStacks } from "./hooks/use-cfn";
 
+enum ResourceType {
+  Stacks = "Stacks",
+  Exports = "Exports",
+}
+type SetResourceType = { setResourceType: (value: ResourceType) => void };
+
 export default function CloudFormation() {
-  const [isExportsEnabled, setExportsEnabled] = useCachedState<boolean>("show", false, {
+  const [resourceType, setResourceType] = useCachedState<ResourceType>("resource-type", ResourceType.Stacks, {
     cacheNamespace: "aws-cfn-exports",
   });
 
-  if (isExportsEnabled) {
-    return <CloudFormationExports setExportsEnabled={setExportsEnabled} />;
+  if (resourceType === ResourceType.Exports) {
+    return <CloudFormationExports {...{ setResourceType }} />;
   }
-  return <CloudFormationStacks setExportsEnabled={setExportsEnabled} />;
+  return <CloudFormationStacks {...{ setResourceType }} />;
 }
 
-const CloudFormationStacks = ({ setExportsEnabled }: { setExportsEnabled: (value: boolean) => void }) => {
+const CloudFormationStacks = ({ setResourceType }: SetResourceType) => {
   const { stacks, error, isLoading, revalidate, pagination } = useStacks();
 
   return (
@@ -85,17 +90,9 @@ const CloudFormationStacks = ({ setExportsEnabled }: { setExportsEnabled: (value
                   <Action.CopyToClipboard title="Copy Stack ID" content={s.StackId || ""} />
                   <Action.CopyToClipboard title="Copy Stack Name" content={s.StackName || ""} />
                 </ActionPanel.Section>
-                <ActionPanel.Section title="Other Resources">
-                  <Action.Push
-                    icon={Icon.Eye}
-                    title={"Show Exports"}
-                    target={
-                      <CloudFormationExports revalidateStacks={revalidate} setExportsEnabled={setExportsEnabled} />
-                    }
-                    onPush={() => setExportsEnabled(true)}
-                    shortcut={{ modifiers: ["ctrl"], key: "e" }}
-                  />
-                </ActionPanel.Section>
+                <AwsAction.SwitchResourceType
+                  {...{ setResourceType, current: ResourceType.Stacks, enumType: ResourceType }}
+                />
               </ActionPanel>
             }
             accessories={[
@@ -153,15 +150,8 @@ const CloudFormationStackResources = ({ stack }: { stack: StackSummary }) => {
   );
 };
 
-const CloudFormationExports = ({
-  revalidateStacks,
-  setExportsEnabled,
-}: {
-  revalidateStacks?: () => void;
-  setExportsEnabled: (value: boolean) => void;
-}) => {
+const CloudFormationExports = ({ setResourceType }: SetResourceType) => {
   const { exports, isLoading, revalidate, error, pagination } = useExports();
-  const { push, pop } = useNavigation();
 
   return (
     <List
@@ -196,22 +186,9 @@ const CloudFormationExports = ({
               <ActionPanel>
                 <Action.CopyToClipboard title="Copy Export Name" content={e.Name || ""} />
                 <Action.CopyToClipboard title="Copy Export Value" content={e.Value || ""} />
-                <ActionPanel.Section title="Resource Types">
-                  <Action
-                    icon={Icon.Eye}
-                    title="Show Stacks"
-                    onAction={() => {
-                      pop();
-                      if (revalidateStacks) {
-                        revalidateStacks();
-                      } else {
-                        push(<CloudFormationStacks setExportsEnabled={setExportsEnabled} />);
-                      }
-                      setExportsEnabled(false);
-                    }}
-                    shortcut={{ modifiers: ["ctrl"], key: "s" }}
-                  />
-                </ActionPanel.Section>
+                <AwsAction.SwitchResourceType
+                  {...{ setResourceType, current: ResourceType.Exports, enumType: ResourceType }}
+                />
               </ActionPanel>
             }
           />

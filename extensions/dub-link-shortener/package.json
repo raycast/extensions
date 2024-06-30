@@ -12,13 +12,15 @@
     "Applications",
     "Web"
   ],
+  "contributors": [
+    "stelo"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "shorten-link",
       "title": "Shorten Link",
-      "subtitle": "Shorten a link with dub.co",
-      "description": "Shorten links with dub.co",
+      "description": "Shorten links from arguments, clipboard or selection with dub.co using workspaces, custom domains, tags etc.",
       "mode": "view",
       "arguments": [
         {
@@ -36,16 +38,14 @@
     {
       "name": "search-links",
       "title": "Search Links",
-      "subtitle": "Search shortened dub.co links",
-      "description": "Search shortened links with dub.co",
+      "description": "Search shortened links with dub.co in different workspaces",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.61.2",
-    "axios": "^1.6.2",
-    "react-dom": "^18.2.0",
-    "react-query": "^3.39.3"
+    "@raycast/utils": "^1.16.0",
+    "axios": "^1.6.2"
   },
   "preferences": [
     {
@@ -54,28 +54,12 @@
       "required": true,
       "title": "API Key",
       "description": "Dub.co API key."
-    },
-    {
-      "name": "projectSlug",
-      "type": "textfield",
-      "required": true,
-      "title": "Project Slug",
-      "description": "Dub.co project slug.",
-      "placeholder": "project-slug"
-    },
-    {
-      "name": "projectDomain",
-      "type": "textfield",
-      "required": true,
-      "title": "Project Domain",
-      "description": "Dub.co project domain.",
-      "placeholder": "dub.co"
     }
   ],
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "18.18.4",
-    "@types/react": "18.2.27",
+    "@types/node": "^20.14.2",
+    "@types/react": "^18.3.3",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"

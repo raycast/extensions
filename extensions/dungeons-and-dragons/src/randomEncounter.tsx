@@ -10,7 +10,7 @@ interface monstersType {
 }
 
 function getMonsterNames(data: index[]): string {
-  if(!data) return "";
+  if (!data) return "";
   const names: string[] = data.map((monster) => monster.name);
   return names.join(", ");
 }
@@ -59,7 +59,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Random
       <Detail
         isLoading={isLoading}
         markdown={
-          (data ?? '') +
+          (data ?? "") +
           `\n ${
             isLoading ? "Generating encounter..." : ""
           }\n --- \n ## Random Encounter parameters: \n - Challenge Level: ${challengeLevel} \n - Location: ${

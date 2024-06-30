@@ -1,5 +1,14 @@
 # Git Commands Changelog
 
+## [Quicklook] - 2024-06-22
+
+- Added quicklook to see command details directly from the list. This can be toggled on or off as needed.
+- Improved readability: aliases are now displayed as main text.
+- A small dot icon is now displayed with the color of the type. You can deactivate it in preferences if you prefer everything more detached.
+- We have changed `Favorite` to `Pin`, which is more intuitive and according to shortcuts `Cmd + Shift + P`.
+- If you have more Pins than are shown based on your preferences, the total number will now be displayed.
+- Fix: You can now correctly limit the total number of favorites or recents through the extension preferences.
+
 ## [Favorites and Recent feature] - 2024-06-11
 
 - Save favorites.

@@ -1,5 +1,11 @@
 # Dub Link Shortener Changelog
 
+## [Improvements] - 2024-06-28
+
+- Search Links: Improved the UX, added metadata and a workspace selection accessory
+- Shorten Links: Added form options for workspace, tags, domain and improved UX
+- Replaced project slug with workspaceId as slug is deprecated now
+- Used React hooks from @raycast/utils and upgraded dependencies
 
 ## [Enhancement: Remove long URL in the list view for clarity] - 2024-02-07
 - Take in urlKey that sets a custom short URL

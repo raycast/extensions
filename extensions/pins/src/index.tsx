@@ -212,7 +212,7 @@ export default function ShowPinsCommand() {
           localData.currentDirectory.name == "Desktop" &&
           localData.selectedFiles.length == 0
         ) ? (
-          <MenuBarExtra.Section title="Quick Pins">
+          <MenuBarExtra.Section title="Quick Pins" key="quickPins">
             <AppQuickPin app={localData.currentApplication} />
             <TextQuickPin />
             <TabQuickPin app={localData.currentApplication} tab={localData.currentTab} />

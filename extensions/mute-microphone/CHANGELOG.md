@@ -1,5 +1,9 @@
 # Mute microphone Changelog
 
+## [Improvements] - 2024-06-23
+
+- Option to choose muted icon color for menubar
+
 ## [Bugfix] - 2024-05-31
 
 - Fix menu bar icon behaviour
