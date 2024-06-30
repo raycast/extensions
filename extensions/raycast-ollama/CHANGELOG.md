@@ -1,6 +1,7 @@
 # raycast-ollama Changelog
 
-## [BugFix] - 2024-06-20
+## [BugFix] - 2024-06-30
+
 - Fixed typo on error code 'Raycast Browser Extensions Needed for This Feature'.
 
 ## [BugFix] - 2024-06-20
