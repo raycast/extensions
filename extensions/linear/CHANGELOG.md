@@ -3,8 +3,8 @@
 ## [Fixes] - {PR_MERGE_DATE}
 
 - [#10856](https://github.com/raycast/extensions/issues/10856): Typeahead search for teams while creating/editing issues and in active cycles command
-- [#8704](https://github.com/raycast/extensions/issues/8704): Assignees missing from Linear issue creation
-- [#13194](https://github.com/raycast/extensions/issues/13194): Allow to add links to issues
+- [#8704](https://github.com/raycast/extensions/issues/8704): Typeahead search for users/assignees/leads in various actions and commands, getting rid of missing assignees issue.
+- [#13194](https://github.com/raycast/extensions/issues/13194): Feature to add links while creating issues and ad-hoc action to add attachments and links while viewing issues.
 
 ## [Improved Notifications] - 2024-06-14
 

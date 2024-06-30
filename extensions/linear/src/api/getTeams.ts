@@ -1,4 +1,4 @@
-import { Cycle, Organization, Project, Team } from "@linear/sdk";
+import { Cycle, Organization, Team } from "@linear/sdk";
 import { getLinearClient } from "./linearClient";
 
 export type TeamResult = Pick<
@@ -15,8 +15,6 @@ export type TeamResult = Pick<
   organization: Pick<Organization, "logoUrl">;
 } & {
   activeCycle?: Pick<Cycle, "id" | "number">;
-} & {
-  projects: { nodes: Project["id"][] };
 };
 
 export async function getTeams(query: string = "") {
@@ -30,11 +28,6 @@ export async function getTeams(query: string = "") {
             name
             icon
             color
-            projects {
-              nodes {
-                id
-              }
-            }
             organization {
               logoUrl
             }
