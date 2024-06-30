@@ -4,11 +4,6 @@ import { PLOI_API_URL } from "./config";
 import { getHeaders } from "./helpers";
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  ploi_api_key: string;
-  ploi_ssh_user: string;
-}
-
 const preferences = getPreferenceValues<Preferences>();
 
 const headers = getHeaders(preferences.ploi_api_key);

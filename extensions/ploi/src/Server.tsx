@@ -12,6 +12,7 @@ import { Site } from "./api/Site";
 import { ISite, SitesList } from "./Site";
 import { useIsMounted } from "./helpers";
 import { PLOI_PANEL_URL } from "./config";
+import { usePromise } from "@raycast/utils";
 
 export const ServersList = () => {
   const [servers, setServers] = useState<IServer[]>([]);
@@ -33,7 +34,8 @@ export const ServersList = () => {
       ));
   };
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingLocal, setIsLoading] = useState(true);
+  const [execute, setExecute] = useState(false);
 
   useEffect(() => {
     LocalStorage.allItems()
@@ -51,32 +53,38 @@ export const ServersList = () => {
       .finally(() => {
         setIsLoading(false);
         if (!isMounted.current) return;
-        Server.getAll().then(async (servers: Array<IServer> | undefined) => {
-          if (!isMounted.current) return;
-          // Add the server list to storage to avoid content flash
-          servers && setServers(servers);
-          await LocalStorage.setItem("ploi-servers", JSON.stringify(servers));
-        });
+        setExecute(true);
       });
   }, []);
 
-  if (!servers?.length && !isLoading) {
-    return (
-      <List>
-        <List.Item
-          title="There are no results to display."
-          accessoryTitle="If you create your first server in ploi.io, it will show up here."
-        />
-      </List>
-    );
-  }
+  const { isLoading: isLoadingPromise, pagination } = usePromise(
+    () => async (options: { page: number }) => {
+      const result = await Server.getAll(options.page + 1);
+      return {
+        data: result.data,
+        hasMore: Boolean(result.links?.next)
+      }
+    }, [], {
+      execute,
+      async onData(servers) {
+        if (!isMounted.current) return;
+        // Add the server list to storage to avoid content flash
+        servers && setServers(servers);
+        await LocalStorage.setItem("ploi-servers", JSON.stringify(servers));
+      },
+    }
+  );
+
+  const isLoading = isLoadingLocal || isLoadingPromise;
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search Servers..."
       onSelectionChange={(serverId) => serverId && fetchAndCacheSites(serverId)}
+      pagination={pagination}
     >
+      {!servers?.length && !isLoading && <List.EmptyView title="There are no results to display." description="If you create your first server in ploi.io, it will show up here." />}
       {servers.map((server: IServer) => {
         const key = `ploi-sites-${server.id.toString()}`;
         const sites = JSON.parse(siteData[key] ?? "[]") as ISite[];
@@ -98,13 +106,20 @@ const ServerListItem = ({
       id={server.id.toString()}
       key={server.id}
       title={server.name}
+      subtitle={server.status}
       icon={{
         source: {
           light: "server.png",
           dark: "server-dark.png",
         },
       }}
-      accessoryTitle={server.ipAddress}
+      accessories={[
+        { tag: server.type },
+        { text: `PHP ${server.phpVersion}` },
+        { text: `MySQL ${server.mysqlVersion}` },
+        {text: server.ipAddress},
+        { date: new Date(server.createdAt) }
+      ]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -156,7 +171,7 @@ const SingleServerView = ({
           key="open-in-ssh"
           title={`Open SSH Connection (${sshUser})`}
           icon={Icon.Terminal}
-          accessoryTitle={`ssh://${sshUser}@${server.ipAddress}`}
+          accessories={[{text: `ssh://${sshUser}@${server.ipAddress}`}]}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
@@ -171,7 +186,7 @@ const SingleServerView = ({
           key="open-in-sftp"
           title={`Open SFTP Connection (${sshUser})`}
           icon={Icon.Terminal}
-          accessoryTitle={`sftp://${sshUser}@${server.ipAddress}`}
+          accessories={[{text: `sftp://${sshUser}@${server.ipAddress}`}]}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
@@ -186,7 +201,7 @@ const SingleServerView = ({
           key="open-in-ploi"
           title="Open in ploi.io"
           icon={Icon.Globe}
-          accessoryTitle="ploi.io"
+          accessories={[{text: "ploi.io"}]}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
@@ -200,7 +215,7 @@ const SingleServerView = ({
           key="copy-ip"
           title="Copy IP Address"
           icon={Icon.Clipboard}
-          accessoryTitle={server.ipAddress}
+          accessories={[{text: server.ipAddress}]}
           actions={
             <ActionPanel>
               <Action.CopyToClipboard
@@ -215,7 +230,7 @@ const SingleServerView = ({
           key="server-id"
           title="Server ID"
           icon={Icon.Document}
-          accessoryTitle={`${server.id}`}
+          accessories={[{text: server.id.toString()}]}
           actions={
             <ActionPanel>
               <Action.CopyToClipboard content={server.id ?? ""} />

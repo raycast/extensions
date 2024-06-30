@@ -2,18 +2,19 @@ import { showToast, Toast } from "@raycast/api";
 import { ISite } from "../Site";
 import { camelCase, mapKeys, sortBy } from "lodash";
 import { IServer } from "../Server";
-import { PLOI_API_URL } from "../config";
+import { PLOI_API_URL, PLOI_PER_PAGE } from "../config";
 import axios, { AxiosError } from "axios";
+import { PaginatedResponse } from "../common/types";
 
 export const Site = {
   async getAll(server: IServer) {
     try {
       const response = await axios.get(
-        `${PLOI_API_URL}/servers/${server.id}/sites?per_page=50`
+        `${PLOI_API_URL}/servers/${server.id}/sites?per_page=${PLOI_PER_PAGE}`
       );
       const siteData = (await response.data) as Sites;
       let sites = siteData?.data ?? [];
-
+      
       // eslint-disable-next-line
       // @ts-expect-error Not sure how to convert Dictionary from lodash to IServer
       sites = sites.map((s) => mapKeys(s, (_, k) => camelCase(k)) as ISite);
@@ -91,6 +92,4 @@ export const Site = {
   },
 };
 
-type Sites = {
-  data: ISite[];
-};
+type Sites = PaginatedResponse<ISite>;
