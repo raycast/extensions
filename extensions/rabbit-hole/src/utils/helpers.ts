@@ -3,7 +3,7 @@ import fs from "fs";
 import https from "https";
 import path from "path";
 import os from "os";
-import { showToast, Toast, Clipboard } from "@raycast/api";
+import { showToast } from "@raycast/api";
 
 // Maintain a reference to the current audio process
 let currentAudioProcess: ChildProcess | null = null;
@@ -15,42 +15,43 @@ export function playRemoteAudio(url: string) {
   // Stop the current audio process if it exists
   if (currentAudioProcess) {
     currentAudioProcess.kill();
-    showToast({title: "Audio playback stopped"});
+    showToast({ title: "Audio playback stopped" });
     return;
   }
 
-  if(!url.includes('https')){
-    showToast({title: "File still downloading... Please try again"})
-    return
+  if (!url.includes("https")) {
+    showToast({ title: "File still downloading... Please try again" });
+    return;
   }
 
-  https.get(url, (response) => {
-    const fileStream = fs.createWriteStream(tempFile);
-    response.pipe(fileStream);
+  https
+    .get(url, (response) => {
+      const fileStream = fs.createWriteStream(tempFile);
+      response.pipe(fileStream);
 
-    fileStream.on("finish", () => {
-      fileStream.close();
-      console.log("Download completed");
-      showToast({title: "Playing audio from the Rabbit Hole"});
+      fileStream.on("finish", () => {
+        fileStream.close();
+        console.log("Download completed");
+        showToast({ title: "Playing audio from the Rabbit Hole" });
 
-      // Play the downloaded file
-      currentAudioProcess = exec(`afplay "${tempFile}"`, (error: ExecException | null) => {
-        if (error) {
-          console.error(`Error playing audio: ${error}`);
-        }
-        // Delete the temporary file after playing
-        fs.unlink(tempFile, (err) => {
-          if (err) console.error(`Error deleting temporary file: ${err}`);
+        // Play the downloaded file
+        currentAudioProcess = exec(`afplay "${tempFile}"`, (error: ExecException | null) => {
+          if (error) {
+            console.error(`Error playing audio: ${error}`);
+          }
+          // Delete the temporary file after playing
+          fs.unlink(tempFile, (err) => {
+            if (err) console.error(`Error deleting temporary file: ${err}`);
+          });
+          // Clear the reference to the process after it finishes
+          currentAudioProcess = null;
         });
-        // Clear the reference to the process after it finishes
-        currentAudioProcess = null;
       });
+    })
+    .on("error", (err) => {
+      console.error(`Error downloading file: ${err}`);
     });
-  }).on("error", (err) => {
-    console.error(`Error downloading file: ${err}`);
-  });
 }
-
 
 export function formatDate(timestamp: string): string {
   const date = new Date(timestamp);

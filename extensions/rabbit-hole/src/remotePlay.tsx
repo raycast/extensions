@@ -10,14 +10,8 @@ const RemotePlay: React.FC<RemotePlayProps> = ({ file }) => {
   if (!file) return null;
 
   const audioFile = RabbitAsset(file as string);
-  console.log(audioFile)
 
-  return (
-    <Action 
-      title="Play Recording" 
-      onAction={() => playRemoteAudio(audioFile)} 
-    />
-  );
+  return <Action title="Play Recording" onAction={() => playRemoteAudio(audioFile)} />;
 };
 
 export default RemotePlay;

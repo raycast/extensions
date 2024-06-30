@@ -17,7 +17,7 @@ interface JournalEntry {
     magicCameraData?: {
       originalImage: {
         url: string;
-      }
+      };
       aiGeneratedImages: {
         url: string;
       }[];
@@ -177,7 +177,7 @@ export default function Command() {
     }
 
     // debugging
-    markdown += `\n\n---\n\n${JSON.stringify(item.data, null, 2)}`;
+    // markdown += `\n\n---\n\n${JSON.stringify(item.data, null, 2)}`;
 
     return (
       <List.Item

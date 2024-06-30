@@ -35,10 +35,8 @@ export default function RabbitAsset(file: string) {
   }
 
   if (!asset.data) {
-    console.log(asset);
     return `asset could not be displayed`;
   }
-
 
   if (["png", "gif", "jpg", "jpeg", "svg", "webp"].includes(assetType)) {
     return `![asset](${asset.data.resources[0]})`;
