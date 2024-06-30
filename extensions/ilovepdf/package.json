@@ -79,6 +79,13 @@
       "subtitle": "iLovePDF",
       "description": "Protects a PDF with a password using iLovePDF API.",
       "mode": "view"
+ },
+    {
+      "name": "add-page-number",
+      "title": "Add Page Number",
+      "subtitle": "iLovePDF",
+      "description": "Add page number to PDF using iLovePDF API.",
+      "mode": "view"
     }
   ],
   "preferences": [
