@@ -1,15 +1,9 @@
-import { List, ActionPanel, Action, getPreferenceValues, showToast, Toast, Application, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, getPreferenceValues, showToast, Toast, Icon, PreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fs from "fs";
 import path from "path";
 import os from "os";
 import simpleGit from "simple-git";
-
-interface Preferences {
-  directory: string;
-  codeEditor: Application;
-  terminalApp: Application;
-}
 
 function expandHomeDir(directory: string): string {
   if (directory.startsWith("~")) {
@@ -48,10 +42,16 @@ async function getSubdirectories(rootDir: string): Promise<string[]> {
   return gitDirectories.filter(Boolean) as string[];
 }
 
-async function getCommits(directory: string): Promise<{ hash: string; message: string; date: string }[]> {
+async function getCommits(
+  directory: string,
+  page: number = 1,
+  perPage: number = 50
+): Promise<{ hash: string; message: string; date: string }[]> {
   const git = simpleGit(directory);
   try {
-    const log = await git.log();
+    const from = (page - 1) * perPage;
+    
+    const log = await git.log(['--max-count', `${perPage}`, '--skip', `${from}`]);
     return log.all.map((commit) => ({
       hash: commit.hash,
       message: commit.message,
@@ -67,12 +67,15 @@ async function getCommits(directory: string): Promise<{ hash: string; message: s
   }
 }
 
+
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<PreferenceValues>();
   const [subdirs, setSubdirs] = useState<string[]>([]);
   const [commits, setCommits] = useState<{ hash: string; message: string; date: string }[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [selectedDir, setSelectedDir] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMoreCommits, setHasMoreCommits] = useState(true);
 
   useEffect(() => {
     async function fetchSubdirs() {
@@ -99,28 +102,44 @@ export default function Command() {
   }, [preferences.directory]);
 
   useEffect(() => {
-    if (!selectedDir) return;
-
-    async function fetchCommits() {
-      try {
-        if (selectedDir) {
-          const commits = await getCommits(selectedDir);
-          setCommits(commits);
-          if (commits.length === 0) {
-            setError("No commits found in this repository.");
-          } else {
-            setError(null);
-          }
-        }
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : String(err);
-        setError(errorMessage);
-        showToast(Toast.Style.Failure, "Error fetching commits", errorMessage);
-      }
+    if (selectedDir) {
+      setCommits([]);
+      setCurrentPage(1);
+      setHasMoreCommits(true);
+      fetchCommits();
     }
-
-    fetchCommits();
   }, [selectedDir]);
+
+  useEffect(() => {
+    if (selectedDir && currentPage > 1) {
+      fetchCommits();
+    }
+  }, [currentPage]);
+
+  async function fetchCommits() {
+    try {
+      if (selectedDir) {
+        const newCommits = await getCommits(selectedDir, currentPage);
+        setCommits((prevCommits) => [...prevCommits, ...newCommits]);
+        setHasMoreCommits(newCommits.length === 50); // Assuming 50 per page
+        if (newCommits.length === 0 && currentPage === 1) {
+          setError("No commits found in this repository.");
+        } else {
+          setError(null);
+        }
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(errorMessage);
+      showToast(Toast.Style.Failure, "Error fetching commits", errorMessage);
+    }
+  }
+
+  const loadMoreCommits = () => {
+    if (hasMoreCommits) {
+      setCurrentPage((prevPage) => prevPage + 1);
+    }
+  };
 
   if (error) {
     return (
@@ -142,9 +161,7 @@ export default function Command() {
             icon={Icon.CodeBlock}
             actions={
               <ActionPanel>
-                {selectedDir && (
-                  <Action title="Back to Repository List" onAction={() => setSelectedDir(null)} icon={Icon.ArrowLeft} />
-                )}
+                <Action title="Back to Repository List" onAction={() => setSelectedDir(null)} icon={Icon.ArrowLeft} />
                 <Action.ShowInFinder title="Open in Finder" path={selectedDir} icon={Icon.Folder} />
                 <Action.CopyToClipboard
                   title="Copy Commit Message"
@@ -155,6 +172,17 @@ export default function Command() {
             }
           />
         ))}
+        {hasMoreCommits && (
+          <List.Item
+            title="Load More"
+            icon={Icon.Download}
+            actions={
+              <ActionPanel>
+                <Action title="Load More Commits" onAction={loadMoreCommits} />
+              </ActionPanel>
+            }
+          />
+        )}
         {commits.length === 0 && (
           <List.EmptyView title="No Commits Found" description="This repository does not have any commits yet." />
         )}
