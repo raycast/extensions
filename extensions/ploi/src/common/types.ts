@@ -1,17 +1,16 @@
 type MetaLink = {
-    url: string | null;
-    label: string;
-    active: boolean;
-
-}
+  url: string | null;
+  label: string;
+  active: boolean;
+};
 export type PaginatedResponse<T> = {
-    data: T[];
-    links: {
-        first: string;
-        last: string;
-        prev: string | null;
-        next: string | null;
-    },
+  data: T[];
+  links: {
+    first: string;
+    last: string;
+    prev: string | null;
+    next: string | null;
+  };
   meta: {
     current_page: number;
     from: number | null;
@@ -21,5 +20,5 @@ export type PaginatedResponse<T> = {
     per_page: number;
     to: number | null;
     total: number;
-  }
-}
+  };
+};

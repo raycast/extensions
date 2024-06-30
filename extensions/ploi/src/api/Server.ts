@@ -12,18 +12,11 @@ export const Server = {
     const sortedServers = sortBy(response?.data, (s) => s.name.toLowerCase()) ?? {};
     return {
       ...response,
-      data: sortedServers
+      data: sortedServers,
     };
   },
 
-  async reboot({
-    serverId,
-    label = "server",
-  }: {
-    serverId: number | string;
-    key?: string;
-    label?: string;
-  }) {
+  async reboot({ serverId, label = "server" }: { serverId: number | string; key?: string; label?: string }) {
     try {
       await axios.post(`${PLOI_API_URL}/servers/${serverId}/restart`);
       await showToast(Toast.Style.Success, `Rebooting ${label}...`);
@@ -34,19 +27,9 @@ export const Server = {
     }
   },
 
-  async restartService({
-    serverId,
-    service,
-    label,
-  }: {
-    serverId: number | string;
-    service: string;
-    label: string;
-  }) {
+  async restartService({ serverId, service, label }: { serverId: number | string; service: string; label: string }) {
     try {
-      await axios.post(
-        `${PLOI_API_URL}/servers/${serverId}/services/${service}/restart`
-      );
+      await axios.post(`${PLOI_API_URL}/servers/${serverId}/services/${service}/restart`);
       await showToast(Toast.Style.Success, `Restarting ${label}...`);
     } catch (error) {
       console.error(error);
@@ -62,17 +45,8 @@ export const Server = {
     } catch (error) {
       const axiosError = (error as AxiosError).response;
 
-      if (
-        axiosError &&
-        axiosError.status === 422 &&
-        axiosError.data &&
-        axiosError.data.errors[0]
-      ) {
-        await showToast(
-          Toast.Style.Failure,
-          "Error",
-          axiosError.data.errors[0]
-        );
+      if (axiosError && axiosError.status === 422 && axiosError.data && axiosError.data.errors[0]) {
+        await showToast(Toast.Style.Failure, "Error", axiosError.data.errors[0]);
         return;
       }
 
@@ -88,13 +62,13 @@ const getServers = async (page: number) => {
 
     const serverData = (await response.data) as ServersResponse;
     const servers = serverData?.data ?? [];
-    
+
     // eslint-disable-next-line
     // @ts-expect-error Not sure how to convert Dictionary from lodash to IServer
     const mappedServers = servers.map((s) => mapKeys(s, (_, k) => camelCase(k)) as IServer);
     return {
       ...serverData,
-      data: mappedServers
+      data: mappedServers,
     };
   } catch (error) {
     const axiosError = (error as AxiosError).response;
@@ -104,7 +78,7 @@ const getServers = async (page: number) => {
       await showToast(
         Toast.Style.Failure,
         "Wrong API key used",
-        "Please remove your API key in the preferences window, and enter a valid one"
+        "Please remove your API key in the preferences window, and enter a valid one",
       );
 
       // Clear anything we have
