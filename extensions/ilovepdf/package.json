@@ -79,6 +79,13 @@
       "subtitle": "iLovePDF",
       "description": "Protects a PDF with a password using iLovePDF API.",
       "mode": "view"
+    },
+    {
+      "name": "add-watermark-to-pdf",
+      "title": "Add Watermark to PDF",
+      "subtitle": "iLovePDF",
+      "description": "Adds watermark to PDF using iLovePDF API.",
+      "mode": "view"
     }
   ],
   "preferences": [
