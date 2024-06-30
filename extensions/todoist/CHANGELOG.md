@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+Completing tasks or other action no longer throw errors if menu bar command is not activated.
+
 ## [Add time to Schedule Task action] - 2024-01-25
 
 It's now possible to specify a time when scheduling a task from the list item.
