@@ -1,12 +1,13 @@
-import { CliToolType, Shell, ShellHistory, Terminal } from "../types/types";
+import { Cli, CliType, Shell, ShellHistory, Terminal } from "../types/types";
 import path from "path";
 import os from "os";
 import readLastLines from "read-last-lines";
 import { maxLines, removeDuplicates } from "../types/preferences";
-import { captureException, Icon, open, showHUD, trash } from "@raycast/api";
+import { captureException, Icon, open, showToast, Toast, trash } from "@raycast/api";
 import { ITERM2, TERMINAL } from "./constants";
 import { runAppleScript } from "@raycast/utils";
 import shellQuote from "shell-quote";
+import { showCustomHud } from "./common-utils";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
@@ -40,26 +41,31 @@ export const getShellIcon = (shell: Shell) => {
 };
 export const getShellHistoryFromFiles = async (shell: Shell, maxLineCount: number = parseInt(maxLines, 10)) => {
   let history: ShellHistory[] = [];
-  switch (shell) {
-    case Shell.ZSH: {
-      const commands = await readLastLines.read(zshHistoryFilePath, maxLineCount);
-      history = parseZshShellHistory(commands, shell);
-      break;
+  try {
+    switch (shell) {
+      case Shell.ZSH: {
+        const commands = await readLastLines.read(zshHistoryFilePath, maxLineCount);
+        history = parseZshShellHistory(commands, shell);
+        break;
+      }
+      case Shell.BASH: {
+        const commands = await readLastLines.read(bashHistoryFilePath, maxLineCount);
+        history = parseBashShellHistory(commands, shell);
+        break;
+      }
+      case Shell.FISH: {
+        const commands = await readLastLines.read(fishHistoryFilePath, maxLineCount * 2);
+        history = parseFishShellHistory(commands, shell).reverse();
+        break;
+      }
+      default:
+        break;
     }
-    case Shell.BASH: {
-      const commands = await readLastLines.read(bashHistoryFilePath, maxLineCount);
-      history = parseBashShellHistory(commands, shell);
-      break;
-    }
-    case Shell.FISH: {
-      const commands = await readLastLines.read(fishHistoryFilePath, maxLineCount * 2);
-      history = parseFishShellHistory(commands, shell).reverse();
-      break;
-    }
-    default:
-      break;
+    return removeDuplicates ? removeArrayDuplicates(history.reverse()) : history.reverse();
+  } catch (e) {
+    console.error(`${shell} ${e}`);
   }
-  return removeDuplicates ? removeArrayDuplicates(history.reverse()) : history.reverse();
+  return history;
 };
 
 function parseZshShellHistory(content: string, shell: Shell): ShellHistory[] {
@@ -77,6 +83,7 @@ function parseZshShellHistory(content: string, shell: Shell): ShellHistory[] {
           command: commandBuffer.trim(),
           timestamp: timestamp,
           shell: shell,
+          cli: parseCliTool(commandBuffer.trim()),
         });
       }
       timestamp = parseInt(match[1], 10) * 1000;
@@ -91,6 +98,7 @@ function parseZshShellHistory(content: string, shell: Shell): ShellHistory[] {
       command: commandBuffer.trim(),
       timestamp: timestamp,
       shell: shell,
+      cli: parseCliTool(commandBuffer.trim()),
     });
   }
 
@@ -106,6 +114,7 @@ function parseBashShellHistory(content: string, shell: Shell): ShellHistory[] {
       command: line.trim(),
       timestamp: undefined,
       shell: shell,
+      cli: parseCliTool(line.trim()),
     });
   });
 
@@ -129,6 +138,7 @@ function parseFishShellHistory(content: string, shell: Shell): ShellHistory[] {
         command: command,
         timestamp: timestamp,
         shell: shell,
+        cli: parseCliTool(command.trim()),
       };
 
       history.push(commandHistory);
@@ -165,9 +175,9 @@ export const runShellCommand = async (command: string, terminal: Terminal) => {
     ret = e;
   }
   if (ret) {
-    await showHUD(`🚨 ${ret}`);
+    await showToast({ title: String(ret), style: Toast.Style.Failure });
   } else {
-    await showHUD(`🚀 Run '${command}' in ${terminal.application.name}`);
+    await showCustomHud(`🚀 Run '${command}' in ${terminal.application.name}`);
   }
 };
 
@@ -229,33 +239,52 @@ end tell
   `;
 }
 
-export function extractCliTool(command: string) {
-  let firstCli = undefined;
-  try {
-    const parsedEntries = shellQuote.parse(command);
-    if (parsedEntries.length > 0) {
-      const shellCommand = parsedEntries[0];
-      if (typeof shellCommand === "string") {
-        firstCli = { type: CliToolType.COMMAND, value: shellCommand, icon: Icon.Stars };
-      } else if ("op" in shellCommand) {
-        firstCli = { type: CliToolType.OP, value: shellCommand.op, icon: Icon.PlusMinusDivideMultiply };
-      } else if ("comment" in shellCommand) {
-        firstCli = { type: CliToolType.COMMENT, value: shellCommand.comment, icon: Icon.Hashtag };
-      }
-    }
-    return { cli: parsedEntries, firstCli: firstCli };
-  } catch (e) {
-    console.error(e);
+export const getCliIcon = (cliType: CliType | undefined) => {
+  switch (cliType) {
+    case CliType.CliTool:
+      return Icon.Stars;
+    case CliType.Operation:
+      return Icon.PlusMinusDivideMultiply;
+    case CliType.Comment:
+      return Icon.Hashtag;
+    default:
+      return Icon.QuestionMark;
   }
-  return { cli: [], firstCli: firstCli };
-}
+};
 
-export function parseCli(command: string) {
+export function parseCliTool(command: string): Cli[] {
   try {
     const parsedEntries = shellQuote.parse(command);
-    return parsedEntries;
+    return parseToCliArray(parsedEntries);
   } catch (e) {
     console.error(e);
   }
   return [];
+}
+
+export function parseToCliArray(arr: (string | { op?: string; comment?: string })[]): Cli[] {
+  return arr.map((item) => {
+    if (typeof item === "string") {
+      return {
+        type: CliType.CliTool,
+        command: item,
+      };
+    } else if (typeof item === "object" && item !== null) {
+      if (item.op) {
+        return {
+          type: CliType.Operation,
+          command: item.op,
+        };
+      } else if (item.comment) {
+        return {
+          type: CliType.Comment,
+          command: item.comment,
+        };
+      }
+    }
+    return {
+      type: CliType.Unknown,
+      command: String(item),
+    };
+  });
 }

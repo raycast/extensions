@@ -1,3 +1,3 @@
 # Shell History
 
-Search shell command history. Supports bash, zsh, and fish.
+Search shell command history. Supports zsh, bash, and fish.

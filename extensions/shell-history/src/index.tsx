@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
-import { Icon, List } from "@raycast/api";
+import { ActionPanel, Icon, List } from "@raycast/api";
 import { useShellHistory } from "./hooks/useShellHistory";
 import { allShellTags, ShellHistory } from "./types/types";
 import { ActionShellCommand } from "./components/action-shell-command";
-import { extractCliTool, getShellIcon, isEmpty } from "./utils/shell-utils";
+import { getCliIcon, getShellIcon } from "./utils/shell-utils";
 import { useShowDetail } from "./hooks/useShowDetail";
+import { ActionOpenPreferences } from "./components/action-open-preferences";
 
 export default function Index() {
   const [shellTag, setShellTag] = useState<string>("All");
@@ -64,7 +65,15 @@ export default function Index() {
         </List.Dropdown>
       }
     >
-      <List.EmptyView icon={Icon.Terminal} title={"No Commands"} />
+      <List.EmptyView
+        icon={Icon.Terminal}
+        title={"No Commands"}
+        actions={
+          <ActionPanel>
+            <ActionOpenPreferences />
+          </ActionPanel>
+        }
+      />
 
       {shellHistory?.map((shell, shellIndex) => {
         return (
@@ -72,7 +81,7 @@ export default function Index() {
             <List.Section key={shell[0].shell + shellIndex} title={shell[0].shell} subtitle={shell.length.toString()}>
               {shell.map((history, index) => {
                 const date = history.timestamp ? new Date(history.timestamp) : undefined;
-                const { cli, firstCli } = extractCliTool(history.command);
+                const firstCli = history.cli?.length > 0 ? history.cli[0] : undefined;
                 return (
                   <List.Item
                     key={`${history.shell}_${index}`}
@@ -90,11 +99,9 @@ export default function Index() {
                                 }
                               : {},
                             {
-                              tag: isEmpty(firstCli?.value) ? history.command : firstCli?.value,
-                              icon: firstCli?.icon,
-                              tooltip: firstCli
-                                ? `${firstCli.type}: ${isEmpty(firstCli?.value) ? history.command : firstCli?.value}`
-                                : "",
+                              tag: firstCli?.command,
+                              icon: getCliIcon(firstCli?.type),
+                              tooltip: firstCli ? `${firstCli.type}: ${firstCli?.command}` : "",
                             },
                             {
                               tag: history.shell,
@@ -109,12 +116,10 @@ export default function Index() {
                         metadata={
                           <List.Item.Detail.Metadata>
                             {date && <List.Item.Detail.Metadata.Label title="Time" text={date?.toLocaleString()} />}
-                            {cli.length > 0 && (
+                            {history.cli?.length > 0 && (
                               <List.Item.Detail.Metadata.TagList title="CLI">
-                                {cli.map((cliTool, index) => {
-                                  return (
-                                    <List.Item.Detail.Metadata.TagList.Item key={index} text={cliTool.toString()} />
-                                  );
+                                {history.cli.map((cliTool, index) => {
+                                  return <List.Item.Detail.Metadata.TagList.Item key={index} text={cliTool.command} />;
                                 })}
                               </List.Item.Detail.Metadata.TagList>
                             )}

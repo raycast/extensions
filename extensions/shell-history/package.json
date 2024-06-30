@@ -92,6 +92,17 @@
       ]
     }
   ],
+  "preferences": [
+    {
+      "title": "Tips",
+      "name": "showTips",
+      "label": "Show Tips",
+      "description": "Show tips after successful execution of action",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.77.3",
     "@raycast/utils": "^1.16.1",

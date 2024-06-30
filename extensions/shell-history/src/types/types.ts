@@ -1,9 +1,22 @@
-import { Application, Icon } from "@raycast/api";
+import { Application } from "@raycast/api";
+
+export enum CliType {
+  CliTool = "CliTool",
+  Operation = "Operation",
+  Comment = "Comment",
+  Unknown = "Unknown",
+}
+
+export interface Cli {
+  type: CliType;
+  command: string;
+}
 
 export interface ShellHistory {
   command: string;
   timestamp: number | undefined;
   shell: Shell;
+  cli: Cli[];
 }
 
 export enum Shell {
@@ -21,16 +34,4 @@ export const allShellTags = [
 export interface Terminal {
   application: Application;
   supportInput: boolean;
-}
-
-export enum CliToolType {
-  COMMAND = "Command",
-  OP = "Operation",
-  COMMENT = "Comment",
-}
-
-export interface CliTool {
-  type: string;
-  value: string;
-  icon: Icon;
 }
