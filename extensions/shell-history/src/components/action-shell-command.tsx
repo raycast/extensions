@@ -15,7 +15,7 @@ export function ActionShellCommand(props: {
   shell: Shell;
   shellCommand: string;
   cliTool: Cli | undefined;
-  mutate: MutatePromise<ShellHistory[][]>;
+  mutate: MutatePromise<ShellHistory[][] | undefined, ShellHistory[][] | undefined>;
   showDetail: boolean;
   showDetailMutate: MutatePromise<number | undefined, number | undefined>;
 }) {

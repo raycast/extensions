@@ -9,10 +9,6 @@ import { runAppleScript } from "@raycast/utils";
 import shellQuote from "shell-quote";
 import { showCustomHud } from "./common-utils";
 
-export const isEmpty = (string: string | null | undefined) => {
-  return !(string != null && String(string).length > 0);
-};
-
 export const zshHistoryFilePath = path.join(os.homedir(), ".zsh_history");
 export const bashHistoryFilePath = path.join(os.homedir(), ".bash_history");
 export const fishHistoryFilePath = path.join(os.homedir(), ".local/share/fish/fish_history");
@@ -39,34 +35,39 @@ export const getShellIcon = (shell: Shell) => {
       return "shell-history-icon.png";
   }
 };
-export const getShellHistoryFromFiles = async (shell: Shell, maxLineCount: number = parseInt(maxLines, 10)) => {
-  let history: ShellHistory[] = [];
+
+export async function getShellHistoryZshFromFiles(maxLineCount: number = parseInt(maxLines, 10)) {
   try {
-    switch (shell) {
-      case Shell.ZSH: {
-        const commands = await readLastLines.read(zshHistoryFilePath, maxLineCount);
-        history = parseZshShellHistory(commands, shell);
-        break;
-      }
-      case Shell.BASH: {
-        const commands = await readLastLines.read(bashHistoryFilePath, maxLineCount);
-        history = parseBashShellHistory(commands, shell);
-        break;
-      }
-      case Shell.FISH: {
-        const commands = await readLastLines.read(fishHistoryFilePath, maxLineCount * 2);
-        history = parseFishShellHistory(commands, shell).reverse();
-        break;
-      }
-      default:
-        break;
-    }
+    const commands = await readLastLines.read(zshHistoryFilePath, maxLineCount);
+    const history = parseZshShellHistory(commands, Shell.ZSH);
     return removeDuplicates ? removeArrayDuplicates(history.reverse()) : history.reverse();
   } catch (e) {
-    console.error(`${shell} ${e}`);
+    console.error(`${Shell.ZSH} ${e}`);
   }
-  return history;
-};
+  return [];
+}
+
+export async function getShellHistoryBashFromFiles(maxLineCount: number = parseInt(maxLines, 10)) {
+  try {
+    const commands = await readLastLines.read(bashHistoryFilePath, maxLineCount);
+    const history = parseBashShellHistory(commands, Shell.BASH);
+    return removeDuplicates ? removeArrayDuplicates(history.reverse()) : history.reverse();
+  } catch (e) {
+    console.error(`${Shell.BASH} ${e}`);
+  }
+  return [];
+}
+
+export async function getShellHistoryFishFromFiles(maxLineCount: number = parseInt(maxLines, 10)) {
+  try {
+    const commands = await readLastLines.read(fishHistoryFilePath, maxLineCount);
+    const history = parseFishShellHistory(commands, Shell.FISH);
+    return removeDuplicates ? removeArrayDuplicates(history.reverse()) : history.reverse();
+  } catch (e) {
+    console.error(`${Shell.FISH} ${e}`);
+  }
+  return [];
+}
 
 function parseZshShellHistory(content: string, shell: Shell): ShellHistory[] {
   const history: ShellHistory[] = [];
