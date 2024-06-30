@@ -33,10 +33,10 @@ Effortlessly navigate through your Git repositories and view commit history with
 ## Screenshots
 
 ### Directory Explorer
-![Directory Explorer](metadata/View-Projects.png)
+![Directory Explorer](metadata/view-projects.png)
 
 ### View Commits
-![View Commits](metadata/View-Commits.png)
+![View Commits](metadata/view-commits.png)
 
 ## Dependencies
 

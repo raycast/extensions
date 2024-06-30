@@ -45,13 +45,13 @@ async function getSubdirectories(rootDir: string): Promise<string[]> {
 async function getCommits(
   directory: string,
   page: number = 1,
-  perPage: number = 50
+  perPage: number = 50,
 ): Promise<{ hash: string; message: string; date: string }[]> {
   const git = simpleGit(directory);
   try {
     const from = (page - 1) * perPage;
-    
-    const log = await git.log(['--max-count', `${perPage}`, '--skip', `${from}`]);
+
+    const log = await git.log(["--max-count", `${perPage}`, "--skip", `${from}`]);
     return log.all.map((commit) => ({
       hash: commit.hash,
       message: commit.message,
@@ -66,7 +66,6 @@ async function getCommits(
     throw error;
   }
 }
-
 
 export default function Command() {
   const preferences = getPreferenceValues<PreferenceValues>();
