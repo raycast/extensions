@@ -507,7 +507,7 @@ export default function IssueActions({
         ) : null}
 
         <Action.Push
-          title="Add Attachments"
+          title="Add Attachments and Links"
           icon={Icon.NewDocument}
           target={<IssueAttachmentsForm issue={issue} />}
           shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "a" }}

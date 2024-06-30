@@ -89,6 +89,7 @@ export function IssueAttachmentsForm({ issue: { id: issueId, title, identifier }
           <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.NewDocument} title="Attach" />
         </ActionPanel>
       }
+      navigationTitle="Add Attachments and Links"
     >
       <Form.Description title="Issue" text={`[${identifier}] ${title}`} />
       <Form.FilePicker title="Attachment" {...itemProps.attachments} />
