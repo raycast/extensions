@@ -23,3 +23,10 @@ export const ACLs = {
     upgrade: "Upgrade Existing Servers",
     vke: "Manage Vultr Kubernetes Engines"
 }
+
+export const VULTR_ICON = "vultr.png";
+const VULTR_DASH = "https://my.vultr.com/";
+export const VULTR_LINKS = {
+    bandwidthUsage: VULTR_DASH + "billing/#bandwidthusage",
+    settingsprofile: VULTR_DASH + "settings/#settingsprofile"
+}

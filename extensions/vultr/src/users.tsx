@@ -4,24 +4,25 @@ import { AddUser, type UpdateUser, User } from "./lib/types/user";
 import { FormValidation, useForm } from "@raycast/utils";
 import useVultr from "./lib/hooks/useVultr";
 import { ACLs } from "./lib/constants";
+import { useState } from "react";
 
 export default function Users() {
     const { isLoading, data, pagination, revalidate } = useVultrPaginated<User>("users");
     
     return <List isLoading={isLoading} pagination={pagination} isShowingDetail>
         {!isLoading && !data.length && <List.EmptyView title="No Users" description="Add new users with full or limited access to your account." actions={<ActionPanel>
-            <Action.Push title="Add New User" icon={Icon.AddPerson} target={<AddNewUser onUserAdded={revalidate} />} />
+            <Action.Push title="Add New User" icon={Icon.AddPerson} shortcut={{ modifiers: ["cmd"], key: "n" }} target={<AddNewUser onUserAdded={revalidate} />} />
         </ActionPanel>} />}
         {data.map(user => <List.Item key={user.id} icon={Icon.Person} title={user.name} subtitle={user.email} accessories={[
             { tag:  { value: "API", color: user.api_enabled ? Color.Green : Color.Red }}]}
             detail={<List.Item.Detail metadata={<List.Item.Detail.Metadata>
                 <List.Item.Detail.Metadata.TagList title="ACLs">
-                    {user.acls.map(acl => <List.Item.Detail.Metadata.TagList.Item key={acl} text={acl} />)}
+                    {user.acls.map(acl => <List.Item.Detail.Metadata.TagList.Item key={acl} text={ACLs[acl as keyof typeof ACLs]} />)}
                 </List.Item.Detail.Metadata.TagList>
             </List.Item.Detail.Metadata>} />} actions={<ActionPanel>
                 <Action.Push title="Update User" icon={Icon.Pencil} target={<UpdateUser user={user} onUserUpdated={revalidate} />} />
                 <ActionPanel.Section>
-                <Action.Push title="Add New User" icon={Icon.AddPerson} target={<AddNewUser onUserAdded={revalidate} />} />
+                <Action.Push title="Add New User" icon={Icon.AddPerson} shortcut={{ modifiers: ["cmd"], key: "n" }} target={<AddNewUser onUserAdded={revalidate} />} />
                 </ActionPanel.Section>
                 
             </ActionPanel>}
@@ -34,9 +35,11 @@ type UpdateUserProps = {
     onUserUpdated: () => void;
 }
 function UpdateUser({ user, onUserUpdated }: UpdateUserProps) {
+    const [execute, setExecute] = useState(false);
+    
     const { itemProps, values, handleSubmit } = useForm<UpdateUser>({
         onSubmit() {
-            update();
+            setExecute(true);
         },
         initialValues: {
             name: user.name,
@@ -48,9 +51,10 @@ function UpdateUser({ user, onUserUpdated }: UpdateUserProps) {
 
     const { pop } = useNavigation();
     
-    const { isLoading, revalidate: update } = useVultr(`users/${user.id}`, {
+    const { isLoading } = useVultr(`users/${user.id}`, {
         method: "PATCH",
         body: values,
+        execute,
         onData() {
             onUserUpdated();
             pop();
@@ -58,14 +62,13 @@ function UpdateUser({ user, onUserUpdated }: UpdateUserProps) {
     })
 
     return <Form isLoading={isLoading} actions={<ActionPanel>
-        <Action.SubmitForm icon={Icon.Check} title="Add User" onSubmit={handleSubmit} />
+        <Action.SubmitForm icon={Icon.Check} title="Update User" onSubmit={handleSubmit} />
     </ActionPanel>}>
-        <Form.Description title={String(isLoading)} text="This will create a new https://my.vultr.com log in with limited privileges to manage your account" />
         <Form.TextField title="Name" placeholder="Name" {...itemProps.name} />
         <Form.TextField title="Email" placeholder="Email" {...itemProps.email} />
         <Form.PasswordField title="Password" placeholder="hunter2" {...itemProps.password} />
         <Form.Checkbox label="API Enabled" {...itemProps.api_enabled} />
-        <Form.TagPicker title="ACLs" {...itemProps.acls}>
+        <Form.TagPicker title="ACLs" placeholder="ACL" {...itemProps.acls}>
             {Object.entries(ACLs).map(([key, val]) => <Form.TagPicker.Item key={key} title={val} value={key} />)}
         </Form.TagPicker>
     </Form>
@@ -75,9 +78,11 @@ type AddNewUserProps = {
     onUserAdded: () => void;
 }
 function AddNewUser({ onUserAdded }: AddNewUserProps) {
+    const [execute, setExecute] = useState(false);
+
     const { itemProps, values, handleSubmit } = useForm<AddUser>({
         onSubmit() {
-            add();
+            setExecute(true);
         },
         initialValues: {
             api_enabled: true
@@ -91,9 +96,10 @@ function AddNewUser({ onUserAdded }: AddNewUserProps) {
 
     const { pop } = useNavigation();
     
-    const { isLoading, revalidate: add } = useVultr<{ user: User }>("users", {
+    const { isLoading } = useVultr<{ user: User }>("users", {
         method: "POST",
         body: values,
+        execute,
         onData() {
             onUserAdded();
             pop();
@@ -108,7 +114,7 @@ function AddNewUser({ onUserAdded }: AddNewUserProps) {
         <Form.TextField title="Email" placeholder="Email" {...itemProps.email} />
         <Form.PasswordField title="Password" placeholder="hunter2" {...itemProps.password} />
         <Form.Checkbox label="API Enabled" {...itemProps.api_enabled} />
-        <Form.TagPicker title="ACLs" {...itemProps.acls}>
+        <Form.TagPicker title="ACLs" placeholder="ACL" {...itemProps.acls}>
             {Object.entries(ACLs).map(([key, val]) => <Form.TagPicker.Item key={key} title={val} value={key} />)}
         </Form.TagPicker>
     </Form>

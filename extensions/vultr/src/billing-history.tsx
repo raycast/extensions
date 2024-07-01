@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import useVultrPaginated from "./lib/hooks/useVultrPaginated";
 import { InvoiceItem, type BillingHistory } from "./lib/types/billing";
 
@@ -6,10 +6,17 @@ export default function BillingHistory() {
     const { isLoading, data, pagination } = useVultrPaginated<BillingHistory>("billing/history");
     
     return <List isLoading={isLoading} pagination={pagination} isShowingDetail>
-        {data.map(history => <List.Item key={history.id} title={history.description} subtitle={history.type} accessories={[
-            {date: new Date(history.date)}]} detail={<List.Item.Detail markdown={`amount: ${history.amount} \n\n balance: ${history.balance}`} />} actions={history.type==="invoice" && <ActionPanel>
-                <Action.Push title="View Invoice Items" target={<InvoiceItems invoiceId={history.id} />} />
-            </ActionPanel>} />)}
+        {data.map(history => {
+            const isInvoice = history.type==="invoice";
+            const markdown = `
+| amount: | balance | date |
+|---------|---------|------|
+| ${history.amount} | ${history.balance} | ${new Date(history.date).toLocaleDateString()} |`;
+            return <List.Item key={history.id} icon={isInvoice ? Icon.Receipt : Icon.CreditCard} title={history.description} subtitle={history.type} accessories={[
+                {date: new Date(history.date)}]} detail={<List.Item.Detail markdown={markdown} />} actions={isInvoice && <ActionPanel>
+                    <Action.Push title="View Invoice Items" target={<InvoiceItems invoiceId={history.id} />} />
+                </ActionPanel>} />
+        })}
     </List>
 }
 
