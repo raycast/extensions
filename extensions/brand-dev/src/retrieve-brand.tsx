@@ -86,9 +86,6 @@ export default function RetrieveBrand(props: LaunchProps<{ arguments: Arguments.
       "Content-Type": "application/json",
       Authorization: `Bearer ${api_key}`,
     },
-    onWillExecute() {
-      console.log("as");
-    },
     async onData(data) {
       const toast = await showToast(Toast.Style.Animated, "Fetched! Generating...");
       const newBrand: BrandInStorage = {
