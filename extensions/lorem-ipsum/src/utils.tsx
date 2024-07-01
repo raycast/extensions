@@ -25,9 +25,9 @@ export const generateParagraphs = (count: number, wrapHtmlTag?: string) => {
         generator.generateSentences(
           Math.floor(
             Math.random() *
-              (loremIpsumOptions.sentencesPerParagraph.max - loremIpsumOptions.sentencesPerParagraph.min + 1)
-          ) + loremIpsumOptions.sentencesPerParagraph.min
-        )
+              (loremIpsumOptions.sentencesPerParagraph.max - loremIpsumOptions.sentencesPerParagraph.min + 1),
+          ) + loremIpsumOptions.sentencesPerParagraph.min,
+        ),
       )
       .join(`${wrapHtmlTag && `</${wrapHtmlTag}>`}\r\n\r\n${wrapHtmlTag && `<${wrapHtmlTag}>`}`) +
     (wrapHtmlTag && `</${wrapHtmlTag}>`)
