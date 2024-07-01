@@ -1,25 +1,30 @@
 import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
 import useNameSilo from "./lib/hooks/useNameSilo";
-import { Domain, type DomainInfo } from "./lib/types";
+import { ArrOrObjOrNull, Domain, type DomainInfo } from "./lib/types";
 import { getFavicon } from "@raycast/utils";
+import { NAMESILO_LINKS } from "./lib/constants";
+import { parseAsArray } from "./lib/utils/parseAsArray";
 
 export default function Domains() {
-    const { isLoading, data } = useNameSilo<{domains: Domain[] | null}>("listDomains");
+    const { isLoading, data } = useNameSilo<{domains: ArrOrObjOrNull<Domain>}>("listDomains");
+    const domains = parseAsArray(data?.domains);
     
     return <List isLoading={isLoading}>
-        {data?.domains?.map(domain => <List.Item key={domain.domain} icon={getFavicon(`https://${domain.domain}`, { fallback: Icon.Globe })} title={domain.domain} accessories={[
-            { text: `created: ${domain.created}` },
-            { text: `expires: ${domain.expires}` }
-        ]} actions={<ActionPanel>
-            <Action.Push title="Get Domain Info" target={<DomainInfo domain={domain.domain} />} />
-        </ActionPanel>} />)}
+            {(!isLoading && !domains.length) ? <List.EmptyView title="You do not have any active domains in your account" description="Go online to register a new domain" actions={<ActionPanel>
+                <Action.OpenInBrowser title="Go to NameSilo Domain Search" url={NAMESILO_LINKS.search} icon={getFavicon(NAMESILO_LINKS.search)} />
+            </ActionPanel>} /> : domains.map(domain => <List.Item key={domain.domain} icon={getFavicon(`https://${domain.domain}`, { fallback: Icon.Globe })} title={domain.domain} accessories={[
+                { text: `created: ${domain.created}` },
+                { text: `expires: ${domain.expires}` }
+            ]} actions={<ActionPanel>
+                <Action.Push title="Get Domain Info" target={<DomainInfo domain={domain.domain} />} />
+            </ActionPanel>} />)}
     </List>
 }
 
 function DomainInfo({ domain }: { domain: string }) {
-    const { isLoading, data } = useNameSilo<DomainInfo>("getDomainInfo", new URLSearchParams({
+    const { isLoading, data } = useNameSilo<DomainInfo>("getDomainInfo", {
         domain
-    }));
+    });
     return <Detail isLoading={isLoading} navigationTitle={`Domains / ${domain} / Info`} metadata={data && <Detail.Metadata>
         <Detail.Metadata.Label title="Created" text={data.created} />
         <Detail.Metadata.Label title="Expires" text={data.expires} />

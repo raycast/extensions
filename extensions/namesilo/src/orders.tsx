@@ -6,24 +6,26 @@ import { parseAsArray } from "./lib/utils/parseAsArray";
 export default function Orders() {
     type OrderResponse = {order: ArrOrObjOrNull<Order>};
     const { isLoading, data } = useNameSilo<OrderResponse>("listOrders");
-    const orders = parseAsArray<Order>(data?.order);
+    const orders = parseAsArray(data?.order);
     
     return <List isLoading={isLoading}>
+        <List.Section title={`${orders.length} orders`}>
         {orders.map(order => <List.Item key={order.order_number} icon={Icon.Document} title={order.order_number} subtitle={order.order_date} accessories={[
             { tag: order.method },
             {text: order.total }
         ]} actions={<ActionPanel>
-            <Action.Push title="View Order Details" target={<OrderDetails order_number={order.order_number} />} />
+            <Action.Push icon={Icon.Eye} title="View Order Details" target={<OrderDetails order_number={order.order_number} />} />
         </ActionPanel>} />)}
+        </List.Section>
     </List>
 }
 
 function OrderDetails({ order_number }: { order_number: string }) {
-    type OrderDetailsResponse = {order_details: OrderDetails[] | OrderDetails | null};
-    const { isLoading, data } = useNameSilo<OrderDetailsResponse>("orderDetails", new URLSearchParams({
+    type OrderDetailsResponse = {order_details: ArrOrObjOrNull<OrderDetails>};
+    const { isLoading, data } = useNameSilo<OrderDetailsResponse>("orderDetails", {
         order_number
-    }));
-    const orderDetails = !data?.order_details ? [] : (data.order_details instanceof Array ? data.order_details : [data.order_details]);
+    });
+    const orderDetails = parseAsArray(data?.order_details);
 
     return <List isLoading={isLoading} navigationTitle={`Orders / ${order_number} / Details`}>
         {orderDetails.map((order, orderIndex) => <List.Item key={orderIndex} icon={Icon.Dot} title={order.description} subtitle={`${order.years_qty} years`} accessories={[

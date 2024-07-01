@@ -80,6 +80,9 @@ export type EmptySuccessResponse = {
         detail: "success";
     }
 }
+export type MessageSuccessResponse = BaseResponse & EmptySuccessResponse & {
+    message: string;
+}
 export type SuccessResponse<T> = BaseResponse & {
     reply: {
         code: 300;

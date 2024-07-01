@@ -4,9 +4,9 @@ import { WhoisInfo } from "./lib/types";
 
 export default function Whois(props: LaunchProps<{ arguments: Arguments.Whois }>) {
     const { domain } = props.arguments;
-    const { isLoading, data } = useNameSilo<WhoisInfo>("whoisInfo", new URLSearchParams({
+    const { isLoading, data } = useNameSilo<WhoisInfo>("whoisInfo", {
         domain
-    }));
+    });
 
     const dataMarkdown = !data ? "" : `
 Domain: ${data.domain}

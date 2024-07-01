@@ -1,13 +1,14 @@
 import { Toast, showToast, updateCommandMetadata } from "@raycast/api";
 import { type AccountBalance, ErrorResponse, SuccessResponse } from "./lib/types";
 import fetch from "cross-fetch";
-import { API_PARAMS, API_URL } from "./lib/constants";
 import { showFailureToast } from "@raycast/utils";
+import generateApiUrl from "./lib/utils/generateApiUrl";
 
 export default async function AccountBalance() {
         try {
             await showToast(Toast.Style.Animated, "Fetching Account Balance");
-          const response = await fetch(API_URL + "getAccountBalance?" + API_PARAMS.toString());
+          const url = generateApiUrl("getAccountBalance");
+            const response = await fetch(url);
           const result = await response.json() as SuccessResponse<AccountBalance> | ErrorResponse;
           if (result.reply.detail!=="success") {
             throw new Error(result.reply.detail);

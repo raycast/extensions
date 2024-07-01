@@ -7,6 +7,9 @@ export default function Prices() {
     
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const prices = !data ? {} : (({ code: _code, detail: _detail, ...rest }) => rest)(data);
+    // The above is done as response is like
+    // { code: 300, detail: "success", ac: Price, .... }
+    // so we remove code, detail
     
     return <List isLoading={isLoading}>
         <List.Section title={Object.keys(prices).length + " prices"}>

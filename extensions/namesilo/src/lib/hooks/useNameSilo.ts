@@ -1,9 +1,10 @@
 import { useFetch } from "@raycast/utils";
-import { API_PARAMS, API_URL } from "../constants";
 import { ErrorResponse, SuccessResponse } from "../types";
+import generateApiUrl from "../utils/generateApiUrl";
 
-export default function useNameSilo<T>(operation: string, params?: URLSearchParams) {
-    const { isLoading, data, error, revalidate } = useFetch(API_URL + operation + "?" + API_PARAMS.toString() + (params ? `&${params}` : ""), {
+export default function useNameSilo<T>(operation: string, params?: {[key: string]: string | string[]}) {
+    const url = generateApiUrl(operation, params);
+    const { isLoading, data, error, revalidate } = useFetch(url, {
         mapResult(result: SuccessResponse<T> | ErrorResponse) {
             if (result.reply.detail!=="success") {
                 throw new Error(result.reply.detail);
