@@ -1,5 +1,8 @@
 # Tailscale Changelog
 
+## [Custom Admin Console URL] - 2024-07-01
+- Add support for custom Admin Console URLs ([#12048](https://github.com/raycast/extensions/issues/12048))
+
 ## [Improvement] - 2024-05-23
 
 - Remove trailing `.` from the end of MagicDNS addresses ([#12451](https://github.com/raycast/extensions/issues/12451))
