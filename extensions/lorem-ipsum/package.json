@@ -28,21 +28,6 @@
   ],
   "commands": [
     {
-      "name": "html-paragraphs",
-      "title": "Generate HTML Paragraphs",
-      "subtitle": "Lorem Ipsum",
-      "description": "Generate random paragraphs as HTML and copy them to the clipboard",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "numberOfLoremIpsumsToGenerate",
-          "type": "text",
-          "required": false,
-          "placeholder": "1"
-        }
-      ]
-    },
-    {
       "name": "paragraphs",
       "title": "Generate Paragraphs",
       "subtitle": "Lorem Ipsum",
@@ -54,6 +39,12 @@
           "type": "text",
           "required": false,
           "placeholder": "1"
+        },
+        {
+          "name": "wrapHtmlTag",
+          "type": "text",
+          "required": false,
+          "placeholder": "Wrap with HTML tag"
         }
       ]
     },

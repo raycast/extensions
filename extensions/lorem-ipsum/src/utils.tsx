@@ -17,22 +17,9 @@ const loremIpsumOptions = {
 
 const generator = new LoremIpsum(loremIpsumOptions);
 
-export const generateParagraphs = (count: number) => {
-  return Array.from(Array(count))
-    .map(() =>
-      generator.generateSentences(
-        Math.floor(
-          Math.random() *
-            (loremIpsumOptions.sentencesPerParagraph.max - loremIpsumOptions.sentencesPerParagraph.min + 1)
-        ) + loremIpsumOptions.sentencesPerParagraph.min
-      )
-    )
-    .join("\r\n\r\n"); // newline + seperator line
-};
-
-export const generateHtmlParagraphs = (count: number) => {
+export const generateParagraphs = (count: number, wrapHtmlTag?: string) => {
   return (
-    "<p>" +
+    (wrapHtmlTag && `<${wrapHtmlTag}>`) +
     Array.from(Array(count))
       .map(() =>
         generator.generateSentences(
@@ -42,9 +29,9 @@ export const generateHtmlParagraphs = (count: number) => {
           ) + loremIpsumOptions.sentencesPerParagraph.min
         )
       )
-      .join("</p>\r\n\r\n<p>") +
-    "</p>"
-  ); // newline + seperator line
+      .join(`${wrapHtmlTag && `</${wrapHtmlTag}>`}\r\n\r\n${wrapHtmlTag && `<${wrapHtmlTag}>`}`) +
+    (wrapHtmlTag && `</${wrapHtmlTag}>`)
+  );
 };
 
 export const generateSentences = (count: number) => {
