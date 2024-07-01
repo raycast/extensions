@@ -1,5 +1,9 @@
 # Apple Notes Changelog
 
+## [Open Note In Folder] - 2024-07-01
+
+Open notes in the context of their folder
+
 ## [Bug Fix Update] - 2024-06-22
 
 Fix Add Text to Note hooks rendering issue.

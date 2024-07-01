@@ -19,7 +19,7 @@ import { NodeHtmlMarkdown } from "node-html-markdown";
 import { useState } from "react";
 
 import { NoteTitle } from "..";
-import { deleteNoteById, restoreNoteById, openNoteSeparately, getNotePlainText, getNoteBody } from "../api";
+import { deleteNoteById, restoreNoteById, openNoteInFolder, openNoteSeparately, getNotePlainText, getNoteBody } from "../api";
 import { fileIcon, getOpenNoteURL } from "../helpers";
 import { NoteItem, useNotes } from "../useNotes";
 
@@ -247,6 +247,14 @@ type OpenNoteActionProps = {
 };
 
 function OpenNoteAction({ note, separately, shortcut }: OpenNoteActionProps) {
+  async function openNote() {
+    try {
+      await openNoteInFolder(note.id);
+      await closeMainWindow();
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not open note" });
+    }
+  }
   async function openNoteInSeparateWindow() {
     try {
       await openNoteSeparately(note.id);
@@ -267,11 +275,10 @@ function OpenNoteAction({ note, separately, shortcut }: OpenNoteActionProps) {
     );
   } else {
     return (
-      <Action.Open
+      <Action
         title="Open in Notes"
-        target={getOpenNoteURL(note.UUID)}
         icon={{ fileIcon }}
-        application="com.apple.notes"
+        onAction={openNote}
         shortcut={shortcut}
       />
     );

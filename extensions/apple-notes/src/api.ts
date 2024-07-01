@@ -18,6 +18,18 @@ export async function createNote(text?: string) {
     `);
 }
 
+export async function openNoteInFolder(id: string) {
+  return runAppleScript(`
+    tell application "Notes"
+      set theNote to note id "${escapeDoubleQuotes(id)}"
+      set theFolder to container of theNote
+      show theFolder
+      show theNote
+      activate
+    end tell
+    `);
+}
+
 export async function openNoteSeparately(id: string) {
   return runAppleScript(`
     tell application "Notes"
