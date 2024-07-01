@@ -76,6 +76,12 @@
       "name": "convert-color",
       "title": "Convert Color",
       "description": "Convert any color to a different format.",
+      "mode": "no-view"
+    },
+    {
+      "name": "name-color",
+      "title": "Name Color",
+      "description": "name the color selected.",
       "mode": "no-view",
       "arguments": [
         {
@@ -150,6 +156,7 @@
   "dependencies": {
     "@raycast/api": "^1.68.0",
     "@raycast/utils": "^1.15.0",
+    "color-namer": "^1.4.0",
     "colorjs.io": "^0.4.5",
     "raycast-cross-extension": "^0.1.0"
   },
