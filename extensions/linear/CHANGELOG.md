@@ -5,6 +5,8 @@
 - [#10856](https://github.com/raycast/extensions/issues/10856): Typeahead search for teams while creating/editing issues and in active cycles command
 - [#8704](https://github.com/raycast/extensions/issues/8704): Typeahead search for users/assignees/leads in various actions and commands, getting rid of missing assignees issue.
 - [#13194](https://github.com/raycast/extensions/issues/13194): Feature to add links while creating issues and ad-hoc action to add attachments and links while viewing issues.
+- The order of teams in "Create issue" respects order of teams in the Linear native application.
+- When using "Create issue for myself" without specifying a preferred team in settings, use first team from the sorted array of teams.
 
 ## [Improved Notifications] - 2024-06-14
 

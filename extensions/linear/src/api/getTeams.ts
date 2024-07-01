@@ -1,5 +1,6 @@
 import { Cycle, Organization, Team } from "@linear/sdk";
 import { getLinearClient } from "./linearClient";
+import { sortBy } from "lodash";
 
 export type TeamResult = Pick<
   Team,
@@ -15,13 +16,20 @@ export type TeamResult = Pick<
   organization: Pick<Organization, "logoUrl">;
 } & {
   activeCycle?: Pick<Cycle, "id" | "number">;
+} & {
+  membership?: {
+    sortOrder: number;
+  };
 };
 
 export async function getTeams(query: string = "") {
-  const { graphQLClient } = getLinearClient();
+  const { graphQLClient, linearClient } = getLinearClient();
+
+  const me = await linearClient.viewer;
+
   const { data } = await graphQLClient.rawRequest<{ teams: { nodes: TeamResult[] } }, Record<string, unknown>>(
     `
-      query($query: String!) {
+      query($userId: String!, $query: String!) {
         teams(filter: {name: {containsIgnoreCase: $query}}) {
           nodes {
             id
@@ -32,6 +40,9 @@ export async function getTeams(query: string = "") {
               logoUrl
             }
             key
+            membership(userId: $userId) {
+              sortOrder
+            }
             issueEstimationType
             issueEstimationAllowZero
             issueEstimationExtended
@@ -43,8 +54,9 @@ export async function getTeams(query: string = "") {
         }
       }
     `,
-    { query },
+    { userId: me.id, query },
   );
 
-  return data?.teams.nodes;
+  const teams = data?.teams.nodes ?? [];
+  return sortBy(teams, (team) => team.membership?.sortOrder ?? Infinity);
 }
