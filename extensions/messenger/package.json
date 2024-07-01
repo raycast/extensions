@@ -14,11 +14,46 @@
       "name": "send-msg",
       "title": "Send Message",
       "description": "Send an imessage through the Messages app.",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "contactName",
+          "placeholder": "Contact Name",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "messageText",
+          "placeholder": "Message Text",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }, {
+      "name": "silent-send-msg",
+      "title": "Quick Message",
+      "description": "Send an imessage silently through the Messages app.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "contactName",
+          "placeholder": "Contact Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "messageText",
+          "placeholder": "Message Text",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.3"
+    "@raycast/api": "^1.77.3",
+    "@raycast/utils": "^1.16.1",
+    "signal-exit": "^4.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
