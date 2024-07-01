@@ -1,6 +1,5 @@
-import { getPreferenceValues } from "@raycast/api";
+import { environment, getPreferenceValues } from "@raycast/api";
 
-const preferences = getPreferenceValues<Preferences>();
+export const { apiKey } = getPreferenceValues<Preferences>();
 
-export const apiKey = preferences.apiKey;
-export const projectSlug = preferences.projectSlug;
+export const { extensionName, commandName } = environment;
