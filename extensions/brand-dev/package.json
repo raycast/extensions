@@ -2,19 +2,21 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brand-dev",
   "title": "Brand.dev",
-  "description": "",
-  "icon": "command-icon.png",
+  "description": "An API to get a company's brand logos, colors, slogan, socials, and more.",
+  "icon": "brand-dev.png",
   "author": "xmok",
   "categories": [
     "Applications",
-    "Data"
+    "Data",
+    "Design Tools"
   ],
   "license": "MIT",
   "preferences": [
     {
-      "name": "api_token",
-      "title": "API Token",
-      "description": "",
+      "name": "api_key",
+      "title": "API Key",
+      "description": "API Key from Brand.dev Dashboard",
+      "placeholder": "brand__3ZY...jJ",
       "required": true,
       "type": "password"
     }
@@ -23,7 +25,7 @@
     {
       "name": "retrieve-brand",
       "title": "Retrieve Brand",
-      "description": "",
+      "description": "Get a company's brand logos, colors, slogan, socials, and more",
       "mode": "view",
       "arguments": [
         {

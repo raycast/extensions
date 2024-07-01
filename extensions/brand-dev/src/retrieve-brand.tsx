@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Detail, Icon, LaunchProps, LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { Action, ActionPanel, Detail, Icon, LaunchProps, List, LocalStorage, Toast, getPreferenceValues, showToast, useNavigation } from "@raycast/api";
+import { getFavicon, useFetch, useLocalStorage } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
 type Color = {
@@ -30,9 +30,9 @@ type Social = {
 }
 type Brand = {
     domain: string;
-    title: string;
-    description: string;
-    slogan: string;
+    title: string | null;
+    description: string | null;
+    slogan: string | null;
     colors: Color[];
     logos: Logo[];
     backdrops: Backdrop[];
@@ -48,25 +48,36 @@ type BrandInStorage = Brand & {
     updated_on: string;
 }
 
+async function getFromStorage() {
+    const localBrands = await LocalStorage.getItem<string>("brands") || "[]";
+    const parsedBrands: BrandInStorage[] = await JSON.parse(localBrands);
+    return parsedBrands;
+}
+
 export default function RetrieveBrand(props: LaunchProps<{ arguments: Arguments.RetrieveBrand }>) {
     const { domain } = props.arguments;
-    const { api_token } = getPreferenceValues<Preferences>();
+    const { api_key } = getPreferenceValues<Preferences>();
 
     const [brand, setBrand] = useState<Brand>();
+    const [domainToRetrieve, setDomainToRetrieve] = useState(domain);
     
     const [isGetting, setIsGetting] = useState(true);
     const [isSetting, setIsSetting] = useState(false);
+    const [execute, setExecute] = useState(false);
     
-    const { error, isLoading: isFetching, revalidate } = useFetch<Response>(`https://api.brand.dev/v1/brand/retrieve?domain=${domain}`, {
+    const { error, isLoading: isFetching, revalidate } = useFetch<Response>(`https://api.brand.dev/v1/brand/retrieve?domain=${domainToRetrieve}`, {
         headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${api_token}`
+            Authorization: `Bearer ${api_key}`
+        },
+        onWillExecute() {
+            console.log('as');
         },
         async onData(data) {
             const toast = await showToast(Toast.Style.Animated, "Fetched! Generating...");
             const newBrand: BrandInStorage = {...data.brand, created_on: new Date().toISOString(), updated_on: new Date().toISOString() };
             const brands = await getFromStorage();
-            const index = brands.findIndex(brand => brand.domain === domain);
+            const index = brands.findIndex(brand => brand.domain === domainToRetrieve);
             index!==-1 ? brands[index] = newBrand : brands.push(newBrand);
             setBrand(data.brand);
             setIsSetting(true);
@@ -75,21 +86,15 @@ export default function RetrieveBrand(props: LaunchProps<{ arguments: Arguments.
             toast.style = Toast.Style.Success;
             toast.title = "Generated!";
         },
-        execute: false
+        execute
     });
-
-    async function getFromStorage() {
-        const localBrands = await LocalStorage.getItem<string>("brands") || "[]";
-        const parsedBrands: BrandInStorage[] = await JSON.parse(localBrands);
-        return parsedBrands;
-    }
 
     const isLoading = isGetting || isSetting || isFetching;
     useEffect(() => {
         async function checkLocalOrFetch() {
             const toast = await showToast(Toast.Style.Animated, "Checking Local Storage...");
             const brands = await getFromStorage();
-            const brandInStorage = brands?.find(brand => brand.domain===domain);
+            const brandInStorage = brands.find(brand => brand.domain===domainToRetrieve);
             setIsGetting(false);
             if (brandInStorage) {
                 toast.title = "Found Locally! Generating...";
@@ -98,13 +103,13 @@ export default function RetrieveBrand(props: LaunchProps<{ arguments: Arguments.
                 toast.title = "Generated!";
             } else {
                 toast.title = "Not Found Locally! Fetching...";
-                revalidate();
+                setExecute(true);
             }
         }
         checkLocalOrFetch();
-    }, []);
+    }, [domainToRetrieve]);
 
-      const markdown = error ? `${error.message}` : !brand ? "Generating..." : `![](${brand.logos[0].url})
+      const markdown = error ? `## ERROR \n\n ${error.message}` : !brand ? "Generating..." : `![](${brand.logos[0]?.url})
     
 ${brand.title} \n\n [${brand.domain}](${brand.domain})
 
@@ -119,6 +124,33 @@ ${brand.description}
 ${brand.logos.map(logo => `![${logo.url}](${logo.url})`)}`;
     
 return <Detail isLoading={isLoading} markdown={markdown} actions={<ActionPanel>
-    {brand && <Action title="Fetch Latest" icon={Icon.Redo} onAction={revalidate} />}
+    {brand && <ActionPanel.Section>
+            <Action.OpenInBrowser icon={getFavicon("https://world.brand.dev/")} title="View on brand.dev" url={`https://world.brand.dev/brand/${brand.domain}`} />
+            {brand.logos.length && <Action.OpenInBrowser title="Open Logo in Browser" icon={brand.logos[0].url} url={brand.logos[0].url} />}
+            <Action title="Fetch Latest" icon={Icon.Redo} onAction={async () => {
+                await showToast(Toast.Style.Animated, `Refreshing ${brand.domain}`);
+                revalidate();
+            }} />
+        </ActionPanel.Section>}
+    {!isLoading && <Action.Push title="View Storage" icon={Icon.Coin} target={<ViewStorage onDomainSelected={setDomainToRetrieve} />} shortcut={{ modifiers: ["cmd"], key: "v" }} />}
 </ActionPanel>} />
+}
+
+type ViewStorageProps = {
+    onDomainSelected: (domain: string) => void;
+}
+function ViewStorage({onDomainSelected}: ViewStorageProps) {
+    const { pop } = useNavigation();
+    const { isLoading, value: brands } = useLocalStorage<BrandInStorage[]>("brands");
+
+    return <List isLoading={isLoading}>
+        <List.Section title="Storage">
+            {brands?.map(brand => <List.Item key={brand.domain} icon={brand.logos[0]?.url || Icon.Dot} title={brand.domain} subtitle={`${brand.title} - ${brand.slogan}`} accessories={[{date: new Date(brand.updated_on)}]} actions={<ActionPanel>
+                <Action title="View Brand" icon={Icon.Eye} onAction={() => {
+                    onDomainSelected(brand.domain);
+                    pop();
+                }} />
+            </ActionPanel>} />)}
+        </List.Section>
+    </List>
 }
