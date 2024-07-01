@@ -1,6 +1,6 @@
 # Session Changelog
 
-## [Fix]
+## [Fix] - 2024-06-30
 - Now supports Session being installed in the user-level applications folder
 - Update the "Pause" command title to "Pause/Resume" to make it clearer it can also resume a session
 
