@@ -4,6 +4,15 @@
 
 import { TagSchema } from "@/types";
 
+export type User = {
+  /**
+   * The role of the authenticated user in the workspace.
+   */
+  id: string;
+  name: string;
+  image: string;
+};
+
 export type ItemSchema = {
   /**
    * The unique ID of the item.
@@ -33,6 +42,7 @@ export type ItemSchema = {
    * The user ID of the creator of the item.
    */
   userId: string;
+  user: User;
   /**
    * The workspace ID of the item.
    */

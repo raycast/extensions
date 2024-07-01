@@ -64,7 +64,10 @@ export default function SearchItems() {
         <List.EmptyView title="No items found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
       {(items ?? []).map((value) => {
-        const { sku, description, cost, quantity, tags, id, userId, createdAt, updatedAt } = value;
+        const { sku, description, cost, quantity, tags, id, userId, user, createdAt, updatedAt } = value;
+        const formattedCost = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+          Number(cost),
+        );
         return (
           <List.Item
             key={sku}
@@ -77,12 +80,9 @@ export default function SearchItems() {
               userId,
               ...(tags ?? []).map((t) => t.name),
             ]}
-            icon={{ source: Icon.Tray, tintColor: Color.Blue }}
+            icon={{ source: user.image, mask: Image.Mask.Circle }}
             title={sku}
-            accessories={[
-              { text: String(cost), icon: { source: Icon.Coins, tintColor: Color.Green }, tooltip: "Cost" },
-              { text: String(quantity), icon: { source: Icon.BarChart, tintColor: Color.Blue }, tooltip: "Quantity" },
-            ]}
+            subtitle={description}
             detail={
               <List.Item.Detail
                 metadata={
@@ -92,22 +92,9 @@ export default function SearchItems() {
                     <List.Item.Detail.Metadata.Label title={"Description"} text={description} />
                     <List.Item.Detail.Metadata.Separator />
 
-                    <List.Item.Detail.Metadata.Label title={"Cost"} text={cost.toString()} />
+                    <List.Item.Detail.Metadata.Label title={"Cost"} text={formattedCost} />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label title={"Quantity"} text={quantity.toString()} />
-                    <List.Item.Detail.Metadata.Separator />
-
-                    <List.Item.Detail.Metadata.Label
-                      title={"Created At"}
-                      text={createdAt.substring(0, 19).replace("T", " ")}
-                      icon={Icon.Calendar}
-                    />
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label
-                      title={"Updated At"}
-                      text={updatedAt.substring(0, 19).replace("T", " ")}
-                      icon={Icon.Calendar}
-                    />
                     <List.Item.Detail.Metadata.Separator />
                     {tags && tags.length > 0 && (
                       <>
@@ -124,6 +111,23 @@ export default function SearchItems() {
                         <List.Item.Detail.Metadata.Separator />
                       </>
                     )}
+                    <List.Item.Detail.Metadata.Label
+                      title={"Created By"}
+                      text={user.name}
+                      icon={{ source: user.image, mask: Image.Mask.Circle }}
+                    />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label
+                      title={"Created At"}
+                      text={createdAt.substring(0, 19).replace("T", " ")}
+                      icon={Icon.Calendar}
+                    />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label
+                      title={"Updated At"}
+                      text={updatedAt.substring(0, 19).replace("T", " ")}
+                      icon={Icon.Calendar}
+                    />
                   </List.Item.Detail.Metadata>
                 }
               />

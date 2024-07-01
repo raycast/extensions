@@ -61,14 +61,6 @@
       "required": true,
       "title": "API Key",
       "description": "Retrac API key."
-    },
-    {
-      "name": "projectSlug",
-      "type": "textfield",
-      "required": true,
-      "title": "Workspace Slug",
-      "description": "Retrac workspace slug.",
-      "placeholder": "workspace-slug"
     }
   ],
   "devDependencies": {
