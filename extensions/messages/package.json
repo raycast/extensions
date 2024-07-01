@@ -1,20 +1,54 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "messages",
-  "title": "Messages",
-  "description": "Quickly send a message to one of your contacts.",
-  "icon": "apple-messages-icon.png",
-  "author": "thomaslombart",
+  "title": "Ping",
+  "description": "Send an imessage directly from Raycast using arguments.",
+  "icon": "message.png",
+  "author": "rish139",
   "contributors": [
-    "timothy_gray"
+    "timothy_gray",
+    "rish139"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "send-message",
       "title": "Send Message",
-      "description": "Quickly send a message through the Messages app.",
-      "mode": "view"
+      "description": "Send an imessage through the Messages app.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "contactName",
+          "placeholder": "Contact Name",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "messageText",
+          "placeholder": "Message Text",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }, {
+      "name": "silent-send-message",
+      "title": "Quick Message",
+      "description": "Send an imessage silently through the Messages app.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "contactName",
+          "placeholder": "Contact Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "messageText",
+          "placeholder": "Message Text",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
