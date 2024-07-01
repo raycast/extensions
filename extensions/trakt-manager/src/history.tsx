@@ -77,11 +77,11 @@ export default function Command() {
     },
   );
 
-  const onMediaTypeChange = (newValue: string) => {
+  const onMediaTypeChange = useCallback((newValue: string) => {
     abortable.current?.abort();
     abortable.current = new AbortController();
     setMediaType(newValue as MediaType);
-  };
+  }, []);
 
   const handleMovieAction = useCallback(
     async (movie: TraktMovieListItem, action: (movie: TraktMovieListItem) => Promise<void>) => {
