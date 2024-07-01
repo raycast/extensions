@@ -1,5 +1,9 @@
 # Wikipedia Changelog
 
+## [Contributor maintenance] - {PR_MERGE_DATE}
+
+- Remove @JonathanWbn from list of contributors
+
 ## [Add simple english version] - 2024-05-31
 
 ## [Flag update] - 2024-04-19

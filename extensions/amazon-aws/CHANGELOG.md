@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Contributor maintenance] - {PR_MERGE_DATE}
+
+- Remove @JonathanWbn from list of contributors
+
 ## [Fixes] - 2024-06-24
 
 - Fixed [the issue](https://github.com/raycast/extensions/issues/13088) when codepipeline(s) are rendered with no executions.
