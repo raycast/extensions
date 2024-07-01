@@ -3,7 +3,7 @@
   "name": "messenger",
   "title": "Messenger",
   "description": "Send an iMessage directly from Raycast using the messages app utilizaing arguments.",
-  "icon": "command-icon.png",
+  "icon": "message.png",
   "author": "rish139",
   "categories": [
     "Communication"

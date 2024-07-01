@@ -25,7 +25,7 @@ type Contact = {
 function createDeeplink(contactId: string, address: string, text: string) {
   const protocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
   const context = encodeURIComponent(JSON.stringify({ contactId, address, text }));
-  return `${protocol}extensions/thomaslombart/messages/send-message?launchContext=${context}`;
+  return `${protocol}extensions/rish139/messenger/send-msg?launchContext=${context}`;
 }
 
 function getName(contact: Contact) {
