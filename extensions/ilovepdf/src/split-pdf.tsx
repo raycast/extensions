@@ -144,7 +144,7 @@ export default function Command() {
           setSplitMode(newMode);
           setDefaultText(
             newMode == "ranges"
-              ? "Format: 1,5,10-14"
+              ? "Accepted format: 1,5,10-14"
               : newMode == "fixed_range"
                 ? "Format is fixed value: 3"
                 : " Accepted format: 1,4,8-12,16",
