@@ -5,6 +5,9 @@
   "description": "Interact with Anthropic's Claude API directly from Raycast",
   "icon": "icon.png",
   "author": "florisdobber",
+  "contributors": [
+    "alextlopez11"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"

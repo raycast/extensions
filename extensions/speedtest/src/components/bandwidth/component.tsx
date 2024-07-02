@@ -1,17 +1,20 @@
-import { Icon, List } from "@raycast/api";
+import { Icon, Image, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { ListItemMetadata } from "../list-item-metadata";
 import { ActivitySpeedQuality, InternetSpeed } from "./types";
 import { convertBitsToMbps, speedToAvailableActivityQuality } from "./utils";
 
-export const ListBandwidthItem = (props: {
+type ListBandwidthItemProps = {
   speed: InternetSpeed;
   activity: ActivitySpeedQuality;
   isLoading: boolean;
   title: string;
-  icon: Icon;
-}): JSX.Element => {
-  const { title, icon, speed, activity, isLoading } = props;
+  icon: Image.ImageLike;
+  actions?: JSX.Element;
+};
+
+export const ListBandwidthItem = (props: ListBandwidthItemProps): JSX.Element => {
+  const { title, icon, speed, activity, isLoading, actions } = props;
   const [qualities, setQualities] = useState<string>("");
 
   useEffect(() => {
@@ -28,7 +31,7 @@ export const ListBandwidthItem = (props: {
   return (
     <List.Item
       title={title}
-      icon={{ source: icon, tintColor: "#494949" }}
+      icon={icon}
       accessories={[
         {
           text: isLoading ? "?" : qualities,
@@ -36,6 +39,7 @@ export const ListBandwidthItem = (props: {
         },
       ]}
       detail={speed && <ListItemMetadata data={speed} />}
+      actions={actions}
     />
   );
 };

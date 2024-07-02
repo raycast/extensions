@@ -13,7 +13,7 @@ export default function Command() {
   return (
     <List searchBarPlaceholder="Search network speed info" filtering={false}>
       <List.EmptyView
-        icon={"loading/loading-graph.gif"}
+        icon={"loading/loading.gif"}
         title={loading ? "Testing Your Connection..." : "No info"}
         description={loading ? networkSpeedLoading : ""}
         actions={

@@ -6,12 +6,13 @@ import {
   ListPipelineExecutionsCommand,
   ListPipelinesCommand,
 } from "@aws-sdk/client-codepipeline";
+import { Pipeline, PipelineStage } from "../codepipeline";
 
 export const usePipelines = () => {
   const {
     data: pipelines,
     pagination,
-    revalidate,
+    mutate,
     error,
     isLoading,
   } = useCachedPromise(
@@ -22,30 +23,34 @@ export const usePipelines = () => {
         );
 
         const keyedPipelines = await Promise.all(
-          (pipelineSummaries ?? []).map(async (p) => {
-            const { pipelineExecutionSummaries: executions } = await new CodePipelineClient({}).send(
-              new ListPipelineExecutionsCommand({ pipelineName: p.name }),
-            );
+          (pipelineSummaries ?? [])
+            .filter((p) => !!p.name)
+            .map(async (p) => {
+              const { pipelineExecutionSummaries } = await new CodePipelineClient({}).send(
+                new ListPipelineExecutionsCommand({ pipelineName: p.name }),
+              );
+              const executions = (pipelineExecutionSummaries ?? []).filter((e) => !!e.pipelineExecutionId);
 
-            const { stageStates } = await new CodePipelineClient({}).send(
-              new GetPipelineStateCommand({ name: p.name }),
-            );
-            const stages = (stageStates ?? []).map((s, i) => {
-              let nextStage = undefined;
-              if (i < stageStates!.length - 1) {
-                nextStage = stageStates![i + 1];
-              }
-              return { ...s, nextStage };
-            });
+              const { stageStates } = await new CodePipelineClient({}).send(
+                new GetPipelineStateCommand({ name: p.name }),
+              );
+              const definedStages = (stageStates ?? []).filter((s) => !!s.stageName);
+              const stages = definedStages.map((s, i) => {
+                let nextStage = undefined;
+                if (i < definedStages.length - 1) {
+                  nextStage = definedStages[i + 1];
+                }
+                return { ...s, nextStage };
+              }) as PipelineStage[];
 
-            return { ...p, pipelineKey: `#${page}-${p.name}`, executions, stages };
-          }),
+              return { ...p, pipelineKey: `#${page}-${p.name}`, executions, stages };
+            }),
         );
-        return { data: keyedPipelines, hasMore: !!nextToken, cursor: nextToken };
+        return { data: keyedPipelines as Pipeline[], hasMore: !!nextToken, cursor: nextToken };
       },
     [],
-    { execute: isReadyToFetch() },
+    { execute: isReadyToFetch(), failureToastOptions: { title: "❌Failed to fetch pipelines" } },
   );
 
-  return { pipelines, pagination, error, isLoading: (!pipelines && !error) || isLoading, revalidate };
+  return { pipelines, pagination, error, isLoading: (!pipelines && !error) || isLoading, mutate };
 };

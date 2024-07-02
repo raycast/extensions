@@ -1,165 +1,175 @@
-import { Action, ActionPanel, List, Keyboard, Cache, showToast, Toast, Icon } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { getData, typeColor, iconStar } from "./utils";
-import { Alias } from "./types";
-import CommandDetail from "./command-detail";
+import {
+  Action,
+  ActionPanel,
+  List,
+  Keyboard,
+  Cache,
+  showToast,
+  Icon,
+  Color,
+  getPreferenceValues,
+  openCommandPreferences,
+} from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { Alias, Data } from "./types";
+import aliasesJSON from "./alias.json";
 
 const cache = new Cache();
 
 export default function Command() {
-  const { isLoading, data, revalidate } = useCachedPromise(async () => {
-    const response = JSON.parse(cache.get("data") || "{}");
-    const { aliases = getData() } = response;
-    return { aliases };
+  const [showDetails, setShowDetails] = useCachedState("show-details", false);
+
+  // Preferences
+  const preferences = getPreferenceValues();
+  const maxRecent = Number(preferences.MaxRecent);
+  const maxPins = Number(preferences.MaxPins);
+  const isPinColored = preferences.IconPinColored;
+  const showTypeIcon = preferences.ShowTypeIcon;
+
+  // Colors for type
+  const typeColor = { show: Color.Green, default: Color.Blue, delete: Color.Red };
+
+  const fetchData = async (): Promise<Data> => {
+    const { aliases = aliasesJSON } = JSON.parse(cache.get("data") || "{}");
+    const reversed: Alias[] = aliases.slice().reverse();
+    const pins = reversed.filter((alias) => alias.pin);
+    const recent = reversed.filter((alias) => alias.recent);
+
+    return { aliases, pins, recent };
+  };
+
+  const { isLoading, data, revalidate } = useCachedPromise(fetchData, [], {
+    initialData: { aliases: [], pins: [], recent: [] },
   });
 
-  const aliases: Alias[] = data?.aliases || [];
-  const favorites: Alias[] = aliases?.filter((alias: Alias) => alias.fav) || [];
-  const recent: Alias[] = aliases?.filter((alias: Alias) => alias.recent) || [];
-  const hasRecent = recent?.length > 0 || false;
-
-  const saveCache = async ({ data, title, message }: { data: Alias[] | []; title?: string; message?: string }) => {
-    if (!data || !data.length || data.some((a) => typeof a !== "object")) {
-      await showToast({
-        title: "Error saving",
-        message: "Invalid data provided to saveCache",
-        style: Toast.Style.Failure,
-      });
-      return;
-    }
-
-    cache.set("data", JSON.stringify({ aliases: data }));
-    if (title && message) await showToast({ title, message });
+  const saveAliases = async (aliases: Alias[]) => {
+    cache.set("data", JSON.stringify({ aliases }));
     revalidate();
   };
 
-  const handleFav = (alias: Alias) => {
-    const data = aliases?.map((a) => {
-      return a.name === alias.name ? { ...a, fav: !a.fav, recent: !a.fav ? false : a.recent } : a;
+  const handlePin = (alias: Alias) => {
+    const aliases = data.aliases.map((a: Alias) => {
+      return a.name === alias.name ? { ...a, pin: !a.pin, recent: !a.pin ? false : a.recent } : a;
     });
 
-    const options = alias.fav
-      ? {
-          title: "Favorite removed",
-          message: alias.name + " has been removed from favorites",
-        }
-      : {
-          title: "Favorite added",
-          message: alias.name + " has been added to favorites",
-        };
-
-    saveCache({ data, ...options });
+    saveAliases(aliases).then(() => {
+      showToast(
+        alias.pin
+          ? { title: "Unpin", message: alias.name + " is now pinned" }
+          : { title: "Pinned", message: alias.name + " is no longer pinned" },
+      );
+    });
   };
 
   const addRecent = (alias: Alias) => {
-    const data = aliases?.map((a) => {
-      // Set as recent only if alias is not a favorite
-      const recent = a.fav ? a.recent : true;
+    const aliases = data.aliases.map((a: Alias) => {
+      // Set as recent only if alias is not pinned
+      const recent = a.pin ? a.recent : true;
       return a.name === alias.name ? { ...a, recent } : a;
     });
 
-    saveCache({ data });
-  };
-
-  const removeRecent = (alias: Alias) => {
-    const data = aliases?.map((a) => {
-      return a.name === alias.name ? { ...a, recent: false } : a;
-    });
-
-    saveCache({ data, title: "Recent removed", message: alias.name + " has been removed from recent" });
+    saveAliases(aliases);
   };
 
   const clearRecent = () => {
-    const data = aliases?.map((alias) => ({ ...alias, recent: false }));
-    saveCache({ data, title: "All recent removed" });
+    const aliases = data.aliases.map((alias) => ({ ...alias, recent: false }));
+    saveAliases(aliases).then(() =>
+      showToast({ title: "All recent removed", message: "All recent commands have been removed" }),
+    );
   };
 
-  const Item = ({ alias }: { alias: Alias }) => {
-    const { name, command, type, description, fav = false } = alias;
-    const tag = { tag: { value: name, color: typeColor(type) } };
+  const Item = ({ alias, hidePin }: { alias: Alias; hidePin?: boolean }) => {
+    const { name, command, type, description, pin = false, recent = false } = alias;
+
+    const detail = `## ${name}
+  ####
+  \`\`\`
+  ${command}
+  \`\`\`
+  ####
+  ${description}`;
     return (
       <List.Item
-        title={command}
-        subtitle={description}
+        icon={showTypeIcon ? { source: Icon.Dot, tintColor: typeColor[type] } : undefined}
+        title={name}
+        subtitle={{ value: command, tooltip: command }}
+        detail={<List.Item.Detail markdown={detail} />}
         keywords={[description, command]}
-        accessories={[...(fav ? [{ icon: iconStar() }] : []), tag]}
-        actions={Actions(alias)}
+        accessories={[
+          ...(pin && !hidePin
+            ? [{ icon: { source: Icon.Tack, ...(isPinColored && { tintColor: Color.Yellow }) } }]
+            : []),
+        ]}
+        actions={
+          <ActionPanel>
+            <ActionPanel.Section>
+              <Action.CopyToClipboard title="Copy Alias" content={name} onCopy={() => addRecent(alias)} />
+              <Action.Paste title="Paste Alias" content={name} onPaste={() => addRecent(alias)} />
+            </ActionPanel.Section>
+
+            <>
+              {pin && (
+                <Action
+                  icon={Icon.TackDisabled}
+                  title="Unpin"
+                  onAction={() => handlePin(alias)}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                />
+              )}
+              {pin || (
+                <Action
+                  icon={Icon.Tack}
+                  title="Pin"
+                  onAction={() => handlePin(alias)}
+                  shortcut={Keyboard.Shortcut.Common.Pin}
+                />
+              )}
+            </>
+
+            <ActionPanel.Section>
+              <Action
+                icon={Icon.AppWindowSidebarRight}
+                title="Toggle Details"
+                onAction={() => setShowDetails(!showDetails)}
+                shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+              />
+            </ActionPanel.Section>
+
+            {recent && data.recent.length && (
+              <Action
+                icon={Icon.XMarkCircle}
+                title="Clear All Recent"
+                onAction={clearRecent}
+                shortcut={Keyboard.Shortcut.Common.RemoveAll}
+              />
+            )}
+            <Action icon={Icon.Gear} title="CahcColors in Preferences" onAction={openCommandPreferences} />
+          </ActionPanel>
+        }
       />
     );
   };
 
-  const Actions = (alias: Alias) => {
-    return (
-      <ActionPanel>
-        <Action.Push
-          icon={Icon.Eye}
-          title="Open Alias"
-          target={<CommandDetail alias={alias} onFavorite={() => handleFav(alias)} onCopy={() => addRecent(alias)} />}
-          shortcut={Keyboard.Shortcut.Common.Open}
-        />
-
-        <Action.CopyToClipboard
-          title="Copy Alias"
-          content={alias.name}
-          shortcut={Keyboard.Shortcut.Common.Copy}
-          onCopy={() => addRecent(alias)}
-        />
-
-        <>
-          {alias.fav && (
-            <Action
-              icon={Icon.StarDisabled}
-              title="Remove From Favorites"
-              onAction={() => handleFav(alias)}
-              shortcut={Keyboard.Shortcut.Common.Remove}
-            />
-          )}
-          {alias.fav || (
-            <Action
-              icon={Icon.Star}
-              title="Add to Favorites"
-              onAction={() => handleFav(alias)}
-              shortcut={Keyboard.Shortcut.Common.Pin}
-            />
-          )}
-        </>
-
-        {alias.recent && (
-          <Action
-            icon={Icon.Clock}
-            title="Remove From Recent"
-            onAction={() => removeRecent(alias)}
-            shortcut={Keyboard.Shortcut.Common.Remove}
-          />
-        )}
-        {hasRecent && (
-          <Action
-            icon={Icon.XMarkCircle}
-            title="Clear All Recent"
-            onAction={clearRecent}
-            shortcut={Keyboard.Shortcut.Common.RemoveAll}
-          />
-        )}
-      </ActionPanel>
-    );
-  };
-
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search command, description or alias">
-      <List.Section title="Favorites">
-        {favorites.map((alias) => (
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search command, description or alias"
+      isShowingDetail={showDetails}
+    >
+      <List.Section title="Pinned" subtitle={data.pins.length > maxPins ? `${data.pins.length}` : ""}>
+        {data.pins.slice(0, maxPins).map((alias) => (
+          <Item key={alias.name} alias={alias} hidePin />
+        ))}
+      </List.Section>
+
+      <List.Section title="Recent" subtitle={data.recent.length > maxRecent ? `${data.recent.length}` : ""}>
+        {data.recent.slice(0, maxRecent).map((alias) => (
           <Item key={alias.name} alias={alias} />
         ))}
       </List.Section>
 
-      <List.Section title="Recently Used">
-        {recent.map((alias) => (
-          <Item key={alias.name} alias={alias} />
-        ))}
-      </List.Section>
-
-      <List.Section title="Commands">
-        {aliases.map((alias) => (
+      <List.Section title="All aliases" subtitle={`${data.aliases.length}`}>
+        {data.aliases.map((alias) => (
           <Item key={alias.name} alias={alias} />
         ))}
       </List.Section>

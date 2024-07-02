@@ -105,10 +105,3 @@ const getEnumKeys = <T extends object>(enumType: T): (keyof T)[] => {
 export const getEnumKeysExcludingCurrent = <T extends object>(enumType: T, currentValue: T[keyof T]): (keyof T)[] => {
   return getEnumKeys(enumType).filter((key) => enumType[key] !== currentValue);
 };
-
-export const normalizeUrl = (url: string) => {
-  if (url.endsWith("/")) {
-    return url;
-  }
-  return `${url}/`;
-};

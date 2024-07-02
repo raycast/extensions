@@ -1,6 +1,10 @@
 # Network Speed Changelog
 
-## [Time cost] - 2024-06-20
+## [Update Loading View] - 2024-06-25
+
+- Update loading view
+
+## [Show Time Cost] - 2024-06-20
 
 - Show the time cost of the network speed test
 

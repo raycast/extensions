@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pip",
   "title": "PiP",
-  "description": "Watch video in Picture in Picture mode",
+  "description": "Watch video in Picture in Picture or Full Screen mode",
   "icon": "pip-icon.png",
   "author": "koinzhang",
   "license": "MIT",
@@ -14,21 +14,88 @@
   "keywords": [
     "pip",
     "picture-in-picture",
+    "fullscreen",
     "video",
+    "native",
     "html5",
+    "player",
     "picture",
+    "piPifier",
+    "fullifier",
     "iina"
   ],
   "commands": [
     {
       "name": "toggle-pip",
-      "title": "Toggle PiP",
-      "description": "Toggle video in Picture in Picture mode",
+      "title": "Toggle Picture in Picture",
+      "description": "Watch video in Picture in Picture mode",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-full-screen",
+      "title": "Toggle Full Screen",
+      "description": "Watch video in browser's native Full Screen mode",
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "title": "Simulate Keyboard Shortcut",
+      "name": "simulateKeyboard",
+      "description": "Simulate pressing the keyboard in a Chromium-based browser to automate picture-in-picture or full-screen mode. If there is a conflict with the keystrokes, please select another keystroke or No Simulate.",
+      "type": "dropdown",
+      "default": "key code 122",
+      "required": false,
+      "data": [
+        {
+          "title": "No Simulate",
+          "value": ""
+        },
+        {
+          "title": "F1",
+          "value": "key code 122"
+        },
+        {
+          "title": "F2",
+          "value": "key code 120"
+        },
+        {
+          "title": "F3",
+          "value": "key code 99"
+        },
+        {
+          "title": "F4",
+          "value": "key code 118"
+        },
+        {
+          "title": "F5",
+          "value": "key code 95"
+        },
+        {
+          "title": "F6",
+          "value": "key code 97"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "Z",
+          "value": "z"
+        },
+        {
+          "title": "X",
+          "value": "x"
+        }
+      ]
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.77.0",
+    "@raycast/api": "^1.77.1",
     "@raycast/utils": "^1.16.0"
   },
   "devDependencies": {

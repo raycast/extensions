@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
-import { getFinderPath } from "../utils/common-utils";
+import { Action, ActionPanel, Icon, Toast } from "@raycast/api";
+import { getFinderPath, showCustomToast } from "../utils/common-utils";
 import NewFileWithDetails from "../new-file-with-details";
 import { homedir } from "os";
 import AddFileTemplate from "../add-file-template";
@@ -25,7 +25,11 @@ export function ActionNewFileHere(props: {
           try {
             await createNewFile(fileType, await getFinderPath());
           } catch (e) {
-            await showToast(Toast.Style.Failure, "Failed to create file.", String(e));
+            await showCustomToast({
+              title: "Failed to create file.",
+              message: String(e),
+              style: Toast.Style.Failure,
+            });
           }
         }}
       />
@@ -44,7 +48,11 @@ export function ActionNewFileHere(props: {
             try {
               await createNewFile(fileType, `${homedir()}/Desktop/`);
             } catch (e) {
-              await showToast(Toast.Style.Failure, "Failed to create file.", String(e));
+              await showCustomToast({
+                title: "Failed to create file.",
+                message: String(e),
+                style: Toast.Style.Failure,
+              });
             }
           }}
         />

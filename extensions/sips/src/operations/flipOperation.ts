@@ -5,13 +5,14 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-05 23:16:12
- * Last modified  : 2023-07-06 15:48:56
+ * Last modified  : 2024-06-26 21:37:46
  */
 
 import { execSync } from "child_process";
 import path from "path";
 
 import {
+  execSIPSCommandOnAVIF,
   execSIPSCommandOnSVG,
   execSIPSCommandOnWebP,
   flipPDF,
@@ -29,13 +30,14 @@ import { Direction } from "../utilities/enums";
  */
 export default async function flip(sourcePaths: string[], direction: Direction) {
   const pathStrings = '"' + sourcePaths.join('" "') + '"';
-  const newPaths = getDestinationPaths(sourcePaths);
+  const newPaths = await getDestinationPaths(sourcePaths);
   const directionString = direction == Direction.HORIZONTAL ? "horizontal" : "vertical";
 
   if (
     pathStrings.toLowerCase().includes("webp") ||
     pathStrings.toLowerCase().includes("svg") ||
-    pathStrings.toLowerCase().includes("pdf")
+    pathStrings.toLowerCase().includes("pdf") ||
+    pathStrings.toLowerCase().includes("avif")
   ) {
     // Special types present -- Handle each image individually
     const resultPaths = [];
@@ -48,7 +50,10 @@ export default async function flip(sourcePaths: string[], direction: Direction) 
         resultPaths.push(await execSIPSCommandOnSVG(`sips --flip ${directionString}`, imgPath));
       } else if (imgPath.toLowerCase().endsWith("pdf")) {
         // Flip each page of PDF
-        resultPaths.push(flipPDF(imgPath, direction));
+        resultPaths.push(await flipPDF(imgPath, direction));
+      } else if (imgPath.toLowerCase().endsWith("avif")) {
+        // Convert to PNG, flip, and restore to AVIF
+        resultPaths.push(await execSIPSCommandOnAVIF(`sips --flip ${directionString}`, imgPath));
       } else {
         // Image is not a special format, so just flip it using SIPS
         const newPath = newPaths[sourcePaths.indexOf(imgPath)];

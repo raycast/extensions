@@ -1,11 +1,12 @@
 import { closeMainWindow, getFrontmostApplication } from "@raycast/api";
-import { finderName } from "./utils/constants";
-import { copyPath, copyUrl } from "./utils/common-utils";
+import { finderBundleId } from "./utils/constants";
+import { copyPath, copyUrl, showLoadingHUD } from "./utils/common-utils";
 
 export default async () => {
   await closeMainWindow();
+  await showLoadingHUD("Copying...");
   const frontmostApp = await getFrontmostApplication();
-  if (frontmostApp.name === finderName) {
+  if (frontmostApp.bundleId === finderBundleId) {
     // get finder path
     await copyPath();
   } else {
