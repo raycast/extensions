@@ -14,11 +14,14 @@ interface OtpListItemProps {
 }
 
 export default function OtpListItem({ index, item, timeLeft, setItems }: OtpListItemProps) {
-  const otp = item.seed != null ? generateTOTP(item.seed, {
-    digits: item.digits,
-    period: item.period,
-    timestamp: new Date().getTime()
-  }) : CORRUPTED;
+  const otp =
+    item.seed != null
+      ? generateTOTP(item.seed, {
+          digits: item.digits,
+          period: item.period,
+          timestamp: new Date().getTime(),
+        })
+      : CORRUPTED;
   const subtitle = item.issuer || item.accountType || "";
   const subtitleDisplay = subtitle.match("authenticator") || !compareByName(subtitle, item.name) ? "" : subtitle;
   const progress = (100 - Math.round((timeLeft / item.period) * 100)) / 100;
@@ -37,22 +40,22 @@ export default function OtpListItem({ index, item, timeLeft, setItems }: OtpList
       }
       accessories={[
         {
-          tag: `${otp}`
+          tag: `${otp}`,
         },
         {
           icon: {
             source: {
               light: getProgressIcon(progress, "#CCC", {
                 background: Color.PrimaryText,
-                backgroundOpacity: 1
+                backgroundOpacity: 1,
               }),
               dark: getProgressIcon(progress, "#333", {
                 background: Color.PrimaryText,
-                backgroundOpacity: 1
-              })
-            }
-          }
-        }
+                backgroundOpacity: 1,
+              }),
+            },
+          },
+        },
       ]}
     />
   );

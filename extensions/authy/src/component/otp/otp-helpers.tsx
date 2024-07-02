@@ -1,11 +1,13 @@
 import {
   Action,
   confirmAlert,
-  getPreferenceValues, Icon,
+  getPreferenceValues,
+  Icon,
   open,
-  openCommandPreferences, popToRoot,
+  openCommandPreferences,
+  popToRoot,
   showToast,
-  Toast
+  Toast,
 } from "@raycast/api";
 import {
   addToCache,
@@ -14,12 +16,16 @@ import {
   getFromCache,
   OPT_SERVICES_KEY,
   RECENTLY_USED,
-  SECRET_SEED
+  SECRET_SEED,
 } from "../../cache";
 import { getOtpServices, logout, Service } from "../login/login-helper";
 import { compareByDate, compareByName, toId } from "../../util/compare";
 
-const { excludeNames: excludeNamesCsv = "", primaryActionIsCopy, recentlyUsedOrder } = getPreferenceValues<{
+const {
+  excludeNames: excludeNamesCsv = "",
+  primaryActionIsCopy,
+  recentlyUsedOrder,
+} = getPreferenceValues<{
   excludeNames: string;
   primaryActionIsCopy: boolean;
   recentlyUsedOrder: boolean;
@@ -33,8 +39,11 @@ export const CORRUPTED = "corrupted";
 /**
  * Just a type to use in other files
  */
-export type setItemsFunction = (value: (((prevState: { otpList: Service[]; isLoading: boolean }) =>
-  { otpList: Service[]; isLoading: boolean }) | { otpList: Service[]; isLoading: boolean })) => void;
+export type setItemsFunction = (
+  value:
+    | ((prevState: { otpList: Service[]; isLoading: boolean }) => { otpList: Service[]; isLoading: boolean })
+    | { otpList: Service[]; isLoading: boolean }
+) => void;
 
 /**
  * Loads OTP services to show, sort and exclude values from extension properties
@@ -44,7 +53,7 @@ export async function loadData(setItems: setItemsFunction): Promise<void> {
 
   setItems({
     otpList: otpServices,
-    isLoading: false
+    isLoading: false,
   });
 }
 
@@ -63,7 +72,7 @@ export async function checkError(otpList: Service[]) {
       message: "Check your Authy Backup Password in settings",
       primaryAction: {
         title: "Open Preferences",
-        onAction: () => openCommandPreferences()
+        onAction: () => openCommandPreferences(),
       },
       dismissAction: {
         title: "Cancel",
@@ -73,10 +82,10 @@ export async function checkError(otpList: Service[]) {
             message: "Check Q&A in store",
             primaryAction: {
               title: "Open Store Page",
-              onAction: () => open("https://www.raycast.com/guga4ka/authy")
-            }
-          })
-      }
+              onAction: () => open("https://www.raycast.com/guga4ka/authy"),
+            },
+          }),
+      },
     });
   }
 }
@@ -88,18 +97,18 @@ export async function refresh(setItems: setItemsFunction) {
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Twilio’s Authy",
-    message: "Refreshing"
+    message: "Refreshing",
   });
   await toast.show();
-  setItems(prevState => {
+  setItems((prevState) => {
     return {
       otpList: prevState.otpList,
-      isLoading: true
+      isLoading: true,
     };
   });
   let services: Service[] = [];
   try {
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 5000));
     const deviceId: number = await getFromCache(DEVICE_ID);
     const secretSeed: string = await getFromCache(SECRET_SEED);
     services = await getOtpServices(deviceId, secretSeed, toast);
@@ -108,7 +117,7 @@ export async function refresh(setItems: setItemsFunction) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Twilio’s Authy",
-        message: error.message
+        message: error.message,
       });
       return;
     } else {
@@ -118,13 +127,13 @@ export async function refresh(setItems: setItemsFunction) {
   services = await sortServices(services);
   setItems({
     otpList: services,
-    isLoading: false
+    isLoading: false,
   });
   await toast.hide();
   await showToast({
     style: Toast.Style.Success,
     title: "Twilio’s Authy",
-    message: "Data has been synced"
+    message: "Data has been synced",
   });
 }
 
@@ -132,13 +141,25 @@ export async function refresh(setItems: setItemsFunction) {
  * Refresh and Logout Actions
  */
 export function commonActions(refresh: () => Promise<void>) {
-  return <>
-    <Action title={"Sync"} icon={Icon.ArrowClockwise} shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={refresh} />
-    <Action title={"Logout"} icon={Icon.Logout} shortcut={{ modifiers: ["cmd"], key: "l" }}
-            onAction={async () => {
-              await logout();
-              await popToRoot();
-            }} /></>;
+  return (
+    <>
+      <Action
+        title={"Sync"}
+        icon={Icon.ArrowClockwise}
+        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        onAction={refresh}
+      />
+      <Action
+        title={"Logout"}
+        icon={Icon.Logout}
+        shortcut={{ modifiers: ["cmd"], key: "l" }}
+        onAction={async () => {
+          await logout();
+          await popToRoot();
+        }}
+      />
+    </>
+  );
 }
 
 /**
@@ -150,23 +171,37 @@ export function otpActions(otp: string, id: string, index: number, setItems: set
     return <Action.OpenInBrowser title="Submit Issue" url="https://github.com/raycast/extensions/issues/new/choose" />;
   }
 
-  return <>
-    {primaryActionIsCopy ? (
-      <>
-        <Action.CopyToClipboard title="Copy OTP" content={otp}
-                                onCopy={async () => await updateOrderIfEnabled(id, index, setItems)} />
-        <Action.Paste title="Output OTP" content={otp}
-                      onPaste={async () => await updateOrderIfEnabled(id, index, setItems)} />
-      </>
-    ) : (
-      <>
-        <Action.Paste title="Output OTP" content={otp}
-                      onPaste={async () => await updateOrderIfEnabled(id, index, setItems)} />
-        <Action.CopyToClipboard title="Copy OTP" content={otp}
-                                onCopy={async () => await updateOrderIfEnabled(id, index, setItems)} />
-      </>
-    )}
-  </>;
+  return (
+    <>
+      {primaryActionIsCopy ? (
+        <>
+          <Action.CopyToClipboard
+            title="Copy OTP"
+            content={otp}
+            onCopy={async () => await updateOrderIfEnabled(id, index, setItems)}
+          />
+          <Action.Paste
+            title="Output OTP"
+            content={otp}
+            onPaste={async () => await updateOrderIfEnabled(id, index, setItems)}
+          />
+        </>
+      ) : (
+        <>
+          <Action.Paste
+            title="Output OTP"
+            content={otp}
+            onPaste={async () => await updateOrderIfEnabled(id, index, setItems)}
+          />
+          <Action.CopyToClipboard
+            title="Copy OTP"
+            content={otp}
+            onCopy={async () => await updateOrderIfEnabled(id, index, setItems)}
+          />
+        </>
+      )}
+    </>
+  );
 }
 
 async function updateOrderIfEnabled(id: string, index: number, setOtpList: setItemsFunction) {

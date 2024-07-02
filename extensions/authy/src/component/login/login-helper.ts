@@ -10,14 +10,14 @@ import {
   removeFromCache,
   REQUEST_ID,
   SECRET_SEED,
-  SERVICES_KEY
+  SERVICES_KEY,
 } from "../../cache";
 import {
   checkRequestStatus,
   completeRegistration,
   getAuthyApps,
   getServices,
-  requestRegistration
+  requestRegistration,
 } from "../../client/authy-client";
 import { generateTOTP } from "../../util/totp";
 import { encode } from "hi-base32";
@@ -50,7 +50,7 @@ export async function requestLoginIfNeeded() {
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Twilio’s Authy",
-    message: "Waiting for Approval"
+    message: "Waiting for Approval",
   });
   try {
     const requestExists = await checkIfCached(REQUEST_ID);
@@ -64,7 +64,7 @@ export async function requestLoginIfNeeded() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Twilio’s Authy",
-        message: error.message
+        message: error.message,
       });
     } else {
       throw error;
@@ -74,13 +74,12 @@ export async function requestLoginIfNeeded() {
 
 export async function login(setLogin: (step: boolean) => void) {
   const loginToast = new Toast({
-    title: "Twilio’s Authy"
+    title: "Twilio’s Authy",
   });
 
   try {
-
     // check if login request exist
-    if (!await checkIfCached(REQUEST_ID)) {
+    if (!(await checkIfCached(REQUEST_ID))) {
       loginToast.message = "Login Request not found";
       loginToast.style = Toast.Style.Failure;
       await loginToast.show();
@@ -123,7 +122,6 @@ export async function resetRegistration() {
   await removeFromCache(SECRET_SEED);
   await requestLoginIfNeeded();
 }
-
 
 async function checkForApproval(requestId: string, toast: Toast) {
   toast.message = "Checking request status";
@@ -170,7 +168,7 @@ export async function getOtpServices(deviceId: number, secretSeed: string, toast
   const otps = [
     generateTOTP(seed, { digits: 7, period: 10, timestamp: timestamp.getTime() }),
     generateTOTP(seed, { digits: 7, period: 10, timestamp: timestamp.getTime() + 10 * 1000 }),
-    generateTOTP(seed, { digits: 7, period: 10, timestamp: timestamp.getTime() + 10 * 2 * 1000 })
+    generateTOTP(seed, { digits: 7, period: 10, timestamp: timestamp.getTime() + 10 * 2 * 1000 }),
   ];
 
   // get authy apps
