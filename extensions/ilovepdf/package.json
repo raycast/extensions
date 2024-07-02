@@ -65,6 +65,13 @@
       "subtitle": "iLovePDF",
       "description": "Converts an HTML page to PDF using iLovePDF API.",
       "mode": "view"
+    },
+    {
+      "name": "repair-pdf",
+      "title": "Repair PDF",
+      "subtitle": "iLovePDF",
+      "description": "Tries to repair corrupted PDF using iLovePDF API.",
+      "mode": "view"
     }
   ],
   "preferences": [

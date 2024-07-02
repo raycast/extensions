@@ -1,5 +1,7 @@
 # iLovePDF Changelog
 
+## [Add Repair PDF Command] - 2024-07-03
+
 ## [Add Convert HTML Page to PDF] - 2024-06-23
 
 ## [Refactor Ask Before Download and Open Now] - 2024-06-17
