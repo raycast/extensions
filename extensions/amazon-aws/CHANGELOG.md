@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Improvements] - 2024-07-02
+
+- Changed AwsAction.Console component, to create sso shortcut login links, if possible
+
 ## [Fixes] - 2024-06-24
 
 - Fixed [the issue](https://github.com/raycast/extensions/issues/13088) when codepipeline(s) are rendered with no executions.
