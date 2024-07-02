@@ -1,11 +1,11 @@
-import { ActionPanel, List } from "@raycast/api";
+import { ActionPanel, Icon, List } from "@raycast/api";
 import { PreferenceActions } from "./preference-actions";
 
 export function TrendsEmptyView() {
   return (
     <List.EmptyView
-      icon={"extension-icon/empty-view-icon.png"}
-      title={"No Trend"}
+      icon={Icon.Hashtag}
+      title={"No Trends"}
       actions={
         <ActionPanel>
           <PreferenceActions />

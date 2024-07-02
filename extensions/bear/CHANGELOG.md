@@ -1,5 +1,10 @@
 # Bear Changelog
 
+## [Connect note pinning form value to API call] - 2024-06-08
+- When creating a new note, checking the option to "pin to top" is now taken into account within the API call
+- When hovering over the preference for "Pin note in notes list", the description is now accurate to the purpose
+- Fixes issue where a note's title, body and tags would show as URL encoded
+
 ## [Menu Bar Command and Improvements] - 2024-06-04
 
 - Added a menu bar command to easily open notes.

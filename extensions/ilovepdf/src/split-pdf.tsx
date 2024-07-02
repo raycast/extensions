@@ -49,6 +49,7 @@ export default function Command() {
   const [splitMode, setSplitMode] = useState<SplitModes>("ranges");
   const [mergeAfter, setMergeAfter] = useState<boolean>(false);
   const [ranges, setRanges] = useState<string>("");
+  const [defaultText, setDefaultText] = useState<string>("Format: 1,5,10-14");
 
   async function handleSubmit(values: Values) {
     setIsLoading(true);
@@ -83,7 +84,6 @@ export default function Command() {
 
     const instance = new ILovePDFApi(publicKey, secretKey);
     const task = instance.newTask("split") as SplitTask;
-
     try {
       await task.start();
       const iLovePdfFile = new ILovePDFFile(file);
@@ -140,7 +140,15 @@ export default function Command() {
         title="Split Mode"
         value={splitMode}
         onChange={(newVal: string) => {
-          setSplitMode(newVal as SplitModes);
+          const newMode = newVal as SplitModes;
+          setSplitMode(newMode);
+          setDefaultText(
+            newMode == "ranges"
+              ? "Accepted format: 1,5,10-14"
+              : newMode == "fixed_range"
+                ? "Format is fixed value: 3"
+                : " Accepted format: 1,4,8-12,16",
+          );
         }}
         info={
           "Ranges: Define different ranges of pages\nFixed Range: Split the PDF with fixed range value\nRemove Pages: Remove the specified Ranges"
@@ -150,19 +158,7 @@ export default function Command() {
         <Form.Dropdown.Item value="fixed_range" title="Fixed Range" />
         <Form.Dropdown.Item value="remove_pages" title="Remove Pages" />
       </Form.Dropdown>
-      <Form.TextArea
-        id="ranges"
-        title={"range"}
-        value={ranges}
-        onChange={setRanges}
-        info={
-          splitMode == "ranges"
-            ? "Format: 1,5,10-14"
-            : splitMode == "fixed_range"
-              ? "Format is fixed value: 3"
-              : " Accepted format: 1,4,8-12,16"
-        }
-      />
+      <Form.TextArea id="ranges" title={"Range"} value={ranges} onChange={setRanges} placeholder={defaultText} />
       {splitMode == "ranges" ? (
         <Form.Checkbox
           id="merge_after"
