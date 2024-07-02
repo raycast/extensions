@@ -1,10 +1,16 @@
 # Browser Tabs
 
-Search all open browser tabs.
+Search and open tabs in Chrome, Safari, Edge, Arc, Brave, Vivaldi, Opera and Orion.
 
+## Supported Browsers
 
-## Supported Apps
+- **Safari** (WebKit-based)
+- **Chrome** (Chromium-based)
+- **Edge** (Chromium-based)
+- **Arc** (Chromium-based)
+- Other Chromium or WebKit-based browsers
 
-- ✨ Support **Safari**, **Chrome**, **Edge** , **Arc** and other Chromium, Webkit-based browsers
+## Unsupported Browsers
 
-- 🚨 Not Support Gecko-based browsers such as **Firefox** is not supported
+- **Firefox** (Gecko-based)
+- Other Gecko-based browsers are not supported.

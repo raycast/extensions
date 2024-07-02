@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "browser-tabs",
   "title": "Browser Tabs",
-  "description": "Search all open browser tabs.",
+  "description": "Search and open tabs in Chrome, Safari, Edge, Arc, Brave, Vivaldi, Opera and Orion.",
   "icon": "browser-tabs-icon.png",
   "author": "koinzhang",
   "license": "MIT",
@@ -10,7 +10,7 @@
     {
       "name": "index",
       "title": "Search Browser Tabs",
-      "description": "Search all open browser tabs.",
+      "description": "Search and open tabs from your browsers.",
       "mode": "view",
       "preferences": [
         {
