@@ -2,7 +2,7 @@
 
 ## [Contributor maintenance] - {PR_MERGE_DATE}
 
-- Remove @JonathanWbn from list of contributors
+- Move @JonathanWbn to list of past contributors
 
 ## [Add simple english version] - 2024-05-31
 
