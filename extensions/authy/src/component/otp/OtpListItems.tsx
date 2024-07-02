@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import OtpListItem, { Otp } from "./OtpListItem";
 import { clearTimeout } from "node:timers";
+import { Service } from "../login/login-helper";
+import OtpListItem from "./OtpListItem";
+import { setItemsFunction } from "./otp-helpers";
 
 function calculateTimeLeft(basis: number) {
   return basis - (new Date().getSeconds() % basis);
@@ -12,12 +14,11 @@ interface TimeState {
 }
 
 interface OtpListItemsProps {
-  items: Otp[];
-  refresh: () => Promise<void>;
-  setOtpList: (value: (prev: Otp[]) => Otp[]) => void;
+  items: Service[];
+  setItems: setItemsFunction;
 }
 
-export default function OtpListItems({ items, refresh, setOtpList }: OtpListItemsProps) {
+export default function OtpListItems({ items, setItems }: OtpListItemsProps) {
   const [{ timeLeft10, timeLeft30 }, setTimes] = useState<TimeState>({
     timeLeft10: calculateTimeLeft(10),
     timeLeft30: calculateTimeLeft(30),
@@ -37,7 +38,6 @@ export default function OtpListItems({ items, refresh, setOtpList }: OtpListItem
     doSetTimes();
     return () => clearTimeout(id);
   }, []);
-
   return (
     <>
       {items.map((item, index) => (
@@ -45,10 +45,8 @@ export default function OtpListItems({ items, refresh, setOtpList }: OtpListItem
           key={index}
           index={index}
           item={item}
-          basis={item.type === "service" ? 30 : 10}
           timeLeft={item.type === "service" ? timeLeft30 : timeLeft10}
-          refresh={refresh}
-          setOtpList={setOtpList}
+          setItems={setItems}
         />
       ))}
     </>

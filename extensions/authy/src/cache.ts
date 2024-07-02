@@ -2,6 +2,7 @@ import { LocalStorage } from "@raycast/api";
 
 export const SERVICES_KEY = "services";
 export const APPS_KEY = "apps";
+export const OPT_SERVICES_KEY = "otpServices";
 export const REQUEST_ID = "requestId";
 export const DEVICE_ID = "deviceId";
 export const SECRET_SEED = "secretSeed";
@@ -18,6 +19,15 @@ export async function getFromCache<T>(key: string): Promise<T> {
     return JSON.parse(fromCache);
   } else {
     throw new Error(`${key} not found`);
+  }
+}
+
+export async function getFromCacheOrDefault<T>(key: string, defaultValue: T): Promise<T> {
+  const fromCache = await LocalStorage.getItem<string>(key);
+  if (fromCache != undefined) {
+    return JSON.parse(fromCache);
+  } else {
+    return defaultValue;
   }
 }
 
