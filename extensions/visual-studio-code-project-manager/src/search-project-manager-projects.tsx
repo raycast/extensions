@@ -55,7 +55,7 @@ function getProjectEntries(storagePath: string): ProjectEntry[] {
         if (projectEntries.find(({ rootPath }) => rootPath === fullPath)) {
           return;
         }
-        projectEntries.push({ name, rootPath: fullPath, tags: [], enabled: true });
+        projectEntries.push({ id: fullPath, name, rootPath: fullPath, tags: [], enabled: true });
       });
     }
   });
@@ -122,8 +122,8 @@ function getProjectsGroupedByTag(projects: ProjectEntry[]): Map<string, ProjectE
   return new Map([...groupedProjects.entries()].sort());
 }
 
-type FrecencyResturnType<T> = ReturnType<typeof useFrecencySorting<T>>;
-type FrecencyUpdateType<T> = Pick<FrecencyResturnType<T>, "visitItem" | "resetRanking">;
+type FrecencyReturnType<T extends { id: string }> = ReturnType<typeof useFrecencySorting<T>>;
+type FrecencyUpdateType<T extends { id: string }> = Pick<FrecencyReturnType<T>, "visitItem" | "resetRanking">;
 
 function getProjectsGroupedByTagAsElements(
   projectEntries: ProjectEntry[],
@@ -204,7 +204,7 @@ export default function Command() {
         const search = searchText.toLowerCase();
 
         if (aName === search) {
-          if (aName === bName) return 0
+          if (aName === bName) return 0;
           return -1;
         }
         if (bName === search) return 1;
