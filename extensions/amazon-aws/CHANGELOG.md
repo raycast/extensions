@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-07-02
 
 - Changed AwsAction.Console component, to create sso shortcut login links, if possible
 
