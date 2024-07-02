@@ -19,6 +19,7 @@ export function useModel(): ModelHook {
   const [isLoading, setLoading] = useState<boolean>(false);
 
   const option: Model["option"][] = [
+    "claude-3-5-sonnet-20240620",
     "claude-3-opus-20240229",
     "claude-3-sonnet-20240229",
     "claude-3-haiku-20240307",

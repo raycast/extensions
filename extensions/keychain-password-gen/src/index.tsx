@@ -4,8 +4,9 @@ import { randomInt } from "crypto";
 export default async function Command() {
   const pass = generate();
   await Clipboard.copy(pass, { transient: true });
+  await Clipboard.paste(pass);
 
-  await showHUD("Password copied to clipboard");
+  await showHUD("Password copied (and pasted) ✅");
 }
 
 function generate() {

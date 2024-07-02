@@ -1,6 +1,9 @@
 # iLovePDF Changelog
 
-## [Add Placeholder for format of split range] - 2024-06-23
+
+## [Add Placeholder for format of split range] - 2024-07-02
+
+## [Add Convert HTML Page to PDF] - 2024-06-23
 
 ## [Refactor Ask Before Download and Open Now] - 2024-06-17
 

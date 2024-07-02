@@ -5,7 +5,7 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-18 18:45:28
- * Last modified  : 2023-07-18 18:46:08
+ * Last modified  : 2024-06-26 21:37:46
  */
 
 import { showToast, Toast } from "@raycast/api";
@@ -44,7 +44,7 @@ export default async function runOperation(params: {
     await showErrorToast(
       `${params.failureMessage} ${params.selectedImages.length.toString()} ${pluralized}`,
       error as Error,
-      toast
+      toast,
     );
   } finally {
     await cleanup();

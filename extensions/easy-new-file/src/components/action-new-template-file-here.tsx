@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Clipboard, Icon, showHUD, showToast, Toast } from "@raycast/api";
-import { getFinderPath } from "../utils/common-utils";
+import { Action, ActionPanel, Clipboard, Icon, Toast } from "@raycast/api";
+import { getFinderPath, showCustomHUD, showCustomToast } from "../utils/common-utils";
 import NewFileWithDetails from "../new-file-with-details";
 import { homedir } from "os";
 import AddFileTemplate from "../add-file-template";
@@ -27,7 +27,7 @@ export function ActionNewTemplateFileHere(props: {
           try {
             await createNewFileByTemplate(template, await getFinderPath());
           } catch (e) {
-            await showToast(Toast.Style.Failure, "Create file failure.", String(e));
+            await showCustomToast({ title: "Fetch path success!", message: String(e), style: Toast.Style.Failure });
           }
         }}
       />
@@ -51,7 +51,7 @@ export function ActionNewTemplateFileHere(props: {
             try {
               await createNewFileByTemplate(template, `${homedir()}/Desktop/`);
             } catch (e) {
-              await showToast(Toast.Style.Failure, "Create file failure.", String(e));
+              await showCustomToast({ title: "Create file failure.", message: String(e), style: Toast.Style.Failure });
             }
           }}
         />
@@ -63,7 +63,7 @@ export function ActionNewTemplateFileHere(props: {
           shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
           onAction={async () => {
             await Clipboard.copy({ file: template.path });
-            await showHUD(`📋 ${template.name} copied to clipboard`);
+            await showCustomHUD({ title: `📋 ${template.name} copied to clipboard` });
           }}
         />
         <Action
@@ -72,7 +72,7 @@ export function ActionNewTemplateFileHere(props: {
           shortcut={{ modifiers: ["shift", "cmd"], key: "v" }}
           onAction={async () => {
             await Clipboard.paste({ file: template.path });
-            await showHUD(`📋 ${template.name} pasted to front app`);
+            await showCustomHUD({ title: `📋 ${template.name} pasted to front app` });
           }}
         />
       </ActionPanel.Section>
@@ -97,10 +97,10 @@ export function ActionNewTemplateFileHere(props: {
               `Are you sure you want to remove the ${template.name + "." + template.extension}?`,
               "Remove",
               async () => {
-                await showToast(Toast.Style.Animated, "Removing template...");
+                await showCustomToast({ title: "Removing template...", style: Toast.Style.Animated });
                 fse.removeSync(template.path);
                 setRefresh(Date.now());
-                await showToast(Toast.Style.Success, "Remove template success!");
+                await showCustomToast({ title: "Remove template success!", style: Toast.Style.Success });
               },
             );
           }}

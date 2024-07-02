@@ -138,6 +138,32 @@
           "default": true
         },
         {
+          "name": "calendarView",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Upcoming",
+              "value": "upcoming"
+            },
+            {
+              "title": "All",
+              "value": "all"
+            }
+          ],
+          "default": "today",
+          "required": false,
+          "title": "Calendar View",
+          "description": "Choose which calendar events you want to see in your menu bar."
+        },
+        {
           "name": "remindersView",
           "type": "dropdown",
           "data": [
