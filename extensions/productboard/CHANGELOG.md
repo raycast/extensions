@@ -1,6 +1,6 @@
 # Productboard Changelog
 
-## [Add `Notes` Command] - {PR_MERGE_DATE}
+## [Add `Notes` Command] - 2024-07-02
 
 ### Enhancements
 
