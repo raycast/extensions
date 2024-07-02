@@ -40,8 +40,8 @@ export default function Server() {
         icon={Icon.Pencil}
         onAction={() => push(<ServerForm server={server} use={{ servers: collectionsServers }} />)}
       />
-      <Action title={"Restart"} onAction={() => uS.itemRestart(server)} />
-      <Action title={"Amfetamine"} onAction={() => uS.itemAmfetamine(server)} />
+      <Action title={"Restart"} icon={Icon.ArrowClockwise} onAction={() => uS.itemRestart(server)} />
+      <Action title={"Amfetamine"} icon={Icon.Wand} onAction={() => uS.itemAmfetamine(server)} />
       <Action title={"Reload Servers"} icon={Icon.Download} onAction={() => uS.reload()} />
     </ActionPanel>
   );

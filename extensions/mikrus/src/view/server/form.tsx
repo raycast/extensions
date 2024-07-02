@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { ServerHookType, ServerType } from "../../type/server";
+import { GetApiKey, GetDefaultServer } from "../../type/config";
 
 export const ServerForm = (props: { server?: ServerType; use: { servers: ServerHookType }; name?: string }) => {
   const { use, server } = props;
@@ -24,7 +25,7 @@ export const ServerForm = (props: { server?: ServerType; use: { servers: ServerH
     },
     initialValues: {
       server_id: server?.server_id,
-      apiKey: server?.apiKey ?? "",
+      apiKey: server?.apiKey ?? (GetDefaultServer() === server?.server_id ? GetApiKey() : ""),
     },
   });
 
