@@ -60,7 +60,7 @@ export default function Server() {
       actions={getActionList}
     >
       {collectionsServers.data.length === 0 ? (
-        <List.EmptyView title="No servers" description="Reload servers" icon={Icon.Stars} />
+        <List.EmptyView title="No Servers" description="Reload servers by pressing enter" icon={Icon.Stars} />
       ) : (
         <ServerListView
           key="servers"
