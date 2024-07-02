@@ -31,7 +31,7 @@
     },
     {
       "name": "defaultServer",
-      "title": "Default server id",
+      "title": "Default Server ID",
       "description": "ID server",
       "type": "textfield",
       "required": true
