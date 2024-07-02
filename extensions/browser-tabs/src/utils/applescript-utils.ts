@@ -33,8 +33,6 @@ end tell
 
 const jumpToWebkitTab = async (browser: string, tab: Tab) => {
   try {
-    console.log(`jumpToWebkitTab for ${browser}`);
-    console.log(tab);
     return await runAppleScript(scriptJumpToWebkitTab(browser, tab));
   } catch (e) {
     console.error(`Error jumpToWebkitTab for ${browser}`);
@@ -44,7 +42,6 @@ const jumpToWebkitTab = async (browser: string, tab: Tab) => {
 
 const jumpToChromeTab = async (browser: string, tab: Tab) => {
   try {
-    console.log(tab);
     return await runAppleScript(scriptJumpToChromeTab(browser, tab));
   } catch (e) {
     console.error(`Error jumpToChromeTab for ${browser}`);
@@ -57,7 +54,6 @@ export const jumpToBrowserTab = async (browser: Application, tab: Tab) => {
     return await runAppleScriptOnArcTab(browser, tab, "select", true);
   } else {
     const webKitRet = await jumpToWebkitTab(browser.name, tab);
-    console.log("jumpToWebkitTab", webKitRet);
     if (isEmpty(webKitRet)) {
       return webKitRet;
     } else {
@@ -99,8 +95,6 @@ end tell
 
 const runAppleScriptOnArcTab = async (browser: Application, tab: Tab, action: string, activate = false) => {
   try {
-    console.log(`runAppleScriptOnArcTab for ${browser.name}`);
-    console.log(action, activate);
     return await runAppleScript(scriptOnArc(browser, tab, action, activate));
   } catch (e) {
     console.error(`Error runAppleScriptOnArcTab for ${browser.name}`);

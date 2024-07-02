@@ -32,13 +32,11 @@ export default function Command() {
       }
       return item.browser.name === selectedBrowser;
     });
-    // 如果frontmostApp存在，则将对应的浏览器移动到数组的第一个位置
     if (frontmostApp && filteredTabs && filteredTabs.length > 1) {
       const index = filteredTabs.findIndex((item) => item.browser.name === frontmostApp.name);
       if (index > 0) {
-        // 如果找到了并且不是第一个元素，进行移动
-        const [frontmostBrowser] = filteredTabs.splice(index, 1); // 从数组中移除
-        filteredTabs.unshift(frontmostBrowser); // 插入到数组的开头
+        const [frontmostBrowser] = filteredTabs.splice(index, 1);
+        filteredTabs.unshift(frontmostBrowser);
       }
     }
 
