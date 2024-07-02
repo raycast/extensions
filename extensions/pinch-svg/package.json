@@ -25,14 +25,14 @@
         {
           "name": "width",
           "type": "text",
-          "placeholder": "300",
+          "placeholder": "width",
           "required": true
         },
         {
           "name": "height",
           "type": "text",
 
-          "placeholder": "200",
+          "placeholder": "height",
           "required": true
         }
       ]
