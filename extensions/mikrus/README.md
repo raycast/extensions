@@ -35,7 +35,7 @@ All preferences properties list that can be customize through `Raycast Settings 
 | Properties                   | Label                          | Value       | Required | Default    | Description                                                                                          |
 | ---------------------------- | ------------------------------ | ----------- | -------- | ---------- | ---------------------------------------------------------------------------------------------------- |
 | `apiKey`                     | API Key                        | `string`    | `false`  | `empty`    | Your default api key to get lists servers                                                            |
-| `defaultServer`              | Default server id              | `string`    | `false`  | `empty`    | Your defalt id server                                                                                |
+| `defaultServer`              | Default Server ID              | `string`    | `false`  | `empty`    | Your defalt id server                                                                                |
 
 ---
 
