@@ -1,0 +1,108 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jose",
+  "title": "Jose",
+  "description": "Private chat interaction",
+  "icon": "icon.png",
+  "author": "tkowalski29",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "assistant",
+      "title": "Assistant",
+      "subtitle": "Assistants collection",
+      "description": "Collection of your private assistants",
+      "mode": "view"
+    },
+    {
+      "name": "chat",
+      "title": "Chat",
+      "subtitle": "Chat view",
+      "description": "Chat view for starting conversation",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "ask",
+          "type": "text",
+          "placeholder": "Ask",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "conversation",
+      "title": "Chats",
+      "subtitle": "Conversations collection",
+      "description": "Collection of your recent conversation",
+      "mode": "view"
+    },
+    {
+      "name": "snippet",
+      "title": "Snippet",
+      "subtitle": "Snippets collection",
+      "description": "Collection of your private snippets",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiOpenAiKey",
+      "title": "Open AI API Key",
+      "description": "Enter your personal Open AI API Key",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "apiEndpoint",
+      "title": "API Endpoint",
+      "description": "API endpoint for communication",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "apiBinnary",
+      "title": "Patch to binnary script",
+      "description": "Binnary endpoint for communication",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "apiEndpointData",
+      "title": "API Endpoint Data",
+      "description": "API endpoint for download assistants and snippets",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@langchain/community": "^0.2.9",
+    "@langchain/openai": "^0.1.2",
+    "@raycast/api": "^1.48.8",
+    "@raycast/utils": "^1.5.2",
+    "@types/react": "^18.3.3",
+    "@types/uuid": "^9.0.0",
+    "node-fetch": "^3.3.2",
+    "openai": "^4.52.3",
+    "say": "^0.16.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "18.8.3",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

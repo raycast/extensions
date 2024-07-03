@@ -1,0 +1,198 @@
+{
+  "name": "[Jose] blueprint",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "2550fd0a-a466-463c-93d6-115af033c55c",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "0cc126f6-1f76-45b8-8644-9a8fb7e7b35d",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        440,
+        320
+      ],
+      "webhookId": "2550fd0a-a466-463c-93d6-115af033c55c"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.dataType }}",
+                    "rightValue": "snippets",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "3aeefa3b-6171-4591-b95e-d5bfdbe1f460",
+                    "leftValue": "={{ $json.body.dataType }}",
+                    "rightValue": "talk",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "ec439a98-bcc1-424a-90bc-b4155cf9c29a",
+                    "leftValue": "={{ $json.body.dataType }}",
+                    "rightValue": "assistants",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d62106c2-753a-40d5-9cf7-0ee2b0dd41de",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        640,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "[\n  {\n    \"additionalData\": \"\",\n    \"assistantId\": \"0bb69d53-0389-49a4-a593-b75124fe25a7\",\n    \"avatar\": \"\",\n    \"description\": \"Chatty, easygoing digital sidekick\",\n    \"emoji\": \"\",\n    \"intents\": \"\",\n    \"model\": \"openai__gtp-4-turbo-preview\",\n    \"modelTemperature\": \"0.7\",\n    \"promptSystem\": \"You are an AI assistant designed for ultra-concise, engaging conversations. Follow these rules:\\n\\n- Use the fewest words possible while maintaining clarity, impact and natural language\\n- Keep a friendly, casual tone with occasional colloquialisms\\n- Always wrap code with triple backticks and keywords with single backticks\\n- Ask for clarification to avoid assumptions\\n- Detect intentions and emotional states to tailor responses perfectly.\\n- Focus solely on instructions and provide relevant, comprehensive responses\\n- Never repeat info or mention limitations\\n- Simplify complex tasks; provide the best output possible\\n- Prioritize user needs; tailor responses to their context and goals\\n- When asked for specific content, start response with requested info immediately\\n- Continuously improve based on user feedback\\n\\nLet's keep it ultra-concise and engaging!\",\n    \"title\": \"Jose\",\n    \"webhookUrl\": null\n  }\n]",
+        "options": {}
+      },
+      "id": "757baf3c-4483-4e13-9e8c-c47829878416",
+      "name": "Respond `assistants`",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        860,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"result\": {\n    \"text\": \"Awesome, all is working, your question: `{{ $json.body.question.text }}`\"\n  }\n}",
+        "options": {}
+      },
+      "id": "72a06a7b-3cdf-423e-b01a-7feb053e8e47",
+      "name": "Respond `talk`",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        860,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "[\n  {\n    \"category\": \"fun\",\n    \"emoji\": \"\",\n    \"model\": \"openai__gtp-4-turbo-preview\",\n    \"modelTemperature\": \"0.7\",\n    \"promptSystem\": \"Whatever I say, turn into a joke. Make it short, sarcastic and to the point.\",\n    \"snippetId\": \"4918f458-4e4a-48fa-8dde-809f5fe7b4f5\",\n    \"title\": \"Turn it into a joke\",\n    \"webhookUrl\": null\n  }\n]",
+        "options": {}
+      },
+      "id": "e7b0205b-0886-41d6-b7fe-ab26d56e4b0e",
+      "name": "Respond `snippets`",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        860,
+        160
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Respond `snippets`",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond `talk`",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond `assistants`",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "fe9f20ef-fc1a-4cde-b5c4-77220c45da24",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bd8bca130ff234f92012b5dbf68b6ef22ae7de88e31aea6d3ca8c499d32674da"
+  },
+  "id": "QlG6v4vcidgWy016",
+  "tags": []
+}
