@@ -30,6 +30,15 @@
     "andyburris",
     "thomaslombart"
   ],
+  "debug": {
+    "reloadShortcut": {
+      "key": "r",
+      "modifiers": [
+        "command",
+        "shift"
+      ]
+    }
+  },
   "license": "MIT",
   "preferences": [
     {
