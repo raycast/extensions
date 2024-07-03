@@ -1,16 +1,15 @@
-import { Client } from "@notionhq/client";
-import { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints";
+import { BlockObjectRequest, UpdatePageParameters } from "@notionhq/client/build/src/api-endpoints";
 import { showToast, Toast, Image, Icon } from "@raycast/api";
 import { markdownToBlocks } from "@tryfabric/martian";
 import { NotionToMarkdown } from "notion-to-md";
 
-import { UnwrapRecord } from "../types";
+import { getDateMention } from "../block";
+import { handleError, pageMapper } from "../global";
+import { getNotionClient } from "../oauth";
 
-import { getDateMention } from "./block";
-import { handleError, pageMapper } from "./global";
-import { getNotionClient } from "./oauth";
+import { PageProperty } from "./property";
 
-import { NotionObject } from ".";
+export * from "./property";
 
 export async function fetchPage(pageId: string, silent: boolean = true) {
   try {
@@ -48,7 +47,7 @@ export async function deletePage(pageId: string) {
   }
 }
 
-export async function patchPage(pageId: string, properties: Parameters<Client["pages"]["update"]>[0]["properties"]) {
+export async function patchPage(pageId: string, properties: UpdatePageParameters["properties"]) {
   try {
     const notion = getNotionClient();
     const page = await notion.pages.update({
@@ -187,12 +186,9 @@ export interface Page {
   icon_file: string | null;
   icon_external: string | null;
   url?: string;
-  properties: Record<string, PagePropertyType>;
+  properties: Record<string, PageProperty>;
 }
 
 export interface PageContent {
   markdown: string | undefined;
 }
-
-type NotionProperties<T, TObject> = T extends { object: TObject; properties: infer U } ? U : never;
-export type PagePropertyType = UnwrapRecord<NotionProperties<NotionObject, "page">>;
