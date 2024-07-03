@@ -37,9 +37,21 @@
       "mode": "view"
     },
     {
+      "name": "un-photos",
+      "title": "UN Photos",
+      "description": "United Nations Photo Gallery.",
+      "mode": "view"
+    },
+    {
       "name": "un-press",
       "title": "UN Press",
       "description": "Meetings Coverage and Press Releases",
+      "mode": "view"
+    },
+    {
+      "name": "un-site-index",
+      "title": "UN Site Index",
+      "description": "Site Index of United Nations.",
       "mode": "view"
     }
   ],
@@ -73,11 +85,11 @@
           "title": "Русский"
         },
         {
-          "value": "pt",
+          "value": "es",
           "title": "Español"
         },
         {
-          "value": "es",
+          "value": "pt",
           "title": "Português"
         },
         {
@@ -91,6 +103,40 @@
         {
           "value": "ur",
           "title": "Urdu اردو"
+        }
+      ]
+    },
+    {
+      "type": "dropdown",
+      "title": "Site Index Language",
+      "name": "siteIndexLanguageCode",
+      "description": "Display launage for UN Site Index.",
+      "required": true,
+      "default": "en",
+      "data": [
+        {
+          "value": "ar",
+          "title": "العربية"
+        },
+        {
+          "value": "zh",
+          "title": "中文"
+        },
+        {
+          "value": "en",
+          "title": "English"
+        },
+        {
+          "value": "fr",
+          "title": "Français"
+        },
+        {
+          "value": "ru",
+          "title": "Русский"
+        },
+        {
+          "value": "es",
+          "title": "Español"
         }
       ]
     },
@@ -148,7 +194,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.76.0",
+    "@raycast/api": "^1.77.1",
     "@raycast/utils": "^1.15.0",
     "cheerio": "^1.0.0-rc.12",
     "execa": "^9.2.0",

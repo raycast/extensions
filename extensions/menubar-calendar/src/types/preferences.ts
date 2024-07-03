@@ -9,6 +9,7 @@ interface Preferences {
   highlightCalendar: boolean;
   showWeekNumber: boolean;
   showCalendar: boolean;
+  calendarView: string;
   remindersView: string;
   showReminders: boolean;
   showSettings: boolean;
@@ -22,6 +23,7 @@ export const {
   largeCalendar,
   highlightCalendar,
   showWeekNumber,
+  calendarView,
   remindersView,
   showCalendar,
   showReminders,

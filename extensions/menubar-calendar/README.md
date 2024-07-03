@@ -2,7 +2,9 @@
 
 Show calendar and reminders in the menu bar.
 
-Swift code from the extension [Apple Reminder](https://www.raycast.com/raycast/apple-reminders).
+✨For Calendar, you can:
+
+- Click on the event to open it in Calendar.
 
 ✨For Reminders, you can:
 

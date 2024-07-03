@@ -1,9 +1,9 @@
-import { ActionPanel, environment, getPreferenceValues, Icon, List, Action } from "@raycast/api";
-import { icondir } from "../constants";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { icon } from "../util/icon";
 import { compareByName } from "../util/compare";
 import { addToCache, checkIfCached, getFromCache, RECENTLY_USED } from "../cache";
 import { CORRUPTED } from "./OtpList";
+import { getProgressIcon } from "@raycast/utils";
 
 const { primaryActionIsCopy, recentlyUsedOrder } = getPreferenceValues<{
   primaryActionIsCopy: boolean;
@@ -73,7 +73,7 @@ export default function OtpListItem({ index, item, basis, timeLeft, refresh, set
   const otp = item.generate();
   const subtitle = item.issuer || item.accountType || "";
   const subtitleDisplay = subtitle.match("authenticator") || !compareByName(subtitle, item.name) ? "" : subtitle;
-  const pie = `pie-${basis === 30 ? timeLeft : timeLeft * 3}`;
+  const progress = (100 - Math.round((timeLeft / basis) * 100)) / 100;
 
   return (
     <List.Item
@@ -101,13 +101,19 @@ export default function OtpListItem({ index, item, basis, timeLeft, refresh, set
       }
       accessories={[
         {
-          text: `${otp}`,
+          tag: `${otp}`,
         },
         {
           icon: {
             source: {
-              light: `${environment.assetsPath}/${icondir}/light/${pie}.png`,
-              dark: `${environment.assetsPath}/${icondir}/dark/${pie}.png`,
+              light: getProgressIcon(progress, "#CCC", {
+                background: Color.PrimaryText,
+                backgroundOpacity: 1,
+              }),
+              dark: getProgressIcon(progress, "#333", {
+                background: Color.PrimaryText,
+                backgroundOpacity: 1,
+              }),
             },
           },
         },

@@ -5,6 +5,11 @@
 - Adds an action to sort the PRs, issues, discussions and repos
 - For creating branches with no linked issues, the branch name does not need to start with `refs/heads`
 
+## [Notifications Improvements] - 2024-07-03
+
+- Fixed a bug causing unread notifications to flicker.
+- Updated HUD messages style for unread notification actions in the menu bar command.
+
 ## [Improvements] - 2024-06-20
 
 - PRs: Add an option to omit team review requests from query results

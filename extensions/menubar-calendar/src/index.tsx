@@ -2,6 +2,7 @@ import { Color, Icon, MenuBarExtra, Toast, confirmAlert, openCommandPreferences,
 import { calData, calDateTitle, calFirstColumn, calWeekTitle } from "./utils/calendar-utils";
 import { CALENDAR_APP, REMINDERS_APP, SETTINGS_APP } from "./utils/constans";
 import {
+  calendarView,
   highlightCalendar,
   largeCalendar,
   remindersView,
@@ -19,14 +20,17 @@ import {
   openApp,
 } from "./utils/common-utils";
 import { Fragment, useMemo } from "react";
-import { Priority, Reminder, useData } from "./hooks/useData";
-import { isOverdue, isToday, isTomorrow, truncate } from "./utils/reminders-utils";
+import { Reminder, useReminders } from "./hooks/useReminders";
+import { addPriorityToTitle, isOverdue, isToday, isTomorrow, truncate } from "./utils/reminders-utils";
 import { deleteReminder as apiDeleteReminder, toggleCompletionStatus } from "swift:../swift/AppleReminders";
+import { CalendarEvent, useCalendar } from "./hooks/useCalendar";
+import { formatTimestamp, getCalendarIcon, timeStampIsThreeDay, timeStampIsToday } from "./utils/calendar-events-utils";
 
 export default function Command() {
   const calList = calData();
 
-  const { data, isLoading, mutate } = useData();
+  const { data: calendarEvents } = useCalendar();
+  const { data: remindersEvents, isLoading, mutate } = useReminders();
 
   async function deleteReminder(reminder: Reminder) {
     try {
@@ -47,11 +51,11 @@ export default function Command() {
   }
 
   const reminders = useMemo(() => {
-    if (!data) return [];
-    return data.reminders;
-  }, [data]);
+    if (!remindersEvents) return [];
+    return remindersEvents.reminders;
+  }, [remindersEvents]);
 
-  const sections = useMemo(() => {
+  const reminderSections = useMemo(() => {
     const overdue: Reminder[] = [];
     const today: Reminder[] = [];
     const tomorrow: Reminder[] = [];
@@ -97,18 +101,32 @@ export default function Command() {
     }
   }, [reminders]);
 
-  function addPriorityToTitle(title: string, priority: Priority) {
-    switch (priority) {
-      case "high":
-        return `!!! ${title}`;
-      case "medium":
-        return `!! ${title}`;
-      case "low":
-        return `! ${title}`;
-      default:
-        return title;
-    }
-  }
+  const calendars = useMemo(() => {
+    if (!calendarEvents) return [];
+    return calendarEvents;
+  }, [calendarEvents]);
+
+  const calendarEventSections = useMemo(() => {
+    if (calendarView === "none") return [];
+    const allCalendarEvents: CalendarEvent[] = [];
+    const now = new Date();
+    calendars?.map((calendar) => {
+      switch (calendarView) {
+        case "today":
+          calendar.events = calendar.events.filter((event) => timeStampIsToday(event.startDate, now));
+          break;
+        case "upcoming":
+          calendar.events = calendar.events.filter((event) => timeStampIsThreeDay(event.startDate, now));
+          break;
+        case "all":
+          break;
+      }
+      allCalendarEvents.push(...calendar.events);
+    });
+
+    return allCalendarEvents.sort((a, b) => a.startDate - b.startDate);
+  }, [calendars]);
+
   return (
     <MenuBarExtra isLoading={isLoading} title={menubarTitle()} icon={menubarIcon()}>
       <MenuBarExtra.Item title={calDateTitle} onAction={highlightCalendar ? () => {} : undefined} />
@@ -132,7 +150,25 @@ export default function Command() {
         </Fragment>
       ))}
 
-      {sections.map((section) => (
+      {calendarEventSections?.map((event, index) => {
+        return (
+          <MenuBarExtra.Section
+            key={event.openUrl}
+            title={truncate(formatTimestamp(event.startDate, event.endDate, event.isAllDay))}
+          >
+            <MenuBarExtra.Item
+              key={event.openUrl + index}
+              icon={getCalendarIcon(event.status, event.color)}
+              title={truncate(event.title)}
+              onAction={async () => {
+                await open(event.openUrl, "com.apple.iCal");
+              }}
+            />
+          </MenuBarExtra.Section>
+        );
+      })}
+
+      {reminderSections.map((section) => (
         <MenuBarExtra.Section key={section.title} title={section.title}>
           {section.items.map((reminder) => {
             return (

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "copy-path",
   "title": "Copy Path",
-  "description": "Copy the path of the current Finder open folder, the path of the selected file or the URL of the current browser tab.",
+  "description": "Copy the path of the open folder, selected file or the URL of the current browser tab.",
   "icon": "copy-path.png",
   "author": "koinzhang",
   "categories": [
@@ -11,6 +11,7 @@
     "System"
   ],
   "keywords": [
+    "tab",
     "web",
     "link"
   ],
@@ -19,7 +20,7 @@
     {
       "name": "copy-path",
       "title": "Copy Path or URL",
-      "description": "Copy the path of the current Finder open folder, the path of the selected file or the URL of the current browser tab.",
+      "description": "Copy the path of the open folder, selected file or the URL of the current browser tab.",
       "mode": "no-view"
     }
   ],
@@ -39,7 +40,7 @@
       "required": false,
       "label": "Show Last Copy",
       "description": "Show the path or URL of the most recent copy in the subtitle of the command.",
-      "default": true
+      "default": false
     },
     {
       "name": "showTabTitle",
@@ -107,18 +108,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.75.1",
-    "@raycast/utils": "^1.15.0",
+    "@raycast/api": "^1.77.0",
+    "@raycast/utils": "^1.16.0",
     "parse-url": "^9.2.0"
   },
   "devDependencies": {
-    "@types/node": "~20.12.12",
-    "@types/react": "^18.3.2",
-    "@typescript-eslint/eslint-plugin": "^7.10.0",
-    "@typescript-eslint/parser": "^7.10.0",
+    "@types/node": "~20.14.6",
+    "@types/react": "^18.3.3",
+    "@typescript-eslint/eslint-plugin": "^7.13.1",
+    "@typescript-eslint/parser": "^7.13.1",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.2.5",
+    "prettier": "^3.3.2",
     "typescript": "^5.4.5"
   },
   "scripts": {
