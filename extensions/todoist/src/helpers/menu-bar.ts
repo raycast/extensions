@@ -1,9 +1,9 @@
-import { LaunchType, launchCommand, captureException } from "@raycast/api";
+import { LaunchType, launchCommand } from "@raycast/api";
 
 export function refreshMenuBarCommand() {
-  return launchCommand({ name: "menu-bar", type: LaunchType.Background, context: { fromCommand: true } }).catch(
-    captureException,
-  );
+  return launchCommand({ name: "menu-bar", type: LaunchType.Background, context: { fromCommand: true } }).catch(() => {
+    /* do nothing */
+  });
 }
 
 export const truncateMiddle = (fullStr: string, strLen: number, separator = "…") => {
