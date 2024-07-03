@@ -14,8 +14,8 @@
   "commands": [
     {
       "name": "search-commands",
-      "title": "Search Commands",
-      "description": "Search command, description or alias.",
+      "title": "Search Git Commands",
+      "description": "Search Git command, description or alias.",
       "mode": "view"
     }
   ],
