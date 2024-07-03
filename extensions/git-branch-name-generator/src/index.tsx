@@ -1,4 +1,5 @@
-import { Form, ActionPanel, Action, showToast, Clipboard } from "@raycast/api";
+import { Form, ActionPanel, Action, Clipboard, showHUD, PopToRootType } from "@raycast/api";
+import { useForm } from "@raycast/utils";
 
 type Values = {
   branchType: string;
@@ -6,26 +7,46 @@ type Values = {
   description: string;
   snakeCase: boolean;
   prefixDate: boolean;
+  includeGitCommand: boolean;
 };
 
-function slugify(content: string, separator: string) {
-  return content.toLowerCase().replaceAll(" ", separator);
+function slugify(content: string, snakeCase: boolean) {
+  const separator = snakeCase ? "_" : "-";
+  return (
+    content
+      .toLowerCase()
+      // replace all but 0-9, a-z, and / with the separator
+      .replace(new RegExp(`[^0-9a-z/]`, "g"), separator)
+      // replace multiple separators with a single separator
+      .replace(new RegExp(`[${separator}]+`, "g"), separator)
+      // trim separators from the beginning
+      .replace(new RegExp(`^${separator}+`), "")
+      // trim separators from the end
+      .replace(new RegExp(`${separator}+$`), "")
+      // only take the first 100 characters
+      .substring(0, 100)
+  );
 }
 
 export default function Command() {
-  const handleSubmit = ({ branchType, prefix, description, snakeCase, prefixDate }: Values) => {
-    const separator = snakeCase ? "_" : "-";
-    const date = prefixDate ? `${new Date().toISOString().split("T")[0]}${separator}` : "";
-    let content = `${date}${prefix}${branchType}${description}`;
+  const { handleSubmit, itemProps } = useForm<Values>({
+    async onSubmit({ branchType, prefix, description, snakeCase, prefixDate, includeGitCommand }) {
+      // leave trailing space for slugify to add separator
+      const date = prefixDate ? `${new Date().toISOString().split("T")[0]}-` : "";
+      const content = `${date}${prefix}${branchType}${description}`;
+      const gitCommand = includeGitCommand ? "git checkout -b " : "";
+      const branchName = `${gitCommand} ${slugify(content, snakeCase)}`;
 
-    if (snakeCase && content.includes("-")) {
-      content = content.replaceAll("-", "_");
-    }
-
-    const branchName = slugify(content, separator);
-    Clipboard.copy(branchName);
-    showToast({ title: branchName, message: "Copied to your clipboard!" });
-  };
+      Clipboard.copy(branchName);
+      await showHUD(`Copied to your clipboard: ${branchName}`, {
+        popToRootType: PopToRootType.Immediate,
+        clearRootSearch: true,
+      });
+    },
+    validation: {
+      description: (value) => (value ? null : "Please enter a description for the branch name."),
+    },
+  });
 
   return (
     <Form
@@ -43,7 +64,12 @@ export default function Command() {
         <Form.Dropdown.Item value="chore/" title="chore (non-production changes)" />
         <Form.Dropdown.Item value="docs/" title="docs (add or modify documentation)" />
       </Form.Dropdown>
-      <Form.TextField id="description" title="Description" placeholder="Description of this branch" storeValue />
+      <Form.TextField
+        {...itemProps.description}
+        title="Description"
+        placeholder="Description of this branch"
+        storeValue
+      />
       <Form.TextField
         id="prefix"
         title="Prefix"
