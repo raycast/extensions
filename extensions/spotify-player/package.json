@@ -408,7 +408,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.75.1",
+    "@raycast/api": "^1.77.0",
     "@raycast/utils": "^1.16.1",
     "node-fetch": "^3.3.2",
     "oazapfts": "^4.10.0"
@@ -416,7 +416,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.9.1",
-    "@types/react": "18.2.37",
+    "@types/react": "^18.3.3",
     "eslint": "^8.53.0",
     "prettier": "^3.1.0",
     "typescript": "^5.2.2"
