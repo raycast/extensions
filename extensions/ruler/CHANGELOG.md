@@ -2,7 +2,8 @@
 
 ## [Improvements] - 2024-06-29
 
-- Remove drag to measure feature and replaced it with click to measure.
+- Added drag mode as a feature
+- Added option not to have the distance copied to the clipboard
 - Added measured distance to the tooltip.
 - Press ESC to reset Ruler
 
