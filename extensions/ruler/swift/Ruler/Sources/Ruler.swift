@@ -40,9 +40,28 @@ class RulerWindow: NSWindow {
     }
   }
 
+  override func mouseUp(with event: NSEvent) {
+    if !Ruler.shared.dragMode {
+      return
+    }
+    let point = convertToScreenCoordinates(event.locationInWindow)
+    Ruler.shared.handleMouseUp(at: point)
+  }
+
   override func mouseDown(with event: NSEvent) {
+    if Ruler.shared.dragMode {
+      return
+    }
     let point = convertToScreenCoordinates(event.locationInWindow)
     Ruler.shared.handleMouseDown(at: point)
+  }
+
+  override func mouseDragged(with event: NSEvent) {
+    if !Ruler.shared.dragMode {
+      return
+    }
+    let point = convertToScreenCoordinates(event.locationInWindow)
+    Ruler.shared.handleMouseDragged(to: point)
   }
 
   override func mouseMoved(with event: NSEvent) {
@@ -185,6 +204,7 @@ class RulerWindow: NSWindow {
 
 class Ruler: NSObject {
   static let shared = Ruler()
+  var dragMode: Bool = false
 
   var startPoint: NSPoint? {
     didSet {
@@ -204,7 +224,9 @@ class Ruler: NSObject {
     startPoint = nil
   }
 
-  func measureDistance() {
+  func measureDistance(dragMode: Bool = false) {
+    self.dragMode = dragMode
+
     let application = NSApplication.shared
     application.setActivationPolicy(.accessory)
 
@@ -271,11 +293,31 @@ class Ruler: NSObject {
     }
   }
 
+  func handleMouseDragged(to point: NSPoint) {
+    guard let rulerWindow = rulerWindow else { return }
+
+    if startPoint == nil {
+      startPoint = point
+      rulerWindow.drawStroke(from: point, to: point)
+      rulerWindow.removeCoordinatesOverlay()
+    } else {
+      rulerWindow.drawStroke(from: startPoint!, to: point)
+    }
+  }
+
   func handleMouseMoved(to point: NSPoint) {
     guard let rulerWindow = rulerWindow else { return }
     if let startPoint = startPoint {
       rulerWindow.drawStroke(from: startPoint, to: point)
     }
+  }
+
+  func handleMouseUp(at point: NSPoint) {
+    guard let rulerWindow = rulerWindow, dragMode, let startPoint = startPoint else { return }
+    endPoint = point
+    rulerWindow.drawStroke(from: startPoint, to: endPoint!)
+    calculateAndPrintDistance()
+    NSApplication.shared.terminate(nil)
   }
 
   // Modify calculateDistance to be more reusable
@@ -294,6 +336,6 @@ class Ruler: NSObject {
   }
 }
 
-@raycast func measureDistance() {
-  return Ruler.shared.measureDistance()
+@raycast func measureDistance(dragMode: Bool = false) {
+  return Ruler.shared.measureDistance(dragMode: dragMode)
 }
