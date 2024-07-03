@@ -35,7 +35,7 @@ export default function Command() {
       const date = prefixDate ? `${new Date().toISOString().split("T")[0]}-` : "";
       const content = `${date}${prefix}${branchType}${description}`;
       const gitCommand = includeGitCommand ? "git checkout -b " : "";
-      const branchName = `${gitCommand} ${slugify(content, snakeCase)}`;
+      const branchName = `${gitCommand}${slugify(content, snakeCase)}`;
 
       Clipboard.copy(branchName);
       await showHUD(`Copied to your clipboard: ${branchName}`, {

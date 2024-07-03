@@ -1,4 +1,5 @@
-import { Form, ActionPanel, Action, showToast, Clipboard } from "@raycast/api";
+import { Form, ActionPanel, Action, showHUD, PopToRootType, Clipboard } from "@raycast/api";
+import { useForm } from "@raycast/utils";
 
 type Values = {
   prefix: string;
@@ -7,16 +8,20 @@ type Values = {
 };
 
 export default function Random() {
-  const handleSubmit = ({ prefix, length, includeGitCommand }: Values) => {
-    const branchLength = parseInt(length);
-    const randomValue = (Math.random() * 1e20).toString(36).slice(0, branchLength);
-    const branchName = `${prefix ? prefix + "/" : ""}${randomValue}`;
-    const gitCommand = includeGitCommand ? "git checkout -b " : "";
+  const { handleSubmit } = useForm<Values>({
+    async onSubmit({ prefix, length, includeGitCommand }) {
+      const branchLength = parseInt(length);
+      const randomValue = (Math.random() * 1e20).toString(36).slice(0, branchLength);
+      const gitCommand = includeGitCommand ? "git checkout -b " : "";
+      const branchName = `${gitCommand}${prefix}${randomValue}`;
 
-    const result = `${gitCommand}${branchName}`;
-    Clipboard.copy(result);
-    showToast({ title: branchName, message: "Copied to your clipboard!" });
-  };
+      Clipboard.copy(branchName);
+      await showHUD(`Copied to your clipboard: ${branchName}`, {
+        popToRootType: PopToRootType.Immediate,
+        clearRootSearch: true,
+      });
+    },
+  });
 
   return (
     <Form
