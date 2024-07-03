@@ -5,9 +5,9 @@ import { SearchResults } from "./lib";
 import _ from "lodash";
 import algoliaSearch from "algoliasearch";
 
-const APPID = "KXECYAMEX8";
-const APIKEY = "01279e9ede105d87a1ade54565b1a2fd";
-const INDEX = "adonisjs_next";
+const APPID = "2XMML2O2ES";
+const APIKEY = "c66d8c1caefe3ba8895d676f9843da3b";
+const INDEX = "bentocache";
 
 export default function SearchDocumentation() {
   const algoliaClient = useMemo(() => {
