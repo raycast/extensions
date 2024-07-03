@@ -2,10 +2,10 @@ import { AssistantDefaultTemperature } from "../../type/assistant";
 import { SnippetDefaultTemperature } from "../../type/snippet";
 import { TalkType } from "../../type/talk";
 import { ReplacePlaceholders } from "../../common/prompt";
-import { Call } from "../../ai/llm";
 import { Toast } from "@raycast/api";
 import { ConversationSelectedTypeSnippet } from "../../type/conversation";
-import { Respond } from "../../ai/logic/thinking";
+import { Call } from "../ai/llm";
+import { Respond } from "../ai/logic/thinking";
 
 export async function RunLangChain(
   chat: TalkType,
