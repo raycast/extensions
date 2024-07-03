@@ -1,5 +1,5 @@
 # Browser Tabs Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2024-07-03
 
 - Search all open browser tabs.
