@@ -1,6 +1,6 @@
 # GitHub Gist Changelog
 
-## [Refactor Command] - {PR_MERGE_DATE}
+## [Refactor Command] - 2024-07-03
 
 - Simplify the code and improve performance
 - Use useForm to optimise performance
