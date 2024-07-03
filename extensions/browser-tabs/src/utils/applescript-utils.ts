@@ -78,9 +78,8 @@ tell application "${browser.name}"
         set currentURL to URL of aTab
         if currentURL is equal to "${tab.url}" then
             set foundTab to true
-            -- 执行操作，比如刷新或关闭标签
             tell aTab to ${action}
-            exit repeat -- 找到后退出循环
+            exit repeat 
         end if
     end repeat
     if foundTab is false then
@@ -129,16 +128,6 @@ export const closeBrowserTab = async (browser: Application, tab: Tab) => {
   }
 };
 
-/**
- * get the list of tabs from the browser
- * @param browser
- * @returns
- * title
- * url
- *
- * title
- * url
- */
 const scriptBrowserTabs = (browser: string) => `
 tell application "${browser}"
 	if running then
