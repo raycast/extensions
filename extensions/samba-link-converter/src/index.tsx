@@ -60,11 +60,7 @@ export default function Command() {
           <Action.SubmitForm title="Convert Link" onSubmit={handleSubmit} />
           {macLink && (
             <>
-              <Action.Open
-                title="Open in Finder"
-                target={macLink}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
-              />
+              <Action.Open title="Open in Finder" target={macLink} shortcut={{ modifiers: ["cmd"], key: "o" }} />
               <Action
                 title="Copy to Clipboard"
                 onAction={copyToClipboard}
@@ -75,29 +71,15 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="windowsLink"
-        title="Windows Samba Link"
-        placeholder="\\share1\folder\folder2"
-      />
-      <Form.TextField
-        id="namespace"
-        title="Namespace"
-        placeholder="namespace.ns"
-        storeValue
-      />
+      <Form.TextField id="windowsLink" title="Windows Samba Link" placeholder="\\share1\folder\folder2" />
+      <Form.TextField id="namespace" title="Namespace" placeholder="namespace.ns" storeValue />
       <Form.Checkbox
         id="returnRootPath"
         label="Return Root Path Only"
         info="This is useful because macOS mounts the subfolder link you provide it and doesn't provide an easy way to go up the file tree in a share folder"
         storeValue
       />
-      {macLink && (
-        <Form.Description
-          title="Converted Mac Link"
-          text={macLink}
-        />
-      )}
+      {macLink && <Form.Description title="Converted Mac Link" text={macLink} />}
     </Form>
   );
 }
