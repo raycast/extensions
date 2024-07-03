@@ -31,6 +31,7 @@ export const AssistantDefault: TalkAssistantType = {
   `,
   webhookUrl: undefined,
   additionalData: undefined,
+  snippet: undefined,
   isLocal: true,
 };
 

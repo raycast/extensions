@@ -35,6 +35,7 @@ export const AssistantImportForm = (props: { use: { assistants: AssistantHookTyp
           promptSystem: item.instructions,
           webhookUrl: undefined,
           additionalData: "",
+          snippet: undefined,
           isLocal: false,
           typeCommunication: ConfigurationTypeCommunicationDefault,
         };
