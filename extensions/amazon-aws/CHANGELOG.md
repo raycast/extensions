@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2024-07-03
 
 - Reverts back to rendering all pipelines at once. We can add wait later if this causes issues
 - Optimized the mutation for pipeline actions even further.
