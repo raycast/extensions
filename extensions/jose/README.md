@@ -5,7 +5,7 @@ Made with ♥ from Poland
 ---
 
 <p align="center">
-<img width=100 src="https://www.raycast.com/_next/image?url=https%3A%2F%2Ffiles.raycast.com%2Fj4i99i2slyspd2ack2wo6b8szpjp&w=128&q=75">
+<img width=100 src="https://raw.githubusercontent.com/tkowalski29/ai-jose-raycast-extension/main/assets/icon.png">
 </p>
 
 <h1 align="center">Jose</h1>
