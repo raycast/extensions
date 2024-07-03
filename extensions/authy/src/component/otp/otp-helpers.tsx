@@ -171,35 +171,26 @@ export function otpActions(otp: string, id: string, index: number, setItems: set
     return <Action.OpenInBrowser title="Submit Issue" url="https://github.com/raycast/extensions/issues/new/choose" />;
   }
 
+  const copy = (
+    <Action.CopyToClipboard
+      title="Copy OTP"
+      content={otp}
+      onCopy={async () => await updateOrderIfEnabled(id, index, setItems)}
+    />
+  );
+
+  const paste = (
+    <Action.Paste
+      title="Output OTP"
+      content={otp}
+      onPaste={async () => await updateOrderIfEnabled(id, index, setItems)}
+    />
+  );
+
   return (
     <>
-      {primaryActionIsCopy ? (
-        <>
-          <Action.CopyToClipboard
-            title="Copy OTP"
-            content={otp}
-            onCopy={async () => await updateOrderIfEnabled(id, index, setItems)}
-          />
-          <Action.Paste
-            title="Output OTP"
-            content={otp}
-            onPaste={async () => await updateOrderIfEnabled(id, index, setItems)}
-          />
-        </>
-      ) : (
-        <>
-          <Action.Paste
-            title="Output OTP"
-            content={otp}
-            onPaste={async () => await updateOrderIfEnabled(id, index, setItems)}
-          />
-          <Action.CopyToClipboard
-            title="Copy OTP"
-            content={otp}
-            onCopy={async () => await updateOrderIfEnabled(id, index, setItems)}
-          />
-        </>
-      )}
+      {primaryActionIsCopy ? copy : paste}
+      {primaryActionIsCopy ? paste : copy}
     </>
   );
 }
