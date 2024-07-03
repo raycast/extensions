@@ -462,7 +462,7 @@ export default function Command() {
 | isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | `false` |
 | isShowingDetail | Whether the List should have an area on the right side of the items to show additional details about the selected item. | <code>boolean</code> | - |
 | navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | Command title |
-| pagination | Configuration for pagination | <code>{ hasMore: boolean; pageSize: number; onLoadMore: (page: number) => void }</code> | - |
+| pagination | Configuration for pagination | <code>{ hasMore: boolean; pageSize: number; onLoadMore: () => void }</code> | - |
 | searchBarAccessory | [List.Dropdown](list.md#list.dropdown) that will be shown in the right-hand-side of the search bar. | <code>ReactElement&lt;[List.Dropdown.Props](list.md#props), string></code> | - |
 | searchBarPlaceholder | Placeholder text that will be shown in the search bar. | <code>string</code> | `"Search…"` |
 | searchText | The text that will be displayed in the search bar. | <code>string</code> | - |

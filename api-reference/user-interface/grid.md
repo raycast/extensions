@@ -396,7 +396,7 @@ export default function Command() {
 | inset | Indicates how much space there should be between a [Grid.Item](grid.md#grid.item)s' content and its borders. The absolute value depends on the value of the `itemSize` prop. | <code>[Grid.Inset](grid.md#grid.inset)</code> | - |
 | isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | `false` |
 | navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | Command title |
-| pagination | Configuration for pagination | <code>{ hasMore: boolean; pageSize: number; onLoadMore: (page: number) => void }</code> | - |
+| pagination | Configuration for pagination | <code>{ hasMore: boolean; pageSize: number; onLoadMore: () => void }</code> | - |
 | searchBarAccessory | [Grid.Dropdown](grid.md#grid.dropdown) that will be shown in the right-hand-side of the search bar. | <code>ReactElement&lt;[List.Dropdown.Props](list.md#props), string></code> | - |
 | searchBarPlaceholder | Placeholder text that will be shown in the search bar. | <code>string</code> | `"Search…"` |
 | searchText | The text that will be displayed in the search bar. | <code>string</code> | - |

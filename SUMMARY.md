@@ -79,7 +79,8 @@
   - [Colors](api-reference/user-interface/colors.md)
   - [Icons & Images](api-reference/user-interface/icons-and-images.md)
   - [Navigation](api-reference/user-interface/navigation.md)
-- [Window & Search Bar](api-reference/window-and-search-bar.md)
+- [Raycast Window & Search Bar](api-reference/window-and-search-bar.md)
+- [Window Management](api-reference/window-and-search-bar.md)
 
 ## Utilities
 

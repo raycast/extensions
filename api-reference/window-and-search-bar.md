@@ -1,4 +1,4 @@
-# Window & Search Bar
+# Raycast Window & Search Bar
 
 ## API Reference
 
