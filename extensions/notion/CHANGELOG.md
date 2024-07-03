@@ -1,8 +1,8 @@
 # Notion Changelog
 
-## [Refactore] - 2024-06-18
+## [Refactor] - 2024-07-03
 
-- Refactore code. No Functional changes.
+- Refactor code. No Functional changes.
 
 ## [Seperate property managment for quicklinks] - 2024-04-22
 
