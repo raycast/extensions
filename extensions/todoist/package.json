@@ -15,7 +15,8 @@
     "AnishDe12020",
     "kud",
     "gerardcs",
-    "prince_yadav"
+    "prince_yadav",
+    "stelo"
   ],
   "commands": [
     {
@@ -251,7 +252,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/lodash": "^4.14.202",
-    "@types/mime": "^3.0.4",
+    "@types/mime": "^4.0.0",
     "@types/node": "^20.11.6",
     "@types/react": "^18.2.48",
     "@types/remove-markdown": "^0.3.4",

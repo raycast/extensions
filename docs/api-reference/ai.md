@@ -4,7 +4,7 @@ The AI API provides developers with seamless access to AI functionality without 
 
 {% hint style="info" %}
 
-Some users might not have access to this API. If a user doesn't have access to Raycast AI, they will be asked if they want to get access when your extension calls the AI API. If the user doesn't wish to get access, the API call will throw an error.
+Some users might not have access to this API. If a user doesn't have access to Raycast Pro, they will be asked if they want to get access when your extension calls the AI API. If the user doesn't wish to get access, the API call will throw an error.
 
 You can check if a user has access to the API using [`environment.canAccess(AI)`](./environment.md).
 
@@ -159,7 +159,7 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT3.
 | OpenAI_GPT4-turbo             | GPT-4 Turbo from OpenAI has a big context window that fits hundreds of pages of text, making it a great choice for workloads that involve longer prompts.           |
 | OpenAI_GPT4o                  | GPT-4o is the most advanced and fastest model from OpenAI, making it a great choice for complex everyday problems and deeper conversations.                         |
 | Anthropic_Claude_Haiku        | Claude 3 Haiku is Anthropic's fastest model, with a large context window that makes it ideal for analyzing code, documents, or large amounts of text.               |
-| Anthropic_Claude_Sonnet       | Claude 3 Sonnet from Anthropic strikes a balance between speed and intelligence, making it an ideal assistant for daily tasks like coding and copywriting.          |
+| Anthropic_Claude_Sonnet       | Claude 3.5 Sonnet from Anthropic has enhanced intelligence with increased speed. It excels at complex tasks like visual reasoning or workflow orchestrations.       |
 | Anthropic_Claude_Opus         | Claude 3 Opus is Anthropic's most intelligent model, with best-in-market performance on highly complex tasks. It stands out for remarkable fluency.                 |
 | Perplexity_Llama3_Sonar_Small | Perplexity's Llama 3 Sonar Small is built for speed. It quickly gives you helpful answers using the latest internet knowledge while minimizing hallucinations.      |
 | Perplexity_Llama3_Sonar_Large | Perplexity's most advanced model, Llama 3 Sonar Large, can handle complex questions. It considers current web knowledge to provide well-reasoned, in-depth answers. |
