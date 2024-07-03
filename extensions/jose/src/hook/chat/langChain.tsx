@@ -4,8 +4,8 @@ import { TalkType } from "../../type/talk";
 import { ReplacePlaceholders } from "../../common/prompt";
 import { Toast } from "@raycast/api";
 import { ConversationSelectedTypeSnippet } from "../../type/conversation";
-import { Call } from "../ai/llm";
-import { Respond } from "../ai/logic/thinking";
+import { Call } from "../../ai/llm";
+import { Respond } from "../../ai/logic/thinking";
 
 export async function RunLangChain(
   chat: TalkType,

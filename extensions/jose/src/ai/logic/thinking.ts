@@ -1,5 +1,5 @@
 import { HumanMessage, AIMessage } from "@langchain/core/messages";
-import { TalkType } from "../../../type/talk";
+import { TalkType } from "../../type/talk";
 
 export const Respond = (
   prompt: string,
