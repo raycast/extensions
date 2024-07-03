@@ -20,7 +20,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.3",
+    "@raycast/api": "^1.78.0",
     "@icon-park/svg": "^1.4.2",
     "d3-color": "^3.1.0",
     "js-base64": "^3.7.7",
