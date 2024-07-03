@@ -18,12 +18,12 @@
       "mode": "view",
       "preferences": [
         {
-        "name": "shouldCloseMainWindow",
-        "type": "checkbox",
-        "label": "Close window immediately",
-        "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
-        "default": true,
-        "required": false
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": false,
+          "required": false
         }
       ]
     }
