@@ -81,7 +81,7 @@
     {
       "name": "name-color",
       "title": "Name Color",
-      "description": "name the color selected.",
+      "description": "Name a color on your desktop",
       "mode": "no-view",
       "arguments": [
         {
