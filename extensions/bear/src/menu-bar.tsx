@@ -38,8 +38,8 @@ export default function MenuBar() {
               note.title === ""
                 ? "Untitled Note"
                 : note.title.length > 40
-                ? note.title.substring(0, 40) + "…"
-                : note.title
+                  ? note.title.substring(0, 40) + "…"
+                  : note.title
             }
             subtitle={note.formattedTags}
             onAction={() => open(`bear://x-callback-url/open-note?id=${note.id}`)}

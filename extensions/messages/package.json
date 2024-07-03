@@ -6,7 +6,8 @@
   "icon": "apple-messages-icon.png",
   "author": "thomaslombart",
   "contributors": [
-    "timothy_gray"
+    "timothy_gray",
+    "ramsay"
   ],
   "license": "MIT",
   "commands": [
@@ -14,12 +15,22 @@
       "name": "send-message",
       "title": "Send Message",
       "description": "Quickly send a message through the Messages app.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": false,
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.0",
-    "@raycast/utils": "^1.11.1"
+    "@raycast/api": "^1.76.0",
+    "@raycast/utils": "^1.16.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

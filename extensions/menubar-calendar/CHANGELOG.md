@@ -1,5 +1,11 @@
 # Menubar Calendar Changelog
 
+## [Show Calendar Events in Menubar] - 2024-07-03
+
+- Show calendar events in the menu bar
+- Combined display of events on the same day
+- Support more time formats
+
 ## [Show Calendar Events] - 2024-06-25
 
 - Show calendar events in the menu bar

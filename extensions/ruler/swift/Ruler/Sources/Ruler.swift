@@ -30,25 +30,43 @@ class RulerWindow: NSWindow {
 
   override func keyDown(with event: NSEvent) {
     if event.keyCode == 53 {  // 53 is the key code for ESC
-      NSApplication.shared.terminate(nil)
+      if Ruler.shared.startPoint != nil {
+        Ruler.shared.resetStartPoint()
+      } else {
+        NSApplication.shared.terminate(nil)
+      }
     } else {
       super.keyDown(with: event)
     }
   }
 
-  override func mouseDragged(with event: NSEvent) {
-    let point = convertToScreenCoordinates(event.locationInWindow)
-    Ruler.shared.handleMouseDragged(to: point)
-
-  }
-
   override func mouseUp(with event: NSEvent) {
+    if !Ruler.shared.dragMode {
+      return
+    }
     let point = convertToScreenCoordinates(event.locationInWindow)
     Ruler.shared.handleMouseUp(at: point)
   }
 
+  override func mouseDown(with event: NSEvent) {
+    if Ruler.shared.dragMode {
+      return
+    }
+    let point = convertToScreenCoordinates(event.locationInWindow)
+    Ruler.shared.handleMouseDown(at: point)
+  }
+
+  override func mouseDragged(with event: NSEvent) {
+    if !Ruler.shared.dragMode {
+      return
+    }
+    let point = convertToScreenCoordinates(event.locationInWindow)
+    Ruler.shared.handleMouseDragged(to: point)
+  }
+
   override func mouseMoved(with event: NSEvent) {
     let point = convertToScreenCoordinates(event.locationInWindow)
+    Ruler.shared.handleMouseMoved(to: point)
     updateCoordinatesOverlay(at: point)
   }
 
@@ -171,7 +189,14 @@ class RulerWindow: NSWindow {
     // Remove the previous coordinates overlay if it exists
     coordinatesOverlay?.removeFromSuperview()
 
-    let coordinatesText = "\(Int(point.x)) × \(Int(point.y))"
+    var coordinatesText = "\(Int(point.x)) × \(Int(point.y))"
+
+    // Calculate and append the distance if startPoint exists
+    if let startPoint = Ruler.shared.startPoint {
+      let distance = Ruler.shared.calculateDistance(from: startPoint, to: point)
+      coordinatesText += " · \(Int(distance))px"
+    }
+
     coordinatesOverlay = createOverlay(at: point, with: coordinatesText)
     contentView?.addSubview(coordinatesOverlay!)
   }
@@ -179,8 +204,15 @@ class RulerWindow: NSWindow {
 
 class Ruler: NSObject {
   static let shared = Ruler()
+  var dragMode: Bool = false
 
-  private var startPoint: NSPoint?
+  var startPoint: NSPoint? {
+    didSet {
+      if startPoint == nil {
+        rulerWindow?.removeLine()
+      }
+    }
+  }
   private var endPoint: NSPoint?
   private var rulerWindow: RulerWindow?
 
@@ -188,7 +220,13 @@ class Ruler: NSObject {
     super.init()
   }
 
-  func measureDistance() {
+  func resetStartPoint() {
+    startPoint = nil
+  }
+
+  func measureDistance(dragMode: Bool = false) {
+    self.dragMode = dragMode
+
     let application = NSApplication.shared
     application.setActivationPolicy(.accessory)
 
@@ -241,6 +279,20 @@ class Ruler: NSObject {
     application.run()
   }
 
+  func handleMouseDown(at point: NSPoint) {
+    guard let rulerWindow = rulerWindow else { return }
+
+    if startPoint == nil {
+      startPoint = point
+    } else {
+      // If startPoint is already set, draw the line to the new point and calculate distance
+      endPoint = point
+      rulerWindow.drawStroke(from: startPoint!, to: endPoint!)
+      calculateAndPrintDistance()
+      NSApplication.shared.terminate(nil)
+    }
+  }
+
   func handleMouseDragged(to point: NSPoint) {
     guard let rulerWindow = rulerWindow else { return }
 
@@ -253,24 +305,37 @@ class Ruler: NSObject {
     }
   }
 
+  func handleMouseMoved(to point: NSPoint) {
+    guard let rulerWindow = rulerWindow else { return }
+    if let startPoint = startPoint {
+      rulerWindow.drawStroke(from: startPoint, to: point)
+    }
+  }
+
   func handleMouseUp(at point: NSPoint) {
+    guard let rulerWindow = rulerWindow, dragMode, let startPoint = startPoint else { return }
     endPoint = point
-    calculateDistance()
+    rulerWindow.drawStroke(from: startPoint, to: endPoint!)
+    calculateAndPrintDistance()
     NSApplication.shared.terminate(nil)
   }
 
-  private func calculateDistance() {
+  // Modify calculateDistance to be more reusable
+  func calculateDistance(from startPoint: NSPoint, to endPoint: NSPoint) -> CGFloat {
+    let distanceX = endPoint.x - startPoint.x
+    let distanceY = endPoint.y - startPoint.y
+    return sqrt(pow(distanceX, 2) + pow(distanceY, 2)).rounded()
+  }
+
+  private func calculateAndPrintDistance() {
     guard let startPoint = startPoint, let endPoint = endPoint else {
       return
     }
-
-    let distanceX = endPoint.x - startPoint.x
-    let distanceY = endPoint.y - startPoint.y
-    let distance = sqrt(pow(distanceX, 2) + pow(distanceY, 2)).rounded()
+    let distance = calculateDistance(from: startPoint, to: endPoint)
     print(distance)
   }
 }
 
-@raycast func measureDistance() {
-  return Ruler.shared.measureDistance()
+@raycast func measureDistance(dragMode: Bool = false) {
+  return Ruler.shared.measureDistance(dragMode: dragMode)
 }
