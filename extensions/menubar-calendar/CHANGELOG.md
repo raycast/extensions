@@ -1,6 +1,6 @@
 # Menubar Calendar Changelog
 
-## [Show Calendar Events in Menubar] - {PR_MERGE_DATE}
+## [Show Calendar Events in Menubar] - 2024-07-03
 
 - Show calendar events in the menu bar
 - Combined display of events on the same day
