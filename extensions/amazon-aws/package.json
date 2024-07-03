@@ -88,6 +88,12 @@
       "mode": "view"
     },
     {
+      "name": "glue",
+      "title": "Glue",
+      "description": "List and open Glue jobs and job runs",
+      "mode": "view"
+    },
+    {
       "name": "dynamodb",
       "title": "DynamoDB",
       "description": "List tables and perform CRUD operations",

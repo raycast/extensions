@@ -39,42 +39,6 @@ export default function Glue() {
     </List>
   );
 }
-function GlueJobRunDetails({ jobRun: glueJobRun }: { jobRun: GlueJobRun }) {
-  return (
-    <List.Item.Detail
-      metadata={
-        <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Job Name" text={glueJobRun.JobName} />
-          <List.Item.Detail.Metadata.Label
-            title="Job Run State"
-            text={{ value: glueJobRun.JobRunState || "", color: glueJobRun.iconTintColor }}
-          />
-          <List.Item.Detail.Metadata.Label title="Execution Time" text={glueJobRun.ExecutionTime?.toString() + "s"} />
-          <List.Item.Detail.Metadata.Label title="Started on" text={glueJobRun.StartedOn?.toUTCString()} />
-          <List.Item.Detail.Metadata.Label title="Completed On" text={glueJobRun.CompletedOn?.toUTCString() || ""} />
-          <List.Item.Detail.Metadata.Label
-            title="Error Message"
-            text={{ color: Color.Red, value: glueJobRun.ErrorMessage || "" }}
-          />
-          <List.Item.Detail.Metadata.Label title="Arguments" text={JSON.stringify(glueJobRun.Arguments)} />
-          <List.Item.Detail.Metadata.Label title="DPU Seconds" text={(glueJobRun.DPUSeconds?.toString() || "") + "s"} />
-          <List.Item.Detail.Metadata.Label title="Attempt" text={glueJobRun.Attempt?.toString()} />
-          <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title="Worker Type" text={glueJobRun.WorkerType} />
-          <List.Item.Detail.Metadata.Label title="Number of Workers" text={glueJobRun.NumberOfWorkers?.toString()} />
-          <List.Item.Detail.Metadata.Label title="Timeout" text={glueJobRun.Timeout?.toString() + "s"} />
-          <List.Item.Detail.Metadata.Label title="Profile Name" text={glueJobRun.ProfileName || ""} />
-          <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.TagList title="Versions">
-            <List.Item.Detail.Metadata.TagList.Item text={"Glue V" + glueJobRun.GlueVersion} color={"#eed535"} />
-          </List.Item.Detail.Metadata.TagList>
-          <List.Item.Detail.Metadata.Label title="Log Group Name" text={glueJobRun.LogGroupName} />
-          <List.Item.Detail.Metadata.Label title="Id" text={glueJobRun.Id} />
-        </List.Item.Detail.Metadata>
-      }
-    />
-  );
-}
 
 function GlueJob({ job: glueJobRun }: { job: GlueJobRun }) {
   return (
@@ -145,6 +109,43 @@ function GlueJobRuns({ glueJobName: glueJobName }: { glueJobName: string }) {
   );
 }
 
+function GlueJobRunDetails({ jobRun: glueJobRun }: { jobRun: GlueJobRun }) {
+  return (
+    <List.Item.Detail
+      metadata={
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label title="Job Name" text={glueJobRun.JobName} />
+          <List.Item.Detail.Metadata.Label
+            title="Job Run State"
+            text={{ value: glueJobRun.JobRunState || "", color: glueJobRun.iconTintColor }}
+          />
+          <List.Item.Detail.Metadata.Label title="Execution Time" text={glueJobRun.ExecutionTime?.toString() + "s"} />
+          <List.Item.Detail.Metadata.Label title="Started on" text={glueJobRun.StartedOn?.toUTCString()} />
+          <List.Item.Detail.Metadata.Label title="Completed On" text={glueJobRun.CompletedOn?.toUTCString() || ""} />
+          <List.Item.Detail.Metadata.Label
+            title="Error Message"
+            text={{ color: Color.Red, value: glueJobRun.ErrorMessage || "" }}
+          />
+          <List.Item.Detail.Metadata.Label title="Arguments" text={JSON.stringify(glueJobRun.Arguments)} />
+          <List.Item.Detail.Metadata.Label title="DPU Seconds" text={(glueJobRun.DPUSeconds?.toString() || "") + "s"} />
+          <List.Item.Detail.Metadata.Label title="Attempt" text={glueJobRun.Attempt?.toString()} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Worker Type" text={glueJobRun.WorkerType} />
+          <List.Item.Detail.Metadata.Label title="Number of Workers" text={glueJobRun.NumberOfWorkers?.toString()} />
+          <List.Item.Detail.Metadata.Label title="Timeout" text={glueJobRun.Timeout?.toString() + "s"} />
+          <List.Item.Detail.Metadata.Label title="Profile Name" text={glueJobRun.ProfileName || ""} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.TagList title="Versions">
+            <List.Item.Detail.Metadata.TagList.Item text={"Glue V" + glueJobRun.GlueVersion} color={"#eed535"} />
+          </List.Item.Detail.Metadata.TagList>
+          <List.Item.Detail.Metadata.Label title="Log Group Name" text={glueJobRun.LogGroupName} />
+          <List.Item.Detail.Metadata.Label title="Id" text={glueJobRun.Id} />
+        </List.Item.Detail.Metadata>
+      }
+    />
+  );
+}
+
 async function RunGlueJob(glueJobName: string) {
   try {
     const client = new GlueClient();
@@ -156,7 +157,7 @@ async function RunGlueJob(glueJobName: string) {
   }
 }
 
-export function GlueJobDefinition({ glueJobName: glueJobName }: { glueJobName: string }) {
+function GlueJobDefinition({ glueJobName: glueJobName }: { glueJobName: string }) {
   const { data: glueJobDetails, isLoading } = useCachedPromise(fetchJobDetails, [glueJobName]);
   const description = glueJobDetails?.Job?.Description
     ? glueJobDetails?.Job?.Description!.toString()
@@ -213,13 +214,13 @@ export function GlueJobDefinition({ glueJobName: glueJobName }: { glueJobName: s
     />
   );
 }
+
 async function fetchJobDetails(glueJobName: string): Promise<GetJobCommandOutput> {
   const client = new GlueClient({});
   const input = {
-    // GetJobRequest
     JobName: glueJobName, // required
   };
-  const command = await new GetJobCommand(input);
+  const command = new GetJobCommand(input);
   const response: GetJobCommandOutput = await client.send(command);
 
   return response;
@@ -240,14 +241,12 @@ async function fetchJobs(nextMarker?: string, jobs?: string[]): Promise<string[]
 
 async function fetchJobRuns(maxResults: number, jobNames?: string[]): Promise<GlueJobRun[]> {
   // The function should return only the latest job run result per job.
-  // TODO: what happens when there is no job run?
   if (!isReadyToFetch() && jobNames) return [];
   const jobRuns: JobRun[] = [];
   for (const jobName of jobNames!) {
     const { JobRuns: jobRunsResponses } = await new GlueClient({}).send(
       new GetJobRunsCommand({ JobName: jobName, MaxResults: maxResults }),
     );
-    // add icon, icontintcolor and accessoriestext properies, which are dependend on the jobrunstate
 
     jobRunsResponses?.map((jobRun) => {
       const jobRunResponse: GlueJobRun = jobRun;
