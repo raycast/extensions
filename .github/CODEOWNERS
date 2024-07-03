@@ -93,7 +93,7 @@
 /extensions/battery-optimizer                                       @Qetesh @VatsalSy
 /extensions/bazinga-tools                                           @luin
 /extensions/beancount-mate                                          @iwfan
-/extensions/bear                                                    @hmarr @lucaschultz @diokhan @ron-myers @juanbanchero @thomaslombart
+/extensions/bear                                                    @hmarr @lucaschultz @diokhan @ron-myers @juanbanchero @ramsaysewell @thomaslombart
 /extensions/beat-per-minute                                         @pernielsentikaer
 /extensions/bech32-converter                                        @Zygimantass
 /extensions/bed-time-calculator                                     @khlebobul
@@ -162,7 +162,7 @@
 /extensions/canvascast                                              @YodaLightsabr @yug2005
 /extensions/capacities                                              @sbleh
 /extensions/capture                                                 @syhchen
-/extensions/capture-fullpage-of-website                             @Coun1er
+/extensions/capture-fullpage-of-website                             @Coun1er @j3lte
 /extensions/capture-raycast-metadata                                @koinzhang
 /extensions/carbon-raycast                                          @adelowo
 /extensions/cardpointers                                            @emcro
@@ -823,7 +823,7 @@
 /extensions/minion-ipsum                                            @vigosan
 /extensions/minisim                                                 @okwasniewski
 /extensions/miro                                                    @felixhaeberle @mathieudutour
-/extensions/mite                                                    @paoloricciuti
+/extensions/mite                                                    @paoloricciuti @ramsaysewell
 /extensions/mixpanel                                                @smsimone
 /extensions/mlb-scores                                              @jso8910
 /extensions/mldocs                                                  @sadanand-singh
@@ -941,6 +941,7 @@
 /extensions/open-in-json-hero                                       @ericallam @ivanovart
 /extensions/open-in-sublime-text                                    @anfalas
 /extensions/open-in-visual-studio-code                              @shubzkothekar @thomaspaulmann
+/extensions/open-laravel-herd-site                                  @medienbaecker
 /extensions/open-link-in-specific-browser                           @koinzhang
 /extensions/open-path                                               @koinzhang
 /extensions/open-targets-raycast                                    @ireneisdoomed
@@ -1045,7 +1046,7 @@
 /extensions/prism-launcher                                          @lockieluke
 /extensions/prisma-cli-commands                                     @rajmasha
 /extensions/privileges                                              @ph00lt0
-/extensions/productboard                                            @honzatmn
+/extensions/productboard                                            @honzatmn @xmok
 /extensions/producthunt                                             @ragnorc @pernielsentikaer
 /extensions/productlane                                             @scopsy @pernielsentikaer @DanielHougaard
 /extensions/project-companion                                       @maximedaraize

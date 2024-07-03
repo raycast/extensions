@@ -10,6 +10,7 @@
     "diokhan",
     "ron-myers",
     "JuanBanchero",
+    "ramsay",
     "thomaslombart"
   ],
   "license": "MIT",
@@ -61,7 +62,7 @@
         },
         {
           "default": false,
-          "description": "When creating a new note, prepend time and date",
+          "description": "When creating a new note, pin the note",
           "label": "Pin note in notes list",
           "name": "pinNote",
           "required": false,
