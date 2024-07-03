@@ -1,7 +1,7 @@
 import path from "node:path";
 import * as os from "node:os";
 import * as fs from "fs-extra";
-import { LaunchType, closeMainWindow, environment, launchCommand, open } from "@raycast/api";
+import { closeMainWindow, environment, open } from "@raycast/api";
 import { spawnSync } from "node:child_process";
 import { isEmpty, showStickiesNotRunningHUD, truncate } from "./common-utils";
 import { isStickiesRunning, newStickiesNote, showStickiesWindows, toggleStickiesWindows } from "./applescript-utils";
@@ -146,8 +146,4 @@ export async function showStickies(isToggle: boolean = false) {
       await showStickiesNotRunningHUD();
     }
   }
-
-  // Update the command metadata
-  await launchCommand({ name: "new-stickies-note", type: LaunchType.Background });
-  await launchCommand({ name: "close-stickies-note", type: LaunchType.Background });
 }

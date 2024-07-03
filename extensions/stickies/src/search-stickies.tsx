@@ -49,6 +49,7 @@ export default function MenubarStickies() {
           quickLook={{ path: note.rawPath }}
           detail={
             <List.Item.Detail
+              isLoading={isLoading}
               markdown={showAsMarkdown ? note.content : "```" + "\n" + note.content + "\n```"}
               metadata={
                 showDetailMetadata ? (

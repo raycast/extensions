@@ -1,5 +1,5 @@
-import { showHUD, updateCommandMetadata, Clipboard, showToast, Toast } from "@raycast/api";
-import { getStickiesNotesCount, StickiesNote } from "./stickies-utils";
+import { showHUD, Clipboard, showToast, Toast } from "@raycast/api";
+import { StickiesNote } from "./stickies-utils";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
@@ -7,12 +7,6 @@ export const isEmpty = (string: string | null | undefined) => {
 
 export const showStickiesNotRunningHUD = async () => {
   await showToast({ title: "Stickies is not running", style: Toast.Style.Failure });
-};
-
-export const updateStickiesWindowsCount = async () => {
-  const windowCount = await getStickiesNotesCount();
-  const subtitle = windowCount === 0 ? "Stickies" : `${windowCount} Stickies`;
-  await updateCommandMetadata({ subtitle: subtitle });
 };
 
 export function truncate(str: string, maxLength = 30): string {
