@@ -1,6 +1,6 @@
 # ImproVMX Changelog
 
-## [View Domain Logs + `chore` + `fix`] = {PR_MERGE_DATE}
+## [View Domain Logs + `chore` + `fix`] = 2024-07-03
 
 ### Enhancements
 
