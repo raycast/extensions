@@ -1,9 +1,12 @@
 import path from "node:path";
 import * as os from "node:os";
 import * as fs from "fs-extra";
-import { environment } from "@raycast/api";
+import { LaunchType, closeMainWindow, environment, launchCommand, open } from "@raycast/api";
 import { spawnSync } from "node:child_process";
-import { isEmpty, truncate } from "./common-utils";
+import { isEmpty, showStickiesNotRunningHUD, truncate } from "./common-utils";
+import { isStickiesRunning, newStickiesNote, showStickiesWindows, toggleStickiesWindows } from "./applescript-utils";
+import { STICKIES_PATH } from "./constants";
+import { autoOpen } from "../types/preference";
 
 const stickiesDir = path.join(os.homedir(), "Library/Containers/com.apple.Stickies/Data/Library/Stickies");
 const stickiesTempDir = path.join(environment.supportPath, "temp");
@@ -73,7 +76,7 @@ function readRtf() {
 
 const getFirstLine = (text: string): string => {
   const firstNewLineIndex = text.indexOf("\n");
-  if (firstNewLineIndex === -1) return text; // 没有换行符，整个文本就是一行
+  if (firstNewLineIndex === -1) return text;
   return text.substring(0, firstNewLineIndex);
 };
 
@@ -118,4 +121,33 @@ export async function readStickies() {
     console.error("Error reading Stickies directory:", err);
   }
   return result;
+}
+
+export async function showStickies(isToggle: boolean = false) {
+  await closeMainWindow();
+  const stickiesRunning = isStickiesRunning();
+  if (stickiesRunning) {
+    const windowCount = await getStickiesNotesCount();
+    if (windowCount > 0) {
+      if (isToggle) {
+        await toggleStickiesWindows();
+      } else {
+        await open(STICKIES_PATH);
+        await showStickiesWindows();
+      }
+    } else {
+      await newStickiesNote();
+    }
+  } else {
+    if (autoOpen) {
+      await open(STICKIES_PATH);
+      await showStickiesWindows();
+    } else {
+      await showStickiesNotRunningHUD();
+    }
+  }
+
+  // Update the command metadata
+  await launchCommand({ name: "new-stickies-note", type: LaunchType.Background });
+  await launchCommand({ name: "close-stickies-note", type: LaunchType.Background });
 }

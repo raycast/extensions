@@ -1,10 +1,9 @@
-import { Icon, launchCommand, LaunchType, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
+import { Icon, launchCommand, LaunchType, MenuBarExtra, openCommandPreferences } from "@raycast/api";
 import { useStickies } from "./hooks/useStickies";
 import { useMemo } from "react";
 import { primaryAction, showMenubarTitle } from "./types/preference";
 import { firstLine, handleClipboardOperation } from "./utils/common-utils";
-import { showStickiesWindows } from "./utils/applescript-utils";
-import { STICKIES_PATH } from "./utils/constants";
+import { showStickies } from "./utils/stickies-utils";
 
 export default function MenubarStickies() {
   const { data: strickiesNotesData, isLoading } = useStickies();
@@ -47,8 +46,7 @@ export default function MenubarStickies() {
           title={"Show Stickies Window"}
           shortcut={{ modifiers: ["shift", "cmd"], key: "s" }}
           onAction={async () => {
-            await showStickiesWindows();
-            await open(STICKIES_PATH);
+            await showStickies();
           }}
         />
       </MenuBarExtra.Section>

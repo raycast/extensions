@@ -1,5 +1,5 @@
 import { MutatePromise } from "@raycast/utils";
-import { StickiesNote } from "../utils/stickies-utils";
+import { StickiesNote, showStickies } from "../utils/stickies-utils";
 import {
   Action,
   ActionPanel,
@@ -77,6 +77,14 @@ export function ActionsNotes(props: {
           shortcut={{ modifiers: ["cmd"], key: "r" }}
           icon={Icon.Repeat}
           onAction={mutate}
+        />
+        <Action
+          title={"Show Stickies Window"}
+          icon={Icon.AppWindowList}
+          shortcut={{ modifiers: ["shift", "cmd"], key: "s" }}
+          onAction={async () => {
+            await showStickies();
+          }}
         />
       </ActionPanel.Section>
 

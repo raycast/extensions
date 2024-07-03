@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List, openCommandPreferences, openExtensionPreferences } from "@raycast/api";
-import { StickiesNote } from "../utils/stickies-utils";
+import { StickiesNote, showStickies } from "../utils/stickies-utils";
 import { MutatePromise } from "@raycast/utils";
 
 export function StickiesListEmptyView(props: {
@@ -18,6 +18,14 @@ export function StickiesListEmptyView(props: {
               shortcut={{ modifiers: ["cmd"], key: "r" }}
               icon={Icon.Repeat}
               onAction={mutate}
+            />
+            <Action
+              title={"Show Stickies Window"}
+              icon={Icon.AppWindowList}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "s" }}
+              onAction={async () => {
+                await showStickies();
+              }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
