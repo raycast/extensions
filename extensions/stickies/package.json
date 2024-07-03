@@ -149,7 +149,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.3",
+    "@raycast/api": "^1.78.0",
     "@raycast/utils": "^1.16.1",
     "fs-extra": "^11.2.0",
     "fuse.js": "^7.0.0"
