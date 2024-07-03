@@ -80,7 +80,7 @@
   - [Icons & Images](api-reference/user-interface/icons-and-images.md)
   - [Navigation](api-reference/user-interface/navigation.md)
 - [Raycast Window & Search Bar](api-reference/window-and-search-bar.md)
-- [Window Management](api-reference/window-and-search-bar.md)
+- [Window Management](api-reference/window-management.md)
 
 ---
 
