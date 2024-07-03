@@ -21,7 +21,7 @@
     {
       "name": "apiKey",
       "label": "API Key",
-      "description": "Enter your personal API Key",
+      "description": "Enter your personal API Key, which you can get from https://pedia.cloud.edu.tw/Home/OpenAPI",
       "type": "password",
       "title": "API Key",
       "required": true

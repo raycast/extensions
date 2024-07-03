@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 import { DictDetail } from "./DictDetail";
@@ -39,15 +39,6 @@ export const Main = () => {
       isShowingDetail={isShowingDetail}
       searchText={input}
       onSearchTextChange={setInput}
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open GitHub"
-            url="https://github.com/CofCat456/raycast-chinese-dictionary"
-            icon={Icon.Code}
-          />
-        </ActionPanel>
-      }
     >
       {result != null ? (
         <List.Item
