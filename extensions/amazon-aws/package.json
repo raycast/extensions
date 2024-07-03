@@ -82,12 +82,6 @@
       "mode": "view"
     },
     {
-      "name": "glue",
-      "title": "Glue",
-      "description": "List Glue Jobs and view details",
-      "mode": "view"
-    },
-    {
       "name": "lambda",
       "title": "Lambda Functions",
       "description": "Find and open a function",

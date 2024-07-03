@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
-import { getEnumKeysExcludingCurrent, normalizeUrl } from "../../util";
+import { getEnumKeysExcludingCurrent } from "../../util";
 
 export class AwsAction {
   public static Console = ({ url, onAction }: { url: string; onAction?: () => void }) => (
