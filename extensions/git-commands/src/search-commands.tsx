@@ -55,8 +55,8 @@ export default function Command() {
     saveAliases(aliases).then(() => {
       showToast(
         alias.pin
-          ? { title: "Unpin", message: alias.name + " is now pinned" }
-          : { title: "Pinned", message: alias.name + " is no longer pinned" },
+          ? { title: "Unpin", message: alias.name + " is no longer pinned" }
+          : { title: "Pinned", message: alias.name + " is now pinned" },
       );
     });
   };
@@ -78,6 +78,16 @@ export default function Command() {
     );
   };
 
+  const toKeyword = (word: string) => {
+    const clean = word
+      .replace(/[^a-zA-Z0-9- ]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (!clean) return [];
+
+    return [...new Set([clean, clean.replace(/--/g, "")])];
+  };
   const Item = ({ alias, hidePin }: { alias: Alias; hidePin?: boolean }) => {
     const { name, command, type, description, pin = false, recent = false } = alias;
 
@@ -94,7 +104,7 @@ export default function Command() {
         title={name}
         subtitle={{ value: command, tooltip: command }}
         detail={<List.Item.Detail markdown={detail} />}
-        keywords={[description, command]}
+        keywords={[...description.split(" "), ...command.split(" ").map(toKeyword).flat()]}
         accessories={[
           ...(pin && !hidePin
             ? [{ icon: { source: Icon.Tack, ...(isPinColored && { tintColor: Color.Yellow }) } }]
@@ -143,7 +153,7 @@ export default function Command() {
                 shortcut={Keyboard.Shortcut.Common.RemoveAll}
               />
             )}
-            <Action icon={Icon.Gear} title="CahcColors in Preferences" onAction={openCommandPreferences} />
+            <Action icon={Icon.Gear} title="Change Colors in Preferences" onAction={openCommandPreferences} />
           </ActionPanel>
         }
       />

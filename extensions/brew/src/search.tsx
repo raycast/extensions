@@ -111,5 +111,8 @@ function isInstalled(name: string, installed?: InstalledMap): boolean {
   if (!installed) {
     return false;
   }
-  return installed.formulae.get(name) != undefined || installed.casks.get(name) != undefined;
+  return (
+    (installed.formulae instanceof Map && installed.formulae.get(name) != undefined) ||
+    (installed.casks instanceof Map && installed.casks.get(name) != undefined)
+  );
 }

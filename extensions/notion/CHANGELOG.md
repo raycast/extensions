@@ -1,5 +1,9 @@
 # Notion Changelog
 
+## [Refactor] - 2024-07-03
+
+- Refactor code. No Functional changes.
+
 ## [Seperate property managment for quicklinks] - 2024-04-22
 
 - Manage database properties visibility and order seperatly in quicklinks.

@@ -1,5 +1,4 @@
 import { addDays, formatISO, isBefore, isSameDay } from "date-fns";
-import { largeCalendar } from "../types/preferences";
 import { Priority } from "../hooks/useReminders";
 
 export function isFullDay(date: string) {
@@ -21,26 +20,6 @@ export function isToday(date: string) {
 export function isTomorrow(date: string) {
   const today = isFullDay(date) ? getTodayInLocalTime() : new Date();
   return isSameDay(date, addDays(today, 1));
-}
-
-export function truncate(str: string, maxLength = largeCalendar ? 32 : 28): string {
-  let length = 0;
-  let i;
-  for (i = 0; i < str.length; i++) {
-    const charCode = str.charCodeAt(i);
-    // 判断字符是否为中文字符（Unicode范围）
-    if (charCode >= 0x4e00 && charCode <= 0x9fff) {
-      length += 2.2;
-    } else {
-      length += 1;
-    }
-
-    if (length > maxLength) {
-      break;
-    }
-  }
-
-  return str.substring(0, i) + (i < str.length ? "…" : "");
 }
 
 export function addPriorityToTitle(title: string, priority: Priority) {

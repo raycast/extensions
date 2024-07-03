@@ -1,5 +1,9 @@
 # Brew Changelog
 
+## [Bug Fix] - 2024-07-03
+
+- Fix a crash that could occur when showing installed formula or cask
+
 ## [Improvements] - 2024-06-24
 
 - Search now includes cask names

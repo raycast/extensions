@@ -10,28 +10,36 @@ import { resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
 import { usePipelines } from "./hooks/use-codepipeline";
 import { ToggleStageTransitionAction } from "./components/codepipeline/toggle-stage-transition-action";
-import { RetryStageExecutionAction } from "./components/codepipeline/retry-stage-execution-action";
 import { StopExecutionAction } from "./components/codepipeline/stop-execution-action";
+import { useFrecencySorting } from "@raycast/utils";
+import { RetryStageExecutionAction } from "./components/codepipeline/retry-stage-execution-action";
 
 export type PipelineStage = StageState & {
   nextStage?: StageState;
 };
 
 export type Pipeline = PipelineSummary & {
-  pipelineKey: string;
-  executions: PipelineExecutionSummary[];
-  stages: PipelineStage[];
+  latestExecution?: PipelineExecutionSummary;
 };
 
 export default function CodePipeline() {
-  const { pipelines, error, isLoading, mutate, pagination } = usePipelines();
+  const { pipelines, error, isLoading, mutate } = usePipelines();
+
+  const {
+    data: sortedPipelines,
+    resetRanking,
+    visitItem: visit,
+  } = useFrecencySorting(pipelines, {
+    key: (pipeline) => pipeline.name!,
+    namespace: "aws-pipelines",
+    sortUnvisited: (a, b) => a.name!.localeCompare(b.name!),
+  });
 
   return (
     <List
       isLoading={isLoading}
       filtering
-      pagination={pagination}
-      searchBarPlaceholder="Filter pipelines by name, executionId..."
+      searchBarPlaceholder="Filter pipelines by name, type, mode..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={mutate} />}
     >
       {error && (
@@ -41,34 +49,44 @@ export default function CodePipeline() {
           icon={{ source: Icon.Warning, tintColor: Color.Red }}
         />
       )}
-      {!error && pipelines?.length === 0 && (
+      {!error && sortedPipelines?.length === 0 && (
         <List.EmptyView title="No pipelines found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
-      {pipelines?.map((pipeline) => (
+      {sortedPipelines?.map((pipeline) => (
         <List.Item
-          key={pipeline.pipelineKey}
-          title={pipeline.name || ""}
-          keywords={[
-            pipeline.name || "",
-            pipeline.pipelineType || "",
-            pipeline.executionMode || "",
-            ...pipeline.executions.map((e) => e.pipelineExecutionId || ""),
-          ]}
+          key={pipeline.name!}
+          title={pipeline.name!}
+          keywords={[pipeline.name!, pipeline.pipelineType || "", pipeline.executionMode || ""]}
           icon={{ source: "aws-icons/cp.png", mask: Image.Mask.RoundedRectangle }}
           actions={
             <ActionPanel>
-              <AwsAction.Console url={resourceToConsoleLink(pipeline.name, "AWS::CodePipeline::Pipeline")} />
+              <AwsAction.Console
+                url={resourceToConsoleLink(pipeline.name, "AWS::CodePipeline::Pipeline")}
+                onAction={() => visit(pipeline)}
+              />
               <ActionPanel.Section title={"Pipeline Actions"}>
-                <ToggleStageTransitionAction {...{ pipeline, mutate, isLoading }} />
-                <RetryStageExecutionAction {...{ pipeline, mutate, isLoading }} />
-                <StopExecutionAction {...{ pipeline, mutate, isLoading }} />
-                <Action.CopyToClipboard title="Copy Pipeline Name" content={pipeline.name || ""} />
-                {pipeline.executions.length > 0 && pipeline.executions[0].pipelineExecutionId && (
+                <ToggleStageTransitionAction {...{ pipeline, mutate, visit }} />
+                <RetryStageExecutionAction {...{ pipeline, mutate, visit }} />
+                <StopExecutionAction {...{ pipeline, mutate, visit }} />
+                <Action.CopyToClipboard
+                  title="Copy Pipeline Name"
+                  content={pipeline.name || ""}
+                  onCopy={() => visit(pipeline)}
+                />
+                {pipeline.latestExecution && pipeline.latestExecution.pipelineExecutionId && (
                   <Action.CopyToClipboard
                     title="Copy Latest Execution ID"
-                    content={pipeline.executions[0].pipelineExecutionId}
+                    content={pipeline.latestExecution.pipelineExecutionId}
+                    onCopy={() => visit(pipeline)}
                   />
                 )}
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <Action
+                  title="Reset Ranking"
+                  icon={Icon.ArrowCounterClockwise}
+                  onAction={() => resetRanking(pipeline)}
+                />
               </ActionPanel.Section>
             </ActionPanel>
           }
@@ -84,8 +102,14 @@ export default function CodePipeline() {
               tooltip: "Execution Mode",
             },
             { date: pipeline.updated, icon: Icon.Calendar, tooltip: "Last Updated" },
-            pipeline.executions.length > 0 && pipeline.executions[0].status
-              ? { icon: statusToIconMap[pipeline.executions[0].status], tooltip: pipeline.executions[0].status }
+            pipeline.latestExecution && pipeline.latestExecution.status
+              ? {
+                  icon: statusToIconMap[pipeline.latestExecution.status],
+                  tooltip: [
+                    pipeline.latestExecution.status,
+                    ...(pipeline.latestExecution.statusSummary ? [": ", pipeline.latestExecution.statusSummary] : []),
+                  ].join(""),
+                }
               : { icon: { source: Icon.CircleProgress, tintColor: Color.Blue }, tooltip: "NotStarted" },
           ]}
         />
