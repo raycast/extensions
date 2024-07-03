@@ -34,7 +34,7 @@ function CreateNoteAction() {
       }&edit=${values.openNote === "no" ? "no" : "yes"}&timestamp=${values.timestamp ? "yes" : "no"}&text=${
         values.text
       }&pin=${values.pin ? "yes" : "no"}`,
-      { background: values.openNote === "no" }
+      { background: values.openNote === "no" },
     );
     await closeMainWindow();
     await popToRoot({ clearSearchBar: true });
@@ -44,7 +44,7 @@ function CreateNoteAction() {
 }
 
 export default function NewNote() {
-  const { newNoteOpenMode, prependTimeAndDate, pinNote } = getPreferenceValues();
+  const { newNoteOpenMode, prependTimeAndDate, pinNote } = getPreferenceValues<Preferences.NewNote>();
   return (
     <Form
       navigationTitle={"Create Note"}
