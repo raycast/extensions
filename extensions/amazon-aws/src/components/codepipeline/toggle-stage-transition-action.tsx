@@ -3,30 +3,35 @@ import {
   CodePipelineClient,
   DisableStageTransitionCommand,
   EnableStageTransitionCommand,
+  PipelineExecutionStatus,
   StageTransitionType,
 } from "@aws-sdk/client-codepipeline";
 import { getErrorMessage } from "../../util";
 import { MutatePromise } from "@raycast/utils";
 import { Pipeline, PipelineStage } from "../../codepipeline";
+import { usePipelineState } from "../../hooks/use-codepipeline";
 
 export const ToggleStageTransitionAction = ({
   pipeline,
-  isLoading,
   mutate,
+  visit,
 }: {
   pipeline: Pipeline;
-  isLoading: boolean;
-  mutate: MutatePromise<Pipeline[]>;
+  mutate: MutatePromise<Pipeline[] | undefined>;
+  visit: (pipeline: Pipeline) => Promise<void>;
 }) => {
+  const { stages, isLoading, mutate: revalidate } = usePipelineState(pipeline.name!);
+
   return (
     <ActionPanel.Submenu
       title="Toggle Stage Transition"
       icon={Icon.Bolt}
       shortcut={{ modifiers: ["ctrl"], key: "t" }}
       isLoading={isLoading}
+      onOpen={revalidate}
       filtering
     >
-      {pipeline.stages
+      {(stages ?? [])
         .filter((s) => !!s.nextStage)
         .map((s) => {
           const transitionEnabled = !!s.nextStage!.inboundTransitionState?.enabled;
@@ -39,7 +44,10 @@ export const ToggleStageTransitionAction = ({
                   : { source: Icon.BoltDisabled, tintColor: Color.Red }
               }
               title={`${s.stageName} -> ${s.nextStage!.stageName}`}
-              onAction={() => toggleStageTransition(transitionEnabled, pipeline.name!, s, mutate)}
+              onAction={async () => {
+                await visit(pipeline);
+                await toggleStageTransition(transitionEnabled, pipeline.name!, s, mutate);
+              }}
             />
           );
         })}
@@ -51,29 +59,30 @@ const toggleStageTransition = async (
   transitionEnabled: boolean,
   pipelineName: string,
   stage: PipelineStage,
-  mutate: MutatePromise<Pipeline[]>,
+  mutate: MutatePromise<Pipeline[] | undefined>,
 ) => {
   await mutate(transitionEnabled ? disableTransition(pipelineName, stage) : enableTransition(pipelineName, stage), {
-    optimisticUpdate: (pipelines) =>
-      pipelines.map((p) =>
-        p.name !== pipelineName
-          ? p
-          : {
+    optimisticUpdate: (pipelines) => {
+      if (!pipelines) {
+        return;
+      }
+
+      return pipelines.map((p) =>
+        p.name === pipelineName && transitionEnabled
+          ? {
               ...p,
-              stages: p.stages.map((s) =>
-                s.stageName !== stage.stageName
-                  ? s
-                  : {
-                      ...s,
-                      nextStage: {
-                        ...s.nextStage,
-                        inboundTransitionState: { ...s.nextStage?.inboundTransitionState, enabled: !transitionEnabled },
-                      },
-                    },
-              ),
-            },
-      ),
-    shouldRevalidateAfter: false,
+              ...(p.latestExecution && {
+                latestExecution: {
+                  ...p.latestExecution,
+                  status: PipelineExecutionStatus.Stopped,
+                  statusSummary: "Stage transition disabled",
+                },
+              }),
+            }
+          : p,
+      );
+    },
+    shouldRevalidateAfter: !transitionEnabled,
   });
 };
 
@@ -83,7 +92,7 @@ const enableTransition = async (pipelineName: string, stage: PipelineStage) => {
     "❗Enabling transition",
     `between ${stage.stageName} -> ${stage.nextStage!.stageName}`,
   );
-  return await new CodePipelineClient({})
+  return new CodePipelineClient({})
     .send(
       new EnableStageTransitionCommand({
         pipelineName,
@@ -111,7 +120,7 @@ const disableTransition = async (pipelineName: string, stage: PipelineStage) => 
     "❗Disabling transition",
     `between ${stage.stageName} -> ${stage.nextStage!.stageName}`,
   );
-  return await new CodePipelineClient({})
+  return new CodePipelineClient({})
     .send(
       new DisableStageTransitionCommand({
         pipelineName,
