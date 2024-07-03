@@ -5,7 +5,7 @@ Made with ♥ from Poland
 ---
 
 <p align="center">
-<img width=100 src="https://raw.githubusercontent.com/tkowalski29/mikrus-raycast-extension/main/assets/command-icon.png">
+<img width=100 src="https://raw.githubusercontent.com/tkowalski29/mikrus-raycast-extension/main/assets/icon.png">
 </p>
 
 <h1 align="center">Mikr.us</h1>
