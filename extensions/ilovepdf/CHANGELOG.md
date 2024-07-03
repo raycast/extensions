@@ -1,5 +1,6 @@
 # iLovePDF Changelog
 
+## [Add Repair PDF Command] - 2024-07-03
 
 ## [Add Placeholder for format of split range] - 2024-07-02
 
