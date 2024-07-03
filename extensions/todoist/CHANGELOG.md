@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2024-07-03
 
 Completing tasks or other action no longer throw errors if menu bar command is not activated.
 
