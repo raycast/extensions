@@ -1,5 +1,11 @@
 # Copy Path Changelog
 
+## [Support More Browsers] - 2024-07-04
+
+- Now that there is no browser restriction, you can try to copy the URL in any Webkit or Chromium-based browser
+- Copy the name, path or bundle identifier of the current window by setting the preference
+- Other detail optimisation
+
 ## [Support More Browsers] - 2024-06-25
 
 - Support Safari Web App and Firefox browser by using an alternative method

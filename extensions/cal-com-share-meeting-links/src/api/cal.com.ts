@@ -3,10 +3,6 @@ import axios, { AxiosRequestConfig } from "axios";
 import { useCachedPromise } from "@raycast/utils";
 import moment from "moment";
 
-export interface Preferences {
-  token: string;
-}
-
 export interface CalUser {
   id: number;
   username: string;
@@ -69,6 +65,7 @@ export interface CalEventType {
   slotInterval: null;
   metadata: object;
   successRedirectUrl: null;
+  link: string;
 }
 
 interface recurringEvent {
@@ -81,7 +78,7 @@ interface CalEventTypeResp {
   event_types: CalEventType[];
 }
 
-interface CalBookingResp {
+export interface CalBookingResp {
   bookings: {
     id: number;
     userId: number;
@@ -125,17 +122,8 @@ export interface updateBookingContent {
   status: string;
 }
 
-export interface CancelBookingProps {
-  bookingId: number;
-  revalidate: () => void;
-}
-
-export interface CancelBookingForm {
-  reason: string;
-}
-
 const defaultBaseUrl = "https://api.cal.com/v1/";
-const { token }: Preferences = getPreferenceValues();
+const { token } = getPreferenceValues<Preferences>();
 
 const api = axios.create({
   baseURL: defaultBaseUrl,
@@ -148,28 +136,36 @@ async function calAPI<T>({ method = "GET", ...props }: AxiosRequestConfig) {
 }
 
 export function useCurrentUser() {
-  return useCachedPromise(async () => {
-    const data = await calAPI<CalUserResp>({ url: "/me" });
-    return data.user;
-  });
+  return useCachedPromise(
+    async () => {
+      const data = await calAPI<CalUserResp>({ url: "/me" });
+      return data.user;
+    },
+    [],
+    { failureToastOptions: { title: "Unable to load current user" } },
+  );
 }
 
 export function useEventTypes() {
-  return useCachedPromise(async () => {
-    const data = await calAPI<CalEventTypeResp>({ url: "/event-types" });
-    const sortedEventTypes = data.event_types.sort((a, b) => b.position - a.position);
-    return sortedEventTypes;
-  }, []);
+  return useCachedPromise(
+    async () => {
+      const data = await calAPI<CalEventTypeResp>({ url: "/event-types" });
+      return data.event_types.sort((a, b) => b.position - a.position);
+    },
+    [],
+    { failureToastOptions: { title: "Unable to load event types" } },
+  );
 }
 
 export function useBookings() {
-  return useCachedPromise(async () => {
-    const data = await calAPI<CalBookingResp>({ url: "/bookings" });
-    const sortedBookings = data.bookings.sort(
-      (a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
-    );
-    return sortedBookings;
-  }, []);
+  return useCachedPromise(
+    async () => {
+      const data = await calAPI<CalBookingResp>({ url: "/bookings" });
+      return data.bookings.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
+    },
+    [],
+    { failureToastOptions: { title: "Unable to load bookings" } },
+  );
 }
 
 export function updateBooking(bookingId: number, data: updateBookingContent) {
@@ -191,9 +187,9 @@ export function cancelBooking(bookingId: number, reason: string) {
 }
 
 export function formatDateTime(date: string) {
-  return moment(date).format("Do MMM HH:mm");
+  return moment(date).format("Do MMM HH:mm a");
 }
 
 export function formatTime(date: string) {
-  return moment(date).format("HH:mm");
+  return moment(date).format("HH:mm a");
 }

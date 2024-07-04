@@ -1,5 +1,9 @@
 # raycast-ollama Changelog
 
+## [BugFix] - 2024-06-30
+
+- Fixed typo on error code 'Raycast Browser Extensions Needed for This Feature'.
+
 ## [BugFix] - 2024-06-20
 
 - Fixed Error `keep alive, error missing unit in duration` on **Command 'Create Custom Command'**.

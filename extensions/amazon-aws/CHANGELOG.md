@@ -8,6 +8,10 @@
 - Secrets: Removed pre-loading resource policy and instead provided an ad-hoc action. This reduces [throttling](https://github.com/raycast/extensions/issues/13296).
 - Pipelines: Changed icons and improved mutation logic.
 
+## [Contributor maintenance] - 2024-07-04
+
+- Move @JonathanWbn to list of past contributors
+
 ## [Fixes] - 2024-07-03
 
 - Reverts to rendering all pipelines at once. We can add wait later if this causes issues

@@ -39,21 +39,27 @@ export function useNetworkServices() {
     loadData();
   }, []);
 
-  const updateServiceStatus = (service: NetworkService, status: NetworkServiceStatus) => {
+  const updateServiceStatus = async (service: NetworkService, status: NetworkServiceStatus) => {
     const networkServiceName = service.name.replace(/"/g, '\\"');
     const command =
       status === "connecting"
         ? `/usr/sbin/networksetup -connectpppoeservice "${networkServiceName}"`
         : `/usr/sbin/networksetup -disconnectpppoeservice "${networkServiceName}"`;
 
-    execPromise(command)
-      .then(() => {
-        setNetworkServices((currentServices) => ({
-          ...currentServices,
-          [service.id]: { ...service, status },
-        }));
-      })
-      .catch((err) => setError(err));
+    try {
+      await execPromise(command);
+      setNetworkServices((currentServices) => ({
+        ...currentServices,
+        [service.id]: { ...service, status },
+      }));
+      const updatedStatus = await waitForFinalServiceStatus(service);
+      setNetworkServices((currentServices) => ({
+        ...currentServices,
+        [service.id]: { ...service, status: updatedStatus },
+      }));
+    } catch (err) {
+      setError(err as Error);
+    }
   };
 
   const fetchServiceStatus = async (service: NetworkService) => {
@@ -67,6 +73,26 @@ export function useNetworkServices() {
       setError(err as Error);
     }
   };
+
+  const waitForFinalServiceStatus = (service: NetworkService) =>
+    new Promise<NetworkServiceStatus>((resolve) => {
+      const checkStatus = async () => {
+        try {
+          const status = await showPPPoEStatus(service.name);
+
+          if (status === "connected" || status === "disconnected") {
+            resolve(status);
+          } else {
+            setTimeout(checkStatus, 500);
+          }
+        } catch (err) {
+          // If there's an error, we'll continue polling
+          setTimeout(checkStatus, 500);
+        }
+      };
+
+      checkStatus();
+    });
 
   const addToFavorites = async (service: NetworkService) => {
     const updatedFavorites = { ...favorites, [service.id]: true };
@@ -185,16 +211,6 @@ export function useNetworkServices() {
       disconnecting: { actionName: undefined, action: undefined, icon: Icon.CircleEllipsis },
       invalid: { actionName: undefined, action: undefined, icon: Icon.XMarkCircle },
     })[service.status] || { icon: Icon.XMarkCircle };
-
-  useEffect(() => {
-    const needsUpdate = Object.values(networkServices).some(
-      (service) => service.status === "connecting" || service.status === "disconnecting",
-    );
-    if (!isLoading && needsUpdate) {
-      const intervalId = setInterval(() => fetchDataWithFavorites(favorites, favoriteOrder), 500);
-      return () => clearInterval(intervalId);
-    }
-  }, [isLoading, networkServices, favorites, favoriteOrder]);
 
   const favoriteServices = useMemo(
     () =>
