@@ -1,5 +1,10 @@
 # Shakespearify Changelog
 
+## [Updated README and API Key Handling] - 2024-07-04
+
+- Updated README which previously had the wrong link for Google AI Studio
+- Updated *`Shakespearify`* command to handle API errors and display a detailed view
+
 ## [Initial Version] - 2024-06-27
 
 - Fixed TypeScript *`any`* type error

@@ -43,7 +43,6 @@ export async function shakespearify(text: string) {
     await LocalStorage.setItem("history", JSON.stringify(array));
     return generatedText;
   } catch (error) {
-    console.error("Error:", error);
-    throw error;
+    return "error";
   }
 }

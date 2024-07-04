@@ -24,7 +24,7 @@ When you first run the extension, you will be asked a few configuration options.
 
 #### Obtaining a Gemini API Key
 
-1. Visit [Google AI Studio Website](https://exchange.gemini.com/settings/api) and create an API key.
+1. Visit [Google AI Studio Website](https://aistudio.google.com/app/apikey) and create an API key.
 2. Copy the API key after generating.
 3. Paste the API key when asked during the setup process.
 
