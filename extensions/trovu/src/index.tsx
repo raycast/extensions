@@ -116,7 +116,7 @@ ${examples || ""}
           />
           <Action.OpenInBrowser
             title="Report Problem"
-            url={`https://github.com/trovu/trovu-web/issues/new?title=Problem%20with%20shortcut%20%60${suggestion.namespace}.${suggestion.keyword}%20${suggestion.argumentCount}%60`}
+            url={`https://github.com/trovu/trovu/issues/new?title=Problem%20with%20shortcut%20%60${suggestion.namespace}.${suggestion.keyword}%20${suggestion.argumentCount}%60`}
           />
         </>
       )}
