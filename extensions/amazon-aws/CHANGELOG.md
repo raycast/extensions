@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [Contributor maintenance] - {PR_MERGE_DATE}
+## [Contributor maintenance] - 2024-07-04
 
 - Move @JonathanWbn to list of past contributors
 
