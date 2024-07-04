@@ -6,29 +6,35 @@ import {
   getPropertyIcon,
   notionColorToTintColor,
   patchPage,
-  PagePropertyType,
+  PageProperty,
   DatabaseProperty,
-  DatabasePropertyOption,
+  PropertyConfig,
+  getPropertyConfig,
 } from "../../utils/notion";
 
-export function ActionEditPageProperty(props: {
+type EditPropertyOptions = PropertyConfig<"select" | "multi_select">["options"][number] & {
+  icon?: string;
+};
+
+export function ActionEditPageProperty({
+  databaseProperty,
+  pageId,
+  pageProperty,
+  shortcut,
+  mutate,
+  icon,
+  options,
+}: {
   databaseProperty: DatabaseProperty;
   pageId: string;
-  pageProperty?: PagePropertyType;
+  pageProperty?: PageProperty;
   mutate: () => Promise<void>;
   shortcut?: Keyboard.Shortcut;
   icon?: Image.ImageLike;
-  customOptions?: DatabasePropertyOption[];
+  options?: EditPropertyOptions[];
 }) {
-  const {
-    databaseProperty,
-    pageId,
-    pageProperty,
-    shortcut,
-    mutate,
-    icon = getPropertyIcon(databaseProperty),
-    customOptions: options = databaseProperty.options || [],
-  } = props;
+  if (!icon) icon = getPropertyIcon(databaseProperty);
+  if (!options) options = getPropertyConfig(databaseProperty, ["select", "multi_select"])?.options;
 
   const { data: users } = useUsers();
 
@@ -65,7 +71,7 @@ export function ActionEditPageProperty(props: {
       const value = pageProperty && "select" in pageProperty ? pageProperty.select?.id : null;
       return (
         <ActionPanel.Submenu title={title} icon={icon} shortcut={shortcut}>
-          {(options as DatabasePropertyOption[])?.map((opt) => (
+          {options?.map((opt) => (
             <Action
               key={opt.id}
               icon={
@@ -94,7 +100,7 @@ export function ActionEditPageProperty(props: {
       const value = pageProperty && "status" in pageProperty ? pageProperty.status?.id : null;
       return (
         <ActionPanel.Submenu title={title} icon={icon} shortcut={shortcut}>
-          {(options as DatabasePropertyOption[])?.map((opt) => (
+          {options?.map((opt) => (
             <Action
               key={opt.id}
               icon={
@@ -160,7 +166,7 @@ export function ActionEditPageProperty(props: {
       const multiSelectIds = value.map((selection) => selection.id);
       return (
         <ActionPanel.Submenu title={title} icon={icon} shortcut={shortcut}>
-          {(options as DatabasePropertyOption[])?.map((opt) => {
+          {options?.map((opt) => {
             if (!opt.id) {
               return null;
             }

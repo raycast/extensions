@@ -4,6 +4,12 @@
 
 - Move @JonathanWbn to list of past contributors
 
+## [Fixes] - 2024-07-03
+
+- Reverts back to rendering all pipelines at once. We can add wait later if this causes issues
+- Optimized the mutation for pipeline actions even further.
+- Reduced AWS calls during initial rendering. Also revalidates the list in pipeline action sub-menus every time it is opened.
+
 ## [Improvements] - 2024-07-02
 
 - Changed AwsAction.Console component, to create sso shortcut login links, if possible

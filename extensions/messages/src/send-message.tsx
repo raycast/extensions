@@ -1,4 +1,16 @@
-import { Action, ActionPanel, environment, Form, Icon, LaunchProps, open, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  environment,
+  Form,
+  getPreferenceValues,
+  Icon,
+  LaunchProps,
+  open,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useForm, runAppleScript, useCachedPromise, FormValidation, getAvatarIcon } from "@raycast/utils";
 import { useEffect, useMemo } from "react";
 import { fetchAllContacts } from "swift:../swift/contacts";
@@ -30,7 +42,11 @@ type Values = {
 export default function Command({
   draftValues,
   launchContext,
-}: LaunchProps<{ draftValues: Values; launchContext: { contactId: string; address: string; text: string } }>) {
+}: LaunchProps<{
+  draftValues: Values;
+  launchContext: { contactId: string; address: string; text: string };
+}>) {
+  const { shouldCloseMainWindow } = getPreferenceValues<{ shouldCloseMainWindow: boolean }>();
   const { data: contacts, isLoading } = useCachedPromise(async () => {
     const contacts = await fetchAllContacts();
     return contacts as Contact[];
@@ -67,6 +83,10 @@ export default function Command({
       if (result === "Success") {
         const name = getName(correspondingContact);
 
+        if (shouldCloseMainWindow) {
+          await closeMainWindow({ clearRootSearch: true });
+        }
+
         await showToast({
           style: Toast.Style.Success,
           title: `Sent Message to ${name}`,
@@ -81,7 +101,7 @@ export default function Command({
 
         reset({ text: "" });
       } else {
-        showToast({ style: Toast.Style.Failure, title: "Could not send message", message: result });
+        await showToast({ style: Toast.Style.Failure, title: "Could not send message", message: result });
       }
     },
     initialValues: {
@@ -125,18 +145,20 @@ export default function Command({
       enableDrafts
     >
       <Form.Dropdown {...itemProps.contact} title="Contact" storeValue>
-        {contacts?.map((contact, i) => {
-          const name = getName(contact);
-          return (
-            <Form.Dropdown.Item
-              key={i}
-              title={`${name}`}
-              icon={getAvatarIcon(name)}
-              keywords={[contact.givenName, contact.familyName, ...contact.phoneNumbers, ...contact.emailAddresses]}
-              value={contact.id}
-            />
-          );
-        })}
+        {contacts
+          ?.filter((c) => c.givenName || c.familyName)
+          .map((contact, i) => {
+            const name = getName(contact);
+            return (
+              <Form.Dropdown.Item
+                key={i}
+                title={`${name.trim()}`}
+                icon={getAvatarIcon(name)}
+                keywords={[contact.givenName, contact.familyName, ...contact.phoneNumbers, ...contact.emailAddresses]}
+                value={contact.id}
+              />
+            );
+          })}
       </Form.Dropdown>
       <Form.Dropdown {...itemProps.address} title="Address" storeValue>
         {contactAddresses?.map((address) => {

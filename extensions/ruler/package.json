@@ -22,8 +22,28 @@
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "required": true,
+      "name": "dragMode",
+      "title": "Drag Mode",
+      "description": "By default: Click point A and point B to measure distance",
+      "type": "checkbox",
+      "label": "Drag point A to point B to measure distance",
+      "default": false
+    },
+    {
+      "required": true,
+      "name": "copyToClipboard",
+      "title": "Copy to Clipboard",
+      "description": "Copy the distance to the clipboard",
+      "type": "checkbox",
+      "label": "Copy the distance to the clipboard",
+      "default": false
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.74.0"
+    "@raycast/api": "^1.77.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

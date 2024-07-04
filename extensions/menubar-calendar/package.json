@@ -113,6 +113,44 @@
           ]
         },
         {
+          "title": "Show Events in Menubar",
+          "name": "showEventsInMenubar",
+          "type": "dropdown",
+          "description": "Show calendar events in the menu bar",
+          "required": false,
+          "default": "0.5",
+          "data": [
+            {
+              "title": "Never",
+              "value": "0"
+            },
+            {
+              "title": "10 minutes before",
+              "value": "0.16"
+            },
+            {
+              "title": "20 minutes before",
+              "value": "0.33"
+            },
+            {
+              "title": "30 minutes before",
+              "value": "0.5"
+            },
+            {
+              "title": "1 hour before",
+              "value": "1"
+            },
+            {
+              "title": "As long as they are upcoming",
+              "value": "6"
+            },
+            {
+              "title": "Always",
+              "value": "-1"
+            }
+          ]
+        },
+        {
           "title": "Calendar Style",
           "name": "largeCalendar",
           "label": "Large Calendar",
@@ -136,6 +174,40 @@
           "description": "Show week number in the calendar",
           "required": false,
           "default": true
+        },
+        {
+          "name": "dateFormat",
+          "title": "Date Fromat",
+          "type": "dropdown",
+          "description": "Choose the time format to display.",
+          "required": false,
+          "default": "macOS",
+          "data": [
+            {
+              "title": "Default",
+              "value": "macOS"
+            },
+            {
+              "title": "MM/dd/yyyy",
+              "value": "MM/dd/yyyy"
+            },
+            {
+              "title": "dd/MM/yyyy",
+              "value": "dd/MM/yyyy"
+            },
+            {
+              "title": "yyyy/MM/dd",
+              "value": "yyyy/MM/dd"
+            },
+            {
+              "title": "yyyy-MM-dd",
+              "value": "yyyy-MM-dd"
+            },
+            {
+              "title": "dd.MM.yyyy",
+              "value": "dd.MM.yyyy"
+            }
+          ]
         },
         {
           "name": "calendarView",
@@ -219,20 +291,20 @@
   ],
   "dependencies": {
     "date-fns": "^3.6.0",
-    "@raycast/api": "^1.77.0",
+    "@raycast/api": "^1.78.0",
     "calendar": "^0.1.1",
     "unicode-text-decorator": "^0.1.1",
     "weeknumber": "^1.2.1",
-    "@raycast/utils": "^1.16.0"
+    "@raycast/utils": "^1.16.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/calendar": "^0.1.4",
-    "@types/node": "20.14.2",
+    "@types/node": "20.14.9",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",
     "prettier": "^3.3.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.2"
   },
   "scripts": {
     "build": "ray build -e dist",
