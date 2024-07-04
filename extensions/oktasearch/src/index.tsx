@@ -34,11 +34,10 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
 
   async function search(query: string) {
-
     if (query.trim().length === 0) {
-        setSearchResults([]);
-        setIsLoading(false);
-        return;
+      setSearchResults([]);
+      setIsLoading(false);
+      return;
     }
     setIsLoading(true);
     try {
@@ -51,7 +50,7 @@ export default function Command() {
               "Content-Type": "application/json",
               Authorization: `SSWS ${preferences.oktaApiKey}`,
             },
-          }
+          },
         ),
         axios.get<OktaGroup[]>(
           `https://${preferences.oktaDomain}/api/v1/groups?search=profile.name sw "${query}" and type eq "OKTA_GROUP"`,
@@ -61,7 +60,7 @@ export default function Command() {
               "Content-Type": "application/json",
               Authorization: `SSWS ${preferences.oktaApiKey}`,
             },
-          }
+          },
         ),
       ]);
 
@@ -137,10 +136,10 @@ export default function Command() {
                     shortcut={{ modifiers: ["cmd"], key: "." }}
                   />
                   <Action.CopyToClipboard
-                      title="Copy Group ID"
-                      content={group.id}
-                      shortcut={{ modifiers: ["cmd"], key: "," }}
-                    />
+                    title="Copy Group ID"
+                    content={group.id}
+                    shortcut={{ modifiers: ["cmd"], key: "," }}
+                  />
                 </ActionPanel>
               }
             />

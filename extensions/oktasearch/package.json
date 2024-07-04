@@ -2,19 +2,21 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "oktasearch",
   "title": "Okta Search",
-  "description": "Allow you to serach through Okta users and groups",
+  "description": "Serach Okta users and groups by name.",
   "icon": "okta.png",
   "author": "damian_zachwieja",
+  "categories": [
+    "Security"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Search Okta users and groups",
-      "description": "Search for users and groups in Okta",
+      "title": "Search Users and Groups",
+      "description": "Search for users and groups in your Okta account.",
       "mode": "view"
     }
   ],
-  
   "preferences": [
     {
       "name": "oktaApiKey",
@@ -41,7 +43,8 @@
   "dependencies": {
     "@raycast/api": "^1.55.2",
     "axios": "^1.7.2",
-    "node-fetch": "^3.3.1"
+    "node-fetch": "^3.3.1",
+    "ray": "^0.0.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
@@ -49,7 +52,7 @@
     "@types/react": "^18.2.18",
     "eslint": "^8.46.0",
     "prettier": "^3.0.1",
-    "typescript": "^5.1.6"
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",
