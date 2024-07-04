@@ -1,9 +1,8 @@
 import { ItemInput } from "./input-utils";
 import { urlBuilder } from "./common-utils";
-import { Application, Icon, open, popToRoot, showHUD } from "@raycast/api";
+import { Application, Icon, open, showHUD } from "@raycast/api";
 import { SEARCH_ENGINE } from "./constants";
 import { ItemType } from "../types/types";
-import React from "react";
 import { surfEngine } from "../types/preferences";
 
 export const actionTitle = (inputText: ItemInput, applicationName: string) => {
@@ -28,22 +27,26 @@ export const actionIcon = (inputText: ItemInput) => {
   }
 };
 
-export const tooltipsContent = (inputText: ItemInput) => {
+export const tooltipsContent = (inputText: ItemInput, onlyDomain: boolean = false) => {
   switch (inputText.type) {
     case ItemType.TEXT:
       return "🔍 " + inputText.content;
     case ItemType.URL:
-      return "🔗 " + inputText.content;
+      return "🔗 " + (onlyDomain ? getHostname(inputText.content) : inputText.content);
     case ItemType.NULL:
       return "✨ Detecting...";
   }
 };
 
-export async function actionOnApplicationItem(
-  inputText: ItemInput,
-  app: Application,
-  setRefresh: React.Dispatch<React.SetStateAction<number>>,
-) {
+const getHostname = (url: string) => {
+  try {
+    return new URL(url).hostname;
+  } catch (e) {
+    return url;
+  }
+};
+
+export async function actionOnApplicationItem(inputText: ItemInput, app: Application) {
   if (inputText.type != ItemType.NULL) {
     switch (inputText.type) {
       case ItemType.URL:
@@ -54,9 +57,6 @@ export async function actionOnApplicationItem(
         break;
     }
     await openLinkinBrowser(searchEngineURLBuilder(inputText), app.path);
-    await popToRoot({ clearSearchBar: true });
-  } else {
-    setRefresh(Date.now());
   }
 }
 

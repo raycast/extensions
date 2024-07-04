@@ -1,5 +1,9 @@
 # Copy Path Changelog
 
+## [Support More Browsers] - 2024-06-25
+
+- Support Safari Web App and Firefox browser by using an alternative method
+
 ## [Copy Window Title] - 2024-06-06
 
 - Copy the title of the current window when no path or URL is detected

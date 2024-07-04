@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import OtpListItem, { Otp } from "./OtpListItem";
+import { clearTimeout } from "node:timers";
 
 function calculateTimeLeft(basis: number) {
   return basis - (new Date().getSeconds() % basis);
@@ -23,18 +24,18 @@ export default function OtpListItems({ items, refresh, setOtpList }: OtpListItem
   });
 
   useEffect(() => {
-    // use 250ms to get closer to the start of the second
-    // and only update when we are close to the start of the second
-    const id = setInterval(
-      () =>
-        new Date().getMilliseconds() < 250 &&
-        setTimes({
-          timeLeft10: calculateTimeLeft(10),
-          timeLeft30: calculateTimeLeft(30),
-        }),
-      250
-    );
-    return () => clearInterval(id);
+    let id: NodeJS.Timeout;
+
+    // rather use recursive setTimeout to get close to the start of the second
+    const doSetTimes = () => {
+      setTimes({
+        timeLeft10: calculateTimeLeft(10),
+        timeLeft30: calculateTimeLeft(30),
+      });
+      id = setTimeout(doSetTimes, 1000 - new Date().getMilliseconds());
+    };
+    doSetTimes();
+    return () => clearTimeout(id);
   }, []);
 
   return (

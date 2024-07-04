@@ -78,7 +78,7 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
         recentlyUsedOrder,
       } = getPreferenceValues<{ authyPassword: string; excludeNames: string; recentlyUsedOrder: boolean }>();
       const services: Otp[] = servicesResponse.authenticator_tokens.map((i) => {
-        const seed = decryptSeed(i.encrypted_seed, i.salt, authyPassword);
+        const seed = decryptSeed(i.encrypted_seed, i.salt, authyPassword, i.key_derivation_iterations || 1000);
 
         return {
           id: i.unique_id,

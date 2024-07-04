@@ -17,6 +17,10 @@ import PinNamesPlaceholder from "./custom-placeholders/pinNames";
 import { JavaScriptPlaceholder } from "placeholders-toolkit/dist/lib/defaultPlaceholders";
 import vm from "vm";
 import PinStatisticsPlaceholder from "./custom-placeholders/pinStatistics";
+import LaunchPinDirective from "./custom-placeholders/launchPin";
+import LaunchGroupDirective from "./custom-placeholders/launchGroup";
+import CreatePinDirective from "./custom-placeholders/createPin";
+import DeletePinDirective from "./custom-placeholders/deletePin";
 
 const filteredPlaceholders = Object.values(DefaultPlaceholders).filter((p) => !["location", "js"].includes(p.name));
 
@@ -44,6 +48,10 @@ const PinsPlaceholders = [
   GroupsPlaceholder,
   AskAIDirective,
   InputDirective,
+  LaunchPinDirective,
+  LaunchGroupDirective,
+  CreatePinDirective,
+  DeletePinDirective,
   ...filteredPlaceholders.filter((p) => p.type == PlaceholderType.InteractiveDirective),
   ...filteredPlaceholders.filter((p) => p.type == PlaceholderType.Custom),
   ...filteredPlaceholders.filter((p) => p.type == PlaceholderType.Script),

@@ -5,10 +5,13 @@ interface Preferences {
   menubarStyle: string;
   menubarIconStyle: string;
   menubarItemIconStyle: string;
+  showEventsInMenubar: string;
   largeCalendar: boolean;
   highlightCalendar: boolean;
   showWeekNumber: boolean;
   showCalendar: boolean;
+  dateFormat: string;
+  calendarView: string;
   remindersView: string;
   showReminders: boolean;
   showSettings: boolean;
@@ -19,9 +22,12 @@ export const {
   menubarStyle,
   menubarIconStyle,
   menubarItemIconStyle,
+  showEventsInMenubar,
   largeCalendar,
   highlightCalendar,
   showWeekNumber,
+  dateFormat,
+  calendarView,
   remindersView,
   showCalendar,
   showReminders,
