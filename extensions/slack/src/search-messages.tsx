@@ -69,7 +69,7 @@ function Search() {
       </ActionPanel.Submenu>
     </>
   );
-
+  console.log(data);
   return (
     <List
       isLoading={isLoading}
@@ -102,6 +102,12 @@ function Search() {
         </List.Dropdown>
       }
     >
+      {data === undefined ? (
+        <List.EmptyView
+          title="Search Slack messages"
+          description="Type something in the search bar to start searching."
+        />
+      ) : null}
       {data?.map((m) => {
         if (!m.text || !m.ts) return null;
 
