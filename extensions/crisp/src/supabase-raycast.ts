@@ -1,5 +1,5 @@
-import { LocalStorage, Cache, environment } from "@raycast/api";
-import { createClient, Session } from "@supabase/supabase-js";
+import { LocalStorage, environment } from "@raycast/api";
+import { Session, createClient } from "@supabase/supabase-js";
 
 export const supabaseRef = "cqsizljceopjyurqfajr";
 
@@ -26,7 +26,7 @@ export async function getSupabaseWithSession() {
     console.time("getSupabaseWithSession");
     const contextSession = getContextSession();
     if (contextSession) {
-      const { data, error } = await supabase.auth.setSession(contextSession);
+      const { error } = await supabase.auth.setSession(contextSession);
       if (error) {
         throw error;
       }
