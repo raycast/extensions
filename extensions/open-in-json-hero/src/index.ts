@@ -66,7 +66,7 @@ async function createNewDocument(title: string, json: unknown): Promise<{ id: st
   };
 
   const response = await fetch(`https://jsonhero.io/api/create.json?utm_source=raycast`, options);
-  let jsonResponse = await response.json();
+  let jsonResponse:any = await response.json();
 
   invariant(jsonResponse, "jsonResponse is undefined");
   invariant(typeof jsonResponse === "object", "jsonResponse is not an object");
