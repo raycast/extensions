@@ -1,6 +1,6 @@
 # Shell History Changelog
 
-## [Show Detail] - {PR_MERGE_DATE}
+## [Show Detail] - 2024-07-04
 
 - Show detail of a command history
 - Fix multi line command history search
