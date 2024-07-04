@@ -1,4 +1,4 @@
-import { LocalStorage, environment } from "@raycast/api";
+import { LocalStorage, Cache, environment } from "@raycast/api";
 import { createClient, Session } from "@supabase/supabase-js";
 
 export const supabaseRef = "cqsizljceopjyurqfajr";
@@ -20,29 +20,27 @@ function getContextSession() {
   }
   return;
 }
-async function getStorageSession() {
-  const rawSession = await LocalStorage.getItem("session");
-  try {
-    const session: Session = rawSession ? JSON.parse(String(rawSession)) : undefined;
-    return session;
-  } catch (error) {
-    console.error("Failed to parse session", error);
-  }
-}
 
 export async function getSupabaseWithSession() {
-  const session = getContextSession() || (await getStorageSession());
-
-  if (session) {
-    const { data, error } = await supabase.auth.setSession(session);
-    if (error) {
-      return { session: null, user: null, error };
+  try {
+    console.time("getSupabaseWithSession");
+    const contextSession = getContextSession();
+    if (contextSession) {
+      const { data, error } = await supabase.auth.setSession(contextSession);
+      if (error) {
+        throw error;
+      }
     }
-    await LocalStorage.setItem("session", JSON.stringify(data.session));
-    // console.log("saved session", session);
-    return { session, user: data.user, error };
-  } else {
-    return { session: null, user: null, error: null };
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+    if (error) {
+      throw error;
+    }
+    return { session, error };
+  } finally {
+    console.timeEnd("getSupabaseWithSession");
   }
 }
 
