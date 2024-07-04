@@ -1,4 +1,4 @@
-import { Color, Icon, LaunchType, getPreferenceValues, launchCommand, open, MenuBarExtra } from "@raycast/api";
+import { Color, Icon, LaunchType, getPreferenceValues, launchCommand, open } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
 import {
