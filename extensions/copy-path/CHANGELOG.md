@@ -1,6 +1,6 @@
 # Copy Path Changelog
 
-## [Support More Browsers] - {PR_MERGE_DATE}
+## [Support More Browsers] - 2024-07-04
 
 - Now that there is no browser restriction, you can try to copy the URL in any Webkit or Chromium-based browser
 - Copy the name, path or bundle identifier of the current window by setting the preference
