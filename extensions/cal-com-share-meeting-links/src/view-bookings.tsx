@@ -1,73 +1,57 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Form,
-  Icon,
-  List,
-  Toast,
-  confirmAlert,
-  openCommandPreferences,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, openCommandPreferences, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useCachedState } from "@raycast/utils";
-import {
-  CancelBookingForm,
-  CancelBookingProps,
-  cancelBooking,
-  formatDateTime,
-  formatTime,
-  updateBooking,
-  useBookings,
-} from "./services/cal.com";
+import { formatDateTime, formatTime, updateBooking, useBookings } from "@api/cal.com";
+import { CancelBooking } from "@components/cancel-booking";
 
 export default function viewBookings() {
-  const { data: items, isLoading, error, revalidate } = useBookings();
+  const { data: items, isLoading, error, mutate } = useBookings();
   const [isShowingDetail, setIsShowingDetail] = useCachedState("show-details", false);
-
-  if (error) {
-    showToast({
-      title: "Unable to load your events",
-      message: "Check your API key",
-      style: Toast.Style.Failure,
-      primaryAction: { onAction: openCommandPreferences, title: "Open Preferences" },
-    });
-  }
 
   const handleUpdateBookingStatus = async (bookingId: number, status: string) => {
     const data = { status };
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Updating booking status" });
     try {
       await updateBooking(bookingId, data);
-      revalidate();
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Booking Status Updated",
-        message: `Booking status has been successfully updated to ${status.toLowerCase()}`,
-      });
+      toast.style = Toast.Style.Success;
+      toast.title = "Booking Status Updated";
+      toast.message = `Booking status has been successfully updated to ${status.toLowerCase()}`;
     } catch (error) {
-      showFailureToast(error, { title: "Failed to update booking status" });
+      await showFailureToast(error, { title: "Failed to update booking status" });
+      throw error;
     }
+  };
+
+  const handleUpdateAndMutate = async (bookingId: number, status: string) => {
+    await mutate(handleUpdateBookingStatus(bookingId, status), {
+      optimisticUpdate: (bookings) => {
+        if (!bookings) {
+          return;
+        }
+
+        return bookings.map((b) => (b.id === bookingId ? { ...b, status } : b));
+      },
+    });
   };
 
   return (
     <List isLoading={isLoading} isShowingDetail={isShowingDetail}>
+      {error && (
+        <List.EmptyView
+          title="Unable to load your events"
+          description="Check your API key"
+          icon={{ source: Icon.Warning, tintColor: Color.Red }}
+          actions={
+            <ActionPanel>
+              <Action title="Open Preferences" onAction={openCommandPreferences} icon={Icon.Gear} />
+            </ActionPanel>
+          }
+        />
+      )}
       {items?.map((item) => (
         <List.Item
           key={item.id}
-          icon={{
-            source: Icon.Circle,
-            tintColor:
-              item.status === "ACCEPTED"
-                ? Color.Green
-                : item.status === "PENDING"
-                ? Color.Yellow
-                : item.status === "CANCELLED"
-                ? Color.Red
-                : Color.Purple,
-          }}
+          icon={getIconForStatus(item.status)}
           title={item.title}
-          subtitle={!isShowingDetail ? formatDateTime(item.startTime) + " - " + formatTime(item.endTime) : undefined}
           actions={
             <ActionPanel>
               <Action
@@ -76,37 +60,36 @@ export default function viewBookings() {
                 onAction={() => setIsShowingDetail(!isShowingDetail)}
               />
               <Action.OpenInBrowser title="Open Booking in Browser" url={`https://cal.com/booking/${item.uid}`} />
+              {item.metadata && (item.metadata["videoCallUrl"] as string | undefined) && (
+                <Action.OpenInBrowser
+                  title="Open Video Call"
+                  url={item.metadata["videoCallUrl"] as string}
+                  icon={Icon.Video}
+                  shortcut={{ modifiers: ["cmd"], key: "v" }}
+                />
+              )}
               <ActionPanel.Submenu title="Update Status" icon={Icon.Pencil} shortcut={{ modifiers: ["cmd"], key: "s" }}>
                 <Action
                   title="Accept"
-                  icon={Icon.CheckCircle}
-                  onAction={async () => {
-                    handleUpdateBookingStatus(item.id, "ACCEPTED");
-                    revalidate();
-                  }}
+                  icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
+                  onAction={() => handleUpdateAndMutate(item.id, "ACCEPTED")}
                 />
                 <Action
                   title="Reject"
-                  icon={Icon.XMarkCircle}
-                  onAction={async () => {
-                    handleUpdateBookingStatus(item.id, "REJECTED");
-                    revalidate();
-                  }}
+                  icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+                  onAction={() => handleUpdateAndMutate(item.id, "REJECTED")}
                 />
                 <Action
                   title="Pending"
-                  icon={Icon.Clock}
-                  onAction={async () => {
-                    handleUpdateBookingStatus(item.id, "PENDING");
-                    revalidate();
-                  }}
+                  icon={{ source: Icon.Clock, tintColor: Color.Orange }}
+                  onAction={() => handleUpdateAndMutate(item.id, "PENDING")}
                 />
               </ActionPanel.Submenu>
               <Action.Push
                 title="Cancel Booking"
-                icon={Icon.XMarkCircle}
+                icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
                 shortcut={{ modifiers: ["cmd"], key: "c" }}
-                target={<CancelBooking bookingId={item.id} revalidate={revalidate} />}
+                target={<CancelBooking bookingId={item.id} mutate={mutate} />}
               />
               <Action.OpenInBrowser
                 title="Open All Bookings in Browser"
@@ -115,17 +98,81 @@ export default function viewBookings() {
               />
             </ActionPanel>
           }
+          accessories={[
+            ...(isShowingDetail
+              ? []
+              : [
+                  ...(item.metadata && (item.metadata["videoCallUrl"] as string | undefined)
+                    ? [
+                        {
+                          icon: { source: Icon.Video, tintColor: Color.Yellow },
+                          tooltip: "Video Call",
+                        },
+                      ]
+                    : []),
+                  ...(item.responses?.location?.optionValue
+                    ? [
+                        {
+                          icon: { source: Icon.Pin, tintColor: Color.Yellow },
+                          tooltip: "In Person",
+                        },
+                      ]
+                    : []),
+                  {
+                    date: new Date(item.startTime),
+                    icon: { source: Icon.Calendar, tintColor: Color.Blue },
+                    tooltip: `${formatDateTime(item.startTime) + " - " + formatTime(item.endTime)}`,
+                  },
+                ]),
+            {
+              icon: Icon.TwoPeople,
+              tag: { value: String(item.attendees.length), color: Color.Magenta },
+              tooltip: "Attendees",
+            },
+          ]}
           detail={
             <List.Item.Detail
-              markdown={item.description ? item.description : "No description available."}
+              markdown={item.description ? item.description : undefined}
               metadata={
                 <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.Label title="Title" text={item.title} />
                   <List.Item.Detail.Metadata.Label
                     title="Status"
                     text={item.status.charAt(0).toUpperCase() + item.status.slice(1).toLowerCase()}
+                    icon={getIconForStatus(item.status)}
                   />
-                  <List.Item.Detail.Metadata.Label title="Start" text={formatDateTime(item.startTime)} />
-                  <List.Item.Detail.Metadata.Label title="End" text={formatDateTime(item.endTime)} />
+                  <List.Item.Detail.Metadata.Label
+                    title="Start"
+                    text={formatDateTime(item.startTime)}
+                    icon={{ source: Icon.Calendar, tintColor: Color.Blue }}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="End"
+                    text={formatDateTime(item.endTime)}
+                    icon={{ source: Icon.Calendar, tintColor: Color.Blue }}
+                  />
+                  {item.metadata && (item.metadata["videoCallUrl"] as string | undefined) && (
+                    <List.Item.Detail.Metadata.Link
+                      title="Video Call"
+                      target={item.metadata["videoCallUrl"] as string}
+                      text={"Link"}
+                    />
+                  )}
+                  {item.responses?.location?.optionValue && (
+                    <List.Item.Detail.Metadata.Label
+                      title={"Location"}
+                      icon={{ source: Icon.Pin, tintColor: Color.Yellow }}
+                      text={item.responses?.location?.optionValue}
+                    />
+                  )}
+                  <List.Item.Detail.Metadata.Separator />
+                  {item.attendees.map((a, i) => (
+                    <List.Item.Detail.Metadata.Label
+                      key={i}
+                      title={`Attendee #${i + 1}`}
+                      text={a.name ? `${a.name} (${a.email})` : a.email}
+                    />
+                  ))}
                 </List.Item.Detail.Metadata>
               }
             />
@@ -136,50 +183,16 @@ export default function viewBookings() {
   );
 }
 
-function CancelBooking({ bookingId, revalidate }: CancelBookingProps) {
-  const { pop } = useNavigation();
-
-  const handleCancelBooking = async (values: CancelBookingForm) => {
-    try {
-      await confirmAlert({
-        title: "Cancel Booking",
-        message: "Are you sure you want to cancel this booking?",
-        icon: Icon.XMarkCircle,
-        primaryAction: {
-          title: "Yes",
-          onAction: async () => {
-            await cancelBooking(bookingId, values.reason);
-
-            await showToast({
-              style: Toast.Style.Success,
-              title: "Booking Cancelled",
-              message: "Booking has been successfully cancelled",
-            });
-
-            revalidate();
-            pop();
-          },
-        },
-        dismissAction: {
-          title: "No",
-          onAction: () => pop(),
-        },
-      });
-    } catch (error) {
-      showFailureToast(error, { title: "Failed to cancel booking" });
-    }
-  };
-
-  return (
-    <Form
-      navigationTitle="Cancel Booking"
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Cancel Booking" icon={Icon.XMarkCircle} onSubmit={handleCancelBooking} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField id="reason" title="Reason" />
-    </Form>
-  );
+function getIconForStatus(status: string) {
+  switch (status) {
+    case "ACCEPTED":
+      return { source: Icon.CheckCircle, tintColor: Color.Green };
+    case "REJECTED":
+    case "CANCELLED":
+      return { source: Icon.XMarkCircle, tintColor: Color.Red };
+    case "PENDING":
+      return { source: Icon.Clock, tintColor: Color.Orange };
+    default:
+      return { source: Icon.Circle, tintColor: Color.Purple };
+  }
 }
