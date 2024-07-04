@@ -88,7 +88,14 @@ function Search() {
           {channels ? (
             <List.Dropdown.Section>
               {channels.flat().map((c) => {
-                return <List.Dropdown.Item key={c.id} icon={c.icon} value={c.name} title={c.name} />;
+                return (
+                  <List.Dropdown.Item
+                    key={c.id}
+                    icon={c.icon}
+                    value={"username" in c ? c.username : c.name}
+                    title={c.name}
+                  />
+                );
               })}
             </List.Dropdown.Section>
           ) : null}
@@ -102,7 +109,6 @@ function Search() {
         const date = convertTimestampToDate(m.ts);
         const text = emoji.emojify(m.text);
         const formattedDate = format(date, "EEEE dd MMMM yyyy 'at' HH:mm");
-
         return (
           <List.Item
             key={m.iid}
@@ -114,7 +120,7 @@ function Search() {
                 markdown={text}
                 metadata={
                   <List.Item.Detail.Metadata>
-                    {m.channel ? (
+                    {m.type === "message" && m.channel ? (
                       <List.Item.Detail.Metadata.Label title="Channel Name" icon={Icon.Hashtag} text={m.channel.name} />
                     ) : null}
 
