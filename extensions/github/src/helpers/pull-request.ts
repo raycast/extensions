@@ -1,7 +1,6 @@
 import { Color, Icon, List } from "@raycast/api";
 import { uniqBy } from "lodash";
 
-import { commands } from "../../package.json";
 import {
   PullRequestDetailsFieldsFragment,
   PullRequestFieldsFragment,
@@ -133,12 +132,21 @@ export function getReviewDecision(reviewDecision?: PullRequestReviewDecision | n
   }
 }
 
-const SORT_TYPE_PREFERENCE = commands
-  .find(({ name }) => name === "my-pull-requests-menu")!
-  .preferences!.find(({ name }) => name === "sortQuery")! as {
-  default: string;
-  data: { title: string; value: string }[];
-};
-
-export const PR_SORT_TYPES_TO_QUERIES = SORT_TYPE_PREFERENCE.data;
-export const PR_DEFAULT_SORT_QUERY = SORT_TYPE_PREFERENCE.default;
+export const PR_SORT_TYPES_TO_QUERIES = [
+  { title: "Newest", value: "sort:created-desc" },
+  { title: "Oldest", value: "sort:created-asc" },
+  { title: "Most Commented", value: "sort:comments-desc" },
+  { title: "Least Commented", value: "sort:comments-asc" },
+  { title: "Recently Updated", value: "sort:updated-desc" },
+  { title: "Least Recently Updated", value: "sort:updated-asc" },
+  { title: "Best Match", value: "sort:relevance-desc" },
+  { title: "👍", value: "sort:reactions-+1-desc" },
+  { title: "👎", value: "sort:reactions--1-desc" },
+  { title: "😄", value: "sort:reactions-smile-desc" },
+  { title: "🎉", value: "sort:reactions-tada-desc" },
+  { title: "🙁", value: "sort:reactions-thinking_face-desc" },
+  { title: "❤️", value: "sort:reactions-heart-desc" },
+  { title: "🚀", value: "sort:reactions-rocket-desc" },
+  { title: "👀", value: "sort:reactions-eyes-desc" },
+];
+export const PR_DEFAULT_SORT_QUERY = "sort:updated-desc";

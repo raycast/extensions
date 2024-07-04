@@ -14679,8 +14679,6 @@ export type Organization = Actor &
     updatedAt: Scalars["DateTime"]["output"];
     /** The HTTP URL for this organization. */
     url: Scalars["URI"]["output"];
-    /** Verified domains available to this organization. */
-    verifiedDomainsList: Array<Scalars["String"]["output"]>;
     /** Organization is adminable by the viewer. */
     viewerCanAdminister: Scalars["Boolean"]["output"];
     /** Can the viewer pin repositories and gists to the profile? */
@@ -29712,8 +29710,6 @@ export type User = Actor &
     updatedAt: Scalars["DateTime"]["output"];
     /** The HTTP URL for this user */
     url: Scalars["URI"]["output"];
-    /** Verified domains available to this organization. */
-    verifiedDomainsList: Array<Scalars["String"]["output"]>;
     /** Can the viewer pin repositories and gists to the profile? */
     viewerCanChangePinnedItems: Scalars["Boolean"]["output"];
     /** Can the current viewer create new projects on this owner. */
