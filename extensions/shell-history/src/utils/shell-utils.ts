@@ -7,7 +7,7 @@ import { captureException, Icon, open, showToast, Toast, trash } from "@raycast/
 import { ITERM2, TERMINAL } from "./constants";
 import { runAppleScript } from "@raycast/utils";
 import shellQuote from "shell-quote";
-import { showCustomHud } from "./common-utils";
+import { showCustomHud, truncate } from "./common-utils";
 
 export const zshHistoryFilePath = path.join(os.homedir(), ".zsh_history");
 export const bashHistoryFilePath = path.join(os.homedir(), ".bash_history");
@@ -268,18 +268,18 @@ export function parseToCliArray(arr: (string | { op?: string; comment?: string }
     if (typeof item === "string") {
       return {
         type: CliType.CliTool,
-        command: item,
+        command: truncate(item),
       };
     } else if (typeof item === "object" && item !== null) {
       if (item.op) {
         return {
           type: CliType.Operation,
-          command: item.op,
+          command: truncate(item.op),
         };
       } else if (item.comment) {
         return {
           type: CliType.Comment,
-          command: item.comment,
+          command: truncate(item.comment),
         };
       }
     }

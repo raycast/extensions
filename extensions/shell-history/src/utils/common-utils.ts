@@ -6,3 +6,7 @@ export const showCustomHud = async (title: string) => {
     await showHUD(title);
   }
 };
+
+export function truncate(str: string, maxLength: number = 55): string {
+  return str.substring(0, maxLength) + (maxLength < str.length ? "…" : "");
+}
