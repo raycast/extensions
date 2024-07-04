@@ -1,6 +1,6 @@
 # Stickies Changelog
 
-## [Search Stickies] - {PR_MERGE_DATE}
+## [Search Stickies] - 2024-07-04
 
 - New command : Search Stickies to search Stickies by content.
 - New command : Menubar Stickies to show recently updated Stickies in the menu bar.
