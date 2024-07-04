@@ -1,11 +1,7 @@
 # Shadcn/vue Changelog
 
-## [Initial Version] - 2024-05-09
-
-### 🩹 Fixes
+## [🩹 Fixes] - {PR_MERGE_DATE}
 
 - Documentation urls (a635398)
 
-### ❤️ Contributors
-
-- [Selemondev](https://github.com/selemondev)
+## [Initial Version] - 2024-05-09
