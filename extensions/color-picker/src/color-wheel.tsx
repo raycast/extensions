@@ -35,5 +35,5 @@ export default function Command() {
     pickAndHandleColor();
   }, []);
 
-  return <Detail markdown={`![Color Wheel](color-wheel.png?raycast-width=800&raycast-height=400)`} />;
+  return <Detail markdown={`![Color Wheel](color-wheel.webp?raycast-width=350&raycast-height=350)`} />;
 }
