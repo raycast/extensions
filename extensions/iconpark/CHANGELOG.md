@@ -1,6 +1,6 @@
 # IconPark Changelog
 
-## [Refactor Code] - {PR_MERGE_DATE}
+## [Refactor Code] - 2024-07-04
 
 - Refactor code to optimise extended runtime performance
 
