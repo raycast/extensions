@@ -5,7 +5,7 @@ export function ActionToIconPark() {
     <ActionPanel.Section>
       <Action.OpenInBrowser
         title="Go to IconPark"
-        shortcut={{ modifiers: ["cmd"], key: "g" }}
+        shortcut={{ modifiers: ["opt", "cmd"], key: "o" }}
         url={"https://iconpark.oceanengine.com/official"}
       />
     </ActionPanel.Section>

@@ -73,6 +73,12 @@
       "description": "Rotate a PDF using iLovePDF API.",
       "mode": "view"
     }
+      "name": "protect-pdf",
+      "title": "Protect PDF",
+      "subtitle": "iLovePDF",
+      "description": "Protects a PDF with a password using iLovePDF API.",
+      "mode": "view"
+    }
   ],
   "preferences": [
     {
