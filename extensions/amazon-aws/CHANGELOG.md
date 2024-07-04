@@ -1,8 +1,15 @@
 # Amazon AWS Changelog
 
+## [SQS, Secrets and Logs Commands] - {PR_MERGE_DATE}
+
+- No unnecessary pagination with typeahead for SQS, Secrets and Logs commands. Pagination with typeahead is redundant.
+- Added frecency sorting for SQS, Secrets and Logs command results.
+- SQS: Reduced max items per search to 25 to reduce throttling, added mutation after sending message and purging.
+- Secrets: Removed pre-loading resource policy and instead provided an ad-hoc action. This reduces [throttling](https://github.com/raycast/extensions/issues/13296).
+
 ## [Fixes] - 2024-07-03
 
-- Reverts back to rendering all pipelines at once. We can add wait later if this causes issues
+- Reverts to rendering all pipelines at once. We can add wait later if this causes issues
 - Optimized the mutation for pipeline actions even further.
 - Reduced AWS calls during initial rendering. Also revalidates the list in pipeline action sub-menus every time it is opened.
 
