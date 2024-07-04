@@ -1,5 +1,9 @@
 # Apple Notes Changelog
 
+## [Bug Fix Update] - 2024-06-22
+
+Fix Add Text to Note hooks rendering issue.
+
 ## [View Selected Note command] - 2024-06-17
 
 Add a new command allowing users to see the currently selected note from within Raycast. This can be handy if you want to open note backlinks for example.

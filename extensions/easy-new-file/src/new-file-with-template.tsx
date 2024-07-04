@@ -1,17 +1,16 @@
 import fse from "fs-extra";
 import * as XLSX from "xlsx";
-import { environment, getPreferenceValues, open, showHUD, showInFinder } from "@raycast/api";
+import { environment, open, showInFinder } from "@raycast/api";
 import React, { useState } from "react";
-import { isEmpty } from "./utils/common-utils";
+import { isEmpty, showCustomHUD } from "./utils/common-utils";
 import { FileType, TemplateType } from "./types/file-type";
 import { getTemplateFile } from "./hooks/hooks";
-import { Preferences } from "./types/preferences";
 import { NewFileHereListLayout } from "./components/new-file-here-list-layout";
 import { NewFileHereGridLayout } from "./components/new-file-here-grid-layout";
 import { rtfPreContent } from "./utils/constants";
+import { createdAction, layout } from "./types/preferences";
 
 export default function NewFileWithTemplate() {
-  const { layout } = getPreferenceValues<Preferences>();
   const [refresh, setRefresh] = useState<number>(0);
   const launchContext = environment.launchContext;
   const navigationTitle = launchContext?.navigationTitle || "New File With Template";
@@ -93,7 +92,7 @@ export async function createNewFileByTemplate(template: TemplateType, desPath: s
 }
 
 export const showCreateSuccess = async (fileName: string, filePath: string, folderPath: string) => {
-  switch (getPreferenceValues<Preferences>().createdAction) {
+  switch (createdAction) {
     case "no": {
       break;
     }
@@ -105,5 +104,5 @@ export const showCreateSuccess = async (fileName: string, filePath: string, fold
       await showInFinder(filePath);
     }
   }
-  await showHUD(`📄 ${fileName} created in ${folderPath.slice(0, -1)}`);
+  await showCustomHUD({ title: `📄 ${fileName} created in ${folderPath.slice(0, -1)}` });
 };

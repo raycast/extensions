@@ -1,5 +1,25 @@
 # Amazon AWS Changelog
 
+## [Fixes] - 2024-07-03
+
+- Reverts back to rendering all pipelines at once. We can add wait later if this causes issues
+- Optimized the mutation for pipeline actions even further.
+- Reduced AWS calls during initial rendering. Also revalidates the list in pipeline action sub-menus every time it is opened.
+
+## [Improvements] - 2024-07-02
+
+- Changed AwsAction.Console component, to create sso shortcut login links, if possible
+
+## [Fixes] - 2024-06-24
+
+- Fixed [the issue](https://github.com/raycast/extensions/issues/13088) when codepipeline(s) are rendered with no executions.
+- Adds mutate optimization for toggling stage transition.
+
+## [Console command] - 2024-06-19
+
+- [Frecency sorting](https://developers.raycast.com/utilities/react-hooks/usefrecencysorting) so that most/recent used service console links appear at the top of search
+- Fixed issue where console links were improperly generated: [#13032](https://github.com/raycast/extensions/issues/13032)
+
 ## [Improvements] - 2024-06-18
 
 - CodePipeline: Adds action to retry failed stage, stop ongoing execution and toggle stage transition

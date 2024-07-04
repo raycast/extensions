@@ -1,5 +1,10 @@
 # Paste as Plain text Changelog
 
+## [Optional No Prompt] - 2024-06-17
+
+-  Optional No Prompt after pasting
+-  Update metadata screenshot
+
 ## [Paste as File] - 2024-06-17
 
 -  Paste as File, extract file path from the clipboard and paste it as file

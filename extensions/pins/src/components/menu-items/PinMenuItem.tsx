@@ -57,7 +57,6 @@ export default function PinMenuItem(props: {
           icon={getPinIcon(pin)}
           title={`Edit '${pin.name || (pin.url.length > 20 ? pin.url.substring(0, 19) + "..." : pin.url)}'`}
           tooltip={pin.tooltip}
-          shortcut={pin.shortcut}
           onAction={async () =>
             launchCommand({ name: "view-pins", type: LaunchType.UserInitiated, context: { pinID: pin.id } })
           }

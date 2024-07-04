@@ -78,3 +78,45 @@ export const getChromiumBrowserPath = async (app: string) => {
     return "";
   }
 };
+
+// firefox browser
+export const scriptFirefoxBrowserPath = (app: string) => `
+tell application "${app}"
+  activate
+  tell application "System Events"
+    keystroke "l" using command down
+    keystroke "c" using command down
+    key code 53
+  end tell
+  delay 0.2
+  set activeTabURL to the clipboard
+  return (activeTabURL)
+end tell`;
+
+export const copyFirefoxBrowserPath = async (app: string) => {
+  try {
+    return await runAppleScript(scriptFirefoxBrowserPath(app));
+  } catch (e) {
+    return "";
+  }
+};
+
+// safari web app browser
+export const scriptSafariWebAppPath = (app: string) => `
+tell application "${app}" to activate
+tell application "System Events"
+  tell process "${app}"
+    keystroke "c" using {option down, command down}
+  end tell
+  delay 0.2
+  set activeTabURL to the clipboard
+  return (activeTabURL)
+end tell`;
+
+export const copySafariWebAppPath = async (app: string) => {
+  try {
+    return await runAppleScript(scriptSafariWebAppPath(app));
+  } catch (e) {
+    return "";
+  }
+};

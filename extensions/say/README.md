@@ -23,11 +23,37 @@ Siri is the closest thing to a real human voice. You can go to `System Settings 
 
 ## API
 
-### With `launchCommand`
+With this extension, users can use this extension's configuration page for more settings within Raycast.
 
-We recommned using `launchCommand` to use this extension. Users can use this extension's configuration page for more settings within Raycast.
+### Use `raycast-cross-extension`
+
+This is the most recommended way, `raycast-corss-extension` will verify the `corssExtensions` field in the `package.json`.
+This helps your upstream extension provider to get to know who is using their extension. For more details, see [Raycast Cross Extension Conventsions][raycast-cross-extension-link].
 
 ```javascript
+import { crossLaunchCommand } from "raycast-cross-extension";
+
+crossLaunchCommand({
+  name: "typeToSay",
+  type: LaunchType.Background,
+  extensionName: "say",
+  ownerOrAuthorName: "litomore",
+  arguments: {
+    content: "Hello, world!",
+  },
+  context: {
+    sayOptions: {
+      voice: "Cellos",
+    },
+  },
+});
+```
+
+### Use `launchCommand`
+
+```javascript
+import { launchCommand } from "@raycast/api";
+
 launchCommand({
   name: "typeToSay",
   type: LaunchType.Background,
@@ -37,12 +63,14 @@ launchCommand({
     content: "Hello, world!",
   },
   context: {
-    voice: "Cellos",
+    sayOptions: {
+      voice: "Cellos",
+    },
   },
 });
 ```
 
-### With `mac-say`
+### Use `mac-say`
 
 Get it from https://github.com/LitoMore/mac-say.
 

@@ -1,5 +1,5 @@
-import { ActionPanel, List, Image } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
+import { useCachedPromise, useFrecencySorting } from "@raycast/utils";
 import { readFile } from "fs/promises";
 import { AwsAction } from "./components/common/action";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
@@ -7,6 +7,14 @@ import { AWS_URL_BASE } from "./constants";
 
 export default function Console() {
   const { data: services, isLoading, revalidate } = useCachedPromise(loadJSON);
+  const {
+    data: sortedServices,
+    visitItem,
+    resetRanking,
+  } = useFrecencySorting(services, {
+    namespace: "aws-console",
+    sortUnvisited: (a, b) => a.title.localeCompare(b.title),
+  });
 
   return (
     <List
@@ -14,24 +22,17 @@ export default function Console() {
       searchBarPlaceholder="Filter services by name..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
     >
-      {services?.map((service) => (
+      {sortedServices?.map((service) => (
         <List.Item
-          key={service.uid}
+          key={service.id}
           title={service.title}
           subtitle={service.subtitle}
           icon={{ source: service.icon.path, mask: Image.Mask.RoundedRectangle }}
           keywords={service.match.split(" ")}
           actions={
             <ActionPanel>
-              <AwsAction.Console
-                url={
-                  typeof process.env.AWS_SSO_ACCOUNT_ID !== "undefined" &&
-                  typeof process.env.AWS_SSO_ROLE_NAME !== "undefined" &&
-                  typeof process.env.AWS_SSO_START_URL !== "undefined"
-                    ? `${normalizeUrl(process.env.AWS_SSO_START_URL)}console?account_id=${encodeURI(process.env.AWS_SSO_ACCOUNT_ID)}&role_name=${encodeURI(process.env.AWS_SSO_ROLE_NAME)}&destination=${encodeURI(AWS_URL_BASE + service.arg)}`
-                    : `${AWS_URL_BASE}${service.arg}`
-                }
-              />
+              <AwsAction.Console url={`${AWS_URL_BASE}${service.arg}`} onAction={() => visitItem(service)} />
+              <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => resetRanking(service)} />
             </ActionPanel>
           }
         />
@@ -41,7 +42,7 @@ export default function Console() {
 }
 
 type AWSService = {
-  uid: string;
+  id: string;
   title: string;
   subtitle: string;
   arg: string;
@@ -55,18 +56,5 @@ type AWSIcon = {
 
 async function loadJSON() {
   const file = await readFile(`${__dirname}/assets/aws-services.json`, "utf8");
-  const services = (JSON.parse(file).items as AWSService[])
-    .filter((service) => {
-      return !!service.title; // Only include services that have a title
-    })
-    .sort((a, b) => (a.title > b.title ? 1 : b.title > a.title ? -1 : 0));
-
-  return services;
-}
-
-function normalizeUrl(url: string): string {
-  if (url.endsWith("/")) {
-    return url;
-  }
-  return `${url}/`;
+  return (JSON.parse(file).items as AWSService[]).filter((service) => !!service.title && !!service.id);
 }

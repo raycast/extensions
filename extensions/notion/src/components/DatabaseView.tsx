@@ -1,6 +1,13 @@
 import { List, Image } from "@raycast/api";
 
-import { notionColorToTintColor, Page, DatabaseProperty, DatabasePropertyOption, User } from "../utils/notion";
+import {
+  notionColorToTintColor,
+  getPropertyConfig,
+  Page,
+  DatabaseProperty,
+  PropertyConfig,
+  User,
+} from "../utils/notion";
 import type { DatabaseView } from "../utils/types";
 
 import { PageListItem } from "./PageListItem";
@@ -125,11 +132,9 @@ export function DatabaseView(props: DatabaseViewProps) {
     tempSections[propId].push(p);
   });
 
-  const optionsMap: Record<string, DatabasePropertyOption> = {};
-  const customOptions: DatabasePropertyOption[] = [];
-
-  statusProperty.options
-    ?.filter((x) => x.id)
+  const optionsMap: Record<string, PropertyConfig<"status">["options"][number]> = {};
+  const customOptions = getPropertyConfig(statusProperty, ["status"])
+    ?.options.filter((opt) => opt.id)
     .sort((dpa, dpb) => {
       const value_a = dpa.id ? actionEditIds.indexOf(dpa.id) : -1;
       const value_b = dpb.id ? actionEditIds.indexOf(dpb.id) : -1;
@@ -144,17 +149,14 @@ export function DatabaseView(props: DatabaseViewProps) {
 
       return 0;
     })
-    .forEach((option) => {
-      if (!option.id) {
-        return;
-      }
+    .map((option) => {
       optionsMap[option.id] = option;
-      customOptions.push({
+      return {
         icon: statusSourceIcon(option.id),
         color: option.color,
         name: option.name,
         id: option.id,
-      });
+      };
     });
 
   sectionIds.forEach((sectionId) => {
@@ -189,7 +191,7 @@ export function DatabaseView(props: DatabaseViewProps) {
               <ActionEditPageProperty
                 key={`kanban-section-${ds.id}-page-${p.id}-custom-edit-status-action`}
                 databaseProperty={statusProperty}
-                customOptions={customOptions}
+                options={customOptions}
                 pageId={p.id}
                 pageProperty={p.properties[propertyId]}
                 icon="./icon/kanban_status_started.png"

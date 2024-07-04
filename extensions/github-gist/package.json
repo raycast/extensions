@@ -34,23 +34,6 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "remember-tag",
-          "type": "checkbox",
-          "required": false,
-          "title": "Preferences",
-          "label": "Remember Filter Tag",
-          "description": "Remember gist filter tag.",
-          "default": false
-        },
-        {
-          "name": "detail",
-          "type": "checkbox",
-          "required": false,
-          "label": "Show Gist Content",
-          "description": "Show gist content details.",
-          "default": true
-        },
-        {
           "name": "perPage",
           "type": "dropdown",
           "description": "Number of gist loaded per page.",
@@ -75,6 +58,41 @@
               "value": "100"
             }
           ]
+        },
+        {
+          "name": "remember-tag",
+          "type": "checkbox",
+          "required": false,
+          "title": "Preferences",
+          "label": "Remember Filter Tag",
+          "description": "Remember gist filter tag.",
+          "default": false
+        },
+        {
+          "name": "detail",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Gist Content",
+          "description": "Show gist content details.",
+          "default": true
+        },
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "description": "Primary action for gist item.",
+          "required": false,
+          "title": "Primary Action",
+          "default": "paste",
+          "data": [
+            {
+              "title": "Paste to Active App",
+              "value": "paste"
+            },
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            }
+          ]
         }
       ]
     },
@@ -87,16 +105,18 @@
     }
   ],
   "dependencies": {
-    "@octokit/core": "^4.2.0",
-    "@raycast/api": "^1.55.0"
+    "@octokit/core": "^6.1.0",
+    "@raycast/api": "^1.77.3",
+    "@raycast/utils": "^1.16.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "^18.8.3",
-    "eslint": "^8.39.0",
-    "prettier": "^3.0.0",
-    "react-devtools": "^4.27.6",
-    "typescript": "^5.0.4"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.14.9",
+    "@types/node-fetch": "^2.6.11",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

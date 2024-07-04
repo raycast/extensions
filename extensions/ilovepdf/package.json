@@ -58,6 +58,13 @@
       "subtitle": "iLovePDF",
       "description": "Split a PDF file using iLovePDF API.",
       "mode": "view"
+    },
+    {
+      "name": "html-to-pdf",
+      "title": "HTML to PDF",
+      "subtitle": "iLovePDF",
+      "description": "Converts an HTML page to PDF using iLovePDF API.",
+      "mode": "view"
     }
   ],
   "preferences": [
