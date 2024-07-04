@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "maverickdotdev",
   "contributors": [
-    "ivart"
+    "ivart",
+    "glendon_thompson"
   ],
   "categories": [
     "Developer Tools",
@@ -23,6 +24,14 @@
     }
   ],
   "preferences": [
+    {
+      "name": "tab",
+      "description": "Currently you can leave this blank or choose /editor or /tree",
+      "type": "textfield",
+      "required": false,
+      "default": "/editor",
+      "title": "Open at tab:"
+    },
     {
       "name": "ttl",
       "description": "How long you want your file stored",
