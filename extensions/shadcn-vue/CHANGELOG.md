@@ -1,6 +1,6 @@
 # Shadcn/vue Changelog
 
-## [🩹 Fixes] - {PR_MERGE_DATE}
+## [🩹 Fixes] - 2024-07-04
 
 - Documentation urls (a635398)
 
