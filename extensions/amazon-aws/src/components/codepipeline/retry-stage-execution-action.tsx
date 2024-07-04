@@ -2,10 +2,11 @@ import { Action, ActionPanel, captureException, Color, confirmAlert, Icon, showT
 import {
   CodePipelineClient,
   PipelineExecutionStatus,
-  RetryStageExecutionCommand, RetryStageExecutionCommandInput,
+  RetryStageExecutionCommand,
+  RetryStageExecutionCommandInput,
   StageExecutionStatus,
   StageRetryMode,
-} from '@aws-sdk/client-codepipeline';
+} from "@aws-sdk/client-codepipeline";
 import { getErrorMessage } from "../../util";
 import { Pipeline, PipelineStage } from "../../codepipeline";
 import { MutatePromise } from "@raycast/utils";
@@ -83,13 +84,17 @@ const retryStageExecution = async (
   });
 };
 
-const retry = async (pipelineName: string, stage: PipelineStage & { retryMode: StageRetryMode }, mutate: MutatePromise<Pipeline[] | undefined>) => {
+const retry = async (
+  pipelineName: string,
+  stage: PipelineStage & { retryMode: StageRetryMode },
+  mutate: MutatePromise<Pipeline[] | undefined>,
+) => {
   const input: RetryStageExecutionCommandInput = {
     pipelineName,
     pipelineExecutionId: stage.latestExecution!.pipelineExecutionId,
     stageName: stage.stageName,
     retryMode: stage.retryMode,
-  }
+  };
 
   const toast = await showToast(
     Toast.Style.Animated,
@@ -105,27 +110,29 @@ const retry = async (pipelineName: string, stage: PipelineStage & { retryMode: S
       return pipelines?.map((p) =>
         p.name === pipelineName
           ? {
-            ...p,
-            ...(p.latestExecution && {
-              latestExecution: {
-                ...p.latestExecution,
-                status: PipelineExecutionStatus.InProgress,
-                statusSummary: "Retried stage execution",
-              },
-            }),
-          }
+              ...p,
+              ...(p.latestExecution && {
+                latestExecution: {
+                  ...p.latestExecution,
+                  status: PipelineExecutionStatus.InProgress,
+                  statusSummary: "Retried stage execution",
+                },
+              }),
+            }
           : p,
       );
     },
     shouldRevalidateAfter: false,
-  }).then(({pipelineExecutionId}) => {
-    toast.style = Toast.Style.Success;
-    toast.title = `✅ Retried ${stage.retryMode === StageRetryMode.ALL_ACTIONS ? "all actions" : "failed actions"} in ${stage.stageName}`;
-    toast.message = `Execution ID: ${pipelineExecutionId}`;
-  }).catch(err => {
-    captureException(err);
-    toast.style = Toast.Style.Failure;
-    toast.title = `❌ Failed to retry ${stage.retryMode === StageRetryMode.ALL_ACTIONS ? "all actions" : "failed actions"} in ${stage.stageName}`;
-    toast.message = getErrorMessage(err);
   })
+    .then(({ pipelineExecutionId }) => {
+      toast.style = Toast.Style.Success;
+      toast.title = `✅ Retried ${stage.retryMode === StageRetryMode.ALL_ACTIONS ? "all actions" : "failed actions"} in ${stage.stageName}`;
+      toast.message = `Execution ID: ${pipelineExecutionId}`;
+    })
+    .catch((err) => {
+      captureException(err);
+      toast.style = Toast.Style.Failure;
+      toast.title = `❌ Failed to retry ${stage.retryMode === StageRetryMode.ALL_ACTIONS ? "all actions" : "failed actions"} in ${stage.stageName}`;
+      toast.message = getErrorMessage(err);
+    });
 };

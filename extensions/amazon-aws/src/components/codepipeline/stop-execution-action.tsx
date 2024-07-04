@@ -3,8 +3,9 @@ import {
   CodePipelineClient,
   PipelineExecutionStatus,
   PipelineExecutionSummary,
-  StopPipelineExecutionCommand, StopPipelineExecutionCommandInput,
-} from '@aws-sdk/client-codepipeline';
+  StopPipelineExecutionCommand,
+  StopPipelineExecutionCommandInput,
+} from "@aws-sdk/client-codepipeline";
 import { getErrorMessage } from "../../util";
 import { Pipeline } from "../../codepipeline";
 import { MutatePromise } from "@raycast/utils";
@@ -24,7 +25,7 @@ export const StopExecutionAction = ({
   return (
     <ActionPanel.Submenu
       title="Stop Execution"
-      icon={Icon.Stop}
+      icon={{ source: Icon.Stop, tintColor: Color.Red }}
       shortcut={{ modifiers: ["ctrl"], key: "s" }}
       isLoading={isLoading}
       onOpen={revalidate}
@@ -63,13 +64,17 @@ const stopExecution = async (
   });
 };
 
-const stop = async (pipelineName: string, execution: PipelineExecutionSummary, mutate: MutatePromise<Pipeline[] | undefined>) => {
+const stop = async (
+  pipelineName: string,
+  execution: PipelineExecutionSummary,
+  mutate: MutatePromise<Pipeline[] | undefined>,
+) => {
   const input: StopPipelineExecutionCommandInput = {
     pipelineName,
     pipelineExecutionId: execution.pipelineExecutionId,
     abandon: true,
     reason: "Abandoned by Raycast",
-  }
+  };
 
   const toast = await showToast(
     Toast.Style.Animated,
@@ -86,15 +91,15 @@ const stop = async (pipelineName: string, execution: PipelineExecutionSummary, m
       return pipelines.map((p) =>
         p.name === pipelineName
           ? {
-            ...p,
-            ...(p.latestExecution && {
-              latestExecution: {
-                ...p.latestExecution,
-                status: PipelineExecutionStatus.Stopped,
-                statusSummary: "Stopped execution",
-              },
-            }),
-          }
+              ...p,
+              ...(p.latestExecution && {
+                latestExecution: {
+                  ...p.latestExecution,
+                  status: PipelineExecutionStatus.Stopped,
+                  statusSummary: "Stopped execution",
+                },
+              }),
+            }
           : p,
       );
     },

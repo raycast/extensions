@@ -168,7 +168,7 @@ export default function SQS() {
                   onPush={() => visit(queue)}
                 />
                 <Action
-                  icon={{source: Icon.Trash, tintColor: Color.Red}}
+                  icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   title="Purge Queue"
                   shortcut={{ modifiers: ["ctrl"], key: "p" }}
                   onAction={async () => {
