@@ -1,7 +1,7 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import fetch from "node-fetch";
-import { SnippetDefaultTemperature, SnippetHookType } from "../type/snippet";
+import { SnippetDefault, SnippetDefaultTemperature, SnippetHookType } from "../type/snippet";
 import {
   ClearPromptSystem,
   ConfigurationTypeCommunicationDefault,
@@ -23,10 +23,10 @@ export function useSnippet(): SnippetHookType {
       if (stored) {
         setData((previous) => [...previous, ...JSON.parse(stored)]);
       } else {
-        if (GetApiEndpointData() !== "") {
+        if (GetApiEndpointData() !== "" && GetApiEndpointData() !== undefined) {
           await apiLoad(setData, data);
         } else {
-          setData([]);
+          setData(SnippetDefault);
         }
       }
 
@@ -39,6 +39,9 @@ export function useSnippet(): SnippetHookType {
   }, [data]);
 
   const reload = useCallback(async () => {
+    if (GetApiEndpointData() !== "" && GetApiEndpointData() !== undefined) {
+      return;
+    }
     await apiLoad(setData, data);
 
     await showToast({

@@ -58,7 +58,7 @@ export const SnippetListItem = ({
       subtitle={
         ConfigurationModelCollection.find((x: { key: string; title: string }) => x.key === snippet.model)?.title
       }
-      icon={snippet.emoji}
+      icon={{ source: snippet.emoji }}
       detail={<ModelDetailView snippet={snippet} />}
       actions={selectedsnippet === snippet.snippetId ? actionPanel(snippet) : undefined}
     />

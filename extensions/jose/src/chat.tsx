@@ -31,10 +31,10 @@ export default function Chat(props: { conversation?: ConversationType; arguments
   const isLoadConversation = props.conversation ? true : false;
 
   const [conversation, setConversation] = useState<ConversationType>(
-    props.conversation ? props.conversation : GetNewConversation(AssistantDefault, false)
+    props.conversation ? props.conversation : GetNewConversation(AssistantDefault[0], false)
   );
   const [selectedAssistant, setSelectedAssistant] = useState<TalkAssistantType>(
-    props.conversation && props.conversation.assistant ? props.conversation.assistant : AssistantDefault
+    props.conversation && props.conversation.assistant ? props.conversation.assistant : AssistantDefault[0]
   );
   const [selectedSnippet, setSelectedSnippet] = useState<TalkSnippetType | undefined>(
     props.conversation && props.conversation.snippet ? props.conversation.snippet : GetNewSnippet()

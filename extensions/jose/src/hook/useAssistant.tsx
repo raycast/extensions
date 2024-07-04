@@ -23,10 +23,10 @@ export function useAssistant(): AssistantHookType {
       if (stored) {
         setData((previous) => [...previous, ...JSON.parse(stored)]);
       } else {
-        if (GetApiEndpointData() !== "") {
+        if (GetApiEndpointData() !== "" && GetApiEndpointData() !== undefined) {
           await apiLoad(setData, data);
         } else {
-          setData([AssistantDefault]);
+          setData(AssistantDefault);
         }
       }
 
@@ -39,6 +39,9 @@ export function useAssistant(): AssistantHookType {
   }, [data]);
 
   const reload = useCallback(async () => {
+    if (GetApiEndpointData() !== "" && GetApiEndpointData() !== undefined) {
+      return;
+    }
     await apiLoad(setData, data);
 
     await showToast({

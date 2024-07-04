@@ -36,7 +36,7 @@ export const ChatDropdown = (props: ChangeDropdownPropType) => {
                   key={snippet.snippetId}
                   title={snippet.title}
                   value={"snippet__" + snippet.snippetId}
-                  icon={snippet.emoji}
+                  icon={{ source: snippet.emoji }}
                 />
               ))}
             </List.Dropdown.Section>
@@ -49,7 +49,7 @@ export const ChatDropdown = (props: ChangeDropdownPropType) => {
             key={selectedAssistant.assistantId}
             title={selectedAssistant.title}
             value={"assistant__" + selectedAssistant.assistantId}
-            icon={selectedAssistant.avatar}
+            icon={selectedAssistant.avatar ? { source: selectedAssistant.avatar } : { source: selectedAssistant.emoji }}
           />
         )}
         {assistants
@@ -59,7 +59,7 @@ export const ChatDropdown = (props: ChangeDropdownPropType) => {
               key={assistant.assistantId}
               title={assistant.title}
               value={"assistant__" + assistant.assistantId}
-              icon={assistant.avatar ?? assistant.emoji}
+              icon={assistant.avatar ? { source: assistant.avatar } : { source: assistant.emoji }}
             />
           ))}
       </List.Dropdown.Section>

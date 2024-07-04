@@ -47,7 +47,7 @@ const AssistantListItem = ({
       subtitle={
         ConfigurationModelCollection.find((x: { key: string; title: string }) => x.key === assistant.model)?.title
       }
-      icon={assistant.avatar ?? assistant.emoji}
+      icon={assistant.avatar ? { source: assistant.avatar } : { source: assistant.emoji }}
       detail={<ModelDetailView assistant={assistant} snippets={snippets} />}
       actions={selectedAssistant === assistant.assistantId ? actionPanel(assistant) : undefined}
     />

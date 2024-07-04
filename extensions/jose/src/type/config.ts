@@ -32,7 +32,7 @@ export const ConfigurationTypeCommunication: { key: string; title: string }[] = 
   },
 ];
 
-export const ConfigurationModelDefault = "openai__gpt-3.5-turbo";
+export const ConfigurationModelDefault = "openai__gpt-4o";
 
 export const ConfigurationModelCollection: { key: string; title: string }[] = [
   {
