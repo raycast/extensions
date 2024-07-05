@@ -69,7 +69,7 @@ function Search() {
       </ActionPanel.Submenu>
     </>
   );
-  console.log(data);
+
   return (
     <List
       isLoading={isLoading}
