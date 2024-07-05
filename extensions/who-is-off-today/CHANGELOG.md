@@ -1,6 +1,6 @@
 # Who Is Off Today? Changelog
 
-## [Updated screenshots] - {PR_MERGE_DATE}
+## [Updated screenshots] - 2024-07-05
 
 ### Changed
 
