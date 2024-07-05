@@ -1,4 +1,3 @@
-import { Request } from './request';
 import { PokemonStatData } from './pokemon';
 
 interface StatInfo {
@@ -18,7 +17,7 @@ interface TotalInfo {
 export async function GetStats(id: string, totalInfo: TotalInfo, pokemonStatData: PokemonStatData) {
     console.log('Pokemon Stats finished.')
     // 定义一个映射，key是hp, attack... value是对应的更新结构体数据的函数
-    let statMap: {[key: string] : (value: number) => void } = {
+    const statMap: {[key: string] : (value: number) => void } = {
         'hp': (value: number) => {pokemonStatData.base_stats.hp = value;},
         'attack': (value: number) => {pokemonStatData.base_stats.attack = value;},
         'defense': (value: number) => {pokemonStatData.base_stats.defense = value;},
@@ -28,8 +27,8 @@ export async function GetStats(id: string, totalInfo: TotalInfo, pokemonStatData
     }
 
     for (let i = 0; i < totalInfo.stats.length; i++) {
-        let key = totalInfo.stats[i].stat.name;
-        let value: number = totalInfo.stats[i].base_stat;
+        const key = totalInfo.stats[i].stat.name;
+        const value: number = totalInfo.stats[i].base_stat;
         statMap[key](value);
     }
 

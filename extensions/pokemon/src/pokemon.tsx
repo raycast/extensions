@@ -1,5 +1,4 @@
-import { Color, Detail, List, Icon } from "@raycast/api";
-import { showToast, Toast } from "@raycast/api";
+import { Detail, List } from "@raycast/api";
 import { GetPokemonStats } from './utils/pokemon';
 import { IconList } from "./utils/iconlist";
 // import { mapping.cnColorMapping, enColorMapping, damageTypeColorMapping } from "./utils/color_mapping";
@@ -20,8 +19,8 @@ interface AttrInfo {
 }
 
 export default function ShowPokemonStats(props: Argument) {
-    let name = props.arguments.name;
-    const {pokemonStatData, loading, error} = GetPokemonStats(name);
+    const name = props.arguments.name;
+    const {pokemonStatData, loading} = GetPokemonStats(name);
     if(loading) {
         return <Detail markdown="# 结果查询中..." />;
     } else {

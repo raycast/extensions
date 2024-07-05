@@ -1,9 +1,8 @@
 import { createInterface } from 'readline';
-import path from 'path';
 import fs from 'fs';
 
 // 读取本地csv配置文件成K-V键值对
-export async function readCSVtoMapping(filePath: any): Promise<{[key: string]: string}> {
+export async function readCSVtoMapping(filePath: string): Promise<{[key: string]: string}> {
     const mapping: { [key: string]: string } = {};
     const fileStream = fs.createReadStream(filePath);   // 创建流
     // 创建 readline 接口

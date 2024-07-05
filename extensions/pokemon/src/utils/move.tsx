@@ -61,7 +61,7 @@ interface TotalInfo {
 
 function getMoveLevel(move: MoveVersionDetail) {
     // 获取某个技能在第九世代在多少级可以升级学习到(找不到的话去第八世代)
-    let tmp = (
+    const tmp = (
         move.version_group_details.filter(item => (item.version_group.name === "scarlet-violet" && item.move_learn_method.name === "level-up") ? item.level_learned_at : -1) ||
         move.version_group_details.filter(item => (item.version_group.name === "sword-shield" && item.move_learn_method.name === "level-up") ? item.level_learned_at : -1) ||
         move.version_group_details.filter(item => (item.version_group.name === "ultra-sun-ultra-moon" && item.move_learn_method.name === "level-up") ? item.level_learned_at : -1) ||
@@ -74,29 +74,28 @@ function getMoveLevel(move: MoveVersionDetail) {
 
 // NOTE: 获取升级技能学习情况
 export async function GetMoves(id: string, totalInfo:TotalInfo, pokemonStatData: PokemonStatData) {
-    var moveLevelDetails: MoveLevelDetail[] = [];
-    let candidateMoveInfos = totalInfo.moves.filter((item: MoveVersionDetail) => getMoveLevel(item) > 0)
+    let moveLevelDetails: MoveLevelDetail[] = [];
+    const candidateMoveInfos = totalInfo.moves.filter((item: MoveVersionDetail) => getMoveLevel(item) > 0)
     // 尝试使用Promise.all来并发请求
-    var promises = candidateMoveInfos.map(async (move: MoveVersionDetail) => {
-        let moveUrl = move.move.url;    // 查询该技能详情的url, 可以获取中文名, 威力, 命中, pp等信息
-        let moveLevel = getMoveLevel(move);
-        let result = await Request(moveUrl, "GET", null, {});
+    const promises = candidateMoveInfos.map(async (move: MoveVersionDetail) => {
+        const moveUrl = move.move.url;    // 查询该技能详情的url, 可以获取中文名, 威力, 命中, pp等信息
+        const moveLevel = getMoveLevel(move);
+        const result = await Request(moveUrl, "GET", null, {});
         return {moveLevel, result}
     })
-    var results = await Promise.all(promises);
+    const results = await Promise.all(promises);
     console.log('Pokemon Moves finished.')
     results.sort((a, b) => a.moveLevel - b.moveLevel);
     for (let i = 0; i < results.length; i ++) {
-        let moveDetail: MoveDetail = results[i].result;
-        let moveLevel = results[i].moveLevel;
-        let cn_name_list = (
+        const moveDetail: MoveDetail = results[i].result;
+        const moveLevel = results[i].moveLevel;
+        const cn_name_list = (
             moveDetail.names.filter(item => (item.language.name === "zh-Hans") ? item.name : "") ||
             moveDetail.names.filter(item => (item.language.name === "zh-Hant") ? item.name : "")
         );
 
         // console.log('moveDetail.names', moveDetail.names);
-        let tmp = moveDetail.names.filter(item => (item.language.name === "en") ? item.name : "")[0];
-        let _moveLevelDetail: MoveLevelDetail = {
+        const _moveLevelDetail: MoveLevelDetail = {
             // en_name: moveDetail.names.filter(item => (item.language.name === "en") ? item.name : "")[0].name,
             // en_name: "",
             cn_name: cn_name_list[0].name,

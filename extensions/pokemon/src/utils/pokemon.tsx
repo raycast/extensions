@@ -1,12 +1,7 @@
 import { readCSVtoMapping } from './parse_csv';
 import { useState, useEffect } from 'react';
 import { Request } from './request';
-import { createInterface } from 'readline';
-import { typeMapping, damageTypeMapping } from './type';
 import path from 'path';
-import fs from 'fs';
-import * as ab from './ability';
-import { BlockList } from 'net';
 import { GetStats } from './stats';
 import { GetMoves, MoveLevelDetail } from './move';
 import { GetAbility, AbilityDetail } from './ability';
@@ -18,17 +13,6 @@ interface Detail {
     url: string,
 }
 
-// 接口返回的不同属性克制的伤害关系
-interface DamageRelation {
-    damage_relations: {
-        double_damage_from: Detail[],
-        double_damage_to: Detail[],
-        half_damage_from: Detail[],
-        half_damage_to: Detail[],
-        no_damage_from: Detail[],
-        no_damage_to: Detail[]
-    }
-}
 
 // 根据id查询宝可梦的属性信息, 也是最后插件返回的数据格式
 export interface PokemonStatData {
@@ -112,8 +96,6 @@ export function GetPokemonStats(name: string) {
         
     });
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-
 
     useEffect(() => {
         async function SearchPokemonIDFromName(name: string) {
@@ -121,14 +103,14 @@ export function GetPokemonStats(name: string) {
             // 中英文对照网址: https://wiki.52poke.com/zh-hans/%E5%AE%9D%E5%8F%AF%E6%A2%A6%E5%88%97%E8%A1%A8%EF%BC%88%E5%9C%A8%E5%85%B6%E4%BB%96%E8%AF%AD%E8%A8%80%E4%B8%AD%EF%BC%89
             // icon网址: https://zh.pngtree.com/freepng/3d-realistrc-pokemon-ball-art-pic_14754358.html
             
-            let nameMappingFilePath = path.join(__dirname, '../pokemon-tools/assets', 'name_chn_eng.csv');
+            const nameMappingFilePath = path.join(__dirname, '../pokemon-tools/assets', 'name_chn_eng.csv');
             console.log('filepath:', nameMappingFilePath)
-            let pokemonNameMapping = await readCSVtoMapping(nameMappingFilePath);
-            let id = pokemonNameMapping[name];
+            const pokemonNameMapping = await readCSVtoMapping(nameMappingFilePath);
+            const id = pokemonNameMapping[name];
             
             // 获取种族值
             const urlPokemonStats = `https://pokeapi.co/api/v2/pokemon/${id}`;
-            let totalInfo = await Request(urlPokemonStats, 'GET', null, {})
+            const totalInfo = await Request(urlPokemonStats, 'GET', null, {})
             // console.log('Pokemon Total Info finished.')
 
             // 获取属性
@@ -136,7 +118,8 @@ export function GetPokemonStats(name: string) {
             // 获取种族值
             await GetStats(id, totalInfo, pokemonStatData);
             // 获取特性详情
-            await GetAbility(id, totalInfo, pokemonStatData, name);
+            await GetAbility(id, totalInfo, pokemonStatData);
+            
             // 获取技能详情
             await GetMoves(id, totalInfo, pokemonStatData);
 
@@ -152,5 +135,5 @@ export function GetPokemonStats(name: string) {
         SearchPokemonIDFromName(name);
     }, [])
 
-    return {pokemonStatData, loading, error}
+    return {pokemonStatData, loading}
 }
