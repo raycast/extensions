@@ -1,7 +1,6 @@
 // This filename should be named `switch-to-channel.tsx` or something similar
 // but it's kept as `search.tsx` as changing the command's name will cause users to lose their keywords and aliases
 import { ActionPanel, Action, Icon, List, getPreferenceValues } from "@raycast/api";
-
 import { User, useChannels } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
 import { useFrecencySorting } from "@raycast/utils";

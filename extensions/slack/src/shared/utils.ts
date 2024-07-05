@@ -3,7 +3,6 @@ import { showFailureToast } from "@raycast/utils";
 import { CodedError, ErrorCode } from "@slack/web-api";
 import { formatDistance } from "date-fns";
 import { slack } from "./client/WebClient";
-
 import * as emoji from "node-emoji";
 
 function getTimeLocale(): string {
