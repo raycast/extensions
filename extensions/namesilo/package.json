@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "namesilo",
   "title": "NameSilo",
-  "description": "",
+  "description": "View your Domains, Orders, Whois Info and Account Balance",
   "icon": "namesilo.png",
   "author": "xmok",
   "categories": [
@@ -14,7 +14,7 @@
       "name": "api_key",
       "title": "API Key",
       "required": true,
-      "description": "",
+      "description": "API Key from NameSilo Dashboard",
       "type": "password"
     }
   ],
@@ -22,13 +22,13 @@
     {
       "name": "domains",
       "title": "Domains",
-      "description": "",
+      "description": "View Domains and Domain Info",
       "mode": "view"
     },
     {
       "name": "whois",
       "title": "Whois",
-      "description": "",
+      "description": "View Whois Info for any domain",
       "mode": "view",
       "arguments": [
         {
@@ -42,26 +42,20 @@
     {
       "name": "orders",
       "title": "Orders",
-      "description": "",
+      "description": "View your Orders and Order Details",
       "mode": "view"
     },
     {
       "name": "prices",
       "title": "Prices",
-      "description": "",
+      "description": "View Prices by TLD",
       "mode": "view"
     },
     {
       "name": "account-balance",
       "title": "Account Balance",
-      "description": "",
+      "description": "View your Account Balance",
       "mode": "no-view"
-    },
-    {
-      "name": "portfolio-manager",
-      "title": "Portfolio Manager",
-      "description": "",
-      "mode": "view"
     }
   ],
   "dependencies": {

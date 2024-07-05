@@ -1,3 +1,3 @@
 # NameSilo Changelog
 
-## [Initial Version] - 2024-06-10
+## [Initial Version] - {PR_MERGE_DATE}
