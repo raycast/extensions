@@ -48,7 +48,45 @@
       "title": "Toggl Menu Bar",
       "description": "View, start, or stop existing time entries from the Menu Bar.",
       "mode": "menu-bar",
-      "interval": "10s"
+      "interval": "10s",
+      "preferences": [
+        {
+          "name": "showTitleInMenuBar",
+          "type": "checkbox",
+          "required": false,
+          "title": "Show Running Entry Title in Menu Bar",
+          "description": "Whether or not to show the entry title in the menu bar.",
+          "label": "Show title",
+          "default": true
+        },
+        {
+          "name": "showTimeInMenuBar",
+          "type": "checkbox",
+          "required": false,
+          "title": "Show Running Entry Time in Menu Bar",
+          "description": "Whether or not to show the entry timer in the menu bar.",
+          "label": "Show timer",
+          "default": false
+        },
+        {
+          "name": "showProjectInMenuBar",
+          "type": "checkbox",
+          "required": false,
+          "title": "Show Running Entry Project in Menu Bar",
+          "description": "Whether or not to show the entry project in the menu bar.",
+          "label": "Show project",
+          "default": false
+        },
+        {
+          "name": "showClientInMenuBar",
+          "type": "checkbox",
+          "required": false,
+          "title": "Show Running Entry Client in Menu Bar",
+          "description": "Whether or not to show the entry client in the menu bar.",
+          "label": "Show client",
+          "default": false
+        }
+      ]
     },
     {
       "name": "manageProjects",

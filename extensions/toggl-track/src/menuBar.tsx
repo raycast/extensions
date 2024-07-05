@@ -1,4 +1,4 @@
-import { MenuBarExtra, Icon, launchCommand, LaunchType } from "@raycast/api";
+import { MenuBarExtra, Icon, launchCommand, LaunchType, getPreferenceValues } from "@raycast/api";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 
@@ -26,34 +26,63 @@ export default function Command() {
     revalidateTimeEntries,
   );
   const currentTime = useCurrentTime();
+  const runningEntry = runningTimeEntry;
+  const currentDuration = runningEntry
+    ? dayjs.duration(dayjs(currentTime).diff(runningEntry.start), "milliseconds").format("HH:mm:ss")
+    : "";
 
-  const entry = runningTimeEntry;
+  const preferences = getPreferenceValues<Preferences.MenuBar>();
+
+  let menuBarTitle = "";
+
+  if (runningEntry) {
+    const menuBarElements = [];
+    if (preferences.showTitleInMenuBar) {
+      menuBarElements.push(runningEntry.description);
+    }
+
+    if (preferences.showTimeInMenuBar) {
+      menuBarElements.push(currentDuration);
+    }
+
+    if (preferences.showProjectInMenuBar) {
+      menuBarElements.push(runningEntry.project_name);
+    }
+
+    if (preferences.showClientInMenuBar) {
+      menuBarElements.push(runningEntry.client_name);
+    }
+
+    menuBarTitle = menuBarElements.join(" | ");
+  }
 
   return (
     <MenuBarExtra
-      icon={{ source: Icon.Circle, tintColor: entry?.project_color }}
+      icon={{ source: Icon.Circle, tintColor: runningEntry?.project_color }}
       isLoading={isLoading}
-      title={entry ? entry.description : ""}
+      title={menuBarTitle}
       tooltip={
-        entry
-          ? dayjs.duration(dayjs(currentTime).diff(entry.start), "milliseconds").format("HH:mm:ss") +
+        runningEntry
+          ? currentDuration +
             " | " +
-            (entry.project_name ? entry.project_name + " | " : "") +
-            (entry.client_name ?? "")
+            (runningEntry.project_name ? runningEntry.project_name + " | " : "") +
+            (runningEntry.client_name ?? "")
           : "No time entries"
       }
     >
-      {entry && (
+      {runningEntry && (
         <MenuBarExtra.Section title="Running time entry">
           <MenuBarExtra.Item
-            icon={{ source: Icon.Circle, tintColor: entry?.project_color }}
-            onAction={() => stopRunningTimeEntry(entry)}
-            title={entry.description || ""}
+            icon={{ source: Icon.Circle, tintColor: runningEntry?.project_color }}
+            onAction={() => {
+              stopRunningTimeEntry(runningEntry);
+            }}
+            title={runningEntry.description || ""}
             subtitle={
-              dayjs.duration(dayjs(currentTime).diff(entry.start), "milliseconds").format("HH:mm:ss") +
+              currentDuration +
               " | " +
-              (entry.project_name ? entry.project_name + " | " : "") +
-              (entry.client_name ?? "")
+              (runningEntry.project_name ? runningEntry.project_name + " | " : "") +
+              (runningEntry.client_name ?? "")
             }
           />
         </MenuBarExtra.Section>
