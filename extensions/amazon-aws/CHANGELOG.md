@@ -8,6 +8,10 @@
 - Secrets: Removed pre-loading resource policy and instead provided an ad-hoc action. This reduces [throttling](https://github.com/raycast/extensions/issues/13296).
 - Pipelines: Changed icons and improved mutation logic.
 
+## [Improvements] - 2024-07-05
+
+- Adds copy option to s3 command
+
 ## [Contributor maintenance] - 2024-07-04
 
 - Move @JonathanWbn to list of past contributors

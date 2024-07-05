@@ -154,9 +154,9 @@ export default function DownloadVideo() {
           <Form.Dropdown.Section key={container} title={`Video (${container})`}>
             {videoFormats
               .filter((format) => format.container == container)
-              .map((format) => (
+              .map((format, index) => (
                 <Form.Dropdown.Item
-                  key={format.itag}
+                  key={`${format.itag}-${format.quality}-${container}-${index}`}
                   value={JSON.stringify({ itag: format.itag.toString(), container: container } as FormatOptions)}
                   title={`${format.qualityLabel} (${
                     format.contentLength
@@ -169,9 +169,9 @@ export default function DownloadVideo() {
           </Form.Dropdown.Section>
         ))}
         <Form.Dropdown.Section title="Audio">
-          {audioFormats.map((format) => (
+          {audioFormats.map((format, index) => (
             <Form.Dropdown.Item
-              key={format.itag}
+              key={`${format.itag}-${format.audioBitrate}-${index}`}
               value={JSON.stringify({ itag: format.itag.toString() } as FormatOptions)}
               title={`${format.audioBitrate}kps (${prettyBytes(parseInt(format.contentLength))})`}
               icon={Icon.Music}

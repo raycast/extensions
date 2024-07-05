@@ -77,20 +77,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.48.8",
+    "@raycast/api": "^1.77.0",
+    "@raycast/utils": "^1.16.1",
     "parse-git-config": "^3.0.0",
     "prettier": "^3.2.5",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
+    "@types/node": "^20.8.10",
     "@types/parse-git-config": "^3.0.1",
-    "@types/react": "^17.0.28",
+    "@types/react": "^18.2.27",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
+    "react": "^18.2.0",
+    "react-devtools": "^5.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

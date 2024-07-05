@@ -232,7 +232,7 @@
 /extensions/collected-notes                                         @txemaleon
 /extensions/color-casket                                            @slavarazum @fe9lix @pernielsentikaer @fengtianze
 /extensions/color-hunt                                              @bxb100
-/extensions/color-picker                                            @thomaspaulmann @otakustay @EmersonEmerson @pernielsentikaer @arronhunt @kvdo2 @thomaslombart @LitoMore @samuelkraft
+/extensions/color-picker                                            @thomaspaulmann @otakustay @EmersonEmerson @pernielsentikaer @arronhunt @kvdo2 @thomaslombart @LitoMore @samuelkraft @ridemountainpig
 /extensions/color-shades                                            @qeude
 /extensions/color-studio-picker                                     @sejas
 /extensions/colorify                                                @EvanZhouDev
@@ -534,7 +534,7 @@
 /extensions/google-meet                                             @vitoorgomes @hughlaw @iwex
 /extensions/google-search                                           @mblode
 /extensions/google-tasks                                            @elliotdes @pernielsentikaer
-/extensions/google-translate                                        @gebeto @FezVrasta @ickas @metakirby5 @tangerine1202 @nirtamir2 @pernielsentikaer @rasitayaz @Popalay
+/extensions/google-translate                                        @gebeto @FezVrasta @ickas @metakirby5 @tangerine1202 @nirtamir2 @pernielsentikaer @rasitayaz @Popalay @LitoMore
 /extensions/google-trends                                           @kkange
 /extensions/google-workspace                                        @thomaslombart @mathieudutour @marcmagn1 @mepearso @jbjanot
 /extensions/gopass                                                  @bake @buchanan
@@ -928,6 +928,7 @@
 /extensions/ohmyzsh-git-alias                                       @yufeikang
 /extensions/ohmyzsh-plugins                                         @k8scat
 /extensions/ok-json                                                 @francisfeng
+/extensions/oktasearch                                              @zachmian
 /extensions/omg-lol                                                 @danpalmer @rknightuk
 /extensions/omni-news                                               @danielkastberg
 /extensions/omnivore                                                @KarolusD
@@ -1583,7 +1584,7 @@
 /extensions/youtrack                                                @tiulpin @skoch13 @GrimbiXcode
 /extensions/youtube                                                 @tonka3000 @SKaplanOfficial @madza91 @xilopaint
 /extensions/youtube-companion                                       @sasivarnan
-/extensions/youtube-downloader                                      @vimtor @pernielsentikaer @darmiel
+/extensions/youtube-downloader                                      @vimtor @pernielsentikaer @darmiel @ridemountainpig
 /extensions/youtube-music                                           @danieldbird @AlexStrNik @zach-fuller @gnosticdev
 /extensions/youtube-shorts-to-normal-video-page                     @b6pzeusbc54tvhw5jgpyw8pwz2x6gs
 /extensions/youtube-subscriber-count                                @imaNNeo
