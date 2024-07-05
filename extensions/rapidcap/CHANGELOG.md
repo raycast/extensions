@@ -1,6 +1,6 @@
 # RapidCap Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2024-07-05
 
 - Fix for card blocked from being saved if there are no other cards already saved
 
