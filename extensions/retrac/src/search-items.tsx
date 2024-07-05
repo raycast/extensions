@@ -14,7 +14,7 @@ import {
 import { useItems } from "@hooks/use-items";
 import { useWorkspaces } from "@hooks/use-workspaces";
 import { useState } from "react";
-import { RETRAC_URL } from "@utils/constants";
+import { RETRAC_APP_URL } from "@utils/constants";
 import { deleteItem } from "@/api";
 import { MutatePromise, showFailureToast } from "@raycast/utils";
 import { ItemSchema } from "@/types";
@@ -146,7 +146,7 @@ export default function SearchItems() {
                   <Action.OpenInBrowser
                     title="Go to Retrac"
                     shortcut={Keyboard.Shortcut.Common.Open}
-                    url={RETRAC_URL}
+                    url={RETRAC_APP_URL}
                   />
                 </ActionPanel.Section>
               </ActionPanel>

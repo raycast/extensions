@@ -9,12 +9,11 @@ import {
   showToast,
   Toast,
   useNavigation,
-  LaunchProps,
 } from "@raycast/api";
 import { useWorkspaces } from "@hooks/use-workspaces";
 import { FormValidation, showFailureToast, useCachedPromise, useCachedState, useForm } from "@raycast/utils";
 import { createItem } from "@/api"; // Adjust the API call to your requirements
-import { fetchItem, isEmpty } from "@utils/clipboard";
+import { fetchItem } from "@utils/clipboard";
 
 interface ItemFormValues {
   workspaceId: string;
@@ -25,11 +24,11 @@ interface ItemFormValues {
   tagIds: string[];
 }
 
-const AddItemForm = ({ retryValues, args }: { retryValues?: ItemFormValues; args: Arguments.AddItem }) => {
+const AddItemForm = () => {
   const { push, pop } = useNavigation();
-  const { sku, description, cost } = args;
-  const [workspaceId, setWorkspaceId] = useCachedState("selected_workspace", "", { cacheNamespace: "add-items" });
-  const { isLoading: isLoadingItem } = useCachedPromise(fetchItem, [], { execute: isEmpty(sku) });
+
+  const [, setWorkspaceId] = useCachedState("selected_workspace", "", { cacheNamespace: "add-items" });
+  const { isLoading: isLoadingItem } = useCachedPromise(fetchItem, []);
   const { workspaces, isLoading } = useWorkspaces();
 
   const { handleSubmit, itemProps, values } = useForm<ItemFormValues>({
@@ -50,7 +49,7 @@ const AddItemForm = ({ retryValues, args }: { retryValues?: ItemFormValues; args
           toast.primaryAction = {
             title: "Retry",
             onAction: () => {
-              push(<AddItemForm retryValues={vals} args={args} />);
+              push(<AddItemForm />);
               toast.hide();
             },
           };
@@ -66,17 +65,10 @@ const AddItemForm = ({ retryValues, args }: { retryValues?: ItemFormValues; args
         }
       },
       cost: (value) => {
-        if (value && (isNaN(parseFloat(value)) || parseFloat(value) <= 0)) {
+        if (value && (isNaN(parseFloat(value)) || parseFloat(value) < 0)) {
           return "Cost must be a positive number";
         }
       },
-    },
-    initialValues: retryValues ?? {
-      workspaceId,
-      sku: sku || "",
-      description: description || "",
-      cost: cost?.toString() || "",
-      quantity: "",
     },
   });
 
@@ -104,7 +96,7 @@ const AddItemForm = ({ retryValues, args }: { retryValues?: ItemFormValues; args
       <Form.Separator />
       <Form.TextField {...itemProps.sku} placeholder="Enter SKU/Item Code" title="Item Code" />
       <Form.TextField {...itemProps.description} placeholder="Enter item description" title="Description" />
-      <Form.TextField {...itemProps.cost} placeholder="Enter cost" title="Cost" />
+      <Form.TextField {...itemProps.cost} placeholder="$12.00" title="Cost (USD)" />
       <Form.TextField {...itemProps.quantity} placeholder="Enter quantity" title="Quantity" />
       <Form.TagPicker {...itemProps.tagIds} title="Tags">
         {workspaces
@@ -122,6 +114,6 @@ const AddItemForm = ({ retryValues, args }: { retryValues?: ItemFormValues; args
   );
 };
 
-export default function AddItem(props: LaunchProps<{ arguments: Arguments.AddItem }>) {
-  return <AddItemForm args={props.arguments} />;
+export default function AddItem() {
+  return <AddItemForm />;
 }

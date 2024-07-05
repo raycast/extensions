@@ -20,24 +20,7 @@
       "title": "Add Item",
       "subtitle": "Retrac",
       "description": "Add a new item to your inventory on Retrac.",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "sku",
-          "placeholder": "SKU",
-          "type": "text"
-        },
-        {
-          "name": "description",
-          "placeholder": "Description",
-          "type": "text"
-        },
-        {
-          "name": "cost",
-          "placeholder": "Cost",
-          "type": "text"
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "search-items",
