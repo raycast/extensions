@@ -5,7 +5,10 @@ import { showFailureToast } from "@raycast/utils";
 export default async function Command(args: LaunchProps) {
   const spaceIndex = parseInt(args.arguments.spaceIndex, 10);
 
-  if (isNaN(spaceIndex)) {
+	await focusSpace(spaceIndex)
+}
+export  async function focusSpace(spaceIndex :number) {
+	  if (isNaN(spaceIndex)) {
     showHUD(`Invalid space index: ${args.arguments.spaceIndex}`);
     return;
   }
@@ -33,4 +36,5 @@ export default async function Command(args: LaunchProps) {
 
     showFailureToast("Failed to focus space");
   }
+
 }

@@ -8,3 +8,4 @@
 -- Adds "Layout BSP" command.
 -- Adds "Layout Stack" command.
 -- Adds "Layout Float" command.
+## [Added MenuBar to indicate the current screen and listed windows of the current screen] - 2024-07-05
