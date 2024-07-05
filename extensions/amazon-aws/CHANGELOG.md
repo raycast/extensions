@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Improvements] - 2024-07-05
+
+- Adds copy option to s3 command
+
 ## [Contributor maintenance] - 2024-07-04
 
 - Move @JonathanWbn to list of past contributors
