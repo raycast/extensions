@@ -2,6 +2,11 @@ import { open } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { CodedError, ErrorCode } from "@slack/web-api";
 import { formatDistance } from "date-fns";
+import * as emoji from "node-emoji";
+
+export function convertSlackEmojiToUnicode(text: string): string {
+  return emoji.emojify(text);
+}
 
 const timeDifference = (date: Date): string => {
   const now = new Date();

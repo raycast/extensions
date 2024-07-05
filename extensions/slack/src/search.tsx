@@ -1,14 +1,10 @@
-import * as emoji from "node-emoji";
 import { ActionPanel, Action, Icon, Image, List } from "@raycast/api";
 
 import { User, useChannels } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
 import { useFrecencySorting } from "@raycast/utils";
 import { OpenChannelInSlack, OpenChatInSlack, useSlackApp } from "./shared/OpenInSlack";
-
-function convertSlackEmojiToUnicode(text: string): string {
-  return emoji.emojify(text);
-}
+import { convertSlackEmojiToUnicode } from "./shared/utils";
 
 function getCoworkerTime(coworkerTimeZone: string): string {
   const time = new Date();
