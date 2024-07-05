@@ -1,6 +1,6 @@
 # Open in JSON Hero Changelog
 
-## [Preferences] - 2024-07-04
+## [Preferences] - {PR_MERGE_DATE}
 
 - Added open to tab preference
 
