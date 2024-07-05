@@ -21,6 +21,7 @@ export default async function main() {
       html: html,
       text: plainText,
     });
+    await showHUD("Markdown converted and pasted successfully");
   } catch (error) {
     await showHUD("Failed to convert text");
   }
