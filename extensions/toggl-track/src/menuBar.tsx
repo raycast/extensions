@@ -2,7 +2,6 @@ import { MenuBarExtra, Icon, launchCommand, LaunchType, getPreferenceValues } fr
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 
-import { Preferences } from "@/api/types";
 import { formatSeconds } from "@/helpers/formatSeconds";
 import { useCurrentTime } from "@/hooks/useCurrentTime";
 import { useProcessedTimeEntries } from "@/hooks/useProcessedTimeEntries";
@@ -32,7 +31,7 @@ export default function Command() {
     ? dayjs.duration(dayjs(currentTime).diff(runningEntry.start), "milliseconds").format("HH:mm:ss")
     : "";
 
-  const preferences = getPreferenceValues<Preferences["MenuBar"]>();
+  const preferences = getPreferenceValues();
 
   let menuBarTitle = "";
 
