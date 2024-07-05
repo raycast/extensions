@@ -6,7 +6,6 @@
 
 </div>
 
-
 查询特定宝可梦的详细数据，适合新手训练师查询/老训练师回忆。常用常更新~
 
 > 业余程序猿，面向gpt开发，仅支持中文。
@@ -14,13 +13,13 @@
 ## Screenshot
 
 - 首页
-![](./metadata/home.png)
+  ![](./metadata/home.png)
 - 种族值
-![](./metadata/stats.png)
+  ![](./metadata/stats.png)
 - 属性
-![](./metadata/types.png)
+  ![](./metadata/types.png)
 - 技能
-![](./metadata/moves.png)
+  ![](./metadata/moves.png)
 
 ## Features
 
@@ -33,6 +32,7 @@
 - 技能列表（升级可学技能，默认最新世代，暂不包括招式学习器）
 
 ## TODO
+
 - 进化信息
--  UI美化
--  种族值标签
+- UI美化
+- 种族值标签
