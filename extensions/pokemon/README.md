@@ -14,13 +14,13 @@
 ## Screenshot
 
 - 首页
-![](./assets/screenshots/home.png)
+![](./metadata/home.png)
 - 种族值
-![](./assets/screenshots/stats.png)
+![](./metadata/stats.png)
 - 属性
-![](./assets/screenshots/types.png)
+![](./metadata/types.png)
 - 技能
-![](./assets/screenshots/moves.png)
+![](./metadata/moves.png)
 
 ## Features
 
