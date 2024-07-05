@@ -10,6 +10,6 @@ export default function useTeams(query: string = "") {
     org: data?.organization,
     teamsError: error,
     isLoadingTeams: (!data && !error) || isLoading,
-    supportsTeamTypeahead: query.length > 0 || data?.hasMoreTeams,
+    supportsTeamTypeahead: query.trim().length > 0 || data?.hasMoreTeams,
   };
 }

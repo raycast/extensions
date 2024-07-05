@@ -17,7 +17,7 @@ export default function useUsers(query: string = "") {
 
   return {
     users: data?.users,
-    supportsUserTypeahead: query.length > 0 || data?.hasMoreUsers,
+    supportsUserTypeahead: query.trim().length > 0 || data?.hasMoreUsers,
     usersError: error,
     isLoadingUsers: (!data && !error) || isLoading,
   };
