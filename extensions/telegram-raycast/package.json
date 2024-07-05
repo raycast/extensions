@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "telegram-raycast",
+  "title": "Telegram Raycast",
+  "description": "Send Telegram message without the distractions of a full client",
+  "icon": "command-icon.png",
+  "author": "noxlovette",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "telegram-send-message",
+      "title": "Telegram Message",
+      "description": "A quick message on Telegram",
+      "mode": "view",
+      "keywords": [
+        "send",
+        "message",
+        "telegram",
+        "chat",
+        "contact",
+        "messenger"
+      ]
+    },
+    {
+      "name": "telegram-login",
+      "title": "Telegram Login",
+      "description": "Log into Telegram Raycast",
+      "mode": "view"
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^1.76.0",
+    "@raycast/utils": "^1.16.0",
+    "@types/got": "^9.6.12",
+    "got": "^14.4.1",
+    "telegram": "^2.22.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "preferences": [
+    {
+      "name": "phoneNumber",
+      "type": "textfield",
+      "title": "Phone Number",
+      "description": "Your phone number, international format",
+      "required": true
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
