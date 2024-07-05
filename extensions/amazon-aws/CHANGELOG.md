@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Adds copy option to s3 command
+
 ## [Fixes] - 2024-07-03
 
 - Reverts back to rendering all pipelines at once. We can add wait later if this causes issues
