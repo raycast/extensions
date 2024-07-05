@@ -143,10 +143,11 @@ type AddUserProps = {
 function AddUser({ onUserAdded }: AddUserProps) {
     const { pop } = useNavigation();
     const { isLoading: isFetching, data: userPackages } = getUserPackages();
+    const [execute, setExecute] = useState(false);
 
     const { handleSubmit, itemProps, values } = useForm<AddUserFormValues>({
         async onSubmit() {
-            add?.();
+            setExecute(true);
         },
         validation: {
           user: FormValidation.Required,
@@ -155,13 +156,13 @@ function AddUser({ onUserAdded }: AddUserProps) {
         },
     });
     
-    const { isLoading: isAdding, revalidate: add } = useHestia<Record<string, never>>("v-add-user", "Adding User", { body: [
+    const { isLoading: isAdding } = useHestia<Record<string, never>>("v-add-user", "Adding User", { body: [
                 values.user,
                 values.password,
                 values.email,
                 values.package,
                 values.name
-            ], execute: false, onData() {
+            ], execute, onData() {
                 showToast({
                     title: "SUCCESS",
                     message: `Added ${values.user}<${values.email}>`

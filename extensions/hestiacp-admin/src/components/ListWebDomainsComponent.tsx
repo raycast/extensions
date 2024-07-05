@@ -11,83 +11,7 @@ type ListWebDomainsComponentProps = {
     user: string;
 }
 export default function ListWebDomainsComponent({ user }: ListWebDomainsComponentProps) {
-    const { isLoading: isFetching, data: domains } = getWebDomains(user);
-    
-    const { isLoading: isSuspending } = useHestia<Record<string, never>>("v-suspend-web-domain", "Suspending Web Domain", { body: [user] })
-    
-
-    const isLoading = isFetching;
-
-    async function suspendDomain(domain: string) {
-        setIsLoading(true);
-        const response = await suspendWebDomain(user, domain);
-        if (!("error" in response)) {
-            await showToast({
-                title: "SUCCESS",
-                message: `Suspended ${domain}`
-            })
-            await getFromApi();
-        }
-        setIsLoading(false);
-    }
-    async function unsuspendDomain(domain: string) {
-        setIsLoading(true);
-        const response = await unsuspendWebDomain(user, domain);
-        if (!("error" in response)) {
-            await showToast({
-                title: "SUCCESS",
-                message: `Unsuspended ${domain}`
-            })
-            await getFromApi();
-        }
-        setIsLoading(false);
-    }
-    async function suspendAllDomains() {
-        setIsLoading(true);
-        const response = await suspendWebDomains(user);
-        if (!("error" in response)) {
-            await showToast({
-                title: "SUCCESS",
-                message: `Suspended All Web Domains`
-            })
-            await getFromApi();
-        }
-        setIsLoading(false);
-    }
-    async function unsuspendAllDomains() {
-        setIsLoading(true);
-        const response = await unsuspendWebDomains(user);
-        if (!("error" in response)) {
-            await showToast({
-                title: "SUCCESS",
-                message: `Unsuspended All Web Domains`
-            })
-            await getFromApi();
-        }
-        setIsLoading(false);
-    }
-
-    async function confirmAndDeleteDomain(domain: string) {
-        setIsLoading(true);
-        if (
-          await confirmAlert({
-            title: `Delete domain '${domain}'?`,
-            message: "This action cannot be undone.",
-            icon: { source: Icon.DeleteDocument, tintColor: Color.Red },
-            primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
-          })
-        ) {
-          const response = await deleteWebDomain(user, domain);
-          if (!("error" in response)) {
-                await showToast({
-                    title: "SUCCESS",
-                    message: `Deleted domain '${domain}'`
-                })
-                await getFromApi();
-            };
-        }
-        setIsLoading(false);
-      }
+    const { isLoading, data: domains, revalidate } = getWebDomains(user);
     
     return <List isLoading={isLoading} isShowingDetail>
         {domains && Object.entries(domains).map(([domain, data]) => <List.Item key={domain} title={domain} icon={getFavicon(`https://${domain}`, { fallback: Icon.Globe })} detail={<ListItemDetailComponent data={data} />} accessories={[
@@ -101,19 +25,10 @@ export default function ListWebDomainsComponent({ user }: ListWebDomainsComponen
                 </ActionPanel.Submenu>
                 <Action.Push title="View Domain SSL" icon={Icon.Lock} target={<ViewDomainSSL user={user} domain={domain} />} />
             </ActionPanel.Section>
-            <ActionPanel.Section>
-                {data.SUSPENDED==="no" && <Action title="Suspend Domain" icon={Icon.Pause} onAction={() => suspendDomain(domain)} />}
-                {data.SUSPENDED==="yes" && <Action title="Unsuspend Domain" icon={Icon.Play} onAction={() => unsuspendDomain(domain)} />}
-                <Action title="Delete Domain" icon={Icon.Trash} style={Action.Style.Destructive} onAction={() => confirmAndDeleteDomain(domain)} />
-            </ActionPanel.Section>
-            <ActionPanel.Section>
-                <Action title="Suspend All Domains" icon={{ source: Icon.PauseFilled, tintColor: Color.Yellow }} onAction={suspendAllDomains} />
-                <Action title="Unsuspend All Domains" icon={{ source: Icon.PlayFilled, tintColor: Color.Green }} onAction={unsuspendAllDomains} />
-            </ActionPanel.Section>
         </ActionPanel>} />)}
         {!isLoading && <List.Section title="Actions">
             <List.Item title="Add Web Domain" icon={Icon.Plus} actions={<ActionPanel>
-                <Action.Push title="Add Web Domain" target={<AddWebDomain user={user} onWebDomainAdded={getFromApi} />} />
+                <Action.Push title="Add Web Domain" target={<AddWebDomain user={user} onWebDomainAdded={revalidate} />} />
             </ActionPanel>} />
         </List.Section>}
     </List>

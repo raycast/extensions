@@ -1,5 +1,6 @@
 # Hestia
 
+```json
 [
     "v-acknowledge-user-notification",
     "v-add-access-key",
@@ -169,7 +170,7 @@
     "v-delete-cron-job",
     "v-delete-cron-reports",
     "v-delete-cron-restart-job",
-    <!-- "v-delete-database", -->
+    // "v-delete-database",
     "v-delete-database-host",
     "v-delete-database-temp-user",
     "v-delete-databases",
@@ -229,7 +230,7 @@
     "v-delete-user-sftp-jail",
     "v-delete-user-ssh-key",
     "v-delete-user-stats",
-    <!-- "v-delete-web-domain", -->
+    ❌ "v-delete-web-domain",
     "v-delete-web-domain-alias",
     "v-delete-web-domain-allow-users",
     "v-delete-web-domain-backend",
@@ -276,7 +277,7 @@
     "v-list-database-host",
     "v-list-database-hosts",
     "v-list-database-types",
-    <!-- "v-list-databases", -->
+    // "v-list-databases",
     "v-list-default-php",
     "v-list-dns-domain",
     "v-list-dns-domains",
@@ -334,13 +335,13 @@
     "v-list-sys-web-status",
     "v-list-sys-webmail",
     "v-list-user",
-    <!-- "v-list-user-auth-log", -->
+    // "v-list-user-auth-log",
     "v-list-user-backup",
     "v-list-user-backup-exclusions",
     "v-list-user-backups",
     "v-list-user-ips",
     "v-list-user-log",
-    <!-- "v-list-user-notifications", -->
+    // "v-list-user-notifications",
     "v-list-user-ns",
     "v-list-user-package",
     <!-- "v-list-user-packages", --> <!-- user when adding user -->
@@ -411,9 +412,9 @@
     "v-stop-service",
     "v-suspend-cron-job",
     "v-suspend-cron-jobs",
-    <!-- "v-suspend-database", -->
+    // "v-suspend-database"
     "v-suspend-database-host",
-    <!-- "v-suspend-databases", -->
+    // "v-suspend-databases"
     "v-suspend-dns-domain",
     "v-suspend-dns-domains",
     "v-suspend-dns-record",
@@ -425,14 +426,14 @@
     "v-suspend-mail-domains",
     "v-suspend-remote-dns-host",
     "v-suspend-user",
-    <!-- "v-suspend-web-domain", -->
-    <!-- "v-suspend-web-domains", -->
+    ❌ "v-suspend-web-domain",
+    ❌ "v-suspend-web-domains",
     "v-sync-dns-cluster",
     "v-unsuspend-cron-job",
     "v-unsuspend-cron-jobs",
-    <!-- "v-unsuspend-database", -->
+    // "v-unsuspend-database",
     "v-unsuspend-database-host",
-    <!-- "v-unsuspend-databases", -->
+    // "v-unsuspend-databases",
     "v-unsuspend-dns-domain",
     "v-unsuspend-dns-domains",
     "v-unsuspend-dns-record",
@@ -444,8 +445,8 @@
     "v-unsuspend-mail-domains",
     "v-unsuspend-remote-dns-host",
     "v-unsuspend-user",
-    <!-- "v-unsuspend-web-domain", -->
-    <!-- "v-unsuspend-web-domains", -->
+    ❌ "v-unsuspend-web-domain",
+    ❌ "v-unsuspend-web-domains",
     "v-update-database-disk",
     "v-update-databases-disk",
     "v-update-dns-templates",
@@ -492,8 +493,9 @@
     "v-update-web-templates",
     "v-update-white-label-logo"
 ]
+```
 
-NOTES
+## 🗒️ NOTES
 instead of adding IP in API you can allow from any API by entering `allow-all`
 
 <!-- for acces key use `v-generate-api-key` -->

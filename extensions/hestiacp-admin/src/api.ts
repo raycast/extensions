@@ -55,13 +55,7 @@ const callApi = async (cmd: string, animatedToastMessage = "", body?: any) => {
   }
 };
 
-export async function getWebDomains(user: string) {
-    const body = {
-        arg1: user,
-        arg2: "json"
-    };
-    return (await callApi("v-list-web-domains", "Fetching Web Domains", body)) as ErrorResponse | ListWebDomainsResponse;
-}
+
 export async function getWebDomainAccesslog(user: string, domain: string) {
     const body = {
         arg1: user,
@@ -87,32 +81,6 @@ export async function getWebDomainSSL(user: string, domain: string) {
         arg3: "json"  
     };
     return (await callApi("v-list-web-domain-ssl", "Fetching Web Domain SSL", body)) as ErrorResponse | ListWebDomainSSLResponse;
-}
-export async function suspendWebDomain(user: string, domain: string) {
-    const body = {
-        arg1: user,
-        arg2: domain
-    };
-    return (await callApi("v-suspend-web-domain", "Suspending Web Domain", body)) as ErrorResponse | Record<string, never>;
-}
-export async function unsuspendWebDomain(user: string, domain: string) {
-    const body = {
-        arg1: user,
-        arg2: domain
-    };
-    return (await callApi("v-unsuspend-web-domain", "Unsuspending Web Domain", body)) as ErrorResponse | Record<string, never>;
-}
-export async function suspendWebDomains(user: string) {
-    const body = {
-        arg1: user,
-    }
-    return (await callApi("v-suspend-web-domains", "Suspending Web Domains", body)) as ErrorResponse | Record<string, never>;
-}
-export async function unsuspendWebDomains(user: string) {
-    const body = {
-        arg1: user,
-    }
-    return (await callApi("v-unsuspend-web-domains", "Unsuspending Web Domains", body)) as ErrorResponse | Record<string, never>;
 }
 export async function addWebDomain(newWebDomain: AddWebDomainRequest) {
     const body = {
