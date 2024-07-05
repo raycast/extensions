@@ -38,4 +38,8 @@ A: That means the extension couldn't decrypt your OTP, pls submit a [GitHub issu
 
 Q: I got `corrupted` OTP for ALL of my records
 
-A: That means extension the couldn't decrypt any of your OTPs, The likely cause is that your Authy Backup Password is incorrect. Please check or reset the password.  
+A: That means the extension couldn't decrypt any of your OTPs, The likely cause is that your Authy Backup Password is incorrect. Please check or reset the password.
+
+Q: Can I export data that using by the extension?
+
+A: Yes. Use Export Tokens action (⌘ + K ⇒ ⌘ + E on any of OTPs) 

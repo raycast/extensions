@@ -153,6 +153,7 @@ export function commonActions(refresh: () => Promise<void>) {
         title={"Logout"}
         icon={Icon.Logout}
         shortcut={{ modifiers: ["cmd"], key: "l" }}
+        style={Action.Style.Destructive}
         onAction={async () => {
           await logout();
           await popToRoot();

@@ -5,6 +5,7 @@
 - Code refactoring
 - Assets cleanup 
 - Speed extension loading
+- Add Export Tokens action
 
 ## [API Update, Accuracy and UI] - 2024-06-24
 
