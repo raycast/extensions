@@ -31,7 +31,7 @@ export default function Command() {
     ? dayjs.duration(dayjs(currentTime).diff(runningEntry.start), "milliseconds").format("HH:mm:ss")
     : "";
 
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences.MenuBar>();
 
   let menuBarTitle = "";
 
