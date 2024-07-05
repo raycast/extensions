@@ -1,6 +1,6 @@
 # Google Translate Changelog
 
-## [Fix] - 2024-07-02
+## [Fix] - {PR_MERGE_DATE}
 
 - Keep language names consistent with `translate.google.com`
 
