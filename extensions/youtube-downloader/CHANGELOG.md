@@ -1,6 +1,6 @@
 # YouTube Downloader Changelog
 
-## [Update copy the video or audio file name with the video title] - {PR_MERGE_DATE}
+## [Update copy the video or audio file name with the video title] - 2024-07-05
 
 - Update copy the video or audio file name with the video title
 - Fix the key rendering problem in the format dropdown
