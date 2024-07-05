@@ -67,7 +67,7 @@ export class SlackClient {
           const statusText = profile?.status_text?.replace(/&amp;/g, "&") ?? undefined;
           const statusExpiration = profile?.status_expiration ?? undefined;
           const timezone = tz ?? "";
-          
+
           let statusExpirationDate = "";
           if (statusExpiration) {
             const date = new Date(statusExpiration * 1000);
@@ -92,7 +92,7 @@ export class SlackClient {
             statusText,
             statusExpiration: statusExpirationDate,
             conversationId: conversation?.id,
-            timezone
+            timezone,
           };
         })
         .filter((i): i is User => !!(i.id?.trim() && i.name?.trim() && i.teamId?.trim()))
