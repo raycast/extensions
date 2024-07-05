@@ -1,5 +1,4 @@
 /** @module Env */
-import pkg from "../../../package.json";
 import Helper from "./Helper.js";
 import Logger from "./Logger.js";
 import NamespaceFetcher from "./NamespaceFetcher.js";
@@ -18,12 +17,7 @@ export default class Env {
   constructor(env) {
     countriesList.languages["eo"] = { name: "Esperanto", native: "Esperanto" };
     this.setToThis(env);
-    if (pkg.gitCommitHash) {
-      this.commitHash = pkg.gitCommitHash.slice(0, 7);
-    } else {
-      this.commitHash = "unknown";
-    }
-
+    this.commitHash = "unknown";
     this.logger = new Logger("#log");
   }
 
@@ -98,6 +92,7 @@ export default class Env {
    * @param {array} params - List of parameters to be used in environment.
    */
   async populate(params) {
+    this.commitHash = await this.getCommitHash();
     if (!params) {
       params = Env.getParamsFromUrl();
     }
@@ -334,6 +329,14 @@ export default class Env {
     // Default debug.
     if (typeof this.debug != "boolean") {
       this.debug = Boolean(this.debug);
+    }
+  }
+
+  async getCommitHash() {
+    if (this.context === "browser") {
+      const pkg = await import("../../../package.json");
+      const commitHash = pkg.gitCommitHash.slice(0, 7);
+      return commitHash;
     }
   }
 
