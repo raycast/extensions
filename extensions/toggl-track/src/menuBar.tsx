@@ -1,4 +1,4 @@
-import { MenuBarExtra, Icon } from "@raycast/api";
+import { MenuBarExtra, Icon, launchCommand, LaunchType } from "@raycast/api";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 
@@ -58,6 +58,19 @@ export default function Command() {
           />
         </MenuBarExtra.Section>
       )}
+
+      <MenuBarExtra.Section title="Actions">
+        <MenuBarExtra.Item
+          title="Start/Stop Time Entry"
+          icon={"command-icon.png"}
+          onAction={() =>
+            launchCommand({
+              name: "index",
+              type: LaunchType.UserInitiated,
+            })
+          }
+        />
+      </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Recent time entries">
         {timeEntriesWithUniqueProjectAndDescription.map((timeEntry) => (
