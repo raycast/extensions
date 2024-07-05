@@ -9,6 +9,7 @@ export default class Logger {
   constructor(logElementSelector) {
     this.logs = [];
     if (!(typeof document === "undefined")) {
+      // eslint-disable-next-line no-undef
       this.logElement = document.querySelector(logElementSelector);
     }
   }

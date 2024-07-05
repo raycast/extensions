@@ -311,6 +311,9 @@ export default class Env {
    * @return {string} navigatorLanguage - The browser's value of navigator.language.
    */
   getNavigatorLanguage() {
+    if (typeof navigator === "undefined") {
+      return "";
+    }
     // eslint-disable-next-line no-undef
     const languageStr = navigator.language;
     return languageStr;
