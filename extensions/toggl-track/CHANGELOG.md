@@ -1,5 +1,9 @@
 # Toggl Track Changelog
 
+## [Bug Fixes] - 2024-07-05
+
+- Fix running time entries not showing project details
+
 ## [New Feature] - 2024-07-05
 
 - Add ability to view, start, or stop existing time entries from the Menu Bar

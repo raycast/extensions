@@ -29,9 +29,10 @@ function RunningTimeEntry({
           runningTimeEntry.client_name || "",
         ]}
         subtitle={
+          dayjs.duration(dayjs(currentTime).diff(runningTimeEntry.start), "milliseconds").format("HH:mm:ss") +
+          " | " +
           (runningTimeEntry.client_name ? runningTimeEntry.client_name + " | " : "") +
-          (runningTimeEntry.project_name ?? "") +
-          dayjs.duration(dayjs(currentTime).diff(runningTimeEntry.start), "milliseconds").format("HH:mm:ss")
+          (runningTimeEntry.project_name ?? "")
         }
         accessories={[...runningTimeEntry.tags.map((tag) => ({ tag })), { text: runningTimeEntry.billable ? "$" : "" }]}
         icon={{ source: Icon.Circle, tintColor: runningTimeEntry.project_color }}

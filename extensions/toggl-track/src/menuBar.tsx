@@ -36,9 +36,10 @@ export default function Command() {
       title={entry ? entry.description : ""}
       tooltip={
         entry
-          ? (entry.client_name ? entry.client_name + " | " : "") +
-            (entry.project_name ?? "") +
-            dayjs.duration(dayjs(currentTime).diff(entry.start), "milliseconds").format("HH:mm:ss")
+          ? dayjs.duration(dayjs(currentTime).diff(entry.start), "milliseconds").format("HH:mm:ss") +
+            " | " +
+            (entry.project_name ? entry.project_name + " | " : "") +
+            (entry.client_name ?? "")
           : "No time entries"
       }
     >
@@ -47,10 +48,12 @@ export default function Command() {
           <MenuBarExtra.Item
             icon={{ source: Icon.Circle, tintColor: entry?.project_color }}
             onAction={() => stopRunningTimeEntry(entry)}
-            title={
-              (entry.client_name ? entry.client_name + " | " : "") +
-              (entry.project_name ?? "") +
-              dayjs.duration(dayjs(currentTime).diff(entry.start), "milliseconds").format("HH:mm:ss")
+            title={entry.description || ""}
+            subtitle={
+              dayjs.duration(dayjs(currentTime).diff(entry.start), "milliseconds").format("HH:mm:ss") +
+              " | " +
+              (entry.project_name ? entry.project_name + " | " : "") +
+              (entry.client_name ?? "")
             }
           />
         </MenuBarExtra.Section>

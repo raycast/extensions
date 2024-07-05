@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 
-import { TimeEntry, TimeEntryMetaData } from "@/api";
 import { useTimeEntries, useRunningTimeEntry } from "@/hooks";
 
 export function useProcessedTimeEntries() {
@@ -20,9 +19,13 @@ export function useProcessedTimeEntries() {
     }, []);
   }, [timeEntries, runningTimeEntry]);
 
+  const runningTimeWithUniqueProjectAndDescription = timeEntries.find(
+    (entry) => entry.description === runningTimeEntry?.description && entry.project_id === runningTimeEntry.project_id,
+  );
+
   return {
     timeEntries,
-    runningTimeEntry: runningTimeEntry as TimeEntry & TimeEntryMetaData,
+    runningTimeEntry: runningTimeWithUniqueProjectAndDescription,
     isLoading,
     revalidateTimeEntries,
     revalidateRunningTimeEntry,
