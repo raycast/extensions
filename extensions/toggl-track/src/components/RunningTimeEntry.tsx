@@ -1,8 +1,9 @@
-import { List, Icon, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { List, Icon, ActionPanel, Action } from "@raycast/api";
 import dayjs from "dayjs";
 
-import { stopTimeEntry, TimeEntry, TimeEntryMetaData } from "@/api";
-import useCurrentTime from "@/hooks/useCurrentTime";
+import { TimeEntry, TimeEntryMetaData } from "@/api";
+import { useCurrentTime } from "@/hooks/useCurrentTime";
+import { useTimeEntryActions } from "@/hooks/useTimeEntryActions";
 
 interface RunningTimeEntryProps {
   runningTimeEntry: TimeEntry & TimeEntryMetaData;
@@ -16,19 +17,7 @@ function RunningTimeEntry({
   revalidateTimeEntries,
 }: RunningTimeEntryProps) {
   const currentTime = useCurrentTime();
-
-  const stopRunningTimeEntry = async () => {
-    await showToast(Toast.Style.Animated, "Stopping time entry...");
-    try {
-      await stopTimeEntry({ id: runningTimeEntry.id, workspaceId: runningTimeEntry.workspace_id });
-      await showToast(Toast.Style.Success, `Stopped time entry`);
-    } catch (e) {
-      await showToast(Toast.Style.Failure, "Failed to stop time entry");
-      return;
-    }
-    revalidateRunningTimeEntry();
-    revalidateTimeEntries();
-  };
+  const { stopRunningTimeEntry } = useTimeEntryActions(revalidateRunningTimeEntry, revalidateTimeEntries);
 
   return (
     <List.Section title="Running time entry" key="running-time-entry">
