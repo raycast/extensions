@@ -45,7 +45,7 @@
     },
     {
       "name": "menuBar",
-      "title": "Toggl Menu bar",
+      "title": "Toggl Menu Bar",
       "description": "View, start, or stop existing time entries from the Menu Bar.",
       "mode": "menu-bar",
       "interval": "10s"
