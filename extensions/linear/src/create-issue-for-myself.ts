@@ -18,7 +18,7 @@ const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => 
     }
 
     const viewer = await linearClient.viewer;
-    const teams = await getTeams();
+    const { teams } = await getTeams();
 
     let teamId: string | undefined;
 

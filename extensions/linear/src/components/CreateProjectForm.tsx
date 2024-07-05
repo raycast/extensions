@@ -26,11 +26,11 @@ export type CreateProjectValues = {
 export default function CreateProjectForm({ draftValues }: { draftValues?: CreateProjectValues }) {
   const { linearClient } = getLinearClient();
 
-  const { teams, isLoadingTeams } = useTeams();
+  const { teams, org, isLoadingTeams } = useTeams();
   const { users, isLoadingUsers } = useUsers();
 
   const [leadQuery, setLeadQuery] = useState<string>("");
-  const { users: leads, isLoadingUsers: isLoadingLeads } = useUsers(leadQuery);
+  const { users: leads, supportsUserTypeahead, isLoadingUsers: isLoadingLeads } = useUsers(leadQuery);
 
   const { handleSubmit, itemProps, focus, reset } = useForm<CreateProjectValues>({
     async onSubmit(values) {
@@ -107,7 +107,7 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
     >
       <Form.TagPicker title="Team(s)" placeholder="Add team" {...itemProps.teamIds}>
         {teams?.map((team) => (
-          <Form.TagPicker.Item key={team.id} value={team.id} title={team.name} icon={getTeamIcon(team)} />
+          <Form.TagPicker.Item key={team.id} value={team.id} title={team.name} icon={getTeamIcon(team, org)} />
         ))}
       </Form.TagPicker>
 
@@ -138,9 +138,7 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
         title="Lead"
         storeValue
         {...itemProps.leadId}
-        throttle
-        onSearchTextChange={setLeadQuery}
-        isLoading={isLoadingLeads}
+        {...(supportsUserTypeahead && { onSearchTextChange: setLeadQuery, throttle: true, isLoading: isLoadingLeads })}
       >
         <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
 

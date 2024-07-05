@@ -24,11 +24,11 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
 
   const { pop } = useNavigation();
 
-  const { teams, isLoadingTeams } = useTeams();
+  const { teams, org, isLoadingTeams } = useTeams();
   const { users, isLoadingUsers } = useUsers();
 
   const [leadQuery, setLeadQuery] = useState<string>("");
-  const { users: leads, isLoadingUsers: isLoadingLeads } = useUsers(leadQuery);
+  const { users: leads, supportsUserTypeahead, isLoadingUsers: isLoadingLeads } = useUsers(leadQuery);
 
   const { handleSubmit, itemProps } = useForm<CreateProjectValues>({
     async onSubmit(values) {
@@ -87,7 +87,7 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
     >
       <Form.TagPicker title="Team(s)" placeholder="Add team" {...itemProps.teamIds}>
         {teams?.map((team) => (
-          <Form.TagPicker.Item key={team.id} value={team.id} title={team.name} icon={getTeamIcon(team)} />
+          <Form.TagPicker.Item key={team.id} value={team.id} title={team.name} icon={getTeamIcon(team, org)} />
         ))}
       </Form.TagPicker>
 
@@ -117,9 +117,7 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
       <Form.Dropdown
         title="Lead"
         {...itemProps.leadId}
-        throttle
-        onSearchTextChange={setLeadQuery}
-        isLoading={isLoadingLeads}
+        {...(supportsUserTypeahead && { onSearchTextChange: setLeadQuery, isLoading: isLoadingLeads, throttle: true })}
       >
         <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
 

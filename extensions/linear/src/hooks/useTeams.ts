@@ -3,11 +3,13 @@ import { useCachedPromise } from "@raycast/utils";
 import { getTeams } from "../api/getTeams";
 
 export default function useTeams(query: string = "") {
-  const { data: teams, error, isLoading } = useCachedPromise(getTeams, [query]);
+  const { data, error, isLoading } = useCachedPromise(getTeams, [query]);
 
   return {
-    teams,
+    teams: data?.teams,
+    org: data?.organization,
     teamsError: error,
-    isLoadingTeams: (!teams && !error) || isLoading,
+    isLoadingTeams: (!data && !error) || isLoading,
+    supportsTeamTypeahead: query.length > 0 || data?.hasMoreTeams,
   };
 }

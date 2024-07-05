@@ -362,7 +362,7 @@ export default function IssueActions({
   }
 
   const [userQuery, setUserQuery] = useState<string>("");
-  const { users, isLoadingUsers } = useUsers(userQuery);
+  const { users, supportsUserTypeahead, isLoadingUsers } = useUsers(userQuery);
 
   return (
     <>
@@ -408,9 +408,11 @@ export default function IssueActions({
           icon={Icon.AddPerson}
           title="Assign To"
           shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-          isLoading={isLoadingUsers}
-          throttle
-          onSearchTextChange={setUserQuery}
+          {...(supportsUserTypeahead && {
+            onSearchTextChange: setUserQuery,
+            isLoading: isLoadingUsers,
+            throttle: true,
+          })}
         >
           {users?.map((user) => (
             <Action

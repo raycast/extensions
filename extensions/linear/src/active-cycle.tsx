@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useMemo, useState } from "react";
 
 import { getActiveCycleIssues } from "./api/getIssues";
@@ -16,7 +16,7 @@ import View from "./components/View";
 
 function ActiveCycle() {
   const [teamQuery, setTeamQuery] = useState<string>("");
-  const { teams, isLoadingTeams } = useTeams(teamQuery);
+  const { teams, org, supportsTeamTypeahead, isLoadingTeams } = useTeams(teamQuery);
   const [selectedTeam, setSelectedTeam] = useState<string>("");
 
   const { priorities, isLoadingPriorities } = usePriorities();
@@ -37,12 +37,17 @@ function ActiveCycle() {
           tooltip="Change Team"
           onChange={setSelectedTeam}
           storeValue
-          throttle
-          isLoading={isLoadingTeams}
-          onSearchTextChange={setTeamQuery}
+          {...(supportsTeamTypeahead && {
+            throttle: true,
+            onSearchTextChange: setTeamQuery,
+            isLoading: isLoadingTeams,
+          })}
         >
+          {(!teams || teams.length === 0) && (
+            <List.Dropdown.Item title="No team" value="-" key="-" icon={Icon.TwoPeople} />
+          )}
           {teams?.map((team) => (
-            <List.Dropdown.Item key={team.id} value={team.id} title={team.name} icon={getTeamIcon(team)} />
+            <List.Dropdown.Item key={team.id} value={team.id} title={team.name} icon={getTeamIcon(team, org)} />
           ))}
         </List.Dropdown>
       }
@@ -52,7 +57,7 @@ function ActiveCycle() {
     >
       <List.EmptyView
         title={cycleId ? "No issues" : "No active cycles"}
-        description={cycleId ? "There are no issues in the active cycle." : "This team does not have active cycles."} // "There are no issues in the active cycle."
+        description={cycleId ? "There are no issues in the active cycle." : "This team does not have active cycles."}
         {...{
           ...((cycleId && {
             actions: (

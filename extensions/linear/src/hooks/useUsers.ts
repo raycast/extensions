@@ -9,11 +9,16 @@ export default function useUsers(query: string = "") {
       const users = await linearClient.users(
         contains.trim().length > 0 ? { filter: { name: { containsIgnoreCase: contains } } } : undefined,
       );
-      return users.nodes;
+      return { users: users?.nodes ?? [], hasMoreUsers: !!users?.pageInfo?.hasNextPage };
     },
     [query],
     { initialData: [] },
   );
 
-  return { users: data, usersError: error, isLoadingUsers: (!data && !error) || isLoading };
+  return {
+    users: data?.users,
+    supportsUserTypeahead: query.length > 0 || data?.hasMoreUsers,
+    usersError: error,
+    isLoadingUsers: (!data && !error) || isLoading,
+  };
 }

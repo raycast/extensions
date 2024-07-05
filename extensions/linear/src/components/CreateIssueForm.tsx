@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Clipboard,
   Form,
@@ -107,19 +107,27 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
   const { autofocusField, copyToastAction } = getPreferenceValues<Preferences.CreateIssue>();
 
   const [teamQuery, setTeamQuery] = useState<string>("");
-  const { teams, isLoadingTeams } = useTeams(teamQuery);
+  const { teams, org, supportsTeamTypeahead, isLoadingTeams } = useTeams(teamQuery);
   const hasMoreThanOneTeam = teams && teams.length > 1;
 
   const [userQuery, setUserQuery] = useState<string>("");
-  const { users, isLoadingUsers } = useUsers(userQuery);
+  const { users, supportsUserTypeahead, isLoadingUsers } = useUsers(userQuery);
 
-  const { handleSubmit, itemProps, values, focus, reset } = useForm<CreateIssueValues>({
+  const { handleSubmit, itemProps, values, setValue, focus, reset, setValidationError } = useForm<CreateIssueValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
 
+      const teamId = hasMoreThanOneTeam ? values.teamId : teams?.[0]?.id;
+
+      if (!teamId) {
+        // that should never happen
+        setValidationError("teamId", "The team is required.");
+        return false;
+      }
+
       try {
         const payload: CreateIssuePayload = {
-          teamId: values.teamId,
+          teamId,
           title: values.title,
           description: values.description || "",
           stateId: values.stateId,
@@ -216,7 +224,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       }
     },
     validation: {
-      teamId: FormValidation.Required,
+      teamId: hasMoreThanOneTeam ? FormValidation.Required : undefined,
       title: FormValidation.Required,
       stateId: FormValidation.Required,
       priority: FormValidation.Required,
@@ -239,13 +247,19 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
     },
   });
 
-  const execute = hasMoreThanOneTeam && !!values.teamId && values.teamId.trim().length > 0;
+  const execute = !!values.teamId && values.teamId.trim().length > 0;
   const { states } = useStates(values.teamId, { execute });
   const { labels } = useLabels(values.teamId, { execute });
   const { cycles } = useCycles(values.teamId, { execute });
   const { issues } = useIssues(getLastCreatedIssues, [], { execute });
   const { projects } = useProjects(values.teamId, { execute });
   const { milestones } = useMilestones(values.projectId, { execute: !!values.projectId });
+
+  useEffect(() => {
+    if (teams?.length === 1) {
+      setValue("teamId", teams[0].id);
+    }
+  }, [teams]);
 
   const team = teams?.find((team) => team.id === values.teamId);
 
@@ -277,19 +291,25 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       }
       isLoading={isLoadingTeams || isLoadingUsers || props.isLoading}
     >
-      <Form.Dropdown
-        title="Team"
-        storeValue
-        {...itemProps.teamId}
-        isLoading={isLoadingTeams}
-        throttle
-        onSearchTextChange={setTeamQuery}
-      >
-        {teams?.map((team) => (
-          <Form.Dropdown.Item title={team.name} value={team.id} key={team.id} icon={getTeamIcon(team)} />
-        ))}
-      </Form.Dropdown>
-      <Form.Separator />
+      {(supportsTeamTypeahead || hasMoreThanOneTeam) && (
+        <>
+          <Form.Dropdown
+            title="Team"
+            storeValue
+            {...itemProps.teamId}
+            {...(supportsTeamTypeahead && {
+              onSearchTextChange: setTeamQuery,
+              isLoading: isLoadingTeams,
+              throttle: true,
+            })}
+          >
+            {teams?.map((team) => (
+              <Form.Dropdown.Item title={team.name} value={team.id} key={team.id} icon={getTeamIcon(team, org)} />
+            ))}
+          </Form.Dropdown>
+          <Form.Separator />
+        </>
+      )}
 
       <Form.TextField
         title="Title"
@@ -334,9 +354,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
         title="Assignee"
         storeValue
         {...itemProps.assigneeId}
-        isLoading={isLoadingUsers}
-        throttle
-        onSearchTextChange={setUserQuery}
+        {...(supportsUserTypeahead && { onSearchTextChange: setUserQuery, isLoading: isLoadingUsers, throttle: true })}
       >
         <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
 

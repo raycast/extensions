@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Form, ActionPanel, Action, Icon, Toast, useNavigation, showToast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
@@ -43,13 +43,13 @@ export default function EditIssueForm(props: EditIssueFormProps) {
   const { issue, isLoadingIssue, mutateDetail } = useIssueDetail(props.issue);
 
   const [teamQuery, setTeamQuery] = useState<string>("");
-  const { teams, isLoadingTeams } = useTeams(teamQuery);
+  const { teams, org, supportsTeamTypeahead, isLoadingTeams } = useTeams(teamQuery);
   const hasMoreThanOneTeam = teams && teams.length > 1;
 
   const [userQuery, setUserQuery] = useState<string>("");
-  const { users, isLoadingUsers } = useUsers(userQuery);
+  const { users, supportsUserTypeahead, isLoadingUsers } = useUsers(userQuery);
 
-  const { handleSubmit, itemProps, values } = useForm<CreateIssueValues>({
+  const { handleSubmit, itemProps, values, setValue } = useForm<CreateIssueValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Editing issue" });
 
@@ -95,7 +95,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
       }
     },
     validation: {
-      teamId: FormValidation.Required,
+      teamId: hasMoreThanOneTeam ? FormValidation.Required : undefined,
       title: FormValidation.Required,
       stateId: FormValidation.Required,
       priority: FormValidation.Required,
@@ -117,7 +117,14 @@ export default function EditIssueForm(props: EditIssueFormProps) {
     },
   });
 
-  const execute = hasMoreThanOneTeam && !!values.teamId && values.teamId.trim().length > 0;
+  // The issue's detail (for description and due date) isn't returned
+  // immediately, so the fields need to be properly updated once it's done
+  useEffect(() => {
+    setValue("description", issue.description || "");
+    setValue("dueDate", issue.dueDate ? new Date(issue.dueDate) : null);
+  }, [issue]);
+
+  const execute = !!values.teamId && values.teamId.trim().length > 0;
   const { states } = useStates(values.teamId, { execute });
   const { labels } = useLabels(values.teamId, { execute });
   const { cycles } = useCycles(values.teamId, { execute });
@@ -154,18 +161,26 @@ export default function EditIssueForm(props: EditIssueFormProps) {
       }
       isLoading={isLoadingTeams || isLoadingIssue || isLoadingUsers}
     >
-      <Form.Dropdown
-        title="Team"
-        {...itemProps.teamId}
-        isLoading={isLoadingTeams}
-        throttle
-        onSearchTextChange={setTeamQuery}
-      >
-        {teams?.map((team) => {
-          return <Form.Dropdown.Item title={team.name} value={team.id} key={team.id} icon={getTeamIcon(team)} />;
-        })}
-      </Form.Dropdown>
-      <Form.Separator />
+      {(supportsTeamTypeahead || hasMoreThanOneTeam) && (
+        <>
+          <Form.Dropdown
+            title="Team"
+            {...itemProps.teamId}
+            {...(supportsTeamTypeahead && {
+              onSearchTextChange: setTeamQuery,
+              isLoading: isLoadingTeams,
+              throttle: true,
+            })}
+          >
+            {teams?.map((team) => {
+              return (
+                <Form.Dropdown.Item title={team.name} value={team.id} key={team.id} icon={getTeamIcon(team, org)} />
+              );
+            })}
+          </Form.Dropdown>
+          <Form.Separator />
+        </>
+      )}
 
       <Form.TextField title="Title" placeholder="Issue title" autoFocus {...itemProps.title} />
 
@@ -203,9 +218,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
       <Form.Dropdown
         title="Assignee"
         {...itemProps.assigneeId}
-        throttle
-        onSearchTextChange={setUserQuery}
-        isLoading={isLoadingUsers}
+        {...(supportsUserTypeahead && { onSearchTextChange: setUserQuery, isLoading: isLoadingUsers, throttle: true })}
       >
         <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
 
