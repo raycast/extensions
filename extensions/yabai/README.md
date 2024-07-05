@@ -13,4 +13,4 @@ following command in your terminal:
 brew install koekeishiya/formulae/yabai
 ```
 
-[Official installation instructions](https://github.com/koekeishiya/yabai/wiki/Installing-yabai-(latest-release))
+[Official installation instructions](<https://github.com/koekeishiya/yabai/wiki/Installing-yabai-(latest-release)>)
