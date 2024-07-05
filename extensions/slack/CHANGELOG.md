@@ -2,6 +2,7 @@
 
 ## [Update to Search command] -2024-07-05 
 - Added job title, timezone, current time, and slack status to the List that gets returned as part of the Search command
+- Adds Emojify to unread messages command to convert :fireworks: to 🎆, as an example
 
 ### [OAuth + Many Improvements] - 2024-06-18
 
