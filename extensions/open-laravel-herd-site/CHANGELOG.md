@@ -1,6 +1,6 @@
 # Laravel Herd Changelog
 
-## [New setting] - 2024-07-03
+## [New setting] - {PR_MERGE_DATE}
 
 - Added an app picker setting so you can choose your favorite code editor.
 - The directories/sites are now sorted alphabetically.
