@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-07-05
 
 - Adds copy option to s3 command
 
