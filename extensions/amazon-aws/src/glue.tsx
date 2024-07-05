@@ -8,7 +8,7 @@ import {
   GetJobCommandOutput,
 } from "@aws-sdk/client-glue";
 import { Action, ActionPanel, Icon, List, Image, Color, Detail, showToast, Toast } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { MutatePromise, showFailureToast, useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { isReadyToFetch, resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
@@ -21,7 +21,11 @@ interface GlueJobRun extends JobRun {
 
 export default function Glue() {
   const { data: glueJobs, error, isLoading, mutate } = useCachedPromise(fetchJobs);
-  const { data: glueJobRuns, isLoading: isLoadingJobRuns } = useCachedPromise(fetchJobRuns, [1, glueJobs]);
+  const {
+    data: glueJobRuns,
+    isLoading: isLoadingJobRuns,
+    mutate: mutateJobRuns,
+  } = useCachedPromise(fetchJobRuns, [1, glueJobs]);
 
   return (
     <List
@@ -34,13 +38,13 @@ export default function Glue() {
       {error ? (
         <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
       ) : (
-        glueJobRuns?.map((job) => <GlueJob key={job.JobName} job={job} />)
+        glueJobRuns?.map((job) => <GlueJob job={job} mutate={mutateJobRuns} />)
       )}
     </List>
   );
 }
 
-function GlueJob({ job: glueJobRun }: { job: GlueJobRun }) {
+function GlueJob({ job: glueJobRun, mutate }: { job: GlueJobRun; mutate: MutatePromise<GlueJobRun[]> }) {
   return (
     <List.Item
       key={glueJobRun.JobName}
@@ -54,12 +58,23 @@ function GlueJob({ job: glueJobRun }: { job: GlueJobRun }) {
             icon={Icon.List}
             target={<GlueJobRuns glueJobName={glueJobRun.JobName!} />}
           />
-          <Action title="Start Run" onAction={() => RunGlueJob(glueJobRun.JobName!)} icon={Icon.Play} />
+          <Action title="Start Run" onAction={() => RunGlueJob(glueJobRun.JobName!, mutate)} icon={Icon.Play} />
           <Action.Push
             title="Show Job Definition"
             icon={Icon.Info}
             target={<GlueJobDefinition glueJobName={glueJobRun.JobName!} />}
             shortcut={{ modifiers: ["cmd"], key: "d" }}
+          />
+          <Action
+            title="Refresh"
+            onAction={() =>
+              mutate(fetchJobRuns(1, [glueJobRun.JobName!]), {
+                optimisticUpdate(data) {
+                  return data;
+                },
+              })
+            }
+            icon={Icon.RotateAntiClockwise}
           />
           <AwsAction.Console url={resourceToConsoleLink(glueJobRun.JobName, "AWS::Glue::JobRuns")} />
           <ActionPanel.Section title={"Copy"}>
@@ -146,15 +161,18 @@ function GlueJobRunDetails({ jobRun: glueJobRun }: { jobRun: GlueJobRun }) {
   );
 }
 
-async function RunGlueJob(glueJobName: string) {
-  try {
-    const client = new GlueClient();
-    const command = new StartJobRunCommand({ JobName: glueJobName });
-    const response = await client.send(command);
-    showToast({ style: Toast.Style.Success, title: "Triggered Glue job", message: "JobRunId: " + response.JobRunId });
-  } catch (error) {
-    showFailureToast(error, { title: "Unable to trigger Glue Job" });
-  }
+async function RunGlueJob(glueJobName: string, mutate: MutatePromise<GlueJobRun[]>) {
+  mutate(new GlueClient({}).send(new StartJobRunCommand({ JobName: glueJobName })), {
+    optimisticUpdate(data) {
+      return data;
+    },
+  })
+    .then((response) => {
+      showToast({ style: Toast.Style.Success, title: "Triggered Glue job", message: "JobRunId: " + response.JobRunId });
+    })
+    .catch((error) => {
+      showFailureToast(error, { title: "Unable to trigger Glue Job" });
+    });
 }
 
 function GlueJobDefinition({ glueJobName: glueJobName }: { glueJobName: string }) {
