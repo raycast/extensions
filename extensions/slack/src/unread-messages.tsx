@@ -196,7 +196,7 @@ function UnreadMessagesConversation({
             icon={{ source: user?.icon ?? Icon.Person, mask: Image.Mask.Circle }}
             title={user?.name ?? ""}
             subtitle={timeDifference(new Date(message.receivedAt))}
-            detail={<List.Item.Detail markdown={emoji.emojify(message.message)} />}
+            detail={<List.Item.Detail markdown={convertSlackEmojiToUnicode(message.message)} />}
           />
         );
       })}
