@@ -20,6 +20,7 @@ import {
 } from "../../cache";
 import { getOtpServices, logout, Service } from "../login/login-helper";
 import { compareByDate, compareByName, toId } from "../../util/compare";
+import Export from "../export/Export";
 
 const {
   excludeNames: excludeNamesCsv = "",
@@ -148,6 +149,12 @@ export function commonActions(refresh: () => Promise<void>) {
         icon={Icon.ArrowClockwise}
         shortcut={{ modifiers: ["cmd"], key: "r" }}
         onAction={refresh}
+      />
+      <Action.Push
+        title={"Export Tokens"}
+        icon={Icon.Download}
+        target={<Export />}
+        shortcut={{ modifiers: ["cmd"], key: "e" }}
       />
       <Action
         title={"Logout"}

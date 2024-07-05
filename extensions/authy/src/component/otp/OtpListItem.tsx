@@ -1,11 +1,10 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { ActionPanel, Color, List } from "@raycast/api";
 import { icon } from "../../util/icon";
 import { compareByName } from "../../util/compare";
 import { getProgressIcon } from "@raycast/utils";
 import { Service } from "../login/login-helper";
 import { generateTOTP } from "../../util/totp";
 import { commonActions, CORRUPTED, otpActions, refresh, setItemsFunction } from "./otp-helpers";
-import Export from "../export/Export";
 
 interface OtpListItemProps {
   index: number;
@@ -37,12 +36,6 @@ export default function OtpListItem({ index, item, timeLeft, setItems }: OtpList
         <ActionPanel>
           {otpActions(otp, item.id, index, setItems)}
           {commonActions(async () => await refresh(setItems))}
-          <Action.Push
-            title={"Export Tokens"}
-            icon={Icon.Download}
-            target={<Export />}
-            shortcut={{ modifiers: ["cmd"], key: "e" }}
-          />
         </ActionPanel>
       }
       accessories={[
