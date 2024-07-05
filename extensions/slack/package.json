@@ -8,7 +8,8 @@
   "contributors": [
     "Elliot67",
     "stelo",
-    "thomaslombart"
+    "thomaslombart",
+    "Rob"
   ],
   "categories": [
     "Communication",
@@ -24,7 +25,18 @@
         "search"
       ],
       "description": "Search for all workspace members, group chats, and channels and open them directly in your Slack app.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Channel Metadata",
+          "label": "Display extra metadata in Open Channel results",
+          "description": "Show team member's titles, time zone, and current time in Open Channel results",
+          "name": "displayExtraMetadata",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
     },
     {
       "name": "search-messages",
@@ -79,12 +91,32 @@
       "type": "checkbox",
       "required": false,
       "default": true
+    },
+    {
+      "title": "Time Format",
+      "label": "Time Format",
+      "description": "Determines how time is formatted in the extension",
+      "name": "timeFormat",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "value": "hour12",
+          "title": "12-hour format (AM/PM)"
+        },
+        {
+          "value": "hour24",
+          "title": "24-hour format"
+        }
+      ],
+      "default": "hour12"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.76.0",
     "@raycast/utils": "^1.16.0",
     "@slack/web-api": "^7.0.4",
+    "@types/node-emoji": "^2.1.0",
     "date-fns": "^3.6.0",
     "lodash": "^4.17.21",
     "node-emoji": "^2.1.3"

@@ -22,8 +22,13 @@ export interface SlackMember {
     first_name?: string;
     last_name?: string;
     image_24?: string;
+    title?: string;
+    phone?: string;
+    status_text?: string;
+    status_emoji?: string;
+    status_expiration?: number;
   };
-
+  tz?: string;
   deleted?: boolean;
   is_bot?: boolean;
   is_workflow_bot?: boolean;

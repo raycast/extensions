@@ -1,8 +1,19 @@
-import { open } from "@raycast/api";
+import { open, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { CodedError, ErrorCode } from "@slack/web-api";
 import { formatDistance } from "date-fns";
 import { slack } from "./client/WebClient";
+
+import * as emoji from "node-emoji";
+
+function getTimeLocale(): string {
+  const timeFormat = getPreferenceValues().timeFormat;
+  return timeFormat === "hour24" ? "en-GB" : "en-US";
+}
+
+function convertSlackEmojiToUnicode(text: string): string {
+  return emoji.emojify(text);
+}
 
 const timeDifference = (date: Date): string => {
   const now = new Date();
@@ -87,4 +98,11 @@ const handleError = async (error: CodedError | Error | unknown, title?: string) 
   return showFailureToast(error, { title: title ?? "Something unexpected happened" });
 };
 
-export { timeDifference, convertTimestampToDate, buildScriptEnsuringSlackIsRunning, handleError };
+export {
+  timeDifference,
+  convertTimestampToDate,
+  buildScriptEnsuringSlackIsRunning,
+  handleError,
+  convertSlackEmojiToUnicode,
+  getTimeLocale,
+};

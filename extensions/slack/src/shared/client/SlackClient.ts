@@ -1,5 +1,6 @@
 import { Icon, Image } from "@raycast/api";
 import { SlackConversation, SlackMember, getSlackWebClient } from "./WebClient";
+import { getTimeLocale } from "../utils";
 
 interface Item {
   id: string;
@@ -11,6 +12,11 @@ interface Item {
 export interface User extends Item {
   username: string;
   conversationId: string | undefined;
+  title: string;
+  statusEmoji: string | undefined;
+  statusText: string | undefined;
+  statusExpiration: string;
+  timezone: string;
 }
 
 export type Channel = Item;
@@ -56,10 +62,31 @@ export class SlackClient {
         .filter(
           ({ is_bot, is_workflow_bot, deleted, id }) => !is_bot && !is_workflow_bot && !deleted && id !== "USLACKBOT",
         )
-        .map(({ id, name: username, profile, team_id }) => {
+        .map(({ id, name: username, profile, team_id, tz }) => {
           const firstName = profile?.first_name ?? "";
           const lastName = profile?.last_name ?? "";
           const name = `${firstName} ${lastName}`;
+          const jobTitle = profile?.title ?? "";
+          const statusEmoji = profile?.status_emoji ?? undefined;
+          const statusText = profile?.status_text?.replace(/&amp;/g, "&") ?? undefined;
+          const statusExpiration = profile?.status_expiration ?? undefined;
+          const timezone = tz ?? "";
+
+          let statusExpirationDate = "";
+          let statusExpirationTime = "";
+
+          if (statusExpiration) {
+            const date = new Date(statusExpiration * 1000);
+            if (!isNaN(date.getTime())) {
+              statusExpirationDate = date.toISOString().split("T")[0];
+              statusExpirationTime = date.toLocaleTimeString(getTimeLocale(), {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+
+              statusExpirationDate = `Back on ${statusExpirationDate} at ${statusExpirationTime}`;
+            }
+          }
 
           const displayName = [name, profile?.display_name, profile?.real_name].find((x): x is string => !!x?.trim());
 
@@ -71,7 +98,12 @@ export class SlackClient {
             icon: profile?.image_24 ? { source: profile?.image_24, mask: Image.Mask.Circle } : Icon.Person,
             teamId: team_id,
             username,
+            title: jobTitle,
+            statusEmoji,
+            statusText,
+            statusExpiration: statusExpirationDate,
             conversationId: conversation?.id,
+            timezone,
           } as User;
         })
         .filter((i) => !!(i.id?.trim() && i.name?.trim() && i.teamId?.trim()))
