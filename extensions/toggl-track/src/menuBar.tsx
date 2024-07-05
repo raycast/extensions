@@ -46,7 +46,7 @@ export default function Command() {
         <MenuBarExtra.Section title="Running time entry">
           <MenuBarExtra.Item
             icon={{ source: Icon.Circle, tintColor: entry?.project_color }}
-            onAction={stopRunningTimeEntry}
+            onAction={() => stopRunningTimeEntry(entry)}
             title={
               (entry.client_name ? entry.client_name + " | " : "") +
               (entry.project_name ?? "") +
