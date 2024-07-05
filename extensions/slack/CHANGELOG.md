@@ -1,5 +1,8 @@
 # Slack Changelog
 
+## [Update to Search command] -2024-07-05 
+- Added job title, timezone, current time, and slack status to the List that gets returned as part of the Search command
+
 ### [OAuth + Many Improvements] - 2024-06-18
 
 - **Added OAuth Support:** Users can now log in using OAuth, making it a more secure and streamlined authentication process.
