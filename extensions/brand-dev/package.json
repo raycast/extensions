@@ -23,18 +23,10 @@
   ],
   "commands": [
     {
-      "name": "retrieve-brand",
-      "title": "Retrieve Brand",
+      "name": "retrieve-brands",
+      "title": "Retrieve Brands",
       "description": "Get a company's brand logos, colors, slogan, socials, and more",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "domain",
-          "placeholder": "brand.dev",
-          "required": true,
-          "type": "text"
-        }
-      ]
+      "mode": "view"
     }
   ],
   "dependencies": {

@@ -22,6 +22,4 @@ This is a Raycast extension to get a company's brand logos, colors, slogan, soci
 
 ## 🗒️ NOTE
 
-The Free Plan of Brand.dev includes 100 API Calls per month so to reduce usage of API Calls, when you retrieve a Brand, it is stored locally in `LocalStorage`. The local value will take priority unless you explicitly "refresh" the brand.
-
-You can view locally stored brands by running the `View Storage` Action.
+The Free Plan of Brand.dev includes 100 API Calls per month so to reduce usage of API Calls, when you retrieve a Brand, it is stored locally in `LocalStorage`.
