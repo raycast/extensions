@@ -25,13 +25,6 @@ const useDesktop = () => {
   });
   useEffect(() => {
     (async () => {
-      const { stdout } = await runYabaiCommand("-m signal --list");
-      const list = JSON.parse(stdout) as { event: string; action: string }[];
-      const action =
-        "nohup open -g raycast://extensions/krzysztoff1/yabai/screens-menu-bar?launchType=background > /dev/null 2>&1 &";
-      if (list.filter((f) => f.event === "space_changed" && f.action === action).length == 0) {
-        runYabaiCommand(`-m signal --add event=space_changed action="${action}"`, { shell: true });
-      }
       const desktopList = await getDesktopList();
       const desktop = desktopList.filter((f) => f["is-visible"])[0];
       setState({

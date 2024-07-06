@@ -37,7 +37,7 @@
     },
     {
       "name": "windows-list-current-space",
-      "title": "Windows List By Current Space",
+      "title": "Windows List by Current Space",
       "description": "Show the application of the current space.",
       "mode": "view"
     },
