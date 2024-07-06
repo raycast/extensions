@@ -144,7 +144,7 @@ export default class NamespaceFetcher {
     if (!namespaceInfo.github) {
       namespaceInfo.github = namespaceInfo.name;
     }
-    namespaceInfo.url = `https://raw.githubusercontent.com/${namespaceInfo.github}/trovu-data-user/master/shortcuts.yml?${this.env.commitHash}`;
+    namespaceInfo.url = `https://raw.githubusercontent.com/${namespaceInfo.github}/trovu-data-user/master/shortcuts.yml`;
     return namespaceInfo;
   }
 

@@ -17,7 +17,6 @@ export default class Env {
   constructor(env) {
     countriesList.languages["eo"] = { name: "Esperanto", native: "Esperanto" };
     this.setToThis(env);
-    this.commitHash = "unknown";
     this.logger = new Logger("#log");
   }
 
@@ -92,7 +91,9 @@ export default class Env {
    * @param {array} params - List of parameters to be used in environment.
    */
   async populate(params) {
-    this.commitHash = await this.getCommitHash();
+    this.fetch = await this.getFetch();
+    this.data = this.data || (await this.getData());
+
     if (!params) {
       params = Env.getParamsFromUrl();
     }
@@ -106,8 +107,6 @@ export default class Env {
     Object.assign(this, params_from_query);
 
     this.getFromLocalStorage();
-
-    this.fetch = await this.getFetch();
 
     if (typeof params.github === "string" && params.github !== "") {
       this.configUrl = this.buildGithubConfigUrl(params.github);
@@ -134,7 +133,6 @@ export default class Env {
       this.namespaces.push(this.extraNamespaceName);
     }
 
-    this.data = this.data || (await this.getData());
     this.namespaceInfos = await new NamespaceFetcher(this).getNamespaceInfos(this.namespaces);
 
     // Remove extra namespace if it turned out to be invalid.
@@ -189,7 +187,7 @@ export default class Env {
    * @returns {string} The URL to the config file.
    */
   buildGithubConfigUrl(github) {
-    const configUrl = `https://raw.githubusercontent.com/${github}/trovu-data-user/master/config.yml?${this.commitHash}`;
+    const configUrl = `https://raw.githubusercontent.com/${github}/trovu-data-user/master/config.yml`;
     return configUrl;
   }
 
@@ -335,14 +333,6 @@ export default class Env {
     }
   }
 
-  async getCommitHash() {
-    if (this.context === "browser") {
-      const pkg = await import("../../../package.json");
-      const commitHash = pkg.gitCommitHash.slice(0, 7);
-      return commitHash;
-    }
-  }
-
   /**
    * Fetches data from /data.
    * @returns {Object} An object containing the fetched data.
@@ -352,11 +342,11 @@ export default class Env {
     let url;
     switch (this.context) {
       case "browser":
-        url = `/data.json?${this.commitHash}`;
+        url = "/data.json";
         text = await Helper.fetchAsync(url, this);
         break;
       case "raycast":
-        url = `https://trovu.net/data.json?${this.commitHash}`;
+        url = "https://trovu.net/data.json";
         text = await Helper.fetchAsync(url, this);
         break;
       case "node": {
