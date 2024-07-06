@@ -140,10 +140,10 @@ export default function Command() {
       isLoading={isLoading}
     >
       <Form.FilePicker id="files" title="Choose a PDF" allowMultipleSelection={false} />
-      <Form.Description title="Page Mode" text="" />
       <Form.Checkbox
         id="facingPage"
         label="Facing pages"
+        title="Page Mode"
         value={facingPage}
         onChange={setFacingPage}
         info="Convert the PDF into a face page mode"
@@ -151,6 +151,7 @@ export default function Command() {
       <Form.Checkbox
         id="firstCover"
         label="First page is cover"
+        title=" "
         value={firstCover}
         onChange={setFirstCover}
         info="If first page is cover, it will not be numbered"
