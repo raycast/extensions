@@ -15,9 +15,10 @@ export function getRecentColors(): Promise<RecentColor[]> {
 
         for (var i = 0; i < count; i++) {
             const color = app.recentcolors[i];
+            const hex = color.hex().slice(0, 7);
             array.push({
             name: color.name(),
-            hex: color.hex(),
+            hex: hex,
             });
         }
 
@@ -100,7 +101,7 @@ export function convertColor(colorString: string, formatId: string): Promise<str
 
         for (var i = 0; i < count; i++) {
             const format = app.colorformats[i];
-            
+
             if (format.id() == "${formatId}") {
                 return format.format({ color: "${colorString}" });
             }
