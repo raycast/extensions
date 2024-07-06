@@ -94,13 +94,13 @@ async function exportData(options: Options) {
   }
   if (options.authUrl) {
     const decryptedData = decryptData(apps, services);
-    const baseUrl = new URL("otpauth://totp");
+    const baseUrl = "otpauth://totp";
     const urls = decryptedData
       .filter((i) => {
         return i.seed != null;
       })
       .map((i) => {
-        const url = new URL(i.name, baseUrl);
+        const url = new URL(`${baseUrl}/${i.name}`);
         url.searchParams.append("secret", i.seed!);
         url.searchParams.append("algorithm", i.algorithm);
         url.searchParams.append("digits", i.digits.toString());
