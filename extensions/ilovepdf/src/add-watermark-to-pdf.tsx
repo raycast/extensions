@@ -13,7 +13,7 @@ import ILovePDFFile from "@ilovepdf/ilovepdf-nodejs/ILovePDFFile";
 import { useState } from "react";
 import fs from "fs";
 import path from "path";
-import { chooseDownloadLocation, getFilePath, handleOpenNow } from "./common/utils";
+import { chooseDownloadLocation, getErrorMessage, getFilePath, handleOpenNow } from "./common/utils";
 import { Status } from "./common/types";
 
 type Values = {
@@ -53,9 +53,9 @@ export default function Command() {
   const [horizontalPosition, setHorizontalPosition] = useState<string>("center");
   const [font, setFont] = useState<string>("Arial Unicode MS");
   const [fontSize, setFontSize] = useState<string>("14");
-  const [fontStyle, setFontStyle] = useState<string>("null");
+  const [fontStyle, setFontStyle] = useState<string>("Regular");
   const [rotation, setRotation] = useState<string>("0");
-  const [transparency, setTransparency] = useState<string>("100");
+  const [opacity, setOpacity] = useState<string>("100");
 
   async function handleSubmit(values: Values) {
     setIsLoading(true);
@@ -107,7 +107,7 @@ export default function Command() {
         font_size: Number(fontSize),
         font_style: fontStyle as FontStyle,
         layer: layer as Layer,
-        transparency: Number(transparency),
+        transparency: Number(opacity),
       });
       const data = await task.download();
       fs.writeFileSync(destinationFile, data);
@@ -119,10 +119,10 @@ export default function Command() {
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "failure";
-      toast.message = `Error happened during processing the file. Reason ${error}`;
+      toast.message = `Error happened during processing the file. Reason ${getErrorMessage(error)}`;
       setStatus("failure");
       setIsLoading(false);
-      console.log(error);
+      console.log(getErrorMessage(error));
       return;
     }
 
@@ -195,10 +195,10 @@ export default function Command() {
         placeholder="Accepted integer range: 0-360."
       />
       <Form.TextField
-        id="transparency"
-        title="Transparency"
-        value={transparency}
-        onChange={setTransparency}
+        id="opacity"
+        title="Opacity"
+        value={opacity}
+        onChange={setOpacity}
         info="Percentage of opacity for stamping text."
         placeholder="Accepted integer range 1-100."
       />
@@ -213,7 +213,7 @@ export default function Command() {
         <Form.Dropdown.Item value="Lohit Marathi" title="Lohit Marathi" />
       </Form.Dropdown>
       <Form.Dropdown id="fontStyle" title="Font Style" value={fontStyle} onChange={setFontStyle}>
-        <Form.Dropdown.Item value="null" title="Regular" />
+        <Form.Dropdown.Item value="Regular" title="Regular" />
         <Form.Dropdown.Item value="Bold" title="Bold" />
         <Form.Dropdown.Item value="Italic" title="Italic" />
       </Form.Dropdown>
