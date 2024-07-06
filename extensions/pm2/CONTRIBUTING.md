@@ -9,12 +9,15 @@ See [Contribute to an Extension](https://developers.raycast.com/basics/contribut
 
 ## Folder structure
 
-The `pm2-wrapper` is placed under the `assets` folder. It's a standalone Node.js application. You don't need to run `npm install` unless you need to modify the package related information.
+The `assets/fake-vendor` folder is used for mocking unused dependencies from `pm2`. Currently, unused dependencies are:
 
-Please make sure there is no `node_modules` under the `pm2-wrapper` folder. The Raycast will build all assets to `~/.config/raycast/pm2/assets`. You should verify the `node_modules` isntallation behavior there.
+- `pty.js`
+- `term.js`
+
+We also omitted `fsevents` from `package-lock.json` due to it has issue while compiling.
 
 ## Development
 
-If you have modified `pm2-wrapper`, you will need to stop and restart the dev server (`npm run dev`) to apply the new changes.
+If you have modified `example.mjs` or `fake-vendor`, you will need to stop and restart the dev server (`npm run dev`) to apply the new changes.
 
 Please note that when you run Node.js in Raycast's box, the environment variables and PATH information you get are not the same as when running directly in your Terminal.

@@ -10,16 +10,6 @@ Adavnced, producing process manager for Node.js.
 - Manage PM2 processes (start, stop, restart, reload, delete)
 - Run any Raycast Node.js application in PM2 through [Cross-Extension][raycast-cross-extension-link]
 
-## Requirements
-
-- Get Node.js and npm installed on your machine
-- Get PM2 installed on your machine
-
-## Principles
-
-Due to runtime reasons, the [pm2](https://npmjs.com/pm2) package won't work in Raycast extension. We used a PM2 wrapper application under the assets folder to bypass this problem.
-The extension will run `npm install` under the `pm2-wrapper` folder during the first run.
-
 ## API
 
 This extensions follows [Raycast Cross-Extension Conventions][raycast-cross-extension-link]. You can send Node.js application to PM2 through `crossLaunchCommand`.
@@ -39,13 +29,6 @@ Options for running the [`pm2.start()`](https://pm2.keymetrics.io/docs/usage/pm2
 [`pm2.restart()`](https://pm2.keymetrics.io/docs/usage/pm2-api/#pm2restartprocess-fn),
 [`pm2.reload()`](https://pm2.keymetrics.io/docs/usage/pm2-api/#pm2reloadprocess-fn),
 and [`pm2.delete()`](https://pm2.keymetrics.io/docs/usage/pm2-api/#pm2deleteprocess-fn).
-
-#### RuntimeOptions
-
-Type: `RuntimeOptions`
-
-Optional. Use this option for specifying the runtime properties. The `nodePath` defaults to Raycast's Node.js `process.execPath`.
-The default `nodePath` can be changed from extension configuration.
 
 ### Example
 

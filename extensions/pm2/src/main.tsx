@@ -1,18 +1,15 @@
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, Color, Icon, List, confirmAlert, open } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
-import { $ } from "execa";
-import { ProcessDescription } from "pm2";
+import pm2, { ProcessDescription } from "pm2";
 import { MetaData, ProcessActions } from "./components.js";
 import {
-  checkIfNeedSetup,
-  getNodeBinaryPath,
   getProcessStatusColor,
   getRaycastIcon,
   isRaycastNodeProcess,
-  pm2WrapperExamplePath,
-  pm2WrapperIndexPath,
+  pm2ExamplePath,
   runPm2Command,
+  setupNodeEnv,
 } from "./utils.js";
 
 export default function Main() {
@@ -21,12 +18,11 @@ export default function Main() {
   const [list, setList] = useState<ProcessDescription[]>([]);
 
   const loadList = async () => {
-    await checkIfNeedSetup();
-    const nodeBinaryPath = getNodeBinaryPath();
-    const { stdout } = await $`${nodeBinaryPath} ${pm2WrapperIndexPath} list`;
-    const parsedList = JSON.parse(stdout);
-    setList(parsedList);
-    setIsLoading(false);
+    setupNodeEnv();
+    pm2.list((error, list) => {
+      setList(error ? [] : list);
+      setIsLoading(false);
+    });
   };
 
   useEffect(() => {
@@ -38,7 +34,7 @@ export default function Main() {
       icon={Icon.GameController}
       title="Start Example Process"
       onAction={async () => {
-        await runPm2Command("start", { script: pm2WrapperExamplePath, name: "raycast-pm2-example" });
+        await runPm2Command("start", { script: pm2ExamplePath, name: "raycast-pm2-example" });
         loadList();
         if (
           await confirmAlert({

@@ -37,57 +37,23 @@
       "disabledByDefault": true
     }
   ],
-  "preferences": [
-    {
-      "type": "textfield",
-      "required": true,
-      "name": "nodePath",
-      "title": "node bin path",
-      "description": "Your node binary path",
-      "placeholder": "e.g. /opt/homebrew/bin/node"
-    },
-    {
-      "type": "textfield",
-      "required": true,
-      "name": "npmPath",
-      "title": "npm bin path",
-      "description": "Your npm binary path",
-      "placeholder": "e.g. /opt/homebrew/bin/npm"
-    },
-    {
-      "type": "dropdown",
-      "required": false,
-      "name": "defaultNodeExecutor",
-      "title": "Default Node.js executor",
-      "default": "raycastNodePath",
-      "description": "Select the default Node.js executor for running PM2 commands",
-      "data": [
-        {
-          "title": "Raycast Built-in",
-          "value": "raycastNodePath"
-        },
-        {
-          "title": "Preference Settings",
-          "value": "preferenceNodePath"
-        }
-      ]
-    }
-  ],
   "dependencies": {
-    "@raycast/api": "^1.75.2",
-    "@raycast/utils": "^1.15.0",
+    "@raycast/api": "^1.78.1",
+    "@raycast/utils": "^1.16.1",
     "@types/lodash": "^4.17.4",
     "date-fns": "^3.6.0",
     "execa": "^9.1.0",
     "lodash": "^4.17.21",
-    "raycast-cross-extension": "^0.2.2"
+    "pm2": "^5.4.1",
+    "pty.js": "file:./assets/fake-vendor",
+    "raycast-cross-extension": "^0.2.3",
+    "term.js": "file:./assets/fake-vendor"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "^20.12.5",
     "@types/react": "^18.2.75",
     "eslint": "^8.57.0",
-    "pm2": "^5.4.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4.4"
   }

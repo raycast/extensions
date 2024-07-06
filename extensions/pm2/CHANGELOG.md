@@ -1,6 +1,13 @@
 # Raycast PM2
 
-## [Bugfixes & Chore]
+## [Enhancement] - {PR_MERGE_DATE}
+
+- Bump dependencies
+- Drop `pm2-wrapper`
+- Drop pre-requirements for Node.js, npm, and pm2 on user's local
+- Drop `RuntimeOptions` support, please pass-in your runtime context through `pm2.start()` options instead
+
+## [Bugfixes & Chore] - 2024-06-05
 
 - Fix API command
 - Add [`raycast-pm2`](https://github.com/LitoMore/raycast-pm2) example to readme
