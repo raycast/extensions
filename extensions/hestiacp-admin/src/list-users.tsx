@@ -106,7 +106,7 @@ export function ViewUserStats({ user }: ViewUserStatsProps) {
   const { isLoading, data: stats } = getUserStats(user);
 
   return (
-    <List navigationTitle="View User Stats" isLoading={isLoading} isShowingDetail>
+    <List navigationTitle={`Users / ${user} / Stats`} isLoading={isLoading} isShowingDetail>
       {stats &&
         Object.entries(stats).map(([date, data]) => (
           <List.Item
@@ -141,7 +141,7 @@ export function ViewUserLogs({ user }: ViewUserLogsProps) {
 
   return (
     <List
-      navigationTitle="View User Logs"
+      navigationTitle={`Users / ${user} / Logs`}
       isLoading={isLoading}
       isShowingDetail
       searchBarAccessory={
@@ -215,7 +215,7 @@ export function ViewUserAuthLog({ user }: ViewUserAuthLogProps) {
   const { isLoading, data: authLog } = getUserAuthLog(user);
 
   return (
-    <List navigationTitle="View User Auth Log" isLoading={isLoading} isShowingDetail>
+    <List navigationTitle={`Users / ${user} / Auth Log`} isLoading={isLoading} isShowingDetail>
       {authLog &&
         Object.entries(authLog)
           .sort(([keyA], [keyB]) => Number(keyB) - Number(keyA)) // we reverse so latest log is at top
@@ -271,40 +271,38 @@ export function ViewUserNotifications({ user }: ViewUserNotificationsProps) {
   const { isLoading, data: notifications } = getUserNotifications(user);
 
   return (
-    <List navigationTitle="View User Notifications" isLoading={isLoading} isShowingDetail>
+    <List navigationTitle={`Users / ${user} / Notifications`} isLoading={isLoading} isShowingDetail>
       {notifications &&
-        Object.entries(notifications)
-          // .sort(([keyA], [keyB]) => keyB - keyA) // we reverse so latest log is at top
-          .map(([line, data]) => (
-            <List.Item
-              key={line}
-              title={line}
-              detail={
-                <List.Item.Detail
-                  markdown={data.NOTICE}
-                  metadata={
-                    <List.Item.Detail.Metadata>
-                      {Object.entries(data).map(([key, val]) => {
-                        const { text, icon } = getTextAndIconFromVal(val);
-                        return <List.Item.Detail.Metadata.Label key={key} title={key} text={text} icon={icon} />;
-                      })}
-                    </List.Item.Detail.Metadata>
-                  }
+        Object.entries(notifications).map(([line, data]) => (
+          <List.Item
+            key={line}
+            title={line}
+            detail={
+              <List.Item.Detail
+                markdown={data.NOTICE}
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    {Object.entries(data).map(([key, val]) => {
+                      const { text, icon } = getTextAndIconFromVal(val);
+                      return <List.Item.Detail.Metadata.Label key={key} title={key} text={text} icon={icon} />;
+                    })}
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
+            accessories={[{ date: new Date(data.DATE) }]}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard title={`Copy Line#${line} to Clipboard`} content={JSON.stringify(data)} />
+                <Action.CopyToClipboard
+                  title={`Copy All to Clipboard as JSON`}
+                  content={JSON.stringify(notifications)}
                 />
-              }
-              accessories={[{ date: new Date(data.DATE) }]}
-              actions={
-                <ActionPanel>
-                  <Action.CopyToClipboard title={`Copy Line#${line} to Clipboard`} content={JSON.stringify(data)} />
-                  <Action.CopyToClipboard
-                    title={`Copy All to Clipboard as JSON`}
-                    content={JSON.stringify(notifications)}
-                  />
-                </ActionPanel>
-              }
-              icon={data.ACK === "yes" ? Icon.BellDisabled : Icon.Bell}
-            />
-          ))}
+              </ActionPanel>
+            }
+            icon={data.ACK === "yes" ? Icon.BellDisabled : Icon.Bell}
+          />
+        ))}
     </List>
   );
 }

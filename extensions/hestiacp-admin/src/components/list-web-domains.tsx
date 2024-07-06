@@ -19,7 +19,7 @@ export default function ListWebDomainsComponent({ user }: ListWebDomainsComponen
   const { isLoading, data: domains, revalidate } = getWebDomains(user);
 
   return (
-    <List isLoading={isLoading} isShowingDetail>
+    <List isLoading={isLoading} isShowingDetail navigationTitle={`Users / ${user} / Web Domains`}>
       {domains &&
         Object.entries(domains).map(([domain, data]) => (
           <List.Item
@@ -91,9 +91,9 @@ export function ViewDomainAccessLog({ user, domain }: ViewDomainAccessLogProps) 
 
   return (
     <Detail
-      navigationTitle="View Access Log"
+      navigationTitle={`Users / ${user} / Web Domains / ${domain}`}
       isLoading={isLoading}
-      markdown={markdown}
+      markdown={`# Access Log \n\n` + markdown}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy to Clipboard" icon={Icon.Clipboard} content={JSON.stringify(accesslog)} />
@@ -114,9 +114,9 @@ export function ViewDomainErrorLog({ user, domain }: ViewDomainErrorLogProps) {
 
   return (
     <Detail
-      navigationTitle="View Error Log"
+      navigationTitle={`Users / ${user} / Web Domains / ${domain}`}
       isLoading={isLoading}
-      markdown={markdown}
+      markdown={`# Error Log \n\n` + markdown}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy to Clipboard" icon={Icon.Clipboard} content={JSON.stringify(errorlog)} />
@@ -135,9 +135,7 @@ export function ViewDomainSSL({ user, domain }: ViewDomainSSLProps) {
 
   const markdown = !ssl
     ? ""
-    : `SSL Certificate
-
-${ssl[domain].CRT}
+    : `${ssl[domain].CRT}
 
 SSL Private Key
 
@@ -149,9 +147,9 @@ ${ssl[domain].CA}`;
 
   return (
     <Detail
-      navigationTitle="View Domain SSL"
+      navigationTitle={`Users / ${user} / Web Domains / ${domain}`}
       isLoading={isLoading}
-      markdown={markdown}
+      markdown={`# SSL Certificate \n\n` + markdown}
       metadata={
         ssl && (
           <Detail.Metadata>

@@ -16,7 +16,7 @@
       "title": "Hostname",
       "type": "textfield",
       "required": true,
-      "placeholder": "demo.hestiacp.com"
+      "placeholder": "demo.hestiacp.com:8083"
     },
     {
       "name": "username",

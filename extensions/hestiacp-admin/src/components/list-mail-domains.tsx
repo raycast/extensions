@@ -10,7 +10,7 @@ export default function ListMailDomainsComponent({ user }: ListMailDomainsCompon
   const { isLoading, data: domains } = getMailDomains(user);
 
   return (
-    <List isLoading={isLoading} isShowingDetail>
+    <List isLoading={isLoading} isShowingDetail navigationTitle={`Users / ${user} / Mail Domains`}>
       {domains &&
         Object.entries(domains).map(([domain, data]) => (
           <List.Item

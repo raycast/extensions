@@ -7,25 +7,28 @@ export default function ListUserPackages() {
 
   return (
     <List isLoading={isLoading} isShowingDetail>
-      {userPackages &&
-        Object.entries(userPackages).map(([userPackage, data]) => (
-          <List.Item
-            key={userPackage}
-            title={userPackage}
-            icon={Icon.Box}
-            accessories={[{ date: new Date(`${data.DATE} ${data.TIME}`) }]}
-            detail={<ListItemDetailComponent data={data} />}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy to Clipboard as JSON"
-                  icon={Icon.Clipboard}
-                  content={JSON.stringify(data)}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
+      {userPackages && (
+        <List.Section title={`${Object.keys(userPackages).length} user packages`}>
+          {Object.entries(userPackages).map(([userPackage, data]) => (
+            <List.Item
+              key={userPackage}
+              title={userPackage}
+              icon={Icon.Box}
+              accessories={[{ date: new Date(`${data.DATE} ${data.TIME}`) }]}
+              detail={<ListItemDetailComponent data={data} />}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard
+                    title="Copy to Clipboard as JSON"
+                    icon={Icon.Clipboard}
+                    content={JSON.stringify(data)}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }

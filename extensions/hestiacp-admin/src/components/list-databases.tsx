@@ -14,7 +14,7 @@ export default function ListDatabasesComponent({ user }: ListDatabasesComponentP
   const { isLoading, data: databases, revalidate } = getUserDatabases(user);
 
   return (
-    <List navigationTitle="List Databases" isLoading={isLoading} isShowingDetail>
+    <List navigationTitle={`Users / ${user} / Databases`} isLoading={isLoading} isShowingDetail>
       {databases &&
         Object.entries(databases).map(([database, data]) => (
           <List.Item
