@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "hestia-admin",
-  "title": "Hestia Admin",
-  "description": "",
+  "name": "hestiacp-admin",
+  "title": "HestiaCP Admin",
+  "description": "Manage Users, Domains, Mail Domains, Databases, and more, in your HestiaCP isntance",
   "icon": "hestia.png",
   "author": "xmok",
   "categories": [
@@ -31,34 +31,35 @@
       "description": "HestiaCP API Access Key",
       "title": "Access Key",
       "type": "textfield",
-      "required": true
+      "required": true,
+      "placeholder": "3II...MYT"
     },
     {
       "name": "secret_key",
       "description": "HestiaCP API Secret Key",
       "title": "Secret Key",
       "type": "password",
-      "required": true
+      "required": true,
+      "placeholder": "hB...=s"
     }
   ],
   "commands": [
     {
       "name": "list-users",
       "title": "List Users",
-      "description": "List Users",
+      "description": "Manage Users, View Logs and Navigate to Domains, DBs, and more",
       "mode": "view"
     },
     {
       "name": "list-user-packages",
       "title": "List User Packages",
-      "description": "",
+      "description": "View and Copy User Packages",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.67.1",
-    "@raycast/utils": "^1.12.4",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^1.78.1",
+    "@raycast/utils": "^1.16.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

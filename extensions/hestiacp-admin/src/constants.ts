@@ -8,11 +8,24 @@ export const SECRET_KEY = getPreferenceValues<Preferences>().secret_key;
 export const DB_PASS_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;
 
 export const USER_ACCESS_LOG_FILTERS = {
-    levels: ["info", "warning", "error"],
-    categories: [
-        "web", "dns", "mail", "db", "letsencrypt", "pwchange", "pwreset", //user
-        "ip", "firewall", "service", "updates", //system
-        "users", "pwchange", "pwreset", "impersonation"
-    ],
-}
-// export const LOG_EVENT
+  levels: ["info", "warning", "error"],
+  categories: [
+    "web",
+    "dns",
+    "mail",
+    "db",
+    "letsencrypt",
+    "pwchange",
+    "pwreset", //user
+    "ip",
+    "firewall",
+    "service",
+    "updates", //system
+    "users",
+    "pwchange",
+    "pwreset",
+    "impersonation",
+  ],
+};
+
+export const DOMAIN_LOG_LINES = "70";
