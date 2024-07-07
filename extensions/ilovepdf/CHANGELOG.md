@@ -1,5 +1,7 @@
 # iLovePDF Changelog
 
+## [Add PDF to PDF/A Command] - 2024-07-14
+
 ## [Add Repair PDF Command] - 2024-07-09
 
 ## [Add Page Number Command] - 2024-07-06
