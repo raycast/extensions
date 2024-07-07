@@ -30,7 +30,7 @@ export default function SearchItems() {
       isShowingDetail={
         !isLoadingWorkspaces && !isLoadingItems && !workspacesError && !itemsError && items?.length !== 0
       }
-      searchBarPlaceholder={"Search items by sku, description, cost, quantity, tags..."}
+      searchBarPlaceholder={"Search items by sku, description, cost, supplier, tags..."}
       filtering
       searchBarAccessory={
         <List.Dropdown
@@ -64,7 +64,7 @@ export default function SearchItems() {
         <List.EmptyView title="No items found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
       {(items ?? []).map((value) => {
-        const { sku, description, cost, quantity, tags, id, userId, user, createdAt, updatedAt } = value;
+        const { sku, description, cost, supplier, tags, id, userId, user, createdAt, updatedAt } = value;
         const formattedCost = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
           Number(cost),
         );
@@ -75,7 +75,7 @@ export default function SearchItems() {
               sku,
               description,
               cost.toString(),
-              quantity.toString(),
+              supplier ?? "",
               id,
               userId,
               ...(tags ?? []).map((t) => t.name),
@@ -94,8 +94,12 @@ export default function SearchItems() {
 
                     <List.Item.Detail.Metadata.Label title={"Cost"} text={formattedCost} />
                     <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label title={"Quantity"} text={quantity.toString()} />
-                    <List.Item.Detail.Metadata.Separator />
+                    {supplier && (
+                      <>
+                        <List.Item.Detail.Metadata.Label title="Supplier" text={supplier} />
+                        <List.Item.Detail.Metadata.Separator />
+                      </>
+                    )}
                     {tags && tags.length > 0 && (
                       <>
                         <List.Item.Detail.Metadata.TagList title="Tags">

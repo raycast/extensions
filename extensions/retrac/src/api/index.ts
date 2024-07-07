@@ -32,14 +32,14 @@ export const createItem = async ({
   sku,
   description,
   cost,
-  quantity,
+  supplier,
   workspaceId,
   tagIds,
-}: { sku: string; description: string; cost: number; quantity: number; tagIds?: string[] } & WorkspaceId) => {
+}: { sku: string; description: string; cost: number; supplier: string; tagIds?: string[] } & WorkspaceId) => {
   return await callApi<ItemSchema>({
     method: "POST",
     url: `${BASE_API_URL}/items?workspaceId=${workspaceId}`,
-    data: { sku, description, cost, quantity, tagIds },
+    data: { sku, description, cost, supplier, tagIds },
   });
 };
 

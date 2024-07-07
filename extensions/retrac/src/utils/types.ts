@@ -2,8 +2,8 @@ export type DomainResponse = {
   id: string;
   sku: string;
   description: string;
-  quantity: number;
   cost: number;
+  supplier: string;
   tagId: string;
   userId: string;
   projectId: string;
@@ -23,6 +23,6 @@ export type Item = {
   id: string;
   sku: string;
   description: string;
-  quantity: number;
   cost: number;
+  supplier: string;
 };

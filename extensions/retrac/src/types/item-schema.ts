@@ -31,9 +31,9 @@ export type ItemSchema = {
    */
   cost: number;
   /**
-   * The quantity of the item.
+   * The supplier of the item.
    */
-  quantity: number;
+  supplier: string;
   /**
    * The tags assigned to the item.
    */

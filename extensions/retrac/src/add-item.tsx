@@ -19,8 +19,8 @@ interface ItemFormValues {
   workspaceId: string;
   sku: string;
   description: string;
-  quantity: string;
   cost: string;
+  supplier: string;
   tagIds: string[];
 }
 
@@ -35,7 +35,7 @@ const AddItemForm = () => {
     onSubmit: async (vals) => {
       setWorkspaceId(vals.workspaceId);
       await showToast({ style: Toast.Style.Animated, title: "Adding item..." });
-      createItem({ ...vals, quantity: parseInt(vals.quantity, 10), cost: parseFloat(vals.cost) })
+      createItem({ ...vals, cost: parseFloat(vals.cost) })
         .then(async () => {
           await showToast({
             style: Toast.Style.Success,
@@ -59,11 +59,6 @@ const AddItemForm = () => {
     validation: {
       sku: FormValidation.Required,
       description: FormValidation.Required,
-      quantity: (value) => {
-        if (value && (isNaN(parseInt(value, 10)) || parseInt(value, 10) <= 0)) {
-          return "Quantity must be a positive number";
-        }
-      },
       cost: (value) => {
         if (value && (isNaN(parseFloat(value)) || parseFloat(value) < 0)) {
           return "Cost must be a positive number";
@@ -97,7 +92,7 @@ const AddItemForm = () => {
       <Form.TextField {...itemProps.sku} placeholder="Enter SKU/Item Code" title="Item Code" />
       <Form.TextField {...itemProps.description} placeholder="Enter item description" title="Description" />
       <Form.TextField {...itemProps.cost} placeholder="$12.00" title="Cost (USD)" />
-      <Form.TextField {...itemProps.quantity} placeholder="Enter quantity" title="Quantity" />
+      <Form.TextField {...itemProps.supplier} placeholder="Add supplier" title="Supplier" />
       <Form.TagPicker {...itemProps.tagIds} title="Tags">
         {workspaces
           .find((w) => w.id === values.workspaceId)
