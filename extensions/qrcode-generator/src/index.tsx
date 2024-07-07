@@ -4,7 +4,7 @@ import { useState } from "react";
 import { generateQRCode, getQRCodePath, QRCodeView } from "./utils";
 import { FormValidation, useForm } from "@raycast/utils";
 import { randomBytes } from "crypto";
-var open = require('mac-open');
+import open from "mac-open";
 interface FormValues {
   url: string;
   inline: boolean;
