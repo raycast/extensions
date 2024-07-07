@@ -52,10 +52,10 @@
       ]
     },
     {
-      "name": "speak",
-      "title": "Speak Word",
+      "name": "pronounce",
+      "title": "Pronounce Word",
       "subtitle": "Eudic",
-      "description": "Speak word on eudic",
+      "description": "Pronounce word on eudic",
       "mode": "no-view",
       "arguments": [
         {
@@ -67,7 +67,7 @@
       ],
       "keywords": [
         "eudic",
-        "speak",
+        "pronounce",
         "word"
       ]
     }
