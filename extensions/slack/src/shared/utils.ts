@@ -1,10 +1,17 @@
-import { open } from "@raycast/api";
+import { open, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { CodedError, ErrorCode } from "@slack/web-api";
 import { formatDistance } from "date-fns";
 import * as emoji from "node-emoji";
+import { Preferences } from "./client/WebClient";
 
-export function convertSlackEmojiToUnicode(text: string): string {
+
+function getTimeLocale(): string {
+  const timeFormat = getPreferenceValues<Preferences>().timeFormat;
+  return timeFormat === "hour24" ? "en-GB" : "en-US";
+};
+
+function convertSlackEmojiToUnicode(text: string): string {
   return emoji.emojify(text);
 }
 
@@ -75,4 +82,4 @@ const handleError = async (error: CodedError | Error | unknown, title?: string) 
   return showFailureToast(error, { title: title ?? "Something unexpected happened" });
 };
 
-export { timeDifference, buildScriptEnsuringSlackIsRunning, handleError };
+export { timeDifference, buildScriptEnsuringSlackIsRunning, handleError, convertSlackEmojiToUnicode, getTimeLocale };

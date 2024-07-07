@@ -1,4 +1,5 @@
 import { SlackConversation, SlackMember, getSlackWebClient } from "./WebClient";
+import { getTimeLocale } from "../utils";
 
 interface Item {
   id: string;
@@ -69,11 +70,18 @@ export class SlackClient {
           const timezone = tz ?? "";
 
           let statusExpirationDate = "";
+          let statusExpirationTime = "";
+
           if (statusExpiration) {
             const date = new Date(statusExpiration * 1000);
             if (!isNaN(date.getTime())) {
               statusExpirationDate = date.toISOString().split("T")[0];
-              statusExpirationDate = "Back on " + statusExpirationDate;
+              statusExpirationTime = date.toLocaleTimeString(getTimeLocale(), {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+
+              statusExpirationDate = `Back on ${statusExpirationDate} at ${statusExpirationTime}`;
             }
           }
 

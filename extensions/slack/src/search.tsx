@@ -1,19 +1,44 @@
-import { ActionPanel, Action, Icon, Image, List } from "@raycast/api";
-
+import { ActionPanel, Action, Icon, Image, List, getPreferenceValues } from "@raycast/api";
 import { User, useChannels } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
 import { useFrecencySorting } from "@raycast/utils";
 import { OpenChannelInSlack, OpenChatInSlack, useSlackApp } from "./shared/OpenInSlack";
-import { convertSlackEmojiToUnicode } from "./shared/utils";
+import { convertSlackEmojiToUnicode, getTimeLocale } from "./shared/utils";
+import { Preferences } from "./shared/client/WebClient";
+
+const { displayExtraMetadata } = getPreferenceValues<Preferences>();
 
 function getCoworkerTime(coworkerTimeZone: string): string {
   const time = new Date();
-  const coworkerTimeInLocale = new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(getTimeLocale(), {
     timeZone: coworkerTimeZone,
     hour: "2-digit",
     minute: "2-digit",
   }).format(time);
-  return coworkerTimeInLocale;
+}
+
+function searchItemAccessories(
+  statusEmoji: string | undefined,
+  statusText: string | undefined,
+  statusExpiration: string | null,
+  timezone: string,
+) {
+  const searchMetadata: Array<{ icon: string | Icon; text: string; tooltip?: string | null | undefined }> = [
+    {
+      icon: convertSlackEmojiToUnicode(statusEmoji ?? ""),
+      text: statusText ?? "",
+      tooltip: statusExpiration ? String(statusExpiration) : undefined,
+    },
+  ];
+
+  if (displayExtraMetadata) {
+    searchMetadata.push(
+      { icon: Icon.Globe, text: timezone.split("/")[1].replace(/_/g, " ") },
+      { icon: Icon.Clock, text: getCoworkerTime(timezone) },
+    );
+  }
+
+  return searchMetadata;
 }
 
 function Search() {
@@ -46,17 +71,9 @@ function Search() {
             <List.Item
               key={userId}
               title={name}
-              subtitle={title}
+              subtitle={displayExtraMetadata === true ? title : ""}
               icon={icon ? { source: icon, mask: Image.Mask.Circle } : Icon.Person}
-              accessories={[
-                {
-                  icon: convertSlackEmojiToUnicode(statusEmoji ?? ""),
-                  text: statusText ?? "",
-                  tooltip: statusExpiration ?? 0,
-                },
-                { icon: Icon.Globe, text: timezone.split("/")[1].replace(/_/g, " ") },
-                { icon: Icon.Clock, text: getCoworkerTime(timezone) },
-              ]}
+              accessories={searchItemAccessories(statusEmoji, statusText, statusExpiration, timezone)}
               actions={
                 <ActionPanel>
                   <OpenChatInSlack
