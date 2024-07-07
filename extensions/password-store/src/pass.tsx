@@ -1,4 +1,4 @@
-import { List, Action, ActionPanel, Icon, closeMainWindow, Clipboard, getPreferenceValues, LocalStorage } from "@raycast/api";
+import { List, Action, ActionPanel, Icon, closeMainWindow, Clipboard, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { exec } from "child_process";
 import { promisify } from "node:util";
@@ -6,7 +6,7 @@ import { glob } from "glob";
 import os from "os";
 import { getOptionIcon, getPasswordIcon } from "./utils/icons";
 import { getLastUsedPassword, updateLastUsedPassword } from "./utils/lastUsedPassword";
-import url from 'url';
+import url from "url";
 
 const execPromise = promisify(exec);
 
@@ -90,7 +90,7 @@ function PasswordOptions(props: { selectedPassword: string; showOtpFirst: boolea
     const preferences = getPreferenceValues<Preferences>();
     const gpgKey = preferences.GPG_KEY;
 
-    const cmdOptions = gpgKey ? `--pinentry-mode=loopback --passphrase "${gpgKey}"` : '';
+    const cmdOptions = gpgKey ? `--pinentry-mode=loopback --passphrase "${gpgKey}"` : "";
     const stdout = await runCmd(`gpg ${cmdOptions} -d ${PASSWORDS_PATH}${selectedPassword}.gpg`);
 
     // Split the output into lines
