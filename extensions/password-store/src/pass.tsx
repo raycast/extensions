@@ -1,4 +1,4 @@
-import { List, Action, ActionPanel, Icon, closeMainWindow, Clipboard } from "@raycast/api";
+import { List, Action, ActionPanel, Icon, closeMainWindow, Clipboard, getPreferenceValues, LocalStorage } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { exec } from "child_process";
 import { promisify } from "node:util";
@@ -6,17 +6,20 @@ import { glob } from "glob";
 import os from "os";
 import { getOptionIcon, getPasswordIcon } from "./utils/icons";
 import { getLastUsedPassword, updateLastUsedPassword } from "./utils/lastUsedPassword";
+import url from 'url';
 
 const execPromise = promisify(exec);
 
-const PASS_CMD = "pass";
-const OTP_CMD = "pass otp";
 const SHELL_PREFIX = "export PATH=$PATH:/opt/homebrew/bin &&"; // Needed for the 'pass' command to work on M1 Mac
 const PASSWORDS_PATH = `${os.homedir()}/.password-store/`;
 
 interface Password {
   value: string;
   showOtpFirst?: boolean;
+}
+
+interface Preferences {
+  GPG_KEY?: string;
 }
 
 /**
@@ -84,7 +87,11 @@ function PasswordOptions(props: { selectedPassword: string; showOtpFirst: boolea
   const { isLoading, data } = usePromise(async () => {
     // Get the decrypted contents of the file
     // Run command to get decrypted contents of the file
-    const stdout = await runCmd(`${PASS_CMD} ${selectedPassword}`);
+    const preferences = getPreferenceValues<Preferences>();
+    const gpgKey = preferences.GPG_KEY;
+
+    const cmdOptions = gpgKey ? `--pinentry-mode=loopback --passphrase "${gpgKey}"` : '';
+    const stdout = await runCmd(`gpg ${cmdOptions} -d ${PASSWORDS_PATH}${selectedPassword}.gpg`);
 
     // Split the output into lines
     const passwordOptions = stdout.split("\n");
@@ -106,7 +113,9 @@ function PasswordOptions(props: { selectedPassword: string; showOtpFirst: boolea
           options.push({ title: elements[0], value: elements[1] });
         } else if (option.startsWith("otpauth://")) {
           // Check if the line is an OTP entry
-          const otpValue = await runCmd(`${OTP_CMD} ${selectedPassword}`);
+          const otpUrl = url.parse(option, true);
+          const otpSecret = otpUrl.query.secret;
+          const otpValue = await runCmd(`oathtool -b --totp ${otpSecret}`);
 
           // Push OTP option as the first or second option, depending on the 'showOtpFirst' variable
           options.splice(showOtpFirst ? 0 : 1, 0, { title: "OTP", value: otpValue });
