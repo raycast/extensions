@@ -1,17 +1,18 @@
-import { Action, ActionPanel, Form, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import QRCode from "qrcode";
 import { useState } from "react";
 import { generateQRCode, getQRCodePath, QRCodeView } from "./utils";
 import { FormValidation, useForm } from "@raycast/utils";
-
+import { randomBytes } from "crypto";
+var open = require('mac-open');
 interface FormValues {
   url: string;
   inline: boolean;
 }
 
 export default function Command() {
-  const [qrData, setQrData] = useState<string>();
-  const { primaryAction } = getPreferenceValues<Preferences.Index>();
+  const [qrData, setQrData] = useState<string>();randomBytes
+  const primAction= getPreferenceValues().primaryAction;
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {
@@ -23,8 +24,8 @@ export default function Command() {
         const path = getQRCodePath(values.url);
         QRCode.toFile(path, values.url)
           .then(() => {
-            showToast(Toast.Style.Success, "QRCode saved", `You can find it here: ${path}`);
-            open(path);
+            showToast(Toast.Style.Success, "Code saved", `You can find it here: ${path}`);
+            open(path, {R: true});
           })
           .catch((error: Error) => {
             showToast(Toast.Style.Failure, "Error generating QR code", error.message);
@@ -55,7 +56,7 @@ export default function Command() {
       />
     );
 
-    return primaryAction === "save" ? (
+    return primAction === "save" ? (
       <>
         {saveAction}
         {showAction}

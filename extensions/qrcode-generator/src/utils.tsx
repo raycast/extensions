@@ -1,4 +1,4 @@
-import { Detail, showToast, Toast } from "@raycast/api";
+import { Detail, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { homedir } from "os";
 import { toDataURL } from "qrcode";
 
@@ -31,11 +31,12 @@ export function QRCodeView({ qrData }: { qrData: string }) {
 }
 
 export const getQRCodePath = (qrcodeUrl: string) => {
+  const fileType = getPreferenceValues().fileType;
   // `https://www.example.com/foo?bar=foo` -> `www.example.com`
   const filename = String(qrcodeUrl.match(/^(?:https?:\/\/)?(?:[^@/\n]+@)?(?:www\.)?([^:/\n]+)/gm)).replace(
     /^(?:https?:\/\/)?/gm,
     ""
   );
 
-  return `${homedir()}/Downloads/qrcode-${filename}.png`;
+  return `${homedir()}/Downloads/qrcode-${filename}.`+fileType;
 };
