@@ -25,7 +25,7 @@ export default function Command() {
         QRCode.toFile(path, values.url)
           .then(() => {
             showToast(Toast.Style.Success, "Code saved", `You can find it here: ${path}`);
-            open(path, {R: true});
+            showInFinder(path);
           })
           .catch((error: Error) => {
             showToast(Toast.Style.Failure, "Error generating QR code", error.message);
