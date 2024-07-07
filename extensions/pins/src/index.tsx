@@ -20,7 +20,7 @@ import { useCachedState } from "@raycast/utils";
 import OpenAllMenuItem from "./components/menu-items/OpenAllMenuItem";
 import PinMenuItem from "./components/menu-items/PinMenuItem";
 import RecentApplicationsList from "./components/RecentApplicationsList";
-import { KEYBOARD_SHORTCUT } from "./lib/constants";
+import { KEYBOARD_SHORTCUT, Visibility } from "./lib/constants";
 import { Group, useGroups } from "./lib/Groups";
 import { getGroupIcon } from "./lib/icons";
 import { useLocalData } from "./lib/LocalData";
@@ -98,7 +98,14 @@ export default function ShowPinsCommand() {
   );
 
   const allPins = sortPins(
-    pins.filter((p) => preferences.showInapplicablePins || !irrelevantPins.find((pin) => pin.id == p.id)),
+    pins
+      .filter((p) => preferences.showInapplicablePins || !irrelevantPins.find((pin) => pin.id == p.id))
+      .filter(
+        (pin) =>
+          pin.visibility === undefined ||
+          pin.visibility === Visibility.VISIBLE ||
+          pin.visibility === Visibility.MENUBAR_ONLY,
+      ),
     groups,
   );
 
@@ -171,6 +178,9 @@ export default function ShowPinsCommand() {
     );
   };
 
+  const ungroupedPins = allPins.filter((p) =>
+    preferences.groupDisplaySetting !== GroupDisplaySetting.None ? p.group == "None" : true,
+  );
   const groupSubmenus =
     preferences.groupDisplaySetting === GroupDisplaySetting.None
       ? []
@@ -184,11 +194,10 @@ export default function ShowPinsCommand() {
     <MenuBarExtra icon={pinIcon} isLoading={loadingPins || loadingGroups || loadingLocalData}>
       {[
         [
-          <MenuBarExtra.Section title={preferences.showCategories ? "Pins" : undefined} key="pins">
-            {allPins.length == 0 ? <MenuBarExtra.Item title="No pins yet!" /> : null}
-            {allPins
-              .filter((p) => (preferences.groupDisplaySetting !== GroupDisplaySetting.None ? p.group == "None" : true))
-              .map((pin: Pin) => (
+          ungroupedPins.length > 0 ? (
+            <MenuBarExtra.Section title={preferences.showCategories ? "Pins" : undefined} key="pins">
+              {allPins.length == 0 ? <MenuBarExtra.Item title="No pins yet!" /> : null}
+              {ungroupedPins.map((pin: Pin) => (
                 <PinMenuItem
                   pin={pin}
                   relevant={relevantPins.find((p) => p.id == pin.id) != undefined && !preferences.showInapplicablePins}
@@ -198,7 +207,8 @@ export default function ShowPinsCommand() {
                   key={pin.id}
                 />
               ))}
-          </MenuBarExtra.Section>,
+            </MenuBarExtra.Section>
+          ) : null,
           groupSubmenus?.length ? (
             <MenuBarExtra.Section title={preferences.showCategories ? "Groups" : undefined} key="groups">
               {groupSubmenus}
