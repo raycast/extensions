@@ -31,7 +31,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.56.0",
-    "gyazo-api": "^0.3.1"
+    "axios": "^1.7.2",
+    "form-data": "^4.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

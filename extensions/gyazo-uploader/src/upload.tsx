@@ -1,9 +1,7 @@
 import { Clipboard, getPreferenceValues, showToast, Toast, open, showHUD } from "@raycast/api";
 import fs from "fs";
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import Gyazo from "gyazo-api";
+import FormData from "form-data";
+import axios from "axios";
 
 interface Preferences {
   accessToken: string;
@@ -41,8 +39,13 @@ export default async () => {
   // gyazo clientを使って画像をアップロードする
   const fileUrl = new URL(file);
   const image = fs.createReadStream(fileUrl);
-  const client = new Gyazo(accessToken);
-  const response = await client.upload(image);
+  const form = new FormData();
+  form.append("access_token", accessToken);
+  form.append("imagedata", image);
+  const response = await axios.post("https://upload.gyazo.com/api/upload", form, {
+    headers: form.getHeaders(),
+  });
+
   const data: GyazoResponse = response.data;
 
   // アップロードした画像へのダイレクトリンクをクリップボードへコピーする
