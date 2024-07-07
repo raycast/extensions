@@ -3,6 +3,7 @@
   "name": "zefix",
   "title": "Zefix",
   "description": "A Raycast extension that looks up companies in the Swiss national trade register",
+  "categories": ["Data", "Finance", "Productivity", "Web"],
   "icon": "command-icon.png",
   "author": "cmdr",
   "license": "MIT",
