@@ -38,5 +38,5 @@ export const getQRCodePath = (qrcodeUrl: string) => {
     ""
   );
 
-  return `${homedir()}/Downloads/qrcode-${filename}.`+fileType;
+  return `${homedir()}/Downloads/qrcode-${filename}.${fileType}`;
 };
