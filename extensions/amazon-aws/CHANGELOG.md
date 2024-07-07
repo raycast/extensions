@@ -1,5 +1,13 @@
 # Amazon AWS Changelog
 
+## [Improvements] - 2024-07-05
+
+- Adds copy option to s3 command
+
+## [Contributor maintenance] - 2024-07-04
+
+- Move @JonathanWbn to list of past contributors
+
 ## [Fixes] - 2024-07-03
 
 - Reverts back to rendering all pipelines at once. We can add wait later if this causes issues
