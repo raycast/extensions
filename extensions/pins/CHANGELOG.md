@@ -3,6 +3,7 @@
 ## [1.8.1 - Visibility Setting] - 2024-07-07
 
 - Added visibility setting for pins and groups.
+- Added ability to launch pins via deeplinks.
 - Fixed timeout error when running AppleScript scripts.
 
 ## [1.8.0 - Bug Fixes, More AI Models, & Pin Management Placeholders] - 2024-06-22
