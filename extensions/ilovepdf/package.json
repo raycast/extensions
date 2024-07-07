@@ -107,6 +107,13 @@
       "subtitle": "iLovePDF",
       "description": "Unlocks a PDF using iLovePDF API.",
       "mode": "view"
+    },
+    {
+      "name": "validate-pdfa",
+      "title": "Validate PDF/A",
+      "subtitle": "iLovePDF",
+      "description": "Validates a PDF/A with using iLovePDF API.",
+      "mode": "view"
     }
   ],
   "preferences": [
