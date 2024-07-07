@@ -1,10 +1,10 @@
 import { ActionPanel, List, Action, Color, Icon } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { exec } from "child_process";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 export default function Command() {
-  const [state, setState] = useState<Device[]>([]);
-  const [query, setQuery] = useState<string | undefined>(undefined);
+  const [state, setState] = useCachedState<State[]>("state", []);
 
   const fetchSimulators = () => {
     exec(`xcrun simctl list --json devices`, (err, stdout) => {
@@ -13,11 +13,21 @@ export default function Command() {
         return;
       }
       const list: SimctlList = JSON.parse(stdout);
-      const devices = Object.keys(list.devices)
-        .map((key) => {
-          return list.devices[key];
-        })
-        .flat();
+      const devices = Object.entries(list.devices).flatMap(([key, devices]) =>
+        devices
+          .filter((device) => device.isAvailable)
+          .map((device) => {
+            // e.g. com.apple.CoreSimulator.SimRuntime.watchOS-8-5
+            const os = key
+              .replaceAll("com.apple.CoreSimulator.SimRuntime.", "") // watchOS-8-5
+              .split("-"); // [watchOS, 8, 5]
+            const osName = os[0]; // watchOS
+            const osVer = os.slice(1).join("."); // 8.5
+            const runtime = `${osName} ${osVer}`; // watchOS 8.5
+
+            return { ...device, runtime };
+          })
+      );
       setState(devices);
     });
   };
@@ -94,23 +104,8 @@ export default function Command() {
   };
 
   return (
-    <List
-      isLoading={state.length === 0}
-      searchBarPlaceholder="Filter by name..."
-      onSearchTextChange={(query) => setQuery(query)}
-    >
+    <List isLoading={state.length === 0} searchBarPlaceholder="Filter by name or runtime...">
       {state
-        .filter((device) => {
-          if (device.isAvailable == false) {
-            return false;
-          }
-
-          if (query == null) {
-            return true;
-          }
-          const nameMatches = device.name.toLowerCase().includes(query.toLowerCase());
-          return nameMatches;
-        })
         .sort((a, b) => {
           if (a.state === "Booted" && b.state !== "Booted") {
             return -1;
@@ -123,7 +118,10 @@ export default function Command() {
           return (
             <List.Item
               id={device.udid}
+              icon="list-icon.png"
               title={device.name}
+              keywords={[device.runtime]}
+              subtitle={device.runtime}
               key={device.udid}
               accessories={[
                 { tag: { value: device.state, color: device.state === "Booted" ? Color.Green : Color.SecondaryText } },
@@ -158,7 +156,7 @@ export default function Command() {
 
 type SimctlList = {
   devices: {
-    [key: string]: Device[];
+    [key in `com.apple.CoreSimulator.SimRuntime.${string}`]: Device[];
   };
 };
 
@@ -173,4 +171,7 @@ type Device = {
   deviceTypeIdentifier: string;
   state: string; // "Booted" | "Shutdown"
   name: string;
+};
+type State = Device & {
+  runtime: string;
 };
