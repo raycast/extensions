@@ -1,15 +1,18 @@
 import { ActionPanel, List, Action, Color, Icon } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { exec } from "child_process";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function Command() {
   const [state, setState] = useCachedState<State[]>("state", []);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchSimulators = () => {
+    setIsLoading(true);
     exec(`xcrun simctl list --json devices`, (err, stdout) => {
       if (err != null) {
         console.log(err);
+        setIsLoading(false);
         return;
       }
       const list: SimctlList = JSON.parse(stdout);
@@ -26,9 +29,10 @@ export default function Command() {
             const runtime = `${osName} ${osVer}`; // watchOS 8.5
 
             return { ...device, runtime };
-          })
+          }),
       );
       setState(devices);
+      setIsLoading(false);
     });
   };
 
@@ -77,7 +81,7 @@ export default function Command() {
         title="Boot"
         icon={Icon.Power}
         onAction={() => {
-          exec(`xcrun simctl boot ${device.udid}`, (err, stdout) => {
+          exec(`xcrun simctl boot ${device.udid}`, () => {
             fetchSimulators();
           });
         }}
@@ -95,7 +99,7 @@ export default function Command() {
         icon={Icon.XMarkCircle}
         style={Action.Style.Destructive}
         onAction={() => {
-          exec(`xcrun simctl shutdown ${device.udid}`, (err, stdout) => {
+          exec(`xcrun simctl shutdown ${device.udid}`, () => {
             fetchSimulators();
           });
         }}
@@ -104,7 +108,7 @@ export default function Command() {
   };
 
   return (
-    <List isLoading={state.length === 0} searchBarPlaceholder="Filter by name or runtime...">
+    <List isLoading={isLoading} searchBarPlaceholder="Filter by name or runtime...">
       {state
         .sort((a, b) => {
           if (a.state === "Booted" && b.state !== "Booted") {
@@ -120,7 +124,7 @@ export default function Command() {
               id={device.udid}
               icon="list-icon.png"
               title={device.name}
-              keywords={[device.runtime]}
+              keywords={device.runtime.split(" ")}
               subtitle={device.runtime}
               key={device.udid}
               accessories={[
