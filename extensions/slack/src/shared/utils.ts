@@ -5,11 +5,10 @@ import { formatDistance } from "date-fns";
 import * as emoji from "node-emoji";
 import { Preferences } from "./client/WebClient";
 
-
 function getTimeLocale(): string {
   const timeFormat = getPreferenceValues<Preferences>().timeFormat;
   return timeFormat === "hour24" ? "en-GB" : "en-US";
-};
+}
 
 function convertSlackEmojiToUnicode(text: string): string {
   return emoji.emojify(text);
