@@ -14,7 +14,9 @@ export interface User extends Item {
 }
 
 export type Channel = Item;
-export type Group = Item;
+export type Group = Item & {
+  groupName: string;
+};
 
 export type PresenceStatus = "online" | "offline" | "forced-offline";
 export interface SnoozeStatus {
@@ -153,7 +155,7 @@ export class SlackClient {
             .filter((x) => !!x)
             .join(", ");
 
-          return { id, name: displayName, teamId, icon: "channel-private.png" } as Group;
+          return { id, name: displayName, teamId, icon: "channel-private.png", groupName: name } as Group;
         })
         .filter((i) => !!(i.id?.trim() && i.name?.trim() && i.teamId.trim()))
         .sort((a, b) => sortNames(a.name, b.name)) ?? [];
