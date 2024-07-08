@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Improvements and Fixes] - {PR_MERGE_DATE}
+## [Improvements and Fixes] - 2024-07-08
 
 - Adds an action to sort the PRs, issues, discussions and repos
 - For creating branches with no linked issues, the branch name does not need to start with `refs/heads`
