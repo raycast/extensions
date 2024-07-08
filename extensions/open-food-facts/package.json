@@ -11,7 +11,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "product-by-gtin",
       "title": "Get Product by Barcode",
       "subtitle": "Open Food Facts",
       "description": "View Products from Open Food Facts by Barcode / GTIN",

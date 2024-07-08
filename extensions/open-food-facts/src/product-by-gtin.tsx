@@ -2,12 +2,44 @@ import { ActionPanel, Detail, Action, LaunchProps, getPreferenceValues, openExte
 import { useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
+interface ProductData {
+  product: {
+    product_name?: string;
+    brands?: string;
+    categories?: string;
+    labels?: string;
+    nutrient_levels?: {
+      fat?: string;
+      saturated_fat?: string;
+      sugars?: string;
+      salt?: string;
+    };
+    nutriments?: {
+      energy?: string;
+      energy_unit?: string;
+      "energy-kcal"?: string;
+      fat?: string;
+      "saturated-fat"?: string;
+      carbohydrates?: string;
+      sugars?: string;
+      proteins?: string;
+      salt?: string;
+    };
+    ingredients_text?: string;
+    nutriscore_grade?: string;
+    nova_group?: number;
+    ecoscore_grade?: string;
+    additives_n?: number;
+    image_front_url?: string;
+  };
+}
+
 interface Preferences {
   language?: string;
   country?: string;
 }
 
-export default function Command(props: LaunchProps<{ arguments: Arguments.OpenFoodFacts }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.ProductByGtin }>) {
   const [barcode, setBarcode] = useState("");
 
   const preferences = getPreferenceValues<Preferences>();
@@ -15,12 +47,11 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.OpenFo
   const country = preferences.country;
 
   useEffect(() => {
-    // Initialize barcode state with the argument
     const { barcode } = props.arguments;
     setBarcode(barcode);
-  }, [props.arguments]); // Corrected to use props.arguments
-
-  const { isLoading, data, revalidate } = useFetch(
+  }, [props.arguments]); 
+  
+  const { isLoading, data, revalidate } = useFetch<ProductData>(
     `https://${country}.openfoodfacts.org/api/v3/product/${barcode}?cc=${language}&lc=${language}&tags_lc=${language}`,
   );
 
@@ -30,7 +61,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.OpenFo
 
   const category = categories ? categories[categories.length - 1] : "";
 
-  const brands = data?.product?.brands.split(",");
+  const brands = data?.product?.brands?.split(",");
   const brand = brands ? brands[0] : "";
 
   const markdown = `# ${data?.product?.product_name} - ${brand}
@@ -67,14 +98,14 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.OpenFo
   `;
 
   function getKcal() {
-    if (data?.product?.nutriments["energy-kcal"]) {
-      return `${data?.product?.nutriments["energy-kcal"]} kcal`;
+    if (data?.product?.nutriments?.["energy-kcal"]) {
+      return `${data?.product?.nutriments?.["energy-kcal"]} kcal`;
     }
   }
 
   function getSaturatedFat() {
-    if (data?.product?.nutriments["saturated-fat"]) {
-      return `${data?.product?.nutriments["saturated-fat"]} g`;
+    if (data?.product?.nutriments?.["saturated-fat"]) {
+      return `${data?.product?.nutriments?.["saturated-fat"]} g`;
     }
   }
 
@@ -87,10 +118,10 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.OpenFo
         <Detail.Metadata>
           <Detail.Metadata.Label title="Brand" text={data?.product?.brands} />
           {/* <Detail.Metadata.Label title="Quantity" text={data?.product?.quantity} /> */}
-          <Detail.Metadata.Label title="Nutri-Score" text={data?.product?.nutriscore_grade.toUpperCase()} />
-          <Detail.Metadata.Label title="NOVA Group" text={data?.product?.nova_group.toString()} />
-          <Detail.Metadata.Label title="Ecoscore" text={data?.product?.ecoscore_grade.toUpperCase()} />
-          <Detail.Metadata.Label title="Number of Additives" text={data?.product?.additives_n.toString()} />
+          <Detail.Metadata.Label title="Nutri-Score" text={data?.product?.nutriscore_grade?.toUpperCase()} />
+          <Detail.Metadata.Label title="NOVA Group" text={data?.product?.nova_group?.toString()} />
+          <Detail.Metadata.Label title="Ecoscore" text={data?.product?.ecoscore_grade?.toUpperCase()} />
+          <Detail.Metadata.Label title="Number of Additives" text={data?.product?.additives_n?.toString()} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Category" text={category} />
         </Detail.Metadata>
