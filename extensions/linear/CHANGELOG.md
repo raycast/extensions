@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2024-07-08
 
 - [#10856](https://github.com/raycast/extensions/issues/10856): Typeahead search for teams while creating/editing issues and in active cycles command. Typeahead is only triggered if no. of teams is > 50.
 - [#8704](https://github.com/raycast/extensions/issues/8704): Typeahead search for users/assignees/leads in various actions and commands, getting rid of missing assignees issue. Typeahead is only triggered if no. of users is > 50.
