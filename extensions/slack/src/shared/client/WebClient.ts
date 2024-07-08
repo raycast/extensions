@@ -2,11 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 import { WebClient } from "@slack/web-api";
 
-export type Preferences = {
-  timeFormat: "hour12" | "hour24";
-  displayExtraMetadata: boolean;
-};
-
 export interface SlackConversation {
   id?: string;
   name?: string;
