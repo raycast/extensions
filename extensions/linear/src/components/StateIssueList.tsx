@@ -13,11 +13,10 @@ type StateIssueListProps = {
   mutateList?: MutatePromise<IssueResult[] | undefined>;
   issues: IssueResult[] | undefined;
   priorities: IssuePriorityValue[] | undefined;
-  users: User[] | undefined;
   me: User | undefined;
 };
 
-export default function StateIssueList({ mutateList, issues, priorities, me, users }: StateIssueListProps) {
+export default function StateIssueList({ mutateList, issues, priorities, me }: StateIssueListProps) {
   if (!issues || (issues && issues.length === 0)) {
     return null;
   }
@@ -46,14 +45,7 @@ export default function StateIssueList({ mutateList, issues, priorities, me, use
         return (
           <List.Section title={state.name} key={state.id} subtitle={numberOfIssues}>
             {groupedIssues[state.id]?.map((issue) => (
-              <IssueListItem
-                issue={issue}
-                key={issue.id}
-                mutateList={mutateList}
-                priorities={priorities}
-                users={users}
-                me={me}
-              />
+              <IssueListItem issue={issue} key={issue.id} mutateList={mutateList} priorities={priorities} me={me} />
             ))}
           </List.Section>
         );

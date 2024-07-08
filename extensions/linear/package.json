@@ -243,7 +243,7 @@
     }
   ],
   "dependencies": {
-    "@linear/sdk": "^22.0.0",
+    "@linear/sdk": "^24.0.0",
     "@raycast/api": "^1.72.1",
     "@raycast/utils": "^1.16.0",
     "date-fns": "^3.6.0",

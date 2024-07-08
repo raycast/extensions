@@ -6,6 +6,7 @@ import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 import { getGitHubUser } from "../helpers/users";
 
 import RepositoryActions from "./RepositoryActions";
+import { SortActionProps } from "./SortAction";
 
 type RepositoryListItemProps = {
   repository: ExtendedRepositoryFieldsFragment;
@@ -13,7 +14,13 @@ type RepositoryListItemProps = {
   mutateList: MutatePromise<ExtendedRepositoryFieldsFragment[] | undefined>;
 };
 
-export default function RepositoryListItem({ repository, mutateList, onVisit }: RepositoryListItemProps) {
+export default function RepositoryListItem({
+  repository,
+  mutateList,
+  onVisit,
+  sortQuery,
+  setSortQuery,
+}: RepositoryListItemProps & SortActionProps) {
   const preferences = getPreferenceValues<Preferences.SearchRepositories>();
 
   const owner = getGitHubUser(repository.owner);
@@ -68,7 +75,7 @@ export default function RepositoryListItem({ repository, mutateList, onVisit }: 
           }
         : {})}
       accessories={accessories}
-      actions={<RepositoryActions repository={repository} mutateList={mutateList} onVisit={onVisit} />}
+      actions={<RepositoryActions {...{ repository, onVisit, mutateList, sortQuery, setSortQuery }} />}
     />
   );
 }
