@@ -49,8 +49,8 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Produc
   useEffect(() => {
     const { barcode } = props.arguments;
     setBarcode(barcode);
-  }, [props.arguments]); 
-  
+  }, [props.arguments]);
+
   const { isLoading, data, revalidate } = useFetch<ProductData>(
     `https://${country}.openfoodfacts.org/api/v3/product/${barcode}?cc=${language}&lc=${language}&tags_lc=${language}`,
   );
