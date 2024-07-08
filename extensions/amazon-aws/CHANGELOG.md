@@ -1,5 +1,10 @@
 # Amazon AWS Changelog
 
+## [S3 Command] - {PR_MERGE_DATE}
+
+- added reverse order option
+- added bucket policy view
+
 ## [Improvements] - 2024-07-05
 
 - Adds copy option to s3 command
