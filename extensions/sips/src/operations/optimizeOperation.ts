@@ -62,7 +62,9 @@ const optimizeWEBP = async (webpPath: string, amount: number) => {
   const newPath = (await getDestinationPaths([optimizedPath]))[0];
 
   const [cwebpPath] = await getWebPBinaryPath();
-  execSync(`${cwebpPath} ${preferences.useLosslessConversion ? '-lossless' : ''} -q ${amount} "${webpPath}" -o "${newPath}"`);
+  execSync(
+    `${cwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} -q ${amount} "${webpPath}" -o "${newPath}"`,
+  );
   return newPath;
 };
 
@@ -133,7 +135,9 @@ export default async function optimize(sourcePaths: string[], amount: number) {
       let newPath = newPaths[sourcePaths.indexOf(imgPath)];
       newPath = path.join(path.dirname(newPath), path.basename(newPath, path.extname(newPath)) + " (Optimized).avif");
       resultPaths.push(newPath);
-      execSync(`${encoderPath} ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100" : ""} "${jpegFile.path}" "${newPath}"`);
+      execSync(
+        `${encoderPath} ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100" : ""} "${jpegFile.path}" "${newPath}"`,
+      );
     } else if (imgPath.toLowerCase().endsWith("pdf")) {
       // PDF -> JPEG -> PDF
       throw new Error(
