@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Search Messages command] - 2024-06-21
+## [Search Messages command] - 2024-07-08
 
 - Add a new command to search through your Slack's workspace messages.
 - ⚠️ The previous `Search` command is renamed as `Open Channel` to differentiate from `Search Messages`
