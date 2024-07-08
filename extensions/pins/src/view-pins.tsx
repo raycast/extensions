@@ -21,10 +21,13 @@ import {
   Pin,
   checkExpirations,
   deletePin,
+  disablePin,
   getLastOpenedPin,
   getPinKeywords,
+  hidePin,
   openPin,
   sortPins,
+  unhidePin,
   usePins,
 } from "./lib/Pins";
 import { useGroups } from "./lib/Groups";
@@ -145,13 +148,15 @@ export default function ViewPinsCommand(args: { launchContext?: { pinID?: number
   const allPins = pins;
   const maxTimesOpened = Math.max(...pins.map((pin) => pin.timesOpened || 0));
 
+  const visibleGroups = showingHidden ? groups : groups.filter((group) => group.visibility === Visibility.VISIBLE || group.visibility === Visibility.VIEW_PINS_ONLY || group.visibility === undefined);
+
   /**
    * Gets the list of pins as a list of ListItems.
    * @param pins The list of pins.
    * @returns A list of ListItems.
    */
   const getPinListItems = (pins: Pin[]) => {
-    return sortPins(pins, groups)
+    return sortPins(pins, visibleGroups)
       .filter((pin) => {
         if (showingHidden) return true;
         return (
@@ -174,7 +179,9 @@ export default function ViewPinsCommand(args: { launchContext?: { pinID?: number
         if (preferences.showFrequency) addFrequencyAccessory(pin, accessories, maxTimesOpened);
         if (preferences.showTags) addTagAccessories(pin, accessories);
 
-        const group = groups.find((group) => group.name == pin.group) || { name: "None", icon: "Minus", id: -1 };
+        const visiblePins = pins.filter((pin) => showingHidden ? true : pin.visibility === Visibility.VISIBLE || pin.visibility === Visibility.VIEW_PINS_ONLY || pin.visibility === undefined);
+
+        const group = visibleGroups.find((group) => group.name == pin.group) || { name: "None", icon: "Minus", id: -1 };
         return (
           <List.Item
             title={pin.name || cutoff(pin.url, 20)}
@@ -229,7 +236,7 @@ export default function ViewPinsCommand(args: { launchContext?: { pinID?: number
                     }}
                   />
 
-                  <ActionPanel.Submenu title="Move Pin..." icon={Icon.ChevronUpDown}>
+                  <ActionPanel.Submenu title="Move Pin..." icon={Icon.ChevronUpDown} shortcut={{ modifiers: ["cmd"], key: "m" }}>
                     {index > 0 &&
                     (group?.sortStrategy == "manual" ||
                       (!group?.sortStrategy && preferences.defaultSortStrategy == "manual") ||
@@ -243,7 +250,7 @@ export default function ViewPinsCommand(args: { launchContext?: { pinID?: number
                         }}
                       />
                     ) : null}
-                    {index < pins.length - 1 &&
+                    {index < pins.length - 1 && visiblePins.length > 1 &&
                     (group?.sortStrategy == "manual" ||
                       (!group?.sortStrategy && preferences.defaultSortStrategy == "manual") ||
                       (group?.name == undefined && preferences.defaultSortStrategy == "manual")) ? (
@@ -257,7 +264,7 @@ export default function ViewPinsCommand(args: { launchContext?: { pinID?: number
                       />
                     ) : null}
                     <ActionPanel.Section title="Between Groups">
-                      {groups
+                      {visibleGroups
                         .filter((g) => g.name !== pin.group)
                         .map((group) => (
                           <Action
@@ -328,6 +335,31 @@ export default function ViewPinsCommand(args: { launchContext?: { pinID?: number
                     kind="pins"
                   />
                 ) : null}
+
+                <Action
+                  title={pin.visibility === Visibility.HIDDEN ? "Unhide Pin" : "Hide Pin"}
+                  icon={pin.visibility === Visibility.HIDDEN ? Icon.Eye : Icon.EyeDisabled}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+                  onAction={async () => {
+                    if (pin.visibility === Visibility.HIDDEN) {
+                      await unhidePin(pin, setPins);
+                    } else {
+                      await hidePin(pin, setPins);
+                    }
+                  }}
+                />
+                <Action
+                  title={pin.visibility === Visibility.DISABLED ? "Enable Pin" : "Disable Pin"}
+                  icon={pin.visibility === Visibility.DISABLED ? Icon.Checkmark : Icon.XMarkCircle}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                  onAction={async () => {
+                    if (pin.visibility === Visibility.DISABLED) {
+                      await unhidePin(pin, setPins);
+                    } else {
+                      await disablePin(pin, setPins);
+                    }
+                  }}
+                />
                 <Action
                   title={showingHidden ? "Hide Hidden Pins" : "Show Hidden Pins"}
                   icon={showingHidden ? Icon.EyeDisabled : Icon.Eye}
@@ -336,6 +368,7 @@ export default function ViewPinsCommand(args: { launchContext?: { pinID?: number
                     setShowingHidden(!showingHidden);
                   }}
                 />
+
                 <PlaceholdersGuideAction />
                 <CopyPinActionsSubmenu pin={pin} pins={pins} />
               </ActionPanel>
@@ -399,7 +432,7 @@ export default function ViewPinsCommand(args: { launchContext?: { pinID?: number
         description="Add a custom pin (⌘N)  or install some examples (⌘E)"
         icon="no-view.png"
       />
-      {[{ name: "None", icon: "Minus", id: -1 }].concat(groups).map((group) =>
+      {[{ name: "None", icon: "Minus", id: -1 }].concat(visibleGroups).map((group) =>
         preferences.showGroups ? (
           <List.Section title={group.name == "None" ? "Other" : group.name} key={group.id}>
             {getPinListItems(

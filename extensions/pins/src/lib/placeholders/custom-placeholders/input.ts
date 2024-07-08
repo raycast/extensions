@@ -14,14 +14,11 @@ const InputDirective: Placeholder = {
     const pinsIcon = path.join(environment.assetsPath, "pins.icns");
     const prompt = str.match(/(?<=prompt=("|')).*?(?=("|'))/)?.[0] || "Input:";
     const result = (
-      await runAppleScript(
-        `try
+      await runAppleScript(`try
         return text returned of (display dialog "${prompt}" default answer "" giving up after 60 with title "Input" with icon (POSIX file "${pinsIcon}"))
       on error
         return ""
-      end try`,
-        { timeout: 0 },
-      )
+      end try`)
     ).replaceAll(/({{|}})/g, "");
     return { result };
   },

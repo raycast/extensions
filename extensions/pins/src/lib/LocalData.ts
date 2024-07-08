@@ -231,7 +231,7 @@ export const requestLocalData = async (): Promise<{
     
     return data;
   }`,
-    { language: "JavaScript", humanReadableOutput: false, timeout: 0 },
+    { language: "JavaScript", humanReadableOutput: false },
   );
   return JSON.parse(data);
 };
@@ -252,7 +252,7 @@ export const getFinderSelection = async (): Promise<{ name: string; path: string
         return thePath
       end tell
     end try`,
-    { humanReadableOutput: true, timeout: 0 },
+    { humanReadableOutput: true },
   );
 
   const entries = data.split(", ");

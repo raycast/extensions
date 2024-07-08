@@ -97,6 +97,13 @@ export default function ShowPinsCommand() {
       file.path && ((fs.existsSync(file.path) && fs.statSync(file.path).isFile()) || file.path.endsWith(".app/")),
   );
 
+  const visibleGroups = groups.filter(
+    (g) =>
+      g.visibility === undefined ||
+      g.visibility === Visibility.VISIBLE ||
+      g.visibility === Visibility.MENUBAR_ONLY,
+  );
+
   const allPins = sortPins(
     pins
       .filter((p) => preferences.showInapplicablePins || !irrelevantPins.find((pin) => pin.id == p.id))
@@ -106,7 +113,7 @@ export default function ShowPinsCommand() {
           pin.visibility === Visibility.VISIBLE ||
           pin.visibility === Visibility.MENUBAR_ONLY,
       ),
-    groups,
+      visibleGroups,
   );
 
   /**
@@ -184,7 +191,7 @@ export default function ShowPinsCommand() {
   const groupSubmenus =
     preferences.groupDisplaySetting === GroupDisplaySetting.None
       ? []
-      : groups
+      : visibleGroups
           .filter((g) => g.parent == undefined)
           .map((group) => getSubsections(group, groups))
           .filter((g) => g != null);
@@ -226,13 +233,13 @@ export default function ShowPinsCommand() {
             <AppQuickPin app={localData.currentApplication} />
             <TextQuickPin />
             <TabQuickPin app={localData.currentApplication} tab={localData.currentTab} />
-            <TabsQuickPin app={localData.currentApplication} tabs={localData.tabs} groups={groups} />
-            <FilesQuickPin app={localData.currentApplication} selectedFiles={selectedFiles} groups={groups} />
+            <TabsQuickPin app={localData.currentApplication} tabs={localData.tabs} groups={visibleGroups} />
+            <FilesQuickPin app={localData.currentApplication} selectedFiles={selectedFiles} groups={visibleGroups} />
             <DirectoryQuickPin app={localData.currentApplication} directory={localData.currentDirectory} />
             <DocumentQuickPin app={localData.currentApplication} document={localData.currentDocument} />
             <TrackQuickPin app={localData.currentApplication} track={localData.currentTrack} />
-            <NotesQuickPin app={localData.currentApplication} notes={localData.selectedNotes} groups={groups} />
-            <TargetGroupMenu groups={groups} />
+            <NotesQuickPin app={localData.currentApplication} notes={localData.selectedNotes} groups={visibleGroups} />
+            <TargetGroupMenu groups={visibleGroups} />
           </MenuBarExtra.Section>
         ) : null,
       ].sort(() => (preferences.topSection == "quickPins" ? -1 : 1))}
