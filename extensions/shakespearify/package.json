@@ -65,7 +65,7 @@
     {
         "name": "history",
         "title": "Wise History",
-        "description": "Reflect on your past Shakespeared text",
+        "description": "Take a look at your history of previously Shakespearified texts",
         "mode": "view"
     }
   ],

@@ -1,6 +1,12 @@
-# Shakespearify
+<br>
 
-Convert plain boring English text to something like Shakespeare would write!
+<p align="center">
+    <img src="assets/icon.png" style="height: 128px; width: 128px;" align="center" />
+</p>
+
+<h1 align="center">Shakespearify</h1>
+
+<p align="center">Convert plain boring English text to something like Shakespeare would write!</p>
 
 ## Setting up Shakespearify
 
@@ -17,7 +23,7 @@ When you first run the extension, you will be asked a few configuration options.
     - **"Don't Paste"**, the converted text will be displayed in a dialog box.
 
 - ###### "Gemini API Key"
-    - Enter the API key generated from Google AI studio.
+    - Enter the API key generated from Google AI studio in the input box.
     - It will be used to translate text.
     - Gemini API offers a free tier as opposed to most other APIs.
     - To learn how to obtain a key, refer to the section below.
