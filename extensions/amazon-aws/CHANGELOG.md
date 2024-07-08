@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [SQS, Secrets, Pipelines and Logs Commands] - {PR_MERGE_DATE}
+## [SQS, Secrets, Pipelines and Logs Commands] - 2024-07-08
 
 - No unnecessary pagination with typeahead for SQS, Secrets and Logs commands. Pagination with typeahead is redundant.
 - Added frecency sorting for SQS, Secrets and Logs command results.
