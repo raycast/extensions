@@ -16,6 +16,14 @@
   ],
   "preferences": [
     {
+      "name": "PASSWORDS_PATH",
+      "title": "Password Store Location",
+      "description": "The full path to your password store",
+      "type": "directory",
+      "default": "~/.password-store/",
+      "required": true
+    },
+    {
       "name": "GPG_KEY",
       "title": "GPG decryption password",
       "description": "Your password for your GPG key",

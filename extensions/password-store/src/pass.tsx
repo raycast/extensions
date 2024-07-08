@@ -1,26 +1,12 @@
-import { List, Action, ActionPanel, Icon, closeMainWindow, Clipboard, getPreferenceValues } from "@raycast/api";
+import { List, Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { exec } from "child_process";
-import { promisify } from "node:util";
 import { glob } from "glob";
-import os from "os";
-import { getOptionIcon, getPasswordIcon } from "./utils/icons";
-import { getLastUsedPassword, updateLastUsedPassword } from "./utils/lastUsedPassword";
+import { getOptionIcon, getPasswordIcon } from "./utils/icons.util";
+import { getLastUsedPassword } from "./utils/password.util";
+import { runCmd } from "./utils/cmd.util";
+import { performAction } from "./utils/action.util";
+import { Option, Password, Preferences } from "./interfaces";
 import url from "url";
-
-const execPromise = promisify(exec);
-
-const SHELL_PREFIX = "export PATH=$PATH:/opt/homebrew/bin &&"; // Needed for the 'pass' command to work on M1 Mac
-const PASSWORDS_PATH = `${os.homedir()}/.password-store/`;
-
-interface Password {
-  value: string;
-  showOtpFirst?: boolean;
-}
-
-interface Preferences {
-  GPG_KEY?: string;
-}
 
 /**
  * Command component that displays a list of passwords, with the last used password at the top if available.
@@ -42,12 +28,15 @@ export default function Command(): JSX.Element {
         ]
       : [];
 
+    const preferences = getPreferenceValues<Preferences>();
+    const passPath = preferences.PASSWORDS_PATH;
+
     // Get all password files
-    const files = await glob(`${PASSWORDS_PATH}**/*.gpg`);
+    const files = await glob(`${passPath}/**/*.gpg`);
 
     // Add each password to the list, excluding the last used password
     files.sort().forEach((file) => {
-      const password = file.replace(PASSWORDS_PATH, "").replace(".gpg", "");
+      const password = file.replace(`${passPath}/`, "").replace(".gpg", "");
       if (password !== lastUsedPassword.password) passwords.push({ value: password });
     });
 
@@ -89,9 +78,10 @@ function PasswordOptions(props: { selectedPassword: string; showOtpFirst: boolea
     // Run command to get decrypted contents of the file
     const preferences = getPreferenceValues<Preferences>();
     const gpgKey = preferences.GPG_KEY;
+    const passPath = preferences.PASSWORDS_PATH;
 
     const cmdOptions = gpgKey ? `--pinentry-mode=loopback --passphrase "${gpgKey}"` : "";
-    const stdout = await runCmd(`gpg ${cmdOptions} -d ${PASSWORDS_PATH}${selectedPassword}.gpg`);
+    const stdout = await runCmd(`gpg ${cmdOptions} -d ${passPath}/${selectedPassword}.gpg`);
 
     // Split the output into lines
     const passwordOptions = stdout.split("\n");
@@ -128,7 +118,7 @@ function PasswordOptions(props: { selectedPassword: string; showOtpFirst: boolea
 
   return (
     <List isLoading={isLoading}>
-      {data?.map((option: { title: string; value: string }) => (
+      {data?.map((option: Option) => (
         <List.Item
           icon={getOptionIcon(option.title)}
           title={option.title}
@@ -151,52 +141,4 @@ function PasswordOptions(props: { selectedPassword: string; showOtpFirst: boolea
       ))}
     </List>
   );
-}
-
-/**
- * Performs an action (copy or paste) with the specified password option and updates the last used password.
- *
- * @param {string} selectedPassword - The selected password entry.
- * @param {{ title: string, value: string }} option - The option object containing the title and value.
- * @param {'copy' | 'paste'} action - The action to perform, either 'copy' or 'paste'.
- * @returns {Promise<void>} A promise that resolves when the action is complete.
- */
-async function performAction(
-  selectedPassword: string,
-  option: { title: string; value: string },
-  action: "copy" | "paste",
-): Promise<void> {
-  try {
-    // Update the last used password file
-    await updateLastUsedPassword(selectedPassword, option.title);
-
-    // Perform the specified action (copy or paste) with the option value
-    await Clipboard[action](option.value);
-
-    // Close the main window and clear the root search
-    await closeMainWindow({ clearRootSearch: true });
-  } catch (error) {
-    // Log any errors that occur during the action
-    console.error("Error performing action:", error);
-  }
-}
-
-/**
- * Executes a shell command and returns the standard output.
- *
- * @param {string} cmd - The command to execute.
- * @returns {Promise<string>} A promise that resolves to the standard output of the executed command.
- */
-async function runCmd(cmd: string): Promise<string> {
-  try {
-    // Execute the command and wait for the result
-    const { stdout } = await execPromise(`${SHELL_PREFIX} ${cmd}`, { shell: "/bin/zsh" });
-
-    // Return the standard output
-    return stdout;
-  } catch (error) {
-    // Log the error and rethrow it
-    console.error("Error executing command:", error);
-    throw error;
-  }
 }
