@@ -8,8 +8,8 @@ interface Preferences {
 }
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.OpenFoodFacts }>) {
-  const [barcode, setBarcode] = useState('');
-  
+  const [barcode, setBarcode] = useState("");
+
   const preferences = getPreferenceValues<Preferences>();
   const language = preferences.language;
   const country = preferences.country;
@@ -26,7 +26,8 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.OpenFo
 
   // console.log(data);
 
-  const categories = data?.product?.categories.split(",");
+  const categories = data?.product?.categories?.split(",") ?? [];
+
   const category = categories ? categories[categories.length - 1] : "";
 
   const brands = data?.product?.brands.split(",");
@@ -65,19 +66,17 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.OpenFo
   ${data?.product?.ingredients_text}
   `;
 
-  function getKcal() {  
-    if (data?.product?.nutriments['energy-kcal']) {
-      return `${data?.product?.nutriments['energy-kcal']} kcal`;
+  function getKcal() {
+    if (data?.product?.nutriments["energy-kcal"]) {
+      return `${data?.product?.nutriments["energy-kcal"]} kcal`;
     }
   }
 
   function getSaturatedFat() {
-    if (data?.product?.nutriments['saturated-fat']) {
-      return `${data?.product?.nutriments['saturated-fat']} g`;
+    if (data?.product?.nutriments["saturated-fat"]) {
+      return `${data?.product?.nutriments["saturated-fat"]} g`;
     }
   }
-
-  
 
   return (
     <Detail
