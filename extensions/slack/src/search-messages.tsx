@@ -110,7 +110,6 @@ function Search() {
       ) : null}
       {data?.map((m) => {
         if (!m.text || !m.ts) return null;
-        console.log(m);
         const user = users?.find((u) => u.id === m.user);
         const date = convertTimestampToDate(m.ts);
         const text = emoji.emojify(m.text);
