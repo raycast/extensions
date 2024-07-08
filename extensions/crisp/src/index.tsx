@@ -124,9 +124,10 @@ export function Command() {
                 text: timeAgo,
                 tooltip: new Date(conversation.updated_at).toLocaleString(),
               },
-              allDomains.size > 1 && {
-                tag: { value: site?.domain, color: domainColor },
-              },
+              allDomains.size > 1 &&
+                Boolean(site?.domain) && {
+                  tag: { value: site?.domain, color: domainColor },
+                },
               // {
               //   icon: { source: getFlagEmoji(country) },
               // },
