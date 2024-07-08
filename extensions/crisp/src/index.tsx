@@ -63,7 +63,7 @@ export function Command() {
       };
     }
     const client = createClient({ supabaseRef, session, url: backendUrl, fetch });
-    console.time("get conversations");
+
     const res = await client.api.v1.conversations.$get({});
 
     if (res.status === 401) {
@@ -74,7 +74,7 @@ export function Command() {
     }
 
     const json = res.json();
-    console.timeEnd("get conversations");
+
     return json;
   });
 

@@ -22,26 +22,21 @@ function getContextSession() {
 }
 
 export async function getSupabaseWithSession() {
-  try {
-    console.time("getSupabaseWithSession");
-    const contextSession = getContextSession();
-    if (contextSession) {
-      const { error } = await supabase.auth.setSession(contextSession);
-      if (error) {
-        throw error;
-      }
-    }
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.getSession();
+  const contextSession = getContextSession();
+  if (contextSession) {
+    const { error } = await supabase.auth.setSession(contextSession);
     if (error) {
       throw error;
     }
-    return { session, error };
-  } finally {
-    console.timeEnd("getSupabaseWithSession");
   }
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.getSession();
+  if (error) {
+    throw error;
+  }
+  return { session, error };
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
