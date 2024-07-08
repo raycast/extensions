@@ -3,10 +3,9 @@ import { showFailureToast } from "@raycast/utils";
 import { CodedError, ErrorCode } from "@slack/web-api";
 import { formatDistance } from "date-fns";
 import * as emoji from "node-emoji";
-import { Preferences } from "./client/WebClient";
 
 function getTimeLocale(): string {
-  const timeFormat = getPreferenceValues<Preferences>().timeFormat;
+  const timeFormat = getPreferenceValues().timeFormat;
   return timeFormat === "hour24" ? "en-GB" : "en-US";
 }
 

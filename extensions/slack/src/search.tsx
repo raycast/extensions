@@ -4,9 +4,8 @@ import { withSlackClient } from "./shared/withSlackClient";
 import { useFrecencySorting } from "@raycast/utils";
 import { OpenChannelInSlack, OpenChatInSlack, useSlackApp } from "./shared/OpenInSlack";
 import { convertSlackEmojiToUnicode, getTimeLocale } from "./shared/utils";
-import { Preferences } from "./shared/client/WebClient";
 
-const { displayExtraMetadata } = getPreferenceValues<Preferences>();
+const { displayExtraMetadata } = getPreferenceValues();
 
 function getCoworkerTime(coworkerTimeZone: string): string {
   const time = new Date();

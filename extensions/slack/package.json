@@ -22,7 +22,18 @@
       "title": "Search",
       "subtitle": "Slack",
       "description": "Search for all workspace members, group chats, and channels and open them directly in your Slack app.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Search Command",
+          "label": "Display extra metadata in search results",
+          "description": "Show team member's titles, time zone, and current time in search results",
+          "name": "displayExtraMetadata",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
     },
     {
       "name": "open-unread-messages",
@@ -89,15 +100,6 @@
         }
       ],
       "default": "hour12"
-    },
-    {
-      "title": "Search Command",
-      "label": "Display extra metadata in search results",
-      "description": "Show team member's titles, time zone, and current time in search results",
-      "name": "displayExtraMetadata",
-      "type": "checkbox",
-      "required": false,
-      "default": false
     }
   ],
   "dependencies": {

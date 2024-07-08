@@ -1,8 +1,9 @@
 # Slack Changelog
 
-## [Update to Search command] - 2024-07-05 
-- Added job title, timezone, current time, and slack status to the List that gets returned as part of the Search command
-- Adds Emojify to unread messages command to convert :fireworks: to 🎆, as an example
+## [Update to Search command] - {PR_MERGE_DATE}  
+- Adds job title, timezone, current time, and slack status to the List that gets returned as part of the Search command.
+- Adds preferences to show this metadata, as well as time format preferences throughout the extension. 
+- Adds Emojify to unread messages command to convert :fireworks: to 🎆, for example.
 
 ### [OAuth + Many Improvements] - 2024-06-18
 
