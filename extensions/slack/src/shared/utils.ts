@@ -5,7 +5,7 @@ import { formatDistance } from "date-fns";
 import * as emoji from "node-emoji";
 
 function getTimeLocale(): string {
-  const timeFormat = getPreferenceValues().timeFormat;
+  const timeFormat = getPreferenceValues<Preferences>().timeFormat;
   return timeFormat === "hour24" ? "en-GB" : "en-US";
 }
 
