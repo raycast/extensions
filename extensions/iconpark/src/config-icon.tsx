@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, Icon, LocalStorage, useNavigation } from "@raycast/api";
 import React, { useState } from "react";
-import { ActionOpenPreferences } from "./components/action-open-preferences";
+import { ActionSettings } from "./components/action-settings";
 import {
   configSize,
   configTheme,
@@ -15,12 +15,10 @@ import { FormOutline } from "./components/form-outline";
 import { FormTwoTone } from "./components/form-two-tone";
 import { FormFilled } from "./components/form-filled";
 import { FormMultiColor } from "./components/form-multi-color";
+import { MutatePromise } from "@raycast/utils";
 
-export function ConfigIcon(props: {
-  iconConfig: IIconConfig;
-  setRefresh: React.Dispatch<React.SetStateAction<number>>;
-}) {
-  const { iconConfig, setRefresh } = props;
+export function ConfigIcon(props: { iconConfig: IIconConfig; mutate: MutatePromise<string | undefined> }) {
+  const { iconConfig, mutate } = props;
   const { pop } = useNavigation();
   const [theme, setTheme] = useState<string>(iconConfig.theme);
 
@@ -30,13 +28,13 @@ export function ConfigIcon(props: {
       actions={
         <ActionPanel>
           <Action
-            icon={Icon.List}
+            icon={Icon.ArrowLeftCircle}
             title={"Back to Search Icons"}
-            shortcut={{ modifiers: ["ctrl"], key: "a" }}
+            shortcut={{ modifiers: ["cmd"], key: "e" }}
             onAction={pop}
           />
           <ActionToIconPark />
-          <ActionOpenPreferences />
+          <ActionSettings />
         </ActionPanel>
       }
     >
@@ -48,7 +46,7 @@ export function ConfigIcon(props: {
           const config = { ...iconConfig };
           config.size = newValue;
           await LocalStorage.setItem(LocalStorageKey.ICON_CONFIG, JSON.stringify(config));
-          setRefresh(Date.now());
+          await mutate();
         }}
       >
         {configSize().map((value) => {
@@ -64,7 +62,7 @@ export function ConfigIcon(props: {
           const config = { ...iconConfig };
           config.strokeWidth = parseInt(newValue);
           await LocalStorage.setItem(LocalStorageKey.ICON_CONFIG, JSON.stringify(config));
-          setRefresh(Date.now());
+          await mutate();
         }}
       >
         {strokeWidth.map((value) => {
@@ -81,7 +79,7 @@ export function ConfigIcon(props: {
           config.theme = newValue as Theme;
           setTheme(config.theme);
           await LocalStorage.setItem(LocalStorageKey.ICON_CONFIG, JSON.stringify(config));
-          setRefresh(Date.now());
+          await mutate();
         }}
       >
         {configTheme.map((value) => {
@@ -89,10 +87,10 @@ export function ConfigIcon(props: {
         })}
       </Form.Dropdown>
 
-      {theme === "outline" && <FormOutline iconConfig={iconConfig} setRefresh={setRefresh} />}
-      {theme === "filled" && <FormFilled iconConfig={iconConfig} setRefresh={setRefresh} />}
-      {theme === "two-tone" && <FormTwoTone iconConfig={iconConfig} setRefresh={setRefresh} />}
-      {theme === "multi-color" && <FormMultiColor iconConfig={iconConfig} setRefresh={setRefresh} />}
+      {theme === "outline" && <FormOutline iconConfig={iconConfig} mutate={mutate} />}
+      {theme === "filled" && <FormFilled iconConfig={iconConfig} mutate={mutate} />}
+      {theme === "two-tone" && <FormTwoTone iconConfig={iconConfig} mutate={mutate} />}
+      {theme === "multi-color" && <FormMultiColor iconConfig={iconConfig} mutate={mutate} />}
       <Form.Dropdown
         id={"Stroke Line Cap"}
         title={"Stroke Line Cap"}
@@ -101,7 +99,7 @@ export function ConfigIcon(props: {
           const config = { ...iconConfig };
           config.strokeLinecap = newValue as StrokeLinecap;
           await LocalStorage.setItem(LocalStorageKey.ICON_CONFIG, JSON.stringify(config));
-          setRefresh(Date.now());
+          await mutate();
         }}
       >
         {strokeLineCap.map((value) => {
@@ -117,7 +115,7 @@ export function ConfigIcon(props: {
           const config = { ...iconConfig };
           config.strokeLinejoin = newValue as StrokeLinejoin;
           await LocalStorage.setItem(LocalStorageKey.ICON_CONFIG, JSON.stringify(config));
-          setRefresh(Date.now());
+          await mutate();
         }}
       >
         {strokeLineJoin.map((value) => {

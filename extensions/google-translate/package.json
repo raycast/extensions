@@ -17,7 +17,8 @@
     "nirtamir2",
     "pernielsentikaer",
     "rasitayaz",
-    "popalay"
+    "popalay",
+    "litomore"
   ],
   "license": "MIT",
   "commands": [
@@ -109,11 +110,11 @@
           "value": "ceb"
         },
         {
-          "title": "🇨🇳 Chinese Simplified",
+          "title": "Chinese (Simplified)",
           "value": "zh-CN"
         },
         {
-          "title": "Chinese Traditional",
+          "title": "Chinese (Traditional)",
           "value": "zh-TW"
         },
         {
@@ -551,11 +552,11 @@
           "value": "ceb"
         },
         {
-          "title": "🇨🇳 Chinese Simplified",
+          "title": "Chinese (Simplified)",
           "value": "zh-CN"
         },
         {
-          "title": "🇹🇼 Taiwanese Mandarin",
+          "title": "Chinese (Tranditional)",
           "value": "zh-TW"
         },
         {

@@ -1,5 +1,9 @@
 # Color Picker Changelog
 
+## [Enhancement] - 2024-06-30
+
+- Add "Color Wheel" command
+
 ## [Enhancement] - 2024-06-07
 
 - Fix bug with OKLCH/LCH conversion
