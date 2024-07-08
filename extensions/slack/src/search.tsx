@@ -71,7 +71,7 @@ function Search() {
             <List.Item
               key={userId}
               title={name}
-              subtitle={displayExtraMetadata === true ? title : ""}
+              subtitle={displayExtraMetadata ? title : undefined}
               icon={icon ? { source: icon, mask: Image.Mask.Circle } : Icon.Person}
               accessories={searchItemAccessories(statusEmoji, statusText, statusExpiration, timezone)}
               actions={
