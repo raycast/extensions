@@ -13,14 +13,14 @@ export const SortAction = ({ sortQuery, setSortQuery, data }: SortActionDataProp
       {data
         .filter(({ value }) => !value.startsWith("sort:reaction"))
         .map(({ title, value }) => (
-          <SortActionItem {...{ title, value, sortQuery, setSortQuery }} />
+          <SortActionItem key={value} {...{ title, value, sortQuery, setSortQuery }} />
         ))}
       {data.some(({ value }) => value.startsWith("sort:reaction")) && (
         <ActionPanel.Section title={"Most Reactions"}>
           {data
             .filter(({ value }) => value.startsWith("sort:reaction"))
             .map(({ title, value }) => (
-              <SortActionItem {...{ title, value, sortQuery, setSortQuery }} />
+              <SortActionItem key={value} {...{ title, value, sortQuery, setSortQuery }} />
             ))}
         </ActionPanel.Section>
       )}
@@ -36,7 +36,6 @@ const SortActionItem = ({
   setSortQuery,
 }: { title: string; value: string } & Required<SortActionProps>) => (
   <Action
-    key={value}
     title={title}
     icon={sortQuery === value ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
     onAction={() => setSortQuery(value)}
@@ -49,14 +48,14 @@ export const SortMenuBarAction = ({ sortQuery, setSortQuery, data }: SortActionD
       {data
         .filter(({ value }) => !value.startsWith("sort:reaction"))
         .map(({ title, value }) => (
-          <SortMenuBarItem {...{ title, value, sortQuery, setSortQuery }} />
+          <SortMenuBarItem key={value} {...{ title, value, sortQuery, setSortQuery }} />
         ))}
       {data.some(({ value }) => value.startsWith("sort:reaction")) && (
         <MenuBarExtra.Section title="Most Reactions">
           {data
             .filter(({ value }) => value.startsWith("sort:reaction"))
             .map(({ title, value }) => (
-              <SortMenuBarItem {...{ title, value, sortQuery, setSortQuery }} />
+              <SortMenuBarItem key={value} {...{ title, value, sortQuery, setSortQuery }} />
             ))}
         </MenuBarExtra.Section>
       )}
@@ -72,7 +71,6 @@ const SortMenuBarItem = ({
   setSortQuery,
 }: { title: string; value: string } & Required<SortActionProps>) => (
   <MenuBarExtra.Item
-    key={value}
     title={title}
     icon={sortQuery === value ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
     onAction={() => setSortQuery(value)}
