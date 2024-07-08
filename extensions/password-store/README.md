@@ -4,6 +4,10 @@ Raycast Extension for copying/pasting credentials from your password store (aka 
 [pass](https://passwordstore.org) is a password manager inspired by the Unix philosophy. It has a command-line interface, and uses GnuPG for encryption and decryption of stored passwords.  
 This extension allows you to quickly copy/paste passwords using Raycast, without the need to spawn a new terminal.  
 
+## Configuration
+* Password Store Location. Defaults to `~/.password-store`
+* (optional) GPG decryption password. The extension needs to be able to decrypt your password store files. You can either save you password in your macOS Keychain or you can use this 'preference' to save the your passowrd in the Raycast Extension.
+
 ## Requirements
 * [pass](https://passwordstore.org) cli tool installed and configured
 * [pass-otp](https://github.com/tadfisher/pass-otp) extension installed (optional)
