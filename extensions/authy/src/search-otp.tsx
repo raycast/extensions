@@ -8,8 +8,8 @@ import {
   getFromCache,
   getFromCacheOrDefault,
   OPT_SERVICES_KEY,
-  READ_NOTIFICATION, removeFromCache,
-  SERVICES_KEY
+  READ_NOTIFICATION,
+  SERVICES_KEY,
 } from "./cache";
 import LoginForm from "./component/login/LoginForm";
 import { OtpList } from "./component/otp/OtpList";
