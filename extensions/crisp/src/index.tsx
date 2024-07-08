@@ -148,7 +148,11 @@ export function Command() {
 
 function getFlagEmoji(countryCode: string) {
   if (!countryCode) return "";
-  return countryCode.toUpperCase().replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
+  try {
+    return countryCode.toUpperCase().replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
+  } catch {
+    return "";
+  }
 }
 
 const colorHash = new ColorHash({ lightness: 0.6, saturation: 0.2 });
