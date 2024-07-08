@@ -95,15 +95,15 @@ export function Command() {
         const email = conversation?.meta.email || "visitor";
 
         const icon = (() => {
-          if (!conversation.unread.operator) {
+          if (!conversation.unread?.operator) {
             return { source: Icon.Dot, tintColor: Color.SecondaryText };
           }
-          if (conversation.unread.operator) {
+          if (conversation.unread?.operator) {
             return { source: Icon.Dot, tintColor: Color.Red };
           }
         })();
-        const country = conversation.meta.device.geolocation.country;
-        const segments = conversation.meta.segments.filter((x) => x !== "chat");
+        const country = conversation.meta?.device?.geolocation?.country;
+        const segments = conversation.meta?.segments?.filter((x) => x !== "chat") || [];
         const domainColor = getStringColor(site?.domain || "");
         const nickname = conversation.meta.nickname || "visitor";
         return (
@@ -147,12 +147,13 @@ export function Command() {
 }
 
 function getFlagEmoji(countryCode: string) {
+  if (!countryCode) return "";
   return countryCode.toUpperCase().replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
 }
 
 const colorHash = new ColorHash({ lightness: 0.6, saturation: 0.2 });
 function getStringColor(text: string) {
-  return colorHash.hex(text);
+  return colorHash.hex(text || "");
 }
 
 // like Boolean but with typescript guard
