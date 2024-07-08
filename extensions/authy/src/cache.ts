@@ -8,6 +8,7 @@ export const DEVICE_ID = "deviceId";
 export const SECRET_SEED = "secretSeed";
 export const AUTHY_ID = "authyId";
 export const RECENTLY_USED = "recentlyUsed";
+export const READ_NOTIFICATION = "readNotification";
 
 export async function checkIfCached(key: string): Promise<boolean> {
   return (await LocalStorage.getItem(key)) != undefined;

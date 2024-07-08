@@ -6,6 +6,9 @@ Warning: This extension is using Authy private api and may not compliant with th
 
 ---
 
+# Extension current state
+Due to changes in the Authy API, new installation onboarding is currently impossible. I recommend exporting your extension data to enable migration to other 2FA apps.
+
 ## Setup
 
 Pre-requirements:
