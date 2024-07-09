@@ -26,6 +26,7 @@ This is a Raycast extension for [NameSilo](https://www.namesilo.com/). With this
 
     c. `Enter this key` in Preferences OR at first prompt
 
-## 🗒️ NOTE
+## 🗒️ NOTES
 
-You can email the NameSilo team to get access to a Sandbox / OTE environment but the extension does not currently support OTE (this might change in the future).
+- Using `namesilo.com` as a query/parameter will almost always show an error e.g. running a `whois` for "namesilo.com" will error out. This is an issue with the API.
+- You can email the NameSilo team to get access to a Sandbox / OTE environment but the extension does not currently support OTE (this might change in the future).

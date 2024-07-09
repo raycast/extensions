@@ -13,15 +13,15 @@ export default function Whois(props: LaunchProps<{ arguments: Arguments.Whois }>
     : `
 Domain: ${data.domain}
 
-Registered: ${data.registered}
+Registered: ${data.registered || (!isLoading ? "N/A" : "...")}
 
-Changed: ${data.changed}
+Changed: ${data.changed || (!isLoading ? "N/A" : "...")}
 
-Created: ${data.created}
+Created: ${data.created || (!isLoading ? "N/A" : "...")}
 
-Expires: ${data.expires}
+Expires: ${data.expires || (!isLoading ? "N/A" : "...")}
 
-Registrar: ${data.registrar}`;
+Registrar: ${data.registrar || (!isLoading ? "N/A" : "...")}`;
 
-  return <Detail isLoading={isLoading} markdown={`Whois Info for ${domain} \n\n ----- ${dataMarkdown}`} />;
+  return <Detail isLoading={isLoading} markdown={`WHOIS Info for ${domain} \n\n ----- ${dataMarkdown}`} />;
 }
