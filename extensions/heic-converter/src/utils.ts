@@ -1,30 +1,27 @@
-import fs from 'fs';
-import convert from 'heic-convert';
-import { basename, dirname, extname, join } from 'path';
-import { getSelectedFinderItems, showHUD, showToast, Toast } from '@raycast/api';
+import fs from "fs";
+import convert from "heic-convert";
+import { basename, dirname, extname, join } from "path";
+import { getSelectedFinderItems, showHUD, showToast, Toast } from "@raycast/api";
 
 export enum ImageType {
-  PNG = 'PNG' ,
-  JPEG = 'JPEG'
+  PNG = "PNG",
+  JPEG = "JPEG",
 }
 
-const convertImage = async (
-  filePath: string,
-  type: ImageType
-) => {
+const convertImage = async (filePath: string, type: ImageType) => {
   const inputBuffer = fs.readFileSync(filePath);
   const outputBuffer = await convert({
     buffer: inputBuffer,
-    format: type
+    format: type,
   });
 
   const outputDir = dirname(filePath);
-  const fileName = basename(filePath)
-  const extName = extname(filePath)
-  const outputFileName = fileName.replace(extName, `.${type}`)
+  const fileName = basename(filePath);
+  const extName = extname(filePath);
+  const outputFileName = fileName.replace(extName, `.${type}`);
   const outputPath = join(outputDir, outputFileName);
-  fs.writeFileSync(outputPath, outputBuffer as never)
-}
+  fs.writeFileSync(outputPath, outputBuffer as never);
+};
 
 export const convertImages = async (type: ImageType) => {
   let filePaths: string[];
@@ -48,12 +45,10 @@ export const convertImages = async (type: ImageType) => {
   try {
     await Promise.all(filePaths.map((filePath) => convertImage(filePath, type)));
 
-    await showHUD(
-      `Successful conversion 🎉`
-    );
+    await showHUD(`Successful conversion 🎉`);
   } catch (e) {
     toast.style = Toast.Style.Failure;
     toast.title = "Error";
     toast.message = e instanceof Error ? e.message : "Conversion failed";
   }
-}
+};

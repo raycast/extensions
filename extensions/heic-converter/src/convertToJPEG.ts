@@ -1,5 +1,5 @@
-import { convertImages, ImageType } from './utils';
+import { convertImages, ImageType } from "./utils";
 
 export default async function main() {
-  await convertImages(ImageType.JPEG)
+  await convertImages(ImageType.JPEG);
 }
