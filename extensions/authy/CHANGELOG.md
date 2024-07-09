@@ -1,6 +1,6 @@
 # Authy Extension Changelog
 
-## [Refactoring] - {PR_MERGE_DATE}
+## [Refactoring] - 2024-07-09
 
 - Code refactoring
 - Assets cleanup 
