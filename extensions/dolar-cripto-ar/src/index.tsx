@@ -13,6 +13,24 @@ export default function Command() {
   const btcAbortControllerRef = useRef<AbortController | null>(null);
   const ethAbortControllerRef = useRef<AbortController | null>(null);
 
+  const handleError = async (error: unknown, message: string) => {
+    if (error instanceof Error) {
+      if (error.name !== "AbortError") {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: message,
+          message: error.message,
+        });
+      }
+    } else {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: message,
+        message: "An unknown error occurred.",
+      });
+    }
+  };
+
   const fetchDollarRatesWrapper = async () => {
     if (dollarAbortControllerRef.current) {
       dollarAbortControllerRef.current.abort();
@@ -22,21 +40,7 @@ export default function Command() {
     try {
       return await fetchDollarRates(dollarAbortControllerRef.current.signal);
     } catch (error) {
-      if (error instanceof Error) {
-        if (error.name !== "AbortError") {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to fetch dollar rates",
-            message: error.message,
-          });
-        }
-      } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to fetch dollar rates",
-          message: "An unknown error occurred.",
-        });
-      }
+      await handleError(error, "Failed to fetch dollar rates");
       throw error;
     }
   };
@@ -50,21 +54,7 @@ export default function Command() {
     try {
       return await fetchBtcPrice(btcAbortControllerRef.current.signal);
     } catch (error) {
-      if (error instanceof Error) {
-        if (error.name !== "AbortError") {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to fetch BTC price",
-            message: error.message,
-          });
-        }
-      } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to fetch BTC price",
-          message: "An unknown error occurred.",
-        });
-      }
+      await handleError(error, "Failed to fetch BTC price");
       throw error;
     }
   };
@@ -78,21 +68,7 @@ export default function Command() {
     try {
       return await fetchEthPrice(ethAbortControllerRef.current.signal);
     } catch (error) {
-      if (error instanceof Error) {
-        if (error.name !== "AbortError") {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to fetch ETH price",
-            message: error.message,
-          });
-        }
-      } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to fetch ETH price",
-          message: "An unknown error occurred.",
-        });
-      }
+      await handleError(error, "Failed to fetch ETH price");
       throw error;
     }
   };
