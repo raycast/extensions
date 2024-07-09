@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Todoist Quicklinks] - 2024-07-09
+
+- Added a new action to create quicklinks for various views in Todoist (e.g., Today, specific projects, etc.).
+
 ## [Fixes] - 2024-07-03
 
 Completing tasks or other action no longer throw errors if menu bar command is not activated.
