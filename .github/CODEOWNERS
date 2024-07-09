@@ -415,6 +415,7 @@
 /extensions/ethereum-gas-tracker                                    @vinch
 /extensions/ethereum-price                                          @peduarte
 /extensions/ethereum-utils                                          @Destiner
+/extensions/eudic                                                   @tears330
 /extensions/everhour                                                @farisaziz12 @ahoereth
 /extensions/evil-insult                                             @j3lte
 /extensions/evm-codes                                               @clabby
@@ -1006,6 +1007,7 @@
 /extensions/phind-search                                            @aiyogg @pernielsentikaer
 /extensions/phonenumber-in-im                                       @TimonPeng
 /extensions/phosphor-icons                                          @marinsokol
+/extensions/photoroom-image-editing                                 @ubuntudroid
 /extensions/php-docs                                                @comes @pernielsentikaer
 /extensions/php-toolbox                                             @inxilpro
 /extensions/phpmon                                                  @nicoverbruggen
