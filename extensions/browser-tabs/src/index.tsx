@@ -1,5 +1,5 @@
 import { List, Icon, ActionPanel, Image, Action, open } from "@raycast/api";
-import { useData } from "./hooks/useData";
+import { useBrowserTabs } from "./hooks/useBrowserTabs";
 import { getFavicon } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { useFrontmostApp } from "./hooks/useFrontmostApp";
@@ -10,6 +10,8 @@ import { ActionTab } from "./components/action-tab";
 import { useDefaultBrowser } from "./hooks/useDefaultBrowser";
 import { rememberFilterTag, showDomain } from "./types/preferences";
 import { searchUrlBuilder } from "./utils/common-utils";
+import { SetupBrowsers } from "./setup-browsers";
+import { useBrowserSetup } from "./hooks/useBrowserSetup";
 
 export default function Command() {
   const [query, setQuery] = useState("");
@@ -18,7 +20,14 @@ export default function Command() {
   const { data: defaultBrowser } = useDefaultBrowser();
 
   const [searchBrowser, setSearchBrowser] = useState(defaultBrowser);
-  const { data: browserTabs, isLoading, mutate } = useData();
+  const { data: browserTabs, isLoading, mutate } = useBrowserTabs();
+
+  const { data: browserSetupData } = useBrowserSetup();
+
+  const browserSetup = useMemo(() => {
+    if (!browserSetupData) return [];
+    return browserSetupData;
+  }, [browserSetupData]);
 
   const filterBrowserTabs = useMemo(() => {
     if (selectedBrowser === "") {
@@ -107,6 +116,23 @@ export default function Command() {
                 }}
               />
             )}
+            <Action
+              icon={Icon.Repeat}
+              title={`Fetch Tabs`}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              onAction={async () => {
+                await frontmostMutate();
+                await mutate();
+              }}
+            />
+            <ActionPanel.Section>
+              <Action.Push
+                title={"Setup Browser"}
+                icon={Icon.CheckCircle}
+                shortcut={{ modifiers: ["shift", "cmd"], key: "s" }}
+                target={<SetupBrowsers browserTabsMutate={mutate} />}
+              />
+            </ActionPanel.Section>
             <ActionSettings />
           </ActionPanel>
         }
@@ -127,6 +153,7 @@ export default function Command() {
                   tab={tabItem}
                   mutate={mutate}
                   frontmostMutate={frontmostMutate}
+                  browserSetup={browserSetup}
                 />
                 <ActionSettings />
               </ActionPanel>

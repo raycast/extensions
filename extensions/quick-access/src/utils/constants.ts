@@ -1,14 +1,15 @@
+import { Icon } from "@raycast/api";
+
 export enum LocalStorageKey {
   LOCAL_PIN_DIRECTORY = "Local Pin",
 }
 
-export const tagDirectoryTypes = ["Image", "Folder", "File"];
-
-export enum SortBy {
-  Rank = "Rank",
-  NameUp = "Name+",
-  NameDown = "Name-",
-}
+export const DirectoryTagTypes = ["Image", "Folder", "File"];
+export const DirectoryTags = [
+  { title: "Image", icon: Icon.Image },
+  { title: "Folder", icon: Icon.Folder },
+  { title: "File", icon: Icon.Document },
+];
 
 export const imgExt = [
   ".cr2",

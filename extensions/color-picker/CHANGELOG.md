@@ -1,5 +1,15 @@
 # Color Picker Changelog
 
+## [Cross-Extension] - 2024-07-09
+
+- Bump dependencies
+- Expose Color Wheel ability through [Raycast Cross-Extension Conventions](https://github.com/LitoMore/raycast-cross-extension-conventions)
+- Update API documentation
+
+## [Enhancement] - 2024-06-30
+
+- Add "Color Wheel" command
+
 ## [Enhancement] - 2024-06-07
 
 - Fix bug with OKLCH/LCH conversion

@@ -1,5 +1,11 @@
 # Image Modification Changelog
 
+## [Lossless Setting & Improved PNG Optimization] - 2024-07-08
+
+- Added a "Lossless Conversions" setting for WebP and AVIF image operations, disabled by default
+- Improved PNG optimization by using PNGOUT
+- Fixed a bug where intermediate files were not being deleted after various operations
+
 ## [AVIF, More File Managers, & Bug Fixes] - 2024-06-26
 
 - Added support for NeoFinder and HoudahSpot

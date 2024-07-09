@@ -1,4 +1,4 @@
-import { Action, Color, List, Icon } from "@raycast/api";
+import { Action, Color, Icon, List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 

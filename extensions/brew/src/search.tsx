@@ -33,7 +33,7 @@ export default function Main(): JSX.Element {
         return results;
       }),
     [searchText],
-    { abortable, keepPreviousData: true }
+    { abortable, keepPreviousData: true },
   );
 
   // when the installed casks and formulaes have been fetched, we update the results

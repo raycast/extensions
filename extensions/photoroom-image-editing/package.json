@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "photoroom-image-editing",
+  "title": "Photoroom Image Editing",
+  "description": "Official Photoroom Raycast extension. Resize images, remove and change the background, add shadows and much more!",
+  "icon": "photoroom_raycast.png",
+  "author": "ubuntudroid",
+  "categories": [
+    "Developer Tools",
+    "Design Tools",
+    "Fun",
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Edit Images",
+      "subtitle": "Photoroom Image Editing v2 API",
+      "description": "Resize images, remove and change the background, add shadows and much more! Uses the Photoroom Image Editing v2 API.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "photoroomApiKey",
+      "description": "The Photoroom API Key. Get it from https://app.photoroom.com/api-dashboard",
+      "type": "password",
+      "required": true,
+      "title": "Phtororoom API Key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.71.4",
+    "@raycast/utils": "^1.15.0",
+    "formdata-node": "^5",
+    "got": "^12",
+    "is-image": "^4.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "react-devtools": "^4.28.4",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

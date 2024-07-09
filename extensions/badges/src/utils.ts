@@ -19,7 +19,7 @@ export const pickColor = async ({ field }: { field: string }) => {
   try {
     await crossLaunchCommand(
       {
-        name: "pick-color",
+        name: "color-wheel",
         type: LaunchType.UserInitiated,
         extensionName: "color-picker",
         ownerOrAuthorName: "thomas",

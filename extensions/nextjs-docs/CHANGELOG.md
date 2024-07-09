@@ -1,5 +1,10 @@
 # nextjs Changelog
 
+## [Update Docs + Filter by Router] - 2024-07-24
+
+- Filter to show docs by App Router or Pages Router
+- Toasts to show what's happening
+
 ## [Enhancement] - 2022-10-31
 
 - Added Open in Browser action

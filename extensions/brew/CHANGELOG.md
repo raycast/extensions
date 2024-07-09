@@ -1,5 +1,9 @@
 # Brew Changelog
 
+## [Improvements] - 2024-06-14
+
+- Updated dependencies
+
 ## [Bug Fix] - 2024-07-03
 
 - Fix a crash that could occur when showing installed formula or cask
