@@ -117,7 +117,29 @@ export async function checkoutBranch(repoPath: string, branchName: string): Prom
   await runCommand(`cd ${repoPath} && git checkout ${branchName}`);
 }
 
-export async function pruneAndDeleteUntrackedBranches(repoPath: string): Promise<void> {
-  const command = `cd ${repoPath} && git fetch --prune && git pull && git branch -vv | awk '/: gone]/{print $1}' | xargs git branch -d`;
+export async function cleanupBranches(repoPath: string): Promise<void> {
+  const command = `
+    cd ${repoPath} &&
+    git checkout main &&
+    git fetch --prune &&
+    git pull &&
+    git branch -vv | awk '/: gone]/{print $1}' | xargs git branch -d
+  `;
   await runCommand(command);
+}
+
+export async function deleteBranch(repoPath: string, branchName: string): Promise<void> {
+  // Ensure we're not on the branch we're trying to delete
+  const currentBranch = await getCurrentBranchName(repoPath);
+  if (currentBranch === branchName) {
+    throw new Error("Cannot delete the currently active branch.");
+  }
+
+  // Attempt to delete the branch
+  const result = await runCommand(`cd ${repoPath} && git branch -d ${branchName}`);
+
+  // If the branch couldn't be deleted, it might not be fully merged
+  if (result.includes("error:")) {
+    throw new Error(`Failed to delete branch ${branchName}. It may not be fully merged.`);
+  }
 }

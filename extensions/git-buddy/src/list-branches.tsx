@@ -5,7 +5,8 @@ import {
   getBranches,
   checkoutBranch,
   getCurrentBranchName,
-  pruneAndDeleteUntrackedBranches,
+  deleteBranch,
+  cleanupBranches,
 } from "./_lib/git-utils";
 import { handleError } from "./_lib/error-utils";
 
@@ -57,14 +58,29 @@ export default function Command() {
     }
   }
 
-  async function handlePruneAndDelete() {
+  async function handleCleanupBranches() {
     try {
       const repoPath = await getRepoPath();
-      await pruneAndDeleteUntrackedBranches(repoPath);
-      await showToast({ title: "Success", message: "Pruned and deleted untracked branches." });
-      await popToRoot();
+      await cleanupBranches(repoPath);
+      await showToast({ title: "Success", message: "Cleaned up branches and switched to main." });
+      fetchBranches();
     } catch (error) {
-      setError("Failed to prune and delete untracked branches.");
+      setError("Failed to clean up branches.");
+    }
+  }
+
+  async function handleDeleteBranch(branchName: string) {
+    try {
+      const repoPath = await getRepoPath();
+      await deleteBranch(repoPath, branchName);
+      await showToast({ title: "Success", message: `Deleted branch ${branchName}.` });
+      fetchBranches();
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError(`Failed to delete branch ${branchName}.`);
+      }
     }
   }
 
@@ -107,7 +123,18 @@ export default function Command() {
                   shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   icon={Icon.CopyClipboard}
                 />
-                <Action title="Prune and Delete Untracked Branches" onAction={handlePruneAndDelete} icon={Icon.Trash} />
+                <Action
+                  title="Delete Branch"
+                  onAction={() => handleDeleteBranch(cleanedBranch)}
+                  icon={Icon.Trash}
+                  shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                />
+                <Action
+                  title="Clean Up Branches"
+                  onAction={handleCleanupBranches}
+                  icon={Icon.Eraser}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+                />
               </ActionPanel>
             }
           />

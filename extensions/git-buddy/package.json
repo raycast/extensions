@@ -22,23 +22,27 @@
           "description": "The AI model to use for generating commit messages.",
           "type": "dropdown",
           "required": false,
-          "default": "openai-gpt-4o",
+          "default": "Anthropic_Claude_Sonnet",
           "data": [
             {
               "title": "GPT-4o",
-              "value": "openai-gpt-4o"
+              "value": "OpenAI_GPT4o"
             },
             {
               "title": "GPT-4 Turbo",
-              "value": "openai-gpt-4-turbo"
+              "value": "OpenAI_GPT4-turbo"
             },
             {
               "title": "Claude 3 Haiku",
-              "value": "anthropic-claude-haiku"
+              "value": "Anthropic_Claude_Haiku"
             },
             {
               "title": "Mixtral 8×7B",
-              "value": "mixtral-8x7b"
+              "value": "MixtraL_8x7B"
+            },
+            {
+              "title": "Claude 3.5 Sonnet",
+              "value": "Anthropic_Claude_Sonnet"
             }
           ]
         }
@@ -53,26 +57,30 @@
         {
           "name": "pr-description-ai-model",
           "title": "AI Model",
-          "description": "The AI model to use for generating commit messages.",
+          "description": "The AI model to use for generating PR descriptions.",
           "type": "dropdown",
           "required": false,
-          "default": "openai-gpt-4o",
+          "default": "Anthropic_Claude_Sonnet",
           "data": [
             {
               "title": "GPT-4o",
-              "value": "openai-gpt-4o"
+              "value": "OpenAI_GPT4o"
             },
             {
               "title": "GPT-4 Turbo",
-              "value": "openai-gpt-4-turbo"
+              "value": "OpenAI_GPT4-turbo"
             },
             {
               "title": "Claude 3 Opus",
-              "value": "anthropic-claude-opus"
+              "value": "Anthropic_Claude_Opus"
             },
             {
               "title": "Mixtral 8×7B",
-              "value": "mixtral-8x7b"
+              "value": "MixtraL_8x7B"
+            },
+            {
+              "title": "Claude 3.5 Sonnet",
+              "value": "Anthropic_Claude_Sonnet"
             }
           ]
         },

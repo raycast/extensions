@@ -5,11 +5,15 @@ const CREATIVITY_LEVEL = "medium";
 
 export async function getAIModel(preferenceKey: string): Promise<AI.Model> {
   const preferences = await getPreferenceValues<{ [key: string]: string }>();
-  const aiModel = preferences[preferenceKey];
-  if (!aiModel) {
+  const aiModelKey = preferences[preferenceKey];
+  if (!aiModelKey) {
     throw new Error("No AI model provided");
   }
-  return AI.Model[aiModel as keyof typeof AI.Model];
+  const aiModel = AI.Model[aiModelKey as keyof typeof AI.Model];
+  if (!aiModel) {
+    throw new Error(`Invalid AI model: ${aiModelKey}`);
+  }
+  return aiModel;
 }
 
 interface FetchAIContentOptions {
