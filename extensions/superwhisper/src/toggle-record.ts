@@ -6,5 +6,5 @@ export default async function main() {
   if (!isInstalled) {
     return;
   }
-  open("superwhisper://record", SUPERWHISPER_BUNDLE_ID);
+  await open("superwhisper://record", SUPERWHISPER_BUNDLE_ID);
 }

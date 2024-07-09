@@ -23,23 +23,14 @@ const CreatePinDirective: Placeholder = {
 
     const allGroups: Group[] = await getStorage(StorageKey.LOCAL_GROUPS);
     if (group != "None" && !allGroups.some((g) => g.name == group)) {
-      await createNewGroup(group, "None");
+      await createNewGroup({ name: group, icon: "None" });
     }
 
-    await createNewPin(
+    await createNewPin({
       name,
-      target,
-      "None",
+      url: target,
       group,
-      "None",
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-    );
+    });
     return { result: "" };
   },
   constant: false,

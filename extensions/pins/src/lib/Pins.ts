@@ -5,7 +5,7 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-09-04 17:37:42
- * Last modified  : 2024-04-23 00:47:05
+ * Last modified  : 2024-07-05 01:57:20
  */
 
 import { useCachedState } from "@raycast/utils";
@@ -24,13 +24,13 @@ import {
   showToast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { SORT_FN, StorageKey, SORT_STRATEGY } from "./constants";
+import { SORT_FN, StorageKey, SORT_STRATEGY, Visibility, PinAction } from "./constants";
 import { objectFromNonNullableEntriesOfObject, runCommand, runCommandInTerminal } from "./utils";
 import { ExtensionPreferences } from "./preferences";
 import * as fs from "fs";
 import * as os from "os";
 import path from "path";
-import { Group } from "./Groups";
+import { Group, getGroups } from "./Groups";
 import { PLApplicator } from "placeholders-toolkit";
 import PinsPlaceholders from "./placeholders";
 import { getStorage, setStorage } from "./storage";
@@ -129,6 +129,21 @@ export type Pin = {
    * The tooltip to display when hovering over the pin.
    */
   tooltip?: string;
+
+  /**
+   * Where the pin is visible in the UI, if at all.
+   */
+  visibility?: Visibility;
+
+  /**
+   * The action to take when the pin expires.
+   */
+  expirationAction?: string;
+
+  /**
+   * Other names that the pin can be referred to by.
+   */
+  aliases?: string[];
 };
 
 /**
@@ -153,39 +168,141 @@ export const PinKeys = [
   "tags",
   "notes",
   "tooltip",
-];
-
-/**
- * Removes expired pins.
- */
-export const checkExpirations = async () => {
-  const storedPins = await getStorage(StorageKey.LOCAL_PINS);
-  let numExpired = 0;
-  const newPins = storedPins.filter((pin: Pin) => {
-    if (pin.expireDate) {
-      if (new Date(pin.expireDate) < new Date()) {
-        numExpired++;
-        return false;
-      }
-    }
-    return true;
-  });
-  if (numExpired > 0) {
-    if (environment.launchType == LaunchType.Background) {
-      await showHUD(`Removed ${numExpired} expired pin${numExpired == 1 ? "" : "s"}`);
-    } else {
-      await showToast({ title: `Removed ${numExpired} expired pin${numExpired == 1 ? "" : "s"}` });
-    }
-  }
-  await setStorage(StorageKey.LOCAL_PINS, newPins);
-};
+  "visibility",
+  "expirationAction",
+  "aliases",
+] as const;
 
 /**
  * Gets the stored pins.
  * @returns The list of pin objects.
  */
 export const getPins = async () => {
-  return await getStorage(StorageKey.LOCAL_PINS);
+  return (await getStorage(StorageKey.LOCAL_PINS)) as Pin[];
+};
+
+/**
+ * Removes expired pins.
+ */
+export const checkExpirations = async () => {
+  const storedPins = (await getPins()) as Pin[];
+  let numRemoved = 0;
+  let numHidden = 0;
+  let numDisabled = 0;
+  const customActionPins: Pin[] = [];
+  const newPins = await Promise.all(
+    storedPins
+      .filter((pin: Pin) => {
+        if (pin.expireDate) {
+          if (new Date(pin.expireDate) < new Date()) {
+            if (pin.expirationAction === PinAction.DELETE || pin.expirationAction == undefined) {
+              numRemoved++;
+              return false;
+            } else if (pin.expirationAction == PinAction.HIDE) {
+              numHidden++;
+            } else if (pin.expirationAction == PinAction.DISABLE) {
+              numDisabled++;
+            } else if (pin.expirationAction?.startsWith("custom")) {
+              customActionPins.push(pin);
+            }
+          }
+        }
+        return true;
+      })
+      .map(async (pin: Pin) => {
+        if (pin.expireDate && new Date(pin.expireDate) < new Date()) {
+          let newVisibility = pin.visibility;
+          if (pin.expirationAction == PinAction.HIDE) {
+            newVisibility = Visibility.HIDDEN;
+          } else if (pin.expirationAction == PinAction.DISABLE) {
+            newVisibility = Visibility.DISABLED;
+          }
+
+          return {
+            ...pin,
+            expireDate: undefined,
+            visibility: newVisibility,
+          };
+        }
+        return pin;
+      }),
+  );
+
+  let message = "";
+  if (numRemoved > 0) {
+    message = `Removed ${numRemoved} expired pin${numRemoved == 1 ? "" : "s"}`;
+  }
+
+  if (numHidden > 0) {
+    if (numRemoved > 0) {
+      message += `, hid ${numHidden} pin${numHidden == 1 ? "" : "s"}`;
+    } else {
+      message += `Hid ${numHidden} pin${numHidden == 1 ? "" : "s"}`;
+    }
+  }
+
+  if (numDisabled > 0) {
+    if ((numRemoved > 0 && numHidden == 0) || (numRemoved == 0 && numHidden > 0)) {
+      message += `, disabled ${numDisabled} pin${numDisabled == 1 ? "" : "s"}`;
+    } else if (numRemoved > 0 && numHidden > 0) {
+      message += `, and disabled ${numDisabled} pin${numDisabled == 1 ? "" : "s"}`;
+    } else {
+      message += `Disabled ${numDisabled} pin${numDisabled == 1 ? "" : "s"}`;
+    }
+  }
+
+  if (customActionPins.length > 0) {
+    const numCustom = customActionPins.length;
+    if ((numRemoved > 0 || numHidden > 0 || numDisabled > 0) && numCustom > 0) {
+      message += `. Ran custom expiration actions for ${numCustom} pin${numCustom == 1 ? "" : "s"}.`;
+    } else {
+      message += `Ran custom expiration actions for ${numCustom} pin${numCustom == 1 ? "" : "s"}`;
+    }
+  }
+
+  if (message != "") {
+    if (environment.launchType == LaunchType.Background) {
+      showHUD(message);
+    } else {
+      showToast({ title: message });
+    }
+  }
+
+  await setStorage(StorageKey.LOCAL_PINS, newPins);
+
+  for (const pin of customActionPins) {
+    if (pin.expirationAction) {
+      // Run any placeholder directives in the expiration action
+      await PLApplicator.bulkApply(pin.expirationAction, {
+        context: {
+          pin: pin,
+        },
+        allPlaceholders: PinsPlaceholders,
+      });
+    }
+  }
+};
+
+/**
+ * Validates a list of pins, ensuring that they all have valid IDs and group names.
+ * @param pins The list of pins to validate.
+ * @returns The list of validated pins.
+ */
+export const validatePins = async (pins: Pin[]) => {
+  const checkedPins: Pin[] = [];
+  for (const [index, pin] of pins.entries()) {
+    for (const [index2, pin2] of pins.entries()) {
+      if (index != index2 && pin.id == pin2.id) {
+        pin.id = await getNextPinID();
+      }
+    }
+    checkedPins.push({
+      ...pin,
+      group: pin.group == undefined ? "None" : pin.group,
+      id: pin.id == undefined ? await getNextPinID() : pin.id,
+    });
+  }
+  return checkedPins;
 };
 
 /**
@@ -198,16 +315,10 @@ export const usePins = () => {
 
   const revalidatePins = async () => {
     setLoading(true);
-    const storedPins: Pin[] = await getStorage(StorageKey.LOCAL_PINS);
-    const checkedPins: Pin[] = [];
-    for (const pin of storedPins) {
-      checkedPins.push({
-        ...pin,
-        group: pin.group == undefined ? "None" : pin.group,
-        id: pin.id == undefined ? await getNextPinID() : pin.id,
-      });
-    }
-    setPins(checkedPins);
+    const storedPins: Pin[] = await getPins();
+
+    const validatedPins = await validatePins(storedPins);
+    setPins(validatedPins);
     setLoading(false);
   };
 
@@ -230,7 +341,7 @@ export const usePins = () => {
  */
 export const openPin = async (
   pin: Pin,
-  preferences: { preferredBrowser: Application },
+  preferences: { preferredBrowser?: Application },
   context?: { [key: string]: unknown },
 ) => {
   const startDate = new Date();
@@ -238,12 +349,7 @@ export const openPin = async (
     if (pin.fragment) {
       // Copy the text fragment to the clipboard
       await Clipboard.copy(pin.url);
-
-      if (environment.commandName == "index") {
-        await showHUD("Copied To Clipboard");
-      } else {
-        await showToast({ title: "Copied To Clipboard" });
-      }
+      await showToast({ title: "Copied To Clipboard" });
       await setStorage(StorageKey.LAST_OPENED_PIN, pin.id);
     } else {
       // Convert LocalData objects to strings
@@ -271,7 +377,7 @@ export const openPin = async (
 
       const targetRaw = pin.url.startsWith("~") ? pin.url.replace("~", os.homedir()) : pin.url;
       const target = await PLApplicator.bulkApply(targetRaw, {
-        context: filteredContext,
+        context: { ...filteredContext, pin: pin },
         allPlaceholders: PinsPlaceholders,
       });
       if (target != "") {
@@ -306,40 +412,27 @@ export const openPin = async (
     }
   } catch (error) {
     console.error(error);
-    if (environment.commandName == "view-pins") {
-      await showToast({
-        title: "Failed to open " + (pin.name || (pin.url.length > 20 ? pin.url.substring(0, 19) + "..." : pin.url)),
-        message: (error as Error).message,
-        style: Toast.Style.Failure,
-      });
-    } else {
-      await showHUD(`Failed to open ${pin.name || pin.url}: ${(error as Error).message}`);
-    }
+    await showToast({
+      title: "Failed to open " + (pin.name || (pin.url.length > 20 ? pin.url.substring(0, 19) + "..." : pin.url)),
+      message: (error as Error).message,
+      style: Toast.Style.Failure,
+    });
   }
 
   const endDate = new Date();
   const timeElapsed = endDate.getTime() - startDate.getTime();
   await modifyPin(
     pin,
-    pin.name,
-    pin.url,
-    pin.icon,
-    pin.group,
-    pin.application,
-    pin.expireDate ? new Date(pin.expireDate) : undefined,
-    pin.execInBackground,
-    pin.fragment,
-    pin.shortcut,
-    new Date(),
-    (pin.timesOpened || 0) + 1,
-    pin.dateCreated ? new Date(pin.dateCreated) : new Date(),
-    pin.iconColor,
-    pin.tags,
-    pin.notes,
-    pin.tooltip,
-    pin.averageExecutionTime
-      ? Math.round((pin.averageExecutionTime * (pin.timesOpened || 0) + timeElapsed) / ((pin.timesOpened || 0) + 1))
-      : timeElapsed,
+    {
+      ...pin,
+      expireDate: pin.expireDate ? new Date(pin.expireDate).toUTCString() : undefined,
+      lastOpened: new Date().toUTCString(),
+      timesOpened: (pin.timesOpened || 0) + 1,
+      dateCreated: pin.dateCreated ? new Date(pin.dateCreated).toUTCString() : new Date().toUTCString(),
+      averageExecutionTime: pin.averageExecutionTime
+        ? Math.round((pin.averageExecutionTime * (pin.timesOpened || 0) + timeElapsed) / ((pin.timesOpened || 0) + 1))
+        : timeElapsed,
+    },
     () => {
       null;
     },
@@ -355,10 +448,10 @@ export const openPin = async (
  */
 export const getNextPinID = async () => {
   // Get the stored pins
-  const storedPins = await getStorage(StorageKey.LOCAL_PINS);
+  const storedPins = await getPins();
 
   // Get the next available group ID
-  let newID = (await getStorage(StorageKey.NEXT_PIN_ID))[0] || 1;
+  let newID = ((await getStorage(StorageKey.NEXT_PIN_ID))[0] as number) || 1;
   while (storedPins.some((pin: Group) => pin.id == newID)) {
     newID++;
   }
@@ -368,172 +461,72 @@ export const getNextPinID = async () => {
 
 /**
  * Creates a new pin; updates local storage.
- * @param name The name of the pin.
- * @param target The URL, path, or Terminal command to pin.
- * @param icon The icon for the pin.
- * @param group The group the pin belongs to.
- * @param application The application to open the pin in.
- * @param expireDate The date the pin expires.
- * @param execInBackground Whether to run the specified command, if any, in the background.
- * @param fragment Whether to treat the pin's target as a text fragment, regardless of its contents.
- * @param shortcut The keyboard shortcut to open/execute the pin.
- * @param iconColor The color of the icon.
- * @param tags The tags associated with the pin.
- * @param notes User-defined notes for the pin.
- * @returns The ID of the new pin.
+ * @param attributes The attributes of the new pin.
+ * @returns The new pin object.
  */
-export const createNewPin = async (
-  name: string,
-  target: string,
-  icon: string,
-  group: string,
-  application: string,
-  expireDate: Date | undefined,
-  execInBackground: boolean | undefined,
-  fragment: boolean | undefined,
-  shortcut: Keyboard.Shortcut | undefined,
-  iconColor: string | undefined,
-  tags: string[] | undefined,
-  notes: string | undefined,
-) => {
+export const createNewPin = async (attributes: Partial<Pin>) => {
   // Get the stored pins
-  const storedPins = await getStorage(StorageKey.LOCAL_PINS);
-
-  // Get the next available pin ID
-  let newID = (await getStorage(StorageKey.NEXT_PIN_ID))[0] || 1;
-  while (storedPins.some((pin: Pin) => pin.id == newID)) {
-    newID++;
-  }
-  await setStorage(StorageKey.NEXT_PIN_ID, [newID + 1]);
+  const storedPins = await getPins();
+  const newID = await getNextPinID();
 
   // Add the new pin to the list of stored pins
   const newData = [...storedPins];
-  newData.push({
-    name: name,
-    url: target,
-    icon: icon,
-    group: group,
+  const newPin = {
+    ...attributes,
+    name: attributes.name?.toString() || "New Pin",
+    url: attributes.url?.toString() || "",
+    icon: attributes.icon?.toString() || "Favicon / File Icon",
+    group: attributes.group?.toString() || "None",
+    application: attributes.application?.toString() || "None",
     id: newID,
-    application: application,
-    expireDate: expireDate?.toUTCString(),
-    execInBackground: execInBackground,
-    fragment: fragment,
-    shortcut: shortcut,
+    expireDate: attributes.expireDate ? new Date(attributes.expireDate as string).toUTCString() : undefined,
     dateCreated: new Date().toUTCString(),
-    iconColor: iconColor,
-    tags: tags,
-    notes: notes,
-  });
+    visibility: attributes.visibility || Visibility.VISIBLE,
+    expirationAction: attributes.expirationAction || PinAction.DELETE,
+  } as Pin;
+  newData.push(newPin);
 
   // Update the stored pins
   await setStorage(StorageKey.LOCAL_PINS, newData);
-  return newID;
+  return newPin;
 };
 
 /**
  * Updates a pin; updates local storage.
  * @param pin The pin to update.
- * @param name The new name of the pin.
- * @param url The new URL, path, or Terminal command to pin.
- * @param icon The new icon for the pin.
- * @param group The new group the pin belongs to.
- * @param application The new application to open the pin in.
- * @param expireDate The new date the pin expires.
- * @param execInBackground Whether to run the specified command, if any, in the background.
- * @param fragment Whether to treat the pin's target as a text fragment, regardless of its contents.
- * @param shortcut The new keyboard shortcut to open/execute the pin.
- * @param pop The function to close the pin editor.
+ * @param attributes The attributes to update, along with their new values.
  * @param setPins The function to update the list of pins.
+ * @param pop The function to close the modal.
+ * @param notify Whether to display a notification.
  */
 export const modifyPin = async (
   pin: Pin,
-  name: string,
-  url: string,
-  icon: string,
-  group: string,
-  application: string,
-  expireDate: Date | undefined,
-  execInBackground: boolean | undefined,
-  fragment: boolean | undefined,
-  shortcut: Keyboard.Shortcut | undefined,
-  lastOpened: Date | undefined,
-  timesOpened: number | undefined,
-  dateCreated: Date | undefined,
-  iconColor: string | undefined,
-  tags: string[] | undefined,
-  notes: string | undefined,
-  tooltip: string | undefined,
-  averageExecutionTime: number | undefined,
-  pop: () => void,
+  attributes: Partial<Pin>,
   setPins: React.Dispatch<React.SetStateAction<Pin[]>>,
+  pop: () => void,
   notify = true,
 ) => {
-  const storedPins = await getStorage(StorageKey.LOCAL_PINS);
-  const checkedPins: Pin[] = [];
-  for (const pin of storedPins) {
-    checkedPins.push({
-      ...pin,
-      group: pin.group == undefined ? "None" : pin.group,
-      id: pin.id == undefined ? await getNextPinID() : pin.id,
-    });
-  }
+  const storedPins = await getPins();
+  const validatedPins = await validatePins(storedPins);
 
-  const newData: Pin[] = checkedPins.map((oldPin: Pin) => {
+  const newData: Pin[] = validatedPins.map((oldPin: Pin) => {
     // Update pin if it exists
     if (pin.id != -1 && oldPin.id == pin.id) {
       return {
-        name: name,
-        url: url,
-        icon: icon,
-        group: group,
-        id: pin.id,
-        application: application,
-        expireDate: expireDate?.toUTCString(),
-        execInBackground: execInBackground,
-        fragment: fragment,
-        shortcut: shortcut,
-        lastOpened: lastOpened?.toUTCString(),
-        timesOpened: timesOpened,
-        dateCreated: dateCreated?.toUTCString(),
-        iconColor: iconColor,
-        tags: tags,
-        notes: notes,
-        tooltip: tooltip,
-        averageExecutionTime: averageExecutionTime,
+        ...oldPin,
+        ...attributes,
+        expireDate: attributes.expireDate ? new Date(attributes.expireDate as string).toUTCString() : undefined,
+        dateCreated: new Date().toUTCString(),
       } as Pin;
     } else {
       return oldPin;
     }
   });
 
+  // Add new pin if it doesn't exist
   if (pin.id == -1) {
-    pin.id = (await getStorage(StorageKey.NEXT_PIN_ID))[0] || 1;
-    while (checkedPins.some((checkedPin: Pin) => checkedPin.id == pin.id)) {
-      pin.id = pin.id + 1;
-    }
-    setStorage(StorageKey.NEXT_PIN_ID, [pin.id + 1]);
-
-    // Add new pin if it doesn't exist
-    newData.push({
-      name: name,
-      url: url,
-      icon: icon,
-      group: group,
-      id: pin.id,
-      application: application,
-      expireDate: expireDate?.toUTCString(),
-      execInBackground: execInBackground,
-      fragment: fragment,
-      shortcut: shortcut,
-      lastOpened: lastOpened?.toUTCString(),
-      timesOpened: timesOpened,
-      dateCreated: dateCreated?.toUTCString(),
-      iconColor: iconColor,
-      tags: tags,
-      notes: notes,
-      tooltip: tooltip,
-      averageExecutionTime: averageExecutionTime,
-    });
+    const newPin = await createNewPin(attributes);
+    newData.push(newPin);
   }
 
   setPins(newData);
@@ -544,6 +537,66 @@ export const modifyPin = async (
   }
   pop();
 };
+
+/**
+ * Sets the value of a pin attribute and updates local storage.
+ * @param pin The pin to update.
+ * @param attribute The name of the attribute to update.
+ * @param value The new value of the attribute.
+ * @param setPins The function to update the list of pins.
+ */
+export const setPinAttribute = async (
+  pin: Pin,
+  attribute: keyof Pin,
+  value: Pin[keyof Pin],
+  setPins: React.Dispatch<React.SetStateAction<Pin[]>>,
+) => {
+  const storedPins = await getPins();
+  const newData: Pin[] = storedPins.map((oldPin: Pin) => {
+    if (oldPin.id == pin.id) {
+      return {
+        ...oldPin,
+        [attribute]: value,
+      };
+    }
+    return oldPin;
+  });
+
+  setPins(newData);
+  await setStorage(StorageKey.LOCAL_PINS, newData);
+};
+
+/**
+ * Hides a pin; updates local storage.
+ * @param pin The pin to hide.
+ * @param setPins The function to update the list of pins.
+ */
+export const hidePin = async (pin: Pin, setPins: React.Dispatch<React.SetStateAction<Pin[]>>) =>
+  setPinAttribute(pin, "visibility", Visibility.HIDDEN, setPins);
+
+/**
+ * Unhides a pin; updates local storage.
+ * @param pin The pin to unhide.
+ * @param setPins The function to update the list of pins.
+ */
+export const unhidePin = async (pin: Pin, setPins: React.Dispatch<React.SetStateAction<Pin[]>>) =>
+  setPinAttribute(pin, "visibility", Visibility.VISIBLE, setPins);
+
+/**
+ * Disables a pin; updates local storage.
+ * @param pin The pin to disable.
+ * @param setPins The function to update the list of pins.
+ */
+export const disablePin = async (pin: Pin, setPins: React.Dispatch<React.SetStateAction<Pin[]>>) =>
+  setPinAttribute(pin, "visibility", Visibility.DISABLED, setPins);
+
+/**
+ * Moves a pin to the specified group; updates local storage.
+ * @param pin The pin to enable.
+ * @param setPins The function to update the list of pins.
+ */
+export const movePin = async (pin: Pin, group: string, setPins?: React.Dispatch<React.SetStateAction<Pin[]>>) =>
+  setPinAttribute(pin, "group", group, setPins || (() => {}));
 
 /**
  * Deletes a pin; updates local storage.
@@ -564,7 +617,7 @@ export const deletePin = async (
       primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     }))
   ) {
-    const storedPins = await getStorage(StorageKey.LOCAL_PINS);
+    const storedPins = await getPins();
 
     const filteredPins = storedPins.filter((oldPin: Pin) => {
       return oldPin.id != pin.id;
@@ -583,7 +636,7 @@ export const deletePin = async (
 export const getPreviousPin = async (): Promise<Pin | undefined> => {
   const previousPin = await getStorage(StorageKey.LAST_OPENED_PIN);
   if (previousPin == undefined || parseInt(previousPin) == undefined) return undefined;
-  const pins = await getStorage(StorageKey.LOCAL_PINS);
+  const pins = await getPins();
   return pins.find((pin: Pin) => pin.id == previousPin);
 };
 
@@ -595,48 +648,27 @@ export const getPreviousPin = async (): Promise<Pin | undefined> => {
  */
 export const sortPins = (
   pins: Pin[],
-  groups: Group[],
+  groups?: Group[],
   sortMethod?: keyof typeof SORT_STRATEGY,
   sortFn?: (a: unknown, b: unknown) => number,
 ) => {
   const preferences = getPreferenceValues<ExtensionPreferences>();
   return [...pins].sort((p1, p2) => {
-    const group = groups.find((group) => group.name == p1.group);
+    const group = groups?.find((group) => group.name == p1.group);
     if (sortFn) {
       // Use custom sort function if provided
       return sortFn(p1, p2);
     }
 
-    if (
-      sortMethod == "alphabetical" ||
-      (sortMethod == undefined &&
-        (group?.sortStrategy == "alphabetical" || (!group && preferences.defaultSortStrategy == "alphabetical")))
-    ) {
-      return p1.name.localeCompare(p2.name);
-    } else if (
-      sortMethod == "frequency" ||
-      (sortMethod == undefined &&
-        (group?.sortStrategy == "frequency" || (!group && preferences.defaultSortStrategy == "frequency")))
-    ) {
-      return (p2.timesOpened || 0) - (p1.timesOpened || 0);
-    } else if (
-      sortMethod == "recency" ||
-      (sortMethod == undefined &&
-        (group?.sortStrategy == "recency" || (!group && preferences.defaultSortStrategy == "recency")))
-    ) {
-      return (p1.lastOpened ? new Date(p1.lastOpened) : new Date(0)).getTime() >
-        (p2.lastOpened ? new Date(p2.lastOpened) : new Date(0)).getTime()
-        ? -1
-        : 1;
-    } else if (
-      sortMethod == "dateCreated" ||
-      (sortMethod == undefined &&
-        (group?.sortStrategy == "dateCreated" || (!group && preferences.defaultSortStrategy == "dateCreated")))
-    ) {
-      return (p1.dateCreated ? new Date(p1.dateCreated) : new Date(0)).getTime() >
-        (p2.dateCreated ? new Date(p2.dateCreated) : new Date(0)).getTime()
-        ? -1
-        : 1;
+    const activeSortMethod = sortMethod ? sortMethod : group?.sortStrategy || preferences.defaultSortStrategy;
+    if (activeSortMethod === "alphabetical") {
+      return SORT_FN.ALPHA_ASC(p1, p2);
+    } else if (activeSortMethod === "frequency") {
+      return SORT_FN.MOST_FREQUENT(p1, p2);
+    } else if (activeSortMethod === "recency") {
+      return SORT_FN.LAST_OPENED(p1, p2);
+    } else if (activeSortMethod === "dateCreated") {
+      return SORT_FN.NEWEST(p1, p2);
     }
     return 0;
   });
@@ -711,9 +743,7 @@ export const calculatePinFrequencyPercentile = (pin: Pin, pins: Pin[]) => {
  * @returns The percentile of the pin's execution time compared to all other pins.
  */
 export const calculatePinExecutionTimePercentile = (pin: Pin, pins: Pin[]) => {
-  const pinsSortedByExecutionTime = pins
-    .filter((p) => p.averageExecutionTime != undefined)
-    .sort((a, b) => (a.averageExecutionTime || 0) - (b.averageExecutionTime || 0));
+  const pinsSortedByExecutionTime = sortPins(pins, [], undefined, SORT_FN.FASTEST);
   const pinIndex = pinsSortedByExecutionTime.findIndex(
     (p) => p.id == pin.id || (p.averageExecutionTime || 0) >= (pin.averageExecutionTime || 0),
   );
@@ -732,6 +762,8 @@ export const getPinKeywords = (pin: Pin) => {
       .replaceAll(/([ /:.'"-])(.+?)(?=\b|[ /:.'"-])/gs, " $1 $1$2 $2")
       .split(" ")
       .filter((term) => term.trim().length > 0),
+    ...(pin.tags || []),
+    ...(pin.aliases || []).flat(),
   ];
 };
 
@@ -740,8 +772,8 @@ export const getPinKeywords = (pin: Pin) => {
  * @returns A promise resolving to the JSON object containing all pins and groups.
  */
 export const getPinsJSON = async () => {
-  const pins: Pin[] = await getStorage(StorageKey.LOCAL_PINS);
-  const groups: Group[] = await getStorage(StorageKey.LOCAL_GROUPS);
+  const pins: Pin[] = await getPins();
+  const groups: Group[] = await getGroups();
   const data = {
     groups: groups,
     pins: pins,
@@ -754,8 +786,8 @@ export const getPinsJSON = async () => {
  * @returns A promise resolving to the JSON string of the pin data.
  */
 export const copyPinData = async () => {
-  const pins = await getStorage(StorageKey.LOCAL_PINS);
-  const groups = await getStorage(StorageKey.LOCAL_GROUPS);
+  const pins = await getPins();
+  const groups = await getGroups();
 
   const data = {
     groups: groups,

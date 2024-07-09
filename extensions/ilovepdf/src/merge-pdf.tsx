@@ -15,7 +15,7 @@ import ILovePDFFile from "@ilovepdf/ilovepdf-nodejs/ILovePDFFile";
 import { useState } from "react";
 import fs from "fs";
 import path from "path";
-import { chooseDownloadLocation, getFilePath, handleOpenNow, validateFileType } from "./common/utils";
+import { chooseDownloadLocation, getErrorMessage, getFilePath, handleOpenNow, validateFileType } from "./common/utils";
 import { Status } from "./common/types";
 
 type Values = {
@@ -104,10 +104,9 @@ export default function Command() {
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "failure";
-      toast.message = `Error happened during merging the files. Reason ${error}`;
+      toast.message = `Error happened during merging the files. Reason ${getErrorMessage(error)}`;
       setStatus("failure");
       setIsLoading(false);
-      console.log(error);
       return;
     }
 

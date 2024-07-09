@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Topic } from "../types";
 import axios from "axios";
-import { parse } from "node-html-parser";
 import { Toast, showToast } from "@raycast/api";
 
 export default function () {
@@ -16,7 +15,7 @@ export default function () {
 
         // Fetch the search results from the Figma help center
         try {
-            data = await axios(`https://api.maxmckinney.com/api/figma/hc?search=${searchText}`, {});
+            data = await axios(`https://help.figma.com/api/v2/help_center/articles/search?query=${searchText}`, {});
         } catch (error) {
             showToast(Toast.Style.Failure, "Error", "Couldn't fetch the help center");
             console.error(error);
@@ -24,22 +23,18 @@ export default function () {
             return;
         }
 
-        // Parse the HTML and extract the search results
-        const html = parse(data.data);
+        const results = data.data;
         const searchList: Topic[] = [];
-        const searchResults = html.querySelectorAll(".search-result-list-item");
-        // Extract the title, URL and category of each search result and add it to the searchList
-        searchResults.map((result) => {
-            const title = result.querySelector(".results-list-item-link")?.text;
-            const url =
-                "https://help.figma.com" + result.querySelector(".results-list-item-link")?.getAttribute("href");
-            const category = result.querySelectorAll(".search-result-breadcrumbs li").pop()?.text;
-
-            // If the title, URL and category are present, add it to the searchList, if not, skip it
-            if (title && url && category) {
+        // Loop through the search results and push them to the searchList array
+        // The map needs to be async because we need to fetch the category name for each result, and that needs to be inside the Promise.all to make sure all the categories are fetched before setting the state
+        await Promise.all(
+            results.results.map(async (result: { title: string; html_url: string; section_id: number }) => {
+                const title = result.title;
+                const url = "https://help.figma.com" + result.html_url;
+                const category = await getSectionName(result.section_id);
                 searchList.push({ title, url, category });
-            }
-        });
+            }),
+        );
 
         setFoundTopics([...searchList]);
         setIsLoading(false);
@@ -50,4 +45,9 @@ export default function () {
         searchHelpCenter,
         foundTopics,
     };
+}
+
+async function getSectionName(fromId: number) {
+    const data = await axios(`https://help.figma.com/api/v2/help_center/sections/${fromId}`, {});
+    return data.data.section.name;
 }

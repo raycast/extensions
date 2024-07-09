@@ -9,6 +9,7 @@ import {
   Youtrack,
 } from "youtrack-rest-client";
 import { Issue, IssueExtended, Project, User } from "./interfaces";
+import { IssueCustomFieldValue } from "youtrack-rest-client/dist/entities/issueCustomField";
 
 type PreparedFavorites = { cached: Project[]; toFetch: string[] };
 type FetchedFavorites = { fetched: Project[]; errored: string[] };
@@ -45,6 +46,15 @@ function prepareProject(project: ReducedProject): Project {
 async function getUserAvatarUrl(userId: string, yt: Youtrack): Promise<string | undefined> {
   const { avatarUrl } = await yt.users.byId(userId);
   return avatarUrl ?? "";
+}
+
+async function customFieldToUser(user: IssueCustomFieldValue, yt: Youtrack): Promise<User> {
+  return {
+    id: user.id ?? "0",
+    name: user.name ?? "Unknown",
+    fullName: user.fullName ?? "Unknown",
+    avatarUrl: user.id ? await getUserAvatarUrl(user.id, yt) : undefined,
+  };
 }
 
 async function reducedUserToUser(user: ReducedUser, yt: Youtrack): Promise<User> {
@@ -87,11 +97,18 @@ function formatDate(dateString: number): string {
 }
 
 export async function fetchIssueDetails(issue: Issue, yt: Youtrack): Promise<IssueExtended> {
-  const { reporter, updater, tags, created, updated, project } = await yt.issues.byId(issue.id);
+  const issueDetails = await yt.issues.byId(issue.id);
+  let assignee = undefined;
+  if (issueDetails.fields) {
+    const assigneeField = issueDetails.fields.find((field) => field.name === "Assignee");
+    assignee = assigneeField?.value ?? undefined;
+  }
+  const { reporter, updater, tags, created, updated, project } = issueDetails;
   return {
     ...issue,
     date: formatDate(updated ?? 0),
     created: formatDate(created ?? 0),
+    assignee: assignee && (await customFieldToUser(assignee, yt)),
     reporter: reporter && (await reducedUserToUser(reporter, yt)),
     updater: updater && (await reducedUserToUser(updater, yt)),
     tags,

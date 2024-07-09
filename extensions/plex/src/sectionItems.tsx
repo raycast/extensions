@@ -1,17 +1,13 @@
-import { ActionPanel, Action, Grid } from "@raycast/api";
-import { useFetch, Response } from "@raycast/utils";
-import React from "react";
-import { useState, useEffect } from "react";
-import { ENDPOINTS, plex_token } from "../utils/constants";
+import { Action, ActionPanel, Grid } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { useMemo, useState } from "react";
 import { SectionItemsApiResponse } from "../types/types";
+import { ENDPOINTS, plex_token } from "../utils/constants";
 import thumbLinks from "../utils/thumbLinks";
 import { MediaItem } from "./mediaItem";
 
 export function GetSectionItems({ sectionId, sectionName }: { sectionId: string; sectionName: string }) {
-  const [searchText, setSearchText] = useState("");
-  const [filteredList, filterList] = useState([]);
-
-  // TODO: Search functionality still not working fix it.
+  const [searchText, setSearchText] = useState<string>("");
 
   const endpoint = `${ENDPOINTS.librarySections}${sectionId}/all`;
 
@@ -22,16 +18,10 @@ export function GetSectionItems({ sectionId, sectionName }: { sectionId: string;
     keepPreviousData: true,
   });
 
-  useEffect(() => {
-    if (Array.isArray(data)) {
-      filterList(
-        data.filter(
-          (item: SectionItemsApiResponse["MediaContainer"]["Metadata"]) =>
-            Array.isArray(item.title) && item.title.some((keyword: string) => keyword.includes(searchText)),
-        ),
-      );
-    }
-  }, [searchText, filteredList, data]);
+  const filteredItems = useMemo(() => {
+    const items = Array.isArray(data) ? data : [];
+    return filterItems(items, searchText);
+  }, [searchText, data]);
 
   return (
     <Grid
@@ -46,8 +36,8 @@ export function GetSectionItems({ sectionId, sectionName }: { sectionId: string;
       navigationTitle={sectionName}
       searchBarPlaceholder={"Search " + sectionName}
     >
-      {Array.isArray(data) &&
-        data.map((item: SectionItemsApiResponse["MediaContainer"]["Metadata"]) => (
+      {Array.isArray(filteredItems) &&
+        filteredItems.map((item: SectionItemsApiResponse["MediaContainer"]["Metadata"]) => (
           <Grid.Item
             key={item.guid}
             content={{
@@ -73,4 +63,14 @@ async function parseResponse(response: Response): Promise<SectionItemsApiRespons
   }
 
   return json.MediaContainer.Metadata;
+}
+
+function filterItems(items: SectionItemsApiResponse["MediaContainer"]["Metadata"][], filter: string) {
+  if (filter.length === 0) {
+    return items;
+  }
+
+  return items.filter((item: SectionItemsApiResponse["MediaContainer"]["Metadata"]) =>
+    item.title.toLowerCase().includes(filter.toLowerCase()),
+  );
 }

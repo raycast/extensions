@@ -59,7 +59,7 @@ It returns the icon data.
 ### Launch Example
 
 ```jsx
-import { crossLaunchCommand } from "raycast-cross-command";
+import { crossLaunchCommand } from "raycast-cross-extension";
 
 crossLaunchCommand({
   name: "index",

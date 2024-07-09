@@ -1,5 +1,9 @@
 # Modify File Hash Changelog
 
+## [Bugfix] - 2024-08-01
+
+- Remove irregular files
+
 ## [New Commands] - 2022-10-28
 
 Add two zip commands:

@@ -1,8 +1,12 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Icon, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { readdir, readFile } from "fs/promises";
-import { join } from "path";
+import { join, basename } from "path";
 import { homedir } from "os";
+
+interface Preferences {
+  editor?: string | { path: string; applicationName: string };
+}
 
 interface Site {
   name: string;
@@ -46,12 +50,26 @@ async function getSites(paths: string[]): Promise<Site[]> {
   });
 
   const nestedSites = await Promise.all(sitePromises);
-  return nestedSites.flat();
+  return nestedSites.flat().sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+}
+
+function getEditorInfo(editor?: string | { path: string; applicationName: string }): { name: string; path: string } {
+  if (!editor) {
+    return { name: "Default Application", path: "" };
+  }
+
+  if (typeof editor === "string") {
+    const name = basename(editor, ".app");
+    return { name, path: editor };
+  }
+
+  return { name: editor.applicationName || basename(editor.path, ".app"), path: editor.path };
 }
 
 export default function Command() {
   const [sites, setSites] = useState<Site[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const preferences = getPreferenceValues<Preferences>();
 
   useEffect(() => {
     async function fetchSites() {
@@ -74,6 +92,8 @@ export default function Command() {
     fetchSites();
   }, []);
 
+  const { name: editorName, path: editorPath } = getEditorInfo(preferences.editor);
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search sites...">
       {sites.map((site) => (
@@ -84,10 +104,10 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.Open
-                title="Open in Visual Studio Code"
+                title={`Open in ${editorName}`}
                 icon={Icon.Code}
                 target={site.path}
-                application="/Applications/Visual Studio Code.app"
+                application={editorPath}
               />
               <Action.OpenInBrowser title="Open in Browser" url={`http://${site.name}.test`} />
               <Action.ShowInFinder path={site.path} />

@@ -1,5 +1,9 @@
 # search joplin notes Changelog
 
+## [FIX Codes] - 2024-7-29
+
+Fix searches so that they do not take more data
+
 ## [FIX Codes] - 2024-1-27
 
 Fix App path

@@ -37,7 +37,7 @@ For more complex debugging you can install the [VSCode extension](https://market
 
 All unhandled exceptions and Promise rejections are shown with an error overlay in Raycast.
 
-![Unhandled exception in development mode](../.gitbook/assets/basics-unhandled-exception.png)
+![Unhandled exception in development mode](../.gitbook/assets/basics-unhandled-exception.webp)
 
 During development, we show the stack trace and add an action to jump to the error to make it easy to fix it. In production, only the error message is shown. You should [show a toast](../api-reference/feedback/toast.md#showtoast) for all expected errors, e.g. a failing network request.
 
@@ -46,13 +46,13 @@ During development, we show the stack trace and add an action to jump to the err
 When unhandled exceptions and Promise rejections occur in the production build of a public extension, Raycast tries to redact all potentially sensitive information they may include, and reports them to our error backend. As an extension author, or as the manager of an organisation, you can view and manage error reports for your public extensions by going to https://www.raycast.com/extension-issues, or by finding your extension in Raycast's root, `Store` command, or `Manage Extensions` command, and using the `View Issues` action.
 The dashboard should give you an overview of what issues occurred, how many times, how many users were affected, and more. Each issue additionally has a detail view, including a stack trace, breadcrumbs (typically the actions performed before the crash), extension release date, Raycast version, macOS version.
 
-![Extension Issues](../.gitbook/assets/extension-issues.png)
+![Extension Issues](../.gitbook/assets/extension-issues.webp)
 
 ## React Developer Tools
 
 We support [React Developer Tools](https://github.com/facebook/react/tree/main/packages/react-devtools) out-of-the-box. Use the tools to inspect and change the props of your React components, and see the results immediately in Raycast. This is especially useful for complex commands with a lot of states.
 
-![React Developer Tools](../.gitbook/assets/basics-react-developer-tools.png)
+![React Developer Tools](../.gitbook/assets/basics-react-developer-tools.webp)
 
 To get started, add the `react-devtools` to your extension. Open a terminal, navigate to your extension directory and run the following command:
 

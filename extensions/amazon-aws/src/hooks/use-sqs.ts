@@ -8,38 +8,36 @@ export const useQueues = (prefixQuery: string) => {
     data: queues,
     error,
     isLoading,
-    revalidate,
-    pagination,
+    mutate,
   } = useCachedPromise(
-    (prefix: string) =>
-      async ({ page, cursor }: { page: number; cursor?: string }) => {
-        const { NextToken, QueueUrls } = await new SQSClient({}).send(
-          new ListQueuesCommand({
-            NextToken: cursor,
-            MaxResults: 100,
-            ...(prefix.trim().length > 2 && { QueueNamePrefix: prefix }),
-          }),
-        );
-        const queues = await Promise.all(
-          (QueueUrls ?? []).map(async (queueUrl) => {
-            const { Attributes: attributes } = await new SQSClient({}).send(
-              new GetQueueAttributesCommand({ QueueUrl: queueUrl, AttributeNames: ["All"] }),
-            );
-            return { queueUrl, attributes, queueKey: `#${page}-${attributes?.QueueArn}` };
-          }),
-        );
+    async (prefix: string) => {
+      const { QueueUrls } = await new SQSClient({}).send(
+        new ListQueuesCommand({
+          MaxResults: 25,
+          ...(prefix.trim().length > 2 && { QueueNamePrefix: prefix }),
+        }),
+      );
 
-        return { data: queues as Queue[], hasMore: !!NextToken, cursor: NextToken };
-      },
+      const queues = await Promise.all(
+        (QueueUrls ?? []).map(async (queueUrl) => {
+          const { Attributes: attributes } = await new SQSClient({}).send(
+            new GetQueueAttributesCommand({ QueueUrl: queueUrl, AttributeNames: ["All"] }),
+          );
+
+          return { queueUrl, attributes } as Queue;
+        }),
+      );
+
+      return queues.filter((q) => !!q && !!q.queueUrl && !!q.attributes && !!q.attributes.QueueArn);
+    },
     [prefixQuery],
-    { execute: isReadyToFetch() },
+    { execute: isReadyToFetch(), failureToastOptions: { title: "❌Failed to load queues" } },
   );
 
   return {
     queues,
     error,
     isLoading: (!queues && !error) || isLoading,
-    revalidate,
-    pagination,
+    mutate,
   };
 };

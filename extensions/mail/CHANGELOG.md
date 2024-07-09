@@ -1,5 +1,22 @@
 # Mail Changelog
 
+## [Fix] - 2024-09-02
+
+Fix an issue where a mailbox name containing a comma causes an incorrect mailbox name after string splitting.
+
+## [Update README.md] - 2024-08-31
+
+- Update README.md
+
+## [Fixes and Improvements] - 2024-08-14
+
+- [#13936](https://github.com/raycast/extensions/issues/13936): Fixed See Recent Messages to factor in Message Limit.
+- Visual Improvements for See Recent Messages and See Important Messages commands.
+- Improved error handling for See Recent Messages and See Important Messages commands.
+- Message Actions: Fixed rendering order for "See Message" and "Open in Mail" actions.
+- Confirmation toast instead of HUDs to better prompt users for all no-view commands.
+- Upgraded the dependencies
+
 ## [Enhancement] - 2024-04-12
 
 Add text delimiters to multiple email addresses in the mailbox caption

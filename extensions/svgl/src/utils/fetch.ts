@@ -4,7 +4,9 @@ import { Category, Svg } from "../type";
 import { ONE_WEEK_MS, withCache } from "./cache";
 
 export const APP_URL = "https://svgl.app";
-export const API_URL = `${APP_URL}/api`;
+export const API_URL = "https://api.svgl.app";
+// Because copy react component is using the old API, we need to keep the old API URL.
+export const OLD_API_URL = `${APP_URL}/api`;
 
 interface SvrgApiResponse {
   data: string;
@@ -12,7 +14,7 @@ interface SvrgApiResponse {
 
 export const fetchSvgs = async () => {
   return withCache("svgl_svgs", async () => {
-    const svgsResponse = await fetch(`${API_URL}/svgs`);
+    const svgsResponse = await fetch(API_URL);
     if (!svgsResponse.ok) {
       throw new Error(`Error ${svgsResponse.status}, please try again later.`);
     }
@@ -46,7 +48,7 @@ const fetchReactComponent = async (url: string, name: string, tsx: boolean) => {
   return withCache(
     `svgl_svgr_${url}_${tsx}`,
     async () => {
-      const res = await fetch(`${API_URL}/svgs/svgr`, {
+      const res = await fetch(`${OLD_API_URL}/svgs/svgr`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

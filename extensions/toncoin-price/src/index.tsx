@@ -12,7 +12,12 @@ export default function Command() {
     <MenuBarExtra
       title={error ? "Error" : data?.lastPrice}
       isLoading={isLoading}
-      icon="../assets/toncoin-logo.svg"
+      icon={{
+        source: {
+          light: "../assets/toncoin-logo-dark.svg",
+          dark: "../assets/toncoin-logo-light.svg",
+        },
+      }}
       tooltip="Show Toncoin price"
     >
       {spotLinks.section && (

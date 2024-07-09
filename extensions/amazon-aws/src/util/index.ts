@@ -36,11 +36,13 @@ export function resourceToConsoleLink(resourceId: string | undefined, resourceTy
     case "AWS::CodePipeline::Pipeline":
       return `${AWS_URL_BASE}/codesuite/codepipeline/pipelines/${resourceId}/view?region=${AWS_REGION}`;
     case "AWS::S3::Bucket":
-      return `https://s3.console.aws.amazon.com/s3/buckets/${resourceId}`;
+      return `https://s3.console.aws.amazon.com/s3/buckets/${resourceId}?region=${AWS_REGION}`;
     case "AWS::S3::Object": {
       const [bucket, ...objectKey] = resourceId.split("/");
       return `https://s3.console.aws.amazon.com/s3/object/${bucket}?&prefix=${objectKey.join("/")}`;
     }
+    case "AWS::S3::BucketPolicy":
+      return `https://s3.console.aws.amazon.com/s3/buckets/${resourceId}?region=${AWS_REGION}&tab=permissions`;
     case "AWS::SQS::Queue":
       return `${AWS_URL_BASE}/sqs/v2/home?region=${AWS_REGION}#/queues/${encodeURIComponent(resourceId)}`;
     case "AWS::SNS::Topic":
@@ -71,21 +73,6 @@ export const getErrorMessage = (error: unknown) => {
   }
 
   return String(error);
-};
-
-export const uniqBy = <T>(array: T[], iteratee: (item: T) => string | number): T[] => {
-  const seen = new Set<string | number>();
-  const result: T[] = [];
-
-  for (const item of array) {
-    const criterion = iteratee(item);
-    if (!seen.has(criterion)) {
-      seen.add(criterion);
-      result.push(item);
-    }
-  }
-
-  return result;
 };
 
 export const formatBytes = (bytes: number) => {

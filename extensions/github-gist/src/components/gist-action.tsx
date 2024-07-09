@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Application, Clipboard, Icon, open, showHUD, showToast, Toast } from "@raycast/api";
 import { alertDialog, raySo } from "../util/utils";
-import { deleteGist, Gist, GithubGistTag, starGist, unStarGist } from "../util/gist-utils";
-import CreateGist from "../create-gist";
+import { CreateGistForm } from "../create-gist";
 import { primaryAction } from "../types/preferences";
 import { MutatePromise } from "@raycast/utils";
+import { Gist, GithubGistTag } from "../util/gist-utils";
+import { getGitHubClient } from "../api/oauth";
 
 export function GistAction(props: {
   gist: Gist;
@@ -11,15 +12,16 @@ export function GistAction(props: {
   gistFileContent: string;
   tag: GithubGistTag;
   gistMutate: MutatePromise<Gist[]>;
-  fronstmostApp: Application;
+  frontmostApp: Application;
 }) {
-  const { gist, gistFileName, gistFileContent, tag, gistMutate, fronstmostApp } = props;
+  const client = getGitHubClient();
+  const { gist, gistFileName, gistFileContent, tag, gistMutate, frontmostApp } = props;
 
   return (
     <>
       <Action
-        title={primaryAction === "copy" ? "Copy to Clipboard" : "Paste to " + fronstmostApp?.name}
-        icon={primaryAction === "copy" ? Icon.Clipboard : { fileIcon: fronstmostApp?.path }}
+        title={primaryAction === "copy" ? "Copy to Clipboard" : "Paste to " + frontmostApp?.name}
+        icon={primaryAction === "copy" ? Icon.Clipboard : { fileIcon: frontmostApp?.path }}
         onAction={async () => {
           if (primaryAction === "copy") {
             await Clipboard.copy(gistFileContent);
@@ -31,8 +33,8 @@ export function GistAction(props: {
         }}
       />
       <Action
-        title={primaryAction === "copy" ? "Paste to " + fronstmostApp?.name : "Copy to Clipboard"}
-        icon={primaryAction === "copy" ? { fileIcon: fronstmostApp?.path } : Icon.Clipboard}
+        title={primaryAction === "copy" ? "Paste to " + frontmostApp?.name : "Copy to Clipboard"}
+        icon={primaryAction === "copy" ? { fileIcon: frontmostApp?.path } : Icon.Clipboard}
         onAction={async () => {
           if (primaryAction === "copy") {
             await Clipboard.paste(gistFileContent);
@@ -55,7 +57,7 @@ export function GistAction(props: {
                     icon={Icon.Star}
                     shortcut={{ modifiers: ["cmd"], key: "s" }}
                     onAction={async () => {
-                      const response = await starGist(gist.gist_id);
+                      const response = await client.starGist(gist.gist_id);
                       if (response.status == 204) {
                         await showToast(Toast.Style.Success, "Gist Stared");
                       } else {
@@ -67,7 +69,7 @@ export function GistAction(props: {
                     title={"Edit Gist"}
                     icon={Icon.Pencil}
                     shortcut={{ modifiers: ["cmd"], key: "e" }}
-                    target={<CreateGist gist={gist} gistMutate={gistMutate} />}
+                    target={<CreateGistForm gist={gist} gistMutate={gistMutate} />}
                   />
                 </>
               );
@@ -79,7 +81,7 @@ export function GistAction(props: {
                   icon={Icon.Star}
                   shortcut={{ modifiers: ["cmd"], key: "s" }}
                   onAction={async () => {
-                    const response = await starGist(gist.gist_id);
+                    const response = await client.starGist(gist.gist_id);
                     if (response.status == 204) {
                       await showToast(Toast.Style.Success, "Gist Stared");
                     } else {
@@ -96,7 +98,7 @@ export function GistAction(props: {
                   icon={Icon.StarDisabled}
                   shortcut={{ modifiers: ["cmd"], key: "u" }}
                   onAction={async () => {
-                    const response = await unStarGist(gist.gist_id);
+                    const response = await client.unStarGist(gist.gist_id);
                     if (response.status == 204) {
                       await showToast(Toast.Style.Success, "Gist Unstared");
                       await gistMutate();
@@ -115,7 +117,7 @@ export function GistAction(props: {
           title={"Create Gist"}
           icon={Icon.PlusTopRightSquare}
           shortcut={{ modifiers: ["cmd"], key: "n" }}
-          target={<CreateGist gist={undefined} gistMutate={gistMutate} />}
+          target={<CreateGistForm gist={undefined} gistMutate={gistMutate} />}
         />
         <Action
           title={"Clone Gist"}
@@ -140,7 +142,7 @@ export function GistAction(props: {
                 "Are you sure you want to delete this gist?",
                 "Confirm",
                 async () => {
-                  const response = await deleteGist(gist.gist_id);
+                  const response = await client.deleteGist(gist.gist_id);
                   if (response.status == 204) {
                     await showToast(Toast.Style.Success, "Gist Deleted");
                     await gistMutate();
@@ -178,11 +180,15 @@ export function GistAction(props: {
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
           snippet={{ name: gistFileName, text: gistFileContent }}
         />
+        <Action.CreateQuicklink
+          shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+          quicklink={{ name: gistFileName, link: gist.html_url }}
+        />
         <Action.OpenInBrowser
           title={"Open in Ray.so"}
-          icon={{ source: { light: "raycast.png", dark: "raycast@dark.png" } }}
+          icon={Icon.RaycastLogoPos}
           shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-          url={raySo(gistFileName, Buffer.from(gistFileContent, "utf-8").toString("base64"))}
+          url={raySo(gistFileName, gistFileContent)}
         />
       </ActionPanel.Section>
     </>

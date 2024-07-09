@@ -1,33 +1,25 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Clipboard,
-  Color,
-  confirmAlert,
-  Icon,
-  Keyboard,
-  showHUD,
-  trash,
-} from "@raycast/api";
-import React from "react";
+import { Action, ActionPanel, Alert, Clipboard, Color, confirmAlert, Icon, Keyboard, LocalStorage } from "@raycast/api";
 import { ActionOpenPreferences } from "./action-open-preferences";
 import { PrimaryAction, primaryAction } from "../types/preferences";
 import { useTerminals } from "../hooks/useTerminals";
-import { bashHistoryFilePath, getShellIcon, runShellCommand, zshHistoryFilePath } from "../utils/shell-utils";
-import { CliTool, Shell, ShellHistory } from "../types/types";
+import { clearShellHistory, getShellIcon, runShellCommand } from "../utils/shell-utils";
+import { Cli, Shell, ShellHistory } from "../types/types";
 import { MutatePromise } from "@raycast/utils/dist/types";
 import KeyEquivalent = Keyboard.KeyEquivalent;
 import ActionStyle = Alert.ActionStyle;
 import { useFrontmostApp } from "../hooks/useFrontmostApp";
+import { CacheKey } from "../utils/constants";
+import { showCustomHud } from "../utils/common-utils";
 
 export function ActionShellCommand(props: {
   shell: Shell;
   shellCommand: string;
-  cliTool: CliTool | undefined;
-  mutate: MutatePromise<ShellHistory[][]>;
+  cliTool: Cli | undefined;
+  mutate: MutatePromise<ShellHistory[][] | undefined, ShellHistory[][] | undefined>;
+  showDetail: boolean;
+  showDetailMutate: MutatePromise<number | undefined, number | undefined>;
 }) {
-  const { shell, shellCommand, cliTool, mutate } = props;
+  const { shell, shellCommand, cliTool, mutate, showDetail, showDetailMutate } = props;
   const { data } = useTerminals();
   const frontmostApps = useFrontmostApp();
   const pasteAppActionTitle = () => {
@@ -50,10 +42,10 @@ export function ActionShellCommand(props: {
         onAction={async () => {
           if (primaryAction === PrimaryAction.PASTE) {
             await Clipboard.paste(shellCommand);
-            await showHUD(`📝 ${shellCommand}`);
+            await showCustomHud(`📝 ${shellCommand}`);
           } else {
             await Clipboard.copy(shellCommand);
-            await showHUD(`📋 ${shellCommand}`);
+            await showCustomHud(`📋 ${shellCommand}`);
           }
         }}
       />
@@ -63,10 +55,10 @@ export function ActionShellCommand(props: {
         onAction={async () => {
           if (primaryAction === PrimaryAction.PASTE) {
             await Clipboard.copy(shellCommand);
-            await showHUD(`📋 ${shellCommand}`);
+            await showCustomHud(`📋 ${shellCommand}`);
           } else {
             await Clipboard.paste(shellCommand);
-            await showHUD(`📝 ${shellCommand}`);
+            await showCustomHud(`📝 ${shellCommand}`);
           }
         }}
       />
@@ -74,10 +66,10 @@ export function ActionShellCommand(props: {
         <Action
           title={"Copy CLI Tool"}
           icon={Icon.Terminal}
-          shortcut={{ modifiers: ["ctrl"], key: "c" }}
+          shortcut={{ modifiers: ["shift", "cmd"], key: "enter" }}
           onAction={async () => {
-            await Clipboard.copy(cliTool?.value || "");
-            await showHUD(`📋 ${cliTool?.value}`);
+            await Clipboard.copy(cliTool?.command || "");
+            await showCustomHud(`📋 ${cliTool?.command}`);
           }}
         />
         <Action.CreateSnippet
@@ -103,6 +95,14 @@ export function ActionShellCommand(props: {
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action
+          title={`Refresh ${shell} History`}
+          icon={Icon.Repeat}
+          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          onAction={async () => {
+            await mutate();
+          }}
+        />
+        <Action
           title={`Clear ${shell} History`}
           icon={{ source: Icon.Trash, tintColor: Color.Red }}
           shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
@@ -115,15 +115,21 @@ export function ActionShellCommand(props: {
                 title: "Confirm",
                 style: ActionStyle.Destructive,
                 onAction: async () => {
-                  if (shell === Shell.ZSH) {
-                    await trash(zshHistoryFilePath);
-                  } else if (shell === Shell.BASH) {
-                    await trash(bashHistoryFilePath);
-                  }
+                  await clearShellHistory(shell);
                   await mutate();
                 },
               },
             });
+          }}
+        />
+        <Action
+          title={`Toggle History Deatil`}
+          icon={Icon.Sidebar}
+          shortcut={{ modifiers: ["shift", "cmd"], key: "d" }}
+          onAction={async () => {
+            LocalStorage.setItem(CacheKey.ShowDetail, !showDetail);
+            await mutate();
+            await showDetailMutate();
           }}
         />
       </ActionPanel.Section>

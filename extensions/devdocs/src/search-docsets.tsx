@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, environment, Icon, Keyboard, List } from "@raycast/api";
 import { getFavicon, useFetch } from "@raycast/utils";
 import { Doc } from "./types";
 import { SearchEntries } from "./search-entries";
@@ -6,21 +6,15 @@ import { SearchEntries } from "./search-entries";
 export default function SearchDocsets(): JSX.Element {
   const { data, isLoading } = useFetch<Doc[]>(`https://devdocs.io/docs/docs.json`, {});
 
-  return (
-    <List isLoading={isLoading}>
-      {data?.map((doc) => (
-        <DocItem key={doc.slug} doc={doc} />
-      ))}
-    </List>
-  );
+  return <List isLoading={isLoading}>{data?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}</List>;
 }
 
 function DocItem({ doc }: { doc: Doc }): JSX.Element {
   const quicklink = {
-    link: `raycast://extensions/pomdtr/devdocs/search-entries?arguments=${encodeURIComponent(
-      JSON.stringify({ slug: doc.slug })
-    )}`,
-    name: doc.version ? `Search ${doc.name} ${doc.version} Entries` : `Search ${doc.name} Entries`,
+    link: `raycast://extensions/${environment.ownerOrAuthorName}/${
+      environment.extensionName
+    }/search-entries?arguments=${encodeURIComponent(JSON.stringify({ slug: doc.slug }))}`,
+    name: doc.version ? `Search DevDocs ${doc.name} ${doc.version} Entries` : `Search DevDocs ${doc.name} Entries`,
   };
   return (
     <List.Item
@@ -37,7 +31,12 @@ function DocItem({ doc }: { doc: Doc }): JSX.Element {
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.CreateQuicklink icon={Icon.Link} quicklink={quicklink} />
+            <Action.CreateQuicklink
+              icon={Icon.Link}
+              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              quicklink={quicklink}
+            />
+            <Action.CopyToClipboard content={doc.slug} shortcut={Keyboard.Shortcut.Common.CopyName} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             {doc.links?.home && (

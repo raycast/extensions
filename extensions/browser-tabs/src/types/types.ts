@@ -13,3 +13,8 @@ export type BrowserTab = {
   browser: Application;
   tabs: Tab[];
 };
+
+export type BrowserSetup = {
+  browser: Application;
+  isChecked: boolean;
+};

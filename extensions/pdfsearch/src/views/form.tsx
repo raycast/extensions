@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
-import { Collection } from "../type";
-import { Action, ActionPanel, Form, LocalStorage, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, environment, Form, LocalStorage, showToast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { lstatSync } from "fs";
 import path from "path";
-import { showFailureToast } from "@raycast/utils";
-import { getValidFiles, supportedFiletypes } from "../util";
+import { useState } from "react";
+import { createOrUpdateCollection, deleteCollection } from "swift:../../swift";
+import { Collection, UpsertCollectionResponse } from "../type";
+import { getValidFiles, supportedFiletypes } from "../utils";
 
 export function CreateCollectionForm(props: {
   collection?: Collection; // if this is defined it means we are editing an existing collection
@@ -20,53 +21,58 @@ export function CreateCollectionForm(props: {
 
   const revalidateName = async () => {
     if (name.length === 0) {
-      setNameError("Name shouldn't be empty!");
+      setNameError("Required");
+      return false;
     } else if (!props.collection && (await LocalStorage.getItem(name))) {
-      // if we are not editing an existing collection and it exists, it means
-      // collection name is not unique
-      setNameError("Name should be unique!");
-    } else if (nameError) {
-      // if both checks pass and there was previosly an existing error, we reset the error
+      setNameError("Name should be unique");
+      return false;
+    } else {
       setNameError(undefined);
+      return true;
     }
   };
 
-  function revalidateFiles() {
+  const handleNameBlur = async () => {
+    await revalidateName();
+  };
+
+  const revalidateFiles = () => {
     if (files.length === 0) {
-      setFileError("Add at least 1 file!");
-    } else if (
-      !files.every((file) => lstatSync(file).isDirectory() || supportedFiletypes.includes(path.extname(file)))
-    ) {
-      // check if there are any individually added files that are not supported
-      setFileError("Unsupported file type detected!");
-    } else if (fileError) {
+      setFileError("Add at least 1 file");
+      return false;
+    } else if (!files.every((file) => lstatSync(file).isDirectory() || supportedFiletypes.has(path.extname(file)))) {
+      setFileError("Unsupported file type detected");
+      return false;
+    } else {
       setFileError(undefined);
+      return true;
     }
-  }
-
-  useEffect(() => {
-    revalidateName();
-  }, [name]);
-
-  useEffect(() => {
-    revalidateFiles();
-  }, [files]);
+  };
 
   const handleSubmit = async (values: Collection) => {
-    if (!fileError && !nameError) {
+    const isNameValid = await revalidateName();
+    const areFilesValid = revalidateFiles();
+
+    if (isNameValid && areFilesValid) {
       try {
         const validFiles = getValidFiles(values.files);
         if (validFiles.length === 0) {
-          setFileError("No supported files found!");
+          setFileError("No supported files found");
           return;
         }
 
-        // if editing a collection and name changes, we delete the old collection
         if (props.collection && props.collection.name !== values.name) {
           await LocalStorage.removeItem(props.collection.name);
+          await deleteCollection(props.collection.name, environment.supportPath);
         }
-        await LocalStorage.setItem(values.name, JSON.stringify(values));
 
+        const response: UpsertCollectionResponse = await createOrUpdateCollection(
+          values.name,
+          environment.supportPath,
+          validFiles,
+        );
+        values.indexedFiles = response.indexedFiles;
+        await LocalStorage.setItem(values.name, JSON.stringify(values));
         showToast({ title: "Success", message: "Collection saved!" });
       } catch (err) {
         showFailureToast(err);
@@ -80,18 +86,18 @@ export function CreateCollectionForm(props: {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Save Collection" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextField
         id="name"
-        title="Collection Name"
-        placeholder="Collection Name (Must be unique)"
+        title="Name"
         error={nameError}
         onChange={(e) => {
           setName(e);
         }}
+        onBlur={handleNameBlur}
         value={name}
       />
       <Form.TextArea id="description" title="Description" onChange={setDescription} value={description} />

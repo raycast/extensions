@@ -7,14 +7,17 @@
   "author": "vimtor",
   "contributors": [
     "shubzkothekar",
-    "JonathanWbn",
     "nikos",
     "menahishayan",
     "pernielsentikaer",
-    "igor9silva",
     "Ek217",
     "sergiivelykodnyi",
-    "j3lte"
+    "j3lte",
+    "peterbrinck"
+  ],
+  "pastContributors": [
+    "igor9silva",
+    "JonathanWbn"
   ],
   "license": "MIT",
   "preferences": [

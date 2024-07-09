@@ -1,6 +1,6 @@
 # Bear Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2024-07-03
 
 - Tags don't appear in dropdown if all associated notes are either trashed or archived: [#13297](https://github.com/raycast/extensions/issues/13297)
 

@@ -3,10 +3,37 @@
 ## [Glue command] - {PR_MERGE_DATE}
 
 - Add Glue command to list Glue jobs, job runs, job definitions and to trigger a job run [#13316](https://github.com/raycast/extensions/pull/13316)
+## [Pipelines, DDB, CFN commands] - 2024-07-29
+
+- Pipelines: Reduced the size per page to reduce throttling: [#13304](https://github.com/raycast/extensions/issues/13304)
+- DDB: Handle pagination upfront instead of Raycast pagination. Also, adds frecency sorting.
+- DDB: Add item count to accessories and handle mutation during item update/deletion.
+- CFN: Handle pagination upfront instead of Raycast pagination. Also, adds frecency sorting.
+
+## [S3 Command] - 2024-07-12
+
+- added reverse order option
+- added bucket policy view
+
+## [SQS, Secrets, Pipelines and Logs Commands] - 2024-07-08
+
+- No unnecessary pagination with typeahead for SQS, Secrets and Logs commands. Pagination with typeahead is redundant.
+- Added frecency sorting for SQS, Secrets and Logs command results.
+- SQS: Reduced max items per search to 25 to reduce throttling, added mutation after sending message and purging.
+- Secrets: Removed pre-loading resource policy and instead provided an ad-hoc action. This reduces [throttling](https://github.com/raycast/extensions/issues/13296).
+- Pipelines: Changed icons and improved mutation logic.
+
+## [Improvements] - 2024-07-05
+
+- Adds copy option to s3 command
+
+## [Contributor maintenance] - 2024-07-04
+
+- Move @JonathanWbn to list of past contributors
 
 ## [Fixes] - 2024-07-03
 
-- Reverts back to rendering all pipelines at once. We can add wait later if this causes issues
+- Reverts to rendering all pipelines at once. We can add wait later if this causes issues
 - Optimized the mutation for pipeline actions even further.
 - Reduced AWS calls during initial rendering. Also revalidates the list in pipeline action sub-menus every time it is opened.
 

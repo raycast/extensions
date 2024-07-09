@@ -5,6 +5,9 @@
   "description": "Automatically quit the application after all windows are closed",
   "icon": "extension-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "alextlopez11"
+  ],
   "categories": [
     "Applications",
     "System"
@@ -139,6 +142,18 @@
             {
               "title": "20m",
               "value": "20"
+            },
+            {
+              "title": "30m",
+              "value": "30"
+            },
+            {
+              "title": "45m",
+              "value": "45"
+            },
+            {
+              "title": "60m",
+              "value": "60"
             }
           ]
         }

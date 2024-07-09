@@ -20,7 +20,8 @@
     "erics118",
     "tm.wrnr",
     "tleo19",
-    "lin"
+    "lin",
+    "yug2005"
   ],
   "keywords": [
     "vscode",
@@ -38,7 +39,7 @@
     },
     {
       "name": "open-with-vscode",
-      "title": "Open With Visual Studio Code",
+      "title": "Open with Visual Studio Code",
       "subtitle": "Visual Studio Code",
       "description": "Opens the currently selected Finder item with Visual Studio Code.",
       "mode": "no-view"

@@ -1,35 +1,23 @@
-import { Grid, Action, Image, ActionPanel, Cache } from "@raycast/api";
-import fetch from "node-fetch";
+import { Grid, Action, Image, ActionPanel } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
+import * as icons from "css.gg/icons/icons.json";
 
 interface Icon {
   nr: number;
   name: string;
   tags: string;
   css: string;
-  views: string;
-  downloads: string;
-  bytes: string;
-  markup: string;
-  standard: string;
-  import: string;
-  json: string;
-  svg_path: string;
-}
-
-interface ApiResponse {
-  [key: string]: Icon[];
+  svg: string;
 }
 
 interface IconProps {
   icon: Icon;
-  svgPath: string;
 }
 
-function IconComponent({ icon, svgPath }: IconProps) {
+function GG({ icon }: IconProps) {
   const key = uuidv4();
-  const keywords = [icon.name, ...icon.tags.split(" ")];
+  const keywords = [icon.name, ...(icon.tags ? icon.tags.split(" ") : [])];
 
   const tint = {
     light: "#000000",
@@ -37,15 +25,12 @@ function IconComponent({ icon, svgPath }: IconProps) {
     adjustContrast: true,
   };
 
+  const encodedSvg = `data:image/svg+xml;base64,${btoa(icon.svg)}`;
+
   const content = {
-    source: svgPath + icon.name + ".svg",
+    source: encodedSvg,
     tintColor: tint,
   };
-
-  const decorator = (browser: string) => ({
-    source: svgPath + browser + ".svg",
-    tintColor: tint,
-  });
 
   return (
     <Grid.Item
@@ -55,15 +40,14 @@ function IconComponent({ icon, svgPath }: IconProps) {
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Options">
-            <Action.Paste content={icon.svg_path} icon={decorator("browser")} />
+            <Action.Paste content={icon.svg} />
             <Action.CopyToClipboard
               title="Copy to Clipboard"
-              content={icon.svg_path}
-              icon={decorator("clipboard")}
+              content={icon.svg}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
             <Action.OpenInBrowser
-              url={`https://css.gg/${icon.name}`}
+              url={`https://css.gg/icon/${icon.name}`}
               shortcut={{ modifiers: ["shift"], key: "enter" }}
             />
           </ActionPanel.Section>
@@ -81,33 +65,17 @@ function IconComponent({ icon, svgPath }: IconProps) {
 }
 
 export default function Command() {
-  const [icons, setIcons] = useState<Icon[]>([]);
+  const [iconsState, setIconsState] = useState<Icon[]>([]);
   const [allIcons, setAllIcons] = useState<Icon[]>([]);
   const [selectedTag, setSelectedTag] = useState<string>("all");
 
-  const svgPath = "https://cdn.css.gg/svg/";
-
   useEffect(() => {
-    const cache = new Cache();
-    const cachedResponse = cache.get("icons");
-
-    if (cachedResponse) {
-      const allIcons = Object.values(JSON.parse(cachedResponse) as ApiResponse).flat();
-      setIcons(allIcons);
-      setAllIcons(allIcons);
-    } else {
-      fetch("https://cdn.css.gg/icons.json")
-        .then((response) => response.json())
-        .then((data: unknown) => {
-          const allIcons = Object.values(data as ApiResponse).flat();
-          setIcons(allIcons);
-          setAllIcons(allIcons);
-          cache.set("icons", JSON.stringify(data));
-        });
-    }
+    const allIcons = Object.values(icons).flat();
+    setIconsState(allIcons);
+    setAllIcons(allIcons);
   }, []);
 
-  const tags = [...new Set(allIcons.flatMap((icon) => icon.tags.split(" ")))];
+  const tags = [...new Set(allIcons.flatMap((icon) => (icon.tags ? icon.tags.split(" ") : [])))];
 
   function titleCase(str: string) {
     return str.charAt(0).toUpperCase() + str.slice(1);
@@ -116,8 +84,8 @@ export default function Command() {
   const sections = tags
     .sort()
     .map((tag) => {
-      const filteredIcons = icons
-        .filter((icon) => icon.tags.split(" ").includes(tag))
+      const filteredIcons = iconsState
+        .filter((icon) => icon.tags && icon.tags.split(" ").includes(tag))
         .sort((a, b) => a.name.localeCompare(b.name));
       const subtitle = `${filteredIcons.length} ${filteredIcons.length === 1 ? "icon" : "icons"}`;
 
@@ -126,7 +94,7 @@ export default function Command() {
         section: (
           <Grid.Section key={uuidv4()} title={titleCase(tag)} subtitle={subtitle}>
             {filteredIcons.map((icon) => (
-              <IconComponent key={uuidv4()} icon={icon} svgPath={svgPath} />
+              <GG key={uuidv4()} icon={icon} />
             ))}
           </Grid.Section>
         ),
@@ -147,10 +115,10 @@ export default function Command() {
           onChange={(tag) => {
             if (tag === "all") {
               setSelectedTag(tag);
-              setIcons(allIcons);
+              setIconsState(allIcons);
             } else {
               setSelectedTag(tag);
-              setIcons(allIcons.filter((icon) => icon.tags.split(" ").includes(tag)));
+              setIconsState(allIcons.filter((icon) => icon.tags && icon.tags.split(" ").includes(tag)));
             }
           }}
           value={selectedTag}

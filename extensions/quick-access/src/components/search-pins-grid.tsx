@@ -1,128 +1,55 @@
-import React, { useState } from "react";
-import { getPreferenceValues, Grid } from "@raycast/api";
-import { DirectoryType, Layout } from "../types/types";
-import { Preferences } from "../types/preferences";
-import { copyLatestFile, localDirectoryWithFiles } from "../hooks/hooks";
-import { tagDirectoryTypes } from "../utils/constants";
+import React, { useMemo, useState } from "react";
+import { Grid } from "@raycast/api";
+import { Layout, TypeDirectoryEnum } from "../types/types";
+import { DirectoryTagTypes } from "../utils/constants";
 import { QuickAccessEmptyView } from "./quick-access-empty-view";
-import { parse } from "path";
-import { directory2File, isImage } from "../utils/common-utils";
-import { ActionOnPins } from "./action-on-pins";
+import { columns, itemInset } from "../types/preferences";
+import { TagDropdown } from "./tag-dropdown";
+import { usePinnedDirectories } from "../hooks/usePinnedDirectories";
+import { useFrontmostApp } from "../hooks/useFrontmostApp";
+import { SearchPinsGridItem } from "./search-pins-grid-item";
 
 export function SearchPinsGrid() {
-  const { columns, itemInset, primaryAction, rememberTag, autoCopyLatestFile, showOpenFolders } =
-    getPreferenceValues<Preferences>();
   const [tag, setTag] = useState<string>("All");
-  const [refresh, setRefresh] = useState<number>(0);
+  const { data, isLoading, mutate } = usePinnedDirectories();
 
-  const { directoryWithFiles, loading } = localDirectoryWithFiles(refresh, showOpenFolders);
+  const allDirectories = useMemo(() => {
+    return data || [];
+  }, [data]);
+  const pinnedDirectories = useMemo(() => {
+    if (!data) return [];
+    return data[1].directories;
+  }, [data]);
 
-  //preference: copy the latest file
-  copyLatestFile(autoCopyLatestFile, directoryWithFiles);
+  const { data: frontmostApp } = useFrontmostApp();
 
   return (
     <Grid
-      isLoading={loading}
+      isLoading={isLoading}
       columns={parseInt(columns)}
-      aspectRatio={"1"}
+      aspectRatio={"4/3"}
       inset={itemInset as Grid.Inset}
       fit={Grid.Fit.Contain}
       searchBarPlaceholder={"Search files"}
-      searchBarAccessory={
-        directoryWithFiles.length !== 0 ? (
-          <Grid.Dropdown onChange={setTag} tooltip={"File type"} storeValue={rememberTag}>
-            <Grid.Dropdown.Item key={"All"} title={"All"} value={"All"} />
-            <Grid.Dropdown.Section title={"File"}>
-              {directoryWithFiles.map((value, index) => {
-                return (
-                  <Grid.Dropdown.Item
-                    key={index + value.directory.name}
-                    title={value.directory.name}
-                    value={value.directory.name}
-                  />
-                );
-              })}
-            </Grid.Dropdown.Section>
-            <Grid.Dropdown.Section title={"Type"}>
-              {tagDirectoryTypes.map((directoryType, index) => {
-                return <Grid.Dropdown.Item key={index + directoryType} title={directoryType} value={directoryType} />;
-              })}
-            </Grid.Dropdown.Section>
-          </Grid.Dropdown>
-        ) : null
-      }
+      searchBarAccessory={<TagDropdown directoryWithFiles={allDirectories} setTag={setTag} />}
     >
-      <QuickAccessEmptyView
-        layout={Layout.GRID}
-        title={directoryWithFiles.length === 0 ? "Please pin first" : "No files"}
-        description={directoryWithFiles.length === 0 ? "You can pin files or folders from the Action Panel" : ""}
-        setRefresh={setRefresh}
-        directoryWithFiles={directoryWithFiles}
-      />
-      {directoryWithFiles.map(
-        (directory, directoryIndex) =>
-          (tag == directory.directory.name || tag == "All" || tagDirectoryTypes.includes(tag)) &&
-          (directory.directory.type === DirectoryType.FOLDER ? (
-            <Grid.Section
-              key={directory.directory.id + directoryIndex}
-              title={directory.directory.name}
-              subtitle={directory.files.length.toString()}
-            >
-              {directory.files.map(
-                (fileValue, fileIndex) =>
-                  (tag === fileValue.type || !tagDirectoryTypes.includes(tag)) && (
-                    <Grid.Item
-                      id={JSON.stringify(fileValue)}
-                      key={fileValue.path + fileIndex}
-                      content={
-                        isImage(parse(fileValue.path).ext) ? { source: fileValue.path } : { fileIcon: fileValue.path }
-                      }
-                      title={fileValue.name}
-                      quickLook={{ path: fileValue.path, name: fileValue.name }}
-                      actions={
-                        <ActionOnPins
-                          primaryAction={primaryAction}
-                          directoryIndex={directoryIndex}
-                          directory={directory}
-                          file={fileValue}
-                          showDetail={false}
-                          setRefresh={setRefresh}
-                          setRefreshDetail={undefined}
-                        />
-                      }
-                    />
-                  )
-              )}
-            </Grid.Section>
-          ) : (
-            <Grid.Section title={directory.directory.name} key={directory.directory.id + directoryIndex}>
-              <Grid.Item
-                id={JSON.stringify(directory2File(directory.directory))}
-                key={directory.directory.id + directoryIndex}
-                title={directory.directory.name}
-                quickLook={{
-                  path: directory2File(directory.directory).path,
-                  name: directory2File(directory.directory).name,
-                }}
-                content={
-                  isImage(parse(directory.directory.path).ext)
-                    ? { source: directory.directory.path }
-                    : { fileIcon: directory.directory.path }
-                }
-                actions={
-                  <ActionOnPins
-                    primaryAction={primaryAction}
-                    directoryIndex={directoryIndex}
-                    directory={directory}
-                    file={directory2File(directory.directory)}
-                    showDetail={false}
-                    setRefresh={setRefresh}
-                    setRefreshDetail={undefined}
-                  />
-                }
+      <QuickAccessEmptyView layout={Layout.GRID} />
+      {allDirectories.map((typeDirectory) =>
+        typeDirectory.directories.map(
+          (directory, directoryIndex) =>
+            (tag == directory.directory.name || tag == "All" || DirectoryTagTypes.includes(tag)) && (
+              <SearchPinsGridItem
+                key={typeDirectory.type + directory.directory.id + directoryIndex}
+                isPinnedDirectories={typeDirectory.type === TypeDirectoryEnum.PinnedFolder}
+                pinnedDirectories={pinnedDirectories}
+                directory={directory}
+                directoryIndex={directoryIndex}
+                tag={tag}
+                frontmostApp={frontmostApp}
+                mutate={mutate}
               />
-            </Grid.Section>
-          ))
+            ),
+        ),
       )}
     </Grid>
   );

@@ -81,3 +81,7 @@ You can defined one or multiple home network SSIDs.
 
 If the current WiFi SSID is `MyWifi1` the internal URL would be used.
 If the current WiFi SSID is `AntoherNetwork` the Home Assistant URL would be used.
+
+## Requirements
+
+The minimum required version of Home Assistant is `2024.04`.

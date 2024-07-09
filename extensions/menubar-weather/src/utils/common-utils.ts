@@ -1,4 +1,4 @@
-import { Cache, getPreferenceValues, Icon } from "@raycast/api";
+import { Cache, getPreferenceValues } from "@raycast/api";
 import { Preferences } from "../types/preferences";
 import { OpenMeteoWeather } from "../types/types";
 import {
@@ -22,9 +22,7 @@ import {
 } from "./weather-utils";
 
 export enum CacheKey {
-  CURRENT_WEATHER = "Open-Meteo Weather",
-  LOCATION = "Location",
-  REFRESH_TIME = "Refresh Time",
+  LATEST_WEATHER = "Open-Meteo Weather",
 
   ICON_STYLE = "Icon Style",
   CITY_NAME = "City Name",
@@ -186,72 +184,7 @@ function getCacheBoolean(key: string, defaultValue = false) {
 }
 
 export function getDateIcon(day: string) {
-  switch (day) {
-    case "01":
-      return Icon.Number01;
-    case "02":
-      return Icon.Number02;
-    case "03":
-      return Icon.Number03;
-    case "04":
-      return Icon.Number04;
-    case "05":
-      return Icon.Number05;
-    case "06":
-      return Icon.Number06;
-    case "07":
-      return Icon.Number07;
-    case "08":
-      return Icon.Number08;
-    case "09":
-      return Icon.Number09;
-    case "10":
-      return Icon.Number10;
-    case "11":
-      return Icon.Number11;
-    case "12":
-      return Icon.Number12;
-    case "13":
-      return Icon.Number13;
-    case "14":
-      return Icon.Number14;
-    case "15":
-      return Icon.Number15;
-    case "16":
-      return Icon.Number16;
-    case "17":
-      return Icon.Number17;
-    case "18":
-      return Icon.Number18;
-    case "19":
-      return Icon.Number19;
-    case "20":
-      return Icon.Number20;
-    case "21":
-      return Icon.Number21;
-    case "22":
-      return Icon.Number22;
-    case "23":
-      return Icon.Number23;
-    case "24":
-      return Icon.Number24;
-    case "25":
-      return Icon.Number25;
-    case "26":
-      return Icon.Number26;
-    case "27":
-      return Icon.Number27;
-    case "28":
-      return Icon.Number28;
-    case "29":
-      return Icon.Number29;
-    case "30":
-      return Icon.Number30;
-    case "31":
-      return Icon.Number31;
-    default:
-      return Icon.Number00;
-  }
+  return `number-${day}-16`;
 }
 
 export function getMenuItem(weather: OpenMeteoWeather | undefined): string[] {

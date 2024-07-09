@@ -33,7 +33,7 @@ export default function Main(): JSX.Element {
         return results;
       }),
     [searchText],
-    { abortable, keepPreviousData: true }
+    { abortable, keepPreviousData: true },
   );
 
   // when the installed casks and formulaes have been fetched, we update the results
@@ -48,8 +48,8 @@ export default function Main(): JSX.Element {
     });
   }, [installed]);
 
-  const formulae = filter != InstallableFilterType.casks ? results?.formulae ?? [] : [];
-  const casks = filter != InstallableFilterType.formulae ? results?.casks ?? [] : [];
+  const formulae = filter != InstallableFilterType.casks ? (results?.formulae ?? []) : [];
+  const casks = filter != InstallableFilterType.formulae ? (results?.casks ?? []) : [];
 
   return (
     <FormulaList

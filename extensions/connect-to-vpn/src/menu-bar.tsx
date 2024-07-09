@@ -1,4 +1,4 @@
-import { MenuBarExtra, Icon, showToast, Toast } from "@raycast/api";
+import { MenuBarExtra, showToast, Toast } from "@raycast/api";
 import { NetworkService, normalizeHardwarePort, openNetworkSettings, useNetworkServices } from "./network-services";
 
 export default function Command() {
@@ -16,8 +16,16 @@ export default function Command() {
     showToast(Toast.Style.Failure, "Something went wrong", error.message);
   }
 
+  const isConnected = [...favoriteServices, ...otherServices, ...(!hideInvalidDevices ? invalidServices : [])].some(
+    (s) => s.status === "connected",
+  );
+
   return (
-    <MenuBarExtra icon={Icon.Network} tooltip="Network Services" isLoading={isLoading}>
+    <MenuBarExtra
+      icon={isConnected ? "network-connected.png" : "network-disconnected.png"}
+      tooltip="Network Services"
+      isLoading={isLoading}
+    >
       {favoriteServices.length > 0 && (
         <MenuBarExtra.Section title="Favorites">
           {favoriteServices.map((service) => (

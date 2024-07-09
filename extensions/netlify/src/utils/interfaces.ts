@@ -142,6 +142,34 @@ export interface DomainSearch {
   renewal_price: string | null;
 }
 
+type Scope = 'builds' | 'functions' | 'runtime' | 'post-processing';
+interface EnvVarValue {
+  id: string;
+  value: string;
+  context:
+    | 'all'
+    | 'dev'
+    | 'branch-deploy'
+    | 'deploy-preview'
+    | 'production'
+    | 'branch';
+  context_parameter?: string;
+  role?: string;
+}
+export interface EnvVar {
+  key: string;
+  scopes: Scope[];
+  values: EnvVarValue[];
+  is_secret: boolean;
+  updated_at: string;
+  updated_by: {
+    id: string;
+    full_name: string;
+    email: string;
+    avatar_url: string;
+  };
+}
+
 export type Framework =
   | 'angular'
   | 'astro'

@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { LocalStorage, environment } from "@raycast/api";
+import { LocalStorage, Toast, environment, showToast } from "@raycast/api";
 
 import GithubOcto from "../Octokit";
 import { TopicType } from "../types/GithubType";
@@ -12,6 +12,7 @@ const DATA_PATH = path.resolve(environment.supportPath, "data");
  * @param topic|string
  */
 async function getPageFromGithub(topic: TopicType): Promise<string> {
+  await showToast(Toast.Style.Animated, "Fetching from GitHub");
   const octokit = new GithubOcto();
 
   const { data } = await octokit.request(`GET /repos/vercel/next.js/contents/docs/${topic.path}`, {
@@ -57,10 +58,10 @@ async function writeToFile(fpath: string, content: string): Promise<void> {
  */
 export async function getPageFromCache(topic: TopicType): Promise<string | undefined> {
   try {
+    await showToast(Toast.Style.Animated, "Fetching from Cache");
     return fs.readFileSync(path.resolve(DATA_PATH, topic.path), "utf8");
   } catch (err) {
     clearStorageItem(topic.path);
-    console.error("Failed to get data from cache:", err);
     return undefined;
   }
 }
@@ -69,8 +70,9 @@ export async function getPageFromCache(topic: TopicType): Promise<string | undef
  * Check for updates in docs and update cache
  */
 export async function checkForUpdates(topic: TopicType): Promise<string | null> {
-  const last_updated: string = await getStorageItem(topic.path);
-  const last_updated_date = new Date(last_updated).setHours(0, 0, 0, 0);
+  await showToast(Toast.Style.Animated, "Checking for Updates");
+  const last_updated: string | undefined = await getStorageItem(topic.path);
+  const last_updated_date = new Date(last_updated || "").setHours(0, 0, 0, 0);
   const today = new Date().setHours(0, 0, 0, 0);
 
   // If the data is older than 24hours, fetch it from Github

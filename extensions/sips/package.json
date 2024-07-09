@@ -17,7 +17,7 @@
     "rotate",
     "sips"
   ],
-  "version": "1.8.0",
+  "version": "1.8.1",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "contributors": [
@@ -95,6 +95,15 @@
         }
       ],
       "default": "replaceOriginal",
+      "required": false
+    },
+    {
+      "title": "Image Operation Settings",
+      "name": "useLosslessConversion",
+      "description": "Whether to use lossless conversion when performing operations on WebP and AVIF images.",
+      "label": "Lossless Conversions",
+      "type": "checkbox",
+      "default": false,
       "required": false
     }
   ],
@@ -515,7 +524,7 @@
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
     "@types/tar": "^6.1.11",
-    "@typescript-eslint/eslint-plugin": "^7.14.1",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5"

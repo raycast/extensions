@@ -25,13 +25,13 @@ async function getActiveWindow(): Promise<Window>;
 #### Example
 
 ```typescript
-import { getActiveWindow, setWindowBounds, showToast } from "@raycast/api";
+import { WindowManagement, showToast } from "@raycast/api";
 
 export default async function Command() {
   try {
-    const window = await getActiveWindow();
+    const window = await WindowManagement.getActiveWindow();
     if (window.positionable) {
-      setWindowBounds({ id: window.id, bounds: { position: { x: 100 } } });
+      WindowManagement.setWindowBounds({ id: window.id, bounds: { position: { x: 100 } } });
     }
   } catch (error) {
     showToast({ title: "Could not move window", message: error.message, style: Toast.Style.Failure });
@@ -56,16 +56,16 @@ async function getWindowsOnActiveDesktop(): Promise<Window[]>;
 #### Example
 
 ```typescript
-import { getWindowsOnActiveDesktop, setWindowBounds, showToast } from "@raycast/api";
+import { WindowManagement, showToast } from "@raycast/api";
 
 export default async function Command() {
-  const windows = await getWindowsOnActiveDesktop();
+  const windows = await WindowManagement.getWindowsOnActiveDesktop();
   const chrome = windows.find((x) => x.application?.bundleId === "com.google.Chrome");
   if (!chrome) {
     showToast({ title: "Couldn't find chrome", style: Toast.Style.Failure });
     return;
   }
-  setWindowBounds({ id: chrome.id, bounds: { position: { x: 100 } } });
+  WindowManagement.setWindowBounds({ id: chrome.id, bounds: { position: { x: 100 } } });
 }
 ```
 
@@ -86,10 +86,10 @@ async function getDesktops(): Promise<Desktop[]>;
 #### Example
 
 ```typescript
-import { getDesktops, showToast } from "@raycast/api";
+import { WindowManagement, showToast } from "@raycast/api";
 
 export default function Command() {
-  const desktops = await getDesktops();
+  const desktops = await WindowManagement.getDesktops();
   const screens = Set(desktops.map((desktop) => desktop.screenId));
   showToast({ title: `Found ${desktops.length} desktops on ${screens.size} screens.` });
 }
@@ -125,13 +125,13 @@ async function setWindowBounds(
 #### Example
 
 ```typescript
-import { getActiveWindow, setWindowBounds, showToast } from "@raycast/api";
+import { WindowManagement, showToast } from "@raycast/api";
 
 export default async function Command() {
   try {
-    const window = await getActiveWindow();
+    const window = await WindowManagement.getActiveWindow();
     if (window.positionable) {
-      setWindowBounds({ id: window.id, bounds: { position: { x: 100 } } });
+      WindowManagement.setWindowBounds({ id: window.id, bounds: { position: { x: 100 } } });
     }
   } catch (error) {
     showToast({ title: "Could not move window", message: error.message, style: Toast.Style.Failure });

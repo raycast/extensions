@@ -1,5 +1,10 @@
 # Badges Changelog
 
+## [Enhancement] - 2024-07-09
+
+- Bump dependencies
+- Use color wheel for picking colors
+
 ## [Enhancement] - 2024-05-31
 
 - Refactor text inputs

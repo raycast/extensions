@@ -7,13 +7,11 @@ import {
   Action,
   Toast,
 } from '@raycast/api';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import Service, {
   AuthError,
   DeployResponse,
-  DomainResponse,
   NetworkError,
-  Owner,
   ServiceResponse,
 } from './service';
 import {
@@ -29,13 +27,40 @@ import {
   getDomainIcon,
   getServiceIcon,
 } from './utils';
+import { useCachedPromise } from '@raycast/utils';
 
 const renderService = new Service(getKey());
 
 export default function Command() {
-  const [owners, setOwners] = useState<Owner[]>([]);
-  const [services, setServices] = useState<ServiceResponse[]>([]);
-  const [isLoading, setLoading] = useState<boolean>(true);
+  const { isLoading: isLoadingOwners, data: owners } = useCachedPromise(
+    async () => {
+      const owners = await renderService.getOwners();
+      return owners;
+    },
+    [],
+    {
+      onError(error) {
+        handleError(error);
+      },
+      initialData: [],
+      keepPreviousData: true,
+    },
+  );
+  const { isLoading: isLoadingServices, data: services } = useCachedPromise(
+    async () => {
+      const services = await renderService.getServices();
+      return services;
+    },
+    [],
+    {
+      onError(error) {
+        handleError(error);
+      },
+      initialData: [],
+      keepPreviousData: true,
+    },
+  );
+  const isLoading = isLoadingOwners || isLoadingServices;
 
   const serviceMap = useMemo(() => {
     const map: Record<string, ServiceResponse[]> = {};
@@ -61,24 +86,8 @@ export default function Command() {
     return map;
   }, [owners]);
 
-  useEffect(() => {
-    async function fetchServices() {
-      try {
-        const owners = await renderService.getOwners();
-        const services = await renderService.getServices();
-        setOwners(owners);
-        setServices(services);
-      } catch (e) {
-        handleError(e);
-      }
-      setLoading(false);
-    }
-
-    fetchServices();
-  }, []);
-
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search service">
       {Object.keys(ownerMap).map((owner) => (
         <List.Section key={owner} title={ownerMap[owner]}>
           {serviceMap[owner] &&
@@ -88,10 +97,11 @@ export default function Command() {
                 icon={getServiceIcon(service)}
                 title={service.name}
                 subtitle={formatServiceType(service)}
+                accessories={[{ date: new Date(service.updatedAt) }]}
                 actions={
                   <ActionPanel>
                     <Action.Push
-                      icon={Icon.TextDocument}
+                      icon={Icon.BlankDocument}
                       title="Show Details"
                       target={<ServiceView service={service} />}
                     />
@@ -218,36 +228,38 @@ interface ServiceProps {
 function DeployListView(props: ServiceProps) {
   const { service } = props;
 
-  const [deploys, setDeploys] = useState<DeployResponse[]>([]);
-  const [isLoading, setLoading] = useState<boolean>(true);
+  const { isLoading, data: deploys } = useCachedPromise(
+    async () => {
+      const deploys = await renderService.getDeploys(service.id);
+      return deploys;
+    },
+    [],
+    {
+      onError(error) {
+        handleError(error);
+      },
+      initialData: [],
+    },
+  );
 
   const navigationTitle = `${service.name}: Deploys`;
 
-  useEffect(() => {
-    async function fetchDeploys() {
-      try {
-        const deploys = await renderService.getDeploys(service.id);
-        setDeploys(deploys);
-      } catch (e) {
-        handleError(e);
-      }
-      setLoading(false);
-    }
-
-    fetchDeploys();
-  }, []);
-
   return (
-    <List navigationTitle={navigationTitle} isLoading={isLoading}>
+    <List
+      navigationTitle={navigationTitle}
+      isLoading={isLoading}
+      searchBarPlaceholder="Search deploy"
+    >
       {deploys.map((deploy) => (
         <List.Item
           key={deploy.id}
           icon={getDeployStatusIcon(deploy.status)}
           title={formatCommit(deploy.commit.message)}
+          accessories={[{ date: new Date(deploy.finishedAt) }]}
           actions={
             <ActionPanel>
               <Action.Push
-                icon={Icon.TextDocument}
+                icon={Icon.BlankDocument}
                 title="Show Details"
                 target={<DeployView service={service} deploy={deploy} />}
               />
@@ -315,27 +327,28 @@ interface EnvVariableListProps {
 function EnvVariableListView(props: EnvVariableListProps) {
   const { serviceId, serviceName } = props;
 
-  const [variables, setVariables] = useState<Record<string, string>>({});
-  const [isLoading, setLoading] = useState<boolean>(true);
+  const { isLoading, data: variables } = useCachedPromise(
+    async () => {
+      const variables = await renderService.getEnvVariables(serviceId);
+      return variables;
+    },
+    [],
+    {
+      onError(error) {
+        handleError(error);
+      },
+      initialData: {},
+    },
+  );
 
   const navigationTitle = `${serviceName}: Environment Variables`;
 
-  useEffect(() => {
-    async function fetchVariables() {
-      try {
-        const variables = await renderService.getEnvVariables(serviceId);
-        setVariables(variables);
-      } catch (e) {
-        handleError(e);
-      }
-      setLoading(false);
-    }
-
-    fetchVariables();
-  }, []);
-
   return (
-    <List navigationTitle={navigationTitle} isLoading={isLoading}>
+    <List
+      navigationTitle={navigationTitle}
+      isLoading={isLoading}
+      searchBarPlaceholder="Search environment variable"
+    >
       {Object.entries(variables).map(([key, value]) => (
         <List.Item
           key={key}
@@ -360,27 +373,28 @@ interface DomainListProps {
 function DomainListView(props: DomainListProps) {
   const { serviceId, serviceName } = props;
 
-  const [domains, setDomains] = useState<DomainResponse[]>([]);
-  const [isLoading, setLoading] = useState<boolean>(true);
+  const { isLoading, data: domains } = useCachedPromise(
+    async () => {
+      const domains = await renderService.getDomains(serviceId);
+      return domains;
+    },
+    [],
+    {
+      onError(error) {
+        handleError(error);
+      },
+      initialData: [],
+    },
+  );
 
   const navigationTitle = `${serviceName}: Domains`;
 
-  useEffect(() => {
-    async function fetchDomains() {
-      try {
-        const domains = await renderService.getDomains(serviceId);
-        setDomains(domains);
-      } catch (e) {
-        handleError(e);
-      }
-      setLoading(false);
-    }
-
-    fetchDomains();
-  });
-
   return (
-    <List navigationTitle={navigationTitle} isLoading={isLoading}>
+    <List
+      navigationTitle={navigationTitle}
+      isLoading={isLoading}
+      searchBarPlaceholder="Search domain"
+    >
       {domains.map((domain) => (
         <List.Item icon={getDomainIcon(domain.verified)} title={domain.name} />
       ))}

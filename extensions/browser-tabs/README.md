@@ -1,6 +1,6 @@
 # Browser Tabs
 
-Search and open tabs in Chrome, Safari, Edge, Arc, Brave, Vivaldi, Opera and Orion.
+Search and open tabs in Chrome, Safari, Edge, Arc, Brave, Vivaldi, Opera and Orion, etc.
 
 ## Supported Browsers
 

@@ -1,5 +1,9 @@
 # Google Workspace Changelog
 
+## [Log out the user if re-authentication fails] - 2024-07-11
+
+- Automatically log out users if re-authentication fails, instead of displaying an error message.
+
 ## [Fix download link] - 2024-06-17
 
 - Fixes the Google Drive's download links to use the currently authenticated user.

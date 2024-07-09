@@ -14,7 +14,8 @@
   "license": "MIT",
   "contributors": [
     "AnishDe12020",
-    "pomdtr"
+    "pomdtr",
+    "jimmy-b36"
   ],
   "commands": [
     {
@@ -563,6 +564,21 @@
       "title": "ElementPlus",
       "subtitle": "DocSearch",
       "description": "Search ElementPlus documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "vuetify",
+      "icon": "/logo/vuetify.png",
+      "title": "Vuetify",
+      "subtitle": "DocSearch",
+      "description": "Search Vuetify documentation",
       "arguments": [
         {
           "name": "search",

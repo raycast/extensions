@@ -1,7 +1,6 @@
 import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { GlobalPreferences } from "../models/global-preferences";
 
 export type Inbox = {
   id: number;
@@ -24,34 +23,46 @@ export type Email = {
   to_email: string;
 };
 
-export function getInboxes() {
-  const globalPreferences = getPreferenceValues<GlobalPreferences>();
+const { apiKey, accountId } = getPreferenceValues<Preferences>();
+const headers = {
+  "Api-Token": apiKey,
+  "Content-Type": "application/json",
+};
 
-  return useFetch<Inbox[]>(`https://mailtrap.io/api/accounts/${globalPreferences.accountId}/inboxes`, {
-    headers: [["Api-Token", globalPreferences.apiKey]],
+export function getInboxes() {
+  return useFetch(`https://mailtrap.io/api/accounts/${accountId}/inboxes`, {
+    headers,
+    mapResult(result: Inbox[]) {
+      return {
+        data: result,
+      };
+    },
+    initialData: [],
   });
 }
 
 export function getEmails(inboxId: number) {
-  const globalPreferences = getPreferenceValues<GlobalPreferences>();
-
-  return useFetch<Email[]>(
-    `https://mailtrap.io/api/accounts/${globalPreferences.accountId}}/inboxes/${inboxId}/messages`,
+  return useFetch(
+    (options) =>
+      `https://mailtrap.io/api/accounts/${accountId}}/inboxes/${inboxId}/messages?` +
+      new URLSearchParams({ page: String(options.page + 1) }).toString(),
     {
-      headers: [["Api-Token", globalPreferences.apiKey]],
+      headers,
+      mapResult(result: Email[]) {
+        return {
+          data: result,
+          hasMore: result.length === 30,
+        };
+      },
+      initialData: [],
     }
   );
 }
 
 export function markAsRead(inboxId: number, emailId: number) {
-  const globalPreferences = getPreferenceValues<GlobalPreferences>();
-
-  fetch(`https://mailtrap.io/api/accounts/${globalPreferences.accountId}}/inboxes/${inboxId}}/messages/${emailId}`, {
+  fetch(`https://mailtrap.io/api/accounts/${accountId}}/inboxes/${inboxId}}/messages/${emailId}`, {
     method: "PATCH",
-    headers: [
-      ["Api-Token", globalPreferences.apiKey],
-      ["Content-Type", "application/json"],
-    ],
+    headers,
     body: JSON.stringify({
       message: {
         is_read: true,

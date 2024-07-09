@@ -1,5 +1,9 @@
 # GIF Search Changelog
 
+## [Fix favorites GIFS can't be removed] - 2024-09-02
+
+- Fixes a bug where favorited GIFs couldn't be removed from the favorites list
+
 ## [Better Results] - 2024-04-19
 
 - The extension now uses GIPHY Pro and Tenor v2 to have better GIF results

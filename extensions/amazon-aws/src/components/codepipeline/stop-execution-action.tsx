@@ -4,6 +4,7 @@ import {
   PipelineExecutionStatus,
   PipelineExecutionSummary,
   StopPipelineExecutionCommand,
+  StopPipelineExecutionCommandInput,
 } from "@aws-sdk/client-codepipeline";
 import { getErrorMessage } from "../../util";
 import { Pipeline } from "../../codepipeline";
@@ -24,7 +25,7 @@ export const StopExecutionAction = ({
   return (
     <ActionPanel.Submenu
       title="Stop Execution"
-      icon={Icon.Stop}
+      icon={{ source: Icon.Stop, tintColor: Color.Red }}
       shortcut={{ modifiers: ["ctrl"], key: "s" }}
       isLoading={isLoading}
       onOpen={revalidate}
@@ -58,62 +59,61 @@ const stopExecution = async (
     message: `Stop ${execution.pipelineExecutionId} for ${pipelineName}?`,
     primaryAction: {
       title: "Stop",
-      onAction: async () => {
-        await mutate(stop(pipelineName, execution), {
-          optimisticUpdate: (pipelines) => {
-            if (!pipelines) {
-              return;
-            }
-
-            return pipelines.map((p) =>
-              p.name === pipelineName
-                ? {
-                    ...p,
-                    ...(p.latestExecution && {
-                      latestExecution: {
-                        ...p.latestExecution,
-                        status: PipelineExecutionStatus.Stopped,
-                        statusSummary: "Stopped execution",
-                      },
-                    }),
-                  }
-                : p,
-            );
-          },
-          shouldRevalidateAfter: false,
-        });
-      },
+      onAction: () => stop(pipelineName, execution, mutate),
     },
   });
 };
 
-const stop = async (pipelineName: string, execution: PipelineExecutionSummary): Promise<string> => {
+const stop = async (
+  pipelineName: string,
+  execution: PipelineExecutionSummary,
+  mutate: MutatePromise<Pipeline[] | undefined>,
+) => {
+  const input: StopPipelineExecutionCommandInput = {
+    pipelineName,
+    pipelineExecutionId: execution.pipelineExecutionId,
+    abandon: true,
+    reason: "Abandoned by Raycast",
+  };
+
   const toast = await showToast(
     Toast.Style.Animated,
     `❗Stopping execution for ${pipelineName}`,
     `Execution ID: ${execution.pipelineExecutionId}`,
   );
 
-  return new CodePipelineClient({})
-    .send(
-      new StopPipelineExecutionCommand({
-        pipelineName,
-        pipelineExecutionId: execution.pipelineExecutionId,
-        abandon: true,
-        reason: "Abandoned by Raycast",
-      }),
-    )
+  mutate(new CodePipelineClient({}).send(new StopPipelineExecutionCommand(input)), {
+    optimisticUpdate: (pipelines) => {
+      if (!pipelines) {
+        return;
+      }
+
+      return pipelines.map((p) =>
+        p.name === pipelineName
+          ? {
+              ...p,
+              ...(p.latestExecution && {
+                latestExecution: {
+                  ...p.latestExecution,
+                  status: PipelineExecutionStatus.Stopped,
+                  statusSummary: "Stopped execution",
+                },
+              }),
+            }
+          : p,
+      );
+    },
+    shouldRevalidateAfter: false,
+  })
     .then(({ pipelineExecutionId }) => {
       toast.style = Toast.Style.Success;
       toast.title = `✅ Stopped execution for ${pipelineName}`;
       toast.message = `Execution ID: ${pipelineExecutionId}`;
-      return pipelineExecutionId ?? "";
     })
     .catch((err) => {
       captureException(err);
       toast.style = Toast.Style.Failure;
       toast.title = `❌ Failed to stop execution for ${pipelineName}`;
       toast.message = getErrorMessage(err);
-      throw err;
     });
 };

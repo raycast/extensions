@@ -1,11 +1,12 @@
 import { useHAStates } from "@components/hooks";
-import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "@components/menu";
+import { LaunchCommandMenubarItem } from "@components/menu";
 import { StateMenubarItem } from "@components/state/menu";
 import { filterViaPreferencePatterns } from "@components/state/utils";
 import { getErrorMessage } from "@lib/utils";
 import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 
-export default function EntitiesMenuCommand(): JSX.Element {
+export default function EntitiesMenuCommand() {
   const { states, error, isLoading } = useHAStates();
   const entities = filterViaPreferencePatterns(states, []);
   const header = error ? getErrorMessage(error) : undefined;
@@ -19,15 +20,17 @@ export default function EntitiesMenuCommand(): JSX.Element {
       {header && <MenuBarExtra.Item title={header} />}
       <LaunchCommandMenubarItem
         title="Open All Entities"
-        name="index"
-        type={LaunchType.UserInitiated}
+        command={{
+          name: "index",
+          type: LaunchType.UserInitiated,
+        }}
         icon={Icon.Terminal}
       />
       <MenuBarExtra.Section title="Entities">
         {entities?.map((m) => <StateMenubarItem key={m.entity_id} state={m} />)}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
-        <MenuBarItemConfigureCommand />
+        <RUIMenuBarExtra.ConfigureCommand />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

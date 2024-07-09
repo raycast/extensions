@@ -5,6 +5,9 @@
   "description": "View the media in your Plex Media Server",
   "icon": "command-icon-plex.png",
   "author": "mSarheed",
+  "contributors": [
+    "AndersDigital"
+  ],
   "categories": [
     "Media",
     "Fun",

@@ -59,7 +59,7 @@ async function startTimer({
     cmdParts.push(`while [ -f "${dismissFile}" ]; do ${afplayString}; done`);
   }
   cmdParts.push(`rm "${masterName}"; else echo "Timer deleted"; fi`);
-  exec(cmdParts.join(" && "), (error, stderr) => {
+  exec(cmdParts.join(" ; "), (error, stderr) => {
     if (error) {
       console.log(`error: ${error.message}`);
       return;
