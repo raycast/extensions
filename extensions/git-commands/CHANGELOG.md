@@ -1,5 +1,10 @@
 # Git Commands Changelog
 
+## [Improved search and use Git documentation] - 2024-06-29
+
+- Now you can find single words without having to type hyphens or other characters. Example: for `rebase auto` you will see `git pull --rebase --autostash`, ...
+- Updated descriptions based on official Git documentation.
+
 ## [Quicklook] - 2024-06-22
 
 - Added quicklook to see command details directly from the list. This can be toggled on or off as needed.

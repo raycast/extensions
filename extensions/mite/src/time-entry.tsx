@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Form, Toast, showToast, popToRoot } from "@raycast/api";
 import { useMite, fetch_mite } from "./hooks/useMite";
 import { projects_schema, services_schema, time_entry_post_schema } from "./validations";
 import { parse } from "valibot";
@@ -16,6 +16,10 @@ export default function Command() {
       });
       if (res.ok) {
         showToast({ title: "Entry created", style: Toast.Style.Success });
+
+        popToRoot({
+          clearSearchBar: false,
+        });
         return;
       }
       showToast({
@@ -31,6 +35,7 @@ export default function Command() {
       });
     }
   }
+
   const hrs: Array<{ value: string; title: string }> = [];
 
   for (let minutes = 0; minutes <= 480; minutes += 30) {
@@ -73,6 +78,7 @@ export default function Command() {
             <Form.Dropdown.Item key={service.id} value={service.id.toString()} title={service.name} />
           ))}
       </Form.Dropdown>
+      <Form.TextArea id="note" title={"Note"} storeValue />
     </Form>
   );
 }

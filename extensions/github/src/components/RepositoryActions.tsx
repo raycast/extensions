@@ -5,12 +5,13 @@ import { format } from "date-fns";
 import { getGitHubClient } from "../api/githubClient";
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
-import { cloneAndOpen, WEB_IDES } from "../helpers/repository";
+import { cloneAndOpen, REPO_SORT_TYPES_TO_QUERIES, WEB_IDES } from "../helpers/repository";
 
 import { RepositoryDiscussionList } from "./RepositoryDiscussions";
 import { RepositoryIssueList } from "./RepositoryIssues";
 import { RepositoryPullRequestList } from "./RepositoryPullRequest";
 import RepositoryReleases from "./RepositoryReleases";
+import { SortAction, SortActionProps } from "./SortAction";
 
 type RepositoryActionProps = {
   repository: ExtendedRepositoryFieldsFragment;
@@ -18,7 +19,13 @@ type RepositoryActionProps = {
   mutateList: MutatePromise<ExtendedRepositoryFieldsFragment[] | undefined>;
 };
 
-export default function RepositoryActions({ repository, mutateList, onVisit }: RepositoryActionProps) {
+export default function RepositoryActions({
+  repository,
+  mutateList,
+  onVisit,
+  setSortQuery,
+  sortQuery,
+}: RepositoryActionProps & SortActionProps) {
   const { github } = getGitHubClient();
 
   const updatedAt = new Date(repository.updatedAt);
@@ -229,6 +236,10 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
         <Action.CopyToClipboard content={repository.name} title="Copy Repository Name" />
 
         <Action.CopyToClipboard content={repository.owner.login} title="Copy Repository Owner" />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <SortAction data={REPO_SORT_TYPES_TO_QUERIES} {...{ sortQuery, setSortQuery }} />
       </ActionPanel.Section>
     </ActionPanel>
   );

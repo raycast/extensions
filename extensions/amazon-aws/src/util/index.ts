@@ -73,21 +73,6 @@ export const getErrorMessage = (error: unknown) => {
   return String(error);
 };
 
-export const uniqBy = <T>(array: T[], iteratee: (item: T) => string | number): T[] => {
-  const seen = new Set<string | number>();
-  const result: T[] = [];
-
-  for (const item of array) {
-    const criterion = iteratee(item);
-    if (!seen.has(criterion)) {
-      seen.add(criterion);
-      result.push(item);
-    }
-  }
-
-  return result;
-};
-
 export const formatBytes = (bytes: number) => {
   if (bytes === 0) return "0 Bytes";
 
@@ -104,11 +89,4 @@ const getEnumKeys = <T extends object>(enumType: T): (keyof T)[] => {
 
 export const getEnumKeysExcludingCurrent = <T extends object>(enumType: T, currentValue: T[keyof T]): (keyof T)[] => {
   return getEnumKeys(enumType).filter((key) => enumType[key] !== currentValue);
-};
-
-export const normalizeUrl = (url: string) => {
-  if (url.endsWith("/")) {
-    return url;
-  }
-  return `${url}/`;
 };
