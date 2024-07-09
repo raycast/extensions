@@ -1,6 +1,6 @@
 # Badges Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2024-07-09
 
 - Bump dependencies
 - Use color wheel for picking colors

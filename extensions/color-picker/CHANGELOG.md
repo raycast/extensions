@@ -1,6 +1,6 @@
 # Color Picker Changelog
 
-## [Cross-Extension] - {PR_MERGE_DATE}
+## [Cross-Extension] - 2024-07-09
 
 - Bump dependencies
 - Expose Color Wheel ability through [Raycast Cross-Extension Conventions](https://github.com/LitoMore/raycast-cross-extension-conventions)
