@@ -1,5 +1,5 @@
 export type Response = { drinks: Drink[] | null };
-type Drink = {
+export type Drink = {
         idDrink: string;
       strDrink: string;
       strDrinkAlternate: string | null;
