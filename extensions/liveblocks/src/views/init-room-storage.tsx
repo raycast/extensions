@@ -1,22 +1,16 @@
-import { Form, ActionPanel, Action, showToast, Toast, LocalStorage, open, Icon } from "@raycast/api";
-import axios from "axios";
-import { useEffect, useRef, useState } from "react";
-import { getTokenFromSecret } from "./utils";
+import { Form, ActionPanel, Action, showToast, Toast, open, Icon } from "@raycast/api";
+import { useRef, useState } from "react";
+import { initRoomStorage } from "../api";
 
 interface CommandForm {
   roomId: string;
-  type: string;
+  type: "LiveObject";
   payload: string;
 }
 
-export default function Command() {
-  const [roomId, setRoomId] = useState("");
+export default function Command({ roomId }: { roomId: string }) {
   const [payload, setPayload] = useState("");
-  const roomIdFieldRef = useRef<Form.TextField>("");
-
-  useEffect(() => {
-    getTokenFromSecret();
-  }, []);
+  const roomIdFieldRef = useRef<Form.TextField>(null);
 
   async function handleSubmit(values: CommandForm) {
     if (values.roomId == "") {
@@ -25,7 +19,6 @@ export default function Command() {
       return;
     }
 
-    const jwt = await LocalStorage.getItem<string>("liveblocks-jwt");
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Initializing the room...",
@@ -36,31 +29,19 @@ export default function Command() {
     }
 
     try {
-      await axios.post(
-        `https://liveblocks.net/api/v1/room/${encodeURIComponent(values.roomId)}/storage/json`,
-        {
-          data: {
-            liveblocksType: values.type,
-            data: JSON.parse(values.payload),
-          },
-        },
-        {
-          headers: { Authorization: `Bearer ${jwt}` },
-        }
-      );
+      initRoomStorage(roomId, values.type, values.payload);
 
       toast.style = Toast.Style.Success;
       toast.title = "Room initialized successfully";
       toast.primaryAction = {
         title: "Open in Dashboard",
         onAction: (toast) => {
-          open(`https://liveblocks.io/dashboard/rooms/${encodeURIComponent(values.roomId)}`);
+          open(`https://liveblocks.io/dashboard/rooms/${encodeURIComponent(roomId)}`);
           toast.hide();
         },
       };
 
       roomIdFieldRef.current?.focus();
-      setRoomId("");
       setPayload("");
     } catch (e) {
       toast.style = Toast.Style.Failure;
@@ -76,14 +57,6 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="roomId"
-        title="Room ID"
-        ref={roomIdFieldRef}
-        value={roomId}
-        onChange={setRoomId}
-        placeholder="Enter Room ID"
-      />
       <Form.Dropdown id="type" title="Type" defaultValue="LiveObject">
         <Form.Dropdown.Item value="LiveObject" title="LiveObject" />
         <Form.Dropdown.Item value="LiveList" title="LiveList" />
