@@ -2,14 +2,6 @@
 
 - [Introduction](README.md)
 
-## Links
-
-- [Community](https://raycast.com/community)
-- [GitHub](https://github.com/raycast/extensions)
-- [Store](https://raycast.com/store)
-- [Icon Generator](https://icon.ray.so)
-- [Extension Icon Template](https://www.figma.com/community/file/1030764827259035122)
-
 ## Basics
 
 - [Getting Started](basics/getting-started.md)
