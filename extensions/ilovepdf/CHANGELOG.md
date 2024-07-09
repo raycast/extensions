@@ -1,5 +1,7 @@
 # iLovePDF Changelog
 
+## [Add Watermark to PDF Command] - 2024-07-09
+
 ## [Add Unlock PDF Command] - 2024-07-06
 
 ## [Add Rotate PDF Command] - 2024-06-03
