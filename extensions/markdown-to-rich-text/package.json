@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Markdown to Rich Text",
+      "title": "Convert Clipboard To Rich Text",
       "description": "This command reads Markdown text from the clipboard, converts it to Rich text, and pastes it.",
       "mode": "no-view"
     }
