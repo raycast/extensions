@@ -1,5 +1,5 @@
 import { showFailureToast, useFetch } from "@raycast/utils";
-import { API_HEADERS, API_KEY, API_URL } from "../../config";
+import { API_BODY, API_HEADERS, API_URL } from "../../config";
 import { ErrorResponse, SuccessResponse } from "../../types";
 
 type useUptimeRobotOptions<T> = {
@@ -9,12 +9,11 @@ type useUptimeRobotOptions<T> = {
 }
 export default function useUptimeRobot<T, K extends string>(endpoint: string, values: {[key: string]: string}, options?: useUptimeRobotOptions<T>) {
     const { execute=true } = options || {};
-    const { isLoading } = useFetch(API_URL + endpoint, {
+    const { isLoading, revalidate } = useFetch(API_URL + endpoint, {
         headers: API_HEADERS,
         method: "POST",
         body: new URLSearchParams({
-            api_key: API_KEY,
-            fomat: "json",
+            ...API_BODY,
             ...values
         }).toString(),
         mapResult(result: SuccessResponse<{ [key in K]: T }> | ErrorResponse) {
@@ -35,7 +34,10 @@ export default function useUptimeRobot<T, K extends string>(endpoint: string, va
             options?.onError?.();
         },
         execute,
-        keepPreviousData: true
+        keepPreviousData: true,
+        onWillExecute() {
+            console.log('2');
+        },
     })
-    return { isLoading };
+    return { isLoading, revalidate };
 }

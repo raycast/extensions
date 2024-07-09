@@ -1,29 +1,13 @@
 import { useLocalStorage } from "@raycast/utils";
-import { Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import useUptimeRobot from "./lib/hooks/use-uptime-robot";
-
-type Account = {
-    email: string;
-    user_id: number;
-    firstname: string;
-    sms_credits: number;
-    payment_processor: string | null;
-    payment_period: string | null;
-    subscription_expiry_date: string | null;
-    monitor_limit: number;
-    monitor_interval: number;
-    up_monitors: number;
-    down_monitors: number;
-    paused_monitors: number;
-    total_monitors_count: number;
-    registered_at: string;
-    active_subscription: string | null;
-    organizations: unknown[];
-}
+import { Account } from "./types";
+import { useEffect } from "react";
+import { hasDayPassed } from "./lib/utils/has-day-passed";
 
 export default function AccountDetails() {
     const { isLoading: isUsingLocal, value: account, setValue: setAccountDetails } = useLocalStorage<Account & {updated_at: Date}>("account-details");
-    const { isLoading: isFetching } = useUptimeRobot<Account, "account">("getAccountDetails", {}, {
+    const { isLoading: isFetching, revalidate } = useUptimeRobot<Account, "account">("getAccountDetails", {}, {
         async onData(data) {
             await setAccountDetails({
                 ...data,
@@ -32,6 +16,10 @@ export default function AccountDetails() {
         },
         execute: !isUsingLocal && !account
     });
+
+    useEffect(() => {
+        account && hasDayPassed(account.updated_at) && revalidate();
+    }, [account])
 
     const isLoading = isUsingLocal || isFetching;
 
@@ -57,5 +45,7 @@ export default function AccountDetails() {
         <Detail.Metadata.Label title="Registered" text={new Date(account.registered_at).toDateString()} />
         <Detail.Metadata.Label title="Active Subscription" text={account.active_subscription || "N/A"} />
         <Detail.Metadata.Label title="Subscription Expiry Date" text={account.subscription_expiry_date ? new Date(account.subscription_expiry_date).toDateString() : "N/A"} />
-    </Detail.Metadata>} />
+    </Detail.Metadata>} actions={<ActionPanel>
+        <Action icon={Icon.Redo} title="Refresh Acccount Details" onAction={revalidate} />
+    </ActionPanel>} />
 }

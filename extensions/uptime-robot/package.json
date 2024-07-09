@@ -36,7 +36,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.78.1",
-    "@raycast/utils": "^1.16.1"
+    "@raycast/utils": "^1.16.1",
+    "dayjs": "^1.11.11"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

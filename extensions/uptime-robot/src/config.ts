@@ -1,9 +1,13 @@
 import { getPreferenceValues } from "@raycast/api";
 
 export const API_URL = "https://api.uptimerobot.com/v2/";
-export const API_KEY = getPreferenceValues<Preferences>().main_api_key;
+const API_KEY = getPreferenceValues<Preferences>().main_api_key;
 export const API_HEADERS = {
     "Content-Type": "application/x-www-form-urlencoded"
+}
+export const API_BODY = {
+    api_key: API_KEY,
+    format: "json"
 }
 export const DEFAULT_PAGE_LIMIT = 50;
 

@@ -1,45 +1,16 @@
 import { FormValidation, useFetch, useForm } from "@raycast/utils";
-import { API_HEADERS, API_KEY, API_URL, DEFAULT_PAGE_LIMIT, MONITOR, MONITOR_INTERVALS, MONITOR_TYPES } from "./config";
+import { API_BODY, API_HEADERS, API_URL, DEFAULT_PAGE_LIMIT, MONITOR, MONITOR_INTERVALS, MONITOR_TYPES } from "./config";
 import { Action, ActionPanel, Form, Icon, List, useNavigation } from "@raycast/api";
-import { ErrorResponse, NewMonitor } from "./types";
+import { ErrorResponse, Monitor, NewMonitor } from "./types";
 import { useState } from "react";
 import useUptimeRobot from "./lib/hooks/use-uptime-robot";
+import getMonitorIcon from "./lib/utils/get-monitor-icon";
+import unixToDate from "./lib/utils/unix-to-date";
 
 type Pagination = {
     offset: number;
     limit: number;
     total: number;
-}
-// type MonitorLog = {
-//     id: number;
-//     type: number;
-//     datetime: number;
-//     duration: number;
-//     reason: {
-//         code: number;
-//         detail: string;
-//     }
-// }
-type Monitor = {
-    id: number;
-    friendly_name: string;
-    url: string;
-    type: number
-    sub_type: string;
-    keyword_type: number;
-    keyword_case_type: number;
-    keyword_value: string;
-    http_username: string;
-    http_password: string;
-    port: string;
-    interval: number;
-    timeou: number;
-    status: number;
-    create_datetime: number;
-    // logs: MonitorLog[];
-    // "all_time_uptime_ratio": "0.000",
-    // "all_time_uptime_durations": "0-38-3148",
-    // "lastLogTypeBeforeStartDate": {}
 }
 type MonitorsResult = {
     stat: "ok";
@@ -56,8 +27,8 @@ export default function Monitors() {
             headers: API_HEADERS,
             method: "POST",
             body: new URLSearchParams({
-                api_key: API_KEY,
-                format: "json"
+                ...API_BODY,
+                logs: "1"
             }).toString(),
           mapResult(result: MonitorsResult | ErrorResponse) {
             if (result.stat==="fail") throw(result.error.message);
@@ -70,17 +41,18 @@ export default function Monitors() {
           },
           keepPreviousData: true,
           initialData: [],
+          execute: false
         },
       );
 
       return <List isLoading={isLoading} pagination={pagination}>
         {!isLoading && !monitors ? <List.EmptyView /> :
-        monitors.map(monitor => <List.Item key={monitor.id} title={monitor.friendly_name} icon={monitor.status===0 ? Icon.Pause : monitor.status===1 ? Icon.Play : Icon.Dot} accessories={[
+        monitors.map(monitor => <List.Item key={monitor.id} title={monitor.friendly_name} icon={getMonitorIcon(monitor.status)} accessories={[
             { icon: Icon.Redo },
             {text: `${monitor.interval/60} min`},
-            { date: new Date(monitor.create_datetime) }
+            { date: unixToDate(monitor.create_datetime) }
         ]} actions={<ActionPanel>
-            <Action.Push title="Add New Monitor" target={<AddNewMonitor onMonitorAdded={revalidate} />} />
+            <Action.Push icon={Icon.Plus} title="Add New Monitor" target={<AddNewMonitor onMonitorAdded={revalidate} />} />
         </ActionPanel>} />)}
       </List>
 }
