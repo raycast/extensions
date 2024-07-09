@@ -2,6 +2,10 @@
 
 ## [Add Page Number Command] - 2024-07-06
 
+## [Add Watermark to PDF Command] - 2024-07-09
+
+## [Add Unlock PDF Command] - 2024-07-06
+
 ## [Add Rotate PDF Command] - 2024-06-03
 
 ## [Add Protect PDF Command] - 2024-07-03

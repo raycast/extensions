@@ -79,12 +79,26 @@
       "subtitle": "iLovePDF",
       "description": "Protects a PDF with a password using iLovePDF API.",
       "mode": "view"
- },
+    },
     {
       "name": "add-page-number",
       "title": "Add Page Number",
       "subtitle": "iLovePDF",
       "description": "Add page number to PDF using iLovePDF API.",
+      "mode": "view"
+    },
+     {
+      "name": "add-watermark-to-pdf",
+      "title": "Add Watermark to PDF",
+      "subtitle": "iLovePDF",
+      "description": "Adds watermark to PDF using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "unlock-pdf",
+      "title": "Unlock PDF",
+      "subtitle": "iLovePDF",
+      "description": "Unlocks a PDF using iLovePDF API.",
       "mode": "view"
     }
   ],

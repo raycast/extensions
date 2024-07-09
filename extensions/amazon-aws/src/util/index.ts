@@ -73,21 +73,6 @@ export const getErrorMessage = (error: unknown) => {
   return String(error);
 };
 
-export const uniqBy = <T>(array: T[], iteratee: (item: T) => string | number): T[] => {
-  const seen = new Set<string | number>();
-  const result: T[] = [];
-
-  for (const item of array) {
-    const criterion = iteratee(item);
-    if (!seen.has(criterion)) {
-      seen.add(criterion);
-      result.push(item);
-    }
-  }
-
-  return result;
-};
-
 export const formatBytes = (bytes: number) => {
   if (bytes === 0) return "0 Bytes";
 
