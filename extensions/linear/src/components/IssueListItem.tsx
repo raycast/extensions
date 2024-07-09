@@ -20,18 +20,10 @@ type IssueListItemProps = {
   mutateList?: MutatePromise<IssueResult[] | undefined>;
   mutateSubIssues?: MutatePromise<IssueResult[] | undefined>;
   priorities: IssuePriorityValue[] | undefined;
-  users: User[] | undefined;
   me: User | undefined;
 };
 
-export default function IssueListItem({
-  issue,
-  mutateList,
-  mutateSubIssues,
-  priorities,
-  me,
-  users,
-}: IssueListItemProps) {
+export default function IssueListItem({ issue, mutateList, mutateSubIssues, priorities, me }: IssueListItemProps) {
   const keywords = [issue.identifier, issue.state.name, issue.priorityLabel];
 
   if (issue.assignee) {
@@ -103,7 +95,7 @@ export default function IssueListItem({
           <Action.Push
             title="Show Details"
             icon={Icon.Sidebar}
-            target={<IssueDetail issue={issue} mutateList={mutateList} priorities={priorities} users={users} me={me} />}
+            target={<IssueDetail issue={issue} mutateList={mutateList} priorities={priorities} me={me} />}
           />
 
           <IssueActions
@@ -111,7 +103,6 @@ export default function IssueListItem({
             mutateList={mutateList}
             mutateSubIssues={mutateSubIssues}
             priorities={priorities}
-            users={users}
             me={me}
           />
         </ActionPanel>

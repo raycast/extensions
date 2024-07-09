@@ -8,6 +8,7 @@ import { useMyIssues } from "../hooks/useMyIssues";
 
 import IssueActions from "./IssueActions";
 import IssueDetail from "./IssueDetail";
+import { SortActionProps } from "./SortAction";
 
 type IssueListItemProps = {
   issue: IssueFieldsFragment;
@@ -15,7 +16,13 @@ type IssueListItemProps = {
   mutateList: MutatePromise<IssueFieldsFragment[] | undefined> | ReturnType<typeof useMyIssues>["mutate"];
 };
 
-export default function IssueListItem({ issue, viewer, mutateList }: IssueListItemProps) {
+export default function IssueListItem({
+  issue,
+  viewer,
+  mutateList,
+  sortQuery,
+  setSortQuery,
+}: IssueListItemProps & SortActionProps) {
   const updatedAt = new Date(issue.updatedAt);
 
   const author = getIssueAuthor(issue);
@@ -61,7 +68,7 @@ export default function IssueListItem({ issue, viewer, mutateList }: IssueListIt
       keywords={keywords}
       accessories={accessories}
       actions={
-        <IssueActions issue={issue} mutateList={mutateList} viewer={viewer}>
+        <IssueActions {...{ issue, mutateList, viewer, sortQuery, setSortQuery }}>
           <Action.Push
             title="Show Details"
             icon={Icon.Sidebar}
