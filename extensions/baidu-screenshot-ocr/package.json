@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "baidu-screenshot-ocr",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Baidu-Screenshot-OCR",
   "title": "Baidu-Scrennshot-Ocr",
   "icon": "ocr.png",
