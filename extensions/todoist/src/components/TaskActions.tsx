@@ -32,7 +32,7 @@ import { QuickLinkView } from "../home";
 import { useFocusedTask } from "../hooks/useFocusedTask";
 import { ViewProps } from "../hooks/useViewTasks";
 
-import CreateViewAction from "./CreateViewAction";
+import CreateViewActions from "./CreateViewActions";
 import Project from "./Project";
 import RefreshAction from "./RefreshAction";
 import SubTasks from "./SubTasks";
@@ -625,7 +625,7 @@ export default function TaskActions({
 
       {quickLinkView ? (
         <ActionPanel.Section>
-          <CreateViewAction {...quickLinkView} />
+          <CreateViewActions {...quickLinkView} />
         </ActionPanel.Section>
       ) : null}
 
