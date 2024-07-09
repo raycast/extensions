@@ -10,3 +10,6 @@ This Raycast extension provides access to the powerful Photoroom API. Edit image
 - Resize the image
 - Batch editing: edit mulitple images at once
 - Support for Raycast's drafts: start editing now, finish later
+
+
+Please note, that the extension uses the Image Editing v2 API and needs a Photoroom API key which can be requested here: https://app.photoroom.com/api-dashboard
