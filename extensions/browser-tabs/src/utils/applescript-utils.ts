@@ -3,6 +3,7 @@ import { Application, captureException, getApplications, LocalStorage, open } fr
 import { BrowserSetup, Tab } from "../types/types";
 import { ARC_BUNDLE_ID, CacheKey, TEST_URL, unsupportedBrowsers } from "./constants";
 import { isEmpty } from "./common-utils";
+import { recentOnTop } from "../types/preferences";
 
 export const getBrowserSetup = async () => {
   try {
@@ -199,13 +200,12 @@ export const getTabsString = async (browser: string) => {
 const parseTabs = (browser: Application, tabs: string): Tab[] => {
   try {
     const tabStrList = tabs.split("\n\n").filter((tab) => tab.length > 0);
-    return tabStrList
-      .map((tabStr) => {
-        const [title, url, windowId, tabId] = tabStr.split("\n");
-        const domain = new URL(url).hostname;
-        return { browser: browser.name, title, url, domain, windowId, tabId };
-      })
-      .reverse();
+    const tabList = tabStrList.map((tabStr) => {
+      const [title, url, windowId, tabId] = tabStr.split("\n");
+      const domain = new URL(url).hostname;
+      return { browser: browser.name, title, url, domain, windowId, tabId };
+    });
+    return recentOnTop ? tabList.reverse() : tabList;
   } catch (e) {
     captureException(e);
     console.error("Error parsing tabs");

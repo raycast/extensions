@@ -14,10 +14,18 @@
       "mode": "view",
       "preferences": [
         {
-          "title": "Tab",
+          "title": "Tabs",
           "name": "showDomain",
           "label": "Show Domain",
           "description": "When enabled, the domain of the tab will be displayed as a subtitle.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "recentOnTop",
+          "label": "Recent Tabs on Top",
+          "description": "When enabled, the recent tabs will be displayed on top.",
           "type": "checkbox",
           "default": true,
           "required": false
@@ -71,7 +79,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.14.9",
+    "@types/node": "20.14.10",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",
     "prettier": "^3.3.2",

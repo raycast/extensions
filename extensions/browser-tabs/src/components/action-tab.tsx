@@ -156,7 +156,7 @@ export function ActionTab(props: {
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action.Push
-          title={"Setup Browser"}
+          title={"Select Browsers"}
           icon={Icon.CheckCircle}
           shortcut={{ modifiers: ["shift", "cmd"], key: "s" }}
           target={<SetupBrowsers browserTabsMutate={mutate} />}
