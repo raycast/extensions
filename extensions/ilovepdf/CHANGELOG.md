@@ -1,6 +1,6 @@
 # iLovePDF Changelog
 
-## [Add Watermark to PDF Command] - {PR_MERGE_DATE}
+## [Add Watermark to PDF Command] - 2024-07-09
 
 ## [Add Unlock PDF Command] - 2024-07-06
 
