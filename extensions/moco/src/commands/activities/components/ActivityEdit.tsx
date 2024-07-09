@@ -43,7 +43,7 @@ export const ActivityEdit: React.FC<ActivityEditProps> = ({ index, activity, mod
                   description: values.description,
                   hours: values.hours.includes(":") ? toDecimalTime(values.hours) : values.hours,
                 },
-                activity.id
+                activity.id,
               )
                 .then(() =>
                   modifyActivity(
@@ -54,8 +54,8 @@ export const ActivityEdit: React.FC<ActivityEditProps> = ({ index, activity, mod
                       description: values.description,
                       hours: values.hours.includes(":") ? toDecimalTime(values.hours) : values.hours,
                     },
-                    Actions.update
-                  )
+                    Actions.update,
+                  ),
                 )
                 .then(() => navigation.pop())
             }

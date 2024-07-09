@@ -131,3 +131,11 @@ export function useHistory(searchText: string | undefined, searchFilter: string 
 
   return { data, visitRepository };
 }
+
+export const REPO_SORT_TYPES_TO_QUERIES = [
+  { title: "Last Update", value: "sort:updated-desc" },
+  { title: "Name", value: "sort:name-asc" },
+  { title: "Stars", value: "sort:stars-desc" },
+  { title: "Forks", value: "sort:forks-desc" },
+];
+export const REPO_DEFAULT_SORT_QUERY = REPO_SORT_TYPES_TO_QUERIES[0].value;

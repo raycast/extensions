@@ -1,5 +1,10 @@
 # YouTube Downloader Changelog
 
+## [Update copy the video or audio file name with the video title] - 2024-07-05
+
+- Update copy the video or audio file name with the video title
+- Fix the key rendering problem in the format dropdown
+
 ## [Fix FFmpeg v7 error] - 2024-05-26
 
 ## [Update FFmpeg installation docs] - 2024-04-17

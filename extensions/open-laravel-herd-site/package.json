@@ -18,6 +18,15 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "editor",
+      "title": "Preferred Editor",
+      "description": "Choose your preferred code editor",
+      "type": "appPicker",
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.77.1"
   },

@@ -13,7 +13,8 @@
     "kvdo2",
     "thomaslombart",
     "litomore",
-    "samuelkraft"
+    "samuelkraft",
+    "ridemountainpig"
   ],
   "categories": [
     "Design Tools"
@@ -71,6 +72,12 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "color-wheel",
+      "title": "Color Wheel",
+      "description": "Pick a color with color wheel",
+      "mode": "view"
     },
     {
       "name": "convert-color",
