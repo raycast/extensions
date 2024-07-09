@@ -2,11 +2,11 @@
 
 Check the availability of bikes/e-bikes at Citi Bike NYC stations from Raycast.
 
-| Description                       | Preview                                                                                 |
-| --------------------------------- | --------------------------------------------------------------------------------------- |
-| Searching for stations            | ![screenshot: searching stations](./metadata/check-citi-bike-availability-1.png)        |
-| Adding stations to favorites      | ![screenshot: adding favorite stations](./metadata/check-citi-bike-availability-2.png)  |
-| Viewing favorite station statuses | ![screenshot: favorite station statuses](./metadata/check-citi-bike-availability-3.png) |
+| Description                       | Preview                                                                              |
+| --------------------------------- | ------------------------------------------------------------------------------------ |
+| Searching for stations            | ![screenshot: searching stations](./media/check-citi-bike-availability-1.png)        |
+| Adding stations to favorites      | ![screenshot: adding favorite stations](./media/check-citi-bike-availability-2.png)  |
+| Viewing favorite station statuses | ![screenshot: favorite station statuses](./media/check-citi-bike-availability-3.png) |
 
 ---
 
