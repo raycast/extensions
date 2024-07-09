@@ -29,10 +29,12 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.78.1"
+    "@raycast/api": "^1.78.1",
+    "heic-convert": "^2.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
+    "@types/heic-convert": "^1.2.3",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",
