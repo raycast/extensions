@@ -74,7 +74,7 @@
 - [Raycast Window & Search Bar](api-reference/window-and-search-bar.md)
 - [Window Management](api-reference/window-management.md)
 
----
+## Misc
 
 - [Changelog](changelog.md)
 - [Migration](migration/README.md)
