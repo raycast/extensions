@@ -180,11 +180,7 @@ function SearchBrand({ onSearched }: SearchBrandProps) {
 
 function ViewBrand({ brand }: { brand: BrandInStorage }) {
   const logo = brand.logos[0]?.url;
-  const markdown = `![](${logo})
-    
-${brand.title} \n\n [${brand.domain}](${brand.domain})
-
-${brand.colors.map((color) => `- ![${color.name}](https://placehold.co/30x30/${color.hex.substring(1)}/${color.hex.substring(1)}.png) ${color.name}`)}
+  const markdown = `# ${brand.title}
 
 ${brand.description}
 
@@ -192,7 +188,13 @@ ${brand.description}
 
 ## Logos
 
-${brand.logos.map((logo) => `![${logo.url}](${logo.url})`)}`;
+${brand.logos.map((logo) => `![${logo.url}](${logo.url})`).join(`\n\n`)}
+
+---
+
+## Backdrops
+
+${brand.backdrops.map(({ url }) => `![${url}](${url})`).join(`\n\n`)}`;
 
   return (
     <Detail
@@ -200,10 +202,23 @@ ${brand.logos.map((logo) => `![${logo.url}](${logo.url})`)}`;
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Domain" icon={logo || Icon.QuestionMark} text={brand.domain} />
-          <Detail.Metadata.Label title="Title" text={brand.title || "N/A"} />
-          <Detail.Metadata.Label title="Description" text={brand.description || "N/A"} />
           <Detail.Metadata.Label title="Slogan" text={brand.slogan || "N/A"} />
           <Detail.Metadata.Label title="Verified" icon={brand.verified ? Icon.Check : Icon.Multiply} />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.TagList title="Colors">
+            {brand.colors.map((color) => (
+              <Detail.Metadata.TagList.Item key={color.name} text={color.name} color={color.hex} />
+            ))}
+          </Detail.Metadata.TagList>
+          <Detail.Metadata.Separator />
+          {brand.socials.map((social) => (
+            <Detail.Metadata.Link
+              key={social.type}
+              title={formatSocialType(social.type)}
+              text={social.url}
+              target={social.url}
+            />
+          ))}
         </Detail.Metadata>
       }
       actions={
@@ -222,4 +237,15 @@ ${brand.logos.map((logo) => `![${logo.url}](${logo.url})`)}`;
       }
     />
   );
+}
+
+function formatSocialType(type: string) {
+  switch (type) {
+    case "x":
+      return "X (formerly Twitter)";
+    case "linkedin":
+      return "LinkedIn";
+    default:
+      return type.charAt(0).toUpperCase() + type.slice(1);
+  }
 }
