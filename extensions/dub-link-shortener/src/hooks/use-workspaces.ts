@@ -9,13 +9,18 @@ export const useWorkspaces = () => {
     error,
   } = useCachedPromise(
     async () => {
-      const workspaces = await getAllWorkspaces();
-      return await Promise.all(
-        workspaces.map(async (w) => {
-          const tags = await getAllTags({ workspaceId: w.id });
-          return { ...w, tags } as WorkspaceSchema;
-        }),
-      );
+      try {
+        const workspaces = await getAllWorkspaces();
+        return await Promise.all(
+          workspaces.map(async (w) => {
+            const tags = await getAllTags({ workspaceId: w.id });
+            return { ...w, tags } as WorkspaceSchema;
+          }),
+        );
+      } catch (err) {
+        const tags = await getAllTags();
+        return [{ tags } as WorkspaceSchema];
+      }
     },
     [],
     {

@@ -1,5 +1,5 @@
 export type WorkspaceId = {
-  workspaceId: string;
+  workspaceId?: string;
 };
 
 /**
