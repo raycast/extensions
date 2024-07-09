@@ -21,9 +21,7 @@ import { LinkSchema } from "@/types";
 
 export default function SearchLinks() {
   const [workspaceId, setWorkspaceId] = useState<string | undefined>(undefined);
-  const { workspaces, isLoading: isLoadingWorkspaces, error: workspacesError } = useWorkspaces();
-
-  const isOnlyWorkspace = !isLoadingWorkspaces && !workspacesError && workspaces && workspaces.length === 1;
+  const { workspaces, isLoading: isLoadingWorkspaces, error: workspacesError, isSingleWorkspace } = useWorkspaces();
 
   const {
     shortLinks,
@@ -41,7 +39,7 @@ export default function SearchLinks() {
       searchBarPlaceholder={"Search links by domain, url, key, comments, tags..."}
       filtering
       searchBarAccessory={
-        !isOnlyWorkspace ? (
+        !isSingleWorkspace && !workspacesError ? (
           <List.Dropdown
             tooltip="Select Workspace"
             placeholder="Select Workspace"

@@ -5,7 +5,7 @@ import { WorkspaceSchema } from "@/types";
 export const useWorkspaces = () => {
   const {
     data: workspaces,
-    isLoading,
+    isLoading: isLoadingWorkspaces,
     error,
   } = useCachedPromise(
     async () => {
@@ -29,5 +29,8 @@ export const useWorkspaces = () => {
     },
   );
 
-  return { workspaces, isLoading: (!workspaces && !error) || isLoading, error };
+  const isLoading = (!workspaces && !error) || isLoadingWorkspaces;
+  const isSingleWorkspace = !isLoading && workspaces && workspaces.length === 1;
+
+  return { workspaces, isLoading, error, isSingleWorkspace };
 };

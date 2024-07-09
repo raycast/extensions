@@ -31,9 +31,7 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
   const { push, pop } = useNavigation();
   const { url, key } = args;
   const { data: originalLink, isLoading: isLoadingLink } = useCachedPromise(fetchLink, [], { execute: isEmpty(url) });
-  const { workspaces, isLoading, error } = useWorkspaces();
-
-  const isOnlyWorkspace = !isLoading && !error && workspaces && workspaces.length === 1;
+  const { workspaces, isLoading, isSingleWorkspace, error } = useWorkspaces();
 
   const { handleSubmit, itemProps, values } = useForm<ShortLinkFormValues>({
     onSubmit: async (vals) => {
@@ -71,7 +69,7 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
     validation: {
       url: FormValidation.Required,
       domain: FormValidation.Required,
-      workspaceId: !isOnlyWorkspace ? FormValidation.Required : undefined,
+      workspaceId: !isSingleWorkspace ? FormValidation.Required : undefined,
     },
     initialValues: retryValues ?? { domain: "dub.sh", url: isEmpty(url) ? originalLink : url, key },
   });
@@ -87,7 +85,7 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
       }
     >
       <Form.Description title={"❗"} text="Your shortened link will be copied to your clipboard." />
-      {!isOnlyWorkspace && (
+      {!isSingleWorkspace && !error && (
         <Form.Dropdown {...itemProps.workspaceId} title="Workspace">
           {workspaces.map((w) => (
             <Form.Dropdown.Item
