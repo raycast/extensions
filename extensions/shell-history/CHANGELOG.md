@@ -1,5 +1,10 @@
 # Shell History Changelog
 
+## [Auto Close Window] - {PR_MERGE_DATE}
+
+- Automatically close window after performing an action
+- Add a new configuration option to enable/disable show tips
+
 ## [Show Detail] - 2024-07-04
 
 - Show detail of a command history
