@@ -1,6 +1,6 @@
 # BetterZip Changelog
 
-## [Update API] - {PR_MERGE_DATE}
+## [Update API] - 2024-07-10
 
 - Update Raycast API and simplify the code
 
