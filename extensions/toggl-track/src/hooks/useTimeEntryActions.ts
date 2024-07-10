@@ -1,8 +1,11 @@
 import { showToast, Toast, clearSearchBar } from "@raycast/api";
 
 import { createTimeEntry, stopTimeEntry, TimeEntry } from "@/api";
+import { useProcessedTimeEntries } from "@/hooks/useProcessedTimeEntries";
 
-export function useTimeEntryActions(revalidateRunningTimeEntry: () => void, revalidateTimeEntries: () => void) {
+export function useTimeEntryActions() {
+  const { revalidateTimeEntries, revalidateRunningTimeEntry } = useProcessedTimeEntries();
+
   async function resumeTimeEntry(timeEntry: TimeEntry) {
     await showToast(Toast.Style.Animated, "Starting timer...");
     try {

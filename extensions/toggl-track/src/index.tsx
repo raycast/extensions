@@ -23,7 +23,7 @@ function ListView() {
   } = useProcessedTimeEntries();
 
   const totalDurationToday = useTotalDurationToday(timeEntries, runningTimeEntry);
-  const { resumeTimeEntry } = useTimeEntryActions(revalidateRunningTimeEntry, revalidateTimeEntries);
+  const { resumeTimeEntry } = useTimeEntryActions();
 
   return (
     <List
@@ -31,9 +31,7 @@ function ListView() {
       throttle
       navigationTitle={isLoading ? undefined : `Today: ${formatSeconds(totalDurationToday)}`}
     >
-      {runningTimeEntry && (
-        <RunningTimeEntry {...{ runningTimeEntry, revalidateRunningTimeEntry, revalidateTimeEntries }} />
-      )}
+      {runningTimeEntry && <RunningTimeEntry runningTimeEntry={runningTimeEntry} />}
       <List.Section title="Actions">
         <List.Item
           title="Create a new time entry"
