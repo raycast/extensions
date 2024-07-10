@@ -32,13 +32,8 @@ export interface TUpscaleCreationOutput {
 }
 
 export interface TGalleryPage {
-  next?: number;
-  hits: TOutput[];
-}
-
-export interface THistoryPage {
-  next?: number;
-  outputs: TOutputHistory[];
+  next?: string;
+  outputs: TOutput[];
 }
 
 export interface TOutput {

@@ -9,6 +9,7 @@ export const scoreThreshold = 50;
 export const maxPromptLength = 500;
 
 export const modelIdToName = {
+  "986d447d-c38b-4218-a2c8-6e0b691f47ec": "Stable Diffusion 3",
   "b6c1372f-31a7-457c-907c-d292a6ffef97": "Luna Diffusion",
   "048b4aa3-5586-47ed-900f-f4341c96bdb2": "Stable Diffusion v1.5",
   "fc06f6ab-ed14-4186-a7c0-aaec288d4f38": "22h Diffusion",
