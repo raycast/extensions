@@ -74,8 +74,8 @@ export default function Command() {
         <MenuBarExtra.Section title="Running time entry">
           <MenuBarExtra.Item
             icon={{ source: Icon.Circle, tintColor: runningEntry?.project_color }}
-            onAction={() => {
-              stopRunningTimeEntry(runningEntry);
+            onAction={async () => {
+              await stopRunningTimeEntry(runningEntry);
             }}
             title={runningEntry.description || ""}
             subtitle={
@@ -92,8 +92,8 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Start/Stop Time Entry"
           icon={"command-icon.png"}
-          onAction={() =>
-            launchCommand({
+          onAction={async () =>
+            await launchCommand({
               name: "index",
               type: LaunchType.UserInitiated,
             })
@@ -108,7 +108,9 @@ export default function Command() {
             title={timeEntry.description || "No description"}
             subtitle={(timeEntry.client_name ? timeEntry.client_name + " | " : "") + (timeEntry.project_name ?? "")}
             icon={{ source: Icon.Circle, tintColor: timeEntry.project_color }}
-            onAction={() => resumeTimeEntry(timeEntry)}
+            onAction={async () => {
+              await resumeTimeEntry(timeEntry);
+            }}
           />
         ))}
       </MenuBarExtra.Section>
