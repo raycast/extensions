@@ -1,4 +1,4 @@
-import { List, Action, ActionPanel, Icon, getPreferenceValues, preferences, showToast, Toast } from "@raycast/api";
+import { List, Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { glob } from "glob";
 import { getOptionIcon, getPasswordIcon } from "./utils/icons.util";
@@ -22,10 +22,11 @@ export default function Command(): JSX.Element {
     const passwords: Password[] = [];
 
     // Push the last used password if it exists
-    if (lastUsedPassword.password) passwords.push({
-      value: lastUsedPassword.password,
-      showOtpFirst: lastUsedPassword.option === "Password",
-    });
+    if (lastUsedPassword.password)
+      passwords.push({
+        value: lastUsedPassword.password,
+        showOtpFirst: lastUsedPassword.option === "Password",
+      });
 
     const preferences = getPreferenceValues<Preferences>();
     const passPath = preferences.PASSWORDS_PATH;
@@ -45,7 +46,10 @@ export default function Command(): JSX.Element {
   return (
     <List isLoading={isLoading}>
       {data && data.length === 0 ? (
-        <List.EmptyView title="No password files found" description="Please check that you have the correct folder selected in your extension preferences. " />
+        <List.EmptyView
+          title="No password files found"
+          description="Please check that you have the correct folder selected in your extension preferences. "
+        />
       ) : (
         data?.map((password: Password) => (
           <List.Item
@@ -63,7 +67,6 @@ export default function Command(): JSX.Element {
           />
         ))
       )}
-
     </List>
   );
 }
@@ -128,7 +131,10 @@ function PasswordOptions(props: { selectedPassword: string; showOtpFirst: boolea
   return (
     <List isLoading={isLoading}>
       {!data ? (
-        <List.EmptyView title="Error decrypting password" description="There was an error while decrypting the password file. Make sure your GPG password is saved on your macOS keychain or in the extension preferences." />
+        <List.EmptyView
+          title="Error decrypting password"
+          description="There was an error while decrypting the password file. Make sure your GPG password is saved on your macOS keychain or in the extension preferences."
+        />
       ) : (
         data?.map((option: Option) => (
           <List.Item
@@ -152,7 +158,6 @@ function PasswordOptions(props: { selectedPassword: string; showOtpFirst: boolea
           />
         ))
       )}
-
     </List>
   );
 }
