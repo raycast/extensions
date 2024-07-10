@@ -1,5 +1,7 @@
 # Sentry Changelog
 
+## [Fix command when user has multiple orgs and projects with same name] - 2024-07-10
+
 ## [Added pagination] - 2024-03-27
 
 - Added pagination support.
