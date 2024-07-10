@@ -25,12 +25,12 @@ export async function RunLangChain(
     model = chat.snippet.model;
   }
   promptString = ReplacePlaceholders(chat, promptString);
-  model = model.split("__")[1];
+  const models = model.split("__");
 
   return await Call(
     chat,
     Respond(promptString, chat.question.text, conversations.reverse(), loadHistory).messages,
-    { stream: useStream, temperature, model },
+    { stream: useStream, temperature, model: models[1], modelCompany: models[0] },
     interaction
   );
 }

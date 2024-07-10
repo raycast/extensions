@@ -30,7 +30,6 @@ Chat with GPT straight from your computer
 - Cohere
 - Perplexity
 - Anthropic
-- Ollama
 
 #### Binnary
 - blueprint golang
@@ -53,6 +52,7 @@ Chat with GPT straight from your computer
 
 - GPT 3.5*
 - GPT 4*
+- LLaMA
 
 # How to use
 

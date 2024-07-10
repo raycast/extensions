@@ -2,14 +2,23 @@ import { getPreferenceValues, environment } from "@raycast/api";
 
 export interface ConfigurationPreferencesType {
   apiOpenAiKey: string;
+  apiOllamaHost: string;
+  apiLangSmithKey: string;
+  apiLunaryKey: string;
+  apiLangFusePublicKey: string;
+  apiLangFuseSecretKey: string;
   apiEndpoint: string;
   apiBinnary: string;
   apiEndpointData: string;
-  GetApiOpenAiKey(): string;
-  GetApiEnpointUrl(): string;
-  GetApiBinnaryPath(): string;
-  GetApiEndpointData(): string;
-  IsClearHistoryWhenUseSnippet(): boolean;
+
+  GetApiOpenAi(): { key: string };
+  GetApiOllama(): { host: string };
+  GetApiLangSmith(): { host: string; key: string; projectName: string };
+  GetApiLunary(): { key: string };
+  GetApiLangFuse(): { host: string; public: string; secret: string };
+  GetApiEndpoint(): { host: string };
+  GetApiBinnary(): { path: string };
+  GetApiEndpointData(): { host: string };
 }
 
 export const ConfigurationTypeCommunicationLangChain = "lang-chain";
@@ -83,6 +92,14 @@ export const ConfigurationModelCollection: { key: string; title: string }[] = [
     key: "openai__gpt-3.5-turbo",
     title: "GPT 3.5 Turbo",
   },
+  {
+    key: "ollama__llama2",
+    title: "Ollama 2",
+  },
+  {
+    key: "ollama__llama3",
+    title: "Ollama 3",
+  },
 ];
 
 export function ClearImportModel(str: string): string {
@@ -135,20 +152,56 @@ function getConfig(): ConfigurationPreferencesType {
   return getPreferenceValues<ConfigurationPreferencesType>();
 }
 
-export function GetApiOpenAiKey(): string {
-  return getConfig().apiOpenAiKey;
+export function GetApiOpenAi(): { key: string } {
+  return {
+    key: getConfig().apiOpenAiKey,
+  };
 }
 
-export function GetApiEnpointUrl(): string {
-  return getConfig().apiEndpoint;
+export function GetApiOllama(): { host: string } {
+  return {
+    host: getConfig().apiOllamaHost,
+  };
 }
 
-export function GetApiBinnaryPath(): string {
-  return getConfig().apiBinnary;
+export function GetApiLangSmith(): { host: string; key: string; projectName: string } {
+  return {
+    host: "https://api.smith.langchain.com",
+    key: getConfig().apiLangSmithKey,
+    projectName: "raycast_jose",
+  };
 }
 
-export function GetApiEndpointData(): string {
-  return getConfig().apiEndpointData;
+export function GetApiLunary(): { key: string } {
+  return {
+    key: getConfig().apiLunaryKey,
+  };
+}
+
+export function GetApiLangFuse(): { host: string; public: string; secret: string } {
+  return {
+    host: "https://cloud.langfuse.com",
+    public: getConfig().apiLangFusePublicKey,
+    secret: getConfig().apiLangFuseSecretKey,
+  };
+}
+
+export function GetApiEndpoint(): { host: string } {
+  return {
+    host: getConfig().apiEndpoint,
+  };
+}
+
+export function GetApiBinnary(): { path: string } {
+  return {
+    path: getConfig().apiBinnary,
+  };
+}
+
+export function GetApiEndpointData(): { host: string } {
+  return {
+    host: getConfig().apiEndpointData,
+  };
 }
 
 export function GetUserName(): string {

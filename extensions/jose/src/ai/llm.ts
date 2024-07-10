@@ -1,110 +1,91 @@
-import { ChatOpenAI } from "@langchain/openai";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { Toast } from "@raycast/api";
-import { GetApiOpenAiKey } from "../type/config";
 import { TalkType } from "../type/talk";
+import { CallOpenAI } from "./model/openai";
+import { TracerCallbacks } from "./tracer";
+import { InteractionCallbacks } from "./interaction";
 
 export const Call = async (
   chat: TalkType,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   messages: any[],
-  config: { stream: boolean; temperature: string; model: string },
+  config: { stream: boolean; temperature: string; model: string; modelCompany: string },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   interaction: { toast: Toast; setData: any; setStreamData: any; setLoading: any }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> => {
-  const modelSettings = {
-    apiKey: GetApiOpenAiKey(),
-    modelName: config.model,
-    streaming: false,
-    temperature: parseFloat(config.temperature),
-    callbacks: [
-      {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        handleLLMNewToken: async (token: string, idx: any, runId: any, parentRunId: any, tags: any, fields: any) => {
-          if (fields.chunk.generationInfo.finish_reason === "stop") {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            interaction.setData((prev: any) => {
-              return prev.map((a: TalkType) => {
-                if (a.chatId === chat.chatId) {
-                  return chat;
-                }
-                return a;
-              });
-            });
-
-            setTimeout(async () => {
-              interaction.setStreamData(undefined);
-            }, 5);
-
-            interaction.setLoading(false);
-
-            interaction.toast.title = "Got your answer!";
-            interaction.toast.style = Toast.Style.Success;
-            return;
-          }
-          if (chat.result === undefined) {
-            chat.result = {
-              text: token,
-              imageExist: false,
-              images: undefined,
-              actionType: "",
-              actionName: "",
-              actionStatus: "",
-            };
-          }
-
-          chat.result.text += token;
-
-          interaction.setStreamData({ ...chat, result: chat.result });
-        },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        handleLLMEnd: async (output: any) => {
-          if (chat.result === undefined) {
-            chat.result = {
-              text: output.generations[0][0].text,
-              imageExist: false,
-              images: undefined,
-              actionType: "",
-              actionName: "",
-              actionStatus: "",
-            };
-          }
-          chat.result.text = output.generations[0][0].text;
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          interaction.setData((prev: any) => {
-            return prev.map((a: TalkType) => {
-              if (a.chatId === chat.chatId) {
-                return chat;
-              }
-              return a;
-            });
-          });
-
-          setTimeout(async () => {
-            interaction.setStreamData(undefined);
-          }, 5);
-
-          interaction.setLoading(false);
-
-          interaction.toast.title = "Got your answer!";
-          interaction.toast.style = Toast.Style.Success;
-        },
-        handleLLMError: async (err: Error) => {
-          console.error(err);
-        },
-      },
-    ],
-  };
-
-  const c = new ChatOpenAI(modelSettings);
-  await c.invoke(messages);
-
-  return chat;
+  switch (config.modelCompany) {
+    case "openai":
+      console.log("Using langChain `openai`");
+      return await CallOpenAI(chat, messages, config, {
+        model: await TracerCallbacks([]),
+        invoke: await InteractionCallbacks([], chat, interaction),
+      });
+      break;
+    // still in preparation
+    // case "ollama":
+    //   console.log("Using langChain `ollama`");
+    //   return await CallOllama(chat, messages, config, {
+    //     model: await TracerCallbacks([]),
+    //     invoke: await InteractionCallbacks([], chat, interaction),
+    //   });
+    //   break;
+    default:
+      console.log("Using langChain `default`");
+  }
 };
 
 export const Embed = async (query: string) => {
   const embeddings = new OpenAIEmbeddings();
   return embeddings.embedQuery(query);
 };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function ChatTransfomer(chat: TalkType[], prompt: string, loadHistory: boolean): any[] {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const messages: any[] = [{ role: "system", content: prompt }];
+
+  if (loadHistory) {
+    limitConversationLength(chat).forEach(({ question, result }) => {
+      messages.push({
+        role: "user",
+        content: question.text,
+      });
+      messages.push({
+        role: "assistant",
+        content: result?.text,
+      });
+    });
+  }
+
+  return messages;
+}
+
+function countOpenAITokens(text: string): number {
+  // 100 tokens ~= 75 words
+  const words = text.split(" ").length;
+  const openAITokens = Math.ceil(words / 75) * 100;
+  return openAITokens;
+}
+
+function limitConversationLength(chats: TalkType[]) {
+  // https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them
+  const maxTokens = 3750;
+  const newChats: TalkType[] = [];
+  let tokens = 0;
+
+  for (const chat of chats) {
+    const questionTokens = countOpenAITokens(chat.question.text);
+    const answerTokens = countOpenAITokens(chat.result ? chat.result.text : "");
+
+    tokens = tokens + questionTokens + answerTokens;
+
+    if (tokens > maxTokens) {
+      break;
+    }
+
+    newChats.push(chat);
+  }
+
+  return newChats;
+}

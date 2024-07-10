@@ -35,7 +35,7 @@ export default function Snippet() {
         icon={Icon.PlusCircle}
         onAction={() => push(<SnippetImportForm use={{ snippets: collectionsSnipppets }} />)}
       />
-      <Action title={"Reload Snippets"} icon={Icon.Download} onAction={() => collections.reload()} />
+      <Action title={"Reload Snippets From Api"} icon={Icon.Download} onAction={() => collections.reload()} />
     </ActionPanel>
   );
   const getActionItem = (snippet: TalkSnippetType) => (

@@ -76,7 +76,7 @@ export function useChat(): ChatHookType {
     }
 
     if (chatResponse !== undefined) {
-      console.log("Send webhook");
+      console.log("Send webhook?");
       sendWebhook(chatResponse, setData);
     }
 

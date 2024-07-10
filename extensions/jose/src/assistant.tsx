@@ -46,7 +46,11 @@ export default function Assistant() {
         icon={Icon.PlusCircle}
         onAction={() => push(<AssistantImportForm use={{ assistants: collectionsAssistants }} />)}
       />
-      <Action title={"Reload Assistants"} icon={Icon.Download} onAction={() => collectionsAssistant.reload()} />
+      <Action
+        title={"Reload Assistants From Api"}
+        icon={Icon.Download}
+        onAction={() => collectionsAssistant.reload()}
+      />
     </ActionPanel>
   );
   const getActionItem = (assistant: TalkAssistantType) => (

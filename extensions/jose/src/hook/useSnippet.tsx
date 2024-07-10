@@ -23,7 +23,7 @@ export function useSnippet(): SnippetHookType {
       if (stored) {
         setData((previous) => [...previous, ...JSON.parse(stored)]);
       } else {
-        if (GetApiEndpointData() !== "" && GetApiEndpointData() !== undefined) {
+        if (GetApiEndpointData() !== undefined) {
           await apiLoad(setData, data);
         } else {
           setData(SnippetDefault);
@@ -39,7 +39,7 @@ export function useSnippet(): SnippetHookType {
   }, [data]);
 
   const reload = useCallback(async () => {
-    if (GetApiEndpointData() !== "" && GetApiEndpointData() !== undefined) {
+    if (GetApiEndpointData() === undefined) {
       return;
     }
     await apiLoad(setData, data);
@@ -121,7 +121,7 @@ export function useSnippet(): SnippetHookType {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function apiLoad(setData: any, oldData: TalkSnippetType[]) {
-  await fetch(GetApiEndpointData(), {
+  await fetch(GetApiEndpointData().host, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

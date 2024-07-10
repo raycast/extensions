@@ -1,6 +1,6 @@
 import { Toast } from "@raycast/api";
 import fetch from "node-fetch";
-import { GetApiEnpointUrl } from "../../type/config";
+import { GetApiEndpoint } from "../../type/config";
 import { TalkQuestionFileType, TalkType } from "../../type/talk";
 
 export async function RunCustomApi(
@@ -19,7 +19,7 @@ export async function RunCustomApi(
     });
   }
 
-  return await fetch(GetApiEnpointUrl(), {
+  return await fetch(GetApiEndpoint().host, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

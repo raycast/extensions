@@ -56,6 +56,41 @@
       "required": false
     },
     {
+      "name": "apiOllamaHost",
+      "title": "Ollama API Host",
+      "description": "Enter your host to Ollama API",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "apiLangSmithKey",
+      "title": "Lang Smith API Key",
+      "description": "Enter your personal Lang Smith API Key for project `Raycast Jose`",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "apiLunaryKey",
+      "title": "Lunary API Key",
+      "description": "Enter your personal Lunary API Key for project `Raycast Jose`",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "apiLangFusePublicKey",
+      "title": "Lang Fuse public API Key",
+      "description": "Enter your personal Lang Fuse public API Key for project `Raycast Jose`",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "apiLangFuseSecretKey",
+      "title": "Lang Fuse secret API Key",
+      "description": "Enter your personal Lang Fuse secret API Key for project `Raycast Jose`",
+      "type": "password",
+      "required": false
+    },
+    {
       "name": "apiEndpoint",
       "title": "API Endpoint",
       "description": "API endpoint for communication",
@@ -85,7 +120,11 @@
     "@raycast/utils": "^1.5.2",
     "@types/react": "^18.3.3",
     "@types/uuid": "^9.0.0",
-    "node-fetch": "^3.3.2",
+    "langchain": "^0.2.8",
+    "langfuse-langchain": "^3.14.0",
+    "langsmith": "^0.1.36",
+    "lunary": "^0.6.16",
+    "node-fetch": "^2.7.0",
     "openai": "^4.52.3",
     "say": "^0.16.0",
     "uuid": "^9.0.0"
@@ -100,9 +139,8 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
+    "lint-fix": "ray lint --fix",
     "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }
