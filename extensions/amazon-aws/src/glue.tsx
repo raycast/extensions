@@ -44,7 +44,7 @@ export default function Glue() {
   );
 }
 
-function GlueJob({ job: glueJobRun, mutate }: { job: GlueJobRun; mutate: MutatePromise<GlueJobRun[]> }) {
+function GlueJob({ job: glueJobRun, mutate }: { job: GlueJobRun; mutate: MutatePromise<GlueJobRun[] | undefined> }) {
   return (
     <List.Item
       key={glueJobRun.JobName}
@@ -161,7 +161,7 @@ function GlueJobRunDetails({ jobRun: glueJobRun }: { jobRun: GlueJobRun }) {
   );
 }
 
-async function RunGlueJob(glueJobName: string, mutate: MutatePromise<GlueJobRun[]>) {
+async function RunGlueJob(glueJobName: string, mutate: MutatePromise<GlueJobRun[] | undefined>) {
   mutate(new GlueClient({}).send(new StartJobRunCommand({ JobName: glueJobName })), {
     optimisticUpdate(data) {
       return data;
