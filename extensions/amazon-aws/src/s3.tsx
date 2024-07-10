@@ -265,7 +265,7 @@ export const fetchBucketPolicy = (bucket: string) => {
       const { Policy = "❗Not Yet Defined" } = await new S3Client({}).send(
         new GetBucketPolicyCommand({ Bucket: bucket }),
       );
-      let md = "## Resource Policy\n\n```";
+      let md = "## Bucket Policy\n\n```";
       let value = Policy;
 
       try {
