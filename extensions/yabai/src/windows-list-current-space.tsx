@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, List, closeMainWindow } from "@raycast/api";
+import { Action, ActionPanel, List, PopToRootType, closeMainWindow } from "@raycast/api";
 import { runYabaiCommand } from "./helpers/scripts";
+import { execaCommand } from "execa";
 
 interface IWindow {
   id: number;
+  pid: number;
   title: string;
+  icon: string;
   app: string;
   "has-focus": boolean;
   "stack-index": number;
@@ -28,7 +31,13 @@ const useWindowsList = () => {
         const list = await getWindowsList();
         list.sort((a, b) => a["stack-index"] - b["stack-index"]);
         setState({
-          list,
+          list: await Promise.all(
+            list.map(async (el) => {
+              el.icon = (await findAppPath(el.pid)) || "";
+              el.title = el.title || el.app;
+              return el;
+            }),
+          ),
           isLoading: false,
         });
       } catch (error) {
@@ -43,10 +52,25 @@ const useWindowsList = () => {
 
   return state;
 };
+async function findAppPath(pid: number): Promise<string> {
+  const { stdout, stderr } = await execaCommand(`/usr/sbin/lsof -p ${pid} | grep txt | grep -v DEL | head -n 1 `, {
+    shell: true,
+  });
+  if (stderr) {
+    console.error(stderr);
+    return "";
+  }
+  const beginIndex = stdout.indexOf("/");
+  const appIndex = stdout.indexOf(".app");
+  if (appIndex === -1) {
+    return stdout;
+  }
+  return stdout.substring(beginIndex, appIndex + 4);
+}
 
 export function selectWindow(id: number) {
   runYabaiCommand(`-m window --focus ${id}`);
-  closeMainWindow({ clearRootSearch: true });
+  closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
 }
 
 export default function Command() {
@@ -54,7 +78,6 @@ export default function Command() {
 
   let selectedItemId = 0;
   if (list) {
-    console.log(list);
     selectedItemId = list.find((f) => f["has-focus"])?.id || 0;
   }
 
@@ -64,7 +87,7 @@ export default function Command() {
         <List.Item
           id={item.id.toString()}
           key={item.id}
-          icon={{ fileIcon: `/Applications/${item.app}.app` }}
+          icon={{ fileIcon: item.icon }}
           title={item.title}
           accessories={[{ text: item.app }]}
           actions={
