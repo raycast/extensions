@@ -11,7 +11,8 @@ export function useProcessedTimeEntries() {
   const timeEntriesWithUniqueProjectAndDescription = useMemo(() => {
     return timeEntries.reduce<typeof timeEntries>((acc, timeEntry) => {
       if (
-        timeEntry.id === runningTimeEntry?.id ||
+        (timeEntry.description == runningTimeEntry?.description &&
+          timeEntry.project_id == runningTimeEntry?.project_id) ||
         acc.find((t) => t.description === timeEntry.description && t.project_id === timeEntry.project_id)
       )
         return acc;
