@@ -95,7 +95,7 @@ function S3BucketObjects({
     error,
     isLoading,
     mutate,
-  } = useCachedPromise(() => fetchBucketObjects(bucket.Name!, prefix, isReversedOrder));
+  } = useCachedPromise(fetchBucketObjects, [bucket.Name!, prefix, isReversedOrder]);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter objects by name...">
