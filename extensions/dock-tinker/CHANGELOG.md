@@ -1,6 +1,6 @@
 # Dock Tinker Changelog
 
-## [Reset to Confirm] - {PR_MERGE_DATE}
+## [Reset to Confirm] - 2024-07-10
 
 - Reset Dock State command shows a confirmation dialog.
 
