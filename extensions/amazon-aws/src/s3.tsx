@@ -2,7 +2,7 @@ import fs from "fs";
 import { homedir } from "os";
 import { Readable } from "stream";
 import { ActionPanel, List, Action, Icon, showToast, Toast, Detail, Image } from "@raycast/api";
-import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import {
   Bucket,
   GetObjectCommand,
@@ -13,13 +13,15 @@ import {
   ListObjectsV2Command,
   CommonPrefix,
   GetBucketPolicyCommand,
-  GetBucketPolicyCommandOutput,
 } from "@aws-sdk/client-s3";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { isReadyToFetch, resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
 
 export default function S3() {
+  const [isReversedOrder, setReversedOrder] = useCachedState<boolean>("reverse-order", false, {
+    cacheNamespace: "aws-s3",
+  });
   const { data: buckets, error, isLoading, revalidate } = useCachedPromise(fetchBuckets);
 
   return (
@@ -31,22 +33,43 @@ export default function S3() {
       {error ? (
         <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
       ) : (
-        buckets?.map((bucket) => <S3Bucket key={bucket.Name} bucket={bucket} />)
+        buckets?.map((bucket) => (
+          <S3Bucket
+            key={bucket.Name}
+            bucket={bucket}
+            isReversedOrder={isReversedOrder}
+            setReversedOrder={setReversedOrder}
+          />
+        ))
       )}
     </List>
   );
 }
 
-function S3Bucket({ bucket }: { bucket: Bucket }) {
+function S3Bucket({
+  bucket,
+  isReversedOrder,
+  setReversedOrder,
+}: {
+  bucket: Bucket;
+  isReversedOrder: boolean;
+  setReversedOrder: (value: boolean) => void;
+}) {
   return (
     <List.Item
       key={bucket.Name}
       icon={{ source: "aws-icons/s3.png", mask: Image.Mask.RoundedRectangle }}
-      title={bucket.Name || ""}
+      title={bucket.Name!}
       actions={
         <ActionPanel>
-          <Action.Push target={<S3BucketObjects bucket={bucket} />} title="List Objects" icon={Icon.List} />
-          <Action.Push target={<S3BucketPolicy bucket={bucket} />} title="Show Bucket Policy" icon={Icon.Document} />
+          <Action.Push
+            target={
+              <S3BucketObjects bucket={bucket} isReversedOrder={isReversedOrder} setReversedOrder={setReversedOrder} />
+            }
+            title="List Objects"
+            icon={Icon.List}
+          />
+          <Action.Push target={<S3BucketPolicy bucket={bucket} />} title="Show Bucket Policy" icon={Icon.Key} />{" "}
           <AwsAction.Console url={resourceToConsoleLink(bucket.Name, "AWS::S3::Bucket")} />
           <Action.CopyToClipboard title="Copy Name" content={bucket.Name || ""} />
           <Action.CopyToClipboard title="Copy ARN" content={"arn:aws:s3:::" + bucket.Name || ""} />
@@ -56,23 +79,23 @@ function S3Bucket({ bucket }: { bucket: Bucket }) {
   );
 }
 
-function S3BucketObjects({ bucket, prefix = "" }: { bucket: Bucket; prefix?: string }) {
-  const [isReversedOrder, setReversedOrder] = useCachedState<boolean>("reverse-order", false, {
-    cacheNamespace: "aws-s3",
-  });
+function S3BucketObjects({
+  bucket,
+  prefix = "",
+  isReversedOrder,
+  setReversedOrder,
+}: {
+  bucket: Bucket;
+  prefix?: string;
+  isReversedOrder: boolean;
+  setReversedOrder: (value: boolean) => void;
+}) {
   const {
     data: objects,
     error,
     isLoading,
     mutate,
-  } = useCachedPromise(() =>
-    fetchBucketObjects(bucket.Name!, prefix).then((data) => {
-      if (!isReversedOrder) return data;
-      data.prefixes = data.prefixes.reverse();
-      data.objects = data.objects.reverse();
-      return data;
-    }),
-  );
+  } = useCachedPromise(() => fetchBucketObjects(bucket.Name!, prefix, isReversedOrder));
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter objects by name...">
@@ -88,22 +111,22 @@ function S3BucketObjects({ bucket, prefix = "" }: { bucket: Bucket; prefix?: str
               actions={
                 <ActionPanel>
                   <Action.Push
-                    target={<S3BucketObjects bucket={bucket} prefix={commonPrefix.Prefix} />}
+                    target={
+                      <S3BucketObjects
+                        bucket={bucket}
+                        prefix={commonPrefix.Prefix}
+                        isReversedOrder={isReversedOrder}
+                        setReversedOrder={setReversedOrder}
+                      />
+                    }
                     title="List Objects"
                     icon={Icon.List}
                   />
                   <Action
-                    title="Reverse Order"
+                    title={`${isReversedOrder ? "Standard" : "Reversed"} Order`}
                     onAction={() => {
-                      mutate(fetchBucketObjects(bucket.Name!, prefix), {
-                        optimisticUpdate: (data) => {
-                          setReversedOrder(!isReversedOrder);
-                          if (!isReversedOrder) return data;
-                          data!.prefixes = data!.prefixes.reverse();
-                          data!.objects = data!.objects.reverse();
-                          return data;
-                        },
-                      });
+                      setReversedOrder(!isReversedOrder);
+                      mutate();
                     }}
                     icon={Icon.Switch}
                   />
@@ -161,25 +184,15 @@ function S3BucketObjects({ bucket, prefix = "" }: { bucket: Bucket; prefix?: str
 }
 
 function S3BucketPolicy({ bucket }: { bucket: Bucket }) {
-  const { data: policy, isLoading } = useCachedPromise(() =>
-    fetchBucketPolicy(bucket.Name!)
-      .then((data) => {
-        showToast({ title: "Policy loaded" });
-        return data;
-      })
-      .catch((error) => {
-        showFailureToast(error, { title: "Error loading policy" });
-      }),
-  );
-
+  const { policy, isLoading } = fetchBucketPolicy(bucket.Name!);
   return (
     <Detail
-      navigationTitle={`'${bucket.Name}' Bucket Policy`}
+      navigationTitle="Bucket Policy"
       isLoading={isLoading}
-      markdown={`\`\`\`json\n` + JSON.stringify(JSON.parse(policy!.Policy!), null, 2) + `\`\`\``}
+      markdown={policy?.markdown || ""}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Policy" content={policy?.Policy || ""} />
+          <Action.CopyToClipboard title="Copy Policy" content={policy?.value || ""} />
           <AwsAction.Console url={resourceToConsoleLink(bucket.Name, "AWS::S3::BucketPolicy")} />
         </ActionPanel>
       }
@@ -196,6 +209,7 @@ async function fetchBuckets() {
 async function fetchBucketObjects(
   bucket: string,
   prefix: string,
+  isReversedOrder: boolean,
   _region?: string,
   continuationToken?: string,
   objects: _Object[] = [],
@@ -207,11 +221,15 @@ async function fetchBucketObjects(
     new ListObjectsV2Command({ Bucket: bucket, ContinuationToken: continuationToken, Delimiter: "/", Prefix: prefix }),
   );
 
-  const combinedObjects = [...objects, ...(Contents || [])];
-  const combinedPrefixes = [...prefixes, ...(CommonPrefixes || [])];
+  let combinedObjects = [...objects, ...(Contents || [])];
+  let combinedPrefixes = [...prefixes, ...(CommonPrefixes || [])];
 
   if (NextContinuationToken) {
-    return fetchBucketObjects(bucket, prefix, region, NextContinuationToken, combinedObjects);
+    return fetchBucketObjects(bucket, prefix, isReversedOrder, region, NextContinuationToken, combinedObjects);
+  }
+  if (isReversedOrder) {
+    combinedObjects = combinedObjects.reverse();
+    combinedPrefixes = combinedPrefixes.reverse();
   }
 
   return { objects: combinedObjects, prefixes: combinedPrefixes };
@@ -237,6 +255,32 @@ function humanFileSize(bytes: number) {
   return bytes.toFixed() + " " + units[u];
 }
 
-async function fetchBucketPolicy(bucket: string): Promise<GetBucketPolicyCommandOutput> {
-  return await new S3Client({}).send(new GetBucketPolicyCommand({ Bucket: bucket }));
-}
+export const fetchBucketPolicy = (bucket: string) => {
+  const {
+    data: policy,
+    error,
+    isLoading,
+  } = useCachedPromise(
+    async (bucket: string) => {
+      const { Policy = "❗Not Yet Defined" } = await new S3Client({}).send(
+        new GetBucketPolicyCommand({ Bucket: bucket }),
+      );
+      let md = "## Resource Policy\n\n```";
+      let value = Policy;
+
+      try {
+        const json = JSON.parse(Policy.toString() || "");
+        md += `json\n${JSON.stringify(json, null, 4)}`;
+        value = JSON.stringify(json, null, 4);
+      } catch (error) {
+        md += `text\n${Policy.toString()}`;
+      }
+
+      return { value, markdown: md + "\n```" };
+    },
+    [bucket],
+    { execute: isReadyToFetch(), failureToastOptions: { title: "Failed to load bucket policy" } },
+  );
+
+  return { policy, isLoading: (!policy && !error) || isLoading };
+};
