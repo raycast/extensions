@@ -120,7 +120,7 @@ function S3BucketObjects({
                       />
                     }
                     title="List Objects"
-                    icon={Icon.List}
+                    icon={Icon.Document}
                   />
                   <Action
                     title={`${isReversedOrder ? "Standard" : "Reversed"} Order`}
