@@ -1,3 +1,5 @@
 # Cocktail DB Changelog
 
-## [Initial Version] - 2024-06-26
+## [Initial Version] - {PR_MERGE_DATE}
+
+- Search up to 25 drinks via name or ingredient

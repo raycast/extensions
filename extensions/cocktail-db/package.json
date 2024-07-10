@@ -2,18 +2,27 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cocktail-db",
   "title": "Cocktail DB",
-  "description": "",
-  "icon": "command-icon.png",
+  "description": "Search Drinks by Name or Ingredient via TheCocktailDB",
+  "icon": "cocktail-db.png",
   "author": "xmok",
   "categories": [
     "Data"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "api_key",
+      "title": "API Key",
+      "type": "password",
+      "required": false,
+      "description": "Optional API Key from Patreon"
+    }
+  ],
   "commands": [
     {
       "name": "search-cocktail-by-name",
       "title": "Search Cocktail by Name",
-      "description": "",
+      "description": "Get up to 25 drinks by name",
       "mode": "view",
       "arguments": [
         {
@@ -25,20 +34,22 @@
       ]
     },
     {
-      "name": "search-cocktail-by-first-letter",
-      "title": "Search Cocktail by First Letter",
-      "description": "",
-      "mode": "view"
-    },
-    {
       "name": "search-cocktail-by-ingredient",
       "title": "Search Cocktail by Ingredient",
-      "description": "",
-      "mode": "view"
+      "description": "Get up to 25 drinks by ingredient",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "ingredient",
+          "placeholder": "INGREDIENT",
+          "required": true,
+          "type": "text"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.3",
+    "@raycast/api": "^1.78.0",
     "@raycast/utils": "^1.16.1"
   },
   "devDependencies": {
