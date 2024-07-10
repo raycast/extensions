@@ -3,19 +3,22 @@ import { useCachedState } from "@raycast/utils";
 import { useMemo, useState } from "react";
 
 import { Client, Project, Task, TimeEntry, TimeEntryMetaData, createTimeEntry } from "@/api";
-import { useClients, useMe, useProjects, useTags, useTasks, useWorkspaces } from "@/hooks";
+import {
+  useClients,
+  useMe,
+  useProjects,
+  useRunningTimeEntry,
+  useTags,
+  useTasks,
+  useTimeEntries,
+  useWorkspaces,
+} from "@/hooks";
 
 interface CreateTimeEntryFormParams {
-  revalidateRunningTimeEntry: () => void;
-  revalidateTimeEntries: () => void;
   initialValues?: TimeEntry & TimeEntryMetaData;
 }
 
-function CreateTimeEntryForm({
-  revalidateRunningTimeEntry,
-  revalidateTimeEntries,
-  initialValues,
-}: CreateTimeEntryFormParams) {
+function CreateTimeEntryForm({ initialValues }: CreateTimeEntryFormParams) {
   const navigation = useNavigation();
   const { me, isLoadingMe } = useMe();
   const { workspaces, isLoadingWorkspaces } = useWorkspaces();
@@ -23,6 +26,8 @@ function CreateTimeEntryForm({
   const { projects, isLoadingProjects } = useProjects();
   const { tasks, isLoadingTasks } = useTasks();
   const { tags, isLoadingTags } = useTags();
+  const { revalidateTimeEntries } = useTimeEntries();
+  const { revalidateRunningTimeEntry } = useRunningTimeEntry();
 
   const [selectedWorkspace, setSelectedWorkspace] = useCachedState("defaultWorspace", workspaces.at(0)?.id);
   const [selectedClient, setSelectedClient] = useState<Client | undefined>(() => {

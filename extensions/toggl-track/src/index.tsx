@@ -13,14 +13,8 @@ import { useTotalDurationToday } from "@/hooks/useTotalDurationToday";
 dayjs.extend(duration);
 
 function ListView() {
-  const {
-    timeEntries,
-    runningTimeEntry,
-    isLoading,
-    revalidateTimeEntries,
-    revalidateRunningTimeEntry,
-    timeEntriesWithUniqueProjectAndDescription,
-  } = useProcessedTimeEntries();
+  const { timeEntries, runningTimeEntry, isLoading, timeEntriesWithUniqueProjectAndDescription } =
+    useProcessedTimeEntries();
 
   const totalDurationToday = useTotalDurationToday(timeEntries, runningTimeEntry);
   const { resumeTimeEntry } = useTimeEntryActions();
@@ -43,10 +37,7 @@ function ListView() {
                 icon={{ source: Icon.Clock }}
                 target={
                   <ExtensionContextProvider>
-                    <TimeEntryForm
-                      revalidateRunningTimeEntry={revalidateRunningTimeEntry}
-                      revalidateTimeEntries={revalidateTimeEntries}
-                    />
+                    <TimeEntryForm />
                   </ExtensionContextProvider>
                 }
               />
@@ -76,11 +67,7 @@ function ListView() {
                     icon={{ source: Icon.Plus }}
                     target={
                       <ExtensionContextProvider>
-                        <TimeEntryForm
-                          revalidateRunningTimeEntry={revalidateRunningTimeEntry}
-                          revalidateTimeEntries={revalidateTimeEntries}
-                          initialValues={timeEntry}
-                        />
+                        <TimeEntryForm initialValues={timeEntry} />
                       </ExtensionContextProvider>
                     }
                   />
