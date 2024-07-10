@@ -1,6 +1,6 @@
 # Claude Changelog
 
-## [Update] - 2024-07-06
+## [Update] - {PR_MERGE_DATE}
 
 - Fix: Restarting a conversation will retain the currently selected model
 
