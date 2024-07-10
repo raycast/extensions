@@ -15,10 +15,4 @@ with results. **You'll only be able to see this once**.
 
 ### Screencast
 
-- Create Gist
-
-https://user-images.githubusercontent.com/36128970/159211152-65b06683-56a3-4db4-842f-3acb05c6ce62.mp4
-
-- Search Gist
-
-https://user-images.githubusercontent.com/36128970/159161962-70adae29-29c5-4026-82d0-19f23b8dcc22.mp4
+<img src="media/usage.gif" alt="Usage">
