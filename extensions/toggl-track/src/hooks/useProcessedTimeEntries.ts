@@ -35,7 +35,7 @@ export function useProcessedTimeEntries() {
   );
 
   const runningTimeWithUniqueProjectAndDescription =
-    runningTimeEntryMetadata && runningTimeEntry ? { ...runningTimeEntryMetadata, ...runningTimeEntry } : null;
+    runningTimeEntryMetadata && runningTimeEntry ? { ...runningTimeEntryMetadata, ...runningTimeEntry } : undefined;
 
   return {
     timeEntries,
