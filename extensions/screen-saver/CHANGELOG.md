@@ -1,6 +1,6 @@
 # Screen Saver Changelog
 
-## [Remove Invalid Command] - {PR_MERGE_DATE}
+## [Remove Invalid Command] - 2024-07-10
 
 - Remove Random Screen Saver command, this feature is not supported on macOS 14 and above
 
