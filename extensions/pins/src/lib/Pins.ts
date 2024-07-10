@@ -24,7 +24,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { SORT_FN, StorageKey, SORT_STRATEGY } from "./constants";
+import { SORT_FN, StorageKey, SORT_STRATEGY, Visibility } from "./constants";
 import { objectFromNonNullableEntriesOfObject, runCommand, runCommandInTerminal } from "./utils";
 import { ExtensionPreferences } from "./preferences";
 import * as fs from "fs";
@@ -129,6 +129,8 @@ export type Pin = {
    * The tooltip to display when hovering over the pin.
    */
   tooltip?: string;
+
+  visibility?: Visibility;
 };
 
 /**
@@ -340,6 +342,7 @@ export const openPin = async (
     pin.averageExecutionTime
       ? Math.round((pin.averageExecutionTime * (pin.timesOpened || 0) + timeElapsed) / ((pin.timesOpened || 0) + 1))
       : timeElapsed,
+    pin.visibility,
     () => {
       null;
     },
@@ -395,6 +398,7 @@ export const createNewPin = async (
   iconColor: string | undefined,
   tags: string[] | undefined,
   notes: string | undefined,
+  visibility?: Visibility | undefined,
 ) => {
   // Get the stored pins
   const storedPins = await getStorage(StorageKey.LOCAL_PINS);
@@ -423,6 +427,7 @@ export const createNewPin = async (
     iconColor: iconColor,
     tags: tags,
     notes: notes,
+    visibility: visibility || Visibility.VISIBLE,
   });
 
   // Update the stored pins
@@ -464,6 +469,7 @@ export const modifyPin = async (
   notes: string | undefined,
   tooltip: string | undefined,
   averageExecutionTime: number | undefined,
+  visibility: Visibility | undefined,
   pop: () => void,
   setPins: React.Dispatch<React.SetStateAction<Pin[]>>,
   notify = true,
@@ -500,6 +506,7 @@ export const modifyPin = async (
         notes: notes,
         tooltip: tooltip,
         averageExecutionTime: averageExecutionTime,
+        visibility: visibility || Visibility.VISIBLE,
       } as Pin;
     } else {
       return oldPin;
@@ -533,6 +540,7 @@ export const modifyPin = async (
       notes: notes,
       tooltip: tooltip,
       averageExecutionTime: averageExecutionTime,
+      visibility: visibility || Visibility.VISIBLE,
     });
   }
 
@@ -543,6 +551,48 @@ export const modifyPin = async (
     await showToast({ title: `Updated pin!` });
   }
   pop();
+};
+
+/**
+ * Hides a pin; updates local storage.
+ * @param pin The pin to hide.
+ * @param setPins The function to update the list of pins.
+ */
+export const hidePin = async (pin: Pin, setPins: React.Dispatch<React.SetStateAction<Pin[]>>) => {
+  const storedPins = await getStorage(StorageKey.LOCAL_PINS);
+  const newData: Pin[] = storedPins.map((oldPin: Pin) => {
+    if (oldPin.id == pin.id) {
+      return {
+        ...oldPin,
+        visibility: Visibility.HIDDEN,
+      };
+    }
+    return oldPin;
+  });
+
+  setPins(newData);
+  await setStorage(StorageKey.LOCAL_PINS, newData);
+};
+
+/**
+ * Disables a pin; updates local storage.
+ * @param pin The pin to disable.
+ * @param setPins The function to update the list of pins.
+ */
+export const disablePin = async (pin: Pin, setPins: React.Dispatch<React.SetStateAction<Pin[]>>) => {
+  const storedPins = await getStorage(StorageKey.LOCAL_PINS);
+  const newData: Pin[] = storedPins.map((oldPin: Pin) => {
+    if (oldPin.id == pin.id) {
+      return {
+        ...oldPin,
+        visibility: Visibility.DISABLED,
+      };
+    }
+    return oldPin;
+  });
+
+  setPins(newData);
+  await setStorage(StorageKey.LOCAL_PINS, newData);
 };
 
 /**

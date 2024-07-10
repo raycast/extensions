@@ -12,7 +12,7 @@ import path from "path";
 
 import { Color, Icon, List } from "@raycast/api";
 
-import { SORT_STRATEGY } from "./constants";
+import { SORT_STRATEGY, Visibility } from "./constants";
 import { Group } from "./Groups";
 import { getLinkedPins, Pin } from "./Pins";
 import { pluralize } from "./utils";
@@ -137,6 +137,26 @@ export const addApplicationAccessory = (pin: Pin, accessories: List.Item.Accesso
     !pin.url?.match(/^[a-zA-Z0-9]*?:.*/g)
   ) {
     accessories.push({ icon: Icon.Terminal, tooltip: "Runs Terminal Command" });
+  }
+};
+
+/**
+ * Adds a visibility accessory to the given list of accessories.
+ * @param pin The pin to add the accessory for.
+ * @param accessories The list of accessories to add the visibility accessory to.
+ */
+export const addVisibilityAccessory = (pin: Pin, accessories: List.Item.Accessory[], showingHidden: boolean) => {
+  if (pin.visibility === Visibility.MENUBAR_ONLY) {
+    accessories.push({ tag: { value: "Menubar Only", color: Color.Blue }, tooltip: "Visible in Menubar Only" });
+  } else if (pin.visibility === Visibility.VIEW_PINS_ONLY && showingHidden) {
+    accessories.push({
+      tag: { value: "'View Pins' Only", color: Color.Purple },
+      tooltip: "Visible in 'View Pins' Only",
+    });
+  } else if (pin.visibility === Visibility.HIDDEN) {
+    accessories.push({ tag: "Hidden", tooltip: "Hidden — Use Deeplinks to Open" });
+  } else if (pin.visibility === Visibility.DISABLED) {
+    accessories.push({ tag: { value: "Disabled", color: Color.Red }, tooltip: "Pin Disabled — Cannot be Opened" });
   }
 };
 

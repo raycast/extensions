@@ -84,6 +84,16 @@ export enum RightClickAction {
    * Open the edit pin form.
    */
   Edit = "edit",
+
+  /**
+   * Hide the pin.
+   */
+  Hide = "hide",
+
+  /**
+   * Disable the pin.
+   */
+  Disable = "disable",
 }
 
 /**
@@ -179,6 +189,11 @@ export interface ViewPinsPreferences {
    * Whether to display the execution visibility for Terminal command pins.
    */
   showExecutionVisibility: boolean;
+
+  /**
+   * Whether to display the visibility of each pin.
+   */
+  showVisibility: boolean;
 
   /**
    * Whether to display an icon accessory for text fragments.

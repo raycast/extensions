@@ -18,7 +18,7 @@ import {
 } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 
-import { KEYBOARD_SHORTCUT } from "../lib/constants";
+import { KEYBOARD_SHORTCUT, Visibility } from "../lib/constants";
 import { useGroups } from "../lib/Groups";
 import { iconMap } from "../lib/icons";
 import { createNewPin, getPins, getPinStatistics, modifyPin, Pin } from "../lib/Pins";
@@ -183,6 +183,7 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
                   values.notesField,
                   values.tooltipField,
                   pin.averageExecutionTime,
+                  values.visibilityField,
                   pop,
                   setPins,
                 );
@@ -203,6 +204,7 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
                     .map((tag) => tag.trim())
                     .filter((tag) => tag.length > 0),
                   values.notesField,
+                  values.visibilityField,
                 );
                 if (setPins) {
                   setPins(await getPins());
@@ -358,6 +360,34 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
           })}
         </Form.Dropdown>
       ) : null}
+
+      <Form.Dropdown
+        id="visibilityField"
+        title="Visibility"
+        info="Controls the visibility of the pin in the 'View Pins' command and the menu bar dropdown. If set to 'Hidden', you can find the pin by using the 'Show Hidden Pins' action of the 'View Pins' command. Hidden pins can still be opened using deeplinks, while disabled pins cannot be opened at all."
+        defaultValue={(pin ? pin.visibility : Visibility.VISIBLE)?.toString()}
+      >
+        <Form.Dropdown.Item key="visible" title="Visible" value={Visibility.VISIBLE.toString()} icon={Icon.Eye} />
+        <Form.Dropdown.Item
+          key="menubarOnly"
+          title="Show in Menubar Only"
+          value={Visibility.MENUBAR_ONLY.toString()}
+          icon={Icon.Window}
+        />
+        <Form.Dropdown.Item
+          key="raycastOnly"
+          title="Show in 'View Pins' Only"
+          value={Visibility.VIEW_PINS_ONLY.toString()}
+          icon={Icon.AppWindowList}
+        />
+        <Form.Dropdown.Item key="hidden" title="Hidden" value={Visibility.HIDDEN.toString()} icon={Icon.EyeDisabled} />
+        <Form.Dropdown.Item
+          key="disabled"
+          title="Disabled"
+          value={Visibility.DISABLED.toString()}
+          icon={Icon.XMarkCircle}
+        />
+      </Form.Dropdown>
 
       <Form.DatePicker
         id="dateField"
