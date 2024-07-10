@@ -1,16 +1,10 @@
 import { List } from "@raycast/api";
-import { getAvatarIcon } from "@raycast/utils";
 import { useProjects } from "./sentry";
 import { Project } from "./types";
 
 function ProjectDropdownItem(props: { project: Project }) {
   const slug = `${props.project.organization.slug}/${props.project.slug}`;
-  return (
-    <List.Dropdown.Item
-      value={slug}
-      title={slug}
-    />
-  );
+  return <List.Dropdown.Item value={slug} title={slug} />;
 }
 
 export function ProjectDropdown(props: {
