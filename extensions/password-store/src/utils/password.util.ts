@@ -1,5 +1,5 @@
 import os from "os";
-import fsPromises from "fs/promises";
+import fs from "fs";
 
 const LAST_USED_PASSWORD = `${os.homedir()}/.last-used-password.json`;
 
@@ -10,8 +10,13 @@ const LAST_USED_PASSWORD = `${os.homedir()}/.last-used-password.json`;
  */
 export const getLastUsedPassword = async (): Promise<{ password: string | null; option: string | null }> => {
   try {
+    // Check if last used password file already exists
+    if (!fs.existsSync(LAST_USED_PASSWORD)) {
+      fs.writeFileSync(LAST_USED_PASSWORD, "");
+    }
+
     // Read the content of the last used password file
-    const lastUsedPasswordFile = await fsPromises.readFile(LAST_USED_PASSWORD, "utf8");
+    const lastUsedPasswordFile = fs.readFileSync(LAST_USED_PASSWORD, "utf8");
 
     if (lastUsedPasswordFile) {
       // Parse the JSON content of the file
@@ -51,7 +56,7 @@ export const updateLastUsedPassword = async (password: string, option: string): 
     });
 
     // Write the JSON string to the file
-    await fsPromises.writeFile(LAST_USED_PASSWORD, jsonString);
+    fs.writeFileSync(LAST_USED_PASSWORD, jsonString);
   } catch (error) {
     // Log any errors that occur during the file write operation
     console.error("Error updating the last used password file:", error);
