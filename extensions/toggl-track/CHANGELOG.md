@@ -1,5 +1,9 @@
 # Toggl Track Changelog
 
+## [Bug Fixes] - 2024-07-10
+
+- Do not show currently running time entry in the recent time entries list
+
 ## [Bug Fixes] - 2024-07-05
 
 - Fix running time entries not showing project details
