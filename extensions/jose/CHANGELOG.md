@@ -17,3 +17,7 @@
 - add tracers lunary
 - add tracers langfuse
 - change structure in the ai catalog
+
+## [Version: 1.1.1] - 2024-07-10
+
+- ollama without langchain

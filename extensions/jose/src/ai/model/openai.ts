@@ -12,8 +12,7 @@ export const CallOpenAI = async (
   config: { stream: boolean; temperature: string; model: string; modelCompany: string },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   callbacks: { model: any[]; invoke: any[] }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> => {
+): Promise<TalkType> => {
   const c = new ChatOpenAI({
     apiKey: GetApiOpenAi().key,
     modelName: config.model,

@@ -1,4 +1,4 @@
-import { HumanMessage, AIMessage } from "@langchain/core/messages";
+import { HumanMessage, AIMessage, BaseMessage } from "@langchain/core/messages";
 import { TalkType } from "../../type/talk";
 
 export const Respond = (
@@ -7,7 +7,7 @@ export const Respond = (
   conversation: TalkType[],
   loadConverasationsHistory: boolean
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): any => {
+): BaseMessage[] => {
   const messages = [new AIMessage(prompt)];
 
   if (loadConverasationsHistory && conversation.length) {
@@ -21,7 +21,5 @@ export const Respond = (
 
   messages.push(new HumanMessage(question));
 
-  return {
-    messages,
-  };
+  return messages;
 };

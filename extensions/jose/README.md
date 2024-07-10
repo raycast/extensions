@@ -18,6 +18,8 @@ Chat with GPT straight from your computer
 
 # Still in development
 
+- external page to config llm's
+
 #### Features
 - langChain - intent
 - langChain - skill

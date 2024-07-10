@@ -4,11 +4,13 @@ import { TalkType } from "../type/talk";
 import { CallOpenAI } from "./model/openai";
 import { TracerCallbacks } from "./tracer";
 import { InteractionCallbacks } from "./interaction";
+import { CallOllama } from "./model/ollama";
+import { BaseMessage } from "@langchain/core/messages";
 
 export const Call = async (
   chat: TalkType,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  messages: any[],
+  messages: BaseMessage[],
   config: { stream: boolean; temperature: string; model: string; modelCompany: string },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   interaction: { toast: Toast; setData: any; setStreamData: any; setLoading: any }
@@ -22,14 +24,10 @@ export const Call = async (
         invoke: await InteractionCallbacks([], chat, interaction),
       });
       break;
-    // still in preparation
-    // case "ollama":
-    //   console.log("Using langChain `ollama`");
-    //   return await CallOllama(chat, messages, config, {
-    //     model: await TracerCallbacks([]),
-    //     invoke: await InteractionCallbacks([], chat, interaction),
-    //   });
-    //   break;
+    case "ollama":
+      console.log("Using langChain `ollama`");
+      return await CallOllama(chat, messages, config, interaction);
+      break;
     default:
       console.log("Using langChain `default`");
   }

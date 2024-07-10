@@ -1,44 +1,85 @@
 import { GetApiOllama } from "../../type/config";
 import { TalkType } from "../../type/talk";
-import { ChatOllama } from "@langchain/community/chat_models/ollama";
-import { ReadableStream } from "node:stream/web";
+import { Ollama, Message } from "ollama";
+import fetch from "node-fetch";
+import { Toast } from "@raycast/api";
+import { BaseMessage } from "@langchain/core/messages";
 // @ts-expect-error ignore
-globalThis.ReadableStream = ReadableStream;
+globalThis.fetch = fetch;
 
 export const CallOllama = async (
   chat: TalkType,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  messages: any[],
+  messages: BaseMessage[],
   config: { stream: boolean; temperature: string; model: string; modelCompany: string },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  callbacks: { model: any[]; invoke: any[] }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> => {
-  const c = new ChatOllama({
-    baseUrl: GetApiOllama().host,
-    model: "llama3",
-    temperature: parseFloat(config.temperature),
-    // callbacks: callbacks.model,
+  interaction: { toast: Toast; setData: any; setStreamData: any; setLoading: any }
+): Promise<TalkType> => {
+  const ollama = new Ollama({
+    host: GetApiOllama().host,
+  });
+  const response = await ollama.chat({
+    model: config.model,
+    messages: ollamaMessage(messages),
   });
 
-  // console.log("b")
-  // const stream = await c
-  // .pipe(new StringOutputParser())
-  // .stream(`Translate "I love programming" into German.`);
+  if (chat.result === undefined) {
+    chat.result = {
+      text: response.message.content,
+      imageExist: false,
+      images: undefined,
+      actionType: "",
+      actionName: "",
+      actionStatus: "",
+    };
+  }
+  chat.result.text = response.message.content;
 
-  // const chunks = [];
-  // for await (const chunk of stream) {
-  //   chunks.push(chunk);
-  // }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  interaction.setData((prev: any) => {
+    return prev.map((a: TalkType) => {
+      if (a.chatId === chat.chatId) {
+        return chat;
+      }
+      return a;
+    });
+  });
 
-  // console.log(chunks.join(""));
+  setTimeout(async () => {
+    interaction.setStreamData(undefined);
+  }, 5);
 
-  // console.log("cc")
+  interaction.setLoading(false);
 
-  await c.invoke(messages, { callbacks: callbacks.invoke });
-  // const res = await c.invoke(messages);
-
-  // console.log(res)
+  interaction.toast.title = "Got your answer!";
+  interaction.toast.style = Toast.Style.Success;
 
   return chat;
 };
+
+function ollamaMessage(messages: BaseMessage[]): Message[] {
+  const newMessage: Message[] = [];
+
+  //langchain = "system" | "human"  | "ai"        | "generic" |  "function" | "tool"
+  //ollama    = "system" | "user"   | "assistant"
+  messages.map(async (msg: BaseMessage) => {
+    if (msg._getType() === "system") {
+      newMessage.push({
+        role: "system",
+        content: msg.content.toString(),
+      });
+    } else if (msg._getType() === "human") {
+      newMessage.push({
+        role: "user",
+        content: msg.content.toString(),
+      });
+    } else if (msg._getType() === "ai") {
+      newMessage.push({
+        role: "assistant",
+        content: msg.content.toString(),
+      });
+    }
+  });
+
+  return newMessage;
+}

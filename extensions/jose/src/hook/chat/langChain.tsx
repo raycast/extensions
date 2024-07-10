@@ -29,7 +29,7 @@ export async function RunLangChain(
 
   return await Call(
     chat,
-    Respond(promptString, chat.question.text, conversations.reverse(), loadHistory).messages,
+    Respond(promptString, chat.question.text, conversations.reverse(), loadHistory),
     { stream: useStream, temperature, model: models[1], modelCompany: models[0] },
     interaction
   );
