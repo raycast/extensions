@@ -3,12 +3,12 @@ import { useMemo, useState } from "react";
 import { formatGistContentDetail } from "./util/utils";
 import { GistAction } from "./components/gist-action";
 import { ActionSettings } from "./components/action-settings";
-import { perPage, rememberTag, showDetail } from './types/preferences';
+import { perPage, rememberTag, showDetail } from "./types/preferences";
 import { useFrontmostApp } from "./hooks/useFrontmostApp";
-import { withGitHubClient } from './components/with-github-client';
-import { useCachedPromise } from '@raycast/utils';
-import { getGitHubClient } from './api/oauth';
-import { GithubGistTag, githubGistTags } from './util/gist-utils';
+import { withGitHubClient } from "./components/with-github-client";
+import { useCachedPromise } from "@raycast/utils";
+import { getGitHubClient } from "./api/oauth";
+import { GithubGistTag, githubGistTags } from "./util/gist-utils";
 
 function SearchGists() {
   const client = getGitHubClient();
@@ -17,19 +17,30 @@ function SearchGists() {
 
   const { data: frontmostAppData } = useFrontmostApp();
 
-  const { data: gistsData, isLoading: gistsLoading, mutate: gistMutate, pagination } = useCachedPromise(
+  const {
+    data: gistsData,
+    isLoading: gistsLoading,
+    mutate: gistMutate,
+    pagination,
+  } = useCachedPromise(
     (t: string) => async (options) => {
       const data = await client.requestGist(t, options.page + 1, parseInt(perPage));
       const hasMore = data[data.length - 1] != options.lastItem && options.page < 50;
       return { data, hasMore };
-    }, [tag], { keepPreviousData: true, failureToastOptions: {title: "Failed to load gists"} });
+    },
+    [tag],
+    { keepPreviousData: true, failureToastOptions: { title: "Failed to load gists" } },
+  );
 
   const { data: gistContentData, isLoading: gistContentLoading } = useCachedPromise(
     (rawUrl: string) => {
       return client.octokit.request(`${rawUrl}`).then((response) => {
         return response.data;
       }) as Promise<string>;
-    }, [gistId], { failureToastOptions: {title: "Failed to load gist content"} });
+    },
+    [gistId],
+    { failureToastOptions: { title: "Failed to load gist content" } },
+  );
 
   const frontmostApp = useMemo(() => {
     return frontmostAppData as Application;

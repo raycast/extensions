@@ -1,7 +1,7 @@
 import { parse } from "path";
 import { Alert, confirmAlert, Icon } from "@raycast/api";
 import ActionStyle = Alert.ActionStyle;
-import { GistItem } from './gist-utils';
+import { GistItem } from "./gist-utils";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);

@@ -1,4 +1,4 @@
-import { Icon } from '@raycast/api';
+import { Icon } from "@raycast/api";
 
 export interface GistFile {
   filename: string;

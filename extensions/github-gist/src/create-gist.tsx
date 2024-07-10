@@ -3,9 +3,9 @@ import { Fragment, useEffect, useMemo, useState } from "react";
 import { fetchItemInput } from "./util/input";
 import { ActionSettings } from "./components/action-settings";
 import { MutatePromise, useForm } from "@raycast/utils";
-import { withGitHubClient } from './components/with-github-client';
-import { getGitHubClient } from './api/oauth';
-import { Gist, GistFile, validateGistFileContents, validateGistFileName } from './util/gist-utils';
+import { withGitHubClient } from "./components/with-github-client";
+import { getGitHubClient } from "./api/oauth";
+import { Gist, GistFile, validateGistFileContents, validateGistFileName } from "./util/gist-utils";
 
 interface GistFilesValidation {
   error: string | undefined;
@@ -48,15 +48,17 @@ export function CreateGistForm(props: { gist?: Gist | undefined; gistMutate?: Mu
     setValue: setFormValues,
   } = useForm<GistFormValues>({
     onSubmit() {
-      client.updateOrCreateGists(
-        isEdit,
-        gist,
-        formValues.description,
-        formValues.isPublic,
-        formValues.gistFiles,
-        oldGistFiles,
-        gistMutate,
-      ).then();
+      client
+        .updateOrCreateGists(
+          isEdit,
+          gist,
+          formValues.description,
+          formValues.isPublic,
+          formValues.gistFiles,
+          oldGistFiles,
+          gistMutate,
+        )
+        .then();
     },
     validation: {
       gistFiles: () => {

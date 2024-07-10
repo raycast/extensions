@@ -3,8 +3,8 @@ import { alertDialog, raySo } from "../util/utils";
 import { CreateGistForm } from "../create-gist";
 import { primaryAction } from "../types/preferences";
 import { MutatePromise } from "@raycast/utils";
-import { Gist, GithubGistTag } from '../util/gist-utils';
-import { getGitHubClient } from '../api/oauth';
+import { Gist, GithubGistTag } from "../util/gist-utils";
+import { getGitHubClient } from "../api/oauth";
 
 export function GistAction(props: {
   gist: Gist;

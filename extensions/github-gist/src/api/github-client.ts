@@ -1,13 +1,13 @@
-import { Octokit } from '@octokit/core';
-import { formatBytes, isEmpty } from '../util/utils';
-import { Clipboard, open, showToast, Toast } from '@raycast/api';
-import { Gist, GistFile, GithubGistTag } from '../util/gist-utils';
+import { Octokit } from "@octokit/core";
+import { formatBytes, isEmpty } from "../util/utils";
+import { Clipboard, open, showToast, Toast } from "@raycast/api";
+import { Gist, GistFile, GithubGistTag } from "../util/gist-utils";
 
 export class GithubClient {
   constructor(public readonly octokit: Octokit) {}
 
   public async requestGist(tag: string, page: number, perPage: number) {
-    const {octokit} = this;
+    const { octokit } = this;
     const response = await (async () => {
       switch (tag) {
         case GithubGistTag.MY_GISTS: {
@@ -145,5 +145,4 @@ export class GithubClient {
       toast.title = "Failed to " + (isEdit ? "Update" : "Create");
     }
   }
-
 }
