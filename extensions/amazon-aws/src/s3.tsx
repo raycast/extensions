@@ -67,7 +67,7 @@ function S3Bucket({
               <S3BucketObjects bucket={bucket} isReversedOrder={isReversedOrder} setReversedOrder={setReversedOrder} />
             }
             title="List Objects"
-            icon={Icon.List}
+            icon={Icon.Document}
           />
           <Action.Push target={<S3BucketPolicy bucket={bucket} />} title="Show Bucket Policy" icon={Icon.Key} />{" "}
           <AwsAction.Console url={resourceToConsoleLink(bucket.Name, "AWS::S3::Bucket")} />
