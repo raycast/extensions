@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Form, Icon, LocalStorage, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Form,
+  Icon,
+  LocalStorage,
+  PopToRootType,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { checkDuplicatePath, fetchDirectoryPath, getLocalStorage, isDirectory, isEmpty } from "./utils/common-utils";
 import { DirectoryInfo, DirectoryType } from "./types/types";
 import { parse } from "path";
@@ -15,6 +26,7 @@ interface PinFormValues {
 export default function Pin() {
   const { handleSubmit, itemProps, setValue } = useForm<PinFormValues>({
     async onSubmit(values) {
+      await closeMainWindow({ popToRootType: PopToRootType.Immediate });
       await pinFiles(values.paths);
     },
     validation: {
