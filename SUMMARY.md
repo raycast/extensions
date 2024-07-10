@@ -74,6 +74,34 @@
 - [Raycast Window & Search Bar](api-reference/window-and-search-bar.md)
 - [Window Management](api-reference/window-management.md)
 
+## Utilities
+
+- [Getting Started](utils-reference/getting-started.md)
+- [Functions](utils-reference/functions/README.md)
+  - [runAppleScript](utils-reference/functions/runAppleScript.md)
+  - [showFailureToast](utils-reference/functions/showFailureToast.md)
+- [Icons](utils-reference/icons/README.md)
+  - [getAvatarIcon](utils-reference/icons/getAvatarIcon.md)
+  - [getFavicon](utils-reference/icons/getFavicon.md)
+  - [getProgressIcon](utils-reference/icons/getProgressIcon.md)
+- [OAuth Utils](utils-reference/oauth/README.md)
+  - [OAuthService](utils-reference/oauth/OAuthService.md)
+  - [withAccessToken](utils-reference/oauth/withAccessToken.md)
+  - [getAccessToken](utils-reference/oauth/getAccessToken.md)
+  - [Getting a Google client ID](utils-reference/oauth/getting-google-client-id.md)
+- [React hooks](utils-reference/react-hooks/README.md)
+  - [useCachedState](utils-reference/react-hooks/useCachedState.md)
+  - [usePromise](utils-reference/react-hooks/usePromise.md)
+  - [useCachedPromise](utils-reference/react-hooks/useCachedPromise.md)
+  - [useFetch](utils-reference/react-hooks/useFetch.md)
+  - [useForm](utils-reference/react-hooks/useForm.md)
+  - [useExec](utils-reference/react-hooks/useExec.md)
+  - [useSQL](utils-reference/react-hooks/useSQL.md)
+  - [useAI](utils-reference/react-hooks/useAI.md)
+  - [useFrecencySorting](utils-reference/react-hooks/useFrecencySorting.md)
+  - [useStreamJSON](utils-reference/react-hooks/useStreamJSON.md)
+  - [useLocalStorage](utils-reference/react-hooks/useLocalStorage.md)
+
 ## Misc
 
 - [Changelog](changelog.md)
