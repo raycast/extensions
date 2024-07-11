@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Repository Search] - {PR_MERGE_DATE}
+
+- Adds primary language color and code icon to the accessory for being in-sync with GitHub UI.
+
 ## [Improvements and Fixes] - 2024-07-08
 
 - Adds an action to sort the PRs, issues, discussions and repos
