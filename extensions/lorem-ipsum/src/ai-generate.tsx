@@ -1,5 +1,5 @@
-import { AI, closeMainWindow, environment, LaunchProps, showToast, Toast } from "@raycast/api";
-import { produceOutput } from "./utils";
+import { AI, environment, LaunchProps, showToast, Toast } from "@raycast/api";
+import { showError, produceOutput } from "./utils";
 
 function constructPrompt(topic: string | undefined) {
   const topicInstructions = topic
@@ -18,8 +18,7 @@ function constructPrompt(topic: string | undefined) {
 
 export default async function AICommand(props?: LaunchProps<{ arguments: Arguments.AiGenerate }>) {
   if (!environment.canAccess(AI)) {
-    await closeMainWindow();
-    await showToast(Toast.Style.Failure, "You don't have access to AI.");
+    await showError("You don't have access to AI.");
     return;
   }
 

@@ -1,5 +1,5 @@
-import { LaunchProps, showToast, Toast, closeMainWindow } from "@raycast/api";
-import { generateWords, produceOutput, safeLoremIpsumNumberArg } from "./utils";
+import { LaunchProps } from "@raycast/api";
+import { generateWords, showError, produceOutput, safeLoremIpsumNumberArg } from "./utils";
 
 export default async function WordCommand(props?: LaunchProps<{ arguments: Arguments.Words }>) {
   const numberArg = props?.arguments.numberOfWords;
@@ -7,8 +7,7 @@ export default async function WordCommand(props?: LaunchProps<{ arguments: Argum
   const { error, safeLoremIpsumNumber } = await safeLoremIpsumNumberArg(numberArg);
 
   if (error) {
-    await closeMainWindow();
-    await showToast(Toast.Style.Failure, error.message);
+    await showError(error.message);
   } else {
     const output = generateWords(safeLoremIpsumNumber);
     await produceOutput(output);

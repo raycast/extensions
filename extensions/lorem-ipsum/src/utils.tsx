@@ -72,6 +72,11 @@ export const safeLoremIpsumNumberArg = async (arg: string | undefined) => {
   }
 };
 
+export const showError = async (msg: string) => {
+  await closeMainWindow();
+  await showToast(Toast.Style.Failure, msg);
+};
+
 export const produceOutput = async (content: string) => {
   const { action: preference = "clipboard" } = getPreferenceValues();
 
