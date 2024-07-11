@@ -10,7 +10,7 @@ export interface Forecast {
   wind_speed?: number;
 }
 
-export function isDailyForecast(forecast: Forecast[] | undefined): boolean {
+export function isDailyForecast(forecast: Forecast[] | undefined | null): boolean {
   if (forecast && forecast.length > 1) {
     const t1 = new Date(forecast[0].datetime);
     const t2 = new Date(forecast[1].datetime);

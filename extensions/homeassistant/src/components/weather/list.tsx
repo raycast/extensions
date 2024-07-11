@@ -11,6 +11,7 @@ import {
   weatherConditionToIcon,
   weatherConditionToText,
 } from "./utils";
+import { useWeatherForecast } from "./hooks";
 
 function WeatherTemperature(props: { state: State }): ReactElement | null {
   const s = props.state;
@@ -98,11 +99,12 @@ function WeatherForecastItem(props: { forecast: Forecast; isDaily: boolean; temp
 
 function WeatherList(props: { state: State }): ReactElement {
   const s = props.state;
-  const forecast = s.attributes.forecast as Forecast[] | undefined;
+  const forecastAttribute = s.attributes.forecast as Forecast[] | undefined;
+  const { isLoading, data: forecast } = useWeatherForecast(s.entity_id, { data: forecastAttribute });
   const isDaily = isDailyForecast(forecast);
   const tempUnit = s.attributes.temperature_unit as string | undefined;
   return (
-    <List>
+    <List isLoading={isLoading}>
       <List.Section title="Current">
         <WeatherCondition condition={s.state} />
         <WeatherTemperature state={s} />
