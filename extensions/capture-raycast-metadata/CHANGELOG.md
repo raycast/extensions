@@ -1,6 +1,6 @@
 # Capture Raycast Metadata Changelog
 
-## [Update Raycast API] - {PR_MERGE_DATE}
+## [Update Raycast API] - 2024-07-11
 
 - Update Raycast API version to 1.78.1
 
