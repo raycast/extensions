@@ -1,5 +1,4 @@
 import { useHAStates } from "@components/hooks";
-import { MenuBarItemConfigureCommand } from "@components/menu";
 import { PrimaryIconColor } from "@components/state/utils";
 import { useWeatherForecast } from "@components/weather/hooks";
 import { WeatherCurrentMenubarSection, WeatherForecastMenubarSection } from "@components/weather/menu";
@@ -7,6 +6,7 @@ import { getTemperatureFromState, weatherConditionToIcon, weatherConditionToText
 import { State } from "@lib/haapi";
 import { getErrorMessage, getFriendlyName } from "@lib/utils";
 import { Color, getPreferenceValues, Icon, Image, MenuBarExtra, openCommandPreferences } from "@raycast/api";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 
 function WeatherMenuBarExtra(props: {
   children: React.ReactNode;
@@ -31,7 +31,7 @@ function WeatherMenuBarExtra(props: {
             <MenuBarExtra.Item title={`Error: ${error}`} />
           </MenuBarExtra.Section>
           <MenuBarExtra.Section>
-            <MenuBarItemConfigureCommand />
+            <RUIMenuBarExtra.ConfigureCommand />
           </MenuBarExtra.Section>
         </>
       ) : (
@@ -73,17 +73,18 @@ export default function WeatherMenuBarCommand(): JSX.Element {
       state={weather}
       icon={weather?.state ? weatherConditionToIcon(weather.state) : undefined}
     >
-      <MenuBarExtra.Section title="Entity">
-        <MenuBarExtra.Item
-          icon={{ source: "entity.png", tintColor: PrimaryIconColor }}
-          title={weather ? getFriendlyName(weather) : ""}
-          onAction={openCommandPreferences}
-        />
-      </MenuBarExtra.Section>
       <WeatherCurrentMenubarSection weather={weather} />
       <WeatherForecastMenubarSection weather={weather} forecast={forecast} />
       <MenuBarExtra.Section>
-        <MenuBarItemConfigureCommand />
+        <MenuBarExtra.Item
+          icon={{ source: "entity.png", tintColor: PrimaryIconColor }}
+          title="Source"
+          subtitle={weather ? getFriendlyName(weather) : ""}
+          onAction={openCommandPreferences}
+        />
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section>
+        <RUIMenuBarExtra.ConfigureCommand />
       </MenuBarExtra.Section>
     </WeatherMenuBarExtra>
   );

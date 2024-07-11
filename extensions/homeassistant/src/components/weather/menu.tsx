@@ -1,5 +1,6 @@
 import { State } from "@lib/haapi";
 import { Color, LaunchType, MenuBarExtra, Toast, launchCommand, showToast } from "@raycast/api";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 
 import { MenuBarSubmenu } from "@components/menu";
 import { getErrorMessage, getFriendlyName } from "@lib/utils";
@@ -11,7 +12,6 @@ import {
   getPressureFromState,
   getTemperatureFromState,
   getWindspeedFromState,
-  isDailyForecast,
   weatherConditionToIcon,
   weatherConditionToText,
   WeatherForecastType,
@@ -158,27 +158,25 @@ export function WeatherForecastMenubarSection(props: { weather: State | undefine
   if (!weather) {
     return null;
   }
-  const { data: forecastAll } = useWeatherForecast(weather.entity_id, {
+  const { data: daily } = useWeatherForecast(weather.entity_id, {
     data: props.forecast,
     type: WeatherForecastType.Daily,
   });
-  const forecastSliced = forecastAll?.slice(0, 10);
-  const isDaily = isDailyForecast(forecastSliced);
 
   const { data: hourly } = useWeatherForecast(weather.entity_id, { type: WeatherForecastType.Hourly });
   const tempUnit = weather?.attributes.temperature_unit as string | undefined;
   return (
     <>
-      <MenuBarExtra.Section title="Forecast (Hourly)">
-        {hourly
-          ?.slice(0, 4)
-          .map((f) => <WeatherForecastMenubarItem key={f.datetime} forecast={f} isDaily={false} tempUnit={tempUnit} />)}
-      </MenuBarExtra.Section>
-      <MenuBarExtra.Section title="Forecast (Daily)">
-        {forecastSliced?.map((f) => (
-          <WeatherForecastMenubarItem key={f.datetime} forecast={f} isDaily={isDaily} tempUnit={tempUnit} />
+      <RUIMenuBarExtra.Section title="Forecast (Hourly)" childrenLimit={{ max: 5 }}>
+        {hourly?.map((f) => (
+          <WeatherForecastMenubarItem key={f.datetime} forecast={f} isDaily={false} tempUnit={tempUnit} />
         ))}
-      </MenuBarExtra.Section>
+      </RUIMenuBarExtra.Section>
+      <RUIMenuBarExtra.Section title="Forecast (Daily)" childrenLimit={{ max: 10 }}>
+        {daily?.map((f) => (
+          <WeatherForecastMenubarItem key={f.datetime} forecast={f} isDaily={true} tempUnit={tempUnit} />
+        ))}
+      </RUIMenuBarExtra.Section>
     </>
   );
 }

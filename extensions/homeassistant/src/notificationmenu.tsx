@@ -1,5 +1,4 @@
 import { useHAStates } from "@components/hooks";
-import { MenuBarItemConfigureCommand } from "@components/menu";
 import { useHAPersistentNotifications } from "@components/persistentnotification/hooks";
 import { PersistentNotificationsMenubarSection } from "@components/persistentnotification/list";
 import { HAPersistentNotification } from "@components/persistentnotification/utils";
@@ -8,6 +7,7 @@ import { getHACSRepositories } from "@components/update/utils";
 import { State } from "@lib/haapi";
 import { getErrorMessage } from "@lib/utils";
 import { getPreferenceValues, MenuBarExtra } from "@raycast/api";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 
 function showCountInMenu(): boolean {
   const prefs = getPreferenceValues();
@@ -49,7 +49,7 @@ export default function MenuCommand(): JSX.Element {
       <PersistentNotificationsMenubarSection notifications={notifications} />
       <UpdatesMenubarSection updates={updates} hacs={hacs} />
       <MenuBarExtra.Section>
-        <MenuBarItemConfigureCommand />
+        <RUIMenuBarExtra.ConfigureCommand />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

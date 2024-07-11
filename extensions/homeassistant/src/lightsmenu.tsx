@@ -1,9 +1,10 @@
 import { useHAStates } from "@components/hooks";
 import { LightMenubarItem } from "@components/light/menu";
-import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "@components/menu";
+import { LaunchCommandMenubarItem } from "@components/menu";
 import { filterViaPreferencePatterns } from "@components/state/utils";
 import { getErrorMessage, getFriendlyName } from "@lib/utils";
 import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 
 export default function LightsMenuCommand(): JSX.Element {
   const { states, error, isLoading } = useHAStates();
@@ -33,7 +34,7 @@ export default function LightsMenuCommand(): JSX.Element {
         {entities?.map((e) => <LightMenubarItem key={e.entity_id} state={e} />)}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
-        <MenuBarItemConfigureCommand />
+        <RUIMenuBarExtra.ConfigureCommand />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

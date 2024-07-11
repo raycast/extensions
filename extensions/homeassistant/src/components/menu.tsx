@@ -10,22 +10,10 @@ import {
   Toast,
   launchCommand,
   open,
-  openCommandPreferences,
   showHUD,
   showToast,
 } from "@raycast/api";
 import { ReactNode } from "react";
-
-export function MenuBarItemConfigureCommand(): JSX.Element {
-  return (
-    <MenuBarExtra.Item
-      title="Configure Command"
-      shortcut={{ modifiers: ["cmd"], key: "," }}
-      icon={Icon.Gear}
-      onAction={() => openCommandPreferences()}
-    />
-  );
-}
 
 export async function copyToClipboardWithHUD(content: string | number | Clipboard.Content) {
   await Clipboard.copy(content);

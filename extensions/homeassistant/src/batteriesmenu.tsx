@@ -6,10 +6,11 @@ import {
   sortBatteries,
 } from "@components/battery/utils";
 import { useHAStates } from "@components/hooks";
-import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "@components/menu";
+import { LaunchCommandMenubarItem } from "@components/menu";
 import { filterViaPreferencePatterns } from "@components/state/utils";
 import { getErrorMessage, getFriendlyName } from "@lib/utils";
 import { Color, LaunchType, MenuBarExtra, getPreferenceValues } from "@raycast/api";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 
 function excludedBatteriesHigherThenPreference(): number | undefined {
   const prefs = getPreferenceValues();
@@ -64,7 +65,7 @@ export default function BatteriesMenuCommand(): JSX.Element {
         emptyElement={<MenuBarExtra.Item title="No Batteries" />}
       />
       <MenuBarExtra.Section>
-        <MenuBarItemConfigureCommand />
+        <RUIMenuBarExtra.ConfigureCommand />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

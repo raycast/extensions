@@ -8,7 +8,7 @@ import { InputButtonMenubarItem } from "@components/input_button/menu";
 import { InputSelectMenubarItem } from "@components/input_select/menu";
 import { LightMenubarItem } from "@components/light/menu";
 import { MediaPlayerMenubarItem } from "@components/mediaplayer/menu";
-import { CopyToClipboardMenubarItem, MenuBarItemConfigureCommand, MenuBarSubmenu } from "@components/menu";
+import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { PersonMenubarItem } from "@components/person/menu";
 import { SceneMenubarItem } from "@components/scene/menu";
 import { ScriptMenubarItem } from "@components/script/menu";
@@ -19,6 +19,7 @@ import { WeatherMenubarItem } from "@components/weather/menu";
 import { State } from "@lib/haapi";
 import { ensureShort, getErrorMessage, getFriendlyName } from "@lib/utils";
 import { Icon, MenuBarExtra, getPreferenceValues } from "@raycast/api";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 import { getIcon, getStateValue } from "./utils";
 
 export function CopyEntityIDToClipboard(props: { state: State }) {
@@ -117,7 +118,7 @@ export function MenuBarExtraEntity(props: { state: State | undefined; isLoading?
       tooltip={s ? getFriendlyName(s) : undefined}
       isLoading={props.isLoading}
     >
-      <MenuBarItemConfigureCommand />
+      <RUIMenuBarExtra.ConfigureCommand />
     </MenuBarExtra>
   );
 }
