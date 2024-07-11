@@ -1,16 +1,11 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
 import { Fragment, useEffect, useMemo, useState } from "react";
-import {
-  Gist,
-  GistFile,
-  octokit,
-  updateOrCreateGists,
-  validateGistFileContents,
-  validateGistFileName,
-} from "./util/gist-utils";
 import { fetchItemInput } from "./util/input";
 import { ActionSettings } from "./components/action-settings";
 import { MutatePromise, useForm } from "@raycast/utils";
+import { withGitHubClient } from "./components/with-github-client";
+import { getGitHubClient } from "./api/oauth";
+import { Gist, GistFile, validateGistFileContents, validateGistFileName } from "./util/gist-utils";
 
 interface GistFilesValidation {
   error: string | undefined;
@@ -26,13 +21,13 @@ interface GistFormValues {
 
 enum GistFormValuesId {
   DESCRIPTION = "description",
-  IS_PUBLIC = "isPublic",
   GIST_FILES = "gistFiles",
   GIST_FILE_NAME_VALIDATION = "gistFileNameValidation",
   GIST_FILE_CONTENT_VALIDATION = "gistFileContentValidation",
 }
 
-export default function CreateGist(props: { gist: Gist | undefined; gistMutate: MutatePromise<Gist[]> }) {
+export function CreateGistForm(props: { gist?: Gist | undefined; gistMutate?: MutatePromise<Gist[]> | undefined }) {
+  const client = getGitHubClient();
   const isEdit = !!props.gist;
   const gist = props.gist ?? {
     gist_id: "",
@@ -53,15 +48,17 @@ export default function CreateGist(props: { gist: Gist | undefined; gistMutate: 
     setValue: setFormValues,
   } = useForm<GistFormValues>({
     onSubmit() {
-      updateOrCreateGists(
-        isEdit,
-        gist,
-        formValues.description,
-        formValues.isPublic,
-        formValues.gistFiles,
-        oldGistFiles,
-        gistMutate,
-      ).then();
+      client
+        .updateOrCreateGists(
+          isEdit,
+          gist,
+          formValues.description,
+          formValues.isPublic,
+          formValues.gistFiles,
+          oldGistFiles,
+          gistMutate,
+        )
+        .then();
     },
     validation: {
       gistFiles: () => {
@@ -90,7 +87,7 @@ export default function CreateGist(props: { gist: Gist | undefined; gistMutate: 
       if (isEdit) {
         const _gistFiles: GistFile[] = [];
         for (const value of gist.file) {
-          const { data } = await octokit.request(`${value.raw_url}`);
+          const { data } = await client.octokit.request(`${value.raw_url}`);
           _gistFiles.push({
             filename: value.filename,
             content: data as string,
@@ -203,3 +200,5 @@ export default function CreateGist(props: { gist: Gist | undefined; gistMutate: 
     </Form>
   );
 }
+
+export default withGitHubClient(CreateGistForm);
