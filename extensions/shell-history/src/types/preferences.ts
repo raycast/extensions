@@ -1,14 +1,14 @@
 import { getPreferenceValues } from "@raycast/api";
 
 interface Preferences {
-  showTips: boolean;
   maxLines: string;
   removeDuplicates: boolean;
   rememberShellTag: boolean;
   primaryAction: string;
+  showTips: boolean;
 }
 
-export const { showTips, maxLines, removeDuplicates, rememberShellTag, primaryAction } =
+export const { maxLines, removeDuplicates, rememberShellTag, primaryAction, showTips } =
   getPreferenceValues<Preferences>();
 
 export enum PrimaryAction {

@@ -96,12 +96,21 @@
               "value": "Copy"
             }
           ]
+        },
+        {
+          "title": "Tips",
+          "name": "showTips",
+          "label": "Show Tips",
+          "description": "Show tips when performing actions",
+          "type": "checkbox",
+          "default": true,
+          "required": false
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.78.0",
+    "@raycast/api": "^1.78.1",
     "@raycast/utils": "^1.16.1",
     "read-last-lines": "^1.8.0",
     "shell-quote": "^1.8.1"
@@ -113,7 +122,7 @@
     "@types/shell-quote": "^1.7.5",
     "eslint": "^8.57.0",
     "prettier": "^3.3.2",
-    "typescript": "^5.5.2"
+    "typescript": "^5.5.3"
   },
   "scripts": {
     "build": "ray build -e dist",
