@@ -63,7 +63,6 @@ function S3BucketObjects({ bucket, prefix = "" }: { bucket: Bucket; prefix?: str
     data: objects,
     error,
     isLoading,
-    mutate,
   } = useCachedPromise(fetchBucketObjects, [bucket.Name!, prefix, isReversedOrder]);
 
   return (
