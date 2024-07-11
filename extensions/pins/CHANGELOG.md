@@ -1,6 +1,6 @@
 # Pins Changelog
 
-## [1.8.2 - Group Visibility, Pin Expiration Actions] - {PR_MERGE_DATE}
+## [1.8.2 - Group Visibility, Pin Expiration Actions] - 2024-07-11
 
 - Added ability to set custom expiration actions.
 - Added visibility setting for groups.
