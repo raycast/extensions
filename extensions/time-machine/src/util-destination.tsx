@@ -129,7 +129,7 @@ export function util_startbackup(destination?: Destination): Promise<string> {
   if (destination != undefined) {
     command = `/usr/bin/tmutil startbackup -d '${destination.MountPoint}'`;
   } else {
-    command = `/usr/bin/tmutil startbackup`;
+    command = `/usr/bin/tmutil startbackup --auto`;
   }
 
   return new Promise((resolve, reject) => {

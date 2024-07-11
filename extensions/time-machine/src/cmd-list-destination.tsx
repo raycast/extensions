@@ -22,6 +22,7 @@ import {
   util_listBackupContent,
   util_getTimestampLocation,
   BackupContent,
+  util_startbackup,
 } from "./util-destination";
 import { Clipboard } from "@raycast/api";
 import { open } from "@raycast/api";
@@ -232,6 +233,35 @@ function ListbackupcontentAction(props: { path?: string; timestamp?: string; des
   );
 }
 
+// Backup to destination action
+function StartbackupAction(props: { destination: Destination }) {
+  if (props.destination.MountPoint != undefined || props.destination.URL != undefined) {
+    return (
+      <Action
+        title="Start Backup on Destination"
+        onAction={() => {
+          showToast({ title: "Starting Backup...", style: Toast.Style.Animated }).then((_load_toast_) => {
+            console.log(`/usr/bin/tmutil startbackup --destination="${props.destination.ID}"`);
+            util_startbackup(props.destination)
+              .then(() => {
+                setTimeout(() => {
+                  _load_toast_.hide();
+                  showToast({ title: "Backup Started", style: Toast.Style.Success });
+                }, 1000);
+              })
+              .catch(() => {
+                _load_toast_.hide();
+                showToast({ title: "Failed to Start Backup", style: Toast.Style.Failure });
+              });
+          });
+        }}
+      />
+    );
+  } else {
+    return <></>;
+  }
+}
+
 // Main export component
 export default function Command() {
   const [destinations, set_destinations] = useState<Destination[]>([]);
@@ -272,6 +302,7 @@ export default function Command() {
               ]}
               actions={
                 <ActionPanel>
+                  <StartbackupAction destination={destination} />
                   <ListbackupAction destination={destination} />
                   <MountAction destination={destination} set_isLoading={set_isLoading} />
                 </ActionPanel>
