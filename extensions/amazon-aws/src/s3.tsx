@@ -91,6 +91,7 @@ function S3BucketObjects({ bucket, prefix = "" }: { bucket: Bucket; prefix?: str
                       mutate();
                     }}
                     icon={Icon.Switch}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
                   />
                   <AwsAction.Console
                     url={resourceToConsoleLink(`${bucket.Name}/${commonPrefix.Prefix}`, "AWS::S3::Bucket")}
@@ -134,6 +135,15 @@ function S3BucketObjects({ bucket, prefix = "" }: { bucket: Bucket; prefix?: str
                     }}
                   />
                   <Action.CopyToClipboard title="Copy Key" content={object.Key || ""} />
+                  <Action
+                    title={`${isReversedOrder ? "Standard" : "Reversed"} Order`}
+                    onAction={() => {
+                      setReversedOrder(!isReversedOrder);
+                      mutate();
+                    }}
+                    icon={Icon.Switch}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  />
                 </ActionPanel>
               }
               accessories={[{ text: humanFileSize(object.Size || 0) }]}
