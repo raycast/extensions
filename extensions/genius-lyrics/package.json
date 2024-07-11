@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "genius-lyrics",
   "title": "Genius Lyrics",
-  "description": "Query and quickly read lyrics for any song from the Genius API.",
+  "description": "Search by song title to instantly view lyrics, or enter remembered lyrics to quickly find the song's title, utilizing the Genius Lyrics API.",
   "icon": "command-icon.png",
   "author": "tkdkid1000",
+  "contributors": [
+    "johnstclair"
+  ],
   "categories": [
     "Media"
   ],
@@ -12,8 +15,21 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Lyrics",
+      "title": "Search for Lyrics",
       "description": "Search lyrics with the Genius API.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "lyric-search",
+      "title": "Search with Lyrics",
+      "description": "Search for song titles using remembered lyrics with the Genius API.",
       "mode": "view",
       "arguments": [
         {
@@ -27,7 +43,8 @@
   "dependencies": {
     "@raycast/api": "^1.73.2",
     "@raycast/utils": "^1.15.0",
-    "cheerio": "^1.0.0-rc.12"
+    "cheerio": "^1.0.0-rc.12",
+    "axios": "^1.7.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
