@@ -1,2 +1,2 @@
-# raycast-time-tracker
-Time Tracking plugin for Raycast
+# Time Tracker
+Effortlessly monitor your time with customizable timers and insightful analytics.
