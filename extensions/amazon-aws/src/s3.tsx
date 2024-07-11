@@ -19,9 +19,6 @@ import { isReadyToFetch, resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
 
 export default function S3() {
-  const [isReversedOrder, setReversedOrder] = useCachedState<boolean>("reverse-order", false, {
-    cacheNamespace: "aws-s3",
-  });
   const { data: buckets, error, isLoading, revalidate } = useCachedPromise(fetchBuckets);
 
   return (
@@ -33,28 +30,13 @@ export default function S3() {
       {error ? (
         <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
       ) : (
-        buckets?.map((bucket) => (
-          <S3Bucket
-            key={bucket.Name}
-            bucket={bucket}
-            isReversedOrder={isReversedOrder}
-            setReversedOrder={setReversedOrder}
-          />
-        ))
+        buckets?.map((bucket) => <S3Bucket key={bucket.Name} bucket={bucket} />)
       )}
     </List>
   );
 }
 
-function S3Bucket({
-  bucket,
-  isReversedOrder,
-  setReversedOrder,
-}: {
-  bucket: Bucket;
-  isReversedOrder: boolean;
-  setReversedOrder: (value: boolean) => void;
-}) {
+function S3Bucket({ bucket }: { bucket: Bucket }) {
   return (
     <List.Item
       key={bucket.Name}
@@ -62,13 +44,7 @@ function S3Bucket({
       title={bucket.Name!}
       actions={
         <ActionPanel>
-          <Action.Push
-            target={
-              <S3BucketObjects bucket={bucket} isReversedOrder={isReversedOrder} setReversedOrder={setReversedOrder} />
-            }
-            title="List Objects"
-            icon={Icon.Document}
-          />
+          <Action.Push target={<S3BucketObjects bucket={bucket} />} title="List Objects" icon={Icon.Document} />
           <Action.Push target={<S3BucketPolicy bucket={bucket} />} title="Show Bucket Policy" icon={Icon.Key} />{" "}
           <AwsAction.Console url={resourceToConsoleLink(bucket.Name, "AWS::S3::Bucket")} />
           <Action.CopyToClipboard title="Copy Name" content={bucket.Name || ""} />
@@ -79,17 +55,10 @@ function S3Bucket({
   );
 }
 
-function S3BucketObjects({
-  bucket,
-  prefix = "",
-  isReversedOrder,
-  setReversedOrder,
-}: {
-  bucket: Bucket;
-  prefix?: string;
-  isReversedOrder: boolean;
-  setReversedOrder: (value: boolean) => void;
-}) {
+function S3BucketObjects({ bucket, prefix = "" }: { bucket: Bucket; prefix?: string }) {
+  const [isReversedOrder, setReversedOrder] = useCachedState<boolean>("reverse-order", false, {
+    cacheNamespace: "aws-s3",
+  });
   const {
     data: objects,
     error,
@@ -111,14 +80,7 @@ function S3BucketObjects({
               actions={
                 <ActionPanel>
                   <Action.Push
-                    target={
-                      <S3BucketObjects
-                        bucket={bucket}
-                        prefix={commonPrefix.Prefix}
-                        isReversedOrder={isReversedOrder}
-                        setReversedOrder={setReversedOrder}
-                      />
-                    }
+                    target={<S3BucketObjects bucket={bucket} prefix={commonPrefix.Prefix} />}
                     title="List Objects"
                     icon={Icon.Document}
                   />
