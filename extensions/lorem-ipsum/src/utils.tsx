@@ -1,4 +1,4 @@
-import { closeMainWindow, Clipboard, showHUD, getPreferenceValues } from "@raycast/api";
+import { closeMainWindow, Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { LoremIpsum } from "lorem-ipsum";
 
 // don't want to cause a heap error, so cap it 😱
@@ -75,17 +75,16 @@ export const safeLoremIpsumNumberArg = async (arg: string | undefined) => {
 export const produceOutput = async (content: string) => {
   const { action: preference = "clipboard" } = getPreferenceValues();
 
+  await closeMainWindow();
+
   switch (preference) {
     case "clipboard":
       await Clipboard.copy(content);
-      showHUD("Copied to clipboard! 📋");
+      await showToast(Toast.Style.Success, "Copied to clipboard! 📋");
       break;
 
     case "paste":
-      await Clipboard.paste(content);
-      showHUD("Pasted to active app! 📝");
+      await showToast(Toast.Style.Success, "Pasted to active app! 📝");
       break;
   }
-
-  await closeMainWindow();
 };
