@@ -86,10 +86,7 @@ function S3BucketObjects({ bucket, prefix = "" }: { bucket: Bucket; prefix?: str
                   />
                   <Action
                     title={`${isReversedOrder ? "Standard" : "Reversed"} Order`}
-                    onAction={() => {
-                      setReversedOrder(!isReversedOrder);
-                      mutate();
-                    }}
+                    onAction={() => setReversedOrder(!isReversedOrder)}
                     icon={Icon.Switch}
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
                   />
