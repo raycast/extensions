@@ -994,6 +994,7 @@
   "capipo/pass": "pass",
   "omBratteng/passphrase-generator": "passphrase-generator",
   "joshuaiz/password-generator": "password-generator",
+  "afok/password-store": "password-store",
   "koinzhang/paste-as-plain-text": "paste-as-plain-text",
   "winann/paste-from-apple-books": "paste-from-apple-books",
   "vimtor/pastebin": "pastebin",
