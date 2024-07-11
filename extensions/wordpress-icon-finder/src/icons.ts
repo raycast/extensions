@@ -2574,4 +2574,3 @@ export const iconsData = [
     height: 24,
   },
 ];
-
