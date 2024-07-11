@@ -1,6 +1,6 @@
 # Simulator Control Changelog
 
-## [Filter and See Runtime/OS] - ${PR_MERGE_DATE}
+## [Filter and See Runtime/OS] - $2024-07-11
 
 - chore and deps updated
 - list icons
