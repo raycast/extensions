@@ -44,6 +44,11 @@ const durations: Duration[] = [
     seconds: 86400,
     icon: "🫧",
   },
+  {
+    display: "Forever",
+    seconds: Infinity,
+    icon: "🤯",
+  },
 ];
 
 export default function Command() {
