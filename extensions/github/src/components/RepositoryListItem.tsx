@@ -50,7 +50,7 @@ export default function RepositoryListItem({
 
   if (repository.primaryLanguage) {
     accessories.unshift({
-      tag: {value: repository.primaryLanguage.name, color: repository.primaryLanguage.color ?? Color.SecondaryText},
+      tag: { value: repository.primaryLanguage.name, color: repository.primaryLanguage.color ?? Color.SecondaryText },
       icon: Icon.Code,
       tooltip: `Language: ${repository.primaryLanguage.name}`,
     });
