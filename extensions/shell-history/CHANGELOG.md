@@ -1,6 +1,6 @@
 # Shell History Changelog
 
-## [Auto Close Window] - {PR_MERGE_DATE}
+## [Auto Close Window] - 2024-07-11
 
 - Automatically close window after performing an action
 - Add a new configuration option to enable/disable show tips
