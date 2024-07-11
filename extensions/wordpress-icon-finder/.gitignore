@@ -3,6 +3,8 @@
 # dependencies
 /node_modules
 
+yarn.lock
+
 # Raycast specific files
 raycast-env.d.ts
 .raycast-swift-build
