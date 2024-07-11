@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { List, showToast, LaunchProps, Toast, Action, ActionPanel } from "@raycast/api";
-import axios from "axios";
+import { useState } from "react";
+import { List, LaunchProps, Action, ActionPanel } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 
 const GENIUS_SEARCH_URL = "https://genius.com/api/search/lyrics?q=";
 
@@ -33,48 +33,20 @@ interface SearchData {
   response: SearchResponse;
 }
 
-async function fetchGeniusSearch(query: string) {
-  try {
-    const response = await axios.get(`${GENIUS_SEARCH_URL}${encodeURIComponent(query)}`);
-    const data: SearchData = response.data;
-
-    const hits = data.response.sections[0].hits as SearchHit[];
-
-    return hits;
-  } catch (error) {
-    console.error("Error searching lyrics:", error);
-    showToast(Toast.Style.Failure, "Failed to fetch data from Genius");
-    throw error;
-  }
-}
-
 export default function Command(props: LaunchProps<{ arguments: { query: string } }>) {
   const [searchQuery, setSearchQuery] = useState(props.arguments.query || "");
-  const [results, setResults] = useState<SearchHit[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchResults = async () => {
-      if (searchQuery) {
-        setIsLoading(true);
-        const searchHits: SearchHit[] = await fetchGeniusSearch(searchQuery);
-        setResults(searchHits);
-        setIsLoading(false);
-      } else {
-        setResults([]);
-      }
-    };
+  const { data, isLoading } = useFetch<SearchData>(`${GENIUS_SEARCH_URL}${encodeURIComponent(searchQuery)}`);
 
-    fetchResults();
-  }, [searchQuery]);
+  const results = (data?.response?.sections?.[0]?.hits as SearchHit[]) || [];
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchQuery} searchBarPlaceholder="Enter lyrics...">
       {results.map((hit: SearchHit) => (
         <List.Item
           key={hit.result.id}
-          title={hit.result.title}
-          subtitle={`${hit.result.primary_artist.name} - ${hit.highlights[0].value.replace("\n", " ")}`}
+          title={`${hit.result.title} by ${hit.result.primary_artist.name}`}
+          subtitle={`${hit.highlights[0].value.replace("\n", " ")}`}
           icon={hit.result.header_image_url}
           actions={
             <ActionPanel title="Actions">

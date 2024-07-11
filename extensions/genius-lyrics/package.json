@@ -15,7 +15,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search for Lyrics",
+      "title": "Search Lyrics by Title",
       "description": "Search lyrics with the Genius API.",
       "mode": "view",
       "arguments": [
@@ -28,7 +28,7 @@
     },
     {
       "name": "lyric-search",
-      "title": "Search with Lyrics",
+      "title": "Search Song by Lyrics",
       "description": "Search for song titles using remembered lyrics with the Genius API.",
       "mode": "view",
       "arguments": [
