@@ -207,6 +207,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
           return {
             id: results.id,
             title: results.name,
+            organization: results.name,
             subtitle: "org",
             accessoryTitle: "",
             type: results.type,
