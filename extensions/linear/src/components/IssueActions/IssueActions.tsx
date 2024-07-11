@@ -27,6 +27,9 @@ import IssueAttachments from "../IssueAttachments";
 import CreateSubIssues from "../CreateSubIssues";
 import MilestoneSubmenu from "./MilestoneSubmenu";
 import OpenInLinear from "../OpenInLinear";
+import { useState } from "react";
+import useUsers from "../../hooks/useUsers";
+import { IssueAttachmentsForm } from "../IssueAttachmentsForm";
 
 type IssueActionsProps = {
   issue: IssueResult;
@@ -36,7 +39,6 @@ type IssueActionsProps = {
   showAttachmentsAction?: boolean;
   attachments?: Attachment[];
   priorities: IssuePriorityValue[] | undefined;
-  users: User[] | undefined;
   me: User | undefined;
 };
 
@@ -58,7 +60,6 @@ export default function IssueActions({
   showAttachmentsAction,
   attachments,
   priorities,
-  users,
   me,
 }: IssueActionsProps) {
   const { pop } = useNavigation();
@@ -360,6 +361,9 @@ export default function IssueActions({
     }
   }
 
+  const [userQuery, setUserQuery] = useState<string>("");
+  const { users, supportsUserTypeahead, isLoadingUsers } = useUsers(userQuery);
+
   return (
     <>
       <OpenInLinear title="Open Issue" url={issue.url} />
@@ -372,7 +376,6 @@ export default function IssueActions({
           target={
             <EditIssueForm
               priorities={priorities}
-              users={users}
               me={me}
               issue={issue}
               mutateList={mutateList}
@@ -401,23 +404,26 @@ export default function IssueActions({
           </ActionPanel.Submenu>
         ) : null}
 
-        {users && users.length > 0 ? (
-          <ActionPanel.Submenu
-            icon={Icon.AddPerson}
-            title="Assign To"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-          >
-            {users.map((user) => (
-              <Action
-                key={user.id}
-                autoFocus={user.id === issue.assignee?.id}
-                title={`${user.displayName} (${user.email})`}
-                icon={getUserIcon(user)}
-                onAction={() => setAssignee(user)}
-              />
-            ))}
-          </ActionPanel.Submenu>
-        ) : null}
+        <ActionPanel.Submenu
+          icon={Icon.AddPerson}
+          title="Assign To"
+          shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+          {...(supportsUserTypeahead && {
+            onSearchTextChange: setUserQuery,
+            isLoading: isLoadingUsers,
+            throttle: true,
+          })}
+        >
+          {users?.map((user) => (
+            <Action
+              key={user.id}
+              autoFocus={user.id === issue.assignee?.id}
+              title={`${user.displayName} (${user.email})`}
+              icon={getUserIcon(user)}
+              onAction={() => setAssignee(user)}
+            />
+          ))}
+        </ActionPanel.Submenu>
 
         {me ? (
           <Action
@@ -497,10 +503,17 @@ export default function IssueActions({
           <Action.Push
             title="Show Issue Links"
             icon={Icon.Link}
-            target={<IssueAttachments attachments={attachments ?? []} />}
+            target={<IssueAttachments attachments={attachments ?? []} issue={issue} />}
             shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "l" }}
           />
         ) : null}
+
+        <Action.Push
+          title="Add Attachments and Links"
+          icon={Icon.NewDocument}
+          target={<IssueAttachmentsForm issue={issue} />}
+          shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "a" }}
+        />
 
         <Action.Push
           title="Add Comment"

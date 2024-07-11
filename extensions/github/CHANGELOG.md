@@ -1,5 +1,10 @@
 # GitHub Changelog
 
+## [Improvements and Fixes] - 2024-07-08
+
+- Adds an action to sort the PRs, issues, discussions and repos
+- For creating branches with no linked issues, the branch name does not need to start with `refs/heads`
+
 ## [Notifications Improvements] - 2024-07-03
 
 - Fixed a bug causing unread notifications to flicker.

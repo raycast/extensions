@@ -18,9 +18,19 @@
   "commands": [
     {
       "name": "search",
-      "title": "Search",
+      "title": "Open Channel",
       "subtitle": "Slack",
+      "keywords": [
+        "search"
+      ],
       "description": "Search for all workspace members, group chats, and channels and open them directly in your Slack app.",
+      "mode": "view"
+    },
+    {
+      "name": "search-messages",
+      "title": "Search Messages",
+      "subtitle": "Slack",
+      "description": "Search for Slack messages.",
       "mode": "view"
     },
     {

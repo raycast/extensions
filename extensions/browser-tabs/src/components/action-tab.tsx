@@ -11,10 +11,11 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { BrowserTab, Tab } from "../types/types";
+import { BrowserSetup, BrowserTab, Tab } from "../types/types";
 import { isEmpty, isNotEmpty } from "../utils/common-utils";
 import { closeBrowserTab, jumpToBrowserTab } from "../utils/applescript-utils";
 import { MutatePromise } from "@raycast/utils";
+import { SetupBrowsers } from "../setup-browsers";
 
 export function ActionTab(props: {
   defaultBrowser: Application | undefined;
@@ -22,8 +23,9 @@ export function ActionTab(props: {
   tab: Tab;
   mutate: MutatePromise<BrowserTab[] | undefined>;
   frontmostMutate: MutatePromise<Application, undefined>;
+  browserSetup: BrowserSetup[];
 }) {
-  const { defaultBrowser, browser, tab, mutate, frontmostMutate } = props;
+  const { defaultBrowser, browser, tab, mutate, frontmostMutate, browserSetup } = props;
   return (
     <>
       <ActionPanel.Section>
@@ -47,6 +49,34 @@ export function ActionTab(props: {
               await mutate();
             }}
           />
+        )}
+        {browserSetup.filter((browserSetup) => {
+          return browserSetup.browser.path !== browser.path || browserSetup.browser.path !== defaultBrowser?.path;
+        }).length > 0 && (
+          <ActionPanel.Submenu
+            title={"Open in"}
+            icon={Icon.Compass}
+            shortcut={{ modifiers: ["shift", "cmd"], key: "enter" }}
+          >
+            {browserSetup
+              .filter((browserSetup) => {
+                return browserSetup.browser.path !== browser.path || browserSetup.browser.path !== defaultBrowser?.path;
+              })
+              .map((browserSetup, index) => {
+                return (
+                  <Action
+                    key={browserSetup.browser.path + index}
+                    title={browserSetup.browser.name}
+                    icon={{ fileIcon: browserSetup.browser.path }}
+                    onAction={async () => {
+                      await open(tab.url, browserSetup.browser);
+                      await new Promise((r) => setTimeout(r, 500)); // wait for the browser to open
+                      await mutate();
+                    }}
+                  />
+                );
+              })}
+          </ActionPanel.Submenu>
         )}
       </ActionPanel.Section>
 
@@ -122,6 +152,14 @@ export function ActionTab(props: {
             await frontmostMutate();
             await mutate();
           }}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action.Push
+          title={"Select Browsers"}
+          icon={Icon.CheckCircle}
+          shortcut={{ modifiers: ["shift", "cmd"], key: "s" }}
+          target={<SetupBrowsers browserTabsMutate={mutate} />}
         />
       </ActionPanel.Section>
     </>

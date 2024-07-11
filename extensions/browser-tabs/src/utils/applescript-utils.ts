@@ -1,12 +1,36 @@
 import { runAppleScript } from "@raycast/utils";
-import { Application, captureException, getApplications, open } from "@raycast/api";
-import { BrowserTab, Tab } from "../types/types";
-import { ARC_BUNDLE_ID, TEST_URL, unsupportedBrowsers } from "./constants";
+import { Application, captureException, getApplications, LocalStorage, open } from "@raycast/api";
+import { BrowserSetup, Tab } from "../types/types";
+import { ARC_BUNDLE_ID, CacheKey, TEST_URL, unsupportedBrowsers } from "./constants";
 import { isEmpty } from "./common-utils";
+import { recentOnTop } from "../types/preferences";
 
-export const getBrowsers = async () => {
+export const getBrowserSetup = async () => {
   try {
-    return await getApplications(TEST_URL);
+    // get browser applications
+    const allOpenUrlApps = await getApplications(TEST_URL);
+    const browsers = allOpenUrlApps.filter(
+      (browser) => !unsupportedBrowsers.some((unsupported) => browser.name.includes(unsupported)),
+    );
+    // get setup
+    const localStorage = await LocalStorage.getItem<string>(CacheKey.BrowserSetup);
+    if (!localStorage) {
+      return browsers.map((browser) => {
+        return {
+          browser: browser,
+          isChecked: true,
+        };
+      });
+    } else {
+      const browserSetup = JSON.parse(localStorage) as BrowserSetup[];
+      return browsers.map((browser) => {
+        const setup = browserSetup.find((setup) => setup.browser.path === browser.path);
+        return {
+          browser: browser,
+          isChecked: setup ? setup.isChecked : true,
+        };
+      });
+    }
   } catch (e) {
     captureException(e);
     console.error("Error fetching browsers");
@@ -176,11 +200,12 @@ export const getTabsString = async (browser: string) => {
 const parseTabs = (browser: Application, tabs: string): Tab[] => {
   try {
     const tabStrList = tabs.split("\n\n").filter((tab) => tab.length > 0);
-    return tabStrList.map((tabStr) => {
+    const tabList = tabStrList.map((tabStr) => {
       const [title, url, windowId, tabId] = tabStr.split("\n");
       const domain = new URL(url).hostname;
       return { browser: browser.name, title, url, domain, windowId, tabId };
     });
+    return recentOnTop ? tabList.reverse() : tabList;
   } catch (e) {
     captureException(e);
     console.error("Error parsing tabs");
@@ -190,23 +215,23 @@ const parseTabs = (browser: Application, tabs: string): Tab[] => {
 
 export const getBrowsersTabs = async () => {
   try {
-    const browsers_ = await getBrowsers();
-    const browsers = browsers_.filter(
-      (browser) => !unsupportedBrowsers.some((unsupported) => browser.name.includes(unsupported)),
-    );
-    const tabsResults = [];
-    for (const browser of browsers) {
+    const browserSetup = await getBrowserSetup();
+    const browsers = browserSetup.filter((setup) => setup.isChecked).map((setup) => setup.browser);
+
+    const tabsResultsPromises = browsers.map(async (browser) => {
       const tabsString = await getTabsString(browser.name);
       if (tabsString) {
-        const browserTabs: BrowserTab = {
-          browser: browser,
+        return {
+          browser,
           tabs: parseTabs(browser, tabsString),
         };
-        tabsResults.push(browserTabs);
       }
-    }
+      return null;
+    });
 
-    return tabsResults;
+    const tabsResults = await Promise.all(tabsResultsPromises);
+
+    return tabsResults.filter((result) => result !== null);
   } catch (error) {
     captureException(error);
     console.error("Error fetching browser tabs");

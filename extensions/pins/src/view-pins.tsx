@@ -219,7 +219,6 @@ export default function ViewPinsCommand(args: { launchContext?: { pinID?: number
                       await revalidateGroups();
                     }}
                   />
-
                   <Action.Push
                     title="Edit"
                     icon={Icon.Pencil}
@@ -321,7 +320,6 @@ export default function ViewPinsCommand(args: { launchContext?: { pinID?: number
                           const groupStart = pins.findIndex((p) => p.id == groupPins[0].id);
                           const targetIndex = groupStart + groupPins.length;
                           const newPins = [...pins.slice(0, targetIndex), pin, ...pins.slice(targetIndex)];
-
                           await setStorage(StorageKey.LOCAL_PINS, newPins);
                           await revalidatePins();
                         }}
@@ -386,7 +384,6 @@ export default function ViewPinsCommand(args: { launchContext?: { pinID?: number
                     setShowingHidden(!showingHidden);
                   }}
                 />
-
                 <PlaceholdersGuideAction />
                 <CopyPinActionsSubmenu pin={pin} pins={pins} />
               </ActionPanel>

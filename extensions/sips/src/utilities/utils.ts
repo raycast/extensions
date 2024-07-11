@@ -301,10 +301,22 @@ export const addItemToRemove = async (item: string) => {
  * @param extension The extension of the file
  * @returns A promise resolving to the path of the temporary file.
  */
-export const scopedTempFile = async (name: string, extension: string) => {
+// export const scopedTempFile = async (name: string, extension: string) => {
+//   const tempPath = path.join(os.tmpdir(), `${name}.${extension}`);
+//   await addItemToRemove(tempPath);
+//   return tempPath;
+// };
+
+export const getScopedTempFile = async (name: string, extension: string) => {
   const tempPath = path.join(os.tmpdir(), `${name}.${extension}`);
-  await addItemToRemove(tempPath);
-  return tempPath;
+  return {
+    path: tempPath,
+    [Symbol.asyncDispose]: async () => {
+      if (fs.existsSync(tempPath)) {
+        await fs.promises.rm(tempPath, { recursive: true });
+      }
+    },
+  };
 };
 
 /**
@@ -500,13 +512,14 @@ export const getWebPBinaryPath = async () => {
  * @returns A promise resolving to the path of the resulting image.
  */
 export const execSIPSCommandOnWebP = async (command: string, webpPath: string): Promise<string> => {
-  const tmpPath = await scopedTempFile("tmp", "png");
+  const preferences = getPreferenceValues<ExtensionPreferences>();
+  await using tmpFile = await getScopedTempFile("tmp", "png");
   const newPath = (await getDestinationPaths([webpPath]))[0];
 
   const [dwebpPath, cwebpPath] = await getWebPBinaryPath();
 
   execSync(
-    `${dwebpPath} "${webpPath}" -o "${tmpPath}" && ${command} "${tmpPath}" && ${cwebpPath} "${tmpPath}" -o "${newPath}"`,
+    `${dwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} "${webpPath}" -o "${tmpFile.path}" && ${command} "${tmpFile.path}" && ${cwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} "${tmpFile.path}" -o "${newPath}"`,
   );
   return newPath;
 };
@@ -518,12 +531,13 @@ export const execSIPSCommandOnWebP = async (command: string, webpPath: string): 
  * @param avifPath The path of the AVIF image.
  */
 export const execSIPSCommandOnAVIF = async (command: string, avifPath: string): Promise<string> => {
-  const tmpPath = await scopedTempFile("tmp", "png");
+  const preferences = getPreferenceValues<ExtensionPreferences>();
+  await using tmpFile = await getScopedTempFile("tmp", "png");
   const newPath = (await getDestinationPaths([avifPath]))[0];
 
   const { encoderPath, decoderPath } = await getAVIFEncPaths();
   execSync(
-    `${decoderPath} "${avifPath}" "${tmpPath}" && ${command} "${tmpPath}" && ${encoderPath} "${tmpPath}" "${newPath}"`,
+    `${decoderPath} "${avifPath}" "${tmpFile.path}" && ${command} "${tmpFile.path}" && ${encoderPath} ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100" : ""}  "${tmpFile.path}" "${newPath}"`,
   );
   return newPath;
 };
@@ -535,13 +549,13 @@ export const execSIPSCommandOnAVIF = async (command: string, avifPath: string): 
  * @param svgPath The path of the SVG image.
  */
 export const execSIPSCommandOnSVG = async (command: string, svgPath: string): Promise<string> => {
-  const tmpPath = await scopedTempFile("tmp", "bmp");
+  await using tmpFile = await getScopedTempFile("tmp", "bmp");
   const newPath = (await getDestinationPaths([svgPath]))[0];
 
-  await convertSVG("BMP", svgPath, tmpPath);
+  await convertSVG("BMP", svgPath, tmpFile.path);
   execSync(`chmod +x ${environment.assetsPath}/potrace/potrace`);
   execSync(
-    `${command} "${tmpPath}" && ${environment.assetsPath}/potrace/potrace -s --tight -o "${newPath}" "${tmpPath}"`,
+    `${command} "${tmpFile.path}" && ${environment.assetsPath}/potrace/potrace -s --tight -o "${newPath}" "${tmpFile.path}"`,
   );
   return newPath;
 };

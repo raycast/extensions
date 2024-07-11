@@ -701,6 +701,48 @@ export const movePin = async (pin: Pin, group: string, setPins?: React.Dispatch<
   setPinAttribute(pin, "group", group, setPins || (() => {}));
 
 /**
+ * Hides a pin; updates local storage.
+ * @param pin The pin to hide.
+ * @param setPins The function to update the list of pins.
+ */
+export const hidePin = async (pin: Pin, setPins: React.Dispatch<React.SetStateAction<Pin[]>>) => {
+  const storedPins = await getStorage(StorageKey.LOCAL_PINS);
+  const newData: Pin[] = storedPins.map((oldPin: Pin) => {
+    if (oldPin.id == pin.id) {
+      return {
+        ...oldPin,
+        visibility: Visibility.HIDDEN,
+      };
+    }
+    return oldPin;
+  });
+
+  setPins(newData);
+  await setStorage(StorageKey.LOCAL_PINS, newData);
+};
+
+/**
+ * Disables a pin; updates local storage.
+ * @param pin The pin to disable.
+ * @param setPins The function to update the list of pins.
+ */
+export const disablePin = async (pin: Pin, setPins: React.Dispatch<React.SetStateAction<Pin[]>>) => {
+  const storedPins = await getStorage(StorageKey.LOCAL_PINS);
+  const newData: Pin[] = storedPins.map((oldPin: Pin) => {
+    if (oldPin.id == pin.id) {
+      return {
+        ...oldPin,
+        visibility: Visibility.DISABLED,
+      };
+    }
+    return oldPin;
+  });
+
+  setPins(newData);
+  await setStorage(StorageKey.LOCAL_PINS, newData);
+};
+
+/**
  * Deletes a pin; updates local storage.
  * @param pin The pin to delete.
  * @param setPins The function to update the list of pins.
