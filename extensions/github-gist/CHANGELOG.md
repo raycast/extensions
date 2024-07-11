@@ -1,6 +1,6 @@
 # GitHub Gist Changelog
 
-## [OAuth2.0 Support] - {PR_MERGE_DATE}
+## [OAuth2.0 Support] - 2024-07-11
 
 - Uses Raycast OAuth2.0 GitHub integration with `repo read:user gist` scopes.
 - ⚠️Disables the personal access token preference. Users can delete their tokens after successful OAuth2.0 connection.
