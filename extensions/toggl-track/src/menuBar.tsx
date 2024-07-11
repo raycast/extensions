@@ -2,6 +2,7 @@ import { MenuBarExtra, Icon, launchCommand, LaunchType, getPreferenceValues } fr
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 
+import { sleep } from "@/helpers/common";
 import { formatSeconds } from "@/helpers/formatSeconds";
 import { useCurrentTime } from "@/hooks/useCurrentTime";
 import { useProcessedTimeEntries } from "@/hooks/useProcessedTimeEntries";
@@ -67,6 +68,7 @@ export default function Command() {
             icon={{ source: Icon.Circle, tintColor: runningEntry?.project_color }}
             onAction={async () => {
               await stopRunningTimeEntry(runningEntry);
+              await sleep(250);
             }}
             title={runningEntry.description || ""}
             subtitle={
@@ -101,6 +103,7 @@ export default function Command() {
             icon={{ source: Icon.Circle, tintColor: timeEntry.project_color }}
             onAction={async () => {
               await resumeTimeEntry(timeEntry);
+              await sleep(250);
             }}
           />
         ))}
