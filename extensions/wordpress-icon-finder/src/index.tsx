@@ -9,8 +9,8 @@ interface IconFile {
   keywords?: string[];
 }
 
-function buildSVG(svg: string, color: string = "#fff"): string {
-  const rawSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="${color}" viewBox="0 0 24 24" stroke-width="0.8">${svg}</svg>`;
+function buildSVG(name: string, svg: string, color: string = "#fff"): string {
+  const rawSVG = `<svg id="${name}" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="${color}" viewBox="0 0 24 24" stroke-width="0.8">${svg}</svg>`;
   return rawSVG;
 }
 
@@ -20,7 +20,7 @@ export default function DisplayIcon() {
 
   useEffect(() => {
     const tempIcons = iconsData.map((iconData) => {
-      const source = buildSVG(iconData.path);
+      const source = buildSVG(iconData.name, iconData.path);
       const base64 = Buffer.from(source).toString("base64");
       return {
         name: iconData.name.replace(/-/g, " "),
@@ -53,7 +53,7 @@ export default function DisplayIcon() {
                 icon={Icon.Eye}
                 title="Copy Icon"
                 onAction={async () => {
-                  await Clipboard.copy(buildSVG(icon.path, color));
+                  await Clipboard.copy(buildSVG(icon.name, icon.path, color));
                   await showHUD(`${icon.name.replace(/ /g, "-")} was copied to your clipboard`);
                 }}
               />
