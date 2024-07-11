@@ -33364,6 +33364,8 @@ export type SearchRepositoriesQuery = {
 
 export type MyLatestRepositoriesQueryVariables = Exact<{
   numberOfItems: Scalars["Int"]["input"];
+  orderByField: RepositoryOrderField;
+  orderByDirection: OrderDirection;
 }>;
 
 export type MyLatestRepositoriesQuery = {
@@ -34670,9 +34672,13 @@ export const SearchRepositoriesDocument = gql`
   ${ExtendedRepositoryFieldsFragmentDoc}
 `;
 export const MyLatestRepositoriesDocument = gql`
-  query myLatestRepositories($numberOfItems: Int!) {
+  query myLatestRepositories(
+    $numberOfItems: Int!
+    $orderByField: RepositoryOrderField!
+    $orderByDirection: OrderDirection!
+  ) {
     viewer {
-      repositories(first: $numberOfItems, orderBy: { field: PUSHED_AT, direction: DESC }) {
+      repositories(first: $numberOfItems, orderBy: { field: $orderByField, direction: $orderByDirection }) {
         nodes {
           ...ExtendedRepositoryFields
         }

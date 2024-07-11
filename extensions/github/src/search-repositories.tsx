@@ -8,7 +8,7 @@ import RepositoryListEmptyView from "./components/RepositoryListEmptyView";
 import RepositoryListItem from "./components/RepositoryListItem";
 import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
 import { ExtendedRepositoryFieldsFragment } from "./generated/graphql";
-import { REPO_DEFAULT_SORT_QUERY, useHistory } from "./helpers/repository";
+import { REPO_DEFAULT_SORT_QUERY, REPO_SORT_TYPES_TO_QUERIES, useHistory } from "./helpers/repository";
 import { withGitHubClient } from "./helpers/withGithubClient";
 
 function SearchRepositories() {
@@ -21,6 +21,7 @@ function SearchRepositories() {
   const [sortQuery, setSortQuery] = useCachedState<string>("sort-query", REPO_DEFAULT_SORT_QUERY, {
     cacheNamespace: "github-search-repo",
   });
+  const sortTypes = REPO_SORT_TYPES_TO_QUERIES;
 
   const { data: history, visitRepository } = useHistory(searchText, searchFilter);
   const query = useMemo(
@@ -70,7 +71,7 @@ function SearchRepositories() {
         {history.map((repository) => (
           <RepositoryListItem
             key={repository.id}
-            {...{ repository, onVisit: visitRepository, mutateList, sortQuery, setSortQuery }}
+            {...{ repository, onVisit: visitRepository, mutateList, sortQuery, setSortQuery, sortTypes }}
           />
         ))}
       </List.Section>
@@ -84,7 +85,7 @@ function SearchRepositories() {
             return (
               <RepositoryListItem
                 key={repository.id}
-                {...{ repository, onVisit: visitRepository, mutateList, sortQuery, setSortQuery }}
+                {...{ repository, onVisit: visitRepository, mutateList, sortQuery, setSortQuery, sortTypes }}
               />
             );
           })}

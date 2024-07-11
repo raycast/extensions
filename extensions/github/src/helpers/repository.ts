@@ -138,4 +138,10 @@ export const REPO_SORT_TYPES_TO_QUERIES = [
   { title: "Stars", value: "sort:stars-desc" },
   { title: "Forks", value: "sort:forks-desc" },
 ];
+export const MY_REPO_SORT_TYPES_TO_QUERIES = [
+  { title: "Last Pushed", value: "sort:pushed_at:desc" },
+  { title: "Name", value: "sort:name:asc" },
+  { title: "Stars", value: "sort:stargazers:desc" },
+];
 export const REPO_DEFAULT_SORT_QUERY = REPO_SORT_TYPES_TO_QUERIES[0].value;
+export const MY_REPO_DEFAULT_SORT_QUERY = MY_REPO_SORT_TYPES_TO_QUERIES[0].value;
