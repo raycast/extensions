@@ -84,6 +84,7 @@ export const produceOutput = async (content: string) => {
       break;
 
     case "paste":
+      await Clipboard.paste(content);
       await showToast(Toast.Style.Success, "Pasted to active app! 📝");
       break;
   }
