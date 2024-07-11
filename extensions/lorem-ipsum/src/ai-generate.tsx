@@ -1,5 +1,5 @@
-import { AI, closeMainWindow, environment, LaunchProps, showToast, Toast } from '@raycast/api';
-import { produceOutput } from './utils';
+import { AI, closeMainWindow, environment, LaunchProps, showToast, Toast } from "@raycast/api";
+import { produceOutput } from "./utils";
 
 function constructPrompt(topic: string | undefined) {
   const topicInstructions = topic
