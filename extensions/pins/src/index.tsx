@@ -99,9 +99,7 @@ export default function ShowPinsCommand() {
 
   const visibleGroups = groups.filter(
     (g) =>
-      g.visibility === undefined ||
-      g.visibility === Visibility.VISIBLE ||
-      g.visibility === Visibility.MENUBAR_ONLY,
+      g.visibility === undefined || g.visibility === Visibility.VISIBLE || g.visibility === Visibility.MENUBAR_ONLY,
   );
 
   const allPins = sortPins(
@@ -113,7 +111,7 @@ export default function ShowPinsCommand() {
           pin.visibility === Visibility.VISIBLE ||
           pin.visibility === Visibility.MENUBAR_ONLY,
       ),
-      visibleGroups,
+    visibleGroups,
   );
 
   /**

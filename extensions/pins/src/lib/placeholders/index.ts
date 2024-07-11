@@ -108,9 +108,9 @@ JavaScriptPlaceholder.apply = async (str: string, context?: { [key: string]: unk
         console.warn("`log` is deprecated. Use `console.log` instead.");
         console.log(str); // Make logging available to JS scripts
         return "";
-      }
-    }
-    
+      },
+    };
+
     const res = await vm.runInNewContext(script, sandbox, {
       timeout: 1000,
       displayErrors: true,

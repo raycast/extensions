@@ -148,7 +148,14 @@ export default function ViewPinsCommand(args: { launchContext?: { pinID?: number
   const allPins = pins;
   const maxTimesOpened = Math.max(...pins.map((pin) => pin.timesOpened || 0));
 
-  const visibleGroups = showingHidden ? groups : groups.filter((group) => group.visibility === Visibility.VISIBLE || group.visibility === Visibility.VIEW_PINS_ONLY || group.visibility === undefined);
+  const visibleGroups = showingHidden
+    ? groups
+    : groups.filter(
+        (group) =>
+          group.visibility === Visibility.VISIBLE ||
+          group.visibility === Visibility.VIEW_PINS_ONLY ||
+          group.visibility === undefined,
+      );
 
   /**
    * Gets the list of pins as a list of ListItems.
@@ -179,7 +186,13 @@ export default function ViewPinsCommand(args: { launchContext?: { pinID?: number
         if (preferences.showFrequency) addFrequencyAccessory(pin, accessories, maxTimesOpened);
         if (preferences.showTags) addTagAccessories(pin, accessories);
 
-        const visiblePins = pins.filter((pin) => showingHidden ? true : pin.visibility === Visibility.VISIBLE || pin.visibility === Visibility.VIEW_PINS_ONLY || pin.visibility === undefined);
+        const visiblePins = pins.filter((pin) =>
+          showingHidden
+            ? true
+            : pin.visibility === Visibility.VISIBLE ||
+              pin.visibility === Visibility.VIEW_PINS_ONLY ||
+              pin.visibility === undefined,
+        );
 
         const group = visibleGroups.find((group) => group.name == pin.group) || { name: "None", icon: "Minus", id: -1 };
         return (
@@ -236,7 +249,11 @@ export default function ViewPinsCommand(args: { launchContext?: { pinID?: number
                     }}
                   />
 
-                  <ActionPanel.Submenu title="Move Pin..." icon={Icon.ChevronUpDown} shortcut={{ modifiers: ["cmd"], key: "m" }}>
+                  <ActionPanel.Submenu
+                    title="Move Pin..."
+                    icon={Icon.ChevronUpDown}
+                    shortcut={{ modifiers: ["cmd"], key: "m" }}
+                  >
                     {index > 0 &&
                     (group?.sortStrategy == "manual" ||
                       (!group?.sortStrategy && preferences.defaultSortStrategy == "manual") ||
@@ -250,7 +267,8 @@ export default function ViewPinsCommand(args: { launchContext?: { pinID?: number
                         }}
                       />
                     ) : null}
-                    {index < pins.length - 1 && visiblePins.length > 1 &&
+                    {index < pins.length - 1 &&
+                    visiblePins.length > 1 &&
                     (group?.sortStrategy == "manual" ||
                       (!group?.sortStrategy && preferences.defaultSortStrategy == "manual") ||
                       (group?.name == undefined && preferences.defaultSortStrategy == "manual")) ? (

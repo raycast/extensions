@@ -24,7 +24,8 @@ const DeletePinDirective: Placeholder = {
     return { result: "" };
   },
   constant: false,
-  fn: async (pinRef, silent = "false") => (await DeletePinDirective.apply(`{{deletePin silent=${silent}:${pinRef}}}`)).result,
+  fn: async (pinRef, silent = "false") =>
+    (await DeletePinDirective.apply(`{{deletePin silent=${silent}:${pinRef}}}`)).result,
   example: "{{deletePin:pinName}}",
   description: "Deletes a pin.",
   hintRepresentation: "{{deletePin silent=true:...}}",
