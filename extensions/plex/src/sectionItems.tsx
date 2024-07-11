@@ -10,7 +10,6 @@ import { MediaItem } from "./mediaItem";
 export function GetSectionItems({ sectionId, sectionName }: { sectionId: string; sectionName: string }) {
   const [searchText, setSearchText] = useState<string>("");
   const [filteredList, setFilteredList] = useState<SectionItemsApiResponse["MediaContainer"]["Metadata"][]>([]);
-  const [unfilteredList, setUnfilteredList] = useState<SectionItemsApiResponse["MediaContainer"]["Metadata"][]>([]);
 
   const endpoint = `${ENDPOINTS.librarySections}${sectionId}/all`;
 
@@ -23,20 +22,21 @@ export function GetSectionItems({ sectionId, sectionName }: { sectionId: string;
 
   useEffect(() => {
     if (!isLoading && Array.isArray(data)) {
-      setUnfilteredList(data);
       setFilteredList(data);
     }
   }, [isLoading, data]);
 
   useEffect(() => {
-    if (searchText.length > 0) {
-      setFilteredList(
-        filteredList.filter((item: SectionItemsApiResponse["MediaContainer"]["Metadata"]) =>
-          item.title.toLowerCase().includes(searchText),
-        ),
-      );
-    } else if (searchText.length === 0) {
-      setFilteredList(unfilteredList);
+    if (Array.isArray(data)) {
+      if (searchText.length > 0) {
+        setFilteredList(
+          filteredList.filter((item: SectionItemsApiResponse["MediaContainer"]["Metadata"]) =>
+            item.title.toLowerCase().includes(searchText.toLowerCase()),
+          ),
+        );
+      } else if (searchText.length === 0) {
+        setFilteredList(data);
+      }
     }
   }, [searchText]);
 
