@@ -15,6 +15,7 @@ import {
   weatherConditionToIcon,
   weatherConditionToText,
 } from "./utils";
+import { useWeatherForecast } from "./hooks";
 
 async function launchWeatherCommand() {
   try {
@@ -151,15 +152,18 @@ export function WeatherCurrentMenubarSection(props: { weather: State | undefined
   );
 }
 
-export function WeatherForecastMenubarSection(props: { weather: State | undefined }) {
+export function WeatherForecastMenubarSection(props: { weather: State | undefined; forecast?: Forecast[] | null }) {
   const weather = props.weather;
-  const forecastAll = weather?.attributes.forecast as Forecast[] | undefined;
-  const forecast = forecastAll?.slice(0, 10);
-  const isDaily = isDailyForecast(forecast);
+  if (!weather) {
+    return null;
+  }
+  const { data: forecastAll } = useWeatherForecast(weather.entity_id, { data: props.forecast });
+  const forecastSliced = forecastAll?.slice(0, 10);
+  const isDaily = isDailyForecast(forecastSliced);
   const tempUnit = weather?.attributes.temperature_unit as string | undefined;
   return (
     <MenuBarExtra.Section title="Forecast">
-      {forecast?.map((f) => (
+      {forecastSliced?.map((f) => (
         <WeatherForecastMenubarItem key={f.datetime} forecast={f} isDaily={isDaily} tempUnit={tempUnit} />
       ))}
     </MenuBarExtra.Section>

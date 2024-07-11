@@ -1,3 +1,4 @@
+import { getHAWSConnection } from "@lib/common";
 import { State } from "@lib/haapi";
 
 export interface Forecast {
@@ -107,4 +108,37 @@ const weatherStatusToText: Record<string, string> = {
 
 export function weatherConditionToText(condition: string): string {
   return weatherStatusToText[condition] || "❓";
+}
+
+interface WeatherForecastResponse {
+  forecast: Array<Forecast> | undefined;
+}
+
+interface WeatherForecastRoot {
+  response: Record<string, WeatherForecastResponse>;
+}
+
+export async function getWeatherForecast(entityID: string) {
+  const con = await getHAWSConnection();
+  const rc: WeatherForecastRoot | undefined = await con?.sendMessagePromise({
+    type: "execute_script",
+    sequence: [
+      {
+        service: "weather.get_forecasts",
+        data: {
+          type: "daily",
+        },
+        target: {
+          entity_id: entityID,
+        },
+        response_variable: "service_result",
+      },
+      {
+        stop: "done",
+        response_variable: "service_result",
+      },
+    ],
+  });
+  const forecast = rc?.response[entityID].forecast;
+  return forecast;
 }

@@ -1,6 +1,7 @@
 import { useHAStates } from "@components/hooks";
 import { MenuBarItemConfigureCommand } from "@components/menu";
 import { PrimaryIconColor } from "@components/state/utils";
+import { useWeatherForecast } from "@components/weather/hooks";
 import { WeatherCurrentMenubarSection, WeatherForecastMenubarSection } from "@components/weather/menu";
 import { getTemperatureFromState, weatherConditionToIcon, weatherConditionToText } from "@components/weather/utils";
 import { State } from "@lib/haapi";
@@ -50,7 +51,7 @@ function getWeatherEntityPreference(): string {
 }
 
 export default function WeatherMenuBarCommand(): JSX.Element {
-  const { states, error: stateError, isLoading } = useHAStates();
+  const { states, error: stateError, isLoading: statesLoading } = useHAStates();
   const entity = getWeatherEntityPreference();
   const weatherStates = states?.filter((s) => s.entity_id === entity);
   const weather = weatherStates && weatherStates.length > 0 ? weatherStates[0] : undefined;
@@ -60,6 +61,9 @@ export default function WeatherMenuBarCommand(): JSX.Element {
     : weather === undefined
       ? `Entity '${entity}' not found`
       : undefined;
+
+  const { data: forecast, isLoading: forecastLoading } = useWeatherForecast(weather?.entity_id);
+  const isLoading = statesLoading || forecastLoading;
   return (
     <WeatherMenuBarExtra
       title={temp ? temp.toString() : undefined}
@@ -77,7 +81,7 @@ export default function WeatherMenuBarCommand(): JSX.Element {
         />
       </MenuBarExtra.Section>
       <WeatherCurrentMenubarSection weather={weather} />
-      <WeatherForecastMenubarSection weather={weather} />
+      <WeatherForecastMenubarSection weather={weather} forecast={forecast} />
       <MenuBarExtra.Section>
         <MenuBarItemConfigureCommand />
       </MenuBarExtra.Section>
