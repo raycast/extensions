@@ -118,7 +118,12 @@ interface WeatherForecastRoot {
   response: Record<string, WeatherForecastResponse>;
 }
 
-export async function getWeatherForecast(entityID: string) {
+export enum WeatherForecastType {
+  Daily = "daily",
+  Hourly = "hourly",
+}
+
+export async function getWeatherForecast(entityID: string, options: { type: WeatherForecastType }) {
   const con = await getHAWSConnection();
   const rc: WeatherForecastRoot | undefined = await con?.sendMessagePromise({
     type: "execute_script",
@@ -126,7 +131,7 @@ export async function getWeatherForecast(entityID: string) {
       {
         service: "weather.get_forecasts",
         data: {
-          type: "daily",
+          type: options.type,
         },
         target: {
           entity_id: entityID,

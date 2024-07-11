@@ -14,6 +14,7 @@ import {
   isDailyForecast,
   weatherConditionToIcon,
   weatherConditionToText,
+  WeatherForecastType,
 } from "./utils";
 import { useWeatherForecast } from "./hooks";
 
@@ -157,16 +158,28 @@ export function WeatherForecastMenubarSection(props: { weather: State | undefine
   if (!weather) {
     return null;
   }
-  const { data: forecastAll } = useWeatherForecast(weather.entity_id, { data: props.forecast });
+  const { data: forecastAll } = useWeatherForecast(weather.entity_id, {
+    data: props.forecast,
+    type: WeatherForecastType.Daily,
+  });
   const forecastSliced = forecastAll?.slice(0, 10);
   const isDaily = isDailyForecast(forecastSliced);
+
+  const { data: hourly } = useWeatherForecast(weather.entity_id, { type: WeatherForecastType.Hourly });
   const tempUnit = weather?.attributes.temperature_unit as string | undefined;
   return (
-    <MenuBarExtra.Section title="Forecast">
-      {forecastSliced?.map((f) => (
-        <WeatherForecastMenubarItem key={f.datetime} forecast={f} isDaily={isDaily} tempUnit={tempUnit} />
-      ))}
-    </MenuBarExtra.Section>
+    <>
+      <MenuBarExtra.Section title="Forecast (Hourly)">
+        {hourly
+          ?.slice(0, 4)
+          .map((f) => <WeatherForecastMenubarItem key={f.datetime} forecast={f} isDaily={false} tempUnit={tempUnit} />)}
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section title="Forecast (Daily)">
+        {forecastSliced?.map((f) => (
+          <WeatherForecastMenubarItem key={f.datetime} forecast={f} isDaily={isDaily} tempUnit={tempUnit} />
+        ))}
+      </MenuBarExtra.Section>
+    </>
   );
 }
 

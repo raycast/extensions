@@ -10,6 +10,7 @@ import {
   isDailyForecast,
   weatherConditionToIcon,
   weatherConditionToText,
+  WeatherForecastType,
 } from "./utils";
 import { useWeatherForecast } from "./hooks";
 
@@ -100,8 +101,16 @@ function WeatherForecastItem(props: { forecast: Forecast; isDaily: boolean; temp
 function WeatherList(props: { state: State }): ReactElement {
   const s = props.state;
   const forecastAttribute = s.attributes.forecast as Forecast[] | undefined;
-  const { isLoading, data: forecast } = useWeatherForecast(s.entity_id, { data: forecastAttribute });
-  const isDaily = isDailyForecast(forecast);
+  const { isLoading: dailyLoading, data: daily } = useWeatherForecast(s.entity_id, {
+    data: forecastAttribute,
+    type: WeatherForecastType.Daily,
+  });
+  const isDaily = isDailyForecast(daily);
+  const { isLoading: hourlyLoading, data: hourly } = useWeatherForecast(s.entity_id, {
+    data: forecastAttribute,
+    type: WeatherForecastType.Hourly,
+  });
+  const isLoading = dailyLoading || hourlyLoading;
   const tempUnit = s.attributes.temperature_unit as string | undefined;
   return (
     <List isLoading={isLoading}>
@@ -113,8 +122,11 @@ function WeatherList(props: { state: State }): ReactElement {
         <WeatherWindBearing state={s} />
         <WeatherWindSpeed state={s} />
       </List.Section>
-      <List.Section title="Forecast">
-        {forecast?.map((f) => <WeatherForecastItem forecast={f} isDaily={isDaily} tempUnit={tempUnit} />)}
+      <List.Section title="Forecast (Hourly)">
+        {hourly?.slice(0, 4).map((f) => <WeatherForecastItem forecast={f} isDaily={false} tempUnit={tempUnit} />)}
+      </List.Section>
+      <List.Section title="Forecast (Daily)">
+        {daily?.map((f) => <WeatherForecastItem forecast={f} isDaily={isDaily} tempUnit={tempUnit} />)}
       </List.Section>
     </List>
   );
