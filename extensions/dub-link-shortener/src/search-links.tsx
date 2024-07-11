@@ -20,14 +20,15 @@ import { MutatePromise, showFailureToast } from "@raycast/utils";
 import { LinkSchema } from "@/types";
 
 export default function SearchLinks() {
-  const [workspaceId, setWorkspaceId] = useState<string>("");
-  const { workspaces, isLoading: isLoadingWorkspaces, error: workspacesError } = useWorkspaces();
+  const [workspaceId, setWorkspaceId] = useState<string | undefined>(undefined);
+  const { workspaces, isLoading: isLoadingWorkspaces, error: workspacesError, isSingleWorkspace } = useWorkspaces();
+
   const {
     shortLinks,
     error: linksError,
     isLoading: isLoadingLinks,
     mutate,
-  } = useShortLinks({ workspaceId, workspacesError });
+  } = useShortLinks({ workspaceId, isLoadingWorkspaces, workspacesError });
 
   return (
     <List
@@ -38,24 +39,26 @@ export default function SearchLinks() {
       searchBarPlaceholder={"Search links by domain, url, key, comments, tags..."}
       filtering
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Select Workspace"
-          placeholder="Select Workspace"
-          storeValue
-          filtering
-          isLoading={isLoadingWorkspaces}
-          onChange={setWorkspaceId}
-        >
-          {(workspaces ?? []).map((w) => (
-            <List.Dropdown.Item
-              key={w.id}
-              title={w.name}
-              value={w.id}
-              keywords={[w.id, w.name, w.slug]}
-              icon={{ source: w.logo ?? "command-icon.png", mask: Image.Mask.Circle }}
-            />
-          ))}
-        </List.Dropdown>
+        !isSingleWorkspace && !workspacesError ? (
+          <List.Dropdown
+            tooltip="Select Workspace"
+            placeholder="Select Workspace"
+            storeValue
+            filtering
+            isLoading={isLoadingWorkspaces}
+            onChange={setWorkspaceId}
+          >
+            {(workspaces ?? []).map((w) => (
+              <List.Dropdown.Item
+                key={w.id}
+                title={w.name}
+                value={w.id}
+                keywords={[w.id, w.name, w.slug]}
+                icon={{ source: w.logo ?? "command-icon.png", mask: Image.Mask.Circle }}
+              />
+            ))}
+          </List.Dropdown>
+        ) : undefined
       }
     >
       {(workspacesError || linksError) && (
@@ -178,7 +181,7 @@ export default function SearchLinks() {
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   title={"Delete Link"}
                   shortcut={Keyboard.Shortcut.Common.Remove}
-                  onAction={() => deleteLink(id, workspaceId, mutate)}
+                  onAction={() => deleteLink(id, mutate, workspaceId)}
                 />
                 <ActionPanel.Section>
                   <Action.OpenInBrowser
@@ -196,31 +199,37 @@ export default function SearchLinks() {
   );
 }
 
-const deleteLink = (linkId: string, workspaceId: string, mutate: MutatePromise<LinkSchema[]>) =>
+const deleteLink = (linkId: string, mutate: MutatePromise<LinkSchema[]>, workspaceId?: string) =>
   confirmAlert({
     title: "Delete Link",
     message: "Are you sure you want to delete this link?",
     primaryAction: {
       title: "Delete",
       style: Alert.ActionStyle.Destructive,
-      onAction: async () => {
-        const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting link..." });
-        await mutate(
-          deleteShortLink({ linkId, workspaceId })
-            .then(async ({ id }) => {
-              toast.style = Toast.Style.Success;
-              toast.title = "✅ Link deleted";
-              toast.message = `with id ${id}`;
-            })
-            .catch(async (err) => {
-              await showFailureToast(err, {
-                title: "❗ Failed to delete link",
-                primaryAction: { title: "Retry", onAction: () => deleteLink(linkId, workspaceId, mutate) },
-              });
-              throw err;
-            }),
-          { optimisticUpdate: (data) => data?.filter((l) => l.id !== linkId) },
-        );
-      },
+      onAction: () => tryDeleteLink(linkId, mutate, workspaceId),
     },
   });
+
+const tryDeleteLink = async (linkId: string, mutate: MutatePromise<LinkSchema[]>, workspaceId?: string) => {
+  const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting link..." });
+  await mutate(deleteShortLink({ linkId, workspaceId }), {
+    optimisticUpdate: (data) => data?.filter((l) => l.id !== linkId),
+  })
+    .then(async ({ id }) => {
+      toast.style = Toast.Style.Success;
+      toast.title = "✅ Link deleted";
+      toast.message = `with id ${id}`;
+    })
+    .catch(async (err) => {
+      await showFailureToast(err, {
+        title: "❗ Failed to delete link",
+        primaryAction: {
+          title: "Retry",
+          onAction: async (toast) => {
+            await tryDeleteLink(linkId, mutate, workspaceId);
+            await toast.hide();
+          },
+        },
+      });
+    });
+};

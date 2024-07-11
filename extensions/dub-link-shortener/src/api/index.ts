@@ -40,25 +40,27 @@ export const createShortLink = async ({
   const url = hasHttps(originalUrl) ? originalUrl : `https://${originalUrl}`;
   return await callApi<LinkSchema>({
     method: "POST",
-    url: `${BASE_API_URL}/links?workspaceId=${workspaceId}`,
+    url: workspaceId ? `${BASE_API_URL}/links?workspaceId=${workspaceId}` : `${BASE_API_URL}/links`,
     data: { domain, url, key, tagIds, comments },
   });
 };
 
-export const getAllShortLinks = async ({ workspaceId }: WorkspaceId) => {
-  return await callApi<LinkSchema[]>({ method: "GET", url: `${BASE_API_URL}/links?workspaceId=${workspaceId}` });
+export const getAllShortLinks = async ({ workspaceId }: WorkspaceId = {}) => {
+  const url = workspaceId ? `${BASE_API_URL}/links?workspaceId=${workspaceId}` : `${BASE_API_URL}/links`;
+  return await callApi<LinkSchema[]>({ method: "GET", url });
 };
 
 export const deleteShortLink = async ({ linkId, workspaceId }: { linkId: string } & WorkspaceId) => {
-  return await callApi<DeleteLinkResponseBody>({
-    method: "DELETE",
-    url: `${BASE_API_URL}/links/${linkId}?workspaceId=${workspaceId}`,
-  });
+  const url = workspaceId
+    ? `${BASE_API_URL}/links/${linkId}?workspaceId=${workspaceId}`
+    : `${BASE_API_URL}/links/${linkId}`;
+  return await callApi<DeleteLinkResponseBody>({ method: "DELETE", url });
 };
 
 /**
  * todo: Add commands and api(s) to create/manage tags in the workspace.
  */
-export const getAllTags = async ({ workspaceId }: WorkspaceId) => {
-  return await callApi<TagSchema[]>({ method: "GET", url: `${BASE_API_URL}/tags?workspaceId=${workspaceId}` });
+export const getAllTags = async ({ workspaceId }: WorkspaceId = {}) => {
+  const url = workspaceId ? `${BASE_API_URL}/tags?workspaceId=${workspaceId}` : `${BASE_API_URL}/tags`;
+  return await callApi<TagSchema[]>({ method: "GET", url });
 };
