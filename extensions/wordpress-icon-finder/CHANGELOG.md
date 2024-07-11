@@ -1,3 +1,3 @@
 # Icon Finder Changelog
 
-## [Initial Version] - 2024-05-07
+## [Initial Version] - {PR_MERGE_DATE}
