@@ -1,6 +1,6 @@
 # Yoink Changelog
 
-## [Support SetApp Yoink] - {PR_MERGE_DATE}
+## [Support SetApp Yoink] - 2024-07-11
 
 - Support Yoink from SetApp.
 
