@@ -246,4 +246,7 @@ export enum PinAction {
   COPY = "copy",
   EDIT = "edit",
   DELETE = "delete",
+  HIDE = "hide",
+  DISABLE = "disable",
+  MOVE = "move",
 }
