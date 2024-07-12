@@ -4,6 +4,8 @@ import { DrinkCompleteInfo } from "./types";
 import { useState } from "react";
 import generateDrinkMarkdown from "./utils/generate-drink-markdown";
 import useCocktailDB from "./hooks/use-cocktail-db";
+import getPreviewImage from "./utils/get-preview-image";
+import OpenInBrowserAction from "./utils/open-in-browser-action";
 
 export default function SearchCocktailByName(props: LaunchProps<{ arguments: Arguments.SearchCocktailByName }>) {
   const { name } = props.arguments;
@@ -26,7 +28,7 @@ export default function SearchCocktailByName(props: LaunchProps<{ arguments: Arg
           {drinks.map((drink) => (
             <List.Item
               key={drink.idDrink}
-              icon={{ source: drink.strDrinkThumb, fallback: Icon.Dot }}
+              icon={{ source: getPreviewImage(drink.strDrinkThumb), fallback: Icon.Dot }}
               title={drink.strDrink}
               subtitle={drink.strDrinkAlternate || ""}
               accessories={
@@ -71,6 +73,7 @@ export default function SearchCocktailByName(props: LaunchProps<{ arguments: Arg
                     icon={Icon.AppWindowSidebarLeft}
                     onAction={() => setIsShowingDetail((prev) => !prev)}
                   />
+                  <OpenInBrowserAction drink={drink} />
                 </ActionPanel>
               }
             />

@@ -4,6 +4,7 @@ import { useState } from "react";
 import useCocktailDB from "./hooks/use-cocktail-db";
 import generateDrinkMarkdown from "./utils/generate-drink-markdown";
 import getPreviewImage from "./utils/get-preview-image";
+import OpenInBrowserAction from "./utils/open-in-browser-action";
 
 export default function SearchCocktailByName(props: LaunchProps<{ arguments: Arguments.SearchCocktailByIngredient }>) {
   const { ingredient } = props.arguments;
@@ -24,6 +25,7 @@ export default function SearchCocktailByName(props: LaunchProps<{ arguments: Arg
               actions={
                 <ActionPanel>
                   <Action.Push icon={Icon.Eye} title="View Drink" target={<ViewDrink id={drink.idDrink} />} />
+                  <OpenInBrowserAction drink={drink} />
                 </ActionPanel>
               }
             />
@@ -58,6 +60,13 @@ function ViewDrink({ id }: { id: string }) {
             <Detail.Metadata.Label title="Glass" text={drink.strGlass} />
             <Detail.Metadata.Separator />
           </Detail.Metadata>
+        )
+      }
+      actions={
+        drink && (
+          <ActionPanel>
+            <OpenInBrowserAction drink={drink} />
+          </ActionPanel>
         )
       }
     />
