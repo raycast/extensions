@@ -18,7 +18,7 @@ import {
 } from "./utils";
 import { useWeatherForecast } from "./hooks";
 
-async function launchWeatherCommand() {
+export async function launchWeatherCommand() {
   try {
     await launchCommand({ name: "weather", type: LaunchType.UserInitiated });
   } catch (error) {
