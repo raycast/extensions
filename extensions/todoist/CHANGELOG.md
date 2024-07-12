@@ -1,5 +1,10 @@
 # Todoist Changelog
 
+## [Focus Label] - {PR_MERGE_DATE}
+
+Adds a preference to set a specified label for the task in focus. The label will be removed when the task is not in focus.
+This helps filter in-focus tasks on Todoist UI. The label will only be applied if the preference textfield is not empty.
+
 ## [Todoist Quicklinks] - 2024-07-09
 
 - Added a new action to create quicklinks for various views in Todoist (e.g., Today, specific projects, etc.).
