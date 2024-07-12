@@ -98,8 +98,9 @@
   ],
   "dependencies": {
     "@octokit/core": "^6.1.0",
-    "@raycast/api": "^1.77.3",
-    "@raycast/utils": "^1.16.1"
+    "@raycast/api": "^1.78.1",
+    "@raycast/utils": "^1.16.2",
+    "js-base64": "^3.7.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
