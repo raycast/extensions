@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Focus Label] - {PR_MERGE_DATE}
+## [Focus Label] - 2024-07-12
 
 Adds a preference to set a specified label for the task in focus. The label will be removed when the task is not in focus.
 This helps filter in-focus tasks on Todoist UI. The label will only be applied if the preference textfield is not empty.
