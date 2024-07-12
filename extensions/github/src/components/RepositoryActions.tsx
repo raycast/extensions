@@ -11,7 +11,7 @@ import { RepositoryDiscussionList } from "./RepositoryDiscussions";
 import { RepositoryIssueList } from "./RepositoryIssues";
 import { RepositoryPullRequestList } from "./RepositoryPullRequest";
 import RepositoryReleases from "./RepositoryReleases";
-import { SortAction, SortActionProps, SortTypeProps } from "./SortAction";
+import { SortAction, SortActionProps, SortTypesDataProps } from "./SortAction";
 
 type RepositoryActionProps = {
   repository: ExtendedRepositoryFieldsFragment;
@@ -25,8 +25,8 @@ export default function RepositoryActions({
   onVisit,
   setSortQuery,
   sortQuery,
-  sortTypes,
-}: RepositoryActionProps & SortActionProps & SortTypeProps) {
+  sortTypesData,
+}: RepositoryActionProps & SortActionProps & SortTypesDataProps) {
   const { github } = getGitHubClient();
 
   const updatedAt = new Date(repository.updatedAt);
@@ -240,7 +240,7 @@ export default function RepositoryActions({
       </ActionPanel.Section>
 
       <ActionPanel.Section>
-        <SortAction {...{ data: sortTypes, sortQuery, setSortQuery }} />
+        <SortAction {...{ data: sortTypesData, sortQuery, setSortQuery }} />
       </ActionPanel.Section>
     </ActionPanel>
   );

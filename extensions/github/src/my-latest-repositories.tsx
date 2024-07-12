@@ -16,7 +16,7 @@ function MyLatestRepositories() {
   const [sortQuery, setSortQuery] = useCachedState<string>("sort-query", MY_REPO_DEFAULT_SORT_QUERY, {
     cacheNamespace: "github-my-latest-repo",
   });
-  const sortTypes = MY_REPO_SORT_TYPES_TO_QUERIES;
+  const sortTypesData = MY_REPO_SORT_TYPES_TO_QUERIES;
 
   const {
     data,
@@ -24,8 +24,8 @@ function MyLatestRepositories() {
     mutate: mutateList,
   } = useCachedPromise(
     async (sort: string) => {
-      const orderByField = sort.split(":")[1].toUpperCase() as RepositoryOrderField;
-      const orderByDirection = sort.split(":")[2].toUpperCase() as OrderDirection;
+      const orderByField = sort.split(":")[0].toUpperCase() as RepositoryOrderField;
+      const orderByDirection = sort.split(":")[1].toUpperCase() as OrderDirection;
       const result = await github.myLatestRepositories({
         numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }),
         orderByField,
@@ -49,7 +49,7 @@ function MyLatestRepositories() {
         {history.map((repository) => (
           <RepositoryListItem
             key={repository.id}
-            {...{ repository, mutateList, onVisit: visitRepository, sortQuery, setSortQuery, sortTypes }}
+            {...{ repository, mutateList, onVisit: visitRepository, sortQuery, setSortQuery, sortTypesData }}
           />
         ))}
       </List.Section>
@@ -60,7 +60,7 @@ function MyLatestRepositories() {
             return (
               <RepositoryListItem
                 key={repository.id}
-                {...{ repository, mutateList, onVisit: visitRepository, sortQuery, setSortQuery, sortTypes }}
+                {...{ repository, mutateList, onVisit: visitRepository, sortQuery, setSortQuery, sortTypesData }}
               />
             );
           })}

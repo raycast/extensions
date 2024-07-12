@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Icon, MenuBarExtra } from "@raycast/api";
 
 type SortType = { title: string; value: string };
 
-export type SortTypeProps = { sortTypes: SortType[] };
+export type SortTypesDataProps = { sortTypesData: SortType[] };
 
 export type SortActionProps = Partial<{
   sortQuery: string;
