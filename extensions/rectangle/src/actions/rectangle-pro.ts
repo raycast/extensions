@@ -680,12 +680,14 @@ export const commandGroups: CommandGroups<RectangleProAction> = {
         icon: "window-positions/restoreTemplate.png",
         description: "Restore the focused window to its previous size",
       },
-      {
-        name: "fullscreen",
-        title: "Fullscreen",
-        icon: "window-positions/maximizeTemplate.png",
-        description: "Maximize the focused window to fullscreen",
-      },
+      // `fullscreen` is not working as of 7/12/2024 (see Rectangle Pro discussion: https://github.com/rxhanson/RectanglePro-Community/issues/463)
+      // TODO: re-enable when corresponding bug in Rectangle Pro is fixed & update tests
+      // {
+      //   name: "fullscreen",
+      //   title: "Fullscreen",
+      //   icon: "window-positions/maximizeTemplate.png",
+      //   description: "Maximize the focused window to fullscreen",
+      // },
       {
         name: "stash-left",
         title: "Stash Left",
