@@ -1,6 +1,6 @@
 # Genius Lyrics Changelog
 
-## [New Command] - {PR_MERGE_DATE}
+## [New Command] - 2024-07-12
 
 - Added the `Search with Lyrics` Command
 
