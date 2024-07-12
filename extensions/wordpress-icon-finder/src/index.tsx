@@ -6,11 +6,23 @@ interface IconFile {
   name: string;
   path: string;
   content: string;
+  minWidth?: number;
+  minHeight?: number;
+  width?: number;
+  height?: number;
   keywords?: string[];
 }
 
-function buildSVG(svg: string, color: string = "#fff"): string {
-  const rawSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="${color}" viewBox="0 0 24 24" stroke-width="0.8">${svg}</svg>`;
+function buildSVG(
+  name: string,
+  svg: string,
+  minWidth: number = 0,
+  minHeight: number = 0,
+  width: number = 24,
+  height: number = 24,
+  color: string = "#fff",
+): string {
+  const rawSVG = `<svg id="${name}" xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" fill="${color}" viewBox="${minWidth} ${minHeight} ${width} ${height}" stroke-width="0.8">${svg}</svg>`;
   return rawSVG;
 }
 
@@ -20,12 +32,23 @@ export default function DisplayIcon() {
 
   useEffect(() => {
     const tempIcons = iconsData.map((iconData) => {
-      const source = buildSVG(iconData.path);
+      const source = buildSVG(
+        iconData.name,
+        iconData.path,
+        iconData.minWidth,
+        iconData.minHeight,
+        iconData.width,
+        iconData.height,
+      );
       const base64 = Buffer.from(source).toString("base64");
       return {
         name: iconData.name.replace(/-/g, " "),
         path: iconData.path,
         keywords: iconData.keywords,
+        minWidth: iconData.minWidth,
+        minHeight: iconData.minHeight,
+        width: iconData.width,
+        height: iconData.height,
         content: `data:image/svg+xml;base64,${base64}`,
       };
     });
@@ -53,7 +76,9 @@ export default function DisplayIcon() {
                 icon={Icon.Eye}
                 title="Copy Icon"
                 onAction={async () => {
-                  await Clipboard.copy(buildSVG(icon.path, color));
+                  await Clipboard.copy(
+                    buildSVG(icon.name, icon.path, icon.minWidth, icon.minHeight, icon.width, icon.height, color),
+                  );
                   await showHUD(`${icon.name.replace(/ /g, "-")} was copied to your clipboard`);
                 }}
               />
