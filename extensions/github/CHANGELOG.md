@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Repository Improvements] - {PR_MERGE_DATE}
+## [Repository Improvements] - 2024-07-12
 
 - Adds primary language color and code icon to the accessory for being in-sync with GitHub UI.
 - Adds "Sort By" action for My Latest Repositories with supported options
