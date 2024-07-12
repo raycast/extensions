@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [S3 Command] - {PR_MERGE_DATE}
+## [S3 Command] - 2024-07-12
 
 - added reverse order option
 - added bucket policy view
