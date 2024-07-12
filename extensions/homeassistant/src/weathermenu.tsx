@@ -72,14 +72,19 @@ function stringToNumber(text: string | undefined | null, options: { fallback?: n
   return result;
 }
 
-function getMaxHourlyForecastItemsPreferences() {
+function getMaxHourlyForecastItemsPreference() {
   const prefs = getPreferenceValues<Preferences.Weathermenu>();
   return stringToNumber(prefs.maxHourlyForecastItems, { fallback: 5, min: 0, max: 100 });
 }
 
-function getMaxDailyForecastItemsPreferences() {
+function getMaxDailyForecastItemsPreference() {
   const prefs = getPreferenceValues<Preferences.Weathermenu>();
   return stringToNumber(prefs.maxDailyForecastItems, { fallback: 10, min: 0, max: 100 });
+}
+
+function getTemperatureEntityPreference() {
+  const prefs = getPreferenceValues<Preferences.Weathermenu>();
+  return prefs.temperatureEntity?.trim();
 }
 
 export default function WeatherMenuBarCommand(): JSX.Element {
@@ -87,7 +92,11 @@ export default function WeatherMenuBarCommand(): JSX.Element {
   const entity = getWeatherEntityPreference();
   const weatherStates = states?.filter((s) => s.entity_id === entity);
   const weather = weatherStates && weatherStates.length > 0 ? weatherStates[0] : undefined;
-  const temp = getTemperatureFromState(weather);
+  const temperatureSensorID = getTemperatureEntityPreference();
+  const temperatureState = states?.filter(
+    (s) => s.entity_id === temperatureSensorID && s.attributes.device_class === "temperature",
+  )[0];
+  const temp = getTemperatureFromState(temperatureState ?? weather);
   const error = stateError
     ? getErrorMessage(stateError)
     : weather === undefined
@@ -106,12 +115,12 @@ export default function WeatherMenuBarCommand(): JSX.Element {
       state={weather}
       icon={weather?.state ? weatherConditionToIcon(weather.state) : undefined}
     >
-      <WeatherCurrentMenubarSection weather={weather} />
+      <WeatherCurrentMenubarSection weather={weather} temperature={temperatureState} />
       <WeatherForecastMenubarSection
         weather={weather}
         forecast={forecast}
-        maxDailyChildren={getMaxDailyForecastItemsPreferences()}
-        maxHourlyChildren={getMaxHourlyForecastItemsPreferences()}
+        maxDailyChildren={getMaxDailyForecastItemsPreference()}
+        maxHourlyChildren={getMaxHourlyForecastItemsPreference()}
       />
       <SunMenubarSection sun={sunState} />
       <MenuBarExtra.Section>

@@ -139,12 +139,12 @@ export function WeatherForecastMenubarItem(props: {
   );
 }
 
-export function WeatherCurrentMenubarSection(props: { weather: State | undefined }) {
+export function WeatherCurrentMenubarSection(props: { weather: State | undefined; temperature?: State }) {
   const weather = props.weather;
   return (
     <MenuBarExtra.Section title="Current">
       <WeatherConditionMenubarItem condition={weather?.state} />
-      <WeatherTemperatureMenubarItem state={weather} />
+      <WeatherTemperatureMenubarItem state={props.temperature ?? weather} />
       <WeatherHumidityMenubarItem state={weather} />
       <WeatherPressureMenubarItem state={weather} />
       <WeatherWindSpeedMenubarItem state={weather} />

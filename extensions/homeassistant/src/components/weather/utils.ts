@@ -60,6 +60,11 @@ export function getTemperatureFromState(state: State | undefined): string | unde
   if (!state) {
     return undefined;
   }
+  if (state.attributes.device_class === "temperature") {
+    const unit = state.attributes.unit_of_measurement;
+    return unit ? `${state.state} ${unit}` : `${state.state}`;
+  }
+
   const temp = state.attributes.temperature as number | undefined;
   if (temp !== undefined) {
     const unit = state.attributes.temperature_unit as string | undefined;
