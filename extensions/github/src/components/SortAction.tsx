@@ -1,11 +1,15 @@
 import { Action, ActionPanel, Color, Icon, MenuBarExtra } from "@raycast/api";
 
+type SortType = { title: string; value: string };
+
+export type SortTypesDataProps = { sortTypesData: SortType[] };
+
 export type SortActionProps = Partial<{
   sortQuery: string;
   setSortQuery: (value: string) => void;
 }>;
 
-type SortActionDataProps = { data: { title: string; value: string }[] } & SortActionProps;
+type SortActionDataProps = { data: SortType[] } & SortActionProps;
 
 export const SortAction = ({ sortQuery, setSortQuery, data }: SortActionDataProps) =>
   sortQuery && setSortQuery ? (
