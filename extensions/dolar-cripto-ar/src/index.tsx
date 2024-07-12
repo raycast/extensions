@@ -128,11 +128,11 @@ export default function Command() {
   useEffect(() => {
     const fetchData = async () => {
       if (["Blue", "MEP", "CCL"].includes(selectedCurrency)) {
-         revalidateDollar();
+        revalidateDollar();
       } else if (selectedCurrency === "BTC") {
-         revalidateBtc();
+        revalidateBtc();
       } else if (selectedCurrency === "ETH") {
-         revalidateEth();
+        revalidateEth();
       }
     };
     fetchData();
