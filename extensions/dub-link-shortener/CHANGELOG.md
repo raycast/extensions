@@ -1,5 +1,9 @@
 # Dub Link Shortener Changelog
 
+## [Minor metadata updates] - 2024-07-12
+
+- Updated the title, description, logo, and auth instructions
+
 ## [Workspace API Keys] - 2024-07-11
 
 - Supports newly launched [workspace api keys](https://dub.co/blog/workspace-api-keys) as user keys are deprecated
