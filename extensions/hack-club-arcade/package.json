@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hack-club-arcade",
+  "title": "Hack Club Arcade",
+  "description": "Manage your Hack Club Arcade sessions from Raycast",
+  "icon": "hackclub.png",
+  "author": "d99-1",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "menu-bar",
+      "title": "Manage Session",
+      "description": "Manage your Arcade session from the menu bar",
+      "mode": "menu-bar",
+      "icon": "hackclub.png"
+    },
+    {
+      "name": "startSession",
+      "title": "Start New Session",
+      "description": "Start a new Arcade session",
+      "mode": "view",
+      "icon": "hackclub.png"
+    },
+    {
+      "name": "pauseSession",
+      "title": "Pause/Resume Session",
+      "description": "Pause your existing Arcade session",
+      "mode": "no-view",
+      "icon": "hackclub.png"
+    },
+    {
+      "name": "endSession",
+      "title": "End Session",
+      "description": "End your existing Arcade session",
+      "mode": "no-view",
+      "icon": "hackclub.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Your Hack Club Arcade API token",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "Run /api in #arcade on Slack to get your API token"
+    },
+    {
+      "name": "userid",
+      "title": "Slack User ID",
+      "description": "Your Slack User ID",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "Visit #what-is-my-slack-id in the Hack Club Slack to get your User ID"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.78.1",
+    "@raycast/utils": "^1.15.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
