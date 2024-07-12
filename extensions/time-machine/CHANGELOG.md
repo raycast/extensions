@@ -1,3 +1,3 @@
 # Time Machine Changelog
 
-## [Initial Version] - 2024-07-08
+## [Initial Version] - {PR_MERGE_DATE}
