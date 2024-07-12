@@ -1,6 +1,6 @@
 # Lorem Ipsum Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-07-12
 
 - Replaced HUDs with Toasts (after closing the window) for color coding prompts
 - Fail-fast AI generation in case user doesn't have access to AI
