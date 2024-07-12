@@ -241,7 +241,7 @@
       "name": "focusLabelName",
       "type": "textfield",
       "required": false,
-      "title": "Focus Mode",
+      "title": "Focus Label",
       "description": "Shared label name to apply to your focused task. No label will be applied if left empty.",
       "placeholder": "raycast-focus"
     }
