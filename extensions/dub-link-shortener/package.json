@@ -45,7 +45,8 @@
   "dependencies": {
     "@raycast/api": "^1.61.2",
     "@raycast/utils": "^1.16.0",
-    "axios": "^1.6.2"
+    "axios": "^1.6.2",
+    "dub": "^0.33.1"
   },
   "preferences": [
     {
