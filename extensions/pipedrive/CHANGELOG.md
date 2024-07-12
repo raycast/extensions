@@ -1,6 +1,6 @@
 # Pipedrive Changelog
 
-## [Feature] - 2024-07-11
+## [Feature] - {PR_MERGE_DATE}
 
 - Ability to copy the name of an organization
 
