@@ -36,8 +36,8 @@ function ViewDNSZone({ zone }: { zone: string }) {
     return <List isLoading={isLoading}>
         <List.Section title={`Domains / ${zone} / DNS Zone`}>
             {data?.filter(zoneItem => !["SOA", "NS"].includes(zoneItem.record_type)).map(zoneItem => {
-                const subtitle = zoneItem.dname_b64.includes(zone) ? undefined : `.${zone}.`;
-                return <List.Item key={zoneItem.line_index} title={zoneItem.dname_b64} subtitle={subtitle} accessories={[{tag: zoneItem.record_type}]} />;
+                const subtitle = zoneItem.dname.includes(zone) ? undefined : `.${zone}.`;
+                return <List.Item key={zoneItem.line_index} title={zoneItem.dname} subtitle={subtitle} accessories={[{tag: zoneItem.record_type}]} />;
             })}
         </List.Section>
     </List>

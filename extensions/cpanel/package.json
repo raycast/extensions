@@ -2,18 +2,19 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cpanel",
   "title": "cPanel",
-  "description": "",
+  "description": "View Domains and their DNS Zones, Email Accounts and their Disk Usage",
   "icon": "cpanel.png",
   "author": "xmok",
   "categories": [
-    "Applications"
+    "Applications",
+    "Developer Tools"
   ],
   "license": "MIT",
   "preferences": [
     {
       "name": "cpanel_url",
       "title": "cPanel URL w/ Port",
-      "description": "",
+      "description": "cPanel URL with Port",
       "type": "textfield",
       "placeholder": "https://example.com:2083",
       "required": true
@@ -21,7 +22,7 @@
     {
       "name": "cpanel_username",
       "title": "cPanel Username",
-      "description": "",
+      "description": "cPanel Username",
       "type": "textfield",
       "placeholder": "user",
       "required": true
@@ -29,7 +30,7 @@
     {
       "name": "api_token",
       "title": "cPanel API Token",
-      "description": "",
+      "description": "cPanel API Token",
       "type": "password",
       "placeholder": "U7HMR63FHY282DQZ4H5BIH16JLYSO01M",
       "required": true
@@ -39,13 +40,13 @@
     {
       "name": "email-accounts",
       "title": "Email Accounts",
-      "description": "",
+      "description": "View Email Accounts and their Disk Information",
       "mode": "view"
     },
     {
       "name": "domains",
       "title": "Domains",
-      "description": "",
+      "description": "View Domains and their DNS Zones",
       "mode": "view"
     }
   ],
