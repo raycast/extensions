@@ -153,7 +153,12 @@ export function WeatherCurrentMenubarSection(props: { weather: State | undefined
   );
 }
 
-export function WeatherForecastMenubarSection(props: { weather: State | undefined; forecast?: Forecast[] | null }) {
+export function WeatherForecastMenubarSection(props: {
+  weather: State | undefined;
+  forecast?: Forecast[] | null;
+  maxDailyChildren?: number;
+  maxHourlyChildren?: number;
+}) {
   const weather = props.weather;
   if (!weather) {
     return null;
@@ -165,18 +170,28 @@ export function WeatherForecastMenubarSection(props: { weather: State | undefine
 
   const { data: hourly } = useWeatherForecast(weather.entity_id, { type: WeatherForecastType.Hourly });
   const tempUnit = weather?.attributes.temperature_unit as string | undefined;
+  const validMaxChildrenValue = (value: number | undefined) => {
+    if (value === undefined || value <= 0) {
+      return false;
+    }
+    return true;
+  };
   return (
     <>
-      <RUIMenuBarExtra.Section title="Forecast (Hourly)" childrenLimit={{ max: 5 }}>
-        {hourly?.map((f) => (
-          <WeatherForecastMenubarItem key={f.datetime} forecast={f} isDaily={false} tempUnit={tempUnit} />
-        ))}
-      </RUIMenuBarExtra.Section>
-      <RUIMenuBarExtra.Section title="Forecast (Daily)" childrenLimit={{ max: 10 }}>
-        {daily?.map((f) => (
-          <WeatherForecastMenubarItem key={f.datetime} forecast={f} isDaily={true} tempUnit={tempUnit} />
-        ))}
-      </RUIMenuBarExtra.Section>
+      {validMaxChildrenValue(props.maxHourlyChildren) && (
+        <RUIMenuBarExtra.Section title="Forecast (Hourly)" childrenLimit={{ max: props.maxHourlyChildren }}>
+          {hourly?.map((f) => (
+            <WeatherForecastMenubarItem key={f.datetime} forecast={f} isDaily={false} tempUnit={tempUnit} />
+          ))}
+        </RUIMenuBarExtra.Section>
+      )}
+      {validMaxChildrenValue(props.maxDailyChildren) && (
+        <RUIMenuBarExtra.Section title="Forecast (Daily)" childrenLimit={{ max: props.maxDailyChildren ?? 10 }}>
+          {daily?.map((f) => (
+            <WeatherForecastMenubarItem key={f.datetime} forecast={f} isDaily={true} tempUnit={tempUnit} />
+          ))}
+        </RUIMenuBarExtra.Section>
+      )}
     </>
   );
 }

@@ -237,6 +237,22 @@
           "required": false,
           "title": "Weather Entity",
           "placeholder": "weather.home"
+        },
+        {
+          "name": "maxHourlyForecastItems",
+          "description": "Max Hourly Forecast Items. 0 will disable the hourly forecast.",
+          "type": "textfield",
+          "required": false,
+          "title": "Max Hourly Forecast Items",
+          "placeholder": "5"
+        },
+        {
+          "name": "maxDailyForecastItems",
+          "description": "Max Daily Forecast Items. 0 will disable the daily forecast.",
+          "type": "textfield",
+          "required": false,
+          "title": "Max Daily Forecast Items",
+          "placeholder": "10"
         }
       ]
     },

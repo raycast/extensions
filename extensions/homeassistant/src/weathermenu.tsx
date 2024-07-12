@@ -55,6 +55,33 @@ function getWeatherEntityPreference(): string {
   return "weather.home";
 }
 
+function stringToNumber(text: string | undefined | null, options: { fallback?: number; min?: number; max?: number }) {
+  if (text === undefined || text === null) {
+    return options.fallback;
+  }
+  const result = parseFloat(text);
+  if (Number.isNaN(result)) {
+    return options.fallback;
+  }
+  if (options.min !== undefined && result < options.min) {
+    return options.fallback;
+  }
+  if (options.max !== undefined && result > options.max) {
+    return options.fallback;
+  }
+  return result;
+}
+
+function getMaxHourlyForecastItemsPreferences() {
+  const prefs = getPreferenceValues<Preferences.Weathermenu>();
+  return stringToNumber(prefs.maxHourlyForecastItems, { fallback: 5, min: 0, max: 100 });
+}
+
+function getMaxDailyForecastItemsPreferences() {
+  const prefs = getPreferenceValues<Preferences.Weathermenu>();
+  return stringToNumber(prefs.maxDailyForecastItems, { fallback: 10, min: 0, max: 100 });
+}
+
 export default function WeatherMenuBarCommand(): JSX.Element {
   const { states, error: stateError, isLoading: statesLoading } = useHAStates();
   const entity = getWeatherEntityPreference();
@@ -80,7 +107,12 @@ export default function WeatherMenuBarCommand(): JSX.Element {
       icon={weather?.state ? weatherConditionToIcon(weather.state) : undefined}
     >
       <WeatherCurrentMenubarSection weather={weather} />
-      <WeatherForecastMenubarSection weather={weather} forecast={forecast} />
+      <WeatherForecastMenubarSection
+        weather={weather}
+        forecast={forecast}
+        maxDailyChildren={getMaxDailyForecastItemsPreferences()}
+        maxHourlyChildren={getMaxHourlyForecastItemsPreferences()}
+      />
       <SunMenubarSection sun={sunState} />
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
