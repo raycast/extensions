@@ -236,6 +236,14 @@
       "title": "Todoist Token",
       "description": "Your Todoist Token. Find it in Todoist integration settings view.",
       "placeholder": "Enter your Todoist token"
+    },
+    {
+      "name": "focusLabelName",
+      "type": "textfield",
+      "required": false,
+      "title": "Focus Label",
+      "description": "Shared label name to apply to your focused task. No label will be applied if left empty.",
+      "placeholder": "raycast-focus"
     }
   ],
   "dependencies": {
