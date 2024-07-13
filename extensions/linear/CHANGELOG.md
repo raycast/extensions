@@ -1,5 +1,11 @@
 # Linear Changelog
 
+## [Documents] - {PR_MERGE_DATE}
+
+- New "Search Documents" command to search documents across Linear. Supports typeahead if there are too many docs
+- New action "Show Project Documents" to look up project documents
+- Preference to show recently deleted/archived docs
+
 ## [Fixes] - 2024-07-08
 
 - [#10856](https://github.com/raycast/extensions/issues/10856): Typeahead search for teams while creating/editing issues and in active cycles command. Typeahead is only triggered if no. of teams is > 50.

@@ -111,6 +111,12 @@
       "mode": "view"
     },
     {
+      "name": "search-documents",
+      "title": "Search Documents",
+      "description": "Explore documents for your Linear team.",
+      "mode": "view"
+    },
+    {
       "name": "create-project",
       "title": "Create Project",
       "description": "Create projects for your Linear team.",
@@ -238,6 +244,14 @@
       "title": "Advanced",
       "label": "Hide Redundant Issues",
       "description": "When enabled, the issues that are marked as Done, Canceled or Duplicate will not show up in search results.",
+      "default": false,
+      "required": false
+    },
+    {
+      "type": "checkbox",
+      "label": "Show Archived Documents",
+      "name": "showArchivedDocs",
+      "description": "Show documents that have been archived.",
       "default": false,
       "required": false
     }
