@@ -1,0 +1,29 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# Raycast specific files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+.env
+
+# misc
+.DS_Store
+generate_code_context_for_AI.py
+code.txt
+
+
+
+# python
+venv/
+*.py
+*.ipynb
+*.pkl
+llm_python/
+*.pyc
+
+
+__pycache__/exercise_description.cpython-310.pyc

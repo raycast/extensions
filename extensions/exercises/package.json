@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "exercises",
+  "title": "Exercises - Fitness and Workouts",
+  "description": "Find fitness exercises. Create and do custom workouts",
+  "icon": "exercises-icon.png",
+  "author": "arthur_kosten",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Find Exercises",
+      "description": "Find and view exercises, favorite and add to workout",
+      "mode": "view"
+    },
+    {
+      "name": "createWorkout",
+      "title": "Create Workout",
+      "description": "Create a new workout with a list of exercises",
+      "mode": "view"
+    },
+    {
+      "name": "manageWorkout",
+      "title": "Manage Workout",
+      "description": "View workouts, see delete and reorder exercises",
+      "mode": "view"
+    },
+    {
+      "name": "doWorkout",
+      "title": "Do Workout",
+      "description": "Time to Exercise! Do a workout",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.78.1",
+    "@raycast/utils": "^1.16.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
