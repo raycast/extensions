@@ -16,4 +16,3 @@ dist/
 __tests__/
 *.test.ts
 docs/
-*.md
