@@ -6,6 +6,31 @@ export interface HAServiceFieldSelectorNumber {
   unit_of_measurement?: string;
 }
 
+export interface HAServiceFieldSelectorIcon {
+  placeholder?: string | null;
+}
+
+export interface HAServiceFieldSelectorLabel {
+  multiple?: boolean | null;
+}
+
+export interface HAServiceFieldSelectorEntity {
+  multiple?: boolean | null;
+}
+
+export interface HAServiceFieldSelectorDevice {
+  integration?: string | null;
+}
+
+export interface HAServiceFieldSelectorSelectOption {
+  label: string;
+  value: string;
+}
+
+export interface HAServiceFieldSelectorSelect {
+  options?: HAServiceFieldSelectorSelectOption[] | null;
+}
+
 export interface HAServiceFieldSelector {
   text?: string | null;
   area?: string | null;
@@ -13,6 +38,13 @@ export interface HAServiceFieldSelector {
   config_entry?: string | null;
   object?: string | null;
   number?: HAServiceFieldSelectorNumber | null;
+  icon?: HAServiceFieldSelectorIcon | null;
+  label?: HAServiceFieldSelectorLabel | null;
+  entity?: HAServiceFieldSelectorEntity | null;
+  device?: HAServiceFieldSelectorDevice | null;
+  boolean?: boolean | null;
+  select?: HAServiceFieldSelectorSelect | null;
+  theme?: string | null;
 }
 
 export interface HAServiceField {
