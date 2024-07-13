@@ -13,7 +13,11 @@ export default function Command() {
 
   function handleSubmit({ base64 }: Values) {
     if (!base64) {
-      showToast({ title: "Error", message: "Please enter a base64 string", style: Toast.Style.Failure });
+      showToast({
+        title: "Error",
+        message: "Please enter a base64 string",
+        style: Toast.Style.Failure,
+      });
       return;
     }
 
@@ -56,9 +60,17 @@ export default function Command() {
 
     fs.writeFile(filePath, buffer, (err) => {
       if (err) {
-        showToast({ title: "Error", message: "Failed to download image", style: Toast.Style.Failure });
+        showToast({
+          title: "Error",
+          message: "Failed to download image",
+          style: Toast.Style.Failure,
+        });
       } else {
-        showToast({ title: "Success", message: `Image downloaded to ${filePath}`, style: Toast.Style.Success });
+        showToast({
+          title: "Success",
+          message: `Image downloaded to ${filePath}`,
+          style: Toast.Style.Success,
+        });
       }
     });
   }
