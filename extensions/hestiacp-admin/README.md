@@ -2,7 +2,7 @@
     <img src="./assets/hestia.png" width="200" height="200" />
 </p>
 
-# Hestia (CP) [Admin] Raycast Extension
+# Hestia Control Panel [Admin] Raycast Extension
 
 This is a Raycast extension for [Hestia Control Panel](https://hestiacp.com/) Admin level accounts. With this extension you can manage Users, Domains, Mail Domains, Databases, and more (see the last section for table of what is included).
 
@@ -32,8 +32,8 @@ Before using API you need to enable API and whitelist the IPs you will be using.
 1. METHOD 1 (recommended)
     - `ssh` into your HestiaCP instance
     - use HestiaCP CLI to run `v-generate-api-key`
-    - then change /usr/local/hestia/data/api/ to '`*`' (this will grant all API permissions)
-    - use HestiaCP CLI to run `v-add-access-key admin` (AS ADMIN)
+    - use HestiaCP CLI to run `v-add-access-key admin '*'` (AS ADMIN) (this will grant all API permissions)
+    - finally, `copy` the Access Keys (they will be output on the terminal)
     
 2. METHOD 2 (this method is not recommended as it does not grant all API permissions athough you could use Method 2 to generate the key and then use CLI from METHOD 1 to grant all permissions)
     - `navigate` to "Users" and `click` the user ![](./assets/readme/1-hestiacp-users.png)

@@ -1,4 +1,4 @@
-import { Toast, showToast } from "@raycast/api";
+import { Toast, openExtensionPreferences, showToast } from "@raycast/api";
 import { showFailureToast, useFetch } from "@raycast/utils";
 import { ACCESS_KEY, HOSTNAME, SECRET_KEY } from "../../constants";
 
@@ -25,7 +25,7 @@ export default function useHestia<T>(
         {} as { [key: string]: string },
       ) || {};
     // and we need the last one to be 'arg[last]: json' so we get JSON
-    args[`arg${body.length + 1}`] = "json";
+    if (!cmd.includes("v-add")) args[`arg${body.length + 1}`] = "json";
 
     const { data, isLoading, revalidate, error } = useFetch(API_URL.toString(), {
       method: API_METHOD,
@@ -60,8 +60,18 @@ export default function useHestia<T>(
         options?.onData?.(data);
       },
       async onError(error) {
-        const title = (error as Error).cause?.toString() || "Something went wrong";
-        await showFailureToast(error, { title });
+        const title = error.cause?.toString() || "Something went wrong";
+        await showFailureToast(error, {
+          title,
+          primaryAction: !title.includes("401")
+            ? undefined
+            : {
+                title: "Open Extension Preferences",
+                async onAction() {
+                  await openExtensionPreferences();
+                },
+              },
+        });
         options?.onError?.();
       },
     });

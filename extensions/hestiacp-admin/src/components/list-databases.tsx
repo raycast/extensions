@@ -94,7 +94,7 @@ function AddDatabase({ user, onDatabaseAdded }: AddDatabaseProps) {
   });
 
   const { isLoading } = useHestia<Record<string, never>>("v-add-database", "Adding Database", {
-    body: [values.user, values.database, values.db_user, values.db_pass],
+    body: [user, values.database, values.db_user, values.db_pass],
     execute,
     async onData() {
       await showToast({
@@ -103,6 +103,9 @@ function AddDatabase({ user, onDatabaseAdded }: AddDatabaseProps) {
       });
       onDatabaseAdded();
       pop();
+    },
+    onError() {
+      setExecute(false);
     },
   });
 
