@@ -16,6 +16,7 @@ import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@ra
 import { createShortLink } from "@/api";
 import { fetchLink, isEmpty } from "@utils/clipboard";
 import { useTags } from "@hooks/use-tags";
+import { useDomains } from "@hooks/use-domains";
 
 interface ShortLinkFormValues {
   url: string;
@@ -30,6 +31,7 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
   const { url, key } = args;
   const { data: originalLink, isLoading: isLoadingLink } = useCachedPromise(fetchLink, [], { execute: isEmpty(url) });
   const { tags } = useTags();
+  const { domains } = useDomains();
 
   const { handleSubmit, itemProps } = useForm<ShortLinkFormValues>({
     onSubmit: async (vals) => {
@@ -86,7 +88,7 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
       <Form.TextField {...itemProps.url} placeholder="https://dub.co" title="Original URL" />
       <Form.TextField {...itemProps.key} placeholder="(Optional)" title="URL Key" />
       {/* todo: Add commands to create/manage tags in the workspace */}
-      <Form.TagPicker {...itemProps.tagIds} title="Tags">
+      <Form.TagPicker {...itemProps.tagIds} title="Tags" placeholder="(Optional)">
         {tags.map((t) => (
           <Form.TagPicker.Item
             key={t.id}
@@ -101,8 +103,16 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
           key="dub.sh"
           value="dub.sh"
           title="dub.sh"
-          icon={{ source: Icon.Link, tintColor: Color.Blue }}
+          icon={{ source: Icon.Globe, tintColor: Color.Blue }}
         />
+        {domains.map((d) => (
+          <Form.Dropdown.Item
+            key={d.id}
+            value={d.slug}
+            title={d.slug}
+            icon={{ source: Icon.Globe, tintColor: Color.Purple }}
+          />
+        ))}
       </Form.Dropdown>
       <Form.TextField {...itemProps.comments} placeholder="(Optional)" title="Comments" />
     </Form>

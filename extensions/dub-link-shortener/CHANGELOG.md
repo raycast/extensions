@@ -1,6 +1,6 @@
 # Dub Link Shortener Changelog
 
-## [Workspace API Keys] - 2024-07-12
+## [Workspace API Keys] - {PR_MERGE_DATE}
 
 - Simplify Dub Raycast Extension by using [`dub` TypeScript SDK](https://dub.co/solutions/typescript)
 

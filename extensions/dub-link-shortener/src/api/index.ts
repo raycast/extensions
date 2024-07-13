@@ -41,3 +41,7 @@ export const deleteShortLink = async (linkId: string) => {
 export const getAllTags = async () => {
   return dub.tags.list();
 };
+
+export const getAllDomains = async () => {
+  return dub.domains.list();
+};
