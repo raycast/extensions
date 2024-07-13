@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "street-address",
+  "title": "Street Address",
+  "description": "Search Street Address(도로명주소) (Only available in South Korea)",
+  "icon": "raycast_icon.png",
+  "author": "SHINEE",
+  "categories": [
+    "Productivity",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-address",
+      "title": "도로명주소 검색",
+      "description": "도로명주소 검색(지번주소로도 검색 가능)",
+      "mode": "view"
+    },
+    {
+      "name": "english-address",
+      "title": "도로명주소 영문 변환",
+      "description": "도로명주소를 영문 주소로 변환",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.78.1",
+    "axios": "^1.7.2",
+    "qs": "^6.12.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/qs": "^6.9.15",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.5.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
