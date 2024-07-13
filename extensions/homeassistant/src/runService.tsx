@@ -1,5 +1,6 @@
 import { useHAStates } from "@components/hooks";
 import { HAServiceCall, useServiceCalls } from "@components/services/hooks";
+import { HAServiceField } from "@components/services/utils";
 import { ha } from "@lib/common";
 import { getFriendlyName } from "@lib/utils";
 import { Action, ActionPanel, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
@@ -9,6 +10,13 @@ import { parse, stringify } from "yaml";
 
 function fullServiceName(serviceCall: HAServiceCall) {
   return `${serviceCall.domain}.${serviceCall.service}`;
+}
+
+function getNameOfServiceField(field: HAServiceField, fallback: string) {
+  if (field.name !== undefined && field.name !== null && field.name.trim().length > 0) {
+    return field.name;
+  }
+  return fallback;
 }
 
 function getServiceCallData(serviceCall: HAServiceCall) {
@@ -174,7 +182,7 @@ export default function ServiceCallCommand() {
             return (
               <Form.TextField
                 id={k}
-                title={v.name}
+                title={getNameOfServiceField(v, k)}
                 value={formData[k] ?? ""}
                 placeholder={v.description}
                 onChange={(nv) => setFormData({ ...formData, [k]: nv })}
@@ -189,7 +197,7 @@ export default function ServiceCallCommand() {
             return (
               <Form.TextField
                 id={k}
-                title={v.name}
+                title={getNameOfServiceField(v, k)}
                 value={formData[k] ?? val.toString()}
                 placeholder={v.description}
                 onChange={(nv) => setFormData({ ...formData, [k]: nv })}
@@ -199,7 +207,7 @@ export default function ServiceCallCommand() {
             return (
               <Form.TagPicker
                 id={k}
-                title={v.name}
+                title={getNameOfServiceField(v, k)}
                 value={formData[k] ?? ""}
                 onChange={(newValue) => setFormData({ ...formData, [k]: newValue })}
               >
@@ -216,7 +224,7 @@ export default function ServiceCallCommand() {
             return (
               <Form.Dropdown
                 id={k}
-                title={v.name}
+                title={getNameOfServiceField(v, k)}
                 value={formData[k] ?? ""}
                 onChange={(nv) => setFormData({ ...formData, [k]: nv })}
               >
@@ -229,7 +237,7 @@ export default function ServiceCallCommand() {
             return (
               <Form.Checkbox
                 id={k}
-                title={v.name}
+                title={getNameOfServiceField(v, k)}
                 label={v.description}
                 value={formData[k] ?? false}
                 onChange={(nv) => setFormData({ ...formData, [k]: nv })}
@@ -240,7 +248,7 @@ export default function ServiceCallCommand() {
             return (
               <Form.TextField
                 id={k}
-                title={v.name}
+                title={getNameOfServiceField(v, k)}
                 value={formData[k] ?? ""}
                 placeholder={v.description}
                 onChange={(nv) => setFormData({ ...formData, [k]: nv })}

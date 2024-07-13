@@ -49,7 +49,7 @@ export interface HAServiceFieldSelector {
 
 export interface HAServiceField {
   required?: boolean;
-  name: string;
+  name?: string;
   description: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   example: any;
