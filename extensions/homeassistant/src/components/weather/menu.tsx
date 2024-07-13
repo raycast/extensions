@@ -171,7 +171,7 @@ export function WeatherForecastMenubarSection(props: {
   const { data: hourly } = useWeatherForecast(weather.entity_id, { type: WeatherForecastType.Hourly });
   const tempUnit = weather?.attributes.temperature_unit as string | undefined;
   const validMaxChildrenValue = (value: number | undefined) => {
-    if (value === undefined || value <= 0) {
+    if (value !== undefined && value <= 0) {
       return false;
     }
     return true;
@@ -179,7 +179,7 @@ export function WeatherForecastMenubarSection(props: {
   return (
     <>
       {validMaxChildrenValue(props.maxHourlyChildren) && (
-        <RUIMenuBarExtra.Section title="Forecast (Hourly)" childrenLimit={{ max: props.maxHourlyChildren }}>
+        <RUIMenuBarExtra.Section title="Forecast (Hourly)" childrenLimit={{ max: props.maxHourlyChildren ?? 5 }}>
           {hourly?.map((f) => (
             <WeatherForecastMenubarItem key={f.datetime} forecast={f} isDaily={false} tempUnit={tempUnit} />
           ))}
