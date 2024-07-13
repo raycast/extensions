@@ -4,7 +4,7 @@ import Chat from "./chat";
 import { useConversations } from "./hook/useConversations";
 import { ConversationListView } from "./view/chat/conversationList";
 import { ConversationType } from "./type/conversation";
-import { TalkType } from "./type/talk";
+import { ITalk } from "./ai/type";
 
 export default function Conversation() {
   const conversations = useConversations();
@@ -33,9 +33,9 @@ export default function Conversation() {
   const filteredConversations = searchText
     ? uniqueConversations.filter((x: ConversationType) =>
         x.chats.some(
-          (x: TalkType) =>
-            x.question.text.toLowerCase().includes(searchText.toLocaleLowerCase()) ||
-            x.result?.text.toLowerCase().includes(searchText.toLocaleLowerCase())
+          (x: ITalk) =>
+            x.conversation.question.content.toLowerCase().includes(searchText.toLocaleLowerCase()) ||
+            x.result?.content.toLowerCase().includes(searchText.toLocaleLowerCase())
         )
       )
     : uniqueConversations;

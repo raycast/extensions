@@ -49,44 +49,72 @@
   ],
   "preferences": [
     {
-      "name": "apiOpenAiKey",
-      "title": "Open AI API Key",
-      "description": "Enter your personal Open AI API Key",
+      "name": "anthropicApiKey",
+      "title": "Anthropic API Key",
+      "description": "Enter your Anthropic API Key",
       "type": "password",
       "required": false
     },
     {
-      "name": "apiOllamaHost",
-      "title": "Ollama API Host",
-      "description": "Enter your host to Ollama API",
+      "name": "cohereApiKey",
+      "title": "Cohere API Key",
+      "description": "Enter your Cohere API Key",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "groqApiKey",
+      "title": "Groq API Key",
+      "description": "Enter your Groq API Key",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "ollamaApiUrl",
+      "title": "Ollama API Url",
+      "description": "Enter your Ollama API Url",
       "type": "textfield",
       "required": false
     },
     {
-      "name": "apiLangSmithKey",
-      "title": "Lang Smith API Key",
-      "description": "Enter your personal Lang Smith API Key for project `Raycast Jose`",
+      "name": "openaiApiKey",
+      "title": "OpenAI API Key",
+      "description": "Enter your OpenAI API Key",
       "type": "password",
       "required": false
     },
     {
-      "name": "apiLunaryKey",
+      "name": "perplexityApiKey",
+      "title": "Perplexity API Key",
+      "description": "Enter your Perplexity API Key",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "langfuseSecretApiKey",
+      "title": "LangFuse Secret API Key",
+      "description": "Enter your LangFuse Secret API Key",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "lanfusePublicApiKey",
+      "title": "LangFuse Public API Key",
+      "description": "Enter your LangFuse Public API Key",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "langfuseApiUrl",
+      "title": "LangFuse API Url",
+      "description": "Enter your LangFuse API Url",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "lunaryApiKey",
       "title": "Lunary API Key",
-      "description": "Enter your personal Lunary API Key for project `Raycast Jose`",
-      "type": "password",
-      "required": false
-    },
-    {
-      "name": "apiLangFusePublicKey",
-      "title": "Lang Fuse public API Key",
-      "description": "Enter your personal Lang Fuse public API Key for project `Raycast Jose`",
-      "type": "password",
-      "required": false
-    },
-    {
-      "name": "apiLangFuseSecretKey",
-      "title": "Lang Fuse secret API Key",
-      "description": "Enter your personal Lang Fuse secret API Key for project `Raycast Jose`",
+      "description": "Enter your Lunary API Key",
       "type": "password",
       "required": false
     },
@@ -114,19 +142,19 @@
   ],
   "tools": [],
   "dependencies": {
-    "@langchain/community": "^0.2.9",
-    "@langchain/openai": "^0.1.2",
+    "@anthropic-ai/sdk": "^0.24.3",
     "@raycast/api": "^1.48.8",
     "@raycast/utils": "^1.5.2",
     "@types/react": "^18.3.3",
     "@types/uuid": "^9.0.0",
-    "langchain": "^0.2.8",
-    "langfuse-langchain": "^3.14.0",
+    "cohere-ai": "^7.10.6",
+    "groq-sdk": "^0.5.0",
+    "langfuse": "^3.16.1",
     "langsmith": "^0.1.36",
     "lunary": "^0.6.16",
     "node-fetch": "^2.7.0",
     "ollama": "^0.5.2",
-    "openai": "^4.52.3",
+    "openai": "^4.52.7",
     "say": "^0.16.0",
     "uuid": "^9.0.0"
   },

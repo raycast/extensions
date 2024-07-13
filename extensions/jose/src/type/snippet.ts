@@ -1,15 +1,13 @@
 import { Icon } from "@raycast/api";
 import { ConfigurationModelDefault, ConfigurationTypeCommunicationDefault } from "./config";
 import { HookType, PromiseFunctionNoArgType, PromiseFunctionWithOneArgType } from "./hook";
-import { TalkSnippetType } from "./talk";
-
-export const SnippetDefaultTemperature = "0.7";
+import { ITalkSnippet, SnippetDefaultTemperature } from "../ai/type";
 
 export function GetNewSnippet(): undefined {
   return undefined;
 }
 
-export const SnippetDefault: TalkSnippetType[] = [
+export const SnippetDefault: ITalkSnippet[] = [
   {
     category: "code",
     emoji: Icon.CodeBlock,
@@ -970,7 +968,7 @@ export const SnippetDefault: TalkSnippetType[] = [
   },
 ];
 
-export type SnippetHookType = HookType<TalkSnippetType> & {
-  update: PromiseFunctionWithOneArgType<TalkSnippetType>;
+export type SnippetHookType = HookType<ITalkSnippet> & {
+  update: PromiseFunctionWithOneArgType<ITalkSnippet>;
   reload: PromiseFunctionNoArgType;
 };

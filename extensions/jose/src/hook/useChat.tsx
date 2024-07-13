@@ -2,27 +2,29 @@ import { clearSearchBar, showToast, Toast } from "@raycast/api";
 import { useCallback, useMemo, useState } from "react";
 import { ChatHookType, GetNewChat } from "../type/chat";
 import fetch from "node-fetch";
-import {
-  ConversationSelectedTypeAssistant,
-  ConversationSelectedTypeSnippet,
-  ConversationType,
-} from "../type/conversation";
+import { ConversationType } from "../type/conversation";
 import {
   ConfigurationTypeCommunicationBinaryFile,
   ConfigurationTypeCommunicationExternalApi,
   ConfigurationTypeCommunicationLangChain,
 } from "../type/config";
-import { RunCustomApi } from "./chat/api";
-import { RunBinnary } from "./chat/binary";
-import { TalkQuestionFileType, TalkQuestionType, TalkType } from "../type/talk";
-import { RunLangChain } from "./chat/langChain";
 import { useConversations } from "./useConversations";
+import {
+  ConversationSelectedTypeAssistant,
+  ConversationSelectedTypeSnippet,
+  ITalk,
+  ITalkQuestion,
+  ITalkQuestionFile,
+} from "../ai/type";
+import { RunLocal } from "./chat/local";
+import { RunBinnary } from "./chat/binary";
+import { RunCustomApi } from "./chat/api";
 
 export function useChat(): ChatHookType {
-  const [data, setData] = useState<TalkType[]>([]);
+  const [data, setData] = useState<ITalk[]>([]);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [isLoading, setLoading] = useState<boolean>(false);
-  const [streamData, setStreamData] = useState<TalkType | undefined>();
+  const [streamData, setStreamData] = useState<ITalk | undefined>();
   const conversations = useConversations();
 
   async function ask(question: string, file: string[] | undefined, conversation: ConversationType) {
@@ -34,54 +36,55 @@ export function useChat(): ChatHookType {
       style: Toast.Style.Animated,
     });
 
-    const chatQuestion: TalkQuestionType = { text: question, files: undefined };
+    const chatQuestion: ITalkQuestion = { content: question, files: undefined };
     if (file) {
-      const f: TalkQuestionFileType = { type: "image", path: file[0], base64: undefined, url: undefined };
+      const f: ITalkQuestionFile = { type: "image", path: file[0], base64: undefined, url: undefined };
       chatQuestion.files = [f];
     }
-    const chat: TalkType = GetNewChat(chatQuestion, conversation, conversation.assistant, conversation.snippet);
-    chat.conversationType = conversation.selectedType;
+    const chat: ITalk = GetNewChat(chatQuestion, conversation, conversation.assistant, conversation.snippet);
+    chat.conversation.type = conversation.selectedType;
 
     setData(() => {
       return [...conversation.chats, chat];
     });
 
     setTimeout(async () => {
-      setSelectedChatId(chat.chatId);
+      setSelectedChatId(chat.id);
     }, 50);
 
-    console.log("SelectedType: " + conversation.selectedType);
+    console.info("SelectedType: " + conversation.selectedType);
     const typeCommunication =
       conversation.selectedType === ConversationSelectedTypeSnippet
         ? conversation.snippet?.typeCommunication
         : conversation.assistant.typeCommunication;
-    let chatResponse: TalkType | undefined = undefined;
+    let chatResponse: ITalk | undefined = undefined;
 
     switch (typeCommunication) {
       case ConfigurationTypeCommunicationLangChain:
-        console.log("Using local");
-        chatResponse = await RunLangChain(chat, data, { toast, setData, setStreamData, setLoading });
+        console.info("Using local");
+        chatResponse = await RunLocal(chat, { toast, setData, setStreamData, setLoading });
         break;
       case ConfigurationTypeCommunicationExternalApi:
-        console.log("Using custom API endpoint");
+        console.info("Using custom API endpoint");
         chatResponse = await RunCustomApi(chat, { toast, setData, setStreamData, setLoading });
         break;
       case ConfigurationTypeCommunicationBinaryFile:
-        console.log("Using local binnary file");
+        console.info("Using local binnary file");
         chatResponse = await RunBinnary(chat, { toast, setData, setStreamData, setLoading });
         break;
       default:
-        console.log("Using default");
-        chatResponse = await RunLangChain(chat, data, { toast, setData, setStreamData, setLoading });
+        console.info("Using default");
+        chatResponse = await RunLocal(chat, { toast, setData, setStreamData, setLoading });
     }
 
     if (chatResponse !== undefined) {
-      console.log("Send webhook?");
-      sendWebhook(chatResponse, setData);
+      console.info("Send webhook?");
+      sendWebhook(chatResponse, setData, chat.snippet?.object?.webhookUrl);
+      sendWebhook(chatResponse, setData, chat.assistant.object.webhookUrl);
     }
 
     if (chatResponse !== undefined) {
-      console.log("Reset selected");
+      console.info("Reset selected");
       conversation.selectedType = ConversationSelectedTypeAssistant;
       await conversations.update(conversation);
     }
@@ -98,10 +101,8 @@ export function useChat(): ChatHookType {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function sendWebhook(chat: TalkType, setData: any) {
-  const webhook =
-    chat.conversationType === ConversationSelectedTypeSnippet ? chat.snippet?.webhookUrl : chat.assistant.webhookUrl;
-  const newChat: TalkType = JSON.parse(JSON.stringify(chat));
+async function sendWebhook(chat: ITalk, setData: any, webhook: string | undefined) {
+  const newChat: ITalk = JSON.parse(JSON.stringify(chat));
   // eslint-disable-next-line
   // @ts-ignore
   newChat.assistant = { assistantId: newChat.assistant.assistantId };
@@ -124,8 +125,8 @@ async function sendWebhook(chat: TalkType, setData: any) {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setData((prev: any) => {
-        return prev.map((a: TalkType) => {
-          if (a.chatId === chat.chatId) {
+        return prev.map((a: ITalk) => {
+          if (a.id === chat.id) {
             return chat;
           }
           return a;
@@ -133,7 +134,7 @@ async function sendWebhook(chat: TalkType, setData: any) {
       });
     })
     .catch((error) => {
-      console.log("Webhook error");
-      console.log(error);
+      console.info("Webhook error");
+      console.error(error);
     });
 }

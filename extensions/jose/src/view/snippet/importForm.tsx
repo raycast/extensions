@@ -8,8 +8,8 @@ import {
   ConfigurationModelDefault,
   ConfigurationTypeCommunicationDefault,
 } from "../../type/config";
-import { SnippetDefaultTemperature, SnippetHookType } from "../../type/snippet";
-import { TalkSnippetType } from "../../type/talk";
+import { SnippetHookType } from "../../type/snippet";
+import { ITalkSnippet, SnippetDefaultTemperature } from "../../ai/type";
 
 export const SnippetImportForm = (props: { use: { snippets: SnippetHookType } }) => {
   const { use } = props;
@@ -24,7 +24,7 @@ export const SnippetImportForm = (props: { use: { snippets: SnippetHookType } })
           iModel = ConfigurationModelDefault;
         }
 
-        const newAssistant: TalkSnippetType = {
+        const newAssistant: ITalkSnippet = {
           snippetId: uuidv4(),
           title: item.title,
           category: "new",

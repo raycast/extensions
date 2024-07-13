@@ -1,24 +1,21 @@
 import { getPreferenceValues, environment } from "@raycast/api";
 
 export interface ConfigurationPreferencesType {
-  apiOpenAiKey: string;
-  apiOllamaHost: string;
-  apiLangSmithKey: string;
-  apiLunaryKey: string;
-  apiLangFusePublicKey: string;
-  apiLangFuseSecretKey: string;
+  anthropicApiKey: string;
+  cohereApiKey: string;
+  groqApiKey: string;
+  ollamaApiUrl: string;
+  openaiApiKey: string;
+  perplexityApiKey: string;
+
+  langfuseSecretApiKey: string;
+  lanfusePublicApiKey: string;
+  langfuseApiUrl: string;
+  lunaryApiKey: string;
+
   apiEndpoint: string;
   apiBinnary: string;
   apiEndpointData: string;
-
-  GetApiOpenAi(): { key: string };
-  GetApiOllama(): { host: string };
-  GetApiLangSmith(): { host: string; key: string; projectName: string };
-  GetApiLunary(): { key: string };
-  GetApiLangFuse(): { host: string; public: string; secret: string };
-  GetApiEndpoint(): { host: string };
-  GetApiBinnary(): { path: string };
-  GetApiEndpointData(): { host: string };
 }
 
 export const ConfigurationTypeCommunicationLangChain = "lang-chain";
@@ -44,61 +41,155 @@ export const ConfigurationTypeCommunication: { key: string; title: string }[] = 
 export const ConfigurationModelDefault = "openai__gpt-4o";
 
 export const ConfigurationModelCollection: { key: string; title: string }[] = [
+  // anthropic
   {
-    key: "openai__gpt-4o-2024-05-13",
-    title: "GPT 4 o 2024-05-13",
+    key: "anthropic__claude-3-5-sonnet-20240620",
+    title: "claude-3-5-sonnet-20240620",
   },
   {
-    key: "openai__gpt-4o",
-    title: "GPT 4 o",
+    key: "anthropic__claude-3-opus-20240229",
+    title: "claude-3-opus-20240229",
   },
   {
-    key: "openai__gpt-4-turbo-2024-04-09",
-    title: "GPT 4 Turbo 2024-04-09",
+    key: "anthropic__claude-3-sonnet-20240229",
+    title: "claude-3-sonnet-20240229",
   },
   {
-    key: "openai__gpt-4-turbo",
-    title: "GPT 4 Turbo",
+    key: "anthropic__claude-3-haiku-20240307",
+    title: "claude-3-haiku-20240307",
+  },
+  //cohere
+  {
+    key: "cohere__command-r-plus",
+    title: "command-r-plus",
   },
   {
-    key: "openai__gpt-4-turbo-preview",
-    title: "GPT 4 Turbo Preview",
+    key: "cohere__command-r",
+    title: "command-r",
   },
   {
-    key: "openai__gpt-4-1106-preview",
-    title: "GPT 4 1106 Preview",
+    key: "cohere__command",
+    title: "command",
   },
   {
-    key: "openai__gpt-4",
-    title: "GPT 4",
+    key: "cohere__command-nightly",
+    title: "command-nightly",
   },
   {
-    key: "openai__gpt-4-0613",
-    title: "GPT 4 0613",
+    key: "cohere__command-light",
+    title: "command-light",
   },
   {
-    key: "openai__gpt-3.5-turbo-0125",
-    title: "GPT 3.5 Turbo 0125",
+    key: "cohere__command-light-nightly",
+    title: "command-light-nightly",
+  },
+  //groq
+  {
+    key: "groq__llama3-8b-8192",
+    title: "llama3-8b-8192",
   },
   {
-    key: "openai__gpt-3.5-turbo-1106",
-    title: "GPT 3.5 Turbo 1106",
+    key: "groq__llama3-70b-8192",
+    title: "llama3-70b-8192",
   },
   {
-    key: "openai__gpt-3.5-turbo-0613",
-    title: "GPT 3.5 Turbo 0613",
+    key: "groq__mixtral-8x7b-32768",
+    title: "mixtral-8x7b-32768",
   },
   {
-    key: "openai__gpt-3.5-turbo",
-    title: "GPT 3.5 Turbo",
+    key: "groq__gemma-7b-it",
+    title: "gemma-7b-it",
   },
+  {
+    key: "groq__gemma2-9b-it",
+    title: "gemma2-9b-it",
+  },
+  //ollama
   {
     key: "ollama__llama2",
-    title: "Ollama 2",
+    title: "llama2",
   },
   {
     key: "ollama__llama3",
-    title: "Ollama 3",
+    title: "llama3",
+  },
+  // openai
+  {
+    key: "openai__gpt-4o-2024-05-13",
+    title: "gpt-4o-2024-05-13",
+  },
+  {
+    key: "openai__gpt-4o",
+    title: "gpt-4o",
+  },
+  {
+    key: "openai__gpt-4-turbo-2024-04-09",
+    title: "gpt-4-turbo-2024-04-09",
+  },
+  {
+    key: "openai__gpt-4-turbo",
+    title: "gpt-4-turbo",
+  },
+  {
+    key: "openai__gpt-4-turbo-preview",
+    title: "gpt-4-turbo-preview",
+  },
+  {
+    key: "openai__gpt-4-1106-preview",
+    title: "gpt-4-1106-preview",
+  },
+  {
+    key: "openai__gpt-4",
+    title: "gpt-4",
+  },
+  {
+    key: "openai__gpt-4-0613",
+    title: "gpt-4-0613",
+  },
+  {
+    key: "openai__gpt-3.5-turbo-0125",
+    title: "gpt-3.5-turbo-0125",
+  },
+  {
+    key: "openai__gpt-3.5-turbo-1106",
+    title: "gpt-3.5-turbo-1106",
+  },
+  {
+    key: "openai__gpt-3.5-turbo-0613",
+    title: "gpt-3.5-turbo-0613",
+  },
+  {
+    key: "openai__gpt-3.5-turbo",
+    title: "gpt-3.5-turbo",
+  },
+  //perplexity
+  {
+    key: "perplexity__llama-3-sonar-small-32k-chat",
+    title: "llama-3-sonar-small-32k-chat",
+  },
+  {
+    key: "perplexity__llama-3-sonar-small-32k-online",
+    title: "llama-3-sonar-small-32k-online",
+  },
+  {
+    key: "perplexity__llama-3-sonar-large-32k-chat",
+    title: "llama-3-sonar-large-32k-chat",
+  },
+  {
+    key: "perplexity__llama-3-sonar-large-32k-online",
+    title: "llama-3-sonar-large-32k-online",
+  },
+  {
+    key: "perplexity__llama-3-8b-instruct",
+    title: "llama-3-8b-instruct",
+  },
+  {
+    key: "perplexity__llama-3-70b-instruct",
+    title: "llama-3-70b-instruct",
+  },
+  {
+    key: "perplexity__mixtral-8x7b-instruct",
+    title: "mixtral-8x7b-instruct",
   },
 ];
 
@@ -152,39 +243,70 @@ function getConfig(): ConfigurationPreferencesType {
   return getPreferenceValues<ConfigurationPreferencesType>();
 }
 
-export function GetApiOpenAi(): { key: string } {
+//
+
+export function GetAnthropicApi(): { key: string } {
   return {
-    key: getConfig().apiOpenAiKey,
+    key: getConfig().anthropicApiKey,
   };
 }
 
-export function GetApiOllama(): { host: string } {
+export function GetCohereApi(): { key: string } {
   return {
-    host: getConfig().apiOllamaHost,
+    key: getConfig().cohereApiKey,
   };
 }
 
-export function GetApiLangSmith(): { host: string; key: string; projectName: string } {
+export function GetGroqApi(): { key: string } {
   return {
-    host: "https://api.smith.langchain.com",
-    key: getConfig().apiLangSmithKey,
-    projectName: "raycast_jose",
+    key: getConfig().groqApiKey,
   };
 }
 
-export function GetApiLunary(): { key: string } {
+export function GetOllamaApi(): { url: string } {
   return {
-    key: getConfig().apiLunaryKey,
+    url: getConfig().ollamaApiUrl,
   };
 }
 
-export function GetApiLangFuse(): { host: string; public: string; secret: string } {
+export function GetOpenaiApi(): { key: string } {
   return {
-    host: "https://cloud.langfuse.com",
-    public: getConfig().apiLangFusePublicKey,
-    secret: getConfig().apiLangFuseSecretKey,
+    key: getConfig().openaiApiKey,
   };
 }
+
+export function GetPerplexityApi(): { key: string } {
+  return {
+    key: getConfig().perplexityApiKey,
+  };
+}
+
+//
+
+export function GetLangfuseApi(): { enable: boolean; url: string; public: string; secret: string } {
+  return {
+    enable:
+      getConfig().langfuseApiUrl !== "" &&
+      getConfig().langfuseApiUrl !== undefined &&
+      getConfig().lanfusePublicApiKey !== "" &&
+      getConfig().lanfusePublicApiKey !== undefined &&
+      getConfig().langfuseSecretApiKey !== "" &&
+      getConfig().langfuseSecretApiKey !== undefined &&
+      1 === 1,
+    url: getConfig().langfuseApiUrl,
+    public: getConfig().lanfusePublicApiKey,
+    secret: getConfig().langfuseSecretApiKey,
+  };
+}
+
+export function GetLunaryApi(): { enable: boolean; key: string } {
+  return {
+    enable: getConfig().lunaryApiKey !== "" && getConfig().lunaryApiKey !== undefined && 1 === 1,
+    key: getConfig().lunaryApiKey,
+  };
+}
+
+//
 
 export function GetApiEndpoint(): { host: string } {
   return {

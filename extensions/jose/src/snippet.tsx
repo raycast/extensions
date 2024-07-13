@@ -4,8 +4,8 @@ import { useSnippet } from "./hook/useSnippet";
 import { SnippetForm } from "./view/snippet/form";
 import { SnippetListView } from "./view/snippet/list";
 import { SnippetImportForm } from "./view/snippet/importForm";
-import { TalkSnippetType } from "./type/talk";
 import { SnippetHookType } from "./type/snippet";
+import { ITalkSnippet } from "./ai/type";
 
 export default function Snippet() {
   const collections = useSnippet();
@@ -16,7 +16,7 @@ export default function Snippet() {
 
   useEffect(() => {
     if (searchText != "" && searchText.length > 1) {
-      collectionsSnipppets.data = collections.data.filter((x: TalkSnippetType) => x.title.includes(searchText));
+      collectionsSnipppets.data = collections.data.filter((x: ITalkSnippet) => x.title.includes(searchText));
     } else {
       collectionsSnipppets.data = collections.data;
     }
@@ -38,7 +38,7 @@ export default function Snippet() {
       <Action title={"Reload Snippets From Api"} icon={Icon.Download} onAction={() => collections.reload()} />
     </ActionPanel>
   );
-  const getActionItem = (snippet: TalkSnippetType) => (
+  const getActionItem = (snippet: ITalkSnippet) => (
     <ActionPanel>
       <ActionPanel.Section title="Modify">
         <Action

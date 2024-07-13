@@ -1,26 +1,26 @@
 import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
-import { AssistantDefaultTemperature, AssistantHookType } from "../../type/assistant";
+import { AssistantHookType } from "../../type/assistant";
 import {
   ConfigurationModelCollection,
   ConfigurationModelDefault,
   ConfigurationTypeCommunication,
   ConfigurationTypeCommunicationDefault,
 } from "../../type/config";
-import { TalkAssistantType, TalkSnippetType } from "../../type/talk";
+import { AssistantDefaultTemperature, ITalkAssistant, ITalkSnippet } from "../../ai/type";
 
 export const AssistantForm = (props: {
-  assistant?: TalkAssistantType;
-  use: { assistants: AssistantHookType; snippets: TalkSnippetType[] };
+  assistant?: ITalkAssistant;
+  use: { assistants: AssistantHookType; snippets: ITalkSnippet[] };
   name?: string;
 }) => {
   const { use, assistant } = props;
   const { pop } = useNavigation();
 
-  const { handleSubmit, itemProps } = useForm<TalkAssistantType>({
+  const { handleSubmit, itemProps } = useForm<ITalkAssistant>({
     onSubmit: async (assistant) => {
-      const updatedItem: TalkAssistantType = { ...assistant };
+      const updatedItem: ITalkAssistant = { ...assistant };
 
       if (props.assistant?.isLocal != true && props.assistant !== undefined) {
         updatedItem.title = props.assistant.title;

@@ -18,24 +18,17 @@ Chat with GPT straight from your computer
 
 # Still in development
 
+## Features
+- fix ollama not working streaming
+
 - external page to config llm's
+- external page to intent
+- llm - integration memeory
+- llm - integration skill
+- llm - integration intent
 
-#### Features
-- langChain - intent
-- langChain - skill
-- langChain - memory
-
-#### Models
-- Azure OpenAI
-- Gemini
-- Groq
-- Cohere
-- Perplexity
-- Anthropic
-
-#### Binnary
-- blueprint golang
-- blueprint nodeJs
+## Binnary && Api
+- blueprint golang binnary
 
 # Features
 1. **Personalized Assistants:** Custom prompts for each user.
@@ -52,8 +45,7 @@ Chat with GPT straight from your computer
 
 # Models availability
 
-- GPT 3.5*
-- GPT 4*
+- GPT 3.5* / 4*
 - LLaMA
 
 # How to use

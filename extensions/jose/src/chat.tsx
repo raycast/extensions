@@ -3,12 +3,7 @@ import { useEffect, useState } from "react";
 import { useChat } from "./hook/useChat";
 import { useConversations } from "./hook/useConversations";
 import { useQuestion } from "./hook/useQuestion";
-import {
-  ConversationSelectedTypeAssistant,
-  ConversationSelectedTypeSnippet,
-  ConversationType,
-  GetNewConversation,
-} from "./type/conversation";
+import { ConversationType, GetNewConversation } from "./type/conversation";
 import { ChatView } from "./view/chat/view";
 import { useAssistant } from "./hook/useAssistant";
 import { AssistantDefault } from "./type/assistant";
@@ -16,7 +11,12 @@ import { ChatFullForm } from "./view/chat/form";
 import { useSnippet } from "./hook/useSnippet";
 import { GetNewSnippet } from "./type/snippet";
 import { ChatDropdown } from "./view/chat/dropdown";
-import { TalkAssistantType, TalkSnippetType } from "./type/talk";
+import {
+  ConversationSelectedTypeAssistant,
+  ConversationSelectedTypeSnippet,
+  ITalkAssistant,
+  ITalkSnippet,
+} from "./ai/type";
 
 export default function Chat(props: { conversation?: ConversationType; arguments?: { ask: string } }) {
   const { push } = useNavigation();
@@ -26,17 +26,18 @@ export default function Chat(props: { conversation?: ConversationType; arguments
   const chats = useChat();
   const question = useQuestion({
     initialQuestion: props.arguments && props.arguments.ask ? props.arguments.ask : "",
-    disableAutoLoad: props.conversation ? true : props.arguments && props.arguments.ask ? true : false,
+    // disableAutoLoad: props.conversation ? true : props.arguments && props.arguments.ask ? true : false,
+    disableAutoLoad: false,
   });
   const isLoadConversation = props.conversation ? true : false;
 
   const [conversation, setConversation] = useState<ConversationType>(
     props.conversation ? props.conversation : GetNewConversation(AssistantDefault[0], false)
   );
-  const [selectedAssistant, setSelectedAssistant] = useState<TalkAssistantType>(
+  const [selectedAssistant, setSelectedAssistant] = useState<ITalkAssistant>(
     props.conversation && props.conversation.assistant ? props.conversation.assistant : AssistantDefault[0]
   );
-  const [selectedSnippet, setSelectedSnippet] = useState<TalkSnippetType | undefined>(
+  const [selectedSnippet, setSelectedSnippet] = useState<ITalkSnippet | undefined>(
     props.conversation && props.conversation.snippet ? props.conversation.snippet : GetNewSnippet()
   );
 
@@ -68,7 +69,7 @@ export default function Chat(props: { conversation?: ConversationType; arguments
         .filter((conversation: ConversationType) => conversation.chats.length > 0)
         .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
       if (convs[0]) {
-        console.log("load last conversation");
+        console.info("load last conversation");
         setSelectedAssistant(convs[0].assistant);
         setConversation(convs[0]);
       }
@@ -79,7 +80,7 @@ export default function Chat(props: { conversation?: ConversationType; arguments
     setConversation(updatedConversation);
   }, [chats.data]);
   useEffect(() => {
-    const selected = assistants.data.find((x: TalkAssistantType) => x.assistantId === selectedAssistant.assistantId);
+    const selected = assistants.data.find((x: ITalkAssistant) => x.assistantId === selectedAssistant.assistantId);
     conversation.selectedType = ConversationSelectedTypeAssistant;
     setConversation({
       ...conversation,
@@ -89,7 +90,7 @@ export default function Chat(props: { conversation?: ConversationType; arguments
   }, [selectedAssistant]);
   useEffect(() => {
     if (selectedSnippet !== undefined) {
-      const selected = snippets.data.find((x: TalkSnippetType) => x.snippetId === selectedSnippet.snippetId);
+      const selected = snippets.data.find((x: ITalkSnippet) => x.snippetId === selectedSnippet.snippetId);
       conversation.selectedType = ConversationSelectedTypeSnippet;
       setConversation({
         ...conversation,

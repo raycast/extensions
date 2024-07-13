@@ -1,22 +1,22 @@
 import { Toast } from "@raycast/api";
-import { TalkQuestionFileType, TalkType } from "../../type/talk";
 import { GetApiBinnary } from "../../type/config";
+import { ITalk, ITalkQuestionFile } from "../../ai/type";
 
 export async function RunBinnary(
-  chat: TalkType,
+  chat: ITalk,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   interaction: { toast: Toast; setData: any; setStreamData: any; setLoading: any }
-): Promise<TalkType | undefined> {
+): Promise<ITalk | undefined> {
   // eslint-disable-next-line
   const util = require("util");
   // eslint-disable-next-line
   const fs = require("fs");
   // eslint-disable-next-line
   const exec = util.promisify(require("child_process").exec);
-  const newChat: TalkType = JSON.parse(JSON.stringify(chat));
+  const newChat: ITalk = JSON.parse(JSON.stringify(chat));
 
-  if (newChat.question.files !== undefined) {
-    newChat.question.files.forEach((f: TalkQuestionFileType) => {
+  if (newChat.conversation.question.files !== undefined) {
+    newChat.conversation.question.files.forEach((f: ITalkQuestionFile) => {
       f.type = "image";
       f.base64 = fs.readFileSync(f.path, { encoding: "base64" });
     });
@@ -27,7 +27,7 @@ export async function RunBinnary(
     const { stdout, stderr } = await exec(`chmod +x ${GetApiBinnary().path}; .${GetApiBinnary().path} '${b64}'`);
 
     if (stderr !== "") {
-      console.log(stderr);
+      console.error(stderr);
 
       interaction.toast.title = "Error";
       interaction.toast.message = String(stderr);
@@ -38,18 +38,18 @@ export async function RunBinnary(
       return undefined;
     }
 
-    const out: TalkType = JSON.parse(stdout);
+    const out: ITalk = JSON.parse(stdout);
     chat = { ...chat, result: out.result ?? undefined };
 
-    if (typeof chat.result?.text === "string") {
+    if (typeof chat.result?.content === "string") {
       interaction.setLoading(false);
 
       interaction.toast.title = "Got your answer!";
       interaction.toast.style = Toast.Style.Success;
 
-      interaction.setData((prev: TalkType[]) => {
-        return prev.map((a: TalkType) => {
-          if (a.chatId === chat.chatId) {
+      interaction.setData((prev: ITalk[]) => {
+        return prev.map((a: ITalk) => {
+          if (a.id === chat.id) {
             return chat;
           }
           return a;
@@ -59,7 +59,7 @@ export async function RunBinnary(
 
     return chat;
   } catch (error) {
-    console.log(error);
+    console.error(error);
 
     interaction.toast.title = "Error";
     interaction.toast.message = String(error);

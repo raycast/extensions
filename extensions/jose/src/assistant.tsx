@@ -4,9 +4,9 @@ import { useAssistant } from "./hook/useAssistant";
 import { AssistantForm } from "./view/assistant/form";
 import { AssistantListView } from "./view/assistant/list";
 import { AssistantImportForm } from "./view/assistant/importForm";
-import { TalkAssistantType } from "./type/talk";
 import { AssistantHookType } from "./type/assistant";
 import { useSnippet } from "./hook/useSnippet";
+import { ITalkAssistant } from "./ai/type";
 
 export default function Assistant() {
   const collectionsAssistant = useAssistant();
@@ -18,7 +18,7 @@ export default function Assistant() {
 
   useEffect(() => {
     if (searchText != "" && searchText.length > 1) {
-      collectionsAssistants.data = collectionsAssistant.data.filter((x: TalkAssistantType) =>
+      collectionsAssistants.data = collectionsAssistant.data.filter((x: ITalkAssistant) =>
         x.title.includes(searchText)
       );
     } else {
@@ -53,7 +53,7 @@ export default function Assistant() {
       />
     </ActionPanel>
   );
-  const getActionItem = (assistant: TalkAssistantType) => (
+  const getActionItem = (assistant: ITalkAssistant) => (
     <ActionPanel>
       <ActionPanel.Section title="Modify">
         <Action

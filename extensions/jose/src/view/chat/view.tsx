@@ -5,7 +5,7 @@ import { EmptyView } from "../empty";
 import { ChatFullForm } from "./form";
 import say from "say";
 import { GetNewConversation } from "../../type/conversation";
-import { TalkType } from "../../type/talk";
+import { ITalk } from "../../ai/type";
 
 export const ChatView = ({
   data,
@@ -34,7 +34,7 @@ export const ChatView = ({
     />
   );
 
-  const getActionPanel = (selectedChat: TalkType) => (
+  const getActionPanel = (selectedChat: ITalk) => (
     <ActionPanel>
       {question.length > 0 ? (
         <Action
@@ -42,14 +42,14 @@ export const ChatView = ({
           icon={Icon.ArrowRight}
           onAction={() => use.chats.ask(question, undefined, conversation)}
         />
-      ) : selectedChat.result?.text && use.chats.selectedChatId === selectedChat.chatId ? (
+      ) : selectedChat.result?.content && use.chats.selectedChatId === selectedChat.id ? (
         <>
           <ActionPanel.Section title="Copy">
-            <CopyToClipboardAction title="Copy Answer" content={selectedChat.result.text} />
-            <CopyToClipboardAction title="Copy Question" content={selectedChat.question} />
+            <CopyToClipboardAction title="Copy Answer" content={selectedChat.result.content} />
+            <CopyToClipboardAction title="Copy Question" content={selectedChat.conversation.question.content} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Output">
-            <TextToSpeechAction content={selectedChat.result.text} />
+            <TextToSpeechAction content={selectedChat.result.content} />
           </ActionPanel.Section>
         </>
       ) : null}
@@ -100,13 +100,13 @@ export const ChatView = ({
     <EmptyView />
   ) : (
     <List.Section title="History" subtitle={data.length.toLocaleString()}>
-      {sortedChats.map((sc: TalkType, i) => {
+      {sortedChats.map((sc: ITalk, i) => {
         return (
           <List.Item
-            id={sc.chatId}
-            key={sc.chatId}
+            id={sc.id}
+            key={sc.id}
             accessories={[{ text: `#${sortedChats.length - i}` }]}
-            title={sc.question.text}
+            title={sc.conversation.question.content}
             detail={sc && <AnswerDetailView chat={sc} streamData={use.chats.streamData} />}
             actions={use.chats.isLoading ? undefined : getActionPanel(sc)}
           />

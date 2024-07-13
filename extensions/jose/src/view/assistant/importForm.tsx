@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
-import { AssistantDefaultTemperature, AssistantHookType } from "../../type/assistant";
+import { AssistantHookType } from "../../type/assistant";
 import {
   ClearImportModel,
   ClearImportModelTemperature,
@@ -9,7 +9,7 @@ import {
   ConfigurationModelDefault,
   ConfigurationTypeCommunicationDefault,
 } from "../../type/config";
-import { TalkAssistantType } from "../../type/talk";
+import { AssistantDefaultTemperature, ITalkAssistant } from "../../ai/type";
 
 export const AssistantImportForm = (props: { use: { assistants: AssistantHookType } }) => {
   const { use } = props;
@@ -24,7 +24,7 @@ export const AssistantImportForm = (props: { use: { assistants: AssistantHookTyp
           iModel = ConfigurationModelDefault;
         }
 
-        const newAssistant: TalkAssistantType = {
+        const newAssistant: ITalkAssistant = {
           assistantId: uuidv4(),
           title: item.name,
           description: "",

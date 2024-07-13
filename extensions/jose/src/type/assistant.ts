@@ -1,11 +1,99 @@
 import { Icon } from "@raycast/api";
 import { ConfigurationModelDefault, ConfigurationTypeCommunicationDefault } from "./config";
 import { HookType, PromiseFunctionNoArgType, PromiseFunctionWithOneArgType } from "./hook";
-import { TalkAssistantType } from "./talk";
+import { AssistantDefaultTemperature, ITalkAssistant } from "../ai/type";
 
-export const AssistantDefaultTemperature = "0.7";
-
-export const AssistantDefault: TalkAssistantType[] = [
+export const AssistantDefault: ITalkAssistant[] = [
+  {
+    typeCommunication: ConfigurationTypeCommunicationDefault,
+    assistantId: "1",
+    title: "anthropic",
+    description: "claude-3-opus-20240229",
+    emoji: Icon.QuestionMark,
+    avatar: "",
+    model: "anthropic" + "__" + "claude-3-opus-20240229",
+    modelTemperature: AssistantDefaultTemperature,
+    promptSystem: "Tell true",
+    webhookUrl: undefined,
+    additionalData: undefined,
+    snippet: undefined,
+    isLocal: true,
+  },
+  {
+    typeCommunication: ConfigurationTypeCommunicationDefault,
+    assistantId: "2",
+    title: "cohere",
+    description: "command",
+    emoji: Icon.QuestionMark,
+    avatar: "",
+    model: "cohere" + "__" + "command",
+    modelTemperature: AssistantDefaultTemperature,
+    promptSystem: "Tell true",
+    webhookUrl: undefined,
+    additionalData: undefined,
+    snippet: undefined,
+    isLocal: true,
+  },
+  {
+    typeCommunication: ConfigurationTypeCommunicationDefault,
+    assistantId: "3",
+    title: "groq",
+    description: "llama3-8b-8192",
+    emoji: Icon.QuestionMark,
+    avatar: "",
+    model: "groq" + "__" + "llama3-8b-8192",
+    modelTemperature: AssistantDefaultTemperature,
+    promptSystem: "Tell true",
+    webhookUrl: undefined,
+    additionalData: undefined,
+    snippet: undefined,
+    isLocal: true,
+  },
+  {
+    typeCommunication: ConfigurationTypeCommunicationDefault,
+    assistantId: "4",
+    title: "ollama",
+    description: "llama3",
+    emoji: Icon.QuestionMark,
+    avatar: "",
+    model: "ollama" + "__" + "llama3",
+    modelTemperature: AssistantDefaultTemperature,
+    promptSystem: "Tell true",
+    webhookUrl: undefined,
+    additionalData: undefined,
+    snippet: undefined,
+    isLocal: true,
+  },
+  {
+    typeCommunication: ConfigurationTypeCommunicationDefault,
+    assistantId: "5",
+    title: "openai",
+    description: "gpt-4o",
+    emoji: Icon.QuestionMark,
+    avatar: "",
+    model: "openai" + "__" + "gpt-4o",
+    modelTemperature: AssistantDefaultTemperature,
+    promptSystem: "Tell true",
+    webhookUrl: undefined,
+    additionalData: undefined,
+    snippet: undefined,
+    isLocal: true,
+  },
+  {
+    typeCommunication: ConfigurationTypeCommunicationDefault,
+    assistantId: "6",
+    title: "perplexity",
+    description: "llama-3-sonar-small-32k-online",
+    emoji: Icon.QuestionMark,
+    avatar: "",
+    model: "perplexity" + "__" + "llama-3-sonar-small-32k-online",
+    modelTemperature: AssistantDefaultTemperature,
+    promptSystem: "Tell true",
+    webhookUrl: undefined,
+    additionalData: undefined,
+    snippet: undefined,
+    isLocal: true,
+  },
   {
     typeCommunication: ConfigurationTypeCommunicationDefault,
     assistantId: "0bb69d53-0389-49a4-a593-b75124fe25a7",
@@ -24,7 +112,7 @@ export const AssistantDefault: TalkAssistantType[] = [
   },
 ];
 
-export type AssistantHookType = HookType<TalkAssistantType> & {
-  update: PromiseFunctionWithOneArgType<TalkAssistantType>;
+export type AssistantHookType = HookType<ITalkAssistant> & {
+  update: PromiseFunctionWithOneArgType<ITalkAssistant>;
   reload: PromiseFunctionNoArgType;
 };

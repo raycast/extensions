@@ -21,3 +21,16 @@
 ## [Version: 1.1.1] - 2024-07-10
 
 - ollama without langchain
+
+## [Version: 1.2.0] - 2024-07-13
+
+- remove langchain
+- remove langsmith
+- llm: anthropic
+- llm: cohere
+- llm: groq
+- llm: ollama
+- llm: openai
+- llm: perplexity
+- update trace: langfuse
+- update trace: lunary

@@ -1,12 +1,9 @@
 import { v4 as uuidv4 } from "uuid";
 import { HookType, PromiseFunctionWithOneArgType } from "./hook";
 import { GetDevice, GetUserName } from "./config";
-import { TalkAssistantType, TalkSnippetType, TalkType } from "./talk";
+import { ConversationSelectedTypeAssistant, ITalk, ITalkAssistant, ITalkSnippet } from "../ai/type";
 
-export const ConversationSelectedTypeAssistant = "assistant";
-export const ConversationSelectedTypeSnippet = "snippet";
-
-export function GetNewConversation(assistant: TalkAssistantType, cleared: boolean): ConversationType {
+export function GetNewConversation(assistant: ITalkAssistant, cleared: boolean): ConversationType {
   return {
     conversationId: uuidv4(),
     selectedType: ConversationSelectedTypeAssistant,
@@ -24,13 +21,13 @@ export function GetNewConversation(assistant: TalkAssistantType, cleared: boolea
 export interface ConversationType {
   conversationId: string;
   selectedType: string;
-  assistant: TalkAssistantType;
-  snippet: TalkSnippetType | undefined;
+  assistant: ITalkAssistant;
+  snippet: ITalkSnippet | undefined;
   userName: string;
   device: string;
   updatedAt: string;
   createdAt: string;
-  chats: TalkType[];
+  chats: ITalk[];
   cleared: boolean;
 }
 

@@ -1,21 +1,21 @@
 import { List } from "@raycast/api";
 import { ConfigurationModelCollection, ConfigurationTypeCommunication } from "../../type/config";
-import { TalkSnippetType } from "../../type/talk";
+import { ITalkSnippet } from "../../ai/type";
 
 export const SnippetListView = ({
   snippets,
   selectedSnippet,
   actionPanel,
 }: {
-  snippets: TalkSnippetType[];
+  snippets: ITalkSnippet[];
   selectedSnippet: string | null;
-  actionPanel: (snippet: TalkSnippetType) => JSX.Element;
+  actionPanel: (snippet: ITalkSnippet) => JSX.Element;
 }) => {
   return (
     <>
-      {Object.entries(SnippetGroupByCategory(snippets) as Record<string, TalkSnippetType[]>).map(([name, list]) => (
+      {Object.entries(SnippetGroupByCategory(snippets) as Record<string, ITalkSnippet[]>).map(([name, list]) => (
         <List.Section key={name} title={name} subtitle={list.length.toLocaleString()}>
-          {list.map((snippet: TalkSnippetType) => (
+          {list.map((snippet: ITalkSnippet) => (
             <SnippetListItem
               key={snippet.snippetId}
               snippet={snippet}
@@ -29,9 +29,9 @@ export const SnippetListView = ({
   );
 };
 
-export function SnippetGroupByCategory(array: TalkSnippetType[]) {
+export function SnippetGroupByCategory(array: ITalkSnippet[]) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return array.reduce((acc: any, obj: TalkSnippetType) => {
+  return array.reduce((acc: any, obj: ITalkSnippet) => {
     const key = obj.category;
     if (!acc[key]) {
       acc[key] = [];
@@ -46,9 +46,9 @@ export const SnippetListItem = ({
   selectedsnippet,
   actionPanel,
 }: {
-  snippet: TalkSnippetType;
+  snippet: ITalkSnippet;
   selectedsnippet: string | null;
-  actionPanel: (snippet: TalkSnippetType) => JSX.Element;
+  actionPanel: (snippet: ITalkSnippet) => JSX.Element;
 }) => {
   return (
     <List.Item
@@ -65,7 +65,7 @@ export const SnippetListItem = ({
   );
 };
 
-const ModelDetailView = (props: { snippet: TalkSnippetType; markdown?: string | null | undefined }) => {
+const ModelDetailView = (props: { snippet: ITalkSnippet; markdown?: string | null | undefined }) => {
   const { snippet, markdown } = props;
 
   return (

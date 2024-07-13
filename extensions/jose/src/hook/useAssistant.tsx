@@ -1,7 +1,7 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import fetch from "node-fetch";
-import { AssistantDefault, AssistantDefaultTemperature, AssistantHookType } from "../type/assistant";
+import { AssistantDefault, AssistantHookType } from "../type/assistant";
 import {
   ClearPromptSystem,
   ConfigurationTypeCommunicationDefault,
@@ -9,10 +9,10 @@ import {
   GetDevice,
   GetUserName,
 } from "../type/config";
-import { TalkAssistantType } from "../type/talk";
+import { AssistantDefaultTemperature, ITalkAssistant } from "../ai/type";
 
 export function useAssistant(): AssistantHookType {
-  const [data, setData] = useState<TalkAssistantType[]>([]);
+  const [data, setData] = useState<ITalkAssistant[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
 
   const localStorageName = "assistants";
@@ -39,7 +39,8 @@ export function useAssistant(): AssistantHookType {
   }, [data]);
 
   const reload = useCallback(async () => {
-    if (GetApiEndpointData() === undefined) {
+    if (GetApiEndpointData() === undefined || GetApiEndpointData().host === "") {
+      setData(AssistantDefault);
       return;
     }
     await apiLoad(setData, data);
@@ -51,9 +52,9 @@ export function useAssistant(): AssistantHookType {
   }, [setData, data]);
 
   const add = useCallback(
-    async (item: TalkAssistantType) => {
+    async (item: ITalkAssistant) => {
       item.isLocal = true;
-      const newData: TalkAssistantType = { ...item };
+      const newData: ITalkAssistant = { ...item };
       setData([...data, newData]);
 
       await showToast({
@@ -65,9 +66,9 @@ export function useAssistant(): AssistantHookType {
   );
 
   const update = useCallback(
-    async (item: TalkAssistantType) => {
+    async (item: ITalkAssistant) => {
       setData((prev) => {
-        return prev.map((v: TalkAssistantType) => {
+        return prev.map((v: ITalkAssistant) => {
           if (v.assistantId === item.assistantId) {
             return item;
           }
@@ -85,7 +86,7 @@ export function useAssistant(): AssistantHookType {
   );
 
   const remove = useCallback(
-    async (item: TalkAssistantType) => {
+    async (item: ITalkAssistant) => {
       if (item.isLocal !== true) {
         await showToast({
           title: "Removing your assistant imposible, assistant is not local",
@@ -95,7 +96,7 @@ export function useAssistant(): AssistantHookType {
         return;
       }
 
-      const newData: TalkAssistantType[] = data.filter((o) => o.assistantId !== item.assistantId);
+      const newData: ITalkAssistant[] = data.filter((o) => o.assistantId !== item.assistantId);
       setData(newData);
 
       await showToast({
@@ -120,7 +121,7 @@ export function useAssistant(): AssistantHookType {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function apiLoad(setData: any, oldData: TalkAssistantType[]) {
+async function apiLoad(setData: any, oldData: ITalkAssistant[]) {
   await fetch(GetApiEndpointData().host, {
     method: "POST",
     headers: {
@@ -136,8 +137,8 @@ async function apiLoad(setData: any, oldData: TalkAssistantType[]) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .then(async (res: any) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const newRes: TalkAssistantType[] = res.map((item: any) => {
-        const existing = oldData.find((x: TalkAssistantType) => x.assistantId === item.assistantId);
+      const newRes: ITalkAssistant[] = res.map((item: any) => {
+        const existing = oldData.find((x: ITalkAssistant) => x.assistantId === item.assistantId);
         return {
           ...item,
           promptSystem: ClearPromptSystem(item.promptSystem),
@@ -150,7 +151,7 @@ async function apiLoad(setData: any, oldData: TalkAssistantType[]) {
 
       setData(newRes);
     })
-    .catch((err) => {
-      console.log(err);
+    .catch((error) => {
+      console.error(error);
     });
 }

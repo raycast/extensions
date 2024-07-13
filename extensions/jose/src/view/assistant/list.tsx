@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 import { ConfigurationModelCollection, ConfigurationTypeCommunication } from "../../type/config";
-import { TalkAssistantType, TalkSnippetType } from "../../type/talk";
+import { ITalkAssistant, ITalkSnippet } from "../../ai/type";
 
 export const AssistantListView = ({
   title,
@@ -10,13 +10,13 @@ export const AssistantListView = ({
   actionPanel,
 }: {
   title: string;
-  assistants: TalkAssistantType[];
-  snippets: TalkSnippetType[];
+  assistants: ITalkAssistant[];
+  snippets: ITalkSnippet[];
   selectedAssistant: string | null;
-  actionPanel: (assistant: TalkAssistantType) => JSX.Element;
+  actionPanel: (assistant: ITalkAssistant) => JSX.Element;
 }) => (
   <List.Section title={title} subtitle={assistants.length.toLocaleString()}>
-    {assistants.map((assistant: TalkAssistantType) => (
+    {assistants.map((assistant: ITalkAssistant) => (
       <AssistantListItem
         key={assistant.assistantId}
         assistant={assistant}
@@ -34,10 +34,10 @@ const AssistantListItem = ({
   selectedAssistant,
   actionPanel,
 }: {
-  assistant: TalkAssistantType;
-  snippets: TalkSnippetType[];
+  assistant: ITalkAssistant;
+  snippets: ITalkSnippet[];
   selectedAssistant: string | null;
-  actionPanel: (assistant: TalkAssistantType) => JSX.Element;
+  actionPanel: (assistant: ITalkAssistant) => JSX.Element;
 }) => {
   return (
     <List.Item
@@ -55,8 +55,8 @@ const AssistantListItem = ({
 };
 
 const ModelDetailView = (props: {
-  assistant: TalkAssistantType;
-  snippets: TalkSnippetType[];
+  assistant: ITalkAssistant;
+  snippets: ITalkSnippet[];
   markdown?: string | null | undefined;
 }) => {
   const { assistant, snippets, markdown } = props;
@@ -97,8 +97,8 @@ const ModelDetailView = (props: {
             <List.Item.Detail.Metadata.Label
               key={snippetId}
               title=""
-              text={snippets.find((x: TalkSnippetType) => x.snippetId === snippetId)?.title}
-              icon={snippets.find((x: TalkSnippetType) => x.snippetId === snippetId)?.emoji}
+              text={snippets.find((x: ITalkSnippet) => x.snippetId === snippetId)?.title}
+              icon={snippets.find((x: ITalkSnippet) => x.snippetId === snippetId)?.emoji}
             />
           ))}
         </List.Item.Detail.Metadata>
