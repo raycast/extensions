@@ -472,6 +472,12 @@
           "placeholder": "weather.home"
         }
       ]
+    },
+    {
+      "name": "runService",
+      "title": "Run Service",
+      "description": "Run a Service",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -577,7 +583,8 @@
     "ping": "^0.4.4",
     "plist": "^3.0.6",
     "url-join": "^4.0.1",
-    "ws": "^8.2.3"
+    "ws": "^8.2.3",
+    "yaml": "^2.4.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

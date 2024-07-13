@@ -4,6 +4,7 @@
 
 - Use `weather.get_forecasts` to receive weather forecasts (required since Home Assistant `2024.07`)
 - Add sun entity support for weather menu command
+- Add `Run Service` command
 
 ## [Update] - 2024-04-06
 
