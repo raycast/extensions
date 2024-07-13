@@ -28,7 +28,11 @@ export default function main(props: LaunchProps) {
         </ActionPanel>
       }
     >
-      <Form.TextField id="timestamp" title="Timestamp" defaultValue={defaultValue} />
+      <Form.TextField
+        id="timestamp"
+        title="Timestamp"
+        defaultValue={defaultValue}
+      />
     </Form>
   );
 }
