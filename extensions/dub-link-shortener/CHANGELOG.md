@@ -1,6 +1,6 @@
 # Dub Link Shortener Changelog
 
-## [Minor metadata updates] - 2024-07-12
+## [Minor metadata updates] - {PR_MERGE_DATE}
 
 - Updated the title, description, logo, and auth instructions
 
