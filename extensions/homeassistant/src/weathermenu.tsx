@@ -87,6 +87,11 @@ function getTemperatureEntityPreference() {
   return prefs.temperatureEntity?.trim();
 }
 
+function getHumidityEntityPreference() {
+  const prefs = getPreferenceValues<Preferences.Weathermenu>();
+  return prefs.humidityEntity?.trim();
+}
+
 export default function WeatherMenuBarCommand(): JSX.Element {
   const { states, error: stateError, isLoading: statesLoading } = useHAStates();
   const entity = getWeatherEntityPreference();
@@ -104,6 +109,11 @@ export default function WeatherMenuBarCommand(): JSX.Element {
       : undefined;
 
   const sunState = states?.filter((s) => s.entity_id === "sun.sun")[0];
+  const humidityState = states?.filter(
+    (s) =>
+      s.entity_id === getHumidityEntityPreference() &&
+      (s.attributes.device_class === "humidity" || s.entity_id.startsWith("weather.")),
+  )[0];
   const { data: forecast, isLoading: forecastLoading } = useWeatherForecast(weather?.entity_id);
   const isLoading = statesLoading || forecastLoading;
   return (
@@ -115,7 +125,7 @@ export default function WeatherMenuBarCommand(): JSX.Element {
       state={weather}
       icon={weather?.state ? weatherConditionToIcon(weather.state) : undefined}
     >
-      <WeatherCurrentMenubarSection weather={weather} temperature={temperatureState} />
+      <WeatherCurrentMenubarSection weather={weather} temperature={temperatureState} humidity={humidityState} />
       <WeatherForecastMenubarSection
         weather={weather}
         forecast={forecast}

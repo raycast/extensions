@@ -50,6 +50,10 @@ export function getHumidityFromState(state: State | undefined): string | undefin
   if (!state) {
     return undefined;
   }
+  if (state.attributes.device_class === "humidity") {
+    const unit = state.attributes.unit_of_measurement as string | undefined;
+    return unit && unit.length > 0 ? `${state.state} ${unit}` : `${state.state}`;
+  }
   const humidity = state.attributes.humidity as number | undefined;
   if (humidity !== undefined) {
     return `${humidity}%`;
