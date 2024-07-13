@@ -18,7 +18,7 @@ export type DocList = {
 
 export type DocContent = Pick<Document, "content" | "id">;
 
-const docListFragment = `
+const docFragment = `
   id
   url
   icon
@@ -51,7 +51,7 @@ export async function getDocuments(query: string = "", projectId: string = "") {
       query($query: String!) {
         documents(orderBy: updatedAt, includeArchived: ${showArchivedDocs}, filter: { title: { containsIgnoreCase: $query } } ) {
           nodes {
-            ${docListFragment}
+            ${docFragment}
           }
           pageInfo {
             hasNextPage
@@ -66,7 +66,7 @@ export async function getDocuments(query: string = "", projectId: string = "") {
           { project: { id: { eq: $projectId } } } 
         ] }) {
           nodes {
-            ${docListFragment}
+            ${docFragment}
           }
           pageInfo {
             hasNextPage
