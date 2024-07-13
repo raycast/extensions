@@ -3,6 +3,7 @@ import { ActionPanel, Detail } from "@raycast/api";
 import { useDocumentContent } from "../../hooks/useDocuments";
 import { DocumentActions } from "./DocumentActions";
 import { MutatePromise } from "@raycast/utils";
+import { emojify } from "node-emoji";
 
 type DocumentDetailProps = {
   doc: Doc;
@@ -14,7 +15,7 @@ export function DocumentDetail({ doc, mutateDocs }: DocumentDetailProps) {
 
   let markdown = `# ${doc.title}`;
   if (content) {
-    markdown += `\n\n${content}`;
+    markdown += `\n\n${emojify(content)}`;
   }
 
   return (

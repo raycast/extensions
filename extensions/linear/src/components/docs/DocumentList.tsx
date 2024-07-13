@@ -37,8 +37,8 @@ export function DocumentList({ project }: DocumentListProps) {
       {...(!project && projects && projects.length > 0
         ? {
             searchBarAccessory: (
-              <List.Dropdown tooltip="Change Project" onChange={setProjectId} storeValue>
-                <List.Dropdown.Item value="" title="All Projects" />
+              <List.Dropdown tooltip="Change Project" placeholder="Search Project" onChange={setProjectId} storeValue>
+                <List.Dropdown.Item value="" title="All Documents" />
 
                 <List.Dropdown.Section>
                   {projects?.map((project) => (
