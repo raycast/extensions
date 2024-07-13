@@ -5,6 +5,9 @@
   "description": "Convert between unix timestamp and human readable form date",
   "icon": "command-icon.png",
   "author": "destiner",
+  "contributors": [
+    "zvikarp"
+  ],
   "categories": ["Data", "Developer Tools"],
   "license": "MIT",
   "scripts": {
@@ -23,7 +26,15 @@
       "name": "timestamp-to-date",
       "title": "Convert Timestamp to Date",
       "description": "Converts unix timestamp to date",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "timestamp",
+          "placeholder": "Timestamp",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "date-to-timestamp",

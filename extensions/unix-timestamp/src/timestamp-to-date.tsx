@@ -5,6 +5,7 @@ import {
   Form,
   Action,
   Toast,
+  LaunchProps,
 } from '@raycast/api';
 import {
   getCurrentTimestamp,
@@ -17,21 +18,22 @@ interface Form {
   timestamp: string;
 }
 
-export default function main() {
+export default function main(props: LaunchProps) {
+  const defaultValue = props.arguments?.timestamp;
   return (
     <Form
       actions={
         <ActionPanel>
-          <ConvertAction />
+          <ConvertAction defaultValue={defaultValue} />
         </ActionPanel>
       }
     >
-      <Form.TextField id="timestamp" title="Timestamp" />
+      <Form.TextField id="timestamp" title="Timestamp" defaultValue={defaultValue} />
     </Form>
   );
 }
 
-function ConvertAction() {
+function ConvertAction(props: { defaultValue?: string }) {
   async function handleSubmit(values: Form) {
     const { timestamp } = values;
     if (timestamp.length === 0) {
@@ -75,6 +77,10 @@ function ConvertAction() {
       style: Toast.Style.Success,
       title: text,
     });
+  }
+
+  if (props?.defaultValue?.length) {
+    handleSubmit({ timestamp: props.defaultValue });
   }
 
   return (
