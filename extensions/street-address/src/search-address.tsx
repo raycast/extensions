@@ -1,4 +1,4 @@
-import { ActionPanel, List, showToast, ToastStyle, useNavigation, copyTextToClipboard, popToRoot } from "@raycast/api";
+import { ActionPanel, List, showToast, ToastStyle, copyTextToClipboard, popToRoot } from "@raycast/api";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import qs from "qs";
@@ -11,7 +11,6 @@ type AddressItem = {
 export default function Command() {
   const [query, setQuery] = useState<string>("");
   const [results, setResults] = useState<AddressItem[]>([]); // 초기 상태를 빈 배열로 설정
-  const { push } = useNavigation();
 
   useEffect(() => {
     if (query.length > 0) {
@@ -52,11 +51,7 @@ export default function Command() {
   };
 
   return (
-    <List
-      searchBarPlaceholder="Enter address keyword"
-      onSearchTextChange={setQuery}
-      throttle
-    >
+    <List searchBarPlaceholder="Enter address keyword" onSearchTextChange={setQuery} throttle>
       {results.map((item, index) => (
         <List.Item
           key={index}

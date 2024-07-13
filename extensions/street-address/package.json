@@ -35,7 +35,7 @@
     "@types/qs": "^6.9.15",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
+    "prettier": "^3.3.2",
     "typescript": "^5.5.3"
   },
   "scripts": {
