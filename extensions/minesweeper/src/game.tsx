@@ -1,5 +1,3 @@
-import { open } from "@raycast/api";
-
 export const SIZE: number = 8;
 const BOMB_COUNT: number = 8;
 const TOTAL_SQUARES = 64;
@@ -9,7 +7,8 @@ export enum CellState {
   Lost = "#FF0000",
   Won = "#00FF00",
   Flag = "🚩",
-  Bomb = "💣", // not currently displayable, only used for debuggin' (actual_board)
+  Bomb = "💣",
+  Celebratory = "🎉",
 }
 
 export interface Cell {
@@ -81,8 +80,6 @@ export default class Game {
     console.log("Lost");
     Game.updateBoardState(newBoard.board, CellState.Lost);
 
-    // TODO: reveal bomb positions
-
     return newBoard;
   }
 
@@ -91,10 +88,6 @@ export default class Game {
 
     console.log("Win");
     Game.updateBoardState(newBoard.board, CellState.Won);
-
-    setTimeout(() => {
-      open("raycast://confetti");
-    }, 5000);
 
     return newBoard;
   }
