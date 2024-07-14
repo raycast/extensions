@@ -34,7 +34,7 @@ export default async function command(props: PickColorCommandLaunchProps) {
       }
 
       try {
-        await callbackLaunchCommand(props.launchContext.callbackLaunchOptions, { colorName });
+        await callbackLaunchCommand(props.launchContext.callbackLaunchOptions, { hex, colorName });
       } catch (e) {
         await showFailureToast(e);
       }
