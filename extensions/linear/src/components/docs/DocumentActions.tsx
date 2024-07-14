@@ -32,7 +32,9 @@ function MoveDocument({ doc, mutateDocs, projects, initiatives }: DocumentAction
           : { initiative: { ...initiative }, project: undefined };
         return {
           ...data,
-          docs: data.docs?.map((d) => (d.id !== doc.id ? d : ({ ...d, ...overrides } as DocumentResult))),
+          docs: data.docs?.map((d) =>
+            d.id !== doc.id ? d : ({ ...d, ...overrides, updatedAt: new Date() } as DocumentResult),
+          ),
         };
       },
     })
@@ -100,7 +102,10 @@ export function DocumentActions({ doc, mutateDocs, ...rest }: DocumentActionsPro
           return undefined;
         }
 
-        return { ...data, docs: data.docs?.map((d) => (d.id !== doc.id ? d : { ...d, archivedAt: undefined })) };
+        return {
+          ...data,
+          docs: data.docs?.map((d) => (d.id !== doc.id ? d : { ...d, archivedAt: undefined, updatedAt: new Date() })),
+        };
       },
     })
       .then(({ success }) => {
@@ -137,7 +142,10 @@ export function DocumentActions({ doc, mutateDocs, ...rest }: DocumentActionsPro
           return undefined;
         }
 
-        return { ...data, docs: data.docs?.map((d) => (d.id !== doc.id ? d : { ...d, archivedAt: new Date() })) };
+        return {
+          ...data,
+          docs: data.docs?.map((d) => (d.id !== doc.id ? d : { ...d, archivedAt: new Date(), updatedAt: new Date() })),
+        };
       },
     })
       .then(({ success }) => {
