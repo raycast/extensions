@@ -2,6 +2,7 @@ import { Form } from "@raycast/api";
 import { getNameOfHAServiceField, HAServiceField } from "./utils";
 import { State } from "@lib/haapi";
 import { getFriendlyName } from "@lib/utils";
+import { parse } from "yaml";
 
 export interface ServiceFormFieldEntitiesTagPickerProps extends Form.TagPicker.Props {
   field: HAServiceField;
@@ -70,5 +71,47 @@ export function ServiceFormFieldSelectDropdown({ id, field }: ServiceFormFieldSe
     <Form.Dropdown id={id} title={getNameOfHAServiceField(field, id)}>
       {labeledOpts?.map((o) => <Form.Dropdown.Item key={o.value} value={o.value} title={o.label} />)}
     </Form.Dropdown>
+  );
+}
+
+export interface ServiceFormFieldObjectProps extends Form.TextArea.Props {
+  field: HAServiceField;
+}
+
+export function ServiceFormFieldObject({ id, field, value, ...restProps }: ServiceFormFieldObjectProps) {
+  const error = () => {
+    try {
+      if (value) {
+        parse(value);
+      }
+    } catch (error) {
+      return "Invalid yaml";
+    }
+  };
+  return (
+    <Form.TextArea
+      id={id}
+      title={`${getNameOfHAServiceField(field, id)} (yaml)`}
+      value={value}
+      error={error()}
+      placeholder={field.description}
+      {...restProps}
+    />
+  );
+}
+
+export interface ServiceFormTargetEntitiesTagPickerProps extends Form.TagPicker.Props {
+  states: State[] | undefined;
+}
+
+export function ServiceFormTargetEntitiesTagPicker({
+  id,
+  states,
+  ...restProps
+}: ServiceFormTargetEntitiesTagPickerProps) {
+  return (
+    <Form.TagPicker id={id} title="Target Entities" placeholder="Target Entities" {...restProps}>
+      {states?.map((s) => <Form.TagPicker.Item value={s.entity_id} title={`${getFriendlyName(s)} (${s.entity_id})`} />)}
+    </Form.TagPicker>
   );
 }

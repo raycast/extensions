@@ -2,7 +2,9 @@ import { useHAStates } from "@components/hooks";
 import {
   ServiceFormFieldEntitiesTagPicker,
   ServiceFormFieldNumber,
+  ServiceFormFieldObject,
   ServiceFormFieldSelectDropdown,
+  ServiceFormTargetEntitiesTagPicker,
 } from "@components/services/form";
 import { HAServiceCall, useServiceCalls } from "@components/services/hooks";
 import {
@@ -12,7 +14,6 @@ import {
   getNameOfHAServiceField,
 } from "@components/services/utils";
 import { ha } from "@lib/common";
-import { getFriendlyName } from "@lib/utils";
 import { Action, ActionPanel, Form, Icon, Keyboard, popToRoot, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
@@ -148,17 +149,12 @@ export default function ServiceCallCommand() {
         ))}
       </Form.Dropdown>
       {!yamlMode && selectedService?.meta.target?.entity && (
-        <Form.TagPicker
+        <ServiceFormTargetEntitiesTagPicker
           id="entity_id"
-          title="Target Entities"
-          placeholder="Target Entities"
+          states={states}
           value={formData.entity_id}
           onChange={(newValue) => setFormData({ ...formData, entity_id: newValue })}
-        >
-          {states?.map((s) => (
-            <Form.TagPicker.Item value={s.entity_id} title={`${getFriendlyName(s)} (${s.entity_id})`} />
-          ))}
-        </Form.TagPicker>
+        />
       )}
       {!yamlMode &&
         Object.entries(selectedService?.meta.fields ?? {}).map(([k, v]) => {
@@ -187,15 +183,13 @@ export default function ServiceCallCommand() {
             );
           } else if (sel?.object !== undefined) {
             return (
-              <Form.TextArea
+              <ServiceFormFieldObject
                 id={k}
-                title={`${getNameOfHAServiceField(v, k)} (yaml)`}
+                field={v}
                 value={formData[k]}
-                placeholder={v.description}
                 onChange={(nv) => {
                   try {
-                    const no = nv.trim().length <= 0 ? {} : parse(nv);
-                    setFormData({ ...formData, [k]: no });
+                    setFormData({ ...formData, [k]: nv.trim().length <= 0 ? undefined : nv });
                   } catch (error) {
                     //
                   }
