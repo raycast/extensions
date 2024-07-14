@@ -69,48 +69,50 @@ function ListbackupAction(props: { destination: Destination }) {
                 load_toast.hide();
                 push(
                   <List>
-                    {listbackup_strings.length==0?
-                    <List.EmptyView title="No backup found on this destination." icon={Icon.Info}></List.EmptyView>
-                    :listbackup_strings.map((backup_string) => {
-                      const [date_str, time_str] = transform_ListbackupTimestamp(backup_string);
-                      return (
-                        <List.Item
-                          icon={Icon.Clock}
-                          key={backup_string}
-                          title={date_str}
-                          subtitle={time_str}
-                          actions={
-                            <ActionPanel>
-                              <ListbackupcontentAction timestamp={backup_string} destination={props.destination} />
-                              <Action
-                                title="Reveal in Finder"
-                                shortcut={{ key: "r", modifiers: ["ctrl", "cmd"] }}
-                                onAction={() => {
-                                  util_openTimestampDestination(backup_string, props.destination)
-                                    .then(() => closeMainWindow({ clearRootSearch: true }))
-                                    .catch(() => showHUD(`Failed to open backup: ${backup_string}`));
-                                }}
-                              />
-                              <Action.CopyToClipboard
-                                title="Copy Timestamp"
-                                content={backup_string}
-                                shortcut={{ key: "c", modifiers: ["cmd"] }}
-                              />
-                              <Action
-                                title="Copy Timestamp Volume Path"
-                                shortcut={{ key: "c", modifiers: ["cmd", "opt"] }}
-                                onAction={() => {
-                                  util_getTimestampLocation(backup_string, props.destination).then((data) => {
-                                    Clipboard.copy(data.toString());
-                                    showHUD("Copied to Clipboard");
-                                  });
-                                }}
-                              />
-                            </ActionPanel>
-                          }
-                        />
-                      );
-                    })}
+                    {listbackup_strings.length == 0 ? (
+                      <List.EmptyView title="No backup found on this destination." icon={Icon.Info}></List.EmptyView>
+                    ) : (
+                      listbackup_strings.map((backup_string) => {
+                        const [date_str, time_str] = transform_ListbackupTimestamp(backup_string);
+                        return (
+                          <List.Item
+                            icon={Icon.Clock}
+                            key={backup_string}
+                            title={date_str}
+                            subtitle={time_str}
+                            actions={
+                              <ActionPanel>
+                                <ListbackupcontentAction timestamp={backup_string} destination={props.destination} />
+                                <Action
+                                  title="Reveal in Finder"
+                                  shortcut={{ key: "r", modifiers: ["ctrl", "cmd"] }}
+                                  onAction={() => {
+                                    util_openTimestampDestination(backup_string, props.destination)
+                                      .then(() => closeMainWindow({ clearRootSearch: true }))
+                                      .catch(() => showHUD(`Failed to open backup: ${backup_string}`));
+                                  }}
+                                />
+                                <Action.CopyToClipboard
+                                  title="Copy Timestamp"
+                                  content={backup_string}
+                                  shortcut={{ key: "c", modifiers: ["cmd"] }}
+                                />
+                                <Action
+                                  title="Copy Timestamp Volume Path"
+                                  shortcut={{ key: "c", modifiers: ["cmd", "opt"] }}
+                                  onAction={() => {
+                                    util_getTimestampLocation(backup_string, props.destination).then((data) => {
+                                      Clipboard.copy(data.toString());
+                                      showHUD("Copied to Clipboard");
+                                    });
+                                  }}
+                                />
+                              </ActionPanel>
+                            }
+                          />
+                        );
+                      })
+                    )}
                   </List>,
                 );
               })
