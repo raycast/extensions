@@ -130,14 +130,14 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <Action.OpenInBrowser
-                    title="Run"
-                    url={`raycast://extensions/cyxn/universal-commands/run-custom-command?arguments=${encodeURIComponent(JSON.stringify({ id }))}`}
-                  />
                   <Action.CreateQuicklink
                     quicklink={{
                       link: composeFullUrl(id),
                     }}
+                  />
+                  <Action.OpenInBrowser
+                    title="Run"
+                    url={`raycast://extensions/cyxn/universal-commands/run-custom-command?arguments=${encodeURIComponent(JSON.stringify({ id }))}`}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section>

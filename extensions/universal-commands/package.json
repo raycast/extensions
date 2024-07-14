@@ -16,7 +16,14 @@
       "name": "manage-custom-commands",
       "title": "List Custom Commands",
       "subtitle": "Get List of Custom Commands",
-      "description": "Get list of all existing commands, create new commandss, view its details, edit or delete them",
+      "description": "Get list of all existing commands, create new commands, view its details, edit or delete them",
+      "mode": "view"
+    },
+    {
+      "name": "create-custom-command",
+      "title": "Create Custom Command",
+      "subtitle": "Create Custom Command",
+      "description": "Create new custom command for Universal Commands extension",
       "mode": "view"
     },
     {
