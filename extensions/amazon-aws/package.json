@@ -7,7 +7,6 @@
   "author": "Falcon",
   "contributors": [
     "Hodglim",
-    "JonathanWbn",
     "gebeto",
     "mommertf",
     "duboiss",
@@ -21,6 +20,9 @@
     "stelo",
     "srikirank",
     "b0lle"
+  ],
+  "pastContributors": [
+    "JonathanWbn"
   ],
   "categories": [
     "Developer Tools",
@@ -161,6 +163,7 @@
     "util": "^0.12.5"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
     "@types/node": "^20.12.12",
     "@types/react": "^18.3.2",
     "@typescript-eslint/eslint-plugin": "^7.9.0",

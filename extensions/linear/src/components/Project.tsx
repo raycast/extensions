@@ -20,12 +20,11 @@ import ProjectUpdates from "./ProjectUpdates";
 type ProjectProps = {
   project: ProjectResult;
   priorities: IssuePriorityValue[] | undefined;
-  users: User[] | undefined;
   me: User | undefined;
   mutateProjects: MutatePromise<ProjectResult[] | undefined>;
 };
 
-export default function Project({ project, priorities, users, me, mutateProjects }: ProjectProps) {
+export default function Project({ project, priorities, me, mutateProjects }: ProjectProps) {
   const { linearClient } = getLinearClient();
 
   const progress = `${Math.round(project.progress * 100)}%`;
@@ -106,7 +105,7 @@ export default function Project({ project, priorities, users, me, mutateProjects
       actions={
         <ActionPanel title={project.name}>
           <Action.Push
-            target={<ProjectIssues projectId={project.id} priorities={priorities} users={users} me={me} />}
+            target={<ProjectIssues projectId={project.id} priorities={priorities} me={me} />}
             title="Show Issues"
             icon={Icon.List}
           />

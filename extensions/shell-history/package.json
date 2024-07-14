@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shell-history",
   "title": "Shell History",
-  "description": "Search shell command history.",
+  "description": "Search shell command history from zsh, bash, and fish.",
   "icon": "shell-history-icon.png",
   "author": "koinzhang",
   "license": "MIT",
@@ -25,7 +25,7 @@
     {
       "name": "index",
       "title": "Search Shell History",
-      "description": "Search shell command history",
+      "description": "Search shell command history.",
       "mode": "view",
       "preferences": [
         {
@@ -65,8 +65,16 @@
         {
           "title": "Shell History",
           "name": "removeDuplicates",
-          "label": "Remove duplicates",
+          "label": "Remove Duplicates",
           "description": "Remove duplicate commands",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "rememberShellTag",
+          "label": "Remember Shell Tag",
+          "description": "Remember the shell tag",
           "type": "checkbox",
           "default": true,
           "required": false
@@ -88,24 +96,33 @@
               "value": "Copy"
             }
           ]
+        },
+        {
+          "title": "Tips",
+          "name": "showTips",
+          "label": "Show Tips",
+          "description": "Show tips when performing actions",
+          "type": "checkbox",
+          "default": true,
+          "required": false
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.0",
-    "@raycast/utils": "^1.16.0",
+    "@raycast/api": "^1.78.1",
+    "@raycast/utils": "^1.16.1",
     "read-last-lines": "^1.8.0",
     "shell-quote": "^1.8.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.14.6",
+    "@types/node": "20.14.9",
     "@types/react": "18.3.3",
     "@types/shell-quote": "^1.7.5",
     "eslint": "^8.57.0",
     "prettier": "^3.3.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.3"
   },
   "scripts": {
     "build": "ray build -e dist",

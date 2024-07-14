@@ -14,7 +14,7 @@ import {
   LaunchProps,
 } from "@raycast/api";
 import { useWorkspaces } from "@hooks/use-workspaces";
-import { FormValidation, showFailureToast, useCachedPromise, useCachedState, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import { createShortLink } from "@/api";
 import { fetchLink, isEmpty } from "@utils/clipboard";
 
@@ -30,13 +30,11 @@ interface ShortLinkFormValues {
 const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormValues; args: Arguments.ShortenLink }) => {
   const { push, pop } = useNavigation();
   const { url, key } = args;
-  const [workspaceId, setWorkspaceId] = useCachedState("selected_workspace", "", { cacheNamespace: "shorten-links" });
   const { data: originalLink, isLoading: isLoadingLink } = useCachedPromise(fetchLink, [], { execute: isEmpty(url) });
-  const { workspaces, isLoading } = useWorkspaces();
+  const { workspaces, isLoading, isSingleWorkspace, error } = useWorkspaces();
 
   const { handleSubmit, itemProps, values } = useForm<ShortLinkFormValues>({
     onSubmit: async (vals) => {
-      setWorkspaceId(vals.workspaceId);
       await showToast({ style: Toast.Style.Animated, title: "Creating link..." });
       createShortLink({ originalUrl: vals.url, ...vals })
         .then(async ({ shortLink }) => {
@@ -71,9 +69,9 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
     validation: {
       url: FormValidation.Required,
       domain: FormValidation.Required,
-      workspaceId: FormValidation.Required,
+      workspaceId: !isSingleWorkspace ? FormValidation.Required : undefined,
     },
-    initialValues: retryValues ?? { domain: "dub.sh", workspaceId, url: isEmpty(url) ? originalLink : url, key },
+    initialValues: retryValues ?? { domain: "dub.sh", url: isEmpty(url) ? originalLink : url, key },
   });
 
   return (
@@ -87,16 +85,18 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
       }
     >
       <Form.Description title={"❗"} text="Your shortened link will be copied to your clipboard." />
-      <Form.Dropdown {...itemProps.workspaceId} title="Workspace">
-        {workspaces.map((w) => (
-          <Form.Dropdown.Item
-            key={w.id}
-            value={w.id}
-            title={w.name}
-            icon={{ source: w.logo ?? "command-icon.png", mask: Image.Mask.Circle }}
-          />
-        ))}
-      </Form.Dropdown>
+      {!isSingleWorkspace && !error && (
+        <Form.Dropdown {...itemProps.workspaceId} title="Workspace">
+          {workspaces.map((w) => (
+            <Form.Dropdown.Item
+              key={w.id}
+              value={w.id}
+              title={w.name}
+              icon={{ source: w.logo ?? "command-icon.png", mask: Image.Mask.Circle }}
+            />
+          ))}
+        </Form.Dropdown>
+      )}
       <Form.Separator />
       <Form.TextField {...itemProps.url} placeholder="https://dub.co" title="Original URL" />
       <Form.TextField {...itemProps.key} placeholder="(Optional)" title="URL Key" />

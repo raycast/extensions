@@ -20,7 +20,7 @@ import { useCachedState } from "@raycast/utils";
 import OpenAllMenuItem from "./components/menu-items/OpenAllMenuItem";
 import PinMenuItem from "./components/menu-items/PinMenuItem";
 import RecentApplicationsList from "./components/RecentApplicationsList";
-import { KEYBOARD_SHORTCUT } from "./lib/constants";
+import { KEYBOARD_SHORTCUT, Visibility } from "./lib/constants";
 import { Group, useGroups } from "./lib/Groups";
 import { getGroupIcon } from "./lib/icons";
 import { useLocalData } from "./lib/LocalData";
@@ -97,9 +97,21 @@ export default function ShowPinsCommand() {
       file.path && ((fs.existsSync(file.path) && fs.statSync(file.path).isFile()) || file.path.endsWith(".app/")),
   );
 
+  const visibleGroups = groups.filter(
+    (g) =>
+      g.visibility === undefined || g.visibility === Visibility.VISIBLE || g.visibility === Visibility.MENUBAR_ONLY,
+  );
+
   const allPins = sortPins(
-    pins.filter((p) => preferences.showInapplicablePins || !irrelevantPins.find((pin) => pin.id == p.id)),
-    groups,
+    pins
+      .filter((p) => preferences.showInapplicablePins || !irrelevantPins.find((pin) => pin.id == p.id))
+      .filter(
+        (pin) =>
+          pin.visibility === undefined ||
+          pin.visibility === Visibility.VISIBLE ||
+          pin.visibility === Visibility.MENUBAR_ONLY,
+      ),
+    visibleGroups,
   );
 
   /**
@@ -171,10 +183,13 @@ export default function ShowPinsCommand() {
     );
   };
 
+  const ungroupedPins = allPins.filter((p) =>
+    preferences.groupDisplaySetting !== GroupDisplaySetting.None ? p.group == "None" : true,
+  );
   const groupSubmenus =
     preferences.groupDisplaySetting === GroupDisplaySetting.None
       ? []
-      : groups
+      : visibleGroups
           .filter((g) => g.parent == undefined)
           .map((group) => getSubsections(group, groups))
           .filter((g) => g != null);
@@ -184,11 +199,10 @@ export default function ShowPinsCommand() {
     <MenuBarExtra icon={pinIcon} isLoading={loadingPins || loadingGroups || loadingLocalData}>
       {[
         [
-          <MenuBarExtra.Section title={preferences.showCategories ? "Pins" : undefined} key="pins">
-            {allPins.length == 0 ? <MenuBarExtra.Item title="No pins yet!" /> : null}
-            {allPins
-              .filter((p) => (preferences.groupDisplaySetting !== GroupDisplaySetting.None ? p.group == "None" : true))
-              .map((pin: Pin) => (
+          ungroupedPins.length > 0 ? (
+            <MenuBarExtra.Section title={preferences.showCategories ? "Pins" : undefined} key="pins">
+              {allPins.length == 0 ? <MenuBarExtra.Item title="No pins yet!" /> : null}
+              {ungroupedPins.map((pin: Pin) => (
                 <PinMenuItem
                   pin={pin}
                   relevant={relevantPins.find((p) => p.id == pin.id) != undefined && !preferences.showInapplicablePins}
@@ -198,7 +212,8 @@ export default function ShowPinsCommand() {
                   key={pin.id}
                 />
               ))}
-          </MenuBarExtra.Section>,
+            </MenuBarExtra.Section>
+          ) : null,
           groupSubmenus?.length ? (
             <MenuBarExtra.Section title={preferences.showCategories ? "Groups" : undefined} key="groups">
               {groupSubmenus}
@@ -216,13 +231,13 @@ export default function ShowPinsCommand() {
             <AppQuickPin app={localData.currentApplication} />
             <TextQuickPin />
             <TabQuickPin app={localData.currentApplication} tab={localData.currentTab} />
-            <TabsQuickPin app={localData.currentApplication} tabs={localData.tabs} groups={groups} />
-            <FilesQuickPin app={localData.currentApplication} selectedFiles={selectedFiles} groups={groups} />
+            <TabsQuickPin app={localData.currentApplication} tabs={localData.tabs} groups={visibleGroups} />
+            <FilesQuickPin app={localData.currentApplication} selectedFiles={selectedFiles} groups={visibleGroups} />
             <DirectoryQuickPin app={localData.currentApplication} directory={localData.currentDirectory} />
             <DocumentQuickPin app={localData.currentApplication} document={localData.currentDocument} />
             <TrackQuickPin app={localData.currentApplication} track={localData.currentTrack} />
-            <NotesQuickPin app={localData.currentApplication} notes={localData.selectedNotes} groups={groups} />
-            <TargetGroupMenu groups={groups} />
+            <NotesQuickPin app={localData.currentApplication} notes={localData.selectedNotes} groups={visibleGroups} />
+            <TargetGroupMenu groups={visibleGroups} />
           </MenuBarExtra.Section>
         ) : null,
       ].sort(() => (preferences.topSection == "quickPins" ? -1 : 1))}

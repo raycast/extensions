@@ -61,7 +61,31 @@ const toggleStageTransition = async (
   stage: PipelineStage,
   mutate: MutatePromise<Pipeline[] | undefined>,
 ) => {
-  await mutate(transitionEnabled ? disableTransition(pipelineName, stage) : enableTransition(pipelineName, stage), {
+  const toast = await showToast(
+    Toast.Style.Animated,
+    `❗${transitionEnabled ? "Disabling" : "Enabling"} transition`,
+    `between ${stage.stageName} -> ${stage.nextStage!.stageName}`,
+  );
+
+  const client = new CodePipelineClient({});
+  const promise = transitionEnabled
+    ? client.send(
+        new DisableStageTransitionCommand({
+          pipelineName,
+          stageName: stage.nextStage!.stageName,
+          reason: "Disabled by Raycast",
+          transitionType: StageTransitionType.Inbound,
+        }),
+      )
+    : client.send(
+        new EnableStageTransitionCommand({
+          pipelineName,
+          stageName: stage.nextStage!.stageName,
+          transitionType: StageTransitionType.Inbound,
+        }),
+      );
+
+  mutate(promise, {
     optimisticUpdate: (pipelines) => {
       if (!pipelines) {
         return;
@@ -83,62 +107,15 @@ const toggleStageTransition = async (
       );
     },
     shouldRevalidateAfter: !transitionEnabled,
-  });
-};
-
-const enableTransition = async (pipelineName: string, stage: PipelineStage) => {
-  const toast = await showToast(
-    Toast.Style.Animated,
-    "❗Enabling transition",
-    `between ${stage.stageName} -> ${stage.nextStage!.stageName}`,
-  );
-  return new CodePipelineClient({})
-    .send(
-      new EnableStageTransitionCommand({
-        pipelineName,
-        stageName: stage.nextStage!.stageName,
-        transitionType: StageTransitionType.Inbound,
-      }),
-    )
+  })
     .then(() => {
       toast.style = Toast.Style.Success;
-      toast.title = "✅ Enabled transition";
-      return true;
+      toast.title = `✅ ${transitionEnabled ? "Disabled" : "Enabled"} transition`;
     })
     .catch((err) => {
       captureException(err);
       toast.style = Toast.Style.Failure;
-      toast.title = "❌ Failed to enable transition";
+      toast.title = `❌ Failed to ${transitionEnabled ? "disable" : "enable"} transition`;
       toast.message = getErrorMessage(err);
-      throw err;
-    });
-};
-
-const disableTransition = async (pipelineName: string, stage: PipelineStage) => {
-  const toast = await showToast(
-    Toast.Style.Animated,
-    "❗Disabling transition",
-    `between ${stage.stageName} -> ${stage.nextStage!.stageName}`,
-  );
-  return new CodePipelineClient({})
-    .send(
-      new DisableStageTransitionCommand({
-        pipelineName,
-        stageName: stage.nextStage!.stageName,
-        transitionType: StageTransitionType.Inbound,
-        reason: "Disabled by Raycast",
-      }),
-    )
-    .then(() => {
-      toast.style = Toast.Style.Success;
-      toast.title = "✅ Disabled transition";
-      return true;
-    })
-    .catch((err) => {
-      captureException(err);
-      toast.style = Toast.Style.Failure;
-      toast.title = "❌ Failed to disable transition";
-      toast.message = getErrorMessage(err);
-      throw err;
     });
 };

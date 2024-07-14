@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { compareDesc, format, subDays } from "date-fns";
+import { format, subDays } from "date-fns";
 import { uniqBy } from "lodash";
 
 import { getGitHubClient } from "../api/githubClient";
@@ -16,11 +16,11 @@ export enum SectionType {
   RecentlyClosed = "Recently Closed",
 }
 
-export function useMyPullRequests(repository: string | null) {
+export function useMyPullRequests(repository: string | null, sortQuery: string) {
   const { github } = getGitHubClient();
 
   const { data, ...rest } = useCachedPromise(
-    async (repository) => {
+    async (repository, sortTxt) => {
       const numberOfDays = 14;
       const twoWeeksAgo = format(subDays(Date.now(), numberOfDays), "yyyy-MM-dd");
       const updatedFilter = `updated:>${twoWeeksAgo}`;
@@ -32,22 +32,27 @@ export function useMyPullRequests(repository: string | null) {
 
       const results = await Promise.all(
         [
-          `is:pr author:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,
-          `is:pr author:@me archived:false is:closed ${updatedFilter} ${repositoryFilter}`,
-          `is:pr assignee:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,
-          `is:pr assignee:@me archived:false is:closed ${updatedFilter} ${repositoryFilter}`,
-          `is:pr mentions:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,
-          `is:pr mentions:@me archived:false is:closed ${updatedFilter} ${repositoryFilter}`,
-          `is:pr ${reviewRequestedQuery}:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,
-          `is:pr ${reviewRequestedQuery}:@me archived:false is:closed ${updatedFilter} ${repositoryFilter}`,
-          `is:pr reviewed-by:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,
-          `is:pr reviewed-by:@me archived:false is:closed ${updatedFilter} ${repositoryFilter}`,
-        ].map((query) => github.searchPullRequests({ query, numberOfItems: 20 })),
+          `is:pr author:@me archived:false is:open`,
+          `is:pr author:@me archived:false is:closed`,
+          `is:pr assignee:@me archived:false is:open`,
+          `is:pr assignee:@me archived:false is:closed`,
+          `is:pr mentions:@me archived:false is:open`,
+          `is:pr mentions:@me archived:false is:closed`,
+          `is:pr ${reviewRequestedQuery}:@me archived:false is:open`,
+          `is:pr ${reviewRequestedQuery}:@me archived:false is:closed`,
+          `is:pr reviewed-by:@me archived:false is:open`,
+          `is:pr reviewed-by:@me archived:false is:closed`,
+        ].map((query) =>
+          github.searchPullRequests({
+            query: `${query} ${sortTxt} ${updatedFilter} ${repositoryFilter}`,
+            numberOfItems: 20,
+          }),
+        ),
       );
 
       return results.map((result) => result.search.edges?.map((edge) => edge?.node as PullRequestFieldsFragment));
     },
-    [repository],
+    [repository, sortQuery],
   );
 
   const [
@@ -92,7 +97,6 @@ export function useMyPullRequests(repository: string | null) {
     .filter((section) => section.pullRequests && section.pullRequests.length > 0)
     .map((section) => {
       const pullRequests = getPullRequestsWithoutDuplicates(section.pullRequests);
-      pullRequests?.sort((a, b) => compareDesc(new Date(a.updatedAt), new Date(b.updatedAt)));
 
       const subtitle = pluralize(pullRequests?.length ?? 0, "pull request", { withNumber: true });
 

@@ -24,7 +24,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { SORT_FN, StorageKey, SORT_STRATEGY } from "./constants";
+import { SORT_FN, StorageKey, SORT_STRATEGY, Visibility, PinAction } from "./constants";
 import { objectFromNonNullableEntriesOfObject, runCommand, runCommandInTerminal } from "./utils";
 import { ExtensionPreferences } from "./preferences";
 import * as fs from "fs";
@@ -129,6 +129,16 @@ export type Pin = {
    * The tooltip to display when hovering over the pin.
    */
   tooltip?: string;
+
+  /**
+   * Where the pin is visible in the UI, if at all.
+   */
+  visibility?: Visibility;
+
+  /**
+   * The action to take when the pin expires.
+   */
+  expirationAction?: string;
 };
 
 /**
@@ -153,31 +163,110 @@ export const PinKeys = [
   "tags",
   "notes",
   "tooltip",
+  "visibility",
+  "expirationAction",
 ];
 
 /**
  * Removes expired pins.
  */
 export const checkExpirations = async () => {
-  const storedPins = await getStorage(StorageKey.LOCAL_PINS);
-  let numExpired = 0;
-  const newPins = storedPins.filter((pin: Pin) => {
-    if (pin.expireDate) {
-      if (new Date(pin.expireDate) < new Date()) {
-        numExpired++;
-        return false;
-      }
-    }
-    return true;
-  });
-  if (numExpired > 0) {
-    if (environment.launchType == LaunchType.Background) {
-      await showHUD(`Removed ${numExpired} expired pin${numExpired == 1 ? "" : "s"}`);
+  const storedPins = (await getStorage(StorageKey.LOCAL_PINS)) as Pin[];
+  let numRemoved = 0;
+  let numHidden = 0;
+  let numDisabled = 0;
+  const customActionPins: Pin[] = [];
+  const newPins = await Promise.all(
+    storedPins
+      .filter((pin: Pin) => {
+        if (pin.expireDate) {
+          if (new Date(pin.expireDate) < new Date()) {
+            if (pin.expirationAction === PinAction.DELETE || pin.expirationAction == undefined) {
+              numRemoved++;
+              return false;
+            } else if (pin.expirationAction == PinAction.HIDE) {
+              numHidden++;
+            } else if (pin.expirationAction == PinAction.DISABLE) {
+              numDisabled++;
+            } else if (pin.expirationAction?.startsWith("custom")) {
+              customActionPins.push(pin);
+            }
+          }
+        }
+        return true;
+      })
+      .map(async (pin: Pin) => {
+        if (pin.expireDate && new Date(pin.expireDate) < new Date()) {
+          let newVisibility = pin.visibility;
+          if (pin.expirationAction == PinAction.HIDE) {
+            newVisibility = Visibility.HIDDEN;
+          } else if (pin.expirationAction == PinAction.DISABLE) {
+            newVisibility = Visibility.DISABLED;
+          }
+
+          return {
+            ...pin,
+            expireDate: undefined,
+            visibility: newVisibility,
+          };
+        }
+        return pin;
+      }),
+  );
+
+  let message = "";
+  if (numRemoved > 0) {
+    message = `Removed ${numRemoved} expired pin${numRemoved == 1 ? "" : "s"}`;
+  }
+
+  if (numHidden > 0) {
+    if (numRemoved > 0) {
+      message += `, hid ${numHidden} pin${numHidden == 1 ? "" : "s"}`;
     } else {
-      await showToast({ title: `Removed ${numExpired} expired pin${numExpired == 1 ? "" : "s"}` });
+      message += `Hid ${numHidden} pin${numHidden == 1 ? "" : "s"}`;
     }
   }
+
+  if (numDisabled > 0) {
+    if ((numRemoved > 0 && numHidden == 0) || (numRemoved == 0 && numHidden > 0)) {
+      message += `, disabled ${numDisabled} pin${numDisabled == 1 ? "" : "s"}`;
+    } else if (numRemoved > 0 && numHidden > 0) {
+      message += `, and disabled ${numDisabled} pin${numDisabled == 1 ? "" : "s"}`;
+    } else {
+      message += `Disabled ${numDisabled} pin${numDisabled == 1 ? "" : "s"}`;
+    }
+  }
+
+  if (customActionPins.length > 0) {
+    const numCustom = customActionPins.length;
+    if ((numRemoved > 0 || numHidden > 0 || numDisabled > 0) && numCustom > 0) {
+      message += `. Ran custom expiration actions for ${numCustom} pin${numCustom == 1 ? "" : "s"}.`;
+    } else {
+      message += `Ran custom expiration actions for ${numCustom} pin${numCustom == 1 ? "" : "s"}`;
+    }
+  }
+
+  if (message != "") {
+    if (environment.launchType == LaunchType.Background) {
+      showHUD(message);
+    } else {
+      showToast({ title: message });
+    }
+  }
+
   await setStorage(StorageKey.LOCAL_PINS, newPins);
+
+  for (const pin of customActionPins) {
+    if (pin.expirationAction) {
+      // Run any placeholder directives in the expiration action
+      await PLApplicator.bulkApply(pin.expirationAction, {
+        context: {
+          pin: pin,
+        },
+        allPlaceholders: PinsPlaceholders,
+      });
+    }
+  }
 };
 
 /**
@@ -199,6 +288,7 @@ export const usePins = () => {
   const revalidatePins = async () => {
     setLoading(true);
     const storedPins: Pin[] = await getStorage(StorageKey.LOCAL_PINS);
+
     const checkedPins: Pin[] = [];
     for (const pin of storedPins) {
       checkedPins.push({
@@ -271,7 +361,7 @@ export const openPin = async (
 
       const targetRaw = pin.url.startsWith("~") ? pin.url.replace("~", os.homedir()) : pin.url;
       const target = await PLApplicator.bulkApply(targetRaw, {
-        context: filteredContext,
+        context: { ...filteredContext, pin: pin },
         allPlaceholders: PinsPlaceholders,
       });
       if (target != "") {
@@ -340,6 +430,8 @@ export const openPin = async (
     pin.averageExecutionTime
       ? Math.round((pin.averageExecutionTime * (pin.timesOpened || 0) + timeElapsed) / ((pin.timesOpened || 0) + 1))
       : timeElapsed,
+    pin.visibility,
+    pin.expirationAction,
     () => {
       null;
     },
@@ -395,6 +487,8 @@ export const createNewPin = async (
   iconColor: string | undefined,
   tags: string[] | undefined,
   notes: string | undefined,
+  visibility?: Visibility | undefined,
+  expireAction?: string | undefined,
 ) => {
   // Get the stored pins
   const storedPins = await getStorage(StorageKey.LOCAL_PINS);
@@ -423,6 +517,8 @@ export const createNewPin = async (
     iconColor: iconColor,
     tags: tags,
     notes: notes,
+    visibility: visibility || Visibility.VISIBLE,
+    expirationAction: expireAction || PinAction.DELETE,
   });
 
   // Update the stored pins
@@ -464,6 +560,8 @@ export const modifyPin = async (
   notes: string | undefined,
   tooltip: string | undefined,
   averageExecutionTime: number | undefined,
+  visibility: Visibility | undefined,
+  expirationAction: string | undefined,
   pop: () => void,
   setPins: React.Dispatch<React.SetStateAction<Pin[]>>,
   notify = true,
@@ -500,6 +598,8 @@ export const modifyPin = async (
         notes: notes,
         tooltip: tooltip,
         averageExecutionTime: averageExecutionTime,
+        visibility: visibility || Visibility.VISIBLE,
+        expirationAction: expirationAction || PinAction.DELETE,
       } as Pin;
     } else {
       return oldPin;
@@ -533,6 +633,8 @@ export const modifyPin = async (
       notes: notes,
       tooltip: tooltip,
       averageExecutionTime: averageExecutionTime,
+      visibility: visibility || Visibility.VISIBLE,
+      expirationAction: expirationAction || PinAction.DELETE,
     });
   }
 
@@ -544,6 +646,59 @@ export const modifyPin = async (
   }
   pop();
 };
+
+export const setPinAttribute = async (
+  pin: Pin,
+  attribute: keyof Pin,
+  value: Pin[keyof Pin],
+  setPins: React.Dispatch<React.SetStateAction<Pin[]>>,
+) => {
+  const storedPins = await getStorage(StorageKey.LOCAL_PINS);
+  const newData: Pin[] = storedPins.map((oldPin: Pin) => {
+    if (oldPin.id == pin.id) {
+      return {
+        ...oldPin,
+        [attribute]: value,
+      };
+    }
+    return oldPin;
+  });
+
+  setPins(newData);
+  await setStorage(StorageKey.LOCAL_PINS, newData);
+};
+
+/**
+ * Hides a pin; updates local storage.
+ * @param pin The pin to hide.
+ * @param setPins The function to update the list of pins.
+ */
+export const hidePin = async (pin: Pin, setPins: React.Dispatch<React.SetStateAction<Pin[]>>) =>
+  setPinAttribute(pin, "visibility", Visibility.HIDDEN, setPins);
+
+/**
+ * Unhides a pin; updates local storage.
+ * @param pin The pin to unhide.
+ * @param setPins The function to update the list of pins.
+ */
+export const unhidePin = async (pin: Pin, setPins: React.Dispatch<React.SetStateAction<Pin[]>>) =>
+  setPinAttribute(pin, "visibility", Visibility.VISIBLE, setPins);
+
+/**
+ * Disables a pin; updates local storage.
+ * @param pin The pin to disable.
+ * @param setPins The function to update the list of pins.
+ */
+export const disablePin = async (pin: Pin, setPins: React.Dispatch<React.SetStateAction<Pin[]>>) =>
+  setPinAttribute(pin, "visibility", Visibility.DISABLED, setPins);
+
+/**
+ * Moves a pin to the specified group; updates local storage.
+ * @param pin The pin to enable.
+ * @param setPins The function to update the list of pins.
+ */
+export const movePin = async (pin: Pin, group: string, setPins?: React.Dispatch<React.SetStateAction<Pin[]>>) =>
+  setPinAttribute(pin, "group", group, setPins || (() => {}));
 
 /**
  * Deletes a pin; updates local storage.

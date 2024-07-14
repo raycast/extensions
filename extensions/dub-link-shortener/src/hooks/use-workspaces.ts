@@ -5,17 +5,22 @@ import { WorkspaceSchema } from "@/types";
 export const useWorkspaces = () => {
   const {
     data: workspaces,
-    isLoading,
+    isLoading: isLoadingWorkspaces,
     error,
   } = useCachedPromise(
     async () => {
-      const workspaces = await getAllWorkspaces();
-      return await Promise.all(
-        workspaces.map(async (w) => {
-          const tags = await getAllTags({ workspaceId: w.id });
-          return { ...w, tags } as WorkspaceSchema;
-        }),
-      );
+      try {
+        const workspaces = await getAllWorkspaces();
+        return await Promise.all(
+          workspaces.map(async (w) => {
+            const tags = await getAllTags({ workspaceId: w.id });
+            return { ...w, tags } as WorkspaceSchema;
+          }),
+        );
+      } catch (err) {
+        const tags = await getAllTags();
+        return [{ tags } as WorkspaceSchema];
+      }
     },
     [],
     {
@@ -24,5 +29,8 @@ export const useWorkspaces = () => {
     },
   );
 
-  return { workspaces, isLoading: (!workspaces && !error) || isLoading, error };
+  const isLoading = (!workspaces && !error) || isLoadingWorkspaces;
+  const isSingleWorkspace = !isLoading && workspaces && workspaces.length === 1;
+
+  return { workspaces, isLoading, error, isSingleWorkspace };
 };

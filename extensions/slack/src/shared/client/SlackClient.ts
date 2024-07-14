@@ -1,10 +1,11 @@
+import { Icon, Image } from "@raycast/api";
 import { SlackConversation, SlackMember, getSlackWebClient } from "./WebClient";
 
 interface Item {
   id: string;
   teamId: string;
   name: string;
-  icon: string;
+  icon: Image.ImageLike;
 }
 
 export interface User extends Item {
@@ -13,7 +14,9 @@ export interface User extends Item {
 }
 
 export type Channel = Item;
-export type Group = Item;
+export type Group = Item & {
+  groupName: string;
+};
 
 export type PresenceStatus = "online" | "offline" | "forced-offline";
 export interface SnoozeStatus {
@@ -65,13 +68,13 @@ export class SlackClient {
           return {
             id,
             name: displayName,
-            icon: profile?.image_24,
+            icon: profile?.image_24 ? { source: profile?.image_24, mask: Image.Mask.Circle } : Icon.Person,
             teamId: team_id,
             username,
             conversationId: conversation?.id,
-          };
+          } as User;
         })
-        .filter((i): i is User => !!(i.id?.trim() && i.name?.trim() && i.teamId?.trim()))
+        .filter((i) => !!(i.id?.trim() && i.name?.trim() && i.teamId?.trim()))
         .sort((a, b) => sortNames(a.name, b.name)) ?? [];
 
     return users;
@@ -128,9 +131,9 @@ export class SlackClient {
             ...(context_team_id ? [context_team_id] : []),
           ];
           const teamId = teamIds.length > 0 ? teamIds[0] : "";
-          return { id, name, teamId, icon: is_private ? "channel-private.png" : "channel-public.png" };
+          return { id, name, teamId, icon: is_private ? "channel-private.png" : "channel-public.png" } as Channel;
         })
-        .filter((i): i is Channel => !!(i.id?.trim() && i.name?.trim() && i.teamId.trim()))
+        .filter((i) => !!(i.id?.trim() && i.name?.trim() && i.teamId.trim()))
         .sort((a, b) => sortNames(a.name, b.name)) ?? []
     );
   }
@@ -152,9 +155,9 @@ export class SlackClient {
             .filter((x) => !!x)
             .join(", ");
 
-          return { id, name: displayName, teamId, icon: "channel-private.png" };
+          return { id, name: displayName, teamId, icon: "channel-private.png", groupName: name } as Group;
         })
-        .filter((i): i is Group => !!(i.id?.trim() && i.name?.trim() && i.teamId.trim()))
+        .filter((i) => !!(i.id?.trim() && i.name?.trim() && i.teamId.trim()))
         .sort((a, b) => sortNames(a.name, b.name)) ?? [];
 
     return groups;
@@ -255,5 +258,15 @@ export class SlackClient {
     const slackWebClient = getSlackWebClient();
 
     await slackWebClient.conversations.mark({ channel: conversationId, ts: `${new Date().getTime() / 1000}` });
+  }
+
+  public static async getMe() {
+    const slackWebClient = getSlackWebClient();
+
+    const authResponse = await slackWebClient.auth.test();
+
+    const id = authResponse.user_id;
+    const username = authResponse.user;
+    return { id, username };
   }
 }
