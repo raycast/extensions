@@ -1,4 +1,5 @@
 import { useHAStates } from "@components/hooks";
+import { ServiceFormFieldEntitiesTagPicker, ServiceFormFieldNumber } from "@components/services/form";
 import { HAServiceCall, useServiceCalls } from "@components/services/hooks";
 import {
   fullHAServiceName,
@@ -199,26 +200,22 @@ export default function ServiceCallCommand() {
             );
           } else if (sel?.number !== undefined) {
             return (
-              <Form.TextField
+              <ServiceFormFieldNumber
                 id={k}
-                title={getNameOfHAServiceField(v, k)}
-                value={formData[k]}
-                placeholder={v.description}
-                onChange={(nv) => setFormData({ ...formData, [k]: parseFloat(nv) })}
+                value={formData[k] !== undefined ? `${formData[k]}` : undefined}
+                field={v}
+                onChange={(nv) => setFormData({ ...formData, [k]: nv })}
               />
             );
           } else if (sel?.entity !== undefined) {
             return (
-              <Form.TagPicker
+              <ServiceFormFieldEntitiesTagPicker
                 id={k}
-                title={getNameOfHAServiceField(v, k)}
+                field={v}
+                states={states}
                 value={formData[k]}
                 onChange={(newValue) => setFormData({ ...formData, [k]: newValue })}
-              >
-                {states?.map((s) => (
-                  <Form.TagPicker.Item value={s.entity_id} title={`${getFriendlyName(s)} (${s.entity_id})`} />
-                ))}
-              </Form.TagPicker>
+              />
             );
           } else if (sel?.select !== undefined) {
             const opts = sel?.select?.options;
