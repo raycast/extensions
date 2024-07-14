@@ -1,5 +1,17 @@
 # GitHub Gist Changelog
 
+## [OAuth2.0 Support] - 2024-07-11
+
+- Uses Raycast OAuth2.0 GitHub integration with `repo read:user gist` scopes.
+- ⚠️Disables the personal access token preference. Users can delete their tokens after successful OAuth2.0 connection.
+- Minor refactoring and updated dependencies.
+
+## [Refactor Command] - 2024-07-03
+
+- Simplify the code and improve performance
+- Use useForm to optimise performance
+- Support saving gist as snippets
+
 ## [Add Copy Raw Link action] - 2023-11-09
 
 - Add action to copy the raw link of the gist file
@@ -17,7 +29,7 @@
 
 - Updated dependencies
 
-## [Optimize extension] - 2022-09-30 
+## [Optimize extension] - 2022-09-30
 
 - Optimize Search Gists command loading speed
 

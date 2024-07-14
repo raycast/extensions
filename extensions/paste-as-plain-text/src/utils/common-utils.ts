@@ -1,5 +1,5 @@
-import { cleanLineBreaks, trimEnd, trimStart } from "../types/types";
-import { Cache } from "@raycast/api";
+import { cleanLineBreaks, showTips, trimEnd, trimStart } from "../types/types";
+import { Cache, showHUD, showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import cheerio from "cheerio";
 
@@ -87,10 +87,23 @@ export async function fetchTitle(url: string) {
     const response = await axios.get(url);
     const html = response.data;
     const $ = cheerio.load(html);
-    const title = $("title").text();
-    return title;
+    return $("title").text();
   } catch (error) {
     console.error("Error fetching title:", error);
     return "";
   }
 }
+
+export const showCustomHUD = (options: Toast.Options) => {
+  if (options.style && options.style === Toast.Style.Failure) {
+    // failure should always show toast
+    return showToast(options);
+  } else if (showTips) {
+    // success or animated should show HUD
+    if (options.style && options.style === Toast.Style.Animated) {
+      return showToast(options);
+    } else {
+      return showHUD(options.title);
+    }
+  }
+};

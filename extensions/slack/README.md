@@ -1,6 +1,16 @@
 # Slack
 
+This Raycast extension is the perfect companion for Slack users. It allows you to:
+
+- Quickly open Slack channels
+- Search for messages
+- See unread messages,
+- Snooze notifications
+- Set your presence status
+
 ## How to get an access token?
+
+If you don't want to log in through OAuth, you can use an access token instead. Here's how to get one:
 
 1. Open https://api.slack.com/apps/
 2. Click Button `Create New App`
@@ -52,7 +62,3 @@
 7. Press `Install to Workspace`
 8. Get your personal access token from `Features -> OAuth & Permissions` (section `OAuth Tokens for Your Workspace`).  
    Your personal access token will start with `xoxp-`.
-
-## Validate your Slack API Token after extension updates
-
-After extension updates in which new features were introduced you might be kindly asked for validating the permission scopes of your Slack API Token. If they differ from those scopes that are mentioned in this README your action is required: To get the extension running again you need to update the permission scopes of your existing Slack API Token or create a completely new Token by following the instructions above.

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "paste-as-plain-text",
   "title": "Paste as Plain Text",
-  "description": "Paste text from the clipboard as any format you want.",
+  "description": "Paste text from the clipboard as any format.",
   "icon": "paste-icon.png",
   "author": "koinzhang",
   "contributors": [
@@ -69,6 +69,14 @@
       "description": "Replace clipboard with pasted text after pasting",
       "required": false,
       "default": false
+    },
+    {
+      "name": "showTips",
+      "label": "Show Tips",
+      "type": "checkbox",
+      "description": "Show tips after pasting",
+      "required": false,
+      "default": true
     }
   ],
   "commands": [
@@ -76,7 +84,7 @@
       "name": "paste-as-plain-text",
       "title": "Paste as",
       "subtitle": "Plain Text",
-      "description": "Paste text from the clipboard as any format you want.",
+      "description": "Paste text from the clipboard as any format.",
       "mode": "no-view",
       "arguments": [
         {
@@ -117,7 +125,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.76.0",
+    "@raycast/api": "^1.77.1",
     "axios": "^1.7.2",
     "cheerio": "^1.0.0-rc.12",
     "fs-extra": "^11.2.0",

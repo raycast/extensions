@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.78.0 - 2024-07-03
+
+### ✨ New
+
+- In addition to the new Custom Window Management commands, we are introducing a `WindowManagement` API to give you total control to move your windows depending on any kind of logic you can imagine.
+- You can now access the `ownerOrAuthorName` in the `environment`, useful for re-usable libraries.
+
+### 🐞 Fixes
+
+- **Pagination**: Fixed the TypeScript definition of the `onLoadMore` callback.
+
 ## 1.77.0 - 2024-06-19
 
 ### ✨ New

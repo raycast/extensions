@@ -124,7 +124,7 @@ export const NewsDetail = ({ news }: { news: UnNews }) => {
 
   const detailMarkdown = [
     `## ${news.title}`,
-    `*${news.source} (${new Date(news.pubDate).toLocaleString()})*`,
+    `*${news.source} (${new Date(news.pubDate).toLocaleString(newsLanguageCode)})*`,
     `> ${news.description}`,
     `![](${news.image})`,
     ...(markdownContent === undefined

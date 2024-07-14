@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Clipboard,
   Form,
@@ -15,7 +15,7 @@ import { IssuePriorityValue, User } from "@linear/sdk";
 
 import { getLastCreatedIssues, IssueResult } from "../api/getIssues";
 import { createIssue, CreateIssuePayload } from "../api/createIssue";
-import { createAttachment } from "../api/attachments";
+import { attachLinkUrl, createAttachment } from "../api/attachments";
 
 import useLabels from "../hooks/useLabels";
 import useStates from "../hooks/useStates";
@@ -36,6 +36,8 @@ import { getTeamIcon } from "../helpers/teams";
 
 import IssueDetail from "./IssueDetail";
 import { getMilestoneIcon } from "../helpers/milestones";
+import useUsers from "../hooks/useUsers";
+import { getLinksFromNewLines } from "../helpers/links";
 
 type CreateIssueFormProps = {
   assigneeId?: string;
@@ -45,7 +47,6 @@ type CreateIssueFormProps = {
   milestoneId?: string;
   parentId?: string;
   priorities: IssuePriorityValue[] | undefined;
-  users: User[] | undefined;
   me: User | undefined;
   isLoading?: boolean;
   draftValues?: CreateIssueValues;
@@ -67,6 +68,7 @@ export type CreateIssueValues = {
   milestoneId: string;
   parentId: string;
   attachments: string[];
+  links: string;
 };
 
 function getCopyToastAction(copyToastAction: Preferences.CreateIssue["copyToastAction"], issue: IssueResult) {
@@ -104,8 +106,12 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
   const { push } = useNavigation();
   const { autofocusField, copyToastAction } = getPreferenceValues<Preferences.CreateIssue>();
 
-  const { teams, isLoadingTeams } = useTeams();
+  const [teamQuery, setTeamQuery] = useState<string>("");
+  const { teams, org, supportsTeamTypeahead, isLoadingTeams } = useTeams(teamQuery);
   const hasMoreThanOneTeam = teams && teams.length > 1;
+
+  const [userQuery, setUserQuery] = useState<string>("");
+  const { users, supportsUserTypeahead, isLoadingUsers } = useUsers(userQuery);
 
   const { handleSubmit, itemProps, values, setValue, focus, reset, setValidationError } = useForm<CreateIssueValues>({
     async onSubmit(values) {
@@ -146,7 +152,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
             title: "Open Issue",
             shortcut: { modifiers: ["cmd", "shift"], key: "o" },
             onAction: async () => {
-              push(<IssueDetail issue={issue} priorities={props.priorities} users={props.users} me={props.me} />);
+              push(<IssueDetail issue={issue} priorities={props.priorities} me={props.me} />);
               await toast.hide();
             },
           };
@@ -164,9 +170,31 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
             dueDate: null,
             parentId: "",
             attachments: [],
+            links: "",
           });
 
           hasMoreThanOneTeam && autofocusField ? focus(autofocusField) : focus("title");
+
+          const links = getLinksFromNewLines(values.links);
+          if (links.length > 0) {
+            const linkWord = links.length === 1 ? "link" : "links";
+            try {
+              toast.message = `Attaching ${linkWord}…`;
+              await Promise.all(
+                links.map((link) =>
+                  attachLinkUrl({
+                    issueId: issue.id,
+                    url: link,
+                  }),
+                ),
+              );
+              toast.message = `Successfully attached ${linkWord}`;
+            } catch (error) {
+              toast.style = Toast.Style.Failure;
+              toast.title = `Failed attaching ${linkWord}`;
+              toast.message = getErrorMessage(error);
+            }
+          }
 
           if (values.attachments.length > 0) {
             const attachmentWord = values.attachments.length === 1 ? "attachment" : "attachments";
@@ -215,14 +243,16 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       projectId: props.draftValues?.projectId || props.projectId,
       milestoneId: props.draftValues?.milestoneId || props.milestoneId,
       parentId: props.draftValues?.parentId || props.parentId,
+      links: props.draftValues?.links || "",
     },
   });
 
-  const { states } = useStates(values.teamId);
-  const { labels } = useLabels(values.teamId);
-  const { cycles } = useCycles(values.teamId);
-  const { issues } = useIssues(getLastCreatedIssues);
-  const { projects } = useProjects(values.teamId);
+  const execute = !!values.teamId && values.teamId.trim().length > 0;
+  const { states } = useStates(values.teamId, { execute });
+  const { labels } = useLabels(values.teamId, { execute });
+  const { cycles } = useCycles(values.teamId, { execute });
+  const { issues } = useIssues(getLastCreatedIssues, [], { execute });
+  const { projects } = useProjects(values.teamId, { execute });
   const { milestones } = useMilestones(values.projectId, { execute: !!values.projectId });
 
   useEffect(() => {
@@ -245,7 +275,6 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
 
   const hasStates = states && states.length > 0;
   const hasPriorities = props.priorities && props.priorities.length > 0;
-  const hasUsers = props.users && props.users.length > 0;
   const hasLabels = labels && labels.length > 0;
   const hasCycles = cycles && cycles.length > 0;
   const hasProjects = projects && projects.length > 0;
@@ -260,26 +289,27 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           <Action.SubmitForm onSubmit={handleSubmit} title="Create Issue" />
         </ActionPanel>
       }
-      isLoading={isLoadingTeams}
+      isLoading={isLoadingTeams || isLoadingUsers || props.isLoading}
     >
-      {hasMoreThanOneTeam ? (
+      {(supportsTeamTypeahead || hasMoreThanOneTeam) && (
         <>
-          <Form.Dropdown title="Team" storeValue {...itemProps.teamId}>
-            {teams.map((team) => {
-              return (
-                <Form.Dropdown.Item
-                  title={team.name}
-                  value={team.id}
-                  key={team.id}
-                  keywords={[team.key]}
-                  icon={getTeamIcon(team)}
-                />
-              );
+          <Form.Dropdown
+            title="Team"
+            storeValue
+            {...itemProps.teamId}
+            {...(supportsTeamTypeahead && {
+              onSearchTextChange: setTeamQuery,
+              isLoading: isLoadingTeams,
+              throttle: true,
             })}
+          >
+            {teams?.map((team) => (
+              <Form.Dropdown.Item title={team.name} value={team.id} key={team.id} icon={getTeamIcon(team, org)} />
+            ))}
           </Form.Dropdown>
           <Form.Separator />
         </>
-      ) : null}
+      )}
 
       <Form.TextField
         title="Title"
@@ -320,15 +350,18 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           : null}
       </Form.Dropdown>
 
-      {hasUsers ? (
-        <Form.Dropdown title="Assignee" storeValue {...itemProps.assigneeId}>
-          <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
+      <Form.Dropdown
+        title="Assignee"
+        storeValue
+        {...itemProps.assigneeId}
+        {...(supportsUserTypeahead && { onSearchTextChange: setUserQuery, isLoading: isLoadingUsers, throttle: true })}
+      >
+        <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
 
-          {props.users?.map((user) => {
-            return <Form.Dropdown.Item title={user.name} value={user.id} key={user.id} icon={getUserIcon(user)} />;
-          })}
-        </Form.Dropdown>
-      ) : null}
+        {users?.map((user) => {
+          return <Form.Dropdown.Item title={user.name} value={user.id} key={user.id} icon={getUserIcon(user)} />;
+        })}
+      </Form.Dropdown>
 
       <Form.TagPicker title="Labels" placeholder="Add label" {...itemProps.labelIds}>
         {hasLabels
@@ -441,6 +474,11 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       <Form.Separator />
 
       <Form.FilePicker title="Attachment" {...itemProps.attachments} />
+      <Form.TextArea
+        title={"Links"}
+        placeholder={"https://a.com\nhttps://b.com\nNew link(s) on separate line(s)"}
+        {...itemProps.links}
+      />
     </Form>
   );
 }

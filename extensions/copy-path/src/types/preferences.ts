@@ -6,7 +6,8 @@ interface Preferences {
   showTabTitle: boolean;
   multiPathSeparator: string;
   copyUrlContent: string;
+  copyWhenUnSupported: string;
 }
 
-export const { showCopyTip, showLastCopy, showTabTitle, multiPathSeparator, copyUrlContent } =
+export const { showCopyTip, showLastCopy, showTabTitle, multiPathSeparator, copyUrlContent, copyWhenUnSupported } =
   getPreferenceValues<Preferences>();

@@ -7,5 +7,6 @@ export enum ItemType {
 export enum ItemSource {
   SELECTED = "Selected",
   CLIPBOARD = "Clipboard",
+  FRONTMOSTAPP = "FrontmostApp",
   NULL = "",
 }

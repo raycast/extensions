@@ -1,5 +1,21 @@
 # iLovePDF Changelog
 
+## [Add Repair PDF Command] - 2024-07-09
+
+## [Add Page Number Command] - 2024-07-06
+
+## [Add Watermark to PDF Command] - 2024-07-09
+
+## [Add Unlock PDF Command] - 2024-07-06
+
+## [Add Rotate PDF Command] - 2024-06-03
+
+## [Add Protect PDF Command] - 2024-07-03
+
+## [Add Placeholder for format of split range] - 2024-07-02
+
+## [Add Convert HTML Page to PDF] - 2024-06-23
+
 ## [Refactor Ask Before Download and Open Now] - 2024-06-17
 
 ## [Add Extract Text from PDF Command] - 2024-06-16

@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from "@raycast/api";
 import { fetchUnNews } from "./api.js";
 import { NewsDetail, StopTextToSpeech } from "./components.js";
 import { i18n } from "./i18n.js";
 import { UnNews, NewsRegion, NewsTopic, NewsType } from "./types.js";
 
 export default function () {
+  const { newsLanguageCode } = getPreferenceValues<Preferences>();
   const [isLoading, setIsLoading] = useState(true);
   const [newsList, setNewsList] = useState<UnNews[]>([]);
   const [newsType, setNewsType] = useState<NewsType>("all");
@@ -46,12 +47,15 @@ export default function () {
       }
     >
       {newsList.map((news, index) => {
-        const date = new Date(news.pubDate).toLocaleDateString();
+        const date = new Date(news.pubDate).toLocaleDateString(newsLanguageCode);
         return (
           <List.Item
             key={`news-${index}`}
-            title={news.title}
-            accessories={[{ text: date }]}
+            title={newsLanguageCode === "ar" ? "" : news.title}
+            subtitle={newsLanguageCode === "ar" ? date : undefined}
+            accessories={
+              newsLanguageCode === "ar" ? [{ text: { value: news.title, color: Color.PrimaryText } }] : [{ text: date }]
+            }
             actions={
               <ActionPanel>
                 <Action.Push icon={Icon.Snippets} title="View Summary" target={<NewsDetail news={news} />} />

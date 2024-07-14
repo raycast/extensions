@@ -5,7 +5,7 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-06 15:34:53
- * Last modified  : 2023-07-06 15:41:56
+ * Last modified  : 2024-06-26 21:37:46
  */
 
 /**
@@ -21,6 +21,11 @@ export interface ExtensionPreferences {
    * The strategy for handling the result of the image processing, i.e. where to save or display the result. One of {@link ImageResultHandling}.
    */
   imageResultHandling: string;
+
+  /**
+   * Whether to use lossless conversion when operating on WebP and AVIF images.
+   */
+  useLosslessConversion: boolean;
 }
 
 /**
@@ -28,6 +33,7 @@ export interface ExtensionPreferences {
  */
 export interface ConvertPreferences {
   showASTC: boolean;
+  showAVIF: boolean;
   showBMP: boolean;
   showDDS: boolean;
   showEXR: boolean;
@@ -48,7 +54,8 @@ export interface ConvertPreferences {
   showTIFF: boolean;
   showWEBP: boolean;
   showSVG: boolean;
-  [key: string]: boolean;
+  jpegExtension: string;
+  [key: string]: boolean | string;
 }
 
 /**
@@ -69,4 +76,14 @@ export interface PadPreferences {
    * The default color to use when padding images and no color argument is provided.
    */
   defaultPadColor: string;
+}
+
+/**
+ * Preferences for the Create New Image command.
+ */
+export interface CreateImagePreferences {
+  /**
+   * Whether to generate previews for the image patterns.
+   */
+  generatePreviews: boolean;
 }

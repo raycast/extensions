@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Update] - 2024-07-06
+
+- Removed the `New Note` command.
+
 ## [Improvements] - 2024-03-15
 
 - Added search suggestions to Kagi search engine.

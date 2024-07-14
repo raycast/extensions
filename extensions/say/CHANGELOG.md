@@ -1,5 +1,10 @@
 # Say - Spoken Content Changelog
 
+## [Bugfix] - 2024-06-23
+
+- Fix unexpected strings start with dashes
+- Update API documentation
+
 ## [Chore] - 2024-06-09
 
 - Kill existing `say` process before running

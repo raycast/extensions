@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
+import { icons } from "../lib/speedtest-pretty-names";
 import { ISPInterface } from "../lib/speedtest.types";
 import { ListItemMetadata } from "./list-item-metadata";
-import { icons } from "../lib/speedtest-pretty-names";
 
 type ISPListItemProps = {
   name: string;
@@ -12,7 +12,7 @@ type ISPListItemProps = {
 export function ISPListItem({ name, isp, children }: ISPListItemProps): JSX.Element {
   return (
     <List.Item
-      title="Internet Service Provider"
+      title="ISP"
       icon={icons.interface}
       actions={children}
       accessories={[

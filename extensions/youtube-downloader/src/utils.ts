@@ -49,9 +49,17 @@ export async function downloadVideo(url: string, options: DownloadOptions) {
 
   const container = formatObject.container || "mp4";
   const title = info.videoDetails.title;
-  const filePath = options.copyToClipboard
-    ? tempfile(`.${container}`)
-    : unusedFilenameSync(path.join(preferences.downloadPath, `${sanitizeFilename(title)}.${container}`));
+  let filePath = "";
+
+  if (options.copyToClipboard) {
+    const tempfilePath = tempfile();
+    filePath = path.join(
+      tempfilePath.substring(0, tempfilePath.lastIndexOf("/")),
+      `${sanitizeFilename(title)}.${container}`
+    );
+  } else {
+    filePath = unusedFilenameSync(path.join(preferences.downloadPath, `${sanitizeFilename(title)}.${container}`));
+  }
 
   const videoFormat = ytdl.chooseFormat(info.formats, {
     quality: "highestvideo",
@@ -211,9 +219,14 @@ export async function downloadAudio(url: string, options: DownloadOptions) {
     return;
   }
 
-  const filePath = options.copyToClipboard
-    ? tempfile(".mp3")
-    : unusedFilenameSync(path.join(preferences.downloadPath, `${sanitizeFilename(title)}.mp3`));
+  let filePath = "";
+
+  if (options.copyToClipboard) {
+    const tempfilePath = tempfile();
+    filePath = path.join(tempfilePath.substring(0, tempfilePath.lastIndexOf("/")), `${sanitizeFilename(title)}.mp3`);
+  } else {
+    filePath = unusedFilenameSync(path.join(preferences.downloadPath, `${sanitizeFilename(title)}.mp3`));
+  }
 
   return new Promise((resolve) => {
     const command = ffmpeg();
