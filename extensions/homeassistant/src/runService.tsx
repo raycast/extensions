@@ -218,7 +218,7 @@ export default function ServiceCallCommand() {
                 title={getNameOfServiceField(v, k)}
                 value={formData[k] ?? val.toString()}
                 placeholder={v.description}
-                onChange={(nv) => setFormData({ ...formData, [k]: nv })}
+                onChange={(nv) => setFormData({ ...formData, [k]: parseFloat(nv) })}
               />
             );
           } else if (sel?.entity !== undefined) {
