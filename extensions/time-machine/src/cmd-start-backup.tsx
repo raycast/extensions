@@ -29,7 +29,7 @@ export default async function () {
     }
   } catch (err) {
     toast.style = Toast.Style.Failure;
-    toast.title = "Failed to Start Bakcup !";
+    toast.title = "Failed to Start Backup !";
     if (err instanceof Error) {
       toast.message = err.message;
     }

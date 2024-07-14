@@ -80,16 +80,6 @@ function ListbackupAction(props: { destination: Destination }) {
                           actions={
                             <ActionPanel>
                               <ListbackupcontentAction timestamp={backup_string} destination={props.destination} />
-                              {/* <Action
-                                                        title="Get Unique Size"
-                                                        onAction={()=>{
-                                                            showToast({title:"Calculating Unique Size....", style: Toast.Style.Animated}).then((load_toast)=>{
-                                                                util_getUniquesuzeTimestamp(backup_string, props.destination)
-                                                                    .then((size)=>{  load_toast.hide(); backup_size=size; showToast({title:`Backup Unique Size: ${size}`, style: Toast.Style.Success});})
-                                                                    .catch((error)=>{load_toast.hide(); showToast({title:error.toString(), style: Toast.Style.Failure});})
-                                                            });
-                                                        }}
-                                                    /> */}
                               <Action
                                 title="Reveal in Finder"
                                 shortcut={{ key: "r", modifiers: ["ctrl", "cmd"] }}
@@ -114,13 +104,6 @@ function ListbackupAction(props: { destination: Destination }) {
                                   });
                                 }}
                               />
-                              {/* <Action
-                                                        title="Copy Deletion Command"
-                                                        shortcut={{key:"x", modifiers:["ctrl"]}}
-                                                        onAction={()=>{
-                                                            util_deleteTimestampDestination(backup_string, props.destination);
-                                                        }}
-                                                    /> */}
                             </ActionPanel>
                           }
                         />
