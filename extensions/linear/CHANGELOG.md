@@ -2,9 +2,9 @@
 
 ## [Documents] - {PR_MERGE_DATE}
 
-- New "Search Documents" command to search documents across Linear. Supports typeahead if there are too many docs
-- New action "Show Project Documents" to look up project documents
-- Preference to show recently deleted/archived docs
+- New "Search Documents" command to search documents across Linear projects and initiatives. Supports typeahead if there are too many docs.
+- New action "Show Project Documents" to look up project documents.
+- Preference to show recently deleted/archived docs, and an action to restore them.
 
 ## [Fixes] - 2024-07-08
 

@@ -1,20 +1,14 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { MutatePromise } from "@raycast/utils";
 import { getUserIcon } from "../../helpers/users";
-import { Doc } from "../../api/documents";
 import { getDocumentIcon } from "../../helpers/documents";
 import { format } from "date-fns";
 import { getProjectIcon } from "../../helpers/projects";
-import { DocumentActions } from "./DocumentActions";
+import { DocumentActions, DocumentActionsProps } from "./DocumentActions";
 import { DocumentDetail } from "./DocumentDetail";
+import { getInitiativeIcon } from "../../helpers/initiatives";
 
-type DocumentProps = {
-  doc: Doc;
-  mutateDocs: MutatePromise<{ docs: Doc[]; hasMoreDocs: boolean } | undefined>;
-};
-
-export function Document({ doc, mutateDocs }: DocumentProps) {
-  const keywords = [doc.project.name, doc.title, doc.creator.displayName];
+export function Document({ doc, ...rest }: DocumentActionsProps) {
+  const keywords = [doc.project?.name ?? "", doc.title, doc.creator.displayName];
   const lastUpdated = doc.updatedAt ? new Date(doc.updatedAt) : new Date(doc.createdAt);
 
   return (
@@ -37,10 +31,22 @@ export function Document({ doc, mutateDocs }: DocumentProps) {
           icon: Icon.Clock,
           tooltip: `Updated: ${format(lastUpdated, "MM/dd/yyyy")}`,
         },
-        {
-          icon: getProjectIcon(doc.project),
-          tooltip: `Project: ${doc.project.name}`,
-        },
+        ...(doc.project
+          ? [
+              {
+                icon: getProjectIcon(doc.project),
+                tooltip: `Project: ${doc.project.name}`,
+              },
+            ]
+          : []),
+        ...(doc.initiative
+          ? [
+              {
+                icon: getInitiativeIcon(doc.initiative),
+                tooltip: `Initiative: ${doc.initiative.name}`,
+              },
+            ]
+          : []),
         {
           icon: getUserIcon(doc.creator),
           tooltip: `Creator: ${doc.creator.displayName} (${doc.creator.email})`,
@@ -49,14 +55,10 @@ export function Document({ doc, mutateDocs }: DocumentProps) {
       actions={
         <ActionPanel>
           {!doc.archivedAt && (
-            <Action.Push
-              title="Show Document"
-              target={<DocumentDetail doc={doc} mutateDocs={mutateDocs} />}
-              icon={Icon.Eye}
-            />
+            <Action.Push title="Show Document" target={<DocumentDetail doc={doc} {...rest} />} icon={Icon.Eye} />
           )}
 
-          <DocumentActions doc={doc} mutateDocs={mutateDocs} />
+          <DocumentActions doc={doc} {...rest} />
         </ActionPanel>
       }
     />

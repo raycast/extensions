@@ -1,16 +1,9 @@
-import { Doc } from "../../api/documents";
 import { ActionPanel, Detail } from "@raycast/api";
 import { useDocumentContent } from "../../hooks/useDocuments";
-import { DocumentActions } from "./DocumentActions";
-import { MutatePromise } from "@raycast/utils";
+import { DocumentActions, DocumentActionsProps } from "./DocumentActions";
 import { emojify } from "node-emoji";
 
-type DocumentDetailProps = {
-  doc: Doc;
-  mutateDocs: MutatePromise<{ docs: Doc[]; hasMoreDocs: boolean } | undefined>;
-};
-
-export function DocumentDetail({ doc, mutateDocs }: DocumentDetailProps) {
+export function DocumentDetail({ doc, ...rest }: DocumentActionsProps) {
   const { content, isLoadingContent } = useDocumentContent(doc.id);
 
   let markdown = `# ${doc.title}`;
@@ -25,7 +18,7 @@ export function DocumentDetail({ doc, mutateDocs }: DocumentDetailProps) {
       navigationTitle={doc.title}
       actions={
         <ActionPanel>
-          <DocumentActions doc={doc} mutateDocs={mutateDocs} />
+          <DocumentActions doc={doc} {...rest} />
         </ActionPanel>
       }
     />

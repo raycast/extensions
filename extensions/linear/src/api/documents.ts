@@ -1,19 +1,21 @@
-import { Document, Project, User } from "@linear/sdk";
+import { Document, Initiative, Project, User } from "@linear/sdk";
 import { getLinearClient } from "./linearClient";
 import { sortBy } from "lodash";
 import { getPreferenceValues } from "@raycast/api";
 
-export type Doc = Pick<
+export type DocumentResult = Pick<
   Document,
   "id" | "url" | "color" | "createdAt" | "slugId" | "sortOrder" | "title" | "updatedAt" | "icon" | "archivedAt"
 > & {
-  project: Pick<Project, "id" | "name" | "icon" | "color">;
+  project?: Pick<Project, "id" | "name" | "icon" | "color">;
 } & {
   creator: Pick<User, "displayName" | "avatarUrl" | "email">;
+} & {
+  initiative?: Pick<Initiative, "id" | "name" | "color" | "icon">;
 };
 
 export type DocList = {
-  documents: { nodes: Doc[]; pageInfo: { hasNextPage: boolean } };
+  documents: { nodes: DocumentResult[]; pageInfo: { hasNextPage: boolean } };
 };
 
 export type DocContent = Pick<Document, "content" | "id">;
@@ -34,6 +36,12 @@ const docFragment = `
     name
     icon
     color
+  }
+  initiative {
+    id
+    name
+    color
+    icon
   }
   creator {
     displayName
@@ -137,4 +145,28 @@ export async function deleteDocument(documentId: string) {
   );
 
   return { success: data?.documentDelete.success };
+}
+
+export type DocUpdatePayload = Partial<{
+  projectId: string;
+  initiativeId: string;
+}>;
+
+export async function updateDocument(documentId: string, payload: DocUpdatePayload) {
+  const { graphQLClient } = getLinearClient();
+
+  let docUpdateInput = `projectId: ${payload.projectId ? `"${payload.projectId}"` : null}`;
+  docUpdateInput += `, initiativeId: ${payload.initiativeId ? `"${payload.initiativeId}"` : null}`;
+
+  const { data } = await graphQLClient.rawRequest<{ documentUpdate: { success: boolean } }, Record<string, unknown>>(
+    `
+      mutation {
+        documentUpdate(id: "${documentId}", input: {${docUpdateInput}}) {
+          success
+        }
+      }
+    `,
+  );
+
+  return { success: data?.documentUpdate.success };
 }
