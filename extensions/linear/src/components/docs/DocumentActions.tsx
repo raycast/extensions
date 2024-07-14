@@ -17,19 +17,23 @@ export type DocumentActionsProps = {
 };
 
 function MoveDocument({ doc, mutateDocs, projects, initiatives }: DocumentActionsProps) {
-  const moveDocument = async ({ project, initiative }: { project?: ProjectResult; initiative?: InitiativeResult }) => {
-    const msg = `to ${project ? `Project: ${project.name}` : `Initiative: ${initiative?.name}`}`;
+  const moveDocument = async (props: { project: ProjectResult } | { initiative: InitiativeResult }) => {
+    const isProject = "project" in props;
+
+    const msg = `to ${isProject ? `Project: ${props.project.name}` : `Initiative: ${props.initiative.name}`}`;
     const toast = await showToast(Toast.Style.Animated, "Moving document", msg);
-    const payload = project ? { projectId: project.id } : { initiativeId: initiative?.id };
+
+    const payload = isProject ? { projectId: props.project.id } : { initiativeId: props.initiative.id };
+
     await mutateDocs(updateDocument(doc.id, payload), {
       optimisticUpdate: (data) => {
         if (!data) {
           return undefined;
         }
 
-        const overrides = project
-          ? { project: { ...project }, initiative: undefined }
-          : { initiative: { ...initiative }, project: undefined };
+        const overrides = isProject
+          ? { project: { ...props.project }, initiative: undefined }
+          : { initiative: { ...props.initiative }, project: undefined };
         return {
           ...data,
           docs: data.docs?.map((d) =>
@@ -50,7 +54,7 @@ function MoveDocument({ doc, mutateDocs, projects, initiatives }: DocumentAction
         toast.message = getErrorMessage(err);
         toast.primaryAction = {
           title: "Retry",
-          onAction: () => moveDocument({ project, initiative }),
+          onAction: () => moveDocument(props),
           shortcut: { modifiers: ["cmd"], key: "r" },
         };
       });

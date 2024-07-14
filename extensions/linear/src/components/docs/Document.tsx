@@ -34,16 +34,26 @@ export function Document({ doc, ...rest }: DocumentActionsProps) {
         ...(doc.project
           ? [
               {
+                tag: {
+                  value: doc.project.name,
+                  color: doc.project.color
+                    ? { light: doc.project.color, dark: doc.project.color, adjustContrast: true }
+                    : Color.SecondaryText,
+                },
                 icon: getProjectIcon(doc.project),
-                tooltip: `Project: ${doc.project.name}`,
               },
             ]
           : []),
         ...(doc.initiative
           ? [
               {
+                tag: {
+                  value: doc.initiative.name,
+                  color: doc.initiative.color
+                    ? { light: doc.initiative.color, dark: doc.initiative.color, adjustContrast: true }
+                    : Color.SecondaryText,
+                },
                 icon: getInitiativeIcon(doc.initiative),
-                tooltip: `Initiative: ${doc.initiative.name}`,
               },
             ]
           : []),
