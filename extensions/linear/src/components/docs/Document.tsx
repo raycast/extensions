@@ -8,7 +8,7 @@ import { DocumentDetail } from "./DocumentDetail";
 import { getInitiativeIcon } from "../../helpers/initiatives";
 
 export function Document({ doc, ...rest }: DocumentActionsProps) {
-  const keywords = [doc.project?.name ?? "", doc.title, doc.creator.displayName];
+  const keywords = [doc.project?.name ?? "", doc.initiative?.name ?? "", doc.title, doc.creator.displayName];
   const lastUpdated = doc.updatedAt ? new Date(doc.updatedAt) : new Date(doc.createdAt);
 
   return (

@@ -39,12 +39,7 @@ export function DocumentList({ project }: DocumentListProps) {
       {...(!project && (projects ?? []).length > 0
         ? {
             searchBarAccessory: (
-              <List.Dropdown
-                tooltip="Change Parent"
-                onChange={setProjectId}
-                storeValue
-                filtering={{ keepSectionOrder: true }}
-              >
+              <List.Dropdown tooltip="Change Parent" onChange={setProjectId} storeValue>
                 <List.Dropdown.Item value="" title="All Documents" />
 
                 <List.Dropdown.Section title="Projects">
@@ -63,7 +58,10 @@ export function DocumentList({ project }: DocumentListProps) {
           }
         : {})}
       {...(!supportsDocTypeahead
-        ? { filtering: { keepSectionOrder: true }, searchBarPlaceholder: "Filter by title, creator or project" }
+        ? {
+            filtering: { keepSectionOrder: true },
+            searchBarPlaceholder: "Filter by title, creator, project or initiative name",
+          }
         : { onSearchTextChange: setQuery, searchBarPlaceholder: "Search by document title", throttle: true })}
     >
       {filteredDocs.map((doc) => (
