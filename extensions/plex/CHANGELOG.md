@@ -1,6 +1,6 @@
 # Plex Changelog
 
-## [New Features] - 2024-07-11
+## [New Features] - 2024-07-12
 
  - Fix search functionality
 
