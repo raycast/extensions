@@ -58,7 +58,7 @@ export interface HAServiceField {
   selector?: HAServiceFieldSelector;
 }
 
-export interface HAServiceTargetEntity { }
+export interface HAServiceTargetEntity {}
 
 export interface HAServiceTarget {
   entity?: HAServiceTargetEntity[] | null;

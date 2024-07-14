@@ -185,7 +185,7 @@ export default function ServiceCallCommand() {
               <Form.TextArea
                 id={k}
                 title={`${getNameOfHAServiceField(v, k)} (yaml)`}
-                value={formData[k] ?? ""}
+                value={formData[k]}
                 placeholder={v.description}
                 onChange={(nv) => {
                   try {
@@ -212,7 +212,7 @@ export default function ServiceCallCommand() {
               <Form.TagPicker
                 id={k}
                 title={getNameOfHAServiceField(v, k)}
-                value={formData[k] ?? ""}
+                value={formData[k]}
                 onChange={(newValue) => setFormData({ ...formData, [k]: newValue })}
               >
                 {states?.map((s) => (
@@ -229,7 +229,7 @@ export default function ServiceCallCommand() {
               <Form.Dropdown
                 id={k}
                 title={getNameOfHAServiceField(v, k)}
-                value={formData[k] ?? ""}
+                value={formData[k]}
                 onChange={(nv) => setFormData({ ...formData, [k]: nv })}
               >
                 {opts.map((o) => (
@@ -253,7 +253,7 @@ export default function ServiceCallCommand() {
               <Form.TextField
                 id={k}
                 title={getNameOfHAServiceField(v, k)}
-                value={formData[k] ?? ""}
+                value={formData[k]}
                 placeholder={v.description}
                 onChange={(nv) => setFormData({ ...formData, [k]: nv })}
               />
