@@ -58,10 +58,7 @@ export function DocumentList({ project }: DocumentListProps) {
           }
         : {})}
       {...(!supportsDocTypeahead
-        ? {
-            filtering: { keepSectionOrder: true },
-            searchBarPlaceholder: "Filter by title, creator, project or initiative name",
-          }
+        ? { searchBarPlaceholder: "Filter by title, creator, project or initiative name" }
         : { onSearchTextChange: setQuery, searchBarPlaceholder: "Search by document title", throttle: true })}
     >
       {filteredDocs.map((doc) => (

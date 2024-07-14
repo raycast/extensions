@@ -157,6 +157,7 @@ export function DocumentActions({ doc, mutateDocs, ...rest }: DocumentActionsPro
       <ActionPanel.Section>
         <Action.CreateQuicklink
           icon={Icon.RaycastLogoPos}
+          title="Create Quicklink"
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
           quicklink={{ link: doc.url, name: doc.title, application: isLinearInstalled ? "Linear" : undefined }}
         />

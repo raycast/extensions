@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Documents] - {PR_MERGE_DATE}
+## [Document Support] - {PR_MERGE_DATE}
 
 - New "Search Documents" command to search documents across Linear projects and initiatives. Supports typeahead if there are too many docs.
 - New action "Show Project Documents" to look up project documents.

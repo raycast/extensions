@@ -56,7 +56,7 @@ export function Document({ doc, ...rest }: DocumentActionsProps) {
       ]}
       actions={
         <ActionPanel>
-          <Action.Push title="Show Document" target={<DocumentDetail doc={doc} {...rest} />} icon={Icon.Eye} />
+          <Action.Push title="Show Content" target={<DocumentDetail doc={doc} {...rest} />} icon={Icon.Eye} />
 
           <DocumentActions doc={doc} {...rest} />
         </ActionPanel>
