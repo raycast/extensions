@@ -8,7 +8,7 @@ import {
 } from "@components/services/utils";
 import { ha } from "@lib/common";
 import { getFriendlyName } from "@lib/utils";
-import { Action, ActionPanel, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Keyboard, popToRoot, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { parse, stringify } from "yaml";
@@ -61,6 +61,18 @@ export default function ServiceCallCommand() {
   useEffect(() => {
     setYamlText(stringify(formData).trim());
   }, [formData]);
+
+  const quicklink = () => {
+    if (selectedService) {
+      return getHAServiceQuicklink({
+        domain: selectedService.domain,
+        service: selectedService.service,
+        data: formData,
+      });
+    }
+    return "";
+  };
+
   return (
     <Form
       isLoading={isLoading}
@@ -92,16 +104,22 @@ export default function ServiceCallCommand() {
                   }}
                   shortcut={{ modifiers: ["cmd"], key: "y" }}
                 />
+              </ActionPanel.Section>
+              <ActionPanel.Section>
                 {selectedService && (
-                  <Action.CreateQuicklink
-                    quicklink={{
-                      link: getHAServiceQuicklink({
-                        domain: selectedService.domain,
-                        service: selectedService.service,
-                        data: formData,
-                      }),
-                    }}
-                  />
+                  <>
+                    <Action.CreateQuicklink
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                      quicklink={{
+                        link: quicklink(),
+                      }}
+                    />
+                    <Action.CopyToClipboard
+                      title="Copy Quicklink to Clipboard"
+                      shortcut={Keyboard.Shortcut.Common.CopyDeeplink}
+                      content={quicklink()}
+                    />
+                  </>
                 )}
               </ActionPanel.Section>
             </>
@@ -128,6 +146,7 @@ export default function ServiceCallCommand() {
         <Form.TagPicker
           id="entity_id"
           title="Target Entities"
+          placeholder="Target Entities"
           value={formData.entity_id}
           onChange={(newValue) => setFormData({ ...formData, entity_id: newValue })}
         >
@@ -138,6 +157,9 @@ export default function ServiceCallCommand() {
       )}
       {!yamlMode &&
         Object.entries(selectedService?.meta.fields ?? {}).map(([k, v]) => {
+          if (v.collapsed === true) {
+            return;
+          }
           const sel = v.selector;
           if (
             sel?.text !== undefined ||
@@ -153,7 +175,7 @@ export default function ServiceCallCommand() {
               <Form.TextField
                 id={k}
                 title={getNameOfHAServiceField(v, k)}
-                value={formData[k] ?? ""}
+                value={formData[k]}
                 placeholder={v.description}
                 onChange={(nv) => setFormData({ ...formData, [k]: nv })}
               />
@@ -176,16 +198,11 @@ export default function ServiceCallCommand() {
               />
             );
           } else if (sel?.number !== undefined) {
-            let val = 0;
-            const num = sel?.number;
-            if (num?.min !== null && num?.min !== undefined) {
-              val = num.min;
-            }
             return (
               <Form.TextField
                 id={k}
                 title={getNameOfHAServiceField(v, k)}
-                value={formData[k] ?? val.toString()}
+                value={formData[k]}
                 placeholder={v.description}
                 onChange={(nv) => setFormData({ ...formData, [k]: parseFloat(nv) })}
               />

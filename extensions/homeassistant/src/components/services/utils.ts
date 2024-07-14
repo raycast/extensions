@@ -52,12 +52,13 @@ export interface HAServiceField {
   required?: boolean;
   name?: string;
   description: string;
+  collapsed?: boolean; // don't show in the UI mode
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   example: any;
   selector?: HAServiceFieldSelector;
 }
 
-export interface HAServiceTargetEntity {}
+export interface HAServiceTargetEntity { }
 
 export interface HAServiceTarget {
   entity?: HAServiceTargetEntity[] | null;
