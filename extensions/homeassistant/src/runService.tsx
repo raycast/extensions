@@ -35,10 +35,11 @@ function getServiceCallData(serviceCall: HAServiceCall) {
         selector?.text !== undefined ||
         selector?.area !== undefined ||
         selector?.floor !== undefined ||
-        selector?.config_entry !== undefined ||
-        selector?.object !== undefined
+        selector?.config_entry !== undefined
       ) {
         result[k] = "";
+      } else if (selector?.object !== undefined) {
+        result[k] = {};
       } else if (selector?.number !== undefined) {
         let val = 0;
         const num = selector?.number;
@@ -60,14 +61,17 @@ export default function ServiceCallCommand() {
   if (error) {
     showFailureToast(error, { title: "Could not fetch Service Calls" });
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [formData, setFormData] = useState<Record<string, any>>({});
   const handle = async (input: Form.Values, options?: { popToRootOnSuccessful?: boolean }) => {
     try {
+      const payload = yamlMode ? parse(yamlText) : formData;
       const service = services?.find((s) => fullServiceName(s) === input.service);
       if (!service) {
         throw new Error(`Could not get service for id "${input.service}"`);
       }
 
-      const response = await ha.callService(service.domain, service.service, parse(input.data), {
+      const response = await ha.callService(service.domain, service.service, payload, {
         throwException: false,
       });
       if (!response) {
@@ -85,13 +89,11 @@ export default function ServiceCallCommand() {
     }
   };
   const [yamlMode, setYamlMode] = useState<boolean>(false);
-  const [data, setData] = useState<string>("");
+  const [yamlText, setYamlText] = useState<string>("");
   const [selectedService, setSelectedService] = useState<HAServiceCall>();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [formData, setFormData] = useState<Record<string, any>>({});
   useEffect(() => {
     if (!selectedService) {
-      setData("");
+      setYamlText("");
       return;
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -99,7 +101,7 @@ export default function ServiceCallCommand() {
     setFormData(dataObject);
   }, [selectedService]);
   useEffect(() => {
-    setData(stringify(formData));
+    setYamlText(stringify(formData).trim());
   }, [formData]);
   return (
     <Form
@@ -124,9 +126,9 @@ export default function ServiceCallCommand() {
                   onAction={() => {
                     const newYamlMode = !yamlMode;
                     if (newYamlMode) {
-                      setData(stringify(formData));
+                      setYamlText(stringify(formData).trim());
                     } else {
-                      setFormData(parse(data));
+                      setFormData(parse(yamlText));
                     }
                     setYamlMode(newYamlMode);
                   }}
@@ -173,7 +175,6 @@ export default function ServiceCallCommand() {
             sel?.area !== undefined ||
             sel?.floor !== undefined ||
             sel?.config_entry !== undefined ||
-            sel?.object !== undefined ||
             sel?.icon !== undefined ||
             sel?.label !== undefined ||
             sel?.device !== undefined ||
@@ -186,6 +187,23 @@ export default function ServiceCallCommand() {
                 value={formData[k] ?? ""}
                 placeholder={v.description}
                 onChange={(nv) => setFormData({ ...formData, [k]: nv })}
+              />
+            );
+          } else if (sel?.object !== undefined) {
+            return (
+              <Form.TextArea
+                id={k}
+                title={`${getNameOfServiceField(v, k)} (yaml)`}
+                value={formData[k] ?? ""}
+                placeholder={v.description}
+                onChange={(nv) => {
+                  try {
+                    const no = nv.trim().length <= 0 ? {} : parse(nv);
+                    setFormData({ ...formData, [k]: no });
+                  } catch (error) {
+                    //
+                  }
+                }}
               />
             );
           } else if (sel?.number !== undefined) {
@@ -256,7 +274,7 @@ export default function ServiceCallCommand() {
             );
           }
         })}
-      {yamlMode && <Form.TextArea id="data" title="Data (yaml)" value={data} onChange={setData} />}
+      {yamlMode && <Form.TextArea id="yamltext" title="Data (yaml)" value={yamlText} onChange={setYamlText} />}
     </Form>
   );
 }
