@@ -1,4 +1,5 @@
 import { ha } from "@lib/common";
+import { HAServiceCall } from "./hooks";
 
 export interface HAServiceFieldSelectorNumber {
   min?: number | null;
@@ -78,4 +79,64 @@ export interface HAService {
 export async function getHomeAssistantServices() {
   const response = await ha.fetch("services");
   return response as HAService[] | undefined;
+}
+
+export function fullHAServiceName(serviceCall: HAServiceCall) {
+  return `${serviceCall.domain}.${serviceCall.service}`;
+}
+
+export function getNameOfHAServiceField(field: HAServiceField, fallback: string) {
+  if (field.name !== undefined && field.name !== null && field.name.trim().length > 0) {
+    return field.name;
+  }
+  return fallback;
+}
+
+export function getHAServiceCallData(serviceCall: HAServiceCall) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result: any = {};
+  if (serviceCall.meta.target) {
+    if (serviceCall.meta.target.entity) {
+      result["entity_id"] = [];
+    }
+  }
+
+  for (const [k, v] of Object.entries(serviceCall.meta.fields)) {
+    if (v?.required === true) {
+      const selector = v?.selector;
+      if (
+        selector?.text !== undefined ||
+        selector?.area !== undefined ||
+        selector?.floor !== undefined ||
+        selector?.config_entry !== undefined
+      ) {
+        result[k] = "";
+      } else if (selector?.object !== undefined) {
+        result[k] = {};
+      } else if (selector?.number !== undefined) {
+        let val = 0;
+        const num = selector?.number;
+        if (num?.min !== null && num?.min !== undefined) {
+          val = num.min;
+        }
+        result[k] = val;
+      } else {
+        result[k] = {};
+      }
+    }
+  }
+  return result;
+}
+
+export interface HAServiceCallPayload {
+  domain: string;
+  service: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any;
+}
+
+export function getHAServiceQuicklink(payload: HAServiceCallPayload) {
+  console.log(JSON.stringify(payload));
+  const encoded = encodeURI(JSON.stringify(payload));
+  return `raycast://extensions/tonka3000/homeassistant/runService?context=${encoded}`;
 }

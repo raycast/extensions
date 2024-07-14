@@ -474,10 +474,16 @@
       ]
     },
     {
+      "name": "services",
+      "title": "Services",
+      "description": "Interact with Home Assistant Services",
+      "mode": "view"
+    },
+    {
       "name": "runService",
       "title": "Run Service",
-      "description": "Run a Service",
-      "mode": "view"
+      "description": "Run a service. It accepts a context argument to launch services via Quicklinks or Deeplinks.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
