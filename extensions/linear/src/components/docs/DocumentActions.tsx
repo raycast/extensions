@@ -67,7 +67,7 @@ function MoveDocument({ doc, mutateDocs, projects, initiatives }: DocumentAction
             {initiatives?.map((initiative) => (
               <Action
                 key={initiative.id}
-                title={initiative.name + (doc.initiative?.id === initiative.id ? " [current]" : "")}
+                title={initiative.name}
                 icon={getInitiativeIcon(initiative)}
                 onAction={() => moveDocument({ initiative })}
               />
@@ -79,7 +79,7 @@ function MoveDocument({ doc, mutateDocs, projects, initiatives }: DocumentAction
             {projects?.map((project) => (
               <Action
                 key={project.id}
-                title={project.name + (doc.project?.id === project.id ? " [current]" : "")}
+                title={project.name}
                 icon={getProjectIcon(project)}
                 onAction={() => moveDocument({ project })}
               />
@@ -107,7 +107,6 @@ export function DocumentActions({ doc, mutateDocs, ...rest }: DocumentActionsPro
         if (success) {
           toast.style = Toast.Style.Success;
           toast.title = "Document restored";
-          toast.message = doc.title;
         }
       })
       .catch((err) => {
@@ -145,7 +144,6 @@ export function DocumentActions({ doc, mutateDocs, ...rest }: DocumentActionsPro
         if (success) {
           toast.style = Toast.Style.Success;
           toast.title = "Document deleted";
-          toast.message = doc.title;
         }
       })
       .catch((err) => {
