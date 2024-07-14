@@ -29,7 +29,7 @@ export interface HAServiceFieldSelectorSelectOption {
 }
 
 export interface HAServiceFieldSelectorSelect {
-  options?: HAServiceFieldSelectorSelectOption[] | null;
+  options?: HAServiceFieldSelectorSelectOption[] | string[] | null;
 }
 
 export interface HAServiceFieldSelector {

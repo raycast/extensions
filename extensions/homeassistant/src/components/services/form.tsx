@@ -52,3 +52,23 @@ export function ServiceFormFieldNumber({ onChange, value, field, id, ...restProp
     ></Form.TextField>
   );
 }
+
+export interface ServiceFormFieldSelectDropdownProps extends Form.Dropdown.Props {
+  field: HAServiceField;
+}
+
+export function ServiceFormFieldSelectDropdown({ id, field }: ServiceFormFieldSelectDropdownProps) {
+  if (field.selector?.select === undefined) {
+    return null;
+  }
+  const opts = field.selector?.select?.options;
+  if (opts === undefined || opts === null || opts.length <= 0) {
+    return null;
+  }
+  const labeledOpts = opts.map((o) => (typeof o === "string" ? { label: o, value: o } : o));
+  return (
+    <Form.Dropdown id={id} title={getNameOfHAServiceField(field, id)}>
+      {labeledOpts?.map((o) => <Form.Dropdown.Item key={o.value} value={o.value} title={o.label} />)}
+    </Form.Dropdown>
+  );
+}

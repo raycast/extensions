@@ -1,5 +1,9 @@
 import { useHAStates } from "@components/hooks";
-import { ServiceFormFieldEntitiesTagPicker, ServiceFormFieldNumber } from "@components/services/form";
+import {
+  ServiceFormFieldEntitiesTagPicker,
+  ServiceFormFieldNumber,
+  ServiceFormFieldSelectDropdown,
+} from "@components/services/form";
 import { HAServiceCall, useServiceCalls } from "@components/services/hooks";
 import {
   fullHAServiceName,
@@ -218,21 +222,13 @@ export default function ServiceCallCommand() {
               />
             );
           } else if (sel?.select !== undefined) {
-            const opts = sel?.select?.options;
-            if (opts === undefined || opts === null || opts.length <= 0) {
-              return;
-            }
             return (
-              <Form.Dropdown
+              <ServiceFormFieldSelectDropdown
                 id={k}
-                title={getNameOfHAServiceField(v, k)}
+                field={v}
                 value={formData[k]}
                 onChange={(nv) => setFormData({ ...formData, [k]: nv })}
-              >
-                {opts.map((o) => (
-                  <Form.Dropdown.Item value={o.value} title={o.label} />
-                ))}
-              </Form.Dropdown>
+              />
             );
           } else if (sel?.boolean !== undefined) {
             return (
