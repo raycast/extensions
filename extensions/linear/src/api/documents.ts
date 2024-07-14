@@ -1,11 +1,10 @@
 import { Document, Initiative, Project, User } from "@linear/sdk";
 import { getLinearClient } from "./linearClient";
 import { sortBy } from "lodash";
-import { getPreferenceValues } from "@raycast/api";
 
 export type DocumentResult = Pick<
   Document,
-  "id" | "url" | "color" | "createdAt" | "slugId" | "sortOrder" | "title" | "updatedAt" | "icon" | "archivedAt"
+  "id" | "url" | "color" | "createdAt" | "slugId" | "sortOrder" | "title" | "updatedAt" | "icon"
 > & {
   project?: Pick<Project, "id" | "name" | "icon" | "color">;
 } & {
@@ -26,7 +25,6 @@ const docFragment = `
   icon
   color
   createdAt
-  archivedAt
   slugId
   sortOrder
   title
@@ -52,12 +50,11 @@ const docFragment = `
 
 export async function getDocuments(query: string = "", projectId: string = "") {
   const { graphQLClient } = getLinearClient();
-  const { showArchivedDocs } = getPreferenceValues<Preferences>();
 
   const input = !projectId.trim().length
     ? `
       query($query: String!) {
-        documents(orderBy: updatedAt, includeArchived: ${showArchivedDocs}, filter: { title: { containsIgnoreCase: $query } } ) {
+        documents(orderBy: updatedAt, filter: { title: { containsIgnoreCase: $query } } ) {
           nodes {
             ${docFragment}
           }
@@ -69,7 +66,7 @@ export async function getDocuments(query: string = "", projectId: string = "") {
     `
     : `
       query($query: String!, $projectId: ID!) {
-        documents(orderBy: updatedAt, includeArchived: ${showArchivedDocs}, filter: { and: [ 
+        documents(orderBy: updatedAt, filter: { and: [ 
           { title: { containsIgnoreCase: $query } }, 
           { project: { id: { eq: $projectId } } } 
         ] }) {
@@ -113,22 +110,6 @@ export async function getDocumentContent(documentId: string) {
   );
 
   return data?.documents.nodes?.[0];
-}
-
-export async function restoreDocument(documentId: string) {
-  const { graphQLClient } = getLinearClient();
-
-  const { data } = await graphQLClient.rawRequest<{ documentUnarchive: { success: boolean } }, Record<string, unknown>>(
-    `
-      mutation {
-        documentUnarchive(id: "${documentId}") {
-          success
-        }
-      }
-    `,
-  );
-
-  return { success: data?.documentUnarchive.success };
 }
 
 export async function deleteDocument(documentId: string) {

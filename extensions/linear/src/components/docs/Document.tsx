@@ -18,14 +18,6 @@ export function Document({ doc, ...rest }: DocumentActionsProps) {
       keywords={keywords}
       icon={getDocumentIcon(doc)}
       accessories={[
-        ...(doc.archivedAt
-          ? [
-              {
-                icon: { source: Icon.DeleteDocument, tintColor: Color.Orange },
-                tooltip: `Deleted: ${format(new Date(doc.archivedAt), "MM/dd/yyyy")}`,
-              },
-            ]
-          : []),
         {
           date: lastUpdated,
           icon: Icon.Clock,
@@ -64,9 +56,7 @@ export function Document({ doc, ...rest }: DocumentActionsProps) {
       ]}
       actions={
         <ActionPanel>
-          {!doc.archivedAt && (
-            <Action.Push title="Show Document" target={<DocumentDetail doc={doc} {...rest} />} icon={Icon.Eye} />
-          )}
+          <Action.Push title="Show Document" target={<DocumentDetail doc={doc} {...rest} />} icon={Icon.Eye} />
 
           <DocumentActions doc={doc} {...rest} />
         </ActionPanel>

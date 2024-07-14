@@ -246,14 +246,6 @@
       "description": "When enabled, the issues that are marked as Done, Canceled or Duplicate will not show up in search results.",
       "default": false,
       "required": false
-    },
-    {
-      "type": "checkbox",
-      "label": "Show Archived Documents",
-      "name": "showArchivedDocs",
-      "description": "Show documents that have been archived.",
-      "default": false,
-      "required": false
     }
   ],
   "dependencies": {

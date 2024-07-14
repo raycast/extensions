@@ -1,4 +1,4 @@
-import { deleteDocument, DocumentResult, restoreDocument, updateDocument } from "../../api/documents";
+import { deleteDocument, DocumentResult, updateDocument } from "../../api/documents";
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, showToast, Toast } from "@raycast/api";
 import OpenInLinear from "../OpenInLinear";
 import { MutatePromise } from "@raycast/utils";
@@ -98,38 +98,6 @@ function MoveDocument({ doc, mutateDocs, projects, initiatives }: DocumentAction
 }
 
 export function DocumentActions({ doc, mutateDocs, ...rest }: DocumentActionsProps) {
-  const restore = async () => {
-    const toast = await showToast(Toast.Style.Animated, "Restoring document", doc.title);
-    await mutateDocs(restoreDocument(doc.id), {
-      optimisticUpdate: (data) => {
-        if (!data) {
-          return undefined;
-        }
-
-        return {
-          ...data,
-          docs: data.docs?.map((d) => (d.id !== doc.id ? d : { ...d, archivedAt: undefined, updatedAt: new Date() })),
-        };
-      },
-    })
-      .then(({ success }) => {
-        if (success) {
-          toast.style = Toast.Style.Success;
-          toast.title = "Document restored";
-        }
-      })
-      .catch((err) => {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Failed to restore document";
-        toast.message = getErrorMessage(err);
-        toast.primaryAction = {
-          title: "Retry",
-          onAction: restore,
-          shortcut: { modifiers: ["cmd"], key: "r" },
-        };
-      });
-  };
-
   const trash = async () =>
     confirmAlert({
       title: "Delete Document",
@@ -148,7 +116,7 @@ export function DocumentActions({ doc, mutateDocs, ...rest }: DocumentActionsPro
 
         return {
           ...data,
-          docs: data.docs?.map((d) => (d.id !== doc.id ? d : { ...d, archivedAt: new Date(), updatedAt: new Date() })),
+          docs: data.docs?.filter((d) => d.id !== doc.id),
         };
       },
     })
@@ -177,22 +145,13 @@ export function DocumentActions({ doc, mutateDocs, ...rest }: DocumentActionsPro
       <ActionPanel.Section>
         <MoveDocument doc={doc} mutateDocs={mutateDocs} {...rest} />
 
-        {doc.archivedAt ? (
-          <Action
-            title="Restore Document"
-            icon={{ source: Icon.NewDocument, tintColor: Color.Blue }}
-            onAction={restore}
-            shortcut={{ modifiers: ["ctrl"], key: "r" }}
-          />
-        ) : (
-          <Action
-            title="Delete Document"
-            icon={{ source: Icon.DeleteDocument, tintColor: Color.Red }}
-            onAction={trash}
-            style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["ctrl"], key: "x" }}
-          />
-        )}
+        <Action
+          title="Delete Document"
+          icon={{ source: Icon.DeleteDocument, tintColor: Color.Red }}
+          onAction={trash}
+          style={Action.Style.Destructive}
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+        />
       </ActionPanel.Section>
 
       <ActionPanel.Section>
