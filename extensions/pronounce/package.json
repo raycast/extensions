@@ -1,0 +1,325 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pronounce",
+  "title": "Pronounce",
+  "description": "A command to pronounce text in the preferred language",
+  "icon": "command-icon.png",
+  "author": "yusuf",
+  "categories": [
+    "Applications",
+    "Communication",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "pronounce",
+      "title": "Pronounce",
+      "subtitle": "Pronounce selected text",
+      "description": "Pronounces selected or inputted text in the preferred language",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "text"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "Preferred language to pronounce",
+      "required": true,
+      "type": "dropdown",
+      "default": "en",
+      "data": [
+        {
+          "title": "🇿🇦 Afrikaans",
+          "value": "af"
+        },
+        {
+          "title": "🇦🇱 Albanian",
+          "value": "sq"
+        },
+        {
+          "title": "Amharic",
+          "value": "am"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "Basque",
+          "value": "eu"
+        },
+        {
+          "title": "Bengali",
+          "value": "bn"
+        },
+        {
+          "title": "🇧🇦 Bosnian",
+          "value": "bs"
+        },
+        {
+          "title": "🇧🇬 Bulgarian",
+          "value": "bg"
+        },
+        {
+          "title": "Catalan",
+          "value": "ca"
+        },
+        {
+          "title": "Chinese (Simplified)",
+          "value": "zh-CN"
+        },
+        {
+          "title": "Chinese (Traditional)",
+          "value": "zh-TW"
+        },
+        {
+          "title": "🇭🇷 Croatian",
+          "value": "hr"
+        },
+        {
+          "title": "🇨🇿 Czech",
+          "value": "cs"
+        },
+        {
+          "title": "🇩🇰 Danish",
+          "value": "da"
+        },
+        {
+          "title": "🇳🇱 Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "🇬🇧 English",
+          "value": "en"
+        },
+        {
+          "title": "🇪🇪 Estonian",
+          "value": "et"
+        },
+        {
+          "title": "🇫🇮 Finnish",
+          "value": "fi"
+        },
+        {
+          "title": "🇫🇷 French",
+          "value": "fr"
+        },
+        {
+          "title": "Galician",
+          "value": "gl"
+        },
+        {
+          "title": "🇩🇪 German",
+          "value": "de"
+        },
+        {
+          "title": "🇬🇷 Greek",
+          "value": "el"
+        },
+        {
+          "title": "Gujarati",
+          "value": "gu"
+        },
+        {
+          "title": "Hausa",
+          "value": "ha"
+        },
+        {
+          "title": "🇮🇱 Hebrew",
+          "value": "iw"
+        },
+        {
+          "title": "🇮🇳 Hindi",
+          "value": "hi"
+        },
+        {
+          "title": "🇭🇺 Hungarian",
+          "value": "hu"
+        },
+        {
+          "title": "🇮🇸 Icelandic",
+          "value": "is"
+        },
+        {
+          "title": "🇮🇩 Indonesian",
+          "value": "id"
+        },
+        {
+          "title": "🇮🇹 Italian",
+          "value": "it"
+        },
+        {
+          "title": "🇯🇵 Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Kannada",
+          "value": "kn"
+        },
+        {
+          "title": "Khmer",
+          "value": "km"
+        },
+        {
+          "title": "🇰🇷 Korean",
+          "value": "ko"
+        },
+        {
+          "title": "🇱🇻 Latvian",
+          "value": "lv"
+        },
+        {
+          "title": "🇱🇹 Lithuanian",
+          "value": "lt"
+        },
+        {
+          "title": "🇲🇾 Malay",
+          "value": "ms"
+        },
+        {
+          "title": "Malayalam",
+          "value": "ml"
+        },
+        {
+          "title": "Marathi",
+          "value": "mr"
+        },
+        {
+          "title": "🇲🇲 Myanmar (Burmese)",
+          "value": "my"
+        },
+        {
+          "title": "🇳🇵 Nepali",
+          "value": "ne"
+        },
+        {
+          "title": "🇳🇴 Norwegian",
+          "value": "no"
+        },
+        {
+          "title": "🇵🇱 Polish",
+          "value": "pl"
+        },
+        {
+          "title": "🇵🇹 Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "🇮🇳 Punjabi",
+          "value": "pa"
+        },
+        {
+          "title": "🇷🇴 Romanian",
+          "value": "ro"
+        },
+        {
+          "title": "🇷🇺 Russian",
+          "value": "ru"
+        },
+        {
+          "title": "🇷🇸 Serbian",
+          "value": "sr"
+        },
+        {
+          "title": "Sinhala (Sinhalese)",
+          "value": "si"
+        },
+        {
+          "title": "🇸🇰 Slovak",
+          "value": "sk"
+        },
+        {
+          "title": "🇪🇸 Spanish",
+          "value": "es"
+        },
+        {
+          "title": "🇸🇩 Sundanese",
+          "value": "su"
+        },
+        {
+          "title": "Swahili",
+          "value": "sw"
+        },
+        {
+          "title": "🇸🇪 Swedish",
+          "value": "sv"
+        },
+        {
+          "title": "🇵🇭 Tagalog (Filipino)",
+          "value": "tl"
+        },
+        {
+          "title": "Tamil",
+          "value": "ta"
+        },
+        {
+          "title": "Telugu",
+          "value": "te"
+        },
+        {
+          "title": "Thai",
+          "value": "th"
+        },
+        {
+          "title": "🇹🇷 Turkish",
+          "value": "tr"
+        },
+        {
+          "title": "🇺🇦 Ukrainian",
+          "value": "uk"
+        },
+        {
+          "title": "Urdu",
+          "value": "ur"
+        },
+        {
+          "title": "🇻🇳 Vietnamese",
+          "value": "vi"
+        },
+        {
+          "title": "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Welsh",
+          "value": "cy"
+        }
+      ]
+    },
+    {
+      "name": "isAlwaysSlow",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "description": "If checked, command will always pronounce in slow mode",
+      "label": "Yes",
+      "title": "Always pronounce slowly"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.78.1",
+    "@raycast/utils": "^1.16.2",
+    "google-tts-api": "^2.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
