@@ -18,11 +18,6 @@ export function Document({ doc, ...rest }: DocumentActionsProps) {
       keywords={keywords}
       icon={getDocumentIcon(doc)}
       accessories={[
-        {
-          date: lastUpdated,
-          icon: Icon.Clock,
-          tooltip: `Updated: ${format(lastUpdated, "MM/dd/yyyy")}`,
-        },
         ...(doc.project
           ? [
               {
@@ -49,6 +44,11 @@ export function Document({ doc, ...rest }: DocumentActionsProps) {
               },
             ]
           : []),
+        {
+          date: lastUpdated,
+          icon: Icon.Clock,
+          tooltip: `Updated: ${format(lastUpdated, "MM/dd/yyyy")}`,
+        },
         {
           icon: getUserIcon(doc.creator),
           tooltip: `Creator: ${doc.creator.displayName} (${doc.creator.email})`,
