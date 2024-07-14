@@ -113,8 +113,12 @@ export function util_listbackup(destination: Destination): Promise<string[]> {
   return new Promise((resolve, reject) => {
     exec(`/usr/bin/tmutil listbackups -d "${destination.MountPoint}" -t`, (error, stdout, stderr) => {
       if (error) {
-        reject([]);
-        console.error(stderr);
+        if(error.toString().includes("No backups found for host.")){
+            resolve([]);
+        } else {
+            reject([]);
+            console.error(stderr);
+        }
       }
       const backuplist_array = stdout.split("\n") as string[];
       backuplist_array.pop();

@@ -69,7 +69,9 @@ function ListbackupAction(props: { destination: Destination }) {
                 load_toast.hide();
                 push(
                   <List>
-                    {listbackup_strings.map((backup_string) => {
+                    {listbackup_strings.length==0?
+                    <List.EmptyView title="No backup found on this destination." icon={Icon.Info}></List.EmptyView>
+                    :listbackup_strings.map((backup_string) => {
                       const [date_str, time_str] = transform_ListbackupTimestamp(backup_string);
                       return (
                         <List.Item
