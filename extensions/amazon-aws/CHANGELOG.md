@@ -1,5 +1,10 @@
 # Amazon AWS Changelog
 
+## [S3 Command] - 2024-07-12
+
+- added reverse order option
+- added bucket policy view
+
 ## [SQS, Secrets, Pipelines and Logs Commands] - 2024-07-08
 
 - No unnecessary pagination with typeahead for SQS, Secrets and Logs commands. Pagination with typeahead is redundant.

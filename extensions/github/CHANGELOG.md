@@ -1,5 +1,10 @@
 # GitHub Changelog
 
+## [Repository Improvements] - 2024-07-12
+
+- Adds primary language color and code icon to the accessory for being in-sync with GitHub UI.
+- Adds "Sort By" action for My Latest Repositories with supported options
+
 ## [Improvements and Fixes] - 2024-07-08
 
 - Adds an action to sort the PRs, issues, discussions and repos
