@@ -17,7 +17,7 @@ import runOperation from "./operations/runOperation";
 export default async function Command(props: { arguments: { optimizationFactor: string } }) {
   const { optimizationFactor } = props.arguments;
 
-  let optimizationValue = 100;
+  let optimizationValue = 50;
   if (optimizationFactor != "") {
     optimizationValue = parseFloat(optimizationFactor);
     if (!optimizationValue) {

@@ -8,10 +8,8 @@ import thumbLinks from "../utils/thumbLinks";
 import { MediaItem } from "./mediaItem";
 
 export function GetSectionItems({ sectionId, sectionName }: { sectionId: string; sectionName: string }) {
-  const [searchText, setSearchText] = useState("");
-  const [filteredList, filterList] = useState([]);
-
-  // TODO: Search functionality still not working fix it.
+  const [searchText, setSearchText] = useState<string>("");
+  const [filteredList, setFilteredList] = useState<SectionItemsApiResponse["MediaContainer"]["Metadata"][]>([]);
 
   const endpoint = `${ENDPOINTS.librarySections}${sectionId}/all`;
 
@@ -23,15 +21,24 @@ export function GetSectionItems({ sectionId, sectionName }: { sectionId: string;
   });
 
   useEffect(() => {
-    if (Array.isArray(data)) {
-      filterList(
-        data.filter(
-          (item: SectionItemsApiResponse["MediaContainer"]["Metadata"]) =>
-            Array.isArray(item.title) && item.title.some((keyword: string) => keyword.includes(searchText)),
-        ),
-      );
+    if (!isLoading && Array.isArray(data)) {
+      setFilteredList(data);
     }
-  }, [searchText, filteredList, data]);
+  }, [isLoading, data]);
+
+  useEffect(() => {
+    if (Array.isArray(data)) {
+      if (searchText.length > 0) {
+        setFilteredList(
+          filteredList.filter((item: SectionItemsApiResponse["MediaContainer"]["Metadata"]) =>
+            item.title.toLowerCase().includes(searchText.toLowerCase()),
+          ),
+        );
+      } else if (searchText.length === 0) {
+        setFilteredList(data);
+      }
+    }
+  }, [searchText]);
 
   return (
     <Grid
@@ -46,8 +53,8 @@ export function GetSectionItems({ sectionId, sectionName }: { sectionId: string;
       navigationTitle={sectionName}
       searchBarPlaceholder={"Search " + sectionName}
     >
-      {Array.isArray(data) &&
-        data.map((item: SectionItemsApiResponse["MediaContainer"]["Metadata"]) => (
+      {Array.isArray(filteredList) &&
+        filteredList.map((item: SectionItemsApiResponse["MediaContainer"]["Metadata"]) => (
           <Grid.Item
             key={item.guid}
             content={{

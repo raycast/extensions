@@ -25,8 +25,8 @@ export default function GridError({ error, searchBarAccessory }: { error: string
           error === insufficientCreditsCode || error === notEnoughCreditsString
             ? Icon.Bolt
             : error === nsfwPromptCode || error === nsfwPromptString
-            ? Icon.Warning
-            : Icon.Bug
+              ? Icon.Warning
+              : Icon.Bug
         }
         title={getErrorText(error)}
       />

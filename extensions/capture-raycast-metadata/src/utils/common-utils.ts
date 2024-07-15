@@ -1,4 +1,4 @@
-import { getPreferenceValues, LocalStorage, open, showHUD, showInFinder, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, LocalStorage, open, showInFinder, showToast, Toast } from "@raycast/api";
 import fse from "fs-extra";
 import Values = LocalStorage.Values;
 import { homedir } from "os";
@@ -101,7 +101,7 @@ export async function captureWithInternalMonitor(raycastLocation: RaycastLocatio
   const picturePath = `${getScreenshotsDirectory()}/${buildFileName(
     getScreenshotsDirectory() + "/",
     finalScreenshotName,
-    screenshotFormat
+    screenshotFormat,
   )}`;
   const viewX = `${raycastLocation.x - METADATA_PADDING_X_PX / scale}`;
   const viewY = `${raycastLocation.y - METADATA_PADDING_Y_PX / scale}`;
@@ -115,28 +115,26 @@ export async function captureWithInternalMonitor(raycastLocation: RaycastLocatio
 export async function captureResultToast(captureResult: CaptureResult) {
   if (captureResult.captureSuccess) {
     const optionsToast: Toast.Options = {
-      title: "Capture Success!",
+      title: "Captured Successfully",
       style: Toast.Style.Success,
       message: `${captureResult.picturePath.replace(`${homedir()}`, "~")}`,
       primaryAction: {
         title: "Open in Finder",
         onAction: async () => {
           await open(captureResult.picturePath);
-          await showHUD("Open metadata in default app");
         },
       },
       secondaryAction: {
         title: "Show in Finder",
         onAction: async () => {
           await showInFinder(captureResult.picturePath);
-          await showHUD("Reveal metadata in Finder");
         },
       },
     };
     await showToast(optionsToast);
   } else {
     await showToast({
-      title: "Capture Failure!",
+      title: "Captured Failed",
       style: Toast.Style.Failure,
       message: captureResult.errorMassage,
     });

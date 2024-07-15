@@ -1,6 +1,6 @@
 import { Clipboard, LaunchType, MenuBarExtra, launchCommand, showToast } from "@raycast/api";
 import { getPinIcon } from "../../lib/icons";
-import { Pin, deletePin, openPin } from "../../lib/Pins";
+import { Pin, deletePin, disablePin, hidePin, openPin } from "../../lib/Pins";
 import { ExtensionPreferences, PinsMenubarPreferences, RightClickAction } from "../../lib/preferences";
 import { LocalDataObject } from "../../lib/LocalData";
 
@@ -47,6 +47,12 @@ export default function PinMenuItem(props: {
               break;
             case RightClickAction.Edit:
               launchCommand({ name: "view-pins", type: LaunchType.UserInitiated, context: { pinID: pin.id } });
+              break;
+            case RightClickAction.Hide:
+              await hidePin(pin, setPins);
+              break;
+            case RightClickAction.Disable:
+              await disablePin(pin, setPins);
               break;
           }
         }

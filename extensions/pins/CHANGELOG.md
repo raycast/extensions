@@ -1,5 +1,17 @@
 # Pins Changelog
 
+## [1.8.2 - Group Visibility, Pin Expiration Actions] - 2024-07-11
+
+- Added ability to set custom expiration actions.
+- Added visibility setting for groups.
+- Added `{{pinName}}` and `{{pinTarget}}` placeholders for getting info about the current pin.
+
+## [1.8.1 - Visibility Setting] - 2024-07-07
+
+- Added visibility setting for pins.
+- Added ability to launch pins via deeplinks.
+- Fixed timeout error when running AppleScript scripts.
+
 ## [1.8.0 - Bug Fixes, More AI Models, & Pin Management Placeholders] - 2024-06-22
 
 - Added support for new Raycast AI models.

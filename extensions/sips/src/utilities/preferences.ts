@@ -21,6 +21,11 @@ export interface ExtensionPreferences {
    * The strategy for handling the result of the image processing, i.e. where to save or display the result. One of {@link ImageResultHandling}.
    */
   imageResultHandling: string;
+
+  /**
+   * Whether to use lossless conversion when operating on WebP and AVIF images.
+   */
+  useLosslessConversion: boolean;
 }
 
 /**

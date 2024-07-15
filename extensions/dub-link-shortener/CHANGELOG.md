@@ -1,5 +1,10 @@
 # Dub Link Shortener Changelog
 
+## [Workspace API Keys] - 2024-07-11
+
+- Supports newly launched [workspace api keys](https://dub.co/blog/workspace-api-keys) as user keys are deprecated
+- If workspace keys are used or if there is only one workspace for use, the workspace dropdown is not rendered
+
 ## [Improvements] - 2024-06-28
 
 - Search Links: Improved the UX, added metadata and a workspace selection accessory

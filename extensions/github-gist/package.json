@@ -9,6 +9,7 @@
     "Aayush9029",
     "LunaticMuch",
     "pernielsentikaer",
+    "stelo",
     "nbbaier"
   ],
   "categories": [
@@ -16,15 +17,6 @@
     "Productivity"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "access-token",
-      "type": "password",
-      "required": true,
-      "title": "Personal access tokens",
-      "description": "GitHub personal access tokens."
-    }
-  ],
   "commands": [
     {
       "name": "search-gists",
