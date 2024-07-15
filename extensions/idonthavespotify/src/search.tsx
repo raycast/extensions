@@ -1,16 +1,15 @@
-import fetch from "node-fetch";
 import { useState, useCallback, useEffect } from "react";
 
 import { Action, ActionPanel, Clipboard, Icon, List, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 
-import type { SearchResult, ApiError } from "./@types/global";
+import type { SearchResult } from "./@types/global";
 import { Adapter, MetadataType } from "./@types/global";
 
-import { SITE_URL, API_URL, LINK_REGEX } from "./constants";
+import { SITE_URL } from "./constants";
 
 import { cacheLastSearch, cleanLastSearch, getLastSearch } from "./utils/cache";
 import { playAudio, stopAudio } from "./utils/audio";
-import { getAdapters } from "./utils/preferences";
+import { apiCall } from "./shared/searchToClipboard";
 
 const searchResultLinksTitles: Record<Adapter, string> = {
   [Adapter.YouTube]: "YouTube",
@@ -30,8 +29,6 @@ const searchResultTypesTitles: Record<MetadataType, string> = {
   [MetadataType.Show]: "Show",
 };
 
-const serviceTypes = Object.values(Adapter).map((serviceType) => serviceType.toLowerCase());
-
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [state, setState] = useState<{ searchText: string; searchResult: SearchResult | null }>({
@@ -39,34 +36,12 @@ export default function Command() {
     searchResult: null,
   });
 
-  const fetchSearchResult = useCallback(
+  const searchLinks = useCallback(
     async (link: string) => {
       setIsLoading(true);
 
-      if (
-        !link ||
-        !LINK_REGEX.test(link) ||
-        !serviceTypes.some((serviceType) => link.toLowerCase().includes(serviceType.toLowerCase()))
-      ) {
-        setIsLoading(false);
-        return;
-      }
-
       try {
-        const request = await fetch(API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ link, adapters: getAdapters() }),
-        });
-
-        const response = (await request.json()) as SearchResult & ApiError;
-
-        if (request.status !== 200) {
-          throw new Error(response.message);
-        }
-
+        const response = await apiCall(link);
         setState((prev) => ({ ...prev, searchResult: response }));
         cacheLastSearch(link, response);
       } catch (error) {
@@ -86,7 +61,7 @@ export default function Command() {
       const lastSearch = getLastSearch();
 
       if (clipboardText && !(lastSearch?.link === clipboardText)) {
-        await fetchSearchResult(clipboardText);
+        await searchLinks(clipboardText);
         return;
       }
 
@@ -102,7 +77,7 @@ export default function Command() {
         });
       }
     })();
-  }, [fetchSearchResult, setIsLoading, setState]);
+  }, [searchLinks, setIsLoading, setState]);
 
   return (
     <List
@@ -113,8 +88,7 @@ export default function Command() {
           searchText: link,
           searchResult: null,
         });
-
-        fetchSearchResult(link);
+        searchLinks(link);
       }}
       actions={
         <ActionPanel>

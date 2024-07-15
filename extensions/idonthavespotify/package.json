@@ -15,44 +15,50 @@
       "name": "search",
       "title": "Find Alternative Sources",
       "subtitle": "I Don't Have Spotify",
-      "description": "Effortlessly convert Spotify links to your preferred streaming service",
+      "description": "Effortlessly convert Spotify links to your preferred streaming service.",
       "mode": "view"
-    }
-  ],
-  "preferences": [
+    },
     {
-      "name": "defaultAdapter",
-      "title": "Default streaming service",
-      "description": "Convert links only to this service",
-      "type": "dropdown",
-      "required": false,
-      "value": "all",
-      "data": [
-        {
-          "title": "All",
-          "value": "all"
-        },
-        {
-          "title": "Youtube Music",
-          "value": "youTube"
-        },
-        {
-          "title": "Apple Music",
-          "value": "appleMusic"
-        },
-        {
-          "title": "SoundCloud",
-          "value": "soundCloud"
-        },
-        {
-          "title": "Deezer",
-          "value": "deezer"
-        },
-        {
-          "title": "Tidal",
-          "value": "tidal"
-        }
-      ]
+      "name": "toYouTube",
+      "title": "Convert Link to YouTube Music",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert clipboard link to YouTube Music and copy it back.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toAppleMusic",
+      "title": "Convert Link to Apple Music",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert clipboard link to Apple Music and copy it back.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toSoundCloud",
+      "title": "Convert Link to SoundCloud",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert clipboard link to SoundCloud and copy it back.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toDeezer",
+      "title": "Convert Link to Deezer",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert clipboard link to Deezer and copy it back.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toTidal",
+      "title": "Convert Link to Tidal",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert clipboard link to Tidal and copy it back.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toSpotify",
+      "title": "Convert Link to Spotify",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert clipboard link to Spotify and copy it back.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
