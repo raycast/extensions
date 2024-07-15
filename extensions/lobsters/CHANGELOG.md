@@ -1,5 +1,11 @@
 # lobsters
 
+## 1.0.3
+
+### Patch Changes
+
+- 832876c: Update avatars & nicknames due to changes in RSS structure
+
 ## 1.0.2
 
 ### Patch Changes
