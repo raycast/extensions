@@ -18,7 +18,7 @@ export default function SearchLinks() {
       {linksError && (
         <List.EmptyView
           title="Failed to fetch short links"
-          description={linksError?.message}
+          description={linksError.message}
           icon={{ source: Icon.Warning, tintColor: Color.Red }}
         />
       )}
