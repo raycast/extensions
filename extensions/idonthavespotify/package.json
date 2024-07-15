@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "search",
-      "title": "Find Alternative Sources",
+      "title": "Convert Link to All Platforms",
       "subtitle": "I Don't Have Spotify",
       "description": "Effortlessly convert Spotify links to your preferred streaming service.",
       "mode": "view"
@@ -51,7 +51,8 @@
       "title": "Convert Link to Tidal",
       "subtitle": "I Don't Have Spotify",
       "description": "Convert clipboard link to Tidal and copy it back.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "toSpotify",
