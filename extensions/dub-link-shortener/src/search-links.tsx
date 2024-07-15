@@ -1,3 +1,4 @@
+import "@/polyfills/fetch";
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { useShortLinks } from "@hooks/use-short-links";
 import { DUB_CO_URL } from "@utils/constants";

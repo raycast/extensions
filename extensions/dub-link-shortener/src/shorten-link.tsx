@@ -1,3 +1,4 @@
+import "@/polyfills/fetch";
 import {
   Action,
   ActionPanel,
