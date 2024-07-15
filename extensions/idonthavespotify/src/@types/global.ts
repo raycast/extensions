@@ -1,10 +1,10 @@
-export enum ServiceType {
+export enum Adapter {
   Spotify = "spotify",
   YouTube = "youTube",
   AppleMusic = "appleMusic",
-  Tidal = "tidal",
   SoundCloud = "soundCloud",
   Deezer = "deezer",
+  Tidal = "tidal",
 }
 
 export enum MetadataType {
@@ -25,7 +25,7 @@ export type SearchMetadata = {
 };
 
 export type SearchResultLink = {
-  type: ServiceType;
+  type: Adapter;
   url: string;
   isVerified?: boolean;
 };

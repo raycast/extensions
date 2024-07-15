@@ -19,6 +19,42 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "defaultAdapter",
+      "title": "Default streaming service",
+      "description": "Convert links only to this service",
+      "type": "dropdown",
+      "required": false,
+      "value": "all",
+      "data": [
+        {
+          "title": "All",
+          "value": "all"
+        },
+        {
+          "title": "Youtube Music",
+          "value": "youTube"
+        },
+        {
+          "title": "Apple Music",
+          "value": "appleMusic"
+        },
+        {
+          "title": "SoundCloud",
+          "value": "soundCloud"
+        },
+        {
+          "title": "Deezer",
+          "value": "deezer"
+        },
+        {
+          "title": "Tidal",
+          "value": "tidal"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.78.1",
     "@raycast/utils": "^1.16.2",

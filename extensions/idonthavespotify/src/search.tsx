@@ -1,23 +1,24 @@
 import fetch from "node-fetch";
 import { useState, useCallback, useEffect } from "react";
 
-import { Action, ActionPanel, Clipboard, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Icon, List, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 
 import type { SearchResult, ApiError } from "./@types/global";
-import { ServiceType, MetadataType } from "./@types/global";
+import { Adapter, MetadataType } from "./@types/global";
 
 import { SITE_URL, API_URL, LINK_REGEX } from "./constants";
 
 import { cacheLastSearch, cleanLastSearch, getLastSearch } from "./utils/cache";
 import { playAudio, stopAudio } from "./utils/audio";
+import { getAdapters } from "./utils/preferences";
 
-const searchResultLinksTitles: Record<ServiceType, string> = {
-  [ServiceType.YouTube]: "YouTube",
-  [ServiceType.Deezer]: "Deezer",
-  [ServiceType.AppleMusic]: "Apple Music",
-  [ServiceType.Tidal]: "Tidal",
-  [ServiceType.SoundCloud]: "SoundCloud",
-  [ServiceType.Spotify]: "Spotify",
+const searchResultLinksTitles: Record<Adapter, string> = {
+  [Adapter.YouTube]: "YouTube",
+  [Adapter.Deezer]: "Deezer",
+  [Adapter.AppleMusic]: "Apple Music",
+  [Adapter.Tidal]: "Tidal",
+  [Adapter.SoundCloud]: "SoundCloud",
+  [Adapter.Spotify]: "Spotify",
 };
 
 const searchResultTypesTitles: Record<MetadataType, string> = {
@@ -29,7 +30,7 @@ const searchResultTypesTitles: Record<MetadataType, string> = {
   [MetadataType.Show]: "Show",
 };
 
-const serviceTypes = Object.values(ServiceType).map((serviceType) => serviceType.toLowerCase());
+const serviceTypes = Object.values(Adapter).map((serviceType) => serviceType.toLowerCase());
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
@@ -57,7 +58,7 @@ export default function Command() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ link }),
+          body: JSON.stringify({ link, adapters: getAdapters() }),
         });
 
         const response = (await request.json()) as SearchResult & ApiError;
@@ -115,6 +116,11 @@ export default function Command() {
 
         fetchSearchResult(link);
       }}
+      actions={
+        <ActionPanel>
+          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+        </ActionPanel>
+      }
       throttle
     >
       {state.searchText === "" && !state.searchResult ? (
@@ -160,7 +166,7 @@ export default function Command() {
                 <List.Item
                   key={type}
                   icon={Icon.Link}
-                  title={searchResultLinksTitles[type as ServiceType]}
+                  title={searchResultLinksTitles[type as Adapter]}
                   subtitle={url}
                   accessories={[{ icon: isVerified ? Icon.CheckCircle : null }]}
                   actions={
