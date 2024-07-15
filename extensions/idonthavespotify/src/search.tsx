@@ -9,7 +9,7 @@ import { SITE_URL } from "./constants";
 
 import { cacheLastSearch, cleanLastSearch, getLastSearch } from "./utils/cache";
 import { playAudio, stopAudio } from "./utils/audio";
-import { apiCall } from "./shared/searchToClipboard";
+import { apiCall, isLinkValid } from "./shared/searchToClipboard";
 
 const searchResultLinksTitles: Record<Adapter, string> = {
   [Adapter.YouTube]: "YouTube",
@@ -30,7 +30,7 @@ const searchResultTypesTitles: Record<MetadataType, string> = {
 };
 
 export default function Command() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [state, setState] = useState<{ searchText: string; searchResult: SearchResult | null }>({
     searchText: "",
     searchResult: null,
@@ -39,6 +39,7 @@ export default function Command() {
   const searchLinks = useCallback(
     async (link: string) => {
       setIsLoading(true);
+
       try {
         const response = await apiCall(link);
         setState((prev) => ({ ...prev, searchResult: response }));
@@ -47,9 +48,9 @@ export default function Command() {
         console.error(error);
         setState((prev) => ({ ...prev, response: null }));
         showToast(Toast.Style.Failure, "Error", (error as Error).message);
-      } finally {
-        setIsLoading(false);
       }
+
+      setIsLoading(false);
     },
     [state.searchText, setIsLoading, setState],
   );
@@ -59,7 +60,9 @@ export default function Command() {
       const clipboardText = await Clipboard.readText();
       const lastSearch = getLastSearch();
 
-      if (clipboardText && !(lastSearch?.link === clipboardText)) {
+      if (clipboardText && !(lastSearch?.link === clipboardText) && isLinkValid(clipboardText)) {
+        setState((prev) => ({ ...prev, searchText: clipboardText }));
+        showToast(Toast.Style.Success, "Link captured from clipboard!");
         await searchLinks(clipboardText);
         return;
       }
@@ -70,25 +73,28 @@ export default function Command() {
           return;
         }
 
-        setState({
-          searchText: lastSearch.link,
-          searchResult: lastSearch.searchResult,
-        });
+        setState({ searchText: lastSearch.link, searchResult: lastSearch.searchResult });
       }
     })();
-  }, [searchLinks, setIsLoading, setState]);
+  }, []);
 
   return (
     <List
       isLoading={isLoading}
       searchText={state.searchText}
       onSearchTextChange={(link) => {
-        if (!link) return;
-
         setState({
           searchText: link,
           searchResult: null,
         });
+
+        if (!link) return;
+
+        if (!isLinkValid(link)) {
+          showToast(Toast.Style.Failure, "Error", "Make sure to enter a valid link");
+          return;
+        }
+
         searchLinks(link);
       }}
       actions={

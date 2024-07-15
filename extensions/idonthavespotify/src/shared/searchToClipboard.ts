@@ -6,15 +6,13 @@ import { Adapter, ApiError, SearchResult } from "../@types/global";
 
 const ALL_ADAPTERS = Object.values(Adapter).map((adapter) => adapter.toLowerCase());
 
-export const apiCall = async (link: string, adapter?: Adapter) => {
-  if (
-    !link ||
-    !LINK_REGEX.test(link) ||
-    !ALL_ADAPTERS.some((adapter) => link.toLowerCase().includes(adapter.toLowerCase()))
-  ) {
-    throw new Error("Invalid link");
-  }
+export const isLinkValid = (link: string) => {
+  return (
+    link && LINK_REGEX.test(link) && ALL_ADAPTERS.some((adapter) => link.toLowerCase().includes(adapter.toLowerCase()))
+  );
+};
 
+export const apiCall = async (link: string, adapter?: Adapter) => {
   const request = await fetch(API_URL, {
     method: "POST",
     headers: {
