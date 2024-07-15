@@ -68,6 +68,7 @@ export default function Command() {
             icon={{ source: Icon.Circle, tintColor: runningEntry?.project_color }}
             onAction={async () => {
               await stopRunningTimeEntry(runningEntry);
+              // Raycast menubar doesn't update instantly without this workaround
               await sleep(250);
             }}
             title={runningEntry.description || ""}
@@ -103,6 +104,7 @@ export default function Command() {
             icon={{ source: Icon.Circle, tintColor: timeEntry.project_color }}
             onAction={async () => {
               await resumeTimeEntry(timeEntry);
+              // Raycast menubar doesn't update instantly without this workaround
               await sleep(250);
             }}
           />

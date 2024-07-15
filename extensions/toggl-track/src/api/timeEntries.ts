@@ -28,7 +28,7 @@ type CreateTimeEntryParameters = {
   taskId?: number;
   billable?: boolean;
 };
-export async function createTimeEntry({
+export function createTimeEntry({
   projectId,
   workspaceId,
   description,
@@ -51,7 +51,7 @@ export async function createTimeEntry({
   });
 }
 
-export async function stopTimeEntry({ id, workspaceId }: { id: number; workspaceId: number }) {
+export function stopTimeEntry({ id, workspaceId }: { id: number; workspaceId: number }) {
   return patch<{ data: TimeEntry }>(`/workspaces/${workspaceId}/time_entries/${id}/stop`, {});
 }
 
