@@ -121,14 +121,14 @@ export default function Command() {
                               <List.Item.Detail.Metadata.Link
                                 title="Facebook"
                                 text={site[1].contact.faceboook}
-                                target={`facebook.com/${site[1].contact.faceboook}`}
+                                target={`https://facebook.com/${site[1].contact.faceboook}`}
                               />
                             )}
                             {site[1].contact.twitter && (
                               <List.Item.Detail.Metadata.Link
                                 title="Twitter/X"
                                 text={site[1].contact.twitter}
-                                target={`x.com/${site[1].contact.twitter}`}
+                                target={`https://x.com/${site[1].contact.twitter}`}
                               />
                             )}
                             {site[1].contact.language && (
