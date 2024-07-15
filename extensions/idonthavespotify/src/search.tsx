@@ -84,6 +84,8 @@ export default function Command() {
       isLoading={isLoading}
       searchText={state.searchText}
       onSearchTextChange={(link) => {
+        if (!link) return;
+
         setState({
           searchText: link,
           searchResult: null,
