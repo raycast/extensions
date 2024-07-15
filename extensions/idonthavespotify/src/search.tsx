@@ -39,7 +39,6 @@ export default function Command() {
   const searchLinks = useCallback(
     async (link: string) => {
       setIsLoading(true);
-
       try {
         const response = await apiCall(link);
         setState((prev) => ({ ...prev, searchResult: response }));
