@@ -21,6 +21,7 @@ export default function Search(props: LaunchProps<{ arguments: Arguments.Search 
 	const [lexicons, setLexicons] = useState<Record<string, LexiconDoc | null>>({});
 	const [searchText, setSearchText] = useState(query || "");
 	const [selectedNsid, setSelectedNsid] = useState<string | null>(null);
+	const [filter, setFilter] = useState("All");
 
 	useEffect(() => {
 		(async function () {
@@ -57,20 +58,27 @@ export default function Search(props: LaunchProps<{ arguments: Arguments.Search 
 			}),
 	);
 
-	const listToDisplay = useMemo(() => {
+	const listToDisplay = useMemo<Record<string, LexiconDoc | LexiconDoc["defs"][string]>>(() => {
+		let entries;
 		if (searchText && lexicons[searchText]) {
-			return Object.fromEntries(
-				Object.entries(lexicons[searchText].defs).map(([key, def]) => [`${searchText}#${key}`, def]),
-			);
+			entries = Object.entries(lexicons[searchText].defs).map(([key, def]) => [`${searchText}#${key}`, def]);
+		} else if (filter !== "All") {
+			entries = Object.entries(extensiveLexiconListing).filter(([, doc]) => doc?.type === filter.toLowerCase());
 		}
-		return searchText.includes("#") ? extensiveLexiconListing : lexicons;
-	}, [searchText, lexicons, extensiveLexiconListing]);
+		return entries ? Object.fromEntries(entries) : searchText.includes("#") ? extensiveLexiconListing : lexicons;
+	}, [searchText, filter, lexicons, extensiveLexiconListing]);
 
 	const selectedDoc = selectedNsid ? (lexicons[selectedNsid] ?? null) : null;
 
 	return (
 		<List
 			searchBarPlaceholder="Search lexicons..."
+			searchBarAccessory={
+				<FilterDropdown
+					options={["All", "Query", "Procedure", "Object", "Record", "Array"]}
+					setSelected={setFilter}
+				/>
+			}
 			isLoading={isLoading}
 			searchText={searchText}
 			onSearchTextChange={(text) => setSearchText(text)}
@@ -130,5 +138,15 @@ export default function Search(props: LaunchProps<{ arguments: Arguments.Search 
 				<List.EmptyView title="Failed to load lexicons" />
 			)}
 		</List>
+	);
+}
+
+function FilterDropdown({ options, setSelected }: { options: string[]; setSelected: (value: string) => void }) {
+	return (
+		<List.Dropdown tooltip="Type" defaultValue={options[0]} onChange={setSelected}>
+			{options.map((option) => (
+				<List.Dropdown.Item key={option} title={option} value={option} />
+			))}
+		</List.Dropdown>
 	);
 }
