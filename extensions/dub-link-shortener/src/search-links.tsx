@@ -179,9 +179,8 @@ const tryDeleteLink = async (linkId: string, mutate: MutatePromise<LinkSchema[]>
         title: "❗ Failed to delete link",
         primaryAction: {
           title: "Retry",
-          onAction: async (toast) => {
+          onAction: async () => {
             await tryDeleteLink(linkId, mutate);
-            await toast.hide();
           },
         },
       });
