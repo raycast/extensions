@@ -6,7 +6,7 @@ import { ConversationType } from "../type/conversation";
 import {
   ConfigurationTypeCommunicationBinaryFile,
   ConfigurationTypeCommunicationExternalApi,
-  ConfigurationTypeCommunicationLangChain,
+  ConfigurationTypeCommunicationLocal,
 } from "../type/config";
 import { useConversations } from "./useConversations";
 import {
@@ -60,7 +60,7 @@ export function useChat(): ChatHookType {
     let chatResponse: ITalk | undefined = undefined;
 
     switch (typeCommunication) {
-      case ConfigurationTypeCommunicationLangChain:
+      case ConfigurationTypeCommunicationLocal:
         console.info("Using local");
         chatResponse = await RunLocal(chat, { toast, setData, setStreamData, setLoading });
         break;
