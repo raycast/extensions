@@ -1,6 +1,6 @@
 # Timers Changelog
 
-## [Bugfixes and improvements] - 2024-07-13
+## [Bugfixes and improvements] - {PR_MERGE_DATE}
 
 - Fix bug where alert sound would not play if osascript notification command failed due to lack of permissions
 - Fix bug where quicklink-root-presets would not close properly if "Automatically close window on start" was disabled
