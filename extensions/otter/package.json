@@ -36,6 +36,27 @@
       "mode": "view"
     },
     {
+      "name": "tags",
+      "title": "View Tags",
+      "subtitle": "Otter",
+      "description": "View Otter tags",
+      "mode": "view"
+    },
+    {
+      "name": "collections",
+      "title": "View Collections",
+      "subtitle": "Otter",
+      "description": "View Otter Collections",
+      "mode": "view"
+    },
+    {
+      "name": "bookmark-types",
+      "title": "View Types",
+      "subtitle": "Otter",
+      "description": "View Otter Types",
+      "mode": "view"
+    },
+    {
       "name": "menubar",
       "title": "View Recent Bookmarks",
       "description": "View recent Otter items",

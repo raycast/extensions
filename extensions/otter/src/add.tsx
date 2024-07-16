@@ -11,10 +11,12 @@ import urlJoin from 'proper-url-join'
 import { copy } from './utils/copy'
 import { URL } from 'url'
 import { useEffect, useState } from 'react'
+import { useActiveTab } from './utils/useActiveTabs'
 
 export default () => {
   const pref = getPreferenceValues()
-  const [url, setUrl] = useState<string>('')
+  const activeTab = useActiveTab()
+  const [url, setUrl] = useState<string>(activeTab?.url || '')
 
   useEffect(() => {
     async function getUrl() {
@@ -26,8 +28,12 @@ export default () => {
         return
       }
     }
-    getUrl()
-  }, [])
+    if (!activeTab?.url) {
+      getUrl()
+    } else {
+      setUrl(activeTab.url)
+    }
+  }, [activeTab])
 
   async function handleSubmit(values: { url: string }) {
     try {
