@@ -8,6 +8,7 @@ import {
   closeMainWindow,
   Grid,
   ActionPanel,
+  Icon,
 } from "@raycast/api";
 import { DetectedInstallation, ensureRectangleIsInstalled } from "./utils/checkInstall";
 import { CommandGroups } from "./actions/interface";
@@ -54,7 +55,12 @@ export default function Command() {
               subtitle={description}
               actions={
                 <ActionPanel>
-                  <Action title={`Execute ${title}`} onAction={() => buildCommand(name)()} />
+                  <Action title={`Execute ${title}`} onAction={() => buildCommand(name)()} icon={Icon.Play} />
+                  <Action.CreateQuicklink
+                    title={`Create Quicklink for ${title}`}
+                    icon={Icon.Link}
+                    quicklink={{ link: `${detectedInstallation}://execute-action?name=${name}`, name: title }}
+                  />
                 </ActionPanel>
               }
             />
