@@ -17,10 +17,31 @@ See the [Set up a Google Client ID](#set-up-a-google-client-id) section below fo
 
 ## Features
 
-- **Create events** quickly
-- **See upcoming meetings** and their status
-- **Join Google Meet** conferences
-- **Manage your calendars** and choose the ones that are of interest for you to see from Raycast
+### Feature: Quick create event
+
+Create an event quickly by typing a title, a human-readable time descrption (e.g., "tomorrow at 10am") and a duration (e.g., "30m").
+
+![Quick create event](/assets/screenshot-quick-create-event.png)
+
+### Feature: Upcoming events
+
+See upcoming events from the Google Calendars you have set to be visible in the extension.
+
+![Upcoming events](/assets/screenshot-upcoming-events.png)
+
+### Feature: Join Google Meet
+
+Join a Google Meet conference straight from Raycast.
+
+![Join Google Meet](/assets/screenshot-join-google-meet.png)
+
+### Feature: Create event
+
+Create an event straight from Raycast.
+
+![Create event](/assets/screenshot-create-event.png)
+
+---
 
 ## Set up a Google Client ID
 
