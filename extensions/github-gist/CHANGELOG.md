@@ -1,6 +1,6 @@
 # GitHub Gist Changelog
 
-## [Reduce GitHub Authentication] - {PR_MERGE_DATE}
+## [Reduce GitHub Authentication] - 2024-07-16
 
 - Reduce GitHub authentication permissions to access only GitHub Gist content
 - Fix the issue of **Open in Ray.so** command displaying garbled code
