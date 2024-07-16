@@ -6,10 +6,10 @@
 
 - [Quick insert #11627](https://github.com/raycast/extensions/issues/11627)
   - `CMD + enter` now will paste the OTP into the last focused input
-- Sort by priority
-  - ability to set a priority for accounts
-  - accounts are sorted by this
-  - higher prio is higher in the list
+- [Reorder menu items #11628](https://github.com/raycast/extensions/issues/11628)
+  - create new option was moved to the bottom of the list
+- Reorder accounts
+  - ability to reorder accounts
 - Key Icon before accounts
 
 ### Changed
