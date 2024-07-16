@@ -1,0 +1,51 @@
+{
+  "name": "shodan",
+  "title": "Shodan",
+  "description": "Interact with the Shodan API to search for devices, get host information, and more.",
+  "icon": "shodan-icon.png",
+  "author": "0xMarc",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Shodan API",
+      "description": "Access Shodan API methods",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "Shodan API Key",
+      "description": "Your Shodan API key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.78.1",
+    "@raycast/utils": "^1.3.3",
+    "axios": "^0.21.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^8.51.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
