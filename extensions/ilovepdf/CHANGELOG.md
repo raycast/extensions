@@ -1,6 +1,6 @@
 # iLovePDF Changelog
 
-## [Add User Friendly Error Messages] - 2024-07-14
+## [Add User Friendly Error Messages] - {PR_MERGE_DATE}
 
 ## [Add Repair PDF Command] - 2024-07-09
 
