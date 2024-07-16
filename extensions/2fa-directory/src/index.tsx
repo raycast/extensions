@@ -1,24 +1,6 @@
 import { List, Action, ActionPanel } from "@raycast/api";
 import { getFavicon, useFetch } from "@raycast/utils";
 
-// SAMPLE RESPONSE
-// [
-//   [
-//     "000webhost",
-//     {
-//       "domain": "000webhost.com",
-//       "contact": {
-//         "twitter": "000webhost_com",
-//         "facebook": "000webhost.Global"
-//       },
-//       "keywords": [
-//         "hosting"
-//       ]
-//     }
-//   ],
-//   ...
-// ]
-
 interface SiteDetails {
   domain: string;
   "additional-domains"?: string[];
