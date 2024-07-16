@@ -153,6 +153,29 @@ export default () => {
     }
   }
 
+  const globalActions = (
+    <ActionPanel.Section>
+      <ActionPanel.Submenu title="Create New" icon={Icon.Plus} shortcut={{ modifiers: ['cmd'], key: 'n' }}>
+        <Action title="Scan a QR Code" icon={Icon.Camera} onAction={() => scanQRCode('scan')} />
+        <Action.Push title="Enter a Setup Key" icon={Icon.Keyboard} target={<SetupKey onSubmit={handleFormSubmit} />} />
+        <Action
+          title="Select a QR Code"
+          icon={Icon.Camera}
+          shortcut={{ modifiers: ['cmd'], key: 'i' }}
+          onAction={() => scanQRCode('select')}
+        />
+      </ActionPanel.Submenu>
+      <Action
+        title={`${preferences.passwordVisibility ? 'Hide' : 'Show'} Passwords`}
+        icon={preferences.passwordVisibility ? Icon.EyeDisabled : Icon.Eye}
+        onAction={() => {
+          openExtensionPreferences();
+          popToRoot();
+        }}
+      />
+    </ActionPanel.Section>
+  );
+
   useEffect(() => {
     loadAccounts();
     update();
@@ -219,14 +242,7 @@ export default () => {
                   shortcut={{ modifiers: ['cmd'], key: 'backspace' }}
                   onAction={() => handleRemoveAccount(account)}
                 />
-                <Action
-                  title={`${preferences.passwordVisibility ? 'Hide' : 'Show'} Password`}
-                  icon={preferences.passwordVisibility ? Icon.EyeDisabled : Icon.Eye}
-                  onAction={() => {
-                    openExtensionPreferences();
-                    popToRoot();
-                  }}
-                />
+                {globalActions}
               </ActionPanel>
             }
           />
@@ -235,23 +251,14 @@ export default () => {
       {!loading && ( // NOTE: defers rendering so accounts are in focus
         <List.Section title="New">
           <List.Item
-            title={'Create new'}
-            subtitle={'Create a new one-time password'}
+            title="Create new"
+            subtitle="Create a new one-time password"
             icon={Icon.Plus}
             accessories={
               !qrCodeScanType
                 ? [
-                    {
-                      icon: Icon.Camera,
-                      tag: {
-                        value: 'Scan QR',
-                        color: Color.Yellow,
-                      },
-                    },
-                    {
-                      icon: Icon.Keyboard,
-                      tag: 'Enter Setup Key',
-                    },
+                    { icon: Icon.Camera, tag: { value: 'Scan QR', color: Color.Yellow } },
+                    { icon: Icon.Keyboard, tag: 'Enter Setup Key' },
                   ]
                 : qrCodeScanType === 'scan'
                 ? [{ text: 'Scanning QR Code...' }]
