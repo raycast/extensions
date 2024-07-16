@@ -209,7 +209,7 @@
 /extensions/clipboard-formatter                                     @joshtemple
 /extensions/clipboard-utilities                                     @noidwasavailable
 /extensions/clipmenu                                                @Envl
-/extensions/clockify                                                @ismamz @sxn @kuddl
+/extensions/clockify                                                @ismamz @sxn @kuddl @azlekov
 /extensions/clojuredocs-search                                      @edblancas
 /extensions/close-finder                                            @qeude
 /extensions/cloudflare                                              @Destiner @niklaswa @teziovsky
@@ -377,7 +377,7 @@
 /extensions/dropshare                                               @tjosten
 /extensions/drupal-org                                              @hussainweb @BossElijah
 /extensions/drupal-toolbox                                          @emircanerkul @pernielsentikaer
-/extensions/dub-link-shortener                                      @quuu @jfkisafk
+/extensions/dub-link-shortener                                      @quuu @jfkisafk @steven-tey
 /extensions/duck-duck-go-search                                     @tegola @justspacedog
 /extensions/duck-facts                                              @validatedev @pernielsentikaer
 /extensions/duckduckgo-email                                        @Hugo-Persson
@@ -573,6 +573,7 @@
 /extensions/helm-docs                                               @tiagomichaelsousa
 /extensions/heroicons                                               @haackt @mil3na @j3lte
 /extensions/heroku                                                  @Yukaii
+/extensions/hestiacp-admin                                          @xmok
 /extensions/hetzner                                                 @alex-w0
 /extensions/hexlify                                                 @gkpln3
 /extensions/hidden-icons                                            @koinzhang
