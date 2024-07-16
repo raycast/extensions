@@ -16,16 +16,8 @@ import {
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { getProgressIcon } from '@raycast/utils';
-import { z } from 'zod';
 import * as store from './store';
-import {
-  readDataFromQRCodeOnScreen,
-  getCurrentSeconds,
-  splitStrToParts,
-  ScanType,
-  parseUrl,
-  getPrioTag,
-} from './utils';
+import { readDataFromQRCodeOnScreen, getCurrentSeconds, splitStrToParts, ScanType, parseUrl } from './utils';
 import { TOKEN_TIME, generateToken } from './totp';
 import { extractAccountsFromMigrationUrl } from './google-authenticator';
 import { config } from './config';
@@ -178,7 +170,7 @@ export default () => {
             subtitle={displayToken(account.secret)}
             keywords={[account.issuer ?? '', account.name]}
             accessories={[
-              getPrioTag(account.prio),
+              { tag: { value: account.index.toString(), color: Color.Orange } },
               account.issuer ? { tag: account.issuer } : {},
               {
                 icon: { source: getProgressIcon(timer / TOKEN_TIME), tintColor: getProgressColor() },
@@ -189,7 +181,7 @@ export default () => {
               <ActionPanel>
                 <Action.CopyToClipboard content={getCopyToClipboardContent(account.secret)} />
                 <Action.Paste content={getCopyToClipboardContent(account.secret)} />
-                {(account.prio ?? 0) > 0 && (
+                {(account.index ?? 0) > 0 && (
                   <Action
                     title="Move up"
                     icon={Icon.ArrowUp}
@@ -200,7 +192,7 @@ export default () => {
                     shortcut={{ modifiers: ['cmd', 'opt'], key: 'arrowUp' }}
                   />
                 )}
-                {(account.prio ?? 0) < accounts.length - 1 && (
+                {(account.index ?? 0) < accounts.length - 1 && (
                   <Action
                     title="Move down"
                     icon={Icon.ArrowDown}

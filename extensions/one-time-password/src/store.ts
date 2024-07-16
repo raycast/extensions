@@ -1,7 +1,7 @@
 import { LocalStorage } from '@raycast/api';
 import crypto from 'crypto';
 import { z } from 'zod';
-import { parseUrl, sortByPrio } from './utils';
+import { parseUrl, sortByIndex } from './utils';
 
 export const OldAccount = z.object({
   id: z.string(),
@@ -12,12 +12,12 @@ export const OldAccount = z.object({
 });
 
 export const Account = OldAccount.extend({
-  prio: z.number(),
+  index: z.number(),
 });
 export type Account = z.infer<typeof Account>;
 
-type CreateAccount = Omit<Account, 'id' | 'prio'>;
-type UpdateAccount = Omit<Account, 'prio'>;
+type CreateAccount = Omit<Account, 'id' | 'index'>;
+type UpdateAccount = Omit<Account, 'index'>;
 
 const STORAGE_KEY = 'one-time-password-accounts';
 
@@ -32,12 +32,24 @@ async function save(accounts: Account[]) {
   await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
 }
 
+async function migrateOldAccounts(data: string) {
+  const oldAccounts = OldAccount.array().parse(JSON.parse(data));
+  const fixAttempted = oldAccounts.map((o, i) => ({ ...o, index: i }));
+
+  const accounts = Account.array().parse(fixAttempted).sort(sortByIndex);
+  await save(accounts);
+
+  return accounts;
+}
+
 export async function getAccounts() {
   const data = (await LocalStorage.getItem<string>(STORAGE_KEY)) || '[]';
 
-  // P0: migrate old accounts
-  
-  return Account.array().parse(JSON.parse(data)).sort(sortByPrio);
+  try {
+    return Account.array().parse(JSON.parse(data)).sort(sortByIndex);
+  } catch (e) {
+    return migrateOldAccounts(data);
+  }
 }
 
 function isOtpUrl(str: string) {
@@ -53,7 +65,7 @@ export async function addAccount(account: CreateAccount) {
     account.issuer = issuer || '';
   }
 
-  accounts.push({ ...account, prio: accounts.length, id: generateAccountId(account) });
+  accounts.push({ ...account, index: accounts.length, id: generateAccountId(account) });
   await save(accounts);
 }
 
@@ -85,14 +97,14 @@ export async function moveAccount(id: string, dir: MoveDir) {
   const moved = accounts.find((account) => account.id === id);
   if (!moved) return;
 
-  const fromPrio = moved.prio ?? 0;
-  const toPrio = fromPrio + dir;
+  const fromIndex = moved.index ?? 0;
+  const toIndex = fromIndex + dir;
 
-  const target = accounts.find((account) => account.prio === toPrio);
+  const target = accounts.find((account) => account.index === toIndex);
   if (!target) return;
 
-  moved.prio = toPrio;
-  target.prio = fromPrio;
+  moved.index = toIndex;
+  target.index = fromIndex;
 
   await save(accounts);
 }

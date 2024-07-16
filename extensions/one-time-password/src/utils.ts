@@ -3,10 +3,6 @@ import Jimp from 'jimp';
 import jsQR from 'jsqr';
 import { promisify } from 'util';
 import os from 'os';
-import { Icon } from '@raycast/api';
-
-import type { ItemAccessory } from './types';
-import { config } from './config';
 
 export type ScanType = 'scan' | 'select' | null;
 
@@ -81,25 +77,6 @@ export function isGoogleAuthenticatorMigration(str?: string) {
   return str?.startsWith('otpauth-migration://');
 }
 
-export function sortByPrio<T extends { prio?: number }>(a: T, b: T) {
-  return (a.prio ?? 0) - (b.prio ?? 0);
-}
-
-export function getPrioColor(prio: number) {
-  if (prio > 0) return config.colors.prio.positive;
-  if (prio < 0) return config.colors.prio.negative;
-}
-
-export function getPrioIcon(prio: number) {
-  if (prio > 0) return { source: Icon.ChevronUp, tintColor: config.colors.prio.positive };
-  if (prio < 0) return { source: Icon.ChevronDown, tintColor: config.colors.prio.negative };
-}
-
-export function getPrioTag(prio?: number): ItemAccessory {
-  if (!prio) return {};
-  return {
-    tag: { value: Math.abs(prio).toString(), color: getPrioColor(prio) },
-    icon: getPrioIcon(prio),
-    tooltip: `Priority: ${prio}`,
-  };
+export function sortByIndex<T extends { index: number }>(a: T, b: T) {
+  return a.index - b.index;
 }
