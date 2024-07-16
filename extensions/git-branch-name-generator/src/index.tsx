@@ -73,7 +73,7 @@ export default function Command() {
       <Form.TextField
         id="prefix"
         title="Prefix"
-        placeholder="Add a custom prefix for the branch: (e.g. jiwon)"
+        placeholder="Add a custom prefix for the branch: (e.g. prefix/)"
         storeValue
       />
       <Form.Checkbox

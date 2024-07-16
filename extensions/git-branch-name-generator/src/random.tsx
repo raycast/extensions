@@ -31,7 +31,7 @@ export default function Random() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="prefix" title="Prefix" placeholder="Add prefix of the branch: (e.g. jwn/~)" storeValue />
+      <Form.TextField id="prefix" title="Prefix" placeholder="Add prefix of the branch: (e.g. prefix/~)" storeValue />
       <Form.TextField id="length" title="Length" defaultValue="4" storeValue />
       <Form.Checkbox
         id="includeGitCommand"
