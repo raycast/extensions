@@ -16,6 +16,22 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.16.2
+
+- Fixed the refresh token flow to log out the user instead of throwing an error.
+
+### v1.16.1
+
+- Fixed an issue where `bodyEncoding` wasn't properly used in OAuthService.
+
+### v1.16.0
+
+- Add a `failureToastOptions` prop to `useFetch`, `useCachedPromise`, and `usePromise` to make it possible to customize the error displayed instead of a generic "Failed to fetch latest data".
+
+### v1.15.0
+
+- Add `useLocalStorage` hook.
+
 ### v1.14.0
 
 - Add `useStreamJSON` hook.

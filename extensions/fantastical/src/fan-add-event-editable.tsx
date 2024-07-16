@@ -1,13 +1,9 @@
-import { Toast, open, showToast } from "@raycast/api";
+import { open, showToast, Toast } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import defaultBrowserId from "default-browser-id";
-import { runAppleScript } from "run-applescript";
 import { getName } from "./getName";
 
-interface Arguments {
-  add: string;
-}
-
-export default async (props: { arguments: Arguments }) => {
+export default async (props: { arguments: Arguments.FanAddEventEditable }) => {
   const args = props.arguments;
   const name = await getName();
   const defaultBrowser = await defaultBrowserId();

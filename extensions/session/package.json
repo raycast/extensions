@@ -5,13 +5,8 @@
   "description": "Control Session pomodoro timers. Requires v2.6.23 or later installed: www.stayinsession.com",
   "icon": "session.png",
   "author": "jameslyons",
-  "categories": [
-    "Applications",
-    "Productivity"
-  ],
-  "contributors": [
-    "pernielsentikaer"
-  ],
+  "categories": ["Applications", "Productivity"],
+  "contributors": ["pernielsentikaer"],
   "license": "MIT",
   "commands": [
     {
@@ -28,8 +23,8 @@
     },
     {
       "name": "session-pause",
-      "title": "Pause Session",
-      "description": "Pauses a focus session in Session app",
+      "title": "Pause/Resume Session",
+      "description": "Pauses or resumes a focus session in Session app, based on current playing state",
       "mode": "no-view"
     },
     {

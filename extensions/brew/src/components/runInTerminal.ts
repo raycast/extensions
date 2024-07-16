@@ -1,5 +1,5 @@
 import { closeMainWindow } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import { preferences } from "../preferences";
 
 const terminalApp = preferences.terminalApp || "terminal";

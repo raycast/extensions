@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.78.0 - 2024-07-03
+
+### ✨ New
+
+- In addition to the new Custom Window Management commands, we are introducing a `WindowManagement` API to give you total control to move your windows depending on any kind of logic you can imagine.
+- You can now access the `ownerOrAuthorName` in the `environment`, useful for re-usable libraries.
+
+### 🐞 Fixes
+
+- **Pagination**: Fixed the TypeScript definition of the `onLoadMore` callback.
+
+## 1.77.0 - 2024-06-19
+
+### ✨ New
+
+- Updated React version to 18.3.1 to prepare for the next major version of React. This shouldn't impact any extensions but let us know if you find any unexpected behaviour.
+
+### 🐞 Fixes
+
+- **Menu Bar Extra**: fixed an issue where `Submenu` icons changed appearance based on Raycast's appearance, instead of the system's.
+
+## 1.76.0 - 2024-06-05
+
+### 💎 Improvements
+
+- Some companies requires all package.json’s names to be name-spaced (eg. `@foo/bar`). However, Raycast only understands names that _aren’t_ name-spaced. This prevented some people from creating internal extensions. In order to workaround this issue, you can now use the `@workaround` namespace in extension names (eg. `@workaround/bar`).
+
+### 🐞 Fixes
+
+- **Clipboard**: Fixed an issue where 2 items were added to the pasteboard when copying a file (one with the file name, and one with the file url). It now correctly adds 1 item with 2 representations.
+
 ## 1.74.0 - 2024-05-15
 
 ### ✨ New

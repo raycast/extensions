@@ -1,10 +1,9 @@
 import axios from "axios";
-import { OpenMeteoGeoLocation, OpenMeteoWeather } from "../types/types";
-import { cityName, precipitationUnits, tempUnits, windSpeedUnits } from "./weather-utils";
+import { OpenMeteoWeather } from "../types/types";
+import { precipitationUnits, tempUnits, windSpeedUnits } from "./weather-utils";
 
 export const OPEN_METEO = "https://open-meteo.com/en";
 const OPEN_METEO_WEATHER = "https://api.open-meteo.com/v1/forecast";
-const OPEN_METEO_LOCATION = "https://geocoding-api.open-meteo.com/v1/search";
 
 export async function getOpenMeteoWeather(lat: string, lon: string) {
   const axiosResponse = await axios({
@@ -26,16 +25,4 @@ export async function getOpenMeteoWeather(lat: string, lon: string) {
     },
   });
   return axiosResponse.data as OpenMeteoWeather;
-}
-
-export async function getOpenMeteoLocation() {
-  const axiosResponse = await axios({
-    method: "GET",
-    url: OPEN_METEO_LOCATION,
-    params: {
-      name: cityName,
-      count: "1",
-    },
-  });
-  return axiosResponse.data as OpenMeteoGeoLocation;
 }

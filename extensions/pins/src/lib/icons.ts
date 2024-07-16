@@ -46,8 +46,8 @@ export const getPinIcon = (pin: Pin) => {
   return pin.icon in iconMap || pin.icon == "None" || pin.icon.startsWith("/")
     ? getIcon(pin.icon, pin.iconColor)
     : pin.fragment
-    ? Icon.Text
-    : getIcon(pin.url);
+      ? Icon.Text
+      : getIcon(pin.url);
 };
 
 /**
@@ -59,6 +59,6 @@ export const getGroupIcon = (group: Group) => {
   return group.name == "Recent Applications"
     ? Icon.Clock
     : group.icon in iconMap
-    ? { source: iconMap[group.icon], tintColor: group.iconColor }
-    : Icon.Minus;
+      ? { source: iconMap[group.icon], tintColor: group.iconColor }
+      : Icon.Minus;
 };

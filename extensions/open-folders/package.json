@@ -5,6 +5,9 @@
   "description": "Open your common files and folders quickly!",
   "icon": "extension-icon.png",
   "author": "timothy_boye",
+  "contributors": [
+    "Undolog"
+  ],
   "access": "public",
   "categories": [
     "Productivity",

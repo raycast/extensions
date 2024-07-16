@@ -3,12 +3,11 @@ import { Clipboard, closeMainWindow, getPreferenceValues, LaunchProps, open, Toa
 import { quickAddTask, handleError, updateTask } from "./api";
 import { isTodoistInstalled, checkTodoistApp } from "./helpers/isTodoistInstalled";
 import { getTaskAppUrl, getTaskUrl } from "./helpers/tasks";
-import { initializeApi } from "./helpers/withTodoistApi";
+import { withTodoistApi } from "./helpers/withTodoistApi";
 
 type QuickAddTaskProps = { arguments: Arguments.QuickAddTask } & LaunchProps;
 
-export default async function QuickAddTask(props: QuickAddTaskProps) {
-  await initializeApi();
+async function QuickAddTask(props: QuickAddTaskProps) {
   const toast = new Toast({ style: Toast.Style.Animated, title: "Creating task" });
   await toast.show();
 
@@ -47,3 +46,5 @@ export default async function QuickAddTask(props: QuickAddTaskProps) {
     handleError({ error, title: "Unable to create task" });
   }
 }
+
+export default withTodoistApi(QuickAddTask);

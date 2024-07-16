@@ -1,14 +1,20 @@
+import { useEffect, useState } from "react";
 import { createWriteStream } from "node:fs";
 import { access, constants, copyFile, readdir, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pipeline as streamPipeline } from "node:stream/promises";
-import { Cache, Toast, environment, showToast } from "@raycast/api";
+import { Cache, Toast, environment, confirmAlert, open, showToast } from "@raycast/api";
 import { execa } from "execa";
 import got, { Progress } from "got";
-import { JsDelivrNpmResponse, IconData, IconJson } from "./types.js";
+import { JsDelivrNpmResponse, IconData, IconJson, LaunchContext } from "./types.js";
 
 const cache = new Cache();
+
+export const buildDeeplinkParameters = (launchContext?: LaunchContext) => {
+  if (!launchContext) return "";
+  return "?context=" + encodeURIComponent(JSON.stringify(launchContext));
+};
 
 export const downloadAssetPack = async (version: string) => {
   const toast = await showToast({
@@ -63,7 +69,7 @@ export const loadCachedJson = async (version: string) => {
   return JSON.parse(jsonFile) as IconJson;
 };
 
-export const loadCachedVersion = async () => {
+export const loadCachedVersion = () => {
   return cache.get("cached-version") ?? "";
 };
 
@@ -77,15 +83,28 @@ export const loadLatestVersion = async () => {
   return json.tags.latest;
 };
 
-export const loadVersion = async () => {
-  return loadLatestVersion().catch(async () => {
-    showToast({
-      style: Toast.Style.Animated,
-      title: "",
-      message: "Using local cached version",
+export const useVersion = ({ launchContext }: { launchContext?: LaunchContext }) => {
+  const cachedVersion = loadCachedVersion();
+  const [version, setVerion] = useState(cachedVersion);
+  useEffect(() => {
+    loadLatestVersion().then(async (latestVersion) => {
+      if (cachedVersion !== latestVersion) {
+        if (cachedVersion) {
+          cache.set("cached-version", "");
+          const confirmed = await confirmAlert({
+            title: "New version available",
+            message: "Do you want to reload the command to apply updates?",
+          });
+          if (confirmed) {
+            open("raycast://extensions/litomore/simple-icons/index" + buildDeeplinkParameters(launchContext));
+          }
+        } else {
+          setVerion(latestVersion);
+        }
+      }
     });
-    return loadCachedVersion();
-  });
+  }, []);
+  return version;
 };
 
 export const loadSvg = async (version: string, slug: string) => {

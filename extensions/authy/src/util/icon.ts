@@ -1,13 +1,13 @@
 import { environment } from "@raycast/api";
-import { Otp } from "../component/OtpListItem";
 import { genericColors, icondir, logos, logoAliases } from "../constants";
 import { toId } from "./compare";
+import { Service } from "../component/login/login-helper";
 
-const iconLookupKeys = ["logo", "accountType", "name"] as (keyof Otp)[];
+const iconLookupKeys = ["logo", "accountType", "name", "issuer"] as (keyof Service)[];
 
 const colors = genericColors.map((color) => `authenticator_${color.name}`);
 
-function getIcon(name: Otp[keyof Otp]) {
+function getIcon(name: Service[keyof Service]) {
   if (typeof name !== "string") {
     return;
   }
@@ -26,7 +26,7 @@ function getIcon(name: Otp[keyof Otp]) {
   }
 }
 
-export function icon(otp: Otp) {
+export function icon(otp: Service) {
   if (otp === undefined) {
     return `${environment.assetsPath}/${icondir}/authenticator_blue.png`;
   }

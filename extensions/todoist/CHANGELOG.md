@@ -1,5 +1,18 @@
 # Todoist Changelog
 
+## [Focus Label] - 2024-07-12
+
+Adds a preference to set a specified label for the task in focus. The label will be removed when the task is not in focus.
+This helps filter in-focus tasks on Todoist UI. The label will only be applied if the preference textfield is not empty.
+
+## [Todoist Quicklinks] - 2024-07-09
+
+- Added a new action to create quicklinks for various views in Todoist (e.g., Today, specific projects, etc.).
+
+## [Fixes] - 2024-07-03
+
+Completing tasks or other action no longer throw errors if menu bar command is not activated.
+
 ## [Add time to Schedule Task action] - 2024-01-25
 
 It's now possible to specify a time when scheduling a task from the list item.

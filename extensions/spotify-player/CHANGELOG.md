@@ -1,5 +1,14 @@
 # Spotify Player Changelog
 
+## [Log out the user if re-authentication fails] - 2024-07-11
+
+- Automatically log out users if re-authentication fails, instead of displaying an error message.
+
+## [Generate Playlist Fixes] - 2024-06-11
+
+- Removed automatic copying to clipboard after AI generates a result.
+- Improved the error message displayed when the playlist generation fails.
+
 ## [Generate Playlist] - 2024-06-04
 
 - Added a new feature where Raycast AI can create a playlist for you. You can then add this playlist to Spotify or queue all the songs directly.
@@ -10,7 +19,7 @@
 
 ## [Automatically Trigger Current Track] - 2024-05-28
 
-- Automatically trigger the current track command when commands that modify the current track state are executed. (Like, Unlike, Next, Previous)
+- Automatically trigger the current track command when commands that modify the current track state are executed. (Like, Unlike, Next, Previous).
 
 ## [New Actions Added] - 2024-05-27
 

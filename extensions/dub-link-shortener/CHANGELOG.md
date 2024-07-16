@@ -1,5 +1,20 @@
 # Dub Link Shortener Changelog
 
+## [Minor metadata updates] - 2024-07-16
+
+- Updated the title, description, logo, and auth instructions
+
+## [Workspace API Keys] - 2024-07-11
+
+- Supports newly launched [workspace api keys](https://dub.co/blog/workspace-api-keys) as user keys are deprecated
+- If workspace keys are used or if there is only one workspace for use, the workspace dropdown is not rendered
+
+## [Improvements] - 2024-06-28
+
+- Search Links: Improved the UX, added metadata and a workspace selection accessory
+- Shorten Links: Added form options for workspace, tags, domain and improved UX
+- Replaced project slug with workspaceId as slug is deprecated now
+- Used React hooks from @raycast/utils and upgraded dependencies
 
 ## [Enhancement: Remove long URL in the list view for clarity] - 2024-02-07
 - Take in urlKey that sets a custom short URL

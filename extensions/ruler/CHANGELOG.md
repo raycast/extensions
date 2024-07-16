@@ -1,5 +1,12 @@
 # Ruler Changelog
 
+## [Improvements] - 2024-06-29
+
+- Added drag mode as a feature
+- Added option not to have the distance copied to the clipboard
+- Added measured distance to the tooltip.
+- Press ESC to reset Ruler
+
 ## [Improvements] - 2024-05-17
 
 - Added coordinates

@@ -1,10 +1,10 @@
 import { environment } from "@raycast/api";
-import path from "path/posix";
+import axios from "axios";
 import fs from "fs";
 import afs from "fs/promises";
-import download from "download";
+import path from "path/posix";
+import { extract } from "tar";
 import { sha256FileHash } from "./utils";
-import tar from "tar";
 
 const cliVersion = "1.2.0";
 const cliFileInfo = {
@@ -30,16 +30,25 @@ export async function ensureCLI() {
     const dir = path.join(environment.supportPath, "cli");
     const tempDir = path.join(environment.supportPath, ".tmp");
     try {
-      await download(binaryURL, tempDir, { filename: cliFileInfo.pkg });
+      const response = await axios.get(binaryURL, { responseType: "stream" });
+      await afs.mkdir(tempDir, { recursive: true });
+      const filePath = path.join(tempDir, cliFileInfo.pkg);
+      const writer = fs.createWriteStream(filePath);
+      response.data.pipe(writer);
+
+      await new Promise((resolve, reject) => {
+        writer.on("finish", resolve);
+        writer.on("error", reject);
+      });
     } catch (error) {
-      throw Error("Could not installed speedtest cli");
+      throw Error("Could not install speedtest cli");
     }
     try {
       const archive = path.join(tempDir, cliFileInfo.pkg);
       const archiveHash = await sha256FileHash(archive);
       if (archiveHash === cliFileInfo.sha256) {
         await afs.mkdir(dir, { recursive: true });
-        await tar.extract({ file: archive, filter: (p) => p === "speedtest", cwd: dir });
+        await extract({ file: archive, filter: (p) => p === "speedtest", cwd: dir });
       } else {
         throw Error("hash of archive is wrong");
       }
@@ -54,6 +63,7 @@ export async function ensureCLI() {
       await afs.rm(cli);
       throw Error("Could not chmod speedtest cli");
     }
+
     return cli;
   }
 }

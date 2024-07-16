@@ -34,6 +34,11 @@ export interface ExtensionPreferences {
    * The default sort strategy for lists of pins outside of groups.
    */
   defaultSortStrategy: string;
+
+  /**
+   * The default Raycast AI model to use for AI queries.
+   */
+  defaultAIModel: string;
 }
 
 /**
@@ -79,6 +84,16 @@ export enum RightClickAction {
    * Open the edit pin form.
    */
   Edit = "edit",
+
+  /**
+   * Hide the pin.
+   */
+  Hide = "hide",
+
+  /**
+   * Disable the pin.
+   */
+  Disable = "disable",
 }
 
 /**
@@ -176,6 +191,11 @@ export interface ViewPinsPreferences {
   showExecutionVisibility: boolean;
 
   /**
+   * Whether to display the visibility of each pin.
+   */
+  showVisibility: boolean;
+
+  /**
    * Whether to display an icon accessory for text fragments.
    */
   showFragment: boolean;
@@ -194,6 +214,11 @@ export interface ViewPinsPreferences {
    * Whether to display the tags of each pin as accessories.
    */
   showTags: boolean;
+
+  /**
+   * Whether to display the number of linked pins as an accessory.
+   */
+  showLinkCount: boolean;
 }
 
 /**
