@@ -254,16 +254,20 @@ export default function Command() {
   const [destinations, set_destinations] = useState<Destination[]>([]);
   const [isLoading, set_isLoading] = useState<boolean>(true);
   useEffect(() => {
-    util_listDestinationInfo().then((data) => {
-      set_destinations(data);
-    });
+    util_listDestinationInfo()
+      .then((data) => {
+        set_destinations(data);
+      })
+      .catch(() => {
+        set_destinations([]);
+      });
     set_isLoading(false);
   }, [isLoading]);
 
   return (
     <List isLoading={isLoading}>
       {destinations.length === 0 ? (
-        <List.EmptyView title="Setup at least one TimeMachine backup destination first." />
+        <List.EmptyView title="Setup at least one backup destination first." />
       ) : (
         destinations.map((destination: Destination) => {
           const mount_position = destination.Kind == "Local" ? destination.MountPoint : destination.URL;
