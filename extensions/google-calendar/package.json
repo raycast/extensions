@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-calendar",
+  "title": "Google Calendar",
+  "description": "Raycast extension to manage Google Calendar",
+  "icon": "extension-icon.png",
+  "author": "guy_waldman",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "description": "The client ID for your Google Calendar API",
+      "id": "googleClientId",
+      "name": "googleClientId",
+      "required": true,
+      "title": "Google Client ID",
+      "type": "textfield"
+    }
+  ],
+  "commands": [
+    {
+      "name": "calendars",
+      "title": "List Calendars",
+      "subtitle": "List all your Google Calendars",
+      "description": "List all your Google Calendars",
+      "mode": "view"
+    },
+    {
+      "name": "upcoming-events",
+      "title": "Upcoming Events",
+      "subtitle": "List upcoming events from your Google Calendars",
+      "description": "List upcoming events from your Google Calendars",
+      "mode": "view"
+    },
+    {
+      "name": "create-event",
+      "title": "Create Event",
+      "subtitle": "Create a new Google Calendar Event",
+      "description": "Create a new Google Calendar Event",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "title",
+          "type": "text",
+          "required": false,
+          "placeholder": "My event title",
+          "title": "Title",
+          "description": "The title of the event"
+        },
+        {
+          "name": "eventTime",
+          "type": "text",
+          "required": false,
+          "placeholder": "tomorrow at 10",
+          "title": "Event Time",
+          "description": "Time of the event"
+        },
+        {
+          "name": "eventDuration",
+          "type": "text",
+          "required": false,
+          "placeholder": "30m",
+          "title": "Event Duration",
+          "description": "Duration of the event"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.76.1",
+    "@raycast/utils": "^1.16.0",
+    "chrono-node": "^2.7.6",
+    "date-fns": "^3.6.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2",
+    "watch": "^1.0.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
