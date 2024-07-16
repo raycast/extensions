@@ -80,6 +80,7 @@ function MoveDocument({ doc, mutateDocs, projects, initiatives }: DocumentAction
             ))}
           </ActionPanel.Section>
         )}
+
         {(projects ?? []).length > 0 && (
           <ActionPanel.Section title="Projects">
             {projects?.map((project) => (

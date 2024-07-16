@@ -48,41 +48,37 @@ const docFragment = `
   }
 `;
 
-export async function getDocuments(query: string = "", projectId: string = "") {
+export type DocumentEntity = { projectId: string } | { initiativeId: string };
+
+export async function getDocuments(query: string = "", entity: DocumentEntity = { projectId: "" }) {
   const { graphQLClient } = getLinearClient();
 
-  const input = !projectId.trim().length
+  const searchProject = "projectId" in entity && entity.projectId.length > 0;
+  const searchInitiative = "initiativeId" in entity && entity.initiativeId.length > 0;
+  const schema = `nodes { ${docFragment} } pageInfo { hasNextPage }`;
+
+  const input = searchProject
     ? `
-      query($query: String!) {
-        documents(orderBy: updatedAt, filter: { title: { containsIgnoreCase: $query } } ) {
-          nodes {
-            ${docFragment}
-          }
-          pageInfo {
-            hasNextPage
-          }
-        }
-      }
-    `
-    : `
       query($query: String!, $projectId: ID!) {
         documents(orderBy: updatedAt, filter: { and: [ 
           { title: { containsIgnoreCase: $query } }, 
           { project: { id: { eq: $projectId } } } 
-        ] }) {
-          nodes {
-            ${docFragment}
-          }
-          pageInfo {
-            hasNextPage
-          }
-        }
-      }
+        ] }) { ${schema} } }
+    `
+    : searchInitiative
+      ? `
+      query($query: String!, $initiativeId: ID!) {
+        documents(orderBy: updatedAt, filter: { and: [ 
+          { title: { containsIgnoreCase: $query } }, 
+          { initiative: { id: { eq: $initiativeId } } } 
+        ] }) { ${schema} } }
+    `
+      : `
+      query($query: String!) {
+        documents(orderBy: updatedAt, filter: { title: { containsIgnoreCase: $query } }) { ${schema} } }
     `;
 
-  const variables = !projectId.trim().length
-    ? { query: query.trim() }
-    : { query: query.trim(), projectId: projectId.trim() };
+  const variables = searchProject || searchInitiative ? { query: query.trim(), ...entity } : { query: query.trim() };
 
   const { data } = await graphQLClient.rawRequest<DocList, Record<string, unknown>>(input, variables);
 

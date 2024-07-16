@@ -1,9 +1,9 @@
 import { useCachedPromise } from "@raycast/utils";
 
-import { getDocumentContent, getDocuments } from "../api/documents";
+import { DocumentEntity, getDocumentContent, getDocuments } from "../api/documents";
 
-export function useDocuments(query: string = "", projectId: string = "") {
-  const { data, error, isLoading, mutate } = useCachedPromise(getDocuments, [query, projectId], {
+export function useDocuments(query: string = "", entity: DocumentEntity = { projectId: "" }) {
+  const { data, error, isLoading, mutate } = useCachedPromise(getDocuments, [query, entity], {
     failureToastOptions: { title: "Failed to load documents" },
     keepPreviousData: true,
   });

@@ -2,13 +2,14 @@ import { Initiative } from "@linear/sdk";
 import { getLinearClient } from "./linearClient";
 import { sortBy } from "lodash";
 
-export type InitiativeResult = Pick<Initiative, "id" | "name" | "color" | "icon" | "sortOrder">;
+export type InitiativeResult = Pick<Initiative, "id" | "name" | "color" | "icon" | "sortOrder" | "description">;
 
 const initiativeFragment = `
   id
   name
   color
   icon
+  description
   sortOrder
 `;
 
