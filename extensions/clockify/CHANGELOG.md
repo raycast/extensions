@@ -1,6 +1,6 @@
 # Clockify Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-07-16
 
 - Select tasks for projects when starting timer
 - Do not suggest archived projects
