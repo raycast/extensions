@@ -47,10 +47,25 @@ export default function Command({
   launchContext: { contactId: string; address: string; text: string };
 }>) {
   const { shouldCloseMainWindow } = getPreferenceValues<{ shouldCloseMainWindow: boolean }>();
-  const { data: contacts, isLoading } = useCachedPromise(async () => {
-    const contacts = await fetchAllContacts();
-    return contacts as Contact[];
-  });
+  const { data: contacts, isLoading } = useCachedPromise(
+    async () => {
+      const contacts = await fetchAllContacts();
+      return contacts as Contact[];
+    },
+    [],
+    {
+      failureToastOptions: {
+        title: "Could not get contacts",
+        message: "Make sure you have granted Raycast access to your contacts.",
+        primaryAction: {
+          title: "Open System Preferences",
+          onAction() {
+            open("x-apple.systempreferences:com.apple.preference.security?Privacy_Contacts");
+          },
+        },
+      },
+    },
+  );
 
   const { itemProps, handleSubmit, values, reset, focus } = useForm<Values>({
     async onSubmit(values) {
@@ -133,13 +148,24 @@ export default function Command({
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.SpeechBubble} title="Send Message" onSubmit={handleSubmit} />
-          <Action.CreateQuicklink
-            title="Create Messages Quicklink"
-            quicklink={{
-              link: createDeeplink(values.contact, values.address, values.text),
-              name: `Send Message to ${contacts?.find((c) => c.id === values.contact)?.givenName}`,
-            }}
-          />
+
+          <ActionPanel.Section>
+            <Action.CreateQuicklink
+              title="Create Messages Quicklink"
+              icon={{ fileIcon: "/System/Applications/Messages.app" }}
+              quicklink={{
+                link: `sms:${values.address}`,
+                name: `Send Message to ${contacts?.find((c) => c.id === values.contact)?.givenName}`,
+              }}
+            />
+            <Action.CreateQuicklink
+              title="Create Raycast Quicklink"
+              quicklink={{
+                link: createDeeplink(values.contact, values.address, values.text),
+                name: `Send Message to ${contacts?.find((c) => c.id === values.contact)?.givenName}`,
+              }}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       enableDrafts
