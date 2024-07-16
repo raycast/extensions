@@ -1,6 +1,6 @@
 # Plex Changelog
 
-## [New Features] - {PR_MERGE_DATE}
+## [New Features] - 2024-07-16
 
  - Refactored filtering for a snappier, faster experience
 
