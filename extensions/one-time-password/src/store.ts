@@ -3,21 +3,25 @@ import crypto from 'crypto';
 import { z } from 'zod';
 import { parseUrl, sortByPrio } from './utils';
 
-export const Account = z.object({
+export const OldAccount = z.object({
   id: z.string(),
   name: z.string(),
   issuer: z.string().optional(),
   secret: z.string(),
   token: z.string().optional(),
-  prio: z.number().optional(),
+});
+
+export const Account = OldAccount.extend({
+  prio: z.number(),
 });
 export type Account = z.infer<typeof Account>;
 
-type AccountWithoutId = Omit<Account, 'id'>;
+type CreateAccount = Omit<Account, 'id' | 'prio'>;
+type UpdateAccount = Omit<Account, 'prio'>;
 
 const STORAGE_KEY = 'one-time-password-accounts';
 
-function generateAccountId(account: AccountWithoutId) {
+function generateAccountId(account: Pick<Account, 'name' | 'secret'>) {
   const hash = crypto.createHash('sha256');
   const { name, secret } = account;
   const str = `${name}:${secret}`;
@@ -30,14 +34,17 @@ async function save(accounts: Account[]) {
 
 export async function getAccounts() {
   const data = (await LocalStorage.getItem<string>(STORAGE_KEY)) || '[]';
-  return z.array(Account).parse(JSON.parse(data)).sort(sortByPrio);
+
+  // P0: migrate old accounts
+  
+  return Account.array().parse(JSON.parse(data)).sort(sortByPrio);
 }
 
 function isOtpUrl(str: string) {
   return str.startsWith('otpauth://');
 }
 
-export async function addAccount(account: AccountWithoutId) {
+export async function addAccount(account: CreateAccount) {
   const accounts = await getAccounts();
 
   if (isOtpUrl(account.secret)) {
@@ -46,7 +53,7 @@ export async function addAccount(account: AccountWithoutId) {
     account.issuer = issuer || '';
   }
 
-  accounts.push({ ...account, id: generateAccountId(account) });
+  accounts.push({ ...account, prio: accounts.length, id: generateAccountId(account) });
   await save(accounts);
 }
 
@@ -58,13 +65,15 @@ export async function removeAccount(id: string) {
   await save(accounts);
 }
 
-export async function updateAccount(id: string, account: AccountWithoutId) {
+export async function updateAccount(account: UpdateAccount) {
   const accounts = await getAccounts();
-  const accountFound = accounts.find((account) => account.id === id);
+
+  const accountFound = accounts.find((acc) => acc.id === account.id);
   if (!accountFound) return;
+
   accountFound.name = account.name;
   accountFound.secret = account.secret;
-  accountFound.prio = account.prio;
+
   await save(accounts);
 }
 

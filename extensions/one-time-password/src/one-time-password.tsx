@@ -216,13 +216,7 @@ export default () => {
                   shortcut={{ modifiers: ['cmd'], key: 'e' }}
                   icon={Icon.Pencil}
                   target={
-                    <SetupKey
-                      id={account.id}
-                      name={account.name}
-                      secret={account.secret}
-                      prio={account.prio?.toString()}
-                      onSubmit={handleFormSubmit}
-                    />
+                    <SetupKey id={account.id} name={account.name} secret={account.secret} onSubmit={handleFormSubmit} />
                   }
                 />
                 <Action
@@ -298,40 +292,18 @@ type SetupKeyProps = {
   id?: string;
   name?: string;
   secret?: string;
-  prio?: string;
 };
-
-const Prio = z.coerce
-  .number()
-  .transform((val) => Math.floor(val))
-  .pipe(z.number().int())
-  .optional();
-
-function validatePrio(prev?: string, newPrio?: string) {
-  if (newPrio === undefined || newPrio === '') return undefined;
-
-  const prio = Prio.safeParse(newPrio);
-  if (prio.success) return prio.data?.toString();
-  return prev;
-}
 
 function SetupKey(props: SetupKeyProps) {
   const [name, setName] = useState(props.name ?? '');
   const [secret, setSecret] = useState(props.secret ?? '');
-  const [prioText, setPrio] = useState(props.prio ?? '');
 
   async function handleSubmit() {
-    const validPrio = validatePrio(props.prio, prioText);
-    setPrio(validPrio ?? '');
-
-    const prio = Prio.parse(validPrio);
-    if (props.id) await store.updateAccount(props.id, { name, secret, prio });
-    else await store.addAccount({ name, secret, prio });
+    if (props.id) await store.updateAccount({ id: props.id, name, secret });
+    else await store.addAccount({ name, secret });
 
     props.onSubmit();
   }
-
-  const handlePrioBlur = () => setPrio((prev) => validatePrio(props.prio, prev) ?? '');
 
   return (
     <Form
@@ -343,7 +315,6 @@ function SetupKey(props: SetupKeyProps) {
     >
       <Form.TextField id="name" title="Name" value={name} onChange={setName} />
       <Form.TextField id="secret" title="Secret" value={secret} onChange={setSecret} />
-      <Form.TextField id="prio" title="Priority" value={prioText} onChange={setPrio} onBlur={handlePrioBlur} />
     </Form>
   );
 }
