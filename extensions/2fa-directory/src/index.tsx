@@ -32,7 +32,7 @@ interface SiteDetails {
   notes?: string;
   contact?: {
     email?: string;
-    faceboook?: string;
+    facebook?: string;
     twitter?: string;
     language?: string;
     form?: string;
@@ -70,7 +70,7 @@ export default function Command() {
                     markdown={site[1].notes}
                     metadata={
                       <List.Item.Detail.Metadata>
-                        <List.Item.Detail.Metadata.Label title="Name" text={`${site[0]}`} />
+                        <List.Item.Detail.Metadata.Label title="Name" text={site[0]} />
                         {site[1].url && (
                           <List.Item.Detail.Metadata.Link title="URL" target={site[1].url} text={site[1].url} />
                         )}
@@ -84,26 +84,26 @@ export default function Command() {
                         {site[1].recovery && (
                           <List.Item.Detail.Metadata.Link title="Recovery" target={site[1].recovery} text="Open URL" />
                         )}
-                        <List.Item.Detail.Metadata.Label title="Keywords" text={`${site[1].keywords.join(", ")}`} />
+                        <List.Item.Detail.Metadata.Label title="Keywords" text={site[1].keywords.join(", ")} />
                         {site[1].tfa && (
-                          <List.Item.Detail.Metadata.Label title="TFA" text={`${site[1].tfa.join(", ") ?? "-"}`} />
+                          <List.Item.Detail.Metadata.Label title="TFA" text={site[1].tfa.join(", ")} />
                         )}
                         {site[1].regions && (
                           <List.Item.Detail.Metadata.Label
                             title="Regions"
-                            text={`${site[1].regions.join(", ") ?? "-"}`}
+                            text={site[1].regions.join(", ")}
                           />
                         )}
                         {site[1]["additional-domains"] && (
                           <List.Item.Detail.Metadata.Label
                             title="Additional Domains"
-                            text={`${site[1]["additional-domains"].join(", ") ?? "-"}`}
+                            text={site[1]["additional-domains"].join(", ")}
                           />
                         )}
                         {site[1]["custom-software"] && (
                           <List.Item.Detail.Metadata.Label
                             title="Custom Software"
-                            text={`${site[1]["custom-software"].join(", ") ?? "-"}`}
+                            text={site[1]["custom-software"].join(", ")}
                           />
                         )}
                         {site[1].contact && (
@@ -117,11 +117,11 @@ export default function Command() {
                                 target={`mailto:${site[1].contact.email}`}
                               />
                             )}
-                            {site[1].contact.faceboook && (
+                            {site[1].contact.facebook && (
                               <List.Item.Detail.Metadata.Link
                                 title="Facebook"
-                                text={site[1].contact.faceboook}
-                                target={`https://facebook.com/${site[1].contact.faceboook}`}
+                                text={site[1].contact.facebook}
+                                target={`https://facebook.com/${site[1].contact.facebook}`}
                               />
                             )}
                             {site[1].contact.twitter && (
