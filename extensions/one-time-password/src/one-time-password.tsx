@@ -17,6 +17,7 @@ import {
 import { useEffect, useState } from 'react';
 import { getProgressIcon } from '@raycast/utils';
 import * as store from './store';
+import { MoveDir } from './store';
 import { readDataFromQRCodeOnScreen, getCurrentSeconds, splitStrToParts, ScanType, parseUrl } from './utils';
 import { TOKEN_TIME, generateToken } from './totp';
 import { extractAccountsFromMigrationUrl } from './google-authenticator';
@@ -162,7 +163,7 @@ export default () => {
   return (
     <List isLoading={loading}>
       <List.Section title="Accounts">
-        {accounts.map((account) => (
+        {accounts.map((account, index) => (
           <List.Item
             key={account.id}
             icon={{ source: Icon.Key, tintColor: config.colors.key }}
@@ -170,7 +171,7 @@ export default () => {
             subtitle={displayToken(account.secret)}
             keywords={[account.issuer ?? '', account.name]}
             accessories={[
-              { tag: { value: account.index.toString(), color: Color.Orange } },
+              { tag: { value: index.toString(), color: Color.Orange } },
               account.issuer ? { tag: account.issuer } : {},
               {
                 icon: { source: getProgressIcon(timer / TOKEN_TIME), tintColor: getProgressColor() },
@@ -181,23 +182,23 @@ export default () => {
               <ActionPanel>
                 <Action.CopyToClipboard content={getCopyToClipboardContent(account.secret)} />
                 <Action.Paste content={getCopyToClipboardContent(account.secret)} />
-                {(account.index ?? 0) > 0 && (
+                {index > 0 && (
                   <Action
                     title="Move up"
                     icon={Icon.ArrowUp}
                     onAction={async () => {
-                      await store.moveAccount(account.id, store.MoveDir.UP);
+                      await store.moveAccount(account.id, MoveDir.UP);
                       await loadAccounts();
                     }}
                     shortcut={{ modifiers: ['cmd', 'opt'], key: 'arrowUp' }}
                   />
                 )}
-                {(account.index ?? 0) < accounts.length - 1 && (
+                {index < accounts.length - 1 && (
                   <Action
                     title="Move down"
                     icon={Icon.ArrowDown}
                     onAction={async () => {
-                      await store.moveAccount(account.id, store.MoveDir.DOWN);
+                      await store.moveAccount(account.id, MoveDir.DOWN);
                       await loadAccounts();
                     }}
                     shortcut={{ modifiers: ['cmd', 'opt'], key: 'arrowDown' }}
@@ -244,7 +245,7 @@ export default () => {
                       icon: Icon.Camera,
                       tag: {
                         value: 'Scan QR',
-                        color: '#ded260',
+                        color: Color.Yellow,
                       },
                     },
                     {
