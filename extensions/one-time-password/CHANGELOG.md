@@ -1,6 +1,6 @@
 # One Time Password Changelog
 
-## [1.1.0] - {PR_MERGE_DATE}
+## {PR_MERGE_DATE}
 
 ### Added
 
