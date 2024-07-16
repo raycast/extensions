@@ -1,0 +1,149 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "5devs",
+  "title": "5Devs",
+  "description": "Get fake data for your tests",
+  "icon": "5.png",
+  "author": "gustavofior",
+  "categories": [
+    "Data",
+    "Productivity",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "empresa",
+      "title": "Empresa",
+      "description": "Gere dados de empresas",
+      "mode": "view",
+      "icon": "empresa.png",
+      "keywords": [
+        "empresa",
+        "dados",
+        "gerador",
+        "razao social",
+        "cnpj",
+        "inscricao estadual"
+      ],
+      "subtitle": "Razão social, CNPJ, inscrição estadual"
+    },
+    {
+      "name": "pessoa",
+      "title": "Pessoa",
+      "description": "Gere dados de pessoas",
+      "mode": "view",
+      "icon": "pessoa.png",
+      "keywords": [
+        "pessoa",
+        "dados",
+        "gerador",
+        "nome",
+        "sobrenome",
+        "cpf",
+        "rg",
+        "data de nascimento"
+      ],
+      "subtitle": "Nome, CPF, RG, data de nascimento"
+    },
+    {
+      "name": "endereco",
+      "title": "Endereço",
+      "description": "Gere dados de endereços",
+      "mode": "view",
+      "icon": "endereco.png",
+      "keywords": [
+        "endereco",
+        "dados",
+        "gerador",
+        "logradouro",
+        "numero",
+        "bairro",
+        "cidade",
+        "estado",
+        "cep"
+      ],
+      "subtitle": "Rua, número, cidade, estado, CEP"
+    },
+    {
+      "name": "veiculo",
+      "title": "Veículo",
+      "description": "Gere dados de veículos",
+      "mode": "view",
+      "icon": "veiculo.png",
+      "keywords": [
+        "veiculo",
+        "dados",
+        "gerador",
+        "marca",
+        "modelo",
+        "ano",
+        "placa",
+        "cor"
+      ],
+      "subtitle": "Marca, modelo, ano, placa, cor"
+    },
+    {
+      "name": "cartao",
+      "title": "Cartão",
+      "description": "Gere dados de cartões",
+      "mode": "view",
+      "icon": "cartao.png",
+      "keywords": [
+        "cartão",
+        "dados",
+        "gerador",
+        "cvv",
+        "expiração",
+        "numero"
+      ],
+      "subtitle": "CVV, expiração, número, titular"
+    },
+    {
+      "name": "uteis",
+      "title": "Úteis",
+      "description": "Gere dados utilitários",
+      "mode": "view",
+      "icon": "uteis.png",
+      "keywords": [
+        "uteis",
+        "dados",
+        "gerador",
+        "tipo",
+        "valor",
+        "uuid",
+        "ip",
+        "ipv6",
+        "mac",
+        "hash"
+      ],
+      "subtitle": "UUID, IP, MAC, hash"
+    }
+  ],
+  "dependencies": {
+    "@mihnea.dev/credit-card-generator": "^1.0.9",
+    "@raycast/api": "^1.64.4",
+    "@raycast/utils": "^1.16.2",
+    "node-fetch": "^3.3.2",
+    "random-ipv6": "^1.0.2",
+    "react": "^18.2.0",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/random-ipv6": "^1.0.4",
+    "@types/react": "18.2.27",
+    "@types/uuid": "^10.0.0",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
