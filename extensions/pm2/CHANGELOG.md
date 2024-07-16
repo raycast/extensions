@@ -1,6 +1,6 @@
 # Raycast PM2
 
-## [Enhancement] - 2024-07-14
+## [Enhancement] - {PR_MERGE_DATE}
 
 - Bump dependencies
 - Add support for customzing `PM2_HOME`
