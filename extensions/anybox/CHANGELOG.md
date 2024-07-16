@@ -1,6 +1,6 @@
 # Anybox Changelog
 
-## [Bug fix] - {PR_MERGE_DATE}
+## [Bug fix] - 2024-07-16
 
 - Fix typo in command description
 
