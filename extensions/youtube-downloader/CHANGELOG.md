@@ -1,6 +1,6 @@
 # YouTube Downloader Changelog
 
-## [Fix download failed] - 2024-07-13
+## [Fix download failed] - {PR_MERGE_DATE}
 
 - Replace the `ytdl-core` with `@distube/ytdl-core` to fix the download failed issue
 
