@@ -58,7 +58,15 @@ function ViewDrink({ id }: { id: string }) {
               <Detail.Metadata.TagList.Item text={drink.strCategory} />
             </Detail.Metadata.TagList>
             <Detail.Metadata.Label title="Glass" text={drink.strGlass} />
-            <Detail.Metadata.Separator />
+            {drink.strTags ? (
+              <Detail.Metadata.TagList title="Tags">
+                {drink.strTags.split(",").map((tag) => (
+                  <Detail.Metadata.TagList.Item key={tag} text={tag} />
+                ))}
+              </Detail.Metadata.TagList>
+            ) : (
+              <Detail.Metadata.Label title="Tags" text="N/A" />
+            )}
           </Detail.Metadata>
         )
       }

@@ -25,59 +25,79 @@ export default function SearchCocktailByName(props: LaunchProps<{ arguments: Arg
         <List.EmptyView title="No matching drinks found" description="Try searching: Gin or Vodka" />
       ) : (
         <List.Section title={`${drinks.length} drinks`}>
-          {drinks.map((drink) => (
-            <List.Item
-              key={drink.idDrink}
-              icon={{ source: getPreviewImage(drink.strDrinkThumb), fallback: Icon.Dot }}
-              title={drink.strDrink}
-              subtitle={drink.strDrinkAlternate || ""}
-              accessories={
-                isShowingDetail
-                  ? undefined
-                  : [
-                      ...(drink.strTags?.split(",").map((tag) => ({ tag })) || []),
-                      {
-                        tag: {
-                          value: drink.strAlcoholic,
-                          color: drink.strAlcoholic === "Alcoholic" ? Color.Red : Color.Green,
+          {drinks.map((drink) => {
+            const tags = drink.strTags?.split(",") || [];
+            // >4 tags hides the last 2 accessories so we show max 4
+            const accessoryTags = tags
+              .map((tag, index) => {
+                if (index === 4) return { tag: `+${tags.length - 5}` };
+                if (index > 4) return undefined;
+                return { tag };
+              })
+              .filter((tag) => !!tag);
+
+            return (
+              <List.Item
+                key={drink.idDrink}
+                icon={{ source: getPreviewImage(drink.strDrinkThumb), fallback: Icon.Dot }}
+                title={drink.strDrink}
+                subtitle={drink.strDrinkAlternate || ""}
+                accessories={
+                  isShowingDetail
+                    ? undefined
+                    : [
+                        ...accessoryTags,
+                        {
+                          tag: {
+                            value: drink.strAlcoholic,
+                            color: drink.strAlcoholic === "Alcoholic" ? Color.Red : Color.Green,
+                          },
                         },
-                      },
-                      { date: new Date(drink.dateModified) },
-                    ]
-              }
-              detail={
-                <List.Item.Detail
-                  markdown={generateDrinkMarkdown(drink)}
-                  metadata={
-                    <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label title="ID" text={drink.idDrink} />
-                      <List.Item.Detail.Metadata.Label title="Name" text={drink.strDrink} />
-                      {drink.strVideo ? (
-                        <List.Item.Detail.Metadata.Link title="Video" text={drink.strVideo} target={drink.strVideo} />
-                      ) : (
-                        <List.Item.Detail.Metadata.Label title="Video" text="N/A" />
-                      )}
-                      <List.Item.Detail.Metadata.TagList title="Category">
-                        <List.Item.Detail.Metadata.TagList.Item text={drink.strCategory} />
-                      </List.Item.Detail.Metadata.TagList>
-                      <List.Item.Detail.Metadata.Label title="Glass" text={drink.strGlass} />
-                      <List.Item.Detail.Metadata.Separator />
-                    </List.Item.Detail.Metadata>
-                  }
-                />
-              }
-              actions={
-                <ActionPanel>
-                  <Action
-                    title="Toggle Details"
-                    icon={Icon.AppWindowSidebarLeft}
-                    onAction={() => setIsShowingDetail((prev) => !prev)}
+                        { date: new Date(drink.dateModified) },
+                      ]
+                }
+                detail={
+                  <List.Item.Detail
+                    markdown={generateDrinkMarkdown(drink)}
+                    metadata={
+                      <List.Item.Detail.Metadata>
+                        <List.Item.Detail.Metadata.Label title="ID" text={drink.idDrink} />
+                        <List.Item.Detail.Metadata.Label title="Name" text={drink.strDrink} />
+                        {drink.strVideo ? (
+                          <List.Item.Detail.Metadata.Link title="Video" text={drink.strVideo} target={drink.strVideo} />
+                        ) : (
+                          <List.Item.Detail.Metadata.Label title="Video" text="N/A" />
+                        )}
+                        <List.Item.Detail.Metadata.TagList title="Category">
+                          <List.Item.Detail.Metadata.TagList.Item text={drink.strCategory} />
+                        </List.Item.Detail.Metadata.TagList>
+                        <List.Item.Detail.Metadata.Label title="Glass" text={drink.strGlass} />
+                        {drink.strTags ? (
+                          <List.Item.Detail.Metadata.TagList title="Tags">
+                            {drink.strTags.split(",").map((tag) => (
+                              <List.Item.Detail.Metadata.TagList.Item key={tag} text={tag} />
+                            ))}
+                          </List.Item.Detail.Metadata.TagList>
+                        ) : (
+                          <List.Item.Detail.Metadata.Label title="Tags" text="N/A" />
+                        )}
+                      </List.Item.Detail.Metadata>
+                    }
                   />
-                  <OpenInBrowserAction drink={drink} />
-                </ActionPanel>
-              }
-            />
-          ))}
+                }
+                actions={
+                  <ActionPanel>
+                    <Action
+                      title="Toggle Details"
+                      icon={Icon.AppWindowSidebarLeft}
+                      onAction={() => setIsShowingDetail((prev) => !prev)}
+                    />
+                    <OpenInBrowserAction drink={drink} />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
         </List.Section>
       )}
     </List>
