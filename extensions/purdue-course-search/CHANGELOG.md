@@ -1,5 +1,5 @@
 # Purdue Class Search Changelog
 
-## [Initial Version] - 2024-07-12
+## [Initial Version] - {PR_MERGE_DATE}
 
 Initial release!
