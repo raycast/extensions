@@ -85,14 +85,9 @@ export default function Command() {
                           <List.Item.Detail.Metadata.Link title="Recovery" target={site[1].recovery} text="Open URL" />
                         )}
                         <List.Item.Detail.Metadata.Label title="Keywords" text={site[1].keywords.join(", ")} />
-                        {site[1].tfa && (
-                          <List.Item.Detail.Metadata.Label title="TFA" text={site[1].tfa.join(", ")} />
-                        )}
+                        {site[1].tfa && <List.Item.Detail.Metadata.Label title="TFA" text={site[1].tfa.join(", ")} />}
                         {site[1].regions && (
-                          <List.Item.Detail.Metadata.Label
-                            title="Regions"
-                            text={site[1].regions.join(", ")}
-                          />
+                          <List.Item.Detail.Metadata.Label title="Regions" text={site[1].regions.join(", ")} />
                         )}
                         {site[1]["additional-domains"] && (
                           <List.Item.Detail.Metadata.Label
