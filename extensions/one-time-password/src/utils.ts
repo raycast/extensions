@@ -82,7 +82,7 @@ export function isGoogleAuthenticatorMigration(str?: string) {
 }
 
 export function sortByPrio<T extends { prio?: number }>(a: T, b: T) {
-  return (b.prio ?? 0) - (a.prio ?? 0);
+  return (a.prio ?? 0) - (b.prio ?? 0);
 }
 
 export function getPrioColor(prio: number) {

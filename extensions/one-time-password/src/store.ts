@@ -67,3 +67,23 @@ export async function updateAccount(id: string, account: AccountWithoutId) {
   accountFound.prio = account.prio;
   await save(accounts);
 }
+
+export const MoveDir = { UP: -1, DOWN: 1 } as const;
+export type MoveDir = (typeof MoveDir)[keyof typeof MoveDir];
+export async function moveAccount(id: string, dir: MoveDir) {
+  const accounts = await getAccounts();
+
+  const moved = accounts.find((account) => account.id === id);
+  if (!moved) return;
+
+  const fromPrio = moved.prio ?? 0;
+  const toPrio = fromPrio + dir;
+
+  const target = accounts.find((account) => account.prio === toPrio);
+  if (!target) return;
+
+  moved.prio = toPrio;
+  target.prio = fromPrio;
+
+  await save(accounts);
+}

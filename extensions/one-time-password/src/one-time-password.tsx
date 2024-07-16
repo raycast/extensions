@@ -44,7 +44,7 @@ export default () => {
   const [qrCodeScanType, setQRCodeScanType] = useState<ScanType>(null);
 
   async function loadAccounts() {
-    setLoading(true);
+    if (accounts.length === 0) setLoading(true);
     setAccounts(await store.getAccounts());
     setLoading(false);
   }
@@ -170,9 +170,9 @@ export default () => {
   return (
     <List isLoading={loading}>
       <List.Section title="Accounts">
-        {accounts.map((account, i) => (
+        {accounts.map((account) => (
           <List.Item
-            key={i}
+            key={account.id}
             icon={{ source: Icon.Key, tintColor: config.colors.key }}
             title={account.name}
             subtitle={displayToken(account.secret)}
@@ -189,6 +189,28 @@ export default () => {
               <ActionPanel>
                 <Action.CopyToClipboard content={getCopyToClipboardContent(account.secret)} />
                 <Action.Paste content={getCopyToClipboardContent(account.secret)} />
+                {(account.prio ?? 0) > 0 && (
+                  <Action
+                    title="Move up"
+                    icon={Icon.ArrowUp}
+                    onAction={async () => {
+                      await store.moveAccount(account.id, store.MoveDir.UP);
+                      await loadAccounts();
+                    }}
+                    shortcut={{ modifiers: ['cmd', 'opt'], key: 'arrowUp' }}
+                  />
+                )}
+                {(account.prio ?? 0) < accounts.length - 1 && (
+                  <Action
+                    title="Move down"
+                    icon={Icon.ArrowDown}
+                    onAction={async () => {
+                      await store.moveAccount(account.id, store.MoveDir.DOWN);
+                      await loadAccounts();
+                    }}
+                    shortcut={{ modifiers: ['cmd', 'opt'], key: 'arrowDown' }}
+                  />
+                )}
                 <Action.Push
                   title="Edit Account"
                   shortcut={{ modifiers: ['cmd'], key: 'e' }}
