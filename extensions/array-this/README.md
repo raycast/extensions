@@ -8,13 +8,13 @@
   <br/>
 
   <div>
-    <img src="https://github.com/matheus-depaula/array-this/blob/main/metadata/array-this-1.png" width="75%" />
+    <img src="https://github.com/matheus-depaula/array-this/blob/main/public/array-this-1.png" width="75%" />
     <br/>
     <br/>
-    <img src="https://github.com/matheus-depaula/array-this/blob/main/metadata/array-this-2.png" width="75%" />
+    <img src="https://github.com/matheus-depaula/array-this/blob/main/public/array-this-2.png" width="75%" />
     <br/>
     <br/>
-    <img src="https://github.com/matheus-depaula/array-this/blob/main/metadata/array-this-3.png" width="75%" />
+    <img src="https://github.com/matheus-depaula/array-this/blob/main/public/array-this-3.png" width="75%" />
   </div>
 </div>
 
