@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lexicon-search",
-  "title": "Lexicon Search",
+  "title": "ATproto Lexicon Search",
   "description": "Quickly look up atproto lexicons.",
   "icon": "magnisky.png",
   "author": "futur",

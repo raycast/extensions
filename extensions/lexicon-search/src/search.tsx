@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, LaunchProps, List, LocalStorage, useNavigation } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { showFailureToast } from "@raycast/utils";
 import { fetchLexicons, loadLexiconsFromDisk, loadSingleLexicon } from "./util/downloadLexicons";
 import { useEffect, useMemo, useState } from "react";
 import { LexiconDoc } from "@atproto/lexicon";
@@ -11,13 +11,8 @@ export default function Search(props: LaunchProps<{ arguments: Arguments.Search 
 
 	const { push } = useNavigation();
 
-	const { isLoading: loadingFromDisk, data } = usePromise(loadLexiconsFromDisk, [], {
-		onData: (data) => void (data && setLexicons(data)),
-		// eslint-disable-next-line @typescript-eslint/no-empty-function
-		onError: () => {},
-	});
-
 	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState<Error | null>(null);
 	const [lexicons, setLexicons] = useState<Record<string, LexiconDoc | null>>({});
 	const [searchText, setSearchText] = useState(query || "");
 	const [selectedNsid, setSelectedNsid] = useState<string | null>(null);
@@ -26,11 +21,17 @@ export default function Search(props: LaunchProps<{ arguments: Arguments.Search 
 	useEffect(() => {
 		(async function () {
 			const lastFetched = (await LocalStorage.getItem<number>("lastFetched")) ?? 0;
-			if ((!data && !loadingFromDisk) || Date.now() - lastFetched > 1000 * 60 * 60) {
+
+			const data = await loadLexiconsFromDisk().catch(() => null);
+			if (data) setLexicons(data);
+			if (!data || Date.now() - lastFetched > 1000 * 60 * 60) {
+				setError(null);
 				setIsLoading(true);
 				try {
 					setLexicons(await fetchLexicons());
 				} catch (e) {
+					console.error(e);
+					setError(e instanceof Error ? e : new Error("Failed to fetch new lexicon data"));
 					await showFailureToast(e, {
 						title: "Failed to fetch new lexicon data",
 					});
@@ -133,9 +134,9 @@ export default function Search(props: LaunchProps<{ arguments: Arguments.Search 
 					);
 				})
 			) : isLoading ? (
-				<List.EmptyView title="Loading lexicons..." />
+				<List.EmptyView title="Loading lexicons..." description="This might take a minute or two!" />
 			) : (
-				<List.EmptyView title="Failed to load lexicons" />
+				<List.EmptyView title="Failed to load lexicons" description={error?.message} />
 			)}
 		</List>
 	);
