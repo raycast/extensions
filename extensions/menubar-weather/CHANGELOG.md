@@ -1,6 +1,6 @@
 # Menubar Weather Changelog
 
-## [Refactor Extension] - {PR_MERGE_DATE}
+## [Refactor Extension] - 2024-07-16
 
 - Refactoring code to optimise extension performance
 - Get latitude and longitude based on Swift API, support more fine-grained address
