@@ -6,12 +6,18 @@ import {
   BodyRequest,
   CreateAPIKeyRequest,
   CreateAPIKeyResponse,
+  CreateContactRequest,
+  CreateContactResponse,
   ErrorResponse,
   GetAPIKeysResponse,
+  GetAudiencesResponse,
+  GetContactsResponse,
   GetDomainsResponse,
   GetEmailResponse,
   SendEmailRequest,
   SendEmailResponse,
+  UpdateContactRequest,
+  UpdateContactResponse,
   VerifyDomainResponse,
 } from "./types";
 import fetch from "node-fetch";
@@ -92,4 +98,37 @@ export async function getEmail(id: string) {
 }
 export async function sendEmail(newEmail: SendEmailRequest) {
   return (await callApi(`emails`, "POST", { ...newEmail }, "Sending Email")) as ErrorResponse | SendEmailResponse;
+}
+
+// AUDIENCES
+export async function getAudiences() {
+  return (await callApi(`audiences`, "GET", undefined, "Fetching Audiences")) as ErrorResponse | GetAudiencesResponse;
+}
+
+// CONTACTS
+export async function getContacts(id: string) {
+  return (await callApi(`audiences/${id}/contacts`, "GET", undefined, "Fetching Contacts")) as
+    | ErrorResponse
+    | GetContactsResponse;
+}
+
+export async function createContact(id: string, newContact: CreateContactRequest) {
+  return (await callApi(`audiences/${id}/contacts`, "POST", { ...newContact }, "Adding Contact")) as
+    | ErrorResponse
+    | CreateContactResponse;
+}
+
+export async function deleteContact(audienceId: string, contactId: string) {
+  return (await callApi(`audiences/${audienceId}/contacts/${contactId}`, "DELETE", undefined, "Deleting Contact")) as
+    | ErrorResponse
+    | Record<string, never>;
+}
+
+export async function updateContact(audienceId: string, contactId: string, updatedContact: UpdateContactRequest) {
+  return (await callApi(
+    `audiences/${audienceId}/contacts/${contactId}`,
+    "PATCH",
+    { ...updatedContact },
+    "Updating Contact"
+  )) as ErrorResponse | UpdateContactResponse;
 }

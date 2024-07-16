@@ -17,7 +17,7 @@ export function queryMdns(address: string, timeout = 5000) {
       }
     });
 
-    mdns.query(address, (error, bytes) => {
+    mdns.query(address, (error) => {
       if (error) {
         clearTimeout(timer);
         resolve(undefined);

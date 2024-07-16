@@ -5,7 +5,7 @@ import removeMarkdown from "remove-markdown";
 import { IssueResult } from "../api/getIssues";
 
 import { getUserIcon } from "../helpers/users";
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 import { getErrorMessage } from "../helpers/errors";
 
 import useIssueComments from "../hooks/useIssueComments";

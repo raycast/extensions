@@ -10,7 +10,8 @@
     "koseduhemak",
     "ryanp",
     "LunaticMuch",
-    "nick318"
+    "nick318",
+    "marinsokol"
   ],
   "license": "MIT",
   "commands": [
@@ -19,6 +20,13 @@
       "title": "Search Issues",
       "subtitle": "Jira Search (Self-Hosted)",
       "description": "Search Jira issues by text, type and project",
+      "mode": "view"
+    },
+    {
+      "name": "open-issues",
+      "title": "Open Issues",
+      "subtitle": "Jira Search (Self-Hosted)",
+      "description": "Search Jira issues assinged to current user by text, type and project",
       "mode": "view"
     },
     {

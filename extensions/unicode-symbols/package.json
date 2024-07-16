@@ -70,20 +70,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.63.0",
+    "@raycast/api": "^1.69.0",
     "fuse.js": "^6.6.2",
-    "js-base64": "^3.7.5"
+    "js-base64": "^3.7.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^1.0.8",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "react-devtools": "^4.28.4",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.2.2",
+    "@types/node": "20.11.25",
+    "@types/react": "18.2.64",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.2",
     "unidata": "^13.0.0"
   },
   "scripts": {

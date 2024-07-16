@@ -14,18 +14,83 @@ import {
   launchCommand,
   LaunchType,
 } from "@raycast/api";
+import fs from "fs";
+import { readFile } from "fs/promises";
 import { useEffect, useState } from "react";
 import { Source } from "./types";
 import SourceForm from "./components/SourceForm";
 import { capitalize, omit } from "lodash";
-import { getInterestsSelected, getSources, saveInterestsSelected, saveSources } from "./store";
+import { getInterestsSelected, getSources, saveDigests, saveInterestsSelected, saveSources } from "./store";
 import { filterByShownStatus, sleep } from "./utils/util";
 import CustomActionPanel from "./components/CustomActionPanel";
 import SourcesJson from "./components/SourcesJson";
 import { validateSources } from "./utils/validate";
 import SharableLinkAction from "./components/SharableLinkAction";
 import { usePromise } from "@raycast/utils";
-import RecommendedForm from "./components/RecommendedForm";
+import Onboarding from "./components/Onboarding";
+import ShowRSSDetailAction from "./components/ShowRSSDetailAction";
+import { parseOpmlToSources } from "./utils/parseOpmlToSources";
+
+function BatchImportForm(props: { onSubmit: (newSources: Source[]) => void }) {
+  const [type, setType] = useState("json");
+  const { onSubmit } = props;
+  return (
+    <Form
+      searchBarAccessory={
+        <Form.LinkAccessory target="https://tidyread.info/docs/batch-import-sources" text="🤔 Learn How to Import" />
+      }
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Save"
+            onSubmit={async (values) => {
+              try {
+                const type = values.type;
+                let newSources: Partial<Source>[] = [];
+                if (type === "opml") {
+                  const filePath = values.files[0];
+                  if (!fs.existsSync(filePath) || !fs.lstatSync(filePath).isFile()) {
+                    return false;
+                  }
+                  const fileContents = await readFile(filePath, { encoding: "utf8" });
+                  showToast(Toast.Style.Animated, "parsing opml file");
+                  newSources = await parseOpmlToSources(fileContents);
+                } else {
+                  newSources = JSON.parse(values.sources) as Partial<Source>[];
+                }
+
+                showToast(Toast.Style.Animated, "Validating sources json");
+                await validateSources(newSources);
+                const now = Date.now();
+                await onSubmit(
+                  newSources.map(
+                    (s, index) =>
+                      ({
+                        schedule: "everyday",
+                        timeSpan: "1",
+                        ...s,
+                        id: `${now + index}`,
+                      }) as Source,
+                  ),
+                );
+              } catch (error: any) {
+                showToast(Toast.Style.Failure, "Invalid sources value", error.message);
+              }
+            }}
+          />
+        </ActionPanel>
+      }
+      navigationTitle="Bulk Import Sources"
+    >
+      <Form.Dropdown id="type" placeholder="Enter Data Type" title="Data Type" defaultValue="opml" onChange={setType}>
+        <Form.Dropdown.Item value="opml" title="opml" />
+        <Form.Dropdown.Item value="json" title="json" />
+      </Form.Dropdown>
+      {type === "json" && <Form.TextArea id="sources" title="Sources" placeholder="Enter sources json here" />}
+      {type === "opml" && <Form.FilePicker id="files" allowMultipleSelection={false} />}
+    </Form>
+  );
+}
 
 export default function SourceList() {
   const [sources, setSources] = useState<Source[]>();
@@ -58,46 +123,25 @@ export default function SourceList() {
 
   const batchImportActionNode = (
     <Action.Push
-      title="Batch Import Sources"
+      title="Bulk Import Sources"
       icon="import.svg"
       shortcut={{ modifiers: ["cmd"], key: "i" }}
       target={
-        <Form
-          searchBarAccessory={
-            <Form.LinkAccessory target="https://tidyread.info/docs/batch-import-sources" text="Learn How To Import" />
-          }
-          actions={
-            <ActionPanel>
-              <Action.SubmitForm
-                title="Save Source"
-                onSubmit={async (values) => {
-                  try {
-                    const newSources = JSON.parse(values.sources) as Source[];
-                    showToast(Toast.Style.Animated, "Validating sources json");
-                    await validateSources(newSources);
-                    const now = Date.now();
-                    await saveSources([...sources!, ...newSources.map((s, index) => ({ ...s, id: `${now + index}` }))]);
-                    showToast(Toast.Style.Success, "Sources imported");
-                    pop();
-                    loadSources();
-                  } catch (error: any) {
-                    showToast(Toast.Style.Failure, "Invalid sources json", error.message);
-                  }
-                }}
-              />
-            </ActionPanel>
-          }
-          navigationTitle="Batch Import Sources"
-        >
-          <Form.TextArea id="sources" title="Sources" placeholder="Enter sources json here" />
-        </Form>
+        <BatchImportForm
+          onSubmit={async (newSources) => {
+            await saveSources([...sources!, ...newSources]);
+            showToast(Toast.Style.Success, "Sources imported");
+            pop();
+            loadSources();
+          }}
+        />
       }
     />
   );
 
   if (showInterestsSelectPanel) {
     return (
-      <RecommendedForm
+      <Onboarding
         onSkip={async () => {
           await saveInterestsSelected(true);
           revalidate();
@@ -106,7 +150,19 @@ export default function SourceList() {
           await saveInterestsSelected(true);
           await sleep(500);
           const now = Date.now();
-          await saveSources(sources.map((s, index) => ({ ...s, id: `${now + index}` })));
+          await saveSources(
+            sources.map((s, index) => ({
+              schedule: "everyday",
+              timeSpan: "1",
+              title: s.title!,
+              url: s.url!,
+              rssLink: s.rssLink,
+              favicon: s.favicon,
+              tags: s.tags ?? [],
+              customDays: [],
+              id: `${now + index}`,
+            })),
+          );
           showToast(Toast.Style.Success, "Sources Generated");
           await launchCommand({
             name: "daily-read.command",
@@ -127,25 +183,19 @@ export default function SourceList() {
         <List.EmptyView
           actions={
             <CustomActionPanel>
-              <Action.Push
+              <Action
                 title="Add Source"
                 shortcut={Keyboard.Shortcut.Common.New}
                 icon={Icon.Plus}
-                target={
-                  <SourceForm
-                    navigationTitle="Add Source"
-                    onSuccess={async () => {
-                      pop();
-                      loadSources();
-                    }}
-                  ></SourceForm>
-                }
+                onAction={async () => {
+                  await launchCommand({ name: "add-source.command", type: LaunchType.UserInitiated });
+                }}
               />
               {batchImportActionNode}
             </CustomActionPanel>
           }
           title="No Source Found"
-          description="Add your first source, or press cmd + Enter to import sources from json."
+          description="Press `Enter` to add your first source, or press `⌘ + Enter` to bulk import"
         />
       ) : (
         (sources || []).map((item, index) => {
@@ -160,7 +210,7 @@ export default function SourceList() {
                 value: `${(item.tags || [])?.join?.(", ")}`,
                 color: Color.Blue,
               },
-              show: item.tags?.length > 0,
+              show: (item.tags || [])?.length > 0,
             },
             {
               tag: {
@@ -194,19 +244,13 @@ export default function SourceList() {
                       ></SourceForm>
                     }
                   />
-                  <Action.Push
+                  <Action
                     title="Add Source"
                     icon={Icon.Plus}
                     shortcut={Keyboard.Shortcut.Common.New}
-                    target={
-                      <SourceForm
-                        navigationTitle="Add Source"
-                        onSuccess={async () => {
-                          pop();
-                          loadSources();
-                        }}
-                      ></SourceForm>
-                    }
+                    onAction={async () => {
+                      await launchCommand({ name: "add-source.command", type: LaunchType.UserInitiated });
+                    }}
                   />
                   <Action
                     style={Action.Style.Destructive}
@@ -252,7 +296,7 @@ export default function SourceList() {
                     actionTitle="Share Your Sources"
                     articleTitle="My Reading Sources"
                     articleContent={() => {
-                      return `You can batch import the sources into your [Tidyread](https://tidyread.info) in 'Manage Source List' Command.\n\n\`\`\`json\n${JSON.stringify(
+                      return `You can bulk import the sources into your [Tidyread](https://tidyread.info) in 'Manage Sources' Command.\n\n\`\`\`json\n${JSON.stringify(
                         sources!.map((s) => omit(s, ["id"])),
                         null,
                         4,
@@ -266,6 +310,7 @@ export default function SourceList() {
                     target={<SourcesJson />}
                   />
                   {batchImportActionNode}
+                  {item.rssLink && <ShowRSSDetailAction rssLink={item.rssLink} url={item.url} />}
                   {item.rssLink && (
                     <Action.OpenInBrowser
                       shortcut={{ modifiers: ["cmd"], key: "l" }}
@@ -273,6 +318,27 @@ export default function SourceList() {
                       title="Open RSS Link"
                     />
                   )}
+                  <Action
+                    style={Action.Style.Destructive}
+                    icon={Icon.Trash}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                    title="Delete All Digests"
+                    onAction={async () => {
+                      const flag = await confirmAlert({
+                        title: "Delete All Digests",
+                        icon: Icon.Trash,
+                        primaryAction: {
+                          style: Alert.ActionStyle.Destructive,
+                          title: "Delete",
+                        },
+                        message: "Confirm delete all digests permanently?",
+                      });
+                      if (flag) {
+                        await saveDigests([]);
+                        showToast(Toast.Style.Success, "Digests all deleted");
+                      }
+                    }}
+                  />
                 </CustomActionPanel>
               }
             />

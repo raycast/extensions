@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Detail, environment, Icon, Image } from '@raycast/api';
+import { Action, ActionPanel, Detail, environment, Icon, Image, showToast } from '@raycast/api';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { toDataURL } from 'qrcode';
-import { initQRCode, NextStep, QRCodeStatus, User } from '../../../services/auth';
+import { initQRCode, NextStep, QRCodeStatus, QRCodeUser } from '../../../services/auth';
 
 interface QRLoginProps {
   onConfirm: (cookies: string[]) => void;
@@ -11,7 +11,7 @@ export const QRLogin: React.FC<QRLoginProps> = ({ onConfirm }) => {
   const timer = useRef<NodeJS.Timeout>();
   const unmountedRef = useRef(false);
   const tokenRef = useRef('');
-  const userRef = useRef<User | null>();
+  const userRef = useRef<QRCodeUser | null>();
   const [markdown, setMarkdown] = useState<string>();
   const [status, setStatus] = useState(QRCodeStatus.Init);
 
@@ -30,6 +30,7 @@ export const QRLogin: React.FC<QRLoginProps> = ({ onConfirm }) => {
       userRef.current = null;
       setMarkdown(qrCodeMarkdown);
       setStatus(QRCodeStatus.NotScanned);
+      showToast({ title: 'QR Code is refreshed' });
 
       const polling = async () => {
         const result = await qrCode.polling();
@@ -80,19 +81,19 @@ export const QRLogin: React.FC<QRLoginProps> = ({ onConfirm }) => {
             {status === QRCodeStatus.NotScanned ? (
               <Detail.Metadata.Label title="Status" icon={Icon.Clock} text="Waiting for scanning" />
             ) : status === QRCodeStatus.Scanned ? (
-              <Detail.Metadata.Label title="Status" icon={Icon.Checkmark} text="Scanned" />
+              <Detail.Metadata.Label
+                title="Status"
+                icon={
+                  userRef.current?.avatar_url
+                    ? { source: userRef.current.avatar_url, mask: Image.Mask.Circle }
+                    : Icon.Checkmark
+                }
+                text="Scanned"
+              />
             ) : status === QRCodeStatus.Canceled ? (
               <Detail.Metadata.Label title="Status" icon={Icon.XMarkCircle} text="Cancelled" />
             ) : (
               <Detail.Metadata.Label title="Status" text={QRCodeStatus[status]} />
-            )}
-            <Detail.Metadata.Separator />
-            {userRef.current && (
-              <Detail.Metadata.Label
-                title="User"
-                icon={{ source: userRef.current.avatar_url, mask: Image.Mask.Circle }}
-                text={userRef.current.name}
-              />
             )}
           </Detail.Metadata>
         ) : null

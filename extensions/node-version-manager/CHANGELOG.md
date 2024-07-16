@@ -6,3 +6,4 @@
 - Add List Remote Versions
 - Add Install Commnad
 - Add Make Default Command
+- Add Support for brew

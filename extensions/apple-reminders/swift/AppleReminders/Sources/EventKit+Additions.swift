@@ -102,7 +102,7 @@ extension EKRecurrenceRule {
     if months.count == 12 {
       return " of Every Month"
     } else {
-      let formattedMonths = months.compactMap { monthSymbols?[$0.intValue] }.formatted()
+      let formattedMonths = months.compactMap { monthSymbols?[$0.intValue - 1] }.formatted()
       return " in \(formattedMonths)"
     }
   }
@@ -247,5 +247,15 @@ extension EKCalendar {
     return ReminderList(
       id: self.calendarIdentifier, title: self.title, color: hexColor,
       isDefault: defaultCalendarId != nil ? isDefault : false)
+  }
+}
+
+extension EKEventStore {
+  func fetchReminders(matching predicate: NSPredicate) async -> [EKReminder]? {
+    await withCheckedContinuation { continuation in
+      fetchReminders(matching: predicate) { reminders in
+        continuation.resume(returning: reminders)
+      }
+    }
   }
 }

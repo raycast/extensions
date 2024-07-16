@@ -17,3 +17,5 @@ This is a extension for raycast to manage terminal sessions.
 3. Install [Extension](https://www.raycast.com/raycast)
 4. Open Raycast and type "Connect to Session `sesh`" to connect to a session
 5. First time you need to setup your terminal emulator to attach to sessions automatically
+
+**Note:** due to limitations with Raycast, tmux has to be running before you can use this extension.

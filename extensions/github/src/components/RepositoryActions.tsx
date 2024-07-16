@@ -1,16 +1,17 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
-import { MutatePromise, getFavicon } from "@raycast/utils";
+import { getFavicon, MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 
+import { getGitHubClient } from "../api/githubClient";
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
 import { cloneAndOpen, WEB_IDES } from "../helpers/repository";
-import { getGitHubClient } from "../helpers/withGithubClient";
 
 import { RepositoryDiscussionList } from "./RepositoryDiscussions";
 import { RepositoryIssueList } from "./RepositoryIssues";
 import { RepositoryPullRequestList } from "./RepositoryPullRequest";
 import RepositoryReleases from "./RepositoryReleases";
+import { SortAction, SortActionProps, SortTypesDataProps } from "./SortAction";
 
 type RepositoryActionProps = {
   repository: ExtendedRepositoryFieldsFragment;
@@ -18,7 +19,14 @@ type RepositoryActionProps = {
   mutateList: MutatePromise<ExtendedRepositoryFieldsFragment[] | undefined>;
 };
 
-export default function RepositoryActions({ repository, mutateList, onVisit }: RepositoryActionProps) {
+export default function RepositoryActions({
+  repository,
+  mutateList,
+  onVisit,
+  setSortQuery,
+  sortQuery,
+  sortTypesData,
+}: RepositoryActionProps & SortActionProps & SortTypesDataProps) {
   const { github } = getGitHubClient();
 
   const updatedAt = new Date(repository.updatedAt);
@@ -136,14 +144,14 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
       <ActionPanel.Section title="Open in Raycast">
         <Action.Push
           title="Show Issues"
-          icon={{ source: "issue-opened.svg", tintColor: Color.PrimaryText }}
+          icon={{ source: "issue-open.svg", tintColor: Color.PrimaryText }}
           shortcut={{ modifiers: ["cmd", "opt"], key: "i" }}
           target={<RepositoryIssueList repo={repository.nameWithOwner} />}
           onPush={() => onVisit(repository)}
         />
         <Action.Push
           title="Show Pull Requests"
-          icon={{ source: "pull-request.svg", tintColor: Color.PrimaryText }}
+          icon={{ source: "pull-request-open.svg", tintColor: Color.PrimaryText }}
           shortcut={{ modifiers: ["cmd", "opt"], key: "p" }}
           target={<RepositoryPullRequestList repo={repository.nameWithOwner} />}
           onPush={() => onVisit(repository)}
@@ -169,7 +177,7 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
 
       <ActionPanel.Section title="Open in Browser">
         <Action.OpenInBrowser
-          icon={{ source: "pull-request.svg", tintColor: Color.PrimaryText }}
+          icon={{ source: "pull-request-open.svg", tintColor: Color.PrimaryText }}
           title="Open Pull Requests"
           url={`${repository.url}/pulls`}
           shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
@@ -178,7 +186,7 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
 
         {repository.hasIssuesEnabled ? (
           <Action.OpenInBrowser
-            icon={{ source: "issue-opened.svg", tintColor: Color.PrimaryText }}
+            icon={{ source: "issue-open.svg", tintColor: Color.PrimaryText }}
             title="Open Issues"
             url={`${repository.url}/issues`}
             shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
@@ -229,6 +237,10 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
         <Action.CopyToClipboard content={repository.name} title="Copy Repository Name" />
 
         <Action.CopyToClipboard content={repository.owner.login} title="Copy Repository Owner" />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <SortAction {...{ data: sortTypesData, sortQuery, setSortQuery }} />
       </ActionPanel.Section>
     </ActionPanel>
   );

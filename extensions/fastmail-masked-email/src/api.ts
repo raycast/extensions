@@ -26,7 +26,7 @@ async function getSession(): Promise<Session> {
     session = (await response.json()) as Session;
     return session;
   } catch {
-    throw new Error("Failed to authenticate. Please check your API token.");
+    throw new Error("Failed to authenticate, please check your API token");
   }
 }
 
@@ -55,4 +55,4 @@ async function makeRequest<Request, Response>({ request }: MakeRequestArgs<Reque
   return (await response.json()) as APIResponse<Response>;
 }
 
-export { type Session, type APIRequest, type APIResponse, getSession, makeRequest };
+export { getSession, makeRequest, type APIRequest, type APIResponse, type Session };

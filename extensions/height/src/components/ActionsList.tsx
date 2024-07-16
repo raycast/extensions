@@ -11,13 +11,14 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { getList, updateList } from "../api/list";
-import { ListObject } from "../types/list";
-import { CachedPromiseMutateType } from "../types/utils";
-import { WorkspaceObject } from "../types/workspace";
-import { isHeightInstalled } from "../utils/application";
-import SearchTasks from "./SearchTasks";
-import UpdateList from "./UpdateList";
+
+import { getList, updateList } from "@/api/list";
+import SearchTasks from "@/components/SearchTasks";
+import UpdateList from "@/components/UpdateList";
+import { ListObject } from "@/types/list";
+import { CachedPromiseMutateType } from "@/types/utils";
+import { WorkspaceObject } from "@/types/workspace";
+import { isHeightInstalled } from "@/utils/application";
 
 type Props = {
   list: ListObject;

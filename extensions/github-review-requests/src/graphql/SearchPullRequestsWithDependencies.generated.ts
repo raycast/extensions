@@ -4,7 +4,7 @@ import { GraphQLClient } from "graphql-request";
 import * as Dom from "graphql-request/dist/types.dom";
 import gql from "graphql-tag";
 export type SearchPullRequestsWithDependenciesQueryVariables = Types.Exact<{
-  query: Types.Scalars["String"];
+  query: Types.Scalars["String"]["input"];
 }>;
 
 export type SearchPullRequestsWithDependenciesQuery = {
@@ -25,6 +25,7 @@ export type SearchPullRequestsWithDependenciesQuery = {
           url: string;
           createdAt: string;
           updatedAt: string;
+          reviewDecision?: Types.PullRequestReviewDecision | null;
           author?:
             | { __typename?: "Bot"; login: string; avatarUrl: string }
             | { __typename?: "EnterpriseUserAccount"; login: string; avatarUrl: string }
@@ -32,6 +33,13 @@ export type SearchPullRequestsWithDependenciesQuery = {
             | { __typename?: "Organization"; login: string; avatarUrl: string }
             | { __typename?: "User"; login: string; avatarUrl: string }
             | null;
+          repository: {
+            __typename?: "Repository";
+            name: string;
+            owner:
+              | { __typename?: "Organization"; login: string; avatarUrl: string }
+              | { __typename?: "User"; login: string; avatarUrl: string };
+          };
           reviews?: {
             __typename?: "PullRequestReviewConnection";
             nodes?: Array<{
@@ -72,6 +80,7 @@ export type SearchPullRequestsWithDependenciesQuery = {
             nodes?: Array<{
               __typename?: "ReviewRequest";
               requestedReviewer?:
+                | { __typename: "Bot" }
                 | { __typename: "Mannequin" }
                 | { __typename: "Team"; id: string; name: string }
                 | { __typename: "User"; id: string; login: string; avatarUrl: string }
@@ -98,9 +107,17 @@ export const SearchPullRequestsWithDependenciesDocument = gql`
           url
           createdAt
           updatedAt
+          reviewDecision
           author {
             login
             avatarUrl
+          }
+          repository {
+            name
+            owner {
+              login
+              avatarUrl
+            }
           }
           reviews(last: 1) {
             nodes {
@@ -151,10 +168,11 @@ export const SearchPullRequestsWithDependenciesDocument = gql`
 
 export type SdkFunctionWrapper = <T>(
   action: (requestHeaders?: Record<string, string>) => Promise<T>,
-  operationName: string
+  operationName: string,
+  operationType?: string
 ) => Promise<T>;
 
-const defaultWrapper: SdkFunctionWrapper = (action, _operationName) => action();
+const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationType) => action();
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
@@ -169,7 +187,8 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
             variables,
             { ...requestHeaders, ...wrappedRequestHeaders }
           ),
-        "SearchPullRequestsWithDependencies"
+        "SearchPullRequestsWithDependencies",
+        "query"
       );
     },
   };

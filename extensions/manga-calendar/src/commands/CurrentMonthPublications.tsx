@@ -1,19 +1,19 @@
-import { useFetch } from "@raycast/utils";
+import { DateDropdown } from "@components/DateDropdown";
+import { ListItem } from "@components/ListItem";
 import { List } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { GraphicPublication, GraphicPublicationList } from "@types";
+import { generateKey } from "@utils/generateKey";
+import { monthNames } from "@utils/months";
+import { getMangaCalendar } from "@utils/scrapper";
 import { useEffect, useMemo, useState } from "react";
-import { MangaList } from "../types";
-import { getMangaCalendar } from "../utils/scrapper";
-import { monthNames } from "../utils/months";
-import MangaListItem from "../components/MangaListItem";
-import { DateDropdown } from "../components/DateDropdown";
-import { generateKey } from "../utils/generateKey";
 
 export default function CurrentMonthPublications() {
   const currentDate = new Date();
   const currentMonth = monthNames[currentDate.getMonth()];
   const currentYear = currentDate.getFullYear();
 
-  const [mangaList, setMangaList] = useState<MangaList>({});
+  const [publicationsList, setPublicationsList] = useState<GraphicPublicationList>({});
   const [searchText, setSearchText] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<string>("");
 
@@ -23,33 +23,39 @@ export default function CurrentMonthPublications() {
 
   useEffect(() => {
     getMangaCalendar(String(data) || "").then((result) => {
-      setMangaList(result);
+      setPublicationsList(result);
     });
   }, [data]);
 
-  const filteredMangaList = useMemo(() => {
+  const filteredPublicationsList = useMemo(() => {
     if (!searchText && !selectedDate) {
-      return mangaList;
+      return publicationsList;
     }
 
     const searchTitle = searchText.toLowerCase();
     const searchDate = selectedDate.toLowerCase();
-    return Object.entries(mangaList).reduce((filteredMangasByDate, [publicationDate, mangas]) => {
-      const filteredMangas = mangas.filter(
-        ({ name, publicationDate, editorial }) =>
-          (!searchText || (name + editorial).toLowerCase().includes(searchTitle)) &&
-          (!selectedDate || publicationDate.toLowerCase().includes(searchDate))
-      );
-      if (filteredMangas.length > 0) {
-        filteredMangasByDate[publicationDate] = filteredMangas;
-      }
-      return filteredMangasByDate;
-    }, {} as MangaList);
-  }, [mangaList, selectedDate, searchText]);
+    return Object.entries(publicationsList).reduce(
+      (
+        filteredPublicationsByDate: GraphicPublicationList,
+        [publicationDate, publications]: [string, GraphicPublication[]]
+      ) => {
+        const filteredMangas = publications.filter(
+          ({ name, publicationDate, editorial }) =>
+            (!searchText || (name + editorial).toLowerCase().includes(searchTitle)) &&
+            (!selectedDate || publicationDate.toLowerCase().includes(searchDate))
+        );
+        if (filteredMangas.length > 0) {
+          filteredPublicationsByDate[publicationDate] = filteredMangas;
+        }
+        return filteredPublicationsByDate;
+      },
+      {} as GraphicPublicationList
+    );
+  }, [publicationsList, selectedDate, searchText]);
 
   const publicationDates: string[] = useMemo(() => {
-    return Object.keys(mangaList);
-  }, [mangaList]);
+    return Object.keys(publicationsList);
+  }, [publicationsList]);
 
   return (
     <List
@@ -57,12 +63,12 @@ export default function CurrentMonthPublications() {
       onSearchTextChange={setSearchText}
       searchBarAccessory={<DateDropdown dateList={publicationDates} onDropdownChange={setSelectedDate} />}
     >
-      {Object.entries(filteredMangaList).map(([date, mangasByDate]) => {
+      {Object.entries(filteredPublicationsList).map(([date, mangasByDate]) => {
         return (
           mangasByDate && (
             <List.Section key={generateKey()} title={date.includes("00") ? "No Date" : date}>
-              {mangasByDate.map((manga) => (
-                <MangaListItem key={manga.id} manga={manga} />
+              {mangasByDate.map((publication) => (
+                <ListItem key={publication.id} publication={publication} isShowingDetail handleAction={() => false} />
               ))}
             </List.Section>
           )

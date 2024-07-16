@@ -19,7 +19,7 @@ export default function Command(props: { arguments?: { generate?: string } }) {
   const placeholder = placeholders[Math.floor(Math.random() * placeholders.length)];
 
   function handleSubmit(values: Values) {
-    const searchQuery = values.searchQuery.trim();
+    const searchQuery = values.searchQuery.trim().replace(/ /g, "+");
     if (!searchQuery) {
       showToast({ title: "Error", message: "Please enter a search query" });
       return;

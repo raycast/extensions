@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
 import { Pin, getPinStatistics } from "../../lib/Pins";
+import { PinAction } from "../../lib/constants";
 
 /**
  * Submenu for actions that copy information about a pin to the clipboard.
@@ -26,6 +27,16 @@ export default function CopyPinActionsSubmenu(props: { pin: Pin; pins: Pin[] }) 
         title="Copy Pin ID"
         content={pin.id.toString()}
         shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+      />
+      <Action.CopyToClipboard
+        title="Copy Deeplink"
+        content={`raycast://extensions/HelloImSteven/pins/view-pins?context=${encodeURIComponent(
+          JSON.stringify({
+            pinID: pin.id,
+            action: PinAction.OPEN,
+          }),
+        )}`}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
       />
       <Action.CopyToClipboard
         title="Copy Pin JSON"

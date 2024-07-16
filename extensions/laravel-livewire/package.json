@@ -5,6 +5,9 @@
   "description": "Quickly search through Laravel Livewire documentation and open it in the browser",
   "icon": "livewire-icon-transparent.png",
   "author": "tafhyseni",
+  "contributors": [
+    "patrikkernke"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -23,6 +26,10 @@
           "default": "2.x",
           "data": [
             {
+              "title": "3.x",
+              "value": "3.x"
+            },
+            {
               "title": "2.x",
               "value": "2.x"
             },
@@ -36,15 +43,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3"
+    "@raycast/api": "^1.67.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
+    "react": "^18.2.0",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },

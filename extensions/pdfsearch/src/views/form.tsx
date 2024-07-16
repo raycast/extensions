@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { Collection } from "../type";
 import { Action, ActionPanel, Form, LocalStorage, showToast, useNavigation } from "@raycast/api";
-import { lstatSync, readdirSync } from "fs";
+import { lstatSync } from "fs";
 import path from "path";
 import { showFailureToast } from "@raycast/utils";
-
-const supportedFiletypes = [".pdf"];
+import { getValidFiles, supportedFiletypes } from "../util";
 
 export function CreateCollectionForm(props: {
   collection?: Collection; // if this is defined it means we are editing an existing collection
@@ -45,23 +44,6 @@ export function CreateCollectionForm(props: {
     }
   }
 
-  // returns all POSIX filepaths in directory with supportedFiletype
-  const loadDir = (dirpath: string) => {
-    let validFiles: string[] = [];
-    const files = readdirSync(dirpath);
-
-    files.forEach((file) => {
-      const fullPath = path.join(dirpath, file);
-      if (lstatSync(fullPath).isDirectory()) {
-        validFiles = validFiles.concat(loadDir(fullPath));
-      } else if (supportedFiletypes.includes(path.extname(file))) {
-        validFiles.push(fullPath);
-      }
-    });
-
-    return validFiles;
-  };
-
   useEffect(() => {
     revalidateName();
   }, [name]);
@@ -73,29 +55,16 @@ export function CreateCollectionForm(props: {
   const handleSubmit = async (values: Collection) => {
     if (!fileError && !nameError) {
       try {
-        // load array of unique supported files from files and directories
-        let validFiles: string[] = [];
-        values.files.forEach((file) => {
-          if (lstatSync(file).isDirectory()) {
-            validFiles = validFiles.concat(loadDir(file));
-          } else if (supportedFiletypes.includes(path.extname(file))) {
-            validFiles.push(file);
-          }
-        });
-        validFiles = [...new Set(validFiles)];
-
+        const validFiles = getValidFiles(values.files);
         if (validFiles.length === 0) {
-          setFileError("No supported filetypes found!");
+          setFileError("No supported files found!");
           return;
         }
-
-        values.files = validFiles;
 
         // if editing a collection and name changes, we delete the old collection
         if (props.collection && props.collection.name !== values.name) {
           await LocalStorage.removeItem(props.collection.name);
         }
-
         await LocalStorage.setItem(values.name, JSON.stringify(values));
 
         showToast({ title: "Success", message: "Collection saved!" });

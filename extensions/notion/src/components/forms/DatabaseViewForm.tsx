@@ -2,7 +2,7 @@ import { Form, ActionPanel, Icon, showToast, useNavigation, Action, Toast } from
 import { useEffect, useState } from "react";
 
 import { useDatabaseProperties, useDatabases } from "../../hooks";
-import { notionColorToTintColor, DatabaseProperty, DatabasePropertyOption } from "../../utils/notion";
+import { notionColorToTintColor, DatabaseProperty, getPropertyConfig } from "../../utils/notion";
 import { DatabaseView } from "../../utils/types";
 
 export function DatabaseViewForm(props: {
@@ -82,10 +82,10 @@ export function DatabaseViewForm(props: {
                       d.icon_emoji
                         ? d.icon_emoji
                         : d.icon_file
-                        ? d.icon_file
-                        : d.icon_external
-                        ? d.icon_external
-                        : Icon.List
+                          ? d.icon_file
+                          : d.icon_external
+                            ? d.icon_external
+                            : Icon.List
                     }
                   />
                 );
@@ -132,25 +132,24 @@ function KanbanViewFormItem(props: { properties: DatabaseProperty[]; databaseVie
 
   const statusProperty = properties.find((dp) => dp.id === statusPropertyId);
 
-  function getStatusState(statusProperty: DatabaseProperty | undefined) {
-    if (statusProperty && statusProperty.options) {
+  function getStatusState(property: DatabaseProperty | undefined) {
+    if (!property) return;
+    const propertyConfig = getPropertyConfig(property, ["status"]);
+    if (propertyConfig) {
+      const statusOptions = propertyConfig.options.filter((o) => o.id !== "_select_null_");
       const currentConfig = databaseView?.kanban;
-
-      const statusOptions = (statusProperty.options as DatabasePropertyOption[]).filter(
-        (o) => o.id !== "_select_null_",
-      );
 
       const defaultBacklogOpts = currentConfig ? currentConfig.backlog_ids : ["_select_null_"];
       const defaultCompletedOpts = currentConfig
         ? currentConfig.completed_ids
         : statusOptions[statusOptions.length - 1]?.id
-        ? [statusOptions[statusOptions.length - 1].id!]
-        : [];
+          ? [statusOptions[statusOptions.length - 1].id!]
+          : [];
       const defaultNotStartedOpts = currentConfig
         ? currentConfig.not_started_ids
         : statusOptions[0] && !defaultCompletedOpts.includes(statusOptions[0].id!)
-        ? [statusOptions[0].id!]
-        : [];
+          ? [statusOptions[0].id!]
+          : [];
       const defaultStartedOpts = currentConfig
         ? currentConfig.started_ids
         : statusOptions
@@ -227,6 +226,7 @@ function StatusTagPicker(props: {
   statusProperty: DatabaseProperty;
 }) {
   const { id, title, statusProperty, value, onChange } = props;
+  const propertyConfig = getPropertyConfig(statusProperty, ["status"]);
 
   return (
     <Form.TagPicker
@@ -236,7 +236,7 @@ function StatusTagPicker(props: {
       value={value}
       onChange={onChange}
     >
-      {(statusProperty?.options as DatabasePropertyOption[]).map((o) => {
+      {propertyConfig?.options.map((o) => {
         if (!o.id) {
           return null;
         }

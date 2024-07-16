@@ -231,7 +231,7 @@ export const requestLocalData = async (): Promise<{
     
     return data;
   }`,
-    { language: "JavaScript", humanReadableOutput: false },
+    { language: "JavaScript", humanReadableOutput: false, timeout: 0 },
   );
   return JSON.parse(data);
 };
@@ -252,7 +252,7 @@ export const getFinderSelection = async (): Promise<{ name: string; path: string
         return thePath
       end tell
     end try`,
-    { humanReadableOutput: true },
+    { humanReadableOutput: true, timeout: 0 },
   );
 
   const entries = data.split(", ");
@@ -326,17 +326,10 @@ export const useLocalData = () => {
   const [localData, setLocalData] = useCachedState<LocalDataObject>("--local-data", dummyData());
   const [loadingLocalData, setLoadingLocalData] = useState(true);
 
-  const preferences = getPreferenceValues<ExtensionPreferences & { showPinShortcut: boolean }>();
-
   useEffect(() => {
     const getLocalData = async () => {
       const newData = dummyData();
       newData.recentApplications = await getRecentApplications();
-
-      if (!preferences.showPinShortcut) {
-        // Skip costly operations if the user doesn't want the pin shortcut
-        return { ...localData, recentApplications: newData.recentApplications };
-      }
 
       const app = newData.recentApplications[0];
       newData.currentApplication = { name: app.name, path: app.path, bundleId: app.bundleId || "" };

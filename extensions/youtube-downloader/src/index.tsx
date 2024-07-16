@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Clipboard, Detail, Form, Icon, showToast, Toast } from "@raycast/api";
-import ytdl, { videoFormat } from "ytdl-core";
+import ytdl, { videoFormat } from "@distube/ytdl-core";
 import { useEffect, useMemo, useState } from "react";
 import { FormValidation, useForm } from "@raycast/utils";
 import prettyBytes from "pretty-bytes";
@@ -71,8 +71,16 @@ export default function DownloadVideo() {
       ytdl
         .getInfo(values.url)
         .then((info) => {
+          const videoDuration = parseInt(info.videoDetails.lengthSeconds);
+          if (info.videoDetails.isLiveContent && videoDuration === 0) {
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Live streams are not supported",
+            });
+            return;
+          }
           setLoading(false);
-          setDuration(parseInt(info.videoDetails.lengthSeconds));
+          setDuration(videoDuration);
           setTitle(info.videoDetails.title);
           setFormats(info.formats);
         })
@@ -146,9 +154,9 @@ export default function DownloadVideo() {
           <Form.Dropdown.Section key={container} title={`Video (${container})`}>
             {videoFormats
               .filter((format) => format.container == container)
-              .map((format) => (
+              .map((format, index) => (
                 <Form.Dropdown.Item
-                  key={format.itag}
+                  key={`${format.itag}-${format.quality}-${container}-${index}`}
                   value={JSON.stringify({ itag: format.itag.toString(), container: container } as FormatOptions)}
                   title={`${format.qualityLabel} (${
                     format.contentLength
@@ -161,9 +169,9 @@ export default function DownloadVideo() {
           </Form.Dropdown.Section>
         ))}
         <Form.Dropdown.Section title="Audio">
-          {audioFormats.map((format) => (
+          {audioFormats.map((format, index) => (
             <Form.Dropdown.Item
-              key={format.itag}
+              key={`${format.itag}-${format.audioBitrate}-${index}`}
               value={JSON.stringify({ itag: format.itag.toString() } as FormatOptions)}
               title={`${format.audioBitrate}kps (${prettyBytes(parseInt(format.contentLength))})`}
               icon={Icon.Music}

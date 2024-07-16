@@ -1,7 +1,9 @@
-import { getSelectedText, Clipboard } from "@raycast/api";
-import { isEmailGroup, isEmpty, isMailTo, isUrl, mailtoBuilder, urlIPBuilder } from "./common-utils";
+import { getSelectedText, Clipboard, getFrontmostApplication } from "@raycast/api";
+import { isEmpty, isUrl, urlIPBuilder } from "./common-utils";
 import { isIP } from "net";
 import { ItemSource, ItemType } from "../types/types";
+import { chromiumBrowserNames, webkitBrowserNames } from "./constants";
+import { getChromiumBrowserPath, getWebkitBrowserPath } from "./applescript-utils";
 
 export class ItemInput {
   content: string;
@@ -29,13 +31,7 @@ export class ItemInput {
       this.source = ItemSource.NULL;
       this.type = ItemType.NULL;
     } else {
-      if (isMailTo(trimText)) {
-        this.content = mailtoBuilder(trimText.slice(7));
-        this.type = ItemType.EMAIL;
-      } else if (isEmailGroup(trimText)) {
-        this.content = mailtoBuilder(trimText);
-        this.type = ItemType.EMAIL;
-      } else if (isUrl(trimText)) {
+      if (isUrl(trimText)) {
         let url;
         if (isIP(trimText)) {
           if (trimText == "127.0.0.1") {
@@ -62,25 +58,45 @@ const clipboard = async () => {
   return typeof content == "undefined" ? "" : content;
 };
 
-export const fetchItemInput = () => {
+export const fetchItemInput = async () => {
   const itemInput = new ItemInput();
-  return getSelectedText()
+  const inputText = await getSelectedText()
     .then(async (text) =>
       !isEmpty(text)
         ? itemInput.setContent(text.substring(0, 9999)).setSource(ItemSource.SELECTED).setType()
         : itemInput
             .setContent(String(await clipboard()))
             .setSource(ItemSource.CLIPBOARD)
-            .setType()
+            .setType(),
     )
     .catch(async () =>
       itemInput
         .setContent(String(await clipboard()))
         .setSource(ItemSource.CLIPBOARD)
-        .setType()
+        .setType(),
     )
     .then((item) =>
-      !isEmpty(item.content) ? itemInput : itemInput.setContent("").setSource(ItemSource.NULL).setType()
+      !isEmpty(item.content) ? itemInput : itemInput.setContent("").setSource(ItemSource.NULL).setType(),
     )
     .catch(() => itemInput.setContent("").setSource(ItemSource.NULL).setType());
+
+  if (inputText.type !== ItemType.URL) {
+    const frontmostAppUrl = await getFrontmostAppUrl();
+    if (!isEmpty(frontmostAppUrl)) {
+      return new ItemInput(frontmostAppUrl, ItemSource.FRONTMOSTAPP, ItemType.URL);
+    }
+  }
+  return inputText;
+};
+
+export const getFrontmostAppUrl = async () => {
+  const frontmostApp = await getFrontmostApplication();
+  // get browser web page url
+  let url = "";
+  if (webkitBrowserNames.includes(frontmostApp.name)) {
+    url = await getWebkitBrowserPath(frontmostApp.name);
+  } else if (chromiumBrowserNames.includes(frontmostApp.name)) {
+    url = await getChromiumBrowserPath(frontmostApp.name);
+  }
+  return url;
 };

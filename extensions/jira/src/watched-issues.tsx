@@ -8,6 +8,4 @@ export function WatchedIssues() {
   return <StatusIssueList issues={issues} isLoading={isLoading} mutate={mutate} />;
 }
 
-export default function Command() {
-  return withJiraCredentials(<WatchedIssues />);
-}
+export default withJiraCredentials(WatchedIssues);

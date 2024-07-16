@@ -9,7 +9,9 @@
     "ikupenov",
     "pernielsentikaer",
     "fengtianze",
-    "tleo19"
+    "tleo19",
+    "lukah",
+    "StevenRCE0"
   ],
   "categories": [
     "Applications",
@@ -78,7 +80,7 @@
   "commands": [
     {
       "name": "check-for-mail",
-      "title": "Check For New Mail",
+      "title": "Check for New Mail",
       "description": "Check for new mail for all accounts.",
       "mode": "no-view"
     },
@@ -108,7 +110,7 @@
     },
     {
       "name": "share-with-mail",
-      "title": "Share With Mail",
+      "title": "Share with Mail",
       "description": "Share selected Finder items with Mail.",
       "mode": "view"
     },
@@ -127,7 +129,7 @@
     },
     {
       "name": "mark-all-as-read",
-      "title": "Mark All As Read",
+      "title": "Mark All as Read",
       "description": "Mark all your emails as read.",
       "mode": "no-view"
     }

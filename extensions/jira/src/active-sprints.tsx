@@ -68,6 +68,4 @@ export function ActiveSprints() {
   );
 }
 
-export default function Command() {
-  return withJiraCredentials(<ActiveSprints />);
-}
+export default withJiraCredentials(ActiveSprints);

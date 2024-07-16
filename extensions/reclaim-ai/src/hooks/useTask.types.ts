@@ -1,5 +1,3 @@
-import { Task } from "../types/task";
-
 export interface CreateTaskProps {
   title: string;
   timePolicy: string;
@@ -10,8 +8,7 @@ export interface CreateTaskProps {
   snoozeUntil: Date;
   due: Date;
   notes: string;
+  alwaysPrivate: boolean;
   priority: string;
   onDeck: boolean;
 }
-
-export type ApiResponseTasks = Task[];

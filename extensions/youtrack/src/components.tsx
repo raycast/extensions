@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Action, ActionPanel, List, Icon, Color, Image, Detail } from "@raycast/api";
 import { Issue, IssueExtended } from "./interfaces";
 import { isURL, issueStates, removeMarkdownImages } from "./utils";
+import { WorkItem } from "youtrack-rest-client";
+import { AddWork } from "./work-item";
 
 const resolvedIcon = { source: Icon.Check, tintColor: Color.Green };
 const openIcon = { source: Icon.Dot };
@@ -12,6 +14,7 @@ export function IssueListItem(props: {
   instance: string;
   resolved: boolean;
   getIssueDetailsCb: () => Promise<IssueExtended> | null;
+  createWorkItemCb: (workItem: WorkItem) => Promise<WorkItem> | null;
 }) {
   const [state, setState] = useState<{ icon: Image; accessories: List.Item.Accessory[] }>({
     icon: { source: "" },
@@ -29,15 +32,24 @@ export function IssueListItem(props: {
     <List.Item
       icon={state.icon}
       title={props.item.summary}
+      keywords={[props.item.id]}
       subtitle={props.item.date}
       accessories={state.accessories}
-      actions={<Actions item={props.item} instance={props.instance} getIssueDetailsCb={props.getIssueDetailsCb} />}
+      actions={
+        <Actions
+          item={props.item}
+          instance={props.instance}
+          getIssueDetailsCb={props.getIssueDetailsCb}
+          createWorkItemCb={(workItem) => props.createWorkItemCb(workItem)}
+        />
+      }
     />
   );
 }
 
 function IssueDetails(props: {
   getIssueDetailsCb: () => Promise<IssueExtended> | null;
+  createWorkItemCb: (workItem: WorkItem) => Promise<WorkItem> | null;
   link: string;
   instance: string;
 }) {
@@ -63,6 +75,15 @@ function IssueDetails(props: {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Created" text={issue.created} />
+          <Detail.Metadata.Label
+            title="Assignee"
+            text={issue.assignee?.fullName}
+            icon={
+              isURL(issue.assignee?.avatarUrl ?? "")
+                ? issue.assignee?.avatarUrl
+                : `${props.instance}${issue.assignee?.avatarUrl}`
+            }
+          />
           <Detail.Metadata.Label
             title="Author"
             text={issue.reporter?.fullName}
@@ -101,6 +122,19 @@ function IssueDetails(props: {
               title="Copy Link"
               shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
             />
+            <Action.Push
+              icon={Icon.AppWindowSidebarRight}
+              title="Add Work"
+              shortcut={{ modifiers: ["cmd"], key: "t" }}
+              target={
+                <AddWork
+                  link={props.link}
+                  instance={props.instance}
+                  getIssueDetailsCb={() => props.getIssueDetailsCb()}
+                  createWorkItemCb={(workItem) => props.createWorkItemCb(workItem)}
+                />
+              }
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -108,7 +142,12 @@ function IssueDetails(props: {
   );
 }
 
-function Actions(props: { item: Issue; instance: string; getIssueDetailsCb: () => Promise<IssueExtended> | null }) {
+function Actions(props: {
+  item: Issue;
+  instance: string;
+  getIssueDetailsCb: () => Promise<IssueExtended> | null;
+  createWorkItemCb: (workItem: WorkItem) => Promise<WorkItem> | null;
+}) {
   const link = `${props.instance}/issue/${props.item.id}`;
   return (
     <ActionPanel title={props.item.summary}>
@@ -116,9 +155,29 @@ function Actions(props: { item: Issue; instance: string; getIssueDetailsCb: () =
         {link && (
           <Action.Push
             icon={Icon.AppWindowSidebarRight}
-            title="Show details"
+            title="Show Details"
             target={
-              <IssueDetails link={link} instance={props.instance} getIssueDetailsCb={() => props.getIssueDetailsCb()} />
+              <IssueDetails
+                link={link}
+                instance={props.instance}
+                getIssueDetailsCb={() => props.getIssueDetailsCb()}
+                createWorkItemCb={(workItem) => props.createWorkItemCb(workItem)}
+              />
+            }
+          />
+        )}
+        {link && (
+          <Action.Push
+            icon={Icon.AppWindowSidebarRight}
+            title="Add Work"
+            shortcut={{ modifiers: ["cmd"], key: "t" }}
+            target={
+              <AddWork
+                link={link}
+                instance={props.instance}
+                getIssueDetailsCb={props.getIssueDetailsCb}
+                createWorkItemCb={(workItem) => props.createWorkItemCb(workItem)}
+              />
             }
           />
         )}

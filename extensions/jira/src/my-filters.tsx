@@ -44,6 +44,4 @@ export function MyFilters() {
   );
 }
 
-export default function Command() {
-  return withJiraCredentials(<MyFilters />);
-}
+export default withJiraCredentials(MyFilters);

@@ -1,6 +1,6 @@
 import { useLists } from "../hooks/useLists";
 import { ActionPanel, Icon, List, PushAction } from "@raycast/api";
-import { ListTasks } from "./ListTasks";
+import { ListTasks } from "./TaskList/ListTasks";
 
 function FolderLists({ folderId, folderName }: { folderId: string; folderName: string }) {
   const lists = useLists(folderId);

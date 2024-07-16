@@ -1,7 +1,7 @@
-import { useNavigation, Form, showToast, Toast, ActionPanel, Action } from "@raycast/api";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { getErrorMessage } from "@lib/utils";
+import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
 
 export function InputTextForm(props: { state: State }): JSX.Element {
   const s = props.state;

@@ -1,11 +1,8 @@
-import { useCachedPromise } from "@raycast/utils";
-import { getWorkspaces } from "../api";
+import { getMyWorkspaces } from "@/api";
+import { useSafeCachedPromise } from "@/hooks/useSafeCachedPromise";
 
-export function useWorkspaces(initialExecute = true) {
-  const { data, error, isLoading, revalidate } = useCachedPromise(getWorkspaces, [], {
-    initialData: [],
-    execute: initialExecute,
-  });
+export function useWorkspaces() {
+  const { data, error, isLoading, revalidate } = useSafeCachedPromise(getMyWorkspaces, [], { initialData: [] });
   return {
     workspaces: data,
     workspacesError: error,

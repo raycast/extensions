@@ -3,7 +3,8 @@ import { useFetch } from "@raycast/utils";
 
 import { getStarredFilesURL, File } from "./api/getFiles";
 import FileListItem from "./components/FileListItem";
-import { withGoogleAuth, getOAuthToken, getUserEmail } from "./components/withGoogleAuth";
+import { withGoogleAuth } from "./components/withGoogleAuth";
+import { getOAuthToken, getUserEmail } from "./api/googleAuth";
 
 function StarredGoogleDriveFiles() {
   const email = getUserEmail();
@@ -40,6 +41,4 @@ function StarredGoogleDriveFiles() {
   );
 }
 
-export default function Command() {
-  return withGoogleAuth(<StarredGoogleDriveFiles />);
-}
+export default withGoogleAuth(StarredGoogleDriveFiles);

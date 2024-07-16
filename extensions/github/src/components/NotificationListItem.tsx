@@ -1,4 +1,4 @@
-import { List, Color } from "@raycast/api";
+import { List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 
 import {
@@ -14,7 +14,7 @@ import NotificationActions from "./NotificationActions";
 export type Notification = NotificationsResponse["data"][0];
 
 type NotificationListItemProps = {
-  notification: Notification;
+  notification: Notification & { icon: Awaited<ReturnType<typeof getNotificationIcon>> };
   userId?: string;
   mutateList: MutatePromise<Notification[] | undefined>;
 };
@@ -22,12 +22,10 @@ type NotificationListItemProps = {
 export default function NotificationListItem({ notification, userId, mutateList }: NotificationListItemProps) {
   const updatedAt = new Date(notification.updated_at);
 
-  const icon = getNotificationIcon(notification);
-
   return (
     <List.Item
       icon={{
-        value: { source: icon.value, tintColor: Color.PrimaryText },
+        value: notification.icon.value,
         tooltip: getNotificationTypeTitle(notification),
       }}
       title={notification.subject.title}

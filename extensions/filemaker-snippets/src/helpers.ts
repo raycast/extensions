@@ -5,6 +5,7 @@ import { existsSync } from "fs";
 
 export type ParsedFilePath =
   | {
+      id: string;
       local: true;
       exists: boolean;
       raw: string;
@@ -12,7 +13,7 @@ export type ParsedFilePath =
       locationName: string;
       fileName: string;
     }
-  | { local: false; raw: string; host: string; locationName: string; fileName: string };
+  | { id: string; local: false; raw: string; host: string; locationName: string; fileName: string };
 
 function parseFilePath(raw: string): ParsedFilePath {
   const local = raw.startsWith("file");
@@ -28,6 +29,7 @@ function parseFilePath(raw: string): ParsedFilePath {
     raw,
     locationName: local ? host : locationName,
     fileName,
+    id: raw,
   };
 }
 

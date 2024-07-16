@@ -6,10 +6,10 @@ import { SpaceListItem } from './components/space-list-item';
 import { withAuth } from './features/with-auth';
 import { withQuery } from './features/with-query';
 import {
-  fetchRecentList,
+  fetchRecentDocsList,
   searchDocs,
   removeRecentDocument,
-  RecentListResponse as RecentList,
+  RecentDocsListResponse as RecentList,
   SearchDocsResponse as SearchResults,
 } from './services/space';
 import { StorageKey } from './utils/storage';
@@ -27,7 +27,7 @@ const SearchDocsView: React.FC = () => {
     queryFn: ({ signal }) =>
       searchKeywords
         ? searchDocs({ query: searchKeywords }, signal)
-        : fetchRecentList(preference.recentListCount, signal).then((data) => {
+        : fetchRecentDocsList(preference.recentListCount, signal).then((data) => {
             setCachedRecentList(data);
             return data;
           }),
@@ -35,6 +35,7 @@ const SearchDocsView: React.FC = () => {
   });
 
   const handleRemoveRecent = async (objToken: string) => {
+    showToast({ title: 'Removing', style: Toast.Style.Animated });
     const result = await removeRecentDocument(objToken);
     if (result) {
       showToast(Toast.Style.Success, 'Removed successfully');
@@ -80,14 +81,12 @@ const RecentDocumentsView: React.FC<{
             node={nodeEntity}
             owner={ownerEntity}
             actions={
-              <>
-                <Action
-                  icon={Icon.Trash}
-                  title="Remove From Recent Documents"
-                  shortcut={{ key: 'x', modifiers: ['ctrl'] }}
-                  onAction={() => onRemove?.(nodeId)}
-                />
-              </>
+              <Action
+                icon={Icon.Trash}
+                title="Remove From Recent Documents"
+                shortcut={{ key: 'x', modifiers: ['ctrl'] }}
+                onAction={() => onRemove?.(nodeId)}
+              />
             }
           />
         );

@@ -33,6 +33,10 @@ After the extension command show up, You can stop(`Ctrl-c`) the server safely.
 
 ![Intro](doc/configuration.png)
 
+It is recommended to set the Provider to "Custom..." and then manage your Providers using the "Setup Provider" command.
+
+![Setup Provider](doc/setup-provider.png)
+
 ## Main Feature
 
 - Selected text translation
@@ -59,10 +63,16 @@ After the extension command show up, You can stop(`Ctrl-c`) the server safely.
 
 ## Multiple LLM Provider Support
 
+![Multi LLM](doc/multi-llm.png)
+
 - [OpenAI ChatGPT](https://chat.openai.com/)
 - [Raycast AI](https://www.raycast.com/pro)
 - [Azure OpenAI Service](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service)
-- [PaLM 2](https://ai.google/discover/palm2)
+- [Gemini](https://gemini.google.com/)
+- [Claude](https://claude.ai/)
+- [Groq](https://groq.com/)
+- [Moonshot](https://moonshot.cn/)
+- [Ollama](https://ollama.com/)
 
 ### OpenAI ChatGPT
 
@@ -84,13 +94,25 @@ Requires [Raycast Pro](https://www.raycast.com/pro) to support.
 - API Key: [Azure](https://portal.azure.com/) -> Azure OpenAI -> Keys and Endpoint
 - API Model：No configuration required.
 
-### PaLM 2
+### Gemini
 
-- API Entrypoint: none
-- API Key: [MakerSuite->API Keys](Https:/ /makersuite.google.Com/app/API key)
-- API Model：No configuration required, the current text-bison
+- API Key: [Google AI Studio -> Get API Key](https://aistudio.google.com/app/apikey)
 
-Function is limited and only supports US IP addresses.
+### Claude
+
+- API Key: [Anthrop Console](https://console.anthropic.com/settings/keys)
+
+### Groq
+
+- API Key: [GroqCloud](https://console.groq.com/keys)
+
+### Moonshot
+
+- API Key: [Moonshot AI](https://platform.moonshot.cn/console/api-keys)
+
+### Ollama
+
+[OpenAI compatibility](https://ollama.com/blog/openai-compatibility)
 
 ## Others
 

@@ -8,8 +8,8 @@ import { filesize } from "filesize";
 import fetch from "node-fetch";
 
 import { Attachment } from "../api/issues";
+import { getJiraCredentials } from "../api/jiraCredentials";
 import { getUserAvatar } from "../helpers/avatars";
-import { getJiraCredentials } from "../helpers/withJiraCredentials";
 
 type IssueAttachmentsProps = {
   attachments: Attachment[];

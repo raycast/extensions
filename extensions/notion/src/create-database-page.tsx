@@ -1,7 +1,6 @@
-import type { LaunchProps } from "@raycast/api";
+import { withAccessToken } from "@raycast/utils";
 
-import { CreatePageForm, type CreatePageFormValues } from "./components/forms/CreatePageForm";
+import { CreatePageForm } from "./components/forms/CreatePageForm";
+import { notionService } from "./utils/notion/oauth";
 
-export default function Command(props: LaunchProps<{ launchContext?: CreatePageFormValues }>) {
-  return <CreatePageForm defaults={props.launchContext} />;
-}
+export default withAccessToken(notionService)(CreatePageForm);

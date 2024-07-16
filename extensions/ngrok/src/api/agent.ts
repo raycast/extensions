@@ -1,4 +1,5 @@
 import fetch, { FetchError } from "node-fetch";
+
 import { config } from "./config";
 import { LocalTunnel } from "./types";
 
@@ -11,20 +12,34 @@ export async function checkIsNgrokReady() {
   }
 }
 
-export async function createTunnel(port: number, domain: string | undefined, label: string | undefined) {
+export async function createTunnel(
+  port: number,
+  domain: string | undefined,
+  tag: string | undefined,
+  cloudEdgeLabels: string | undefined,
+) {
   try {
     const response = await fetch(`${config.localApi}/api/tunnels`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        name: `port_${port}_${Date.now()}`,
-        proto: "http",
-        addr: port,
-        domain,
-        metadata: label,
-      }),
+      body: JSON.stringify(
+        cloudEdgeLabels
+          ? {
+              name: `port_${port}_${Date.now()}`,
+              addr: port,
+              metadata: tag,
+              labels: [...cloudEdgeLabels.split(",")],
+            }
+          : {
+              name: `port_${port}_${Date.now()}`,
+              proto: "http",
+              addr: port,
+              domain,
+              metadata: tag,
+            },
+      ),
     });
 
     if (!response.ok) {

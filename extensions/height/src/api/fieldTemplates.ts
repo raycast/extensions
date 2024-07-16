@@ -1,8 +1,9 @@
 import fetch from "node-fetch";
-import { getOAuthToken } from "../components/withHeightAuth";
-import { FieldTemplateObject } from "../types/fieldTemplate";
-import { ApiErrorResponse, ApiResponse } from "../types/utils";
-import { ApiUrls } from "./helpers";
+
+import { ApiUrls } from "@/api/helpers";
+import { getOAuthToken } from "@/components/withHeightAuth";
+import { FieldTemplateObject } from "@/types/fieldTemplate";
+import { ApiErrorResponse, ApiResponse } from "@/types/utils";
 
 export async function getFieldTemplates() {
   const response = await fetch(ApiUrls.fieldTemplates, {

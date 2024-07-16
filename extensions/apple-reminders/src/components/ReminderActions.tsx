@@ -6,15 +6,17 @@ import {
   setPriorityStatus,
   toggleCompletionStatus,
   setDueDate as setReminderDueDate,
+  setLocation,
 } from "swift:../../swift/AppleReminders";
 
 import { CreateReminderForm } from "../create-reminder";
 import { getPriorityIcon } from "../helpers";
 import { Priority, Reminder, List as TList } from "../hooks/useData";
+import useLocations, { Location } from "../hooks/useLocations";
 import { ViewProps } from "../hooks/useViewReminders";
 
 import EditReminder from "./EditReminder";
-import SetLocationReminder from "./SetLocationReminder";
+import LocationForm from "./LocationForm";
 
 type ReminderActionsProps = {
   reminder: Reminder;
@@ -24,6 +26,8 @@ type ReminderActionsProps = {
 };
 
 export default function ReminderActions({ reminder, listId, viewProps, mutate }: ReminderActionsProps) {
+  const { locations } = useLocations();
+
   async function toggleReminder() {
     async function toggle() {
       await mutate(toggleCompletionStatus(reminder.id), {
@@ -136,6 +140,32 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
     }
   }
 
+  async function setReminderLocation(location: Location) {
+    try {
+      const radius = parseInt(location.radius);
+
+      await mutate(
+        setLocation({
+          reminderId: reminder.id,
+          address: location.address,
+          proximity: location.proximity,
+          radius,
+        }),
+      );
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Set location reminder",
+        message: location.name,
+      });
+    } catch (error) {
+      console.error(error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Unable to set location reminder",
+      });
+    }
+  }
+
   async function deleteReminderAction() {
     if (
       await confirmAlert({
@@ -212,12 +242,22 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
           onChange={setDueDate}
         />
 
-        <Action.Push
-          title="Set Location"
-          icon={Icon.Pin}
-          shortcut={{ modifiers: ["cmd"], key: "l" }}
-          target={<SetLocationReminder reminder={reminder} mutate={mutate} />}
-        />
+        <ActionPanel.Submenu title="Set Location" icon={Icon.Pin} shortcut={{ modifiers: ["cmd"], key: "l" }}>
+          {locations.map((location) => (
+            <Action
+              key={location.id}
+              title={location.name}
+              icon={location.icon}
+              onAction={() => setReminderLocation(location)}
+            />
+          ))}
+
+          <Action.Push
+            title="Custom Location"
+            icon={Icon.Pencil}
+            target={<LocationForm onSubmit={setReminderLocation} isCustomLocation />}
+          />
+        </ActionPanel.Submenu>
 
         <Action
           title="Delete Reminder"
@@ -298,7 +338,7 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
           title="Create Reminder"
           icon={Icon.Plus}
           shortcut={{ modifiers: ["cmd"], key: "n" }}
-          target={<CreateReminderForm listId={listId !== "all" ? listId : ""} />}
+          target={<CreateReminderForm listId={listId} />}
         />
       </ActionPanel.Section>
 

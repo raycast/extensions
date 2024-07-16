@@ -1,21 +1,23 @@
-import { Action, ActionPanel, Color, Icon, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
+import { getGitHubClient } from "../api/githubClient";
 import {
   MergeableState,
-  MyPullRequestsQuery,
   PullRequestDetailsFieldsFragment,
   PullRequestFieldsFragment,
   PullRequestMergeMethod,
   UserFieldsFragment,
 } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
+import { PR_SORT_TYPES_TO_QUERIES } from "../helpers/pull-request";
 import { getGitHubUser } from "../helpers/users";
-import { getGitHubClient } from "../helpers/withGithubClient";
+import { useMyPullRequests } from "../hooks/useMyPullRequests";
 
 import AddPullRequestReview from "./AddPullRequestReview";
 import PullRequestCommits from "./PullRequestCommits";
+import { SortAction, SortActionProps } from "./SortAction";
 
 export type PullRequest =
   | PullRequestFieldsFragment
@@ -25,7 +27,7 @@ export type PullRequest =
 type PullRequestActionsProps = {
   pullRequest: PullRequest;
   viewer?: UserFieldsFragment;
-  mutateList?: MutatePromise<MyPullRequestsQuery | undefined> | MutatePromise<PullRequestFieldsFragment[] | undefined>;
+  mutateList?: MutatePromise<PullRequestFieldsFragment[] | undefined> | ReturnType<typeof useMyPullRequests>["mutate"];
   mutateDetail?: MutatePromise<PullRequest>;
   children?: React.ReactNode;
 };
@@ -36,7 +38,9 @@ export default function PullRequestActions({
   mutateList,
   mutateDetail,
   children,
-}: PullRequestActionsProps) {
+  sortQuery,
+  setSortQuery,
+}: PullRequestActionsProps & SortActionProps) {
   const { github } = getGitHubClient();
 
   async function mutate() {
@@ -172,11 +176,18 @@ export default function PullRequestActions({
 
   const isAssignedToMe = pullRequest.assignees.nodes?.some((assignee) => assignee?.isViewer);
 
+  const { isOpenInBrowser } = getPreferenceValues<Preferences>();
+
+  const openInBrowserAction = <Action.OpenInBrowser url={pullRequest.permalink} />;
+
+  const [primaryAction, secondaryAction] = isOpenInBrowser
+    ? [openInBrowserAction, children]
+    : [children, openInBrowserAction];
+
   return (
     <ActionPanel title={`#${pullRequest.number} in ${pullRequest.repository.nameWithOwner}`}>
-      {children}
-
-      <Action.OpenInBrowser url={pullRequest.permalink} />
+      {primaryAction}
+      {secondaryAction}
 
       <Action.Push
         icon={Icon.Document}
@@ -197,7 +208,7 @@ export default function PullRequestActions({
           {pullRequest.repository.mergeCommitAllowed ? (
             <Action
               title="Create Merge Commit"
-              icon={{ source: "merge.svg", tintColor: Color.PrimaryText }}
+              icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
               shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
               onAction={() => mergePullRequest(PullRequestMergeMethod.Merge)}
             />
@@ -206,7 +217,7 @@ export default function PullRequestActions({
           {pullRequest.repository.squashMergeAllowed ? (
             <Action
               title="Squash and Merge"
-              icon={{ source: "merge.svg", tintColor: Color.PrimaryText }}
+              icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
               shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }}
               onAction={() => mergePullRequest(PullRequestMergeMethod.Squash)}
             />
@@ -215,7 +226,7 @@ export default function PullRequestActions({
           {pullRequest.repository.rebaseMergeAllowed ? (
             <Action
               title="Rebase and Merge"
-              icon={{ source: "merge.svg", tintColor: Color.PrimaryText }}
+              icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
               shortcut={{ modifiers: ["opt", "shift"], key: "enter" }}
               onAction={() => mergePullRequest(PullRequestMergeMethod.Rebase)}
             />
@@ -248,7 +259,7 @@ export default function PullRequestActions({
         {pullRequest.closed && !pullRequest.merged ? (
           <Action
             title="Reopen Pull Request"
-            icon={{ source: "pull-request.svg", tintColor: Color.PrimaryText }}
+            icon={{ source: "pull-request-open.svg", tintColor: Color.PrimaryText }}
             onAction={() => reopenPullRequest()}
           />
         ) : null}
@@ -298,6 +309,7 @@ export default function PullRequestActions({
       </ActionPanel.Section>
 
       <ActionPanel.Section>
+        <SortAction data={PR_SORT_TYPES_TO_QUERIES} {...{ sortQuery, setSortQuery }} />
         <Action
           icon={Icon.ArrowClockwise}
           title="Refresh"

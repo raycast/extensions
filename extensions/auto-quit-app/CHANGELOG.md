@@ -1,5 +1,22 @@
 # Auto Quit App Changelog
 
+## [Bug Fix] - 2024-06-20
+
+- Fix the bug that accidentally quit the safari web app
+
+## [Optimise Command] - 2024-06-11
+
+- Optimise the execution speed of the auto-quit application command
+- Fix the bug of not being able to quit the app automatically
+
+## [Fix Bug] - 2024-06-11
+
+- Fix the bug of not being able to quit the app automatically
+
+## [Fix Crash] - 2024-02-05
+
+- Fix potential crash issues
+
 ## [Support More Apps] - 2023-05-15
 
 - Now you can set any app to quit automatically

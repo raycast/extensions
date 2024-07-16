@@ -41,6 +41,12 @@ export default function Command() {
     filterList(contests.filter((item) => item.name.toLowerCase().includes(searchText.toLowerCase())));
   }, [searchText]);
 
+  function unixTimestampToISOString(unixTimestamp: string | number | Date) {
+    const date = new Date(unixTimestamp);
+    const formattedDate = date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+    return formattedDate;
+  }
+
   return (
     <List
       isLoading={isLoading}
@@ -79,7 +85,15 @@ export default function Command() {
                   title="View Problems"
                 />
               ) : (
-                <></>
+                <Action.OpenInBrowser
+                  icon={Icon.AppWindowList}
+                  title="Add to Calendar"
+                  url={`https://calendar.google.com/calendar/u/0/r/eventedit?text=${
+                    contest.name
+                  }&dates=${unixTimestampToISOString(contest.startTimeSeconds * 1000)}/${unixTimestampToISOString(
+                    (contest.startTimeSeconds + contest.durationSeconds) * 1000,
+                  )}`}
+                />
               )}
               <Action.OpenInBrowser
                 url={`${CODEFORCES_BASE}${contest.phase === "BEFORE" ? "contests" : `contest/${contest.id}`}`}

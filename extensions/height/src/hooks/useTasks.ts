@@ -2,9 +2,10 @@ import { getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { orderBy } from "lodash-es";
 import { useMemo } from "react";
-import { ApiUrls } from "../api/helpers";
-import { getTask } from "../api/task";
-import { Preferences, CachedPromiseOptionsType } from "../types/utils";
+
+import { ApiUrls } from "@/api/helpers";
+import { getTask } from "@/api/task";
+import { Preferences, CachedPromiseOptionsType } from "@/types/utils";
 
 type Props = {
   listId?: string;

@@ -9,7 +9,16 @@ type Args = {
 };
 
 export default async function Command(props: Args) {
-  const { name, description } = props.arguments;
+  let { name, description } = props.arguments;
+
+  name = name?.trim() ?? "";
+  description = description?.trim();
+
+  if (name.length === 0) {
+    await showFailureToast("Project name cannot be empty.", { title: "Invalid project name" });
+    return;
+  }
+
   if (await LocalStorage.getItem(name)) {
     showFailureToast(`Project "${name}" already exists.`);
     return;

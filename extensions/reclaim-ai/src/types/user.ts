@@ -86,6 +86,7 @@ export interface UserFeatures {
       alwaysPrivate: boolean;
       minChunkSize: number;
       maxChunkSize: number;
+      onDeck: boolean;
     };
     autoWorkflowSettings: {
       category: string;

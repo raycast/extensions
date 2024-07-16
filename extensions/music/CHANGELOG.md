@@ -1,5 +1,9 @@
 # Apple Music Changelog
 
+## [New Command] - 2024-02-10
+
+- Added a new command that removes the currently playing track from the current playlist and skips to the next track. 
+
 ## [Update] - 2023-10-12
 
 - Added macos version check in the "favorite" command in order to make it compatible with version older than Sonoma.

@@ -1,5 +1,6 @@
 import { Color } from "@raycast/api";
-import { ListColor, ListHue, ListObject } from "../types/list";
+
+import { ListColor, ListHue, ListObject } from "@/types/list";
 
 export const ListIcons = [
   {

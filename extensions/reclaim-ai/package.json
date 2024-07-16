@@ -76,12 +76,6 @@
       "mode": "view"
     },
     {
-      "name": "join-meeting",
-      "title": "Join Meeting",
-      "description": "Quickly join your current meeting",
-      "mode": "no-view"
-    },
-    {
       "name": "my-calendar",
       "title": "My Calendar",
       "description": "View & manage your upcoming calendar events for the day",

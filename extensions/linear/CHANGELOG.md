@@ -1,5 +1,77 @@
 # Linear Changelog
 
+## [Fixes] - 2024-07-08
+
+- [#10856](https://github.com/raycast/extensions/issues/10856): Typeahead search for teams while creating/editing issues and in active cycles command. Typeahead is only triggered if no. of teams is > 50.
+- [#8704](https://github.com/raycast/extensions/issues/8704): Typeahead search for users/assignees/leads in various actions and commands, getting rid of missing assignees issue. Typeahead is only triggered if no. of users is > 50.
+- [#13194](https://github.com/raycast/extensions/issues/13194): Feature to add links while creating issues and ad-hoc action to add attachments and links while viewing issues.
+- The order of teams in "Create issue" respects the order of teams in the Linear native application.
+- When using "Create issue for myself" without specifying a preferred team in settings, use first team from the sorted array of teams.
+
+## [Improved Notifications] - 2024-06-14
+
+- Added support for all types of notifications, ensuring that "Unknown Notification" no longer appear.
+
+## [Project Improvements] - 2024-06-11
+
+- Added support for all the latest Linear icons.
+- Introduced a new "See Project Updates" action.
+
+## [Action Shortcut] - 2024-06-10
+
+- Added a new shortcut in the Search Projects command: Press Cmd + Enter to open a project in Linear.
+
+## [Improvements] - 2024-05-30
+
+- Added preference to hide redundant (Done, Canceled, Duplicate) issues across all searches
+
+## [Bug Fixes] - 2024-05-25
+
+- Fixed milestones to be updated with "Create Issue" command
+
+## [Improvements] - 2024-05-14
+
+- Notifications now support Projects (Updates, comments, reactions, added as member), Document Mentions and Bots (GitHub and GitLab)
+- Updated Project Icons
+
+## [Added two new actions] - 2024-05-10
+
+- Added two new toast actions: `Copy Issue ID as Link` and `Copy Issue Title as Link`
+
+## [Fix missing icons] - 2024-05-01
+
+- Update missing Linear icons
+
+## [Improvements] - 2024-04-29
+
+- Add pagination when searching issues
+- Rename "Assigned Issues" to "My Issues"
+
+## [New icons] - 2024-04-26
+
+- Use new Linear icons
+
+## [Fix Creating issue with milestone] - 2024-04-23
+
+- Fix defining `milestoneId` in payload.
+
+## [Enhanced Notifications] - 2024-03-12
+
+- Notifications now include links to comments, project updates, and projects, making it easier to navigate directly to the relevant content in Linear.
+- You can now copy the URL of a notification's related item directly from the notification panel.
+
+## [Improve Notifications search] - 2024-03-01
+
+- It's possible to search your notifications by issue identifiers, issue titles, or usernames.
+
+## [Fix images in issues] - 2024-02-02
+
+- Images are now properly loaded when looking at the details of an issue.
+
+## [Use OAuth utils] - 2024-02-01
+
+- Use new OAuth utils
+
 ## [Fix projects search not working] - 2024-01-30
 
 - The projects search was not working in case there were no roadmaps available. This is now fixed.

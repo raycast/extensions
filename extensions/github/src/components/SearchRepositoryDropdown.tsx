@@ -1,4 +1,4 @@
-import { Icon, List, Image } from "@raycast/api";
+import { Icon, Image, List } from "@raycast/api";
 
 import { useViewer } from "../hooks/useViewer";
 

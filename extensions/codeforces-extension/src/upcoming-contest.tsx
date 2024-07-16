@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { MenuBarExtra, open } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { CODEFORCES_API_BASE, CODEFORCES_BASE } from "./constants";
+import { CODEFORCES_API_BASE } from "./constants";
 import { useEffect, useState } from "react";
 
 export default function Command() {
@@ -32,6 +32,12 @@ export default function Command() {
     }
   }, [isLoading]);
 
+  function unixTimestampToISOString(unixTimestamp: string | number | Date) {
+    const date = new Date(unixTimestamp);
+    const formattedDate = date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+    return formattedDate;
+  }
+
   return (
     <MenuBarExtra
       isLoading
@@ -45,8 +51,16 @@ export default function Command() {
           .map((item) => (
             <MenuBarExtra.Item
               key={item.id}
-              title={item.name}
-              onAction={() => open(`${CODEFORCES_BASE}contests`)}
+              title={`${item.name.slice(0, 40)}${item.name.length > 40 ? "..." : ""}`}
+              onAction={() =>
+                open(
+                  `https://calendar.google.com/calendar/u/0/r/eventedit?text=${
+                    item.name
+                  }&dates=${unixTimestampToISOString(item.startTimeSeconds * 1000)}/${unixTimestampToISOString(
+                    (item.startTimeSeconds + item.durationSeconds) * 1000,
+                  )}`,
+                )
+              }
               alternate={
                 <MenuBarExtra.Item
                   title={`${new Date(item.startTimeSeconds * 1000).toLocaleTimeString([], {

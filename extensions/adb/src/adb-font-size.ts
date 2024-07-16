@@ -1,13 +1,19 @@
 import { LaunchProps, showHUD } from "@raycast/api";
 import { execSync } from "child_process";
-import checkAdbExists from "./utils";
+import { checkAdbDeviceExists } from "./utils";
 
 interface AdbFontSizeArguments {
   factor: string;
 }
 
 export default async function fontSize(props: LaunchProps<{ arguments: AdbFontSizeArguments }>) {
-  const adbDir = await checkAdbExists();
+  let adbDir: string;
+  try {
+    adbDir = await checkAdbDeviceExists();
+  } catch (e) {
+    await showHUD(`${e}`);
+    return;
+  }
   const factor = props.arguments.factor;
   await showHUD(`🔎 Setting font size to ${factor}`);
   execSync(`${adbDir} shell settings put system font_scale ${factor}`);

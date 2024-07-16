@@ -9,13 +9,14 @@ import {
 } from '@raycast/api'
 import { useFetch, useCachedState } from '@raycast/utils'
 import { useState, useEffect } from 'react'
-import { PackageListItem, Preferences } from './PackagListItem'
+import type { Preferences } from './components/PackagListItem'
+import { PackageListItem } from './components/PackagListItem'
 import { addToHistory, getHistory } from './utils/history-storage'
-import { HistoryListItem } from './HistoryListItem'
+import { HistoryListItem } from './components/HistoryListItem'
 import { useDebouncedCallback } from 'use-debounce'
-import type { NpmFetchResponse } from './npmResponse.model'
+import type { NpmFetchResponse } from './model/npmResponse.model'
 import type { HistoryItem } from './utils/history-storage'
-import { useFavorites } from './useFavorites'
+import { useFavorites } from './hooks/useFavorites'
 
 const API_PATH = 'https://www.npmjs.com/search/suggestions?q='
 export default function PackageList() {

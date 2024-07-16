@@ -72,13 +72,30 @@ const ActiveTaskItem = ({ activeTask, setActiveTask, setSelectedItemId }: Active
     }
   }
 
+  // ellipse title & subtitle if too long to not overlap the accessories
+  let truncated = false;
+  let title: string = activeTask.display_name ? activeTask.display_name : activeTask.name;
+  let subtitle: string = activeTask.timer_info ? activeTask.timer_info.note : "";
+  const subtitleUnchanged: string = subtitle;
+  const titleUnchanged: string = title;
+  const maxLength = 75;
+
+  if ((title + subtitle).length > maxLength) {
+    truncated = true;
+    if (title.includes("/")) {
+      const splitTitle: string[] = title.split("/");
+      title = `${splitTitle[0]}/ ... / ${splitTitle[splitTitle.length - 1]}`;
+    }
+    subtitle = subtitle.substring(0, maxLength - title.length) + "...";
+  }
+
   return (
     <List.Item
       key={activeTask.task_id}
       id={activeTask.task_id.toString()}
       icon={{ source: Icon.Stop, tintColor: activeTask.color }}
-      title={activeTask.display_name ? activeTask.display_name : activeTask.name}
-      subtitle={activeTask.timer_info ? activeTask.timer_info.note : ""}
+      title={{ value: title, tooltip: truncated ? titleUnchanged : null }}
+      subtitle={{ value: subtitle, tooltip: truncated ? subtitleUnchanged : null }}
       accessories={[
         {
           icon: { source: Icon.CommandSymbol, tintColor: Color.Red },

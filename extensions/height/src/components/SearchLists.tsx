@@ -1,10 +1,11 @@
 import { List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import useLists from "../hooks/useLists";
-import { ListObject } from "../types/list";
-import { getTintColorFromHue, ListColors, ListTypes } from "../utils/list";
-import ActionsList from "./ActionsList";
-import useWorkspace from "../hooks/useWorkspace";
+
+import ActionsList from "@/components/ActionsList";
+import useLists from "@/hooks/useLists";
+import useWorkspace from "@/hooks/useWorkspace";
+import { ListObject } from "@/types/list";
+import { getTintColorFromHue, ListColors, ListTypes } from "@/utils/list";
 
 export default function SearchLists() {
   const [searchText, setSearchText] = useState<string>("");

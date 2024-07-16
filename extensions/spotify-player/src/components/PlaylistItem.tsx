@@ -6,15 +6,17 @@ import { PlaylistActionPanel } from "./PlaylistActionPanel";
 type PlaylistItemProps = {
   type: "grid" | "list";
   playlist: SimplifiedPlaylistObject;
+  actions?: JSX.Element;
 };
 
-export default function PlaylistItem({ type, playlist }: PlaylistItemProps) {
+export default function PlaylistItem({ type, playlist, actions }: PlaylistItemProps) {
   const title = playlist.name as string;
   const subtitle = playlist?.owner?.display_name ?? undefined;
   const imageURL = playlist?.images?.[playlist.images.length - 1]?.url;
   const icon: Image.ImageLike = {
     source: imageURL ?? Icon.BlankDocument,
   };
+  actions = actions ?? <PlaylistActionPanel title={title} playlist={playlist} />;
 
   return (
     <ListOrGridItem
@@ -24,7 +26,7 @@ export default function PlaylistItem({ type, playlist }: PlaylistItemProps) {
       subtitle={subtitle}
       content={icon}
       accessories={[{ text: `${playlist?.tracks?.total} songs` }]}
-      actions={<PlaylistActionPanel title={title} playlist={playlist} />}
+      actions={actions}
     />
   );
 }

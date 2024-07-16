@@ -1,16 +1,17 @@
 import { getPreferenceValues, List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { trim } from "lodash";
 import { useState } from "react";
 
+import { getGitHubClient } from "./api/githubClient";
 import { getBoundedPreferenceNumber } from "./components/Menu";
 import PullRequestListEmptyView from "./components/PullRequestListEmptyView";
 import PullRequestListItem from "./components/PullRequestListItem";
 import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
-import View from "./components/View";
 import { PullRequestFieldsFragment } from "./generated/graphql";
 import { pluralize } from "./helpers";
-import { getGitHubClient } from "./helpers/withGithubClient";
+import { PR_DEFAULT_SORT_QUERY } from "./helpers/pull-request";
+import { withGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
 
 function SearchPullRequests() {
@@ -20,6 +21,9 @@ function SearchPullRequests() {
 
   const { defaultSearchTerms } = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState(trim(defaultSearchTerms) + " ");
+  const [sortQuery, setSortQuery] = useCachedState<string>("sort-query", PR_DEFAULT_SORT_QUERY, {
+    cacheNamespace: "github-search-pr",
+  });
   const [searchFilter, setSearchFilter] = useState<string | null>(null);
 
   const {
@@ -27,15 +31,15 @@ function SearchPullRequests() {
     isLoading,
     mutate: mutateList,
   } = useCachedPromise(
-    async (searchText, searchFilter) => {
+    async (searchText, searchFilter, sortTxt) => {
       const result = await github.searchPullRequests({
         numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }),
-        query: `is:pr archived:false ${searchFilter} ${searchText}`,
+        query: `is:pr archived:false ${sortTxt} ${searchFilter} ${searchText}`,
       });
 
       return result.search.edges?.map((edge) => edge?.node as PullRequestFieldsFragment);
     },
-    [searchText, searchFilter],
+    [searchText, searchFilter, sortQuery],
     { keepPreviousData: true },
   );
 
@@ -51,15 +55,13 @@ function SearchPullRequests() {
       {data ? (
         <List.Section
           title={searchText ? "Search Results" : "Created Recently"}
-          subtitle={pluralize(data.length, "Pull Request", { withNumber: true })}
+          subtitle={pluralize(data.length, "pull request", { withNumber: true })}
         >
           {data.map((pullRequest) => {
             return (
               <PullRequestListItem
                 key={pullRequest.id}
-                pullRequest={pullRequest}
-                viewer={viewer}
-                mutateList={mutateList}
+                {...{ pullRequest, viewer, mutateList, sortQuery, setSortQuery }}
               />
             );
           })}
@@ -71,10 +73,4 @@ function SearchPullRequests() {
   );
 }
 
-export default function Command() {
-  return (
-    <View>
-      <SearchPullRequests />
-    </View>
-  );
-}
+export default withGitHubClient(SearchPullRequests);

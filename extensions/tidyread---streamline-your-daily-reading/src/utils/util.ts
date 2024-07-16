@@ -25,7 +25,7 @@ export function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<
     timeoutHandle = setTimeout(() => {
       reject(
         new Error(
-          `Operation timed out after ${timeoutMs} ms, you could try to set \`Http Proxy\` in \`Extensions Settings Page\` and try again`,
+          `Operation timed out after ${timeoutMs} ms, you could try to set "Http Proxy" in "Extensions Settings Page" and try again`,
         ),
       );
     }, timeoutMs);
@@ -126,4 +126,41 @@ export function reflect<T, P>(
   return promise
     .then((value) => ({ payload, status: "fulfilled" as const, value }))
     .catch((reason) => Promise.reject({ payload, status: "rejected", reason }));
+}
+
+export function extractDomain(urlString: string) {
+  const parsedUrl = new URL(urlString);
+  const hostname = parsedUrl.hostname; // 获取完整主机名，例如 "www.baidu.com"
+
+  // 分割主机名并提取域名部分
+  const parts = hostname.split(".");
+  const domain = parts.length > 2 ? parts[parts.length - 2] : parts[0];
+
+  return domain;
+}
+
+/**
+ * 执行一个函数并在出错时返回null。跟lodash attempt类似，不过失败是返回null
+ *
+ * @param fn 要执行的函数。
+ * @returns 函数的返回值或null（如果执行失败）。
+ */
+export const silent = <T>(fn: () => T): T | null => {
+  try {
+    return fn();
+  } catch (error) {
+    return null;
+  }
+};
+
+/**
+ * 修复 Error: Cannot parse render tree JSON: Missing low code point in surrogate pair
+ */
+export function fixSurrogatePairs(str: string): string {
+  // 使用正则表达式查找孤立的高代理项（D800-DFFF之间但后面没有低代理项）
+  // 或孤立的低代理项（后面没有高代理项）
+  return str.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|([^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/g, (_, lowSurrogate) => {
+    // 如果找到孤立的低代理项，则将其移除，否则替换高代理项为�（代表无法解析的字符）
+    return lowSurrogate ? "" : "�";
+  });
 }

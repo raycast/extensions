@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "terminalfinder",
   "title": "Terminal Finder",
-  "description": "Open currently selected Finder (or Path Finder) window in Terminal (or iTerm2, Warp) and vice versa",
+  "description": "Open currently selected Finder (or Path Finder) window in Terminal (or iTerm2, Warp, WezTerm) and vice versa",
   "icon": "command-icon.png",
   "author": "yedongze",
+  "contributors": [
+    "Ianvs"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -24,6 +27,13 @@
     {
       "name": "clipboardToWarp",
       "title": "Clipboard → Warp",
+      "subtitle": "Open Path",
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view"
+    },
+    {
+      "name": "clipboardToWez",
+      "title": "Clipboard → WezTerm",
       "subtitle": "Open Path",
       "description": "Open current Finder directory in Terminal",
       "mode": "no-view"
@@ -50,6 +60,13 @@
       "mode": "no-view"
     },
     {
+      "name": "finderToWez",
+      "title": "Finder → WezTerm",
+      "subtitle": "Open Path",
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view"
+    },
+    {
       "name": "iTermToFinder",
       "title": "iTerm → Finder",
       "subtitle": "Open Path",
@@ -66,6 +83,13 @@
     {
       "name": "warpToFinder",
       "title": "Warp → Finder",
+      "subtitle": "Open Path",
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view"
+    },
+    {
+      "name": "wezToFinder",
+      "title": "WezTerm → Finder",
       "subtitle": "Open Path",
       "description": "Open current Finder directory in Terminal",
       "mode": "no-view"

@@ -43,7 +43,6 @@ const StatusDropdown = (props: StatusDropdownProps) => {
   );
 };
 
-// Main Function
 function TaskList() {
   const [selectedStatus, setSelectedStatus] = useState<DropdownStatus | undefined>();
   const { currentUser } = useUser();
@@ -57,85 +56,63 @@ function TaskList() {
   const { useFetchTasks, addTime, updateTask, doneTask, incompleteTask } = useTask();
 
   const { data: tasksData, isLoading } = useFetchTasks();
-  const tasks = useMemo(() => tasksData ?? [], [tasksData]);
-
-  const handleUpdatePriority = async (task: Task, priority: string) => {
-    await showToast(Toast.Style.Animated, "Updating priority...");
-    try {
-      task.priority = priority;
-      const updatedPriority = await updateTask(task);
-      if (updatedPriority) {
-        showToast(Toast.Style.Success, `Updated priority successfully!`);
-      } else {
-        throw new Error("Update task priority failed.");
-      }
-    } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error while updating priority", message: String(error) });
-    }
-  };
+  const [tasks, setTasks] = useState<Task[]>(tasksData ?? []);
 
   // Add time to task function
   const handleAddTime = async (task: Task, time: number) => {
     await showToast(Toast.Style.Animated, "Adding time...");
     try {
-      const updatedTime = await addTime(task, time);
-      if (updatedTime) {
-        showToast(Toast.Style.Success, `Added ${formatStrDuration(time + "m")} to "${task.title}" successfully!`);
-      } else {
-        throw new Error("Update time request failed.");
-      }
+      await addTime(task, time);
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: "Error while updating time", message: String(error) });
+      return;
     }
+    // optimistic update
+    const updatedTime = task.timeChunksRemaining + time / TIME_BLOCK_IN_MINUTES;
+    setTasks((prevTasks) => prevTasks.map((t) => (t.id === task.id ? { ...t, timeChunksRemaining: updatedTime } : t)));
+    showToast(Toast.Style.Success, `Added ${formatStrDuration(time + "m")} to "${task.title}" successfully!`);
   };
 
   // Set task to done
   const handleDoneTask = async (task: Task) => {
     await showToast(Toast.Style.Animated, "Updating task...");
     try {
-      const setTaskDone = await doneTask(task);
-      if (setTaskDone) {
-        showToast(Toast.Style.Success, `Task '${task.title}' marked done. Nice work!`);
-      } else {
-        throw new Error("Update task request failed.");
-      }
+      await doneTask(task);
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: "Error while updating task", message: String(error) });
+      return;
     }
+    // optimistic update
+    setTasks((prevTasks) => prevTasks.map((t) => (t.id === task.id ? { ...t, status: "ARCHIVED" } : t)));
+    showToast(Toast.Style.Success, `Task '${task.title}' marked done. Nice work!`);
   };
 
   // Set task to incomplete
   const handleIncompleteTask = async (task: Task) => {
     await showToast(Toast.Style.Animated, "Updating task...");
     try {
-      const setTaskDone = await incompleteTask(task);
-      if (setTaskDone) {
-        showToast(Toast.Style.Success, `Task '${task.title}' marked incomplete!`);
-      } else {
-        throw new Error("Update task request failed.");
-      }
+      await incompleteTask(task);
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: "Error while updating task", message: String(error) });
+      return;
     }
+    // optimistic update
+    setTasks((prevTasks) => prevTasks.map((t) => (t.id === task.id ? { ...t, status: "NEW" } : t)));
+    showToast(Toast.Style.Success, `Task '${task.title}' marked incomplete!`);
   };
 
-  // Update due date
-  const handleUpdateTask = async (task: Task) => {
-    await showToast(Toast.Style.Animated, "Updating due date...");
+  // Update tasks
+  const handleUpdateTask = async (task: Partial<Task>, payload: Partial<Task>) => {
+    await showToast(Toast.Style.Animated, `Updating '${task.title}'...`);
     try {
-      const updatedTask = await updateTask(task);
-      if (updatedTask) {
-        showToast(Toast.Style.Success, `Updated due date for "${task.title}" successfully!`);
-      } else {
-        throw new Error("Update due date request failed.");
-      }
+      await updateTask(task, payload);
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error while updating due date",
-        message: String(error),
-      });
+      showToast({ style: Toast.Style.Failure, title: `Error while updating '${task.title}'!`, message: String(error) });
+      return;
     }
+    // optimistic update
+    setTasks((prevTasks) => prevTasks.map((t) => (t.id === task.id ? { ...t, ...payload } : t)));
+    showToast(Toast.Style.Success, `Updated '${task.title}'!`);
   };
 
   // Filter tasks by status
@@ -163,23 +140,25 @@ function TaskList() {
   const getListAccessories = (task: Task) => {
     const list = [];
 
+    if (task.status !== "ARCHIVED" && task.atRisk) {
+      list.push({
+        tag: {
+          value: "",
+          color: Color.Red,
+        },
+        icon: Icon.ExclamationMark,
+        tooltip: "Task at risk!",
+      });
+    }
+
     if (defaults.schedulerVersion > 14) {
       if (task.onDeck) {
         list.push({
           tag: {
             value: "",
-            color: Color.Green,
+            color: Color.Yellow,
           },
-          tooltip: "Remove from Up Next",
-          icon: Icon.ArrowNe,
-        });
-      } else {
-        list.push({
-          tag: {
-            value: "",
-            color: Color.SecondaryText,
-          },
-          tooltip: "Send to Up Next",
+          tooltip: "Task is Up Next",
           icon: Icon.ArrowNe,
         });
       }
@@ -298,8 +277,8 @@ function TaskList() {
                                 icon={{ source: Icon.FullSignal }}
                                 title="Critical"
                                 onAction={() => {
-                                  const priority = "P1";
-                                  handleUpdatePriority(task, priority);
+                                  const payload = { priority: "P1" };
+                                  handleUpdateTask(task, payload);
                                 }}
                               />
 
@@ -307,8 +286,8 @@ function TaskList() {
                                 icon={{ source: Icon.Signal3 }}
                                 title="High Priority"
                                 onAction={() => {
-                                  const priority = "P2";
-                                  handleUpdatePriority(task, priority);
+                                  const payload = { priority: "P2" };
+                                  handleUpdateTask(task, payload);
                                 }}
                               />
 
@@ -316,16 +295,16 @@ function TaskList() {
                                 icon={{ source: Icon.Signal2 }}
                                 title="Medium Priority"
                                 onAction={() => {
-                                  const priority = "P3";
-                                  handleUpdatePriority(task, priority);
+                                  const payload = { priority: "P3" };
+                                  handleUpdateTask(task, payload);
                                 }}
                               />
                               <Action
                                 icon={{ source: Icon.Signal1 }}
                                 title="Low Priority"
                                 onAction={() => {
-                                  const priority = "P1";
-                                  handleUpdatePriority(task, priority);
+                                  const payload = { priority: "P4" };
+                                  handleUpdateTask(task, payload);
                                 }}
                               />
                             </ActionPanel.Submenu>
@@ -382,12 +361,32 @@ function TaskList() {
                             shortcut={{ modifiers: ["cmd"], key: "d" }}
                             onChange={(date: Date | null) => {
                               if (date) {
-                                handleUpdateTask({ ...task, due: date.toISOString() });
+                                const payload = { due: date.toISOString() };
+                                handleUpdateTask(task, payload);
                               }
                             }}
                           />
+                          {task.onDeck ? (
+                            <Action
+                              icon={{ source: Icon.ArrowDown, tintColor: Color.Red }}
+                              title="Remove From Up Next"
+                              onAction={() => {
+                                const payload = { onDeck: false };
+                                handleUpdateTask(task, payload);
+                              }}
+                            />
+                          ) : (
+                            <Action
+                              icon={{ source: Icon.ArrowNe, tintColor: Color.Yellow }}
+                              title="Send to Up Next"
+                              onAction={() => {
+                                const payload = { onDeck: true };
+                                handleUpdateTask(task, payload);
+                              }}
+                            />
+                          )}
                           <Action
-                            icon={Icon.Checkmark}
+                            icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
                             title="Mark as Done"
                             onAction={() => {
                               handleDoneTask(task);

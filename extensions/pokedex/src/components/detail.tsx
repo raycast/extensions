@@ -60,7 +60,7 @@ function random(lower: number, upper: number) {
 export default function PokemonDetail(props: { id?: number }) {
   const [loading, setLoading] = useState<boolean>(false);
   const [pokemon, setPokemon] = useState<PokemonV2Pokemon | undefined>(
-    undefined
+    undefined,
   );
 
   useEffect(() => {
@@ -84,7 +84,7 @@ export default function PokemonDetail(props: { id?: number }) {
         prev[curr.language_id] = curr;
         return prev;
       },
-      {}
+      {},
     );
   }, [pokemon]);
 
@@ -100,12 +100,12 @@ export default function PokemonDetail(props: { id?: number }) {
     if (!first) return [];
 
     const seconds = species.filter(
-      (s) => s.evolves_from_species_id === first.id
+      (s) => s.evolves_from_species_id === first.id,
     );
 
     return seconds.map((second) => {
       const third = species.find(
-        (s) => s.evolves_from_species_id === second.id
+        (s) => s.evolves_from_species_id === second.id,
       );
 
       return third ? [first, second, third] : [first, second];
@@ -193,7 +193,7 @@ export default function PokemonDetail(props: { id?: number }) {
       let pokemonForms = p.pokemon_v2_pokemonforms;
       if (varieties.length) {
         pokemonForms = pokemonForms.filter((f) =>
-          varieties.includes(f.form_name)
+          varieties.includes(f.form_name),
         );
       }
       pokemonForms.forEach((f, fIdx) => {
@@ -221,7 +221,9 @@ export default function PokemonDetail(props: { id?: number }) {
 
     const data = [
       {
-        h1: `#${pkmNumber} ${nameByLang[language].name}`,
+        h1: `#${pokemon.id.toString().padStart(4, "0")} ${
+          nameByLang[language].name
+        }`,
       },
       {
         p: nameByLang["2"]
@@ -258,7 +260,7 @@ export default function PokemonDetail(props: { id?: number }) {
         p: `_Base friendship:_ ${pokemon_v2_pokemonspecy.base_happiness}`,
       },
       {
-        p: `_Base exp.:_ ${pokemon.base_experience}`,
+        p: `_Base experience:_ ${pokemon.base_experience || ""}`,
       },
       {
         p: `_Growth rate:_ ${
@@ -273,7 +275,7 @@ export default function PokemonDetail(props: { id?: number }) {
           .map(
             (g) =>
               g.pokemon_v2_egggroup.pokemon_v2_egggroupnames[0]?.name ||
-              g.pokemon_v2_egggroup.name
+              g.pokemon_v2_egggroup.name,
           )
           .join(", ")}`,
       },
@@ -326,8 +328,8 @@ export default function PokemonDetail(props: { id?: number }) {
                   .padStart(3, "0")}.png)`;
               })
               .join(" "),
-          })
-        )
+          }),
+        ),
       );
     }
 

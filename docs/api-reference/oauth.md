@@ -213,9 +213,9 @@ const authRequest = await client.authorizationRequest({
 
 #### Parameters
 
-| Name    | Type                                                                           | Required | Description                                           |
-| :------ | :----------------------------------------------------------------------------- | :------- | :---------------------------------------------------- |
-| options | <code>[AuthorizationRequestOptions](#oauth.authorizationrequestoptions)</code> | Yes      | The options used to create the authorization request. |
+| Name                                      | Type                                                                           | Description                                           |
+| :---------------------------------------- | :----------------------------------------------------------------------------- | :---------------------------------------------------- |
+| options<mark style="color:red;">\*</mark> | <code>[AuthorizationRequestOptions](#oauth.authorizationrequestoptions)</code> | The options used to create the authorization request. |
 
 #### Return
 
@@ -239,9 +239,9 @@ const { authorizationCode } = await client.authorize(authRequest);
 
 #### Parameters
 
-| Name    | Type                                                                                                                    | Required | Description                    |
-| :------ | :---------------------------------------------------------------------------------------------------------------------- | :------- | :----------------------------- |
-| options | <code>[AuthorizationRequest](#oauth.authorizationrequest) \| [AuthorizationOptions](#oauth.authorizationoptions)</code> | Yes      | The options used to authorize. |
+| Name                                      | Type                                                                                                                    | Description                    |
+| :---------------------------------------- | :---------------------------------------------------------------------------------------------------------------------- | :----------------------------- |
+| options<mark style="color:red;">\*</mark> | <code>[AuthorizationRequest](#oauth.authorizationrequest) \| [AuthorizationOptions](#oauth.authorizationoptions)</code> | The options used to authorize. |
 
 #### Return
 
@@ -270,9 +270,9 @@ await client.setTokens(tokenResponse);
 
 #### Parameters
 
-| Name    | Type                                                                                            | Required | Description                              |
-| :------ | :---------------------------------------------------------------------------------------------- | :------- | :--------------------------------------- |
-| options | <code>[TokenSetOptions](#oauth.tokensetoptions) \| [TokenResponse](#oauth.tokenresponse)</code> | Yes      | The options used to store the token set. |
+| Name                                      | Type                                                                                            | Description                              |
+| :---------------------------------------- | :---------------------------------------------------------------------------------------------- | :--------------------------------------- |
+| options<mark style="color:red;">\*</mark> | <code>[TokenSetOptions](#oauth.tokensetoptions) \| [TokenResponse](#oauth.tokenresponse)</code> | The options used to store the token set. |
 
 #### Return
 

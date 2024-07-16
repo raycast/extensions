@@ -1,10 +1,9 @@
-import { useCachedPromise } from "@raycast/utils";
-import { getMe } from "../api";
+import { getMe } from "@/api";
+import { useSafeCachedPromise } from "@/hooks/useSafeCachedPromise";
 
-export function useMe(initialExecute = true) {
-  const { data, error, isLoading, revalidate } = useCachedPromise(getMe, [], {
+export function useMe() {
+  const { data, error, isLoading, revalidate } = useSafeCachedPromise(getMe, [], {
     initialData: null,
-    execute: initialExecute,
   });
   return {
     me: data,

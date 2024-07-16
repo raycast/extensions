@@ -1,5 +1,8 @@
 # HubSpot Changelog
 
+## [Added new commands] - 2024-02-02
+- Search Companies
+
 ## [Fix] - 2023-10-03
 
 - Fixed a bug that caused the extension to crash.

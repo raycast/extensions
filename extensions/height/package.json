@@ -80,21 +80,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.64.2",
-    "@raycast/utils": "^1.10.1",
-    "date-fns": "^2.30.0",
+    "@raycast/api": "^1.67.1",
+    "@raycast/utils": "^1.12.4",
+    "date-fns": "^3.3.1",
     "lodash-es": "^4.17.21",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/lodash-es": "^4.17.12",
-    "@types/node": "20.10.4",
-    "@types/react": "18.2.45",
-    "@typescript-eslint/eslint-plugin": "^6.14.0",
-    "@typescript-eslint/parser": "^6.14.0",
-    "eslint": "^8.55.0",
+    "@types/node": "20.11.19",
+    "@types/react": "18.2.55",
+    "@typescript-eslint/eslint-plugin": "^7.0.1",
+    "@typescript-eslint/parser": "^7.0.1",
+    "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.1.1",
+    "prettier": "^3.2.5",
     "typescript": "^5.3.3"
   },
   "scripts": {

@@ -101,9 +101,9 @@ const AddEntryCommand = ({ draftValues }: LaunchProps) => {
       />
       <Form.DatePicker
         id="date"
-        title="Date"
-        info="You can add entries to any day. Defaults to today."
-        type={Form.DatePicker.Type.Date}
+        title="Timestamp"
+        info="Set the timestamp on this entry. Defaults to now."
+        type={Form.DatePicker.Type.DateTime}
         value={date}
         onChange={setDate}
       />

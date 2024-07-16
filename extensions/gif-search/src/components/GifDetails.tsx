@@ -5,7 +5,13 @@ import { GifActions } from "./GifActions";
 import { IGif, renderGifMarkdownDetails } from "../models/gif";
 import { getServiceTitle, ServiceName } from "../preferences";
 
-export function GifDetails(props: { item: IGif; service?: ServiceName }) {
+type GifDetailsProps = {
+  item: IGif;
+  service?: ServiceName;
+  mutate: () => Promise<void>;
+};
+
+export function GifDetails(props: GifDetailsProps) {
   const { title, metadata, attribution } = props.item;
 
   const tags = [];
@@ -15,7 +21,7 @@ export function GifDetails(props: { item: IGif; service?: ServiceName }) {
         {metadata.tags.map((tag, index) => (
           <Detail.Metadata.TagList.Item text={tag} key={index} />
         ))}
-      </Detail.Metadata.TagList>
+      </Detail.Metadata.TagList>,
     );
   }
   const labels = metadata?.labels
@@ -30,16 +36,12 @@ export function GifDetails(props: { item: IGif; service?: ServiceName }) {
   return (
     <Detail
       markdown={renderGifMarkdownDetails(props.item)}
-      actions={<GifActions item={props.item} showViewDetails={false} service={props.service} />}
+      actions={<GifActions item={props.item} showViewDetails={false} service={props.service} mutate={props.mutate} />}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Title" text={title} />
-          {metadata?.width ? (
-            <Detail.Metadata.Label title="Width" text={`${metadata.width.toString()}px`} />
-          ) : undefined}
-          {metadata?.height ? (
-            <Detail.Metadata.Label title="Height" text={`${metadata.height.toString()}px`} />
-          ) : undefined}
+          {metadata?.width ? <Detail.Metadata.Label title="Width" text={`${metadata.width.toString()}px`} /> : null}
+          {metadata?.height ? <Detail.Metadata.Label title="Height" text={`${metadata.height.toString()}px`} /> : null}
           {metadata?.size && <Detail.Metadata.Label title="Size" text={FileSizeFormat.si(metadata?.size)} />}
           {labels}
           {links}

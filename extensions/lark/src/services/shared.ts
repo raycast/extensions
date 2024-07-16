@@ -1,4 +1,4 @@
-import { AbortError } from 'got';
+import { AbortError, got } from 'got';
 import { getDefaultStore } from 'jotai';
 import { Cookie, CookieJar } from 'tough-cookie';
 import { isAuthenticatedAtom } from '../hooks/atoms';
@@ -6,6 +6,12 @@ import { DOMAIN, GENERAL_DOMAIN } from '../utils/config';
 import { StorageKey, getStorage, setStorage } from '../utils/storage';
 
 export const cookieJar = new CookieJar();
+
+export const client = got.extend({
+  cookieJar,
+  headers: { 'User-Agent': 'Raycast' },
+  responseType: 'json',
+});
 
 export async function checkAuthState(): Promise<boolean> {
   if (getDefaultStore().get(isAuthenticatedAtom)) return true;

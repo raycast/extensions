@@ -1,4 +1,4 @@
-import { Icon, LaunchProps, List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState, useMemo } from "react";
 
@@ -125,6 +125,4 @@ export function SearchIssues({ query: initialQuery }: SearchIssuesProps) {
     </List>
   );
 }
-export default function Command(props: LaunchProps) {
-  return withJiraCredentials(<SearchIssues query={props.launchContext?.query} />);
-}
+export default withJiraCredentials(SearchIssues);

@@ -1,6 +1,6 @@
 # Myna UI Icons
 
-1050+ beautifully crafted open source icons for your next project.
+1090+ beautifully crafted open source icons for your next project.
 
 - MIT Licensed
 - Optimised SVG

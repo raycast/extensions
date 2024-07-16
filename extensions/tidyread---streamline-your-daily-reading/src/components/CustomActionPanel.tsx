@@ -3,7 +3,7 @@ import CommonActions from "./CommonActions";
 
 type CustomActionPanelProps = React.ComponentProps<typeof ActionPanel>;
 
-function CustomCustomActionPanel(props: CustomActionPanelProps) {
+function CustomActionPanel(props: CustomActionPanelProps) {
   return (
     <ActionPanel>
       {props.children}
@@ -12,4 +12,4 @@ function CustomCustomActionPanel(props: CustomActionPanelProps) {
   );
 }
 
-export default CustomCustomActionPanel;
+export default CustomActionPanel;

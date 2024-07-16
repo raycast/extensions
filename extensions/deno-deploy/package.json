@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "deno-deploy",
+  "title": "Deno Deploy",
+  "description": "View and modify your Deno Deploy projects",
+  "icon": "command-icon.png",
+  "author": "j3lte",
+  "license": "MIT",
+  "keywords": [
+    "deno",
+    "deploy",
+    "projects",
+    "cloud",
+    "playground"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
+  "commands": [
+    {
+      "name": "search-projects",
+      "title": "Search Projects",
+      "subtitle": "Deno Deploy",
+      "description": "Explore your Deno Deploy projects",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "search-organizations",
+      "title": "Search Organizations",
+      "subtitle": "Deno Deploy",
+      "description": "Explore your Deno Deploy organizations",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "create-playground",
+      "title": "Create Playground",
+      "subtitle": "Deno Deploy",
+      "description": "Create a new playground for Deno Deploy",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "create-playground-quick",
+      "title": "Create Playground (Quick)",
+      "subtitle": "Deno Deploy",
+      "description": "Create a new playground for Deno Deploy",
+      "icon": "command-icon.png",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accessToken",
+      "type": "password",
+      "required": true,
+      "title": "Access Token",
+      "description": "Your Deno Deploy access token",
+      "placeholder": "Enter your access token here",
+      "link": "https://dash.deno.com/account#access-tokens"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.71.4",
+    "@raycast/utils": "^1.14.0",
+    "node-fetch": "^3.3.2",
+    "swr": "^2.2.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/node": "20.12.7",
+    "@types/react": "18.2.79",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

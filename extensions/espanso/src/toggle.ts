@@ -1,6 +1,5 @@
 import { showHUD } from "@raycast/api";
 import { $ } from "zx";
-import {} from "zx";
 
 export default async function main() {
   try {

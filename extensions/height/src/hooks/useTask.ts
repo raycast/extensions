@@ -1,7 +1,8 @@
 import { useCachedPromise } from "@raycast/utils";
-import { ApiUrls } from "../api/helpers";
-import { getOneTask } from "../api/task";
-import { CachedPromiseOptionsType } from "../types/utils";
+
+import { ApiUrls } from "@/api/helpers";
+import { getOneTask } from "@/api/task";
+import { CachedPromiseOptionsType } from "@/types/utils";
 
 type Props = {
   taskId: string;

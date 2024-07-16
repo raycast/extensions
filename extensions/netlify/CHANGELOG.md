@@ -1,5 +1,17 @@
 # Changelog
 
+## [Manage DNS Commands] - 2024-05-07
+
+### Enhancements
+
+- Renamed `Search Domains` (title) -> `Search Domains and Manage DNS Records`.
+    - Added `Manage DNS Records` subcommand to `View`, `Create`, `Delete` DNS Records
+
+### Chore
+
+- Bump `@raycast/api` from 1.42.0 to 1.72.0
+- Bump `@raycast/utils` from 1.4.14 to 1.14.0
+
 ## [New Logo] - 2023-05-26
 
 - Updated the logo

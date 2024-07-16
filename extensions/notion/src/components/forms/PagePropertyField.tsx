@@ -1,7 +1,15 @@
 import { Form, Icon, Image } from "@raycast/api";
 import type { useForm } from "@raycast/utils";
 
-import { notionColorToTintColor, getPageIcon, Page, DatabaseProperty, User } from "../../utils/notion";
+import {
+  notionColorToTintColor,
+  getPageIcon,
+  Page,
+  DatabaseProperty,
+  User,
+  PropertyConfig,
+  getPropertyConfig,
+} from "../../utils/notion";
 
 export function createConvertToFieldFunc(
   itemPropsFor: GetFieldPropsFunc,
@@ -21,17 +29,19 @@ export function createConvertToFieldFunc(
       case "status":
         return (
           <Form.Dropdown {...itemPropsFor<typeof property.type>(property)}>
-            {property.options?.map(createMapOptionsFunc(Form.Dropdown.Item))}
+            {getPropertyConfig(property, [property.type])?.options.map(createMapOptionsFunc(Form.Dropdown.Item))}
           </Form.Dropdown>
         );
       case "multi_select":
       case "relation":
       case "people": {
-        let options: typeof property.options | Page[] | User[] | undefined;
-        if (property.type == "multi_select") options = property.options;
+        let options: PropertyConfig<"multi_select">["options"] | Page[] | User[] | undefined;
+        if (property.type == "multi_select") options = getPropertyConfig(property, [property.type])?.options;
         else if (property.type == "people") options = users;
-        else if (relationPages && property.type == "relation" && property.relation_id)
-          options = relationPages[property.relation_id];
+        else if (relationPages && property.type == "relation") {
+          const relationId = getPropertyConfig(property, [property.type])?.database_id;
+          if (relationId) options = relationPages[relationId];
+        }
         return (
           <Form.TagPicker placeholder={placeholder} {...itemPropsFor<typeof property.type>(property)}>
             {options?.map(createMapOptionsFunc(Form.TagPicker.Item))}
@@ -41,13 +51,19 @@ export function createConvertToFieldFunc(
       case "formula":
         return null;
       default:
-        return <Form.TextField placeholder={placeholder} {...itemPropsFor<typeof property.type>(property)} />;
+        return (
+          <Form.TextField
+            info="Supports a single line of inline Markdown"
+            placeholder={placeholder}
+            {...itemPropsFor<typeof property.type>(property)}
+          />
+        );
     }
   };
 }
 
 function createMapOptionsFunc(Tag: typeof Form.Dropdown.Item | typeof Form.TagPicker.Item) {
-  return (option: DatabaseProperty["options"][number] | Page | User) => {
+  return (option: PropertyConfig<"select">["options"][number] | Page | User) => {
     if (!option.id) return null;
     let title: string | null;
     let icon: Image.ImageLike | undefined;
@@ -72,11 +88,11 @@ export type FieldProps<T extends DatabaseProperty["type"]> = ReturnType<
     [k: string]: T extends "date"
       ? Date | null
       : T extends "checkbox"
-      ? boolean
-      : T extends "multi_select" | "relation" | "people"
-      ? string[]
-      : T extends "formula"
-      ? null
-      : string;
+        ? boolean
+        : T extends "multi_select" | "relation" | "people"
+          ? string[]
+          : T extends "formula"
+            ? null
+            : string;
   }>
 >["itemProps"][string];

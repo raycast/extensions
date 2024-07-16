@@ -60,6 +60,7 @@ function autoPasteEnabled(): boolean {
 }
 
 function convert(input: string) {
+  if (isJson(input)) return input;
   if (input.endsWith(';')) input = input.slice(0, -1);
   try {
     if (isExecuteable(input)) throw new Error('executeable');
@@ -87,4 +88,30 @@ function parse(input: string) {
     });
     return;
   }
+}
+
+export function formatToJSONLines(input: string) {
+  if (!isJson(input) || !isArray(input)) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: 'Please enter a valid JSON/JS Array Object',
+    });
+    return;
+  }
+
+  const jsonVal = JSON.parse(`{"data":${input}}`);
+  return jsonVal.data.map(JSON.stringify).join('\n');
+}
+
+function isJson(str: string) {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
+}
+
+function isArray(str: string) {
+  return str.startsWith('[') && str.endsWith(']');
 }

@@ -9,12 +9,14 @@ export function GetAccessories(connection: Connection) {
     accessories.push({ tag: connection.Driver.toString() });
   }
 
-  accessories.push({
-    tag: {
-      color: tintColors[connection.Environment],
-      value: uppercaseText(connection.Environment),
-    },
-  });
+  if (connection.Environment) {
+    accessories.push({
+      tag: {
+        color: tintColors[connection.Environment],
+        value: uppercaseText(connection.Environment),
+      },
+    });
+  }
 
   return accessories;
 }

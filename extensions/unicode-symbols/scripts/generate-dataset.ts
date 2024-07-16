@@ -16,6 +16,7 @@ const blockNamesToFilter = [
   "Latin-1 Supplement",
   "Latin Extended-A",
   "Latin Extended-B",
+  "Latin Extended Additional",
   "IPA Extensions",
   "Spacing Modifier Letters",
   "Combining Diacritical Marks",

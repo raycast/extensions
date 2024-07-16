@@ -1,21 +1,18 @@
-import { Action, ActionPanel, showToast, Toast, open } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
-import { getName } from "./getName";
+import { open, showToast, Toast } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import defaultBrowserId from "default-browser-id";
+import { getName } from "./getName";
 
-interface Arguments {
-  add: string;
-}
-
-export default async (props: { arguments: Arguments }) => {
+export default async (props: { arguments: Arguments.FanAddEventEditable }) => {
   const args = props.arguments;
   const name = await getName();
   const defaultBrowser = await defaultBrowserId();
   if (name !== undefined) {
+    const escapedAdd = args.add.replace(/"/g, '\\"');
     await runAppleScript(`
-        tell application "${name}" 
-            \n parse sentence "${args.add}" \n
-        end tell`);
+      tell application "${name}" 
+        parse sentence "${escapedAdd}" 
+      end tell`);
   } else {
     await showToast({
       title: "Fantastical is not installed",

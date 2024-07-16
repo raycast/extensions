@@ -1,7 +1,8 @@
+import { getPreferenceValues } from "@raycast/api";
 import * as changeCase from "change-case";
 import { spongeCase } from "sponge-case";
 import { swapCase } from "swap-case";
-import { titleCase } from "title-case";
+import { SMALL_WORDS, titleCase as titleCaseLib } from "title-case";
 
 export type CaseFunction = (input: string) => string;
 export type CaseFunctions = Record<string, CaseFunction>;
@@ -14,6 +15,26 @@ const lowerFirst = (input: string) => {
   }
   return input[0].toLowerCase() + input.slice(1);
 };
+
+const kebabUpperCase = (input: string) => {
+  const words = changeCase.split(input);
+  return words.map((word) => word.toUpperCase()).join("-");
+};
+
+const handleSmallWordsTitleCase = (input: string, sentenceCase: boolean) => {
+  const exceptions =
+    getPreferenceValues<ExtensionPreferences>()
+      .exceptions.split(",")
+      .map((e) => e.trim()) ?? [];
+
+  const smallWords = new Set<string>([...exceptions, ...SMALL_WORDS]);
+
+  return titleCaseLib(input, { sentenceCase, smallWords });
+};
+
+const sentenceCase = (input: string) => handleSmallWordsTitleCase(input, true);
+
+const titleCase = (input: string) => handleSmallWordsTitleCase(input, false);
 
 const upperCase = (input: string) => input.toUpperCase();
 
@@ -29,26 +50,32 @@ export const functions: CaseFunctions = {
   "Capital Case": changeCase.capitalCase,
   "Constant Case": changeCase.constantCase,
   "Dot Case": changeCase.dotCase,
-  "Header Case": changeCase.trainCase, // see Train Case
-  "Kebab Case": changeCase.kebabCase,
+  "Header Case": changeCase.trainCase,
   "Lower Case": lowerCase,
   "Lower First": lowerFirst,
-  "Macro Case": changeCase.constantCase, // see Constant Case
   "No Case": changeCase.noCase,
-  "Param Case": changeCase.kebabCase, // see Kebab Case
+  "Kebab Case": changeCase.kebabCase,
+  "Kebab Upper Case": kebabUpperCase,
   "Pascal Case": changeCase.pascalCase,
   "Pascal Snake Case": changeCase.pascalSnakeCase,
   "Path Case": changeCase.pathCase,
   "Random Case": spongeCase,
-  "Sentence Case": changeCase.sentenceCase,
+  "Sentence Case": sentenceCase,
   "Snake Case": changeCase.snakeCase,
   "Swap Case": swapCase,
   "Title Case": titleCase,
   "Upper Case": upperCase,
   "Upper First": upperFirst,
-  "Sponge Case": spongeCase, // see Random Case
-  "Train Case": changeCase.trainCase,
 };
 
 export const cases = Object.keys(functions);
 export type CaseType = (typeof cases)[number];
+
+export const aliases: Record<CaseType, string[]> = {
+  "Header Case": ["train", "dash"],
+  "No Case": ["none"],
+  "Kebab Case": ["dash", "slug", "param"],
+  "Random Case": ["sponge"],
+  "Swap Case": ["reverse"],
+  "Constant Case": ["macro"],
+};

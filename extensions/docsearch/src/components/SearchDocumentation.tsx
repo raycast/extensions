@@ -1,18 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { API } from "../types";
-import APIData from "../data/apis";
+import { API, data, DocID } from "../data/apis";
 import { useAlgolia, useMeilisearch } from "../hooks";
 
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { getTitleForAlgolis, getTitleForMeilisearch } from "../utils/getTitle";
 import { generateContent } from "../utils";
 
-export function SearchDocumentation(props: { id: string; quickSearch?: string }) {
-  const currentAPI = APIData.find((api) => props.id === api.id) as API;
-
+export function SearchDocumentation(props: { id: DocID; quickSearch?: string }) {
+  const currentDocs = data[props.id] as Readonly<{ [key in string]: API }>;
+  const tags = useMemo(() => Object.keys(currentDocs), [currentDocs]);
   const [searchText, setSearchText] = useState(props.quickSearch || "");
+  const [searchTag, setSearchTag] = useState<string>(tags[0]);
   const [currentIdx, setCurrentIdx] = useState(0);
+  const currentAPI = currentDocs[searchTag] as Readonly<API>;
 
   let isLoading = false;
   let searchResults: Array<any> = [];
@@ -41,7 +42,7 @@ export function SearchDocumentation(props: { id: string; quickSearch?: string })
   return (
     <List
       throttle={true}
-      navigationTitle={currentAPI.name}
+      navigationTitle={DocID[props.id] || "No Title"}
       isLoading={isLoading || searchResults === undefined}
       isShowingDetail={showDetailList[currentIdx]}
       onSearchTextChange={setSearchText}
@@ -49,6 +50,20 @@ export function SearchDocumentation(props: { id: string; quickSearch?: string })
       onSelectionChange={(id) => {
         setCurrentIdx(parseInt(id || "0"));
       }}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Select Tag"
+          storeValue
+          onChange={(tag) => {
+            setSearchTag(tag);
+            setCurrentIdx(0);
+          }}
+        >
+          {tags.map((tag) => (
+            <List.Dropdown.Item key={tag} title={tag} value={tag} />
+          ))}
+        </List.Dropdown>
+      }
     >
       {searchResults?.map((result) => (
         <List.Item

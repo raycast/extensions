@@ -107,7 +107,7 @@ export default function RetrieveAllDomains() {
               ]}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser url={item.domain} />
+                  <Action.OpenInBrowser url={`https://${item.domain}`} />
                   <Action.Push
                     title="Get Name Servers"
                     icon={Icon.AppWindowGrid3x3}

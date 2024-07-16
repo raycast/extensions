@@ -1,10 +1,11 @@
 -- FM-XML Objects to Multi-Objects
--- version 4.2, Daniel A. Shockley, Erik Shagdar
+-- version 4.3, Daniel A. Shockley, Erik Shagdar
 (* 
 	Takes objects in the clipboard and adds multiple types of FileMaker objects into clipboard (plus return-delimited text). 
 	
 
 HISTORY:
+	4.3 - 2023-05-24 ( danshockley ): Added getFmAppProc to avoid being tied to one specific "FileMaker" app name. 
 	4.2 - 2023-02-07 ( danshockley ): Add support for custom functions (XMFN) by adding the function NAMES to the clipboard alongside the objects. 
 	4.1 - 2019-09-11 ( danshockley ): If clipboard was Script Steps (XMSS) and not ALL were 'Set Field' or 'Set Variable', try to get useful info about all the different script steps, rather than ignoring. 
 	4.0 - 2018-04-04 ( danshockley/eshagdar ): load fmObjectTranslator code by reference instead of embedded. Made fmObjTrans into a global so that sub-script objects can use the already-instantiated library object. 
@@ -124,8 +125,10 @@ on run
 		end tell
 		-- result DOES NOT INCLUDE THE TABLE!
 		tell application "System Events"
-			if name of window 1 of application process "FileMaker Pro Advanced" starts with "Manage Database for" then
-				set tableName to value of pop up button 1 of tab group 1 of window 1 of application process "FileMaker Pro Advanced"
+			set fmAppProc to my getFmAppProc()
+			
+			if name of window 1 of fmAppProc starts with "Manage Database for" then
+				set tableName to value of pop up button 1 of tab group 1 of window 1 of fmAppProc
 			else
 				set tableName to text returned of (display dialog "Please enter the table name for these field objects." default answer "")
 			end if
@@ -435,7 +438,24 @@ on run
 end run
 
 
-
+on getFmAppProc()
+	-- version 2023-05-24
+	-- Gets the frontmost "FileMaker" app (if any), otherwise the 1st one available.
+	tell application "System Events"
+		set fmAppProc to first application process whose frontmost is true
+		if name of fmAppProc does not contain "FileMaker" then
+			-- frontmost is not FileMaker, so just get the 1st one we can find 
+			-- (if multiple copies running, must make the one you want is frontmost to be sure it is used)
+			try
+				set fmAppProc to get first application process whose name contains "FileMaker"
+			on error errMsg number errNum
+				if errNum is -1719 then return false
+				error errMsg number errNum
+			end try
+		end if
+		return fmAppProc
+	end tell
+end getFmAppProc
 
 
 on addTextToVariableScriptSteps(nameOptionalValueList)

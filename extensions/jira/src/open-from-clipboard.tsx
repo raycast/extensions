@@ -17,11 +17,10 @@ function getBaseURL() {
   }
 }
 
-function OpenIssue({ issueKey }: { issueKey: string }) {
-  return withJiraCredentials(<IssueDetail issueKey={issueKey} />);
-}
+const OpenIssue = ({ issueKey }: { issueKey: string }) => <IssueDetail issueKey={issueKey} />;
+const AuthorizedOpenIssue = withJiraCredentials(OpenIssue);
 
-function OpenFromClipboard() {
+export default function OpenFromClipboard() {
   const [issueKey, setIssueKey] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -57,9 +56,6 @@ function OpenFromClipboard() {
   if (!issueKey) {
     return <Detail isLoading />;
   }
-  return <OpenIssue issueKey={issueKey} />;
-}
 
-export default function Command() {
-  return <OpenFromClipboard />;
+  return <AuthorizedOpenIssue issueKey={issueKey} />;
 }

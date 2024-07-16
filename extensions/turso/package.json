@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "turso",
+  "title": "Turso",
+  "description": "Manage your Turso databases with Raycast",
+  "icon": "icon.png",
+  "author": "spioune",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "platform-api-tokens",
+      "title": "Platform API Tokens",
+      "subtitle": "Turso",
+      "description": "List Platform API tokens",
+      "mode": "view"
+    },
+    {
+      "name": "create-database",
+      "title": "Create Database",
+      "subtitle": "Turso",
+      "description": "Create a new database",
+      "mode": "view"
+    },
+    {
+      "name": "databases",
+      "title": "List Databases",
+      "subtitle": "Turso",
+      "description": "List databases",
+      "mode": "view"
+    }
+  ],
+  "keywords": [
+    "turso",
+    "database"
+  ],
+  "dependencies": {
+    "@libsql/client": "^0.5.2",
+    "@raycast/api": "^1.68.1",
+    "@raycast/utils": "^1.12.5",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

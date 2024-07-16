@@ -8,3 +8,6 @@
 
 # raycast generated types
 raycast-env.d.ts
+
+# IDEs and editors
+/.idea

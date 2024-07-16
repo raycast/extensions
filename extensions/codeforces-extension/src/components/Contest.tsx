@@ -94,7 +94,7 @@ export function Contest(value: { name: any }) {
                   </List.Item.Detail.Metadata.TagList>
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label
-                    title="Rating Last Updated"
+                    title="Time"
                     text={`${new Date(item.ratingUpdateTimeSeconds * 1000).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",

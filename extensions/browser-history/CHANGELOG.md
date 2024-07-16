@@ -1,5 +1,8 @@
 # Browser History Changelog
 
+## [Add Sidekick browser] - 2024-02-10
+- Added Sidekick history search support.
+
 ## [Enhancement] - 2023-04-19
 
 - Make it possible to force historic links to open in the originating browser as opposed to forcing either the default or a specific one.

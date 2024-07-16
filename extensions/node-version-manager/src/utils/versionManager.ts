@@ -1,6 +1,7 @@
 import preferences from './preferences';
 import nvm from './managers/nvm';
 import fnm from './managers/fnm';
+import brew from './managers/brew';
 import { NodeVersionsInfo } from '../types';
 
 const versionManager = preferences.versionManager;
@@ -11,6 +12,8 @@ const getVersionManager = () => {
       return nvm;
     case 'fnm':
       return fnm;
+    case 'brew':
+      return brew;
     default:
       return {
         name: '',

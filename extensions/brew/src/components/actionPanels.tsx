@@ -10,11 +10,12 @@ import { Cask, Formula, OutdatedCask, OutdatedFormula } from "../brew";
 import { FormulaInfo } from "./formulaInfo";
 import { CaskInfo } from "./caskInfo";
 import * as Actions from "./actions";
-import { runCommandInTerminal } from "./runInTerminal";
+import { runCommandInTerminal, terminalName } from "./runInTerminal";
 
 export function CaskActionPanel(props: {
   cask: Cask;
   showDetails: boolean;
+  isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
 }): JSX.Element {
   const cask = props.cask;
@@ -27,9 +28,10 @@ export function CaskActionPanel(props: {
             <Action.Push
               title="Show Details"
               icon={Icon.Document}
-              target={<CaskInfo cask={cask} onAction={props.onAction} />}
+              target={<CaskInfo cask={cask} isInstalled={props.isInstalled} onAction={props.onAction} />}
             />
           )}
+          {cask.outdated && <Actions.FormulaUpgradeAction formula={cask} onAction={props.onAction} />}
           <Action.ShowInFinder path={brewInstallPath(cask)} />
         </ActionPanel.Section>
         <ActionPanel.Section>
@@ -44,7 +46,7 @@ export function CaskActionPanel(props: {
             shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
           />
           <Action
-            title="Run Uninstall In Terminal"
+            title={`Run Uninstall in ${terminalName()}`}
             icon={Icon.Terminal}
             onAction={() => {
               runCommandInTerminal(brewUninstallCommand(cask));
@@ -53,7 +55,6 @@ export function CaskActionPanel(props: {
         </ActionPanel.Section>
 
         <ActionPanel.Section>
-          {cask.outdated && <Actions.FormulaUpgradeAction formula={cask} onAction={props.onAction} />}
           <Action.CopyToClipboard
             title="Copy Cask Name"
             content={cask.token}
@@ -73,7 +74,7 @@ export function CaskActionPanel(props: {
             <Action.Push
               title="Show Details"
               icon={Icon.Document}
-              target={<CaskInfo cask={cask} onAction={props.onAction} />}
+              target={<CaskInfo cask={cask} isInstalled={props.isInstalled} onAction={props.onAction} />}
             />
           )}
           <Actions.FormulaInstallAction formula={cask} onAction={props.onAction} />
@@ -92,7 +93,7 @@ export function CaskActionPanel(props: {
             shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
           />
           <Action
-            title="Run Install In Terminal"
+            title={`Run Install in ${terminalName()}`}
             icon={Icon.Terminal}
             onAction={() => {
               runCommandInTerminal(brewInstallCommand(cask));
@@ -117,6 +118,7 @@ export function CaskActionPanel(props: {
 export function FormulaActionPanel(props: {
   formula: Formula;
   showDetails: boolean;
+  isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
 }): JSX.Element {
   const formula = props.formula;
@@ -129,9 +131,10 @@ export function FormulaActionPanel(props: {
             <Action.Push
               title="Show Details"
               icon={Icon.Document}
-              target={<FormulaInfo formula={formula} onAction={props.onAction} />}
+              target={<FormulaInfo formula={formula} isInstalled={props.isInstalled} onAction={props.onAction} />}
             />
           )}
+          {formula.outdated && <Actions.FormulaUpgradeAction formula={formula} onAction={props.onAction} />}
           <Action.ShowInFinder path={brewInstallPath(formula)} />
           <Actions.FormulaPinAction formula={formula} onAction={props.onAction} />
         </ActionPanel.Section>
@@ -148,15 +151,12 @@ export function FormulaActionPanel(props: {
             shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
           />
           <Action
-            title="Run Uninstall In Terminal"
+            title={`Run Uninstall in ${terminalName()}`}
             icon={Icon.Terminal}
             onAction={() => {
               runCommandInTerminal(brewUninstallCommand(formula));
             }}
           />
-        </ActionPanel.Section>
-        <ActionPanel.Section>
-          {formula.outdated && <Actions.FormulaUpgradeAction formula={formula} onAction={props.onAction} />}
         </ActionPanel.Section>
       </ActionPanel>
     );
@@ -170,7 +170,7 @@ export function FormulaActionPanel(props: {
             <Action.Push
               title="Show Details"
               icon={Icon.Document}
-              target={<FormulaInfo formula={formula} onAction={props.onAction} />}
+              target={<FormulaInfo formula={formula} isInstalled={props.isInstalled} onAction={props.onAction} />}
             />
           )}
           <Actions.FormulaInstallAction formula={formula} onAction={props.onAction} />
@@ -188,7 +188,7 @@ export function FormulaActionPanel(props: {
             shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
           />
           <Action
-            title="Run Install In Terminal"
+            title={`Run Install in ${terminalName()}`}
             icon={Icon.Terminal}
             onAction={() => {
               runCommandInTerminal(brewInstallCommand(formula));
@@ -234,7 +234,7 @@ export function OutdatedActionPanel(props: {
           shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
         />
         <Action
-          title="Run Upgrade In Terminal"
+          title={`Run Upgrade in ${terminalName()}`}
           icon={Icon.Terminal}
           onAction={() => {
             runCommandInTerminal(brewUpgradeCommand(outdated));
@@ -245,7 +245,7 @@ export function OutdatedActionPanel(props: {
         <Actions.FormulaUninstallAction formula={outdated} onAction={props.onAction} />
         <Action.CopyToClipboard title="Copy Uninstall Command" content={brewUninstallCommand(outdated)} />
         <Action
-          title="Run Uninstall In Terminal"
+          title={`Run Uninstall in ${terminalName()}`}
           icon={Icon.Terminal}
           onAction={() => {
             runCommandInTerminal(brewUninstallCommand(outdated));

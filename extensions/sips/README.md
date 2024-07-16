@@ -4,14 +4,16 @@ Apply filters and transformations to various image formats, and convert between 
 
 ## Features
 
-- Convert between many different image formats, including WebP and SVG
+- Convert between many different image formats, including WebP, SVG, and AVIF
   - WebP conversion supported by [cwebp and dwebp](https://developers.google.com/speed/webp/docs/precompiled)
   - SVG conversion supported by [Potrace](https://potrace.sourceforge.net)
+  - AVIF conversion supported by [libavif](https://github.com/AOMediaCodec/libavif)
 - Rotate, flip, scale, resize, and pad images by applying SIPS commands
 - Apply filters and distortions such as Bokeh Blur, Noir, X-Ray, and more
 - Real time filter previews
 - Rotate, flip, and apply filters to the pages of PDFs
 - Optimize images using JPEG compression, [svgo](https://github.com/svg/svgo), and other strategies
+  - PNG optimization suppored by [PNGOUT](http://www.jonof.id.au/kenutils.html)
 - Perform realtime image manipulation on images in the clipboard
 - Strip EXIF data from images using [ExifTool](https://exiftool.org)
 

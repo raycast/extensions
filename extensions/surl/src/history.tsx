@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, Cache } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Cache, openExtensionPreferences } from "@raycast/api";
 import { useState } from "react";
 
 const FRONTEND_ENDPOINT = "https://surlapp.uk";
@@ -42,6 +42,14 @@ export default function Command() {
                     onAction={() => handleRemoveCache(index)}
                     shortcut={{ modifiers: ["ctrl"], key: "x" }}
                   />
+                  <ActionPanel.Section title="Global Options">
+                    <Action
+                      icon={{ source: Icon.Clock }}
+                      title="Customize Expiration Date"
+                      onAction={openExtensionPreferences}
+                      shortcut={{ modifiers: ["cmd"], key: "." }}
+                    />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />

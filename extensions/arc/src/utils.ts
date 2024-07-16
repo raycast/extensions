@@ -21,6 +21,13 @@ export function getSpaceTitle(space: Space) {
   return space.title || `Space ${space.id}`;
 }
 
+export function findSpaceInSpaces(spaceId: string, spaces: Space[]): string | undefined {
+  const space = spaces.find(
+    (s) => getSpaceTitle(s).toLowerCase() === spaceId.toLowerCase() || s.id.toString() === spaceId
+  );
+  return space && getSpaceTitle(space);
+}
+
 export function getKey(tab: Tab) {
   return `${tab.id}`;
 }
@@ -70,6 +77,7 @@ export function getNumberOfTabs(tabs?: Tab[]) {
   return tabs.length === 1 ? "1 tab" : `${tabs.length} tabs`;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isTab(tab: any): tab is Tab {
   if (tab && tab.id && tab.url && tab.title && tab.location) {
     return true;

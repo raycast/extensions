@@ -30,7 +30,7 @@ export default function SharableLinkAction(props: {
         if (some([writeFreelyEndpoint, writeFreelyAccount, writeFreelyPassword], (item) => !item)) {
           push(
             <Detail
-              markdown={`Please press Enter to set up WriteFreely endpoint, account and password in extension preferences first.\n\nIf you don't have a WriteFreely instance, you can use [paper.wf](https://paper.wf) for free.\n\nOr use a community instance [here](https://writefreely.org/instances).`}
+              markdown={`Please press \`Enter\` to set up WriteFreely endpoint, account and password in extension preferences first.\n\nIf you don't have a WriteFreely instance, you can use [paper.wf](https://paper.wf) for free. Or use a community instance [here](https://writefreely.org/instances).\n\n💡 Check [the doc](https://www.tidyread.info/docs/share-your-digest) to learn more.`}
               actions={<CustomActionPanel />}
             />,
           );

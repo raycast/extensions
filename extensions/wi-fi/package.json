@@ -37,7 +37,7 @@
       "subtitle": "Wi-Fi",
       "description": "Show wifi signal strength in menu bar.",
       "mode": "menu-bar",
-      "interval": "10m",
+      "interval": "5m",
       "preferences": [
         {
           "name": "showColorfulSignal",
@@ -67,17 +67,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.65.1",
+    "@raycast/api": "^1.66.2",
     "node-wifi": "^2.0.16",
     "shell-env": "^4.0.1"
   },
   "devDependencies": {
     "@types/node-wifi": "^2.0.2",
-    "@typescript-eslint/eslint-plugin": "^6.19.0",
-    "@typescript-eslint/parser": "^6.19.0",
+    "@typescript-eslint/eslint-plugin": "^6.20.0",
+    "@typescript-eslint/parser": "^6.20.0",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.2.4",
+    "prettier": "^3.2.5",
     "typescript": "^5.3.3"
   },
   "scripts": {

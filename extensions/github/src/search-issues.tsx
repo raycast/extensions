@@ -1,16 +1,17 @@
 import { getPreferenceValues, List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { trim } from "lodash";
 import { useState } from "react";
 
+import { getGitHubClient } from "./api/githubClient";
 import IssueListEmptyView from "./components/IssueListEmptyView";
 import IssueListItem from "./components/IssueListItem";
 import { getBoundedPreferenceNumber } from "./components/Menu";
 import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
-import View from "./components/View";
 import { IssueFieldsFragment } from "./generated/graphql";
 import { pluralize } from "./helpers";
-import { getGitHubClient } from "./helpers/withGithubClient";
+import { ISSUE_DEFAULT_SORT_QUERY } from "./helpers/issue";
+import { withGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
 
 function SearchIssues() {
@@ -20,6 +21,9 @@ function SearchIssues() {
 
   const { defaultSearchTerms } = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState(trim(defaultSearchTerms) + " ");
+  const [sortQuery, setSortQuery] = useCachedState<string>("sort-query", ISSUE_DEFAULT_SORT_QUERY, {
+    cacheNamespace: "github-search-issue",
+  });
   const [searchFilter, setSearchFilter] = useState<string | null>(null);
 
   const {
@@ -27,15 +31,15 @@ function SearchIssues() {
     isLoading,
     mutate: mutateList,
   } = useCachedPromise(
-    async (searchText, searchFilter) => {
+    async (searchText, searchFilter, sortTxt) => {
       const result = await github.searchIssues({
         numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }),
-        query: `is:issue archived:false ${searchFilter} ${searchText}`,
+        query: `is:issue archived:false ${sortTxt} ${searchFilter} ${searchText}`,
       });
 
       return result.search.nodes?.map((node) => node as IssueFieldsFragment);
     },
-    [searchText, searchFilter],
+    [searchText, searchFilter, sortQuery],
     { keepPreviousData: true },
   );
 
@@ -51,10 +55,10 @@ function SearchIssues() {
       {data ? (
         <List.Section
           title={searchText ? "Search Results" : "Created Recently"}
-          subtitle={pluralize(data.length, "Issue", { withNumber: true })}
+          subtitle={pluralize(data.length, "issue", { withNumber: true })}
         >
           {data.map((issue) => {
-            return <IssueListItem key={issue.id} issue={issue} viewer={viewer} mutateList={mutateList} />;
+            return <IssueListItem key={issue.id} {...{ issue, viewer, mutateList, sortQuery, setSortQuery }} />;
           })}
         </List.Section>
       ) : null}
@@ -64,10 +68,4 @@ function SearchIssues() {
   );
 }
 
-export default function Command() {
-  return (
-    <View>
-      <SearchIssues />
-    </View>
-  );
-}
+export default withGitHubClient(SearchIssues);

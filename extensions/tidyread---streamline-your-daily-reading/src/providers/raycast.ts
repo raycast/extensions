@@ -2,9 +2,18 @@ import { AI, environment } from "@raycast/api";
 import { Provider, ProviderOptions } from "../types";
 // import { sendMessageToChatGPT } from "../utils/gpt";
 
+function normalizeModel(name?: string) {
+  if (!name) return "gpt-3.5-turbo-instruct";
+  if (!name.includes("raycast-")) return "gpt-3.5-turbo-instruct";
+  return name.replace("raycast-", "");
+}
+
 class RaycastProvider extends Provider {
   constructor(options: ProviderOptions) {
-    super(options);
+    super({
+      ...options,
+      apiModel: normalizeModel(options?.apiModel),
+    });
 
     if (!environment.canAccess(AI)) {
       this.available = false;
@@ -20,7 +29,7 @@ class RaycastProvider extends Provider {
 
     const message = `${summarizePrompt}\n\nHere is the content:\n\n${content}`;
 
-    console.log("raycast ai summarize prompt", message);
+    console.log("raycast ai summarize prompt:", message);
 
     try {
       const resp = await AI.ask(message, {

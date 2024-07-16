@@ -5,7 +5,8 @@ import { useState } from "react";
 import { QueryTypes, getFilesURL, File, ScopeTypes } from "./api/getFiles";
 import FileListItem from "./components/FileListItem";
 
-import { withGoogleAuth, getOAuthToken, getUserEmail } from "./components/withGoogleAuth";
+import { withGoogleAuth } from "./components/withGoogleAuth";
+import { getOAuthToken, getUserEmail } from "./api/googleAuth";
 
 function SearchGoogleDriveFiles() {
   const [query, setQuery] = useState("");
@@ -78,6 +79,4 @@ function SearchGoogleDriveFiles() {
   );
 }
 
-export default function Command() {
-  return withGoogleAuth(<SearchGoogleDriveFiles />);
-}
+export default withGoogleAuth(SearchGoogleDriveFiles);

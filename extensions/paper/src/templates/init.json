@@ -1,0 +1,34 @@
+{
+  "personal": {
+    "color": "Blue",
+    "papers": [
+      {
+        "name": "Quick note",
+        "createdAt": 1709917660671,
+        "content": "IyBRdWljayBOb3RlCgo8YXNpZGU+CvCfkqEgKipOb3Rpb24gVGlwOioqIFVzZSB0aGlzIHRlbXBsYXRlIHRvIHdyaXRlIHF1aWNrIG5vdGVzIHlvdSBjYW4gcmVmZXJlbmNlIGxhdGVyIGFuZCBxdWlja2x5IGNyZWF0ZSBhIHJpY2ggZG9jdW1lbnQuIFlvdSBjYW4gZW1iZWQgbGlua3MsIGltYWdlcywgdG8tZG/igJlzLCBhbmQgbW9yZS4gTGVhcm4gbW9yZSBhYm91dCB0aGUgZGlmZmVyZW50IHR5cGVzIG9mIGNvbnRlbnQgYmxvY2tzIFtoZXJlXShodHRwczovL3d3dy5ub3Rpb24uc28vaGVscC9ndWlkZXMvdHlwZXMtb2YtY29udGVudC1ibG9ja3MpLgoKPC9hc2lkZT4KCiMgSm90IGRvd24gc29tZSB0ZXh0CgotLS0KClRoZXkgZm91bmQgTWFyeSwgYXMgdXN1YWwsIGRlZXAgaW4gdGhlIHN0dWR5IG9mIHRob3JvdWdoLWJhc3MgYW5kIGh1bWFuIG5hdHVyZTsgYW5kIGhhZCBzb21lIGV4dHJhY3RzIHRvIGFkbWlyZSwgYW5kIHNvbWUgbmV3IG9ic2VydmF0aW9ucyBvZiB0aHJlYWRiYXJlIG1vcmFsaXR5IHRvIGxpc3RlbiB0by4gQ2F0aGVyaW5lIGFuZCBMeWRpYSBoYWQgaW5mb3JtYXRpb24gZm9yIHRoZW0gb2YgYSBkaWZmZXJlbnQgc29ydC4KCiMgTWFrZSBhIHRvLWRvIGxpc3QKCi0tLQoKLSBbeF0gIFdha2UgdXAKLSBbeF0gIEJydXNoIHRlZXRoCi0gWyBdICBFYXQgYnJlYWtmYXN0CgojIENyZWF0ZSBzdWItcGFnZXMKCi0tLQoKW1N1YiBQYWdlXShodHRwczovL3d3dy5ub3Rpb24uc28vU3ViLVBhZ2UtMWRmZTFlNmRkOGYxNDA2Njg3MTRjMWYxNzI5MTRmMWU/cHZzPTIxKQoKIyBFbWJlZCBsaW5rcwoKLS0tCgpbQmV5b25kIEZyYW5rIExsb3lkIFdyaWdodDogQSBCcm9hZGVyIFZpZXcgb2YgQXJ0IGluIENoaWNhZ29dKGh0dHBzOi8vd3d3Lm55dGltZXMuY29tLzIwMTgvMDMvMDgvYXJ0cy9jaGljYWdvLW11c2V1bXMtYXJ0Lmh0bWw/cnJlZj1jb2xsZWN0aW9uJTJGc2VjdGlvbmNvbGxlY3Rpb24lMkZ0cmF2ZWwpCgpbSGF2YW5hJ3MgU3ltcGhvbnkgb2YgU291bmRdKGh0dHBzOi8vd3d3Lm55dGltZXMuY29tLzIwMTgvMDMvMTIvdHJhdmVsL2hhdmFuYS1jdWJhLmh0bWw/cnJlZj1jb2xsZWN0aW9uJTJGc2VjdGlvbmNvbGxlY3Rpb24lMkZ0cmF2ZWwpCgpbaHR0cHM6Ly9ub3Rpb24uc28vYjE0NjI0YzI3MmZhNDRlOWE4ZWNjOWQ4MjY1N2UxMzBdKGh0dHBzOi8vbm90aW9uLnNvL2IxNDYyNGMyNzJmYTQ0ZTlhOGVjYzlkODI2NTdlMTMwKQ==",
+        "description": "Use this template to write quick notes you can reference later and quickly create a rich document."
+      }
+    ]
+  },
+  "ideas": {
+    "color": "Yellow",
+    "papers": [
+      {
+        "name": "Project application iphone",
+        "createdAt": 1709162248782,
+        "content": "IyBUbyBEbzoKLSBbXSBUYXNrIG9uZS4KLSBbeF0gVGFzayB0d28",
+        "description": "App with intereting areas around me"
+      }
+    ]
+  },
+  "work": {
+    "color": "Magenta",
+    "papers": [
+      {
+        "name": "To do",
+        "createdAt": 1709126343351,
+        "content": "IyBTaG9wOgoKLSBCdXkgY2FyCi0gTWF5YmUgYSBob3VzZQotIEVhdCBGcnVpdHM="
+      }
+    ]
+  }
+}

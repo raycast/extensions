@@ -1,7 +1,7 @@
-import { Color, Icon, Action } from "@raycast/api";
+import { Action, Color, Icon } from "@raycast/api";
 import { PlaylistList } from "./playlist";
-import { SearchVideoList } from "./video_search";
 import { addRecentChannel } from "./recent_channels";
+import { SearchVideoList } from "./video_search";
 
 export interface ChannelActionProps {
   channelId: string;

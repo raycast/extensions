@@ -5,6 +5,10 @@
   "description": "Convert timestamps and datetime strings into various formats.",
   "icon": "command-icon.png",
   "author": "yangxy",
+  "contributors": [
+    "yifengkuaijian",
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -15,12 +19,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.2",
+    "@raycast/api": "^1.72.1",
     "dayjs": "^1.10.8"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "react": "18.2.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
@@ -33,6 +38,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

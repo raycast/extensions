@@ -1,5 +1,111 @@
 # Changelog
 
+## 1.78.0 - 2024-07-03
+
+### ✨ New
+
+- In addition to the new Custom Window Management commands, we are introducing a `WindowManagement` API to give you total control to move your windows depending on any kind of logic you can imagine.
+- You can now access the `ownerOrAuthorName` in the `environment`, useful for re-usable libraries.
+
+### 🐞 Fixes
+
+- **Pagination**: Fixed the TypeScript definition of the `onLoadMore` callback.
+
+## 1.77.0 - 2024-06-19
+
+### ✨ New
+
+- Updated React version to 18.3.1 to prepare for the next major version of React. This shouldn't impact any extensions but let us know if you find any unexpected behaviour.
+
+### 🐞 Fixes
+
+- **Menu Bar Extra**: fixed an issue where `Submenu` icons changed appearance based on Raycast's appearance, instead of the system's.
+
+## 1.76.0 - 2024-06-05
+
+### 💎 Improvements
+
+- Some companies requires all package.json’s names to be name-spaced (eg. `@foo/bar`). However, Raycast only understands names that _aren’t_ name-spaced. This prevented some people from creating internal extensions. In order to workaround this issue, you can now use the `@workaround` namespace in extension names (eg. `@workaround/bar`).
+
+### 🐞 Fixes
+
+- **Clipboard**: Fixed an issue where 2 items were added to the pasteboard when copying a file (one with the file name, and one with the file url). It now correctly adds 1 item with 2 representations.
+
+## 1.74.0 - 2024-05-15
+
+### ✨ New
+
+- **AI:** The models available in the API now matches the ones available in the app (eg. GPt-4o, Llama-3, etc.). As part of this, the models are now part of an enum `AI.Model` which will make it easier to add and deprecate them as time goes on.
+- **Utils:** we’ve added a new React hook called `useLocalStorage`. This hook simplifies managing a value in `LocalStorage`. Take a look at the [developer docs](https://developers.raycast.com/utilities/react-hooks/uselocalstorage) to learn more.
+
+### 💎 Improvements
+
+- **DX**: Improved the precision of warning messages when trying to add children to a react component that can’t accept them.
+
+## 1.72.0 - 2024-04-24
+
+### ✨ New
+
+- **Browser Extension**: You can now access the context of the focused browser via the Raycast Browser Extension. You can get the list of open tabs as well as the content of a tab.
+
+### 🐞 Fixes
+
+- **Grid**: Fixed a bug that caused the selected Grid item to be brought into focus when paginating.
+
+## 1.71.0 - 2024-04-10
+
+### ✨ New
+
+- **Developer Hub:** you can now programmatically send error reports using the new `captureException` function.
+- **Utils**: we’ve added a new React hook, `useStreamJSON`. The new hook simplifies the process of streaming through large JSON data sources, which normally would not fit in the extension’s memory. Take a look at the [developer docs](https://developers.raycast.com/utilities/react-hooks/usestreamjson) to learn more.
+- **AI**: All the new models are also available in the API.
+
+### 💎 Improvements
+
+- `getApplications`, `getDefaultApplication`, and `Action.OpenWith` now support remote URLs and will return the installed Applications that can open remote URLs (usually browsers)
+
+### 🐞 Fixes
+
+- **Pagination**: Fixed a bug that could cause pagination to not work when `filtering` was set to true.
+- **CLI**: Fixed the cursor being kept hidden when interrupting a command
+
+## 1.70.0 - 2024-03-20
+
+### 💎 Improvements
+
+- **Grid & List:** The placeholders shown while waiting for the next page to load are now animated
+- **Application info:** Application object now returns the localized name if the application is running
+
+### 🐞 Fixes
+
+- **Forms:** Fixed an issue which made it impossible to select a value of a controlled Dropdown after changing its value programmatically
+- **Grid:** Fixed an issue where pagination would not work when scrolling to the bottom while `isLoading` is initially false
+- **List:** Fixed an issue where pagination would not work if there was an empty section at the end
+- Fixed a rare case where, when an extension throws an error, a different error saying “Could not communicate with command worker” would be thrown instead
+
+## 1.69.0 - 2024-03-07
+
+### ✨ New
+
+- `List` and `Grid` now have native pagination support! 🎉 If you want to update your extension to support pagination, head over to the [docs](https://developers.raycast.com/api-reference/user-interface/list#pagination) for instructions on how to get your extension to use pagination.
+- Markdown: Added support for specifying a tint color in the url of a markdown image by adding a `raycast-tint-color` query string
+
+### 💎 Improvements
+
+- Lint: The eslint plugin and `ray` CLI has been updated to have the same algorithm to check if a string is in Title Case (using the definition from Apple)
+- `getApplications` (and `Action.OpenWith`) will now show `Terminal` when using a path to a directory
+
+### 🐞 Fixes
+
+- Fixed an issue where, when the user would change the selection in a List or Grid and rapidly trigger an action, the action of the previously selected item would execute instead
+
+## 1.67.0 - 2024-02-07
+
+### 🐞 Fixes
+
+- Fix a crash that could happen when exporting a function that would return another function.
+- **Menu Bar Extra:** Fixed a bug that caused the text in text-only extras to be offset.
+
 ## 1.66.0 - 2024-01-24
 
 ### 💎 Improvements
@@ -8,7 +114,7 @@
 
 ### 🐞 Fixes
 
-- **Form**: Fixed the display of full-day dates in the Date Picker.
+- **Form**: Fixed the display of full-day dates in the Date Picker.
 
 ## 1.65.0 - 2024-01-10
 
@@ -36,13 +142,13 @@
 
 ### 💎 Improvements
 
-- **Window Capture**: Added a warning when trying to take a screenshot of Raycast if that screenshot won’t match the requirement for the Store’s extensions guidelines (eg. if Raycast is too close to an edge or if the screen doesn’t have a high enough resolution).
+- **Window Capture**: Added a warning when trying to take a screenshot of Raycast if that screenshot won't match the requirement for the Store's extensions guidelines (eg. if Raycast is too close to an edge or if the screen doesn't have a high enough resolution).
 
 ### 🐞 Fixes
 
 - **Types generation**: Fixed the type of a required `appPicker` preference (even if it is `required`, the app might be undefined because it is missing).
 - **Empty View**: Fixed an issue where the Empty View might not be showing in a certain case.
-- **Menu Bar Extra**: \*\*\*\*icons tinted with `Color.PrimaryText` and `Color.SecondaryText` should now change based on the menu bar’s appearance.
+- **Menu Bar Extra**: \*\*\*\*icons tinted with `Color.PrimaryText` and `Color.SecondaryText` should now change based on the menu bar's appearance.
 - **List Metadata:** `Link`s should be properly aligned again.
 
 ## 1.63.0 - 2023-11-29
@@ -130,15 +236,15 @@ The new Extension Issues Dashboard is designed to help you quickly troubleshoot 
 
 ### 💎 Improvements
 
-- The “Fork Extension” action is now also available in the Store for installed extensions.
+- The "Fork Extension" action is now also available in the Store for installed extensions.
 - All the APIs that accepts a file path will now resolve `~` if necessary.
 
 ### 🐞 Fixes
 
 - Fix an issue where some Toasts would not disappear after the command was terminated.
-- Fix an issue where List Item’s accessories with an icon could have their text cut off.
+- Fix an issue where List Item's accessories with an icon could have their text cut off.
 - Fix `getFrontmostApplication` failing for some applications.
-- The “Fork Extension” will now be more robust dealing with unexpected `package.json` formats.
+- The "Fork Extension" will now be more robust dealing with unexpected `package.json` formats.
 - Fixed an issue where newly created Extensions would not use the correct username after it had been updated.
 - Fix an issue where it was possible to set a multiline `searchText`
 
@@ -178,13 +284,13 @@ The new Extension Issues Dashboard is designed to help you quickly troubleshoot 
 
 ### 💎 Improvements
 
-- **Fallback Commands**: Local commands will now have an indicator so that it’s possible to differentiate them from the commands installed from the Store
+- **Fallback Commands**: Local commands will now have an indicator so that it's possible to differentiate them from the commands installed from the Store
 - The NodeJS process used for Raycast extensions will now be named `Raycast Helper (Extensions)`
 - Active menu bar commands will now be displayed in `Extension Diagnostics`.
 
 ### 🐞 Fixes
 
-- Fix an issue where Metadata’s Tag items would sometimes not be updated
+- Fix an issue where Metadata's Tag items would sometimes not be updated
 - Fix a bug where renamed commands appear in the root search with both the original and the updated name after an extension update.
 
 ## 1.54.0 - 2023-06-21
@@ -199,7 +305,7 @@ The new Extension Issues Dashboard is designed to help you quickly troubleshoot 
 ### 🐞 Fixes
 
 - Fix a performance issue on the first render of Lists and Grids
-- Fix an issue where required arguments wouldn’t be required when launching a command right after installing it
+- Fix an issue where required arguments wouldn't be required when launching a command right after installing it
 - Fix a regression where the deprecated `render` method would not work anymore
 - Fix an edge case where some Form items would not be updated if some items would be added at the same time
 
@@ -216,7 +322,7 @@ The new Extension Issues Dashboard is designed to help you quickly troubleshoot 
 ### 💎 Improvements
 
 - Updated NodeJS to 18.16.0
-- Improve the “Fork Extension” action to avoid modifying the manifest as much as possible.
+- Improve the "Fork Extension" action to avoid modifying the manifest as much as possible.
 
 ### 🐞 Fixes
 
@@ -259,7 +365,7 @@ The new Extension Issues Dashboard is designed to help you quickly troubleshoot 
 
 - **Forms**: Fixed an issue where drafts would not save the value of a File Picker.
 - **Forms**: Fixed an issue where `onChange` would not be triggered in certain cases for a File Picker.
-- **Lists**: Fixed an issue that caused a List’s section to re-render whenever an action panel’s submenu was updated.
+- **Lists**: Fixed an issue that caused a List's section to re-render whenever an action panel's submenu was updated.
 - **Colors:** Fixed a crash that could sometimes occur when using `adjustContrast` on a dynamic color.
 
 ## 1.50.0 - 2023-04-27
@@ -389,7 +495,7 @@ The new Extension Issues Dashboard is designed to help you quickly troubleshoot 
 
 ### 💎 Improvements
 
-- **Pop To Root Behavior**: `closeMainWindow` accepts a new parameter `popToRootType` that lets you control when Raycast pops back to root: the default is as-is and respects the user's "Pop to Root Search" preference in Raycast. `PopToRootType.Immediate` closes the window _and_ immediately pops back to root, regardless of the user's setting (so you can get rid of an additional `popToRoot()` call). The new mode `PopToRootType.Suspended` temporarily prevents Raycast from automatically popping back to root; this is useful for situations where a command needs to interact with an external system utility and then return the user back to the launching command.
+- **Pop To Root Behavior**: `closeMainWindow` accepts a new parameter `popToRootType` that lets you control when Raycast pops back to root: the default is as-is and respects the user's "Pop to Root Search" preference in Raycast. `PopToRootType.Immediate` closes the window _and_ immediately pops back to root, regardless of the user's setting (so you can get rid of an additional `popToRoot()` call). The new mode `PopToRootType.Suspended` temporarily prevents Raycast from automatically popping back to root; this is useful for situations where a command needs to interact with an external system 00ity and then return the user back to the launching command.
 - **Clipboard:** We added new options to copy and paste HTML content, which is useful for sharing formatted text, e.g. a link to a Notion page in Slack.
 - **Markdown**: Markdown in a `Detail` component now supports convenience image references for icons and asset folder files such as:
   `![built-in icon](${Icon.AddPerson})` or `![local-assets-image](example.png)` (absolute URLs and user folder paths via `~` are also supported)

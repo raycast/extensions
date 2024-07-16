@@ -20,7 +20,7 @@ function EmailMe() {
 
   const [subject, setSubject] = React.useState(defaultSubject);
   const [body, setBody] = React.useState("");
-  const [addresses, setAddresses] = React.useState(defaultAddressesArray);
+  const [addresses, setAddresses] = React.useState([defaultAddressesArray[0]]);
   const [additionalAddresses, setAdditionalAddresses] = React.useState([""]);
 
   React.useEffect(() => {
@@ -53,8 +53,9 @@ function EmailMe() {
           message: "Specify at least one recipient",
         });
       }
+      const bccAddresses = [...restAddresses, ...additionalAddresses];
 
-      await sendEmail(subject, body, toAddress, restAddresses);
+      await sendEmail(subject, body, toAddress, bccAddresses);
       showHUD("Email sent!");
       popToRoot();
     } catch (error) {
@@ -82,20 +83,20 @@ function EmailMe() {
         <Form.Checkbox
           key={address}
           id={address}
-          title={index === 0 ? `Default Recepients` : ``}
+          title={index === 0 ? `Default Recipients` : ``}
           label={address}
           value={addresses.includes(address)}
           onChange={(checked) => {
             if (checked) {
               if (addresses.includes(address)) return;
-              setAddresses([...addresses, address]);
+              setAddresses((addresses) => [...addresses, address]);
             } else {
-              setAddresses(addresses.filter((x) => x !== address));
+              setAddresses((addresses) => addresses.filter((x) => x !== address));
             }
           }}
         />
       ))}
-      <Form.TextArea
+      <Form.TextField
         id="bcc"
         title="BCC"
         placeholder="john@dash.com, doe@off.com"

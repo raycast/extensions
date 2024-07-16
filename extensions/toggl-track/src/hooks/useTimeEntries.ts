@@ -1,15 +1,15 @@
-import { useRef } from "react";
-import { useCachedPromise } from "@raycast/utils";
 import dayjs from "dayjs";
-import { getTimeEntries } from "../api";
+import { useRef } from "react";
 
-export function useTimeEntries(initialExecute = true) {
+import { getMyTimeEntries } from "@/api";
+import { useSafeCachedPromise } from "@/hooks/useSafeCachedPromise";
+
+export function useTimeEntries() {
   const startDateRef = useRef(dayjs().subtract(1, "week").toDate());
-  const endDateRef = useRef(dayjs().toDate());
-  const { data, error, isLoading, revalidate } = useCachedPromise(
-    () => getTimeEntries({ startDate: startDateRef.current, endDate: endDateRef.current }),
+  const { data, error, isLoading, revalidate } = useSafeCachedPromise(
+    () => getMyTimeEntries({ startDate: startDateRef.current, endDate: dayjs().toDate(), includeMetadata: true }),
     [],
-    { initialData: [], execute: initialExecute },
+    { initialData: [] },
   );
   return {
     timeEntries: data,

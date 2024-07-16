@@ -7,7 +7,23 @@ type Args = {
 };
 
 export default async function Command(props: Args) {
-  const { url, name, description } = props.arguments;
+  let { url, name, description } = props.arguments;
+
+  // Added extra checks due to errors reporting required fields were still passed as undefined
+  url = url?.trim() ?? "";
+  name = name?.trim() ?? "";
+  description = description?.trim();
+
+  if (url.length === 0) {
+    showFailureToast("Project URL cannot be empty.", { title: "Invalid project URL" });
+    return;
+  }
+
+  if (name.length === 0) {
+    showFailureToast("Project name cannot be empty.", { title: "Invalid project name" });
+    return;
+  }
+
   if (!url.startsWith("https://www.tldraw.com/r/")) {
     showFailureToast("Invalid project URL, must start with https://www.tldraw.com/r/");
     return;

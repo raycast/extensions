@@ -51,6 +51,7 @@ export function GroupListItem(props: { group: any; nameOnly?: boolean }): JSX.El
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Group ID" content={group.id} />
+            <Action.CopyToClipboard title="Copy Group URL" content={group.web_url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.Push
@@ -105,7 +106,7 @@ export function GroupListItem(props: { group: any; nameOnly?: boolean }): JSX.El
   );
 }
 
-function GroupListEmptyView(): JSX.Element {
+export function GroupListEmptyView(): JSX.Element {
   return <List.EmptyView title="No Groups or Projects" icon={{ source: "group.svg", tintColor: Color.PrimaryText }} />;
 }
 

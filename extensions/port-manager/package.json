@@ -16,6 +16,20 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "kill-listening-process",
+      "title": "Kill Process Listening On",
+      "description": "Kill the process listening on a given port",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "port",
+          "placeholder": "Port",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
       "name": "named-ports",
       "title": "Named Ports",
       "description": "Name ports to make them easier to find in the open port list",

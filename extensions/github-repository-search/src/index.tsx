@@ -95,7 +95,7 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
           icon={{ source: "pull-request.png", tintColor: Color.PrimaryText }}
           title="Open Pull Requests"
           url={`${props.repository.url}/pulls`}
-          shortcut={{ modifiers: ["cmd"], key: "p" }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
           onOpen={() => props.onVisit(props.repository)}
         />
         {props.repository.hasIssuesEnabled && (
@@ -112,7 +112,7 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
             icon={{ source: "wiki.png", tintColor: Color.PrimaryText }}
             title="Open Wiki"
             url={`${props.repository.url}/wiki`}
-            shortcut={{ modifiers: ["cmd"], key: "w" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
             onOpen={() => props.onVisit(props.repository)}
           />
         )}

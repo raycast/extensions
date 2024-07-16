@@ -1,8 +1,9 @@
 import fetch from "node-fetch";
-import { getOAuthToken } from "../components/withHeightAuth";
-import { ApiErrorResponse } from "../types/utils";
-import { WorkspaceObject } from "../types/workspace";
-import { ApiUrls } from "./helpers";
+
+import { ApiUrls } from "@/api/helpers";
+import { getOAuthToken } from "@/components/withHeightAuth";
+import { ApiErrorResponse } from "@/types/utils";
+import { WorkspaceObject } from "@/types/workspace";
 
 export async function getWorkspace() {
   const response = await fetch(ApiUrls.workspace, {
