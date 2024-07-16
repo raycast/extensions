@@ -1,6 +1,6 @@
 # lobsters
 
-## 1.0.3 - {PR_MERGE_DATE}
+## 1.0.3 - 2024-07-16
 
 ### Patch Changes
 
