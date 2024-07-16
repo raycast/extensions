@@ -2,7 +2,7 @@
 
 ## [Initial Version] - 2024-05-26
 
-## [1.0.2] - 2024-07-09
+## [1.0.2] - {PR_MERGE_DATE}
 
 ### Fixed
 
