@@ -1,15 +1,11 @@
-const theme = {
-  grey: '#909090',
-  green: '#288056',
-  red: '#802828',
-};
+import { Color } from '@raycast/api';
 
 export const config = {
   colors: {
-    key: theme.grey,
+    key: Color.SecondaryText,
     prio: {
-      positive: theme.grey, // theme.green,
-      negative: theme.grey, // theme.red,
+      positive: Color.SecondaryText, // Color.Green,
+      negative: Color.SecondaryText, // Color.Red,
     },
   },
 };
