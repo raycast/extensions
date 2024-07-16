@@ -37,7 +37,7 @@ export async function loadSingleLexicon(nsid: string) {
 	}
 }
 
-export async function fetchLexicons() {
+export async function* fetchLexicons() {
 	const response = await fetch(`https://api.github.com/repos/${LEXICONS_REPO}/contents${LEXICONS_PATH}`);
 	if (!response.ok) {
 		throw new Error(response.status + " " + response.statusText);
@@ -57,24 +57,28 @@ export async function fetchLexicons() {
 	const lexiconDocs: Record<string, LexiconDoc | null> = {};
 
 	for (const url of lexiconDocUrls) {
-		try {
-			const response = await fetch(url).catch(() => null);
-			if (!response?.ok) {
-				throw null;
-			}
+		const response = await fetch(url);
 
+		let ok = true;
+
+		if (response.ok) {
 			const doc = await response.json();
-			if (typeof doc !== "object") {
-				throw null;
-			}
+			if (typeof doc === "object") {
+				const lexiconDoc = parseLexiconDoc(doc);
+				lexiconDocs[lexiconDoc.id] = lexiconDoc;
+				yield { nsid: lexiconDoc.id, doc: lexiconDoc };
+			} else ok = false;
+		} else if (response.status === 403) {
+			throw new Error(response.status + " " + response.statusText);
+		} else ok = false;
 
-			const lexiconDoc = parseLexiconDoc(doc);
-			lexiconDocs[lexiconDoc.id] = lexiconDoc;
-		} catch (e) {
+		if (!ok) {
 			const [, nsid1, nsid2, nsid3, nsid4] =
 				url.match(/lexicons\/([^/]+)\/([^/]+)\/([^/]+)\/([^/]+)\.json/) || [];
 			if (nsid1 && nsid2 && nsid3 && nsid4) {
-				lexiconDocs[`${nsid1}.${nsid2}.${nsid3}.${nsid4}`] = null;
+				const nsid = `${nsid1}.${nsid2}.${nsid3}.${nsid4}`;
+				lexiconDocs[nsid] = null;
+				yield { nsid, doc: null };
 			}
 		}
 	}

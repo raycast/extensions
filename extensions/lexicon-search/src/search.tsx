@@ -28,9 +28,10 @@ export default function Search(props: LaunchProps<{ arguments: Arguments.Search 
 				setError(null);
 				setIsLoading(true);
 				try {
-					setLexicons(await fetchLexicons());
+					for await (const { nsid, doc } of fetchLexicons()) {
+						setLexicons((prev) => ({ ...prev, [nsid]: doc }));
+					}
 				} catch (e) {
-					console.error(e);
 					setError(e instanceof Error ? e : new Error("Failed to fetch new lexicon data"));
 					await showFailureToast(e, {
 						title: "Failed to fetch new lexicon data",
@@ -89,8 +90,8 @@ export default function Search(props: LaunchProps<{ arguments: Arguments.Search 
 		>
 			{Object.entries(listToDisplay).length ? (
 				Object.entries(listToDisplay).map(([nsid, document]) => {
-					const id = "id" in document ? document.id : nsid;
-					if ("defs" in document && Object.values(document.defs).length === 1) {
+					const id = !!document && "id" in document ? document.id : nsid;
+					if (!!document && "defs" in document && Object.values(document.defs).length === 1) {
 						nsid += "#" + Object.keys(document.defs)[0];
 					}
 					return (
