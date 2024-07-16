@@ -3,7 +3,7 @@
   "name": "virtualizor-enduser",
   "title": "Virtualizor Enduser",
   "description": "Manage Virtualizor Enduser instance",
-  "icon": "command-icon.png",
+  "icon": "virtualizor.png",
   "author": "xmok",
   "categories": [
     "Applications",
@@ -13,33 +13,45 @@
   "preferences": [
     {
       "name": "virtualizor_url",
-"title": "Virtualizor URL",
-"placeholder": "https://example.com:4083",
-"description": "URL of Virtualizor Instance w/ Port",
-"required": true,
-"type": "textfield"
+      "title": "Virtualizor URL",
+      "placeholder": "https://example.com:4083",
+      "description": "URL of Virtualizor Instance w/ Port",
+      "required": true,
+      "type": "textfield"
     },
     {
       "name": "api_key",
-"title": "API Key",
-"placeholder": "HS...MI",
-"description": "",
-"required": true,
-"type": "password"
+      "title": "API Key",
+      "placeholder": "HS...MI",
+      "description": "",
+      "required": true,
+      "type": "password"
     },
     {
       "name": "api_pass",
-"title": "API Pass",
-"placeholder": "",
-"description": "",
-"required": true,
-"type": "password"
+      "title": "API Pass",
+      "placeholder": "",
+      "description": "",
+      "required": true,
+      "type": "password"
     }
   ],
   "commands": [
     {
       "name": "virtual-servers",
       "title": "Virtual Servers",
+      "description": "",
+      "mode": "view"
+    },
+    {
+      "name": "logs",
+      "title": "Logs",
+      "description": "",
+      "mode": "view"
+    },
+    {
+      "name": "tasks",
+      "title": "Tasks",
       "description": "",
       "mode": "view"
     }

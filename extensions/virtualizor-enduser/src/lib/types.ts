@@ -542,10 +542,73 @@ export type ListVirtualServersResponse = {
     [key: string]: number;
   };
 }
+
+type Log = {
+  actid: string;
+  uid: string;
+  vpsid: string;
+  action: string;
+  data: string;
+  time: string;
+  status: "0" | "1";
+  ip: string;
+  email: string | null;
+  action_text: string;
+}
+export type LogsResponse = {
+  logs: {
+    [key: string]: Log;
+  }
+}
+
+export type Task = {
+  actid: string;
+  slaveactid: string;
+  uid: string;
+  vpsid: string;
+  serid: number;
+  action: string | null;
+  data: string;
+  time: string;
+  status_txt: string;
+  status: string;
+  progress: string;
+  started: string;
+  updated: string;
+  ended: string;
+  proc_id: string;
+  ip: string;
+  internal: string;
+  email: string;
+  progress_num: string;
+  notupdated_task: number;
+  server_name: string;
+}
+
+type Page = {
+  start: number;
+  len: number;
+  maxNum: string;
+}
+
 export type MessageResponse = {
   done: {
     msg: string;
+    goto?: string;
+    vpsid: string;
   }
+  status?: number;
   output: string;
+} & {
+  [key: string]: {
+    done: 1;
+    done_msg: string;
+  }
 }
 export type SuccessResponse<T> = CommonResponse & T;
+export type SuccessPaginatedResponse<T> = CommonResponse & T & {page: Page};
+export type ErrorResponse = CommonResponse & {
+  error: string[];
+  status?: number;
+  output: null;
+};

@@ -1,13 +1,14 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
-import useVirtualizor from "./lib/hooks/useVirtualizor";
 import { ListVirtualServersResponse, MessageResponse } from "./lib/types";
 import { useState } from "react";
+import generateBaseUrl from "./lib/utils/generate-base-url";
+import { useVirtualizor } from "./lib/hooks";
 
 export default function VirtualServers() {
     const [action, setAction] = useState("");
     const [ID, setID] = useState<string | null>("");
     
-    const { isLoading: isFetching, data, revalidate, BASE_URL } = useVirtualizor<ListVirtualServersResponse>("listvs");
+    const { isLoading: isFetching, data, revalidate } = useVirtualizor<ListVirtualServersResponse>("listvs");
     const { isLoading: isDoingAction } = useVirtualizor<MessageResponse>(action, {
         params: {
             svs: ID || "",
@@ -15,7 +16,7 @@ export default function VirtualServers() {
         },
         execute: Boolean(action) && Boolean(ID),
         async onWillExecute() {
-            await showToast(Toast.Style.Animated, action.at(0)?.toUpperCase() + action.slice(1) + `ing Server ${ID}`);
+            await showToast(Toast.Style.Animated, "PROCESSING", `${action} Server ${ID}`);
         },
         async onData(data) {
             await showToast(Toast.Style.Success, data.done.msg, data.output);
@@ -44,12 +45,19 @@ export default function VirtualServers() {
         return { source: Icon.Dot, tintColor };
     }
 
-    return <List isLoading={isLoading} onSelectionChange={setID}>
+    return <List isLoading={isLoading} onSelectionChange={setID} searchBarPlaceholder="Search virtual server">
         {data && Object.values(data.vs).map(vps => <List.Item key={vps.vpsid} id={vps.vpsid} icon={getIcon(vps.status)} title={vps.hostname} subtitle={Object.values(vps.ips).join(", ")} accessories={[
-            { icon: BASE_URL + vps.distro },
+            { icon: generateBaseUrl() + vps.distro },
             { text: vps.email }
         ]} actions={!isLoading && <ActionPanel>
-            <Action icon={Icon.Redo} title="Restart VPS" onAction={() => setAction("restart")} />
+            <Action icon={Icon.Redo} title="Revalidate" onAction={revalidate} />
+                <ActionPanel.Section>
+            {vps.status!==0 && <>
+                <Action icon={{ source: Icon.Redo, tintColor: Color.Blue }} title="Restart VPS" onAction={() => setAction("restart")} />
+                <Action icon={{ source: Icon.Stop, tintColor: Color.Red }} title="Stop VPS" onAction={() => setAction("stop")} />
+                    </>}
+            {vps.status===0 && <Action icon={{ source: Icon.Play, tintColor: Color.Green }} title="Start VPS" onAction={() => setAction("start")} />}
+                </ActionPanel.Section>
         </ActionPanel>} />)}
     </List>
 }

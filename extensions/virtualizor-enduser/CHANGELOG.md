@@ -1,3 +1,3 @@
 # Virtualizor Enduser Changelog
 
-## [Initial Version] - 2024-07-13
+## [Initial Version] - {PR_MERGE_DATE}
