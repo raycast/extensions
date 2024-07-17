@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.79.0 - 2024-07-17
+
+### ✨ New
+
+- **Navigation**: Added a second argument to `useNavigation().push` to specify a callback called when the pushed view will be popped. You can use it to update the current view when it will become active again. There’s also a new `onPop` prop on `Action.Push` to do the same thing.
+
+### 💎 Improvements
+
+- When creating or forking an extension, an alert will be shown if you specify an existing folder (and thus avoid overwriting files without warning)
+
 ## 1.78.0 - 2024-07-03
 
 ### ✨ New
