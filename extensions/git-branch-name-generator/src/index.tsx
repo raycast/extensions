@@ -89,7 +89,7 @@ export default function Command() {
       <Form.Dropdown
         id="branchType"
         title="Branch Type"
-        placeholder="Custom... (Enter existing branch type to delete)"
+        placeholder="Custom..."
         onSearchTextChange={handleSearchText}
         storeValue
       >
