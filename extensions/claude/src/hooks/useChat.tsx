@@ -48,7 +48,8 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
           system: model.prompt,
           max_tokens: Number(model.max_tokens) || 4096,
           messages: [...chatTransformer(data), { role: "user", content: question }],
-        })
+        },
+          { headers: { 'anthropic-beta': 'max-tokens-3-5-sonnet-2024-07-15' } },)
         .on("text", (res) => {
           chat.answer += res;
           setStreamData({ ...chat, answer: chat.answer });

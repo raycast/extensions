@@ -44,7 +44,7 @@ Got the answer that you wanted? Great.
 
 # Models available
 
-## Calude 3.5
+## Claude 3.5
 
 - `claude-3-5-sonnet-20240620`
 
