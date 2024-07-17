@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.1 - 2024-07-16
+## 1.0.1 - {PR_MERGE_DATE}
 
 Add new tags, collections & bookmark types views
 
