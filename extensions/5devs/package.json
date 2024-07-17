@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "5devs",
   "title": "5Devs",
-  "description": "Get fake data for your tests",
+  "description": "Get realistic data for testing purposes.",
   "icon": "5.png",
   "author": "gustavofior",
   "categories": [
