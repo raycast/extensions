@@ -16,6 +16,10 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.16.2
+
+- Fixed the refresh token flow to log out the user instead of throwing an error.
+
 ### v1.16.1
 
 - Fixed an issue where `bodyEncoding` wasn't properly used in OAuthService.

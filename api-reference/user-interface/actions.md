@@ -266,6 +266,7 @@ export default function Command() {
 | title<mark style="color:red;">*</mark> | The title displayed for the Action. | <code>string</code> | - |
 | icon | The icon displayed for the Action. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
 | shortcut | The keyboard shortcut for the Action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
+| onPop | Callback when the target view will be popped. | <code>() => void</code> | - |
 | onPush | Callback when the target view was pushed. | <code>() => void</code> | - |
 
 ### Action.ShowInFinder
