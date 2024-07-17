@@ -29,6 +29,8 @@ export default function AppsView() {
       code: string;
       percent: number;
       time: string;
+      secret: string;
+      options: Options;
     }[]
   >([]);
   const { defaultAction } = getPreferenceValues();
@@ -49,6 +51,8 @@ export default function AppsView() {
                 token.options.period) *
               100,
             code: generateTOTP(token.secret, token.options).toString().padStart(token.options.digits, "0"),
+            secret: token.secret,
+            options: token.options,
           };
         })
     );
@@ -132,6 +136,11 @@ export default function AppsView() {
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>
+                <Action.CopyToClipboard
+                    icon={Icon.Warning}
+                    title="Backup App"
+                    content={JSON.stringify({ name: a.name, secret: a.secret, options: a.options })}
+                  />
                 <Action
                   icon={Icon.Trash}
                   title="Remove App"

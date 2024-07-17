@@ -5,6 +5,9 @@
   "description": "Quickly access your two-factor authentication codes.",
   "icon": "command-icon.png",
   "author": "cjdenio",
+  "contributors": [
+    "97albertus"
+  ],
   "license": "MIT",
   "keywords": [
     "auth",
