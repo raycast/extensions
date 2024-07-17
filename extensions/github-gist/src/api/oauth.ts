@@ -6,7 +6,7 @@ import { GithubClient } from "./github-client";
 let client: GithubClient | undefined = undefined;
 
 export const githubOAuthService = OAuthService.github({
-  scope: "repo gist read:user",
+  scope: "gist",
   onAuthorize: ({ token }) => {
     const octokit = new Octokit({ auth: token, request: { fetch } });
 
