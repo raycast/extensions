@@ -28,6 +28,8 @@ const useEvent = () => {
     [apiToken]
   );
 
+  const hasRescheduleUnstarted = currentUser?.features.assistSettings.rescheduleUnstarted;
+
   const useFetchEvents = ({ start, end }: { start: Date; end: Date }) => {
     const { data, ...rest } = useFetch<ApiResponseEvents>(
       `${apiUrl}/events?${new URLSearchParams({
@@ -159,10 +161,15 @@ const useEvent = () => {
   };
 
   const getEventActions = useCallback((event: Event): EventActions => {
-    const isHappening = isWithinInterval(new Date(), {
+    const isActive = isWithinInterval(new Date(), {
       end: new Date(event.eventEnd),
       start: new Date(event.eventStart),
     });
+
+    const isEventManuallyStarted = event.assist?.manuallyStarted;
+    const showStart = !isActive || (!!isActive && !!hasRescheduleUnstarted && !isEventManuallyStarted);
+    const showRestartStop =
+      !!isActive && (!hasRescheduleUnstarted || (!!hasRescheduleUnstarted && !!isEventManuallyStarted));
 
     const eventActions: EventActions = [];
 
@@ -178,30 +185,33 @@ const useEvent = () => {
 
     switch (event.assist?.eventType) {
       case "TASK_ASSIGNMENT":
-        isHappening
-          ? eventActions.push(
-              {
-                icon: Icon.Rewind,
-                title: "Restart",
-                action: async () => {
-                  event.assist?.taskId && (await handleRestartTask(String(event.assist.taskId)));
-                },
-              },
-              {
-                icon: Icon.Stop,
-                title: "Stop",
-                action: async () => {
-                  event.assist?.taskId && (await handleStopTask(String(event.assist.taskId)));
-                },
-              }
-            )
-          : eventActions.push({
-              icon: Icon.Play,
-              title: "Start",
+        showStart &&
+          eventActions.push({
+            icon: Icon.Play,
+            title: "Start",
+            action: async () => {
+              event.assist?.taskId && (await handleStartTask(String(event.assist.taskId)));
+            },
+          });
+
+        showRestartStop &&
+          eventActions.push(
+            {
+              icon: Icon.Rewind,
+              title: "Restart",
               action: async () => {
-                event.assist?.taskId && (await handleStartTask(String(event.assist.taskId)));
+                event.assist?.taskId && (await handleRestartTask(String(event.assist.taskId)));
               },
-            });
+            },
+            {
+              icon: Icon.Stop,
+              title: "Stop",
+              action: async () => {
+                event.assist?.taskId && (await handleStopTask(String(event.assist.taskId)));
+              },
+            }
+          );
+
         eventActions.push({
           icon: Icon.Calendar,
           title: "Open in Planner",
@@ -235,7 +245,7 @@ const useEvent = () => {
         });
         break;
       case "HABIT_ASSIGNMENT":
-        isHappening
+        isActive
           ? eventActions.push(
               {
                 icon: Icon.Rewind,
@@ -273,33 +283,35 @@ const useEvent = () => {
         });
         break;
       case "SMART_HABIT":
-        isHappening
-          ? eventActions.push(
-              {
-                icon: Icon.Rewind,
-                title: "Restart",
-                action: async () => {
-                  event.assist?.seriesLineageId &&
-                    (await handleStartOrRestartSmartHabit(String(event.assist?.seriesLineageId), event.title));
-                },
-              },
-              {
-                icon: Icon.Stop,
-                title: "Stop",
-                action: async () => {
-                  event.assist?.seriesLineageId &&
-                    (await handleStopSmartHabit(String(event.assist?.seriesLineageId), event.title));
-                },
-              }
-            )
-          : eventActions.push({
-              icon: Icon.Play,
-              title: "Start",
+        showRestartStop &&
+          eventActions.push(
+            {
+              icon: Icon.Rewind,
+              title: "Restart",
               action: async () => {
                 event.assist?.seriesLineageId &&
                   (await handleStartOrRestartSmartHabit(String(event.assist?.seriesLineageId), event.title));
               },
-            });
+            },
+            {
+              icon: Icon.Stop,
+              title: "Stop",
+              action: async () => {
+                event.assist?.seriesLineageId &&
+                  (await handleStopSmartHabit(String(event.assist?.seriesLineageId), event.title));
+              },
+            }
+          );
+
+        showStart &&
+          eventActions.push({
+            icon: Icon.Play,
+            title: "Start",
+            action: async () => {
+              event.assist?.seriesLineageId &&
+                (await handleStartOrRestartSmartHabit(String(event.assist?.seriesLineageId), event.title));
+            },
+          });
 
         eventActions.push({
           icon: Icon.Calendar,
@@ -315,7 +327,7 @@ const useEvent = () => {
 
     eventActions.push({
       icon: Icon.Calendar,
-      title: "Open in Google Calendar",
+      title: "Open in Calendar",
       action: () => {
         open(`${apiUrl}/events/view/${event.key}`);
       },
