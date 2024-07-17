@@ -1,5 +1,7 @@
 # iLovePDF Changelog
 
+## [Add User Friendly Error Messages] - 2024-07-16
+
 ## [Add Repair PDF Command] - 2024-07-09
 
 ## [Add Page Number Command] - 2024-07-06
