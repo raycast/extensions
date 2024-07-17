@@ -1,11 +1,8 @@
-import { Form, ActionPanel, Action, useNavigation, Toast, showToast } from "@raycast/api";
+import { Form, ActionPanel, Action, Toast, showToast, launchCommand, LaunchType } from "@raycast/api";
 import { useState } from "react";
 import { isDomain, fetchPageSpeed } from "./utils";
-import Main from "./pagespeed";
 
 export default function PagespeedForm() {
-  const { push } = useNavigation();
-
   const [isLoading, setIsLoading] = useState(false);
   const [domainError, setDomainError] = useState<string | undefined>();
 
@@ -35,7 +32,10 @@ export default function PagespeedForm() {
       setIsLoading(true);
       await fetchPageSpeed(values.domainField);
       setIsLoading(false);
-      push(<Main />);
+      launchCommand({
+        name: "pagespeed",
+        type: LaunchType.UserInitiated,
+      });
     } catch (error) {
       setIsLoading(false);
       showToast(Toast.Style.Failure, "Failed to fetch PageSpeed report");
