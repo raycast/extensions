@@ -28,9 +28,9 @@ export default function Search(props: LaunchProps<{ arguments: Arguments.Search 
 				setError(null);
 				setIsLoading(true);
 				try {
-					for await (const { nsid, doc } of fetchLexicons()) {
+					await fetchLexicons((nsid, doc) => {
 						setLexicons((prev) => ({ ...prev, [nsid]: doc }));
-					}
+					});
 				} catch (e) {
 					setError(e instanceof Error ? e : new Error("Failed to fetch new lexicon data"));
 					await showFailureToast(e, {
@@ -60,14 +60,16 @@ export default function Search(props: LaunchProps<{ arguments: Arguments.Search 
 			}),
 	);
 
-	const listToDisplay = useMemo<Record<string, LexiconDoc | LexiconDoc["defs"][string]>>(() => {
-		let entries;
+	const listToDisplay = useMemo<Record<string, LexiconDoc | LexiconDoc["defs"][string] | null>>(() => {
+		let entries: Array<[string, LexiconDoc | LexiconDoc["defs"][string] | null]>;
 		if (searchText && lexicons[searchText]) {
 			entries = Object.entries(lexicons[searchText].defs).map(([key, def]) => [`${searchText}#${key}`, def]);
 		} else if (filter !== "All") {
 			entries = Object.entries(extensiveLexiconListing).filter(([, doc]) => doc?.type === filter.toLowerCase());
-		}
-		return entries ? Object.fromEntries(entries) : searchText.includes("#") ? extensiveLexiconListing : lexicons;
+		} else if (searchText.includes("#")) {
+			entries = Object.entries(extensiveLexiconListing);
+		} else entries = Object.entries(lexicons);
+		return Object.fromEntries(entries.sort(([a], [b]) => a.localeCompare(b)));
 	}, [searchText, filter, lexicons, extensiveLexiconListing]);
 
 	const selectedDoc = selectedNsid ? (lexicons[selectedNsid] ?? null) : null;
@@ -110,9 +112,9 @@ export default function Search(props: LaunchProps<{ arguments: Arguments.Search 
 										<Action
 											title="Retry"
 											onAction={() =>
-												loadSingleLexicon(nsid).then((lexicon) => {
-													if (lexicon) {
-														setLexicons((prev) => ({ ...prev, [nsid]: lexicon }));
+												loadSingleLexicon(nsid).then((loaded) => {
+													if (loaded) {
+														setLexicons((prev) => ({ ...prev, [loaded.nsid]: loaded.doc }));
 													}
 												})
 											}
@@ -135,7 +137,7 @@ export default function Search(props: LaunchProps<{ arguments: Arguments.Search 
 					);
 				})
 			) : isLoading ? (
-				<List.EmptyView title="Loading lexicons..." description="This might take a minute or two!" />
+				<List.EmptyView title="Loading lexicons..." description="This might take a bit!" />
 			) : (
 				<List.EmptyView title="Failed to load lexicons" description={error?.message} />
 			)}
