@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Clipboard, Detail, Form, Icon, showToast, Toast } from "@raycast/api";
-import ytdl, { videoFormat } from "ytdl-core";
+import ytdl, { videoFormat } from "@distube/ytdl-core";
 import { useEffect, useMemo, useState } from "react";
 import { FormValidation, useForm } from "@raycast/utils";
 import prettyBytes from "pretty-bytes";

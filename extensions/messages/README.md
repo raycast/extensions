@@ -1,3 +1,3 @@
 # Messages
 
-Send quick messages.
+Send quick messages from Raycast.

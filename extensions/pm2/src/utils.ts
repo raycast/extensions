@@ -33,9 +33,19 @@ export const base64Encode = (str: string) => Buffer.from(str).toString("base64")
 
 export const encodeParameters = (parameters: StartOptions | Pm2Process) => base64Encode(JSON.stringify(parameters));
 
-export const getNodeBinaryPath = (runtimeOptions?: RuntimeOptions) => {
-  const { defaultNodeExecutor, nodePath } = getPreferenceValues<Preferences>();
-  return runtimeOptions?.nodePath ?? (defaultNodeExecutor === "raycastNodePath" ? raycastNodePath : nodePath);
+export const setupEnv = (options?: { runtimeOptions?: RuntimeOptions }) => {
+  const { defaultNodeExecutor, nodePath, pm2Home } = getPreferenceValues<Preferences>();
+  const nodeBinaryPath = path.dirname(
+    options?.runtimeOptions?.nodePath ?? (defaultNodeExecutor === "raycastNodePath" ? raycastNodePath : nodePath),
+  );
+
+  if (!process.env.PATH?.includes(nodeBinaryPath)) {
+    process.env.PATH = process.env.PATH ? `${process.env.PATH}:${nodeBinaryPath}` : nodeBinaryPath;
+  }
+
+  if (pm2Home) {
+    process.env.PM2_HOME = pm2Home;
+  }
 };
 
 export async function runPm2Command(
@@ -59,8 +69,8 @@ export async function runPm2Command(
     console.error("No options provided for PM2 command");
     return;
   }
-  const nodeBinaryPath = getNodeBinaryPath(runtimeOptions);
-  const commandLine = `PATH="$PATH:${path.dirname(nodeBinaryPath)}" '${nodeBinaryPath}' '${pm2WrapperIndexPath}' ${command} --options=${encodeParameters(options)}`;
+  setupEnv({ runtimeOptions });
+  const commandLine = `node '${pm2WrapperIndexPath}' ${command} --options=${encodeParameters(options)}`;
   const toast =
     environment.commandMode === "view"
       ? await showToast({ title: "", message: `Running ${command} command...` })

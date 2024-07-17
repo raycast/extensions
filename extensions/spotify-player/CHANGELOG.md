@@ -19,7 +19,7 @@
 
 ## [Automatically Trigger Current Track] - 2024-05-28
 
-- Automatically trigger the current track command when commands that modify the current track state are executed. (Like, Unlike, Next, Previous)
+- Automatically trigger the current track command when commands that modify the current track state are executed. (Like, Unlike, Next, Previous).
 
 ## [New Actions Added] - 2024-05-27
 
