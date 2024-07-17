@@ -1,5 +1,9 @@
 # YouTube Downloader Changelog
 
+## [Fix download failed] - 2024-07-16
+
+- Replace the `ytdl-core` with `@distube/ytdl-core` to fix the download failed issue
+
 ## [Update copy the video or audio file name with the video title] - 2024-07-05
 
 - Update copy the video or audio file name with the video title
