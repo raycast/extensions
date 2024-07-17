@@ -14,24 +14,28 @@ import { useEvent } from "./hooks/useEvent";
 import { EventActions } from "./hooks/useEvent.types";
 import { Event } from "./types/event";
 import { eventColors } from "./utils/events";
+import { useTask } from "./hooks/useTask";
+import { SNOOZE_OPTIONS } from "./consts/tasks.consts";
 
 type EventSection = { section: string; sectionTitle: string; events: Event[] };
 
 const EventActionsList = ({ event }: { event: Event }) => {
   const [eventActions, setEventActions] = useState<EventActions>([]);
 
-  const { getEventActions, handleRescheduleTask } = useEvent();
+  const { getEventActions } = useEvent();
+  const { rescheduleTask } = useTask();
 
   const loadEventActions = async () => {
     const actions = await getEventActions(event);
     setEventActions(actions);
   };
 
-  const rescheduleTask = async (taskId: string, reschedule: string, startDate?: Date) => {
+  const handleRescheduleTask = async (taskId: string, reschedule: string, startDate?: Date) => {
     await showToast(Toast.Style.Animated, "Rescheduling event...");
     try {
-      const executeReschedule = await handleRescheduleTask(taskId, reschedule, startDate?.toISOString());
-      if (executeReschedule) {
+      const task = await rescheduleTask(taskId, reschedule, startDate?.toISOString());
+
+      if (task) {
         showToast(Toast.Style.Success, `Rescheduled"${event.title}" successfully!`);
       } else {
         throw new Error("Rescheduling failed.");
@@ -63,54 +67,15 @@ const EventActionsList = ({ event }: { event: Event }) => {
       ))}
       {event.reclaimManaged === true && event.assist?.eventType === "TASK_ASSIGNMENT" && (
         <ActionPanel.Submenu title="Snooze Task" icon={Icon.ArrowClockwise}>
-          <Action
-            title="15min"
-            onAction={() => {
-              rescheduleTask(String(event.assist?.taskId), "FROM_NOW_15M");
-            }}
-          />
-          <Action
-            title="30min"
-            onAction={() => {
-              rescheduleTask(String(event.assist?.taskId), "FROM_NOW_30M");
-            }}
-          />
-          <Action
-            title="1hr"
-            onAction={() => {
-              rescheduleTask(String(event.assist?.taskId), "FROM_NOW_1H");
-            }}
-          />
-          <Action
-            title="2hrs"
-            onAction={() => {
-              rescheduleTask(String(event.assist?.taskId), "FROM_NOW_2H");
-            }}
-          />
-          <Action
-            title="4hrs"
-            onAction={() => {
-              rescheduleTask(String(event.assist?.taskId), "FROM_NOW_4H");
-            }}
-          />
-          <Action
-            title="1 Day"
-            onAction={() => {
-              rescheduleTask(String(event.assist?.taskId), "TOMORROW");
-            }}
-          />
-          <Action
-            title="2 Days"
-            onAction={() => {
-              rescheduleTask(String(event.assist?.taskId), "IN_TWO_DAYS");
-            }}
-          />
-          <Action
-            title="1 Week"
-            onAction={() => {
-              rescheduleTask(String(event.assist?.taskId), "NEXT_WEEK");
-            }}
-          />
+          {SNOOZE_OPTIONS.map((option) => (
+            <Action
+              key={option.title}
+              title={option.title}
+              onAction={() => {
+                handleRescheduleTask(String(event.assist?.taskId), option.value);
+              }}
+            />
+          ))}
         </ActionPanel.Submenu>
       )}
     </ActionPanel>

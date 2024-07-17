@@ -144,6 +144,26 @@ const useTask = () => {
     }
   };
 
+  // Snooze Task
+  const rescheduleTask = async (taskId: string, rescheduleCommand: string, relativeFrom?: string) => {
+    try {
+      const [task, error] = await axiosPromiseData(
+        fetcher(
+          `/planner/task/${taskId}/snooze?snoozeOption=${rescheduleCommand}&relativeFrom=${
+            relativeFrom ? relativeFrom : null
+          }`,
+          {
+            method: "POST",
+          }
+        )
+      );
+      if (!task || error) throw error;
+      return task;
+    } catch (error) {
+      console.error("Error while rescheduling event", error);
+    }
+  };
+
   return {
     useFetchTasks,
     createTask,
@@ -154,6 +174,7 @@ const useTask = () => {
     updateTask,
     doneTask,
     incompleteTask,
+    rescheduleTask,
   };
 };
 

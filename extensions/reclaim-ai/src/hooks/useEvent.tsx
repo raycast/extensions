@@ -131,7 +131,9 @@ const useEvent = () => {
   const handleStartOrRestartSmartHabit = async (lineageId: string, title: string) => {
     try {
       await showHUD("Started Habit: " + parseEmojiField(title).textWithoutEmoji);
-      const [habit, error] = await axiosPromiseData(fetcher(`/smart-habits/planner/${lineageId}/start`, { method: "POST" }));
+      const [habit, error] = await axiosPromiseData(
+        fetcher(`/smart-habits/planner/${lineageId}/start`, { method: "POST" })
+      );
       if (!habit || error) throw error;
 
       return habit;
@@ -144,7 +146,9 @@ const useEvent = () => {
   const handleStopSmartHabit = async (lineageId: string, title: string) => {
     try {
       await showHUD("Stopped Habit: " + parseEmojiField(title).textWithoutEmoji);
-      const [habit, error] = await axiosPromiseData(fetcher(`/smart-habits/planner/${lineageId}/stop`, { method: "POST" }));
+      const [habit, error] = await axiosPromiseData(
+        fetcher(`/smart-habits/planner/${lineageId}/stop`, { method: "POST" })
+      );
       if (!habit || error) throw error;
 
       return habit;
@@ -176,21 +180,21 @@ const useEvent = () => {
       case "TASK_ASSIGNMENT":
         isHappening
           ? eventActions.push(
-            {
-              icon: Icon.Rewind,
-              title: "Restart",
-              action: async () => {
-                event.assist?.taskId && (await handleRestartTask(String(event.assist.taskId)));
+              {
+                icon: Icon.Rewind,
+                title: "Restart",
+                action: async () => {
+                  event.assist?.taskId && (await handleRestartTask(String(event.assist.taskId)));
+                },
               },
-            },
-            {
-              icon: Icon.Stop,
-              title: "Stop",
-              action: async () => {
-                event.assist?.taskId && (await handleStopTask(String(event.assist.taskId)));
-              },
-            }
-          )
+              {
+                icon: Icon.Stop,
+                title: "Stop",
+                action: async () => {
+                  event.assist?.taskId && (await handleStopTask(String(event.assist.taskId)));
+                },
+              }
+            )
           : eventActions.push({
               icon: Icon.Play,
               title: "Start",
@@ -233,21 +237,23 @@ const useEvent = () => {
       case "HABIT_ASSIGNMENT":
         isHappening
           ? eventActions.push(
-            {
-              icon: Icon.Rewind,
-              title: "Restart",
-              action: async () => {
-                event.assist?.dailyHabitId && (await handleRestartHabit(String(event.assist?.dailyHabitId), event.title));
+              {
+                icon: Icon.Rewind,
+                title: "Restart",
+                action: async () => {
+                  event.assist?.dailyHabitId &&
+                    (await handleRestartHabit(String(event.assist?.dailyHabitId), event.title));
+                },
               },
-            },
-            {
-              icon: Icon.Stop,
-              title: "Stop",
-              action: async () => {
-                event.assist?.dailyHabitId && (await handleStopHabit(String(event.assist?.dailyHabitId), event.title));
-              },
-            }
-          )
+              {
+                icon: Icon.Stop,
+                title: "Stop",
+                action: async () => {
+                  event.assist?.dailyHabitId &&
+                    (await handleStopHabit(String(event.assist?.dailyHabitId), event.title));
+                },
+              }
+            )
           : eventActions.push({
               icon: Icon.Play,
               title: "Start",
@@ -269,26 +275,29 @@ const useEvent = () => {
       case "SMART_HABIT":
         isHappening
           ? eventActions.push(
-            {
-              icon: Icon.Rewind,
-              title: "Restart",
-              action: async () => {
-                event.assist?.seriesLineageId && (await handleStartOrRestartSmartHabit(String(event.assist?.seriesLineageId), event.title));
+              {
+                icon: Icon.Rewind,
+                title: "Restart",
+                action: async () => {
+                  event.assist?.seriesLineageId &&
+                    (await handleStartOrRestartSmartHabit(String(event.assist?.seriesLineageId), event.title));
+                },
               },
-            },
-            {
-              icon: Icon.Stop,
-              title: "Stop",
-              action: async () => {
-                event.assist?.seriesLineageId && (await handleStopSmartHabit(String(event.assist?.seriesLineageId), event.title));
-              },
-            }
-          )
+              {
+                icon: Icon.Stop,
+                title: "Stop",
+                action: async () => {
+                  event.assist?.seriesLineageId &&
+                    (await handleStopSmartHabit(String(event.assist?.seriesLineageId), event.title));
+                },
+              }
+            )
           : eventActions.push({
               icon: Icon.Play,
               title: "Start",
               action: async () => {
-                event.assist?.seriesLineageId && (await handleStartOrRestartSmartHabit(String(event.assist?.seriesLineageId), event.title));
+                event.assist?.seriesLineageId &&
+                  (await handleStartOrRestartSmartHabit(String(event.assist?.seriesLineageId), event.title));
               },
             });
 
@@ -315,26 +324,11 @@ const useEvent = () => {
     return eventActions;
   }, []);
 
-  const handleRescheduleTask = async (taskId: string, rescheduleCommand: string, relativeFrom?: string) => {
-    try {
-      const [task, error] = await axiosPromiseData(
-        fetcher(`/planner/task/${taskId}/snooze?snoozeOption=${rescheduleCommand}&relativeFrom=${relativeFrom ? relativeFrom : null}`, {
-          method: "POST",
-        })
-      );
-      if (!task || error) throw error;
-      return task;
-    } catch (error) {
-      console.error("Error while rescheduling event", error);
-    }
-  };
-
   return {
     useFetchEvents,
     fetchEvents,
     getEventActions,
     showFormattedEventTitle,
-    handleRescheduleTask,
   };
 };
 
