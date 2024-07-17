@@ -14,8 +14,8 @@
   "commands": [
     {
       "name": "empresa",
-      "title": "Empresa",
-      "description": "Gere dados de empresas",
+      "title": "Company",
+      "description": "Generate a company",
       "mode": "view",
       "icon": "empresa.png",
       "keywords": [
@@ -26,12 +26,12 @@
         "cnpj",
         "inscricao estadual"
       ],
-      "subtitle": "Razão social, CNPJ, inscrição estadual"
+      "subtitle": "Name, documents, state registration..."
     },
     {
       "name": "pessoa",
-      "title": "Pessoa",
-      "description": "Gere dados de pessoas",
+      "title": "Person",
+      "description": "Generate a person",
       "mode": "view",
       "icon": "pessoa.png",
       "keywords": [
@@ -44,12 +44,12 @@
         "rg",
         "data de nascimento"
       ],
-      "subtitle": "Nome, CPF, RG, data de nascimento"
+      "subtitle": "Name, documents, birth date..."
     },
     {
       "name": "endereco",
-      "title": "Endereço",
-      "description": "Gere dados de endereços",
+      "title": "Address",
+      "description": "Generate an address",
       "mode": "view",
       "icon": "endereco.png",
       "keywords": [
@@ -63,12 +63,12 @@
         "estado",
         "cep"
       ],
-      "subtitle": "Rua, número, cidade, estado, CEP"
+      "subtitle": "Zip, street, number, neighborhood..."
     },
     {
       "name": "veiculo",
-      "title": "Veículo",
-      "description": "Gere dados de veículos",
+      "title": "Vehicle",
+      "description": "Generate a vehicle",
       "mode": "view",
       "icon": "veiculo.png",
       "keywords": [
@@ -81,12 +81,12 @@
         "placa",
         "cor"
       ],
-      "subtitle": "Marca, modelo, ano, placa, cor"
+      "subtitle": "Make, model, year, color..."
     },
     {
       "name": "cartao",
-      "title": "Cartão",
-      "description": "Gere dados de cartões",
+      "title": "Card",
+      "description": "Generate a credit card",
       "mode": "view",
       "icon": "cartao.png",
       "keywords": [
@@ -97,12 +97,12 @@
         "expiração",
         "numero"
       ],
-      "subtitle": "CVV, expiração, número, titular"
+      "subtitle": "CVV, expiration date, number..."
     },
     {
       "name": "uteis",
-      "title": "Úteis",
-      "description": "Gere dados utilitários",
+      "title": "Utils",
+      "description": "Generate utilitary data",
       "mode": "view",
       "icon": "uteis.png",
       "keywords": [
