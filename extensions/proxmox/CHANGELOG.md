@@ -1,6 +1,6 @@
 # Proxmox Changelog
 
-## [Handle Errors] - {PR_MERGE_DATE}
+## [Handle Errors] - 2024-07-17
 
 ## [Added Pause/Resume VM] - 2024-04-05
 
