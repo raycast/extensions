@@ -177,7 +177,7 @@
 /extensions/charged                                                 @apoorvsadana
 /extensions/charming-chatgpt                                        @KittenYang
 /extensions/chatgo                                                  @chuyun
-/extensions/chatgpt                                                 @abielzulio @erodactyl @pernielsentikaer @shichongrui @timolins @cruelmoney @abielzulio @abielzulio @k8scat @Nauxscript @aeither
+/extensions/chatgpt                                                 @abielzulio @erodactyl @pernielsentikaer @shichongrui @timolins @cruelmoney @abielzulio @abielzulio @k8scat @Nauxscript @aeither @leeonfield
 /extensions/chatgpt-quick-actions                                   @alanzchen
 /extensions/chatgpt3-prompt                                         @denizyoldas @pernielsentikaer
 /extensions/chatwith                                                @rafalzawadzki
@@ -942,6 +942,7 @@
 /extensions/one-thing                                               @pernielsentikaer @mathieudutour @thomaslombart
 /extensions/one-time-password                                       @lacherogwu
 /extensions/one-time-secret                                         @LarsaSolidor
+/extensions/onelook-thesaurus                                       @FelipeCortez
 /extensions/onenote                                                 @alewandows
 /extensions/ones                                                    @k8scat
 /extensions/open-camera-menu-bar                                    @peduarte
@@ -1407,6 +1408,7 @@
 /extensions/tim                                                     @tmwrnr
 /extensions/time                                                    @devidw
 /extensions/time-logger                                             @aramikuto
+/extensions/time-machine                                            @SuoweiHu
 /extensions/time-tracking                                           @EinLinuus
 /extensions/time-traveling-world-clock                              @himarky
 /extensions/time-until-i-do                                         @MuhaddiMu
@@ -1422,7 +1424,7 @@
 /extensions/tl-dr-ai-summary-tool                                   @crazygo
 /extensions/tldr                                                    @pomdtr
 /extensions/tldraw                                                  @zephraph
-/extensions/tmdb                                                    @Aayush9029 @andreaselia @thomaslombart @j3lte @joeynotjoe
+/extensions/tmdb                                                    @Aayush9029 @andreaselia @thomaslombart @j3lte @joeynotjoe @VBenny42
 /extensions/tmux-sessioner                                          @louishuyng @sxn
 /extensions/tny                                                     @stayallive @stayallive
 /extensions/todo-list                                               @maggie-j-liu @joshkorol @madza91 @bkeys818 @pernielsentikaer @telmen
@@ -1584,7 +1586,7 @@
 /extensions/xkcd                                                    @maggie-j-liu
 /extensions/xqc                                                     @Aayush9029
 /extensions/y-combinator                                            @thomaspaulmann
-/extensions/yabai                                                   @krzysztoff1 @rubentsirunyan
+/extensions/yabai                                                   @krzysztoff1 @rubentsirunyan @webdesus
 /extensions/yafw                                                    @pablopunk @mlz11 @tonypinkevych
 /extensions/yandex-music                                            @AlexStrNik
 /extensions/year-in-progress                                        @thomaspaulmann @anothertempore @akshykhade
