@@ -16,7 +16,7 @@ import { useUser } from "./useUser";
 const useEvent = () => {
   const { fetcher } = reclaimApi();
   const { currentUser } = useUser();
-  const { handleStartTask, handleStopTask } = useTask();
+  const { handleStartTask, handleRestartTask, handleStopTask } = useTask();
   const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
 
   const headers = useMemo(
@@ -103,10 +103,48 @@ const useEvent = () => {
     }
   };
 
+  const handleRestartHabit = async (id: string, title: string) => {
+    try {
+      await showHUD("Restarted Habit: " + parseEmojiField(title).textWithoutEmoji);
+      const [habit, error] = await axiosPromiseData(fetcher(`/planner/restart/habit/${id}`, { method: "POST" }));
+      if (!habit || error) throw error;
+      return habit;
+    } catch (error) {
+      console.error("Error while restarting habit", error);
+      await showHUD("Whoops, something went wrong! Contact support.");
+    }
+  };
+
   const handleStopHabit = async (id: string, title: string) => {
     try {
-      await showHUD("Completed Habit: " + parseEmojiField(title).textWithoutEmoji);
+      await showHUD("Stopped Habit: " + parseEmojiField(title).textWithoutEmoji);
       const [habit, error] = await axiosPromiseData(fetcher(`/planner/stop/habit/${id}`, { method: "POST" }));
+      if (!habit || error) throw error;
+
+      return habit;
+    } catch (error) {
+      console.error("Error while stopping habit", error);
+      await showHUD("Whoops, something went wrong! Contact support.");
+    }
+  };
+
+  const handleStartOrRestartSmartHabit = async (lineageId: string, title: string) => {
+    try {
+      await showHUD("Started Habit: " + parseEmojiField(title).textWithoutEmoji);
+      const [habit, error] = await axiosPromiseData(fetcher(`/smart-habits/planner/${lineageId}/start`, { method: "POST" }));
+      if (!habit || error) throw error;
+
+      return habit;
+    } catch (error) {
+      console.error("Error while starting habit", error);
+      await showHUD("Whoops, something went wrong! Contact support.");
+    }
+  };
+
+  const handleStopSmartHabit = async (lineageId: string, title: string) => {
+    try {
+      await showHUD("Stopped Habit: " + parseEmojiField(title).textWithoutEmoji);
+      const [habit, error] = await axiosPromiseData(fetcher(`/smart-habits/planner/${lineageId}/stop`, { method: "POST" }));
       if (!habit || error) throw error;
 
       return habit;
@@ -137,13 +175,22 @@ const useEvent = () => {
     switch (event.assist?.eventType) {
       case "TASK_ASSIGNMENT":
         isHappening
-          ? eventActions.push({
+          ? eventActions.push(
+            {
+              icon: Icon.Rewind,
+              title: "Restart",
+              action: async () => {
+                event.assist?.taskId && (await handleRestartTask(String(event.assist.taskId)));
+              },
+            },
+            {
               icon: Icon.Stop,
-              title: "Complete",
+              title: "Stop",
               action: async () => {
                 event.assist?.taskId && (await handleStopTask(String(event.assist.taskId)));
               },
-            })
+            }
+          )
           : eventActions.push({
               icon: Icon.Play,
               title: "Start",
@@ -172,15 +219,35 @@ const useEvent = () => {
           },
         });
         break;
+      case "SMART_MEETING":
+        eventActions.push({
+          icon: Icon.Calendar,
+          title: "Open in Planner",
+          action: () => {
+            open(
+              `https://app.reclaim.ai/planner?eventId=${event.eventId}&type=smart-meeting&assignmentId=${event.assist?.seriesLineageId}`
+            );
+          },
+        });
+        break;
       case "HABIT_ASSIGNMENT":
         isHappening
-          ? eventActions.push({
+          ? eventActions.push(
+            {
+              icon: Icon.Rewind,
+              title: "Restart",
+              action: async () => {
+                event.assist?.dailyHabitId && (await handleRestartHabit(String(event.assist?.dailyHabitId), event.title));
+              },
+            },
+            {
               icon: Icon.Stop,
-              title: "Complete",
+              title: "Stop",
               action: async () => {
                 event.assist?.dailyHabitId && (await handleStopHabit(String(event.assist?.dailyHabitId), event.title));
               },
-            })
+            }
+          )
           : eventActions.push({
               icon: Icon.Play,
               title: "Start",
@@ -198,7 +265,42 @@ const useEvent = () => {
             );
           },
         });
+        break;
+      case "SMART_HABIT":
+        isHappening
+          ? eventActions.push(
+            {
+              icon: Icon.Rewind,
+              title: "Restart",
+              action: async () => {
+                event.assist?.seriesLineageId && (await handleStartOrRestartSmartHabit(String(event.assist?.seriesLineageId), event.title));
+              },
+            },
+            {
+              icon: Icon.Stop,
+              title: "Stop",
+              action: async () => {
+                event.assist?.seriesLineageId && (await handleStopSmartHabit(String(event.assist?.seriesLineageId), event.title));
+              },
+            }
+          )
+          : eventActions.push({
+              icon: Icon.Play,
+              title: "Start",
+              action: async () => {
+                event.assist?.seriesLineageId && (await handleStartOrRestartSmartHabit(String(event.assist?.seriesLineageId), event.title));
+              },
+            });
 
+        eventActions.push({
+          icon: Icon.Calendar,
+          title: "Open in Planner",
+          action: () => {
+            open(
+              `https://app.reclaim.ai/planner?eventId=${event.eventId}&type=smart-habit&assignmentId=${event.assist?.seriesLineageId}`
+            );
+          },
+        });
         break;
     }
 
@@ -213,10 +315,10 @@ const useEvent = () => {
     return eventActions;
   }, []);
 
-  const handleRescheduleTask = async (calendarID: string, eventID: string, rescheduleCommand: string) => {
+  const handleRescheduleTask = async (taskId: string, rescheduleCommand: string, relativeFrom?: string) => {
     try {
       const [task, error] = await axiosPromiseData(
-        fetcher(`/planner/task/${calendarID}/${eventID}/reschedule?snoozeOption=${rescheduleCommand}`, {
+        fetcher(`/planner/task/${taskId}/snooze?snoozeOption=${rescheduleCommand}&relativeFrom=${relativeFrom ? relativeFrom : null}`, {
           method: "POST",
         })
       );

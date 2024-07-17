@@ -68,6 +68,16 @@ const useTask = () => {
     }
   };
 
+  const handleRestartTask = async (id: string) => {
+    try {
+      const [task, error] = await axiosPromiseData(fetcher(`/planner/restart/task/${id}`, { method: "POST" }));
+      if (!task || error) throw error;
+      return task;
+    } catch (error) {
+      console.error("Error while restarting task", error);
+    }
+  };
+
   const handleStopTask = async (id: string) => {
     try {
       const [task, error] = await axiosPromiseData(fetcher(`/planner/stop/task/${id}`, { method: "POST" }));
@@ -138,6 +148,7 @@ const useTask = () => {
     useFetchTasks,
     createTask,
     handleStartTask,
+    handleRestartTask,
     handleStopTask,
     addTime,
     updateTask,

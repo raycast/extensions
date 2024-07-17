@@ -27,10 +27,10 @@ const EventActionsList = ({ event }: { event: Event }) => {
     setEventActions(actions);
   };
 
-  const rescheduleTask = async (calendarId: string, eventId: string, reschedule: string) => {
+  const rescheduleTask = async (taskId: string, reschedule: string, startDate?: Date) => {
     await showToast(Toast.Style.Animated, "Rescheduling event...");
     try {
-      const executeReschedule = await handleRescheduleTask(calendarId, eventId, reschedule);
+      const executeReschedule = await handleRescheduleTask(taskId, reschedule, startDate?.toISOString());
       if (executeReschedule) {
         showToast(Toast.Style.Success, `Rescheduled"${event.title}" successfully!`);
       } else {
@@ -61,54 +61,54 @@ const EventActionsList = ({ event }: { event: Event }) => {
           }}
         />
       ))}
-      {event.reclaimManaged === true && (
-        <ActionPanel.Submenu title="Reschedule Event" icon={Icon.ArrowClockwise}>
+      {event.reclaimManaged === true && event.assist?.eventType === "TASK_ASSIGNMENT" && (
+        <ActionPanel.Submenu title="Snooze Task" icon={Icon.ArrowClockwise}>
           <Action
             title="15min"
             onAction={() => {
-              rescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_15M");
+              rescheduleTask(String(event.assist?.taskId), "FROM_NOW_15M");
             }}
           />
           <Action
             title="30min"
             onAction={() => {
-              rescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_30M");
+              rescheduleTask(String(event.assist?.taskId), "FROM_NOW_30M");
             }}
           />
           <Action
             title="1hr"
             onAction={() => {
-              rescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_1H");
+              rescheduleTask(String(event.assist?.taskId), "FROM_NOW_1H");
             }}
           />
           <Action
             title="2hrs"
             onAction={() => {
-              rescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_2H");
+              rescheduleTask(String(event.assist?.taskId), "FROM_NOW_2H");
             }}
           />
           <Action
             title="4hrs"
             onAction={() => {
-              rescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_4H");
+              rescheduleTask(String(event.assist?.taskId), "FROM_NOW_4H");
             }}
           />
           <Action
             title="1 Day"
             onAction={() => {
-              rescheduleTask(String(event.calendarId), event.eventId, "TOMORROW");
+              rescheduleTask(String(event.assist?.taskId), "TOMORROW");
             }}
           />
           <Action
             title="2 Days"
             onAction={() => {
-              rescheduleTask(String(event.calendarId), event.eventId, "IN_TWO_DAYS");
+              rescheduleTask(String(event.assist?.taskId), "IN_TWO_DAYS");
             }}
           />
           <Action
             title="1 Week"
             onAction={() => {
-              rescheduleTask(String(event.calendarId), event.eventId, "NEXT_WEEK");
+              rescheduleTask(String(event.assist?.taskId), "NEXT_WEEK");
             }}
           />
         </ActionPanel.Submenu>
