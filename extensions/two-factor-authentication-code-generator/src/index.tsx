@@ -137,10 +137,10 @@ export default function AppsView() {
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <Action.CopyToClipboard
-                    icon={Icon.Warning}
-                    title="Backup App"
-                    content={JSON.stringify({ name: a.name, secret: a.secret, options: a.options })}
-                  />
+                  icon={Icon.Warning}
+                  title="Backup App"
+                  content={JSON.stringify({ name: a.name, secret: a.secret, options: a.options })}
+                />
                 <Action
                   icon={Icon.Trash}
                   title="Remove App"
