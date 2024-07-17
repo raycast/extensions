@@ -1,13 +1,4 @@
-import {
-  ActionPanel,
-  Detail,
-  List,
-  Action,
-  Icon,
-  Color,
-  getPreferenceValues,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { ActionPanel, List, Action, Icon, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 type Notes = {
@@ -35,8 +26,6 @@ function ucfirst(str: string) {
 }
 
 export default function Command() {
-  const isShowingDetail = getPreferenceValues<Preferences>().details_in_list;
-
   const { isLoading, data: sites } = useFetch(
     "https://raw.githubusercontent.com/jdm-contrib/jdm/master/_data/sites.json",
     {
@@ -60,7 +49,7 @@ export default function Command() {
   } as { [key: string]: string };
 
   return (
-    <List isLoading={isLoading} throttle isShowingDetail={isShowingDetail} searchBarPlaceholder="Search web services">
+    <List isLoading={isLoading} throttle searchBarPlaceholder="Search web services" isShowingDetail>
       <List.Section title={`${sites.length} web services`}>
         {sites.map((site: Site, index: number) => {
           let email = "";
@@ -84,29 +73,10 @@ export default function Command() {
               subtitle={ucfirst(site.difficulty)}
               icon={{ source: Icon.Info, tintColor: difficultyColors[site.difficulty] }}
               keywords={site.domains}
-              accessories={isShowingDetail ? undefined : [{ text: site.domains[0] }]}
               actions={
                 <ActionPanel>
-                  {!isShowingDetail && (
-                    <Action.Push
-                      title="Show Details"
-                      icon={Icon.AppWindow}
-                      target={
-                        <Detail
-                          navigationTitle={`${site.name}: ${site.domains[0]}`}
-                          markdown={markdown}
-                          actions={
-                            <ActionPanel>
-                              <Action.OpenInBrowser title="Go to Site" url={site.url} />
-                              {email && <Action.OpenInBrowser icon={Icon.Envelope} title="Send Email" url={email} />}
-                            </ActionPanel>
-                          }
-                        />
-                      }
-                    />
-                  )}
-                  {isShowingDetail && <Action.OpenInBrowser title="Go to Site" url={site.url} />}
-                  <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+                  <Action.OpenInBrowser title="Go to Site" url={site.url} />
+                  {email && <Action.OpenInBrowser icon={Icon.Envelope} title="Send Email" url={email} />}
                 </ActionPanel>
               }
               detail={
@@ -122,7 +92,7 @@ export default function Command() {
                         />
                       </List.Item.Detail.Metadata.TagList>
                       {site.email && (
-                        <List.Item.Detail.Metadata.Link title="Send email" text={site.email} target={email} />
+                        <List.Item.Detail.Metadata.Link title="Send Email" text={site.email} target={email} />
                       )}
                       <List.Item.Detail.Metadata.Separator />
                       {site.domains.map((domain, domainIndex) => (

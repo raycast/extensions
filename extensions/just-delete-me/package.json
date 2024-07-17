@@ -17,16 +17,6 @@
     "Applications"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "details_in_list",
-      "label": "Show Details and List in one view",
-      "type": "checkbox",
-      "required": false,
-      "default": false,
-      "description": "Check this if you want to see Details and List in one view"
-    }
-  ],
   "commands": [
     {
       "name": "index",
