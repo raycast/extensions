@@ -1,6 +1,7 @@
 # Auto Quit App Changelog
 
-## [Added More Time] - 2024-07-17
+## [Added More Time] - {PR_MERGE_DATE}
+
 - Added more time options
 
 ## [Bug Fix] - 2024-06-20
