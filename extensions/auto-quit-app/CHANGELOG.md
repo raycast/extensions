@@ -1,5 +1,8 @@
 # Auto Quit App Changelog
 
+## [Added More Time] - 2024-07-17
+- Added more time options
+
 ## [Bug Fix] - 2024-06-20
 
 - Fix the bug that accidentally quit the safari web app
