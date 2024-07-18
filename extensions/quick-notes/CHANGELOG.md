@@ -1,6 +1,6 @@
 # Quick Notes Changelog
 
-## [Performance] - {PR_MERGE_DATE}
+## [Performance] - 2024-07-18
 
 - Reduce lag when loading and searching
 
