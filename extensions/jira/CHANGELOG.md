@@ -1,5 +1,13 @@
 # Jira Changelog
 
+## [Log out the user if re-authentication fails] - 2024-07-11
+
+- Automatically log out users if re-authentication fails, instead of displaying an error message.
+
+## [Fix URL port issue] 2024-06-17
+
+- Fixed an issue where adding a port to the URL was not possible
+
 ## [The custom fields can be render as required] - 2024-05-16
 
 - Fixed an issue where the custom fields were not recognized as required, even though the API suggested they were.

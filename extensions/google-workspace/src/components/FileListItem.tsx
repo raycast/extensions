@@ -62,7 +62,7 @@ export default function FileListItem({ file, email }: FileListItemProps) {
               title="Download in Browser"
               icon={Icon.Download}
               shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-              url={file.webContentLink}
+              url={`${file.webContentLink}${email ? `&authuser=${email}` : ""}`}
             />
           ) : null}
 

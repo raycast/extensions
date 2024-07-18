@@ -11,6 +11,7 @@ import { RepositoryDiscussionList } from "./RepositoryDiscussions";
 import { RepositoryIssueList } from "./RepositoryIssues";
 import { RepositoryPullRequestList } from "./RepositoryPullRequest";
 import RepositoryReleases from "./RepositoryReleases";
+import { SortAction, SortActionProps, SortTypesDataProps } from "./SortAction";
 
 type RepositoryActionProps = {
   repository: ExtendedRepositoryFieldsFragment;
@@ -18,7 +19,14 @@ type RepositoryActionProps = {
   mutateList: MutatePromise<ExtendedRepositoryFieldsFragment[] | undefined>;
 };
 
-export default function RepositoryActions({ repository, mutateList, onVisit }: RepositoryActionProps) {
+export default function RepositoryActions({
+  repository,
+  mutateList,
+  onVisit,
+  setSortQuery,
+  sortQuery,
+  sortTypesData,
+}: RepositoryActionProps & SortActionProps & SortTypesDataProps) {
   const { github } = getGitHubClient();
 
   const updatedAt = new Date(repository.updatedAt);
@@ -229,6 +237,10 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
         <Action.CopyToClipboard content={repository.name} title="Copy Repository Name" />
 
         <Action.CopyToClipboard content={repository.owner.login} title="Copy Repository Owner" />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <SortAction {...{ data: sortTypesData, sortQuery, setSortQuery }} />
       </ActionPanel.Section>
     </ActionPanel>
   );

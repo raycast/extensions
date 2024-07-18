@@ -5,7 +5,7 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-06 14:52:33
- * Last modified  : 2023-07-06 15:47:50
+ * Last modified  : 2024-06-26 21:37:46
  */
 
 import { Action, ActionPanel, Grid } from "@raycast/api";
@@ -63,7 +63,7 @@ export default function Command() {
           setSelectedFilter(filter);
           const selection = await getSelectedImages();
           if (selection.length > 0 && selection[0].trim() !== "") {
-            const preview = getFilterThumbnail(filter, selection[0]);
+            const preview = await getFilterThumbnail(filter, selection[0]);
             setPreview(preview);
           }
           await cleanup();

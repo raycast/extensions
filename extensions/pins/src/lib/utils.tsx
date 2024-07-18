@@ -66,3 +66,34 @@ export const cutoff = (str: string, cutoff: number) => {
 export const pluralize = (str: string, count: number) => {
   return `${str}${count === 1 ? "" : "s"}`;
 };
+
+/**
+ * Checks if a value is nullish.
+ *
+ * A nullish value is a value that is either null, undefined, an empty string, an empty array, or an empty object.
+ *
+ * @param value The value to check.
+ * @returns True if the value is nullish, false otherwise.
+ */
+export const isNullish = (value: unknown): value is null | undefined => {
+  if (typeof value == "string") {
+    return value != "";
+  }
+  if (Array.isArray(value)) {
+    return value.length > 0;
+  }
+  if (typeof value == "object") {
+    return value !== null && Object.keys(value).length > 0;
+  }
+  return value !== null && value !== undefined;
+};
+
+/**
+ * Returns a new object with all nullish values removed.
+ * @param obj The object to remove nullish values from.
+ * @returns A new object with all nullish values removed.
+ */
+export const objectFromNonNullableEntriesOfObject = <T extends Record<string, unknown>>(obj: T): T => {
+  const entries = Object.entries(obj);
+  return Object.fromEntries(entries.filter(([, value]) => isNullish(value))) as T;
+};

@@ -1,5 +1,13 @@
 # Simple Reminder Changelog
 
+## [Fix] - 2024-06-26
+
+- Fix issue with reminders in the menu bar not presenting the time they are going to trigger
+
+## [Improved developer experience] - 2024-06-17
+
+- Add clearer error messages for the extension maintainers/contributors to better debug and assess errors in production 
+
 ## [Reminder Menu Bar] - 2024-05-16
 
 - Fix Reminder length not being cut off if topic length is greater than 30

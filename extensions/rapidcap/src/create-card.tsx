@@ -25,9 +25,7 @@ function CreateCardAction({ setCards }: { setCards: (cards: Card[]) => void }) {
         (async () => {
           const cards: Card[] = await getCards();
 
-          if (cards.length > 0) {
-            cards.push(values);
-          }
+          cards.push(values);
           await saveCards(cards);
           setCards(await getCards());
 

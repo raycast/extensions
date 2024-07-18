@@ -1,4 +1,5 @@
 import { Color, Icon, LaunchType, getPreferenceValues, launchCommand, open } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 
 import {
   MenuBarItem,
@@ -7,7 +8,8 @@ import {
   MenuBarSection,
   getBoundedPreferenceNumber,
 } from "./components/Menu";
-import { getIssueStatus } from "./helpers/issue";
+import { SortMenuBarAction } from "./components/SortAction";
+import { getIssueStatus, ISSUE_DEFAULT_SORT_QUERY, ISSUE_SORT_TYPES_TO_QUERIES } from "./helpers/issue";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useMyIssues } from "./hooks/useMyIssues";
 
@@ -26,7 +28,10 @@ function getMaxIssuesPreference(): number {
 }
 
 function MyIssuesMenu() {
-  const { data: sections, isLoading } = useMyIssues(null);
+  const [sortQuery, setSortQuery] = useCachedState<string>("sort-query", ISSUE_DEFAULT_SORT_QUERY, {
+    cacheNamespace: "github-my-issue-menu",
+  });
+  const { data: sections, isLoading } = useMyIssues(null, sortQuery);
 
   const issuesCount = sections?.reduce((acc, section) => acc + section.issues.length, 0);
 
@@ -70,6 +75,7 @@ function MyIssuesMenu() {
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={() => launchMyIssuesCommand()}
         />
+        <SortMenuBarAction {...{ sortQuery, setSortQuery, data: ISSUE_SORT_TYPES_TO_QUERIES }} />
         <MenuBarItemConfigureCommand />
       </MenuBarSection>
     </MenuBarRoot>

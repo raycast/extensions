@@ -7,7 +7,6 @@
   "author": "Falcon",
   "contributors": [
     "Hodglim",
-    "JonathanWbn",
     "gebeto",
     "mommertf",
     "duboiss",
@@ -19,7 +18,11 @@
     "nagauta",
     "vineus",
     "stelo",
-    "srikirank"
+    "srikirank",
+    "b0lle"
+  ],
+  "pastContributors": [
+    "JonathanWbn"
   ],
   "categories": [
     "Developer Tools",
@@ -64,8 +67,8 @@
     },
     {
       "name": "codepipeline",
-      "title": "CodePipeline Pipelines",
-      "description": "Find and open a pipeline",
+      "title": "CodePipeline",
+      "description": "Find and manage a pipeline, it's executions and stages",
       "mode": "view"
     },
     {
@@ -160,6 +163,7 @@
     "util": "^0.12.5"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
     "@types/node": "^20.12.12",
     "@types/react": "^18.3.2",
     "@typescript-eslint/eslint-plugin": "^7.9.0",

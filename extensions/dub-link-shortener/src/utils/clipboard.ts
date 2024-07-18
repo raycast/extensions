@@ -1,5 +1,8 @@
 import { Clipboard, getSelectedText } from "@raycast/api";
-import { isEmpty } from "./common";
+
+export const isEmpty = (string: string | null | undefined) => {
+  return !(typeof string !== "undefined" && string != null && String(string).length > 0);
+};
 
 export const fetchLink = async () => {
   return getSelectedText()

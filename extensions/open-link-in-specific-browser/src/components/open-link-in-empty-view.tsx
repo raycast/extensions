@@ -7,7 +7,7 @@ export function OpenLinkInEmptyView() {
   return layout === "List" ? (
     <List.EmptyView
       icon={{ source: "empty-icon.png" }}
-      title={"No Browser"}
+      title={"No Browsers"}
       actions={
         <ActionPanel>
           <ActionOpenPreferences />
@@ -17,7 +17,7 @@ export function OpenLinkInEmptyView() {
   ) : (
     <Grid.EmptyView
       icon={{ source: "empty-icon.png" }}
-      title={"No Browser"}
+      title={"No Browsers"}
       actions={
         <ActionPanel>
           <ActionOpenPreferences />
