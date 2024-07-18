@@ -63,18 +63,17 @@ const Result = ({ cmd }: { cmd: string }) => {
         if (killed) {
           return;
         }
-        setOutput((out) => `${out}${data}`);
+        setOutput(data);
+        return;
       });
       child.stdout?.on("data", (data: string) => {
         if (killed) {
           return;
         }
-        setOutput((out) => `${out}${data}`);
+        // FIX the string interpolation (w/ concat) create hangs on UI for large data (like `top`)
+        setOutput(data);
       });
       child.on("exit", () => {
-        if (killed) {
-          return;
-        }
         setFinished(true);
       });
     };
