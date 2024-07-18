@@ -118,7 +118,7 @@ export default function Command() {
 
   const { useFetchEvents } = useEvent();
 
-  const { data: eventsData, isLoading } = useFetchEvents({
+  const { events: eventsData, isLoading } = useFetchEvents({
     start: startOfDay(now),
     end: addDays(now, 7),
   });

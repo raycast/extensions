@@ -64,18 +64,20 @@ export default function Command() {
 
   const { useFetchEvents } = useEvent();
 
-  const { data: eventData, isLoading: isLoadingEvents } = useFetchEvents({
+  const { events: eventData, isLoading: isLoadingEvents } = useFetchEvents({
     start: startOfDay(now),
     end: addDays(now, 2),
   });
 
-  const { useFetchNext } = useMoment();
+  // console.log('=> eventData', eventData)
 
-  const { data: eventMomentData, isLoading: isLoadingMoment } = useFetchNext();
+  const { useFetchMomentNext } = useMoment();
 
-  // if the events returned my moment/next are synced events then return the original event from the events call if it exists
+  const { data: eventMomentData, isLoading: isLoadingMoment } = useFetchMomentNext();
+
+  // if the events returned by moment/next are synced events then return the original event from the events call if it exists
   const eventMoment = useMemo(() => {
-    if (!eventMomentData) return eventMomentData;
+    if (!eventMomentData) return;
 
     const findEvent = (event: Event | undefined | null) => {
       if (!event || !eventData || eventData.length === 0) return event;

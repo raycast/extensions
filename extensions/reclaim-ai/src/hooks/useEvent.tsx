@@ -31,7 +31,7 @@ const useEvent = () => {
   const hasRescheduleUnstarted = currentUser?.features.assistSettings.rescheduleUnstarted;
 
   const useFetchEvents = ({ start, end }: { start: Date; end: Date }) => {
-    const { data, ...rest } = useFetch<ApiResponseEvents>(
+    const { data: events, ...rest } = useFetch<ApiResponseEvents>(
       `${apiUrl}/events?${new URLSearchParams({
         sourceDetails: "true",
         start: format(start, "yyyy-MM-dd"),
@@ -44,36 +44,40 @@ const useEvent = () => {
       }
     );
 
+    // console.log('=> events', events)
+
     return {
-      data: useMemo(() => filterMultipleOutDuplicateEvents(data), [data]),
+      events: useMemo(() => filterMultipleOutDuplicateEvents(events), [events]),
       ...rest,
     };
   };
 
-  const fetchEvents = async ({ start, end }: { start: Date; end: Date }) => {
-    try {
-      const strStart = format(start, "yyyy-MM-dd");
-      const strEnd = format(end, "yyyy-MM-dd");
+  // appears unused
 
-      const [eventsResponse, error] = await axiosPromiseData<ApiResponseEvents>(
-        fetcher("/events?sourceDetails=true", {
-          method: "GET",
-          params: {
-            start: strStart,
-            end: strEnd,
-            allConnected: true,
-          },
-        })
-      );
+  // const fetchEvents = async ({ start, end }: { start: Date; end: Date }) => {
+  //   try {
+  //     const strStart = format(start, "yyyy-MM-dd");
+  //     const strEnd = format(end, "yyyy-MM-dd");
 
-      if (!eventsResponse || error) throw error;
+  //     const [eventsResponse, error] = await axiosPromiseData<ApiResponseEvents>(
+  //       fetcher("/events?sourceDetails=true", {
+  //         method: "GET",
+  //         params: {
+  //           start: strStart,
+  //           end: strEnd,
+  //           allConnected: true,
+  //         },
+  //       })
+  //     );
 
-      // Filter out events that are synced, managed by Reclaim and part of multiple calendars
-      return filterMultipleOutDuplicateEvents(eventsResponse);
-    } catch (error) {
-      console.error("Error while fetching events", error);
-    }
-  };
+  //     if (!eventsResponse || error) throw error;
+
+  //     // Filter out events that are synced, managed by Reclaim and part of multiple calendars
+  //     return filterMultipleOutDuplicateEvents(eventsResponse);
+  //   } catch (error) {
+  //     console.error("Error while fetching events", error);
+  //   }
+  // };
 
   const showFormattedEventTitle = useCallback(
     (event: Event, mini = false) => {
@@ -338,7 +342,7 @@ const useEvent = () => {
 
   return {
     useFetchEvents,
-    fetchEvents,
+    // fetchEvents,
     getEventActions,
     showFormattedEventTitle,
   };
