@@ -60,20 +60,16 @@ export default function Command() {
       const clipboardText = await Clipboard.readText();
       const lastSearch = getLastSearch();
 
-      if (clipboardText && !(lastSearch?.link === clipboardText) && isLinkValid(clipboardText)) {
+      if (lastSearch && clipboardText === lastSearch.link) {
+        setState({ searchText: lastSearch.link, searchResult: lastSearch.searchResult });
+        return;
+      }
+
+      if (clipboardText && isLinkValid(clipboardText)) {
         setState((prev) => ({ ...prev, searchText: clipboardText }));
         showToast(Toast.Style.Success, "Link captured from clipboard!");
         await searchLinks(clipboardText);
         return;
-      }
-
-      if (lastSearch) {
-        if (state.searchText !== "") {
-          cleanLastSearch();
-          return;
-        }
-
-        setState({ searchText: lastSearch.link, searchResult: lastSearch.searchResult });
       }
     })();
   }, []);
@@ -91,7 +87,7 @@ export default function Command() {
         if (!link) return;
 
         if (!isLinkValid(link)) {
-          showToast(Toast.Style.Failure, "Error", "Make sure to enter a valid link");
+          showToast(Toast.Style.Failure, "Error", "Invalid link or not supported");
           return;
         }
 

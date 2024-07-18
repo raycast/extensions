@@ -24,7 +24,9 @@ export const apiCall = async (link: string, adapter?: Adapter) => {
   const response = (await request.json()) as SearchResult & ApiError;
 
   if (request.status !== 200) {
-    throw new Error(response.message);
+    throw new Error(
+      response.code === "VALIDATION" ? "Invalid link or not supported" : "Internal error, please try again",
+    );
   }
 
   return response;
