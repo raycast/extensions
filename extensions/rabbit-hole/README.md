@@ -24,3 +24,7 @@ Your access key normally expires in 24 hours. However, somtimes (still experimen
 
 ## Help! I am no longer able to access my journal data
 It is most likely that your access key has expired. If you stepped away from your machine for an extended amount of time, or quit Raycast from running, it is possible your access key wasn't able to be renewed. Follow the steps in the "Getting your access key" to add it back in again.
+
+## Disclaimer
+
+This extension is a third-party contribution and is not officially affiliated with or endorsed by Raycast. The developers of this extension are solely responsible for its functionality and maintenance. Users of this extension do so at their own risk, and Raycast bears no responsibility for its use or any consequences thereof. By installing and using this extension, you acknowledge that you are responsible for your use of this extension and any actions taken through it.
