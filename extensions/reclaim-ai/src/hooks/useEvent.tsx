@@ -28,9 +28,7 @@ const useEvent = () => {
     [apiToken]
   );
 
-  const hasRescheduleUnstarted = currentUser?.features.assistSettings.rescheduleUnstarted;
-
-  const useFetchEvents = ({ start, end }: { start: Date; end: Date }) => {
+  const fetchEvents = ({ start, end }: { start: Date; end: Date }) => {
     const { data: events, ...rest } = useFetch<ApiResponseEvents>(
       `${apiUrl}/events?${new URLSearchParams({
         sourceDetails: "true",
@@ -44,40 +42,14 @@ const useEvent = () => {
       }
     );
 
-    // console.log('=> events', events)
+    if (!events || rest.error) throw rest.error;
 
     return {
+      // Filter out events that are synced, managed by Reclaim and part of multiple calendars
       events: useMemo(() => filterMultipleOutDuplicateEvents(events), [events]),
       ...rest,
     };
   };
-
-  // appears unused
-
-  // const fetchEvents = async ({ start, end }: { start: Date; end: Date }) => {
-  //   try {
-  //     const strStart = format(start, "yyyy-MM-dd");
-  //     const strEnd = format(end, "yyyy-MM-dd");
-
-  //     const [eventsResponse, error] = await axiosPromiseData<ApiResponseEvents>(
-  //       fetcher("/events?sourceDetails=true", {
-  //         method: "GET",
-  //         params: {
-  //           start: strStart,
-  //           end: strEnd,
-  //           allConnected: true,
-  //         },
-  //       })
-  //     );
-
-  //     if (!eventsResponse || error) throw error;
-
-  //     // Filter out events that are synced, managed by Reclaim and part of multiple calendars
-  //     return filterMultipleOutDuplicateEvents(eventsResponse);
-  //   } catch (error) {
-  //     console.error("Error while fetching events", error);
-  //   }
-  // };
 
   const showFormattedEventTitle = useCallback(
     (event: Event, mini = false) => {
@@ -170,6 +142,7 @@ const useEvent = () => {
       start: new Date(event.eventStart),
     });
 
+    const hasRescheduleUnstarted = currentUser?.features.assistSettings.rescheduleUnstarted;
     const isEventManuallyStarted = event.assist?.manuallyStarted;
     const showStart = !isActive || (!!isActive && !!hasRescheduleUnstarted && !isEventManuallyStarted);
     const showRestartStop =
@@ -341,8 +314,7 @@ const useEvent = () => {
   }, []);
 
   return {
-    useFetchEvents,
-    // fetchEvents,
+    fetchEvents,
     getEventActions,
     showFormattedEventTitle,
   };

@@ -16,13 +16,13 @@ export const useMoment = () => {
     [apiToken]
   );
 
-  const useFetchMomentNext = () =>
+  const fetchMomentNext = () =>
     useFetch<ApiResponseMoment>(`${apiUrl}/moment/next`, {
       headers,
       keepPreviousData: true,
     });
 
   return {
-    useFetchMomentNext,
+    fetchMomentNext,
   };
 };
