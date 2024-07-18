@@ -1,6 +1,6 @@
 # shell Changelog
 
-## [Fix] {PR_MERGE_DATE}
+## [Fix] 2024-07-18
 Fix [issue](https://github.com/raycast/extensions/issues/13496) to avoid UI hanging on large data from `child_process`. 
 
 ## [Fix] 2024-05-15
