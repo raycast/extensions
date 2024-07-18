@@ -1,5 +1,5 @@
 import { Form } from "@raycast/api";
-import { getNameOfHAServiceField, HAServiceField } from "./utils";
+import { getNameOfHAServiceField, HAServiceField, HAServiceTargetEntity } from "./utils";
 import { State } from "@lib/haapi";
 import { getFriendlyName } from "@lib/utils";
 import { parse } from "yaml";
@@ -102,15 +102,31 @@ export function ServiceFormFieldObject({ id, field, value, ...restProps }: Servi
 
 export interface ServiceFormTargetEntitiesTagPickerProps extends Form.TagPicker.Props {
   states: State[] | undefined;
+  target?: HAServiceTargetEntity[] | null;
 }
 
 export function ServiceFormTargetEntitiesTagPicker({
   id,
   states,
+  target,
   value,
   ...restProps
 }: ServiceFormTargetEntitiesTagPickerProps) {
-  console.log("v:", value);
+  const filteredStates = target
+    ? states?.filter((s) => {
+        for (const t of target) {
+          if (t.domain) {
+            const domain = s.entity_id.split(".")[0];
+            if (t.domain.includes(domain)) {
+              return true;
+            }
+          }
+          // TODO check integration as well
+        }
+        return false;
+      })
+    : states;
+  console.log("states", states?.length, "filtered:", filteredStates?.length);
   return (
     <Form.TagPicker
       id={id}
@@ -119,7 +135,7 @@ export function ServiceFormTargetEntitiesTagPicker({
       {...restProps}
       defaultValue={value ?? []}
     >
-      {states?.map((s) => (
+      {filteredStates?.map((s) => (
         <Form.TagPicker.Item key={s.entity_id} value={s.entity_id} title={`${getFriendlyName(s)} (${s.entity_id})`} />
       ))}
     </Form.TagPicker>

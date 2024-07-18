@@ -165,6 +165,7 @@ export default function ServiceCallCommand() {
                   id={`${f.id}_${fullHAServiceName(selectedService)}`}
                   states={states}
                   value={userData[f.id]}
+                  target={selectedService.meta.target?.entity}
                   onChange={(newValue) => setUserDataByKey("entity_id", newValue)}
                 />
               );

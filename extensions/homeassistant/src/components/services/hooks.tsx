@@ -93,7 +93,6 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
         result.push({
           id: k,
           value: undefined,
-          //fromYaml: (text) => text,
           toYaml: (value) => {
             return value;
           },
