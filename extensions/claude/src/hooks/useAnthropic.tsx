@@ -3,13 +3,27 @@ import Anthropic from "@anthropic-ai/sdk";
 import { useState } from "react";
 
 export function useAnthropic(): Anthropic {
-  const [anthropic] = useState(() => {
-    const apiKey = getPreferenceValues<{
-      apiKey: string;
-    }>().apiKey;
+	const [anthropic] = useState(() => {
+		const preferences = getPreferenceValues<{
+			apiKey: string;
+			useBetaFeatures: boolean;
+		}>();
 
-    return new Anthropic({ apiKey: apiKey });
-  });
+		const apiKey = preferences.apiKey;
+		const useBetaFeatures = preferences.useBetaFeatures;
 
-  return anthropic;
+		const config: Anthropic.AnthropicOptions = {
+			apiKey: apiKey,
+		};
+
+		if (useBetaFeatures) {
+			config.defaultHeaders = {
+				"anthropic-beta": "max-tokens-3-5-sonnet-2024-07-15",
+			};
+		}
+
+		return new Anthropic(config);
+	});
+
+	return anthropic;
 }

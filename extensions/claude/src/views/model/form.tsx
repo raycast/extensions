@@ -1,86 +1,120 @@
-import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel,getPreferenceValues, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCallback, useState } from "react";
 import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
 import { Model, ModelHook, CSVPrompt } from "../../type";
 import { parse } from "csv-parse/sync";
 
+interface Preferences {
+	useBetaFeatures: boolean;
+}
+
 export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; name?: string }) => {
   const { use, model } = props;
   const { pop } = useNavigation();
+  const [selectedModel, setSelectedModel] = useState(model?.option ?? "claude-3-haiku-20240307");
 
   const { handleSubmit, itemProps, setValue } = useForm<Model>({
-    onSubmit: async (model) => {
-      let updatedModel: Model = { ...model, updated_at: new Date().toISOString() };
-      updatedModel = { ...updatedModel, temperature: updatedModel.temperature };
-      if (props.model) {
-        const toast = await showToast({
-          title: "Update your model...",
-          style: Toast.Style.Animated,
-        });
-        use.models.update({ ...updatedModel, id: props.model.id, created_at: props.model.created_at });
-        toast.title = "Model updated!";
-        toast.style = Toast.Style.Success;
-      } else {
-        await showToast({
-          title: "Save your model...",
-          style: Toast.Style.Animated,
-        });
-        use.models.add({
-          ...updatedModel,
-          id: uuidv4(),
-          created_at: new Date().toISOString(),
-        });
-        await showToast({
-          title: "Model saved",
-          style: Toast.Style.Animated,
-        });
-      }
-      pop();
-    },
-    validation: {
-      name: FormValidation.Required,
-      temperature: (value) => {
-        if (value !== undefined && value !== null) {
-          const numValue = Number(value);
-          if (!isNaN(numValue)) {
-            if (numValue < 0) {
-              return "Minimal value is 0";
-            } else if (numValue > 1) {
-              return "Maximum value is 1";
-            }
-          }
-        } else {
-          return FormValidation.Required;
-        }
-      },
-      max_tokens: (value) => {
-        if (value !== undefined && value !== null) {
-          const numValue = Number(value);
-          if (!isNaN(numValue)) {
-            if (numValue % 1 !== 0) {
-              return "Value must be an integer";
-            }
-            if (numValue < 0) {
-              return "Minimal value is 0";
-            } else if (numValue > 4096) {
-              return "Maximum value is 4096";
-            }
-          }
-        } else {
-          return FormValidation.Required;
-        }
-      },
-    },
-    initialValues: {
-      name: model?.name ?? "",
-      temperature: model?.temperature.toString() ?? "1",
-      max_tokens: model?.max_tokens ?? "4096",
-      option: model?.option ?? "claude-3-haiku-20240307",
-      prompt: model?.prompt ?? "",
-      pinned: model?.pinned ?? false,
-    },
-  });
+			onSubmit: async (model) => {
+				let updatedModel: Model = {
+					...model,
+					updated_at: new Date().toISOString(),
+				};
+				updatedModel = {
+					...updatedModel,
+					temperature: updatedModel.temperature,
+				};
+				if (props.model) {
+					const toast = await showToast({
+						title: "Update your model...",
+						style: Toast.Style.Animated,
+					});
+					use.models.update({
+						...updatedModel,
+						id: props.model.id,
+						created_at: props.model.created_at,
+					});
+					toast.title = "Model updated!";
+					toast.style = Toast.Style.Success;
+				} else {
+					await showToast({
+						title: "Save your model...",
+						style: Toast.Style.Animated,
+					});
+					use.models.add({
+						...updatedModel,
+						id: uuidv4(),
+						created_at: new Date().toISOString(),
+					});
+					await showToast({
+						title: "Model saved",
+						style: Toast.Style.Animated,
+					});
+				}
+				pop();
+			},
+			validation: {
+				name: FormValidation.Required,
+				temperature: (value) => {
+					if (value === undefined || value === null || value === "") {
+						return "Temperature is required";
+					}
+					const numValue = Number(value);
+					if (Number.isNaN(numValue)) {
+						return "Temperature must be a number";
+					}
+					if (numValue < 0) {
+						return "Minimal value is 0";
+					}
+					if (numValue > 1) {
+						return "Maximum value is 1";
+					}
+					return undefined; // Valid input
+				},
+				max_tokens: (value) => {
+					if (value === undefined || value === null || value === "") {
+						return "Max tokens is required";
+					}
+					const numValue = Number(value);
+					if (Number.isNaN(numValue)) {
+						return "Max tokens must be a number";
+					}
+					if (numValue % 1 !== 0) {
+						return "Value must be an integer";
+					}
+					if (numValue < 0) {
+						return "Minimal value is 0";
+					}
+
+					const preferences = getPreferenceValues<Preferences>();
+					const isBetaEnabled = preferences.useBetaFeatures;
+					const maxAllowed =
+						selectedModel === "claude-3-5-sonnet-20240620" && isBetaEnabled
+							? 8192
+							: 4096;
+
+					if (numValue > maxAllowed) {
+						if (
+							selectedModel === "claude-3-5-sonnet-20240620" &&
+							numValue > 4096 &&
+							!isBetaEnabled
+						) {
+							return `Enable Beta Features in the extension preferences to use values over ${maxAllowed}`;
+						}
+						return `Maximum value is ${maxAllowed}`;
+					}
+					return undefined; // Valid input
+				},
+			},
+			initialValues: {
+				name: model?.name ?? "",
+				temperature: model?.temperature.toString() ?? "1",
+				max_tokens: model?.max_tokens ?? "4096",
+				option: model?.option ?? "claude-3-haiku-20240307",
+				prompt: model?.prompt ?? "",
+				pinned: model?.pinned ?? false,
+			},
+		});
 
   const MODEL_OPTIONS = use.models.option;
 
@@ -139,11 +173,21 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
         {...itemProps.temperature}
       />
       <Form.TextField
-        title="Max token output"
-        placeholder="Set he maximum number of tokens to generate before stopping (0 - 4096)"
-        {...itemProps.max_tokens}
-      />
-      <Form.Dropdown title="Model" placeholder="Choose model option" {...itemProps.option}>
+  title="Max token output"
+  placeholder={`Set the maximum number of tokens to generate before stopping (0 - ${
+    (selectedModel === "claude-3-5-sonnet-20240620" && getPreferenceValues<Preferences>().useBetaFeatures) ? "8192" : "4096"
+  })`}
+  {...itemProps.max_tokens}
+/> 
+      <Form.Dropdown
+        title="Model"
+        placeholder="Choose model option"
+        {...itemProps.option}
+        onChange={(newValue) => {
+          setSelectedModel(newValue);
+          setValue("option", newValue);
+        }}
+      >
         {MODEL_OPTIONS.map((option) => (
           <Form.Dropdown.Item value={option} title={option} key={option} />
         ))}

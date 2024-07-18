@@ -1,5 +1,9 @@
 # Claude Changelog
 
+## [Update] - 2024-07-17
+
+- Feature: Enabled Beta [8192 tokens output limit](https://x.com/alexalbert__/status/1812921642143900036) for Claude 3.5 Sonnet (enable on extension preferences)
+
 ## [Update] - 2024-07-10
 
 - Fix: Restarting a conversation will retain the currently selected model

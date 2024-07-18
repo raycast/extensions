@@ -92,6 +92,15 @@
       "title": "Use Full Text Input",
       "default": false,
       "required": false
+    },
+    {
+      "name": "useBetaFeatures",
+      "label": "Enable full 8192 token output for Sonnet 3.5",
+      "description": "Enable beta features to allow for longer output",
+      "type": "checkbox",
+      "title": "Enable Beta Features",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {
