@@ -1,6 +1,6 @@
 # Google Meet Changelog
 
-## [Improvement] - 2024-07-18
+## [Improvement] - {PR_MERGE_DATE}
 
 - Change the way to get the URL in Chromium-based browsers
 
