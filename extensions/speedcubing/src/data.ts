@@ -157,9 +157,165 @@ const CASES: { [index: string]: Case } = {
       },
     ],
   },
+  "pll-e": {
+    id: "pll-e",
+    name: "PLL (E)",
+    algs: [
+      {
+        moves: "x' L' U L D' L' U' L D L' U' L D' L' U L D",
+      },
+    ],
+  },
+  "pll-na": {
+    id: "pll-na",
+    name: "PLL (Na)",
+    algs: [
+      {
+        moves: "R U R' U R U R' F' R U R' U' R' F R2 U' R' U2 R U' R'",
+      },
+    ],
+  },
+  "pll-nb": {
+    id: "pll-nb",
+    name: "PLL (Nb)",
+    algs: [
+      {
+        moves: "R' U R U' R' F' U' F R U R' F R' F' R U' R",
+      },
+    ],
+  },
+  "pll-v": {
+    id: "pll-v",
+    name: "PLL (V)",
+    algs: [
+      {
+        moves: "R' U R' U' y R' F' R2 U' R' U R' F R F",
+      },
+    ],
+  },
+  "pll-y": {
+    id: "pll-y",
+    name: "PLL (Y)",
+    algs: [
+      {
+        moves: "F ( R U' R' U' ) R U R' F' ( R U R' U' ) R' F R F'",
+      },
+    ],
+  },
+  "pll-aa": {
+    id: "pll-aa",
+    name: "PLL (Aa)",
+    algs: [
+      {
+        moves: "x L2 D2 L' U' L D2 L' U L'",
+      },
+      {
+        moves: "y Lw' U R' D2 R U' R' D2 R2",
+      },
+    ],
+  },
+  "pll-ab": {
+    id: "pll-ab",
+    name: "PLL (Ab)",
+    algs: [
+      {
+        moves: "x' L2 D2 L U L' D2 L U' L",
+      },
+    ],
+  },
+  "pll-f": {
+    id: "pll-f",
+    name: "PLL (F)",
+    algs: [
+      {
+        moves: "R' U' F' R U R' U' R' F R2 U' R' U' R U R' U R",
+      },
+    ],
+  },
+  "pll-ga": {
+    id: "pll-ga",
+    name: "PLL (Ga)",
+    algs: [
+      {
+        moves: "R2 U R' U R' U' R U' R2 U' D R' U R D'",
+      },
+    ],
+  },
+  "pll-gb": {
+    id: "pll-gb",
+    name: "PLL (Gb)",
+    algs: [
+      {
+        moves: "R' U' R U D' R2 U R' U R U' R U' R2 D",
+      },
+    ],
+  },
+  "pll-gc": {
+    id: "pll-gc",
+    name: "PLL (Gc)",
+    algs: [
+      {
+        moves: "R2 U' R U' R U R' U R2 U D' R U' R' D",
+      },
+    ],
+  },
+  "pll-gd": {
+    id: "pll-gd",
+    name: "PLL (Gd)",
+    algs: [
+      {
+        moves: "R U R' U' D R2 U' R U' R' U R' U R2 D'",
+      },
+    ],
+  },
+  "pll-ja": {
+    id: "pll-ja",
+    name: "PLL (Ja)",
+    algs: [
+      {
+        moves: "x R2 F R F' R U2 r' U r U2",
+      },
+    ],
+  },
+  "pll-jb": {
+    id: "pll-jb",
+    name: "PLL (Jb)",
+    algs: [
+      {
+        moves: "R U R' F' R U R' U' R' F R2 U' R'",
+      },
+    ],
+  },
+  "pll-ra": {
+    id: "pll-ra",
+    name: "PLL (Ra)",
+    algs: [
+      {
+        moves: "R U' R' U' R U R D R' U' R D' R' U2 R'",
+      },
+    ],
+  },
+  "pll-rb": {
+    id: "pll-rb",
+    name: "PLL (Rb)",
+    algs: [
+      {
+        moves: "R2 F R U R U' R' F' R U2 R' U2 R",
+      },
+    ],
+  },
+  "pll-t": {
+    id: "pll-t",
+    name: "PLL (T)",
+    algs: [
+      {
+        moves: "R U R' U' R' F R2 U' R' U' R U R' F'",
+      },
+    ],
+  },
 };
 
-type Step = {
+export type Step = {
   title: string;
   cases: Case[];
 };
@@ -179,6 +335,34 @@ export const fourLookLastLayer: Step[] = [
   },
   {
     title: "Permute Last Layer Edges",
+    cases: [CASES["pll-h"], CASES["pll-ua"], CASES["pll-ub"], CASES["pll-z"]],
+  },
+];
+
+export const permutationOfTheLastLayer: Step[] = [
+  {
+    title: "Adjacent Corner Swap",
+    cases: [
+      CASES["pll-aa"],
+      CASES["pll-ab"],
+      CASES["pll-f"],
+      CASES["pll-ga"],
+      CASES["pll-gb"],
+      CASES["pll-gc"],
+      CASES["pll-gd"],
+      CASES["pll-ja"],
+      CASES["pll-jb"],
+      CASES["pll-ra"],
+      CASES["pll-rb"],
+      CASES["pll-t"],
+    ],
+  },
+  {
+    title: "Diagonal Corner Swap",
+    cases: [CASES["pll-e"], CASES["pll-na"], CASES["pll-nb"], CASES["pll-v"], CASES["pll-y"]],
+  },
+  {
+    title: "Edges Only",
     cases: [CASES["pll-h"], CASES["pll-ua"], CASES["pll-ub"], CASES["pll-z"]],
   },
 ];
@@ -203,5 +387,9 @@ export const notation = [
   {
     title: "Slice Moves",
     notations: ["M", "E", "S", "M'", "E'", "S'"],
+  },
+  {
+    title: "Cube Rotations",
+    notations: ["x", "y", "z", "x'", "y'", "z'"],
   },
 ];
