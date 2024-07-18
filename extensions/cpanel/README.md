@@ -26,8 +26,6 @@ This is a Raycast extension for [cPanel](https://cpanel.net/) `User` level accou
 
 - This extension is for ****User**** level accounts so `Reseller` and `Admin` accounts as well as `WHM` accounts are not guaranteed to work.
 
-- On a Technical Note, some "user" commands have dedicated DirectAdmin endpoints but for those which do not, a **Reseller** can `impersonate` a user through the API.
-
 ## 🔧 Commands
 
 <details>
