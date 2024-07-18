@@ -12,8 +12,9 @@ export function useAnthropic(): Anthropic {
     const apiKey = preferences.apiKey;
     const useBetaFeatures = preferences.useBetaFeatures;
 
-    const config: Anthropic.AnthropicOptions = {
+    const config = {
       apiKey: apiKey,
+      defaultHeaders: {},
     };
 
     if (useBetaFeatures) {
