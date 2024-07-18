@@ -1,6 +1,6 @@
 # Coffee Changelog
 
-## [Update] – {PR_MERGE_DATE}
+## [Update] – 2024-07-18
 
 - Updated HUD show time to improve user experience.
 
