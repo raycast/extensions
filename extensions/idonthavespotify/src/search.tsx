@@ -7,7 +7,7 @@ import { Adapter, MetadataType } from "./@types/global";
 
 import { SITE_URL } from "./constants";
 
-import { cacheLastSearch, cleanLastSearch, getLastSearch } from "./utils/cache";
+import { cacheLastSearch, getLastSearch } from "./utils/cache";
 import { playAudio, stopAudio } from "./utils/audio";
 import { apiCall, isLinkValid } from "./shared/searchToClipboard";
 
