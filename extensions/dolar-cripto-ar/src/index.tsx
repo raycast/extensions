@@ -43,7 +43,6 @@ export default function Command() {
       return result;
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
-        console.log("Dollar rates fetch aborted");
         return null;
       }
       await handleError(error, "Failed to fetch dollar rates");
@@ -62,7 +61,6 @@ export default function Command() {
       return result;
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
-        console.log("BTC fetch aborted");
         return null;
       }
       await handleError(error, "Failed to fetch BTC price");
@@ -81,7 +79,6 @@ export default function Command() {
       return result;
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
-        console.log("ETH fetch aborted");
         return null;
       }
       await handleError(error, "Failed to fetch ETH price");
