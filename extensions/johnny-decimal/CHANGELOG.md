@@ -1,3 +1,3 @@
 # Johnny.Decimal Changelog
 
-## [Initial Version] - 2024-07-17
+## [Initial Version] - {PR_MERGE_DATE}
