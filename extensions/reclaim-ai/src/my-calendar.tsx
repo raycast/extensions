@@ -116,24 +116,24 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const now = new Date();
 
-  const { useFetchEvents } = useEvent();
+  const { fetchEvents } = useEvent();
 
-  const { events: eventsData, isLoading } = useFetchEvents({
+  const { events, isLoading } = fetchEvents({
     start: startOfDay(now),
     end: addDays(now, 7),
   });
 
-  const events = useMemo<EventSection[]>(() => {
-    if (!eventsData) return [];
+  const eventSections = useMemo<EventSection[]>(() => {
+    if (!events) return [];
 
     const today = startOfDay(now);
     const tomorrow = startOfDay(addDays(now, 1));
 
-    const events: EventSection[] = [
+    const eventSections: EventSection[] = [
       {
         section: "NOW",
         sectionTitle: "Now",
-        events: eventsData
+        events: events
           .filter((event) => {
             const start = new Date(event.eventStart);
             const end = new Date(event.eventEnd);
@@ -146,7 +146,7 @@ export default function Command() {
       {
         section: "TODAY",
         sectionTitle: "Today",
-        events: eventsData
+        events: events
           .filter((event) => {
             const start = new Date(event.eventStart);
             return isAfter(start, now) && isBefore(start, endOfDay(now));
@@ -158,7 +158,7 @@ export default function Command() {
       {
         section: "EARLIER_TODAY",
         sectionTitle: "Earlier today",
-        events: eventsData
+        events: events
           .filter((event) => {
             const end = new Date(event.eventEnd);
             const start = new Date(event.eventStart);
@@ -171,7 +171,7 @@ export default function Command() {
       {
         section: "TOMORROW",
         sectionTitle: "Tomorrow",
-        events: eventsData
+        events: events
           .filter((event) => {
             const start = new Date(event.eventStart);
             return isWithinInterval(start, { start: tomorrow, end: endOfDay(tomorrow) });
@@ -182,8 +182,8 @@ export default function Command() {
       },
     ];
 
-    return events.filter((event) => event.events.length > 0);
-  }, [eventsData]);
+    return eventSections.filter((event) => event.events.length > 0);
+  }, [events]);
 
   return (
     <List
@@ -194,8 +194,8 @@ export default function Command() {
       navigationTitle="My Calendar"
       searchBarPlaceholder="Search your events"
     >
-      {events.map((section) => (
-        <ListSection key={section.section} sectionTitle={section.sectionTitle} events={section.events} />
+      {eventSections.map((eventSection) => (
+        <ListSection key={eventSection.section} sectionTitle={eventSection.sectionTitle} events={eventSection.events} />
       ))}
     </List>
   );
