@@ -1,6 +1,6 @@
 # Speedcubing Changelog
 
-## ["Add PLL algorithms and cube rotation notations] - {PR_MERGE_DATE}
+## ["Add PLL algorithms and cube rotation notations] - 2024-07-18
 
 - Added PLL step algorithms and cube rotation notations
 
