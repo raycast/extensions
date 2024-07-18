@@ -20,7 +20,7 @@ Link **DocSearch** and **Meilisearch** into Raycast.
 |        [TailwindCSS](https://tailwindcss.com/)        |            [Tauri](https://tauri.app/)            |           [Unidata](https://unidata.app/)           |
 |              [Vite](https://vitejs.dev/)              |           [Vitest](https://vitest.dev/)           |       [Vue Router](https://router.vuejs.org/)       |
 |               [Vue](https://vuejs.org/)               |           [VueUse](https://vueuse.org/)           |     [Vuepress](https://v2.vuepress.vuejs.org/)      |
-|    [ElementPlus](https://element-plus.org/en-US/)     |         [Vuetify](https://vuetifyjs.com/)         |
+|    [ElementPlus](https://element-plus.org/en-US/)     |         [Vuetify](https://vuetifyjs.com/)         |                                                     |
 
 ### Docsearch
 
