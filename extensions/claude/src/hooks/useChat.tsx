@@ -48,9 +48,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
           system: model.prompt,
           max_tokens: Number(model.max_tokens) || 4096,
           messages: [...chatTransformer(data), { role: "user", content: question }],
-        },
-         
-        )
+        })
         .on("text", (res) => {
           chat.answer += res;
           setStreamData({ ...chat, answer: chat.answer });
@@ -60,7 +58,8 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
           toast.message = `Couldn't stream message: ${err}`;
           toast.style = Toast.Style.Failure;
           setLoading(false);
-        }).on("end", () => {
+        })
+        .on("end", () => {
           setData((prev) => {
             return prev.map((a) => {
               if (a.id === chat.id) {
@@ -72,20 +71,14 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         });
     } else {
       await chatAnthropic.messages
-  .create(
-    {
-      model: model.option,
-      temperature: Number(model.temperature),
-      system: model.prompt,
-      max_tokens: Number(model.max_tokens) || 4096,
-      messages: [
-        ...chatTransformer(data),
-        { role: "user", content: question },
-      ],
-    },
-    
-  )
-  .then(async (res) => {
+        .create({
+          model: model.option,
+          temperature: Number(model.temperature),
+          system: model.prompt,
+          max_tokens: Number(model.max_tokens) || 4096,
+          messages: [...chatTransformer(data), { role: "user", content: question }],
+        })
+        .then(async (res) => {
           if ("content" in res) {
             chat = { ...chat, answer: res.content[0].text };
           }
