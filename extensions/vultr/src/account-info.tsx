@@ -1,13 +1,15 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
-import useVultr from "./lib/hooks/useVultr";
+import useVultr from "./lib/hooks/use-vultr";
 import { Account, AccountBandwidth } from "./lib/types/account";
 import { timestampToString } from "./lib/utils";
 import { ACLs, VULTR_LINKS } from "./lib/constants";
 import OpenInVultr from "./lib/components/open-in-vultr";
 
 export default function AccountInfo() {
-    const { isLoading, data } = useVultr<{ account: Account}>("account");
-    const markdown = !data ? "" : `
+  const { isLoading, data } = useVultr<{ account: Account }>("account");
+  const markdown = !data
+    ? ""
+    : `
     
 | Balance | Pending Charges |
 |---------|-----------------|
@@ -21,20 +23,37 @@ export default function AccountInfo() {
 |-------------------|---------------------|
 | ${data.account.last_payment_date} | ${data.account.last_payment_amount} |`;
 
-    return <Detail isLoading={isLoading} markdown={"Account Info" + markdown} metadata={data && <Detail.Metadata>
-        <Detail.Metadata.TagList title="ACLs">
-            {data.account.acls.map(acl => <Detail.Metadata.TagList.Item key={acl} text={ACLs[acl as keyof typeof ACLs]} />)}
-        </Detail.Metadata.TagList>
-    </Detail.Metadata>} actions={<ActionPanel>
-        <Action.Push title="Account Bandwidth Info" icon={Icon.PieChart} target={<AccountBandwidthInfo />} />
-        <OpenInVultr url={VULTR_LINKS.settingsprofile} />
-    </ActionPanel>} />
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={"Account Info" + markdown}
+      metadata={
+        data && (
+          <Detail.Metadata>
+            <Detail.Metadata.TagList title="ACLs">
+              {data.account.acls.map((acl) => (
+                <Detail.Metadata.TagList.Item key={acl} text={ACLs[acl as keyof typeof ACLs]} />
+              ))}
+            </Detail.Metadata.TagList>
+          </Detail.Metadata>
+        )
+      }
+      actions={
+        <ActionPanel>
+          <Action.Push title="Account Bandwidth Info" icon={Icon.PieChart} target={<AccountBandwidthInfo />} />
+          <OpenInVultr url={VULTR_LINKS.settingsprofile} />
+        </ActionPanel>
+      }
+    />
+  );
 }
 
 function AccountBandwidthInfo() {
-    const { isLoading, data } = useVultr<{ bandwidth: AccountBandwidth }>("account/bandwidth");
+  const { isLoading, data } = useVultr<{ bandwidth: AccountBandwidth }>("account/bandwidth");
 
-    const markdown = !data ? "" : `
+  const markdown = !data
+    ? ""
+    : `
 | | Previous Month | Current Month To Date | Current Month Projected |
 |---|----------------|---------------------|-------------------------|
 | **Timestamp Start** | ${timestampToString(data.bandwidth.previousMonth.timestampStart)} | ${timestampToString(data.bandwidth.currentMonthToDate.timestampStart)} | ${timestampToString(data.bandwidth.currentMonthProjected.timestampStart)} |
@@ -49,9 +68,17 @@ function AccountBandwidthInfo() {
 | **Overage** | ${data.bandwidth.previousMonth.overage} | ${data.bandwidth.currentMonthToDate.overage} | ${data.bandwidth.currentMonthProjected.overage} |
 | **Overage Unit Cost** | ${data.bandwidth.previousMonth.overage_unit_cost} | ${data.bandwidth.currentMonthToDate.overage_unit_cost} | ${data.bandwidth.currentMonthProjected.overage_unit_cost} |
 | **Overage Cost** | ${data.bandwidth.previousMonth.overage_cost} | ${data.bandwidth.currentMonthToDate.overage_cost} | ${data.bandwidth.currentMonthProjected.overage_cost} |
-`
+`;
 
-    return <Detail isLoading={isLoading} markdown={"Account Bandwidth Info" + markdown} actions={<ActionPanel>
-        <OpenInVultr url={VULTR_LINKS.bandwidthUsage} />
-    </ActionPanel>} />
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={"## Account Bandwidth Info" + markdown}
+      actions={
+        <ActionPanel>
+          <OpenInVultr url={VULTR_LINKS.bandwidthUsage} />
+        </ActionPanel>
+      }
+    />
+  );
 }

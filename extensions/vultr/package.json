@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vultr",
   "title": "Vultr",
-  "description": "",
+  "description": "Manage Users, View Account Information and Billing History",
   "icon": "vultr.png",
   "author": "xmok",
   "categories": [
@@ -17,33 +17,32 @@
       "placeholder": "NEGQWCS...NUEQ",
       "required": true,
       "type": "password",
-      "description": ""
+      "description": "PAT from Vultr Dashboard"
     }
   ],
   "commands": [
     {
       "name": "account-info",
       "title": "Account Info",
-      "description": "",
+      "description": "View Account and Account Bandwidth Info",
       "mode": "view"
     },
     {
       "name": "billing-history",
       "title": "Billing History",
-      "description": "",
+      "description": "View Billing History and Invoice Details",
       "mode": "view"
     },
     {
       "name": "users",
       "title": "Users",
-      "description": "",
+      "description": "View, Edit and Add Users",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.77.3",
-    "@raycast/utils": "^1.16.1",
-    "dayjs": "^1.11.11"
+    "@raycast/utils": "^1.16.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
