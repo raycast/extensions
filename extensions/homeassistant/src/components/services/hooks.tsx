@@ -100,6 +100,9 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
             return value;
           },
           validator: (userValue) => {
+            if (v.required === true && !userValue) {
+              return "Required";
+            }
             if (userValue && userValue.trim().length > 0) {
               try {
                 parse(userValue);
@@ -123,7 +126,10 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
           },
           type: "text",
           meta: v,
-          validator: () => {
+          validator: (val) => {
+            if (v.required === true && !val) {
+              return "Required";
+            }
             return undefined;
           },
         });
@@ -143,6 +149,9 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
           meta: v,
           validator: (value) => {
             if (!value) {
+              if (v.required === true) {
+                return "Required";
+              }
               return undefined;
             }
             const n = Number.parseFloat(value);
@@ -172,7 +181,10 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
           },
           type: "entity",
           meta: v,
-          validator: () => {
+          validator: (userValue) => {
+            if (v.required === true && !userValue) {
+              return "Required";
+            }
             return undefined;
           },
         });
@@ -188,7 +200,10 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
           },
           type: "select",
           meta: v,
-          validator: () => {
+          validator: (userValue) => {
+            if (v.required === true && !userValue) {
+              return "Required";
+            }
             return undefined;
           },
         });
@@ -204,7 +219,10 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
           },
           type: "text",
           meta: v,
-          validator: () => {
+          validator: (userValue) => {
+            if (v.required === true && !userValue) {
+              return "Required";
+            }
             return undefined;
           },
         });
@@ -220,7 +238,10 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
           },
           type: "area",
           meta: v,
-          validator: () => {
+          validator: (userValue) => {
+            if (v.required === true && !userValue) {
+              return "Required";
+            }
             return undefined;
           },
         });
@@ -236,7 +257,10 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
           },
           type: "floor",
           meta: v,
-          validator: () => {
+          validator: (userValue) => {
+            if (v.required === true && !userValue) {
+              return "Required";
+            }
             return undefined;
           },
         });
@@ -252,7 +276,10 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
           },
           type: "config_entry",
           meta: v,
-          validator: () => {
+          validator: (userValue) => {
+            if (v.required === true && !userValue) {
+              return "Required";
+            }
             return undefined;
           },
         });
@@ -268,7 +295,10 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
           },
           type: "icon",
           meta: v,
-          validator: () => {
+          validator: (userValue) => {
+            if (v.required === true && !userValue) {
+              return "Required";
+            }
             return undefined;
           },
         });
@@ -284,7 +314,10 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
           },
           type: "label",
           meta: v,
-          validator: () => {
+          validator: (userValue) => {
+            if (v.required === true && !userValue) {
+              return "Required";
+            }
             return undefined;
           },
         });
@@ -300,7 +333,10 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
           },
           type: "device",
           meta: v,
-          validator: () => {
+          validator: (userValue) => {
+            if (v.required === true && !userValue) {
+              return "Required";
+            }
             return undefined;
           },
         });
@@ -316,7 +352,10 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
           },
           type: "theme",
           meta: v,
-          validator: () => {
+          validator: (userValue) => {
+            if (v.required === true && !userValue) {
+              return "Required";
+            }
             return undefined;
           },
         });
@@ -326,7 +365,15 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
     }
     setFields(result);
     setUserData({});
-    setUserDataError({});
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const initialDataError: Record<string, any> = {};
+    for (const f of result) {
+      const ne = f.validator(f.value);
+      if (ne !== undefined) {
+        initialDataError[f.id] = ne;
+      }
+    }
+    setUserDataError(initialDataError);
   }, [serviceCall]);
 
   return {
