@@ -34,7 +34,7 @@ export function ServiceFormFieldNumber({ onChange, value, field, id, ...restProp
     }
   };
   const error = () => {
-    if (value === undefined || value === null || value.trim().length <= 0) {
+    if (value === undefined || value === null || (typeof value === "string" && value.trim().length <= 0)) {
       return;
     }
     if (Number.isNaN(parseFloat(value))) {
@@ -107,11 +107,21 @@ export interface ServiceFormTargetEntitiesTagPickerProps extends Form.TagPicker.
 export function ServiceFormTargetEntitiesTagPicker({
   id,
   states,
+  value,
   ...restProps
 }: ServiceFormTargetEntitiesTagPickerProps) {
+  console.log("v:", value);
   return (
-    <Form.TagPicker id={id} title="Target Entities" placeholder="Target Entities" {...restProps}>
-      {states?.map((s) => <Form.TagPicker.Item value={s.entity_id} title={`${getFriendlyName(s)} (${s.entity_id})`} />)}
+    <Form.TagPicker
+      id={id}
+      title="Target Entities"
+      placeholder="Target Entities"
+      {...restProps}
+      defaultValue={value ?? []}
+    >
+      {states?.map((s) => (
+        <Form.TagPicker.Item key={s.entity_id} value={s.entity_id} title={`${getFriendlyName(s)} (${s.entity_id})`} />
+      ))}
     </Form.TagPicker>
   );
 }

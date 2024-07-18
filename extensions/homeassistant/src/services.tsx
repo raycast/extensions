@@ -6,13 +6,8 @@ import {
   ServiceFormFieldSelectDropdown,
   ServiceFormTargetEntitiesTagPicker,
 } from "@components/services/form";
-import { HAServiceCall, useServiceCalls } from "@components/services/hooks";
-import {
-  fullHAServiceName,
-  getHAServiceCallData,
-  getHAServiceQuicklink,
-  getNameOfHAServiceField,
-} from "@components/services/utils";
+import { HAServiceCall, useHAServiceCallFormData, useServiceCalls } from "@components/services/hooks";
+import { fullHAServiceName, getHAServiceQuicklink, getNameOfHAServiceField } from "@components/services/utils";
 import { ha } from "@lib/common";
 import { Action, ActionPanel, Form, Icon, Keyboard, popToRoot, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
@@ -25,11 +20,14 @@ export default function ServiceCallCommand() {
   if (error) {
     showFailureToast(error, { title: "Could not fetch Service Calls" });
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [formData, setFormData] = useState<Record<string, any>>({});
+
+  const [yamlMode, setYamlMode] = useState<boolean>(false);
+  const [yamlText, setYamlText] = useState<string>("");
+  const [selectedService, setSelectedService] = useState<HAServiceCall>();
+  const { fields, userData, setUserDataByKey, setUserData, userDataError } = useHAServiceCallFormData(selectedService);
   const handle = async (input: Form.Values, options?: { popToRootOnSuccessful?: boolean }) => {
     try {
-      const payload = yamlMode ? parse(yamlText) : formData;
+      const payload = yamlMode ? parse(yamlText) : userData;
       const service = services?.find((s) => fullHAServiceName(s) === input.service);
       if (!service) {
         throw new Error(`Could not get service for id "${input.service}"`);
@@ -52,28 +50,18 @@ export default function ServiceCallCommand() {
       showFailureToast(error, { title: "Error calling Service" });
     }
   };
-  const [yamlMode, setYamlMode] = useState<boolean>(false);
-  const [yamlText, setYamlText] = useState<string>("");
-  const [selectedService, setSelectedService] = useState<HAServiceCall>();
   useEffect(() => {
-    if (!selectedService) {
-      setYamlText("");
-      return;
-    }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const dataObject = getHAServiceCallData(selectedService);
-    setFormData(dataObject);
+    setYamlText("");
+    setUserData({});
   }, [selectedService]);
-  useEffect(() => {
-    setYamlText(stringify(formData).trim());
-  }, [formData]);
+  console.log("userdata: ", JSON.stringify(userData));
 
   const quicklink = () => {
     if (selectedService) {
       return getHAServiceQuicklink({
         domain: selectedService.domain,
         service: selectedService.service,
-        data: formData,
+        data: userData,
       });
     }
     return "";
@@ -102,9 +90,28 @@ export default function ServiceCallCommand() {
                   onAction={() => {
                     const newYamlMode = !yamlMode;
                     if (newYamlMode) {
-                      setYamlText(stringify(formData).trim());
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      const types: Record<string, any> = {};
+                      for (const f of fields) {
+                        if (userData[f.id]) {
+                          types[f.id] = f.toYaml(userData[f.id]);
+                        }
+                      }
+                      setYamlText(stringify(types).trim());
                     } else {
-                      setFormData(parse(yamlText));
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      const types: Record<string, any> = {};
+                      const yamlObject = parse(yamlText);
+                      for (const f of fields) {
+                        const yamlValue = yamlObject[f.id];
+                        if (yamlValue !== undefined) {
+                          const uiValue = f.fromYaml(yamlValue);
+                          if (uiValue !== undefined) {
+                            types[f.id] = uiValue;
+                          }
+                        }
+                      }
+                      setUserData(types);
                     }
                     setYamlMode(newYamlMode);
                   }}
@@ -148,105 +155,105 @@ export default function ServiceCallCommand() {
           />
         ))}
       </Form.Dropdown>
-      {!yamlMode && selectedService?.meta.target?.entity && (
-        <ServiceFormTargetEntitiesTagPicker
-          id="entity_id"
-          states={states}
-          value={formData.entity_id}
-          onChange={(newValue) => setFormData({ ...formData, entity_id: newValue })}
-        />
-      )}
       {!yamlMode &&
-        Object.entries(selectedService?.meta.fields ?? {}).map(([k, v]) => {
-          if (v.collapsed === true) {
-            return;
-          }
-          const sel = v.selector;
-          if (
-            sel?.text !== undefined ||
-            sel?.area !== undefined ||
-            sel?.floor !== undefined ||
-            sel?.config_entry !== undefined ||
-            sel?.icon !== undefined ||
-            sel?.label !== undefined ||
-            sel?.device !== undefined ||
-            sel?.theme !== undefined
-          ) {
-            return (
-              <Form.TextField
-                id={k}
-                title={getNameOfHAServiceField(v, k)}
-                value={formData[k]}
-                placeholder={v.description}
-                onChange={(nv) => setFormData({ ...formData, [k]: nv })}
-              />
-            );
-          } else if (sel?.object !== undefined) {
-            return (
-              <ServiceFormFieldObject
-                id={k}
-                field={v}
-                value={formData[k]}
-                onChange={(nv) => {
-                  try {
-                    setFormData({ ...formData, [k]: nv.trim().length <= 0 ? undefined : nv });
-                  } catch (error) {
-                    //
-                  }
-                }}
-              />
-            );
-          } else if (sel?.number !== undefined) {
-            return (
-              <ServiceFormFieldNumber
-                id={k}
-                value={formData[k] !== undefined ? `${formData[k]}` : undefined}
-                field={v}
-                onChange={(nv) => setFormData({ ...formData, [k]: nv })}
-              />
-            );
-          } else if (sel?.entity !== undefined) {
-            return (
-              <ServiceFormFieldEntitiesTagPicker
-                id={k}
-                field={v}
-                states={states}
-                value={formData[k]}
-                onChange={(newValue) => setFormData({ ...formData, [k]: newValue })}
-              />
-            );
-          } else if (sel?.select !== undefined) {
-            return (
-              <ServiceFormFieldSelectDropdown
-                id={k}
-                field={v}
-                value={formData[k]}
-                onChange={(nv) => setFormData({ ...formData, [k]: nv })}
-              />
-            );
-          } else if (sel?.boolean !== undefined) {
-            return (
-              <Form.Checkbox
-                id={k}
-                title={getNameOfHAServiceField(v, k)}
-                label={v.description}
-                value={formData[k] ?? false}
-                onChange={(nv) => setFormData({ ...formData, [k]: nv })}
-              />
-            );
-          } else {
-            // assume all other fields are strings
-            return (
-              <Form.TextField
-                id={k}
-                title={getNameOfHAServiceField(v, k)}
-                value={formData[k]}
-                placeholder={v.description}
-                onChange={(nv) => setFormData({ ...formData, [k]: nv })}
-              />
-            );
+        selectedService &&
+        fields?.map((f) => {
+          switch (f.type) {
+            case "target_entity": {
+              return (
+                <ServiceFormTargetEntitiesTagPicker
+                  id={`${f.id}_${fullHAServiceName(selectedService)}`}
+                  states={states}
+                  value={userData[f.id]}
+                  onChange={(newValue) => setUserDataByKey("entity_id", newValue)}
+                />
+              );
+            }
+            case "text":
+            case "area":
+            case "floor":
+            case "config_entry":
+            case "icon":
+            case "label":
+            case "device":
+            case "theme": {
+              return (
+                <Form.TextField
+                  id={`${f.id}_${fullHAServiceName(selectedService)}`}
+                  title={getNameOfHAServiceField(f.meta, f.id)}
+                  value={userData[f.id]}
+                  placeholder={f.meta.description}
+                  onChange={(nv) => {
+                    setUserDataByKey(f.id, nv.length > 0 ? nv : undefined);
+                  }}
+                  error={userDataError[f.id]}
+                />
+              );
+            }
+            case "object": {
+              return (
+                <ServiceFormFieldObject
+                  id={`${f.id}_${fullHAServiceName(selectedService)}`}
+                  field={f.meta}
+                  placeholder={f.meta.description}
+                  value={userData[f.id]}
+                  onChange={(nv) => setUserDataByKey(f.id, nv)}
+                  error={userDataError[f.id]}
+                />
+              );
+            }
+            case "number": {
+              return (
+                <ServiceFormFieldNumber
+                  id={`${f.id}_${fullHAServiceName(selectedService)}`}
+                  field={f.meta}
+                  placeholder={f.meta.description}
+                  value={userData[f.id]}
+                  onChange={(nv) => setUserDataByKey(f.id, nv)}
+                  error={userDataError[f.id]}
+                />
+              );
+            }
+            case "entity": {
+              return (
+                <ServiceFormFieldEntitiesTagPicker
+                  id={`${f.id}_${fullHAServiceName(selectedService)}`}
+                  field={f.meta}
+                  placeholder={f.meta.description}
+                  states={states}
+                  value={userData[f.id]}
+                  onChange={(nv) => setUserDataByKey(f.id, nv)}
+                  error={userDataError[f.id]}
+                />
+              );
+            }
+            case "select": {
+              return (
+                <ServiceFormFieldSelectDropdown
+                  id={`${f.id}_${fullHAServiceName(selectedService)}`}
+                  field={f.meta}
+                  placeholder={f.meta.description}
+                  value={userData[f.id]}
+                  onChange={(nv) => setUserDataByKey(f.id, nv)}
+                  error={userDataError[f.id]}
+                />
+              );
+            }
+            case "boolean": {
+              return (
+                <Form.Checkbox
+                  id={`${f.id}_${fullHAServiceName(selectedService)}`}
+                  title={getNameOfHAServiceField(f.meta, f.id)}
+                  label={f.meta.description}
+                  value={userData[f.id]}
+                  onChange={(nv) => setUserDataByKey(f.id, nv)}
+                  error={userDataError[f.id]}
+                />
+              );
+            }
           }
         })}
+      <Form.Separator />
       {yamlMode && <Form.TextArea id="yamltext" title="Data (yaml)" value={yamlText} onChange={setYamlText} />}
     </Form>
   );
