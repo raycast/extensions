@@ -1,11 +1,10 @@
 # Rick and Morty
 
-Access characters, images, locations and episodes from the television show "Rick and Morty".
+Access characters, images, locations and episodes from the television show "Rick and Morty" via the API at https://rickandmortyapi.com/.
 
 ## ⚠️ WARNING
 
 There may be some spoilers depending on how much of the show you've seen!
-
 
 ## ©️ ATTRIBUTIONS
 
