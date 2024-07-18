@@ -33,14 +33,6 @@ export function ServiceFormFieldNumber({ onChange, value, field, id, ...restProp
       onChange(newValue);
     }
   };
-  const error = () => {
-    if (value === undefined || value === null || (typeof value === "string" && value.trim().length <= 0)) {
-      return;
-    }
-    if (Number.isNaN(parseFloat(value))) {
-      return "Not a number";
-    }
-  };
   return (
     <Form.TextField
       id={id}
@@ -49,7 +41,6 @@ export function ServiceFormFieldNumber({ onChange, value, field, id, ...restProp
       placeholder={field.description}
       value={value !== undefined && value !== null && !Number.isNaN(value) ? `${value}` : undefined}
       {...restProps}
-      error={error()}
     ></Form.TextField>
   );
 }

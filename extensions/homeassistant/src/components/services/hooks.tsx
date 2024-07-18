@@ -141,7 +141,22 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
           },
           type: "number",
           meta: v,
-          validator: () => {
+          validator: (value) => {
+            if (!value) {
+              return undefined;
+            }
+            const n = Number.parseFloat(value);
+            if (Number.isNaN(n)) {
+              return "Not a valid number";
+            }
+            const max = s?.number?.max;
+            const min = s?.number?.min;
+            if (max !== undefined && max !== null && n > max) {
+              return `Maximum is ${max} `;
+            }
+            if (min !== undefined && min !== null && n < min) {
+              return `Minimum is ${min} `;
+            }
             return undefined;
           },
         });

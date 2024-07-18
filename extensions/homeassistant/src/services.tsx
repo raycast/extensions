@@ -54,7 +54,6 @@ export default function ServiceCallCommand() {
     setYamlText("");
     setUserData({});
   }, [selectedService]);
-  console.log("userdata: ", JSON.stringify(userData));
 
   const quicklink = () => {
     if (selectedService) {
