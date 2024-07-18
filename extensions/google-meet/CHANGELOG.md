@@ -1,5 +1,9 @@
 # Google Meet Changelog
 
+## [Improvement] - 2024-07-18
+
+- Change the way to get the URL in Chromium-based browsers
+
 ## [Improvement] - 2024-05-29
 
 - Change the way to get the URL in Arc Browser
