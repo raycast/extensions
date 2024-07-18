@@ -1,0 +1,67 @@
+{
+  "name": "pipedream",
+  "title": "Pipedream",
+  "description": "Add, manage, and monitor your Pipedream workflows. Track errors, perform quick actions, and view workflow statuses directly from Raycast and your menu bar.",
+  "icon": "pipedream-logo.png",
+  "author": "olekristianbe",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-workflow",
+      "title": "Add Workflow",
+      "subtitle": "Pipedream",
+      "description": "Add a new Pipedream workflow to manage",
+      "mode": "view"
+    },
+    {
+      "name": "manage-workflows",
+      "title": "Manage Workflows",
+      "subtitle": "Pipedream",
+      "description": "View, manage, sort, and filter your saved Pipedream workflows",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar-workflows",
+      "title": "Show Workflow Status",
+      "subtitle": "Pipedream",
+      "description": "Display workflow status, error counts, and quick actions in the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "PIPEDREAM_API_KEY",
+      "type": "password",
+      "required": true,
+      "title": "Pipedream API Key",
+      "description": "Your Pipedream API key. For setup instructions, see the About This Extension section in preferences."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.16.2",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "~18.8.3",
+    "@types/node-fetch": "^2.6.11",
+    "@types/react": "^18.0.9",
+    "@typescript-eslint/eslint-plugin": "^6.8.0",
+    "@typescript-eslint/parser": "^6.8.0",
+    "eslint": "^8.51.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "raycast-scripts publish"
+  }
+}
