@@ -26,7 +26,7 @@ type State = {
   filter: string; // store it to state
 };
 
-export default function Command() {
+export default function Command({ isRunPrimary }: { isRunPrimary?: boolean }) {
   const { browser } = getPreferenceValues();
   const [state, setState] = React.useState<State>({
     isLoading: true,
@@ -130,15 +130,23 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
+                  {isRunPrimary && (
+                    <Action.OpenInBrowser
+                      title="Run"
+                      url={`raycast://extensions/cyxn/universal-commands/run-custom-command?arguments=${encodeURIComponent(JSON.stringify({ id }))}`}
+                    />
+                  )}
                   <Action.CreateQuicklink
                     quicklink={{
                       link: composeFullUrl(id),
                     }}
                   />
-                  <Action.OpenInBrowser
-                    title="Run"
-                    url={`raycast://extensions/cyxn/universal-commands/run-custom-command?arguments=${encodeURIComponent(JSON.stringify({ id }))}`}
-                  />
+                  {isRunPrimary ? null : (
+                    <Action.OpenInBrowser
+                      title="Run"
+                      url={`raycast://extensions/cyxn/universal-commands/run-custom-command?arguments=${encodeURIComponent(JSON.stringify({ id }))}`}
+                    />
+                  )}
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   <CreateCustomCommandAction />

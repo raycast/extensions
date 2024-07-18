@@ -30,13 +30,13 @@
       "name": "run-custom-command",
       "title": "Run Custom Command for Current Application",
       "description": "Run custom command. Accepts id of the command. Based on the application, will execute different shorcut",
-      "mode": "no-view",
+      "mode": "view",
       "arguments": [
         {
           "name": "id",
-          "placeholder": "1",
+          "placeholder": "Command Id",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     }

@@ -1,14 +1,38 @@
-import { closeMainWindow, getFrontmostApplication, getPreferenceValues, LocalStorage, showHUD } from "@raycast/api";
+import {
+  closeMainWindow,
+  getFrontmostApplication,
+  getPreferenceValues,
+  LocalStorage,
+  popToRoot,
+  showHUD,
+} from "@raycast/api";
 import { doesMatchUrl, getActiveTabUrl, isCurrentAppBrowser, runShortcut } from "./utils";
 import { idToCommandMap } from "./mock";
-import { CommandRecord, ShortcutToRun } from "./types";
+import ManageCustomCommands from "./manage-custom-commands";
 
-export default async function main({ arguments: { id } }: { arguments: { id: string } }) {
+import { CommandRecord, ShortcutToRun } from "./types";
+import { useEffect } from "react";
+
+export default function Command({ arguments: { id } }: { arguments: { id: string } }) {
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+
+    callCommand(id);
+  }, []);
+
+  if (!id) {
+    return <ManageCustomCommands isRunPrimary />;
+  }
+
+  return null;
+}
+
+async function callCommand(id: string) {
   const frontmostApplication = await getFrontmostApplication();
   const { name: frontmostApplicationName } = frontmostApplication;
   const { browser } = getPreferenceValues();
-
-  console.log({ id });
 
   const applicationCommandRecordMocked = idToCommandMap[id];
 
@@ -61,13 +85,18 @@ export default async function main({ arguments: { id } }: { arguments: { id: str
   }
 
   if (!shortcutToRun) {
-    return await showHUD(
+    await showHUD(
       `No shortcut was found for application "${frontmostApplicationName}" for command "${applicationCommandRecord.name}"`,
     );
+    await popToRoot();
+    return null;
   }
-  await closeMainWindow();
+  await closeMainWindow({
+    clearRootSearch: true,
+  });
   await runShortcut({ ...shortcutToRun, appName: frontmostApplicationName });
   // todo remove hud in case of success.
   const resultText = `${applicationCommandRecord.name} in ${metaActiveTabUrl || frontmostApplicationName}`;
   await showHUD(resultText);
+  await popToRoot();
 }
