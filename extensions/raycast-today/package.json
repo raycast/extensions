@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-today",
+  "title": "ToDay",
+  "version": "1.0.0",
+  "description": "Manage your Notion task  from multiple databases",
+  "icon": "logo.png",
+  "author": "julienR2",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "ToDay",
+      "description": "Display all you tasks",
+      "mode": "view"
+    },
+    {
+      "name": "addDatabase",
+      "title": "Add Database",
+      "description": "Add another Notion Database to your workspace",
+      "mode": "view"
+    },
+    {
+      "name": "manageDatabases",
+      "title": "Manage Databases",
+      "description": "Manage the databases you've added to your workspace",
+      "mode": "view"
+    },
+    {
+      "name": "newTask",
+      "title": "New Task",
+      "description": "Add a new task",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "nodemon --watch '../common/**/*' -e ts,tsx --exec 'ray develop'",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "type": "npx tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@notionhq/client": "^2.2.15",
+    "@raycast/api": "^1.72.0",
+    "@raycast/utils": "^1.15.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/lodash": "^4.17.4",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "nodemon": "^3.1.4",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  }
+}
