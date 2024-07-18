@@ -16,6 +16,7 @@ import { getDateIcon } from "../helpers/dates";
 import CreateMilestoneForm from "./CreateMilestoneForm";
 import OpenInLinear from "./OpenInLinear";
 import ProjectUpdates from "./ProjectUpdates";
+import { DocumentList } from "./docs/DocumentList";
 
 type ProjectProps = {
   project: ProjectResult;
@@ -132,6 +133,13 @@ export default function Project({ project, priorities, me, mutateProjects }: Pro
               icon={Icon.Heartbeat}
               shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
               target={<ProjectUpdates project={project} />}
+            />
+
+            <Action.Push
+              title="See Project Documents"
+              icon={Icon.Document}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              target={<DocumentList project={project} />}
             />
 
             <Action
