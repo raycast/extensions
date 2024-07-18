@@ -148,7 +148,7 @@ ${latestPrediction ? `In ${latestPrediction.year}, ${groundhog.shortname} predic
 }
 
 function ViewPredictions({ groundhog }: { groundhog: Groundhog }) {
-  const markdown = `Past predictions
+  const markdown = `${groundhog.name} / Past predictions
 
 | Year | Shadow | Details |
 |------|--------|---------|
@@ -166,7 +166,6 @@ ${groundhog.predictions
 
   return (
     <Detail
-      navigationTitle={groundhog.name}
       markdown={markdown}
       actions={
         <ActionPanel>
