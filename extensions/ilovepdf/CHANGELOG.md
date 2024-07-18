@@ -1,6 +1,9 @@
 # iLovePDF Changelog
 
-## [Add PDF to PDF/A Command] - 2024-07-17
+
+## [Add Validate PDF/A Command] - 2024-07-18
+
+## [Add PDF to PDF/A Command] - 2024-07-18
 
 ## [Add User Friendly Error Messages] - 2024-07-16
 
