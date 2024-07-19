@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/matheus-depaula/array-this/blob/main/assets/command-icon.png" width="131px" />
+  <img src="assets/command-icon.png" width="131px" />
 
   <h1>Array This</h1>
   
