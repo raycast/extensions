@@ -3,10 +3,10 @@ import { loadFront } from "yaml-front-matter";
 
 import { TopicType } from "./types/GithubType";
 import { getPageFromCache, checkForUpdates } from "./services/NextjsPage";
-import { useCachedPromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 
 const TopicDetail = (props: { topic: TopicType }) => {
-  const { isLoading, data: markdown } = useCachedPromise(
+  const { isLoading, data: markdown } = usePromise(
     async () => {
       const cached_data = await getPageFromCache(props.topic);
       const updated_data = await checkForUpdates(props.topic);
@@ -18,7 +18,6 @@ const TopicDetail = (props: { topic: TopicType }) => {
       async onData() {
         await showToast(Toast.Style.Success, `Fetched item`);
       },
-      initialData: "",
     },
   );
 
@@ -26,7 +25,7 @@ const TopicDetail = (props: { topic: TopicType }) => {
     <Detail
       isLoading={isLoading}
       navigationTitle={props.topic.title}
-      markdown={markdown}
+      markdown={markdown || ""}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser icon="command-icon.png" url={`https://nextjs.org/docs/${props.topic.filepath}`} />
