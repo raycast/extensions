@@ -1,8 +1,8 @@
 import { Dub } from "dub";
-import { apiKey } from "@utils/env";
+import { workspaceApiKey } from "@utils/env";
 
 const dub = new Dub({
-  token: apiKey,
+  token: workspaceApiKey,
 });
 
 export const createShortLink = async ({
