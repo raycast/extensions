@@ -12,8 +12,7 @@ This Raycast extension allows you to interface with the Brandfetch API to fetch 
 
 ## Prerequisites
 
-- Raycast installed on your macOS.
-- Brandfetch API Key.
+A Brandfetch API Key.
 
 ## Configuration
 
