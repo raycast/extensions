@@ -2,7 +2,7 @@
 
 Makes it easy to manage AFPS disk volumes.
 
-### Create Volume
+### Create Volume and Quick Create Volume
 
 This command makes it easy to create an encrypted APFS volume. It generates a secure passphrase, creates the volume, 
 and stores the passphrase in the system keychain so that the volume can be automatically decrypted and mounted on boot. 

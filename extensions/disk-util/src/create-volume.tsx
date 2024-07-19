@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   closeMainWindow,
+  Color,
   environment,
   Form,
   Icon,
@@ -17,8 +18,7 @@ import { sep } from "path";
 type FormValues = {
   name: string;
   quota: string;
-  caseSensitive: boolean;
-  encrypted: boolean;
+  format: string;
   symlink: boolean;
 };
 
@@ -33,16 +33,17 @@ export default function CreateVolume(props: LaunchProps<{ draftValues: FormValue
   ]);
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
-    onSubmit: async ({ name, encrypted, caseSensitive, quota, symlink }) => {
+    onSubmit: async ({ name, format, quota, symlink }) => {
       const toast = await showToast(Toast.Style.Animated, `Creating Volume '${name}'`, "Please wait...");
-      const fs = caseSensitive ? "Case-sensitive APFS" : "APFS";
+      const fs = format.split(":")[1] === "case-sensitive" ? "Case-sensitive APFS" : "APFS";
+      const encrypted = (format.split(":")[2] === "encrypted") + "";
 
       const askpassPath = `${assetsPath}/scripts/askpass`;
       const env = Object.assign({}, process.env, { SUDO_ASKPASS: askpassPath, RAYCAST_BUNDLE: bundleId });
 
       const child = spawn(
         "sudo -A",
-        [`${assetsPath}/scripts/create-volume`, name, `"${fs}"`, encrypted + "", symlink + "", quota ? quota : "none"],
+        [`${assetsPath}/scripts/create-volume`, name, `"${fs}"`, encrypted, symlink + "", quota ? quota : "none"],
         { shell: true, env },
       );
       child.stdout.on("data", async (msg) => {
@@ -62,7 +63,7 @@ export default function CreateVolume(props: LaunchProps<{ draftValues: FormValue
         toast.message = msg;
       });
     },
-    initialValues: draftValues ?? { caseSensitive: true, encrypted: true },
+    initialValues: draftValues ?? { format: "apfs:case-sensitive:encrypted" },
     validation: {
       name: FormValidation.Required,
       quota: (value) => {
@@ -90,17 +91,35 @@ export default function CreateVolume(props: LaunchProps<{ draftValues: FormValue
       enableDrafts
     >
       <Form.TextField title="Volume Name" placeholder="vol1" {...itemProps.name} />
-      <Form.Checkbox label="Case Sensitive" {...itemProps.caseSensitive} />
-      <Form.Checkbox label="Encrypted" {...itemProps.encrypted} />
-      <Form.Checkbox label="Create Symlink from $HOME" {...itemProps.symlink} />
-      <Form.Separator />
-      <Form.Description title="Size Options" text="APFS volumes share storage space within their container." />
+      <Form.Dropdown title="Format" {...itemProps.format}>
+        <Form.Dropdown.Item
+          title="APFS"
+          value="apfs:case-insensitive:non-encrypted"
+          icon={{ source: Icon.LockDisabled, tintColor: Color.Orange }}
+        />
+        <Form.Dropdown.Item
+          title="APFS (Encrypted)"
+          value="apfs:case-insensitive:encrypted"
+          icon={{ source: Icon.Lock, tintColor: Color.Blue }}
+        />
+        <Form.Dropdown.Item
+          title="APFS (Case-sensitive)"
+          value="apfs:case-sensitive:non-encrypted"
+          icon={{ source: Icon.LockDisabled, tintColor: Color.Orange }}
+        />
+        <Form.Dropdown.Item
+          title="APFS (Case-sensitive, Encrypted)"
+          value="apfs:case-sensitive:encrypted"
+          icon={{ source: Icon.Lock, tintColor: Color.Blue }}
+        />
+      </Form.Dropdown>
       <Form.TextField
         title="Quota Size (in GB)"
         placeholder="(optional)"
         info="The optional reserve size ensures that amount of storage will remain available for this volume."
         {...itemProps.quota}
       />
+      <Form.Checkbox label="Create Symlink from $HOME" {...itemProps.symlink} />
     </Form>
   );
 }
