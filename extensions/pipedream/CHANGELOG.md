@@ -1,6 +1,6 @@
 # Pipedream Workflow Manager Changelog
 
-## [Initial Version] - 2024-07-18
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Add workflow management functionality
   - Add new workflows
