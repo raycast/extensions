@@ -1,6 +1,6 @@
 # DocSearch Changelog
 
-## [Support for new documentation] - {PR_MERGE_DATE}
+## [Support for new documentation] - 2024-07-19
 
 - 📄 Support [Vuetify](https://vuetifyjs.com/)
 
