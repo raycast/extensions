@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { showFailureToast, useFetch, usePromise } from "@raycast/utils";
+import { showFailureToast, useFetch } from "@raycast/utils";
 import { baseUrl, parseRecipes } from "minecraft-crafting-info";
 import { useState } from "react";
 import MaterialTag from "./components/MaterialTag";
