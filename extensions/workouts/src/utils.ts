@@ -22,7 +22,6 @@ export const formatDistance = (distance: number) => {
     return `${(distance / 1609.34).toFixed(2)} mi`;
   }
 };
-
 export const formatSpeedForSportType = (sportType: ActivityType, speed: number) => {
   const preferences = getPreferenceValues<Preferences>();
 
@@ -108,3 +107,67 @@ export function getSportTypesFromActivityTypes(
   }
   return sportTypes;
 }
+
+
+export function formatSportTypesText(input: string): string {
+  input = input.replace(/(^E)([A-Z])/g, 'E-$2');
+  return input.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
+}
+
+
+export function convertDurationToSeconds(duration: string): number {
+  const [hoursStr, minutesStr, secondsStr] = duration.split(':');
+  const hours = parseInt(hoursStr, 10);
+  const minutes = parseInt(minutesStr, 10);
+  const seconds = parseInt(secondsStr, 10);
+
+  return hours * 3600 + minutes * 60 + seconds;
+}
+
+
+export function isDurationValid(duration: string | undefined): { hours: number; minutes: number; seconds: number } | null {
+  if(!duration) return null;
+  const regex = /^(\d{1,2}):([0-5]?\d):([0-5]?\d)$/; 
+  const matches = duration.match(regex);
+  if (matches) {
+    const [, hoursStr, minutesStr, secondsStr] = matches;
+    const hours = parseInt(hoursStr, 10);
+    const minutes = parseInt(minutesStr, 10);
+    const seconds = parseInt(secondsStr, 10);
+    if ( 
+      hours >= 0 && hours < 100 &&
+      minutes >= 0 && minutes < 60 &&
+      seconds >= 0 && seconds < 60
+    ) {
+      return { hours, minutes, seconds };
+    }
+  }
+  return null;
+}
+
+
+export function convertDistanceToMeters(distance : string, unit :  string)
+{
+ const cleanedString = distance.trim();
+ const value = parseFloat(cleanedString);
+ 
+ if (isNaN(value)) {
+   throw new Error('Invalid distance format');
+ }
+ switch (unit) {
+   case 'km':
+     return value * 1000;
+   case 'mi':
+     return value * 1609.344;
+   default:
+     throw new Error('Unsupported unit');
+ }
+
+}
+
+export function isNumber(distance: string | undefined){
+  if (distance) {
+    var sanitizedValue = distance.replace(/[^\d.]/g, "").replace(/(\..*)\./g, "$1");
+    return !(sanitizedValue === "" || isNaN(Number(sanitizedValue)));
+  }
+};

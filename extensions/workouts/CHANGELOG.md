@@ -9,6 +9,10 @@
 - Add "Analyze workout" command to get a detailed analysis and suggestions for a specific workout.
 - Add weekly stats to the menu bar
 
+## [Add Create Activity Comman] - 2024-07-24
+
+Added a command to create a manual activity
+
 ## [Refresh interval update] - 2024-05-09
 
 Updated menu bar refresh interval

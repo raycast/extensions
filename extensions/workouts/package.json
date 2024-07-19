@@ -13,7 +13,8 @@
   "icon": "icon.png",
   "author": "samuelkraft",
   "contributors": [
-    "yvysunu"
+    "yvysunu",
+    "dianne_mcewan"
   ],
   "categories": [
     "Data"
@@ -24,6 +25,12 @@
       "name": "workouts",
       "title": "Search Workouts",
       "description": "See your recent workouts from Strava",
+      "mode": "view"
+    },
+    {
+      "name": "createActivity",
+      "title": "Create Activity",
+      "description": "Create a manual activity on Strava",
       "mode": "view"
     },
     {
