@@ -4,26 +4,16 @@ import { useState } from "react";
 
 export function useAnthropic(): Anthropic {
   const [anthropic] = useState(() => {
-    const preferences = getPreferenceValues<{
+    const apiKey = getPreferenceValues<{
       apiKey: string;
-      useBetaFeatures: boolean;
-    }>();
+    }>().apiKey;
 
-    const apiKey = preferences.apiKey;
-    const useBetaFeatures = preferences.useBetaFeatures;
-
-    const config = {
+    return new Anthropic({
       apiKey: apiKey,
-      defaultHeaders: {},
-    };
-
-    if (useBetaFeatures) {
-      config.defaultHeaders = {
+      defaultHeaders: {
         "anthropic-beta": "max-tokens-3-5-sonnet-2024-07-15",
-      };
-    }
-
-    return new Anthropic(config);
+      },
+    });
   });
 
   return anthropic;

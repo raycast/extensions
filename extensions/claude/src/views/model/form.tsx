@@ -87,13 +87,10 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
         }
 
         const preferences = getPreferenceValues<Preferences>();
-        const isBetaEnabled = preferences.useBetaFeatures;
-        const maxAllowed = selectedModel === "claude-3-5-sonnet-20240620" && isBetaEnabled ? 8192 : 4096;
+
+        const maxAllowed = selectedModel === "claude-3-5-sonnet-20240620" ? 8192 : 4096;
 
         if (numValue > maxAllowed) {
-          if (selectedModel === "claude-3-5-sonnet-20240620" && numValue > 4096 && !isBetaEnabled) {
-            return `Enable Beta Features in the extension preferences to use values over ${maxAllowed}`;
-          }
           return `Maximum value is ${maxAllowed}`;
         }
         return undefined; // Valid input
