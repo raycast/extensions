@@ -4,7 +4,7 @@ import path from "path";
 import axios from "axios";
 import WebSocket from "ws";
 
-const CHUNK_SIZE = 2 * 1024 * 1024; // 2MB
+const CHUNK_SIZE = 8 * 1024 * 1024; // 2MB
 
 export default async function Command() {
   try {
@@ -79,12 +79,26 @@ async function uploadFile(filePath: string) {
       title: "Copied URL to clipboard",
       message: `${fileName}`,
       primaryAction: {
-        title: "Open in Browser",
+        title: "Open Download in Browser",
         onAction: () => open(downloadUrl),
       },
       secondaryAction: {
-        title: "Copy Deletion URL",
-        onAction: () => Clipboard.copy(deletionUrl),
+        title: "Delete File",
+        onAction: async () => {
+          try {
+            await axios.get(deletionUrl);
+            await showToast({
+              style: Toast.Style.Success,
+              title: "File deleted successfully",
+            });
+          } catch (error) {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Failed to delete file",
+              message: error instanceof Error ? error.message : String(error),
+            });
+          }
+        },
       },
     });
   } catch (error) {

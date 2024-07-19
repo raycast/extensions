@@ -17,8 +17,7 @@
       "title": "Upload file",
       "subtitle": "Upload file to streamshare",
       "description": "Upload a file to streamshare.",
-      "mode": "no-view",
-      "icon": "command-icon.png"
+      "mode": "no-view"
     }
   ],
   "dependencies": {
