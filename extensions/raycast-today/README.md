@@ -38,12 +38,18 @@ The search bar quickly transforms into a smart way to add a new task very fast. 
 
 ![Add task](./metadata/add_task.gif)
 
-### List of commands
+## List of commands
 
 - Press `↵` or `⌘ + S` to set the status.
 - Press `⌘ + O` to open in Notion.
 - Press `^ + X` to delete a task.
 
-### Thanks
+## Thanks
 
 A huge thanks to [Hypersonic](https://github.com/raycast/extensions/tree/main/extensions/hypersonic) for their extension giving me inspiration to create this one.
+
+## What's next?
+
+- [ ] 👥 Support multiple accounts
+- [ ] 🤹 Support multiple views
+- [ ] 📱 A mobile app! (80% done)
