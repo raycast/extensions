@@ -29,7 +29,7 @@
         {
           "name": "query",
           "required": true,
-          "placeholder": "shopify",
+          "placeholder": "Type a brand name",
           "type": "text"
         }
       ]
