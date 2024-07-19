@@ -2,7 +2,7 @@
 
 ## [Improvement] - {PR_MERGE_DATE}
 
-- Change the way to get the URL in Chromium-based browsers
+- Change the way to get the URL in some Chromium-based browsers
 
 ## [Improvement] - 2024-05-29
 
