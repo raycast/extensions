@@ -225,4 +225,3 @@ export type StravaClubActivity = {
   sport_type: SportType;
   workout_type: number;
 };
-
