@@ -1,5 +1,8 @@
 # Spotify Player Changelog
 
+## [Quicklink to Add Playing Song to Playlist] - 2024-07-19
+- Adds an action to create a quicklink to add the currently playing song to a specific playlist.
+
 ## [Log out the user if re-authentication fails] - 2024-07-11
 
 - Automatically log out users if re-authentication fails, instead of displaying an error message.
