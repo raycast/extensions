@@ -1,6 +1,5 @@
 import React from "react";
-import { ActionPanel, Color, Icon, Image, List } from "@raycast/api";
-import { useStore } from "@today/common/components/StoreContext";
+import { ActionPanel, Color, Icon, List } from "@raycast/api";
 
 import { Task } from "@today/common/types";
 import { trimString } from "../../utils";
