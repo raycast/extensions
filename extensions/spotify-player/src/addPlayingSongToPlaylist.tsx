@@ -30,11 +30,6 @@ type AddToPlaylistCommandProps = {
   playlistId?: string;
 };
 
-// const immediatelyConvertToCase = props.launchContext?.case;
-
-// const context = encodeURIComponent(`{"case":"${props.case}"}`);
-// const deeplink = `raycast://extensions/erics118/${environment.extensionName}/${environment.commandName}?context=${context}`;
-
 function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
   const [searchText, setSearchText] = useState("");
@@ -43,12 +38,6 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
   const { meData } = useMe();
 
   if (!currentlyPlayingData || !currentlyPlayingData.item) {
-    // if (props?.playlistId) {
-    //   showHUD("Nothing is playing right now");
-    //   popToRoot();
-    //   return;
-    // }
-
     return (
       <List isLoading={currentlyPlayingIsLoading}>
         <List.EmptyView
@@ -154,7 +143,7 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
                   {playlist.id && (
                     <CreateQuicklink
                       title={`Create Quicklink to Add to ${playlist.name}`}
-                      quicklinkTitle={`Add to ${playlist.name}`}
+                      quicklinkTitle={`Add Playing Song to ${playlist.name}`}
                       command="addPlayingSongToPlaylist"
                       data={{ playlistId: playlist.id }}
                     />
