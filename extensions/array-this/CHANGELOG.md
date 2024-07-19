@@ -1,5 +1,5 @@
 # Array this Changelog
 
-## [Added Array This] - {PR_MERGE_DATE}
+## [Added Array This] - 2024-07-19
 
 - Initial version code
