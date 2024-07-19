@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Ebene_1" data-name="Ebene 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 512 512">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: url(#Unbenannter_Verlauf);
+      }
+
+      .cls-1, .cls-2, .cls-3 {
+        stroke-width: 0px;
+      }
+
+      .cls-2 {
+        fill: none;
+      }
+
+      .cls-3 {
+        fill: #538dd7;
+      }
+    </style>
+    <radialGradient id="Unbenannter_Verlauf" data-name="Unbenannter Verlauf" cx="-958.6" cy="817.9" fx="-958.6" fy="817.9" r="1" gradientTransform="translate(491071 419022) scale(512 -512)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset="1" stop-color="#c5c5c5"/>
+    </radialGradient>
+  </defs>
+  <rect id="r6f" class="cls-1" width="512" height="512" rx="128" ry="128"/>
+  <path class="cls-2" d="M159.7,162.2c8.6-5.4,14.2-14.9,14.2-25.8,0-16.8-13.7-30.5-30.5-30.5s-30.5,13.7-30.5,30.5,4.6,18.5,11.7,24v245.5h37.5v-37.5h218.9c8.6,0,15.5-6.9,15.5-15.5s-.5-4.3-1.3-6.3l-36.2-81.4,36.2-81.4c.9-2,1.3-4.1,1.3-6.3,0-8.6-6.9-15.5-15.5-15.5h-221.4Z"/>
+  <path class="cls-3" d="M155.7,155.6c8.9-5.6,14.9-15.6,14.9-26.9,0-17.6-14.2-31.8-31.8-31.8s-31.8,14.2-31.8,31.8,4.8,19.3,12.2,25.1v256.2h39.1v-39.1h228.5c8.9,0,16.1-7.2,16.1-16.1s-.5-4.5-1.4-6.5l-37.7-84.9,37.7-84.9c.9-2.1,1.4-4.3,1.4-6.5,0-8.9-7.2-16.1-16.1-16.1h-231.1Z"/>
+</svg>
