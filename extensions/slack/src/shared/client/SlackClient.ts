@@ -1,6 +1,6 @@
 import { Icon, Image } from "@raycast/api";
 import { SlackConversation, SlackMember, getSlackWebClient } from "./WebClient";
-import { getTimeLocale } from "../utils";
+import { formatRelative } from "date-fns";
 
 interface Item {
   id: string;
@@ -73,18 +73,12 @@ export class SlackClient {
           const timezone = tz ?? "";
 
           let statusExpirationDate = "";
-          let statusExpirationTime = "";
 
           if (statusExpiration) {
             const date = new Date(statusExpiration * 1000);
             if (!isNaN(date.getTime())) {
-              statusExpirationDate = date.toISOString().split("T")[0];
-              statusExpirationTime = date.toLocaleTimeString(getTimeLocale(), {
-                hour: "2-digit",
-                minute: "2-digit",
-              });
-
-              statusExpirationDate = `Back on ${statusExpirationDate} at ${statusExpirationTime}`;
+              statusExpirationDate = formatRelative(date, new Date(), { weekStartsOn: 1 });
+              statusExpirationDate = `Until ${statusExpirationDate}`;
             }
           }
 

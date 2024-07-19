@@ -29,7 +29,7 @@
       "preferences": [
         {
           "title": "Channel Metadata",
-          "label": "Display extra metadata in Open Channel results",
+          "label": "Display extra metadata in results",
           "description": "Show team member's titles, time zone, and current time in Open Channel results",
           "name": "displayExtraMetadata",
           "type": "checkbox",
