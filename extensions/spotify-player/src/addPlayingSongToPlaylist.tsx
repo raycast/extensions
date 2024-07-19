@@ -12,7 +12,7 @@ import {
   showHUD,
   showToast,
 } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCurrentlyPlaying } from "./hooks/useCurrentlyPlaying";
 import { useMe } from "./hooks/useMe";
 import { ListOrGridSection } from "./components/ListOrGridSection";
@@ -81,27 +81,28 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
     );
   }
 
-  if (props?.playlistId) {
-    try {
-      addToPlaylist({
-        playlistId: props.playlistId,
-        trackUris: [currentlyPlayingData.item?.uri as string],
-      });
-      const playlist = myPlaylistsData?.items?.find((p) => p.id == props.playlistId);
-      if (!playlist) {
-        showHUD("Playlist not found");
-        popToRoot();
-        return;
+  useEffect(() => {
+    if (props?.playlistId) {
+      try {
+        addToPlaylist({
+          playlistId: props.playlistId,
+          trackUris: [currentlyPlayingData.item?.uri as string],
+        });
+        const playlist = myPlaylistsData?.items?.find((p) => p.id == props.playlistId);
+        if (!playlist) {
+          showHUD("Playlist not found");
+          popToRoot();
+          return;
+        }
+        showHUD(`Added to ${playlist?.name}`);
+      } catch (err) {
+        const error = getError(err);
+        showHUD(`Error adding song to playlist: ${error.message}`);
       }
-      showHUD(`Added to ${playlist?.name}`);
-    } catch (err) {
-      const error = getError(err);
-      showHUD(`Error adding song to playlist: ${error.message}`);
+      popToRoot();
+      return;
     }
-    popToRoot();
-
-    return;
-  }
+  }, []);
 
   return (
     <List
