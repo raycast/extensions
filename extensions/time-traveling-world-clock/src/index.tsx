@@ -1,5 +1,6 @@
 import { ActionPanel, List, Action, LocalStorage, useNavigation, Clipboard, closeMainWindow, Icon } from "@raycast/api";
 import { CityData, findFromCityStateProvince } from "city-timezones";
+import getUnicodeFlagIcon from 'country-flag-icons/unicode'
 import { useEffect, useState, useMemo } from "react";
 
 const timeFormatter = new Intl.DateTimeFormat("en-US", {
@@ -193,7 +194,7 @@ export default function Command() {
         return (
           <List.Item
             key={c.city}
-            title={c.city}
+            title={c.city + ' ' + getUnicodeFlagIcon(c.iso2)}
             subtitle={subtitle}
             icon={getIconForTime(date)}
             actions={actions({ time: subtitle, city: c })}
