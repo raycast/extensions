@@ -90,7 +90,6 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
         continue;
       }
       const selectorKeys = Object.keys(s);
-      console.log("selector keys:", selectorKeys);
       for (const sk of selectorKeys) {
         switch (sk) {
           case "object":

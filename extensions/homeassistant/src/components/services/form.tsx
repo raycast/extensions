@@ -117,7 +117,6 @@ export function ServiceFormTargetEntitiesTagPicker({
         return false;
       })
     : states;
-  console.log("states", states?.length, "filtered:", filteredStates?.length);
   return (
     <Form.TagPicker
       id={id}

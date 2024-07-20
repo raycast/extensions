@@ -125,7 +125,6 @@ export interface HAServiceCallPayload {
 }
 
 export function getHAServiceQuicklink(payload: HAServiceCallPayload) {
-  console.log(JSON.stringify(payload));
   const encoded = encodeURI(JSON.stringify(payload));
   return `raycast://extensions/tonka3000/homeassistant/runService?context=${encoded}`;
 }
