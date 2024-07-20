@@ -270,7 +270,6 @@ export default function ServiceCallCommand() {
             }
           }
         })}
-      <Form.Separator />
       {yamlMode && <Form.TextArea id="yamltext" title="Data (yaml)" value={yamlText} onChange={setYamlText} />}
     </Form>
   );
