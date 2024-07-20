@@ -1,5 +1,9 @@
 # DocSearch Changelog
 
+## [Support for new documentation] - 2024-07-19
+
+- 📄 Support [Vuetify](https://vuetifyjs.com/)
+
 ## [Fix Bugs] - 2024-3-19
 
 - 🐛 Fix icon of docs not found

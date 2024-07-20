@@ -65,6 +65,7 @@
 /extensions/apply-inline-code                                       @aforian
 /extensions/arc                                                     @thomaspaulmann @zach-fuller @ankitchouhan1020 @pernielsentikaer @danpalmer @rgrunberg @tleo19 @loris @bdsqqq @xilopaint @jayeshbhole @hinzed1127 @omar-salama @underscoregeb
 /extensions/archiver                                                @404J
+/extensions/array-this                                              @matheus-depaula
 /extensions/ars-technica                                            @edwin-dd-ong
 /extensions/arxiv                                                   @koayon @pernielsentikaer
 /extensions/asana                                                   @thomaslombart @spaceDolph1n @tuzemec
@@ -171,7 +172,7 @@
 /extensions/cc0-lib                                                 @0xN1
 /extensions/ccf-what                                                @CrackedPoly
 /extensions/center                                                  @enesozturk
-/extensions/chakra-ui-docs                                          @pgvr @Ansub
+/extensions/chakra-ui-docs                                          @pgvr @Ansub @StanleyDing
 /extensions/change-case                                             @erics118 @pernielsentikaer @nagauta @PWrzesinski
 /extensions/change-scroll-direction                                 @gregoralbrecht @emilshr
 /extensions/charged                                                 @apoorvsadana
@@ -353,7 +354,7 @@
 /extensions/dock-tinker                                             @koinzhang @garrucho
 /extensions/docker                                                  @priithaamer @gebeto @BalliAsghar @noblecloud
 /extensions/dockerhub                                               @k8scat @tonka3000 @BalliAsghar
-/extensions/docsearch                                               @Fatpandac @AnishDe12020 @pomdtr
+/extensions/docsearch                                               @Fatpandac @AnishDe12020 @pomdtr @Jimmy-b36
 /extensions/dog-images                                              @BossElijah @pernielsentikaer
 /extensions/dolar-cripto-ar                                         @koaladlt
 /extensions/dolar-hoy                                               @GustavoCarvallo01
@@ -734,6 +735,7 @@
 /extensions/lenscast                                                @peduarte
 /extensions/let-me-google-that                                      @Ek2100 @Princeyadav05
 /extensions/letterboxd                                              @rgarcia
+/extensions/lexicon-search                                          @futurGH
 /extensions/liba-ro                                                 @neemspees
 /extensions/libraries-io                                            @djpowers
 /extensions/library-genesis                                         @yz3440 @j3lte

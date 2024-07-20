@@ -46,15 +46,16 @@
   "dependencies": {
     "@raycast/api": "^1.61.2",
     "@raycast/utils": "^1.16.0",
-    "axios": "^1.6.2"
+    "dub": "^0.33.1",
+    "undici": "^6.19.2"
   },
   "preferences": [
     {
-      "name": "apiKey",
+      "name": "workspaceApiKey",
       "type": "password",
       "required": true,
-      "title": "API Key",
-      "description": "Dub API key."
+      "title": "Workspace API Key",
+      "description": "Workspace API key on Dub. Learn more: https://d.to/tokens"
     }
   ],
   "devDependencies": {

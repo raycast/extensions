@@ -13,6 +13,25 @@ export default function Command() {
   const btcAbortControllerRef = useRef<AbortController | null>(null);
   const ethAbortControllerRef = useRef<AbortController | null>(null);
 
+  const handleError = async (error: unknown, message: string) => {
+    console.error("Error details:", error);
+    if (error instanceof Error) {
+      if (error.name !== "AbortError") {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: message,
+          message: error.message,
+        });
+      }
+    } else {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: message,
+        message: "An unknown error occurred.",
+      });
+    }
+  };
+
   const fetchDollarRatesWrapper = async () => {
     if (dollarAbortControllerRef.current) {
       dollarAbortControllerRef.current.abort();
@@ -20,23 +39,13 @@ export default function Command() {
     dollarAbortControllerRef.current = new AbortController();
 
     try {
-      return await fetchDollarRates(dollarAbortControllerRef.current.signal);
+      const result = await fetchDollarRates(dollarAbortControllerRef.current.signal);
+      return result;
     } catch (error) {
-      if (error instanceof Error) {
-        if (error.name !== "AbortError") {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to fetch dollar rates",
-            message: error.message,
-          });
-        }
-      } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to fetch dollar rates",
-          message: "An unknown error occurred.",
-        });
+      if (error instanceof Error && error.name === "AbortError") {
+        return null;
       }
+      await handleError(error, "Failed to fetch dollar rates");
       throw error;
     }
   };
@@ -48,23 +57,13 @@ export default function Command() {
     btcAbortControllerRef.current = new AbortController();
 
     try {
-      return await fetchBtcPrice(btcAbortControllerRef.current.signal);
+      const result = await fetchBtcPrice(btcAbortControllerRef.current.signal);
+      return result;
     } catch (error) {
-      if (error instanceof Error) {
-        if (error.name !== "AbortError") {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to fetch BTC price",
-            message: error.message,
-          });
-        }
-      } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to fetch BTC price",
-          message: "An unknown error occurred.",
-        });
+      if (error instanceof Error && error.name === "AbortError") {
+        return null;
       }
+      await handleError(error, "Failed to fetch BTC price");
       throw error;
     }
   };
@@ -76,23 +75,13 @@ export default function Command() {
     ethAbortControllerRef.current = new AbortController();
 
     try {
-      return await fetchEthPrice(ethAbortControllerRef.current.signal);
+      const result = await fetchEthPrice(ethAbortControllerRef.current.signal);
+      return result;
     } catch (error) {
-      if (error instanceof Error) {
-        if (error.name !== "AbortError") {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to fetch ETH price",
-            message: error.message,
-          });
-        }
-      } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to fetch ETH price",
-          message: "An unknown error occurred.",
-        });
+      if (error instanceof Error && error.name === "AbortError") {
+        return null;
       }
+      await handleError(error, "Failed to fetch ETH price");
       throw error;
     }
   };
@@ -103,6 +92,7 @@ export default function Command() {
     revalidate: revalidateDollar,
   } = useCachedPromise(fetchDollarRatesWrapper, [], {
     initialData: null,
+    keepPreviousData: true,
   });
 
   const {
@@ -111,6 +101,7 @@ export default function Command() {
     revalidate: revalidateBtc,
   } = useCachedPromise(fetchBtcPriceWrapper, [], {
     initialData: null,
+    keepPreviousData: true,
   });
 
   const {
@@ -119,6 +110,7 @@ export default function Command() {
     revalidate: revalidateEth,
   } = useCachedPromise(fetchEthPriceWrapper, [], {
     initialData: null,
+    keepPreviousData: true,
   });
 
   useEffect(() => {
@@ -130,43 +122,17 @@ export default function Command() {
     }
   }, [dollarData, btcData, ethData]);
 
-  const blueDollarPrice = dollarData?.blue?.ask;
-  const mepDollarPrice = dollarData?.mep?.al30["24hs"]?.price;
-  const cclDollarPrice = dollarData?.ccl?.al30["24hs"]?.price;
-  const btcPrice = btcData?.USD;
-  const ethPrice = ethData?.USD;
-
-  const formatPrice = (price: number | undefined) => {
-    return price ? `$${Math.floor(price)}` : "";
-  };
-
-  const getTitle = () => {
-    if (!initialFetchDone || !selectedCurrency) {
-      return "Cargando...";
-    }
-
-    if (selectedCurrency === "Blue" && blueDollarPrice !== undefined) {
-      return formatPrice(blueDollarPrice);
-    }
-    if (selectedCurrency === "MEP" && mepDollarPrice !== undefined) {
-      return formatPrice(mepDollarPrice);
-    }
-    if (selectedCurrency === "CCL" && cclDollarPrice !== undefined) {
-      return formatPrice(cclDollarPrice);
-    }
-    if (selectedCurrency === "BTC" && btcPrice !== undefined) {
-      return `${formatPrice(btcPrice)}`;
-    }
-    if (selectedCurrency === "ETH" && ethPrice !== undefined) {
-      return `${formatPrice(ethPrice)}`;
-    }
-    return selectedCurrency;
-  };
-
   useEffect(() => {
-    revalidateDollar();
-    revalidateBtc();
-    revalidateEth();
+    const fetchData = async () => {
+      if (["Blue", "MEP", "CCL"].includes(selectedCurrency)) {
+        revalidateDollar();
+      } else if (selectedCurrency === "BTC") {
+        revalidateBtc();
+      } else if (selectedCurrency === "ETH") {
+        revalidateEth();
+      }
+    };
+    fetchData();
   }, [selectedCurrency, revalidateDollar, revalidateBtc, revalidateEth]);
 
   useEffect(() => {
@@ -182,6 +148,33 @@ export default function Command() {
       }
     };
   }, []);
+
+  const formatPrice = (price: number | undefined) => {
+    return price ? `$${Math.floor(price)}` : "";
+  };
+
+  const getTitle = () => {
+    if (!initialFetchDone || !selectedCurrency) {
+      return "Cargando...";
+    }
+
+    if (selectedCurrency === "Blue" && dollarData?.blue?.ask !== undefined) {
+      return formatPrice(dollarData.blue.ask);
+    }
+    if (selectedCurrency === "MEP" && dollarData?.mep?.al30["24hs"]?.price !== undefined) {
+      return formatPrice(dollarData.mep.al30["24hs"].price);
+    }
+    if (selectedCurrency === "CCL" && dollarData?.ccl?.al30["24hs"]?.price !== undefined) {
+      return formatPrice(dollarData.ccl.al30["24hs"].price);
+    }
+    if (selectedCurrency === "BTC" && btcData?.USD !== undefined) {
+      return `${formatPrice(btcData.USD)}`;
+    }
+    if (selectedCurrency === "ETH" && ethData?.USD !== undefined) {
+      return `${formatPrice(ethData.USD)}`;
+    }
+    return selectedCurrency;
+  };
 
   return (
     <MenuBarExtra title={getTitle()} isLoading={isDollarFetching || isBtcFetching || isEthFetching}>
