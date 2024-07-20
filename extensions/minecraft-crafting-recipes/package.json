@@ -20,7 +20,7 @@
   "dependencies": {
     "@raycast/api": "^1.79.0",
     "@raycast/utils": "^1.16.2",
-    "minecraft-crafting-info": "^0.0.3",
+    "minecraft-crafting-info": "^0.0.4",
     "string-to-color": "^2.2.2"
   },
   "devDependencies": {
