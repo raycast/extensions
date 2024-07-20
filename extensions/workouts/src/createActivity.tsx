@@ -1,21 +1,9 @@
 import { ActionPanel, Form, Icon, Toast, showToast, getPreferenceValues, Action } from "@raycast/api";
-import { SportType } from "./api/types";
+import { SportType, StravaManualActivity } from "./api/types";
 import { createActivity, provider } from "./api/client";
-import {  formatSportTypesText, isDurationValid, isNumber } from "./utils";
+import { formatSportTypesText, isDurationValid, isNumber } from "./utils";
 import { withAccessToken, useForm, FormValidation } from "@raycast/utils";
-import { useRef } from 'react';
-
-
-export type CreateActivityFormValues = {
-  name: string;
-  sportType: string;
-  date: Date;
-  duration: string;
-  distance: string;
-  description: string;
-  isTrainer: boolean;
-  isCommute: boolean; 
-};
+import { useRef } from "react";
 
 
 function CreateActivity() {
@@ -23,7 +11,7 @@ function CreateActivity() {
   const distanceUnitRef = useRef(getPreferenceValues<Preferences>().distance_unit);
   const distanceFieldTitle = "Distance (" + distanceUnitRef.current + ")";
 
-  const { handleSubmit, itemProps } = useForm<CreateActivityFormValues>({
+  const { handleSubmit, itemProps } = useForm<StravaManualActivity>({
     onSubmit(values) {
       submitActivity(values);
     },
@@ -31,25 +19,24 @@ function CreateActivity() {
       name: FormValidation.Required,
       date: FormValidation.Required,
       sportType: FormValidation.Required,
-      duration: (value) => { 
-        if(!value){
+      duration: (value) => {
+        if (!value) {
           return "Enter in a duration";
         } else if (!isDurationValid(value)) {
-          return "Use the format hh:mm:ss"
+          return "Use the format hh:mm:ss";
         }
       },
-      distance: (value) => { 
-        console.log("value: " + value)
+      distance: (value) => {
         if (isNumber(value) || value == "") {
-          return undefined
-        } else {       
+          return undefined;
+        } else {
           return "Enter a valid number";
         }
-      }
+      },
     },
   });
 
-  async function submitActivity(values: CreateActivityFormValues) {
+  async function submitActivity(values: StravaManualActivity) {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Saving your activity",
@@ -64,7 +51,7 @@ function CreateActivity() {
       toast.message = String(error);
     }
   }
-  
+
   return (
     <Form
       actions={
@@ -73,47 +60,23 @@ function CreateActivity() {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        title="Name *"
-        placeholder="Enter a name for your activity"
-        {...itemProps.name}
-      />
-      <Form.Dropdown
-        title="Sport Type *"
-        {...itemProps.sportType}
-      >
+      <Form.TextField title="Name *" placeholder="Enter a name for your activity" {...itemProps.name} />
+      <Form.Dropdown title="Sport Type *" {...itemProps.sportType}>
         <Form.Dropdown.Item value="" title="Please select an option" />
         {sportTypes.map((sportType) => (
           <Form.Dropdown.Item key={sportType} value={sportType} title={formatSportTypesText(sportType)} />
         ))}
       </Form.Dropdown>
-      <Form.DatePicker
-        id="date"
-        title="Date *"
-        defaultValue={new Date()}
-      />
+      <Form.DatePicker id="date" title="Date *" defaultValue={new Date()} />
       <Form.TextField
         title={"Duration (hh:mm:ss) *"}
         placeholder="Enter the duration for your activity"
         {...itemProps.duration}
       />
-      <Form.TextField
-        title={distanceFieldTitle}
-        placeholder="Enter in your distance"
-        {...itemProps.distance}
-      />
-      <Form.TextArea
-        title="Description"
-        {...itemProps.description}
-      />
-      <Form.Checkbox
-        label="Trainer"
-        {...itemProps.isTrainer}
-      />
-      <Form.Checkbox
-        label="Commute"
-        {...itemProps.isCommute}
-      />
+      <Form.TextField title={distanceFieldTitle} placeholder="Enter in your distance" {...itemProps.distance} />
+      <Form.TextArea title="Description" {...itemProps.description} />
+      <Form.Checkbox label="Trainer" {...itemProps.isTrainer} />
+      <Form.Checkbox label="Commute" {...itemProps.isCommute} />
     </Form>
   );
 }

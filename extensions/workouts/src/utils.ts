@@ -126,15 +126,15 @@ export function convertDurationToSeconds(duration: string): number {
 
 
 export function isDurationValid(duration: string | undefined): { hours: number; minutes: number; seconds: number } | null {
-  if(!duration) return null;
-  const regex = /^(\d{1,2}):([0-5]?\d):([0-5]?\d)$/; 
+  if (!duration) return null;
+  const regex = /^(\d{1,2}):([0-5]?\d):([0-5]?\d)$/;
   const matches = duration.match(regex);
   if (matches) {
     const [, hoursStr, minutesStr, secondsStr] = matches;
     const hours = parseInt(hoursStr, 10);
     const minutes = parseInt(minutesStr, 10);
     const seconds = parseInt(secondsStr, 10);
-    if ( 
+    if (
       hours >= 0 && hours < 100 &&
       minutes >= 0 && minutes < 60 &&
       seconds >= 0 && seconds < 60
@@ -146,26 +146,25 @@ export function isDurationValid(duration: string | undefined): { hours: number; 
 }
 
 
-export function convertDistanceToMeters(distance : string, unit :  string)
-{
- const cleanedString = distance.trim();
- const value = parseFloat(cleanedString);
- 
- if (isNaN(value)) {
-   throw new Error('Invalid distance format');
- }
- switch (unit) {
-   case 'km':
-     return value * 1000;
-   case 'mi':
-     return value * 1609.344;
-   default:
-     throw new Error('Unsupported unit');
- }
+export function convertDistanceToMeters(distance: string, unit: string) {
+  const cleanedString = distance.trim();
+  const value = parseFloat(cleanedString);
+
+  if (isNaN(value)) {
+    throw new Error('Invalid distance format');
+  }
+  switch (unit) {
+    case 'km':
+      return value * 1000;
+    case 'mi':
+      return value * 1609.344;
+    default:
+      throw new Error('Unsupported unit');
+  }
 
 }
 
-export function isNumber(distance: string | undefined){
+export function isNumber(distance: string | undefined) {
   if (distance) {
     var sanitizedValue = distance.replace(/[^\d.]/g, "").replace(/(\..*)\./g, "$1");
     return !(sanitizedValue === "" || isNaN(Number(sanitizedValue)));

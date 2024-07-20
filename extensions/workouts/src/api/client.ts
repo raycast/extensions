@@ -6,6 +6,7 @@ import {
   StravaClubActivity,
   StravaStats,
   StravaSummaryClub,
+  StravaManualActivity
 } from "./types";
 import { OAuth } from "@raycast/api";
 import { getAccessToken, OAuthService } from "@raycast/utils";
@@ -197,7 +198,7 @@ export const getClubActivities = async (clubId: string, page = 1, pageSize = PAG
 };
 
 
- export const createActivity = async (activityValues : any) =>
+ export const createActivity = async (activityValues : StravaManualActivity) =>
   {
     console.log( "activityValues");
     console.log(activityValues);
