@@ -3,22 +3,16 @@ import { getFavicon, useFetch } from "@raycast/utils";
 import { Doc } from "./types";
 import { SearchEntries } from "./search-entries";
 
-export default function SearchDocsets(): JSX.Element {
+export default function SearchDocumentations(): JSX.Element {
   const { data, isLoading } = useFetch<Doc[]>(`https://devdocs.io/docs/docs.json`, {});
 
-  return (
-    <List isLoading={isLoading}>
-      {data?.map((doc) => (
-        <DocItem key={doc.slug} doc={doc} />
-      ))}
-    </List>
-  );
+  return <List isLoading={isLoading}>{data?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}</List>;
 }
 
 function DocItem({ doc }: { doc: Doc }): JSX.Element {
   const quicklink = {
     link: `raycast://extensions/pomdtr/devdocs/search-entries?arguments=${encodeURIComponent(
-      JSON.stringify({ slug: doc.slug })
+      JSON.stringify({ slug: doc.slug }),
     )}`,
     name: doc.version ? `Search ${doc.name} ${doc.version} Entries` : `Search ${doc.name} Entries`,
   };

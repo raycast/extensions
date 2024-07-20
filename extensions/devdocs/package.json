@@ -8,11 +8,12 @@
   "author": "pomdtr",
   "commands": [
     {
-      "name": "search-docsets",
-      "title": "Search Docsets",
+      "name": "search-documentations",
+      "title": "Search Documentations",
       "subtitle": "DevDocs",
-      "description": "Search through DevDocs documentation sets from Raycast",
-      "mode": "view"
+      "description": "Search through DevDocs documentations from Raycast",
+      "mode": "view",
+      "keywords": ["search docset"]
     },
     {
       "name": "search-entries",
