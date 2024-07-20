@@ -6,7 +6,7 @@ import {
   StravaClubActivity,
   StravaStats,
   StravaSummaryClub,
-  StravaManualActivity
+  StravaManualActivity,
 } from "./types";
 import { OAuth } from "@raycast/api";
 import { getAccessToken, OAuthService } from "@raycast/utils";
@@ -207,11 +207,11 @@ export const createActivity = async (activityValues: StravaManualActivity) => {
   try {
     const { token } = await getAccessToken();
     console.log(activityValues);
-    const response = await fetch('https://www.strava.com/api/v3/activities', {
-      method: 'POST',
+    const response = await fetch("https://www.strava.com/api/v3/activities", {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         name: activityValues.name,
@@ -221,7 +221,7 @@ export const createActivity = async (activityValues: StravaManualActivity) => {
         description: activityValues.description,
         distance: convertDistanceToMeters(activityValues.distance, activityValues.distanceUnit),
         trainer: isTrainer,
-        commute: isCommute
+        commute: isCommute,
       }),
     });
     const json = await response.json();
@@ -229,12 +229,10 @@ export const createActivity = async (activityValues: StravaManualActivity) => {
       console.log((json as Error).message);
     }
     return true;
-
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err);
     const error = err instanceof Error ? err.message : "An error occurred";
     console.error("createActivity Error:", err);
     throw new Error(error);
   }
-}
+};
