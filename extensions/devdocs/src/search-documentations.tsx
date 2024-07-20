@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { getFavicon, useFetch } from "@raycast/utils";
 import { Doc } from "./types";
 import { SearchEntries } from "./search-entries";
@@ -31,7 +31,12 @@ function DocItem({ doc }: { doc: Doc }): JSX.Element {
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.CreateQuicklink icon={Icon.Link} quicklink={quicklink} />
+            <Action.CreateQuicklink
+              icon={Icon.Link}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+              quicklink={quicklink}
+            />
+            <Action.CopyToClipboard content={doc.slug} shortcut={Keyboard.Shortcut.Common.CopyName} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             {doc.links?.home && (
