@@ -7,10 +7,10 @@ const exec = promisify(Exec);
 
 export default async function main() {
   let input = "";
+
   try {
     input = await getSelectedText();
-  } catch (error) {
-    console.log("Unable to get selected text");
+  } catch {
     await showHUD("Unable to get selected text");
     return;
   }
@@ -24,17 +24,22 @@ export default async function main() {
   const switched = switchStringLayout(input, detectedLayout);
 
   await Clipboard.paste(switched);
-  await switchLayout(detectedLayout === "ABC" ? "Ukrainian" : "ABC");
+  await switchLayout(detectedLayout === "ABC" ? "Ukrainian" : "U.S.");
 
   await showHUD(`Layout switched to ${detectedLayout === "ABC" ? "Ukrainian 🇺🇦" : "English 🇬🇧"}!`);
 }
 
 function switchStringLayout(string: string, currentLayout: string): string {
   const layoutMap = currentLayout === "ABC" ? en_ukr : ukr_en;
-  return string
-    .split("")
-    .map((char) => layoutMap.get(char) ?? char)
-    .join("");
+  let result = "";
+
+  for (const char of string) {
+    const lowerChar = char.toLowerCase();
+    const switchedChar = layoutMap.get(lowerChar) ?? char;
+    result += char === lowerChar ? switchedChar : switchedChar.toUpperCase();
+  }
+
+  return result;
 }
 
 async function switchLayout(target: string): Promise<void> {
@@ -43,7 +48,7 @@ async function switchLayout(target: string): Promise<void> {
 }
 
 function detectLayout(input: string): string {
-  const enChars = input.split("").filter((c) => en_ukr.has(c)).length;
-  const ukrChars = input.split("").filter((c) => ukr_en.has(c)).length;
+  const enChars = Array.from(input).filter((c) => en_ukr.has(c.toLowerCase())).length;
+  const ukrChars = Array.from(input).filter((c) => ukr_en.has(c.toLowerCase())).length;
   return enChars > ukrChars ? "ABC" : "Ukrainian";
 }
