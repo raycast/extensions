@@ -1,0 +1,6 @@
+# EVM Search Changelog
+
+## [Initial Version] - 2024-07-20
+
+Initial Version
+
