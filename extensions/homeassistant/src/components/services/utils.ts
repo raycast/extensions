@@ -32,6 +32,14 @@ export interface HAServiceFieldSelectorSelect {
   options?: HAServiceFieldSelectorSelectOption[] | string[] | null;
 }
 
+export interface HAServiceFieldSelectorColorRgb {}
+
+export interface HAServiceFieldSelectorColorTemp {
+  unit?: string;
+  min?: number;
+  max?: number;
+}
+
 export interface HAServiceFieldSelector {
   text?: string | null;
   area?: string | null;
@@ -46,6 +54,8 @@ export interface HAServiceFieldSelector {
   boolean?: boolean | null;
   select?: HAServiceFieldSelectorSelect | null;
   theme?: string | null;
+  color_rgb?: HAServiceFieldSelectorColorRgb | null;
+  color_temp?: HAServiceFieldSelectorColorTemp | null;
 }
 
 export interface HAServiceField {

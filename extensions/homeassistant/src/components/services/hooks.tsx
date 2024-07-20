@@ -359,6 +359,62 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
             return undefined;
           },
         });
+      } else if (s?.color_rgb !== undefined) {
+        result.push({
+          id: k,
+          value: undefined,
+          toYaml: (value) => {
+            return value;
+          },
+          fromYaml: (value) => {
+            return value;
+          },
+          type: "color_rgb",
+          meta: v,
+          validator: (userValue) => {
+            if (v.required === true && !userValue) {
+              return "Required";
+            }
+            return undefined;
+          },
+        });
+      } else if (s?.color_temp !== undefined) {
+        result.push({
+          id: k,
+          value: undefined,
+          toYaml: (value) => {
+            return Number.parseFloat(value);
+          },
+          fromYaml: (value) => {
+            if (value && !Number.isNaN(value)) {
+              return `${value}`;
+            }
+          },
+          type: "color_temp",
+          meta: v,
+          validator: (userValue) => {
+            if (!userValue) {
+              if (v.required) {
+                return "Required";
+              }
+              return undefined;
+            }
+            const n = Number.parseFloat(userValue);
+            if (Number.isNaN(n)) {
+              return "Not a valid number";
+            }
+            const ct = s.color_temp;
+            const max = ct?.max;
+            if (max !== undefined && max !== null && n > max) {
+              return `Maximum is ${max} `;
+            }
+            const min = ct?.min;
+            if (min !== undefined && min !== null && n < min) {
+              return `Minimum is ${min} `;
+            }
+            return undefined;
+          },
+        });
       } else {
         console.error(`Unknown field type '${k}' `, v);
       }

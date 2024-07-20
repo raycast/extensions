@@ -176,6 +176,7 @@ export default function ServiceCallCommand() {
             case "icon":
             case "label":
             case "device":
+            case "color_rgb":
             case "theme": {
               return (
                 <Form.TextField
@@ -202,6 +203,7 @@ export default function ServiceCallCommand() {
                 />
               );
             }
+            case "color_temp":
             case "number": {
               return (
                 <ServiceFormFieldNumber
@@ -250,6 +252,9 @@ export default function ServiceCallCommand() {
                   error={userDataError[f.id]}
                 />
               );
+            }
+            default: {
+              console.error(`Unknown field type ${f.type}`);
             }
           }
         })}

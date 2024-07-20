@@ -25,7 +25,7 @@ export interface ServiceFormFieldNumberProps extends Form.TextField.Props {
 }
 
 export function ServiceFormFieldNumber({ onChange, value, field, id, ...restProps }: ServiceFormFieldNumberProps) {
-  if (field.selector?.number === undefined) {
+  if (field.selector?.number === undefined && field.selector?.color_temp === undefined) {
     return null;
   }
   const handle = (newValue: string) => {
