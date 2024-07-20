@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cemil",
+  "title": "cemil",
+  "description": "Lists and opens frequently used links defined by a config file",
+  "icon": "img.png",
+  "author": "akadir",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "configPath",
+      "type": "textfield",
+      "placeholder": "path/to/config",
+      "title": "Path to Config JSON File",
+      "required": true,
+      "description": "Specify the path to your config json file"
+    },
+    {
+      "name": "sortAlphabetically",
+      "type": "checkbox",
+      "title": "If entries in each group should be alphabetically sorted or listed as defined in json",
+      "required": false,
+      "description": "Specify if the entries sorted by alphabetically or not",
+      "label": "Sort Alphabetically"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "cemil",
+      "subtitle": "suat",
+      "description": "list urls defined in json to quickly access and open in browser",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.78.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
