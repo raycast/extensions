@@ -2,7 +2,6 @@ import { Alert, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
 import { setSpotifyClient } from "./helpers/withSpotifyClient";
 import { getCurrentlyPlaying } from "./api/getCurrentlyPlaying";
 import { removeFromPlaylist } from "./api/removeFromPlaylist";
-import { showFailureToast } from "@raycast/utils";
 import { skipToNext } from "./api/skipToNext";
 
 export default async function Command() {
@@ -64,10 +63,11 @@ export default async function Command() {
         }
       }
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Error removing song from playlist. Please try again.";
-      showFailureToast(errorMessage);
-      return;
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failure",
+        message: "You may not have permission to remove songs from this playlist. Trying again may also work.",
+      });
     }
   }
 }

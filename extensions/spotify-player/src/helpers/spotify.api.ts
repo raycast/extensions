@@ -586,8 +586,7 @@ export type CurrentlyPlayingContextObject = {
   timestamp?: number;
   progress_ms?: number;
   is_playing?: boolean;
-  item?:
-    | ({
+  item: ({
         type: "TrackObject";
       } & TrackObject)
     | ({
