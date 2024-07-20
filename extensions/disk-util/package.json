@@ -18,6 +18,12 @@
       "mode": "view"
     },
     {
+      "name": "show-volumes",
+      "title": "Show Volumes",
+      "description": "Show the disk volumes present on the system.",
+      "mode": "view"
+    },
+    {
       "name": "quick-create-volume",
       "title": "Quick Create Volume",
       "description": "Quick create APFS volumes. For encrypted volumes, it generates a secure passphrase, creates the volume, and stores the passphrase in the system keychain so that the volume can be automatically decrypted and mounted on boot.",
@@ -56,7 +62,7 @@
         {
           "name": "quota",
           "type": "text",
-          "placeholder": "Quota",
+          "placeholder": "Quota (in GB)",
           "required": false
         }
       ]
@@ -64,11 +70,13 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.16.2"
+    "@raycast/utils": "^1.16.2",
+    "plist": "^3.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "^20.14.11",
+    "@types/plist": "^3.0.5",
     "@types/react": "^18.3.3",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
