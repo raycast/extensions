@@ -177,30 +177,34 @@ export const getAllMemos = (currentUserId?: number) => {
 
   const url = getRequestUrl(`/api/v1/memos?filter=${filter}&pageSize=20`);
 
-  const { isLoading, data, revalidate, pagination } = useFetch<{
-    memos: MemoInfoResponse[];
-    nextPageToken: string
-  },
-  MemoInfoResponse[],
-  MemoInfoResponse[]
-  >((options) => {
-    return `${url}&pageToken=${options?.cursor || ''}`
-  }, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getToken()}`,
+  const { isLoading, data, revalidate, pagination } = useFetch<
+    {
+      memos: MemoInfoResponse[];
+      nextPageToken: string;
     },
-    parseResponse,
-    mapResult(result) {
-      return {
-        data: result?.memos || [],
-        cursor: result?.nextPageToken || '',
-        hasMore: !!result.nextPageToken || false,
-      };
+    MemoInfoResponse[],
+    MemoInfoResponse[]
+  >(
+    (options) => {
+      return `${url}&pageToken=${options?.cursor || ""}`;
     },
-    keepPreviousData: true,
-    initialData: [],
-  });
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+      parseResponse,
+      mapResult(result) {
+        return {
+          data: result?.memos || [],
+          cursor: result?.nextPageToken || "",
+          hasMore: !!result.nextPageToken || false,
+        };
+      },
+      keepPreviousData: true,
+      initialData: [],
+    },
+  );
 
   return { isLoading, data: currentUserId ? data : [], revalidate, pagination };
 };
@@ -240,7 +244,6 @@ export const deleteMemo = (memoId: string) => {
 };
 
 export const getResourceBin = (resourceName: string, resourceFilename: string) => {
-
   const url = getRequestUrl(`/file/${resourceName}/${resourceFilename}`);
 
   return getFetch<BinaryData>({
@@ -248,4 +251,4 @@ export const getResourceBin = (resourceName: string, resourceFilename: string) =
     method: "GET",
     responseType: "blob",
   });
-}
+};
