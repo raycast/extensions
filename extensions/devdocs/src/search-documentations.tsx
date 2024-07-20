@@ -14,7 +14,7 @@ function DocItem({ doc }: { doc: Doc }): JSX.Element {
     link: `raycast://extensions/pomdtr/devdocs/search-entries?arguments=${encodeURIComponent(
       JSON.stringify({ slug: doc.slug }),
     )}`,
-    name: doc.version ? `Search ${doc.name} ${doc.version} Entries` : `Search ${doc.name} Entries`,
+    name: doc.version ? `Search DevDocs ${doc.name} ${doc.version} Entries` : `Search ${doc.name} Entries`,
   };
   return (
     <List.Item
