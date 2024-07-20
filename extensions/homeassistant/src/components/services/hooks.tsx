@@ -33,7 +33,7 @@ export interface FieldState {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   id: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  value: any;
+  value?: any;
   type: string;
   meta: HAServiceField;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -89,466 +89,239 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
       if (!s) {
         continue;
       }
-      if (s.object !== undefined) {
-        result.push({
-          id: k,
-          value: undefined,
-          toYaml: (value) => {
-            return value;
-          },
-          fromYaml: (value) => {
-            return value;
-          },
-          validator: (userValue) => {
-            if (v.required === true && !userValue) {
-              return "Required";
+      const selectorKeys = Object.keys(s);
+      console.log("selector keys:", selectorKeys);
+      for (const sk of selectorKeys) {
+        switch (sk) {
+          case "object":
+            {
+              result.push({
+                id: k,
+                toYaml: (value) => {
+                  return value;
+                },
+                fromYaml: (value) => {
+                  return value;
+                },
+                validator: (userValue) => {
+                  if (v.required === true && !userValue) {
+                    return "Required";
+                  }
+                  if (userValue && userValue.trim().length > 0) {
+                    try {
+                      parse(userValue);
+                    } catch (error) {
+                      return "No valid yaml";
+                    }
+                  }
+                },
+                type: sk,
+                meta: v,
+              });
             }
-            if (userValue && userValue.trim().length > 0) {
-              try {
-                parse(userValue);
-              } catch (error) {
-                return "No valid yaml";
-              }
+            break;
+          case "number":
+            {
+              result.push({
+                id: k,
+                toYaml: (value) => {
+                  return Number.parseFloat(value);
+                },
+                fromYaml: (value) => {
+                  if (value && !Number.isNaN(value)) {
+                    return `${value}`;
+                  }
+                },
+                type: sk,
+                meta: v,
+                validator: (value) => {
+                  if (!value) {
+                    if (v.required === true) {
+                      return "Required";
+                    }
+                    return undefined;
+                  }
+                  const n = Number.parseFloat(value);
+                  if (Number.isNaN(n)) {
+                    return "Not a valid number";
+                  }
+                  const max = s?.number?.max;
+                  const min = s?.number?.min;
+                  if (max !== undefined && max !== null && n > max) {
+                    return `Maximum is ${max} `;
+                  }
+                  if (min !== undefined && min !== null && n < min) {
+                    return `Minimum is ${min} `;
+                  }
+                  return undefined;
+                },
+              });
             }
-          },
-          type: "object",
-          meta: v,
-        });
-      } else if (s.text !== undefined) {
-        result.push({
-          id: k,
-          value: undefined,
-          toYaml: (value) => {
-            return value;
-          },
-          fromYaml: (value) => {
-            return value;
-          },
-          type: "text",
-          meta: v,
-          validator: (val) => {
-            if (v.required === true && !val) {
-              return "Required";
+            break;
+          case "boolean":
+            {
+              result.push({
+                id: k,
+                toYaml: (value) => {
+                  return value;
+                },
+                fromYaml: (value) => {
+                  return value;
+                },
+                type: sk,
+                meta: v,
+                validator: (value) => {
+                  if (!value) {
+                    if (v.required === true) {
+                      return "Required";
+                    }
+                    return undefined;
+                  }
+                  return undefined;
+                },
+              });
             }
-            return undefined;
-          },
-        });
-      } else if (s.number !== undefined) {
-        result.push({
-          id: k,
-          value: undefined,
-          toYaml: (value) => {
-            return Number.parseFloat(value);
-          },
-          fromYaml: (value) => {
-            if (value && !Number.isNaN(value)) {
-              return `${value}`;
+            break;
+          case "entity":
+            {
+              result.push({
+                id: k,
+                toYaml: (value) => {
+                  return value;
+                },
+                fromYaml: (value) => {
+                  return value;
+                },
+                type: sk,
+                meta: v,
+                validator: (userValue) => {
+                  if (v.required === true && !userValue) {
+                    return "Required";
+                  }
+                  return undefined;
+                },
+              });
             }
-          },
-          type: "number",
-          meta: v,
-          validator: (value) => {
-            if (!value) {
-              if (v.required === true) {
-                return "Required";
-              }
-              return undefined;
+            break;
+          case "select":
+            {
+              result.push({
+                id: k,
+                value: undefined,
+                toYaml: (value) => {
+                  return value;
+                },
+                fromYaml: (value) => {
+                  return value;
+                },
+                type: sk,
+                meta: v,
+                validator: (userValue) => {
+                  if (v.required === true && !userValue) {
+                    return "Required";
+                  }
+                  return undefined;
+                },
+              });
             }
-            const n = Number.parseFloat(value);
-            if (Number.isNaN(n)) {
-              return "Not a valid number";
+            break;
+          case "color_temp":
+            {
+              result.push({
+                id: k,
+                value: undefined,
+                toYaml: (value) => {
+                  return Number.parseFloat(value);
+                },
+                fromYaml: (value) => {
+                  if (value && !Number.isNaN(value)) {
+                    return `${value}`;
+                  }
+                },
+                type: sk,
+                meta: v,
+                validator: (userValue) => {
+                  if (!userValue) {
+                    if (v.required) {
+                      return "Required";
+                    }
+                    return undefined;
+                  }
+                  const n = Number.parseFloat(userValue);
+                  if (Number.isNaN(n)) {
+                    return "Not a valid number";
+                  }
+                  const ct = s.color_temp;
+                  const max = ct?.max;
+                  if (max !== undefined && max !== null && n > max) {
+                    return `Maximum is ${max} `;
+                  }
+                  const min = ct?.min;
+                  if (min !== undefined && min !== null && n < min) {
+                    return `Minimum is ${min} `;
+                  }
+                  return undefined;
+                },
+              });
             }
-            const max = s?.number?.max;
-            const min = s?.number?.min;
-            if (max !== undefined && max !== null && n > max) {
-              return `Maximum is ${max} `;
+            break;
+          case "text":
+          case "floor":
+          case "area":
+          case "config_entry":
+          case "icon":
+          case "label":
+          case "device":
+          case "theme":
+          case "color_rgb":
+          case "addon":
+          case "backup_location":
+          case "time":
+          case "conversation_agent":
+          case "datetime":
+            {
+              result.push({
+                id: k,
+                toYaml: (value) => {
+                  return value;
+                },
+                fromYaml: (value) => {
+                  return value;
+                },
+                type: sk,
+                meta: v,
+                validator: (userValue) => {
+                  if (v.required === true && !userValue) {
+                    return "Required";
+                  }
+                  return undefined;
+                },
+              });
             }
-            if (min !== undefined && min !== null && n < min) {
-              return `Minimum is ${min} `;
+            break;
+          default:
+            {
+              // handle all not validate selectors and handle them as string types
+              result.push({
+                id: k,
+                toYaml: (value) => {
+                  return value;
+                },
+                fromYaml: (value) => {
+                  return value;
+                },
+                type: sk,
+                meta: v,
+                validator: (userValue) => {
+                  if (v.required === true && !userValue) {
+                    return "Required";
+                  }
+                  return undefined;
+                },
+              });
             }
-            return undefined;
-          },
-        });
-      } else if (s.boolean !== undefined) {
-        result.push({
-          id: k,
-          value: false,
-          toYaml: (value) => {
-            return value;
-          },
-          fromYaml: (value) => {
-            return value;
-          },
-          type: "boolean",
-          meta: v,
-          validator: (value) => {
-            if (!value) {
-              if (v.required === true) {
-                return "Required";
-              }
-              return undefined;
-            }
-            return undefined;
-          },
-        });
-      } else if (s.entity !== undefined) {
-        result.push({
-          id: k,
-          value: undefined,
-          toYaml: (value) => {
-            return value;
-          },
-          fromYaml: (value) => {
-            return value;
-          },
-          type: "entity",
-          meta: v,
-          validator: (userValue) => {
-            if (v.required === true && !userValue) {
-              return "Required";
-            }
-            return undefined;
-          },
-        });
-      } else if (s.select !== undefined) {
-        result.push({
-          id: k,
-          value: undefined,
-          toYaml: (value) => {
-            return value;
-          },
-          fromYaml: (value) => {
-            return value;
-          },
-          type: "select",
-          meta: v,
-          validator: (userValue) => {
-            if (v.required === true && !userValue) {
-              return "Required";
-            }
-            return undefined;
-          },
-        });
-      } else if (s?.text !== undefined) {
-        result.push({
-          id: k,
-          value: undefined,
-          toYaml: (value) => {
-            return value;
-          },
-          fromYaml: (value) => {
-            return value;
-          },
-          type: "text",
-          meta: v,
-          validator: (userValue) => {
-            if (v.required === true && !userValue) {
-              return "Required";
-            }
-            return undefined;
-          },
-        });
-      } else if (s?.area !== undefined) {
-        result.push({
-          id: k,
-          value: undefined,
-          toYaml: (value) => {
-            return value;
-          },
-          fromYaml: (value) => {
-            return value;
-          },
-          type: "area",
-          meta: v,
-          validator: (userValue) => {
-            if (v.required === true && !userValue) {
-              return "Required";
-            }
-            return undefined;
-          },
-        });
-      } else if (s?.floor !== undefined) {
-        result.push({
-          id: k,
-          value: undefined,
-          toYaml: (value) => {
-            return value;
-          },
-          fromYaml: (value) => {
-            return value;
-          },
-          type: "floor",
-          meta: v,
-          validator: (userValue) => {
-            if (v.required === true && !userValue) {
-              return "Required";
-            }
-            return undefined;
-          },
-        });
-      } else if (s?.config_entry !== undefined) {
-        result.push({
-          id: k,
-          value: undefined,
-          toYaml: (value) => {
-            return value;
-          },
-          fromYaml: (value) => {
-            return value;
-          },
-          type: "config_entry",
-          meta: v,
-          validator: (userValue) => {
-            if (v.required === true && !userValue) {
-              return "Required";
-            }
-            return undefined;
-          },
-        });
-      } else if (s?.icon !== undefined) {
-        result.push({
-          id: k,
-          value: undefined,
-          toYaml: (value) => {
-            return value;
-          },
-          fromYaml: (value) => {
-            return value;
-          },
-          type: "icon",
-          meta: v,
-          validator: (userValue) => {
-            if (v.required === true && !userValue) {
-              return "Required";
-            }
-            return undefined;
-          },
-        });
-      } else if (s?.label !== undefined) {
-        result.push({
-          id: k,
-          value: undefined,
-          toYaml: (value) => {
-            return value;
-          },
-          fromYaml: (value) => {
-            return value;
-          },
-          type: "label",
-          meta: v,
-          validator: (userValue) => {
-            if (v.required === true && !userValue) {
-              return "Required";
-            }
-            return undefined;
-          },
-        });
-      } else if (s?.device !== undefined) {
-        result.push({
-          id: k,
-          value: undefined,
-          toYaml: (value) => {
-            return value;
-          },
-          fromYaml: (value) => {
-            return value;
-          },
-          type: "device",
-          meta: v,
-          validator: (userValue) => {
-            if (v.required === true && !userValue) {
-              return "Required";
-            }
-            return undefined;
-          },
-        });
-      } else if (s?.theme !== undefined) {
-        result.push({
-          id: k,
-          value: undefined,
-          toYaml: (value) => {
-            return value;
-          },
-          fromYaml: (value) => {
-            return value;
-          },
-          type: "theme",
-          meta: v,
-          validator: (userValue) => {
-            if (v.required === true && !userValue) {
-              return "Required";
-            }
-            return undefined;
-          },
-        });
-      } else if (s?.color_rgb !== undefined) {
-        result.push({
-          id: k,
-          value: undefined,
-          toYaml: (value) => {
-            return value;
-          },
-          fromYaml: (value) => {
-            return value;
-          },
-          type: "color_rgb",
-          meta: v,
-          validator: (userValue) => {
-            if (v.required === true && !userValue) {
-              return "Required";
-            }
-            return undefined;
-          },
-        });
-      } else if (s?.color_temp !== undefined) {
-        result.push({
-          id: k,
-          value: undefined,
-          toYaml: (value) => {
-            return Number.parseFloat(value);
-          },
-          fromYaml: (value) => {
-            if (value && !Number.isNaN(value)) {
-              return `${value}`;
-            }
-          },
-          type: "color_temp",
-          meta: v,
-          validator: (userValue) => {
-            if (!userValue) {
-              if (v.required) {
-                return "Required";
-              }
-              return undefined;
-            }
-            const n = Number.parseFloat(userValue);
-            if (Number.isNaN(n)) {
-              return "Not a valid number";
-            }
-            const ct = s.color_temp;
-            const max = ct?.max;
-            if (max !== undefined && max !== null && n > max) {
-              return `Maximum is ${max} `;
-            }
-            const min = ct?.min;
-            if (min !== undefined && min !== null && n < min) {
-              return `Minimum is ${min} `;
-            }
-            return undefined;
-          },
-        });
-      } else if (s.addon !== undefined) {
-        result.push({
-          id: k,
-          value: false,
-          toYaml: (value) => {
-            return value;
-          },
-          fromYaml: (value) => {
-            return value;
-          },
-          type: "addon",
-          meta: v,
-          validator: (value) => {
-            if (!value) {
-              if (v.required === true) {
-                return "Required";
-              }
-              return undefined;
-            }
-            return undefined;
-          },
-        });
-      } else if (s.backup_location !== undefined) {
-        result.push({
-          id: k,
-          value: false,
-          toYaml: (value) => {
-            return value;
-          },
-          fromYaml: (value) => {
-            return value;
-          },
-          type: "backup_location",
-          meta: v,
-          validator: (value) => {
-            if (!value) {
-              if (v.required === true) {
-                return "Required";
-              }
-              return undefined;
-            }
-            return undefined;
-          },
-        });
-      } else if (s.time !== undefined) {
-        result.push({
-          id: k,
-          value: false,
-          toYaml: (value) => {
-            return value;
-          },
-          fromYaml: (value) => {
-            return value;
-          },
-          type: "time",
-          meta: v,
-          validator: (value) => {
-            if (!value) {
-              if (v.required === true) {
-                return "Required";
-              }
-              return undefined;
-            }
-            return undefined;
-          },
-        });
-      } else if (s.conversation_agent !== undefined) {
-        result.push({
-          id: k,
-          value: false,
-          toYaml: (value) => {
-            return value;
-          },
-          fromYaml: (value) => {
-            return value;
-          },
-          type: "conversation_agent",
-          meta: v,
-          validator: (value) => {
-            if (!value) {
-              if (v.required === true) {
-                return "Required";
-              }
-              return undefined;
-            }
-            return undefined;
-          },
-        });
-      } else if (s.datetime !== undefined) {
-        result.push({
-          id: k,
-          value: false,
-          toYaml: (value) => {
-            return value;
-          },
-          fromYaml: (value) => {
-            return value;
-          },
-          type: "datetime",
-          meta: v,
-          validator: (value) => {
-            if (!value) {
-              if (v.required === true) {
-                return "Required";
-              }
-              return undefined;
-            }
-            return undefined;
-          },
-        });
-      } else {
-        console.error(`Unknown field type '${k}' `, v);
+            break;
+        }
       }
     }
     setFields(result);
