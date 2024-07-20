@@ -108,12 +108,10 @@ export function getSportTypesFromActivityTypes(
   return sportTypes;
 }
 
-
 export function formatSportTypesText(input: string): string {
   input = input.replace(/(^E)([A-Z])/g, 'E-$2');
   return input.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
 }
-
 
 export function convertDurationToSeconds(duration: string): number {
   const [hoursStr, minutesStr, secondsStr] = duration.split(':');
@@ -123,7 +121,6 @@ export function convertDurationToSeconds(duration: string): number {
 
   return hours * 3600 + minutes * 60 + seconds;
 }
-
 
 export function isDurationValid(duration: string | undefined): { hours: number; minutes: number; seconds: number } | null {
   if (!duration) return null;
@@ -145,7 +142,6 @@ export function isDurationValid(duration: string | undefined): { hours: number; 
   return null;
 }
 
-
 export function convertDistanceToMeters(distance: string, unit: string) {
   const cleanedString = distance.trim();
   const value = parseFloat(cleanedString);
@@ -161,12 +157,11 @@ export function convertDistanceToMeters(distance: string, unit: string) {
     default:
       throw new Error('Unsupported unit');
   }
-
 }
 
 export function isNumber(distance: string | undefined) {
   if (distance) {
-    var sanitizedValue = distance.replace(/[^\d.]/g, "").replace(/(\..*)\./g, "$1");
+    let sanitizedValue = distance.replace(/[^\d.]/g, "").replace(/(\..*)\./g, "$1");
     return !(sanitizedValue === "" || isNaN(Number(sanitizedValue)));
   }
 };

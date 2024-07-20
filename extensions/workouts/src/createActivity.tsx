@@ -5,7 +5,6 @@ import { formatSportTypesText, isDurationValid, isNumber } from "./utils";
 import { withAccessToken, useForm, FormValidation } from "@raycast/utils";
 import { useRef } from "react";
 
-
 function CreateActivity() {
   const sportTypes = Object.values(SportType);
   const distanceUnitRef = useRef(getPreferenceValues<Preferences>().distance_unit);
