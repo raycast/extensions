@@ -5,23 +5,23 @@ const linkToRef = (ref: string, lexName: string) =>
 	`[${ref}](raycast://extensions/futur/lexicon-search/search?arguments=${encodeURIComponent(
 		JSON.stringify({
 			query: ref.startsWith("#") ? `${lexName}${ref}` : ref,
-		}),
+		})
 	)})`;
 
 function stringifyPossibleRef(possibleRef: LexObject["properties"][string], lexName: string): string {
 	return possibleRef.type === "ref"
 		? linkToRef(possibleRef.ref, lexName)
 		: possibleRef.type === "union" && possibleRef.refs.length === 1
-			? linkToRef(possibleRef.refs[0], lexName)
-			: possibleRef.type === "array"
-				? `Array<${stringifyPossibleRef(possibleRef.items, lexName)}>`
-				: possibleRef.type;
+		? linkToRef(possibleRef.refs[0], lexName)
+		: possibleRef.type === "array"
+		? `Array<${stringifyPossibleRef(possibleRef.items, lexName)}>`
+		: possibleRef.type;
 }
 
 function stringifyComplexType(
 	type: LexObject | LexXrpcParameters | LexObject["properties"][string],
 	lexName: string,
-	indentAmount = 2,
+	indentAmount = 2
 ): string | null {
 	const indent = " ".repeat(indentAmount); // nbsp
 	if (type.type === "union")
@@ -38,7 +38,7 @@ function stringifyComplexType(
 				prop,
 				!type.required?.includes(name) || ("nullable" in type && type.nullable?.includes(name)) || false,
 				lexName,
-				indentAmount,
+				indentAmount
 			);
 		}
 		return result;
@@ -76,7 +76,7 @@ function stringifyAttributes(type: LexObject | LexObject["properties"][string]):
 			([key, value]) =>
 				`\t>\t- ${key}: ${
 					Array.isArray(value) ? value.map((v) => JSON.stringify(v)).join(", ") : JSON.stringify(value)
-				}`,
+				}`
 		)
 		.join("\n");
 }
@@ -86,7 +86,7 @@ function stringifyPropertyType(
 	property: LexObject["properties"][string],
 	optional: boolean,
 	lexName: string,
-	indentAmount = 0,
+	indentAmount = 0
 ): string {
 	const indent = " ".repeat(indentAmount); // nbsp
 	let markdown = indent + `- **${name}**`;
@@ -127,12 +127,12 @@ export function DefOverviewDetail({ def, lexiconName }: { def: LexUserType; lexi
 	} = "properties" in def && def.properties
 		? def
 		: "record" in def && def.record.properties
-			? def.record
-			: {
-					properties: undefined,
-					required: undefined,
-					nullable: undefined,
-				};
+		? def.record
+		: {
+				properties: undefined,
+				required: undefined,
+				nullable: undefined,
+		  };
 
 	if (properties) {
 		markdown += "\n\n## Properties";

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, LaunchProps, List, LocalStorage, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, LaunchProps, List, LocalStorage, useNavigation } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { fetchLexicons, loadLexiconsFromDisk, loadSingleLexicon } from "./util/downloadLexicons";
 import { useEffect, useMemo, useState } from "react";
@@ -44,7 +44,7 @@ export default function Search(props: LaunchProps<{ arguments: Arguments.Search 
 	}, []);
 
 	useEffect(() => {
-		if (query.includes("#")) {
+		if (query?.includes("#")) {
 			const [nsid, key] = query.split("#");
 			if (lexicons[nsid]) {
 				push(<LexiconDefsList doc={lexicons[nsid]} initialSearchText={"#" + key} />);
@@ -57,7 +57,7 @@ export default function Search(props: LaunchProps<{ arguments: Arguments.Search 
 			.filter(([, doc]) => !!doc)
 			.flatMap(([nsid, doc]) => {
 				return doc?.defs ? Object.entries(doc.defs).map(([key, def]) => [`${nsid}#${key}`, def]) : [];
-			}),
+			})
 	);
 
 	const listToDisplay = useMemo<Record<string, LexiconDoc | LexiconDoc["defs"][string] | null>>(() => {
@@ -72,7 +72,7 @@ export default function Search(props: LaunchProps<{ arguments: Arguments.Search 
 		return Object.fromEntries(entries.sort(([a], [b]) => a.localeCompare(b)));
 	}, [searchText, filter, lexicons, extensiveLexiconListing]);
 
-	const selectedDoc = selectedNsid ? (lexicons[selectedNsid] ?? null) : null;
+	const selectedDoc = selectedNsid ? lexicons[selectedNsid] ?? null : null;
 
 	return (
 		<List
@@ -125,6 +125,13 @@ export default function Search(props: LaunchProps<{ arguments: Arguments.Search 
 									) : null}
 									{nsid.includes("#") ? (
 										<Action.OpenInBrowser title="View on GitHub" url={linkLexicon(id)} />
+									) : null}
+									{document ? (
+										<Action.CopyToClipboard
+											title="Copy NSID"
+											content={nsid}
+											shortcut={{ modifiers: ["cmd", "ctrl"], key: "c" }}
+										/>
 									) : null}
 								</ActionPanel>
 							}

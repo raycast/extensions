@@ -31,7 +31,7 @@ export async function fetchLexicons(onFetch: (nsid: string, doc: LexiconDoc | nu
 		(nsid, doc) => {
 			lexiconDocs[nsid] = doc;
 			onFetch(nsid, doc);
-		},
+		}
 	)
 		.then(() => writeLexiconsToDisk(lexiconDocs))
 		.then(() => LocalStorage.setItem("lastFetched", Date.now()));
@@ -39,7 +39,7 @@ export async function fetchLexicons(onFetch: (nsid: string, doc: LexiconDoc | nu
 
 async function recursiveFetchLexiconDocuments(
 	url: string,
-	onFetch: (nsid: string, doc: LexiconDoc | null) => void,
+	onFetch: (nsid: string, doc: LexiconDoc | null) => void
 ): Promise<void> {
 	const response = await fetch(url).catch(() => null);
 	if (!response?.ok) return;
@@ -76,7 +76,7 @@ async function recursiveFetchLexiconDocuments(
 					}
 				});
 			}
-		}),
+		})
 	).then(() => {});
 }
 
