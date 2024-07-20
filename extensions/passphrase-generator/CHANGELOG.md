@@ -1,6 +1,5 @@
 # Passphrase Generator
 
-<<<<<<< HEAD
 ## [Improve] - {PR_MERGE_DATE}
 
 - Enhance the dictionary words by adding capitalization and numbers to make it universally applicable for password requirements.
