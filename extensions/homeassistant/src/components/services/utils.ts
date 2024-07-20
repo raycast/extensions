@@ -40,6 +40,12 @@ export interface HAServiceFieldSelectorColorTemp {
   max?: number;
 }
 
+export interface HAServiceFieldSelectorAddon {}
+export interface HAServiceFieldSelectorBackupLocation {}
+export interface HAServiceFieldSelectorTime {}
+export interface HAServiceFieldSelectorConversationAgent {}
+export interface HAServiceFieldSelectorDatetime {}
+
 export interface HAServiceFieldSelector {
   text?: string | null;
   area?: string | null;
@@ -56,6 +62,11 @@ export interface HAServiceFieldSelector {
   theme?: string | null;
   color_rgb?: HAServiceFieldSelectorColorRgb | null;
   color_temp?: HAServiceFieldSelectorColorTemp | null;
+  addon?: HAServiceFieldSelectorAddon | null;
+  backup_location?: HAServiceFieldSelectorBackupLocation | null;
+  time?: HAServiceFieldSelectorTime | null;
+  conversation_agent?: HAServiceFieldSelectorConversationAgent | null;
+  datetime?: HAServiceFieldSelectorDatetime | null;
 }
 
 export interface HAServiceField {

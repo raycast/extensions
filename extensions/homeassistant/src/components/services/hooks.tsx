@@ -169,6 +169,28 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
             return undefined;
           },
         });
+      } else if (s.boolean !== undefined) {
+        result.push({
+          id: k,
+          value: false,
+          toYaml: (value) => {
+            return value;
+          },
+          fromYaml: (value) => {
+            return value;
+          },
+          type: "boolean",
+          meta: v,
+          validator: (value) => {
+            if (!value) {
+              if (v.required === true) {
+                return "Required";
+              }
+              return undefined;
+            }
+            return undefined;
+          },
+        });
       } else if (s.entity !== undefined) {
         result.push({
           id: k,
@@ -411,6 +433,116 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
             const min = ct?.min;
             if (min !== undefined && min !== null && n < min) {
               return `Minimum is ${min} `;
+            }
+            return undefined;
+          },
+        });
+      } else if (s.addon !== undefined) {
+        result.push({
+          id: k,
+          value: false,
+          toYaml: (value) => {
+            return value;
+          },
+          fromYaml: (value) => {
+            return value;
+          },
+          type: "addon",
+          meta: v,
+          validator: (value) => {
+            if (!value) {
+              if (v.required === true) {
+                return "Required";
+              }
+              return undefined;
+            }
+            return undefined;
+          },
+        });
+      } else if (s.backup_location !== undefined) {
+        result.push({
+          id: k,
+          value: false,
+          toYaml: (value) => {
+            return value;
+          },
+          fromYaml: (value) => {
+            return value;
+          },
+          type: "backup_location",
+          meta: v,
+          validator: (value) => {
+            if (!value) {
+              if (v.required === true) {
+                return "Required";
+              }
+              return undefined;
+            }
+            return undefined;
+          },
+        });
+      } else if (s.time !== undefined) {
+        result.push({
+          id: k,
+          value: false,
+          toYaml: (value) => {
+            return value;
+          },
+          fromYaml: (value) => {
+            return value;
+          },
+          type: "time",
+          meta: v,
+          validator: (value) => {
+            if (!value) {
+              if (v.required === true) {
+                return "Required";
+              }
+              return undefined;
+            }
+            return undefined;
+          },
+        });
+      } else if (s.conversation_agent !== undefined) {
+        result.push({
+          id: k,
+          value: false,
+          toYaml: (value) => {
+            return value;
+          },
+          fromYaml: (value) => {
+            return value;
+          },
+          type: "conversation_agent",
+          meta: v,
+          validator: (value) => {
+            if (!value) {
+              if (v.required === true) {
+                return "Required";
+              }
+              return undefined;
+            }
+            return undefined;
+          },
+        });
+      } else if (s.datetime !== undefined) {
+        result.push({
+          id: k,
+          value: false,
+          toYaml: (value) => {
+            return value;
+          },
+          fromYaml: (value) => {
+            return value;
+          },
+          type: "datetime",
+          meta: v,
+          validator: (value) => {
+            if (!value) {
+              if (v.required === true) {
+                return "Required";
+              }
+              return undefined;
             }
             return undefined;
           },

@@ -92,7 +92,7 @@ export default function ServiceCallCommand() {
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       const types: Record<string, any> = {};
                       for (const f of fields) {
-                        if (userData[f.id]) {
+                        if (userData[f.id] !== undefined) {
                           types[f.id] = f.toYaml(userData[f.id]);
                         }
                       }
@@ -177,6 +177,11 @@ export default function ServiceCallCommand() {
             case "label":
             case "device":
             case "color_rgb":
+            case "addon":
+            case "backup_location":
+            case "time":
+            case "conversation_agent":
+            case "datetime":
             case "theme": {
               return (
                 <Form.TextField
