@@ -57,7 +57,7 @@ export default function Search(props: LaunchProps<{ arguments: Arguments.Search 
 			.filter(([, doc]) => !!doc)
 			.flatMap(([nsid, doc]) => {
 				return doc?.defs ? Object.entries(doc.defs).map(([key, def]) => [`${nsid}#${key}`, def]) : [];
-			})
+			}),
 	);
 
 	const listToDisplay = useMemo<Record<string, LexiconDoc | LexiconDoc["defs"][string] | null>>(() => {
@@ -72,7 +72,7 @@ export default function Search(props: LaunchProps<{ arguments: Arguments.Search 
 		return Object.fromEntries(entries.sort(([a], [b]) => a.localeCompare(b)));
 	}, [searchText, filter, lexicons, extensiveLexiconListing]);
 
-	const selectedDoc = selectedNsid ? lexicons[selectedNsid] ?? null : null;
+	const selectedDoc = selectedNsid ? (lexicons[selectedNsid] ?? null) : null;
 
 	return (
 		<List
