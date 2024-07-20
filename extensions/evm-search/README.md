@@ -9,7 +9,7 @@
 A Raycast extension that helps with quickly finding EVM network information.
 </p>
 
-<img width="862" src="./metadata/evm-search-2.png">
+<img width="862" src="./public/evm-search-2.png">
 
 ## Motivation
 
@@ -44,15 +44,15 @@ Or:
 
 #### Displays list of EVM networks sorted by TVL.
 
-<img width="862" src="./metadata/evm-search-1.png">
+<img width="862" src="./public/evm-search-1.png">
 
 #### Search for a chain by chainID
 
-<img width="862" src="./metadata/evm-search-3.png">
+<img width="862" src="./public/evm-search-3.png">
 
 #### Chain Info
 
-<img width="862" src="./metadata/evm-search-2.png">
+<img width="862" src="./public/evm-search-2.png">
 
 ## Credits
 
