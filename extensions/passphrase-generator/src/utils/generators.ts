@@ -215,8 +215,3 @@ export class PronounceableGenerator extends DictionaryGenerator {
     return this.words;
   }
 }
-
-export class NumDictionaryGenerator extends DictionaryGenerator {
-  id = "numdictionary";
-  title = "Dictionary words with numbers";
-}
