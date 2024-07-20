@@ -161,7 +161,8 @@ export default function ServiceCallCommand() {
             case "target_entity": {
               return (
                 <ServiceFormTargetEntitiesTagPicker
-                  id={`${f.id}_${fullHAServiceName(selectedService)}`}
+                  id={f.id}
+                  key={`${f.id}_${fullHAServiceName(selectedService)}`}
                   states={states}
                   value={userData[f.id]}
                   target={selectedService.meta.target?.entity}
@@ -185,7 +186,8 @@ export default function ServiceCallCommand() {
             case "theme": {
               return (
                 <Form.TextField
-                  id={`${f.id}_${fullHAServiceName(selectedService)}`}
+                  id={f.id}
+                  key={`${f.id}_${fullHAServiceName(selectedService)}`}
                   title={getNameOfHAServiceField(f.meta, f.id)}
                   value={userData[f.id]}
                   placeholder={f.meta.description}
@@ -199,7 +201,8 @@ export default function ServiceCallCommand() {
             case "object": {
               return (
                 <ServiceFormFieldObject
-                  id={`${f.id}_${fullHAServiceName(selectedService)}`}
+                  id={f.id}
+                  key={`${f.id}_${fullHAServiceName(selectedService)}`}
                   field={f.meta}
                   placeholder={f.meta.description}
                   value={userData[f.id]}
@@ -212,7 +215,8 @@ export default function ServiceCallCommand() {
             case "number": {
               return (
                 <ServiceFormFieldNumber
-                  id={`${f.id}_${fullHAServiceName(selectedService)}`}
+                  id={f.id}
+                  key={`${f.id}_${fullHAServiceName(selectedService)}`}
                   field={f.meta}
                   placeholder={f.meta.description}
                   value={userData[f.id]}
@@ -224,7 +228,8 @@ export default function ServiceCallCommand() {
             case "entity": {
               return (
                 <ServiceFormFieldEntitiesTagPicker
-                  id={`${f.id}_${fullHAServiceName(selectedService)}`}
+                  id={f.id}
+                  key={`${f.id}_${fullHAServiceName(selectedService)}`}
                   field={f.meta}
                   placeholder={f.meta.description}
                   states={states}
@@ -237,7 +242,8 @@ export default function ServiceCallCommand() {
             case "select": {
               return (
                 <ServiceFormFieldSelectDropdown
-                  id={`${f.id}_${fullHAServiceName(selectedService)}`}
+                  id={f.id}
+                  key={`${f.id}_${fullHAServiceName(selectedService)}`}
                   field={f.meta}
                   placeholder={f.meta.description}
                   value={userData[f.id]}
@@ -249,7 +255,8 @@ export default function ServiceCallCommand() {
             case "boolean": {
               return (
                 <Form.Checkbox
-                  id={`${f.id}_${fullHAServiceName(selectedService)}`}
+                  id={f.id}
+                  key={`${f.id}_${fullHAServiceName(selectedService)}`}
                   title={getNameOfHAServiceField(f.meta, f.id)}
                   label={f.meta.description}
                   value={userData[f.id]}
