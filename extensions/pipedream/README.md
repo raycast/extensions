@@ -16,7 +16,7 @@ Manage your Pipedream workflows directly from Raycast. Add, monitor, and control
 1. Install the extension from the Raycast store.
 2. You'll need a Pipedream API key to use this extension. To get one:
    - Log in to your Pipedream account
-   - Go to [Pipedream Account Settings](https://pipedream.com/settings/account)
+   - Go to [Pipedream Settings](https://pipedream.com/settings/user)
    - Under "API Keys", create a new key
 3. Open the extension in Raycast and enter your API key when prompted.
 

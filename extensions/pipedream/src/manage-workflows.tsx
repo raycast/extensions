@@ -81,7 +81,6 @@ export default function ManageWorkflows() {
         );
         counts[workflow.id] = recentErrors.length;
       } catch (error) {
-        console.error(`Error fetching errors for workflow ${workflow.id}:`, error);
         counts[workflow.id] = 0;
       }
     }
@@ -125,7 +124,6 @@ export default function ManageWorkflows() {
         await refreshWorkflows();
         await refreshErrorCounts();
       } catch (error) {
-        console.error("Error toggling workflow status:", error);
         showToast({
           title: "Error",
           message: `Failed to update workflow status: ${error instanceof Error ? error.message : String(error)}`,
@@ -168,7 +166,6 @@ export default function ManageWorkflows() {
             await refreshWorkflows();
             await refreshErrorCounts();
           } catch (error) {
-            console.error("Error updating workflow name:", error);
             showToast({
               title: "Error",
               message: `Failed to update workflow name: ${error instanceof Error ? error.message : String(error)}`,
@@ -274,7 +271,7 @@ export default function ManageWorkflows() {
 
               <ActionPanel.Section title="Visibility Actions">
                 <Action
-                  title={workflow.showInMenuBar ? "Remove from Menu Bar" : "Add to Menu Bar"}
+                  title={workflow.showInMenuBar ? "Remove From Menu Bar" : "Add to Menu Bar"}
                   icon={workflow.showInMenuBar ? Icon.EyeSlash : Icon.Eye}
                   onAction={() => toggleMenuBarVisibility(workflow.id)}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
@@ -283,7 +280,7 @@ export default function ManageWorkflows() {
 
               <ActionPanel.Section>
                 <Action
-                  title="Remove from Extension"
+                  title="Remove From Extension"
                   icon={Icon.Trash}
                   onAction={() => handleDeleteWorkflow(workflow.id)}
                   style={Action.Style.Destructive}

@@ -27,7 +27,6 @@ export default function MenuBarWorkflows() {
             lastError: recentErrors[0],
           };
         } catch (error) {
-          console.error(`Error fetching errors for workflow ${workflow.id}:`, error);
           errors[workflow.id] = { errorCount: 0 };
         }
       }

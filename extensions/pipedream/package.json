@@ -10,10 +10,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "add-workflow",
-      "title": "Add Workflow",
+      "name": "connect-workflow",
+      "title": "Connect Workflow",
       "subtitle": "Pipedream",
-      "description": "Add a new Pipedream workflow to manage",
+      "description": "Connect an existing Pipedream workflow to manage",
       "mode": "view"
     },
     {
