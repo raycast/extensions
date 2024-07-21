@@ -2,7 +2,7 @@
 
 ## [Fixes] - {PR_MERGE_DATE}
 
-- Fixed an issue where the `Search Arc`, `Search Spaces`, and `Search Tabs` commands would fail if Arc was not open.
+- Fixed an issue where the `Search Arc`, `Search Spaces`, `Search Tabs`, and `Access Spaces and Favorites` commands would fail if Arc was not open.
 
 ## [Update] - 2024-07-06
 
