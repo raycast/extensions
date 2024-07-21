@@ -6,6 +6,7 @@
   "description": "Search through DevDocs documentation sets from Raycast.",
   "icon": "devdocs.png",
   "author": "pomdtr",
+  "contributors": ["djpowers"],
   "commands": [
     {
       "name": "search-documentations",
