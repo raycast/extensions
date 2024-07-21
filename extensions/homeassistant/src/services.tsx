@@ -9,6 +9,7 @@ import {
 import { HAServiceCall, useHAServiceCallFormData, useServiceCalls } from "@components/services/hooks";
 import { fullHAServiceName, getHAServiceQuicklink, getNameOfHAServiceField } from "@components/services/utils";
 import { ha } from "@lib/common";
+import { capitalizeFirstLetter } from "@lib/utils";
 import { Action, ActionPanel, Form, Icon, Keyboard, popToRoot, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
@@ -149,7 +150,7 @@ export default function ServiceCallCommand() {
           <Form.Dropdown.Item
             key={fullHAServiceName(s)}
             value={fullHAServiceName(s)}
-            title={`${s.domain}: ${s.name}`}
+            title={`${capitalizeFirstLetter(s.domain)}: ${s.name}`}
             keywords={[fullHAServiceName(s), s.domain, s.service]}
           />
         ))}
