@@ -1,6 +1,7 @@
 import {
   Color,
   Icon,
+  Image,
   LaunchType,
   MenuBarExtra,
   Toast,
@@ -10,7 +11,6 @@ import {
   openCommandPreferences,
   openExtensionPreferences,
   showToast,
-  Image,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
