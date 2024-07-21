@@ -19,7 +19,7 @@ function useFuse<U>(
   return [results.map((result) => result.item), setQuery];
 }
 
-function formatSlugVersion(slug: String) {
+function formatSlugVersion(slug: string) {
   return slug.replace("~", " ");
 }
 
