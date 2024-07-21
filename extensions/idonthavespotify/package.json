@@ -23,28 +23,32 @@
       "title": "Convert Link to YouTube Music",
       "subtitle": "I Don't Have Spotify",
       "description": "Convert link from clipboard to YouTube Music and copy it back.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "toAppleMusic",
       "title": "Convert Link to Apple Music",
       "subtitle": "I Don't Have Spotify",
       "description": "Convert link from clipboard to YouTube Music and copy it back.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "toSoundCloud",
       "title": "Convert Link to SoundCloud",
       "subtitle": "I Don't Have Spotify",
       "description": "Convert link from clipboard to YouTube Music and copy it back.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "toDeezer",
       "title": "Convert Link to Deezer",
       "subtitle": "I Don't Have Spotify",
       "description": "Convert link from clipboard to YouTube Music and copy it back.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "toTidal",
@@ -59,7 +63,8 @@
       "title": "Convert Link to Spotify",
       "subtitle": "I Don't Have Spotify",
       "description": "Convert link from clipboard to YouTube Music and copy it back.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "dependencies": {
