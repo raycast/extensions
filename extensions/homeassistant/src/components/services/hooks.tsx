@@ -70,7 +70,6 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
     if (serviceCall.meta.target?.entity !== undefined) {
       result.push({
         id: "entity_id",
-        value: undefined,
         toYaml: (value) => {
           return value;
         },
@@ -83,7 +82,22 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
         type: "target_entity",
         meta: { description: "", example: "" },
       });
+      result.push({
+        id: "area_id",
+        toYaml: (value) => {
+          return value;
+        },
+        fromYaml: (value) => {
+          return value;
+        },
+        validator: () => {
+          return undefined;
+        },
+        type: "target_area",
+        meta: { description: "", example: "" },
+      });
     }
+
     for (const [k, v] of Object.entries(serviceCall.meta.fields)) {
       const s = v.selector;
       if (!s) {

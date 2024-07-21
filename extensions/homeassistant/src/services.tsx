@@ -1,9 +1,11 @@
+import { useHAAreas } from "@components/area/hooks";
 import { useHAStates } from "@components/hooks";
 import {
   ServiceFormFieldEntitiesTagPicker,
   ServiceFormFieldNumber,
   ServiceFormFieldObject,
   ServiceFormFieldSelectDropdown,
+  ServiceFormTargetAreaTagPicker,
   ServiceFormTargetEntitiesTagPicker,
 } from "@components/services/form";
 import { HAServiceCall, useHAServiceCallFormData, useServiceCalls } from "@components/services/hooks";
@@ -17,6 +19,7 @@ import { parse, stringify } from "yaml";
 
 export default function ServiceCallCommand() {
   const { data: services, error, isLoading } = useServiceCalls();
+  const { areas } = useHAAreas();
   const { states } = useHAStates();
   if (error) {
     showFailureToast(error, { title: "Could not fetch Service Calls" });
@@ -168,6 +171,17 @@ export default function ServiceCallCommand() {
                   value={userData[f.id]}
                   target={selectedService.meta.target?.entity}
                   onChange={(newValue) => setUserDataByKey("entity_id", newValue)}
+                />
+              );
+            }
+            case "target_area": {
+              return (
+                <ServiceFormTargetAreaTagPicker
+                  id={f.id}
+                  key={`${f.id}_${fullHAServiceName(selectedService)}`}
+                  areas={areas}
+                  value={userData[f.id]}
+                  onChange={(nv) => setUserDataByKey(f.id, nv)}
                 />
               );
             }

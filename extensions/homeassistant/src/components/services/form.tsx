@@ -1,8 +1,9 @@
 import { Form } from "@raycast/api";
-import { getNameOfHAServiceField, HAServiceField, HAServiceTargetEntity } from "./utils";
+import { getNameOfHAServiceField, HAServiceField, HAServiceTargetArea, HAServiceTargetEntity } from "./utils";
 import { State } from "@lib/haapi";
 import { getFriendlyName } from "@lib/utils";
 import { parse } from "yaml";
+import { HAArea } from "@components/area/utils";
 
 export interface ServiceFormFieldEntitiesTagPickerProps extends Form.TagPicker.Props {
   field: HAServiceField;
@@ -128,6 +129,24 @@ export function ServiceFormTargetEntitiesTagPicker({
       {filteredStates?.map((s) => (
         <Form.TagPicker.Item key={s.entity_id} value={s.entity_id} title={`${getFriendlyName(s)} (${s.entity_id})`} />
       ))}
+    </Form.TagPicker>
+  );
+}
+
+export interface ServiceFormTargetAreaTagPickerProps extends Form.TagPicker.Props {
+  areas: HAArea[] | undefined;
+  target?: HAServiceTargetArea[] | null;
+}
+
+export function ServiceFormTargetAreaTagPicker({
+  id,
+  areas,
+  value,
+  ...restProps
+}: ServiceFormTargetAreaTagPickerProps) {
+  return (
+    <Form.TagPicker id={id} title="Target Area" placeholder="Target Area" {...restProps} defaultValue={value ?? []}>
+      {areas?.map((s) => <Form.TagPicker.Item key={s.area_id} value={s.area_id} title={s.name ?? s.area_id} />)}
     </Form.TagPicker>
   );
 }

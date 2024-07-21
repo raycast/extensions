@@ -84,8 +84,13 @@ export interface HAServiceTargetEntity {
   domain?: string[] | null;
 }
 
+export interface HAServiceTargetArea {
+  multiple?: boolean | null;
+}
+
 export interface HAServiceTarget {
   entity?: HAServiceTargetEntity[] | null;
+  area?: HAServiceTargetArea | null;
 }
 
 export interface HAServiceMeta {
