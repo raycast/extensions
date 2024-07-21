@@ -56,26 +56,18 @@ export default function TabsQuickPin(props: TabsQuickPinProps) {
             newGroupName = `New Tab Group (${iter})`;
             iter++;
           }
-          await createNewGroup(
-            newGroupName,
-            Object.entries(Icon).find((entry) => entry[1] == Icon.AppWindowGrid3x3)?.[0] || "None",
-          );
+          await createNewGroup({
+            name: newGroupName,
+            icon: "app-window-grid-3x3-16",
+          });
         }
         for (const tab of tabs) {
-          await createNewPin(
-            tab.name,
-            tab.url,
-            "Favicon / File Icon",
-            newGroupName,
-            app.name,
-            undefined,
-            undefined,
-            false,
-            undefined,
-            undefined,
-            [],
-            "",
-          );
+          await createNewPin({
+            name: tab.name,
+            url: tab.url,
+            application: app.name,
+            group: newGroupName,
+          });
         }
       }}
     />
