@@ -1,17 +1,19 @@
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { getHomeAssistantServices, HAServiceField, HAServiceMeta } from "./utils";
 import { parse } from "path";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { getHAWSConnection } from "@lib/common";
+import { Connection, subscribeServices, servicesColl, HassServices } from "home-assistant-js-websocket";
 
 export interface HAServiceCall {
   domain: string;
   service: string;
-  name: string;
-  description: string;
+  name: string | undefined;
+  description: string | undefined;
   meta: HAServiceMeta;
 }
 
-export function useServiceCalls() {
+export function useServiceCallsViaRest() {
   const { data, error, isLoading } = useCachedPromise(async () => {
     const result: HAServiceCall[] = [];
     const services = await getHomeAssistantServices();
@@ -26,6 +28,63 @@ export function useServiceCalls() {
     }
     return result;
   });
+  return { data, error, isLoading };
+}
+
+export function useServiceCalls(): {
+  data?: HAServiceCall[] | undefined;
+  error?: Error;
+  isLoading: boolean;
+} {
+  const [data, setData] = useCachedState<HAServiceCall[]>("servicescalls");
+  const [error, setError] = useState<Error>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const hawsRef = useRef<Connection>();
+
+  useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      setError(undefined);
+
+      try {
+        if (!hawsRef.current) {
+          const con = await getHAWSConnection();
+
+          subscribeServices(con, (services: HassServices) => {
+            const result: HAServiceCall[] = [];
+            for (const [domain, domainValue] of Object.entries(services)) {
+              for (const [serviceName, serviceData] of Object.entries(domainValue)) {
+                const meta = serviceData as HAServiceMeta | undefined;
+                if (meta) {
+                  result.push({
+                    domain: domain,
+                    service: serviceName,
+                    name: meta.name,
+                    description: meta.name,
+                    meta: meta,
+                  });
+                }
+              }
+            }
+            setData(result);
+            setIsLoading(false);
+          });
+          hawsRef.current = con;
+        } else {
+          const serColl = servicesColl(hawsRef.current);
+          await serColl.refresh();
+        }
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (e: any) {
+        const err = e instanceof Error ? e : new Error(e);
+        setError(err);
+        setIsLoading(false);
+      }
+    }
+
+    fetchData();
+  }, []);
+
   return { data, error, isLoading };
 }
 
