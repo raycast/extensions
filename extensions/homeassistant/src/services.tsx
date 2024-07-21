@@ -1,4 +1,5 @@
 import { useHAAreas } from "@components/area/hooks";
+import { useHADevices } from "@components/device/hooks";
 import { useHAStates } from "@components/hooks";
 import {
   ServiceFormFieldArea,
@@ -7,6 +8,7 @@ import {
   ServiceFormFieldObject,
   ServiceFormFieldSelectDropdown,
   ServiceFormTargetAreaTagPicker,
+  ServiceFormTargetDeviceTagPicker,
   ServiceFormTargetEntitiesTagPicker,
 } from "@components/services/form";
 import { HAServiceCall, useHAServiceCallFormData, useServiceCalls } from "@components/services/hooks";
@@ -20,8 +22,9 @@ import { parse, stringify } from "yaml";
 
 export default function ServiceCallCommand() {
   const { data: services, error, isLoading } = useServiceCalls();
-  const { areas } = useHAAreas();
   const { states } = useHAStates();
+  const { areas } = useHAAreas();
+  const { devices } = useHADevices();
   if (error) {
     showFailureToast(error, { title: "Could not fetch Service Calls" });
   }
@@ -181,6 +184,17 @@ export default function ServiceCallCommand() {
                   id={f.id}
                   key={`${f.id}_${fullHAServiceName(selectedService)}`}
                   areas={areas}
+                  value={userData[f.id]}
+                  onChange={(nv) => setUserDataByKey(f.id, nv)}
+                />
+              );
+            }
+            case "target_device": {
+              return (
+                <ServiceFormTargetDeviceTagPicker
+                  id={f.id}
+                  key={`${f.id}_${fullHAServiceName(selectedService)}`}
+                  devices={devices}
                   value={userData[f.id]}
                   onChange={(nv) => setUserDataByKey(f.id, nv)}
                 />

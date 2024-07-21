@@ -4,6 +4,7 @@ import { State } from "@lib/haapi";
 import { getFriendlyName } from "@lib/utils";
 import { parse } from "yaml";
 import { HAArea } from "@components/area/utils";
+import { HADevice } from "@components/device/utils";
 
 export interface ServiceFormFieldEntitiesTagPickerProps extends Form.TagPicker.Props {
   field: HAServiceField;
@@ -147,6 +148,26 @@ export function ServiceFormTargetAreaTagPicker({
   return (
     <Form.TagPicker id={id} title="Target Area" placeholder="Target Area" {...restProps} defaultValue={value ?? []}>
       {areas?.map((s) => <Form.TagPicker.Item key={s.area_id} value={s.area_id} title={s.name ?? s.area_id} />)}
+    </Form.TagPicker>
+  );
+}
+
+export interface ServiceFormTargetDeviceTagPickerProps extends Form.TagPicker.Props {
+  devices: HADevice[] | undefined;
+  target?: HAServiceTargetArea[] | null;
+}
+
+export function ServiceFormTargetDeviceTagPicker({
+  id,
+  devices,
+  value,
+  ...restProps
+}: ServiceFormTargetDeviceTagPickerProps) {
+  return (
+    <Form.TagPicker id={id} title="Target Device" placeholder="Target Device" {...restProps} defaultValue={value ?? []}>
+      {devices?.map((s) => (
+        <Form.TagPicker.Item key={s.id} value={s.id} title={s.name && s.name.trim().length > 0 ? s.name : s.id} />
+      ))}
     </Form.TagPicker>
   );
 }

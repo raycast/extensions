@@ -96,6 +96,20 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
         type: "target_area",
         meta: { description: "", example: "" },
       });
+      result.push({
+        id: "device_id",
+        toYaml: (value) => {
+          return value;
+        },
+        fromYaml: (value) => {
+          return value;
+        },
+        validator: () => {
+          return undefined;
+        },
+        type: "target_device",
+        meta: { description: "", example: "" },
+      });
     }
 
     for (const [k, v] of Object.entries(serviceCall.meta.fields)) {
