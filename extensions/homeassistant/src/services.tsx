@@ -1,6 +1,7 @@
 import { useHAAreas } from "@components/area/hooks";
 import { useHAStates } from "@components/hooks";
 import {
+  ServiceFormFieldArea,
   ServiceFormFieldEntitiesTagPicker,
   ServiceFormFieldNumber,
   ServiceFormFieldObject,
@@ -185,8 +186,24 @@ export default function ServiceCallCommand() {
                 />
               );
             }
+            case "area": {
+              return (
+                <ServiceFormFieldArea
+                  id={f.id}
+                  key={`${f.id}_${fullHAServiceName(selectedService)}`}
+                  field={f.meta}
+                  areas={areas}
+                  title={getNameOfHAServiceField(f.meta, f.id)}
+                  value={userData[f.id]}
+                  placeholder={f.meta.description}
+                  onChange={(nv) => {
+                    setUserDataByKey(f.id, nv);
+                  }}
+                  error={userDataError[f.id]}
+                />
+              );
+            }
             case "text":
-            case "area":
             case "floor":
             case "config_entry":
             case "icon":

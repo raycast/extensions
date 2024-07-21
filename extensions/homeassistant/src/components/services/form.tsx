@@ -150,3 +150,16 @@ export function ServiceFormTargetAreaTagPicker({
     </Form.TagPicker>
   );
 }
+
+export interface ServiceFormFieldAreaProps extends Form.TagPicker.Props {
+  field: HAServiceField;
+  areas: HAArea[] | undefined;
+}
+
+export function ServiceFormFieldArea({ id, areas, field, value, ...restProps }: ServiceFormFieldAreaProps) {
+  return (
+    <Form.TagPicker id={id} title={getNameOfHAServiceField(field, id)} {...restProps} defaultValue={value ?? []}>
+      {areas?.map((s) => <Form.TagPicker.Item key={s.area_id} value={s.area_id} title={s.name ?? s.area_id} />)}
+    </Form.TagPicker>
+  );
+}
