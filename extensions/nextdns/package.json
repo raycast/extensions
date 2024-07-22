@@ -5,6 +5,9 @@
   "description": "Viewing and controlling NextDNS settings",
   "icon": "extension_icon.png",
   "author": "itsmingjie",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Developer Tools",
     "Security"
@@ -61,7 +64,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.65.1",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.16.2",
     "axios": "^1.6.5",
     "is-valid-domain": "^0.1.6",
     "ky": "^1.2.0"

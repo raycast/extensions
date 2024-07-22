@@ -12,6 +12,7 @@ import isValidDomain from "is-valid-domain";
 import { getApiClient, getProfileName } from "./libs/api";
 import { NextDNSError } from "./types/nextdns";
 import { useEffect, useState } from "react";
+import { showFailureToast } from "@raycast/utils";
 
 type Values = {
   domain: string;
@@ -60,10 +61,14 @@ export default function Command() {
         }
       } else {
         showToast(Toast.Style.Success, "Success", `${domain} has been denylisted`);
-        launchCommand({
-          name: "denylist",
-          type: LaunchType.UserInitiated,
-        });
+        try {
+          await launchCommand({
+            name: "denylist",
+            type: LaunchType.UserInitiated,
+          });
+        } catch (error) {
+          showFailureToast(error);
+        }
       }
     }
   }
@@ -78,7 +83,7 @@ export default function Command() {
     >
       <Form.Description text={`Configuring profile "${profileName}" (${preferences.nextdns_profile_id})`} />
 
-      <Form.TextField id="domain" title="Add a domain" placeholder="example.com" />
+      <Form.TextField id="domain" title="Add a Domain" placeholder="example.com" />
 
       <Form.Description text="Denying a domain will automatically deny all its subdomains." />
     </Form>
