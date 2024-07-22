@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2024-07-22
 
 - Fixed an issue where the `Search Arc`, `Search Spaces`, `Search Tabs`, and `Access Spaces and Favorites` commands would fail if Arc was not open.
 
