@@ -5,6 +5,9 @@
   "description": "A simple extension that reports page speed insights based on page-speed.dev",
   "icon": "icon.png",
   "author": "vorillaz",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Developer Tools",
     "Web",
