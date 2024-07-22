@@ -229,6 +229,7 @@ export default function ServiceCallCommand() {
             case "time":
             case "conversation_agent":
             case "datetime":
+            case "duration":
             case "theme": {
               return (
                 <Form.TextField
@@ -313,6 +314,19 @@ export default function ServiceCallCommand() {
             }
             default: {
               console.error(`Unknown field type ${f.type}`);
+              return (
+                <Form.TextField
+                  id={f.id}
+                  key={`${f.id}_${fullHAServiceName(selectedService)}`}
+                  title={getNameOfHAServiceField(f.meta, f.id)}
+                  value={userData[f.id]}
+                  placeholder={f.meta.description}
+                  onChange={(nv) => {
+                    setUserDataByKey(f.id, nv.length > 0 ? nv : undefined);
+                  }}
+                  error={userDataError[f.id]}
+                />
+              );
             }
           }
         })}
