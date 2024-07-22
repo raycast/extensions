@@ -41,11 +41,10 @@ export default function Command() {
   const [tags, setTags] = useState<TagItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
-  
+
   const preferences = getPreferenceValues<Preferences>();
-    
+
   useEffect(() => {
-    
     const checkCLIPath = async () => {
       if (!fs.existsSync(cliPath)) {
         await showToast({
@@ -57,15 +56,15 @@ export default function Command() {
       }
       return true;
     };
-    
+
     const fetchURLs = async (query: string) => {
-      if (query.length > 2 && await checkCLIPath()) {
+      if (query.length > 2 && (await checkCLIPath())) {
         setLoading(true);
         try {
           const apikey = preferences.apikey ? `--key ${preferences.apikey}` : "";
           const { stdout } = await execPromise(`${cliPath} ${query} -j -a -l 50 ${apikey}`);
           const result: SurfedResponse = JSON.parse(stdout);
-          
+
           if (result.error) {
             await showToast({
               style: Toast.Style.Failure,
@@ -96,26 +95,22 @@ export default function Command() {
         setTags([]);
       }
     };
-    
+
     fetchURLs(searchText);
   }, [searchText]);
-  
+
   return (
-    <List
-      isLoading={loading}
-      searchBarPlaceholder="Search..."
-      onSearchTextChange={setSearchText}
-    >
+    <List isLoading={loading} searchBarPlaceholder="Search..." onSearchTextChange={setSearchText}>
       {collections.length > 0 && (
         <List.Section title="Collections">
           {collections.map((item, index) => (
             <List.Item
               key={`collection-${index}`}
-              icon={{ source: "collection-icon.png" }}  // Add the path to your collection icon here
+              icon={{ source: "collection-icon.png" }} // Add the path to your collection icon here
               title={item.title}
               actions={
                 <ActionPanel>
-                <Action.OpenInBrowser url={item.url} />
+                  <Action.OpenInBrowser url={item.url} />
                 </ActionPanel>
               }
             />
@@ -127,11 +122,11 @@ export default function Command() {
           {tags.map((item, index) => (
             <List.Item
               key={`tag-${index}`}
-              icon={{ source: "tag-icon.png" }}  // Add the path to your tag icon here
+              icon={{ source: "tag-icon.png" }} // Add the path to your tag icon here
               title={item.title}
               actions={
                 <ActionPanel>
-                <Action.OpenInBrowser url={item.url} />
+                  <Action.OpenInBrowser url={item.url} />
                 </ActionPanel>
               }
             />
@@ -143,7 +138,7 @@ export default function Command() {
           {urls.map((item, index) => (
             <List.Item
               key={`url-${index}`}
-              icon={{ source: item.imagePath }}  // Add the path to your URL icon here
+              icon={{ source: item.imagePath }} // Add the path to your URL icon here
               title={item.title ? item.title : item.url}
               subtitle={item.url}
               actions={
