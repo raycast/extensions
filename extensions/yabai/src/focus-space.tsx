@@ -3,13 +3,16 @@ import { runYabaiCommand } from "./helpers/scripts";
 import { showFailureToast } from "@raycast/utils";
 
 export default async function Command(args: LaunchProps) {
-  const spaceIndex = parseInt(args.arguments.spaceIndex, 10);
-
-  if (isNaN(spaceIndex)) {
+  if (isNaN(args.arguments.spaceIndex)) {
     showHUD(`Invalid space index: ${args.arguments.spaceIndex}`);
     return;
   }
 
+  const spaceIndex = parseInt(args.arguments.spaceIndex, 10);
+
+  await focusSpace(spaceIndex);
+}
+export async function focusSpace(spaceIndex: number) {
   try {
     const { stderr } = await runYabaiCommand(`-m space --focus ${spaceIndex}`);
 

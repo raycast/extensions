@@ -1,3 +1,4 @@
+import "@/polyfills/fetch";
 import {
   Action,
   ActionPanel,
@@ -5,7 +6,6 @@ import {
   Color,
   Form,
   Icon,
-  Image,
   showToast,
   Toast,
   open,
@@ -13,13 +13,13 @@ import {
   useNavigation,
   LaunchProps,
 } from "@raycast/api";
-import { useWorkspaces } from "@hooks/use-workspaces";
 import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import { createShortLink } from "@/api";
 import { fetchLink, isEmpty } from "@utils/clipboard";
+import { useTags } from "@hooks/use-tags";
+import { useDomains } from "@hooks/use-domains";
 
 interface ShortLinkFormValues {
-  workspaceId: string;
   url: string;
   key: string;
   tagIds: string[];
@@ -31,9 +31,10 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
   const { push, pop } = useNavigation();
   const { url, key } = args;
   const { data: originalLink, isLoading: isLoadingLink } = useCachedPromise(fetchLink, [], { execute: isEmpty(url) });
-  const { workspaces, isLoading, isSingleWorkspace, error } = useWorkspaces();
+  const { tags } = useTags();
+  const { domains } = useDomains();
 
-  const { handleSubmit, itemProps, values } = useForm<ShortLinkFormValues>({
+  const { handleSubmit, itemProps } = useForm<ShortLinkFormValues>({
     onSubmit: async (vals) => {
       await showToast({ style: Toast.Style.Animated, title: "Creating link..." });
       createShortLink({ originalUrl: vals.url, ...vals })
@@ -69,7 +70,6 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
     validation: {
       url: FormValidation.Required,
       domain: FormValidation.Required,
-      workspaceId: !isSingleWorkspace ? FormValidation.Required : undefined,
     },
     initialValues: retryValues ?? { domain: "dub.sh", url: isEmpty(url) ? originalLink : url, key },
   });
@@ -77,7 +77,7 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
   return (
     <Form
       searchBarAccessory={<Form.LinkAccessory text="Dashboard" target="https://app.dub.co" />}
-      isLoading={isLoading || isLoadingLink}
+      isLoading={isLoadingLink}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Shorten Link" icon={Icon.Link} onSubmit={handleSubmit} />
@@ -85,51 +85,35 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
       }
     >
       <Form.Description title={"❗"} text="Your shortened link will be copied to your clipboard." />
-      {!isSingleWorkspace && !error && (
-        <Form.Dropdown {...itemProps.workspaceId} title="Workspace">
-          {workspaces.map((w) => (
-            <Form.Dropdown.Item
-              key={w.id}
-              value={w.id}
-              title={w.name}
-              icon={{ source: w.logo ?? "command-icon.png", mask: Image.Mask.Circle }}
-            />
-          ))}
-        </Form.Dropdown>
-      )}
       <Form.Separator />
       <Form.TextField {...itemProps.url} placeholder="https://dub.co" title="Original URL" />
       <Form.TextField {...itemProps.key} placeholder="(Optional)" title="URL Key" />
       {/* todo: Add commands to create/manage tags in the workspace */}
-      <Form.TagPicker {...itemProps.tagIds} title="Tags">
-        {workspaces
-          .find((w) => w.id === values.workspaceId)
-          ?.tags?.map((t) => (
-            <Form.TagPicker.Item
-              key={t.id}
-              value={t.id}
-              title={t.name}
-              icon={{ source: Icon.Tag, tintColor: Color.Orange }}
-            />
-          ))}
+      <Form.TagPicker {...itemProps.tagIds} title="Tags" placeholder="(Optional)">
+        {tags.map((t) => (
+          <Form.TagPicker.Item
+            key={t.id}
+            value={t.id}
+            title={t.name}
+            icon={{ source: Icon.Tag, tintColor: Color.Orange }}
+          />
+        ))}
       </Form.TagPicker>
       <Form.Dropdown {...itemProps.domain} title="Domain">
         <Form.Dropdown.Item
           key="dub.sh"
           value="dub.sh"
           title="dub.sh"
-          icon={{ source: Icon.Link, tintColor: Color.Blue }}
+          icon={{ source: Icon.Globe, tintColor: Color.Blue }}
         />
-        {workspaces
-          .find((w) => w.id === values.workspaceId)
-          ?.domains?.map((d) => (
-            <Form.Dropdown.Item
-              key={d.slug}
-              value={d.slug}
-              title={d.slug}
-              icon={{ source: Icon.Link, tintColor: Color.Blue }}
-            />
-          ))}
+        {domains.map((d) => (
+          <Form.Dropdown.Item
+            key={d.id}
+            value={d.slug}
+            title={d.slug}
+            icon={{ source: Icon.Globe, tintColor: Color.Purple }}
+          />
+        ))}
       </Form.Dropdown>
       <Form.TextField {...itemProps.comments} placeholder="(Optional)" title="Comments" />
     </Form>

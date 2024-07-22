@@ -1,5 +1,15 @@
 # Dub Link Shortener Changelog
 
+
+## [Workspace API Keys] - 2024-07-19
+
+- Simplify Dub Raycast Extension by using [`dub` TypeScript SDK](https://dub.co/solutions/typescript)
+- ⚠️This is a breaking change if you are using _User API Keys_. Please switch to using [Workspace API keys](https://dub.co/blog/workspace-api-keys) to continue using the extension.
+
+## [Minor metadata updates] - 2024-07-16
+
+- Updated the title, description, logo, and auth instructions
+
 ## [Workspace API Keys] - 2024-07-11
 
 - Supports newly launched [workspace api keys](https://dub.co/blog/workspace-api-keys) as user keys are deprecated
@@ -13,16 +23,20 @@
 - Used React hooks from @raycast/utils and upgraded dependencies
 
 ## [Enhancement: Remove long URL in the list view for clarity] - 2024-02-07
+
 - Take in urlKey that sets a custom short URL
 - Support arguments inline to the shorten link command
 
 ## [Enhancement: Remove long URL in the list view for clarity] - 2023-12-21
+
 - Showing both the shortened & long URL was cluttering the list view, so removing the long URL for now
 
 ## [Enhancement: Show the shortened and long URL in the list view] - 2023-12-14
+
 - Be consistent with the web app and show both the short and long URL for each item in the list view
 
 ## [Enhancement: Better feedback and UX] - 2023-12-06
+
 - More specific language around copying to clipboard
 - Showing the shortened link as pop up text after successfully shortening
 

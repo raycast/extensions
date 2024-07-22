@@ -111,6 +111,12 @@
       "mode": "view"
     },
     {
+      "name": "search-documents",
+      "title": "Search Documents",
+      "description": "Explore documents for your Linear team.",
+      "mode": "view"
+    },
+    {
       "name": "create-project",
       "title": "Create Project",
       "description": "Create projects for your Linear team.",
