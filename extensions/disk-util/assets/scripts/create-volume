@@ -24,7 +24,6 @@ if [[ "$encrypted" == "true" ]]; then
 
 vol_passphrase="$(dd if=/dev/urandom bs=64 count=1 2>/dev/null | base64 | tr -d '\n')"
 /usr/sbin/diskutil apfs addVolume "$disk_name" "$file_system" "$vol_name" -stdinpassphrase $vol_quota <<< "$vol_passphrase"
-echo "Your volume passphrase is: $vol_passphrase"
 
 else
 
