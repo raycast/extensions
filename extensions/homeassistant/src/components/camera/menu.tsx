@@ -1,4 +1,9 @@
-import { CopyToClipboardMenubarItem, MenuBarSubmenu, OpenInMenubarItem } from "@components/menu";
+import {
+  CopyToClipboardMenubarItem,
+  LastUpdateChangeMenubarItem,
+  MenuBarSubmenu,
+  OpenInMenubarItem,
+} from "@components/menu";
 import { getIcon } from "@components/state/utils";
 import { State } from "@lib/haapi";
 import { capitalizeFirstLetter, getFriendlyName } from "@lib/utils";
@@ -34,6 +39,7 @@ export function CameraMenubarItem(props: { state: State }): JSX.Element | null {
   return (
     <MenuBarSubmenu key={s.entity_id} title={title()} subtitle={subtitle()} icon={getIcon(s)}>
       <CameraOpenStreamInBrowserMenubarItem state={s} />
+      <LastUpdateChangeMenubarItem state={s} />
       <CopyToClipboardMenubarItem title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
     </MenuBarSubmenu>
   );

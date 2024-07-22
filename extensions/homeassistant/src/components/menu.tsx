@@ -1,5 +1,6 @@
 import { ha } from "@lib/common";
-import { getErrorMessage } from "@lib/utils";
+import { State } from "@lib/haapi";
+import { formatToHumanDateTime, getErrorMessage } from "@lib/utils";
 import {
   Clipboard,
   Icon,
@@ -35,6 +36,38 @@ export function CopyToClipboardMenubarItem(props: { title: string; content: stri
       onAction={copyToClipboard}
       tooltip={props.tooltip}
     />
+  );
+}
+
+export function LastUpdateChangeMenubarItem({ state, onAction }: { state: State; onAction?: () => void }) {
+  const humanDateString = (dt: string) => {
+    const r = `${formatToHumanDateTime(dt)}`;
+    return r ? r : "?";
+  };
+  const tooltip = (dt: string) => {
+    try {
+      return `${humanDateString(dt)} (${new Date(dt).toLocaleString()})`;
+    } catch (error) {
+      return `${humanDateString(dt)}`;
+    }
+  };
+  return (
+    <>
+      <MenuBarExtra.Item
+        title={"Last Change"}
+        subtitle={`${humanDateString(state.last_changed)}`}
+        icon={Icon.Clock}
+        onAction={onAction ? onAction : () => {}}
+        tooltip={`Last Change: ${tooltip(state.last_changed)}`}
+      />
+      <MenuBarExtra.Item
+        title={"Last Update"}
+        subtitle={`${humanDateString(state.last_updated)}`}
+        icon={Icon.Clock}
+        onAction={onAction ? onAction : () => {}}
+        tooltip={`Last Update: ${tooltip(state.last_updated)}`}
+      />
+    </>
   );
 }
 

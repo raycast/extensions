@@ -9,10 +9,10 @@ TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
 
 export function stringToDate(ds: string | null | undefined): Date | undefined {
-  if (!ds || ds.trim().length <= 0) {
-    return undefined;
-  }
   try {
+    if (!ds || ds.trim().length <= 0) {
+      return undefined;
+    }
     if (!isNaN(Date.parse(ds))) {
       return new Date(ds);
     }
@@ -22,14 +22,19 @@ export function stringToDate(ds: string | null | undefined): Date | undefined {
 }
 
 export function formatToHumanDateTime(input: Date | string | undefined): string | undefined {
-  if (!input) {
-    return;
-  }
-  const date = typeof input === "string" ? stringToDate(input) : input;
-  if (!date) {
+  try {
+    if (!input) {
+      return;
+    }
+
+    const date = typeof input === "string" ? stringToDate(input) : input;
+    if (!date) {
+      return undefined;
+    }
+    return timeAgo.format(date) as string;
+  } catch (error) {
     return undefined;
   }
-  return timeAgo.format(date) as string;
 }
 
 export function getErrorMessage(error: unknown): string {

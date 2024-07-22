@@ -1,4 +1,4 @@
-import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "@components/menu";
+import { CopyToClipboardMenubarItem, LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { getIcon, stateChangeSleep } from "@components/state/utils";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
@@ -74,6 +74,7 @@ export function LightMenubarItem(props: { state: State }): JSX.Element | null {
       <LightTurnOnMenubarItem state={s} />
       <LightTurnOffMenubarItem state={s} />
       <LightBrightnessControl state={s} />
+      <LastUpdateChangeMenubarItem state={s} />
       <CopyToClipboardMenubarItem title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
     </MenuBarSubmenu>
   );

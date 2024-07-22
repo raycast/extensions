@@ -1,4 +1,4 @@
-import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "@components/menu";
+import { CopyToClipboardMenubarItem, LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { getIcon } from "@components/state/utils";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
@@ -67,6 +67,7 @@ export function CoverMenubarItem(props: { state: State }): JSX.Element | null {
       <CoverOpenMenubarItem state={s} />
       <CoverCloseMenubarItem state={s} />
       <CoverStopMenubarItem state={s} />
+      <LastUpdateChangeMenubarItem state={s} />
       <CopyToClipboardMenubarItem title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
     </MenuBarSubmenu>
   );

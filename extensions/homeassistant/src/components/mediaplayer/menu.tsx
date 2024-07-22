@@ -3,7 +3,7 @@ import { getErrorMessage, getFriendlyName, range } from "@lib/utils";
 import { getMediaPlayerTitleAndArtist } from "./utils";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
-import { CopyToClipboardMenubarItem } from "@components/menu";
+import { CopyToClipboardMenubarItem, LastUpdateChangeMenubarItem } from "@components/menu";
 
 function volumeRange() {
   return range(0.0, 1.0, 0.05);
@@ -92,6 +92,7 @@ export function MediaPlayerMenubarItem(props: { state: State }): JSX.Element | n
       <MediaPlayerPreviousMenubarItem state={s} />
       <MediaPlayerVolumeSubmenu state={s} />
       {mediaTitle && <CopyToClipboardMenubarItem title="Copy Track" content={mediaTitle} />}
+      <LastUpdateChangeMenubarItem state={s} />
       <CopyToClipboardMenubarItem title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
     </MenuBarExtra.Submenu>
   );

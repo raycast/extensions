@@ -8,7 +8,7 @@ import { InputButtonMenubarItem } from "@components/input_button/menu";
 import { InputSelectMenubarItem } from "@components/input_select/menu";
 import { LightMenubarItem } from "@components/light/menu";
 import { MediaPlayerMenubarItem } from "@components/mediaplayer/menu";
-import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "@components/menu";
+import { CopyToClipboardMenubarItem, LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { PersonMenubarItem } from "@components/person/menu";
 import { SceneMenubarItem } from "@components/scene/menu";
 import { ScriptMenubarItem } from "@components/script/menu";
@@ -93,6 +93,7 @@ export function StateMenubarItem(props: { state: State }): JSX.Element | null {
       subtitle={ensureShort(getStateValue(s))}
       icon={getIcon(s)}
     >
+      <LastUpdateChangeMenubarItem state={s} />
       <CopyEntityIDToClipboard state={s} />
       <CopyEntityStateToClipboardMenubarItem state={s} />
     </MenuBarSubmenu>

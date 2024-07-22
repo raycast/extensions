@@ -5,6 +5,7 @@
 - Use `weather.get_forecasts` to receive weather forecasts (required since Home Assistant `2024.07`)
 - Add sun entity support for weather menu command
 - Add `Services` and `Run Service` command to be able to call Services (including Quicklinks/Deeplinks)
+- Menu items show the last update/last change info
 
 ## [Update] - 2024-04-06
 

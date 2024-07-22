@@ -8,10 +8,11 @@ import {
 } from "@components/weather/menu";
 import { getTemperatureFromState, weatherConditionToIcon, weatherConditionToText } from "@components/weather/utils";
 import { State } from "@lib/haapi";
-import { formatToHumanDateTime, getErrorMessage, getFriendlyName } from "@lib/utils";
+import { getErrorMessage, getFriendlyName } from "@lib/utils";
 import { Color, getPreferenceValues, Icon, Image, MenuBarExtra, openCommandPreferences } from "@raycast/api";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 import { SunMenubarSection } from "@components/sun/menu";
+import { LastUpdateChangeMenubarItem } from "@components/menu";
 
 function WeatherMenuBarExtra(props: {
   children: React.ReactNode;
@@ -140,12 +141,7 @@ export default function WeatherMenuBarCommand(): JSX.Element {
           subtitle={weather ? getFriendlyName(weather) : ""}
           onAction={openCommandPreferences}
         />
-        <MenuBarExtra.Item
-          title="Fetched"
-          subtitle={formatToHumanDateTime(new Date())}
-          icon={Icon.Clock}
-          onAction={launchWeatherCommand}
-        />
+        {weather && <LastUpdateChangeMenubarItem state={weather} onAction={launchWeatherCommand} />}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <RUIMenuBarExtra.ConfigureCommand />
