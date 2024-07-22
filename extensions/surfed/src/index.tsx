@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { exec } from "child_process";
 import util from "util";
 import fs from "fs";
-import path from "path";
 
 const execPromise = util.promisify(exec);
 const cliPath = "/Applications/Surfed.app/Contents/MacOS/surfed-cli.app/Contents/MacOS/surfed-cli";
