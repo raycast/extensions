@@ -8,8 +8,8 @@ interface Arguments {
 const NEW_LINE = "\r\n\r\n";
 
 export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
-  const term = props.arguments["Term"] || props.fallbackText;
-  const words = (term || "").split(" ");
+  const term = props.arguments["Term"] || (props.fallbackText || "");
+  const words = term.split(" ");
 
   // Map over the word and then map of the characters of that word
   const as_nato = words.map((w: string) => {
