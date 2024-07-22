@@ -5,17 +5,21 @@ import { User, useChannels } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
 import { useFrecencySorting } from "@raycast/utils";
 import { OpenChannelInSlack, OpenChatInSlack, useSlackApp } from "./shared/OpenInSlack";
-import { convertSlackEmojiToUnicode, getTimeLocale } from "./shared/utils";
+import { convertSlackEmojiToUnicode } from "./shared/utils";
 
 const { displayExtraMetadata } = getPreferenceValues<Preferences.Search>();
 
 function getCoworkerTime(coworkerTimeZone: string): string {
-  const time = new Date();
-  return new Intl.DateTimeFormat(getTimeLocale(), {
-    timeZone: coworkerTimeZone,
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(time);
+  const localTime = new Date();
+  const coworkerTime = new Date(localTime.toLocaleString("en-US", { timeZone: coworkerTimeZone }));
+
+  const diffInMinutes = Math.round((coworkerTime.getTime() - localTime.getTime()) / (1000 * 60));
+  const diffHours = Math.floor(Math.abs(diffInMinutes) / 60);
+  const diffMinutes = Math.abs(diffInMinutes) % 60;
+
+  const formattedDiff = `${diffInMinutes >= 0 ? "+" : "-"}${diffHours}h${diffMinutes !== 0 ? ` ${diffMinutes}m` : ""}`;
+
+  return formattedDiff;
 }
 
 function searchItemAccessories(

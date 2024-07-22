@@ -1,14 +1,9 @@
-import { open, getPreferenceValues } from "@raycast/api";
+import { open } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { CodedError, ErrorCode } from "@slack/web-api";
 import { formatDistance } from "date-fns";
 import { slack } from "./client/WebClient";
 import * as emoji from "node-emoji";
-
-function getTimeLocale(): string {
-  const { timeFormat } = getPreferenceValues<Preferences>();
-  return timeFormat === "hour24" ? "en-GB" : "en-US";
-}
 
 function convertSlackEmojiToUnicode(text: string): string {
   return emoji.emojify(text);
@@ -103,5 +98,4 @@ export {
   buildScriptEnsuringSlackIsRunning,
   handleError,
   convertSlackEmojiToUnicode,
-  getTimeLocale,
 };

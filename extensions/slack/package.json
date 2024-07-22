@@ -91,25 +91,6 @@
       "type": "checkbox",
       "required": false,
       "default": true
-    },
-    {
-      "title": "Time Format",
-      "label": "Time Format",
-      "description": "Determines how time is formatted in the extension",
-      "name": "timeFormat",
-      "type": "dropdown",
-      "required": false,
-      "data": [
-        {
-          "value": "hour12",
-          "title": "12-hour format (AM/PM)"
-        },
-        {
-          "value": "hour24",
-          "title": "24-hour format"
-        }
-      ],
-      "default": "hour12"
     }
   ],
   "dependencies": {
@@ -117,6 +98,7 @@
     "@raycast/utils": "^1.16.0",
     "@slack/web-api": "^7.0.4",
     "date-fns": "^3.6.0",
+    "date-fns-tz": "^3.1.3",
     "lodash": "^4.17.21",
     "node-emoji": "^2.1.3"
   },
