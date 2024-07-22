@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Fix copy commit URL action] - 2024-07-22
+
+- Fix the "Copy Commit URL" action to ensure it correctly copies the commit URL as intended.
+
 ## [Repository Improvements] - 2024-07-12
 
 - Adds primary language color and code icon to the accessory for being in-sync with GitHub UI.
