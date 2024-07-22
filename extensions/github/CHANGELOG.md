@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Fix copy commit URL action] - {PR_MERGE_DATE}
+## [Fix copy commit URL action] - 2024-07-22
 
 - Fix the "Copy Commit URL" action to ensure it correctly copies the commit URL as intended.
 
