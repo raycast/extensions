@@ -3,7 +3,7 @@
   "name": "short-links",
   "title": "Short Links",
   "description": "Show links and copies to clipboard",
-  "icon": "command-icon.png",
+  "icon": "lucide-list.png",
   "author": "Tatu",
   "categories": [
     "Productivity"
