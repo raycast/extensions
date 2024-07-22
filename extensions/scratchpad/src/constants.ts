@@ -20,6 +20,7 @@ const editors: ApplicationInfo[] = [
   { name: "TextWrangler", bundleId: "com.barebones.textwrangler" },
   { name: "TextEdit", bundleId: "com.apple.TextEdit" },
   { name: "Zed", bundleId: "dev.zed.Zed" },
+  { name: "Cursor", bundleId: "com.todesktop.230313mzl4w4u92" },
 ];
 
 export const editorBundleIds = editors.map((editor) => editor.bundleId);
