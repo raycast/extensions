@@ -1,69 +1,106 @@
 import {
   Action,
   ActionPanel,
-  closeMainWindow,
   Color,
   environment,
   Form,
   Icon,
   LaunchProps,
-  popToRoot,
   showToast,
   Toast,
+  useNavigation,
 } from "@raycast/api";
-import { FormValidation, useExec, useForm } from "@raycast/utils";
+import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 import { spawn } from "node:child_process";
 import { sep } from "path";
+import { useScriptsAccessible } from "@hooks/use-scripts-accessible";
+import { VolumeDetails } from "@components/volume-details";
+import { Volumes } from "@components/volumes";
 
 type FormValues = {
   name: string;
   quota: string;
   format: string;
   symlink: boolean;
+  disableIndexing: boolean;
 };
 
 export default function CreateVolume(props: LaunchProps<{ draftValues: FormValues }>) {
   const { draftValues } = props;
   const { assetsPath, supportPath } = environment;
+  const { push } = useNavigation();
+  const [lastFormat, setLastFormat] = useCachedState<string>("last-format", "apfs:case-sensitive:encrypted", {
+    cacheNamespace: "create-volume",
+  });
   const bundleId = supportPath.split(sep).find((comp) => comp.startsWith("com.raycast")) ?? "com.raycast.macos";
-  const { isLoading } = useExec("chmod", [
-    "+x",
-    `${assetsPath}/scripts/create-volume`,
-    `${assetsPath}/scripts/askpass`,
-  ]);
+  const { isScriptsLoading } = useScriptsAccessible();
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
-    onSubmit: async ({ name, format, quota, symlink }) => {
+    onSubmit: async ({ name, format, quota, symlink, disableIndexing }) => {
       const toast = await showToast(Toast.Style.Animated, `Creating Volume '${name}'`, "Please wait...");
+      setLastFormat(format);
       const fs = format.split(":")[1] === "case-sensitive" ? "Case-sensitive APFS" : "APFS";
       const encrypted = (format.split(":")[2] === "encrypted") + "";
 
       const askpassPath = `${assetsPath}/scripts/askpass`;
       const env = Object.assign({}, process.env, { SUDO_ASKPASS: askpassPath, RAYCAST_BUNDLE: bundleId });
 
-      const child = spawn(
-        "sudo -A",
-        [`${assetsPath}/scripts/create-volume`, name, `"${fs}"`, encrypted, symlink + "", quota ? quota : "none"],
-        { shell: true, env },
-      );
+      const child =
+        encrypted === "true"
+          ? spawn(
+              "sudo -A",
+              [
+                `${assetsPath}/scripts/create-volume`,
+                name,
+                `"${fs}"`,
+                encrypted,
+                symlink + "",
+                disableIndexing + "",
+                quota ? quota : "none",
+              ],
+              { shell: true, env },
+            )
+          : spawn(
+              `${assetsPath}/scripts/create-volume`,
+              [name, `"${fs}"`, encrypted, symlink + "", disableIndexing + "", quota ? quota : "none"],
+              { shell: true },
+            );
+
       child.stdout.on("data", async (msg) => {
         toast.message = msg;
         if (msg.includes("success")) {
-          await closeMainWindow();
           toast.style = Toast.Style.Success;
           toast.title = `Successfully created volume '${name}'.`;
-          await toast.show();
-          await popToRoot();
+
+          toast.primaryAction = {
+            title: "Show Volume Details",
+            shortcut: { modifiers: ["cmd"], key: "d" },
+            onAction: async () => {
+              push(<VolumeDetails name={name} />);
+              await toast.hide();
+            },
+          };
+
+          toast.secondaryAction = {
+            title: "Show All Volumes",
+            shortcut: { modifiers: ["cmd"], key: "a" },
+            onAction: async () => {
+              push(<Volumes />);
+              await toast.hide();
+            },
+          };
         }
       });
 
       child.stderr.on("data", async (msg) => {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Failed to create volume";
-        toast.message = msg;
+        if (!msg.includes("disabling Spotlight")) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Failed to create volume";
+          toast.message = msg;
+        }
       });
     },
-    initialValues: draftValues ?? { format: "apfs:case-sensitive:encrypted" },
+    initialValues: draftValues ?? { format: lastFormat },
     validation: {
       name: FormValidation.Required,
       quota: (value) => {
@@ -87,7 +124,7 @@ export default function CreateVolume(props: LaunchProps<{ draftValues: FormValue
           <Action.SubmitForm title="Create Volume" onSubmit={handleSubmit} icon={Icon.HardDrive} />
         </ActionPanel>
       }
-      isLoading={isLoading}
+      isLoading={isScriptsLoading}
       enableDrafts
     >
       <Form.TextField title="Volume Name" placeholder="vol1" {...itemProps.name} />
@@ -120,6 +157,7 @@ export default function CreateVolume(props: LaunchProps<{ draftValues: FormValue
         {...itemProps.quota}
       />
       <Form.Checkbox label="Create Symlink from $HOME" {...itemProps.symlink} />
+      <Form.Checkbox label="Disable Spotlight indexing to save CPU overhead" {...itemProps.disableIndexing} />
     </Form>
   );
 }

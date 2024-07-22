@@ -22,50 +22,6 @@
       "title": "Show Volumes",
       "description": "Show the disk volumes present on the system.",
       "mode": "view"
-    },
-    {
-      "name": "quick-create-volume",
-      "title": "Quick Create Volume",
-      "description": "Quick create APFS volumes. For encrypted volumes, it generates a secure passphrase, creates the volume, and stores the passphrase in the system keychain so that the volume can be automatically decrypted and mounted on boot.",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "name",
-          "type": "text",
-          "placeholder": "Volume Name",
-          "required": true
-        },
-        {
-          "name": "format",
-          "type": "dropdown",
-          "placeholder": "Format",
-          "data": [
-            {
-              "title": "APFS",
-              "value": "apfs:case-insensitive:non-encrypted"
-            },
-            {
-              "title": "APFS (Encrypted)",
-              "value": "apfs:case-insensitive:encrypted"
-            },
-            {
-              "title": "APFS (Case-sensitive)",
-              "value": "apfs:case-sensitive:non-encrypted"
-            },
-            {
-              "title": "APFS (Case-sensitive, Encrypted)",
-              "value": "apfs:case-sensitive:encrypted"
-            }
-          ],
-          "required": true
-        },
-        {
-          "name": "quota",
-          "type": "text",
-          "placeholder": "Quota (in GB)",
-          "required": false
-        }
-      ]
     }
   ],
   "dependencies": {

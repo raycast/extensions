@@ -1,11 +1,9 @@
-import { useExec } from "@raycast/utils";
 import {
   Action,
   ActionPanel,
   Alert,
   Color,
   confirmAlert,
-  Detail,
   environment,
   Icon,
   List,
@@ -13,22 +11,11 @@ import {
   Toast,
 } from "@raycast/api";
 import { spawn } from "node:child_process";
-import { parse } from "plist";
 import { sep } from "path";
-
-type VolumeInfo = Partial<{
-  VolumeUUID: string;
-  VolumeName: string;
-  FilesystemName: string;
-  MountPoint: string;
-  DeviceIdentifier: string;
-  DeviceNode: string;
-  CapacityInUse: number;
-  TotalSize: number;
-  FileVault: boolean;
-}>;
-
-export type VolumeListInfo = Pick<VolumeInfo, "MountPoint" | "VolumeUUID" | "VolumeName">;
+import { VolumeListInfo } from "@components/volumes";
+import { useVolumeInfo } from "@hooks/use-volume-info";
+import { VolumeDetails } from "@components/volume-details";
+import { VolumeActions } from "@components/volume-actions";
 
 export const VolumeItem = ({
   volume,
@@ -39,17 +26,7 @@ export const VolumeItem = ({
   deleted: string[];
   setDeleted: (deleted: string[]) => void;
 }) => {
-  const { data } = useExec("/usr/sbin/diskutil", ["info", "-plist", `${volume.VolumeName}`], {
-    failureToastOptions: { title: `Failed to get info for volume: ${volume.VolumeName}` },
-    parseOutput: (args) => {
-      try {
-        return parse(args.stdout) as VolumeInfo;
-      } catch {
-        return {} as VolumeInfo;
-      }
-    },
-    keepPreviousData: true,
-  });
+  const { volume: data } = useVolumeInfo(volume.VolumeName!);
   const sizeIcon = getSizeIcon(data?.CapacityInUse ?? 0, data?.TotalSize ?? 0);
 
   const deleteVolume = async () => {
@@ -60,11 +37,23 @@ export const VolumeItem = ({
     const askpassPath = `${assetsPath}/scripts/askpass`;
     const env = Object.assign({}, process.env, { SUDO_ASKPASS: askpassPath, RAYCAST_BUNDLE: bundleId });
 
-    const child = spawn(
-      "sudo -A",
-      [`${assetsPath}/scripts/delete-volume`, `${volume.VolumeName}`, `${volume.VolumeUUID}`, `${!!data?.FileVault}`],
-      { shell: true, env },
-    );
+    const child = data?.FileVault
+      ? spawn(
+          "sudo -A",
+          [
+            `${assetsPath}/scripts/delete-volume`,
+            `${volume.VolumeName}`,
+            `${volume.VolumeUUID}`,
+            `${!!data?.FileVault}`,
+          ],
+          { shell: true, env },
+        )
+      : spawn(
+          `${assetsPath}/scripts/delete-volume`,
+          [`${volume.VolumeName}`, `${volume.VolumeUUID}`, `${!!data?.FileVault}`],
+          { shell: true },
+        );
+
     child.stdout.on("data", async (msg) => {
       toast.message = msg;
       if (msg.includes("success")) {
@@ -84,8 +73,7 @@ export const VolumeItem = ({
   return (
     <List.Item
       key={volume.VolumeUUID}
-      title={volume.VolumeName!}
-      subtitle={volume.MountPoint!}
+      title={volume.MountPoint!}
       icon={{ source: Icon.HardDrive, tintColor: Color.Purple }}
       accessories={
         !data
@@ -125,7 +113,7 @@ export const VolumeItem = ({
       }
       actions={
         <ActionPanel>
-          <Action.Push title="Show Details" icon={Icon.Eye} target={<VolumeDetails volume={volume} />} />
+          <Action.Push title="Show Details" icon={Icon.Eye} target={<VolumeDetails name={volume.VolumeName!} />} />
           {data && <VolumeActions volume={data} />}
           <ActionPanel.Section>
             <Action
@@ -145,56 +133,6 @@ export const VolumeItem = ({
         </ActionPanel>
       }
     />
-  );
-};
-
-const VolumeDetails = ({ volume }: { volume: VolumeInfo }) => {
-  const { data, isLoading } = useExec("/usr/sbin/diskutil", ["info", `${volume.VolumeName}`], {
-    failureToastOptions: { title: `Failed to get info for volume: ${volume.VolumeName}` },
-    keepPreviousData: true,
-  });
-
-  return (
-    <Detail
-      isLoading={isLoading}
-      navigationTitle={volume.MountPoint}
-      markdown={`### \`${volume.MountPoint}\` Information\n\`\`\`\n${data}\n\`\`\``}
-      actions={
-        <ActionPanel>
-          <VolumeActions volume={volume} />
-        </ActionPanel>
-      }
-    />
-  );
-};
-
-export const VolumeActions = ({ volume }: { volume: VolumeInfo }) => {
-  return (
-    <>
-      <Action.ShowInFinder path={volume.MountPoint!} />
-      <ActionPanel.Section>
-        <Action.CreateQuicklink
-          title="Create Quicklink"
-          icon={Icon.RaycastLogoPos}
-          quicklink={{
-            link: `file://${volume.MountPoint}`,
-            name: `Volume ${volume.VolumeName}`,
-            application: "Finder",
-          }}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
-        />
-        <Action.CopyToClipboard
-          title="Copy Device Node"
-          content={volume.DeviceNode ?? ""}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-        />
-        <Action.CopyToClipboard
-          title="Copy Mount Point"
-          content={volume.MountPoint!}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "'" }}
-        />
-      </ActionPanel.Section>
-    </>
   );
 };
 

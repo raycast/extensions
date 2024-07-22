@@ -5,11 +5,12 @@ vol_name="$1"
 file_system="$2"
 encrypted="$3"
 symlink="$4"
+disable_indexing="$5"
 
 vol_quota=""
 
-if [[ "$5" != "none" ]]; then
-    vol_quota="-quota $5g"
+if [[ "$6" != "none" ]]; then
+    vol_quota="-quota $6g"
 fi
 
 disk_name=disk1
@@ -36,6 +37,10 @@ vol_info_file="/tmp/$vol_name.plist"
 vol_uuid="$(/usr/libexec/PlistBuddy -c 'Print VolumeUUID' "$vol_info_file")"
 vol_mountPoint="$(/usr/libexec/PlistBuddy -c 'Print MountPoint' "$vol_info_file")"
 rm "$vol_info_file"
+
+if [[ "$disable_indexing" == "true" ]]; then
+/usr/bin/mdutil -i off "$vol_mountPoint"
+fi
 
 if [[ "$encrypted" == "true" ]]; then
 
