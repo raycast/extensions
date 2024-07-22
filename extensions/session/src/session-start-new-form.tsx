@@ -53,7 +53,7 @@ export default function Command() {
     >
       <Form.TextField id="intent" title="Intent" autoFocus />
       <CategoryField />
-      <Form.TextField id="duration" title="Duration" placeholder="Leave blank for default value" />
+      <Form.TextField id="duration" title="Duration (Minutes)" placeholder="Leave blank for default value" />
       <Form.TextArea id="notes" title="Notes" />
     </Form>
   );
