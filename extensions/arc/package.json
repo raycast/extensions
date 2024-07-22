@@ -223,7 +223,7 @@
       "interval": "10m"
     },
     {
-      "name": "search-arc",
+      "name": "search",
       "title": "Search Arc",
       "description": "Search tabs, history and search suggestions",
       "mode": "view",
