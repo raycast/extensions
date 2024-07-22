@@ -8,9 +8,8 @@ interface Arguments {
 const NEW_LINE = "\r\n\r\n";
 
 export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
-  const term = props.arguments["Term"];
-
-  const words = term.split(" ");
+  const term = props.arguments["Term"] || props.fallbackText;
+  const words = (term || "").split(" ");
 
   // Map over the word and then map of the characters of that word
   const as_nato = words.map((w: string) => {
@@ -20,8 +19,8 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
       if (c in DICTIONARY) {
         return {
           character: c,
-          telephony: DICTIONARY[c][0] as string,
-          pronunciation: DICTIONARY[c][1] as string,
+          telephony: DICTIONARY[c][0],
+          pronunciation: DICTIONARY[c][1],
         };
       } else {
         return {
