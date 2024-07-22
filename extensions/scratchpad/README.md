@@ -16,6 +16,7 @@ Scratchpad is simple rayacast extension to create scratchpad files in a specific
 10. TextWrangler
 11. TextEdit
 12. Zed
+13. Cursor
 ```
 
 ### Files Supported
