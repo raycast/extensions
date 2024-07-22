@@ -23,7 +23,7 @@ export default function Main(): ReactElement {
   return (
     <List isLoading={isLoading} onSearchTextChange={setInput} searchText={input} throttle>
       {(!data || data.length === 0) && !isLoading && (
-        <List.EmptyView icon={Icon.ExclamationMark} title="No reports found" />
+        <List.EmptyView icon={Icon.ExclamationMark} title="No Reports Found" />
       )}
       {data &&
         data.length > 0 &&
