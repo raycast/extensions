@@ -21,7 +21,7 @@ export default function SearchCocktailByName(props: LaunchProps<{ arguments: Arg
       searchText={searchName}
       isShowingDetail={isShowingDetail}
     >
-      {!drinks.length ? (
+      {!drinks.length && !isLoading ? (
         <List.EmptyView title="No matching drinks found" description="Try searching: Gin or Vodka" />
       ) : (
         <List.Section title={`${drinks.length} drinks`}>

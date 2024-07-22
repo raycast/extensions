@@ -13,7 +13,7 @@ export default function SearchCocktailByName(props: LaunchProps<{ arguments: Arg
 
   return (
     <Grid isLoading={isLoading} throttle onSearchTextChange={setSearchIngredient} searchText={searchIngredient}>
-      {!drinks.length ? (
+      {!drinks.length && !isLoading ? (
         <Grid.EmptyView title="No matching drinks found" description="Try searching: Gin or Vodka" />
       ) : (
         <Grid.Section title={`${drinks.length} drinks`}>
