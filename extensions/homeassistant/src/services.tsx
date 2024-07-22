@@ -228,7 +228,6 @@ export default function ServiceCallCommand() {
             case "backup_location":
             case "time":
             case "conversation_agent":
-            case "datetime":
             case "duration":
             case "theme": {
               return (
@@ -240,6 +239,20 @@ export default function ServiceCallCommand() {
                   placeholder={f.meta.description}
                   onChange={(nv) => {
                     setUserDataByKey(f.id, nv.length > 0 ? nv : undefined);
+                  }}
+                  error={userDataError[f.id]}
+                />
+              );
+            }
+            case "datetime": {
+              return (
+                <Form.DatePicker
+                  id={f.id}
+                  key={`${f.id}_${fullHAServiceName(selectedService)}`}
+                  title={getNameOfHAServiceField(f.meta, f.id)}
+                  value={userData[f.id]}
+                  onChange={(nv) => {
+                    setUserDataByKey(f.id, nv);
                   }}
                   error={userDataError[f.id]}
                 />
