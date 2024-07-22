@@ -1,3 +1,3 @@
 # Short Links
 
-Show links and copies to clipboard
+Quickly display a list of pre-saved texts and copy them to the current application.
