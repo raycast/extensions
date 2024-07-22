@@ -23,7 +23,7 @@
     },
     {
       "name": "session-start-new-form",
-      "title": "Start New Session with Form",
+      "title": "Start Custom Session",
       "description": "Starts a focus session in Session app with a form input. Supply a semi-colon separated list of categories in order to choose from one of them in the form (ie: \"Personal;Work;Play\" will create three dropdown options).",
       "mode": "view",
       "preferences": [
