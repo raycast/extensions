@@ -104,7 +104,7 @@ function SuggestionsListSection(props: { suggestions?: Suggestion[]; searchText:
     return null;
   }
 
-  const preferences = getPreferenceValues<Preferences.SearchArc>();
+  const preferences = getPreferenceValues<Preferences.Search>();
 
   return (
     <List.Section title="Suggestions" subtitle={preferences.engine}>
