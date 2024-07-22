@@ -157,7 +157,7 @@ export default function ServiceCallCommand() {
           <Form.Dropdown.Item
             key={fullHAServiceName(s)}
             value={fullHAServiceName(s)}
-            title={`${capitalizeFirstLetter(s.domain)}: ${s.name}`}
+            title={`${capitalizeFirstLetter(s.domain)?.replace("_", " ")}: ${s.name}`}
             keywords={[fullHAServiceName(s), s.domain, s.service]}
           />
         ))}
