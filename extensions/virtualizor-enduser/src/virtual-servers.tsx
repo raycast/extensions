@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
-import { ListVirtualServersResponse, MessageResponse } from "./lib/types";
+import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { ListVirtualServersResponse, MessageResponse, VirtualServersInfoResponse } from "./lib/types";
 import { useState } from "react";
 import generateBaseUrl from "./lib/utils/generate-base-url";
 import { useVirtualizor } from "./lib/hooks";
@@ -50,6 +50,7 @@ export default function VirtualServers() {
             { icon: generateBaseUrl() + vps.distro },
             { text: vps.email }
         ]} actions={!isLoading && <ActionPanel>
+        <Action.Push icon={Icon.Eye} title="View VPS Info" target={<ViewVPSInfo vpsid={vps.vpsid} />} />
             <Action icon={Icon.Redo} title="Revalidate" onAction={revalidate} />
                 <ActionPanel.Section>
             {vps.status!==0 && <>
@@ -60,4 +61,19 @@ export default function VirtualServers() {
                 </ActionPanel.Section>
         </ActionPanel>} />)}
     </List>
+}
+
+function ViewVPSInfo({ vpsid }: {vpsid: string}) {
+    const { isLoading, data } = useVirtualizor<VirtualServersInfoResponse>("vpsmanage", {
+        params: {
+            svs: vpsid
+        },
+        execute: true
+    });
+    const markdonw = "```" + JSON.stringify(data) + "```";
+    return <Detail isLoading={isLoading} markdown={markdonw} metadata={data && <Detail.Metadata>
+        <Detail.Metadata.TagList title="Flags">
+            {Object.entries(data.info.flags).map(([flag, active]) => <Detail.Metadata.TagList.Item key={flag} text={flag} color={active ? Color.Green : Color.Red} />)}
+        </Detail.Metadata.TagList>
+    </Detail.Metadata>} />
 }
