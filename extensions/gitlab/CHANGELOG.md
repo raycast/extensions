@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Todo Menubar Fix] - {PR_MERGE_DATE}
+## [Todo Menubar Fix] - 2024-07-23
 
 - [#13612](https://github.com/raycast/extensions/issues/13612): Don't show menubar item when there are no todo(s) present.
 
