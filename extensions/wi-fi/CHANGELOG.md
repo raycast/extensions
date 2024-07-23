@@ -1,5 +1,9 @@
 # Wi-Fi Changelog
 
+## [Goodbye, Scan Wi-Fi command] - {PR_MERGE_DATE}
+
+- The airport command line tool is deprecated and the Scan Wi-Fi command based on it is removed.
+
 ## [Fix crash] - 2024-02-05
 
 - Fix potential crash issues
