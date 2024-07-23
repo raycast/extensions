@@ -14,8 +14,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Upload file",
-      "subtitle": "Upload file to streamshare",
+      "title": "Upload File",
+      "subtitle": "Streamshare Uploader",
       "description": "Upload a file to streamshare.",
       "mode": "no-view"
     }
