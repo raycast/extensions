@@ -1,5 +1,5 @@
 import { deleteDocument, DocumentResult, updateDocument } from "../../api/documents";
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import OpenInLinear from "../OpenInLinear";
 import { MutatePromise } from "@raycast/utils";
 import { isLinearInstalled } from "../../helpers/isLinearInstalled";
@@ -134,7 +134,7 @@ export function DocumentActions({ doc, mutateDocs, ...rest }: DocumentActionsPro
         toast.primaryAction = {
           title: "Retry",
           onAction: tryDelete,
-          shortcut: { modifiers: ["cmd"], key: "r" },
+          shortcut: Keyboard.Shortcut.Common.Refresh,
         };
       });
   };
@@ -151,7 +151,7 @@ export function DocumentActions({ doc, mutateDocs, ...rest }: DocumentActionsPro
           icon={{ source: Icon.DeleteDocument, tintColor: Color.Red }}
           onAction={trash}
           style={Action.Style.Destructive}
-          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+          shortcut={Keyboard.Shortcut.Common.Remove}
         />
       </ActionPanel.Section>
 
