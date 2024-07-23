@@ -1,13 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "disk-util",
+  "name": "diskutil",
   "title": "Disk Utility",
-  "description": "Makes it easy to manage AFPS disk volumes",
+  "description": "Create, list and delete Apple File System (APFS) disk volumes",
   "icon": "command-icon.png",
   "author": "stelo",
   "categories": [
     "Developer Tools",
-    "System"
+    "System",
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
