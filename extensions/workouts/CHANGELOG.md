@@ -1,5 +1,9 @@
 # Workouts Changelog
 
+## [Add Create Activity Comman] - 2024-07-24
+
+Added a command to create a manual activity
+
 ## [Remember selected club] - 2024-07-02
 
 - Saved last selected club in LocalStorage for the leaderboard command
@@ -8,10 +12,6 @@
 
 - Add "Analyze workout" command to get a detailed analysis and suggestions for a specific workout.
 - Add weekly stats to the menu bar
-
-## [Add Create Activity Comman] - 2024-07-24
-
-Added a command to create a manual activity
 
 ## [Refresh interval update] - 2024-05-09
 
