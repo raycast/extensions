@@ -1,9 +1,19 @@
 import { useCallback, useEffect, useReducer, useState } from "react";
 import { handleDelete, htmlToMarkdown, isLoggedIn, timeAgo, withToast } from "./libs/utils";
 import { createAccount, deleteAccount, getAccount, getMails, deleteMail, getMessage } from "./libs/api";
-import { Action, ActionPanel, Color, Detail, Icon, List, popToRoot, environment } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Detail,
+  Icon,
+  List,
+  popToRoot,
+  environment,
+  showHUD,
+  showToast,
+} from "@raycast/api";
 import { useAccount } from "./hooks/useAccount";
-import { Mail } from "./types";
 
 enum View {
   Loading,
@@ -76,15 +86,45 @@ function Mail(): JSX.Element {
           icon={{ source: Icon.Envelope, tintColor: Color.Purple }}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard title="Copy Address" content={Account?.email ?? ""} />
+              <Action.OpenInBrowser
+                title="Open in Browser"
+                url="https://mail.tm/"
+                icon={{ source: Icon.Globe, tintColor: Color.Blue }}
+                onOpen={() => showHUD("Login to view your account")}
+              />
+              <Action.CopyToClipboard
+                title="Copy Email"
+                content={Account?.email ?? ""}
+                icon={{ source: Icon.Envelope, tintColor: Color.Purple }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+              />
+              <Action.CopyToClipboard
+                title="Copy Password"
+                content={Account?.password ?? ""}
+                icon={{ source: Icon.Key, tintColor: Color.Purple }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+              />
+              <Action
+                title="Refresh"
+                icon={{ source: Icon.ArrowClockwise, tintColor: Color.Blue }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                onAction={() => {
+                  setRefreshKey(refreshKey + 1);
+                  showToast({
+                    title: "Refreshed",
+                    message: "Mails refreshed successfully",
+                  });
+                }}
+              />
               <Action
                 title="Delete Account"
                 icon={{ source: Icon.Trash, tintColor: Color.Red }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                 onAction={() =>
                   handleDelete(
                     () => deleteAccount(),
                     () => popToRoot(),
-                    "account",
+                    "Account",
                   )
                 }
               />
@@ -112,8 +152,12 @@ function Mail(): JSX.Element {
             ]}
             actions={
               <ActionPanel>
-                <Action.ToggleQuickLook title="Quick Look" />
-                <Action.Push icon={Icon.Message} title="View Message" target={<Message messageId={mail.id} />} />
+                <Action.ToggleQuickLook title="Quick Look" icon={{ source: Icon.Eye, tintColor: Color.Blue }} />
+                <Action.Push
+                  title="View Message"
+                  target={<Message messageId={mail.id} />}
+                  icon={{ source: Icon.Message, tintColor: Color.Blue }}
+                />
                 <Action
                   title="Delete Message"
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
@@ -122,7 +166,7 @@ function Mail(): JSX.Element {
                     handleDelete(
                       () => deleteMail(mail.id),
                       () => setRefreshKey(refreshKey + 1),
-                      "message",
+                      "Message",
                     )
                   }
                 />
@@ -156,7 +200,11 @@ function Message({ messageId }: { messageId: string }): JSX.Element {
       isLoading={isloading}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open in Browser" url={path} />
+          <Action.OpenInBrowser
+            title="Open in Browser"
+            url={path}
+            icon={{ source: Icon.Globe, tintColor: Color.Blue }}
+          />
         </ActionPanel>
       }
     />
