@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "trim-whitespace",
+  "title": "Trim",
+  "description": "Trims all whitespace from last copied item",
+  "icon": "scissors.png",
+  "author": "rvp97",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "whitespace",
+      "title": "Trim whitespace",
+      "description": "Trims all whitespace from last copied item and copies it back to clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "commas",
+      "title": "Remove Comma",
+      "description": "Removes commas from last copied item",
+      "mode": "no-view"
+    },
+    {
+      "name": "newLine",
+      "title": "Remove New Line",
+      "description": "Removes new lines and replaces them with spaces from last copied item",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.59.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
