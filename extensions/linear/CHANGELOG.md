@@ -1,5 +1,10 @@
 # Linear Changelog
 
+## [Issue Fixes] - {PR_MERGE_DATE}
+
+- Create Issue: Fixed issue that made projects, cycles, estimates, etc. disappear in the form after consecutive issue creation.
+- Issue Actions: Standardized the issue deletion shortcut.
+
 ## [Document Support] - 2024-07-18
 
 - New "Search Documents" command to search documents across Linear projects and initiatives. Supports typeahead if there are too many docs.

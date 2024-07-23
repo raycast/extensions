@@ -477,7 +477,7 @@ export default function IssueActions({
 
         <Action
           title="Delete Issue"
-          shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
           icon={Icon.Trash}
           style={Action.Style.Destructive}
           onAction={() => deleteIssue()}
