@@ -1,6 +1,6 @@
 # itch.io Changelog
 
-## [Optionally View "My Games"] - {PR_MERGE_DATE}
+## [Optionally View "My Games"] - 2024-07-23
 - Added ability to view games you've uploaded or have edit access to (optional)
 - Added metadata images
 
