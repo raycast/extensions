@@ -7,7 +7,9 @@ export default function isImage(classification?: ClassificationSpecificEnum) {
     ClassificationSpecificEnum.Png,
   ];
 
-  const isImage = imageClassifications.includes(classification ?? ClassificationSpecificEnum.Unknown);
+  const isImage = imageClassifications.includes(
+    classification ?? ClassificationSpecificEnum.Unknown,
+  );
 
   return isImage;
 }
