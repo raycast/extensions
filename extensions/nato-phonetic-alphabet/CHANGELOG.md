@@ -1,6 +1,6 @@
 # NATO Phonetic Alphabet Changelog
 
-## [Fix] - 2024-07-22
+## [Fix] - 2024-07-23
 
 - Fixed an issue where the fallback text is not recognized ([#13607](https://github.com/raycast/extensions/issues/13607))
 - Updated dependencies
