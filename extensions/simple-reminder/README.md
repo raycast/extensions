@@ -1,6 +1,6 @@
 # Simple Reminder
 
-Set your reminders in plain english without the need to have any application installed and be notified when the time is right!
+Set your reminders in plain english without any 3rd party apps installed and be notified when the time is right!
 
 ## Example usage
 
@@ -15,9 +15,29 @@ Set your reminders in plain english without the need to have any application ins
 ![Demo 1](metadata/simple-reminder-1.png)
 ![Demo 2](metadata/simple-reminder-2.png)
 ![Demo 3](metadata/simple-reminder-3.png)
-![Demo 4](metadata/simple-reminder-4.png)
+![Demo 3](metadata/simple-reminder-4.png)
+![Demo 4](metadata/simple-reminder-5.png)
 
-## Mobile notifications
+## Main features
+
+### Recurrent reminders
+
+When setting your reminders, you have the possibility to set them with a recurrence:
+
+- Daily
+- Weekly
+- Bi-weekly
+- Monthly
+
+Allowing the same reminder to trigger at those set intervals.
+
+### Menu bar reminders
+
+To help keep context of the next reminders, the extension will display the next reminder in the macos menu bar. This way you can always have a quick glance at what's coming up.
+
+![Demo 1](media/menu-bar.png)
+
+### Mobile notifications
 
 Sometimes we're simply not near our mac when a reminder is up. Being able to receive these reminder notifications in the mobile is a blessing and really useful.
 
@@ -29,7 +49,6 @@ With the app installed, you simply need to go to the preferences panel of the Si
 This handles the extension side of things. The next step involves your mobile device.
 
 Simply download ntfy from [Google Play](https://play.google.com/store/apps/details?id=io.heckel.ntfy) or from the [App Store](https://apps.apple.com/us/app/ntfy/id1625396347) and subscribe to the topic that you just defined in the extension. As simple as that.
-
 
 <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExODQxOTU2ODk1ZDNkZGIxMDliNDUxMDI5MjBlZWVlYWMyZjgwZWFmNyZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/upd24i7KoatmzLw34v/giphy.gif" width="400">
 
