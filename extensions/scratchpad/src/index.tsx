@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, Application, Detail } from "@raycast/api";
+import { Form, ActionPanel, Action, Application } from "@raycast/api";
 import { fileTypes } from "./constants";
 import {
   isEmpty,
@@ -43,6 +43,9 @@ export default function Command() {
         }
       },
     },
+    initialValues: {
+      fileNamePrefix: "scratch_",
+    },
   });
 
   useEffect(() => {
@@ -66,18 +69,14 @@ export default function Command() {
 
       setValue("applicationBundleId", defaultEditor);
       setValue("folders", lastUsedScratchpadFolder);
-      setValue("fileNamePrefix", "scratch_");
 
       setHasInitDataLoaded(true);
     })();
   }, []);
 
-  if (!hasInitDataLoaded) {
-    return <Detail markdown="Please wait while we load the application." />;
-  }
-
   return (
     <Form
+      isLoading={!hasInitDataLoaded}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Scratchpad File" onSubmit={handleSubmit} />
