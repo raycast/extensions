@@ -1,6 +1,6 @@
 # Pins Changelog
 
-## [1.9.0] - 2024-07-21
+## [1.9.0 - Pin Aliases & Per-Group Display Setting] - 2024-07-21
 
 - Added setting for pin aliases.
 - Added setting to control how individual groups are displayed in the menu bar dropdown.
