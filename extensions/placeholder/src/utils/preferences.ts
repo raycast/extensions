@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+
 interface Preferences {
   layout: string;
   columns: string;
@@ -25,8 +26,3 @@ export const {
   grayscale,
   noCache,
 } = getPreferenceValues<Preferences>();
-
-export interface PlaceholderArguments {
-  height: string;
-  width: string;
-}

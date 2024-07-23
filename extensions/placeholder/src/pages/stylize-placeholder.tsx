@@ -1,10 +1,10 @@
+import { useState } from "react";
 import { ActionPanel, Form } from "@raycast/api";
-import React, { useState } from "react";
-import { useSpecifyIdPlaceholderImageURL } from "./hooks/hooks";
-import { SpecifyIdImageConfig } from "./types/types";
-import { ActionOpenPreferences } from "./components/action-open-preferences";
-import { PicsumImageAction } from "./components/picsum-image-action";
-import { RevealImageAction } from "./components/reveal-image-action";
+import type { SpecifyIdImageConfig } from "@/types/types";
+import useSpecifyIdPlaceholderImageURL from "@/hooks/use-placeholder-image-url";
+import { ActionOpenPreferences } from "@/components/action-open-preferences";
+import { PicsumImageAction } from "@/components/picsum-image-action";
+import { RevealImageAction } from "@/components/reveal-image-action";
 
 export default function StylizePlaceholder(props: { id: string; width: number; height: number }) {
   const { id, width, height } = props;
@@ -47,9 +47,7 @@ export default function StylizePlaceholder(props: { id: string; width: number; h
         info={"Image width"}
         placeholder={"300"}
         onChange={(newValue) => {
-          const _randomImageConfig = { ...picsumConfig };
-          _randomImageConfig.width = newValue;
-          setPicsumConfig(_randomImageConfig);
+          setPicsumConfig((prev) => ({ ...prev, width: newValue }));
         }}
       />
       <Form.TextField
@@ -59,9 +57,7 @@ export default function StylizePlaceholder(props: { id: string; width: number; h
         info={"Image height"}
         placeholder={"300"}
         onChange={(newValue) => {
-          const _randomImageConfig = { ...picsumConfig };
-          _randomImageConfig.height = newValue;
-          setPicsumConfig(_randomImageConfig);
+          setPicsumConfig((prev) => ({ ...prev, height: newValue }));
         }}
       />
       <Form.TextField
@@ -71,9 +67,7 @@ export default function StylizePlaceholder(props: { id: string; width: number; h
         placeholder={"0-10"}
         info={"Level of image blurriness form 0-10"}
         onChange={(newValue) => {
-          const _randomImageConfig = { ...picsumConfig };
-          _randomImageConfig.blur = newValue;
-          setPicsumConfig(_randomImageConfig);
+          setPicsumConfig((prev) => ({ ...prev, blur: newValue }));
         }}
       />
       <Form.Checkbox
@@ -82,9 +76,7 @@ export default function StylizePlaceholder(props: { id: string; width: number; h
         value={picsumConfig.jpg}
         info={"Get image url as .jpg"}
         onChange={(newValue) => {
-          const _randomImageConfig = { ...picsumConfig };
-          _randomImageConfig.jpg = newValue;
-          setPicsumConfig(_randomImageConfig);
+          setPicsumConfig((prev) => ({ ...prev, jpg: newValue }));
         }}
       />
       <Form.Checkbox
@@ -93,9 +85,7 @@ export default function StylizePlaceholder(props: { id: string; width: number; h
         value={picsumConfig.grayscale}
         info={"Image grayscale or normal"}
         onChange={(newValue) => {
-          const _randomImageConfig = { ...picsumConfig };
-          _randomImageConfig.grayscale = newValue;
-          setPicsumConfig(_randomImageConfig);
+          setPicsumConfig((prev) => ({ ...prev, grayscale: newValue }));
         }}
       />
       <Form.Checkbox
@@ -104,9 +94,7 @@ export default function StylizePlaceholder(props: { id: string; width: number; h
         value={picsumConfig.cache}
         info={"Prevent the image from being cached"}
         onChange={(newValue) => {
-          const _randomImageConfig = { ...picsumConfig };
-          _randomImageConfig.cache = newValue;
-          setPicsumConfig(_randomImageConfig);
+          setPicsumConfig((prev) => ({ ...prev, cache: newValue }));
         }}
       />
       <Form.Description title="Image URL" text={imageURL} />
