@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-07-23
 
 - Enhanced the display of repository stars in the `Search Repositories` command by prefixing the number with a star symbol (★).
 
