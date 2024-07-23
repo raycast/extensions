@@ -1,6 +1,6 @@
 # Klack Changelog
 
-## [Cardboard Support] - 2023-01-13
+## [Cardboard Support] - 2024-07-23
 
 – Added support for the new Cardboard switch set
 – Added loading state while fetching current switch set
