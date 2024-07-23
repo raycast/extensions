@@ -1,4 +1,4 @@
-export const DICTIONARY: { [key: string]: string[] } = {
+export const DICTIONARY: { [key: string]: [string, string] } = {
   a: ["Alfa", "AL-FAH"],
   b: ["Bravo", "BRAH-VOH"],
   c: ["Charlie", "CHAR-LEE"],
