@@ -1,4 +1,4 @@
-<div style="text-align: center">
+<div align="center">
   <img
     src="https://github.com/raycast/extensions/blob/main/extensions/gitlab/assets/gitlab.png?raw=true"
     width="50"
