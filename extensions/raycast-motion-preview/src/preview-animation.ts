@@ -1,9 +1,7 @@
 import { getFocusFinderPath, hasExt } from "./lib/util";
-import { chmodSync } from "node:fs";
-import { environment, showHUD } from "@raycast/api";
-import { join } from "node:path";
-import { execa } from "execa";
+import { showHUD } from "@raycast/api";
 import { isValidLottie } from "./lib/is-valid-lottie";
+import { previewFile } from "swift:../swift/motion-preview";
 
 const PreviewLottieJson = async () => {
   const currentFile = await getFocusFinderPath();
@@ -35,9 +33,12 @@ const PreviewLottieJson = async () => {
     return;
   }
 
-  const command = join(environment.assetsPath, "bin/rc-motion-preview");
-  chmodSync(command, 0o755);
-  execa(command, [currentFile]);
+  try {
+    await previewFile(currentFile);
+  } catch (e) {
+    console.log(e);
+    //
+  }
 };
 
 export default PreviewLottieJson;

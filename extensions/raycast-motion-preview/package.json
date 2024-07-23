@@ -23,7 +23,6 @@
   "dependencies": {
     "@raycast/api": "^1.79.1",
     "@raycast/utils": "^1.16.2",
-    "execa": "^9.3.0",
     "stream-chain": "^2.2.5",
     "stream-json": "^1.8.0"
   },
@@ -38,8 +37,7 @@
     "typescript": "^5.4.5"
   },
   "scripts": {
-    "build:swift": "swift build --configuration=release && cp .build/release/rc-motion-preview ./assets/bin/rc-motion-preview",
-    "build": "npm run build:swift && ray build -e dist",
+    "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
