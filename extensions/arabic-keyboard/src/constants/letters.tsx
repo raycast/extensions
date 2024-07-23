@@ -26,7 +26,7 @@ export const letters = [
   { content: "ن", keywords: ["N", "Noon"], path: "../assets/items/noon.svg" },
   { content: "ه", keywords: ["H", "Haa"], path: "../assets/items/ha.svg" },
   { content: "و", keywords: ["W", "Waw"], path: "../assets/items/waw.svg" },
-  { content: "ي", keywords: ["Y", "Yaa"], path: "../assets/items/yaa.svg" }
+  { content: "ي", keywords: ["Y", "Yaa"], path: "../assets/items/yaa.svg" },
 ];
 
 export const numbers = [
@@ -40,4 +40,4 @@ export const numbers = [
   { content: "٧", keywords: ["7", "Seven"], path: "../assets/items/seven.svg" },
   { content: "٨", keywords: ["8", "Eight"], path: "../assets/items/eight.svg" },
   { content: "٩", keywords: ["9", "Nine"], path: "../assets/items/nine.svg" },
-]
+];

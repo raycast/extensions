@@ -2,7 +2,6 @@ import { Action, ActionPanel, Grid } from "@raycast/api";
 import { useState } from "react";
 import { letters, numbers } from "./constants/letters";
 
-
 export default function Command() {
   const [searchText, setSearchText] = useState("");
 
@@ -24,7 +23,7 @@ export default function Command() {
               <ActionPanel>
                 <Action
                   title="Select"
-                  onAction={() => setSearchText(prevSearchText => prevSearchText + letter.content)}
+                  onAction={() => setSearchText((prevSearchText) => prevSearchText + letter.content)}
                 />
                 <Action.CopyToClipboard content={searchText} />
               </ActionPanel>
@@ -42,7 +41,7 @@ export default function Command() {
               <ActionPanel>
                 <Action
                   title="Select"
-                  onAction={() => setSearchText(prevSearchText => prevSearchText + number.content)}
+                  onAction={() => setSearchText((prevSearchText) => prevSearchText + number.content)}
                 />
                 <Action.CopyToClipboard content={searchText} />
               </ActionPanel>
