@@ -71,7 +71,7 @@ export default function RepositoryListItem({
       {...(numberOfStars > 0
         ? {
             subtitle: {
-              value: `${numberOfStars}`,
+              value: `★ ${numberOfStars}`,
               tooltip: `Number of Stars: ${numberOfStars}`,
             },
           }
