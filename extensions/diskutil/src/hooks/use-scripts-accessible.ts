@@ -1,9 +1,7 @@
 import { useExec } from "@raycast/utils";
-import { environment } from "@raycast/api";
+import { assetsPath } from "@utils/env";
 
 export const useScriptsAccessible = () => {
-  const { assetsPath } = environment;
-
   const { isLoading: isScriptsLoading } = useExec("chmod", [
     "+x",
     `${assetsPath}/scripts/create-volume`,

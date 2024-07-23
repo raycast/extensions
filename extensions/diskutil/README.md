@@ -1,5 +1,5 @@
-<div style="text-align: center">
-  <img src="media/disk-util.png" width="100" alt="Logo">
+<div align="center">
+  <img src="media/diskutil.png" width="100" alt="Logo">
   <h1>Disk Utility</h1>
 
 Raycast extension to create, list and delete Apple File System (APFS) disk volumes

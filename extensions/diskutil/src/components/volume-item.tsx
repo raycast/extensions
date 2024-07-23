@@ -1,21 +1,10 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Color,
-  confirmAlert,
-  environment,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { spawn } from "node:child_process";
-import { sep } from "path";
 import { VolumeListInfo } from "@components/volumes";
 import { useVolumeInfo } from "@hooks/use-volume-info";
 import { VolumeDetails } from "@components/volume-details";
 import { VolumeActions } from "@components/volume-actions";
+import { assetsPath, env } from "@utils/env";
 
 export const VolumeItem = ({
   volume,
@@ -30,12 +19,7 @@ export const VolumeItem = ({
   const sizeIcon = getSizeIcon(data?.CapacityInUse ?? 0, data?.TotalSize ?? 0);
 
   const deleteVolume = async () => {
-    const { assetsPath, supportPath } = environment;
     const toast = await showToast(Toast.Style.Animated, `Deleting Volume '${volume.VolumeName}'`, "Please wait...");
-
-    const bundleId = supportPath.split(sep).find((comp) => comp.startsWith("com.raycast")) ?? "com.raycast.macos";
-    const askpassPath = `${assetsPath}/scripts/askpass`;
-    const env = Object.assign({}, process.env, { SUDO_ASKPASS: askpassPath, RAYCAST_BUNDLE: bundleId });
 
     const child = data?.FileVault
       ? spawn(

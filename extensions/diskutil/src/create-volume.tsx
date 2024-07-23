@@ -1,21 +1,10 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  environment,
-  Form,
-  Icon,
-  LaunchProps,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Form, Icon, LaunchProps, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 import { spawn } from "node:child_process";
-import { sep } from "path";
 import { useScriptsAccessible } from "@hooks/use-scripts-accessible";
 import { VolumeDetails } from "@components/volume-details";
 import { Volumes } from "@components/volumes";
+import { assetsPath, env } from "@utils/env";
 
 type FormValues = {
   name: string;
@@ -27,12 +16,10 @@ type FormValues = {
 
 export default function CreateVolume(props: LaunchProps<{ draftValues: FormValues }>) {
   const { draftValues } = props;
-  const { assetsPath, supportPath } = environment;
   const { push } = useNavigation();
   const [lastFormat, setLastFormat] = useCachedState<string>("last-format", "apfs:case-sensitive:encrypted", {
     cacheNamespace: "create-volume",
   });
-  const bundleId = supportPath.split(sep).find((comp) => comp.startsWith("com.raycast")) ?? "com.raycast.macos";
   const { isScriptsLoading } = useScriptsAccessible();
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
@@ -41,9 +28,6 @@ export default function CreateVolume(props: LaunchProps<{ draftValues: FormValue
       setLastFormat(format);
       const fs = format.split(":")[1] === "case-sensitive" ? "Case-sensitive APFS" : "APFS";
       const encrypted = (format.split(":")[2] === "encrypted") + "";
-
-      const askpassPath = `${assetsPath}/scripts/askpass`;
-      const env = Object.assign({}, process.env, { SUDO_ASKPASS: askpassPath, RAYCAST_BUNDLE: bundleId });
 
       const child =
         encrypted === "true"
