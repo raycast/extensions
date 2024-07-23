@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pins",
   "title": "Pins",
-  "version": "1.8.2",
+  "version": "1.9.0",
   "description": "Create pins for paths and URLs and display them in the menu bar",
   "keywords": [
     "pin",
@@ -290,6 +290,14 @@
       "description": "View and modify groups for pins",
       "mode": "view",
       "preferences": [
+        {
+          "name": "showVisibility",
+          "type": "checkbox",
+          "label": "Show Visibility",
+          "description": "Whether to show the visibility for each group.",
+          "default": true,
+          "required": false
+        },
         {
           "name": "showIDs",
           "type": "checkbox",

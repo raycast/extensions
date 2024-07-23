@@ -51,6 +51,8 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
     application: pin ? pin.application : undefined,
     expireDate: pin ? pin.expireDate : undefined,
     expirationAction: pin ? pin.expirationAction : undefined,
+    tags: pin ? pin.tags?.join(", ") : undefined,
+    aliases: pin ? pin.aliases?.join(", ") : undefined,
   });
 
   const iconList = Object.keys(Icon);
@@ -173,51 +175,66 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
               if (pin && setPins) {
                 await modifyPin(
                   pin,
-                  values.nameField,
-                  values.urlField,
-                  values.iconField,
-                  values.groupField || "None",
-                  values.openWithField,
-                  values.dateField,
-                  values.execInBackgroundField,
-                  values.fragmentField,
-                  values.modifiersField.length ? { modifiers: values.modifiersField, key: values.keyField } : undefined,
-                  pin.lastOpened ? new Date(pin.lastOpened) : undefined,
-                  pin.timesOpened,
-                  pin.dateCreated ? new Date(pin.dateCreated) : new Date(),
-                  values.iconColorField,
-                  (values.tagsField as string)
-                    .split(",")
-                    .map((tag) => tag.trim())
-                    .filter((tag) => tag.length > 0),
-                  values.notesField,
-                  values.tooltipField,
-                  pin.averageExecutionTime,
-                  values.visibilityField,
-                  expirationAction,
-                  pop,
+                  {
+                    ...pin,
+                    name: values.nameField,
+                    url: values.urlField,
+                    icon: values.iconField,
+                    group: values.groupField || "None",
+                    application: values.openWithField,
+                    expireDate: values.dateField ? new Date(values.dateField).toUTCString() : undefined,
+                    execInBackground: values.execInBackgroundField,
+                    fragment: values.fragmentField,
+                    iconColor: values.iconColorField,
+                    tags: (values.tagsField as string)
+                      .split(",")
+                      .map((tag) => tag.trim())
+                      .filter((tag) => tag.length > 0),
+                    notes: values.notesField,
+                    tooltip: values.tooltipField,
+                    visibility: values.visibilityField,
+                    expirationAction: expirationAction,
+                    shortcut: values.modifiersField.length
+                      ? { modifiers: values.modifiersField, key: values.keyField }
+                      : undefined,
+                    lastOpened: pin.lastOpened ? new Date(pin.lastOpened).toUTCString() : undefined,
+                    dateCreated: pin.dateCreated ? new Date(pin.dateCreated).toUTCString() : new Date().toUTCString(),
+                    aliases: (values.aliasesField as string)
+                      .split(",")
+                      .map((alias) => alias.trim())
+                      .filter((alias) => alias.length > 0),
+                  },
                   setPins,
+                  pop,
                 );
               } else {
-                await createNewPin(
-                  values.nameField || values.urlField.substring(0, 50),
-                  values.urlField,
-                  values.iconField,
-                  values.groupField || "None",
-                  values.openWithField,
-                  values.dateField,
-                  values.execInBackgroundField,
-                  values.fragmentField,
-                  { modifiers: values.modifiersField, key: values.keyField },
-                  values.iconColorField,
-                  (values.tagsField as string)
+                await createNewPin({
+                  ...pin,
+                  name: values.nameField || values.urlField.substring(0, 50),
+                  url: values.urlField,
+                  icon: values.iconField,
+                  group: values.groupField || "None",
+                  application: values.openWithField,
+                  expireDate: values.dateField ? new Date(values.dateField).toUTCString() : undefined,
+                  execInBackground: values.execInBackgroundField,
+                  fragment: values.fragmentField,
+                  iconColor: values.iconColorField,
+                  tags: (values.tagsField as string)
                     .split(",")
                     .map((tag) => tag.trim())
                     .filter((tag) => tag.length > 0),
-                  values.notesField,
-                  values.visibilityField,
-                  expirationAction,
-                );
+                  notes: values.notesField,
+                  tooltip: values.tooltipField,
+                  visibility: values.visibilityField,
+                  expirationAction: expirationAction,
+                  shortcut: values.modifiersField.length
+                    ? { modifiers: values.modifiersField, key: values.keyField }
+                    : undefined,
+                  aliases: (values.aliasesField as string)
+                    .split(",")
+                    .map((alias) => alias.trim())
+                    .filter((alias) => alias.length > 0),
+                });
                 if (setPins) {
                   setPins(await getPins());
                 }
@@ -226,14 +243,16 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
               }
             }}
           />
+
           <Action.Open
             title="Open Placeholders Guide"
             icon={Icon.Info}
             target={path.resolve(environment.assetsPath, "placeholders_guide.md")}
             shortcut={{ modifiers: ["cmd"], key: "g" }}
           />
-          {pin && setPins ? <DeletePinAction pin={pin} setPins={setPins} pop={pop} /> : null}
+
           {pin && pins ? <CopyPinActionsSubmenu pin={pin} pins={pins} /> : null}
+          {pin && setPins ? <DeletePinAction pin={pin} setPins={setPins} pop={pop} /> : null}
         </ActionPanel>
       }
     >
@@ -377,8 +396,14 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
         id="visibilityField"
         title="Visibility"
         info="Controls the visibility of the pin in the 'View Pins' command and the menu bar dropdown. If set to 'Hidden', you can find the pin by using the 'Show Hidden Pins' action of the 'View Pins' command. Hidden pins can still be opened using deeplinks, while disabled pins cannot be opened at all."
-        defaultValue={pin ? pin.visibility : Visibility.VISIBLE}
+        defaultValue={pin ? pin.visibility : Visibility.USE_PARENT}
       >
+        <Form.Dropdown.Item
+          key="use_parent"
+          title="Use Parent Setting"
+          value={Visibility.USE_PARENT}
+          icon={Icon.Gear}
+        />
         <Form.Dropdown.Item key="visible" title="Visible" value={Visibility.VISIBLE} icon={Icon.Eye} />
         <Form.Dropdown.Item
           key="menubarOnly"
@@ -411,14 +436,23 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
         </Form.Dropdown>
       ) : null}
 
+      <Form.Separator />
+
       <Form.TextField
         id="tagsField"
         title="Tags"
         info="The comma-separated list of tags associated with the pin. Tags can be used to filter pins in the 'View Pins' command."
-        defaultValue={pin ? pin.tags?.join(", ") : ""}
+        value={values.tags || ""}
+        onChange={(value) => setValues({ ...values, tags: value })}
       />
 
-      <Form.Separator />
+      <Form.TextField
+        id="aliasesField"
+        title="Aliases"
+        info="The comma-separated list of aliases that can be used to find the pin."
+        value={values.aliases}
+        onChange={(value) => setValues({ ...values, aliases: value })}
+      />
 
       <Form.TextField
         id="tooltipField"

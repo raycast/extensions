@@ -3,6 +3,9 @@ import { getPinIcon } from "../../lib/icons";
 import { Pin, deletePin, disablePin, hidePin, openPin } from "../../lib/Pins";
 import { ExtensionPreferences, PinsMenubarPreferences, RightClickAction } from "../../lib/preferences";
 import { LocalDataObject } from "../../lib/LocalData";
+import { bulkApply } from "placeholders-toolkit/dist/lib/apply";
+import { PinsInfoPlaceholders } from "../../lib/placeholders";
+import { useEffect, useState } from "react";
 
 /**
  * A menu item for a pin.
@@ -21,11 +24,22 @@ export default function PinMenuItem(props: {
   setPins: React.Dispatch<React.SetStateAction<Pin[]>>;
 }) {
   const { pin, relevant, preferences, localData, setPins } = props;
+  const [title, setTitle] = useState<string>(
+    pin.name || (pin.url.length > 20 ? pin.url.substring(0, 19) + "..." : pin.url),
+  );
+
+  useEffect(() => {
+    (async () => {
+      const newTitle = await bulkApply(title, { allPlaceholders: PinsInfoPlaceholders });
+      setTitle(newTitle);
+    })();
+  }, []);
+
   return (
     <MenuBarExtra.Item
       key={pin.id}
       icon={getPinIcon(pin)}
-      title={pin.name || (pin.url.length > 20 ? pin.url.substring(0, 19) + "..." : pin.url)}
+      title={title}
       subtitle={relevant ? "  ✧" : ""}
       tooltip={pin.tooltip}
       shortcut={pin.shortcut}
