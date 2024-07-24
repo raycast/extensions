@@ -33,7 +33,7 @@ function DocItem({ doc }: { doc: Doc }): JSX.Element {
           <ActionPanel.Section>
             <Action.CreateQuicklink
               icon={Icon.Link}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+              shortcut={{ modifiers: ["cmd"], key: "s" }}
               quicklink={quicklink}
             />
             <Action.CopyToClipboard content={doc.slug} shortcut={Keyboard.Shortcut.Common.CopyName} />
