@@ -1,6 +1,6 @@
 # United Nations Extension
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2024-07-24
 
 - Handle possibly undefined parameter on UN News
 
