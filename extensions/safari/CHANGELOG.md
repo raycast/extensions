@@ -1,5 +1,8 @@
 # Safari Changelog
 
+## [Update] - {PR_MERGE_DATE}
+- The default search has been changed to a fuzzy search. Refactored some code.
+
 ## [Update] - 2024-04-18
 
 - Adds a preference to skip browsing iCloud tabs
