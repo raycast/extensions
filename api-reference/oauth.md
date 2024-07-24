@@ -8,7 +8,7 @@ Before considering OAuth, first check if your provider supports PKCE. You can us
 
 ## OAuth Flow
 
-![](../.gitbook/assets/oauth-overlay-twitter.png)
+![](../.gitbook/assets/oauth-overlay-twitter.webp)
 
 The OAuth flow from an extension looks like this:
 
@@ -21,7 +21,7 @@ The OAuth flow from an extension looks like this:
 When the flow is complete, the extension has received an access token from the provider and can perform API calls.
 The API provides functions for securely storing and retrieving token sets, so that an extension can check whether the user is already logged in and whether an expired access token needs to be refreshed. Raycast also automatically shows a logout preference.
 
-![](../.gitbook/assets/oauth-overlay-twitter-success.png)
+![](../.gitbook/assets/oauth-overlay-twitter-success.webp)
 
 ## OAuth App
 
