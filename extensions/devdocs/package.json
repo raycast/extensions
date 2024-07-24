@@ -9,12 +9,12 @@
   "pastContributors": ["pomdtr"],
   "commands": [
     {
-      "name": "search-documentations",
+      "name": "search-docsets",
       "title": "Search Documentations",
       "subtitle": "DevDocs",
       "description": "Search through DevDocs documentations from Raycast",
       "mode": "view",
-      "keywords": ["search docset"]
+      "keywords": ["search docsets"]
     },
     {
       "name": "search-entries",
