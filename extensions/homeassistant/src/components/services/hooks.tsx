@@ -130,6 +130,9 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
       result.push({
         id: "entity_id",
         toYaml: (value) => {
+          if (Array.isArray(value) && value.length <= 0) {
+            return undefined;
+          }
           return value;
         },
         fromYaml: (value) => {
@@ -144,6 +147,9 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
       result.push({
         id: "area_id",
         toYaml: (value) => {
+          if (Array.isArray(value) && value.length <= 0) {
+            return undefined;
+          }
           return value;
         },
         fromYaml: (value) => {
@@ -158,6 +164,9 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
       result.push({
         id: "device_id",
         toYaml: (value) => {
+          if (Array.isArray(value) && value.length <= 0) {
+            return undefined;
+          }
           return value;
         },
         fromYaml: (value) => {
