@@ -5,8 +5,8 @@
   "title": "Devdocs",
   "description": "Search through DevDocs documentation sets from Raycast.",
   "icon": "devdocs.png",
-  "author": "pomdtr",
-  "contributors": ["djpowers"],
+  "author": "djpowers",
+  "pastContributors": ["pomdtr"],
   "commands": [
     {
       "name": "search-documentations",
