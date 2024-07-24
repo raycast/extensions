@@ -258,3 +258,16 @@ export function secondsBetweenDates(d1: Date, d2: Date) {
 export function minutesBetweenDates(d1: Date, d2: Date) {
   return secondsBetweenDates(d1, d2) / 60;
 }
+
+export function toUTCDate(date: Date) {
+  return new Date(date.toISOString());
+}
+
+export function nowUTC() {
+  return toUTCDate(new Date());
+}
+
+export function isPastEvent(event: CalendarEvent) {
+  const end = toUTCDate(new Date(event.end));
+  return end.getTime() < nowUTC().getTime();
+}

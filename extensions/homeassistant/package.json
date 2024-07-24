@@ -505,6 +505,28 @@
           "required": false,
           "title": "Maximum Root Text Length",
           "placeholder": "10"
+        },
+        {
+          "name": "pastEventHandling",
+          "description": "Handling past events",
+          "type": "dropdown",
+          "required": false,
+          "title": "Past Events Handling",
+          "default": "show",
+          "data": [
+            {
+              "title": "Show",
+              "value": "show"
+            },
+            {
+              "title": "Disable",
+              "value": "disable"
+            },
+            {
+              "title": "Hide",
+              "value": "hide"
+            }
+          ]
         }
       ]
     }

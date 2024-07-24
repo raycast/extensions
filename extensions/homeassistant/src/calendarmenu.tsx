@@ -3,9 +3,11 @@ import {
   addDays,
   calendarEventKey,
   dateDayName,
+  getDateOnly,
   groupEventsByDay,
   humanEventTimeRange,
   isAllDayEvent,
+  isPastEvent,
   minutesBetweenDates,
   secondsBetweenDates,
   sortCalendarEvents,
@@ -32,7 +34,7 @@ function maxRootTextLengthPreference() {
 
 export default function MenuCommand() {
   const { events, calendars, isLoading, error } = useHACalendarEvents({
-    startDatetime: now,
+    startDatetime: getDateOnly(now),
     endDatetime: addDays(now, 1),
   });
   const friendlyCalendarName = (entityId: string) => {
@@ -65,6 +67,7 @@ export default function MenuCommand() {
     : undefined;
 
   const groupedByDay = groupEventsByDay(sortedEvents);
+  const pastEventHandling = getPreferenceValues<Preferences.Calendarmenu>().pastEventHandling;
 
   const maxTextLength = 50;
 
@@ -118,16 +121,22 @@ export default function MenuCommand() {
               ),
             }}
           >
-            {d.events?.map((ev) => (
-              <RUIMenuBarExtra.Item
-                key={`${ev.entityId}${ev.start}${ev.end}${ev.summary}`}
-                title={title(ev)}
-                subtitle={friendlyCalendarName(ev.entityId)}
-                icon={{ source: Icon.Calendar, tintColor: ev.calendarColor }}
-                textLimits={{ maxLength: maxTextLength }}
-                onAction={() => {}}
-              />
-            ))}
+            {d.events?.map((ev) => {
+              const past = isPastEvent(ev);
+              if (past && pastEventHandling === "hide") {
+                return null;
+              }
+              return (
+                <RUIMenuBarExtra.Item
+                  key={`${ev.entityId}${ev.start}${ev.end}${ev.summary}`}
+                  title={title(ev)}
+                  subtitle={friendlyCalendarName(ev.entityId)}
+                  icon={{ source: Icon.Calendar, tintColor: ev.calendarColor }}
+                  textLimits={{ maxLength: maxTextLength }}
+                  onAction={past && pastEventHandling === "disable" ? undefined : () => {}}
+                />
+              );
+            })}
           </RUIMenuBarExtra.Section>
         ))}
       <RUIMenuBarExtra.Section>
