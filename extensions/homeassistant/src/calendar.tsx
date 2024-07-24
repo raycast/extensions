@@ -1,39 +1,15 @@
 import { CalendarEvent, useHACalendarEvents } from "@components/calendar/hooks";
+import { CalendarListDropdown } from "@components/calendar/list";
 import {
   addDays,
-  CalendarState,
   dateDayName,
   groupEventsByDay,
   humanEventTimeRange,
   sortCalendarEvents,
 } from "@components/calendar/utils";
 import { getFriendlyName } from "@lib/utils";
-import { Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { showFailureToast, useCachedState } from "@raycast/utils";
-
-interface CalendarListDropdownProps extends Omit<List.Dropdown.Props, "tooltip"> {
-  calendars: CalendarState[] | undefined;
-}
-
-function CalendarListDropdown({ calendars, ...restProps }: CalendarListDropdownProps) {
-  return (
-    <List.Dropdown tooltip="Calendars" {...restProps}>
-      <List.Dropdown.Section>
-        <List.Dropdown.Item title="All" value="" icon={Icon.Calendar} />
-      </List.Dropdown.Section>
-      <List.Dropdown.Section title="Calendars">
-        {calendars?.map((c) => (
-          <List.Dropdown.Item
-            key={c.entity_id}
-            title={getFriendlyName(c)}
-            value={c.entity_id}
-            icon={{ source: Icon.Calendar, tintColor: c.color }}
-          />
-        ))}
-      </List.Dropdown.Section>
-    </List.Dropdown>
-  );
-}
 
 const now = new Date();
 
@@ -42,7 +18,8 @@ export default function CalendarCommand() {
     startDatetime: now,
     endDatetime: addDays(now, 6),
   });
-  const [selectedCalendar, setSelectedCalendar] = useCachedState<string>("selected-calendar");
+  const [selectedCalendar, setSelectedCalendar] = useCachedState<string>("selected-calendar", "");
+  const [showDetails, setShowDetails] = useCachedState("show-details", false, { cacheNamespace: "calendar" });
   if (error) {
     showFailureToast(error);
   }
@@ -65,9 +42,14 @@ export default function CalendarCommand() {
 
   const groupedByDay = groupEventsByDay(sortedEvents);
 
+  const markdown = (event: CalendarEvent) => {
+    return [`# ${event.summary}`, "", event.description ?? "<no description>"].join("\n");
+  };
+
   return (
     <List
       isLoading={isLoading}
+      isShowingDetail={showDetails}
       searchBarAccessory={
         <CalendarListDropdown calendars={calendars} value={selectedCalendar} onChange={setSelectedCalendar} />
       }
@@ -77,9 +59,44 @@ export default function CalendarCommand() {
           {d.events?.map((e) => (
             <List.Item
               key={`${e.start}${e.end}${e.summary}`}
-              icon={{ source: Icon.Calendar, tintColor: e.calendarColor }}
+              icon={{
+                source: Icon.Calendar,
+                tintColor: e.calendarColor,
+                tooltip: `Calendar: ${friendlyCalendarName(e.entityId)}`,
+              }}
               title={title(e)}
-              accessories={[{ tag: { value: friendlyCalendarName(e.entityId), color: e.calendarColor } }]}
+              accessories={
+                !showDetails && selectedCalendar === ""
+                  ? [{ tag: { value: friendlyCalendarName(e.entityId), color: e.calendarColor } }]
+                  : undefined
+              }
+              detail={
+                <List.Item.Detail
+                  markdown={markdown(e)}
+                  metadata={
+                    <List.Item.Detail.Metadata>
+                      <List.Item.Detail.Metadata.Label title="Start" text={new Date(e.start).toLocaleString()} />
+                      <List.Item.Detail.Metadata.Label title="End" text={new Date(e.end).toLocaleString()} />
+                      <List.Item.Detail.Metadata.TagList title="Calendar">
+                        <List.Item.Detail.Metadata.TagList.Item
+                          text={friendlyCalendarName(e.entityId)}
+                          color={e.calendarColor}
+                        />
+                      </List.Item.Detail.Metadata.TagList>
+                    </List.Item.Detail.Metadata>
+                  }
+                />
+              }
+              actions={
+                <ActionPanel>
+                  <Action
+                    title={showDetails ? "Hide Details" : "Show Details"}
+                    icon={showDetails ? Icon.EyeDisabled : Icon.Eye}
+                    onAction={() => setShowDetails(!showDetails)}
+                    shortcut={{ modifiers: ["opt"], key: "d" }}
+                  />
+                </ActionPanel>
+              }
             />
           ))}
         </List.Section>
