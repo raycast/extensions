@@ -3,6 +3,7 @@ import { CalendarListDropdown } from "@components/calendar/list";
 import {
   addDays,
   dateDayName,
+  getDateOnly,
   groupEventsByDay,
   humanEventTimeRange,
   sortCalendarEvents,
@@ -15,7 +16,7 @@ const now = new Date();
 
 export default function CalendarCommand() {
   const { events, calendars, isLoading, error } = useHACalendarEvents({
-    startDatetime: now,
+    startDatetime: getDateOnly(now),
     endDatetime: addDays(now, 6),
   });
   const [selectedCalendar, setSelectedCalendar] = useCachedState<string>("selected-calendar", "");
