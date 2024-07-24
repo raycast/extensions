@@ -52,13 +52,13 @@ export default function Command() {
 
 function getCleanDescription(text: string): string {
   const cleanedText = text
-    .replace(/<[^>]*>/g, '')
-    .replace(/\b(Discussion|Link)\b|\s*\|\s*/g, '')
+    .replace(/<[^>]*>/g, "")
+    .replace(/\b(Discussion|Link)\b|\s*\|\s*/g, "")
     .trim();
 
   const sentences = cleanedText.split(/(?<=[.!?])\s+/);
 
-  return sentences[0] || '';
+  return sentences[0] || "";
 }
 
 function StoryListItem(props: { item: FeedItem; index: number }) {
@@ -74,7 +74,7 @@ function StoryListItem(props: { item: FeedItem; index: number }) {
       actions={<Actions item={item} />}
       accessories={[
         {
-          text: item.author
+          text: item.author,
         },
         {
           date: date,
