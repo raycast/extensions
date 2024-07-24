@@ -484,6 +484,19 @@
       "title": "Run Service",
       "description": "Run a service. It accepts a context argument to launch services via Quicklinks or Deeplinks.",
       "mode": "no-view"
+    },
+    {
+      "name": "calendar",
+      "title": "Calendar",
+      "description": "Query Calendars",
+      "mode": "view"
+    },
+    {
+      "name": "calendarmenu",
+      "title": "Calendar Menu",
+      "description": "Calendar in the menubar",
+      "mode": "menu-bar",
+      "interval": "1m"
     }
   ],
   "preferences": [

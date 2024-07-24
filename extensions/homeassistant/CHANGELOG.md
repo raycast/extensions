@@ -6,6 +6,7 @@
 - Add sun entity support for weather menu command
 - Add `Services` and `Run Service` command to be able to call Services (including Quicklinks/Deeplinks)
 - Menu items show the last update/last change info
+- Add `Calendar` and `Calendar Menu` command
 
 ## [Update] - 2024-04-06
 
