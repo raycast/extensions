@@ -1,6 +1,6 @@
 # Ploi Changelog
 
-## [Paginated Servers] - {PR_MERGE_DATE}
+## [Paginated Servers] - 2024-07-24
 
 - You can now view Servers even if they are > 50 (Pagination for Sites will come later)
 - Updated metadata images
