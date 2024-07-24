@@ -13,6 +13,10 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
   day: "numeric",
 });
 
+const dayOfWeekFormatter = new Intl.DateTimeFormat("en-US", {
+  weekday: "long",
+});
+
 function AddCityView({ initialCityName, onAdd }: { initialCityName?: string; onAdd: (c: CityData) => void }) {
   const { pop } = useNavigation();
   const [cityName, setCityName] = useState(initialCityName ?? "");
@@ -161,9 +165,9 @@ export default function Command() {
   localDate.setTime(localDate.getTime() + offsetHrs * 60 * 60 * 1000);
   const localTime = timeFormatter.format(localDate);
   const localDateString = dateFormatter.format(localDate);
-  const todayDateString = dateFormatter.format(new Date());
+  const localDayOfWeek = dayOfWeekFormatter.format(localDate);
 
-  const subtitle = localTime + " " + (offsetHrs && localDateString !== todayDateString ? localDateString : "");
+  const subtitle = localDayOfWeek + ", " + localDateString + ", " + localTime;
 
   const local = (
     <List.Item
@@ -189,7 +193,8 @@ export default function Command() {
         const date = new Date(_date.toLocaleString("en-US", { timeZone: c.timezone }));
         const timeString = timeFormatter.format(date);
         const dateString = dateFormatter.format(date);
-        const subtitle = `${timeString} ${todayDateString === dateString ? "" : dateString}`;
+        const dayOfWeek = dayOfWeekFormatter.format(date);
+        const subtitle = `${dayOfWeek}, ${dateString}, ${timeString}`;
 
         return (
           <List.Item
