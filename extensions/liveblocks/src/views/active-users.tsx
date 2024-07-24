@@ -19,8 +19,9 @@ export default function Command({ roomId }: { roomId: string }) {
     fetchData();
   }, []);
 
+  console.log(activeUsers);
   return (
-    <List isLoading={loading}>
+    <List isLoading={loading} isShowingDetail>
       {activeUsers.length === 0 && (
         <List.EmptyView title="No active users" description="There are no active users in this room" />
       )}
@@ -30,7 +31,27 @@ export default function Command({ roomId }: { roomId: string }) {
           key={index}
           title={`${activeUser.id}`}
           subtitle={activeUser.type}
-          accessories={[{ text: `${activeUser.info}` }]}
+          detail={
+            <List.Item.Detail
+              markdown={`${JSON.stringify(activeUser.info)}`}
+              metadata={
+                <List.Item.Detail.Metadata>
+                  {Object.values(activeUser.info ?? []).map((info, index) => {
+                    const key = Object.keys(activeUser.info ?? [])[index];
+                    const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
+
+                    return (
+                      <List.Item.Detail.Metadata.Label
+                        key={index}
+                        title={capitalizedKey}
+                        text={info?.toString() ?? ""}
+                      />
+                    )
+                  })}
+                </List.Item.Detail.Metadata>
+              }
+            />
+          }
         />
       ))}
     </List>
