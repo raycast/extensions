@@ -54,8 +54,10 @@ export default function BatteriesMenuCommand(): JSX.Element {
       {header && <MenuBarExtra.Item title={header} />}
       <LaunchCommandMenubarItem
         title="Open All Batteries"
-        name="batteries"
-        type={LaunchType.UserInitiated}
+        command={{
+          name: "batteries",
+          type: LaunchType.UserInitiated,
+        }}
         icon="battery-00.png"
       />
       <BatteryMenubarSection title={`Low Batteries < ${lowBatteryThreshold}%`} states={lowBatteries} />

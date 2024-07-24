@@ -26,8 +26,10 @@ export default function LightsMenuCommand(): JSX.Element {
       {header && <MenuBarExtra.Item title={header} />}
       <LaunchCommandMenubarItem
         title="Open All Lights"
-        name="lights"
-        type={LaunchType.UserInitiated}
+        command={{
+          name: "lights",
+          type: LaunchType.UserInitiated,
+        }}
         icon={Icon.Terminal}
       />
       <MenuBarExtra.Section title="Lights">

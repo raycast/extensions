@@ -1,7 +1,7 @@
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
-import { formatToHumanDateTime, getErrorMessage } from "@lib/utils";
-import { Icon, Image, Keyboard, LaunchType, MenuBarExtra, Toast, launchCommand, showToast } from "@raycast/api";
+import { formatToHumanDateTime } from "@lib/utils";
+import { Icon, Image, Keyboard, MenuBarExtra } from "@raycast/api";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 
 export function LastUpdateChangeMenubarItem({ state, onAction }: { state: State; onAction?: () => void }) {
@@ -46,27 +46,10 @@ export function MenuBarSubmenu({ titleSeparator, children, ...restProps }: MenuB
   );
 }
 
-export function LaunchCommandMenubarItem(props: {
-  title: string;
-  icon?: Image.ImageLike;
-  name: string;
-  type: LaunchType;
-}) {
-  const launch = async () => {
-    try {
-      return await launchCommand({ name: props.name, type: props.type });
-    } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: getErrorMessage(error) || "Internal Error" });
-    }
-  };
-  return (
-    <MenuBarExtra.Item
-      title={props.title}
-      icon={props.icon}
-      shortcut={{ modifiers: ["cmd"], key: "o" }}
-      onAction={launch}
-    />
-  );
+export interface LaunchCommandMenubarItemProps extends RUIMenuBarExtra.LaunchCommand.Props {}
+
+export function LaunchCommandMenubarItem({ shortcut, ...restProps }: LaunchCommandMenubarItemProps) {
+  return <RUIMenuBarExtra.LaunchCommand shortcut={shortcut ?? { modifiers: ["cmd"], key: "o" }} {...restProps} />;
 }
 
 export function OpenInMenubarItem(props: {

@@ -20,8 +20,10 @@ export default function EntitiesMenuCommand(): JSX.Element {
       {header && <MenuBarExtra.Item title={header} />}
       <LaunchCommandMenubarItem
         title="Open All Entities"
-        name="index"
-        type={LaunchType.UserInitiated}
+        command={{
+          name: "index",
+          type: LaunchType.UserInitiated,
+        }}
         icon={Icon.Terminal}
       />
       <MenuBarExtra.Section title="Entities">

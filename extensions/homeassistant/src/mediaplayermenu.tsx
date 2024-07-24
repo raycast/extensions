@@ -22,8 +22,10 @@ export default function MediaPlayerMenuCommand(): JSX.Element {
       {header && <MenuBarExtra.Item title={header} />}
       <LaunchCommandMenubarItem
         title="Open All Media Players"
-        name="mediaplayers"
-        type={LaunchType.UserInitiated}
+        command={{
+          name: "mediaplayers",
+          type: LaunchType.UserInitiated,
+        }}
         icon={Icon.Terminal}
       />
       <MenuBarExtra.Section title="Media Players">
