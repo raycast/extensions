@@ -1,6 +1,6 @@
 # Wi-Fi Changelog
 
-## [Goodbye, Scan Wi-Fi command] - {PR_MERGE_DATE}
+## [Goodbye, Scan Wi-Fi command] - 2024-07-24
 
 - The airport command line tool is deprecated and the Scan Wi-Fi command based on it is removed.
 
