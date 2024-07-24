@@ -19,7 +19,9 @@ export default function CalendarCommand() {
     startDatetime: getDateOnly(now),
     endDatetime: addDays(now, 6),
   });
-  const [selectedCalendar, setSelectedCalendar] = useCachedState<string>("selected-calendar", "");
+  const [selectedCalendar, setSelectedCalendar] = useCachedState<string>("selected-calendar", "", {
+    cacheNamespace: "calendar",
+  });
   const [showDetails, setShowDetails] = useCachedState("show-details", false, { cacheNamespace: "calendar" });
   if (error) {
     showFailureToast(error);
