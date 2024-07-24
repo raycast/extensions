@@ -10,7 +10,7 @@ export interface Forecast {
   wind_speed?: number;
 }
 
-export function isDailyForecast(forecast: Forecast[] | undefined | null): boolean {
+export function isDailyForecast(forecast: Forecast[] | undefined | null) {
   if (forecast && forecast.length > 1) {
     const t1 = new Date(forecast[0].datetime);
     const t2 = new Date(forecast[1].datetime);
@@ -22,7 +22,7 @@ export function isDailyForecast(forecast: Forecast[] | undefined | null): boolea
   return false;
 }
 
-export function getWindspeedFromState(state: State | undefined): string | undefined {
+export function getWindspeedFromState(state: State | undefined) {
   if (!state) {
     return undefined;
   }
@@ -34,7 +34,7 @@ export function getWindspeedFromState(state: State | undefined): string | undefi
   }
 }
 
-export function getPressureFromState(state: State | undefined): string | undefined {
+export function getPressureFromState(state: State | undefined) {
   if (!state) {
     return undefined;
   }
@@ -46,7 +46,7 @@ export function getPressureFromState(state: State | undefined): string | undefin
   }
 }
 
-export function getHumidityFromState(state: State | undefined): string | undefined {
+export function getHumidityFromState(state: State | undefined) {
   if (!state) {
     return undefined;
   }
@@ -60,7 +60,7 @@ export function getHumidityFromState(state: State | undefined): string | undefin
   }
 }
 
-export function getTemperatureFromState(state: State | undefined): string | undefined {
+export function getTemperatureFromState(state: State | undefined) {
   if (!state) {
     return undefined;
   }
@@ -94,7 +94,7 @@ export const weatherStatusToIcon: Record<string, string> = {
   "windy-variant": "💨",
 };
 
-export function weatherConditionToIcon(condition: string): string {
+export function weatherConditionToIcon(condition: string) {
   return weatherStatusToIcon[condition] || "✨";
 }
 
@@ -115,7 +115,7 @@ const weatherStatusToText: Record<string, string> = {
   "windy-variant": "Windy Variant",
 };
 
-export function weatherConditionToText(condition: string): string {
+export function weatherConditionToText(condition: string) {
   return weatherStatusToText[condition] || "❓";
 }
 

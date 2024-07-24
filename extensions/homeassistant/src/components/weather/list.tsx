@@ -1,6 +1,5 @@
 import { State } from "@lib/haapi";
 import { Action, Color, List } from "@raycast/api";
-import { ReactElement } from "react";
 import {
   Forecast,
   getHumidityFromState,
@@ -14,8 +13,7 @@ import {
 } from "./utils";
 import { useWeatherForecast } from "./hooks";
 
-function WeatherTemperature(props: { state: State }): ReactElement | null {
-  const s = props.state;
+function WeatherTemperature({ state: s }: { state: State }) {
   const val = getTemperatureFromState(s);
   if (val === undefined) {
     return null;
@@ -29,8 +27,7 @@ function WeatherTemperature(props: { state: State }): ReactElement | null {
   );
 }
 
-function WeatherHumidity(props: { state: State }): ReactElement | null {
-  const s = props.state;
+function WeatherHumidity({ state: s }: { state: State }) {
   const val = getHumidityFromState(s);
   if (val === undefined) {
     return null;
@@ -38,8 +35,7 @@ function WeatherHumidity(props: { state: State }): ReactElement | null {
   return <List.Item title="Humidity" icon="💧" accessories={[{ text: `${val}` }]} />;
 }
 
-function WeatherPressure(props: { state: State }): ReactElement | null {
-  const s = props.state;
+function WeatherPressure({ state: s }: { state: State }) {
   const val = getPressureFromState(s);
   if (val === undefined) {
     return null;
@@ -47,8 +43,7 @@ function WeatherPressure(props: { state: State }): ReactElement | null {
   return <List.Item title="Pressure" icon="📈" accessories={[{ text: `${val}` }]} />;
 }
 
-function WeatherWindBearing(props: { state: State }): ReactElement | null {
-  const s = props.state;
+function WeatherWindBearing({ state: s }: { state: State }) {
   const val = s.attributes.wind_bearing as number | undefined;
   if (val === undefined) {
     return null;
@@ -56,8 +51,7 @@ function WeatherWindBearing(props: { state: State }): ReactElement | null {
   return <List.Item title="Wind Bearing" icon="↗️" accessories={[{ text: `${val}` }]} />;
 }
 
-function WeatherWindSpeed(props: { state: State }): ReactElement | null {
-  const s = props.state;
+function WeatherWindSpeed({ state: s }: { state: State }) {
   const val = getWindspeedFromState(s);
   if (val === undefined) {
     return null;
@@ -65,13 +59,12 @@ function WeatherWindSpeed(props: { state: State }): ReactElement | null {
   return <List.Item title="Wind Speed" icon="💨" accessories={[{ text: `${val}` }]} />;
 }
 
-function WeatherCondition(props: { condition: string }): ReactElement | null {
-  const c = props.condition;
+function WeatherCondition({ condition: c }: { condition: string }) {
   const source = weatherConditionToIcon(c);
   return <List.Item title="Condition" icon={source} accessories={[{ text: `${c}` }]} />;
 }
 
-function WeatherForecastItem(props: { forecast: Forecast; isDaily: boolean; tempUnit?: string }): ReactElement {
+function WeatherForecastItem(props: { forecast: Forecast; isDaily: boolean; tempUnit?: string }) {
   const f = props.forecast;
   const tostr = (val: number | undefined, param?: { prefix?: string; suffix?: string }): string | undefined => {
     if (val === undefined) {
@@ -98,8 +91,7 @@ function WeatherForecastItem(props: { forecast: Forecast; isDaily: boolean; temp
   );
 }
 
-function WeatherList(props: { state: State }): ReactElement {
-  const s = props.state;
+function WeatherList({ state: s }: { state: State }) {
   const forecastAttribute = s.attributes.forecast as Forecast[] | undefined;
   const { isLoading: dailyLoading, data: daily } = useWeatherForecast(s.entity_id, {
     data: forecastAttribute,
@@ -132,6 +124,6 @@ function WeatherList(props: { state: State }): ReactElement {
   );
 }
 
-export function ShowWeatherAction(props: { state: State }): ReactElement {
-  return <Action.Push title="Show Weather" target={<WeatherList state={props.state} />} />;
+export function ShowWeatherAction({ state }: { state: State }) {
+  return <Action.Push title="Show Weather" target={<WeatherList state={state} />} />;
 }
