@@ -4,7 +4,7 @@ import { sortBy } from "lodash";
 
 export type DocumentResult = Pick<
   Document,
-  "id" | "url" | "color" | "createdAt" | "slugId" | "sortOrder" | "title" | "updatedAt" | "icon"
+  "id" | "url" | "color" | "createdAt" | "sortOrder" | "title" | "updatedAt" | "icon"
 > & {
   project?: Pick<Project, "id" | "name" | "icon" | "color">;
 } & {
@@ -17,7 +17,7 @@ export type DocList = {
   documents: { nodes: DocumentResult[]; pageInfo: { hasNextPage: boolean } };
 };
 
-export type DocContent = Pick<Document, "content" | "id">;
+export type DocumentWithContent = Pick<Document, "content"> & DocumentResult;
 
 const docFragment = `
   id
@@ -25,7 +25,6 @@ const docFragment = `
   icon
   color
   createdAt
-  slugId
   sortOrder
   title
   updatedAt
@@ -74,8 +73,7 @@ export async function getDocuments(query: string = "", entity: DocumentEntity = 
         ] }) { ${schema} } }
     `
       : `
-      query($query: String!) {
-        documents(orderBy: updatedAt, filter: { title: { containsIgnoreCase: $query } }) { ${schema} } }
+      query($query: String!) { documents(orderBy: updatedAt, filter: { title: { containsIgnoreCase: $query } }) { ${schema} } }
     `;
 
   const variables = searchProject || searchInitiative ? { query: query.trim(), ...entity } : { query: query.trim() };
@@ -91,13 +89,16 @@ export async function getDocuments(query: string = "", entity: DocumentEntity = 
 export async function getDocumentContent(documentId: string) {
   const { graphQLClient } = getLinearClient();
 
-  const { data } = await graphQLClient.rawRequest<{ documents: { nodes: DocContent[] } }, Record<string, unknown>>(
+  const { data } = await graphQLClient.rawRequest<
+    { documents: { nodes: DocumentWithContent[] } },
+    Record<string, unknown>
+  >(
     `
       query($documentId: ID!) {
         documents(filter: { id: { eq: $documentId } }) {
           nodes {
             content
-            id
+            ${docFragment}
           }
         }
       }

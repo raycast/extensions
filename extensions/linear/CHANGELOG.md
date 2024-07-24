@@ -1,9 +1,10 @@
 # Linear Changelog
 
-## [Issue Fixes] - {PR_MERGE_DATE}
+## [Documents and Issues Fixes] - {PR_MERGE_DATE}
 
 - Create Issue: Fixed issue that made projects, cycles, estimates, etc. disappear in the form after consecutive issue creation.
 - Issue Actions: Standardized the issue deletion shortcut.
+- Documents: Moving documents action does not show the current entity and removed delete action from Document Detail view.
 
 ## [Document Support] - 2024-07-18
 
