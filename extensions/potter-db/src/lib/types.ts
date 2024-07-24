@@ -48,7 +48,7 @@ export type Character = Common & {
   attributes: {
     slug: string;
     alias_names: string[];
-    // animagus: null,
+    animagus: string | null;
     blood_status: string;
     boggart: string;
     born: string;
@@ -70,7 +70,7 @@ export type Character = Common & {
     species: string;
     titles: string[];
     wands: string[];
-    // weight: null,
+    weight: string | null;
     wiki: string;
   };
 };

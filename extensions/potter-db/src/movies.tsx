@@ -1,5 +1,5 @@
-import { usePotterDB } from "./utils/usePotterDB";
-import { Movie } from "./types";
+import { usePotterDB } from "./lib/use-potter-db";
+import { Movie } from "./lib/types";
 import { List } from "@raycast/api";
 
 export default function Movies() {

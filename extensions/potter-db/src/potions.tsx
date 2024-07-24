@@ -1,7 +1,7 @@
-import { usePotterDB } from "./utils/usePotterDB";
-import { Potion } from "./types";
+import { usePotterDB } from "./lib/use-potter-db";
+import { Potion } from "./lib/types";
 import { Icon, List } from "@raycast/api";
-import { DEFAULT_IMAGE } from "./constants";
+import { DEFAULT_IMAGE } from "./lib/constants";
 import { useState } from "react";
 
 export default function Potions() {

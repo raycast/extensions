@@ -1,5 +1,5 @@
-import { usePotterDB } from "./utils/usePotterDB";
-import { Book, Chapter } from "./types";
+import { usePotterDB } from "./lib/use-potter-db";
+import { Book, Chapter } from "./lib/types";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 
 export default function Books() {

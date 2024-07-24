@@ -1,6 +1,6 @@
 import { useFetch } from "@raycast/utils";
-import { SuccessResponse } from "../types";
-import { API_HEADERS, API_URL } from "../constants";
+import { SuccessResponse } from "./types";
+import { API_HEADERS, API_URL } from "./constants";
 import { Toast, showToast } from "@raycast/api";
 
 export function usePotterDB<T>(endpoint: string, pluralItem = "", filter?: string) {
