@@ -50,7 +50,6 @@ export default function MenuCommand() {
   };
 
   const maxRootLength = maxRootTextLengthPreference();
-  console.log("maxroot", maxRootLength);
 
   const nextEvent = sortedEvents?.find(
     (c) =>
