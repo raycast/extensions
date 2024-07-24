@@ -1,43 +1,8 @@
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { formatToHumanDateTime, getErrorMessage } from "@lib/utils";
-import {
-  Clipboard,
-  Icon,
-  Image,
-  Keyboard,
-  LaunchType,
-  MenuBarExtra,
-  Toast,
-  launchCommand,
-  open,
-  showHUD,
-  showToast,
-} from "@raycast/api";
-import { ReactNode } from "react";
-
-export async function copyToClipboardWithHUD(content: string | number | Clipboard.Content) {
-  await Clipboard.copy(content);
-  showHUD("Copied to Clipboard");
-}
-
-export function CopyToClipboardMenubarItem(props: { title: string; content: string; tooltip?: string }) {
-  const copyToClipboard = async () => {
-    try {
-      await copyToClipboardWithHUD(props.content);
-    } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
-    }
-  };
-  return (
-    <MenuBarExtra.Item
-      title={props.title}
-      icon={Icon.CopyClipboard}
-      onAction={copyToClipboard}
-      tooltip={props.tooltip}
-    />
-  );
-}
+import { Icon, Image, Keyboard, LaunchType, MenuBarExtra, Toast, launchCommand, showToast } from "@raycast/api";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 
 export function LastUpdateChangeMenubarItem({ state, onAction }: { state: State; onAction?: () => void }) {
   const humanDateString = (dt: string) => {
@@ -71,30 +36,13 @@ export function LastUpdateChangeMenubarItem({ state, onAction }: { state: State;
   );
 }
 
-function joinNonEmpty(parts?: (string | undefined)[], separator?: string | undefined): string | undefined {
-  if (!parts || parts.length <= 0) {
-    return undefined;
-  }
-  return parts.join(separator);
-}
+export interface MenuBarSubmenuProps extends RUIMenuBarExtra.Submenu.Props {}
 
-export function MenuBarSubmenu(props: {
-  title: string;
-  subtitle?: string;
-  icon?: Image.ImageLike | undefined;
-  children?: ReactNode;
-  separator?: string;
-}): JSX.Element {
-  const sep = props.separator && props.separator.length > 0 ? props.separator : "|";
-  const title =
-    joinNonEmpty(
-      [props.title, props.subtitle && props.subtitle.length > 0 ? sep : undefined, props.subtitle].filter((e) => e),
-      " ",
-    ) || "";
+export function MenuBarSubmenu({ titleSeparator, children, ...restProps }: MenuBarSubmenuProps) {
   return (
-    <MenuBarExtra.Submenu title={title} icon={props.icon}>
-      {props.children}
-    </MenuBarExtra.Submenu>
+    <RUIMenuBarExtra.Submenu titleSeparator={titleSeparator ?? "|"} {...restProps}>
+      {children}
+    </RUIMenuBarExtra.Submenu>
   );
 }
 
@@ -135,10 +83,10 @@ export function OpenInMenubarItem(props: {
   const title = `${action} ${app}`;
   const icon = isCompanion ? "home-assistant.png" : Icon.Globe;
   return (
-    <MenuBarExtra.Item
+    <RUIMenuBarExtra.OpenInBrowser
+      url={url}
       title={props.title ? props.title : title}
       shortcut={props.shortcut}
-      onAction={() => open(url)}
       icon={props.icon ? props.icon : icon}
     />
   );

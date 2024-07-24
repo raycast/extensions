@@ -8,7 +8,7 @@ import { InputButtonMenubarItem } from "@components/input_button/menu";
 import { InputSelectMenubarItem } from "@components/input_select/menu";
 import { LightMenubarItem } from "@components/light/menu";
 import { MediaPlayerMenubarItem } from "@components/mediaplayer/menu";
-import { CopyToClipboardMenubarItem, LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
+import { LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { PersonMenubarItem } from "@components/person/menu";
 import { SceneMenubarItem } from "@components/scene/menu";
 import { ScriptMenubarItem } from "@components/script/menu";
@@ -24,12 +24,12 @@ import { getIcon, getStateValue } from "./utils";
 
 export function CopyEntityIDToClipboard(props: { state: State }) {
   const s = props.state;
-  return <CopyToClipboardMenubarItem title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />;
+  return <RUIMenuBarExtra.CopyToClipboard title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />;
 }
 
 export function CopyEntityStateToClipboardMenubarItem(props: { state: State }) {
   const s = props.state;
-  return <CopyToClipboardMenubarItem title="Copy Entity State" content={s.state} tooltip={s.state} />;
+  return <RUIMenuBarExtra.CopyToClipboard title="Copy Entity State" content={s.state} tooltip={s.state} />;
 }
 
 export function StateMenubarItem(props: { state: State }): JSX.Element | null {

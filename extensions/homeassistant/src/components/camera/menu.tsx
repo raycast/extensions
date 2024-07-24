@@ -1,13 +1,9 @@
-import {
-  CopyToClipboardMenubarItem,
-  LastUpdateChangeMenubarItem,
-  MenuBarSubmenu,
-  OpenInMenubarItem,
-} from "@components/menu";
+import { LastUpdateChangeMenubarItem, MenuBarSubmenu, OpenInMenubarItem } from "@components/menu";
 import { getIcon } from "@components/state/utils";
 import { State } from "@lib/haapi";
 import { capitalizeFirstLetter, getFriendlyName } from "@lib/utils";
 import { getVideoStreamUrlFromCamera } from "./utils";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 
 function CameraOpenStreamInBrowserMenubarItem(props: { state: State }): JSX.Element | null {
   const s = props.state;
@@ -40,7 +36,7 @@ export function CameraMenubarItem(props: { state: State }): JSX.Element | null {
     <MenuBarSubmenu key={s.entity_id} title={title()} subtitle={subtitle()} icon={getIcon(s)}>
       <CameraOpenStreamInBrowserMenubarItem state={s} />
       <LastUpdateChangeMenubarItem state={s} />
-      <CopyToClipboardMenubarItem title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
+      <RUIMenuBarExtra.CopyToClipboard title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
     </MenuBarSubmenu>
   );
 }

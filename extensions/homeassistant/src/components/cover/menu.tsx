@@ -1,9 +1,10 @@
-import { CopyToClipboardMenubarItem, LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
+import { LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { getIcon } from "@components/state/utils";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { capitalizeFirstLetter, getErrorMessage, getFriendlyName } from "@lib/utils";
 import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 
 function CoverOpenMenubarItem(props: { state: State }) {
   if (props.state.attributes.current_position >= 100) {
@@ -68,7 +69,7 @@ export function CoverMenubarItem(props: { state: State }): JSX.Element | null {
       <CoverCloseMenubarItem state={s} />
       <CoverStopMenubarItem state={s} />
       <LastUpdateChangeMenubarItem state={s} />
-      <CopyToClipboardMenubarItem title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
+      <RUIMenuBarExtra.CopyToClipboard title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
     </MenuBarSubmenu>
   );
 }

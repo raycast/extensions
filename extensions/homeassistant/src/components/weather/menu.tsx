@@ -2,7 +2,7 @@ import { State } from "@lib/haapi";
 import { Color, LaunchType, MenuBarExtra, Toast, launchCommand, showToast } from "@raycast/api";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 
-import { CopyToClipboardMenubarItem, LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
+import { LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { getErrorMessage, getFriendlyName } from "@lib/utils";
 import { ReactElement } from "react";
 import { getIcon } from "../state/utils";
@@ -208,7 +208,7 @@ export function WeatherMenubarItem(props: { state: State }) {
       <WeatherForecastMenubarSection weather={s} />
       <MenuBarExtra.Section>
         <LastUpdateChangeMenubarItem state={s} />
-        <CopyToClipboardMenubarItem title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
+        <RUIMenuBarExtra.CopyToClipboard title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
       </MenuBarExtra.Section>
     </MenuBarSubmenu>
   );

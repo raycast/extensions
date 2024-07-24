@@ -4,7 +4,8 @@ import { State } from "@lib/haapi";
 import { getErrorMessage, getFriendlyName } from "@lib/utils";
 import { MenuBarExtra, Toast, showToast } from "@raycast/api";
 import { capitalize } from "lodash-es";
-import { CopyToClipboardMenubarItem, LastUpdateChangeMenubarItem, MenuBarSubmenu } from "../menu";
+import { LastUpdateChangeMenubarItem, MenuBarSubmenu } from "../menu";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 
 function SwitchToggleItem(props: { state: State }) {
   const handle = async () => {
@@ -57,7 +58,7 @@ export function SwitchMenubarItem(props: { state: State }): JSX.Element | null {
       <SwitchTurnOnItem state={s} />
       <SwitchTurnOffItem state={s} />
       <LastUpdateChangeMenubarItem state={s} />
-      <CopyToClipboardMenubarItem title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
+      <RUIMenuBarExtra.CopyToClipboard title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
     </MenuBarSubmenu>
   );
 }
