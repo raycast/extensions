@@ -8,3 +8,6 @@
 Make sure to read our [Community](https://manual.raycast.com/community-guidelines) and [Extension](https://manual.raycast.com/extensions) guidelines!
 
 We're still figuring things out and updating our guidelines. If at any point something is unclear, please tell us in [our community](https://raycast.com/community).
+
+
+HELLO
