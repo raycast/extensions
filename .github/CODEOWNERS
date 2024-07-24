@@ -599,7 +599,7 @@
 /extensions/http-mime                                               @Envl @pernielsentikaer
 /extensions/http-status-codes                                       @AlexVanderbist @pernielsentikaer @lucasmezencio
 /extensions/http.cat                                                @lucasmezencio @AlexVanderbist
-/extensions/hubspot                                                 @harisvsulaiman @pernielsentikaer @6farer @scoop @yuanminglee
+/extensions/hubspot                                                 @harisvsulaiman @pernielsentikaer @6farer @scoop @yuanminglee @j3lte
 /extensions/hubspot-portal-launcher                                 @chrisoklepke @pernielsentikaer
 /extensions/hue                                                     @pindab0ter @thomaspaulmann @robertvanhoesel
 /extensions/hugging-face                                            @crisboarna
@@ -1039,7 +1039,7 @@
 /extensions/pipedrive                                               @ahpatel
 /extensions/pitchfork                                               @koayon
 /extensions/pixabay                                                 @tonka3000 @mjherich @j3lte
-/extensions/placeholder                                             @koinzhang
+/extensions/placeholder                                             @koinzhang @j3lte
 /extensions/planetscale                                             @vimtor
 /extensions/plausible-analytics                                     @thebrokenfinger
 /extensions/playback-duration-calculator                            @nathanwijaya
