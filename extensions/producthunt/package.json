@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "ragnor",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "thomasjost"
   ],
   "license": "MIT",
   "commands": [
