@@ -49,15 +49,6 @@
     "dub": "^0.33.1",
     "undici": "^6.19.2"
   },
-  "preferences": [
-    {
-      "name": "workspaceApiKey",
-      "type": "password",
-      "required": true,
-      "title": "Workspace API Key",
-      "description": "Workspace API key on Dub. Learn more: https://d.to/tokens"
-    }
-  ],
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "^20.14.2",

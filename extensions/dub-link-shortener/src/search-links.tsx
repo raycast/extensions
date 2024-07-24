@@ -3,10 +3,11 @@ import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, 
 import { useShortLinks } from "@hooks/use-short-links";
 import { DUB_CO_URL } from "@utils/constants";
 import { deleteShortLink } from "@/api";
-import { MutatePromise, showFailureToast } from "@raycast/utils";
+import { MutatePromise, showFailureToast, withAccessToken } from "@raycast/utils";
 import type { LinkSchema } from "dub/models/components";
+import { dubOAuth } from "./oauth";
 
-export default function SearchLinks() {
+function SearchLinks() {
   const { shortLinks, error: linksError, isLoading: isLoadingLinks, mutate } = useShortLinks();
 
   return (
@@ -187,3 +188,5 @@ const tryDeleteLink = async (linkId: string, mutate: MutatePromise<LinkSchema[]>
       });
     });
 };
+
+export default withAccessToken(dubOAuth)(SearchLinks);

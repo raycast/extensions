@@ -13,11 +13,12 @@ import {
   useNavigation,
   LaunchProps,
 } from "@raycast/api";
-import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useCachedPromise, useForm, withAccessToken } from "@raycast/utils";
 import { createShortLink } from "@/api";
 import { fetchLink, isEmpty } from "@utils/clipboard";
 import { useTags } from "@hooks/use-tags";
 import { useDomains } from "@hooks/use-domains";
+import { dubOAuth } from "./oauth";
 
 interface ShortLinkFormValues {
   url: string;
@@ -120,6 +121,8 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
   );
 };
 
-export default function ShortenLink(props: LaunchProps<{ arguments: Arguments.ShortenLink }>) {
+export function ShortenLink(props: LaunchProps<{ arguments: Arguments.ShortenLink }>) {
   return <ShortenLinkForm args={props.arguments} />;
 }
+
+export default withAccessToken(dubOAuth)(ShortenLink);
