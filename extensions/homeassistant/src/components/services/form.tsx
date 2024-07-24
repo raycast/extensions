@@ -98,6 +98,11 @@ export interface ServiceFormTargetEntitiesTagPickerProps extends Form.TagPicker.
   target?: HAServiceTargetEntity[] | null;
 }
 
+function isEmptyTarget(target: HAServiceTargetEntity[]) {
+  // check if target is [{}] which should fitler all entities
+  return target.length === 1 && Object.keys(target[0]).length <= 0;
+}
+
 export function ServiceFormTargetEntitiesTagPicker({
   id,
   states,
@@ -105,20 +110,21 @@ export function ServiceFormTargetEntitiesTagPicker({
   value,
   ...restProps
 }: ServiceFormTargetEntitiesTagPickerProps) {
-  const filteredStates = target
-    ? states?.filter((s) => {
-        for (const t of target) {
-          if (t.domain) {
-            const domain = s.entity_id.split(".")[0];
-            if (t.domain.includes(domain)) {
-              return true;
+  const filteredStates =
+    target && !isEmptyTarget(target)
+      ? states?.filter((s) => {
+          for (const t of target) {
+            if (t.domain) {
+              const domain = s.entity_id.split(".")[0];
+              if (t.domain.includes(domain)) {
+                return true;
+              }
             }
+            // TODO check integration as well
           }
-          // TODO check integration as well
-        }
-        return false;
-      })
-    : states;
+          return false;
+        })
+      : states;
   return (
     <Form.TagPicker
       id={id}

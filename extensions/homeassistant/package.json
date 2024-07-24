@@ -496,7 +496,17 @@
       "title": "Calendar Menu",
       "description": "Calendar in the menubar",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "maxRootTextLength",
+          "description": "Maximum Root Text Length. 0 disable the feature.",
+          "type": "textfield",
+          "required": false,
+          "title": "Maximum Root Text Length",
+          "placeholder": "10"
+        }
+      ]
     }
   ],
   "preferences": [

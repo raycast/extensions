@@ -10,11 +10,25 @@ import {
   secondsBetweenDates,
   sortCalendarEvents,
 } from "@components/calendar/utils";
-import { Icon, LaunchType } from "@raycast/api";
+import { getPreferenceValues, Icon, LaunchType } from "@raycast/api";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 import { ensureShort, formatToHumanDateTime, getErrorMessage, getFriendlyName } from "@lib/utils";
 
 const now = new Date();
+
+function maxRootTextLengthPreference() {
+  const prefs = getPreferenceValues<Preferences.Calendarmenu>();
+  const m = prefs.maxRootTextLength;
+  const defaultValue = 10;
+  if (!m || m.trim().length <= 0) {
+    return defaultValue;
+  }
+  const num = Number.parseInt(m);
+  if (Number.isNaN(num)) {
+    return defaultValue;
+  }
+  return num;
+}
 
 export default function MenuCommand() {
   const { events, calendars, isLoading, error } = useHACalendarEvents({
@@ -32,6 +46,9 @@ export default function MenuCommand() {
   const title = (ev: CalendarEvent) => {
     return `${humanEventTimeRange(ev)} | ${ev.summary && ev.summary.trim().length > 0 ? ev.summary.trim() : "?"}`;
   };
+
+  const maxRootLength = maxRootTextLengthPreference();
+  console.log("maxroot", maxRootLength);
 
   const nextEvent = sortedEvents?.find(
     (c) =>
@@ -58,8 +75,8 @@ export default function MenuCommand() {
     <RUIMenuBarExtra
       icon={{ source: Icon.Calendar, tintColor: nextEvent ? nextEvent.calendarColor : undefined }}
       title={
-        nextEventMeta && nextEventMeta.secondsToEvent < 30 * 60
-          ? `${ensureShort(nextEvent?.summary, { max: 10 })} • ${nextEventMeta.humanTimeToEvent}`
+        maxRootLength > 0 && nextEventMeta && nextEventMeta.secondsToEvent < 30 * 60
+          ? `${ensureShort(nextEvent?.summary, { max: maxRootLength })} • ${nextEventMeta.humanTimeToEvent}`
           : undefined
       }
       tooltip={nextEventTextTooltip}

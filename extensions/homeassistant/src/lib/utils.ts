@@ -85,7 +85,7 @@ export function ensureShort(text: string | undefined, options?: { max?: number }
   if (!text) {
     return text;
   }
-  const max = options?.max !== undefined && options.max > 2 ? options.max : 80;
+  const max = options?.max !== undefined && options.max > 0 ? options.max : 80;
   if (text.length > max) {
     return text.slice(0, max) + " ...";
   }
