@@ -1,6 +1,6 @@
 # nextjs Changelog
 
-## [Update Docs + Filter by Router] - {PR_MERGE_DATE}
+## [Update Docs + Filter by Router] - 2024-07-24
 
 - Filter to show docs by App Router or Pages Router
 - Toasts to show what's happening
