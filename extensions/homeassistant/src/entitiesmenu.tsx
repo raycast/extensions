@@ -6,7 +6,7 @@ import { getErrorMessage } from "@lib/utils";
 import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 
-export default function EntitiesMenuCommand(): JSX.Element {
+export default function EntitiesMenuCommand() {
   const { states, error, isLoading } = useHAStates();
   const entities = filterViaPreferencePatterns(states, []);
   const header = error ? getErrorMessage(error) : undefined;

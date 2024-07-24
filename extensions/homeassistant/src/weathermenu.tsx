@@ -22,7 +22,7 @@ function WeatherMenuBarExtra(props: {
   icon?: Image.ImageLike | undefined;
   tooltip?: string;
   error?: string | undefined;
-}): JSX.Element {
+}) {
   const error = props.error;
   return (
     <MenuBarExtra
@@ -47,7 +47,7 @@ function WeatherMenuBarExtra(props: {
   );
 }
 
-function getWeatherEntityPreference(): string {
+function getWeatherEntityPreference() {
   const prefs = getPreferenceValues();
   const entity = prefs.entity as string | undefined;
   if (entity && entity.trim().length > 0) {
@@ -93,7 +93,7 @@ function getHumidityEntityPreference() {
   return prefs.humidityEntity?.trim();
 }
 
-export default function WeatherMenuBarCommand(): JSX.Element {
+export default function WeatherMenuBarCommand() {
   const { states, error: stateError, isLoading: statesLoading } = useHAStates();
   const entity = getWeatherEntityPreference();
   const weatherStates = states?.filter((s) => s.entity_id === entity);

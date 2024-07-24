@@ -6,7 +6,7 @@ import { getErrorMessage, getFriendlyName } from "@lib/utils";
 import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 
-export default function CoversMenuCommand(): JSX.Element {
+export default function CoversMenuCommand() {
   const { states, error, isLoading } = useHAStates();
   const entities = filterViaPreferencePatterns(states, ["cover.*"])?.sort((a, b) =>
     getFriendlyName(a).localeCompare(getFriendlyName(b)),

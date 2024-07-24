@@ -6,7 +6,7 @@ import { getErrorMessage, getFriendlyName } from "@lib/utils";
 import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 
-export default function MediaPlayerMenuCommand(): JSX.Element {
+export default function MediaPlayerMenuCommand() {
   const { states, error, isLoading } = useHAStates();
   const mediaPlayers = filterViaPreferencePatterns(states, ["media_player.*"])?.sort((a, b) =>
     getFriendlyName(a).localeCompare(getFriendlyName(b)),
