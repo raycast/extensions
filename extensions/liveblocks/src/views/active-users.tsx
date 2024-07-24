@@ -46,7 +46,7 @@ export default function Command({ roomId }: { roomId: string }) {
                         title={capitalizedKey}
                         text={info?.toString() ?? ""}
                       />
-                    )
+                    );
                   })}
                 </List.Item.Detail.Metadata>
               }
