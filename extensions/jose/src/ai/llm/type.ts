@@ -7,5 +7,5 @@ export class ILlm {
   async chat(chatData: ITalk): Promise<any>;
   // @ts-expect-error ignore
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  prepareResponse(stream: boolean, trace: ITrace, answer: any): ITalkDataResult;
+  prepareResponse(chatData: ITalk, stream: boolean, trace: ITrace, answer: any): ITalkDataResult;
 }

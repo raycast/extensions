@@ -65,8 +65,9 @@ export class CohereLLM implements ILlm {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  prepareResponse(stream: boolean, trace: ITrace, answer: any): ITalkDataResult {
+  prepareResponse(chatData: ITalk, stream: boolean, trace: ITrace, answer: any): ITalkDataResult {
     const response: ITalkDataResult = newTalkDataResult();
+    response.assistant = chatData.assistant.object;
 
     if (!stream) {
       response.content = answer.text;

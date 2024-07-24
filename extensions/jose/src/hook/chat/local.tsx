@@ -75,7 +75,7 @@ export async function RunLocal(
     const answer = await llm.chat(chatData);
 
     if (!answer.stream) {
-      const r = llm.prepareResponse(answer.stream, trace, answer.data);
+      const r = llm.prepareResponse(chatData, answer.stream, trace, answer.data);
 
       if (chatData.result === undefined) {
         chatData.result = newTalkDataResult();
@@ -101,7 +101,7 @@ export async function RunLocal(
       interaction.toast.style = Toast.Style.Success;
     } else {
       for await (const chunk of answer.data) {
-        const r = llm.prepareResponse(answer.stream, trace, chunk);
+        const r = llm.prepareResponse(chatData, answer.stream, trace, chunk);
 
         if (r.finish) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -92,6 +92,7 @@ export interface ITalkDataResult {
   content: string;
   finish: boolean;
   createdAt: string;
+  assistant: ITalkAssistant | undefined;
   image:
     | {
         exist: boolean;
@@ -112,6 +113,7 @@ export const newTalkDataResult = (): ITalkDataResult => {
     content: "",
     finish: false,
     createdAt: new Date().toISOString(),
+    assistant: undefined,
     image: undefined,
     action: undefined,
   };

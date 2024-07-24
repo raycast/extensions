@@ -55,9 +55,10 @@ export class OllamaLLM implements ILlm {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  prepareResponse(stream: boolean, trace: ITrace, answer: any): ITalkDataResult {
+  prepareResponse(chatData: ITalk, stream: boolean, trace: ITrace, answer: any): ITalkDataResult {
     let actualTrace = trace.changeHelper(undefined);
     const response: ITalkDataResult = newTalkDataResult();
+    response.assistant = chatData.assistant.object;
 
     if (!stream) {
       response.content = answer.message.content;
