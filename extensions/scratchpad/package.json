@@ -5,6 +5,9 @@
   "description": "Creates a scratchpad file and opens it in an editor",
   "icon": "scratchpad-icon.png",
   "author": "asnimansari",
+  "contributors": [
+    "iwex"
+  ],
   "license": "MIT",
   "commands": [
     {

@@ -21,6 +21,7 @@ const editors: ApplicationInfo[] = [
   { name: "TextEdit", bundleId: "com.apple.TextEdit" },
   { name: "Zed", bundleId: "dev.zed.Zed" },
   { name: "Cursor", bundleId: "com.todesktop.230313mzl4w4u92" },
+  { name: "CotEditor", bundleId: "com.coteditor.CotEditor" },
 ];
 
 export const editorBundleIds = editors.map((editor) => editor.bundleId);
