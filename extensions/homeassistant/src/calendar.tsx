@@ -9,8 +9,7 @@ import {
 } from "@components/calendar/utils";
 import { getFriendlyName } from "@lib/utils";
 import { Icon, List } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { useState } from "react";
+import { showFailureToast, useCachedState } from "@raycast/utils";
 
 interface CalendarListDropdownProps extends Omit<List.Dropdown.Props, "tooltip"> {
   calendars: CalendarState[] | undefined;
@@ -19,15 +18,19 @@ interface CalendarListDropdownProps extends Omit<List.Dropdown.Props, "tooltip">
 function CalendarListDropdown({ calendars, ...restProps }: CalendarListDropdownProps) {
   return (
     <List.Dropdown tooltip="Calendars" {...restProps}>
-      <List.Dropdown.Item title="All" value="" />
-      {calendars?.map((c) => (
-        <List.Dropdown.Item
-          key={c.entity_id}
-          title={getFriendlyName(c)}
-          value={c.entity_id}
-          icon={{ source: Icon.Calendar, tintColor: c.color }}
-        />
-      ))}
+      <List.Dropdown.Section>
+        <List.Dropdown.Item title="All" value="" icon={Icon.Calendar} />
+      </List.Dropdown.Section>
+      <List.Dropdown.Section title="Calendars">
+        {calendars?.map((c) => (
+          <List.Dropdown.Item
+            key={c.entity_id}
+            title={getFriendlyName(c)}
+            value={c.entity_id}
+            icon={{ source: Icon.Calendar, tintColor: c.color }}
+          />
+        ))}
+      </List.Dropdown.Section>
     </List.Dropdown>
   );
 }
@@ -39,7 +42,7 @@ export default function CalendarCommand() {
     startDatetime: now,
     endDatetime: addDays(now, 6),
   });
-  const [selectedCalendar, setSelectedCalendar] = useState<string>("");
+  const [selectedCalendar, setSelectedCalendar] = useCachedState<string>("selected-calendar");
   if (error) {
     showFailureToast(error);
   }

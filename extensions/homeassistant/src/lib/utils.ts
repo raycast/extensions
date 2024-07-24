@@ -81,11 +81,11 @@ export async function sleep(delay: number) {
   await setTimeout(delay);
 }
 
-export function ensureShort(text: string | undefined): string | undefined {
+export function ensureShort(text: string | undefined, options?: { max?: number }): string | undefined {
   if (!text) {
     return text;
   }
-  const max = 80;
+  const max = options?.max !== undefined && options.max > 2 ? options.max : 80;
   if (text.length > max) {
     return text.slice(0, max) + " ...";
   }

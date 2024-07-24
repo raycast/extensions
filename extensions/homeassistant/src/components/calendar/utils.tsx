@@ -148,7 +148,62 @@ export function groupEventsByDay(events: CalendarEvent[] | undefined) {
   return result;
 }
 
-const colorMap = [Color.Blue, Color.Green, Color.Magenta, Color.Orange, Color.Purple, Color.Red, Color.Yellow];
+const colorMap = [
+  Color.Blue,
+  Color.Green,
+  Color.Magenta,
+  Color.Orange,
+  Color.Purple,
+  Color.Yellow,
+  "#FF5733", // Vibrant red-orange
+  "#33FF57", // Vibrant green
+  "#3357FF", // Vibrant blue
+  "#FF33A1", // Vibrant pink
+  "#A133FF", // Vibrant purple
+  "#33FFA1", // Vibrant aqua
+  "#FFBD33", // Vibrant gold
+  "#33FFBD", // Vibrant light green
+  "#57FF33", // Vibrant lime
+  "#BD33FF", // Vibrant magenta
+  "#33A1FF", // Vibrant sky blue
+  "#5733FF", // Vibrant indigo
+  "#A1FF33", // Vibrant chartreuse
+  "#33FF33", // Vibrant green
+  "#FF33FF", // Vibrant magenta
+  "#33FFFF", // Vibrant cyan
+  "#FF9933", // Vibrant orange
+  "#33FF99", // Vibrant light green
+  "#9933FF", // Vibrant purple
+  "#33FFCC", // Vibrant mint
+  "#FF6633", // Vibrant red-orange
+  "#33FF66", // Vibrant green
+  "#3366FF", // Vibrant blue
+  "#FF3366", // Vibrant pink
+  "#6633FF", // Vibrant indigo
+  "#33FF33", // Vibrant green
+  "#FF33CC", // Vibrant pink
+  "#33CCFF", // Vibrant sky blue
+  "#FFCC33", // Vibrant yellow
+  "#33FFCC", // Vibrant mint
+  "#CC33FF", // Vibrant purple
+  "#33FF99", // Vibrant light green
+  "#9933FF", // Vibrant purple
+  "#33FF66", // Vibrant green
+  "#FF9966", // Vibrant orange
+  "#6699FF", // Vibrant blue
+  "#FF6699", // Vibrant pink
+  "#9966FF", // Vibrant purple
+  "#66FF99", // Vibrant light green
+  "#FF3399", // Vibrant pink
+  "#3399FF", // Vibrant sky blue
+  "#FF6633", // Vibrant red-orange
+  "#33FF66", // Vibrant green
+  "#3366FF", // Vibrant blue
+  "#FF3366", // Vibrant pink
+  "#6633FF", // Vibrant indigo
+  "#33FF33", // Vibrant green
+  "#FF33CC", // Vibrant pink
+];
 
 export function getCalendarColorByIndex(index: number) {
   if (index < 0) {

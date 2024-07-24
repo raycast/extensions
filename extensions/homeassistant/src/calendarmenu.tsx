@@ -12,7 +12,7 @@ import {
 } from "@components/calendar/utils";
 import { Icon, LaunchType } from "@raycast/api";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
-import { formatToHumanDateTime, getErrorMessage, getFriendlyName } from "@lib/utils";
+import { ensureShort, formatToHumanDateTime, getErrorMessage, getFriendlyName } from "@lib/utils";
 
 const now = new Date();
 
@@ -51,14 +51,18 @@ export default function MenuCommand() {
 
   const maxTextLength = 50;
 
+  const nextEventTextTooltip =
+    nextEvent && nextEventMeta ? `Upcoming: ${nextEvent.summary} • ${nextEventMeta.humanTimeToEvent}` : undefined;
+
   return (
     <RUIMenuBarExtra
       icon={{ source: Icon.Calendar, tintColor: nextEvent ? nextEvent.calendarColor : undefined }}
       title={
         nextEventMeta && nextEventMeta.secondsToEvent < 30 * 60
-          ? `${nextEvent?.summary.slice(0, 10)}${nextEvent && nextEvent?.summary.length > 10 ? "..." : ""} • ${nextEventMeta.humanTimeToEvent}`
+          ? `${ensureShort(nextEvent?.summary, { max: 10 })} • ${nextEventMeta.humanTimeToEvent}`
           : undefined
       }
+      tooltip={nextEventTextTooltip}
       isLoading={isLoading}
     >
       {error && (
@@ -91,7 +95,7 @@ export default function MenuCommand() {
               max: 10,
               moreElement: (hidden) => (
                 <RUIMenuBarExtra.LaunchCommand
-                  command={{ name: "calendars", type: LaunchType.UserInitiated }}
+                  command={{ name: "calendar", type: LaunchType.UserInitiated }}
                   title={`${hidden} more Events`}
                 />
               ),
