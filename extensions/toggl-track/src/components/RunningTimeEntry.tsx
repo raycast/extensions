@@ -1,22 +1,19 @@
 import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import dayjs from "dayjs";
 
-import { stopTimeEntry, TimeEntry, TimeEntryMetaData, Workspace } from "@/api";
-import { generateTimeEntryAccessories } from "@/helpers/accessories";
+import { stopTimeEntry, TimeEntry, TimeEntryMetaData } from "@/api";
 import useCurrentTime from "@/hooks/useCurrentTime";
 
 interface RunningTimeEntryProps {
   runningTimeEntry: TimeEntry & TimeEntryMetaData;
   revalidateRunningTimeEntry: () => void;
   revalidateTimeEntries: () => void;
-  workspaces: Workspace[];
 }
 
 function RunningTimeEntry({
   runningTimeEntry,
   revalidateRunningTimeEntry,
   revalidateTimeEntries,
-  workspaces,
 }: RunningTimeEntryProps) {
   const currentTime = useCurrentTime();
 
@@ -47,7 +44,10 @@ function RunningTimeEntry({
           (runningTimeEntry.project_name ?? "") +
           dayjs.duration(dayjs(currentTime).diff(runningTimeEntry.start), "milliseconds").format("HH:mm:ss")
         }
-        accessories={generateTimeEntryAccessories(runningTimeEntry, workspaces)}
+        accessories={[
+          ...runningTimeEntry.tags.map((tag) => ({ tag })),
+          runningTimeEntry.billable ? { tag: { value: "$" } } : {},
+        ]}
         icon={{ source: Icon.Circle, tintColor: runningTimeEntry.project_color }}
         actions={
           <ActionPanel>

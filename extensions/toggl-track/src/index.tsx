@@ -19,19 +19,17 @@ import { removeTimeEntry } from "@/api/timeEntries";
 import TimeEntryForm from "@/components/CreateTimeEntryForm";
 import RunningTimeEntry from "@/components/RunningTimeEntry";
 import { ExtensionContextProvider } from "@/context/ExtensionContext";
-import { generateTimeEntryAccessories } from "@/helpers/accessories";
 import { formatSeconds } from "@/helpers/formatSeconds";
 import { Verb, withToast } from "@/helpers/withToast";
-import { useRunningTimeEntry, useTimeEntries, useWorkspaces } from "@/hooks";
+import { useRunningTimeEntry, useTimeEntries } from "@/hooks";
 
 dayjs.extend(duration);
 
 function ListView() {
-  const { workspaces, isLoadingWorkspaces } = useWorkspaces();
   const { timeEntries, isLoadingTimeEntries, revalidateTimeEntries, mutateTimeEntries } = useTimeEntries();
   const { runningTimeEntry, isLoadingRunningTimeEntry, revalidateRunningTimeEntry } = useRunningTimeEntry();
 
-  const isLoading = isLoadingTimeEntries || isLoadingRunningTimeEntry || isLoadingWorkspaces;
+  const isLoading = isLoadingTimeEntries || isLoadingRunningTimeEntry;
 
   const timeEntriesWithUniqueProjectAndDescription = timeEntries.reduce<typeof timeEntries>((acc, timeEntry) => {
     if (
@@ -80,7 +78,6 @@ function ListView() {
           runningTimeEntry={runningTimeEntry}
           revalidateRunningTimeEntry={revalidateRunningTimeEntry}
           revalidateTimeEntries={revalidateRunningTimeEntry}
-          workspaces={workspaces}
         />
       )}
       <List.Section title="Actions">
@@ -113,7 +110,10 @@ function ListView() {
               keywords={[timeEntry.description, timeEntry.project_name || "", timeEntry.client_name || ""]}
               title={timeEntry.description || "No description"}
               subtitle={(timeEntry.client_name ? timeEntry.client_name + " | " : "") + (timeEntry.project_name ?? "")}
-              accessories={generateTimeEntryAccessories(timeEntry, workspaces)}
+              accessories={[
+                ...timeEntry.tags.map((tag) => ({ tag })),
+                timeEntry.billable ? { tag: { value: "$" } } : {},
+              ]}
               icon={{ source: Icon.Circle, tintColor: timeEntry.project_color }}
               actions={
                 <ActionPanel>
