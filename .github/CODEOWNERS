@@ -326,7 +326,7 @@
 /extensions/deta-space                                              @deta @SlumberDemon
 /extensions/deutscherwetterdienst                                   @NicolaiSchmid
 /extensions/dev-to                                                  @aeither
-/extensions/devdocs                                                 @pomdtr
+/extensions/devdocs                                                 @djpowers @pernielsentikaer
 /extensions/developer-excuse                                        @niemtec
 /extensions/devonthink                                              @kudrykv
 /extensions/devutils                                                @vietanhlehuu
@@ -946,7 +946,7 @@
 /extensions/omnivore                                                @KarolusD
 /extensions/one-tab-group                                           @xiaoluoboding
 /extensions/one-thing                                               @pernielsentikaer @mathieudutour @thomaslombart
-/extensions/one-time-password                                       @lacherogwu
+/extensions/one-time-password                                       @lacherogwu @SoulEvans07
 /extensions/one-time-secret                                         @LarsaSolidor
 /extensions/onelook-thesaurus                                       @FelipeCortez
 /extensions/onenote                                                 @alewandows
@@ -1106,6 +1106,7 @@
 /extensions/quip                                                    @justin0u0 @liznear
 /extensions/quit-applications                                       @mackopes @jrnxf @3llomi @sxn @codesjedi
 /extensions/r-pkg-search                                            @gadenbuie
+/extensions/rabbit-hole                                             @RobErskine
 /extensions/radicle                                                 @sebastinez
 /extensions/radix                                                   @peduarte @emlez
 /extensions/railway                                                 @coffee-cup @nagauta
@@ -1252,7 +1253,7 @@
 /extensions/semantic-scholar                                        @blainerothrock
 /extensions/send-to-flomo                                           @ahonn @fankaidev @pernielsentikaer @thishym @maidangzhu
 /extensions/sensible                                                @michaelwschultz
-/extensions/sentry                                                  @thomaspaulmann @mattisssa @NoorBayari
+/extensions/sentry                                                  @thomaspaulmann @mattisssa @NoorBayari @remorses
 /extensions/sequel-ace                                              @nagauta @macbookandrew
 /extensions/serverless-framework-docs                               @yemilgr
 /extensions/sesh                                                    @joshmedeski
@@ -1409,7 +1410,7 @@
 /extensions/the-noble-quran                                         @BalliAsghar
 /extensions/the-verge                                               @klkvsky @pernielsentikaer
 /extensions/thesaurus                                               @ABukSwienty
-/extensions/things                                                  @loris @andreaselia @thomaslombart
+/extensions/things                                                  @loris @andreaselia @jfkisafk @thomaslombart
 /extensions/thrasher-magazine                                       @whitespacecode
 /extensions/ticktick                                                @viduycheung @viduycheung @Alireza29675 @Yakitrak
 /extensions/tidyread---streamline-your-daily-reading                @DophinL
@@ -1488,6 +1489,7 @@
 /extensions/unifi                                                   @tonka3000
 /extensions/united-nations                                          @LitoMore
 /extensions/unitex                                                  @jaymody
+/extensions/universal-commands                                      @cyxn
 /extensions/universal-inbox                                         @dax
 /extensions/universities                                            @alewandows
 /extensions/unix-timestamp                                          @Destiner

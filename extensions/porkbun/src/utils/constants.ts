@@ -44,7 +44,7 @@ export const URL_FORWARDING_TYPES = [
 ];
 
 const FORCE_IPV4 = getPreferenceValues<Preferences>().force_ipv4;
-const API_DOMAIN = FORCE_IPV4 ? "api-ipv4.porkbun.com" : "porkbun.com";
+const API_DOMAIN = FORCE_IPV4 ? "api-ipv4.porkbun.com" : "api.porkbun.com";
 export const API_URL = `https://${API_DOMAIN}/api/json/v3/`;
 export const API_KEY = getPreferenceValues<Preferences>().api_key;
 export const SECRET_API_KEY = getPreferenceValues<Preferences>().secret_api_key;
