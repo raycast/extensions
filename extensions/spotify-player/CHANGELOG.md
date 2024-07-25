@@ -1,6 +1,7 @@
 # Spotify Player Changelog
 
-## [Quicklink to Add Playing Song to Playlist] - 2024-07-19
+## [Quicklink to Add Playing Song to Playlist] - {PR_MERGE_DATE}
+
 - Adds an action to create a quicklink to add the currently playing song to a specific playlist.
 
 ## [Log out the user if re-authentication fails] - 2024-07-11

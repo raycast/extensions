@@ -10,7 +10,8 @@ type CreateQuicklinkProps = {
 };
 
 export function CreateQuicklink({ title, quicklinkTitle, command, data }: CreateQuicklinkProps) {
-  let url = `raycast://extensions/${environment.ownerOrAuthorName}/${environment.extensionName}/${command}`;
+  const protocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
+  let url = `${protocol}extensions/${environment.ownerOrAuthorName}/${environment.extensionName}/${command}`;
   if (data) {
     url += `?context=${encodeURIComponent(JSON.stringify(data))}`;
   }
