@@ -53,10 +53,6 @@ function AddCityView({ initialCityName, onAdd }: { initialCityName?: string; onA
             <ActionPanel>
               <Action
                 title="Add"
-                shortcut={{
-                  modifiers: ["cmd"],
-                  key: "enter",
-                }}
                 onAction={() => {
                   onAdd(city);
                   pop();
