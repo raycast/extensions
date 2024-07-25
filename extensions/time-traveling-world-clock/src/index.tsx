@@ -1,7 +1,21 @@
-import { ActionPanel, List, Action, LocalStorage, useNavigation, Clipboard, closeMainWindow, Icon } from "@raycast/api";
+import {
+  ActionPanel,
+  List,
+  Action,
+  LocalStorage,
+  useNavigation,
+  Clipboard,
+  closeMainWindow,
+  Icon,
+  getPreferenceValues,
+} from "@raycast/api";
 import { CityData, findFromCityStateProvince } from "city-timezones";
 import getUnicodeFlagIcon from "country-flag-icons/unicode";
 import { useEffect, useState, useMemo } from "react";
+
+interface Preferences {
+  showUtc: boolean;
+}
 
 const timeFormatter = new Intl.DateTimeFormat("en-US", {
   hour: "numeric",
@@ -66,6 +80,7 @@ export default function Command() {
   const [offsetHrs, setOffsetHrs] = useState(0);
   const [, _forceUpdate] = useState({});
   const forceUpdate = () => _forceUpdate({});
+  const preferences = getPreferenceValues<Preferences>();
 
   useEffect(() => {
     (async () => {
@@ -187,6 +202,25 @@ export default function Command() {
         actions={<ActionPanel>{addCityAction}</ActionPanel>}
       ></List.EmptyView>
       {local}
+      {preferences.showUtc &&
+        (() => {
+          const _date = new Date();
+          _date.setTime(_date.getTime() + offsetHrs * 60 * 60 * 1000);
+          const date = new Date(_date.toLocaleString("en-US", { timeZone: "UTC" }));
+          const timeString = timeFormatter.format(date);
+          const dateString = dateFormatter.format(date);
+          const dayOfWeek = dayOfWeekFormatter.format(date);
+          const subtitle = `${dayOfWeek}, ${dateString}, ${timeString}`;
+          return (
+            <List.Item
+              key={"utc"}
+              title={"UTC"}
+              subtitle={subtitle}
+              icon={getIconForTime(date)}
+              actions={actions({ time: subtitle })}
+            />
+          );
+        })()}
       {cities.map((c) => {
         const _date = new Date();
         _date.setTime(_date.getTime() + offsetHrs * 60 * 60 * 1000);

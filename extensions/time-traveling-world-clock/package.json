@@ -40,5 +40,15 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "preferences": [
+    {
+      "name": "showUtc",
+      "description": "Show UTC time",
+      "type": "checkbox",
+      "required": false,
+      "title": "UTC",
+      "label": "Show UTC time"
+    }
+  ]
 }

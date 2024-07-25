@@ -1,5 +1,8 @@
 # World Clock Changelog
 
+## [Improvement] - {PR_MERGE_DATE}
+- Added UTC time
+
 ## [Improvement] - 2024-07-24
 - Added week day to the clock
 
