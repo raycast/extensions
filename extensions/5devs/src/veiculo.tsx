@@ -31,9 +31,9 @@ export default function Command() {
   const actions = (content: string) => {
     return (
       <ActionPanel>
-        <Action.CopyToClipboard title="Copiar" content={content} />
+        <Action.CopyToClipboard title="Copy" content={content} />
         <Action
-          title="Gerar Nova Empresa"
+          title="Generate New Vehicle"
           icon={Icon.Repeat}
           onAction={async () => {
             const newVehicle = veiculo(mask);
@@ -42,7 +42,7 @@ export default function Command() {
           }}
         />
         <Action
-          title="Mudar Máscara"
+          title="Toggle Mask"
           icon={Icon.Mask}
           onAction={() => {
             setMask(!mask);
@@ -56,10 +56,10 @@ export default function Command() {
   return (
     <>
       <List isLoading={isLoading}>
-        <List.Section title="Veículo">
+        <List.Section title="Vehicle">
           <List.Item
             title={mask ? vehicle.placa : vehicle.placa.replaceAll(/[^0-9A-Z]/g, "")}
-            subtitle="Placa"
+            subtitle="License Plate"
             icon={Icon.BarCode}
             actions={actions(vehicle.placa)}
           />
@@ -69,30 +69,30 @@ export default function Command() {
             actions={actions(vehicle.renavam)}
             icon={Icon.Receipt}
           />
-          <List.Item title={vehicle.marca} subtitle="Marca" actions={actions(vehicle.marca)} icon={Icon.Lowercase} />
+          <List.Item title={vehicle.marca} subtitle="Brand" actions={actions(vehicle.marca)} icon={Icon.Lowercase} />
           <List.Item
             title={vehicle.modelo}
-            subtitle="Modelo"
+            subtitle="Model"
             actions={actions(vehicle.modelo)}
             icon={vehicle.tipo === "Carro" ? Icon.Car : Icon.Bike}
           />
           <List.Item
             title={vehicle.tipo}
-            subtitle="Tipo"
+            subtitle="Type"
             actions={actions(vehicle.tipo)}
             icon={vehicle.tipo === "Carro" ? Icon.Car : Icon.Bike}
           />
-          <List.Item title={vehicle.ano} subtitle="Ano" actions={actions(vehicle.ano)} icon={Icon.Calendar} />
-          <List.Item title={vehicle.cor} subtitle="Cor" actions={actions(vehicle.cor)} icon={Icon.EyeDropper} />
+          <List.Item title={vehicle.ano} subtitle="Year" actions={actions(vehicle.ano)} icon={Icon.Calendar} />
+          <List.Item title={vehicle.cor} subtitle="Color" actions={actions(vehicle.cor)} icon={Icon.EyeDropper} />
           <List.Item
             title={vehicle.combustivel}
-            subtitle="Combustível"
+            subtitle="Fuel"
             actions={actions(vehicle.combustivel)}
             icon={Icon.Raindrop}
           />
           <List.Item
             title={vehicle.municipio}
-            subtitle="Município"
+            subtitle="City"
             actions={actions(vehicle.municipio)}
             icon={Icon.Pin}
           />

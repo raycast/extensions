@@ -45,9 +45,9 @@ export default function Command() {
   const actions = (content: string) => {
     return (
       <ActionPanel>
-        <Action.CopyToClipboard title="Copiar" content={content} />
+        <Action.CopyToClipboard title="Copy" content={content} />
         <Action
-          title="Gerar Nova Empresa"
+          title="Generate New Company"
           icon={Icon.Repeat}
           onAction={async () => {
             setIsLoading(true);
@@ -61,7 +61,7 @@ export default function Command() {
           }}
         />
         <Action
-          title="Mudar Máscara"
+          title="Toggle Mask"
           icon={Icon.Mask}
           onAction={() => {
             setMask(!mask);
@@ -75,10 +75,10 @@ export default function Command() {
   return (
     <>
       <List isLoading={isLoading}>
-        <List.Section title="Empresa">
+        <List.Section title="Company">
           <List.Item
             title={company.razaoSocial}
-            subtitle="Razão Social"
+            subtitle="Name"
             icon={Icon.Building}
             actions={actions(company.razaoSocial)}
           />
@@ -90,20 +90,20 @@ export default function Command() {
           />
           <List.Item
             title={mask ? company.inscricaoEstadual : company.inscricaoEstadual.replaceAll(/\D/g, "")}
-            subtitle={company.inscricaoEstadual}
+            subtitle="State Registration"
             icon={Icon.CreditCard}
             actions={actions(company.inscricaoEstadual)}
           />
           <List.Item
             title={company.dataAbertura}
-            subtitle="Data de Abertura"
+            subtitle="Opening Date"
             icon={Icon.Calendar}
             actions={actions(company.dataAbertura)}
           />
           <List.Item title={company.site} subtitle="Site" icon={Icon.Globe} actions={actions(company.site)} />
           <List.Item title={company.email} subtitle="Email" icon={Icon.Envelope} actions={actions(company.email)} />
         </List.Section>
-        <List.Section title="Endereço">
+        <List.Section title="Address">
           <List.Item
             title={mask ? address.cep : address.cep.replaceAll(/\D/g, "")}
             subtitle="CEP"
@@ -112,32 +112,32 @@ export default function Command() {
           />
           <List.Item
             title={address.logradouro}
-            subtitle="Rua"
+            subtitle="Street"
             actions={actions(address.logradouro)}
             icon={Icon.Geopin}
           />
-          <List.Item title={address.numero} subtitle="Número" actions={actions(address.numero)} icon={Icon.Cd} />
+          <List.Item title={address.numero} subtitle="Number" actions={actions(address.numero)} icon={Icon.Cd} />
           {address.complemento && (
             <List.Item
               title={address.complemento}
-              subtitle="Complemento"
+              subtitle="Complement"
               actions={actions(address.complemento)}
               icon={Icon.Lowercase}
             />
           )}
-          <List.Item title={address.bairro} subtitle="Bairro" actions={actions(address.bairro)} icon={Icon.Map} />
+          <List.Item title={address.bairro} subtitle="Neighborhood" actions={actions(address.bairro)} icon={Icon.Map} />
           <List.Item
             title={address.localidade}
-            subtitle="Cidade"
+            subtitle="City"
             actions={actions(address.localidade)}
             icon={Icon.Compass}
           />
-          <List.Item title={address.uf} subtitle="Estado" actions={actions(address.uf)} icon={Icon.AirplaneTakeoff} />
+          <List.Item title={address.uf} subtitle="State" actions={actions(address.uf)} icon={Icon.AirplaneTakeoff} />
         </List.Section>
-        <List.Section title="Telefone">
+        <List.Section title="Phone">
           <List.Item
             title={mask ? phone : phone.replaceAll(/\D/g, "")}
-            subtitle="Telefone"
+            subtitle="Phone"
             icon={Icon.Phone}
             actions={actions(phone)}
           />

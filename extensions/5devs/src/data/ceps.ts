@@ -142,7 +142,6 @@ export const ceps = [
   "37044570",
   "36400334",
   "31050350",
-  //
   "20031050",
   "05508900",
   "66035130",
@@ -215,29 +214,29 @@ export const ceps = [
   "01319000",
   "59062500",
   "30190001",
-  "20010000", // Copacabana, Rio de Janeiro
-  "22041021", // Ipanema, Rio de Janeiro
-  "30150221", // Praça da Estação, Belo Horizonte
-  "60165121", // Beach Park, Fortaleza
-  "66035350", // Praça da República, Belém
-  "90010240", // Parque Farroupilha, Porto Alegre
-  "51011060", // Brasília Teimosa, Recife
-  "65025650", // Praia de Genipabu, Natal
-  "88330675", // Avenida Atlântica, Balneário Camboriú
-  "13015081", // Avenida Paulista, São Paulo
-  "05428070", // Rua 25 de Março, São Paulo
-  "21941915", // Quinta da Boa Vista, Rio de Janeiro
-  "14015130", // Praça da Sé, Ribeirão Preto
-  "80035050", // Jardim Botânico, Curitiba
-  "88062505", // Lagoa da Conceição, Florianópolis
-  "69305630", // Encontro das Águas, Manaus
-  "50030901", // Marco Zero, Recife
-  "22290240", // Forte de Copacabana, Rio de Janeiro
-  "04549000", // Rua Augusta, São Paulo
-  "90010310", // Mercado Público, Porto Alegre
-  "41950370", // Elevador Lacerda, Salvador
-  "60811280", // Praia do Futuro, Fortaleza
-  "66087300", // Ilha de Mosqueiro, Belém
+  "20010000", 
+  "22041021", 
+  "30150221", 
+  "60165121",
+  "66035350", 
+  "90010240", 
+  "51011060", 
+  "65025650", 
+  "88330675", 
+  "13015081",
+  "05428070", 
+  "21941915", 
+  "14015130", 
+  "80035050", 
+  "88062505", 
+  "69305630", 
+  "50030901", 
+  "22290240", 
+  "04549000", 
+  "90010310", 
+  "41950370", 
+  "60811280", 
+  "66087300", 
   "01002010",
   "20031050",
   "60025080",
@@ -245,7 +244,7 @@ export const ceps = [
   "69020170",
   "21051500",
   "30240020",
-  "50090350", // Estádios
+  "50090350", 
   "88015600",
   "49010520",
   "58013420",
@@ -273,7 +272,6 @@ export const ceps = [
   "77804030", // Edifício Palácio da Justiça, Campo Grande, MS
   "65076820", // Edifício Buriti, Teresina, PI
   "57017870", // Edifício Empresarial Eurico Salles, Maceió, AL
-  // cwb
   "80020290", // Jardim Botânico
   "80010180", // Ópera de Arame
   "80710200", // Museu Oscar Niemeyer
@@ -292,7 +290,6 @@ export const ceps = [
   "80510280", // Memorial da Imigração Polonesa
   "80710200", // Museu Oscar Niemeyer
   "80030000", // Rua das Flores
-  // rj
   "20031050", // Prefeitura do Rio de Janeiro
   "22290240", // Cristo Redentor
   "22470010", // Pão de Açúcar
@@ -314,7 +311,6 @@ export const ceps = [
   "20940080", // Ilha Fiscal
   "22793000", // Pedra da Gávea
   "22210050", // Porto Maravilha
-  // sp
   "01002010", // Prefeitura de São Paulo
   "01451000", // Mercado Municipal
   "04330060", // Catedral da Sé
@@ -339,7 +335,6 @@ export const ceps = [
   "01236000", // Prédio Banespa
   "04118000", // Bairro dos Jardins
   "11010071", // Shopping Anália Franco
-  // sc
   "88015600", // Centro de Florianópolis
   "88037500", // Lagoa da Conceição, Florianópolis
   "88032005", // Pontal Norte, Florianópolis
@@ -352,7 +347,6 @@ export const ceps = [
   "88370650", // Navegantes
   "89062050", // Pomerode
   "89219710", // Canasvieiras, Florianópolis
-  // rs
   "90010460", // Centro de Porto Alegre
   "91330520", // Moinhos de Vento, Porto Alegre
   "90840440", // Bairro Moinhos de Vento, Porto Alegre
@@ -364,7 +358,6 @@ export const ceps = [
   "97015030", // Centro de Santa Maria
   "96810012", // Centro de Santa Cruz do Sul
   "96010610", // Pelotas
-  // mg
   "30190010", // Edifício Acaiaca, Belo Horizonte
   "30330180", // Praça da Liberdade, Belo Horizonte
   "30240020", // Estádio Mineirão, Belo Horizonte
@@ -376,7 +369,6 @@ export const ceps = [
   "38025180", // Bairro Santa Mônica, Uberlândia
   "38411136", // Shopping Uberlândia
   "38408144", // Aeroporto de Uberlândia
-  // mt
   "78020290", // Bairro Duque de Caxias, Cuiabá
   "78070000", // Parque das Águas Quentes, Cuiabá
   "78098970", // Chapada dos Guimarães

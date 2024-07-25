@@ -28,9 +28,9 @@ export default function Command() {
   const actions = (content: string) => {
     return (
       <ActionPanel>
-        <Action.CopyToClipboard title="Copiar" content={content} />
+        <Action.CopyToClipboard title="Copy" content={content} />
         <Action
-          title="Gerar Nova Cartão"
+          title="Generate New Utils"
           icon={Icon.Repeat}
           onAction={async () => {
             const newUtils = getUtils();
@@ -45,7 +45,7 @@ export default function Command() {
   return (
     <>
       <List isLoading={isLoading}>
-        <List.Section title="Úteis">
+        <List.Section title="Utils">
           <List.Item title={utils.ipv4} subtitle="IPv4" icon={Icon.Signal3} actions={actions(utils.ipv4)} />
           <List.Item title={utils.ipv6} subtitle="IPv6" icon={Icon.Signal3} actions={actions(utils.ipv6)} />
           <List.Item title={utils.mac} subtitle="MAC" icon={Icon.ComputerChip} actions={actions(utils.mac)} />

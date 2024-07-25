@@ -26,9 +26,9 @@ export default function Command() {
   const actions = (content: string) => {
     return (
       <ActionPanel>
-        <Action.CopyToClipboard title="Copiar" content={content} />
+        <Action.CopyToClipboard title="Copy" content={content} />
         <Action
-          title="Gerar Nova Cartão"
+          title="Generate New Card"
           icon={Icon.Repeat}
           onAction={async () => {
             const newCard = cartao();
@@ -37,7 +37,7 @@ export default function Command() {
           }}
         />
         <Action
-          title="Mudar Máscara"
+          title="Toggle Mask"
           icon={Icon.Mask}
           onAction={() => {
             setMask(!mask);
@@ -51,22 +51,22 @@ export default function Command() {
   return (
     <>
       <List isLoading={isLoading}>
-        <List.Section title="Cartão">
+        <List.Section title="Card">
           <List.Item
             title={mask ? card.numero : card.numero.replaceAll(/\D/g, "")}
-            subtitle="Número"
+            subtitle="Number"
             icon={Icon.CreditCard}
             actions={actions(card.numero)}
           />
           <List.Item title={card.cvv} subtitle="CVV" icon={Icon.Hashtag} actions={actions(card.cvv)} />
-          <List.Item title={card.bandeira} subtitle="Bandeira" icon={Icon.Flag} actions={actions(card.bandeira)} />
+          <List.Item title={card.bandeira} subtitle="Brand" icon={Icon.Flag} actions={actions(card.bandeira)} />
           <List.Item
             title={card.expiracao}
-            subtitle="Expiração"
+            subtitle="Expiration"
             icon={Icon.Calendar}
             actions={actions(card.expiracao)}
           />
-          <List.Item title={card.titular} subtitle="Titular" icon={Icon.Person} actions={actions(card.titular)} />
+          <List.Item title={card.titular} subtitle="Holder" icon={Icon.Person} actions={actions(card.titular)} />
         </List.Section>
       </List>
     </>

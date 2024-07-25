@@ -49,9 +49,9 @@ export default function Command() {
   const actions = (content: string) => {
     return (
       <ActionPanel>
-        <Action.CopyToClipboard title="Copiar" content={content} />
+        <Action.CopyToClipboard title="Copy" content={content} />
         <Action
-          title="Gerar Nova Pessoa"
+          title="Generate New Person"
           icon={Icon.Repeat}
           onAction={async () => {
             const newPerson = personData(mask);
@@ -64,7 +64,7 @@ export default function Command() {
           }}
         />
         <Action
-          title="Mudar Máscara"
+          title="Toggle Mask"
           icon={Icon.Mask}
           onAction={() => {
             setMask(!mask);
@@ -78,8 +78,8 @@ export default function Command() {
   return (
     <>
       <List isLoading={isLoading}>
-        <List.Section title="Pessoa">
-          <List.Item title={person.nome} subtitle="Nome" icon={Icon.Lowercase} actions={actions(person.nome)} />
+        <List.Section title="Person">
+          <List.Item title={person.nome} subtitle="Name" icon={Icon.Lowercase} actions={actions(person.nome)} />
           <List.Item
             title={mask ? person.cpf : person.cpf.replaceAll(/\D/g, "")}
             subtitle="CPF"
@@ -94,22 +94,22 @@ export default function Command() {
           />
           <List.Item
             title={person.sexo}
-            subtitle="Sexo"
+            subtitle="Gender"
             icon={person.sexo === "Masculino" ? Icon.Male : Icon.Female}
             actions={actions(person.sexo)}
           />
           <List.Item
             title={person.dataNascimento}
-            subtitle="Data de Nascimento"
+            subtitle="Birthday"
             icon={Icon.Calendar}
             actions={actions(person.dataNascimento)}
           />
           <List.Item title={person.email} subtitle="Email" icon={Icon.Envelope} actions={actions(person.email)} />
-          <List.Item title={person.signo} subtitle="Signo" icon={Icon.Star} actions={actions(person.signo)} />
-          <List.Item title={person.nomePai} subtitle="Nome Pai" icon={Icon.Male} actions={actions(person.nomePai)} />
-          <List.Item title={person.nomeMae} subtitle="Nome Mãe" icon={Icon.Female} actions={actions(person.nomeMae)} />
+          <List.Item title={person.signo} subtitle="Zodiac Sign" icon={Icon.Star} actions={actions(person.signo)} />
+          <List.Item title={person.nomePai} subtitle="Father's Name" icon={Icon.Male} actions={actions(person.nomePai)} />
+          <List.Item title={person.nomeMae} subtitle="Mother's Name" icon={Icon.Female} actions={actions(person.nomeMae)} />
         </List.Section>
-        <List.Section title="Endereço">
+        <List.Section title="Address">
           <List.Item
             title={mask ? address.cep : address.cep.replaceAll(/\D/g, "")}
             subtitle="CEP"
@@ -118,32 +118,32 @@ export default function Command() {
           />
           <List.Item
             title={address.logradouro}
-            subtitle="Rua"
+            subtitle="Street"
             actions={actions(address.logradouro)}
             icon={Icon.Geopin}
           />
-          <List.Item title={address.numero} subtitle="Número" actions={actions(address.numero)} icon={Icon.Cd} />
+          <List.Item title={address.numero} subtitle="Number" actions={actions(address.numero)} icon={Icon.Cd} />
           {address.complemento && (
             <List.Item
               title={address.complemento}
-              subtitle="Complemento"
+              subtitle="Complement"
               actions={actions(address.complemento)}
               icon={Icon.Lowercase}
             />
           )}
-          <List.Item title={address.bairro} subtitle="Bairro" actions={actions(address.bairro)} icon={Icon.Map} />
+          <List.Item title={address.bairro} subtitle="Neighborhood" actions={actions(address.bairro)} icon={Icon.Map} />
           <List.Item
             title={address.localidade}
-            subtitle="Cidade"
+            subtitle="City"
             actions={actions(address.localidade)}
             icon={Icon.Compass}
           />
-          <List.Item title={address.uf} subtitle="Estado" actions={actions(address.uf)} icon={Icon.AirplaneTakeoff} />
+          <List.Item title={address.uf} subtitle="State" actions={actions(address.uf)} icon={Icon.AirplaneTakeoff} />
         </List.Section>
-        <List.Section title="Telefone">
+        <List.Section title="Phone">
           <List.Item
             title={mask ? phone : phone.replaceAll(/\D/g, "")}
-            subtitle="Telefone"
+            subtitle="Phone"
             icon={Icon.Phone}
             actions={actions(phone)}
           />

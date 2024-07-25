@@ -15,7 +15,7 @@
     {
       "name": "empresa",
       "title": "Company",
-      "description": "Generate a company",
+      "description": "Generate data about a company",
       "mode": "view",
       "icon": "empresa.png",
       "keywords": [
@@ -26,12 +26,12 @@
         "cnpj",
         "inscricao estadual"
       ],
-      "subtitle": "Name, documents, state registration..."
+      "subtitle": "Name, CNPJ, State registration"
     },
     {
       "name": "pessoa",
       "title": "Person",
-      "description": "Generate a person",
+      "description": "Generate data about people",
       "mode": "view",
       "icon": "pessoa.png",
       "keywords": [
@@ -44,12 +44,12 @@
         "rg",
         "data de nascimento"
       ],
-      "subtitle": "Name, documents, birth date..."
+      "subtitle": "Name, CPF, RG, birth date"
     },
     {
       "name": "endereco",
       "title": "Address",
-      "description": "Generate an address",
+      "description": "Generate data about addresses",
       "mode": "view",
       "icon": "endereco.png",
       "keywords": [
@@ -63,12 +63,12 @@
         "estado",
         "cep"
       ],
-      "subtitle": "Zip, street, number, neighborhood..."
+      "subtitle": "Street, number, city, state, CEP"
     },
     {
       "name": "veiculo",
       "title": "Vehicle",
-      "description": "Generate a vehicle",
+      "description": "Generate data about vehicles",
       "mode": "view",
       "icon": "veiculo.png",
       "keywords": [
@@ -81,12 +81,12 @@
         "placa",
         "cor"
       ],
-      "subtitle": "Make, model, year, color..."
+      "subtitle": "Brand, model, year, plate, color"
     },
     {
       "name": "cartao",
       "title": "Card",
-      "description": "Generate a credit card",
+      "description": "Generate data about credit cards",
       "mode": "view",
       "icon": "cartao.png",
       "keywords": [
@@ -97,12 +97,12 @@
         "expiração",
         "numero"
       ],
-      "subtitle": "CVV, expiration date, number..."
+      "subtitle": "CVV, expiration, number, holder"
     },
     {
       "name": "uteis",
-      "title": "Utils",
-      "description": "Generate utilitary data",
+      "title": "Utilities",
+      "description": "Generate utility data",
       "mode": "view",
       "icon": "uteis.png",
       "keywords": [
