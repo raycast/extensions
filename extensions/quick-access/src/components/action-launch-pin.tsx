@@ -4,7 +4,7 @@ import React from "react";
 export function ActionLaunchPin() {
   return (
     <Action
-      icon={Icon.Pin}
+      icon={Icon.Tack}
       title={`Pin`}
       shortcut={{ modifiers: ["cmd"], key: "n" }}
       onAction={async () => {
