@@ -1,6 +1,6 @@
 # One Time Password Changelog
 
-## {PR_MERGE_DATE}
+## 2024-07-25
 
 ### Added
 
