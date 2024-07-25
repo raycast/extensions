@@ -62,7 +62,7 @@ export default function Command() {
         setLoading(true);
         try {
           const apikey = preferences.apikey ? `--key ${preferences.apikey}` : "";
-          const { stdout } = await execPromise(`${cliPath} ${query} -j -a -l 50 ${apikey}`);
+          const { stdout } = await execPromise(`${cliPath} ${query} -j -a ${apikey}`);
           const result: SurfedResponse = JSON.parse(stdout);
 
           if (result.error) {
