@@ -34,12 +34,13 @@ export default function Glue() {
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={mutate} />}
       isShowingDetail={!isLoading && !error}
     >
-      if (error)
-      {error ? (
-        <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
-      ) : (
-        glueJobRuns?.map((job) => <GlueJob job={job} mutate={mutateJobRuns} />)
+      {!isLoading && error && <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />}
+      {!isLoading && !error && (glueJobRuns || []).length < 1 && (
+        <List.EmptyView title="No Glue jobs found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
+      {(glueJobRuns || []).map((job) => (
+        <GlueJob job={job} mutate={mutateJobRuns} />
+      ))}
     </List>
   );
 }
@@ -48,6 +49,7 @@ function GlueJob({ job: glueJobRun, mutate }: { job: GlueJobRun; mutate: MutateP
   return (
     <List.Item
       key={glueJobRun.JobName}
+      keywords={[glueJobRun.Id || "", glueJobRun.JobRunState || "", glueJobRun.ErrorMessage || ""]}
       icon={{ source: "aws-icons/glue.png", mask: Image.Mask.RoundedRectangle }}
       title={glueJobRun.JobName!}
       detail={<GlueJobRunDetails jobRun={glueJobRun} />}
@@ -83,11 +85,13 @@ function GlueJob({ job: glueJobRun, mutate }: { job: GlueJobRun; mutate: MutateP
         </ActionPanel>
       }
       accessories={[
-        { date: glueJobRun.CompletedOn ?? glueJobRun.StartedOn, tooltip: glueJobRun.CompletedOn ? "Completed On" : "Started On" },
         {
-          text: glueJobRun.accessoriesText,
+          date: glueJobRun.CompletedOn ?? glueJobRun.StartedOn,
+          tooltip: glueJobRun.CompletedOn ? "Completed On" : "Started On",
+        },
+        {
           icon: { source: glueJobRun.icon!, tintColor: glueJobRun.iconTintColor },
-          tooltip: "Recent Job Run State",
+          tooltip: glueJobRun.accessoriesText,
         },
       ]}
     />
@@ -101,15 +105,15 @@ function GlueJobRuns({ glueJobName: glueJobName }: { glueJobName: string }) {
       {glueJobRuns?.map((jobRun) => (
         <List.Item
           accessories={[
-            { date: jobRun.CompletedOn, tooltip: "Completed On" },
+            { date: jobRun.StartedOn, tooltip: "Started On" },
             {
-              text: jobRun.accessoriesText,
               icon: { source: jobRun.icon!, tintColor: jobRun.iconTintColor },
               tooltip: "Recent Job Run State",
             },
           ]}
-          title={jobRun.CompletedOn?.toUTCString() || ""}
+          title={jobRun.StartedOn?.toUTCString() || ""}
           detail={<GlueJobRunDetails jobRun={jobRun} />}
+          keywords={[jobRun.JobRunState || "", jobRun.ErrorMessage || "", jobRun.Id || ""]}
           actions={
             <ActionPanel>
               <AwsAction.Console url={resourceToConsoleLink(jobRun.Id, "AWS::Glue::JobRun")} />
@@ -127,6 +131,11 @@ function GlueJobRuns({ glueJobName: glueJobName }: { glueJobName: string }) {
 function GlueJobRunDetails({ jobRun: glueJobRun }: { jobRun: GlueJobRun }) {
   return (
     <List.Item.Detail
+      markdown={
+        glueJobRun.Arguments
+          ? `**Arguments**\n\`\`\`json\n${JSON.stringify(glueJobRun.Arguments, null, 2)}\n\`\`\``
+          : undefined
+      }
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Job Name" text={glueJobRun.JobName} />
@@ -136,19 +145,33 @@ function GlueJobRunDetails({ jobRun: glueJobRun }: { jobRun: GlueJobRun }) {
           />
           <List.Item.Detail.Metadata.Label title="Execution Time" text={glueJobRun.ExecutionTime?.toString() + "s"} />
           <List.Item.Detail.Metadata.Label title="Started on" text={glueJobRun.StartedOn?.toUTCString()} />
-          <List.Item.Detail.Metadata.Label title="Completed On" text={glueJobRun.CompletedOn?.toUTCString() || ""} />
-          <List.Item.Detail.Metadata.Label
-            title="Error Message"
-            text={{ color: Color.Red, value: glueJobRun.ErrorMessage || "" }}
-          />
+          {glueJobRun.CompletedOn && (
+            <List.Item.Detail.Metadata.Label title="Completed On" text={glueJobRun.CompletedOn?.toUTCString()} />
+          )}
+          {glueJobRun.ErrorMessage && (
+            <List.Item.Detail.Metadata.Label
+              title="Error Message"
+              text={{ color: Color.Red, value: glueJobRun.ErrorMessage || "" }}
+            />
+          )}
           <List.Item.Detail.Metadata.Label title="Arguments" text={JSON.stringify(glueJobRun.Arguments)} />
-          <List.Item.Detail.Metadata.Label title="DPU Seconds" text={(glueJobRun.DPUSeconds?.toString() || "") + "s"} />
-          <List.Item.Detail.Metadata.Label title="Attempt" text={glueJobRun.Attempt?.toString()} />
+          {glueJobRun.DPUSeconds && (
+            <List.Item.Detail.Metadata.Label title="DPU Seconds" text={glueJobRun.DPUSeconds?.toString() + "s"} />
+          )}
+          {glueJobRun.Attempt && (
+            <List.Item.Detail.Metadata.Label title="Attempt" text={glueJobRun.Attempt?.toString()} />
+          )}
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="Worker Type" text={glueJobRun.WorkerType} />
-          <List.Item.Detail.Metadata.Label title="Number of Workers" text={glueJobRun.NumberOfWorkers?.toString()} />
-          <List.Item.Detail.Metadata.Label title="Timeout" text={glueJobRun.Timeout?.toString() + "s"} />
-          <List.Item.Detail.Metadata.Label title="Profile Name" text={glueJobRun.ProfileName || ""} />
+          {glueJobRun.WorkerType && (
+            <List.Item.Detail.Metadata.Label title="Number of Workers" text={glueJobRun.NumberOfWorkers?.toString()} />
+          )}
+          {glueJobRun.Timeout && (
+            <List.Item.Detail.Metadata.Label title="Timeout" text={glueJobRun.Timeout?.toString() + "s"} />
+          )}
+          {glueJobRun.ProfileName && (
+            <List.Item.Detail.Metadata.Label title="Profile Name" text={glueJobRun.ProfileName} />
+          )}
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.TagList title="Versions">
             <List.Item.Detail.Metadata.TagList.Item text={"Glue V" + glueJobRun.GlueVersion} color={Color.Yellow} />
@@ -184,14 +207,14 @@ function GlueJobDefinition({ glueJobName: glueJobName }: { glueJobName: string }
     <Detail
       navigationTitle="Glue Job Definition"
       markdown={
-        `### ` +
-        glueJobName +
-        glueJobDetails?.Job?.Description ? `\n\n${description}` : '' +
-        `\n\n` +
-        `___\n**Job Definition**\n` +
-        `\`\`\`json\n` +
-        JSON.stringify(glueJobDetails?.Job, null, 2) +
-        `\`\`\``
+        `### ` + glueJobName + glueJobDetails?.Job?.Description
+          ? `\n\n${description}`
+          : "" +
+            `\n\n` +
+            `___\n**Job Definition**\n` +
+            `\`\`\`json\n` +
+            JSON.stringify(glueJobDetails?.Job, null, 2) +
+            `\`\`\``
       }
       isLoading={isLoading}
       actions={
@@ -207,24 +230,38 @@ function GlueJobDefinition({ glueJobName: glueJobName }: { glueJobName: string }
       }
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Role" text={glueJobDetails?.Job?.Role} />
-          <Detail.Metadata.Label title="LastModifiedOn" text={glueJobDetails?.Job?.LastModifiedOn?.toISOString()} />
-          <Detail.Metadata.Label title="WorkerType" text={glueJobDetails?.Job?.WorkerType} />
-          <Detail.Metadata.Label
-            title="MaxConcurrentRuns"
-            text={glueJobDetails?.Job?.ExecutionProperty?.MaxConcurrentRuns?.toString()}
-          />
-          <Detail.Metadata.Label title="MaxCapacity" text={glueJobDetails?.Job?.MaxCapacity?.toString()} />
-          <Detail.Metadata.Label title="NumerOfWorkers" text={glueJobDetails?.Job?.NumberOfWorkers?.toString()} />
-          <Detail.Metadata.Label title="Timeout" text={glueJobDetails?.Job?.Timeout?.toString()} />
+          {glueJobDetails?.Job && <Detail.Metadata.Label title="Role" text={glueJobDetails?.Job?.Role} />}
+          {glueJobDetails?.Job?.LastModifiedOn && (
+            <Detail.Metadata.Label title="LastModifiedOn" text={glueJobDetails?.Job?.LastModifiedOn?.toISOString()} />
+          )}
+          {glueJobDetails?.Job?.WorkerType && (
+            <Detail.Metadata.Label title="WorkerType" text={glueJobDetails?.Job?.WorkerType} />
+          )}
+          {glueJobDetails?.Job?.ExecutionProperty?.MaxConcurrentRuns && (
+            <Detail.Metadata.Label
+              title="MaxConcurrentRuns"
+              text={glueJobDetails?.Job?.ExecutionProperty?.MaxConcurrentRuns?.toString()}
+            />
+          )}
+          {glueJobDetails?.Job?.MaxCapacity && (
+            <Detail.Metadata.Label title="MaxCapacity" text={glueJobDetails?.Job?.MaxCapacity?.toString()} />
+          )}
+          {glueJobDetails?.Job?.NumberOfWorkers && (
+            <Detail.Metadata.Label title="NumerOfWorkers" text={glueJobDetails?.Job?.NumberOfWorkers?.toString()} />
+          )}
+          {glueJobDetails?.Job?.Timeout && (
+            <Detail.Metadata.Label title="Timeout" text={glueJobDetails?.Job?.Timeout?.toString()} />
+          )}
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="CreatedOn" text={glueJobDetails?.Job?.CreatedOn?.toISOString()} />
-          <Detail.Metadata.Label title="GlueVersion" text={glueJobDetails?.Job?.GlueVersion?.toString()} />
-          <Detail.Metadata.Label title="PythonVersion" text={glueJobDetails?.Job?.Command?.PythonVersion} />
-          <Detail.Metadata.Label
-            title="Default Arguments"
-            text={JSON.stringify(glueJobDetails?.Job?.DefaultArguments)}
-          />
+          {glueJobDetails?.Job?.CreatedOn && (
+            <Detail.Metadata.Label title="CreatedOn" text={glueJobDetails?.Job?.CreatedOn?.toISOString()} />
+          )}
+          {glueJobDetails?.Job?.GlueVersion && (
+            <Detail.Metadata.Label title="GlueVersion" text={glueJobDetails?.Job?.GlueVersion?.toString()} />
+          )}
+          {glueJobDetails?.Job?.Command && (
+            <Detail.Metadata.Label title="PythonVersion" text={glueJobDetails?.Job?.Command?.PythonVersion} />
+          )}
           <Detail.Metadata.Label title="JobMode" text={glueJobDetails?.Job?.JobMode} />
         </Detail.Metadata>
       }
