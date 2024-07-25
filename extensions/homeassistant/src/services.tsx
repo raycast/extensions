@@ -12,7 +12,12 @@ import {
   ServiceFormTargetEntitiesTagPicker,
 } from "@components/services/form";
 import { HAServiceCall, useHAServiceCallFormData, useServiceCalls } from "@components/services/hooks";
-import { fullHAServiceName, getHAServiceQuicklink, getNameOfHAServiceField } from "@components/services/utils";
+import {
+  formDataToObject,
+  fullHAServiceName,
+  getHAServiceQuicklink,
+  getNameOfHAServiceField,
+} from "@components/services/utils";
 import { ha } from "@lib/common";
 import { capitalizeFirstLetter } from "@lib/utils";
 import { Action, ActionPanel, Form, Icon, Keyboard, popToRoot, showToast, Toast } from "@raycast/api";
@@ -35,7 +40,7 @@ export default function ServiceCallCommand() {
   const { fields, userData, setUserDataByKey, setUserData, userDataError } = useHAServiceCallFormData(selectedService);
   const handle = async (input: Form.Values, options?: { popToRootOnSuccessful?: boolean }) => {
     try {
-      const payload = yamlMode ? parse(yamlText) : userData;
+      const payload = yamlMode ? parse(yamlText) : formDataToObject(userData, fields);
       const service = services?.find((s) => fullHAServiceName(s) === input.service);
       if (!service) {
         throw new Error(`Could not get service for id "${input.service}"`);
@@ -97,13 +102,7 @@ export default function ServiceCallCommand() {
                   onAction={() => {
                     const newYamlMode = !yamlMode;
                     if (newYamlMode) {
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      const types: Record<string, any> = {};
-                      for (const f of fields) {
-                        if (userData[f.id] !== undefined) {
-                          types[f.id] = f.toYaml(userData[f.id]);
-                        }
-                      }
+                      const types = formDataToObject(userData, fields);
                       setYamlText(stringify(types).trim());
                     } else {
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any

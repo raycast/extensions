@@ -1,5 +1,5 @@
 import { ha } from "@lib/common";
-import { HAServiceCall } from "./hooks";
+import { FieldState, HAServiceCall } from "./hooks";
 
 export interface HAServiceFieldSelectorNumber {
   min?: number | null;
@@ -132,4 +132,16 @@ export interface HAServiceCallPayload {
 export function getHAServiceQuicklink(payload: HAServiceCallPayload) {
   const encoded = encodeURI(JSON.stringify(payload));
   return `raycast://extensions/tonka3000/homeassistant/runService?context=${encoded}`;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function formDataToObject(userData: Record<string, any>, fields: FieldState[]) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result: Record<string, any> = {};
+  for (const f of fields) {
+    if (userData[f.id] !== undefined) {
+      result[f.id] = f.toYaml(userData[f.id]);
+    }
+  }
+  return result;
 }
