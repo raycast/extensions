@@ -83,7 +83,7 @@ function GlueJob({ job: glueJobRun, mutate }: { job: GlueJobRun; mutate: MutateP
         </ActionPanel>
       }
       accessories={[
-        { date: glueJobRun.CompletedOn, tooltip: "Completed On" },
+        { date: glueJobRun.CompletedOn ?? glueJobRun.StartedOn, tooltip: glueJobRun.CompletedOn ? "Completed On" : "Started On" },
         {
           text: glueJobRun.accessoriesText,
           icon: { source: glueJobRun.icon!, tintColor: glueJobRun.iconTintColor },
