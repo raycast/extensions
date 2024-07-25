@@ -1,10 +1,16 @@
 # Surfed
 
-Surfed is a Unified browser history and bookmark manager, as well as a web automation tool for macOS and iOS. Search and filter your browsing history using multiple search terms and full-text search.
+Surfed is a unified browser history and bookmark manager, as well as a web automation tool for macOS and iOS. Search and filter your browsing history using multiple search terms and full-text search.
 
-With the Raycast extension you can search your Collections, Tags, URLs and Browsing History in Surfed.
+With the Raycast extension you can search your Collections, Tags, URLs and Browsing History in Surfed and open the link directly in your Browser or Surfed.
 
 For more information about Surfed visit [surfed.app](https://surfed.app).
+
+## Images
+
+![Image](metadata/search_1.png)
+![Image](metadata/search_2.png)
+![Image](metadata/search_3.png)
 
 ## Which filter types are available to search in the browser history, websites, tag and collection lists?
 
@@ -62,7 +68,18 @@ Add a <code>!</code> before the shortcut to negate the filter e.g. <code>!u:{ter
 | At Night      | :tn                    |
 
 Add a <code>!</code> before the shortcut to negate the filter e.g. <code>!u:{term}</code>.
+You can add multiple search terms add once e.g.:
+<code>u:foo.bar t:Lorum !c:Ipsum :ld :tm</code>
+This searches for <em>URLs</em> containing <em>foo.bar</em>, <em>title</em> containing <em>Lorum</em>, <em>article</em> not containing <em>Ipsum</em> visited <em>yesterday morning</em>.
 
 ## Configuration
 
-If Surfed is protected by an password you have to enter the Surfed API-Key <code>Surfed.app > Settings > API-Key</code> in the Raycast preferences to get search results.
+If Surfed is protected by a password, you have to enter the Surfed API-Key (found in  <code>Surfed.app > Settings > API-Key </code>) in the Raycast preferences to get search results.
+
+![Image](metadata/preferences.png)
+
+Open [Settings](surfed://settings/) in Surfed.app (if the app is installed), copy the API-Key and enter it in Raycast.
+
+![Image](metadata/settings-api-key.png)
+
+
