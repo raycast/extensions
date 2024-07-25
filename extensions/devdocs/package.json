@@ -7,6 +7,8 @@
   "icon": "devdocs.png",
   "author": "djpowers",
   "pastContributors": ["pomdtr"],
+  "categories": ["Documentation"],
+  "keywords": ["API", "developer", "development", "docs", "docset", "documentation", "reference"],
   "commands": [
     {
       "name": "search-docsets",
