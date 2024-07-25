@@ -68,7 +68,8 @@ This searches for <em>URLs</em> containing <em>foo.bar</em>, <em>title</em> cont
 
 ## Configuration
 
-If Surfed is protected by a password, you have to enter the Surfed API-Key (found in  <code>Surfed.app > Settings > API-Key </code>) in the Raycast preferences to get search results.
+If Surfed is protected by a password (<code>Use Password</code> enabled in settings), you have to enter the Surfed API-Key (found in  <code>Surfed.app > Settings > API-Key </code>) in the Raycast preferences to get search results.
+Otherwise, if Surfed is not protected by a password (<code>Use Password</code> disabled in settings), leave the API-Key setting empty.
 
 ![Image](metadata/preferences.png)
 
