@@ -1,5 +1,6 @@
 import { ActionPanel, List, Action, LocalStorage, useNavigation, Clipboard, closeMainWindow, Icon } from "@raycast/api";
 import { CityData, findFromCityStateProvince } from "city-timezones";
+import getUnicodeFlagIcon from "country-flag-icons/unicode";
 import { useEffect, useState, useMemo } from "react";
 
 const timeFormatter = new Intl.DateTimeFormat("en-US", {
@@ -10,6 +11,10 @@ const timeFormatter = new Intl.DateTimeFormat("en-US", {
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
   day: "numeric",
+});
+
+const dayOfWeekFormatter = new Intl.DateTimeFormat("en-US", {
+  weekday: "long",
 });
 
 function AddCityView({ initialCityName, onAdd }: { initialCityName?: string; onAdd: (c: CityData) => void }) {
@@ -77,7 +82,7 @@ export default function Command() {
   const addCityAction = (
     <Action.Push
       icon={Icon.Building}
-      title="Add a city"
+      title="Add a City"
       shortcut={{
         modifiers: ["cmd", "shift"],
         key: "=",
@@ -99,7 +104,7 @@ export default function Command() {
     <ActionPanel>
       <Action
         icon={Icon.CopyClipboard}
-        title="Copy time"
+        title="Copy Time"
         shortcut={{
           modifiers: [],
           key: "enter",
@@ -111,7 +116,7 @@ export default function Command() {
       />
       <Action
         icon={Icon.Plus}
-        title="Add 1 hour"
+        title="Add 1 Hour"
         shortcut={{
           modifiers: ["cmd"],
           key: "arrowRight",
@@ -120,7 +125,7 @@ export default function Command() {
       />
       <Action
         icon={Icon.Minus}
-        title="Subtract 1 hour"
+        title="Subtract 1 Hour"
         shortcut={{
           modifiers: ["cmd"],
           key: "arrowLeft",
@@ -129,7 +134,7 @@ export default function Command() {
       />
       <Action
         icon={Icon.Clock}
-        title="Clear hours offset"
+        title="Clear Hours Offset"
         shortcut={{
           modifiers: ["cmd"],
           key: "0",
@@ -140,7 +145,7 @@ export default function Command() {
       {city ? (
         <Action
           icon={Icon.XMarkCircle}
-          title="Remove city"
+          title="Remove City"
           style={Action.Style.Destructive}
           shortcut={{
             modifiers: ["cmd"],
@@ -160,9 +165,9 @@ export default function Command() {
   localDate.setTime(localDate.getTime() + offsetHrs * 60 * 60 * 1000);
   const localTime = timeFormatter.format(localDate);
   const localDateString = dateFormatter.format(localDate);
-  const todayDateString = dateFormatter.format(new Date());
+  const localDayOfWeek = dayOfWeekFormatter.format(localDate);
 
-  const subtitle = localTime + " " + (offsetHrs && localDateString !== todayDateString ? localDateString : "");
+  const subtitle = localDayOfWeek + ", " + localDateString + ", " + localTime;
 
   const local = (
     <List.Item
@@ -188,12 +193,13 @@ export default function Command() {
         const date = new Date(_date.toLocaleString("en-US", { timeZone: c.timezone }));
         const timeString = timeFormatter.format(date);
         const dateString = dateFormatter.format(date);
-        const subtitle = `${timeString} ${todayDateString === dateString ? "" : dateString}`;
+        const dayOfWeek = dayOfWeekFormatter.format(date);
+        const subtitle = `${dayOfWeek}, ${dateString}, ${timeString}`;
 
         return (
           <List.Item
             key={c.city}
-            title={c.city}
+            title={c.city + " " + getUnicodeFlagIcon(c.iso2)}
             subtitle={subtitle}
             icon={getIconForTime(date)}
             actions={actions({ time: subtitle, city: c })}

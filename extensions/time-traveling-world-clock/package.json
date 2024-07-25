@@ -5,6 +5,10 @@
   "description": "A world clock that enables you to scrub across time and see the corresponding time across various cities.",
   "icon": "icon-command.png",
   "author": "marky",
+  "contributors": [
+    "iwex",
+    "ridemountainpig"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -19,7 +23,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.54.1",
-    "city-timezones": "^1.2.1"
+    "city-timezones": "^1.2.1",
+    "country-flag-icons": "^1.5.13"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

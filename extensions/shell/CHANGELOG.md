@@ -1,5 +1,8 @@
 # shell Changelog
 
+## [Fix] 2024-07-18
+Fix [issue](https://github.com/raycast/extensions/issues/13496) to avoid UI hanging on large data from `child_process`. 
+
 ## [Fix] 2024-05-15
 Fix an [issue](https://github.com/raycast/extensions/issues/12350) where commands aren't send to iTerm2.
 

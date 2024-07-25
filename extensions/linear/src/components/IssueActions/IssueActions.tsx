@@ -1,4 +1,14 @@
-import { Action, Icon, ActionPanel, showToast, Toast, confirmAlert, Color, useNavigation } from "@raycast/api";
+import {
+  Action,
+  Icon,
+  ActionPanel,
+  showToast,
+  Toast,
+  confirmAlert,
+  Color,
+  useNavigation,
+  Keyboard,
+} from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
 import { IssueUpdateInput } from "@linear/sdk/dist/_generated_documents";
@@ -477,7 +487,7 @@ export default function IssueActions({
 
         <Action
           title="Delete Issue"
-          shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+          shortcut={Keyboard.Shortcut.Common.Remove}
           icon={Icon.Trash}
           style={Action.Style.Destructive}
           onAction={() => deleteIssue()}

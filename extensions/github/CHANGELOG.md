@@ -1,14 +1,22 @@
 # GitHub Changelog
 
+## [Improvements] - 2024-07-23
+
+- Enhanced the display of repository stars in the `Search Repositories` command by prefixing the number with a star symbol (★).
+
+## [Fix copy commit URL action] - 2024-07-22
+
+- Fix the "Copy Commit URL" action to ensure it correctly copies the commit URL as intended.
+
 ## [Repository Improvements] - 2024-07-12
 
 - Adds primary language color and code icon to the accessory for being in-sync with GitHub UI.
-- Adds "Sort By" action for My Latest Repositories with supported options
+- Adds "Sort By" action for My Latest Repositories with supported options.
 
 ## [Improvements and Fixes] - 2024-07-08
 
-- Adds an action to sort the PRs, issues, discussions and repos
-- For creating branches with no linked issues, the branch name does not need to start with `refs/heads`
+- Adds an action to sort the PRs, issues, discussions and repos.
+- For creating branches with no linked issues, the branch name does not need to start with `refs/heads`.
 
 ## [Notifications Improvements] - 2024-07-03
 
@@ -17,8 +25,8 @@
 
 ## [Improvements] - 2024-06-20
 
-- PRs: Add an option to omit team review requests from query results
-- Updated dependencies and removed high-security vulnerabilities
+- PRs: Add an option to omit team review requests from query results.
+- Updated dependencies and removed high-security vulnerabilities.
 
 ## [Fix copy commit hash action] - 2024-06-17
 
