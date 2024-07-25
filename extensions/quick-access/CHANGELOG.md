@@ -1,6 +1,6 @@
 # Quick Access Changelog
 
-## [Update Icons] - {PR_MERGE_DATE}
+## [Update Icons] - 2024-07-25
 
 - Updated icons for extensions, commands and Menu bar
 
