@@ -6,8 +6,7 @@ import { allModels as changeModels, currentDate, countToken, estimatePrice } fro
 import { ResultViewProps } from "./ResultView.types";
 
 export default function ResultView(props: ResultViewProps) {
-  const { sys_prompt, selected_text, user_extra_msg, model_override, toast_title, temperature } =
-    props;
+  const { sys_prompt, selected_text, user_extra_msg, model_override, toast_title, temperature } = props;
   const [response_token_count, setResponseTokenCount] = useState(0);
   const [prompt_token_count, setPromptTokenCount] = useState(0);
   const [response, setResponse] = useState("");
@@ -17,12 +16,7 @@ export default function ResultView(props: ResultViewProps) {
   const [model, setModel] = useState(model_override == "global" ? global_model : model_override);
   const [temp, setTemperature] = useState(temperature ? temperature : 1);
 
-  async function getChatResponse(
-    sysPrompt: string,
-    selectedText: string,
-    model: string,
-    temp: number
-  ) {
+  async function getChatResponse(sysPrompt: string, selectedText: string, model: string, temp: number) {
     sysPrompt = `Current date: ${currentDate}.\n\n ${sysPrompt}`;
     const userPrompt = `${user_extra_msg ? `${user_extra_msg.trim()}\n\n` : ""}${
       selectedText ? `The following is the text:\n"${selectedText.trim()}"` : ""
@@ -43,8 +37,7 @@ export default function ResultView(props: ResultViewProps) {
       await showToast({ style: Toast.Style.Failure, title: "Error" });
       setLoading(false);
       setResponse(
-        "## ⚠️ Issue when accessing the API. \n\n" +
-          `Error Message: \n\n \`\`\`${(error as Error).message}\`\`\``
+        "## ⚠️ Issue when accessing the API. \n\n" + `Error Message: \n\n \`\`\`${(error as Error).message}\`\`\``,
       );
       return;
     }
@@ -64,18 +57,13 @@ export default function ResultView(props: ResultViewProps) {
         await showToast({ style: Toast.Style.Failure, title: "Error" });
         setLoading(false);
         setResponse(
-          "⚠️ Raycast was unable to get the selected text. You may try copying the text to a text editor and try again."
+          "⚠️ Raycast was unable to get the selected text. You may try copying the text to a text editor and try again.",
         );
         return;
       }
     }
 
-    const resp = await getChatResponse(
-      sys_prompt,
-      selectedText,
-      newModel ?? model,
-      newTemp ?? temp
-    );
+    const resp = await getChatResponse(sys_prompt, selectedText, newModel ?? model, newTemp ?? temp);
     if (!resp) return;
 
     let response_ = "";
@@ -115,9 +103,7 @@ export default function ResultView(props: ResultViewProps) {
   useEffect(() => {
     if (loading == false) {
       setCumulativeTokens(cumulative_tokens + prompt_token_count + response_token_count);
-      setCumulativeCost(
-        cumulative_cost + estimatePrice(prompt_token_count, response_token_count, model)
-      );
+      setCumulativeCost(cumulative_cost + estimatePrice(prompt_token_count, response_token_count, model));
     }
   }, [loading]);
 
@@ -164,41 +150,13 @@ export default function ResultView(props: ResultViewProps) {
               icon={Icon.Temperature}
               shortcut={{ modifiers: ["cmd"], key: "t" }}
             >
-              <Action
-                icon={{ source: Icon.Signal1 }}
-                title="0.2"
-                onAction={() => retry({ newTemp: 0.2 })}
-              />
-              <Action
-                icon={{ source: Icon.Signal1 }}
-                title="0.4"
-                onAction={() => retry({ newTemp: 0.4 })}
-              />
-              <Action
-                icon={{ source: Icon.Signal2 }}
-                title="0.6"
-                onAction={() => retry({ newTemp: 0.6 })}
-              />
-              <Action
-                icon={{ source: Icon.Signal2 }}
-                title="0.8"
-                onAction={() => retry({ newTemp: 0.8 })}
-              />
-              <Action
-                icon={{ source: Icon.Signal3 }}
-                title="1.0"
-                onAction={() => retry({ newTemp: 1.0 })}
-              />
-              <Action
-                icon={{ source: Icon.FullSignal }}
-                title="1.2"
-                onAction={() => retry({ newTemp: 1.2 })}
-              />
-              <Action
-                icon={{ source: Icon.FullSignal }}
-                title="1.4"
-                onAction={() => retry({ newTemp: 1.4 })}
-              />
+              <Action icon={{ source: Icon.Signal1 }} title="0.2" onAction={() => retry({ newTemp: 0.2 })} />
+              <Action icon={{ source: Icon.Signal1 }} title="0.4" onAction={() => retry({ newTemp: 0.4 })} />
+              <Action icon={{ source: Icon.Signal2 }} title="0.6" onAction={() => retry({ newTemp: 0.6 })} />
+              <Action icon={{ source: Icon.Signal2 }} title="0.8" onAction={() => retry({ newTemp: 0.8 })} />
+              <Action icon={{ source: Icon.Signal3 }} title="1.0" onAction={() => retry({ newTemp: 1.0 })} />
+              <Action icon={{ source: Icon.FullSignal }} title="1.2" onAction={() => retry({ newTemp: 1.2 })} />
+              <Action icon={{ source: Icon.FullSignal }} title="1.4" onAction={() => retry({ newTemp: 1.4 })} />
             </ActionPanel.Submenu>
           </ActionPanel>
         )
@@ -210,20 +168,14 @@ export default function ResultView(props: ResultViewProps) {
           <Detail.Metadata.Label title="Prompt Tokens" text={prompt_token_count.toString()} />
           <Detail.Metadata.Label title="Response Tokens" text={response_token_count.toString()} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label
-            title="Total Tokens"
-            text={(prompt_token_count + response_token_count).toString()}
-          />
+          <Detail.Metadata.Label title="Total Tokens" text={(prompt_token_count + response_token_count).toString()} />
           <Detail.Metadata.Label
             title="Total Cost"
             text={estimatePrice(prompt_token_count, response_token_count, model).toString() + " ¢"}
           />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Culmulative Tokens" text={cumulative_tokens.toString()} />
-          <Detail.Metadata.Label
-            title="Culmulative Cost"
-            text={cumulative_cost.toFixed(4) + " ¢"}
-          />
+          <Detail.Metadata.Label title="Culmulative Cost" text={cumulative_cost.toFixed(4) + " ¢"} />
         </Detail.Metadata>
       }
     />
