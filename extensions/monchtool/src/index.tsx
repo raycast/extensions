@@ -36,9 +36,7 @@ export default function GoldenRatioCommand() {
       const ratios = [];
       for (let i = -3; i <= 3; i++) {
         const ratioNumber = number * Math.pow(ratioConstant, i);
-        const ratioText = showDecimal
-          ? ratioNumber.toFixed(2)
-          : Math.round(ratioNumber).toString();
+        const ratioText = showDecimal ? ratioNumber.toFixed(2) : Math.round(ratioNumber).toString();
         ratios.push(ratioText);
       }
 
@@ -47,20 +45,12 @@ export default function GoldenRatioCommand() {
 
       setSequence(ratios);
 
-      const short = showDecimal
-        ? (number / ratioConstant).toFixed(2)
-        : Math.round(number / ratioConstant).toString();
-      const long = showDecimal
-        ? (number * ratioConstant).toFixed(2)
-        : Math.round(number * ratioConstant).toString();
+      const short = showDecimal ? (number / ratioConstant).toFixed(2) : Math.round(number / ratioConstant).toString();
+      const long = showDecimal ? (number * ratioConstant).toFixed(2) : Math.round(number * ratioConstant).toString();
       const part1Value = number / (1 + ratioConstant);
-      const part1 = showDecimal
-        ? part1Value.toFixed(2)
-        : Math.round(part1Value).toString(); // Short Side
+      const part1 = showDecimal ? part1Value.toFixed(2) : Math.round(part1Value).toString(); // Short Side
       const part2Value = number - part1Value;
-      const part2 = showDecimal
-        ? part2Value.toFixed(2)
-        : Math.round(part2Value).toString(); // Long Side
+      const part2 = showDecimal ? part2Value.toFixed(2) : Math.round(part2Value).toString(); // Long Side
 
       setShortSide(short);
       setLongSide(long);
@@ -77,16 +67,16 @@ export default function GoldenRatioCommand() {
                 index === 0
                   ? "skyblue"
                   : index === 1
-                  ? "lightcoral"
-                  : index === 2
-                  ? "yellowgreen"
-                  : index === 3
-                  ? "orange"
-                  : index === 4
-                  ? "purple"
-                  : index === 5
-                  ? "lightpink"
-                  : "cyan";
+                    ? "lightcoral"
+                    : index === 2
+                      ? "yellowgreen"
+                      : index === 3
+                        ? "orange"
+                        : index === 4
+                          ? "purple"
+                          : index === 5
+                            ? "lightpink"
+                            : "cyan";
 
               const rectSvg = `<rect x="${xCoordinate}" y="0" width="${value}" height="${value}" fill="${fill}" />`;
               xCoordinate += parseFloat(value);
