@@ -61,19 +61,28 @@ export default function GoldenRatioCommand() {
       let xCoordinate = 0;
       const svg = `
         <svg width="${totalWidth}" height="${sequence[6]}" xmlns="http://www.w3.org/2000/svg">
-          ${sequence.map((value, index) => {
-            const fill = index === 0 ? "skyblue" :
-                         index === 1 ? "lightcoral" :
-                         index === 2 ? "yellowgreen" :
-                         index === 3 ? "orange" :
-                         index === 4 ? "purple" :
-                         index === 5 ? "lightpink" :
-                         "cyan";
-      
+          ${sequence
+          .map((value, index) => {
+            const fill =
+              index === 0
+                ? "skyblue"
+                : index === 1
+                  ? "lightcoral"
+                  : index === 2
+                    ? "yellowgreen"
+                    : index === 3
+                      ? "orange"
+                      : index === 4
+                        ? "purple"
+                        : index === 5
+                          ? "lightpink"
+                          : "cyan";
+
             const rectSvg = `<rect x="${xCoordinate}" y="0" width="${value}" height="${value}" fill="${fill}" />`;
             xCoordinate += parseFloat(value);
             return rectSvg;
-          }).join("\n")}
+          })
+          .join("\n")}
         </svg>
       `;
       setSvgCode(svg.trim());
@@ -109,14 +118,8 @@ export default function GoldenRatioCommand() {
         accessories={[{ text: isGoldenRatio ? "Golden Ratio" : "Silver Ratio" }]}
         actions={
           <ActionPanel>
-            <Action
-              title={isGoldenRatio ? "Golden Ratio" : "Silver Ratio"}
-              onAction={toggleRatioMode}
-            />
-            <Action
-              title={`Show ${showDecimal ? "Integer" : "Decimal"}`}
-              onAction={toggleDecimalVisibility}
-            />
+            <Action title={isGoldenRatio ? "Golden Ratio" : "Silver Ratio"} onAction={toggleRatioMode} />
+            <Action title={`Show ${showDecimal ? "Integer" : "Decimal"}`} onAction={toggleDecimalVisibility} />
           </ActionPanel>
         }
       />
@@ -128,10 +131,7 @@ export default function GoldenRatioCommand() {
             accessories={[{ text: shortSideText }]}
             actions={
               <ActionPanel>
-                <Action
-                  title="Copy Short Side"
-                  onAction={() => handleCopyToClipboard([shortSideText])}
-                />
+                <Action title="Copy Short Side" onAction={() => handleCopyToClipboard([shortSideText])} />
               </ActionPanel>
             }
           />
@@ -141,20 +141,14 @@ export default function GoldenRatioCommand() {
             accessories={[{ text: longSideText }]}
             actions={
               <ActionPanel>
-                <Action
-                  title="Copy Long Side"
-                  onAction={() => handleCopyToClipboard([longSideText])}
-                />
+                <Action title="Copy Long Side" onAction={() => handleCopyToClipboard([longSideText])} />
               </ActionPanel>
             }
           />
           <List.Item
             icon={Icon.CircleProgress100}
             title="Total"
-            accessories={[
-              { text: `${part1Text}` },
-              { text: `${part2Text}` }
-            ]}
+            accessories={[{ text: `${part1Text}` }, { text: `${part2Text}` }]}
             actions={
               <ActionPanel>
                 <Action
@@ -174,14 +168,11 @@ export default function GoldenRatioCommand() {
               { text: sequence[3] },
               { text: sequence[4] },
               { text: sequence[5] },
-              { text: sequence[6] }
+              { text: sequence[6] },
             ]}
             actions={
               <ActionPanel>
-                <Action
-                  title="Copy Sequence"
-                  onAction={() => handleCopyToClipboard(sequence)}
-                />
+                <Action title="Copy Sequence" onAction={() => handleCopyToClipboard(sequence)} />
               </ActionPanel>
             }
           />
@@ -197,11 +188,7 @@ export default function GoldenRatioCommand() {
           />
         </>
       ) : (
-        <List.EmptyView
-          icon={Icon.Text}
-          title="No Results"
-          description="Please enter a non-zero number."
-        />
+        <List.EmptyView icon={Icon.Text} title="No Results" description="Please enter a non-zero number." />
       )}
     </List>
   );
