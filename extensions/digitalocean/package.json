@@ -51,6 +51,13 @@
       "subtitle": "DigitalOcean",
       "description": "Search your projects in DigitalOcean, and go to them directly in your browser.",
       "mode": "view"
+    },
+    {
+      "name": "search-app-platform",
+      "title": "Search App Platform",
+      "subtitle": "DigitalOcean",
+      "description": "Search your apps in DigitalOcean, and go to them directly in your browser.",
+      "mode": "view"
     }
   ],
   "dependencies": {
