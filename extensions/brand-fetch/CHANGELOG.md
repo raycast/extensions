@@ -1,6 +1,6 @@
 # Brandfetch Changelog
 
-## [New Features] - {PR_MERGE_DATE}
+## [New Features] - 2024-07-25
 
 - Support free search API
 - Support input as both query or url
