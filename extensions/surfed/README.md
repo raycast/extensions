@@ -6,12 +6,6 @@ With the Raycast extension you can search your Collections, Tags, URLs and Brows
 
 For more information about Surfed visit [surfed.app](https://surfed.app).
 
-## Images
-
-![Image](metadata/search_1.png)
-![Image](metadata/search_2.png)
-![Image](metadata/search_3.png)
-
 ## Which filter types are available to search in the browser history, websites, tag and collection lists?
 
 ### Filter
@@ -80,6 +74,6 @@ If Surfed is protected by a password, you have to enter the Surfed API-Key (foun
 
 Open [Settings](surfed://settings/) in Surfed.app (if the app is installed), copy the API-Key and enter it in Raycast.
 
-![Image](metadata/settings-api-key.png)
+![Image](readme_assets/settings-api-key.png)
 
 
