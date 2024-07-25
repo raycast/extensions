@@ -1,5 +1,9 @@
 # Quick Access Changelog
 
+## [Update Icons] - {PR_MERGE_DATE}
+
+- Updated icons for extensions, commands and Menu bar
+
 ## [Refactor Code] - 2024-07-11
 
 - Refactor the code to simplify the logic and improve the performance
