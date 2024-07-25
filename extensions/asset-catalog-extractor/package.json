@@ -5,6 +5,9 @@
   "description": "Quickly extract Asset Catalog files (.car) using Asset Catalog Tinkerer",
   "icon": "act-icon.png",
   "author": "chrismessina",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity",
@@ -15,7 +18,7 @@
     {
       "name": "index",
       "title": "Extract Catalog",
-      "subtitle": "Quickly extract Asset Catalog files (.car)",
+      "subtitle": "Asset Catalog Extractor",
       "description": "Quickly extract Asset Catalog files (.car) using Asset Catalog Tinkerer",
       "mode": "no-view"
     }
