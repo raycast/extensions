@@ -32,7 +32,7 @@ export default function Glue() {
       isLoading={isLoading || isLoadingJobRuns}
       searchBarPlaceholder="Filter Jobs by name..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={mutate} />}
-      isShowingDetail
+      isShowingDetail={!isLoading && !error}
     >
       if (error)
       {error ? (
