@@ -1,6 +1,6 @@
 # Porkbun Changelog
 
-## [Labels in Domains + Update API hostname] - {PR_MERGE_DATE}
+## [Labels in Domains + Update API hostname] - 2024-07-25
 
 - Labels applied in Porkbun dashboard to domains will now be fetched
 - new `usePorkbun` hook that uses Raycast's `useFetch` to improve handling of some endpoints
