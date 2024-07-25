@@ -67,6 +67,7 @@ export default function AskView(props: { arguments: { query?: string }; fallback
                 user_extra_msg={question ? question : default_question}
                 model_override={model_override}
                 toast_title={toast_title}
+                temperature={0.4}
               />
             }
           />
@@ -106,7 +107,12 @@ export default function AskView(props: { arguments: { query?: string }; fallback
           }
         />
       )}
-      <Form.Dropdown id="selectedModel" title="Selected Model" defaultValue={model_override} onChange={setUsedModel}>
+      <Form.Dropdown
+        id="selectedModel"
+        title="Selected Model"
+        defaultValue={model_override}
+        onChange={setUsedModel}
+      >
         {changeModels.map((model) => (
           <Form.Dropdown.Item key={model.id} value={model.id} title={model.name} />
         ))}
