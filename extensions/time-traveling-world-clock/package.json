@@ -44,11 +44,11 @@
   "preferences": [
     {
       "name": "showUtc",
-      "description": "Show UTC time",
+      "description": "Show UTC time in the list",
       "type": "checkbox",
       "required": false,
       "title": "UTC",
-      "label": "Show UTC time"
+      "label": "Show UTC time in the list"
     }
   ]
 }
