@@ -23,7 +23,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.79.0",
-    "city-timezones": "^1.2.1",
+    "city-timezones": "^1.2.2",
     "country-flag-icons": "^1.5.13"
   },
   "devDependencies": {

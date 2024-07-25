@@ -158,7 +158,7 @@ export default function Command() {
           style={Action.Style.Destructive}
           shortcut={{
             modifiers: ["cmd"],
-            key: "delete",
+            key: "d",
           }}
           onAction={() => {
             const _cities = cities.filter((_city) => _city !== city);
