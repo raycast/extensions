@@ -184,12 +184,11 @@ function GlueJobDefinition({ glueJobName: glueJobName }: { glueJobName: string }
     <Detail
       navigationTitle="Glue Job Definition"
       markdown={
-        `# ` +
+        `### ` +
         glueJobName +
+        glueJobDetails?.Job?.Description ? `\n\n${description}` : '' +
         `\n\n` +
-        description +
-        `\n\n` +
-        `___\n## Job Definition\n` +
+        `___\n**Job Definition**\n` +
         `\`\`\`json\n` +
         JSON.stringify(glueJobDetails?.Job, null, 2) +
         `\`\`\``
