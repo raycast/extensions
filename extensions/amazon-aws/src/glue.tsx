@@ -151,7 +151,7 @@ function GlueJobRunDetails({ jobRun: glueJobRun }: { jobRun: GlueJobRun }) {
           <List.Item.Detail.Metadata.Label title="Profile Name" text={glueJobRun.ProfileName || ""} />
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.TagList title="Versions">
-            <List.Item.Detail.Metadata.TagList.Item text={"Glue V" + glueJobRun.GlueVersion} color={"#eed535"} />
+            <List.Item.Detail.Metadata.TagList.Item text={"Glue V" + glueJobRun.GlueVersion} color={Color.Yellow} />
           </List.Item.Detail.Metadata.TagList>
           <List.Item.Detail.Metadata.Label title="Log Group Name" text={glueJobRun.LogGroupName} />
           <List.Item.Detail.Metadata.Label title="Id" text={glueJobRun.Id} />
