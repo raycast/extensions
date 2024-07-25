@@ -15,12 +15,8 @@ import { useEffect, useState, useMemo } from "react";
 
 interface Preferences {
   showUtc: boolean;
+  twentyFourFormat: boolean;
 }
-
-const timeFormatter = new Intl.DateTimeFormat("en-US", {
-  hour: "numeric",
-  minute: "2-digit",
-});
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -58,7 +54,7 @@ function AddCityView({ initialCityName, onAdd }: { initialCityName?: string; onA
               <Action
                 title="Add"
                 shortcut={{
-                  modifiers: [],
+                  modifiers: ["cmd"],
                   key: "enter",
                 }}
                 onAction={() => {
@@ -81,6 +77,12 @@ export default function Command() {
   const [, _forceUpdate] = useState({});
   const forceUpdate = () => _forceUpdate({});
   const preferences = getPreferenceValues<Preferences>();
+
+  const timeFormatter = new Intl.DateTimeFormat("en-GB", {
+    hour: "numeric",
+    minute: "2-digit",
+    hourCycle: preferences.twentyFourFormat ? "h23" : "h12",
+  });
 
   useEffect(() => {
     (async () => {
@@ -120,10 +122,6 @@ export default function Command() {
       <Action
         icon={Icon.CopyClipboard}
         title="Copy Time"
-        shortcut={{
-          modifiers: [],
-          key: "enter",
-        }}
         onAction={() => {
           Clipboard.copy(time);
           closeMainWindow();
