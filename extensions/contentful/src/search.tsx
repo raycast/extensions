@@ -1,15 +1,9 @@
 import { useState, FC, useMemo } from "react";
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  Color,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { CONTENTFUL } from "./lib/contentful";
 import { ContentType, EntryProps, KeyValueMap, QueryOptions } from "contentful-management";
-import { CONTENTFUL_SPACE } from "./lib/config";
+import { CONTENTFUL_APP_URL, CONTENTFUL_LOCALE, CONTENTFUL_SPACE } from "./lib/config";
 
 type ContentfulContentEntry = EntryProps<KeyValueMap>;
 type ContentfulEntryStatus = "archived" | "published" | "draft" | "changed";
@@ -21,10 +15,10 @@ function getEntryStatus(entry: ContentfulContentEntry): ContentfulEntryStatus {
   return entry.sys.archivedVersion
     ? "archived"
     : isChanged
-    ? "changed"
-    : (entry.sys.publishedCounter && entry.sys.publishedCounter > 0)
-    ? "published"
-    : "draft";
+      ? "changed"
+      : entry.sys.publishedCounter && entry.sys.publishedCounter > 0
+        ? "published"
+        : "draft";
 }
 
 export const ColorMapping: Record<ContentfulEntryStatus, Color> = {
@@ -42,14 +36,16 @@ export default function ContentfulSearch() {
   const [searchText, setSearchText] = useState("");
   const [showDetail, setShowDetail] = useState(false);
   const toggleDetail = () => setShowDetail((s) => !s);
-  
+
   const { isLoading: contentTypesLoading, data: contentTypes } = useCachedPromise(
     async () => {
       const response = await CONTENTFUL.contentType.getMany({});
       return response;
-    }, [], {
-     keepPreviousData: true
-    }
+    },
+    [],
+    {
+      keepPreviousData: true,
+    },
   );
 
   const contentTypesDict: Record<string, ContentType> = useMemo(
@@ -59,24 +55,26 @@ export default function ContentfulSearch() {
           ...dict,
           [item.sys.id]: item,
         }),
-        {}
+        {},
       ) || {},
-    [contentTypes]
+    [contentTypes],
   );
 
   const { isLoading, data: entries } = useCachedPromise(
     async (content_type: string, query_text: string) => {
       const query: QueryOptions = {
         content_type,
-        query: query_text
-      }
-      if (!content_type || content_type==="__all__") delete query.content_type;
+        query: query_text,
+      };
+      if (!content_type || content_type === "__all__") delete query.content_type;
       const response = await CONTENTFUL.entry.getMany({ query });
       return response;
-    }, [contentType, searchText], {
-     keepPreviousData: true
-    }
-  )
+    },
+    [contentType, searchText],
+    {
+      keepPreviousData: true,
+    },
+  );
 
   return (
     <List
@@ -102,7 +100,7 @@ export default function ContentfulSearch() {
     >
       {entries?.items.map((entry) => {
         const titleField = entry.fields[contentTypesDict[entry.sys.contentType.sys.id].displayField];
-        const title = titleField["en-US"] ?? "title";
+        const title = titleField[CONTENTFUL_LOCALE] ?? "title";
         return (
           <ContentfulContentEntryItem
             key={entry.sys.id}
@@ -136,7 +134,7 @@ export const ContentfulContentEntryItem: FC<ContentfulContentEntryItemProps> = (
   showDetail,
   toggleDetail,
 }) => {
-  const entryUrl = `https://app.contentful.com/spaces/${space}/entries/${entry.sys.id}`;
+  const entryUrl = `${CONTENTFUL_APP_URL}spaces/${space}/entries/${entry.sys.id}`;
   const status = getEntryStatus(entry);
   const statusColor = ColorMapping[status];
 
@@ -205,7 +203,7 @@ export const ContentfulContentEntryDetail: FC<ContentfulContentEntryDetailProps>
 
           <List.Item.Detail.Metadata.Label title="Fields" />
           {Object.keys(entry.fields).map((key) => {
-            const field = entry.fields[key]["en-US"];
+            const field = entry.fields[key][CONTENTFUL_LOCALE];
             return (
               <List.Item.Detail.Metadata.Label
                 key={key}
