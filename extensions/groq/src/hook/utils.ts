@@ -1,4 +1,4 @@
-import { encode } from "@nem035/gpt-3-encoder";
+import { encode } from 'gpt-tokenizer';
 
 export const allModels = [
   { name: "Follow global model", id: "global" },
