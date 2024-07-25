@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "monchtool",
-  "title": "monchtool",
+  "title": "Monchtool",
   "description": "Golden Ratio and Silver Ratio Calculation Tools",
   "icon": "monchfun.png",
   "author": "yang_monch",
