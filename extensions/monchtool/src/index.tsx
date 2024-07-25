@@ -1,4 +1,12 @@
-import { List, showToast, Toast, Clipboard, ActionPanel, Action, Icon } from "@raycast/api";
+import {
+  List,
+  showToast,
+  Toast,
+  Clipboard,
+  ActionPanel,
+  Action,
+  Icon,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 
 export default function GoldenRatioCommand() {
@@ -36,7 +44,9 @@ export default function GoldenRatioCommand() {
       const ratios = [];
       for (let i = -3; i <= 3; i++) {
         const ratioNumber = number * Math.pow(ratioConstant, i);
-        const ratioText = showDecimal ? ratioNumber.toFixed(2) : Math.round(ratioNumber).toString();
+        const ratioText = showDecimal
+          ? ratioNumber.toFixed(2)
+          : Math.round(ratioNumber).toString();
         ratios.push(ratioText);
       }
 
@@ -45,19 +55,30 @@ export default function GoldenRatioCommand() {
 
       setSequence(ratios);
 
-      const short = showDecimal ? (number / ratioConstant).toFixed(2) : Math.round(number / ratioConstant).toString();
-      const long = showDecimal ? (number * ratioConstant).toFixed(2) : Math.round(number * ratioConstant).toString();
+      const short = showDecimal
+        ? (number / ratioConstant).toFixed(2)
+        : Math.round(number / ratioConstant).toString();
+      const long = showDecimal
+        ? (number * ratioConstant).toFixed(2)
+        : Math.round(number * ratioConstant).toString();
       const part1Value = number / (1 + ratioConstant);
-      const part1 = showDecimal ? part1Value.toFixed(2) : Math.round(part1Value).toString(); // Short Side
+      const part1 = showDecimal
+        ? part1Value.toFixed(2)
+        : Math.round(part1Value).toString(); // Short Side
       const part2Value = number - part1Value;
-      const part2 = showDecimal ? part2Value.toFixed(2) : Math.round(part2Value).toString(); // Long Side
+      const part2 = showDecimal
+        ? part2Value.toFixed(2)
+        : Math.round(part2Value).toString(); // Long Side
 
       setShortSide(short);
       setLongSide(long);
       setPart1(part1);
       setPart2(part2);
 
-      const totalWidth = sequence.reduce((acc, value) => acc + parseFloat(value), 0);
+      const totalWidth = sequence.reduce(
+        (acc, value) => acc + parseFloat(value),
+        0,
+      );
       let xCoordinate = 0;
       const svg = `
         <svg width="${totalWidth}" height="${sequence[6]}" xmlns="http://www.w3.org/2000/svg">
@@ -105,21 +126,35 @@ export default function GoldenRatioCommand() {
     setShowDecimal(!showDecimal);
   };
 
-  const shortSideText = showDecimal ? shortSide : parseInt(shortSide).toString();
+  const shortSideText = showDecimal
+    ? shortSide
+    : parseInt(shortSide).toString();
   const longSideText = showDecimal ? longSide : parseInt(longSide).toString();
   const part1Text = showDecimal ? part1 : parseInt(part1).toString();
   const part2Text = showDecimal ? part2 : parseInt(part2).toString();
 
   return (
-    <List searchBarPlaceholder="Enter a number" onSearchTextChange={setInputNumber} throttle>
+    <List
+      searchBarPlaceholder="Enter a number"
+      onSearchTextChange={setInputNumber}
+      throttle
+    >
       <List.Item
         title="Ratio Switch"
         icon={Icon.Ruler}
-        accessories={[{ text: isGoldenRatio ? "Golden Ratio" : "Silver Ratio" }]}
+        accessories={[
+          { text: isGoldenRatio ? "Golden Ratio" : "Silver Ratio" },
+        ]}
         actions={
           <ActionPanel>
-            <Action title={isGoldenRatio ? "Golden Ratio" : "Silver Ratio"} onAction={toggleRatioMode} />
-            <Action title={`Show ${showDecimal ? "Integer" : "Decimal"}`} onAction={toggleDecimalVisibility} />
+            <Action
+              title={isGoldenRatio ? "Golden Ratio" : "Silver Ratio"}
+              onAction={toggleRatioMode}
+            />
+            <Action
+              title={`Show ${showDecimal ? "Integer" : "Decimal"}`}
+              onAction={toggleDecimalVisibility}
+            />
           </ActionPanel>
         }
       />
@@ -131,7 +166,10 @@ export default function GoldenRatioCommand() {
             accessories={[{ text: shortSideText }]}
             actions={
               <ActionPanel>
-                <Action title="Copy Short Side" onAction={() => handleCopyToClipboard([shortSideText])} />
+                <Action
+                  title="Copy Short Side"
+                  onAction={() => handleCopyToClipboard([shortSideText])}
+                />
               </ActionPanel>
             }
           />
@@ -141,7 +179,10 @@ export default function GoldenRatioCommand() {
             accessories={[{ text: longSideText }]}
             actions={
               <ActionPanel>
-                <Action title="Copy Long Side" onAction={() => handleCopyToClipboard([longSideText])} />
+                <Action
+                  title="Copy Long Side"
+                  onAction={() => handleCopyToClipboard([longSideText])}
+                />
               </ActionPanel>
             }
           />
@@ -153,7 +194,9 @@ export default function GoldenRatioCommand() {
               <ActionPanel>
                 <Action
                   title="Copy Total"
-                  onAction={() => handleCopyToClipboard([part1Text, part2Text, inputNumber])}
+                  onAction={() =>
+                    handleCopyToClipboard([part1Text, part2Text, inputNumber])
+                  }
                 />
               </ActionPanel>
             }
@@ -172,7 +215,10 @@ export default function GoldenRatioCommand() {
             ]}
             actions={
               <ActionPanel>
-                <Action title="Copy Sequence" onAction={() => handleCopyToClipboard(sequence)} />
+                <Action
+                  title="Copy Sequence"
+                  onAction={() => handleCopyToClipboard(sequence)}
+                />
               </ActionPanel>
             }
           />
@@ -182,13 +228,20 @@ export default function GoldenRatioCommand() {
             accessories={[{ text: "Copy SVG" }]}
             actions={
               <ActionPanel>
-                <Action title="Copy SVG" onAction={() => handleCopyToClipboard([svgCode])} />
+                <Action
+                  title="Copy SVG"
+                  onAction={() => handleCopyToClipboard([svgCode])}
+                />
               </ActionPanel>
             }
           />
         </>
       ) : (
-        <List.EmptyView icon={Icon.Text} title="No Results" description="Please enter a non-zero number." />
+        <List.EmptyView
+          icon={Icon.Text}
+          title="No Results"
+          description="Please enter a non-zero number."
+        />
       )}
     </List>
   );
