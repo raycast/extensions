@@ -44,7 +44,7 @@ export function useHACalendarEvents(args: { startDatetime: Date; endDatetime: Da
       });
       for (const [calendarId, calendarResponse] of Object.entries(calEvents ?? {})) {
         for (const ev of calendarResponse.events ?? []) {
-          const color = calendars?.find((c) => c.entity_id === calendarId)?.color ?? Color.PrimaryText; //getCalendarColorByIndex(calcs?.findIndex((c) => c.entity_id === calendarId) ?? -1);
+          const color = calendars?.find((c) => c.entity_id === calendarId)?.color ?? Color.PrimaryText;
           if (isSameDay(new Date(ev.start), new Date(ev.end)) || isAllDayEvent(ev)) {
             result.push({ entityId: calendarId, calendarColor: color, ...ev });
           } else {

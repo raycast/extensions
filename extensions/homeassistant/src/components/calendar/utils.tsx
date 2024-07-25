@@ -104,23 +104,37 @@ export function getTimeOnlyString(d: Date) {
   return `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
 }
 
-export function getDateOnlyString(d: Date) {
+export function getDateOnlyStringUTC(d: Date) {
   return `${d.getUTCFullYear()}-${(d.getUTCMonth() + 1).toString().padStart(2, "0")}-${d.getUTCDate().toString().padStart(2, "0")}`;
 }
 
-export function getDateOnly(d: Date) {
+export function getDateOnlyString(d: Date) {
+  return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, "0")}-${d.getDate().toString().padStart(2, "0")}`;
+}
+
+export function getDateOnlyUTC(d: Date) {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+}
+
+export function getDateOnly(d: Date) {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
 export function endOfDay(date: Date) {
   const result = new Date(date);
+  result.setHours(23, 59, 59, 999);
+  return result;
+}
+
+export function endOfDayUTC(date: Date) {
+  const result = toUTCDate(date);
   result.setUTCHours(23, 59, 59, 999);
   return result;
 }
 
 export function nextStartOfDay(date: Date) {
   const nextDay = addDays(date, 1);
-  const d = getDateOnly(nextDay);
+  const d = nextDay;
   return d;
 }
 
@@ -132,7 +146,7 @@ interface DayEvents {
 export function groupEventsByDay(events: CalendarEvent[] | undefined) {
   const temp: Record<string, CalendarEvent[]> = {};
   for (const e of events ?? []) {
-    const t = getDateOnly(new Date(e.start)).toISOString();
+    const t = getDateOnlyUTC(new Date(e.start)).toISOString();
     if (!(t in temp)) {
       temp[t] = [];
     }
