@@ -95,7 +95,7 @@ function GlueJob({ job: glueJobRun, mutate }: { job: GlueJobRun; mutate: MutateP
 }
 
 function GlueJobRuns({ glueJobName: glueJobName }: { glueJobName: string }) {
-  const { data: glueJobRuns, isLoading: isLoadingJobRuns } = useCachedPromise(fetchJobRuns, [25, [glueJobName]]);
+  const { data: glueJobRuns, isLoading: isLoadingJobRuns } = useCachedPromise(fetchJobRuns, [100, [glueJobName]]);
   return (
     <List isLoading={isLoadingJobRuns} navigationTitle={`Glue Job Runs of ` + glueJobName} isShowingDetail>
       {glueJobRuns?.map((jobRun) => (
