@@ -1,6 +1,6 @@
 # Open Link in Specific Browser Changelog
 
-## [Update Icon] - {PR_MERGE_DATE}
+## [Update Icon] - 2024-07-25
 
 - Update menu bar icon
 
