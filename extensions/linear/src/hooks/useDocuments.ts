@@ -18,13 +18,14 @@ export function useDocuments(query: string = "", entity: DocumentEntity = { proj
 }
 
 export function useDocumentContent(documentId: string) {
-  const { data, error, isLoading } = useCachedPromise(getDocumentContent, [documentId], {
+  const { data, error, isLoading, mutate } = useCachedPromise(getDocumentContent, [documentId], {
     failureToastOptions: { title: "Failed to load document content" },
   });
 
   return {
-    content: data?.content,
-    contentError: error,
-    isLoadingContent: (!data && !error) || isLoading,
+    doc: data,
+    docError: error,
+    isLoadingDoc: (!data && !error) || isLoading,
+    mutateDoc: mutate,
   };
 }

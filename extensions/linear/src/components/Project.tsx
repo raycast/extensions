@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { IssuePriorityValue, User } from "@linear/sdk";
 import { getProgressIcon, MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
@@ -147,7 +147,7 @@ export default function Project({ project, priorities, me, mutateProjects }: Pro
               onAction={deleteProject}
               style={Action.Style.Destructive}
               icon={Icon.Trash}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
             />
           </ActionPanel.Section>
 
