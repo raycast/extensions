@@ -6,13 +6,7 @@ import { SearchEntries } from "./search-entries";
 export default function SearchDocumentations(): JSX.Element {
   const { data, isLoading } = useFetch<Doc[]>(`https://devdocs.io/docs/docs.json`, {});
 
-  return (
-    <List isLoading={isLoading}>
-      {data?.map((doc) => (
-        <DocItem key={doc.slug} doc={doc} />
-      ))}
-    </List>
-  );
+  return <List isLoading={isLoading}>{data?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}</List>;
 }
 
 function DocItem({ doc }: { doc: Doc }): JSX.Element {
