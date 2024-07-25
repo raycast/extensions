@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Documents and Issues Fixes] - {PR_MERGE_DATE}
+## [Documents and Issues Fixes] - 2024-07-25
 
 - Create Issue: Fixed issue that made projects, cycles, estimates, etc. disappear in the form after consecutive issue creation.
 - Issue Actions: Standardized the issue deletion shortcut.
