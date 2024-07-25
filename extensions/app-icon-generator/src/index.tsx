@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  useNavigation,
-  showHUD,
-  showToast,
-  Toast,
-  open,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, useNavigation, showHUD, showToast, Toast, open } from "@raycast/api";
 import Jimp from "jimp";
 import pngToIco from "png-to-ico";
 import { join, dirname, basename, extname } from "path";
@@ -79,11 +70,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.FilePicker
-        id="imagePath"
-        title="Select Image"
-        allowMultipleSelection={false}
-      />
+      <Form.FilePicker id="imagePath" title="Select Image" allowMultipleSelection={false} />
       <Form.TagPicker id="platforms" title="Select Platforms">
         {Object.entries(PLATFORMS).map(([key, value]) => (
           <Form.TagPicker.Item key={key} value={key} title={value} />
@@ -140,7 +127,6 @@ function ProcessImage({ imagePath, platforms }: { imagePath: string; platforms: 
 
       // Open output directory
       await open(outputDir);
-
     } catch (error) {
       console.error("Error:", error);
       await showToast({
@@ -162,13 +148,13 @@ async function generateIcoIcon(image: Jimp, outputDir: string) {
     sizes.map(async (size) => {
       const resized = await image.clone().resize(size, size);
       return resized.getBufferAsync(Jimp.MIME_PNG);
-    })
+    }),
   );
 
   try {
     const icoBuffer = await pngToIco(pngBuffers);
     await fs.writeFile(join(outputDir, "icon.ico"), icoBuffer);
-    console.log(`Generated multi-size ICO icon (sizes: ${sizes.join(', ')})`);
+    console.log(`Generated multi-size ICO icon (sizes: ${sizes.join(", ")})`);
   } catch (error) {
     console.error("Error generating ICO:", error);
     throw error;
@@ -183,6 +169,6 @@ async function generatePlatformIcons(image: Jimp, platform: keyof typeof SIZES, 
       const fileName = `icon_${size}x${size}.png`;
       await resized.writeAsync(join(outputDir, fileName));
       console.log(`Generated ${platform} icon: ${fileName}`);
-    })
+    }),
   );
 }

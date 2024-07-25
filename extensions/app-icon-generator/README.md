@@ -32,10 +32,6 @@ App Icon Generator is a Raycast extension that allows you to easily create app i
 - iPad: Various sizes for different devices and contexts
 - macOS: Standard sizes for macOS applications
 
-## Requirements
-- macOS 10.15 or later
-- Raycast v1.38.2 or later
-
 ## Troubleshooting
 If you encounter any issues while using the App Icon Generator:
 1. Ensure your source image is of high quality and at least 1024x1024 pixels.
