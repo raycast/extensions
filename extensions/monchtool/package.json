@@ -5,25 +5,20 @@
   "description": "Golden Ratio and Silver Ratio Calculation Tools",
   "icon": "monchfun.png",
   "author": "yang_monch",
-  "categories": [
-    "Productivity",
-    "Design Tools"
-  ],
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "calculation-ratio",
       "title": "Calculation Ratio",
       "description": "A calculator for computing the golden ratio, silver ratio, and other ratios, with support for exporting to SVG.",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.1",
-    "@raycast/utils": "^1.15.0"
+    "@raycast/api": "^1.79.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",
