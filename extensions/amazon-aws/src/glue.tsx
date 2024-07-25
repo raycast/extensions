@@ -245,7 +245,6 @@ async function fetchJobDetails(glueJobName: string): Promise<GetJobCommandOutput
 }
 
 async function fetchJobs(nextMarker?: string, jobs?: string[]): Promise<string[]> {
-  if (!isReadyToFetch()) return [];
   const { NextToken, JobNames } = await new GlueClient({}).send(new ListJobsCommand({ NextToken: nextMarker }));
 
   const combinedJobs = [...(jobs || []), ...(JobNames || [])];
