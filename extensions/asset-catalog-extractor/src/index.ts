@@ -124,6 +124,10 @@ export default async function command() {
         style: Toast.Style.Failure,
         title: "Asset Catalog Tinkerer not found",
         message: "Please install Asset Catalog Tinkerer",
+        primaryAction: {
+          title: "Download Asset Catalog Tinkerer",
+          onAction: () => open("https://github.com/insidegui/AssetCatalogTinkerer"),
+        },
       });
       return;
     }
