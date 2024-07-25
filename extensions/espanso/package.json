@@ -6,7 +6,8 @@
   "icon": "espanso-logo.png",
   "author": "kud",
   "contributors": [
-    "nbbaier"
+    "nbbaier",
+    "erics118"
   ],
   "categories": [
     "Applications",
@@ -14,6 +15,15 @@
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "espansoPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Espanso CLI Path",
+      "description": "Location to the Espanso CLI (Defaults to `/opt/homebrew/bin/espanso` on Apple Silicon Macs, and `/usr/local/bin/espanso` otherwise)"
+    }
+  ],
   "commands": [
     {
       "name": "index",
@@ -52,25 +62,25 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.61.1",
-    "@raycast/utils": "^1.10.0",
+    "@raycast/api": "^1.79.1",
+    "@raycast/utils": "^1.16.2",
     "change-case": "5.4.4",
-    "fs-extra": "^11.1.1",
-    "zx": "7.2.3"
+    "fs-extra": "^11.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.8",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.34",
+    "@types/node": "^20.14.12",
+    "@types/react": "^18.3.3",
     "eslint": "^8.53.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

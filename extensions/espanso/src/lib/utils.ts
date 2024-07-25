@@ -3,6 +3,7 @@ import path from "path";
 import { $ } from "zx";
 import { EspansoMatch, MultiTrigger, Label, Replacement, NormalizedEspansoMatch, EspansoConfig } from "./types";
 import YAML from "yaml";
+import { espanso } from "./espanso";
 $.verbose = false;
 
 function lastUpdatedDate(file: string) {
@@ -99,7 +100,7 @@ export async function getEspansoConfig(): Promise<EspansoConfig> {
     match: "",
   };
 
-  const { stdout: configString } = await $`espanso path`;
+  const { stdout: configString } = await espanso("path");
 
   configString.split("\n").forEach((item) => {
     const [key, value] = item.split(":");
