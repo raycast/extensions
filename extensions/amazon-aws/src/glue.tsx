@@ -271,8 +271,8 @@ async function fetchJobRuns(maxResults: number, jobNames?: string[]): Promise<Gl
         jobRunResponse.iconTintColor = Color.Red;
         jobRunResponse.accessoriesText = jobRun.ErrorMessage;
       } else if (jobRun.JobRunState === "RUNNING") {
-        jobRunResponse.icon = Icon.Clock;
-        jobRunResponse.iconTintColor = Color.Yellow;
+        jobRunResponse.icon = Icon.Hourglass;
+        jobRunResponse.iconTintColor = Color.Blue;
         jobRunResponse.accessoriesText = jobRun.JobRunState;
       } else if (jobRun.JobRunState === "SUCCEEDED") {
         jobRunResponse.icon = Icon.CheckCircle;
