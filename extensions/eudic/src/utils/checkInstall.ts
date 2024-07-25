@@ -1,9 +1,9 @@
 import { Toast, getApplications, open, showToast } from "@raycast/api";
-import { EUDIC_BUNDLE_ID, EUDIC_OFFICAL_SITE } from "../constatnts";
+import { EUDIC_BUNDLE_IDS, EUDIC_OFFICAL_SITE } from "../constatnts";
 
 async function isEudicInstalled() {
   const applications = await getApplications();
-  return applications.some(({ bundleId }) => bundleId === EUDIC_BUNDLE_ID);
+  return applications.some(({ bundleId }) => EUDIC_BUNDLE_IDS.includes(bundleId ?? ""));
 }
 
 export async function checkEudicInstallation() {
