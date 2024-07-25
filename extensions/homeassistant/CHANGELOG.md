@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Weather] - 2024-07-11
+## [Weather] - 2024-07-25
 
 - Use `weather.get_forecasts` to receive weather forecasts (required since Home Assistant `2024.07`)
 - Add sun entity support for weather menu command
