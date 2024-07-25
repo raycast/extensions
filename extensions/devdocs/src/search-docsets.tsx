@@ -11,7 +11,7 @@ export default function SearchDocumentations(): JSX.Element {
 
 function DocItem({ doc }: { doc: Doc }): JSX.Element {
   const quicklink = {
-    link: `raycast://extensions/pomdtr/devdocs/search-entries?arguments=${encodeURIComponent(
+    link: `raycast://extensions/djpowers/devdocs/search-entries?arguments=${encodeURIComponent(
       JSON.stringify({ slug: doc.slug }),
     )}`,
     name: doc.version ? `Search DevDocs ${doc.name} ${doc.version} Entries` : `Search ${doc.name} Entries`,
