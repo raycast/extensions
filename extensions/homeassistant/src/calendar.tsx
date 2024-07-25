@@ -69,8 +69,16 @@ export default function CalendarCommand() {
               }}
               title={title(e)}
               accessories={
-                !showDetails && selectedCalendar === ""
-                  ? [{ tag: { value: friendlyCalendarName(e.entityId), color: e.calendarColor } }]
+                !showDetails
+                  ? [
+                      {
+                        tag:
+                          selectedCalendar === ""
+                            ? { value: friendlyCalendarName(e.entityId), color: e.calendarColor }
+                            : undefined,
+                      },
+                      { date: new Date(e.start) },
+                    ]
                   : undefined
               }
               detail={
