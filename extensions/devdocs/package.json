@@ -6,7 +6,12 @@
   "description": "Search through DevDocs documentation sets from Raycast.",
   "icon": "devdocs.png",
   "author": "djpowers",
-  "pastContributors": ["pomdtr"],
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "pastContributors": [
+    "pomdtr"
+  ],
   "categories": ["Documentation"],
   "keywords": ["API", "developer", "development", "docs", "docset", "documentation", "reference"],
   "commands": [
