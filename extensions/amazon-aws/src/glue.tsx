@@ -49,7 +49,7 @@ function GlueJob({ job: glueJobRun, mutate }: { job: GlueJobRun; mutate: MutateP
     <List.Item
       key={glueJobRun.JobName}
       icon={{ source: "aws-icons/glue.png", mask: Image.Mask.RoundedRectangle }}
-      title={glueJobRun.JobName || ""}
+      title={glueJobRun.JobName!}
       detail={<GlueJobRunDetails jobRun={glueJobRun} />}
       actions={
         <ActionPanel>
