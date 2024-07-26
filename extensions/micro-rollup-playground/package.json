@@ -20,6 +20,7 @@
   "dependencies": {
     "@raycast/api": "^1.79.1",
     "@raycast/utils": "^1.16.2",
+    "ethers": "^6.13.2",
     "got": "^11.8.2"
   },
   "devDependencies": {
