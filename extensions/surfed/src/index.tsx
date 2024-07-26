@@ -100,77 +100,64 @@ export default function Command() {
   }, [searchText]);
 
   return (
-    <List
-    isLoading={loading}
-    searchBarPlaceholder="Search..."
-    onSearchTextChange={setSearchText}
-    >
-    {searchText.length < 3 ? (
-      <List.EmptyView
-      title="Start typing to search"
-      description="Enter at least 3 characters to start the search."
-      />
-    ) : loading ? (
-      <List.EmptyView
-      title="Searching…"
-      description="Loading search results"
-      />
-    ) : urls.length === 0 && collections.length === 0 && tags.length === 0 ? (
-      <List.EmptyView
-      title="No Results"
-      description="No matching results found."
-      />
-    ) : (
-      <>
-      {collections.length > 0 && (
-        <List.Section title="Collections">
-          {collections.map((item, index) => (
-            <List.Item
-              key={`collection-${index}`}
-              icon={{ source: "collection-icon.png" }} // Add the path to your collection icon here
-              title={item.title}
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser url={item.url} />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      )}
-      {tags.length > 0 && (
-        <List.Section title="Tags">
-          {tags.map((item, index) => (
-            <List.Item
-              key={`tag-${index}`}
-              icon={{ source: "tag-icon.png" }} // Add the path to your tag icon here
-              title={item.title}
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser url={item.url} />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      )}
-      {urls.length > 0 && (
-        <List.Section title="History">
-          {urls.map((item, index) => (
-            <List.Item
-              key={`url-${index}`}
-              icon={{ source: item.imagePath }} // Add the path to your URL icon here
-              title={item.title ? item.title : item.url}
-              subtitle={item.url}
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser url={item.url} />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      )}
+    <List isLoading={loading} searchBarPlaceholder="Search..." onSearchTextChange={setSearchText}>
+      {searchText.length < 3 ? (
+        <List.EmptyView title="Start typing to search" description="Enter at least 3 characters to start the search." />
+      ) : loading ? (
+        <List.EmptyView title="Searching…" description="Loading search results" />
+      ) : urls.length === 0 && collections.length === 0 && tags.length === 0 ? (
+        <List.EmptyView title="No Results" description="No matching results found." />
+      ) : (
+        <>
+          {collections.length > 0 && (
+            <List.Section title="Collections">
+              {collections.map((item, index) => (
+                <List.Item
+                  key={`collection-${index}`}
+                  icon={{ source: "collection-icon.png" }} // Add the path to your collection icon here
+                  title={item.title}
+                  actions={
+                    <ActionPanel>
+                      <Action.OpenInBrowser url={item.url} />
+                    </ActionPanel>
+                  }
+                />
+              ))}
+            </List.Section>
+          )}
+          {tags.length > 0 && (
+            <List.Section title="Tags">
+              {tags.map((item, index) => (
+                <List.Item
+                  key={`tag-${index}`}
+                  icon={{ source: "tag-icon.png" }} // Add the path to your tag icon here
+                  title={item.title}
+                  actions={
+                    <ActionPanel>
+                      <Action.OpenInBrowser url={item.url} />
+                    </ActionPanel>
+                  }
+                />
+              ))}
+            </List.Section>
+          )}
+          {urls.length > 0 && (
+            <List.Section title="History">
+              {urls.map((item, index) => (
+                <List.Item
+                  key={`url-${index}`}
+                  icon={{ source: item.imagePath }} // Add the path to your URL icon here
+                  title={item.title ? item.title : item.url}
+                  subtitle={item.url}
+                  actions={
+                    <ActionPanel>
+                      <Action.OpenInBrowser url={item.url} />
+                    </ActionPanel>
+                  }
+                />
+              ))}
+            </List.Section>
+          )}
         </>
       )}
     </List>
