@@ -1,6 +1,6 @@
 # Kaalam Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-07-26
 
 - Added 24-hour time format to the list
 
