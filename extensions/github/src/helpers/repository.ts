@@ -101,7 +101,6 @@ export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment,
     return;
   }
 
-
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
   toast.title = "Opening repository...";
