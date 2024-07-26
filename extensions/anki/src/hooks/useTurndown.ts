@@ -19,6 +19,11 @@ function useTurndown() {
       },
     });
 
+    td.addRule('ignoreJS', {
+      filter: ['script', 'style'],
+      replacement: () => '',
+    });
+
     return td;
   }, [ankiMediaPath, isLoading, error]);
 

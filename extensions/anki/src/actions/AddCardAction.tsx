@@ -92,7 +92,6 @@ export default function AddCardAction({ deckName }: Props) {
       return true;
     } catch (error) {
       if (error instanceof AnkiError) {
-        console.log('here');
         showToast({
           title: error.action,
           message: error.message,

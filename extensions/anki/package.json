@@ -38,6 +38,13 @@
       "subtitle": "Anki",
       "description": "Add a card to a deck in Anki",
       "mode": "view"
+    },
+    {
+      "name": "viewStats",
+      "title": "View Stats",
+      "subtitle": "Anki",
+      "description": "View Anki collection statistics",
+      "mode": "view"
     }
   ],
   "dependencies": {

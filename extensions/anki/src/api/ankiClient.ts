@@ -25,6 +25,7 @@ type AnkiAction =
   | 'guiBrowse'
   | 'guiSelectNote'
   | 'modelNames'
+  | 'getCollectionStatsHTML'
   | 'modelNamesAndIds'
   | 'notesInfo'
   | 'sync'
