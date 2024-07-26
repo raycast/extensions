@@ -106,8 +106,18 @@ export default function Command() {
           />
           <List.Item title={person.email} subtitle="Email" icon={Icon.Envelope} actions={actions(person.email)} />
           <List.Item title={person.signo} subtitle="Zodiac Sign" icon={Icon.Star} actions={actions(person.signo)} />
-          <List.Item title={person.nomePai} subtitle="Father's Name" icon={Icon.Male} actions={actions(person.nomePai)} />
-          <List.Item title={person.nomeMae} subtitle="Mother's Name" icon={Icon.Female} actions={actions(person.nomeMae)} />
+          <List.Item
+            title={person.nomePai}
+            subtitle="Father's Name"
+            icon={Icon.Male}
+            actions={actions(person.nomePai)}
+          />
+          <List.Item
+            title={person.nomeMae}
+            subtitle="Mother's Name"
+            icon={Icon.Female}
+            actions={actions(person.nomeMae)}
+          />
         </List.Section>
         <List.Section title="Address">
           <List.Item

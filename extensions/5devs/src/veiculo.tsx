@@ -90,14 +90,8 @@ export default function Command() {
             actions={actions(vehicle.combustivel)}
             icon={Icon.Raindrop}
           />
-          <List.Item
-            title={vehicle.municipio}
-            subtitle="City"
-            actions={actions(vehicle.municipio)}
-            icon={Icon.Pin}
-          />
+          <List.Item title={vehicle.municipio} subtitle="City" actions={actions(vehicle.municipio)} icon={Icon.Pin} />
           <List.Item title={vehicle.uf} subtitle="State" actions={actions(vehicle.uf)} icon={Icon.AirplaneTakeoff} />
-
         </List.Section>
       </List>
     </>
