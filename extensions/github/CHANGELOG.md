@@ -1,5 +1,10 @@
 # GitHub Changelog
 
+## [Enhance repository cloning functionality] - 2024-07-26
+
+- Added the ability to select a specific branch when cloning a repository.
+- Implemented a feature to specify the clone path when cloning a repository.
+
 ## [Improvements] - 2024-07-23
 
 - Enhanced the display of repository stars in the `Search Repositories` command by prefixing the number with a star symbol (★).
