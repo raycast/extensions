@@ -1,6 +1,6 @@
 # Wi-Fi Changelog
 
-## [Show IP Address] - {PR_MERGE_DATE}
+## [Show IP Address] - 2024-07-26
 
 - Menubar Wi-Fi command supports show IP Address in the menu bar
 
