@@ -1,5 +1,9 @@
 # Wi-Fi Changelog
 
+## [Show IP Address] - {PR_MERGE_DATE}
+
+- Menubar Wi-Fi command supports show IP Address in the menu bar
+
 ## [Goodbye, Scan Wi-Fi command] - 2024-07-24
 
 - The airport command line tool is deprecated and the Scan Wi-Fi command based on it is removed.
