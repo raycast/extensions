@@ -1,6 +1,6 @@
 # shell Changelog
 
-## [Add result indication] {PR_MERGE_DATE}
+## [Add result indication] 2024-07-26
 Fix partially [issue](https://github.com/raycast/extensions/issues/13496), displaying an indicator on command finishes, with success or failure.
 
 
