@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, PreferenceValues } from "@raycast/api";
 import axios, { AxiosRequestConfig } from "axios";
 import { useCachedPromise } from "@raycast/utils";
 import moment from "moment";
@@ -123,7 +123,7 @@ export interface updateBookingContent {
 }
 
 const defaultBaseUrl = "https://api.cal.com/v1/";
-const { token } = getPreferenceValues<Preferences>();
+const { token } = getPreferenceValues<PreferenceValues>();
 
 const api = axios.create({
   baseURL: defaultBaseUrl,
@@ -192,4 +192,12 @@ export function formatDateTime(date: string) {
 
 export function formatTime(date: string) {
   return moment(date).format("HH:mm a");
+}
+
+export function formatCurrency(price: number, currency: string) {
+  return (price / 100).toLocaleString(undefined, {
+    style: "currency",
+    currency: currency,
+    currencyDisplay: "narrowSymbol",
+  });
 }
