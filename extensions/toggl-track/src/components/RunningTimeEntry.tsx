@@ -7,11 +7,17 @@ import { useTimeEntryActions } from "@/hooks/useTimeEntryActions";
 
 interface RunningTimeEntryProps {
   runningTimeEntry: TimeEntry & TimeEntryMetaData;
+  revalidateRunningTimeEntry: () => void;
+  revalidateTimeEntries: () => void;
 }
 
-function RunningTimeEntry({ runningTimeEntry }: RunningTimeEntryProps) {
+function RunningTimeEntry({
+  runningTimeEntry,
+  revalidateRunningTimeEntry,
+  revalidateTimeEntries,
+}: RunningTimeEntryProps) {
   const currentTime = useCurrentTime();
-  const { stopRunningTimeEntry } = useTimeEntryActions();
+  const { stopRunningTimeEntry } = useTimeEntryActions(revalidateRunningTimeEntry, revalidateTimeEntries);
 
   return (
     <List.Section title="Running time entry" key="running-time-entry">

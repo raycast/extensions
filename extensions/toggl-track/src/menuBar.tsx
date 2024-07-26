@@ -12,11 +12,20 @@ import { useTotalDurationToday } from "@/hooks/useTotalDurationToday";
 dayjs.extend(duration);
 
 export default function Command() {
-  const { timeEntries, runningTimeEntry, isLoading, timeEntriesWithUniqueProjectAndDescription } =
-    useProcessedTimeEntries();
+  const {
+    isLoading,
+    revalidateRunningTimeEntry,
+    revalidateTimeEntries,
+    runningTimeEntry,
+    timeEntries,
+    timeEntriesWithUniqueProjectAndDescription,
+  } = useProcessedTimeEntries();
 
   const totalDurationToday = useTotalDurationToday(timeEntries, runningTimeEntry);
-  const { resumeTimeEntry, stopRunningTimeEntry } = useTimeEntryActions();
+  const { resumeTimeEntry, stopRunningTimeEntry } = useTimeEntryActions(
+    revalidateRunningTimeEntry,
+    revalidateTimeEntries,
+  );
   const currentTime = useCurrentTime();
   const runningEntry = runningTimeEntry;
   const currentDuration = runningEntry
