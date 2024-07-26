@@ -9,6 +9,8 @@ import {
   List,
   popToRoot,
   showHUD,
+  Toast,
+  showToast,
 } from "@raycast/api";
 import { shellHistory } from "shell-history";
 import { shellEnv } from "shell-env";
@@ -64,16 +66,27 @@ const Result = ({ cmd }: { cmd: string }) => {
           return;
         }
         setOutput(data);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Error executing command",
+        });
         return;
       });
       child.stdout?.on("data", (data: string) => {
         if (killed) {
           return;
         }
-        // FIX the string interpolation (w/ concat) create hangs on UI for large data (like `top`)
+        showToast({
+          style: Toast.Style.Animated,
+          title: "Executing command...",
+        });
         setOutput(data);
       });
       child.on("exit", () => {
+        showToast({
+          style: Toast.Style.Success,
+          title: "Command execution complete",
+        });
         setFinished(true);
       });
     };
