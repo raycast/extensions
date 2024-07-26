@@ -11,3 +11,7 @@
 - Support tags for metadata
 - Support filtering by tags
 - Add the ability to select multiple snippet folders.
+
+## [Enhancements] - 2024-07-27
+- Implement case-insensitive parsing of metadata in markdown files.
+- Handle metadata with tab characters, replacing them with spaces to prevent parsing errors.
