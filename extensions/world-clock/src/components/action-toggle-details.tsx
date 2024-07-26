@@ -9,7 +9,7 @@ export function ActionToggleDetails(props: { showDetail: boolean; setRefresh: Di
       <Action
         icon={Icon.Sidebar}
         title={"Toggle Details"}
-        shortcut={{ modifiers: ["shift", "ctrl"], key: "d" }}
+        shortcut={{ modifiers: ["shift", "cmd"], key: "d" }}
         onAction={async () => {
           await LocalStorage.setItem(localStorageKey.SHOW_DETAILS, !showDetail);
           setRefresh(Date.now());

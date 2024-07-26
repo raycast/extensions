@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Image, List } from "@raycast/api";
 import { Dispatch, SetStateAction } from "react";
 import { TimeInfo, Timezone } from "../types/types";
 import { TimeInfoDetail } from "./time-info-detail";
@@ -12,6 +12,7 @@ import {
 import { ActionOnTimezone } from "./action-on-timezone";
 import { ActionOnStarredTimezone } from "./action-on-starred-timezone";
 import { getAvatarIcon } from "@raycast/utils";
+import Mask = Image.Mask;
 
 export function TimeZoneListItem(props: {
   timezone: string;
@@ -82,7 +83,12 @@ export function StarredTimeZoneListItem(props: {
               tooltip: timezone,
             }
       }
-      accessories={[
+      accessories={(starTimezones[index].avatar
+        ? (starTimezones[index].avatar.map((value) => {
+            return { icon: { source: value, mask: Mask.RoundedRectangle } };
+          }) as [])
+        : [{}]
+      ).concat([
         !isEmpty(starTimezones[index].memo) && showDetail
           ? {
               icon: starTimezones[index].memoIcon,
@@ -102,7 +108,7 @@ export function StarredTimeZoneListItem(props: {
                 buildFullDateTime(new Date(starTimezones[index].unixtime)) +
                 buildIntervalTime(starTimezones[index].unixtime),
             },
-      ]}
+      ])}
       subtitle={
         !isEmpty(starTimezones[index].memo) && !showDetail
           ? {

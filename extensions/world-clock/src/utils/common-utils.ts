@@ -1,13 +1,42 @@
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
-import { Preferences } from "../types/preferences";
+import { Image, LocalStorage } from "@raycast/api";
+import { dateFormat, hour24 } from "../types/preferences";
 import { localStorageKey } from "./costants";
 import { Timezone } from "../types/types";
+import { format } from "date-fns";
+import Mask = Image.Mask;
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
 };
 
-const { dateFormat } = getPreferenceValues<Preferences>();
+export function formatMenubarDate(date: Date) {
+  let dateFormatStr: string;
+  switch (dateFormat) {
+    case "en": {
+      dateFormatStr = "MM/dd/yyyy";
+      break;
+    }
+    case "en-GB": {
+      dateFormatStr = "dd/MM/yyyy";
+      break;
+    }
+    default: {
+      dateFormatStr = "yyyy-MM-dd";
+    }
+  }
+  let sanitizedFormat = dateFormatStr.replace(/y+\/?|\/?y+/gi, "").trim();
+  sanitizedFormat = sanitizedFormat
+    .replace(/^\/|\/$/g, "")
+    .replace(/^\.|\.$/g, "")
+    .replace(/^-|-$/g, "");
+
+  const time = date.toLocaleTimeString("en-US", {
+    hour12: !hour24,
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return format(date, sanitizedFormat) + " " + time;
+}
 
 export const getStarredTimezones = async () => {
   const _localStorage = await LocalStorage.getItem<string>(localStorageKey.STAR_TIMEZONE);
@@ -17,23 +46,6 @@ export const getStarredTimezones = async () => {
     value.unixtime = calculateDateTimeByOffset(value.utc_offset).unixtime;
   });
   return _starTimezones;
-};
-
-export const hour24 = getPreferenceValues<Preferences>().hour24;
-
-const build2DigitTime = (num: string | number) => {
-  const numStr = num + "";
-  return numStr.length <= 1 ? "0" + numStr : numStr;
-};
-
-const buildHour24Time = (date: Date) => {
-  return (
-    build2DigitTime(date.getHours()) +
-    ":" +
-    build2DigitTime(date.getMinutes()) +
-    ":" +
-    build2DigitTime(date.getSeconds())
-  );
 };
 
 export const buildDayAndNightIcon = (dateTime: string | number, light: boolean) => {
@@ -66,21 +78,15 @@ export const buildIntervalTime = (dateTime: string | number) => {
 };
 
 export const buildFullDateTime = (dateTime: Date) => {
-  if (hour24) {
-    const time = buildHour24Time(dateTime);
-    return dateTime.toLocaleDateString(dateFormat) + " " + time;
-  } else {
-    return (
-      dateTime.toLocaleDateString(dateFormat) +
-      " " +
-      dateTime.toLocaleTimeString("en-US", {
-        hour12: true,
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      })
-    );
-  }
+  return (
+    dateTime.toLocaleDateString(dateFormat) +
+    " " +
+    dateTime.toLocaleTimeString("en-US", {
+      hour12: !hour24,
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  );
 };
 
 export const calculateDateTimeByOffset = (offset: string) => {
@@ -88,14 +94,11 @@ export const calculateDateTimeByOffset = (offset: string) => {
   dateTime.setDate(dateTime.getUTCDate());
   dateTime.setHours(dateTime.getUTCHours() + parseInt(offset));
   return {
-    date_time: hour24
-      ? buildHour24Time(dateTime)
-      : dateTime.toLocaleTimeString("en-US", {
-          hour12: true,
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        }),
+    date_time: dateTime.toLocaleTimeString("en-US", {
+      hour12: !hour24,
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
     unixtime: dateTime.getTime(),
   };
 };
@@ -112,31 +115,43 @@ export const calculateTimeInfoByOffset = (unixtime: number, offset: string) => {
   utc.setDate(utc.getDate());
   utc.setHours(utc.getUTCHours());
 
-  let time = dateTime.toLocaleTimeString("en-US", {
-    hour12: true,
+  const time = dateTime.toLocaleTimeString("en-US", {
+    hour12: !hour24,
     hour: "2-digit",
     minute: "2-digit",
-    second: "2-digit",
   });
-  let _datetime = dateTime.toLocaleDateString(dateFormat) + " " + time;
-  let _utcDatetime =
-    utc.toLocaleDateString(dateFormat) +
-    " " +
-    utc.toLocaleTimeString("en-US", {
-      hour12: true,
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
 
-  if (hour24) {
-    time = buildHour24Time(dateTime);
-    _datetime = dateTime.toLocaleDateString(dateFormat) + " " + time;
-    _utcDatetime = utc.toLocaleDateString(dateFormat) + " " + buildHour24Time(utc);
-  }
   return {
     time: time,
-    dateTime: _datetime,
-    utc_datetime: _utcDatetime,
+    dateTime: buildFullDateTime(dateTime),
+    utc_datetime: buildFullDateTime(utc),
+    dateRaw: dateTime,
   };
+};
+
+export const getGridAvatar = (timezone: Timezone) => {
+  if (timezone.avatar && timezone.avatar.length > 0) {
+    return {
+      source: timezone.avatar[0],
+      mask: Mask.RoundedRectangle,
+    };
+  } else {
+    return timezone.memoIcon;
+  }
+};
+
+export const getMenubarAvatar = (timezone: Timezone) => {
+  if (timezone.avatar && timezone.avatar.length > 0) {
+    return {
+      source: timezone.avatar[0],
+      mask: Mask.RoundedRectangle,
+    };
+  } else {
+    return {
+      source: {
+        light: buildDayAndNightIcon(timezone.unixtime, true),
+        dark: buildDayAndNightIcon(timezone.unixtime, false),
+      },
+    };
+  }
 };

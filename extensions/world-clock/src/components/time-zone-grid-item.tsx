@@ -1,7 +1,13 @@
 import { Grid } from "@raycast/api";
 import { Dispatch, SetStateAction } from "react";
 import { TimeInfo, Timezone } from "../types/types";
-import { buildFullDateTime, buildIntervalTime, isEmpty } from "../utils/common-utils";
+import {
+  buildFullDateTime,
+  buildIntervalTime,
+  calculateDateTimeByOffset,
+  getGridAvatar,
+  isEmpty,
+} from "../utils/common-utils";
 import { ActionOnTimezone } from "./action-on-timezone";
 import { ActionOnStarredTimezone } from "./action-on-starred-timezone";
 
@@ -34,6 +40,11 @@ export function TimeZoneGridItem(props: {
                 dark: "timezone-icon@dark.svg",
               },
             }
+      }
+      subtitle={
+        timeInfo.timezone === timezone
+          ? calculateDateTimeByOffset(timeInfo.utc_offset).date_time + buildIntervalTime(timeInfo.datetime)
+          : undefined
       }
       title={timezone}
       actions={
@@ -71,13 +82,17 @@ export function StarredTimeZoneGridItem(props: {
             dark: `clock-icons@dark/${new Date(starTimezones[index].unixtime).getHours()}.svg`,
           },
         },
-        tooltip: `${starTimezones[index].timezone}
+        tooltip: `${starTimezones[index].timezone}${isEmpty(starTimezones[index].alias) ? "" : `\n${starTimezones[index].alias}`}
 ${buildFullDateTime(new Date(starTimezones[index].unixtime))}${buildIntervalTime(starTimezones[index].unixtime)}`,
       }}
       keywords={keywords}
       title={isEmpty(starTimezones[index].alias) ? timezone : starTimezones[index].alias + ""}
       subtitle={starTimezones[index].date_time + buildIntervalTime(starTimezones[index].unixtime)}
-      accessory={{ icon: starTimezones[index].memoIcon, tooltip: starTimezones[index].memo }}
+      accessory={{
+        icon: getGridAvatar(starTimezones[index]),
+        tooltip: `${isEmpty(starTimezones[index].alias) ? "" : `${starTimezones[index].alias}\n`}
+${starTimezones[index].memo}`,
+      }}
       actions={
         <ActionOnStarredTimezone
           timeInfo={timeInfo}

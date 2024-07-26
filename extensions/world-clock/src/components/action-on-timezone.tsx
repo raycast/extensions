@@ -1,5 +1,5 @@
 import { Action, ActionPanel, getPreferenceValues, Icon, LocalStorage } from "@raycast/api";
-import { TimeInfo, Timezone, TimezoneId } from "../types/types";
+import { TimeInfo, Timezone } from "../types/types";
 import { Dispatch, SetStateAction } from "react";
 import { localStorageKey } from "../utils/costants";
 import { ActionToggleDetails } from "./action-toggle-details";

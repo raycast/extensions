@@ -43,7 +43,10 @@ export function ActionOnStarredTimezone(props: {
         icon={Icon.Pencil}
         title={"Edit Timezone"}
         shortcut={{ modifiers: ["cmd"], key: "e" }}
-        target={<EditTimeZone index={index} starTimezones={starTimezones} setRefresh={setRefresh} />}
+        target={<EditTimeZone index={index} starTimezones={starTimezones} />}
+        onPop={() => {
+          setRefresh(Date.now());
+        }}
       />
       {getPreferenceValues<Preferences>().itemLayout === "List" && (
         <ActionToggleDetails showDetail={showDetail} setRefresh={setRefreshDetail} />

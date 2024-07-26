@@ -17,7 +17,7 @@ export function TimeInfoDetail(props: { timeInfo: TimeInfo; detailLoading: boole
           ? `<img src="${fileUrl(
               `${environment.assetsPath}/${
                 environment.appearance === "light" ? "clock-icons" : "clock-icons@dark"
-              }/${new Date(timeInfo.datetime).getHours()}.svg`
+              }/${new Date(timeInfo.datetime).getHours()}.svg`,
             )}" alt="${timeInfo.timezone}" height="190" />`
           : undefined
       }

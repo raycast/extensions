@@ -1,15 +1,14 @@
-import { getPreferenceValues, Grid } from "@raycast/api";
+import { Grid } from "@raycast/api";
 import { useState } from "react";
 import { TimezoneId } from "../types/types";
 import { filterTag } from "../utils/costants";
 import { isEmpty } from "../utils/common-utils";
-import { Preferences } from "../types/preferences";
+import { columns, rememberTag } from "../types/preferences";
 import { getAllTimezones, getRegionTime } from "../hooks/hooks";
 import { StarredTimeZoneGridItem, TimeZoneGridItem } from "./time-zone-grid-item";
 import { GridEmptyView } from "./grid-empty-view";
 
 export function QueryWorldGridLayout() {
-  const { rememberTag, columns } = getPreferenceValues<Preferences>();
   const [tag, setTag] = useState<string>("");
   const [region, setRegion] = useState<string>("");
   const [refresh, setRefresh] = useState<number>(0);
@@ -35,7 +34,7 @@ export function QueryWorldGridLayout() {
         starTimezones.length !== 0 ? (
           <Grid.Dropdown onChange={setTag} tooltip={"Filter tags"} storeValue={rememberTag}>
             {filterTag.map((value) => {
-              return <Grid.Dropdown.Item key={value.value} title={value.title} value={value.value} />;
+              return <Grid.Dropdown.Item key={value.value} title={value.title} value={value.value} icon={value.icon} />;
             })}
           </Grid.Dropdown>
         ) : null

@@ -32,7 +32,7 @@ export function QueryWorldListLayout() {
         starTimezones.length !== 0 ? (
           <List.Dropdown onChange={setTag} tooltip={"Filter tags"} storeValue={rememberTag}>
             {filterTag.map((value) => {
-              return <List.Dropdown.Item key={value.value} title={value.title} value={value.value} />;
+              return <List.Dropdown.Item key={value.value} title={value.title} value={value.value} icon={value.icon} />;
             })}
           </List.Dropdown>
         ) : null
