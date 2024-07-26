@@ -24,7 +24,7 @@ interface Preferences {
 
 type CloneFormProps = {
   repository: ExtendedRepositoryFieldsFragment;
-  onCloneComplete: () => void; // 引数なしの関数に変更
+  onCloneComplete: () => void;
 };
 
 export default function CloneForm({ repository, onCloneComplete }: CloneFormProps) {

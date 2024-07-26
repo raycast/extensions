@@ -60,13 +60,11 @@ export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment,
   let targetDir = path.join(clonePath, repoName);
   let counter = 1;
 
-  // Find a unique directory name
   while (existsSync(targetDir)) {
     targetDir = path.join(clonePath, `${repoName}-${counter}`);
     counter++;
   }
 
-  // Create the target directory
   try {
     mkdirSync(targetDir, { recursive: true });
   } catch (error) {
@@ -103,7 +101,7 @@ export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment,
     return;
   }
 
-  // Wait a bit to ensure the clone operation is fully complete
+
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
   toast.title = "Opening repository...";
