@@ -1,6 +1,6 @@
 # Liveblocks Changelog
 
-## [Updated Liveblocks to support v2] - 2024-07-09
+## [Updated Liveblocks to support v2] - {PR_MERGE_DATE}
 
 Updated and refactored Liveblocks to support v2
 
