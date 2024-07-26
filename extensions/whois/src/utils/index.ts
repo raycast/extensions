@@ -50,3 +50,17 @@ export const getURL = async () => {
 
   throw new Error(`Application ${browser} not supported`);
 };
+
+export interface ParsedInput {
+  isIp?: boolean;
+  isDomain?: boolean;
+  input?: string;
+}
+
+export const parseDomain = (domainOrIp: string): ParsedInput => {
+  const isIp = domainOrIp ? /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(domainOrIp) : false;
+  const isDomain = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/.test(domainOrIp);
+  // const url = isIp ? `https://ipwho.is/${domainOrIp}` : `https://scraper.run/whois?addr=${domainOrIp}`;
+
+  return { isIp, isDomain, input: domainOrIp };
+};
