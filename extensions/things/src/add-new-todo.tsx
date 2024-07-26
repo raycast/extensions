@@ -48,7 +48,7 @@ export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoPr
         when: values.when === 'upcoming' && values.date ? getDateString(values.date) : values.when,
         'list-id': values.listId,
         deadline: values.deadline ? getDateString(values.deadline) : '',
-        tags: values.tags,
+        ...(values.tags.length > 0 && { tags: values.tags.join(',') }),
         'checklist-items': values['checklist-items'],
       };
 

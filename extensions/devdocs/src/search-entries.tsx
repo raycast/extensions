@@ -7,7 +7,7 @@ import { Entry, Index } from "./types";
 function useFuse<U>(
   items: U[] | undefined,
   options: Fuse.IFuseOptions<U>,
-  limit: number
+  limit: number,
 ): [U[], Dispatch<SetStateAction<string>>] {
   const [query, setQuery] = useState("");
   const fuse = useMemo(() => {
@@ -17,6 +17,10 @@ function useFuse<U>(
   if (!query) return [(items || []).slice(0, limit), setQuery];
   const results = fuse.search(query, { limit: limit });
   return [results.map((result) => result.item), setQuery];
+}
+
+function formatSlugVersion(slug: string) {
+  return slug.replace("~", " ");
 }
 
 export default function LaunchFn(props: LaunchProps<{ arguments: { slug: string } }>): JSX.Element {
@@ -33,6 +37,8 @@ export function SearchEntries({ slug }: { slug: string }): JSX.Element {
       onSearchTextChange={(text) => {
         setQuery(text);
       }}
+      navigationTitle={`Search Entries: ${formatSlugVersion(slug)}`}
+      searchBarPlaceholder={`Search ${formatSlugVersion(slug)} entries...`}
     >
       {results.map((entry) => (
         <EntryItem entry={entry} key={entry.name + entry.path + entry.type} slug={slug} />
