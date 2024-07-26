@@ -3,9 +3,9 @@ import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, 
 import { useShortLinks } from "@hooks/use-short-links";
 import { DUB_CO_URL } from "@utils/constants";
 import { deleteShortLink } from "@/api";
-import { MutatePromise, showFailureToast, withAccessToken } from "@raycast/utils";
+import { MutatePromise, showFailureToast } from "@raycast/utils";
 import type { LinkSchema } from "dub/models/components";
-import { dubOAuth } from "./oauth";
+import { withDubClient } from "./with-dub-client";
 
 function SearchLinks() {
   const { shortLinks, error: linksError, isLoading: isLoadingLinks, mutate } = useShortLinks();
@@ -189,4 +189,4 @@ const tryDeleteLink = async (linkId: string, mutate: MutatePromise<LinkSchema[]>
     });
 };
 
-export default withAccessToken(dubOAuth)(SearchLinks);
+export default withDubClient(SearchLinks);
