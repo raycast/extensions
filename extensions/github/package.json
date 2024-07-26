@@ -403,6 +403,7 @@
     }
   ],
   "dependencies": {
+    "@octokit/rest": "^21.0.1",
     "@raycast/api": "^1.76.1",
     "@raycast/utils": "^1.16.0",
     "date-fns": "^3.6.0",

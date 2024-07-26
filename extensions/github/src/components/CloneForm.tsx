@@ -119,7 +119,7 @@ export function CloneForm({ repository }: { repository: ExtendedRepositoryFields
       console.error("Error selecting directory:", error);
       await showToast({
         style: Toast.Style.Failure,
-        title: "Failed to select directory",
+        title: "Failed to select directory. Please reopen Raycast.",
         message: "Please try again",
       });
     }
