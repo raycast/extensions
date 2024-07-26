@@ -4,6 +4,7 @@
 
 - Do not show currently running time entry in the recent time entries list
 - Fix running time entries not showing project details
+- Fix no clients, projects, tasks on create new time entry form, if there is no selected workspace
 
 ## [New Feature] - 2024-07-15
 

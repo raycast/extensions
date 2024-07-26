@@ -69,14 +69,17 @@ function CreateTimeEntryForm({
 
   const filteredClients = useMemo(() => {
     if (selectedProject) return clients.filter((client) => !client.archived && client.id === selectedProject.client_id);
-    else return clients.filter((client) => !client.archived && client.wid === selectedWorkspace);
+    else
+      return clients.filter((client) => !client.archived && (client.wid === selectedWorkspace || !selectedWorkspace));
   }, [projects, selectedWorkspace, selectedProject]);
 
   const filteredProjects = useMemo(() => {
     if (selectedClient)
       return projects.filter((project) => project.client_id === selectedClient.id && project.status != "archived");
     else
-      return projects.filter((project) => project.workspace_id === selectedWorkspace && project.status != "archived");
+      return projects.filter(
+        (project) => (project.workspace_id === selectedWorkspace || !selectedWorkspace) && project.status != "archived",
+      );
   }, [projects, selectedWorkspace, selectedClient]);
 
   const filteredTasks = useMemo(() => {
@@ -85,7 +88,7 @@ function CreateTimeEntryForm({
       return tasks.filter(
         (task) => task.project_id === projects.find((project) => project.client_id === selectedClient.id)?.id,
       );
-    else return tasks.filter((task) => task.workspace_id === selectedWorkspace);
+    else return tasks.filter((task) => task.workspace_id === selectedWorkspace || !selectedWorkspace);
   }, [tasks, selectedWorkspace, selectedClient, selectedProject]);
 
   const onWorkspaceChange = (workspaceId: string) => {
