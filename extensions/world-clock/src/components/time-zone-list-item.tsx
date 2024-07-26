@@ -1,5 +1,4 @@
 import { Image, List } from "@raycast/api";
-import { Dispatch, SetStateAction } from "react";
 import { TimeInfo, Timezone } from "../types/types";
 import { TimeInfoDetail } from "./time-info-detail";
 import {
@@ -11,7 +10,7 @@ import {
 } from "../utils/common-utils";
 import { ActionOnTimezone } from "./action-on-timezone";
 import { ActionOnStarredTimezone } from "./action-on-starred-timezone";
-import { getAvatarIcon } from "@raycast/utils";
+import { getAvatarIcon, MutatePromise } from "@raycast/utils";
 import Mask = Image.Mask;
 
 export function TimeZoneListItem(props: {
@@ -20,11 +19,11 @@ export function TimeZoneListItem(props: {
   timeInfo: TimeInfo;
   detailLoading: boolean;
   starTimezones: Timezone[];
-  setRefresh: Dispatch<SetStateAction<number>>;
-  setRefreshDetail: Dispatch<SetStateAction<number>>;
+  mutate: () => Promise<void>;
+  showDetailMutate: MutatePromise<boolean | undefined, boolean | undefined>;
   showDetail: boolean;
 }) {
-  const { index, timezone, timeInfo, detailLoading, starTimezones, setRefresh, setRefreshDetail, showDetail } = props;
+  const { index, timezone, timeInfo, detailLoading, starTimezones, mutate, showDetailMutate, showDetail } = props;
   return (
     <List.Item
       id={JSON.stringify({ type: "all", index: index, region: timezone })}
@@ -44,9 +43,9 @@ export function TimeZoneListItem(props: {
           timeInfo={timeInfo}
           starTimezones={starTimezones}
           timezone={timezone}
-          setRefresh={setRefresh}
+          mutate={mutate}
           showDetail={showDetail}
-          setRefreshDetail={setRefreshDetail}
+          showDetailMutate={showDetailMutate}
         />
       }
     />
@@ -59,11 +58,11 @@ export function StarredTimeZoneListItem(props: {
   timeInfo: TimeInfo;
   detailLoading: boolean;
   starTimezones: Timezone[];
-  setRefresh: Dispatch<SetStateAction<number>>;
-  setRefreshDetail: Dispatch<SetStateAction<number>>;
+  mutate: () => Promise<void>;
+  showDetailMutate: MutatePromise<boolean | undefined, boolean | undefined>;
   showDetail: boolean;
 }) {
-  const { index, timezone, timeInfo, detailLoading, starTimezones, setRefresh, setRefreshDetail, showDetail } = props;
+  const { index, timezone, timeInfo, detailLoading, starTimezones, mutate, showDetailMutate, showDetail } = props;
   const keywords = timezone.toLowerCase().split("/");
 
   return (
@@ -125,9 +124,9 @@ export function StarredTimeZoneListItem(props: {
           index={index}
           starTimezones={starTimezones}
           timezone={timezone}
-          setRefresh={setRefresh}
+          mutate={mutate}
           showDetail={showDetail}
-          setRefreshDetail={setRefreshDetail}
+          showDetailMutate={showDetailMutate}
         />
       }
     />

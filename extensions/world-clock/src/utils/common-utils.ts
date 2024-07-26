@@ -35,18 +35,10 @@ export function formatMenubarDate(date: Date) {
     hour: "2-digit",
     minute: "2-digit",
   });
-  return format(date, sanitizedFormat) + " " + time;
-}
 
-export const getStarredTimezones = async () => {
-  const _localStorage = await LocalStorage.getItem<string>(localStorageKey.STAR_TIMEZONE);
-  const _starTimezones = typeof _localStorage === "undefined" ? [] : (JSON.parse(_localStorage) as Timezone[]);
-  _starTimezones.forEach((value) => {
-    value.date_time = calculateDateTimeByOffset(value.utc_offset).date_time;
-    value.unixtime = calculateDateTimeByOffset(value.utc_offset).unixtime;
-  });
-  return _starTimezones;
-};
+  const weekDayShort = new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(date);
+  return weekDayShort + " " + format(date, sanitizedFormat) + " " + time;
+}
 
 export const buildDayAndNightIcon = (dateTime: string | number, light: boolean) => {
   const date = new Date(dateTime);
@@ -156,9 +148,13 @@ export const getMenubarAvatar = (timezone: Timezone) => {
   }
 };
 
-export const addTimeZones = async (starTimezones: Timezone[], timezone: Timezone) => {
+export const addTimeZones = async (starTimezones: Timezone[], timezone: Timezone, index: number = -1) => {
   const _starTimezones = [...starTimezones];
-  _starTimezones.push(timezone);
+  if (index == -1) {
+    _starTimezones.push(timezone);
+  } else {
+    _starTimezones.splice(index, 0, timezone);
+  }
   _starTimezones.forEach((value) => {
     value.date_time = "";
     value.unixtime = 0;

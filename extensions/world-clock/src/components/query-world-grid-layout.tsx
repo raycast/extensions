@@ -1,28 +1,44 @@
 import { Grid } from "@raycast/api";
-import { useState } from "react";
-import { TimezoneId } from "../types/types";
+import { useMemo, useState } from "react";
+import { TimeInfo, TimezoneId } from "../types/types";
 import { filterTag } from "../utils/costants";
 import { isEmpty } from "../utils/common-utils";
 import { columns, rememberTag } from "../types/preferences";
-import { getAllTimezones, getRegionTime } from "../hooks/hooks";
 import { StarredTimeZoneGridItem, TimeZoneGridItem } from "./time-zone-grid-item";
 import { GridEmptyView } from "./grid-empty-view";
+import { useAllTimezones } from "../hooks/useAllTimezones";
+import { useStarTimezones } from "../hooks/useStarTimezones";
+import { useRegionTimeInfo } from "../hooks/useRegionTimeInfo";
 
 export function QueryWorldGridLayout() {
   const [tag, setTag] = useState<string>("");
   const [region, setRegion] = useState<string>("");
-  const [refresh, setRefresh] = useState<number>(0);
-  const showDetail = false;
-  const setRefreshDetail = () => {
-    return;
+
+  const { data: allTimezonesData, isLoading: allTimezonesLoading } = useAllTimezones();
+  const timezones = useMemo(() => {
+    return allTimezonesData || [];
+  }, [allTimezonesData]);
+
+  const { data: starTimezonesData, isLoading: starTimezonesLoading, mutate: starTimezonesMutate } = useStarTimezones();
+
+  const mutate = async () => {
+    await starTimezonesMutate();
   };
-  const { starTimezones, timezones, loading } = getAllTimezones(refresh, region);
-  const { timeInfo } = getRegionTime(region);
+
+  const starTimezones = useMemo(() => {
+    return starTimezonesData || [];
+  }, [starTimezonesData]);
+
+  const { data: timeInfoData } = useRegionTimeInfo(region);
+  const timeInfo = useMemo(() => {
+    return timeInfoData || ({} as TimeInfo);
+  }, [timeInfoData]);
+
   return (
     <Grid
       inset={Grid.Inset.Small}
       columns={parseInt(columns)}
-      isLoading={loading || (starTimezones.length !== 0 && tag === "")}
+      isLoading={starTimezonesLoading || allTimezonesLoading}
       searchBarPlaceholder={"Search timezones"}
       onSelectionChange={(id) => {
         if (typeof id === "string" && !isEmpty(id)) {
@@ -51,9 +67,7 @@ export function QueryWorldGridLayout() {
                 timezone={value.timezone}
                 timeInfo={timeInfo}
                 starTimezones={starTimezones}
-                setRefresh={setRefresh}
-                setRefreshDetail={setRefreshDetail}
-                showDetail={showDetail}
+                mutate={mutate}
               />
             );
           })}
@@ -69,9 +83,7 @@ export function QueryWorldGridLayout() {
                 timezone={value}
                 timeInfo={timeInfo}
                 starTimezones={starTimezones}
-                setRefresh={setRefresh}
-                setRefreshDetail={setRefreshDetail}
-                showDetail={showDetail}
+                mutate={mutate}
               />
             );
           })}

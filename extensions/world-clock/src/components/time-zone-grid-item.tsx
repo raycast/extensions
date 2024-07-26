@@ -1,5 +1,4 @@
 import { Grid } from "@raycast/api";
-import { Dispatch, SetStateAction } from "react";
 import { TimeInfo, Timezone } from "../types/types";
 import {
   buildFullDateTime,
@@ -16,11 +15,9 @@ export function TimeZoneGridItem(props: {
   timezone: string;
   timeInfo: TimeInfo;
   starTimezones: Timezone[];
-  setRefresh: Dispatch<SetStateAction<number>>;
-  setRefreshDetail: Dispatch<SetStateAction<number>>;
-  showDetail: boolean;
+  mutate: () => Promise<void>;
 }) {
-  const { index, timezone, timeInfo, starTimezones, setRefresh, setRefreshDetail, showDetail } = props;
+  const { index, timezone, timeInfo, starTimezones, mutate } = props;
   return (
     <Grid.Item
       id={JSON.stringify({ type: "all", index: index, region: timezone })}
@@ -53,9 +50,9 @@ export function TimeZoneGridItem(props: {
           timeInfo={timeInfo}
           starTimezones={starTimezones}
           timezone={timezone}
-          setRefresh={setRefresh}
-          showDetail={showDetail}
-          setRefreshDetail={setRefreshDetail}
+          mutate={mutate}
+          showDetail={false}
+          showDetailMutate={undefined}
         />
       }
     />
@@ -67,11 +64,9 @@ export function StarredTimeZoneGridItem(props: {
   timezone: string;
   timeInfo: TimeInfo;
   starTimezones: Timezone[];
-  setRefresh: Dispatch<SetStateAction<number>>;
-  setRefreshDetail: Dispatch<SetStateAction<number>>;
-  showDetail: boolean;
+  mutate: () => Promise<void>;
 }) {
-  const { index, timezone, timeInfo, starTimezones, setRefresh, setRefreshDetail, showDetail } = props;
+  const { index, timezone, timeInfo, starTimezones, mutate } = props;
   const keywords = timezone.toLowerCase().split("/");
   return (
     <Grid.Item
@@ -100,9 +95,9 @@ ${starTimezones[index].memo}`,
           index={index}
           starTimezones={starTimezones}
           timezone={timezone}
-          setRefresh={setRefresh}
-          showDetail={showDetail}
-          setRefreshDetail={setRefreshDetail}
+          mutate={mutate}
+          showDetail={false}
+          showDetailMutate={undefined}
         />
       }
     />
