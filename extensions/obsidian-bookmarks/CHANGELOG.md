@@ -1,6 +1,6 @@
 # Obsidian Bookmarks Changelog
 
-## [1.0.3] - {PR_MERGE_DATE}
+## [1.0.3] - 2024-07-26
 
 - Added support for different chromium-based browsers
 
