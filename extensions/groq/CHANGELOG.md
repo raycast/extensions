@@ -1,9 +1,16 @@
 # Groq Changelog
 
-## [Update] - 2024-05-18
+## [New Models] - 2024-07-26
 
-- Added new AI chat command `AI Chat`.
-- Improved system prompt for `Fix Grammar and Spelling` and `Improve Text` commands.
+- Added `Llama 3.1 8B` and `Llama 3.1 70B`
+- Added `Gemma2 9B`
+- Improved temperatures
+- Changed tokenization
+
+## [New Command] - 2024-05-18
+
+- Added new AI chat command `AI Chat`
+- Improved system prompt for `Fix Grammar and Spelling` and `Improve Text` commands
 
 ## [Update] - 2024-04-25
 
@@ -13,7 +20,7 @@
 - Fixed typo in command title
 - Updated screenshots
 
-## [New Model] - 2024-04-19
+## [New Models] - 2024-04-19
 
 - Removed `Llama2 70B`
 - Added `Llama3 70B` and `Llama3 8B`

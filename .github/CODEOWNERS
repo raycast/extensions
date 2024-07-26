@@ -71,6 +71,7 @@
 /extensions/asana                                                   @thomaslombart @spaceDolph1n @tuzemec
 /extensions/asoiaf                                                  @xmok
 /extensions/aspect-raytio                                           @ickas
+/extensions/asset-catalog-extractor                                 @chrismessina @pernielsentikaer
 /extensions/associated-press                                        @Dammmien
 /extensions/asyncapi                                                @smoya
 /extensions/atomic                                                  @joepio
@@ -202,7 +203,7 @@
 /extensions/citation-generator                                      @AbhinavPalacharla
 /extensions/clash                                                   @ciiiii
 /extensions/claude                                                  @florisdobber @alejandrot96 @FelixLisczyk
-/extensions/clean-keyboard                                          @ike-gg
+/extensions/clean-keyboard                                          @ike-gg @owain-williams
 /extensions/cleanshotx                                              @Aayush9029 @thomaslombart @lukaszmtw @erics118 @mlnchk @pernielsentikaer
 /extensions/clear-clipboard                                         @d3caf
 /extensions/clickup                                                 @Ali-Parandeh @aesadde @JoltCode
@@ -1258,7 +1259,7 @@
 /extensions/sequel-ace                                              @nagauta @macbookandrew
 /extensions/serverless-framework-docs                               @yemilgr
 /extensions/sesh                                                    @joshmedeski
-/extensions/session                                                 @jamesjlyons @pernielsentikaer
+/extensions/session                                                 @jamesjlyons @pernielsentikaer @benkates
 /extensions/setapp                                                  @lardissone
 /extensions/sf-symbols-search                                       @peteschaffner
 /extensions/shadcn-svelte                                           @selemondev
