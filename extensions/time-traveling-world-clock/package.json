@@ -56,7 +56,7 @@
       "description": "Show time in 24-hour format",
       "type": "checkbox",
       "required": false,
-      "title": "24-hour format",
+      "title": "24-hour Format",
       "label": "Show time in 24-hour format"
     }
   ]
