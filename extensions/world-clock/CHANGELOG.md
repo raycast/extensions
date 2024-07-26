@@ -2,9 +2,10 @@
 
 ## [Update Extension Icon] - {PR_MERGE_DATE}
 
-- Update the extension and command icons
-- Show the first starred time zones in the menu bar
 - Support set avatar for starred time zones
+- Support duplicate starred time zones
+- Show the first starred time zones in the menu bar
+- Update the extension and command icons
 
 ## [Update Memo Icon] - 2023-10-16
 

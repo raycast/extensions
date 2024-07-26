@@ -7,6 +7,7 @@ import { ActionOpenCommandPreferences } from "./action-open-command-preferences"
 import { ActionTimeInfo } from "./action-time-info";
 import EditTimeZone from "../edit-time-zone";
 import { Preferences } from "../types/preferences";
+import { addTimeZones } from "../utils/common-utils";
 
 export function ActionOnStarredTimezone(props: {
   timeInfo: TimeInfo;
@@ -21,33 +22,45 @@ export function ActionOnStarredTimezone(props: {
   return (
     <ActionPanel>
       {timeInfo !== ({} as TimeInfo) && timeInfo.timezone === timezone && <ActionTimeInfo timeInfo={timeInfo} />}
-      <Action
-        icon={Icon.StarDisabled}
-        title={"Unstar Timezone"}
-        shortcut={{ modifiers: ["ctrl"], key: "x" }}
-        onAction={async () => {
-          if (starTimezones.some((value) => value.timezone === timezone)) {
-            const _starTimezones = [...starTimezones];
-            _starTimezones.splice(index, 1);
-            _starTimezones.forEach((value) => {
-              value.date_time = "";
-              value.unixtime = 0;
-            });
-            await LocalStorage.setItem(localStorageKey.STAR_TIMEZONE, JSON.stringify(_starTimezones)).then(() => {
-              setRefresh(Date.now());
-            });
-          }
-        }}
-      />
-      <Action.Push
-        icon={Icon.Pencil}
-        title={"Edit Timezone"}
-        shortcut={{ modifiers: ["cmd"], key: "e" }}
-        target={<EditTimeZone index={index} starTimezones={starTimezones} />}
-        onPop={() => {
-          setRefresh(Date.now());
-        }}
-      />
+      <ActionPanel.Section>
+        <Action
+          icon={Icon.StarDisabled}
+          title={"Unstar Timezone"}
+          shortcut={{ modifiers: ["cmd"], key: "s" }}
+          onAction={async () => {
+            if (starTimezones.some((value) => value.timezone === timezone)) {
+              const _starTimezones = [...starTimezones];
+              _starTimezones.splice(index, 1);
+              _starTimezones.forEach((value) => {
+                value.date_time = "";
+                value.unixtime = 0;
+              });
+              await LocalStorage.setItem(localStorageKey.STAR_TIMEZONE, JSON.stringify(_starTimezones)).then(() => {
+                setRefresh(Date.now());
+              });
+            }
+          }}
+        />
+        <Action.Push
+          icon={Icon.Pencil}
+          title={"Edit Timezone"}
+          shortcut={{ modifiers: ["cmd"], key: "e" }}
+          target={<EditTimeZone index={index} starTimezones={starTimezones} />}
+          onPop={() => {
+            setRefresh(Date.now());
+          }}
+        />
+        <Action
+          icon={Icon.Duplicate}
+          title={"Duplicate Timezone"}
+          shortcut={{ modifiers: ["cmd"], key: "d" }}
+          onAction={async () => {
+            await addTimeZones(starTimezones, starTimezones[index]);
+            setRefresh(Date.now());
+          }}
+        />
+      </ActionPanel.Section>
+
       {getPreferenceValues<Preferences>().itemLayout === "List" && (
         <ActionToggleDetails showDetail={showDetail} setRefresh={setRefreshDetail} />
       )}

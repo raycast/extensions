@@ -64,6 +64,7 @@ export function QueryWorldListLayout() {
             return (
               <TimeZoneListItem
                 key={index}
+                index={index}
                 timezone={value}
                 timeInfo={timeInfo}
                 detailLoading={detailLoading}

@@ -15,6 +15,7 @@ import { getAvatarIcon } from "@raycast/utils";
 import Mask = Image.Mask;
 
 export function TimeZoneListItem(props: {
+  index: number;
   timezone: string;
   timeInfo: TimeInfo;
   detailLoading: boolean;
@@ -23,10 +24,10 @@ export function TimeZoneListItem(props: {
   setRefreshDetail: Dispatch<SetStateAction<number>>;
   showDetail: boolean;
 }) {
-  const { timezone, timeInfo, detailLoading, starTimezones, setRefresh, setRefreshDetail, showDetail } = props;
+  const { index, timezone, timeInfo, detailLoading, starTimezones, setRefresh, setRefreshDetail, showDetail } = props;
   return (
     <List.Item
-      id={JSON.stringify({ type: "all", region: timezone })}
+      id={JSON.stringify({ type: "all", index: index, region: timezone })}
       icon={getAvatarIcon(timezone.replace("/", " "))}
       title={timezone}
       accessories={[
@@ -67,7 +68,7 @@ export function StarredTimeZoneListItem(props: {
 
   return (
     <List.Item
-      id={JSON.stringify({ type: "star", region: timezone })}
+      id={JSON.stringify({ type: "star", index: index, region: timezone })}
       icon={{
         source: {
           light: buildDayAndNightIcon(starTimezones[index].unixtime, true),

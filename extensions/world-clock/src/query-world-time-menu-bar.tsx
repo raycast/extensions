@@ -39,11 +39,11 @@ export default function QueryWorldTime() {
   return (
     <MenuBarExtra isLoading={isLoading} icon={menubarIcon} title={menubarTitle}>
       {starTimezones.length === 0 && <MenuBarExtra.Item title={"No star timezone"} />}
-      {starTimezones.map((value) => {
+      {starTimezones.map((value, index) => {
         const timeInfo = calculateTimeInfoByOffset(Date.now(), value.utc_offset);
         return (
           <MenuBarExtra.Submenu
-            key={value.timezone}
+            key={value.timezone + index}
             icon={getMenubarAvatar(value)}
             title={(isEmpty(value.alias) ? value.timezone : value.alias + "") + "   " + value.date_time}
           >

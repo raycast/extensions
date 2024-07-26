@@ -12,6 +12,7 @@ import { ActionOnTimezone } from "./action-on-timezone";
 import { ActionOnStarredTimezone } from "./action-on-starred-timezone";
 
 export function TimeZoneGridItem(props: {
+  index: number;
   timezone: string;
   timeInfo: TimeInfo;
   starTimezones: Timezone[];
@@ -19,10 +20,10 @@ export function TimeZoneGridItem(props: {
   setRefreshDetail: Dispatch<SetStateAction<number>>;
   showDetail: boolean;
 }) {
-  const { timezone, timeInfo, starTimezones, setRefresh, setRefreshDetail, showDetail } = props;
+  const { index, timezone, timeInfo, starTimezones, setRefresh, setRefreshDetail, showDetail } = props;
   return (
     <Grid.Item
-      id={JSON.stringify({ type: "all", region: timezone })}
+      id={JSON.stringify({ type: "all", index: index, region: timezone })}
       content={
         timeInfo.timezone === timezone
           ? {
@@ -74,7 +75,7 @@ export function StarredTimeZoneGridItem(props: {
   const keywords = timezone.toLowerCase().split("/");
   return (
     <Grid.Item
-      id={JSON.stringify({ type: "star", region: timezone })}
+      id={JSON.stringify({ type: "star", index: index, region: timezone })}
       content={{
         value: {
           source: {

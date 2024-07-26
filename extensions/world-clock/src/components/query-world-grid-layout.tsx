@@ -65,6 +65,7 @@ export function QueryWorldGridLayout() {
             return (
               <TimeZoneGridItem
                 key={index}
+                index={index}
                 timezone={value}
                 timeInfo={timeInfo}
                 starTimezones={starTimezones}

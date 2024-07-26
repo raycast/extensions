@@ -155,3 +155,13 @@ export const getMenubarAvatar = (timezone: Timezone) => {
     };
   }
 };
+
+export const addTimeZones = async (starTimezones: Timezone[], timezone: Timezone) => {
+  const _starTimezones = [...starTimezones];
+  _starTimezones.push(timezone);
+  _starTimezones.forEach((value) => {
+    value.date_time = "";
+    value.unixtime = 0;
+  });
+  await LocalStorage.setItem(localStorageKey.STAR_TIMEZONE, JSON.stringify(_starTimezones));
+};
