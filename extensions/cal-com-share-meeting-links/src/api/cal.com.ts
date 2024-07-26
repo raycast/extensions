@@ -1,4 +1,4 @@
-import { getPreferenceValues, PreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import axios, { AxiosRequestConfig } from "axios";
 import { useCachedPromise } from "@raycast/utils";
 import moment from "moment";
@@ -123,7 +123,7 @@ export interface updateBookingContent {
 }
 
 const defaultBaseUrl = "https://api.cal.com/v1/";
-const { token } = getPreferenceValues<PreferenceValues>();
+const { token } = getPreferenceValues<Preferences>();
 
 const api = axios.create({
   baseURL: defaultBaseUrl,

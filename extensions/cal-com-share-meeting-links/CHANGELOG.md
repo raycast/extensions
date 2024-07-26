@@ -1,6 +1,6 @@
 # Cal.com Share Meeting Links Changelog
 
-## [Update] - 2024-07-26
+## [Update] - {PR_MERGE_DATE}
 
 - Display event prices
 
