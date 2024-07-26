@@ -15,12 +15,8 @@ import { useEffect, useState, useMemo } from "react";
 
 interface Preferences {
   showUtc: boolean;
+  twentyFourFormat: boolean;
 }
-
-const timeFormatter = new Intl.DateTimeFormat("en-US", {
-  hour: "numeric",
-  minute: "2-digit",
-});
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -57,10 +53,6 @@ function AddCityView({ initialCityName, onAdd }: { initialCityName?: string; onA
             <ActionPanel>
               <Action
                 title="Add"
-                shortcut={{
-                  modifiers: [],
-                  key: "enter",
-                }}
                 onAction={() => {
                   onAdd(city);
                   pop();
@@ -81,6 +73,12 @@ export default function Command() {
   const [, _forceUpdate] = useState({});
   const forceUpdate = () => _forceUpdate({});
   const preferences = getPreferenceValues<Preferences>();
+
+  const timeFormatter = new Intl.DateTimeFormat("en-GB", {
+    hour: "numeric",
+    minute: "2-digit",
+    hourCycle: preferences.twentyFourFormat ? "h23" : "h12",
+  });
 
   useEffect(() => {
     (async () => {
@@ -120,10 +118,6 @@ export default function Command() {
       <Action
         icon={Icon.CopyClipboard}
         title="Copy Time"
-        shortcut={{
-          modifiers: [],
-          key: "enter",
-        }}
         onAction={() => {
           Clipboard.copy(time);
           closeMainWindow();
@@ -164,7 +158,7 @@ export default function Command() {
           style={Action.Style.Destructive}
           shortcut={{
             modifiers: ["cmd"],
-            key: "delete",
+            key: "d",
           }}
           onAction={() => {
             const _cities = cities.filter((_city) => _city !== city);

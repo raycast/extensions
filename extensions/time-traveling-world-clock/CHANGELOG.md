@@ -1,5 +1,8 @@
 # World Clock Changelog
 
+## [Improvement] - 2024-07-26
+- Added 24-hour format for time
+
 ## [Improvement] - 2024-07-25
 - Added UTC time
 
