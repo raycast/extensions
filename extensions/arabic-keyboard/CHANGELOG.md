@@ -1,3 +1,3 @@
 # Arabic Keyboard Changelog
 
-## [Initial Version] - 2024-07-22
+## [Initial Version] - {PR_MERGE_DATE}
