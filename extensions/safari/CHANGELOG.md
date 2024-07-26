@@ -1,9 +1,11 @@
 # Safari Changelog
 
 ## [Fix] - {PR_MERGE_DATE}
+
 - Fixed bug with fuzzy search and undefined `device.tabs`
 
 ## [Update] - 2024-07-25
+
 - The default search has been changed to a fuzzy search. Refactored some code.
 
 ## [Update] - 2024-04-18
