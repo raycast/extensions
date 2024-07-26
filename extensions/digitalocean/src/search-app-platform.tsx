@@ -1,8 +1,10 @@
 import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
 import { App, AppDeploymentPhase, useAppDeployments, useApps } from "./client";
+import { DO } from "./config";
 
 export default function Command() {
   const { data, error, isLoading } = useApps();
+  const apps = data?.apps || [];
 
   if (error) {
     return <Detail markdown={`Failed to list apps: ${error.message}`} />;
@@ -10,7 +12,10 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
-      {data?.apps.map((app) => (
+      {!isLoading && !apps.length && <List.EmptyView icon={DO.LOGO} title="Build and deploy apps from code to production in just a few clicks" description="Create your first app now" actions={<ActionPanel>
+        <Action.OpenInBrowser icon={DO.ICON} title="Create App" url={DO.LINKS.apps.new} />
+      </ActionPanel>} />}
+      {apps.map((app) => (
         <List.Item
           key={app.id}
           icon={{ source: Icon.Dot, tintColor: app.live_url ? Color.Green : Color.Blue }}
