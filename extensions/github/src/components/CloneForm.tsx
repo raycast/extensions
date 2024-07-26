@@ -1,6 +1,4 @@
 import { execSync } from "child_process";
-import * as fs from "fs";
-import * as path from "path";
 
 import { Octokit } from "@octokit/rest";
 import {
@@ -17,13 +15,19 @@ import fetch from "node-fetch";
 import { useState, useEffect } from "react";
 
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
+import { cloneAndOpen } from "../helpers/repository";
 
 interface Preferences {
   defaultClonePath: string;
   personalAccessToken?: string;
 }
 
-export function CloneForm({ repository }: { repository: ExtendedRepositoryFieldsFragment }) {
+type CloneFormProps = {
+  repository: ExtendedRepositoryFieldsFragment;
+  onCloneComplete: () => void; // 引数なしの関数に変更
+};
+
+export default function CloneForm({ repository, onCloneComplete }: CloneFormProps) {
   const preferences = getPreferenceValues<Preferences>();
   const [clonePath, setClonePath] = useState(preferences.defaultClonePath || "");
   const [branch, setBranch] = useState("");
@@ -80,24 +84,15 @@ export function CloneForm({ repository }: { repository: ExtendedRepositoryFields
 
   async function handleSubmit(values: { clonePath: string; branch: string; customBranch: string }) {
     const selectedBranch = values.branch === "custom" ? values.customBranch : values.branch;
-    const url = `https://github.com/${repository.nameWithOwner}.git`;
     try {
-      if (!fs.existsSync(values.clonePath)) {
-        fs.mkdirSync(values.clonePath, { recursive: true });
+      await cloneAndOpen(repository, clonePath, selectedBranch);
+      if (onCloneComplete) {
+        onCloneComplete();
       }
-
-      const cloneDir = path.join(values.clonePath, repository.name);
-
-      execSync(`git clone -b ${selectedBranch} ${url} "${cloneDir}"`);
-      showToast({
-        style: Toast.Style.Success,
-        title: "Repository cloned successfully",
-        message: `Cloned ${repository.name} (${selectedBranch}) to ${cloneDir}`,
-      });
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "Failed to clone repository",
+        title: "Failed to clone and open repository",
         message: error instanceof Error ? error.message : String(error),
       });
     }
@@ -130,7 +125,7 @@ export function CloneForm({ repository }: { repository: ExtendedRepositoryFields
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Clone Repository" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Clone and Open Repository" onSubmit={handleSubmit} />
           <Action title="Select Clone Directory" onAction={handleSelectDirectory} />
         </ActionPanel>
       }

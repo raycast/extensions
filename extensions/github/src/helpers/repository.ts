@@ -34,9 +34,10 @@ export const WEB_IDES = [
   },
 ];
 
-import { execSync } from "node:child_process";
-import { existsSync } from "node:fs";
-import { homedir } from "node:os";
+import { exec } from "node:child_process";
+import { existsSync, mkdirSync } from "node:fs";
+import path from "node:path";
+import { promisify } from "node:util";
 
 import { LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
@@ -49,45 +50,74 @@ import { getErrorMessage } from "./errors";
 const VISITED_REPOSITORIES_KEY = "VISITED_REPOSITORIES";
 const VISITED_REPOSITORIES_LENGTH = 25;
 
-export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment) {
-  const { application, baseClonePath } = getPreferenceValues<Preferences.SearchRepositories>();
+const execAsync = promisify(exec);
+
+export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment, clonePath: string, branch?: string) {
+  const { application } = getPreferenceValues<Preferences.SearchRepositories>();
   const applicationPath = application?.path.replaceAll(" ", "\\ ");
-  const clonePath = `${baseClonePath}/${repository.nameWithOwner}`;
-  const openCommand = `open -a ${applicationPath} ${clonePath}`;
+
+  const repoName = repository.name;
+  let targetDir = path.join(clonePath, repoName);
+  let counter = 1;
+
+  // Find a unique directory name
+  while (existsSync(targetDir)) {
+    targetDir = path.join(clonePath, `${repoName}-${counter}`);
+    counter++;
+  }
+
+  // Create the target directory
+  try {
+    mkdirSync(targetDir, { recursive: true });
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Error creating directory",
+      message: getErrorMessage(error),
+    });
+    console.error(error);
+    return;
+  }
+
+  const openCommand = `open -a ${applicationPath} ${targetDir}`;
 
   const toast = await showToast({
-    title: `Opening ${repository.nameWithOwner}`,
-    message: `at ${clonePath}`,
+    title: `Cloning ${repository.nameWithOwner}`,
+    message: `to ${targetDir}`,
     style: Toast.Style.Animated,
   });
 
-  if (!existsSync(clonePath.replace("~", homedir()))) {
-    const cloneUrl = `https://github.com/${repository.nameWithOwner}`;
-    const cloneCommand = `git clone ${cloneUrl} ${clonePath}`;
-
-    try {
-      execSync(cloneCommand);
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Error while cloning the repository";
-      toast.message = getErrorMessage(error);
-      console.error(error);
-      return;
-    }
-  }
+  const cloneUrl = `https://github.com/${repository.nameWithOwner}`;
+  const branchOption = branch ? `-b ${branch}` : "";
+  const cloneCommand = `git clone ${branchOption} ${cloneUrl} ${targetDir}`;
 
   try {
-    execSync(openCommand);
+    await execAsync(cloneCommand);
+    toast.title = "Repository cloned successfully";
+    toast.style = Toast.Style.Success;
   } catch (error) {
     toast.style = Toast.Style.Failure;
-    toast.title = "Error while opening the repository";
+    toast.title = "Error while cloning the repository";
     toast.message = getErrorMessage(error);
     console.error(error);
     return;
   }
 
-  toast.title = "Code editor launched!";
-  toast.style = Toast.Style.Success;
+  // Wait a bit to ensure the clone operation is fully complete
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  toast.title = "Opening repository...";
+
+  try {
+    await execAsync(openCommand);
+    toast.title = "Code editor launched!";
+    toast.style = Toast.Style.Success;
+  } catch (error) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Error while opening the repository";
+    toast.message = getErrorMessage(error);
+    console.error(error);
+  }
 }
 
 // History was stored in `LocalStorage` before, after migration it's stored in `Cache`
