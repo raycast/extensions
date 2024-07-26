@@ -1,5 +1,9 @@
 # Vivaldi Changelog
 
+## [Improvement] - {PR_MERGE_DATE}
+
+- Added Vivaldi New Window Command
+
 ## [Profiles support] - 2023-01-25
 
 - Added support for profiles across all commands
