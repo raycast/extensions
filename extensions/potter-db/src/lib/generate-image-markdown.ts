@@ -1,3 +1,6 @@
+import { environment } from "@raycast/api";
+
 export function generateImageMarkdown(image: string | null, height = 150) {
-  return `![Illustration](${image || "question-mark.png"}?raycast-height=${height})`;
+  const questionMarkImage = environment.appearance === "dark" ? "question-mark@dark.png" : "question-mark.png";
+  return `![Illustration](${image || questionMarkImage}?raycast-height=${height})`;
 }
