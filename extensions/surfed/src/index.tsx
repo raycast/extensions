@@ -62,7 +62,7 @@ export default function Command() {
         setLoading(true);
         try {
           const apikey = preferences.apikey ? `--key ${preferences.apikey}` : "";
-          const { stdout } = await execPromise(`${cliPath} ${query} -j -a ${apikey}`);
+          const { stdout } = await execPromise(`${cliPath} '${query}' -j -l 50 -a ${apikey}`);
           const result: SurfedResponse = JSON.parse(stdout);
 
           if (result.error) {
@@ -100,7 +100,28 @@ export default function Command() {
   }, [searchText]);
 
   return (
-    <List isLoading={loading} searchBarPlaceholder="Search..." onSearchTextChange={setSearchText}>
+    <List
+    isLoading={loading}
+    searchBarPlaceholder="Search..."
+    onSearchTextChange={setSearchText}
+    >
+    {searchText.length < 3 ? (
+      <List.EmptyView
+      title="Start typing to search"
+      description="Enter at least 3 characters to start the search."
+      />
+    ) : loading ? (
+      <List.EmptyView
+      title="Searching…"
+      description="Loading search results"
+      />
+    ) : urls.length === 0 && collections.length === 0 && tags.length === 0 ? (
+      <List.EmptyView
+      title="No Results"
+      description="No matching results found."
+      />
+    ) : (
+      <>
       {collections.length > 0 && (
         <List.Section title="Collections">
           {collections.map((item, index) => (
@@ -149,6 +170,8 @@ export default function Command() {
             />
           ))}
         </List.Section>
+      )}
+        </>
       )}
     </List>
   );
