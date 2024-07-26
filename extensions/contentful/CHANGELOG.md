@@ -1,6 +1,6 @@
 # Contentful Changelog
 
-## [New `Search Assets` command] - {PR_MERGE_DATE}
+## [New `Search Assets` command] - 2024-07-26
 
 - Search your assets library (pagination included 🚀)
 - Add the `Contentful Management JS SDK` for better TS support
