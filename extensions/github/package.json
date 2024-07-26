@@ -30,7 +30,8 @@
     "dmitrii_mitrofanov",
     "j3lte",
     "stelo",
-    "vlasischar"
+    "vlasischar",
+    "javalangruntimeexception"
   ],
   "categories": [
     "Developer Tools",
@@ -348,6 +349,12 @@
           "description": "Includes pull request you recently closed in the icon counter."
         }
       ]
+    },
+    {
+      "name": "clone-repository",
+      "title": "Clone GitHub Repository",
+      "description": "Clone a GitHub repository to your local machine",
+      "mode": "view"
     }
   ],
   "preferences": [
