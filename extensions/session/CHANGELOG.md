@@ -1,6 +1,6 @@
 # Session Changelog
 
-## [Added new form-based session command] - {PR_MERGE_DATE}
+## [Added new form-based session command] - 2024-07-26
 
 - Add a native Raycast form for creating a session with options for intent, category, duration, and notes. The category options are configured via a semi-colon separated list in the command preferences.
 
