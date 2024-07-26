@@ -1,6 +1,6 @@
 # World Clock Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2024-07-26
 - Added 24-hour format for time
 
 ## [Improvement] - 2024-07-25
