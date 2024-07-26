@@ -1,6 +1,6 @@
 # Clean Keyboard Changelog
 
-## [1 hour] - {PR_MERGE_DATE}
+## [1 hour] - 2024-07-26
 
 - Added 1 hour duration
 - Added 24 hour duration
