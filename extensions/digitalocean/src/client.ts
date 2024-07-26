@@ -196,17 +196,17 @@ type AppSpec = {
     git?: {
       repo_clone_url: string;
       branch: string;
-    }
+    };
     github?: {
       branch: string;
       deploy_on_push: boolean;
       reop: string;
-    }
+    };
     gitlab?: {
       branch: string;
       deploy_on_push: boolean;
       reop: string;
-    }
+    };
     image?: {
       registry: string;
       registry_type: "DOCKER_HUB" | "DOCR" | "GHCR";
@@ -216,8 +216,8 @@ type AppSpec = {
       digest: string;
       deploy_on_push: {
         enabled: boolean;
-      }
-    }
+      };
+    };
     dockerfile_path?: string;
     build_command?: string;
     run_command?: string;
@@ -243,39 +243,49 @@ type AppSpec = {
       match: {
         path: {
           prefix: string;
-        }
-      }
+        };
+      };
       cors?: unknown;
       component: {
         name: string;
         preserve_path_prefix?: string;
         rewrite?: string;
-      }
+      };
       redirect?: {
         uri: string;
         authority: string;
         port: number;
         scheme: "http" | "https";
         redirect_code: 300 | 301 | 302 | 303 | 304 | 307 | 308;
-      }
+      };
     }>;
-  }
+  };
   features: string[];
-}
+};
 type AppStep = {
   name: string;
   status: "UNKNOWN" | "PENDING" | "RUNNING" | "ERROR" | "SUCCESS";
   component_name?: string;
   message_base?: string;
   steps?: AppStep[];
-}
+};
+export type AppDeploymentPhase =
+  | "UNKNOWN"
+  | "PENDING_BUILD"
+  | "BUILDING"
+  | "PENDING_DEPLOY"
+  | "DEPLOYING"
+  | "ACTIVE"
+  | "SUPERSEDED"
+  | "ERROR"
+  | "CANCELED";
 type AppDeployment = {
   id: string;
   spec: AppSpec;
   static_sites: Array<{
     name: string;
     source_commit_hash: string;
-  }>
+  }>;
   phase_last_updated_at: string;
   created_at: string;
   updated_at: string;
@@ -284,7 +294,8 @@ type AppDeployment = {
     pending_steps: number;
     total_steps: number;
     steps: AppStep[];
-    phase: string;
+  };
+  phase: AppDeploymentPhase;
   tier_slug: string;
   cause_details: {
     digitalocean_user_action: {
@@ -292,15 +303,15 @@ type AppDeployment = {
         uuid: string;
         email: string;
         full_name: string;
-      }
+      };
       name: string;
-    },
+    };
     type: string;
-  }
+  };
   timing: {
     pending: string;
-  }
-}}
+  };
+};
 export type App = {
   id: string;
   owner_uuid: string;
@@ -319,10 +330,10 @@ export type App = {
     flag: string;
     continent: string;
     data_centers: string[];
-  }
+  };
   tier_slug: string;
   build_config: unknown;
-}
+};
 
 const useAuthorizedFetch =
   <T, P extends string[] = []>(path: string | ((...params: P) => string)) =>
@@ -379,3 +390,6 @@ export function useMutateDomainRecords(domain: string): {
 }
 
 export const useApps = useAuthorizedFetch<{ apps: App[] }>("apps");
+export const useAppDeployments = useAuthorizedFetch<{ deployments: AppDeployment[] }, [string]>(
+  (app: string) => `apps/${app}/deployments`,
+);
