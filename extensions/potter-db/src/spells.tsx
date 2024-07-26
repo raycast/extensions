@@ -3,6 +3,7 @@ import { Spell } from "./lib/types";
 import { Icon, List } from "@raycast/api";
 import { DEFAULT_IMAGE } from "./lib/constants";
 import { useState } from "react";
+import { generateImageMarkdown } from "./lib/generate-image-markdown";
 
 export default function Spells() {
   const [searchName, setSearchName] = useState("");
@@ -18,14 +19,14 @@ export default function Spells() {
       throttle
     >
       <List.Section title={`${spells?.length} spells`}>
-        {spells?.map((spell) => (
+        {spells.map((spell) => (
           <List.Item
             key={spell.id}
             title={spell.attributes.name}
             icon={spell.attributes.image || DEFAULT_IMAGE}
             detail={
               <List.Item.Detail
-                markdown={`![Illustration](${spell.attributes.image}) \n\n ${spell.attributes.effect}`}
+                markdown={`${generateImageMarkdown(spell.attributes.image)} \n\n ${spell.attributes.effect}`}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="ID" text={spell.id} />

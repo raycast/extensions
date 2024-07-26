@@ -3,6 +3,7 @@ import { Character } from "./lib/types";
 import { Icon, List } from "@raycast/api";
 import { DEFAULT_IMAGE } from "./lib/constants";
 import { useState } from "react";
+import { generateImageMarkdown } from "./lib/generate-image-markdown";
 
 export default function Characters() {
   const [searchName, setSearchName] = useState("");
@@ -26,7 +27,7 @@ export default function Characters() {
             icon={character.attributes.image || DEFAULT_IMAGE}
             detail={
               <List.Item.Detail
-                markdown={`![Illustration](${character.attributes.image}) \n\n ${character.attributes.name}`}
+                markdown={generateImageMarkdown(character.attributes.image, 185)}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="ID" text={character.id} />
@@ -36,7 +37,11 @@ export default function Characters() {
                       text={character.attributes.alias_names.join(",")}
                       icon={!character.attributes.alias_names.length ? Icon.Minus : undefined}
                     />
-                    {/* animagus */}
+                    <List.Item.Detail.Metadata.Label
+                      title="Animagus"
+                      text={character.attributes.animagus || ""}
+                      icon={character.attributes.animagus ?? Icon.Minus}
+                    />
                     <List.Item.Detail.Metadata.Label
                       title="Blood Status"
                       text={character.attributes.blood_status || ""}

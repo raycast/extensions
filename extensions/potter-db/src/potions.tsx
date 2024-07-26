@@ -3,6 +3,7 @@ import { Potion } from "./lib/types";
 import { Icon, List } from "@raycast/api";
 import { DEFAULT_IMAGE } from "./lib/constants";
 import { useState } from "react";
+import { generateImageMarkdown } from "./lib/generate-image-markdown";
 
 export default function Potions() {
   const [searchName, setSearchName] = useState("");
@@ -17,15 +18,15 @@ export default function Potions() {
       onSearchTextChange={setSearchName}
       throttle
     >
-      <List.Section title={`${potions?.length} potions`}>
-        {potions?.map((potion) => (
+      <List.Section title={`${potions.length} potions`}>
+        {potions.map((potion) => (
           <List.Item
             key={potion.id}
             title={potion.attributes.name}
             icon={potion.attributes.image || DEFAULT_IMAGE}
             detail={
               <List.Item.Detail
-                markdown={`![Illustration](${potion.attributes.image}) \n\n ${potion.attributes.effect || ""}`}
+                markdown={`${generateImageMarkdown(potion.attributes.image)} \n\n ${potion.attributes.effect || ""}`}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="ID" text={potion.id} />

@@ -1,6 +1,7 @@
 import { usePotterDB } from "./lib/use-potter-db";
 import { Movie } from "./lib/types";
 import { List } from "@raycast/api";
+import { generateImageMarkdown } from "./lib/generate-image-markdown";
 
 export default function Movies() {
   const { data: movies, isLoading, pagination } = usePotterDB<Movie>("movies", "Movies");
@@ -29,7 +30,7 @@ function MoviesSection({ title, movies }: { title: string; movies: Movie[] }) {
           icon={movie.attributes.poster}
           detail={
             <List.Item.Detail
-              markdown={`![Illustration](${movie.attributes.poster}) \n\n ${movie.attributes.summary}`}
+              markdown={`${generateImageMarkdown(movie.attributes.poster)} \n\n ${movie.attributes.summary}`}
               metadata={
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Label title="ID" text={movie.id} />

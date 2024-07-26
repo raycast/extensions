@@ -1,6 +1,7 @@
 import { usePotterDB } from "./lib/use-potter-db";
 import { Book, Chapter } from "./lib/types";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { generateImageMarkdown } from "./lib/generate-image-markdown";
 
 export default function Books() {
   const { data: books, isLoading } = usePotterDB<Book>("books", "Books");
@@ -15,7 +16,7 @@ export default function Books() {
             icon={book.attributes.cover}
             detail={
               <List.Item.Detail
-                markdown={`![Illustration](${book.attributes.cover}) \n\n ${book.attributes.summary}`}
+                markdown={`${generateImageMarkdown(book.attributes.cover)} \n\n ${book.attributes.summary}`}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="ID" text={book.id} />
