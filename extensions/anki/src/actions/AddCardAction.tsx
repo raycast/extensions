@@ -3,7 +3,7 @@ import noteActions from '../api/noteActions';
 import { useCachedPromise } from '@raycast/utils';
 import deckActions from '../api/deckActions';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CreateCardFormValues, ShortcutDictionary } from '../types';
+import { CreateCardFormValues, FieldRef, ShortcutDictionary } from '../types';
 import modelActions from '../api/modelActions';
 import React from 'react';
 import { transformSubmittedData } from '../util';
@@ -31,10 +31,8 @@ export default function AddCardAction({ deckName }: Props) {
     error: tagsError,
   } = useCachedPromise(noteActions.getTags);
 
-  // TODO: udpate this to also allow using different models
-  const frontCardRef = useRef<Form.TextArea>(null);
-  const backCardRef = useRef<Form.TextArea>(null);
   const tagsCardRef = useRef<Form.TextArea>(null);
+  const fieldRefs = useRef<Record<string, FieldRef>>({});
 
   const shortcuts = useMemo((): ShortcutDictionary => {
     return {
@@ -58,11 +56,18 @@ export default function AddCardAction({ deckName }: Props) {
   }, [decksError, tagsError, modelsError]);
 
   const handleClearForm = () => {
-    frontCardRef.current?.reset();
-    backCardRef.current?.reset();
     tagsCardRef.current?.reset();
+    Object.values(fieldRefs.current).forEach(ref => {
+      if (ref.current && ref.current.reset) {
+        ref.current.reset();
+      }
+    });
 
-    frontCardRef.current?.focus();
+    // Focus on the first field
+    const firstFieldRef = Object.values(fieldRefs.current)[0];
+    if (firstFieldRef && firstFieldRef.current) {
+      firstFieldRef.current.focus();
+    }
   };
 
   const handleDeckChange = useCallback(
@@ -119,22 +124,31 @@ export default function AddCardAction({ deckName }: Props) {
 
     return (
       <>
-        {flds.map(field => (
-          <React.Fragment key={field.name}>
-            <Form.TextArea
-              id={`field_${field.name}`}
-              title={field.name}
-              placeholder={field.description || `Enter ${field.name}`}
-              storeValue={false}
-            />
-            <Form.FilePicker
-              id={`file_${field.name}`}
-              title={`${field.name} files`}
-              storeValue={false}
-              allowMultipleSelection
-            />
-          </React.Fragment>
-        ))}
+        {flds.map(field => {
+          const textAreaRef = React.createRef<Form.TextArea>();
+          const filePickerRef = React.createRef<Form.FilePicker>();
+          fieldRefs.current[`field_${field.name}`] = textAreaRef;
+          fieldRefs.current[`file_${field.name}`] = filePickerRef;
+
+          return (
+            <React.Fragment key={field.name}>
+              <Form.TextArea
+                id={`field_${field.name}`}
+                title={field.name}
+                placeholder={field.description || `Enter ${field.name}`}
+                storeValue={false}
+                ref={textAreaRef}
+              />
+              <Form.FilePicker
+                id={`file_${field.name}`}
+                title={`${field.name} files`}
+                storeValue={false}
+                allowMultipleSelection
+                ref={filePickerRef}
+              />
+            </React.Fragment>
+          );
+        })}
       </>
     );
   }, [models, modelsLoading, modelsError, selectedModelName]);
@@ -169,9 +183,6 @@ export default function AddCardAction({ deckName }: Props) {
           <Form.Dropdown.Item key={deck.deck_id} title={deck.name} value={deck.name} />
         ))}
       </Form.Dropdown>
-      <Form.TagPicker id="tags" title="Tags" ref={tagsCardRef}>
-        {tags?.map(tag => <Form.TagPicker.Item key={tag} value={tag} title={tag} />)}
-      </Form.TagPicker>
 
       <Form.Dropdown
         id="modelName"
@@ -186,6 +197,10 @@ export default function AddCardAction({ deckName }: Props) {
       </Form.Dropdown>
 
       {fields}
+
+      <Form.TagPicker id="tags" title="Tags" ref={tagsCardRef}>
+        {tags?.map(tag => <Form.TagPicker.Item key={tag} value={tag} title={tag} />)}
+      </Form.TagPicker>
     </Form>
   );
 }

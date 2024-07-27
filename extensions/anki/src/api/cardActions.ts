@@ -79,7 +79,7 @@ export default {
   findCards: async (deckName: string): Promise<number[] | undefined> => {
     const deckQuery = `"deck:${deckName}"`;
     const cards: number[] = await ankiReq('findCards', {
-      query: deckQuery, // TODO: figure out the correct format to pass query search string
+      query: deckQuery,
     });
     return cards;
   },
