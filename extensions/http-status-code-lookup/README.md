@@ -1,4 +1,4 @@
-# HTTP Status Codes - Raycast Extension
+# HTTP Status Code Lookup - Raycast Extension
 
 This extension provides a list of HTTP status codes and their descriptions.
 
