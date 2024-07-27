@@ -1,5 +1,10 @@
 # JSR Changelog
 
+## [Bugfix] - 2024-07-23
+
+- Bugfix for search API, not accepting JSON, moving to FormData
+- Updated dependencies
+
 ## [Updates] - 2024-05-08
 
 - Add version and score badges to detail page

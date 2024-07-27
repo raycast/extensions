@@ -2,7 +2,7 @@
 
 When the user takes an important action (for example when irreversibly deleting something), you can ask for confirmation by using `confirmAlert`.
 
-![](../../.gitbook/assets/alert.png)
+![](../../.gitbook/assets/alert.webp)
 
 ## API Reference
 
@@ -89,8 +89,8 @@ Use [Alert.ActionStyle.Destructive](#alert.actionstyle) for confirmations of a d
 
 #### Enumeration members
 
-| Name        | Value                                                   |
-| :---------- | :------------------------------------------------------ |
-| Default     | ![](../../.gitbook/assets/alert-action-default.png)     |
-| Destructive | ![](../../.gitbook/assets/alert-action-destructive.png) |
-| Cancel      | ![](../../.gitbook/assets/alert-action-cancel.png)      |
+| Name        | Value                                                    |
+| :---------- | :------------------------------------------------------- |
+| Default     | ![](../../.gitbook/assets/alert-action-default.webp)     |
+| Destructive | ![](../../.gitbook/assets/alert-action-destructive.webp) |
+| Cancel      | ![](../../.gitbook/assets/alert-action-cancel.webp)      |

@@ -1,10 +1,10 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lexicon-search",
-  "title": "ATproto Lexicon Search",
+  "title": "AT Protocol Lexicon Search",
   "description": "Quickly look up atproto lexicons.",
   "icon": "magnisky.png",
-  "author": "futur",
+  "author": "ftrstk",
   "categories": [
     "Developer Tools",
     "Documentation"

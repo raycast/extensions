@@ -1,5 +1,9 @@
 # United Nations Extension
 
+## [Bugfix] - 2024-07-24
+
+- Handle possibly undefined parameter on UN News
+
 ## [Updates] - 2024-06-20
 
 - Fix language settings of Spanish and Portuguese

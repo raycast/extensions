@@ -25,16 +25,7 @@ export default function OpenLinkInSpecificBrowser() {
   const { data: sortedBrowsers, visitItem } = useFrecencySorting(browsers, { key: (browsers) => browsers.path });
 
   return (
-    <MenuBarExtra
-      isLoading={isLoading}
-      tooltip={"Open Link in Specific Browser"}
-      icon={{
-        source: {
-          light: "open-link-menu-bar-icon.png",
-          dark: "open-link-menu-bar-icon@dark.png",
-        },
-      }}
-    >
+    <MenuBarExtra isLoading={isLoading} tooltip={"Open Link in Specific Browser"} icon={Icon.Compass}>
       {sortedBrowsers.map((browser) => (
         <MenuBarExtra.Item
           key={browser.path}

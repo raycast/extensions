@@ -5,7 +5,7 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-09-04 17:37:42
- * Last modified  : 2023-11-01 00:17:40
+ * Last modified  : 2024-07-05 01:57:20
  */
 
 import { Application } from "@raycast/api";
@@ -48,17 +48,27 @@ export enum GroupDisplaySetting {
   /**
    * Do not display groups. Show all pins in a single list.
    */
-  None = "none",
+  NONE = "none",
+
+  /**
+   * Use the parent group's display setting.
+   */
+  USE_PARENT = "useParent",
 
   /**
    * Display groups as separate submenus.
    */
-  Submenus = "submenus",
+  SUBMENUS = "submenus",
 
   /**
    * Display groups as separate sections.
    */
-  Subsections = "subsections",
+  SUBSECTIONS = "subsections",
+
+  /**
+   * Display groups as individual items.
+   */
+  ITEMS = "items",
 }
 
 /**
@@ -239,6 +249,11 @@ export type ViewGroupsPreferences = {
    * Whether to display the parent group of each group as an accessory.
    */
   showParentGroup: boolean;
+
+  /**
+   * Whether to display the visibility of each group as an accessory.
+   */
+  showVisibility: boolean;
 };
 
 /**

@@ -57,7 +57,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
     - There is no need for a subtitle for the `Search Emoji` command since it's self-explanatory
     - **Rule of thumb:** If your subtitle is almost a duplication of your command title, you probably don't need it
 
-![Example of a good subtitle](../.gitbook/assets/good-subtitle.png)
+![Example of a good subtitle](../.gitbook/assets/good-subtitle.webp)
 
 ## Extension Icon
 
@@ -78,11 +78,11 @@ We made a new icon generator tool to ease the process of creating icons for your
 - If your extension requires additional setup, such as getting an API access token, enabling some preferences in other applications, or has non-trivial use cases, please provide a README file at the root folder of your extension. When a README is provided, users will see the "About This Extension" button on the preferences onboarding screen.
 - Supporting README media: Put all linked media files in a top-level `media` folder inside your extension directory. (This is different from assets that are required at runtime in your extension: they go inside the assets folder and will be bundled into your extension.)
 
-![Onboarding button linking to the README file](../.gitbook/assets/required-preference.png)
+![Onboarding button linking to the README file](../.gitbook/assets/required-preference.webp)
 
 ## Categories
 
-![Categories shown on an extension details screen](../.gitbook/assets/categories-focus.png)
+![Categories shown on an extension details screen](../.gitbook/assets/categories-focus.webp)
 
 - All extensions should be published with at least one category
 - Categories are case-sensitive and should follow the [Title Case](https://titlecaseconverter.com/rules/) convention
@@ -110,7 +110,7 @@ We made a new icon generator tool to ease the process of creating icons for your
 
 ## Screenshots
 
-![An example of an extension with screenshot metadata](../.gitbook/assets/hn-store.png)
+![An example of an extension with screenshot metadata](../.gitbook/assets/hn-store.webp)
 
 - Screenshots are displayed in the metadata of an extension details screen, where users can click and browse through them to understand what your extension does in greater detail, before installing
 - You can add a maximum of six screenshots. We recommend adding at least three, so your extensions detail screen looks beautiful.
@@ -148,7 +148,7 @@ You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make you
 
 ## Version History
 
-![A CHANGELOG.md file displayed in the app](../.gitbook/assets/version-history.png)
+![A CHANGELOG.md file displayed in the app](../.gitbook/assets/version-history.webp)
 
 - Make it easier for users to see exactly what notable changes have been made between each release of your extension with a `CHANGELOG.md` file in your extension metadata
   - To add Version History to your extension, add a `CHANGELOG.md` file to the root folder of your extension
@@ -229,7 +229,7 @@ You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you
 
 ### Preferences
 
-![Required preferences will be shown when opening the command](../.gitbook/assets/required-preferences-2.png)
+![Required preferences will be shown when opening the command](../.gitbook/assets/required-preferences-2.webp)
 
 - Use the [preferences API](https://developers.raycast.com/api-reference/preferences) to let your users configure your extension or for providing credentials like API tokens
   - When using `required: true`, Raycast will ask the user to set preferences before continuing with an extension. See the example [here](https://github.com/raycast/extensions/blob/main/extensions/gitlab/package.json#L150).
@@ -237,7 +237,7 @@ You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you
 
 ### Action Panel
 
-![Raycast Action Panel component](../.gitbook/assets/action-panel.png)
+![Raycast Action Panel component](../.gitbook/assets/action-panel.webp)
 
 - Actions in the action panel should also follow the **Title Case** naming convention
   - ✅ `Open in Browser`, `Copy to Clipboard`

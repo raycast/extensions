@@ -3,24 +3,24 @@ import { useDocumentContent } from "../../hooks/useDocuments";
 import { DocumentActions, DocumentActionsProps } from "./DocumentActions";
 import { emojify } from "node-emoji";
 
-export function DocumentDetail({ doc, ...rest }: DocumentActionsProps) {
-  const { content, isLoadingContent } = useDocumentContent(doc.id);
+export function DocumentDetail({ doc: parent, ...rest }: DocumentActionsProps) {
+  const { doc, isLoadingDoc, mutateDoc } = useDocumentContent(parent.id);
 
-  let markdown = `# ${doc.title}`;
-  if (content) {
-    markdown += `\n\n${emojify(content)}`;
+  let markdown = "";
+  if (doc?.content) {
+    markdown = `# ${doc.title}\n\n${emojify(doc.content)}`;
   }
 
   return (
     <Detail
       markdown={markdown}
-      isLoading={isLoadingContent}
-      navigationTitle={doc.title}
+      isLoading={isLoadingDoc}
+      navigationTitle={parent.title}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Markdown" content={markdown} />
 
-          <DocumentActions doc={doc} {...rest} />
+          {doc && <DocumentActions doc={doc} mutateDoc={mutateDoc} {...rest} deleteUnsupported />}
         </ActionPanel>
       }
     />
