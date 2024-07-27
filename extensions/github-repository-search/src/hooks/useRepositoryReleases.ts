@@ -1,10 +1,15 @@
-import { getPreferenceValues } from "@raycast/api";
+import fetch from "node-fetch";
 import { Octokit } from "octokit";
 import { useEffect, useState } from "react";
-import { Release, Repository, RepositoryReleasesResponse } from "./types";
+import { getPreferenceValues } from "@raycast/api";
+import type { Release, Repository, RepositoryReleasesResponse } from "@/types";
 
 const preferenceValues = getPreferenceValues();
-const octokit = new Octokit({ auth: preferenceValues["token"], baseUrl: preferenceValues["baseUrl"] });
+const octokit = new Octokit({
+  request: { fetch },
+  auth: preferenceValues["token"],
+  baseUrl: preferenceValues["baseUrl"],
+});
 
 const REPOSITORY_RELEASES_QUERY = `
 query RepositoryReleases($name: String!, $owner: String!) {

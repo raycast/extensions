@@ -1,6 +1,6 @@
+import { useEffect, useState } from "react";
 import { LocalStorage } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { Repository } from "./types";
+import type { Repository } from "@/types";
 
 const VISITED_REPOSITORIES_KEY = "VISITED_REPOSITORIES";
 const VISITED_REPOSITORIES_LENGTH = 25;
