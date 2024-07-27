@@ -75,9 +75,9 @@ interface Props {
 
 function openURL(url: string, preferredBrowser: string) {
   if (preferredBrowser) {
-    open(url, preferredBrowser)
+    open(url, preferredBrowser);
   } else {
-    open(url)
+    open(url);
   }
 }
 
