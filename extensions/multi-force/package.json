@@ -12,9 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "MultiForce",
-      "subtitle": "Open a Salesforce org in your browser",
-      "description": "Select a Salesforce login to authenticate and open in your preferred browser.",
+      "title": "Manage Salesforce Orgs",
+      "description": "Create and use Salesforce logins created via Salesforce's SF CLI tool and quickly log in to orgs you are working in.",
       "mode": "view"
     }
   ],
