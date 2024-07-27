@@ -86,7 +86,7 @@ function UnreadMenuCommand() {
         />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
-        {!error && unreadCount <= 0 && <MenuBarExtra.Item title="No Unread Mails" />}
+        {!error && unreadCount <= 0 && <MenuBarExtra.Item title="No Unread Mails" icon={Icon.Envelope} />}
         {data?.map((m) => <MessageMenubarItem key={m.data.id} message={m.data} onAction={() => onMailOpen(m.data)} />)}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
