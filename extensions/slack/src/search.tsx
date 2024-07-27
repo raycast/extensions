@@ -6,20 +6,18 @@ import { withSlackClient } from "./shared/withSlackClient";
 import { useFrecencySorting } from "@raycast/utils";
 import { OpenChannelInSlack, OpenChatInSlack, useSlackApp } from "./shared/OpenInSlack";
 import { convertSlackEmojiToUnicode } from "./shared/utils";
+import { toZonedTime } from "date-fns-tz";
+import { differenceInMinutes } from "date-fns";
 
 const { displayExtraMetadata } = getPreferenceValues<Preferences.Search>();
 
 function getCoworkerTime(coworkerTimeZone: string): string {
   const localTime = new Date();
-  const coworkerTime = new Date(localTime.toLocaleString("en-US", { timeZone: coworkerTimeZone }));
+  const coworkerTime = toZonedTime(localTime, coworkerTimeZone);
 
-  const diffInMinutes = Math.round((coworkerTime.getTime() - localTime.getTime()) / (1000 * 60));
-  const diffHours = Math.floor(Math.abs(diffInMinutes) / 60);
-  const diffMinutes = Math.abs(diffInMinutes) % 60;
-
-  const formattedDiff = `${diffInMinutes >= 0 ? "+" : "-"}${diffHours}h${diffMinutes !== 0 ? ` ${diffMinutes}m` : ""}`;
-
-  return formattedDiff;
+  const diffInMinutes = differenceInMinutes(coworkerTime, localTime);
+  const diffInHours = diffInMinutes / 60;
+  return `${diffInMinutes >= 0 ? "+" : "-"}${Math.abs(diffInHours) % 1 === 0 ? Math.abs(diffInHours) : Math.abs(diffInHours).toFixed(1)}h`;
 }
 
 function searchItemAccessories(
@@ -37,10 +35,11 @@ function searchItemAccessories(
   ];
 
   if (displayExtraMetadata) {
-    searchMetadata.push(
-      { icon: Icon.Globe, text: timezone.split("/")[1].replace(/_/g, " ") },
-      { icon: Icon.Clock, text: getCoworkerTime(timezone) },
-    );
+    searchMetadata.push({ icon: Icon.Globe, text: timezone.split("/")[1].replace(/_/g, " ") });
+
+    if (getCoworkerTime(timezone) !== "+0h") {
+      searchMetadata.push({ icon: Icon.Clock, text: getCoworkerTime(timezone) });
+    }
   }
 
   return searchMetadata;
