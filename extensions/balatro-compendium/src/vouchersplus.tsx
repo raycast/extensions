@@ -26,7 +26,7 @@ export default function Command() {
                   showToast(
                     Toast.Style.Success,
                     "Downgraded Voucher:",
-                    `${item.Downgrade}`
+                    `${item.Downgrade}`,
                   );
                 }}
               />
