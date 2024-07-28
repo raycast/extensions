@@ -1,4 +1,4 @@
-import type { Device } from "@j3lte/govee-lan-controller";
+import type { Device, Govee } from "@j3lte/govee-lan-controller";
 
 import type { Icon } from "@raycast/api";
 
@@ -31,7 +31,7 @@ export type ScenariosHook = {
   updateScenario: (id: string, data: ScenarioData) => void;
   deleteScenario: (id: string) => void;
   duplicateScenario: (id: string) => string;
-  revalidate: () => Promise<void>;
+  isLoading: boolean;
 };
 
 export type GoveeControllerReturn = {
@@ -39,4 +39,5 @@ export type GoveeControllerReturn = {
   executeScenario: ({ scenario }: { scenario: Scenario }) => Promise<void>;
   isLoading: boolean;
   error: Error | null;
+  controller: Govee | null;
 };
