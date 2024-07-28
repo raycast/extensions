@@ -1,13 +1,6 @@
 import { List } from "@raycast/api";
 import listData from "./tags.json";
 
-const rarityColors: { [key: string]: string } = {
-  Common: "#0093FF",
-  Uncommon: "#35BD86",
-  Rare: "#FF4B40",
-  Legendary: "#AB5BB5",
-};
-
 export default function Command() {
   return (
     <List

@@ -1,5 +1,4 @@
 import { ActionPanel, List, Icon, Action } from "@raycast/api";
-import { showToast, Toast } from "@raycast/api";
 import listData from "./planets.json";
 
 export default function Command() {
