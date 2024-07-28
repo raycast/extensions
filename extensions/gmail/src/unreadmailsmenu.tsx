@@ -70,8 +70,8 @@ function UnreadMenuCommand() {
     }
   };
   const unreadCount = data?.length || 0;
-  const showMenuAlways = getPreferenceValues<Preferences.Unreadmailsmenu>().showAlways;
-  if (!showMenuAlways && unreadCount <= 0) {
+  const { showAlways } = getPreferenceValues<Preferences.Unreadmailsmenu>();
+  if (!showAlways && unreadCount <= 0) {
     return null;
   }
   return (
