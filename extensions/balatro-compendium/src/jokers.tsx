@@ -52,7 +52,16 @@ export default function Command() {
   );
 }
 
-function generateMarkdown(item: any): string {
+interface Item {
+  Name: string;
+  Appearance: string;
+  Effect: string;
+  Rarity: string;
+  UnlockRequirement: string;
+  Cost: string;
+}
+
+function generateMarkdown(item: Item): string {
   return `
 # ${item.Name}
 
@@ -63,7 +72,7 @@ ${item.Effect}
 `;
 }
 
-function ItemDetail({ item }: { item: any }) {
+function ItemDetail({ item }: { item: Item }) {
   const rarity = item.Rarity;
   const color = rarityColors[rarity] || "#000000";
   //const unlockRequirement =item.UnlockRequirement;

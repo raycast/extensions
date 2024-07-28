@@ -117,6 +117,7 @@
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
+    "eslint": "^9.8.0",
     "eslint-plugin-react": "^7.35.0",
     "globals": "^15.8.0",
     "prettier": "3.3.3",

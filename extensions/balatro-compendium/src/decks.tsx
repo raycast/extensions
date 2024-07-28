@@ -39,7 +39,14 @@ export default function Command() {
   );
 }
 
-function generateMarkdown(item: any): string {
+interface Item {
+  Name: string;
+  Appearance: string;
+  Effect: string;
+  UnlockRequirement: string;
+}
+
+function generateMarkdown(item: Item): string {
   return `
 # ${item.Name}
 

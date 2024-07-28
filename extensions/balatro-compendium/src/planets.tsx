@@ -1,4 +1,4 @@
-import { ActionPanel, List, Icon, Action } from "@raycast/api";
+import { List } from "@raycast/api";
 import listData from "./planets.json";
 
 export default function Command() {
@@ -22,7 +22,14 @@ export default function Command() {
   );
 }
 
-function generateMarkdown(item: any): string {
+interface Item {
+  Name: string;
+  Appearance: string;
+  Effect: string;
+  HandType: string;
+}
+
+function generateMarkdown(item: Item): string {
   return `
 # ${item.Name}
 
