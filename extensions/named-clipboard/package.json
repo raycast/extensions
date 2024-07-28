@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "named-clipboard",
+  "title": "Named Clipboard",
+  "description": "Manage multiple named clipboards",
+  "icon": "command-icon.png",
+  "author": "mikolaj_solik",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "copy-to-named-clipboard",
+      "title": "Copy to Named Clipboard",
+      "subtitle": "Create or update a named clipboard",
+      "description": "Copy text to a new or existing named clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "paste-from-named-clipboard",
+      "title": "Paste from Named Clipboard",
+      "subtitle": "Search and paste from named clipboards",
+      "description": "Search, manage, and paste from your named clipboards",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
