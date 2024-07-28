@@ -1,5 +1,9 @@
 # Pexels Changelog
 
+## [Refactor Code] - {PR_MERGE_DATE}
+
+- Refactor the code to simplify the logic and improve the performance
+
 ## [Add New Command] - 2023-03-31
 
 - Add Search Videos command
