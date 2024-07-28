@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { List, ActionPanel, Action, showToast, Toast, popToRoot } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, popToRoot, Detail } from "@raycast/api";
 import { AuthenticateNewOrg } from "./components/AuthenticateNewOrg";
 import { DeveloperOrg } from "./models/models";
 import { openOrg, getOrgList, deleteOrg } from "./utils/sf";
 import { loadOrgs, saveOrgs } from "./utils/storage-management";
-
+import { EmptyOrgList } from "./components/EmptyOrgList";
 export default function Command() {
   const [orgs, setOrgs] = useState<DeveloperOrg[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -87,7 +87,11 @@ export default function Command() {
     toast.hide();
   };
 
+
   return (
+    orgs.length === 0 ?
+    <EmptyOrgList/>
+    :
     <List isLoading={isLoading}>
       {orgs.map((org, index) => (
         <List.Item
@@ -108,7 +112,7 @@ export default function Command() {
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
               />
               <Action.Push
-                title="Authenticate to a New Org"
+                title="Authenticate a New Org"
                 target={<AuthenticateNewOrg />}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
               />
