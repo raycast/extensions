@@ -1,5 +1,10 @@
 # Todo List Changelog
 
+## [New Action] - 2024-07-28
+
+- Added an action to set a tag for a todo item.
+- Added a dropdown filter to filter by tag.
+
 ## [New Action & Fix shortcut] - 2023-11-13
 
 - Added action to clear all completed tasks
