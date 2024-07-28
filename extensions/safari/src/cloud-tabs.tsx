@@ -18,7 +18,11 @@ const Command = () => {
   return (
     <List isLoading={!devices} onSearchTextChange={setSearchText}>
       {_.map(devices, (device: Device) => {
-        const tabs = search(device.tabs, ["title", "url"], searchText) as Tab[];
+        const tabs = search(
+          typeof device.tabs === "undefined" ? [] : device.tabs,
+          ["title", "url"],
+          searchText,
+        ) as Tab[];
         return <DeviceListSection key={device.uuid} device={device} filteredTabs={tabs} refresh={refreshDevices} />;
       })}
       <FallbackSearchSection searchText={searchText} />

@@ -1,6 +1,7 @@
 import { showHUD } from "@raycast/api";
 import { getCachedEnv } from "./shell-utils";
 import { execSync } from "child_process";
+import os from "os";
 
 export const getCurWifiInfo = async () => {
   try {
@@ -95,3 +96,20 @@ export const toggleWifi = async () => {
     await showHUD("❌ " + String(e));
   }
 };
+
+export function getIPV4Address() {
+  const interfaces = os.networkInterfaces();
+  for (const devName in interfaces) {
+    const iface = interfaces[devName];
+    if (typeof iface !== "undefined") {
+      for (let i = 0; i < iface.length; i++) {
+        const alias = iface[i];
+        //console.log(alias)
+        if (alias.family === "IPv4" && alias.address !== "127.0.0.1" && !alias.internal) {
+          return alias.address;
+        }
+      }
+    }
+  }
+  return null;
+}

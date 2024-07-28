@@ -194,14 +194,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.1",
-    "@raycast/utils": "^1.15.0",
+    "@raycast/api": "^1.79.1",
+    "@raycast/utils": "^1.16.2",
     "cheerio": "^1.0.0-rc.12",
     "execa": "^9.2.0",
     "fast-xml-parser": "^4.4.0",
     "got": "^14.3.0",
-    "mac-say": "^0.2.8",
-    "raycast-cross-extension": "^0.2.2",
+    "mac-say": "^0.2.9",
+    "raycast-cross-extension": "^0.2.3",
     "turndown": "^7.2.0"
   },
   "devDependencies": {

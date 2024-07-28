@@ -72,7 +72,7 @@ const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => 
     toast.primaryAction = {
       title: "Copy Error Log",
       shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-      onAction: () => Clipboard.copy(e instanceof Error ? e.stack ?? e.message : String(e)),
+      onAction: () => Clipboard.copy(e instanceof Error ? (e.stack ?? e.message) : String(e)),
     };
   }
 };

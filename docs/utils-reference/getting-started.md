@@ -16,6 +16,10 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.16.3
+
+- Fix an issue where `URLSearchParams` couldn't be passed as an option to `useFetch` or `useCachedPromise`, causing extensions to crash.
+
 ### v1.16.2
 
 - Fixed the refresh token flow to log out the user instead of throwing an error.

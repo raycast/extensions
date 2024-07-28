@@ -67,6 +67,7 @@ jobs:
           cli_version: "${{ github.event.inputs.cli_version }}"
           allow_owners_only_for_extensions: "${{ steps.allow_owners_only_for_extensions.outputs.value }}"
       - name: Post Store URLs
+        if: github.event_name == 'push'
         uses: raycast/github-actions/git-post-store-urls-to-pr@v1.16.0
         with:
           store_urls: ${{ steps.ray_cli.outputs.store_urls }}
