@@ -110,14 +110,14 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.16.2"
+    "@raycast/utils": "^1.16.2",
+    "eslint": "^8.57.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.8.0",
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
-    "eslint": "^7.17.0",
     "eslint-plugin-react": "^7.35.0",
     "globals": "^15.8.0",
     "prettier": "3.3.3",
