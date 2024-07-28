@@ -1,23 +1,23 @@
-export interface Posts {
+export interface PostType {
   id: string;
-  user: User;
-  timestamp: number | null;
-  slackUrl: null | string;
+  user: UserType;
+  timestamp: number;
+  slackUrl: string | null;
   postedAt: Date;
   text: string;
   attachments: string[];
   mux: string[];
-  reactions: Reaction[];
+  reactions: ReactionType[];
 }
 
-export interface Reaction {
+export interface ReactionType {
   name: string;
   usersReacted: string[];
   url?: string;
   char?: string;
 }
 
-export interface User {
+export interface UserType {
   id: string;
   slackID: null | string;
   email: null | string;
@@ -42,16 +42,4 @@ export interface User {
   customAudioURL: null;
   lastUsernameUpdatedTime: Date | null;
   webhookURL: null;
-}
-
-export interface Post {
-  id: string;
-  user: User;
-  timestamp: number;
-  slackUrl: string | null;
-  postedAt: Date;
-  text: string;
-  attachments: string[];
-  mux: string[];
-  reactions: Reaction[];
 }

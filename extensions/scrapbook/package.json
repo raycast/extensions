@@ -22,11 +22,18 @@
       "title": "Search Users",
       "description": "Search scrapbook users",
       "mode": "view"
+    },
+    {
+      "name": "search-users-posts",
+      "title": "Search User's Posts",
+      "description": "Search for posts by a user",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.16.2"
+    "@raycast/utils": "^1.16.2",
+    "fuse.js": "^7.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
