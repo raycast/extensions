@@ -42,7 +42,6 @@ interface Item {
   Name: string;
   Appearance: string;
   Effect: string;
-  Upgrade: string;
 }
 
 function generateMarkdown(item: Item): string {
