@@ -9,6 +9,8 @@ import {
   List,
   popToRoot,
   showHUD,
+  Toast,
+  showToast,
 } from "@raycast/api";
 import { shellHistory } from "shell-history";
 import { shellEnv } from "shell-env";
@@ -63,18 +65,28 @@ const Result = ({ cmd }: { cmd: string }) => {
         if (killed) {
           return;
         }
-        setOutput((out) => `${out}${data}`);
+        setOutput(data);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Error executing command",
+        });
+        return;
       });
       child.stdout?.on("data", (data: string) => {
         if (killed) {
           return;
         }
-        setOutput((out) => `${out}${data}`);
+        showToast({
+          style: Toast.Style.Animated,
+          title: "Executing command...",
+        });
+        setOutput(data);
       });
       child.on("exit", () => {
-        if (killed) {
-          return;
-        }
+        showToast({
+          style: Toast.Style.Success,
+          title: "Command execution complete",
+        });
         setFinished(true);
       });
     };

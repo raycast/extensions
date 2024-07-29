@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dub-link-shortener",
-  "title": "Dub Link Shortener",
-  "description": "Dub.co is the open-source link management infrastructure. This extension allows you to shorten and retrieve your Dub links directly inside Raycast.",
+  "title": "Dub",
+  "description": "Dub is the open-source link management platform for modern marketing teams. This extension allows you to shorten and retrieve your Dub links directly inside Raycast.",
   "icon": "command-icon.png",
   "author": "quuu",
   "categories": [
@@ -13,7 +13,8 @@
     "Web"
   ],
   "contributors": [
-    "stelo"
+    "stelo",
+    "steventey"
   ],
   "license": "MIT",
   "commands": [
@@ -45,15 +46,16 @@
   "dependencies": {
     "@raycast/api": "^1.61.2",
     "@raycast/utils": "^1.16.0",
-    "axios": "^1.6.2"
+    "dub": "^0.33.1",
+    "undici": "^6.19.2"
   },
   "preferences": [
     {
-      "name": "apiKey",
+      "name": "workspaceApiKey",
       "type": "password",
       "required": true,
-      "title": "API Key",
-      "description": "Dub.co API key."
+      "title": "Workspace API Key",
+      "description": "Workspace API key on Dub. Learn more: https://d.to/tokens"
     }
   ],
   "devDependencies": {

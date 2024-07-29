@@ -11,6 +11,7 @@ import { Site } from './utils/interfaces';
 import { OpenOnNetlify, OpenRepo } from './components/actions';
 import DeployListView from './components/deploys';
 import TeamDropdown from './components/team-dropdown';
+import EnvListView from './components/envs';
 
 export default function Command() {
   const [query, setQuery] = useState<string>('');
@@ -153,6 +154,11 @@ const SiteActions = ({
         icon={Icon.Rocket}
         title="Show Deploys"
         target={<DeployListView siteId={site.id} siteName={site.name} />}
+      />
+      <Action.Push
+        icon={Icon.MagnifyingGlass}
+        title="Show Environment Variables"
+        target={<EnvListView siteId={site.id} siteName={site.name} />}
       />
     </ActionPanel.Section>
     <ActionPanel.Section>

@@ -1,6 +1,12 @@
 # Slack Changelog
 
-### [OAuth + Many Improvements] - 2024-06-18
+## [Search Messages command] - 2024-07-08
+
+- Add a new command to search through your Slack's workspace messages.
+- ⚠️ The previous `Search` command is renamed as `Open Channel` to differentiate from `Search Messages`
+- Add `Save as Quicklink` action in `Open Channel` command
+
+## [OAuth + Many Improvements] - 2024-06-18
 
 - **Added OAuth Support:** Users can now log in using OAuth, making it a more secure and streamlined authentication process.
 - **Improved Search Functionality:** Recently opened channels now appear at the top of search results, making it easier to find what you need quickly.

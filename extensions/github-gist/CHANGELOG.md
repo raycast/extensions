@@ -1,5 +1,17 @@
 # GitHub Gist Changelog
 
+## [Reduce GitHub Authentication] - 2024-07-16
+
+- Reduce GitHub authentication permissions to access only GitHub Gist content
+- Fix the issue of **Open in Ray.so** command displaying garbled code
+- Add new Action: Save as Quicklink
+
+## [OAuth2.0 Support] - 2024-07-11
+
+- Uses Raycast OAuth2.0 GitHub integration with `repo read:user gist` scopes.
+- ⚠️Disables the personal access token preference. Users can delete their tokens after successful OAuth2.0 connection.
+- Minor refactoring and updated dependencies.
+
 ## [Refactor Command] - 2024-07-03
 
 - Simplify the code and improve performance

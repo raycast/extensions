@@ -5,7 +5,7 @@ import useLocalStorage from "@/hooks/useLocalStorage";
 const useNameMapping = () => {
   const { data, setData } = useLocalStorage<GoveeNameMapping>("nameMapping", {});
 
-  const getName = (deviceId: string) => data[deviceId] || null;
+  const getName = (deviceId: string) => (data ? data[deviceId] : null);
   const setName = (deviceId: string, name: string | null) => {
     if (!name) {
       setData((data) => {

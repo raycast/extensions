@@ -13,7 +13,7 @@ import ILovePDFFile from "@ilovepdf/ilovepdf-nodejs/ILovePDFFile";
 import { useState } from "react";
 import fs from "fs";
 import path from "path";
-import { chooseDownloadLocation, getFilePath, handleOpenNow } from "./common/utils";
+import { chooseDownloadLocation, getErrorMessage, getFilePath, handleOpenNow } from "./common/utils";
 import filetype from "magic-bytes.js";
 import { Status } from "./common/types";
 
@@ -107,10 +107,9 @@ export default function Command() {
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "failure";
-      toast.message = `Error happened during splitting the file. Reason ${error}`;
+      toast.message = `Error happened during splitting the file. Reason ${getErrorMessage(error)}`;
       setStatus("failure");
       setIsLoading(false);
-      console.log(error);
       return;
     }
 

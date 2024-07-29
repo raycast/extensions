@@ -1,4 +1,4 @@
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
 import {
   Action,
   ActionPanel,
@@ -10,8 +10,9 @@ import {
   useNavigation,
   Clipboard,
   captureException,
+  Keyboard,
 } from "@raycast/api";
-import { MessageAttributeValue, SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
+import { MessageAttributeValue, SendMessageCommand, SendMessageCommandInput, SQSClient } from "@aws-sdk/client-sqs";
 import { Queue } from "../../sqs";
 import Style = Toast.Style;
 import { getErrorMessage } from "../../util";
@@ -29,15 +30,16 @@ interface SendMessageFormValues {
 
 export const SendMessageForm = ({
   queue,
-  revalidate,
+  mutate,
   retryInitValues,
 }: {
   queue: Queue;
-  revalidate: () => void;
+  mutate: MutatePromise<Queue[] | undefined>;
   retryInitValues?: SendMessageFormValues;
 }) => {
   const isFifoQueue = queue.attributes?.FifoQueue === "true";
-  const { pop } = useNavigation();
+  const { push, pop } = useNavigation();
+
   const { handleSubmit, values, itemProps } = useForm<SendMessageFormValues>({
     onSubmit: async (values) =>
       confirmAlert({
@@ -46,29 +48,47 @@ export const SendMessageForm = ({
         primaryAction: {
           title: "Send",
           onAction: async () => {
+            const input: SendMessageCommandInput = {
+              QueueUrl: queue.queueUrl,
+              MessageBody: values.msgBody,
+              ...(values.useDelaySeconds && { DelaySeconds: Number(values.delaySeconds) }),
+              ...(isFifoQueue && { MessageGroupId: values.msgGroupId }),
+              ...((values.useMsgDeduplicationId || queue.attributes?.ContentBasedDeduplication === "false") && {
+                MessageDeduplicationId: values.msgDeduplicationId,
+              }),
+              ...(values.useMsgAttributes && {
+                MessageAttributes: JSON.parse(values.msgAttributes) as Record<string, MessageAttributeValue>,
+              }),
+            };
+
             const toast = await showToast({ style: Style.Animated, title: "🚧 Sending message..." });
-            new SQSClient({})
-              .send(
-                new SendMessageCommand({
-                  QueueUrl: queue.queueUrl,
-                  MessageBody: values.msgBody,
-                  ...(values.useDelaySeconds && { DelaySeconds: Number(values.delaySeconds) }),
-                  ...(isFifoQueue && { MessageGroupId: values.msgGroupId }),
-                  ...((values.useMsgDeduplicationId || queue.attributes?.ContentBasedDeduplication === "false") && {
-                    MessageDeduplicationId: values.msgDeduplicationId,
-                  }),
-                  ...(values.useMsgAttributes && {
-                    MessageAttributes: JSON.parse(values.msgAttributes) as Record<string, MessageAttributeValue>,
-                  }),
-                }),
-              )
+            mutate(new SQSClient({}).send(new SendMessageCommand(input)), {
+              optimisticUpdate: (queues) => {
+                if (!queues) {
+                  return;
+                }
+
+                return queues.map((q) =>
+                  q.queueUrl !== queue.queueUrl
+                    ? q
+                    : {
+                        ...q,
+                        attributes: {
+                          ...q.attributes,
+                          ApproximateNumberOfMessages:
+                            Number(q.attributes?.ApproximateNumberOfMessages ?? "0") + 1 + "",
+                        },
+                      },
+                );
+              },
+            })
               .then(({ MessageId }) => {
                 toast.style = Style.Success;
                 toast.title = "✅ Message sent";
                 toast.message = `Message ID: ${MessageId}`;
                 toast.primaryAction = {
                   title: "Copy Message ID",
-                  shortcut: { modifiers: ["cmd"], key: "c" },
+                  shortcut: Keyboard.Shortcut.Common.Copy,
                   onAction: () => Clipboard.copy(`${MessageId}`),
                 };
               })
@@ -77,11 +97,24 @@ export const SendMessageForm = ({
                 toast.style = Style.Failure;
                 toast.title = "❌ Failed to send message";
                 toast.message = getErrorMessage(err);
+                toast.primaryAction = {
+                  title: "Retry",
+                  shortcut: Keyboard.Shortcut.Common.Refresh,
+                  onAction: () => {
+                    push(<SendMessageForm queue={queue} mutate={mutate} retryInitValues={values} />);
+                    toast.hide();
+                  },
+                };
+                toast.secondaryAction = {
+                  title: "Copy Error",
+                  shortcut: Keyboard.Shortcut.Common.Copy,
+                  onAction: () => {
+                    Clipboard.copy(getErrorMessage(err));
+                    toast.hide();
+                  },
+                };
               })
-              .finally(() => {
-                pop();
-                revalidate();
-              });
+              .finally(pop);
           },
         },
       }),

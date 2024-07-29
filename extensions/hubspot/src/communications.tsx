@@ -1,12 +1,11 @@
 import { Action, ActionPanel, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { lowerCase, startCase } from "lodash";
-import { useCommunications } from "./hooks/useCommunications";
+import { useCommunications } from "@/hooks/useCommunications";
 
 export default function Command() {
   const { isLoading, data } = useCommunications();
 
   const communications = data?.results;
-  console.log(communications);
 
   return (
     <List isLoading={isLoading}>
@@ -14,7 +13,7 @@ export default function Command() {
 
       {communications?.map((communication) => {
         const hs_communication_channel_type = startCase(
-          lowerCase(communication?.properties?.hs_communication_channel_type)
+          lowerCase(communication?.properties?.hs_communication_channel_type),
         );
         const hs_communication_logged_from = communication?.properties?.hs_communication_logged_from;
         const createdate = communication?.properties?.hs_lastmodifieddate;

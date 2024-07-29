@@ -3,7 +3,7 @@ import { Action, ActionPanel, List, Toast, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useHAStates } from "./hooks";
 
-export function StatesAttributesList(): JSX.Element {
+export function StatesAttributesList() {
   const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
   const { states } = useSearch(searchText, allStates);

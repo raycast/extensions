@@ -74,7 +74,7 @@ export const usePipelineExecutions = (pipelineName: string) => {
 
 const fetchPipelines = async (toast: Toast, nextToken?: string, aggregate?: Pipeline[]): Promise<Pipeline[]> => {
   const { pipelines: pipelineSummaries, nextToken: cursor } = await new CodePipelineClient({}).send(
-    new ListPipelinesCommand({ nextToken, maxResults: 50 }),
+    new ListPipelinesCommand({ nextToken, maxResults: 5 }),
   );
 
   const pipelines = await Promise.all(

@@ -6,6 +6,7 @@ import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 import { getGitHubUser } from "../helpers/users";
 
 import RepositoryActions from "./RepositoryActions";
+import { SortActionProps, SortTypesDataProps } from "./SortAction";
 
 type RepositoryListItemProps = {
   repository: ExtendedRepositoryFieldsFragment;
@@ -13,7 +14,14 @@ type RepositoryListItemProps = {
   mutateList: MutatePromise<ExtendedRepositoryFieldsFragment[] | undefined>;
 };
 
-export default function RepositoryListItem({ repository, mutateList, onVisit }: RepositoryListItemProps) {
+export default function RepositoryListItem({
+  repository,
+  mutateList,
+  onVisit,
+  sortQuery,
+  setSortQuery,
+  sortTypesData,
+}: RepositoryListItemProps & SortActionProps & SortTypesDataProps) {
   const preferences = getPreferenceValues<Preferences.SearchRepositories>();
 
   const owner = getGitHubUser(repository.owner);
@@ -43,7 +51,8 @@ export default function RepositoryListItem({ repository, mutateList, onVisit }: 
 
   if (repository.primaryLanguage) {
     accessories.unshift({
-      tag: repository.primaryLanguage.name,
+      tag: { value: repository.primaryLanguage.name, color: repository.primaryLanguage.color ?? Color.SecondaryText },
+      icon: Icon.Code,
       tooltip: `Language: ${repository.primaryLanguage.name}`,
     });
   }
@@ -62,13 +71,13 @@ export default function RepositoryListItem({ repository, mutateList, onVisit }: 
       {...(numberOfStars > 0
         ? {
             subtitle: {
-              value: `${numberOfStars}`,
+              value: `★ ${numberOfStars}`,
               tooltip: `Number of Stars: ${numberOfStars}`,
             },
           }
         : {})}
       accessories={accessories}
-      actions={<RepositoryActions repository={repository} mutateList={mutateList} onVisit={onVisit} />}
+      actions={<RepositoryActions {...{ repository, onVisit, mutateList, sortQuery, setSortQuery, sortTypesData }} />}
     />
   );
 }

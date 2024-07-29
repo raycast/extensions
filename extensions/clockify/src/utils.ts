@@ -1,4 +1,4 @@
-import { clearLocalStorage, getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
+import { LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import fetch from "node-fetch";
 import { FetcherArgs, FetcherResponse, PreferenceValues, TimeEntry } from "./types";
 
@@ -26,8 +26,8 @@ export async function fetcher(
       return { data };
     } else {
       if (response.status === 401) {
-        clearLocalStorage();
-        showToast(ToastStyle.Failure, "Invalid API Key detected");
+        LocalStorage.clear();
+        showToast(Toast.Style.Failure, "Invalid API Key detected");
       }
 
       return { error: response.statusText };
@@ -42,7 +42,7 @@ export function validateToken(): boolean {
   const token = String(preferences?.token);
 
   if (token.length !== 48) {
-    showToast(ToastStyle.Failure, "Invalid API Key detected");
+    showToast(Toast.Style.Failure, "Invalid API Key detected");
     return false;
   }
 
