@@ -51,8 +51,13 @@ function EntryItem({ entry, slug }: { entry: Entry; slug: string }) {
   return (
     <List.Item
       title={entry.name}
-      icon={Icon.Dot}
+      icon={Icon.Document}
       key={entry.name + entry.path}
+      accessories={[
+        {
+          tag: entry.type,
+        },
+      ]}
       keywords={[entry.type].concat(entry.name.split("."))}
       actions={
         <ActionPanel>
