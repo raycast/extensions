@@ -1,5 +1,9 @@
 # Safari Changelog
 
+## [Improve] - {PR_MERGE_DATE}
+
+- Changed fuzzy search weights
+
 ## [Fix] - 2024-07-26
 
 - Fixed bug with fuzzy search and undefined `device.tabs`
