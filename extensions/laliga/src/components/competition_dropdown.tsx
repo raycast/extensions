@@ -40,7 +40,13 @@ const decades = [
 
 const seasons: { [key: string]: { title: string; value: string }[] } = {};
 decades.forEach(({ from, to, competitions }) => {
-  if (!to) to = from + 1;
+  if (!to) {
+    const date = new Date();
+    const currentYear = date.getFullYear();
+    const currentMonth = date.getMonth();
+
+    to = currentMonth >= 6 ? currentYear + 1 : currentYear;
+  }
 
   for (let year = from; year < to; year++) {
     const endYear = year + 1;
