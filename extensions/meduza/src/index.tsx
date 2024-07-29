@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Detail, Image, showToast, Toast, Cache } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Cache, Detail } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { format } from "timeago.js";
 import Parser from "rss-parser";
@@ -17,28 +17,34 @@ interface FeedItem {
   };
 }
 
-function formatTimeAgo(dateString: string): string {
+interface FeedConfig {
+  url: string;
+  cacheKey: string;
+}
+
+const FEEDS: { [key: string]: FeedConfig } = {
+  ru: {
+    url: "https://meduza.io/rss/all",
+    cacheKey: "meduzaRussianFeedItems",
+  },
+  en: {
+    url: "https://meduza.io/rss/en/all",
+    cacheKey: "meduzaEnglishFeedItems",
+  },
+};
+
+function formatTimeAgo(dateString: string, locale: string): string {
   const date = new Date(dateString);
-  return format(date, 'ru');
+  return format(date, locale);
 }
 
-function extractImagesFromContent(content: string): string[] {
-  const imgRegex = /<img.*?src="(.*?)".*?>/g;
-  const matches = [...content.matchAll(imgRegex)];
-  return matches.map(match => match[1]);
-}
-
-function ArticleDetail({ article }: { article: FeedItem }) {
-  const [imageIndex, setImageIndex] = useState(0);
-  const images = extractImagesFromContent(article.content);
+function ArticleDetail({ article, locale }: { article: FeedItem; locale: string }) {
   const featuredImage = article.enclosure?.url || article.icon;
 
   const markdown = `
 ![Featured Image](${featuredImage})
 
-${formatDate(article.pubDate)}
-
-${images.length > 0 ? `![Article Image](${images[imageIndex]})` : ''}
+${formatTimeAgo(article.pubDate, locale)}
 
 ${stripHtml(article.content)}
   `;
@@ -49,62 +55,29 @@ ${stripHtml(article.content)}
       navigationTitle={article.title}
       metadata={
         <Detail.Metadata>
-
-          <Detail.Metadata.Label
-            title={article.title}
-            text={formatTimeAgo(article.pubDate)}
-          />
-
+          <Detail.Metadata.Label title={article.title} text={formatTimeAgo(article.pubDate, locale)} />
 
           <Detail.Metadata.Link title="Original Article" target={article.link} text="Open in Browser" />
-          {images.length > 0 && (
-            <Detail.Metadata.TagList title="Images">
-              {images.map((image, index) => (
-                <Detail.Metadata.TagList.Item
-                  key={index}
-                  text={`Image ${index + 1}`}
-                  onAction={() => setImageIndex(index)}
-                />
-              ))}
-            </Detail.Metadata.TagList>
-          )}
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={article.link} />
           <Action.CopyToClipboard content={article.link} title="Copy Link" />
-          {images.length > 1 && (
-            <Action
-              title="Next Image"
-              onAction={() => setImageIndex((imageIndex + 1) % images.length)}
-            />
-          )}
         </ActionPanel>
       }
     />
   );
 }
 
-
 function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>?/gm, '');
+  return html.replace(/<[^>]*>?/gm, "");
 }
 
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('ru-RU', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-}
-
-export default function Command() {
+export function MeduzaFeed({ feedKey }: { feedKey: "ru" | "en" }) {
   const [items, setItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const feedConfig = FEEDS[feedKey];
 
   useEffect(() => {
     fetchFeed();
@@ -113,17 +86,15 @@ export default function Command() {
   async function fetchFeed() {
     setLoading(true);
 
-    const feedUrl = "https://meduza.io/rss/all"
-
     try {
-      const cachedData = cache.get("feedItems");
+      const cachedData = cache.get(feedConfig.cacheKey);
       if (cachedData) {
         setItems(JSON.parse(cachedData));
         setLoading(false);
       }
 
-      const feed = await parser.parseURL(feedUrl);
-      const newItems = feed.items.map((item: any) => ({
+      const feed = await parser.parseURL(feedConfig.url);
+      const newItems = feed.items.map((item) => ({
         icon: item.enclosure?.url || "icon.png",
         title: item.title || "",
         link: item.link || "",
@@ -135,7 +106,7 @@ export default function Command() {
       setItems(newItems);
 
       showToast(Toast.Style.Success, "Updated feed");
-      cache.set("feedItems", JSON.stringify(newItems));
+      cache.set(feedConfig.cacheKey, JSON.stringify(newItems));
     } catch (error) {
       console.error(error);
       showToast(Toast.Style.Failure, "Failed to fetch feed");
@@ -157,12 +128,12 @@ export default function Command() {
       {items.map((item) => (
         <List.Item
           key={item.link}
-          icon={"icon.png"}
           title={item.title}
-          accessories={[{ text: formatTimeAgo(item.pubDate) }]}
+          icon={"icon.png"}
+          accessories={[{ text: formatTimeAgo(item.pubDate, feedKey) }]}
           actions={
             <ActionPanel>
-              <Action.Push title="View Article" target={<ArticleDetail article={item} />} />
+              <Action.Push title="View Article" target={<ArticleDetail article={item} locale={feedKey} />} />
               <Action.OpenInBrowser url={item.link} />
               <Action.CopyToClipboard content={item.link} title="Copy Link" />
             </ActionPanel>

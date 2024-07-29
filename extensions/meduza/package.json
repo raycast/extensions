@@ -2,21 +2,39 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "meduza",
   "title": "Meduza",
-  "description": "",
+  "description": "Every day, we bring you the most important news and feature stories from hundreds of sources in Russia and across the former Soviet Union. Our team includes some of Russia’s top professionals in news and reporting. We value our independence and strive to be a reliable, trusted outlet for verified, unbiased information about Russia and the former Soviet Union, as well as a source for sharp insights about one of the world’s most enigmatic regions",
   "icon": "icon.png",
   "author": "castletaste",
+  "access": "private",
   "categories": [
     "News"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "en",
+      "title": "Meduza",
+      "subtitle": "News",
+      "description": "Latest daily news",
+      "mode": "view"
+    },
+    {
+      "name": "ru",
       "title": "Meduza",
       "subtitle": "Новости",
-      "description": "Get the latest from all your favourite sources at once",
+      "description": "Последние новости",
       "mode": "view"
     }
+  ],
+  "keywords": [
+    "news",
+    "russia",
+    "meduza",
+    "russian news",
+    "english news",
+    "world news",
+    "international news",
+    "independent media"
   ],
   "dependencies": {
     "@raycast/api": "^1.79.1",
