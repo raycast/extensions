@@ -39,14 +39,15 @@ export default class Helper {
    * @return {string} text  - The content.
    */
   static async fetchAsync(url, env) {
+    const requestCache = env.reload ? "reload" : "default";
     const response = await env.fetch(url, {
-      cache: env.reload ? "reload" : "force-cache",
+      cache: requestCache,
     });
     if (response.status != 200) {
-      env.logger.info(`Problem fetching via ${env.reload ? "reload" : "cache"} ${url}: ${response.status}`);
+      env.logger.info(`Problem fetching via ${requestCache} ${url}: ${response.status}`);
       return null;
     }
-    env.logger.success(`Success fetching via ${env.reload ? "reload" : "cache"} ${url}`);
+    env.logger.success(`Success fetching via ${requestCache} ${url}`);
     const text = await response.text();
     return text;
   }
