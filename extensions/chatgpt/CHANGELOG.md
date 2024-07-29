@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2024-07-29
 
 - Restarting a conversation will retain the currently selected model
 
