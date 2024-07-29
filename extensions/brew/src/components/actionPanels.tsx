@@ -10,7 +10,7 @@ import { Cask, Formula, OutdatedCask, OutdatedFormula } from "../brew";
 import { FormulaInfo } from "./formulaInfo";
 import { CaskInfo } from "./caskInfo";
 import * as Actions from "./actions";
-import { runCommandInTerminal, terminalName } from "./runInTerminal";
+import { runCommandInTerminal, terminalIcon, terminalName } from "./runInTerminal";
 
 export function CaskActionPanel(props: {
   cask: Cask;
@@ -47,7 +47,8 @@ export function CaskActionPanel(props: {
           />
           <Action
             title={`Run Uninstall in ${terminalName()}`}
-            icon={Icon.Terminal}
+            icon={terminalIcon()}
+            style={Action.Style.Destructive}
             onAction={() => {
               runCommandInTerminal(brewUninstallCommand(cask));
             }}
@@ -94,7 +95,7 @@ export function CaskActionPanel(props: {
           />
           <Action
             title={`Run Install in ${terminalName()}`}
-            icon={Icon.Terminal}
+            icon={terminalIcon()}
             onAction={() => {
               runCommandInTerminal(brewInstallCommand(cask));
             }}
@@ -152,7 +153,8 @@ export function FormulaActionPanel(props: {
           />
           <Action
             title={`Run Uninstall in ${terminalName()}`}
-            icon={Icon.Terminal}
+            style={Action.Style.Destructive}
+            icon={terminalIcon()}
             onAction={() => {
               runCommandInTerminal(brewUninstallCommand(formula));
             }}
@@ -189,7 +191,7 @@ export function FormulaActionPanel(props: {
           />
           <Action
             title={`Run Install in ${terminalName()}`}
-            icon={Icon.Terminal}
+            icon={terminalIcon()}
             onAction={() => {
               runCommandInTerminal(brewInstallCommand(formula));
             }}
@@ -217,7 +219,7 @@ export function OutdatedActionPanel(props: {
   const outdated = props.outdated;
 
   function isPinable(o: OutdatedCask | OutdatedFormula): o is OutdatedFormula {
-    return (o as OutdatedFormula).pinned != undefined ? true : false;
+    return (o as OutdatedFormula).pinned != undefined;
   }
 
   return (
@@ -235,7 +237,7 @@ export function OutdatedActionPanel(props: {
         />
         <Action
           title={`Run Upgrade in ${terminalName()}`}
-          icon={Icon.Terminal}
+          icon={terminalIcon()}
           onAction={() => {
             runCommandInTerminal(brewUpgradeCommand(outdated));
           }}
@@ -246,7 +248,8 @@ export function OutdatedActionPanel(props: {
         <Action.CopyToClipboard title="Copy Uninstall Command" content={brewUninstallCommand(outdated)} />
         <Action
           title={`Run Uninstall in ${terminalName()}`}
-          icon={Icon.Terminal}
+          icon={terminalIcon()}
+          style={Action.Style.Destructive}
           onAction={() => {
             runCommandInTerminal(brewUninstallCommand(outdated));
           }}

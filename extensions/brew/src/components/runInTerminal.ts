@@ -1,4 +1,4 @@
-import { closeMainWindow } from "@raycast/api";
+import { closeMainWindow, Image } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { preferences } from "../preferences";
 
@@ -8,7 +8,31 @@ const names: { [key in typeof terminalApp]: string } = {
   terminal: "Terminal",
   iterm: "iTerm",
   warp: "Warp",
+  kitty: "kitty",
+  alacritty: "Alacritty",
+  wezterm: "WezTerm",
+  hyper: "Hyper",
 };
+
+const icons: { [key in typeof terminalApp]: Image.ImageLike } = {
+  terminal: { fileIcon: "/System/Applications/Utilities/Terminal.app" },
+  iterm: { fileIcon: "/Applications/iTerm.app" },
+  warp: { fileIcon: "/Applications/Warp.app" },
+  kitty: { fileIcon: "/Applications/kitty.app" },
+  alacritty: { fileIcon: "/Applications/Alacritty.app" },
+  wezterm: { fileIcon: "/Applications/WezTerm.app" },
+  hyper: { fileIcon: "/Applications/Hyper.app" },
+};
+
+const runCommandInTermAppleScript = (c: string, terminalApp: string): string => `
+    tell application "${terminalApp}" to activate
+    tell application "System Events" to tell process "${terminalApp}"
+        keystroke "t" using command down
+        delay 0.5
+        keystroke "${c}"
+        keystroke return
+    end tell
+  `;
 
 const appleScripts: { [key in typeof terminalApp]: (c: string) => string } = {
   terminal: (c: string) => `
@@ -22,20 +46,19 @@ const appleScripts: { [key in typeof terminalApp]: (c: string) => string } = {
       set newWindow to create window with default profile command "bash -c '${c}; read -n 1 -s -r -p \\"Press any key to exit - will not quit\\" ; echo' ; exit"
     end tell
   `,
-  warp: (c: string) => `
-    tell application "Warp" to activate
-    tell application "System Events" to tell process "Warp"
-        keystroke "t" using command down
-        keystroke "${c}"
-        delay 1.0
-        key code 36
-    end tell
-`,
-  /// warp does not provide an URI or anyway to pass commands so this was a workaround
+  kitty: (c: string) => runCommandInTermAppleScript(c, names.kitty),
+  alacritty: (c: string) => runCommandInTermAppleScript(c, names.alacritty),
+  warp: (c: string) => runCommandInTermAppleScript(c, names.warp),
+  wezterm: (c: string) => runCommandInTermAppleScript(c, names.wezterm),
+  hyper: (c: string) => runCommandInTermAppleScript(c, names.hyper),
 };
 
 export function terminalName(): string {
   return names[terminalApp];
+}
+
+export function terminalIcon(): Image.ImageLike {
+  return icons[terminalApp];
 }
 
 export function runCommandInTerminal(command: string): void {
