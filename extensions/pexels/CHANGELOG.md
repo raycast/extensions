@@ -1,6 +1,6 @@
 # Pexels Changelog
 
-## [Refactor Code] - {PR_MERGE_DATE}
+## [Refactor Code] - 2024-07-29
 
 - Refactor the code to simplify the logic and improve the performance
 
