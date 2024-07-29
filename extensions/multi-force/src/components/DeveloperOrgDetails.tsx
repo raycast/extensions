@@ -85,8 +85,9 @@ export function DeveloperOrgDetails(props: { org: DeveloperOrg; callback: () => 
   return (
     <Form>
       <Form.Description title={title} text="" />
-      <Form.Description title="Org Alias" text={props.org.alias} />
       <Form.Description title="Org URL" text={props.org.instanceUrl} />
+      <Form.Description title="Username" text={props.org.username} />
+      <Form.Description title="Org Alias" text={props.org.alias} />
       <Form.TextField id="label" title="Label" value={label} onChange={handleLabelChange} />
       <Form.TextField
         id="color"
