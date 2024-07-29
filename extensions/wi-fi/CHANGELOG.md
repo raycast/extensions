@@ -1,6 +1,6 @@
 # Wi-Fi Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2024-07-29
 
 - Fixing Menubar Wi-Fi bugs
 
