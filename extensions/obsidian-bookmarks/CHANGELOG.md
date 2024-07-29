@@ -1,5 +1,9 @@
 # Obsidian Bookmarks Changelog
 
+## [1.0.4] - {PR_MERGE_DATE}
+
+- Fixed bug with useEffect
+
 ## [1.0.3] - 2024-07-26
 
 - Added support for different chromium-based browsers
