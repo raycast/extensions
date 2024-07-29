@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-07-29
 
 - Added new terminal options for Alacritty, kitty, WezTerm and Hyper.
 - Used app icons for actions to run commands in terminals.
