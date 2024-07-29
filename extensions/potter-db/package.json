@@ -18,31 +18,36 @@
   "commands": [
     {
       "name": "books",
-      "title": "Books",
+      "title": "Search Books",
+      "subtitle": "Potter DB",
       "description": "Retrieve books from the \"Wizarding World\"",
       "mode": "view"
     },
     {
       "name": "characters",
-      "title": "Characters",
+      "title": "Search Characters",
+      "subtitle": "Potter DB",
       "description": "Retrieve characters from the \"Wizarding World\"",
       "mode": "view"
     },
     {
       "name": "movies",
-      "title": "Movies",
+      "title": "Search Movies",
+      "subtitle": "Potter DB",
       "description": "Retrieve movies from the \"Wizarding World\"",
       "mode": "view"
     },
     {
       "name": "potions",
-      "title": "Potions",
+      "title": "Search Potions",
+      "subtitle": "Potter DB",
       "description": "Retrieve potions from the \"Wizarding World\"",
       "mode": "view"
     },
     {
       "name": "spells",
-      "title": "Spells",
+      "title": "Search Spells",
+      "subtitle": "Potter DB",
       "description": "Retrieve spells from the \"Wizarding World\"",
       "mode": "view"
     }
