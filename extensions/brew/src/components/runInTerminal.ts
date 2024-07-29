@@ -1,10 +1,10 @@
-import { closeMainWindow, Image } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
+import { closeMainWindow, getApplications, Image } from "@raycast/api";
+import { runAppleScript, useCachedPromise } from "@raycast/utils";
 import { preferences } from "../preferences";
 
-const terminalApp = preferences.terminalApp || "terminal";
+type TerminalApp = (typeof preferences)["terminalApp"];
 
-const names: { [key in typeof terminalApp]: string } = {
+const names: { [key in TerminalApp]: string } = {
   terminal: "Terminal",
   iterm: "iTerm",
   warp: "Warp",
@@ -14,7 +14,7 @@ const names: { [key in typeof terminalApp]: string } = {
   hyper: "Hyper",
 };
 
-const icons: { [key in typeof terminalApp]: Image.ImageLike } = {
+const icons: { [key in TerminalApp]: Image.ImageLike } = {
   terminal: { fileIcon: "/System/Applications/Utilities/Terminal.app" },
   iterm: { fileIcon: "/Applications/iTerm.app" },
   warp: { fileIcon: "/Applications/Warp.app" },
@@ -22,6 +22,16 @@ const icons: { [key in typeof terminalApp]: Image.ImageLike } = {
   alacritty: { fileIcon: "/Applications/Alacritty.app" },
   wezterm: { fileIcon: "/Applications/WezTerm.app" },
   hyper: { fileIcon: "/Applications/Hyper.app" },
+};
+
+const appBundleIds: { [key in TerminalApp]: string } = {
+  terminal: "com.apple.terminal",
+  iterm: "com.googlecode.iterm2",
+  warp: "dev.warp.Warp-Stable",
+  kitty: "org.kovidgoyal.kitty",
+  alacritty: "org.alacritty",
+  wezterm: "com.github.wez.wezterm",
+  hyper: "co.zeit.hyper",
 };
 
 const runCommandInTermAppleScript = (c: string, terminalApp: string): string => `
@@ -34,7 +44,7 @@ const runCommandInTermAppleScript = (c: string, terminalApp: string): string => 
     end tell
   `;
 
-const appleScripts: { [key in typeof terminalApp]: (c: string) => string } = {
+const appleScripts: { [key in TerminalApp]: (c: string) => string } = {
   terminal: (c: string) => `
     tell application "Terminal"
       do shell script "open -a 'Terminal'"
@@ -53,15 +63,23 @@ const appleScripts: { [key in typeof terminalApp]: (c: string) => string } = {
   hyper: (c: string) => runCommandInTermAppleScript(c, names.hyper),
 };
 
-export function terminalName(): string {
-  return names[terminalApp];
-}
+export const useTerminalApp = () => {
+  const { data } = useCachedPromise(
+    async (terminalApp: TerminalApp) => {
+      const apps = await getApplications();
+      return apps.some((app) => app.bundleId?.toLowerCase() === appBundleIds[terminalApp].toLowerCase());
+    },
+    [preferences.terminalApp],
+    { failureToastOptions: { title: "Failed to check if Terminal App is installed" } },
+  );
 
-export function terminalIcon(): Image.ImageLike {
-  return icons[terminalApp];
-}
-
-export function runCommandInTerminal(command: string): void {
-  runAppleScript(appleScripts[terminalApp](command));
-  closeMainWindow();
-}
+  return {
+    terminalIcon: data ? icons[preferences.terminalApp] : icons.terminal,
+    terminalName: data ? names[preferences.terminalApp] : names.terminal,
+    runCommandInTerminal: async (command: string) => {
+      const cmd = data ? appleScripts[preferences.terminalApp](command) : appleScripts.terminal(command);
+      await runAppleScript(cmd);
+      await closeMainWindow();
+    },
+  };
+};
