@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { Clipboard } from "@raycast/api";
 import saveClipboardToPieces from "../save-clipboard-to-pieces";
 import ConnectorSingleton from "../connection/ConnectorSingleton";
+import logTestResult from "./utils/logResult";
 
 export default async function testSaveClipboardToPieces() {
   await Clipboard.copy("hello world");
@@ -33,7 +34,5 @@ export default async function testSaveClipboardToPieces() {
     }),
   ).to.be.true;
 
-  console.info(
-    "Save clipboard to Pieces command should save text to Pieces success!",
-  );
+  logTestResult("save clipboard");
 }

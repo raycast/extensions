@@ -7,6 +7,14 @@ export default async function Comand() {
   const healthy = await piecesHealthCheck();
   if (!healthy) return;
 
+  const user = await ConnectorSingleton.getInstance().userApi.userSnapshot();
+
+  if (user.user) {
+    return await Notifications.getInstance().errorToast(
+      "You are already logged in!",
+    );
+  }
+
   await ConnectorSingleton.getInstance()
     .osApi.signIntoOS()
     .then(() => {

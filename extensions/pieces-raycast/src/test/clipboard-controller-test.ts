@@ -4,6 +4,8 @@ import ClipboardController, {
 } from "../controllers/ClipboardController";
 import { Clipboard } from "@raycast/api";
 import { randomUUID } from "crypto";
+import sleep from "../utils/sleep";
+import logTestResult from "./utils/logResult";
 
 export default async function testClipboardController() {
   await ClipboardController.getInstance().updateHistory(); // make sure the clipboard history is updated for the tests
@@ -21,7 +23,7 @@ export default async function testClipboardController() {
   );
 
   await ClipboardController.getInstance().updateHistory();
-  await new Promise((res) => setTimeout(res, 50));
+  await sleep(50);
   expect(events).to.eq(1); // should get a single event each time that update history is called
   expect(items.length).to.eq(
     // should have the same number of items if the history did not change
@@ -31,12 +33,16 @@ export default async function testClipboardController() {
 
   const snippet = `const id = ${randomUUID()};`;
   await Clipboard.copy(snippet); // copy to update history
+  await sleep(50);
   await ClipboardController.getInstance().updateHistory(); // call update history to update the clipboard controller values
+  await sleep(50);
 
-  expect(eventItems.length - 1).to.eq(
-    items.length,
-    "There is not one extra item",
-  ); // should have one extra item
+  if (items.length !== 30)
+    expect(eventItems.length - 1).to.eq(
+      items.length,
+      "There is not one extra item",
+    ); // should have one extra item
+  expect(items.length <= 30).to.eq(true);
   expect(eventItems[0].clipboard.text).to.eq(
     snippet,
     "Recently copied is not first item",
@@ -64,6 +70,6 @@ export default async function testClipboardController() {
 
   expect(valid).to.eq(true, "Item did not get enriched in 5 seconds or less"); // the clipboard item should be enriched within up to 5 seconds of the clipboard controller being updated
 
-  console.info("Clipboard controller tests success!");
+  logTestResult("clipboard controller");
   unsubscribe();
 }

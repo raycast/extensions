@@ -132,7 +132,7 @@ export default abstract class EnrichmentController<
     }
 
     for (let i = lengthDifference; i < this.draftQueue.length; i++) {
-      if (this.draftQueue[i] + lengthDifference > 29) {
+      if (this.draftQueue[i] + lengthDifference > 30) {
         this.draftQueue.splice(i);
       } else {
         this.draftQueue[i] += lengthDifference;

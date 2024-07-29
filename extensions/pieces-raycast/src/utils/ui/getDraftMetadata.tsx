@@ -1,4 +1,4 @@
-import { Detail } from "@raycast/api";
+import { Detail, open } from "@raycast/api";
 import { BrowserAsset } from "../../controllers/BrowserController";
 import { ClipboardAsset } from "../../controllers/ClipboardController";
 import classificationSpecificToReadable from "../converters/classificationSpecificToReadable";

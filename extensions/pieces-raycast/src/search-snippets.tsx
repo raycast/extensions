@@ -74,7 +74,7 @@ export default function Command() {
       filtering={false}
       onSearchTextChange={setSearchText}
       navigationTitle="Search History"
-      searchBarPlaceholder="Search for an item to save in your clipboard history"
+      searchBarPlaceholder="Search for a snippet"
     >
       {filteredList.length ? (
         filteredList.map((item, index) => (

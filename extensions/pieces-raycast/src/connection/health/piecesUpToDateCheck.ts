@@ -4,6 +4,7 @@ import { showToast, open, Toast } from "@raycast/api";
 import Notifications from "../../ui/Notifications";
 import { UpdatingStatusEnum } from "@pieces.app/pieces-os-client";
 import { pollForConnection } from "./piecesHealthCheck";
+import sleep from "../../utils/sleep";
 
 const MIN_VERSION = "10.0.0";
 const MAX_VERSION = "11.0.0";
@@ -79,7 +80,7 @@ async function updatePieces(): Promise<boolean> {
       if (status?.status === UpdatingStatusEnum.ReadyToRestart) {
         clearInterval(intervalId);
         await ConnectorSingleton.getInstance().osApi.osRestart();
-        await new Promise((res) => setTimeout(res, 500)); // avoiding race condition where pieces might still be running
+        await sleep(500); // avoiding race condition where pieces might still be running
         const running = await pollForConnection(15e3);
         res(running);
       }
