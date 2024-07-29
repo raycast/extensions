@@ -100,6 +100,7 @@ export interface UserResponse {
 export interface CollectionItem {
   value?: number;
   label: string;
+  name?: string;
 }
 
 export type BookmarksParams = {
