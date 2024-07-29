@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [Pipelines, DDB, CFN commands] - {PR_MERGE_DATE}
+## [Pipelines, DDB, CFN commands] - 2024-07-29
 
 - Pipelines: Reduced the size per page to reduce throttling: [#13304](https://github.com/raycast/extensions/issues/13304)
 - DDB: Handle pagination upfront instead of Raycast pagination. Also, adds frecency sorting.
