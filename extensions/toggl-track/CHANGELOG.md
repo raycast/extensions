@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [Enhancements] - 2024-06-18
+## [Enhancements] - 2024-07-29
 
 - Add ability to set billable in new entry form
 - Add ability to delete entry from list
