@@ -1,6 +1,6 @@
 # Changelog
 
-## [View Site Environment Variables] - ${PR_MERGE_DATE}
+## [View Site Environment Variables] - $2024-07-29
 
 ### Enhancements
 
