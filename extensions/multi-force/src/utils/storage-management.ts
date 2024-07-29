@@ -17,3 +17,11 @@ export async function loadSfPath(): Promise<string | undefined> {
   const storage = await LocalStorage.getItem<string>(SF_PATH_STORAGE_KEY);
   return storage ? (JSON.parse(storage) as string) : undefined;
 }
+
+export async function updateOrg(org: DeveloperOrg) {
+  const orgs = await loadOrgs();
+  const matchedOrg = orgs!.find((og) => og.alias === org.alias);
+  Object.assign(matchedOrg!, org);
+  console.log("POST UPDATE:");
+  console.log(org);
+}

@@ -4,7 +4,7 @@ MultiForce is an extension for the Raycast search tool on Mac. MultiForce uses t
 
 ## Viewing Your Orgs
 
-![screenshot](./readme_images/multi-force-1.png)
+![screenshot](./readme_images/Home-Page.png)
 
 Opening MultiForce shows you a list of all Salesforce orgs you have authenticated into. This list comes from the same source file as the `sf org list` CLI command, meaning that all Salesforce Orgs you use in VSCode are also available in MultiForce.
 
