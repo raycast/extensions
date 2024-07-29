@@ -7,7 +7,9 @@ import Fuse from "fuse.js";
 
 export default function SearchUsers(props: LaunchProps) {
   const [searchText, setSearchText] = useState<string>(props.launchContext?.username || "");
-  const { isLoading, data, revalidate } = useFetch<UserType[]>("https://scrapbook.hackclub.com/api/users");
+  const { isLoading, data, revalidate } = useFetch<UserType[]>("https://scrapbook.hackclub.com/api/users", {
+    execute: searchText.length > 0,
+  });
   const [filteredUsers, setFilteredUsers] = useState<UserType[] | undefined>(undefined);
 
   useEffect(() => {
@@ -24,7 +26,7 @@ export default function SearchUsers(props: LaunchProps) {
 
   return (
     <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText} isShowingDetail throttle>
-      <List.EmptyView title="No users found" description="Begin typing to search" icon={Icon.Person} />
+      <List.EmptyView title="No Users Found" description="Begin typing to search" icon={Icon.Person} />
       {filteredUsers?.map((user: UserType) => <UserView key={user.id} user={user} revalidate={revalidate} />)}
     </List>
   );

@@ -17,7 +17,9 @@ export default function SearchUsersPosts(props: LaunchProps) {
   const [searchText, setSearchText] = useState<string>("");
   const [searchUsers, setSearchUsers] = useState<UserType[]>([]);
   const [directMatch, setDirectMatch] = useState<UserType | null>(null);
-  const { isLoading, data: usersData } = useFetch<UserType[]>("https://scrapbook.hackclub.com/api/users");
+  const { isLoading, data: usersData } = useFetch<UserType[]>("https://scrapbook.hackclub.com/api/users", {
+    execute: searchText.length > 0,
+  });
 
   useEffect(() => {
     if (usersData) {
