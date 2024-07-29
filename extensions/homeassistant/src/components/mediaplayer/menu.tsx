@@ -3,7 +3,8 @@ import { getErrorMessage, getFriendlyName, range } from "@lib/utils";
 import { getMediaPlayerTitleAndArtist } from "./utils";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
-import { CopyToClipboardMenubarItem } from "@components/menu";
+import { LastUpdateChangeMenubarItem } from "@components/menu";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 
 function volumeRange() {
   return range(0.0, 1.0, 0.05);
@@ -91,8 +92,9 @@ export function MediaPlayerMenubarItem(props: { state: State }): JSX.Element | n
       <MediaPlayerNextMenubarItem state={s} />
       <MediaPlayerPreviousMenubarItem state={s} />
       <MediaPlayerVolumeSubmenu state={s} />
-      {mediaTitle && <CopyToClipboardMenubarItem title="Copy Track" content={mediaTitle} />}
-      <CopyToClipboardMenubarItem title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
+      {mediaTitle && <RUIMenuBarExtra.CopyToClipboard title="Copy Track" content={mediaTitle} />}
+      <LastUpdateChangeMenubarItem state={s} />
+      <RUIMenuBarExtra.CopyToClipboard title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
     </MenuBarExtra.Submenu>
   );
 }

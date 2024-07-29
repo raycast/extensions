@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { IssuePriorityValue, User } from "@linear/sdk";
 import { getProgressIcon, MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
@@ -16,6 +16,7 @@ import { getDateIcon } from "../helpers/dates";
 import CreateMilestoneForm from "./CreateMilestoneForm";
 import OpenInLinear from "./OpenInLinear";
 import ProjectUpdates from "./ProjectUpdates";
+import { DocumentList } from "./docs/DocumentList";
 
 type ProjectProps = {
   project: ProjectResult;
@@ -134,12 +135,19 @@ export default function Project({ project, priorities, me, mutateProjects }: Pro
               target={<ProjectUpdates project={project} />}
             />
 
+            <Action.Push
+              title="See Project Documents"
+              icon={Icon.Document}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              target={<DocumentList project={project} />}
+            />
+
             <Action
               title="Delete Project"
               onAction={deleteProject}
               style={Action.Style.Destructive}
               icon={Icon.Trash}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
             />
           </ActionPanel.Section>
 

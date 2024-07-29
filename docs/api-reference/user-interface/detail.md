@@ -1,6 +1,6 @@
 # Detail
 
-![](../../.gitbook/assets/detail.png)
+![](../../.gitbook/assets/detail.webp)
 
 ## API Reference
 
@@ -54,7 +54,7 @@ A Metadata view that will be shown in the right-hand-side of the `Detail`.
 
 Use it to display additional structured data about the main content shown in the `Detail` view.
 
-![Detail-metadata illustration](../../.gitbook/assets/detail-metadata.png)
+![Detail-metadata illustration](../../.gitbook/assets/detail-metadata.webp)
 
 #### Example
 
@@ -99,7 +99,7 @@ export default function Main() {
 
 A single value with an optional icon.
 
-![Detail-metadata-label illustration](../../.gitbook/assets/detail-metadata-label.png)
+![Detail-metadata-label illustration](../../.gitbook/assets/detail-metadata-label.webp)
 
 #### Example
 
@@ -138,7 +138,7 @@ export default function Main() {
 
 An item to display a link.
 
-![Detail-metadata-link illustration](../../.gitbook/assets/detail-metadata-link.png)
+![Detail-metadata-link illustration](../../.gitbook/assets/detail-metadata-link.webp)
 
 #### Example
 
@@ -177,7 +177,7 @@ export default function Main() {
 
 A list of [`Tags`](detail.md#detail.metadata.taglist.item) displayed in a row.
 
-![Detail-metadata-taglist illustration](../../.gitbook/assets/detail-metadata-taglist.png)
+![Detail-metadata-taglist illustration](../../.gitbook/assets/detail-metadata-taglist.webp)
 
 #### Example
 
@@ -226,7 +226,7 @@ A Tag in a `Detail.Metadata.TagList`.
 
 A metadata item that shows a separator line. Use it for grouping and visually separating metadata items.
 
-![](../../.gitbook/assets/detail-metadata-separator.png)
+![](../../.gitbook/assets/detail-metadata-separator.webp)
 
 ```typescript
 import { Detail } from "@raycast/api";

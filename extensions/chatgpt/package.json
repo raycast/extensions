@@ -15,7 +15,8 @@
     "thanhlongb",
     "k8scat",
     "Nauxscript",
-    "lin"
+    "lin",
+    "leeonfield"
   ],
   "pastContributors": [
     "pomdtr",
@@ -212,6 +213,7 @@
       "name": "apiEndpoint",
       "required": false,
       "title": "API Endpoint",
+      "placeholder": "https://api.openai.com/v1",
       "type": "textfield"
     },
     {

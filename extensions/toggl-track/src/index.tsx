@@ -1,19 +1,32 @@
-import { ActionPanel, clearSearchBar, Icon, List, Action, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  clearSearchBar,
+  Color,
+  confirmAlert,
+  Icon,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import { useMemo } from "react";
 
 import { createTimeEntry, TimeEntry } from "@/api";
+import { removeTimeEntry } from "@/api/timeEntries";
 import TimeEntryForm from "@/components/CreateTimeEntryForm";
 import RunningTimeEntry from "@/components/RunningTimeEntry";
 import { ExtensionContextProvider } from "@/context/ExtensionContext";
 import { formatSeconds } from "@/helpers/formatSeconds";
-import { useTimeEntries, useRunningTimeEntry } from "@/hooks";
+import { Verb, withToast } from "@/helpers/withToast";
+import { useRunningTimeEntry, useTimeEntries } from "@/hooks";
 
 dayjs.extend(duration);
 
 function ListView() {
-  const { timeEntries, isLoadingTimeEntries, revalidateTimeEntries } = useTimeEntries();
+  const { timeEntries, isLoadingTimeEntries, revalidateTimeEntries, mutateTimeEntries } = useTimeEntries();
   const { runningTimeEntry, isLoadingRunningTimeEntry, revalidateRunningTimeEntry } = useRunningTimeEntry();
 
   const isLoading = isLoadingTimeEntries || isLoadingRunningTimeEntry;
@@ -61,7 +74,11 @@ function ListView() {
       navigationTitle={isLoading ? undefined : `Today: ${formatSeconds(totalDurationToday)}`}
     >
       {runningTimeEntry && (
-        <RunningTimeEntry {...{ runningTimeEntry, revalidateRunningTimeEntry, revalidateTimeEntries }} />
+        <RunningTimeEntry
+          runningTimeEntry={runningTimeEntry}
+          revalidateRunningTimeEntry={revalidateRunningTimeEntry}
+          revalidateTimeEntries={revalidateRunningTimeEntry}
+        />
       )}
       <List.Section title="Actions">
         <List.Item
@@ -93,7 +110,10 @@ function ListView() {
               keywords={[timeEntry.description, timeEntry.project_name || "", timeEntry.client_name || ""]}
               title={timeEntry.description || "No description"}
               subtitle={(timeEntry.client_name ? timeEntry.client_name + " | " : "") + (timeEntry.project_name ?? "")}
-              accessories={[...timeEntry.tags.map((tag) => ({ tag })), { text: timeEntry.billable ? "$" : "" }]}
+              accessories={[
+                ...timeEntry.tags.map((tag) => ({ tag })),
+                timeEntry.billable ? { tag: { value: "$" } } : {},
+              ]}
               icon={{ source: Icon.Circle, tintColor: timeEntry.project_color }}
               actions={
                 <ActionPanel>
@@ -115,6 +135,37 @@ function ListView() {
                       </ExtensionContextProvider>
                     }
                   />
+                  <ActionPanel.Section>
+                    <Action
+                      title="Delete Time Entry"
+                      icon={Icon.Trash}
+                      style={Action.Style.Destructive}
+                      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                      onAction={async () => {
+                        await confirmAlert({
+                          title: "Delete Time Entry",
+                          message: "Are you sure you want to delete this time entry?",
+                          icon: {
+                            source: Icon.Trash,
+                            tintColor: Color.Red,
+                          },
+                          primaryAction: {
+                            title: "Delete",
+                            style: Alert.ActionStyle.Destructive,
+                            onAction: () => {
+                              withToast({
+                                noun: "Time Entry",
+                                verb: Verb.Delete,
+                                action: async () => {
+                                  await mutateTimeEntries(removeTimeEntry(timeEntry.workspace_id, timeEntry.id));
+                                },
+                              });
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />

@@ -1,5 +1,16 @@
 # Linear Changelog
 
+## [Documents and Issues Fixes] - 2024-07-25
+
+- Create Issue: Fixed issue that made projects, cycles, estimates, etc. disappear in the form after consecutive issue creation.
+- Issue Actions: Standardized the issue deletion shortcut.
+- Documents: Moving documents action does not show the current entity and removed delete action from Document Detail view.
+
+## [Document Support] - 2024-07-18
+
+- New "Search Documents" command to search documents across Linear projects and initiatives. Supports typeahead if there are too many docs.
+- New action "Show Project Documents" to look up project documents.
+
 ## [Fixes] - 2024-07-08
 
 - [#10856](https://github.com/raycast/extensions/issues/10856): Typeahead search for teams while creating/editing issues and in active cycles command. Typeahead is only triggered if no. of teams is > 50.

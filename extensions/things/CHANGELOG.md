@@ -1,5 +1,10 @@
 # Things Changelog
 
+## [Fix tags for new issues] - 2024-07-24
+
+- [#13560](https://github.com/raycast/extensions/issues/13560): Tags are correctly appended to the deeplink while creating new todo(s).
+- Updated dependencies and resolved security vulnerabilities.
+
 ## [Add Status Icons in Menu Bar] - 2024-04-16
 
 - It's possible to see which to-do is completed, canceled, or to-do in the menu bar command.

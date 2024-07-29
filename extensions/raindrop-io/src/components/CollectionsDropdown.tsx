@@ -21,13 +21,15 @@ const CollectionsDropdown = React.memo(function CollectionsDropdown({
     <List.Dropdown onChange={handleChange} tooltip="Select Collection" defaultValue={defaultValue}>
       <List.Dropdown.Item title="All bookmarks" value="0" />
       <List.Dropdown.Item title="Unsorted" value="-1" />
-      {collections?.map((collection: CollectionItem) => (
-        <List.Dropdown.Item
-          key={`${collection.value}_${Math.random().toString(16).substring(2, 8)}`}
-          title={collection.label}
-          value={`${collection.value}`}
-        />
-      ))}
+      <List.Dropdown.Section title="Collections">
+        {collections?.map((collection: CollectionItem) => (
+          <List.Dropdown.Item
+            key={`${collection.value}_${Math.random().toString(16).substring(2, 8)}`}
+            title={collection.name ? `${collection.name} (${collection.label})` : collection.label}
+            value={`${collection.value}`}
+          />
+        ))}
+      </List.Dropdown.Section>
       <List.Dropdown.Item title="🗑 Trash" value="-99" />
     </List.Dropdown>
   );

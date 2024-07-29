@@ -6,7 +6,7 @@ import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 import { getGitHubUser } from "../helpers/users";
 
 import RepositoryActions from "./RepositoryActions";
-import { SortActionProps } from "./SortAction";
+import { SortActionProps, SortTypesDataProps } from "./SortAction";
 
 type RepositoryListItemProps = {
   repository: ExtendedRepositoryFieldsFragment;
@@ -20,7 +20,8 @@ export default function RepositoryListItem({
   onVisit,
   sortQuery,
   setSortQuery,
-}: RepositoryListItemProps & SortActionProps) {
+  sortTypesData,
+}: RepositoryListItemProps & SortActionProps & SortTypesDataProps) {
   const preferences = getPreferenceValues<Preferences.SearchRepositories>();
 
   const owner = getGitHubUser(repository.owner);
@@ -50,7 +51,8 @@ export default function RepositoryListItem({
 
   if (repository.primaryLanguage) {
     accessories.unshift({
-      tag: repository.primaryLanguage.name,
+      tag: { value: repository.primaryLanguage.name, color: repository.primaryLanguage.color ?? Color.SecondaryText },
+      icon: Icon.Code,
       tooltip: `Language: ${repository.primaryLanguage.name}`,
     });
   }
@@ -69,13 +71,13 @@ export default function RepositoryListItem({
       {...(numberOfStars > 0
         ? {
             subtitle: {
-              value: `${numberOfStars}`,
+              value: `★ ${numberOfStars}`,
               tooltip: `Number of Stars: ${numberOfStars}`,
             },
           }
         : {})}
       accessories={accessories}
-      actions={<RepositoryActions {...{ repository, onVisit, mutateList, sortQuery, setSortQuery }} />}
+      actions={<RepositoryActions {...{ repository, onVisit, mutateList, sortQuery, setSortQuery, sortTypesData }} />}
     />
   );
 }

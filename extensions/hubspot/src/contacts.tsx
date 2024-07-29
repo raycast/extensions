@@ -1,9 +1,9 @@
 import { Action, ActionPanel, closeMainWindow, Icon, List, open, openExtensionPreferences } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
 import { useState } from "react";
-import { useContacts } from "./hooks/useContacts";
-import { useAccountInfo } from "./hooks/useAccountInfo";
-import { Contact } from "./types/contact";
+import { useContacts } from "@/hooks/useContacts";
+import { useAccountInfo } from "@/hooks/useAccountInfo";
+import type { Contact } from "@/types/contact";
 
 const Detail = ({ contact, hubspotUrl }: { contact: Contact; hubspotUrl: string }) => {
   const firstname = contact?.properties?.firstname;

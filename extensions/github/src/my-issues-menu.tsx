@@ -9,7 +9,7 @@ import {
   getBoundedPreferenceNumber,
 } from "./components/Menu";
 import { SortMenuBarAction } from "./components/SortAction";
-import { getIssueStatus, ISSUE_DEFAULT_SORT_QUERY, ISSUE_SORT_TYPES_TO_QUERIES } from "./helpers/issue";
+import { ISSUE_DEFAULT_SORT_QUERY, ISSUE_SORT_TYPES_TO_QUERIES, getIssueStatus } from "./helpers/issue";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useMyIssues } from "./hooks/useMyIssues";
 

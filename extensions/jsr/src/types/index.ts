@@ -20,6 +20,10 @@ export type SearchResult = {
   document: SearchResultDocument;
 };
 
+export type ErrorResult = {
+  message: string;
+};
+
 export type SearchResults = {
   hits: SearchResult[];
   elapsed: {

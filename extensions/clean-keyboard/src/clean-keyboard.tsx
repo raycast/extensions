@@ -34,6 +34,21 @@ const durations: Duration[] = [
     seconds: 300,
     icon: "🛁",
   },
+  {
+    display: "1 hour",
+    seconds: 3600,
+    icon: "🧹",
+  },
+  {
+    display: "24 hours",
+    seconds: 86400,
+    icon: "🫧",
+  },
+  {
+    display: "Forever",
+    seconds: Infinity,
+    icon: "🤯",
+  },
 ];
 
 export default function Command() {
