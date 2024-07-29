@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { useTimeEntries, useRunningTimeEntry } from "@/hooks";
 
 export function useProcessedTimeEntries() {
-  const { timeEntries, isLoadingTimeEntries, revalidateTimeEntries } = useTimeEntries();
+  const { timeEntries, isLoadingTimeEntries, revalidateTimeEntries, mutateTimeEntries } = useTimeEntries();
   const { runningTimeEntry, isLoadingRunningTimeEntry, revalidateRunningTimeEntry } = useRunningTimeEntry();
 
   const isLoading = isLoadingTimeEntries || isLoadingRunningTimeEntry;
@@ -39,6 +39,7 @@ export function useProcessedTimeEntries() {
 
   return {
     isLoading,
+    mutateTimeEntries,
     revalidateRunningTimeEntry,
     revalidateTimeEntries,
     runningTimeEntry: runningTimeWithUniqueProjectAndDescription,
