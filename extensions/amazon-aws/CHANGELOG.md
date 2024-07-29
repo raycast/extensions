@@ -1,5 +1,8 @@
 # Amazon AWS Changelog
 
+## [Glue command] - {PR_MERGE_DATE}
+
+- Add Glue command to list Glue jobs, job runs, job definitions and to trigger a job run [#13316](https://github.com/raycast/extensions/pull/13316)
 ## [S3 Command] - 2024-07-12
 
 - added reverse order option
