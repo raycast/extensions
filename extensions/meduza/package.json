@@ -5,7 +5,7 @@
   "description": "Every day, we bring you the most important news and feature stories from hundreds of sources in Russia and across the former Soviet Union. Our team includes some of Russia’s top professionals in news and reporting. We value our independence and strive to be a reliable, trusted outlet for verified, unbiased information about Russia and the former Soviet Union, as well as a source for sharp insights about one of the world’s most enigmatic regions",
   "icon": "icon.png",
   "author": "castletaste",
-  "access": "private",
+  "access": "public",
   "categories": [
     "News"
   ],
