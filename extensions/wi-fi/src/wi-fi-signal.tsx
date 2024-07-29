@@ -1,15 +1,17 @@
 import { Clipboard, Icon, MenuBarExtra, openCommandPreferences } from "@raycast/api";
-import { getIPV4Address, toggleWifi } from "./utils/common-utils";
+import { toggleWifi } from "./utils/common-utils";
 import { useWifiStatus } from "./hooks/useWifiStatus";
 import { useMemo } from "react";
 import { useWifiInfo } from "./hooks/useWifiInfo";
 import { useWifiName } from "./hooks/useWifiName";
 import { showIpAddress, showWifiName } from "./types/preferences";
+import { useIpAddress } from "./hooks/useIpAddress";
 
 export default function WifiSignal() {
   const { data: wifiInfoData, isLoading: wifiInfoLoading } = useWifiInfo();
   const { data: wifiNameData, isLoading: wifiNameLoading } = useWifiName();
   const { data: wifiStatusData, isLoading: wifiStatusLoading } = useWifiStatus();
+  const { data: ipAddressData } = useIpAddress();
 
   const icon = useMemo(() => {
     const wifiStatus = wifiStatusData || false;
@@ -31,20 +33,18 @@ export default function WifiSignal() {
       title = wifiNameData;
     }
     if (showIpAddress) {
-      const ipAddress = getIPV4Address();
-      if (ipAddress) {
-        title = title + " " + ipAddress;
-      }
+      title = title + " " + ipAddressData;
     }
     return title;
-  }, [wifiNameData]);
+  }, [wifiNameData, ipAddressData]);
 
   return (
     <MenuBarExtra title={menubarTitle} icon={icon} isLoading={wifiStatusLoading || wifiInfoLoading || wifiNameLoading}>
       <MenuBarExtra.Section>
-        {wifiInfo.map((info) => {
+        {wifiInfo.map((info, index) => {
           return (
             <MenuBarExtra.Item
+              key={info.key + index}
               title={info.key}
               subtitle={info.value}
               onAction={async () => {

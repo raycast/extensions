@@ -1,5 +1,9 @@
 # Wi-Fi Changelog
 
+## [Bug Fix] - 2024-07-29
+
+- Fixing Menubar Wi-Fi bugs
+
 ## [Show IP Address] - 2024-07-26
 
 - Menubar Wi-Fi command supports show IP Address in the menu bar

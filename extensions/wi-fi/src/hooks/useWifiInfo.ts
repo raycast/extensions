@@ -3,11 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { WifiInfo } from "../types/types";
 
 export const useWifiInfo = () => {
-  return useCachedPromise(
-    () => {
-      return getCurWifiInfo() as Promise<WifiInfo[]>;
-    },
-    [],
-    { keepPreviousData: true },
-  );
+  return useCachedPromise(() => {
+    return getCurWifiInfo() as Promise<WifiInfo[]>;
+  });
 };
