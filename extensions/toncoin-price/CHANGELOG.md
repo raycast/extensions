@@ -4,6 +4,7 @@
 
 - Added MEXC Spot link to the menu bar
 - Fixed menu bar icon for light macOS theme
+- Updated screenshot of extension
 
 ## [Initial Version] - 2024-06-21
 
