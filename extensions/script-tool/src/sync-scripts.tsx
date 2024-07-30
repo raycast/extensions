@@ -8,10 +8,10 @@ interface Preferences {
 
 interface LToast {
   style?: Toast.Style;
-  title?: String;
+  title?: string;
 }
 
-async function command(cmd: any) {
+async function command(cmd: string) {
   return new Promise((resolve, reject) => {
     exec(cmd, (error, stdout, stderr) => {
       if (error) {
