@@ -1,5 +1,8 @@
-import { Form, ActionPanel, Action, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
+
+import { Form, ActionPanel, Action, Icon, getPreferenceValues } from "@raycast/api";
+import { JsonTsOptions } from "json-ts";
+
 import jsonToYaml from "./utils/json-to-yaml";
 import jsonToGo from "./utils/json-to-go";
 import jsonToTs from "./utils/json-to-ts";
@@ -7,11 +10,14 @@ import jsonToTs from "./utils/json-to-ts";
 const ErrorInvalidJSON = "Invalid JSON";
 const ErrorIvalidFilterExpression = "Invalid filter expression";
 
+type Preferences = JsonTsOptions;
+
 export default function Command() {
   const [text, setText] = useState("");
   const [pattern, setPattern] = useState("");
   const [result, setResult] = useState("");
   const [jsonObj, setJsonObj] = useState({});
+  const jsonTsOptions = getPreferenceValues<Preferences>();
 
   useEffect(() => {
     const [result, object] = filterJSONByPattern(text, pattern);
@@ -29,7 +35,12 @@ export default function Command() {
             {<Action.CopyToClipboard content={JSON.stringify(jsonObj)} title="Copy Minified Result" />}
             {<Action.CopyToClipboard content={escapeJsonText(jsonObj)} title="Escape Result" />}
             {<Action.CopyToClipboard content={jsonToYaml(jsonObj)} title="Convert Result to YAML" />}
-            {<Action.CopyToClipboard content={jsonToTs(result)} title="Convert Result to Typescript Definition" />}
+            {
+              <Action.CopyToClipboard
+                content={jsonToTs(result, jsonTsOptions)}
+                title="Convert Result to Typescript Definition"
+              />
+            }
             {<Action.CopyToClipboard content={jsonToGo(result)} title="Convert Result to Go Type Definition" />}
             {<Action.OpenInBrowser title="Sponsor Project ♥️" icon={Icon.Heart} url="https://ko-fi.com/herbertlu" />}
           </ActionPanel>
