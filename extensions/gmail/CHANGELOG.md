@@ -1,6 +1,6 @@
 # Gmail Changelog
 
-## [MenuBar Improvements] - {PR_MERGE_DATE}
+## [MenuBar Improvements] - 2024-07-30
 
 - Add possibility to hide the menu if there are no unread mails
 
