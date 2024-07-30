@@ -1,6 +1,6 @@
 # World Clock Changelog
 
-## [Update Extension Icon] - {PR_MERGE_DATE}
+## [Update Extension Icon] - 2024-07-30
 
 - Support set avatar for starred time zones
 - Support duplicate starred time zones
