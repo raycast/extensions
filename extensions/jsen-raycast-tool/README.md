@@ -1,3 +1,3 @@
 # Jsen Raycast Tool
 
-jsen use full tools
+jsen usefull tools
