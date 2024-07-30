@@ -4,7 +4,7 @@ import {
   launchCommand,
   LaunchType,
   MenuBarExtra,
-  openExtensionPreferences,
+  openCommandPreferences,
   showHUD,
 } from "@raycast/api";
 import { calculateTimeInfoByOffset, formatMenubarDate, getMenubarAvatar, isEmpty } from "./utils/common-utils";
@@ -121,11 +121,11 @@ export default function QueryWorldTime() {
 
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          title={"Settings"}
+          title={"Settings..."}
           icon={Icon.Gear}
           shortcut={{ modifiers: ["cmd"], key: "," }}
           onAction={() => {
-            openExtensionPreferences().then();
+            openCommandPreferences().then();
           }}
         />
       </MenuBarExtra.Section>
