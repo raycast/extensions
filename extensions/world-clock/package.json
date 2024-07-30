@@ -105,7 +105,7 @@
       "title": "Menubar World Time",
       "description": "Query the current time of starred timezones from the menu bar.",
       "mode": "menu-bar",
-      "interval": "1m",
+      "interval": "10s",
       "preferences": [
         {
           "title": "Advanced",
