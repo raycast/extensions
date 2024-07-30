@@ -1,6 +1,6 @@
 # Vivaldi Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2024-07-30
 
 - Added Vivaldi New Window Command
 
