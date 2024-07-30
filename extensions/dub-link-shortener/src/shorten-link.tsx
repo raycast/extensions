@@ -90,7 +90,7 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
       <Form.TextField {...itemProps.url} placeholder="https://dub.co" title="Original URL" />
       <Form.TextField {...itemProps.key} placeholder="(Optional)" title="URL Key" />
       {/* todo: Add commands to create/manage tags in the workspace */}
-      <Form.TagPicker {...itemProps.tagIds} title="Tags" placeholder="(Optional)">
+      <Form.TagPicker {...itemProps.tagIds} title="Tags" placeholder="(Optional)" info="Add tags in Dub.co">
         {tags.map((t) => (
           <Form.TagPicker.Item
             key={t.id}
