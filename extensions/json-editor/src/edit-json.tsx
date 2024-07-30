@@ -18,7 +18,7 @@ export default function Command() {
   const jsonTsOptions = useJsonTsOptions();
 
   useEffect(() => {
-    const [result, object] = filterJSONByPattern(text, pattern);
+    const [result, object] = filterJSONByPattern(text.trim(), pattern);
     setResult(result);
     setJsonObj(object);
   }, [text, pattern]);
