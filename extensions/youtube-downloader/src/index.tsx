@@ -72,10 +72,14 @@ export default function DownloadVideo() {
         .getInfo(values.url)
         .then((info) => {
           const videoDuration = parseInt(info.videoDetails.lengthSeconds);
-          if (info.videoDetails.isLiveContent && videoDuration === 0) {
+          const isLiveStream = info.videoDetails.isLiveContent && videoDuration === 0;
+          const isLivePremiere = info.videoDetails.liveBroadcastDetails?.isLiveNow;
+          if (isLiveStream || isLivePremiere) {
             showToast({
               style: Toast.Style.Failure,
-              title: "Live streams are not supported",
+              title: isLiveStream
+                ? "Live streams are not supported"
+                : "Live premieres are not supported. Please download the video after the live premiere.",
             });
             return;
           }
