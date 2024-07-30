@@ -26,7 +26,11 @@ export default function SearchUsers(props: LaunchProps) {
 
   return (
     <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText} isShowingDetail throttle>
-      <List.EmptyView title="No Users Found" description="Begin typing to search" icon={Icon.Person} />
+      <List.EmptyView
+        title={searchText.length > 0 ? "No users found" : `${data?.length || 0} users loaded`}
+        description={searchText.length > 0 ? "No users match the current search query" : "Begin typing to search"}
+        icon={Icon.Person}
+      />
       {filteredUsers?.map((user: UserType) => <UserView key={user.id} user={user} revalidate={revalidate} />)}
     </List>
   );

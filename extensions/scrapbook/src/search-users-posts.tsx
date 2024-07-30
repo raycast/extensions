@@ -63,28 +63,29 @@ export default function SearchUsersPosts(props: LaunchProps) {
           </List.Section>
         ) : null}
 
-        {searchUsers.length > 0 ? (
-          <List.Section title="Other Users">
-            {searchUsers.map((user) => (
-              <List.Item
-                key={user.id}
-                title={user.username}
-                icon={Icon.Person}
-                actions={
-                  <ActionPanel>
-                    <Action.Push
-                      title="View Profile"
-                      icon={Icon.Person}
-                      target={<UserPosts username={user.username} />}
-                    />
-                  </ActionPanel>
-                }
-              />
-            ))}
-          </List.Section>
-        ) : (
-          <List.EmptyView title="User not found" description="No user found for the current name" icon={Icon.Person} />
-        )}
+        <List.EmptyView
+          title={searchText.length > 0 ? "No users found" : `${usersData?.length || 0} users loaded`}
+          description={searchText.length > 0 ? "No users match the current search query" : "Begin typing to search"}
+          icon={Icon.Person}
+        />
+        <List.Section title="Other Users">
+          {searchUsers.map((user) => (
+            <List.Item
+              key={user.id}
+              title={user.username}
+              icon={Icon.Person}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="View Profile"
+                    icon={Icon.Person}
+                    target={<UserPosts username={user.username} />}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
       </List>
     );
   }
@@ -97,8 +98,8 @@ function UserPosts({ username }: { username: string }) {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={data ? `${data?.profile.username}'s Posts` : "Unknown User"}
-      searchBarPlaceholder={data ? `Search ${data?.posts.length} Posts` : undefined}
+      navigationTitle={data ? `${data.profile.username}'s Posts` : "Unknown User"}
+      searchBarPlaceholder={data ? `Search ${data.posts.length} Posts` : undefined}
       searchBarAccessory={
         <ReactionsDropdown
           posts={data?.posts || []}
