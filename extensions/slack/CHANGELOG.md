@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Adds Optional Metadata to Open Channel Command] - {PR_MERGE_DATE}
+## [Adds Optional Metadata to Open Channel Command] - 2024-07-30
 
 - Now includes job title, timezone, current time, and Slack status in the list returned by the Open Channel command.
 - Adds user preferences to display this new metadata.
