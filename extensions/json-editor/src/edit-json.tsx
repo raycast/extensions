@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Form, ActionPanel, Action, Icon } from "@raycast/api";
+import { Form, ActionPanel, Action, Icon, Color } from "@raycast/api";
 
 import jsonToYaml from "./utils/json-to-yaml";
 import jsonToGo from "./utils/json-to-go";
@@ -29,18 +29,22 @@ export default function Command() {
         text &&
         jsonObj && (
           <ActionPanel>
-            {<Action.CopyToClipboard content={result} title="Copy Result" />}
-            {<Action.CopyToClipboard content={JSON.stringify(jsonObj)} title="Copy Minified Result" />}
-            {<Action.CopyToClipboard content={escapeJsonText(jsonObj)} title="Escape Result" />}
-            {<Action.CopyToClipboard content={jsonToYaml(jsonObj)} title="Convert Result to YAML" />}
-            {
-              <Action.CopyToClipboard
-                content={jsonToTs(result, jsonTsOptions)}
-                title="Convert Result to Typescript Definition"
+            <Action.CopyToClipboard content={result} title="Copy Result" />
+            <Action.CopyToClipboard content={JSON.stringify(jsonObj)} title="Copy Minified Result" />
+            <Action.CopyToClipboard content={escapeJsonText(jsonObj)} title="Escape Result" />
+            <Action.CopyToClipboard content={jsonToYaml(jsonObj)} title="Convert Result to YAML" />
+            <Action.CopyToClipboard
+              content={jsonToTs(result, jsonTsOptions)}
+              title="Convert Result to Typescript Definition"
+            />
+            <Action.CopyToClipboard content={jsonToGo(result)} title="Convert Result to Go Type Definition" />
+            <ActionPanel.Section>
+              <Action.OpenInBrowser
+                title="Sponsor Project"
+                icon={{ source: Icon.Heart, tintColor: Color.Red }}
+                url="https://ko-fi.com/herbertlu"
               />
-            }
-            {<Action.CopyToClipboard content={jsonToGo(result)} title="Convert Result to Go Type Definition" />}
-            {<Action.OpenInBrowser title="Sponsor Project ♥️" icon={Icon.Heart} url="https://ko-fi.com/herbertlu" />}
+            </ActionPanel.Section>
           </ActionPanel>
         )
       }
