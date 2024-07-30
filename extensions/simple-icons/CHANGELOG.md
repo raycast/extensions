@@ -1,5 +1,13 @@
 # Brand Icons Changelog
 
+## [Maintenance] - {PR_MREGE_DATE}
+
+- Bump dependencies
+- Use `fast-fuzzy` for searching
+- Add support for searching aliases
+- Limit memory usage with array slices
+- Fix API documentation in readme
+
 ## [Enhancements] - 2024-06-07
 
 - Optimize load time
