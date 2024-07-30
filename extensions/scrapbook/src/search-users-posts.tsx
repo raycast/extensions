@@ -27,14 +27,11 @@ export default function SearchUsersPosts(props: LaunchProps) {
         keys: ["username"],
         threshold: 0.3,
       });
-
       const results = fuse.search(searchText);
       const topResults = results.slice(0, 10);
-
       if (topResults.length > 0 && topResults[0].item.username.toLowerCase() === searchText.toLowerCase()) {
         setDirectMatch(topResults[0].item);
         setSearchUsers(topResults.slice(1).map((result) => result.item));
-        setSearchText(topResults[0].item.username);
       } else {
         setDirectMatch(null);
         setSearchUsers(topResults.map((result) => result.item));
