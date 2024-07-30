@@ -6,14 +6,33 @@
   "icon": "command-icon.png",
   "author": "DanielSinclair",
   "contributors": [
-    "sammarks"
+    "sammarks",
+    "vitorlostada"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Base64",
-      "description": "Encode / decode Base64",
+      "name": "text-to-base64",
+      "title": "Text to Base64",
+      "description": "Convert text to base64",
+      "mode": "view"
+    },
+    {
+      "name": "base64-to-text",
+      "title": "Base64 to Text",
+      "description": "Decode a base64 string",
+      "mode": "view"
+    },
+    {
+      "name": "base64-to-image",
+      "title": "Base64 to Image",
+      "description": "Convert base64 to image",
+      "mode": "view"
+    },
+    {
+      "name": "image-to-base64",
+      "title": "Image to Base64",
+      "description": "Convert image to base64",
       "mode": "view"
     },
     {
@@ -38,16 +57,24 @@
       "title": "Default Action",
       "default": "copyToClipboard",
       "data": [
-        { "value": "copyToClipboard", "title": "Copy to Clipboard" },
-        { "value": "pasteInApp", "title": "Paste in App" },
-        { "value": "openInBrowser", "title": "Open in Browser" }
+        {
+          "value": "copyToClipboard",
+          "title": "Copy to Clipboard"
+        },
+        {
+          "value": "pasteInApp",
+          "title": "Paste in App"
+        },
+        {
+          "value": "openInBrowser",
+          "title": "Open in Browser"
+        }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.44.0",
-    "js-base64": "3.7.2",
-    "run-applescript": "6.0.0"
+    "@raycast/api": "1.79.1",
+    "js-base64": "3.7.7"
   },
   "devDependencies": {
     "@types/node": "16.11.7",
@@ -61,6 +88,9 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }
