@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [Fix Generate Checklist with AI] - {PR_MERGE_DATE}
+## [Fix Generate Checklist with AI] - 2024-07-30
 
 - Action to "Generate Checklist with AI" only visible if the user has access to AI.
 - Fixed issue where all checklist items were being generated in French.
