@@ -1,7 +1,7 @@
 # Dub Link Shortener Changelog
 
 
-## [OAuth flow] - {PR_MERGE_DATE}
+## [OAuth flow] - 2024-07-30
 
 - Added OAuth flow to connect to Dub account
 
