@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { isEqual } from "lodash";
 import { useEffect, useState } from "react";
-import * as emoji from "node-emoji";
+import { convertSlackEmojiToUnicode } from "./shared/utils";
 
 import { Message, SlackClient, useChannels, User, useUnreadConversations } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
@@ -124,7 +124,7 @@ function UnreadMessages() {
               <List.Item
                 key={unreadConversation.conversationId}
                 title={conversation?.name ?? ""}
-                subtitle={unreadConversation.messageHistory[0].message}
+                subtitle={convertSlackEmojiToUnicode(unreadConversation.messageHistory[0].message)}
                 icon={conversation?.icon}
                 accessories={[
                   { text: timeDifference(new Date(unreadConversation.messageHistory[0].receivedAt)) },
@@ -196,7 +196,7 @@ function UnreadMessagesConversation({
             icon={user?.icon}
             title={user?.name ?? ""}
             subtitle={timeDifference(new Date(message.receivedAt))}
-            detail={<List.Item.Detail markdown={emoji.emojify(message.message)} />}
+            detail={<List.Item.Detail markdown={convertSlackEmojiToUnicode(message.message)} />}
           />
         );
       })}
