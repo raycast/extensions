@@ -1,6 +1,6 @@
 # World Clock Changelog
 
-## [Update Refresh interval] - {PR_MERGE_DATE}
+## [Update Refresh interval] - 2024-07-30
 
 - Update the refresh interval to 10 seconds
 
