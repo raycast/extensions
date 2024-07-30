@@ -80,6 +80,8 @@ export default function Command() {
           />
         </MenuBarExtra.Section>
       )}
+      <MenuBarExtra.Section>
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }

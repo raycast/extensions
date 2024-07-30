@@ -33,7 +33,7 @@ export default function Command() {
   }, []);
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search for lectures">
       {lectures.map((lecture, index) => (
         <LectureCard key={index} lecture={lecture} />
       ))}
@@ -48,6 +48,17 @@ export default function Command() {
           }
         />
       ) : null}
+      {/* <List.Section title="Infoscreen">
+        <List.Item
+          title="Go to Infoscreen"
+          icon={Icon.Link}
+          actions={
+            <ActionPanel>
+              <Action.Push title="Go to Infoscreen" target="https://infoscreen.sae.ch/" />
+            </ActionPanel>
+          }
+        />
+      </List.Section> */}
     </List>
   );
 }
