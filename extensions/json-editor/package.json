@@ -50,7 +50,7 @@
       "name": "rootName",
       "description": "Override the RootObject name of the top-level interface",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "default": "RootObject",
       "title": "Typescript Definition - Root name"
     }

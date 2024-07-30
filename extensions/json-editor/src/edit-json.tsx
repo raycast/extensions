@@ -1,23 +1,21 @@
 import { useEffect, useState } from "react";
 
-import { Form, ActionPanel, Action, Icon, getPreferenceValues } from "@raycast/api";
-import { JsonTsOptions } from "json-ts";
+import { Form, ActionPanel, Action, Icon } from "@raycast/api";
 
 import jsonToYaml from "./utils/json-to-yaml";
 import jsonToGo from "./utils/json-to-go";
 import jsonToTs from "./utils/json-to-ts";
+import useJsonTsOptions from "./hooks/useJsonTsOptions";
 
 const ErrorInvalidJSON = "Invalid JSON";
 const ErrorIvalidFilterExpression = "Invalid filter expression";
-
-type Preferences = JsonTsOptions;
 
 export default function Command() {
   const [text, setText] = useState("");
   const [pattern, setPattern] = useState("");
   const [result, setResult] = useState("");
   const [jsonObj, setJsonObj] = useState({});
-  const jsonTsOptions = getPreferenceValues<Preferences>();
+  const jsonTsOptions = useJsonTsOptions();
 
   useEffect(() => {
     const [result, object] = filterJSONByPattern(text, pattern);
