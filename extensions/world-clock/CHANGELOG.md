@@ -1,5 +1,12 @@
 # World Clock Changelog
 
+## [Update Extension Icon] - 2024-07-30
+
+- Support set avatar for starred time zones
+- Support duplicate starred time zones
+- Show the first starred time zones in the menu bar
+- Update the extension and command icons
+
 ## [Update Memo Icon] - 2023-10-16
 
 - Now the Grid view will show the memo icon
