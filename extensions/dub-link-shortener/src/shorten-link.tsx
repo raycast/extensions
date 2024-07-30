@@ -18,6 +18,7 @@ import { createShortLink } from "@/api";
 import { fetchLink, isEmpty } from "@utils/clipboard";
 import { useTags } from "@hooks/use-tags";
 import { useDomains } from "@hooks/use-domains";
+import { withDubClient } from "./with-dub-client";
 
 interface ShortLinkFormValues {
   url: string;
@@ -89,7 +90,7 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
       <Form.TextField {...itemProps.url} placeholder="https://dub.co" title="Original URL" />
       <Form.TextField {...itemProps.key} placeholder="(Optional)" title="URL Key" />
       {/* todo: Add commands to create/manage tags in the workspace */}
-      <Form.TagPicker {...itemProps.tagIds} title="Tags" placeholder="(Optional)">
+      <Form.TagPicker {...itemProps.tagIds} title="Tags" placeholder="(Optional)" info="Add tags in Dub.co">
         {tags.map((t) => (
           <Form.TagPicker.Item
             key={t.id}
@@ -120,6 +121,8 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
   );
 };
 
-export default function ShortenLink(props: LaunchProps<{ arguments: Arguments.ShortenLink }>) {
+function ShortenLink(props: LaunchProps<{ arguments: Arguments.ShortenLink }>) {
   return <ShortenLinkForm args={props.arguments} />;
 }
+
+export default withDubClient(ShortenLink);

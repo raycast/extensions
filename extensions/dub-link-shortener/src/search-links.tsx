@@ -5,8 +5,9 @@ import { DUB_CO_URL } from "@utils/constants";
 import { deleteShortLink } from "@/api";
 import { MutatePromise, showFailureToast } from "@raycast/utils";
 import type { LinkSchema } from "dub/models/components";
+import { withDubClient } from "./with-dub-client";
 
-export default function SearchLinks() {
+function SearchLinks() {
   const { shortLinks, error: linksError, isLoading: isLoadingLinks, mutate } = useShortLinks();
 
   return (
@@ -187,3 +188,5 @@ const tryDeleteLink = async (linkId: string, mutate: MutatePromise<LinkSchema[]>
       });
     });
 };
+
+export default withDubClient(SearchLinks);

@@ -1,6 +1,10 @@
 # Dub Link Shortener Changelog
 
 
+## [OAuth flow] - 2024-07-30
+
+- Added OAuth flow to connect to Dub account
+
 ## [Workspace API Keys] - 2024-07-19
 
 - Simplify Dub Raycast Extension by using [`dub` TypeScript SDK](https://dub.co/solutions/typescript)
