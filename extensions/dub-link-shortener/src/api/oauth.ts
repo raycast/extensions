@@ -1,7 +1,6 @@
 import { OAuth } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 import { Dub } from "dub";
-import { workspaceApiKey } from "@utils/env";
 
 let dub: Dub | null = null;
 
@@ -21,7 +20,6 @@ export const dubOAuth = new OAuthService({
   tokenUrl: "https://api.dub.co/oauth/token",
   refreshTokenUrl: "https://api.dub.co/oauth/token",
   bodyEncoding: "url-encoded",
-  personalAccessToken: workspaceApiKey,
   onAuthorize({ token }) {
     dub = new Dub({
       token,
