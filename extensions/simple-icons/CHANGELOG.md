@@ -7,6 +7,7 @@
 - Add support for searching aliases
 - Limit memory usage with array slices
 - Fix API documentation in readme
+- Update screenshots
 
 ## [Enhancements] - 2024-06-07
 
