@@ -1,6 +1,6 @@
 # Notion Changelog
 
-## [Bug Fix] - 2024-7-20
+## [Bug Fix] - 2024-7-30
 
 - The relation property field now shows every page in the related database.
 
