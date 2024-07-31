@@ -7,7 +7,6 @@
   "author": "thomaslombart",
   "contributors": [
     "FezVrasta",
-    "jesperorb",
     "teziovsky",
     "rifont",
     "gavinroderick",
@@ -137,7 +136,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.64.3",
-    "@raycast/utils": "^1.12.4",
+    "@raycast/utils": "^1.16.2",
     "date-fns": "^2.30.0",
     "filesize": "^10.1.0",
     "form-data": "^4.0.0",

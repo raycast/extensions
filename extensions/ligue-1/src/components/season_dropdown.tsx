@@ -1,20 +1,14 @@
 import { Grid, List } from "@raycast/api";
 
-const startYear = 1993;
+const startYear = 2023;
 const endYear = new Date().getFullYear();
 
-const seasons: { [key: string]: { [key: string]: string } } = {};
+const seasons: { season: number; title: string }[] = [];
 
-for (let year = endYear; year >= startYear; year--) {
-  const decade = `${Math.floor(year / 10) * 10}s`;
-  const seasonKey = `${year}-${year + 1}`;
-  const seasonValue = `${year}/${year + 1}`;
+for (let season = endYear; season >= startYear; season--) {
+  const title = `${season}/${season + 1}`;
 
-  if (!seasons[decade]) {
-    seasons[decade] = {};
-  }
-
-  seasons[decade][seasonKey] = seasonValue;
+  seasons.push({ season, title });
 }
 
 export default function CompetitionDropdown(props: {
@@ -31,20 +25,13 @@ export default function CompetitionDropdown(props: {
       value={props.selected}
       onChange={props.onSelect}
     >
-      {Object.entries(seasons).map(([annees, years]) => {
+      {seasons.map((season) => {
         return (
-          <DropdownComponent.Section title={annees} key={annees}>
-            {Object.entries(years).map(([key, value]) => {
-              return (
-                <DropdownComponent.Item
-                  key={key}
-                  value={key}
-                  title={value}
-                  // title={competition.title}
-                />
-              );
-            })}
-          </DropdownComponent.Section>
+          <DropdownComponent.Item
+            key={season.season}
+            value={season.season.toString()}
+            title={season.title}
+          />
         );
       })}
     </DropdownComponent>

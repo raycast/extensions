@@ -1,11 +1,12 @@
 import { Toast, closeMainWindow, showHUD, showToast } from "@raycast/api";
-import { addFromClipboard, addFromFinder, checkYoink } from "./common-utils";
+import { addFromClipboard, addFromFinder, checkYoink, confirmAlertYoinkInstall } from "./common-utils";
 import { showNotification } from "./types";
 
 export default async () => {
   try {
     // check Yoink
-    if (!(await checkYoink())) {
+    if (!checkYoink()) {
+      await confirmAlertYoinkInstall();
       return;
     }
     await closeMainWindow();

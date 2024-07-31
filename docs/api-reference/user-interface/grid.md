@@ -13,7 +13,7 @@ Because its API tries to stick as closely to [List](list.md#list)'s as possible,
 - finally, replacing all usages of `List` with `Grid`.
   {% endhint %}
 
-![](../../.gitbook/assets/grid.png)
+![](../../.gitbook/assets/grid.webp)
 
 ## Search Bar
 
@@ -512,7 +512,7 @@ empty view alongside the other `Grid.Item`s.
 
 Note that the `EmptyView` is _never_ displayed if the `Grid`'s `isLoading` property is true and the search bar is empty.
 
-![Grid EmptyView illustration](../../.gitbook/assets/grid-empty-view.png)
+![Grid EmptyView illustration](../../.gitbook/assets/grid-empty-view.webp)
 
 #### Example
 
@@ -582,7 +582,7 @@ Sections can specify their own `columns`, `fit`, `aspectRatio` and `inset` props
 
 #### Example
 
-![](../../.gitbook/assets/grid-styled-sections.png)
+![](../../.gitbook/assets/grid-styled-sections.webp)
 
 {% tabs %}
 {% tab title="GridWithSection.tsx" %}
@@ -645,7 +645,7 @@ export default function Command() {
 
 An interface describing an accessory view in a `Grid.Item`.
 
-![Grid.Item accessories illustration](../../.gitbook/assets/grid-item-accessories.png)
+![Grid.Item accessories illustration](../../.gitbook/assets/grid-item-accessories.webp)
 
 ### Grid.Inset
 

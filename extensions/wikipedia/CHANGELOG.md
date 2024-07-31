@@ -1,5 +1,13 @@
 # Wikipedia Changelog
 
+## [Add Danish language] - 2024-07-25
+
+- Add `Danish` language
+
+## [Contributor maintenance] - 2024-07-04
+
+- Move @JonathanWbn to list of past contributors
+
 ## [Add simple english version] - 2024-05-31
 
 ## [Flag update] - 2024-04-19

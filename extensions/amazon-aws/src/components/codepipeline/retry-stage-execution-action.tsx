@@ -3,6 +3,7 @@ import {
   CodePipelineClient,
   PipelineExecutionStatus,
   RetryStageExecutionCommand,
+  RetryStageExecutionCommandInput,
   StageExecutionStatus,
   StageRetryMode,
 } from "@aws-sdk/client-codepipeline";
@@ -78,60 +79,60 @@ const retryStageExecution = async (
     message: `Retry ${stage.retryMode === StageRetryMode.ALL_ACTIONS ? "all actions" : "failed actions"} in ${stage.stageName}?`,
     primaryAction: {
       title: "Retry",
-      onAction: async () => {
-        await mutate(retry(pipelineName, stage), {
-          optimisticUpdate: (pipelines) => {
-            if (!pipelines) {
-              return;
-            }
-
-            return pipelines?.map((p) =>
-              p.name === pipelineName
-                ? {
-                    ...p,
-                    ...(p.latestExecution && {
-                      latestExecution: {
-                        ...p.latestExecution,
-                        status: PipelineExecutionStatus.InProgress,
-                        statusSummary: "Retried stage execution",
-                      },
-                    }),
-                  }
-                : p,
-            );
-          },
-          shouldRevalidateAfter: false,
-        });
-      },
+      onAction: () => retry(pipelineName, stage, mutate),
     },
   });
 };
 
-const retry = async (pipelineName: string, stage: PipelineStage & { retryMode: StageRetryMode }): Promise<string> => {
+const retry = async (
+  pipelineName: string,
+  stage: PipelineStage & { retryMode: StageRetryMode },
+  mutate: MutatePromise<Pipeline[] | undefined>,
+) => {
+  const input: RetryStageExecutionCommandInput = {
+    pipelineName,
+    pipelineExecutionId: stage.latestExecution!.pipelineExecutionId,
+    stageName: stage.stageName,
+    retryMode: stage.retryMode,
+  };
+
   const toast = await showToast(
     Toast.Style.Animated,
     `Retrying ${stage.retryMode === StageRetryMode.ALL_ACTIONS ? "all actions" : "failed actions"} in ${stage.stageName}`,
   );
-  return new CodePipelineClient({})
-    .send(
-      new RetryStageExecutionCommand({
-        pipelineName,
-        pipelineExecutionId: stage.latestExecution!.pipelineExecutionId,
-        stageName: stage.stageName,
-        retryMode: stage.retryMode,
-      }),
-    )
+
+  mutate(new CodePipelineClient({}).send(new RetryStageExecutionCommand(input)), {
+    optimisticUpdate: (pipelines) => {
+      if (!pipelines) {
+        return;
+      }
+
+      return pipelines?.map((p) =>
+        p.name === pipelineName
+          ? {
+              ...p,
+              ...(p.latestExecution && {
+                latestExecution: {
+                  ...p.latestExecution,
+                  status: PipelineExecutionStatus.InProgress,
+                  statusSummary: "Retried stage execution",
+                },
+              }),
+            }
+          : p,
+      );
+    },
+    shouldRevalidateAfter: false,
+  })
     .then(({ pipelineExecutionId }) => {
       toast.style = Toast.Style.Success;
       toast.title = `✅ Retried ${stage.retryMode === StageRetryMode.ALL_ACTIONS ? "all actions" : "failed actions"} in ${stage.stageName}`;
       toast.message = `Execution ID: ${pipelineExecutionId}`;
-      return pipelineExecutionId ?? "";
     })
     .catch((err) => {
       captureException(err);
       toast.style = Toast.Style.Failure;
       toast.title = `❌ Failed to retry ${stage.retryMode === StageRetryMode.ALL_ACTIONS ? "all actions" : "failed actions"} in ${stage.stageName}`;
       toast.message = getErrorMessage(err);
-      throw err;
     });
 };

@@ -1,6 +1,7 @@
 import {
   Color,
   Icon,
+  Image,
   LaunchType,
   MenuBarExtra,
   Toast,
@@ -109,7 +110,7 @@ function UnreadNotifications() {
 
       <MenuBarExtra.Section>
         {hasUnread ? (
-          data.map((notification) => {
+          data.map((notification: Notification & { icon: { value: Image; tooltip: string } }) => {
             const title = notification.subject.title;
             const updatedAt = new Date(notification.updated_at);
             const tooltip = getNotificationTooltip(updatedAt);

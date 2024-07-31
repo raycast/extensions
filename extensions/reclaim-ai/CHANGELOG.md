@@ -1,5 +1,12 @@
 # reclaim Changelog
 
+## [Update] - 2024-07-30
+- Add actions for Smart Meetings & Habits 2.0
+- Parity between Raycast actions and Omnibar Actions
+- Fix "reschedule event" to work for Tasks and use new endpoint
+- Tasks/smart habits start/stop/restart respect auto reschedule setting
+- Sort Time Schemes in Create Task form
+
 ## [Update] - 2024-05-10
 - Cache the user object for 30 minute for a small performance benefit.
 

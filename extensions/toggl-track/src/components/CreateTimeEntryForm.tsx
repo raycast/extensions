@@ -24,7 +24,7 @@ function CreateTimeEntryForm({
   const { tasks, isLoadingTasks } = useTasks();
   const { tags, isLoadingTags } = useTags();
 
-  const [selectedWorkspace, setSelectedWorkspace] = useCachedState("defaultWorspace", workspaces.at(0)?.id);
+  const [selectedWorkspace, setSelectedWorkspace] = useCachedState("defaultWorkspace", workspaces.at(0)?.id);
   const [selectedClient, setSelectedClient] = useState<Client | undefined>(() => {
     return clients.find((client) => client.name === initialValues?.client_name);
   });
@@ -35,6 +35,7 @@ function CreateTimeEntryForm({
     return tasks.find((task) => task.id === initialValues?.task_id);
   });
   const [selectedTags, setSelectedTags] = useState<string[]>(initialValues?.tags || []);
+  const [billable, setBillable] = useState(initialValues?.billable || false);
 
   async function handleSubmit(values: { description: string; billable?: boolean }) {
     const workspaceId = selectedProject?.workspace_id || me?.default_workspace_id;
@@ -67,16 +68,23 @@ function CreateTimeEntryForm({
     }
   }
 
+  const isWorkspacePremium = useMemo(() => {
+    return workspaces.find((workspace) => workspace.id === selectedWorkspace)?.premium;
+  }, [workspaces, selectedWorkspace]);
+
   const filteredClients = useMemo(() => {
     if (selectedProject) return clients.filter((client) => !client.archived && client.id === selectedProject.client_id);
-    else return clients.filter((client) => !client.archived && client.wid === selectedWorkspace);
+    else
+      return clients.filter((client) => !client.archived && (client.wid === selectedWorkspace || !selectedWorkspace));
   }, [projects, selectedWorkspace, selectedProject]);
 
   const filteredProjects = useMemo(() => {
     if (selectedClient)
       return projects.filter((project) => project.client_id === selectedClient.id && project.status != "archived");
     else
-      return projects.filter((project) => project.workspace_id === selectedWorkspace && project.status != "archived");
+      return projects.filter(
+        (project) => (project.workspace_id === selectedWorkspace || !selectedWorkspace) && project.status != "archived",
+      );
   }, [projects, selectedWorkspace, selectedClient]);
 
   const filteredTasks = useMemo(() => {
@@ -85,7 +93,7 @@ function CreateTimeEntryForm({
       return tasks.filter(
         (task) => task.project_id === projects.find((project) => project.client_id === selectedClient.id)?.id,
       );
-    else return tasks.filter((task) => task.workspace_id === selectedWorkspace);
+    else return tasks.filter((task) => task.workspace_id === selectedWorkspace || !selectedWorkspace);
   }, [tasks, selectedWorkspace, selectedClient, selectedProject]);
 
   const onWorkspaceChange = (workspaceId: string) => {
@@ -194,6 +202,8 @@ function CreateTimeEntryForm({
             <Form.TagPicker.Item key={tag.id} value={tag.name.toString()} title={tag.name} />
           ))}
       </Form.TagPicker>
+
+      {isWorkspacePremium && <Form.Checkbox id="billable" label="Billable" value={billable} onChange={setBillable} />}
     </Form>
   );
 }

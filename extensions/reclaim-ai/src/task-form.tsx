@@ -7,6 +7,9 @@ import { useUser } from "./hooks/useUser";
 import { TimePolicy } from "./types/time-policy";
 import { TIME_BLOCK_IN_MINUTES, formatDuration, parseDurationToMinutes } from "./utils/dates";
 import { TaskPlanDetails } from "./types/plan";
+import { makeOrderedListComparator } from "./utils/arrays";
+
+export const timeSchemeTitleComparator = makeOrderedListComparator<string>(["Working Hours", "Personal Hours"]);
 
 interface FormValues {
   title: string;
@@ -150,12 +153,14 @@ export default (props: Props) => {
     }
   };
 
-  const timePolicyOptions = useMemo(() => {
+  const timePolicyOptionsSorted = useMemo(() => {
     return timePolicies
-      ? timePolicies.map((policy) => ({
-          title: policy.title,
-          value: policy.id,
-        }))
+      ? timePolicies
+          .map((policy) => ({
+            title: policy.title,
+            value: policy.id,
+          }))
+          .sort((a, b) => timeSchemeTitleComparator(a.title, b.title))
       : [];
   }, [timePolicies]);
 
@@ -235,7 +240,7 @@ export default (props: Props) => {
       />
 
       <Form.Dropdown id="timePolicy" title="Hours" value={timePolicy} onChange={setTimePolicy}>
-        {timePolicyOptions?.map((policy) => (
+        {timePolicyOptionsSorted?.map((policy) => (
           <Form.Dropdown.Item key={policy.value} title={policy.title} value={policy.value} />
         ))}
       </Form.Dropdown>

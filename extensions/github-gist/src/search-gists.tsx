@@ -1,21 +1,46 @@
 import { ActionPanel, Application, Color, Icon, List } from "@raycast/api";
 import { useMemo, useState } from "react";
-import { GithubGistTag, githubGistTags } from "./util/gist-utils";
 import { formatGistContentDetail } from "./util/utils";
 import { GistAction } from "./components/gist-action";
 import { ActionSettings } from "./components/action-settings";
-import { useGists } from "./hooks/useGists";
-import { rememberTag, showDetail } from "./types/preferences";
-import { useGistContent } from "./hooks/useGistContent";
+import { perPage, rememberTag, showDetail } from "./types/preferences";
 import { useFrontmostApp } from "./hooks/useFrontmostApp";
+import { withGitHubClient } from "./components/with-github-client";
+import { useCachedPromise } from "@raycast/utils";
+import { getGitHubClient } from "./api/oauth";
+import { GithubGistTag, githubGistTags } from "./util/gist-utils";
 
-export default function main() {
+function SearchGists() {
+  const client = getGitHubClient();
   const [tag, setTag] = useState<GithubGistTag>(GithubGistTag.MY_GISTS);
   const [gistId, setGistId] = useState<string>("");
 
   const { data: frontmostAppData } = useFrontmostApp();
-  const { data: gistsData, isLoading: gistsLoading, mutate: gistMutate, pagination } = useGists(tag);
-  const { data: gistContentData, isLoading: gistContentLoading } = useGistContent(gistId);
+
+  const {
+    data: gistsData,
+    isLoading: gistsLoading,
+    mutate: gistMutate,
+    pagination,
+  } = useCachedPromise(
+    (t: string) => async (options) => {
+      const data = await client.requestGist(t, options.page + 1, parseInt(perPage));
+      const hasMore = data[data.length - 1] != options.lastItem && options.page < 50;
+      return { data, hasMore };
+    },
+    [tag],
+    { keepPreviousData: true, failureToastOptions: { title: "Failed to load gists" } },
+  );
+
+  const { data: gistContentData, isLoading: gistContentLoading } = useCachedPromise(
+    (rawUrl: string) => {
+      return client.octokit.request(`${rawUrl}`).then((response) => {
+        return response.data;
+      }) as Promise<string>;
+    },
+    [gistId],
+    { failureToastOptions: { title: "Failed to load gist content" } },
+  );
 
   const frontmostApp = useMemo(() => {
     return frontmostAppData as Application;
@@ -101,7 +126,7 @@ Size: ${gistFile.size}`,
                         gistFileContent={gistContent}
                         tag={tag}
                         gistMutate={gistMutate}
-                        fronstmostApp={frontmostApp}
+                        frontmostApp={frontmostApp}
                       />
                       <ActionSettings command={true} />
                     </ActionPanel>
@@ -115,3 +140,5 @@ Size: ${gistFile.size}`,
     </List>
   );
 }
+
+export default withGitHubClient(SearchGists);

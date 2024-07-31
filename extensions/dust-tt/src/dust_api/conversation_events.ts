@@ -53,6 +53,29 @@ export type DustDocument = {
   reference: number;
 };
 
+export type AgentMessageType = {
+  id: number;
+  agentMessageId: number;
+  created: number;
+  type: "agent_message";
+  sId: string;
+  visibility: "visible" | "deleted";
+  version: number;
+  parentMessageId: string | null;
+  status: "created" | "succeeded" | "failed" | "cancelled";
+  actions: AgentActionType[];
+  content: string | null;
+  chainOfThought: string | null;
+  rawContents: Array<{
+    step: number;
+    content: string;
+  }>;
+  error: {
+    code: string;
+    message: string;
+  } | null;
+};
+
 export type AgentActionType = RetrievalActionType | DustAppRunActionType;
 
 export type AgentActionSuccessEvent = {
@@ -70,15 +93,17 @@ export type GenerationTokensEvent = {
   configurationId: string;
   messageId: string;
   text: string;
+  classification: "tokens" | "chain_of_thought" | "opening_delimiter" | "closing_delimiter";
 };
 
-// Event sent once the generation is completed.
-export type AgentGenerationSuccessEvent = {
-  type: "agent_generation_success";
+// Event sent once the message is completed and successful.
+export type AgentMessageSuccessEvent = {
+  type: "agent_message_success";
   created: number;
   configurationId: string;
   messageId: string;
-  text: string;
+  message: AgentMessageType;
+  runIds: string[];
 };
 
 // Event sent when the user message is created.
@@ -101,12 +126,4 @@ export type AgentErrorEvent = {
     code: string;
     message: string;
   };
-};
-
-export type GenerationSuccessEvent = {
-  type: "generation_success";
-  created: number;
-  configurationId: string;
-  messageId: string;
-  text: string;
 };

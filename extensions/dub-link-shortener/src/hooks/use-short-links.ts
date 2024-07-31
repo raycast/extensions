@@ -1,16 +1,14 @@
 import { useCachedPromise } from "@raycast/utils";
 import { getAllShortLinks } from "@/api";
-import { WorkspaceId } from "@/types";
 
-export const useShortLinks = ({ workspaceId, workspacesError }: WorkspaceId & { workspacesError?: Error }) => {
+export const useShortLinks = () => {
   const {
     data: shortLinks,
     isLoading,
     error,
     mutate,
-  } = useCachedPromise(getAllShortLinks, [{ workspaceId }], {
+  } = useCachedPromise(getAllShortLinks, [], {
     initialData: [],
-    execute: workspaceId.length > 0 && !workspacesError,
     failureToastOptions: { title: "❗ Failed to fetch short links" },
   });
 
