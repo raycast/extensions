@@ -49,7 +49,6 @@ Here are some examples to help you out:
 
 Here's the task: "${props.fallbackText ?? props.arguments.text}"`);
 
-    console.log(result.trim());
     const json = JSON.parse(result.trim());
 
     if (props.arguments.notes) {
