@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2024-07-31
 
 - Do not show currently running time entry in the recent time entries list
 - Fix running time entries not showing project details
