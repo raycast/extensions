@@ -1,5 +1,12 @@
 # Perplexity API Changelog
 
+## [New Models] - 2024-07-31
+
+- Added `Llama 3.1 8B` and `Llama 3.1 70B`.
+- Added Llama3.1 based `Sonar Small` and `Sonar Large`.
+- Added addtional temperaturs values.
+- Changed tokenizer to `cl100k_base`.
+
 ## [Update] - 2024-05-14
 
 - Removed deprecated model `mixtral-8x22b-instruct`.
