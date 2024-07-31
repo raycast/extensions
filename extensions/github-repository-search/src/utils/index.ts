@@ -1,7 +1,7 @@
-import { Image } from "@raycast/api";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
-import { Repository } from "./types";
+import { Image } from "@raycast/api";
+import type { Repository } from "@/types";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");

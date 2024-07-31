@@ -1,6 +1,6 @@
-import { ActionPanel, Action, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
-import { Repository } from "./types";
+import type { Repository } from "@/types";
 
 export const WebIdes = [
   {
@@ -41,7 +41,7 @@ export const WebIdes = [
 export function OpenInWebIDEAction(props: { repository: Repository; onOpen: () => void }) {
   const { repository, onOpen } = props;
   return (
-    <ActionPanel.Submenu icon={Icon.Globe} title="Open in">
+    <ActionPanel.Submenu icon={Icon.Globe} title="Open In">
       {WebIdes.map((ide) => (
         <Action.OpenInBrowser
           title={ide.title}
