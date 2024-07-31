@@ -61,6 +61,6 @@ export default async function Command() {
   }
   // if event does not succeed, try next event
   if (!(await joinMeeting(momentRequest.event))) {
-      await showHUD("No meetings found.");
+    await showHUD("No meetings found.");
   }
 }
