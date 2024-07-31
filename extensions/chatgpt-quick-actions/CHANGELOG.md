@@ -9,6 +9,7 @@ See details [here](https://github.com/openai/openai-node/discussions/217).
 - Bump dependencies and `npm audit` suggestions
 - Migrate API configuration in `api.ts`
 - Simplify and migrate `getResult()` in `common.tsx`
+- Migrate `Command()` in `execute.ts`
 
 ## [Update models] - 2024-07-31
 
