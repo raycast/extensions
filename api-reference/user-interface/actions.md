@@ -532,6 +532,7 @@ export default function Command() {
 | :--- | :--- | :--- |
 | link<mark style="color:red;">*</mark> | The URL or file path, optionally including placeholders such as in "https://google.com/search?q=\{Query\}" | <code>string</code> |
 | application | The application that the quicklink should be opened in. | <code>string</code> or <code>[Application](../utilities.md#application)</code> |
+| icon | The icon to display for the quicklink. | <code>[Icon](icons-and-images.md#icon)</code> |
 | name | The quicklink name | <code>string</code> |
 
 ### Action.Style
