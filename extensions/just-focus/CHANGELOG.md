@@ -1,4 +1,9 @@
 # Just Focus Changelog
+
+## [Update Raycast API] - {PR_MERGE_DATE}
+
+- Update Raycast API version to 1.79.1
+
 ## [Make Commands Work During Timer Counting] - 2024-02-28
 - Stop timer before short break/long break/start to fix these commands can't work
 
