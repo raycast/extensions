@@ -1,6 +1,6 @@
 # I Don't Have Spotify Changelog
 
-## [New Commands] - {PR_MERGE_DATE}
+## [New Commands] - 2024-07-31
 
 - Convert link from clipboard and copy it back for each platform.
 - Generate audio temp file path using built-in libraries.
