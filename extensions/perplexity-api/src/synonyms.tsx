@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import ResultView from "./hook/perplexityAPI";
+import ResultView from "./hook/accessAPI";
 
 const prompt = getPreferenceValues().prompt_synonyms;
 const model_override = getPreferenceValues().model_synonyms;

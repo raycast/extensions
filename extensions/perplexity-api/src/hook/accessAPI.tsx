@@ -1,6 +1,6 @@
 import { getSelectedText, Detail, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { global_model, enable_streaming, openai } from "./api";
+import { global_model, enable_streaming, openai } from "./configAPI";
 import { Stream } from "openai/streaming";
 import { allModels as changeModels, currentDate, countToken, estimatePrice } from "./utils";
 import { ResultViewProps } from "./ResultView.types";
@@ -105,16 +105,16 @@ export default function ResultView(props: ResultViewProps) {
     }
   }, [loading]);
 
+  const formatUserMessage = (message: string): string => {
+    return message
+      .split("\n")
+      .map((line) => `>${line}`)
+      .join("\n");
+  };
+
   return (
     <Detail
-      markdown={
-        (user_extra_msg
-          ? user_extra_msg
-              .split("\n")
-              .map((line) => `>${line}`)
-              .join("\n") + "\n\n"
-          : "") + response
-      }
+    markdown={`${user_extra_msg ? formatUserMessage(user_extra_msg) + "\n\n" : ""}${response}`}
       isLoading={loading}
       actions={
         !loading && (
