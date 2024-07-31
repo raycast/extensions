@@ -14,7 +14,7 @@ export async function getGames(tag: string): Promise<ItchModel[]> {
   const url = `${BASE_URL}${tag.replaceAll(" ", "-")}.xml`;
   const response = await fetch(url);
   const data = await response.text();
-  const json = parser.parse(data).rss;
+  const json = await parser.parse(data).rss;
   for (let i = 0; i < json.channel.item.length; i++) {
     const item = json.channel.item[i];
     const platforms = Object.keys(item.platforms).filter((key) => item.platforms[key] === "yes");

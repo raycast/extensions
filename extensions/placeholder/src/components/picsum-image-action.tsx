@@ -1,13 +1,13 @@
+import type { Dispatch, SetStateAction } from "react";
 import { Action, Clipboard, Icon, showHUD } from "@raycast/api";
-import { downloadAndCopyImage, downloadImage } from "../utils/common-utils";
-import React from "react";
-import { primaryAction } from "../types/preferences";
+import { downloadAndCopyImage, downloadImage } from "@/utils/common-utils";
+import { primaryAction } from "@/utils/preferences";
 
 export function PicsumImageAction(props: {
   imageURL: string;
   size: string;
   autoRefresh?: boolean;
-  setRefresh?: React.Dispatch<React.SetStateAction<number>>;
+  setRefresh?: Dispatch<SetStateAction<number>>;
 }) {
   const { imageURL, size } = props;
   const autoRefresh = typeof props.autoRefresh === "undefined" ? false : props.autoRefresh;

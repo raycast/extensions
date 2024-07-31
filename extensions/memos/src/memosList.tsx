@@ -6,7 +6,7 @@ import { MemoInfoResponse, ROW_STATUS } from "./types";
 export default function MemosListCommand(): JSX.Element {
   const [searchText, setSearchText] = useState("");
   const [currentUserId, setCurrentUserId] = useState<number>();
-  const { isLoading, data, revalidate } = getAllMemos(currentUserId);
+  const { isLoading, data, revalidate, pagination } = getAllMemos(currentUserId);
   const { isLoading: isLoadingUser, data: user } = getMe();
   const [filterList, setFilterList] = useState<MemoInfoResponse[]>([]);
 
@@ -23,12 +23,13 @@ export default function MemosListCommand(): JSX.Element {
   }, [currentUserId]);
 
   useEffect(() => {
-    const dataList = data?.memos || [];
+    const dataList = data || [];
+
     setFilterList(dataList.filter((item) => item.content.includes(searchText)) || []);
   }, [searchText]);
 
   useEffect(() => {
-    const dataList = data?.memos || [];
+    const dataList = data || [];
     setFilterList(dataList);
   }, [data]);
 
@@ -39,9 +40,20 @@ export default function MemosListCommand(): JSX.Element {
   }
 
   function getItemMarkdown(item: MemoInfoResponse) {
-    const { content } = item;
+    const { content, resources } = item;
+    let markdown = content;
 
-    return content;
+    resources.forEach((resource, index) => {
+      const resourceUrl = getRequestUrl(`/file/${resource.name}/${resource.filename}`);
+
+      if (index === 0) {
+        markdown += "\n\n";
+      }
+
+      markdown += ` ![${resource.filename}](${resourceUrl})`;
+    });
+
+    return markdown;
   }
 
   async function onArchive(item: MemoInfoResponse) {
@@ -151,6 +163,7 @@ export default function MemosListCommand(): JSX.Element {
       navigationTitle="Search Memos"
       searchBarPlaceholder="Search your memo..."
       isShowingDetail
+      pagination={pagination}
     >
       {filterList.map((item) => (
         <List.Item

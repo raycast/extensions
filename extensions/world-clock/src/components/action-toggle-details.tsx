@@ -1,18 +1,23 @@
 import { Action, ActionPanel, Icon, LocalStorage } from "@raycast/api";
-import { Dispatch, SetStateAction } from "react";
 import { localStorageKey } from "../utils/costants";
+import { MutatePromise } from "@raycast/utils";
 
-export function ActionToggleDetails(props: { showDetail: boolean; setRefresh: Dispatch<SetStateAction<number>> }) {
-  const { showDetail, setRefresh } = props;
+export function ActionToggleDetails(props: {
+  showDetail: boolean;
+  showDetailMutate: MutatePromise<boolean | undefined, boolean | undefined> | undefined;
+}) {
+  const { showDetail, showDetailMutate } = props;
   return (
     <ActionPanel.Section>
       <Action
         icon={Icon.Sidebar}
         title={"Toggle Details"}
-        shortcut={{ modifiers: ["shift", "ctrl"], key: "d" }}
+        shortcut={{ modifiers: ["shift", "cmd"], key: "d" }}
         onAction={async () => {
           await LocalStorage.setItem(localStorageKey.SHOW_DETAILS, !showDetail);
-          setRefresh(Date.now());
+          if (showDetailMutate) {
+            await showDetailMutate();
+          }
         }}
       />
     </ActionPanel.Section>

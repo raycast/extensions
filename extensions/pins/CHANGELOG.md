@@ -1,5 +1,12 @@
 # Pins Changelog
 
+## [1.9.0 - Pin Aliases & Per-Group Display Setting] - 2024-07-21
+
+- Added setting for pin aliases.
+- Added setting to control how individual groups are displayed in the menu bar dropdown.
+- Added support for using information placeholders in pin names.
+- Added support for importing multiple pin data files at once.
+
 ## [1.8.2 - Group Visibility, Pin Expiration Actions] - 2024-07-11
 
 - Added ability to set custom expiration actions.

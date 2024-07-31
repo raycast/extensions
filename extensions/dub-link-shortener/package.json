@@ -14,7 +14,8 @@
   ],
   "contributors": [
     "stelo",
-    "steventey"
+    "steventey",
+    "devkiran"
   ],
   "license": "MIT",
   "commands": [
@@ -46,17 +47,9 @@
   "dependencies": {
     "@raycast/api": "^1.61.2",
     "@raycast/utils": "^1.16.0",
-    "axios": "^1.6.2"
+    "dub": "^0.33.1",
+    "undici": "^6.19.2"
   },
-  "preferences": [
-    {
-      "name": "apiKey",
-      "type": "password",
-      "required": true,
-      "title": "API Key",
-      "description": "Dub API key."
-    }
-  ],
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "^20.14.2",

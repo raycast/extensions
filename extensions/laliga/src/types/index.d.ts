@@ -292,7 +292,7 @@ export interface Round {
   type: string;
   status: string;
   gameweeks: CurrentGameweek[];
-  groups: any[];
+  groups: unknown;
   num_gameweeks?: number;
 }
 

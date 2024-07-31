@@ -2,10 +2,10 @@ import { Action, ActionPanel, Image, List } from "@raycast/api";
 import { getFavicon, MutatePromise } from "@raycast/utils";
 import {
   CopyLinkActionSection,
+  CreateQuickLinkActionSection,
   EditTabActionSection,
   OpenLinkActionSections,
   OpenSpaceAction,
-  CreateQuickLinkActionSection,
 } from "./actions";
 import { HistoryEntry, Space, Suggestion, Tab } from "./types";
 import { getDomain, getLastVisitedAt, getSpaceTitle } from "./utils";

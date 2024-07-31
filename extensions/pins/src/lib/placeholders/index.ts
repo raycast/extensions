@@ -123,4 +123,7 @@ JavaScriptPlaceholder.apply = async (str: string, context?: { [key: string]: unk
 
 PinsPlaceholders.push(JavaScriptPlaceholder);
 
+const PinsInfoPlaceholders = PinsPlaceholders.filter((p) => p.type == PlaceholderType.Informational);
+
 export default PinsPlaceholders;
+export { PinsInfoPlaceholders };

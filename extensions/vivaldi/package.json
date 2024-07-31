@@ -5,6 +5,9 @@
   "description": "Search open tabs, bookmarks and history in Vivaldi.",
   "icon": "vivaldi-logo.png",
   "author": "crisboarna",
+  "contributors": [
+    "iwex"
+  ],
   "categories": [
     "Applications",
     "Developer Tools",
@@ -19,6 +22,13 @@
       "subtitle": "Vivaldi",
       "description": "Open a new Vivaldi tab.",
       "mode": "view"
+    },
+    {
+      "name": "new-window",
+      "title": "New Window",
+      "subtitle": "Vivaldi",
+      "description": "Open a new Vivaldi window.",
+      "mode": "no-view"
     },
     {
       "name": "search-tab",
@@ -76,13 +86,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
+    "@raycast/api": "^1.79.1",
     "@raycast/utils": "^1.4.13",
     "run-applescript": "6.0.0"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/react": "18.3.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
