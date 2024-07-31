@@ -1,6 +1,6 @@
 # Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2024-07-31
 
 - Updated (dev) dependencies, code cleanup
 - Bugfix for not being able to browse the repository releases ([#12808](https://github.com/raycast/extensions/issues/12808))
