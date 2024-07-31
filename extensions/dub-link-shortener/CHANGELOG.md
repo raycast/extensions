@@ -1,6 +1,6 @@
 # Dub Link Shortener Changelog
 
-## [README changes] - {PR_MERGE_DATE}
+## [README changes] - 2024-07-31
 
 - Remove the instructions about API key from README.
 
