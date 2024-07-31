@@ -15,4 +15,4 @@ https://user-images.githubusercontent.com/2144783/232259860-dcf47f25-cd1b-4612-a
 # Tips
  - Specify a global preferred model or customize preferred model for each command.
  - Regenerate the results with `cmd + R` if you are not satisfied.
- - Retry with `cmd + shift + R` to temporarily use `GPT-4` if you were using `gpt-3.5-turbo` for the command.
+ - Retry with `cmd + shift + R` to temporarily use `GPT-4o` if you were using a different model for the command.
