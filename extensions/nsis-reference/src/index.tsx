@@ -1,6 +1,8 @@
-import { ActionPanel, Detail, Icon, List, PushAction } from "@raycast/api";
+import { ActionPanel, Detail, Icon, List, Action } from "@raycast/api";
+// @ts-expect-error Cannot find module '@nsis/docs' or its corresponding type declarations.ts (2307)
 import { Callbacks, Commands, Includes, Plugins, Variables } from "@nsis/docs";
 import slugify from "@sindresorhus/slugify";
+import { useState } from "react";
 
 const reference = {
   Commands,
@@ -17,19 +19,19 @@ const reference = {
   Plugins,
 };
 
-function editLink(name, category) {
+function editLink(name: string, category: string) {
   const linkCategory = ["FileFunc", "LogicLib", "Memento", "StrFunc", "TextFunc", "WinVer", "WordFunc", "x64"].includes(
-    category
+    category,
   )
     ? `Includes/${category}`
     : category;
 
   const linkName = name.replace(/^\$/, "").replace(/^{/, "").replace(/}$/, "");
 
-  return `\n\n---\n\n[Edit on GitHub](https://github.com/NSIS-Dev/Documentation/edit/master/docs/${linkCategory}/${linkName}.md)`;
+  return `\n\n---\n\n[Edit on GitHub](https://github.com/NSIS-Dev/Documentation/edit/main/docs/${linkCategory}/${linkName}.md)`;
 }
 
-function mapTintColor(category) {
+function mapTintColor(category: string) {
   switch (category) {
     case "Commands":
       return "#4caf50";
@@ -58,25 +60,54 @@ function mapTintColor(category) {
   }
 }
 
+type Value = {
+  name: string;
+  content: string;
+};
+type Item = {
+  [key: string]: Value;
+};
+
 export default function Command() {
+  const [category, setCategory] = useState("");
+  const filtered = !category
+    ? reference
+    : Object.fromEntries(Object.entries(reference).filter(([key]) => key === category));
+
   return (
-    <List>
-      {Object.entries(reference).map(([category, item]) =>
-        Object.entries(item).map(([key, value]) => (
+    <List
+      searchBarAccessory={
+        <List.Dropdown tooltip="Filter by Category" onChange={setCategory}>
+          <List.Dropdown.Item icon={Icon.MagnifyingGlass} title="All" value="" />
+          <List.Dropdown.Section title="Categories">
+            {Object.keys(reference).map((category) => (
+              <List.Dropdown.Item
+                key={category}
+                icon={{ source: Icon.MagnifyingGlass, tintColor: mapTintColor(category) }}
+                title={category}
+                value={category}
+              />
+            ))}
+          </List.Dropdown.Section>
+        </List.Dropdown>
+      }
+    >
+      {Object.entries(filtered).map(([category, item]) =>
+        Object.entries(item as Item).map(([key, value]) => (
           <List.Item
             key={slugify(`${category}-${key}`)}
             icon={{ source: Icon.MagnifyingGlass, tintColor: mapTintColor(category) }}
             title={value.name}
             actions={
               <ActionPanel>
-                <PushAction
-                  title={`Show Documentation`}
+                <Action.Push
+                  title="Show Documentation"
                   target={<Detail markdown={`${value.content}${editLink(value.name, category)}`} />}
                 />
               </ActionPanel>
             }
           />
-        ))
+        )),
       )}
     </List>
   );

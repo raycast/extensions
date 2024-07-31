@@ -5,6 +5,12 @@
   "description": "Search NSIS references",
   "icon": "command-icon.png",
   "author": "idleberg",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "Documentation"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -16,23 +22,23 @@
     }
   ],
   "dependencies": {
-    "@nsis/docs": "^0.1.0",
-    "@raycast/api": "^1.27.0",
+    "@nsis/docs": "^0.2.1",
+    "@raycast/api": "^1.79.0",
     "@sindresorhus/slugify": "^2.1.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.51.0",
+    "react": "^18.2.0",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
