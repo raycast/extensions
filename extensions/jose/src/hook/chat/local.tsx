@@ -38,6 +38,7 @@ export async function RunLocal(
     lunaryTrace = new LunaryTrace(GetLunaryApi().key);
   }
 
+  // eslint-disable-next-line no-useless-catch
   try {
     const trace = new Trace();
     trace.init(langFuseTrace, lunaryTrace);
@@ -68,7 +69,7 @@ export async function RunLocal(
     }
 
     if (llm === undefined) {
-      console.error("Unknown llm:", chatData.llm.llm);
+      throw new Error("Unknown llm: " + chatData.llm.llm);
       return;
     }
 
@@ -122,7 +123,7 @@ export async function RunLocal(
 
           interaction.toast.title = "Got your answer!";
           interaction.toast.style = Toast.Style.Success;
-          return;
+          return chatData;
         }
         if (chatData.result === undefined) {
           chatData.result = newTalkDataResult();
@@ -135,8 +136,8 @@ export async function RunLocal(
 
     trace.finish();
     return chatData;
-  } catch (error) {
-    console.error("Error processing request:", error);
-    return undefined;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    throw error;
   }
 }

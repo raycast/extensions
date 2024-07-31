@@ -2,13 +2,7 @@ import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import fetch from "node-fetch";
 import { AssistantDefault, AssistantHookType } from "../type/assistant";
-import {
-  ClearPromptSystem,
-  ConfigurationTypeCommunicationDefault,
-  GetApiEndpointData,
-  GetDevice,
-  GetUserName,
-} from "../type/config";
+import { ClearPromptSystem, ConfigurationTypeCommunicationDefault, GetApiEndpointData } from "../type/config";
 import { AssistantDefaultTemperature, ITalkAssistant } from "../ai/type";
 
 export function useAssistant(): AssistantHookType {
@@ -23,7 +17,7 @@ export function useAssistant(): AssistantHookType {
       if (stored) {
         setData((previous) => [...previous, ...JSON.parse(stored)]);
       } else {
-        if (GetApiEndpointData() !== undefined) {
+        if (GetApiEndpointData() !== undefined && GetApiEndpointData().host !== undefined) {
           await apiLoad(setData, data);
         } else {
           setData(AssistantDefault);
@@ -39,7 +33,7 @@ export function useAssistant(): AssistantHookType {
   }, [data]);
 
   const reload = useCallback(async () => {
-    if (GetApiEndpointData() === undefined || GetApiEndpointData().host === "") {
+    if (GetApiEndpointData() === undefined || GetApiEndpointData().host === undefined) {
       setData(AssistantDefault);
       return;
     }
@@ -122,17 +116,7 @@ export function useAssistant(): AssistantHookType {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function apiLoad(setData: any, oldData: ITalkAssistant[]) {
-  await fetch(GetApiEndpointData().host, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      author: GetUserName(),
-      device: GetDevice(),
-      dataType: "assistants",
-    }),
-  })
+  await fetch(GetApiEndpointData().host + "/api/resource/assistant")
     .then(async (response) => response.json())
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .then(async (res: any) => {

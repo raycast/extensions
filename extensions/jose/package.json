@@ -34,7 +34,7 @@
     },
     {
       "name": "conversation",
-      "title": "Chats",
+      "title": "Conversations",
       "subtitle": "Conversations collection",
       "description": "Collection of your recent conversation",
       "mode": "view"

@@ -23,19 +23,12 @@ export async function RunBinnary(
   }
   const b64 = Buffer.from(JSON.stringify(newChat)).toString("base64");
 
+  // eslint-disable-next-line no-useless-catch
   try {
     const { stdout, stderr } = await exec(`chmod +x ${GetApiBinnary().path}; .${GetApiBinnary().path} '${b64}'`);
 
     if (stderr !== "") {
-      console.error(stderr);
-
-      interaction.toast.title = "Error";
-      interaction.toast.message = String(stderr);
-      interaction.toast.style = Toast.Style.Failure;
-
-      interaction.setLoading(false);
-
-      return undefined;
+      throw stderr;
     }
 
     const out: ITalk = JSON.parse(stdout);
@@ -59,14 +52,6 @@ export async function RunBinnary(
 
     return chat;
   } catch (error) {
-    console.error(error);
-
-    interaction.toast.title = "Error";
-    interaction.toast.message = String(error);
-    interaction.toast.style = Toast.Style.Failure;
-
-    interaction.setLoading(false);
-
-    return undefined;
+    throw error;
   }
 }

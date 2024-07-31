@@ -1,6 +1,6 @@
 import { OpenAI } from "openai";
 import { Stream } from "openai/streaming";
-import { ChatCompletion, ChatCompletionChunk, ChatCompletionMessageParam } from "openai/resources";
+import { ChatCompletionChunk, ChatCompletion, ChatCompletionMessageParam } from "openai/resources";
 import { ITrace } from "../trace/type";
 import { ILlm } from "./type";
 import { EMessage_role, ITalk, ITalkDataResult, ITalkHistory, ITalkQuestion, newTalkDataResult } from "../type";
@@ -14,7 +14,7 @@ export class PerplexityLLM implements ILlm {
 
   constructor(key: string | undefined) {
     if (!key) {
-      throw new Error("KEY is not defined");
+      throw new Error("Perplexity setting `API Key` is not defined");
     }
 
     this.key = key;
@@ -31,7 +31,7 @@ export class PerplexityLLM implements ILlm {
   }
 
   async chat(chatData: ITalk): Promise<{ stream: boolean; data: Stream<ChatCompletionChunk> | ChatCompletion }> {
-    if (!this.llm) throw new Error("LLM is not initialized");
+    if (!this.llm) throw new Error("Perplexity LLM is not initialized");
 
     try {
       const answer = await this.llm.chat.completions.create({

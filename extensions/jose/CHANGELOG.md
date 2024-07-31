@@ -34,3 +34,8 @@
 - llm: perplexity
 - update trace: langfuse
 - update trace: lunary
+
+## [Version: 1.2.1] - 2024-07-31
+
+- fix UI
+- add separate form for local and no local assistant / snippet

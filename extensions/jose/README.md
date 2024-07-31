@@ -45,8 +45,12 @@ Chat with GPT straight from your computer
 
 # Models availability
 
-- GPT 3.5* / 4*
-- LLaMA
+- Anthropic
+- Cohere
+- Groq
+- Ollama
+- OpenAi
+- Perplexity
 
 # How to use
 

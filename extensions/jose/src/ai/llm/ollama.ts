@@ -1,5 +1,4 @@
 import { Ollama, Message, ChatResponse } from "ollama";
-import { AbortableAsyncIterator } from "ollama/src/utils.js";
 import { EMessage_role, ITalk, ITalkDataResult, ITalkHistory, ITalkQuestion, newTalkDataResult } from "../type";
 import { ITrace } from "../trace/type";
 import { ILlm } from "./type";
@@ -16,7 +15,7 @@ export class OllamaLLM implements ILlm {
 
   constructor(host: string | undefined) {
     if (!host) {
-      throw new Error("HOST is not defined");
+      throw new Error("Ollama setting `API Url` is not defined");
     }
 
     this.host = host;
@@ -29,8 +28,9 @@ export class OllamaLLM implements ILlm {
     }
   }
 
-  async chat(chatData: ITalk): Promise<{ stream: boolean; data: AbortableAsyncIterator<ChatResponse> | ChatResponse }> {
-    if (!this.llm) throw new Error("LLM is not initialized");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async chat(chatData: ITalk): Promise<{ stream: boolean; data: any | ChatResponse }> {
+    if (!this.llm) throw new Error("Ollama LLM is not initialized");
 
     try {
       const answer = await this.llm.chat({

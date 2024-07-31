@@ -29,11 +29,6 @@ export function useConversations(): ConversationsHookType {
   const add = useCallback(
     async (conversation: ConversationType) => {
       setData([...data, conversation]);
-
-      await showToast({
-        title: "Conversation saved!",
-        style: Toast.Style.Success,
-      });
     },
     [setData, data]
   );
@@ -47,11 +42,6 @@ export function useConversations(): ConversationsHookType {
           }
           return x;
         });
-      });
-
-      await showToast({
-        title: "Conversation updated!",
-        style: Toast.Style.Success,
       });
     },
     [setData, data]

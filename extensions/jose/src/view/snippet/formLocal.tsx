@@ -10,7 +10,11 @@ import {
 } from "../../type/config";
 import { ITalkSnippet, SnippetDefaultTemperature } from "../../ai/type";
 
-export const SnippetForm = (props: { snippet?: ITalkSnippet; use: { snippets: SnippetHookType }; name?: string }) => {
+export const SnippetFormLocal = (props: {
+  snippet?: ITalkSnippet;
+  use: { snippets: SnippetHookType };
+  name?: string;
+}) => {
   const { use, snippet } = props;
   const { pop } = useNavigation();
 
@@ -56,16 +60,20 @@ export const SnippetForm = (props: { snippet?: ITalkSnippet; use: { snippets: Sn
         </ActionPanel>
       }
     >
-      <Form.Dropdown title="Temperature" placeholder="Temperature model" {...itemProps.modelTemperature}>
-        {Array.from({ length: 10 }, (_, index) => (
+      <Form.TextField title="Title" placeholder="Title your snippet" {...itemProps.title} />
+      <Form.TextArea title="Prompt" placeholder="Prompt your snippet" {...itemProps.promptSystem} />
+      <Form.TextField title="Category" placeholder="Category your snippet" {...itemProps.category} />
+      <Form.Dropdown title="Emoji" {...itemProps.emoji}>
+        {Object.keys(Icon).map((iconName, index) => (
           <Form.Dropdown.Item
-            value={`${(1 - index / 10).toFixed(1)}`}
-            title={`${(1 - index / 10).toFixed(1)}`}
-            key={`${(1 - index / 10).toFixed(1)}`}
+            title={iconName}
+            value={Object.values(Icon)[index]}
+            key={iconName}
+            icon={Object.values(Icon)[index]}
           />
         ))}
       </Form.Dropdown>
-      <Form.TextField title="Webhook" placeholder="Url to send response" {...itemProps.webhookUrl} />
+
       <Form.Dropdown
         title="Type communication"
         placeholder="Type communication snippet"
@@ -75,18 +83,22 @@ export const SnippetForm = (props: { snippet?: ITalkSnippet; use: { snippets: Sn
           <Form.Dropdown.Item value={value.key} key={value.key} title={value.title} />
         ))}
       </Form.Dropdown>
-      <Form.Separator />
-      <Form.TextField title="Title" placeholder="Title your snippet" {...itemProps.title} />
-      <Form.TextField title="Category" placeholder="Category your snippet" {...itemProps.category} />
-      <Form.TextField title="Emoji" placeholder="Emoji your snippet" {...itemProps.emoji} />
-
       <Form.Dropdown title="Model" placeholder="Choose model" {...itemProps.model}>
         {Object.entries(ConfigurationModelCollection).map(([, value]) => (
           <Form.Dropdown.Item value={value.key} key={value.key} title={value.title} />
         ))}
       </Form.Dropdown>
+      <Form.Dropdown title="Temperature" placeholder="Temperature model" {...itemProps.modelTemperature}>
+        {Array.from({ length: 10 }, (_, index) => (
+          <Form.Dropdown.Item
+            value={`${(1 - index / 10).toFixed(1)}`}
+            title={`${(1 - index / 10).toFixed(1)}`}
+            key={`${(1 - index / 10).toFixed(1)}`}
+          />
+        ))}
+      </Form.Dropdown>
 
-      <Form.TextArea title="Prompt" placeholder="Prompt your snippet" {...itemProps.promptSystem} />
+      <Form.TextField title="Webhook" placeholder="Url to send response" {...itemProps.webhookUrl} />
     </Form>
   );
 };

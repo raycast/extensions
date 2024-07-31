@@ -14,7 +14,7 @@ export class CohereLLM implements ILlm {
 
   constructor(key: string | undefined) {
     if (!key) {
-      throw new Error("KEY is not defined");
+      throw new Error("Cohere setting `API Key` is not defined");
     }
 
     this.key = key;
@@ -30,7 +30,7 @@ export class CohereLLM implements ILlm {
   async chat(
     chatData: ITalk
   ): Promise<{ stream: boolean; data: Stream<StreamedChatResponse> | NonStreamedChatResponse }> {
-    if (!this.llm) throw new Error("LLM is not initialized");
+    if (!this.llm) throw new Error("Cohere LLM is not initialized");
 
     try {
       if (!chatData.llm.stream) {

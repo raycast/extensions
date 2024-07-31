@@ -57,15 +57,7 @@ export async function RunCustomApi(
         return chatData;
       })
       .catch((error) => {
-        console.error(error);
-
-        interaction.toast.title = "Error";
-        interaction.toast.message = String(error);
-        interaction.toast.style = Toast.Style.Failure;
-
-        interaction.setLoading(false);
-
-        return undefined;
+        throw error;
       });
   } else {
     return await fetch(GetApiEndpoint().host, {
@@ -115,15 +107,7 @@ export async function RunCustomApi(
         return chatData;
       })
       .catch((error) => {
-        console.error(error);
-
-        interaction.toast.title = "Error";
-        interaction.toast.message = String(error);
-        interaction.toast.style = Toast.Style.Failure;
-
-        interaction.setLoading(false);
-
-        return undefined;
+        throw error;
       });
   }
 }

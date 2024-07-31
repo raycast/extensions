@@ -1,11 +1,12 @@
 import { Action, ActionPanel, Icon, List, useNavigation, confirmAlert, Alert } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useSnippet } from "./hook/useSnippet";
-import { SnippetForm } from "./view/snippet/form";
 import { SnippetListView } from "./view/snippet/list";
 import { SnippetImportForm } from "./view/snippet/importForm";
 import { SnippetHookType } from "./type/snippet";
 import { ITalkSnippet } from "./ai/type";
+import { SnippetFormLocal } from "./view/snippet/formLocal";
+import { SnippetFormApi } from "./view/snippet/formApi";
 
 export default function Snippet() {
   const collections = useSnippet();
@@ -28,7 +29,7 @@ export default function Snippet() {
         title={"Create Snippet"}
         shortcut={{ modifiers: ["cmd"], key: "c" }}
         icon={Icon.Plus}
-        onAction={() => push(<SnippetForm name={searchText} use={{ snippets: collectionsSnipppets }} />)}
+        onAction={() => push(<SnippetFormLocal name={searchText} use={{ snippets: collectionsSnipppets }} />)}
       />
       <Action
         title={"Import Snippet"}
@@ -45,7 +46,11 @@ export default function Snippet() {
           title={"Edit Snippet"}
           shortcut={{ modifiers: ["cmd"], key: "e" }}
           icon={Icon.Pencil}
-          onAction={() => push(<SnippetForm snippet={snippet} use={{ snippets: collectionsSnipppets }} />)}
+          onAction={() =>
+            snippet.isLocal
+              ? push(<SnippetFormLocal snippet={snippet} use={{ snippets: collectionsSnipppets }} />)
+              : push(<SnippetFormApi snippet={snippet} use={{ snippets: collectionsSnipppets }} />)
+          }
         />
         <Action
           style={Action.Style.Destructive}
@@ -71,7 +76,7 @@ export default function Snippet() {
         title={"Create Snippet"}
         shortcut={{ modifiers: ["cmd"], key: "c" }}
         icon={Icon.Plus}
-        onAction={() => push(<SnippetForm name={searchText} use={{ snippets: collections }} />)}
+        onAction={() => push(<SnippetFormLocal name={searchText} use={{ snippets: collections }} />)}
       />
       <Action
         title={"Import Snippet"}

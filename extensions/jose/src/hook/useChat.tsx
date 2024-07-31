@@ -36,57 +36,63 @@ export function useChat(): ChatHookType {
       style: Toast.Style.Animated,
     });
 
-    const chatQuestion: ITalkQuestion = { content: question, files: undefined };
-    if (file) {
-      const f: ITalkQuestionFile = { type: "image", path: file[0], base64: undefined, url: undefined };
-      chatQuestion.files = [f];
-    }
-    const chat: ITalk = GetNewChat(chatQuestion, conversation, conversation.assistant, conversation.snippet);
-    chat.conversation.type = conversation.selectedType;
+    try {
+      const chatQuestion: ITalkQuestion = { content: question, files: undefined };
+      if (file) {
+        const f: ITalkQuestionFile = { type: "image", path: file[0], base64: undefined, url: undefined };
+        chatQuestion.files = [f];
+      }
+      const chat: ITalk = GetNewChat(chatQuestion, conversation, conversation.assistant, conversation.snippet);
+      chat.conversation.type = conversation.selectedType;
 
-    setData(() => {
-      return [...conversation.chats, chat];
-    });
+      setData(() => {
+        return [...conversation.chats, chat];
+      });
 
-    setTimeout(async () => {
-      setSelectedChatId(chat.id);
-    }, 50);
+      setTimeout(async () => {
+        setSelectedChatId(chat.id);
+      }, 50);
 
-    console.info("SelectedType: " + conversation.selectedType);
-    const typeCommunication =
-      conversation.selectedType === ConversationSelectedTypeSnippet
-        ? conversation.snippet?.typeCommunication
-        : conversation.assistant.typeCommunication;
-    let chatResponse: ITalk | undefined = undefined;
+      console.info("SelectedType: " + conversation.selectedType);
+      const typeCommunication =
+        conversation.selectedType === ConversationSelectedTypeSnippet
+          ? conversation.snippet?.typeCommunication
+          : conversation.assistant.typeCommunication;
+      let chatResponse: ITalk | undefined = undefined;
 
-    switch (typeCommunication) {
-      case ConfigurationTypeCommunicationLocal:
-        console.info("Using local");
-        chatResponse = await RunLocal(chat, { toast, setData, setStreamData, setLoading });
-        break;
-      case ConfigurationTypeCommunicationExternalApi:
-        console.info("Using custom API endpoint");
-        chatResponse = await RunCustomApi(chat, { toast, setData, setStreamData, setLoading });
-        break;
-      case ConfigurationTypeCommunicationBinaryFile:
-        console.info("Using local binnary file");
-        chatResponse = await RunBinnary(chat, { toast, setData, setStreamData, setLoading });
-        break;
-      default:
-        console.info("Using default");
-        chatResponse = await RunLocal(chat, { toast, setData, setStreamData, setLoading });
-    }
+      switch (typeCommunication) {
+        case ConfigurationTypeCommunicationLocal:
+          console.info("Using local");
+          chatResponse = await RunLocal(chat, { toast, setData, setStreamData, setLoading });
+          break;
+        case ConfigurationTypeCommunicationExternalApi:
+          console.info("Using custom API endpoint");
+          chatResponse = await RunCustomApi(chat, { toast, setData, setStreamData, setLoading });
+          break;
+        case ConfigurationTypeCommunicationBinaryFile:
+          console.info("Using local binnary file");
+          chatResponse = await RunBinnary(chat, { toast, setData, setStreamData, setLoading });
+          break;
+        default:
+          console.info("Using default");
+          chatResponse = await RunLocal(chat, { toast, setData, setStreamData, setLoading });
+      }
 
-    if (chatResponse !== undefined) {
-      console.info("Send webhook?");
-      sendWebhook(chatResponse, setData, chat.snippet?.object?.webhookUrl);
-      sendWebhook(chatResponse, setData, chat.assistant.object.webhookUrl);
-    }
+      if (chatResponse !== undefined) {
+        console.info("Send webhook?");
+        sendWebhook(chatResponse, setData, chat.snippet?.object?.webhookUrl);
+        sendWebhook(chatResponse, setData, chat.assistant.object.webhookUrl);
+      }
 
-    if (chatResponse !== undefined) {
-      console.info("Reset selected");
-      conversation.selectedType = ConversationSelectedTypeAssistant;
-      await conversations.update(conversation);
+      if (chatResponse !== undefined) {
+        console.info("Reset selected");
+        conversation.selectedType = ConversationSelectedTypeAssistant;
+        await conversations.update(conversation);
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.title = error.toString();
+      toast.style = Toast.Style.Failure;
     }
   }
 

@@ -14,7 +14,7 @@ export class GroqLLM implements ILlm {
 
   constructor(key: string | undefined) {
     if (!key) {
-      throw new Error("KEY is not defined");
+      throw new Error("Groq setting `API Key` is not defined");
     }
 
     this.key = key;
@@ -28,7 +28,7 @@ export class GroqLLM implements ILlm {
   }
 
   async chat(chatData: ITalk): Promise<{ stream: boolean; data: Stream<ChatCompletionChunk> | ChatCompletion }> {
-    if (!this.llm) throw new Error("LLM is not initialized");
+    if (!this.llm) throw new Error("Groq LLM is not initialized");
 
     try {
       const answer = await this.llm.chat.completions.create({

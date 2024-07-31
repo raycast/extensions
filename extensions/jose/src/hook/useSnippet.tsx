@@ -2,13 +2,7 @@ import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import fetch from "node-fetch";
 import { SnippetDefault, SnippetHookType } from "../type/snippet";
-import {
-  ClearPromptSystem,
-  ConfigurationTypeCommunicationDefault,
-  GetApiEndpointData,
-  GetDevice,
-  GetUserName,
-} from "../type/config";
+import { ClearPromptSystem, ConfigurationTypeCommunicationDefault, GetApiEndpointData } from "../type/config";
 import { ITalkSnippet, SnippetDefaultTemperature } from "../ai/type";
 
 export function useSnippet(): SnippetHookType {
@@ -23,7 +17,7 @@ export function useSnippet(): SnippetHookType {
       if (stored) {
         setData((previous) => [...previous, ...JSON.parse(stored)]);
       } else {
-        if (GetApiEndpointData() !== undefined) {
+        if (GetApiEndpointData() !== undefined && GetApiEndpointData().host !== undefined) {
           await apiLoad(setData, data);
         } else {
           setData(SnippetDefault);
@@ -39,7 +33,7 @@ export function useSnippet(): SnippetHookType {
   }, [data]);
 
   const reload = useCallback(async () => {
-    if (GetApiEndpointData() === undefined || GetApiEndpointData().host === "") {
+    if (GetApiEndpointData() === undefined || GetApiEndpointData().host === undefined) {
       setData(SnippetDefault);
       return;
     }
@@ -122,17 +116,7 @@ export function useSnippet(): SnippetHookType {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function apiLoad(setData: any, oldData: ITalkSnippet[]) {
-  await fetch(GetApiEndpointData().host, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      author: GetUserName(),
-      device: GetDevice(),
-      dataType: "snippets",
-    }),
-  })
+  await fetch(GetApiEndpointData().host + "/api/resource/snippet")
     .then(async (response) => response.json())
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .then(async (res: any) => {

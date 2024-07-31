@@ -1,12 +1,13 @@
 import { Action, ActionPanel, Icon, List, useNavigation, confirmAlert, Alert } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useAssistant } from "./hook/useAssistant";
-import { AssistantForm } from "./view/assistant/form";
 import { AssistantListView } from "./view/assistant/list";
 import { AssistantImportForm } from "./view/assistant/importForm";
 import { AssistantHookType } from "./type/assistant";
 import { useSnippet } from "./hook/useSnippet";
 import { ITalkAssistant } from "./ai/type";
+import { AssistantFormLocal } from "./view/assistant/formLocal";
+import { AssistantFormApi } from "./view/assistant/formApi";
 
 export default function Assistant() {
   const collectionsAssistant = useAssistant();
@@ -34,7 +35,7 @@ export default function Assistant() {
         icon={Icon.Plus}
         onAction={() =>
           push(
-            <AssistantForm
+            <AssistantFormLocal
               name={searchText}
               use={{ assistants: collectionsAssistants, snippets: collectionsSnippet.data }}
             />
@@ -61,12 +62,19 @@ export default function Assistant() {
           shortcut={{ modifiers: ["cmd"], key: "e" }}
           icon={Icon.Pencil}
           onAction={() =>
-            push(
-              <AssistantForm
-                assistant={assistant}
-                use={{ assistants: collectionsAssistants, snippets: collectionsSnippet.data }}
-              />
-            )
+            assistant.isLocal
+              ? push(
+                  <AssistantFormLocal
+                    assistant={assistant}
+                    use={{ assistants: collectionsAssistants, snippets: collectionsSnippet.data }}
+                  />
+                )
+              : push(
+                  <AssistantFormApi
+                    assistant={assistant}
+                    use={{ assistants: collectionsAssistants, snippets: collectionsSnippet.data }}
+                  />
+                )
           }
         />
         <Action
@@ -95,7 +103,7 @@ export default function Assistant() {
         icon={Icon.Plus}
         onAction={() =>
           push(
-            <AssistantForm
+            <AssistantFormLocal
               name={searchText}
               use={{ assistants: collectionsAssistants, snippets: collectionsSnippet.data }}
             />
