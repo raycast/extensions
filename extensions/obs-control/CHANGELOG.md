@@ -1,6 +1,6 @@
 # OBS Control Changelog
 
-## [Improvements] - 2024-07-26
+## [Improvements] - {PR_MERGE_DATE}
 
 - Updated dependencies
 - Code cleanup
