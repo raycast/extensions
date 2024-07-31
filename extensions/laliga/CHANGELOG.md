@@ -1,5 +1,9 @@
 # LaLiga Changelog
 
+## [Improvements] - 2024-07-29
+- Update extension icon, competition list
+- Fix reported extension issues
+
 ## [Improvements] - 2023-10-04
 - Add match comments
 - Generate seasons list dynamically

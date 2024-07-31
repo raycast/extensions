@@ -1,14 +1,13 @@
-import { showHUD } from "@raycast/api";
-import { generateParagraphs, produceOutput, safeLoremIpsumNumberArg } from "./utils";
-import { LoremIpsumArguments } from "./types";
+import { LaunchProps } from "@raycast/api";
+import { generateParagraphs, showError, produceOutput, safeLoremIpsumNumberArg } from "./utils";
 
-export default async function ParagraphCommand(props?: { arguments: LoremIpsumArguments }) {
-  const numberArg = props?.arguments.numberOfLoremIpsumsToGenerate;
+export default async function ParagraphCommand(props?: LaunchProps<{ arguments: Arguments.Paragraphs }>) {
+  const numberArg = props?.arguments.numberOfParagraphs;
 
   const { error, safeLoremIpsumNumber } = await safeLoremIpsumNumberArg(numberArg);
 
   if (error) {
-    await showHUD(`❌ ${error.message}`);
+    await showError(error.message);
   } else {
     const output = generateParagraphs(safeLoremIpsumNumber);
     await produceOutput(output);

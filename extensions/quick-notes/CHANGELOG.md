@@ -1,5 +1,9 @@
 # Quick Notes Changelog
 
+## [Performance] - 2024-07-18
+
+- Reduce lag when loading and searching
+
 ## [Bugfix] - 2024-06-07
 
 - Fix to respect sort when filtering by tag

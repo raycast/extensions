@@ -147,9 +147,16 @@ export const CreateForm = (props: CreateFormProps) => {
       >
         <Form.Dropdown.Item key="-2" value="-2" title="Create Collection" icon={Icon.Plus} />
         <Form.Dropdown.Item key="-1" value="-1" title="Unsorted" icon={Icon.Tray} />
-        {collections.map(({ value, label }) => (
-          <Form.Dropdown.Item key={value} value={`${value ?? "-1"}`} title={label} icon={Icon.Folder} />
-        ))}
+        <Form.Dropdown.Section title="Collections">
+          {collections.map(({ value, label, name }) => (
+            <Form.Dropdown.Item
+              key={value}
+              value={`${value ?? "-1"}`}
+              title={name ? `${name} (${label})` : label}
+              icon={Icon.Folder}
+            />
+          ))}
+        </Form.Dropdown.Section>
       </Form.Dropdown>
       {showCollectionCreation && (
         <Form.TextField {...itemProps.newCollection} title="New Collection" placeholder="Name" />

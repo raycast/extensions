@@ -1,11 +1,12 @@
 import { useHAStates } from "@components/hooks";
 import { MediaPlayerMenubarItem } from "@components/mediaplayer/menu";
-import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "@components/menu";
+import { LaunchCommandMenubarItem } from "@components/menu";
 import { filterViaPreferencePatterns } from "@components/state/utils";
 import { getErrorMessage, getFriendlyName } from "@lib/utils";
 import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 
-export default function MediaPlayerMenuCommand(): JSX.Element {
+export default function MediaPlayerMenuCommand() {
   const { states, error, isLoading } = useHAStates();
   const mediaPlayers = filterViaPreferencePatterns(states, ["media_player.*"])?.sort((a, b) =>
     getFriendlyName(a).localeCompare(getFriendlyName(b)),
@@ -21,15 +22,17 @@ export default function MediaPlayerMenuCommand(): JSX.Element {
       {header && <MenuBarExtra.Item title={header} />}
       <LaunchCommandMenubarItem
         title="Open All Media Players"
-        name="mediaplayers"
-        type={LaunchType.UserInitiated}
+        command={{
+          name: "mediaplayers",
+          type: LaunchType.UserInitiated,
+        }}
         icon={Icon.Terminal}
       />
       <MenuBarExtra.Section title="Media Players">
         {mediaPlayers?.map((m) => <MediaPlayerMenubarItem key={m.entity_id} state={m} />)}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
-        <MenuBarItemConfigureCommand />
+        <RUIMenuBarExtra.ConfigureCommand />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

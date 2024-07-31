@@ -33,7 +33,7 @@ export default function Main(): JSX.Element {
         return results;
       }),
     [searchText],
-    { abortable, keepPreviousData: true }
+    { abortable, keepPreviousData: true },
   );
 
   // when the installed casks and formulaes have been fetched, we update the results
@@ -48,8 +48,8 @@ export default function Main(): JSX.Element {
     });
   }, [installed]);
 
-  const formulae = filter != InstallableFilterType.casks ? results?.formulae ?? [] : [];
-  const casks = filter != InstallableFilterType.formulae ? results?.casks ?? [] : [];
+  const formulae = filter != InstallableFilterType.casks ? (results?.formulae ?? []) : [];
+  const casks = filter != InstallableFilterType.formulae ? (results?.casks ?? []) : [];
 
   return (
     <FormulaList
@@ -111,5 +111,8 @@ function isInstalled(name: string, installed?: InstalledMap): boolean {
   if (!installed) {
     return false;
   }
-  return installed.formulae.get(name) != undefined || installed.casks.get(name) != undefined;
+  return (
+    (installed.formulae instanceof Map && installed.formulae.get(name) != undefined) ||
+    (installed.casks instanceof Map && installed.casks.get(name) != undefined)
+  );
 }

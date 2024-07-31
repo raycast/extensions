@@ -1,7 +1,12 @@
 import { Icon, LaunchProps, List, getPreferenceValues } from "@raycast/api";
 import { MutatePromise, useCachedPromise, useSQL } from "@raycast/utils";
+import { chain } from "lodash";
 import { useState } from "react";
-import { historyDatabasePath, getHistoryQuery } from "./sql";
+import { getTabs } from "./arc";
+import { HistoryEntryListItem, SuggestionListItem, TabListItem } from "./list";
+import { searchArcPreferences } from "./preferences";
+import { getHistoryQuery, historyDatabasePath } from "./sql";
+import { useSuggestions } from "./suggestions";
 import { HistoryEntry, Suggestion, Tab } from "./types";
 import {
   getKey,
@@ -12,11 +17,6 @@ import {
   isLocationShown,
 } from "./utils";
 import { VersionCheck } from "./version";
-import { chain } from "lodash";
-import { getTabs } from "./arc";
-import { useSuggestions } from "./suggestions";
-import { HistoryEntryListItem, SuggestionListItem, TabListItem } from "./list";
-import { searchArcPreferences } from "./preferences";
 
 function SearchArc(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");

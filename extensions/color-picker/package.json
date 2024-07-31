@@ -13,7 +13,8 @@
     "kvdo2",
     "thomaslombart",
     "litomore",
-    "samuelkraft"
+    "samuelkraft",
+    "ridemountainpig"
   ],
   "categories": [
     "Design Tools"
@@ -71,6 +72,12 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "color-wheel",
+      "title": "Color Wheel",
+      "description": "Pick a color with color wheel",
+      "mode": "view"
     },
     {
       "name": "convert-color",
@@ -148,10 +155,10 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.68.0",
+    "@raycast/api": "^1.78.1",
     "@raycast/utils": "^1.15.0",
     "colorjs.io": "^0.4.5",
-    "raycast-cross-extension": "^0.1.0"
+    "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

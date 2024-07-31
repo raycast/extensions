@@ -5,6 +5,10 @@
   "description": "Control Yabai using Raycast. Requires yabai to be installed.",
   "icon": "yabai-icon-512px.png",
   "author": "krzysztoff1",
+  "contributors": [
+    "rubentsirunyan",
+    "webdesus"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -24,6 +28,18 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "screens-menu-bar",
+      "title": "Show Current Screen",
+      "description": "Update the status information about the currently selected screen.",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "windows-list-current-space",
+      "title": "Windows List by Current Space",
+      "description": "Show the application of the current space.",
+      "mode": "view"
     },
     {
       "name": "toggle",
@@ -53,6 +69,42 @@
       "name": "balance",
       "title": "Balance",
       "description": "Balance the windows.",
+      "mode": "no-view"
+    },
+    {
+      "name": "restart",
+      "title": "Restart",
+      "description": "Restart yabai service.",
+      "mode": "no-view"
+    },
+    {
+      "name": "start",
+      "title": "Start",
+      "description": "Start yabai service.",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop",
+      "title": "Stop",
+      "description": "Stop yabai service.",
+      "mode": "no-view"
+    },
+    {
+      "name": "layout-bsp",
+      "title": "Layout BSP",
+      "description": "Switch to BSP layout for the current space.",
+      "mode": "no-view"
+    },
+    {
+      "name": "layout-stack",
+      "title": "Layout Stack",
+      "description": "Switch to stack layout for the current space.",
+      "mode": "no-view"
+    },
+    {
+      "name": "layout-float",
+      "title": "Layout Float",
+      "description": "Switch to float layout for the current space.",
       "mode": "no-view"
     },
     {

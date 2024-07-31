@@ -26,12 +26,17 @@ export function useRelations(properties: DatabaseProperty[]) {
     async (properties: DatabaseProperty[]) => {
       const relationPages: Record<string, Page[]> = {};
 
+      for (const property of properties)
+        if (property.type == "relation") relationPages[property.relation.database_id] = [];
+
       await Promise.all(
-        properties.map(async (property) => {
-          if (property.type !== "relation" || !property.relation_id) return null;
-          const pages = await queryDatabase(property.relation_id, undefined);
-          relationPages[property.relation_id] = pages;
-          return pages;
+        Object.keys(relationPages).map(async (relationId) => {
+          let cursor: string | null = null;
+          do {
+            const { pages, nextCursor } = await queryDatabase(relationId, { cursor: cursor ?? undefined });
+            relationPages[relationId].push(...pages);
+            cursor = nextCursor;
+          } while (cursor != null);
         }),
       );
 

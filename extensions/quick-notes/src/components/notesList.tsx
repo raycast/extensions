@@ -101,7 +101,7 @@ const NotesList = () => {
 
   const [searchText, setSearchText] = useState("");
   const [searchTag, setSearchTag] = useState("");
-  const [filteredNotes, setFilteredNotes] = useState<Note[]>(notes);
+  const [filteredNotes, setFilteredNotes] = useState<Note[]>([]);
 
   // Update notes on sort
   useEffect(() => {
@@ -174,6 +174,7 @@ const NotesList = () => {
 
   return (
     <List
+      isLoading={filteredNotes.length === 0 && notes.length !== 0 && searchText === "" && searchTag === ""}
       searchBarPlaceholder="Search for a Note"
       filtering={false}
       isShowingDetail={notes.length > 0}

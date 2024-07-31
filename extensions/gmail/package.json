@@ -80,7 +80,18 @@
       "subtitle": "Gmail",
       "description": "Show unread Mails in the Menubar",
       "mode": "menu-bar",
-      "interval": "10m"
+      "interval": "10m",
+      "preferences": [
+        {
+          "name": "showAlways",
+          "description": "Always show the menu, regardless of the number of unread emails",
+          "type": "checkbox",
+          "required": false,
+          "title": "Appearance",
+          "label": "Show Always",
+          "default": true
+        }
+      ]
     }
   ],
   "preferences": [
@@ -94,7 +105,7 @@
   ],
   "dependencies": {
     "@googleapis/gmail": "^5.0.0",
-    "@raycast/api": "^1.62.0",
+    "@raycast/api": "^1.79.0",
     "@raycast/utils": "^1.10.0",
     "cross-fetch": "^4.0.0",
     "googleapis": "^123.0.0"
@@ -102,7 +113,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
     "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
     "prettier": "^3.0.1",
     "react": "^18.2.0",

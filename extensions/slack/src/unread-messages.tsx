@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Color, Icon, Image, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { isEqual } from "lodash";
 import { useEffect, useState } from "react";
-import * as emoji from "node-emoji";
+import { convertSlackEmojiToUnicode } from "./shared/utils";
 
 import { Message, SlackClient, useChannels, User, useUnreadConversations } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
@@ -124,8 +124,8 @@ function UnreadMessages() {
               <List.Item
                 key={unreadConversation.conversationId}
                 title={conversation?.name ?? ""}
-                subtitle={unreadConversation.messageHistory[0].message}
-                icon={conversation ? { source: conversation.icon, mask: Image.Mask.Circle } : undefined}
+                subtitle={convertSlackEmojiToUnicode(unreadConversation.messageHistory[0].message)}
+                icon={conversation?.icon}
                 accessories={[
                   { text: timeDifference(new Date(unreadConversation.messageHistory[0].receivedAt)) },
                   { icon: Icon.Message, text: `${unreadConversation.messageHistory.length}` },
@@ -193,10 +193,10 @@ function UnreadMessagesConversation({
         return (
           <List.Item
             key={index}
-            icon={{ source: user?.icon ?? Icon.Person, mask: Image.Mask.Circle }}
+            icon={user?.icon}
             title={user?.name ?? ""}
             subtitle={timeDifference(new Date(message.receivedAt))}
-            detail={<List.Item.Detail markdown={emoji.emojify(message.message)} />}
+            detail={<List.Item.Detail markdown={convertSlackEmojiToUnicode(message.message)} />}
           />
         );
       })}
@@ -258,7 +258,7 @@ function Configuration({ data, refreshConversations }: ConfigurationProps) {
               key={conversationId}
               title={name}
               icon={isConversationSelected ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.Circle}
-              accessories={[{ icon: { source: icon, mask: Image.Mask.Circle } }]}
+              accessories={[{ icon }]}
               actions={
                 <ActionPanel>
                   <Action

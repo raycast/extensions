@@ -6,12 +6,12 @@ import { getAvailableAiModels } from "./api";
 import { Preset, PresetCategory } from "./data/presets";
 import { getIcon, raycastProtocol } from "./helpers";
 
-const CONTRIBUTE_URL = "https://github.com/raycast/preset-explorer/blob/main/data/presets.ts";
-const baseUrl = "https://presets.ray.so";
+const CONTRIBUTE_URL = "https://github.com/raycast/ray-so";
+const baseUrl = "https://ray.so/presets";
 
 export default function ExplorePresets() {
   const { data: aiModels, isLoading: isAiModelsLoading } = useCachedPromise(getAvailableAiModels);
-  const { data: categories, isLoading } = useFetch<PresetCategory[]>(`${baseUrl}/api/presets`);
+  const { data: categories, isLoading } = useFetch<PresetCategory[]>(`https://ray.so/api/presets`);
   const [selectedCategory, setSelectedCategory] = useState("");
 
   const filteredCategories = useMemo(() => {

@@ -5,7 +5,7 @@ import type { Scenario, ScenarioData, ScenariosHook } from "@/types";
 import useLocalStorage from "@/hooks/useLocalStorage";
 
 const useScenarios = (): ScenariosHook => {
-  const { data, setData, revalidate } = useLocalStorage<Scenario[]>("scenarios", []);
+  const { data, setData, isLoading } = useLocalStorage<Scenario[]>("scenarios", []);
 
   const createScenario = (data: ScenarioData) => {
     const id = nanoid();
@@ -28,16 +28,16 @@ const useScenarios = (): ScenariosHook => {
     return createScenario({ ...rest, title: `${scenario.title} (Copy)` });
   };
 
-  const getScenario = (id: string) => data.find((scenario) => scenario.id === id);
+  const getScenario = (id: string) => (data || []).find((scenario) => scenario.id === id);
 
   return {
-    scenarios: data,
+    scenarios: data || [],
     getScenario,
     createScenario,
     updateScenario,
     deleteScenario,
     duplicateScenario,
-    revalidate,
+    isLoading,
   };
 };
 

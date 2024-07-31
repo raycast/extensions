@@ -24,3 +24,7 @@ export const getTerminals = async () => {
   }
   return terminals;
 };
+
+export enum CacheKey {
+  ShowDetail = "showDetail",
+}

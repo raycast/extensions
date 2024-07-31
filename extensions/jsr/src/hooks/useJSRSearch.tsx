@@ -1,11 +1,11 @@
 import * as cheerio from "cheerio";
-import fetch from "node-fetch";
+import fetch, { FormData } from "node-fetch";
 import { useMemo, useRef } from "react";
 
-import { environment } from "@raycast/api";
+import { captureException, environment } from "@raycast/api";
 import { useCachedPromise, useFetch } from "@raycast/utils";
 
-import type { SearchResult, SearchResults } from "@/types";
+import type { ErrorResult, SearchResult, SearchResults } from "@/types";
 
 type SearchAPIData = {
   apiKey: string;
@@ -61,6 +61,13 @@ const useJSRSearch = (queryString: string) => {
     return `https://cloud.orama.run/v1/indexes/${apiData.indexId}/search?api-key=${apiData.apiKey}`;
   }, [apiData, isLoadingAPIData]);
 
+  const formData = useMemo(() => {
+    const body = { term: query, limit: 20, mode: "fulltext" };
+    const formData = new FormData();
+    formData.append("q", JSON.stringify(body));
+    return formData;
+  }, [query]);
+
   const {
     isLoading,
     error: dataError,
@@ -73,16 +80,17 @@ const useJSRSearch = (queryString: string) => {
       return fetch(url, {
         method: "POST",
         signal: abortable.current?.signal,
-        headers: {
-          "Content-Type": "application/json",
-          Agent: `Raycast/${environment.raycastVersion} ${environment.extensionName} (https://raycast.com)`,
-        },
-        body: JSON.stringify({
-          q: { term: query, limit: 20, mode: "fulltext" },
-        }),
+        body: formData,
       })
-        .then((response) => response.json() as Promise<SearchResults>)
-        .then((data) => data.hits.filter((h) => !!h.id && !!h.document.id));
+        .then((response) => response.json() as Promise<SearchResults | ErrorResult>)
+        .then((data) => {
+          if ("message" in data) {
+            captureException(data.message);
+            return [];
+          }
+
+          return data.hits.filter((h) => !!h.id && !!h.document.id);
+        });
     },
     [searchURL, query],
     {

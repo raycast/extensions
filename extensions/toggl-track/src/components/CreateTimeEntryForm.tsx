@@ -24,7 +24,7 @@ function CreateTimeEntryForm({
   const { tasks, isLoadingTasks } = useTasks();
   const { tags, isLoadingTags } = useTags();
 
-  const [selectedWorkspace, setSelectedWorkspace] = useCachedState("defaultWorspace", workspaces.at(0)?.id);
+  const [selectedWorkspace, setSelectedWorkspace] = useCachedState("defaultWorkspace", workspaces.at(0)?.id);
   const [selectedClient, setSelectedClient] = useState<Client | undefined>(() => {
     return clients.find((client) => client.name === initialValues?.client_name);
   });
@@ -35,6 +35,7 @@ function CreateTimeEntryForm({
     return tasks.find((task) => task.id === initialValues?.task_id);
   });
   const [selectedTags, setSelectedTags] = useState<string[]>(initialValues?.tags || []);
+  const [billable, setBillable] = useState(initialValues?.billable || false);
 
   async function handleSubmit(values: { description: string; billable?: boolean }) {
     const workspaceId = selectedProject?.workspace_id || me?.default_workspace_id;
@@ -66,6 +67,10 @@ function CreateTimeEntryForm({
       await showToast(Toast.Style.Failure, "Failed to start time entry");
     }
   }
+
+  const isWorkspacePremium = useMemo(() => {
+    return workspaces.find((workspace) => workspace.id === selectedWorkspace)?.premium;
+  }, [workspaces, selectedWorkspace]);
 
   const filteredClients = useMemo(() => {
     if (selectedProject) return clients.filter((client) => !client.archived && client.id === selectedProject.client_id);
@@ -194,6 +199,8 @@ function CreateTimeEntryForm({
             <Form.TagPicker.Item key={tag.id} value={tag.name.toString()} title={tag.name} />
           ))}
       </Form.TagPicker>
+
+      {isWorkspacePremium && <Form.Checkbox id="billable" label="Billable" value={billable} onChange={setBillable} />}
     </Form>
   );
 }

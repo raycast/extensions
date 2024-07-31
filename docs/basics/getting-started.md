@@ -15,7 +15,7 @@ Before you can create your first extension, make sure you have the following pre
 
 ## Sign In
 
-![Opening the "Store" command in Raycast](../.gitbook/assets/welcome.png)
+![Opening the "Store" command in Raycast](../.gitbook/assets/welcome.webp)
 
 You need to be signed in to use the following extension development commands.
 

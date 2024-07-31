@@ -1,4 +1,16 @@
-import { Action, ActionPanel, environment, Form, Icon, LaunchProps, open, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  environment,
+  Form,
+  getPreferenceValues,
+  Icon,
+  LaunchProps,
+  open,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useForm, runAppleScript, useCachedPromise, FormValidation, getAvatarIcon } from "@raycast/utils";
 import { useEffect, useMemo } from "react";
 import { fetchAllContacts } from "swift:../swift/contacts";
@@ -30,11 +42,30 @@ type Values = {
 export default function Command({
   draftValues,
   launchContext,
-}: LaunchProps<{ draftValues: Values; launchContext: { contactId: string; address: string; text: string } }>) {
-  const { data: contacts, isLoading } = useCachedPromise(async () => {
-    const contacts = await fetchAllContacts();
-    return contacts as Contact[];
-  });
+}: LaunchProps<{
+  draftValues: Values;
+  launchContext: { contactId: string; address: string; text: string };
+}>) {
+  const { shouldCloseMainWindow } = getPreferenceValues<{ shouldCloseMainWindow: boolean }>();
+  const { data: contacts, isLoading } = useCachedPromise(
+    async () => {
+      const contacts = await fetchAllContacts();
+      return contacts as Contact[];
+    },
+    [],
+    {
+      failureToastOptions: {
+        title: "Could not get contacts",
+        message: "Make sure you have granted Raycast access to your contacts.",
+        primaryAction: {
+          title: "Open System Preferences",
+          onAction() {
+            open("x-apple.systempreferences:com.apple.preference.security?Privacy_Contacts");
+          },
+        },
+      },
+    },
+  );
 
   const { itemProps, handleSubmit, values, reset, focus } = useForm<Values>({
     async onSubmit(values) {
@@ -67,6 +98,10 @@ export default function Command({
       if (result === "Success") {
         const name = getName(correspondingContact);
 
+        if (shouldCloseMainWindow) {
+          await closeMainWindow({ clearRootSearch: true });
+        }
+
         await showToast({
           style: Toast.Style.Success,
           title: `Sent Message to ${name}`,
@@ -81,7 +116,7 @@ export default function Command({
 
         reset({ text: "" });
       } else {
-        showToast({ style: Toast.Style.Failure, title: "Could not send message", message: result });
+        await showToast({ style: Toast.Style.Failure, title: "Could not send message", message: result });
       }
     },
     initialValues: {
@@ -113,30 +148,43 @@ export default function Command({
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.SpeechBubble} title="Send Message" onSubmit={handleSubmit} />
-          <Action.CreateQuicklink
-            title="Create Messages Quicklink"
-            quicklink={{
-              link: createDeeplink(values.contact, values.address, values.text),
-              name: `Send Message to ${contacts?.find((c) => c.id === values.contact)?.givenName}`,
-            }}
-          />
+
+          <ActionPanel.Section>
+            <Action.CreateQuicklink
+              title="Create Messages Quicklink"
+              icon={{ fileIcon: "/System/Applications/Messages.app" }}
+              quicklink={{
+                link: `sms:${values.address}`,
+                name: `Send Message to ${contacts?.find((c) => c.id === values.contact)?.givenName}`,
+              }}
+            />
+            <Action.CreateQuicklink
+              title="Create Raycast Quicklink"
+              quicklink={{
+                link: createDeeplink(values.contact, values.address, values.text),
+                name: `Send Message to ${contacts?.find((c) => c.id === values.contact)?.givenName}`,
+              }}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       enableDrafts
     >
       <Form.Dropdown {...itemProps.contact} title="Contact" storeValue>
-        {contacts?.map((contact, i) => {
-          const name = getName(contact);
-          return (
-            <Form.Dropdown.Item
-              key={i}
-              title={`${name}`}
-              icon={getAvatarIcon(name)}
-              keywords={[contact.givenName, contact.familyName, ...contact.phoneNumbers, ...contact.emailAddresses]}
-              value={contact.id}
-            />
-          );
-        })}
+        {contacts
+          ?.filter((c) => c.givenName || c.familyName)
+          .map((contact, i) => {
+            const name = getName(contact);
+            return (
+              <Form.Dropdown.Item
+                key={i}
+                title={`${name.trim()}`}
+                icon={getAvatarIcon(name)}
+                keywords={[contact.givenName, contact.familyName, ...contact.phoneNumbers, ...contact.emailAddresses]}
+                value={contact.id}
+              />
+            );
+          })}
       </Form.Dropdown>
       <Form.Dropdown {...itemProps.address} title="Address" storeValue>
         {contactAddresses?.map((address) => {

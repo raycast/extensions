@@ -49,15 +49,16 @@ export class PocketClient {
           consumer_key: consumerKey,
           access_token: this.accessToken,
           url: encodeURI(url),
-          title,
-          tags: tags.join(","),
+          title: title || undefined,
+          tags: tags?.length > 0 ? tags.join(",") : undefined,
         },
       })
-      .json<{ item: { title: string; resolved_url: string; item_id: string } }>();
+      .json<{ title: string; resolved_url: string; item_id: string }>();
+
     return {
-      title: result.item.title,
-      url: result.item.resolved_url,
-      pocketUrl: `https://getpocket.com/read/${result.item.item_id}`,
+      title: result.title,
+      url: result.resolved_url,
+      pocketUrl: `https://getpocket.com/read/${result.item_id}`,
     };
   }
 
