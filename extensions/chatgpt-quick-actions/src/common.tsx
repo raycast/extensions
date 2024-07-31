@@ -18,7 +18,6 @@ export default function ResultView(prompt: string, model_override: string, toast
   const [prompt_token_count, setPromptTokenCount] = useState(0);
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(true);
-  let response_ = "";
   const [cumulative_tokens, setCumulativeTokens] = useState(0);
   const [cumulative_cost, setCumulativeCost] = useState(0);
   const [model, setModel] = useState(model_override == "global" ? global_model : model_override);
