@@ -15,7 +15,7 @@ import { getOriginalEventIDFromSyncEvent } from "./utils/events";
  * @param {ApiResponseMoment["event"] | ApiResponseMoment["nextEvent"]} event - The event to join.
  * @returns {Promise<boolean>} - Returns a promise that resolves to a boolean indicating whether the meeting was joined successfully.
  */
-const joinMeeting = async (event: ApiResponseMoment["event"] | ApiResponseMoment["nextEvent"]) => {
+const joinMeeting = async (event: ApiResponseMoment["event"]) => {
   const { apiUrl } = getPreferenceValues<NativePreferences>();
   if (!event) return false;
 
@@ -61,8 +61,6 @@ export default async function Command() {
   }
   // if event does not succeed, try next event
   if (!(await joinMeeting(momentRequest.event))) {
-    if (!(await joinMeeting(momentRequest.nextEvent))) {
       await showHUD("No meetings found.");
-    }
   }
 }
