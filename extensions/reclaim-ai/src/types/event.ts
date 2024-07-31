@@ -2,9 +2,7 @@ export enum ReclaimEventTypeEnum {
   USER = "USER",
   SYNC = "SYNC",
   HABITASSIGNMENT = "HABIT_ASSIGNMENT",
-  SMARTHABIT = "SMART_HABIT",
   ONEONONEASSIGNMENT = "ONE_ON_ONE_ASSIGNMENT",
-  SMARTMEETING = "SMART_MEETING",
   TASKASSIGNMENT = "TASK_ASSIGNMENT",
   CONFBUFFER = "CONF_BUFFER",
   TRAVELBUFFER = "TRAVEL_BUFFER",
@@ -71,7 +69,6 @@ export enum RecurringAssignmentType {
 export interface AssistDetails {
   type?: AssistType;
   customHabit?: boolean;
-  smartSeries?: boolean;
   habitOrTask?: boolean;
   task?: boolean;
   conferenceBuffer?: boolean;
@@ -88,15 +85,12 @@ export interface AssistDetails {
   pinned?: boolean;
   lockState?: LockState | null;
   dailyHabitId?: number | null;
-  seriesLineageId?: number | null;
-  seriesId?: number | null;
   taskId?: number | null;
   taskIndex?: number | null;
   policyOverride?: AssistPolicyOverride | null;
   lastManualAdjustment?: string;
   recurringAssignmentType?: RecurringAssignmentType;
   eventType?: ReclaimEventType;
-  manuallyStarted?: boolean;
   assistReferenceValid?: boolean;
 }
 

@@ -16,7 +16,7 @@ import { useUser } from "./useUser";
 const useEvent = () => {
   const { fetcher } = reclaimApi();
   const { currentUser } = useUser();
-  const { handleStartTask, handleRestartTask, handleStopTask } = useTask();
+  const { handleStartTask, handleStopTask } = useTask();
   const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
 
   const headers = useMemo(
@@ -28,8 +28,8 @@ const useEvent = () => {
     [apiToken]
   );
 
-  const fetchEvents = ({ start, end }: { start: Date; end: Date }) => {
-    const { data: events, ...rest } = useFetch<ApiResponseEvents>(
+  const useFetchEvents = ({ start, end }: { start: Date; end: Date }) => {
+    const { data, ...rest } = useFetch<ApiResponseEvents>(
       `${apiUrl}/events?${new URLSearchParams({
         sourceDetails: "true",
         start: format(start, "yyyy-MM-dd"),
@@ -42,13 +42,35 @@ const useEvent = () => {
       }
     );
 
-    if (!events || rest.error) throw rest.error;
-
     return {
-      // Filter out events that are synced, managed by Reclaim and part of multiple calendars
-      events: useMemo(() => filterMultipleOutDuplicateEvents(events), [events]),
+      data: useMemo(() => filterMultipleOutDuplicateEvents(data), [data]),
       ...rest,
     };
+  };
+
+  const fetchEvents = async ({ start, end }: { start: Date; end: Date }) => {
+    try {
+      const strStart = format(start, "yyyy-MM-dd");
+      const strEnd = format(end, "yyyy-MM-dd");
+
+      const [eventsResponse, error] = await axiosPromiseData<ApiResponseEvents>(
+        fetcher("/events?sourceDetails=true", {
+          method: "GET",
+          params: {
+            start: strStart,
+            end: strEnd,
+            allConnected: true,
+          },
+        })
+      );
+
+      if (!eventsResponse || error) throw error;
+
+      // Filter out events that are synced, managed by Reclaim and part of multiple calendars
+      return filterMultipleOutDuplicateEvents(eventsResponse);
+    } catch (error) {
+      console.error("Error while fetching events", error);
+    }
   };
 
   const showFormattedEventTitle = useCallback(
@@ -81,21 +103,9 @@ const useEvent = () => {
     }
   };
 
-  const handleRestartHabit = async (id: string, title: string) => {
-    try {
-      await showHUD("Restarted Habit: " + parseEmojiField(title).textWithoutEmoji);
-      const [habit, error] = await axiosPromiseData(fetcher(`/planner/restart/habit/${id}`, { method: "POST" }));
-      if (!habit || error) throw error;
-      return habit;
-    } catch (error) {
-      console.error("Error while restarting habit", error);
-      await showHUD("Whoops, something went wrong! Contact support.");
-    }
-  };
-
   const handleStopHabit = async (id: string, title: string) => {
     try {
-      await showHUD("Stopped Habit: " + parseEmojiField(title).textWithoutEmoji);
+      await showHUD("Completed Habit: " + parseEmojiField(title).textWithoutEmoji);
       const [habit, error] = await axiosPromiseData(fetcher(`/planner/stop/habit/${id}`, { method: "POST" }));
       if (!habit || error) throw error;
 
@@ -106,47 +116,11 @@ const useEvent = () => {
     }
   };
 
-  const handleStartOrRestartSmartHabit = async (lineageId: string, title: string) => {
-    try {
-      await showHUD("Started Habit: " + parseEmojiField(title).textWithoutEmoji);
-      const [habit, error] = await axiosPromiseData(
-        fetcher(`/smart-habits/planner/${lineageId}/start`, { method: "POST" })
-      );
-      if (!habit || error) throw error;
-
-      return habit;
-    } catch (error) {
-      console.error("Error while starting habit", error);
-      await showHUD("Whoops, something went wrong! Contact support.");
-    }
-  };
-
-  const handleStopSmartHabit = async (lineageId: string, title: string) => {
-    try {
-      await showHUD("Stopped Habit: " + parseEmojiField(title).textWithoutEmoji);
-      const [habit, error] = await axiosPromiseData(
-        fetcher(`/smart-habits/planner/${lineageId}/stop`, { method: "POST" })
-      );
-      if (!habit || error) throw error;
-
-      return habit;
-    } catch (error) {
-      console.error("Error while stopping habit", error);
-      await showHUD("Whoops, something went wrong! Contact support.");
-    }
-  };
-
   const getEventActions = useCallback((event: Event): EventActions => {
-    const isActive = isWithinInterval(new Date(), {
+    const isHappening = isWithinInterval(new Date(), {
       end: new Date(event.eventEnd),
       start: new Date(event.eventStart),
     });
-
-    const hasRescheduleUnstarted = currentUser?.features.assistSettings.rescheduleUnstarted;
-    const isEventManuallyStarted = event.assist?.manuallyStarted;
-    const showStart = !isActive || (!!isActive && !!hasRescheduleUnstarted && !isEventManuallyStarted);
-    const showRestartStop =
-      !!isActive && (!hasRescheduleUnstarted || (!!hasRescheduleUnstarted && !!isEventManuallyStarted));
 
     const eventActions: EventActions = [];
 
@@ -162,33 +136,21 @@ const useEvent = () => {
 
     switch (event.assist?.eventType) {
       case "TASK_ASSIGNMENT":
-        showStart &&
-          eventActions.push({
-            icon: Icon.Play,
-            title: "Start",
-            action: async () => {
-              event.assist?.taskId && (await handleStartTask(String(event.assist.taskId)));
-            },
-          });
-
-        showRestartStop &&
-          eventActions.push(
-            {
-              icon: Icon.Rewind,
-              title: "Restart",
-              action: async () => {
-                event.assist?.taskId && (await handleRestartTask(String(event.assist.taskId)));
-              },
-            },
-            {
+        isHappening
+          ? eventActions.push({
               icon: Icon.Stop,
-              title: "Stop",
+              title: "Complete",
               action: async () => {
                 event.assist?.taskId && (await handleStopTask(String(event.assist.taskId)));
               },
-            }
-          );
-
+            })
+          : eventActions.push({
+              icon: Icon.Play,
+              title: "Start",
+              action: async () => {
+                event.assist?.taskId && (await handleStartTask(String(event.assist.taskId)));
+              },
+            });
         eventActions.push({
           icon: Icon.Calendar,
           title: "Open in Planner",
@@ -210,37 +172,15 @@ const useEvent = () => {
           },
         });
         break;
-      case "SMART_MEETING":
-        eventActions.push({
-          icon: Icon.Calendar,
-          title: "Open in Planner",
-          action: () => {
-            open(
-              `https://app.reclaim.ai/planner?eventId=${event.eventId}&type=smart-meeting&assignmentId=${event.assist?.seriesLineageId}`
-            );
-          },
-        });
-        break;
       case "HABIT_ASSIGNMENT":
-        isActive
-          ? eventActions.push(
-              {
-                icon: Icon.Rewind,
-                title: "Restart",
-                action: async () => {
-                  event.assist?.dailyHabitId &&
-                    (await handleRestartHabit(String(event.assist?.dailyHabitId), event.title));
-                },
+        isHappening
+          ? eventActions.push({
+              icon: Icon.Stop,
+              title: "Complete",
+              action: async () => {
+                event.assist?.dailyHabitId && (await handleStopHabit(String(event.assist?.dailyHabitId), event.title));
               },
-              {
-                icon: Icon.Stop,
-                title: "Stop",
-                action: async () => {
-                  event.assist?.dailyHabitId &&
-                    (await handleStopHabit(String(event.assist?.dailyHabitId), event.title));
-                },
-              }
-            )
+            })
           : eventActions.push({
               icon: Icon.Play,
               title: "Start",
@@ -258,53 +198,13 @@ const useEvent = () => {
             );
           },
         });
-        break;
-      case "SMART_HABIT":
-        showRestartStop &&
-          eventActions.push(
-            {
-              icon: Icon.Rewind,
-              title: "Restart",
-              action: async () => {
-                event.assist?.seriesLineageId &&
-                  (await handleStartOrRestartSmartHabit(String(event.assist?.seriesLineageId), event.title));
-              },
-            },
-            {
-              icon: Icon.Stop,
-              title: "Stop",
-              action: async () => {
-                event.assist?.seriesLineageId &&
-                  (await handleStopSmartHabit(String(event.assist?.seriesLineageId), event.title));
-              },
-            }
-          );
 
-        showStart &&
-          eventActions.push({
-            icon: Icon.Play,
-            title: "Start",
-            action: async () => {
-              event.assist?.seriesLineageId &&
-                (await handleStartOrRestartSmartHabit(String(event.assist?.seriesLineageId), event.title));
-            },
-          });
-
-        eventActions.push({
-          icon: Icon.Calendar,
-          title: "Open in Planner",
-          action: () => {
-            open(
-              `https://app.reclaim.ai/planner?eventId=${event.eventId}&type=smart-habit&assignmentId=${event.assist?.seriesLineageId}`
-            );
-          },
-        });
         break;
     }
 
     eventActions.push({
       icon: Icon.Calendar,
-      title: "Open in Calendar",
+      title: "Open in Google Calendar",
       action: () => {
         open(`${apiUrl}/events/view/${event.key}`);
       },
@@ -313,10 +213,26 @@ const useEvent = () => {
     return eventActions;
   }, []);
 
+  const handleRescheduleTask = async (calendarID: string, eventID: string, rescheduleCommand: string) => {
+    try {
+      const [task, error] = await axiosPromiseData(
+        fetcher(`/planner/task/${calendarID}/${eventID}/reschedule?snoozeOption=${rescheduleCommand}`, {
+          method: "POST",
+        })
+      );
+      if (!task || error) throw error;
+      return task;
+    } catch (error) {
+      console.error("Error while rescheduling event", error);
+    }
+  };
+
   return {
+    useFetchEvents,
     fetchEvents,
     getEventActions,
     showFormattedEventTitle,
+    handleRescheduleTask,
   };
 };
 
