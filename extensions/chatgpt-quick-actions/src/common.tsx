@@ -44,8 +44,8 @@ export default function ResultView(prompt: string, model_override: string, toast
       const stream = await openai.chat.completions.create({
         model: model,
         messages: [
-          { "role": "system", "content": prompt },
-          { "role": "user", "content": selectedText },
+          { role: "system", content: prompt },
+          { role: "user", content: selectedText },
         ],
         stream: true,
       });
