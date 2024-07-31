@@ -814,17 +814,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.67.1",
-    "openai": "^4.27.0",
-    "@nem035/gpt-3-encoder": "^1.1.7"
+    "@raycast/api": "^1.78.0",
+    "openai": "^4.53.2",
+    "gpt-tokenizer": "^2.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.2.4",
-    "typescript": "^5.2.2"
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
