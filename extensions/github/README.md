@@ -25,6 +25,14 @@ Otherwise, you can manually create it:
 5. Click "Generate token".
 6. Copy the token in the "GitHub Token" field in the extension's preferences.
 
+## Commands Disabled by Default
+
+For simplicity, some commands are disabled by default. To use them, you can enable them in the extension's settings. These include:
+
+- `Create Branch`
+- `My Discussions`
+- `Search Discussions`
+
 ## FAQ
 
 ### Can I use my GitHub pull request or issue template?
