@@ -6,7 +6,7 @@ export function isNonEmptyFile(pathname: string) {
 }
 
 export function isPngFile(pathname: string) {
-  return path.extname(pathname).toLowerCase() === '.png';
+  return path.extname(pathname).toLowerCase() === ".png";
 }
 
 export function isNonEmptyDirectory(pathname: string) {

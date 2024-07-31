@@ -1,14 +1,14 @@
-import * as Jimp from 'jimp';
-import path from 'path';
+import * as Jimp from "jimp";
+import path from "path";
 export async function customize(imagePath: string, padding: number) {
   const padding_top = padding || 45;
 
   try {
     const image = await Jimp.read(imagePath);
-    const baseImage = await Jimp.read(path.join(__dirname, 'assets/default-folder.png'));
+    const baseImage = await Jimp.read(path.join(__dirname, "assets/default-folder.png"));
 
-    const baseWidth = baseImage.bitmap.width
-    const baseHeight = baseImage.bitmap.height
+    const baseWidth = baseImage.bitmap.width;
+    const baseHeight = baseImage.bitmap.height;
 
     const width = baseImage.bitmap.width - 5 * (2 * padding_top);
     const height = Math.round((image.bitmap.height / image.bitmap.width) * width);
@@ -25,7 +25,7 @@ export async function customize(imagePath: string, padding: number) {
     });
 
     const x = (baseImage.bitmap.width - image.bitmap.width) / 2;
-    const y = ((baseImage.bitmap.height - image.bitmap.height) / 2) + padding_top;
+    const y = (baseImage.bitmap.height - image.bitmap.height) / 2 + padding_top;
 
     baseImage.composite(image, x, y);
 
@@ -33,16 +33,15 @@ export async function customize(imagePath: string, padding: number) {
     const base64BaseImage = await baseImage.getBase64Async(Jimp.AUTO);
 
     // Create preview image
-    baseImage.resize(baseImage.bitmap.width/3, Jimp.AUTO);
+    baseImage.resize(baseImage.bitmap.width / 3, Jimp.AUTO);
     const base64PreviewImage = await baseImage.getBase64Async(Jimp.AUTO);
 
     return {
       base64BaseImage,
       base64PreviewImage,
       baseWidth,
-      baseHeight
+      baseHeight,
     };
-
   } catch (err) {
     console.error(err);
     return null;
