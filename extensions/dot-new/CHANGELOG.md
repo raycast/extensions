@@ -1,6 +1,6 @@
 # .new
 
-## [Update List] - {PR_MERGE_DATE}
+## [Update List] - 2024-07-31
 
 ## [Initial Release] - 2022-03-31
 
