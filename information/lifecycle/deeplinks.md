@@ -1,6 +1,6 @@
 # Deeplinks
 
-Deeplinks are Raycast-specific URLs you can use to launch any command, as long as it's installed an enabled in Raycast.
+Deeplinks are Raycast-specific URLs you can use to launch any command, as long as it's installed and enabled in Raycast.
 
 They adhere to the following format:
 
