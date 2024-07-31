@@ -62,50 +62,53 @@ export default function Command() {
 
   const now = new Date();
 
-  const { fetchEvents } = useEvent();
+  const { useFetchEvents } = useEvent();
 
-  const { events, isLoading: isLoadingEvents } = fetchEvents({
+  const { data: eventData, isLoading: isLoadingEvents } = useFetchEvents({
     start: startOfDay(now),
     end: addDays(now, 2),
   });
 
-  const { fetchMomentNext } = useMoment();
+  const { useFetchNext } = useMoment();
 
-  const { data: momentNextData, isLoading: isLoadingMoment } = fetchMomentNext();
+  const { data: eventMomentData, isLoading: isLoadingMoment } = useFetchNext();
 
-  // if the events returned by moment/next are synced events then return the original event from the events call if it exists
-  const momentNextEvent = useMemo(() => {
-    if (!momentNextData) return;
+  // if the events returned my moment/next are synced events then return the original event from the events call if it exists
+  const eventMoment = useMemo(() => {
+    if (!eventMomentData) return eventMomentData;
 
     const findEvent = (event: Event | undefined | null) => {
-      if (!event || !events || events.length === 0) return event;
+      if (!event || !eventData || eventData.length === 0) return event;
 
       const originalEventID = getOriginalEventIDFromSyncEvent(event);
       if (!originalEventID) return event;
 
-      return events.find((e) => e.eventId === originalEventID) ?? event;
+      return eventData.find((e) => e.eventId === originalEventID) ?? event;
     };
 
-    const { event } = momentNextData;
+    const { event, nextEvent } = eventMomentData;
 
-    return findEvent(event);
-  }, [momentNextData, events]);
+    return {
+      event: findEvent(event),
+      nextEvent: findEvent(nextEvent),
+    };
+  }, [eventMomentData, eventData]);
 
   const showDeclinedEvents = useMemo(() => {
     return !!currentUser?.settings.showDeclinedEvents;
   }, [currentUser]);
 
-  const eventSections = useMemo<EventSection[]>(() => {
-    if (!events) return [];
+  const events = useMemo<EventSection[]>(() => {
+    if (!eventData) return [];
 
     const now = new Date();
     const today = startOfDay(now);
 
-    const eventSections: EventSection[] = [
+    const events: EventSection[] = [
       {
         section: "NOW",
         sectionTitle: "Now",
-        events: events
+        events: eventData
           .filter((event) => {
             return showDeclinedEvents ? true : event.rsvpStatus !== "Declined" && event.rsvpStatus !== "NotResponded";
           })
@@ -124,7 +127,7 @@ export default function Command() {
       {
         section: "TODAY",
         sectionTitle: "Upcoming events",
-        events: events
+        events: eventData
           .filter((event) => {
             return showDeclinedEvents ? true : event.rsvpStatus !== "Declined" && event.rsvpStatus !== "NotResponded";
           })
@@ -142,8 +145,8 @@ export default function Command() {
       },
     ];
 
-    return eventSections.filter((eventSection) => eventSection.events.length > 0);
-  }, [events, showDeclinedEvents]);
+    return events.filter((event) => event.events.length > 0);
+  }, [eventData, showDeclinedEvents]);
 
   const handleOpenReclaim = () => {
     open("https://app.reclaim.ai");
@@ -155,11 +158,12 @@ export default function Command() {
 
   const titleInfo = useMemo<TitleInfo>(() => {
     const now = new Date();
+    const eventNextNow = eventMoment?.event;
 
-    if (momentNextEvent) {
-      const realEventTitle = momentNextEvent.sourceDetails?.title || momentNextEvent.title;
-      const eventStart = new Date(momentNextEvent.eventStart);
-      const eventEnd = new Date(momentNextEvent.eventEnd);
+    if (eventNextNow) {
+      const realEventTitle = eventNextNow.sourceDetails?.title || eventNextNow.title;
+      const eventStart = new Date(eventNextNow.eventStart);
+      const eventEnd = new Date(eventNextNow.eventEnd);
 
       const isNow = isWithinInterval(new Date(), { start: eventStart, end: eventEnd });
 
@@ -174,13 +178,13 @@ export default function Command() {
 
       return isNow
         ? {
-            event: momentNextEvent,
+            event: eventNextNow,
             fullTitle: `Now: ${eventString}`,
             minTitle: `Now: ${miniEventString}`,
             nowOrNext: "NOW",
           }
         : {
-            event: momentNextEvent,
+            event: eventNextNow,
             fullTitle: `Next: ${eventString} ${distanceString}`,
             minTitle: `Next: ${miniEventString} ${distanceString}`,
             nowOrNext: "NEXT",
@@ -193,7 +197,7 @@ export default function Command() {
       nowOrNext: "NONE",
       event: null,
     };
-  }, [momentNextEvent]);
+  }, [eventMoment]);
 
   return (
     <MenuBarExtra
@@ -202,7 +206,7 @@ export default function Command() {
       title={titleInfo.minTitle}
       tooltip={titleInfo.fullTitle}
     >
-      {eventSections.map((eventSection) => (
+      {events.map((eventSection) => (
         <EventsSection
           key={eventSection.section}
           events={eventSection.events}
