@@ -1,5 +1,9 @@
 # Things Changelog
 
+## [Quick To-do Improvements] - {PR_MERGE_DATE}
+
+- Preference to disable date parsing for todo classification, sending all todo(s) to inbox.
+
 ## [Fix Generate Checklist with AI] - 2024-07-30
 
 - Action to "Generate Checklist with AI" only visible if the user has access to AI.

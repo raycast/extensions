@@ -104,6 +104,14 @@
           "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
           "default": true,
           "required": false
+        },
+        {
+          "name": "disableDateParsing",
+          "type": "checkbox",
+          "label": "Disable Date Parsing",
+          "description": "When checked, date parsing for todo(s) classification is disabled, sending all todo(s) to the inbox.",
+          "default": false,
+          "required": false
         }
       ],
       "arguments": [
@@ -164,7 +172,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.14.11",
+    "@types/node": "^22.0.0",
     "@types/qs": "^6.9.15",
     "@types/react": "^18.3.3",
     "eslint": "^8.57.0",
