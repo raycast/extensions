@@ -1,6 +1,6 @@
 # ChatGPT Quick Actions Changelog
 
-## [Upgrade Open AI API from v3 to v4] - 2024-07-31
+## [Upgrade Open AI API from v3 to v4] - {PR_MERGE_DATE}
 
 In Aug 2023, Open AI updated its SDK to v4 that natively supports streaming completion.
 See details [here](https://github.com/openai/openai-node/discussions/217).
