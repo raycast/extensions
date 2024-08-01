@@ -6,6 +6,7 @@
   "icon": "command-icon.png",
   "author": "HunterJi",
   "categories": ["Design Tools", "Developer Tools"],
+  "version": "1.0.0",
   "license": "MIT",
   "commands": [
     {
