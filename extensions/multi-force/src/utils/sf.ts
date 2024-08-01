@@ -15,7 +15,7 @@ export async function getOrgList(): Promise<DeveloperOrg[]> {
   const orgs: DeveloperOrg[] = authInfos.map((authInfo): DeveloperOrg => {
     const { username } = authInfo;
     return {
-      alias: authInfo.aliases ? authInfo.aliases[0] : username,
+      alias: authInfo.aliases && authInfo.aliases.length > 0 ? authInfo.aliases[0] : username,
       username,
       instanceUrl: authInfo.instanceUrl ?? "",
     };

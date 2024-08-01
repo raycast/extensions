@@ -55,12 +55,15 @@ export default function Command() {
     }
   };
 
-  const refreshOrgs = async () => {
+  const refreshOrgs = async (shouldShowToast: boolean = true) => {
     setIsLoading(true);
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Refreshing your orgs.",
-    });
+    let toast;
+    if (shouldShowToast) {
+      toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Refreshing your orgs.",
+      });
+    }
 
     const flatOrgs = Array.from(orgs.values()).flat();
 
@@ -94,7 +97,9 @@ export default function Command() {
     setOrgs(groupOrgs(combinedOrgs));
     saveOrgs(combinedOrgs);
     setIsLoading(false);
-    toast.hide();
+    if (shouldShowToast) {
+      toast!.hide();
+    }
   };
 
   return Array.from(orgs.keys()).length === 0 && !isLoading ? (

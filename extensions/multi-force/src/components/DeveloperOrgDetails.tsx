@@ -6,7 +6,10 @@ import { MISC_ORGS_SECTION_LABEL, NEW_SECTION_LABEL } from "../utils/constants";
 
 const HEX_REGEX = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3}|[A-Fa-f0-9]{8}|[A-Fa-f0-9]{4})$/;
 
-export function DeveloperOrgDetails(props: { org: DeveloperOrg; callback: () => Promise<void> }) {
+export function DeveloperOrgDetails(props: {
+  org: DeveloperOrg;
+  callback: (shouldShowToast: boolean) => Promise<void>;
+}) {
   const [label, setLabel] = useState<string>(props.org.label ?? "");
   const [colorError, setColorError] = useState<string>();
   const [color, setColor] = useState<string>(props.org.color ?? "#0000FF");
@@ -36,7 +39,7 @@ export function DeveloperOrgDetails(props: { org: DeveloperOrg; callback: () => 
       props.org.label = lbl;
       setLabel(lbl);
       await updateOrg(props.org);
-      props.callback();
+      props.callback(false);
     }
   };
 
@@ -46,7 +49,7 @@ export function DeveloperOrgDetails(props: { org: DeveloperOrg; callback: () => 
         setColorError(undefined);
         (props.org.color = clr), setColor(clr);
         await updateOrg(props.org);
-        props.callback();
+        props.callback(false);
       } else {
         setColor(clr);
         setColorError("Color must be a valid HEX Color. For example #0000FF for blue.");
@@ -61,7 +64,7 @@ export function DeveloperOrgDetails(props: { org: DeveloperOrg; callback: () => 
         setSection(sect);
         props.org.section = sect;
         await updateOrg(props.org);
-        props.callback();
+        props.callback(false);
       } else {
         setSection(sect);
         setShowNewSelection(true);
@@ -74,7 +77,7 @@ export function DeveloperOrgDetails(props: { org: DeveloperOrg; callback: () => 
       setShowNewSelectionError(undefined);
       props.org.section = sect;
       await updateOrg(props.org);
-      props.callback();
+      props.callback(false);
     } else {
       setShowNewSelectionError("Please enter a section name.");
     }
