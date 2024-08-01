@@ -2,6 +2,7 @@
 
 ## [Renaming] - 2024-08-01
 - Rename extension from `dub-link-shortener` to `dub`
+- Transfer to `dubinc` organization
 
 ## [README changes] - 2024-07-31
 
