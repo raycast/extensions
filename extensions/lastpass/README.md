@@ -2,6 +2,11 @@
 
 Search, view, and copy credentials from LastPass.
 
+## Notes
+
+Since [LastPass ClI](https://github.com/lastpass/lastpass-cli) is not supporting 2FA, this extension can not support it too.
+When you have 2FA enabled, this extension will fail with error of wrong password ( that is what returned by LastPass ClI ).
+
 ## Prerequisites
 
 - [LastPass ClI](https://github.com/lastpass/lastpass-cli) installed
