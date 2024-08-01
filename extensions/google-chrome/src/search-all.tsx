@@ -36,30 +36,31 @@ export default function Command() {
 
   return (
     <List
-      // isLoading={isLoadingTab || isLoadingHistory || isLoadingBookmark}
+      // loading appears not to matter, but leaving it case it handles a case that I'm unaware of
+      isLoading={isLoadingTab || isLoadingHistory || isLoadingBookmark}
       onSearchTextChange={setSearchText}
       throttle={true}
       searchBarAccessory={<ChromeProfileDropDown onProfileSelected={revalidate} />}
     >
-      <List.Section title="Tabs">
-        {tabData.map((tab) => (
-          <ChromeListItems.TabList key={tab.key()} tab={tab} useOriginalFavicon={useOriginalFavicon} />
-        ))}
-      </List.Section>
+      {/* use Item for titles instead of sections for explicit feedback that the list is empty */}
+      <List.Item title="Tabs" />
+      {tabData.map((tab) => (
+        <ChromeListItems.TabList key={tab.key()} tab={tab} useOriginalFavicon={useOriginalFavicon} />
+      ))}
 
-      <List.Section title="History">
-        {Array.from(groupEntriesByDate(historyData).entries(), ([groupDate, group]) =>
-          [<List.Item title={groupDate} key={groupDate} />].concat(
-            group.map((e) => <ChromeListItems.TabHistory key={e.id} entry={e} profile={profile} />)
-          )
-        )}
-      </List.Section>
+      <List.Item title="History" />
+      {Array.from(groupEntriesByDate(historyData).entries(), ([groupDate, group]) => (
+        <List.Section title={groupDate} key={groupDate}>
+          {group.map((e) => (
+            <ChromeListItems.TabHistory key={e.id} entry={e} profile={profile} />
+          ))}
+        </List.Section>
+      ))}
 
-      <List.Section title="Bookmarks">
-        {bookmarkData.map((e) => (
-          <ChromeListItems.TabHistory key={e.id} entry={e} profile={profile} />
-        ))}
-      </List.Section>
+      <List.Item title="Bookmarks" />
+      {bookmarkData.map((e) => (
+        <ChromeListItems.TabHistory key={e.id} entry={e} profile={profile} />
+      ))}
     </List>
   );
 }
