@@ -176,7 +176,12 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
 
   function itemPropsFor<T extends DatabaseProperty["type"]>(property: DatabaseProperty) {
     const id = createPropertyId(property);
-    return itemProps[id] as FieldProps<T>;
+    return {
+      ...(itemProps[id] as FieldProps<T>),
+      title: property.name,
+      key: id,
+      id,
+    };
   }
 
   const convertToField = createConvertToFieldFunc(itemPropsFor, relationPages, users);
