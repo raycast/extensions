@@ -3,7 +3,7 @@ import type { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoint
 import { type Form, showToast, Toast } from "@raycast/api";
 import { markdownToBlocks } from "@tryfabric/martian";
 
-import { isWritableProperty } from "..";
+import { isWritableProperty, Page } from "..";
 import { handleError, isNotNullOrUndefined, pageMapper } from "../global";
 import { getNotionClient } from "../oauth";
 import { formValueToPropertyValue } from "../page/property";
@@ -85,37 +85,49 @@ export async function fetchDatabaseProperties(databaseId: string) {
 
 export async function queryDatabase(
   databaseId: string,
-  query: string | undefined,
-  sort: "last_edited_time" | "created_time" = "last_edited_time",
-) {
+  options?: {
+    query?: string;
+    sort?: "last_edited_time" | "created_time";
+    /** Maximum 100 */
+    pageSize?: number;
+    cursor?: string;
+  },
+): Promise<{
+  pages: Page[];
+  hasMore: boolean;
+  nextCursor: string | null;
+}> {
   try {
     const notion = getNotionClient();
-    const database = await notion.databases.query({
+    const { results, has_more, next_cursor } = await notion.databases.query({
       database_id: databaseId,
-      page_size: 20,
+      page_size: options?.pageSize ?? 20,
+      start_cursor: options?.cursor,
       sorts: [
         {
           direction: "descending",
-          timestamp: sort,
+          timestamp: options?.sort ?? "last_edited_time",
         },
       ],
-      filter: query
+      filter: options?.query
         ? {
-            and: [
-              {
-                property: "title",
-                title: {
-                  contains: query,
-                },
-              },
-            ],
+            property: "title",
+            title: { contains: options.query },
           }
         : undefined,
     });
 
-    return database.results.map(pageMapper);
+    return {
+      pages: results.map(pageMapper),
+      hasMore: has_more,
+      nextCursor: next_cursor,
+    };
   } catch (err) {
-    return handleError(err, "Failed to query database", []);
+    return handleError(err, "Failed to query database", {
+      pages: [],
+      hasMore: false,
+      nextCursor: null,
+    });
   }
 }
 
