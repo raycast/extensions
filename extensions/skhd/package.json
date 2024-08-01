@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "skhd",
+  "title": "skhd",
+  "description": "SKHD Shortcuts + Manager",
+  "icon": "skhd.png",
+  "author": "tchsqx582s",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "commands",
+      "title": "Commands",
+      "description": "Display All SKHD Commands",
+      "mode": "view",
+      "component": "commands"
+    },
+    {
+      "name": "open-skhd-config-file",
+      "title": "Open SKHD Config File",
+      "description": "Opens skhdrc",
+      "mode": "no-view",
+      "component": "open-skhd-config-file"
+    }
+  ],
+  "configuration": {
+    "properties": {
+      "skhdrcPath": {
+        "title": "Path to skhdrc",
+        "type": "string",
+        "description": "Specify the path to the skhdrc file. Leave empty for the default path (~/.config/skhd/skhdrc).",
+        "required": false
+      },
+      "editorCommand": {
+        "title": "Editor Command",
+        "type": "string",
+        "description": "Specify the command to open the skhdrc file (e.g., 'code' for VSCode, 'subl' for Sublime Text). Leave empty to use the default editor.",
+        "required": false
+      }
+    }
+  },
+  "dependencies": {
+    "@raycast/api": "^1.80.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
