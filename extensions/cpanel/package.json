@@ -39,13 +39,15 @@
   "commands": [
     {
       "name": "email-accounts",
-      "title": "Email Accounts",
+      "title": "View Email Accounts",
+      "subtitle": "cPanel",
       "description": "View Email Accounts and their Disk Information",
       "mode": "view"
     },
     {
       "name": "domains",
-      "title": "Domains",
+      "title": "View Domains",
+      "subtitle": "cPanel",
       "description": "View Domains and their DNS Zones",
       "mode": "view"
     }
