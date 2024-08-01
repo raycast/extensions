@@ -15,7 +15,7 @@ export async function getOrgList(): Promise<DeveloperOrg[]> {
   const orgs: DeveloperOrg[] = authInfos.map((authInfo): DeveloperOrg => {
     const { username } = authInfo;
     return {
-      alias: authInfo.aliases![0],
+      alias: authInfo.aliases ? authInfo.aliases[0] : username,
       username,
       instanceUrl: authInfo.instanceUrl ?? "",
     };
@@ -65,6 +65,7 @@ export async function openOrg(orgAlias: string) {
     <body onload="document.body.firstElementChild.submit()">
       <form method="POST" action="${instanceUrl}/secur/frontdoor.jsp">
         <input type="hidden" name="sid" value="${authToken}" />
+        <input type="hidden" name="directBridge2" value="true" />
         <input type="hidden" name="retURL" value="${retUrl}" /> 
       </form>
     </body>
