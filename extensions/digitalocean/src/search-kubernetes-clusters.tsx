@@ -13,9 +13,22 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
-      {!isLoading && !kubernetes_clusters.length && <List.EmptyView icon={DO.LOGO} title="Business-ready Kubernetes" description="Create your first Kubernetes Cluster now" actions={<ActionPanel>
-        <Action.OpenInBrowser icon={DO.ICON} title="Create Kubernetes Cluster" url={DO.LINKS.kubernetes.clusters.new} />
-      </ActionPanel>} />}
+      {!isLoading && !kubernetes_clusters.length && (
+        <List.EmptyView
+          icon={DO.LOGO}
+          title="Business-ready Kubernetes"
+          description="Create your first Kubernetes Cluster now"
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                icon={DO.ICON}
+                title="Create Kubernetes Cluster"
+                url={DO.LINKS.kubernetes.clusters.new}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
       {kubernetes_clusters.map((cluster) => (
         <List.Item
           key={cluster.id}

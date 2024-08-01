@@ -16,9 +16,18 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
-      {!isLoading && !domains.length && <List.EmptyView icon={DO.LOGO} title="Resilient network" description="Add your first domain now" actions={<ActionPanel>
-        <Action.OpenInBrowser icon={DO.ICON} title="Add Domain" url={DO.LINKS.networking.domains} />
-      </ActionPanel>} />}
+      {!isLoading && !domains.length && (
+        <List.EmptyView
+          icon={DO.LOGO}
+          title="Resilient network"
+          description="Add your first domain now"
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser icon={DO.ICON} title="Add Domain" url={DO.LINKS.networking.domains} />
+            </ActionPanel>
+          }
+        />
+      )}
       {domains.map((domain) => (
         <List.Item
           key={domain.name}

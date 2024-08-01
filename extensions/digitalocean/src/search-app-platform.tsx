@@ -12,9 +12,18 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
-      {!isLoading && !apps.length && <List.EmptyView icon={DO.LOGO} title="Build and deploy apps from code to production in just a few clicks" description="Create your first app now" actions={<ActionPanel>
-        <Action.OpenInBrowser icon={DO.ICON} title="Create App" url={DO.LINKS.apps.new} />
-      </ActionPanel>} />}
+      {!isLoading && !apps.length && (
+        <List.EmptyView
+          icon={DO.LOGO}
+          title="Build and deploy apps from code to production in just a few clicks"
+          description="Create your first app now"
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser icon={DO.ICON} title="Create App" url={DO.LINKS.apps.new} />
+            </ActionPanel>
+          }
+        />
+      )}
       {apps.map((app) => (
         <List.Item
           key={app.id}

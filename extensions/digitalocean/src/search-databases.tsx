@@ -13,9 +13,18 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
-      {!isLoading && !databases.length && <List.EmptyView icon={DO.LOGO} title="Managed Databases. Simplified" description="Create your first database cluster now" actions={<ActionPanel>
-        <Action.OpenInBrowser icon={DO.ICON} title="Create Database" url={DO.LINKS.databases.new} />
-      </ActionPanel>} />}
+      {!isLoading && !databases.length && (
+        <List.EmptyView
+          icon={DO.LOGO}
+          title="Managed Databases. Simplified"
+          description="Create your first database cluster now"
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser icon={DO.ICON} title="Create Database" url={DO.LINKS.databases.new} />
+            </ActionPanel>
+          }
+        />
+      )}
       {databases.map((database) => (
         <List.Item
           key={database.id}

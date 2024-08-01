@@ -13,9 +13,18 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
-      {!isLoading && !droplets.length && <List.EmptyView icon={DO.LOGO} title="Droplets in minutes" description="Create your first droplet now" actions={<ActionPanel>
-        <Action.OpenInBrowser icon={DO.ICON} title="Create Droplet" url={DO.LINKS.droplets.new} />
-      </ActionPanel>} />}
+      {!isLoading && !droplets.length && (
+        <List.EmptyView
+          icon={DO.LOGO}
+          title="Droplets in minutes"
+          description="Create your first droplet now"
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser icon={DO.ICON} title="Create Droplet" url={DO.LINKS.droplets.new} />
+            </ActionPanel>
+          }
+        />
+      )}
       {droplets.map((droplet) => (
         <List.Item
           key={droplet.id}
