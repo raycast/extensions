@@ -1,6 +1,6 @@
 # Modify File Hash Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2024-08-01
 
 - Remove irregular files
 
