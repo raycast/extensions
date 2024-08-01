@@ -1,10 +1,11 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon, open } from "@raycast/api";
-import { useState } from "react";
+import { ActionPanel, Action, List, showToast, Toast, Icon } from "@raycast/api";
+import useLocalStorage from "./hooks/useLocalStorage";
+
+import { useEffect, useState } from "react";
 import fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import YAML from "yaml";
-import { usePromise } from "@raycast/utils";
 import { launchConfig } from "./uri";
 
 interface SearchResult {
@@ -18,6 +19,12 @@ const fullPath = path.join(os.homedir(), configPath);
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
+  const {
+    data: resultsWeights,
+    setData: setResultsWeights,
+    isLoading: isResultsWeightsLoading,
+  } = useLocalStorage<{ [key: string]: number }>("resultsWeights", {});
+
   const [error, setError] = useState(false);
 
   const showError = async (title: string, message: string) => {
@@ -65,10 +72,35 @@ export default function Command() {
       );
     }
 
-    setResults(fileList);
+    if (Object.keys(resultsWeights).length > 0) {
+      const filteredResultsWeights: { [key: string]: number } = {};
+      for (const key of Object.keys(resultsWeights)) {
+        if (fileList.find((file) => file.name === key)) {
+          filteredResultsWeights[key] = resultsWeights[key];
+        }
+      }
+    } else {
+      const initialWeights: { [key: string]: number } = {};
+      fileList.forEach((obj, index) => {
+        initialWeights[obj.name] = index;
+      });
+    }
+
+    setResults(
+      fileList.sort((fileA, fileB) => {
+        return (resultsWeights[fileB.name] || 0) - (resultsWeights[fileA.name] || 0);
+      })
+    );
   };
 
-  usePromise(init, []);
+  let initialized = false;
+  useEffect(() => {
+    if (initialized || isResultsWeightsLoading) {
+      return;
+    }
+    initialized = true;
+    init();
+  }, [isResultsWeightsLoading]);
 
   return (
     <List
@@ -81,19 +113,60 @@ export default function Command() {
         title="No launch configurations found"
         description="You need to create at least one launch configuration before launching https://docs.warp.dev/features/sessions/launch-configurations."
       />
-      <List.Section title="Results" subtitle={results?.length + ""}>
+      <List.Section title={"Results"} subtitle={results?.length + ""}>
         {results
           ?.filter((f) => f.name.toLowerCase().includes(searchText.toLowerCase()))
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .map((searchResult) => (
-            <SearchListItem key={searchResult.path} searchResult={searchResult} />
+          .map((searchResult, index) => (
+            <SearchListItem
+              isSearching={searchText.length > 0}
+              key={searchResult.path}
+              searchResult={searchResult}
+              moveSearchResultDown={() => {
+                if (index >= results.length - 1) {
+                  return;
+                }
+                const swappedResult = results[index + 1];
+                const resultsWeightsCopy = { ...resultsWeights };
+                resultsWeightsCopy[searchResult.name] = resultsWeightsCopy[searchResult.name] - 1;
+                resultsWeightsCopy[swappedResult.name] = resultsWeightsCopy[swappedResult.name] + 1;
+                setResultsWeights(resultsWeightsCopy);
+
+                const resultsCopy: Array<SearchResult> = [...results];
+                [resultsCopy[index], resultsCopy[index + 1]] = [resultsCopy[index + 1], resultsCopy[index]];
+                setResults(resultsCopy);
+              }}
+              moveSearchResultUp={() => {
+                if (index === 0) {
+                  return;
+                }
+                const swappedResult = results[index - 1];
+                const resultsWeightsCopy = { ...resultsWeights };
+                resultsWeightsCopy[searchResult.name] = resultsWeightsCopy[searchResult.name] + 1;
+                resultsWeightsCopy[swappedResult.name] = resultsWeightsCopy[swappedResult.name] - 1;
+                setResultsWeights(resultsWeightsCopy);
+
+                const resultsCopy: Array<SearchResult> = [...results];
+                [resultsCopy[index], resultsCopy[index - 1]] = [resultsCopy[index - 1], resultsCopy[index]];
+                setResults(resultsCopy);
+              }}
+            />
           ))}
       </List.Section>
     </List>
   );
 }
 
-function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
+function SearchListItem({
+  searchResult,
+  isSearching,
+  moveSearchResultUp,
+  moveSearchResultDown,
+}: {
+  searchResult: SearchResult;
+  isSearching: boolean;
+  moveSearchResultUp: () => void;
+  moveSearchResultDown: () => void;
+}) {
   return (
     <List.Item
       title={searchResult.name}
@@ -118,6 +191,20 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
               title="Save as Quicklink"
               quicklink={{ link: launchConfig(searchResult.name), name: searchResult.name }}
             />
+            {!isSearching && (
+              <Action
+                title="Move up"
+                shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+                onAction={moveSearchResultUp}
+              />
+            )}
+            {!isSearching && (
+              <Action
+                title="Move down"
+                shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+                onAction={moveSearchResultDown}
+              />
+            )}
           </ActionPanel.Section>
         </ActionPanel>
       }
