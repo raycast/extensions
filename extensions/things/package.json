@@ -106,10 +106,10 @@
           "required": false
         },
         {
-          "name": "disableDateParsing",
+          "name": "dontUseAI",
           "type": "checkbox",
-          "label": "Disable Date Parsing",
-          "description": "When checked, date parsing for todo(s) classification is disabled, sending all todo(s) to the inbox.",
+          "label": "Don't use AI",
+          "description": "When enabled, the todo is simply added to your inbox with the input as the title.",
           "default": false,
           "required": false
         }
@@ -167,6 +167,8 @@
   "dependencies": {
     "@raycast/api": "^1.79.1",
     "@raycast/utils": "^1.16.2",
+    "chrono-node": "^2.7.6",
+    "date-fns": "^3.6.0",
     "dayjs": "^1.11.12",
     "qs": "^6.12.3"
   },

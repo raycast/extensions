@@ -1,10 +1,13 @@
-import { AI, closeMainWindow, getPreferenceValues, LaunchProps, showToast, Toast } from '@raycast/api';
-import { handleError, silentlyOpenThingsURL } from './api';
+import { AI, closeMainWindow, environment, getPreferenceValues, LaunchProps, showToast, Toast } from '@raycast/api';
+import { getLists, handleError, silentlyOpenThingsURL } from './api';
 import qs from 'qs';
+import { parse } from 'chrono-node';
+import { format } from 'date-fns';
 
 export default async function Command(props: LaunchProps & { arguments: Arguments.QuickAddTodo }) {
   try {
-    const { shouldCloseMainWindow, disableDateParsing } = getPreferenceValues<Preferences.QuickAddTodo>();
+    const { shouldCloseMainWindow, dontUseAI } = getPreferenceValues<Preferences.QuickAddTodo>();
+    let json, toastMsg;
 
     if (shouldCloseMainWindow) {
       await closeMainWindow();
@@ -12,20 +15,42 @@ export default async function Command(props: LaunchProps & { arguments: Argument
       await showToast({ style: Toast.Style.Animated, title: 'Adding to-do' });
     }
 
-    const generateExampleJson = (originalJson: string) => {
-      const json = JSON.parse(originalJson);
-      if (disableDateParsing) {
-        delete json.when;
-      }
-      return JSON.stringify(json);
-    };
+    if (dontUseAI || !environment.canAccess(AI)) {
+      const { text } = props.arguments;
 
-    const result =
-      await AI.ask(`Act as a task manager. I'll give you a task in a natural language. Your job is to return me only a parsable and minified JSON object.
+      let deadline, isDateTime, list;
+
+      const dateMatch = parse(text);
+      if (dateMatch && dateMatch.length > 0) {
+        const chronoDate = dateMatch[0].start;
+        isDateTime = chronoDate.isCertain('hour') || chronoDate.isCertain('minute') || chronoDate.isCertain('second');
+        const date = chronoDate.date();
+        deadline = isDateTime ? date.toISOString() : format(date, 'yyyy-MM-dd');
+      }
+
+      const listMatch = text.match(/#(\w+)/);
+      if (listMatch && listMatch.length > 0) {
+        const lists = await getLists();
+        list = lists.find((l) => l.name.toLowerCase() === listMatch[1].toLowerCase())?.name;
+      }
+
+      // Clean all values matching from the text input and previous white space
+      const title = text
+        .replace(listMatch ? listMatch[0] : '', '')
+        .replace(dateMatch && dateMatch.length > 0 ? dateMatch[0].text : '', '')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      json = { title, ...(deadline && { deadline }), ...(list && { list }) };
+      const formattedDueDate = deadline ? ` due ${format(deadline, `${isDateTime ? 'PPPpp' : 'PPP'}`)}` : '';
+      toastMsg = `Added "${title}" to ${list ?? 'Inbox'}${formattedDueDate}`;
+    } else {
+      const result =
+        await AI.ask(`Act as a task manager. I'll give you a task in a natural language. Your job is to return me only a parsable and minified JSON object.
 
 Here are the possible keys of the JSON object with their respective values:
 - title: The title of the to-do.
-${disableDateParsing ? '' : `- when: Possible values: "today", "tomorrow", "evening", "anytime", "someday", natural language dates such as "in 3 days" or "next tuesday", or a date time string (natural language dates followed by the @ symbol and then followed by a time string. E.g. "this friday@14:00".).`}
+- when: Possible values: "today", "tomorrow", "evening", "anytime", "someday", natural language dates such as "in 3 days" or "next tuesday", or a date time string (natural language dates followed by the @ symbol and then followed by a time string. E.g. "this friday@14:00".).
 - deadline: The deadline to apply to the to-do. Only can be a date string (yyyy-mm-dd).
 - tags: Comma separated strings corresponding to the titles of tags.
 - list: The title of a project or area to add to.
@@ -38,18 +63,19 @@ Please make sure to follow these rules:
 - Don't add a key if the user didn't specify it.
 
 Here are some examples to help you out:
-- Book flights today in my Trips list: ${generateExampleJson(`{"title":"Book flights","when":"today","list":"Trips"}`)}
-- Add milk to my groceries list for tomorrow with Errand tag: ${generateExampleJson(`{"title":"Milk","when":"tomorrow","list":"Groceries","tags":"Errand"}`)}
+- Book flights today in my Trips list: {"title":"Book flights","when":"today","list":"Trips"}
+- Add milk to my groceries list for tomorrow with Errand tag: {"title":"Milk","when":"tomorrow","list":"Groceries","tags":"Errand"}
 - Respond to mails: {"title":"Respond to mails"}
 - Buy a new car by the end of the year: {"title":"Buy a new car","deadline":"2023-12-31"}
-- Collect dry cleaning this evening at 7PM: ${generateExampleJson(`{"title":"Collect dry cleaning","when":"evening@19:00"}`)}
-- Fix landing page this Friday in bugs heading of Revamp Homepage project: ${generateExampleJson(`{"title":"Fix landing page","when":"this friday","list":"Revamp Homepage","heading":"Bugs"}`)}
+- Collect dry cleaning this evening at 7PM: {"title":"Collect dry cleaning","when":"evening@19:00"}
+- Fix landing page this Friday in bugs heading of Revamp Homepage project: {"title":"Fix landing page","when":"this friday","list":"Revamp Homepage","heading":"Bugs"}
 - Add a completed task called "Ship feature" to my Work list: {"title":"Ship feature","list":"Work","completed":"true"}
 - Answer to mails by this week-end: {"title":"Answer to mails","deadline":"2023-09-08"}
 
 Here's the task: "${props.fallbackText ?? props.arguments.text}"`);
 
-    const json = JSON.parse(result.trim());
+      json = JSON.parse(result.trim());
+    }
 
     if (props.arguments.notes) {
       json.notes = props.arguments.notes;
@@ -67,6 +93,7 @@ Here's the task: "${props.fallbackText ?? props.arguments.text}"`);
     await showToast({
       style: Toast.Style.Success,
       title: 'Added to-do',
+      message: toastMsg,
     });
   } catch (error) {
     handleError(error, 'Unable to add to-do');
