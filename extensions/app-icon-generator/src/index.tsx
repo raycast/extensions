@@ -1,5 +1,16 @@
 import React, { useState } from "react";
-import { Action, ActionPanel, Form, showToast, Toast, open, popToRoot, getPreferenceValues } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  showToast,
+  Toast,
+  open,
+  popToRoot,
+  getPreferenceValues,
+  openExtensionPreferences,
+  Keyboard,
+} from "@raycast/api";
 import Jimp from "jimp";
 import pngToIco from "png-to-ico";
 import { join, dirname, basename, extname } from "path";
@@ -76,12 +87,22 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Generate Icons" onSubmit={handleSubmit} />
+          <Action
+            title="Open Preferences"
+            shortcut={{ modifiers: ["cmd"], key: "," }}
+            onAction={openExtensionPreferences}
+          />
         </ActionPanel>
       }
       isLoading={isProcessing}
     >
       <Form.FilePicker id="imagePath" title="Select Image" allowMultipleSelection={false} />
-      <Form.TagPicker id="platforms" title="Select Platforms" defaultValue={defaultPlatforms}>
+      <Form.TagPicker
+        id="platforms"
+        title="Select Platforms"
+        defaultValue={defaultPlatforms}
+        info="You can set your default platforms in preferences (⌘+,)"
+      >
         {Object.entries(PLATFORMS).map(([key, value]) => (
           <Form.TagPicker.Item key={key} value={key} title={value} />
         ))}
