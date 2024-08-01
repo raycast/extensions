@@ -5,6 +5,8 @@
   "description": "Dub is the open-source link management platform for modern marketing teams. This extension allows you to shorten and retrieve your Dub links directly inside Raycast.",
   "icon": "command-icon.png",
   "author": "quuu",
+  "owner": "dubinc",
+  "access": "public",
   "categories": [
     "Productivity",
     "Developer Tools",
