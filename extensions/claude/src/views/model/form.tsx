@@ -1,13 +1,9 @@
-import { Action, ActionPanel, getPreferenceValues, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCallback, useState } from "react";
 import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
 import { Model, ModelHook, CSVPrompt } from "../../type";
 import { parse } from "csv-parse/sync";
-
-interface Preferences {
-  useBetaFeatures: boolean;
-}
 
 export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; name?: string }) => {
   const { use, model } = props;
@@ -86,8 +82,6 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
           return "Minimal value is 0";
         }
 
-        const preferences = getPreferenceValues<Preferences>();
-
         const maxAllowed = selectedModel === "claude-3-5-sonnet-20240620" ? 8192 : 4096;
 
         if (numValue > maxAllowed) {
@@ -165,9 +159,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
       <Form.TextField
         title="Max token output"
         placeholder={`Set the maximum number of tokens to generate before stopping (0 - ${
-          selectedModel === "claude-3-5-sonnet-20240620" && getPreferenceValues<Preferences>().useBetaFeatures
-            ? "8192"
-            : "4096"
+          selectedModel === "claude-3-5-sonnet-20240620" ? "8192" : "4096"
         })`}
         {...itemProps.max_tokens}
       />

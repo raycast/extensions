@@ -2,7 +2,7 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
-- Feature: Enabled Beta [8192 tokens output limit](https://x.com/alexalbert__/status/1812921642143900036) for Claude 3.5 Sonnet (enable on extension preferences)
+- Feature: Enabled Beta [8192 tokens output limit](https://x.com/alexalbert__/status/1812921642143900036) for Claude 3.5 Sonnet
 
 ## [Update] - 2024-07-10
 
