@@ -1,5 +1,8 @@
 # Dub Link Shortener Changelog
 
+## [Renaming] - 2024-08-01
+- Rename extension from `dub-link-shortener` to `dub`
+
 ## [README changes] - 2024-07-31
 
 - Remove the instructions about API key from README.
