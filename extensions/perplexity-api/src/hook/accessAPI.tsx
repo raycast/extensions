@@ -1,6 +1,6 @@
 import { getSelectedText, Detail, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { global_model, enable_streaming, openai } from "./api";
+import { global_model, enable_streaming, openai } from "./configAPI";
 import { Stream } from "openai/streaming";
 import { allModels as changeModels, currentDate, countToken, estimatePrice } from "./utils";
 import { ResultViewProps } from "./ResultView.types";
@@ -105,16 +105,16 @@ export default function ResultView(props: ResultViewProps) {
     }
   }, [loading]);
 
+  const formatUserMessage = (message: string): string => {
+    return message
+      .split("\n")
+      .map((line) => `>${line}`)
+      .join("\n");
+  };
+
   return (
     <Detail
-      markdown={
-        (user_extra_msg
-          ? user_extra_msg
-              .split("\n")
-              .map((line) => `>${line}`)
-              .join("\n") + "\n\n"
-          : "") + response
-      }
+      markdown={`${user_extra_msg ? formatUserMessage(user_extra_msg) + "\n\n" : ""}${response}`}
       isLoading={loading}
       actions={
         !loading && (
@@ -148,10 +148,13 @@ export default function ResultView(props: ResultViewProps) {
               icon={Icon.Temperature}
               shortcut={{ modifiers: ["cmd"], key: "t" }}
             >
-              <Action icon={{ source: Icon.Signal1 }} title="0.2" onAction={() => retry({ newTemp: 0.2 })} />
+              <Action icon={{ source: Icon.Signal0 }} title="0.2" onAction={() => retry({ newTemp: 0.2 })} />
+              <Action icon={{ source: Icon.Signal1 }} title="0.4" onAction={() => retry({ newTemp: 0.4 })} />
               <Action icon={{ source: Icon.Signal2 }} title="0.6" onAction={() => retry({ newTemp: 0.6 })} />
+              <Action icon={{ source: Icon.Signal2 }} title="0.8" onAction={() => retry({ newTemp: 0.8 })} />
               <Action icon={{ source: Icon.Signal3 }} title="1.0" onAction={() => retry({ newTemp: 1.0 })} />
-              <Action icon={{ source: Icon.FullSignal }} title="1.5" onAction={() => retry({ newTemp: 1.5 })} />
+              <Action icon={{ source: Icon.FullSignal }} title="1.2" onAction={() => retry({ newTemp: 1.2 })} />
+              <Action icon={{ source: Icon.FullSignal }} title="1.4" onAction={() => retry({ newTemp: 1.4 })} />
             </ActionPanel.Submenu>
           </ActionPanel>
         )
