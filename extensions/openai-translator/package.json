@@ -6,7 +6,8 @@
   "icon": "extension_icon.png",
   "author": "douo",
   "contributors": [
-    "JoyG"
+    "JoyG",
+    "leeonfield"
   ],
   "categories": [
     "Applications",
@@ -355,6 +356,14 @@
         {
           "title": "gpt-4-32k-0613",
           "value": "gpt-4-32k-0613"
+        },
+        {
+          "title": "gpt-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "gpt-4o-2024-05-13",
+          "value": "gpt-4o-2024-05-13"
         }
       ]
     },
