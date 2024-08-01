@@ -40,3 +40,4 @@ humaans
 text-replacements
 copilot-workspace
 uploadthing
+dub
