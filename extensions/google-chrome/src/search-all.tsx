@@ -1,5 +1,5 @@
 import { getPreferenceValues, List } from "@raycast/api";
-import { ReactElement, useState } from "react";
+import { useState } from "react";
 import { Preferences } from "./interfaces";
 import { ChromeListItems } from "./components";
 import { useTabSearch } from "./hooks/useTabSearch";
@@ -18,7 +18,7 @@ export default function Command() {
   const { data: tabData, isLoading: isLoadingTab } = useTabSearch(searchText);
 
   const {
-    data: historyData,
+    data: historyData = [],
     isLoading: isLoadingHistory,
     revalidate: revalidateHistory,
   } = useHistorySearch(profile, searchText);
@@ -43,24 +43,39 @@ export default function Command() {
       searchBarAccessory={<ChromeProfileDropDown onProfileSelected={revalidate} />}
     >
       {/* use Item for titles instead of sections for explicit feedback that the list is empty */}
-      <List.Item title="Tabs" />
-      {tabData.map((tab) => (
-        <ChromeListItems.TabList key={tab.key()} tab={tab} useOriginalFavicon={useOriginalFavicon} />
-      ))}
+      <List.Section title="Tabs">
+        {tabData.length === 0 ? (
+          <List.Item title="No tabs found" key={"empty tab list item"} />
+        ) : (
+          tabData.map((tab) => (
+            <ChromeListItems.TabList key={tab.key()} tab={tab} useOriginalFavicon={useOriginalFavicon} />
+          ))
+        )}
+      </List.Section>
 
-      <List.Item title="History" />
-      {Array.from(groupEntriesByDate(historyData).entries(), ([groupDate, group]) => (
-        <List.Section title={groupDate} key={groupDate}>
-          {group.map((e) => (
-            <ChromeListItems.TabHistory key={e.id} entry={e} profile={profile} />
-          ))}
+      {historyData.length === 0 ? (
+        <List.Section title="History">
+          <List.Item title="No history found" />
         </List.Section>
-      ))}
+      ) : (
+        Array.from(groupEntriesByDate(historyData).entries(), ([groupDate, group]) => (
+          <List.Section title={"History " + groupDate} key={groupDate}>
+            {group.map((e) => (
+              <ChromeListItems.TabHistory key={e.id} entry={e} profile={profile} />
+            ))}
+          </List.Section>
+        ))
+      )}
 
-      <List.Item title="Bookmarks" />
-      {bookmarkData.map((e) => (
-        <ChromeListItems.TabHistory key={e.id} entry={e} profile={profile} />
-      ))}
+      <List.Section title="Bookmarks">
+        {bookmarkData.length === 0 ? (
+          <List.Item title="No bookmarks found" key={"empty bookmark list item"} />
+        ) : (
+          tabData.map((tab) => (
+            <ChromeListItems.TabList key={tab.key()} tab={tab} useOriginalFavicon={useOriginalFavicon} />
+          ))
+        )}
+      </List.Section>
     </List>
   );
 }
