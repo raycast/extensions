@@ -16,7 +16,7 @@ This extension is built around [Labrinth](https://github.com/modrinth/labrinth) 
 
 - [Modrinth](https://modrinth.com)
 - [Labrinth](https://github.com/modrinth/labrinth)
-  - [Labrinth API Docs](https://docs.modrinth.com/)
+- [Labrinth API Docs](https://docs.modrinth.com/)
 
 ## License
 
