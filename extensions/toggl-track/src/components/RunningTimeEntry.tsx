@@ -41,7 +41,11 @@ function RunningTimeEntry({
         icon={{ source: Icon.Circle, tintColor: runningTimeEntry.project_color }}
         actions={
           <ActionPanel>
-            <Action.SubmitForm icon={{ source: Icon.Clock }} onSubmit={stopRunningTimeEntry} title="Stop Time Entry" />
+            <Action.SubmitForm
+              icon={{ source: Icon.Clock }}
+              onSubmit={() => stopRunningTimeEntry(runningTimeEntry)}
+              title="Stop Time Entry"
+            />
           </ActionPanel>
         }
       />
