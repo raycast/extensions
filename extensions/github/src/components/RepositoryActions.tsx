@@ -7,7 +7,7 @@ import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
 import { WEB_IDES } from "../helpers/repository";
 
-import CloneForm from "./CloneForm";
+import CloneRepositoryForm from "./CloneRepositoryForm";
 import { RepositoryDiscussionList } from "./RepositoryDiscussions";
 import { RepositoryIssueList } from "./RepositoryIssues";
 import { RepositoryPullRequestList } from "./RepositoryPullRequest";
@@ -31,11 +31,6 @@ export default function RepositoryActions({
   const { github } = getGitHubClient();
 
   const updatedAt = new Date(repository.updatedAt);
-
-  const handleCloneComplete = () => {
-    console.log(`Repository cloned successfully`);
-    onVisit(repository);
-  };
 
   async function star() {
     await showToast({ style: Toast.Style.Animated, title: "Starring repository", message: repository.name });
@@ -124,7 +119,7 @@ export default function RepositoryActions({
         <Action.Push
           icon={Icon.Terminal}
           title="Clone with Options"
-          target={<CloneForm repository={repository} onCloneComplete={handleCloneComplete} />}
+          target={<CloneRepositoryForm repository={repository} />}
           shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "c" }}
         />
         <Action.OpenInBrowser

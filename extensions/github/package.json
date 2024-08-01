@@ -101,15 +101,6 @@
           "description": "Will be used to open the cloned repository."
         },
         {
-          "name": "baseClonePath",
-          "type": "directory",
-          "required": false,
-          "title": "Clone Path",
-          "default": "~/GitHub",
-          "placeholder": "~/GitHub",
-          "description": "Path in which the repositories will be cloned."
-        },
-        {
           "name": "includeForks",
           "type": "checkbox",
           "required": false,
@@ -403,8 +394,7 @@
     "date-fns": "^3.6.0",
     "graphql-request": "^6.1.0",
     "lodash": "^4.17.21",
-    "node-fetch": "^3.3.2",
-    "octokit": "^4.0.2"
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.2",

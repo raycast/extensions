@@ -1,4 +1,3 @@
-import { Endpoints } from "@octokit/types";
 import { List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { partition } from "lodash";
@@ -10,8 +9,6 @@ import RepositoriesDropdown from "./components/RepositoryDropdown";
 import { getNotificationIcon } from "./helpers/notifications";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
-
-export type NotificationsResponse = Endpoints["GET /notifications"]["response"];
 
 function Notifications() {
   const { octokit } = getGitHubClient();
@@ -25,7 +22,7 @@ function Notifications() {
     isLoading,
     mutate: mutateList,
   } = useCachedPromise(async () => {
-    const response = await octokit.rest.activity.listNotificationsForAuthenticatedUser({ all: true });
+    const response = await octokit.activity.listNotificationsForAuthenticatedUser({ all: true });
     return Promise.all(
       response.data.map(async (notification: Notification) => {
         const icon = await getNotificationIcon(notification);

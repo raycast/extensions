@@ -1,9 +1,8 @@
 # GitHub Changelog
 
-## [Enhance repository cloning functionality] - 2024-07-26
+## [Enhanced Repository Cloning Functionality] - 2024-08-01
 
-- Added the ability to select a specific branch when cloning a repository.
-- Implemented a feature to specify the clone path when cloning a repository.
+- Users can now select both a custom directory and a specific branch for cloned repositories.
 
 ## [Improvements] - 2024-07-23
 
