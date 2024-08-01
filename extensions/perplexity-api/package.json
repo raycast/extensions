@@ -18,7 +18,7 @@
     {
       "name": "aiChat",
       "title": "AI Chat",
-      "description": "Chat with Groq",
+      "description": "Chat with Perplexity.",
       "mode": "view",
       "preferences": [
         {
