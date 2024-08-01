@@ -1,5 +1,5 @@
 # Modrinth Search Changelog
 
-## [Initial Version] - 2024-07-30
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Added basic `Search Mods` command, to search Modrinth mods.
