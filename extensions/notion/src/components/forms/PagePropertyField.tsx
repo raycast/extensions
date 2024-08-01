@@ -17,19 +17,18 @@ export function createConvertToFieldFunc(
   users: User[],
 ) {
   return (property: DatabaseProperty) => {
-    const { name, id } = property;
     let placeholder = property.type.replace(/_/g, " ");
     placeholder = placeholder.charAt(0).toUpperCase() + placeholder.slice(1);
 
     switch (property.type) {
       case "date":
-        return <Form.DatePicker {...itemPropsFor<typeof property.type>(property)} title={name} key={id} id={id} />;
+        return <Form.DatePicker {...itemPropsFor<typeof property.type>(property)} />;
       case "checkbox":
-        return <Form.Checkbox {...itemPropsFor<typeof property.type>(property)} key={id} id={id} label={placeholder} />;
+        return <Form.Checkbox {...itemPropsFor<typeof property.type>(property)} label={placeholder} />;
       case "select":
       case "status":
         return (
-          <Form.Dropdown {...itemPropsFor<typeof property.type>(property)} title={name} key={id} id={id}>
+          <Form.Dropdown {...itemPropsFor<typeof property.type>(property)}>
             {getPropertyConfig(property, [property.type])?.options.map(createMapOptionsFunc(Form.Dropdown.Item))}
           </Form.Dropdown>
         );
@@ -44,13 +43,7 @@ export function createConvertToFieldFunc(
           if (relationId) options = relationPages[relationId];
         }
         return (
-          <Form.TagPicker
-            {...itemPropsFor<typeof property.type>(property)}
-            title={name}
-            key={id}
-            id={id}
-            placeholder={placeholder}
-          >
+          <Form.TagPicker placeholder={placeholder} {...itemPropsFor<typeof property.type>(property)}>
             {options?.map(createMapOptionsFunc(Form.TagPicker.Item))}
           </Form.TagPicker>
         );
@@ -60,12 +53,9 @@ export function createConvertToFieldFunc(
       default:
         return (
           <Form.TextField
-            {...itemPropsFor<typeof property.type>(property)}
-            title={name}
-            key={id}
-            id={id}
             info="Supports a single line of inline Markdown"
             placeholder={placeholder}
+            {...itemPropsFor<typeof property.type>(property)}
           />
         );
     }
