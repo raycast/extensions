@@ -3,17 +3,13 @@ import { MutatePromise, usePromise } from "@raycast/utils";
 
 import { getGitHubClient } from "../api/githubClient";
 import { getErrorMessage } from "../helpers/errors";
-import {
-  getGitHubURL,
-  getNotificationSubtitle,
-  getNotificationTypeTitle,
-  Notification,
-} from "../helpers/notifications";
+import { getGitHubURL, getNotificationSubtitle, getNotificationTypeTitle } from "../helpers/notifications";
+import { NotificationWithIcon } from "../notifications";
 
 type NotificationActionsProps = {
-  notification: Notification;
+  notification: NotificationWithIcon;
   userId?: string;
-  mutateList: MutatePromise<Notification[] | undefined>;
+  mutateList: MutatePromise<NotificationWithIcon[] | undefined>;
 };
 
 export default function NotificationActions({ notification, userId, mutateList }: NotificationActionsProps) {

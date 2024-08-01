@@ -4,11 +4,13 @@ import { partition } from "lodash";
 import { useMemo, useState } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
-import NotificationListItem, { Notification } from "./components/NotificationListItem";
+import NotificationListItem from "./components/NotificationListItem";
 import RepositoriesDropdown from "./components/RepositoryDropdown";
-import { getNotificationIcon } from "./helpers/notifications";
+import { getNotificationIcon, Notification } from "./helpers/notifications";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
+
+export type NotificationWithIcon = Notification & { icon: Awaited<ReturnType<typeof getNotificationIcon>> };
 
 function Notifications() {
   const { octokit } = getGitHubClient();

@@ -15,13 +15,13 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 
 import { getGitHubClient } from "./api/githubClient";
-import { Notification } from "./components/NotificationListItem";
 import {
   getGitHubIcon,
   getGitHubURL,
   getNotificationIcon,
   getNotificationSubtitle,
   getNotificationTooltip,
+  Notification,
 } from "./helpers/notifications";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
