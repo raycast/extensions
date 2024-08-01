@@ -15,11 +15,11 @@ export default async function main() {
     return showWebsocketConnectionErrorToast();
   }
 
-  const { outputActive } = await obs.call("ToggleVirtualCam");
+  const { outputActive } = await obs.call("ToggleRecord");
 
   if (outputActive) {
-    showHUD("Virtual Camera started");
+    showHUD("Recording");
   } else {
-    showHUD("Virtual Camera stopped");
+    showHUD("Recording stopped");
   }
 }

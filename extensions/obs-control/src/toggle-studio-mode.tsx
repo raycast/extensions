@@ -15,11 +15,13 @@ export default async function main() {
     return showWebsocketConnectionErrorToast();
   }
 
-  const { outputActive } = await obs.call("ToggleVirtualCam");
+  const { studioModeEnabled } = await obs.call("GetStudioModeEnabled");
 
-  if (outputActive) {
-    showHUD("Virtual Camera started");
+  await obs.call("SetStudioModeEnabled", { studioModeEnabled: !studioModeEnabled });
+
+  if (studioModeEnabled) {
+    showHUD("Studio Mode disabled");
   } else {
-    showHUD("Virtual Camera stopped");
+    showHUD("Studio Mode enabled");
   }
 }
