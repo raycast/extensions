@@ -66,6 +66,7 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
           const toast = await showFailureToast(err, { title: "❗ Failed to create link" });
           toast.primaryAction = {
             title: "Retry",
+            shortcut: Keyboard.Shortcut.Common.Refresh,
             onAction: () => {
               push(<ShortenLinkForm retryValues={vals} args={args} />);
               toast.hide();
