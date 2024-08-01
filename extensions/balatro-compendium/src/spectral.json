@@ -1,0 +1,92 @@
+[
+  {
+    "Name": "Familiar",
+    "Appearance": "familiar.png",
+    "Effect": "Destroy 1 random card in your hand, add 3 random Enhanced face cards to your hand"
+  },
+  {
+    "Name": "Grim",
+    "Appearance": "grim.png",
+    "Effect": "Destroy 1 random card in your hand, add 2 random Enhanced Aces to your hand"
+  },
+  {
+    "Name": "Incantation",
+    "Appearance": "incantation.png",
+    "Effect": "Destroy 1 random card in your hand, add 4 random Enhanced numbered cards to your hand"
+  },
+  {
+    "Name": "Talisman",
+    "Appearance": "talisman.png",
+    "Effect": "Add Gold Seal to 1 selected card in your hand"
+  },
+  {
+    "Name": "Aura",
+    "Appearance": "aura.png",
+    "Effect": "Add Foil, Holographic, or Polychrome effect to 1 selected card in hand"
+  },
+  {
+    "Name": "Wraith",
+    "Appearance": "wraith.png",
+    "Effect": "Creates a random Rare Joker, sets money to $0"
+  },
+  {
+    "Name": "Sigil",
+    "Appearance": "sigil.png",
+    "Effect": "Converts all cards in hand to a single random suit"
+  },
+  {
+    "Name": "Ouija",
+    "Appearance": "ouija.png",
+    "Effect": "Converts all cards in hand to a single random rank&nbsp;-1 hand size"
+  },
+  {
+    "Name": "Ectoplasm",
+    "Appearance": "ectoplasm.png",
+    "Effect": "Add Negative to a random Joker, -1 hand size"
+  },
+  {
+    "Name": "Immolate",
+    "Appearance": "immolate.png",
+    "Effect": "Destroys 5 random cards in hand, gain $20"
+  },
+  {
+    "Name": "Ankh",
+    "Appearance": "spectral_ankh.png",
+    "Effect": "Create a copy of a random Joker, destroy all other Jokers"
+  },
+  {
+    "Name": "Déjà Vu",
+    "Appearance": "spectral_dejavu.png",
+    "Effect": "Add a Red Seal to 1 selected card in your hand"
+  },
+  {
+    "Name": "Hex",
+    "Appearance": "spectral_hex.png",
+    "Effect": "Add Polychrome to a random Joker, destroy all other Jokers"
+  },
+  {
+    "Name": "Trance",
+    "Appearance": "spectral_trance.png",
+    "Effect": "Add a Blue Seal to 1 selected card in your hand"
+  },
+  {
+    "Name": "Medium",
+    "Appearance": "spectral_medium.png",
+    "Effect": "Add a Purple Seal to 1 selected card in your hand"
+  },
+  {
+    "Name": "Cryptid",
+    "Appearance": "spectral_cryptid.png",
+    "Effect": "Create 2 copies of 1 selected card in your hand"
+  },
+  {
+    "Name": "Soul",
+    "Appearance": "spectral_soul.png",
+    "Effect": "Creates a Legendary Joker"
+  },
+  {
+    "Name": "Black Hole",
+    "Appearance": "black_hole.png",
+    "Effect": "Upgrade every poker hand by 1 level"
+  }
+]
