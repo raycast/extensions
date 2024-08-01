@@ -1,5 +1,9 @@
 # YouTube Downloader Changelog
 
+## [Fix video not found] - 2024-08-01
+
+- Update the `@dustube/ytdl-core` dependency to fix the video not found issue
+
 ## [Fix Live Premiere video download] - 2024-07-30
 
 - Fix the live premiere video download issue
