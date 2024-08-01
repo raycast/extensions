@@ -4,6 +4,14 @@
 
 - Users can now select both a custom directory and a specific branch for cloned repositories.
 
+## [Disabled By Default Commands] - 2024-07-31
+
+Make the least-used commands disabled by default to avoid an overwhelming initial experience:
+
+- `Create Branch`
+- `Search Discussions`
+- `My Discussions`
+
 ## [Improvements] - 2024-07-23
 
 - Enhanced the display of repository stars in the `Search Repositories` command by prefixing the number with a star symbol (★).

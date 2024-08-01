@@ -1,5 +1,11 @@
 # Things Changelog
 
+## [Fix Generate Checklist with AI] - 2024-07-30
+
+- Action to "Generate Checklist with AI" only visible if the user has access to AI.
+- Fixed issue where all checklist items were being generated in French.
+- Fixed issue where checklist items started with a hyphen even though explicitly prompted not to.
+
 ## [Fix tags for new issues] - 2024-07-24
 
 - [#13560](https://github.com/raycast/extensions/issues/13560): Tags are correctly appended to the deeplink while creating new todo(s).

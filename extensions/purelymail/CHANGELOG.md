@@ -1,5 +1,7 @@
 # Purelymail Changelog
 
+## [Filter Users by Domain + Copy List of Users] - 2024-07-29
+
 ## [Added ListUser+ModifyUser Endpoints] - 2024-04-08
 
 ### Enhancements

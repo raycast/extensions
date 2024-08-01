@@ -1,5 +1,15 @@
 # Dub Link Shortener Changelog
 
+## [Renaming] - 2024-08-01
+- Rename extension from `dub-link-shortener` to `dub`
+
+## [README changes] - 2024-07-31
+
+- Remove the instructions about API key from README.
+
+## [OAuth flow] - 2024-07-30
+
+- Added OAuth flow to connect to Dub account
 
 ## [Workspace API Keys] - 2024-07-19
 

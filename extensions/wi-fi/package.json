@@ -39,6 +39,14 @@
           "required": false,
           "default": true,
           "description": "Show wifi name in menu bar"
+        },
+        {
+          "name": "showIpAddress",
+          "type": "checkbox",
+          "label": "Show IP Address",
+          "required": false,
+          "default": true,
+          "description": "Show IP address in menu bar"
         }
       ]
     }
@@ -50,7 +58,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.14.11",
+    "@types/node": "20.14.12",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",

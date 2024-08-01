@@ -1,6 +1,7 @@
-import { showHUD } from "@raycast/api";
+import { captureException, showHUD } from "@raycast/api";
 import { getCachedEnv } from "./shell-utils";
 import { execSync } from "child_process";
+import os from "os";
 
 export const getCurWifiInfo = async () => {
   try {
@@ -33,6 +34,7 @@ export const getCurWifiInfo = async () => {
         .filter((item) => item !== null);
     }
   } catch (e) {
+    captureException("Error getting Wi-Fi info:" + e);
     return [];
   }
 };
@@ -50,7 +52,9 @@ export const getCurWifiName = async () => {
     if (network.includes("off")) {
       return "";
     } else {
-      return network.replace("Current Wi-Fi Network: ", "");
+      const index = network.indexOf(": ");
+      if (index === -1) return "";
+      return network.substring(index + 2);
     }
   } catch (e) {
     return "";
@@ -69,7 +73,7 @@ export const getCurWifiStatus = async () => {
     const network = String(out2).trim();
     return !network.includes("off");
   } catch (e) {
-    return true;
+    return false;
   }
 };
 
@@ -95,3 +99,22 @@ export const toggleWifi = async () => {
     await showHUD("❌ " + String(e));
   }
 };
+
+export async function getIPV4Address() {
+  return new Promise<string>((resolve, reject) => {
+    const interfaces = os.networkInterfaces();
+    for (const devName in interfaces) {
+      const iface = interfaces[devName];
+      if (typeof iface !== "undefined") {
+        for (let i = 0; i < iface.length; i++) {
+          const alias = iface[i];
+          if (alias.family === "IPv4" && alias.address !== "127.0.0.1" && !alias.internal) {
+            resolve(alias.address);
+            break;
+          }
+        }
+      }
+    }
+    reject("");
+  });
+}

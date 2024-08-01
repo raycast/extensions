@@ -1,5 +1,9 @@
 # Changelog
 
+## [Fix] - 2024-07-29
+
+- Restarting a conversation will retain the currently selected model
+
 ## [Fix] - 2024-07-16
 
 - Add placeholder to improve accessibility

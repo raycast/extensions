@@ -1,5 +1,20 @@
 # Toggl Track Changelog
 
+## [Bug Fixes] - 2024-07-31
+
+- Do not show currently running time entry in the recent time entries list
+- Fix running time entries not showing project details
+- Fix no clients, projects, tasks on create new time entry form, if there is no selected workspace
+
+## [New Feature] - 2024-07-29
+
+- Add ability to view, start, or stop existing time entries from the Menu Bar
+
+## [Enhancements] - 2024-07-29
+
+- Add ability to set billable in new entry form
+- Add ability to delete entry from list
+
 ## [Enhancements] - 2024-05-27
 
 - Prettier sort imports

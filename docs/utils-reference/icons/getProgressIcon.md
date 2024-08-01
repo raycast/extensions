@@ -13,7 +13,7 @@ function getProgressIcon(
   options?: {
     background?: Color | string;
     backgroundOpacity?: number;
-  }
+  },
 ): Image.Asset;
 ```
 

@@ -1,5 +1,16 @@
 # Changelog
 
+## [View Site Environment Variables] - $2024-07-29
+
+### Enhancements
+
+- Added `Show Environment Variables` subcommand
+
+### Chore
+
+- Bump `@raycast/api` from 1.72.0 to 1.79.0
+- Bump `@raycast/utils` from 1.14.0 to 1.16.3
+
 ## [Manage DNS Commands] - 2024-05-07
 
 ### Enhancements

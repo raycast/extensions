@@ -36,7 +36,9 @@ export const menuBarStatusIcons: Record<'open' | 'completed' | 'canceled', Image
 
 export function getChecklistItemsWithAI(name: string, notes: string) {
   return AI.ask(
-    `Break down a task into sub-tasks. The sub-tasks should be actionable. Each item should be separated by a new line. Return the sub-tasks in the same language than the task's title (e.g if the task title is written in French, the sub-tasks should be written in French as well).
+    `Break down a task into sub-tasks. The sub-tasks should be actionable. Each item should be separated by a new line. Return the sub-tasks in the same language as the task's title language.
+
+Note that each task doesn't start with a hyphen or a number. This is important.
 
 For example, for a task named "Fix bug", you could write:
 Find the root cause
@@ -44,7 +46,6 @@ Fix the bug
 Write tests to prevent regressions
 Ship the fix.
 
-Note that each task doesn't start with a hyphen or a number. This is important.
 Here's the task you need to break-down: "${name}"
 ${notes.length > 0 ? `For additional context, here are the task's notes: "${notes}"` : ''}
 

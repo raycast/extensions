@@ -17,3 +17,5 @@ export const DNS_RECORD_TYPES = {
   SRV: '',
   TXT: 'Free form text data',
 };
+
+export const APP_URL = 'https://app.netlify.com';

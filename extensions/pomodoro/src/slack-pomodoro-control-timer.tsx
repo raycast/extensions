@@ -126,7 +126,7 @@ const EndOfInterval = () => {
   let usingGiphy = false;
 
   if (preferences.enableConfetti) {
-    exec("open raycast://extensions/raycast/raycast/confetti", function (err, stdout, stderr) {
+    exec("open raycast://extensions/raycast/raycast/confetti", function (err) {
       if (err) {
         // handle error
         console.error(err);

@@ -1,11 +1,21 @@
 # I Don't Have Spotify Changelog
 
+## [New Commands] - 2024-07-31
+
+- Convert link from clipboard and copy it back for each platform.
+- Generate audio temp file path using built-in libraries.
+- Open extension preferences action panel.
+- Fix Command EmptyView validation.
+- Fix `cleanLastSearch` if search text is empty.
+- Fix Command wrap search text and results in a single state.
+- Fix Replace `SPOTIFY_LINK_REGEX` with a flexible `LINK_REGEX`, delegating full validation to the server.
+
 ## [Fix] - 2024-01-31
 
-- fix Error: Missing required property "title" for List.Item
-- replace isVerified text with an icon
-- update hostname + SPOTIFY_LINK_REGEX
-- fix cache vs clipboard validation
+- Fix Error: Missing required property "title" for List.Item
+- Replace isVerified text with an icon
+- Update hostname + SPOTIFY_LINK_REGEX
+- Fix cache vs clipboard validation
 
 ## [Fix] - 2023-11-06
 

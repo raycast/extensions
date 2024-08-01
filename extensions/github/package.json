@@ -83,7 +83,8 @@
       "name": "create-branch",
       "title": "Create Branch",
       "description": "Create a branch in one of your GitHub repositories",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "search-repositories",
@@ -174,13 +175,15 @@
       "name": "search-discussions",
       "title": "Search Discussions",
       "description": "Search recent Discussions globally in all repositories",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "my-discussions",
       "title": "My Discussions",
       "description": "Show your Discussions",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "my-projects",

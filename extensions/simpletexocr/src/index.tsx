@@ -17,6 +17,7 @@ export default async () => {
     return;
   }
   const token = getPreferenceValues().token;
+  const suffix = getPreferenceValues().server_suffix;
   const file = fs.readFileSync(savePath);
   const formData = new FormData();
   formData.append("file", file, "capture.png");
@@ -25,7 +26,7 @@ export default async () => {
     token: token,
   };
   try {
-    const res = await axios.post("https://server.simpletex.cn/api/latex_ocr", formData, { headers });
+    const res = await axios.post(`https://server.simpletex.${suffix}/api/latex_ocr`, formData, { headers });
     // console.log(res);
     const data = res.data;
     if (!data.status) {

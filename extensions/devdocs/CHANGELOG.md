@@ -1,5 +1,11 @@
 # DevDocs Extension
 
+## [Changes] - 2024-07-27
+
+- Update list item icon
+- Add `entry.type` as a tag in the list to make it more clear where the entry is coming from
+- Update screenshots
+
 ## [Changes] - 2024-07-21
 
 - Update icon and include dark mode version

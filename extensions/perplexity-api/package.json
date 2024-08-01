@@ -42,24 +42,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3-sonar-small-32k-chat",
-              "title": "Sonar Small 7B 32k"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "llama-3-sonar-large-32k-chat",
-              "title": "Sonar Large 70B 32k"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-3-8b-instruct",
-              "title": "Llama3 8B 8k"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "llama-3-70b-instruct",
-              "title": "Llama3 70B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8×7B 16k"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -92,24 +88,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3-sonar-small-32k-chat",
-              "title": "Sonar Small 7B 32k"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "llama-3-sonar-large-32k-chat",
-              "title": "Sonar Large 70B 32k"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-3-8b-instruct",
-              "title": "Llama3 8B 8k"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "llama-3-70b-instruct",
-              "title": "Llama3 70B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8×7B 16k"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -142,24 +134,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3-sonar-small-32k-chat",
-              "title": "Sonar Small 7B 32k"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "llama-3-sonar-large-32k-chat",
-              "title": "Sonar Large 70B 32k"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-3-8b-instruct",
-              "title": "Llama3 8B 8k"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "llama-3-70b-instruct",
-              "title": "Llama3 70B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8×7B 16k"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -192,24 +180,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3-sonar-small-32k-chat",
-              "title": "Sonar Small 7B 32k"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "llama-3-sonar-large-32k-chat",
-              "title": "Sonar Large 70B 32k"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-3-8b-instruct",
-              "title": "Llama3 8B 8k"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "llama-3-70b-instruct",
-              "title": "Llama3 70B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8×7B 16k"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -242,24 +226,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3-sonar-small-32k-chat",
-              "title": "Sonar Small 7B 32k"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "llama-3-sonar-large-32k-chat",
-              "title": "Sonar Large 70B 32k"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-3-8b-instruct",
-              "title": "Llama3 8B 8k"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "llama-3-70b-instruct",
-              "title": "Llama3 70B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8×7B 16k"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -308,32 +288,28 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3-sonar-small-32k-online",
-              "title": "Sonar Small 7B Online"
+              "value": "llama-3.1-sonar-small-128k-online",
+              "title": "Sonar Small 8B Online"
             },
             {
-              "value": "llama-3-sonar-large-32k-online",
+              "value": "llama-3.1-sonar-large-128k-online",
               "title": "Sonar Large 70B Online"
             },
             {
-              "value": "llama-3-sonar-small-32k-chat",
-              "title": "Sonar Small 7B 32k"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "llama-3-sonar-large-32k-chat",
-              "title": "Sonar Large 70B 32k"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-3-8b-instruct",
-              "title": "Llama3 8B 8k"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "llama-3-70b-instruct",
-              "title": "Llama3 70B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8×7B 16k"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -383,24 +359,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3-sonar-small-32k-chat",
-              "title": "Sonar Small 7B 32k"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "llama-3-sonar-large-32k-chat",
-              "title": "Sonar Large 70B 32k"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-3-8b-instruct",
-              "title": "Llama3 8B 8k"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "llama-3-70b-instruct",
-              "title": "Llama3 70B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8×7B 16k"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -434,24 +406,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3-sonar-small-32k-chat",
-              "title": "Sonar Small 7B 32k"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "llama-3-sonar-large-32k-chat",
-              "title": "Sonar Large 70B 32k"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-3-8b-instruct",
-              "title": "Llama3 8B 8k"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "llama-3-70b-instruct",
-              "title": "Llama3 70B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8×7B 16k"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -485,24 +453,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3-sonar-small-32k-chat",
-              "title": "Sonar Small 7B 32k"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "llama-3-sonar-large-32k-chat",
-              "title": "Sonar Large 70B 32k"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-3-8b-instruct",
-              "title": "Llama3 8B 8k"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "llama-3-70b-instruct",
-              "title": "Llama3 70B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8×7B 16k"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -536,24 +500,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3-sonar-small-32k-chat",
-              "title": "Sonar Small 7B 32k"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "llama-3-sonar-large-32k-chat",
-              "title": "Sonar Large 70B 32k"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-3-8b-instruct",
-              "title": "Llama3 8B 8k"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "llama-3-70b-instruct",
-              "title": "Llama3 70B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8×7B 16k"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -587,24 +547,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3-sonar-small-32k-chat",
-              "title": "Sonar Small 7B 32k"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "llama-3-sonar-large-32k-chat",
-              "title": "Sonar Large 70B 32k"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-3-8b-instruct",
-              "title": "Llama3 8B 8k"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "llama-3-70b-instruct",
-              "title": "Llama3 70B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8×7B 16k"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -638,24 +594,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3-sonar-small-32k-chat",
-              "title": "Sonar Small 7B 32k"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "llama-3-sonar-large-32k-chat",
-              "title": "Sonar Large 70B 32k"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-3-8b-instruct",
-              "title": "Llama3 8B 8k"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "llama-3-70b-instruct",
-              "title": "Llama3 70B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8×7B 16k"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -689,24 +641,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3-sonar-small-32k-chat",
-              "title": "Sonar Small 7B 32k"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "llama-3-sonar-large-32k-chat",
-              "title": "Sonar Large 70B 32k"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-3-8b-instruct",
-              "title": "Llama3 8B 8k"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "llama-3-70b-instruct",
-              "title": "Llama3 70B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8×7B 16k"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -740,24 +688,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3-sonar-small-32k-chat",
-              "title": "Sonar Small 7B 32k"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "llama-3-sonar-large-32k-chat",
-              "title": "Sonar Large 70B 32k"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-3-8b-instruct",
-              "title": "Llama3 8B 8k"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "llama-3-70b-instruct",
-              "title": "Llama3 70B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8×7B 16k"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -782,24 +726,20 @@
       "default": "llama-3-sonar-large-32k-chat",
       "data": [
         {
-          "value": "llama-3-sonar-small-32k-chat",
-          "title": "Sonar Small 7B 32k"
+          "value": "llama-3.1-sonar-small-128k-chat",
+          "title": "Sonar Small 8B 132k"
         },
         {
-          "value": "llama-3-sonar-large-32k-chat",
-          "title": "Sonar Large 70B 32k"
+          "value": "llama-3.1-sonar-large-128k-chat",
+          "title": "Sonar Large 70B 132k"
         },
         {
-          "value": "llama-3-8b-instruct",
-          "title": "Llama3 8B 8k"
+          "value": "llama-3.1-8b-instruct",
+          "title": "Llama3.1 8B 132k"
         },
         {
-          "value": "llama-3-70b-instruct",
-          "title": "Llama3 70B 8k"
-        },
-        {
-          "value": "mixtral-8x7b-instruct",
-          "title": "Mixtral 8×7B 16k"
+          "value": "llama-3.1-70b-instruct",
+          "title": "Llama3.1 70B 132k"
         }
       ]
     },
@@ -814,17 +754,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.67.1",
-    "openai": "^4.27.0",
-    "@nem035/gpt-3-encoder": "^1.1.7"
+    "@raycast/api": "^1.78.0",
+    "openai": "^4.53.2",
+    "gpt-tokenizer": "^2.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.2.4",
-    "typescript": "^5.2.2"
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
