@@ -1,5 +1,16 @@
 import React, { useState } from "react";
-import { Action, ActionPanel, Detail, Form, useNavigation, showToast, Toast, open, popToRoot, Icon } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Form,
+  useNavigation,
+  showToast,
+  Toast,
+  open,
+  popToRoot,
+  Icon,
+} from "@raycast/api";
 import Jimp from "jimp";
 import pngToIco from "png-to-ico";
 import { join, dirname, basename, extname } from "path";
@@ -124,7 +135,7 @@ function ProcessingView({ imagePath, platforms }: { imagePath: string; platforms
   async function handleOpenOutputFolder(outputDir: string) {
     open(outputDir);
     setTimeout(() => {
-      popToRoot()
+      popToRoot();
     }, 1000);
   }
 
