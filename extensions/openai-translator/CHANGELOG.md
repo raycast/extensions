@@ -1,6 +1,6 @@
 # OpenAI Translator Changelog
 
-## [Update OpenAI support model] - {PR_MERGE_DATE}
+## [Update OpenAI support model] - 2024-08-01
 
 - Update OpenAI support model
 
