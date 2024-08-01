@@ -4,6 +4,7 @@ import { promisify } from "util";
 
 import { Action, ActionPanel, closeMainWindow, Form, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
+import { useEffect } from "react";
 
 import { getGitHubClient } from "../api/githubClient";
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
@@ -28,7 +29,7 @@ export default function CloneRepositoryForm({ repository }: CloneRepositoryFormP
     [repository],
   );
 
-  const { itemProps, handleSubmit } = useForm<{
+  const { itemProps, handleSubmit, setValue } = useForm<{
     clonePath: string[];
     branch: string;
     ssh: boolean;
@@ -68,10 +69,35 @@ export default function CloneRepositoryForm({ repository }: CloneRepositoryFormP
           },
         });
       } catch (error) {
+        if (error instanceof Error && error.message.includes("Repository not found")) {
+          await showFailureToast(error, {
+            title: "Repository not found",
+            message: "You may not have access to this repository. Try using SSH instead of HTTPS.",
+          });
+          return;
+        }
+
+        if (error instanceof Error && error.message.includes("already exists")) {
+          await showFailureToast(error, {
+            title: "The repository already exists",
+            message: "Please choose a different directory to clone the repository.",
+          });
+          return;
+        }
+
         await showFailureToast(error, { title: "Failed cloning repository" });
       }
     },
   });
+
+  useEffect(() => {
+    const mainBranch = branches?.find((b) => b === "main");
+    const masterBranch = branches?.find((b) => b === "master");
+
+    if (mainBranch || masterBranch) {
+      setValue("branch", mainBranch ?? masterBranch ?? "");
+    }
+  }, [branches]);
 
   return (
     <Form
