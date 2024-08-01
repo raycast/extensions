@@ -79,11 +79,13 @@ export default function Command() {
           filteredResultsWeights[key] = resultsWeights[key];
         }
       }
+      setResultsWeights(filteredResultsWeights)
     } else {
       const initialWeights: { [key: string]: number } = {};
       fileList.forEach((obj, index) => {
         initialWeights[obj.name] = index;
       });
+      setResultsWeights(initialWeights)
     }
 
     setResults(
@@ -113,7 +115,7 @@ export default function Command() {
         title="No launch configurations found"
         description="You need to create at least one launch configuration before launching https://docs.warp.dev/features/sessions/launch-configurations."
       />
-      <List.Section title={"Results"} subtitle={results?.length + ""}>
+      <List.Section title="Results" subtitle={results?.length + ""}>
         {results
           ?.filter((f) => f.name.toLowerCase().includes(searchText.toLowerCase()))
           .map((searchResult, index) => (
