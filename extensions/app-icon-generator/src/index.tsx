@@ -9,7 +9,6 @@ import {
   popToRoot,
   getPreferenceValues,
   openExtensionPreferences,
-  Keyboard,
 } from "@raycast/api";
 import Jimp from "jimp";
 import pngToIco from "png-to-ico";
