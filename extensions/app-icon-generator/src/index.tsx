@@ -1,16 +1,5 @@
 import React, { useState } from "react";
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Form,
-  useNavigation,
-  showToast,
-  Toast,
-  open,
-  popToRoot,
-  Icon,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, open, popToRoot } from "@raycast/api";
 import Jimp from "jimp";
 import pngToIco from "png-to-ico";
 import { join, dirname, basename, extname } from "path";
@@ -38,9 +27,11 @@ const SIZES = {
 const ALLOWED_EXTENSIONS = [".jpg", ".jpeg", ".png"];
 
 export default function Command() {
-  const { push } = useNavigation();
+  const [isProcessing, setIsProcessing] = useState(false);
 
   async function handleSubmit(values: FormValues) {
+    if (isProcessing) return;
+
     if (!values.imagePath || values.imagePath.length === 0) {
       await showToast({
         style: Toast.Style.Failure,
@@ -71,7 +62,9 @@ export default function Command() {
       return;
     }
 
-    push(<ProcessingView imagePath={imagePath} platforms={values.platforms} />);
+    setIsProcessing(true);
+    await processImage(imagePath, values.platforms);
+    setIsProcessing(false);
   }
 
   return (
@@ -81,6 +74,7 @@ export default function Command() {
           <Action.SubmitForm title="Generate Icons" onSubmit={handleSubmit} />
         </ActionPanel>
       }
+      isLoading={isProcessing}
     >
       <Form.FilePicker id="imagePath" title="Select Image" allowMultipleSelection={false} />
       <Form.TagPicker id="platforms" title="Select Platforms">
@@ -92,95 +86,48 @@ export default function Command() {
   );
 }
 
-function ProcessingView({ imagePath, platforms }: { imagePath: string; platforms: string[] }) {
-  const [status, setStatus] = useState<string>("Processing");
-  const [isProcessing, setIsProcessing] = useState<boolean>(true);
-  const [outputDir, setOutputDir] = useState<string | null>(null);
+async function processImage(imagePath: string, platforms: string[]) {
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Generating Icons",
+    message: "Processing...",
+  });
 
-  React.useEffect(() => {
-    processImage(imagePath, platforms);
-  }, []);
+  try {
+    const parentDir = dirname(imagePath);
+    const baseFileName = basename(imagePath, extname(imagePath));
+    const outputDir = join(parentDir, `${baseFileName}_icons`);
+    await fs.mkdir(outputDir, { recursive: true });
 
-  async function processImage(imagePath: string, platforms: string[]) {
-    try {
-      const parentDir = dirname(imagePath);
-      const baseFileName = basename(imagePath, extname(imagePath));
-      const outputDir = join(parentDir, `${baseFileName}_icons`);
-      await fs.mkdir(outputDir, { recursive: true });
-      setOutputDir(outputDir);
+    const buffer = await fs.readFile(imagePath);
+    const image = await Jimp.read(buffer);
 
-      const buffer = await fs.readFile(imagePath);
-      const image = await Jimp.read(buffer);
+    for (const platform of platforms) {
+      toast.message = `Generating ${PLATFORMS[platform as keyof typeof PLATFORMS]} icons...`;
+      const platformDir = join(outputDir, platform);
+      await fs.mkdir(platformDir, { recursive: true });
 
-      for (const platform of platforms) {
-        const platformDir = join(outputDir, platform);
-        await fs.mkdir(platformDir, { recursive: true });
-
-        if (platform === "ico") {
-          await generateIcoIcon(image, platformDir);
-        } else {
-          await generatePlatformIcons(image, platform as keyof typeof SIZES, platformDir);
-        }
+      if (platform === "ico") {
+        await generateIcoIcon(image, platformDir);
+      } else {
+        await generatePlatformIcons(image, platform as keyof typeof SIZES, platformDir);
       }
-
-      setStatus("Complete");
-    } catch (error) {
-      console.error("Error:", error);
-      setStatus("Error");
-    } finally {
-      setIsProcessing(false);
     }
-  }
 
-  async function handleOpenOutputFolder(outputDir: string) {
-    open(outputDir);
+    toast.style = Toast.Style.Success;
+    toast.title = "Icons Generated Successfully!";
+    toast.message = `The generated folder will be opened. Icons saved in: ${outputDir}`;
+
     setTimeout(() => {
+      open(outputDir);
       popToRoot();
     }, 1000);
+  } catch (error) {
+    console.error("Error:", error);
+    toast.style = Toast.Style.Failure;
+    toast.title = "Error Occurred";
+    toast.message = "Failed to generate icons. Please try again.";
   }
-
-  const getMarkdown = () => {
-    if (isProcessing) {
-      return `
-# Generating Icons ⏳
-
-Please wait...
-      `;
-    }
-    if (status === "Complete") {
-      return `
-# Icons Generated Successfully! 🎉
-
-Icons are saved in:
-
-\`${outputDir}\`
-
-Use the action below to open the output folder.
-      `;
-    }
-    if (status === "Error") {
-      return `
-# Error Occurred 😕
-
-Failed to generate icons. Please try again.
-      `;
-    }
-    return "# Unexpected State";
-  };
-
-  return (
-    <Detail
-      markdown={getMarkdown()}
-      actions={
-        <ActionPanel>
-          {!isProcessing && outputDir && status === "Complete" && (
-            <Action title="Open Output Folder" icon={Icon.Folder} onAction={() => handleOpenOutputFolder(outputDir)} />
-          )}
-          <Action title="Back to Main" icon={Icon.ArrowLeft} onAction={() => popToRoot()} />
-        </ActionPanel>
-      }
-    />
-  );
 }
 
 async function generateIcoIcon(image: Jimp, outputDir: string) {
