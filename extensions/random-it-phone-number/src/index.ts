@@ -1,4 +1,4 @@
-import {Clipboard, getPreferenceValues, showHUD} from "@raycast/api";
+import { Clipboard, getPreferenceValues, showHUD } from "@raycast/api";
 
 function generateItalianPhoneNumber() {
   const prefixes = ["320", "330", "340", "350", "360", "370", "380", "390"]; // Prefissi italiani comuni
@@ -13,7 +13,7 @@ function generateItalianPhoneNumber() {
 
 console.log(generateItalianPhoneNumber());
 
-const {defaultAction: action} = getPreferenceValues();
+const { defaultAction: action } = getPreferenceValues();
 
 export default async function main() {
   let phoneNumber = generateItalianPhoneNumber();
