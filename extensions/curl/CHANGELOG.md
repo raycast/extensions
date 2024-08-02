@@ -1,5 +1,9 @@
 # cURL Changelog
 
+## [Bug fix] - 2024-08-02
+
+- The "Copy Headers" button now copies the request's headers instead of copying the body
+
 ## [Allow custom headers] - 2023-08-15
 
 ## [Add PATCH method and change methods icons] - 2023-01-18
