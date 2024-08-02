@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Update Menu Bar Icon Contrast for Dark Mode] - 2024-08-02
+
+Changed Menu bar icon color contrast issue with certain wallpapers in light mode.
+
 ## [Focus Label] - 2024-07-12
 
 Adds a preference to set a specified label for the task in focus. The label will be removed when the task is not in focus.
