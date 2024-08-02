@@ -98,7 +98,7 @@ function MenuBar(props: MenuBarProps) {
         tintColor: {
           light: "",
           dark: "#E5E5E5",
-          adjustContrast: false
+          adjustContrast: false,
         },
       }}
       isLoading={isLoading || isLoadingFilter}
