@@ -25,7 +25,7 @@ const ArchiveListItemF = ({ item }: ArchiveListItemProps) => {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title="Open in Browser" url={`https://annas-archive.org/md5/${item.id}`} />
-          <Action.CopyToClipboard title="Copy Url to Clipboard" content={`https://annas-archive.org/md5/${item.id}`} />
+          <Action.CopyToClipboard title="Copy URL to Clipboard" content={`https://annas-archive.org/md5/${item.id}`} />
         </ActionPanel>
       }
     />
