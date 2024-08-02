@@ -1,5 +1,6 @@
 # Warp Changelog
-## [Improvments] - 2024-08-01
+
+## [Improvments] - {PR_MERGE_DATE}
 
 - "Open Launch Configuration" command now supports setting order of items. To move item up or down, use "Move up" (⌘⇧↑) or "Move down" (⌘⇧↓) actions.
 
