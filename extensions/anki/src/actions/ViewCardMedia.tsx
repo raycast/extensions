@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Action, ActionPanel, Grid, List, showToast, Toast } from '@raycast/api';
+import { Action, ActionPanel, Grid, List } from '@raycast/api';
 import { FieldMediaMap } from '../types';
 import { useCachedPromise } from '@raycast/utils';
 import mediaActions from '../api/mediaActions';
-import { AnkiError } from '../error/AnkiError';
+import useErrorHandling from '../hooks/useErrorHandling';
 
 interface Props {
   cardMedia: FieldMediaMap;
@@ -14,6 +14,7 @@ export default function ViewCardMedia({ cardMedia }: Props) {
   const [selectedField, setSelectedField] = useState('All');
 
   const { data: ankiMediaPath, isLoading, error } = useCachedPromise(mediaActions.getMediaDirPath);
+  const { handleError } = useErrorHandling();
 
   const filteredCardMedia = useMemo(() => {
     let filtered =
@@ -40,12 +41,7 @@ export default function ViewCardMedia({ cardMedia }: Props) {
 
   useEffect(() => {
     if (error) {
-      const isAnkiError = error instanceof AnkiError;
-      showToast({
-        title: isAnkiError ? 'Anki Error' : 'Error',
-        message: isAnkiError ? error.message : 'Unknown error occured',
-        style: Toast.Style.Failure,
-      });
+      handleError(error);
     }
   }, [error]);
 

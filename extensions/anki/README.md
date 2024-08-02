@@ -51,7 +51,7 @@ It attempts to provide an interface and functionality as close to Anki as possib
 ## Getting Started
 
 1. Install the [Anki](https://apps.ankiweb.net/)
-2. Add the [anki-connect add-on](https://ankiweb.net/shared/info/2055492159) (Installation instructions provided in the URL)
+2. Add the [anki-connect add-on](https://ankiweb.net/shared/info/2055492159) (Please follow the installation instructions provided in the URL) (After installing anki-connect you should re-start Anki for it to activate)
 2. Turn-on Anki (in order for this extension to work; Anki has to be running in the background)
 3. Launch Raycast and explore the Anki Extension commands to start managing your decks and reviewing flashcards.
 
@@ -61,6 +61,6 @@ It attempts to provide an interface and functionality as close to Anki as possib
 
 [Anki](https://apps.ankiweb.net/) is an open-source flashcard program that uses spaced repetition to help you learn and retain information more effectively.
 
-### Anki Connect
+### What is Anki Connect?
 
-This extension relies on the [Anki Connect](https://foosoft.net/projects/anki-connect/) plugin, which allows external applications to communicate with Anki.
+It is an awesome Anki add-on (source code: [Anki Connect](https://foosoft.net/projects/anki-connect/)) developed by Alex Yatskov, which allows external applications to communicate with Anki via HTTP requests

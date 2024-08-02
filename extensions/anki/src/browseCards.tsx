@@ -4,18 +4,19 @@ import cardActions from './api/cardActions';
 import guiActions from './api/guiActions';
 import noteActions from './api/noteActions';
 import useTurndown from './hooks/useTurndown';
-import { Action, ActionPanel, confirmAlert, List, showToast, Toast } from '@raycast/api';
-import { AnkiError } from './error/AnkiError';
+import { Action, ActionPanel, confirmAlert, Detail, List, showToast, Toast } from '@raycast/api';
 import { Card, FieldMediaMap, ShortcutDictionary } from './types';
 import { getCardType, parseMediaFiles } from './util';
 import { useCachedPromise } from '@raycast/utils';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import useErrorHandling from './hooks/useErrorHandling';
 
 interface Props {
   deckName?: string;
 }
 export default function BrowseCards({ deckName }: Props) {
   const { turndown } = useTurndown();
+  const { handleError, errorMarkdown } = useErrorHandling();
 
   const shortcuts = useMemo((): ShortcutDictionary => {
     return {
@@ -36,14 +37,8 @@ export default function BrowseCards({ deckName }: Props) {
   ]);
 
   useEffect(() => {
-    if (error) {
-      const isAnkiError = error instanceof AnkiError;
-      showToast({
-        title: isAnkiError ? 'Anki Error' : 'Error',
-        message: isAnkiError ? error.message : 'Unknown error occured',
-        style: Toast.Style.Failure,
-      });
-    }
+    if (!error) return;
+    handleError(error);
   }, [error]);
 
   const handleUpdateQuery = useCallback(
@@ -89,12 +84,7 @@ export default function BrowseCards({ deckName }: Props) {
       });
       revalidate();
     } catch (error) {
-      const isAnkiError = error instanceof AnkiError;
-      showToast({
-        title: isAnkiError ? 'Anki Error' : 'Error',
-        message: isAnkiError ? error.message : 'Unknown error occured',
-        style: Toast.Style.Failure,
-      });
+      handleError(error);
     }
   }, []);
 
@@ -107,13 +97,7 @@ export default function BrowseCards({ deckName }: Props) {
     try {
       await guiActions.guiBrowse(query);
     } catch (error: unknown) {
-      if (error instanceof AnkiError) {
-        showToast({
-          title: 'Anki Error',
-          message: error.message,
-          style: Toast.Style.Failure,
-        });
-      }
+      handleError(error);
     }
   }, [query]);
 
@@ -212,14 +196,21 @@ export default function BrowseCards({ deckName }: Props) {
   );
 
   return (
-    <List
-      isShowingDetail
-      searchBarPlaceholder="Search cards..."
-      isLoading={isLoading}
-      searchText={query}
-      onSelectionChange={handleSelectionChange}
-      onSearchTextChange={handleUpdateQuery}
-      children={data?.map(handleMapListItems)}
-    />
+    <>
+      {error ? (
+        <Detail markdown={errorMarkdown} />
+      ) : (
+        <List
+          isShowingDetail
+          searchBarPlaceholder="Search cards..."
+          isLoading={isLoading}
+          searchText={query}
+          onSelectionChange={handleSelectionChange}
+          onSearchTextChange={handleUpdateQuery}
+        >
+          {data?.map(handleMapListItems)}
+        </List>
+      )}
+    </>
   );
 }

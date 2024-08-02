@@ -48,7 +48,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
+    "@raycast/api": "^1.80.0",
     "@raycast/utils": "^1.16.2",
     "@types/showdown": "^2.0.6",
     "@types/turndown": "^5.0.4",

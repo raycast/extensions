@@ -1,8 +1,10 @@
 import { Form, ActionPanel, Action, showToast, useNavigation, Toast } from '@raycast/api';
 import deckActions from '../api/deckActions';
+import useErrorHandling from '../hooks/useErrorHandling';
 
 const CreateDeckAction = () => {
   const { pop } = useNavigation();
+  const { handleError } = useErrorHandling();
 
   const handleSubmit = async (values: { deckName: string }) => {
     try {
@@ -14,11 +16,7 @@ const CreateDeckAction = () => {
         message: values.deckName,
       });
     } catch (err) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: 'Error',
-        message: values.deckName,
-      });
+      handleError(err);
     }
     pop();
   };

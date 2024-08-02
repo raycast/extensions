@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, showToast, Toast } from '@raycast/api';
+import { Action, ActionPanel, Detail, Form, showToast } from '@raycast/api';
 import noteActions from '../api/noteActions';
 import { useCachedPromise } from '@raycast/utils';
 import deckActions from '../api/deckActions';
@@ -7,12 +7,13 @@ import { CreateCardFormValues, FieldRef, ShortcutDictionary } from '../types';
 import modelActions from '../api/modelActions';
 import React from 'react';
 import { transformSubmittedData } from '../util';
-import { AnkiError } from '../error/AnkiError';
+import useErrorHandling from '../hooks/useErrorHandling';
 
 interface Props {
   deckName?: string;
 }
 export default function AddCardAction({ deckName }: Props) {
+  const { handleError, errorMarkdown } = useErrorHandling();
   const {
     data: decks,
     isLoading: decksLoading,
@@ -45,14 +46,8 @@ export default function AddCardAction({ deckName }: Props) {
 
   useEffect(() => {
     const error = decksError || tagsError || modelsError;
-    if (error) {
-      const isAnkiError = error instanceof AnkiError;
-      showToast({
-        title: isAnkiError ? 'Anki Error' : 'Error',
-        message: isAnkiError ? error.message : 'Unknown error occured',
-        style: Toast.Style.Failure,
-      });
-    }
+    if (!error) return;
+    handleError(error);
   }, [decksError, tagsError, modelsError]);
 
   const handleClearForm = () => {
@@ -96,17 +91,7 @@ export default function AddCardAction({ deckName }: Props) {
 
       return true;
     } catch (error) {
-      if (error instanceof AnkiError) {
-        showToast({
-          title: error.action,
-          message: error.message,
-          style: Toast.Style.Failure,
-        });
-      } else if (error instanceof Error) {
-        showToast({ title: error.message, style: Toast.Style.Failure });
-      }
-
-      return false;
+      handleError(error);
     }
   };
 
@@ -161,46 +146,56 @@ export default function AddCardAction({ deckName }: Props) {
   );
 
   return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Add Card" onSubmit={handleAddCard} />
-          <Action title="Clear Form" shortcut={shortcuts.clearForm} onAction={handleClearForm} />
-        </ActionPanel>
-      }
-      navigationTitle="Add Card"
-      isLoading={decksLoading || modelsLoading || tagsLoading}
-    >
-      <Form.Dropdown
-        id="deckName"
-        title="Deck"
-        isLoading={decksLoading}
-        storeValue={true}
-        onChange={handleDeckChange}
-        value={selectedDeckName}
-      >
-        {decks?.map(deck => (
-          <Form.Dropdown.Item key={deck.deck_id} title={deck.name} value={deck.name} />
-        ))}
-      </Form.Dropdown>
+    <>
+      {decksError || tagsError || modelsError ? (
+        <Detail markdown={errorMarkdown} />
+      ) : (
+        <Form
+          actions={
+            <ActionPanel>
+              <Action.SubmitForm title="Add Card" onSubmit={handleAddCard} />
+              <Action
+                title="Clear Form"
+                shortcut={shortcuts.clearForm}
+                onAction={handleClearForm}
+              />
+            </ActionPanel>
+          }
+          navigationTitle="Add Card"
+          isLoading={decksLoading || modelsLoading || tagsLoading}
+        >
+          <Form.Dropdown
+            id="deckName"
+            title="Deck"
+            isLoading={decksLoading}
+            storeValue={true}
+            onChange={handleDeckChange}
+            value={selectedDeckName}
+          >
+            {decks?.map(deck => (
+              <Form.Dropdown.Item key={deck.deck_id} title={deck.name} value={deck.name} />
+            ))}
+          </Form.Dropdown>
 
-      <Form.Dropdown
-        id="modelName"
-        title="Model"
-        isLoading={modelsLoading}
-        onChange={handleModelChange}
-        storeValue={true}
-      >
-        {models?.map(model => (
-          <Form.Dropdown.Item key={model.id} title={model.name} value={model.name} />
-        ))}
-      </Form.Dropdown>
+          <Form.Dropdown
+            id="modelName"
+            title="Model"
+            isLoading={modelsLoading}
+            onChange={handleModelChange}
+            storeValue={true}
+          >
+            {models?.map(model => (
+              <Form.Dropdown.Item key={model.id} title={model.name} value={model.name} />
+            ))}
+          </Form.Dropdown>
 
-      {fields}
+          {fields}
 
-      <Form.TagPicker id="tags" title="Tags" ref={tagsCardRef}>
-        {tags?.map(tag => <Form.TagPicker.Item key={tag} value={tag} title={tag} />)}
-      </Form.TagPicker>
-    </Form>
+          <Form.TagPicker id="tags" title="Tags" ref={tagsCardRef}>
+            {tags?.map(tag => <Form.TagPicker.Item key={tag} value={tag} title={tag} />)}
+          </Form.TagPicker>
+        </Form>
+      )}
+    </>
   );
 }
