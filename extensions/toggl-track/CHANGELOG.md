@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [Bug Fixes] - 2024-08-01
+## [Bug Fixes] - {PR_MERGE_DATE}
 
 - Resolve issue when stopping a running time entry doesn't work
 
