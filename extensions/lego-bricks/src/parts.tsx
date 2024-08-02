@@ -7,30 +7,29 @@ import { LegoPartsResponse } from "../types/part";
 export default function GetLEGOSets() {
   const [searchText, setSearchText] = useState<string>("");
 
-  const { data, isLoading, revalidate } = useFetch(
-    `${ENDPOINTS.PARTS}?search=${encodeURIComponent(searchText)}`, {
-      headers: HEADERS,
-      async onWillExecute() {
-        await showToast({
-          title: `Fetching LEGO parts...`,
-          style: Toast.Style.Animated,
-        });
-      },
-      mapResult(result: LegoPartsResponse) {
-        return {
-          data: result.results,
-          hasMore: !!result.next,
-        };
-      },
-      async onData() {
-        await showToast({
-          title: `Successfully fetched LEGO parts`,
-          style: Toast.Style.Success,
-        });
-      },
-      initialData: [],
-      keepPreviousData: true,
-    });
+  const { data, isLoading, revalidate } = useFetch(`${ENDPOINTS.PARTS}?search=${encodeURIComponent(searchText)}`, {
+    headers: HEADERS,
+    async onWillExecute() {
+      await showToast({
+        title: `Fetching LEGO parts...`,
+        style: Toast.Style.Animated,
+      });
+    },
+    mapResult(result: LegoPartsResponse) {
+      return {
+        data: result.results,
+        hasMore: !!result.next,
+      };
+    },
+    async onData() {
+      await showToast({
+        title: `Successfully fetched LEGO parts`,
+        style: Toast.Style.Success,
+      });
+    },
+    initialData: [],
+    keepPreviousData: true,
+  });
 
   useEffect(() => {
     revalidate();
@@ -50,7 +49,7 @@ export default function GetLEGOSets() {
         data.map((part: LegoPartsResponse["results"]) => (
           <Grid.Item
             key={part.part_num}
-            content = {part.part_img_url ?? "https://rebrickable.com/static/img/nil.png"}
+            content={part.part_img_url ?? "https://rebrickable.com/static/img/nil.png"}
             title={part.name}
             subtitle={part.part_num}
             actions={

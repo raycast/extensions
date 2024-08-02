@@ -15,5 +15,5 @@ export const ENDPOINTS = {
 
 export const HEADERS = {
   Authorization: `key ${APIKEY}`,
-  "Accept": "application/json",
+  Accept: "application/json",
 };

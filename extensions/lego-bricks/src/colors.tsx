@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { LegoColorsResponse } from "../types/color";
 import { ENDPOINTS, HEADERS } from "./constants/preferences";
 
-
 export default function GetLEGOColors() {
   const [searchText, setSearchText] = useState<string>("");
 
@@ -34,7 +33,7 @@ export default function GetLEGOColors() {
         filteredItems.map((color: LegoColorsResponse["results"]) => (
           <Grid.Item
             key={color.id}
-            content = {{
+            content={{
               color: color.rgb,
             }}
             title={color.name}
@@ -51,7 +50,6 @@ export default function GetLEGOColors() {
 }
 
 async function parseResponse(response: Response): Promise<LegoColorsResponse["results"]> {
-
   const json = (await response.json()) as LegoColorsResponse;
 
   if (!response.ok) {
@@ -68,7 +66,5 @@ function filterItems(items: LegoColorsResponse["results"][], filter: string) {
     return items;
   }
 
-  return items.filter((item: LegoColorsResponse["results"]) =>
-    item.name.toLowerCase().includes(filter.toLowerCase()),
-  );
+  return items.filter((item: LegoColorsResponse["results"]) => item.name.toLowerCase().includes(filter.toLowerCase()));
 }
