@@ -251,6 +251,10 @@ export default function Command() {
 {% endtab %}
 {% endtabs %}
 
+{% hint style="warning" %}
+Pagination might not work properly if all list items are rendered and visible at once, as `onLoadMore` won't be triggered. This typically happens when an API returns 10 results by default, all fitting within the Raycast window. To fix this, try displaying more items, like 20.
+{% endhint %}
+
 ## Examples
 
 {% tabs %}
