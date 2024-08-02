@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Update Menu Bar Icon Contrast for Dark Mode] - 2024-08-02
+## [Menu Bar Command Fixes] - {PR_MERGE_DATE}
 
 Changed Menu bar icon color contrast issue with certain wallpapers in light mode.
 
