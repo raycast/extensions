@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, Keyboard, List } from "@raycast/api";
 import { useState } from "react";
-import { SubjectCommandPreferences } from "../get-mailtrap-subject";
 import { Email, getEmails, markAsRead } from "../services/mailtrap";
 
 interface ListEmailsViewProps {
@@ -9,9 +8,8 @@ interface ListEmailsViewProps {
 
 export default function ListEmailsView({ inboxId }: ListEmailsViewProps) {
   const [searchText, setSearchText] = useState<string | undefined>(undefined);
-  // eslint-disable-next-line prefer-const
-  let { isLoading, data, revalidate } = getEmails(inboxId);
-  const preferences = getPreferenceValues<SubjectCommandPreferences>();
+  const { isLoading, data, revalidate, pagination } = getEmails(inboxId);
+  const preferences = getPreferenceValues<Preferences.GetMailtrapSubject>();
 
   Clipboard.read().then((value) => {
     if (value && value.text && preferences.clipboardRegex) {
@@ -21,13 +19,11 @@ export default function ListEmailsView({ inboxId }: ListEmailsViewProps) {
     }
   });
 
-  if (data && preferences.onlyShowUnread) {
-    data = data.filter((email) => !email.is_read);
-  }
+  const filteredData = data && preferences.onlyShowUnread ? data.filter((email) => !email.is_read) : data;
 
   return (
-    <List isLoading={isLoading} searchText={searchText}>
-      {(data || []).map((email) => (
+    <List isLoading={isLoading} searchText={searchText} pagination={pagination} searchBarPlaceholder="Search email">
+      {filteredData.map((email) => (
         <List.Item
           key={email.id}
           icon={email.is_read ? Icon.Circle : Icon.CircleFilled}
@@ -54,7 +50,7 @@ export default function ListEmailsView({ inboxId }: ListEmailsViewProps) {
   );
 }
 
-function getCopyActions(email: Email, preferences: SubjectCommandPreferences) {
+function getCopyActions(email: Email, preferences: Preferences.GetMailtrapSubject) {
   const actions = [
     <Action.CopyToClipboard
       key="Copy Subject"
