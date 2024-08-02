@@ -21,6 +21,18 @@
       "title": "Generate 2FA Code",
       "description": "Quickly access your two-factor authentication codes.",
       "mode": "view"
+    },
+    {
+      "name": "backup",
+      "title": "Backup 2FA Codes",
+      "description": "Create a backup of your 2FA codes.",
+      "mode": "view"
+    },
+    {
+      "name": "restore",
+      "title": "Restore 2FA Codes",
+      "description": "Restore your 2FA codes from a backup.",
+      "mode": "view"
     }
   ],
   "preferences": [
