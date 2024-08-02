@@ -15,7 +15,7 @@
     {
       "name": "preview-animation",
       "title": "Preview Animation",
-      "subtitle": "Preview a Lottie or Rive Animation",
+      "subtitle": "Motion Preview",
       "description": "Quickly preview animation files in selected in Finder. Supports Lottie (JSON and dotLottie) and Rive files.",
       "mode": "no-view"
     }
