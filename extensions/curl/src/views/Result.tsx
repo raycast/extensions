@@ -50,7 +50,7 @@ export default function ResultView({ result, curl }: { result: Result; curl: str
           <Action.CopyToClipboard title="Copy Response" content={JSON.stringify(result.response.data, null, 2)} />
           <Action.CopyToClipboard
             title="Copy Headers"
-            content={JSON.stringify(result.response.data, null, 2)}
+            content={JSON.stringify(result.response.headers, null, 2)}
             shortcut={{ modifiers: ["cmd"], key: "h" }}
           />
         </ActionPanel>
