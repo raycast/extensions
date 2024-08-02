@@ -26,20 +26,23 @@ export function countToken(content: string) {
 }
 
 export function estimatePrice(prompt_token: number, output_token: number, model: string) {
-  // price is per 1K tokens, but we are measuing in cents. Hence the denominator is 10
+  // price is per 1M tokens in dollars, but we are measuring in cents. Hence the denominator is 10,000
+  // from : https://openai.com/api/pricing/
   let price = 0;
   if (model == "gpt-3.5-turbo") {
-    price = (prompt_token * 0.0015 + output_token * 0.002) / 10;
-  } else if (model == "gpt-3.5-turbo-16k") {
-    price = (prompt_token * 0.003 + output_token * 0.004) / 10;
+    price = (prompt_token * 0.5 + output_token * 1.5) / 10000;
+  } else if (model == "gpt-4-turbo") {
+    price = (prompt_token * 10.0 + output_token * 30.0) / 10000;
   } else if (model == "gpt-4") {
-    price = (prompt_token * 0.03 + output_token * 0.06) / 10;
-  } else if (model == "gpt-4-32k-0613") {
-    price = (prompt_token * 0.03 + output_token * 0.06) / 10;
+    price = (prompt_token * 30.0 + output_token * 60.0) / 10000;
+  } else if (model == "gpt-4o-mini") {
+    price = (prompt_token * 0.15 + output_token * 0.6) / 10000;
+  } else if (model == "gpt-4o") {
+    price = (prompt_token * 5.0 + output_token * 15.0) / 10000;
   } else {
     return -1;
   }
-  return naiveRound(price, 2);
+  return naiveRound(price, 3);
 }
 
 export async function runAppleScriptSilently(appleScript: string) {
