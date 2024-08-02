@@ -42,14 +42,12 @@ export default async function piecesInstalledCheck() {
   }
 
   toast.title = "Attempting to launch Pieces OS";
-  const launching = await launchRuntime();
-  if (launching) {
-    const connected = await pollForConnection();
+  await launchRuntime();
+  const connected = await pollForConnection();
 
-    if (connected) {
-      toast.hide();
-      return true;
-    }
+  if (connected) {
+    toast.hide();
+    return true;
   }
 
   const shouldInstall = await new Promise<boolean>((res) =>

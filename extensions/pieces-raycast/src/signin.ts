@@ -1,4 +1,9 @@
-import { clearSearchBar, closeMainWindow } from "@raycast/api";
+import {
+  clearSearchBar,
+  closeMainWindow,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import ConnectorSingleton from "./connection/ConnectorSingleton";
 import Notifications from "./ui/Notifications";
 import piecesHealthCheck from "./connection/health/piecesHealthCheck";
@@ -15,6 +20,11 @@ export default async function Comand() {
     );
   }
 
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Opening login page",
+  });
+
   await ConnectorSingleton.getInstance()
     .osApi.signIntoOS()
     .then(() => {
@@ -24,4 +34,6 @@ export default async function Comand() {
     .catch(() => {
       Notifications.getInstance().serverErrorToast("sign into Pieces");
     });
+
+  toast.hide();
 }
