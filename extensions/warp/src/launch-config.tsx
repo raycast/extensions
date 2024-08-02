@@ -79,13 +79,13 @@ export default function Command() {
           filteredResultsWeights[key] = resultsWeights[key];
         }
       }
-      setResultsWeights(filteredResultsWeights)
+      setResultsWeights(filteredResultsWeights);
     } else {
       const initialWeights: { [key: string]: number } = {};
       fileList.forEach((obj, index) => {
         initialWeights[obj.name] = index;
       });
-      setResultsWeights(initialWeights)
+      setResultsWeights(initialWeights);
     }
 
     setResults(
