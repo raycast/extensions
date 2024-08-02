@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Enhanced Repository Cloning Functionality] - 2024-08-01
+
+- Users can now select both a custom directory and a specific branch for cloned repositories.
+
 ## [Disabled By Default Commands] - 2024-07-31
 
 Make the least-used commands disabled by default to avoid an overwhelming initial experience:

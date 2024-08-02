@@ -30,7 +30,8 @@
     "dmitrii_mitrofanov",
     "j3lte",
     "stelo",
-    "vlasischar"
+    "vlasischar",
+    "javalangruntimeexception"
   ],
   "categories": [
     "Developer Tools",
@@ -99,15 +100,6 @@
           "default": "/Applications/Visual Studio Code.app",
           "placeholder": "/Applications/Visual Studio Code.app",
           "description": "Will be used to open the cloned repository."
-        },
-        {
-          "name": "baseClonePath",
-          "type": "directory",
-          "required": false,
-          "title": "Clone Path",
-          "default": "~/GitHub",
-          "placeholder": "~/GitHub",
-          "description": "Path in which the repositories will be cloned."
         },
         {
           "name": "includeForks",
@@ -399,13 +391,13 @@
     }
   ],
   "dependencies": {
+    "@octokit/rest": "^21.0.1",
     "@raycast/api": "^1.76.1",
     "@raycast/utils": "^1.16.0",
     "date-fns": "^3.6.0",
     "graphql-request": "^6.1.0",
     "lodash": "^4.17.21",
-    "node-fetch": "^3.3.2",
-    "octokit": "^4.0.2"
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.2",
