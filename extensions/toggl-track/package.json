@@ -100,7 +100,7 @@
     {
       "description": "The API token for your Toggl account.",
       "name": "togglApiToken",
-      "placeholder": "Can be found at https://track.toggl.com/profile",
+      "placeholder": "Can be found at https://track.toggl.com/profile#api-token-label",
       "required": true,
       "title": "Toggl API Token",
       "type": "password"
