@@ -16,6 +16,44 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "aiChat",
+      "title": "AI Chat",
+      "description": "Chat with Perplexity.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "model_chat",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "value": "global",
+              "title": "Follow global model"
+            },
+            {
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
+            },
+            {
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
+            },
+            {
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
+            },
+            {
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "summarize",
       "title": "Summarize",
       "description": "Summarize selected text.",
@@ -723,7 +761,7 @@
       "description": "LLM model to use for all your commands.",
       "type": "dropdown",
       "required": true,
-      "default": "llama-3-sonar-large-32k-chat",
+      "default": "llama-3.1-sonar-small-128k-chat",
       "data": [
         {
           "value": "llama-3.1-sonar-small-128k-chat",
@@ -754,8 +792,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.78.0",
-    "openai": "^4.53.2",
+    "@raycast/api": "^1.68.1",
+    "openai": "^4.28.4",
     "gpt-tokenizer": "^2.2.1"
   },
   "devDependencies": {

@@ -1,5 +1,9 @@
 # Perplexity API Changelog
 
+## [New Command] - 2024-08-01
+
+- Added new `AI Chat` command.
+
 ## [New Models] - 2024-07-31
 
 - Added `Llama 3.1 8B` and `Llama 3.1 70B`.
