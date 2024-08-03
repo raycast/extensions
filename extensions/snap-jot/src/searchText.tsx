@@ -25,7 +25,6 @@ export default function Command() {
   const folderPath = preferences.directory;
   const [files, setFiles] = useState<FileContent[]>([]);
   const [searchText, setSearchText] = useState("");
-
   useEffect(() => {
     const readFiles = () => {
       try {
@@ -33,17 +32,17 @@ export default function Command() {
         const fileContents = fileNames
           .map((fileName) => {
             const filePath = path.join(folderPath, fileName);
-
+  
             // Check if the file is a directory
             if (fs.lstatSync(filePath).isDirectory()) {
               return null;
             }
-
+  
             const content = fs.readFileSync(filePath, "utf-8");
             return { name: fileName, path: filePath, content };
           })
-          .filter((file) => file !== null); // nullを除外
-
+          .filter((file): file is { name: string; path: string; content: string } => file !== null); // Type guard to exclude null
+  
         setFiles(fileContents);
       } catch (error) {
         showToast({
@@ -55,7 +54,7 @@ export default function Command() {
     };
     readFiles();
   }, [folderPath]);
-
+  
   const matchedLines: MatchedLine[] = files
     .flatMap((file) => {
       return file.content.split("\n").reduce((acc: MatchedLine[], line, index) => {
