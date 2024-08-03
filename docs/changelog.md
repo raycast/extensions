@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.80.0 - 2024-07-31
+
+### ✨ New
+
+- **AI:** OpenAI GPT-4o Mini can now be used in the API.
+- **Quicklinks:** `CreateQuickLink` now accepts an `icon` prop that allows you to customize the icon of your Quicklink.
+
+### 💎 Improvements
+
+- **Menu Bar Commands** now show a confirmation toast when activated or refreshed.
+
 ## 1.79.0 - 2024-07-17
 
 ### ✨ New

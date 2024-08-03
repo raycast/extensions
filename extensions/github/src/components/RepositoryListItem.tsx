@@ -12,7 +12,8 @@ type RepositoryListItemProps = {
   repository: ExtendedRepositoryFieldsFragment;
   onVisit: (repository: ExtendedRepositoryFieldsFragment) => void;
   mutateList: MutatePromise<ExtendedRepositoryFieldsFragment[] | undefined>;
-};
+} & SortActionProps &
+  SortTypesDataProps;
 
 export default function RepositoryListItem({
   repository,
@@ -21,7 +22,7 @@ export default function RepositoryListItem({
   sortQuery,
   setSortQuery,
   sortTypesData,
-}: RepositoryListItemProps & SortActionProps & SortTypesDataProps) {
+}: RepositoryListItemProps) {
   const preferences = getPreferenceValues<Preferences.SearchRepositories>();
 
   const owner = getGitHubUser(repository.owner);

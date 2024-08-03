@@ -14,28 +14,24 @@ import { useEvent } from "./hooks/useEvent";
 import { EventActions } from "./hooks/useEvent.types";
 import { Event } from "./types/event";
 import { eventColors } from "./utils/events";
-import { useTask } from "./hooks/useTask";
-import { SNOOZE_OPTIONS } from "./consts/tasks.consts";
 
 type EventSection = { section: string; sectionTitle: string; events: Event[] };
 
 const EventActionsList = ({ event }: { event: Event }) => {
   const [eventActions, setEventActions] = useState<EventActions>([]);
 
-  const { getEventActions } = useEvent();
-  const { rescheduleTask } = useTask();
+  const { getEventActions, handleRescheduleTask } = useEvent();
 
   const loadEventActions = async () => {
     const actions = await getEventActions(event);
     setEventActions(actions);
   };
 
-  const handleRescheduleTask = async (taskId: string, reschedule: string, startDate?: Date) => {
+  const rescheduleTask = async (calendarId: string, eventId: string, reschedule: string) => {
     await showToast(Toast.Style.Animated, "Rescheduling event...");
     try {
-      const task = await rescheduleTask(taskId, reschedule, startDate?.toISOString());
-
-      if (task) {
+      const executeReschedule = await handleRescheduleTask(calendarId, eventId, reschedule);
+      if (executeReschedule) {
         showToast(Toast.Style.Success, `Rescheduled"${event.title}" successfully!`);
       } else {
         throw new Error("Rescheduling failed.");
@@ -65,17 +61,56 @@ const EventActionsList = ({ event }: { event: Event }) => {
           }}
         />
       ))}
-      {event.reclaimManaged === true && event.assist?.eventType === "TASK_ASSIGNMENT" && (
-        <ActionPanel.Submenu title="Snooze Task" icon={Icon.ArrowClockwise}>
-          {SNOOZE_OPTIONS.map((option) => (
-            <Action
-              key={option.title}
-              title={option.title}
-              onAction={() => {
-                handleRescheduleTask(String(event.assist?.taskId), option.value);
-              }}
-            />
-          ))}
+      {event.reclaimManaged === true && (
+        <ActionPanel.Submenu title="Reschedule Event" icon={Icon.ArrowClockwise}>
+          <Action
+            title="15min"
+            onAction={() => {
+              rescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_15M");
+            }}
+          />
+          <Action
+            title="30min"
+            onAction={() => {
+              rescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_30M");
+            }}
+          />
+          <Action
+            title="1hr"
+            onAction={() => {
+              rescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_1H");
+            }}
+          />
+          <Action
+            title="2hrs"
+            onAction={() => {
+              rescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_2H");
+            }}
+          />
+          <Action
+            title="4hrs"
+            onAction={() => {
+              rescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_4H");
+            }}
+          />
+          <Action
+            title="1 Day"
+            onAction={() => {
+              rescheduleTask(String(event.calendarId), event.eventId, "TOMORROW");
+            }}
+          />
+          <Action
+            title="2 Days"
+            onAction={() => {
+              rescheduleTask(String(event.calendarId), event.eventId, "IN_TWO_DAYS");
+            }}
+          />
+          <Action
+            title="1 Week"
+            onAction={() => {
+              rescheduleTask(String(event.calendarId), event.eventId, "NEXT_WEEK");
+            }}
+          />
         </ActionPanel.Submenu>
       )}
     </ActionPanel>
@@ -116,24 +151,24 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const now = new Date();
 
-  const { fetchEvents } = useEvent();
+  const { useFetchEvents } = useEvent();
 
-  const { events, isLoading } = fetchEvents({
+  const { data: eventsData, isLoading } = useFetchEvents({
     start: startOfDay(now),
     end: addDays(now, 7),
   });
 
-  const eventSections = useMemo<EventSection[]>(() => {
-    if (!events) return [];
+  const events = useMemo<EventSection[]>(() => {
+    if (!eventsData) return [];
 
     const today = startOfDay(now);
     const tomorrow = startOfDay(addDays(now, 1));
 
-    const eventSections: EventSection[] = [
+    const events: EventSection[] = [
       {
         section: "NOW",
         sectionTitle: "Now",
-        events: events
+        events: eventsData
           .filter((event) => {
             const start = new Date(event.eventStart);
             const end = new Date(event.eventEnd);
@@ -146,7 +181,7 @@ export default function Command() {
       {
         section: "TODAY",
         sectionTitle: "Today",
-        events: events
+        events: eventsData
           .filter((event) => {
             const start = new Date(event.eventStart);
             return isAfter(start, now) && isBefore(start, endOfDay(now));
@@ -158,7 +193,7 @@ export default function Command() {
       {
         section: "EARLIER_TODAY",
         sectionTitle: "Earlier today",
-        events: events
+        events: eventsData
           .filter((event) => {
             const end = new Date(event.eventEnd);
             const start = new Date(event.eventStart);
@@ -171,7 +206,7 @@ export default function Command() {
       {
         section: "TOMORROW",
         sectionTitle: "Tomorrow",
-        events: events
+        events: eventsData
           .filter((event) => {
             const start = new Date(event.eventStart);
             return isWithinInterval(start, { start: tomorrow, end: endOfDay(tomorrow) });
@@ -182,8 +217,8 @@ export default function Command() {
       },
     ];
 
-    return eventSections.filter((event) => event.events.length > 0);
-  }, [events]);
+    return events.filter((event) => event.events.length > 0);
+  }, [eventsData]);
 
   return (
     <List
@@ -194,8 +229,8 @@ export default function Command() {
       navigationTitle="My Calendar"
       searchBarPlaceholder="Search your events"
     >
-      {eventSections.map((eventSection) => (
-        <ListSection key={eventSection.section} sectionTitle={eventSection.sectionTitle} events={eventSection.events} />
+      {events.map((section) => (
+        <ListSection key={section.section} sectionTitle={section.sectionTitle} events={section.events} />
       ))}
     </List>
   );

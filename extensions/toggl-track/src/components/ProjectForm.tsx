@@ -133,7 +133,7 @@ export default function ProjectForm({
       <Form.Dropdown id="clientIdString" title="Client" defaultValue={project?.client_id?.toString()}>
         <Form.Dropdown.Item title="None" value="" />
         {clients
-          .filter((cleint) => cleint.wid == workspace.id && !cleint.archived)
+          .filter((client) => client.wid == workspace.id && !client.archived)
           .map((client) => (
             <Form.Dropdown.Item key={client.id} value={client.id.toString()} title={client.name} />
           ))}

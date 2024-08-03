@@ -1,0 +1,43 @@
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: transparent;
+      }
+      #dotlottie-canvas {
+        width: 100%;
+        height: 100%;
+        max-width: 500px;
+        max-height: 500px;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="dotlottie-canvas"></canvas>
+    <script type="module">
+      import { DotLottie } from "https://cdn.jsdelivr.net/npm/@lottiefiles/dotlottie-web@0.28.0/+esm";
+
+      const canvas = document.getElementById("dotlottie-canvas");
+      const base64Data = "{{BASE64_DATA}}";
+      const binaryString = atob(base64Data);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const data = "{{DATA_TYPE}}" === "json" ? JSON.parse(new TextDecoder().decode(bytes)) : bytes.buffer;
+
+      new DotLottie({
+        canvas,
+        data,
+        loop: true,
+        autoplay: true,
+      });
+    </script>
+  </body>
+</html>

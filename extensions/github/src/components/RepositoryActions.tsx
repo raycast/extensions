@@ -5,8 +5,9 @@ import { format } from "date-fns";
 import { getGitHubClient } from "../api/githubClient";
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
-import { cloneAndOpen, WEB_IDES } from "../helpers/repository";
+import { WEB_IDES } from "../helpers/repository";
 
+import CloneRepositoryForm from "./CloneRepositoryForm";
 import { RepositoryDiscussionList } from "./RepositoryDiscussions";
 import { RepositoryIssueList } from "./RepositoryIssues";
 import { RepositoryPullRequestList } from "./RepositoryPullRequest";
@@ -115,13 +116,12 @@ export default function RepositoryActions({
           ))}
         </ActionPanel.Submenu>
 
-        <Action
+        <Action.Push
           icon={Icon.Terminal}
-          title="Clone and Open"
-          onAction={() => cloneAndOpen(repository)}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+          title="Clone with Options"
+          target={<CloneRepositoryForm repository={repository} />}
+          shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "c" }}
         />
-
         <Action.OpenInBrowser
           icon="vscode.svg"
           title="Clone in VSCode"
