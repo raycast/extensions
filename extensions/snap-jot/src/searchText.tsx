@@ -30,18 +30,20 @@ export default function Command() {
     const readFiles = () => {
       try {
         const fileNames = fs.readdirSync(folderPath);
-        const fileContents = fileNames.map((fileName) => {
-          const filePath = path.join(folderPath, fileName);
-          
-          // Check if the file is a directory
-          if (fs.lstatSync(filePath).isDirectory()) {
-            return null;
-          }
-  
-          const content = fs.readFileSync(filePath, "utf-8");
-          return { name: fileName, path: filePath, content };
-        }).filter(file => file !== null); // nullを除外
-  
+        const fileContents = fileNames
+          .map((fileName) => {
+            const filePath = path.join(folderPath, fileName);
+
+            // Check if the file is a directory
+            if (fs.lstatSync(filePath).isDirectory()) {
+              return null;
+            }
+
+            const content = fs.readFileSync(filePath, "utf-8");
+            return { name: fileName, path: filePath, content };
+          })
+          .filter((file) => file !== null); // nullを除外
+
         setFiles(fileContents);
       } catch (error) {
         showToast({
