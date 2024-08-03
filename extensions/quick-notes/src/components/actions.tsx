@@ -46,7 +46,10 @@ const Actions = ({
       setNoteSummary(allData, createdAt);
       resetNotes();
     });
+
     await answer;
+
+    await showToast({ title: "AI Summary Generated" });
   };
 
   return (
