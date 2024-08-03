@@ -1,5 +1,11 @@
 # PDFSearch Changelog
 
+## [1.2.0] - 2024-08-04
+
+- Revamp search logic to use the SearchKit API.
+- Modified Swift scripts to use Raycast Swift extensions.
+- Add support for searching plaintext and markdown files.
+
 ## [1.1.0] - 2024-03-25
 
 - Add outline search for individual PDF documents.

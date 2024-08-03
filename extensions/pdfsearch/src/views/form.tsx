@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Collection } from "../type";
-import { Action, ActionPanel, Form, LocalStorage, showToast, useNavigation } from "@raycast/api";
+import { Collection, UpsertCollectionResponse } from "../type";
+import { Action, ActionPanel, environment, Form, LocalStorage, showToast, useNavigation } from "@raycast/api";
 import { lstatSync } from "fs";
 import path from "path";
 import { showFailureToast } from "@raycast/utils";
-import { getValidFiles, supportedFiletypes } from "../util";
+import { getValidFiles, supportedFiletypes } from "../utils";
+import { createOrUpdateCollection, deleteCollection } from "swift:../../swift";
 
 export function CreateCollectionForm(props: {
   collection?: Collection; // if this is defined it means we are editing an existing collection
@@ -34,9 +35,7 @@ export function CreateCollectionForm(props: {
   function revalidateFiles() {
     if (files.length === 0) {
       setFileError("Add at least 1 file!");
-    } else if (
-      !files.every((file) => lstatSync(file).isDirectory() || supportedFiletypes.includes(path.extname(file)))
-    ) {
+    } else if (!files.every((file) => lstatSync(file).isDirectory() || supportedFiletypes.has(path.extname(file)))) {
       // check if there are any individually added files that are not supported
       setFileError("Unsupported file type detected!");
     } else if (fileError) {
@@ -64,9 +63,16 @@ export function CreateCollectionForm(props: {
         // if editing a collection and name changes, we delete the old collection
         if (props.collection && props.collection.name !== values.name) {
           await LocalStorage.removeItem(props.collection.name);
+          await deleteCollection(props.collection.name, environment.supportPath); // delete old persistent index file
         }
+        // create or update the persistent index for the collection
+        const response: UpsertCollectionResponse = await createOrUpdateCollection(
+          values.name,
+          environment.supportPath,
+          validFiles,
+        );
+        values.indexedFiles = response.indexedFiles;
         await LocalStorage.setItem(values.name, JSON.stringify(values));
-
         showToast({ title: "Success", message: "Collection saved!" });
       } catch (err) {
         showFailureToast(err);
