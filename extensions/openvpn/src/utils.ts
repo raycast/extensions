@@ -31,7 +31,9 @@ export const isRunning = async () => {
 
 export const startOpenVPN = async () => {
   try {
+    // Start the app
     execSync('"/Applications/OpenVPN Connect/OpenVPN Connect.app/contents/MacOS/OpenVPN Connect"');
+    // Minimize it right away (running this command without the app running might fail)
     execSync('"/Applications/OpenVPN Connect/OpenVPN Connect.app/contents/MacOS/OpenVPN Connect" --minimize');
   } catch (e) {
     console.error(e);
