@@ -2,12 +2,21 @@ import path from "node:path";
 import { platform, tmpdir } from "node:os";
 import fs from "node:fs";
 import { sleep } from "@salesforce/kit";
-import { AuthInfo, AuthRemover, Connection, OAuth2Config, Org, SfdcUrl, WebOAuthServer } from "@salesforce/core";
+import {
+  AuthInfo,
+  AuthRemover,
+  Connection,
+  OAuth2Config,
+  Org,
+  SfdcUrl,
+  WebOAuthServer,
+  SfProject,
+} from "@salesforce/core";
 import isWsl from "is-wsl";
 import { execSync } from "node:child_process";
-import { DeveloperOrg, AuthenticateNewOrgFormData } from "../models/models";
-import login from "./login";
 import { open } from "@raycast/api";
+import { getString, isObject } from "@salesforce/ts-types";
+import { AuthenticateNewOrgFormData, DeveloperOrg } from "../types";
 
 export async function getOrgList(): Promise<DeveloperOrg[]> {
   process.env["SF_DISABLE_LOG_FILE"] = "true";
@@ -31,12 +40,11 @@ async function executeLoginFlow(oauthConfig: OAuth2Config): Promise<AuthInfo> {
 }
 
 export async function authorizeOrg(toAuth: AuthenticateNewOrgFormData) {
-  process.env["SF_DISABLE_LOG_FILE"] = "true";
-  const oauthConfig: OAuth2Config = {
-    loginUrl: await login.resolveLoginUrl(toAuth.url),
-  };
-
   try {
+    process.env["SF_DISABLE_LOG_FILE"] = "true";
+    const oauthConfig: OAuth2Config = {
+      loginUrl: await resolveLoginUrl(toAuth.url),
+    };
     const authInfo = await executeLoginFlow(oauthConfig);
     await authInfo.handleAliasAndDefaultSettings({
       alias: toAuth.alias,
@@ -132,3 +140,31 @@ export async function deleteOrg(username: string) {
   const remover = await AuthRemover.create();
   await remover.removeAuth(username);
 }
+
+const resolveLoginUrl = async (instanceUrl?: string): Promise<string> => {
+  const loginUrl = instanceUrl ?? (await getLoginUrl());
+  throwIfLightning(loginUrl);
+  return loginUrl;
+};
+
+/** try to get url from project if there is one, otherwise use the default production URL  */
+const getLoginUrl = async (): Promise<string> => {
+  try {
+    const project = await SfProject.resolve();
+    const projectJson = await project.resolveProjectConfig();
+    return getString(projectJson, "sfdcLoginUrl", SfdcUrl.PRODUCTION);
+  } catch (err) {
+    const message: string = (isObject(err) ? Reflect.get(err, "message") ?? err : err) as string;
+    console.error(message);
+    return SfdcUrl.PRODUCTION;
+  }
+};
+const throwIfLightning = (urlString: string): void => {
+  const url = new SfdcUrl(urlString);
+  if (url.isLightningDomain() || (url.isInternalUrl() && url.origin.includes(".lightning."))) {
+    // throw new SfError(messages.getMessage('lightningInstanceUrl'), 'LightningDomain', [
+    //   messages.getMessage('flags.instance-url.description'),
+    // ]);
+    console.error("Something bad happened in common.");
+  }
+};
