@@ -11,15 +11,17 @@ export default function Command() {
       const files = await getSelectedFinderItems();
       if (files.length === 0) throw Error("No files selected!");
       const outlinePromises = files.map(async (f) => {
-        const fileOutlines: Outline[] = await getPDFOutline(f.path);
-        fileOutlines.forEach((o) => {
-          o.file = f.path;
-        });
-        return fileOutlines;
+        try {
+          const fileOutlines: Outline[] = await getPDFOutline(f.path);
+          fileOutlines.forEach((o) => {
+            o.file = f.path;
+          });
+          return fileOutlines;
+        } catch {
+          return [];
+        }
       });
-      const outlines = await Promise.allSettled(outlinePromises).then((results) =>
-        results.filter((r) => r.status === "fulfilled").flatMap((r) => r.value),
-      );
+      const outlines = (await Promise.all(outlinePromises)).flat();
       if (outlines.length === 0) throw new Error("Not outlines from selected files!");
       return outlines;
     } catch (err) {
