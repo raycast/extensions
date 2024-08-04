@@ -48,16 +48,4 @@ export const openFileCallback = async (page: number) => {
   await runAppleScript(script);
 };
 
-export const selectPDFFile = async () => {
-  const file = await runAppleScript(
-    `
-set selectedFile to choose file with prompt "Please select a PDF file" of type ("pdf")
-set raycastPath to POSIX path of (path to application "Raycast")
-do shell script "open " & raycastPath
-return POSIX path of selectedFile
-          `,
-  );
-  return file;
-};
-
 export const cache = new Cache();

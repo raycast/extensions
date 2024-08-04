@@ -15,6 +15,12 @@ export type Document = {
   // summary: string;
 };
 
+export type Outline = {
+  title: string;
+  page: number;
+  file: string;
+};
+
 // Swift API response formats
 export type UpsertCollectionResponse = {
   messages: string[];

@@ -1,44 +1,51 @@
-import { Action, ActionPanel, List, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, getSelectedFinderItems, List, popToRoot } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
 import fs from "fs";
-import { cache, openFileCallback, selectPDFFile } from "./utils";
+import { cache, openFileCallback } from "./utils";
 import { drawImage, getPDFOutline } from "swift:../swift";
-
-interface Outline {
-  title: string;
-  page: number;
-}
+import { Outline } from "./type";
 
 export default function Command() {
   const { data, isLoading } = usePromise(async () => {
     try {
-      const file = await selectPDFFile();
-      const outlines: Outline[] = await getPDFOutline(file);
-      return { outlines, file };
+      const files = await getSelectedFinderItems();
+      if (files.length === 0) throw Error("No files selected!");
+      const outlinePromises = files.map(async (f) => {
+        const fileOutlines: Outline[] = await getPDFOutline(f.path);
+        fileOutlines.forEach((o) => {
+          o.file = f.path;
+        });
+        return fileOutlines;
+      });
+      const outlines = await Promise.allSettled(outlinePromises).then((results) =>
+        results.filter((r) => r.status === "fulfilled").flatMap((r) => r.value),
+      );
+      if (outlines.length === 0) throw new Error("Not outlines from selected files!");
+      return outlines;
     } catch (err) {
-      showFailureToast(`Failed to get document outline. ${err}`);
+      showFailureToast(err as string);
       await popToRoot();
     }
   });
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search PDF outline..." isShowingDetail>
-      {data?.outlines?.map((outline, i) => (
+      {data?.map((outline, i) => (
         <List.Item
           key={i}
           title={outline.title}
           subtitle={`Page ${outline.page + 1}`}
           actions={
             <ActionPanel>
-              <Action.Open target={data.file} onOpen={() => openFileCallback(outline.page)} title="Open File" />
+              <Action.Open target={outline.file} onOpen={() => openFileCallback(outline.page)} title="Open File" />
               <Action.OpenWith
-                path={data.file}
+                path={outline.file}
                 onOpen={() => openFileCallback(outline.page)}
                 shortcut={{ modifiers: ["cmd"], key: "enter" }}
               />
             </ActionPanel>
           }
-          detail={<OutlineDetail outline={outline} filepath={data.file} />}
+          detail={<OutlineDetail outline={outline} filepath={outline.file} />}
         />
       ))}
     </List>
