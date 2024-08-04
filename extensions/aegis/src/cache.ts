@@ -15,7 +15,10 @@ export async function getFromCache<T>(key: string): Promise<T> {
   }
 }
 
-export async function getFromCacheOrDefault<T>(key: string, defaultValue: T): Promise<T> {
+export async function getFromCacheOrDefault<T>(
+  key: string,
+  defaultValue: T
+): Promise<T> {
   const fromCache = await LocalStorage.getItem<string>(key);
   if (fromCache != undefined) {
     return JSON.parse(fromCache);
@@ -24,7 +27,10 @@ export async function getFromCacheOrDefault<T>(key: string, defaultValue: T): Pr
   }
 }
 
-export async function addToCache(key: string, value: object | string | number | boolean): Promise<void> {
+export async function addToCache(
+  key: string,
+  value: object | string | number | boolean
+): Promise<void> {
   return await LocalStorage.setItem(key, JSON.stringify(value));
 }
 

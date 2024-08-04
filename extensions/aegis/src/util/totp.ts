@@ -11,7 +11,10 @@ export function generateTOTP(key: string, options: Options): string {
   let time = options.timestamp || new Date().getTime();
   time = Math.floor(time / 1000 / options.period);
   const decodedKey = decode.asBytes(key.toUpperCase());
-  const token = truncate(hash(Buffer.from(decodedKey), BigInt(time)), options.digits);
+  const token = truncate(
+    hash(Buffer.from(decodedKey), BigInt(time)),
+    options.digits
+  );
   return token.toString().padStart(options.digits, "0");
 }
 

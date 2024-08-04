@@ -3,7 +3,12 @@ import { genericColors, icondir, logos, logoAliases } from "../constants";
 import { toId } from "./compare";
 import { Service } from "./service";
 
-const iconLookupKeys = ["logo", "accountType", "name", "issuer"] as (keyof Service)[];
+const iconLookupKeys = [
+  "logo",
+  "accountType",
+  "name",
+  "issuer",
+] as (keyof Service)[];
 
 const colors = genericColors.map((color) => `authenticator_${color.name}`);
 

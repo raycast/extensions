@@ -13,17 +13,25 @@ interface OtpListItemProps {
   setItems: setItemsFunction;
 }
 
-export default function OtpListItem({ index, item, timeLeft, setItems }: OtpListItemProps) {
+export default function OtpListItem({
+  index,
+  item,
+  timeLeft,
+  setItems,
+}: OtpListItemProps) {
   const otp =
     item.seed != null
       ? generateTOTP(item.seed, {
-        digits: item.digits,
-        period: item.period,
-        timestamp: new Date().getTime(),
-      })
+          digits: item.digits,
+          period: item.period,
+          timestamp: new Date().getTime(),
+        })
       : CORRUPTED;
   const subtitle = item.issuer || item.accountType || "";
-  const subtitleDisplay = subtitle.match("authenticator") || !compareByName(subtitle, item.name) ? "" : subtitle;
+  const subtitleDisplay =
+    subtitle.match("authenticator") || !compareByName(subtitle, item.name)
+      ? ""
+      : subtitle;
   const progress = (100 - Math.round((timeLeft / item.period) * 100)) / 100;
 
   return (
@@ -33,9 +41,7 @@ export default function OtpListItem({ index, item, timeLeft, setItems }: OtpList
       icon={icon(item)}
       keywords={[subtitle]}
       actions={
-        <ActionPanel>
-          {otpActions(otp, item.id, index, setItems)}
-        </ActionPanel>
+        <ActionPanel>{otpActions(otp, item.id, index, setItems)}</ActionPanel>
       }
       accessories={[
         {

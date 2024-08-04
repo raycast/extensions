@@ -5,7 +5,10 @@ import { Service } from "../../util/service";
 import { checkError, loadData } from "./otp-helpers";
 
 export function OtpList() {
-  const [items, setItems] = useState<{ otpList: Service[]; isLoading: boolean }>({
+  const [items, setItems] = useState<{
+    otpList: Service[];
+    isLoading: boolean;
+  }>({
     otpList: [],
     isLoading: true,
   });

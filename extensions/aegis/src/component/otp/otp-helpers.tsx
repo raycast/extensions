@@ -15,8 +15,6 @@ import { Service } from "../../util/service";
 import { compareByDate, compareByName, toId } from "../../util/compare";
 import { AegisDB } from "../../util/AegisDB";
 
-
-
 const {
   excludeNames: excludeNamesCsv = "",
   primaryActionIsCopy,
@@ -41,7 +39,10 @@ export const CORRUPTED = "corrupted";
  */
 export type setItemsFunction = (
   value:
-    | ((prevState: { otpList: Service[]; isLoading: boolean }) => { otpList: Service[]; isLoading: boolean })
+    | ((prevState: { otpList: Service[]; isLoading: boolean }) => {
+        otpList: Service[];
+        isLoading: boolean;
+      })
     | { otpList: Service[]; isLoading: boolean }
 ) => void;
 
@@ -82,7 +83,6 @@ export async function loadData(setItems: setItemsFunction): Promise<void> {
       isLoading: false,
     });
   }
-
 }
 
 /**
@@ -93,7 +93,9 @@ export async function checkError(otpList: Service[], isLoading: boolean) {
   if (isLoading) return;
 
   // filter out all the corrupted otp
-  const all = otpList.filter((otp) => otp.type == "service" && otp.seed != null);
+  const all = otpList.filter(
+    (otp) => otp.type == "service" && otp.seed != null
+  );
   // if none of the otp are valid assume there is a problem with the password
   if (all.length === 0) {
     confirmAlert({
@@ -123,9 +125,19 @@ export async function checkError(otpList: Service[], isLoading: boolean) {
  * Copy/Paste action in order of extension preferences
  * In case if otp corrupted returns submit issue action
  */
-export function otpActions(otp: string, id: string, index: number, setItems: setItemsFunction) {
+export function otpActions(
+  otp: string,
+  id: string,
+  index: number,
+  setItems: setItemsFunction
+) {
   if (otp == CORRUPTED) {
-    return <Action.OpenInBrowser title="Submit Issue" url="https://github.com/raycast/extensions/issues/new/choose" />;
+    return (
+      <Action.OpenInBrowser
+        title="Submit Issue"
+        url="https://github.com/raycast/extensions/issues/new/choose"
+      />
+    );
   }
 
   const copy = (
@@ -152,7 +164,11 @@ export function otpActions(otp: string, id: string, index: number, setItems: set
   );
 }
 
-async function updateOrderIfEnabled(id: string, index: number, setOtpList: setItemsFunction) {
+async function updateOrderIfEnabled(
+  id: string,
+  index: number,
+  setOtpList: setItemsFunction
+) {
   if (recentlyUsedOrder) {
     // add usage to cache
     const recentlyUsed = (await checkIfCached(RECENTLY_USED))
@@ -171,14 +187,19 @@ async function updateOrderIfEnabled(id: string, index: number, setOtpList: setIt
 async function sortServices(otpServices: Service[]) {
   if (excludeNamesCsv) {
     const excludeNames = excludeNamesCsv.split(",").map(toId).filter(Boolean);
-    const filterByName = ({ name }: { name: string }) => !excludeNames.includes(toId(name));
+    const filterByName = ({ name }: { name: string }) =>
+      !excludeNames.includes(toId(name));
     otpServices = otpServices.filter(filterByName);
   }
 
   otpServices = otpServices.sort((a, b) => compareByName(a.name, b.name));
   if (recentlyUsedOrder && (await checkIfCached(RECENTLY_USED))) {
-    const recentlyUsed = new Map<string, number>(await getFromCache(RECENTLY_USED));
-    otpServices = otpServices.sort((a, b) => compareByDate(recentlyUsed.get(a.id) ?? 0, recentlyUsed.get(b.id) ?? 0));
+    const recentlyUsed = new Map<string, number>(
+      await getFromCache(RECENTLY_USED)
+    );
+    otpServices = otpServices.sort((a, b) =>
+      compareByDate(recentlyUsed.get(a.id) ?? 0, recentlyUsed.get(b.id) ?? 0)
+    );
   }
   return otpServices;
 }
