@@ -26,7 +26,8 @@
       "name": "backup",
       "title": "Backup 2FA Codes",
       "description": "Create a backup of your 2FA codes.",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "restore",
