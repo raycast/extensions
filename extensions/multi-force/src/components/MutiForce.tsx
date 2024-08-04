@@ -14,7 +14,6 @@ export default function MultiForce() {
     async function checkForGlobalOrgChanges(storedOrgs: DeveloperOrg[]) {
       //Get Orgs from Salesforce
       const globalOrgs = await getOrgList();
-
       //If there are no stored orgs, but there are global orgs, use them immediately.
       if (storedOrgs.length === 0 && globalOrgs.length > 0) {
         dispatch({

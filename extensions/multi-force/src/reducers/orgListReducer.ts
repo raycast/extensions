@@ -21,11 +21,9 @@ const addOrg = (orgMap: Map<string, DeveloperOrg[]>, newOrg: DeveloperOrg): Deve
 };
 
 const updatedOrg = (orgMap: Map<string, DeveloperOrg[]>, updatedOrg: DeveloperOrg): DeveloperOrg[] => {
-  const orgs = Array.from(orgMap.values()).flat();
-  const oldOrgIndex = orgs.findIndex((org) => org.alias === updatedOrg.alias);
-  orgs.slice(oldOrgIndex, 1);
-  orgs.push(updatedOrg);
-  return orgs;
+  const updatedOrgs = deleteOrg(orgMap, updatedOrg)
+  updatedOrgs.push(updatedOrg);
+  return updatedOrgs;
 };
 
 const deleteOrg = (orgMap: Map<string, DeveloperOrg[]>, deletedOrg: DeveloperOrg): DeveloperOrg[] => {

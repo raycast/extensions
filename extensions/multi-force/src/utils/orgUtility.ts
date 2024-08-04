@@ -33,7 +33,7 @@ export function combineOrgList(existingOrgs: DeveloperOrg[], newOrgs: DeveloperO
   // Sort the combined list by alias
   combinedOrgs.sort((a, b) => a.alias.localeCompare(b.alias));
 
-  return combinedOrgs;
+  return deduplicateList(combinedOrgs);
 }
 
 export function orgListsAreDifferent(orgs1: DeveloperOrg[], orgs2: DeveloperOrg[]): boolean {
@@ -46,4 +46,8 @@ export function orgListsAreDifferent(orgs1: DeveloperOrg[], orgs2: DeveloperOrg[
   // If the size of the intersection is not equal to the size of either set,
   // there is a discrepancy (meaning some aliases are missing or extra)
   return intersection.size !== aliases1.size || intersection.size !== aliases2.size || orgs1.length !== orgs2.length;
+}
+
+export function removeOrgByAlias(orgs: DeveloperOrg[], aliasToRemove: string): DeveloperOrg[] {
+  return orgs.filter(org => org.alias !== aliasToRemove);
 }

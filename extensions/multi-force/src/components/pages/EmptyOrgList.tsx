@@ -4,7 +4,7 @@ import { useMultiForceContext } from "../providers/OrgListProvider";
 
 export function EmptyOrgList() {
   const markdown =
-    "# Welcome to MultiForce!\nYour easy tool for logging in to your Salesforce orgs!\n\nIt doesn't look like you have added any orgs yet. Press **Enter** to authenticate your first org!";
+    "# Welcome to MultiForce!\nYour easy tool for logging in to your Salesforce orgs!\n\nIt doesn't look like you have added any orgs yet. Press **Enter** to add your first org!";
   const { dispatch } = useMultiForceContext();
 
   return (
@@ -13,7 +13,7 @@ export function EmptyOrgList() {
       actions={
         <ActionPanel>
           <Action.Push
-            title="Authenticate"
+            title="Add"
             target={<AuthenticateNewOrg dispatch={dispatch} />}
             icon={{ source: Icon.PlusSquare }}
             shortcut={Keyboard.Shortcut.Common.New}

@@ -40,6 +40,7 @@ export function OrgListItem(props: { index: number; org: DeveloperOrg }) {
     if (
       await confirmAlert({
         title: `Are you sure you want to delete\n${org.label ? org.label : org.alias}?`,
+        message: `Deleting will log you out in MultiForce, VSCode, and the SF CLI tool. You can always re-add this org later.`,
         icon: { source: Icon.Trash },
         primaryAction: {
           title: "Delete",
@@ -70,7 +71,7 @@ export function OrgListItem(props: { index: number; org: DeveloperOrg }) {
             shortcut={{ modifiers: ["cmd"], key: "return" }}
           />
           <Action.Push
-            title="Authenticate"
+            title="Add"
             target={<AuthenticateNewOrg orgs={orgs} dispatch={dispatch} />}
             icon={{ source: Icon.PlusSquare }}
             shortcut={Keyboard.Shortcut.Common.New}

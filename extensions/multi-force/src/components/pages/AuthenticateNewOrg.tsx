@@ -35,7 +35,6 @@ export function AuthenticateNewOrg(props: {
       }
     }
     getSectionList();
-    setValue("color", DEFAULT_COLOR);
   }, []);
 
   const showErrorToast = async () => {
@@ -57,7 +56,7 @@ export function AuthenticateNewOrg(props: {
     }
   };
 
-  const { handleSubmit, itemProps, setValue } = useForm<AuthenticateNewOrgFormData>({
+  const { handleSubmit, itemProps } = useForm<AuthenticateNewOrgFormData>({
     onSubmit(values: AuthenticateNewOrgFormData) {
       if (values.type === "sandbox") {
         values.url = "https://test.salesforce.com";
@@ -114,20 +113,20 @@ export function AuthenticateNewOrg(props: {
       }
     >
       <Form.Description
-        title="Authenticating a New Salesforce Org"
-        text="Choose the org type, an org alias, and label. When you hit submit, your browser should open. "
+        title="Add an Org"
+        text="Enter the following information for your org. When you submit the form, Salesforce will prompt you to log in."
       />
-      <Form.Dropdown title="Org Type" {...itemProps.type} onChange={setOrgType}>
+      <Form.Dropdown info="What type of org are you logging into? If you have a custom URL, choose the 'Custom' option. "title="Org Type" {...itemProps.type} onChange={setOrgType}>
         <Form.Dropdown.Item value="sandbox" title="Sandbox" icon="🏝️" />
         <Form.Dropdown.Item value="custom" title="Custom" icon="🚀" />
         <Form.Dropdown.Item value="prod" title="Production" icon="💼" />
         <Form.Dropdown.Item value="dev" title="Developer Hub" icon="💻" />
       </Form.Dropdown>
-      {orgType === "custom" ? <Form.TextField title="Custom URL" {...itemProps.url} /> : <></>}
-      <Form.TextField title="Org Alias" {...itemProps.alias} />
-      <Form.TextField title="Label" {...itemProps.label} />
-      <Form.TextField title="Color (Hex Code)" {...itemProps.color} />
-      <Form.Dropdown title="Section" {...itemProps.section} onChange={setSection}>
+      {orgType === "custom" ? <Form.TextField title="Custom URL" {...itemProps.url} placeholder="https://my-custom-org.sandbox.my.salesforce.com"/> : <></>}
+      <Form.TextField info="Enter an alias for your org. This alias is used to uniquely identify your org. If you use VSCode or the SF CLI tools, this alias will also be displayed there." title="Org Alias" {...itemProps.alias} placeholder="my-development-org"/>
+      <Form.TextField info="Enter a label to use with your org." title="Label" {...itemProps.label} placeholder="My Org"/>
+      <Form.TextField info={`Enter a color to use on the Salesforce Icon for your org. This color must be in HEX format, ie ${DEFAULT_COLOR}.`} title="Color" {...itemProps.color} placeholder={DEFAULT_COLOR}/>
+      <Form.Dropdown info="Select a section to group orgs on your list. If you want to create a new group, choose the 'New Section' option." title="Section" {...itemProps.section} onChange={setSection}>
         {sections.map((sect, index) => (
           <Form.Dropdown.Item key={index} value={sect} title={sect} />
         ))}
