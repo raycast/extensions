@@ -3,7 +3,7 @@ import type { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoint
 import { type Form, showToast, Toast } from "@raycast/api";
 import { markdownToBlocks } from "@tryfabric/martian";
 
-import { isWritableProperty } from "..";
+import { isReadableProperty } from "..";
 import { handleError, isNotNullOrUndefined, pageMapper } from "../global";
 import { getNotionClient } from "../oauth";
 import { formValueToPropertyValue } from "../page/property";
@@ -65,7 +65,7 @@ export async function fetchDatabaseProperties(databaseId: string) {
 
     propertyNames.forEach((name) => {
       const property = database.properties[name];
-      if (isWritableProperty(property)) {
+      if (isReadableProperty(property)) {
         if (property.type == "select")
           property.select.options.unshift({
             id: "_select_null_",

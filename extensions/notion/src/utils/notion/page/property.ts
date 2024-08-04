@@ -3,7 +3,7 @@ import { Form } from "@raycast/api";
 import { markdownToRichText } from "@tryfabric/martian";
 import { subMinutes } from "date-fns";
 
-import type { NotionObject, WritablePropertyTypes } from "..";
+import type { NotionObject, ReadablePropertyType } from "..";
 import type { UnwrapRecord } from "../../types";
 import { getLocalTimezone } from "../global";
 
@@ -12,14 +12,14 @@ export type PageProperty = UnwrapRecord<NotionProperties<NotionObject, "page">>;
 
 type PagePropertyValue = CreatePageParameters["properties"][string];
 
-export function formValueToPropertyValue<T extends WritablePropertyTypes>(
+export function formValueToPropertyValue<T extends ReadablePropertyType>(
   type: T,
   formValue: FormValueForDatabaseProperty<T>,
 ): PagePropertyValue | undefined;
 export function formValueToPropertyValue(
   ...[type, value]: {
-    [T in WritablePropertyTypes]: [type: T, value: FormValueForDatabaseProperty<T>];
-  }[WritablePropertyTypes]
+    [T in ReadablePropertyType]: [type: T, value: FormValueForDatabaseProperty<T>];
+  }[ReadablePropertyType]
 ): PagePropertyValue | undefined {
   switch (type) {
     case "title":
@@ -60,11 +60,11 @@ export function formValueToPropertyValue(
   }
 }
 
-const formattedProperty = <T extends WritablePropertyTypes, V>(type: T, value: V) =>
+const formattedProperty = <T extends ReadablePropertyType, V>(type: T, value: V) =>
   ({ [type]: value }) as { [K in T]: V };
 
 // prettier-ignore
-type FormValueForDatabaseProperty<T extends WritablePropertyTypes> =
+type FormValueForDatabaseProperty<T extends ReadablePropertyType> =
         T extends "date" ? Date | null
       : T extends "checkbox" ? boolean
       : T extends "multi_select" | "relation" | "people" ? string[]
