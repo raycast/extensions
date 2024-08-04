@@ -71,7 +71,7 @@ export class AegisDB {
                 ]);
                 masterKey = decrypted;
                 break;
-            } catch (error) {
+            } catch (error: any) {
                 if (error.message !== 'Unsupported state or unable to authenticate data') {
                     throw error;
                 }
