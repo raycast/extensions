@@ -6,6 +6,7 @@ import { ChatFullForm } from "./form";
 import say from "say";
 import { GetNewConversation } from "../../type/conversation";
 import { ITalk } from "../../ai/type";
+import { OnboardingEmpty } from "../onboarding/empty";
 
 export const ChatView = ({
   data,
@@ -14,6 +15,7 @@ export const ChatView = ({
   setConversation,
   use,
   selectedAssistant,
+  noAssistant,
 }: ChatViewPropsType) => {
   const { push } = useNavigation();
   const sortedChats = data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -97,7 +99,11 @@ export const ChatView = ({
   );
 
   return sortedChats.length === 0 ? (
-    <EmptyView />
+    noAssistant ? (
+      <OnboardingEmpty />
+    ) : (
+      <EmptyView />
+    )
   ) : (
     <List.Section title="History" subtitle={data.length.toLocaleString()}>
       {sortedChats.map((sc: ITalk, i) => {

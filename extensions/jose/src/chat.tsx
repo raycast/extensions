@@ -6,10 +6,9 @@ import { useQuestion } from "./hook/useQuestion";
 import { ConversationType, GetNewConversation } from "./type/conversation";
 import { ChatView } from "./view/chat/view";
 import { useAssistant } from "./hook/useAssistant";
-import { AssistantDefault } from "./type/assistant";
 import { ChatFullForm } from "./view/chat/form";
 import { useSnippet } from "./hook/useSnippet";
-import { GetNewSnippet } from "./type/snippet";
+import { SnippetDefault } from "./type/snippet";
 import { ChatDropdown } from "./view/chat/dropdown";
 import {
   ConversationSelectedTypeAssistant,
@@ -17,11 +16,13 @@ import {
   ITalkAssistant,
   ITalkSnippet,
 } from "./ai/type";
+import { needOnboarding } from "./type/config";
+import { Onboarding } from "./view/onboarding/start";
 
 export default function Chat(props: { conversation?: ConversationType; arguments?: { ask: string } }) {
   const { push } = useNavigation();
   const conversations = useConversations();
-  const assistants = useAssistant();
+  const collectionsAssistant = useAssistant();
   const snippets = useSnippet();
   const chats = useChat();
   const question = useQuestion({
@@ -32,13 +33,13 @@ export default function Chat(props: { conversation?: ConversationType; arguments
   const isLoadConversation = props.conversation ? true : false;
 
   const [conversation, setConversation] = useState<ConversationType>(
-    props.conversation ? props.conversation : GetNewConversation(AssistantDefault[0], false)
+    props.conversation ? props.conversation : GetNewConversation(collectionsAssistant.data[0], false)
   );
   const [selectedAssistant, setSelectedAssistant] = useState<ITalkAssistant>(
-    props.conversation && props.conversation.assistant ? props.conversation.assistant : AssistantDefault[0]
+    props.conversation && props.conversation.assistant ? props.conversation.assistant : collectionsAssistant.data[0]
   );
   const [selectedSnippet, setSelectedSnippet] = useState<ITalkSnippet | undefined>(
-    props.conversation && props.conversation.snippet ? props.conversation.snippet : GetNewSnippet()
+    props.conversation && props.conversation.snippet ? props.conversation.snippet : SnippetDefault[0]
   );
 
   useEffect(() => {
@@ -54,10 +55,10 @@ export default function Chat(props: { conversation?: ConversationType; arguments
     }
   }, [conversation]);
   useEffect(() => {
-    if (assistants.data && conversation.chats.length === 0) {
+    if (collectionsAssistant.data && conversation.chats.length === 0) {
       setConversation({ ...conversation, assistant: selectedAssistant, updatedAt: new Date().toISOString() });
     }
-  }, [assistants.data]);
+  }, [collectionsAssistant.data]);
   useEffect(() => {
     if (selectedSnippet !== undefined && snippets.data && conversation.chats.length === 0) {
       setConversation({ ...conversation, snippet: selectedSnippet, updatedAt: new Date().toISOString() });
@@ -80,7 +81,9 @@ export default function Chat(props: { conversation?: ConversationType; arguments
     setConversation(updatedConversation);
   }, [chats.data]);
   useEffect(() => {
-    const selected = assistants.data.find((x: ITalkAssistant) => x.assistantId === selectedAssistant.assistantId);
+    const selected = collectionsAssistant.data.find(
+      (x: ITalkAssistant) => x.assistantId === selectedAssistant.assistantId
+    );
     conversation.selectedType = ConversationSelectedTypeAssistant;
     setConversation({
       ...conversation,
@@ -121,6 +124,54 @@ export default function Chat(props: { conversation?: ConversationType; arguments
     </ActionPanel>
   );
 
+  let getActionPanelDefault = () => (
+    <ActionPanel>
+      <ActionPanel.Section title="Input">
+        <Action
+          title="Full Text Input"
+          shortcut={{ modifiers: ["cmd"], key: "t" }}
+          icon={Icon.Text}
+          onAction={() => {
+            push(
+              <ChatFullForm
+                initialQuestion={question.data}
+                onSubmit={(question: string, file: string[] | undefined) => chats.ask(question, file, conversation)}
+              />
+            );
+          }}
+        />
+      </ActionPanel.Section>
+      <Action
+        title="Onboarding"
+        icon={Icon.Exclamationmark}
+        onAction={() => {
+          push(<Onboarding />);
+        }}
+      />
+    </ActionPanel>
+  );
+  let searchBarPlaceholder =
+    selectedAssistant !== undefined
+      ? selectedAssistant.title + (chats.data.length > 0 ? " - Ask another question..." : " - Ask a question...")
+      : "Ask a question...";
+  let noAssistant = false;
+
+  if (needOnboarding(collectionsAssistant.data.length) || collectionsAssistant.data.length === 0) {
+    getActionPanelDefault = () => (
+      <ActionPanel>
+        <Action
+          title="Onboarding"
+          icon={Icon.Exclamationmark}
+          onAction={() => {
+            push(<Onboarding />);
+          }}
+        />
+      </ActionPanel>
+    );
+    searchBarPlaceholder = "No assistant, first start onboarding to create your first assistant!";
+    noAssistant = true;
+  }
+
   return (
     <List
       searchText={question.data}
@@ -129,36 +180,12 @@ export default function Chat(props: { conversation?: ConversationType; arguments
       isLoading={question.isLoading ? question.isLoading : chats.isLoading}
       onSearchTextChange={question.update}
       throttle={false}
-      navigationTitle={"Ask " + selectedAssistant.title}
-      actions={
-        !question.data ? (
-          <ActionPanel>
-            <ActionPanel.Section title="Input">
-              <Action
-                title="Full Text Input"
-                shortcut={{ modifiers: ["cmd"], key: "t" }}
-                icon={Icon.Text}
-                onAction={() => {
-                  push(
-                    <ChatFullForm
-                      initialQuestion={question.data}
-                      onSubmit={(question: string, file: string[] | undefined) =>
-                        chats.ask(question, file, conversation)
-                      }
-                    />
-                  );
-                }}
-              />
-            </ActionPanel.Section>
-          </ActionPanel>
-        ) : (
-          getActionPanel(question.data)
-        )
-      }
+      navigationTitle={"Ask " + (selectedAssistant !== undefined ? selectedAssistant.title : "")}
+      actions={!question.data ? getActionPanelDefault() : getActionPanel(question.data)}
       selectedItemId={chats.selectedChatId || undefined}
       searchBarAccessory={
         <ChatDropdown
-          assistants={assistants.data}
+          assistants={collectionsAssistant.data}
           snippets={snippets.data}
           selectedAssistant={selectedAssistant}
           onAssistantChange={setSelectedAssistant}
@@ -170,9 +197,7 @@ export default function Chat(props: { conversation?: ConversationType; arguments
           chats.setSelectedChatId(id);
         }
       }}
-      searchBarPlaceholder={
-        selectedAssistant.title + (chats.data.length > 0 ? " - Ask another question..." : " - Ask a question...")
-      }
+      searchBarPlaceholder={searchBarPlaceholder}
     >
       <ChatView
         data={conversation.chats}
@@ -181,6 +206,7 @@ export default function Chat(props: { conversation?: ConversationType; arguments
         setConversation={setConversation}
         use={{ chats, conversations }}
         selectedAssistant={selectedAssistant}
+        noAssistant={noAssistant}
       />
     </List>
   );

@@ -17,7 +17,7 @@ export function useAssistant(): AssistantHookType {
       if (stored) {
         setData((previous) => [...previous, ...JSON.parse(stored)]);
       } else {
-        if (GetApiEndpointData() !== undefined && GetApiEndpointData().host !== undefined) {
+        if (GetApiEndpointData() !== undefined && GetApiEndpointData().assistant !== undefined) {
           await apiLoad(setData, data);
         } else {
           setData(AssistantDefault);
@@ -33,7 +33,7 @@ export function useAssistant(): AssistantHookType {
   }, [data]);
 
   const reload = useCallback(async () => {
-    if (GetApiEndpointData() === undefined || GetApiEndpointData().host === undefined) {
+    if (GetApiEndpointData() === undefined || GetApiEndpointData().assistant === undefined) {
       setData(AssistantDefault);
       return;
     }
@@ -55,6 +55,8 @@ export function useAssistant(): AssistantHookType {
         title: "Assistant saved!",
         style: Toast.Style.Success,
       });
+
+      await LocalStorage.setItem("onboarding", "finish");
     },
     [setData, data]
   );
@@ -116,7 +118,10 @@ export function useAssistant(): AssistantHookType {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function apiLoad(setData: any, oldData: ITalkAssistant[]) {
-  await fetch(GetApiEndpointData().host + "/api/resource/assistant")
+  if (GetApiEndpointData().assistant === "" || GetApiEndpointData().assistant === undefined) {
+    return setData(AssistantDefault);
+  }
+  await fetch(GetApiEndpointData().assistant)
     .then(async (response) => response.json())
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .then(async (res: any) => {
@@ -126,6 +131,7 @@ async function apiLoad(setData: any, oldData: ITalkAssistant[]) {
         return {
           ...item,
           promptSystem: ClearPromptSystem(item.promptSystem),
+          modelApiKeyOrUrl: undefined,
           webhookUrl: existing?.webhookUrl || item.webhookUrl,
           modelTemperature: existing?.modelTemperature || AssistantDefaultTemperature,
           typeCommunication: existing?.typeCommunication || ConfigurationTypeCommunicationDefault,

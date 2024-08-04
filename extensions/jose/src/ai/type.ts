@@ -18,7 +18,9 @@ export interface ITalk {
   llm: {
     llm: string | undefined;
     model: string | undefined;
+    url: string | undefined;
     temperature: string | undefined;
+    object: ITalkLlm | undefined;
     stream: boolean;
   };
   user: {
@@ -145,5 +147,21 @@ export interface ITalkSnippet {
   modelTemperature: string;
   promptSystem: string;
   webhookUrl: string | undefined;
+  isLocal: boolean;
+}
+
+export interface ITalkLlm {
+  key: string;
+  title: string;
+  company: string;
+  model: string;
+  apiKeyOrUrl: string | undefined;
+  useLocalOrEnv: string;
+  url: string | undefined;
+  trainingDataTo: string | undefined;
+  tokens: {
+    contextWindow: number | undefined;
+    maxOutput: number | undefined;
+  };
   isLocal: boolean;
 }

@@ -2,17 +2,12 @@ import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
 import { AssistantHookType } from "../../type/assistant";
-import {
-  ConfigurationModelCollection,
-  ConfigurationModelDefault,
-  ConfigurationTypeCommunication,
-  ConfigurationTypeCommunicationDefault,
-} from "../../type/config";
-import { AssistantDefaultTemperature, ITalkAssistant, ITalkSnippet } from "../../ai/type";
+import { ConfigurationTypeCommunication, ConfigurationTypeCommunicationDefault } from "../../type/config";
+import { AssistantDefaultTemperature, ITalkAssistant, ITalkLlm, ITalkSnippet } from "../../ai/type";
 
 export const AssistantFormLocal = (props: {
   assistant?: ITalkAssistant;
-  use: { assistants: AssistantHookType; snippets: ITalkSnippet[] };
+  use: { assistants: AssistantHookType; snippets: ITalkSnippet[]; llms: ITalkLlm[] };
   name?: string;
 }) => {
   const { use, assistant } = props;
@@ -46,7 +41,7 @@ export const AssistantFormLocal = (props: {
       description: assistant?.description ?? "",
       avatar: assistant?.avatar ?? "",
       emoji: assistant?.emoji ?? "",
-      model: assistant?.model ?? ConfigurationModelDefault,
+      model: assistant?.model ?? "",
       additionalData: assistant?.additionalData ?? "",
       snippet: assistant?.snippet ?? [],
       promptSystem: assistant?.promptSystem ?? "",
@@ -90,8 +85,8 @@ export const AssistantFormLocal = (props: {
           ))}
         </Form.Dropdown>
         <Form.Dropdown title="Model" placeholder="Choose model" {...itemProps.model}>
-          {Object.entries(ConfigurationModelCollection).map(([, value]) => (
-            <Form.Dropdown.Item value={value.key} key={value.key} title={value.title} />
+          {Object.entries(use.llms).map(([, value]) => (
+            <Form.Dropdown.Item value={value.key} key={value.key} title={value.company + " " + value.model} />
           ))}
         </Form.Dropdown>
         <Form.Dropdown title="Temperature" placeholder="Temperature model" {...itemProps.modelTemperature}>

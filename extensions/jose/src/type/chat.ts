@@ -39,7 +39,9 @@ export function GetNewChat(
     llm: {
       llm: undefined,
       model: undefined,
+      url: undefined,
       temperature: undefined,
+      object: undefined,
       stream: false,
     },
     user: {
@@ -89,6 +91,7 @@ export interface ChatViewPropsType {
   setConversation: SetType<ConversationType>;
   use: { chats: ChatHookType; conversations: ConversationsHookType };
   selectedAssistant: ITalkAssistant;
+  noAssistant: boolean;
 }
 
 export interface ChangeModelPropType {
@@ -126,7 +129,7 @@ export type HistoryHookType = HookType<ITalk>;
 export interface ChangeDropdownPropType {
   assistants: ITalkAssistant[];
   snippets: ITalkSnippet[];
-  selectedAssistant: ITalkAssistant;
+  selectedAssistant: ITalkAssistant | undefined;
   onAssistantChange: SetType<ITalkAssistant>;
   onSnippetChange: SetType<ITalkSnippet | undefined>;
 }

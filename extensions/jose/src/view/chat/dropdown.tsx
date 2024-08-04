@@ -6,14 +6,22 @@ import { ITalkAssistant, ITalkSnippet } from "../../ai/type";
 export const ChatDropdown = (props: ChangeDropdownPropType) => {
   const { assistants, snippets, selectedAssistant, onAssistantChange, onSnippetChange } = props;
   const filtredSnippets = snippets.filter((snippet: ITalkSnippet) =>
-    (selectedAssistant.snippet ? selectedAssistant.snippet.join(", ") : "").includes(snippet.snippetId)
+    (selectedAssistant !== undefined && selectedAssistant.snippet ? selectedAssistant.snippet.join(", ") : "").includes(
+      snippet.snippetId
+    )
   );
+  let assistantsList = assistants;
+  if (selectedAssistant !== undefined) {
+    assistantsList = assistantsList.filter(
+      (assistant: ITalkAssistant) => assistant.assistantId !== selectedAssistant.assistantId
+    );
+  }
 
   return (
     <List.Dropdown
       tooltip="Select"
       storeValue={true}
-      defaultValue={"assistant__" + selectedAssistant.assistantId}
+      defaultValue={"assistant__" + (selectedAssistant !== undefined ? selectedAssistant.assistantId : "")}
       onChange={(value: string) => {
         const data = value.split("__");
         if (data[0] === "assistant") {
@@ -52,16 +60,14 @@ export const ChatDropdown = (props: ChangeDropdownPropType) => {
             icon={selectedAssistant.avatar ? { source: selectedAssistant.avatar } : { source: selectedAssistant.emoji }}
           />
         )}
-        {assistants
-          .filter((assistant: ITalkAssistant) => assistant.assistantId !== selectedAssistant.assistantId)
-          .map((assistant: ITalkAssistant) => (
-            <List.Dropdown.Item
-              key={assistant.assistantId}
-              title={assistant.title}
-              value={"assistant__" + assistant.assistantId}
-              icon={assistant.avatar ? { source: assistant.avatar } : { source: assistant.emoji }}
-            />
-          ))}
+        {assistantsList.map((assistant: ITalkAssistant) => (
+          <List.Dropdown.Item
+            key={assistant.assistantId}
+            title={assistant.title}
+            value={"assistant__" + assistant.assistantId}
+            icon={assistant.avatar ? { source: assistant.avatar } : { source: assistant.emoji }}
+          />
+        ))}
       </List.Dropdown.Section>
     </List.Dropdown>
   );

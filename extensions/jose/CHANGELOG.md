@@ -39,3 +39,8 @@
 
 - fix UI
 - add separate form for local and no local assistant / snippet
+
+## [Version: 1.2.1] - 2024-08-04
+
+- llm configuration
+- add onboarding for new user

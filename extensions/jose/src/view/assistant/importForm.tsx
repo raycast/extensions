@@ -5,13 +5,12 @@ import { AssistantHookType } from "../../type/assistant";
 import {
   ClearImportModel,
   ClearImportModelTemperature,
-  ConfigurationModelCollection,
   ConfigurationModelDefault,
   ConfigurationTypeCommunicationDefault,
 } from "../../type/config";
-import { AssistantDefaultTemperature, ITalkAssistant } from "../../ai/type";
+import { AssistantDefaultTemperature, ITalkAssistant, ITalkLlm } from "../../ai/type";
 
-export const AssistantImportForm = (props: { use: { assistants: AssistantHookType } }) => {
+export const AssistantImportForm = (props: { use: { assistants: AssistantHookType; llms: ITalkLlm[] } }) => {
   const { use } = props;
   const { pop } = useNavigation();
 
@@ -20,7 +19,7 @@ export const AssistantImportForm = (props: { use: { assistants: AssistantHookTyp
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       JSON.parse(data.json).map((item: any) => {
         let iModel = ClearImportModel(item.model);
-        if (!ConfigurationModelCollection.some((model) => model.key === iModel)) {
+        if (!use.llms.some((model) => model.key === iModel)) {
           iModel = ConfigurationModelDefault;
         }
 

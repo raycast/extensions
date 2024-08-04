@@ -1,13 +1,15 @@
 import { List } from "@raycast/api";
-import { ConfigurationModelCollection, ConfigurationTypeCommunication } from "../../type/config";
-import { ITalkSnippet } from "../../ai/type";
+import { ConfigurationTypeCommunication } from "../../type/config";
+import { ITalkLlm, ITalkSnippet } from "../../ai/type";
 
 export const SnippetListView = ({
   snippets,
+  llms,
   selectedSnippet,
   actionPanel,
 }: {
   snippets: ITalkSnippet[];
+  llms: ITalkLlm[];
   selectedSnippet: string | null;
   actionPanel: (snippet: ITalkSnippet) => JSX.Element;
 }) => {
@@ -19,6 +21,7 @@ export const SnippetListView = ({
             <SnippetListItem
               key={snippet.snippetId}
               snippet={snippet}
+              llms={llms}
               selectedsnippet={selectedSnippet}
               actionPanel={actionPanel}
             />
@@ -43,10 +46,12 @@ export function SnippetGroupByCategory(array: ITalkSnippet[]) {
 
 export const SnippetListItem = ({
   snippet,
+  llms,
   selectedsnippet,
   actionPanel,
 }: {
   snippet: ITalkSnippet;
+  llms: ITalkLlm[];
   selectedsnippet: string | null;
   actionPanel: (snippet: ITalkSnippet) => JSX.Element;
 }) => {
@@ -55,18 +60,16 @@ export const SnippetListItem = ({
       id={snippet.snippetId}
       key={snippet.snippetId}
       title={snippet.title}
-      subtitle={
-        ConfigurationModelCollection.find((x: { key: string; title: string }) => x.key === snippet.model)?.title
-      }
+      subtitle={llms.find((x: { key: string; title: string }) => x.key === snippet.model)?.title}
       icon={{ source: snippet.emoji }}
-      detail={<ModelDetailView snippet={snippet} />}
+      detail={<ModelDetailView snippet={snippet} llms={llms} />}
       actions={selectedsnippet === snippet.snippetId ? actionPanel(snippet) : undefined}
     />
   );
 };
 
-const ModelDetailView = (props: { snippet: ITalkSnippet; markdown?: string | null | undefined }) => {
-  const { snippet, markdown } = props;
+const ModelDetailView = (props: { snippet: ITalkSnippet; llms: ITalkLlm[]; markdown?: string | null | undefined }) => {
+  const { snippet, llms, markdown } = props;
 
   return (
     <List.Item.Detail
@@ -79,9 +82,7 @@ const ModelDetailView = (props: { snippet: ITalkSnippet; markdown?: string | nul
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
             title="Model"
-            text={
-              ConfigurationModelCollection.find((x: { key: string; title: string }) => x.key === snippet.model)?.title
-            }
+            text={llms.find((x: { key: string; title: string }) => x.key === snippet.model)?.title}
           />
           <List.Item.Detail.Metadata.Label title="Temperature Model" text={snippet.modelTemperature} />
           <List.Item.Detail.Metadata.Label title="Webhook" text={snippet.webhookUrl ? snippet.webhookUrl : ""} />

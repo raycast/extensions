@@ -4,14 +4,13 @@ import { v4 as uuidv4 } from "uuid";
 import {
   ClearImportModel,
   ClearImportModelTemperature,
-  ConfigurationModelCollection,
   ConfigurationModelDefault,
   ConfigurationTypeCommunicationDefault,
 } from "../../type/config";
 import { SnippetHookType } from "../../type/snippet";
-import { ITalkSnippet, SnippetDefaultTemperature } from "../../ai/type";
+import { ITalkLlm, ITalkSnippet, SnippetDefaultTemperature } from "../../ai/type";
 
-export const SnippetImportForm = (props: { use: { snippets: SnippetHookType } }) => {
+export const SnippetImportForm = (props: { use: { snippets: SnippetHookType; llms: ITalkLlm[] } }) => {
   const { use } = props;
   const { pop } = useNavigation();
 
@@ -20,7 +19,7 @@ export const SnippetImportForm = (props: { use: { snippets: SnippetHookType } })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       JSON.parse(data.json).map((item: any) => {
         let iModel = ClearImportModel(item.model);
-        if (!ConfigurationModelCollection.some((model) => model.key === iModel)) {
+        if (!use.llms.some((model) => model.key === iModel)) {
           iModel = ConfigurationModelDefault;
         }
 

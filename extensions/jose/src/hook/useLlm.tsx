@@ -1,15 +1,15 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import fetch from "node-fetch";
-import { SnippetDefault, SnippetHookType } from "../type/snippet";
-import { ClearPromptSystem, ConfigurationTypeCommunicationDefault, GetApiEndpointData } from "../type/config";
-import { ITalkSnippet, SnippetDefaultTemperature } from "../ai/type";
+import { LlmDefault, LlmHookType } from "../type/llm";
+import { GetApiEndpointData } from "../type/config";
+import { ITalkLlm } from "../ai/type";
 
-export function useSnippet(): SnippetHookType {
-  const [data, setData] = useState<ITalkSnippet[]>([]);
+export function useLlm(): LlmHookType {
+  const [data, setData] = useState<ITalkLlm[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
 
-  const localStorageName = "snippets";
+  const localStorageName = "llms";
 
   useEffect(() => {
     (async () => {
@@ -17,10 +17,10 @@ export function useSnippet(): SnippetHookType {
       if (stored) {
         setData((previous) => [...previous, ...JSON.parse(stored)]);
       } else {
-        if (GetApiEndpointData() !== undefined && GetApiEndpointData().snippet !== undefined) {
-          await apiLoad(setData, data);
+        if (GetApiEndpointData() !== undefined && GetApiEndpointData().llm !== undefined) {
+          await apiLoad(setData);
         } else {
-          setData(SnippetDefault);
+          setData(LlmDefault);
         }
       }
 
@@ -33,26 +33,26 @@ export function useSnippet(): SnippetHookType {
   }, [data]);
 
   const reload = useCallback(async () => {
-    if (GetApiEndpointData() === undefined || GetApiEndpointData().snippet === undefined) {
-      setData(SnippetDefault);
+    if (GetApiEndpointData() === undefined || GetApiEndpointData().llm === undefined) {
+      setData(LlmDefault);
       return;
     }
-    await apiLoad(setData, data);
+    await apiLoad(setData);
 
     await showToast({
-      title: "Assistant data realoaded!",
+      title: "LLM data realoaded!",
       style: Toast.Style.Success,
     });
   }, [setData, data]);
 
   const add = useCallback(
-    async (item: ITalkSnippet) => {
+    async (item: ITalkLlm) => {
       item.isLocal = true;
-      const newData: ITalkSnippet = { ...item };
+      const newData: ITalkLlm = { ...item };
       setData([...data, newData]);
 
       await showToast({
-        title: "Snippet saved!",
+        title: "Llm saved!",
         style: Toast.Style.Success,
       });
     },
@@ -60,10 +60,10 @@ export function useSnippet(): SnippetHookType {
   );
 
   const update = useCallback(
-    async (item: ITalkSnippet) => {
+    async (item: ITalkLlm) => {
       setData((prev) => {
-        return prev.map((v: ITalkSnippet) => {
-          if (v.snippetId === item.snippetId) {
+        return prev.map((v: ITalkLlm) => {
+          if (v.key === item.key) {
             return item;
           }
 
@@ -72,7 +72,7 @@ export function useSnippet(): SnippetHookType {
       });
 
       await showToast({
-        title: "Snippet updated!",
+        title: "Llm updated!",
         style: Toast.Style.Success,
       });
     },
@@ -80,21 +80,21 @@ export function useSnippet(): SnippetHookType {
   );
 
   const remove = useCallback(
-    async (item: ITalkSnippet) => {
+    async (item: ITalkLlm) => {
       if (item.isLocal !== true) {
         await showToast({
-          title: "Removing your Snippet imposible, Snippet is not local",
+          title: "Removing your Llm imposible, Llm is not local",
           style: Toast.Style.Failure,
         });
 
         return;
       }
 
-      const newData: ITalkSnippet[] = data.filter((o) => o.snippetId !== item.snippetId);
+      const newData: ITalkLlm[] = data.filter((o) => o.key !== item.key);
       setData(newData);
 
       await showToast({
-        title: "Snippet removed!",
+        title: "Llm removed!",
         style: Toast.Style.Success,
       });
     },
@@ -103,7 +103,7 @@ export function useSnippet(): SnippetHookType {
 
   const clear = useCallback(async () => {
     await showToast({
-      title: "You can't cleared Snippets!",
+      title: "You can't cleared Llms!",
       style: Toast.Style.Failure,
     });
   }, [setData]);
@@ -115,23 +115,18 @@ export function useSnippet(): SnippetHookType {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function apiLoad(setData: any, oldData: ITalkSnippet[]) {
-  if (GetApiEndpointData().snippet === "" || GetApiEndpointData().snippet === undefined) {
-    return setData(SnippetDefault);
+async function apiLoad(setData: any) {
+  if (GetApiEndpointData().llm === "" || GetApiEndpointData().llm === undefined) {
+    return setData(LlmDefault);
   }
-  await fetch(GetApiEndpointData().snippet)
+  await fetch(GetApiEndpointData().llm)
     .then(async (response) => response.json())
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .then(async (res: any) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const newRes: ITalkSnippet[] = res.map((item: any) => {
-        const existing = oldData.find((x: ITalkSnippet) => x.snippetId === item.snippetId);
+      const newRes: ITalkLlm[] = res.map((item: any) => {
         return {
           ...item,
-          promptSystem: ClearPromptSystem(item.promptSystem),
-          webhookUrl: existing?.webhookUrl || item.webhookUrl,
-          modelTemperature: existing?.modelTemperature || SnippetDefaultTemperature,
-          typeCommunication: existing?.typeCommunication || ConfigurationTypeCommunicationDefault,
           isLocal: false,
         };
       });

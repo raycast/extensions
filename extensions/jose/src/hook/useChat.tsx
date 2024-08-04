@@ -13,12 +13,14 @@ import {
   ConversationSelectedTypeAssistant,
   ConversationSelectedTypeSnippet,
   ITalk,
+  ITalkLlm,
   ITalkQuestion,
   ITalkQuestionFile,
 } from "../ai/type";
 import { RunLocal } from "./chat/local";
 import { RunBinnary } from "./chat/binary";
 import { RunCustomApi } from "./chat/api";
+import { useLlm } from "./useLlm";
 
 export function useChat(): ChatHookType {
   const [data, setData] = useState<ITalk[]>([]);
@@ -26,6 +28,7 @@ export function useChat(): ChatHookType {
   const [isLoading, setLoading] = useState<boolean>(false);
   const [streamData, setStreamData] = useState<ITalk | undefined>();
   const conversations = useConversations();
+  const llms = useLlm();
 
   async function ask(question: string, file: string[] | undefined, conversation: ConversationType) {
     clearSearchBar();
@@ -59,6 +62,11 @@ export function useChat(): ChatHookType {
           ? conversation.snippet?.typeCommunication
           : conversation.assistant.typeCommunication;
       let chatResponse: ITalk | undefined = undefined;
+
+      const llmObject = llms.data.filter((llm: ITalkLlm) => chat.llm.model === llm.key);
+      if (llmObject !== undefined) {
+        chat.llm.object = llmObject[0];
+      }
 
       switch (typeCommunication) {
         case ConfigurationTypeCommunicationLocal:

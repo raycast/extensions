@@ -40,6 +40,13 @@
       "mode": "view"
     },
     {
+      "name": "llm",
+      "title": "Llm",
+      "subtitle": "Llms collection",
+      "description": "Collection of your private llms",
+      "mode": "view"
+    },
+    {
       "name": "snippet",
       "title": "Snippet",
       "subtitle": "Snippets collection",
@@ -133,9 +140,23 @@
       "required": false
     },
     {
-      "name": "apiEndpointData",
-      "title": "API Endpoint Data",
-      "description": "API endpoint for download assistants and snippets",
+      "name": "apiEndpointDataAssistant",
+      "title": "API Endpoint Data Assistant",
+      "description": "API endpoint for download assistants",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "apiEndpointDataLlm",
+      "title": "API Endpoint Data Llm",
+      "description": "API endpoint for download llms",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "apiEndpointDataSnippet",
+      "title": "API Endpoint Data Snippet",
+      "description": "API endpoint for download snippets",
       "type": "textfield",
       "required": false
     }
@@ -168,8 +189,8 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint-fix": "ray lint --fix",
     "lint": "ray lint",
+    "lint-fix": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish"
   }
 }

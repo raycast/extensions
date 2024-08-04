@@ -2,17 +2,12 @@ import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
 import { SnippetHookType } from "../../type/snippet";
-import {
-  ConfigurationModelCollection,
-  ConfigurationModelDefault,
-  ConfigurationTypeCommunication,
-  ConfigurationTypeCommunicationDefault,
-} from "../../type/config";
-import { ITalkSnippet, SnippetDefaultTemperature } from "../../ai/type";
+import { ConfigurationTypeCommunication, ConfigurationTypeCommunicationDefault } from "../../type/config";
+import { ITalkLlm, ITalkSnippet, SnippetDefaultTemperature } from "../../ai/type";
 
 export const SnippetFormLocal = (props: {
   snippet?: ITalkSnippet;
-  use: { snippets: SnippetHookType };
+  use: { snippets: SnippetHookType; llms: ITalkLlm[] };
   name?: string;
 }) => {
   const { use, snippet } = props;
@@ -44,7 +39,7 @@ export const SnippetFormLocal = (props: {
       title: snippet?.title ?? "",
       category: snippet?.category ?? "",
       emoji: snippet?.emoji ?? "",
-      model: snippet?.model ?? ConfigurationModelDefault,
+      model: snippet?.model ?? "",
       promptSystem: snippet?.promptSystem ?? "",
       modelTemperature: snippet?.modelTemperature ?? SnippetDefaultTemperature,
       webhookUrl: snippet?.webhookUrl ?? "",
@@ -84,8 +79,8 @@ export const SnippetFormLocal = (props: {
         ))}
       </Form.Dropdown>
       <Form.Dropdown title="Model" placeholder="Choose model" {...itemProps.model}>
-        {Object.entries(ConfigurationModelCollection).map(([, value]) => (
-          <Form.Dropdown.Item value={value.key} key={value.key} title={value.title} />
+        {Object.entries(use.llms).map(([, value]) => (
+          <Form.Dropdown.Item value={value.key} key={value.key} title={value.company + " " + value.model} />
         ))}
       </Form.Dropdown>
       <Form.Dropdown title="Temperature" placeholder="Temperature model" {...itemProps.modelTemperature}>

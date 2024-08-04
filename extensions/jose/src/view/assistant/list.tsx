@@ -1,17 +1,19 @@
 import { List } from "@raycast/api";
-import { ConfigurationModelCollection, ConfigurationTypeCommunication } from "../../type/config";
-import { ITalkAssistant, ITalkSnippet } from "../../ai/type";
+import { ConfigurationTypeCommunication } from "../../type/config";
+import { ITalkAssistant, ITalkLlm, ITalkSnippet } from "../../ai/type";
 
 export const AssistantListView = ({
   title,
   assistants,
   snippets,
+  llms,
   selectedAssistant,
   actionPanel,
 }: {
   title: string;
   assistants: ITalkAssistant[];
   snippets: ITalkSnippet[];
+  llms: ITalkLlm[];
   selectedAssistant: string | null;
   actionPanel: (assistant: ITalkAssistant) => JSX.Element;
 }) => (
@@ -21,6 +23,7 @@ export const AssistantListView = ({
         key={assistant.assistantId}
         assistant={assistant}
         snippets={snippets}
+        llms={llms}
         selectedAssistant={selectedAssistant}
         actionPanel={actionPanel}
       />
@@ -31,11 +34,13 @@ export const AssistantListView = ({
 const AssistantListItem = ({
   assistant,
   snippets,
+  llms,
   selectedAssistant,
   actionPanel,
 }: {
   assistant: ITalkAssistant;
   snippets: ITalkSnippet[];
+  llms: ITalkLlm[];
   selectedAssistant: string | null;
   actionPanel: (assistant: ITalkAssistant) => JSX.Element;
 }) => {
@@ -44,11 +49,9 @@ const AssistantListItem = ({
       id={assistant.assistantId}
       key={assistant.assistantId}
       title={assistant.title}
-      subtitle={
-        ConfigurationModelCollection.find((x: { key: string; title: string }) => x.key === assistant.model)?.title
-      }
+      subtitle={llms.find((x: { key: string; title: string }) => x.key === assistant.model)?.title}
       icon={assistant.avatar ? { source: assistant.avatar } : { source: assistant.emoji }}
-      detail={<ModelDetailView assistant={assistant} snippets={snippets} />}
+      detail={<ModelDetailView assistant={assistant} snippets={snippets} llms={llms} />}
       actions={selectedAssistant === assistant.assistantId ? actionPanel(assistant) : undefined}
     />
   );
@@ -57,9 +60,10 @@ const AssistantListItem = ({
 const ModelDetailView = (props: {
   assistant: ITalkAssistant;
   snippets: ITalkSnippet[];
+  llms: ITalkLlm[];
   markdown?: string | null | undefined;
 }) => {
-  const { assistant, snippets, markdown } = props;
+  const { assistant, snippets, llms, markdown } = props;
 
   return (
     <List.Item.Detail
@@ -73,9 +77,7 @@ const ModelDetailView = (props: {
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
             title="Model"
-            text={
-              ConfigurationModelCollection.find((x: { key: string; title: string }) => x.key === assistant.model)?.title
-            }
+            text={llms.find((x: { key: string; title: string }) => x.key === assistant.model)?.title}
           />
           <List.Item.Detail.Metadata.Label title="Temperature Model" text={assistant.modelTemperature} />
           {/* <List.Item.Detail.Metadata.Label title="Webhook" text={(assistant.webhookUrl ? assistant.webhookUrl : "")} /> */}
@@ -101,6 +103,7 @@ const ModelDetailView = (props: {
               icon={snippets.find((x: ITalkSnippet) => x.snippetId === snippetId)?.emoji}
             />
           ))}
+          {/* <List.Item.Detail.Metadata.Label title="__" text={assistant.modelApiKeyOrUrl} /> */}
         </List.Item.Detail.Metadata>
       }
     />

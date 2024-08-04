@@ -5,10 +5,15 @@ import { useConversations } from "./hook/useConversations";
 import { ConversationListView } from "./view/chat/conversationList";
 import { ConversationType } from "./type/conversation";
 import { ITalk } from "./ai/type";
+import { needOnboarding } from "./type/config";
+import { Onboarding } from "./view/onboarding/start";
+import { useAssistant } from "./hook/useAssistant";
+import { OnboardingEmpty } from "./view/onboarding/empty";
 
 export default function Conversation() {
-  const conversations = useConversations();
   const { push } = useNavigation();
+  const conversations = useConversations();
+  const collectionsAssistant = useAssistant();
 
   const [searchText, setSearchText] = useState<string>("");
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
@@ -70,6 +75,25 @@ export default function Conversation() {
       </ActionPanel.Section>
     </ActionPanel>
   );
+  let searchBarPlaceholder = "Search conversation...";
+  let getAction = undefined;
+  let noAssistant = false;
+
+  if (needOnboarding(collectionsAssistant.data.length) || collectionsAssistant.data.length === 0) {
+    getAction = (
+      <ActionPanel>
+        <Action
+          title="Onboarding"
+          icon={Icon.Exclamationmark}
+          onAction={() => {
+            push(<Onboarding />);
+          }}
+        />
+      </ActionPanel>
+    );
+    searchBarPlaceholder = "No assistant, first start onboarding to create your first assistant!";
+    noAssistant = true;
+  }
 
   return (
     <List
@@ -83,16 +107,21 @@ export default function Conversation() {
           setSelectedConversationId(id);
         }
       }}
-      searchBarPlaceholder="Search conversation..."
+      actions={getAction}
+      searchBarPlaceholder={searchBarPlaceholder}
       searchText={searchText}
       onSearchTextChange={setSearchText}
     >
-      {conversations.data.length === 0 ? (
-        <List.EmptyView
-          title="No Conversation"
-          description="Your recent conversation will be showed up here"
-          icon={Icon.Stars}
-        />
+      {noAssistant || conversations.data.length === 0 ? (
+        noAssistant ? (
+          <OnboardingEmpty />
+        ) : (
+          <List.EmptyView
+            title="No Conversation"
+            description="Your recent conversation will be showed up here"
+            icon={Icon.Stars}
+          />
+        )
       ) : (
         <>
           {sortedConversations && (

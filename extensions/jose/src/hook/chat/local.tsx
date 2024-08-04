@@ -9,6 +9,7 @@ import { GroqLLM, LLM_GROQ } from "../../ai/llm/groq";
 import { LLM_OLLAMA, OllamaLLM } from "../../ai/llm/ollama";
 import { LLM_OPENAI, OpenaiLLM } from "../../ai/llm/openai";
 import { LLM_PERPLEXITY, PerplexityLLM } from "../../ai/llm/perplexity";
+import { LLM_BINARY, BinaryLLM } from "../../ai/llm/binary";
 import {
   GetAnthropicApi,
   GetCohereApi,
@@ -48,23 +49,40 @@ export async function RunLocal(
     trace.llmStart(chatData);
     switch (chatData.llm.llm) {
       case LLM_ANTHROPIC:
-        llm = new AnthropicLLM(GetAnthropicApi().key);
+        llm = new AnthropicLLM(
+          chatData.llm.object?.useLocalOrEnv === "local" ? chatData.llm.object?.apiKeyOrUrl : GetAnthropicApi().key
+        );
+        break;
+      case LLM_BINARY:
+        chatData.llm.stream = false;
+
+        llm = new BinaryLLM();
         break;
       case LLM_COHERE:
-        llm = new CohereLLM(GetCohereApi().key);
+        llm = new CohereLLM(
+          chatData.llm.object?.useLocalOrEnv === "local" ? chatData.llm.object?.apiKeyOrUrl : GetCohereApi().key
+        );
         break;
       case LLM_GROQ:
-        llm = new GroqLLM(GetGroqApi().key);
+        llm = new GroqLLM(
+          chatData.llm.object?.useLocalOrEnv === "local" ? chatData.llm.object?.apiKeyOrUrl : GetGroqApi().key
+        );
         break;
       case LLM_OLLAMA:
         chatData.llm.stream = false;
-        llm = new OllamaLLM(GetOllamaApi().url);
+        llm = new OllamaLLM(
+          chatData.llm.object?.useLocalOrEnv === "local" ? chatData.llm.object?.apiKeyOrUrl : GetOllamaApi().url
+        );
         break;
       case LLM_OPENAI:
-        llm = new OpenaiLLM(GetOpenaiApi().key);
+        llm = new OpenaiLLM(
+          chatData.llm.object?.useLocalOrEnv === "local" ? chatData.llm.object?.apiKeyOrUrl : GetOpenaiApi().key
+        );
         break;
       case LLM_PERPLEXITY:
-        llm = new PerplexityLLM(GetPerplexityApi().key);
+        llm = new PerplexityLLM(
+          chatData.llm.object?.useLocalOrEnv === "local" ? chatData.llm.object?.apiKeyOrUrl : GetPerplexityApi().key
+        );
         break;
     }
 

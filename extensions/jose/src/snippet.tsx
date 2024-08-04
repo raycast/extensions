@@ -7,12 +7,19 @@ import { SnippetHookType } from "./type/snippet";
 import { ITalkSnippet } from "./ai/type";
 import { SnippetFormLocal } from "./view/snippet/formLocal";
 import { SnippetFormApi } from "./view/snippet/formApi";
+import { useLlm } from "./hook/useLlm";
+import { needOnboarding } from "./type/config";
+import { Onboarding } from "./view/onboarding/start";
+import { useAssistant } from "./hook/useAssistant";
+import { OnboardingEmpty } from "./view/onboarding/empty";
 
 export default function Snippet() {
+  const { push } = useNavigation();
   const collections = useSnippet();
+  const collectionsAssistant = useAssistant();
+  const collectionsLlm = useLlm();
   const [searchText, setSearchText] = useState<string>("");
   const [selectedSnippetId, setSelectedSnippetId] = useState<string | null>(null);
-  const { push } = useNavigation();
   const collectionsSnipppets: SnippetHookType = collections;
 
   useEffect(() => {
@@ -23,18 +30,22 @@ export default function Snippet() {
     }
   }, [searchText]);
 
-  const getActionList = (
+  let getActionList = (
     <ActionPanel>
       <Action
         title={"Create Snippet"}
         shortcut={{ modifiers: ["cmd"], key: "c" }}
         icon={Icon.Plus}
-        onAction={() => push(<SnippetFormLocal name={searchText} use={{ snippets: collectionsSnipppets }} />)}
+        onAction={() =>
+          push(
+            <SnippetFormLocal name={searchText} use={{ snippets: collectionsSnipppets, llms: collectionsLlm.data }} />
+          )
+        }
       />
       <Action
         title={"Import Snippet"}
         icon={Icon.PlusCircle}
-        onAction={() => push(<SnippetImportForm use={{ snippets: collectionsSnipppets }} />)}
+        onAction={() => push(<SnippetImportForm use={{ snippets: collectionsSnipppets, llms: collectionsLlm.data }} />)}
       />
       <Action title={"Reload Snippets From Api"} icon={Icon.Download} onAction={() => collections.reload()} />
     </ActionPanel>
@@ -48,8 +59,18 @@ export default function Snippet() {
           icon={Icon.Pencil}
           onAction={() =>
             snippet.isLocal
-              ? push(<SnippetFormLocal snippet={snippet} use={{ snippets: collectionsSnipppets }} />)
-              : push(<SnippetFormApi snippet={snippet} use={{ snippets: collectionsSnipppets }} />)
+              ? push(
+                  <SnippetFormLocal
+                    snippet={snippet}
+                    use={{ snippets: collectionsSnipppets, llms: collectionsLlm.data }}
+                  />
+                )
+              : push(
+                  <SnippetFormApi
+                    snippet={snippet}
+                    use={{ snippets: collectionsSnipppets, llms: collectionsLlm.data }}
+                  />
+                )
           }
         />
         <Action
@@ -76,16 +97,36 @@ export default function Snippet() {
         title={"Create Snippet"}
         shortcut={{ modifiers: ["cmd"], key: "c" }}
         icon={Icon.Plus}
-        onAction={() => push(<SnippetFormLocal name={searchText} use={{ snippets: collections }} />)}
+        onAction={() =>
+          push(<SnippetFormLocal name={searchText} use={{ snippets: collections, llms: collectionsLlm.data }} />)
+        }
       />
       <Action
         title={"Import Snippet"}
         icon={Icon.PlusCircle}
-        onAction={() => push(<SnippetImportForm use={{ snippets: collections }} />)}
+        onAction={() => push(<SnippetImportForm use={{ snippets: collections, llms: collectionsLlm.data }} />)}
       />
       <Action title={"Reload Snippets From Api"} icon={Icon.Download} onAction={() => collections.reload()} />
     </ActionPanel>
   );
+  let searchBarPlaceholder = "Search Snippet...";
+  let noAssistant = false;
+
+  if (needOnboarding(collectionsAssistant.data.length) || collectionsAssistant.data.length === 0) {
+    getActionList = (
+      <ActionPanel>
+        <Action
+          title="Onboarding"
+          icon={Icon.Exclamationmark}
+          onAction={() => {
+            push(<Onboarding />);
+          }}
+        />
+      </ActionPanel>
+    );
+    searchBarPlaceholder = "No assistant, first start onboarding to create your first assistant!";
+    noAssistant = true;
+  }
 
   return (
     <List
@@ -95,17 +136,22 @@ export default function Snippet() {
       throttle={false}
       selectedItemId={selectedSnippetId || undefined}
       onSelectionChange={(id) => setSelectedSnippetId(id)}
-      searchBarPlaceholder="Search Snippet..."
+      searchBarPlaceholder={searchBarPlaceholder}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       actions={getActionList}
     >
-      {collectionsSnipppets.data.length === 0 ? (
-        <List.EmptyView title="No Snippets" description="Create new Snippet with ⌘ + c shortcut" icon={Icon.Stars} />
+      {noAssistant || collectionsSnipppets.data.length === 0 ? (
+        noAssistant ? (
+          <OnboardingEmpty />
+        ) : (
+          <List.EmptyView title="No Snippets" description="Create new Snippet with ⌘ + c shortcut" icon={Icon.Stars} />
+        )
       ) : (
         <SnippetListView
           key="Snippets"
           snippets={collectionsSnipppets.data}
+          llms={collectionsLlm.data}
           selectedSnippet={selectedSnippetId}
           actionPanel={getActionItem}
         />

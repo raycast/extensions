@@ -2,16 +2,12 @@ import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
 import { SnippetHookType } from "../../type/snippet";
-import {
-  ConfigurationModelDefault,
-  ConfigurationTypeCommunication,
-  ConfigurationTypeCommunicationDefault,
-} from "../../type/config";
-import { ITalkSnippet, SnippetDefaultTemperature } from "../../ai/type";
+import { ConfigurationTypeCommunication, ConfigurationTypeCommunicationDefault } from "../../type/config";
+import { ITalkLlm, ITalkSnippet, SnippetDefaultTemperature } from "../../ai/type";
 
 export const SnippetFormApi = (props: {
   snippet?: ITalkSnippet;
-  use: { snippets: SnippetHookType };
+  use: { snippets: SnippetHookType; llms: ITalkLlm[] };
   name?: string;
 }) => {
   const { use, snippet } = props;
@@ -43,7 +39,7 @@ export const SnippetFormApi = (props: {
       title: snippet?.title ?? "",
       category: snippet?.category ?? "",
       emoji: snippet?.emoji ?? "",
-      model: snippet?.model ?? ConfigurationModelDefault,
+      model: snippet?.model ?? "",
       promptSystem: snippet?.promptSystem ?? "",
       modelTemperature: snippet?.modelTemperature ?? SnippetDefaultTemperature,
       webhookUrl: snippet?.webhookUrl ?? "",
