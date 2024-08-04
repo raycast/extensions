@@ -33,7 +33,8 @@
       "name": "restore",
       "title": "Restore 2FA Codes",
       "description": "Restore your 2FA codes from a backup.",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true
     }
   ],
   "preferences": [
