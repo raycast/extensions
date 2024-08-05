@@ -97,6 +97,13 @@ export default function CreateForm() {
           }
         }}
       />
+      <Form.Checkbox
+        id="shades"
+        title={"Shades"}
+        label="Enable shades"
+        defaultValue={true}
+        info={"Toggle the shading effect on the image, switching between a filled mask and shaded tones."}
+      />
     </Form>
   );
 }

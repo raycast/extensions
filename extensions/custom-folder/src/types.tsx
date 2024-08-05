@@ -2,6 +2,7 @@ export type FolderForm = {
   file: string;
   output: string;
   padding: string | number;
+  shades: boolean;
 };
 
 export type PathError = {

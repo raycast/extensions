@@ -29,7 +29,7 @@ export default function Result({ formValues }: { formValues: FolderForm }) {
   useEffect(() => {
     const fetchImage = async () => {
       setIsLoading(true);
-      const result = await customize(formValues.file[0], formValues.padding as number);
+      const result = await customize(formValues.file[0], formValues.padding as number, formValues.shades);
       let outputPath: string;
 
       // get file path without file name
