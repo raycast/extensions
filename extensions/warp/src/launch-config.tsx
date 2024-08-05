@@ -130,8 +130,8 @@ export default function Command() {
           .map((searchResult, index) => (
             <SearchListItem
               key={searchResult.path}
-              isSearching={searchText.length > 0}
               searchResult={searchResult}
+              isSearching={searchText.length > 0}
               moveSearchResultDown={() => swapSearchItems(index, index + 1)}
               moveSearchResultUp={() => swapSearchItems(index, index - 1)}
             />
