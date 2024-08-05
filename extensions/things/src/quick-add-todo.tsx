@@ -1,19 +1,52 @@
-import { AI, closeMainWindow, getPreferenceValues, LaunchProps, showToast, Toast } from '@raycast/api';
-import { handleError, silentlyOpenThingsURL } from './api';
+import { AI, closeMainWindow, environment, getPreferenceValues, LaunchProps, showToast, Toast } from '@raycast/api';
+import { getLists, handleError, silentlyOpenThingsURL } from './api';
 import qs from 'qs';
+import { parse } from 'chrono-node';
+import { format } from 'date-fns';
 
 export default async function Command(props: LaunchProps & { arguments: Arguments.QuickAddTodo }) {
   try {
-    const preferences = getPreferenceValues<Preferences.QuickAddTodo>();
+    const { shouldCloseMainWindow, dontUseAI } = getPreferenceValues<Preferences.QuickAddTodo>();
+    let json, toastMsg;
 
-    if (preferences.shouldCloseMainWindow) {
+    if (shouldCloseMainWindow) {
       await closeMainWindow();
     } else {
       await showToast({ style: Toast.Style.Animated, title: 'Adding to-do' });
     }
 
-    const result =
-      await AI.ask(`Act as a task manager. I'll give you a task in a natural language. Your job is to return me only a parsable and minified JSON object.
+    if (dontUseAI || !environment.canAccess(AI)) {
+      const { text } = props.arguments;
+
+      let deadline, isDateTime, list;
+
+      const dateMatch = parse(text);
+      if (dateMatch && dateMatch.length > 0) {
+        const chronoDate = dateMatch[0].start;
+        isDateTime = chronoDate.isCertain('hour') || chronoDate.isCertain('minute') || chronoDate.isCertain('second');
+        const date = chronoDate.date();
+        deadline = isDateTime ? date.toISOString() : format(date, 'yyyy-MM-dd');
+      }
+
+      const listMatch = text.match(/#(\w+)/);
+      if (listMatch && listMatch.length > 0) {
+        const lists = await getLists();
+        list = lists.find((l) => l.name.toLowerCase() === listMatch[1].toLowerCase())?.name;
+      }
+
+      // Clean all values matching from the text input and previous white space
+      const title = text
+        .replace(listMatch ? listMatch[0] : '', '')
+        .replace(dateMatch && dateMatch.length > 0 ? dateMatch[0].text : '', '')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      json = { title, ...(deadline && { deadline }), ...(list && { list }) };
+      const formattedDueDate = deadline ? ` due ${format(deadline, `${isDateTime ? 'PPPpp' : 'PPP'}`)}` : '';
+      toastMsg = `Added "${title}" to ${list ?? 'Inbox'}${formattedDueDate}`;
+    } else {
+      const result =
+        await AI.ask(`Act as a task manager. I'll give you a task in a natural language. Your job is to return me only a parsable and minified JSON object.
 
 Here are the possible keys of the JSON object with their respective values:
 - title: The title of the to-do.
@@ -41,7 +74,8 @@ Here are some examples to help you out:
 
 Here's the task: "${props.fallbackText ?? props.arguments.text}"`);
 
-    const json = JSON.parse(result.trim());
+      json = JSON.parse(result.trim());
+    }
 
     if (props.arguments.notes) {
       json.notes = props.arguments.notes;
@@ -59,6 +93,7 @@ Here's the task: "${props.fallbackText ?? props.arguments.text}"`);
     await showToast({
       style: Toast.Style.Success,
       title: 'Added to-do',
+      message: toastMsg,
     });
   } catch (error) {
     handleError(error, 'Unable to add to-do');

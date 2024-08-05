@@ -1,5 +1,10 @@
 # Things Changelog
 
+## [Quick To-do Improvements] - 2024-08-05
+
+- Preference to disable date parsing for todo classification, sending all todo(s) to inbox.
+- The title input will still be parsed for assigning deadlines and list name followed with '#' (case-insensitive).
+
 ## [Fix Generate Checklist with AI] - 2024-07-30
 
 - Action to "Generate Checklist with AI" only visible if the user has access to AI.
