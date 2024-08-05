@@ -17,27 +17,35 @@ type Color = {
   hex: string;
   name: string;
 };
+type Resolution = {
+  width: number;
+  height: number;
+};
 type Logo = {
   url: string;
-  mode: string;
+  mode: "dark" | "light";
   group: number;
   colors: Color[];
-  resolution: {
-    width: number;
-    height: number;
-  };
+  resolution: Resolution;
 };
 type Backdrop = {
   url: string;
   colors: Color[];
-  resolution: {
-    width: number;
-    height: number;
-  };
+  resolution: Resolution;
 };
 type Social = {
   type: string;
   url: string;
+};
+type Address = {
+  street?: string;
+  city?: string;
+  country?: string;
+  country_code?: string;
+  state_province?: string;
+  state_code?: string;
+  postal_code?: string;
+  additional_info?: string;
 };
 type Brand = {
   domain: string;
@@ -48,6 +56,7 @@ type Brand = {
   logos: Logo[];
   backdrops: Backdrop[];
   socials: Social[];
+  address: Address | null;
   verified: boolean;
 };
 type Response = {
@@ -61,24 +70,26 @@ type BrandInStorage = Brand & {
 const { api_key } = getPreferenceValues<Preferences>();
 
 export default function RetrieveBrand() {
-  const { isLoading, value: brands, setValue: setBrands } = useLocalStorage<BrandInStorage[]>("brands", []);
+  const { push } = useNavigation();
+  const { isLoading, value: brands = [], setValue: setBrands } = useLocalStorage<BrandInStorage[]>("brands", []);
 
   async function updateBrands(newBrand: BrandInStorage) {
-    const newBrands = brands || [];
+    const newBrands = brands;
     const index = newBrands.findIndex((brand) => brand.domain === newBrand.domain);
     index !== -1 ? (newBrands[index] = newBrand) : newBrands.push(newBrand);
     await setBrands(newBrands);
+    push(<ViewBrand brand={newBrand} />);
   }
   async function removeBrand(oldBrand: BrandInStorage) {
-    const newBrands = brands || [];
+    const newBrands = brands;
     const index = newBrands.findIndex((brand) => brand.domain === oldBrand.domain);
     if (index !== -1) newBrands.splice(index, 1);
     await setBrands(newBrands);
   }
 
   return (
-    <List isLoading={isLoading}>
-      {!isLoading && brands?.length === 0 ? (
+    <List isLoading={isLoading} searchBarPlaceholder="Search brand">
+      {!isLoading && brands.length === 0 ? (
         <List.EmptyView
           title="No Brands"
           description="Search for a brand to get started"
@@ -93,13 +104,14 @@ export default function RetrieveBrand() {
           }
         />
       ) : (
-        <List.Section title={`${brands?.length} Brands`}>
-          {brands?.map((brand) => (
+        <List.Section title={`${brands.length} Brands`}>
+          {brands.map((brand) => (
             <List.Item
               key={brand.domain}
               icon={brand.logos[0]?.url || Icon.Dot}
               title={brand.domain}
               subtitle={`${brand.title} - ${brand.slogan}`}
+              keywords={[`${brand.title}`, `${brand.slogan}`]}
               accessories={[{ date: new Date(brand.updated_on) }]}
               actions={
                 <ActionPanel>
@@ -173,6 +185,7 @@ function SearchBrand({ onSearched }: SearchBrandProps) {
         </ActionPanel>
       }
     >
+      <Form.Description text="Search Brand" />
       <Form.TextField title="Domain" placeholder="brand.dev" {...itemProps.domain} />
     </Form>
   );
@@ -188,7 +201,7 @@ ${brand.description}
 
 ## Logos
 
-${brand.logos.map((logo) => `![${logo.url}](${logo.url})`).join(`\n\n`)}
+${brand.logos.map((logo) => `![${logo.url}](${logo.url}?raycast-height=125)`).join(" ")}
 
 ---
 
@@ -219,13 +232,23 @@ ${brand.backdrops.map(({ url }) => `![${url}](${url})`).join(`\n\n`)}`;
               target={social.url}
             />
           ))}
+          <Detail.Metadata.Separator />
+          {!brand.address ? (
+            <Detail.Metadata.Label title="Address" text="N/A" />
+          ) : (
+            <>
+              {Object.entries(brand.address).map(([key, val]) => (
+                <Detail.Metadata.Label key={key} title={key} text={val} />
+              ))}
+            </>
+          )}
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser
-              icon="brand-dev.png"
+              icon="brand-dev-purple.png"
               title="View on brand.dev"
               url={`https://world.brand.dev/brand/${brand.domain}`}
             />
