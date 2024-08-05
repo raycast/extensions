@@ -1,6 +1,6 @@
 import { showFailureToast, useFetch } from "@raycast/utils";
 import { BASE_URL } from "../utils/constants";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDebounce } from "../utils/use-debounce";
 
 type SearchResponse = {
@@ -40,11 +40,9 @@ const PROJECT_LIMIT = 20;
  */
 export const useModrinthSearch = (): UseProjectReturn => {
   const [searchQuery, setSearchQuery] = useState<string | undefined>();
-  const [offset, setOffset] = useState<number>(0);
-  const [projects, setProjects] = useState<ListModrinthProject[]>([]);
 
-  const { isLoading, error, pagination, mutate } = useFetch<unknown, ListModrinthProject[], ListModrinthProject[]>(
-    () => {
+  const { data, isLoading, error, pagination } = useFetch<unknown, ListModrinthProject[], ListModrinthProject[]>(
+    (options) => {
       const urlParams = new URLSearchParams({
         limit: PROJECT_LIMIT.toString(),
       });
@@ -53,7 +51,7 @@ export const useModrinthSearch = (): UseProjectReturn => {
         urlParams.set("query", searchQuery);
       }
 
-      urlParams.set("offset", offset.toString());
+      urlParams.set("offset", String(options.page * 20));
 
       return `${BASE_URL}/search?${urlParams.toString()}`;
     },
@@ -64,10 +62,6 @@ export const useModrinthSearch = (): UseProjectReturn => {
       },
       mapResult: (result) => {
         if (isListModrinthProjectArray(result)) {
-          setProjects((prev) => {
-            prev.push(...result.hits);
-            return prev;
-          });
           return {
             data: result.hits,
             hasMore: result.total_hits > result.offset + PROJECT_LIMIT,
@@ -81,29 +75,18 @@ export const useModrinthSearch = (): UseProjectReturn => {
     },
   );
 
-  const handleSearchChange = (query: string | undefined) => {
-    setOffset(0);
-    setProjects([]);
-    setSearchQuery(query);
-  };
-
-  const debouncedSearchChnage = useDebounce((query: string | undefined) => handleSearchChange(query), 300);
+  const debouncedSearchChnage = useDebounce((query: string | undefined) => setSearchQuery(query), 300);
 
   const handleLoadMore = () => {
-    setOffset(offset + PROJECT_LIMIT);
+    pagination?.onLoadMore();
   };
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-  useEffect(() => {
-    mutate();
-  }, [offset]);
 
   if (error) {
     showFailureToast(error.message);
   }
 
   return {
-    data: projects,
+    data,
     isLoading,
     handleSearchChange: debouncedSearchChnage,
     onLoadMore: handleLoadMore,
