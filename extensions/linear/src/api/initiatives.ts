@@ -1,8 +1,10 @@
-import {Initiative, Project} from "@linear/sdk";
+import { Initiative, Project } from "@linear/sdk";
 import { getLinearClient } from "./linearClient";
 import { sortBy } from "lodash";
 
-export type InitiativeResult = Pick<Initiative, "id" | "name" | "color" | "icon" | "sortOrder" | "description"> & { projects?: { nodes: Pick<Project, "id">[] } };
+export type InitiativeResult = Pick<Initiative, "id" | "name" | "color" | "icon" | "sortOrder" | "description"> & {
+  projects?: { nodes: Pick<Project, "id">[] };
+};
 
 type InitiativeList = { initiatives: { nodes: InitiativeResult[] } };
 
@@ -20,7 +22,7 @@ const initiativeFragment = `
   }
 `;
 
-export async function getInitiatives(query: string = "") {
+export async function getInitiatives() {
   const { graphQLClient } = getLinearClient();
   const { data } = await graphQLClient.rawRequest<InitiativeList, Record<string, unknown>>(
     `

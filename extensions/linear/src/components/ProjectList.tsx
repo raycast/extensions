@@ -1,4 +1,4 @@
-import {useMemo, useState} from "react";
+import { useMemo, useState } from "react";
 import { List } from "@raycast/api";
 
 import useProjects from "../hooks/useProjects";
@@ -7,8 +7,8 @@ import useMe from "../hooks/useMe";
 
 import Project from "./Project";
 import { ProjectResult } from "../api/getProjects";
-import {useInitiatives} from "../hooks/useInitiatives";
-import {getInitiativeIcon} from "../helpers/initiatives";
+import { useInitiatives } from "../hooks/useInitiatives";
+import { getInitiativeIcon } from "../helpers/initiatives";
 
 export default function ProjectList() {
   const [initiativeId, setInitiativeId] = useState<string>("");
@@ -39,7 +39,7 @@ export default function ProjectList() {
 
     const currentInitiative = initiatives?.find((i) => i.id === initiativeId);
 
-    return currentInitiative?.projects.nodes.map((project) => projectsNormalizedById[project.id]) || [];
+    return (currentInitiative?.projects?.nodes ?? []).map((project) => projectsNormalizedById[project.id]);
   }, [initiativeId, projects, initiatives]);
 
   return (
@@ -53,7 +53,12 @@ export default function ProjectList() {
 
                 <List.Dropdown.Section title="Initiatives">
                   {initiatives?.map((initiative) => (
-                    <List.Dropdown.Item key={initiative.id} value={initiative.id} title={initiative.name} icon={getInitiativeIcon(initiative)} />
+                    <List.Dropdown.Item
+                      key={initiative.id}
+                      value={initiative.id}
+                      title={initiative.name}
+                      icon={getInitiativeIcon(initiative)}
+                    />
                   ))}
                 </List.Dropdown.Section>
               </List.Dropdown>
