@@ -31,7 +31,8 @@
       "name": "createActivity",
       "title": "Create Activity",
       "description": "Create a manual activity on Strava",
-      "mode": "view"
+      "mode": "view",
+      "icon": "create.png"
     },
     {
       "name": "leaderboard",

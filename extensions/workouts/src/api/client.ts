@@ -198,15 +198,11 @@ export const getClubActivities = async (clubId: string, page = 1, pageSize = PAG
 };
 
 export const createActivity = async (activityValues: StravaManualActivity) => {
-  console.log("activityValues");
-  console.log(activityValues);
   const isTrainer = activityValues.isTrainer ? 1 : 0;
   const isCommute = activityValues.isCommute ? 1 : 0;
-  console.log("IsTrainer:" + isTrainer + "IsCommute" + isCommute);
 
   try {
     const { token } = await getAccessToken();
-    console.log(activityValues);
     const response = await fetch("https://www.strava.com/api/v3/activities", {
       method: "POST",
       headers: {
@@ -226,13 +222,11 @@ export const createActivity = async (activityValues: StravaManualActivity) => {
     });
     const json = await response.json();
     if ((json as Error).message) {
-      console.log((json as Error).message);
+      throw new Error((json as Error).message);
     }
     return true;
   } catch (err) {
-    console.log(err);
     const error = err instanceof Error ? err.message : "An error occurred";
-    console.error("createActivity Error:", err);
     throw new Error(error);
   }
 };
