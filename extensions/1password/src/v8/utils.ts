@@ -13,7 +13,6 @@ const preferences = getPreferenceValues();
 
 export class ExtensionError extends Error {
   public title: string;
-
   constructor(title: string, message?: string) {
     if (!message) message = title;
     super(message);
@@ -22,11 +21,8 @@ export class ExtensionError extends Error {
 }
 
 export class NotFoundError extends ExtensionError {}
-
 export class CommandLineMissingError extends ExtensionError {}
-
 export class ZshMissingError extends ExtensionError {}
-
 export class ConnectionError extends ExtensionError {}
 
 export const CLI_PATH = [preferences.cliPath, "/usr/local/bin/op", "/opt/homebrew/bin/op"].find((path) =>
