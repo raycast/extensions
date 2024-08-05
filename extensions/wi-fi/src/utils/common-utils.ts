@@ -34,7 +34,7 @@ export const getCurWifiInfo = async () => {
         .filter((item) => item !== null);
     }
   } catch (e) {
-    captureException("Error getting Wi-Fi info:" + e);
+    console.log(e);
     return [];
   }
 };
