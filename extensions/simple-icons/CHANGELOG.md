@@ -1,6 +1,6 @@
 # Brand Icons Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2024-08-05
 
 - Apply brand color to default copying/opening SVG
 - Add preferences for configuring default copying/opening behaviors
