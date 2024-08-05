@@ -4,7 +4,7 @@ import { execSync } from "node:child_process";
 import { execFileSync } from "child_process";
 import { existsSync } from "fs";
 
-import { Category, CategoryName, Item, User, Vault } from "./types";
+import { Category, CategoryName, Item, Url, User, Vault } from "./types";
 import { useExec } from "@raycast/utils";
 
 export type ActionID = string;
@@ -13,6 +13,7 @@ const preferences = getPreferenceValues();
 
 export class ExtensionError extends Error {
   public title: string;
+
   constructor(title: string, message?: string) {
     if (!message) message = title;
     super(message);
@@ -21,8 +22,11 @@ export class ExtensionError extends Error {
 }
 
 export class NotFoundError extends ExtensionError {}
+
 export class CommandLineMissingError extends ExtensionError {}
+
 export class ZshMissingError extends ExtensionError {}
+
 export class ConnectionError extends ExtensionError {}
 
 export const CLI_PATH = [preferences.cliPath, "/usr/local/bin/op", "/opt/homebrew/bin/op"].find((path) =>
@@ -200,7 +204,7 @@ export const useAccounts = <T = User[], U = ExtensionError>(execute = true) =>
     execute: execute,
   });
 
-export function getCategoryIcon(category: CategoryName) {
+export function getCategoryIcon(category: CategoryName, urls?: Url[]) {
   switch (category) {
     case "API_CREDENTIAL":
       return Icon.Code;
@@ -222,7 +226,7 @@ export function getCategoryIcon(category: CategoryName) {
     case "IDENTITY":
       return Icon.Person;
     case "LOGIN":
-      return Icon.Fingerprint;
+      return getFavicon(urls) ?? Icon.Fingerprint;
     case "MEDICAL_RECORD":
       return Icon.Heartbeat;
     case "MEMBERSHIP":
@@ -254,4 +258,26 @@ export function getCategoryIcon(category: CategoryName) {
 export function titleCaseWord(word: string) {
   if (!word) return word;
   return word[0].toUpperCase() + word.slice(1).toLowerCase();
+}
+
+export function getFavicon(urls?: Url[]) {
+  const url = urls?.at(0)?.href;
+  if (!url) return undefined;
+  try {
+    const { hostname, origin, port } = new URL(url);
+
+    // Special cases
+    if (port) return `${origin}/favicon.ico`;
+    if (hostname.endsWith("1password.com")) return "https://app.1password.com/images/favicon.ico";
+    if (hostname.endsWith("adobe.com")) return "https://www.adobe.com/favicon.ico";
+    if (hostname.endsWith("apple.com")) return "https://www.apple.com/favicon.ico";
+    if (hostname.includes("battle")) return "https://www.google.com/s2/favicons?domain=battle.net&sz=32";
+
+    // get hostname domain
+    const domain = hostname.split(".").slice(-2).join(".");
+    // https://dev.to/derlin/get-favicons-from-any-website-using-a-hidden-google-api-3p1e
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+  } catch (error) {
+    return undefined;
+  }
 }

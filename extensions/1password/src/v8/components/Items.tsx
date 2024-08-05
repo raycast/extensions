@@ -70,7 +70,10 @@ export function Items({ flags }: { flags?: string[] }) {
                 key={item.id}
                 id={item.id}
                 icon={{
-                  value: { source: getCategoryIcon(item.category), tintColor: Color.Blue },
+                  value: {
+                    source: getCategoryIcon(item.category, item.urls),
+                    fallback: getCategoryIcon(item.category),
+                  },
                   tooltip: item.category,
                 }}
                 title={item.title}
