@@ -9,11 +9,13 @@ import {
   closeMainWindow,
   useNavigation,
   getPreferenceValues,
+  getSelectedText,
   LaunchProps,
   PopToRootType,
 } from "@raycast/api";
 import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
 import { format } from "date-fns";
+import { useEffect } from "react";
 import { createReminder } from "swift:../swift/AppleReminders";
 
 import LocationForm from "./components/LocationForm";
@@ -190,6 +192,15 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       }
     },
   });
+
+  useEffect(() => {
+    async function fetchSelectedText() {
+      const text = await getSelectedText();
+      setValue("title", text);
+    }
+
+    fetchSelectedText();
+  }, [setValue]);
 
   let recurrenceDescription = "";
   if (values.frequency && !getIntervalValidationError(values.interval)) {

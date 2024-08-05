@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Add Create Reminder with selected text] - 2024-08-05
+
+- It's now possible to create reminders with selected text in the "Create Reminder" command.
+
 ## [Change AI model for Quick Add Reminder] - 2024-05-23
 
 Now, Quick Add Reminder will use GPT-4o instead of GPT-4 Turbo. 
