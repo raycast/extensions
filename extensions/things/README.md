@@ -12,3 +12,11 @@ The extension uses the [Things URL Scheme](https://culturedcode.com/things/suppo
 ## Troubleshooting
 
 If you don't see any of your to-dos in any commands, please make sure Things is installed and running before using this extension. If Things is running, you may need to grant Raycast access to Things in `System Settings > Privacy & Security > Automation > Raycast > Things`.
+
+## Commands
+
+### Quick Add To-do
+
+Raycast AI is used to select the deadline, list, tags etc. If Raycast AI is not accessible or user has selected `Don't use AI`
+preference, all the quickly created to-do(s) will be sent to Inbox, but the title will still be parsed for assigning deadlines 
+and list name followed with '#' in title (case-insensitive).
