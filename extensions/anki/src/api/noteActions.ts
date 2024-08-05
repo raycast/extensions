@@ -1,3 +1,4 @@
+import { getPreferenceValues } from '@raycast/api';
 import { AddNoteParams, Note, UpdateNoteParams } from '../types';
 import { delay } from '../util';
 import { ankiReq } from './ankiClient';
@@ -26,7 +27,16 @@ export default {
     return notesInfo;
   },
   addNote: async (params: AddNoteParams): Promise<void> => {
-    await ankiReq('addNote', { note: params });
+    const { allow_dup_cards, dup_scope } = getPreferenceValues<Preferences>();
+    await ankiReq('addNote', {
+      note: {
+        ...params,
+        options: {
+          allowDuplicate: allow_dup_cards,
+          duplicateScope: dup_scope,
+        },
+      },
+    });
   },
   deleteNote: async (cardID: number): Promise<void> => {
     const noteIds = await ankiReq('cardsToNotes', { cards: [cardID] });

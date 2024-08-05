@@ -1,5 +1,6 @@
 import { Color, List } from '@raycast/api';
 import { DeckStats, DeckName, AddNoteParams, CreateCardFormValues, MediaFile } from './types';
+import path from 'path';
 
 export const getDeckState = (deck: DeckStats): List.Item.Accessory[] => {
   return [
@@ -51,6 +52,12 @@ export function getQueueType(queue: number): string {
   return queues[queue] || 'Unknown';
 }
 
+const SUPPORTED_FILE_TYPES = {
+  image: ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp'],
+  audio: ['.mp3', '.wav', '.ogg', '.m4a', '.flac'],
+  video: ['.mp4', '.webm', '.mov', '.avi', '.mkv'],
+};
+
 // TODO: add a cleaner re-write of this
 export function transformSubmittedData(submittedData: CreateCardFormValues, modelFields: string[]) {
   const result: AddNoteParams = {
@@ -75,7 +82,7 @@ export function transformSubmittedData(submittedData: CreateCardFormValues, mode
 
       if (!fileExtension || !fileName) return;
 
-      if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+      if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(fileExtension)) {
         result.picture.push({
           path: `/${file}`,
           filename: fileName,
@@ -134,4 +141,9 @@ export function parseMediaFiles(ankiFieldText: string): MediaFile[] {
   }
 
   return mediaFiles;
+}
+
+export function isValidFileType(filePath: string) {
+  const extension = path.extname(filePath).toLowerCase();
+  return Object.values(SUPPORTED_FILE_TYPES).some(types => types.includes(extension));
 }

@@ -1,12 +1,12 @@
-import { Action, ActionPanel, Detail, Form, showToast } from '@raycast/api';
+import { Action, ActionPanel, Detail, Form, showToast, Toast } from '@raycast/api';
 import noteActions from '../api/noteActions';
-import { useCachedPromise } from '@raycast/utils';
+import { useCachedPromise, useForm } from '@raycast/utils';
 import deckActions from '../api/deckActions';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { CreateCardFormValues, FieldRef, ShortcutDictionary } from '../types';
 import modelActions from '../api/modelActions';
 import React from 'react';
-import { transformSubmittedData } from '../util';
+import { isValidFileType, transformSubmittedData } from '../util';
 import useErrorHandling from '../hooks/useErrorHandling';
 
 interface Props {
@@ -14,25 +14,24 @@ interface Props {
 }
 export default function AddCardAction({ deckName }: Props) {
   const { handleError, errorMarkdown } = useErrorHandling();
+
   const {
     data: decks,
     isLoading: decksLoading,
     error: decksError,
   } = useCachedPromise(deckActions.getDecks);
-
   const {
     data: models,
     isLoading: modelsLoading,
     error: modelsError,
   } = useCachedPromise(modelActions.getModels);
-
   const {
     data: tags,
     isLoading: tagsLoading,
     error: tagsError,
   } = useCachedPromise(noteActions.getTags);
 
-  const tagsCardRef = useRef<Form.TextArea>(null);
+  const tagsCardRef = useRef<Form.TagPicker>(null);
   const fieldRefs = useRef<Record<string, FieldRef>>({});
 
   const shortcuts = useMemo((): ShortcutDictionary => {
@@ -41,8 +40,46 @@ export default function AddCardAction({ deckName }: Props) {
     };
   }, []);
 
-  const [selectedModelName, setSelectedModelName] = useState<string>();
-  const [selectedDeckName, setSelectedDeckName] = useState<string | undefined>(deckName);
+  const { handleSubmit, itemProps, values, reset, focus, setValidationError } =
+    useForm<CreateCardFormValues>({
+      initialValues: {
+        deckName: deckName,
+        modelName: '',
+        tags: [],
+      },
+      onSubmit: async values => {
+        if (!models || modelsLoading || modelsError) return;
+        try {
+          const fieldNames = models
+            .find(model => values.modelName === model.name)!
+            .flds.map(fld => fld.name);
+
+          const createCardRequestBody = transformSubmittedData(values, fieldNames);
+
+          // Validate card fields
+          for (const fieldName of fieldNames) {
+            const fieldValue = values[`field_${fieldName}`];
+            if (!fieldValue || (typeof fieldValue === 'string' && fieldValue.trim() === '')) {
+              setValidationError(`field_${fieldName}`, `${fieldName} is required`);
+              return;
+            }
+          }
+
+          await noteActions.addNote(createCardRequestBody);
+
+          showToast({
+            style: Toast.Style.Success,
+            title: `Added new card to deck: ${values.deckName}`,
+          });
+
+          handleClearForm();
+
+          return true;
+        } catch (error) {
+          handleError(error);
+        }
+      },
+    });
 
   useEffect(() => {
     const error = decksError || tagsError || modelsError;
@@ -51,6 +88,7 @@ export default function AddCardAction({ deckName }: Props) {
   }, [decksError, tagsError, modelsError]);
 
   const handleClearForm = () => {
+    reset();
     tagsCardRef.current?.reset();
     Object.values(fieldRefs.current).forEach(ref => {
       if (ref.current && ref.current.reset) {
@@ -59,50 +97,28 @@ export default function AddCardAction({ deckName }: Props) {
     });
 
     // Focus on the first field
-    const firstFieldRef = Object.values(fieldRefs.current)[0];
-    if (firstFieldRef && firstFieldRef.current) {
-      firstFieldRef.current.focus();
-    }
+    focus('deckName');
   };
 
-  const handleDeckChange = useCallback(
-    (deckName: string) => {
-      setSelectedDeckName(deckName);
-    },
-    [selectedDeckName]
-  );
-
-  const handleAddCard = async (values: CreateCardFormValues) => {
-    if (!models || modelsLoading || modelsError) return;
-    try {
-      const fieldNames = models
-        .find(model => selectedModelName === model.name)!
-        .flds.map(fld => fld.name);
-
-      const createCardRequestBody = transformSubmittedData(values, fieldNames);
-
-      await noteActions.addNote(createCardRequestBody);
-
-      showToast({
-        title: `Added new card to deck: ${values.deckName}`,
-      });
-
-      handleClearForm();
-
-      return true;
-    } catch (error) {
-      handleError(error);
+  const handleFileChange = (fieldName: string, files: string[]) => {
+    const invalidFiles = files.filter(file => !isValidFileType(file));
+    if (invalidFiles.length > 0) {
+      setValidationError(
+        `file_${fieldName}`,
+        `Invalid file type(s) selected: ${invalidFiles.join(', ')}`
+      );
+    } else {
+      setValidationError(`file_${fieldName}`, undefined);
     }
   };
 
   const fields = useMemo(() => {
-    if (modelsLoading || modelsError || !models) return;
-    if (!selectedModelName) return;
+    if (modelsLoading || modelsError || !models || !values.modelName) return null;
 
-    const selectedModel = models.find(model => model.name === selectedModelName);
+    const selectedModel = models.find(model => model.name === values.modelName);
 
     if (!selectedModel) {
-      throw new Error(`Model "${selectedModelName}" not found`);
+      throw new Error(`Model "${values.modelName}" not found`);
     }
 
     const { flds } = selectedModel;
@@ -118,17 +134,16 @@ export default function AddCardAction({ deckName }: Props) {
           return (
             <React.Fragment key={field.name}>
               <Form.TextArea
-                id={`field_${field.name}`}
+                {...itemProps[`field_${field.name}`]}
                 title={field.name}
                 placeholder={field.description || `Enter ${field.name}`}
-                storeValue={false}
                 ref={textAreaRef}
               />
               <Form.FilePicker
-                id={`file_${field.name}`}
+                {...itemProps[`file_${field.name}`]}
                 title={`${field.name} files`}
-                storeValue={false}
                 allowMultipleSelection
+                onChange={files => handleFileChange(field.name, files)}
                 ref={filePickerRef}
               />
             </React.Fragment>
@@ -136,14 +151,7 @@ export default function AddCardAction({ deckName }: Props) {
         })}
       </>
     );
-  }, [models, modelsLoading, modelsError, selectedModelName]);
-
-  const handleModelChange = useCallback(
-    (value: string) => {
-      setSelectedModelName(value);
-    },
-    [setSelectedModelName, selectedModelName]
-  );
+  }, [models, modelsLoading, modelsError, values.modelName, itemProps]);
 
   return (
     <>
@@ -153,7 +161,7 @@ export default function AddCardAction({ deckName }: Props) {
         <Form
           actions={
             <ActionPanel>
-              <Action.SubmitForm title="Add Card" onSubmit={handleAddCard} />
+              <Action.SubmitForm title="Add Card" onSubmit={handleSubmit} />
               <Action
                 title="Clear Form"
                 shortcut={shortcuts.clearForm}
@@ -164,26 +172,13 @@ export default function AddCardAction({ deckName }: Props) {
           navigationTitle="Add Card"
           isLoading={decksLoading || modelsLoading || tagsLoading}
         >
-          <Form.Dropdown
-            id="deckName"
-            title="Deck"
-            isLoading={decksLoading}
-            storeValue={true}
-            onChange={handleDeckChange}
-            value={selectedDeckName}
-          >
+          <Form.Dropdown {...itemProps.deckName} title="Deck" isLoading={decksLoading}>
             {decks?.map(deck => (
               <Form.Dropdown.Item key={deck.deck_id} title={deck.name} value={deck.name} />
             ))}
           </Form.Dropdown>
 
-          <Form.Dropdown
-            id="modelName"
-            title="Model"
-            isLoading={modelsLoading}
-            onChange={handleModelChange}
-            storeValue={true}
-          >
+          <Form.Dropdown {...itemProps.modelName} title="Model" isLoading={modelsLoading}>
             {models?.map(model => (
               <Form.Dropdown.Item key={model.id} title={model.name} value={model.name} />
             ))}
@@ -191,7 +186,7 @@ export default function AddCardAction({ deckName }: Props) {
 
           {fields}
 
-          <Form.TagPicker id="tags" title="Tags" ref={tagsCardRef}>
+          <Form.TagPicker {...itemProps.tags} title="Tags" ref={tagsCardRef}>
             {tags?.map(tag => <Form.TagPicker.Item key={tag} value={tag} title={tag} />)}
           </Form.TagPicker>
         </Form>
