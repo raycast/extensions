@@ -147,6 +147,29 @@ export const getDeletedTags = (oldTags: Tag[], newTags: Tag[]): Tag[] => {
   return oldTags.filter((tag) => !newTags.includes(tag));
 };
 
+export const setNoteSummary = (summary: string, createdAt?: Date) => {
+  if (!createdAt) {
+    return;
+  }
+  const notes = getInitialValuesFromFile(TODO_FILE_PATH) as Note[];
+  const note = notes.find((n) => n.createdAt === createdAt);
+  if (!note) {
+    return;
+  }
+
+  const updatedNotes = notes.map((n) => (n.createdAt === createdAt ? { ...n, summary } : n));
+  fs.writeFileSync(TODO_FILE_PATH, JSON.stringify(updatedNotes, null, 2));
+};
+
+export const clearNoteSummary = (createdAt?: Date) => {
+  if (!createdAt) {
+    return;
+  }
+  const notes = getInitialValuesFromFile(TODO_FILE_PATH) as Note[];
+  const updatedNotes = notes.map((n) => (n.createdAt === createdAt ? { ...n, summary: undefined } : n));
+  fs.writeFileSync(TODO_FILE_PATH, JSON.stringify(updatedNotes, null, 2));
+};
+
 export const colors = [
   {
     name: "red",
