@@ -1,6 +1,6 @@
 import { showFailureToast, useFetch } from "@raycast/utils";
 import { BASE_URL } from "../utils/constants";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDebounce } from "../utils/use-debounce";
 
 type SearchResponse = {
@@ -33,23 +33,27 @@ type UseProjectReturn = {
   };
 };
 
+const PROJECT_LIMIT = 20;
+
 /**
  * A hook that contains all logic for fetching and mapping modrinth projects on the search endpoint.
  */
 export const useModrinthSearch = (): UseProjectReturn => {
   const [searchQuery, setSearchQuery] = useState<string | undefined>();
+  const [offset, setOffset] = useState<number>(0);
+  const [projects, setProjects] = useState<ListModrinthProject[]>([]);
 
-  const { data, isLoading, error, pagination } = useFetch<unknown, ListModrinthProject[], ListModrinthProject[]>(
-    (options) => {
-      const urlParams = new URLSearchParams();
+  const { isLoading, error, pagination, mutate } = useFetch<unknown, ListModrinthProject[], ListModrinthProject[]>(
+    () => {
+      const urlParams = new URLSearchParams({
+        limit: PROJECT_LIMIT.toString(),
+      });
 
       if (searchQuery) {
         urlParams.set("query", searchQuery);
       }
 
-      if (options.cursor && options.cursor > 0) {
-        urlParams.set("offset", options.cursor.toString());
-      }
+      urlParams.set("offset", offset.toString());
 
       return `${BASE_URL}/search?${urlParams.toString()}`;
     },
@@ -60,31 +64,46 @@ export const useModrinthSearch = (): UseProjectReturn => {
       },
       mapResult: (result) => {
         if (isListModrinthProjectArray(result)) {
+          setProjects((prev) => {
+            prev.push(...result.hits);
+            return prev;
+          });
           return {
             data: result.hits,
-            hasMore: result.total_hits > result.offset + result.limit,
+            hasMore: result.total_hits > result.offset + PROJECT_LIMIT,
             cursor: result.offset,
           };
         }
-
         return { data: [], hasMore: false, cursor: 0 };
       },
+      keepPreviousData: true,
       initialData: [],
     },
   );
 
-  const debouncedSearchChnage = useDebounce((query: string | undefined) => setSearchQuery(query), 300);
+  const handleSearchChange = (query: string | undefined) => {
+    setOffset(0);
+    setProjects([]);
+    setSearchQuery(query);
+  };
+
+  const debouncedSearchChnage = useDebounce((query: string | undefined) => handleSearchChange(query), 300);
 
   const handleLoadMore = () => {
-    pagination?.onLoadMore();
+    setOffset(offset + PROJECT_LIMIT);
   };
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    mutate();
+  }, [offset]);
 
   if (error) {
     showFailureToast(error.message);
   }
 
   return {
-    data,
+    data: projects,
     isLoading,
     handleSearchChange: debouncedSearchChnage,
     onLoadMore: handleLoadMore,
