@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "phone",
+  "title": "Phone Call",
+  "description": "Make phone and facetime calls with raycast.",
+  "icon": "phone.png",
+  "author": "alexkim5682",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "phone",
+      "title": "Call",
+      "description": "Intiates a phone call with a contact or a given phone number.",
+      "mode": "view",
+      "icon": "phone.png"
+    },
+    {
+      "name": "facetime",
+      "title": "Facetime Call",
+      "description": "Intiates a facetime call with a contact.",
+      "mode": "view",
+      "icon": "facetime.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "no_confirmation",
+      "title": "Remove Confirmation Dialog",
+      "description": "Removes the confirmation dialog when facetiming.",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.16.3",
+    "raycast": "^1.0.8",
+    "react-dev-utils": "^10.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
