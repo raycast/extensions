@@ -1,6 +1,6 @@
 # Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-08-05
 
 ### Added
 - New "Backup App" feature in the action panel for each app
