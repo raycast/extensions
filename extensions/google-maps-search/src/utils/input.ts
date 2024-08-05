@@ -1,23 +1,45 @@
 import { Clipboard, getSelectedText } from "@raycast/api";
 
 /**
- * Gets selected text. If no text selected, gets clipboard text.
- *
- * @returns selected text, or otherwise clipboard text
+ * Checks if a string is empty or null/undefined.
+ * @param str - The string to check.
+ * @returns True if the string is empty, null, or undefined; false otherwise.
  */
-export const fetchItemInput = async () => {
-  return getSelectedText()
-    .then(async (text) => (!isEmpty(text) ? text : await getClipboardText()))
-    .catch(async () => await getClipboardText())
-    .then((item) => (!isEmpty(item) ? item : ""))
-    .catch(() => "" as string);
+const isEmpty = (str: string | null | undefined): boolean => {
+  return !str || str.trim().length === 0;
 };
 
-export const isEmpty = (string: string | null | undefined) => {
-  return !(string != null && String(string).length > 0);
+/**
+ * Gets the text content from the clipboard.
+ * @returns The clipboard text content or an empty string if unavailable.
+ */
+const getClipboardText = async (): Promise<string> => {
+  try {
+    const content = await Clipboard.readText();
+    return content ?? "";
+  } catch (error) {
+    console.error("Error reading clipboard:", error);
+    return "";
+  }
 };
 
-const getClipboardText = async () => {
-  const content = await Clipboard.readText();
-  return typeof content == "undefined" ? "" : content;
+/**
+ * Gets selected text if available, otherwise falls back to clipboard text.
+ * @returns Selected text, clipboard text, or an empty string.
+ */
+export const fetchItemInput = async (): Promise<string> => {
+  try {
+    const selectedText = await getSelectedText();
+    if (!isEmpty(selectedText)) {
+      return selectedText;
+    }
+  } catch (error) {
+    // Silently catch the error and proceed to clipboard
+  }
+
+  // If no selected text or error occurred, try clipboard
+  const clipboardText = await getClipboardText();
+  return clipboardText;
 };
+
+export { isEmpty };
