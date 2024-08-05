@@ -68,6 +68,16 @@ const useTask = () => {
     }
   };
 
+  const handleRestartTask = async (id: string) => {
+    try {
+      const [task, error] = await axiosPromiseData(fetcher(`/planner/restart/task/${id}`, { method: "POST" }));
+      if (!task || error) throw error;
+      return task;
+    } catch (error) {
+      console.error("Error while restarting task", error);
+    }
+  };
+
   const handleStopTask = async (id: string) => {
     try {
       const [task, error] = await axiosPromiseData(fetcher(`/planner/stop/task/${id}`, { method: "POST" }));
@@ -134,15 +144,37 @@ const useTask = () => {
     }
   };
 
+  // Snooze Task
+  const rescheduleTask = async (taskId: string, rescheduleCommand: string, relativeFrom?: string) => {
+    try {
+      const [task, error] = await axiosPromiseData(
+        fetcher(
+          `/planner/task/${taskId}/snooze?snoozeOption=${rescheduleCommand}&relativeFrom=${
+            relativeFrom ? relativeFrom : null
+          }`,
+          {
+            method: "POST",
+          }
+        )
+      );
+      if (!task || error) throw error;
+      return task;
+    } catch (error) {
+      console.error("Error while rescheduling event", error);
+    }
+  };
+
   return {
     useFetchTasks,
     createTask,
     handleStartTask,
+    handleRestartTask,
     handleStopTask,
     addTime,
     updateTask,
     doneTask,
     incompleteTask,
+    rescheduleTask,
   };
 };
 
