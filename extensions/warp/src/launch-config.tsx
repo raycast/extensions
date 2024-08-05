@@ -1,6 +1,5 @@
 import { ActionPanel, Action, List, showToast, Toast, Icon } from "@raycast/api";
 import useLocalStorage from "./hooks/useLocalStorage";
-
 import { useEffect, useState } from "react";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -20,10 +19,10 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const {
-    data: resultsWeights,
-    setData: setResultsWeights,
-    isLoading: isResultsWeightsLoading,
-  } = useLocalStorage<{ [key: string]: number }>("resultsWeights", {});
+    data: resultsOrderList,
+    setData: setResultsOrderList,
+    isLoading: isResultsOrderListLoading,
+  } = useLocalStorage<Array<string>>("resultsOrder", []);
 
   const [error, setError] = useState(false);
 
@@ -58,7 +57,6 @@ export default function Command() {
         .filter((file) => file.match(/.y(a)?ml$/g))
         .map(async (file) => {
           const contents = await fs.readFile(path.join(fullPath, file), "utf-8");
-
           const yaml = YAML.parse(contents);
 
           return { name: yaml.name, path: path.join(fullPath, file) };
@@ -72,37 +70,48 @@ export default function Command() {
       );
     }
 
-    if (Object.keys(resultsWeights).length > 0) {
-      const filteredResultsWeights: { [key: string]: number } = {};
-      for (const key of Object.keys(resultsWeights)) {
-        if (fileList.find((file) => file.name === key)) {
-          filteredResultsWeights[key] = resultsWeights[key];
-        }
-      }
-      setResultsWeights(filteredResultsWeights);
-    } else {
-      const initialWeights: { [key: string]: number } = {};
-      fileList.forEach((obj, index) => {
-        initialWeights[obj.name] = index;
-      });
-      setResultsWeights(initialWeights);
-    }
+    const allFileNames = fileList.map(({ name }) => name);
+    const resultsOrderListFilteredFromStaleFiles = resultsOrderList.filter(
+      (fileName) => allFileNames.indexOf(fileName) !== -1
+    );
+    const newFileNamesNotPresentOnResultsOrderList = allFileNames.filter(
+      (fileName) => resultsOrderList.indexOf(fileName) === -1
+    );
 
+    const currentOrderList = [...resultsOrderListFilteredFromStaleFiles, ...newFileNamesNotPresentOnResultsOrderList];
+    setResultsOrderList(currentOrderList);
     setResults(
-      fileList.sort((fileA, fileB) => {
-        return (resultsWeights[fileB.name] || 0) - (resultsWeights[fileA.name] || 0);
+      [...fileList].sort((fileA, fileB) => {
+        return currentOrderList.indexOf(fileA.name) - currentOrderList.indexOf(fileB.name);
       })
     );
   };
 
   let initialized = false;
   useEffect(() => {
-    if (initialized || isResultsWeightsLoading) {
+    if (initialized || isResultsOrderListLoading) {
       return;
     }
     initialized = true;
     init();
-  }, [isResultsWeightsLoading]);
+  }, [isResultsOrderListLoading]);
+
+  const swapSearchItems = (currentIndex: number, swapIndex: number) => {
+    if (swapIndex < 0 || swapIndex >= results.length) {
+      return;
+    }
+
+    const resultsOrderCopy = [...resultsOrderList];
+    [resultsOrderCopy[currentIndex], resultsOrderCopy[swapIndex]] = [
+      resultsOrderCopy[swapIndex],
+      resultsOrderCopy[currentIndex],
+    ];
+    setResultsOrderList(resultsOrderCopy);
+
+    const resultsCopy = [...results];
+    [resultsCopy[currentIndex], resultsCopy[swapIndex]] = [resultsCopy[swapIndex], resultsCopy[currentIndex]];
+    setResults(resultsCopy);
+  };
 
   return (
     <List
@@ -123,34 +132,8 @@ export default function Command() {
               isSearching={searchText.length > 0}
               key={searchResult.path}
               searchResult={searchResult}
-              moveSearchResultDown={() => {
-                if (index >= results.length - 1) {
-                  return;
-                }
-                const swappedResult = results[index + 1];
-                const resultsWeightsCopy = { ...resultsWeights };
-                resultsWeightsCopy[searchResult.name] = resultsWeightsCopy[searchResult.name] - 1;
-                resultsWeightsCopy[swappedResult.name] = resultsWeightsCopy[swappedResult.name] + 1;
-                setResultsWeights(resultsWeightsCopy);
-
-                const resultsCopy: Array<SearchResult> = [...results];
-                [resultsCopy[index], resultsCopy[index + 1]] = [resultsCopy[index + 1], resultsCopy[index]];
-                setResults(resultsCopy);
-              }}
-              moveSearchResultUp={() => {
-                if (index === 0) {
-                  return;
-                }
-                const swappedResult = results[index - 1];
-                const resultsWeightsCopy = { ...resultsWeights };
-                resultsWeightsCopy[searchResult.name] = resultsWeightsCopy[searchResult.name] + 1;
-                resultsWeightsCopy[swappedResult.name] = resultsWeightsCopy[swappedResult.name] - 1;
-                setResultsWeights(resultsWeightsCopy);
-
-                const resultsCopy: Array<SearchResult> = [...results];
-                [resultsCopy[index], resultsCopy[index - 1]] = [resultsCopy[index - 1], resultsCopy[index]];
-                setResults(resultsCopy);
-              }}
+              moveSearchResultDown={() => swapSearchItems(index, index + 1)}
+              moveSearchResultUp={() => swapSearchItems(index, index - 1)}
             />
           ))}
       </List.Section>
@@ -194,18 +177,18 @@ function SearchListItem({
               quicklink={{ link: launchConfig(searchResult.name), name: searchResult.name }}
             />
             {!isSearching && (
-              <Action
-                title="Move up"
-                shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
-                onAction={moveSearchResultUp}
-              />
-            )}
-            {!isSearching && (
-              <Action
-                title="Move down"
-                shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
-                onAction={moveSearchResultDown}
-              />
+              <>
+                <Action
+                  title="Move up"
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+                  onAction={moveSearchResultUp}
+                />
+                <Action
+                  title="Move down"
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+                  onAction={moveSearchResultDown}
+                />
+              </>
             )}
           </ActionPanel.Section>
         </ActionPanel>
