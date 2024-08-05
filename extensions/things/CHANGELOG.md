@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [Quick To-do Improvements] - {PR_MERGE_DATE}
+## [Quick To-do Improvements] - 2024-08-05
 
 - Preference to disable date parsing for todo classification, sending all todo(s) to inbox.
 - The title input will still be parsed for assigning deadlines and list name followed with '#' (case-insensitive).
