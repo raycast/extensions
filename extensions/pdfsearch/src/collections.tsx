@@ -1,9 +1,21 @@
-import { ActionPanel, Action, List, LocalStorage, showToast, Alert, Icon, Color, confirmAlert } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  LocalStorage,
+  showToast,
+  Alert,
+  Icon,
+  Color,
+  confirmAlert,
+  environment,
+} from "@raycast/api";
 import { useState } from "react";
 import Search from "./views/search";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { Collection } from "./type";
 import { CreateCollectionForm } from "./views/form";
+import { deleteCollection } from "swift:../swift";
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
@@ -25,9 +37,14 @@ export default function Command() {
         title: "Delete Collection",
         onAction: async () => {
           // remove record of collection
-          await LocalStorage.removeItem(name);
+          try {
+            await deleteCollection(name, environment.supportPath);
+            await LocalStorage.removeItem(name);
+            showToast({ title: "Success", message: `Successfully deleted collection ${name}!` });
+          } catch (err) {
+            showFailureToast(`Failed to delete ${name}! ${err}`);
+          }
           revalidate();
-          showToast({ title: "Success", message: `Successfully deleted collection ${name}!` });
         },
       },
     });
