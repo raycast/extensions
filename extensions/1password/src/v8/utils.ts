@@ -269,8 +269,9 @@ export function getFavicon(urls?: Url[]) {
     if (hostname.endsWith("apple.com")) return "https://www.apple.com/favicon.ico";
     if (hostname.includes("battle")) return "https://www.google.com/s2/favicons?domain=battle.net&sz=32";
 
-    // get hostname domain
-    const domain = hostname.split(".").slice(-2).join(".");
+    // get main domain
+    const datum = hostname.split(".");
+    const domain = datum.slice(Math.min(-datum.length + 1, -2)).join(".");
     // https://dev.to/derlin/get-favicons-from-any-website-using-a-hidden-google-api-3p1e
     return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
   } catch (error) {
