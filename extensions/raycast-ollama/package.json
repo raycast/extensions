@@ -137,7 +137,7 @@
       "name": "ollama-longer",
       "title": "Make Longer",
       "subtitle": "Ollama",
-      "description": "Make selected text longher",
+      "description": "Make selected text longer",
       "mode": "view"
     },
     {
@@ -213,7 +213,7 @@
           "name": "parameters",
           "placeholder": "Parameters",
           "type": "text",
-          "required": false
+          "required": true
         }
       ]
     }
