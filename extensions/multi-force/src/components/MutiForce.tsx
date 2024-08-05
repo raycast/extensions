@@ -25,8 +25,9 @@ export default function MultiForce() {
       else if (storedOrgs.length > 0 && orgListsAreDifferent(globalOrgs, storedOrgs)) {
         await showToast({
           title: "Org Changes Available",
+          message: "Some of your orgs are out of sync with Salesforce.",
           primaryAction: {
-            title: "Synchronize orgs from VSCode / SF CLI.",
+            title: "Resolve",
             onAction: (toast) => {
               dispatch({
                 type: OrgListReducerType.SET_ORGS,

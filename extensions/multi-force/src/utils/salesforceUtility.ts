@@ -33,31 +33,32 @@ export async function getOrgList(): Promise<DeveloperOrg[]> {
 }
 
 async function executeLoginFlow(oauthConfig: OAuth2Config): Promise<AuthInfo> {
+  console.log(oauthConfig);
   const oauthServer = await WebOAuthServer.create({ oauthConfig });
-  await oauthServer.start();
-  await open(oauthServer.getAuthorizationUrl());
-  return oauthServer.authorizeAndSave();
+  try {
+    await oauthServer.start();
+    console.log(oauthServer.getAuthorizationUrl());
+    await open(oauthServer.getAuthorizationUrl());
+    return oauthServer.authorizeAndSave();
+  } catch (err) {
+    throw "You already have an open OAuth process. Please go back and complete that process or wait 5 minutes and try again.";
+  }
 }
 
 export async function authorizeOrg(toAuth: AuthenticateNewOrgFormData) {
-  try {
-    process.env["SF_DISABLE_LOG_FILE"] = "true";
-    const oauthConfig: OAuth2Config = {
-      loginUrl: await resolveLoginUrl(toAuth.url),
-    };
-    const authInfo = await executeLoginFlow(oauthConfig);
-    await authInfo.handleAliasAndDefaultSettings({
-      alias: toAuth.alias,
-      setDefault: false,
-      setDefaultDevHub: false,
-    });
-    const fields = authInfo.getFields(true);
-    await AuthInfo.identifyPossibleScratchOrgs(fields, authInfo);
-
-    return fields;
-  } catch (err) {
-    console.error(err);
-  }
+  process.env["SF_DISABLE_LOG_FILE"] = "true";
+  const oauthConfig: OAuth2Config = {
+    loginUrl: await resolveLoginUrl(toAuth.url),
+  };
+  const authInfo = await executeLoginFlow(oauthConfig);
+  await authInfo.handleAliasAndDefaultSettings({
+    alias: toAuth.alias,
+    setDefault: false,
+    setDefaultDevHub: false,
+  });
+  const fields = authInfo.getFields(true);
+  await AuthInfo.identifyPossibleScratchOrgs(fields, authInfo);
+  return fields;
 }
 
 export async function openOrg(orgAlias: string) {

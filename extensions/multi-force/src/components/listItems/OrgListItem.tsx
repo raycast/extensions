@@ -48,11 +48,20 @@ export function OrgListItem(props: { index: number; org: DeveloperOrg }) {
         },
       })
     ) {
-      await deleteOrg(org.username);
-      dispatch({
-        type: OrgListReducerType.DELETE_ORG,
-        deletedOrg: org,
-      });
+      try {
+        await deleteOrg(org.username);
+        dispatch({
+          type: OrgListReducerType.DELETE_ORG,
+          deletedOrg: org,
+        });
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to Delete",
+          message:
+            "There was a problem deleting this org. Please exit MultiForce, reopen, and look for the notification that your orgs are out of sync.",
+        });
+      }
     }
   };
 

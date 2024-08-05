@@ -17,6 +17,7 @@ export function AuthenticateNewOrg(props: {
   dispatch: Dispatch<OrgListReducerAction>;
 }) {
   const { orgs, dispatch } = props;
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [orgType, setOrgType] = useState<string>();
   const [section, setSection] = useState<string>();
   const [sections, setSections] = useState<string[]>([]);
@@ -37,10 +38,10 @@ export function AuthenticateNewOrg(props: {
     getSectionList();
   }, []);
 
-  const showErrorToast = async () => {
+  const showErrorToast = async (error = "unable to authenticate org.") => {
     await showToast({
       style: Toast.Style.Failure,
-      title: `Unable to authenticate org.`,
+      title: error,
     });
   };
 
@@ -64,6 +65,7 @@ export function AuthenticateNewOrg(props: {
         values.url = "https://login.salesforce.com";
       }
       try {
+        setIsLoading(true);
         authorizeOrg(values)
           .then((fields) => {
             addOrg({
@@ -73,15 +75,18 @@ export function AuthenticateNewOrg(props: {
               label: values.label,
               section: values.section === NEW_SECTION_LABEL ? values.newSectionName : values.section,
             } as DeveloperOrg);
+            setIsLoading(false);
             popToRoot();
           })
           .catch((err) => {
             console.error(err);
-            showErrorToast();
+            showErrorToast(err);
+            setIsLoading(false);
           });
       } catch (err) {
         console.error(err);
-        showErrorToast();
+        showErrorToast(err as string);
+        setIsLoading(false);
       }
     },
     validation: {
@@ -106,6 +111,7 @@ export function AuthenticateNewOrg(props: {
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Authenticate" icon={{ source: Icon.PlusSquare }} onSubmit={handleSubmit} />
