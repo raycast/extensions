@@ -20,3 +20,11 @@ If you don't see any of your to-dos in any commands, please make sure Things is 
 Raycast AI is used to select the deadline, list, tags etc. If Raycast AI is not accessible or user has selected `Don't use AI`
 preference, all the quickly created to-do(s) will be sent to Inbox, but the title will still be parsed for assigning deadlines 
 and list name followed with '#' in title (case-insensitive).
+
+**Examples (with AI):**
+* Book flights today in my Trips list -> Creates todo with title "Book flights" classified in "today" and list "Trips".
+* Add milk to my groceries list for tomorrow with Errand tag -> Creates todo with title "Milk" classified in "tomorrow" with list "groceries" and tag "Errand".
+* Buy a new car by the end of the year -> Creates todo with title "Buy a new car" and deadline "20..-12-31".
+
+**Examples (without AI):**
+* Complete project by end of the year #work -> Creates todo with title "Complete project" with deadline "20..-12-31" and list "work".
