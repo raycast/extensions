@@ -1,6 +1,6 @@
 # DigitalOcean Changelog
 
-## [Add `Search App Platforms` Command] - {PR_MERGE_DATE}
+## [Add `Search App Platforms` Command] - 2024-08-05
 
 ## [Fix Crash when zero DBs in Account] - 2024-06-19
 
