@@ -25,6 +25,9 @@ Moreover, view the cluster in the DigitalOcean console.
 ### Search Projects
 Search your projects in DigitalOcean, and go to them directly in your browser.
 
+### Search App Platform
+Search your apps in DigitalOcean, and go to them directly in your browser.
+
 ## Configuration
 Before you can use DigitalOcean, you must generate a Personal Access Token:
 - Go to https://cloud.digitalocean.com/account/api/tokens
