@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Menu Bar Command Fixes] - {PR_MERGE_DATE}
+## [Menu Bar Command Fixes] - 2024-08-05
 
 Changed Menu bar icon color contrast issue with certain wallpapers in light mode.
 
