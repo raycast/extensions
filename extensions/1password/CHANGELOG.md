@@ -1,6 +1,6 @@
 # 1Password Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2024-08-05
 
 - Add support for showing missing 1Password CLI error
 - Adjust toast message
