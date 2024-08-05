@@ -1,6 +1,6 @@
 # cURL Changelog
 
-## [Bug fix] - {PR_MERGE_DATE}
+## [Bug fix] - 2024-08-05
 
 - The "Copy Headers" button now copies the request's headers instead of copying the body
 
