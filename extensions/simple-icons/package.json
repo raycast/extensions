@@ -32,7 +32,6 @@
       "title": "Default detail action",
       "description": "The default action when viewing detail of an item",
       "required": false,
-      "placeholder": "open-with",
       "type": "dropdown",
       "data": [
         {
@@ -62,6 +61,23 @@
         {
           "value": "CopyUnpkg",
           "title": "Copy unpkg link"
+        }
+      ]
+    },
+    {
+      "name": "defaultLoadSvgAction",
+      "title": "Default action for copying/opening SVG",
+      "description": "The default action when copying/opening SVG",
+      "required": false,
+      "type": "dropdown",
+      "data": [
+        {
+          "value": "WithBrandColor",
+          "title": "With Brand Color"
+        },
+        {
+          "value": "PureSvg",
+          "title": "Pure SVG (no color specified)"
         }
       ]
     }
