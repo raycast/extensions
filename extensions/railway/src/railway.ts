@@ -1,3 +1,4 @@
+import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
 
 export const backboardUrl = "https://backboard.railway.app/graphql/v2";
@@ -5,6 +6,8 @@ export const railwayWebUrl = "https://railway.app";
 
 export const projectUrl = (projectId: string, page?: string): string =>
   `${railwayWebUrl}/project/${projectId}/${page ?? "settings"}`;
+
+const token = getPreferenceValues<Preferences>().railwayApiKey;
 
 export interface ProjectGQL {
   id: string;
@@ -26,15 +29,29 @@ interface ProjectEdgeGQL {
   ];
 }
 
-export const gqlRequest = async <T = any>(query: string, token?: string): Promise<T | null> => {
+interface Error {
+  message: string;
+  locations?: Array<{
+    line: number;
+    column: number;
+  }>;
+  path?: string[];
+  extensions?: {
+    code: string;
+  };
+  traceId: string;
+}
+
+export const gqlRequest = async <T>(query: string): Promise<T | null> => {
   const res = await fetch(backboardUrl, {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...(token != null ? { Authorization: `Bearer ${token}` } : {}) },
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify({ query }),
   });
 
-  const json = (await res.json()) as any;
-  const data: T | null = json?.data;
+  const json = (await res.json()) as { errors: Error[]; data?: null } | { data: T };
+  if ("errors" in json) throw new Error(json.errors[0].message);
+  const data = json?.data || null;
 
   return data;
 };
@@ -45,7 +62,7 @@ export interface FetchProjectsQuery {
   };
 }
 
-export const fetchProjects = async (token: string): Promise<ProjectGQL[]> => {
+export const fetchProjects = async (): Promise<ProjectGQL[]> => {
   const res = await gqlRequest<FetchProjectsQuery>(
     `query { 
       me{
@@ -61,7 +78,6 @@ export const fetchProjects = async (token: string): Promise<ProjectGQL[]> => {
         }
       }
   }`,
-    token,
   );
   const user = res?.me;
 
