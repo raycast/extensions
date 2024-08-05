@@ -13,7 +13,8 @@
   "icon": "icon.png",
   "author": "samuelkraft",
   "contributors": [
-    "yvysunu"
+    "yvysunu",
+    "dianne_mcewan"
   ],
   "categories": [
     "Data"
@@ -25,6 +26,13 @@
       "title": "Search Workouts",
       "description": "See your recent workouts from Strava",
       "mode": "view"
+    },
+    {
+      "name": "createActivity",
+      "title": "Create Activity",
+      "description": "Create a manual activity on Strava",
+      "mode": "view",
+      "icon": "create.png"
     },
     {
       "name": "leaderboard",
@@ -147,7 +155,7 @@
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
+    "prettier": "^3.2.5",
     "typescript": "^5.2.2"
   },
   "scripts": {
