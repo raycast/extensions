@@ -21,7 +21,7 @@ const addOrg = (orgMap: Map<string, DeveloperOrg[]>, newOrg: DeveloperOrg): Deve
 };
 
 const updatedOrg = (orgMap: Map<string, DeveloperOrg[]>, updatedOrg: DeveloperOrg): DeveloperOrg[] => {
-  const updatedOrgs = deleteOrg(orgMap, updatedOrg)
+  const updatedOrgs = deleteOrg(orgMap, updatedOrg);
   updatedOrgs.push(updatedOrg);
   return updatedOrgs;
 };

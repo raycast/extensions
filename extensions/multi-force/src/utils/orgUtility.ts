@@ -49,5 +49,5 @@ export function orgListsAreDifferent(orgs1: DeveloperOrg[], orgs2: DeveloperOrg[
 }
 
 export function removeOrgByAlias(orgs: DeveloperOrg[], aliasToRemove: string): DeveloperOrg[] {
-  return orgs.filter(org => org.alias !== aliasToRemove);
+  return orgs.filter((org) => org.alias !== aliasToRemove);
 }

@@ -80,9 +80,18 @@ export function DeveloperOrgDetails(props: { org: DeveloperOrg; dispatch: Dispat
       <Form.Description title="Org URL" text={org.instanceUrl} />
       <Form.Description title="Username" text={org.username} />
       <Form.Description title="Org Alias" text={org.alias} />
-      <Form.TextField title="Label" {...itemProps.label} info="Enter a label to use with your org."/>
-      <Form.TextField title="Color" {...itemProps.color} info={`Enter a color to use on the Salesforce Icon for your org. This color must be in HEX format, ie ${DEFAULT_COLOR}.`}/>
-      <Form.Dropdown title="Section" {...itemProps.section} onChange={setSectionValue} info="Select a section to group orgs on your list. If you want to create a new group, choose the 'New Section' option.">
+      <Form.TextField title="Label" {...itemProps.label} info="Enter a label to use with your org." />
+      <Form.TextField
+        title="Color"
+        {...itemProps.color}
+        info={`Enter a color to use on the Salesforce Icon for your org. This color must be in HEX format, ie ${DEFAULT_COLOR}.`}
+      />
+      <Form.Dropdown
+        title="Section"
+        {...itemProps.section}
+        onChange={setSectionValue}
+        info="Select a section to group orgs on your list. If you want to create a new group, choose the 'New Section' option."
+      >
         {sections.map((sect, index) => (
           <Form.Dropdown.Item key={index} value={sect} title={sect} />
         ))}
