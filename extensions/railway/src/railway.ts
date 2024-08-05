@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
 
-export const backboardUrl = "https://backboard.railway.app/graphql/v2";
+const backboardUrl = "https://backboard.railway.app/graphql/v2";
 export const railwayWebUrl = "https://railway.app";
 
 export const projectUrl = (projectId: string, page?: string): string =>
@@ -9,24 +9,18 @@ export const projectUrl = (projectId: string, page?: string): string =>
 
 const token = getPreferenceValues<Preferences>().railwayApiKey;
 
-export interface ProjectGQL {
+interface ProjectGQL {
   id: string;
   name: string;
   updatedAt: string;
   description: string;
+  isPublic: boolean;
 }
 
 interface ProjectEdgeGQL {
-  edges: [
-    {
-      node: {
-        id: string;
-        name: string;
-        updatedAt: string;
-        description: string;
-      };
-    },
-  ];
+  edges: Array<{
+    node: ProjectGQL;
+  }>;
 }
 
 interface Error {
@@ -72,7 +66,8 @@ export const fetchProjects = async (): Promise<ProjectGQL[]> => {
               id
               name
               description
-              createdAt
+              updatedAt
+              isPublic
             }
           }
         }

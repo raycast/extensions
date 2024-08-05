@@ -1,6 +1,6 @@
-import { ActionPanel, List, Action } from "@raycast/api";
-import { fetchProjects, projectUrl } from "./railway";
-import { useCachedPromise } from "@raycast/utils";
+import { ActionPanel, List, Action, Icon } from "@raycast/api";
+import { fetchProjects, projectUrl, railwayWebUrl } from "./railway";
+import { getFavicon, useCachedPromise } from "@raycast/utils";
 
 export default function Command() {
   return <ListProjects />;
@@ -20,11 +20,28 @@ const ListProjects: React.FC = () => {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search project">
+      {!isLoading && !projects.length && (
+        <List.EmptyView
+          title="Create a New Project"
+          description="No projects found"
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                icon={getFavicon(`${railwayWebUrl}/new`)}
+                title="Create New Project"
+                url={`${railwayWebUrl}/new`}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
       {projects.map((p) => (
         <List.Item
           key={p.id}
+          icon={p.isPublic ? Icon.Eye : Icon.EyeDisabled}
           title={p.name}
           subtitle={p.description}
+          accessories={[{ date: new Date(p.updatedAt) }]}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
