@@ -1,5 +1,9 @@
 # 1Password Changelog
 
+## [Feat] - 2024-08-06
+
+- Add Icon to the item list
+
 ## [Fix] - 2024-08-05
 
 - Add support for showing missing 1Password CLI error
