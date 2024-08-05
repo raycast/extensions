@@ -129,8 +129,8 @@ export default function Command() {
           ?.filter((f) => f.name.toLowerCase().includes(searchText.toLowerCase()))
           .map((searchResult, index) => (
             <SearchListItem
-              isSearching={searchText.length > 0}
               key={searchResult.path}
+              isSearching={searchText.length > 0}
               searchResult={searchResult}
               moveSearchResultDown={() => swapSearchItems(index, index + 1)}
               moveSearchResultUp={() => swapSearchItems(index, index - 1)}
