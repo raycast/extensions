@@ -26,7 +26,7 @@
       "title": "Search Workouts",
       "description": "See your recent workouts from Strava",
       "mode": "view",
-      "tags": [
+      "keywords": [
         "strava",
         "activities",
         "exercise"
@@ -38,7 +38,7 @@
       "description": "Create a manual activity on Strava",
       "mode": "view",
       "icon": "create.png",
-      "tags": [
+      "keywords": [
         "strava",
         "activities",
         "exercise"
@@ -50,7 +50,7 @@
       "description": "See your club's weekly leaderboard",
       "mode": "view",
       "icon": "leaderboard-icon.png",
-      "tags": [
+      "keywords": [
         "strava",
         "activities",
         "exercise"
@@ -72,7 +72,7 @@
           "required": true
         }
       ],
-      "tags": [
+      "keywords": [
         "strava",
         "activities",
         "exercise"
@@ -135,7 +135,7 @@
           ]
         }
       ],
-      "tags": [
+      "keywords": [
         "strava",
         "activities",
         "exercise"
