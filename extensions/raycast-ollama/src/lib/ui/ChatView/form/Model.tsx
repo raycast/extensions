@@ -54,32 +54,14 @@ export function FormModel(props: props): JSX.Element {
       Submit(values);
     },
     initialValues: {
-      serverMain:
-        props.Chat && !IsLoadingModel && Model && Model.has(props.Chat.models.main.server_name)
-          ? props.Chat.models.main.server_name
-          : undefined,
-      modelMain:
-        props.Chat && !IsLoadingModel && Model && Model.has(props.Chat.models.main.server_name)
-          ? props.Chat.models.main.tag
-          : undefined,
+      serverMain: props.Chat ? props.Chat.models.main.server_name : undefined,
+      modelMain: props.Chat ? props.Chat.models.main.tag : undefined,
       keepAliveMain: props.Chat?.models.main.keep_alive ? props.Chat.models.main.keep_alive : "5m",
-      serverVision:
-        props.Chat?.models.vision && !IsLoadingModel && Model && Model.has(props.Chat.models.vision.server_name)
-          ? props.Chat.models.vision.server_name
-          : undefined,
-      modelVision:
-        props.Chat?.models.vision && !IsLoadingModel && Model && Model.has(props.Chat.models.vision.server_name)
-          ? props.Chat.models.vision.tag
-          : undefined,
+      serverVision: props.Chat?.models.vision ? props.Chat.models.vision.server_name : undefined,
+      modelVision: props.Chat?.models.vision ? props.Chat.models.vision.tag : undefined,
       keepAliveVision: props.Chat?.models.vision?.keep_alive ? props.Chat.models.vision.keep_alive : "5m",
-      serverEmbedding:
-        props.Chat?.models.embedding && !IsLoadingModel && Model && Model.has(props.Chat.models.embedding.server_name)
-          ? props.Chat.models.embedding.server_name
-          : undefined,
-      modelEmbedding:
-        props.Chat?.models.embedding && !IsLoadingModel && Model && Model.has(props.Chat.models.embedding.server_name)
-          ? props.Chat.models.embedding.tag
-          : undefined,
+      serverEmbedding: props.Chat?.models.embedding ? props.Chat.models.embedding.server_name : undefined,
+      modelEmbedding: props.Chat?.models.embedding ? props.Chat.models.embedding.tag : undefined,
       keepAliveEmbedding: props.Chat?.models.embedding?.keep_alive ? props.Chat.models.embedding.keep_alive : "5m",
     },
     validation: {
@@ -94,6 +76,14 @@ export function FormModel(props: props): JSX.Element {
       keepAliveEmbedding: (value) => ValidationKeepAlive(CheckboxEmbeddingAdvanced, value),
     },
   });
+
+  React.useEffect(() => {
+    if (!CheckboxEmbedding) SetCheckboxEmbeddingAdvanced(false);
+  }, [CheckboxEmbedding]);
+
+  React.useEffect(() => {
+    if (!CheckboxVision) SetCheckboxVisionAdvanced(false);
+  }, [CheckboxVision]);
 
   const InfoServer = "Ollama Server.";
   const InfoModel = "Ollama Model.";
