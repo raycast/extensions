@@ -3,6 +3,7 @@
 ## [Search Projects Fixes] - {PR_MERGE_DATE}
 
 - [#13882](https://github.com/raycast/extensions/issues/13882): Replaced filtering on roadmaps with filtering on initiatives, as initiatives replaced roadmaps.
+- Made Delete Project action alert destructive and added a retry option in case of errors.
 
 ## [Documents and Issues Fixes] - 2024-07-25
 
