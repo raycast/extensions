@@ -1,6 +1,6 @@
 # base64 Changelog
 
-## [Improvements and Fixes] - {PR_MERGE_DATE}
+## [Improvements and Fixes] - 2024-08-06
 
 - Encode and Decode: Used toasts instead of HUDs to color-code messages/prompts.
 - Encode and Decode: Used Clipboard.read() instead of reading clipboard through applescript to fix [#13842](https://github.com/raycast/extensions/issues/13842).
