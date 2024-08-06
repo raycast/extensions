@@ -1,5 +1,4 @@
 import { Action, Clipboard, Icon, Toast, environment, getPreferenceValues, showToast } from "@raycast/api";
-import { Preferences } from "~/types/preferences";
 import { captureException } from "~/utils/development";
 import { exec as execWithCallbacks } from "child_process";
 import { promisify } from "util";
@@ -24,7 +23,7 @@ const getSafePreferences = () => {
     transientCopyGeneratePasswordQuick,
     transientCopySearch,
     windowActionOnCopy,
-  } = getPreferenceValues<Preferences>();
+  } = getPreferenceValues<AllPreferences>();
 
   return {
     has_clientId: !!clientId,

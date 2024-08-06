@@ -43,6 +43,8 @@ export function VaultProvider(props: VaultProviderProps) {
   const publishItems = useVaultItemPublisher();
   const { getCachedVault, cacheVault } = useVaultCaching();
 
+  console.log({publishItems})
+
   const [currentFolderId, setCurrentFolderId] = useCachedState<Nullable<string>>(CACHE_KEYS.CURRENT_FOLDER_ID, null);
   const [state, setState] = useReducer(
     (previous: VaultState, next: Partial<VaultState>) => ({ ...previous, ...next }),
@@ -67,12 +69,12 @@ export function VaultProvider(props: VaultProviderProps) {
         folders = foldersResult.result;
         items.sort(favoriteItemsFirstSorter);
       } catch (error) {
-        publishItems(new FailedToLoadVaultItemsError());
+        publishItems?.(new FailedToLoadVaultItemsError());
         throw error;
       }
 
       setState({ items, folders });
-      publishItems(items);
+      publishItems?.(items);
       cacheVault(items, folders);
     } catch (error) {
       await showToast(Toast.Style.Failure, "Failed to load vault items", getDisplayableErrorMessage(error));
