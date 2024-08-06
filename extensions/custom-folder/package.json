@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Create Folder",
+      "title": "Create Folder Image",
       "description": "Create a custom folder image.",
       "mode": "view"
     }
