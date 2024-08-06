@@ -12,3 +12,57 @@ export const sortEvents = (a: Partial<Event>, b: Partial<Event>) => {
   }
   return 0;
 };
+
+/**
+ * A comparator to feed into a sort function
+ */
+export type SortStateComparator<T> = (a: T, b: T) => number;
+
+/**
+ * comparator for number arrays
+ */
+export const numComparator: SortStateComparator<number | undefined> = (a = Infinity, b = Infinity) =>
+  a === b ? 0 : a - b;
+/**
+ * comparator for string arrays
+ */
+export const alphaComparator: SortStateComparator<string | undefined> = (a = "", b = "") => {
+  a = a.toLowerCase();
+  b = b.toLowerCase();
+  if (a && !b) return -1;
+  if (!a && b) return 1;
+  // eslint-disable-next-line no-nested-ternary
+  return a === b ? 0 : a > b ? 1 : -1;
+};
+
+export type MakeOrderedListComparatorOptions<T> = {
+  fallbackComparator?: SortStateComparator<T>;
+};
+
+/**
+ * Creates a comparator which orders objects in a list according to order
+ * @param order The order in which to sort
+ * @returns a comparator
+ */
+export const makeOrderedListComparator = <T>(
+  order: readonly T[],
+  options: MakeOrderedListComparatorOptions<T> = {}
+): SortStateComparator<T> => {
+  const { fallbackComparator = (a: T, b: T) => alphaComparator(`${a}`, `${b}`) } = options;
+
+  const indexLookup = Object.values(order).reduce((lookup, item, i) => {
+    lookup.set(item, i);
+    return lookup;
+  }, new Map<T, number>());
+
+  return (a, b) => {
+    const iA = indexLookup.get(a);
+    const iB = indexLookup.get(b);
+
+    if (iA === undefined && iB === undefined) return fallbackComparator(a, b);
+    if (iA === undefined) return 1;
+    if (iB === undefined) return -1;
+
+    return numComparator(iA === undefined ? Infinity : iA, iB === undefined ? Infinity : iB);
+  };
+};
