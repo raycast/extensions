@@ -17,12 +17,12 @@ export function BaseConvertersAdvanceView(props: {
     <>
       <Form.Dropdown id={"fromBase"} title={"From Base"} value={fromBase} onChange={setFromBase}>
         {bases.map((value) => {
-          return <Form.DropdownItem key={"fromBase" + value.value} value={value.value} title={value.title} />;
+          return <Form.Dropdown.Item key={"fromBase" + value.value} value={value.value} title={value.title} />;
         })}
       </Form.Dropdown>
       <Form.Dropdown id={"toBase"} title={"To Base"} value={toBase} onChange={setToBase}>
         {bases.map((value) => {
-          return <Form.DropdownItem key={"toBase" + value.value} value={value.value} title={value.title} />;
+          return <Form.Dropdown.Item key={"toBase" + value.value} value={value.value} title={value.title} />;
         })}
       </Form.Dropdown>
       <Form.TextField
