@@ -9,6 +9,7 @@ import {
   Color,
   Clipboard,
   showToast,
+  Toast,
 } from "@raycast/api";
 import { UserType } from "../lib/types";
 import { UserCommandActions, UserCopyActions } from "./actions";
@@ -57,11 +58,15 @@ export default function User({ user, revalidate }: { user: UserType; revalidate?
                   icon={Icon.ArrowNe}
                   text={"View Posts"}
                   onAction={() => {
-                    launchCommand({
-                      name: "search-users-posts",
-                      type: LaunchType.UserInitiated,
-                      context: { username: user.username },
-                    });
+                    try {
+                      launchCommand({
+                        name: "search-users-posts",
+                        type: LaunchType.UserInitiated,
+                        context: { username: user.username },
+                      });
+                    } catch (err) {
+                      showToast({ title: "Command not enabled", style: Toast.Style.Failure });
+                    }
                   }}
                 />
               </List.Item.Detail.Metadata.TagList>
