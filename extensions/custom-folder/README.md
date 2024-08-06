@@ -1,4 +1,4 @@
-# Custom folder
+# Custom Folder
 
 Create custom MacOS folder images.
 
