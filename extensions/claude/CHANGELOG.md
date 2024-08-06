@@ -1,5 +1,9 @@
 # Claude Changelog
 
+## [Update] - 2024-07-10
+
+- Fix: Restarting a conversation will retain the currently selected model
+
 ## [Update] - 2024-06-20
 - Feature: Added new [Claude 3.5 Sonnet](https://www.anthropic.com/news/claude-3-5-sonnet)
 

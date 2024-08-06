@@ -29,7 +29,9 @@
     "litomore",
     "dmitrii_mitrofanov",
     "j3lte",
-    "stelo"
+    "stelo",
+    "vlasischar",
+    "javalangruntimeexception"
   ],
   "categories": [
     "Developer Tools",
@@ -81,7 +83,8 @@
       "name": "create-branch",
       "title": "Create Branch",
       "description": "Create a branch in one of your GitHub repositories",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "search-repositories",
@@ -97,15 +100,6 @@
           "default": "/Applications/Visual Studio Code.app",
           "placeholder": "/Applications/Visual Studio Code.app",
           "description": "Will be used to open the cloned repository."
-        },
-        {
-          "name": "baseClonePath",
-          "type": "directory",
-          "required": false,
-          "title": "Clone Path",
-          "default": "~/GitHub",
-          "placeholder": "~/GitHub",
-          "description": "Path in which the repositories will be cloned."
         },
         {
           "name": "includeForks",
@@ -181,13 +175,15 @@
       "name": "search-discussions",
       "title": "Search Discussions",
       "description": "Search recent Discussions globally in all repositories",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "my-discussions",
       "title": "My Discussions",
       "description": "Show your Discussions",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "my-projects",
@@ -395,13 +391,13 @@
     }
   ],
   "dependencies": {
+    "@octokit/rest": "^21.0.1",
     "@raycast/api": "^1.76.1",
     "@raycast/utils": "^1.16.0",
     "date-fns": "^3.6.0",
     "graphql-request": "^6.1.0",
     "lodash": "^4.17.21",
-    "node-fetch": "^3.3.2",
-    "octokit": "^4.0.2"
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.2",

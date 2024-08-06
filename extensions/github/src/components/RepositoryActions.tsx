@@ -5,13 +5,14 @@ import { format } from "date-fns";
 import { getGitHubClient } from "../api/githubClient";
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
-import { cloneAndOpen, REPO_SORT_TYPES_TO_QUERIES, WEB_IDES } from "../helpers/repository";
+import { WEB_IDES } from "../helpers/repository";
 
+import CloneRepositoryForm from "./CloneRepositoryForm";
 import { RepositoryDiscussionList } from "./RepositoryDiscussions";
 import { RepositoryIssueList } from "./RepositoryIssues";
 import { RepositoryPullRequestList } from "./RepositoryPullRequest";
 import RepositoryReleases from "./RepositoryReleases";
-import { SortAction, SortActionProps } from "./SortAction";
+import { SortAction, SortActionProps, SortTypesDataProps } from "./SortAction";
 
 type RepositoryActionProps = {
   repository: ExtendedRepositoryFieldsFragment;
@@ -25,7 +26,8 @@ export default function RepositoryActions({
   onVisit,
   setSortQuery,
   sortQuery,
-}: RepositoryActionProps & SortActionProps) {
+  sortTypesData,
+}: RepositoryActionProps & SortActionProps & SortTypesDataProps) {
   const { github } = getGitHubClient();
 
   const updatedAt = new Date(repository.updatedAt);
@@ -114,13 +116,12 @@ export default function RepositoryActions({
           ))}
         </ActionPanel.Submenu>
 
-        <Action
+        <Action.Push
           icon={Icon.Terminal}
-          title="Clone and Open"
-          onAction={() => cloneAndOpen(repository)}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+          title="Clone with Options"
+          target={<CloneRepositoryForm repository={repository} />}
+          shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "c" }}
         />
-
         <Action.OpenInBrowser
           icon="vscode.svg"
           title="Clone in VSCode"
@@ -239,7 +240,7 @@ export default function RepositoryActions({
       </ActionPanel.Section>
 
       <ActionPanel.Section>
-        <SortAction data={REPO_SORT_TYPES_TO_QUERIES} {...{ sortQuery, setSortQuery }} />
+        <SortAction {...{ data: sortTypesData, sortQuery, setSortQuery }} />
       </ActionPanel.Section>
     </ActionPanel>
   );

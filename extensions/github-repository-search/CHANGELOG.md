@@ -1,5 +1,10 @@
 # Changelog
 
+## [Updates] - 2024-07-31
+
+- Updated (dev) dependencies, code cleanup
+- Bugfix for not being able to browse the repository releases ([#12808](https://github.com/raycast/extensions/issues/12808))
+
 ## [Filter Preferences] - 2024-02-02
 
 - Add preference `users`, used to filter results to specific users/organisations

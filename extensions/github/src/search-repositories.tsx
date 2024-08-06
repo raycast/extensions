@@ -8,7 +8,7 @@ import RepositoryListEmptyView from "./components/RepositoryListEmptyView";
 import RepositoryListItem from "./components/RepositoryListItem";
 import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
 import { ExtendedRepositoryFieldsFragment } from "./generated/graphql";
-import { REPO_DEFAULT_SORT_QUERY, useHistory } from "./helpers/repository";
+import { REPO_DEFAULT_SORT_QUERY, REPO_SORT_TYPES_TO_QUERIES, useHistory } from "./helpers/repository";
 import { withGitHubClient } from "./helpers/withGithubClient";
 
 function SearchRepositories() {
@@ -21,6 +21,7 @@ function SearchRepositories() {
   const [sortQuery, setSortQuery] = useCachedState<string>("sort-query", REPO_DEFAULT_SORT_QUERY, {
     cacheNamespace: "github-search-repo",
   });
+  const sortTypesData = REPO_SORT_TYPES_TO_QUERIES;
 
   const { data: history, visitRepository } = useHistory(searchText, searchFilter);
   const query = useMemo(
@@ -28,7 +29,7 @@ function SearchRepositories() {
       `${searchFilter} ${searchText} ${sortQuery} fork:${preferences.includeForks} ${
         preferences.includeArchived ? "" : "archived:false"
       }`,
-    [searchText, searchFilter, sortQuery],
+    [searchText, searchFilter, sortQuery, preferences.includeForks, preferences.includeArchived],
   );
 
   const {
@@ -48,14 +49,13 @@ function SearchRepositories() {
     { keepPreviousData: true },
   );
 
-  // Update visited repositories (history) if any of the metadata changes, especially the repository name.
   useEffect(() => {
     history.forEach((repository) => data?.find((r) => r.id === repository.id && visitRepository(r)));
-  }, [data]);
+  }, [data, history, visitRepository]);
 
   const foundRepositories = useMemo(
     () => data?.filter((repository) => !history.find((r) => r.id === repository.id)),
-    [data],
+    [data, history],
   );
 
   return (
@@ -70,7 +70,12 @@ function SearchRepositories() {
         {history.map((repository) => (
           <RepositoryListItem
             key={repository.id}
-            {...{ repository, onVisit: visitRepository, mutateList, sortQuery, setSortQuery }}
+            repository={repository}
+            onVisit={visitRepository}
+            mutateList={mutateList}
+            sortQuery={sortQuery}
+            setSortQuery={setSortQuery}
+            sortTypesData={sortTypesData}
           />
         ))}
       </List.Section>
@@ -80,14 +85,17 @@ function SearchRepositories() {
           title={searchText ? "Search Results" : "Found Repositories"}
           subtitle={`${foundRepositories.length}`}
         >
-          {foundRepositories.map((repository) => {
-            return (
-              <RepositoryListItem
-                key={repository.id}
-                {...{ repository, onVisit: visitRepository, mutateList, sortQuery, setSortQuery }}
-              />
-            );
-          })}
+          {foundRepositories.map((repository) => (
+            <RepositoryListItem
+              key={repository.id}
+              repository={repository}
+              onVisit={visitRepository}
+              mutateList={mutateList}
+              sortQuery={sortQuery}
+              setSortQuery={setSortQuery}
+              sortTypesData={sortTypesData}
+            />
+          ))}
         </List.Section>
       ) : null}
 

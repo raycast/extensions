@@ -9,7 +9,7 @@ interface ListInboxsViewProps {
 export default function ListInboxsView({ inboxId }: ListInboxsViewProps) {
   const { isLoading, data, revalidate } = getInboxes();
 
-  if (data && data.length > 0 && inboxId) {
+  if (data.length > 0 && inboxId) {
     const inboxIndex = data.findIndex((inbox) => inbox.id === inboxId);
     if (inboxIndex !== -1) {
       const inbox = data.splice(inboxIndex, 1);
@@ -18,10 +18,11 @@ export default function ListInboxsView({ inboxId }: ListInboxsViewProps) {
   }
 
   return (
-    <List isLoading={isLoading}>
-      {(data || []).map((inbox) => (
+    <List isLoading={isLoading} searchBarPlaceholder="Search inbox">
+      {data.map((inbox) => (
         <List.Item
           key={inbox.id}
+          icon={Icon.Box}
           title={inbox.name}
           accessories={[{ icon: Icon.Eye, text: `${inbox.emails_unread_count} / ${inbox.emails_count}` }]}
           actions={

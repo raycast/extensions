@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "idonthavespotify",
   "title": "I Don't Have Spotify",
-  "description": "Find Spotify Links to YouTube, Deezer, Apple Music, Tidal and Soundcloud",
+  "description": "Effortlessly convert Spotify links to your preferred streaming service",
   "version": "1.0.0",
   "author": "sjdonado",
   "icon": "icon.png",
@@ -13,29 +13,68 @@
   "commands": [
     {
       "name": "search",
-      "title": "Find Alternative Sources",
+      "title": "Convert Link to All Platforms",
       "subtitle": "I Don't Have Spotify",
-      "description": "Get YouTube, Deezer, Apple Music, Tidal and Soundcloud links",
+      "description": "Effortlessly convert Spotify links to your preferred streaming service.",
       "mode": "view"
+    },
+    {
+      "name": "toSpotify",
+      "title": "Convert Link to Spotify",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert a link from YouTube Music, Apple Music, Deezer, or SoundCloud to Spotify and copy it back.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toYouTube",
+      "title": "Convert Link to YouTube Music",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert a link from Spotify, Apple Music, Deezer, or SoundCloud to YouTube Music and copy it back.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toAppleMusic",
+      "title": "Convert Link to Apple Music",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert a link from Spotify, YouTube Music, Deezer, or SoundCloud to Apple Music and copy it back.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toDeezer",
+      "title": "Convert Link to Deezer",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert a link from Spotify, YouTube Music, Apple Music, or SoundCloud to Deezer and copy it back.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toSoundCloud",
+      "title": "Convert Link to SoundCloud",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert a link from Spotify, YouTube Music, Apple Music, or Deezer to SoundCloud and copy it back.",
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.40.0",
-    "@raycast/utils": "^1.4.8",
+    "@raycast/api": "^1.78.1",
+    "@raycast/utils": "^1.16.2",
     "node-fetch": "^3.3.1",
-    "play-sound": "^1.1.5",
-    "tempy": "^3.0.0"
+    "play-sound": "^1.1.5"
   },
   "devDependencies": {
-    "@types/node": "16.10.3",
+    "@types/node": "20.14.10",
     "@types/play-sound": "^1.1.0",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@types/react": "18.3.3",
+    "@typescript-eslint/eslint-plugin": "^7.16.0",
+    "@typescript-eslint/parser": "^7.16.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.3"
   },
   "scripts": {
     "build": "ray build -e dist",

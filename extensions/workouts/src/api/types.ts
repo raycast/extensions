@@ -225,3 +225,15 @@ export type StravaClubActivity = {
   sport_type: SportType;
   workout_type: number;
 };
+
+export type StravaManualActivity = {
+  name: string;
+  sportType: string;
+  date: Date;
+  duration: string;
+  distance: string;
+  distanceUnit: string;
+  description: string;
+  isTrainer: boolean;
+  isCommute: boolean;
+};

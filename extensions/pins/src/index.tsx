@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as os from "os";
 import path from "path";
-import { useEffect } from "react";
+import { Fragment, useEffect } from "react";
 
 import {
   Clipboard,
@@ -20,11 +20,11 @@ import { useCachedState } from "@raycast/utils";
 import OpenAllMenuItem from "./components/menu-items/OpenAllMenuItem";
 import PinMenuItem from "./components/menu-items/PinMenuItem";
 import RecentApplicationsList from "./components/RecentApplicationsList";
-import { KEYBOARD_SHORTCUT } from "./lib/constants";
-import { Group, useGroups } from "./lib/Groups";
+import { KEYBOARD_SHORTCUT, Visibility } from "./lib/constants";
+import { getSubgroups, Group, useGroups } from "./lib/Groups";
 import { getGroupIcon } from "./lib/icons";
 import { useLocalData } from "./lib/LocalData";
-import { copyPinData, Pin, sortPins, usePins } from "./lib/Pins";
+import { copyPinData, openPin, Pin, sortPins, usePins } from "./lib/Pins";
 import { ExtensionPreferences, GroupDisplaySetting } from "./lib/preferences";
 import { PinsMenubarPreferences } from "./lib/preferences";
 import PinsPlaceholders from "./lib/placeholders";
@@ -43,7 +43,7 @@ import TargetGroupMenu from "./components/TargetGroupMenu";
  * Raycast menu bar command providing quick access to pins.
  */
 export default function ShowPinsCommand() {
-  const { groups, loadingGroups, revalidateGroups } = useGroups();
+  const { groups, loadingGroups, revalidateGroups, getAncestorsOfGroup, shouldDisplayGroup } = useGroups();
   const { pins, setPins, loadingPins, revalidatePins } = usePins();
   const [relevantPins, setRelevantPins] = useCachedState<Pin[]>("relevant-pins", []);
   const [irrelevantPins, setIrrelevantPins] = useCachedState<Pin[]>("irrelevant-pins", []);
@@ -65,11 +65,10 @@ export default function ShowPinsCommand() {
           const inapplicablePins = [];
           for (const pin of pins) {
             const targetRaw = pin.url.startsWith("~") ? pin.url.replace("~", os.homedir()) : pin.url;
-            const placeholders = PinsPlaceholders;
             let containsPlaceholder = false;
             let passesTests = true;
             let ruleCount = 0;
-            for (const placeholder of placeholders) {
+            for (const placeholder of PinsPlaceholders) {
               if (targetRaw.match(placeholder.regex)) {
                 containsPlaceholder = true;
                 for (const rule of placeholder.rules || []) {
@@ -98,7 +97,15 @@ export default function ShowPinsCommand() {
   );
 
   const allPins = sortPins(
-    pins.filter((p) => preferences.showInapplicablePins || !irrelevantPins.find((pin) => pin.id == p.id)),
+    pins
+      .filter((p) => preferences.showInapplicablePins || !irrelevantPins.find((pin) => pin.id == p.id))
+      .filter(
+        (pin) =>
+          pin.visibility === undefined ||
+          pin.visibility === Visibility.USE_PARENT ||
+          pin.visibility === Visibility.VISIBLE ||
+          pin.visibility === Visibility.MENUBAR_ONLY,
+      ),
     groups,
   );
 
@@ -108,7 +115,9 @@ export default function ShowPinsCommand() {
    * @param groups The list of all groups.
    * @returns A submenu containing the group's subsections and pins.
    */
-  const getSubsections = (group: Group, groups: Group[]) => {
+  const getSubsections = (group: Group, groups: Group[]): JSX.Element | null => {
+    const parent = groups.find((g) => g.id == group.parent);
+    const allSubgroups = getSubgroups(group, groups, true);
     const children = groups.filter((g) => g.parent == group.id);
     const memberPins = allPins.filter((pin) => pin.group == group.name);
     const subgroupPins = allPins.filter((pin) => children.some((g) => g.name == pin.group));
@@ -116,9 +125,96 @@ export default function ShowPinsCommand() {
       return null;
     }
 
-    if (preferences.groupDisplaySetting === GroupDisplaySetting.Subsections) {
+    const trueDepth = getAncestorsOfGroup(group).length;
+    const visualDepth = Math.max(
+      getAncestorsOfGroup(group).findIndex(
+        (g) =>
+          g.menubarDisplay === GroupDisplaySetting.SUBMENUS ||
+          (groups.find((pr) => pr.id === g.parent)?.menubarDisplay === GroupDisplaySetting.SUBMENUS &&
+            g.menubarDisplay === GroupDisplaySetting.USE_PARENT),
+      ),
+      0,
+    );
+
+    if (!shouldDisplayGroup(group)) {
       return (
-        <MenuBarExtra.Section title={group.name} key={group.id}>
+        <Fragment key={group.name}>
+          {allPins
+            .filter(
+              (pin) =>
+                pin.group == group.name && pin.visibility !== Visibility.USE_PARENT && pin.visibility !== undefined,
+            )
+            .map((pin) => (
+              <PinMenuItem
+                pin={pin}
+                relevant={relevantPins.find((p) => p.id == pin.id) != undefined && !preferences.showInapplicablePins}
+                preferences={preferences}
+                localData={localData}
+                setPins={setPins}
+                key={pin.id}
+              />
+            ))}
+          {children
+            .filter((g) => g.visibility !== Visibility.USE_PARENT && g.visibility !== undefined)
+            .map((g) => getSubsections(g, groups))}
+        </Fragment>
+      );
+    }
+
+    if (
+      group.menubarDisplay === GroupDisplaySetting.ITEMS ||
+      (group.menubarDisplay === GroupDisplaySetting.USE_PARENT &&
+        parent?.menubarDisplay === GroupDisplaySetting.ITEMS) ||
+      (group.menubarDisplay === GroupDisplaySetting.USE_PARENT &&
+        visualDepth === 0 &&
+        preferences.groupDisplaySetting === GroupDisplaySetting.ITEMS)
+    ) {
+      return (
+        <Fragment key={group.name}>
+          <MenuBarExtra.Item
+            icon={getGroupIcon(group)}
+            title={group.name}
+            key={group.id}
+            subtitle={memberPins.length > 0 ? "  ✧" : ""}
+            onAction={async () => {
+              for (const pin of memberPins) {
+                await openPin(pin, preferences, localData as unknown as { [key: string]: string });
+              }
+              for (const subgroup of allSubgroups) {
+                const ancestors = getAncestorsOfGroup(subgroup, { excluding: [group] });
+                const openSubgroup =
+                  ancestors.every((g) => g.menubarDisplay === GroupDisplaySetting.USE_PARENT) &&
+                  subgroup.menubarDisplay === GroupDisplaySetting.USE_PARENT;
+                if (openSubgroup) {
+                  for (const pin of allPins.filter((p) => p.group == subgroup.name)) {
+                    await openPin(pin, preferences, localData as unknown as { [key: string]: string });
+                  }
+                }
+              }
+            }}
+          />
+          {children.map((g) => {
+            const ancestors = getAncestorsOfGroup(g, { excluding: [group] });
+            const displaySubgroup =
+              ancestors.some((g) => g.menubarDisplay !== GroupDisplaySetting.USE_PARENT) ||
+              g.menubarDisplay !== GroupDisplaySetting.USE_PARENT;
+            if (displaySubgroup) {
+              return getSubsections(g, groups);
+            }
+          })}
+        </Fragment>
+      );
+    }
+    if (
+      group.menubarDisplay === GroupDisplaySetting.SUBSECTIONS ||
+      (group.menubarDisplay === GroupDisplaySetting.USE_PARENT &&
+        parent?.menubarDisplay === GroupDisplaySetting.SUBSECTIONS) ||
+      (group.menubarDisplay === GroupDisplaySetting.USE_PARENT &&
+        visualDepth === 0 &&
+        preferences.groupDisplaySetting === GroupDisplaySetting.SUBSECTIONS)
+    ) {
+      return (
+        <MenuBarExtra.Section title={`${"  ".repeat(visualDepth)}${group.name}`} key={group.id}>
           {memberPins.map((pin) => (
             <PinMenuItem
               pin={pin}
@@ -130,8 +226,12 @@ export default function ShowPinsCommand() {
             />
           ))}
           {children.map((g) => getSubsections(g, groups))}
-          {subgroupPins.length > 0 ? (
-            <OpenAllMenuItem pins={allPins.filter((p) => p.group == group.name)} submenuName={group.name} />
+          {trueDepth > 0 && visualDepth > 0 ? (
+            <OpenAllMenuItem
+              key={`open_all_${group.name}`}
+              pins={allPins.filter((p) => p.group == group.name)}
+              submenuName={group.name}
+            />
           ) : null}
         </MenuBarExtra.Section>
       );
@@ -165,14 +265,30 @@ export default function ShowPinsCommand() {
             )),
         ].sort(() => (preferences.topSection == "pins" ? -1 : 1))}
         {memberPins.length > 0 ? (
-          <OpenAllMenuItem pins={allPins.filter((p) => p.group == group.name)} submenuName={group.name} />
+          <OpenAllMenuItem
+            key={`open_all_${group.name}`}
+            pins={allPins.filter((p) => p.group == group.name)}
+            submenuName={group.name}
+          />
         ) : null}
       </MenuBarExtra.Submenu>
     );
   };
 
+  const ungroupedPins = allPins.filter((p) => {
+    if (preferences.groupDisplaySetting !== GroupDisplaySetting.NONE) {
+      return p.group == "None";
+    } else {
+      if (p.visibility === Visibility.USE_PARENT || p.visibility === undefined) {
+        return groups.some(
+          (g) => g.name == p.group && g.visibility !== Visibility.HIDDEN && g.visibility !== Visibility.VIEW_PINS_ONLY,
+        );
+      }
+      return true;
+    }
+  });
   const groupSubmenus =
-    preferences.groupDisplaySetting === GroupDisplaySetting.None
+    preferences.groupDisplaySetting === GroupDisplaySetting.NONE
       ? []
       : groups
           .filter((g) => g.parent == undefined)
@@ -184,11 +300,10 @@ export default function ShowPinsCommand() {
     <MenuBarExtra icon={pinIcon} isLoading={loadingPins || loadingGroups || loadingLocalData}>
       {[
         [
-          <MenuBarExtra.Section title={preferences.showCategories ? "Pins" : undefined} key="pins">
-            {allPins.length == 0 ? <MenuBarExtra.Item title="No pins yet!" /> : null}
-            {allPins
-              .filter((p) => (preferences.groupDisplaySetting !== GroupDisplaySetting.None ? p.group == "None" : true))
-              .map((pin: Pin) => (
+          ungroupedPins.length > 0 ? (
+            <MenuBarExtra.Section title={preferences.showCategories ? "Pins" : undefined} key="pins">
+              {allPins.length == 0 ? <MenuBarExtra.Item title="No pins yet!" /> : null}
+              {ungroupedPins.map((pin: Pin) => (
                 <PinMenuItem
                   pin={pin}
                   relevant={relevantPins.find((p) => p.id == pin.id) != undefined && !preferences.showInapplicablePins}
@@ -198,7 +313,8 @@ export default function ShowPinsCommand() {
                   key={pin.id}
                 />
               ))}
-          </MenuBarExtra.Section>,
+            </MenuBarExtra.Section>
+          ) : null,
           groupSubmenus?.length ? (
             <MenuBarExtra.Section title={preferences.showCategories ? "Groups" : undefined} key="groups">
               {groupSubmenus}

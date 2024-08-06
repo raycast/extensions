@@ -1,125 +1,220 @@
 import {
   ActionPanel,
-  Detail,
-  Form,
-  showToast,
-  useNavigation,
   Action,
+  getSelectedText,
+  List,
+  showToast,
   Toast,
 } from '@raycast/api';
-import { formatUnits, parseUnits } from 'ethers';
+import { formatUnits, parseUnits, FixedNumber } from 'ethers';
+import { useEffect, useMemo, useState } from 'react';
 
-interface FormValues {
-  input: string;
-  inputDecimals: string;
-  outputDecimals: string;
+interface FormattedNumber {
+  value: string;
+  unit: string;
+  decimals: number;
+  displayNumber: string;
+}
+
+function getResults(rawInput: string): FormattedNumber[] {
+  const cleanInput = rawInput
+    .replace(' ', '')
+    .replace(/\n/g, '')
+    .replace(/,/g, '');
+  if (cleanInput === '') {
+    return [];
+  }
+  if (!isValidNumber(cleanInput)) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: 'Invalid input',
+      message: 'Please enter a valid number',
+    });
+    return [];
+  }
+  const output: FormattedNumber[] = [];
+  try {
+    const input = expandExponential(cleanInput);
+    const fnInput = FixedNumber.fromString(input, { decimals: 18, width: 512 });
+    let value, unit, decimals, displayNumber;
+    if (fnInput.gte(FixedNumber.fromValue(1e13))) {
+      value = formatUnits(parseUnits(input, 0), 18);
+      unit = 'ether';
+      decimals = 18;
+      displayNumber = Intl.NumberFormat('en-US', {
+        maximumFractionDigits: decimals,
+      }).format(parseFloat(value));
+      output.push({
+        value,
+        unit,
+        decimals,
+        displayNumber,
+      });
+
+      value = formatUnits(parseUnits(input, 0), 6);
+      unit = 'mwei';
+      decimals = 6;
+      displayNumber = Intl.NumberFormat('en-US', {
+        maximumFractionDigits: decimals,
+      }).format(parseFloat(value));
+      output.push({
+        value,
+        unit,
+        decimals,
+        displayNumber,
+      });
+
+      value = formatUnits(parseUnits(input, 0), 0);
+      unit = 'wei';
+      decimals = 18;
+      displayNumber = value;
+      output.push({
+        value,
+        unit,
+        decimals,
+        displayNumber,
+      });
+    } else if (fnInput.lt(FixedNumber.fromValue(1))) {
+      value = formatUnits(parseUnits(input, 6), 0);
+      unit = 'mwei';
+      decimals = 6;
+      displayNumber = value;
+      output.push({
+        value,
+        unit,
+        decimals,
+        displayNumber,
+      });
+
+      value = formatUnits(parseUnits(input, 18), 0);
+      unit = 'wei';
+      decimals = 18;
+      displayNumber = value;
+      output.push({
+        value,
+        unit,
+        decimals,
+        displayNumber,
+      });
+    } else {
+      try {
+        value = formatUnits(parseUnits(input, 0), 6);
+        unit = 'mwei';
+        decimals = 6;
+        displayNumber = Intl.NumberFormat('en-US', {
+          maximumFractionDigits: decimals,
+        }).format(parseFloat(value));
+        output.push({
+          value,
+          unit,
+          decimals,
+          displayNumber,
+        });
+      } catch {
+        // Do nothing
+      }
+
+      try {
+        value = formatUnits(parseUnits(input, 6), 0);
+        unit = 'mwei';
+        decimals = 6;
+        displayNumber = value;
+        output.push({
+          value,
+          unit,
+          decimals,
+          displayNumber,
+        });
+      } catch {
+        // Do nothing
+      }
+
+      value = formatUnits(parseUnits(input, 18), 0);
+      unit = 'wei';
+      decimals = 18;
+      displayNumber = value;
+      output.push({
+        value,
+        unit,
+        decimals,
+        displayNumber,
+      });
+    }
+  } catch (e) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: 'Conversion failed',
+    });
+  }
+  return output;
+}
+
+function isValidNumber(input: string) {
+  const cleanInput = input
+    .replace(' ', '')
+    .replace(/\n/g, '')
+    .replace(/,/g, '');
+  // Check if the remaining string is a valid number
+  try {
+    FixedNumber.fromString(expandExponential(cleanInput), {
+      decimals: 18,
+      width: 512,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function expandExponential(input: string): string {
+  if (input.includes('e')) {
+    return parseFloat(input).toString();
+  } else {
+    // If input is already a regular number, return it
+    return input;
+  }
 }
 
 export default function Command() {
-  const { push } = useNavigation();
+  const [searchText, setSearchText] = useState('');
+  const results = useMemo(() => getResults(searchText), [searchText]);
 
-  function handleSubmit(values: FormValues) {
-    const { input, inputDecimals, outputDecimals } = values;
-
-    if (!isInt(input)) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: 'Invalid input',
-        message: '"Input" should be a number',
+  useEffect(() => {
+    getSelectedText()
+      .then((selectedText) => {
+        const cleanInput = selectedText
+          .replace(' ', '')
+          .replace(/\n/g, '')
+          .replace(/,/g, '');
+        if (isValidNumber(selectedText) && searchText === '') {
+          setSearchText(cleanInput);
+        }
+      })
+      .catch(() => {
+        showToast({
+          style: Toast.Style.Failure,
+          title: 'Failed to get selected text',
+        });
       });
-      return;
-    }
-    if (!isDecimal(inputDecimals)) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: 'Invalid input',
-        message: '"Input decimals" should be a decimal',
-      });
-      return;
-    }
-    if (!isDecimal(outputDecimals)) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: 'Invalid input',
-        message: '"Output decimals" should be a decimals',
-      });
-      return;
-    }
-
-    const inputDecimalsNumber = parseInt(inputDecimals);
-    const outputDecimalsNumber = parseInt(outputDecimals);
-
-    try {
-      const parsedInput = parseUnits(input, inputDecimalsNumber);
-      const output = formatUnits(parsedInput, outputDecimalsNumber);
-
-      push(
-        <ConvertionView
-          input={input}
-          output={output}
-          inputDecimals={inputDecimalsNumber}
-          outputDecimals={outputDecimalsNumber}
-        />,
-      );
-    } catch {
-      showToast({
-        style: Toast.Style.Failure,
-        title: 'Failed to convert',
-        message: 'Please make sure that decimals are in the correct order',
-      });
-    }
-  }
-
-  function isInt(value: string): boolean {
-    return !isNaN(parseInt(value));
-  }
-
-  function isDecimal(value: string): boolean {
-    if (!isInt(value)) {
-      return false;
-    }
-    const number = parseInt(value);
-    return number >= 0 && number <= 30;
-  }
+  }, []);
 
   return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField id="input" title="Input" />
-      <Form.TextField id="inputDecimals" title="Input decimals" />
-      <Form.TextField id="outputDecimals" title="Output decimals" />
-    </Form>
-  );
-}
-
-interface ConvertionProps {
-  input: string;
-  output: string;
-  inputDecimals: number;
-  outputDecimals: number;
-}
-
-function ConvertionView(props: ConvertionProps) {
-  const { input, output, inputDecimals, outputDecimals } = props;
-
-  const markdown = `
-  # Convertion
-
-  ${input} (${inputDecimals} decimals) = ${output} (${outputDecimals} decimals)
-  `;
-  return (
-    <Detail
-      markdown={markdown}
-      actions={
-        <ActionPanel>
-          <Action.CopyToClipboard title="Copy Result" content={output} />
-        </ActionPanel>
-      }
-    />
+    <List searchText={searchText} onSearchTextChange={setSearchText}>
+      {results.map((result, index) => (
+        <List.Item
+          key={index}
+          title={result.displayNumber}
+          subtitle={result.unit}
+          actions={
+            <ActionPanel title="Actions">
+              <Action.CopyToClipboard
+                title="Copy to Clipboard"
+                content={result.value}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
   );
 }

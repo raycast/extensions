@@ -6,7 +6,7 @@ import { QuickLinkView, ViewMode } from "../home";
 import useCachedData from "../hooks/useCachedData";
 import useViewTasks from "../hooks/useViewTasks";
 
-import CreateViewAction from "./CreateViewAction";
+import CreateViewActions from "./CreateViewActions";
 import TaskListSections from "./TaskListSections";
 
 type InboxTasksProps = { quickLinkView: QuickLinkView };
@@ -41,7 +41,11 @@ export default function InboxTasks({ quickLinkView }: InboxTasksProps) {
               target={<CreateTask fromProjectId={inbox?.id} />}
             />
 
-            <CreateViewAction {...quickLinkView} />
+            {quickLinkView ? (
+              <ActionPanel.Section>
+                <CreateViewActions {...quickLinkView} />
+              </ActionPanel.Section>
+            ) : null}
           </ActionPanel>
         }
       />

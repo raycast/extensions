@@ -13,7 +13,7 @@ Our `List` component provides great user experience out of the box:
 - Show loading indicator for longer operations.
 - Use the search query for typeahead experiences, optionally throttled.
 
-![](../../.gitbook/assets/list.png)
+![](../../.gitbook/assets/list.webp)
 
 ## Search Bar
 
@@ -250,6 +250,10 @@ export default function Command() {
 
 {% endtab %}
 {% endtabs %}
+
+{% hint style="warning" %}
+Pagination might not work properly if all list items are rendered and visible at once, as `onLoadMore` won't be triggered. This typically happens when an API returns 10 results by default, all fitting within the Raycast window. To fix this, try displaying more items, like 20.
+{% endhint %}
 
 ## Examples
 
@@ -589,7 +593,7 @@ empty view alongside the other `List.Item`s.
 
 Note that the `EmptyView` is _never_ displayed if the `List`'s `isLoading` property is true and the search bar is empty.
 
-![List EmptyView illustration](../../.gitbook/assets/list-empty-view.png)
+![List EmptyView illustration](../../.gitbook/assets/list-empty-view.webp)
 
 #### Example
 
@@ -652,7 +656,7 @@ A Detail view that will be shown in the right-hand-side of the `List`.
 
 When shown, it is recommended not to show any accessories on the `List.Item` and instead bring those additional information in the `List.Item.Detail` view.
 
-![List-detail illustration](../../.gitbook/assets/list-detail.png)
+![List-detail illustration](../../.gitbook/assets/list-detail.webp)
 
 #### Example
 
@@ -690,7 +694,7 @@ Use it to display additional structured data about the content of the `List.Item
 
 {% tab title="Metadata + Markdown" %}
 
-![List Detail-metadata illustration](../../.gitbook/assets/list-detail-metadata-split.png)
+![List Detail-metadata illustration](../../.gitbook/assets/list-detail-metadata-split.webp)
 
 ```typescript
 import { List } from "@raycast/api";
@@ -738,7 +742,7 @@ There is a plant seed on its back right from the day this Pokémon is born. The 
 
 {% tab title="Metadata Standalone" %}
 
-![List Detail-metadata illustration](../../.gitbook/assets/list-detail-metadata-standalone.png)
+![List Detail-metadata illustration](../../.gitbook/assets/list-detail-metadata-standalone.webp)
 
 ```typescript
 import { List } from "@raycast/api";
@@ -789,7 +793,7 @@ export default function Metadata() {
 
 A title with, optionally, an icon and/or text to its right.
 
-![List Detail-metadata-label illustration](../../.gitbook/assets/list-detail-metadata-label.png)
+![List Detail-metadata-label illustration](../../.gitbook/assets/list-detail-metadata-label.webp)
 
 #### Example
 
@@ -824,7 +828,7 @@ export default function Metadata() {
 
 An item to display a link.
 
-![List Detail-metadata-link illustration](../../.gitbook/assets/list-detail-metadata-link.png)
+![List Detail-metadata-link illustration](../../.gitbook/assets/list-detail-metadata-link.webp)
 
 #### Example
 
@@ -863,7 +867,7 @@ export default function Metadata() {
 
 A list of [`Tags`](list.md#list.item.detail.metadata.taglist.item) displayed in a row.
 
-![List Detail-metadata-tag-list illustration](../../.gitbook/assets/list-detail-metadata-tag-list.png)
+![List Detail-metadata-tag-list illustration](../../.gitbook/assets/list-detail-metadata-tag-list.webp)
 
 #### Example
 
@@ -908,7 +912,7 @@ A Tag in a `List.Item.Detail.Metadata.TagList`.
 
 A metadata item that shows a separator line. Use it for grouping and visually separating metadata items.
 
-![List Detail-metadata-separator illustration](../../.gitbook/assets/list-detail-metadata-separator.png)
+![List Detail-metadata-separator illustration](../../.gitbook/assets/list-detail-metadata-separator.webp)
 
 #### Example
 
@@ -973,7 +977,7 @@ export default function Command() {
 
 An interface describing an accessory view in a `List.Item`.
 
-![List.Item accessories illustration](../../.gitbook/assets/list-item-accessories.png)
+![List.Item accessories illustration](../../.gitbook/assets/list-item-accessories.webp)
 
 #### Properties
 

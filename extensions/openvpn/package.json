@@ -12,26 +12,34 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "connect",
-      "title": "Connect OpenVPN",
-      "description": "Connect to a VPN using applescript to control OpenVPN Client.",
+      "name": "list-profiles",
+      "title": "Profiles OpenVPN",
+      "description": "List OpenVPN profiles and connect/disconnect them.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-last-profile",
+      "title": "Toggle Last Profile OpenVPN",
+      "description": "Connect/Disconnect the last OpenVPN profile used",
       "mode": "no-view"
     },
     {
       "name": "disconnect",
       "title": "Disconnect OpenVPN",
-      "description": "Disconnect to a VPN using applescript to control OpenVPN Client.",
+      "description": "Disconnect current OpenVPN profile.",
       "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.64.0",
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.16.3",
     "run-applescript": "^7.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.8.10",
     "eslint": "^8.56.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
     "prettier": "^3.1.1",
     "typescript": "^5.3.3"
   },

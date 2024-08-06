@@ -1,5 +1,10 @@
 # Messages Changelog
 
+## [Improvements] - 2024-07-16
+
+- **Messages Quicklinks:** Users can now create address quicklinks directly in the Messages app.
+- **Permission Request:** The extension will now ask for permission to access your contacts. If permission is denied, a clear error message will be displayed.
+
 ## [Improvements] - 2024-07-03
 
 - Added a preference allowing users to close Raycast when sending a message.

@@ -1,6 +1,7 @@
 import {
   Color,
   Icon,
+  Image,
   LaunchType,
   MenuBarExtra,
   Toast,
@@ -10,18 +11,17 @@ import {
   openCommandPreferences,
   openExtensionPreferences,
   showToast,
-  Image,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 import { getGitHubClient } from "./api/githubClient";
-import { Notification } from "./components/NotificationListItem";
 import {
   getGitHubIcon,
   getGitHubURL,
   getNotificationIcon,
   getNotificationSubtitle,
   getNotificationTooltip,
+  Notification,
 } from "./helpers/notifications";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
@@ -34,7 +34,7 @@ function UnreadNotifications() {
   const viewer = useViewer();
 
   const { data, isLoading, mutate } = useCachedPromise(async () => {
-    const response = await octokit.rest.activity.listNotificationsForAuthenticatedUser();
+    const response = await octokit.activity.listNotificationsForAuthenticatedUser();
     return Promise.all(
       response.data.map(async (notification: Notification) => {
         const icon = await getNotificationIcon(notification);
@@ -47,7 +47,7 @@ function UnreadNotifications() {
 
   async function markAllNotificationsAsRead() {
     try {
-      await mutate(octokit.rest.activity.markNotificationsAsRead(), {
+      await mutate(octokit.activity.markNotificationsAsRead(), {
         optimisticUpdate() {
           return [];
         },
@@ -65,7 +65,7 @@ function UnreadNotifications() {
           open(`${notification.repository.html_url}/invitations`);
         } else {
           await open(await getGitHubURL(notification, viewer?.id));
-          await octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
+          await octokit.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
         }
       };
 
@@ -81,7 +81,7 @@ function UnreadNotifications() {
 
   async function markNotificationAsRead(notification: Notification) {
     try {
-      await mutate(octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) }), {
+      await mutate(octokit.activity.markThreadAsRead({ thread_id: parseInt(notification.id) }), {
         optimisticUpdate(data) {
           return data?.filter((n: Notification) => n.id !== notification.id) ?? [];
         },

@@ -222,6 +222,8 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
         toast.title = "Failed to create issue";
         toast.message = getErrorMessage(error);
       }
+
+      setValue("teamId", teamId);
     },
     validation: {
       teamId: hasMoreThanOneTeam ? FormValidation.Required : undefined,

@@ -1,5 +1,4 @@
 import { Action, ActionPanel, Icon, open } from "@raycast/api";
-import React from "react";
 import { ActionToPexels } from "./action-to-pexels";
 import { Video } from "pexels";
 import { ActionOpenPreferences } from "./action-open-preferences";
@@ -10,29 +9,29 @@ export function ActionOnVideos(props: { item: Video }) {
     <ActionPanel>
       <Action
         icon={Icon.Video}
-        title={"Show Video in Pexels"}
+        title={"View Video in Pexels"}
         onAction={async () => {
           await open(item.url);
         }}
       />
 
-      <ActionPanel.Section>
+      <ActionPanel.Submenu title={"Copy Info"} icon={Icon.Clipboard}>
         <Action.CopyToClipboard
           title={"Copy Video Link"}
           content={`${item.url}`}
-          shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
+          shortcut={{ modifiers: ["shift", "cmd"], key: "1" }}
         />
         <Action.CopyToClipboard
           title={"Copy User Link"}
           content={`${item.user.url}`}
-          shortcut={{ modifiers: ["shift", "cmd"], key: "." }}
+          shortcut={{ modifiers: ["shift", "cmd"], key: "2" }}
         />
         <Action.CopyToClipboard
           title={"Copy User Name"}
           content={`${item.user.name}`}
-          shortcut={{ modifiers: ["ctrl", "cmd"], key: "." }}
+          shortcut={{ modifiers: ["ctrl", "cmd"], key: "3" }}
         />
-      </ActionPanel.Section>
+      </ActionPanel.Submenu>
 
       <ActionPanel.Section>
         <ActionToPexels />
