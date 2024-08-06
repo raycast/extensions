@@ -1,4 +1,4 @@
-import { SENSITIVE_VALUE_PLACEHOLDER as SENSITIVE_VALUE_PLACEHOLDER } from "~/constants/general";
+import { SENSITIVE_VALUE_PLACEHOLDER } from "~/constants/general";
 import { Folder, IdentityTitle, Item } from "~/types/vault";
 
 export function prepareItemsForCache(items: Item[]): Item[] {
