@@ -182,11 +182,13 @@ function SearchListItem({
                   title="Move up"
                   shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
                   onAction={moveSearchResultUp}
+                  icon={Icon.ArrowUp}
                 />
                 <Action
                   title="Move down"
                   shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
                   onAction={moveSearchResultDown}
+                  icon={Icon.ArrowDown}
                 />
               </>
             )}
