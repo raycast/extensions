@@ -177,12 +177,7 @@ function SearchListItem(props: {
           </ActionPanel.Section>
           <ActionPanel.Section>
             {!isPinned ? (
-              <Action
-                title="Pin Directory"
-                icon={Icon.Pin}
-                shortcut={Keyboard.Shortcut.Common.Pin}
-                onAction={onPin}
-              />
+              <Action title="Pin Directory" icon={Icon.Pin} shortcut={Keyboard.Shortcut.Common.Pin} onAction={onPin} />
             ) : (
               <Action
                 title="Unpin Directory"
