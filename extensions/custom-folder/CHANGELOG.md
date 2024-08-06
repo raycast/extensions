@@ -1,4 +1,4 @@
-# Custom folder Changelog
+# Custom Folder Changelog
 
 ## [Feat Image shades ] - 2024-08-05
 - Added optional toggle - shading effect on the image, switching between a filled mask and shaded tones.
