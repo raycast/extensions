@@ -1,6 +1,6 @@
 # Converter Changelog
 
-## [Refactor Code] - {PR_MERGE_DATE}
+## [Refactor Code] - 2024-08-06
 
 - Refactor code to improve performance and readability.
 - Support big number conversion.
