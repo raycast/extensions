@@ -1,5 +1,9 @@
 # Workouts Changelog
 
+## [Enable maps] - 2024-08-06
+
+Enabled maps for everyone without the need for a personal API key
+
 ## [Add Command Keywords] - 2024-08-06
 
 ## [Add Create Activity Command] - 2024-07-24

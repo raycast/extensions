@@ -53,9 +53,7 @@ export const formatSpeedForSportType = (sportType: ActivityType, speed: number) 
 };
 
 export const generateMapboxImage = (polyline: string) => {
-  const preferences = getPreferenceValues<Preferences>();
-
-  if (!preferences.mapbox_access_token || !polyline) {
+  if (!polyline) {
     return null;
   }
 
@@ -64,7 +62,7 @@ export const generateMapboxImage = (polyline: string) => {
   const padding = encodeURIComponent("40,40,80");
   const poly = encodeURIComponent(polyline);
   const mapboxStyle = environment.appearance === "light" ? "outdoors-v12" : "dark-v11";
-  return `https://api.mapbox.com/styles/v1/mapbox/${mapboxStyle}/static/path-5+f44-0.5(${poly})/auto/${width}x${height}?padding=${padding}&access_token=${preferences.mapbox_access_token}`;
+  return `https://extensions-api-proxy.raycast.com/mapbox/styles/v1/mapbox/${mapboxStyle}/static/path-5+f44-0.5(${poly})/auto/${width}x${height}?padding=${padding}`;
 };
 
 export function getStartOfWeekUnix() {
