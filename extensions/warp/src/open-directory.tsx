@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, showToast, Toast, Keyboard } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import os from "node:os";
@@ -164,7 +164,7 @@ function SearchListItem(props: {
             <Action.OpenInBrowser
               title="Open in New Warp Window"
               url={newWindow(searchResult.path)}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
             <Action.CreateQuicklink
               title="Save as Quicklink: New Tab"
@@ -180,14 +180,14 @@ function SearchListItem(props: {
               <Action
                 title="Pin Directory"
                 icon={Icon.Pin}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                shortcut={Keyboard.Shortcut.Common.Pin}
                 onAction={onPin}
               />
             ) : (
               <Action
                 title="Unpin Directory"
                 icon={Icon.PinDisabled}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                shortcut={Keyboard.Shortcut.Common.Pin}
                 onAction={onPin}
               />
             )}

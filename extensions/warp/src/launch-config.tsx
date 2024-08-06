@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Icon, Keyboard } from "@raycast/api";
 import useLocalStorage from "./hooks/useLocalStorage";
 import { useEffect, useState } from "react";
 import fs from "node:fs/promises";
@@ -170,7 +170,7 @@ function SearchListItem({
             <Action.Open
               title="Edit Launch Configuration"
               target={searchResult.path}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
             <Action.CreateQuicklink
               title="Save as Quicklink"
@@ -180,13 +180,13 @@ function SearchListItem({
               <>
                 <Action
                   title="Move up"
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+                  shortcut={Keyboard.Shortcut.Common.MoveUp}
                   onAction={moveSearchResultUp}
                   icon={Icon.ArrowUp}
                 />
                 <Action
                   title="Move down"
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+                  shortcut={Keyboard.Shortcut.Common.MoveDown}
                   onAction={moveSearchResultDown}
                   icon={Icon.ArrowDown}
                 />
