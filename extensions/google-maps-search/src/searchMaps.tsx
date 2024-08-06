@@ -3,29 +3,23 @@ import { Action, ActionPanel, List, Icon, LocalStorage, getPreferenceValues, Lau
 import { makeSearchURL } from "./utils/url";
 import { Preferences } from "./utils/types";
 
-// Main search command component
 function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
-  // Get user preferences
   const { saveSearchHistory } = getPreferenceValues<Preferences>();
 
-  // State management
   const [searchText, setSearchText] = useState(initialSearchText || "");
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load recent searches from LocalStorage
   const loadRecentSearches = useCallback(async () => {
     const storedSearches = await LocalStorage.getItem<string>("recent-searches");
     setRecentSearches(storedSearches ? JSON.parse(storedSearches) : []);
     setIsLoading(false);
   }, []);
 
-  // Load recent searches on component mount
   useEffect(() => {
     loadRecentSearches();
   }, [loadRecentSearches]);
 
-  // Save new searches to LocalStorage with debounce
   useEffect(() => {
     if (searchText.length > 3 && !recentSearches.includes(searchText.trim()) && saveSearchHistory) {
       const timeoutId = setTimeout(async () => {
@@ -38,7 +32,6 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
     }
   }, [searchText, recentSearches, saveSearchHistory]);
 
-  // Handle removing a search from history
   const handleRemoveSearch = useCallback(
     async (searchToRemove: string) => {
       const updatedSearches = recentSearches.filter((s) => s !== searchToRemove);
@@ -48,7 +41,12 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
     [recentSearches]
   );
 
-  // Common props for List component
+  // New function to clear all recent searches
+  const handleClearAllSearches = useCallback(async () => {
+    await LocalStorage.removeItem("recent-searches");
+    setRecentSearches([]);
+  }, []);
+
   const sharedProps: React.ComponentProps<typeof List> = {
     searchBarPlaceholder: "Search Google Maps...",
     searchText,
@@ -57,7 +55,6 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
     throttle: true,
   };
 
-  // Render recent searches when there's no active search
   if (!searchText) {
     return (
       <List {...sharedProps}>
@@ -71,8 +68,19 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
               <ActionPanel>
                 <Action.OpenInBrowser url={makeSearchURL(search)} />
                 <Action icon={Icon.MagnifyingGlass} title="Search Again" onAction={() => setSearchText(search)} />
-                <Action.CopyToClipboard title="Copy URL" content={makeSearchURL(search)} />
+                <Action.CopyToClipboard
+                  title="Copy URL"
+                  content={makeSearchURL(search)}
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                />
                 <Action icon={Icon.Trash} title="Remove Search" onAction={() => handleRemoveSearch(search)} />
+                {/* New action to clear all searches */}
+                <Action
+                  icon={Icon.Trash}
+                  title="Clear All Searches"
+                  shortcut={{ modifiers: ["cmd"], key: "delete" }}
+                  onAction={handleClearAllSearches}
+                />
               </ActionPanel>
             }
           />
@@ -81,7 +89,6 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
     );
   }
 
-  // Render active search result
   return (
     <List {...sharedProps}>
       <List.Item
@@ -90,7 +97,11 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
         actions={
           <ActionPanel>
             <Action.OpenInBrowser url={makeSearchURL(searchText)} />
-            <Action.CopyToClipboard title="Copy URL" content={makeSearchURL(searchText)} />
+            <Action.CopyToClipboard
+              title="Copy URL"
+              content={makeSearchURL(searchText)}
+              shortcut={{ modifiers: ["cmd"], key: "n" }}
+            />
           </ActionPanel>
         }
       />
@@ -98,7 +109,6 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
   );
 }
 
-// Entry point for the Raycast command
 export default function Command({ launchContext, fallbackText }: LaunchProps<{ launchContext: { query: string } }>) {
   return <SearchCommand initialSearchText={launchContext?.query ?? fallbackText} />;
 }

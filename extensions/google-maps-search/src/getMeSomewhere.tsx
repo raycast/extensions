@@ -25,15 +25,14 @@ export default function Command() {
   // Handle changes to the origin dropdown
   const handleOriginChange = useCallback(
     (value: string) => {
-      if (value === OriginOption.CurLoc) {
+      const newOrigin = value as OriginOption;
+      setOrigin(newOrigin);
+      if (newOrigin === OriginOption.CurLoc) {
         setOriginAddress("");
-        setOrigin(OriginOption.CurLoc);
-      } else if (value === OriginOption.Home) {
+      } else if (newOrigin === OriginOption.Home) {
         setOriginAddress(preferences.homeAddress);
-        setOrigin(OriginOption.Home);
       } else {
         setOriginAddress("");
-        setOrigin(OriginOption.Custom);
       }
     },
     [preferences.homeAddress]
@@ -74,7 +73,6 @@ export default function Command() {
           <Action.CopyToClipboard
             content={makeDirectionsURL(originAddress, destination, mode)}
             icon={Icon.Clipboard}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
             onCopy={() => popToRoot()}
           />
         </ActionPanel>
@@ -90,7 +88,7 @@ export default function Command() {
       />
       <Form.Separator />
       {/* Origin selection dropdown */}
-      <Form.Dropdown id="origin" title="Origin" value={origin} onChange={handleOriginChange}>
+      <Form.Dropdown id="origin" title="Starting from" value={origin} onChange={handleOriginChange}>
         <Form.Dropdown.Item value={OriginOption.CurLoc} title="Current Location" icon={Icon.Pin} />
         <Form.Dropdown.Item value={OriginOption.Home} title="Home" icon={Icon.House} />
         <Form.Dropdown.Item value={OriginOption.Custom} title="Custom Address" icon={Icon.Pencil} />
@@ -99,7 +97,7 @@ export default function Command() {
       {origin === OriginOption.Custom && (
         <Form.TextField
           id="originAddress"
-          title="Origin Address"
+          title="Address"
           placeholder="Name or Address"
           value={originAddress}
           onChange={setOriginAddress}
