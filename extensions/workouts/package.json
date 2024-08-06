@@ -25,21 +25,36 @@
       "name": "workouts",
       "title": "Search Workouts",
       "description": "See your recent workouts from Strava",
-      "mode": "view"
+      "mode": "view",
+      "tags": [
+        "strava",
+        "activities",
+        "exercise"
+      ]
     },
     {
       "name": "createActivity",
       "title": "Create Activity",
       "description": "Create a manual activity on Strava",
       "mode": "view",
-      "icon": "create.png"
+      "icon": "create.png",
+      "tags": [
+        "strava",
+        "activities",
+        "exercise"
+      ]
     },
     {
       "name": "leaderboard",
       "title": "Weekly Leaderboard",
       "description": "See your club's weekly leaderboard",
       "mode": "view",
-      "icon": "leaderboard-icon.png"
+      "icon": "leaderboard-icon.png",
+      "tags": [
+        "strava",
+        "activities",
+        "exercise"
+      ]
     },
     {
       "name": "ask",
@@ -56,6 +71,11 @@
           "placeholder": "Mileage this week?",
           "required": true
         }
+      ],
+      "tags": [
+        "strava",
+        "activities",
+        "exercise"
       ]
     },
     {
@@ -114,6 +134,11 @@
             }
           ]
         }
+      ],
+      "tags": [
+        "strava",
+        "activities",
+        "exercise"
       ]
     }
   ],
