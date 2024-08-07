@@ -34,7 +34,6 @@ export function OtpList() {
               <Action
                 title="Open Extension Preferences"
                 onAction={openExtensionPreferences}
-                shortcut={{ modifiers: ["cmd"], key: "," }}
               />
             </ActionPanel>
           }
