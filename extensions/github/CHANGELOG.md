@@ -1,5 +1,12 @@
 # GitHub Changelog
 
+## [My Issues and PRs Improvements] - {PR_MERGE_DATE}
+
+- My Issues Command + Menu Bar: Preferences to specify categories to display. Issues opened by the user will always be displayed.
+- My PRs Command + Menu Bar: Preferences to specify categories to display. PRs created by the user will always be displayed.
+- The categories not being displayed will not invoke extra API calls, reducing throttling.
+- ⚠️My PRs Menu Bar: Removed `includeCount` options to keep things simple (and in-sync) by just displaying the count of PRs in the categories selected.
+
 ## [Enhanced Repository Cloning Functionality] - 2024-08-01
 
 - Users can now select both a custom directory and a specific branch for cloned repositories.
