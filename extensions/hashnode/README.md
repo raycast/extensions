@@ -47,6 +47,7 @@ Raycast extension to read, search and create stories.
 - [x] Open new draft story
 - [ ] Create draft story with pre-filled (waiting for Hashnode)
 - [ ] Search all your drafts (waiting for Hashnode)
+- [ ] Pagination (fetch more than 50 public and 20 user stories)
 
 and more to come
 

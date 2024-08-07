@@ -1,6 +1,5 @@
-import StoriesList from "components/StoriesList";
-import { StoryType } from "models/StoryType";
-import React from "react";
+import StoriesList from "./components/StoriesList";
+import { StoryType } from "./models/StoryType";
 
 export default function MyStories() {
   return <StoriesList type={StoryType.USER} />;

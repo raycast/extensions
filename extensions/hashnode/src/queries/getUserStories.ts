@@ -1,23 +1,25 @@
 const GET_USER_STORIES = `
   query StoriesByType($username: String!) {
     user(username: $username) {
-        publication {
-            posts {
-                cuid
-                title
-                brief
-                slug
-                totalReactions
-                dateAdded
-                author {
-                  photo
-                  username
-                  blogHandle
-                  publicationDomain
-                }
-            }  
+      posts(page: 1, pageSize: 20) {
+        nodes {
+          cuid
+          title
+          brief
+          slug
+          reactionCount
+          publishedAt
+          author {
+            profilePicture
+            username
+          }
+          url
+          publication {
+            url
+          }
         }
       }
+    }
   }
 `;
 

@@ -1,7 +1,6 @@
 import { List } from "@raycast/api";
-import useStories from "hooks/useStories";
-import { StoryType } from "models/StoryType";
-import React from "react";
+import useStories from "../hooks/useStories";
+import { StoryType } from "../models/StoryType";
 import StoryItem from "./StoryItem";
 
 interface StoriesListProps {
@@ -9,11 +8,11 @@ interface StoriesListProps {
 }
 
 export default function StoriesList({ type }: StoriesListProps) {
-  const stories = useStories(type);
+  const { isLoading, data: stories } = useStories(type);
 
   return (
-    <List isLoading={stories === null} searchBarPlaceholder="Search through stories">
-      {stories?.map((story) => (
+    <List isLoading={isLoading} searchBarPlaceholder="Search through stories">
+      {stories.map((story) => (
         <StoryItem key={story.cuid} story={story} />
       ))}
     </List>

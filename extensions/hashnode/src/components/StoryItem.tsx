@@ -1,7 +1,6 @@
-import { ActionPanel, Icon, ImageMask, List, OpenInBrowserAction } from "@raycast/api";
-import { HashnodeColors } from "models/Colors";
-import { Story } from "models/Story";
-import React from "react";
+import { ActionPanel, Icon, List, Action, Image } from "@raycast/api";
+import { HashnodeColors } from "../models/Colors";
+import { Story } from "../models/Story";
 
 interface StoryItemProps {
   story: Story;
@@ -11,36 +10,36 @@ export default function StoryItem({ story }: StoryItemProps) {
   return (
     <List.Item
       icon={{
-        source: story?.author?.photo ?? Icon.Circle,
-        tintColor: HashnodeColors.PRIMARY,
-        mask: ImageMask.Circle,
+        source: story.author.profilePicture ?? Icon.Circle,
+        tintColor: !story.author.profilePicture ? HashnodeColors.PRIMARY : undefined,
+        mask: Image.Mask.Circle,
       }}
       title={story.title ?? "No title"}
-      accessoryTitle={`📅  ${story.dateAdded.substring(0, 10)} 👍  ${story.totalReactions}`}
       actions={<Actions item={story} />}
+      accessories={[
+        { date: new Date(story.publishedAt) },
+        {
+          text: `👍  ${story.reactionCount}`,
+        },
+      ]}
     />
   );
 }
 
 function Actions({ item }: { item: Story }) {
-  if ((item?.author?.publicationDomain || item?.author?.blogHandle) && item?.slug) {
-    const blogBaseUrl = item?.author?.publicationDomain
-      ? `https://${item.author.publicationDomain}`
-      : `https://${item.author.blogHandle}.hashnode.dev`;
-    const postUrl = `${blogBaseUrl}/${item.slug}`;
-
+  if (item.url) {
     return (
       <ActionPanel title={item.title ?? "No title"}>
         <ActionPanel.Section>
-          <OpenInBrowserAction url={postUrl} />
-          <OpenInBrowserAction
+          <Action.OpenInBrowser url={item.url} />
+          <Action.OpenInBrowser
             icon={{
-              source: item?.author?.photo ?? Icon.Circle,
+              source: item.author.profilePicture ?? Icon.Circle,
               tintColor: HashnodeColors.PRIMARY,
-              mask: ImageMask.Circle,
+              mask: Image.Mask.Circle,
             }}
-            title={`Open ${item?.author?.username ?? "-"}'s blog`}
-            url={blogBaseUrl}
+            title={`Open ${item.author.username ?? "-"}'s blog`}
+            url={item.publication.url}
           />
         </ActionPanel.Section>
       </ActionPanel>
