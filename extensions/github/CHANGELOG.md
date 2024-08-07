@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Updated IDEs icons.
+
 ## [Enhanced Repository Cloning Functionality] - 2024-08-01
 
 - Users can now select both a custom directory and a specific branch for cloned repositories.

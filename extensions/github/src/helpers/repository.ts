@@ -1,34 +1,41 @@
 export const WEB_IDES = [
   {
-    title: "GitHub Dev",
+    title: "github.dev",
     baseUrl: "https://github.dev/",
+    icon: "github-dev.svg",
   },
   {
-    title: "VSCode Dev",
+    title: "VS Code for the Web",
     baseUrl: "https://vscode.dev/github/",
+    icon: "vscode.svg",
   },
   {
     title: "CodeSandbox",
     baseUrl: `https://codesandbox.io/s/github/`,
+    icon: "codesandbox.svg",
   },
   {
-    title: "Repl.it",
+    title: "Replit",
     baseUrl: `https://repl.it/github/`,
+    icon: "replit.svg",
   },
   {
     title: "Gitpod",
     baseUrl: `https://gitpod.io/#https://github.com/`,
+    icon: "gitpod.svg",
   },
   {
     title: "Glitch",
     baseUrl: "https://glitch.com/edit/#!/import/github/",
+    icon: "glitch.svg",
   },
   {
     title: "Sourcegraph",
     baseUrl: `https://sourcegraph.com/github.com/`,
+    icon: "sourcegraph.svg",
   },
   {
-    title: "VSCode Remote Repositories",
+    title: "VS Code Remote Repositories",
     baseUrl: "vscode://GitHub.remotehub/open?url=https://github.com/",
     icon: "vscode.svg",
   },
