@@ -2,7 +2,7 @@ import { showToast, Toast } from "@raycast/api";
 import { fetchLatestHash } from "./helpers";
 import { ApiService } from "./ApiService";
 import type { SearchPayload } from "./types";
-import { StorageService } from "./storageService";
+import { LocalStorage } from "@raycast/api";
 
 /**
  * Takes care about the http connection and response handling
@@ -49,12 +49,12 @@ export class HltbSearch {
     const search: SearchPayload = { ...this.payload };
     search.searchTerms = query;
 
-    let localHash = await StorageService.getHashToken();
+    let localHash = await LocalStorage.getItem<string>("hashToken");
 
     if (!localHash || !(await validateHash(localHash, search))) {
       // Fetch a new hash and update local storage
       localHash = await fetchLatestHash();
-      StorageService.setHashToken(localHash);
+      LocalStorage.setItem("hashToken", localHash);
     }
 
     try {
