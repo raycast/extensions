@@ -1,6 +1,8 @@
 # Workouts Changelog
 
-## [Add Create Activity Comman] - 2024-07-24
+## [Add Command Keywords] - 2024-08-06
+
+## [Add Create Activity Command] - 2024-07-24
 
 Added a command to create a manual activity
 

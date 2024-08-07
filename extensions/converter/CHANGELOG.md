@@ -1,5 +1,11 @@
 # Converter Changelog
 
+## [Refactor Code] - 2024-08-06
+
+- Refactor code to improve performance and readability.
+- Support big number conversion.
+- Update extension icon.
+
 ## [Add Byte Converter] - 2023-05-11
 
 - Add a Byte converter to convert among bits, bytes, kbs, mbs, gbs, etc.

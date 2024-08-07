@@ -49,6 +49,7 @@
 /extensions/android-screen-capture                                  @Leaking
 /extensions/android-versions                                        @bruce3x
 /extensions/anilist-airing-schedule                                 @yeskunall
+/extensions/anki                                                    @anton-suprun
 /extensions/anna-s-archive                                          @j3lte
 /extensions/anonaddy                                                @httpjamesm @pernielsentikaer @mormubis
 /extensions/ansible-documentation                                   @Kcih4518
@@ -93,7 +94,7 @@
 /extensions/bamboohr                                                @RobErskine
 /extensions/banca-d-italia-currency-converter                       @FezVrasta
 /extensions/bark                                                    @koinzhang
-/extensions/base64                                                  @DanielSinclair @sammarks
+/extensions/base64                                                  @DanielSinclair @jfkisafk @sammarks
 /extensions/base64-to-file                                          @iamforrest
 /extensions/battery-health                                          @o1y
 /extensions/battery-menubar                                         @panrafal @yarnaid
@@ -285,7 +286,7 @@
 /extensions/cratecast                                               @gleich @BalliAsghar
 /extensions/crawldoc                                                @johan-perso
 /extensions/create-t3-app                                           @mozzius
-/extensions/cricketcast                                             @sampoder
+/extensions/cricketcast                                             @sampoder @xmok
 /extensions/crisp                                                   @remorses
 /extensions/cron-description                                        @niall-maloney
 /extensions/crossbell                                               @Songkeys @hyoban
@@ -301,6 +302,7 @@
 /extensions/curl                                                    @jonathangiardino @pernielsentikaer @bkeys818
 /extensions/currency-exchange                                       @xeric
 /extensions/curto-io-url-shortener                                  @birobirobiro
+/extensions/custom-folder                                           @Ph-lo
 /extensions/cyberchef                                               @mblode
 /extensions/cyberduck                                               @scottaglia
 /extensions/cyberpanel                                              @xmok
@@ -544,7 +546,7 @@
 /extensions/google-cloud-run                                        @BhavyaMuni
 /extensions/google-drive                                            @vishaltelangre @nametake @daniel-stoneuk
 /extensions/google-fonts                                            @GastroGeek @pernielsentikaer
-/extensions/google-maps-search                                      @ratoru @aeither
+/extensions/google-maps-search                                      @ratoru @aeither @chrismessina
 /extensions/google-maven-repository                                 @koinzhang
 /extensions/google-meet                                             @vitoorgomes @hughlaw @iwex
 /extensions/google-search                                           @mblode
@@ -873,6 +875,7 @@
 /extensions/mui-documentation                                       @kgrhartlage
 /extensions/mullvad                                                 @0x46616c6b @SebKranz
 /extensions/multi                                                   @fbarbat @fbarbat @pernielsentikaer
+/extensions/multi-force                                             @Decoder22
 /extensions/multilinks                                              @abhisheksatre
 /extensions/multipass                                               @davibe @pernielsentikaer
 /extensions/music                                                   @Rawnly @peterdev22 @danpalmer @octoxan @Shpigford @urwrstkn8mare
@@ -1069,7 +1072,7 @@
 /extensions/port-manager                                            @lucaschultz @Sheraff
 /extensions/portuguese-primeira-liga                                @danielsequeira
 /extensions/posthog                                                 @daibhin
-/extensions/postman                                                 @tarikyildizci
+/extensions/postman                                                 @tarikyildizci @ridemountainpig
 /extensions/potter-db                                               @xmok
 /extensions/power-management                                        @sasivarnan @erics118 @bbatsche @iamyeizi
 /extensions/premier-league                                          @anhthang
@@ -1134,7 +1137,7 @@
 /extensions/rapidcap                                                @bcarusone @mikikiv
 /extensions/rateyourmusic-search                                    @romaincabirol
 /extensions/ratio-calculator                                        @Justiniscoding
-/extensions/ray-so                                                  @gt-codes @RSO @dgrzedzielski @emlez @samuelkraft @benoitgrelard
+/extensions/ray-so                                                  @gt-codes @RSO @dgrzedzielski @emlez @samuelkraft @benoitgrelard @sdorra
 /extensions/raycast-arcade                                          @EvanZhouDev
 /extensions/raycast-bard-ai                                         @EvanZhouDev @Visual-Studio-Coder
 /extensions/raycast-create-remix                                    @nuno

@@ -1,15 +1,14 @@
 import { Action, ActionPanel, Form, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { commonPreferences, isEmpty } from "./utils/common-utils";
-import { baseToBase, buildBases } from "./utils/base-converter-utils";
+import { isEmpty } from "./utils/common-utils";
+import { baseToBaseBigInt, buildBases, safeBigIntConverter } from "./utils/base-converter-utils";
 import { BaseConvertersAdvanceView } from "./components/base-converters-advance-view";
 import { BaseConvertersSimpleView } from "./components/base-converters-simple-view";
 import { getInputItem } from "./hooks/get-input-item";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
+import { advanceView, advanceViewLocation } from "./types/preferences";
 
 export default function BaseConverter() {
-  const { autoDetect, priorityDetection, advanceView, advanceViewLocation } = commonPreferences();
-
   const [base10, setBase10] = useState<string>("");
   const [base2, setBase2] = useState<string>("");
   const [base4, setBase4] = useState<string>("");
@@ -25,7 +24,7 @@ export default function BaseConverter() {
   const [toBase, setToBase] = useState<string>("2");
   const bases = buildBases();
 
-  const inputItem = getInputItem(autoDetect, priorityDetection);
+  const inputItem = getInputItem();
   useEffect(() => {
     async function _fetch() {
       setBaseString(inputItem);
@@ -37,8 +36,7 @@ export default function BaseConverter() {
 
   useEffect(() => {
     async function _fetch() {
-      const baseNumber = parseInt(baseString, baseRadix);
-      if (isNaN(baseNumber) || isEmpty(baseString.trim())) {
+      if (isEmpty(baseString.trim())) {
         setBase10("");
         setBase2("");
         setBase4("");
@@ -47,13 +45,15 @@ export default function BaseConverter() {
         setBase32("");
         setInput("");
       } else {
-        setBase10(baseNumber.toString(10));
-        setBase2(baseNumber.toString(2));
-        setBase4(baseNumber.toString(4));
-        setBase8(baseNumber.toString(8));
-        setBase16(baseNumber.toString(16));
-        setBase32(baseNumber.toString(32));
-        setInput(baseNumber.toString(baseRadix));
+        const baseNumber = baseToBaseBigInt(baseString, baseRadix.toString(), "10");
+        const baseStr = safeBigIntConverter(baseNumber);
+        setBase10(baseNumber);
+        setBase2(baseStr.toString(2));
+        setBase4(baseStr.toString(4));
+        setBase8(baseStr.toString(8));
+        setBase16(baseStr.toString(16));
+        setBase32(baseStr.toString(32));
+        setInput(baseStr.toString(baseRadix));
       }
     }
 
@@ -62,7 +62,7 @@ export default function BaseConverter() {
 
   useEffect(() => {
     async function _fetch() {
-      setOutput(baseToBase(input, fromBase, toBase));
+      setOutput(baseToBaseBigInt(input, fromBase, toBase));
       setBaseString(input);
       setBaseRadix(parseInt(fromBase));
     }
