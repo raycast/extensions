@@ -15,9 +15,9 @@ export function useMyIssues({
 }: {
   repository: string | null;
   sortQuery: string;
-  showAssigned?: boolean;
-  showMentioned?: boolean;
-  showRecentlyClosed?: boolean;
+  showAssigned: boolean;
+  showMentioned: boolean;
+  showRecentlyClosed: boolean;
 }) {
   const { github } = getGitHubClient();
 

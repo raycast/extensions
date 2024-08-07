@@ -281,7 +281,7 @@
         },
         {
           "name": "showtext",
-          "description": "Show Issues Count with menu bar icon",
+          "description": "Show issues count with menu bar icon.",
           "type": "checkbox",
           "required": false,
           "label": "Show Count",
@@ -365,7 +365,7 @@
         },
         {
           "name": "maxitems",
-          "description": "Maximum Pull Requests shown per category.",
+          "description": "Maximum pull requests shown per category.",
           "type": "textfield",
           "required": false,
           "title": "Max Pull Requests per category",
@@ -373,7 +373,7 @@
         },
         {
           "name": "showtext",
-          "description": "Show Pull Requests Count",
+          "description": "Show pull requests count with menu bar icon.",
           "type": "checkbox",
           "required": false,
           "label": "Show",

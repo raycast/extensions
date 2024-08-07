@@ -27,11 +27,11 @@ export function useMyPullRequests({
 }: {
   repository: string | null;
   sortQuery: string;
-  includeAssigned?: boolean;
-  includeMentioned?: boolean;
-  includeRecentlyClosed?: boolean;
-  includeReviewRequests?: boolean;
-  includeReviewed?: boolean;
+  includeAssigned: boolean;
+  includeMentioned: boolean;
+  includeRecentlyClosed: boolean;
+  includeReviewRequests: boolean;
+  includeReviewed: boolean;
 }) {
   const { github } = getGitHubClient();
 
@@ -73,8 +73,8 @@ export function useMyPullRequests({
     [
       repository,
       sortQuery,
-      includeMentioned,
       includeAssigned,
+      includeMentioned,
       includeRecentlyClosed,
       includeReviewRequests,
       includeReviewed,
