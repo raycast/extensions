@@ -2,10 +2,6 @@ import fs from "fs";
 import path from "path";
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  profileDirectorySuffix: string;
-}
-
 const userDataDirectoryPath = () => {
   if (!process.env.HOME) {
     throw new Error("$HOME environment variable is not set.");
