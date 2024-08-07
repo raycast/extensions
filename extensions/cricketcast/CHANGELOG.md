@@ -1,6 +1,6 @@
 # CricketCast
 
-## [Add Latest News + Cache + TS Support] - {PR_MERGE_DATE}
+## [Add Latest News + Cache + TS Support] - 2024-08-07
 
 - News and Scores are now cached
 - Toasts are shown so you know what's happening
