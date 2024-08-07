@@ -2,46 +2,46 @@ export const WEB_IDES = [
   {
     title: "github.dev",
     baseUrl: "https://github.dev/",
-    icon: "github-dev.svg",
+    icon: { source: "github-dev.svg", tintColor: Color.PrimaryText },
   },
   {
     title: "VS Code for the Web",
     baseUrl: "https://vscode.dev/github/",
-    icon: "vscode.svg",
+    icon: { source: "vscode.svg", tintColor: Color.PrimaryText },
   },
   {
     title: "CodeSandbox",
     baseUrl: `https://codesandbox.io/s/github/`,
-    icon: "codesandbox.svg",
+    icon: { source: "codesandbox.svg", tintColor: Color.PrimaryText },
   },
   {
     title: "Replit",
     baseUrl: `https://repl.it/github/`,
-    icon: "replit.svg",
+    icon: { source: "replit.svg", tintColor: Color.PrimaryText },
   },
   {
     title: "Gitpod",
     baseUrl: `https://gitpod.io/#https://github.com/`,
-    icon: "gitpod.svg",
+    icon: { source: "gitpod.svg", tintColor: Color.PrimaryText },
   },
   {
     title: "Glitch",
     baseUrl: "https://glitch.com/edit/#!/import/github/",
-    icon: "glitch.svg",
+    icon: { source: "glitch.svg", tintColor: Color.PrimaryText },
   },
   {
     title: "Sourcegraph",
     baseUrl: `https://sourcegraph.com/github.com/`,
-    icon: "sourcegraph.svg",
+    icon: { source: "sourcegraph.svg", tintColor: Color.PrimaryText },
   },
   {
     title: "VS Code Remote Repositories",
     baseUrl: "vscode://GitHub.remotehub/open?url=https://github.com/",
-    icon: "vscode.svg",
+    icon: { source: "vscode.svg", tintColor: Color.PrimaryText },
   },
 ];
 
-import { LocalStorage } from "@raycast/api";
+import { Color, LocalStorage } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useEffect } from "react";
 

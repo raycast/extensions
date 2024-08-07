@@ -123,7 +123,7 @@ export default function RepositoryActions({
           shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "c" }}
         />
         <Action.OpenInBrowser
-          icon="vscode.svg"
+          icon={{ source: "vscode.svg", tintColor: Color.PrimaryText }}
           title="Clone in VS Code"
           url={`vscode://vscode.git/clone?url=${repository.url}`}
           shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
