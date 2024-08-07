@@ -1,12 +1,12 @@
 import fetch, { Headers, Request, Response } from 'node-fetch'
 
 if (!globalThis.fetch) {
-  // @ts-ignore
+  // @ts-expect-error - dw 'bout it
   globalThis.fetch = fetch
-  // @ts-ignore
+  // @ts-expect-error - dw 'bout it
   globalThis.Headers = Headers
-  // @ts-ignore
+  // @ts-expect-error - dw 'bout it
   globalThis.Request = Request
-  // @ts-ignore
+  // @ts-expect-error - dw 'bout it
   globalThis.Response = Response
 }

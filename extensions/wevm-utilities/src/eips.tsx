@@ -1,6 +1,6 @@
 import './internal/fetch-polyfill'
 
-import { Action, ActionPanel, Icon, List, useNavigation } from '@raycast/api'
+import { Action, ActionPanel, Icon, List } from '@raycast/api'
 import { useFetch } from '@raycast/utils'
 import { useState } from 'react'
 
@@ -147,17 +147,19 @@ export default function Command() {
                       <List.Item.Detail.Metadata.Label title="Created" text={eip.created} />
                     )}
                     <List.Item.Detail.Metadata.Separator />
-                    {eip.authors?.split(',').map((author, index) => (
-                      <List.Item.Detail.Metadata.Label
-                        key={author}
-                        title={
-                          index === 0
-                            ? `Author${eip.authors!.split(',').length > 0 ? 's' : ''}`
-                            : ''
-                        }
-                        text={author}
-                      />
-                    ))}
+                    {eip.authors
+                      ?.split(',')
+                      .map((author, index) => (
+                        <List.Item.Detail.Metadata.Label
+                          key={author}
+                          title={
+                            index === 0
+                              ? `Author${eip.authors!.split(',').length > 0 ? 's' : ''}`
+                              : ''
+                          }
+                          text={author}
+                        />
+                      ))}
                     {eip.requires && (
                       <>
                         <List.Item.Detail.Metadata.Separator />

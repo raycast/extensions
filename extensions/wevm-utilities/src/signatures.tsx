@@ -40,7 +40,10 @@ export default function Command(parameters: LaunchProps<{ arguments: { value: st
 function ListItem({
   item,
   searchText,
-}: { item: { selector: string; signature: string }; searchText: string }) {
+}: {
+  item: { selector: string; signature: string }
+  searchText: string
+}) {
   return (
     <List.Item
       key={item.selector}

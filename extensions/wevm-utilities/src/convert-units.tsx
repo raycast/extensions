@@ -19,7 +19,7 @@ export default function Command(parameters: LaunchProps<{ arguments: { value: st
     setTimeout(() => setReady(true), 100)
   }, [])
 
-  const [_, number, unit_raw] = value.match(/(\d*\.?\d*)\s*(\w+)/) || []
+  const [, number, unit_raw] = value.match(/(\d*\.?\d*)\s*(\w+)/) || []
 
   const unit = (() => {
     const unit = unit_raw.toLowerCase()

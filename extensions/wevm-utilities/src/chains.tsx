@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from '@raycast/api'
+import { Action, ActionPanel, List } from '@raycast/api'
 import { useFetch } from '@raycast/utils'
 import { useMemo } from 'react'
 
