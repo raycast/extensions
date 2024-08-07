@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, List } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { useEffect, useState } from "react";
 import OtpListItems from "./OtpListItems";
 import { Service } from "../../util/service";
