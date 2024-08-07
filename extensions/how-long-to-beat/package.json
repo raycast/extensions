@@ -26,6 +26,7 @@
     "cheerio": "^1.0.0-rc.12",
     "howlongtobeat": "^1.8.0",
     "node-fetch": "^3.3.2",
+    "node-html-parser": "^6.1.13",
     "user-agents": "^1.1.228"
   },
   "devDependencies": {
