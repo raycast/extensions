@@ -132,8 +132,14 @@ export default function Command() {
               key={searchResult.path}
               searchResult={searchResult}
               isSearching={searchText.length > 0}
-              moveSearchResultDown={() => swapSearchItems(index, index + 1)}
-              moveSearchResultUp={() => swapSearchItems(index, index - 1)}
+              moveSearchResultDown={() => {
+                swapSearchItems(index, index + 1);
+                showToast(Toast.Style.Success, `Moved down`);
+              }}
+              moveSearchResultUp={() => {
+                swapSearchItems(index, index - 1);
+                showToast(Toast.Style.Success, `Moved up`);
+              }}
             />
           ))}
       </List.Section>

@@ -193,7 +193,7 @@ function SearchListItem(props: {
                   <Action
                     title="Move Up in Pinned"
                     icon={Icon.ArrowUp}
-                    shortcut={{ key: "arrowUp", modifiers: ["cmd", "opt"] }}
+                    shortcut={Keyboard.Shortcut.Common.MoveUp}
                     onAction={() => onRearrange(searchResult, "up")}
                   />
                 )}
@@ -202,7 +202,7 @@ function SearchListItem(props: {
                   <Action
                     title="Move Down in Pinned"
                     icon={Icon.ArrowDown}
-                    shortcut={{ key: "arrowDown", modifiers: ["cmd", "opt"] }}
+                    shortcut={Keyboard.Shortcut.Common.MoveDown}
                     onAction={() => onRearrange(searchResult, "down")}
                   />
                 )}
