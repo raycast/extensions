@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wevm-utilities",
+  "title": "Wevm Utilities",
+  "description": "Collection of Ethereum Utilities for Raycast",
+  "icon": "wevm.png",
+  "author": "wevm",
+  "categories": ["Developer Tools", "Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "chains",
+      "icon": "chains.png",
+      "title": "Search Chains",
+      "description": "List Ethereum chains.",
+      "mode": "view"
+    },
+    {
+      "name": "convert-units",
+      "icon": "units.png",
+      "title": "Convert Units",
+      "description": "Convert Ethereum units between Wei, Gwei, Spark, and Ether.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "value",
+          "type": "text",
+          "placeholder": "100 eth"
+        }
+      ]
+    },
+    {
+      "name": "eips",
+      "icon": "eips.png",
+      "title": "Search EIPs",
+      "description": "Search for EIPs, ERCs, and RIPs.",
+      "mode": "view"
+    },
+    {
+      "name": "signatures",
+      "icon": "signatures.png",
+      "title": "Search Ethereum Signatures",
+      "description": "Look up Ethereum Signatures.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "value",
+          "type": "text",
+          "placeholder": "0x017ce0cf or transfer(address,uint256)"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.1",
+    "@raycast/utils": "^1.16.3",
+    "@shazow/whatsabi": "^0.13.2",
+    "abitype": "^1.0.5",
+    "ethereumjs-units": "^0.2.0",
+    "node-fetch": "^3.3.2",
+    "viem": "^2.18.6"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.8.3",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "biome check src --fix",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit"
+  },
+  "packageManager": "pnpm@9.6.0"
+}
