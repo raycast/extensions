@@ -2,7 +2,7 @@
 
 ## [Fix for non-standard profile names] - 2024-08-06
 
-- Fixes issue (#11920) by adding a new option.
+- Fixes issue (#11920) by adding a new preference.
 
 ## [Added support for ESR profile] - 2024-06-17
 
