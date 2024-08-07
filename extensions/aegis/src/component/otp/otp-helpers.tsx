@@ -40,9 +40,9 @@ export const CORRUPTED = "corrupted";
 export type setItemsFunction = (
   value:
     | ((prevState: { otpList: Service[]; isLoading: boolean }) => {
-      otpList: Service[];
-      isLoading: boolean;
-    })
+        otpList: Service[];
+        isLoading: boolean;
+      })
     | { otpList: Service[]; isLoading: boolean }
 ) => void;
 
