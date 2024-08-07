@@ -50,9 +50,9 @@ export type setItemsFunction = (
  * Loads OTP services to show, sort and exclude values from extension propertiesz
  */
 export async function loadData(setItems: setItemsFunction): Promise<void> {
-  // load Aegis
-  const aegisDB = new AegisDB(aegisDbPath);
   try {
+    // load Aegis
+    const aegisDB = new AegisDB(aegisDbPath);
     //Load the database
     await aegisDB.loadDb();
 
