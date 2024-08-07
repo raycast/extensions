@@ -160,14 +160,6 @@
         }
       ],
       "required": true
-    },
-    {
-      "name": "mapbox_access_token",
-      "title": "Mapbox Access Token",
-      "placeholder": "pk.abc123",
-      "description": "To display maps of your activities. You can create an access token at https://account.mapbox.com/access-tokens/",
-      "type": "textfield",
-      "required": false
     }
   ],
   "dependencies": {
