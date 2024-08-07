@@ -40,9 +40,9 @@ export const CORRUPTED = "corrupted";
 export type setItemsFunction = (
   value:
     | ((prevState: { otpList: Service[]; isLoading: boolean }) => {
-        otpList: Service[];
-        isLoading: boolean;
-      })
+      otpList: Service[];
+      isLoading: boolean;
+    })
     | { otpList: Service[]; isLoading: boolean }
 ) => void;
 
@@ -104,18 +104,6 @@ export async function checkError(otpList: Service[], isLoading: boolean) {
       primaryAction: {
         title: "Open Preferences",
         onAction: () => openCommandPreferences(),
-      },
-      dismissAction: {
-        title: "Cancel",
-        onAction: () =>
-          confirmAlert({
-            title: "No valid OTP",
-            message: "Check Q&A in store",
-            primaryAction: {
-              title: "Open Store Page",
-              onAction: () => open("https://www.raycast.com/guga4ka/authy"),
-            },
-          }),
       },
     });
   }
