@@ -1,0 +1,102 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-calendar",
+  "title": "Google Calendar",
+  "description": "Create events for Google Calendar right from Raycast",
+  "icon": "icon.png",
+  "author": "thomas-bot",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-event",
+      "title": "Create Event",
+      "subtitle": "Google Calendar",
+      "description": "Creates an event in your Google Calendar",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultEventDuration",
+          "title": "Default Event Duration",
+          "description": "The default duration for new events",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "15 minutes",
+              "value": "15"
+            },
+            {
+              "title": "30 minutes",
+              "value": "30"
+            },
+            {
+              "title": "45 minutes",
+              "value": "45"
+            },
+            {
+              "title": "1 hour",
+              "value": "60"
+            },
+            {
+              "title": "1.5 hours",
+              "value": "90"
+            },
+            {
+              "title": "2 hours",
+              "value": "120"
+            }
+          ],
+          "default": "30",
+          "required": false
+        },
+        {
+          "name": "addSignature",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Add Signature",
+          "description": "Add a signature that the event was created using Raycast to the description of the event",
+          "default": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-contacts",
+      "title": "Search Contacts",
+      "description": "Search your Google Contacts",
+      "mode": "view",
+      "subtitle": "Google Calendar"
+    }
+  ],
+  "dependencies": {
+    "@googleapis/calendar": "^9.7.0",
+    "@googleapis/people": "^3.0.7",
+    "@raycast/api": "^1.67.0",
+    "@raycast/utils": "^1.12.4",
+    "cross-fetch": "^4.0.0",
+    "jwt-decode": "^4.0.0",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.3.2",
+    "openai": "^4.27.0",
+    "zod": "^3.22.4",
+    "zod-to-json-schema": "^3.22.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/lodash": "^4.14.202",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
