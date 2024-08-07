@@ -59,7 +59,7 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
     return (
       <List {...sharedProps}>
         <List.EmptyView title="Search Google Maps" />
-        {recentSearches.map((search, index) => (
+        {recentSearches.map((search) => (
           <List.Item
             key={search}
             title={search}
@@ -78,7 +78,7 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
                 <Action
                   icon={Icon.Trash}
                   title="Clear All Searches"
-                  shortcut={{ modifiers: ["cmd"], key: "delete" }}
+                  shortcut={{ modifiers: ["cmd"], key: "d" }}
                   onAction={handleClearAllSearches}
                 />
               </ActionPanel>

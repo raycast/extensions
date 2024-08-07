@@ -14,19 +14,20 @@
   ],
   "keywords": [
     "directions",
+    "maps",
     "navigation"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "getMeHome",
+      "name": "travelHome",
       "title": "Get Me Home",
       "subtitle": "Google Maps",
       "description": "Open Google Maps with directions from your current location to your home.",
       "mode": "no-view"
     },
     {
-      "name": "getMeSomewhere",
+      "name": "travelTo",
       "title": "Get Me Somewhere",
       "subtitle": "Google Maps",
       "description": "Get directions to a destination.",
@@ -51,7 +52,7 @@
       ]
     },
     {
-      "name": "searchMaps",
+      "name": "find",
       "title": "Search Google Maps",
       "subtitle": "Google Maps",
       "description": "Use text selection or clipboard to find a place or category on Google Maps.",
