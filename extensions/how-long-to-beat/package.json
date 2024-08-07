@@ -16,7 +16,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "How Long To Beat A Game",
+      "title": "How Long to Beat a Game",
       "description": "Search games and discover how many hours you need to beat them.",
       "mode": "view"
     }
