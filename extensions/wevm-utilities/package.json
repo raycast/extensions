@@ -4,7 +4,7 @@
   "title": "Wevm Utilities",
   "description": "Collection of Ethereum Utilities for Raycast",
   "icon": "wevm.png",
-  "author": "wevm",
+  "author": "jxom",
   "categories": ["Developer Tools", "Productivity"],
   "license": "MIT",
   "commands": [
