@@ -29,6 +29,15 @@ export function OtpList() {
           icon={Icon.SpeechBubbleImportant}
           title={"Add Services with Aegis"}
           description={"Then export a backup from Aegis and use it here"}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Open Extension Preferences"
+                onAction={openExtensionPreferences}
+                shortcut={{ modifiers: ["cmd"], key: "," }}
+              />
+            </ActionPanel>
+          }
         />
       ) : (
         <OtpListItems items={items.otpList} setItems={setItems} />
