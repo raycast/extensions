@@ -1,9 +1,7 @@
 # Screen Studio Changelog
 
-## [New Commands] - 2024-06-27
+## [New Commands] - 2024-08-07
 
-- Add export recording to file action
-- Add export recording to clipboard action
 - Add copying zipped project to clipboard action
 - Add open settings action
 - Add open projects folder action
