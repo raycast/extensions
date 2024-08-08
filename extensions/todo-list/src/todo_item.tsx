@@ -15,7 +15,11 @@ import { useTodo } from "./hooks/useTodo";
 import MarkAllIncompleteAction from "./mark_all_incomplete";
 
 const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number; sectionKey: keyof TodoSections }) => {
-  const { editTodo, deleteTodo, markTodo, markCompleted, pin, unPin, setPriority } = useTodo({ item, idx, sectionKey });
+  const { editTodo, editTodoTag, deleteTodo, markTodo, markCompleted, pin, unPin, setPriority } = useTodo({
+    item,
+    idx,
+    sectionKey,
+  });
   const [newTodoText] = useAtom(newTodoTextAtom);
   const [editing] = useAtom(editingAtom);
   const [searchMode, setSearchMode] = useAtom(searchModeAtom);
@@ -32,6 +36,11 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
 
   const accessories = useMemo(() => {
     const list: List.Item.Props["accessories"] = [];
+    if (item.tag) {
+      list.push({
+        tag: { value: item.tag, color: Color.PrimaryText },
+      });
+    }
     if (item.priority !== undefined) {
       list.push({
         tooltip: "priority: " + priorityDescriptions[item.priority],
@@ -43,7 +52,7 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
       list.push({ tooltip: name, icon: accessoryIcon });
     }
     return list;
-  }, [item.priority, sectionKey]);
+  }, [item.tag, item.priority, sectionKey]);
 
   return (
     <List.Item
@@ -72,6 +81,15 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
               }}
               shortcut={{ modifiers: ["cmd"], key: "e" }}
               title="Edit Todo"
+            />
+            <Action
+              icon={{ source: Icon.Tag, tintColor: Color.PrimaryText }}
+              onAction={() => {
+                setSearchMode(false);
+                editTodoTag();
+              }}
+              shortcut={{ modifiers: ["cmd"], key: "t" }}
+              title="Edit Tag"
             />
             <Action
               icon={{ source: Icon.Trash, tintColor: Color.Red }}
