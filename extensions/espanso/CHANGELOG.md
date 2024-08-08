@@ -1,5 +1,8 @@
 # Espanso Changelog
 
+# [Path Configuration] - {PR_MERGE_DATE}
+- Add a preference to configure the path to the Espanso executable
+
 ## [Patch] - 2024-07-09
 
 - Remove form items from the list.
