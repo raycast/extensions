@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-notification",
   "title": "Raycast Notification",
-  "description": "This extension makes it easy to display raycast notifications via a quicklink, making the nice raycast interface usable to other applications or scripts",
+  "description": "This extension makes it easy to display Raycast notifications via a quicklink, making the Raycast interface accessible to other applications or scripts",
   "icon": "command-icon.png",
   "author": "maxnyby",
   "categories": [
