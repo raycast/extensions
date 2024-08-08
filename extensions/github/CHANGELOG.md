@@ -2,7 +2,7 @@
 
 ## [Improvements] - {PR_MERGE_DATE}
 
-- Updated IDEs icons.
+- Updated IDE icons.
 
 ## [Enhanced Repository Cloning Functionality] - 2024-08-01
 
