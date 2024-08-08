@@ -14,7 +14,7 @@
   "commands": [
     {
       "name": "colors",
-      "title": "Colors",
+      "title": "Show Colors",
       "description": "Show a list of all LEGO colors",
       "mode": "view"
     },
