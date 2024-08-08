@@ -23,6 +23,21 @@ function formatSlugVersion(slug: string) {
   return slug.replace("~", " ");
 }
 
+function openInBrowserAction(slug: string, entry: Entry) {
+  return <Action.OpenInBrowser url={`https://devdocs.io/${slug}/${entry.path}`} />;
+}
+
+function openInAppAction(slug: string, entry: Entry) {
+  return (
+    <Action.Open
+      icon="devdocs.png"
+      title="Open in DevDocs"
+      target={`devdocs-macos://search?doc=${slug}&term=${entry.path}`}
+      application="DevDocs"
+    />
+  );
+}
+
 export default function LaunchFn(props: LaunchProps<{ arguments: { slug: string } }>): JSX.Element {
   return <SearchEntries slug={props.arguments.slug} />;
 }
@@ -61,13 +76,8 @@ function EntryItem({ entry, slug }: { entry: Entry; slug: string }) {
       keywords={[entry.type].concat(entry.name.split("."))}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={`https://devdocs.io/${slug}/${entry.path}`} />
-          <Action.Open
-            icon="devdocs.png"
-            title="Open in DevDocs"
-            target={`devdocs-macos://search?doc=${slug}&term=${entry.path}`}
-            application="DevDocs"
-          />
+          {openInBrowserAction(slug, entry)}
+          {openInAppAction(slug, entry)}
         </ActionPanel>
       }
     />
