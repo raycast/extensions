@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Cache, Icon, List, getPreferenceValues } from "@raycast/api";
+import { Cache, Icon, List, getPreferenceValues } from "@raycast/api";
 import { generateActionPanel } from "./components/actionpanel";
 import { COLORS, FORMATTING } from "./constants";
 import { escapeChar } from "./utils";

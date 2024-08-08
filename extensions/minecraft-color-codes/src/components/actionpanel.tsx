@@ -20,7 +20,7 @@ export function generateActionPanel({
     <ActionPanel>
       <ActionPanel.Section>
         <Action
-          title="Use primary prefix"
+          title="Use Primary Prefix"
           onAction={() => {
             cache?.set("prefix", prefs.prefix1);
             setPrefix?.(prefs.prefix1);
@@ -35,7 +35,7 @@ export function generateActionPanel({
           }}
         />
         <Action
-          title="Use secondary prefix"
+          title="Use Secondary Prefix"
           onAction={() => {
             cache?.set("prefix", prefs.prefix2);
             setPrefix?.(prefs.prefix2);
