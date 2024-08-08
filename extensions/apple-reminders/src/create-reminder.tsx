@@ -195,8 +195,12 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
 
   useEffect(() => {
     async function fetchSelectedText() {
-      const text = await getSelectedText();
-      setValue("title", text);
+      try {
+        const text = await getSelectedText();
+        setValue("title", text);
+      } catch (error) {
+        setValue("title", "");
+      }
     }
 
     fetchSelectedText();
