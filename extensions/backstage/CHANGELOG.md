@@ -1,5 +1,5 @@
 # Backstage Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2024-08-08
 
 - the initial release of Backstage extension, including Google Cloud IAP support.
