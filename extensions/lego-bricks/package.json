@@ -38,7 +38,7 @@
     },
     {
       "name": "latest-sets",
-      "title": "Latest LEGO sets releases",
+      "title": "Show Latest LEGO Sets Releases",
       "description": "Show a list of most recent releases of LEGO sets",
       "mode": "view"
     }
