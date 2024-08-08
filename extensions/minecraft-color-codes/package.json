@@ -30,6 +30,22 @@
       "type": "checkbox",
       "default": true,
       "required": false
+    },
+    {
+      "name": "prefix1",
+      "title": "Primary prefix",
+      "description": "The prefix for color codes to use when Cmd+1 is pressed.",
+      "type": "textfield",
+      "default": "§",
+      "required": false
+    },
+    {
+      "name": "prefix2",
+      "title": "Secondary prefix",
+      "description": "The prefix for color codes to use when Cmd+2 is pressed.",
+      "type": "textfield",
+      "default": "&",
+      "required": false
     }
   ],
   "dependencies": {
