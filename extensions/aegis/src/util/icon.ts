@@ -9,9 +9,7 @@ const iconLookupKeys = [
   "issuer",
 ] as (keyof Service)[];
 
-const {
-  fallbackIconColor,
-} = getPreferenceValues<{
+const { fallbackIconColor } = getPreferenceValues<{
   fallbackIconColor: string;
 }>();
 
@@ -22,10 +20,9 @@ export function icon(otp: Service) {
 
   // otp.logo should be base64 and otp.logo_mime should be the mime type
   if (otp.logo != null && otp.logo_mime != null) {
-    let icon = `data:${otp.logo_mime};base64,${otp.logo}`;
+    const icon = `data:${otp.logo_mime};base64,${otp.logo}`;
     return icon;
   }
-
 
   return `${environment.assetsPath}/${icondir}/authenticator_${fallbackIconColor}.png`;
 }
