@@ -1,6 +1,6 @@
 # Messages Changelog
 
-## [Improvements] - 2024-08-07
+## [Improvements] - {PR_MERGE_DATE}
 
 - Closing the Messages app if it wasn't open before to keep your dock clean.
 
