@@ -32,7 +32,7 @@
     },
     {
       "name": "parts",
-      "title": "Parts",
+      "title": "Show Parts",
       "description": "Show a list of all LEGO parts",
       "mode": "view"
     },
