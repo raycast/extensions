@@ -1,6 +1,6 @@
 # pieces-raycast Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2024-08-08
 
 - "Save Browser History to Pieces" command that will show a list of code blocks that are present in your browser, enriched with useful metadata. Simply highlight a code block and hit 'return' to save it to Pieces
 - "Save Clipboard History to Pieces", similarly to browser history, it will show your recent clipboard items enriched by Pieces, giving you quick and easy access to save them.
