@@ -1,6 +1,6 @@
 # Whois Changelog
 
-## [Added IP2Location.io API] - 2024-08-08
+## [Added IP2Location.io API] - {PR_MERGE_DATE}
 
 - Added IP2Location.io API as failover for WHOIS data
 
