@@ -22,16 +22,30 @@ interface FormValues {
 
 const PLATFORMS = {
   ico: "ICO",
-  ios: "iOS",
-  ipad: "iPad",
-  macos: "macOS",
+  iOS: "iOS",
+  iPadOS: "iPadOS",
+  macOS: "macOS",
+  android: "Android",
+  watchOS: "watchOS",
+  tvOS: "tvOS",
+  chrome: "Chrome",
+  microsoftStore: "Microsoft Store",
+  steam: "Steam",
+  epic: "Epic Games Store",
 };
 
 const SIZES = {
   ico: [16, 24, 32, 48, 64, 128, 256],
-  ios: [20, 29, 40, 58, 60, 76, 80, 87, 120, 152, 167, 180, 1024],
-  ipad: [20, 29, 40, 58, 76, 80, 87, 120, 152, 167, 180, 1024],
-  macos: [16, 32, 64, 128, 256, 512, 1024],
+  iOS: [20, 29, 40, 58, 60, 76, 80, 87, 120, 152, 167, 180, 1024],
+  iPadOS: [20, 29, 40, 58, 76, 80, 87, 120, 152, 167, 180, 1024],
+  macOS: [16, 32, 64, 128, 256, 512, 1024],
+  android: [48, 72, 96, 144, 192, 512],
+  watchOS: [48, 55, 58, 87, 80, 88, 100, 172, 196, 216, 1024],
+  tvOS: [400, 1280],
+  chrome: [16, 32, 48, 128],
+  microsoftStore: [44, 50, 71, 150, 300],
+  steam: [32, 64, 184, 256],
+  epic: [128, 256, 1024],
 };
 
 const ALLOWED_EXTENSIONS = [".jpg", ".jpeg", ".png"];
@@ -131,7 +145,7 @@ async function processImage(imagePath: string, platforms: string[]) {
       const platformDir = join(outputDir, platform);
       await fs.mkdir(platformDir, { recursive: true });
 
-      if (platform === "ico") {
+      if (platform === PLATFORMS.ico) {
         await generateIcoIcon(image, platformDir);
       } else {
         await generatePlatformIcons(image, platform as keyof typeof SIZES, platformDir);
