@@ -40,9 +40,9 @@ export const CORRUPTED = "corrupted";
 export type setItemsFunction = (
   value:
     | ((prevState: { otpList: Service[]; isLoading: boolean }) => {
-        otpList: Service[];
-        isLoading: boolean;
-      })
+      otpList: Service[];
+      isLoading: boolean;
+    })
     | { otpList: Service[]; isLoading: boolean }
 ) => void;
 
@@ -68,7 +68,8 @@ export async function loadData(setItems: setItemsFunction): Promise<void> {
         accountType: "service",
         issuer: i.issuer,
         // logo: i.logo,
-        logo: "",
+        logo: i.icon,
+        logo_mime: i.icon_mime,
         type: "service",
       };
     });

@@ -7,5 +7,6 @@ export interface Service {
   accountType?: string;
   issuer?: string;
   logo?: string;
+  logo_mime?: string;
   type: "authy" | "service";
 }
