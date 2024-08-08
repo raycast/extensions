@@ -40,7 +40,7 @@ export default function GetLEGOSets() {
     <List
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder={isLoading ? "Still loading..." : "Search for LEGO Sets..."}
+      searchBarPlaceholder={"Search for LEGO Sets..."}
       throttle
       isShowingDetail
       filtering={false}
