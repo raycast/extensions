@@ -69,7 +69,7 @@ export default function Characters() {
             subtitle={character.type}
             detail={
               <List.Item.Detail
-                markdown={`![${character.name}](${character.image})`}
+                markdown={`![${character.name}](${character.image}?raycast-height=185)`}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="ID" text={character.id.toString()} />
