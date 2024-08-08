@@ -33,8 +33,7 @@ const useWhoisData = (input: ParsedInput & { ip?: string | null }, execute = tru
         return markdown;
       },
     });
-  }
-  catch (err) {
+  } catch (err) {
     return useFetch(`https://api.ip2location.io/?ip=${input.ip}`, {
       execute: execute && typeof input.ip !== "undefined" && input.ip !== null,
       keepPreviousData: true,
