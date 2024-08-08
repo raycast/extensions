@@ -11,7 +11,7 @@ enum IndexError: Error {
     case noPermissions(String)
     case failedToAddDocument(String)
     case deletionFailed(String)
-    case flushFailed(String)
+    case compactFailed(String)
 }
 
 /// Returned objects must be Encodable
@@ -22,7 +22,6 @@ struct Document: Encodable {
     let score: Float
     var lower: Int?
     var upper: Int?
-//    let summary: String
 }
 
 struct IndexResult: Encodable {
@@ -152,8 +151,8 @@ func openIndex(_ collection: String, _ supportPath: String) -> SKIndex? {
 
     group.wait()
 
-    guard SKIndexFlush(index) else {
-        throw IndexError.flushFailed("Error occurred while saving changes to index.")
+    guard SKIndexCompact(index) else {
+        throw IndexError.compactFailed("Error occurred while compacting index.")
     }
 
     return IndexResult(messages: messages, indexedFiles: files)
@@ -181,80 +180,121 @@ func extractFilePathAndPageNumber(from url: URL) -> (filepath: String, pageIndex
     }
 }
 
-@raycast func searchCollection(query: String, collectionName: String, supportPath: String) throws -> [Document] {
+@raycast func searchCollection(query: String, collectionName: String, supportPath: String) throws -> Void {
+    // Use pipes and lock files for IPC between Swift process and NodeJS
+    let lockFilePath = "/tmp/search_process.lock"
+    let sigtermFilePath = "/tmp/search_process.terminate"
+    let readStreamPath = "/tmp/search_results.jsonl"
+
+    FileManager.default.createFile(atPath: lockFilePath, contents: nil, attributes: nil)
+
+    let fileHandle: FileHandle
+    if FileManager.default.fileExists(atPath: readStreamPath) {
+        fileHandle = try FileHandle(forWritingTo: URL(fileURLWithPath: readStreamPath))
+        fileHandle.seekToEndOfFile()
+    } else {
+        throw SearchError.missingFile("Missing file to write results.")
+    }
+
+    // Ensure files are removed when the process terminates
+    defer {
+        try? FileManager.default.removeItem(atPath: lockFilePath)
+        fileHandle.closeFile()
+    }
+
     guard let index = openIndex(collectionName, supportPath) else {
         throw IndexError.unableToOpenOrCreateIndex("Index \(collectionName) does not exist.")
     }
 
     // Flush the index to make sure all documents have been added
-    guard SKIndexFlush(index) else {
-        throw IndexError.flushFailed("Error occurred while saving changes to index.")
+    guard SKIndexCompact(index) else {
+        throw IndexError.compactFailed("Error occurred while saving changes to index.")
     }
 
     let options = SKSearchOptions(kSKSearchOptionFindSimilar) // find purely based on similarity instead of boolean query
     let search = SKSearchCreate(index, query as CFString, options).takeRetainedValue()
-    let k = 25
+    let k = 20
     var returnDocuments = [Document]()
     var documentIDs = UnsafeMutablePointer<SKDocumentID>.allocate(capacity: k)
     var scores = UnsafeMutablePointer<Float>.allocate(capacity: k)
     var numResults: CFIndex = 0
     let numSummarySentences: Int = 1
 
+    let lock = NSLock()
+    let queue = DispatchQueue.global(qos: .userInitiated)
+    let group = DispatchGroup()
+
     // Returns the search results by every k items until no results are left
     var hasMore = true
     repeat {
-        hasMore = SKSearchFindMatches(search, k, documentIDs, scores, 4, &numResults)
+        // Check for termination signal
+        if FileManager.default.fileExists(atPath: sigtermFilePath) {
+            try? FileManager.default.removeItem(atPath: sigtermFilePath)
+            break
+        }
+
+        hasMore = SKSearchFindMatches(search, k, documentIDs, scores, 1, &numResults)
         if numResults > 0 {
             var documentURLs = UnsafeMutablePointer<Unmanaged<CFURL>?>.allocate(capacity: numResults)
             SKIndexCopyDocumentURLsForDocumentIDs(index, numResults, documentIDs, documentURLs)
             for i in 0..<numResults {
-                if let unmanagedURL = documentURLs[i] {
-                    let score = scores[i]
-                    let url = unmanagedURL.takeRetainedValue() as URL
-                    if let (filepath, pageidx) = extractFilePathAndPageNumber(from: url) {
-                        guard let pdfDocument = PDFDocument(url: URL(fileURLWithPath: filepath)) else {
-                            throw SearchError.missingFile("Failed to load pdf document.")
-                        }
+                group.enter()
+                let unmanagedURL = documentURLs[i]
 
-                        let selection = pdfDocument.findString(query, withOptions: [.caseInsensitive, NSString.CompareOptions .diacriticInsensitive]).first
-                        guard let content = pdfDocument.page(at: pageidx)?.string else {
-                            continue
-                        }
-                        let range = (content as NSString).range(of: query)
-                        if range.location != NSNotFound {
-                            returnDocuments.append(Document(
+                queue.async {
+                    defer { group.leave() }
+                    if let unmanagedURL = unmanagedURL {
+                        let score = scores[i]
+                        let url = unmanagedURL.takeRetainedValue() as URL
+                        if let (filepath, pageidx) = extractFilePathAndPageNumber(from: url) {
+                            guard let pdfDocument = PDFDocument(url: URL(fileURLWithPath: filepath)) else {
+                                group.leave()
+                                return
+                            }
+
+                            let selection = pdfDocument.findString(query, withOptions: [.caseInsensitive, NSString.CompareOptions .diacriticInsensitive]).first
+                            guard let content = pdfDocument.page(at: pageidx)?.string else {
+                                group.leave()
+                                return
+                            }
+                            let range = (content as NSString).range(of: query)
+
+                            let document = Document(
                                 id: documentIDs[i],
                                 page: pageidx,
                                 file: filepath,
                                 score: score,
-                                lower: range.location,
-                                upper: range.upperBound
-                            ))
+                                lower: range.location != NSNotFound ? range.location : nil,
+                                upper: range.location != NSNotFound ? range.upperBound : nil
+                            )
+                            lock.lock()
+                            defer { lock.unlock() }
+                            returnDocuments.append(document)
                         } else {
-                            returnDocuments.append(Document(
-                                id: documentIDs[i],
-                                page: pageidx,
-                                file: filepath,
-                                score: score
-                            ))
+                            let document = Document(id: documentIDs[i], page: 0, file: url.path, score: score)
+                            lock.lock()
+                            defer { lock.unlock() }
+                            returnDocuments.append(document)
                         }
-                    } else {
-                        returnDocuments.append(Document(id: documentIDs[i], page: 0, file: url.path, score: score))
                     }
-
-//                    if let summary = SKSummaryCreateWithString(content as CFString)?.takeRetainedValue(),
-//                       let highlightedSummary = SKSummaryCopyParagraphSummaryString(summary, numSummarySentences)?.takeRetainedValue() {
-//                        returnDocuments.append(Document(id: documentIDs[i], page: pageidx, file: filepath, score: score, summary: content))
-//                    }
                 }
             }
+
+            group.wait()
             documentURLs.deallocate()
+            returnDocuments.sort(by: { $0.score > $1.score })
+            for doc in returnDocuments {
+                if let jsonData = try? JSONEncoder().encode(doc) {
+                    fileHandle.write(jsonData)
+                    fileHandle.write("\n".data(using: .utf8)!)
+                }
+            }
+            returnDocuments = []
         }
     } while hasMore && numResults > 0
 
     documentIDs.deallocate()
     scores.deallocate()
-    return returnDocuments
 }
 
 @raycast func deleteCollection(collectionName: String, supportPath: String) throws -> Void {
