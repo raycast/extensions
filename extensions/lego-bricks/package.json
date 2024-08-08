@@ -20,7 +20,7 @@
     },
     {
       "name": "minifigs",
-      "title": "Mini Figures",
+      "title": "Show Mini Figures",
       "description": "Show a list of all LEGO mini figures",
       "mode": "view"
     },
