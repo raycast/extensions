@@ -5,6 +5,9 @@
   "description": "Search Pipedrive deals, people and organizations",
   "icon": "command-icon.png",
   "author": "ahp",
+  "contributors": [
+    "cmdr"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -42,21 +45,27 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.65.1",
+    "@raycast/api": "1.78.1",
+    "@raycast/utils": "1.16.1",
+    "@types/node-fetch": "^3.0.3",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "^20.11.5",
-    "@types/react": "^18.2.48",
+    "@raycast/eslint-config": "1.0.8",
+    "@types/node": "^20.14.9",
+    "@types/react": "^18.3.3",
     "@typescript-eslint/eslint-plugin": "^6.19.0",
     "@typescript-eslint/parser": "^6.19.0",
-    "eslint": "^8.56.0",
-    "eslint-config-prettier": "^9.1.0",
-    "react": "^18.2.0",
-    "typescript": "^5.3.3"
+    "eslint": "^8.57.0",
+    "prettier": "3.3.2",
+    "typescript": "^5.5.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
