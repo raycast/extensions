@@ -1,11 +1,11 @@
 import { getMessages } from "./scripts/messages";
 import { getAccounts } from "./scripts/accounts";
-import {closeMainWindow, showToast, Toast} from "@raycast/api";
+import { closeMainWindow, showToast, Toast } from "@raycast/api";
 
 export default async function RefreshMail() {
   await closeMainWindow();
 
-  await showToast(Toast.Style.Animated, "Fetching all accounts")
+  await showToast(Toast.Style.Animated, "Fetching all accounts");
   const accounts = await getAccounts();
   if (!accounts) return;
 

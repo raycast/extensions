@@ -1,4 +1,4 @@
-import {closeMainWindow, showToast, Toast} from "@raycast/api";
+import { closeMainWindow, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 export default async function CheckForMail() {
