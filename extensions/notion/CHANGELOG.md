@@ -1,5 +1,10 @@
 # Notion Changelog
 
+## [Edit Page Property View] - 2024-06-20
+
+- `Edit Page Properties` action now pushes to separate view.
+- All database pages in search view show the `Edit Page Properties` action.
+
 ## [Refactor] - 2024-07-03
 
 - Refactor code. No Functional changes.

@@ -5,30 +5,39 @@ import {
   notionColorToTintColor,
   getPageIcon,
   Page,
-  DatabaseProperty,
+  WritableDatabaseProperty,
   User,
   PropertyConfig,
   getPropertyConfig,
+  WritablePropertyTypes,
 } from "../../utils/notion";
 
 export function createConvertToFieldFunc(
-  itemPropsFor: GetFieldPropsFunc,
+  itemPropsFor: <T extends WritablePropertyTypes>(property: WritableDatabaseProperty) => FieldProps<T>,
   relationPages: Record<string, Page[]> | undefined,
   users: User[],
 ) {
-  return (property: DatabaseProperty) => {
+  return (property: WritableDatabaseProperty) => {
     let placeholder = property.type.replace(/_/g, " ");
     placeholder = placeholder.charAt(0).toUpperCase() + placeholder.slice(1);
 
     switch (property.type) {
       case "date":
-        return <Form.DatePicker {...itemPropsFor<typeof property.type>(property)} />;
+        return <Form.DatePicker key={property.id} {...itemPropsFor<typeof property.type>(property)} />;
       case "checkbox":
-        return <Form.Checkbox {...itemPropsFor<typeof property.type>(property)} label={placeholder} />;
+        return (
+          <Form.Checkbox key={property.id} {...itemPropsFor<typeof property.type>(property)} label={placeholder} />
+        );
       case "select":
       case "status":
         return (
-          <Form.Dropdown {...itemPropsFor<typeof property.type>(property)}>
+          <Form.Dropdown key={property.id} {...itemPropsFor<typeof property.type>(property)}>
+            {property.type == "select" &&
+              createMapOptionsFunc(Form.Dropdown.Item)({
+                id: "_select_null_",
+                name: "No Selection",
+                color: "default",
+              })}
             {getPropertyConfig(property, [property.type])?.options.map(createMapOptionsFunc(Form.Dropdown.Item))}
           </Form.Dropdown>
         );
@@ -43,16 +52,15 @@ export function createConvertToFieldFunc(
           if (relationId) options = relationPages[relationId];
         }
         return (
-          <Form.TagPicker placeholder={placeholder} {...itemPropsFor<typeof property.type>(property)}>
+          <Form.TagPicker key={property.id} placeholder={placeholder} {...itemPropsFor<typeof property.type>(property)}>
             {options?.map(createMapOptionsFunc(Form.TagPicker.Item))}
           </Form.TagPicker>
         );
       }
-      case "formula":
-        return null;
       default:
         return (
           <Form.TextField
+            key={property.id}
             info="Supports a single line of inline Markdown"
             placeholder={placeholder}
             {...itemPropsFor<typeof property.type>(property)}
@@ -81,9 +89,7 @@ function createMapOptionsFunc(Tag: typeof Form.Dropdown.Item | typeof Form.TagPi
   };
 }
 
-export type GetFieldPropsFunc = <T extends DatabaseProperty["type"]>(property: DatabaseProperty) => FieldProps<T>;
-
-export type FieldProps<T extends DatabaseProperty["type"]> = ReturnType<
+export type FieldProps<T extends WritableDatabaseProperty["type"]> = ReturnType<
   typeof useForm<{
     [k: string]: T extends "date"
       ? Date | null
@@ -91,8 +97,6 @@ export type FieldProps<T extends DatabaseProperty["type"]> = ReturnType<
         ? boolean
         : T extends "multi_select" | "relation" | "people"
           ? string[]
-          : T extends "formula"
-            ? null
-            : string;
+          : string;
   }>
 >["itemProps"][string];

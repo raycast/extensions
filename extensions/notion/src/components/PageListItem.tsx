@@ -14,7 +14,7 @@ import {
 import { format, formatDistanceToNow } from "date-fns";
 
 import {
-  DatabaseProperty,
+  WritableDatabaseProperty,
   deleteDatabase,
   deletePage,
   getPageIcon,
@@ -28,26 +28,27 @@ import { DatabaseView } from "../utils/types";
 
 import { DatabaseList } from "./DatabaseList";
 import { PageDetail } from "./PageDetail";
-import { ActionEditPageProperty, ActionSetVisibleProperties } from "./actions";
+import { ActionSetVisibleProperties } from "./actions";
 import ActionCreateQuicklink from "./actions/ActionCreateQuicklink";
 import { AppendToPageForm, CreatePageForm, DatabaseViewForm } from "./forms";
+import { EditPagePropertiesForm } from "./forms/EditPagePropertiesForm";
 
 type PageListItemProps = {
   page: Page;
   databaseView?: DatabaseView;
-  databaseProperties?: DatabaseProperty[];
+  databaseProperties?: WritableDatabaseProperty[];
   setDatabaseView?: (databaseView: DatabaseView) => Promise<void>;
   setRecentPage: (page: Page) => Promise<void>;
   removeRecentPage: (id: string) => Promise<void>;
   mutate: () => Promise<void>;
   users?: User[];
   icon?: Image.ImageLike;
-  customActions?: JSX.Element[];
+  kanbanStatusAction?: JSX.Element;
 };
 
 export function PageListItem({
   page,
-  customActions,
+  kanbanStatusAction,
   databaseProperties,
   databaseView,
   setRecentPage,
@@ -89,12 +90,8 @@ export function PageListItem({
     });
   }
 
-  const quickEditProperties = databaseProperties?.filter((property) =>
-    ["checkbox", "status", "select", "multi_select", "status", "people"].includes(property.type),
-  );
-
   const visiblePropertiesIds: string[] =
-    databaseProperties?.filter((dp: DatabaseProperty) => databaseView?.properties?.[dp.id]).map((dp) => dp.id) || [];
+    databaseProperties?.filter((dp) => databaseView?.properties?.[dp.id]).map((dp) => dp.id) || [];
 
   const title = page.title ? page.title : "Untitled";
 
@@ -158,24 +155,22 @@ export function PageListItem({
         <ActionPanel>
           <ActionPanel.Section title={title}>
             {...OpenPageActions}
-            {customActions?.map((action) => action)}
-            {databaseProperties ? (
-              <ActionPanel.Submenu
+            {kanbanStatusAction}
+            {page.parent_database_id && (
+              <Action.Push
                 title="Edit Property"
-                icon={Icon.BulletPoints}
+                icon={Icon.Pencil}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-              >
-                {quickEditProperties?.map((dp: DatabaseProperty) => (
-                  <ActionEditPageProperty
-                    key={dp.id}
-                    databaseProperty={dp}
-                    pageId={page.id}
-                    pageProperty={page.properties[dp.id]}
+                target={
+                  <EditPagePropertiesForm
+                    page={page}
+                    parentDatabaseId={page.parent_database_id}
+                    databaseProperties={databaseProperties}
                     mutate={mutate}
                   />
-                ))}
-              </ActionPanel.Submenu>
-            ) : null}
+                }
+              />
+            )}
           </ActionPanel.Section>
 
           <ActionPanel.Section>

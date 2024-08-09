@@ -51,7 +51,7 @@ export function useDatabases() {
 
 export function useDatabaseProperties(databaseId: string | null, filter?: (value: DatabaseProperty) => boolean) {
   const value = useCachedPromise(
-    (id): Promise<DatabaseProperty[]> =>
+    (id) =>
       fetchDatabaseProperties(id).then((databaseProperties) => {
         if (databaseProperties && filter) {
           return databaseProperties.filter(filter);
