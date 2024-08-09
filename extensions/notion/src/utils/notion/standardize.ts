@@ -50,9 +50,8 @@ function recursiveStandardize(object: unknown, newKey: string) {
   if (isTyped(object)) {
     const newObject: Record<string, unknown> = {};
     for (const key in object)
-      if (key == object.type) {
-        newObject[key == object.type ? newKey : key] = recursiveStandardize(object[key], newKey);
-      }
+      if (key == object.type) newObject[newKey] = recursiveStandardize(object[key], newKey);
+      else newObject[key] = object[key];
     return newObject;
   } else return object;
 }
