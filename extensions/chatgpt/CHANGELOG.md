@@ -1,5 +1,10 @@
 # Changelog
 
+## [Fix] - 2024-08-09
+
+- Fix: An unhandled error was encountered while parsing the CSV file.
+- Chore: Update prompts.csv URL to the latest version
+
 ## [Fix] - 2024-07-29
 
 - Restarting a conversation will retain the currently selected model
