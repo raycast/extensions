@@ -1,0 +1,123 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "one-word",
+  "title": "One Word",
+  "description": "Your Daily Dose of Linguistic Enrichment.",
+  "icon": "icon.png",
+  "author": "stiven_gonzalez",
+  "categories": [
+    "Productivity",
+    "Data",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "config",
+      "title": "One Word Config",
+      "description": "Customize languages and menu bar appearance.",
+      "icon": "icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "pronunciation",
+      "title": "Pronunciation",
+      "description": "Listen to the pronunciation",
+      "icon": "icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "random-word",
+      "title": "Randomize Word",
+      "description": "Randomly selects a new word to display and also allows input of a custom word.",
+      "icon": "icon.png",
+      "mode": "no-view",
+      "interval": "30m",
+      "arguments": [
+        {
+          "name": "customWord",
+          "placeholder": "Set Word...",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "menu-bar",
+      "title": "Refresh Menu Bar",
+      "description": "Update the menu bar.",
+      "icon": "icon.png",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "menuBarIcon",
+          "type": "textfield",
+          "title": "Menu Bar Icon",
+          "placeholder": "Dot",
+          "description": "Customize Menu Bar Icon. Search for \"Raycast Icons & Images\" to see all icons.",
+          "default": "Hashtag",
+          "required": false
+        },
+        {
+          "name": "showGetNewWord",
+          "type": "checkbox",
+          "label": "Show \"Get New Word\" Command",
+          "description": "Whether to show a \"Get New Word\" command in the menu dropdown.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showPronunciation",
+          "type": "checkbox",
+          "label": "Show \"Listen to Pronunciation\" Command",
+          "description": "Whether to show a \"Listen to Pronunciation\" command in the menu dropdown.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showFav",
+          "type": "checkbox",
+          "label": "Show \"Favorite / Unfavorite\" Command",
+          "description": "Whether to show a \"Favorite / Unfavorite\" command in the menu dropdown.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showCopy",
+          "type": "checkbox",
+          "label": "Show \"Copy to Clipboard\" Command",
+          "description": "Whether to show a \"Copy to Clipboard\" command in the menu dropdown.",
+          "default": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "favorites",
+      "title": "Favorite Words",
+      "description": "⭐ Save words for quick access later.",
+      "icon": "icon.png",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.75.2",
+    "@raycast/utils": "^1.15.0",
+    "axios": "^1.7.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.13.0",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
