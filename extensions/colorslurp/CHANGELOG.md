@@ -1,5 +1,8 @@
 # ColorSlurp Changelog
 
+## [Recent Colors Bug Fix] - 2024-07-06
+Removed the appended alpha channel from the raw return of the recentcolors() script function. This is in line with the UI of ColorSlurp itself and most color pickers.
+
 ## [New Commands] - 2023-05-03
 
 Added the ability to convert colors to different formats.
