@@ -1,6 +1,6 @@
 # PDFSearch Changelog
 
-## [1.2.1] - 2024-08-9
+## [1.2.1] - 2024-08-09
 
 - Add multithreading to searchCollection Swift process.
 - Add streaming search results for long running searches.
