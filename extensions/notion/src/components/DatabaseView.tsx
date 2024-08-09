@@ -117,17 +117,9 @@ export function DatabaseView(props: DatabaseViewProps) {
     const prop = Object.values(p.properties).find((x) => x.id === propertyId);
     let propId = "_select_null_";
 
-    if (prop) {
-      if (prop.type == "select" && prop.select?.id) {
-        propId = prop.select.id;
-      } else if (prop.type == "status" && prop.status?.id) {
-        propId = prop.status.id;
-      }
-    }
+    if (prop && (prop.type == "select" || prop.type == "status") && prop.value) propId = prop.value.id;
 
-    if (!tempSections[propId]) {
-      tempSections[propId] = [];
-    }
+    if (!tempSections[propId]) tempSections[propId] = [];
 
     tempSections[propId].push(p);
   });
