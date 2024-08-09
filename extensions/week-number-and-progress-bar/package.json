@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "week-number-and-progress-bar",
+  "title": "Week Number And Year Progress Menu Bar",
+  "description": "Display the current week number on the menu bar",
+  "icon": "icon.png",
+  "author": "aesadde",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Display Week Number",
+      "description": "Display the current week number on the menu bar",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "format",
+          "title": "Week Number Format",
+          "type": "textfield",
+          "default": "'Week 'ww ', 'yyyy ",
+          "description": "The format of the week number. Use {weekNumber} to insert the week number.",
+          "required": false
+        },
+        {
+          "name": "progressBar",
+          "title": "Show Progress Bar",
+          "type": "checkbox",
+          "default": false,
+          "description": "The format of the week number. Use {weekNumber} to insert the week number.",
+          "required": false,
+          "label": "Show Progress Bar"
+        },
+        {
+          "name": "progressBarEmoji",
+          "title": "Progress Bar Emoji",
+          "type": "textfield",
+          "default": "🟩",
+          "description": "The emoji to use for the progress bar.",
+          "required": false,
+          "dependsOn": "progressBar"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.15.0",
+    "date-fns": "^3.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
