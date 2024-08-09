@@ -25,7 +25,3 @@ export interface IPGeolocationReadable {
   ISP: string; //isp
   Organization: string; //org
 }
-
-export enum CacheKey {
-  MY_IP_GEOLOCATION = "My ip geolocation",
-}
