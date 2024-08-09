@@ -78,7 +78,7 @@
     },
     {
       "name": "copy-and-zip-project",
-      "title": "Copy ZIP Project To Clipboard",
+      "title": "Copy ZIP Project to Clipboard",
       "description": "The project will be compressed into ZIP format and copied to the clipboard.",
       "mode": "no-view"
     }
