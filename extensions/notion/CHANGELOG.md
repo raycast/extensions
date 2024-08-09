@@ -1,5 +1,10 @@
 # Notion Changelog
 
+## [Support LaunchContext in Quick Capture command] - 2024-08-09
+
+- Honors default values for page and captureAs from LaunchContext in the Quick Capture command
+- Adds action command to Create Quicklink as Configured in the Quick Capture command
+
 ## [Refactor] - 2024-07-03
 
 - Refactor code. No Functional changes.

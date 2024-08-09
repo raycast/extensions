@@ -25,6 +25,7 @@ import {
 } from "../../hooks";
 import { createDatabasePage, DatabaseProperty } from "../../utils/notion";
 import { handleOnOpenPage } from "../../utils/openPage";
+import { Quicklink } from "../../utils/types";
 import { ActionSetVisibleProperties } from "../actions";
 import { ActionSetOrderProperties } from "../actions";
 
@@ -51,8 +52,6 @@ type CreatePageFormProps = {
 type CreatePageFormPreferences = {
   closeAfterCreate: boolean;
 };
-
-type Quicklink = Action.CreateQuicklink.Props["quicklink"];
 
 const createPropertyId = (property: DatabaseProperty) => "property::" + property.type + "::" + property.id;
 
