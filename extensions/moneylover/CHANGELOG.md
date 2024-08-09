@@ -1,6 +1,6 @@
 # MoneyLover Changelog
 
-## [Action to `Add Transaction`] - {PR_MERGE_DATE}
+## [Action to `Add Transaction`] - 2024-08-09
 
 - `Wallets` are now cached
 - More `Toasts` are shown to make it clear what's happening
