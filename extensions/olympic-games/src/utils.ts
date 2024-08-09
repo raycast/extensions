@@ -7,13 +7,13 @@ export function getAccessories(props: { item: MedalResult; index: number }) {
   accessories.push({ icon: { source: "🥇" }, text: getMedalNumber(props.item.medals.gold) });
   accessories.push({ icon: { source: "🥈" }, text: getMedalNumber(props.item.medals.silver) });
   accessories.push({ icon: { source: "🥉" }, text: getMedalNumber(props.item.medals.bronze) });
-  accessories.push({ icon: getRankIcon(props.item.rank), text: getMedalNumber(props.item.medals.total) });
+  accessories.push({ icon: getRankIcon(props.item.rank), tooltip: getMedalNumber(props.item.medals.total) });
 
   return accessories;
 }
 
 export function getMedalNumber(number: number) {
-  return String(number).padStart(5, " ");
+  return String(number);
 }
 
 export function getRankIcon(rank: number): Image.ImageLike {
@@ -27,4 +27,9 @@ export function getRankIcon(rank: number): Image.ImageLike {
   return {
     source: `data:image/svg+xml,${svg}`,
   };
+}
+
+export function getFlag(countryCode: string) {
+  const flag_url = `https://codante.s3.amazonaws.com/codante-apis/olympic-games/flags/${countryCode}.png`;
+  return flag_url;
 }

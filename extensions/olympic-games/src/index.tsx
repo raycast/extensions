@@ -1,6 +1,6 @@
 import { Detail, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { getAccessories } from "./utils";
+import { getAccessories, getFlag } from "./utils";
 import { MedalResult } from "./types";
 
 export default function Command() {
@@ -23,8 +23,8 @@ export default function Command() {
 function MedalItem(props: { item: MedalResult; index: number }) {
   return (
     <List.Item
-      icon={{ source: `flags/${props.item.country.code}.png` }}
-      keywords={[props.item.country.code, props.item.country.name, props.item.country.iso_alpha_2]}
+      icon={{ source: getFlag(props.item.country.code) }}
+      keywords={[props.item.country.code, props.item.country.name]}
       title={props.item.country.code}
       subtitle={props.item.country.name}
       accessories={getAccessories(props)}
