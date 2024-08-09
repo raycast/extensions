@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { getPreferenceValues, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useState } from "react";
 
@@ -16,7 +16,21 @@ function MyPullRequests() {
   const [sortQuery, setSortQuery] = useCachedState<string>("sort-query", PR_DEFAULT_SORT_QUERY, {
     cacheNamespace: "github-my-pr",
   });
-  const { data: sections, isLoading, mutate: mutateList } = useMyPullRequests(selectedRepository, sortQuery);
+  const { includeAssigned, includeMentioned, includeReviewed, includeReviewRequests, includeRecentlyClosed } =
+    getPreferenceValues<Preferences.MyPullRequests>();
+  const {
+    data: sections,
+    isLoading,
+    mutate: mutateList,
+  } = useMyPullRequests({
+    repository: selectedRepository,
+    sortQuery,
+    includeAssigned,
+    includeMentioned,
+    includeRecentlyClosed,
+    includeReviewRequests,
+    includeReviewed,
+  });
 
   return (
     <List
