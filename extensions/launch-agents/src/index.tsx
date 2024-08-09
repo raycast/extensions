@@ -6,6 +6,7 @@ import {
   confirmAlert,
   Detail,
   Icon,
+  Keyboard,
   List,
   showToast,
   Toast,
@@ -16,77 +17,46 @@ import { useEffect, useState } from "react";
 
 const getRecurrence = (filePath: string) => {
   const plistContent = execSync(`cat ${filePath}`).toString();
-
   const intervalMatch = plistContent.match(/<key>StartInterval<\/key>\s*<integer>(\d+)<\/integer>/);
-
-  const recurrenceInfo = "No recurrence information";
 
   if (intervalMatch) {
     const seconds = parseInt(intervalMatch[1]);
     if (seconds >= 3600) {
       const hours = (seconds / 3600).toFixed(2);
-      if (hours === "1.00") {
-        return "Recurs every hour";
-      }
-      return `Recurs every ${hours} hours`;
-    } else if (seconds >= 60) {
+      return `Recurs every ${hours} hour${hours === "1.00" ? "" : "s"}`;
+    }
+    if (seconds >= 60) {
       const minutes = (seconds / 60).toFixed(2);
-      if (minutes === "1.00") {
-        return "Recurs every minute";
-      }
-      return `Recurs every ${minutes} minutes`;
+      return `Recurs every ${minutes} minute${minutes === "1.00" ? "" : "s"}`;
     }
-    if (seconds === 1) {
-      return "Recurs every second";
-    }
-    return `Recurs every ${seconds} seconds`;
+    return `Recurs every ${seconds} second${seconds === 1 ? "" : "s"}`;
   }
 
-  const calendarIntervalMatch = [...plistContent.matchAll(/<key>Weekday<\/key>\s*<integer>\d<\/integer>/g)];
-
+  const calendarIntervalMatch = [...plistContent.matchAll(/<key>Weekday<\/key>\s*<integer>(\d)<\/integer>/g)];
   if (calendarIntervalMatch.length > 0) {
     const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const daysOfWeek = calendarIntervalMatch.map((match) => {
-      const day = match[0].match(/<integer>(\d)<\/integer>/);
-      return day ? dayNames[parseInt(day[1])] : "";
-    });
+    const daysOfWeek = calendarIntervalMatch.map((match) => dayNames[parseInt(match[1])]);
     return `Recurs on weekdays: ${daysOfWeek.join(", ")}`;
   }
 
-  return recurrenceInfo;
+  return "No recurrence information";
 };
 
 const isPListOK = (filePath: string) => {
   try {
-    const result = execSync(`plutil -lint ${filePath}`).toString();
-    if (result.includes("OK")) {
-      return true;
-    } else {
-      return false;
-    }
-  } catch (error) {
+    return execSync(`plutil -lint ${filePath}`).toString().includes("OK");
+  } catch {
     return false;
   }
 };
 
-// const isPListLoaded = (fileName: string): boolean => {
-//   try {
-//     const loadedPlists = execSync("launchctl list").toString();
-//     const fileNameWithoutExtension = fileName.replace(/\.plist$/, "");
-//     return loadedPlists.includes(fileNameWithoutExtension);
-//   } catch (error) {
-//     return false;
-//   }
-// };
-
-const getFileName = (filepath: string) => filepath.split("/").pop();
+const getFileName = (filepath: string) => filepath.split("/").pop() || "";
 
 function LaunchAgentDetails({ selectedFile, refreshList }: { selectedFile: string; refreshList: () => void }) {
   const { pop } = useNavigation();
-
   const [isFileLoaded, setIsFileLoaded] = useState<boolean>(false);
 
-  const fileName = selectedFile.split("/").pop();
+  const fileName = getFileName(selectedFile);
   const isFileValid = isPListOK(selectedFile);
   const recurrence = getRecurrence(selectedFile);
 
@@ -100,7 +70,7 @@ function LaunchAgentDetails({ selectedFile, refreshList }: { selectedFile: strin
 | Valid                   | ${isFileValid ? "✅" : "❌"}     |
 | Loaded                  | ${isFileLoaded ? "✅" : "❌"}    |  
 | Recurrence              | ${recurrence}                   |
-| File Path               | ${selectedFile}                   |
+| File Path               | ${selectedFile}                 |
 `;
 
   const isFileCurrentlyLoaded = (file: string) => {
@@ -114,8 +84,8 @@ function LaunchAgentDetails({ selectedFile, refreshList }: { selectedFile: strin
 
   const updateIsFileLoaded = () => {
     try {
-      const output = execSync(`launchctl list | grep $(basename ${selectedFile} .plist)`);
-      setIsFileLoaded(output.toString().trim() !== "");
+      const output = isFileCurrentlyLoaded(selectedFile);
+      setIsFileLoaded(output);
     } catch {
       setIsFileLoaded(false);
     }
@@ -129,7 +99,7 @@ function LaunchAgentDetails({ selectedFile, refreshList }: { selectedFile: strin
       primaryAction: {
         title: "Delete",
         style: Alert.ActionStyle.Destructive,
-        onAction: () => deleteFile(),
+        onAction: deleteFile,
       },
       dismissAction: {
         title: "Cancel",
@@ -190,11 +160,17 @@ function LaunchAgentDetails({ selectedFile, refreshList }: { selectedFile: strin
         <ActionPanel>
           <Action
             icon={isFileLoaded ? Icon.Stop : Icon.Play}
-            title={`${isFileLoaded ? "Unload" : "Load"}`}
+            title={isFileLoaded ? "Unload" : "Load"}
             onAction={loadOrUnloadFile}
           />
           <Action icon={Icon.Folder} title="Open" onAction={() => execSync(`code ${selectedFile}`)} />
-          <Action title="Remove" icon={Icon.Trash} style={Action.Style.Destructive} onAction={confirmDeleteFile} />
+          <Action
+            title="Remove"
+            icon={Icon.Trash}
+            shortcut={Keyboard.Shortcut.Common.Remove}
+            style={Action.Style.Destructive}
+            onAction={confirmDeleteFile}
+          />
         </ActionPanel>
       }
     />
@@ -202,11 +178,13 @@ function LaunchAgentDetails({ selectedFile, refreshList }: { selectedFile: strin
 }
 
 const EmptyView = () => (
-  <List
+  <List.EmptyView
+    icon={Icon.Multiply}
+    title="No Launch Agents found"
     actions={
       <ActionPanel title="Manage Launch Agents">
         <Action
-          icon={{ source: Icon.Circle, tintColor: Color.Red }}
+          icon={{ source: Icon.NewDocument, tintColor: Color.Green }}
           title="Create Launch Agent"
           onAction={() => {
             const fileName = `com.raycast.${Math.random()}`;
@@ -215,13 +193,12 @@ const EmptyView = () => (
         />
       </ActionPanel>
     }
-  >
-    <List.EmptyView icon={Icon.Multiply} title={`No PList Launch Agents found`} />
-  </List>
+  />
 );
 
 export default function Command() {
   const [plistFiles, setPlistFiles] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const loadPlistFiles = () => {
     try {
@@ -235,44 +212,37 @@ export default function Command() {
 
   useEffect(() => {
     loadPlistFiles();
+    setIsLoading(false);
   }, []);
 
-  if (plistFiles.length === 0) {
-    return <EmptyView />;
-  }
-
   return (
-    <List navigationTitle="Search Launch Agents" searchBarPlaceholder="Search your Launch Agent">
-      {plistFiles.map((file, index) => {
-        const fileName = getFileName(file);
-
-        return (
-          <List.Item
-            key={index}
-            title={`${fileName}`}
-            icon={{ source: Icon.Rocket, tintColor: Color.Yellow }}
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  icon={{ source: Icon.Mouse, tintColor: Color.Green }}
-                  title="View Details"
-                  target={<LaunchAgentDetails selectedFile={file} refreshList={loadPlistFiles} />}
-                />
-
-                <Action
-                  icon={{ source: Icon.NewDocument, tintColor: Color.Green }}
-                  title="Create Launch Agent"
-                  onAction={() => {
-                    const fileName = `com.raycast.${Math.random()}`;
-                    execSync(`touch ~/Library/LaunchAgents/${fileName}.plist`);
-                    loadPlistFiles();
-                  }}
-                />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+    <List navigationTitle="Search Launch Agents" searchBarPlaceholder="Search your Launch Agent" isLoading={isLoading}>
+      <EmptyView />
+      {plistFiles.map((file, index) => (
+        <List.Item
+          key={index}
+          title={getFileName(file)}
+          icon={{ source: Icon.Rocket, tintColor: Color.Yellow }}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                icon={{ source: Icon.Mouse, tintColor: Color.Green }}
+                title="View Details"
+                target={<LaunchAgentDetails selectedFile={file} refreshList={loadPlistFiles} />}
+              />
+              <Action
+                icon={{ source: Icon.NewDocument, tintColor: Color.Green }}
+                title="Create Launch Agent"
+                onAction={() => {
+                  const fileName = `com.raycast.${Math.random()}`;
+                  execSync(`touch ~/Library/LaunchAgents/${fileName}.plist`);
+                  loadPlistFiles();
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
     </List>
   );
 }
