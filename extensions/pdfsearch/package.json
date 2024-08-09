@@ -5,6 +5,9 @@
   "description": "Search across collections of PDF documents.",
   "icon": "command-icon.png",
   "author": "kevin-pek",
+  "contributors": [
+    "xilopaint"
+  ],
   "categories": [
     "Productivity"
   ],

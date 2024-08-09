@@ -1,9 +1,9 @@
 import { Action, ActionPanel, getSelectedFinderItems, List, popToRoot } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
 import fs from "fs";
-import { cache, openFileCallback } from "./utils";
 import { drawImage, getPDFOutline } from "swift:../swift";
 import { Outline } from "./type";
+import { cache, openFileCallback } from "./utils";
 
 export default function Command() {
   const { data, isLoading } = usePromise(async () => {
