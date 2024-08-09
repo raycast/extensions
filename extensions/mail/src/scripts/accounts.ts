@@ -54,7 +54,7 @@ export const getAccounts = async (): Promise<Account[] | undefined> => {
             numUnread: parseInt(numUnread),
             mailboxes: await getMailboxes(name),
           };
-        })
+        }),
       );
 
       if (accounts) {

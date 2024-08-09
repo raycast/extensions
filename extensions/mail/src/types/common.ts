@@ -91,10 +91,3 @@ export type Attachment = {
   size: string;
   type?: string;
 };
-
-export type Preferences = {
-  primaryAction: string;
-  saveDirectory: string;
-  messageLimit: string;
-  plainTextMode: boolean;
-};
