@@ -8,10 +8,10 @@ import {
   Icon,
   showToast,
   Toast,
-  open,
   Clipboard,
   useNavigation,
   LaunchProps,
+  Keyboard,
 } from "@raycast/api";
 import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import { createShortLink } from "@/api";
@@ -19,6 +19,7 @@ import { fetchLink, isEmpty } from "@utils/clipboard";
 import { useTags } from "@hooks/use-tags";
 import { useDomains } from "@hooks/use-domains";
 import { withDubClient } from "./with-dub-client";
+import { SearchLinks } from "@/search-links";
 
 interface ShortLinkFormValues {
   url: string;
@@ -29,7 +30,7 @@ interface ShortLinkFormValues {
 }
 
 const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormValues; args: Arguments.ShortenLink }) => {
-  const { push, pop } = useNavigation();
+  const { push } = useNavigation();
   const { url, key } = args;
   const { data: originalLink, isLoading: isLoadingLink } = useCachedPromise(fetchLink, [], { execute: isEmpty(url) });
   const { tags } = useTags();
@@ -47,11 +48,16 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
             message: shortLink,
             primaryAction: {
               title: "Copy Short Link",
+              shortcut: Keyboard.Shortcut.Common.Copy,
               onAction: () => Clipboard.copy(shortLink),
             },
             secondaryAction: {
               title: "Open Short Links",
-              onAction: () => open("raycast://extensions/quuu/dub-link-shortener/search-links"),
+              shortcut: Keyboard.Shortcut.Common.Open,
+              onAction: async (toast) => {
+                push(<SearchLinks />);
+                await toast.hide();
+              },
             },
           });
         })
@@ -60,13 +66,13 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
           const toast = await showFailureToast(err, { title: "❗ Failed to create link" });
           toast.primaryAction = {
             title: "Retry",
+            shortcut: Keyboard.Shortcut.Common.Refresh,
             onAction: () => {
               push(<ShortenLinkForm retryValues={vals} args={args} />);
               toast.hide();
             },
           };
-        })
-        .finally(pop);
+        });
     },
     validation: {
       url: FormValidation.Required,
