@@ -1,13 +1,11 @@
-import { environment } from "@raycast/api";
-import { Action, ActionPanel, List, LocalStorage, Toast, showHUD, showToast } from "@raycast/api";
+import { Action, ActionPanel, List, LocalStorage, Toast, environment, showHUD, showToast } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
 import fs from "fs";
 import path from "path";
 import { useEffect, useRef, useState } from "react";
+import { drawImage, searchCollection } from "swift:../../swift";
 import { Collection, Document } from "../type";
-import { getValidFiles } from "../utils";
-import { cache, openFileCallback } from "../utils";
-import { searchCollection, drawImage } from "swift:../../swift";
+import { cache, getValidFiles, openFileCallback } from "../utils";
 
 const readStreamPath = "/tmp/search_results.jsonl";
 const sigtermFilePath = "/tmp/search_process.terminate";
@@ -132,7 +130,7 @@ export default function SearchCollection(props: { collectionName: string }) {
     <List
       isLoading={isLoading || isSearching}
       onSearchTextChange={setQuery}
-      searchBarPlaceholder={`Searching ${props.collectionName}...`}
+      searchBarPlaceholder={`Search ${props.collectionName}...`}
       throttle
       isShowingDetail
     >

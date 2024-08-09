@@ -1,5 +1,11 @@
 # PDFSearch Changelog
 
+## [1.2.2] - {PR_MERGE_DATE}
+
+- Improved form validation.
+- Added `Delete All Collections` action.
+- Added icons for actions.
+
 ## [1.2.1] - 2024-08-09
 
 - Add multithreading to searchCollection Swift process.
