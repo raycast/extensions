@@ -22,9 +22,9 @@ export function isReadableProperty<T extends { type: PageProperty["type"] }>(
 }
 export function isType<P extends DatabaseProperty | PageProperty, T extends PageProperty["type"]>(
   property: DatabaseProperty | PageProperty,
-  ...type: T[]
+  ...types: T[]
 ): property is Extract<P, { type: T }> {
-  return property.type in type;
+  return types.includes(property.type as T);
 }
 
 export function notionColorToTintColor(notionColor: string | undefined): Color.ColorLike {
