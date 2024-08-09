@@ -5,6 +5,9 @@
   "description": "Paris 2024 Olympic Medal Table",
   "icon": "olympic.png",
   "author": "elonwoo",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "News",
     "Data"
