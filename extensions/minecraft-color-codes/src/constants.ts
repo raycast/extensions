@@ -1,9 +1,6 @@
 import { Icon } from "@raycast/api";
 import { Color, Format } from "./interfaces";
 
-export const PREFIX = "\u00A7";
-export const ESCAPED_PREFIX = `\\u00A7`;
-
 export const COLORS: Color[] = [
   { name: "Black", chatCode: "0", hexCode: "#000000" },
   { name: "Dark Blue", chatCode: "1", hexCode: "#0000AA" },
