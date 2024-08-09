@@ -16,8 +16,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Olympic Games",
-      "subtitle": "Medal Table - Paris 2024",
+      "title": "Show Medal Table",
+      "subtitle": "Olympic Games",
       "description": "Paris 2024 Olympic Medal Table",
       "mode": "view"
     }
