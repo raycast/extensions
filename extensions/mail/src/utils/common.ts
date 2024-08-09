@@ -1,4 +1,4 @@
-import { Icon } from "@raycast/api";
+import { getPreferenceValues, Icon } from "@raycast/api";
 
 import { AnyFn } from "../types";
 
@@ -25,3 +25,6 @@ export const getIconByType = (type: string | undefined): string | Icon => {
 export const invoke = <T>(fn: AnyFn<T>) => {
   return fn();
 };
+
+const { messageLimit: msgLimit } = getPreferenceValues<Preferences>();
+export const messageLimit = parseInt(msgLimit);

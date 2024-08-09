@@ -81,7 +81,7 @@ export const ComposeMessage = (props: ComposeMessageProps) => {
       onData: (data) => {
         setValue("to", data?.join(","));
       },
-    }
+    },
   );
 
   const shouldEnableDrafts = !!values.subject || !!values.content || !!values.attachments;
