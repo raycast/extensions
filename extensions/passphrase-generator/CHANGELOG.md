@@ -1,6 +1,6 @@
 # Passphrase Generator
 
-## [Improve] - {PR_MERGE_DATE}
+## [Improve] - 2024-08-09
 
 - Enhance the dictionary words by adding capitalization and numbers to make it universally applicable for password requirements.
 
