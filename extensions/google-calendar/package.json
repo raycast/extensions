@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-calendar",
+  "title": "Google Calendar",
+  "description": "Manage Google Calendars",
+  "icon": "google_calendar.png",
+  "author": "tonka3000",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-week",
+      "title": "Search Week",
+      "description": "Search next 7 Days",
+      "mode": "view"
+    },
+    {
+      "name": "search-month",
+      "title": "Search Month",
+      "description": "Search next 30 Days",
+      "mode": "view"
+    },
+    {
+      "name": "search-quarter",
+      "title": "Search Quarter",
+      "description": "Search next 90 Days",
+      "mode": "view"
+    },
+    {
+      "name": "search-year",
+      "title": "Search Year",
+      "description": "Search next 365 Days",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Calendar",
+      "description": "Query calendar",
+      "mode": "view"
+    },
+    {
+      "name": "openinbrowser",
+      "title": "Open in Browser",
+      "description": "Open your Calendar in the Browser",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientid",
+      "description": "Client ID",
+      "type": "textfield",
+      "required": true,
+      "title": "OAuth Client ID"
+    }
+  ],
+  "dependencies": {
+    "@googleapis/calendar": "^9.3.1",
+    "@raycast/api": "^1.66.0",
+    "@raycast/utils": "^1.10.0",
+    "cross-fetch": "^4.0.0",
+    "googleapis": "^126.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
