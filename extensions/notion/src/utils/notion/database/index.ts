@@ -7,6 +7,7 @@ import { isReadableProperty } from "..";
 import { handleError, isNotNullOrUndefined, pageMapper } from "../global";
 import { getNotionClient } from "../oauth";
 import { formValueToPropertyValue } from "../page/property";
+import { standardize } from "../../standardize";
 
 import { DatabaseProperty } from "./property";
 
@@ -73,7 +74,7 @@ export async function fetchDatabaseProperties(databaseId: string) {
             color: "default",
           });
 
-        databaseProperties.push(property);
+        databaseProperties.push(standardize(property, property.type, "config"));
       }
     });
 
