@@ -1,11 +1,10 @@
-import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
-import { useState } from "react";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { useMemo, useState } from "react";
 import { ActionOpenExtensionPreferences } from "./components/action-open-extension-preferences";
 import { IpEmptyView } from "./components/ip-empty-view";
-import { useIpGeolocation } from "./hooks/hooks";
-import { Preferences } from "./types/preferences";
 import { isEmpty } from "./utils/common-utils";
 import { listIcons } from "./utils/constants";
+import { useIpGeolocation } from "./hooks/useIpGeolocation";
 
 interface IpArgument {
   ipAddress: string;
@@ -13,12 +12,15 @@ interface IpArgument {
 
 export default function QueryIpGeolocation(props: { arguments: IpArgument }) {
   const { ipAddress } = props.arguments;
-  const { language, coordinatesFormat } = getPreferenceValues<Preferences>();
   const [searchContent, setSearchContent] = useState<string>(ipAddress ? ipAddress.trim() : "");
-  const { ipGeolocation, loading } = useIpGeolocation(language, searchContent, coordinatesFormat);
+  const { data, isLoading } = useIpGeolocation(searchContent);
+
+  const ipGeolocation = useMemo(() => {
+    return data || [];
+  }, [data]);
 
   const emptyViewTitle = () => {
-    if (loading) {
+    if (isLoading) {
       return "Loading...";
     }
     if (ipGeolocation.length === 0 && !isEmpty(searchContent)) {
@@ -29,12 +31,10 @@ export default function QueryIpGeolocation(props: { arguments: IpArgument }) {
 
   return (
     <List
-      isLoading={loading}
+      isLoading={isLoading}
       searchBarPlaceholder={"Query geolocation of IP or domain"}
       searchText={searchContent}
-      onSearchTextChange={(text) => {
-        setSearchContent(text.trim());
-      }}
+      onSearchTextChange={setSearchContent}
       throttle={true}
     >
       <IpEmptyView title={emptyViewTitle()} />
