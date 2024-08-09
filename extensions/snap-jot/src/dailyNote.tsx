@@ -9,10 +9,10 @@ import {
   Icon,
   confirmAlert,
 } from "@raycast/api";
-import fs from "fs";
+import fs from "node:fs";
 import { useState } from "react";
 import { formatDateTime, replaceDatePlaceholders } from "./utils/FormatDateTime";
-import path from "path";
+import path from "node:path";
 
 interface Preferences {
   directory: string;
@@ -25,7 +25,7 @@ interface Preferences {
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const { directory, format, prefix, timeFormat, template } = preferences;
-  const dateTimeFormat = timeFormat === "12" && !prefix.includes("A") ? prefix + "A " : prefix;
+  const dateTimeFormat = timeFormat === "12" && !prefix.includes("A") ? `${prefix}A ` : prefix;
   const timestamp = formatDateTime(new Date(), dateTimeFormat, timeFormat === "12");
   const filePath = path.join(directory, formatDateTime(new Date(), format));
   const memo = formatDateTime(new Date(), timestamp, timeFormat === "12");
@@ -89,7 +89,7 @@ export default function Command() {
         .split("\n")
         .filter((line) => !prefixPattern.test(line))
         .join("\n");
-      const appendUpdatedContent = removeBulletPoints + updatedContent + "\n";
+      const appendUpdatedContent = `${removeBulletPoints + updatedContent}\n`;
       updateFileContent(appendUpdatedContent);
       showToast(Toast.Style.Success, "Memo Deleted");
     }
@@ -116,7 +116,7 @@ export default function Command() {
       {filteredBulletPoints.length > 0
         ? filteredBulletPoints.map((point, index) => (
             <List.Item
-              key={index}
+              key={`${point}`} // Use a unique identifier for the key property
               title={point.replace(/^- /, "")}
               actions={
                 <ActionPanel>

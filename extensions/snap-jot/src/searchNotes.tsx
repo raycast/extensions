@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, getPreferenceValues, Detail, Icon, showToast, Toast } from "@raycast/api";
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import { useState } from "react";
 
 interface ShowNoteProps {
@@ -75,9 +75,9 @@ function ShowNote(props: ShowNoteProps) {
 
   return (
     <List searchBarPlaceholder="Search Memos" onSearchTextChange={setSearchText} throttle={true}>
-      {filteredBulletPoints.map((point, index) => (
+      {filteredBulletPoints.map((point) => (
         <List.Item
-          key={index}
+          key={point}
           title={point.replace("- ", "")}
           actions={
             <ActionPanel>

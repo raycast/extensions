@@ -1,4 +1,4 @@
-export function formatDateTime(date: Date, format: string, is12: boolean = false) {
+export function formatDateTime(date: Date, format: string, is12 = false) {
   const hours = date.getHours();
   const isAM = hours < 12 || hours === 24;
   const ampm = isAM ? "AM" : "PM";

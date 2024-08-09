@@ -79,9 +79,15 @@
       "mode": "view"
     },
     {
-      "name": "listFiles",
+      "name": "searchNotes",
       "title": "Search Notes",
       "description": "Search notes from specified folder.",
+      "mode": "view"
+    },
+    {
+      "name": "searchText",
+      "title": "Search Text",
+      "description": "Search for specific text within your SnapJot notes.",
       "mode": "view"
     }
   ],

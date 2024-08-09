@@ -4,14 +4,14 @@ import {
   Action,
   getPreferenceValues,
   openExtensionPreferences,
-  LaunchProps,
+  type LaunchProps,
   popToRoot,
   Toast,
   showToast,
 } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import { formatDateTime, replaceDatePlaceholders } from "./utils/FormatDateTime";
 
 interface Memo {
@@ -32,7 +32,7 @@ export default function Command(props: LaunchProps<{ draftValues: Memo }>) {
   const { draftValues } = props;
 
   // if prefix is not include "A" and timeFormat is 12, add "A" to prefix.
-  const timestamp = timeFormat === "12" && !prefix.includes("A") ? prefix + "A " : prefix;
+  const timestamp = timeFormat === "12" && !prefix.includes("A") ? `${prefix}A ` : prefix;
 
   function saveMemo(values: Memo) {
     try {
@@ -43,7 +43,7 @@ export default function Command(props: LaunchProps<{ draftValues: Memo }>) {
       if (!fs.existsSync(filePath)) {
         // if template is empyt, content is empty.
         const templateContent = !template ? "" : fs.readFileSync(template, "utf8");
-        memoContent = replaceDatePlaceholders(new Date(), templateContent) + "\n" + memo;
+        memoContent = `${replaceDatePlaceholders(new Date(), templateContent)}\n${memo}`;
       } else {
         // if file exists, check if it ends with a newline and add one if not
         const existingContent = fs.readFileSync(filePath, "utf8");
