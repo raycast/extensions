@@ -12,6 +12,12 @@
       "title": "Manage Launch Agents",
       "description": "Manage Launch Agents",
       "mode": "view"
+    },
+    {
+      "name": "create-launch-agent",
+      "title": "Create Launch Agent",
+      "description": "Create a new Launch Agent",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

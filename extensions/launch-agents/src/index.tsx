@@ -76,9 +76,9 @@ function LaunchAgentDetails({ selectedFile, refreshList }: { selectedFile: strin
   const isFileCurrentlyLoaded = (file: string) => {
     try {
       const result = execSync(`launchctl list | grep $(basename ${file} .plist)`, { stdio: "pipe" });
-      return result.toString().trim() !== ""; // If there's output, it's loaded
+      return result.toString().trim() !== "";
     } catch {
-      return false; // If the command fails, it's not loaded
+      return false;
     }
   };
 
