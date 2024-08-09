@@ -1,5 +1,9 @@
 # Whois Changelog
 
+## [Added IP2Location.io API] - {PR_MERGE_DATE}
+
+- Added IP2Location.io API as failover for WHOIS data
+
 ## [Refactoring] - 2024-07-26
 
 - Updated dependencies, removed axios
