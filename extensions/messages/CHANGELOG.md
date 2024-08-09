@@ -1,5 +1,9 @@
 # Messages Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Closing the Messages app if it wasn't open before to keep your dock clean.
+
 ## [Improvements] - 2024-07-16
 
 - **Messages Quicklinks:** Users can now create address quicklinks directly in the Messages app.
