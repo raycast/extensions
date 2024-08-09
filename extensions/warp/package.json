@@ -7,7 +7,8 @@
   "author": "joetannenbaum",
   "contributors": [
     "theRubberDuckiee",
-    "hakob_nersesian"
+    "hakob_nersesian",
+    "kamil_drzastwa"
   ],
   "pastContributors": [
     "danulqua"
@@ -52,19 +53,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.7",
+    "@raycast/api": "^1.79.0",
     "@raycast/utils": "^1.4.8",
     "node-spotlight": "^1.0.0",
     "yaml": "^2.2.1"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

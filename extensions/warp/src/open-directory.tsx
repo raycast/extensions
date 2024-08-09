@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, showToast, Toast, Keyboard } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import os from "node:os";
@@ -164,7 +164,7 @@ function SearchListItem(props: {
             <Action.OpenInBrowser
               title="Open in New Warp Window"
               url={newWindow(searchResult.path)}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
             <Action.CreateQuicklink
               title="Save as Quicklink: New Tab"
@@ -177,17 +177,12 @@ function SearchListItem(props: {
           </ActionPanel.Section>
           <ActionPanel.Section>
             {!isPinned ? (
-              <Action
-                title="Pin Directory"
-                icon={Icon.Pin}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-                onAction={onPin}
-              />
+              <Action title="Pin Directory" icon={Icon.Pin} shortcut={Keyboard.Shortcut.Common.Pin} onAction={onPin} />
             ) : (
               <Action
                 title="Unpin Directory"
                 icon={Icon.PinDisabled}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                shortcut={Keyboard.Shortcut.Common.Pin}
                 onAction={onPin}
               />
             )}
@@ -198,7 +193,7 @@ function SearchListItem(props: {
                   <Action
                     title="Move Up in Pinned"
                     icon={Icon.ArrowUp}
-                    shortcut={{ key: "arrowUp", modifiers: ["cmd", "opt"] }}
+                    shortcut={Keyboard.Shortcut.Common.MoveUp}
                     onAction={() => onRearrange(searchResult, "up")}
                   />
                 )}
@@ -207,7 +202,7 @@ function SearchListItem(props: {
                   <Action
                     title="Move Down in Pinned"
                     icon={Icon.ArrowDown}
-                    shortcut={{ key: "arrowDown", modifiers: ["cmd", "opt"] }}
+                    shortcut={Keyboard.Shortcut.Common.MoveDown}
                     onAction={() => onRearrange(searchResult, "down")}
                   />
                 )}
