@@ -1,6 +1,6 @@
 # Safari Changelog
 
-## [Improve] - {PR_MERGE_DATE}
+## [Improve] - 2024-08-09
 
 - Changed fuzzy search weights
 
