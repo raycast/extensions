@@ -60,7 +60,7 @@ export default function Command() {
         {wallets.map((wallet) => (
           <List.Item
             key={wallet._id}
-            icon={getIcon(wallet.icon)}
+            icon={{ source: getIcon(wallet.icon), fallback: Icon.Wallet }}
             title={wallet.name}
             subtitle={formatBalance(wallet.balance)}
             accessories={[
