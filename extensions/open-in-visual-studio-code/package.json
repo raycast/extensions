@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "shubzkothekar",
   "contributors": [
-    "thomas"
+    "thomas",
+    "ErikFisher"
   ],
   "categories": [
     "Developer Tools",
@@ -41,6 +42,10 @@
         {
           "title": "VSCodium",
           "value": "com.vscodium"
+        },
+        {
+          "title": "Cursor",
+          "value": "com.todesktop.230313mzl4w4u92"
         }
       ]
     }
