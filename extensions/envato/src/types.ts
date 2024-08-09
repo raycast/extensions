@@ -1,16 +1,16 @@
-export interface statementUser {
-  results?: any;
-}
+import {
+  IAccountDetailsResponse,
+  IBadgesResponse,
+  IPrivateAccountDetailsResponse,
+  ISearchItemsResponse,
+  IStatementResponse,
+  Sale,
+  SearchItem,
+} from "envato";
 
 export interface statementResults {
   item?: any;
   index?: number;
-}
-
-export interface envatoUser {
-  username?: string;
-  sales?: string;
-  image?: string;
 }
 
 export interface saleItem {
@@ -79,18 +79,14 @@ export interface previewsItemURL {
 
 export interface GetData {
   showdetail?: boolean;
-  account?: [];
-  user?: envatoUser;
-  portfolio?: Portfolio;
-  sales?: saleItem[];
-  badges?: [];
-  statement?: statementUser;
+  account?: IPrivateAccountDetailsResponse;
+  user?: IAccountDetailsResponse;
+  portfolio?: ISearchItemsResponse;
+  sales?: Sale[];
+  badges?: IBadgesResponse;
+  statement?: IStatementResponse;
   errors?: envatoErrors;
   isLoading: boolean;
-}
-
-export interface Portfolio {
-  matches: PortfolioItems[];
 }
 
 // export declare type PortfolioItems = Omit<saleItem, 'previews'> & {
@@ -100,12 +96,6 @@ export interface Portfolio {
 //         };
 //     };
 // };
-
-export interface PortfolioItems {
-  id: number;
-  name: string;
-  number_of_sales: string;
-}
 
 export interface envatoErrors {
   empty?: boolean;

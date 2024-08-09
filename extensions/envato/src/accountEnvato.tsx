@@ -3,7 +3,14 @@ import { AccountBadges } from "./badgesEnvato";
 import { SaleItemDetail } from "./saleItem";
 import dateFormat from "dateformat";
 import { useFetch } from "./utils";
-import { saleItem, envatoUser, GetData, PortfolioItems } from "./types";
+import { GetData, saleItem } from "./types";
+import {
+  IAccountDetailsResponse,
+  IBadgesResponse,
+  IPrivateAccountDetailsResponse,
+  SearchItem,
+  SimilarItem,
+} from "envato";
 
 /*-----------------------------------*/
 /*------ INDEX ACCOUNT
@@ -12,7 +19,7 @@ export default function accountEnvato() {
   const cache = new Cache();
   const cached = cache.get("state") ?? "";
   const stateFetch = useFetch();
-  const state = stateFetch.isLoading ? JSON.parse(cached) : stateFetch;
+  const state: GetData = stateFetch.isLoading ? JSON.parse(cached) : stateFetch;
 
   const outPortfolio = state.portfolio !== undefined ? state.portfolio.matches : [];
 
@@ -41,9 +48,9 @@ export function Account(props: { state: GetData }) {
   return (
     <List.Section title="Account">
       <AccountItem
-        infoUser={props.state.user ?? ([] as envatoUser)}
-        infoAccount={props.state.account ?? []}
-        portfolio={props.state.portfolio?.matches ?? ([] as PortfolioItems[])}
+        infoUser={props.state.user ?? {}}
+        infoAccount={props.state.account ?? {}}
+        portfolio={props.state.portfolio?.matches ?? []}
         badges={props.state.badges ?? []}
       />
     </List.Section>
@@ -54,10 +61,10 @@ export function Account(props: { state: GetData }) {
 /*------ ACCOUNT ITEM
 /*-----------------------------------*/
 export function AccountItem(props: {
-  infoUser: envatoUser;
-  infoAccount: any;
-  portfolio: PortfolioItems[];
-  badges: any;
+  infoUser: IAccountDetailsResponse | Record<string, never>;
+  infoAccount: IPrivateAccountDetailsResponse | Record<string, never>;
+  portfolio: SearchItem[];
+  badges: IBadgesResponse;
 }) {
   return (
     <List.Item
@@ -115,13 +122,13 @@ export function PortfolioItem(props: { item: saleItem; key: number }) {
 /*-----------------------------------*/
 /*------ PORTFOLIO
  /*-----------------------------------*/
-export function AccountPortfolio(props: { portfolio: PortfolioItems[]; badges: any }) {
+export function AccountPortfolio(props: { portfolio: SearchItem[]; badges: IBadgesResponse }) {
   return (
     <List isLoading={props.portfolio.length === 0}>
       <AccountBadges badges={props.badges} />
       <List.Section title="My Portfolio">
         {props.portfolio.map((item, index) => {
-          return <PortfolioItem item={item} key={index} />;
+          return <PortfolioItem item={item as unknown as saleItem} key={index} />;
         })}
       </List.Section>
     </List>
