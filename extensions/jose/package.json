@@ -1,0 +1,196 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jose",
+  "title": "Jose",
+  "description": "Private chat interaction",
+  "icon": "icon.png",
+  "author": "tkowalski29",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "assistant",
+      "title": "Assistant",
+      "subtitle": "Assistants collection",
+      "description": "Collection of your private assistants",
+      "mode": "view"
+    },
+    {
+      "name": "chat",
+      "title": "Chat",
+      "subtitle": "Chat view",
+      "description": "Chat view for starting conversation",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "ask",
+          "type": "text",
+          "placeholder": "Ask",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "conversation",
+      "title": "Conversations",
+      "subtitle": "Conversations collection",
+      "description": "Collection of your recent conversation",
+      "mode": "view"
+    },
+    {
+      "name": "llm",
+      "title": "Llm",
+      "subtitle": "Llms collection",
+      "description": "Collection of your private llms",
+      "mode": "view"
+    },
+    {
+      "name": "snippet",
+      "title": "Snippet",
+      "subtitle": "Snippets collection",
+      "description": "Collection of your private snippets",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "anthropicApiKey",
+      "title": "Anthropic API Key",
+      "description": "Enter your Anthropic API Key",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "cohereApiKey",
+      "title": "Cohere API Key",
+      "description": "Enter your Cohere API Key",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "groqApiKey",
+      "title": "Groq API Key",
+      "description": "Enter your Groq API Key",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "ollamaApiUrl",
+      "title": "Ollama API Url",
+      "description": "Enter your Ollama API Url",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "openaiApiKey",
+      "title": "OpenAI API Key",
+      "description": "Enter your OpenAI API Key",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "perplexityApiKey",
+      "title": "Perplexity API Key",
+      "description": "Enter your Perplexity API Key",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "langfuseSecretApiKey",
+      "title": "LangFuse Secret API Key",
+      "description": "Enter your LangFuse Secret API Key",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "lanfusePublicApiKey",
+      "title": "LangFuse Public API Key",
+      "description": "Enter your LangFuse Public API Key",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "langfuseApiUrl",
+      "title": "LangFuse API Url",
+      "description": "Enter your LangFuse API Url",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "lunaryApiKey",
+      "title": "Lunary API Key",
+      "description": "Enter your Lunary API Key",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "apiEndpoint",
+      "title": "API Endpoint",
+      "description": "API endpoint for communication",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "apiBinnary",
+      "title": "Patch to binnary script",
+      "description": "Binnary endpoint for communication",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "apiEndpointDataAssistant",
+      "title": "API Endpoint Data Assistant",
+      "description": "API endpoint for download assistants",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "apiEndpointDataLlm",
+      "title": "API Endpoint Data Llm",
+      "description": "API endpoint for download llms",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "apiEndpointDataSnippet",
+      "title": "API Endpoint Data Snippet",
+      "description": "API endpoint for download snippets",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.24.3",
+    "@raycast/api": "^1.48.8",
+    "@raycast/utils": "^1.5.2",
+    "@types/react": "^18.3.3",
+    "@types/uuid": "^9.0.0",
+    "cohere-ai": "^7.10.6",
+    "groq-sdk": "^0.5.0",
+    "langfuse": "^3.16.1",
+    "langsmith": "^0.1.36",
+    "lunary": "^0.6.16",
+    "node-fetch": "^2.7.0",
+    "ollama": "^0.5.2",
+    "openai": "^4.52.7",
+    "say": "^0.16.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "18.8.3",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "lint-fix": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
