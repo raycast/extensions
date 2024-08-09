@@ -4,8 +4,8 @@ import { markdownToRichText } from "@tryfabric/martian";
 import { subMinutes } from "date-fns";
 
 import type { ReadablePropertyType } from "..";
-import type { Standardized } from "../standardize";
 import { getLocalTimezone } from "../global";
+import type { Standardized } from "../standardize";
 
 export type PageProperty = Standardized<PageObjectResponse["properties"][string], "value">;
 

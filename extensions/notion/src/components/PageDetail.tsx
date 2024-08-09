@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 
 import { fetchPageContent, getPageName, notionColorToTintColor, PageProperty, Page, User } from "../utils/notion";
 import { handleOnOpenPage } from "../utils/openPage";
-import { Standardized, standardize } from "../utils/notion/standardize";
 
 import { AppendToPageForm } from "./forms";
 
@@ -124,14 +123,11 @@ export function PageDetail({ page, setRecentPage, users }: PageDetailProps) {
 
 function getMetadata(
   title: string,
-  property:
-    | PageProperty
-    | (Standardized<Extract<PageProperty, { type: "formula" }>["value"], "value"> & { id: string }),
+  property: PageProperty | (Extract<PageProperty, { type: "formula" }>["value"] & { id: string }),
   users?: User[],
 ): JSX.Element | null {
   if (property.value === null) return null;
   switch (property.type) {
-    case "boolean":
     case "checkbox":
       return (
         <Detail.Metadata.Label
@@ -157,11 +153,7 @@ function getMetadata(
         />
       );
     case "formula":
-      return getMetadata(
-        title,
-        { ...standardize(property.value, property.value.type, "value"), id: property.id },
-        users,
-      );
+      return getMetadata(title, { ...property.value, id: property.id }, users);
     case "multi_select":
       return property.value.length > 0 ? (
         <Detail.Metadata.TagList key={property.id} title={title}>

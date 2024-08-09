@@ -74,7 +74,7 @@ export async function fetchDatabaseProperties(databaseId: string) {
             color: "default",
           });
 
-        databaseProperties.push(standardize(property, property.type, "config"));
+        databaseProperties.push(standardize(property, "config"));
       }
     });
 

@@ -49,7 +49,7 @@ export function pageMapper(notionPage: NotionObject): Page {
   if (notionPage.object === "page" && "properties" in notionPage)
     for (const key in notionPage.properties) {
       const property = notionPage.properties[key];
-      page.properties[key] = standardize(property, property.type, "value");
+      page.properties[key] = standardize(property, "value");
       if (property.type === "title" && property.title[0]?.plain_text) {
         page.title = property.title[0].plain_text;
       }

@@ -23,7 +23,6 @@ import {
   User,
 } from "../utils/notion";
 import { handleOnOpenPage } from "../utils/openPage";
-import { Standardized, standardize } from "../utils/notion/standardize";
 import { DatabaseView } from "../utils/types";
 
 import { DatabaseList } from "./DatabaseList";
@@ -295,7 +294,7 @@ export function PageListItem({
 }
 
 function getPropertyAccessory(
-  property: PageProperty | Standardized<Extract<PageProperty, { type: "formula" }>["value"], "value">,
+  property: PageProperty | Extract<PageProperty, { type: "formula" }>["value"],
   title: string,
   users?: User[],
 ): List.Item.Accessory | List.Item.Accessory[] | undefined {
@@ -319,7 +318,7 @@ function getPropertyAccessory(
     case "url":
       return { text: property.value, tooltip: `${title}: ${property.value}` };
     case "formula":
-      return getPropertyAccessory(standardize(property.value, property.value.type, "value"), title);
+      return getPropertyAccessory(property.value, title);
     case "multi_select":
       return property.value.map((option) => {
         return {
