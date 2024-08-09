@@ -7,7 +7,7 @@ import { isReadableProperty } from "..";
 import { handleError, isNotNullOrUndefined, pageMapper } from "../global";
 import { getNotionClient } from "../oauth";
 import { formValueToPropertyValue } from "../page/property";
-import { standardize } from "../../standardize";
+import { standardize } from "../standardize";
 
 import { DatabaseProperty } from "./property";
 

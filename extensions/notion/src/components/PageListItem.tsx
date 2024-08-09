@@ -23,7 +23,7 @@ import {
   User,
 } from "../utils/notion";
 import { handleOnOpenPage } from "../utils/openPage";
-import { Standardized, standardize } from "../utils/standardize";
+import { Standardized, standardize } from "../utils/notion/standardize";
 import { DatabaseView } from "../utils/types";
 
 import { DatabaseList } from "./DatabaseList";

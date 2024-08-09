@@ -1,7 +1,7 @@
 import { isNotionClientError } from "@notionhq/client";
 import { showToast, Toast } from "@raycast/api";
 
-import { standardize } from "../standardize";
+import { standardize } from "./standardize";
 
 import { NotionObject, Page } from ".";
 

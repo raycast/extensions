@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 import { fetchPageContent, getPageName, notionColorToTintColor, PageProperty, Page, User } from "../utils/notion";
 import { handleOnOpenPage } from "../utils/openPage";
-import { Standardized, standardize } from "../utils/standardize";
+import { Standardized, standardize } from "../utils/notion/standardize";
 
 import { AppendToPageForm } from "./forms";
 
