@@ -1,6 +1,6 @@
 # Week Number Changelog
 
-## [New Menubar Icon] - {PR_MERGE_DATE}
+## [New Menubar Icon] - 2024-08-09
 
 - Add new menubar icon: Progress
 
