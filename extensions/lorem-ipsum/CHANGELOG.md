@@ -1,5 +1,9 @@
 # Lorem Ipsum Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Adds feature to paste to active app and then copy to clipboard.
+
 ## [Improvements] - 2024-07-12
 
 - Replaced HUDs with Toasts (after closing the window) for color coding prompts
