@@ -17,6 +17,7 @@ import { execSync } from "node:child_process";
 import { open } from "@raycast/api";
 import { getString, isObject } from "@salesforce/ts-types";
 import { AuthenticateNewOrgFormData, DeveloperOrg } from "../types";
+import { HOME_PATH } from "../constants";
 
 export async function getOrgList(): Promise<DeveloperOrg[]> {
   process.env["SF_DISABLE_LOG_FILE"] = "true";
@@ -61,14 +62,14 @@ export async function authorizeOrg(toAuth: AuthenticateNewOrgFormData) {
   return fields;
 }
 
-export async function openOrg(orgAlias: string) {
+export async function openOrg(orgAlias: string, openToURL: string = HOME_PATH) {
   process.env["SF_DISABLE_LOG_FILE"] = "true";
 
   const getFileContents = (
     authToken: string,
     instanceUrl: string,
     // we have to defalt this to get to Setup only on the POST version.  GET goes to Setup automatically
-    retUrl = "/lightning/setup/SetupOneHome/home",
+    retUrl = openToURL,
   ): string => `
   <html>
     <body onload="document.body.firstElementChild.submit()">
@@ -95,10 +96,7 @@ export async function openOrg(orgAlias: string) {
   const targetOrg = await Org.create({ aliasOrUsername: orgAlias });
   const conn = targetOrg.getConnection();
   // const env = new Env();
-  const [frontDoorUrl, retUrl] = await Promise.all([
-    buildFrontdoorUrl(targetOrg, conn),
-    "lightning/setup/FlexiPageList/home",
-  ]);
+  const [frontDoorUrl, retUrl] = await Promise.all([buildFrontdoorUrl(targetOrg, conn), openToURL]);
 
   const url = `${frontDoorUrl}${retUrl ? `&retURL=${retUrl}` : ""}`;
 

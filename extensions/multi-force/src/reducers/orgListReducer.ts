@@ -1,6 +1,7 @@
 import { MISC_ORGS_SECTION_LABEL } from "../constants";
 import { OrgListReducerAction, OrgListReducerType, DeveloperOrg } from "../types";
 import { deduplicateList, saveOrgs } from "../utils";
+import { sortOrgList } from "../utils/orgUtility";
 
 const groupOrgs = (orgs: DeveloperOrg[]): Map<string, DeveloperOrg[]> => {
   const orgMap = new Map<string, DeveloperOrg[]>();
@@ -58,5 +59,5 @@ export default function orgListReducer(
 ): Map<string, DeveloperOrg[]> {
   const updatedOrgList = handleAction(orgs, action);
   saveOrgs(updatedOrgList);
-  return groupOrgs(deduplicateList(updatedOrgList));
+  return groupOrgs(deduplicateList(sortOrgList(updatedOrgList)));
 }

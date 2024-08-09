@@ -1,45 +1,23 @@
 # MultiForce
 
-MultiForce is an extension for the Raycast search tool on Mac. MultiForce uses the Salesforce Core and CLI plugins npm packages to interface with the logic behind the `sf org` commands, allowing developers to authenticate, login into, and log out of their Salesforce orgs.
+MultiForce is a Raycast extension that lets you save all of your Salesforce environments and quickly log in. This is the ultimate tool for developers and Salesforce admins who work in multiple Salesforce environments, solving business problems with clicks, code, and curiosity. 
 
-## Viewing Your Orgs
+MultiForce makes it easy to log in to orgs through a simple interface for adding, organizing, and removing Salesforce environments that you use day to day. Once added, you can add labels, colored icons, and group similar accounts into sections to quickly find the org you want to open in your browser.
 
-![screenshot](./readme_images/Home-Page.png)
+## Synchronize Your Salesforce Development Environment
 
-Opening MultiForce shows you a list of all Salesforce orgs you have authenticated into. This list comes from the same source file as the `sf org list` CLI command, meaning that all Salesforce Orgs you use in VSCode are also available in MultiForce.
+Thanks to the Salesforce/Core library, MultiForce works on the same keystore as the SF CLI tool and the Salesforce VS Code Development Package! Adding an org in MultiForce automatically adds the org everywhere else! Did you authenticate a new org from VS Code? MultiForce will ask if you want to bring that org into your list!
 
 
 ## Actions
 
+Each org on the list comes with built in actions that you can take! 
+
 | Shortcut    | Action |
 | -------- | ------- |
-| Enter  | Open the selected org in your browser  |
+| Enter  | Open the selected org in your browser and navigate to your default path. |
 | ⌘ Enter  | Edit the selected org. |
-| ⌃ X | Delete the selected org from your list. (Note, this will also remove it as an org from the SF command and VSCode)     |
-| ⌘ N | Add a new Salesforce Org to your list |
-
-## How To Install
-
-### Download and Install Raycast
-
-To install MultiForce, you first need to have downloaded and setup [Raycast](https://www.raycast.com/), a spotlight search replacement tool. When you set Raycast up, it is recommended that you re-bind `⌘ + Space` in settings to use Raycast instead of the default spotlight search on Mac. [Instructions](https://manual.raycast.com/hotkey)
-
-### Install MultiForce
-
-> [!WARNING]
-> MultiForce is still under review on the Raycast app store. Until they approve it, please look at the instructions to install the Beta.
-
-To install the production version of MultiForce, open the Store in Raycast and search for MultiForce. Select Install.
-
-### Install MultiForce (Beta)
-
-To install the beta version of MultiForce, open a terminal and run the following commands.
-
-```bash
-git clone https://github.com/Decoder22/MultiForce.git
-cd MultiForce/
-npm install
-npm run dev
-```
-
-Now, you can open Raycast and search for `MultiForce` and it will be installed on your computer.
+| ⌘ H | Open the selected org in your browser and navigate to the Lightning Home.  |
+| ⌘ S | Open the selected org in your browser and navigate to the Salesforce Setup Home.  |
+| ⌘ N | Add a new Salesforce Org to your list. |
+| ⌃ X | Delete the selected org from your list. (Note, this will also remove it as an org from the SF command and VSCode).     |
