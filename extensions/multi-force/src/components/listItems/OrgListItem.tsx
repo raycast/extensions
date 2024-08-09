@@ -14,20 +14,22 @@ import { deleteOrg, openOrg } from "../../utils";
 import { useMultiForceContext, useLoadingContext } from "../providers/OrgListProvider";
 import { OrgListReducerType, DeveloperOrg } from "../../types";
 import { AuthenticateNewOrg, DeveloperOrgDetails } from "../pages";
+import { HOME_PATH, SETUP_PATH } from "../../constants";
 
 export function OrgListItem(props: { index: number; org: DeveloperOrg }) {
   const { index, org } = props;
   const { orgs, dispatch } = useMultiForceContext();
   const { setIsLoading } = useLoadingContext();
 
-  const handleOrgSelection = async (orgAlias: string) => {
+  const handleOrgSelection = async (orgAlias: string, url?: string) => {
     setIsLoading(true);
+    const targetOpen = url === SETUP_PATH ? " Setup" : url === HOME_PATH ? " Home" : "";
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: `Opening ${orgAlias}`,
+      title: `Opening ${org.label ? org.label : org.alias}${targetOpen}`,
     });
     try {
-      await openOrg(orgAlias);
+      await openOrg(orgAlias, url);
       setIsLoading(false);
       toast.hide();
       popToRoot();
@@ -72,13 +74,40 @@ export function OrgListItem(props: { index: number; org: DeveloperOrg }) {
       title={org.label ? `${org.label} (${org.alias})` : org.alias}
       actions={
         <ActionPanel>
-          <Action title="Open" onAction={() => handleOrgSelection(org.alias)} icon={{ source: Icon.AppWindow }} />
+          <Action
+            title={org.openToPath === SETUP_PATH ? "Open Setup" : org.openToPath === HOME_PATH ? "Open Home" : "Open"}
+            onAction={() => handleOrgSelection(org.alias, org.openToPath)}
+            icon={{ source: Icon.AppWindow }}
+            shortcut={
+              org.openToPath === SETUP_PATH
+                ? { modifiers: ["cmd"], key: "s" }
+                : org.openToPath === HOME_PATH
+                  ? { modifiers: ["cmd"], key: "h" }
+                  : undefined
+            }
+          />
           <Action.Push
             title="Edit"
             target={<DeveloperOrgDetails org={org} dispatch={dispatch} />}
             icon={{ source: Icon.Pencil }}
             shortcut={{ modifiers: ["cmd"], key: "return" }}
           />
+          {org.openToPath !== HOME_PATH ? (
+            <Action
+              title="Open Home"
+              onAction={() => handleOrgSelection(org.alias, HOME_PATH)}
+              icon={{ source: Icon.House }}
+              shortcut={{ modifiers: ["cmd"], key: "h" }}
+            />
+          ) : undefined}
+          {org.openToPath !== SETUP_PATH ? (
+            <Action
+              title="Open Setup"
+              onAction={() => handleOrgSelection(org.alias, SETUP_PATH)}
+              icon={{ source: Icon.WrenchScrewdriver }}
+              shortcut={{ modifiers: ["cmd"], key: "s" }}
+            />
+          ) : undefined}
           <Action.Push
             title="Add"
             target={<AuthenticateNewOrg orgs={orgs} dispatch={dispatch} />}

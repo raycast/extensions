@@ -22,6 +22,8 @@ export interface AuthenticateNewOrgFormData {
   color: Color.Raw;
   section: string;
   newSectionName?: string;
+  openToPath: string;
+  customPath?: string;
 }
 
 export interface LocalStore {
@@ -36,4 +38,5 @@ export interface DeveloperOrg {
   color?: Color.Raw;
   instanceUrl: string;
   section?: string;
+  openToPath?: string;
 }

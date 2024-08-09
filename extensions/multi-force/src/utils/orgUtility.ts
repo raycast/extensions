@@ -30,10 +30,8 @@ export function combineOrgList(existingOrgs: DeveloperOrg[], newOrgs: DeveloperO
   // Combine merged orgs and additional new orgs
   const combinedOrgs = [...mergedOrgs, ...additionalOrgs];
 
-  // Sort the combined list by alias
-  combinedOrgs.sort((a, b) => a.alias.localeCompare(b.alias));
-
-  return deduplicateList(combinedOrgs);
+  // Sort and deduplicate the combined list by alias
+  return deduplicateList(sortOrgList(combinedOrgs));
 }
 
 export function orgListsAreDifferent(orgs1: DeveloperOrg[], orgs2: DeveloperOrg[]): boolean {
@@ -50,4 +48,9 @@ export function orgListsAreDifferent(orgs1: DeveloperOrg[], orgs2: DeveloperOrg[
 
 export function removeOrgByAlias(orgs: DeveloperOrg[], aliasToRemove: string): DeveloperOrg[] {
   return orgs.filter((org) => org.alias !== aliasToRemove);
+}
+
+export function sortOrgList(orgs: DeveloperOrg[]): DeveloperOrg[] {
+  orgs.sort((a, b) => a.alias.localeCompare(b.alias));
+  return orgs;
 }
