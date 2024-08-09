@@ -12,20 +12,23 @@
   "commands": [
     {
       "name": "characters",
-      "title": "Characters",
-      "description": "Access Characters from \"Rick and Morty\"",
+      "title": "Search Characters",
+      "subtitle": "Rick and Morty",
+      "description": "Search Characters from \"Rick and Morty\"",
       "mode": "view"
     },
     {
       "name": "locations",
-      "title": "Locations",
-      "description": "Access Locations from \"Rick and Morty\"",
+      "title": "Search Locations",
+      "subtitle": "Rick and Morty",
+      "description": "Search Locations from \"Rick and Morty\"",
       "mode": "view"
     },
     {
       "name": "episodes",
-      "title": "Episodes",
-      "description": "Access Episodes from \"Rick and Morty\"",
+      "title": "Search Episodes",
+      "subtitle": "Rick and Morty",
+      "description": "Search Episodes from \"Rick and Morty\"",
       "mode": "view"
     }
   ],

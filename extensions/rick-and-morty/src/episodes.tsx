@@ -1,4 +1,4 @@
-import { Icon, List, Toast, showToast } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { Episode, getEpisodes } from "rickmortyapi";
 import "cross-fetch/polyfill";
@@ -21,12 +21,6 @@ export default function Episodes() {
     },
     [searchName],
     {
-      async onWillExecute() {
-        await showToast(Toast.Style.Animated, "Fetching Episodes");
-      },
-      async onData(data) {
-        await showToast(Toast.Style.Success, `Fetched ${data.length} Episodes`);
-      },
       keepPreviousData: true,
       initialData: [],
     },

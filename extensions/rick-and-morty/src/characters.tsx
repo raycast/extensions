@@ -1,4 +1,4 @@
-import { Color, Icon, List, Toast, showToast } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { Character, getCharacters } from "rickmortyapi";
 import "cross-fetch/polyfill";
@@ -21,12 +21,6 @@ export default function Characters() {
     },
     [searchName],
     {
-      async onWillExecute() {
-        await showToast(Toast.Style.Animated, "Fetching Characters");
-      },
-      async onData(data) {
-        await showToast(Toast.Style.Success, `Fetched ${data.length} Characters`);
-      },
       keepPreviousData: true,
       initialData: [],
     },

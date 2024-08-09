@@ -1,4 +1,4 @@
-import { Icon, List, Toast, showToast } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { Location, getLocations } from "rickmortyapi";
 import "cross-fetch/polyfill";
@@ -21,12 +21,6 @@ export default function Locations() {
     },
     [searchName],
     {
-      async onWillExecute() {
-        await showToast(Toast.Style.Animated, "Fetching Locations");
-      },
-      async onData(data) {
-        await showToast(Toast.Style.Success, `Fetched ${data.length} Locations`);
-      },
       keepPreviousData: true,
       initialData: [],
     },
