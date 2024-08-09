@@ -38,7 +38,15 @@ const Command = () => {
       }
     >
       {_.map(groupedBookmarks, (bookmarks, key) => {
-        const filteredBookmarks = search(bookmarks, ["title", "url", "description"], searchText) as GeneralBookmark[];
+        const filteredBookmarks = search(
+          bookmarks,
+          [
+            { name: "title", weight: 3 },
+            { name: "url", weight: 1 },
+            { name: "description", weight: 0.5 },
+          ],
+          searchText,
+        ) as GeneralBookmark[];
 
         return (
           <BookmarkListSection
