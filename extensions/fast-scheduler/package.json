@@ -1,0 +1,44 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fast-scheduler",
+  "title": "Fast Scheduler",
+  "description": "Schedule calendar events using plain english.",
+  "icon": "command-icon.png",
+  "license": "MIT",
+  "author": "sthupukari",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "schedule-event",
+      "title": "Schedule Event",
+      "description": "Enter a description of your event in plain english.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.1",
+    "@raycast/utils": "1.0.3",
+    "@xstate/react": "^4.0.2",
+    "node-fetch": "^3.3.0",
+    "rrule": "^2.8.1",
+    "xstate": "^5.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.75",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.2.4",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
