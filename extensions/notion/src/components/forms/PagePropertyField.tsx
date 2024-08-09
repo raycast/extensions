@@ -1,15 +1,7 @@
 import { Form, Icon, Image } from "@raycast/api";
 import type { useForm } from "@raycast/utils";
 
-import {
-  notionColorToTintColor,
-  getPageIcon,
-  Page,
-  DatabaseProperty,
-  User,
-  PropertyConfig,
-  getPropertyConfig,
-} from "../../utils/notion";
+import { notionColorToTintColor, getPageIcon, Page, DatabaseProperty, User, PropertyConfig } from "../../utils/notion";
 
 export function createConvertToFieldFunc(
   itemPropsFor: GetFieldPropsFunc,
@@ -29,17 +21,17 @@ export function createConvertToFieldFunc(
       case "status":
         return (
           <Form.Dropdown {...itemPropsFor<typeof property.type>(property)}>
-            {getPropertyConfig(property, [property.type])?.options.map(createMapOptionsFunc(Form.Dropdown.Item))}
+            {property.config.options.map(createMapOptionsFunc(Form.Dropdown.Item))}
           </Form.Dropdown>
         );
       case "multi_select":
       case "relation":
       case "people": {
-        let options: PropertyConfig<"multi_select">["options"] | Page[] | User[] | undefined;
-        if (property.type == "multi_select") options = getPropertyConfig(property, [property.type])?.options;
+        let options: ItemOption[] | Page[] | User[] | undefined;
+        if (property.type == "multi_select") options = property.config.options;
         else if (property.type == "people") options = users;
         else if (relationPages && property.type == "relation") {
-          const relationId = getPropertyConfig(property, [property.type])?.database_id;
+          const relationId = property.config.database_id;
           if (relationId) options = relationPages[relationId];
         }
         return (
@@ -62,8 +54,9 @@ export function createConvertToFieldFunc(
   };
 }
 
+type ItemOption = PropertyConfig<"select">["options"][number];
 function createMapOptionsFunc(Tag: typeof Form.Dropdown.Item | typeof Form.TagPicker.Item) {
-  return (option: PropertyConfig<"select">["options"][number] | Page | User) => {
+  return (option: ItemOption | Page | User) => {
     if (!option.id) return null;
     let title: string | null;
     let icon: Image.ImageLike | undefined;

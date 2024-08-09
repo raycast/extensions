@@ -2,7 +2,7 @@ import { Form, ActionPanel, Icon, showToast, useNavigation, Action, Toast } from
 import { useEffect, useState } from "react";
 
 import { useDatabaseProperties, useDatabases } from "../../hooks";
-import { notionColorToTintColor, DatabaseProperty, getPropertyConfig } from "../../utils/notion";
+import { notionColorToTintColor, DatabaseProperty, isType } from "../../utils/notion";
 import { DatabaseView } from "../../utils/types";
 
 export function DatabaseViewForm(props: {
@@ -108,7 +108,7 @@ export function DatabaseViewForm(props: {
       {databaseProperties && viewType === "kanban" ? (
         <KanbanViewFormItem
           databaseView={databaseView}
-          properties={databaseProperties.filter((dp) => dp.type === "select" || dp.type === "status")}
+          properties={databaseProperties.filter((dp): dp is StatusDatabaseProperty => isType(dp, "select", "status"))}
         />
       ) : null}
     </Form>
@@ -123,9 +123,12 @@ const statusTypes: { [key: string]: string } = {
   canceled: "Canceled",
 };
 
-function KanbanViewFormItem(props: { properties: DatabaseProperty[]; databaseView?: DatabaseView }) {
-  const { properties, databaseView } = props;
-
+type StatusDatabaseProperty = Extract<DatabaseProperty, { type: "select" | "status" }>;
+interface KanbanViewFormItemParams {
+  properties: StatusDatabaseProperty[];
+  databaseView?: DatabaseView;
+}
+function KanbanViewFormItem({ properties, databaseView }: KanbanViewFormItemParams) {
   const [statusPropertyId, setStatusPropertyId] = useState<string | undefined>(
     databaseView?.kanban?.property_id ? databaseView?.kanban?.property_id : properties[0]?.id,
   );
@@ -133,38 +136,35 @@ function KanbanViewFormItem(props: { properties: DatabaseProperty[]; databaseVie
   const statusProperty = properties.find((dp) => dp.id === statusPropertyId);
 
   function getStatusState(property: DatabaseProperty | undefined) {
-    if (!property) return;
-    const propertyConfig = getPropertyConfig(property, ["status"]);
-    if (propertyConfig) {
-      const statusOptions = propertyConfig.options.filter((o) => o.id !== "_select_null_");
-      const currentConfig = databaseView?.kanban;
+    if (!property || !isType(property, "status")) return;
+    const statusOptions = property.config.options.filter((o) => o.id !== "_select_null_");
+    const currentConfig = databaseView?.kanban;
 
-      const defaultBacklogOpts = currentConfig ? currentConfig.backlog_ids : ["_select_null_"];
-      const defaultCompletedOpts = currentConfig
-        ? currentConfig.completed_ids
-        : statusOptions[statusOptions.length - 1]?.id
-          ? [statusOptions[statusOptions.length - 1].id!]
-          : [];
-      const defaultNotStartedOpts = currentConfig
-        ? currentConfig.not_started_ids
-        : statusOptions[0] && !defaultCompletedOpts.includes(statusOptions[0].id!)
-          ? [statusOptions[0].id!]
-          : [];
-      const defaultStartedOpts = currentConfig
-        ? currentConfig.started_ids
-        : statusOptions
-            .filter((o) => !defaultNotStartedOpts.includes(o.id!) && !defaultCompletedOpts.includes(o.id!))
-            .map((o) => o.id!);
-      const defaultCanceledOpts = currentConfig ? currentConfig.canceled_ids : [];
+    const defaultBacklogOpts = currentConfig ? currentConfig.backlog_ids : ["_select_null_"];
+    const defaultCompletedOpts = currentConfig
+      ? currentConfig.completed_ids
+      : statusOptions[statusOptions.length - 1]?.id
+        ? [statusOptions[statusOptions.length - 1].id!]
+        : [];
+    const defaultNotStartedOpts = currentConfig
+      ? currentConfig.not_started_ids
+      : statusOptions[0] && !defaultCompletedOpts.includes(statusOptions[0].id!)
+        ? [statusOptions[0].id!]
+        : [];
+    const defaultStartedOpts = currentConfig
+      ? currentConfig.started_ids
+      : statusOptions
+          .filter((o) => !defaultNotStartedOpts.includes(o.id!) && !defaultCompletedOpts.includes(o.id!))
+          .map((o) => o.id!);
+    const defaultCanceledOpts = currentConfig ? currentConfig.canceled_ids : [];
 
-      return {
-        backlog: defaultBacklogOpts,
-        not_started: defaultNotStartedOpts,
-        started: defaultStartedOpts,
-        completed: defaultCompletedOpts,
-        canceled: defaultCanceledOpts,
-      };
-    }
+    return {
+      backlog: defaultBacklogOpts,
+      not_started: defaultNotStartedOpts,
+      started: defaultStartedOpts,
+      completed: defaultCompletedOpts,
+      canceled: defaultCanceledOpts,
+    };
   }
 
   const [statusState, setStatusState] = useState<{ [key: string]: string[] }>(
@@ -223,10 +223,9 @@ function StatusTagPicker(props: {
   title: string;
   value: string[];
   onChange: (newValue: string[]) => void;
-  statusProperty: DatabaseProperty;
+  statusProperty: StatusDatabaseProperty;
 }) {
   const { id, title, statusProperty, value, onChange } = props;
-  const propertyConfig = getPropertyConfig(statusProperty, ["status"]);
 
   return (
     <Form.TagPicker
@@ -236,7 +235,7 @@ function StatusTagPicker(props: {
       value={value}
       onChange={onChange}
     >
-      {propertyConfig?.options.map((o) => {
+      {statusProperty.config.options.map((o) => {
         if (!o.id) {
           return null;
         }

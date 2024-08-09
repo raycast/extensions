@@ -11,7 +11,7 @@ import { standardize } from "../standardize";
 
 import { DatabaseProperty } from "./property";
 
-export { getPropertyConfig, type PropertyConfig } from "./property";
+export type { PropertyConfig } from "./property";
 export type { DatabaseProperty };
 
 export async function fetchDatabase(pageId: string, silent: boolean = true) {

@@ -8,6 +8,3 @@ export type DatabaseProperty = Standardized<NotionDatabaseProperty, "config">;
 
 // TODO: Replace all uses of this type and function
 export type PropertyConfig<T extends ReadablePropertyType> = Extract<DatabaseProperty, { type: T }>["config"];
-export function getPropertyConfig<T extends ReadablePropertyType>(property: DatabaseProperty, types: T[]) {
-  for (const type of types) if (property.type == type) return property.config as PropertyConfig<T>;
-}

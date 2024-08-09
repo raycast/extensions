@@ -1,13 +1,6 @@
 import { List, Image } from "@raycast/api";
 
-import {
-  notionColorToTintColor,
-  getPropertyConfig,
-  Page,
-  DatabaseProperty,
-  PropertyConfig,
-  User,
-} from "../utils/notion";
+import { notionColorToTintColor, isType, Page, DatabaseProperty, PropertyConfig, User } from "../utils/notion";
 import type { DatabaseView } from "../utils/types";
 
 import { PageListItem } from "./PageListItem";
@@ -43,7 +36,7 @@ export function DatabaseView(props: DatabaseViewProps) {
   const propertyId = databaseView?.kanban?.property_id;
   const statusProperty = databaseProperties.find((dp) => dp.id === propertyId);
 
-  if (viewType === "list" || !propertyId || !statusProperty) {
+  if (viewType === "list" || !propertyId || !statusProperty || !isType(statusProperty, "status", "select")) {
     return (
       <>
         {databasePages?.map((p) => (
@@ -125,8 +118,8 @@ export function DatabaseView(props: DatabaseViewProps) {
   });
 
   const optionsMap: Record<string, PropertyConfig<"status">["options"][number]> = {};
-  const customOptions = getPropertyConfig(statusProperty, ["status"])
-    ?.options.filter((opt) => opt.id)
+  const customOptions = statusProperty.config.options
+    .filter((opt) => opt.id)
     .sort((dpa, dpb) => {
       const value_a = dpa.id ? actionEditIds.indexOf(dpa.id) : -1;
       const value_b = dpb.id ? actionEditIds.indexOf(dpb.id) : -1;

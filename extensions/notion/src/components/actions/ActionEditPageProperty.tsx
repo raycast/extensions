@@ -9,7 +9,6 @@ import {
   PageProperty,
   DatabaseProperty,
   PropertyConfig,
-  getPropertyConfig,
   ReadablePropertyType,
 } from "../../utils/notion";
 
@@ -257,7 +256,7 @@ export function ActionEditPageProperty({
 const propertyHelper = (databaseProperty: DatabaseProperty, pageProperty?: PageProperty) =>
   ({
     type: databaseProperty.type,
-    config: getPropertyConfig(databaseProperty, [databaseProperty.type]),
+    config: databaseProperty.config,
     value: pageProperty?.value,
   }) as {
     [PP in Extract<PageProperty, { type: ReadablePropertyType }> as PP["type"]]: {
