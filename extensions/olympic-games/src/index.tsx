@@ -4,7 +4,7 @@ import { getAccessories, getFlag } from "./utils";
 import { MedalResult } from "./types";
 
 export default function Command() {
-  const url = "https://api.olympics.kevle.xyz/medals";
+  const url = "https://paris-2024-gamma.vercel.app/medals";
 
   const { data, isLoading } = useFetch<{ results: MedalResult[] }>(url, {
     parseResponse: (response: Response) => {
