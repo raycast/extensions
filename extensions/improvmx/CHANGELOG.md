@@ -1,6 +1,13 @@
-# ImproVMX Changelog
+# ImprovMX Changelog
 
-## [View Domain Logs + `chore` + `fix`] = 2024-07-03
+## [Download or Filter Domain Log] - {PR_MERGE_DATE}
+
+### Enhancements
+
+- Filter Domain Log events by status
+- Download .eml
+
+## [View Domain Logs + `chore` + `fix`] - 2024-07-03
 
 ### Enhancements
 
