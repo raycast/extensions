@@ -28,13 +28,6 @@
       "title": "Thingiverse API Key",
       "description": "Get your API key from https://www.thingiverse.com/apps/create",
       "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    },
-    {
-      "name": "downloadDirectory",
-      "type": "directory",
-      "required": true,
-      "title": "Download Location",
-      "description": "Choose the directory where the files will be downloaded"
     }
   ],
   "dependencies": {
