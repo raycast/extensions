@@ -1,21 +1,14 @@
-import { Cache, Icon, List, getPreferenceValues } from "@raycast/api";
+import { Icon, List, getPreferenceValues } from "@raycast/api";
 import { generateActionPanel } from "./components/actionpanel";
 import { COLORS, FORMATTING } from "./constants";
 import { escapeChar } from "./utils";
-import { useState } from "react";
 
-const cache = new Cache({ capacity: 1 });
-// Use a 1-byte cache to store the prefix character,
-// idk where else to store it
-
-if (!cache.has("prefix")) {
-  cache.set("prefix", getPreferenceValues<Preferences>().prefix1);
-}
+import { useCachedState } from "@raycast/utils";
 
 export default function Command() {
   const prefs = getPreferenceValues<Preferences>();
 
-  const [prefix, setPrefix] = useState(cache.get("prefix") || prefs.prefix1);
+  const [prefix, setPrefix] = useCachedState<string>("prefix", prefs.prefix1);
   const prefixEscaped = escapeChar(prefix);
 
   return (
@@ -34,7 +27,6 @@ export default function Command() {
               subtitle={fullChatCode}
               keywords={keywords}
               actions={generateActionPanel({
-                cache,
                 setPrefix,
 
                 chatCode: fullChatCode,
@@ -58,7 +50,6 @@ export default function Command() {
               title={name}
               subtitle={fullChatCode}
               actions={generateActionPanel({
-                cache,
                 setPrefix,
 
                 chatCode: fullChatCode,

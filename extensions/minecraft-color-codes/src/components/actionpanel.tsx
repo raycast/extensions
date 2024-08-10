@@ -1,13 +1,11 @@
-import { Action, ActionPanel, Cache, getPreferenceValues, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, getPreferenceValues, showToast } from "@raycast/api";
 
 export function generateActionPanel({
-  cache,
   setPrefix,
   chatCode,
   chatCodeEscaped,
   hexCode,
 }: {
-  cache?: Cache;
   setPrefix?: (prefix: string) => void;
 
   chatCode: string;
@@ -20,9 +18,9 @@ export function generateActionPanel({
     <ActionPanel>
       <ActionPanel.Section>
         <Action
+          icon={Icon.Key}
           title="Use Primary Prefix"
           onAction={() => {
-            cache?.set("prefix", prefs.prefix1);
             setPrefix?.(prefs.prefix1);
 
             showToast({
@@ -35,9 +33,9 @@ export function generateActionPanel({
           }}
         />
         <Action
+          icon={Icon.Key}
           title="Use Secondary Prefix"
           onAction={() => {
-            cache?.set("prefix", prefs.prefix2);
             setPrefix?.(prefs.prefix2);
 
             showToast({
@@ -52,9 +50,32 @@ export function generateActionPanel({
       </ActionPanel.Section>
 
       <ActionPanel.Section>
-        <Action.CopyToClipboard content={chatCode} title="Copy Chat Code" />
-        <Action.CopyToClipboard content={chatCodeEscaped} title="Copy Escaped Chat Code" />
-        {hexCode && <Action.CopyToClipboard content={hexCode} title="Copy Hex Code" />}
+        <Action.CopyToClipboard
+          content={chatCode}
+          title="Copy Chat Code"
+          shortcut={{
+            modifiers: ["cmd"],
+            key: "c",
+          }}
+        />
+        <Action.CopyToClipboard
+          content={chatCodeEscaped}
+          title="Copy Escaped Chat Code"
+          shortcut={{
+            modifiers: ["cmd", "shift"],
+            key: "c",
+          }}
+        />
+        {hexCode && (
+          <Action.CopyToClipboard
+            content={hexCode}
+            title="Copy Hex Code"
+            shortcut={{
+              modifiers: ["cmd", "shift"],
+              key: "h",
+            }}
+          />
+        )}
       </ActionPanel.Section>
     </ActionPanel>
   );
