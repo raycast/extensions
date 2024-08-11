@@ -46,6 +46,12 @@ export type EmailAccountWithDiskInformation = EmailAccount & {
   humandiskused: string;
 };
 
+export type Database = {
+  database: string;
+  disk_usage: number;
+  users: string[];
+};
+
 export type ErrorResponse = {
   metadata: Record<string, never>;
   status: 0;

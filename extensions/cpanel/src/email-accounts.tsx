@@ -5,7 +5,7 @@ export default function EmailAccounts() {
   const { isLoading, data } = useListEmailAccounts();
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search email account">
       {data?.map((account) => (
         <List.Item
           key={account.email}

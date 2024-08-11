@@ -6,15 +6,26 @@ import {
   EmailAccountWithDiskInformation,
   SuccessResponse,
   ErrorResponse,
+  Database,
 } from "./types";
-import { useFetch } from "@raycast/utils";
+import { showFailureToast, useFetch } from "@raycast/utils";
 
-function useUAPI<T>(module: string, functionName: string, params?: { [key: string]: string | number }) {
+type useUAPIOptions = {
+  execute: boolean;
+  onError?: () => void;
+  onData?: () => void;
+};
+export function useUAPI<T>(
+  module: string,
+  functionName: string,
+  params?: { [key: string]: string | number },
+  options: useUAPIOptions = { execute: true },
+) {
   try {
     const API_URL = new URL(`execute/${module}/${functionName}`, CPANEL_URL);
     if (params) Object.entries(params).forEach(([key, val]) => API_URL.searchParams.append(key, val.toString()));
 
-    const { isLoading, data, error } = useFetch(API_URL.toString(), {
+    const { isLoading, data, error, revalidate } = useFetch(API_URL.toString(), {
       headers: {
         Authorization: `cpanel ${CPANEL_USERNAME}:${API_TOKEN}`,
       },
@@ -24,8 +35,16 @@ function useUAPI<T>(module: string, functionName: string, params?: { [key: strin
           data: result.data,
         };
       },
+      execute: options.execute,
+      async onError(error) {
+        await showFailureToast(error, { title: "cPanel Error" });
+        options.onError?.();
+      },
+      onData() {
+        options.onData?.();
+      },
     });
-    return { isLoading, data, error };
+    return { isLoading, data, error, revalidate };
   } catch (error) {
     return { isLoading: false, data: undefined, error };
   }
@@ -55,3 +74,7 @@ export const useListEmailAccountsWithDiskInfo = (email: string, domain: string) 
     maxaccounts: 1,
     novalidate: 1,
   });
+
+// DATABASES
+export const useListDatabases = (database_type: "Mysql" | "Postgresql") =>
+  useUAPI<Database[]>(database_type, "list_databases");
