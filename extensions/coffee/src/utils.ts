@@ -13,6 +13,13 @@ type Updates = {
   status: boolean;
 };
 
+export interface Schedule {
+  day: string;
+  from: string;
+  to: string;
+  IsManuallyDecafed: boolean;
+}
+
 export async function startCaffeinate(updates: Updates, hudMessage?: string, additionalArgs?: string) {
   if (hudMessage) {
     await showHUD(hudMessage);
@@ -58,3 +65,18 @@ function generateArgs(additionalArgs?: string) {
 
   return args.length > 0 ? `-${args.join("")}` : "";
 }
+
+export function calculateDurationInSeconds(startHour: number, startMinute: number, endHour: number, endMinute: number): number {
+  return (endHour - startHour) * 3600 + (endMinute - startMinute) * 60;
+}
+
+export function dayStringToNumber(day: string): number {
+  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  return daysOfWeek.indexOf(day);
+}
+
+export function numberToDayString(dayIndex: number): string {
+  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  return daysOfWeek[dayIndex];
+}
+

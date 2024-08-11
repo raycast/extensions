@@ -90,6 +90,12 @@
       ]
     },
     {
+      "name": "addSchedule",
+      "title": "Set Caffeination schedule",
+      "description": "Add/Update schedule",
+      "mode": "view"
+    },
+    {
       "name": "status",
       "title": "Caffeinate Status",
       "description": "Show the current caffeination status",
