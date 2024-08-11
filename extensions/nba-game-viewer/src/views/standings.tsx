@@ -6,8 +6,8 @@ import { Conference, League, Team } from "../types/standings.types";
 
 const Standings = () => {
   const { data, isLoading } = useStandings();
-  const { conferences: preference } = getPreferenceValues();
-  const [conference, setConference] = useState<string>(preference);
+  const { conferences: conferencePreference } = getPreferenceValues();
+  const [conference, setConference] = useState<string>(conferencePreference);
 
   const preferenceMapping = {
     Eastern: data?.easternStandings,
@@ -29,7 +29,7 @@ const Standings = () => {
         >
           <List.Dropdown.Item value={Conference.Eastern} title="Eastern" />
           <List.Dropdown.Item value={Conference.Western} title="Western" />
-          <List.Dropdown.Item value={League} title="League" />
+          <List.Dropdown.Item value={League} title="Whole League" />
         </List.Dropdown>
       }
     >

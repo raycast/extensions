@@ -3,12 +3,14 @@ import { useCallback } from "react";
 import { Day, Game, Competitor } from "../types/schedule.types";
 import convertDate from "../utils/convertDate";
 import { useCachedPromise } from "@raycast/utils";
+import { getPreferenceValues } from "@raycast/api";
 
 const useSchedule = () => {
   const fetchGames = useCallback(async () => {
     const currentDate = new Date();
 
     const data = await getSchedule({
+      league: getPreferenceValues().league,
       year: currentDate.getUTCFullYear(),
       month: currentDate.getUTCMonth() + 1,
       day: currentDate.getUTCDate(),

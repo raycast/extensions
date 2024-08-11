@@ -1,4 +1,3 @@
-import { log } from "console";
 import type { Game } from "../types/schedule.types";
 import { Icon, Color } from "@raycast/api";
 

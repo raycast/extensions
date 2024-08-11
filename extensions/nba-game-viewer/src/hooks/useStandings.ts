@@ -2,6 +2,9 @@ import getStandings from "../utils/getStandings";
 import { useCallback } from "react";
 import { Conference, ConferenceStanding, Team } from "../types/standings.types";
 import { useCachedPromise } from "@raycast/utils";
+import { getPreferenceValues } from "@raycast/api";
+
+const league = getPreferenceValues().league;
 
 const getConferenceStandings = (conferenceStanding: ConferenceStanding): Team[] =>
   conferenceStanding.standings.entries
@@ -25,6 +28,7 @@ const useStandings = () => {
     const seasonOpeningMonth = 10;
     const data = await getStandings({
       year: (date.getUTCMonth() >= seasonOpeningMonth ? date.getUTCFullYear() + 1 : date.getUTCFullYear()).toString(),
+      league: league,
       group: "conference",
     });
 

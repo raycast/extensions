@@ -2,10 +2,11 @@ import getRoster from "../utils/getRoster";
 import { useCallback } from "react";
 import type { Player, Injury } from "../types/roster.types";
 import { useCachedPromise } from "@raycast/utils";
+import { getPreferenceValues } from "@raycast/api";
 
 const useRoster = ({ id: id }: { id: number }) => {
   const fetchRoster = useCallback(async (id: number) => {
-    const data = await getRoster({ id: id });
+    const data = await getRoster({ league: getPreferenceValues().league, id: id });
 
     const athletes: Player[] = data.map(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

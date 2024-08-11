@@ -1,7 +1,11 @@
 import axios from "axios";
 
-const getNews = async () => {
-  const baseUrl = "http://site.api.espn.com/apis/site/v2/sports/basketball/nba/news";
+type GetNewsArgs = {
+  league: string;
+};
+
+const getNews = async ({ league }: GetNewsArgs) => {
+  const baseUrl = `http://site.api.espn.com/apis/site/v2/sports/basketball/${league}/news`;
 
   const res = await axios.get(baseUrl);
 

@@ -1,11 +1,12 @@
 import axios from "axios";
 
 type GetRosterArgs = {
+  league: string;
   id: number;
 };
 
-const getRoster = async ({ id: id }: GetRosterArgs) => {
-  const baseUrl = `http://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/${id}`;
+const getRoster = async ({ league, id: id }: GetRosterArgs) => {
+  const baseUrl = `http://site.api.espn.com/apis/site/v2/sports/basketball/${league}/teams/${id}`;
   const params = {
     enable: "roster",
   };

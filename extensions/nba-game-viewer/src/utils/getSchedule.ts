@@ -1,13 +1,14 @@
 import axios from "axios";
 
 type GetScheduleArgs = {
+  league: string;
   year: number;
   month: number;
   day: number;
 };
 
-const getSchedule = async ({ year, month, day }: GetScheduleArgs) => {
-  const baseUrl = `http://cdn.espn.com/core/nba/schedule?dates=${year}${month <= 9 ? "0" + month : month}${
+const getSchedule = async ({ league, year, month, day }: GetScheduleArgs) => {
+  const baseUrl = `http://cdn.espn.com/core/${league}/schedule?dates=${year}${month <= 9 ? "0" + month : month}${
     day <= 9 ? "0" + day : day
   }`;
   const params = {

@@ -2,10 +2,11 @@ import getNews from "../utils/getNews";
 import { useCallback } from "react";
 import type { Article, Category } from "../types/news.types";
 import { useCachedPromise } from "@raycast/utils";
+import { getPreferenceValues } from "@raycast/api";
 
 const useNews = () => {
   const fetchNews = useCallback(async () => {
-    const data = await getNews();
+    const data = await getNews({ league: getPreferenceValues().league });
 
     const articles: Article[] = data.map(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
