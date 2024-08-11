@@ -1,5 +1,7 @@
 # Contentful Changelog
 
+## [New `Search Users` command] - {PR_MERGE_DATE}
+
 ## [New `Search Assets` command] - 2024-07-26
 
 - Search your assets library (pagination included 🚀)
