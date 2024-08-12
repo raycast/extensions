@@ -172,6 +172,13 @@
           "description": "Will be used to open the cloned repository."
         },
         {
+          "name": "baseClonePath",
+          "type": "directory",
+          "required": false,
+          "title": "Clone Path",
+          "description": "Path in which the repositories will be cloned. If not specified here, you will need to select directory within a form."
+        },
+        {
           "name": "includeForks",
           "type": "checkbox",
           "required": false,
