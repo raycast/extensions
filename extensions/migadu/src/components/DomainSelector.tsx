@@ -29,10 +29,10 @@ export default function DomainSelector({ onDomainSelected }: Props) {
     >
       <Form.Dropdown title="Domain" {...itemProps.domain}>
         {DOMAINS.replaceAll(" ", "")
-            .split(",")
-            .map((domain) => (
-              <Form.Dropdown.Item value={domain} title={domain} icon={getFavicon(`https://${domain}`)} key={domain} />
-            ))}
+          .split(",")
+          .map((domain) => (
+            <Form.Dropdown.Item value={domain} title={domain} icon={getFavicon(`https://${domain}`)} key={domain} />
+          ))}
       </Form.Dropdown>
     </Form>
   );

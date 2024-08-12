@@ -28,7 +28,7 @@ const headers = {
   "Content-Type": "application/json",
 };
 
-const callApi = async<T> (endpoint: string, method: APIMethod, body?: BodyRequest) => {
+const callApi = async <T>(endpoint: string, method: APIMethod, body?: BodyRequest) => {
   await showToast(Toast.Style.Animated, "Processing...");
   try {
     const apiResponse = await fetch(API_URL + endpoint, {
@@ -47,7 +47,7 @@ const callApi = async<T> (endpoint: string, method: APIMethod, body?: BodyReques
         const response = (await apiResponse.json()) as ErrorResponse;
         err.error = response.error;
       }
-      await showFailureToast(err.error, { title: `${status} Error` })
+      await showFailureToast(err.error, { title: `${status} Error` });
       return err;
     }
 
@@ -63,24 +63,24 @@ const callApi = async<T> (endpoint: string, method: APIMethod, body?: BodyReques
 
 // Mailboxes
 export async function getMailboxes(domain: string) {
-  return (await callApi<{ mailboxes: Mailbox[] }>(`domains/${domain}/mailboxes`, "GET"));
+  return await callApi<{ mailboxes: Mailbox[] }>(`domains/${domain}/mailboxes`, "GET");
 }
 export async function createMailbox(domain: string, newMailbox: MailboxCreate) {
-  return (await callApi<Mailbox>(`domains/${domain}/mailboxes`, "POST", newMailbox));
+  return await callApi<Mailbox>(`domains/${domain}/mailboxes`, "POST", newMailbox);
 }
 export async function editMailbox(domain: string, mailboxLocalPart: string, modifiedMailbox: MailboxEdit) {
-  return (await callApi<Mailbox>(`domains/${domain}/mailboxes/${mailboxLocalPart}`, "PUT", modifiedMailbox));
+  return await callApi<Mailbox>(`domains/${domain}/mailboxes/${mailboxLocalPart}`, "PUT", modifiedMailbox);
 }
 export async function deleteMailbox(domain: string, mailboxLocalPart: string) {
-  return (await callApi<Mailbox>(`domains/${domain}/mailboxes/${mailboxLocalPart}`, "DELETE"));
+  return await callApi<Mailbox>(`domains/${domain}/mailboxes/${mailboxLocalPart}`, "DELETE");
 }
 
 // Identities
 export async function getMailboxIdentities(domain: string, mailboxLocalPart: string) {
-  return (await callApi<{ identities: Identity[] }>(`domains/${domain}/mailboxes/${mailboxLocalPart}/identities`, "GET"));
+  return await callApi<{ identities: Identity[] }>(`domains/${domain}/mailboxes/${mailboxLocalPart}/identities`, "GET");
 }
 export async function createMailboxIdentity(domain: string, mailboxLocalPart: string, newIdentity: IdentityCreate) {
-  return (await callApi<Identity>(`domains/${domain}/mailboxes/${mailboxLocalPart}/identities`, "POST", newIdentity));
+  return await callApi<Identity>(`domains/${domain}/mailboxes/${mailboxLocalPart}/identities`, "POST", newIdentity);
 }
 export async function editMailboxIdentity(
   domain: string,
@@ -88,43 +88,43 @@ export async function editMailboxIdentity(
   identityLocalPart: string,
   modifiedIdentity: IdentityEdit
 ) {
-  return (await callApi<Identity>(
+  return await callApi<Identity>(
     `domains/${domain}/mailboxes/${mailboxLocalPart}/identities/${identityLocalPart}`,
     "PUT",
     modifiedIdentity
-  ));
+  );
 }
 export async function deleteMailboxIdentity(domain: string, mailboxLocalPart: string, identityLocalPart: string) {
-  return (await callApi<Identity>(
+  return await callApi<Identity>(
     `domains/${domain}/mailboxes/${mailboxLocalPart}/identities/${identityLocalPart}`,
     "DELETE"
-  ));
+  );
 }
 
 // ALIASES
 export async function getDomainAliases(domain: string) {
-  return (await callApi<{ address_aliases: Alias[] }>(`domains/${domain}/aliases`, "GET"));
+  return await callApi<{ address_aliases: Alias[] }>(`domains/${domain}/aliases`, "GET");
 }
 export async function createDomainAlias(domain: string, newAlias: AliasCreate) {
-  return (await callApi<Alias>(`domains/${domain}/aliases`, "POST", newAlias));
+  return await callApi<Alias>(`domains/${domain}/aliases`, "POST", newAlias);
 }
 export async function editDomainAlias(domain: string, aliasLocalPart: string, modifiedAlias: AliasEdit) {
-  return (await callApi<Alias>(`domains/${domain}/aliases/${aliasLocalPart}`, "PUT", modifiedAlias));
+  return await callApi<Alias>(`domains/${domain}/aliases/${aliasLocalPart}`, "PUT", modifiedAlias);
 }
 export async function deleteDomainAlias(domain: string, aliasLocalPart: string) {
-  return (await callApi<Alias>(`domains/${domain}/aliases/${aliasLocalPart}`, "DELETE"));
+  return await callApi<Alias>(`domains/${domain}/aliases/${aliasLocalPart}`, "DELETE");
 }
 
 // REWRITES
 export async function getDomainRewrites(domain: string) {
-  return (await callApi<{ rewrites: Rewrite[] }>(`domains/${domain}/rewrites`, "GET"));
+  return await callApi<{ rewrites: Rewrite[] }>(`domains/${domain}/rewrites`, "GET");
 }
 export async function createDomainRewrite(domain: string, newRewrite: RewriteCreate) {
-  return (await callApi<Rewrite>(`domains/${domain}/rewrites`, "POST", newRewrite));
+  return await callApi<Rewrite>(`domains/${domain}/rewrites`, "POST", newRewrite);
 }
 export async function editDomainRewrite(domain: string, rewriteName: string, modifiedRewrite: RewriteEdit) {
-  return (await callApi<Rewrite>(`domains/${domain}/rewrites/${rewriteName}`, "PUT", modifiedRewrite));
+  return await callApi<Rewrite>(`domains/${domain}/rewrites/${rewriteName}`, "PUT", modifiedRewrite);
 }
 export async function deleteDomainRewrite(domain: string, rewriteName: string) {
-  return (await callApi<Rewrite>(`domains/${domain}/rewrites/${rewriteName}`, "DELETE"));
+  return await callApi<Rewrite>(`domains/${domain}/rewrites/${rewriteName}`, "DELETE");
 }
