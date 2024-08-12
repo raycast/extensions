@@ -1,10 +1,12 @@
 import { LocalStorage } from "@raycast/api";
 import { DeveloperOrg } from "../types";
 import { STORAGE_KEY } from "../constants";
+import { sortOrgList } from "./orgUtility";
 
 export async function loadOrgs(): Promise<DeveloperOrg[]> {
   const storage = await LocalStorage.getItem<string>(STORAGE_KEY);
-  return storage ? (JSON.parse(storage) as DeveloperOrg[]).sort((a, b) => a.alias.localeCompare(b.alias)) : [];
+  const array = storage ? sortOrgList(JSON.parse(storage) as DeveloperOrg[]) : [];
+  return array;
 }
 
 export async function saveOrgs(orgs: DeveloperOrg[]) {
