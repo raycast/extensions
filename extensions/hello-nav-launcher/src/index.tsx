@@ -1,13 +1,14 @@
 import { useState } from "react";
 import data from "@hello-nav/model";
 import { ActionPanel, Action, List } from "@raycast/api";
+import { AppItem } from "./types";
 
 const appList = data.reduce<AppItem[]>((res, item) => [...res, ...item.children], []);
 type LinkKey = "homepage" | "repository";
 type LinkType = { value: LinkKey; name: string };
 const types: LinkType[] = [
-  { value: "homepage", name: "Open Homepage" },
-  { value: "repository", name: "Open GitHub" },
+  { value: "homepage", name: "Homepage" },
+  { value: "repository", name: "GitHub" },
 ];
 
 function Dropdown(props: { types: LinkType[]; onTypeChange: (value: LinkKey) => void }) {

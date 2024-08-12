@@ -1,5 +1,5 @@
-# Changelog
+# Hello Nav Changelog
 
-## [Initial release] - 2024-08-12
+## [Initial Version] - 2024-08-12
 
 Publish Hello Nav

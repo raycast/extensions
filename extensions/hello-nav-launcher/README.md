@@ -1,3 +1,3 @@
-# Hello Nav Launcher
+# Hello Nav
 
-Hello Nav Launcher on Raycast
+Hello Nav Launcher
