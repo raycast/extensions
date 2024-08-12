@@ -70,13 +70,20 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
   const MODEL_OPTIONS = use.models.option;
 
   const { isLoading, data } = useFetch<CSVPrompt[]>(
-    "https://raw.githubusercontent.com/f/awesome-chatgpt-prompts/main/prompts.csv",
+    "https://raw.githubusercontent.com/awesome-chatgpt-prompts/awesome-chatgpt-prompts-github/awesome-chatgpt-prompts/prompts.csv",
     {
       parseResponse: async (response) => {
-        const text = await response.text();
-        return parse(text, {
-          columns: true,
-        });
+        try {
+          const text = await response.text();
+          return parse(text, {
+            columns: true,
+            skipEmptyLines: true,
+            skipRecordsWithError: true,
+            skipRecordsWithEmptyValues: true,
+          });
+        } catch (error) {
+          return [];
+        }
       },
       keepPreviousData: true,
     }
