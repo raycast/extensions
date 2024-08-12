@@ -1,6 +1,6 @@
 # YouTube Downloader Changelog
 
-## [Update package dependency] - {PR_MERGE_DATE}
+## [Update package dependency] - 2024-08-12
 
 - Update the `@dustube/ytdl-core` dependency to resolve the video download failure issue.
 
