@@ -1,6 +1,6 @@
 # IP Geolocation Changelog
 
-## [Fix Auto Close Window] - {PR_MERGE_DATE}
+## [Fix Auto Close Window] - 2024-08-12
 
 - Fix the problem that the Raycast window is automatically closed when the Copy IP command is refreshed in the background.
 - Refactor the code to simplify the logic and improve the performance
