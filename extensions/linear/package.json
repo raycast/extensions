@@ -249,7 +249,7 @@
     }
   ],
   "dependencies": {
-    "@linear/sdk": "^24.0.0",
+    "@linear/sdk": "^26.0.0",
     "@raycast/api": "^1.72.1",
     "@raycast/utils": "^1.16.0",
     "date-fns": "^3.6.0",
@@ -262,7 +262,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/lodash": "^4.14.202",
-    "@types/node": "^20.10.6",
+    "@types/node": "^22.1.0",
     "@types/react": "^18.2.46",
     "@types/remove-markdown": "^0.3.4",
     "eslint": "^8.56.0",

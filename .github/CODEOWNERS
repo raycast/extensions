@@ -19,6 +19,7 @@
 /extensions/ado-search                                              @willemvanlent
 /extensions/adonisjs-documentation                                  @craigharman
 /extensions/advice-slip                                             @pernielsentikaer @andreaselia
+/extensions/aegis                                                   @bfayers @gdsmith @pernielsentikaer @LitoMore @guga4ka
 /extensions/aerospace                                               @limonkufu
 /extensions/ai-gen                                                  @josephschmitt @snilan
 /extensions/ai-git-assistant                                        @Popalay
@@ -87,6 +88,7 @@
 /extensions/avatar                                                  @koinzhang @madza91
 /extensions/axios-docs                                              @denizyoldas
 /extensions/background-sounds                                       @sebdanielsson
+/extensions/backstage                                               @yukukotani
 /extensions/badges                                                  @LitoMore
 /extensions/baidu-ocr                                               @Chivier
 /extensions/balatro-compendium                                      @Azyzraissi
@@ -742,6 +744,7 @@
 /extensions/leafcast                                                @syropian
 /extensions/leetcode                                                @justin0u0
 /extensions/lega-serie-a                                            @anhthang
+/extensions/lego-bricks                                             @mSarheed
 /extensions/leitnerbox                                              @GZyannick
 /extensions/lemmy                                                   @httpjamesm
 /extensions/lenscast                                                @peduarte
@@ -859,7 +862,7 @@
 /extensions/moji                                                    @Kasper4649
 /extensions/momentum                                                @LeOndaz
 /extensions/monday                                                  @freak4pc
-/extensions/moneylover                                              @lacherogwu
+/extensions/moneylover                                              @lacherogwu @xmok
 /extensions/monitor-mate                                            @MuhaddiMu
 /extensions/monobank                                                @danulqua
 /extensions/monorepo-manager                                        @tung-dang
@@ -870,7 +873,7 @@
 /extensions/mound-for-pile                                          @cr34t1ve
 /extensions/mousehunt-helper                                        @chesterhow
 /extensions/mozeidon                                                @egovelox
-/extensions/mozilla-firefox                                         @crisboarna @grandkrav
+/extensions/mozilla-firefox                                         @crisboarna @grandkrav @Laptop765
 /extensions/mozilla-vpn                                             @nwhistler
 /extensions/mui-documentation                                       @kgrhartlage
 /extensions/mullvad                                                 @0x46616c6b @SebKranz
@@ -954,6 +957,7 @@
 /extensions/ohmyzsh-plugins                                         @k8scat
 /extensions/ok-json                                                 @francisfeng
 /extensions/oktasearch                                              @zachmian
+/extensions/olympic-games                                           @elonwoo @pernielsentikaer
 /extensions/omg-lol                                                 @danpalmer @rknightuk
 /extensions/omni-news                                               @danielkastberg
 /extensions/omnivore                                                @KarolusD
@@ -1042,6 +1046,7 @@
 /extensions/pick-random                                             @MatteoGauthier @hongqn
 /extensions/pick-your-wallpaper                                     @hugomarfani
 /extensions/pie-for-pihole                                          @GLaDO8
+/extensions/pieces-raycast                                          @caleb-at-pieces
 /extensions/pika                                                    @rishimohan
 /extensions/pinata                                                  @stevedylandev
 /extensions/pinboard                                                @fe9lix
@@ -1152,6 +1157,7 @@
 /extensions/raycast-link-lock                                       @EvanZhouDev @pernielsentikaer
 /extensions/raycast-monkeytype-theme                                @ridemountainpig
 /extensions/raycast-motion-preview                                  @ayarse
+/extensions/raycast-notification                                    @maxnyby
 /extensions/raycast-nrm                                             @lihaizhong
 /extensions/raycast-ollama                                          @MassimilianoPasquini97
 /extensions/raycast-svg64                                           @EvanZhouDev
@@ -1197,7 +1203,7 @@
 /extensions/remove-background-powered-by-mac                        @remorses
 /extensions/remove-paywall                                          @tegola @whitespacecode @DannySeidel @artivilla
 /extensions/renaming                                                @theodaguier @pernielsentikaer
-/extensions/render                                                  @Destiner
+/extensions/render                                                  @Destiner @xmok
 /extensions/replicate                                               @KevinBatdorf @bfirsh @cbh123
 /extensions/repo-launcher                                           @gksander
 /extensions/repology-search                                         @sebdanielsson
@@ -1211,6 +1217,7 @@
 /extensions/reverso-context                                         @MrModest
 /extensions/rewardful                                               @AlexIsMaking
 /extensions/ricescore                                               @tonka3000
+/extensions/rick-and-morty                                          @xmok
 /extensions/risk-reward-calculator                                  @demirtarik
 /extensions/roam-research                                           @dive2Pro @dive2Pro @baibhavbista
 /extensions/roblox-games                                            @TayIorRobinson

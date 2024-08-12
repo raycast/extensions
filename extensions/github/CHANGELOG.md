@@ -7,6 +7,10 @@
 - The categories not being displayed will not invoke extra API calls, reducing throttling.
 - ⚠️My PRs Menu Bar: Removed `includeCount` options to keep things simple (and in-sync) by just displaying the count of PRs in the categories selected.
 
+## [Improvements] - 2024-08-12
+
+- Updated IDE icons.
+
 ## [Enhanced Repository Cloning Functionality] - 2024-08-01
 
 - Users can now select both a custom directory and a specific branch for cloned repositories.

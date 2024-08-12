@@ -1,0 +1,1 @@
+exports.icondir = "icons";

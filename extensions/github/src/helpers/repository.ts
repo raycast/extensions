@@ -1,40 +1,47 @@
 export const WEB_IDES = [
   {
-    title: "GitHub Dev",
+    title: "github.dev",
     baseUrl: "https://github.dev/",
+    icon: { source: "github-dev.svg", tintColor: Color.PrimaryText },
   },
   {
-    title: "VSCode Dev",
+    title: "VS Code for the Web",
     baseUrl: "https://vscode.dev/github/",
+    icon: { source: "vscode.svg", tintColor: Color.PrimaryText },
   },
   {
     title: "CodeSandbox",
     baseUrl: `https://codesandbox.io/s/github/`,
+    icon: { source: "codesandbox.svg", tintColor: Color.PrimaryText },
   },
   {
-    title: "Repl.it",
+    title: "Replit",
     baseUrl: `https://repl.it/github/`,
+    icon: { source: "replit.svg", tintColor: Color.PrimaryText },
   },
   {
     title: "Gitpod",
     baseUrl: `https://gitpod.io/#https://github.com/`,
+    icon: { source: "gitpod.svg", tintColor: Color.PrimaryText },
   },
   {
     title: "Glitch",
     baseUrl: "https://glitch.com/edit/#!/import/github/",
+    icon: { source: "glitch.svg", tintColor: Color.PrimaryText },
   },
   {
     title: "Sourcegraph",
     baseUrl: `https://sourcegraph.com/github.com/`,
+    icon: { source: "sourcegraph.svg", tintColor: Color.PrimaryText },
   },
   {
-    title: "VSCode Remote Repositories",
+    title: "VS Code Remote Repositories",
     baseUrl: "vscode://GitHub.remotehub/open?url=https://github.com/",
-    icon: "vscode.svg",
+    icon: { source: "vscode.svg", tintColor: Color.PrimaryText },
   },
 ];
 
-import { LocalStorage } from "@raycast/api";
+import { Color, LocalStorage } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useEffect } from "react";
 

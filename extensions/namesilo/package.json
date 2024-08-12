@@ -16,6 +16,21 @@
       "required": true,
       "description": "API Key from NameSilo Dashboard",
       "type": "password"
+    },
+    {
+      "name": "ote_api_key",
+      "title": "OTE API Key",
+      "required": false,
+      "description": "OTE API Key from NameSilo Team",
+      "type": "password"
+    },
+    {
+      "name": "use_ote",
+      "label": "Use OTE",
+      "required": false,
+      "description": "Specify whether to use OTE or Live",
+      "type": "checkbox",
+      "default": false
     }
   ],
   "commands": [
@@ -56,17 +71,24 @@
       "title": "Account Balance",
       "description": "View your Account Balance",
       "mode": "no-view"
+    },
+    {
+      "name": "auctions",
+      "title": "Auctions",
+      "description": "View Public Auctions",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.76.0",
-    "@raycast/utils": "^1.15.0",
-    "cross-fetch": "^4.0.0"
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.16.3",
+    "cross-fetch": "^4.0.0",
+    "dayjs": "^1.11.12"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
+    "@types/react": "^18.3.3",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
