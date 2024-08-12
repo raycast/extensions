@@ -1,5 +1,9 @@
 # YouTube Downloader Changelog
 
+## [Update package dependency] - 2024-08-12
+
+- Update the `@dustube/ytdl-core` dependency to resolve the video download failure issue.
+
 ## [Fix video not found] - 2024-08-01
 
 - Update the `@dustube/ytdl-core` dependency to fix the video not found issue
