@@ -13,7 +13,7 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 import DomainSelector from "./components/DomainSelector";
 
 export default function Rewrites() {
@@ -24,7 +24,7 @@ export default function Rewrites() {
 
 function RewritesIndex({ domain }: { domain: string }) {
   const { push } = useNavigation();
-  const [rewrites, setRewrites] = useState<Rewrite[]>([]);
+  const [rewrites, setRewrites] = useCachedState<Rewrite[]>("rewrites", []);
   const [isLoading, setIsLoading] = useState(true);
 
   async function getDomainRewritesFromApi() {

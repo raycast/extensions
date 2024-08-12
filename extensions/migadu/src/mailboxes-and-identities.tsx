@@ -11,7 +11,7 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 import { FormMailboxCreate, FormMailboxEdit, Mailbox, MailboxCreate, MailboxEdit } from "./utils/types";
 import { useEffect, useState } from "react";
 import { MAILBOX_SPAM_ACTIONS, MAILBOX_SPAM_AGGRESSIVENESS } from "./utils/constants";
@@ -29,7 +29,7 @@ type MailboxesIndexProps = {
 };
 function MailboxesIndex({ domain }: MailboxesIndexProps) {
   const { push } = useNavigation();
-  const [mailboxes, setMailboxes] = useState<Mailbox[]>([]);
+  const [mailboxes, setMailboxes] = useCachedState<Mailbox[]>("mailboxes", []);
   const [isLoading, setIsLoading] = useState(true);
 
   async function getMailboxesFromApi() {

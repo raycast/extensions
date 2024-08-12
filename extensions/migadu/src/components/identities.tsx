@@ -13,11 +13,11 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { useForm } from "@raycast/utils";
+import { useCachedState, useForm } from "@raycast/utils";
 
 export function IdentitiesIndex({ mailbox }: { mailbox: Mailbox }) {
   const { push } = useNavigation();
-  const [identities, setIdentities] = useState<Identity[]>(mailbox.identities);
+  const [identities, setIdentities] = useCachedState<Identity[]>("identities", mailbox.identities);
   const [isLoading, setIsLoading] = useState(false);
 
   const domain = mailbox.domain_name;
