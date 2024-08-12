@@ -2,6 +2,7 @@
 
 # [Path Configuration] - {PR_MERGE_DATE}
 - Add a preference to configure the path to the Espanso executable
+- Explicitly set the path to the Espanso executable as `/opt/homebrew/bin/espanso` for Apple Silicon macs and `/usr/local/bin/espanso` for Intel macs
 
 ## [Patch] - 2024-07-09
 
