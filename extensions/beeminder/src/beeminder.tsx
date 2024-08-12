@@ -179,7 +179,10 @@ export default function Command() {
                   icon: goalIcon,
                 },
               ]}
-              keywords={[goal.slug, goal.title]}
+              keywords={goal.title
+                .split(" ")
+                .map((word) => word.replace(/[^\w\s]/g, ""))
+                .filter((word) => word !== "")}
               actions={
                 <ActionPanel>
                   <Action.Push

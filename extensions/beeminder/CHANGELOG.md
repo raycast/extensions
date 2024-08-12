@@ -2,7 +2,8 @@
 
 ## [Update] - 2024-08-11
 
-Adds a checkmark icon to goals with data entered today.
+- Adds a checkmark icon to goals with data entered today.
+- Makes goals searchable by their descriptions.
 
 ## [Update] - 2024-06-08
 
