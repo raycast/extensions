@@ -1,6 +1,6 @@
 # PDFSearch Changelog
 
-## [1.2.2] - {PR_MERGE_DATE}
+## [1.2.2] - 2024-08-12
 
 - Improved form validation.
 - Added `Delete All Collections` action.
