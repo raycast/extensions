@@ -1,6 +1,6 @@
 # Beeminder Changelog
 
-## [Update] - 2024-03-26
+## [Update] - 2024-08-11
 
 Adds a checkmark icon to goals with data entered today.
 
