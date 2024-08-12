@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-08-12
 
 - Updated IDE icons.
 
