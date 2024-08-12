@@ -17,7 +17,7 @@ const headers = new Headers({
   Authorization: "Bearer " + token,
 });
 
-export const FetchHeaders = headers;
+export const FetchHeaders = [...headers];
 
 const apiURL = "https://api.vercel.com/";
 
@@ -267,7 +267,7 @@ function arrayBufferToBase64(buffer: ArrayBuffer) {
 }
 
 export async function getScreenshotImageURL(deploymentId: Deployment["uid"]) {
-  const theme = environment.theme === "light" ? "0" : "1";
+  const theme = environment.appearance === "light" ? "0" : "1";
   const image = await fetch(
     `https://vercel.com/api/screenshot?dark=${theme}&deploymentId=${deploymentId}&withStatus=false`,
     {
@@ -289,4 +289,8 @@ export function getDeploymentURL(userOrTeamSlug: string, projectName: string, de
   }
 
   return `https://vercel.com/${userOrTeamSlug}/${projectName}/${deploymentId}`;
+}
+
+export function getFetchDomainsURL(teamId?: string, limit = 100) {
+  return apiURL + `v5/domains?teamId=${teamId ?? ""}&limit=${limit}`;
 }
