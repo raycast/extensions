@@ -1,6 +1,6 @@
 # Vercast Changelog
 
-## [2.6] - {PR_MERGE_DATE}
+## [2.6] - 2024-08-12
 
 - Add `Search Domains` command for quickly viewing your Domains
 
