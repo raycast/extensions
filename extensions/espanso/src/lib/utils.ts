@@ -1,21 +1,19 @@
-import fse from "fs-extra";
+import fs from "node:fs";
 import path from "path";
-import { $ } from "zx";
 import { EspansoMatch, MultiTrigger, Label, Replacement, NormalizedEspansoMatch, EspansoConfig } from "./types";
 import YAML from "yaml";
 import { espanso } from "./espanso";
-$.verbose = false;
 
 function lastUpdatedDate(file: string) {
-  const { mtime } = fse.statSync(file);
+  const { mtime } = fs.statSync(file);
 
   return mtime.getTime();
 }
 
 export function getAndSortTargetFiles(espansoMatchDir: string): { file: string; mtime: number }[] {
-  const targetFiles = fse
+  const targetFiles = fs
     .readdirSync(espansoMatchDir, { withFileTypes: true })
-    .filter((dirent: fse.Dirent) => dirent.isFile() && path.extname(dirent.name).toLowerCase() === ".yml");
+    .filter((dirent: fs.Dirent) => dirent.isFile() && path.extname(dirent.name).toLowerCase() === ".yml");
 
   const matchFilesTimes = targetFiles.map((targetFile) => {
     return { file: targetFile.name, mtime: lastUpdatedDate(path.join(espansoMatchDir, targetFile.name)) };
@@ -36,7 +34,7 @@ export function formatMatch(espansoMatch: MultiTrigger & Label & Replacement) {
 
 export function appendMatchToFile(fileContent: string, fileName: string, espansoMatchDir: string) {
   const filePath = path.join(espansoMatchDir, fileName);
-  fse.appendFileSync(filePath, fileContent);
+  fs.appendFileSync(filePath, fileContent);
 
   return { fileName, filePath };
 }
@@ -45,7 +43,7 @@ export function getMatches(espansoMatchDir: string, options?: { packagePath: boo
   const finalMatches: NormalizedEspansoMatch[] = [];
 
   function readDirectory(dir: string) {
-    const items = fse.readdirSync(dir, { withFileTypes: true });
+    const items = fs.readdirSync(dir, { withFileTypes: true });
 
     for (const item of items) {
       const fullPath = path.join(dir, item.name);
@@ -53,7 +51,7 @@ export function getMatches(espansoMatchDir: string, options?: { packagePath: boo
       if (item.isDirectory()) {
         if (options?.packagePath) {
           const packageFilePath = path.join(fullPath, "package.yml");
-          if (fse.existsSync(packageFilePath) && fse.statSync(packageFilePath).isFile()) {
+          if (fs.existsSync(packageFilePath) && fs.statSync(packageFilePath).isFile()) {
             processFile(packageFilePath);
           }
         } else {
@@ -66,7 +64,7 @@ export function getMatches(espansoMatchDir: string, options?: { packagePath: boo
   }
 
   function processFile(filePath: string) {
-    const content = fse.readFileSync(filePath);
+    const content = fs.readFileSync(filePath);
     const { matches = [] }: { matches?: EspansoMatch[] } = YAML.parse(content.toString()) || {};
 
     finalMatches.push(
