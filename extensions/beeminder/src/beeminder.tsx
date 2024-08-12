@@ -121,7 +121,7 @@ export default function Command() {
     const goals = Array.isArray(goalsData) ? goalsData : undefined;
 
     const getCurrentDayStart = () => {
-      return moment().startOf('day').unix();
+      return moment().startOf("day").unix();
     };
 
     return (
@@ -158,14 +158,19 @@ export default function Command() {
             goalIcon = "🟢";
           }
 
-          const hasDataForToday = goal.last_datapoint && goal.last_datapoint.timestamp >= getCurrentDayStart();
+          const hasDataForToday =
+            goal.last_datapoint && goal.last_datapoint.timestamp >= getCurrentDayStart();
 
           return (
             <List.Item
               key={goal.slug}
               title={goal.slug}
               subtitle={`Pledged $${goal.pledge}`}
-              icon={hasDataForToday ? { value: Icon.Checkmark, tooltip: "Data entered today" } : undefined}
+              icon={
+                hasDataForToday
+                  ? { value: Icon.Checkmark, tooltip: "Data entered today" }
+                  : undefined
+              }
               accessories={[
                 {
                   text: dueText,
