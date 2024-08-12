@@ -9,6 +9,9 @@
     "Web"
   ],
   "author": "vivgui",
+  "contributors": [
+    "hnsn"
+  ],
   "license": "MIT",
   "commands": [
     {

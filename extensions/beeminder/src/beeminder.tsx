@@ -8,6 +8,7 @@ import {
   Form,
   getPreferenceValues,
   Cache,
+  Icon,
 } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import moment from "moment";
@@ -118,6 +119,11 @@ export default function Command() {
   function GoalsList({ goalsData }: { goalsData: GoalResponse }) {
     const { beeminderUsername } = getPreferenceValues<Preferences>();
     const goals = Array.isArray(goalsData) ? goalsData : undefined;
+
+    const getCurrentDayStart = () => {
+      return moment().startOf('day').unix();
+    };
+
     return (
       <List isLoading={isLoading}>
         {goals?.map((goal: Goal) => {
@@ -152,11 +158,14 @@ export default function Command() {
             goalIcon = "🟢";
           }
 
+          const hasDataForToday = goal.last_datapoint && goal.last_datapoint.timestamp >= getCurrentDayStart();
+
           return (
             <List.Item
               key={goal.slug}
               title={goal.slug}
               subtitle={`Pledged $${goal.pledge}`}
+              icon={hasDataForToday ? { value: Icon.Checkmark, tooltip: "Data entered today" } : undefined}
               accessories={[
                 {
                   text: dueText,
