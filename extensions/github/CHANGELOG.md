@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [My Issues and PRs Improvements] - {PR_MERGE_DATE}
+## [My Issues and PRs Improvements] - 2024-08-12
 
 - My Issues Command + Menu Bar: Preferences to specify categories to display. Issues opened by the user will always be displayed.
 - My PRs Command + Menu Bar: Preferences to specify categories to display. PRs created by the user will always be displayed.
