@@ -7,10 +7,17 @@ export const getTopRamProcess = async (): Promise<string[][]> => {
   const modProcessList: string[][] = [];
 
   processList.forEach((value) => {
-    let temp: string[] = value.trim().split(" ");
-    temp = [temp.slice(0, -1).join(" "), `${temp[temp.length - 1].slice(0, -1)} MB`];
+    enum MemoryTypes {
+      G = "Gb",
+      M = "Mb",
+    }
 
-    modProcessList.push(temp);
+    const temp: string[] = value.trim().split(" ");
+    const processName = temp.slice(0, -1).join(" ");
+    const processMemory = temp[temp.length - 1].slice(0, -1);
+    const processMemoryType = temp[temp.length - 1].slice(-1) as keyof typeof MemoryTypes;
+
+    modProcessList.push([processName, `${processMemory} ${MemoryTypes[processMemoryType] || MemoryTypes.M}`]);
   });
 
   return modProcessList;
