@@ -1,0 +1,127 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "threads",
+  "title": "Threads",
+  "description": "Quickly post to Threads and see recent updates.",
+  "icon": "threads-icon.png",
+  "author": "chrismessina",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "threads",
+    "social",
+    "posting",
+    "messaging",
+    "communication"
+  ],
+  "commands": [
+    {
+      "name": "home",
+      "title": "Go to...",
+      "subtitle": "Threads",
+      "description": "Go to Threads",
+      "icon": "home-icon.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "feed",
+          "placeholder": "Which feed to show?",
+          "description": "Show timeline...",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "For You",
+              "value": "for_you"
+            },
+            {
+              "title": "Following",
+              "value": "following"
+            },
+            {
+              "title": "Liked",
+              "value": "liked"
+            },
+            {
+              "title": "Saved",
+              "value": "saved"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "quick-thread",
+      "title": "Quick Post",
+      "subtitle": "Threads",
+      "description": "Quickly create a new post on Threads.",
+      "icon": "create-icon.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "description": "The text of the post.",
+          "type": "text",
+          "placeholder": "Start a thread...",
+          "required": true
+        },
+        {
+          "name": "attachment",
+          "description": "An attachment to the post.",
+          "type": "text",
+          "placeholder": "Add a link",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "new-thread",
+      "title": "Start a New Thread",
+      "subtitle": "Threads",
+      "description": "Create a new post on Threads.",
+      "icon": "create-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "quick-follow",
+      "title": "Quickly Follow...",
+      "subtitle": "Threads",
+      "description": "Quickly follow an account on Threads",
+      "icon": "profile-icon.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "username",
+          "description": "The account to be followed.",
+          "type": "text",
+          "placeholder": "@username",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^9.9.0",
+    "eslint-plugin-react": "^7.35.0",
+    "globals": "^15.9.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.0.1"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
