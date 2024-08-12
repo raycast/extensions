@@ -1,10 +1,4 @@
-import {
-  LaunchProps,
-  closeMainWindow,
-  open,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { LaunchProps, closeMainWindow, open } from "@raycast/api";
 import { constructPostIntent } from "./lib/post-intent";
 
 interface Arguments {

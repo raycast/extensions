@@ -1,3 +1,5 @@
+import React from "react";
+import { useState } from "react";
 import {
   Form,
   ActionPanel,
@@ -6,7 +8,6 @@ import {
   Toast,
   open,
 } from "@raycast/api";
-import { useState } from "react";
 import { constructPostIntent } from "./lib/post-intent";
 
 interface ThreadValues {

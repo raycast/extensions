@@ -19,9 +19,9 @@
   "commands": [
     {
       "name": "home",
-      "title": "Go to...",
+      "title": "Go To...",
       "subtitle": "Threads",
-      "description": "Go to Threads",
+      "description": "Go To Threads",
       "icon": "home-icon.png",
       "mode": "no-view",
       "arguments": [
@@ -105,11 +105,15 @@
     "@raycast/api": "^1.80.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.9.0",
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
     "eslint": "^9.9.0",
-    "typescript": "^5.4.5"
+    "eslint-plugin-react": "^7.35.0",
+    "globals": "^15.9.0",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.1.0"
   },
   "scripts": {
     "build": "ray build -e dist",
