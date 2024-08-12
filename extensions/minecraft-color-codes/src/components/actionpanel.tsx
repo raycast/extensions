@@ -17,6 +17,35 @@ export function generateActionPanel({
   return (
     <ActionPanel>
       <ActionPanel.Section>
+        <Action.CopyToClipboard
+          content={chatCode}
+          title="Copy Chat Code"
+          shortcut={{
+            modifiers: ["cmd"],
+            key: "c",
+          }}
+        />
+        <Action.CopyToClipboard
+          content={chatCodeEscaped}
+          title="Copy Escaped Chat Code"
+          shortcut={{
+            modifiers: ["cmd", "shift"],
+            key: "c",
+          }}
+        />
+        {hexCode && (
+          <Action.CopyToClipboard
+            content={hexCode}
+            title="Copy Hex Code"
+            shortcut={{
+              modifiers: ["cmd", "shift"],
+              key: "h",
+            }}
+          />
+        )}
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
         <Action
           icon={Icon.Key}
           title="Use Primary Prefix"
@@ -47,35 +76,6 @@ export function generateActionPanel({
             key: "2",
           }}
         />
-      </ActionPanel.Section>
-
-      <ActionPanel.Section>
-        <Action.CopyToClipboard
-          content={chatCode}
-          title="Copy Chat Code"
-          shortcut={{
-            modifiers: ["cmd"],
-            key: "c",
-          }}
-        />
-        <Action.CopyToClipboard
-          content={chatCodeEscaped}
-          title="Copy Escaped Chat Code"
-          shortcut={{
-            modifiers: ["cmd", "shift"],
-            key: "c",
-          }}
-        />
-        {hexCode && (
-          <Action.CopyToClipboard
-            content={hexCode}
-            title="Copy Hex Code"
-            shortcut={{
-              modifiers: ["cmd", "shift"],
-              key: "h",
-            }}
-          />
-        )}
       </ActionPanel.Section>
     </ActionPanel>
   );
