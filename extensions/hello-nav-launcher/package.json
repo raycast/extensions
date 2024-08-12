@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "hello-nav-launcher",
+  "name": "hello-nav",
   "title": "Hello Nav",
   "description": "Hello Nav Launcher",
   "icon": "logo.png",
