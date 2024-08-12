@@ -1,0 +1,35 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hello-nav-launcher",
+  "title": "Hello Nav",
+  "description": "Hello Nav Launcher",
+  "icon": "logo.png",
+  "author": "heroor",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Hello Nav",
+      "subtitle": "Hello Nav Launcher",
+      "description": "Hello Nav Launcher",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@hello-nav/model": "workspace:*",
+    "@raycast/api": "^1.55.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "pnpx @raycast/api@latest publish"
+  }
+}
