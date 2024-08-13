@@ -92,7 +92,6 @@ export const getTasks = async (projectId: string): Promise<Task[]> => {
   }
   const tasks = (await response.json()) as TaskResp[] as Task[];
 
-  // return tasks.map(({ id, name }: TaskResp) => ({ id, name }));
   return tasks;
 };
 

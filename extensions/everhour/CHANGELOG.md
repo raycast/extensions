@@ -1,6 +1,6 @@
 # Everhour
 
-## {PR_MERGE_DATE} ([#13997](https://github.com/raycast/extensions/pull/13997))
+## {PR_MERGE_DATE} ([#13999](https://github.com/raycast/extensions/pull/13999))
 
 - Fix Issue [#13548](https://github.com/raycast/extensions/issues/13548)
     - The issue would show up if a time entry did not have a task assigned
