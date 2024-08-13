@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { List, Icon, showToast, ToastStyle } from "@raycast/api";
+import { List, Icon, showToast, Toast } from "@raycast/api";
 import { TaskListItem } from "../components";
 import { getRecentTasks, getCurrentTimer } from "../api";
 import { Task } from "../types";
@@ -11,7 +11,10 @@ export function RecentTaskList() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const refreshActiveTimer = async () => {
-    const toast = await showToast(ToastStyle.Animated, "Refreshing tasks");
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Refreshing tasks",
+    });
     try {
       const activeTimer = await getCurrentTimer();
       setActiveTimerTaskId(activeTimer);
@@ -28,7 +31,10 @@ export function RecentTaskList() {
 
   useEffect(() => {
     async function fetch() {
-      const toast = await showToast(ToastStyle.Animated, "Fetching tasks");
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Fetching tasks",
+      });
       try {
         await fetchTasks();
         setIsLoading(false);
@@ -70,7 +76,7 @@ export function RecentTaskList() {
     }
 
     if (!isLoading && tasks[0]) {
-      return <List.Item title="No tasks found" icon={Icon.XmarkCircle} />;
+      return <List.Item title="No tasks found" icon={Icon.XMarkCircle} />;
     }
   };
 

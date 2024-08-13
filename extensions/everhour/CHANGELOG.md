@@ -1,5 +1,14 @@
 # Everhour
 
+## {PR_MERGE_DATE} ([#13997](https://github.com/raycast/extensions/pull/13997))
+
+- Fix Issue [#13548](https://github.com/raycast/extensions/issues/13548)
+    - The issue would show up if a time entry did not have a task assigned
+- Add icons to Actions
+- Make `api` more TS friendly by removing use of `any`
+- Add metadata images
+- Add a README
+
 ## 2023-02-28 ([#5023](https://github.com/raycast/extensions/pull/5023))
 
 - Add recent task view.

@@ -22,7 +22,7 @@ export type TimeRecordResp = {
   time: number;
   user: number;
   date: string;
-  task: TaskResp;
+  task?: TaskResp;
 };
 
 export type TaskTimerResp = {
@@ -38,4 +38,9 @@ export type TaskStopTimerResp = {
 export type CurrentTimerResp = {
   status: string;
   task: { id: string };
+};
+
+export type ErrorResponse = {
+  code: string;
+  message: string;
 };
