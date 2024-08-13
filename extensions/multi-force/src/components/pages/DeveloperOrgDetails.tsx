@@ -7,6 +7,24 @@ import {
   HEX_REGEX,
   COLOR_WARNING_MESSAGE,
   DEFAULT_COLOR,
+  PATH_OPTIONS,
+  CUSTOM_KEY,
+  HOME_PATH,
+  SETUP_PATH,
+  ORG_LABEL_LABEL,
+  ORG_ALIAS_DESCRIPTION,
+  ORG_LABEL_PLACEHOLDER,
+  COLOR_LABEL,
+  COLOR_DESCRIPTION,
+  OPEN_TO_DESCRIPTION,
+  OPEN_TO_LABEL,
+  CUSTOM_PATH_LABEL,
+  CUSTOM_PATH_DESCRIPTION,
+  CUSTOM_PATH_PLACEHOLDER,
+  SECTION_LABEL,
+  SECTION_DESCRIPTION,
+  NEW_SECTION_NAME_LABEL,
+  NEW_SECTION_DESCRIPTION,
 } from "../../constants";
 import { OrgListReducerAction, OrgListReducerType, DeveloperOrg, AuthenticateNewOrgFormData } from "../../types";
 import { FormValidation, useForm } from "@raycast/utils";
@@ -15,6 +33,8 @@ export function DeveloperOrgDetails(props: { org: DeveloperOrg; dispatch: Dispat
   const { org, dispatch } = props;
   const [section, setSection] = useState<string>();
   const [sections, setSections] = useState<string[]>([]);
+  const [paths, setPaths] = useState<{ value: string; key: string }[]>([]);
+  const [path, setPath] = useState<string>(HOME_PATH);
   const { pop } = useNavigation();
 
   const setSectionValue = (section: string) => {
@@ -22,7 +42,15 @@ export function DeveloperOrgDetails(props: { org: DeveloperOrg; dispatch: Dispat
     setValue("section", section);
   };
 
+  const setPathValue = (path: string) => {
+    console.log("Set path value: " + path);
+    setPath(path);
+    setValue("openToPath", path);
+  };
+
   useEffect(() => {
+    console.log("Use effect");
+    console.log(org);
     async function getSectionList() {
       const storedOrgs = await loadOrgs();
       const sects = new Set<string>();
@@ -30,12 +58,30 @@ export function DeveloperOrgDetails(props: { org: DeveloperOrg; dispatch: Dispat
         for (const org of storedOrgs!) {
           if (org.section) sects.add(org.section);
         }
-        setSections([MISC_ORGS_SECTION_LABEL, ...Array.from(sects), NEW_SECTION_LABEL]);
+        const sectionNames = [...new Set([MISC_ORGS_SECTION_LABEL, ...Array.from(sects), NEW_SECTION_LABEL])];
+        setSections(sectionNames);
         setSectionValue(org.section ?? MISC_ORGS_SECTION_LABEL);
       }
+      setPaths(PATH_OPTIONS);
+      //If openToPath is populated, check if it is HOME or SETUP. If so, use that as the picklist option.
+      //If open to Path is populated but not SETUP or HOME, use the Custom key. Otherwise, if openToPath is not populated, default to HOME
+      const pathToOpen =
+        org.openToPath && (org.openToPath === HOME_PATH || org.openToPath === SETUP_PATH)
+          ? org.openToPath
+          : org.openToPath
+            ? CUSTOM_KEY
+            : HOME_PATH;
+      console.log(`Opening to path: ${pathToOpen}`);
+      setPathValue(pathToOpen);
     }
     setValue("color", org.color ?? DEFAULT_COLOR);
     setValue("label", org.label ?? "");
+    setValue(
+      "customPath",
+      org.openToPath !== undefined && (org.openToPath === HOME_PATH || org.openToPath === SETUP_PATH)
+        ? ""
+        : org.openToPath,
+    );
     getSectionList();
   }, []);
 
@@ -49,6 +95,9 @@ export function DeveloperOrgDetails(props: { org: DeveloperOrg; dispatch: Dispat
       };
       if (values.newSectionName) {
         updatedOrg.section = values.newSectionName;
+      }
+      if (values.customPath) {
+        updatedOrg.openToPath = values.customPath;
       }
       console.log(updatedOrg);
       dispatch({
@@ -65,6 +114,16 @@ export function DeveloperOrgDetails(props: { org: DeveloperOrg; dispatch: Dispat
       },
       section: FormValidation.Required,
       newSectionName: section === NEW_SECTION_LABEL ? FormValidation.Required : undefined,
+      openToPath: FormValidation.Required,
+      customPath: (value) => {
+        if (path === CUSTOM_KEY) {
+          if (!value) {
+            return "This item is required";
+          } else if (value.charAt(0) !== "/") {
+            return "Only relative paths are allowed. Make sure your path starts with '/'.";
+          }
+        }
+      },
     },
   });
 
@@ -80,24 +139,39 @@ export function DeveloperOrgDetails(props: { org: DeveloperOrg; dispatch: Dispat
       <Form.Description title="Org URL" text={org.instanceUrl} />
       <Form.Description title="Username" text={org.username} />
       <Form.Description title="Org Alias" text={org.alias} />
-      <Form.TextField title="Label" {...itemProps.label} info="Enter a label to use with your org." />
       <Form.TextField
-        title="Color"
-        {...itemProps.color}
-        info={`Enter a color to use on the Salesforce Icon for your org. This color must be in HEX format, ie ${DEFAULT_COLOR}.`}
+        title={ORG_LABEL_LABEL}
+        {...itemProps.label}
+        info={ORG_ALIAS_DESCRIPTION}
+        placeholder={ORG_LABEL_PLACEHOLDER}
       />
+      <Form.TextField title={COLOR_LABEL} {...itemProps.color} info={COLOR_DESCRIPTION} />
       <Form.Dropdown
-        title="Section"
-        {...itemProps.section}
-        onChange={setSectionValue}
-        info="Select a section to group orgs on your list. If you want to create a new group, choose the 'New Section' option."
+        info={OPEN_TO_DESCRIPTION}
+        title={OPEN_TO_LABEL}
+        {...itemProps.openToPath}
+        value={path}
+        onChange={setPathValue}
       >
+        {paths.map((pathOption, index) => (
+          <Form.Dropdown.Item key={index} value={pathOption.value} title={pathOption.key} />
+        ))}
+      </Form.Dropdown>
+      {path === CUSTOM_KEY ? (
+        <Form.TextField
+          {...itemProps.customPath}
+          title={CUSTOM_PATH_LABEL}
+          placeholder={CUSTOM_PATH_PLACEHOLDER}
+          info={CUSTOM_PATH_DESCRIPTION}
+        />
+      ) : undefined}
+      <Form.Dropdown title={SECTION_LABEL} {...itemProps.section} onChange={setSectionValue} info={SECTION_DESCRIPTION}>
         {sections.map((sect, index) => (
           <Form.Dropdown.Item key={index} value={sect} title={sect} />
         ))}
       </Form.Dropdown>
       {section === NEW_SECTION_LABEL ? (
-        <Form.TextField title="New Section Name" {...itemProps.newSectionName} />
+        <Form.TextField title={NEW_SECTION_NAME_LABEL} info={NEW_SECTION_DESCRIPTION} {...itemProps.newSectionName} />
       ) : undefined}
     </Form>
   );

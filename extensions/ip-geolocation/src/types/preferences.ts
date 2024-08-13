@@ -1,8 +1,12 @@
-export interface Preferences {
+import { getPreferenceValues } from "@raycast/api";
+
+interface Preferences {
   language: string;
   showIPv6: boolean;
   coordinatesFormat: "latLon" | "lonLat";
 }
+
+export const { language, showIPv6, coordinatesFormat } = getPreferenceValues<Preferences>();
 
 export interface CopyIpArguments {
   ipType: string;
