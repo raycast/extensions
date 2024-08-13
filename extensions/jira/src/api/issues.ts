@@ -64,10 +64,6 @@ export async function createIssue(values: IssueFormValues, { customFields }: Cre
     jsonValues.priority = { id: values.priorityId };
   }
 
-  if (values.labels && values.labels.length > 0) {
-    jsonValues.labels = values.labels;
-  }
-
   if (values.components && values.components.length > 0) {
     jsonValues.components = values.components.map((component) => {
       return { id: component };
@@ -188,7 +184,7 @@ export type CustomField = {
   required: boolean;
   schema: Schema;
   name: string;
-  key: string;
+  fieldId: string;
   allowedValues: unknown[];
   autoCompleteUrl?: string;
   hasDefaultValue?: boolean;
@@ -200,45 +196,40 @@ export type IssueTypeWithCustomFields = IssueType & {
 };
 
 type GetCreateIssueMetadataResponse = {
-  projects: { issuetypes: IssueTypeWithCustomFields[] }[];
+  values: IssueTypeWithCustomFields[];
+};
+
+type GetCreateIssueMetadataFieldResponse = {
+  values: CustomField[];
 };
 
 export async function getCreateIssueMetadataSummary(projectId: string) {
-  const params = { projectIds: projectId };
-
-  return getCreateIssueMetadataWithParams(params);
-}
-
-export async function getCreateIssueMetadata(projectId: string, issueTypeId: string) {
-  const params = { expand: "projects.issuetypes.fields", projectIds: projectId, issuetypeIds: issueTypeId };
-
-  return getCreateIssueMetadataWithParams(params);
-}
-
-async function getCreateIssueMetadataWithParams(params: {
-  projectIds: string;
-  expand?: string;
-  issuetypeIds?: string;
-}) {
-  const result = await request<GetCreateIssueMetadataResponse>(`/issue/createmeta`, { params });
-
-  if (!result?.projects) {
-    return result?.projects;
+  const result = await request<GetCreateIssueMetadataResponse>(`/issue/createmeta/${projectId}/issuetypes`);
+  if (!result?.values) {
+    return result?.values;
   }
 
   const resolvedProjects = await Promise.all(
-    result.projects.map(async (project) => {
-      const resolvedIssueTypes = await Promise.all(
-        project.issuetypes.map(async (issueType) => {
-          issueType.iconUrl = await getAuthenticatedUri(issueType.iconUrl, "image/jpeg");
-          return issueType;
-        }),
-      );
-      return { ...project, issuetypes: resolvedIssueTypes };
+    result.values.map(async (issueType) => {
+      issueType.iconUrl = await getAuthenticatedUri(issueType.iconUrl, "image/jpeg");
+      return issueType;
     }),
   );
 
   return resolvedProjects;
+}
+
+export async function getCreateIssueMetadata(projectId: string, issueTypeId: string, issueType: IssueType) {
+  const result = await request<GetCreateIssueMetadataFieldResponse>(
+    `/issue/createmeta/${projectId}/issuetypes/${issueTypeId}`,
+  );
+
+  // make a record of fields which is equal to result.values and each value in this array will be mapped to a string id which is the id of the field
+  const fields: Record<string, CustomField> = result!.values.reduce((acc, field) => {
+    return { ...acc, [field.fieldId]: field };
+  }, {});
+
+  return { ...issueType, fields };
 }
 
 export async function updateIssue(issueIdOrKey: string, body: Record<string, unknown>) {

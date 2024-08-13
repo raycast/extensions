@@ -21,18 +21,18 @@ type IssueFormCustomFieldsProps = {
 export default function IssueFormCustomFields({ fields, itemProps, users }: IssueFormCustomFieldsProps) {
   return (
     <>
-      {fields.map(({ key, name, fieldSchema, allowedValues }) => {
+      {fields.map(({ fieldId, name, fieldSchema, allowedValues }) => {
         if (!name) return null;
 
         let component;
         switch (fieldSchema) {
           case CustomFieldSchema.datePicker: {
-            const props = itemProps[key] as Form.ItemProps<Date | null>;
+            const props = itemProps[fieldId] as Form.ItemProps<Date | null>;
             component = <Form.DatePicker {...props} title={name} type={Form.DatePicker.Type.Date} />;
             break;
           }
           case CustomFieldSchema.dateTime: {
-            const props = itemProps[key] as Form.ItemProps<Date | null>;
+            const props = itemProps[fieldId] as Form.ItemProps<Date | null>;
             component = <Form.DatePicker {...props} title={name} type={Form.DatePicker.Type.DateTime} />;
             break;
           }
@@ -40,12 +40,12 @@ export default function IssueFormCustomFields({ fields, itemProps, users }: Issu
           case CustomFieldSchema.textfield:
           case CustomFieldSchema.storyPointEstimate:
           case CustomFieldSchema.float: {
-            const props = itemProps[key] as Form.ItemProps<string>;
+            const props = itemProps[fieldId] as Form.ItemProps<string>;
             component = <Form.TextField {...props} title={name} />;
             break;
           }
           case CustomFieldSchema.textarea: {
-            const props = itemProps[key] as Form.ItemProps<string>;
+            const props = itemProps[fieldId] as Form.ItemProps<string>;
             component = (
               <Form.TextArea
                 {...props}
@@ -58,7 +58,7 @@ export default function IssueFormCustomFields({ fields, itemProps, users }: Issu
           }
           case CustomFieldSchema.multiSelect:
           case CustomFieldSchema.multiCheckboxes: {
-            const props = itemProps[key] as Form.ItemProps<string[]>;
+            const props = itemProps[fieldId] as Form.ItemProps<string[]>;
             const options = allowedValues as Option[];
             component = (
               <Form.TagPicker {...props} title={name} placeholder="Start">
@@ -71,7 +71,7 @@ export default function IssueFormCustomFields({ fields, itemProps, users }: Issu
           }
           case CustomFieldSchema.radioButtons:
           case CustomFieldSchema.select: {
-            const props = itemProps[key] as Form.ItemProps<string>;
+            const props = itemProps[fieldId] as Form.ItemProps<string>;
             const options = allowedValues as Option[];
             component = (
               <Form.Dropdown {...props} title={name}>
@@ -85,14 +85,14 @@ export default function IssueFormCustomFields({ fields, itemProps, users }: Issu
             break;
           }
           case CustomFieldSchema.sprint: {
-            const props = itemProps[key] as Form.ItemProps<string>;
+            const props = itemProps[fieldId] as Form.ItemProps<string>;
             component = <FormSprintDropdown {...props} title={name} name={name} />;
             break;
           }
           case CustomFieldSchema.userPicker: {
             // We can't use FormUserDropdown (using an autocomplete URL) here because of a strange OAuth bug
             // See: https://community.developer.atlassian.com/t/oauth-2-0-is-not-enabled-for-method/60843/6
-            const props = itemProps[key] as Form.ItemProps<string>;
+            const props = itemProps[fieldId] as Form.ItemProps<string>;
             component = (
               <Form.Dropdown {...props} title={name} storeValue>
                 <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
@@ -112,14 +112,14 @@ export default function IssueFormCustomFields({ fields, itemProps, users }: Issu
             break;
           }
           case CustomFieldSchema.team: {
-            const props = itemProps[key] as Form.ItemProps<string>;
+            const props = itemProps[fieldId] as Form.ItemProps<string>;
             component = <FormTeamDropdown {...props} name={name} />;
             break;
           }
         }
 
         if (component) {
-          return <Fragment key={key}>{component}</Fragment>;
+          return <Fragment key={fieldId}>{component}</Fragment>;
         }
       })}
     </>

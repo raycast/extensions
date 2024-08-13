@@ -1,18 +1,15 @@
 import { Avatar } from "./avatar";
 import { autocomplete, request } from "./request";
 
-type AccountType = "atlassian" | "app" | "customer";
-
 export type User = {
   accountId: string;
-  accountType: AccountType;
   avatarUrls?: Avatar;
   displayName: string;
 };
 
 export async function getUsers() {
-  const result = await request<User[]>("/users/search");
-  return result?.filter((user) => user.accountType === "atlassian");
+  const result = await request<User[]>("user/assignable/multiProjectSearch?projectKeys=KJCA");
+  return result!;
 }
 
 export function getMyself() {

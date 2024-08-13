@@ -11,15 +11,11 @@ import {
   Priority,
   getCreateIssueMetadata,
 } from "../api/issues";
-import { getLabels } from "../api/labels";
 import { getProjects } from "../api/projects";
-import { getUsers } from "../api/users";
 import { getProjectAvatar } from "../helpers/avatars";
 import { getErrorMessage } from "../helpers/errors";
 import { CustomFieldSchema, getCustomFieldsForCreateIssue } from "../helpers/issues";
 
-import FormParentDropdown from "./FormParentDropdown";
-import FormUserDropdown from "./FormUserDropdown";
 import IssueDetail from "./IssueDetail";
 import IssueFormCustomFields from "./IssueFormCustomFields";
 
@@ -31,7 +27,6 @@ export type IssueFormValues = {
   parent: string;
   assigneeId: string;
   priorityId: string;
-  labels?: string[];
   components?: string[];
   fixVersions?: string[];
   dueDate?: Date | null;
@@ -46,15 +41,12 @@ type CreateIssueFormProps = {
 export default function CreateIssueForm({ draftValues, enableDrafts = true }: CreateIssueFormProps) {
   const { push } = useNavigation();
 
-  const [projectQuery, setProjectQuery] = useState("");
+  const [projectQuery, setProjectQuery] = useState("KJCA");
   const { data: projects, isLoading: isLoadingProjects } = useCachedPromise(
     (query) => getProjects(query),
     [projectQuery],
     { keepPreviousData: true },
   );
-
-  const { data: users } = useCachedPromise(() => getUsers());
-  const { data: labels } = useCachedPromise(() => getLabels());
 
   // There's a slight jump on issue types when launching the command since they're
   // retrieved based on the project. Let's cache the last project ID to avoid that
@@ -130,7 +122,6 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
       description: "",
       assigneeId: "",
       priorityId: "",
-      labels: [],
       components: [],
       fixVersions: [],
       dueDate: null,
@@ -153,24 +144,20 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
     { execute: !!values.projectId },
   );
 
-  const selectedProject = projects?.find((project) => project.id === values.projectId);
+  //   const selectedProject = projects?.find((project) => project.id === values.projectId);
 
   // We only query one project in the getCreateIssueMetadata call
   // It's safe to assume the issue types will always correspond to the first element
-  const issueTypesSummary = issueMetadataSummary?.[0]?.issuetypes;
+  const issueTypesSummary = issueMetadataSummary;
 
+  const selectedIssueTypeSummary = issueMetadataSummary?.find((issueType) => issueType.id === values.issueTypeId);
   const { data: issueMetadata } = useCachedPromise(
-    (projectId, issueTypeId) => getCreateIssueMetadata(projectId, issueTypeId),
+    (projectId, issueTypeId) => getCreateIssueMetadata(projectId, issueTypeId, selectedIssueTypeSummary!),
     [values.projectId, values.issueTypeId],
     { execute: !!values.projectId && !!values.issueTypeId },
   );
 
-  const issueTypes = issueMetadata?.[0]?.issuetypes;
-
-  const selectedIssueType = issueTypes?.find((issueType) => issueType.id === values.issueTypeId);
-
-  const epicsOnly = !selectedIssueType?.subtask;
-  const issueLinksAutocompleteUrl = selectedIssueType?.fields.issuelinks?.autoCompleteUrl;
+  const selectedIssueType = issueMetadata;
 
   const priorityField = selectedIssueType?.fields.priority;
   useEffect(() => {
@@ -247,19 +234,10 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
       <Form.Separator />
 
       {epicNameField ? (
-        <Form.TextField {...(itemProps[epicNameField.key] as Form.ItemProps<string>)} title={epicNameField.name} />
+        <Form.TextField {...(itemProps[epicNameField.fieldId] as Form.ItemProps<string>)} title={epicNameField.name} />
       ) : null}
 
       <Form.TextField {...itemProps.summary} title="Summary" placeholder="Short summary for the issue" />
-
-      {issueLinksAutocompleteUrl && selectedProject ? (
-        <FormParentDropdown
-          {...itemProps.parent}
-          autocompleteUrl={issueLinksAutocompleteUrl}
-          epicsOnly={epicsOnly}
-          projectId={selectedProject.id}
-        />
-      ) : null}
 
       <Form.TextArea
         {...itemProps.description}
@@ -268,11 +246,11 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
         enableMarkdown
       />
 
-      <FormUserDropdown
+      {/* <FormUserDropdown
         {...itemProps.assigneeId}
         title="Assignee"
         autocompleteUrl={selectedIssueType?.fields.assignee?.autoCompleteUrl}
-      />
+      /> */}
 
       <Form.Dropdown {...itemProps.priorityId} title="Priority">
         {priorities?.map((priority) => {
@@ -288,14 +266,6 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
       </Form.Dropdown>
 
       <Form.FilePicker title="Attachments" {...itemProps.attachments} canChooseDirectories={false} />
-
-      {labels && labels.length > 0 ? (
-        <Form.TagPicker {...itemProps.labels} title="Labels" placeholder="Start typing label name…">
-          {labels.map((label) => {
-            return <Form.TagPicker.Item key={label} value={label} title={label} icon={Icon.Tag} />;
-          })}
-        </Form.TagPicker>
-      ) : null}
 
       {components && components.length > 0 ? (
         <Form.TagPicker {...itemProps.components} title="Components" placeholder="Start typing component name…">
@@ -329,7 +299,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
         <>
           <Form.Separator />
 
-          <IssueFormCustomFields fields={otherCustomFields} itemProps={itemProps} users={users} />
+          <IssueFormCustomFields fields={otherCustomFields} itemProps={itemProps} />
 
           {unknownCustomFields !== "" ? (
             <Form.Description

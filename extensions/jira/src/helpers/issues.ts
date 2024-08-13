@@ -218,17 +218,17 @@ export function getCustomFieldsForCreateIssue(issueType: IssueTypeWithCustomFiel
     })
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  const initialValues = customFields.reduce((acc, { key, fieldSchema }) => {
+  const initialValues = customFields.reduce((acc, { fieldId, fieldSchema }) => {
     return {
       ...acc,
-      [key]: getCustomFieldInitialValue(fieldSchema),
+      [fieldId]: getCustomFieldInitialValue(fieldSchema),
     };
   }, {});
 
-  const validation = customFields.reduce((acc, { key, fieldSchema, required }) => {
+  const validation = customFields.reduce((acc, { fieldId, fieldSchema, required }) => {
     return {
       ...acc,
-      [key]: getCustomFieldValidation(fieldSchema, required),
+      [fieldId]: getCustomFieldValidation(fieldSchema, required),
     };
   }, {});
 

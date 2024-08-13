@@ -13,7 +13,7 @@ type JiraCredentials = {
 
 export const jiraWithApiToken = {
   authorize: async () => {
-    const { siteUrl, token, email } = getPreferenceValues();
+    const { siteUrl, token } = getPreferenceValues();
 
     let hostname;
     try {
@@ -23,8 +23,9 @@ export const jiraWithApiToken = {
       hostname = siteUrl;
     }
 
-    const authorizationHeader = `Basic ${btoa(`${email}:${token}`)}`;
-    const myselfResponse = await fetch(`https://${hostname}/rest/api/3/myself`, {
+    // const authorizationHeader = `Basic ${btoa(`${email}:${token}`)}`;
+    const authorizationHeader = `Bearer ${token}`;
+    const myselfResponse = await fetch(`https://${hostname}/rest/api/2/myself`, {
       headers: {
         Authorization: authorizationHeader,
         Accept: "application/json",

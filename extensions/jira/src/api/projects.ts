@@ -6,16 +6,15 @@ export type Project = {
   key: string;
   name: string;
   avatarUrls?: Avatar;
-  style: "classic" | "next-gen";
 };
 
 type GetProjectsResponse = {
-  values: Project[];
+  projects: Project[];
 };
 
 export async function getProjects(query: string) {
-  const params = { maxResults: "100", query };
+  const params = { maxResults: "500", query, allowEmptyQuery: "true" };
 
-  const result = await request<GetProjectsResponse>("/project/search", { params });
-  return result?.values;
+  const result = await request<GetProjectsResponse>("/projects/picker", { params });
+  return result?.projects;
 }
