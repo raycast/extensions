@@ -1,5 +1,10 @@
 # Changelog
 
+## [Fix] - 2024-08-13
+
+- Fix: the image width calculation in AnswerDetailView, which previously returned undefined.
+- Update package-lock.json to fix the security vulnerability (npm audit fix)
+
 ## [Fix] - 2024-08-09
 
 - Fix: An unhandled error was encountered while parsing the CSV file.
