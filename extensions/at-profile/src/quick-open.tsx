@@ -1,11 +1,5 @@
-import {
-  launchCommand,
-  LaunchType,
-  showToast,
-  Toast,
-  open,
-} from "@raycast/api";
-import { getAllSites, Site } from "./sites";
+import { showToast, Toast, open } from "@raycast/api";
+import { getAllSites } from "./sites";
 
 export default async function command(props: {
   arguments: { profile: string; site: string };
