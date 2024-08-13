@@ -75,19 +75,18 @@ interface LunaGame {
  * Approximates the model for a search result based on response data.
  */
 interface SearchResult {
-  actions: any[];
   pageContext: { pageType: string };
   pageMemberGroups: {
     mainContent: {
-      widgets: {
-        actions: { target: string }[];
+      widgets: Array<{
+        actions: Array<{ target: string }>;
         id: string;
         type: string;
-        widgets: {
-          actions: { target: string }[];
+        widgets: Array<{
+          actions: Array<{ target: string }>;
           presentationData: string;
-        }[];
-      }[];
+        }>;
+      }>;
     };
   };
 }
@@ -104,7 +103,7 @@ const buildRequestBody = (query: string) => {
   return {
     timeout: 3000,
     searchContext: {
-      query: query,
+      query,
       sort: "RELEVANCE",
     },
     featureScheme: "WEB_V1",
@@ -167,7 +166,9 @@ const getDetail = (game: LunaGame, searchCallback: (query: string) => void) => {
                 color={DISPLAY_VALUES.brandColor}
                 key={genre}
                 text={genre}
-                onAction={() => searchCallback(genre)}
+                onAction={() => {
+                  searchCallback(genre);
+                }}
               />
             ))}
           </List.Item.Detail.Metadata.TagList>
@@ -182,13 +183,17 @@ const getActions = (game: LunaGame) => (
     <Action
       title={DISPLAY_VALUES.openTitle}
       icon={Icon.Globe}
-      onAction={() => open(game.openUrl, CHROME_KEY)}
+      onAction={async () => {
+        await open(game.openUrl, CHROME_KEY);
+      }}
     />
-    {!!game.playUrl ? (
+    {game.playUrl ? (
       <Action
         title={DISPLAY_VALUES.launchGame}
         icon={Icon.Play}
-        onAction={() => open(game.playUrl ?? "", CHROME_KEY)}
+        onAction={async () => {
+          await open(game.playUrl ?? "", CHROME_KEY);
+        }}
       />
     ) : (
       <></>
@@ -282,7 +287,9 @@ export default function Command() {
             title={game.title}
             subtitle={game.publisher}
             actions={getActions(game)}
-            detail={getDetail(game, (genre: string) => searchGames(genre))}
+            detail={getDetail(game, async (genre: string) => {
+              await searchGames(genre);
+            })}
           />
         ))
       ) : (
