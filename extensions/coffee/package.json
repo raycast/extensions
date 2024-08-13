@@ -100,7 +100,7 @@
       "title": "Caffeinate Status",
       "description": "Show the current caffeination status",
       "mode": "no-view",
-      "interval": "1m"
+      "interval": "10s"
     }
   ],
   "preferences": [

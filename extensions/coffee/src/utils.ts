@@ -1,4 +1,4 @@
-import { getPreferenceValues, launchCommand, LaunchType, showHUD } from "@raycast/api";
+import { getPreferenceValues, launchCommand, LaunchType, LocalStorage, showHUD } from "@raycast/api";
 import { exec, execSync } from "node:child_process";
 
 type Preferences = {
@@ -64,6 +64,27 @@ function generateArgs(additionalArgs?: string) {
   if (additionalArgs) args.push(` ${additionalArgs}`);
 
   return args.length > 0 ? `-${args.join("")}` : "";
+}
+
+export async function changeIsManuallyDecafed(operation:string) {
+  const currentDate = new Date();
+  const currentDayString = numberToDayString(currentDate.getDay()).toLowerCase();
+  let schedule: Schedule = JSON.parse((await LocalStorage.getItem(currentDayString)) || '{}');
+
+  switch(operation){
+    case "caffeinate" : {
+      schedule.IsManuallyDecafed = false;
+      await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
+      break;
+    }
+    case "decaffeinate" : {
+      schedule.IsManuallyDecafed = true;
+      await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
+      break
+    }
+
+    default : break
+  }
 }
 
 export function calculateDurationInSeconds(startHour: number, startMinute: number, endHour: number, endMinute: number): number {
