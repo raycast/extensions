@@ -3,15 +3,18 @@
   "display": "Node 18",
   "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
-    "lib": ["es2021"],
-    "module": "commonjs",
-    "target": "es2021",
+    "lib": ["ESNext"],
+    "module": "ESNext",
+    "target": "ESNext",
     "strict": true,
+    "strictNullChecks": true,
+    "noUncheckedIndexedAccess": true,
     "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
+    "moduleResolution": "Bundler",
     "resolveJsonModule": true
   }
 }
