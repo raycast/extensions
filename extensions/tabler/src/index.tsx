@@ -47,18 +47,41 @@ export default function Command() {
               key={tablerIcon.name}
               title={tablerIcon.name}
               content={Outline + tablerIcon.name + ".svg"}
-              accessory={filled ? { tooltip: "Filled Version Available", icon:{
-                source: Filled + tablerIcon.name + ".svg",
-                tintColor: {
-                  light: Color.SecondaryText,
-                  dark: Color.SecondaryText,
-                },
-              } } : undefined}
+              accessory={
+                filled
+                  ? {
+                      tooltip: "Filled Version Available",
+                      icon: {
+                        source: Filled + tablerIcon.name + ".svg",
+                        tintColor: {
+                          light: Color.SecondaryText,
+                          dark: Color.SecondaryText,
+                        },
+                      },
+                    }
+                  : undefined
+              }
               actions={
                 <ActionPanel>
-                  {outline && <Action.CopyToClipboard title="Copy Outline SVG" content={outline} icon={Outline + tablerIcon.name + ".svg"} />}
-                  {filled && <Action.CopyToClipboard title="Copy Filled SVG" content={filled} icon={Filled + tablerIcon.name + ".svg"} />}
-                  <Action.CopyToClipboard title="Copy Name" content={tablerIcon.name} shortcut={{ modifiers: ["cmd"], key: "arrowRight" }} />
+                  {outline && (
+                    <Action.CopyToClipboard
+                      title="Copy Outline SVG"
+                      content={outline}
+                      icon={Outline + tablerIcon.name + ".svg"}
+                    />
+                  )}
+                  {filled && (
+                    <Action.CopyToClipboard
+                      title="Copy Filled SVG"
+                      content={filled}
+                      icon={Filled + tablerIcon.name + ".svg"}
+                    />
+                  )}
+                  <Action.CopyToClipboard
+                    title="Copy Name"
+                    content={tablerIcon.name}
+                    shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
+                  />
                 </ActionPanel>
               }
             />
