@@ -95,8 +95,7 @@
     "format": "prettier --write .",
     "publish": "bunx @raycast/api@latest publish",
     "build": "ray build -e dist",
-    "build-graphql": "graphql-codegen --config src/api/github/codegen.ts",
-    "postinstall": "bun run build-graphql"
+    "postinstall": "graphql-codegen --config src/api/github/codegen.ts"
   },
   "trustedDependencies": [
     "@raycast/api"
