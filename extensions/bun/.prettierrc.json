@@ -1,0 +1,17 @@
+{
+  "printWidth": 120,
+  "singleQuote": false,
+  "plugins": ["@ianvs/prettier-plugin-sort-imports"],
+  "importOrderTypeScriptVersion": "5.3.3",
+  "importOrder": [
+    "<TYPES>",
+    "<TYPES>^[.]",
+    "",
+    "^@raycast/",
+    "",
+    "<THIRD_PARTY_MODULES>",
+    "<BUILTIN_MODULES>",
+    "",
+    "^[.]"
+  ]
+}
