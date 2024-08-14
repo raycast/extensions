@@ -16,7 +16,13 @@
       "title": "Luna Search",
       "subtitle": "Quickly find and open Luna Games",
       "description": "Search Luna's rich catalogue of content to directly find and open games",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [{
+          "name": "search",
+          "placeholder": "Search Term",
+          "type": "text",
+          "required": false
+      }]
     }
   ],
   "dependencies": {

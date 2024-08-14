@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { LaunchProps, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { LunaGame, LunaService } from "./services";
 import { GameList } from "./components";
@@ -7,9 +7,9 @@ import { DISPLAY_VALUES } from "./constants";
 // Create a singleton instance of the LunaService to handle game searches
 const LUNA = new LunaService();
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
   const [games, setGames] = useState<LunaGame[]>([]);
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>(props.arguments.search ?? "");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   /**
