@@ -1128,7 +1128,7 @@
 /extensions/rabbit-hole                                             @RobErskine
 /extensions/radicle                                                 @sebastinez
 /extensions/radix                                                   @peduarte @emlez
-/extensions/railway                                                 @coffee-cup @nagauta
+/extensions/railway                                                 @coffee-cup @nagauta @xmok
 /extensions/rain-radars                                             @danieldbird @koinzhang
 /extensions/raindrop-io                                             @lardissone @ShubhamVerma1811 @pernielsentikaer @sh-cho @tdkn @j3lte
 /extensions/ramda-documentation                                     @jbroomer
@@ -1396,7 +1396,7 @@
 /extensions/switchhosts                                             @tiancheng92
 /extensions/syntax-fm                                               @msmps
 /extensions/system-information                                      @Visual-Studio-Coder @nagauta @Visual-Studio-Coder
-/extensions/system-monitor                                          @hossammourad @Crayon144 @pernielsentikaer @lucasmezencio
+/extensions/system-monitor                                          @hossammourad @lucasmezencio @pernielsentikaer @lucasmezencio
 /extensions/tableplus                                               @pernielsentikaer @nagauta
 /extensions/tabler                                                  @zavbala
 /extensions/tabnews                                                 @juniorodilton
