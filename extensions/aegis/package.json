@@ -64,6 +64,41 @@
       "type": "checkbox",
       "description": "This option enables different list order based on last usage of OTP",
       "default": false
+    },
+    {
+      "required": false,
+      "name": "fallbackIconColor",
+      "label": "Fallback Icon Color",
+      "description": "Color of the fallback icon",
+      "type": "dropdown",
+      "data": [
+        {
+          "value": "black",
+          "title": "Black"
+        },
+        {
+          "value": "blue",
+          "title": "Blue"
+        },
+        {
+          "value": "green",
+          "title": "Green"
+        },
+        {
+          "value": "orange",
+          "title": "Orange"
+        },
+        {
+          "value": "purple",
+          "title": "Purple"
+        },
+        {
+          "value": "red",
+          "title": "Red"
+        }
+      ],
+      "title": "Fallback Icon Color",
+      "default": "blue"
     }
   ],
   "dependencies": {
