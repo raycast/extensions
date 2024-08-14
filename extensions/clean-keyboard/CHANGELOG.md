@@ -1,6 +1,6 @@
 # Clean Keyboard Changelog
 
-## [Fix Unlock Keyboard action]
+## [Fix Unlock Keyboard action]- {PR_MERGE_DATE}
 
 - Fixed the keyboard didn't unlock after the action was executed.
 
