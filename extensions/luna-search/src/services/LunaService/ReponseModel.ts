@@ -5,29 +5,29 @@ import { PageContext } from "./RequestModel";
  * The main content group contains an array of widgets.
  */
 interface PageMemberGroups {
-    mainContent: {
-        widgets: Widget[];
-    };
-};
+  mainContent: {
+    widgets: Widget[];
+  };
+}
 
 /**
  * Represents an action associated with a widget, such as a link or button.
  * The action contains a target, which is typically a URL or other destination.
  */
 interface Action {
-    target: string;
-};
+  target: string;
+}
 
 /**
  * Base unit within a Luna response, representing a widget.
  * Widgets can have actions, an ID, presentation data, a type, and nested widgets.
  */
 export interface Widget {
-    actions: Action[];
-    id: string;
-    presentationData: string;
-    type: string;
-    widgets: Widget[];
+  actions: Action[];
+  id: string;
+  presentationData: string;
+  type: string;
+  widgets: Widget[];
 }
 
 /**
@@ -35,6 +35,6 @@ export interface Widget {
  * The response contains a page context and a collection of page member groups.
  */
 export interface Response {
-    pageContext: PageContext;
-    pageMemberGroups: PageMemberGroups;
+  pageContext: PageContext;
+  pageMemberGroups: PageMemberGroups;
 }

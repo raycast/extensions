@@ -11,7 +11,7 @@ const CHROME_KEY = "com.google.Chrome";
  * Defines the props for the GameActions component.
  */
 interface Props {
-    game: LunaGame;
+  game: LunaGame;
 }
 
 /**
@@ -27,29 +27,31 @@ interface Props {
  * playUrl, an additional "Launch Game" action is displayed.
  */
 export function GameActions({ game }: Props): JSX.Element {
-    return <ActionPanel>
+  return (
+    <ActionPanel>
+      <Action
+        title={DISPLAY_VALUES.openTitle}
+        icon={Icon.Globe}
+        onAction={async () => {
+          await open(game.openUrl, CHROME_KEY);
+        }}
+      />
+      {game.playUrl ? (
         <Action
-            title={DISPLAY_VALUES.openTitle}
-            icon={Icon.Globe}
-            onAction={async () => {
-                await open(game.openUrl, CHROME_KEY);
-            }}
+          title={DISPLAY_VALUES.launchGame}
+          icon={Icon.Play}
+          onAction={async () => {
+            await open(game.playUrl ?? "", CHROME_KEY);
+          }}
         />
-        {game.playUrl ? (
-            <Action
-                title={DISPLAY_VALUES.launchGame}
-                icon={Icon.Play}
-                onAction={async () => {
-                    await open(game.playUrl ?? "", CHROME_KEY);
-                }}
-            />
-        ) : (
-            <></>
-        )}
-        <Action.CopyToClipboard
-            title={DISPLAY_VALUES.copyTitle}
-            shortcut={{ modifiers: ["cmd"], key: "." }}
-            content={game.rawUrl}
-        />
+      ) : (
+        <></>
+      )}
+      <Action.CopyToClipboard
+        title={DISPLAY_VALUES.copyTitle}
+        shortcut={{ modifiers: ["cmd"], key: "." }}
+        content={game.rawUrl}
+      />
     </ActionPanel>
+  );
 }

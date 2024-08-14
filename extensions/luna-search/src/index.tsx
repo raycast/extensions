@@ -1,7 +1,4 @@
-import {
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { LunaGame, LunaService } from "./services";
 import { GameList } from "./components";
@@ -34,7 +31,7 @@ export default function Command() {
     setIsLoading(true);
 
     try {
-      const games = await LUNA.search(query)
+      const games = await LUNA.search(query);
       setGames(games);
     } catch (err) {
       console.debug("Error fetching games:", err);
@@ -51,5 +48,5 @@ export default function Command() {
   // Render the GameList component, which is responsible for displaying the game list.
   // The GameList component receives the games, isLoading, searchCallback, and searchQuery
   // props from the Command component.
-  return <GameList games={games} isLoading={isLoading} searchCallback={searchGames} searchQuery={searchQuery} />
+  return <GameList games={games} isLoading={isLoading} searchCallback={searchGames} searchQuery={searchQuery} />;
 }

@@ -21,15 +21,15 @@ const EMPTY_INDICATOR = "empty";
  * Represents the context for the search query, including the query string and the sort order.
  */
 interface SearchContext {
-    query: string;
-    sort: SearchSortOrder;
+  query: string;
+  sort: SearchSortOrder;
 }
 
 /**
  * Represents the body of the search request, which extends the base request.
  */
 interface SearchBody extends Request {
-    searchContext: SearchContext
+  searchContext: SearchContext;
 }
 
 /**
@@ -38,24 +38,24 @@ interface SearchBody extends Request {
  * and sets the page type to the SEARCH_PAGE_TYPE constant.
  */
 export class Search {
-    readonly headers: Record<string, string>;
-    readonly body: SearchBody;
+  readonly headers: Record<string, string>;
+  readonly body: SearchBody;
 
-    constructor(readonly query: string, readonly timeout: number = DEFAULT_TIMEOUT_S) {
-        this.headers = DEFAULT_HEADERS;
-        // Trim query to 1000 for safety:
-        const safeQuery = query.substring(0, 1000);
-        const body: SearchBody = {
-            ...BASE_REQUEST,
-            searchContext: {
-                query: safeQuery,
-                sort: SEARCH_DEFAULT_SORT_ORDER
-            },
-            timeout
-        };
-        body.pageContext.pageType = SEARCH_PAGE_TYPE;
-        this.body = body;
-    }
+  constructor(readonly query: string, readonly timeout: number = DEFAULT_TIMEOUT_S) {
+    this.headers = DEFAULT_HEADERS;
+    // Trim query to 1000 for safety:
+    const safeQuery = query.substring(0, 1000);
+    const body: SearchBody = {
+      ...BASE_REQUEST,
+      searchContext: {
+        query: safeQuery,
+        sort: SEARCH_DEFAULT_SORT_ORDER,
+      },
+      timeout,
+    };
+    body.pageContext.pageType = SEARCH_PAGE_TYPE;
+    this.body = body;
+  }
 }
 
 /**
@@ -66,5 +66,5 @@ export class Search {
  * @returns True if the search returned no results, false otherwise.
  */
 export function isEmpty(res: Response): boolean {
-    return res.pageContext.pageType.includes(EMPTY_INDICATOR);
+  return res.pageContext.pageType.includes(EMPTY_INDICATOR);
 }

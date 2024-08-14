@@ -28,7 +28,8 @@
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.8.8",
     "typescript": "^5.2.2"
   },
   "scripts": {

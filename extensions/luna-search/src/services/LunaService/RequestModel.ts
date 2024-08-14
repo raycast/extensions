@@ -2,8 +2,8 @@
  * Represents the context of a page in the application, including the page type and page ID.
  */
 export interface PageContext {
-    pageType: string;
-    pageId: string;
+  pageType: string;
+  pageId: string;
 }
 
 /**
@@ -15,12 +15,12 @@ export interface PageContext {
  * - clientContext: The context of the client, including the browser metadata.
  */
 export interface Request {
-    timeout: number;
-    featureScheme: string;
-    pageContext: PageContext;
-    clientContext: {
-        browserMetadata: {
-            browserType: string;
-        };
+  timeout: number;
+  featureScheme: string;
+  pageContext: PageContext;
+  clientContext: {
+    browserMetadata: {
+      browserType: string;
     };
+  };
 }

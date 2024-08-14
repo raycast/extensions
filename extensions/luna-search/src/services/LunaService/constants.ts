@@ -31,27 +31,27 @@ export const FEATURE_SCHEME = "WEB_V1";
  * referrer, and other metadata relevant to the API endpoint.
  */
 export const DEFAULT_HEADERS = {
-    "User-Agent": "RAYCAST",
-    "Accept": "*/*",
-    "Accept-Language": "en-US",
-    "Accept-Encoding": "gzip, deflate, br, zstd",
-    "Referer": "https://luna.amazon.com/",
-    "x-amz-timezone": "America/Los_Angeles",
-    "x-amz-device-type": "browser",
-    "x-amz-platform": "web",
-    "x-amz-locale": "en_US",
-    "x-amz-marketplace-id": "ATVPDKIKX0DER",
-    "x-amz-country-of-residence": "US",
-    "Content-Type": "text/plain;charset=UTF-8",
-    "Origin": "https://luna.amazon.com",
+  "User-Agent": "RAYCAST",
+  Accept: "*/*",
+  "Accept-Language": "en-US",
+  "Accept-Encoding": "gzip, deflate, br, zstd",
+  Referer: "https://luna.amazon.com/",
+  "x-amz-timezone": "America/Los_Angeles",
+  "x-amz-device-type": "browser",
+  "x-amz-platform": "web",
+  "x-amz-locale": "en_US",
+  "x-amz-marketplace-id": "ATVPDKIKX0DER",
+  "x-amz-country-of-residence": "US",
+  "Content-Type": "text/plain;charset=UTF-8",
+  Origin: "https://luna.amazon.com",
 };
 
 /**
  * The default page context used in API requests, which requires a pageType to be specified by the consumer.
  */
 const DEFAULT_PAGE_CONTEXT: PageContext = {
-    pageType: "",
-    pageId: DEFAULT_PAGE_ID
+  pageType: "",
+  pageId: DEFAULT_PAGE_ID,
 };
 
 /**
@@ -60,12 +60,12 @@ const DEFAULT_PAGE_CONTEXT: PageContext = {
  * This can be used as a base for constructing more specific API requests.
  */
 export const BASE_REQUEST: Request = {
-    timeout: DEFAULT_TIMEOUT_S,
-    featureScheme: FEATURE_SCHEME,
-    pageContext: DEFAULT_PAGE_CONTEXT,
-    clientContext: {
-        browserMetadata: {
-            browserType: "RAYCAST"
-        }
-    }
+  timeout: DEFAULT_TIMEOUT_S,
+  featureScheme: FEATURE_SCHEME,
+  pageContext: DEFAULT_PAGE_CONTEXT,
+  clientContext: {
+    browserMetadata: {
+      browserType: "RAYCAST",
+    },
+  },
 };

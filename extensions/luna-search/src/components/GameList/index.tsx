@@ -9,10 +9,10 @@ import { GameActions } from "./GameActions";
  * Defines the props for the GameList component.
  */
 interface Props {
-    games: LunaGame[];
-    isLoading: boolean;
-    searchCallback: (query: string) => Promise<void>;
-    searchQuery: string;
+  games: LunaGame[];
+  isLoading: boolean;
+  searchCallback: (query: string) => Promise<void>;
+  searchQuery: string;
 }
 
 /**
@@ -32,25 +32,29 @@ interface Props {
  * If there are no games to display, the EmptyGameList component is shown instead.
  */
 export function GameList({ games, isLoading, searchCallback, searchQuery }: Props): JSX.Element {
-    return <List
-        isLoading={isLoading}
-        isShowingDetail={!isLoading && games.length > 0}
-        filtering={false}
-        onSearchTextChange={searchCallback}
-        searchBarPlaceholder={DISPLAY_VALUES.searchPlaceholder}
-        searchText={searchQuery}
-        throttle={true}
+  return (
+    <List
+      isLoading={isLoading}
+      isShowingDetail={!isLoading && games.length > 0}
+      filtering={false}
+      onSearchTextChange={searchCallback}
+      searchBarPlaceholder={DISPLAY_VALUES.searchPlaceholder}
+      searchText={searchQuery}
+      throttle={true}
     >
-        {games.length > 0 ? (
-            games.map((game) => (
-                <List.Item
-                    key={game.openUrl}
-                    title={game.title}
-                    subtitle={game.publisher}
-                    actions={<GameActions game={game} />}
-                    detail={<GameDetail game={game} searchCallback={async (genre: string) => await searchCallback(genre)} />}
-                />
-            ))
-        ) : <EmptyGameList isLoading={isLoading} isQueryEmpty={!!searchQuery} />}
+      {games.length > 0 ? (
+        games.map((game) => (
+          <List.Item
+            key={game.openUrl}
+            title={game.title}
+            subtitle={game.publisher}
+            actions={<GameActions game={game} />}
+            detail={<GameDetail game={game} searchCallback={async (genre: string) => await searchCallback(genre)} />}
+          />
+        ))
+      ) : (
+        <EmptyGameList isLoading={isLoading} isQueryEmpty={!searchQuery || searchQuery.length == 0} />
+      )}
     </List>
+  );
 }
