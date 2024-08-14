@@ -1,6 +1,6 @@
 # Mail Changelog
 
-## [Fixes and Improvements] - {PR_MERGE_DATE}
+## [Fixes and Improvements] - 2024-08-14
 
 - [#13936](https://github.com/raycast/extensions/issues/13936): Fixed See Recent Messages to factor in Message Limit.
 - Visual Improvements for See Recent Messages and See Important Messages commands.
