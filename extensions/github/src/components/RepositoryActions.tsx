@@ -131,7 +131,7 @@ export default function RepositoryActions({
 
         {repository.viewerHasStarred ? (
           <Action
-            title="Remove Star From Repository"
+            title="Remove Star from Repository"
             icon={Icon.StarDisabled}
             onAction={removeStar}
             shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
