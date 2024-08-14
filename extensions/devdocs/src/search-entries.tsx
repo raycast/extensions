@@ -76,8 +76,9 @@ function EntryItem({ entry, slug }: { entry: Entry; slug: string }) {
       keywords={[entry.type].concat(entry.name.split("."))}
       actions={
         <ActionPanel>
-          {openInBrowserAction(slug, entry)}
-          {openInAppAction(slug, entry)}
+          {true
+            ? [openInBrowserAction(slug, entry), openInAppAction(slug, entry)]
+            : [openInAppAction(slug, entry), openInBrowserAction(slug, entry)]}
         </ActionPanel>
       }
     />
