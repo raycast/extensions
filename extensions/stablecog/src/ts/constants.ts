@@ -9,6 +9,7 @@ export const scoreThreshold = 50;
 export const maxPromptLength = 500;
 
 export const modelIdToName = {
+  "0a99668b-45bd-4f7e-aa9c-f9aaa41ef13b": "FLUX.1",
   "986d447d-c38b-4218-a2c8-6e0b691f47ec": "Stable Diffusion 3",
   "b6c1372f-31a7-457c-907c-d292a6ffef97": "Luna Diffusion",
   "048b4aa3-5586-47ed-900f-f4341c96bdb2": "Stable Diffusion v1.5",
@@ -33,19 +34,6 @@ export const modelNameToId = {} as Record<TModelName, TModelId>;
 for (const [id, name] of Object.entries(modelIdToName)) {
   modelNameToId[name] = id as TModelId;
 }
-
-export const schedulerIdToName = {
-  "6fb13b76-9900-4fa4-abf8-8f843e034a7f": "Euler",
-  "af2679a4-dbbb-4950-8c06-c3bb15416ef6": "Euler A.",
-  "9d175114-9a26-4371-861c-729ba9ecb4da": "DPM Multistep",
-  "55027f8b-f046-4e71-bc51-53d5448661e0": "LMS",
-  "82cf78dd-6afb-48cc-aca6-14224cca6950": "DDIM",
-  "b7224e56-1440-43b9-ac86-66d66f9e8c91": "P Sampler",
-  "cc1b8dbf-0aec-4e52-8110-8082506fb7ba": "DDPM",
-} as const;
-
-export type TSchedulerId = keyof typeof schedulerIdToName;
-export type TSchedulerName = (typeof schedulerIdToName)[TSchedulerId];
 
 export const aspectRatioToSize = {
   "1:1": { width: 1024, height: 1024 },
