@@ -75,8 +75,8 @@ export function RandomPassword() {
         if (value && isNaN(parseInt(value))) {
           return "Must be a number";
         }
-        if (value && (parseInt(value) < 1 || parseInt(value) > 64)) {
-          return "Password length must be between 1 and 64 characters";
+        if (value && (parseInt(value) < 4 || parseInt(value) > 64)) {
+          return "Password length must be between 5 and 64 characters";
         } else if (!value) {
           return "The item is required";
         }
