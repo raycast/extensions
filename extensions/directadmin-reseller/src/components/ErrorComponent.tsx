@@ -5,8 +5,8 @@ type ErrorComponentProps = {
   errorResponse: ErrorResponse | Error;
 };
 export default function ErrorComponent({ errorResponse }: ErrorComponentProps) {
-  const text = ("text" in errorResponse) ? errorResponse.text : "";
-  const details = ("text" in errorResponse) ? errorResponse.details : errorResponse.message;
+  const text = "text" in errorResponse ? errorResponse.text : "";
+  const details = "text" in errorResponse ? errorResponse.details : errorResponse.message;
   return (
     <Detail
       actions={

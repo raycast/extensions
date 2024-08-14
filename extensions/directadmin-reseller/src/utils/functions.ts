@@ -14,7 +14,7 @@ export function getTitleFromKey(key: string) {
 export function getTextAndIconFromVal(val: string | boolean) {
   let icon = undefined;
   let text = undefined;
-  
+
   const uppercase = val.toString().toUpperCase();
   switch (uppercase) {
     case "ON":
@@ -28,17 +28,17 @@ export function getTextAndIconFromVal(val: string | boolean) {
     case "FALSE":
       icon = Icon.Xmark;
       break;
-  
+
     default:
       text = val.toString();
       break;
   }
-  
+
   return { text, icon };
 }
 
-export function generateApiToken(userToImpersonate="") {
+export function generateApiToken(userToImpersonate = "") {
   return userToImpersonate === ""
-          ? RESELLER_API_TOKEN
-          : btoa(`${RESELLER_USERNAME}|${userToImpersonate}:${RESELLER_PASSWORD}`);
+    ? RESELLER_API_TOKEN
+    : btoa(`${RESELLER_USERNAME}|${userToImpersonate}:${RESELLER_PASSWORD}`);
 }

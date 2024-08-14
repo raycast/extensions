@@ -274,7 +274,7 @@ type GetUserConfigProps = {
 };
 function GetUserConfig({ user }: GetUserConfigProps) {
   const { isLoading, data: config, revalidate } = useGetUserConfig(user);
-  
+
   return (
     <Detail
       navigationTitle="Get User Config"
@@ -286,9 +286,16 @@ function GetUserConfig({ user }: GetUserConfigProps) {
             {Object.entries(config).map(([key, val]) => {
               if (key === "error") return;
               const title = getTitleFromKey(key);
-              if (val instanceof Array) return (val.length) ? <Detail.Metadata.TagList key={title} title={title}>
-                {val.map(item => <Detail.Metadata.TagList.Item key={item} text={item} />)}
-              </Detail.Metadata.TagList> : <Detail.Metadata.Label key={title} title={title} icon={Icon.Minus} />
+              if (val instanceof Array)
+                return val.length ? (
+                  <Detail.Metadata.TagList key={title} title={title}>
+                    {val.map((item) => (
+                      <Detail.Metadata.TagList.Item key={item} text={item} />
+                    ))}
+                  </Detail.Metadata.TagList>
+                ) : (
+                  <Detail.Metadata.Label key={title} title={title} icon={Icon.Minus} />
+                );
 
               const { text, icon } = getTextAndIconFromVal(val);
               return <Detail.Metadata.Label key={key} title={title} text={text} icon={icon} />;
@@ -476,7 +483,8 @@ function CreateUser({ onUserCreated }: CreateUserProps) {
   }, []);
 
   return (
-    <Form isLoading={isLoading}
+    <Form
+      isLoading={isLoading}
       navigationTitle="Create User"
       actions={
         <ActionPanel>

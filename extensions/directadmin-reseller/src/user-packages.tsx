@@ -11,21 +11,21 @@ export default function UserPackages() {
   ) : (
     <List isLoading={isLoading}>
       {packages?.map((packageName) => (
-          <List.Item
-            key={packageName}
-            title={packageName}
-            icon={Icon.Box}
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  title="Get Detailed Information"
-                  icon={Icon.Network}
-                  target={<GetPackageInformation packageName={packageName} />}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
+        <List.Item
+          key={packageName}
+          title={packageName}
+          icon={Icon.Box}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Get Detailed Information"
+                icon={Icon.Network}
+                target={<GetPackageInformation packageName={packageName} />}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
     </List>
   );
 }
@@ -35,7 +35,7 @@ type GetPackageInformationProps = {
 };
 function GetPackageInformation({ packageName }: GetPackageInformationProps) {
   const { isLoading, data: information } = useGetUserPackageInformation(packageName);
-  
+
   return (
     <Detail
       navigationTitle="User Package Information"

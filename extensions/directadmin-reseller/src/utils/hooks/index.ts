@@ -16,7 +16,7 @@ export function useGetUserPackageInformation(packageName: string) {
   return useLegacyDirectAdmin<GetUserPackageInformationResponse>("PACKAGES_USER", {
     params: { package: packageName },
     animatedToastMessage: "Fetching User Package Information",
-    successToastMessage: "Fetched User Package Information"
+    successToastMessage: "Fetched User Package Information",
   });
 }
 
@@ -24,6 +24,6 @@ export function useGetUserPackageInformation(packageName: string) {
 export function useGetUserConfig(user: string) {
   return useJsonDirectAdmin<GetUserConfigResponse>(`users/${user}/config`, {
     animatedToastMessage: "Fetching User Config",
-    successToastMessage: "Fetched User Config"
+    successToastMessage: "Fetched User Config",
   });
 }
