@@ -53,6 +53,13 @@ export function RandomPassword() {
         toast.title = "Failed to generate password";
         if (e instanceof Error) {
           toast.message = e.message;
+          toast.primaryAction = {
+            title: "Copy logs",
+            onAction: async (toast) => {
+              await Clipboard.copy((e as Error).message);
+              await toast.hide();
+            },
+          };
         }
       } finally {
         setIsLoading(false);
@@ -65,6 +72,9 @@ export function RandomPassword() {
     },
     validation: {
       length: (value) => {
+        if (value && isNaN(parseInt(value))) {
+          return "Must be a number";
+        }
         if (value && (parseInt(value) < 1 || parseInt(value) > 64)) {
           return "Password length must be between 1 and 64 characters";
         } else if (!value) {
@@ -101,7 +111,7 @@ export function RandomPassword() {
         </ActionPanel>
       }
     >
-      <Form.Description title={"🔑Password"} text={`${generatedPassword || "Generating..."}\n\n\n`} />
+      <Form.Description title={"🔑 Password"} text={`${generatedPassword || "Generating..."}\n\n\n`} />
 
       <Form.Separator />
       <Form.TextField title="Characters" {...itemProps.length} />

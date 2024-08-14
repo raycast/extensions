@@ -29,8 +29,7 @@ export function CopyToClipboard({
         try {
           let stdout;
           if (attribute === "otp") {
-            // fix https://github.com/raycast/extensions/issues/13513
-            // based on OTP-type
+            // based on OTP-type not field name
             stdout = execFileSync(CLI_PATH, ["item", "get", id, "--otp"]);
           } else {
             const attributeQueryParam = attribute ? `?attribute=${attribute}` : "";
