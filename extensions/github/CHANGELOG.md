@@ -3,7 +3,7 @@
 ## [Clone Repo Fixes] - {PR_MERGE_DATE}
 
 - [#13872](https://github.com/raycast/extensions/issues/13872): Brought back the feature for Raycast to act as a fast brower to open cloned repo.
-- ⚠️Re-added _Clone Path_ preference without any default value this time. If no value is provided, user will need to specify directory with the form.
+- Re-added _Clone Path_ preference without any default value this time. If no value is provided, user will need to specify directory with the form.
 - If a value for _Clone Path_ preference is specified, the old behavior of cloning the repo (or opening if it exists) is enacted.
 
 ## [My Issues and PRs Improvements] - 2024-08-12

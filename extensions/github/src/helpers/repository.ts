@@ -96,6 +96,7 @@ export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment)
   toast.title = "Code editor launched!";
   toast.style = Toast.Style.Success;
 }
+
 // History was stored in `LocalStorage` before, after migration it's stored in `Cache`
 async function loadVisitedRepositories() {
   const item = await LocalStorage.getItem<string>(VISITED_REPOSITORIES_KEY);
