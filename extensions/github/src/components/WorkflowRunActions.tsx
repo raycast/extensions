@@ -127,12 +127,12 @@ export function WorkflowRunActions({ workflowRun, repository, mutateList }: Work
       <Action.OpenInBrowser url={workflowRun.html_url} />
 
       {workflowRun.status === "completed" ? (
-        <Action title="Re-run Workflow" icon={Icon.Clock} onAction={rerunWorkflow} />
+        <Action title="Re-Run Workflow" icon={Icon.Clock} onAction={rerunWorkflow} />
       ) : null}
 
       {workflowRun.status === "completed" && workflowRun.conclusion !== "success" ? (
         <Action
-          title="Re-run Workflow Failed Jobs"
+          title="Re-Run Workflow Failed Jobs"
           icon={Icon.Redo}
           onAction={rerunWorkflowFailedJobs}
           shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
