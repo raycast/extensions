@@ -1,8 +1,6 @@
 import { AI, closeMainWindow, environment, getPreferenceValues, LaunchProps, showToast, Toast } from '@raycast/api';
-import { getLists, handleError, silentlyOpenThingsURL } from './api';
+import { handleError, silentlyOpenThingsURL } from './api';
 import qs from 'qs';
-import { parse } from 'chrono-node';
-import { format } from 'date-fns';
 
 export default async function Command(props: LaunchProps & { arguments: Arguments.QuickAddTodo }) {
   try {
