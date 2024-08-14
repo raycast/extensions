@@ -1,6 +1,6 @@
 # Jira Changelog
 
-## [Fix epic autocomplete to include all epics of a selected project.] - {PR_MERGE_DATE}
+## [Fix epic autocomplete to include all epics of a selected project.] - 2024-08-14
 
 - When a user searches for an epic, the extension prioritizes retrieving search results from Current Search over History Search
 
