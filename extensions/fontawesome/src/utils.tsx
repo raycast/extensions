@@ -3,7 +3,7 @@ import { Clipboard, showHUD, ActionPanel, Action } from '@raycast/api';
 
 export const copySvgToClipboard = async (icon: SearchItem) => {
   // Since v6, Font Awesome stopped setting the SVGs fill color to currentColor, this restores that behavior.
-  const svgWithCurrentColor = icon.svgs[0].toString().replace(/<path/g, '<path fill="currentColor"');
+  const svgWithCurrentColor = icon.svgs[0]['html'].toString().replace(/<path/g, '<path fill="currentColor"');
   await Clipboard.copy(svgWithCurrentColor);
   await showHUD('Copied SVG to clipboard!');
 };

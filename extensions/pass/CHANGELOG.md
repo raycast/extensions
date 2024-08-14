@@ -1,6 +1,12 @@
 # Pass Changelog
 
-## [Initial Version] - 2024-05-18
+## [1.1.0] - 2024-06-16
+
+- BugFix: Error reading password whose name contains space.
+- Pass-otp extension support.
+- Add defaultAction preference to set content row behavior.
+
+## [1.0.0] - 2024-05-18
 
 Add MVP functionality
 

@@ -8,7 +8,7 @@ export async function getNetworkDrives(set_data: Dispatch<SetStateAction<string[
   const usr: string = get_pref_smb_usr();
   const pwd: string = get_pref_smb_pwd();
   exec(
-    `/opt/homebrew/bin/smbclient -L //${ip} --grepable --user=${usr} --password=${pwd} --workgroup=WORKGROUP`,
+    `/usr/bin/smbutil -v view -f //${usr}:${pwd}@${ip} | awk '/Disk/ {print $1}' FS="  "`,
     async (err, stdout, stderr) => {
       if (err) {
         // Prompt user to install "samba" if "smbclient" command is not found
@@ -27,11 +27,8 @@ export async function getNetworkDrives(set_data: Dispatch<SetStateAction<string[
           const stdout_drive: string[] = [];
           const stdout_strlines = stdout.split("\n");
           stdout_strlines.forEach((line) => {
-            if (line.startsWith("Disk")) {
-              const stdout_strlines_part = line.split("|");
-              if (stdout_strlines_part.length > 1) {
-                stdout_drive.push(stdout_strlines_part[1]);
-              }
+            if (line.length != 0) {
+              stdout_drive.push(line);
             }
           });
           set_data(stdout_drive);

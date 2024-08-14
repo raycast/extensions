@@ -118,7 +118,7 @@ export class BearDb {
 
   getNotes(searchQuery: string, tag?: string): Note[] {
     const statement = this.database.prepare(
-      this.getBearVersion() === 2 ? BearDb.searchNotesQueries.v2 : BearDb.searchNotesQueries.v1
+      this.getBearVersion() === 2 ? BearDb.searchNotesQueries.v2 : BearDb.searchNotesQueries.v1,
     );
     if (tag) {
       statement.bind({ ":query": `${searchQuery}`, ":tag": `${tag}` });
@@ -152,7 +152,7 @@ export class BearDb {
 
   getBacklinks(noteID: string): Note[] {
     const statement = this.database.prepare(
-      this.getBearVersion() === 2 ? BearDb.getNoteBacklinksQueries.v2 : BearDb.getNoteBacklinksQueries.v1
+      this.getBearVersion() === 2 ? BearDb.getNoteBacklinksQueries.v2 : BearDb.getNoteBacklinksQueries.v1,
     );
     statement.bind({ ":id": noteID });
 
@@ -169,7 +169,7 @@ export class BearDb {
 
   getNoteLinks(noteID: string): Note[] {
     const statement = this.database.prepare(
-      this.getBearVersion() === 2 ? BearDb.getNoteLinksQueries.v2 : BearDb.getNoteLinksQueries.v1
+      this.getBearVersion() === 2 ? BearDb.getNoteLinksQueries.v2 : BearDb.getNoteLinksQueries.v1,
     );
     statement.bind({ ":id": noteID });
 

@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
-import { ListItemMetadata } from "./list-item-metadata";
-import { Server } from "../lib/speedtest.types";
 import { icons } from "../lib/speedtest-pretty-names";
+import { Server } from "../lib/speedtest.types";
+import { ListItemMetadata } from "./list-item-metadata";
 
 type ServerListItemProps = {
   serverName: string;

@@ -95,7 +95,7 @@ export async function createAlias(values: ParamNewAlias): Promise<AliasResponse 
     });
 }
 
-export async function createRandomAlias(note?: string): Promise<AliasResponse> {
+export async function createRandomAlias(note: string): Promise<AliasResponse> {
   const api_token = preferences.api_token;
   const app_url = preferences.app_url;
   const mode = preferences.mode;
@@ -103,15 +103,11 @@ export async function createRandomAlias(note?: string): Promise<AliasResponse> {
   const endpoint_url = `${app_url}/api/alias/random/new?mode=${mode}`;
 
   return axios
-    .post(
-      endpoint_url,
-      { note },
-      {
-        headers: {
-          Authentication: api_token,
-        },
+    .post(endpoint_url, note !== "" ? { note } : {}, {
+      headers: {
+        Authentication: api_token,
       },
-    )
+    })
     .then((response) => {
       return response.data as AliasResponse;
     });

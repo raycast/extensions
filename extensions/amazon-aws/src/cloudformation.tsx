@@ -9,8 +9,8 @@ import {
   List,
   showToast,
   Toast,
-  useNavigation,
   Clipboard,
+  Keyboard,
 } from "@raycast/api";
 import {
   CloudFormationClient,
@@ -18,34 +18,49 @@ import {
   StackSummary,
   UpdateTerminationProtectionCommand,
 } from "@aws-sdk/client-cloudformation";
-import { useCachedState } from "@raycast/utils";
+import { useCachedState, useFrecencySorting } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { getErrorMessage, resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
 import { useExports, useStackResources, useStacks } from "./hooks/use-cfn";
 
+enum ResourceType {
+  Stacks = "Stacks",
+  Exports = "Exports",
+}
+type SetResourceType = { setResourceType: (value: ResourceType) => void };
+
 export default function CloudFormation() {
-  const [isExportsEnabled, setExportsEnabled] = useCachedState<boolean>("show", false, {
-    cacheNamespace: "aws-cfn-exports",
+  const [resourceType, setResourceType] = useCachedState<ResourceType>("resource-type", ResourceType.Stacks, {
+    cacheNamespace: "aws-cfn",
   });
 
-  if (isExportsEnabled) {
-    return <CloudFormationExports setExportsEnabled={setExportsEnabled} />;
+  if (resourceType === ResourceType.Exports) {
+    return <CloudFormationExports {...{ setResourceType }} />;
   }
-  return <CloudFormationStacks setExportsEnabled={setExportsEnabled} />;
+  return <CloudFormationStacks {...{ setResourceType }} />;
 }
 
-const CloudFormationStacks = ({ setExportsEnabled }: { setExportsEnabled: (value: boolean) => void }) => {
-  const { stacks, error, isLoading, revalidate, pagination } = useStacks();
+const CloudFormationStacks = ({ setResourceType }: SetResourceType) => {
+  const { stacks, error, isLoading, mutate } = useStacks();
+
+  const {
+    data: sortedStacks,
+    visitItem: visit,
+    resetRanking,
+  } = useFrecencySorting(stacks, {
+    namespace: "aws-cfn-stacks",
+    key: (stack) => stack.StackName!,
+    sortUnvisited: (a, b) => a.StackName!.localeCompare(b.StackName!),
+  });
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Filter stacks by name, status or description..."
       filtering
-      pagination={pagination}
       navigationTitle="CloudFormation Stacks"
-      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={mutate} />}
     >
       {error && (
         <List.EmptyView
@@ -54,69 +69,66 @@ const CloudFormationStacks = ({ setExportsEnabled }: { setExportsEnabled: (value
           icon={{ source: Icon.Warning, tintColor: Color.Red }}
         />
       )}
-      {!error && stacks?.length === 0 && (
+      {!error && sortedStacks.length === 0 && (
         <List.EmptyView title="No stacks found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
-      {(stacks || [])
-        .sort((a, b) => `${a.StackName}`.localeCompare(`${b.StackName}`))
-        .map((s) => (
-          <List.Item
-            key={s.stackKey}
-            keywords={[s.StackName || "", s.StackStatus || "", s.TemplateDescription || ""]}
-            icon={"aws-icons/cfn/stack.png"}
-            title={s.StackName || ""}
-            subtitle={s.TemplateDescription}
-            actions={
-              <ActionPanel>
-                <AwsAction.Console url={resourceToConsoleLink(s.StackId, "AWS::CloudFormation::Stack")} />
-                <ActionPanel.Section title="Stack Actions">
-                  <Action.Push
-                    icon={Icon.Eye}
-                    title="Show Stack Resources"
-                    target={<CloudFormationStackResources stack={s} />}
-                    shortcut={{ modifiers: ["ctrl"], key: "r" }}
-                  />
-                  <Action
-                    icon={Icon.LockUnlocked}
-                    title="Update Termination Protection"
-                    shortcut={{ modifiers: ["ctrl"], key: "t" }}
-                    onAction={() => updateTerminationProtection(s.StackName || "")}
-                  />
-                  <Action.CopyToClipboard title="Copy Stack ID" content={s.StackId || ""} />
-                  <Action.CopyToClipboard title="Copy Stack Name" content={s.StackName || ""} />
-                </ActionPanel.Section>
-                <ActionPanel.Section title="Other Resources">
-                  <Action.Push
-                    icon={Icon.Eye}
-                    title={"Show Exports"}
-                    target={
-                      <CloudFormationExports revalidateStacks={revalidate} setExportsEnabled={setExportsEnabled} />
-                    }
-                    onPush={() => setExportsEnabled(true)}
-                    shortcut={{ modifiers: ["ctrl"], key: "e" }}
-                  />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-            accessories={[
-              { date: s.CreationTime, icon: Icon.Calendar, tooltip: "Creation Time" },
-              { icon: statusToIcon(s.StackStatus || ""), tooltip: s.StackStatus },
-            ]}
-          />
-        ))}
+      {sortedStacks.map((s) => (
+        <List.Item
+          key={s.StackId}
+          keywords={[s.StackName || "", s.StackStatus || "", s.TemplateDescription || ""]}
+          icon={"aws-icons/cfn/stack.png"}
+          title={s.StackName || ""}
+          subtitle={s.TemplateDescription}
+          actions={
+            <ActionPanel>
+              <AwsAction.Console
+                url={resourceToConsoleLink(s.StackId, "AWS::CloudFormation::Stack")}
+                onAction={() => visit(s)}
+              />
+              <ActionPanel.Section title="Stack Actions">
+                <Action.Push
+                  icon={Icon.Eye}
+                  title="Show Stack Resources"
+                  target={<CloudFormationStackResources stack={s} />}
+                  shortcut={{ modifiers: ["ctrl"], key: "r" }}
+                  onPush={() => visit(s)}
+                />
+                <Action
+                  icon={Icon.LockUnlocked}
+                  title="Update Termination Protection"
+                  shortcut={{ modifiers: ["ctrl"], key: "t" }}
+                  onAction={async () => {
+                    await visit(s);
+                    await updateTerminationProtection(s.StackName || "");
+                  }}
+                />
+                <Action.CopyToClipboard title="Copy Stack ID" content={s.StackId || ""} onCopy={() => visit(s)} />
+                <Action.CopyToClipboard title="Copy Stack Name" content={s.StackName || ""} onCopy={() => visit(s)} />
+                <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => resetRanking(s)} />
+              </ActionPanel.Section>
+              <AwsAction.SwitchResourceType
+                {...{ setResourceType, current: ResourceType.Stacks, enumType: ResourceType }}
+              />
+            </ActionPanel>
+          }
+          accessories={[
+            { date: s.CreationTime, icon: Icon.Calendar, tooltip: "Creation Time" },
+            { icon: statusToIcon(s.StackStatus || ""), tooltip: s.StackStatus },
+          ]}
+        />
+      ))}
     </List>
   );
 };
 
 const CloudFormationStackResources = ({ stack }: { stack: StackSummary }) => {
-  const { resources, error, isLoading, pagination } = useStackResources(stack.StackName || "");
+  const { resources, error, isLoading } = useStackResources(stack.StackName || "");
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Filter resource by name, type or status..."
       filtering
-      pagination={pagination}
       navigationTitle="Stack Resources"
     >
       {error && (
@@ -131,7 +143,7 @@ const CloudFormationStackResources = ({ stack }: { stack: StackSummary }) => {
 
         return (
           <List.Item
-            key={r.resourceKey}
+            key={r.LogicalResourceId}
             icon={{ source: consoleLink ? Icon.Link : Icon.Tag, tintColor: Color.Blue }}
             title={r.PhysicalResourceId || ""}
             subtitle={r.ResourceType}
@@ -153,24 +165,26 @@ const CloudFormationStackResources = ({ stack }: { stack: StackSummary }) => {
   );
 };
 
-const CloudFormationExports = ({
-  revalidateStacks,
-  setExportsEnabled,
-}: {
-  revalidateStacks?: () => void;
-  setExportsEnabled: (value: boolean) => void;
-}) => {
-  const { exports, isLoading, revalidate, error, pagination } = useExports();
-  const { push, pop } = useNavigation();
+const CloudFormationExports = ({ setResourceType }: SetResourceType) => {
+  const { exports, isLoading, error, mutate } = useExports();
+
+  const {
+    data: sortedExports,
+    visitItem: visit,
+    resetRanking,
+  } = useFrecencySorting(exports, {
+    namespace: "aws-cfn-exports",
+    key: (e) => e.Name!,
+    sortUnvisited: (a, b) => a.Name!.localeCompare(b.Name!),
+  });
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Filter exports by name, value or stack..."
-      pagination={pagination}
       filtering
       navigationTitle="CloudFormation Exports"
-      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={mutate} />}
     >
       {error && (
         <List.EmptyView
@@ -179,43 +193,31 @@ const CloudFormationExports = ({
           icon={{ source: Icon.Warning, tintColor: Color.Red }}
         />
       )}
-      {!error && exports?.length === 0 && (
+      {!error && sortedExports.length === 0 && (
         <List.EmptyView title="No exports found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
-      {(exports || [])
-        .sort((a, b) => `${a.Name}`.localeCompare(`${b.Name}`))
-        .map((e) => (
-          <List.Item
-            key={e.exportKey}
-            icon={{ source: Icon.Hashtag, tintColor: Color.Purple }}
-            title={e.Value || ""}
-            subtitle={e.Name}
-            keywords={[e.Name || "", e.ExportingStackId || "", e.Value || ""]}
-            accessories={[{ tag: e.ExportingStackId?.split("/")[1] }]}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard title="Copy Export Name" content={e.Name || ""} />
-                <Action.CopyToClipboard title="Copy Export Value" content={e.Value || ""} />
-                <ActionPanel.Section title="Resource Types">
-                  <Action
-                    icon={Icon.Eye}
-                    title="Show Stacks"
-                    onAction={() => {
-                      pop();
-                      if (revalidateStacks) {
-                        revalidateStacks();
-                      } else {
-                        push(<CloudFormationStacks setExportsEnabled={setExportsEnabled} />);
-                      }
-                      setExportsEnabled(false);
-                    }}
-                    shortcut={{ modifiers: ["ctrl"], key: "s" }}
-                  />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        ))}
+      {sortedExports.map((e) => (
+        <List.Item
+          key={e.Name}
+          icon={{ source: Icon.Hashtag, tintColor: Color.Purple }}
+          title={e.Value!}
+          subtitle={e.Name}
+          keywords={[e.Name || "", e.ExportingStackId || "", e.Value || ""]}
+          accessories={[{ tag: e.ExportingStackId?.split("/")[1] }]}
+          actions={
+            <ActionPanel>
+              <ActionPanel.Section>
+                <Action.CopyToClipboard title="Copy Export Name" content={e.Name || ""} onCopy={() => visit(e)} />
+                <Action.CopyToClipboard title="Copy Export Value" content={e.Value || ""} onCopy={() => visit(e)} />
+                <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => resetRanking(e)} />
+              </ActionPanel.Section>
+              <AwsAction.SwitchResourceType
+                {...{ setResourceType, current: ResourceType.Exports, enumType: ResourceType }}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
     </List>
   );
 };
@@ -253,12 +255,12 @@ const updateTerminationProtection = async (stackName: string) => {
                 toast.message = getErrorMessage(err);
                 toast.primaryAction = {
                   title: "Retry",
-                  shortcut: { modifiers: ["cmd"], key: "r" },
+                  shortcut: Keyboard.Shortcut.Common.Refresh,
                   onAction: () => updateTerminationProtection(stackName),
                 };
                 toast.secondaryAction = {
                   title: "Copy Error",
-                  shortcut: { modifiers: ["cmd"], key: "c" },
+                  shortcut: Keyboard.Shortcut.Common.Copy,
                   onAction: () => Clipboard.copy(getErrorMessage(err)),
                 };
               });
@@ -274,12 +276,12 @@ const updateTerminationProtection = async (stackName: string) => {
       toast.message = getErrorMessage(err);
       toast.primaryAction = {
         title: "Retry",
-        shortcut: { modifiers: ["cmd"], key: "r" },
+        shortcut: Keyboard.Shortcut.Common.Refresh,
         onAction: () => updateTerminationProtection(stackName),
       };
       toast.secondaryAction = {
         title: "Copy Error",
-        shortcut: { modifiers: ["cmd"], key: "c" },
+        shortcut: Keyboard.Shortcut.Common.Copy,
         onAction: () => Clipboard.copy(getErrorMessage(err)),
       };
     });

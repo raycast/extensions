@@ -1,5 +1,19 @@
 # Cal.com Share Meeting Links Changelog
 
+## [Update] - 2024-07-29
+
+- Display event prices
+
+## [Visual refresh and Improvements] - 2024-07-04
+
+- Visual refresh for "View Bookings" and "Share Meeting Links" commands
+- Using optimistic updates during mutation and updated dependencies
+
+## [Update & bug fix] - 2024-06-20
+
+- Adds action to open upcoming bookings in browser
+- Bug fix for open booking link
+
 ## [Updated] - 2024-06-12
 
 - Adds submenu to View Bookings command to enable you to update a booking's status

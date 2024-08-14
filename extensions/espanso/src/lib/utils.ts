@@ -50,33 +50,40 @@ export function getMatches(espansoMatchDir: string, options?: { packagePath: boo
       const fullPath = path.join(dir, item.name);
 
       if (item.isDirectory()) {
-        readDirectory(fullPath);
-      } else if (item.isFile() && path.extname(item.name).toLowerCase() === ".yml" && item.name !== ".DS_Store") {
-        const filePath = options?.packagePath ? path.join(fullPath, "package.yml") : fullPath;
-        if (!options?.packagePath || fse.statSync(filePath).isFile()) {
-          const content = fse.readFileSync(filePath);
-
-          const { matches = [] }: { matches?: EspansoMatch[] } = YAML.parse(content.toString()) || {};
-
-          finalMatches.push(
-            ...matches.flatMap((obj: EspansoMatch) => {
-              if ("trigger" in obj) {
-                const { trigger, replace, form, label } = obj;
-                return [{ triggers: [trigger], replace, form, label, filePath }];
-              } else if ("triggers" in obj) {
-                const { triggers, replace, form, label } = obj;
-                return triggers.map((trigger: string) => ({ triggers: [trigger], replace, form, label, filePath }));
-              } else if ("regex" in obj) {
-                const { regex, replace, form, label } = obj;
-                return [{ triggers: [regex], replace, form, label, filePath }];
-              } else {
-                return [];
-              }
-            }),
-          );
+        if (options?.packagePath) {
+          const packageFilePath = path.join(fullPath, "package.yml");
+          if (fse.existsSync(packageFilePath) && fse.statSync(packageFilePath).isFile()) {
+            processFile(packageFilePath);
+          }
+        } else {
+          readDirectory(fullPath);
         }
+      } else if (item.isFile() && path.extname(item.name).toLowerCase() === ".yml" && item.name !== ".DS_Store") {
+        processFile(fullPath);
       }
     }
+  }
+
+  function processFile(filePath: string) {
+    const content = fse.readFileSync(filePath);
+    const { matches = [] }: { matches?: EspansoMatch[] } = YAML.parse(content.toString()) || {};
+
+    finalMatches.push(
+      ...matches.flatMap((obj: EspansoMatch) => {
+        if ("trigger" in obj) {
+          const { trigger, replace, form, label } = obj;
+          return [{ triggers: [trigger], replace, form, label, filePath }];
+        } else if ("triggers" in obj) {
+          const { triggers, replace, form, label } = obj;
+          return triggers.map((trigger: string) => ({ triggers: [trigger], replace, form, label, filePath }));
+        } else if ("regex" in obj) {
+          const { regex, replace, form, label } = obj;
+          return [{ triggers: [regex], replace, form, label, filePath }];
+        } else {
+          return [];
+        }
+      }),
+    );
   }
 
   readDirectory(espansoMatchDir);

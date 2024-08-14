@@ -27,23 +27,24 @@ function CreateNoteAction() {
       return;
     }
     open(
-      `bear://x-callback-url/create?title=${encodeURIComponent(values.title)}&tags=${encodeURIComponent(
-        values.tags
-      )}&open_note=${values.openNote !== "no" ? "yes" : "no"}&new_window=${
-        values.openNote === "new" ? "yes" : "no"
-      }&show_window=${values.openNote !== "no" ? "yes" : "no"}&edit=${
-        values.openNote === "no" ? "no" : "yes"
-      }&timestamp=${values.timestamp ? "yes" : "no"}&text=${encodeURIComponent(values.text)}`,
-      { background: values.openNote === "no" ? true : false }
+      `bear://x-callback-url/create?title=${values.title}&tags=${values.tags}&open_note=${
+        values.openNote !== "no" ? "yes" : "no"
+      }&new_window=${values.openNote === "new" ? "yes" : "no"}&show_window=${
+        values.openNote !== "no" ? "yes" : "no"
+      }&edit=${values.openNote === "no" ? "no" : "yes"}&timestamp=${values.timestamp ? "yes" : "no"}&text=${
+        values.text
+      }&pin=${values.pin ? "yes" : "no"}`,
+      { background: values.openNote === "no" },
     );
     await closeMainWindow();
     await popToRoot({ clearSearchBar: true });
   }
+
   return <Action.SubmitForm icon={Icon.Document} title="Create Note" onSubmit={handleSubmit} />;
 }
 
 export default function NewNote() {
-  const { newNoteOpenMode, prependTimeAndDate, pinNote } = getPreferenceValues();
+  const { newNoteOpenMode, prependTimeAndDate, pinNote } = getPreferenceValues<Preferences.NewNote>();
   return (
     <Form
       navigationTitle={"Create Note"}

@@ -10,6 +10,8 @@ import {
 } from "../../../settings/settings";
 import { RaycastChat } from "../../../settings/types";
 import { GetModelsName } from "../../function";
+import { InfoKeepAlive } from "../../info";
+import { ValidationKeepAlive } from "../../valitadion";
 
 interface props {
   SetShow: React.Dispatch<React.SetStateAction<boolean>>;
@@ -52,76 +54,41 @@ export function FormModel(props: props): JSX.Element {
       Submit(values);
     },
     initialValues: {
-      serverMain:
-        props.Chat && !IsLoadingModel && Model && Model.has(props.Chat.models.main.server_name)
-          ? props.Chat.models.main.server_name
-          : undefined,
-      modelMain:
-        props.Chat && !IsLoadingModel && Model && Model.has(props.Chat.models.main.server_name)
-          ? props.Chat.models.main.tag
-          : undefined,
+      serverMain: props.Chat ? props.Chat.models.main.server_name : undefined,
+      modelMain: props.Chat ? props.Chat.models.main.tag : undefined,
       keepAliveMain: props.Chat?.models.main.keep_alive ? props.Chat.models.main.keep_alive : "5m",
-      serverVision:
-        props.Chat?.models.vision && !IsLoadingModel && Model && Model.has(props.Chat.models.vision.server_name)
-          ? props.Chat.models.vision.server_name
-          : undefined,
-      modelVision:
-        props.Chat?.models.vision && !IsLoadingModel && Model && Model.has(props.Chat.models.vision.server_name)
-          ? props.Chat.models.vision.tag
-          : undefined,
+      serverVision: props.Chat?.models.vision ? props.Chat.models.vision.server_name : undefined,
+      modelVision: props.Chat?.models.vision ? props.Chat.models.vision.tag : undefined,
       keepAliveVision: props.Chat?.models.vision?.keep_alive ? props.Chat.models.vision.keep_alive : "5m",
-      serverEmbedding:
-        props.Chat?.models.embedding && !IsLoadingModel && Model && Model.has(props.Chat.models.embedding.server_name)
-          ? props.Chat.models.embedding.server_name
-          : undefined,
-      modelEmbedding:
-        props.Chat?.models.embedding && !IsLoadingModel && Model && Model.has(props.Chat.models.embedding.server_name)
-          ? props.Chat.models.embedding.tag
-          : undefined,
+      serverEmbedding: props.Chat?.models.embedding ? props.Chat.models.embedding.server_name : undefined,
+      modelEmbedding: props.Chat?.models.embedding ? props.Chat.models.embedding.tag : undefined,
       keepAliveEmbedding: props.Chat?.models.embedding?.keep_alive ? props.Chat.models.embedding.keep_alive : "5m",
     },
     validation: {
       serverMain: FormValidation.Required,
       modelMain: FormValidation.Required,
-      keepAliveMain: ValidationKeepAliveMain,
+      keepAliveMain: (value) => ValidationKeepAlive(CheckboxMainAdvanced, value),
       serverVision: CheckboxVision ? FormValidation.Required : undefined,
       modelVision: CheckboxVision ? FormValidation.Required : undefined,
-      keepAliveVision: ValidationKeepAliveVision,
+      keepAliveVision: (value) => ValidationKeepAlive(CheckboxVisionAdvanced, value),
       serverEmbedding: CheckboxEmbedding ? FormValidation.Required : undefined,
       modelEmbedding: CheckboxEmbedding ? FormValidation.Required : undefined,
-      keepAliveEmbedding: ValidationKeepAliveEmbedding,
+      keepAliveEmbedding: (value) => ValidationKeepAlive(CheckboxEmbeddingAdvanced, value),
     },
   });
 
-  function ValidationKeepAlive(values?: string): string | undefined {
-    if (!values) return "The item is required";
-    if (!values.match(/(?:^-1$)|(?:^[0-9]+[m-s]{0,1}$)/g)) return "Wrong Format";
-  }
+  React.useEffect(() => {
+    if (!CheckboxEmbedding) SetCheckboxEmbeddingAdvanced(false);
+  }, [CheckboxEmbedding]);
 
-  function ValidationKeepAliveMain(values?: string): string | undefined {
-    if (!CheckboxMainAdvanced) return;
-    return ValidationKeepAlive(values);
-  }
-
-  function ValidationKeepAliveEmbedding(values?: string): string | undefined {
-    if (!CheckboxEmbeddingAdvanced) return;
-    return ValidationKeepAlive(values);
-  }
-
-  function ValidationKeepAliveVision(values?: string): string | undefined {
-    if (!CheckboxVisionAdvanced) return;
-    return ValidationKeepAlive(values);
-  }
+  React.useEffect(() => {
+    if (!CheckboxVision) SetCheckboxVisionAdvanced(false);
+  }, [CheckboxVision]);
 
   const InfoServer = "Ollama Server.";
   const InfoModel = "Ollama Model.";
   const InfoEmbeddingCheckbox = "Use a different model for embedding when you want to add a large file in context.";
   const InfoVisionCheckbox = "Use a different model for vision when you multimodal cababilities is required.";
-  const InfoKeepAlive = `How many the model need to stay in memory, by default 5 minutes. Can be configured as follow:
-- 0, memory is free when inference is done.
-- -1, model remains on memory permanently.
-- 5 or 5s, memory is free after 5 seconds of idle.
-- 5m, memory is free after 5 minutes of idle.`;
 
   const ActionView = (
     <ActionPanel>

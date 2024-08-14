@@ -20,7 +20,8 @@ export default function muteMenuBar() {
     };
   }, []);
 
-  const disabledIcon = { source: Icon.MicrophoneDisabled, tintColor: Color.Red };
+  const iconColor = preferences.tint === "true" ? Color.Red : Color.PrimaryText;
+  const disabledIcon = { source: Icon.MicrophoneDisabled, tintColor: iconColor };
   const enabledIcon = { source: Icon.Microphone };
   const icon = isMuted ? disabledIcon : enabledIcon;
   const menuItemText = isMuted ? "Unmute" : "Mute";

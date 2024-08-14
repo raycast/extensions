@@ -9,7 +9,9 @@
   "contributors": [
     "shubham",
     "pernielsentikaer",
-    "sh-cho"
+    "sh-cho",
+    "tdkn",
+    "j3lte"
   ],
   "license": "MIT",
   "commands": [
@@ -32,6 +34,13 @@
       "title": "Add Bookmarks",
       "subtitle": "Raindrop.io",
       "description": "Add bookmarks to Raindrop",
+      "mode": "view"
+    },
+    {
+      "name": "save_browser_tab",
+      "title": "Save Browser Tab",
+      "subtitle": "Raindrop.io",
+      "description": "Save the current browser tab to Raindrop",
       "mode": "view"
     }
   ],
@@ -108,20 +117,25 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.3",
-    "@raycast/utils": "^1.5.2",
-    "node-fetch": "^3.3.1"
+    "@raycast/api": "^1.79.1",
+    "@raycast/utils": "^1.16.3",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "^18.15.12",
-    "@types/react": "18.0.37",
-    "eslint": "8.38.0",
-    "react-devtools": "^4.27.5",
-    "typescript": "5.0.4"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.3.3",
+    "react": "^18.2.0",
+    "typescript": "5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx -y @raycast/api@latest publish"
   }
 }

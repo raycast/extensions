@@ -24,7 +24,8 @@ export type Locale =
   | "zh-sg"
   | "zh-tw"
   | "zh-cn"
-  | "uk";
+  | "uk"
+  | "da";
 
 export function useLanguage() {
   return useCachedState<Locale>("language", "en");
@@ -60,4 +61,5 @@ export const languages: { icon: string; title: string; value: Locale }[] = [
   { icon: "🇸🇬", title: "Chinese (Singapore)", value: "zh-sg" },
   { icon: "🇹🇼", title: "Chinese (Taiwan)", value: "zh-tw" },
   { icon: "🇨🇳", title: "Chinese (China)", value: "zh-cn" },
+  { icon: "🇩🇰", title: "Danish", value: "da" },
 ];

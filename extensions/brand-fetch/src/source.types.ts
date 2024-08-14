@@ -1,3 +1,11 @@
+export interface SearchBrandKeyword {
+  claimed: boolean;
+  name: string | null;
+  domain: string;
+  icon: string;
+  brandId: string | null;
+}
+
 export interface RetrieveBrandResponse {
   name: string;
   domain: string;

@@ -5,12 +5,14 @@ import { format } from "date-fns";
 import { getGitHubClient } from "../api/githubClient";
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
-import { cloneAndOpen, WEB_IDES } from "../helpers/repository";
+import { WEB_IDES } from "../helpers/repository";
 
+import CloneRepositoryForm from "./CloneRepositoryForm";
 import { RepositoryDiscussionList } from "./RepositoryDiscussions";
 import { RepositoryIssueList } from "./RepositoryIssues";
 import { RepositoryPullRequestList } from "./RepositoryPullRequest";
 import RepositoryReleases from "./RepositoryReleases";
+import { SortAction, SortActionProps, SortTypesDataProps } from "./SortAction";
 
 type RepositoryActionProps = {
   repository: ExtendedRepositoryFieldsFragment;
@@ -18,7 +20,14 @@ type RepositoryActionProps = {
   mutateList: MutatePromise<ExtendedRepositoryFieldsFragment[] | undefined>;
 };
 
-export default function RepositoryActions({ repository, mutateList, onVisit }: RepositoryActionProps) {
+export default function RepositoryActions({
+  repository,
+  mutateList,
+  onVisit,
+  setSortQuery,
+  sortQuery,
+  sortTypesData,
+}: RepositoryActionProps & SortActionProps & SortTypesDataProps) {
   const { github } = getGitHubClient();
 
   const updatedAt = new Date(repository.updatedAt);
@@ -107,16 +116,15 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
           ))}
         </ActionPanel.Submenu>
 
-        <Action
+        <Action.Push
           icon={Icon.Terminal}
-          title="Clone and Open"
-          onAction={() => cloneAndOpen(repository)}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+          title="Clone with Options"
+          target={<CloneRepositoryForm repository={repository} />}
+          shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "c" }}
         />
-
         <Action.OpenInBrowser
-          icon="vscode.svg"
-          title="Clone in VSCode"
+          icon={{ source: "vscode.svg", tintColor: Color.PrimaryText }}
+          title="Clone in VS Code"
           url={`vscode://vscode.git/clone?url=${repository.url}`}
           shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         />
@@ -229,6 +237,10 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
         <Action.CopyToClipboard content={repository.name} title="Copy Repository Name" />
 
         <Action.CopyToClipboard content={repository.owner.login} title="Copy Repository Owner" />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <SortAction {...{ data: sortTypesData, sortQuery, setSortQuery }} />
       </ActionPanel.Section>
     </ActionPanel>
   );

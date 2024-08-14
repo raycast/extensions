@@ -8,32 +8,30 @@ type ListItemActionsProps = {
   sectionClipboard: ClipboardData;
   summary: JSX.Element;
   restart: JSX.Element;
-  toggleViewAction: JSX.Element;
+  isDetailedViewEnabled: boolean;
+  showViewAction: JSX.Element;
+  hideViewAction: JSX.Element;
 };
 
 export const ListItemActions = ({
-  toggleViewAction,
-  sectionClipboard,
-  url,
-  restart,
-  summary,
   isLoading,
+  url,
+  sectionClipboard,
+  summary,
+  restart,
+  isDetailedViewEnabled,
+  showViewAction,
+  hideViewAction,
 }: ListItemActionsProps) => (
   <ActionPanel>
-    <ActionPanel.Section>{toggleViewAction}</ActionPanel.Section>
+    <ActionPanel.Section>
+      {isDetailedViewEnabled ? hideViewAction : showViewAction}
+      {url && <Action.OpenInBrowser title="Open Results in Browser" url={url} />}
+      {restart}
+    </ActionPanel.Section>
     <ActionPanel.Section>
       {summary}
       {sectionClipboard && <CopySpeedtestResultAction result={sectionClipboard} />}
-    </ActionPanel.Section>
-    <ActionPanel.Section>
-      {url && (
-        <Action.OpenInBrowser
-          title="Open Results in Browser"
-          url={url}
-          shortcut={{ modifiers: ["opt"], key: "enter" }}
-        />
-      )}
-      {restart}
     </ActionPanel.Section>
     <ActionPanel.Section>
       <ClearCacheAction isLoading={isLoading} />

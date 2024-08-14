@@ -12,8 +12,7 @@ import Axios from "axios";
 import { useState } from "react";
 import { createWriteStream } from "fs";
 import { homedir } from "os";
-
-const DOWNLOADS_DIR = homedir() + "/Downloads";
+import { existsSync, lstatSync } from "fs";
 
 type FormValues = {
   VideoURL: string;
@@ -21,6 +20,7 @@ type FormValues = {
 };
 
 export default function Command() {
+  const [DownloadsFolder, SetDownloadsFolder] = useState<string>(homedir() + "/Downloads");
   const [Filename, SetFilename] = useState<string>("");
   const [IsDownloadComplete, SetIsDownloadComplete] = useState<boolean>(false);
   const [ClipboardContent, SetClipboardContent] = useState<Clipboard.Content | string>("");
@@ -28,12 +28,7 @@ export default function Command() {
 
   async function checkClipboardValue() {
     const ClipboardText = await Clipboard.readText();
-    if (
-      // TODO: Improve URL validation
-      ClipboardText &&
-      ClipboardText.includes("twitter.com") &&
-      ClipboardText.split("/").length > 4
-    )
+    if (ClipboardText && ClipboardText.includes("x.com") && ClipboardText.split("/").length > 4)
       handleSubmit({ VideoURL: ClipboardText || "", ProvidedByExtension: true });
   }
 
@@ -56,7 +51,7 @@ export default function Command() {
   }
 
   async function handleDownload(username: string, TweetID: string) {
-    const Writer = createWriteStream(`${DOWNLOADS_DIR}/${TweetID}.mp4`);
+    const Writer = createWriteStream(`${DownloadsFolder}/${TweetID}.mp4`);
     const APIResponse = await Axios(`https://api.vxtwitter.com/${username}/status/${TweetID}`);
     const DirectURL = APIResponse.data.media_extended[0]?.url;
     if (!DirectURL)
@@ -80,7 +75,7 @@ export default function Command() {
           showToast({
             title: "Download Complete",
           });
-          SetClipboardContent({ file: `${DOWNLOADS_DIR}/${TweetID}.mp4` });
+          SetClipboardContent({ file: `${DownloadsFolder}/${TweetID}.mp4` });
           SetIsDownloadComplete(true);
         }).on("error", () => {
           showToast({
@@ -102,17 +97,36 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Download} title="Download Video" onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            icon={Icon.Finder}
+            title="Change Download Folder"
+            onSubmit={async (values: { downloadFolder: string[] }) => {
+              const folder = values.downloadFolder[0];
+              if (!existsSync(folder) || lstatSync(folder).isFile()) {
+                await showToast({
+                  title: "Invalid Folder",
+                  style: Toast.Style.Failure,
+                });
+                return false;
+              }
+              if (folder === DownloadsFolder) return false;
+              SetDownloadsFolder(folder);
+              await showToast({
+                title: "Download Folder Updated",
+              });
+            }}
+          />
           <Action.ShowInFinder
             icon={Icon.Folder}
             title="Open Downloads Folder"
-            path={DOWNLOADS_DIR}
+            path={DownloadsFolder}
             shortcut={Keyboard.Shortcut.Common.Duplicate}
           />
           {IsDownloadComplete && (
             <Action.Open
               icon={Icon.Video}
               title="Open the Video"
-              target={`${DOWNLOADS_DIR}/${Filename}`}
+              target={`${DownloadsFolder}/${Filename}`}
               shortcut={Keyboard.Shortcut.Common.Open}
             />
           )}
@@ -136,6 +150,16 @@ export default function Command() {
         onChange={SetTextField}
         value={TextField}
         autoFocus
+      />
+      <Form.Separator />
+      <Form.FilePicker
+        defaultValue={[DownloadsFolder]}
+        id="downloadFolder"
+        title="Download Folder"
+        canChooseDirectories
+        storeValue
+        allowMultipleSelection={false}
+        canChooseFiles={false}
       />
     </Form>
   );

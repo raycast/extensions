@@ -9,6 +9,7 @@ import {
   Deploy,
   Domain,
   DomainSearch,
+  EnvVar,
   Member,
   Reviewer,
   Role,
@@ -58,6 +59,11 @@ class Api {
 
   async getDeploys(site: string): Promise<Deploy[]> {
     const { data } = await this.netlify.get<Deploy[]>(`/sites/${site}/deploys`);
+    return data;
+  }
+
+  async getEnvVars(site: string): Promise<EnvVar[]> {
+    const { data } = await this.netlify.get<EnvVar[]>(`/sites/${site}/env`);
     return data;
   }
 

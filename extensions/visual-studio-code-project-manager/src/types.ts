@@ -1,6 +1,7 @@
 import { Application } from "@raycast/api";
 
 export interface ProjectEntry {
+  id: string;
   name: string;
   rootPath: string;
   tags: string[];

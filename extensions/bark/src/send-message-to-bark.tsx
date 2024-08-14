@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Cache, Form, Icon, closeMainWindow } from "@raycast/api";
-import React, { useEffect, useRef, useState } from "react";
+import { Action, ActionPanel, Cache, Form, Icon } from "@raycast/api";
+import React, { useEffect, useState } from "react";
 import { getIcon, getSelectedMessage, getSound, sendMessage } from "./utils/common-utils";
 import { CacheKey, sounds } from "./utils/constants";
 import { autoCloseWindow, autoGetMessage } from "./types/preferences";
@@ -35,6 +35,7 @@ export default function SendMessageToBark() {
             <Action
               title="Send"
               icon={Icon.Upload}
+              shortcut={{ modifiers: ["cmd"], key: "s" }}
               onAction={async () => {
                 if (message.length === 0) {
                   setError("Message is required");
@@ -123,7 +124,7 @@ export default function SendMessageToBark() {
         {sounds.map((messageSound) => {
           return (
             <Form.Dropdown.Item
-              icon={icon.length !== 0 && messageSound.value === sound ? icon : Icon.SpeakerOn}
+              icon={messageSound.icon}
               key={messageSound.name}
               title={messageSound.name}
               value={messageSound.value}

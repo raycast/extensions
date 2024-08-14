@@ -9,7 +9,7 @@ import { CONTRIBUTE_URL, getIcon, raycastProtocol, wrapInCodeBlock } from "./hel
 type Props = LaunchProps<{ launchContext: string[] }>;
 
 export default function ExplorePrompts(props: Props) {
-  const { data: rawCategories, isLoading } = useFetch<PromptCategory[]>(`https://prompts.ray.so/api/prompts`);
+  const { data: rawCategories, isLoading } = useFetch<PromptCategory[]>(`https://ray.so/api/prompts`);
   const { data: promptUpvotes, isLoading: isLoadingpromptUpvotes, mutate } = useCachedPromise(() => getPromptUpvotes());
 
   const [selectedIds, setSelectedIds] = useState<string[]>(props.launchContext ?? []);
@@ -289,7 +289,7 @@ export default function ExplorePrompts(props: Props) {
                         title="Contribute"
                         icon={Icon.PlusSquare}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                        url={`${CONTRIBUTE_URL}/src/data/prompts.ts`}
+                        url={CONTRIBUTE_URL}
                       />
                     </ActionPanel.Section>
 

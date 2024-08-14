@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
+import { icons } from "../lib/speedtest-pretty-names";
 import { SpeedtestResult } from "../lib/speedtest.types";
 import { ListItemMetadata } from "./list-item-metadata";
-import { icons } from "../lib/speedtest-pretty-names";
 
 type ResultListItemProps = {
   speedtestResult: SpeedtestResult;

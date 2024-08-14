@@ -5,27 +5,26 @@ import { isReadyToFetch } from "../util";
 export const useLogGroups = (prefixQuery: string) => {
   const {
     data: logGroups,
-    pagination,
-    revalidate,
+    mutate,
     error,
     isLoading,
   } = useCachedPromise(
-    (prefix: string) =>
-      async ({ page, cursor }: { page: number; cursor?: string }) => {
-        const { nextToken, logGroups: groups } = await new CloudWatchLogsClient({}).send(
-          new DescribeLogGroupsCommand({
-            nextToken: cursor,
-            limit: 50,
-            ...(prefix.trim().length > 2 && { logGroupNamePrefix: prefix }),
-          }),
-        );
+    async (prefix: string) => {
+      const { logGroups: groups } = await new CloudWatchLogsClient({}).send(
+        new DescribeLogGroupsCommand({
+          limit: 50,
+          ...(prefix.trim().length > 2 && { logGroupNamePrefix: prefix }),
+        }),
+      );
 
-        const keyedGroups = (groups ?? []).map((group) => ({ ...group, groupKey: `#${page}-${group.logGroupArn}` }));
-        return { data: keyedGroups, hasMore: !!nextToken, cursor: nextToken };
-      },
+      return (groups ?? []).filter(
+        (group) =>
+          !!group && !!group.logGroupArn && !!group.logGroupName && !!group.creationTime && !!group.storedBytes,
+      );
+    },
     [prefixQuery],
-    { execute: isReadyToFetch() },
+    { execute: isReadyToFetch(), failureToastOptions: { title: "❌Failed to load log groups" } },
   );
 
-  return { logGroups, pagination, error, isLoading: (!logGroups && !error) || isLoading, revalidate };
+  return { logGroups, error, isLoading: (!logGroups && !error) || isLoading, mutate };
 };

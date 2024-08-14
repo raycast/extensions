@@ -1,41 +1,13 @@
 import { Action, ActionPanel, List, Toast, showToast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 
+import { SearchResults } from "./lib";
 import _ from "lodash";
 import algoliaSearch from "algoliasearch";
 
 const APPID = "KXECYAMEX8";
 const APIKEY = "01279e9ede105d87a1ade54565b1a2fd";
 const INDEX = "adonisjs_next";
-
-type SearchResults = [string, result[]][];
-
-type result = {
-  url: string;
-  anchor: string;
-  body: string;
-  objectID: string;
-  hierarchy: {
-    [key: string]: string;
-  };
-  _highlightResult: {
-    content:
-      | {
-          value: string;
-          matchlevel: string;
-          fullyHighlighted: boolean;
-          matchedWords: string[];
-        }
-      | undefined;
-    hierarchy: {
-      [key: string]: {
-        value: string;
-        matchLevel: string;
-        matchedWords: string[];
-      };
-    };
-  };
-};
 
 export default function SearchDocumentation() {
   const algoliaClient = useMemo(() => {

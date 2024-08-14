@@ -1,5 +1,8 @@
 # File Manager Changelog
 
+## [Gitignore and Rayignore] - 2024-07-24
+- Added support respecting `.gitignore` and `.rayignore` files.
+
 ## [Features] - 2023-02-22
 
 - Added `iCloud Drive` to the start directory.

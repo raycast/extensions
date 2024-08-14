@@ -6,6 +6,7 @@
   "icon": "command-icon.png",
   "author": "DanielSinclair",
   "contributors": [
+    "stelo",
     "sammarks"
   ],
   "license": "MIT",
@@ -38,29 +39,40 @@
       "title": "Default Action",
       "default": "copyToClipboard",
       "data": [
-        { "value": "copyToClipboard", "title": "Copy to Clipboard" },
-        { "value": "pasteInApp", "title": "Paste in App" },
-        { "value": "openInBrowser", "title": "Open in Browser" }
+        {
+          "value": "copyToClipboard",
+          "title": "Copy to Clipboard"
+        },
+        {
+          "value": "pasteInApp",
+          "title": "Paste in App"
+        },
+        {
+          "value": "openInBrowser",
+          "title": "Open in Browser"
+        }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.44.0",
-    "js-base64": "3.7.2",
-    "run-applescript": "6.0.0"
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.16.3",
+    "js-base64": "^3.7.7"
   },
   "devDependencies": {
-    "@types/node": "16.11.7",
-    "@types/react": "17.0.34",
-    "@typescript-eslint/eslint-plugin": "5.3.1",
-    "@typescript-eslint/parser": "5.3.1",
-    "eslint": "8.2.0",
-    "eslint-config-prettier": "8.3.0",
-    "react-devtools": "4.21.0",
-    "typescript": "4.4.4"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^22.1.0",
+    "@types/react": "^18.3.3",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }

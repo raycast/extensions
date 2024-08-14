@@ -26,7 +26,7 @@ export default function SearchNotes(props: LaunchProps<{ arguments: SearchNotesA
     showToast(Toast.Style.Failure, "Something went wrong", error.message);
   }
 
-  const showDetail = (notes ?? []).length > 0 && getPreferenceValues().showPreviewInListView;
+  const showDetail = (notes ?? []).length > 0 && getPreferenceValues<Preferences>().showPreviewInListView;
   const handleTagChange = (tag: string | null) => setSelectedTag(tag);
 
   return (

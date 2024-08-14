@@ -10,6 +10,7 @@ Control the [Bob](https://bobtranslate.com/) macOS app from Raycast.
 - Translate from clipboard
 - Translate from seleted
 - Translate from capture
+- Translate input text
 
 ### OCR Features
 

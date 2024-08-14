@@ -117,6 +117,14 @@ export default function NoteListItem({ note, noteTitles, isDeleted, mutate }: No
     keywords.push(...["shared"]);
   }
 
+  if (note.links.length > 0) {
+    keywords.push("links");
+  }
+
+  if (note.backlinks.length > 0) {
+    keywords.push("backlinks");
+  }
+
   return (
     <List.Item
       key={note.id}

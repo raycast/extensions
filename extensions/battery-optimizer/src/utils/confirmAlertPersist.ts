@@ -1,9 +1,11 @@
 import { confirmAlert, LocalStorage, openExtensionPreferences } from "@raycast/api";
-import { add_system_service } from "./getPreference";
+import { preferences } from "./getPreference";
 
 export async function confirmAlertPersist() {
-  console.log("add_system_service:" + add_system_service());
-  if (add_system_service() === undefined && (await LocalStorage.getItem<string>("ConfirmedPersist")) !== "true") {
+  const addSystemService = preferences.add_system_service;
+
+  console.log("add_system_service: " + addSystemService);
+  if (addSystemService === undefined && (await LocalStorage.getItem<string>("ConfirmedPersist")) !== "true") {
     await LocalStorage.setItem("ConfirmedPersist", "true");
     return confirmAlert({
       title: "Does it take effect after restart?",

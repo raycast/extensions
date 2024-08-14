@@ -9,14 +9,56 @@
     "Documentation",
     "Developer Tools"
   ],
+  "version": "1.1.0",
   "license": "MIT",
   "commands": [
     {
       "name": "adonis",
       "title": "Adonis",
-      "subtitle": "AdonisJS Documentation search",
+      "subtitle": "AdonisJS documentation search",
       "description": "Search the Adonis JS documentation from within Raycast.",
-      "mode": "view"
+      "mode": "view",
+      "icon": "adonis-logo-128.png"
+    },
+    {
+      "name": "lucid",
+      "title": "Lucid",
+      "subtitle": "Lucid documentation search",
+      "description": "Search the Lucid JS documentation from within Raycast.",
+      "mode": "view",
+      "icon": "lucid-logo.png"
+    },
+    {
+      "name": "vine",
+      "title": "Vine",
+      "subtitle": "Vine documentation search",
+      "description": "Search the Vine JS documentation from within Raycast.",
+      "mode": "view",
+      "icon": "vinejs-logo.png"
+    },
+    {
+      "name": "bento",
+      "title": "Bento Cache",
+      "subtitle": "Bento Cache documentation search",
+      "description": "Search the Bento Cache documentation from within Raycast.",
+      "mode": "view",
+      "icon": "adonis-logo-128.png"
+    },
+    {
+      "name": "edge",
+      "title": "Edge",
+      "subtitle": "Edge templating documentation search",
+      "description": "Search the Edge documentation from within Raycast.",
+      "mode": "view",
+      "icon": "edge-logo.png"
+    },
+    {
+      "name": "japa",
+      "title": "Japa",
+      "subtitle": "Japa testing framework documentation search",
+      "description": "Search the Japa documentation from within Raycast.",
+      "mode": "view",
+      "icon": "japa-logo.png"
     }
   ],
   "tools": [],

@@ -250,7 +250,7 @@ function populateDeals($: CheerioAPI, selector: string, deals: DealEntry[]) {
     const url = $(this).find("a").attr("href") ?? "";
 
     let imageUrl = "";
-    const srcsetAttribute = $(this).find("img").attr("srcset");
+    const srcsetAttribute = $(this).find(".main-image").find("img").attr("srcset");
     if (srcsetAttribute) {
       const sources = srcsetAttribute.split(",");
       const highestResolutionSource = sources.find((source) => source.includes("2x"));

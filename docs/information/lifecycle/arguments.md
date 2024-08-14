@@ -2,7 +2,7 @@
 
 Raycast supports arguments for your commands so that users can enter values right from Root Search before opening the command.
 
-![](../../.gitbook/assets/arguments.png)
+![](../../.gitbook/assets/arguments.webp)
 
 Arguments are configured in the [manifest](../manifest.md#argument-properties) per command.
 

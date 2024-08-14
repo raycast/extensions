@@ -5,6 +5,7 @@ import {
   environment,
   Form,
   Icon,
+  Keyboard,
   render,
   showToast,
   Toast,
@@ -19,6 +20,7 @@ import { showFailureToast, useCachedState, useForm } from "@raycast/utils";
 import { initWasm, Resvg } from "../lib/resvg";
 import path from "node:path";
 import debounce from "lodash.debounce";
+import Shortcut = Keyboard.Shortcut;
 
 const DOWNLOADS_DIR = `${homedir()}/Downloads`;
 
@@ -126,6 +128,11 @@ function Command() {
                 }}
               />
             }
+          />
+          <Action.CopyToClipboard
+            title={"Copy PNG"}
+            content={{ file: environment.supportPath + "/face.png" }}
+            shortcut={Shortcut.Common.Copy}
           />
           <Action
             title={"Download PNG"}

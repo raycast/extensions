@@ -2,35 +2,48 @@ import { DescribeTableCommand, DynamoDBClient, ListTablesCommand, TableDescripti
 import { useCachedPromise } from "@raycast/utils";
 import { PrimaryKey, Table } from "../dynamodb";
 import { isReadyToFetch } from "../util";
+import { showToast, Toast } from "@raycast/api";
 
 export const useTables = () => {
   const {
     data: tables,
-    pagination,
     error,
     isLoading,
-    revalidate,
+    mutate,
   } = useCachedPromise(
-    () =>
-      async ({ page, cursor }: { page: number; cursor?: string }) => {
-        const { LastEvaluatedTableName, TableNames } = await new DynamoDBClient({}).send(
-          new ListTablesCommand({ ExclusiveStartTableName: cursor }),
-        );
-
-        const tables = await Promise.all(
-          (TableNames || []).map(async (t) => {
-            const { Table } = await new DynamoDBClient({}).send(new DescribeTableCommand({ TableName: t }));
-            return { ...Table, keys: fetchKeys(Table!), tableKey: `#${page}-${Table?.TableArn}` };
-          }),
-        );
-
-        return { data: tables as Table[], hasMore: !!LastEvaluatedTableName, cursor: LastEvaluatedTableName };
-      },
+    async () => {
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Loading tables" });
+      return await fetchTables(toast);
+    },
     [],
-    { execute: isReadyToFetch() },
+    { execute: isReadyToFetch(), failureToastOptions: { title: "❌Failed to load tables" } },
   );
 
-  return { tables, pagination, error, isLoading: (!tables && !error) || isLoading, revalidate };
+  return { tables, error, isLoading: (!tables && !error) || isLoading, mutate };
+};
+
+const fetchTables = async (toast: Toast, nextToken?: string, aggregate?: Table[]): Promise<Table[]> => {
+  const { LastEvaluatedTableName: cursor, TableNames } = await new DynamoDBClient({}).send(
+    new ListTablesCommand({ ExclusiveStartTableName: nextToken, Limit: 50 }),
+  );
+
+  const tables = await Promise.all(
+    (TableNames || []).map(async (t) => {
+      const { Table } = await new DynamoDBClient({}).send(new DescribeTableCommand({ TableName: t }));
+      return { ...Table, keys: fetchKeys(Table!) } as Table;
+    }),
+  );
+
+  const agg = [...(aggregate ?? []), ...tables];
+  toast.message = `${agg.length} tables`;
+  if (cursor) {
+    return await fetchTables(toast, cursor, agg);
+  }
+
+  toast.style = Toast.Style.Success;
+  toast.title = "✅ Loaded tables";
+  toast.message = `${agg.length} tables`;
+  return agg;
 };
 
 const fetchKeys = (table: TableDescription): Record<string, PrimaryKey> => {

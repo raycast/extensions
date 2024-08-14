@@ -164,7 +164,7 @@
       "name": "toggleLinkDetection",
       "title": "Toggle Link Detection",
       "subtitle": "Anybox",
-      "description": "Toggle Detect Link from Pasteboarad.",
+      "description": "Toggle Detect Link from Pasteboard.",
       "mode": "no-view"
     },
     {

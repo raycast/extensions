@@ -1,5 +1,17 @@
 # Google Maps Search Changelog
 
+## Adding location history and Quick Search command - 2024-08-05
+
+### Changed
+
+- Upgrade dependencies.
+- Update extension icon.
+- Renamed actions and refined UI text.
+- Replaced emoji with Raycast icons.
+- Added a Quick Search command.
+- Added optional location search history.
+- Added comments throughout.
+
 ## [Optional Autofill] - 2023-04-09
 
 ### Added

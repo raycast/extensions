@@ -1,4 +1,4 @@
-import { environment, popToRoot } from "@raycast/api";
+import { environment } from "@raycast/api";
 import { execSync } from "child_process";
 import { randomUUID } from "crypto";
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "fs";
@@ -56,7 +56,6 @@ const startStopwatch = async ({ swName = "Untitled", launchedFromMenuBar = false
   swStore.push(newTimer);
   writeFileSync(SWPATH, JSON.stringify(swStore));
 
-  popToRoot();
   showHudOrToast({ msg: `Stopwatch "${swName}" started!`, launchedFromMenuBar: launchedFromMenuBar, isErr: false });
 };
 

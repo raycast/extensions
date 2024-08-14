@@ -205,6 +205,8 @@ FROM
   ZSFNOTE AS notes
   LEFT OUTER JOIN Z_7TAGS AS notes_to_tags ON notes.Z_PK = notes_to_tags.Z_7NOTES
   LEFT OUTER JOIN ZSFNOTETAG AS tags ON notes_to_tags.Z_14TAGS = tags.Z_PK 
+-- Ignore tags for trashed and archived notes
+WHERE notes.ZARCHIVED = 0 AND notes.ZTRASHED = 0
 ORDER BY tags.ZTITLE ASC
 `;
 export const ALL_TAGS_V2 = `
@@ -214,5 +216,7 @@ FROM
   ZSFNOTE AS notes
   LEFT OUTER JOIN Z_5TAGS AS notes_to_tags ON notes.Z_PK = notes_to_tags.Z_5NOTES
   LEFT OUTER JOIN ZSFNOTETAG AS tags ON notes_to_tags.Z_13TAGS = tags.Z_PK 
+-- Ignore tags for trashed and archived notes
+WHERE notes.ZARCHIVED = 0 AND notes.ZTRASHED = 0
 ORDER BY tags.ZTITLE ASC
 `;

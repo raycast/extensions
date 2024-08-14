@@ -1,6 +1,6 @@
 import sha256 from "sha256-file";
-import { SpeedtestResultKeys, SpeedtestResultValueType } from "./speedtest.types";
 import { ResultViewIconsListKeys, icons, speedTestResultPrettyNames } from "./speedtest-pretty-names";
+import { SpeedtestResultKeys, SpeedtestResultValueType } from "./speedtest.types";
 
 export function pingToString(ping: number): string {
   return ping === 0 ? "?" : ping.toFixed(1) + " ms";

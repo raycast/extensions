@@ -53,7 +53,14 @@ export async function saveUrl(url: string, labels: string): Promise<{ success: b
   }
 
   const clientRequestId = uuidv4() // Generate a unique ID for each request
-  const separatorRegex = /[,\s]+/ // Regex to split a string by commas and whitespace
+
+  const formatLabels = (labels: string): Array<{ name: string }> | null => {
+    if (!labels.trim()) return null
+    return labels
+      .split(',')
+      .filter((label) => label.trim() !== '')
+      .map((label) => ({ name: label.trim() }))
+  }
 
   try {
     const response = await fetch(apiUrl, {
@@ -69,9 +76,7 @@ export async function saveUrl(url: string, labels: string): Promise<{ success: b
             clientRequestId,
             source: 'api',
             url: url,
-            labels: labels.split(separatorRegex).map((label) => {
-              return { name: label }
-            }),
+            labels: formatLabels(labels),
           },
         },
       }),

@@ -1,6 +1,14 @@
 # Timers Changelog
 
+## [Bugfixes and improvements] - 2024-07-16
+
+- Fix bug where alert sound would not play if osascript notification command failed due to lack of permissions
+- Fix bug where quicklink-root-presets would not close properly if "Automatically close window on start" was disabled
+- Add icons to "Manage Timers" and "Manage Stopwatches" command actions
+- Various code improvements
+
 ## [Persistent commands, codebase cleanup] - 2024-05-19
+
 - Add preference to keep "Manage Timers" and "Manage Stopwatches" commands open on timer/stopwatch start
 - Various refactors around the codebase
 

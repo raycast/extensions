@@ -8,23 +8,11 @@ import YAML from "yaml";
 import * as TOML from "@iarna/toml";
 import { Action, ActionPanel, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 
-import { StorageKey, SORT_STRATEGY } from "./lib/constants";
-import { Group } from "./lib/Groups";
-import { Pin } from "./lib/Pins";
-import { getStorage, setStorage } from "./lib/storage";
-
-/**
- * Updates the ID of each pin/group such that there are no duplicates. The first item will have ID 0, the second 1, etc.
- * @param newItems The list of pins or groups to reassign IDs to.
- */
-const reassignIDs = async (newItems: { id: number }[]) => {
-  let currentID = 0;
-  newItems.forEach((item: { id: number }) => {
-    item.id = currentID;
-    currentID++;
-  });
-  await setStorage(StorageKey.NEXT_PIN_ID, [currentID]);
-};
+import { StorageKey, SORT_STRATEGY, Visibility } from "./lib/constants";
+import { getGroups, Group, isGroup, validateGroups } from "./lib/Groups";
+import { getPins, Pin, validatePins } from "./lib/Pins";
+import { setStorage } from "./lib/storage";
+import { GroupDisplaySetting } from "./lib/preferences";
 
 /**
  * Merges the existing pins/groups with the imported pins/groups, removing any duplicate entries. Duplicate entries are determined by the name of the pin. The ID of each pin is updated to ensure that there are no duplicates.
@@ -51,8 +39,10 @@ const mergeRemovingDuplicates = async (
     }
   });
 
-  await reassignIDs(newItems);
-  return newItems;
+  if (newItems.length > 0 && isGroup(newItems[0])) {
+    return validateGroups(newItems as Group[]);
+  }
+  return validatePins(newItems as Pin[]);
 };
 
 /**
@@ -64,31 +54,31 @@ const importJSONData = async (data: { groups?: Group[]; pins?: Pin[] }, importMe
   if (importMethod == "Merge1") {
     // Maintain duplicates
     // Update groups
-    const oldGroups = await getStorage(StorageKey.LOCAL_GROUPS);
+    const oldGroups = await getGroups();
     const newGroups = oldGroups.concat(data.groups || []);
-    await reassignIDs(newGroups);
+    await validateGroups(newGroups);
     await setStorage(StorageKey.LOCAL_GROUPS, newGroups);
 
     // Update pins
-    const oldPins = await getStorage(StorageKey.LOCAL_PINS);
+    const oldPins = await getPins();
     const newPins = oldPins.concat(data.pins || []);
-    await reassignIDs(newPins);
+    await validatePins(newPins);
     await setStorage(StorageKey.LOCAL_PINS, newPins);
     showToast({ title: "Merged Pin data!" });
   } else if (importMethod == "Merge2") {
     // Remove duplicates
     // Remove group duplicates
     const dataGroups = data.groups;
-    const oldGroups = await getStorage(StorageKey.LOCAL_GROUPS);
+    const oldGroups = await getGroups();
     const newGroups = await mergeRemovingDuplicates(dataGroups || [], oldGroups);
-    await reassignIDs(newGroups);
+    await validateGroups(newGroups);
     await setStorage(StorageKey.LOCAL_GROUPS, newGroups);
 
     // Remove pin duplicates
     const dataPins = data.pins || [];
-    const oldPins = await getStorage(StorageKey.LOCAL_PINS);
+    const oldPins = await getPins();
     const newPins = await mergeRemovingDuplicates(dataPins, oldPins);
-    await reassignIDs(newPins);
+    await validatePins(newPins as Pin[]);
     await setStorage(StorageKey.LOCAL_PINS, newPins);
 
     showToast({ title: "Updated Pin data!" });
@@ -121,64 +111,74 @@ const importCSVData = async (data: string[][], importMethod: string) => {
   if (fieldNames.includes("url")) {
     // The file contains Pin data
     const newPins: Pin[] = data.slice(1).map((row) => {
-      const nameIndex = fieldNames.indexOf("name");
-      const urlIndex = fieldNames.indexOf("url");
-      const iconIndex = fieldNames.indexOf("icon");
-      const groupIndex = fieldNames.indexOf("group");
-      const idIndex = fieldNames.indexOf("id");
-      const applicationIndex = fieldNames.indexOf("application");
-      const expireDateIndex = fieldNames.indexOf("expireDate");
-      const fragmentIndex = fieldNames.indexOf("fragment");
-      const lastOpenedIndex = fieldNames.indexOf("lastOpened");
-      const timesOpenedIndex = fieldNames.indexOf("timesOpened");
-      const dateCreatedIndex = fieldNames.indexOf("dateCreated");
-      const iconColorIndex = fieldNames.indexOf("iconColor");
-      const tagsIndex = fieldNames.indexOf("tags");
-      const notesIndex = fieldNames.indexOf("notes");
-      const tooltipIndex = fieldNames.indexOf("tooltip");
-      const averageExecutionTimeIndex = fieldNames.indexOf("averageExecutionTime");
-
+      const indices = Object.fromEntries(fieldNames.map((name, index) => [name, index]));
       return {
-        name: row[nameIndex],
-        url: row[urlIndex],
-        icon: row[iconIndex],
-        group: row[groupIndex],
-        id: parseInt(row[idIndex]),
-        application: applicationIndex == -1 ? "None" : row[applicationIndex],
-        expireDate: expireDateIndex == -1 ? undefined : row[expireDateIndex],
-        fragment: fragmentIndex == -1 ? undefined : row[fragmentIndex] == "true",
-        lastOpened: lastOpenedIndex == -1 ? undefined : row[lastOpenedIndex],
-        timesOpened: timesOpenedIndex == -1 ? undefined : parseInt(row[timesOpenedIndex]),
-        dateCreated: dateCreatedIndex == -1 ? undefined : row[dateCreatedIndex],
-        iconColor: iconColorIndex == -1 ? undefined : row[iconColorIndex],
+        ...Object.fromEntries(
+          Object.entries(indices).map(([key, value]) => {
+            return [key, row[value] || undefined];
+          }),
+        ),
+        name: row[indices.name],
+        url: row[indices.url],
+        group: indices.group == -1 ? "None" : row[indices.group],
+        icon: indices.icon == -1 ? "None" : row[indices.icon],
+        id: parseInt(row[indices.id]),
+        application: indices.application == -1 ? "None" : row[indices.application],
+        expireDate: indices.expireDate == -1 ? undefined : row[indices.expireDate],
+        fragment: indices.fragment == -1 ? undefined : row[indices.fragment] == "true",
+        lastOpened: indices.lastOpened == -1 ? undefined : row[indices.lastOpened],
+        timesOpened: indices.timesOpened == -1 ? undefined : parseInt(row[indices.timesOpened]),
+        dateCreated: indices.dateCreated == -1 ? undefined : row[indices.dateCreated],
+        iconColor: indices.iconColor == -1 ? undefined : row[indices.iconColor],
         tags:
-          tagsIndex == -1
+          indices.tags == -1
             ? undefined
-            : row[tagsIndex]
+            : row[indices.tags]
                 .split(",")
                 .map((tag) => tag.trim())
                 .filter((tag) => tag.length > 0),
-        notes: notesIndex == -1 ? undefined : row[notesIndex],
-        tooltip: tooltipIndex == -1 ? undefined : row[tooltipIndex],
-        averageExecutionTime: averageExecutionTimeIndex == -1 ? undefined : parseInt(row[averageExecutionTimeIndex]),
+        notes: indices.notes == -1 ? undefined : row[indices.notes],
+        tooltip: indices.tooltip == -1 ? undefined : row[indices.tooltip],
+        averageExecutionTime:
+          indices.averageExecutionTime == -1 ? undefined : parseInt(row[indices.averageExecutionTime]),
+        visibility:
+          indices.visibility == -1 ? undefined : (row[indices.visibility] as Visibility) || Visibility.VISIBLE,
+        expirationAction: indices.expirationAction == -1 ? undefined : row[indices.expirationAction],
+        aliases:
+          indices.aliases == -1
+            ? undefined
+            : row[indices.aliases]
+                .split(",")
+                .map((alias) => alias.trim())
+                .filter((alias) => alias.length > 0),
       };
     });
     await importJSONData({ pins: newPins }, importMethod);
   } else {
     // The file contains Group data
     const newGroups: Group[] = data.slice(1).map((row) => {
-      const nameIndex = fieldNames.indexOf("name");
-      const iconIndex = fieldNames.indexOf("icon");
-      const iconColorIndex = fieldNames.indexOf("iconColor");
-      const sortStrategyIndex = fieldNames.indexOf("sortStrategy");
-      const idIndex = fieldNames.indexOf("id");
+      const indices = Object.fromEntries(
+        fieldNames.map((name, index) => {
+          return [name, index];
+        }),
+      );
 
       return {
-        name: row[nameIndex],
-        icon: row[iconIndex],
-        iconColor: iconColorIndex == -1 ? undefined : row[iconColorIndex],
-        sortStrategy: sortStrategyIndex == -1 ? undefined : (row[sortStrategyIndex] as keyof typeof SORT_STRATEGY),
-        id: parseInt(row[idIndex]),
+        name: row[indices.name],
+        icon: row[indices.icon],
+        iconColor: indices.iconColor == -1 ? undefined : row[indices.iconColor],
+        parent: indices.parent == -1 ? undefined : parseInt(row[indices.parent]),
+        sortStrategy:
+          indices.sortStrategy == -1
+            ? undefined
+            : (row[indices.sortStrategy] as keyof typeof SORT_STRATEGY) || SORT_STRATEGY.manual,
+        id: parseInt(row[indices.id]),
+        visibility:
+          indices.visibility == -1 ? undefined : (row[indices.visibility] as Visibility) || Visibility.VISIBLE,
+        menubarDisplay:
+          indices.menubarDisplay == -1
+            ? undefined
+            : (row[indices.menubarDisplay] as GroupDisplaySetting) || GroupDisplaySetting.USE_PARENT,
       };
     });
     await importJSONData({ groups: newGroups }, importMethod);
@@ -223,7 +223,7 @@ const importXMLData = async (
  */
 const importDataFromFile = async (file: string, importMethod: string) => {
   const fileExtension = path.extname(file);
-  const rawData = fs.readFileSync(file).toString();
+  const rawData = fs.readFileSync(file).toString().replaceAll("]]]", "}}").replaceAll("[[[", "{{");
   if (fileExtension == ".json") {
     const data = JSON.parse(rawData.toString());
     await importJSONData(data, importMethod);
@@ -291,7 +291,7 @@ const checkFileValidity = (file: string, setFileError: (error: string | undefine
  */
 const ImportDataForm = () => {
   const [jsonContent, setJSONContent] = useState<string | undefined>();
-  const [selectedFile, setSelectedFile] = useState<string | undefined>();
+  const [selectedFiles, setSelectedFiles] = useState<string[] | undefined>();
   const [jsonError, setJSONError] = useState<string | undefined>();
   const [fileError, setFileError] = useState<string | undefined>();
 
@@ -307,7 +307,9 @@ const ImportDataForm = () => {
                 await importJSONData(data, values.importMethodField);
               } else {
                 try {
-                  await importDataFromFile(values.dataFileField[0], values.importMethodField);
+                  for (const file of values.dataFileField) {
+                    await importDataFromFile(file, values.importMethodField);
+                  }
                 } catch (error) {
                   console.error(error);
                   await showToast({ title: "Error Reading File", style: Toast.Style.Failure });
@@ -321,7 +323,7 @@ const ImportDataForm = () => {
       <Form.Dropdown
         id="importMethodField"
         title="Import Method"
-        defaultValue="Replace"
+        defaultValue="Merge2"
         info={`'Merge, Maintain duplicates' keeps existing and newly specified items, potentially producing duplicate entries.
       
 'Merge, Remove duplicates' keeps all existing items and any new items with a unique name.
@@ -333,13 +335,17 @@ const ImportDataForm = () => {
         <Form.Dropdown.Item key="Replace" title="Replace all data" value="Replace" />
       </Form.Dropdown>
 
-      {selectedFile ? null : (
+      {selectedFiles ? null : (
         <Form.TextArea
           id="jsonStringField"
           title="JSON String"
           placeholder="Enter a JSON string..."
           error={jsonError}
           onChange={(jsonString) => {
+            if (jsonString.length == 0) {
+              setJSONError("Please enter a JSON string!");
+              return;
+            }
             checkJSONFormat(jsonString, setJSONError);
             setJSONContent(jsonString);
           }}
@@ -349,20 +355,25 @@ const ImportDataForm = () => {
         />
       )}
 
-      {!selectedFile && !jsonContent ? <Form.Description title="" text="OR" /> : null}
+      {!selectedFiles && !jsonContent ? <Form.Description title="" text="OR" /> : null}
 
       {jsonContent ? null : (
         <Form.FilePicker
-          title="Data File"
+          title="Data Files"
           id="dataFileField"
-          info={`A file containing Pins data in any of the following formats: JSON, CSV, TOML, YAML, or XML.
+          info={`One or more files containing Pins data in any of the following formats: JSON, CSV, TOML, YAML, or XML.
           
 Note: When importing CSV files, import groups first, then pins.`}
           error={fileError}
-          allowMultipleSelection={false}
           onChange={(files) => {
-            checkFileValidity(files[0], setFileError);
-            setSelectedFile(files[0]);
+            if (files.length == 0) {
+              setFileError("Please select a file!");
+              return;
+            }
+            for (const file of files) {
+              checkFileValidity(file, setFileError);
+            }
+            setSelectedFiles(files);
           }}
         />
       )}

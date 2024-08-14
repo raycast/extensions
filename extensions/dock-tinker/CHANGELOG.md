@@ -1,5 +1,9 @@
 # Dock Tinker Changelog
 
+## [Reset to Confirm] - 2024-07-10
+
+- Reset Dock State command shows a confirmation dialog.
+
 ## [New function] - 2023-01-24
 
 - Include toggle to lock Dock contents ("contents-immutable" flag).

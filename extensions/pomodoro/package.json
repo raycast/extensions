@@ -13,7 +13,8 @@
     "MartinGonzalez",
     "nathanjms",
     "cchalop1",
-    "hayden_barnes"
+    "hayden_barnes",
+    "j3lte"
   ],
   "keywords": [
     "pomodoro",
@@ -402,7 +403,7 @@
       "type": "checkbox",
       "required": false,
       "title": "Show Quote",
-      "description": "Shows a random quote from quotable.io when interval finishes",
+      "description": "Shows a random quote from zenquotes.io when interval finishes",
       "default": false,
       "label": "Shows quote when interval finishes"
     },

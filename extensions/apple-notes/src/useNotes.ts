@@ -180,7 +180,7 @@ export const useNotes = () => {
   const [pinnedNotes, unpinnedNotes] = partition(activeNotes, (note) => note.pinned);
 
   return {
-    data: { pinnedNotes, unpinnedNotes, deletedNotes },
+    data: { pinnedNotes, unpinnedNotes, deletedNotes, allNotes: [...pinnedNotes, ...unpinnedNotes, ...deletedNotes] },
     ...rest,
   };
 };

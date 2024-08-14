@@ -1,6 +1,8 @@
+import { getPreferenceValues } from '@raycast/api';
 import { ActionPanel, Action, List, Icon } from '@raycast/api';
 import { useEffect, useState, useMemo } from 'react';
 import { decrypt } from './pass';
+import { OtpRow } from './otpRow';
 
 interface Row {
   idx: number;
@@ -9,19 +11,29 @@ interface Row {
 }
 
 function parseRows(content: string): Row[] {
-  const [pass, ...extra] = content.split('\n');
-  return [
-    { idx: 0, name: 'pass', value: pass },
-    ...extra
-      .filter((s) => !!s)
-      .map((s, idx) => {
+  // Starts with `otpauth://`
+  // type can be totp or hotp
+  // label betwen type and`?`
+  // must contain argumens after `?`
+  const otpPattern = /^otpauth:\/\/(totp|hotp)\/([^?]+)\?(.+)$/;
+
+  return content
+    .split('\n')
+    .filter((s) => !!s)
+    .map((s, idx) => {
+      if (otpPattern.test(s)) {
+        return { idx, name: 'otpauth', value: s };
+      } else if (idx === 0) {
+        return { idx, name: 'pass', value: s };
+      } else {
         const [name, value] = s.split(/:\s?/);
-        return { idx: idx + 1, name, value };
-      }),
-  ];
+        return { idx: idx, name, value };
+      }
+    });
 }
 
 function ContentRow(row: Row) {
+  const { defaultAction } = getPreferenceValues();
   const [show, setShow] = useState<boolean>(false);
 
   const { toggleTitle, toggleIcon, itemTitle } = useMemo(() => {
@@ -45,8 +57,17 @@ function ContentRow(row: Row) {
       title={itemTitle}
       actions={
         <ActionPanel>
-          <Action.Paste content={row.value} />
-          <Action.CopyToClipboard content={row.value} shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }} />
+          {defaultAction === 'copy' ? (
+            <>
+              <Action.CopyToClipboard content={row.value} />
+              <Action.Paste content={row.value} />
+            </>
+          ) : (
+            <>
+              <Action.Paste content={row.value} />
+              <Action.CopyToClipboard content={row.value} />
+            </>
+          )}
           <Action
             icon={toggleIcon}
             title={toggleTitle}
@@ -85,9 +106,13 @@ export default function Content({ storepath, file }: ContentProps) {
 
   return (
     <List isLoading={isLoading}>
-      {rows.map((row) => (
-        <ContentRow key={row.idx} {...row} />
-      ))}
+      {rows.map((row) =>
+        row.name === 'otpauth' ? (
+          <OtpRow key={row.idx} file={file} storepath={storepath} />
+        ) : (
+          <ContentRow key={row.idx} {...row} />
+        ),
+      )}
     </List>
   );
 }

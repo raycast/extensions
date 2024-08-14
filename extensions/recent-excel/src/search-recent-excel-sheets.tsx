@@ -1,66 +1,77 @@
-import { List, open, ActionPanel, Action } from "@raycast/api";
-import { useEffect, useState } from "react";
-import fs from "fs/promises";
-import path from "path";
-import { getPreferenceValues } from "@raycast/api";
 import os from "os";
+import path from "path";
+import { List, open, ActionPanel, Action, getPreferenceValues } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { exec } from "child_process";
+import { promisify } from "util";
 
 interface ExcelFile {
   path: string;
   lastModified: Date;
 }
 
-const getExcelFilesInDirectory = async (directory: string): Promise<ExcelFile[]> => {
-  const excelFiles: ExcelFile[] = [];
+const resolveDirectory = (dir: string): string => {
+  if (dir.startsWith("~")) {
+    return path.join(os.homedir(), dir.slice(1));
+  }
+  return dir;
+};
 
-  const resolveDirectory = (dir: string) => {
-    if (dir.startsWith("~")) {
-      return path.join(os.homedir(), dir.slice(1));
+const getExcelFilesInDirectoryUsingFind = async (directory: string): Promise<ExcelFile[]> => {
+  const execAsync = promisify(exec);
+
+  try {
+    const { stdout, stderr } = await execAsync(
+      `find "${directory}" -type f \\( -name "*.xls" -o -name "*.xlsx" -o -name "*.xlsm" \\) | head -n 200 | xargs -I{} stat -f "%N,%m" "{}"`,
+      { maxBuffer: 1024 * 1024 * 10 },
+    );
+
+    if (stderr) {
+      console.error(`Error executing find command: ${stderr}`);
+      return [];
     }
-    return dir;
-  };
 
-  const traverseDirectory = async (currentDir: string) => {
-    try {
-      const files = await fs.readdir(currentDir);
+    const excelFiles: ExcelFile[] = stdout
+      .trim()
+      .split("\n")
+      .filter((line) => line.includes(",")) // Filter out lines without a comma separator
+      .map((line) => {
+        const [path, lastModified] = line.split(",");
+        const lastModifiedDate = new Date(Number(lastModified) * 1000);
+        return {
+          path,
+          lastModified: isNaN(lastModifiedDate.getTime()) ? new Date(0) : lastModifiedDate, // Handle invalid dates
+        };
+      });
 
-      await Promise.all(
-        files.map(async (file) => {
-          const filePath = path.join(currentDir, file);
+    return excelFiles;
+  } catch (error) {
+    console.error(`Error executing find command: ${error}`);
+    return [];
+  }
+};
+const removeChildrenFolders = (folders: string[]): string[] => {
+  // Case 1: users/user/folder/ & ~/folder
+  // Case 2: ~/folder & ~/folder/something
 
-          try {
-            const stats = await fs.stat(filePath);
+  folders = folders.map((folder) => resolveDirectory(folder));
+  folders.sort((a, b) => b.length - a.length);
+  // here we check for case 2 - we need to check for each one if it's a prefix of another one
+  const filteredFolders: string[] = [];
 
-            if (stats.isDirectory()) {
-              await traverseDirectory(filePath);
-            } else if (
-              file.toLowerCase().endsWith(".xls") ||
-              file.toLowerCase().endsWith(".xlsx") ||
-              file.toLowerCase().endsWith(".xlsm")
-            ) {
-              excelFiles.push({ path: filePath, lastModified: stats.mtime });
-            }
-          } catch (error) {
-            if (error instanceof Error && error.message.includes("ENOENT")) {
-              // File or directory does not exist, skip it silently
-            } else {
-              console.error(`Error accessing file: ${filePath}`, error);
-            }
-          }
-        }),
-      );
-    } catch (error) {
-      if (error instanceof Error && error.message.includes("ENOENT")) {
-        // Directory does not exist, skip it silently
-      } else {
-        console.error(`Error accessing directory: ${currentDir}`, error);
+  for (const folderName of folders) {
+    let isChildFolder = false;
+    for (const filteredFolder of filteredFolders) {
+      if (filteredFolder.includes(folderName)) {
+        isChildFolder = true;
+        break;
       }
     }
-  };
-
-  const resolvedDirectory = resolveDirectory(directory);
-  await traverseDirectory(resolvedDirectory);
-  return excelFiles;
+    if (!isChildFolder) {
+      filteredFolders.push(folderName);
+    }
+  }
+  return filteredFolders;
 };
 
 export default function Command(props: { arguments: { folderPath?: string } }) {
@@ -71,11 +82,12 @@ export default function Command(props: { arguments: { folderPath?: string } }) {
   useEffect(() => {
     const fetchExcelFiles = async () => {
       setIsLoading(true);
-      const folders = props.arguments.folderPath
-        ? [props.arguments.folderPath]
+      let folders = props.arguments.folderPath
+        ? props.arguments.folderPath.split(",").map((dir) => dir.trim())
         : directories?.split(",").map((dir) => dir.trim()) || [];
+      folders = removeChildrenFolders(folders);
 
-      const excelFilesInUsers = (await Promise.all(folders.map(getExcelFilesInDirectory))).flat();
+      const excelFilesInUsers = (await Promise.all(folders.map(getExcelFilesInDirectoryUsingFind))).flat();
       const sortedExcelFiles = excelFilesInUsers.sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
 
       setList(sortedExcelFiles);
