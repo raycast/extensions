@@ -1,6 +1,6 @@
 # Stablecog Changelog
 
-## [Minor Update] - 2024-08-14
+## [Minor Update] - {PR_MERGE_DATE}
 
 - Added a new AI model: FLUX.1
 - Removed scheduler options
