@@ -2,8 +2,21 @@ import { Action, ActionPanel, Grid, Color } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-type TablerIcon = { [key in Keys]: string };
-type Keys = "name" | "svg" | "tags" | "category" | "url" | "version" | "unicode";
+type Styles = {
+  outline?: { version: string; unicode: string; svg: string };
+  filled?: { version: string; unicode: string; svg: string };
+};
+
+type TablerIcon = {
+  name: string;
+  svg?: string;
+  tags: string[];
+  category: string;
+  url?: string;
+  version?: string;
+  unicode?: string;
+  styles?: Styles;
+};
 
 const Outline = "https://raw.githubusercontent.com/tabler/tabler-icons/master/icons/outline/";
 const Filled = "https://raw.githubusercontent.com/tabler/tabler-icons/master/icons/filled/";
