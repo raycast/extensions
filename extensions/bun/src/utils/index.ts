@@ -17,7 +17,8 @@ export function formatLoadingValue<T extends ({ isLoading: boolean } | { loading
   }
 
   if (dataProp) {
-    // @ts-expect-error
+    // @ts-expect-error - If dataProp can't index, it will
+    // be undefined and the || will trigger so it's fine
     return value.data?.[dataProp] || value[dataProp] || nullishText;
   }
   return value.data || nullishText;
