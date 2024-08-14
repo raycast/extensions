@@ -1,5 +1,9 @@
 # Clean Keyboard Changelog
 
+## [Fix Unlock Keyboard action]
+
+- Fixed the keyboard didn't unlock after the action was executed.
+
 ## [1 hour] - 2024-07-26
 
 - Added 1 hour duration
