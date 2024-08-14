@@ -1,0 +1,132 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "indiehackers",
+  "title": "IndieHackers",
+  "description": "Browse IndieHackers",
+  "icon": "indie-hackers.png",
+  "author": "xmok",
+  "categories": [
+    "News"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-by-type",
+      "title": "Browse by Type",
+      "subtitle": "IndieHackers",
+      "description": "Browse IH by Organic, Featured or Newest",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "type",
+          "required": true,
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Organic",
+              "value": "organic"
+            },
+            {
+              "title": "Featured",
+              "value": "featured"
+            },
+            {
+              "title": "Newest",
+              "value": "newest"
+            }
+          ],
+          "placeholder": "TYPE"
+        }
+      ]
+    },
+    {
+      "name": "browse-by-time",
+      "title": "Browse by Time",
+      "subtitle": "IndieHackers",
+      "description": "Browse IH by today, week, month or all-time",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "time",
+          "required": true,
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "This Week",
+              "value": "week"
+            },
+            {
+              "title": "This Month",
+              "value": "month"
+            },
+            {
+              "title": "All Time",
+              "value": "all-time"
+            }
+          ],
+          "placeholder": "TIME"
+        }
+      ]
+    },
+    {
+      "name": "browse-by-group",
+      "title": "Browse by Group",
+      "subtitle": "IndieHackers",
+      "description": "Browse IH by Group",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "popular_group",
+          "required": false,
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Building in Public",
+              "value": "building-in-public"
+            },
+            {
+              "title": "Growth",
+              "value": "growth"
+            },
+            {
+              "title": "12 Startups in 12 Months",
+              "value": "12-startups-in-12-months"
+            }
+          ],
+          "placeholder": "POPULAR_GROUP"
+        },
+        {
+          "name": "group_slug",
+          "required": false,
+          "type": "text",
+          "placeholder": "GROUP_SLUG"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.0",
+    "@raycast/utils": "^1.16.4",
+    "rss-parser": "^3.13.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
