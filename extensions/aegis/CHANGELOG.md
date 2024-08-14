@@ -1,6 +1,6 @@
 # Aegis Extension Changelog
 
-## [Aegis Backup Integration] - {PR_MERGE_DATE}
+## [Aegis Backup Integration] - 2024-08-14
 
 - Fix missing preference for fallback icon colour
 
