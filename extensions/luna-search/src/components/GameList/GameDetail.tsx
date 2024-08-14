@@ -41,7 +41,6 @@ function optimizeImageUrl(url: string, size: number) {
  * selected genre as the argument.
  */
 export function GameDetail({ game, searchCallback }: Props): JSX.Element {
-  console.log(game);
   if (!game) return <></>;
   const img = game.imgUrl ? optimizeImageUrl(game.imgUrl, 300) : LUNA_LOGO_IMG;
   return (

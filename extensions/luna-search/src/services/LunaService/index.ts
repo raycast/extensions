@@ -3,12 +3,14 @@ import { API_ROUTE } from "./constants";
 import { isEmpty, Search } from "./SearchModel";
 import { Response } from "./ReponseModel";
 import { LunaGame } from "./GameModel";
+import { ExpiringCache } from "../../utilities";
 
 /**
  * Provides a service for interacting with the Luna API, including
  * searching for games and processing the API response.
  */
 export class LunaService {
+  private readonly cache: ExpiringCache<LunaGame[]>;
   private readonly url: string;
 
   /**
@@ -18,6 +20,7 @@ export class LunaService {
    * @param url The base URL for the Luna API endpoint.
    */
   constructor(url: string = API_ROUTE) {
+    this.cache = new ExpiringCache<LunaGame[]>();
     this.url = url;
   }
 
@@ -30,17 +33,26 @@ export class LunaService {
    * @returns An array of LunaGame instances matching the search query.
    */
   public async search(query: string): Promise<LunaGame[]> {
+    const cachedGames = this.cache.get(query);
+    if (cachedGames) {
+      return cachedGames;
+    }
+
     const request = new Search(query);
 
     const response = await axios.post<Response>(this.url, request.body, { headers: request.headers });
 
     if (!response?.data || isEmpty(response.data)) {
+      this.cache.set(query, []);
       return [];
     }
 
-    return response.data.pageMemberGroups.mainContent.widgets
+    const results = response.data.pageMemberGroups.mainContent.widgets
       .flatMap((widget) => widget.widgets)
       .map((widget) => new LunaGame(widget));
+
+    this.cache.set(query, results);
+    return results;
   }
 }
 
