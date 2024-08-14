@@ -1,6 +1,6 @@
 # Railway Changelog
 
-## [Show Error Toasts + Cache Projects] - {PR_MERGE_DATE}
+## [Show Error Toasts + Cache Projects] - 2024-08-14
 
  - A `Failure` toast is shown if something goes wrong
  - The API Token is now `required`
