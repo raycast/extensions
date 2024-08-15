@@ -1,7 +1,8 @@
 # Things Changelog
 
-## [Fix Disable Automatic Date (when & deadline)] - 2024-08-14
-- Disable Automatic Date (when & deadline), List parsing when AI is not enabled in preferences/is not available via environment
+## [Quick ToDo Fixes] - {PR_MERGE_DATE}
+
+- Quick ToDo Command: Disable Automatic Date (when & deadline), List parsing when AI is not enabled in preferences/is not available via environment.
 
 ## [Quick To-do Improvements] - 2024-08-05
 
