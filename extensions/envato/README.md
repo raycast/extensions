@@ -4,4 +4,4 @@
 </p>
 <p align="center">Tracking New Sales For Envato Author</p>
 
-![](./metadata/envato-01.png?raw=true)
+![](./assets/preview-raycast-temp.png?raw=true)

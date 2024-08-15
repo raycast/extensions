@@ -9,7 +9,6 @@ import {
   IBadgesResponse,
   IPrivateAccountDetailsResponse,
   SearchItem,
-  SimilarItem,
 } from "envato";
 
 /*-----------------------------------*/
@@ -33,7 +32,7 @@ export default function accountEnvato() {
     <List isLoading={outPortfolio && state.isLoading}>
       <Account state={state} />
       <List.Section title="My Portfolio">
-        {outPortfolio.map((item: any, index: any) => {
+        {outPortfolio.map((item: any, index) => {
           return <PortfolioItem item={item} key={index} />;
         })}
       </List.Section>
