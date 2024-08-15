@@ -57,7 +57,7 @@
       "default": "NBA"
     },
     {
-      "name": "conferences",
+      "name": "conference",
       "description": "Choose Standings default conference",
       "type": "dropdown",
       "title": "Conferences",
