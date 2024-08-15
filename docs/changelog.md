@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.81.0 - 2024-08-13
+
+### ✨ New
+
+- **Detail:** You can now render LaTeX in the Detail views. We support the following delimiters:
+  - Inline math: `\(...\)` and `\begin{math}...\end{math}`
+  - Display math: `\[...\]`, `$$...$$` and `\begin{equation}...\end{equation}`
+
+### 💎 Improvements
+
+- You can now pick a different command template for each command that you add in the `Create Extension` command’s form.
+- Added a new `Add Command` action for local extensions in the `Manage Extensions` command.
+
 ## 1.80.0 - 2024-07-31
 
 ### ✨ New

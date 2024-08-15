@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pdfsearch",
   "title": "PDFSearch",
-  "description": "Search across collections of PDF documents.",
+  "description": "Search across collections of PDF files.",
   "icon": "command-icon.png",
   "author": "kevin-pek",
+  "contributors": [
+    "xilopaint"
+  ],
   "categories": [
     "Productivity"
   ],

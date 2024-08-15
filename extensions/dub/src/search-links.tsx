@@ -7,7 +7,7 @@ import { MutatePromise, showFailureToast } from "@raycast/utils";
 import type { LinkSchema } from "dub/models/components";
 import { withDubClient } from "./with-dub-client";
 
-function SearchLinks() {
+export function SearchLinks() {
   const { shortLinks, error: linksError, isLoading: isLoadingLinks, mutate } = useShortLinks();
 
   return (
@@ -181,9 +181,7 @@ const tryDeleteLink = async (linkId: string, mutate: MutatePromise<LinkSchema[]>
         title: "❗ Failed to delete link",
         primaryAction: {
           title: "Retry",
-          onAction: async () => {
-            await tryDeleteLink(linkId, mutate);
-          },
+          onAction: () => tryDeleteLink(linkId, mutate),
         },
       });
     });
