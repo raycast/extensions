@@ -1,11 +1,15 @@
 # GitHub Changelog
 
+## [Fix capitalization] - 2024-08-15
+
+- Ensured title-style capitalization in action titles.
+
 ## [My Issues and PRs Improvements] - 2024-08-12
 
 - My Issues Command + Menu Bar: Preferences to specify categories to display. Issues opened by the user will always be displayed.
 - My PRs Command + Menu Bar: Preferences to specify categories to display. PRs created by the user will always be displayed.
 - The categories not being displayed will not invoke extra API calls, reducing throttling.
-- ⚠️My PRs Menu Bar: Removed `includeCount` options to keep things simple (and in-sync) by just displaying the count of PRs in the categories selected.
+- My PRs Menu Bar: Removed `includeCount` options to keep things simple (and in-sync) by just displaying the count of PRs in the categories selected.
 
 ## [Improvements] - 2024-08-12
 
