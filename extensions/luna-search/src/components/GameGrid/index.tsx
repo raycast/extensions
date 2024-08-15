@@ -1,7 +1,7 @@
 import { Grid } from "@raycast/api";
 import { DISPLAY_VALUES } from "../../constants";
 import { EmptyGameGrid } from "./EmptyGameGrid";
-import { LunaGame } from "../../services";
+import { GameSummary } from "../../services";
 import { GameActions } from "../GameActions";
 import { useState } from "react";
 
@@ -9,7 +9,7 @@ import { useState } from "react";
  * Defines the props for the GameList component.
  */
 interface Props {
-  games: LunaGame[];
+  games: GameSummary[];
   isLoading: boolean;
   searchCallback: (query: string) => void;
   searchQuery: string;
@@ -20,7 +20,7 @@ interface Props {
  * and handling the search functionality across them
  *
  * It receives the following props:
- * - games: An array of LunaGame instances to be displayed.
+ * - games: An array of GameSummary instances to be displayed.
  * - isLoading: A boolean indicating whether the game data is currently being loaded.
  * - searchCallback: A function to be called to trigger a search.
  * - searchQuery: The current search query.

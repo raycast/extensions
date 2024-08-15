@@ -1,13 +1,17 @@
-import { Color, Detail } from "@raycast/api";
+import { Color, Detail, Icon, showToast, Toast } from "@raycast/api";
 import { DISPLAY_VALUES, LUNA_LOGO_IMG } from "../constants";
-import { LunaGame } from "../services";
+import { GameSummary, LunaService } from "../services";
 import { GameActions } from "./GameActions";
+import { useEffect, useState } from "react";
+import { Game } from "../services/LunaService/Game";
+
+const LUNA = LunaService.getInstance();
 
 /**
  * Defines the props for the GameDetail component.
  */
 interface Props {
-  game: LunaGame;
+  game: GameSummary;
   searchCallback: (query: string) => void;
 }
 
@@ -27,26 +31,54 @@ export function optimizeImageUrl(url: string, size: number) {
 
 /**
  * The GameDetail component is responsible for rendering the detailed
- * information about a specific game, including the game art, rating,
- * and genres.
+ * information about a specific game.
  *
  * It receives the following props:
  * - game: The LunaGame instance to display.
  *
  * The component uses the Detail component from the Raycast API
- * to display the game's metadata, including the image, rating, and genres.
+ * to display the game's metadata, including the image, rating, and genres and more.
  * If the game does not have an image URL, it falls back to the LUNA_LOGO_IMG.
  *
- * When a genre is clicked, the searchCallback function is called with the
- * selected genre as the argument.
+ * When a genre / publisher is clicked, the searchCallback function is called with the
+ * selected item as the argument.
  */
 export function GameDetail({ game, searchCallback }: Props): JSX.Element {
   if (!game) return <></>;
-  const img = game.imgUrl ? optimizeImageUrl(game.imgUrl, 300) : LUNA_LOGO_IMG;
+
+  const [gameDetails, setGameDetails] = useState<Game>();
+  const [isLoading, setIsLoading] = useState<boolean>();
+
+  useEffect(() => {
+    setIsLoading(true);
+    const loadDetails = async () => {
+      try {
+        const details = await LUNA.getGameDetails(game);
+        setGameDetails(details);
+      } catch (e) {
+        console.debug("Error getting game details:", e);
+        showToast({
+          style: Toast.Style.Failure,
+          title: DISPLAY_VALUES.errorMessage,
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadDetails();
+  }, []);
+
+  const img = game.imgUrl ? optimizeImageUrl(game.imgUrl, 500) : LUNA_LOGO_IMG;
   return (
     <Detail
       actions={<GameActions game={game} />}
-      markdown={`![Game Art](${img})`}
+      isLoading={isLoading}
+      markdown={`
+![Game Art](${img}?raycast-width=500)
+ # ${game.title}
+
+ ${gameDetails?.description ?? ""}
+ `}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label
@@ -68,6 +100,36 @@ export function GameDetail({ game, searchCallback }: Props): JSX.Element {
                 text={genre}
                 onAction={() => {
                   searchCallback(genre);
+                }}
+              />
+            ))}
+          </Detail.Metadata.TagList>
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Label
+            title={DISPLAY_VALUES.releaseDateTitle}
+            icon={Icon.Calendar}
+            text={gameDetails?.releaseYear}
+          />
+          <Detail.Metadata.TagList title={DISPLAY_VALUES.publishersTitle}>
+            {gameDetails?.publishers?.map((publisher) => (
+              <Detail.Metadata.TagList.Item
+                color={Color.PrimaryText}
+                key={publisher}
+                text={publisher}
+                onAction={() => {
+                  searchCallback(publisher);
+                }}
+              />
+            ))}
+          </Detail.Metadata.TagList>
+          <Detail.Metadata.TagList title={DISPLAY_VALUES.developersTitle}>
+            {gameDetails?.publishers?.map((developers) => (
+              <Detail.Metadata.TagList.Item
+                color={Color.PrimaryText}
+                key={developers}
+                text={developers}
+                onAction={() => {
+                  searchCallback(developers);
                 }}
               />
             ))}

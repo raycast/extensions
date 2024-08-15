@@ -15,6 +15,7 @@ interface PageMemberGroups {
  * The action contains a target, which is typically a URL or other destination.
  */
 interface Action {
+  serviceToken: string;
   target: string;
 }
 

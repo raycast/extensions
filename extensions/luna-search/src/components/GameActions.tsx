@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, Keyboard, open, useNavigation } from "@raycast/api";
-import { LunaGame } from "../services";
+import { GameSummary } from "../services";
 import { DISPLAY_VALUES } from "../constants";
 import { GameDetail } from "./GameDetail";
 
@@ -12,7 +12,7 @@ const CHROME_KEY = "com.google.Chrome";
  * Defines the props for the GameActions component.
  */
 interface Props {
-  game: LunaGame;
+  game: GameSummary;
   isDetailEnabled?: boolean;
   searchCallback?: (query: string) => void;
 }
@@ -23,8 +23,8 @@ interface Props {
  * launching the game, and copying the game's raw URL.
  *
  * It receives the following props:
- * - game: The LunaGame instance to display the actions for.
- * - isDetailEnabled: If the View Detail action should be shown.
+ * - game: The GameSummary instance to display the actions for.
+ * - detailServiceToken: An optional detail service token, which can be used to get details about a game.
  * - searchCallback: Triggers a search, optional - void method provided by default.
  *
  * The component uses the ActionPanel and Action components from the

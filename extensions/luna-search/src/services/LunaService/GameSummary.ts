@@ -10,11 +10,12 @@ const RAYCAST_REF = "&ref=tmp_raycast";
 const LUNA_QUERY_PARAMS = `?g=web${RAYCAST_REF}`;
 
 /**
- * Represents a game on the Luna platform.
- * The LunaGame class is responsible for mapping the data from the
+ * Represents the summary of a game on the Luna platform.
+ * The GameSummary class is responsible for mapping the data from the
  * Luna API response to a more convenient and type-safe representation.
  */
-export class LunaGame {
+export class GameSummary {
+  readonly detailToken: string;
   readonly imgUrl: string;
   readonly genres?: string[];
   readonly playUrl?: string;
@@ -27,15 +28,16 @@ export class LunaGame {
   readonly title: string;
 
   /**
-   * Constructs a new LunaGame instance from the provided Widget data.
+   * Constructs a new GameSummary instance from the provided Widget data.
    * The constructor extracts the relevant information from the Widget's
-   * presentationData and sets the corresponding properties on the LunaGame.
+   * presentationData and sets the corresponding properties on the GameSummary.
    *
    * @param source The Widget object from the Luna API response.
    */
   constructor(source: Widget) {
     const content = JSON.parse(source.presentationData);
 
+    this.detailToken = source.actions[0].serviceToken;
     this.imgUrl = content.imageLandscape;
     this.genres = content.genreTags;
     this.publisher = content.hoverDetails?.publishersText;

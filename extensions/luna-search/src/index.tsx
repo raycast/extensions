@@ -1,14 +1,14 @@
 import { LaunchProps, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { LunaGame, LunaService } from "./services";
+import { GameSummary, LunaService } from "./services";
 import { GameGrid } from "./components";
 import { DISPLAY_VALUES } from "./constants";
 
 // Create a singleton instance of the LunaService to handle game searches
-const LUNA = new LunaService();
+const LUNA = LunaService.getInstance();
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
-  const [games, setGames] = useState<LunaGame[]>([]);
+  const [games, setGames] = useState<GameSummary[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>(props.arguments.search ?? "");
   // Prevent loading flashes by defaulting on loading state if there is a default search
   const [isLoading, setIsLoading] = useState<boolean>(props.arguments.search != "" || false);

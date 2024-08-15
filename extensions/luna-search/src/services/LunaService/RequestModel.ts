@@ -23,4 +23,5 @@ export interface Request {
       browserType: string;
     };
   };
+  serviceToken?: string;
 }
