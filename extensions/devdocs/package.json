@@ -62,7 +62,8 @@
           "value": "browser"
         },
         { "title": "Open in DevDocs app", "value": "app" }
-      ]
+      ],
+      "default": "browser"
     }
   ],
   "dependencies": {
