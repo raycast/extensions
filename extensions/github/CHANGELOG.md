@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Fix capitalization] - {PR_MERGE_DATE}
+## [Fix capitalization] - 2024-08-15
 
 - Ensured title-style capitalization in action titles.
 
