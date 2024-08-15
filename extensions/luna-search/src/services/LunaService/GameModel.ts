@@ -45,6 +45,6 @@ export class LunaGame {
     this.title = content.title;
     this.openUrl = `${LUNA_DOMAIN}${source.actions[0].target}${LUNA_QUERY_PARAMS}`;
     this.playUrl = content.hoverDetails?.productUrl ? `${content.hoverDetails?.productUrl}${RAYCAST_REF}` : undefined;
-    this.rawUrl = `${LUNA_DOMAIN}${source.actions[0].target} `;
+    this.rawUrl = `${LUNA_DOMAIN}${source.actions[0].target}`;
   }
 }

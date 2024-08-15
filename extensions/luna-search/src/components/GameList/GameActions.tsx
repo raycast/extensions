@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, open } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, open } from "@raycast/api";
 import { LunaGame } from "../../services";
 import { DISPLAY_VALUES } from "../../constants";
 
@@ -49,7 +49,7 @@ export function GameActions({ game }: Props): JSX.Element {
       )}
       <Action.CopyToClipboard
         title={DISPLAY_VALUES.copyTitle}
-        shortcut={{ modifiers: ["cmd"], key: "." }}
+        shortcut={Keyboard.Shortcut.Common.Copy}
         content={game.rawUrl}
       />
     </ActionPanel>
