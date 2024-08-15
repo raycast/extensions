@@ -4,12 +4,7 @@ import { SaleItemDetail } from "./saleItem";
 import dateFormat from "dateformat";
 import { useFetch } from "./utils";
 import { GetData, saleItem } from "./types";
-import {
-  IAccountDetailsResponse,
-  IBadgesResponse,
-  IPrivateAccountDetailsResponse,
-  SearchItem,
-} from "envato";
+import { IAccountDetailsResponse, IBadgesResponse, IPrivateAccountDetailsResponse, SearchItem } from "envato";
 
 /*-----------------------------------*/
 /*------ INDEX ACCOUNT
