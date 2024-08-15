@@ -54,7 +54,7 @@
         }
       ],
       "required": true,
-      "default": "NBA"
+      "default": "nba"
     },
     {
       "name": "conference",
