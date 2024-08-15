@@ -37,16 +37,24 @@
             {
               "title": "Following",
               "value": "following"
+            },
+            {
+              "title": "Liked",
+              "value": "liked"
+            },
+            {
+              "title": "Saved",
+              "value": "saved"
             }
           ]
         }
       ]
     },
     {
-      "name": "open",
-      "title": "Open Page",
+      "name": "activity",
+      "title": "Activity",
       "subtitle": "Threads",
-      "description": "Open Threads Page",
+      "description": "View Threads Activity",
       "mode": "no-view",
       "arguments": [
         {
@@ -56,16 +64,32 @@
           "type": "dropdown",
           "data": [
             {
-              "title": "Liked",
-              "value": "liked"
+              "title": "All",
+              "value": "all"
             },
             {
-              "title": "Saved",
-              "value": "saved"
+              "title": "Follows",
+              "value": "follows"
             },
             {
-              "title": "Activity",
-              "value": "activity"
+              "title": "Replies",
+              "value": "replies"
+            },
+            {
+              "title": "Mentions",
+              "value": "mentions"
+            },
+            {
+              "title": "Quotes",
+              "value": "quotes"
+            },
+            {
+              "title": "Reposts",
+              "value": "reposts"
+            },
+            {
+              "title": "Verified",
+              "value": "verified"
             }
           ]
         }
