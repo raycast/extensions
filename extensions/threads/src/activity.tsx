@@ -1,7 +1,7 @@
 import { LaunchProps, closeMainWindow, open } from "@raycast/api";
 
 export default async function Command(
-  props: LaunchProps<{ arguments: Arguments.Open }>,
+  props: LaunchProps<{ arguments: Arguments.Activity }>,
 ) {
   const url = "https://threads.net/activity/";
   await closeMainWindow();
