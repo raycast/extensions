@@ -86,18 +86,18 @@ export async function editMailboxIdentity(
   domain: string,
   mailboxLocalPart: string,
   identityLocalPart: string,
-  modifiedIdentity: IdentityEdit
+  modifiedIdentity: IdentityEdit,
 ) {
   return await callApi<Identity>(
     `domains/${domain}/mailboxes/${mailboxLocalPart}/identities/${identityLocalPart}`,
     "PUT",
-    modifiedIdentity
+    modifiedIdentity,
   );
 }
 export async function deleteMailboxIdentity(domain: string, mailboxLocalPart: string, identityLocalPart: string) {
   return await callApi<Identity>(
     `domains/${domain}/mailboxes/${mailboxLocalPart}/identities/${identityLocalPart}`,
-    "DELETE"
+    "DELETE",
   );
 }
 

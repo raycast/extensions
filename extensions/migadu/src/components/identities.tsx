@@ -7,6 +7,7 @@ import {
   Alert,
   Form,
   Icon,
+  Keyboard,
   List,
   Toast,
   confirmAlert,
@@ -17,7 +18,9 @@ import { useCachedState, useForm } from "@raycast/utils";
 
 export function IdentitiesIndex({ mailbox }: { mailbox: Mailbox }) {
   const { push } = useNavigation();
-  const [identities, setIdentities] = useCachedState<Identity[]>("identities", mailbox.identities);
+  const [identities, setIdentities] = useCachedState<Identity[]>("identities", mailbox.identities, {
+    cacheNamespace: `${mailbox.domain_name}-${mailbox.local_part}`,
+  });
   const [isLoading, setIsLoading] = useState(false);
 
   const domain = mailbox.domain_name;
@@ -65,14 +68,14 @@ export function IdentitiesIndex({ mailbox }: { mailbox: Mailbox }) {
                         mailbox={mailbox}
                         identity={identity}
                         onIdentityEdited={getMailboxIdentitiesFromApi}
-                      />
+                      />,
                     )
                   }
                 />
                 <Action
                   title="Delete Identity"
                   icon={Icon.DeleteDocument}
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                   style={Action.Style.Destructive}
                   onAction={() => confirmAndDelete(identity)}
                 />
@@ -306,7 +309,7 @@ function IdentitiesEdit({ mailbox, identity, onIdentityEdited }: IdentitiesEditP
         identity.domain_name,
         mailbox.local_part,
         identity.local_part,
-        modifiedIdentity
+        modifiedIdentity,
       );
       if (!("error" in response)) {
         await showToast(Toast.Style.Success, "Edited Identity", `${response.name}<${response.address}>`);

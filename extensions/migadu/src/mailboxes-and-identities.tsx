@@ -5,6 +5,7 @@ import {
   Alert,
   Form,
   Icon,
+  Keyboard,
   List,
   Toast,
   confirmAlert,
@@ -29,7 +30,9 @@ type MailboxesIndexProps = {
 };
 function MailboxesIndex({ domain }: MailboxesIndexProps) {
   const { push } = useNavigation();
-  const [mailboxes, setMailboxes] = useCachedState<Mailbox[]>("mailboxes", []);
+  const [mailboxes, setMailboxes] = useCachedState<Mailbox[]>("mailboxes", [], {
+    cacheNamespace: "domain",
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   async function getMailboxesFromApi() {
@@ -84,7 +87,7 @@ function MailboxesIndex({ domain }: MailboxesIndexProps) {
                 <Action
                   title="Delete Mailbox"
                   icon={Icon.DeleteDocument}
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                   style={Action.Style.Destructive}
                   onAction={() => confirmAndDelete(mailbox)}
                 />
