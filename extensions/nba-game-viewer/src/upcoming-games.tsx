@@ -2,10 +2,9 @@ import { getPreferenceValues } from "@raycast/api";
 import Schedule from "./views/schedule";
 
 const Command = () => {
-  const preferences = getPreferenceValues<{ league: string }>();
-  const selectedLeague = preferences.league || "NBA";
+  const { league } = getPreferenceValues<Preferences>();
 
-  return <Schedule subtitle={selectedLeague} />;
+  return <Schedule subtitle={league.toUpperCase()} />;
 };
 
 export default Command;
