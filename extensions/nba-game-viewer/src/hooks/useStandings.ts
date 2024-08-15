@@ -4,7 +4,7 @@ import { Conference, ConferenceStanding, Team } from "../types/standings.types";
 import { useCachedPromise } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
 
-const league = getPreferenceValues().league;
+const { league } = getPreferenceValues<Preferences>();
 
 const getConferenceStandings = (conferenceStanding: ConferenceStanding): Team[] =>
   conferenceStanding.standings.entries
