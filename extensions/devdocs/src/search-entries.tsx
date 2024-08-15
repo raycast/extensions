@@ -40,18 +40,21 @@ function openInAppAction(slug: string, entry: Entry) {
 
 function renderOpenInActions(slug: string, entry: Entry) {
   const preferences = getPreferenceValues<Preferences>();
+  const browserAction = openInBrowserAction(slug, entry);
+  const appAction = openInAppAction(slug, entry);
+
   if (preferences.primaryOpenInAction == "browser") {
     return (
       <>
-        {openInBrowserAction(slug, entry)}
-        {openInAppAction(slug, entry)}
+        {browserAction}
+        {appAction}
       </>
     );
   } else if (preferences.primaryOpenInAction == "app") {
     return (
       <>
-        {openInAppAction(slug, entry)}
-        {openInBrowserAction(slug, entry)}
+        {appAction}
+        {browserAction}
       </>
     );
   }
