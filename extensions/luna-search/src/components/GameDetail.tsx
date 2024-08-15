@@ -4,6 +4,7 @@ import { GameSummary, LunaService } from "../services";
 import { GameActions } from "./GameActions";
 import { useEffect, useState } from "react";
 import { Game } from "../services/LunaService/Game";
+import { SearchCallback } from "..";
 
 const LUNA = LunaService.getInstance();
 
@@ -12,7 +13,7 @@ const LUNA = LunaService.getInstance();
  */
 interface Props {
   game: GameSummary;
-  searchCallback: (query: string) => void;
+  searchCallback: SearchCallback;
 }
 
 /**
@@ -71,7 +72,7 @@ export function GameDetail({ game, searchCallback }: Props): JSX.Element {
   const img = game.imgUrl ? optimizeImageUrl(game.imgUrl, 500) : LUNA_LOGO_IMG;
   return (
     <Detail
-      actions={<GameActions game={game} />}
+      actions={<GameActions game={game} searchCallback={searchCallback} />}
       isLoading={isLoading}
       markdown={`
 ![Game Art](${img}?raycast-width=500)
@@ -99,7 +100,7 @@ export function GameDetail({ game, searchCallback }: Props): JSX.Element {
                 key={genre}
                 text={genre}
                 onAction={() => {
-                  searchCallback(genre);
+                  searchCallback({ query: genre });
                 }}
               />
             ))}
@@ -117,19 +118,19 @@ export function GameDetail({ game, searchCallback }: Props): JSX.Element {
                 key={publisher}
                 text={publisher}
                 onAction={() => {
-                  searchCallback(publisher);
+                  searchCallback({ query: publisher });
                 }}
               />
             ))}
           </Detail.Metadata.TagList>
           <Detail.Metadata.TagList title={DISPLAY_VALUES.developersTitle}>
-            {gameDetails?.publishers?.map((developers) => (
+            {gameDetails?.developers?.map((developer) => (
               <Detail.Metadata.TagList.Item
                 color={Color.PrimaryText}
-                key={developers}
-                text={developers}
+                key={developer}
+                text={developer}
                 onAction={() => {
-                  searchCallback(developers);
+                  searchCallback({ query: developer });
                 }}
               />
             ))}

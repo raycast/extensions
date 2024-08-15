@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, Keyboard, open, useNavigation } from "@rayca
 import { GameSummary } from "../services";
 import { DISPLAY_VALUES } from "../constants";
 import { GameDetail } from "./GameDetail";
+import { SearchCallback, SearchInput } from "..";
 
 /**
  * The key used to identify the Google Chrome application.
@@ -14,7 +15,7 @@ const CHROME_KEY = "com.google.Chrome";
 interface Props {
   game: GameSummary;
   isDetailEnabled?: boolean;
-  searchCallback?: (query: string) => void;
+  searchCallback: SearchCallback;
 }
 
 /**
@@ -24,20 +25,22 @@ interface Props {
  *
  * It receives the following props:
  * - game: The GameSummary instance to display the actions for.
- * - detailServiceToken: An optional detail service token, which can be used to get details about a game.
+ * - isDetailEnabled: An optional value to enable a "see game details" as the primary action.
  * - searchCallback: Triggers a search, optional - void method provided by default.
  *
  * The component uses the ActionPanel and Action components from the
  * Raycast API to render the available actions. If the game has a
  * playUrl, an additional "Launch Game" action is displayed.
  */
-export function GameActions({ game, isDetailEnabled, searchCallback = () => {} }: Props): JSX.Element {
+export function GameActions({ game, isDetailEnabled, searchCallback }: Props): JSX.Element {
   const { pop, push } = useNavigation();
 
   // From a detail perspective, searching means triggering the parent search, and returning to it.
-  const handleSearch = (query: string) => {
-    searchCallback(query);
-    pop();
+  const handleSearch = (input: SearchInput, isPopRequired?: boolean) => {
+    searchCallback(input);
+    if (isPopRequired) {
+      pop();
+    }
   };
 
   return (
@@ -48,7 +51,7 @@ export function GameActions({ game, isDetailEnabled, searchCallback = () => {} }
           title={DISPLAY_VALUES.seeDetailsTitle}
           icon={Icon.Book}
           onAction={() => {
-            push(<GameDetail game={game} searchCallback={handleSearch} />);
+            push(<GameDetail game={game} searchCallback={(input) => handleSearch(input, true)} />);
           }}
         />
       ) : (
@@ -76,6 +79,12 @@ export function GameActions({ game, isDetailEnabled, searchCallback = () => {} }
         title={DISPLAY_VALUES.copyTitle}
         shortcut={Keyboard.Shortcut.Common.Copy}
         content={game.rawUrl}
+      />
+      <Action
+        shortcut={{ modifiers: ["cmd"], key: "t" }}
+        title={DISPLAY_VALUES.seeTrendingTitle}
+        icon={Icon.LineChart}
+        onAction={() => handleSearch({ isTrending: true }, !isDetailEnabled)}
       />
     </ActionPanel>
   );

@@ -7,6 +7,12 @@ import { DISPLAY_VALUES } from "./constants";
 // Create a singleton instance of the LunaService to handle game searches
 const LUNA = LunaService.getInstance();
 
+export interface SearchInput {
+  query?: string;
+  isTrending?: boolean;
+}
+export type SearchCallback = (input: SearchInput) => void;
+
 export default function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
   const [games, setGames] = useState<GameSummary[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>(props.arguments.search ?? "");
@@ -21,18 +27,20 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
    *
    * @param query The search query to use.
    */
-  const searchGames = async (query: string): Promise<void> => {
+  const searchGames = async (input: SearchInput): Promise<void> => {
+    const query = input.query || "";
     setSearchQuery(query);
 
-    if (!query) {
+    if (!input.query && !input.isTrending) {
       setGames([]);
       return;
     }
 
     setIsLoading(true);
 
+    const loader = input.isTrending ? async () => await LUNA.getTrendingGames() : async () => await LUNA.search(query);
     try {
-      const games = await LUNA.search(query);
+      const games = await loader();
       setGames(games);
     } catch (err) {
       console.debug("Error fetching games:", err);
@@ -49,7 +57,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
   // Trigger a search if there was an inital state for the search query.
   useEffect(() => {
     if (searchQuery != null) {
-      searchGames(searchQuery);
+      searchGames({ query: searchQuery });
     }
   }, []);
 

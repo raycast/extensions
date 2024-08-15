@@ -4,15 +4,16 @@ import { EmptyGameGrid } from "./EmptyGameGrid";
 import { GameSummary } from "../../services";
 import { GameActions } from "../GameActions";
 import { useState } from "react";
+import { SearchCallback } from "../..";
 
 /**
  * Defines the props for the GameList component.
  */
 interface Props {
   games: GameSummary[];
-  isLoading: boolean;
-  searchCallback: (query: string) => void;
-  searchQuery: string;
+  isLoading?: boolean;
+  searchCallback: SearchCallback;
+  searchQuery?: string;
 }
 
 /**
@@ -44,7 +45,7 @@ export function GameGrid({ games, isLoading, searchCallback, searchQuery }: Prop
       inset={Grid.Inset.Zero}
       isLoading={isLoading}
       navigationTitle={DISPLAY_VALUES.searchTitle}
-      onSearchTextChange={searchCallback}
+      onSearchTextChange={(search) => searchCallback({ query: search })}
       // When the selection changes, reset the position in grid to the top
       onSelectionChange={() => setSelectedItem(undefined)}
       searchBarPlaceholder={DISPLAY_VALUES.searchPlaceholder}
@@ -63,7 +64,11 @@ export function GameGrid({ games, isLoading, searchCallback, searchQuery }: Prop
           />
         ))
       ) : (
-        <EmptyGameGrid isLoading={isLoading} isQueryEmpty={!searchQuery || searchQuery.length == 0} />
+        <EmptyGameGrid
+          isLoading={isLoading}
+          isQueryEmpty={!searchQuery || searchQuery.length == 0}
+          searchCallback={searchCallback}
+        />
       )}
     </Grid>
   );

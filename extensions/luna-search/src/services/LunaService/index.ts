@@ -7,6 +7,8 @@ import { ExpiringCache } from "../../utilities";
 import { Game } from "./Game";
 import { GetGame } from "./GetGameModel";
 
+const TRENDING_GAMES_INDICATOR = "trending";
+
 /**
  * Provides a service for interacting with the Luna API, including
  * searching for games and processing the API response.
@@ -42,6 +44,14 @@ export class LunaService {
     return LunaService.instance;
   }
 
+  /**
+   * Retrieves games for a specific title on the Luna platform using the provided summary.
+   * The method creates a GetGame instance, sends the request to the Luna API,
+   * and processes the response to extract the game data. Protected by an expiring cache.
+   *
+   * @param query The search query to use.
+   * @returns A Game instance matching the given Summary.
+   */
   public async getGameDetails(game: GameSummary): Promise<Game> {
     const cachedGame = this.gameCache.get(game.title);
     if (cachedGame) {
@@ -53,6 +63,38 @@ export class LunaService {
     const result = new Game(response.data);
     this.gameCache.set(game.title, result);
     return result;
+  }
+
+  /**
+   * Retrieves the currently trending games on Luna using the values from Luna's search page.
+   *
+   * @returns List of GameSummary instances for the trending games on luna
+   */
+  public async getTrendingGames(): Promise<GameSummary[]> {
+    const cachedGames = this.searchCache.get(TRENDING_GAMES_INDICATOR);
+    if (cachedGames) {
+      return cachedGames;
+    }
+
+    // On the initial search screen, Luna shows it's trending games.
+    const request = new Search("");
+
+    const response = await axios.post<Response>(this.url, request.body, { headers: request.headers });
+
+    if (!response?.data) {
+      return [];
+    }
+
+    const results = response.data.pageMemberGroups.mainContent.widgets
+      .find((widget) => widget?.id.includes(TRENDING_GAMES_INDICATOR))
+      ?.widgets.map((widget) => new GameSummary(widget));
+
+    if (!results) {
+      return [];
+    }
+
+    this.searchCache.set(TRENDING_GAMES_INDICATOR, results);
+    return results;
   }
 
   /**

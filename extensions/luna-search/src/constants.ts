@@ -25,6 +25,8 @@ export const DISPLAY_VALUES = {
   searchPlaceholder: "Search for a game on Amazon Luna",
   searchTitle: "Search Amazon Luna",
   seeDetailsTitle: "See Details",
+  seeTrendingTitle: "See Trending Games",
+  trendingPrefix: "Top Games: ",
 };
 /**
  * The URL for the Luna logo image used in the application.
