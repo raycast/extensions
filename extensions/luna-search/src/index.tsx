@@ -1,7 +1,7 @@
 import { LaunchProps, showToast, Toast } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LunaGame, LunaService } from "./services";
-import { GameList } from "./components";
+import { GameGrid } from "./components";
 import { DISPLAY_VALUES } from "./constants";
 
 // Create a singleton instance of the LunaService to handle game searches
@@ -10,7 +10,8 @@ const LUNA = new LunaService();
 export default function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
   const [games, setGames] = useState<LunaGame[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>(props.arguments.search ?? "");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  // Prevent loading flashes by defaulting on loading state if there is a default search
+  const [isLoading, setIsLoading] = useState<boolean>(props.arguments.search != "" || false);
 
   /**
    * Performs a search for games on the Amazon Luna platform based on the provided query.
@@ -45,8 +46,15 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
     }
   };
 
-  // Render the GameList component, which is responsible for displaying the game list.
-  // The GameList component receives the games, isLoading, searchCallback, and searchQuery
+  // Trigger a search if there was an inital state for the search query.
+  useEffect(() => {
+    if (searchQuery != null) {
+      searchGames(searchQuery);
+    }
+  }, []);
+
+  // Render the GameGrid component, which is responsible for displaying the game results.
+  // The GameGrid component receives the games, isLoading, searchCallback, and searchQuery
   // props from the Command component.
-  return <GameList games={games} isLoading={isLoading} searchCallback={searchGames} searchQuery={searchQuery} />;
+  return <GameGrid games={games} isLoading={isLoading} searchCallback={searchGames} searchQuery={searchQuery} />;
 }

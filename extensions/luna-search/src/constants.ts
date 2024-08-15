@@ -5,7 +5,6 @@
  * the application.
  */
 export const DISPLAY_VALUES = {
-  brandColor: "rgb(145, 70, 255)",
   copyTitle: "Copy Game URL",
   defaultDescription: 'Try something like "adventure"',
   defaultTitle: "Start typing to search",
@@ -13,14 +12,15 @@ export const DISPLAY_VALUES = {
   emptyTitle: "No results found",
   errorMessage: "Failed to fetch games",
   launchGame: "Launch Game",
-  lightGrey: "#CCCCCC",
   loadingDescription: "(so many games)",
   loadingTitle: "Seaching",
   metadataGenreTitle: "Genres",
   metadataRatingTitle: "Rating",
-  metadataRatingContentTitle: "Content",
-  openTitle: "Open With Chrome",
+  metadataRatingContentTitle: "", // Intentionally blank for appearance
+  openTitle: "Open in Chrome",
   searchPlaceholder: "Search for a game on Amazon Luna",
+  searchTitle: "Search Amazon Luna",
+  seeDetailsTitle: "See Details",
 };
 /**
  * The URL for the Luna logo image used in the application.
