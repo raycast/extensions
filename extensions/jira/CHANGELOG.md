@@ -1,5 +1,9 @@
 # Jira Changelog
 
+## [Fix epic autocomplete to include all epics of a selected project.] - 2024-08-14
+
+- When a user searches for an epic, the extension prioritizes retrieving search results from Current Search over History Search
+
 ## [Log out the user if re-authentication fails] - 2024-07-11
 
 - Automatically log out users if re-authentication fails, instead of displaying an error message.
