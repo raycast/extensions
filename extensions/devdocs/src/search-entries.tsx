@@ -43,25 +43,15 @@ function renderOpenInActions(slug: string, entry: Entry) {
   if (preferences.primaryOpenInAction == "browser") {
     return (
       <>
-        <Action.OpenInBrowser url={`https://devdocs.io/${slug}/${entry.path}`} />
-        <Action.Open
-          icon="devdocs.png"
-          title="Open in DevDocs"
-          target={`devdocs-macos://search?doc=${slug}&term=${entry.path}`}
-          application="DevDocs"
-        />
+        {openInBrowserAction(slug, entry)}
+        {openInAppAction(slug, entry)}
       </>
     );
   } else if (preferences.primaryOpenInAction == "app") {
     return (
       <>
-        <Action.Open
-          icon="devdocs.png"
-          title="Open in DevDocs"
-          target={`devdocs-macos://search?doc=${slug}&term=${entry.path}`}
-          application="DevDocs"
-        />
-        <Action.OpenInBrowser url={`https://devdocs.io/${slug}/${entry.path}`} />
+        {openInAppAction(slug, entry)}
+        {openInBrowserAction(slug, entry)}
       </>
     );
   }
