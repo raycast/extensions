@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Icon, List, LaunchProps } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List, LaunchProps } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import Fuse from "fuse.js";
 import { Dispatch, SetStateAction, useMemo, useState } from "react";
-import { Entry, Index } from "./types";
+import { Entry, Index, Preferences } from "./types";
 
 function useFuse<U>(
   items: U[] | undefined,
@@ -38,6 +38,35 @@ function openInAppAction(slug: string, entry: Entry) {
   );
 }
 
+function renderOpenInActions(slug: string, entry: Entry) {
+  const preferences = getPreferenceValues<Preferences>();
+  if (preferences.primaryOpenInAction == "browser") {
+    return (
+      <>
+        <Action.OpenInBrowser url={`https://devdocs.io/${slug}/${entry.path}`} />
+        <Action.Open
+          icon="devdocs.png"
+          title="Open in DevDocs"
+          target={`devdocs-macos://search?doc=${slug}&term=${entry.path}`}
+          application="DevDocs"
+        />
+      </>
+    );
+  } else if (preferences.primaryOpenInAction == "app") {
+    return (
+      <>
+        <Action.Open
+          icon="devdocs.png"
+          title="Open in DevDocs"
+          target={`devdocs-macos://search?doc=${slug}&term=${entry.path}`}
+          application="DevDocs"
+        />
+        <Action.OpenInBrowser url={`https://devdocs.io/${slug}/${entry.path}`} />
+      </>
+    );
+  }
+}
+
 export default function LaunchFn(props: LaunchProps<{ arguments: { slug: string } }>): JSX.Element {
   return <SearchEntries slug={props.arguments.slug} />;
 }
@@ -63,6 +92,8 @@ export function SearchEntries({ slug }: { slug: string }): JSX.Element {
 }
 
 function EntryItem({ entry, slug }: { entry: Entry; slug: string }) {
+  const openActions = renderOpenInActions(slug, entry);
+
   return (
     <List.Item
       title={entry.name}
@@ -74,13 +105,7 @@ function EntryItem({ entry, slug }: { entry: Entry; slug: string }) {
         },
       ]}
       keywords={[entry.type].concat(entry.name.split("."))}
-      actions={
-        <ActionPanel>
-          {true
-            ? [openInBrowserAction(slug, entry), openInAppAction(slug, entry)]
-            : [openInAppAction(slug, entry), openInBrowserAction(slug, entry)]}
-        </ActionPanel>
-      }
+      actions={<ActionPanel>{openActions}</ActionPanel>}
     />
   );
 }
