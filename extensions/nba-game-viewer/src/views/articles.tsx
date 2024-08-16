@@ -5,7 +5,8 @@ import { List } from "@raycast/api";
 
 const Articles = () => {
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
-  const { data, isLoading, setSelectedLeague } = useNews("nba");
+  const [selectedLeague, setSelectedLeague] = useState<string>("nba");
+  const { data, isLoading } = useNews(selectedLeague);
 
   return (
     <List
