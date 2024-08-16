@@ -2,9 +2,10 @@ import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
 import { NativePreferences } from "../types/preferences";
-import { ApiResponseMoment } from "./useEvent.types";
+import { SmartHabit } from "../types/smart-series";
+import { normalize } from "../utils/objects";
 
-export const useMoment = () => {
+const useSmartHabits = () => {
   const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
 
   const headers = useMemo(
@@ -17,18 +18,27 @@ export const useMoment = () => {
   );
 
   const {
-    data: momentData,
+    data: smartHabits,
     error,
     isLoading,
-  } = useFetch<ApiResponseMoment>(`${apiUrl}/moment/next`, {
+  } = useFetch<SmartHabit[]>(`${apiUrl}/smart-habits`, {
     headers,
     keepPreviousData: true,
   });
 
-  if (error) console.error("Error while fetching Moment Next", error);
+  if (error) console.error("Error while fetching Smart Habits", error);
+
+  const smartHabitsByLineageIdsMap = useMemo(
+    () => (smartHabits ? normalize(smartHabits, "lineageId") : undefined),
+    [smartHabits]
+  );
 
   return {
-    momentData,
+    smartHabits,
+    smartHabitsByLineageIdsMap,
+    error,
     isLoading,
   };
 };
+
+export { useSmartHabits };

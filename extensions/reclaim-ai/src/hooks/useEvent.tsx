@@ -7,11 +7,13 @@ import { NativePreferences } from "../types/preferences";
 import { axiosPromiseData } from "../utils/axiosPromise";
 import { formatDisplayEventHours, formatDisplayHours } from "../utils/dates";
 import { filterMultipleOutDuplicateEvents } from "../utils/events";
-import { parseEmojiField } from "../utils/string";
+import { stripPlannerEmojis } from "../utils/string";
 import reclaimApi from "./useApi";
 import { ApiResponseEvents, EventActions } from "./useEvent.types";
 import { useTask } from "./useTask";
 import { useUser } from "./useUser";
+import { useSmartHabits } from "./useSmartHabits";
+import { SmartHabit } from "../types/smart-series";
 
 export const useEvents = ({ start, end }: { start: Date; end: Date }) => {
   const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
@@ -42,7 +44,7 @@ export const useEvents = ({ start, end }: { start: Date; end: Date }) => {
     }
   );
 
-  if (error) throw error;
+  if (error) console.error("Error while fetching Events", error);
 
   return {
     events: filterMultipleOutDuplicateEvents(events),
@@ -57,6 +59,8 @@ export const useEventActions = () => {
   const { handleStartTask, handleRestartTask, handleStopTask } = useTask();
   const { apiUrl } = getPreferenceValues<NativePreferences>();
 
+  const { smartHabitsByLineageIdsMap } = useSmartHabits();
+
   const showFormattedEventTitle = useCallback(
     (event: Event, mini = false) => {
       const meridianFormat = currentUser?.settings.format24HourTime ? "24h" : "12h";
@@ -70,14 +74,14 @@ export const useEventActions = () => {
           });
 
       const realEventTitle = event.sourceDetails?.title || event.title;
-      return `${hours}  ${parseEmojiField(realEventTitle).textWithoutEmoji}`;
+      return `${hours}  ${stripPlannerEmojis(realEventTitle)}`;
     },
     [currentUser]
   );
 
   const handleStartHabit = async (id: string, title: string) => {
     try {
-      await showHUD("Started Habit: " + parseEmojiField(title).textWithoutEmoji);
+      await showHUD("Started Habit: " + stripPlannerEmojis(title));
       const [habit, error] = await axiosPromiseData(fetcher(`/planner/start/habit/${id}`, { method: "POST" }));
       if (!habit || error) throw error;
       return habit;
@@ -89,7 +93,7 @@ export const useEventActions = () => {
 
   const handleRestartHabit = async (id: string, title: string) => {
     try {
-      await showHUD("Restarted Habit: " + parseEmojiField(title).textWithoutEmoji);
+      await showHUD("Restarted Habit: " + stripPlannerEmojis(title));
       const [habit, error] = await axiosPromiseData(fetcher(`/planner/restart/habit/${id}`, { method: "POST" }));
       if (!habit || error) throw error;
       return habit;
@@ -101,7 +105,7 @@ export const useEventActions = () => {
 
   const handleStopHabit = async (id: string, title: string) => {
     try {
-      await showHUD("Stopped Habit: " + parseEmojiField(title).textWithoutEmoji);
+      await showHUD("Stopped Habit: " + stripPlannerEmojis(title));
       const [habit, error] = await axiosPromiseData(fetcher(`/planner/stop/habit/${id}`, { method: "POST" }));
       if (!habit || error) throw error;
 
@@ -114,7 +118,7 @@ export const useEventActions = () => {
 
   const handleStartOrRestartSmartHabit = async (lineageId: string, title: string) => {
     try {
-      await showHUD("Started Habit: " + parseEmojiField(title).textWithoutEmoji);
+      await showHUD("Started Habit: " + stripPlannerEmojis(title));
       const [habit, error] = await axiosPromiseData(
         fetcher(`/smart-habits/planner/${lineageId}/start`, { method: "POST" })
       );
@@ -129,7 +133,7 @@ export const useEventActions = () => {
 
   const handleStopSmartHabit = async (lineageId: string, title: string) => {
     try {
-      await showHUD("Stopped Habit: " + parseEmojiField(title).textWithoutEmoji);
+      await showHUD("Stopped Habit: " + stripPlannerEmojis(title));
       const [habit, error] = await axiosPromiseData(
         fetcher(`/smart-habits/planner/${lineageId}/stop`, { method: "POST" })
       );
@@ -148,11 +152,26 @@ export const useEventActions = () => {
       start: new Date(event.eventStart),
     });
 
+    const smartHabit: SmartHabit | undefined = event.assist?.seriesLineageId
+      ? smartHabitsByLineageIdsMap[event.assist.seriesLineageId]
+      : undefined;
+
     const hasRescheduleUnstarted = currentUser?.features.assistSettings.rescheduleUnstarted;
+
     const isEventManuallyStarted = event.assist?.manuallyStarted;
-    const showStart = !isActive || (!!isActive && !!hasRescheduleUnstarted && !isEventManuallyStarted);
+
+    const showStart =
+      !isActive ||
+      (!!isActive &&
+        !!hasRescheduleUnstarted &&
+        !isEventManuallyStarted &&
+        smartHabit?.activeSeries?.rescheduleUnstartedOverride !== false);
+
     const showRestartStop =
-      !!isActive && (!hasRescheduleUnstarted || (!!hasRescheduleUnstarted && !!isEventManuallyStarted));
+      !!isActive &&
+      (!hasRescheduleUnstarted ||
+        (!!hasRescheduleUnstarted && !!isEventManuallyStarted) ||
+        (!!hasRescheduleUnstarted && smartHabit?.activeSeries?.rescheduleUnstartedOverride === false));
 
     const eventActions: EventActions = [];
 

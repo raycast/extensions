@@ -1,5 +1,11 @@
 # reclaim Changelog
 
+## [Update] - 2024-08-13
+- Update contributors list
+- Just strip planner emojis
+- Have smart habit actions respect unscheduleRestartedOverride setting
+- Fail useFetch API calls silently
+
 ## [Update] - 2024-07-30
 - Add actions for Smart Meetings & Habits 2.0
 - Parity between Raycast actions and Omnibar Actions

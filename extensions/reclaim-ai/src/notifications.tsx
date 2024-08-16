@@ -8,7 +8,7 @@ import { Event } from "./types/event";
 import { NativePreferences } from "./types/preferences";
 import { miniDuration } from "./utils/dates";
 import { eventColors, getOriginalEventIDFromSyncEvent, truncateEventSize } from "./utils/events";
-import { parseEmojiField } from "./utils/string";
+import { stripPlannerEmojis } from "./utils/string";
 
 type EventSection = { section: string; sectionTitle: string; events: Event[] };
 
@@ -162,8 +162,8 @@ export default function Command() {
 
       const isNow = isWithinInterval(new Date(), { start: eventStart, end: eventEnd });
 
-      const miniEventString = truncateEventSize(parseEmojiField(realEventTitle).textWithoutEmoji);
-      const eventString = parseEmojiField(realEventTitle).textWithoutEmoji;
+      const eventString = stripPlannerEmojis(realEventTitle);
+      const miniEventString = truncateEventSize(eventString);
 
       const distanceString = miniDuration(
         formatDistance(new Date(eventStart), now, {
