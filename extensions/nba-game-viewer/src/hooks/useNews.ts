@@ -20,9 +20,9 @@ const fetchNews = async (league: string) => {
           id: category.id,
           name: category.description,
           type: category.type,
-        })
+        }),
       ),
-    })
+    }),
   );
   return articles;
 };

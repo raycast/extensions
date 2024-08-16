@@ -27,9 +27,7 @@ const Schedule = () => {
         </List.Dropdown>
       }
     >
-      {data?.map((day) => (
-        <DayComponent key={day.date} day={day} />
-      ))}
+      {data?.map((day) => <DayComponent key={day.date} day={day} />)}
     </List>
   );
 };
