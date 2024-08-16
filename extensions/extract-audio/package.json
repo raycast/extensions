@@ -3,7 +3,7 @@
   "name": "extract-audio",
   "title": "Extract Audio",
   "description": "Extract audio from video using ffmpeg",
-  "icon": "extension-icon.png",
+  "icon": "extension_icon.png",
   "author": "xmorse",
   "license": "MIT",
   "commands": [
