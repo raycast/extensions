@@ -5,7 +5,7 @@ import { useState } from "react";
 
 const Schedule = () => {
   const [selectedLeague, setSelectedLeague] = useState<string>("nba"); // Default to NBA
-  const { data, isLoading, setSelectedLeague: updateLeague } = useSchedule(selectedLeague);
+  const { data, isLoading } = useSchedule(selectedLeague);
 
   return (
     <List
