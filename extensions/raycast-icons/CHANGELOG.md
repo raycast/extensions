@@ -1,6 +1,6 @@
 # Raycast Icons Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2024-08-16
 
 - Introduced AI-based icon search.
 
