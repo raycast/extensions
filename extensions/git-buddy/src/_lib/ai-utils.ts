@@ -1,5 +1,7 @@
 import { AI, getPreferenceValues } from "@raycast/api";
 import { getRepoPath, getStagedGitDiff, getDiffComparedToBranch, getCurrentBranchName } from "./git";
+import { ERROR_MESSAGES } from "../_constants";
+import { handleFetchAIContentError } from "./error-utils";
 
 const CREATIVITY_LEVEL = "medium";
 
@@ -46,7 +48,7 @@ export async function fetchAIContent(options: FetchAIContentOptions) {
     const gitDiff = await getGitDiff({ diffType, repoPath, baseBranch });
 
     if (!gitDiff) {
-      throw new Error("Git diff is empty.");
+      throw new Error(ERROR_MESSAGES.GIT_DIFF_EMPTY);
     }
 
     const aiModel = await getAIModel(aiModelName);
@@ -54,7 +56,6 @@ export async function fetchAIContent(options: FetchAIContentOptions) {
     const branchName = await getCurrentBranchName(repoPath);
     return { aiContent, branchName };
   } catch (error) {
-    const err = error as Error;
-    throw new Error(`Failed to fetch AI content: ${err.message}`);
+    handleFetchAIContentError(error as Error, diffType);
   }
 }

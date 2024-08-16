@@ -28,3 +28,21 @@ export function handleGitError(error: Error): Error {
   // If no specific error is matched, return the original error
   return error;
 }
+
+export function handleFetchAIContentError(error: Error, diffType: "staged" | "baseBranch"): never {
+  const errorMessage = error.message;
+  const knownErrors = {
+    [ERROR_MESSAGES.GIT_DIFF_EMPTY]: ERROR_MESSAGES.GIT_DIFF_EMPTY,
+    [ERROR_MESSAGES.REPO_PATH_MISSING]: ERROR_MESSAGES.REPO_PATH_MISSING,
+    [ERROR_MESSAGES.INVALID_REPO]: ERROR_MESSAGES.INVALID_REPO,
+    "No AI model provided": ERROR_MESSAGES.AI_MODEL_MISSING,
+    "Invalid AI model": ERROR_MESSAGES.AI_MODEL_INVALID,
+  };
+
+  const knownError = Object.entries(knownErrors).find(([key]) => errorMessage.includes(key));
+  if (knownError) {
+    throw new Error(knownError[1]);
+  }
+
+  throw new Error(diffType === "staged" ? ERROR_MESSAGES.FETCH_COMMIT_MESSAGE : ERROR_MESSAGES.FETCH_PR_DESCRIPTION);
+}
