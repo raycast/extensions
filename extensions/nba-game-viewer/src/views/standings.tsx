@@ -1,11 +1,12 @@
-import { List } from "@raycast/api";
+import { getPreferenceValues, List } from "@raycast/api";
 import useStandings from "../hooks/useStandings";
 import TeamComponent from "../components/Team";
 import { useState } from "react";
-import { Team } from "../types/standings.types";
+import { Team, Preferences } from "../types/standings.types";
 
 const Standings = () => {
-  const [selectedLeagueConference, setSelectedLeagueConference] = useState<string>("nba_eastern");
+  const { league, conference, useLastValue } = getPreferenceValues<Preferences>();
+  const [selectedLeagueConference, setSelectedLeagueConference] = useState<string>(`${league}_${conference}`);
 
   const selectedLeague = selectedLeagueConference.split("_")[0];
   const { data, isLoading } = useStandings(selectedLeague);
@@ -22,7 +23,11 @@ const Standings = () => {
     <List
       isLoading={isLoading}
       searchBarAccessory={
-        <List.Dropdown tooltip="Select League and Conference" onChange={setSelectedLeagueConference} storeValue>
+        <List.Dropdown
+          tooltip="Select League and Conference"
+          storeValue={useLastValue}
+          onChange={setSelectedLeagueConference}
+        >
           <List.Dropdown.Section title="NBA">
             <List.Dropdown.Item value="nba_eastern" title="NBA Eastern Conference" />
             <List.Dropdown.Item value="nba_western" title="NBA Western Conference" />

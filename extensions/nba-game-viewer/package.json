@@ -11,6 +11,57 @@
     "degouville",
     "jamtur01"
   ],
+  "preferences": [
+    {
+      "name": "conference",
+      "description": "Choose default conference for dropdown(s) in commands.",
+      "type": "dropdown",
+      "title": "Default Conference",
+      "data": [
+        {
+          "title": "Eastern Conference",
+          "value": "eastern"
+        },
+        {
+          "title": "Western Conference",
+          "value": "western"
+        },
+        {
+          "title": "League",
+          "value": "league"
+        }
+      ],
+      "required": false,
+      "default": "eastern"
+    },
+    {
+      "name": "league",
+      "description": "Choose default league for dropdown(s) in commands.",
+      "type": "dropdown",
+      "title": "Default League",
+      "data": [
+        {
+          "title": "NBA",
+          "value": "nba"
+        },
+        {
+          "title": "WNBA",
+          "value": "wnba"
+        }
+      ],
+      "required": false,
+      "default": "nba"
+    },
+    {
+      "name": "useLastValue",
+      "title": "View Options",
+      "description": "Show last value selected in dropdown(s) instead of defaulting to values selected in preferences everytime.",
+      "type": "checkbox",
+      "label": "Use last selected value for commands",
+      "required": false,
+      "default": false
+    }
+  ],
   "categories": [
     "Fun"
   ],

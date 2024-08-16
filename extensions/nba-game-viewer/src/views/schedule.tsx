@@ -1,10 +1,12 @@
-import { List } from "@raycast/api";
+import { getPreferenceValues, List } from "@raycast/api";
 import useSchedule from "../hooks/useSchedule";
 import DayComponent from "../components/Day";
 import { useState } from "react";
+import { Preferences } from "../types/standings.types";
 
 const Schedule = () => {
-  const [selectedLeague, setSelectedLeague] = useState<string>("nba"); // Default to NBA
+  const { league, useLastValue } = getPreferenceValues<Preferences>();
+  const [selectedLeague, setSelectedLeague] = useState<string>(league); // Default to NBA
   const { data, isLoading } = useSchedule(selectedLeague);
 
   return (
@@ -12,7 +14,7 @@ const Schedule = () => {
       isLoading={isLoading}
       searchBarPlaceholder={`${selectedLeague.toUpperCase()} Schedule`}
       searchBarAccessory={
-        <List.Dropdown tooltip="Select League" storeValue onChange={setSelectedLeague}>
+        <List.Dropdown tooltip="Select League" storeValue={useLastValue} onChange={setSelectedLeague}>
           <List.Dropdown.Section title="Leagues">
             <List.Dropdown.Item value="nba" title="NBA" />
             <List.Dropdown.Item value="wnba" title="WNBA" />

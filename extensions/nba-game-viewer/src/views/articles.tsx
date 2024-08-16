@@ -1,11 +1,13 @@
 import useNews from "../hooks/useNews";
 import ArticleComponent from "../components/Article";
 import { useState } from "react";
-import { List } from "@raycast/api";
+import { getPreferenceValues, List } from "@raycast/api";
+import { Preferences } from "../types/standings.types";
 
 const Articles = () => {
+  const { useLastValue, league } = getPreferenceValues<Preferences>();
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
-  const [selectedLeague, setSelectedLeague] = useState<string>("nba");
+  const [selectedLeague, setSelectedLeague] = useState<string>(league);
   const { data, isLoading } = useNews(selectedLeague);
 
   return (
@@ -13,7 +15,7 @@ const Articles = () => {
       isLoading={isLoading}
       isShowingDetail={isShowingDetail}
       searchBarAccessory={
-        <List.Dropdown tooltip="Select League" storeValue onChange={setSelectedLeague}>
+        <List.Dropdown tooltip="Select League" storeValue={useLastValue} onChange={setSelectedLeague}>
           <List.Dropdown.Item title="NBA" value="nba" />
           <List.Dropdown.Item title="WNBA" value="wnba" />
         </List.Dropdown>

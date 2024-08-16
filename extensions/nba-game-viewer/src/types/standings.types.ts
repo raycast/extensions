@@ -45,9 +45,8 @@ export type Team = {
   losses?: number;
 };
 
-export const Conference = {
-  Eastern: "Eastern",
-  Western: "Western",
-} as const;
-
-export const League = "League" as const;
+export interface Preferences {
+  league: string;
+  conference: string;
+  useLastValue: boolean;
+}
