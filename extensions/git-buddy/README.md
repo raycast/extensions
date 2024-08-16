@@ -10,7 +10,7 @@ Generate a concise and clear commit message for the current branch using AI.
 
 ### Write PR Description
 
-Create a detailed pull request description for the current branch with the help of AI.
+Create a detailed and concise pull request description for the current branch with the help of AI.
 
 ### List Branches
 
