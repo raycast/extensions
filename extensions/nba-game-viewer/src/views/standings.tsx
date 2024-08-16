@@ -51,7 +51,7 @@ const Standings = () => {
 
   const conferenceData = preferenceMapping[selectedLeagueConference as keyof typeof preferenceMapping];
   const sectionTitle = selectedLeagueConference.includes("league")
-    ? "Whole League"
+    ? "League"
     : selectedLeagueConference.includes("eastern")
     ? "Eastern Conference"
     : "Western Conference";
@@ -74,12 +74,12 @@ const Standings = () => {
           <List.Dropdown.Section title="NBA">
             <List.Dropdown.Item value="nba_eastern" title="NBA - Eastern Conference" />
             <List.Dropdown.Item value="nba_western" title="NBA - Western Conference" />
-            <List.Dropdown.Item value="nba_league" title="NBA - Whole League" />
+            <List.Dropdown.Item value="nba_league" title="NBA - League" />
           </List.Dropdown.Section>
           <List.Dropdown.Section title="WNBA">
             <List.Dropdown.Item value="wnba_eastern" title="WNBA - Eastern Conference" />
             <List.Dropdown.Item value="wnba_western" title="WNBA - Western Conference" />
-            <List.Dropdown.Item value="wnba_league" title="WNBA - Whole League" />
+            <List.Dropdown.Item value="wnba_league" title="WNBA - League" />
           </List.Dropdown.Section>
         </List.Dropdown>
       }
