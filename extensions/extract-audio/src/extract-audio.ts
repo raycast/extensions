@@ -51,8 +51,16 @@ export default async function main() {
   const promises = filePaths.map((filePath) => {
     return new Promise((resolve, reject) => {
       const outputFilePath = filePath.replace(".mp4", ".mp3");
-      const command = `ffmpeg -i "${filePath}" -vn -map 0:a:0 -ar 44100 -ab 192k "${outputFilePath}"`;
-      const p = spawn(command, { shell: true, stdio: "inherit", env: process.env });
+      const command = `ffmpeg -y -hide_banner -nostdin -i "${filePath}" -vn -map 0:a:0 -ar 44100 -ab 192k "${outputFilePath}"`;
+      const p = spawn(command, { shell: true, env: process.env });
+      p.stdout.on("data", (data) => {
+        console.log(`${data}`);
+      });
+
+      p.stderr.on("data", (data) => {
+        console.error(`${data}`);
+      });
+
       p.on("exit", (code) => {
         if (code === 0) {
           resolve(outputFilePath);
