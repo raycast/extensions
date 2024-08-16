@@ -1,6 +1,6 @@
 # DevDocs Extension
 
-## [New Preference] - {PR_MERGE_DATE}
+## [New Preference] - 2024-08-16
 
 - Add preference to indicate which "open" action should appear first in action panel
 
