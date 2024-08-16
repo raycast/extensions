@@ -33,20 +33,20 @@ export function TaskListItem({
   const enableTaskTimer = async () => {
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Starting timer",
+      title: "Starting Timer",
     });
     try {
       const { taskName } = await startTaskTimer(task.id);
       refreshActiveTimer();
       createResolvedToast(toast, "Timer started for " + taskName).success();
     } catch (error) {
-      createResolvedToast(toast, "Error starting timer").error();
+      createResolvedToast(toast, "Error Starting Timer").error();
     }
   };
   const disableActiveTimer = async () => {
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Stopping timer",
+      title: "Stopping Timer",
     });
     try {
       const { taskName } = await stopCurrentTaskTimer();

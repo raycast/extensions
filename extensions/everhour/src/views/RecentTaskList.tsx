@@ -13,14 +13,14 @@ export function RecentTaskList() {
   const refreshActiveTimer = async () => {
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Refreshing tasks",
+      title: "Refreshing Tasks",
     });
     try {
       const activeTimer = await getCurrentTimer();
       setActiveTimerTaskId(activeTimer);
-      createResolvedToast(toast, "Tasks refreshed").success();
+      createResolvedToast(toast, "Tasks Refreshed").success();
     } catch (error) {
-      createResolvedToast(toast, "Failed to refresh tasks").error();
+      createResolvedToast(toast, "Failed to Refresh Tasks").error();
     }
   };
 
@@ -33,15 +33,15 @@ export function RecentTaskList() {
     async function fetch() {
       const toast = await showToast({
         style: Toast.Style.Animated,
-        title: "Fetching tasks",
+        title: "Fetching Tasks",
       });
       try {
         await fetchTasks();
         setIsLoading(false);
-        createResolvedToast(toast, "Tasks fetched").success();
+        createResolvedToast(toast, "Tasks Fetched").success();
       } catch (error) {
         const message = (error as { message: string }).message;
-        createResolvedToast(toast, message || "Failed to fetch projects").error();
+        createResolvedToast(toast, message || "Failed to Fetch Projects").error();
         setIsLoading(false);
       }
     }

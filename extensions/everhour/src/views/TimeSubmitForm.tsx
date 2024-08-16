@@ -38,10 +38,10 @@ export function TimeSubmitForm({ taskId, refreshRecords }: { taskId: string; ref
           `Added ${hours} ${parseInt(hours) === 1 ? "hour" : "hours"} to ${taskName}`,
         ).success();
       } else {
-        createResolvedToast(toast, "Failed to add time").error();
+        createResolvedToast(toast, "Failed to Add Time").error();
       }
     } catch (error) {
-      createResolvedToast(toast, "Failed to add time").error();
+      createResolvedToast(toast, "Failed to Add Time").error();
     }
   };
 

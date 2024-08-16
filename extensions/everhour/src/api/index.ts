@@ -24,14 +24,6 @@ const daysAgo = (days: number) => {
   return d;
 };
 
-// export const getCurrentUser = async () => {
-//   const response = await fetch("https://api.everhour.com/users/me", {
-//     headers,
-//   });
-
-//   return (await response.json()) as any;
-// };
-
 export const getRecentTasks = async (userId = "me"): Promise<Task[]> => {
   const [currentDate] = daysAgo(7).toISOString().split("T");
   const response = await fetch(`https://api.everhour.com/users/${userId}/time?limit=1000&from=${currentDate}`, {
