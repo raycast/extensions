@@ -1,5 +1,4 @@
 import { useCachedPromise } from "@raycast/utils";
-import { useEffect } from "react";
 import getRoster from "../utils/getRoster";
 import type { Player, Injury } from "../types/roster.types";
 
@@ -17,7 +16,7 @@ const fetchRoster = async (teamId: number, league: string) => {
           id: injury.id,
           status: injury.status,
           details: `${injury.details.side} ${injury.details.type} ${injury.details.detail}`,
-        }),
+        })
       ),
       headshot: athlete.headshot?.href,
       weight: athlete.displayWeight,
@@ -30,22 +29,12 @@ const fetchRoster = async (teamId: number, league: string) => {
         : "Unavailable",
       draft: athlete.draft?.displayText || "Unavailable",
       link: athlete.links[0]?.href || "",
-    }),
+    })
   );
   return athletes;
 };
 
-const useRoster = ({ id, league }: { id: number; league: string }) => {
-  const { data, isLoading, error, revalidate } = useCachedPromise(() => fetchRoster(id, league), [], {
-    initialData: [],
-    keepPreviousData: false,
-  });
-
-  useEffect(() => {
-    revalidate();
-  }, [id, league]);
-
-  return { data, isLoading, error, revalidate };
-};
+const useRoster = ({ id, league }: { id: number; league: string }) =>
+  useCachedPromise(fetchRoster, [id, league], { failureToastOptions: { title: "Could not fetch roster" } });
 
 export default useRoster;

@@ -1,5 +1,4 @@
 import { useCachedPromise } from "@raycast/utils";
-import { useEffect, useState } from "react";
 import getSchedule from "../utils/getSchedule";
 import type { Day, Game, Competitor } from "../types/schedule.types";
 import convertDate from "../utils/convertDate";
@@ -48,26 +47,14 @@ const fetchSchedule = async (league: string) => {
           inProgress: game.competitions[0].status.type.description === "In Progress",
         },
         stream: game.links[0].href,
-      }),
+      })
     ),
   }));
 
   return scheduledGames;
 };
 
-const useSchedule = (initialLeague: string) => {
-  const [league, setLeague] = useState<string>(initialLeague);
-
-  const { data, isLoading, error, revalidate } = useCachedPromise(() => fetchSchedule(league), [], {
-    initialData: [],
-    keepPreviousData: false,
-  });
-
-  useEffect(() => {
-    revalidate();
-  }, [league]);
-
-  return { data, isLoading, error, revalidate, setSelectedLeague: setLeague };
-};
+const useSchedule = (league: string) =>
+  useCachedPromise(fetchSchedule, [league], { failureToastOptions: { title: "Could not fetch schedule" } });
 
 export default useSchedule;

@@ -1,5 +1,4 @@
 import { useCachedPromise } from "@raycast/utils";
-import { useState, useEffect } from "react";
 import getNews from "../utils/getNews";
 import type { Article, Category } from "../types/news.types";
 
@@ -20,26 +19,14 @@ const fetchNews = async (league: string) => {
           id: category.id,
           name: category.description,
           type: category.type,
-        }),
+        })
       ),
-    }),
+    })
   );
   return articles;
 };
 
-const useNews = (initialLeague: string) => {
-  const [league, setLeague] = useState<string>(initialLeague);
-
-  const { data, isLoading, error, revalidate } = useCachedPromise(() => fetchNews(league), [], {
-    initialData: [],
-    keepPreviousData: false,
-  });
-
-  useEffect(() => {
-    revalidate();
-  }, [league]);
-
-  return { data, isLoading, error, revalidate, setSelectedLeague: setLeague };
-};
+const useNews = (league: string) =>
+  useCachedPromise(fetchNews, [league], { failureToastOptions: { title: "Could not fetch news" } });
 
 export default useNews;

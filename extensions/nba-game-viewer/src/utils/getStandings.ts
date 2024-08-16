@@ -19,18 +19,13 @@ const getStandings = async ({ year, league, group }: GetStandingsArgs): Promise<
     level: group === "league" ? 1 : 2, // Group ID for league vs conference
   };
 
-  try {
-    const res = await axios.get<StandingsResponse>(baseUrl, { params });
+  const res = await axios.get<StandingsResponse>(baseUrl, { params });
 
-    if (!res.data || !res.data.children) {
-      throw new Error(`Unexpected response structure for ${league.toUpperCase()} standings`);
-    }
-
-    return res.data;
-  } catch (error: unknown) {
-    console.error(`Error fetching standings for ${league.toUpperCase()}:`, (error as Error).message);
-    throw error;
+  if (!res.data || !res.data.children) {
+    throw new Error(`Unexpected response structure for ${league.toUpperCase()} standings`);
   }
+
+  return res.data;
 };
 
 export default getStandings;

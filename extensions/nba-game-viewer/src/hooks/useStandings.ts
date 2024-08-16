@@ -1,5 +1,4 @@
 import { useCachedPromise } from "@raycast/utils";
-import { useEffect } from "react";
 import getStandings from "../utils/getStandings";
 import type { Team, ConferenceStanding } from "../types/standings.types";
 
@@ -47,17 +46,7 @@ const fetchStandings = async (league: string) => {
   return { easternStandings, westernStandings, leagueStandings };
 };
 
-const useStandings = (initialLeague: string) => {
-  const { data, isLoading, error, revalidate } = useCachedPromise(() => fetchStandings(initialLeague), [], {
-    initialData: { easternStandings: [], westernStandings: [], leagueStandings: [] },
-    keepPreviousData: false,
-  });
-
-  useEffect(() => {
-    revalidate();
-  }, [initialLeague]);
-
-  return { data, isLoading, error, revalidate };
-};
+const useStandings = (league: string) =>
+  useCachedPromise(fetchStandings, [league], { failureToastOptions: { title: "Could not fetch standings" } });
 
 export default useStandings;

@@ -15,13 +15,8 @@ const getRoster = async ({ league, id }: GetRosterArgs) => {
     enable: "roster",
   };
 
-  try {
-    const res = await axios.get(baseUrl, { params });
-    return res.data.team.athletes;
-  } catch (error) {
-    console.error(`Error fetching roster for ${league.toUpperCase()} team ${id}:`, error);
-    throw error;
-  }
+  const res = await axios.get(baseUrl, { params });
+  return res.data.team.athletes;
 };
 
 export default getRoster;
