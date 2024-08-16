@@ -153,7 +153,7 @@ export const useEventActions = () => {
     });
 
     const smartHabit: SmartHabit | undefined = event.assist?.seriesLineageId
-      ? smartHabitsByLineageIdsMap[event.assist.seriesLineageId]
+      ? smartHabitsByLineageIdsMap?.[event.assist.seriesLineageId]
       : undefined;
 
     const hasRescheduleUnstarted = currentUser?.features.assistSettings.rescheduleUnstarted;

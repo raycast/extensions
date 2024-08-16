@@ -1,5 +1,8 @@
 # reclaim Changelog
 
+## [Fixes] - 2024-08-16
+- Handle possibly undefined
+
 ## [Update] - 2024-08-13
 - Update contributors list
 - Just strip planner emojis
