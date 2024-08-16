@@ -85,9 +85,9 @@
           ]
         },
         {
-          "name": "default-target-branch",
-          "title": "Default Target Branch",
-          "description": "Default PR target branch. Change by using the List Branches command.",
+          "name": "default-base-branch",
+          "title": "Default Base Branch",
+          "description": "Default PR base branch. Change by using the List Branches command.",
           "type": "textfield",
           "required": true,
           "default": "main"
@@ -111,7 +111,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.1"
+    "@raycast/api": "^1.81.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

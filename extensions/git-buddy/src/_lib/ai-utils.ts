@@ -1,9 +1,22 @@
 import { AI, getPreferenceValues } from "@raycast/api";
-import { getRepoPath, getStagedGitDiff, getDiffComparedToBranch, getCurrentBranchName } from "./git-utils";
+import { getRepoPath, getStagedGitDiff, getDiffComparedToBranch, getCurrentBranchName } from "./git";
 
 const CREATIVITY_LEVEL = "medium";
 
-export async function getAIModel(preferenceKey: string): Promise<AI.Model> {
+interface FetchAIContentOptions {
+  diffType: "staged" | "baseBranch";
+  aiModelName: string;
+  aiPrompt: string;
+  baseBranch?: string;
+}
+
+interface GitDiffOptions {
+  diffType: "staged" | "baseBranch";
+  repoPath: string;
+  baseBranch?: string;
+}
+
+async function getAIModel(preferenceKey: string): Promise<AI.Model> {
   const preferences = await getPreferenceValues<{ [key: string]: string }>();
   const aiModelKey = preferences[preferenceKey];
   if (!aiModelKey) {
@@ -16,34 +29,21 @@ export async function getAIModel(preferenceKey: string): Promise<AI.Model> {
   return aiModel;
 }
 
-interface FetchAIContentOptions {
-  diffType: "staged" | "targetBranch";
-  aiModelName: string;
-  aiPrompt: string;
-  targetBranch?: string;
-}
-
-interface GitDiffOptions {
-  diffType: "staged" | "targetBranch";
-  repoPath: string;
-  targetBranch?: string;
-}
-
-async function getGitDiff({ diffType, repoPath, targetBranch }: GitDiffOptions) {
+async function getGitDiff({ diffType, repoPath, baseBranch }: GitDiffOptions): Promise<string> {
   if (diffType === "staged") {
     return await getStagedGitDiff(repoPath);
-  } else if (diffType === "targetBranch" && targetBranch) {
-    return await getDiffComparedToBranch(repoPath, targetBranch);
+  } else if (diffType === "baseBranch" && baseBranch) {
+    return await getDiffComparedToBranch(repoPath, baseBranch);
   } else {
-    throw new Error("Invalid diffType or missing targetBranch");
+    throw new Error("Invalid diffType or missing baseBranch");
   }
 }
 
 export async function fetchAIContent(options: FetchAIContentOptions) {
-  const { diffType, aiModelName, aiPrompt, targetBranch } = options;
+  const { diffType, aiModelName, aiPrompt, baseBranch } = options;
   try {
     const repoPath = await getRepoPath();
-    const gitDiff = await getGitDiff({ diffType, repoPath, targetBranch });
+    const gitDiff = await getGitDiff({ diffType, repoPath, baseBranch });
 
     if (!gitDiff) {
       throw new Error("Git diff is empty.");

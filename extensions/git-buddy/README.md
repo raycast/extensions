@@ -1,6 +1,6 @@
 # Git Buddy
 
-An opinionated, AI-powered Git assistant for commit messages, PR descriptions, and branch management tasks. You can configure the repository path, target branch, and AI model for generating content.
+An opinionated, AI-powered Git assistant for commit messages, PR descriptions, and branch management tasks. You can configure the repository path, base branch, and AI model for generating content.
 
 ## Commands
 
