@@ -25,7 +25,7 @@ export default function Aliases() {
 function AliasesIndex({ domain }: { domain: string }) {
   const { push } = useNavigation();
   const [aliases, setAliases] = useCachedState<Alias[]>("aliases", [], {
-    cacheNamespace: "domain",
+    cacheNamespace: domain,
   });
   const [isLoading, setIsLoading] = useState(true);
 

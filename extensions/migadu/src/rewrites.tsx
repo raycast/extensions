@@ -26,7 +26,7 @@ export default function Rewrites() {
 function RewritesIndex({ domain }: { domain: string }) {
   const { push } = useNavigation();
   const [rewrites, setRewrites] = useCachedState<Rewrite[]>("rewrites", [], {
-    cacheNamespace: "domain",
+    cacheNamespace: domain,
   });
   const [isLoading, setIsLoading] = useState(true);
 

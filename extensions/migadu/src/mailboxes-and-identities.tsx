@@ -31,7 +31,7 @@ type MailboxesIndexProps = {
 function MailboxesIndex({ domain }: MailboxesIndexProps) {
   const { push } = useNavigation();
   const [mailboxes, setMailboxes] = useCachedState<Mailbox[]>("mailboxes", [], {
-    cacheNamespace: "domain",
+    cacheNamespace: domain,
   });
   const [isLoading, setIsLoading] = useState(true);
 
