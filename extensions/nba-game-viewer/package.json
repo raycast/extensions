@@ -38,8 +38,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.37.0",
-    "@raycast/utils": "^1.1.0",
+    "@raycast/api": "^1.81.0",
+    "@raycast/utils": "^1.16.4",
     "axios": "^1.7.4"
   },
   "devDependencies": {
