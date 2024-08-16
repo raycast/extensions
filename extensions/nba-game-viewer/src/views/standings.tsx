@@ -1,42 +1,54 @@
-import { List, getPreferenceValues } from "@raycast/api";
+import { List } from "@raycast/api";
 import useStandings from "../hooks/useStandings";
 import TeamComponent from "../components/Team";
 import { useState } from "react";
-import { Conference, League, Team } from "../types/standings.types";
+import { Team } from "../types/standings.types";
 
 const Standings = () => {
-  const { data, isLoading } = useStandings();
-  const { conferences: conferencePreference } = getPreferenceValues();
-  const [conference, setConference] = useState<string>(conferencePreference);
-
+  const [selectedLeagueConference, setSelectedLeagueConference] = useState<string>("nba_eastern");
+  const selectedLeague = selectedLeagueConference.split("_")[0];
+  const { data, isLoading } = useStandings(selectedLeague);
   const preferenceMapping = {
-    Eastern: data?.easternStandings,
-    Western: data?.westernStandings,
-    League: data?.leagueStandings,
+    nba_eastern: data?.easternStandings,
+    nba_western: data?.westernStandings,
+    nba_league: data?.leagueStandings,
+    wnba_eastern: data?.easternStandings,
+    wnba_western: data?.westernStandings,
+    wnba_league: data?.leagueStandings,
   };
-  const conferenceData = preferenceMapping[conference as keyof typeof preferenceMapping];
-  const sectionTitle = conference === League ? conference : `${conference} Conference`;
+  const conferenceData = preferenceMapping[selectedLeagueConference as keyof typeof preferenceMapping];
+  const sectionTitle = selectedLeagueConference.includes("league")
+    ? "Whole League"
+    : selectedLeagueConference.includes("eastern")
+    ? "Eastern Conference"
+    : "Western Conference";
 
   return (
     <List
       isLoading={isLoading}
       searchBarAccessory={
         <List.Dropdown
-          tooltip="Conference"
-          placeholder="Select a conference"
-          onChange={(value) => setConference(value)}
-          value={conference}
+          tooltip="Select League and Conference"
+          onChange={(newValue) => setSelectedLeagueConference(newValue)}
+          value={selectedLeagueConference}
         >
-          <List.Dropdown.Item value={Conference.Eastern} title="Eastern" />
-          <List.Dropdown.Item value={Conference.Western} title="Western" />
-          <List.Dropdown.Item value={League} title="Whole League" />
+          <List.Dropdown.Section title="NBA">
+            <List.Dropdown.Item value="nba_eastern" title="NBA - Eastern Conference" />
+            <List.Dropdown.Item value="nba_western" title="NBA - Western Conference" />
+            <List.Dropdown.Item value="nba_league" title="NBA - Whole League" />
+          </List.Dropdown.Section>
+          <List.Dropdown.Section title="WNBA">
+            <List.Dropdown.Item value="wnba_eastern" title="WNBA - Eastern Conference" />
+            <List.Dropdown.Item value="wnba_western" title="WNBA - Western Conference" />
+            <List.Dropdown.Item value="wnba_league" title="WNBA - Whole League" />
+          </List.Dropdown.Section>
         </List.Dropdown>
       }
     >
       <List.Section title={sectionTitle}>
-        {conferenceData?.map((team: Team) => {
-          return <TeamComponent key={team.id} team={team} />;
-        })}
+        {conferenceData?.map((team: Team) => (
+          <TeamComponent key={team.id} team={team} league={selectedLeague} />
+        ))}
       </List.Section>
     </List>
   );

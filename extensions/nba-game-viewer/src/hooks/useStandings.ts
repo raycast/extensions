@@ -1,14 +1,15 @@
-import getStandings from "../utils/getStandings";
-import { useCallback } from "react";
-import { Conference, ConferenceStanding, Team } from "../types/standings.types";
 import { useCachedPromise } from "@raycast/utils";
-import { getPreferenceValues } from "@raycast/api";
+import { useEffect } from "react";
+import getStandings from "../utils/getStandings";
+import type { Team, ConferenceStanding } from "../types/standings.types";
 
-const { league } = getPreferenceValues<Preferences>();
+const sortStandings = (a: Team, b: Team) => {
+  return a?.wins !== b?.wins ? (b?.wins || 0) - (a?.wins || 0) : (a?.losses || 0) - (b?.losses || 0);
+};
 
 const getConferenceStandings = (conferenceStanding: ConferenceStanding): Team[] =>
-  conferenceStanding.standings.entries
-    .map((data) => ({
+  conferenceStanding?.standings?.entries
+    ?.map((data) => ({
       id: data.team.id,
       name: data.team.displayName,
       logo: data.team.logos[0].href,
@@ -18,46 +19,45 @@ const getConferenceStandings = (conferenceStanding: ConferenceStanding): Team[] 
       losses: data.stats?.find((stat) => stat.name === "losses")?.value,
       streak: data.stats?.find((stat) => stat.name === "streak")?.displayValue,
     }))
-    .sort((a: Team, b: Team) => {
-      return (a?.seed || 0) - (b?.seed || 0);
-    });
+    .sort(sortStandings) || [];
 
-const useStandings = () => {
-  const fetchTeamStandings = useCallback(async () => {
-    const date = new Date();
-    const seasonOpeningMonth = 10;
-    const data = await getStandings({
-      year: (date.getUTCMonth() >= seasonOpeningMonth ? date.getUTCFullYear() + 1 : date.getUTCFullYear()).toString(),
-      league: league,
-      group: "conference",
-    });
+const fetchStandings = async (league: string) => {
+  const standingsData = await getStandings({
+    year: new Date().getFullYear().toString(),
+    league: league,
+    group: "conference",
+  });
 
-    const easternConference = data?.children?.find(
-      (conference) => conference?.name === `${Conference.Eastern} Conference`
-    );
-    const westernConference = data?.children?.find(
-      (conference) => conference?.name === `${Conference.Western} Conference`
-    );
+  const easternConference = standingsData?.children?.find((conference) => conference?.name === "Eastern Conference");
+  const westernConference = standingsData?.children?.find((conference) => conference?.name === "Western Conference");
 
-    if (!easternConference || !westernConference) throw new Error("Could not find conference standings");
+  if (!easternConference || !westernConference) throw new Error("Could not find conference standings");
 
-    const easternStandings = getConferenceStandings(easternConference);
-    const westernStandings = getConferenceStandings(westernConference);
-    const leagueStandings = getConferenceStandings({
-      name: "League",
-      abbreviation: "L",
-      standings: {
-        name: "League Standings",
-        entries: [...easternConference.standings.entries, ...westernConference.standings.entries],
-      },
-    }).sort((a: Team, b: Team) => {
-      return a?.wins !== b?.wins ? (b?.wins || 0) - (a?.wins || 0) : (a?.losses || 0) - (b?.losses || 0);
-    });
+  const easternStandings = getConferenceStandings(easternConference);
+  const westernStandings = getConferenceStandings(westernConference);
+  const leagueStandings = getConferenceStandings({
+    name: "League",
+    abbreviation: "L",
+    standings: {
+      name: "League Standings",
+      entries: [...easternConference.standings.entries, ...westernConference.standings.entries],
+    },
+  }).sort(sortStandings);
 
-    return { easternStandings, westernStandings, leagueStandings };
-  }, []);
+  return { easternStandings, westernStandings, leagueStandings };
+};
 
-  return useCachedPromise(fetchTeamStandings);
+const useStandings = (initialLeague: string) => {
+  const { data, isLoading, error, revalidate } = useCachedPromise(() => fetchStandings(initialLeague), [], {
+    initialData: { easternStandings: [], westernStandings: [], leagueStandings: [] },
+    keepPreviousData: false,
+  });
+
+  useEffect(() => {
+    revalidate();
+  }, [initialLeague]);
+
+  return { data, isLoading, error, revalidate };
 };
 
 export default useStandings;

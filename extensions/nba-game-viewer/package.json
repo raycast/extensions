@@ -39,24 +39,6 @@
   ],
   "preferences": [
     {
-      "name": "league",
-      "description": "Choose NBA or WNBA League",
-      "type": "dropdown",
-      "title": "League",
-      "data": [
-        {
-          "title": "NBA",
-          "value": "nba"
-        },
-        {
-          "title": "WNBA",
-          "value": "wnba"
-        }
-      ],
-      "required": true,
-      "default": "nba"
-    },
-    {
       "name": "conference",
       "description": "Choose Standings default conference",
       "type": "dropdown",

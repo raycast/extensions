@@ -17,10 +17,14 @@ const getSchedule = async ({ league, year, month, day }: GetScheduleArgs) => {
     device: "desktop",
     userab: 18,
   };
-  const res = await axios.get(baseUrl, {
-    params,
-  });
-  return res.data.content.schedule;
+
+  try {
+    const res = await axios.get(baseUrl, { params });
+    return res.data.content.schedule;
+  } catch (error) {
+    console.error(`Error fetching schedule for ${league.toUpperCase()}:`, error);
+    throw error;
+  }
 };
 
 export default getSchedule;

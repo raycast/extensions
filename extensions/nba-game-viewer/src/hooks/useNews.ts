@@ -1,37 +1,45 @@
-import getNews from "../utils/getNews";
-import { useCallback } from "react";
-import type { Article, Category } from "../types/news.types";
 import { useCachedPromise } from "@raycast/utils";
-import { getPreferenceValues } from "@raycast/api";
+import { useState, useEffect } from "react";
+import getNews from "../utils/getNews";
+import type { Article, Category } from "../types/news.types";
 
-const useNews = () => {
-  const fetchNews = useCallback(async () => {
-    const data = await getNews({ league: getPreferenceValues().league });
+const fetchNews = async (league: string) => {
+  const newsData = await getNews({ league });
+  const articles: Article[] = newsData.map(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (article: any): Article => ({
+      title: article.headline,
+      description: article.description,
+      url: article.links.web.href,
+      imageURL: article.images[0].url,
+      imageCaption: article.images[0].caption,
+      publishedAt: article.published,
+      categories: article.categories.map(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (category: any): Category => ({
+          id: category.id,
+          name: category.description,
+          type: category.type,
+        })
+      ),
+    })
+  );
+  return articles;
+};
 
-    const articles: Article[] = data.map(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (article: any): Article => ({
-        title: article.headline,
-        description: article.description,
-        url: article.links.web.href,
-        imageURL: article.images[0].url,
-        imageCaption: article.images[0].caption,
-        publishedAt: article.published,
-        categories: article.categories.map(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (category: any): Category => ({
-            id: category.id,
-            name: category.description,
-            type: category.type,
-          })
-        ),
-      })
-    );
+const useNews = (initialLeague: string) => {
+  const [league, setLeague] = useState<string>(initialLeague);
 
-    return articles;
-  }, []);
+  const { data, isLoading, error, revalidate } = useCachedPromise(() => fetchNews(league), [], {
+    initialData: [],
+    keepPreviousData: false,
+  });
 
-  return useCachedPromise(fetchNews);
+  useEffect(() => {
+    revalidate();
+  }, [league]);
+
+  return { data, isLoading, error, revalidate, setSelectedLeague: setLeague };
 };
 
 export default useNews;

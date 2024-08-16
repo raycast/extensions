@@ -3,26 +3,34 @@ import { StandingsResponse } from "../types/standings.types";
 
 type GetStandingsArgs = {
   year: string;
-  league: string;
-  group: string;
+  league: string; // "nba" or "wnba"
+  group: string; // "conference" or "league"
 };
 
 const getStandings = async ({ year, league, group }: GetStandingsArgs): Promise<StandingsResponse> => {
-  const typeId = league === "nba" ? 1 : 0;
-  const groupId = group === "league" ? 1 : group === "conference" ? 2 : 3;
   const baseUrl = `https://site.web.api.espn.com/apis/v2/sports/basketball/${league}/standings`;
+
   const params = {
     region: "us",
     lang: "en",
     contentorigin: "espn",
     season: year,
-    type: typeId,
-    level: groupId,
+    type: league === "nba" ? 1 : 0, // Type ID differs between leagues
+    level: group === "league" ? 1 : 2, // Group ID for league vs conference
   };
-  const res = await axios.get(baseUrl, {
-    params,
-  });
-  return res.data;
+
+  try {
+    const res = await axios.get<StandingsResponse>(baseUrl, { params });
+
+    if (!res.data || !res.data.children) {
+      throw new Error(`Unexpected response structure for ${league.toUpperCase()} standings`);
+    }
+
+    return res.data;
+  } catch (error: unknown) {
+    console.error(`Error fetching standings for ${league.toUpperCase()}:`, (error as Error).message);
+    throw error;
+  }
 };
 
 export default getStandings;

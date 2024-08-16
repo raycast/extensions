@@ -5,21 +5,27 @@ import { List } from "@raycast/api";
 
 const Articles = () => {
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
-
-  const { data, isLoading } = useNews();
+  const { data, isLoading, setSelectedLeague } = useNews("nba");
 
   return (
-    <List isLoading={isLoading} isShowingDetail={isShowingDetail}>
-      {data?.map((article) => {
-        return (
-          <ArticleComponent
-            key={article.title}
-            article={article}
-            isShowingDetail={isShowingDetail}
-            setIsShowingDetail={setIsShowingDetail}
-          />
-        );
-      })}
+    <List
+      isLoading={isLoading}
+      isShowingDetail={isShowingDetail}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Select League" storeValue onChange={(value) => setSelectedLeague(value)}>
+          <List.Dropdown.Item title="NBA" value="nba" />
+          <List.Dropdown.Item title="WNBA" value="wnba" />
+        </List.Dropdown>
+      }
+    >
+      {data?.map((article) => (
+        <ArticleComponent
+          key={article.title}
+          article={article}
+          isShowingDetail={isShowingDetail}
+          setIsShowingDetail={setIsShowingDetail}
+        />
+      ))}
     </List>
   );
 };
