@@ -13,7 +13,7 @@ const Articles = () => {
       isLoading={isLoading}
       isShowingDetail={isShowingDetail}
       searchBarAccessory={
-        <List.Dropdown tooltip="Select League" storeValue onChange={(value) => setSelectedLeague(value)}>
+        <List.Dropdown tooltip="Select League" storeValue onChange={setSelectedLeague}>
           <List.Dropdown.Item title="NBA" value="nba" />
           <List.Dropdown.Item title="WNBA" value="wnba" />
         </List.Dropdown>
