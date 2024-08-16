@@ -52,9 +52,16 @@ export default async function main(props: { arguments: { start: string; end: str
   let toShowInFinder = "";
   const promises = filePaths.map((filePath) => {
     return new Promise((resolve, reject) => {
-      const outputFilePath = filePath.replace(/\.[^/.]+$/, `-trimmed-${start}-${end}$&`);
+      const outputFilePath = filePath.replace(/\.[^/.]+$/, `-trimmed-${start || "start"}-${end || "end"}$&`);
       toShowInFinder = outputFilePath;
-      const command = `ffmpeg -y -i "${filePath}" -ss ${start} -to ${end} -c:a copy -c:v copy "${outputFilePath}"`;
+      let command = `ffmpeg -y -hide_banner -nostdin -i "${filePath}"`;
+      if (start) {
+        command += ` -ss ${start}`;
+      }
+      if (end) {
+        command += ` -to ${end}`;
+      }
+      command += ` -c:a copy -c:v copy "${outputFilePath}"`;
       const p = spawn(command, { shell: true, env: process.env });
 
       p.stdout.on("data", (data) => {
