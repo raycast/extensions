@@ -1,5 +1,9 @@
 # Raycast Icons Changelog
 
- ## [Fix] - 2022-11-07
+## [Improvement] - {PR_MERGE_DATE}
 
- - Corrected the query parameter
+- Introduced AI-based icon search.
+
+## [Fix] - 2022-11-07
+
+- Corrected the query parameter.
