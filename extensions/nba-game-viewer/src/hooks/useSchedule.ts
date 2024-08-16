@@ -47,7 +47,7 @@ const fetchSchedule = async (league: string) => {
           inProgress: game.competitions[0].status.type.description === "In Progress",
         },
         stream: game.links[0].href,
-      })
+      }),
     ),
   }));
 

@@ -16,7 +16,7 @@ const fetchRoster = async (teamId: number, league: string) => {
           id: injury.id,
           status: injury.status,
           details: `${injury.details.side} ${injury.details.type} ${injury.details.detail}`,
-        })
+        }),
       ),
       headshot: athlete.headshot?.href,
       weight: athlete.displayWeight,
@@ -29,7 +29,7 @@ const fetchRoster = async (teamId: number, league: string) => {
         : "Unavailable",
       draft: athlete.draft?.displayText || "Unavailable",
       link: athlete.links[0]?.href || "",
-    })
+    }),
   );
   return athletes;
 };
