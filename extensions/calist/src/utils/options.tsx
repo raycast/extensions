@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 
 // Week Settings
-export const weekFormat = Number(getPreferenceValues().weekStart || 0);
+export const weekFormat = Number(getPreferenceValues().weekFormat || 0);
 export const weekEnable = getPreferenceValues().weekEnable || false;
 export const weekDays = getPreferenceValues().weekDays || "";
 

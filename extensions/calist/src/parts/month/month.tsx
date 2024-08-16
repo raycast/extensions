@@ -8,8 +8,13 @@ import { v4 as AHD } from "uuid";
 import { Day } from "@/days/days";
 
 export default function Month() {
-  const { currentDay, currentYear, currentMonth, enableWeek } = useContext(Context);
-  const cal = new Calendar(1);
+  const { currentDay, currentYear, currentMonth, weekFormat, enableWeek } = useContext(Context);
+  let cal;
+  if (weekFormat === 0) {
+    cal = new Calendar(0);
+  } else {
+    cal = new Calendar(1);
+  }
   const weeks = cal.monthDays(currentYear, currentMonth - 1);
 
   return (
@@ -25,9 +30,13 @@ export default function Month() {
                 return <Day key={AHD()} type="empty" day={day} />;
               } else if (day === currentDay) {
                 return <Day key={AHD()} day={day} type="today" hasEvents />;
-              } else if (dayIndex === 5) {
+              } else if (dayIndex === 0 && weekFormat === 0) {
+                return <Day key={AHD()} day={day} type="sunday" />;
+              } else if (dayIndex === 6 && weekFormat === 0) {
+                return <Day key={AHD()} type="saturday" day={day} />;
+              } else if (dayIndex === 5 && weekFormat === 1) {
                 return <Day key={AHD()} day={day} type="saturday" />;
-              } else if (dayIndex === 6) {
+              } else if (dayIndex === 6 && weekFormat === 1) {
                 return <Day key={AHD()} type="sunday" day={day} />;
               } else {
                 return <Day key={AHD()} type="day" day={day} />;

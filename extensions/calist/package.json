@@ -5,6 +5,9 @@
   "description": "Calist a calendar extension, companion for calist.io",
   "icon": "calist.png",
   "author": "astrit",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Productivity"
   ],

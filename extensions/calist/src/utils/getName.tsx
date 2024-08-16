@@ -1,3 +1,5 @@
+import { DAYS } from "./constants";
+
 export const getMonthName = (monthNumber: number) => {
   const date = new Date();
   date.setMonth(monthNumber - 1); // Subtract 1 to account for 0-based indexing
@@ -16,6 +18,9 @@ export const getDayNameShort = (dayNumber: number) => {
   return date.toLocaleString("default", { weekday: "short" });
 };
 
-export const getDayNameAll = () => {
-  return Array.from({ length: 7 }, (_, i) => getDayNameShort(i + 1));
+export const getDayNameAll = (weekFormat: number) => {
+  if (weekFormat === 0) {
+    return DAYS[0];
+  }
+  return DAYS[1];
 };

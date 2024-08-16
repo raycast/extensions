@@ -5,8 +5,8 @@ import { weekDays, monthName } from "u/options";
 import { environment } from "@raycast/api";
 
 export const getTitle = () => {
-  const { currentDay, enableWeek } = useContext(Context);
-  const dayNames = getDayNameAll();
+  const { currentDay, weekFormat, enableWeek } = useContext(Context);
+  const dayNames = getDayNameAll(weekFormat);
   const fontSize = environment.textSize;
   const spaceCount = fontSize === "medium" ? (enableWeek ? 21 : 25) : enableWeek ? 18 : 21;
   const space = " ".repeat(spaceCount);
