@@ -12,14 +12,7 @@ const Schedule = () => {
       isLoading={isLoading}
       searchBarPlaceholder={`${selectedLeague.toUpperCase()} Schedule`}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Select League"
-          onChange={(newValue) => {
-            setSelectedLeague(newValue);
-            updateLeague(newValue);
-          }}
-          value={selectedLeague}
-        >
+        <List.Dropdown tooltip="Select League" storeValue onChange={setSelectedLeague}>
           <List.Dropdown.Section title="Leagues">
             <List.Dropdown.Item value="nba" title="NBA" />
             <List.Dropdown.Item value="wnba" title="WNBA" />
