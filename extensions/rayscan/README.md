@@ -4,11 +4,11 @@ Rayscan brings blockchain data to your fingertips. It is a simple, easy-to-use t
 
 ### Search for transactions
 
-![](metadata/search.png)
+![](./search.png)
 
 ### View block details
 
-![](metadata/view.png)
+![](./view.png)
 
 
 ### Installation and Run
