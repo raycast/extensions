@@ -2,7 +2,6 @@ import useNews from "../hooks/useNews";
 import ArticleComponent from "../components/Article";
 import { useState } from "react";
 import { getPreferenceValues, List } from "@raycast/api";
-import { Preferences } from "../types/standings.types";
 
 const Articles = () => {
   const { useLastValue, league } = getPreferenceValues<Preferences>();
