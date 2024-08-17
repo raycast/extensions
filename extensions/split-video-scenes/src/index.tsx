@@ -10,7 +10,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { ChildProcess, ChildProcessWithoutNullStreams, exec, execSync } from "child_process";
+import { ChildProcess, exec, execSync } from "child_process";
 import os from "os";
 import path from "path";
 import { useState } from "react";
@@ -116,7 +116,7 @@ export default function Command() {
     for (const videoPath of filePaths) {
       const outputDir = path.join(path.dirname(videoPath), path.basename(videoPath, path.extname(videoPath)));
 
-      let command = `scenedetect -i "${videoPath}" -o "${outputDir}" ${detectionMethod} split-video`;
+      const command = `scenedetect -i "${videoPath}" -o "${outputDir}" ${detectionMethod} split-video`;
 
       console.log(`Executing command: ${command}`);
       setLogs((prevLogs) => `Executing command: ${command}\n${prevLogs}`);
@@ -182,7 +182,7 @@ export default function Command() {
       }
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} title="Split Video Into Scenes" />
+          <Action.SubmitForm onSubmit={handleSubmit} title="Split Video into Scenes" />
         </ActionPanel>
       }
     >
