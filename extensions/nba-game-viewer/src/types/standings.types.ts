@@ -44,4 +44,3 @@ export type Team = {
   wins?: number;
   losses?: number;
 };
-
