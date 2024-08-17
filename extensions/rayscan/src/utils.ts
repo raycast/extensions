@@ -22,7 +22,7 @@ export async function getTransactions(hash: string): Promise<TransactionsRespons
         }
 
         const response = await fetch(`https://api.tenderly.co/api/v1/search?query=${hash}`)
-        const transactions: TransactionsResponse | {} = (await response.json()) as TransactionsResponse | {};
+        const transactions: TransactionsResponse = (await response.json()) as TransactionsResponse;
         if ("transactions" in transactions) {
             // Property "transactions" exists in the "transactions" object
             // Add your code here
