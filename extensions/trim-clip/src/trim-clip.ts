@@ -32,6 +32,14 @@ export default async function main(props: { arguments: { start: string; end: str
     showHUD("ffmpeg is not installed");
     return;
   }
+  // if neither start nor end is provided, show toast to tell user to provide start and end
+  if (!start && !end) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `Please provide start or end arguments`,
+    });
+    return;
+  }
 
   const items = await getSelectedFinderItems();
   if (!items.length) {
