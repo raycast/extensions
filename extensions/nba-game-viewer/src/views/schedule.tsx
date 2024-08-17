@@ -2,7 +2,6 @@ import { getPreferenceValues, List } from "@raycast/api";
 import useSchedule from "../hooks/useSchedule";
 import DayComponent from "../components/Day";
 import { useState } from "react";
-import { Preferences } from "../types/standings.types";
 
 const Schedule = () => {
   const { league, useLastValue } = getPreferenceValues<Preferences>();
