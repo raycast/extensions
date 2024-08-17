@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rayscan",
-  "title": "rayscan",
+  "title": "Rayscan",
   "description": "Searches Transaction using hash across evm blockchains",
   "icon": "rayscan.png",
   "author": "jds-23",
@@ -15,7 +15,7 @@
     {
       "name": "index",
       "title": "Search Transaction",
-      "subtitle": "Search Transaction",
+      "subtitle": "search transaction",
       "description": "Searchs Transaction using hash across evm blockchains",
       "mode": "view"
     }
