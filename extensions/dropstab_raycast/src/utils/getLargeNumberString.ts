@@ -7,22 +7,22 @@ export function getLargeNumberString(inp: number) {
     {
       size: 1000000000000,
       longDesc: "trillion",
-      shortDesc: "T"
+      shortDesc: "T",
     },
     {
       size: 1000000000,
       longDesc: "billion",
-      shortDesc: "B"
+      shortDesc: "B",
     },
     {
       size: 1000000,
       longDesc: "million",
-      shortDesc: "M"
+      shortDesc: "M",
     },
     {
       size: 1000,
       longDesc: "thousand",
-      shortDesc: "K"
+      shortDesc: "K",
     },
   ];
 

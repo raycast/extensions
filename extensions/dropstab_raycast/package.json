@@ -3,8 +3,8 @@
   "name": "dropstab",
   "title": "DropsTab",
   "description": "Get crypto coin data and navigate to official sites or X. Instantly view your wallets via blockchain explorers.",
-  "icon": "dropstab-logo.svg",
-  "author": "DropsTab",
+  "icon": "dropstab-logo.png",
+  "author": "nikolayqwerty",
   "license": "MIT",
   "commands": [
     {
@@ -30,7 +30,9 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   },
   "devDependencies": {
     "@types/node-localstorage": "^1.3.3"

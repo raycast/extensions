@@ -1,15 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import fetch, { RequestInit } from 'node-fetch';
-import { AbortError } from 'node-fetch';
+import fetch, { RequestInit } from "node-fetch";
+import { AbortError } from "node-fetch";
 import { showToast, Toast } from "@raycast/api";
 import { SearchResult, SearchState } from "../types/coinType";
 import { getNumberWithCommas } from "../utils/getNumberWithCommas";
 import { getLargeNumberString } from "../utils/getLargeNumberString";
 
-// Функция debounce
-function debounce(func: (...args: any[]) => void, wait: number) {
+// Функция debounce с перегрузками
+function debounce<T extends unknown[]>(func: (...args: T) => void, wait: number) {
   let timeout: NodeJS.Timeout;
-  return (...args: any[]) => {
+  return (...args: T) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
   };
@@ -19,9 +19,12 @@ export function useSearch() {
   const [state, setState] = useState<SearchState>({ results: [], isLoading: true, query: "" });
   const cancelRef = useRef<AbortController | null>(null);
 
-  const debouncedSearch = useCallback(debounce((searchText: string) => {
-    search(searchText);
-  }, 500), []);
+  const debouncedSearch = useCallback(
+    debounce((searchText: string) => {
+      search(searchText);
+    }, 500),
+    [],
+  );
 
   useEffect(() => {
     debouncedSearch("");
@@ -46,7 +49,6 @@ export function useSearch() {
         results: results,
         isLoading: false,
       }));
-
     } catch (error) {
       if (error instanceof AbortError) {
         return;
@@ -57,7 +59,7 @@ export function useSearch() {
   }
 
   async function updateCoinData(items: SearchResult[], setItems: (items: SearchResult[]) => void) {
-    const ids = items.map(item => item.id);
+    const ids = items.map((item) => item.id);
     const updatedItems = await performSearchById(ids, cancelRef.current!.signal);
     setItems(updatedItems);
   }
@@ -77,7 +79,8 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
   let options: RequestInit;
 
   if (searchText.length === 0) {
-    url = "https://api2.icodrops.com/portfolio/api/markets/mostSearched?size=6&fields=currencyId,name,symbol,slug,links,image,rank,ico,trading,price,marketCap,change&withAd=false";
+    url =
+      "https://api2.icodrops.com/portfolio/api/markets/mostSearched?size=6&fields=currencyId,name,symbol,slug,links,image,rank,ico,trading,price,marketCap,change&withAd=false";
     options = {
       method: "get",
       signal: signal,
@@ -107,8 +110,8 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
               "marketCap",
               "change",
               "ico",
-              "trading"
-            ]
+              "trading",
+            ],
           },
           {
             type: "exchanges",
@@ -122,11 +125,11 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
               "rankReported",
               "volumeVerified",
               "volumeReported",
-              "changeReported"
-            ]
-          }
-        ]
-      })
+              "changeReported",
+            ],
+          },
+        ],
+      }),
     };
   }
 
@@ -139,21 +142,27 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
 
     type Json = Record<string, unknown>;
 
-    const json = await response.json() as unknown;
+    const json = (await response.json()) as unknown;
     const jsonResults = searchText.length === 0 ? (json as Json[]) : ((json as { markets: Json[] })?.markets ?? []);
 
     return jsonResults.map((coin) => {
-      const priceUSD = coin.price && (coin.price as Record<string, string>).USD ? parseFloat((coin.price as Record<string, string>).USD) : NaN;
-      const price = !isNaN(priceUSD) 
-      ? (priceUSD < 1 
-          ? `$ ${priceUSD} USD` 
-          : `$ ${getNumberWithCommas(Number(priceUSD.toFixed(2)))} USD`) 
-      : "N/A";
-      const marketcap = coin.marketCap && (coin.marketCap as Record<string, string>).USD ? parseFloat((coin.marketCap as Record<string, string>).USD) : NaN;
+      const priceUSD =
+        coin.price && (coin.price as Record<string, string>).USD
+          ? parseFloat((coin.price as Record<string, string>).USD)
+          : NaN;
+      const price = !isNaN(priceUSD)
+        ? priceUSD < 1
+          ? `$ ${priceUSD} USD`
+          : `$ ${getNumberWithCommas(Number(priceUSD.toFixed(2)))} USD`
+        : "N/A";
+      const marketcap =
+        coin.marketCap && (coin.marketCap as Record<string, string>).USD
+          ? parseFloat((coin.marketCap as Record<string, string>).USD)
+          : NaN;
       const rank = coin.rank ? `# ${coin.rank}` : "N/A";
-      const links = coin.links as { type: string; link: string }[] || [];
-      const twitterLink = links.find(link => link.type === "TWITTER")?.link || "";
-      const websiteLink = links.find(link => link.type === "WEBSITE")?.link || "";
+      const links = (coin.links as { type: string; link: string }[]) || [];
+      const twitterLink = links.find((link) => link.type === "TWITTER")?.link || "";
+      const websiteLink = links.find((link) => link.type === "WEBSITE")?.link || "";
 
       return {
         icon: coin.image as string,
@@ -202,15 +211,15 @@ async function performSearchById(ids: string[], signal: AbortSignal): Promise<Se
         "price",
         "links",
         "change",
-        "marketCap"
+        "marketCap",
       ],
       currencyIds: ids,
       filters: {
         trading: true,
-        eligibleForTop: true
+        eligibleForTop: true,
       },
-      order: "ASC"
-    })
+      order: "ASC",
+    }),
   };
 
   try {
@@ -222,22 +231,28 @@ async function performSearchById(ids: string[], signal: AbortSignal): Promise<Se
 
     type Json = Record<string, unknown>;
 
-    const json = await response.json() as unknown;
+    const json = (await response.json()) as unknown;
     const jsonResults = (json as { markets: { content: Json[] } })?.markets?.content ?? [];
 
     return jsonResults.map((coin) => {
-      const priceUSD = coin.price && (coin.price as Record<string, string>).USD ? parseFloat((coin.price as Record<string, string>).USD) : NaN;
-      const price = !isNaN(priceUSD) 
-      ? (priceUSD < 1 
-          ? `$ ${priceUSD} USD` 
-          : `$ ${getNumberWithCommas(Number(priceUSD.toFixed(2)))} USD`) 
-      : "N/A";
-      const marketcap = coin.marketCap && (coin.marketCap as Record<string, string>).USD ? parseFloat((coin.marketCap as Record<string, string>).USD) : NaN;
+      const priceUSD =
+        coin.price && (coin.price as Record<string, string>).USD
+          ? parseFloat((coin.price as Record<string, string>).USD)
+          : NaN;
+      const price = !isNaN(priceUSD)
+        ? priceUSD < 1
+          ? `$ ${priceUSD} USD`
+          : `$ ${getNumberWithCommas(Number(priceUSD.toFixed(2)))} USD`
+        : "N/A";
+      const marketcap =
+        coin.marketCap && (coin.marketCap as Record<string, string>).USD
+          ? parseFloat((coin.marketCap as Record<string, string>).USD)
+          : NaN;
       const rank = coin.rank ? `# ${coin.rank}` : "N/A";
-      const links = coin.links as { type: string; link: string }[] || [];
-      const twitterLink = links.find(link => link.type === "TWITTER")?.link || "";
-      const websiteLink = links.find(link => link.type === "WEBSITE")?.link || "";
-    
+      const links = (coin.links as { type: string; link: string }[]) || [];
+      const twitterLink = links.find((link) => link.type === "TWITTER")?.link || "";
+      const websiteLink = links.find((link) => link.type === "WEBSITE")?.link || "";
+
       return {
         icon: coin.image as string,
         id: coin.currencyId as string,
