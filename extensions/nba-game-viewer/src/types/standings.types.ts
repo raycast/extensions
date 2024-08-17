@@ -45,8 +45,3 @@ export type Team = {
   losses?: number;
 };
 
-export interface Preferences {
-  league: string;
-  conference: string;
-  useLastValue: boolean;
-}
