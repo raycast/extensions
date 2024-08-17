@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Toast, confirmAlert, showToast, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Icon, Toast, confirmAlert, openExtensionPreferences, showToast } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 
 import { getGitHubClient } from "../api/githubClient";

@@ -16,6 +16,10 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.16.4
+
+- Avoid throwing an error when `useFetch` can't parse the `Content-Type` header of the response
+
 ### v1.16.3
 
 - Fix an issue where `URLSearchParams` couldn't be passed as an option to `useFetch` or `useCachedPromise`, causing extensions to crash.

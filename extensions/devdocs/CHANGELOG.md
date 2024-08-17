@@ -1,5 +1,9 @@
 # DevDocs Extension
 
+## [New Preference] - 2024-08-16
+
+- Add preference to indicate which "open" action should appear first in action panel
+
 ## [Changes] - 2024-07-27
 
 - Update list item icon
@@ -20,7 +24,7 @@
 
 - Fixed wrong link in `Open in DevDocs`
 
-## Deeplinks - 2023-02-07
+## [Deeplinks] - 2023-02-07
 
 - Add deeplinks support
 

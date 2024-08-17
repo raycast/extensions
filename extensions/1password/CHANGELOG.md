@@ -1,5 +1,10 @@
 # 1Password Changelog
 
+## [Enhancements] - 2024-08-13
+
+- Fix: multilingual OTP name can't be read
+- Feat: support generate random password
+
 ## [Fix] - 2024-08-05
 
 - Add support for showing missing 1Password CLI error

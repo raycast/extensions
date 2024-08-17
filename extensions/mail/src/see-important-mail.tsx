@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef } from "react";
-import { List, showToast, Toast } from "@raycast/api";
+import { useCallback, useRef, useState } from "react";
+import { Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 import { MessageListItem } from "./components";
@@ -17,23 +17,21 @@ export default function SeeImportantMail() {
     const accounts = await getAccounts();
 
     if (!accounts) {
-      showToast(Toast.Style.Failure, "Could not get important messages from accounts");
       return [];
     }
 
     const messages = await Promise.all(
       accounts.map((account) => {
         const mailbox = account.mailboxes.find(isImportantMailbox);
-        if (mailbox) {
-          return getMessages(account, mailbox);
-        } else {
+        if (!mailbox) {
           return [];
         }
-      })
+        return getMessages(account, mailbox, true);
+      }),
     );
 
     return accounts.map((account, index) => {
-      account.messages = messages[index];
+      account.messages = messages[index] ?? [];
       return account;
     });
   }, []);
@@ -44,8 +42,10 @@ export default function SeeImportantMail() {
     data: accounts,
     mutate: mutateAccounts,
     isLoading: isLoadingAccounts,
+    error,
   } = useCachedPromise(fetchAccounts, [], {
     abortable: accountsAbortController,
+    failureToastOptions: { title: "Could not get important messages from accounts" },
   });
 
   const handleAction = useCallback((action: () => Promise<void>, mailbox: Mailbox) => {
@@ -68,13 +68,14 @@ export default function SeeImportantMail() {
             return account;
           });
         },
-      }
+      },
     );
   }, []);
 
-  const numMessages = accounts
-    ?.filter((a) => account === undefined || a.id === account.id)
-    .reduce((a, account) => a + (account.messages ? account.messages.length : 0), 0);
+  const numMessages =
+    accounts
+      ?.filter((a) => account === undefined || a.id === account.id)
+      .reduce((a, account) => a + (account.messages ? account.messages.length : 0), 0) ?? 0;
 
   return (
     <List
@@ -91,13 +92,18 @@ export default function SeeImportantMail() {
           <List.Dropdown.Item title="All Accounts" value="" />
           <List.Dropdown.Section>
             {accounts?.map((account) => (
-              <List.Dropdown.Item key={account.id} title={account.name} value={account.id} />
+              <List.Dropdown.Item
+                key={account.id}
+                title={account.name}
+                value={account.id}
+                icon={{ source: Icon.AtSymbol, tintColor: Color.Blue }}
+              />
             ))}
           </List.Dropdown.Section>
         </List.Dropdown>
       }
     >
-      {numMessages && numMessages > 0 ? (
+      {numMessages &&
         accounts
           ?.filter((a) => account === undefined || a.id === account.id)
           .map((account) => {
@@ -117,9 +123,20 @@ export default function SeeImportantMail() {
                 ))}
               </List.Section>
             ) : undefined;
-          })
-      ) : (
-        <List.EmptyView title={"No Important Messages"} description={"You don't have any important messages..."} />
+          })}
+      {!error && !numMessages && !isLoadingAccounts && (
+        <List.EmptyView
+          title={"No Important Messages"}
+          description={"You don't have any important messages..."}
+          icon={{ source: Icon.Envelope, tintColor: Color.Purple }}
+        />
+      )}
+      {error && (
+        <List.EmptyView
+          title="Could not get recent messages"
+          description={error.message}
+          icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+        />
       )}
     </List>
   );
