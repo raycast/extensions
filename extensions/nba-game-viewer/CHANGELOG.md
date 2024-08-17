@@ -2,7 +2,8 @@
 
 ## [Improvements] - {PR_MERGE_DATE}
 
-- Add the ability to select either the NBA or WNBA league to view games, standings, and more.
+- Adds the ability to select either the NBA or WNBA league to view games, standings, and more.
+- Adds a preference to store last values for league, conference etc. in drop-downs instead of default values.
 
 ## [Improvements] - 2023-11-30
 
