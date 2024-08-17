@@ -2,7 +2,7 @@ import { getPreferenceValues, List } from "@raycast/api";
 import useStandings from "../hooks/useStandings";
 import TeamComponent from "../components/Team";
 import { useState } from "react";
-import { Team, Preferences } from "../types/standings.types";
+import { Team } from "../types/standings.types";
 
 const Standings = () => {
   const { league, conference, useLastValue } = getPreferenceValues<Preferences>();
