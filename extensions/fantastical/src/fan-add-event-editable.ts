@@ -1,17 +1,20 @@
+// fan-add-event-editable.tsx
 import { open, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import defaultBrowserId from "default-browser-id";
 import { getName } from "./getName";
+import { FanAddEventEditable } from "./types";
 
-export default async (props: { arguments: Arguments.FanAddReminderEditable }) => {
+export default async (props: { arguments: FanAddEventEditable }) => {
   const args = props.arguments;
   const name = await getName();
   const defaultBrowser = await defaultBrowserId();
   if (name !== undefined) {
-    const escapedAdd = args.add.replace(/"/g, '\\"');
+    const escapedInputText = args.inputText.replace(/"/g, '\\"');
+
     await runAppleScript(`
-      tell application "${name}"
-        parse sentence "Todo ${escapedAdd}"
+      tell application "${name}" 
+        parse sentence "${escapedInputText}" 
       end tell`);
   } else {
     await showToast({
