@@ -1,4 +1,3 @@
-// fan-add-event-editable.tsx
 import { open, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import defaultBrowserId from "default-browser-id";
