@@ -30,14 +30,11 @@ export default function CurrentOnCallCommand() {
   useEffect(() => {
     async function fetchSchedules() {
       try {
-        const response = await axios.get<{ schedules: Schedule[] }>(
-          "https://api.incident.io/v2/schedules",
-          {
-            headers: {
-              Authorization: `Bearer ${preferences.apiKey}`,
-            },
-          }
-        );
+        const response = await axios.get<{ schedules: Schedule[] }>("https://api.incident.io/v2/schedules", {
+          headers: {
+            Authorization: `Bearer ${preferences.apiKey}`,
+          },
+        });
 
         if (response.data && Array.isArray(response.data.schedules)) {
           setSchedules(response.data.schedules);
@@ -63,7 +60,7 @@ export default function CurrentOnCallCommand() {
   }, [preferences.apiKey]);
 
   function getCurrentResponders(schedule: Schedule): string {
-    const responders = schedule.current_shifts.map(shift => shift.user.name);
+    const responders = schedule.current_shifts.map((shift) => shift.user.name);
     return responders.length > 0 ? responders.join(", ") : "No one currently on-call";
   }
 
@@ -81,7 +78,7 @@ export default function CurrentOnCallCommand() {
                 <ActionPanel>
                   <Action.CopyToClipboard
                     title="Copy On-Call Email(s)"
-                    content={schedule.current_shifts.map(shift => shift.user.email).join(", ")}
+                    content={schedule.current_shifts.map((shift) => shift.user.email).join(", ")}
                   />
                 </ActionPanel>
               )
