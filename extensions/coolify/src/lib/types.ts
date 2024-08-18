@@ -1,18 +1,36 @@
 export type Server = {
-    id: number;
     uuid: string;
+    description: string | null;
     name: string;
-    description: string;
     ip: string;
+    is_reachable: boolean;
+    is_usable: boolean;
     user: string;
     port: number;
-    // proxy: {};
-    high_disk_usage_notification_sent: true,
-    unreachable_notification_sent: true,
+    settings: Record<string, string | number | boolean | null>;
+}
+export type ServerDetails = {
+    uuid: string;
+    description: string;
+    name: string;
+    high_disk_usage_notification_sent: boolean;
+    ip: string;
+    log_drain_notification_sent: boolean;
+    port: number;
+    private_key_id: number;
+    proxy: {
+      type: string;
+      status: string;
+    }
+    settings: Record<string, string | number | boolean | null>;
+    // "swarm_cluster": null,
+    team_id: number;
     unreachable_count: number;
-    validation_logs: string;
-    log_drain_notification_sent: true,
-    swarm_cluster: string;
+    unreachable_notification_sent: boolean;
+    user: string;
+    // validation_logs: null,
+    created_at: string;
+    updated_at: string;
 }
 export type CreateServer = {
     name: string;
@@ -24,6 +42,37 @@ export type CreateServer = {
     is_build_server: boolean;
     instant_validate: boolean;
 }
+
+export type Resource = {
+    id: number;
+    uuid: string;
+    name: string;
+    type: string;
+    created_at: string;
+    updated_at: string;
+    status: string;
+}
+export type ResourceDetails = {
+    id: number;
+    uuid: string;
+    name: string;
+    status: string;
+} & ({
+    type: "application";
+    destination: {
+        id: number;
+        name: string;
+        uuid: string;
+        network: string;
+        server_id: number;
+        created_at: string;
+        updated_at: string;
+        server: ServerDetails;
+    }
+} | {
+    type: "service";
+    server: ServerDetails;
+})
 
 export type PrivateKey = {
     id: number;

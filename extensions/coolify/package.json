@@ -3,7 +3,7 @@
   "name": "coolify",
   "title": "Coolify",
   "description": "",
-  "icon": "command-icon.png",
+  "icon": "coolify.png",
   "author": "xmok",
   "categories": [
     "Applications",
@@ -16,7 +16,7 @@
       "name": "coolify_url",
       "required": true,
       "type": "textfield",
-      "description": "",
+      "description": "URL of Coolify Instance",
       "default": "https://app.coolify.io/"
     },
     {
@@ -24,14 +24,20 @@
       "name": "api_token",
       "required": true,
       "type": "password",
-      "description": ""
+      "description": "API Token from Coolify Dashboard"
     }
   ],
   "commands": [
     {
       "name": "servers",
-      "title": "Servers",
-      "description": "",
+      "title": "View Servers",
+      "description": "View Servers and Server Details",
+      "mode": "view"
+    },
+    {
+      "name": "resources",
+      "title": "View Resources",
+      "description": "View Resources",
       "mode": "view"
     }
   ],
