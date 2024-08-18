@@ -10,7 +10,7 @@
     {
       "name": "whois-search",
       "title": "whois search",
-      "description": "",
+      "description": "Search the whois database, look up domain owner information",
       "mode": "view"
     }
   ],

@@ -35,7 +35,6 @@ function WhoisDetail({ domain }: { domain: string }) {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Выполнение whois в асинхронном режиме
     exec(`whois ${domain}`, (error, stdout, stderr) => {
       if (error || stderr) {
         setWhoisData(`Error: Could not retrieve WHOIS data for ${domain}`);
