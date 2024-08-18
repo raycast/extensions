@@ -1,5 +1,9 @@
 # Urban Dictionary Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fix capitalization in metadata label titles.
+
 ## [Bug fix] - 2023-03-24
 
 - Fixed bug with search bar being trigger after every character input
