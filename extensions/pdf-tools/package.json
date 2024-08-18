@@ -102,8 +102,8 @@
   "preferences": [
     {
       "name": "suffix",
-      "title": "Output PDF File Suffix",
-      "description": "Suffix for split PDF files (e.g., 'part')",
+      "title": "Output PDF Filename Suffix",
+      "description": "Suffix for split PDF filenames (e.g., 'part')",
       "type": "textfield",
       "default": "part",
       "required": false
