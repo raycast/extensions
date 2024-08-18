@@ -1,5 +1,11 @@
 # Whois Changelog
 
+## [whois] - 2024-08-18
+
+- Add the main code for the Whois extension
+
+## [Handle IP Addresses] - 2023-10-18
+
 ## [Refactoring] - 2024-07-26
 
 - Updated dependencies, removed axios
