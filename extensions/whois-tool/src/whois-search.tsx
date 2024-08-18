@@ -15,7 +15,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Get WHOIS Info" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Get Whois Info" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -49,9 +49,5 @@ function WhoisDetail({ domain }: { domain: string }) {
     return <Detail markdown={`# 🔍 Loading WHOIS data for ${domain}...`} />;
   }
 
-  return (
-    <Detail
-      markdown={`# 🌎 WHOIS Information for ${domain}\n\`\`\`\n${whoisData}\n\`\`\``}
-    />
-  );
+  return <Detail markdown={`# 🌎 WHOIS Information for ${domain}\n\`\`\`\n${whoisData}\n\`\`\``} />;
 }
