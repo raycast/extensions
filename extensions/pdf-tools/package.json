@@ -9,6 +9,16 @@
   "categories": [
     "Productivity"
   ],
+  "keywords": [
+    "pdf",
+    "split",
+    "merge",
+    "protect",
+    "unlock",
+    "encrypt",
+    "decrypt",
+    "password"
+  ],
   "commands": [
     {
       "name": "splitByFileSize",
@@ -62,7 +72,11 @@
           "name": "password",
           "type": "password",
           "placeholder": "Password",
-          "required": true
+          "required": true,
+          "keywords": [
+            "encrypt",
+            "password"
+          ]
         }
       ]
     },
@@ -76,7 +90,11 @@
           "name": "password",
           "type": "password",
           "placeholder": "Password",
-          "required": true
+          "required": true,
+          "keywords": [
+            "decrypt",
+            "password"
+          ]
         }
       ]
     }
