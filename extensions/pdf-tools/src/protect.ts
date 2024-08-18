@@ -29,7 +29,7 @@ export default async function Command(props: { arguments: { password: string } }
 
       await showToast({
         style: Toast.Style.Animated,
-        title: `Protecting PDF file "${path.basename(item.path)}" [${i + 1} of ${selectedItems.length}]`,
+        title: `Protecting "${path.basename(item.path)}" [file ${i + 1} of ${selectedItems.length}]`,
       });
 
       await protect(item.path, password);

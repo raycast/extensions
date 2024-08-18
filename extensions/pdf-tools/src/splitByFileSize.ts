@@ -40,7 +40,7 @@ export default async function Command(props: { arguments: { maxSizeMB: string } 
 
       await showToast({
         style: Toast.Style.Animated,
-        title: `Splitting PDF file "${path.basename(item.path)}" [${i + 1} of ${selectedItems.length}]`,
+        title: `Splitting "${path.basename(item.path)}" [file ${i + 1} of ${selectedItems.length}]`,
       });
 
       await splitByFileSize(item.path, maxSizeMB, suffix);

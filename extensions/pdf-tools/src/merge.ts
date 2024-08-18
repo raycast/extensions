@@ -24,6 +24,11 @@ export default async function Command(props: { arguments: { outputFilename: stri
 
     await closeMainWindow();
 
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Merging PDF files",
+    });
+
     const pdfFiles = selectedItems.filter((item) => path.extname(item.path).toLowerCase() === ".pdf");
 
     await merge(
