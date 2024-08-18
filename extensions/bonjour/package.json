@@ -3,7 +3,7 @@
   "name": "bonjour",
   "title": "Bonjour",
   "description": "Manage Bonjour services",
-  "icon": "bonjour.png",
+  "icon": "extension_icon.png",
   "author": "that70schris",
   "categories": [
     "System"
