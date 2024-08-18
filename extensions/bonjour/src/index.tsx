@@ -18,7 +18,7 @@ export default function Command() {
       {items &&
         Object.values(items)
           ?.sort((a, b) => {
-            return a.name > b.name ? 1 : -1;
+            return a.name.localeCompare(b.name);
           })
           .map((service: Service, index: number) => {
             const url = `${service.type}://${service.host}:${service.port}`;
