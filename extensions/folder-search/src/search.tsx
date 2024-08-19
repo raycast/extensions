@@ -380,21 +380,25 @@ export default function Command() {
                   shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                   onAction={() => toggleResultPinnedStatus(result, resultIndex)}
                 />
-                {resultIndex > 0 && (
-                  <Action
-                    title="Move Pin Up"
-                    icon={Icon.ArrowUpCircle}
-                    shortcut={{ modifiers: ["cmd"], key: "u" }}
-                    onAction={() => movePinUp(result, resultIndex)}
-                  />
-                )}
-                {resultIndex < props.results.length - 1 && (
-                  <Action
-                    title="Move Pin Down"
-                    icon={Icon.ArrowDownCircle}
-                    shortcut={{ modifiers: ["cmd"], key: "d" }}
-                    onAction={() => movePinDown(result, resultIndex)}
-                  />
+                {resultIsPinned(result) && (
+                  <>
+                    {resultIndex > 0 && (
+                      <Action
+                        title="Move Pin Up"
+                        icon={Icon.ArrowUpCircle}
+                        shortcut={{ modifiers: ["cmd"], key: "u" }}
+                        onAction={() => movePinUp(result, resultIndex)}
+                      />
+                    )}
+                    {resultIndex < props.results.length - 1 && (
+                      <Action
+                        title="Move Pin Down"
+                        icon={Icon.ArrowDownCircle}
+                        shortcut={{ modifiers: ["cmd"], key: "d" }}
+                        onAction={() => movePinDown(result, resultIndex)}
+                      />
+                    )}
+                  </>
                 )}
                 <ActionPanel.Section>
                   <Action.CopyToClipboard
