@@ -21,7 +21,8 @@ export default function Command() {
             return a.name.localeCompare(b.name);
           })
           .map((service: Service, index: number) => {
-            const url = `${service.type}://${service.host}:${service.port}`;
+            const url =
+              `${service.type}://${service.host}:${service.port}`.toLowerCase();
 
             return (
               <List.Item
@@ -33,9 +34,9 @@ export default function Command() {
                     metadata={
                       <List.Item.Detail.Metadata>
                         <List.Item.Detail.Metadata.Link
+                          title="Location"
                           target={url}
                           text={url}
-                          title="Location"
                         />
                         <List.Item.Detail.Metadata.Label
                           title="Host"
