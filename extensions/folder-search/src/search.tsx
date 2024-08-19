@@ -17,6 +17,7 @@ import {
   confirmAlert,
   open,
   getSelectedFinderItems,
+  Keyboard,
 } from "@raycast/api";
 
 import { usePromise } from "@raycast/utils";
@@ -386,7 +387,7 @@ export default function Command() {
                       <Action
                         title="Move Pin Up"
                         icon={Icon.ArrowUpCircle}
-                        shortcut={{ modifiers: ["cmd"], key: "u" }}
+                        shortcut={Keyboard.Shortcut.Common.MoveUp}
                         onAction={() => movePinUp(result, resultIndex)}
                       />
                     )}
@@ -394,7 +395,7 @@ export default function Command() {
                       <Action
                         title="Move Pin Down"
                         icon={Icon.ArrowDownCircle}
-                        shortcut={{ modifiers: ["cmd"], key: "d" }}
+                        shortcut={Keyboard.Shortcut.Common.MoveDown}
                         onAction={() => movePinDown(result, resultIndex)}
                       />
                     )}
