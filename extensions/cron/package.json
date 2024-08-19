@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cron",
   "title": "Cron",
-  "description": "A companion for cron.re",
+  "description": "A companion for Cron (cron.re)",
   "icon": "cron.png",
   "author": "astrit",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -33,15 +36,15 @@
       "data": [
         {
           "title": "Monday",
-          "value": "1"
+          "value": "monday"
         },
         {
           "title": "Sunday",
-          "value": "0"
+          "value": "sunday"
         }
       ],
       "description": "First day of week",
-      "default": "1"
+      "default": "monday"
     },
     {
       "name": "weekEnable",
