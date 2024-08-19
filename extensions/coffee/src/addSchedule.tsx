@@ -2,7 +2,7 @@ import { useState } from "react";
 import { LocalStorage, showToast, Toast, Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useLoadStoredSchedules } from "./fetchStoredSchedule";
 import { ListActionPanel } from "./listActionPanel";
-import { Schedule, numberToDayString, changeIsManuallyDecafed, stopCaffeinate, startCaffeinate } from "./utils";
+import { Schedule, changeScheduleState, stopCaffeinate, startCaffeinate } from "./utils";
 import { extractSchedule } from "./extractSchedule";
 
 export default function Command() {
@@ -47,12 +47,12 @@ export default function Command() {
   };
 
   const handlePauseSchedule = async (day:string) => {
-    changeIsManuallyDecafed("decaffeinate");
+    changeScheduleState("decaffeinate");
     await stopCaffeinate({ menubar: true, status: true }, `Schedule for ${day} is now paused`);
   }
 
   const handleResumeSchedule = async (day:string) => {
-    changeIsManuallyDecafed("caffeinate");
+    changeScheduleState("caffeinate");
     await startCaffeinate({ menubar: true, status: true }, `Schedule for ${day} is now resumed`);
   }
 
@@ -80,7 +80,7 @@ export default function Command() {
           {schedules.map((schedule, index) => (
             schedule?.day ? (
               <List.Item
-                key={index} // Use index as key if unique id not available
+                key={index}
                 title={schedule.day.charAt(0).toUpperCase() + schedule.day.slice(1)}
                 subtitle={`Set from ${schedule.from} to ${schedule.to}`}
                 icon={Icon.Calendar}

@@ -67,7 +67,7 @@ function generateArgs(additionalArgs?: string) {
   return args.length > 0 ? `-${args.join("")}` : "";
 }
 
-export async function changeIsManuallyDecafed(operation:string) {
+export async function changeScheduleState(operation:string) {
   const currentDate = new Date();
   const currentDayString = numberToDayString(currentDate.getDay()).toLowerCase();
   let schedule: Schedule = JSON.parse((await LocalStorage.getItem(currentDayString)) || '{}');
@@ -88,10 +88,6 @@ export async function changeIsManuallyDecafed(operation:string) {
 
     default : break
   }
-}
-
-export function calculateDurationInSeconds(startHour: number, startMinute: number, endHour: number, endMinute: number): number {
-  return (endHour - startHour) * 3600 + (endMinute - startMinute) * 60;
 }
 
 export function numberToDayString(dayIndex: number): string {

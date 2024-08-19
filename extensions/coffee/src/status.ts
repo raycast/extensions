@@ -1,5 +1,5 @@
 import { LocalStorage, LaunchProps, updateCommandMetadata } from "@raycast/api";
-import { Schedule, startCaffeinate, calculateDurationInSeconds, numberToDayString } from "./utils";
+import { Schedule, startCaffeinate, numberToDayString } from "./utils";
 import { execSync } from "node:child_process";
 
 function isCaffeinateRunning(): boolean {
@@ -10,9 +10,6 @@ function isCaffeinateRunning(): boolean {
     return false;
   }
 }
-
-
-// TODO(Aditi): Figure out why checkpoint 2 and 3 are not being printed, that is why is the code not working?
 
 async function handleScheduledCaffeinate(schedule: Schedule, currentDate: Date, currentDayString:string): Promise<boolean> {
   if (!schedule || Object.keys(schedule).length === 0) {
@@ -36,7 +33,7 @@ async function handleScheduledCaffeinate(schedule: Schedule, currentDate: Date, 
     }
 
     if (schedule.IsRunning === false) {
-      const duration = calculateDurationInSeconds(startHour, startMinute, endHour, endMinute);
+      const duration = (endHour - startHour) * 3600 + (endMinute - startMinute) * 60;
       await startCaffeinate(
         { menubar: true, status: true },
         `Scheduled caffeination until ${schedule.to}`,
@@ -51,8 +48,8 @@ async function handleScheduledCaffeinate(schedule: Schedule, currentDate: Date, 
   return true;
 }
 
+// Function to check and handle schedule
 export async function checkSchedule(){
-  console.log("checkpoint 1");
   const currentDate = new Date();
   const currentDayString = numberToDayString(currentDate.getDay()).toLowerCase();
   const schedule: Schedule = JSON.parse((await LocalStorage.getItem(currentDayString)) || '{}');
@@ -66,9 +63,16 @@ export async function checkSchedule(){
 }
 
 export default async function Command(props: LaunchProps) {
-  const isCaffeinated: boolean = props.launchContext?.caffeinated ?? isCaffeinateRunning();
-  let subtitle = isCaffeinated? "✔ Caffeinated":"✖ Decaffeinated";
-  subtitle = await checkSchedule() ? "✔ Caffeinated" : "✖ Decaffeinated";
+  const isCaffeinated = isCaffeinateRunning();
+  const isScheduled = await checkSchedule();
+
+  let subtitle = "✖ Decaffeinated";
+
+  if (isCaffeinated) {
+    subtitle = "✔ Caffeinated";
+  } else if (isScheduled) {
+    subtitle = "✔ Caffeinated";
+  }
 
   updateCommandMetadata({ subtitle });
 }

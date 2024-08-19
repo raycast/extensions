@@ -1,6 +1,6 @@
-import { startCaffeinate, changeIsManuallyDecafed } from "./utils";
+import { startCaffeinate, changeScheduleState } from "./utils";
 
 export default async () => {
-  changeIsManuallyDecafed("caffeinate");
+  changeScheduleState("caffeinate");
   await startCaffeinate({ menubar: true, status: true }, "Your Mac is now caffeinated");
 };
