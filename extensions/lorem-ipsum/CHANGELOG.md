@@ -1,6 +1,6 @@
 # Lorem Ipsum Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-08-19
 
 - Adds feature to paste to active app and then copy to clipboard.
 
