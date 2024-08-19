@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "calist",
+  "name": "cron",
   "title": "Calist",
   "description": "Calist a calendar extension, companion for calist.io",
   "icon": "calist.png",
