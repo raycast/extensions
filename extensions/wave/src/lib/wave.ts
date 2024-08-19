@@ -1,34 +1,42 @@
 import { useFetch } from "@raycast/utils";
 import { Business, Invoice } from "./types";
-import { API_HEADERS, API_URL } from "./config";
+import { API_URL } from "./config";
 
-type Result<T> = {
-    errors: Array<{
+type Result<T> =
+  | {
+      errors: Array<{
         extensions: {
-            id: string;
-            code: string;
-        }
+          id: string;
+          code: string;
+        };
         message: string;
         locations: Array<{
-            line: number;
-            column: number;
-        }>
+          line: number;
+          column: number;
+        }>;
         path: string[];
-    }>;
-    data?: null | T;
-} | {
-    data: T;
-}
+      }>;
+      data?: null | T;
+    }
+  | {
+      data: T;
+    };
 
 type Edges<T> = {
-    edges: Array<{
-        node: T;
-    }>
-}
-export const useGetBusinesses = () => useFetch(API_URL, {
+  edges: Array<{
+    node: T;
+  }>;
+};
+
+export const useGetBusinesses = (token?: string) =>
+  useFetch(API_URL, {
     method: "POST",
-    headers: API_HEADERS,
-    body: JSON.stringify({ query: `query {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `query {
   businesses {
     edges {
       node {
@@ -43,19 +51,26 @@ export const useGetBusinesses = () => useFetch(API_URL, {
     }
   }
 }
-` }),
+`,
+    }),
+    execute: Boolean(token),
     mapResult(result: Result<{ businesses: Edges<Business> }>) {
-        if ("errors" in result) throw new Error(result.errors[0].message);
-        return {
-            data: result.data.businesses.edges.map(edge => edge.node)
-        }
+      if ("errors" in result) throw new Error(result.errors[0].message);
+      return {
+        data: result.data.businesses.edges.map((edge) => edge.node),
+      };
     },
-    initialData: []
-})
-export const useGetBusinessInvoices = (businessId: string) => useFetch(API_URL, {
+    initialData: [],
+  });
+export const useGetBusinessInvoices = (businessId: string, token?: string) =>
+  useFetch(API_URL, {
     method: "POST",
-    headers: API_HEADERS,
-    body: JSON.stringify({ query: `query($businessId: ID!) {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `query($businessId: ID!) {
   business(id: $businessId) {
     id
     invoices {
@@ -134,14 +149,17 @@ export const useGetBusinessInvoices = (businessId: string) => useFetch(API_URL, 
     }
   }
 }
-`, variables: {
-  businessId
-}}),
+`,
+      variables: {
+        businessId,
+      },
+    }),
+    execute: Boolean(token),
     mapResult(result: Result<{ business: { invoices: Edges<Invoice> } }>) {
-        if ("errors" in result) throw new Error(result.errors[0].message);
-        return {
-            data: result.data.business.invoices.edges.map(edge => edge.node)
-        }
+      if ("errors" in result) throw new Error(result.errors[0].message);
+      return {
+        data: result.data.business.invoices.edges.map((edge) => edge.node),
+      };
     },
-    initialData: []
-})
+    initialData: [],
+  });

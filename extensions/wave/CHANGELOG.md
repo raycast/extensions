@@ -1,3 +1,3 @@
 # Wave Changelog
 
-## [Initial Version] - 2024-07-31
+## [Initial Version] - {PR_MERGE_DATE}
