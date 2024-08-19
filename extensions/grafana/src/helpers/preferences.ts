@@ -3,6 +3,8 @@ import { getPreferenceValues } from "@raycast/api";
 export const preferences: Preferences = getPreferenceValues();
 
 export interface Preferences {
-  apikey: string;
+  // apiKey is the same as a service account token
+  // It is not renamed to `serviceAccountToken` to avoid breaking users' existing configurations
+  apiKey: string;
   rootApiUrl: string;
 }
