@@ -2,16 +2,20 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import Bonjour, { Service } from "bonjour-service";
 import { useState } from "react";
 
-const bonjour = new Bonjour();
-const services: { [key: string]: Service } = {};
+let services: { [key: string]: Service };
+new Bonjour().find({ type: "http" }, (service) => {
+  services = {
+    ...services,
+    [service.name]: service,
+  };
+});
 
 export default function Command() {
   const [items, setItems] = useState<{ [key: string]: Service }>();
 
-  bonjour.find({ type: "http" }, (service) => {
-    services[service.name] = service;
+  setInterval(() => {
     setItems(services);
-  });
+  }, 100);
 
   return (
     <List isLoading={!items} isShowingDetail={true}>
