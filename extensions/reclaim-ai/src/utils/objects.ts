@@ -18,9 +18,10 @@ export function normalize<T, V extends string | number>(
   arr: readonly T[],
   idKeyOrFindId: KeysByValue<T, V> | ((item: T) => V)
 ): Record<string, T> {
-  const findId = typeof idKeyOrFindId === "function" ? idKeyOrFindId : (item) => item[idKeyOrFindId];
+  const findId: (item: T) => V =
+    typeof idKeyOrFindId === "function" ? idKeyOrFindId : (item) => item[idKeyOrFindId] as V;
   return arr.reduce((acc, obj) => {
     acc[findId(obj)] = obj;
     return acc;
-  }, {} as Record<string, T>);
+  }, {} as Record<V, T>);
 }
