@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { LocalStorage, showToast, Toast, Action, ActionPanel, Icon, List } from "@raycast/api";
+import { LocalStorage, Color, showToast, Toast, Action, ActionPanel, Icon, List, Alert, confirmAlert } from "@raycast/api";
 import { useLoadStoredSchedules } from "./fetchStoredSchedule";
 import { ListActionPanel } from "./listActionPanel";
 import { Schedule, changeScheduleState, stopCaffeinate, startCaffeinate } from "./utils";
@@ -36,13 +36,32 @@ export default function Command() {
   };
 
   const handleDeleteSchedule = async (day: string) => {
-    try {
-      await LocalStorage.removeItem(day);
-      await showToast(Toast.Style.Success, "Schedule deleted.");
-      setLastUpdated(Date.now());
-    } catch (error) {
-      console.error("Failed to delete schedule:", error);
-      await showToast(Toast.Style.Failure, "Failed to delete schedule.");
+    const deleteConfirmation = await confirmAlert({
+      title: "Delete schedule",
+      message: "Are you sure you wish to delete this schedule?",
+      primaryAction: {
+        title: "Yes",
+        style: Alert.ActionStyle.Destructive,
+      },
+      dismissAction: {
+        title: "No",
+        style: Alert.ActionStyle.Cancel,
+      },
+      icon: {
+        source: Icon.Trash,
+        tintColor: Color.Red,
+      },
+    });
+
+    if (deleteConfirmation){
+      try {
+        await LocalStorage.removeItem(day);
+        await showToast(Toast.Style.Success, "Schedule deleted.");
+        setLastUpdated(Date.now());
+      } catch (error) {
+        console.error("Failed to delete schedule:", error);
+        await showToast(Toast.Style.Failure, "Failed to delete schedule.");
+      }
     }
   };
 
