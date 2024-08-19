@@ -380,7 +380,7 @@ export default function Command() {
                   shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                   onAction={() => toggleResultPinnedStatus(result, resultIndex)}
                 />
-                {resultIsPinned(result) && (
+                {props.title === "Pinned" && (
                   <>
                     {resultIndex > 0 && (
                       <Action
