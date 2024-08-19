@@ -1,7 +1,6 @@
 import { LocalStorage, LaunchProps, updateCommandMetadata } from "@raycast/api";
-import { Schedule, startCaffeinate, calculateDurationInSeconds, dayStringToNumber, numberToDayString } from "./utils";
+import { Schedule, startCaffeinate, calculateDurationInSeconds, numberToDayString } from "./utils";
 import { execSync } from "node:child_process";
-import { TLSSocket } from "node:tls";
 
 function isCaffeinateRunning(): boolean {
   try {
@@ -17,7 +16,6 @@ function isCaffeinateRunning(): boolean {
 
 async function handleScheduledCaffeinate(schedule: Schedule, currentDate: Date, currentDayString:string): Promise<boolean> {
   if (!schedule || Object.keys(schedule).length === 0) {
-    console.log("checkpoint a");
     return false;
   }
 
@@ -27,21 +25,41 @@ async function handleScheduledCaffeinate(schedule: Schedule, currentDate: Date, 
   const currentMinute = currentDate.getMinutes();
 
   if (currentDayString === schedule.day) {
-    console.log("checkpoint 2");
     const isWithinSchedule =
       (currentHour > startHour || (currentHour === startHour && currentMinute >= startMinute)) &&
       (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute));
 
-    if (isWithinSchedule) {
-      console.log("checkpoint 3");
+    if(isWithinSchedule === false){
+      schedule.IsRunning = false;
+      await LocalStorage.setItem(schedule.day, JSON.stringify(schedule)); 
+      return false;
+    }
+
+    if (schedule.IsRunning === false) {
       const duration = calculateDurationInSeconds(startHour, startMinute, endHour, endMinute);
       await startCaffeinate(
         { menubar: true, status: true },
         `Scheduled caffeination until ${schedule.to}`,
         `-t ${duration}`
       );
+      schedule.IsRunning = true;
+      await LocalStorage.setItem(schedule.day, JSON.stringify(schedule)); 
       return true;
-    }
+    } 
+  }
+
+  return true;
+}
+
+export async function checkSchedule(){
+  console.log("checkpoint 1");
+  const currentDate = new Date();
+  const currentDayString = numberToDayString(currentDate.getDay()).toLowerCase();
+  const schedule: Schedule = JSON.parse((await LocalStorage.getItem(currentDayString)) || '{}');
+
+  if (!schedule.IsManuallyDecafed) {
+    const isScheduled = await handleScheduledCaffeinate(schedule, currentDate, currentDayString);
+    return isScheduled;
   }
 
   return false;
@@ -49,23 +67,8 @@ async function handleScheduledCaffeinate(schedule: Schedule, currentDate: Date, 
 
 export default async function Command(props: LaunchProps) {
   const isCaffeinated: boolean = props.launchContext?.caffeinated ?? isCaffeinateRunning();
-  let subtitle = "✖ Decaffeinated";
-
-  if (isCaffeinated) {
-    subtitle = "✔ Caffeinated";
-  } else {
-    const currentDate = new Date();
-    const currentDayString = numberToDayString(currentDate.getDay()).toLowerCase();
-    const schedule: Schedule = JSON.parse((await LocalStorage.getItem(currentDayString)) || '{}');
-
-    if (!schedule.IsManuallyDecafed) {
-      console.log("checkpoint 1");
-      const isScheduled = await handleScheduledCaffeinate(schedule, currentDate, currentDayString);
-      if (isScheduled) {
-        subtitle = "✔ Caffeinated";
-      }
-    }
-  }
+  let subtitle = isCaffeinated? "✔ Caffeinated":"✖ Decaffeinated";
+  subtitle = await checkSchedule() ? "✔ Caffeinated" : "✖ Decaffeinated";
 
   updateCommandMetadata({ subtitle });
 }

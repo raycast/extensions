@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { LocalStorage, showToast, Toast, Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useLoadStoredSchedules } from "./fetchStoredSchedule";
 import { ListActionPanel } from "./listActionPanel";
-import { Schedule } from "./utils";
+import { Schedule, numberToDayString, changeIsManuallyDecafed, stopCaffeinate, startCaffeinate } from "./utils";
 import { extractSchedule } from "./extractSchedule";
 
 export default function Command() {
@@ -21,7 +21,7 @@ export default function Command() {
       return;
     }
       const { days, from, to } = parsedSchedule;
-      const newSchedules = days.map(day => ({ day, from, to, IsManuallyDecafed: false }));
+      const newSchedules = days.map(day => ({ day, from, to, IsManuallyDecafed: false, IsRunning: false }));
 
       for (const schedule of newSchedules) {
         await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
@@ -45,6 +45,16 @@ export default function Command() {
       await showToast(Toast.Style.Failure, "Failed to delete schedule.");
     }
   };
+
+  const handlePauseSchedule = async (day:string) => {
+    changeIsManuallyDecafed("decaffeinate");
+    await stopCaffeinate({ menubar: true, status: true }, `Schedule for ${day} is now paused`);
+  }
+
+  const handleResumeSchedule = async (day:string) => {
+    changeIsManuallyDecafed("caffeinate");
+    await startCaffeinate({ menubar: true, status: true }, `Schedule for ${day} is now resumed`);
+  }
 
   return (
     <List
@@ -80,6 +90,9 @@ export default function Command() {
                     schedule={schedule}
                     onSetScheduleAction={handleSetSchedule}
                     onDeleteScheduleAction={handleDeleteSchedule}
+                    onPauseScheduleAction={handlePauseSchedule}
+                    onResumeScheduleAction={handleResumeSchedule}
+
                   />
                 }
               />

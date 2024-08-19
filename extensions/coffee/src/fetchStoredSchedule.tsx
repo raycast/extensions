@@ -2,6 +2,16 @@ import { LocalStorage } from "@raycast/api";
 import { Schedule } from "./utils";
 import { useEffect } from "react";
 
+const dayOrder: { [key: string]: number } = {
+  "sunday": 0,
+  "monday": 1,
+  "tuesday": 2,
+  "wednesday": 3,
+  "thursday": 4,
+  "friday": 5,
+  "saturday": 6,
+};
+
 export function useLoadStoredSchedules(
   updateSchedules: (schedules: Schedule[]) => void,
   setIsLoading: (isLoading: boolean) => void,
@@ -17,6 +27,8 @@ export function useLoadStoredSchedules(
       );
 
       if (schedules.length > 0) {
+        schedules.sort((a, b) => (dayOrder[a.day] ?? -1) - (dayOrder[b.day] ?? -1));
+
         updateSchedules(schedules);
       }
 
