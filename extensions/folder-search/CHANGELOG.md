@@ -1,6 +1,6 @@
 # Folder Search Changelog
 
-## [New Features] - 
+## [New Features] - {PR_MERGE_DATE}
 
 - **added** Pins can now be ordered by `Move Pin Up` and `Move Pin Down` actions
 
