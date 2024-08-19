@@ -110,7 +110,6 @@ export default function Command() {
           placeholder={`Enter datapoint for ${goalSlug}`}
           {...itemProps.dataPoint}
         />
-
         <Form.TextField id="comment" title="Comment" defaultValue="Sent from Raycast 🐝" />
       </Form>
     );
@@ -125,10 +124,9 @@ export default function Command() {
           const diff = moment.unix(goal.losedate).diff(new Date());
           const timeDiffDuration = moment.duration(diff);
           const dayDifference = moment.unix(goal.losedate).diff(new Date(), "days");
-          const goalRate = goal.rate % 1 === 0 ? goal.rate : goal.rate.toFixed(2);
+          const goalRate = goal.baremin;
 
           let goalIcon;
-
           let dueText = `${goalRate} ${goal.gunits} due in `;
           if (dayDifference > 1) {
             dueText += `${dayDifference} days`;
@@ -138,7 +136,6 @@ export default function Command() {
 
           if (dayDifference < 1) {
             goalIcon = "🔴";
-            // When dayDifference is less than one, express due time in hours and/or minutes
             const hours = timeDiffDuration.hours();
             const minutes = timeDiffDuration.minutes();
             if (hours > 0) {

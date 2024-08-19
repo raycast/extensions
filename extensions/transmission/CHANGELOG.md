@@ -1,5 +1,9 @@
 # Transmission Changelog
 
+## [Usability improvements] - 2024-05-22
+
+- Add a dedicated default download directory 
+
 ## [ETA] - 2024-04-24
 
 - Add an ETA to the torrent details

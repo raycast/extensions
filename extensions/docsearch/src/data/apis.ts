@@ -9,7 +9,7 @@ export enum DocID {
   Remix, Slidev, Taro, Supabase,
   TailwindCSS, Tauri, Unidata, Vite,
   Vitest, Vue_Router, Vue, VueUse,
-  Vuepress, ElementPlus,
+  Vuepress, ElementPlus, Vuetify,
 }
 
 type Base = {
@@ -773,6 +773,16 @@ export const data: Data = {
       indexName: "vueuse",
       type: "algolia",
       homepage: "https://vueuse.org/",
+    },
+  },
+  [DocID.Vuetify]: {
+    "en-US": {
+      icon: "../assets/logo/vuetify.png",
+      apiKey: "ffa344297924c76b0f4155384aff7ef2",
+      appId: "NHT6C0IV19",
+      indexName: "vuetifyjs-v3",
+      type: "algolia",
+      homepage: "https://vuetifyjs.com/",
     },
   },
   [DocID.Vuepress]: {

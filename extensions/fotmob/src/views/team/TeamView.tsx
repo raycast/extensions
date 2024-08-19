@@ -1,7 +1,7 @@
 import { Action, ActionPanel, List } from "@raycast/api";
-import { useTeamFixture } from "../../services/useTeamFixture";
+import { useTeamFixture } from "@/hooks/useTeamFixture";
+import { buildMatchDetailUrl } from "@/utils/url-builder";
 import MatchItem from "../common/MatchItem";
-import { buildMatchDetailUrl } from "../../utils/url-builder";
 
 export default function TeamView({ id }: { id: string }) {
   const { data, isLoading, error } = useTeamFixture(id);

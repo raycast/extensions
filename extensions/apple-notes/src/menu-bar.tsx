@@ -1,7 +1,7 @@
 import { Icon, MenuBarExtra, getPreferenceValues, open, openCommandPreferences } from "@raycast/api";
 
 import { createNote, openNoteSeparately } from "./api";
-import { fileIcon } from "./helpers";
+import { fileIcon, getOpenNoteURL } from "./helpers";
 import { NoteItem, useNotes } from "./useNotes";
 
 export default function Command() {
@@ -61,9 +61,7 @@ function NoteMenuBarItem({ note, openSeparately }: NoteMenuBarItemProps) {
       key={note.id}
       title={title}
       icon="note"
-      onAction={() =>
-        openSeparately ? openNoteSeparately(note.id) : open(`applenotes://showNote?identifier=${note.UUID}`)
-      }
+      onAction={() => (openSeparately ? openNoteSeparately(note.id) : open(getOpenNoteURL(note.UUID)))}
     />
   );
 }

@@ -44,7 +44,6 @@ export function Day({ type, day, hasEvents, name }: DayProps) {
                 }
               : undefined,
         },
-        // tooltip: type !== "week" && type !== "empty" ? `${getDayName(day)} ${day}, ${currentMonth} ${currentYear}` : "",
         tooltip:
           type === "name" && day === undefined
             ? name !== undefined

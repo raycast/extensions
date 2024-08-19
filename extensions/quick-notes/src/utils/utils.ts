@@ -1,8 +1,10 @@
 import { environment, showToast, trash } from "@raycast/api";
-import { Note, Tag } from "../services/atoms";
+import { Note, Sort, Tag } from "../services/atoms";
 import slugify from "slugify";
 import fs from "fs";
 import { TODO_FILE_PATH } from "../services/config";
+import { marked } from "marked";
+import striptags from "striptags";
 
 export const getInitialValuesFromFile = (filepath: string): [] => {
   try {
@@ -17,6 +19,19 @@ export const getInitialValuesFromFile = (filepath: string): [] => {
   } catch (error) {
     fs.mkdirSync(environment.supportPath, { recursive: true });
     return [];
+  }
+};
+
+export const getSortHumanReadable = (sort: Sort): string => {
+  switch (sort) {
+    case "created":
+      return "Created At";
+    case "updated":
+      return "Updated At";
+    case "alphabetical":
+      return "Alphabetical";
+    case "tags":
+      return "Tags";
   }
 };
 
@@ -132,6 +147,29 @@ export const getDeletedTags = (oldTags: Tag[], newTags: Tag[]): Tag[] => {
   return oldTags.filter((tag) => !newTags.includes(tag));
 };
 
+export const setNoteSummary = (summary: string, createdAt?: Date) => {
+  if (!createdAt) {
+    return;
+  }
+  const notes = getInitialValuesFromFile(TODO_FILE_PATH) as Note[];
+  const note = notes.find((n) => n.createdAt === createdAt);
+  if (!note) {
+    return;
+  }
+
+  const updatedNotes = notes.map((n) => (n.createdAt === createdAt ? { ...n, summary } : n));
+  fs.writeFileSync(TODO_FILE_PATH, JSON.stringify(updatedNotes, null, 2));
+};
+
+export const clearNoteSummary = (createdAt?: Date) => {
+  if (!createdAt) {
+    return;
+  }
+  const notes = getInitialValuesFromFile(TODO_FILE_PATH) as Note[];
+  const updatedNotes = notes.map((n) => (n.createdAt === createdAt ? { ...n, summary: undefined } : n));
+  fs.writeFileSync(TODO_FILE_PATH, JSON.stringify(updatedNotes, null, 2));
+};
+
 export const colors = [
   {
     name: "red",
@@ -197,4 +235,20 @@ export const colors = [
 
 export const getRandomColor = () => {
   return colors[Math.floor(Math.random() * colors.length)];
+};
+
+export const getTintColor = (colorName?: string) => {
+  if (!colorName) return undefined;
+  return colors.find((c) => c.name === colorName)?.tintColor;
+};
+
+export const countWords = (markdownString: string): number => {
+  const htmlString = marked.parse(markdownString, { async: false });
+  const plainText = striptags(htmlString as string);
+  const words = plainText
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ")
+    .filter((word) => word !== "");
+  return words.length;
 };

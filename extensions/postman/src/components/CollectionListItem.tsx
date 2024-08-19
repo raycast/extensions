@@ -2,10 +2,12 @@ import {
   Action,
   ActionPanel,
   Color,
+  Detail,
   Icon,
   List,
   showToast,
   Toast,
+  useNavigation,
 } from "@raycast/api"
 import { useMemo } from "react"
 import { RequestDetailsType } from "../types"
@@ -13,6 +15,7 @@ import { ResponseDetails } from "../components/ResponseDetails"
 import { parseRequest } from "../utils"
 import { CollectionItemDetails } from "./CollectionItemDetails"
 import { RequestBuilder } from "./RequestBuilder"
+import { CollectionList } from "./CollectionList"
 
 type CollectionListItemProps = {
   requestDetails: RequestDetailsType
@@ -23,6 +26,46 @@ export const CollectionListItem: React.FC<CollectionListItemProps> = ({
   requestDetails,
   isLoading,
 }) => {
+  const { push } = useNavigation()
+
+  if ("item" in requestDetails) {
+    return (
+      <List.Item
+        key={requestDetails.id}
+        title={requestDetails.name}
+        icon={{ source: Icon.Folder, tintColor: Color.Orange }}
+        detail={
+          <List.Item.Detail
+            metadata={
+              <Detail.Metadata>
+                <Detail.Metadata.Label
+                  title="Folder Name"
+                  text={requestDetails.name}
+                />
+                <Detail.Metadata.Separator />
+              </Detail.Metadata>
+            }
+          />
+        }
+        actions={
+          <ActionPanel>
+            <Action
+              title="Open Folder"
+              icon={Icon.List}
+              onAction={() =>
+                push(
+                  <CollectionList
+                    item={requestDetails["item"] as RequestDetailsType[]}
+                  />
+                )
+              }
+            />
+          </ActionPanel>
+        }
+      />
+    )
+  }
+
   const urlInfo = useMemo(
     () => parseRequest(requestDetails.request),
     [requestDetails]

@@ -1,5 +1,10 @@
 # Swift-evolution Changelog
 
+## [Update to new evolution API] - 2024-05-10
+
+- Use the new evolution api for swift
+- Add filter by status ⌘+P
+
 ## [Minor fixes] - 2024-01-08
 
 - Migrated to newest Raycast API version.

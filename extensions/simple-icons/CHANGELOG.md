@@ -1,5 +1,40 @@
 # Brand Icons Changelog
 
+## [Enhancements] - 2024-08-05
+
+- Apply brand color to default copying/opening SVG
+- Add preferences for configuring default copying/opening behaviors
+- Remove a unused placeholder field from preferences
+
+## [Maintenance] - 2024-07-31
+
+- Bump dependencies
+- Use `fast-fuzzy` for searching
+- Add support for searching aliases
+- Limit memory usage with array slices
+- Fix API documentation in readme
+- Update screenshots
+
+## [Enhancements] - 2024-06-07
+
+- Optimize load time
+- Add new version prompt
+- Bump dependencies
+
+## [New Feature] - 2024-05-24
+
+- Add offline support
+- Bump [`raycast-cross-extension`](https://github.com/LitoMore/raycast-cross-extension-conventions)
+
+## [Updates] - 2024-05-16
+
+- Implement Raycast Cross Extension Conventions
+
+## [Updates] - 2024-04-30
+
+- Expose search function through `launchCommand`
+- Remove unused cache header
+
 ## [Updates] - 2024-04-15
 
 - Rename extension name to Brand Icons

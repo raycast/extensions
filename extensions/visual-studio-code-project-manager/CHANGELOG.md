@@ -1,5 +1,9 @@
 # Visual Studio Code - Project Manager Changelog
 
+## [Update] - 2024-07-05
+
+- The extension now uses frecency sorting for the projects list to show the most recently or frequently used projects first in the search results. When searching for a project, exact matches appear earlier in the list than fuzzy-matched results, while respecting the frequent/recent sorting.
+
 ## [Fixes] - 2024-04-25
 
 - Fixed a problem with invoking `code` when not present in the Path environment known to Node

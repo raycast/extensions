@@ -56,13 +56,25 @@ export default function Command() {
 
   if (recentSearches.length === 0 && searchQuery === "") {
     return (
-      <List searchBarPlaceholder="Search Mercado Libre" onSearchTextChange={setSearchQuery} throttle>
+      <List
+        isLoading={isLoading}
+        searchBarPlaceholder="Search Mercado Libre"
+        searchText={searchQuery}
+        onSearchTextChange={setSearchQuery}
+        throttle
+      >
         <ListEmptyView />
       </List>
     );
   } else if (recentSearches.length > 0 && searchQuery === "") {
     return (
-      <List searchBarPlaceholder="Search Mercado Libre" onSearchTextChange={setSearchQuery} throttle>
+      <List
+        isLoading={isLoading}
+        searchBarPlaceholder="Search Mercado Libre"
+        searchText={searchQuery}
+        onSearchTextChange={setSearchQuery}
+        throttle
+      >
         <List.Section title="Recent Searches">
           {recentSearches.map((query, index) => (
             <RecentSearchListItem
@@ -81,31 +93,39 @@ export default function Command() {
     return viewLayout === "grid" ? (
       <Grid
         isLoading={isLoading}
-        pagination={pagination}
         columns={Number(gridItemSize)}
         searchBarPlaceholder="Search Mercado Libre"
+        searchText={searchQuery}
         onSearchTextChange={setSearchQuery}
         throttle
-        searchText={searchQuery}
+        pagination={pagination}
       >
         <Grid.Section title="Results" subtitle={`${data?.length} ${data?.length === 1 ? "item" : "items"}`}>
-          {data?.map((item) => (
-            <ResultGridItem key={item.id} item={item} handleSearchOpen={() => handleSearchOpen(searchQuery)} />
+          {data?.map((item, index) => (
+            <ResultGridItem
+              key={`${item.id}-${index}`}
+              item={item}
+              handleSearchOpen={() => handleSearchOpen(searchQuery)}
+            />
           ))}
         </Grid.Section>
       </Grid>
     ) : (
       <List
         isLoading={isLoading}
-        pagination={pagination}
         searchBarPlaceholder="Search Mercado Libre"
+        searchText={searchQuery}
         onSearchTextChange={setSearchQuery}
         throttle
-        searchText={searchQuery}
+        pagination={pagination}
       >
         <List.Section title="Results" subtitle={`${data?.length} ${data?.length === 1 ? "item" : "items"}`}>
-          {data?.map((item) => (
-            <ResultListItem key={item.id} item={item} handleSearchOpen={() => handleSearchOpen(searchQuery)} />
+          {data?.map((item, index) => (
+            <ResultListItem
+              key={`${item.id}-${index}`}
+              item={item}
+              handleSearchOpen={() => handleSearchOpen(searchQuery)}
+            />
           ))}
         </List.Section>
       </List>

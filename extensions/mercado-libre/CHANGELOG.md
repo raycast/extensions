@@ -1,5 +1,10 @@
 # Mercado Libre Changelog
 
+## [Fixes and Enhancements] - 2024-05-07
+
+- Improved the quality of thumbnails.
+- Fixed an issue that caused duplicate search results when navigating between pages.
+
 ## [Enhancements] - 2024-03-18
 
 - Update shortcuts for remove/clear actions to conform with Raycast's `⌃X` and `⌃⇧X` convention for such operations.

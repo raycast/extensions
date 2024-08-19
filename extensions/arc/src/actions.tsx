@@ -13,7 +13,7 @@ import {
   selectTab,
 } from "./arc";
 import { Space, Tab } from "./types";
-import { getSpaceTitle, showFailureToast, isTab } from "./utils";
+import { getSpaceTitle, isTab, showFailureToast } from "./utils";
 
 function OpenInArcAction(props: { tabOrUrl: Tab | string }) {
   async function handleAction() {

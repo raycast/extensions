@@ -31,10 +31,10 @@ jobs:
   extensions_build_publish:
     if: github.repository == 'raycast/extensions'
     name: "${{ github.event_name == 'push' && 'Publish' || (github.event_name == 'pull_request' && 'Check' || github.event_name == 'workflow_dispatch' && inputs.command || github.event_name ) }}"
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - name: Setup Xcode
-        uses: raycast/github-actions/setup-xcode@xcode-15.2.x
+        uses: raycast/github-actions/setup-xcode@xcode-15.4.x
       - uses: actions/checkout@v4
         with:
           path: github_utils
@@ -67,6 +67,7 @@ jobs:
           cli_version: "${{ github.event.inputs.cli_version }}"
           allow_owners_only_for_extensions: "${{ steps.allow_owners_only_for_extensions.outputs.value }}"
       - name: Post Store URLs
+        if: github.event_name == 'push'
         uses: raycast/github-actions/git-post-store-urls-to-pr@v1.16.0
         with:
           store_urls: ${{ steps.ray_cli.outputs.store_urls }}

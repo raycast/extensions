@@ -1,11 +1,12 @@
-import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
-import { getErrorMessage, getFriendlyName } from "@lib/utils";
-import { useHAStates } from "@components/hooks";
-import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "@components/menu";
 import { CoverMenubarItem } from "@components/cover/menu";
+import { useHAStates } from "@components/hooks";
+import { LaunchCommandMenubarItem } from "@components/menu";
 import { filterViaPreferencePatterns } from "@components/state/utils";
+import { getErrorMessage, getFriendlyName } from "@lib/utils";
+import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 
-export default function CoversMenuCommand(): JSX.Element {
+export default function CoversMenuCommand() {
   const { states, error, isLoading } = useHAStates();
   const entities = filterViaPreferencePatterns(states, ["cover.*"])?.sort((a, b) =>
     getFriendlyName(a).localeCompare(getFriendlyName(b)),
@@ -25,15 +26,17 @@ export default function CoversMenuCommand(): JSX.Element {
       {header && <MenuBarExtra.Item title={header} />}
       <LaunchCommandMenubarItem
         title="Open All Covers Command"
-        name="covers"
-        type={LaunchType.UserInitiated}
+        command={{
+          name: "covers",
+          type: LaunchType.UserInitiated,
+        }}
         icon={Icon.Terminal}
       />
       <MenuBarExtra.Section title="Covers">
         {entities?.map((e) => <CoverMenubarItem key={e.entity_id} state={e} />)}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
-        <MenuBarItemConfigureCommand />
+        <RUIMenuBarExtra.ConfigureCommand />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

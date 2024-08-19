@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 
 import { Details } from "@/components/Details";
 import { useSearch } from "@/hooks/use-search";
@@ -45,7 +45,7 @@ const locales = [
 ];
 
 export default function MDNSearchResultsList() {
-  const [query, setQuery] = useState<null | string>(null);
+  const [query, setQuery] = useState<string>("");
   const [locale, setLocale] = useState<string>("en-us");
   const { data, isLoading } = useSearch(query, locale);
 
@@ -53,16 +53,10 @@ export default function MDNSearchResultsList() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Type to search MDN..."
-      onSearchTextChange={(text) => setQuery(text)}
+      onSearchTextChange={setQuery}
       throttle
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Select Locale"
-          storeValue={true}
-          onChange={(newValue) => {
-            setLocale(newValue);
-          }}
-        >
+        <List.Dropdown tooltip="Select Locale" storeValue={true} onChange={setLocale}>
           {locales.map((loc) => (
             <List.Dropdown.Item key={loc.value} title={loc.title} value={loc.value} keywords={[loc.title, loc.value]} />
           ))}
@@ -73,7 +67,7 @@ export default function MDNSearchResultsList() {
         <List.Item
           key={idx}
           title={result.title}
-          icon="icon.png"
+          icon={{ source: "icon.png", mask: Image.Mask.RoundedRectangle }}
           subtitle={result.summary}
           actions={
             <ActionPanel>

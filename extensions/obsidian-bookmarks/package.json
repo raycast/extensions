@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "obsidian-bookmarks",
   "title": "Obsidian Bookmarks",
-  "description": "Manage your bookmarked links with Obsidian. Save, search, and access your bookmarks. Supports Chrome, Safari and Arc.",
+  "description": "Manage your bookmarked links with Obsidian. Save, search, and access your bookmarks. Supports Safari, Arc and other Chromium-based browsers",
   "icon": "obsidian-bookmarks.png",
   "author": "dru89",
   "contributors": [
-    "moeyua"
+    "moeyua",
+    "iwex"
   ],
   "categories": [
     "Productivity",

@@ -5,6 +5,9 @@
   "description": "The Pokédex is an invaluable tool to Trainers in the Pokémon world.",
   "icon": "icon.png",
   "author": "anhthang",
+  "contributors": [
+    "miguel-felix1"
+  ],
   "license": "MIT",
   "categories": [
     "Fun"

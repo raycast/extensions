@@ -10,6 +10,11 @@ interface BackupData {
   actions: Action[];
 }
 
+interface AppleScriptError {
+  message: string;
+  stderr: string;
+}
+
 export default class Backup {
   public static async export(): Promise<void> {
     const actions = useActionsState.getState().actions;
@@ -46,7 +51,12 @@ export default class Backup {
         message: "The actions has been exported successfully.",
         style: Toast.Style.Success,
       });
-    } catch (error) {
+    } catch (e) {
+      const error = e as AppleScriptError;
+      if (error.stderr.includes("-128")) {
+        return;
+      }
+
       showToast({
         title: "Error",
         message: "An error occurred while exporting actions.",
@@ -56,43 +66,54 @@ export default class Backup {
   }
 
   public static async import(): Promise<void> {
-    const res = await runAppleScript(
-      `
-      set jsonFile to choose file with prompt "Choose the Alice AI Actions Config to import."
-      set jsonContent to (read jsonFile as «class utf8»)
-    `,
-      {
-        timeout: Infinity32Bit,
-      },
-    );
-
     try {
-      const { name, actions, version } = JSON.parse(res) as BackupData;
+      const res = await runAppleScript(
+        `
+        set jsonFile to choose file with prompt "Choose the Alice AI Actions Config to import."
+        set jsonContent to (read jsonFile as «class utf8»)
+      `,
+        {
+          timeout: Infinity32Bit,
+        },
+      );
 
-      if (name !== "alice-ai-config" && version === undefined) {
-        throw new Error("Invalid backup file.");
+      try {
+        const { name, actions, version } = JSON.parse(res) as BackupData;
+
+        if (name !== "alice-ai-config" && version === undefined) {
+          throw new Error("Invalid backup file.");
+        }
+
+        const actionState = {
+          actions: actions,
+        };
+
+        const migratedActions = useActionsState.persist.getOptions().migrate?.(actionState, version) as typeof actionState;
+        useActionsState.setState(migratedActions);
+
+        showToast({
+          title: "Actions has been imported",
+          message: "The actions has been imported successfully.",
+          style: Toast.Style.Success,
+        });
+      } catch (error) {
+        const e = error as Error;
+
+        showToast({
+          title: "Error",
+          message: e.message || "An error occurred while importing actions.",
+          style: Toast.Style.Failure,
+        });
       }
-
-      const actionState = {
-        actions: actions,
-      };
-
-      const migratedActions = useActionsState.persist.getOptions().migrate?.(actionState, version) as typeof actionState;
-      useActionsState.setState(migratedActions);
-
-      showToast({
-        title: "Actions has been imported",
-        message: "The actions has been imported successfully.",
-        style: Toast.Style.Success,
-      });
-    } catch (error) {
-      const e = error as Error;
-
-      console.error(e);
+    } catch (e) {
+      const error = e as AppleScriptError;
+      if (error.stderr.includes("-128")) {
+        return;
+      }
 
       showToast({
         title: "Error",
-        message: e.message || "An error occurred while importing actions.",
+        message: "An error occurred while importing actions.",
         style: Toast.Style.Failure,
       });
     }

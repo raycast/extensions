@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, Icon, Image } from "@raycast/api";
+import { List, Icon, Image } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   Device,
@@ -9,6 +9,7 @@ import {
   ErrorDetails,
   MULLVAD_DEVICE_TAG,
 } from "./shared";
+import CopyActions from "./components/CopyActions";
 
 export default function DeviceList() {
   const [devices, setDevices] = useState<Device[]>();
@@ -75,13 +76,7 @@ export default function DeviceList() {
                     },
                   ]
             }
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard content={device.ipv4} title="Copy IPv4" />
-                <Action.CopyToClipboard content={device.dns} title="Copy MagicDNS" />
-                <Action.CopyToClipboard content={device.ipv6} title="Copy IPv6" />
-              </ActionPanel>
-            }
+            actions={<CopyActions device={device} />}
           />
         ))
       )}

@@ -30,6 +30,10 @@ const recognizeText = async (isFullScreen = false) => {
       args.push("--ignorelinebreaks");
     }
 
+    if (preference.keepImage) {
+      args.push("--keepImage");
+    }
+
     if (preference.customWordsList) {
       args.push("--customwordslist", preference.customWordsList);
     }

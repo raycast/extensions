@@ -1,10 +1,10 @@
 import { Icon, LaunchProps, List } from "@raycast/api";
+import { useSQL } from "@raycast/utils";
 import { useState } from "react";
-import { historyDatabasePath, getHistoryQuery } from "./sql";
+import { HistoryEntryListItem } from "./list";
+import { getHistoryQuery, historyDatabasePath } from "./sql";
 import { HistoryEntry } from "./types";
 import { VersionCheck } from "./version";
-import { HistoryEntryListItem } from "./list";
-import { useSQL } from "@raycast/utils";
 
 function SearchHistory(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");

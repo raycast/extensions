@@ -79,13 +79,13 @@ export default function PullRequestCommits({ pullRequest }: PullRequestCommitsPr
 
                 <ActionPanel.Section>
                   <Action.CopyToClipboard
-                    content={commit.message}
+                    content={commit.url}
                     title="Copy Commit URL"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
                   />
 
                   <Action.CopyToClipboard
-                    content={commit.message}
+                    content={commit.oid}
                     title="Copy Commit Hash"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                   />

@@ -1,21 +1,24 @@
 import { useEffect, useState } from "react";
+import { setTimeout } from "node:timers/promises";
 import {
   Action,
   ActionPanel,
-  Cache,
   Clipboard,
   Detail,
   Grid,
   Icon,
+  LaunchProps,
   Toast,
   getPreferenceValues,
   showHUD,
   showToast,
 } from "@raycast/api";
+import { Searcher } from "fast-fuzzy";
+import debounce from "lodash/debounce.js";
 import { titleToSlug } from "simple-icons/sdk";
-import { Supports, actions, defaultActionsOrder } from "./actions.js";
-import { loadLatestVersion, loadJson, cleanSavedPaths, initSavePath, getAliases } from "./utils.js";
-import { IconJson, IconData } from "./types.js";
+import { LaunchCommand, Supports, actions, defaultActionsOrder } from "./actions.js";
+import { cacheAssetPack, getAliases, loadCachedJson, useVersion } from "./utils.js";
+import { IconData, LaunchContext } from "./types.js";
 
 const itemDisplayColumns = {
   small: 8,
@@ -23,49 +26,76 @@ const itemDisplayColumns = {
   large: 3,
 } as const;
 
-export default function Command() {
+export default function Command({ launchContext }: LaunchProps<{ launchContext?: LaunchContext }>) {
   const [itemSize, setItemSize] = useState<keyof typeof itemDisplayColumns>("small");
   const [isLoading, setIsLoading] = useState(true);
-  const [version, setVersion] = useState("latest");
   const [icons, setIcons] = useState<IconData[]>([]);
+  const [searchString, setSearchString] = useState("");
+  const version = useVersion({ launchContext });
 
-  const cache = new Cache();
+  const fetchIcons = async (version: string) => {
+    setIsLoading(true);
+    setIcons([]);
 
-  useEffect(() => {
-    (async () => {
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "",
+      message: "Loading Icons",
+    });
+
+    await cacheAssetPack(version).catch(async () => {
       await showToast({
-        style: Toast.Style.Animated,
-        title: "Loading Icons",
+        style: Toast.Style.Failure,
+        title: "",
+        message: "Failed to download icons asset",
       });
+      await setTimeout(1200);
+    });
+    const json = await loadCachedJson(version).catch(() => {
+      return { icons: [] };
+    });
+    const icons = json.icons.map((icon) => ({
+      ...icon,
+      slug: icon.slug || titleToSlug(icon.title),
+    }));
 
-      const version = await loadLatestVersion();
-      const cached = cache.get(`json-${version}`);
-      const json: IconJson = cached ? JSON.parse(cached) : await loadJson(version);
+    setIcons(icons);
+    setIsLoading(false);
 
-      if (!cached) {
-        cleanSavedPaths();
-        cache.clear();
-        cache.set(`json-${version}`, JSON.stringify(json));
-      }
-
-      await initSavePath(version);
-
-      const icons = json.icons.map((icon) => ({
-        ...icon,
-        slug: icon.slug || titleToSlug(icon.title),
-      }));
-
-      setIsLoading(false);
-      setIcons(icons);
-      setVersion(version);
-
+    if (icons.length > 0) {
       await showToast({
         style: Toast.Style.Success,
         title: "",
         message: `${icons.length} icons loaded`,
       });
-    })();
-  }, []);
+    } else {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "",
+        message: "Unable to load icons",
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (version) {
+      fetchIcons(version);
+    }
+  }, [version]);
+
+  const searcher = new Searcher(icons, {
+    keySelector: (icon) =>
+      [
+        icon.title,
+        icon.slug,
+        icon.aliases?.aka,
+        icon.aliases?.dup?.map((duplicate) => duplicate.title),
+        Object.values(icon.aliases?.loc ?? {}),
+      ]
+        .flat()
+        .filter(Boolean) as string[],
+  });
+  const searchResults = searchString ? searcher.search(searchString) : icons;
 
   const { defaultDetailAction = "OpenWith" } = getPreferenceValues<ExtensionPreferences>();
   const DefaultAction = actions[defaultDetailAction];
@@ -78,6 +108,9 @@ export default function Command() {
 
   return (
     <Grid
+      navigationTitle={
+        launchContext?.launchFromExtensionTitle ? `Pick icon for ${launchContext.launchFromExtensionTitle}` : undefined
+      }
       columns={itemDisplayColumns[itemSize]}
       inset={Grid.Inset.Small}
       isLoading={isLoading}
@@ -94,12 +127,13 @@ export default function Command() {
           <Grid.Dropdown.Item title="Large" value="large" />
         </Grid.Dropdown>
       }
+      onSearchTextChange={debounce(setSearchString, 300)}
     >
-      {!isLoading &&
-        icons.map((icon) => {
+      {(!isLoading || !version) &&
+        searchResults.slice(0, 500).map((icon) => {
           const slug = icon.slug || titleToSlug(icon.title);
 
-          const jsdelivrCdnLink = `https://cdn.jsdelivr.net/npm/simple-icons@${version}/icons/${slug}.svg`;
+          const fileLink = `pack/simple-icons-${version}/icons/${slug}.svg`;
           const aliases = getAliases(icon);
 
           return (
@@ -107,7 +141,7 @@ export default function Command() {
               key={slug}
               content={{
                 value: {
-                  source: `https://cdn.jsdelivr.net/npm/simple-icons@${version}/icons/${slug}.svg`,
+                  source: fileLink,
                   tintColor: `#${icon.hex}`,
                 },
                 tooltip: icon.title,
@@ -121,7 +155,7 @@ export default function Command() {
                       title="See Detail"
                       target={
                         <Detail
-                          markdown={`<img src="${jsdelivrCdnLink}?raycast-width=325&raycast-height=325&raycast-tint-color=${icon.hex}" />`}
+                          markdown={`<img src="${fileLink}?raycast-width=325&raycast-height=325&raycast-tint-color=${icon.hex}" />`}
                           navigationTitle={icon.title}
                           metadata={
                             <Detail.Metadata>
@@ -179,14 +213,27 @@ export default function Command() {
                           }
                           actions={
                             <ActionPanel>
-                              <ActionPanel.Section>
-                                <DefaultAction icon={icon} version={version} />
-                              </ActionPanel.Section>
-                              <ActionPanel.Section>
-                                {restActions.map((A, index) => (
-                                  <A key={`action-String(${index})`} icon={icon} version={version} />
-                                ))}
-                              </ActionPanel.Section>
+                              {launchContext && (
+                                <ActionPanel.Section>
+                                  <LaunchCommand
+                                    callbackLaunchOptions={launchContext.callbackLaunchOptions}
+                                    icon={{ ...icon, slug: icon.slug || titleToSlug(icon.title) }}
+                                    version={version}
+                                  />
+                                </ActionPanel.Section>
+                              )}
+                              {(!launchContext || launchContext?.showCopyActions) && (
+                                <>
+                                  <ActionPanel.Section>
+                                    <DefaultAction icon={icon} version={version} />
+                                  </ActionPanel.Section>
+                                  <ActionPanel.Section>
+                                    {restActions.map((A, index) => (
+                                      <A key={`action-String(${index})`} icon={icon} version={version} />
+                                    ))}
+                                  </ActionPanel.Section>
+                                </>
+                              )}
                               <ActionPanel.Section>
                                 <Supports />
                               </ActionPanel.Section>

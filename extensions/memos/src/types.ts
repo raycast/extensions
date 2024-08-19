@@ -28,73 +28,59 @@ export interface PostMemoParams {
   resourceIdList: number[];
 }
 
-interface ResourceObj {
-  id: number;
-  creatorId: number;
-  createdTs: number;
-  updatedTs: number;
+export interface ResourceObj {
+  uid: string;
+  name: string;
+  createTime: string;
   filename: string;
   externalLink: string;
   type: string;
-  size: number;
+  size: string;
   linkedMemoAmount: number;
+  content?: string;
 }
 
 export interface MemoInfoResponse {
-  id: number;
-  name?: string;
+  uid: string;
+  name: string;
   rowStatus: string;
-  creatorId: number;
-  createdTs: number;
-  updatedTs: number;
+  creator: string;
+  createTime: string;
+  updateTime: string;
+  displayTime: string;
   content: string;
   visibility: string;
   pinned: boolean;
   displayTs: number;
-  creator: {
-    id: number;
-    rowStatus: string;
-    createdTs: number;
-    updatedTs: number;
-    username: string;
-    role: string;
-    email: string;
-    nickname: string;
-    openId: string;
-    userSettingList: null;
-  };
-  resourceList: ResourceObj[];
+  resources: ResourceObj[];
 }
 
-export type TagResponse = string[];
+export type TagResponse = {
+  tagAmounts: {
+    [tag: string]: number;
+  };
+};
 
 export interface MeResponse {
   id: number;
-  rowStatus: "NORMAL";
-  createdTs: number;
-  updatedTs: number;
+  name: string;
+  rowStatus: "ACTIVE";
+  createdTime: number;
+  updatedTime: number;
   username: string;
   role: ROLE;
   email: string;
   nickname: string;
-  openId: string;
-  userSettingList: [
-    {
-      UserID: number;
-      key: string;
-      value: string;
-    }
-  ];
 }
 
 export interface PostFileResponse {
   id: number;
   creatorId: number;
-  createdTs: number;
+  createdTs: string;
   updatedTs: number;
   filename: string;
   externalLink: string;
   type: string;
-  size: number;
+  size: string;
   linkedMemoAmount: number;
 }

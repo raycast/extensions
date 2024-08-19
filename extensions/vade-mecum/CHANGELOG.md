@@ -1,5 +1,9 @@
 # Vade Mecum Changelog
 
+## [Fixes] - 2024-07-06
+
+- Removed the Markdown syntax from the article content before running the paste and copy actions.
+
 ## [Improvements] - 2024-04-17
 
 - Added `Paste Article in Active App` action.

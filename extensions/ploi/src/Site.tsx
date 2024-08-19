@@ -5,13 +5,7 @@ import { IServer, ServerCommands } from "./Server";
 import { siteStatusState, useIsMounted, usePolling } from "./helpers";
 import { PLOI_PANEL_URL } from "./config";
 
-export const SitesList = ({
-  server: server,
-  sites: sitesArray,
-}: {
-  server: IServer;
-  sites: ISite[];
-}) => {
+export const SitesList = ({ server: server, sites: sitesArray }: { server: IServer; sites: ISite[] }) => {
   const [sites, setSites] = useState<ISite[]>(sitesArray);
   const isMounted = useIsMounted();
   usePolling(() =>
@@ -19,12 +13,9 @@ export const SitesList = ({
       if (isMounted.current && sites?.length) {
         setSites(sites);
 
-        await LocalStorage.setItem(
-          `ploi-sites-${server.id}`,
-          JSON.stringify(sites)
-        );
+        await LocalStorage.setItem(`ploi-sites-${server.id}`, JSON.stringify(sites));
       }
-    })
+    }),
   );
 
   return (
@@ -43,12 +34,9 @@ const SiteListItem = ({ site, server }: { site: ISite; server: IServer }) => {
       id={site.id.toString()}
       key={site.id}
       title={site.domain}
-      subtitle={
-        site.phpVersion ? "PHP version: " + String(site.phpVersion) ?? "" : ""
-      }
+      subtitle={site.phpVersion ? "PHP version: " + String(site.phpVersion) ?? "" : ""}
       icon={stateIcon}
-      accessoryIcon={siteStatusState(site).icon}
-      accessoryTitle={stateText}
+      accessories={[{ icon: siteStatusState(site).icon }, { text: stateText }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -70,20 +58,14 @@ const SiteListItem = ({ site, server }: { site: ISite; server: IServer }) => {
   );
 };
 
-export const SitesSingleView = ({
-  site,
-  server,
-}: {
-  site: ISite;
-  server: IServer;
-}) => {
+export const SitesSingleView = ({ site, server }: { site: ISite; server: IServer }) => {
   const [current, setCurrent] = useState<ISite>(site);
   const isMounted = useIsMounted();
 
   usePolling(() =>
     Site.get(site, server).then((site: ISite | undefined) => {
       isMounted.current && site && setCurrent(site);
-    })
+    }),
   );
   return (
     <>
@@ -94,15 +76,11 @@ export const SitesSingleView = ({
               id="site-deploy"
               key="site-deploy"
               title="Deploy"
-              accessoryTitle="This will run the deploy script for your site"
+              accessories={[{ text: "This will run the deploy script for your site" }]}
               icon={Icon.Hammer}
               actions={
                 <ActionPanel>
-                  <ActionPanel.Item
-                    icon={Icon.Hammer}
-                    title="Deploy"
-                    onAction={() => Site.deploy(current, server)}
-                  />
+                  <ActionPanel.Item icon={Icon.Hammer} title="Deploy" onAction={() => Site.deploy(current, server)} />
                 </ActionPanel>
               }
             />
@@ -111,7 +89,7 @@ export const SitesSingleView = ({
             id="site-flush-fastcgi-cache"
             key="site-flush-fastcgi-cache"
             title="Flush FastCGI Cache"
-            accessoryTitle="This will flush the FastCGI cache"
+            accessories={[{ text: "This will flush the FastCGI cache" }]}
             icon={Icon.ArrowClockwise}
             actions={
               <ActionPanel>
@@ -128,7 +106,7 @@ export const SitesSingleView = ({
             key="open-in-ssh"
             title={`Open SSH Connection (${site.systemUser})`}
             icon={Icon.Terminal}
-            accessoryTitle={`ssh://${site.systemUser}@${server.ipAddress}`}
+            accessories={[{ text: `ssh://${site.systemUser}@${server.ipAddress}` }]}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser
@@ -143,7 +121,7 @@ export const SitesSingleView = ({
             key="open-in-sftp"
             title={`Open SFTP Connection (${site.systemUser})`}
             icon={Icon.Terminal}
-            accessoryTitle={`sftp://${site.systemUser}@${server.ipAddress}`}
+            accessories={[{ text: `sftp://${site.systemUser}@${server.ipAddress}` }]}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser
@@ -160,12 +138,10 @@ export const SitesSingleView = ({
             key="open-in-ploi"
             title="Open In ploi.io"
             icon={Icon.Globe}
-            accessoryTitle="ploi.io"
+            accessories={[{ text: "ploi.io" }]}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser
-                  url={`${PLOI_PANEL_URL}/servers/${server.id}/sites/${site.id}`}
-                />
+                <Action.OpenInBrowser url={`${PLOI_PANEL_URL}/servers/${server.id}/sites/${site.id}`} />
               </ActionPanel>
             }
           />
@@ -185,7 +161,7 @@ export const SitesSingleView = ({
                   id={key}
                   key={key}
                   title={label}
-                  accessoryTitle={value}
+                  accessories={[{ text: value }]}
                   icon={Icon.Document}
                   actions={
                     <ActionPanel>
@@ -202,13 +178,7 @@ export const SitesSingleView = ({
   );
 };
 
-export const SiteCommands = ({
-  site,
-  server,
-}: {
-  site: ISite;
-  server: IServer;
-}) => {
+export const SiteCommands = ({ site, server }: { site: ISite; server: IServer }) => {
   let url;
   try {
     // The site may fail here if using Default
@@ -218,19 +188,9 @@ export const SiteCommands = ({
   }
   return (
     <>
-      {url && (
-        <Action.OpenInBrowser
-          icon={Icon.Globe}
-          title={`Open site in browser`}
-          url={url.toString()}
-        />
-      )}
+      {url && <Action.OpenInBrowser icon={Icon.Globe} title={`Open site in browser`} url={url.toString()} />}
       {site.hasRepository && (
-        <ActionPanel.Item
-          icon={Icon.Hammer}
-          title="Trigger deploy script"
-          onAction={() => Site.deploy(site, server)}
-        />
+        <ActionPanel.Item icon={Icon.Hammer} title="Trigger deploy script" onAction={() => Site.deploy(site, server)} />
       )}
     </>
   );

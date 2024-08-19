@@ -14,12 +14,16 @@ You can check if a user has the Browser Extension installed using [`environment.
 
 ### BrowserExtension.getContent
 
-Get the content of the active browser tab.
+Get the content of an opened browser tab.
 
 #### Signature
 
 ```typescript
-async function getContent(options?: GetContentOptions): Promise<string>;
+async function getContent(options?: {
+  cssSelector?: string;
+  tabId?: number;
+  format?: "html" | "text" | "markdown";
+}): Promise<string>;
 ```
 
 #### Example
@@ -84,15 +88,9 @@ export default async function command() {
 
 #### Return
 
-A Promise that resolves with the list of tabs.
+A Promise that resolves with the list of [tabs](#browserextension.tab).
 
 ## Types
-
-### BrowserExtension.GetContentOptions
-
-#### Properties
-
-<InterfaceTableFromJSDoc name="BrowserExtension.GetContentOptions" />
 
 ### BrowserExtension.Tab
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { List } from "@raycast/api";
-import { InputType, parseInputNumber } from "./calulator";
+import { InputType, parseInputNumber } from "./calculator";
 
 export interface State {
   inputType: string;
@@ -41,29 +41,35 @@ export default function Command() {
   });
 
   const normalListItems = [
-    <List.Item title={"Detected Input"} accessoryTitle={state.inputType} />,
-    <List.Item title={"Binary Representation"} accessoryTitle={state.binNumber} />,
-    <List.Item title={"Decimal Representation"} accessoryTitle={state.decNumber} />,
-    <List.Item title={"Hexadecimal Representation"} accessoryTitle={state.hexNumber} />,
+    <List.Item title={"Detected Input"} accessories={[{ text: state.inputType }]} />,
+    <List.Item title={"Binary Representation"} accessories={[{ text: state.binNumber }]} />,
+    <List.Item title={"Decimal Representation"} accessories={[{ text: state.decNumber }]} />,
+    <List.Item title={"Hexadecimal Representation"} accessories={[{ text: state.hexNumber }]} />,
   ];
 
   const commaListItems = [
-    <List.Item title={"Detected Input"} accessoryTitle={state.inputType} />,
-    <List.Item title={"Fixed Point Binary Representation"} accessoryTitle={state.binNumber} />,
-    <List.Item title={"Fixed Point Decimal Representation"} accessoryTitle={state.decNumber} />,
+    <List.Item title={"Detected Input"} accessories={[{ text: state.inputType }]} />,
+    <List.Item title={"Fixed Point Binary Representation"} accessories={[{ text: state.binNumber }]} />,
+    <List.Item title={"Fixed Point Decimal Representation"} accessories={[{ text: state.decNumber }]} />,
     <List.Section title={"Floating Point Binary Representation — Single Precision"}>
-      <List.Item title={"Sign"} accessoryTitle={state.binFloat?.singlePrecision.sign} />
-      <List.Item title={"Exponent"} accessoryTitle={state.binFloat?.singlePrecision.exponent} />
-      <List.Item title={"Mantissa"} accessoryTitle={state.binFloat?.singlePrecision.mantissa} />
-      <List.Item title={"Floating Point"} accessoryTitle={state.binFloat?.singlePrecision.floatingPoint} />
-      <List.Item title={"Floating Point Decimal"} accessoryTitle={state.binFloat?.singlePrecision.floatDecimal} />
+      <List.Item title={"Sign"} accessories={[{ text: state.binFloat?.singlePrecision.sign }]} />
+      <List.Item title={"Exponent"} accessories={[{ text: state.binFloat?.singlePrecision.exponent }]} />
+      <List.Item title={"Mantissa"} accessories={[{ text: state.binFloat?.singlePrecision.mantissa }]} />
+      <List.Item title={"Floating Point"} accessories={[{ text: state.binFloat?.singlePrecision.floatingPoint }]} />
+      <List.Item
+        title={"Floating Point Decimal"}
+        accessories={[{ text: state.binFloat?.singlePrecision.floatDecimal }]}
+      />
     </List.Section>,
     <List.Section title={"Floating Point Binary Representation — Double Precision"}>
-      <List.Item title={"Sign"} accessoryTitle={state.binFloat?.doublePrecision.sign} />
-      <List.Item title={"Exponent"} accessoryTitle={state.binFloat?.doublePrecision.exponent} />
-      <List.Item title={"Mantissa"} accessoryTitle={state.binFloat?.doublePrecision.mantissa} />
-      <List.Item title={"Floating Point"} accessoryTitle={state.binFloat?.doublePrecision.floatingPoint} />
-      <List.Item title={"Floating Point Decimal"} accessoryTitle={state.binFloat?.doublePrecision.floatDecimal} />
+      <List.Item title={"Sign"} accessories={[{ text: state.binFloat?.doublePrecision.sign }]} />
+      <List.Item title={"Exponent"} accessories={[{ text: state.binFloat?.doublePrecision.exponent }]} />
+      <List.Item title={"Mantissa"} accessories={[{ text: state.binFloat?.doublePrecision.mantissa }]} />
+      <List.Item title={"Floating Point"} accessories={[{ text: state.binFloat?.doublePrecision.floatingPoint }]} />
+      <List.Item
+        title={"Floating Point Decimal"}
+        accessories={[{ text: state.binFloat?.doublePrecision.floatDecimal }]}
+      />
     </List.Section>,
   ];
   const isComma = state.inputType === InputType.BinaryComma || state.inputType === InputType.DecimalComma;
@@ -72,7 +78,7 @@ export default function Command() {
     <List
       isLoading={!state.inputType}
       searchBarPlaceholder="Enter your calculation: 0b0101+0xff..."
-      onSearchTextChange={async (text) => {
+      onSearchTextChange={async (text: any) => {
         parseInputNumber(text, setState);
       }}
     >

@@ -24,7 +24,11 @@
     "hobhouse",
     "bkeys818",
     "jatindotdev",
-    "devbear"
+    "devbear",
+    "rfaccio",
+    "badta5te",
+    "andyburris",
+    "thomaslombart"
   ],
   "license": "MIT",
   "preferences": [
@@ -44,7 +48,44 @@
       "title": "Search",
       "subtitle": "Spotify",
       "description": "A single unified search command. Search for artists, albums, songs, playlists, podcasts, and episodes. Use the dropdown menu to filter your search to a specific category. Each category offers contextual actions, so you can dive deeper into the search.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Top View",
+          "data": [
+            {
+              "title": "Playlists",
+              "value": "playlists"
+            },
+            {
+              "title": "Albums",
+              "value": "albums"
+            },
+            {
+              "title": "Artists",
+              "value": "artists"
+            },
+            {
+              "title": "Songs",
+              "value": "tracks"
+            },
+            {
+              "title": "Podcasts & Shows",
+              "value": "shows"
+            },
+            {
+              "title": "Episodes",
+              "value": "episodes"
+            }
+          ],
+          "default": "artists",
+          "description": "Show a specific view at the top of the results list by default",
+          "name": "topView",
+          "required": false,
+          "type": "dropdown",
+          "placeholder": "Top View"
+        }
+      ]
     },
     {
       "name": "yourLibrary",
@@ -159,6 +200,14 @@
       "subtitle": "Spotify",
       "description": "Adds the current song to a playlist of your choice.",
       "mode": "view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "removeSongFromPlaylist",
+      "title": "Remove Playing Song from Playlist",
+      "subtitle": "Spotify",
+      "description": "Remove the current song from a playlist of your choice.",
+      "mode": "no-view",
       "disabledByDefault": true
     },
     {
@@ -341,11 +390,26 @@
       "description": "See your queue.",
       "mode": "view",
       "disabledByDefault": true
+    },
+    {
+      "name": "generatePlaylist",
+      "title": "Generate Playlist",
+      "subtitle": "Spotify",
+      "description": "Generate a Spotify playlist using Raycast AI.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "description",
+          "placeholder": "Playlist description",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
-    "@raycast/utils": "^1.10.1",
+    "@raycast/api": "^1.75.1",
+    "@raycast/utils": "^1.16.2",
     "node-fetch": "^3.3.2",
     "oazapfts": "^4.10.0"
   },

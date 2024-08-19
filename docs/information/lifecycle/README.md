@@ -1,6 +1,6 @@
 # Lifecycle
 
-A command is typically launched, run for a while, and then is unloaded.
+A command is typically launched, runs for a while, and then is unloaded.
 
 ## Launch
 

@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Change AI model for Quick Add Reminder] - 2024-05-23
+
+Now, Quick Add Reminder will use GPT-4o instead of GPT-4 Turbo. 
+
 ## [Add Saved Locations] - 2024-04-16
 
 - Save your frequently used locations with the new "Add Saved Location" action when creating a reminder. This makes it easy to quickly add new location-based reminders later.

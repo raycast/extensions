@@ -46,5 +46,5 @@ export type Params = {
 };
 
 export type Spellcheck = {
-  suggestions: any[];
+  suggestions: never[];
 };

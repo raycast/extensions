@@ -1,0 +1,58 @@
+{
+  "version": "3.1.0",
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-norwegian-public-transport",
+  "title": "Norwegian Public Transport",
+  "keywords": [
+    "departures",
+    "avganger",
+    "norway",
+    "norge",
+    "public transport",
+    "kollektivtransport",
+    "travel",
+    "reise",
+    "entur",
+    "journey planner",
+    "real-time",
+    "sanntid"
+  ],
+  "description": "Real-time departures for Norwegian public transport. Data made available by Entur.",
+  "icon": "command-icon.png",
+  "author": "rosvik",
+  "categories": [
+    "Web",
+    "Data",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Departures",
+      "subtitle": "Norwegian Public Transport",
+      "description": "Search for public transport departures from any stop place in Norway",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.15.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.8",
+    "@types/node": "20.12.8",
+    "@types/react": "18.3.1",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

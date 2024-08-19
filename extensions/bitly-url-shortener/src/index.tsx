@@ -14,11 +14,14 @@ export default async function () {
   try {
     const { accessToken, pasteAfterShortening } = getPreferenceValues();
 
-    // Try to get the selected text
-    const selectedText = await getSelectedText();
-
     // If no text is selected, fall back to the clipboard
-    const urlToShorten = selectedText ? selectedText : await Clipboard.readText();
+    let urlToShorten;
+    try {
+      urlToShorten = await getSelectedText();
+    } catch (error: unknown) {
+      urlToShorten = await Clipboard.readText();
+    }
+
     if (!urlToShorten) {
       return await reportError(new Error("No text selected and clipboard is empty"));
     }

@@ -703,7 +703,7 @@ export default function Command(): JSX.Element {
                           icon={Icon.CodeBlock}
                         />
                       )}
-                      {vm.storage_policy_compliance_info && (
+                      {vm.storage_policy_compliance_info && vm.storage_policy_compliance_info.disks[id] && (
                         <List.Item.Detail.Metadata.TagList.Item
                           key={`Storage Policy Compliance: ${vm.storage_policy_compliance_info.disks[id].status}`}
                           text={`${VMStoragePolicyComplianceText.get(

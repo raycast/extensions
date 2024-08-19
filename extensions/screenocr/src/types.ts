@@ -3,6 +3,7 @@ export interface Preferences {
   languageCorrection: string;
   ocrMode: string;
   ignoreLineBreaks: boolean;
+  keepImage: boolean;
   customWordsList: string;
 }
 

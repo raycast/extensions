@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "teslamate",
+  "title": "TeslaMate",
+  "description": "View your TeslaMate data in Raycast",
+  "icon": "teslamate-logo.png",
+  "author": "mSarheed",
+  "categories": [
+    "Data",
+    "Fun",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "overview",
+      "title": "Car Overview",
+      "subtitle": "TeslaMate",
+      "description": "TeslaMate Grafana Overview",
+      "mode": "view"
+    },
+    {
+      "name": "charges",
+      "title": "View Charges",
+      "subtitle": "TeslaMate",
+      "description": "Show last 50 charging sessions",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "tmGrafanaUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Grafana URL",
+      "description": "The URL of your Grafana instance",
+      "placeholder": "http(s)://yourdomain.com or http(s)://192.168.1.5:3000"
+    },
+    {
+      "name": "dataSourceUuid",
+      "type": "textfield",
+      "required": true,
+      "title": "Data Source UUID",
+      "description": "The UUID of the PostgreSQL data source in Grafana",
+      "placeholder": "Pxxxxxxxxxxx"
+    },
+    {
+      "name": "saToken",
+      "type": "password",
+      "required": true,
+      "title": "Grafana SA Token",
+      "description": "The token of the Grafana service account",
+      "placeholder": "sa-{nameOfSA}-xxxxxxxxxxxxx"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.73.2",
+    "@raycast/utils": "^1.15.0",
+    "cross-fetch": "^4.0.0",
+    "moment": "^2.30.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,5 +1,8 @@
 # Deepcast Changelog
 
+## [Error Handling] - 2024-05-31
+- Added error message when the `Translate` command is disabled
+
 ## [Enhancement] - 2023-11-03
 - Default to selected text for the `Translate` command
 - Added action to copy the translation in the `Translate` command

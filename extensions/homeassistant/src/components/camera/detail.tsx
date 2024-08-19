@@ -1,8 +1,8 @@
-import { showToast, Toast, Detail, ActionPanel } from "@raycast/api";
-import { State } from "@lib/haapi";
 import { EntityStandardActionSections } from "@components/entity";
-import { useImage } from "./hooks";
+import { State } from "@lib/haapi";
+import { ActionPanel, Detail, Toast, showToast } from "@raycast/api";
 import { CameraOpenStreamInBrowserAction, CameraOpenStreamInIINAAction, CameraOpenStreamInVLCAction } from "./actions";
+import { useImage } from "./hooks";
 
 export function CameraImageDetail(props: { state: State }): JSX.Element {
   const s = props.state;

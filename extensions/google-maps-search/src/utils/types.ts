@@ -1,11 +1,11 @@
 /**
  * Corresponds to Google Map's four possible modes of travel.
  */
-export enum TravelMode {
-  Driving = "driving",
-  Walking = "walking",
-  Bicycling = "bicycling",
-  Transit = "transit",
+export enum TransportType {
+  Cycling = "c",
+  Driving = "d",
+  Transit = "t",
+  Walking = "w",
 }
 
 /**
@@ -15,4 +15,5 @@ export interface Preferences {
   homeAddress: string;
   preferredMode: string;
   useSelected: boolean;
+  saveSearchHistory: boolean;
 }

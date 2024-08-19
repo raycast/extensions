@@ -1,5 +1,53 @@
 # Changelog
 
+## [Fix] - 2024-08-13
+
+- Fix: the image width calculation in AnswerDetailView, which previously returned undefined.
+- Update package-lock.json to fix the security vulnerability (npm audit fix)
+
+## [Fix] - 2024-08-09
+
+- Fix: An unhandled error was encountered while parsing the CSV file.
+- Chore: Update prompts.csv URL to the latest version
+
+## [Fix] - 2024-07-29
+
+- Restarting a conversation will retain the currently selected model
+
+## [Fix] - 2024-07-16
+
+- Add placeholder to improve accessibility
+
+## [Feature] - 2024-06-13
+
+- Feature: Add Vision Command Capability on Clipboard Image
+- Feature: Add Vision Command Capability on Finder Image
+
+## [Chore] - 2024-06-02
+
+- Chore: Improve README about models and vision capabilities
+
+## [Fix] - 2024-05-16
+
+- Fix: add `isAutoFullInput` state machine check
+- Fix: `isAutoTTS` not available in stream mode
+- Feat: support detail show img
+- Feat: support clipboard upload file
+- Fix: question onchange not clear error
+
+## [Fix] - 2024-05-15
+
+- Fix: `List.Item.Detail.Markdown` display big image caused Heap out of memory
+
+## [Feature] - 2024-05-14
+
+- Feature: support GPT vision input
+
+## [Feature] - 2024-04-30
+
+- Feature: add `Summarize` command to summarize website and YouTube video
+- Refactor: model dropdown save model switch `localstorage` to `cache`
+
 ## [Feature] - 2024-04-09
 
 - Feature: Support custom model name in `Models` (Enable in preferences)

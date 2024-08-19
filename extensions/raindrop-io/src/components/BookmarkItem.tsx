@@ -163,14 +163,8 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
                 }
                 metadata={
                   <Detail.Metadata>
-                    <Detail.Metadata.Label
-                      title="Created"
-                      text={createdDate.toLocaleDateString()}
-                    />
-                    <Detail.Metadata.Label
-                      title="Last Updated"
-                      text={lastUpdatedDate.toLocaleDateString()}
-                    />
+                    <Detail.Metadata.Label title="Created" text={createdDate.toLocaleDateString()} />
+                    <Detail.Metadata.Label title="Last Updated" text={lastUpdatedDate.toLocaleDateString()} />
                     <Detail.Metadata.Label title="Domain" text={bookmark.domain} />
 
                     {bookmark.tags && (

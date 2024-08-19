@@ -50,6 +50,10 @@
         {
           "title": "Supercast",
           "value": "supercast"
+        },
+        {
+          "title": "Nook",
+          "value": "nook"
         }
       ]
     },
@@ -73,21 +77,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.70.3",
-    "@raycast/utils": "^1.14.0",
-    "@types/linkify-it": "^3.0.5",
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.15.0",
     "dedupe": "^4.0.3",
     "linkify-it": "^5.0.0",
     "tlds": "^1.252.0",
     "use-debounce": "^10.0.0"
   },
   "devDependencies": {
+    "@types/linkify-it": "^5.0.0",
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.12.6",
-    "@types/react": "18.2.75",
+    "@types/node": "20.12.8",
+    "@types/react": "18.3.1",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
-    "typescript": "^5.4.4"
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

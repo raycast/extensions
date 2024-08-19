@@ -1,9 +1,10 @@
 import { List, ActionPanel, Action, Icon, confirmAlert, Alert } from "@raycast/api";
-import { Workspace, Tag, deleteTag } from "../api";
-import TagForm from "./TagForm";
-import { withToast, Verb } from "../helpers/withToast";
-import Shortcut from "../helpers/shortcuts";
-import { canModifyTagsIn } from "../helpers/privileges";
+
+import { Workspace, Tag, deleteTag } from "@/api";
+import TagForm from "@/components/TagForm";
+import { canModifyTagsIn } from "@/helpers/privileges";
+import Shortcut from "@/helpers/shortcuts";
+import { withToast, Verb } from "@/helpers/withToast";
 
 interface TagListProps {
   workspace: Workspace;

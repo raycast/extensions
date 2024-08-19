@@ -50,18 +50,32 @@ export default function Command() {
   );
 }
 
+function getCleanDescription(text: string): string {
+  const cleanedText = text
+    .replace(/<[^>]*>/g, "")
+    .replace(/\b(Discussion|Link)\b|\s*\|\s*/g, "")
+    .trim();
+
+  const sentences = cleanedText.split(/(?<=[.!?])\s+/);
+
+  return sentences[0] || "";
+}
+
 function StoryListItem(props: { item: FeedItem; index: number }) {
   const { item, index } = props;
   const date = new Date(item.updated);
-
+  const cleanedContent = getCleanDescription(item.content);
   return (
     <List.Item
       icon={getIcon(index + 1)}
       title={item.title ?? "No title"}
-      subtitle={item.author ?? "No author"}
+      subtitle={cleanedContent ?? "No author"}
       keywords={[item.author]}
       actions={<Actions item={item} />}
       accessories={[
+        {
+          text: item.author,
+        },
         {
           date: date,
           tooltip: date.toLocaleString(),

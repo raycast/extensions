@@ -4,7 +4,7 @@ import { CacheKey, defaultCache } from "../utils/constants";
 import { scriptQuitAppsWithoutWindow } from "../utils/applescript-utils";
 import { refreshInterval } from "../types/preferences";
 
-export const setAutoQuitAppsHook = (refresh: number) => {
+export const useAllApps = (refresh: number) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [quitApps, setQuitApps] = useState<Application[]>([]);
   const [disQuitApps, setDisQuitApps] = useState<Application[]>([]);
@@ -30,19 +30,19 @@ export const setAutoQuitAppsHook = (refresh: number) => {
   return { quitApps: quitApps, disQuitApps: disQuitApps, loading: loading };
 };
 
-export const quitAppsHook = () => {
+export const useEnabledQuitApps = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [quitApps, setQuitApps] = useState<Application[]>([]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    let enabledQuitApps: Application[] = [];
     try {
       const quitAppsString = defaultCache.get(CacheKey.QUIT_APP);
-      let quitApps: Application[] = [];
       if (typeof quitAppsString == "string") {
-        quitApps = JSON.parse(quitAppsString);
+        enabledQuitApps = JSON.parse(quitAppsString);
       }
-      setQuitApps(quitApps);
+      setQuitApps(enabledQuitApps);
     } catch (e) {
       console.error(e);
     }
@@ -55,19 +55,19 @@ export const quitAppsHook = () => {
         realRefreshInterval = parseInt(refreshIntervalString);
       }
       if (realRefreshInterval == refreshInterval) {
-        await scriptQuitAppsWithoutWindow(quitApps);
+        await scriptQuitAppsWithoutWindow(enabledQuitApps);
         defaultCache.set(CacheKey.REFRESH_INTERVAL, "5");
       } else {
         const nextRefreshInterval = realRefreshInterval + 5;
         if (nextRefreshInterval > refreshInterval) {
-          await scriptQuitAppsWithoutWindow(quitApps);
+          await scriptQuitAppsWithoutWindow(enabledQuitApps);
           defaultCache.set(CacheKey.REFRESH_INTERVAL, "5");
         } else {
           defaultCache.set(CacheKey.REFRESH_INTERVAL, String(nextRefreshInterval));
         }
       }
     } else {
-      await scriptQuitAppsWithoutWindow(quitApps);
+      await scriptQuitAppsWithoutWindow(enabledQuitApps);
       defaultCache.set(CacheKey.REFRESH_INTERVAL, "5");
     }
     setLoading(false);

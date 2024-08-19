@@ -29,6 +29,7 @@ const CardSearch = () => {
       isLoading={searchLoading || recentsLoading}
       onSearchTextChange={search}
       searchBarPlaceholder="Search for cards..."
+      isShowingDetail
     >
       {resultCards
         ? Object.values(resultCards).map((card) => (

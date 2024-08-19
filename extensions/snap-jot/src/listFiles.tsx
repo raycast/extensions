@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, getPreferenceValues, Detail, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, getPreferenceValues, Detail, Icon, showToast, Toast } from "@raycast/api";
 import fs from "fs";
 import path from "path";
 import { useState } from "react";
@@ -27,7 +27,11 @@ export default function Command() {
         path: path.join(folderPath, fileName),
       }));
     } catch (error) {
-      console.error("Error reading files:", error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to read directory",
+        message: (error as Error).message, // Type assertion to specify the type of 'error'
+      });
       return [];
     }
   };
@@ -52,7 +56,16 @@ export default function Command() {
 }
 
 function ShowNote(props: ShowNoteProps) {
-  const fileContent = fs.readFileSync(props.filePath, "utf-8");
+  let fileContent = "";
+  try {
+    fileContent = fs.readFileSync(props.filePath, "utf-8");
+  } catch (error) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to read file",
+      message: (error as Error).message, // Type assertion to specify the type of 'error'
+    });
+  }
   const bulletPoints = fileContent
     .split("\n")
     .filter((line) => line.startsWith("- "))

@@ -15,7 +15,7 @@ export default class BlueutilDevicesService extends ApplescriptDevicesService {
     let blueutilDiscovered = false;
     let queuedPaths = standardBrewPaths;
 
-    const { blueutilDirectory: enforcedBlueutilDirectory } = getPreferenceValues();
+    const { blueutilDirectory: enforcedBlueutilDirectory } = getPreferenceValues<ExtensionPreferences>();
     if (enforcedBlueutilDirectory) {
       queuedPaths = [enforcedBlueutilDirectory];
     }

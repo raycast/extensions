@@ -35,7 +35,7 @@ export default function useAllShortcuts(props?: Properties): UseAllShortcutsResu
     async () => {
       if (!keyCodesResult.data) return undefined;
       console.log("Fetching shortcuts");
-      const res = await fetch("https://shortcuts.solomk.in/data/combined-apps.json");
+      const res = await fetch("https://hotkys.com/data/combined-apps.json");
       const allApps: AllApps = await res.json();
       const updatedShortcuts = {
         applications: new ShortcutsParser(keyCodesResult.data).parseInputShortcuts(allApps.list),

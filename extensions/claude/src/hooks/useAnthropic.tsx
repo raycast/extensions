@@ -8,7 +8,12 @@ export function useAnthropic(): Anthropic {
       apiKey: string;
     }>().apiKey;
 
-    return new Anthropic({ apiKey: apiKey });
+    return new Anthropic({
+      apiKey: apiKey,
+      defaultHeaders: {
+        "anthropic-beta": "max-tokens-3-5-sonnet-2024-07-15",
+      },
+    });
   });
 
   return anthropic;

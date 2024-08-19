@@ -5,9 +5,7 @@
   "description": "Manage VMware vCenter",
   "icon": "command-icon.png",
   "author": "massimiliano_pasquini",
-  "categories": [
-    "Productivity"
-  ],
+  "categories": ["Productivity"],
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -59,7 +57,7 @@
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
+    "@raycast/eslint-config": "1.0.8",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^7.32.0",

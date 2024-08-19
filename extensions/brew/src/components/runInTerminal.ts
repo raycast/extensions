@@ -1,16 +1,50 @@
-import { closeMainWindow } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { closeMainWindow, getApplications, Image } from "@raycast/api";
+import { runAppleScript, useCachedPromise } from "@raycast/utils";
 import { preferences } from "../preferences";
 
-const terminalApp = preferences.terminalApp || "terminal";
+type TerminalApp = (typeof preferences)["terminalApp"];
 
-const names: { [key in typeof terminalApp]: string } = {
+const names: { [key in TerminalApp]: string } = {
   terminal: "Terminal",
   iterm: "iTerm",
   warp: "Warp",
+  kitty: "kitty",
+  alacritty: "Alacritty",
+  wezterm: "WezTerm",
+  hyper: "Hyper",
 };
 
-const appleScripts: { [key in typeof terminalApp]: (c: string) => string } = {
+const icons: { [key in TerminalApp]: Image.ImageLike } = {
+  terminal: { fileIcon: "/System/Applications/Utilities/Terminal.app" },
+  iterm: { fileIcon: "/Applications/iTerm.app" },
+  warp: { fileIcon: "/Applications/Warp.app" },
+  kitty: { fileIcon: "/Applications/kitty.app" },
+  alacritty: { fileIcon: "/Applications/Alacritty.app" },
+  wezterm: { fileIcon: "/Applications/WezTerm.app" },
+  hyper: { fileIcon: "/Applications/Hyper.app" },
+};
+
+const appBundleIds: { [key in TerminalApp]: string } = {
+  terminal: "com.apple.terminal",
+  iterm: "com.googlecode.iterm2",
+  warp: "dev.warp.Warp-Stable",
+  kitty: "org.kovidgoyal.kitty",
+  alacritty: "org.alacritty",
+  wezterm: "com.github.wez.wezterm",
+  hyper: "co.zeit.hyper",
+};
+
+const runCommandInTermAppleScript = (c: string, terminalApp: string): string => `
+    tell application "${terminalApp}" to activate
+    tell application "System Events" to tell process "${terminalApp}"
+        keystroke "t" using command down
+        delay 0.5
+        keystroke "${c}"
+        keystroke return
+    end tell
+  `;
+
+const appleScripts: { [key in TerminalApp]: (c: string) => string } = {
   terminal: (c: string) => `
     tell application "Terminal"
       do shell script "open -a 'Terminal'"
@@ -22,23 +56,30 @@ const appleScripts: { [key in typeof terminalApp]: (c: string) => string } = {
       set newWindow to create window with default profile command "bash -c '${c}; read -n 1 -s -r -p \\"Press any key to exit - will not quit\\" ; echo' ; exit"
     end tell
   `,
-  warp: (c: string) => `
-    tell application "Warp" to activate
-    tell application "System Events" to tell process "Warp"
-        keystroke "t" using command down
-        keystroke "${c}"
-        delay 1.0
-        key code 36
-    end tell
-`,
-  /// warp does not provide an URI or anyway to pass commands so this was a workaround
+  kitty: (c: string) => runCommandInTermAppleScript(c, names.kitty),
+  alacritty: (c: string) => runCommandInTermAppleScript(c, names.alacritty),
+  warp: (c: string) => runCommandInTermAppleScript(c, names.warp),
+  wezterm: (c: string) => runCommandInTermAppleScript(c, names.wezterm),
+  hyper: (c: string) => runCommandInTermAppleScript(c, names.hyper),
 };
 
-export function terminalName(): string {
-  return names[terminalApp];
-}
+export const useTerminalApp = () => {
+  const { data } = useCachedPromise(
+    async (terminalApp: TerminalApp) => {
+      const apps = await getApplications();
+      return apps.some((app) => app.bundleId?.toLowerCase() === appBundleIds[terminalApp].toLowerCase());
+    },
+    [preferences.terminalApp],
+    { failureToastOptions: { title: "Failed to check if Terminal App is installed" } },
+  );
 
-export function runCommandInTerminal(command: string): void {
-  runAppleScript(appleScripts[terminalApp](command));
-  closeMainWindow();
-}
+  return {
+    terminalIcon: data ? icons[preferences.terminalApp] : icons.terminal,
+    terminalName: data ? names[preferences.terminalApp] : names.terminal,
+    runCommandInTerminal: async (command: string) => {
+      const cmd = data ? appleScripts[preferences.terminalApp](command) : appleScripts.terminal(command);
+      await runAppleScript(cmd);
+      await closeMainWindow();
+    },
+  };
+};

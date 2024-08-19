@@ -4,10 +4,10 @@
  *
  * @param origin The origin address
  * @param destination The destination address
- * @param travelmode One of four possible travel modes
+ * @param transporttype One of four possible transit types
  * @returns A properly URI encoded string according to Google Maps documentation
  */
-export function makeDirectionsURL(origin: string, destination: string, travelmode: string): string {
+export function makeDirectionsURL(origin: string, destination: string, transporttype: string): string {
   const mapsBase = "https://www.google.com/maps/dir/?api=1";
   return (
     mapsBase +
@@ -16,7 +16,7 @@ export function makeDirectionsURL(origin: string, destination: string, travelmod
     "&destination=" +
     encodeURI(destination) +
     "&travelmode=" +
-    encodeURI(travelmode)
+    encodeURI(transporttype)
   );
 }
 

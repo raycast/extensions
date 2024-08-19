@@ -1,43 +1,64 @@
 {
-    "$schema": "https://www.raycast.com/schemas/extension.json",
-    "name": "itch-io",
-    "title": "itch.io",
-    "description": "Raycast Extension for itch.io, browse through milions of games made by indie developers!",
-    "icon": "command-icon.png",
-    "author": "Aayush9029",
-    "categories": [
-        "Fun",
-        "Other"
-    ],
-    "license": "MIT",
-    "commands": [{
-        "name": "index",
-        "title": "Search Games",
-        "subtitle": "itch.io",
-        "description": "Explore the most popular games in itch.io",
-        "mode": "view"
-    }],
-    "dependencies": {
-        "@raycast/api": "^1.32.1",
-        "dedent-js": "^1.0.1",
-        "fast-xml-parser": "^4.0.7",
-        "node-fetch": "^3.0.0"
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "itch-io",
+  "title": "itch.io",
+  "description": "Raycast Extension for itch.io, browse through milions of games made by indie developers!",
+  "icon": "command-icon.png",
+  "author": "Aayush9029",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "Fun",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Games",
+      "subtitle": "itch.io",
+      "description": "Explore the most popular games in itch.io",
+      "mode": "view"
     },
-    "devDependencies": {
-        "@types/node": "~16.10.0",
-        "@types/react": "^17.0.28",
-        "@typescript-eslint/eslint-plugin": "^5.0.0",
-        "@typescript-eslint/parser": "^5.0.0",
-        "eslint": "^7.32.0",
-        "eslint-config-prettier": "^8.3.0",
-        "prettier": "^2.5.1",
-        "react-devtools": "^4.19.2",
-        "typescript": "^4.4.3"
-    },
-    "scripts": {
-        "build": "ray build -e dist",
-        "dev": "ray develop",
-        "fix-lint": "ray lint --fix",
-        "lint": "ray lint"
+    {
+      "name": "my_games",
+      "title": "My Games",
+      "subtitle": "itch.io",
+      "description": "Data on games you've uploaded or have edit access to",
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "API Key",
+          "name": "api_key",
+          "description": "API Key from itch.io Dashboard",
+          "required": true,
+          "type": "password"
+        }
+      ],
+      "disabledByDefault": true
     }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.16.2",
+    "dedent-js": "^1.0.1",
+    "fast-xml-parser": "^4.0.7",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "react": "^18.2.0",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
 }

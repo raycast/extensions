@@ -32,7 +32,6 @@
       "title": "Default detail action",
       "description": "The default action when viewing detail of an item",
       "required": false,
-      "placeholder": "open-with",
       "type": "dropdown",
       "data": [
         {
@@ -64,19 +63,41 @@
           "title": "Copy unpkg link"
         }
       ]
+    },
+    {
+      "name": "defaultLoadSvgAction",
+      "title": "Default action for copying/opening SVG",
+      "description": "The default action when copying/opening SVG",
+      "required": false,
+      "type": "dropdown",
+      "data": [
+        {
+          "value": "WithBrandColor",
+          "title": "With Brand Color"
+        },
+        {
+          "value": "PureSvg",
+          "title": "Pure SVG (no color specified)"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.70.3",
-    "got": "^14.2.1",
-    "simple-icons": "^11.12.0"
+    "@raycast/api": "^1.79.1",
+    "execa": "^9.3.0",
+    "fast-fuzzy": "^1.12.0",
+    "got": "^14.4.2",
+    "lodash": "^4.17.21",
+    "raycast-cross-extension": "^0.2.3",
+    "simple-icons": "^13.3.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.12.5",
-    "@types/react": "^18.2.75",
+    "@types/lodash": "^4.17.7",
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.3.3",
     "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.4"
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
   }
 }

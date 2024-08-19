@@ -1,5 +1,9 @@
 # Shortcuts Search Changelog
 
+## [Update] - 2024-04-26
+
+- Update datasource url to https://hotkys.com
+
 ## [Bug Fix] - 2024-01-17
 
 - Fix issue with shortcuts not being updated

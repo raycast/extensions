@@ -5,7 +5,6 @@ import Linkify from 'linkify-it';
 import tlds from 'tlds';
 import { preferences } from './preferences';
 
-const isWarpcast = preferences.farcasterClient === 'warpcast';
 const isEtherscan = preferences.walletAddressClient === 'etherscan';
 
 export function getUserIcon(user: Pick<CastAuthor, 'username' | 'pfp_url'>) {
@@ -31,13 +30,38 @@ export function truncateEthAddress(address: string) {
 }
 
 export function getCastUrl(cast: Cast) {
-  return isWarpcast
-    ? `https://warpcast.com/${cast.author.username}/${cast.hash.substring(0, 8)}`
-    : `https://www.supercast.xyz/c/${cast.hash}`;
+  let baseUrl;
+  switch (preferences.farcasterClient) {
+    case 'supercast':
+      baseUrl = `https://www.supercast.xyz/c/${cast.hash}`;
+      break;
+    case 'nook':
+      baseUrl = `https://nook.social/casts/${cast.hash}`;
+      break;
+    case 'warpcast':
+    default:
+      baseUrl = `https://warpcast.com/${cast.author.username}/${cast.hash.substring(0, 8)}`;
+      break;
+  }
+
+  return baseUrl;
 }
 
 export function getProfileUrl(author: CastAuthor) {
-  return isWarpcast ? `https://warpcast.com/${author.username}` : `https://www.supercast.xyz/${author.username}`;
+  let baseUrl;
+  switch (preferences.farcasterClient) {
+    case 'supercast':
+      baseUrl = `https://www.supercast.xyz/${author.username}`;
+      break;
+    case 'nook':
+      baseUrl = `https://nook.social/users/${author.username}`;
+      break;
+    case 'warpcast':
+    default:
+      baseUrl = `https://warpcast.com/${author.username}`;
+      break;
+  }
+  return baseUrl;
 }
 
 export function getEthAddressUrl(walletAddress: string) {
@@ -48,7 +72,7 @@ export function getSolanaAddressUrl(walletAddress: string) {
   return `https://solscan.io/token/${walletAddress}`;
 }
 
-const _linkify = Linkify().tlds(tlds);
+const _linkify = new Linkify().tlds(tlds);
 export function linkify(text: string): string {
   const matches = _linkify.match(text);
 

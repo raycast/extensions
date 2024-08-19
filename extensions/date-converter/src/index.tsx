@@ -2,6 +2,11 @@ import { Clipboard, ActionPanel, List, Action, getPreferenceValues } from "@rayc
 import * as chrono from "chrono-node";
 import { useMemo, useState } from "react";
 import "@total-typescript/ts-reset";
+import TimeAgo from "javascript-time-ago";
+import en from "javascript-time-ago/locale/en";
+
+TimeAgo.addDefaultLocale(en);
+const timeAgo = new TimeAgo("en-US");
 
 interface LabeledDate {
   label?: string;
@@ -19,11 +24,13 @@ interface DateFormatter {
 interface Preferences {
   defaultFormat: string;
   copyAction: "copy" | "paste" | "both";
+  hour24: boolean;
 }
 
-const humanFormatter = new Intl.DateTimeFormat([], {
+const humanFormatter = new Intl.DateTimeFormat(undefined, {
   dateStyle: "full",
-  timeStyle: "short",
+  timeStyle: "medium",
+  hour12: !getPreferenceValues<Preferences>().hour24,
 });
 
 const DATE_FORMATS: DateFormatter[] = [
@@ -60,6 +67,22 @@ function parseMachineReadableDate(query: string): LabeledDate | undefined {
     return {
       date: parsedDate,
       label: "ISO Date",
+      human: false,
+    };
+  }
+  const isNanoSecondTimestamp = /^\d{19}$/.test(query);
+  if (isNanoSecondTimestamp) {
+    return {
+      date: new Date(Number(BigInt(query) / 1_000_000n)),
+      label: "Unix Timestamp (ns)",
+      human: false,
+    };
+  }
+  const isMicroSecondTimestamp = /^\d{16}$/.test(query);
+  if (isMicroSecondTimestamp) {
+    return {
+      date: new Date(Number(BigInt(query) / 1_000n)),
+      label: "Unix Timestamp (μs)",
       human: false,
     };
   }
@@ -167,7 +190,7 @@ export default function Command() {
         <List.Item
           key={date.toISOString()}
           title={humanFormatter.format(date)}
-          subtitle={label}
+          subtitle={`${label} - ${timeAgo.format(date)}`}
           actions={
             <ActionPanel>
               {getSortedFormats({ human }).map(({ id, title, format }) => (

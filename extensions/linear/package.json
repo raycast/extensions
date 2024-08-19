@@ -3,7 +3,7 @@
   "name": "linear",
   "title": "Linear",
   "description": "Bring Linear to every corner of your Mac. Create, search, and modify your issues. Stay on top of your notifications in the menu bar.",
-  "icon": "linear.png",
+  "icon": "linear-app-icon.png",
   "owner": "linear",
   "access": "public",
   "author": "thomaslombart",
@@ -13,7 +13,8 @@
     "peduarte",
     "pernielsentikaer",
     "mil3na",
-    "clemb8"
+    "clemb8",
+    "stelo"
   ],
   "categories": [
     "Productivity"
@@ -57,12 +58,20 @@
               "value": "id"
             },
             {
+              "title": "Copy Issue ID as Link",
+              "value": "id-as-link"
+            },
+            {
               "title": "Copy Issue URL",
               "value": "url"
             },
             {
               "title": "Copy Issue Title",
               "value": "title"
+            },
+            {
+              "title": "Copy Issue Title as Link",
+              "value": "title-as-link"
             }
           ]
         }
@@ -76,9 +85,12 @@
     },
     {
       "name": "assigned-issues",
-      "title": "Assigned Issues",
+      "title": "My Issues",
       "description": "View and modify issues that are assigned to you.",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "assigned"
+      ]
     },
     {
       "name": "created-issues",
@@ -99,6 +111,12 @@
       "mode": "view"
     },
     {
+      "name": "search-documents",
+      "title": "Search Documents",
+      "description": "Explore documents for your Linear team.",
+      "mode": "view"
+    },
+    {
       "name": "create-project",
       "title": "Create Project",
       "description": "Create projects for your Linear team.",
@@ -116,7 +134,6 @@
       "description": "Show unread notifications in the Menu Bar.",
       "mode": "menu-bar",
       "subtitle": "Linear",
-      "icon": "linear.png",
       "interval": "15m",
       "preferences": [
         {
@@ -220,23 +237,32 @@
       "type": "textfield",
       "default": "50",
       "required": false
+    },
+    {
+      "name": "shouldHideRedundantIssues",
+      "type": "checkbox",
+      "title": "Advanced",
+      "label": "Hide Redundant Issues",
+      "description": "When enabled, the issues that are marked as Done, Canceled or Duplicate will not show up in search results.",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {
-    "@linear/sdk": "^13.0.0",
-    "@raycast/api": "^1.64.5",
-    "@raycast/utils": "^1.12.1",
-    "date-fns": "^3.1.0",
-    "file-type": "^18.7.0",
+    "@linear/sdk": "^26.0.0",
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.16.0",
+    "date-fns": "^3.6.0",
+    "file-type": "^19.0.0",
     "lodash": "^4.17.21",
-    "nanoid": "^5.0.4",
+    "nanoid": "^5.0.7",
     "node-emoji": "^2.1.3",
     "remove-markdown": "^0.5.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/lodash": "^4.14.202",
-    "@types/node": "^20.10.6",
+    "@types/node": "^22.1.0",
     "@types/react": "^18.2.46",
     "@types/remove-markdown": "^0.3.4",
     "eslint": "^8.56.0",

@@ -188,7 +188,7 @@
   ],
   "dependencies": {
     "@date-fns/utc": "^1.2.0",
-    "@raycast/api": "^1.71.3",
+    "@raycast/api": "^1.75.1",
     "@raycast/utils": "^1.14.0",
     "chrono-node": "^2.7.5",
     "date-fns": "^3.6.0",

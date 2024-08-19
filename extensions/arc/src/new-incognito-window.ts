@@ -1,7 +1,7 @@
-import { closeMainWindow, showHUD, LaunchProps } from "@raycast/api";
+import { closeMainWindow, LaunchProps, showHUD } from "@raycast/api";
 import { makeNewWindow } from "./arc";
-import { validateURL } from "./utils";
 import { URLArguments } from "./types";
+import { validateURL } from "./utils";
 
 const handleOpenNewIncognitoTab = async (newTabUrl: string) => {
   try {

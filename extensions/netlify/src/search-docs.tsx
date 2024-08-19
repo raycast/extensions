@@ -29,9 +29,8 @@ export default function Command() {
   );
 
   async function getBookmarks() {
-    const bookmarkedItems = await LocalStorage.allItems<
-      Record<string, string>
-    >();
+    const bookmarkedItems =
+      await LocalStorage.allItems<Record<string, string>>();
     const bookmarkedHits: AlgoliaHit[] = Object.values(bookmarkedItems).map(
       (value) => JSON.parse(value),
     );
