@@ -1,5 +1,8 @@
 # reclaim Changelog
 
+## [Fixes] - 2024-08-19
+- Correct typings in `normalize` function so that they pass `tsconfig:strict`
+
 ## [Fixes] - 2024-08-16
 - Handle possibly undefined
 
