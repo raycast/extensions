@@ -1,0 +1,80 @@
+{
+  "name": "prisma-docs-search",
+  "title": "Prisma Docs Search",
+  "description": "Use Prisma's docs AI search feature, powered by kapa.ai, through Raycast",
+  "icon": "prisma.png",
+  "author": "gniting",
+  "categories": [
+    "Productivity",
+    "Web",
+    "Developer Tools",
+    "Documentation"
+  ],
+  "contributors": [
+    "gniting",
+    "petra"
+  ],
+  "access": "public",
+  "license": "MIT",
+  "keywords": [
+    "Prisma",
+    "Search",
+    "AI Search"
+  ],
+  "commands": [
+    {
+      "name": "prisma-docs-search",
+      "title": "Search",
+      "description": "Send search queries to Prisma's Docs AI and get results within Raycast",
+      "keywords": [
+        "Prisma",
+        "Search",
+        "Docs"
+      ],
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Ask Prisma Docs AI for?",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "showMetadata",
+          "title": "Result Information",
+          "label": "Show details about the search result by default.",
+          "description": "Useful information like time to search, word count, AI's confidence level, etc. about the search results.",
+          "type": "checkbox",
+          "required": true,
+          "default": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.2",
+    "got": "^14.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^18.8.3",
+    "@types/react": "^18.0.9",
+    "@typescript-eslint/eslint-plugin": "^6.8.0",
+    "@typescript-eslint/parser": "^6.8.0",
+    "eslint": "^8.52.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  },
+  "raycast": {
+    "permissions": [
+      "network"
+    ]
+  }
+}
