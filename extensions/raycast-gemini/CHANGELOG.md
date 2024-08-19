@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [Add Translate Command]- {PR_MERGE_DATE}
+## [Add Translate Command] - {PR_MERGE_DATE}
 
 More Features:
 
