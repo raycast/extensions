@@ -84,6 +84,15 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
                           recentSearchRevalidate();
                         }}
                       />
+                      <Action
+                        icon={Icon.Trash}
+                        title="Remove All Searches"
+                        style={Action.Style.Destructive}
+                        onAction={async () => {
+                          await LocalStorage.setItem("recent-searches", JSON.stringify([]));
+                          recentSearchRevalidate();
+                        }}
+                      />
                     </ActionPanel>
                   }
                 />
