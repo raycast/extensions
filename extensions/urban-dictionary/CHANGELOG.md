@@ -1,6 +1,6 @@
 # Urban Dictionary Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2024-08-19
 
 - Fix capitalization in metadata label titles.
 
