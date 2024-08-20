@@ -65,14 +65,6 @@ If you encounter any issues while using the App Icon Generator:
 
 If you have any questions, suggestions, or encounter any bugs, please contact the developer through Raycast's support channels.
 
-## About the Author
-
-This plugin is developed by Hunter Ji.
-
-For more of my work and thoughts on development:
-- Visit my blog: [hunterji.com](https://hunterji.com)
-- Follow me on Twitter: [@hi_hunterji](https://x.com/hi_hunterji)
-
 ## License
 
 This project is licensed under the MIT License.
