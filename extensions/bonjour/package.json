@@ -11,10 +11,16 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "list",
       "title": "List Services",
       "description": "Lists Bonjour services",
       "mode": "view"
+    },
+    {
+      "name": "menu",
+      "description": "Adds a Bonjour service list to your menu bar",
+      "title": "Service Menu Bar",
+      "mode": "menu-bar"
     }
   ],
   "dependencies": {
