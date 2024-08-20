@@ -1,6 +1,6 @@
 # Linkwarden Changelog
 
-## [Fix API Auth] - {PR_MERGE_DATE}
+## [Fix API Auth] - 2024-08-20
 
 - The API now uses `Bearer` authorization (fix #13613)
 - Add an Empty view for no Links
