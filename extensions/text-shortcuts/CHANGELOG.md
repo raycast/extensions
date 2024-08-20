@@ -1,6 +1,6 @@
 # Text Shortcuts Changelog
 
-## [Fix command descriptions] - 2024-08-15
+## [Fix command descriptions] - 2024-08-20
 
 - Fix descriptions in extension preferences to match their actions.
 
