@@ -54,6 +54,24 @@
       "type": "textfield",
       "default": "",
       "required": true
+    },
+    {
+      "name": "colorProgression",
+      "title": "Color Progression",
+      "description": "The color progression to use for your goals.",
+      "type": "dropdown",
+      "required": false,
+      "default": "beeminder",
+      "data": [
+        {
+          "title": "Beeminder (🔴 🟠 🔵 🟢)",
+          "value": "beeminder"
+        },
+        {
+          "title": "Rainbow (🔴 🟠 🟡 🟢 🔵 🟣)",
+          "value": "rainbow"
+        }
+      ]
     }
   ],
   "scripts": {

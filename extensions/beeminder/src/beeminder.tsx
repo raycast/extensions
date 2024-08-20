@@ -117,11 +117,27 @@ export default function Command() {
   }
 
   function GoalsList({ goalsData }: { goalsData: GoalResponse }) {
-    const { beeminderUsername } = getPreferenceValues<Preferences>();
+    const { beeminderUsername, colorProgression } = getPreferenceValues<Preferences>();
     const goals = Array.isArray(goalsData) ? goalsData : undefined;
 
     const getCurrentDayStart = () => {
       return moment().startOf("day").unix();
+    };
+
+    const getGoalIcon = (dayDifference: number) => {
+      if (colorProgression === "rainbow") {
+        if (dayDifference < 1) return "🔴";
+        if (dayDifference < 2) return "🟠";
+        if (dayDifference < 3) return "🟡";
+        if (dayDifference < 7) return "🟢";
+        if (dayDifference < 14) return "🔵";
+        return "🟣";
+      } else {
+        if (dayDifference < 1) return "🔴";
+        if (dayDifference < 2) return "🟠";
+        if (dayDifference < 3) return "🔵";
+        return "🟢";
+      }
     };
 
     return (
@@ -132,7 +148,7 @@ export default function Command() {
           const dayDifference = moment.unix(goal.losedate).diff(new Date(), "days");
           const goalRate = goal.baremin;
 
-          let goalIcon;
+          const goalIcon = getGoalIcon(dayDifference);
           let dueText = `${goalRate} ${goal.gunits} due in `;
           if (dayDifference > 1) {
             dueText += `${dayDifference} days`;
@@ -141,7 +157,6 @@ export default function Command() {
           }
 
           if (dayDifference < 1) {
-            goalIcon = "🔴";
             const hours = timeDiffDuration.hours();
             const minutes = timeDiffDuration.minutes();
             if (hours > 0) {
@@ -150,12 +165,6 @@ export default function Command() {
             if (minutes > 0) {
               dueText += minutes > 1 ? ` ${minutes} minutes` : ` ${minutes} minute`;
             }
-          } else if (dayDifference < 2) {
-            goalIcon = "🟠";
-          } else if (dayDifference < 3) {
-            goalIcon = "🔵";
-          } else {
-            goalIcon = "🟢";
           }
 
           const hasDataForToday =
