@@ -27,6 +27,7 @@ import {
   Page,
 } from "./utils/notion";
 import { notionService } from "./utils/notion/oauth";
+import { Quicklink } from "./utils/types";
 
 type QuickCaptureFormValues = {
   url: string;
@@ -172,7 +173,7 @@ ${result?.content}
     getText();
   }, []);
 
-  function getQuicklink(): Action.CreateQuicklink.Props["quicklink"] {
+  function getQuicklink(): Quicklink {
     const url = "raycast://extensions/notion/notion/quick-capture";
     const page = searchPages?.find((page) => page.id === itemProps.page.value);
     const launchContext: LaunchContext = {
