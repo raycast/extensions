@@ -1,6 +1,6 @@
 # Vade Mecum Changelog
 
-## [Fixes and Improvements] - {PR_MERGE_DATE}
+## [Fixes and Improvements] - 2024-08-20
 
 - Updated the paste action to dynamically show the name and icon of the frontmost application.
 
