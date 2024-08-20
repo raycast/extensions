@@ -1,6 +1,6 @@
 # Quit Applications Changelog
 
-## [Update] - 2024-08-13
+## [Update] - {PR_MERGE_DATE}
 
 - Transitions component to from a class component to a function component
 - Fixes issue where quitting an app takes you back to the first element in list
