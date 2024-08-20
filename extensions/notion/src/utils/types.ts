@@ -1,5 +1,3 @@
-import type { Action } from "@raycast/api";
-
 export interface DatabaseView {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   properties?: Record<string, any>;
@@ -23,5 +21,3 @@ export interface KanbanView {
 export type UnwrapRecord<T> = T extends Record<never, infer U> ? U : never;
 export type UnwrapPromise<T> = T extends Promise<infer U> ? U : never;
 export type UnwrapArray<T> = T extends Array<infer U> ? U : never;
-
-export type Quicklink = Action.CreateQuicklink.Props["quicklink"];

@@ -27,7 +27,6 @@ import {
   Page,
 } from "./utils/notion";
 import { notionService } from "./utils/notion/oauth";
-import { Quicklink } from "./utils/types";
 
 type QuickCaptureFormValues = {
   url: string;
@@ -117,17 +116,13 @@ ${result?.content}
         if (launchContext?.defaults?.pageId) {
           const { pageId, objectType = "page" } = launchContext.defaults;
           selectedPage = objectType === "page" ? await fetchPage(pageId) : await fetchDatabase(pageId);
-
-          if (!selectedPage) {
-            await showToast({ style: Toast.Style.Failure, title: "Page selected from Quicklink was not found" });
-            return;
-          }
         } else {
           selectedPage = searchPages?.find((page) => page.id === values.page);
+        }
 
-          if (!selectedPage) {
-            throw new Error("Page selected from dropdown was not found");
-          }
+        if (!selectedPage) {
+          await showToast({ style: Toast.Style.Failure, title: "Could not find page" });
+          return;
         }
 
         if (selectedPage.object === "page") {
@@ -177,7 +172,7 @@ ${result?.content}
     getText();
   }, []);
 
-  function getQuicklink(): Quicklink {
+  function getQuicklink(): Action.CreateQuicklink.Props["quicklink"] {
     const url = "raycast://extensions/notion/notion/quick-capture";
     const page = searchPages?.find((page) => page.id === itemProps.page.value);
     const launchContext: LaunchContext = {
