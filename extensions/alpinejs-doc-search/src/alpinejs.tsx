@@ -8,14 +8,21 @@ const APPID = "SM9GAGAUKZ";
 const APIKEY = "1fad8740c0cf75209d11ae25f1f6f55c";
 const INDEX = "alpinejs";
 
+type Hierarchy = {
+  lvl0: string | null;
+  lvl1: string | null;
+  lvl2: string | null;
+  lvl3: string | null;
+  lvl4: string | null;
+  lvl5: string | null;
+  lvl6: string | null;
+}
 type Result = {
   url: string;
   anchor: string;
   body: string;
   objectID: string;
-  hierarchy: {
-    [key: string]: string;
-  };
+  hierarchy: Hierarchy;
   _highlightResult: {
     content:
       | {
@@ -25,15 +32,7 @@ type Result = {
           matchedWords: string[];
         }
       | undefined;
-    hierarchy: {
-      lvl0: string | null;
-      lvl1: string | null;
-      lvl2: string | null;
-      lvl3: string | null;
-      lvl4: string | null;
-      lvl5: string | null;
-      lvl6: string | null;
-    };
+    hierarchy: Hierarchy;
   };
 };
 
@@ -53,10 +52,13 @@ export default function SearchDocumentation() {
       const res = await algoliaIndex.search<Result>(query, {
         hitsPerPage: 15,
       });
-      return Object.entries(_.groupBy(res.hits, "hierarchy.lvl1"));
+      return Object.entries(_.groupBy(res.hits.filter(hit => hit.hierarchy.lvl2), "hierarchy.lvl1"));
     },
     [searchText],
     {
+      onData(data, pagination) {
+        console.log(data)
+      },
       initialData: [],
       keepPreviousData: true,
       failureToastOptions: {
@@ -69,14 +71,17 @@ export default function SearchDocumentation() {
     <List
       throttle={true}
       isLoading={isLoading}
-      searchBarPlaceholder={"Search Alpine.js Documentation"}
+      searchBarPlaceholder="Search Alpine.js Documentation"
       searchText={searchText}
       onSearchTextChange={setSearchText}
     >
-      {searchResults.map(([hitType, hitTypeResults]) => (
+      {(!isLoading && !searchResults.length) ? <List.EmptyView
+        icon="empty-icon.png"
+        title="Whoops! We did not find any matches for your search."
+        description="Try searching 'x-show'"
+      /> : searchResults.map(([hitType, hitTypeResults]) => (
         <List.Section title={hitType} key={hitType}>
           {hitTypeResults
-            .filter((hit) => hit.hierarchy.lvl2 != null)
             .map((hit) => (
               <List.Item
                 id={hit.objectID}
@@ -103,11 +108,6 @@ export default function SearchDocumentation() {
             ))}
         </List.Section>
       ))}
-      <List.EmptyView
-        icon="empty-icon.png"
-        title="Whoops! We did not find any matches for your search."
-        description="Try searching 'x-show'"
-      />
     </List>
   );
 }
