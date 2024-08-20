@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Add "Remove All Searches" Action in Search Command] - 2024-08-19
+## [Add "Remove All Searches" Action in Search Command] - {PR_MERGE_DATE}
 
 - Added `Remove All Searches` action to remove all search history in one click.
 
