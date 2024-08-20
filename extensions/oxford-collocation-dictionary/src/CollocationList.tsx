@@ -1,20 +1,33 @@
 import { Action, ActionPanel, List } from "@raycast/api";
-import { Collocation } from "./parseHtml";
 import { capitalizeWord } from "./utils";
+import { useState, useEffect } from "react";
 
 type CollocationList = {
-  collocationGroup: Collocation;
+  collocations: string[];
 };
-export const CollocationList = ({ collocationGroup }: CollocationList) => {
+export const CollocationList = ({ collocations }: CollocationList) => {
+  const [items, setItems] = useState<string[]>();
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      setItems(collocations);
+    }, 500);
+
+    return () => {
+      clearTimeout(id);
+    };
+  }, []);
+
   return (
-    <List>
-      {collocationGroup.collocations.map((collocation) => (
+    <List isLoading={items === undefined}>
+      {collocations.map((collocation) => (
         <List.Item
           key={collocation}
           title={capitalizeWord(collocation)}
           actions={
             <ActionPanel>
               <Action.CopyToClipboard title="Copy to Clipboard" content={collocation} />
+              <Action.Paste content={collocation} />
             </ActionPanel>
           }
         />

@@ -5,5 +5,8 @@ export function capitalizeWord(word: string) {
   return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 }
 export function remapType(type: string) {
-  return { "ADJ.": "Adjective", "PREP.": "Preposition", "ADV.": "Adverb", PHRASES: "Phrases" }[type] ?? type;
+  return (
+    { "ADJ.": "Adjective", "PREP.": "Preposition", "ADV.": "Adverb", PHRASES: "Phrases", "QUANT.": "Quantity" }[type] ??
+    type
+  );
 }

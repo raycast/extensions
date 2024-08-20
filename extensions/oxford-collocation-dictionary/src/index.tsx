@@ -34,7 +34,7 @@ export default function Command() {
       throttle
       onSearchTextChange={setQuery}
     >
-      {!hasData && !query && <List.EmptyView icon={{ source: "../assets/oxford.png" }} title="Type to begin search" />}
+      {!hasData && <List.EmptyView icon={{ source: "../assets/oxford.png" }} title="Type to begin search" />}
 
       {!!hasData && (
         <>
@@ -61,7 +61,7 @@ function ListItem({ group, type, query }: { group: Collocation; type: string; qu
           <Action.Push
             title="View Collocations as List"
             icon={Icon.List}
-            target={<CollocationList collocationGroup={group} />}
+            target={<CollocationList collocations={group.collocations} />}
           />
           <Action.OpenInBrowser url={`${URL}?word=${query}`} />
         </ActionPanel>
