@@ -1,5 +1,9 @@
 # ViaCEP Changelog
 
+## [Enhancements] - {PR_MERGE_DATE}
+
+- Dynamically fetch and display app icons for `Open in Apple Maps` and `Open in Google Maps` actions.
+
 ## [Enhancements] - 2024-03-12
 
 - New extension icon.
