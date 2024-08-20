@@ -18,7 +18,7 @@
     {
       "name": "index",
       "title": "Generate App Icons",
-      "description": "Create app icons for ICO, ios, iPad, and macos from a selected image",
+      "description": "Create app icons for ICO, iOS, iPad, and macOS from a selected image",
       "mode": "view"
     }
   ],
@@ -62,7 +62,7 @@
       "required": false,
       "default": false,
       "placeholder": "Add iOS as default platform",
-      "label": "ios"
+      "label": "iOS"
     },
     {
       "name": "ipad",
@@ -71,7 +71,7 @@
       "required": false,
       "default": false,
       "placeholder": "Add iPad as default platform",
-      "label": "ipad"
+      "label": "iPad"
     },
     {
       "name": "macos",
@@ -80,7 +80,7 @@
       "required": false,
       "default": false,
       "placeholder": "Add macOS as default platform",
-      "label": "macos"
+      "label": "macOS"
     },
     {
       "name": "android",
