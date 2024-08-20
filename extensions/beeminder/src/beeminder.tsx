@@ -9,6 +9,7 @@ import {
   getPreferenceValues,
   Cache,
   Icon,
+  Keyboard,
 } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import moment from "moment";
@@ -28,6 +29,7 @@ export default function Command() {
   });
 
   function fetchData() {
+    setIsLoading(true);
     return fetchGoals()
       .then((data) => {
         // When the data changes, update the cache
@@ -198,13 +200,19 @@ export default function Command() {
                 <ActionPanel>
                   <Action.Push
                     title="Enter datapoint"
+                    icon={Icon.PlusCircle}
                     target={<DataPointForm goalSlug={goal.slug} />}
                   />
                   <Action.OpenInBrowser
                     title="Open goal in Beeminder"
                     url={`https://www.beeminder.com/${beeminderUsername}/${goal.slug}`}
                   />
-                  <Action title="Refresh data" onAction={async () => await fetchData()} />
+                  <Action
+                    title="Refresh data"
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
+                    icon={Icon.RotateClockwise}
+                    onAction={async () => await fetchData()}
+                  />
                 </ActionPanel>
               }
             />
