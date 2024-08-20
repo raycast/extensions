@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "app-icon-generator",
   "title": "App Icon Generator",
-  "description": "Generate app icons for ICO, iOS, iPad, and macOS from a single image file",
+  "description": "Generate icons for multiple platforms: iOS, Android, macOS, and more.",
   "icon": "command-icon.png",
   "author": "HunterJi",
   "contributors": [
@@ -18,7 +18,7 @@
     {
       "name": "index",
       "title": "Generate App Icons",
-      "description": "Create app icons for ICO, iOS, iPad, and macOS from a selected image",
+      "description": "Create app icons for ICO, ios, iPad, and macos from a selected image",
       "mode": "view"
     }
   ],
@@ -56,31 +56,31 @@
       "label": "ICO"
     },
     {
-      "name": "iOS",
+      "name": "ios",
       "type": "checkbox",
-      "description": "Add iOS as default platform",
+      "description": "Add ios as default platform",
       "required": false,
       "default": false,
-      "placeholder": "Add iOS as default platform",
-      "label": "iOS"
+      "placeholder": "Add ios as default platform",
+      "label": "ios"
     },
     {
-      "name": "iPadOS",
-      "description": "Add iPadOS as default platform",
+      "name": "ipad",
+      "description": "Add ipad as default platform",
       "type": "checkbox",
       "required": false,
       "default": false,
-      "placeholder": "Add iPadOS as default platform",
-      "label": "iPadOS"
+      "placeholder": "Add ipad as default platform",
+      "label": "ipad"
     },
     {
-      "name": "macOS",
-      "description": "Add macOS as default platform",
+      "name": "macos",
+      "description": "Add macos as default platform",
       "type": "checkbox",
       "required": false,
       "default": false,
-      "placeholder": "Add macOS as default platform",
-      "label": "macOS"
+      "placeholder": "Add macos as default platform",
+      "label": "macos"
     },
     {
       "name": "android",

@@ -22,9 +22,9 @@ interface FormValues {
 
 const PLATFORMS = {
   ico: "ICO",
-  iOS: "iOS",
-  iPadOS: "iPadOS",
-  macOS: "macOS",
+  ios: "ios",
+  ipad: "ipad",
+  macos: "macos",
   android: "Android",
   watchOS: "watchOS",
   tvOS: "tvOS",
@@ -36,9 +36,9 @@ const PLATFORMS = {
 
 const SIZES = {
   ico: [16, 24, 32, 48, 64, 128, 256],
-  iOS: [20, 29, 40, 58, 60, 76, 80, 87, 120, 152, 167, 180, 1024],
-  iPadOS: [20, 29, 40, 58, 76, 80, 87, 120, 152, 167, 180, 1024],
-  macOS: [16, 32, 64, 128, 256, 512, 1024],
+  ios: [20, 29, 40, 58, 60, 76, 80, 87, 120, 152, 167, 180, 1024],
+  ipad: [20, 29, 40, 58, 76, 80, 87, 120, 152, 167, 180, 1024],
+  macos: [16, 32, 64, 128, 256, 512, 1024],
   android: [48, 72, 96, 144, 192, 512],
   watchOS: [48, 55, 58, 87, 80, 88, 100, 172, 196, 216, 1024],
   tvOS: [400, 1280],
