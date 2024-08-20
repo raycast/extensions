@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2024-08-20
 
 - Remove seconds from optional timer in the Menu Bar, as it only updates every 10 seconds.
 
