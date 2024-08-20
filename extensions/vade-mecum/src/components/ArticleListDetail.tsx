@@ -148,7 +148,7 @@ export default function ArticleListDetail({ law }: ArticleListDetailsProps) {
             actions={
               <ActionPanel title={article.title}>
                 <Action.Paste
-                  title={`Paste to ${frontmostApp?.name || "Active App"}`}
+                  title={`Paste Article to ${frontmostApp?.name || "Active App"}`}
                   content={article.content.replace(/`/g, "")}
                   icon={frontmostApp ? { fileIcon: frontmostApp.path } : Icon.Clipboard}
                 />
