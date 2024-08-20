@@ -17,6 +17,8 @@ export function useBrowserLink() {
           return runAppleScript(`tell application "Brave Browser" to return URL of active tab of front window`);
         case "com.apple.Safari":
           return runAppleScript(`tell application "Safari" to return URL of front document`);
+        case "com.kagi.kagimacOS":
+          return runAppleScript(`tell application "Orion" to return URL of front document`);
         case "org.mozilla.firefox":
           return runAppleScript(`
             tell application "System Events"

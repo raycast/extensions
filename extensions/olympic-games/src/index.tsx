@@ -1,36 +1,20 @@
 import { Icon, List } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
 import { getAccessories, getFlag } from "./utils";
-import { MedalResult } from "./types";
+import { OLYMPICS_2024_DATA } from "./Data/2024-medals";
 
 export default function Command() {
-  const url = "https://api.olympics.kevle.xyz/medals";
-
-  const { data, isLoading } = useFetch<{ results: MedalResult[] }>(url, {
-    parseResponse: (response: Response) => {
-      if (!response.ok) {
-        throw new Error(response.statusText);
-      }
-
-      return response.json();
-    },
-  });
-
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search Country">
-      {data?.results?.map((item, index) => <MedalItem key={item.country.code} item={item} index={index} />)}
+    <List searchBarPlaceholder="Search Country">
+      {OLYMPICS_2024_DATA?.results?.map((item, index) => (
+        <List.Item
+          key={index}
+          icon={{ source: getFlag(item.country.code), fallback: Icon.Flag }}
+          keywords={[item.country.code, item.country.name]}
+          title={item.country.code}
+          subtitle={item.country.name}
+          accessories={getAccessories(item)}
+        />
+      ))}
     </List>
-  );
-}
-
-function MedalItem(props: { item: MedalResult; index: number }) {
-  return (
-    <List.Item
-      icon={{ source: getFlag(props.item.country.code), fallback: Icon.Flag }}
-      keywords={[props.item.country.code, props.item.country.name]}
-      title={props.item.country.code}
-      subtitle={props.item.country.name}
-      accessories={getAccessories(props)}
-    />
   );
 }

@@ -1,6 +1,11 @@
 # Tailwind CSS Changelog
 
+## [Add `size-` classes to the JSON file.] - 2024-08-20
+
+- Updated classes file to support `size-` utilities introduced in Tailwind v3.4
+
 ## [Update documentation] - 2024-06-21
+
 - Updated Tailwind CSS documentation links
 
 ## [Fixed sorting] - 2023-10-16

@@ -1,5 +1,9 @@
 # Vade Mecum Changelog
 
+## [Fixes and Improvements] - 2024-08-20
+
+- Updated the paste action to dynamically show the name and icon of the frontmost application.
+
 ## [Fixes] - 2024-07-06
 
 - Removed the Markdown syntax from the article content before running the paste and copy actions.

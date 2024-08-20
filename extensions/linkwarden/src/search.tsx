@@ -1,4 +1,15 @@
-import { Action, ActionPanel, List, Icon, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  List,
+  Icon,
+  getPreferenceValues,
+  showToast,
+  Toast,
+  launchCommand,
+  LaunchType,
+  Keyboard,
+} from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import axios from "axios";
@@ -21,23 +32,27 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState("");
 
-  const { isLoading, data, revalidate } = useFetch<ApiResponse>(
+  const { isLoading, data, revalidate } = useFetch(
     `${preferences.LinkwardenUrl}/api/v1/links?sort=0&searchQueryString=${searchText}&searchByName=true&searchByUrl=true&searchByDescription=true&searchByTags=true&searchByTextContent=true`,
     {
       headers: {
-        Cookie: `__Secure-next-auth.session-token=${preferences.LinkwardenApiKey}`,
+        Authorization: `Bearer ${preferences.LinkwardenApiKey}`,
       },
+      mapResult(result: ApiResponse) {
+        return {
+          data: result.response,
+        };
+      },
+      initialData: [],
       keepPreviousData: true,
     },
   );
-
-  const dataArray = Array.isArray(data?.response) ? data.response : [];
 
   const deleteLink = async (id: number) => {
     try {
       await axios.delete(`${preferences.LinkwardenUrl}/api/v1/links/${id}`, {
         headers: {
-          Cookie: `__Secure-next-auth.session-token=${preferences.LinkwardenApiKey}`,
+          Authorization: `Bearer ${preferences.LinkwardenApiKey}`,
         },
       });
 
@@ -60,7 +75,23 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText} throttle>
-      {dataArray.map((item) => {
+      {!isLoading && !data.length && (
+        <List.EmptyView
+          icon={Icon.Rocket}
+          title="You Haven't Created Any Links Yet"
+          description="Start your journey by creating a new Link!"
+          actions={
+            <ActionPanel>
+              <Action
+                icon={Icon.Plus}
+                title="Create New Link"
+                onAction={async () => await launchCommand({ name: "add", type: LaunchType.UserInitiated })}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
+      {data.map((item) => {
         return (
           <List.Item
             key={item.id}
@@ -77,6 +108,12 @@ export default function Command() {
                   style={Action.Style.Destructive}
                   onAction={() => deleteLink(item.id)}
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
+                />
+                <Action
+                  icon={Icon.Plus}
+                  title="Create New Link"
+                  onAction={async () => await launchCommand({ name: "add", type: LaunchType.UserInitiated })}
+                  shortcut={Keyboard.Shortcut.Common.New}
                 />
               </ActionPanel>
             }

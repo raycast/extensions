@@ -1,16 +1,22 @@
 import { Icon, List, getPreferenceValues } from "@raycast/api";
 import { generateActionPanel } from "./components/actionpanel";
-import { COLORS, ESCAPED_PREFIX, FORMATTING, PREFIX } from "./constants";
+import { COLORS, FORMATTING } from "./constants";
+import { escapeChar } from "./utils";
+
+import { useCachedState } from "@raycast/utils";
 
 export default function Command() {
   const prefs = getPreferenceValues<Preferences>();
+
+  const [prefix, setPrefix] = useCachedState<string>("prefix", prefs.prefix1);
+  const prefixEscaped = escapeChar(prefix);
 
   return (
     <List>
       <List.Section title="Colors">
         {COLORS.map(({ name, chatCode, hexCode, keywords }) => {
-          const fullChatCode = `${PREFIX}${chatCode}`;
-          const chatCodeEscaped = `${ESCAPED_PREFIX}${chatCode}`;
+          const fullChatCode = `${prefix}${chatCode}`;
+          const chatCodeEscaped = `${prefixEscaped}${chatCode}`;
           const formattedHexCode = prefs.hexUpperCase ? hexCode : hexCode.toLowerCase();
 
           return (
@@ -20,7 +26,13 @@ export default function Command() {
               title={name}
               subtitle={fullChatCode}
               keywords={keywords}
-              actions={generateActionPanel(fullChatCode, chatCodeEscaped, formattedHexCode)}
+              actions={generateActionPanel({
+                setPrefix,
+
+                chatCode: fullChatCode,
+                chatCodeEscaped,
+                hexCode: formattedHexCode,
+              })}
             />
           );
         })}
@@ -28,8 +40,8 @@ export default function Command() {
 
       <List.Section title="Formatting">
         {FORMATTING.map(({ name, icon, chatCode }) => {
-          const fullChatCode = `${PREFIX}${chatCode}`;
-          const chatCodeEscaped = `${ESCAPED_PREFIX}${chatCode}`;
+          const fullChatCode = `${prefix}${chatCode}`;
+          const chatCodeEscaped = `${prefixEscaped}${chatCode}`;
 
           return (
             <List.Item
@@ -37,7 +49,12 @@ export default function Command() {
               icon={icon}
               title={name}
               subtitle={fullChatCode}
-              actions={generateActionPanel(fullChatCode, chatCodeEscaped)}
+              actions={generateActionPanel({
+                setPrefix,
+
+                chatCode: fullChatCode,
+                chatCodeEscaped,
+              })}
             />
           );
         })}
