@@ -30,19 +30,19 @@ function getRankIcon(rank: number): Image.ImageLike {
   };
 }
 
-export function getAccessories(props: { item: MedalResult; index: number }) {
+export function getAccessories(item: MedalResult) {
   const accessories = new Array<List.Item.Accessory>();
 
   accessories.push({ icon: { source: "🥇" } });
-  accessories.push({ icon: getMetalNumIcon(props.item.medals.gold) });
+  accessories.push({ icon: getMetalNumIcon(item.medals.gold) });
 
   accessories.push({ icon: { source: "🥈" } });
-  accessories.push({ icon: getMetalNumIcon(props.item.medals.silver) });
+  accessories.push({ icon: getMetalNumIcon(item.medals.silver) });
 
   accessories.push({ icon: { source: "🥉" } });
-  accessories.push({ icon: getMetalNumIcon(props.item.medals.bronze) });
+  accessories.push({ icon: getMetalNumIcon(item.medals.bronze) });
 
-  accessories.push({ icon: getRankIcon(props.item.rank), tooltip: props.item.medals.total.toString() });
+  accessories.push({ icon: getRankIcon(item.rank), tooltip: item.medals.total.toString() });
 
   return accessories;
 }

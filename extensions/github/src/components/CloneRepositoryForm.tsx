@@ -40,7 +40,7 @@ export default function CloneRepositoryForm({ repository }: CloneRepositoryFormP
       const targetDir = path.join(values.clonePath[0], repoName);
 
       await showToast({
-        title: `Cloning ${repository.nameWithOwner} tp ${targetDir}`,
+        title: `Cloning ${repository.nameWithOwner} to ${targetDir}`,
         style: Toast.Style.Animated,
       });
 
