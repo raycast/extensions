@@ -15,6 +15,7 @@ import moment from "moment";
 import { Goal, GoalResponse, DataPointFormValues, Preferences } from "./types";
 import { fetchGoals, sendDatapoint } from "./api";
 import { useEffect, useState } from "react";
+import { useNavigation } from "@raycast/api";
 
 const cache = new Cache();
 
@@ -66,18 +67,20 @@ export default function Command() {
   }
 
   function DataPointForm({ goalSlug }: { goalSlug: string }) {
+    const { pop } = useNavigation();
     const { handleSubmit, itemProps } = useForm<DataPointFormValues>({
       async onSubmit(values) {
         try {
           await sendDatapoint(goalSlug, values.dataPoint, values.comment);
-          popToRoot();
+          pop();
           await showToast({
             style: Toast.Style.Success,
             title: "Datapoint submitted",
             message: "Your datapoint was submitted successfully",
           });
+          await fetchData();
         } catch (error) {
-          popToRoot();
+          pop();
           await showToast({
             style: Toast.Style.Failure,
             title: "Something went wrong",
@@ -117,11 +120,27 @@ export default function Command() {
   }
 
   function GoalsList({ goalsData }: { goalsData: GoalResponse }) {
-    const { beeminderUsername } = getPreferenceValues<Preferences>();
+    const { beeminderUsername, colorProgression } = getPreferenceValues<Preferences>();
     const goals = Array.isArray(goalsData) ? goalsData : undefined;
 
     const getCurrentDayStart = () => {
       return moment().startOf("day").unix();
+    };
+
+    const getGoalIcon = (safebuf: number) => {
+      if (colorProgression === "rainbow") {
+        if (safebuf < 1) return "🔴";
+        if (safebuf < 2) return "🟠";
+        if (safebuf < 3) return "🟡";
+        if (safebuf < 7) return "🟢";
+        if (safebuf < 14) return "🔵";
+        return "🟣";
+      } else {
+        if (safebuf < 1) return "🔴";
+        if (safebuf < 2) return "🟠";
+        if (safebuf < 3) return "🔵";
+        return "🟢";
+      }
     };
 
     return (
@@ -129,19 +148,17 @@ export default function Command() {
         {goals?.map((goal: Goal) => {
           const diff = moment.unix(goal.losedate).diff(new Date());
           const timeDiffDuration = moment.duration(diff);
-          const dayDifference = moment.unix(goal.losedate).diff(new Date(), "days");
           const goalRate = goal.baremin;
 
-          let goalIcon;
+          const goalIcon = getGoalIcon(goal.safebuf);
           let dueText = `${goalRate} ${goal.gunits} due in `;
-          if (dayDifference > 1) {
-            dueText += `${dayDifference} days`;
-          } else if (dayDifference === 1) {
-            dueText += `${dayDifference} day`;
+          if (goal.safebuf > 1) {
+            dueText += `${goal.safebuf} days`;
+          } else if (goal.safebuf === 1) {
+            dueText += `${goal.safebuf} day`;
           }
 
-          if (dayDifference < 1) {
-            goalIcon = "🔴";
+          if (goal.safebuf < 1) {
             const hours = timeDiffDuration.hours();
             const minutes = timeDiffDuration.minutes();
             if (hours > 0) {
@@ -150,12 +167,6 @@ export default function Command() {
             if (minutes > 0) {
               dueText += minutes > 1 ? ` ${minutes} minutes` : ` ${minutes} minute`;
             }
-          } else if (dayDifference < 2) {
-            goalIcon = "🟠";
-          } else if (dayDifference < 3) {
-            goalIcon = "🔵";
-          } else {
-            goalIcon = "🟢";
           }
 
           const hasDataForToday =
