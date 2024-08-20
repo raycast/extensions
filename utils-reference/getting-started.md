@@ -16,9 +16,13 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.16.5
+
+- Fixed the bug where `failureToastOptions` did not apply for `useExec` and `useStreamJSON` hooks.
+
 ### v1.16.4
 
-- Avoid throwing an error when `useFetch` can't parse the `Content-Type` header of the response
+- Avoid throwing an error when `useFetch` can't parse the `Content-Type` header of the response.
 
 ### v1.16.3
 
