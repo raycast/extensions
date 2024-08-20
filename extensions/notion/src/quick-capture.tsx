@@ -198,12 +198,8 @@ ${result?.content}
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} title="Capture" />
-          <Action.CreateQuicklink
-            title="Create Quicklink to Command as Configured"
-            quicklink={getQuicklink()}
-            icon={Icon.Link}
-          />
+          <Action.SubmitForm onSubmit={handleSubmit} title="Capture" icon={Icon.SaveDocument} />
+          <Action.CreateQuicklink title="Create Quicklink" quicklink={getQuicklink()} />
         </ActionPanel>
       }
     >
