@@ -22,9 +22,9 @@ interface FormValues {
 
 const PLATFORMS = {
   ico: "ICO",
-  ios: "ios",
-  ipad: "ipad",
-  macos: "macos",
+  ios: "iOS",
+  ipad: "iPad",
+  macos: "macOS",
   android: "Android",
   watchOS: "watchOS",
   tvOS: "tvOS",
