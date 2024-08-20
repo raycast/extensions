@@ -5,6 +5,7 @@
   "description": "This extension makes it easy to display Raycast notifications via a quicklink, making the Raycast interface accessible to other applications or scripts",
   "icon": "command-icon.png",
   "author": "maxnyby",
+  "contributors": ["stelo"],
   "categories": [
     "Developer Tools"
   ],
@@ -21,6 +22,26 @@
           "placeholder": "Title",
           "type": "text",
           "required": true
+        },
+        {
+          "name": "type",
+          "type": "dropdown",
+          "placeholder": "Type",
+          "required": false,
+          "data": [
+            {
+              "title": "Standard",
+              "value": "standard"
+            },
+            {
+              "title": "Success",
+              "value": "success"
+            },
+            {
+              "title": "Failure",
+              "value": "failure"
+            }
+          ]
         }
       ]
     }
@@ -30,8 +51,8 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
+    "@types/node": "^22.2.0",
+    "@types/react": "^18.3.3",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5"
