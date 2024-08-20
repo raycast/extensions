@@ -1,6 +1,6 @@
 # App Icon Generator Changelog
 
-## [1.1.0] - 2024-08-03
+## [1.1.0] - {PR_MERGE_DATE}
 
 - Added support for multiple new platforms:
   - Android
