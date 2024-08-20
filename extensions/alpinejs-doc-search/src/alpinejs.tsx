@@ -16,7 +16,7 @@ type Hierarchy = {
   lvl4: string | null;
   lvl5: string | null;
   lvl6: string | null;
-}
+};
 type Result = {
   url: string;
   anchor: string;
@@ -52,13 +52,15 @@ export default function SearchDocumentation() {
       const res = await algoliaIndex.search<Result>(query, {
         hitsPerPage: 15,
       });
-      return Object.entries(_.groupBy(res.hits.filter(hit => hit.hierarchy.lvl2), "hierarchy.lvl1"));
+      return Object.entries(
+        _.groupBy(
+          res.hits.filter((hit) => hit.hierarchy.lvl2),
+          "hierarchy.lvl1"
+        )
+      );
     },
     [searchText],
     {
-      onData(data, pagination) {
-        console.log(data)
-      },
       initialData: [],
       keepPreviousData: true,
       failureToastOptions: {
@@ -75,14 +77,16 @@ export default function SearchDocumentation() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
     >
-      {(!isLoading && !searchResults.length) ? <List.EmptyView
-        icon="empty-icon.png"
-        title="Whoops! We did not find any matches for your search."
-        description="Try searching 'x-show'"
-      /> : searchResults.map(([hitType, hitTypeResults]) => (
-        <List.Section title={hitType} key={hitType}>
-          {hitTypeResults
-            .map((hit) => (
+      {!isLoading && !searchResults.length ? (
+        <List.EmptyView
+          icon="empty-icon.png"
+          title="Whoops! We did not find any matches for your search."
+          description="Try searching 'x-show'"
+        />
+      ) : (
+        searchResults.map(([hitType, hitTypeResults]) => (
+          <List.Section title={hitType} key={hitType}>
+            {hitTypeResults.map((hit) => (
               <List.Item
                 id={hit.objectID}
                 key={hit.objectID}
@@ -106,8 +110,9 @@ export default function SearchDocumentation() {
                 }
               />
             ))}
-        </List.Section>
-      ))}
+          </List.Section>
+        ))
+      )}
     </List>
   );
 }
