@@ -126,7 +126,7 @@ export default function Command() {
     const goals = Array.isArray(goalsData) ? goalsData : undefined;
 
     const getCurrentDayStart = () => {
-      return moment().startOf("day").unix();
+      return new Date().setHours(0, 0, 0, 0) / 1000; // Convert to Unix timestamp
     };
 
     const getGoalIcon = (safebuf: number) => {
