@@ -1,32 +1,7 @@
 import { useFetch } from "@raycast/utils";
-import { Business, Invoice } from "./types";
+import { Business, Currency, Customer, Edges, Invoice, Result } from "./types";
 import { API_URL } from "./config";
-
-type Result<T> =
-  | {
-      errors: Array<{
-        extensions: {
-          id: string;
-          code: string;
-        };
-        message: string;
-        locations: Array<{
-          line: number;
-          column: number;
-        }>;
-        path: string[];
-      }>;
-      data?: null | T;
-    }
-  | {
-      data: T;
-    };
-
-type Edges<T> = {
-  edges: Array<{
-    node: T;
-  }>;
-};
+import { QUERIES } from "./gql/queries";
 
 export const useGetBusinesses = (token?: string) =>
   useFetch(API_URL, {
@@ -36,22 +11,7 @@ export const useGetBusinesses = (token?: string) =>
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      query: `query {
-  businesses {
-    edges {
-      node {
-        id
-        name
-        isPersonal
-        modifiedAt
-        currency {
-            code
-        }
-      }
-    }
-  }
-}
-`,
+      query: QUERIES.getBusinesses,
     }),
     execute: Boolean(token),
     mapResult(result: Result<{ businesses: Edges<Business> }>) {
@@ -70,86 +30,7 @@ export const useGetBusinessInvoices = (businessId: string, token?: string) =>
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      query: `query($businessId: ID!) {
-  business(id: $businessId) {
-    id
-    invoices {
-      edges {
-        node {
-          id
-          createdAt
-          modifiedAt
-          pdfUrl
-          viewUrl
-          status
-          title
-          subhead
-          invoiceNumber
-          invoiceDate
-          customer {
-            name
-          }
-          dueDate
-          amountDue {
-            value
-            currency {
-              symbol
-            }
-          }
-          amountPaid {
-            value
-            currency {
-              symbol
-            }
-          }
-          taxTotal {
-            value
-            currency {
-              symbol
-            }
-          }
-          total {
-            value
-            currency {
-              symbol
-            }
-          }
-          itemTitle
-          unitTitle
-          priceTitle
-          amountTitle
-          hideName
-          hideDescription
-          hideUnit
-          hidePrice
-          hideAmount
-          items {
-            product {
-              id
-              name
-            }
-            description
-            quantity
-            price
-            subtotal {
-              value
-              currency {
-                symbol
-              }
-            }
-            total {
-              value
-              currency {
-                symbol
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-`,
+      query: QUERIES.getBusinessInvoices,
       variables: {
         businessId,
       },
@@ -159,6 +40,62 @@ export const useGetBusinessInvoices = (businessId: string, token?: string) =>
       if ("errors" in result) throw new Error(result.errors[0].message);
       return {
         data: result.data.business.invoices.edges.map((edge) => edge.node),
+      };
+    },
+    initialData: [],
+  });
+
+export const useGetBusinessCustomers = (businessId: string, token?: string) =>
+  useFetch(API_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: QUERIES.getBusinessCustomers,
+      variables: {
+        businessId,
+      },
+    }),
+    execute: Boolean(token),
+    mapResult(result: Result<{ business: { customers: Edges<Customer> } }>) {
+      if ("errors" in result) throw new Error(result.errors[0].message);
+      return {
+        data: result.data.business.customers.edges.map((edge) => edge.node),
+      };
+    },
+    initialData: [],
+  });
+
+export const useGetBusinessProductsAndServices = (businessId: string, token?: string) =>
+  useFetch(API_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: QUERIES.getProducts,
+      variables: {
+        businessId,
+      },
+    }),
+    execute: Boolean(token),
+    mapResult(
+      result: Result<{
+        business: {
+          currency: Currency;
+          products: Edges<{ id: string; name: string; description: string; unitPrice: string }>;
+        };
+      }>,
+    ) {
+      if ("errors" in result) throw new Error(result.errors[0].message);
+      return {
+        data: result.data.business.products.edges.map((edge) => ({
+          ...edge.node,
+          price: result.data.business.currency.symbol + edge.node.unitPrice,
+        })),
       };
     },
     initialData: [],

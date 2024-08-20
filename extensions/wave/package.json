@@ -6,10 +6,19 @@
   "icon": "wave.png",
   "author": "xmok",
   "categories": [
-    "Applications",
     "Finance"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "access_token",
+      "title": "Access Token",
+      "description": "Use an Access Token instead of logging in via Wave",
+      "type": "password",
+      "required": false,
+      "placeholder": "OPTIONAL"
+    }
+  ],
   "commands": [
     {
       "name": "manage-wave",

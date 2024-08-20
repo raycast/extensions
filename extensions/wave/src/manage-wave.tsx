@@ -1,10 +1,16 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useGetBusinesses, useGetBusinessInvoices } from "./lib/wave";
+import {
+  useGetBusinessCustomers,
+  useGetBusinesses,
+  useGetBusinessInvoices,
+  useGetBusinessProductsAndServices,
+} from "./lib/wave";
 import { Business } from "./lib/types";
 import { getInvoiceStatusColor } from "./lib/utils";
 import { useCachedState } from "@raycast/utils";
 import { INVOICE_STATUSES } from "./lib/config";
 import { useToken } from "./lib/oauth-client";
+import CustomerStatement from "./lib/components/customer-statement";
 
 export default function ManageWave() {
   const { data: token } = useToken();
@@ -21,11 +27,23 @@ export default function ManageWave() {
           accessories={[{ date: new Date(business.modifiedAt) }]}
           actions={
             <ActionPanel>
-              <Action.Push
-                icon={Icon.Receipt}
-                title="View Invoices"
-                target={<BusinessInvoices business={business} />}
-              />
+              <ActionPanel.Section title="Sales & Payments">
+                <Action.Push
+                  icon={Icon.Receipt}
+                  title="View Invoices"
+                  target={<BusinessInvoices business={business} />}
+                />
+                <Action.Push
+                  icon={Icon.TwoPeople}
+                  title="View Customers"
+                  target={<BusinessCustomers business={business} />}
+                />
+                <Action.Push
+                  icon={Icon.Box}
+                  title="View Products & Services (Sales)"
+                  target={<BusinessProductsAndServices business={business} />}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -101,6 +119,105 @@ ${invoice.items.map((item) => `| ${item.product.name} | ${item.quantity} | ${ite
             />
           );
         })}
+      </List.Section>
+    </List>
+  );
+}
+
+function BusinessCustomers({ business }: { business: Business }) {
+  const [isShowingDetail, setIsShowingDetail] = useCachedState("show-customer-details", false);
+
+  const { data: token } = useToken();
+  const { isLoading, data: customers } = useGetBusinessCustomers(business.id, token);
+
+  return (
+    <List isLoading={isLoading} isShowingDetail={isShowingDetail} searchBarPlaceholder="Search customer">
+      <List.Section title={`Businesses / ${business.name} / Customers`}>
+        {customers.map((customer) => {
+          return (
+            <List.Item
+              key={customer.id}
+              icon={Icon.Person}
+              title={customer.name}
+              subtitle={isShowingDetail ? undefined : `${customer.firstName} ${customer.lastName}`}
+              accessories={
+                isShowingDetail ? undefined : [{ text: customer.email }, { date: new Date(customer.modifiedAt) }]
+              }
+              detail={
+                <List.Item.Detail
+                  metadata={
+                    <List.Item.Detail.Metadata>
+                      <List.Item.Detail.Metadata.Label
+                        title="Created At"
+                        text={new Date(customer.createdAt).toISOString()}
+                      />
+                      <List.Item.Detail.Metadata.Label
+                        title="Modified At"
+                        text={new Date(customer.modifiedAt).toISOString()}
+                      />
+                      <List.Item.Detail.Metadata.Link
+                        title="Website"
+                        text={customer.website}
+                        target={customer.website}
+                      />
+                    </List.Item.Detail.Metadata>
+                  }
+                />
+              }
+              actions={
+                <ActionPanel>
+                  <Action
+                    icon={Icon.AppWindowSidebarLeft}
+                    title="Toggle Details"
+                    onAction={() => setIsShowingDetail((prev) => !prev)}
+                  />
+                  <Action.Push
+                    icon={Icon.Paragraph}
+                    title="View Customer Statement"
+                    target={
+                      <CustomerStatement
+                        businessId={business.id}
+                        customers={customers}
+                        initialCustomerId={customer.id}
+                      />
+                    }
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
+      </List.Section>
+    </List>
+  );
+}
+
+function BusinessProductsAndServices({ business }: { business: Business }) {
+  const [isShowingSubtitle, setIsShowingSubtitle] = useCachedState("show-products-subtitle", false);
+  const { data: token } = useToken();
+  const { isLoading, data: products } = useGetBusinessProductsAndServices(business.id, token);
+
+  return (
+    <List isLoading={isLoading} searchBarPlaceholder="Search product">
+      <List.Section title={`Businesses / ${business.name} / Products & Services`}>
+        {products.map((product) => (
+          <List.Item
+            key={product.id}
+            icon={Icon.Box}
+            title={product.name}
+            subtitle={!isShowingSubtitle ? undefined : product.description}
+            accessories={[{ text: product.price }]}
+            actions={
+              <ActionPanel>
+                <Action
+                  icon={Icon.Text}
+                  title="Toggle Subtitle"
+                  onAction={() => setIsShowingSubtitle((prev) => !prev)}
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
       </List.Section>
     </List>
   );

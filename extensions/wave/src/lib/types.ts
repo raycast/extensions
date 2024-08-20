@@ -1,3 +1,15 @@
+export type Currency = {
+  code: string;
+  symbol: string;
+  name: string;
+  plural: string;
+  exponent: number;
+};
+export type Money = {
+  value: string;
+  currency: Currency;
+};
+
 export type Business = {
   id: string;
   name: string;
@@ -18,6 +30,7 @@ export type InvoiceStatus =
   | "SENT"
   | "UNPAID"
   | "VIEWED";
+
 export type Invoice = {
   id: string;
   createdAt: string;
@@ -36,6 +49,15 @@ export type Invoice = {
   customer: {
     name: string;
   };
+  dueDate: string;
+  amountDue: Money;
+  amountPaid: Money;
+  total: {
+    value: string;
+    currency: {
+      symbol: string;
+    };
+  };
   items: Array<{
     product: {
       id: string;
@@ -49,5 +71,55 @@ export type Invoice = {
         symbol: string;
       };
     };
+  }>;
+};
+
+export type Customer = {
+  id: string;
+  name: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  website: string;
+  currency: {
+    code: string;
+    name: string;
+    symbol: string;
+  };
+  createdAt: string;
+  modifiedAt: string;
+  overdueAmount: {
+    raw: number;
+    value: number;
+  };
+  outstandingAmount: {
+    raw: number;
+    value: string;
+  };
+};
+
+export type Result<T> =
+  | {
+      errors: Array<{
+        extensions: {
+          id: string;
+          code: string;
+        };
+        message: string;
+        locations: Array<{
+          line: number;
+          column: number;
+        }>;
+        path: string[];
+      }>;
+      data?: null | T;
+    }
+  | {
+      data: T;
+    };
+
+export type Edges<T> = {
+  edges: Array<{
+    node: T;
   }>;
 };

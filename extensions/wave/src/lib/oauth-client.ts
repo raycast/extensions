@@ -2,6 +2,7 @@
 import { OAuth } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import fetch from "node-fetch";
+import { ACCESS_TOKEN } from "./config";
 
 const clientId = "5.TcftcT2oqkv43GjlpGxsPXdZh749u1YI2MH50W";
 const clientSecret =
@@ -74,6 +75,9 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
 
   const response = await fetch(tokenUrl, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
     body: bodyParams,
   });
 
@@ -86,6 +90,7 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
 
 export const useToken = () =>
   useCachedPromise(async () => {
+    if (ACCESS_TOKEN) return ACCESS_TOKEN;
     await authorize();
     const token = (await client.getTokens())?.accessToken ?? "";
     return token;

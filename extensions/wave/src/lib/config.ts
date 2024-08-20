@@ -1,4 +1,7 @@
+import { getPreferenceValues } from "@raycast/api";
+
 export const API_URL = "https://gql.waveapps.com/graphql/public";
+export const ACCESS_TOKEN = getPreferenceValues<Preferences>().access_token;
 
 export const INVOICE_STATUSES = {
   DRAFT: "The invoice is still a draft.",
