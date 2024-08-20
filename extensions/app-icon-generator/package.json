@@ -58,28 +58,28 @@
     {
       "name": "ios",
       "type": "checkbox",
-      "description": "Add ios as default platform",
+      "description": "Add iOS as default platform",
       "required": false,
       "default": false,
-      "placeholder": "Add ios as default platform",
+      "placeholder": "Add iOS as default platform",
       "label": "ios"
     },
     {
       "name": "ipad",
-      "description": "Add ipad as default platform",
+      "description": "Add iPad as default platform",
       "type": "checkbox",
       "required": false,
       "default": false,
-      "placeholder": "Add ipad as default platform",
+      "placeholder": "Add iPad as default platform",
       "label": "ipad"
     },
     {
       "name": "macos",
-      "description": "Add macos as default platform",
+      "description": "Add macOS as default platform",
       "type": "checkbox",
       "required": false,
       "default": false,
-      "placeholder": "Add macos as default platform",
+      "placeholder": "Add macOS as default platform",
       "label": "macos"
     },
     {
