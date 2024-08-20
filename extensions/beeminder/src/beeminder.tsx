@@ -82,7 +82,6 @@ export default function Command() {
           });
           await fetchData();
         } catch (error) {
-          pop();
           await showToast({
             style: Toast.Style.Failure,
             title: "Something went wrong",
