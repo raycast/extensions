@@ -6,7 +6,7 @@ let package = Package(
     name: "PDFTools",
     platforms: [.macOS(.v12)],
     dependencies: [
-        .package(url: "https://github.com/raycast/extensions-swift-tools.git", from: "1.0.4"),
+        .package(url: "https://github.com/raycast/extensions-swift-tools.git", from: "1.0.4")
     ],
     targets: [
         .executableTarget(
@@ -14,8 +14,8 @@ let package = Package(
             dependencies: [
                 .product(name: "RaycastSwiftMacros", package: "extensions-swift-tools"),
                 .product(name: "RaycastSwiftPlugin", package: "extensions-swift-tools"),
-                .product(name: "RaycastTypeScriptPlugin", package: "extensions-swift-tools"),
+                .product(name: "RaycastTypeScriptPlugin", package: "extensions-swift-tools")
             ]
-        ),
+        )
     ]
 )

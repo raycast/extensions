@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pdf-tools",
   "title": "PDF Tools",
-  "description": "Manipulate PDF files with ease",
+  "description": "Your all-in-one PDF toolkit",
   "icon": "pdftools-icon.png",
   "author": "xilopaint",
   "license": "MIT",
@@ -21,7 +21,7 @@
   ],
   "commands": [
     {
-      "name": "splitByFileSize",
+      "name": "split-by-file-size",
       "title": "Split PDF by File Size",
       "description": "Split a PDF file into multiple parts based on file size",
       "mode": "no-view",
@@ -35,7 +35,7 @@
       ]
     },
     {
-      "name": "splitByPageCount",
+      "name": "split-by-page-count",
       "title": "Split PDF by Page Count",
       "description": "Split a PDF file into multiple parts based on the number of pages",
       "mode": "no-view",
@@ -110,7 +110,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.81.0"
+    "@raycast/api": "^1.81.2"
   },
   "devDependencies": {
     "eslint": "^8.57.0",
