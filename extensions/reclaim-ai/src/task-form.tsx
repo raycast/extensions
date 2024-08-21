@@ -1,13 +1,13 @@
 import { Action, ActionPanel, Clipboard, Form, Toast, popToRoot, showHUD, showToast } from "@raycast/api";
 import { addDays, addMinutes, setHours, setMilliseconds, setMinutes, setSeconds } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
-import { useTask } from "./hooks/useTask";
+import { useTaskActions } from "./hooks/useTask";
 import { useTimePolicy } from "./hooks/useTimePolicy";
 import { useUser } from "./hooks/useUser";
-import { TimePolicy } from "./types/time-policy";
-import { TIME_BLOCK_IN_MINUTES, formatDuration, parseDurationToMinutes } from "./utils/dates";
 import { TaskPlanDetails } from "./types/plan";
+import { TimePolicy } from "./types/time-policy";
 import { makeOrderedListComparator } from "./utils/arrays";
+import { TIME_BLOCK_IN_MINUTES, formatDuration, parseDurationToMinutes } from "./utils/dates";
 
 export const timeSchemeTitleComparator = makeOrderedListComparator<string>(["Working Hours", "Personal Hours"]);
 
@@ -49,8 +49,8 @@ export default (props: Props) => {
   const { timeNeeded: userTimeNeeded, title: userTitle, interpreter } = props;
 
   const { currentUser } = useUser();
-  const { createTask } = useTask();
-  const { isLoading: isLoadingTimePolicy, getTimePolicy } = useTimePolicy();
+  const { createTask } = useTaskActions();
+  const { filteredPoliciesByFeature, isLoading: isLoadingTimePolicy } = useTimePolicy("TASK_ASSIGNMENT");
 
   const defaults = useMemo(() => {
     // RAI-10338 respect user settings of no default due date and no default snooze date
@@ -141,11 +141,10 @@ export default (props: Props) => {
   };
 
   const loadTimePolicy = async () => {
-    const allPolicies = await getTimePolicy("TASK_ASSIGNMENT");
-    if (allPolicies) {
-      setTimePolicies(allPolicies);
+    if (filteredPoliciesByFeature) {
+      setTimePolicies(filteredPoliciesByFeature);
       if (interpreter?.personal) {
-        const personalPolicy = allPolicies.find((policy) => policy.policyType === "PERSONAL");
+        const personalPolicy = filteredPoliciesByFeature.find((policy) => policy.policyType === "PERSONAL");
         if (personalPolicy) {
           setTimePolicy(personalPolicy.id);
         }

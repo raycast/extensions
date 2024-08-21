@@ -1,6 +1,11 @@
 # reclaim Changelog
 
 ## [Fixes] - 2024-08-19
+- Fix useTask return type
+- Separate state and actions in hooks
+- Break out subcomponents in my-calendar & notications
+
+## [Fixes] - 2024-08-19
 - Correct typings in `normalize` function so that they pass `tsconfig:strict`
 
 ## [Fixes] - 2024-08-16

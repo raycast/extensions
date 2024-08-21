@@ -1,33 +1,41 @@
-import { useState } from "react";
-import reclaimApi from "./useApi";
+import { getPreferenceValues } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { useMemo } from "react";
+import { NativePreferences } from "../types/preferences";
 import { ApiTimePolicy } from "./useTimePolicy.types";
-import { axiosPromiseData } from "../utils/axiosPromise";
 
-const useTimePolicy = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const { fetcher } = reclaimApi();
+export const useTimePolicy = (feature?: string) => {
+  const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
 
-  const getTimePolicy = async (feature: string) => {
-    try {
-      setIsLoading(true);
-      const [allPolicies, error] = await axiosPromiseData<ApiTimePolicy>(fetcher("/timeschemes"));
+  const headers = useMemo(
+    () => ({
+      Authorization: `Bearer ${apiToken}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    }),
+    [apiToken]
+  );
 
-      if (!allPolicies && error) throw error;
+  const {
+    data: timePolicies,
+    error,
+    isLoading,
+  } = useFetch<ApiTimePolicy>(`${apiUrl}/timeschemes`, {
+    headers,
+    keepPreviousData: true,
+  });
 
-      const filteredPolicies = allPolicies?.filter((policy) => !!policy.features.find((f) => f === feature));
+  if (error) console.error("Error while fetching Time Policies", error);
 
-      return filteredPolicies;
-    } catch (error) {
-      console.error("Error fetching time policy ", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const filteredPoliciesByFeature = useMemo(
+    () => timePolicies?.filter((policy) => !!policy.features.find((f) => f === feature)),
+    []
+  );
 
   return {
-    getTimePolicy,
+    timePolicies,
+    filteredPoliciesByFeature,
+    error,
     isLoading,
   };
 };
-
-export { useTimePolicy };

@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { useMemo, useState } from "react";
 
-import { useTask } from "./hooks/useTask";
+import { useTasks, useTaskActions } from "./hooks/useTask";
 import { useUser } from "./hooks/useUser";
 import { Task, TaskStatus } from "./types/task";
 import { TIME_BLOCK_IN_MINUTES, formatPriority, formatPriorityIcon, formatStrDuration } from "./utils/dates";
@@ -53,9 +53,9 @@ function TaskList() {
     [currentUser]
   );
 
-  const { useFetchTasks, addTime, updateTask, doneTask, incompleteTask } = useTask();
+  const { tasks: tasksData, isLoading } = useTasks();
+  const { addTime, updateTask, doneTask, incompleteTask } = useTaskActions();
 
-  const { data: tasksData, isLoading } = useFetchTasks();
   const [tasks, setTasks] = useState<Task[]>(tasksData ?? []);
 
   // Add time to task function

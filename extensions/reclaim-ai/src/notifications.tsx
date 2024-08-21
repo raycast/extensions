@@ -1,13 +1,14 @@
-import { Icon, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
+import { LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
 import { addDays, differenceInHours, endOfDay, formatDistance, isWithinInterval, startOfDay } from "date-fns";
-import { useMemo } from "react";
-import { useEventActions, useEvents } from "./hooks/useEvent";
+import { useCallback, useMemo } from "react";
+import { MenuBarEventSection } from "./components/MenuBarEventSection";
+import { useEvents } from "./hooks/useEvent";
 import { useMoment } from "./hooks/useMoment";
 import { useUser } from "./hooks/useUser";
 import { Event } from "./types/event";
 import { NativePreferences } from "./types/preferences";
 import { miniDuration } from "./utils/dates";
-import { eventColors, getOriginalEventIDFromSyncEvent, truncateEventSize } from "./utils/events";
+import { getOriginalEventIDFromSyncEvent, truncateEventSize } from "./utils/events";
 import { stripPlannerEmojis } from "./utils/string";
 
 type EventSection = { section: string; sectionTitle: string; events: Event[] };
@@ -19,46 +20,14 @@ type TitleInfo = {
   nowOrNext: "NOW" | "NEXT" | "NONE";
 };
 
-const ActionOptionsWithContext = ({ event }: { event: Event }) => {
-  const { getEventActions } = useEventActions();
-
-  return (
-    <>
-      {getEventActions(event).map((action) => (
-        <MenuBarExtra.Item key={action.title} title={action.title} onAction={action.action} />
-      ))}
-    </>
-  );
-};
-
-const EventsSection = ({ events, sectionTitle }: { events: Event[]; sectionTitle: string }) => {
-  const { showFormattedEventTitle } = useEventActions();
-
-  return (
-    <>
-      <MenuBarExtra.Section title={sectionTitle} />
-      {events.map((event) => (
-        <MenuBarExtra.Submenu
-          key={event.eventId}
-          icon={{
-            source: Icon.Dot,
-            tintColor: eventColors[event.color],
-          }}
-          title={showFormattedEventTitle(event, true)}
-        >
-          <ActionOptionsWithContext event={event} />
-        </MenuBarExtra.Submenu>
-      ))}
-    </>
-  );
-};
-
 export default function Command() {
+  /********************/
+  /*   custom hooks   */
+  /********************/
+
   const { upcomingEventsCount } = getPreferenceValues<NativePreferences>();
 
   const { currentUser } = useUser();
-
-  const NUMBER_OF_EVENTS = Number(upcomingEventsCount) || 5;
 
   const now = new Date();
 
@@ -68,6 +37,12 @@ export default function Command() {
   });
 
   const { momentData, isLoading: isLoadingMoment } = useMoment();
+
+  /********************/
+  /* useMemo & consts */
+  /********************/
+
+  const NUMBER_OF_EVENTS = Number(upcomingEventsCount) || 5;
 
   // if the events returned by moment/next are synced events then return the original event from the events call if it exists
   const eventMoment = useMemo(() => {
@@ -143,14 +118,6 @@ export default function Command() {
     return eventSectionsUnfiltered.filter((event) => event.events.length > 0);
   }, [events, showDeclinedEvents]);
 
-  const handleOpenReclaim = () => {
-    open("https://app.reclaim.ai");
-  };
-
-  const handleOpenRaycast = async () => {
-    await launchCommand({ name: "my-calendar", type: LaunchType.UserInitiated });
-  };
-
   const titleInfo = useMemo<TitleInfo>(() => {
     const now = new Date();
     const eventNextNow = eventMoment?.event;
@@ -194,6 +161,22 @@ export default function Command() {
     };
   }, [eventMoment]);
 
+  /********************/
+  /*    useCallback   */
+  /********************/
+
+  const handleOpenReclaim = useCallback(() => {
+    open("https://app.reclaim.ai");
+  }, []);
+
+  const handleOpenRaycast = useCallback(async () => {
+    await launchCommand({ name: "my-calendar", type: LaunchType.UserInitiated });
+  }, []);
+
+  /********************/
+  /*       JSX        */
+  /********************/
+
   return (
     <MenuBarExtra
       isLoading={isLoadingEvents || isLoadingMoment}
@@ -202,7 +185,7 @@ export default function Command() {
       tooltip={titleInfo.fullTitle}
     >
       {eventSections.map((eventSection) => (
-        <EventsSection
+        <MenuBarEventSection
           key={eventSection.section}
           events={eventSection.events}
           sectionTitle={eventSection.sectionTitle}

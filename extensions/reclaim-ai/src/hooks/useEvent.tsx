@@ -10,7 +10,7 @@ import { filterMultipleOutDuplicateEvents } from "../utils/events";
 import { stripPlannerEmojis } from "../utils/string";
 import reclaimApi from "./useApi";
 import { ApiResponseEvents, EventActions } from "./useEvent.types";
-import { useTask } from "./useTask";
+import { useTaskActions } from "./useTask";
 import { useUser } from "./useUser";
 import { useSmartHabits } from "./useSmartHabits";
 import { SmartHabit } from "../types/smart-series";
@@ -56,7 +56,7 @@ export const useEvents = ({ start, end }: { start: Date; end: Date }) => {
 export const useEventActions = () => {
   const { fetcher } = reclaimApi();
   const { currentUser } = useUser();
-  const { handleStartTask, handleRestartTask, handleStopTask } = useTask();
+  const { startTask, restartTask, stopTask } = useTaskActions();
   const { apiUrl } = getPreferenceValues<NativePreferences>();
 
   const { smartHabitsByLineageIdsMap } = useSmartHabits();
@@ -192,7 +192,7 @@ export const useEventActions = () => {
             icon: Icon.Play,
             title: "Start",
             action: async () => {
-              event.assist?.taskId && (await handleStartTask(String(event.assist.taskId)));
+              event.assist?.taskId && (await startTask(String(event.assist.taskId)));
             },
           });
 
@@ -202,14 +202,14 @@ export const useEventActions = () => {
               icon: Icon.Rewind,
               title: "Restart",
               action: async () => {
-                event.assist?.taskId && (await handleRestartTask(String(event.assist.taskId)));
+                event.assist?.taskId && (await restartTask(String(event.assist.taskId)));
               },
             },
             {
               icon: Icon.Stop,
               title: "Stop",
               action: async () => {
-                event.assist?.taskId && (await handleStopTask(String(event.assist.taskId)));
+                event.assist?.taskId && (await stopTask(String(event.assist.taskId)));
               },
             }
           );

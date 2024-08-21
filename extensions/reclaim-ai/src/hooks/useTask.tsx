@@ -7,9 +7,7 @@ import { axiosPromiseData } from "../utils/axiosPromise";
 import reclaimApi from "./useApi";
 import { CreateTaskProps } from "./useTask.types";
 
-const useTask = () => {
-  const { fetcher } = reclaimApi();
-
+export const useTasks = () => {
   const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
 
   const headers = useMemo(
@@ -21,11 +19,26 @@ const useTask = () => {
     [apiToken]
   );
 
-  const useFetchTasks = () =>
-    useFetch<[Task]>(`${apiUrl}/tasks?instances=true`, {
-      headers,
-      keepPreviousData: true,
-    });
+  const {
+    data: tasks,
+    error,
+    isLoading,
+  } = useFetch<Task[]>(`${apiUrl}/tasks?instances=true`, {
+    headers,
+    keepPreviousData: true,
+  });
+
+  if (error) console.error("Error while fetching Tasks", error);
+
+  return {
+    tasks,
+    isLoading,
+    error,
+  };
+};
+
+export const useTaskActions = () => {
+  const { fetcher } = reclaimApi();
 
   const createTask = async (task: CreateTaskProps) => {
     try {
@@ -58,7 +71,7 @@ const useTask = () => {
     }
   };
 
-  const handleStartTask = async (id: string) => {
+  const startTask = async (id: string) => {
     try {
       const [task, error] = await axiosPromiseData(fetcher(`/planner/start/task/${id}`, { method: "POST" }));
       if (!task || error) throw error;
@@ -68,7 +81,7 @@ const useTask = () => {
     }
   };
 
-  const handleRestartTask = async (id: string) => {
+  const restartTask = async (id: string) => {
     try {
       const [task, error] = await axiosPromiseData(fetcher(`/planner/restart/task/${id}`, { method: "POST" }));
       if (!task || error) throw error;
@@ -78,7 +91,7 @@ const useTask = () => {
     }
   };
 
-  const handleStopTask = async (id: string) => {
+  const stopTask = async (id: string) => {
     try {
       const [task, error] = await axiosPromiseData(fetcher(`/planner/stop/task/${id}`, { method: "POST" }));
       if (!task || error) throw error;
@@ -165,11 +178,10 @@ const useTask = () => {
   };
 
   return {
-    useFetchTasks,
     createTask,
-    handleStartTask,
-    handleRestartTask,
-    handleStopTask,
+    startTask,
+    restartTask,
+    stopTask,
     addTime,
     updateTask,
     doneTask,
@@ -177,5 +189,3 @@ const useTask = () => {
     rescheduleTask,
   };
 };
-
-export { useTask };
