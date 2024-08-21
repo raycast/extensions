@@ -6,11 +6,12 @@ import { useState } from "react";
 import fetch from "cross-fetch";
 import path from "path";
 import fs from "fs";
+import { parse as parseContentDispositionHeader } from "content-disposition";
 
 type FormValues = {
   mode: "auto" | "audio";
   vCodec: "h264" | "av1" | "vp9";
-  vQuality: "max" | "2160" | "1440" | "1080" | "720" | "480" | "360";
+  vQuality: "max" | "2160" | "1440" | "1080" | "720" | "480" | "360" | "240" | "144";
   aFormat: "best" | "mp3" | "ogg" | "wav" | "opus";
   url: string;
 };
@@ -40,30 +41,29 @@ export default function Command() {
         aFormat: values.aFormat,
         filenamePattern: preferences.filenamePattern,
         dubLang: false,
+        twitterGif: preferences.twitterGif,
+        tiktokH265: preferences.tiktokH265,
       };
 
-      if (preferences.vimeoDownloadType === "dash") {
-        payload.vimeoDash = true;
-      }
       if (values.mode === "audio") {
         payload.isAudioOnly = true;
-        payload.isNoTTWatermark = true;
         payload.isTTFullAudio = preferences.downloadOriginalTikTokSound;
       } else {
         payload.vQuality = values.vQuality;
         payload.isAudioMuted = preferences.muteVideoAudio;
         if (url.includes("youtube.com/") || url.includes("/youtu.be/")) {
           payload.vCodec = values.vCodec;
-        } else if (url.includes("tiktok.com/") || url.includes("douyin.com/")) {
-          payload.isNoTTWatermark = preferences.removeTikTokWatermark;
-          payload.isTTFullAudio = preferences.downloadOriginalTikTokSound;
         }
       }
 
       fetch(preferences.apiInstanceUrl + "/api/json", {
-        headers: { "user-agent": "raycast-cobalt", "content-type": "application/json", accept: "application/json" },
         body: JSON.stringify(payload),
         method: "POST",
+        headers: {
+          "user-agent": "raycast-cobalt",
+          "content-type": "application/json",
+          accept: "application/json",
+        },
       })
         .then((response) => response.json())
         .then((result: CobaltResponse) => {
@@ -120,13 +120,17 @@ export default function Command() {
       return;
     }
 
-    // Use the file name from the content-disposition header if available. Otherwise, use the last part of the provided URL.
-    const fileName =
-      response.headers.get("content-disposition")?.split('filename="')[1].slice(0, -1).replace(".none", ".mp3") ??
-      url.substring(url.lastIndexOf("/") + 1).split("?")[0];
-
     if (!fs.existsSync(preferences.downloadDirectory)) {
       await mkdir(preferences.downloadDirectory);
+    }
+
+    // Use the file name from the content-disposition header if available. Otherwise, use the last part of the provided URL.
+    let fileName;
+    const contentDispositionHeader = response.headers.get("content-disposition");
+    if (contentDispositionHeader) {
+      fileName = parseContentDispositionHeader(contentDispositionHeader).parameters.filename.replace(".none", ".mp3");
+    } else {
+      fileName = url.substring(url.lastIndexOf("/") + 1).split("?")[0];
     }
 
     const destination = path.resolve(preferences.downloadDirectory, fileName);
@@ -183,13 +187,13 @@ export default function Command() {
         storeValue
         info={
           "Only applies to YouTube video downloads.\n\n" +
-          "H264: best player support, but quality maxs out at 1080p.\n" +
-          "AV1: low player support, but supports 8K & HDR.\n" +
-          "VP9: usually highest bitrate, preserves most detail. supports 4K & HDR.\n\n" +
-          "Pick H264 if you want best editor/player/social media compatibility."
+          "H.264: Best compatibility, average detail level. Max quality is 1080p.\n" +
+          "AV1: Best quality, small file size, most detailed. Supports 8K & HDR.\n" +
+          "VP9: Same quality as AV1, but 2x the file size. Supports 4K & HDR.\n\n" +
+          "Pick H.264 if you want best compatibility, and AV1 if you want the best quality and efficiency."
         }
       >
-        <Form.Dropdown.Item title="H264 (mp4)" value="h264" />
+        <Form.Dropdown.Item title="H.264 (mp4)" value="h264" />
         <Form.Dropdown.Item title="AV1 (mp4)" value="av1" />
         <Form.Dropdown.Item title="VP9 (webm)" value="vp9" />
       </Form.Dropdown>
@@ -210,6 +214,8 @@ export default function Command() {
         <Form.Dropdown.Item title="720p" value="720" />
         <Form.Dropdown.Item title="480p" value="480" />
         <Form.Dropdown.Item title="360p" value="360" />
+        <Form.Dropdown.Item title="240p" value="240" />
+        <Form.Dropdown.Item title="144p" value="144" />
       </Form.Dropdown>
       <Form.Dropdown id="aFormat" title="Audio format" info="Only applies to audio downloads." storeValue>
         <Form.Dropdown.Item title="Best" value="best" />
