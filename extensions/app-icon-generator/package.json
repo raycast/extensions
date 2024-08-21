@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "app-icon-generator",
   "title": "App Icon Generator",
-  "description": "Generate app icons for ICO, iOS, iPad, and macOS from a single image file",
+  "description": "Generate icons for multiple platforms: iOS, Android, macOS, and more.",
   "icon": "command-icon.png",
   "author": "HunterJi",
   "contributors": [
@@ -12,7 +12,7 @@
     "Design Tools",
     "Developer Tools"
   ],
-  "version": "1.0.0",
+  "version": "1.1.0",
   "license": "MIT",
   "commands": [
     {
@@ -81,6 +81,69 @@
       "default": false,
       "placeholder": "Add macOS as default platform",
       "label": "macOS"
+    },
+    {
+      "name": "android",
+      "description": "Add Android as default platform",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "placeholder": "Add Android as default platform",
+      "label": "Android"
+    },
+    {
+      "name": "watchOS",
+      "description": "Add watchOS as default platform",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "placeholder": "Add watchOS as default platform",
+      "label": "watchOS"
+    },
+    {
+      "name": "tvOS",
+      "description": "Add tvOS as default platform",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "placeholder": "Add tvOS as default platform",
+      "label": "tvOS"
+    },
+    {
+      "name": "chrome",
+      "description": "Add Chrome as default platform",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "placeholder": "Add Chrome as default platform",
+      "label": "Chrome"
+    },
+    {
+      "name": "microsoftStore",
+      "description": "Add Microsoft Store as default platform",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "placeholder": "Add Microsoft Store as default platform",
+      "label": "Microsoft Store"
+    },
+    {
+      "name": "steam",
+      "description": "Add Steam as default platform",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "placeholder": "Add Steam as default platform",
+      "label": "Steam"
+    },
+    {
+      "name": "epic",
+      "description": "Add Epic Games Store as default platform",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "placeholder": "Add Epic Games Store as default platform",
+      "label": "Epic Games Store"
     }
   ]
 }
