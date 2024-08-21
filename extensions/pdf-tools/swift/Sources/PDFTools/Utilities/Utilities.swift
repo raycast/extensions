@@ -126,4 +126,4 @@ func savePDFDocument(
     }
 }
 
-extension String: @retroactive Error {}
+extension String: Error {}
