@@ -13,7 +13,7 @@ export default function Command() {
   return (
     <MenuBarExtra
       isLoading={!items}
-      icon="menubar_icon.png"
+      icon="menubar_icon.svg"
       tooltip="View local services"
     >
       {!items ? (
