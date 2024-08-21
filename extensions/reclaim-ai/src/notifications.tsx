@@ -1,7 +1,8 @@
 import { LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
 import { addDays, differenceInHours, endOfDay, formatDistance, isWithinInterval, startOfDay } from "date-fns";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { MenuBarEventSection } from "./components/MenuBarEventSection";
+import { useCallbackSafeRef } from "./hooks/useCallbackSafeRef";
 import { useEvents } from "./hooks/useEvent";
 import { useMoment } from "./hooks/useMoment";
 import { useUser } from "./hooks/useUser";
@@ -165,13 +166,13 @@ export default function Command() {
   /*    useCallback   */
   /********************/
 
-  const handleOpenReclaim = useCallback(() => {
+  const handleOpenReclaim = useCallbackSafeRef(() => {
     open("https://app.reclaim.ai");
-  }, []);
+  });
 
-  const handleOpenRaycast = useCallback(async () => {
+  const handleOpenRaycast = useCallbackSafeRef(async () => {
     await launchCommand({ name: "my-calendar", type: LaunchType.UserInitiated });
-  }, []);
+  });
 
   /********************/
   /*       JSX        */

@@ -1,19 +1,20 @@
 import { Icon, getPreferenceValues, open, showHUD } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { format, isWithinInterval } from "date-fns";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { Event } from "../types/event";
 import { NativePreferences } from "../types/preferences";
+import { SmartHabit } from "../types/smart-series";
 import { axiosPromiseData } from "../utils/axiosPromise";
 import { formatDisplayEventHours, formatDisplayHours } from "../utils/dates";
 import { filterMultipleOutDuplicateEvents } from "../utils/events";
 import { stripPlannerEmojis } from "../utils/string";
 import reclaimApi from "./useApi";
+import { useCallbackSafeRef } from "./useCallbackSafeRef";
 import { ApiResponseEvents, EventActions } from "./useEvent.types";
+import { useSmartHabits } from "./useSmartHabits";
 import { useTaskActions } from "./useTask";
 import { useUser } from "./useUser";
-import { useSmartHabits } from "./useSmartHabits";
-import { SmartHabit } from "../types/smart-series";
 
 export const useEvents = ({ start, end }: { start: Date; end: Date }) => {
   const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
@@ -61,23 +62,20 @@ export const useEventActions = () => {
 
   const { smartHabitsByLineageIdsMap } = useSmartHabits();
 
-  const showFormattedEventTitle = useCallback(
-    (event: Event, mini = false) => {
-      const meridianFormat = currentUser?.settings.format24HourTime ? "24h" : "12h";
+  const showFormattedEventTitle = useCallbackSafeRef((event: Event, mini = false) => {
+    const meridianFormat = currentUser?.settings.format24HourTime ? "24h" : "12h";
 
-      const hours = mini
-        ? formatDisplayHours(new Date(event.eventStart), meridianFormat)
-        : formatDisplayEventHours({
-            start: new Date(event.eventStart),
-            end: new Date(event.eventEnd),
-            hoursFormat: meridianFormat,
-          });
+    const hours = mini
+      ? formatDisplayHours(new Date(event.eventStart), meridianFormat)
+      : formatDisplayEventHours({
+          start: new Date(event.eventStart),
+          end: new Date(event.eventEnd),
+          hoursFormat: meridianFormat,
+        });
 
-      const realEventTitle = event.sourceDetails?.title || event.title;
-      return `${hours}  ${stripPlannerEmojis(realEventTitle)}`;
-    },
-    [currentUser]
-  );
+    const realEventTitle = event.sourceDetails?.title || event.title;
+    return `${hours}  ${stripPlannerEmojis(realEventTitle)}`;
+  });
 
   const handleStartHabit = async (id: string, title: string) => {
     try {
@@ -146,7 +144,7 @@ export const useEventActions = () => {
     }
   };
 
-  const getEventActions = useCallback((event: Event): EventActions => {
+  const getEventActions = useCallbackSafeRef((event: Event): EventActions => {
     const isActive = isWithinInterval(new Date(), {
       end: new Date(event.eventEnd),
       start: new Date(event.eventStart),
@@ -336,7 +334,7 @@ export const useEventActions = () => {
     });
 
     return eventActions;
-  }, []);
+  });
 
   return {
     getEventActions,
