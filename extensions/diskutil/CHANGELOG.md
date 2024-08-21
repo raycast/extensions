@@ -1,7 +1,8 @@
 # Disk Volumes Changelog
 
-## [Update for failureToast fix] - {PR_MERGE_DATE}
-- Adds a new contributor and upgraded Raycast dependencies for failureToast fix
+## [Fixes] - {PR_MERGE_DATE}
+
+- Upgraded Raycast dependencies to fix `failureToastOptions` for `useExec`: [raycast/utils#40](https://github.com/raycast/utils/pull/40)
 
 ## [Initial Version] - 2024-07-24
 
