@@ -1,5 +1,17 @@
 import { useState, useEffect, ComponentProps, Fragment } from "react";
-import { Action, ActionPanel, Grid, Icon, LaunchProps, List, LocalStorage, getPreferenceValues } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Grid,
+  Icon,
+  Keyboard,
+  LaunchProps,
+  List,
+  LocalStorage,
+  confirmAlert,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useSearch } from "./hooks/useSearch";
 import { View } from "./components/View";
@@ -88,9 +100,24 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
                         icon={Icon.Trash}
                         title="Remove All Searches"
                         style={Action.Style.Destructive}
+                        shortcut={Keyboard.Shortcut.Common.RemoveAll}
                         onAction={async () => {
-                          await LocalStorage.setItem("recent-searches", JSON.stringify([]));
-                          recentSearchRevalidate();
+                          await confirmAlert({
+                            title: "Are you sure?",
+                            message: "This will remove all recent searches.",
+                            primaryAction: {
+                              title: "Remove",
+                              style: Alert.ActionStyle.Destructive,
+                              onAction: async () => {
+                                await LocalStorage.setItem("recent-searches", JSON.stringify([]));
+                                recentSearchRevalidate();
+                              },
+                            },
+                            dismissAction: {
+                              title: "Cancel",
+                            },
+                            rememberUserChoice: true,
+                          });
                         }}
                       />
                     </ActionPanel>
