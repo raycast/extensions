@@ -1,6 +1,6 @@
 # TablePlus Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-08-21
 
 - Updated Tag colors to be similar to TablePlus defaults (closes #4231)
 - Filter databases in List View by the Driver
