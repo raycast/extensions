@@ -1,6 +1,6 @@
 # Everhour
 
-## {PR_MERGE_DATE} ([#13999](https://github.com/raycast/extensions/pull/13999))
+##  [Fixes and enhancements] - {PR_MERGE_DATE}
 
 - Fix Issue [#13548](https://github.com/raycast/extensions/issues/13548)
     - The issue would show up if a time entry did not have a task assigned
@@ -9,7 +9,7 @@
 - Add metadata images
 - Add a README
 
-## 2023-02-28 ([#5023](https://github.com/raycast/extensions/pull/5023))
+## [Enhancements] - 2023-02-28
 
 - Add recent task view.
 - List up to 1000 projects.
@@ -17,14 +17,10 @@
 - Quickly start/stop timers with enter.
 - Highlight active task using green dot icon, inactive tasks are gray.
 
-## 2021-11-08 ([#315](https://github.com/raycast/extensions/pull/315))
+## [Updated logo] - 2021-11-08
 
-- Update logo.
-
-## 2021-10-26 ([#225](https://github.com/raycast/extensions/pull/225))
+## [Fix] - 2021-10-26
 
 - Bug fix to also list tasks without time.
 
-## 2021-10-25 ([#73](https://github.com/raycast/extensions/pull/73))
-
-- Initial release
+## [Initial release] - 2021-10-25
