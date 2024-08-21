@@ -2,7 +2,7 @@ import { Grid } from "@raycast/api";
 import { DISPLAY_VALUES, LUNA_LOGO_IMG } from "../../constants";
 import { GameSummary, LunaService } from "../../services";
 import { useEffect, useState } from "react";
-import { EmptyActions } from "../EmptyActions";
+import { EmptyActions } from "../Actions";
 import { SearchCallback } from "../..";
 
 const LUNA = LunaService.getInstance();

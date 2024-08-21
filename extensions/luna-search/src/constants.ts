@@ -19,7 +19,7 @@ export const DISPLAY_VALUES = {
   metadataGenreTitle: "Genres",
   metadataRatingTitle: "Rating",
   metadataRatingContentTitle: "", // Intentionally blank for appearance
-  openTitle: "Open in Chrome",
+  openTitle: "See in Luna",
   publishersTitle: "Publishers",
   releaseDateTitle: "Released",
   searchPlaceholder: "Search for a game on Amazon Luna",
@@ -29,7 +29,6 @@ export const DISPLAY_VALUES = {
   trendingPrefix: "Top Games: ",
 };
 /**
- * The URL for the Luna logo image used in the application.
+ * The path for the Luna logo image used in the application.
  */
-export const LUNA_LOGO_IMG =
-  "https://m.media-amazon.com/images/G/01/T/TC05316420/A07531864/brand/luna-logo._SX500_FMpng_.png";
+export const LUNA_LOGO_IMG = "logo_luna.png";

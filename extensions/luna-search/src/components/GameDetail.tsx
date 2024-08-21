@@ -1,10 +1,10 @@
 import { Color, Detail, Icon, showToast, Toast } from "@raycast/api";
 import { DISPLAY_VALUES, LUNA_LOGO_IMG } from "../constants";
 import { GameSummary, LunaService } from "../services";
-import { GameActions } from "./GameActions";
 import { useEffect, useState } from "react";
 import { Game } from "../services/LunaService/Game";
 import { SearchCallback } from "..";
+import { GameDetailActions } from "./Actions";
 
 const LUNA = LunaService.getInstance();
 
@@ -72,7 +72,7 @@ export function GameDetail({ game, searchCallback }: Props): JSX.Element {
   const img = game.imgUrl ? optimizeImageUrl(game.imgUrl, 500) : LUNA_LOGO_IMG;
   return (
     <Detail
-      actions={<GameActions game={game} searchCallback={searchCallback} />}
+      actions={<GameDetailActions game={game} searchCallback={searchCallback} />}
       isLoading={isLoading}
       markdown={`
 ![Game Art](${img}?raycast-width=500)
