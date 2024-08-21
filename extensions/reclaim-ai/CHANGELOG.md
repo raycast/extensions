@@ -1,5 +1,9 @@
 # reclaim Changelog
 
+## [Fixes] - 2024-08-21
+- Add useCallbackSafeRef hook
+- Fix component wrapping that was causing UI glitch
+
 ## [Fixes] - 2024-08-19
 - Fix useTask return type
 - Separate state and actions in hooks
