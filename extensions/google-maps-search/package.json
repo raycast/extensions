@@ -10,7 +10,8 @@
   ],
   "contributors": [
     "lin",
-    "chrismessina"
+    "chrismessina",
+    "klaussner"
   ],
   "keywords": [
     "directions",
@@ -78,19 +79,19 @@
       "data": [
         {
           "title": "Driving",
-          "value": "d"
+          "value": "driving"
         },
         {
           "title": "Transit",
-          "value": "t"
+          "value": "transit"
         },
         {
           "title": "Walking",
-          "value": "w"
+          "value": "walking"
         },
         {
           "title": "Cycling",
-          "value": "c"
+          "value": "bicycling"
         }
       ]
     },
