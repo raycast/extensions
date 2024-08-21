@@ -43,11 +43,17 @@
           "description": "Default tags for notes. Separate by comma (,)"
         }
       ]
+    },
+    {
+      "name": "objectives",
+      "title": "Objectives",
+      "description": "View and Objectives in Productboard",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.0",
-    "@raycast/utils": "^1.16.1",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.16.5",
     "email-validator": "^2.0.4",
     "got": "^11.8.3",
     "isemail": "^3.2.0",

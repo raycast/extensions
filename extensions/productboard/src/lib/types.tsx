@@ -48,10 +48,39 @@ export type AddNote = {
   tags: string;
 };
 
+// OBJECTIVES
+export type Objective = {
+  id: string;
+  name: string;
+  description: string;
+  level: number | null;
+  // parent
+  owner: {
+    email: string;
+  }
+  // timeframe
+  // state
+  status: {
+    id: string;
+    name: string;
+  }
+  archived: boolean;
+  createdAt: string;
+  updatedAt: string;
+  links: {
+    self: string;
+    html: string;
+  }
+}
+
 // OTHER
 export type PageMeta = {
   pageCursor: string | null;
   totalResults: number;
+} | {
+  links : {
+    next: string | null;
+  }
 };
 export type POSTResponse = {
   links: {
@@ -69,4 +98,10 @@ export type ErrorResponse =
   | { message: string }
   | {
       error: string;
+    } | {
+      errors: Array<{
+        code: string;
+        title: string;
+        detail: string;
+      }>;
     };

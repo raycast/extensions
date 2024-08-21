@@ -1,5 +1,10 @@
 # Productboard Changelog
 
+## [View `Objectives`] - {PR_MERGE_DATE}
+
+- `Objectives` command allows you to view objectives
+- improved API to handle another error case
+
 ## [Add `Notes` Command] - 2024-07-02
 
 ### Enhancements
