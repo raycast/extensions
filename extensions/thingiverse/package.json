@@ -22,11 +22,11 @@
   ],
   "preferences": [
     {
-      "name": "apiKey",
+      "name": "appToken",
       "type": "textfield",
       "required": true,
-      "title": "Thingiverse API Key",
-      "description": "Get your API key from https://www.thingiverse.com/apps/create",
+      "title": "Thingiverse App Token",
+      "description": "Get your App Token from https://www.thingiverse.com/apps/create",
       "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     }
   ],

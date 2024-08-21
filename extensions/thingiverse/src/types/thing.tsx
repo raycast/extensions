@@ -34,7 +34,7 @@ type Tag = {
 
 export type ThingiverseSearchResponse = {
   total: number;
-  hits: Thing;
+  hits: Thing[];
 };
 
 type zip_data = {

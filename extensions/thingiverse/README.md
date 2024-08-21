@@ -3,8 +3,8 @@
 Browse Thingiverse models from Raycast. Using the official Thingiverse API.
 
 ## Installation
-You need an API key from Thingiverse to use this extension.
-### How to get free API key
+You need an App Token from Thingiverse to use this extension.
+### How to get free App Token
 1. Go to [Thingiverse Developer Portal](https://www.thingiverse.com/apps/create)
 2. Login with your Thingiverse account
 3. Create a new application

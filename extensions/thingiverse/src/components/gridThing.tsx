@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Grid } from "@raycast/api";
-import { ThingiverseSearchResponse } from "../types/thing";
+import { Thing } from "../types/thing";
 import { GetThing } from "../get-thing";
 
-export const GridThing = ({ thing }: { thing: ThingiverseSearchResponse["hits"] }) => {
+export const GridThing = ({ thing }: { thing: Thing }) => {
   return (
     <Grid.Item
       content={thing.preview_image ?? "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"}
@@ -13,7 +13,7 @@ export const GridThing = ({ thing }: { thing: ThingiverseSearchResponse["hits"] 
   );
 };
 
-const ThingActionPanel = ({ thing }: { thing: ThingiverseSearchResponse["hits"] }) => {
+const ThingActionPanel = ({ thing }: { thing: Thing }) => {
   return (
     <ActionPanel>
       <Action.Push title={`View Details`} target={<GetThing thing_id={thing.id} />} />
