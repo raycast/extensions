@@ -3,7 +3,7 @@
   "name": "dropstab",
   "title": "DropsTab",
   "description": "Get crypto coin data and navigate to official sites or X. Instantly view your wallets via blockchain explorers.",
-  "icon": "dropstab-logo.png",
+  "icon": "command-icon.png",
   "author": "nikolayqwerty",
   "license": "MIT",
   "commands": [

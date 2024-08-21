@@ -5,11 +5,11 @@
 ### Search
 Dropstab Crypto Toolbox displays the price, market capitalization, and rank of any cryptocurrency, and also allows quick access to the project's page on Dropstab.com or its X (Twitter) profile.
 
-![DropsTab](https://dropsearn.fra1.cdn.digitaloceanspaces.com/static/images/search.png)
+![DropsTab](metadata/search.webp)
 
 ### Wallets
 Dropstab Crypto Toolbox allows you to instantly find and view any crypto address in the blockchain explorer.
-![DropsTab](https://dropsearn.fra1.cdn.digitaloceanspaces.com/static/images/Wallets.png)
+![DropsTab](metadata/wallets.webp)
 
 ## Local Setup Instructions
 **Note:** This project works only on macOS. Please ensure you have Raycast installed before proceeding. You can download Raycast from the [official website](https://www.raycast.com/).
