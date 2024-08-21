@@ -1,5 +1,11 @@
 # TablePlus Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Updated Tag colors to be similar to TablePlus defaults (closes #4231)
+- Filter databases in List View by the Driver
+- Update images
+
 ## [Fix] - 2024-01-02
 
 - Fixed, so connections without an environment don't show an empty tag.
