@@ -1,6 +1,6 @@
 # PDF Tools Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-08-21
 
 - Refactored code for better maintainability.
 
