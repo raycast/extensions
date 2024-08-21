@@ -6,9 +6,12 @@ HttpService.fetch();
 export default function Command() {
   const [items, setItems] = useCachedState<HttpService[]>(KEY);
 
-  cache.subscribe(() => {
+  const set = () => {
     setItems(HttpService.services);
-  });
+  };
+
+  setTimeout(set, 3 * 1000);
+  cache.subscribe(set);
 
   return (
     <List isLoading={!items} isShowingDetail={true}>

@@ -6,16 +6,15 @@ HttpService.fetch();
 export default function Command() {
   const [items, setItems] = useCachedState<HttpService[]>(KEY);
 
-  cache.subscribe(() => {
+  const set = () => {
     setItems(HttpService.services);
-  });
+  };
+
+  setTimeout(set, 3 * 1000);
+  cache.subscribe(set);
 
   return (
-    <MenuBarExtra
-      isLoading={!items}
-      icon="menubar_icon.svg"
-      tooltip="View local services"
-    >
+    <MenuBarExtra icon="menubar_icon.svg" tooltip="View local services">
       {!items ? (
         <MenuBarExtra.Item title="loading..." />
       ) : !items.length ? (
