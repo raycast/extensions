@@ -1,6 +1,6 @@
 # Everhour
 
-##  [Fixes and enhancements] - {PR_MERGE_DATE}
+##  [Fixes and enhancements] - 2024-08-21
 
 - Fix Issue [#13548](https://github.com/raycast/extensions/issues/13548)
     - The issue would show up if a time entry did not have a task assigned
