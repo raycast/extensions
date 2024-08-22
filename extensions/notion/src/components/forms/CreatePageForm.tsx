@@ -28,7 +28,7 @@ import { handleOnOpenPage } from "../../utils/openPage";
 import { ActionSetVisibleProperties } from "../actions";
 import { ActionSetOrderProperties } from "../actions";
 
-import { createConvertToFieldFunc, FieldProps } from "./PagePropertyField";
+import { PagePropertyField } from "./PagePropertyField";
 
 export type CreatePageFormValues = {
   database: string | undefined;
@@ -174,18 +174,6 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
     });
   }
 
-  function itemPropsFor<T extends DatabaseProperty["type"]>(property: DatabaseProperty) {
-    const id = createPropertyId(property);
-    return {
-      ...(itemProps[id] as FieldProps<T>),
-      title: property.name,
-      key: id,
-      id,
-    };
-  }
-
-  const convertToField = createConvertToFieldFunc(itemPropsFor, relationPages, users);
-
   const renderSubmitAction = (type: "main" | "second") => {
     const shortcut: Keyboard.Shortcut | undefined =
       type === "second" ? { modifiers: ["cmd", "shift"], key: "enter" } : undefined;
@@ -276,7 +264,22 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
         </>
       )}
 
-      {databaseProperties?.filter(filterProperties).sort(sortProperties).map(convertToField)}
+      {databaseProperties
+        ?.filter(filterProperties)
+        .sort(sortProperties)
+        .map((dp) => {
+          const id = createPropertyId(dp);
+          return (
+            <PagePropertyField
+              type={dp.type}
+              databaseProperty={dp}
+              itemProps={itemProps[id]}
+              relationPages={relationPages}
+              users={users}
+              key={id}
+            />
+          );
+        })}
       <Form.Separator />
       <Form.TextArea
         {...itemProps["content"]}

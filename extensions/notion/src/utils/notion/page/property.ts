@@ -50,7 +50,7 @@ export function formValueToPropertyValue(
 }
 
 // prettier-ignore
-type FormValueForDatabaseProperty<T extends ReadablePropertyType> =
+export type FormValueForDatabaseProperty<T extends ReadablePropertyType> =
         T extends "date" ? Date | null
       : T extends "checkbox" ? boolean
       : T extends "multi_select" | "relation" | "people" ? string[]
