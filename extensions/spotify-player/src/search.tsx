@@ -85,41 +85,45 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
                   actions={
                     <ActionPanel>
                       <Action icon={Icon.MagnifyingGlass} title="Search Again" onAction={() => setSearchText(search)} />
-                      <Action
-                        icon={Icon.Trash}
-                        title="Remove Search"
-                        onAction={async () => {
-                          await LocalStorage.setItem(
-                            "recent-searches",
-                            JSON.stringify(recentSearches.filter((item: string) => item !== search)),
-                          );
-                          recentSearchRevalidate();
-                        }}
-                      />
-                      <Action
-                        icon={Icon.Trash}
-                        title="Remove All Searches"
-                        style={Action.Style.Destructive}
-                        shortcut={Keyboard.Shortcut.Common.RemoveAll}
-                        onAction={async () => {
-                          await confirmAlert({
-                            title: "Are you sure?",
-                            message: "This will remove all recent searches.",
-                            primaryAction: {
-                              title: "Remove",
-                              style: Alert.ActionStyle.Destructive,
-                              onAction: async () => {
-                                await LocalStorage.setItem("recent-searches", JSON.stringify([]));
-                                recentSearchRevalidate();
+                      <ActionPanel.Section>
+                        <Action
+                          icon={Icon.Trash}
+                          title="Remove Search"
+                          style={Action.Style.Destructive}
+                          shortcut={Keyboard.Shortcut.Common.Remove}
+                          onAction={async () => {
+                            await LocalStorage.setItem(
+                              "recent-searches",
+                              JSON.stringify(recentSearches.filter((item: string) => item !== search)),
+                            );
+                            recentSearchRevalidate();
+                          }}
+                        />
+                        <Action
+                          icon={Icon.Trash}
+                          title="Remove All Searches"
+                          style={Action.Style.Destructive}
+                          shortcut={Keyboard.Shortcut.Common.RemoveAll}
+                          onAction={async () => {
+                            await confirmAlert({
+                              title: "Are you sure?",
+                              message: "This will remove all recent searches.",
+                              primaryAction: {
+                                title: "Remove",
+                                style: Alert.ActionStyle.Destructive,
+                                onAction: async () => {
+                                  await LocalStorage.setItem("recent-searches", JSON.stringify([]));
+                                  recentSearchRevalidate();
+                                },
                               },
-                            },
-                            dismissAction: {
-                              title: "Cancel",
-                            },
-                            rememberUserChoice: true,
-                          });
-                        }}
-                      />
+                              dismissAction: {
+                                title: "Cancel",
+                              },
+                              rememberUserChoice: true,
+                            });
+                          }}
+                        />
+                      </ActionPanel.Section>
                     </ActionPanel>
                   }
                 />
