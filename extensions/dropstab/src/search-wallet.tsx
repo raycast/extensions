@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, showToast, Icon, Clipboard, Toast } from "@raycast/api";
+import { ActionPanel, List, Action, showToast, Icon, Clipboard, Toast, LaunchProps } from "@raycast/api";
 import { useState, useEffect } from "react";
 import {
   getFavorites,
@@ -10,21 +10,33 @@ import { WalletSearchResult } from "./types/walletType";
 
 const WALLET_FAVORITES_KEY = "walletFavorites";
 
-export default function SearchWalletCommand() {
-  const [walletAddress, setWalletAddress] = useState<string>("");
+interface CommandArguments {
+  startAddress?: string;
+}
+
+export default function SearchWalletCommand(props: LaunchProps<{ arguments: CommandArguments }>) {
+  const { startAddress } = props.arguments;
+  const [walletAddress, setWalletAddress] = useState<string>(startAddress || "");
   const [favorites, setFavorites] = useState<WalletSearchResult[]>([]);
   const [searchResults, setSearchResults] = useState<WalletSearchResult[]>([]);
 
   useEffect(() => {
     setFavorites(getFavorites(WALLET_FAVORITES_KEY));
-  }, []);
+
+    if (startAddress) {
+      updateSearchResults(startAddress);
+    }
+  }, [startAddress]);
 
   const handleSearchTextChange = (text: string) => {
     setWalletAddress(text);
-    // Обновите результаты поиска на основе введенного текста
-    const results = getLinks(text).map((link) => ({
-      id: text,
-      name: text,
+    updateSearchResults(text);
+  };
+
+  const updateSearchResults = (address: string) => {
+    const results = getLinks(address).map((link) => ({
+      id: address,
+      name: address,
       url: link.url,
       icon: link.icon,
       network: link.title,
@@ -110,7 +122,12 @@ export default function SearchWalletCommand() {
   };
 
   return (
-    <List onSearchTextChange={handleSearchTextChange} searchBarPlaceholder="Enter wallet address..." throttle>
+    <List
+      onSearchTextChange={handleSearchTextChange}
+      searchBarPlaceholder="Enter wallet address..."
+      throttle
+      searchText={walletAddress} // используем начальный адрес, если он есть
+    >
       {!walletAddress && favorites.length > 0 && (
         <List.Section title="Favorites">
           {favorites.map((favorite) => {

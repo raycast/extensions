@@ -17,7 +17,15 @@
       "name": "search-wallet",
       "title": "Wallet Explorer",
       "description": "Wallet Explorer Dropstab.",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "startAddress",
+          "description": "Wallet address",
+          "placeholder": "Enter wallet address",
+          "type": "text"
+        }
+      ]
     }
   ],
   "dependencies": {

@@ -1,4 +1,4 @@
-import { ActionPanel, List, Icon, Action, Image } from "@raycast/api";
+import { ActionPanel, List, Icon, Action, Image, LaunchProps } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { useSearch } from "./commands/raycastCommands";
 import {
@@ -11,7 +11,13 @@ import { SearchResult } from "./types/coinType";
 
 const CRYPTO_FAVORITES_KEY = "cryptoFavorites";
 
-export default function Command() {
+interface CommandArguments {
+  coin: string;
+  currency: string;
+}
+
+export default function Command(props: LaunchProps<{ arguments: CommandArguments }>) {
+  const { coin } = props.arguments;
   const { state, search, updateCoinData } = useSearch();
   const [favorites, setFavorites] = useState<SearchResult[]>(() => getFavorites(CRYPTO_FAVORITES_KEY));
 
@@ -22,6 +28,12 @@ export default function Command() {
 
     return () => clearInterval(interval);
   }, [favorites]);
+
+  useEffect(() => {
+    if (coin) {
+      search(coin);
+    }
+  }, [coin]);
 
   return (
     <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search by name..." throttle>
