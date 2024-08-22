@@ -1,3 +1,3 @@
 # DropsTab Changelog
 
-## [Initial Version] - 2024-08-22
+## [Initial release] - 2024-08-22
