@@ -5,6 +5,10 @@
   "description": "Manage Bonjour services",
   "icon": "extension_icon.png",
   "author": "that70schris",
+  "keywords": [
+    "local",
+    "mdns"
+  ],
   "categories": [
     "System"
   ],
