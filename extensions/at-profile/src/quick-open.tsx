@@ -1,9 +1,7 @@
 import { showToast, Toast, open } from "@raycast/api";
 import { getAllSites } from "./sites";
 
-export default async function command(props: {
-  arguments: { profile: string; site: string };
-}) {
+export default async function command(props: { arguments: { profile: string; site: string } }) {
   const { profile, site } = props.arguments;
 
   try {

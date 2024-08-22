@@ -52,8 +52,6 @@ export const defaultSites: Site[] = [
 
 export async function getAllSites(): Promise<Site[]> {
   const customSitesJson = await LocalStorage.getItem<string>("customSites");
-  const customSites: Site[] = customSitesJson
-    ? JSON.parse(customSitesJson)
-    : [];
+  const customSites: Site[] = customSitesJson ? JSON.parse(customSitesJson) : [];
   return [...defaultSites, ...customSites];
 }
