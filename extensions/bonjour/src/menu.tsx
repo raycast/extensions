@@ -14,7 +14,7 @@ export default function Command() {
   cache.subscribe(set);
 
   return (
-    <MenuBarExtra icon="menubar_icon.svg" tooltip="View local services">
+    <MenuBarExtra icon="menubar_icon.png" tooltip="View local services">
       {!items ? (
         <MenuBarExtra.Item title="loading..." />
       ) : !items.length ? (

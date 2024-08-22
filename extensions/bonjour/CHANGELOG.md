@@ -1,3 +1,3 @@
 # Bonjour Changelog
 
-## [Initial Version] - 2024-08-14
+## [Initial Version] - 2024-08-22
