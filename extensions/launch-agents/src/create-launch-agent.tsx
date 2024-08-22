@@ -1,10 +1,9 @@
 import { showToast, Toast } from "@raycast/api";
-import { execSync } from "child_process";
+import { createLaunchAgent } from "../lib/plist";
 
 export default function Command() {
   try {
-    const fileName = `com.raycast.${Math.random()}`;
-    execSync(`touch ~/Library/LaunchAgents/${fileName}.plist`);
+    const fileName = createLaunchAgent();
     showToast(Toast.Style.Success, "File Created", `Name: ${fileName}.plist`);
   } catch (error) {
     console.error("Error creating file:", error);
