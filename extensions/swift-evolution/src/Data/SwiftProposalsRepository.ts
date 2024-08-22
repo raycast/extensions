@@ -16,12 +16,12 @@ export class SwiftProposalsRepository implements ProposalsRepository {
   private convertToDataModels(proposals: ProposalJson[]): ProposalDataModel[] {
     const proposalsViewModel: ProposalDataModel[] = proposals
       .map((json) => {
+        console.log(json);
         const viewModel: ProposalDataModel = {
           id: json.id,
           authors: json.authors.map((x) => ({ ...x, name: x.name.trim() })),
           implementations: this.getImplementations(json),
-          reviewManagerName: json.reviewManager.name.trim(),
-          reviewManagerProfileLink: json.reviewManager.link,
+          reviewManagers: json.reviewManagers.map((x) => ({ ...x, name: x.name.trim() })),
           link: "https://github.com/apple/swift-evolution/blob/main/proposals/" + json.link,
           markdownLink: "https://raw.githubusercontent.com/apple/swift-evolution/main/proposals/" + json.link,
           keywords: this.getKeywords(json),
