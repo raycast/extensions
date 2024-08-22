@@ -54,7 +54,10 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={service.origin} />
-                <Action.CopyToClipboard content={service.origin} title="Copy URL to Clipboard" />
+                <Action.CopyToClipboard
+                  content={service.origin}
+                  title="Copy URL to Clipboard"
+                />
               </ActionPanel>
             }
           />
