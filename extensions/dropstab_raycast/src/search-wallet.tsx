@@ -170,16 +170,15 @@ export default function SearchWalletCommand() {
       {!walletAddress && favorites.length > 0 && (
         <List.Section title="Favorites">
           {favorites.map((favorite) => {
-            const link = getFavoriteLink(favorite);
             return (
               <List.Item
                 key={`${favorite.id}-${favorite.network}`}
-                icon={link.icon}
+                icon={favorite.icon}
                 title={favorite.name}
-                accessories={[{ text: `View on ${link.title.split(" ")[2]}` }]}
+                accessories={[{ text: favorite.network}]}
                 actions={
                   <ActionPanel>
-                    <Action.OpenInBrowser title={link.title} url={link.url} />
+                    <Action.OpenInBrowser title={favorite.network} url={favorite.url} />
                     <ActionPanel.Item
                       title="Remove from Favorites"
                       onAction={() => handleRemoveFromFavorites(favorite)}
@@ -207,7 +206,7 @@ export default function SearchWalletCommand() {
                 accessories={[{ text: `${link.network}` }]}
                 actions={
                   <ActionPanel>
-                    <Action.OpenInBrowser title={link.name} url={link.url} />
+                    <Action.OpenInBrowser title={link.network} url={link.url} />
                     {isFavoriteForWallets(link, favorites) ? (
                       <Action
                         title="Remove from Favorites"
