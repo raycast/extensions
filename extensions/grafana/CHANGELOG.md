@@ -1,6 +1,6 @@
 # Grafana Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2024-08-22
 
 - Use Service Account Token instead of API keys
 
