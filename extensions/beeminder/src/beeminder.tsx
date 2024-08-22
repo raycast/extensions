@@ -8,12 +8,15 @@ import {
   Form,
   getPreferenceValues,
   Cache,
+  Icon,
+  Keyboard,
 } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import moment from "moment";
 import { Goal, GoalResponse, DataPointFormValues, Preferences } from "./types";
 import { fetchGoals, sendDatapoint } from "./api";
 import { useEffect, useState } from "react";
+import { useNavigation } from "@raycast/api";
 
 const cache = new Cache();
 
@@ -26,6 +29,7 @@ export default function Command() {
   });
 
   function fetchData() {
+    setIsLoading(true);
     return fetchGoals()
       .then((data) => {
         // When the data changes, update the cache
@@ -65,18 +69,19 @@ export default function Command() {
   }
 
   function DataPointForm({ goalSlug }: { goalSlug: string }) {
+    const { pop } = useNavigation();
     const { handleSubmit, itemProps } = useForm<DataPointFormValues>({
       async onSubmit(values) {
         try {
           await sendDatapoint(goalSlug, values.dataPoint, values.comment);
-          popToRoot();
+          pop();
           await showToast({
             style: Toast.Style.Success,
             title: "Datapoint submitted",
             message: "Your datapoint was submitted successfully",
           });
+          await fetchData();
         } catch (error) {
-          popToRoot();
           await showToast({
             style: Toast.Style.Failure,
             title: "Something went wrong",
@@ -116,26 +121,45 @@ export default function Command() {
   }
 
   function GoalsList({ goalsData }: { goalsData: GoalResponse }) {
-    const { beeminderUsername } = getPreferenceValues<Preferences>();
+    const { beeminderUsername, colorProgression } = getPreferenceValues<Preferences>();
     const goals = Array.isArray(goalsData) ? goalsData : undefined;
+
+    const getCurrentDayStart = () => {
+      return new Date().setHours(0, 0, 0, 0) / 1000; // Convert to Unix timestamp
+    };
+
+    const getGoalIcon = (safebuf: number) => {
+      if (colorProgression === "rainbow") {
+        if (safebuf < 1) return "🔴";
+        if (safebuf < 2) return "🟠";
+        if (safebuf < 3) return "🟡";
+        if (safebuf < 7) return "🟢";
+        if (safebuf < 14) return "🔵";
+        return "🟣";
+      } else {
+        if (safebuf < 1) return "🔴";
+        if (safebuf < 2) return "🟠";
+        if (safebuf < 3) return "🔵";
+        return "🟢";
+      }
+    };
+
     return (
       <List isLoading={isLoading}>
         {goals?.map((goal: Goal) => {
           const diff = moment.unix(goal.losedate).diff(new Date());
           const timeDiffDuration = moment.duration(diff);
-          const dayDifference = moment.unix(goal.losedate).diff(new Date(), "days");
           const goalRate = goal.baremin;
 
-          let goalIcon;
+          const goalIcon = getGoalIcon(goal.safebuf);
           let dueText = `${goalRate} ${goal.gunits} due in `;
-          if (dayDifference > 1) {
-            dueText += `${dayDifference} days`;
-          } else if (dayDifference === 1) {
-            dueText += `${dayDifference} day`;
+          if (goal.safebuf > 1) {
+            dueText += `${goal.safebuf} days`;
+          } else if (goal.safebuf === 1) {
+            dueText += `${goal.safebuf} day`;
           }
 
-          if (dayDifference < 1) {
-            goalIcon = "🔴";
+          if (goal.safebuf < 1) {
             const hours = timeDiffDuration.hours();
             const minutes = timeDiffDuration.minutes();
             if (hours > 0) {
@@ -144,19 +168,21 @@ export default function Command() {
             if (minutes > 0) {
               dueText += minutes > 1 ? ` ${minutes} minutes` : ` ${minutes} minute`;
             }
-          } else if (dayDifference < 2) {
-            goalIcon = "🟠";
-          } else if (dayDifference < 3) {
-            goalIcon = "🔵";
-          } else {
-            goalIcon = "🟢";
           }
+
+          const hasDataForToday =
+            goal.last_datapoint && goal.last_datapoint.timestamp >= getCurrentDayStart();
 
           return (
             <List.Item
               key={goal.slug}
               title={goal.slug}
               subtitle={`Pledged $${goal.pledge}`}
+              icon={
+                hasDataForToday
+                  ? { value: Icon.Checkmark, tooltip: "Data entered today" }
+                  : undefined
+              }
               accessories={[
                 {
                   text: dueText,
@@ -165,18 +191,27 @@ export default function Command() {
                   icon: goalIcon,
                 },
               ]}
-              keywords={[goal.slug, goal.title]}
+              keywords={goal.title
+                .split(" ")
+                .map((word) => word.replace(/[^\w\s]/g, ""))
+                .filter((word) => word !== "")}
               actions={
                 <ActionPanel>
                   <Action.Push
                     title="Enter datapoint"
+                    icon={Icon.PlusCircle}
                     target={<DataPointForm goalSlug={goal.slug} />}
                   />
                   <Action.OpenInBrowser
                     title="Open goal in Beeminder"
                     url={`https://www.beeminder.com/${beeminderUsername}/${goal.slug}`}
                   />
-                  <Action title="Refresh data" onAction={async () => await fetchData()} />
+                  <Action
+                    title="Refresh data"
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
+                    icon={Icon.RotateClockwise}
+                    onAction={async () => await fetchData()}
+                  />
                 </ActionPanel>
               }
             />
