@@ -107,7 +107,7 @@
 /extensions/beat-per-minute                                         @pernielsentikaer
 /extensions/bech32-converter                                        @Zygimantass
 /extensions/bed-time-calculator                                     @khlebobul
-/extensions/beeminder                                               @vivgui
+/extensions/beeminder                                               @vivgui @mybuddymichael
 /extensions/berlin-public-transportation                            @arjanski
 /extensions/better-uptime                                           @andreaselia
 /extensions/betterdiscord-search                                    @TheCommieAxolotl
@@ -553,7 +553,7 @@
 /extensions/google-maps-search                                      @ratoru @aeither @chrismessina
 /extensions/google-maven-repository                                 @koinzhang
 /extensions/google-meet                                             @vitoorgomes @hughlaw @iwex
-/extensions/google-search                                           @mblode
+/extensions/google-search                                           @mblode @VBenny42
 /extensions/google-tasks                                            @elliotdes @pernielsentikaer
 /extensions/google-translate                                        @gebeto @FezVrasta @ickas @metakirby5 @tangerine1202 @nirtamir2 @pernielsentikaer @rasitayaz @Popalay @LitoMore
 /extensions/google-trends                                           @kkange
@@ -902,7 +902,7 @@
 /extensions/nato-phonetic-alphabet                                  @jesse-c @j3lte @pernielsentikaer
 /extensions/nature-remo                                             @uetchy
 /extensions/naver-search                                            @ajchemist @2JS
-/extensions/nba-game-viewer                                         @AbhinavPalacharla @djpowers @michaelli1324 @degouville
+/extensions/nba-game-viewer                                         @AbhinavPalacharla @djpowers @michaelli1324 @degouville @jamtur01
 /extensions/neodb                                                   @Sevichecc
 /extensions/netease-music                                           @chyroc
 /extensions/netlify                                                 @Destiner @jonohewitt @jasonbarry @peduarte @xmok
