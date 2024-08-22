@@ -5,8 +5,17 @@ import { SearchEntries } from "./search-entries";
 
 export default function SearchDocsets(): JSX.Element {
   const { data, isLoading } = useFetch<Doc[]>(`https://devdocs.io/docs/docs.json`, {});
+  const defaultSlugs = ["css", "html", "http", "javascript", "dom"];
+  const preferredDocumentations = data?.filter((documentation) => defaultSlugs.includes(documentation.slug));
 
-  return <List isLoading={isLoading}>{data?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}</List>;
+  return (
+    <List isLoading={isLoading}>
+      <List.Section title="Preferred">
+        {preferredDocumentations?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}
+      </List.Section>
+      <List.Section title="Available">{data?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}</List.Section>
+    </List>
+  );
 }
 
 function DocItem({ doc }: { doc: Doc }): JSX.Element {
