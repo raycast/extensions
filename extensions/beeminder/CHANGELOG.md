@@ -1,6 +1,6 @@
 # Beeminder Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-08-22
 
 - Adds a checkmark icon to goals with data entered today.
 - Makes goals searchable by their descriptions.
