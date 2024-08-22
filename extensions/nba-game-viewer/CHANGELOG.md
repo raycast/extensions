@@ -1,6 +1,6 @@
 # NBA Game Viewer Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-08-22
 
 - Adds the ability to select either the NBA or WNBA league to view games, standings, and more.
 - Adds a preference to store last values for league, conference etc. in drop-downs instead of default values.
