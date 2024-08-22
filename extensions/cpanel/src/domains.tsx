@@ -4,8 +4,12 @@ import { useListDomains, useParsedDNSZone, useUAPI } from "./lib/hooks";
 import { DEFAULT_ICON } from "./lib/constants";
 import { DNSZoneRecord } from "./lib/types";
 import { useState } from "react";
+import { isInvalidUrl } from "./lib/utils";
+import InvalidUrl from "./lib/components/invalid-url";
 
 export default function Domains() {
+  if (isInvalidUrl()) return <InvalidUrl />;
+
   const { isLoading, data } = useListDomains();
 
   return (
@@ -79,7 +83,7 @@ function ViewDNSZone({ zone }: { zone: string }) {
                         <CreateDNSZoneRecord
                           zone={zone}
                           soa={data.find((record) => record.record_type === "SOA") as SOARecord}
-                          onRecordCreated={() => revalidate?.()}
+                          onRecordCreated={revalidate}
                         />
                       }
                     />

@@ -24,7 +24,7 @@ This is a Raycast extension for [cPanel](https://cpanel.net/) `User` level accou
 
 ## 🗒️ Notes
 
-- This extension is for ****User**** level accounts so `Reseller` and `Admin` accounts as well as `WHM` accounts are not guaranteed to work.
+- This extension is for **User** level accounts so `Reseller` and `Admin` accounts as well as `WHM` accounts are not guaranteed to work.
 
 ## 🔧 Commands
 

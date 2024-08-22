@@ -21,33 +21,29 @@ export function useUAPI<T>(
   params?: { [key: string]: string | number },
   options: useUAPIOptions = { execute: true },
 ) {
-  try {
-    const API_URL = new URL(`execute/${module}/${functionName}`, CPANEL_URL);
-    if (params) Object.entries(params).forEach(([key, val]) => API_URL.searchParams.append(key, val.toString()));
+  const API_URL = new URL(`execute/${module}/${functionName}`, CPANEL_URL);
+  if (params) Object.entries(params).forEach(([key, val]) => API_URL.searchParams.append(key, val.toString()));
 
-    const { isLoading, data, error, revalidate } = useFetch(API_URL.toString(), {
-      headers: {
-        Authorization: `cpanel ${CPANEL_USERNAME}:${API_TOKEN}`,
-      },
-      mapResult(result: ErrorResponse | SuccessResponse<T>) {
-        if (!result.status) throw result.errors;
-        return {
-          data: result.data,
-        };
-      },
-      execute: options.execute,
-      async onError(error) {
-        await showFailureToast(error, { title: "cPanel Error" });
-        options.onError?.();
-      },
-      onData() {
-        options.onData?.();
-      },
-    });
-    return { isLoading, data, error, revalidate };
-  } catch (error) {
-    return { isLoading: false, data: undefined, error };
-  }
+  const { isLoading, data, error, revalidate } = useFetch(API_URL.toString(), {
+    headers: {
+      Authorization: `cpanel ${CPANEL_USERNAME}:${API_TOKEN}`,
+    },
+    mapResult(result: ErrorResponse | SuccessResponse<T>) {
+      if (!result.status) throw result.errors;
+      return {
+        data: result.data,
+      };
+    },
+    execute: options.execute,
+    async onError(error) {
+      await showFailureToast(error, { title: "cPanel Error" });
+      options.onError?.();
+    },
+    onData() {
+      options.onData?.();
+    },
+  });
+  return { isLoading, data, error, revalidate };
 }
 
 // DOMAINS
