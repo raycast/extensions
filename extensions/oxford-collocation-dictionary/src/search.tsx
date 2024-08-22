@@ -21,7 +21,7 @@ export default function Command(props: LaunchProps) {
       searchText={query}
       onSearchTextChange={setQuery}
     >
-      {!hasData && <List.EmptyView icon={{ source: "../assets/oxford.png" }} title="Type to begin search" />}
+      {!hasData && <List.EmptyView icon={{ source: "../assets/extension_icon.png" }} title="Type to begin search" />}
 
       {!!hasData && (
         <>
