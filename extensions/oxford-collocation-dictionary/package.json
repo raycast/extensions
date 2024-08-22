@@ -13,10 +13,16 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Search Collocation",
+      "name": "search",
+      "title": "Search a Word",
       "description": "Query the Online Oxford Colocation Dictionary and display it's data",
       "mode": "view"
+    },
+    {
+      "name": "search-selected-word",
+      "title": "Search Selected Text",
+      "description": "Query the Selected Text on Online Oxford Colocation Dictionary and display it's data",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

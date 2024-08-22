@@ -14,7 +14,7 @@ export function parseHtml(data: string) {
   // Initialize the result array
   const $ = cheerio.load(data);
   // Extract the items with class "item" inside the div with id "leftnav"
-  $("#leftnav .item").each((_, item) => {
+  $(".item").each((_, item) => {
     // Extract the type from the first "p" of the item which contains an "i" element
     const type = $(item).find("p").first().find("i").text().trim();
 
