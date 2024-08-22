@@ -94,62 +94,6 @@ export default function SearchWalletCommand() {
     return links;
   };
 
-  const getFavoriteLink = (favorite: WalletSearchResult) => {
-    if (favorite.network === "eth") {
-      return { title: "View on Etherscan", url: `https://etherscan.io/address/${favorite.id}`, icon: "ethereum.png" };
-    } else if (favorite.network === "debank") {
-      return { title: "View on Debank", url: `https://debank.com/profile/${favorite.id}`, icon: "debank.png" };
-    } else if (favorite.network === "arb") {
-      return { title: "View on Arbiscan", url: `https://arbiscan.io/address/${favorite.id}`, icon: "arbitrum.png" };
-    } else if (favorite.network === "zksync") {
-      return { title: "View on Zkscan", url: `https://explorer.zksync.io/address/${favorite.id}`, icon: "zksync.png" };
-    } else if (favorite.network === "optimism") {
-      return {
-        title: "View on Optimism",
-        url: `https://optimistic.etherscan.io/address/${favorite.id}`,
-        icon: "optimism.png",
-      };
-    } else if (favorite.network === "base") {
-      return { title: "View on Base", url: `https://basescan.org/address/${favorite.id}`, icon: "base.png" };
-    } else if (favorite.network === "tron") {
-      return { title: "View on Tronscan", url: `https://tronscan.org/#/address/${favorite.id}`, icon: "tron.png" };
-    } else if (favorite.network === "solana") {
-      return { title: "View on Solscan", url: `https://solscan.io/account/${favorite.id}`, icon: "solana.png" };
-    } else if (favorite.network === "btc") {
-      return {
-        title: "View on Blockchain.com",
-        url: `https://www.blockchain.com/btc/address/${favorite.id}`,
-        icon: "bitcoin.png",
-      };
-    } else if (favorite.network === "bsc") {
-      return { title: "View on BscScan", url: `https://bscscan.com/address/${favorite.id}`, icon: "bsc.png" };
-    } else if (favorite.network === "avax") {
-      return { title: "View on Snowtrace", url: `https://snowtrace.io/address/${favorite.id}`, icon: "avax.png" };
-    } else if (favorite.network === "matic") {
-      return { title: "View on Polygonscan", url: `https://polygonscan.com/address/${favorite.id}`, icon: "matic.png" };
-    } else if (favorite.network === "ftm") {
-      return { title: "View on FtmScan", url: `https://ftmscan.com/address/${favorite.id}`, icon: "ftm.png" };
-    } else if (favorite.network === "inj") {
-      return {
-        title: "View on Injective",
-        url: `https://explorer.injective.network/account/${favorite.id}`,
-        icon: "inj.png",
-      };
-    } else if (favorite.network === "mnt") {
-      return { title: "View on Mantle", url: `https://explorer.mantle.xyz/address/${favorite.id}`, icon: "mnt.png" };
-    } else if (favorite.network === "manta") {
-      return { title: "View on Manta", url: `https://manta.socialscan.io/address/${favorite.id}`, icon: "manta.png" };
-    } else if (favorite.network === "linea") {
-      return { title: "View on Linea", url: `https://explorer.linea.build/address/${favorite.id}`, icon: "linea.png" };
-    } else if (favorite.network === "scroll") {
-      return { title: "View on Scroll", url: `https://scrollscan.com/address/${favorite.id}`, icon: "scroll.png" };
-    } else if (favorite.network === "blast") {
-      return { title: "View on Blast", url: `https://blastscan.io/address/${favorite.id}`, icon: "blast.png" };
-    } else {
-      return { title: "Unknown Network", url: "#", icon: "unknown.png" };
-    }
-  };
-
   const handleAddToFavorites = (link: WalletSearchResult) => {
     const newFavorite: WalletSearchResult = {
       id: link.id,
@@ -175,7 +119,7 @@ export default function SearchWalletCommand() {
                 key={`${favorite.id}-${favorite.network}`}
                 icon={favorite.icon}
                 title={favorite.name}
-                accessories={[{ text: favorite.network}]}
+                accessories={[{ text: favorite.network }]}
                 actions={
                   <ActionPanel>
                     <Action.OpenInBrowser title={favorite.network} url={favorite.url} />
