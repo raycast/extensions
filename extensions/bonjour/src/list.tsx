@@ -14,7 +14,7 @@ export default function Command() {
   cache.subscribe(set);
 
   return (
-    <List isLoading={!items} isShowingDetail={true}>
+    <List isLoading={!items} isShowingDetail={!!items?.length}>
       {items?.map((service: HttpService, index: number) => {
         return (
           <List.Item
