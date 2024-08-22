@@ -1,6 +1,6 @@
 # Claude Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-08-22
 - Feature: 8192 token limit for Claude 3.5 Sonnet [out ot Beta](https://x.com/alexalbert__/status/1825920737326281184)
 - 
 ## [Update] - 2024-08-08
