@@ -122,7 +122,7 @@ function SearchListItem({
                 title="Open Twitter"
                 url={searchResult.twitter}
                 shortcut={{ modifiers: ["cmd"], key: "b" }}
-                icon="logo.svg"
+                icon="twitter.png"
               />
             )}
             {searchResult.website && (
