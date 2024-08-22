@@ -172,21 +172,47 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "insights",
+      "title": "Insights",
+      "subtitle": "Open Threads Insights",
+      "description": "Opens Threads Insights for different time periods (7, 14, or 30 days).",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "period",
+          "description": "The time period for the Insights.",
+          "type": "dropdown",
+          "placeholder": "Time Period",
+          "data": [
+            {
+              "title": "7 Days",
+              "value": "7"
+            },
+            {
+              "title": "14 Days",
+              "value": "14"
+            },
+            {
+              "title": "30 Days",
+              "value": "30"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.80.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.9.0",
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
-    "eslint": "^9.9.0",
-    "eslint-plugin-react": "^7.35.0",
-    "globals": "^15.9.0",
-    "typescript": "^5.4.5",
-    "typescript-eslint": "^8.1.0"
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

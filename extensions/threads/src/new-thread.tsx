@@ -1,14 +1,7 @@
-import React from "react";
-import { useState } from "react";
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  open,
-} from "@raycast/api";
-import { constructPostIntent } from "./lib/post-intent";
+import React from 'react';
+import { useState } from 'react';
+import { Form, ActionPanel, Action, showToast, Toast, open } from '@raycast/api';
+import { constructPostIntent } from './lib/post-intent';
 
 interface ThreadValues {
   content: string;
@@ -31,7 +24,7 @@ export default function ComposeThread() {
     }
 
     // Here you would typically send the data to your API
-    console.log("Posting thread:", values);
+    console.log('Posting thread:', values);
 
     const postIntentUrl = constructPostIntent({
       text: values.content,
@@ -42,15 +35,15 @@ export default function ComposeThread() {
       await open(postIntentUrl);
       await showToast({
         style: Toast.Style.Success,
-        title: "Opening Threads",
-        message: "Posting your thread in the browser",
+        title: 'Opening Threads',
+        message: 'Posting your thread in the browser',
       });
     } catch (error) {
-      console.error("Error opening Threads:", error);
+      console.error('Error opening Threads:', error);
       await showToast({
         style: Toast.Style.Failure,
-        title: "Error",
-        message: "Failed to open Threads in the browser",
+        title: 'Error',
+        message: 'Failed to open Threads in the browser',
       });
     }
   }
@@ -75,11 +68,7 @@ export default function ComposeThread() {
           }
         }}
       />
-      <Form.TextField
-        id="attachment"
-        title="Link"
-        placeholder="https://threads.net"
-      />
+      <Form.TextField id="attachment" title="Link" placeholder="https://threads.net" />
     </Form>
   );
 }
