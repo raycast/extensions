@@ -19,9 +19,11 @@ export default function SearchWalletCommand(props: LaunchProps<{ arguments: Comm
   const [walletAddress, setWalletAddress] = useState<string>(startAddress || "");
   const [favorites, setFavorites] = useState<WalletSearchResult[]>([]);
   const [searchResults, setSearchResults] = useState<WalletSearchResult[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     setFavorites(getFavorites(WALLET_FAVORITES_KEY));
+    setIsLoading(false);
 
     if (startAddress) {
       updateSearchResults(startAddress);
@@ -127,6 +129,7 @@ export default function SearchWalletCommand(props: LaunchProps<{ arguments: Comm
       searchBarPlaceholder="Enter wallet address..."
       throttle
       searchText={walletAddress} // используем начальный адрес, если он есть
+      isLoading={isLoading}
     >
       {!walletAddress && favorites.length > 0 && (
         <List.Section title="Favorites">
