@@ -36,7 +36,7 @@ export default function main() {
           />
           <Action.SubmitForm
             title="View Result"
-            icon={Icon.Checkmark}
+            icon={Icon.Eye}
             onSubmit={() => handleSubmit({ ...values, action: "view" })}
           />
         </ActionPanel>
