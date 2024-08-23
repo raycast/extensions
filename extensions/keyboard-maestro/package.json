@@ -6,12 +6,13 @@
   "icon": "icon.png",
   "author": "eluce2",
   "contributors": [
-    "suaw3k"
+    "suaw3k",
+    "fakerr"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "list",
+      "name": "list-macros",
       "title": "List Macros",
       "subtitle": "Keyboard Maestro",
       "description": "List and quickly trigger Keyboard Maestro Macros",
@@ -34,7 +35,7 @@
       "required": false,
       "title": "Display Details",
       "label": "Shortcuts",
-      "default": false
+      "default": true
     },
     {
       "name": "displayTriggers",
@@ -42,7 +43,7 @@
       "type": "checkbox",
       "required": false,
       "label": "Text Triggers",
-      "default": false
+      "default": true
     },
     {
       "name": "displayIcon",
@@ -50,7 +51,7 @@
       "type": "checkbox",
       "required": false,
       "label": "Icons",
-      "default": false
+      "default": true
     },
     {
       "name": "filterPattern",
@@ -68,10 +69,20 @@
       "required": false,
       "label": "Use Regex",
       "default": false
+    },
+    {
+      "name": "showDisabled",
+      "description": "Do you want to include disabled macros?",
+      "type": "checkbox",
+      "required": false,
+      "title": "Filter Macros",
+      "label": "Show Disabled Macros"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.53.0",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.16.5",
+    "fuse.js": "^7.0.0",
     "plist": "^3.0.4",
     "run-applescript": "^6.0.0"
   },
@@ -81,7 +92,6 @@
     "@types/plist": "^3.0.2",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {
