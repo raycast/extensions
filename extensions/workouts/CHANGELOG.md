@@ -1,5 +1,9 @@
 # Workouts Changelog
 
+## [Add Routes Command] - 2024-08-06
+
+List all your routes with the `routes` command and download them as GPX/TCX files
+
 ## [Enable maps] - 2024-08-06
 
 Enabled maps for everyone without the need for a personal API key
