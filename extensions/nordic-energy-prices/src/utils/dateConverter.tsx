@@ -24,3 +24,15 @@ export function relativeDate(date: string): string {
     return formattedDate;
   }
 }
+
+export function getCurrentTime(): string {
+  const currentHour = new Date().getHours().toString().padStart(2, "0");
+  const currentDate = new Date();
+  currentDate.setHours(parseInt(currentHour), 0, 0, 0);
+
+  // Adjust the time to the local timezone offset
+  const timezoneOffset = currentDate.getTimezoneOffset() * 60000;
+  const localDate = new Date(currentDate.getTime() - timezoneOffset);
+  const isoString = localDate.toISOString().slice(0, -5); // Remove milliseconds part
+  return isoString + "+02:00";
+}

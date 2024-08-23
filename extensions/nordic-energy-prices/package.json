@@ -5,6 +5,9 @@
   "description": "Get today's energy prices in the Nordic countries (Denmark, Sweden, Norway, Finland)",
   "icon": "command-icon-energy.png",
   "author": "mSarheed",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Data",
     "Finance",
