@@ -34,7 +34,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
 
         const fuse = new Fuse(macros, {
           keys: ["name"],
-          threshold: 0.3,
+          threshold: 0.4,
         });
         const result = fuse.search(searchText).map(({ item }) => item);
 
