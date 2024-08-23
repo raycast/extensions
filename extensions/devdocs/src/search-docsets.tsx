@@ -1,5 +1,5 @@
 import { Action, ActionPanel, environment, Icon, Keyboard, List } from "@raycast/api";
-import { getFavicon, useFetch } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 import { Doc } from "./types";
 import { SearchEntries } from "./search-entries";
 
@@ -43,7 +43,10 @@ function DocItem({ doc }: { doc: Doc }): JSX.Element {
   return (
     <List.Item
       title={doc.name}
-      icon={doc.links?.home ? getFavicon(doc.links.home) : Icon.Book}
+      icon={{
+        source: `https://github.com/freeCodeCamp/devdocs/blob/main/public/icons/docs/${doc.slug.split("~")[0]}/16@2x.png?raw=true`,
+        fallback: Icon.Book,
+      }}
       subtitle={doc.version}
       actions={
         <ActionPanel>
