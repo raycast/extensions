@@ -6,7 +6,6 @@ Get today's energy prices in the Nordic countries (Denmark, Sweden, Norway, Finl
 - [ ] Get data for next day
 - [ ] Get data for previous days
 - [ ] Get data for a specific date
-- [ ] Display cheapest and most expensive prices
 
 
 Thanks to the [Beneficial Apps](https://www.beneficial.no) for providing the data.
