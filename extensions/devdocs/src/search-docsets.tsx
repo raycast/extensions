@@ -5,15 +5,30 @@ import { SearchEntries } from "./search-entries";
 
 export default function SearchDocsets(): JSX.Element {
   const { data, isLoading } = useFetch<Doc[]>(`https://devdocs.io/docs/docs.json`, {});
-  const defaultSlugs = ["css", "html", "http", "javascript", "dom"];
-  const preferredDocumentations = data?.filter((documentation) => defaultSlugs.includes(documentation.slug));
+
+  const groupByPreferredDocumentations = (docs: Doc[]) => {
+    const defaultSlugs = ["css", "html", "http", "javascript", "dom"];
+
+    const preferredDocs: Doc[] = [];
+    const otherDocs: Doc[] = [];
+
+    docs.forEach((doc) => {
+      if (defaultSlugs?.find((preferredDoc) => preferredDoc === doc.slug)) {
+        preferredDocs.push(doc);
+      } else {
+        otherDocs.push(doc);
+      }
+    });
+
+    return [preferredDocs, otherDocs];
+  };
+
+  const [preferredDocs, otherDocs] = groupByPreferredDocumentations(data || []);
 
   return (
     <List isLoading={isLoading}>
-      <List.Section title="Preferred">
-        {preferredDocumentations?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}
-      </List.Section>
-      <List.Section title="Available">{data?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}</List.Section>
+      <List.Section title="Preferred">{preferredDocs?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}</List.Section>
+      <List.Section title="Available">{otherDocs?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}</List.Section>
     </List>
   );
 }
