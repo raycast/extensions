@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { OAuth } from "@raycast/api";
+import { OAuth, AI } from "@raycast/api";
 import fetch from "node-fetch";
 
 import { Prompt } from "./data/prompts";
@@ -75,7 +75,7 @@ export async function getAccessToken() {
 
 // API
 
-export async function getPrompts() {
+export async function getPromptUpvotes() {
   const accessToken = await getAccessToken();
 
   const response = await fetch(
@@ -134,4 +134,29 @@ export async function removeUpvote(prompt: Prompt): Promise<any> {
   if (!response.ok) {
     throw new Error(`${response.status}: ${response.statusText}`);
   }
+}
+
+export type AiModel = {
+  id: string;
+  name: string;
+  description: string;
+  availability: "public" | "beta" | "internal" | "deprecated";
+  features: string[];
+  suggestions: string[];
+  capabilities: Record<string, string>;
+  in_better_ai_subscription: boolean;
+  model: AI.Model;
+  provider: string;
+  provider_name: string;
+  provider_brand: string;
+  speed: number;
+  intelligence: number;
+  requires_better_ai: boolean;
+  context: number;
+};
+
+export async function getAvailableAiModels() {
+  const res = await fetch("https://raycast.com/api/v1/ai/models");
+  const models = (await res.json()) as { models: AiModel[] };
+  return models.models as AiModel[];
 }

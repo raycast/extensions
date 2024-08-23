@@ -1,4 +1,4 @@
-import { showHUD } from "@raycast/api";
+import { LaunchType, launchCommand, showHUD } from "@raycast/api";
 import { setSpotifyClient } from "./helpers/withSpotifyClient";
 import { getCurrentlyPlaying } from "./api/getCurrentlyPlaying";
 import { skipToPrevious } from "./api/skipToPrevious";
@@ -21,6 +21,7 @@ export default async function Command() {
   try {
     await skipToPrevious();
     await showHUD("Skipped to previous");
+    await launchCommand({ name: "current-track", type: LaunchType.Background });
   } catch (error) {
     await showHUD("Nothing is currently playing");
   }

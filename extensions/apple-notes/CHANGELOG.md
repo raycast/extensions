@@ -1,8 +1,45 @@
 # Apple Notes Changelog
 
+## [Bug Fix Update] - 2024-06-22
+
+Fix Add Text to Note hooks rendering issue.
+
+## [View Selected Note command] - 2024-06-17
+
+Add a new command allowing users to see the currently selected note from within Raycast. This can be handy if you want to open note backlinks for example.
+
+## [Change AI model for notes] - 2024-05-23
+
+Now, creating an AI note will use GPT-4o instead of GPT-4. 
+
+This update also fixes a bug for users not able to create a note if the default folder isn't spelled "Notes".
+
+## [Bug Fix Update] - 2024-05-16
+
+Fix crashes caused by empty links or tags.
+
+## [Links, Backlinks, and Tags] - 2024-05-14
+
+This update enhances the Apple Notes extension with several new features:
+
+- **Note Links**: You can now see and open links directly in your Apple Notes using the new `Open Links` action.
+- **Backlinks**: The `Open Backlinks` action allows you to easily navigate through related notes and discover how your notes are connected.
+- **Tags**: Tags within your notes are now displayed and searchable, making it simpler to find your notes.
+- **Improved Detail View**: The detail view now provides more information about each note, including the folder name, last update time, links, backlinks, tags, and more.
+
+It also fixes a bug where links would not be opened for users not having macOS Sonoma.
+
+## [Add text to note] - 2024-04-26
+
+Add a new command called `Add Text to Note` allowing you to quickly append text to your notes for faster note-taking. You can also add text to a note from the `Search Notes command`.
+
+## [Use new URI scheme] - 2024-04-25
+
+Merge `Copy Mobile Note URL` into `Copy Note URL` by using the `applenotes://` scheme that works on all platforms.
+
 ## [Find related notes] - 2024-04-10 
 
-Add `Find Related Notes` feature to suggest relevant notes based on a selected note
+Add `Find Related Notes` feature to suggest relevant notes based on a selected note.
 
 ## [Refactoring] - 2024-04-08
 

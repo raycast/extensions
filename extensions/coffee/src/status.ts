@@ -11,7 +11,7 @@ function isCaffeinateProcessRunning() {
 }
 export default async function Command(props: LaunchProps) {
   const isCaffeinated = props.launchContext?.caffeinated ?? isCaffeinateProcessRunning();
-  const subtitle = isCaffeinated ? "☕ Caffeinated" : "❌ Decaffeinated";
+  const subtitle = isCaffeinated ? "✔ Caffeinated" : "✖ Decaffeinated";
 
   updateCommandMetadata({ subtitle });
 }

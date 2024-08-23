@@ -1,5 +1,17 @@
 # Pomodoro Changelog
 
+## [Bugfix] - 2024-07-27
+
+Fixed issue ([#13417](https://github.com/raycast/extensions/issues/13417)) where quotes are not loaded from quotable.io. Moved to zenquotes.io
+
+## [Enhancement] - 2024-06-07
+
+Add option to restart current interval/timer from one click in the menu bar
+
+## [Enhancement] - 2024-04-23
+
+Add recap page to displays information about your prev pomodoro sessions like (total time, total sessions number, back to back sessions,..)
+
 ## [Enhancement] - 2024-02-27
 
 Added support for slack to change status during interval, the two new commands are disabled by default
@@ -42,6 +54,6 @@ Added preference textbox for a markdown image link to render after interval comp
 
 ## [Fix] - 2023-01-03
 
-Fixed so menubar icons works with both light and dark background 
+Fixed so menubar icons works with both light and dark background
 
 ## [Initial Version] - 2022-12-19

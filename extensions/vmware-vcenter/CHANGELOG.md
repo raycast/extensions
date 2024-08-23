@@ -1,5 +1,9 @@
 # VMware vCenter Changelog
 
+## [BugFix] - 2024-05-28
+
+- [BugFix] Fixed "TypeError: Cannot read properties of undefined (reading 'status')".
+
 ## [Feature and BugFix] - 2024-02-16
 
 - [BugFix] Fixed "Error: missing expected parameter key: value".

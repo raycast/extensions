@@ -2,7 +2,7 @@
 
 Raycast supports arguments for your commands so that users can enter values right from Root Search before opening the command.
 
-![](../../.gitbook/assets/arguments.png)
+![](../../.gitbook/assets/arguments.webp)
 
 Arguments are configured in the [manifest](../manifest.md#argument-properties) per command.
 
@@ -15,7 +15,7 @@ Arguments are configured in the [manifest](../manifest.md#argument-properties) p
 
 ## Example
 
-Let's say we want a command with two arguments. Its `package.json` will look like this:
+Let's say we want a command with three arguments. Its `package.json` will look like this:
 
 ```json
 {

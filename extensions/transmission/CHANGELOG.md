@@ -1,5 +1,14 @@
 # Transmission Changelog
 
+## [Usability improvements] - 2024-05-22
+
+- Add a dedicated default download directory 
+
+## [ETA] - 2024-04-24
+
+- Add an ETA to the torrent details
+- Fix a small isse where the cell images are undefined, should show no string
+
 ## [Code improvements] - 2024-04-16
 
 - Refactor the code, splitting the `listTorrents` file into separate components

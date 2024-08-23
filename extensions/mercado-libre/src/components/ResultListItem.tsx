@@ -1,6 +1,6 @@
 import { Action, ActionPanel, List } from "@raycast/api";
 import { MercadoLibreItem } from "../types";
-import { formatPrice } from "../utils";
+import { formatPrice, secureThumbnailURL } from "../utils";
 
 interface ResultListItemProps {
   item: MercadoLibreItem;
@@ -12,10 +12,10 @@ export const ResultListItem = ({ item, handleSearchOpen }: ResultListItemProps) 
     key={item.id}
     title={{ value: item.title, tooltip: item.title }}
     accessories={[{ text: formatPrice(item.price, item.currency_id) }]}
-    icon={item.thumbnail.replace(/^http:/, "https:")}
+    icon={secureThumbnailURL(item.thumbnail)}
     actions={
       <ActionPanel>
-        <Action.OpenInBrowser title="Open in Browser" url={`${item.permalink}`} onOpen={handleSearchOpen} />
+        <Action.OpenInBrowser url={`${item.permalink}`} onOpen={handleSearchOpen} />
       </ActionPanel>
     }
   />

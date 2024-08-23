@@ -1,28 +1,36 @@
 # YouTrack Changelog
 
-## [Update] -  2024-04-12
+## [Update] - 2024-07-08
 
-* Utilize `List.Item`'s `keywords` for filtering by issue ID
+- Add Assignee to Issue Details page
 
-## [Update] -  2024-01-24
+## [Update] - 2024-05-14
 
-* Add 'Add Work' action to add work items to the issue
+- Fix missing `workItemType` for new work items ('Add Work'-feature)
 
-## [Update] -  2024-01-21
+## [Update] - 2024-04-12
 
-* Add 'Create Issue' command
-* BREAKING CHANGE: 'Browse Issues' preferences moved from global to per-command scope
+- Utilize `List.Item`'s `keywords` for filtering by issue ID
 
-## [Bugfixes] -  2023-07-22
+## [Update] - 2024-01-24
 
-* Fix user avatar render issues
-* Remove markdown images from issues' bodies until they are supported by the library
+- Add 'Add Work' action to add work items to the issue
 
-## [Small Update] -  2023-07-16
+## [Update] - 2024-01-21
 
-* Add basic issue details on `Alt(Opt) + Enter`
+- Add 'Create Issue' command
+- BREAKING CHANGE: 'Browse Issues' preferences moved from global to per-command scope
+
+## [Bugfixes] - 2023-07-22
+
+- Fix user avatar render issues
+- Remove markdown images from issues' bodies until they are supported by the library
+
+## [Small Update] - 2023-07-16
+
+- Add basic issue details on `Alt(Opt) + Enter`
 
 ## [Initial Version] - 2022-07-27
 
-* Initial version code. Support basic issues browsing.
-* Icons indicate if an issue is `Resolved` or `Open`.
+- Initial version code. Support basic issues browsing.
+- Icons indicate if an issue is `Resolved` or `Open`.

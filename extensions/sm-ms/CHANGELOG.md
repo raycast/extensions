@@ -1,6 +1,6 @@
 # SM.MS Changelog
 
-## [Copy markdown link] - {PR_MERGE_DATE}
+## [Copy markdown link] - 2024-04-18
 
 - Now you can copy the image link in Markdown form
 

@@ -35,7 +35,8 @@
     "xilopaint",
     "jayeshbhole",
     "hinzed1127",
-    "osalama"
+    "osalama",
+    "geb"
   ],
   "pastContributors": [
     "pomdtr",
@@ -335,14 +336,6 @@
       "title": "Open Arc Boost Gallery",
       "subtitle": "Arc",
       "description": "Open the Arc Boost Gallery",
-      "mode": "no-view",
-      "disabledByDefault": true
-    },
-    {
-      "name": "new-note",
-      "title": "Open New Note",
-      "subtitle": "Arc",
-      "description": "Open a new note",
       "mode": "no-view",
       "disabledByDefault": true
     },

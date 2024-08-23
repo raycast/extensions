@@ -8,7 +8,8 @@
   "contributors": [
     "sxn",
     "qeude",
-    "chetan_goti"
+    "chetan_goti",
+    "drillprop"
   ],
   "categories": [
     "Fun"
@@ -43,12 +44,41 @@
       "mode": "view",
       "keywords": [
         "formula"
+      ],
+      "preferences": [
+        {
+          "required": false,
+          "description": "Choose date format",
+          "type": "dropdown",
+          "title": "Date Format",
+          "name": "dateFormat",
+          "data": [
+            {
+              "title": "MM/DD/YYYY",
+              "value": "MM/dd/yyyy"
+            },
+            {
+              "title": "MM.DD.YYYY",
+              "value": "MM.dd.yyyy"
+            },
+            {
+              "title": "DD/MM/YYYY",
+              "value": "dd/MM/yyyy"
+            },
+            {
+              "title": "DD.MM.YYYY",
+              "value": "dd.MM.yyyy"
+            }
+          ],
+          "default": "MM/dd/yyyy"
+        }
       ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.48.8",
     "cheerio": "^1.0.0-rc.10",
+    "date-fns": "^3.6.0",
     "moment": "^2.29.3",
     "node-fetch": "^3.0.0",
     "raycast-toolkit": "^1.0.3",

@@ -1,4 +1,4 @@
-import { AI, Toast, environment, showToast } from "@raycast/api";
+import { AI, Toast, environment, getPreferenceValues, showToast } from "@raycast/api";
 import { Placeholder, PlaceholderCategory, PlaceholderType } from "placeholders-toolkit";
 
 /**
@@ -6,7 +6,7 @@ import { Placeholder, PlaceholderCategory, PlaceholderType } from "placeholders-
  *
  * Syntax: `{{ai:prompt}}` or `{{ai model="[model]":prompt}}` or `{{ai model="[model]" creativity=[decimal]:prompt}}`
  *
- * The model and creativity are optional. The default model is `gpt-3.5-turbo` and the default creativity is `1.0`. The model can be `gpt-3.5-turbo`, `gpt-3.5-turbo-instruct`, or `gpt-4`. The creativity must be a decimal between 0 and 1.
+ * The model and creativity are optional. The default model is `open-gpt-3.5-turbo` and the default creativity is `1.0`. The creativity must be a decimal between 0 and 1.
  */
 const AskAIDirective: Placeholder = {
   name: "askAI",
@@ -19,14 +19,25 @@ const AskAIDirective: Placeholder = {
     );
     if (matches && environment.canAccess(AI)) {
       const toast = await showToast({ title: "Querying AI...", style: Toast.Style.Animated });
-      const acceptedModels = ["gpt-3.5-turbo", "gpt-3.5-turbo-instruct", "gpt-4"];
+      const preferences = getPreferenceValues<ExtensionPreferences>();
       const modelString = matches[3] || "";
-      const model = acceptedModels.includes(modelString) ? modelString : "gpt-3.5-turbo";
+      const model =
+        Object.entries(AI.Model).find(
+          ([key, value]) =>
+            key.toLowerCase() === modelString.toLowerCase() || value.toLowerCase() === modelString.toLowerCase(),
+        )?.[1] || AI.Model[preferences.defaultAIModel];
       const creativity = matches[6] || "1.0";
       let query = matches[8].substring(0, 4096);
       let result = "";
       let attempt = 0;
       let waiting = true;
+
+      if (!environment.canAccess(AI)) {
+        toast.title = "AI Access Denied";
+        toast.style = Toast.Style.Failure;
+        return { result: "" };
+      }
+
       while (waiting) {
         try {
           result = await AI.ask(query, { model: model as AI.Model, creativity: parseFloat(creativity) || 1.0 });
@@ -46,8 +57,8 @@ const AskAIDirective: Placeholder = {
     return { result: "" };
   },
   constant: false,
-  fn: async (prompt?: string) => {
-    return (await AskAIDirective.apply(`{{askAI:${prompt}}}`)).result;
+  fn: async (prompt?: string, model?: string) => {
+    return (await AskAIDirective.apply(`{{askAI${model ? ` model="${model}"` : ``}:${prompt}}}`)).result;
   },
   example: '{{ai model="gpt-3.5-turbo":What is the meaning of life?}}',
   description:

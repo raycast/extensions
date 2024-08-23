@@ -1,33 +1,45 @@
-import formatRelative from "date-fns/formatRelative";
+import { formatRelative } from "date-fns";
 
-import { GiphyFetch } from "@giphy/js-fetch-api";
 import type { IGif as GiphyGif } from "@giphy/js-types";
-
-import { getAPIKey, GIF_SERVICE } from "../preferences";
 
 import { APIOpt, IGif, IGifAPI, slugify } from "../models/gif";
 
-let gf: GiphyFetch;
-export async function getAPI(force?: boolean) {
-  if (!gf || force) {
-    gf = new GiphyFetch(await getAPIKey(GIF_SERVICE.GIPHY, force));
-  }
+const API_BASE_URL = "https://gif-search.raycast.com/api/giphy";
 
-  return gf;
-}
-
-export default async function giphy(force?: boolean, type?: "gifs" | "videos") {
-  const api = await getAPI(force);
-
+export default async function giphy(type?: "gifs" | "videos") {
   return <IGifAPI>{
     async search(term: string, opt?: APIOpt) {
-      const { offset = 0, limit } = opt || {};
-      return (await api.search(term, { type, offset, limit })).data.map(mapGiphyResponse);
+      const reqUrl = new URL(API_BASE_URL);
+      reqUrl.searchParams.set("q", term);
+      reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
+      reqUrl.searchParams.set("offset", opt?.offset?.toString() ?? "0");
+      if (type) {
+        reqUrl.searchParams.set("type", type);
+      }
+
+      const response = await fetch(reqUrl.toString());
+      if (!response.ok) {
+        throw new Error("Could not search gifs from Giphy");
+      }
+      const results = await response.json();
+      return { results: results.data.map(mapGiphyResponse) };
     },
 
     async trending(opt?: APIOpt) {
-      const { offset = 0, limit = 10 } = opt || {};
-      return (await api.trending({ type, offset, limit })).data.map(mapGiphyResponse);
+      const reqUrl = new URL(API_BASE_URL);
+      reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
+      reqUrl.searchParams.set("offset", opt?.offset?.toString() ?? "0");
+      if (type) {
+        reqUrl.searchParams.set("type", type);
+      }
+
+      const response = await fetch(reqUrl.toString());
+      if (!response.ok) {
+        throw new Error("Could not get trending gifs from Giphy");
+      }
+
+      const results = await response.json();
+      return { results: results.data.map(mapGiphyResponse) };
     },
 
     async gifs(ids: string[]) {
@@ -35,8 +47,12 @@ export default async function giphy(force?: boolean, type?: "gifs" | "videos") {
         return [];
       }
 
-      const { data } = await api.gifs(ids);
-      return data.map(mapGiphyResponse);
+      const reqUrl = new URL(API_BASE_URL);
+      reqUrl.searchParams.set("ids", ids.join(","));
+
+      const response = await fetch(reqUrl.toString());
+      const results = await response.json();
+      return results.data.map(mapGiphyResponse);
     },
   };
 }

@@ -1,6 +1,6 @@
 import { Icon, List, getPreferenceValues } from "@raycast/api";
 import { useEffect } from "react";
-import { loadSharedConfigFiles } from "@aws-sdk/shared-ini-file-loader";
+import { loadSharedConfigFiles, loadSsoSessionData } from "@aws-sdk/shared-ini-file-loader";
 import { useCachedPromise, useCachedState, useExec } from "@raycast/utils";
 
 interface Preferences {
@@ -40,7 +40,19 @@ export default function AWSProfileDropdown({ onProfileSelected }: Props) {
     }
 
     if (selectedProfile) {
-      process.env.AWS_REGION = profileOptions.find((profile) => profile.name === selectedProfile)?.region;
+      const profile = profileOptions.find((profile) => profile.name === selectedProfile);
+      if (profile?.region) {
+        process.env.AWS_REGION = profile.region;
+      }
+      if (profile?.sso_start_url) {
+        process.env.AWS_SSO_START_URL = profile.sso_start_url;
+      }
+      if (profile?.sso_account_id) {
+        process.env.AWS_SSO_ACCOUNT_ID = profile.sso_account_id;
+      }
+      if (profile?.sso_role_name) {
+        process.env.AWS_SSO_ROLE_NAME = profile.sso_role_name;
+      }
     }
 
     if (!vaultSessions?.includes(selectedProfile || "")) {
@@ -121,14 +133,19 @@ const useAwsVault = ({ profile, onUpdate }: { profile?: string; onUpdate: VoidFu
   }, [profile]);
 };
 
-type ProfileOption = {
+export type ProfileOption = {
   name: string;
   region?: string;
   source_profile?: string;
+  sso_start_url?: string;
+  sso_account_id?: string;
+  sso_role_name?: string;
+  sso_session?: string;
 };
 
 const useProfileOptions = (): ProfileOption[] => {
   const { data: configs = { configFile: {}, credentialsFile: {} } } = useCachedPromise(loadSharedConfigFiles);
+  const { data: ssoSessions = {} } = useCachedPromise(loadSsoSessionData);
   const { configFile, credentialsFile } = configs;
 
   const profileOptions =
@@ -136,12 +153,15 @@ const useProfileOptions = (): ProfileOption[] => {
 
   return profileOptions.map(([name, config]) => {
     const includeProfile = configFile[name]?.include_profile;
-    const region =
-      configFile[name]?.region ||
-      credentialsFile[name]?.region ||
-      (includeProfile && configFile[includeProfile]?.region);
-
-    return { ...config, region, name };
+    const region = configFile[name]?.region || (includeProfile && configFile[includeProfile]?.region);
+    const sso_start_url =
+      configFile[name]?.sso_start_url ||
+      (configFile[name]?.sso_session && ssoSessions[configFile[name].sso_session!]?.sso_start_url);
+    const sso_account_id =
+      configFile[name]?.sso_account_id || (includeProfile && configFile[includeProfile]?.sso_account_id);
+    const sso_role_name =
+      configFile[name]?.sso_role_name || (includeProfile && configFile[includeProfile]?.sso_role_name);
+    return { ...config, region, name, sso_start_url, sso_account_id, sso_role_name };
   });
 };
 

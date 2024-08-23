@@ -13,7 +13,8 @@
   ],
   "contributors": [
     "danpalmer",
-    "j3lte"
+    "j3lte",
+    "zhangjiepro"
   ],
   "commands": [
     {
@@ -131,6 +132,14 @@
       "description": "Comma-separated list of paths where you often download your torrents (must be full-paths or tidle-prefixed ones)",
       "type": "textfield",
       "default": "~/Downloads"
+    },
+    {
+      "name": "defaultDownloadDir",
+      "title": "Default Download Directory",
+      "required": false,
+      "description": "The default download directory",
+      "type": "textfield",
+      "default": ""
     },
     {
       "name": "rememberStatusFilter",

@@ -21,21 +21,27 @@ const ItemDetails = ({
 }) => {
   const icons = compatIcons(item);
   const { data, isLoading } = useJSRAPI(item);
+
   return (
     <List.Item.Detail
       isLoading={isLoading}
-      markdown={`## ${item.id}
-${item.description}`}
+      markdown={[
+        `## ${item.id}`,
+        item.description,
+        "",
+        !isLoading && data?.latestVersion ? `![](https://jsr.io/badges/${item.id})` : "",
+        !isLoading && item.score ? `![](https://jsr.io/badges/${item.id}/score)` : "",
+      ].join("\n")}
       metadata={
         <Detail.Metadata>
           {data ? (
             <>
               <Detail.Metadata.Label
                 title="Last Updated"
-                text={formatDistanceToNow(new Date(data.updatedAt), { addSuffix: true })}
+                text={data.updatedAt ? formatDistanceToNow(new Date(data.updatedAt), { addSuffix: true }) : "unknown"}
                 icon={Icon.Clock}
               />
-              <Detail.Metadata.Label title="Version" text={data.latestVersion} icon={Icon.ComputerChip} />
+              <Detail.Metadata.Label title="Version" text={data.latestVersion ?? "unknown"} icon={Icon.ComputerChip} />
               <Detail.Metadata.Separator />
             </>
           ) : null}

@@ -14,4 +14,5 @@ export interface Preferences {
   defaultFormAction: FormActionPreference;
   defaultItemAction: DetailActionPreference;
   extraTags?: string;
+  datePrefix: boolean;
 }

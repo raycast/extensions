@@ -4,9 +4,9 @@ import { groupBy } from "lodash";
 import { useState } from "react";
 import { getTabs } from "./arc";
 import { TabListItem } from "./list";
-import { getKey, getLocationTitle, getNumberOfTabs, getOrderedLocations /*,isTabTypeShown*/ } from "./utils";
-import { VersionCheck } from "./version";
 import { TabLocation } from "./types";
+import { getKey, getLocationTitle, getNumberOfTabs, getOrderedLocations } from "./utils";
+import { VersionCheck } from "./version";
 
 type tabType = {
   id: number;

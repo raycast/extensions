@@ -1,10 +1,9 @@
-import { Action, ActionPanel, List, Toast, showToast, Icon, Color, Image } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
 import { getHAWSConnection, ha } from "@lib/common";
-import { useState, useEffect } from "react";
-import { getErrorMessage } from "@lib/utils";
-import { clearSearchBar } from "@raycast/api";
 import { getTranslation } from "@lib/translation";
+import { getErrorMessage } from "@lib/utils";
+import { Action, ActionPanel, Color, Icon, Image, List, Toast, clearSearchBar, showToast } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { useEffect, useState } from "react";
 
 interface PlainSpeech {
   speech: string;

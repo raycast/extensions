@@ -1,6 +1,7 @@
 import { ActionPanel, Form, Action, useNavigation } from "@raycast/api";
-import { Workspace, Client, updateClient, createClient } from "../api";
-import { withToast, Verb } from "../helpers/withToast";
+
+import { Workspace, Client, updateClient, createClient } from "@/api";
+import { withToast, Verb } from "@/helpers/withToast";
 
 type ClientFormProps =
   | {

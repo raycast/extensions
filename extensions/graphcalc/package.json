@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "graphcalc",
+  "title": "GraphCalc",
+  "description": "GraphCalc is a versatile graphing calculator extension that enables users to visualize mathematical expressions dynamically. With GraphCalc, you can effortlessly plot functions, equations, and data points directly within the Raycast interface.",
+  "icon": "extension_icon.png",
+  "author": "conner_luzier",
+  "contributors": [
+    "luarmr"
+  ],
+  "categories": [
+    "Data",
+    "Applications",
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "GraphCalc",
+      "description": "Graphing Calculator",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "operation",
+          "placeholder": "Operation",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.74.1",
+    "@raycast/utils": "^1.15.0",
+    "chart.js": "^4.4.3",
+    "mathjs": "^12.4.2",
+    "react-vis": "^1.12.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "@types/react-dom": "^18.3.0",
+    "@types/react-vis": "^1.11.15",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,340 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nhk-program-search",
+  "title": "NHK Program Search",
+  "description": "Search NHK program guide by NHK API",
+  "icon": "n-logo.png",
+  "author": "sitogi",
+  "categories": [
+    "Media",
+    "Other"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.15.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.29.1",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "commands": [
+    {
+      "name": "list-program",
+      "title": "List Program",
+      "description": "Display a program guide",
+      "mode": "view"
+    },
+    {
+      "name": "search-program-by-genre",
+      "title": "Search Program by Genne",
+      "description": "Display a program guide filtered by specific genre",
+      "mode": "view"
+    },
+    {
+      "name": "search-program-by-keyword",
+      "title": "Search Program by Keyword",
+      "description": "Display a program guide filtered by specific keyword",
+      "mode": "view"
+    },
+    {
+      "name": "update-local-cache",
+      "title": "Update Local Cache",
+      "description": "Caches a week's worth of program schedule locally",
+      "mode": "no-view",
+      "interval": "1d"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Enter API Key"
+    },
+    {
+      "name": "area",
+      "type": "dropdown",
+      "required": true,
+      "title": "Area",
+      "description": "Select Area",
+      "data": [
+        {
+          "title": "Sapporo",
+          "value": "010"
+        },
+        {
+          "title": "Hakodate",
+          "value": "011"
+        },
+        {
+          "title": "Asahikawa",
+          "value": "012"
+        },
+        {
+          "title": "Obihiro",
+          "value": "013"
+        },
+        {
+          "title": "Kushiro",
+          "value": "014"
+        },
+        {
+          "title": "Kitami",
+          "value": "015"
+        },
+        {
+          "title": "Muroran",
+          "value": "016"
+        },
+        {
+          "title": "Aomori",
+          "value": "020"
+        },
+        {
+          "title": "Morioka",
+          "value": "030"
+        },
+        {
+          "title": "Sendai",
+          "value": "040"
+        },
+        {
+          "title": "Akita",
+          "value": "050"
+        },
+        {
+          "title": "Yamagata",
+          "value": "060"
+        },
+        {
+          "title": "Fukushima",
+          "value": "070"
+        },
+        {
+          "title": "Mito",
+          "value": "080"
+        },
+        {
+          "title": "Utsunomiya",
+          "value": "090"
+        },
+        {
+          "title": "Maebashi",
+          "value": "100"
+        },
+        {
+          "title": "Saitama",
+          "value": "110"
+        },
+        {
+          "title": "Chiba",
+          "value": "120"
+        },
+        {
+          "title": "Tokyo",
+          "value": "130"
+        },
+        {
+          "title": "Yokohama",
+          "value": "140"
+        },
+        {
+          "title": "Niigata",
+          "value": "150"
+        },
+        {
+          "title": "Toyama",
+          "value": "160"
+        },
+        {
+          "title": "Kanazawa",
+          "value": "170"
+        },
+        {
+          "title": "Fukui",
+          "value": "180"
+        },
+        {
+          "title": "Kofu",
+          "value": "190"
+        },
+        {
+          "title": "Nagano",
+          "value": "200"
+        },
+        {
+          "title": "Gifu",
+          "value": "210"
+        },
+        {
+          "title": "Shizuoka",
+          "value": "220"
+        },
+        {
+          "title": "Nagoya",
+          "value": "230"
+        },
+        {
+          "title": "Tsu",
+          "value": "240"
+        },
+        {
+          "title": "Otsu",
+          "value": "250"
+        },
+        {
+          "title": "Kyoto",
+          "value": "260"
+        },
+        {
+          "title": "Osaka",
+          "value": "270"
+        },
+        {
+          "title": "Kobe",
+          "value": "280"
+        },
+        {
+          "title": "Nara",
+          "value": "290"
+        },
+        {
+          "title": "Wakayama",
+          "value": "300"
+        },
+        {
+          "title": "Tottori",
+          "value": "310"
+        },
+        {
+          "title": "Matsue",
+          "value": "320"
+        },
+        {
+          "title": "Okayama",
+          "value": "330"
+        },
+        {
+          "title": "Hiroshima",
+          "value": "340"
+        },
+        {
+          "title": "Yamaguchi",
+          "value": "350"
+        },
+        {
+          "title": "Tokushima",
+          "value": "360"
+        },
+        {
+          "title": "Takamatsu",
+          "value": "370"
+        },
+        {
+          "title": "Matsuyama",
+          "value": "380"
+        },
+        {
+          "title": "Kochi",
+          "value": "390"
+        },
+        {
+          "title": "Fukuoka",
+          "value": "400"
+        },
+        {
+          "title": "Kitakyushu",
+          "value": "401"
+        },
+        {
+          "title": "Saga",
+          "value": "410"
+        },
+        {
+          "title": "Nagasaki",
+          "value": "420"
+        },
+        {
+          "title": "Kumamoto",
+          "value": "430"
+        },
+        {
+          "title": "Oita",
+          "value": "440"
+        },
+        {
+          "title": "Miyazaki",
+          "value": "450"
+        },
+        {
+          "title": "Kagoshima",
+          "value": "460"
+        },
+        {
+          "title": "Okinawa",
+          "value": "470"
+        }
+      ]
+    },
+    {
+      "name": "g1",
+      "type": "checkbox",
+      "required": true,
+      "label": "NHK General",
+      "description": "Select to include NHK General",
+      "title": "Services"
+    },
+    {
+      "name": "e1",
+      "type": "checkbox",
+      "required": true,
+      "label": "NHK Educational",
+      "description": "Select to include NHK Educational"
+    },
+    {
+      "name": "s1",
+      "type": "checkbox",
+      "required": true,
+      "label": "NHK BS",
+      "description": "Select to include NHK BS"
+    },
+    {
+      "name": "s2",
+      "type": "checkbox",
+      "required": true,
+      "label": "NHK BS (102ch)",
+      "description": "Select to include NHK BS (102ch)"
+    },
+    {
+      "name": "s5",
+      "type": "checkbox",
+      "required": true,
+      "label": "NHK BS Premium 4K",
+      "description": "Select to include NHK BS Premium 4K"
+    },
+    {
+      "name": "s6",
+      "type": "checkbox",
+      "required": true,
+      "label": "NHK BS 8K",
+      "description": "Select to include NHK 8K"
+    }
+
+  ]
+}

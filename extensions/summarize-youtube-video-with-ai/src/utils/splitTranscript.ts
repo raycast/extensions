@@ -11,7 +11,7 @@ const splitTranscript = (transcript: string, max_chars: number) =>
       }
       return acc;
     },
-    [""]
+    [""],
   );
 
 export default splitTranscript;

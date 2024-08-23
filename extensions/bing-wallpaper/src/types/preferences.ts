@@ -1,3 +1,5 @@
+import { getPreferenceValues } from "@raycast/api";
+
 export interface Preferences {
   layout: string;
   columns: string;
@@ -7,3 +9,5 @@ export interface Preferences {
   autoDownload: boolean;
   includeDownloadedWallpapers: boolean;
 }
+export const { layout, columns, applyTo, downloadSize, downloadDirectory, autoDownload, includeDownloadedWallpapers } =
+  getPreferenceValues<Preferences>();

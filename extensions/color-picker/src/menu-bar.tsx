@@ -9,7 +9,7 @@ import {
   showHUD,
 } from "@raycast/api";
 import { useHistory } from "./history";
-import { getFormattedColor, getIcon, getShortcut } from "./utils";
+import { getFormattedColor, getIcon, getPreviewColor, getShortcut } from "./utils";
 import { showFailureToast } from "@raycast/utils";
 
 export default function Command() {
@@ -34,10 +34,11 @@ export default function Command() {
       <MenuBarExtra.Section>
         {history?.slice(0, 9).map((historyItem, index) => {
           const formattedColor = getFormattedColor(historyItem.color);
+          const previewColor = getPreviewColor(historyItem.color);
           return (
             <MenuBarExtra.Item
               key={formattedColor}
-              icon={getIcon(formattedColor)}
+              icon={getIcon(previewColor)}
               title={formattedColor}
               subtitle={historyItem.title}
               shortcut={getShortcut(index)}

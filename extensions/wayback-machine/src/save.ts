@@ -1,4 +1,5 @@
-import { LaunchProps, getSelectedText, showToast, Toast } from "@raycast/api";
+import type { LaunchProps } from "@raycast/api";
+import { getSelectedText, showToast, Toast } from "@raycast/api";
 import { savePage, urlRegex } from "./lib";
 
 type WaybackArguments = {

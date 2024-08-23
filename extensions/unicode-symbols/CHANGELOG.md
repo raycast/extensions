@@ -1,5 +1,9 @@
 # Unicode Symbols
 
+## [Filter irrelevant characters] - 2024-05-21
+
+- Added a filter to remove irrelevant characters from the list (#12487)
+
 ## [Add Latin Extended Additional] - 2024-03-11
 
 - Added the Latin Extended Additional character set, totalling to 5195 characters

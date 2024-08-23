@@ -1,5 +1,12 @@
 # Changelog
 
+## [Improvements] - 2024-06-14
+
+- Add "Copy SVG File" to actions and primaryActions
+- Change "Copy SVG" to "Copy SVG String"
+- Change "Paste SVG" to "Paste SVG String"
+- Add "Monochromatic Icon Color" to primaryActions
+
 ## [Improvements] - 2024-03-27
 
 - Add "Paste Name" to actions and primaryActions

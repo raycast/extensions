@@ -1,28 +1,33 @@
 import { ActionPanel, List, Action } from "@raycast/api";
-import * as fs from "fs";
-import path from "path";
-import * as os from "os";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useEffect } from "react";
+
+import { getSSHKeys } from "./util";
+
 export default function Command() {
-  const homeDir = os.homedir();
-  const sshKeyRootDir = path.join(homeDir, ".ssh");
-  const publicKeys = fs.readdirSync(sshKeyRootDir).filter((file) => file.endsWith(".pub"));
+  const { data, isLoading, error } = usePromise(getSSHKeys);
+
+  useEffect(() => {
+    if (error) {
+      showFailureToast(error, {
+        title: "Failed to load SSH keys",
+      });
+    }
+  }, [error]);
 
   return (
-    <List>
+    <List isLoading={isLoading}>
       <List.Section title="SSH Keys">
-        {publicKeys.map((key, index) => {
+        {(data || []).map((file) => {
           return (
             <List.Item
               icon="list-icon.png"
-              key={key}
-              title={key}
-              subtitle={path.join(sshKeyRootDir, publicKeys[index])}
+              key={file.title}
+              title={file.title}
+              subtitle={file.path}
               actions={
                 <ActionPanel>
-                  <Action.CopyToClipboard
-                    title="Copy SSH Key"
-                    content={fs.readFileSync(path.join(sshKeyRootDir, publicKeys[index]), "utf8")}
-                  />
+                  <Action.CopyToClipboard title="Copy SSH Key" content={file.readFile()} />
                 </ActionPanel>
               }
             />

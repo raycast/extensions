@@ -76,6 +76,16 @@ export default function XInProgress() {
     await launchCommand({ name: "index", type: LaunchType.UserInitiated });
   };
 
+  const setShowAsCommand = async (targetProgress: Progress) => {
+    setState((prev) => ({
+      ...prev,
+      allProgress: prev.allProgress.map((progress) => {
+        return { ...progress, showAsCommand: progress.title === targetProgress.title };
+      }),
+    }));
+    await launchCommand({ name: "year-in-progress", type: LaunchType.Background });
+  };
+
   const onEditProgress = (targetProgress: Progress) => {
     navigation.push(
       <AddOrEditProgress
@@ -97,6 +107,7 @@ export default function XInProgress() {
                     shown: values.showInMenubar,
                     title: values.menubarTitle,
                   },
+                  showAsCommand: values.showAsCommand,
                 };
               }
               return progress;
@@ -117,6 +128,12 @@ export default function XInProgress() {
             }
 
             setState((prev) => ({ ...prev, allProgress, currMenubarProgressTitle }));
+
+            // 4. If it is shown as command subtitle, update it
+            const editedProcess = allProgress.find((p) => p.title === targetProgress.title) as Progress;
+            if (editedProcess.showAsCommand) {
+              setShowAsCommand(targetProgress);
+            }
 
             navigation.pop();
             await showToast({
@@ -152,8 +169,13 @@ export default function XInProgress() {
                 shown: values.showInMenubar,
                 title: values.menubarTitle,
               },
+              showAsCommand: values.showAsCommand,
             };
             setState((prev) => ({ ...prev, allProgress: [...prev.allProgress, newProgress] }));
+            // If added process is shown as command, update it
+            if (newProgress.showAsCommand) {
+              setShowAsCommand(newProgress);
+            }
             navigation.pop();
             await showToast({
               style: Toast.Style.Success,
@@ -184,6 +206,12 @@ export default function XInProgress() {
       }
       setState((prev) => ({ ...prev, allProgress, currMenubarProgressTitle }));
 
+      // 3. If it is shown as command, update it
+      if (allProgress.filter((p) => p.showAsCommand).length == 0) {
+        const yearInProgress = allProgress.find((p) => p.title === "Year In Progress") as Progress;
+        setShowAsCommand(yearInProgress);
+      }
+
       await showToast({
         style: Toast.Style.Success,
         title: `${targetTitle} is deleted!`,
@@ -205,12 +233,14 @@ export default function XInProgress() {
               subtitle={getSubtitle(progress.progressNum)}
               icon={getIcon(progress.progressNum)}
               detail={<ProgressDetail progress={progress} />}
+              accessories={progress.showAsCommand ? [{ tag: "Selected" }] : []}
               actions={
                 <Actions
                   progress={progress}
                   onShowingDetails={onShowingDetails}
                   togglePinProgress={togglePinProgress}
                   toggleShowInMenubar={toggleShowInMenubar}
+                  setShowAsCommand={setShowAsCommand}
                   onEditProgress={onEditProgress}
                   onAddProgress={onAddProgress}
                   onDeleteProgress={onDeleteProgress}
@@ -233,12 +263,14 @@ export default function XInProgress() {
                 subtitle={getSubtitle(progress.progressNum)}
                 icon={getIcon(progress.progressNum)}
                 detail={<ProgressDetail progress={progress} />}
+                accessories={progress.showAsCommand ? [{ tag: "Selected" }] : []}
                 actions={
                   <Actions
                     progress={progress}
                     onShowingDetails={onShowingDetails}
                     togglePinProgress={togglePinProgress}
                     toggleShowInMenubar={toggleShowInMenubar}
+                    setShowAsCommand={setShowAsCommand}
                     onEditProgress={onEditProgress}
                     onAddProgress={onAddProgress}
                     onDeleteProgress={onDeleteProgress}
@@ -257,6 +289,7 @@ function Actions(props: {
   onShowingDetails: () => void;
   togglePinProgress: (targetProgress: Progress) => Promise<void>;
   toggleShowInMenubar: (targetProgress: Progress) => Promise<void>;
+  setShowAsCommand: (targetProgress: Progress) => void;
   onEditProgress: (targetProgress: Progress) => void;
   onAddProgress: () => void;
   onDeleteProgress: (targetTitle: string) => Promise<void>;
@@ -266,6 +299,7 @@ function Actions(props: {
     onShowingDetails,
     togglePinProgress,
     toggleShowInMenubar,
+    setShowAsCommand,
     onEditProgress,
     onAddProgress,
     onDeleteProgress,
@@ -289,6 +323,16 @@ function Actions(props: {
             await toggleShowInMenubar(progress);
           }}
         />
+        {!progress.showAsCommand && (
+          <Action
+            title="Show in Command Subtitle"
+            icon={Icon.Eye}
+            onAction={async () => {
+              await setShowAsCommand(progress);
+            }}
+          />
+        )}
+
         {progress.type === "user" && (
           <Action
             title="Edit Progress"

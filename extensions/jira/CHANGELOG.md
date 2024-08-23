@@ -1,5 +1,29 @@
 # Jira Changelog
 
+## [Fix epic autocomplete to include all epics of a selected project.] - 2024-08-14
+
+- When a user searches for an epic, the extension prioritizes retrieving search results from Current Search over History Search
+
+## [Log out the user if re-authentication fails] - 2024-07-11
+
+- Automatically log out users if re-authentication fails, instead of displaying an error message.
+
+## [Fix URL port issue] 2024-06-17
+
+- Fixed an issue where adding a port to the URL was not possible
+
+## [The custom fields can be render as required] - 2024-05-16
+
+- Fixed an issue where the custom fields were not recognized as required, even though the API suggested they were.
+
+## [Fix Open in Browser action] - 2024-05-16
+
+- Fixed an issue where users who logged in using an API token were unable to open issues directly in their web browser.
+
+## [Show target status on Change Status submenu] - 2024-04-30
+
+- Show target status next to the action name on Change Status submenu
+
 ## [API token bug fixes] - 2024-04-22
 
 - Improved handling of invalid URLs in the jiraWithApiToken function

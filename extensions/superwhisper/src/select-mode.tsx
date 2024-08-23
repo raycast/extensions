@@ -1,108 +1,173 @@
-import { Action, ActionPanel, Icon, Image, List, open } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { readdirSync } from "fs";
-import { homedir } from "os";
-import fs from "fs";
-import { SUPERWHISPER_BUNDLE_ID, checkSuperwhisperInstallation } from "./utils";
+import { Action, ActionPanel, Color, Icon, List, openCommandPreferences, showToast } from "@raycast/api";
+import { SUPERWHISPER_BUNDLE_ID } from "./utils";
+import { useModes } from "./hooks";
 
-interface State {
-  items?: Mode[];
-  error?: Error;
-}
-
-interface Mode {
+export interface Mode {
   key: string;
   name: string;
-}
-
-function handleSelection(item: Mode) {
-  const modeKey = item.key;
-  const url = `superwhisper://mode?key=${modeKey}`;
-  open(url, SUPERWHISPER_BUNDLE_ID);
+  description?: string;
+  adjustOutputVolume?: boolean;
+  language?: string;
+  useSystemAudio?: boolean;
+  diarize?: boolean;
+  literalPunctuation?: boolean;
+  languageModelID?: string;
+  contextFromClipboard?: boolean;
+  translateToEnglish?: boolean;
+  voiceModelID?: string;
+  realtimeOutput?: boolean;
+  contextFromActiveApplication?: boolean;
 }
 
 export default function Command() {
-  const [state, setState] = useState<State>({});
-
-  useEffect(() => {
-    async function fetchModes() {
-      const isInstalled = await checkSuperwhisperInstallation();
-      if (!isInstalled) {
-        setState({ error: new Error("Superwhisper is not installed") });
-        return;
-      }
-
-      try {
-        // read mode json files from Documents/superwhisper/modes folder
-        const modes: Mode[] = [];
-        const modeDirURL = `${homedir()}/Documents/superwhisper/modes`;
-        await readdirSync(modeDirURL).forEach((file) => {
-          // make sure its a json file
-          if (file.indexOf(".json") == -1) {
-            return;
-          }
-          // read json file
-          const data = JSON.parse(fs.readFileSync(`${modeDirURL}/${file}`, "utf8"));
-          // add to modes array
-          modes.push(data);
-        });
-        setState({ items: modes });
-      } catch (error) {
-        setState({
-          error: error instanceof Error ? error : new Error("Something went wrong"),
-        });
-      }
-    }
-
-    fetchModes();
-  }, []);
+  const { modes, isLoading, error } = useModes();
+  const isShowingDetail = !isLoading && !error && (modes?.length || 0) > 0;
 
   return (
-    <List isLoading={!state.items && !state.error}>
-      {state.items?.map((item, index) => (
-        <List.Item
-          key={item.key}
-          icon={getIcon(index + 1)}
-          title={item.name || "Default"}
-          subtitle={`⌘${index + 1}`}
-          // accessories={}
-          actions={<Actions item={item} />}
+    <List isLoading={isLoading} isShowingDetail={isShowingDetail}>
+      {error && (
+        <List.EmptyView
+          title="Failed to fetch modes"
+          description={error.message}
+          icon={{ source: Icon.Warning, tintColor: Color.Red }}
+          actions={
+            <ActionPanel>
+              {error.message.includes("not installed") ? (
+                <Action.OpenInBrowser url="https://superwhisper.com" title={"Install From superwhisper.com"} />
+              ) : (
+                <Action icon={Icon.Gear} title={"Open Preferences"} onAction={openCommandPreferences} />
+              )}
+            </ActionPanel>
+          }
         />
-      ))}
+      )}
+      {!isLoading && !error && modes?.length === 0 && (
+        <List.EmptyView
+          title="No modes found"
+          description="Check if mode directory is correct."
+          icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+          actions={
+            <ActionPanel>
+              <Action icon={Icon.Gear} title={"Open Preferences"} onAction={openCommandPreferences} />
+            </ActionPanel>
+          }
+        />
+      )}
+      {modes?.map(
+        (
+          {
+            key,
+            name = "Default",
+            description = "",
+            adjustOutputVolume,
+            language,
+            useSystemAudio,
+            diarize,
+            literalPunctuation,
+            languageModelID,
+            contextFromClipboard,
+            translateToEnglish,
+            voiceModelID,
+            realtimeOutput,
+            contextFromActiveApplication,
+          },
+          index,
+        ) => (
+          <List.Item
+            key={key}
+            icon={Icon.Waveform}
+            title={name}
+            subtitle={`⌘${index + 1}`}
+            detail={
+              <List.Item.Detail
+                markdown={description ? description : undefined}
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="Key" text={key} />
+                    <List.Item.Detail.Metadata.Label title="Name" text={name} />
+                    {language && (
+                      <List.Item.Detail.Metadata.Label
+                        title="Language"
+                        text={language}
+                        icon={{ source: Icon.Microphone, tintColor: Color.Blue }}
+                      />
+                    )}
+                    {languageModelID && (
+                      <List.Item.Detail.Metadata.Label
+                        title="Language Model ID"
+                        text={languageModelID}
+                        icon={{ source: Icon.Dna, tintColor: Color.Yellow }}
+                      />
+                    )}
+                    {voiceModelID && (
+                      <List.Item.Detail.Metadata.Label
+                        title="Voice Model ID"
+                        text={voiceModelID}
+                        icon={{ source: Icon.Waveform, tintColor: Color.Blue }}
+                      />
+                    )}
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label
+                      title="Adjust Output Volume"
+                      {...booleanProps(!!adjustOutputVolume)}
+                    />
+                    <List.Item.Detail.Metadata.Label title="Use System Audio" {...booleanProps(!!useSystemAudio)} />
+                    <List.Item.Detail.Metadata.Label title="Diarize" {...booleanProps(!!diarize)} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Literal Punctuation"
+                      {...booleanProps(!!literalPunctuation)}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Context From Clipboard"
+                      {...booleanProps(!!contextFromClipboard)}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Translate To English"
+                      {...booleanProps(!!translateToEnglish)}
+                    />
+                    <List.Item.Detail.Metadata.Label title="Realtime Output" {...booleanProps(!!realtimeOutput)} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Context From Active Application"
+                      {...booleanProps(!!contextFromActiveApplication)}
+                    />
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
+            accessories={[
+              ...(language
+                ? [
+                    {
+                      text: language,
+                      icon: { source: Icon.Microphone, tintColor: Color.Blue },
+                      tooltip: `Language: ${language}`,
+                    },
+                  ]
+                : []),
+            ]}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Section title={name}>
+                  <Action.Open
+                    icon={Icon.Circle}
+                    title={`Select ${name} Mode`}
+                    target={`superwhisper://mode?key=${key}`}
+                    application={SUPERWHISPER_BUNDLE_ID}
+                    onOpen={() => showToast({ title: `Selected ${name} mode for Superwhisper` })}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        ),
+      )}
     </List>
   );
 }
 
-function Actions(props: { item: Mode }) {
-  return (
-    <ActionPanel title={props.item.name}>
-      <ActionPanel.Section>
-        <SelectModeAction item={props.item} onSelect={() => handleSelection(props.item)} />
-      </ActionPanel.Section>
-    </ActionPanel>
-  );
-}
-
-function SelectModeAction(props: { item: Mode; onSelect: () => void }) {
-  return <Action icon={Icon.Circle} title={`Select ${props.item.name} Mode`} onAction={props.onSelect} />;
-}
-
-function getIcon(index: number): Image.ImageLike {
-  const svg = `
-<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
-  <rect x="0" y="0" width="40" height="40" fill="#333" rx="10"></rect>
-  <text
-  font-size="22"
-  fill="white"
-  font-family="Inter"
-  text-anchor="middle"
-  alignment-baseline="baseline"
-  x="20.5"
-  y="32.5">${index}</text>
-</svg>
-  `.replaceAll("\n", "");
-
+function booleanProps(flag: boolean) {
   return {
-    source: `data:image/svg+xml,${svg}`,
+    text: { value: flag ? "Yes" : "No", color: flag ? Color.Green : Color.Red },
+    icon: { source: flag ? Icon.Checkmark : Icon.Xmark, tintColor: flag ? Color.Green : Color.Red },
   };
 }

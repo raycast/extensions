@@ -144,8 +144,13 @@ export function getFilteredDataset(query: string | null, filter: string | null):
     }
   }
 
+  const hasExactMatches = characters.some((char) => char.score === -1);
+  // We filter results that might come true with a score of -1 if there are more that one character. This has to do with logic regarding getting an exact character.
+  const filtered =
+    characters.length > 1 && hasExactMatches ? characters.filter((char) => char.score !== -1) : characters;
+
   return {
     blocks: dataset.blocks,
-    characters,
+    characters: filtered,
   };
 }

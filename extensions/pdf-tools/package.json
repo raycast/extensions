@@ -1,0 +1,130 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pdf-tools",
+  "title": "PDF Tools",
+  "description": "Your all-in-one PDF toolkit",
+  "icon": "pdftools-icon.png",
+  "author": "xilopaint",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "pdf",
+    "split",
+    "merge",
+    "protect",
+    "unlock",
+    "encrypt",
+    "decrypt",
+    "password"
+  ],
+  "commands": [
+    {
+      "name": "split-by-file-size",
+      "title": "Split PDF by File Size",
+      "description": "Split a PDF file into multiple parts based on file size",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "maxSizeMB",
+          "type": "text",
+          "placeholder": "Max file size in MB",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "split-by-page-count",
+      "title": "Split PDF by Page Count",
+      "description": "Split a PDF file into multiple parts based on the number of pages",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "pageCount",
+          "type": "text",
+          "placeholder": "Number of pages",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "merge",
+      "title": "Merge PDF Files",
+      "description": "Merge multiple PDF files into one",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "outputFilename",
+          "type": "text",
+          "placeholder": "Output filename",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "protect",
+      "title": "Protect PDF",
+      "description": "Protect a PDF file with a password",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "password",
+          "type": "password",
+          "placeholder": "Password",
+          "required": true,
+          "keywords": [
+            "encrypt",
+            "password"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "unlock",
+      "title": "Unlock PDF",
+      "description": "Unlock a password-protected PDF file",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "password",
+          "type": "password",
+          "placeholder": "Password",
+          "required": true,
+          "keywords": [
+            "decrypt",
+            "password"
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "suffix",
+      "title": "Output PDF Filename Suffix",
+      "description": "Suffix for split PDF filenames (e.g., 'part')",
+      "type": "textfield",
+      "default": "part",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "@types/react": "18.3.3",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "build": "ray build -e dist"
+  }
+}

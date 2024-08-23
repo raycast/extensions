@@ -1,15 +1,53 @@
 # Spotify Player Changelog
 
-## [Feature] - 2024-02-02
+## [Add "Remove All Searches" Action in Search Command] - 2024-08-22
+
+- Added `Remove All Searches` action to remove all search history in one click.
+
+## [Log out the user if re-authentication fails] - 2024-07-11
+
+- Automatically log out users if re-authentication fails, instead of displaying an error message.
+
+## [Generate Playlist Fixes] - 2024-06-11
+
+- Removed automatic copying to clipboard after AI generates a result.
+- Improved the error message displayed when the playlist generation fails.
+
+## [Generate Playlist] - 2024-06-04
+
+- Added a new feature where Raycast AI can create a playlist for you. You can then add this playlist to Spotify or queue all the songs directly.
+
+## [New Album Actions] - 2024-05-30
+
+-  Added new actions in the album panel: `Add To Library` and `Remove From Library`.
+
+## [Automatically Trigger Current Track] - 2024-05-28
+
+- Automatically trigger the current track command when commands that modify the current track state are executed. (Like, Unlike, Next, Previous).
+
+## [New Actions Added] - 2024-05-27
+
+- Added `Like` and `Dislike` actions for tracks.
+
+## [Improvements] - 2024-05-27
+
+- Users can now set their preferred first section for search results.
+- Added a new keyboard shortcut for "Add to queue".
+
+## [New "Remove Playing Song from Playlist" command] - 2024-05-27
+
+- New command `Remove Playing Song from Playlist` to remove the current song from the playlist it's in.
+
+## [New "Add Playing Song to Playlist" command] - 2024-02-02
 
 - New command `Add Playing Song to Playlist` to directly add the current song to a playlist of your choice.
 - Removed the condition to filter collaborative playlists from other users, since Spotify doesn't update it correctly.
 
-## [New Command] - 2023-01-31
+## [New "Queue" Command] - 2023-01-31
 
 - New `Queue` command allowing the user to view songs/epsiodes in the queue.
 
-## [Fix] - 2024-01-31
+## [Bug fixes] - 2024-01-31
 
 - Fixed a bug that caused launching the Spotify app to not work properly
 - Modified the device selection preference for playback

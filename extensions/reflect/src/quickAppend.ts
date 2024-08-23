@@ -1,8 +1,15 @@
-import { authorize } from "./helpers/oauth";
-import { prependTimestampIfSelected } from "./helpers/dates";
+import {
+  closeMainWindow,
+  confirmAlert,
+  getPreferenceValues,
+  LaunchProps,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { appendToDailyNote, ReflectApiError } from "./helpers/api";
-import { getPreferenceValues, openExtensionPreferences, LaunchProps } from "@raycast/api";
-import { confirmAlert, showToast, Toast, closeMainWindow } from "@raycast/api";
+import { prependNote } from "./helpers/dates";
+import { authorize } from "./helpers/oauth";
 
 export default async (props: LaunchProps<{ arguments: Arguments.QuickAppend }>) => {
   const preferences: Preferences.QuickAppend & Preferences = getPreferenceValues();
@@ -21,7 +28,7 @@ export default async (props: LaunchProps<{ arguments: Arguments.QuickAppend }>) 
 
   try {
     const authorizationToken = await authorize();
-    const text = prependTimestampIfSelected(props.fallbackText || props.arguments.text, preferences);
+    const text = prependNote(props.fallbackText || props.arguments.text, preferences);
 
     await appendToDailyNote(authorizationToken, preferences.graphId, text, listName);
 

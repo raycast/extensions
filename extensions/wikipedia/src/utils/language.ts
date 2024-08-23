@@ -3,6 +3,7 @@ import { useCachedState } from "@raycast/utils";
 
 export type Locale =
   | "en"
+  | "simple"
   | "es"
   | "de"
   | "fr"
@@ -23,7 +24,8 @@ export type Locale =
   | "zh-sg"
   | "zh-tw"
   | "zh-cn"
-  | "uk";
+  | "uk"
+  | "da";
 
 export function useLanguage() {
   return useCachedState<Locale>("language", "en");
@@ -37,6 +39,7 @@ export async function getStoredLanguage() {
 
 export const languages: { icon: string; title: string; value: Locale }[] = [
   { icon: "🇺🇸", title: "English", value: "en" },
+  { icon: "🇺🇸", title: "English (Simple)", value: "simple" },
   { icon: "🇪🇸", title: "Spanish", value: "es" },
   { icon: "🇩🇪", title: "German", value: "de" },
   { icon: "🇫🇷", title: "French", value: "fr" },
@@ -58,4 +61,5 @@ export const languages: { icon: string; title: string; value: Locale }[] = [
   { icon: "🇸🇬", title: "Chinese (Singapore)", value: "zh-sg" },
   { icon: "🇹🇼", title: "Chinese (Taiwan)", value: "zh-tw" },
   { icon: "🇨🇳", title: "Chinese (China)", value: "zh-cn" },
+  { icon: "🇩🇰", title: "Danish", value: "da" },
 ];

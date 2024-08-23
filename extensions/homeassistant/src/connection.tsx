@@ -1,10 +1,10 @@
-import { Color, Icon, List, Toast, showToast } from "@raycast/api";
-import { useEffect, useState } from "react";
 import { ha } from "@lib/common";
 import { getErrorMessage } from "@lib/utils";
 import { getWifiSSIDSync } from "@lib/wifi";
+import { Color, Icon, List, Toast, showToast } from "@raycast/api";
+import { useEffect, useState } from "react";
 
-export default function ConnectionCommand(): JSX.Element {
+export default function ConnectionCommand() {
   const { error, isLoading, nearestURL } = useConnection();
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: error });

@@ -1,4 +1,4 @@
-import { LocalStorage } from "@raycast/api";
+import { LaunchType, LocalStorage, launchCommand } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Progress } from "../types";
 import { defaultProgress, getProgressNumByDate } from "../utils/progress";
@@ -19,6 +19,7 @@ function getLatestAllProgress(allProgress: Progress[]) {
         shown: updatedProgress?.menubar.shown,
         title: progress.menubar.title,
       },
+      showAsCommand: updatedProgress?.showAsCommand,
     };
   });
   const userProgress = allProgress
@@ -29,6 +30,26 @@ function getLatestAllProgress(allProgress: Progress[]) {
     }));
   return [...latestDefaultProgress, ...userProgress];
 }
+
+export const getLatestXProgress = async () => {
+  const storedAllProgress = await LocalStorage.getItem<string>(STORAGE_KEY);
+  if (!storedAllProgress) {
+    return { allProgress: defaultProgress, currMenubarProgressTitle: defaultProgress[0].title };
+  }
+
+  try {
+    const xProgress: Omit<State, "isLoading"> = JSON.parse(storedAllProgress);
+    return {
+      ...xProgress,
+      allProgress: getLatestAllProgress(xProgress.allProgress),
+    };
+  } catch (err) {
+    return {
+      allProgress: defaultProgress,
+      currMenubarProgressTitle: defaultProgress[0].title,
+    };
+  }
+};
 
 export function useLocalStorageProgress(): [
   State,
@@ -45,12 +66,15 @@ export function useLocalStorageProgress(): [
     (async () => {
       const storedAllProgress = await LocalStorage.getItem<string>(STORAGE_KEY);
       if (!storedAllProgress) {
+        // setting first progress as default command subtitle
+        defaultProgress[0].showAsCommand = true;
         setState((prev) => ({
           ...prev,
           isLoading: false,
           allProgress: defaultProgress,
           currMenubarProgressTitle: defaultProgress[0].title,
         }));
+        await launchCommand({ name: "year-in-progress", type: LaunchType.Background });
         return;
       }
 
@@ -79,26 +103,6 @@ export function useLocalStorageProgress(): [
       JSON.stringify({ allProgress: state.allProgress, currMenubarProgressTitle: state.currMenubarProgressTitle })
     );
   }, [state.allProgress, state.currMenubarProgressTitle]);
-
-  const getLatestXProgress = async () => {
-    const storedAllProgress = await LocalStorage.getItem<string>(STORAGE_KEY);
-    if (!storedAllProgress) {
-      return { allProgress: defaultProgress, currMenubarProgressTitle: defaultProgress[0].title };
-    }
-
-    try {
-      const xProgress: Omit<State, "isLoading"> = JSON.parse(storedAllProgress);
-      return {
-        ...xProgress,
-        allProgress: getLatestAllProgress(xProgress.allProgress),
-      };
-    } catch (err) {
-      return {
-        allProgress: defaultProgress,
-        currMenubarProgressTitle: defaultProgress[0].title,
-      };
-    }
-  };
 
   return [state, setState, getLatestXProgress];
 }

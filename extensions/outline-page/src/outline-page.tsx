@@ -58,7 +58,7 @@ export default async function runOutlinePage() {
     // Handle specific error messages for different applications
     if (frontAppName === "Safari") {
       errorMessage = "Enable the 'Allow JavaScript from Apple Events' option in Safari's Develop menu.";
-    } else if (frontAppName === "Google Chrome") {
+    } else if (frontAppName === "Google Chrome" || frontAppName === "Brave Browser") {
       errorMessage = "Enable the 'Allow JavaScript from Apple Events' option from the menu bar item: View > Developer.";
     } else {
       errorMessage = `Could not run Outline Page in ${frontAppName}. Make sure the frontmost app is Safari or Chrome.`;

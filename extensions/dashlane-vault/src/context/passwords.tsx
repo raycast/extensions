@@ -1,6 +1,8 @@
 import { Toast, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { createContext, useContext } from "react";
 
+import { getErrorAction } from "@/helper/error";
 import { useCachedPasswords } from "@/hooks/useCachedPasswords";
 import { syncVault } from "@/lib/dcli";
 import { VaultCredential } from "@/types/dcli";
@@ -33,9 +35,8 @@ export function PasswordsProvider({ children }: { children: React.ReactNode }) {
 
       toast.hide();
     } catch (error) {
-      showToast({
-        title: "Dashlane sync failed",
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
+        primaryAction: getErrorAction(error),
       });
     }
   }

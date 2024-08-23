@@ -1,6 +1,6 @@
 # Hide Files
 
-Hide and unhide files in any Finder directory, including Desktop, Downloads, Documents, etc.
+Hide or unhide files in any Finder directory, including Desktop, Downloads, Documents, etc.
 
 **Tips:**
 
@@ -14,7 +14,3 @@ Hide and unhide files in any Finder directory, including Desktop, Downloads, Doc
 **⚠️️Note**
 
 - This extension cannot hide the external disk icon
-
-**Screencast**
-
-https://user-images.githubusercontent.com/36128970/163665324-0aa6a448-67f4-419d-9363-ec78cee7cbff.mp4

@@ -23,9 +23,9 @@ const projectSchema = z.array(
         name: z.string(),
         active: z.boolean(),
         billable: z.boolean(),
-      })
+      }),
     ),
-  })
+  }),
 );
 
 const preferences = getPreferenceValues<Preferences>();
@@ -54,6 +54,6 @@ export const fetchProjects = async (): Promise<Project[]> => {
         billable: project.billable as boolean,
         customer: project.customer as Customer,
         tasks: project.tasks as Task[],
-      })
+      }),
     );
 };

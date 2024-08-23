@@ -92,10 +92,9 @@
     {
       "name": "downloadDirectory",
       "title": "Download Directory",
-      "description": "The directory of wallpaper to download. Path format: /Users/Username/Downloads or ~/Downloads.",
+      "description": "Directory of files to download wallpapers",
       "type": "directory",
       "required": false,
-      "placeholder": "~/Pictures/BingWallpaper",
       "default": "~/Downloads"
     },
     {
@@ -168,22 +167,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.2",
+    "@raycast/api": "^1.74.1",
+    "file-url": "^4.0.0",
     "fs-extra": "^11.2.0",
     "node-fetch": "^3.3.2",
-    "run-applescript": "^7.0.0",
-    "file-url": "^4.0.0"
+    "run-applescript": "^7.0.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "~20.11.16",
-    "@types/react": "^18.2.52",
-    "@typescript-eslint/eslint-plugin": "^6.20.0",
-    "@typescript-eslint/parser": "^6.20.0",
-    "eslint": "^8.56.0",
+    "@types/node": "~20.12.12",
+    "@types/react": "^18.3.2",
+    "@typescript-eslint/eslint-plugin": "^7.9.0",
+    "@typescript-eslint/parser": "^7.9.0",
+    "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.2.4",
-    "typescript": "^5.3.3"
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

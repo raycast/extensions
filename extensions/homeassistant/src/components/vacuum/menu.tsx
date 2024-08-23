@@ -1,8 +1,9 @@
-import { Icon, Image, MenuBarExtra } from "@raycast/api";
+import { LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
+import { CopyEntityIDToClipboard } from "@components/state/menu";
 import { State } from "@lib/haapi";
 import { capitalizeFirstLetter, getFriendlyName } from "@lib/utils";
-import { MenuBarSubmenu } from "@components/menu";
-import { CopyEntityIDToClipboard } from "@components/state/menu";
+import { Icon, Image, MenuBarExtra } from "@raycast/api";
+import { getIcon, getStateValue } from "../state/utils";
 import {
   callVacuumLocateService,
   callVacuumPauseService,
@@ -13,7 +14,6 @@ import {
   callVacuumTurnOnService,
   isVacuumEditable,
 } from "./utils";
-import { getStateValue, getIcon } from "../state/utils";
 
 function VacuumMenubarItemBase(props: {
   state: State;
@@ -123,6 +123,7 @@ export function VacuumMenubarItem(props: { state: State }) {
       <VacuumTurnOnMenubarItem state={s} />
       <VacuumTurnOffMenubarItem state={s} />
       <VacuumReturnToBaseMenubarItem state={s} />
+      <LastUpdateChangeMenubarItem state={s} />
       <CopyEntityIDToClipboard state={s} />
     </MenuBarSubmenu>
   );

@@ -1,12 +1,12 @@
-import { Color, Action, ActionPanel } from "@raycast/api";
 import { State } from "@lib/haapi";
+import { Action, ActionPanel, Color } from "@raycast/api";
+import { EntityStandardActionSections } from "../entity";
 import {
   callInputBooleanToggleService,
   callInputBooleanTurnOffService,
   callInputBooleanTurnOnService,
   isEditableInputBoolean,
 } from "./utils";
-import { EntityStandardActionSections } from "../entity";
 
 export function InputBooleanToggleAction(props: { state: State }): JSX.Element | null {
   const s = props.state;

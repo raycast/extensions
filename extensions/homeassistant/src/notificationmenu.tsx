@@ -1,26 +1,26 @@
-import { getPreferenceValues, MenuBarExtra } from "@raycast/api";
-import { getErrorMessage } from "@lib/utils";
-import { MenuBarItemConfigureCommand } from "@components/menu";
 import { useHAStates } from "@components/hooks";
-import { State } from "@lib/haapi";
-import { HAPersistentNotification } from "@components/persistentnotification/utils";
 import { useHAPersistentNotifications } from "@components/persistentnotification/hooks";
 import { PersistentNotificationsMenubarSection } from "@components/persistentnotification/list";
+import { HAPersistentNotification } from "@components/persistentnotification/utils";
 import { UpdatesMenubarSection } from "@components/update/menu";
 import { getHACSRepositories } from "@components/update/utils";
+import { State } from "@lib/haapi";
+import { getErrorMessage } from "@lib/utils";
+import { getPreferenceValues, MenuBarExtra } from "@raycast/api";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 
-function showCountInMenu(): boolean {
+function showCountInMenu() {
   const prefs = getPreferenceValues();
   return (prefs.showcount as boolean) === true;
 }
 
-function updatesIndicatorPreference(): boolean {
+function updatesIndicatorPreference() {
   const prefs = getPreferenceValues();
   const val = prefs.indicatorUpdates as boolean | undefined;
   return val === false ? false : true;
 }
 
-export default function MenuCommand(): JSX.Element {
+export default function MenuCommand() {
   const { notifications, states, error, isLoading } = useNotifications();
   const updates = states?.filter((s) => s.entity_id.startsWith("update.") && s.state === "on");
 
@@ -49,7 +49,7 @@ export default function MenuCommand(): JSX.Element {
       <PersistentNotificationsMenubarSection notifications={notifications} />
       <UpdatesMenubarSection updates={updates} hacs={hacs} />
       <MenuBarExtra.Section>
-        <MenuBarItemConfigureCommand />
+        <RUIMenuBarExtra.ConfigureCommand />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

@@ -1,0 +1,174 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "stickies",
+  "title": "Stickies",
+  "description": "Search and show macOS's built-in Stickies via Raycast",
+  "icon": "stickies-icon.png",
+  "author": "koinzhang",
+  "categories": [
+    "Applications",
+    "Productivity",
+    "System"
+  ],
+  "keywords": [
+    "stickies",
+    "notes"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-stickies",
+      "title": "Search Stickies",
+      "description": "Search Stickies notes.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showAsMarkdown",
+          "title": "Advanced",
+          "label": "Show as Markdown",
+          "type": "checkbox",
+          "description": "Show Stickies notes as Markdown.",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "showDetailMetadata",
+          "label": "Show Detail Metadata",
+          "type": "checkbox",
+          "description": "Show Stickies notes with detail metadata.",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "description": "Set the primary action.",
+          "required": false,
+          "title": "Primary Action",
+          "default": "Copy",
+          "data": [
+            {
+              "title": "Copy to Clipboard",
+              "value": "Copy"
+            },
+            {
+              "title": "Paste to Active App",
+              "value": "Paste"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "menubar-stickies",
+      "title": "Menubar Stickies",
+      "description": "Show Stickies in the menubar.",
+      "mode": "menu-bar",
+      "interval": "10m",
+      "preferences": [
+        {
+          "name": "showMenubarTitle",
+          "title": "Advanced",
+          "label": "Show Menubar Title",
+          "type": "checkbox",
+          "description": "Show first Stickies content in the menubar.",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "description": "Set the primary (left-click) action.",
+          "required": false,
+          "title": "Primary Action",
+          "default": "Copy",
+          "data": [
+            {
+              "title": "Copy to Clipboard",
+              "value": "Copy"
+            },
+            {
+              "title": "Paste to Active App",
+              "value": "Paste"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "new-stickies-note",
+      "title": "New Stickies Note",
+      "description": "Create a new Stickies note.",
+      "mode": "no-view"
+    },
+    {
+      "name": "close-stickies-note",
+      "title": "Close Stickies Note",
+      "description": "Close Stickies note.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "quitWhenNoWindows",
+          "title": "Advanced",
+          "label": "Quit Stickies When No Windows",
+          "type": "checkbox",
+          "description": "Automatically quit Stickies when there are no windows left.",
+          "required": false,
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "toggle-stickies-window",
+      "title": "Toggle Stickies Window",
+      "description": "Show or hide Stickies window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-stickies-float-on-top",
+      "title": "Toggle Stickies Float on Top",
+      "description": "Set Stickies float on top.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-stickies-collapse",
+      "title": "Toggle Stickies Collapse",
+      "description": "Set Stickies collapse or expand.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "autoOpen",
+      "title": "Advanced",
+      "label": "Auto Open Stickies",
+      "type": "checkbox",
+      "description": "Automatically open Stickies when the extension is activated and Stickies is not running.",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.78.0",
+    "@raycast/utils": "^1.16.1",
+    "fs-extra": "^11.2.0",
+    "fuse.js": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "20.14.6",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

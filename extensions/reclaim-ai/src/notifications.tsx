@@ -1,7 +1,7 @@
 import { Icon, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
 import { addDays, differenceInHours, endOfDay, formatDistance, isWithinInterval, startOfDay } from "date-fns";
 import { useMemo } from "react";
-import { useEvent } from "./hooks/useEvent";
+import { useEventActions, useEvents } from "./hooks/useEvent";
 import { useMoment } from "./hooks/useMoment";
 import { useUser } from "./hooks/useUser";
 import { Event } from "./types/event";
@@ -20,7 +20,7 @@ type TitleInfo = {
 };
 
 const ActionOptionsWithContext = ({ event }: { event: Event }) => {
-  const { getEventActions } = useEvent();
+  const { getEventActions } = useEventActions();
 
   return (
     <>
@@ -32,7 +32,7 @@ const ActionOptionsWithContext = ({ event }: { event: Event }) => {
 };
 
 const EventsSection = ({ events, sectionTitle }: { events: Event[]; sectionTitle: string }) => {
-  const { showFormattedEventTitle } = useEvent();
+  const { showFormattedEventTitle } = useEventActions();
 
   return (
     <>
@@ -62,53 +62,48 @@ export default function Command() {
 
   const now = new Date();
 
-  const { useFetchEvents } = useEvent();
-
-  const { data: eventData, isLoading: isLoadingEvents } = useFetchEvents({
+  const { events, isLoading: isLoadingEvents } = useEvents({
     start: startOfDay(now),
     end: addDays(now, 2),
   });
 
-  const { useFetchNext } = useMoment();
+  const { momentData, isLoading: isLoadingMoment } = useMoment();
 
-  const { data: eventMomentData, isLoading: isLoadingMoment } = useFetchNext();
-
-  // if the events returned my moment/next are synced events then return the original event from the events call if it exists
+  // if the events returned by moment/next are synced events then return the original event from the events call if it exists
   const eventMoment = useMemo(() => {
-    if (!eventMomentData) return eventMomentData;
+    if (!momentData) return momentData;
 
     const findEvent = (event: Event | undefined | null) => {
-      if (!event || !eventData || eventData.length === 0) return event;
+      if (!event || !events || events.length === 0) return event;
 
       const originalEventID = getOriginalEventIDFromSyncEvent(event);
       if (!originalEventID) return event;
 
-      return eventData.find((e) => e.eventId === originalEventID) ?? event;
+      return events.find((e) => e.eventId === originalEventID) ?? event;
     };
 
-    const { event, nextEvent } = eventMomentData;
+    const { event } = momentData;
 
     return {
       event: findEvent(event),
-      nextEvent: findEvent(nextEvent),
     };
-  }, [eventMomentData, eventData]);
+  }, [momentData, events]);
 
   const showDeclinedEvents = useMemo(() => {
     return !!currentUser?.settings.showDeclinedEvents;
   }, [currentUser]);
 
-  const events = useMemo<EventSection[]>(() => {
-    if (!eventData) return [];
+  const eventSections = useMemo<EventSection[]>(() => {
+    if (!events) return [];
 
     const now = new Date();
     const today = startOfDay(now);
 
-    const events: EventSection[] = [
+    const eventSectionsUnfiltered: EventSection[] = [
       {
         section: "NOW",
         sectionTitle: "Now",
-        events: eventData
+        events: events
           .filter((event) => {
             return showDeclinedEvents ? true : event.rsvpStatus !== "Declined" && event.rsvpStatus !== "NotResponded";
           })
@@ -127,7 +122,7 @@ export default function Command() {
       {
         section: "TODAY",
         sectionTitle: "Upcoming events",
-        events: eventData
+        events: events
           .filter((event) => {
             return showDeclinedEvents ? true : event.rsvpStatus !== "Declined" && event.rsvpStatus !== "NotResponded";
           })
@@ -145,8 +140,8 @@ export default function Command() {
       },
     ];
 
-    return events.filter((event) => event.events.length > 0);
-  }, [eventData, showDeclinedEvents]);
+    return eventSectionsUnfiltered.filter((event) => event.events.length > 0);
+  }, [events, showDeclinedEvents]);
 
   const handleOpenReclaim = () => {
     open("https://app.reclaim.ai");
@@ -206,7 +201,7 @@ export default function Command() {
       title={titleInfo.minTitle}
       tooltip={titleInfo.fullTitle}
     >
-      {events.map((eventSection) => (
+      {eventSections.map((eventSection) => (
         <EventsSection
           key={eventSection.section}
           events={eventSection.events}

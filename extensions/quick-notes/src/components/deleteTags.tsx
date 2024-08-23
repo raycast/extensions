@@ -1,7 +1,7 @@
 import { Form, ActionPanel, Action, showToast, useNavigation } from "@raycast/api";
 import { useAtom } from "jotai";
 import { tagsAtom } from "../services/atoms";
-import { colors } from "../utils/utils";
+import { getTintColor } from "../utils/utils";
 
 const DeleteTags = () => {
   const [tags, setTags] = useAtom(tagsAtom);
@@ -29,7 +29,7 @@ const DeleteTags = () => {
             key={i}
             value={t.name}
             title={t.name}
-            icon={{ source: "dot.png", tintColor: colors.find((c) => c.name === t.color)?.tintColor }}
+            icon={{ source: "dot.png", tintColor: getTintColor(t.color) }}
           />
         ))}
       </Form.TagPicker>

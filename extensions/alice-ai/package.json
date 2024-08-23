@@ -30,6 +30,62 @@
       "title": "Create New Action",
       "description": "Create New Action",
       "mode": "view"
+    },
+    {
+      "name": "custom",
+      "title": "Custom Action",
+      "description": "Execute your custom action on the fly",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "What's on your mind?",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "model",
+          "title": "Model",
+          "description": "Select Custom Action Model",
+          "type": "dropdown",
+          "default": "gpt-3.5-turbo",
+          "data": [
+            {
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
+            },
+            {
+              "title": "GPT-4 Turbo",
+              "value": "gpt-4-turbo"
+            }
+          ],
+          "required": true
+        },
+        {
+          "name": "temperature",
+          "title": "Temperature",
+          "description": "Custom Action Temperature (value between 0.0 and 1.0)",
+          "type": "textfield",
+          "default": "0.7",
+          "required": true
+        },
+        {
+          "name": "maxTokens",
+          "title": "Max Tokens",
+          "description": "Custom Action Max Tokens to be generated (set -1 for unlimited)",
+          "type": "textfield",
+          "default": "-1",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "menubar",
+      "title": "Display Actions in Menu Bar",
+      "description": "Quick access your actions from the menu bar",
+      "mode": "menu-bar"
     }
   ],
   "preferences": [
@@ -45,8 +101,8 @@
     "@raycast/api": "^1.69.0",
     "@raycast/utils": "^1.14.0",
     "@reduxjs/toolkit": "^2.2.3",
-    "gpt-tokens": "^1.3.3",
-    "openai": "^4.33.0",
+    "gpt-tokens": "^1.3.4",
+    "openai": "^4.38.5",
     "zod": "^3.22.4",
     "zustand": "^4.5.2"
   },
@@ -63,6 +119,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "pull": "npx @raycast/api@latest pull-contributions"
   }
 }

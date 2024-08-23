@@ -1,5 +1,11 @@
 # Porkbun Changelog
 
+## [Labels in Domains + Update API hostname] - 2024-07-25
+
+- Labels applied in Porkbun dashboard to domains will now be fetched
+- new `usePorkbun` hook that uses Raycast's `useFetch` to improve handling of some endpoints
+- update deps
+
 ## [Fix open in browser command for domain items] - 2024-03-14
 
 ### Fixes

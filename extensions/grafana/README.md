@@ -8,7 +8,7 @@
     Grafana
   </h1>
 
-Raycast extension to search dashboards, create, search and modify annotations, and more to come.
+Raycast extension to search dashboards, go to the explore view, create saved queries and list them, create, search and modify annotations, and more to come.
 
   <p>
     <a href="https://www.raycast.com/francois/grafana">
@@ -28,12 +28,6 @@ Raycast extension to search dashboards, create, search and modify annotations, a
       src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg"
       alt="PRs welcome!"  
     />
-    <a href="https://open.vscode.dev/organization/repository">
-      <img
-        src="https://open.vscode.dev/badges/open-in-vscode.svg"
-        alt="Open in Visual Studio Code"
-      />
-    </a>
   </p>
 </div>
 
@@ -41,18 +35,22 @@ Raycast extension to search dashboards, create, search and modify annotations, a
 
 - Quick access & search to your dashboards
 - Search, create, update & delete an annotation
+- Go to the Explore grafana page
+- List, create & open saved queries
 
 ## Getting started
 
-- Go to to your Grafana instance (cloud or self-hosted) e.g. `https://<organization>.grafana.net/org/apikeys`
-- Click on `Add API key`
-- Give your key a name e.g. `Raycast`, select the viewer role (recommended), and set an expiration date (recommended
-- Store in a secure location the given access token
+- Go to to your Grafana instance (cloud or self-hosted) and add a new Service Account (e.g. `https://<organization>.grafana.net/org/serviceaccounts/create`)
+- Give your Service Account a name e.g. `Raycast` & select the editor role (recommended)
+- Click on `Add service account token` & store in a secure location the given access token
 - Start a grafana command and fill the required fields
-  - Root API Url: is the URL of your grafana instance. If you use Grafana Cloud, it is like `https://<organization>.grafana.net`
-  - API-key with your access token previsouly generated.
+  - Root API Url: is the URL of your grafana instance. If you use Grafana Cloud: `https://<organization>.grafana.net`
+  - Service Account token: your access token previously generated
 
 Now you should be able to manage your Grafana Dashboards with Raycast 🚀.
+
+> [!TIP]
+> Set `CTRL + CMD + G` as a shortcut to open your dashboards from anywhere!
 
 ## Showcases
 
@@ -66,13 +64,21 @@ Now you should be able to manage your Grafana Dashboards with Raycast 🚀.
 
 ### Create Annotation
 
-![search-dashboards](./assets/showcase_create_annotation.png)
+![create-annotation](./assets/showcase_create_annotation.png)
 
-## Roadmap
+### Create saved query
 
-- Improve annotation creation with a custom time, and choosing a time range
-- Let the user choose tags from a dropdown for the annotation
+Create a query you often need on Grafana explore via this Raycast extension, to send use it with the "List saved queries" command
+
+![create-saved-query](./assets/showcase_create_saved_query.png)
+
+### List saved queries
+
+Open saved queries directly in your grafana Explore page
+
+![list-saved-queries](./assets/showcase_list_saved_queries.png)
 
 ---
 
-_Extension built & tested for Grafana Cloud v8_
+> [!NOTE]  
+> Extension built & tested for Grafana Cloud v11

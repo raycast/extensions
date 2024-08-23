@@ -1,196 +1,204 @@
-import { Form, ActionPanel, Action, Icon, showToast, Toast, Clipboard, open, showHUD } from "@raycast/api";
-import React, { Dispatch, SetStateAction } from "react";
-import { useEffect, useState } from "react";
-import {
-  checkGistFileContent,
-  checkGistFileName,
-  createGist,
-  Gist,
-  GistFile,
-  octokit,
-  updateGist,
-} from "./util/gist-utils";
+import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { fetchItemInput } from "./util/input";
-import { refreshNumber } from "./hooks/hooks";
-import { GistFileForm } from "./components/gist-file-form";
-import { ActionOpenPreferences } from "./components/action-open-preferences";
+import { ActionSettings } from "./components/action-settings";
+import { MutatePromise, useForm } from "@raycast/utils";
+import { withGitHubClient } from "./components/with-github-client";
+import { getGitHubClient } from "./api/oauth";
+import { Gist, GistFile, validateGistFileContents, validateGistFileName } from "./util/gist-utils";
 
-export default function CreateGist(props: {
-  gist: Gist | undefined;
-  setRefresh: Dispatch<SetStateAction<number>> | undefined;
-}) {
-  const gist =
-    typeof props.gist == "undefined"
-      ? {
-          gist_id: "",
-          description: "",
-          html_url: "",
-          file: [],
-        }
-      : props.gist;
-  const setRefresh =
-    typeof props.setRefresh == "undefined"
-      ? () => {
-          return;
-        }
-      : props.setRefresh;
+interface GistFilesValidation {
+  error: string | undefined;
+}
 
-  const isEdit = typeof props.gist != "undefined";
-  const [description, setDescription] = useState<string>("");
-  const [isPublic, setIsPublic] = useState<boolean>(false);
-  const [gistFiles, setGistFiles] = useState<GistFile[]>([]);
-  const oldGistFiles = gist.file.map((value) => value.filename);
+interface GistFormValues {
+  description: string;
+  isPublic: string;
+  gistFiles: GistFile[];
+  gistFileNameValidation: GistFilesValidation[];
+  gistFileContentValidation: GistFilesValidation[];
+}
+
+enum GistFormValuesId {
+  DESCRIPTION = "description",
+  GIST_FILES = "gistFiles",
+  GIST_FILE_NAME_VALIDATION = "gistFileNameValidation",
+  GIST_FILE_CONTENT_VALIDATION = "gistFileContentValidation",
+}
+
+export function CreateGistForm(props: { gist?: Gist | undefined; gistMutate?: MutatePromise<Gist[]> | undefined }) {
+  const client = getGitHubClient();
+  const isEdit = !!props.gist;
+  const gist = props.gist ?? {
+    gist_id: "",
+    description: "",
+    html_url: "",
+    file: [],
+  };
+  const gistMutate = props.gistMutate ?? (() => {});
+
+  const oldGistFiles = useMemo(() => {
+    return gist.file.map((value) => value.filename);
+  }, [gist]);
+
+  const {
+    handleSubmit,
+    itemProps,
+    values: formValues,
+    setValue: setFormValues,
+  } = useForm<GistFormValues>({
+    onSubmit() {
+      client
+        .updateOrCreateGists(
+          isEdit,
+          gist,
+          formValues.description,
+          formValues.isPublic,
+          formValues.gistFiles,
+          oldGistFiles,
+          gistMutate,
+        )
+        .then();
+    },
+    validation: {
+      gistFiles: () => {
+        const value = formValues.gistFiles;
+        if (!value || value.length == 0) {
+          showToast(Toast.Style.Failure, "Please add at least one file.").then();
+          return "Please add at least one file.";
+        }
+        const isNameValid = validateGistFileName(value);
+        const isContentValid = validateGistFileContents(value);
+        setFormValues(GistFormValuesId.GIST_FILE_NAME_VALIDATION, isNameValid);
+        setFormValues(GistFormValuesId.GIST_FILE_CONTENT_VALIDATION, isContentValid);
+        if (isNameValid.some((value) => value.error)) {
+          return "Content must have unique filename.";
+        }
+        if (isContentValid.some((value) => value.error)) {
+          return `Content cannot be empty.`;
+        }
+      },
+    },
+  });
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    async function _fetchItemInput() {
+    async function _fetch() {
       if (isEdit) {
         const _gistFiles: GistFile[] = [];
         for (const value of gist.file) {
-          const { data } = await octokit.request(`GET ${value.raw_url}`);
+          const { data } = await client.octokit.request(`${value.raw_url}`);
           _gistFiles.push({
             filename: value.filename,
             content: data as string,
           });
         }
-        setDescription(gist.description);
-        setGistFiles(_gistFiles);
+        setFormValues(GistFormValuesId.DESCRIPTION, gist.description);
+        setFormValues(GistFormValuesId.GIST_FILES, _gistFiles);
       } else {
         const inputItem = await fetchItemInput();
-        setGistFiles([...gistFiles, { filename: "", content: inputItem }]);
+        setFormValues(GistFormValuesId.GIST_FILES, [{ filename: "", content: inputItem }]);
       }
       setIsLoading(false);
     }
-
-    _fetchItemInput().then();
+    _fetch().then();
   }, []);
 
   return (
     <Form
       isLoading={isLoading}
       navigationTitle={isEdit ? "Edit Gist" : "Create Gist"}
+      searchBarAccessory={<Form.LinkAccessory target={gist.html_url} text="Go to Gist" />}
       actions={
         <ActionPanel>
-          <Action
+          <Action.SubmitForm
             title={isEdit ? "Update Gist" : "Create Gist"}
-            icon={isEdit ? Icon.Pencil : Icon.Plus}
-            onAction={async () => {
-              try {
-                await showToast(Toast.Style.Animated, isEdit ? "Updating..." : "Creating...");
-                if (gistFiles.length == 0) {
-                  await showToast(Toast.Style.Failure, "No file in gist.");
-                  return;
-                }
-                const _isNameValid = checkGistFileName(gistFiles);
-                if (!_isNameValid) {
-                  await showToast(Toast.Style.Failure, `Content must have unique filename.`);
-                  return;
-                }
-                const _isContentValid = checkGistFileContent(gistFiles);
-                if (!_isContentValid.valid) {
-                  await showToast(
-                    Toast.Style.Failure,
-                    `Content cannot be empty.`,
-                    `Check content of file${_isContentValid.contentIndex}.`,
-                  );
-                } else {
-                  let response: any;
-                  if (isEdit) {
-                    response = await updateGist(gist.gist_id, description, oldGistFiles, gistFiles);
-                  } else {
-                    response = await createGist(description, isPublic, gistFiles);
-                  }
-                  if (response.status === 201 || response.status === 200) {
-                    const options: Toast.Options = {
-                      style: Toast.Style.Success,
-                      title: isEdit ? "Update gist successfully!" : "Create gist successfully!",
-                      message: "Click to copy gist link.",
-                      primaryAction: {
-                        title: "Copy gist link",
-                        onAction: (toast) => {
-                          Clipboard.copy(String(response.data.html_url));
-                          toast.title = "Link is copied to Clipboard.";
-                          toast.message = "";
-                        },
-                      },
-                      secondaryAction: {
-                        title: "Open in browser",
-                        onAction: (toast) => {
-                          open(String(response.data.html_url));
-                          toast.hide();
-                          showHUD("Open in Browser");
-                        },
-                      },
-                    };
-                    await showToast(options);
-                    setRefresh(refreshNumber());
-                  } else {
-                    await showToast(Toast.Style.Failure, isEdit ? "Failed to update gist." : "Failed to create gist.");
-                  }
-                }
-              } catch (e) {
-                await showToast(Toast.Style.Failure, String(e));
-              }
-            }}
+            icon={isEdit ? Icon.Pencil : Icon.PlusTopRightSquare}
+            onSubmit={handleSubmit}
           />
 
-          <ActionPanel.Section title={"File Actions"}>
+          {isEdit && <Action.CopyToClipboard title={"Copy Gist Id"} content={gist.gist_id} />}
+
+          <ActionPanel.Section>
             <Action
               title="Add File"
-              icon={Icon.Document}
+              icon={Icon.NewDocument}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
               onAction={async () => {
-                setGistFiles([...gistFiles, { filename: "", content: "" }]);
+                setFormValues(GistFormValuesId.GIST_FILES, [{ filename: "", content: "" }, ...formValues.gistFiles]);
               }}
             />
             <Action
-              title="Remove File"
-              icon={Icon.Trash}
+              title="Remove First File"
+              icon={Icon.DeleteDocument}
               shortcut={{ modifiers: ["ctrl"], key: "x" }}
               onAction={async () => {
-                const _gistFiles = [...gistFiles];
+                const _gistFiles = [...formValues.gistFiles];
+                _gistFiles.shift();
+                setFormValues(GistFormValuesId.GIST_FILES, _gistFiles);
+              }}
+            />
+            <Action
+              title="Remove Last File"
+              icon={Icon.DeleteDocument}
+              shortcut={{ modifiers: ["ctrl", "opt"], key: "x" }}
+              onAction={async () => {
+                const _gistFiles = [...formValues.gistFiles];
                 _gistFiles.pop();
-                setGistFiles(_gistFiles);
+                setFormValues(GistFormValuesId.GIST_FILES, _gistFiles);
               }}
             />
           </ActionPanel.Section>
-
-          <ActionOpenPreferences command={false} />
+          <ActionSettings command={false} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id={"description"}
-        title={"Description"}
-        placeholder={"Gist description..."}
-        value={description}
-        onChange={(newValue) => {
-          setDescription(newValue);
-        }}
-      />
-      {!isEdit && (
-        <Form.Dropdown
-          id={"visibility"}
-          key={"visibility"}
-          title={"Visibility"}
-          onChange={(newValue) => {
-            setIsPublic(newValue == "true");
-          }}
-        >
+      <Form.TextField title={"Description"} placeholder={"Gist description..."} {...itemProps.description} />
+      {isEdit ? (
+        <Form.Description title={"Gist Id"} text={gist.gist_id} />
+      ) : (
+        <Form.Dropdown key={"visibility"} title={"Visibility"} {...itemProps.isPublic}>
           <Form.Dropdown.Item key={"secret"} icon={Icon.EyeDisabled} title={"Secret"} value={"false"} />
           <Form.Dropdown.Item key={"public"} icon={Icon.Eye} title={"Public"} value={"true"} />
         </Form.Dropdown>
       )}
-      {gistFiles.map((gistFile, index, array) => {
+      {formValues.gistFiles?.map((gistFile, index) => {
         return (
-          <GistFileForm
-            key={"file_fragment" + index}
-            array={array}
-            index={index}
-            useState={[gistFiles, setGistFiles]}
-          />
+          <Fragment key={"file_fragment" + index}>
+            <Form.Separator />
+            <Form.TextField
+              id={"file_name" + index}
+              key={"file_name" + index}
+              title={"File " + (index + 1)}
+              placeholder={"Name with extension..."}
+              value={gistFile.filename}
+              error={formValues.gistFileNameValidation?.at(index)?.error}
+              onChange={(newValue) => {
+                const _gistFiles = [...formValues.gistFiles];
+                _gistFiles[index].filename = newValue;
+                setFormValues(GistFormValuesId.GIST_FILES, _gistFiles);
+                setFormValues(GistFormValuesId.GIST_FILE_NAME_VALIDATION, validateGistFileName(_gistFiles));
+              }}
+            />
+            <Form.TextArea
+              id={"file_content" + index}
+              key={"file_content" + index}
+              value={gistFile.content}
+              title={"Content"}
+              placeholder={"Content..."}
+              error={formValues.gistFileContentValidation?.at(index)?.error}
+              onChange={(newValue) => {
+                const _gistFiles = [...formValues.gistFiles];
+                _gistFiles[index].content = newValue;
+                setFormValues(GistFormValuesId.GIST_FILES, _gistFiles);
+                setFormValues(GistFormValuesId.GIST_FILE_CONTENT_VALIDATION, validateGistFileContents(_gistFiles));
+              }}
+            />
+          </Fragment>
         );
       })}
     </Form>
   );
 }
+
+export default withGitHubClient(CreateGistForm);

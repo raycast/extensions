@@ -2,7 +2,7 @@ export function getSummaryBlockSnippet(
   index: number,
   splitTranscripts: number,
   summaryBlock: string,
-  MAX_CHARS: number
+  MAX_CHARS: number,
 ) {
   return `Summarize this transcription of a youtube video.
     The transcription is split into parts and this is part ${index} of ${splitTranscripts}.

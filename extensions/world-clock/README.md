@@ -2,7 +2,7 @@
 
 Query the current time of a region, ip or domain.
 
-Set aliases for your starred time zones and query the time of people far away.
+Set **alias** and **avatar** for your starred time zones and query the time of people far away.
 
 **World Time** Query Service from [World Time API](http://worldtimeapi.org). The following notes are from the official website
 
