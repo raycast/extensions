@@ -5,8 +5,6 @@
   "description": "Control MacBook Notch via Say No to Notch",
   "icon": "icon.png",
   "author": "honghao",
-  "owner": "ibluebox",
-  "access": "public",
   "license": "MIT",
   "categories": [
     "Applications",
@@ -18,7 +16,11 @@
     "macbook",
     "notch",
     "say no to notch",
-    "ibluebox"
+    "ibluebox",
+    "topnotch",
+    "menubar",
+    "macos",
+    "fix hidden menu bar icon"
   ],
   "commands": [
     {
