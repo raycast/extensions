@@ -3,7 +3,8 @@
 ## [Improvements and fixes] - {PR_MERGE_DATE}
 
 - Format JSON Lines: Make actions in sync with Format JSON command, i.e. copies the output to clipboard for "Format" action.
-- Used toasts instead of HUDs to color-code messages/prompts.
+- Use toasts instead of HUDs to color-code messages/prompts.
+- Added new command to format JSON selected in the foremost editor.
 - Upgraded dependencies to resolve critical security vulnerabilities.
 - Minor refactoring and linter fixes.
 

@@ -22,7 +22,13 @@
     {
       "name": "formatClipboard",
       "title": "Format Clipboard JSON",
-      "description": "Formats a JSON/JS Object string stored in clipboard and copies it back",
+      "description": "Formats a JSON/JS Object string stored in clipboard and copies/pastes it back",
+      "mode": "no-view"
+    },
+    {
+      "name": "formatSelection",
+      "title": "Format Selected JSON",
+      "description": "Formats a JSON/JS Object string selected in the foremost editor and copies/pastes it back",
       "mode": "no-view"
     },
     {
