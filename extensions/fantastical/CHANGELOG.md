@@ -1,6 +1,6 @@
 # Fantastical Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2024-08-23
 
 - Replace the HUD with a similar toast that appears with a hidden Raycast window.
 
