@@ -90,7 +90,6 @@ The raw PR doesn't have all the necessary information, so you will need to edit 
   - `git clone git@github.com:honghaoz/raycast-extensions.git`
   - Add screenshots to `extensions/say-no-to-notch/metadata/say-no-to-notch-1`, `extensions/say-no-to-notch/metadata/say-no-to-notch-2` in the forked repository. 
     - See [Adding Screenshots](https://developers.raycast.com/basics/prepare-an-extension-for-store#adding-screenshots).
-  - Update README.md and CHANGELOG.md in the forked repository.
 - In PR:
   - Add description under the "Description" section.
   - Add screenshots under the "Screencast" section.
