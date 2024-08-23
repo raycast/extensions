@@ -1,5 +1,7 @@
 # NameSilo Changelog
 
+## [View, Add, Change Name Servers + Add DNS Records] - {PR_MERGE_DATE}
+
 ## [Add Auctions + Sort Pricing by Lowest + OTE Support] - 2024-08-09
 
 - `Auctions` lets you view the latest auctions and their details

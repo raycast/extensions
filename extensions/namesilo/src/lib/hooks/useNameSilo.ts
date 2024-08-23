@@ -1,17 +1,33 @@
-import { useFetch } from "@raycast/utils";
+import { showFailureToast, useFetch } from "@raycast/utils";
 import { ErrorResponse, SuccessResponse } from "../types";
 import generateApiUrl from "../utils/generateApiUrl";
 
-export default function useNameSilo<T>(operation: string, params?: { [key: string]: string | string[] }) {
+export default function useNameSilo<T>(
+  operation: string,
+  params?: { [key: string]: string | string[] },
+  {
+    execute,
+    onData,
+    onError,
+  }: { execute: boolean; onData?: (data: SuccessResponse<T>["reply"]) => void; onError?: () => void } = {
+    execute: true,
+  },
+) {
   const url = generateApiUrl(operation, params);
   const { isLoading, data, error, revalidate } = useFetch(url, {
     mapResult(result: SuccessResponse<T> | ErrorResponse) {
       if (result.reply.detail !== "success") {
-        throw new Error(result.reply.detail || "NameSilo Error");
+        throw new Error(result.reply.detail || "Something went wrong");
       }
       return {
         data: (result as SuccessResponse<T>).reply,
       };
+    },
+    execute,
+    onData,
+    async onError(error) {
+      await showFailureToast(error, { title: "NameSilo Error" });
+      onError?.();
     },
   });
   return { isLoading, data, error, revalidate };
