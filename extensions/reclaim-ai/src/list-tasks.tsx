@@ -1,10 +1,11 @@
 import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { useTasks, useTaskActions } from "./hooks/useTask";
 import { useUser } from "./hooks/useUser";
 import { Task, TaskStatus } from "./types/task";
 import { TIME_BLOCK_IN_MINUTES, formatPriority, formatPriorityIcon, formatStrDuration } from "./utils/dates";
+import { useCallbackSafeRef } from "./hooks/useCallbackSafeRef";
 
 type DropdownStatus = "OPEN" | "DONE";
 
@@ -44,8 +45,25 @@ const StatusDropdown = (props: StatusDropdownProps) => {
 };
 
 function TaskList() {
-  const [selectedStatus, setSelectedStatus] = useState<DropdownStatus | undefined>();
+  /********************/
+  /*   custom hooks   */
+  /********************/
+
   const { currentUser } = useUser();
+  const { tasks: sourceTasks, isLoading } = useTasks();
+  const { addTime, updateTask, doneTask, incompleteTask } = useTaskActions();
+
+  /********************/
+  /*     useState     */
+  /********************/
+
+  const [selectedStatus, setSelectedStatus] = useState<DropdownStatus | undefined>();
+  const [tasks, setTasks] = useState<Task[]>(sourceTasks ?? []);
+
+  /********************/
+  /* useMemo & consts */
+  /********************/
+
   const defaults = useMemo(
     () => ({
       schedulerVersion: currentUser?.features.scheduler || 14,
@@ -53,13 +71,31 @@ function TaskList() {
     [currentUser]
   );
 
-  const { tasks: tasksData, isLoading } = useTasks();
-  const { addTime, updateTask, doneTask, incompleteTask } = useTaskActions();
+  // Group tasks by status
+  const groupedTasks = useMemo(() => {
+    const filteredTasks =
+      selectedStatus === "DONE"
+        ? tasks.filter((task) => task.status === "ARCHIVED")
+        : tasks.filter((task) => task.status !== "ARCHIVED");
 
-  const [tasks, setTasks] = useState<Task[]>(tasksData ?? []);
+    const groups: { [key: string]: Task[] } = {};
+
+    filteredTasks.forEach((task) => {
+      if (!groups[task.status]) {
+        groups[task.status] = [];
+      }
+      groups[task.status].push(task);
+    });
+
+    return groups;
+  }, [tasks, selectedStatus]);
+
+  /********************/
+  /*    useCallback   */
+  /********************/
 
   // Add time to task function
-  const handleAddTime = async (task: Task, time: number) => {
+  const handleAddTime = useCallbackSafeRef(async (task: Task, time: number) => {
     await showToast(Toast.Style.Animated, "Adding time...");
     try {
       await addTime(task, time);
@@ -71,10 +107,10 @@ function TaskList() {
     const updatedTime = task.timeChunksRemaining + time / TIME_BLOCK_IN_MINUTES;
     setTasks((prevTasks) => prevTasks.map((t) => (t.id === task.id ? { ...t, timeChunksRemaining: updatedTime } : t)));
     showToast(Toast.Style.Success, `Added ${formatStrDuration(time + "m")} to "${task.title}" successfully!`);
-  };
+  });
 
   // Set task to done
-  const handleDoneTask = async (task: Task) => {
+  const handleDoneTask = useCallbackSafeRef(async (task: Task) => {
     await showToast(Toast.Style.Animated, "Updating task...");
     try {
       await doneTask(task);
@@ -85,10 +121,10 @@ function TaskList() {
     // optimistic update
     setTasks((prevTasks) => prevTasks.map((t) => (t.id === task.id ? { ...t, status: "ARCHIVED" } : t)));
     showToast(Toast.Style.Success, `Task '${task.title}' marked done. Nice work!`);
-  };
+  });
 
   // Set task to incomplete
-  const handleIncompleteTask = async (task: Task) => {
+  const handleIncompleteTask = useCallbackSafeRef(async (task: Task) => {
     await showToast(Toast.Style.Animated, "Updating task...");
     try {
       await incompleteTask(task);
@@ -99,10 +135,10 @@ function TaskList() {
     // optimistic update
     setTasks((prevTasks) => prevTasks.map((t) => (t.id === task.id ? { ...t, status: "NEW" } : t)));
     showToast(Toast.Style.Success, `Task '${task.title}' marked incomplete!`);
-  };
+  });
 
   // Update tasks
-  const handleUpdateTask = async (task: Partial<Task>, payload: Partial<Task>) => {
+  const handleUpdateTask = useCallbackSafeRef(async (task: Partial<Task>, payload: Partial<Task>) => {
     await showToast(Toast.Style.Animated, `Updating '${task.title}'...`);
     try {
       await updateTask(task, payload);
@@ -113,31 +149,9 @@ function TaskList() {
     // optimistic update
     setTasks((prevTasks) => prevTasks.map((t) => (t.id === task.id ? { ...t, ...payload } : t)));
     showToast(Toast.Style.Success, `Updated '${task.title}'!`);
-  };
+  });
 
-  // Filter tasks by status
-  const filteredTasks = useMemo(() => {
-    if (selectedStatus === "DONE") {
-      return tasks.filter((task) => task.status === "ARCHIVED");
-    }
-    return tasks.filter((task) => task.status !== "ARCHIVED");
-  }, [tasks, selectedStatus]);
-
-  // Group tasks by status
-  const groupedTasks = useMemo(() => {
-    const groups: { [key: string]: Task[] } = {};
-
-    filteredTasks.forEach((task) => {
-      if (!groups[task.status]) {
-        groups[task.status] = [];
-      }
-      groups[task.status].push(task);
-    });
-
-    return groups;
-  }, [filteredTasks]);
-
-  const getListAccessories = (task: Task) => {
+  const getListAccessories = useCallbackSafeRef((task: Task) => {
     const list = [];
 
     if (task.status !== "ARCHIVED" && task.atRisk) {
@@ -226,7 +240,19 @@ function TaskList() {
     }
 
     return list;
-  };
+  });
+
+  /********************/
+  /*    useEffects    */
+  /********************/
+
+  useEffect(() => {
+    if (sourceTasks) setTasks(sourceTasks);
+  }, [sourceTasks]);
+
+  /********************/
+  /*       JSX        */
+  /********************/
 
   return (
     <List

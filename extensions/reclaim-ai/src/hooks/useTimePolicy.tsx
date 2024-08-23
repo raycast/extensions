@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { NativePreferences } from "../types/preferences";
 import { ApiTimePolicy } from "./useTimePolicy.types";
 
-export const useTimePolicy = (feature?: string) => {
+export const useTimePolicy = () => {
   const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
 
   const headers = useMemo(
@@ -27,14 +27,8 @@ export const useTimePolicy = (feature?: string) => {
 
   if (error) console.error("Error while fetching Time Policies", error);
 
-  const filteredPoliciesByFeature = useMemo(
-    () => timePolicies?.filter((policy) => !!policy.features.find((f) => f === feature)),
-    []
-  );
-
   return {
     timePolicies,
-    filteredPoliciesByFeature,
     error,
     isLoading,
   };
