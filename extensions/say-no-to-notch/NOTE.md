@@ -25,6 +25,8 @@ References:
 > ```
 > Error: We are restricting public organisation extensions for the moment. Ping `@pedro` on Slack to discuss it. (say-no-to-notch)
 > ```
+>
+> So, for now, we have to publish the extension under our personal account.
 
 ## Publish Extension
 
@@ -33,6 +35,8 @@ Ensure the `package.json` has the required fields, such as `author`, `license`, 
 Ensure `"@raycast/api"` is the latest version.
 
 Update `CHANGELOG.md` to reflect the changes in the extension. See [Version History](https://developers.raycast.com/basics/prepare-an-extension-for-store#version-history).
+
+Add screenshots to `metadata` directory. E.g. `metadata/say-no-to-notch-1.png`, `metadata/say-no-to-notch-2.png`. See [Adding Screenshots](https://developers.raycast.com/basics/prepare-an-extension-for-store#adding-screenshots).
 
 Run `npm run build` to validate the extension.
 
@@ -84,15 +88,7 @@ Under the hood, the `publish` does the following:
 - Push the extension to the repository
 - Open a PR to the [Raycast extensions repository](https://github.com/raycast/extensions), e.g. https://github.com/raycast/extensions/pull/14143
 
-The raw PR doesn't have all the necessary information, so you will need to edit the PR to add the missing information, for example:
-
-- Clone the forked repository
-  - `git clone git@github.com:honghaoz/raycast-extensions.git`
-  - Add screenshots to `extensions/say-no-to-notch/metadata/say-no-to-notch-1`, `extensions/say-no-to-notch/metadata/say-no-to-notch-2` in the forked repository. 
-    - See [Adding Screenshots](https://developers.raycast.com/basics/prepare-an-extension-for-store#adding-screenshots).
-- In PR:
-  - Add description under the "Description" section.
-  - Add screenshots under the "Screencast" section.
+You need to add description and screenshots to the PR.
 
 The PR will be reviewed by the Raycast team and once approved, the extension will be published.
 
