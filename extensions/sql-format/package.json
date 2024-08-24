@@ -46,7 +46,8 @@
       "description": "Output sql tabWidth",
       "name": "tabWidth",
       "required": false,
-      "title": "tabWidth",
+      "title": "Tab Width",
+      "default": "2",
       "type": "dropdown"
     },
     {
