@@ -1,7 +1,7 @@
 # Spotify Player Changelog
 
 ## [Add "Start DJ" Command] - {PR_MERGE_DATE}
-- Added a command to start the DJ.
+- Added a command to start the DJ using AppleScript, because the Spotify API doesn't support it.
 
 ## [Add "Remove All Searches" Action in Search Command] - 2024-08-22
 
