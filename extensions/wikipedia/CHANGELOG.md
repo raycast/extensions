@@ -1,4 +1,7 @@
 # Wikipedia Changelog
+## [Add languages] - 2024-08-24
+
+- Add `Catalan`, `Basque`, `Galician`, `Occitan`, `Aragonese` and `Asturian` languages
 
 ## [Add Danish language] - 2024-07-25
 
