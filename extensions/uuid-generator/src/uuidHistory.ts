@@ -14,7 +14,6 @@ export enum UUIDType {
 }
 
 export const addToHistory = async (uuid: string, type: UUIDType) => {
-
   try {
     let currentHistory = await LocalStorage.getItem("uuidHistory");
 
