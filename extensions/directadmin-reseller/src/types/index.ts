@@ -25,19 +25,19 @@ export type GetUserUsageResponse = {
   vdomains: string;
 };
 export type GetUserConfigResponse = {
-  account: string;
+  account: boolean;
   additional_bandwidth: string;
-  aftp: string;
-  api_with_password: string;
+  aftp: boolean;
+  apiAllowPassword: boolean;
   bandwidth: string;
   catchall: string;
-  cgi: string;
+  cgi: boolean;
   clamav: string;
   creator: string;
-  cron: string;
+  cron: boolean;
   date_created: string;
   demo: string;
-  dnscontrol: string;
+  dnscontrol: boolean;
   docsroot: string;
   domain: string;
   domainptr: string;
@@ -78,8 +78,10 @@ export type GetUserConfigResponse = {
   username: string;
   usertype: string;
   vdomains: string;
-  wordpress: string;
+  wordpress: boolean;
   zoom: string;
+  users: string[];
+  domains: string[];
 };
 export type GetUserDomainsResponse = {
   [key: string]: {
@@ -241,25 +243,25 @@ export type GetUserPackageInformationResponse = {
   catchall: "OFF" | "ON";
   cgi: string;
   cron: string;
-  dnscontrol: string;
+  dnscontrol: "OFF" | "ON";
   domainptr: string;
   ftp: string;
   inode: string;
   language: string;
-  login_keys: string;
+  login_keys: "OFF" | "ON";
   mysql: string;
   nemailf: string;
   nemailml: string;
   nemailr: string;
   nemails: string;
   nsubdomains: string;
-  php: string;
+  php: "OFF" | "ON";
   quota: string;
   skin: string;
   spam: string;
   ssh: string;
   ssl: string;
-  suspend_at_limit: string;
+  suspend_at_limit: "OFF" | "ON";
   sysinfo: string;
   vdomains: string;
 };

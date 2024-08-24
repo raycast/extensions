@@ -22,6 +22,7 @@ const oldMatchGithub =
   /# Extension – \[[^\]]*\]\(https:\/\/(?:www\.)?github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)\/\)/;
 
 const closeIssueMatch = /@raycastbot close this issue/;
+const closeIssueAsNotPlannedMatch = /@raycastbot close as not planned/;
 const reopenIssueMatch = /@raycastbot reopen this issue/;
 const renameIssueMatch = /@raycastbot rename this issue to "(.+)"/;
 const assignMeMatch = /@raycastbot assign me/;
@@ -115,6 +116,15 @@ export default async ({ github, context }: API) => {
           owner: context.repo.owner,
           repo: context.repo.repo,
           state: "closed",
+        });
+      } else if (closeIssueAsNotPlannedMatch.test(context.payload.comment.body)) {
+        console.log(`closing #${context.payload.issue.number} as not planned`);
+        await github.rest.issues.update({
+          issue_number: context.payload.issue.number,
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          state: "closed",
+          state_reason: "not_planned",
         });
       } else if (reopenIssueMatch.test(context.payload.comment.body)) {
         console.log(`reopening #${context.payload.issue.number}`);
@@ -217,6 +227,7 @@ Unfortunately it seems like nobody is maintaining this extension anymore. If you
 The author and contributors of \`${extension}\` can trigger bot actions by commenting:
 
 - \`@raycastbot close this issue\` Closes the issue.
+- \`@raycastbot close as not planned\` Closes the issue as not planned.
 - \`@raycastbot rename this issue to "Awesome new title"\` Renames the issue.
 - \`@raycastbot reopen this issue\` Reopens the issue.
 - \`@raycastbot assign me\` Assigns yourself to the issue.

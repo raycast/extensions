@@ -1,5 +1,9 @@
 # System Monitor Changelog
 
+## [Fix] - 2024-08-12
+
+- Fix issue when showing processes that consume more than 9Gb of RAM
+
 ## [Update & New Additions] - 2024-04-26
 
 - Update dependencies and `package.json` file structure to follow the latest version from Raycast

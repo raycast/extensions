@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "at-profile",
+  "title": "@ Profile",
+  "description": "Quickly open profiles on social platforms.",
+  "icon": "at-icon.png",
+  "author": "chrismessina",
+  "categories": [
+    "Web"
+  ],
+  "keywords": [
+    "mention",
+    "social",
+    "profile"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quick-open",
+      "title": "Open Profile",
+      "subtitle": "@ Profile",
+      "description": "Quickly open a profile on a social site",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "profile",
+          "type": "text",
+          "placeholder": "Profile",
+          "required": true
+        },
+        {
+          "name": "site",
+          "type": "dropdown",
+          "placeholder": "Platform",
+          "required": true,
+          "data": [
+            {
+              "title": "Raycast",
+              "value": "raycast"
+            },
+            {
+              "title": "Threads",
+              "value": "threads"
+            },
+            {
+              "title": "X/Twitter",
+              "value": "x"
+            },
+            {
+              "title": "GitHub",
+              "value": "github"
+            },
+            {
+              "title": "Facebook",
+              "value": "facebook"
+            },
+            {
+              "title": "Reddit",
+              "value": "reddit"
+            },
+            {
+              "title": "YouTube",
+              "value": "youtube"
+            },
+            {
+              "title": "Instagram",
+              "value": "instagram"
+            },
+            {
+              "title": "LinkedIn",
+              "value": "linkedin"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -18,7 +18,9 @@ export default async (props: LaunchProps<{ arguments: CopyIpArguments }>) => {
   const ipVersionString = args[1] === IpVersion.IPV6 ? IpVersion.IPV6 : IpVersion.IPV4;
 
   try {
-    await closeMainWindow();
+    if (environment.launchType === LaunchType.UserInitiated) {
+      await closeMainWindow();
+    }
     let ip = "";
     if (ipTypeString === IpType.LOCAL) {
       let ip_;

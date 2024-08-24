@@ -15,7 +15,8 @@
     "JakeMoosey",
     "superwhys",
     "lukah",
-    "litomore"
+    "litomore",
+    "Lemon"
   ],
   "past_contributors": [
     "Davidwalser"
@@ -64,6 +65,13 @@
         "password",
         "login"
       ],
+      "mode": "view"
+    },
+    {
+      "name": "generate-password",
+      "title": "Generate Password",
+      "subtitle": "1Password",
+      "description": "Generate a random password with 1Password.",
       "mode": "view"
     }
   ],

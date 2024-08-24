@@ -1,15 +1,16 @@
 import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
 import useNameSilo from "./lib/hooks/useNameSilo";
-import { Domain, type DomainInfo } from "./lib/types";
+import { ArrOrObjOrNull, DNSRecord, Domain, type DomainInfo } from "./lib/types";
 import { getFavicon } from "@raycast/utils";
 import { NAMESILO_LINKS } from "./lib/constants";
+import { parseAsArray } from "./lib/utils/parseAsArray";
 
 export default function Domains() {
   const { isLoading, data } = useNameSilo<{ domains: Domain[] | { domain: Domain } }>("listDomains");
   const domains = data?.domains ? (data.domains instanceof Array ? data.domains : [data.domains.domain]) : [];
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search domain">
       {!isLoading && !domains.length ? (
         <List.EmptyView
           title="You do not have any active domains in your account"
@@ -35,6 +36,11 @@ export default function Domains() {
               actions={
                 <ActionPanel>
                   <Action.Push icon={Icon.Eye} title="Get Domain Info" target={<DomainInfo domain={domain.domain} />} />
+                  <Action.Push
+                    icon={Icon.Paragraph}
+                    title="View DNS Records"
+                    target={<DNSRecords domain={domain.domain} />}
+                  />
                 </ActionPanel>
               }
             />
@@ -95,5 +101,32 @@ Contact IDs
         )
       }
     />
+  );
+}
+
+function DNSRecords({ domain }: { domain: string }) {
+  type DNSRecordsResponse = { resource_record: ArrOrObjOrNull<DNSRecord> };
+  const { isLoading, data } = useNameSilo<DNSRecordsResponse>("dnsListRecords", {
+    domain,
+  });
+  const records = parseAsArray(data?.resource_record);
+
+  return (
+    <List isLoading={isLoading} searchBarPlaceholder="Search record">
+      <List.Section title={`Domains / ${domain} / DNS Records`}>
+        {records.map((record) => (
+          <List.Item
+            key={record.record_id}
+            title={record.host}
+            subtitle={record.record_id}
+            accessories={[
+              { tag: record.type },
+              { text: `TTL: ${record.ttl}` },
+              { text: `distance: ${record.distance}` },
+            ]}
+          />
+        ))}
+      </List.Section>
+    </List>
   );
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { List, Icon, showToast, ToastStyle } from "@raycast/api";
+import { List, Icon, showToast, Toast } from "@raycast/api";
 import { ProjectListItem } from "../components";
 import { getProjects, getRecentTasks } from "../api";
 import { Project, Task } from "../types";
@@ -12,7 +12,10 @@ export function ProjectList() {
 
   useEffect(() => {
     async function fetch() {
-      const toast = await showToast(ToastStyle.Animated, "Fetching Projects");
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Fetching Projects",
+      });
       try {
         const projectsResp = await getProjects();
         const records = await getRecentTasks();
@@ -39,7 +42,7 @@ export function ProjectList() {
     }
 
     if (!isLoading && !projects[0]) {
-      return <List.Item title="No projects found" icon={Icon.XmarkCircle} />;
+      return <List.Item title="No projects found" icon={Icon.XMarkCircle} />;
     }
   };
 

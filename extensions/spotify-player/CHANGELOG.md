@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Add "Remove All Searches" Action in Search Command] - 2024-08-22
+
+- Added `Remove All Searches` action to remove all search history in one click.
+
 ## [Log out the user if re-authentication fails] - 2024-07-11
 
 - Automatically log out users if re-authentication fails, instead of displaying an error message.
