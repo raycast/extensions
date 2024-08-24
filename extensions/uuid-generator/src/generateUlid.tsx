@@ -1,4 +1,5 @@
 import { showHUD, Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
+
 import { monotonicFactory } from "ulidx";
 import { generateUuids } from "./utils/uuidUtils";
 import { UUIDType } from "./uuidHistory";
@@ -37,7 +38,7 @@ export default async (props: { arguments: ULIDArguments }) => {
     // safe?
     if (parseableNumber <= ULID_MAX_NUMBER) {
 
-      let ulids =await generateUuids(ulid, parseableNumber, upperCaseLetters, UUIDType.ULID);
+      const ulids =await generateUuids(ulid, parseableNumber, upperCaseLetters, UUIDType.ULID);
 
       if (defaultAction === "copy") {
         await Clipboard.copy(ulids.join("\r\n"));

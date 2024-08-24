@@ -33,7 +33,7 @@ export default async (props: { arguments: UUIDV7Arguments }) => {
     // safe?
     if (parseableNumber <= UUID_MAX_NUMBER) {
 
-      let uuids = await generateUuids(uuidv7, parseableNumber, upperCaseLetters, UUIDType.UUIDV7);
+      const uuids = await generateUuids(uuidv7, parseableNumber, upperCaseLetters, UUIDType.UUIDV7);
 
       if (defaultAction === "copy") {
         await Clipboard.copy(uuids.join("\r\n"));

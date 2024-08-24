@@ -1,13 +1,12 @@
 import { showHUD, Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
+
 import { v4 as uuidV4 } from "uuid";
 import { generateUuids } from "./utils/uuidUtils";
-import { getHistory, UUIDType } from "./uuidHistory";
-import { useEffect } from "react";
+import { UUIDType } from "./uuidHistory";
 
 
 interface UUIDArguments {
   numberOfUUIDsToGenerate: string;
-  prefix: string;
 }
 
 interface Preferences {
@@ -20,7 +19,7 @@ const UUID_MAX_NUMBER = 10000;
 
 export default async (props: { arguments: UUIDArguments }) => {
 
-  let { numberOfUUIDsToGenerate, prefix } = props.arguments;
+  let { numberOfUUIDsToGenerate } = props.arguments;
   const { upperCaseLetters, defaultAction } = getPreferenceValues<Preferences>();
 
   if (!numberOfUUIDsToGenerate) {
@@ -37,7 +36,7 @@ export default async (props: { arguments: UUIDArguments }) => {
     // safe?
     if (parseableNumber <= UUID_MAX_NUMBER) {
 
-      let  uuids = await generateUuids(uuidV4, parseableNumber, upperCaseLetters, UUIDType.UUIDV4);
+      const  uuids = await generateUuids(uuidV4, parseableNumber, upperCaseLetters, UUIDType.UUIDV4);
 
       if (defaultAction === "copy") {
         await Clipboard.copy(uuids.join("\r\n"));

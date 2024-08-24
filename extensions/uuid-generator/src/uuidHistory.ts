@@ -1,5 +1,4 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
-const uuidHistory: { uuid: string; timestamp: Date }[] = [];
 
 
 export interface HistoryEntry {
