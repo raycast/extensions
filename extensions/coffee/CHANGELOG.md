@@ -5,6 +5,7 @@
 - Added functionality to add schedules for caffeination, allowing different schedules for different days.
 - Integrated NLP using regex to support natural language input for setting schedules
 - Added functionality to pause, resume and delete schedules
+- Added README file
 
 ## [Update] – 2024-07-18
 

@@ -11,13 +11,17 @@ function isCaffeinateRunning(): boolean {
   }
 }
 
-async function handleScheduledCaffeinate(schedule: Schedule, currentDate: Date, currentDayString:string): Promise<boolean> {
+async function handleScheduledCaffeinate(
+  schedule: Schedule,
+  currentDate: Date,
+  currentDayString: string,
+): Promise<boolean> {
   if (!schedule || Object.keys(schedule).length === 0) {
     return false;
   }
 
-  const [startHour, startMinute] = schedule.from.split(':').map(Number);
-  const [endHour, endMinute] = schedule.to.split(':').map(Number);
+  const [startHour, startMinute] = schedule.from.split(":").map(Number);
+  const [endHour, endMinute] = schedule.to.split(":").map(Number);
   const currentHour = currentDate.getHours();
   const currentMinute = currentDate.getMinutes();
 
@@ -26,33 +30,33 @@ async function handleScheduledCaffeinate(schedule: Schedule, currentDate: Date, 
       (currentHour > startHour || (currentHour === startHour && currentMinute >= startMinute)) &&
       (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute));
 
-    if(isWithinSchedule === false){
+    if (isWithinSchedule === false && schedule.IsRunning === true) {
       schedule.IsRunning = false;
-      await LocalStorage.setItem(schedule.day, JSON.stringify(schedule)); 
+      await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
       return false;
     }
 
-    if (schedule.IsRunning === false) {
+    if (isWithinSchedule === true && schedule.IsRunning === false) {
       const duration = (endHour - startHour) * 3600 + (endMinute - startMinute) * 60;
       await startCaffeinate(
         { menubar: true, status: true },
         `Scheduled caffeination until ${schedule.to}`,
-        `-t ${duration}`
+        `-t ${duration}`,
       );
       schedule.IsRunning = true;
-      await LocalStorage.setItem(schedule.day, JSON.stringify(schedule)); 
+      await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
       return true;
-    } 
+    }
   }
 
   return true;
 }
 
 // Function to check and handle schedule
-export async function checkSchedule(){
+export async function checkSchedule() {
   const currentDate = new Date();
   const currentDayString = numberToDayString(currentDate.getDay()).toLowerCase();
-  const schedule: Schedule = JSON.parse((await LocalStorage.getItem(currentDayString)) || '{}');
+  const schedule: Schedule = JSON.parse((await LocalStorage.getItem(currentDayString)) || "{}");
 
   if (!schedule.IsManuallyDecafed) {
     const isScheduled = await handleScheduledCaffeinate(schedule, currentDate, currentDayString);

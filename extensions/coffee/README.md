@@ -48,7 +48,8 @@ Examples:
 
   > ⏳ Schedule for everyday except Tuesday from 13:00 to 20:00    
   > ⏳ Schedule for Monday and Thursday from 09:00 to 14:00    
-  > ⏳ Schedule from 10:00 to 16:30  
+  > ⏳ Schedule from 10:00 to 16:30 (adds schedule for all days)  
+  > ⏳ Saturday and Sunday from 20:00 to 23:30
 
 Supported Actions:
 - Add a Schedule

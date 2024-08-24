@@ -67,26 +67,33 @@ function generateArgs(additionalArgs?: string) {
   return args.length > 0 ? `-${args.join("")}` : "";
 }
 
-export async function changeScheduleState(operation:string) {
+export async function changeScheduleState(operation: string) {
   const currentDate = new Date();
   const currentDayString = numberToDayString(currentDate.getDay()).toLowerCase();
-  let schedule: Schedule = JSON.parse((await LocalStorage.getItem(currentDayString)) || '{}');
 
-  switch(operation){
-    case "caffeinate" : {
+  let getSchedule: string | undefined = await LocalStorage.getItem(currentDayString);
+  if (getSchedule === undefined) return;
+
+  let schedule: Schedule = JSON.parse(getSchedule);
+
+  switch (operation) {
+    case "caffeinate": {
       schedule.IsManuallyDecafed = false;
       schedule.IsRunning = false;
       await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
       break;
     }
-    case "decaffeinate" : {
-      schedule.IsManuallyDecafed = true;
-      schedule.IsRunning = false;
-      await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
-      break
+    case "decaffeinate": {
+      if (schedule.IsRunning === true) {
+        schedule.IsManuallyDecafed = true;
+        schedule.IsRunning = false;
+        await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
+      }
+      break;
     }
 
-    default : break
+    default:
+      break;
   }
 }
 
@@ -94,4 +101,3 @@ export function numberToDayString(dayIndex: number): string {
   const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   return daysOfWeek[dayIndex];
 }
-

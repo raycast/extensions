@@ -7,7 +7,7 @@ export interface ParsedSchedule {
 }
 
 export async function extractSchedule(text: string): Promise<ParsedSchedule | null> {
-  const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+  const daysOfWeek = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
   const inputText = text.toLowerCase();
 
   // Extract the time range using a regex
@@ -23,15 +23,15 @@ export async function extractSchedule(text: string): Promise<ParsedSchedule | nu
   const [fromTime, toTime] = times;
 
   // Extract mentioned days
-  const mentionedDays = daysOfWeek.filter(day => inputText.includes(day));
+  const mentionedDays = daysOfWeek.filter((day) => inputText.includes(day));
 
   // Handle the "except" case
-  if (inputText.includes('except')) {
+  if (inputText.includes("except")) {
     if (mentionedDays.length === 0) {
       await showToast(Toast.Style.Failure, "Oops! Please mention the days to be excluded.");
       return null;
     }
-    const allDaysExcept = daysOfWeek.filter(day => !mentionedDays.includes(day));
+    const allDaysExcept = daysOfWeek.filter((day) => !mentionedDays.includes(day));
     return { days: allDaysExcept, from: fromTime, to: toTime };
   }
 

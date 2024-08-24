@@ -1,5 +1,16 @@
 import { useState } from "react";
-import { LocalStorage, Color, showToast, Toast, Action, ActionPanel, Icon, List, Alert, confirmAlert } from "@raycast/api";
+import {
+  LocalStorage,
+  Color,
+  showToast,
+  Toast,
+  Action,
+  ActionPanel,
+  Icon,
+  List,
+  Alert,
+  confirmAlert,
+} from "@raycast/api";
 import { useLoadStoredSchedules } from "./fetchStoredSchedule";
 import { ListActionPanel } from "./listActionPanel";
 import { Schedule, changeScheduleState, stopCaffeinate, startCaffeinate } from "./utils";
@@ -15,13 +26,13 @@ export default function Command() {
 
   const handleSetSchedule = async () => {
     try {
-        const parsedSchedule = await extractSchedule(searchText);
+      const parsedSchedule = await extractSchedule(searchText);
 
-    if (!parsedSchedule) {
-      return;
-    }
+      if (!parsedSchedule) {
+        return;
+      }
       const { days, from, to } = parsedSchedule;
-      const newSchedules = days.map(day => ({ day, from, to, IsManuallyDecafed: false, IsRunning: false }));
+      const newSchedules = days.map((day) => ({ day, from, to, IsManuallyDecafed: false, IsRunning: false }));
 
       for (const schedule of newSchedules) {
         await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
@@ -53,7 +64,7 @@ export default function Command() {
       },
     });
 
-    if (deleteConfirmation){
+    if (deleteConfirmation) {
       try {
         await LocalStorage.removeItem(day);
         await showToast(Toast.Style.Success, "Schedule deleted.");
@@ -65,15 +76,15 @@ export default function Command() {
     }
   };
 
-  const handlePauseSchedule = async (day:string) => {
+  const handlePauseSchedule = async (day: string) => {
     changeScheduleState("decaffeinate");
     await stopCaffeinate({ menubar: true, status: true }, `Schedule for ${day} is now paused`);
-  }
+  };
 
-  const handleResumeSchedule = async (day:string) => {
+  const handleResumeSchedule = async (day: string) => {
     changeScheduleState("caffeinate");
     await startCaffeinate({ menubar: true, status: true }, `Schedule for ${day} is now resumed`);
-  }
+  };
 
   return (
     <List
@@ -96,7 +107,7 @@ export default function Command() {
         />
       ) : (
         <List.Section title="Current Caffeination Schedule">
-          {schedules.map((schedule, index) => (
+          {schedules.map((schedule, index) =>
             schedule?.day ? (
               <List.Item
                 key={index}
@@ -111,18 +122,13 @@ export default function Command() {
                     onDeleteScheduleAction={handleDeleteSchedule}
                     onPauseScheduleAction={handlePauseSchedule}
                     onResumeScheduleAction={handleResumeSchedule}
-
                   />
                 }
               />
             ) : (
-              <List.Item
-                key={index}
-                title="Invalid schedule"
-                subtitle="Schedule data is missing or incomplete"
-              />
-            )
-          ))}
+              <List.Item key={index} title="Invalid schedule" subtitle="Schedule data is missing or incomplete" />
+            ),
+          )}
         </List.Section>
       )}
     </List>
