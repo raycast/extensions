@@ -71,10 +71,10 @@ export async function changeScheduleState(operation: string) {
   const currentDate = new Date();
   const currentDayString = numberToDayString(currentDate.getDay()).toLowerCase();
 
-  let getSchedule: string | undefined = await LocalStorage.getItem(currentDayString);
+  const getSchedule: string | undefined = await LocalStorage.getItem(currentDayString);
   if (getSchedule === undefined) return;
 
-  let schedule: Schedule = JSON.parse(getSchedule);
+  const schedule: Schedule = JSON.parse(getSchedule);
 
   switch (operation) {
     case "caffeinate": {

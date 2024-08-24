@@ -67,7 +67,7 @@ export async function checkSchedule() {
 }
 
 export default async function Command(props: LaunchProps) {
-  const isCaffeinated = isCaffeinateRunning();
+  const isCaffeinated = props.launchContext?.caffeinated ?? isCaffeinateRunning();
   const isScheduled = await checkSchedule();
 
   let subtitle = "✖ Decaffeinated";

@@ -22,26 +22,26 @@ export function ListActionPanel({
     <ActionPanel>
       {searchText.length > 0 && <Action title="Set Schedule" icon={Icon.Calendar} onAction={onSetScheduleAction} />}
       <Action
-        title="Set Caffeination schedule"
+        title="Set Caffeination Schedule"
         icon={Icon.CopyClipboard}
         shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         onAction={() => onSetScheduleAction()}
       />
       <Action
-        title="Delete Caffeination schedule"
+        title="Delete Caffeination Schedule"
         style={Action.Style.Destructive}
         icon={Icon.Trash}
         shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
         onAction={() => onDeleteScheduleAction(schedule.day)}
       />
       <Action
-        title="Pause Caffeination schedule"
+        title="Pause Caffeination Schedule"
         style={Action.Style.Destructive}
         icon={Icon.Pause}
         onAction={() => onPauseScheduleAction(schedule.day)}
       />
       <Action
-        title="Resume Caffeination schedule"
+        title="Resume Caffeination Schedule"
         icon={Icon.Play}
         onAction={() => onResumeScheduleAction(schedule.day)}
       />
