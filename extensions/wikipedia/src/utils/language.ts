@@ -25,7 +25,13 @@ export type Locale =
   | "zh-tw"
   | "zh-cn"
   | "uk"
-  | "da";
+  | "da"
+  | "ca"
+  | "eu"
+  | "gl"
+  | "oc"
+  | "an"
+  | "ast";
 
 export function useLanguage() {
   return useCachedState<Locale>("language", "en");
@@ -62,4 +68,10 @@ export const languages: { icon: string; title: string; value: Locale }[] = [
   { icon: "🇹🇼", title: "Chinese (Taiwan)", value: "zh-tw" },
   { icon: "🇨🇳", title: "Chinese (China)", value: "zh-cn" },
   { icon: "🇩🇰", title: "Danish", value: "da" },
+  { icon: "🇦🇩", title: "Catalan", value: "ca" },
+  { icon: "EU", title: "Basque", value: "eu" },
+  { icon: "GL", title: "Galician", value: "gl" },
+  { icon: "OC", title: "Occitan", value: "oc" },
+  { icon: "AN", title: "Aragonese", value: "an" },
+  { icon: "AST", title: "Asturian", value: "ast" },
 ];
