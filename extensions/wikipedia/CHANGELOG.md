@@ -1,5 +1,6 @@
 # Wikipedia Changelog
-## [Add languages] - 2024-08-24
+
+## [Add languages] - {PR_MERGE_DATE}
 
 - Add `Catalan`, `Basque`, `Galician`, `Occitan`, `Aragonese` and `Asturian` languages
 
