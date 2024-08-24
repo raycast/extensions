@@ -1,5 +1,8 @@
 # Spotify Player Changelog
 
+## [Add "Start DJ" Command] - {PR_MERGE_DATE}
+- Added a command to start the DJ.
+
 ## [Add "Remove All Searches" Action in Search Command] - 2024-08-22
 
 - Added `Remove All Searches` action to remove all search history in one click.
