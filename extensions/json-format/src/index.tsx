@@ -1,16 +1,17 @@
-import { ActionPanel, Icon, Form, Action } from "@raycast/api";
+import { ActionPanel, Icon, Form, Action, useNavigation } from "@raycast/api";
 
 import { copyFormattedJs, formatJS } from "./utils";
 import { useForm } from "@raycast/utils";
+import { FormattedJsonDetail } from "./formattedJsonDetail";
 
 interface FormInput {
   input: string;
-  result: string;
   action: "format" | "view";
 }
 
 export default function main() {
-  const { setValue, values, itemProps, handleSubmit } = useForm<FormInput>({
+  const { push } = useNavigation();
+  const { values, itemProps, handleSubmit } = useForm<FormInput>({
     onSubmit: async ({ input, action }) => {
       const output = await formatJS(input);
 
@@ -18,11 +19,11 @@ export default function main() {
         if (action === "format") {
           await copyFormattedJs(output);
         } else {
-          setValue("result", output);
+          push(<FormattedJsonDetail json={output} />);
         }
       }
     },
-    initialValues: { input: "", result: "" },
+    initialValues: { input: "" },
   });
 
   return (
@@ -43,7 +44,7 @@ export default function main() {
       }
     >
       <Form.TextArea title="Input" placeholder="Paste JSON here…" {...itemProps.input} />
-      <Form.TextArea title="Result" placeholder="Command + Shift + Enter to view result..." {...itemProps.result} />
+      <Form.Description text="Press Command + Shift + Enter to view result." />
     </Form>
   );
 }

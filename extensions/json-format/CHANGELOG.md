@@ -4,6 +4,7 @@
 
 - Format JSON Lines: Make actions in sync with Format JSON command, i.e. copies the output to clipboard for "Format" action.
 - Use toasts instead of HUDs to color-code messages/prompts.
+- Format JSON and JSON Lines: Add a detail view to view decorated JSON in markdown.
 - Added new command to format JSON selected in the foremost editor.
 - Upgraded dependencies to resolve critical security vulnerabilities.
 - Minor refactoring and linter fixes.

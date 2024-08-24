@@ -95,7 +95,7 @@ export async function formatToJSONLines(input: string) {
   }
 
   const jsonVal = JSON.parse(`{"data":${input}}`);
-  return jsonVal.data.map(JSON.stringify).join("\n");
+  return jsonVal.data.map(JSON.stringify);
 }
 
 function isJson(str: string) {
