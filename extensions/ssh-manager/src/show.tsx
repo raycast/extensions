@@ -285,93 +285,6 @@ async function runTerminal(item: ISSHConnection) {
   call_forward()
   `;
 
-  const scriptHyper = `
-  -- Set this property to true to always open in a new window
-  property open_in_new_window : ${openIn == "newWindow"}
-
-  -- Set this property to true to always open in a new tab
-  property open_in_new_tab : ${openIn == "newTab"}
-
-  -- Don't change this :)
-  property opened_new_window : false
-
-  -- Handlers
-  on new_window()
-      tell application "System Events" to tell process "Hyper"
-          click menu item "New Window" of menu "Shell" of menu bar 1
-          set frontmost to true
-      end tell
-      delay 0.5
-  end new_window
-
-  on new_tab()
-      tell application "System Events" to tell process "Hyper"
-          click menu item "New Tab" of menu "Shell" of menu bar 1
-          set frontmost to true
-      end tell
-  end new_tab
-
-  on call_forward()
-      tell application "Hyper" to activate
-      tell application "Hyper" to reopen
-  end call_forward
-
-  on is_running()
-      application "Hyper" is running
-  end is_running
-
-  on has_windows()
-      if not is_running() then return false
-      tell application "System Events"
-          if windows of process "Hyper" is {} then return false
-      end tell
-      true
-  end has_windows
-
-  on send_text(custom_text)
-      tell application "System Events" to tell process "Hyper"
-          keystroke custom_text
-      end tell
-  end send_text
-
-
-  -- Main
-  if not is_running() then
-      call_forward()
-      set opened_new_window to true
-  else
-      call_forward()
-      set opened_new_window to false
-  end if
-
-  if not has_windows() then
-    tell application "Hyper" to reopen
-    delay 0.2
-    tell application "Hyper" to activate
-  end if
-
-  if open_in_new_window and not opened_new_window then
-      new_window()
-  else if open_in_new_tab and not opened_new_window then
-      new_tab()
-  end if
-
-
-  -- Make sure a window exists before we continue, or the write may fail
-  repeat until has_windows()
-      delay 0.5
-  end repeat
-  delay 0.5
-  send_text("${command}
-") -- Enter at the end of string
-  call_forward()
-  `;
-
- 
-  const fs = require('node:fs');
-  fs.writeFile('/Users/emi/Documents/scriptHyper.txt', scriptHyper, () => {
-  }); console.log(scriptHyper);
-  
   if (terminal == "iTerm") {
     try {
       await runAppleScript(scriptIterm);
@@ -393,10 +306,7 @@ async function runTerminal(item: ISSHConnection) {
     } catch (error) {
       await runAppleScript(scriptTerminal);
       console.log(error);
-    } 
-    } else if (terminal == "Hyper") {
-    await closeMainWindow();
-    await runAppleScript(scriptHyper);
+    }
   } else {
     await runAppleScript(scriptTerminal);
   }

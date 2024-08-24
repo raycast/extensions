@@ -53,10 +53,6 @@
         {
           "title": "Alacritty",
           "value": "Alacritty"
-        },
-        {
-          "title": "Hyper",
-          "value": "Hyper"
         }
       ],
       "default": "Terminal"
