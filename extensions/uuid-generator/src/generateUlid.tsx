@@ -1,6 +1,6 @@
 import { showHUD, Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
-
 import { monotonicFactory } from "ulidx";
+
 import { generateUuids } from "./utils/uuidUtils";
 import { UUIDType } from "./uuidHistory";
 

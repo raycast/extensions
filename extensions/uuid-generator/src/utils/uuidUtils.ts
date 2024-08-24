@@ -3,10 +3,10 @@ import { addToHistory, UUIDType } from "../uuidHistory"; // Adjust the path base
 export async function generateUuids(
   uuidGenerator: () => string,
   numberOfUuids: number,
-  upperCaseLetters: boolean = false,
+  upperCaseLetters = false,
   type: UUIDType = UUIDType.UUIDV4
 ): Promise<string[]> {
-  let uuids = Array.from(Array(numberOfUuids)).map(() => {
+  const uuids = Array.from(Array(numberOfUuids)).map(() => {
     const newUuid = uuidGenerator();
     return upperCaseLetters ? newUuid.toUpperCase() : newUuid;
   });

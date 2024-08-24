@@ -1,5 +1,6 @@
 import { showHUD, Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { uuidv7 } from "uuidv7";
+
 import { generateUuids } from "./utils/uuidUtils";
 import { UUIDType } from "./uuidHistory";
 

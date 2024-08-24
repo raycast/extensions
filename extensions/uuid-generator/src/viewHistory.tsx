@@ -1,9 +1,8 @@
+import { ActionPanel, List, Action, getPreferenceValues, Clipboard, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 import { getHistory as fetchHistory, clearHistory as clearStoredHistory, deleteHistoryEntry } from "./uuidHistory";
-
 import { HistoryEntry } from "./uuidHistory";
-import { ActionPanel, List, Action, getPreferenceValues, Clipboard, showToast, Toast } from "@raycast/api";
 
 interface Preferences {
   defaultAction: string;
