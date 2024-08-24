@@ -68,7 +68,8 @@
       "description": "Output sql keywordCase",
       "name": "keywordCase",
       "required": false,
-      "title": "keywordCase",
+      "title": "Keyword Case",
+      "default": "preserve",
       "type": "dropdown"
     }
   ],
