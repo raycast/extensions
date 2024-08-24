@@ -28,8 +28,7 @@ export function formatSQL(text: string) {
       return;
     }
 
-    const { tabWidth } = getPreferenceValues<Preferences>();
-    const { keywordCase } = getPreferenceValues<Preferences>();
+    const { tabWidth, keywordCase } = getPreferenceValues<Preferences>();
     const options = {
       tabWidth: tabWidth === "tab" ? 8 : parseInt(tabWidth as string),
       keywordCase: keywordCase,
