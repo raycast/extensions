@@ -5,6 +5,9 @@
   "description": "Toggle the \"Use all F1, F2, etc. keys as standard function keys\" option in macOS System Preferences.",
   "icon": "fn-key.png",
   "author": "elonwoo",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Productivity",
     "System"

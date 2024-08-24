@@ -1,5 +1,9 @@
 # Toggle Fn Changelog
 
-## [Added Version] - 2024-08-09
+All notable changes to this project will be documented in this file.
 
-Initial version code
+## [1.0.0] - 2024-08-25
+
+### Added
+
+- Initial version code
