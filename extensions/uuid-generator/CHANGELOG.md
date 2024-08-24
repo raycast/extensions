@@ -29,3 +29,7 @@
 - Added the ability to create any number of UUIDs (up to 10000) in one go via an optional argument.
 
 ## [Initial Version] - 2021-11-26
+
+## [Added history management feature] - 2024-08-24
+
+- You can now view, clear, and delete UUID generation history
