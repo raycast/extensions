@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
-import { getHistory as fetchHistory, clearHistory as clearStoredHistory, deleteHistoryEntry } from './uuidHistory';
-import { HistoryEntry } from './uuidHistory';
-import { ActionPanel, List, Action, getPreferenceValues, Clipboard, showToast, Toast } from '@raycast/api';
+import { useEffect, useState } from "react";
+import { getHistory as fetchHistory, clearHistory as clearStoredHistory, deleteHistoryEntry } from "./uuidHistory";
+
+import { HistoryEntry } from "./uuidHistory";
+import { ActionPanel, List, Action, getPreferenceValues, Clipboard, showToast, Toast } from "@raycast/api";
 
 interface Preferences {
   defaultAction: string;
@@ -31,7 +32,7 @@ export default function ViewHistory() {
 
   const copyOrPasteAllUUIDs = async () => {
     const { defaultAction } = getPreferenceValues<Preferences>();
-    const allUUIDs = history.map(entry => entry.uuid).join('\r\n'); // Join all UUIDs with newline
+    const allUUIDs = history.map((entry) => entry.uuid).join("\r\n"); // Join all UUIDs with newline
 
     if (defaultAction === "copy") {
       await Clipboard.copy(allUUIDs);
@@ -54,7 +55,8 @@ export default function ViewHistory() {
               <Action.CopyToClipboard content={entry.uuid} />
               <Action title="Delete Entry" onAction={() => deleteEntry(entry.uuid)} />
               <Action title="Clear History" onAction={clearHistory} />
-              <Action title={`Copy or Paste All UUIDs`} onAction={copyOrPasteAllUUIDs} /> {/* New Action for Copy or Paste All UUIDs */}
+              <Action title={`Copy or Paste All UUIDs`} onAction={copyOrPasteAllUUIDs} />{" "}
+              {/* New Action for Copy or Paste All UUIDs */}
             </ActionPanel>
           }
         />

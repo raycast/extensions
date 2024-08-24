@@ -4,7 +4,6 @@ import { v4 as uuidV4 } from "uuid";
 import { generateUuids } from "./utils/uuidUtils";
 import { UUIDType } from "./uuidHistory";
 
-
 interface UUIDArguments {
   numberOfUUIDsToGenerate: string;
 }
@@ -18,7 +17,6 @@ interface Preferences {
 const UUID_MAX_NUMBER = 10000;
 
 export default async (props: { arguments: UUIDArguments }) => {
-
   let { numberOfUUIDsToGenerate } = props.arguments;
   const { upperCaseLetters, defaultAction } = getPreferenceValues<Preferences>();
 
@@ -35,8 +33,7 @@ export default async (props: { arguments: UUIDArguments }) => {
 
     // safe?
     if (parseableNumber <= UUID_MAX_NUMBER) {
-
-      const  uuids = await generateUuids(uuidV4, parseableNumber, upperCaseLetters, UUIDType.UUIDV4);
+      const uuids = await generateUuids(uuidV4, parseableNumber, upperCaseLetters, UUIDType.UUIDV4);
 
       if (defaultAction === "copy") {
         await Clipboard.copy(uuids.join("\r\n"));

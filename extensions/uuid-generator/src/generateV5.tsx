@@ -41,8 +41,12 @@ export default async (props: { arguments: UUIDV5Arguments }) => {
 
     // safe?
     if (parseableNumber <= UUID_MAX_NUMBER) {
-
-      const uuids = await  generateUuids(() => uuidV5(name, uuidNamespace), parseableNumber, upperCaseLetters, UUIDType.UUIDV5);
+      const uuids = await generateUuids(
+        () => uuidV5(name, uuidNamespace),
+        parseableNumber,
+        upperCaseLetters,
+        UUIDType.UUIDV5
+      );
 
       if (defaultAction === "copy") {
         await Clipboard.copy(uuids.join("\r\n"));
