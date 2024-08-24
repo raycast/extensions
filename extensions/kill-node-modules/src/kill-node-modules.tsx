@@ -53,7 +53,7 @@ export default function Command() {
       console.error(`Error opening folder ${nodePath}:`, error);
       await showToast({
         style: Toast.Style.Failure,
-        title: "Failed to open folder",
+        title: "Failed To Open Folder",
         message: nodePath,
       });
     }
@@ -73,7 +73,7 @@ export default function Command() {
       isLoading={loading}
       pagination={pagination}
       searchBarAccessory={
-        <List.Dropdown tooltip={"Order by"} onChange={(value) => setSortWith(value as "size" | "lastModified")}>
+        <List.Dropdown tooltip={"Order By"} onChange={(value) => setSortWith(value as "size" | "lastModified")}>
           <List.Dropdown.Item title="Last Modified" value="lastModified" />
           <List.Dropdown.Item title="Size" value="size"
            />
