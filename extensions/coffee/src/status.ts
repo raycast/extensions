@@ -1,5 +1,5 @@
 import { LocalStorage, LaunchProps, updateCommandMetadata } from "@raycast/api";
-import { Schedule, startCaffeinate, numberToDayString } from "./utils";
+import { Schedule, startCaffeinate, numberToDayString, stopCaffeinate } from "./utils";
 import { execSync } from "node:child_process";
 
 function isCaffeinateRunning(): boolean {
@@ -32,6 +32,7 @@ async function handleScheduledCaffeinate(
 
     if (isWithinSchedule === false && schedule.IsRunning === true) {
       schedule.IsRunning = false;
+      await stopCaffeinate({ menubar: true, status: true });
       await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
       return false;
     }
@@ -49,7 +50,7 @@ async function handleScheduledCaffeinate(
     }
   }
 
-  return true;
+  return false;
 }
 
 // Function to check and handle schedule
@@ -66,8 +67,8 @@ export async function checkSchedule() {
   return false;
 }
 
-export default async function Command(props: LaunchProps) {
-  const isCaffeinated = props.launchContext?.caffeinated ?? isCaffeinateRunning();
+export default async function Command() {
+  const isCaffeinated = isCaffeinateRunning();
   const isScheduled = await checkSchedule();
 
   let subtitle = "✖ Decaffeinated";

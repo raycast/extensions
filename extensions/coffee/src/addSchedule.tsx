@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   LocalStorage,
   Color,
+  showHUD,
   showToast,
   Toast,
   Action,
@@ -15,6 +16,7 @@ import { useLoadStoredSchedules } from "./fetchStoredSchedule";
 import { ListActionPanel } from "./listActionPanel";
 import { Schedule, changeScheduleState, stopCaffeinate, startCaffeinate } from "./utils";
 import { extractSchedule } from "./extractSchedule";
+import { checkSchedule } from "./status"
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -78,12 +80,13 @@ export default function Command() {
 
   const handlePauseSchedule = async (day: string) => {
     changeScheduleState("decaffeinate");
-    await stopCaffeinate({ menubar: true, status: true }, `Schedule for ${day} is now paused`);
+    await stopCaffeinate({ menubar: true, status: true }, `Schedule for ${day.charAt(0).toUpperCase() + day.slice(1).toLowerCase()} is now paused`);
   };
 
   const handleResumeSchedule = async (day: string) => {
     changeScheduleState("caffeinate");
-    await startCaffeinate({ menubar: true, status: true }, `Schedule for ${day} is now resumed`);
+    await showHUD(`Schedule for ${day.charAt(0).toUpperCase() + day.slice(1).toLowerCase()} is now resumed`);
+    await checkSchedule();
   };
 
   return (
