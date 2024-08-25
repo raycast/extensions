@@ -218,3 +218,7 @@ Introduced Search Projects command to the Linear extension.
 ## [Added Extension to Store] - 2021-11-30
 
 Linear added to the Raycast Store.
+
+## [Bug Fixes] - 2023-08-25
+
+- Fixed a bug where the issue is created but not shown in search issues results.

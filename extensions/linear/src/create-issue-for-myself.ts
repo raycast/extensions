@@ -3,8 +3,10 @@ import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast, showToast
 import { linear } from "./api/linearClient";
 import { getAccessToken, withAccessToken } from "@raycast/utils";
 import { getTeams } from "./api/getTeams";
+import { shouldPingIssue, stopPingingIssue } from "./track-issue-ping";
 
 const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => {
+  await shouldPingIssue();
   const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
 
   try {
@@ -75,6 +77,8 @@ const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => 
       onAction: () => Clipboard.copy(e instanceof Error ? (e.stack ?? e.message) : String(e)),
     };
   }
+
+  await stopPingingIssue();
 };
 
 export default withAccessToken(linear)(command);

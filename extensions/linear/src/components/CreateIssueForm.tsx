@@ -38,6 +38,7 @@ import IssueDetail from "./IssueDetail";
 import { getMilestoneIcon } from "../helpers/milestones";
 import useUsers from "../hooks/useUsers";
 import { getLinksFromNewLines } from "../helpers/links";
+import { shouldPingIssue, stopPingingIssue } from "../track-issue-ping";
 
 type CreateIssueFormProps = {
   assigneeId?: string;
@@ -117,11 +118,14 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
 
+      await shouldPingIssue();
+
       const teamId = hasMoreThanOneTeam ? values.teamId : teams?.[0]?.id;
 
       if (!teamId) {
         // that should never happen
         setValidationError("teamId", "The team is required.");
+        await stopPingingIssue();
         return false;
       }
 
@@ -224,6 +228,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       }
 
       setValue("teamId", teamId);
+      await stopPingingIssue();
     },
     validation: {
       teamId: hasMoreThanOneTeam ? FormValidation.Required : undefined,
