@@ -32,3 +32,8 @@ export const DISPLAY_VALUES = {
  * The path for the Luna logo image used in the application.
  */
 export const LUNA_LOGO_IMG = "logo_luna.png";
+
+/**
+ * The base URL for the Luna API endpoint.
+ */
+export const LUNA_API_ROUTE = "https://proxy-prod.us-east-1.tempo.digital.a2z.com/getPage";

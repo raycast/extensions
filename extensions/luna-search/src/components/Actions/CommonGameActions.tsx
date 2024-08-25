@@ -1,5 +1,5 @@
 import { Action, Icon, Keyboard } from "@raycast/api";
-import { GameSummary } from "../../services";
+import { GameSummary } from "../../models";
 import { DISPLAY_VALUES } from "../../constants";
 import { OpenUrlAction } from "./OpenUrlAction";
 import { SearchCallback } from "../..";

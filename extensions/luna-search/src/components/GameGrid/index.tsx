@@ -1,7 +1,7 @@
 import { Grid } from "@raycast/api";
 import { DISPLAY_VALUES } from "../../constants";
 import { EmptyGameGrid } from "./EmptyGameGrid";
-import { GameSummary } from "../../services";
+import { GameSummary } from "../../models";
 import { GameGridActions } from "../Actions";
 import { useEffect, useState } from "react";
 import { SearchCallback } from "../..";
@@ -33,7 +33,7 @@ interface Props {
   /**
    * The current search query.
    */
-  searchQuery?: string;
+  term: string;
 }
 
 /**
@@ -43,8 +43,8 @@ interface Props {
  * @param pageSize - The desired size of each subarray. Defaults to 10 if not provided.
  * @returns An array of subarrays, each containing up to `pageSize` Game objects.
  */
-function getPages(games: GameSummary[], pageSize: number = 10): GameSummary[][] {
-  return games.reduce<GameSummary[][]>((pages, game, index) => {
+function getPages(games: GameSummary[], pageSize: number = 10): PagedGames {
+  const gamePages = games.reduce<GameSummary[][]>((pages, game, index) => {
     const pageIndex = Math.floor(index / pageSize);
     if (!pages[pageIndex]) {
       pages[pageIndex] = [];
@@ -52,6 +52,18 @@ function getPages(games: GameSummary[], pageSize: number = 10): GameSummary[][] 
     pages[pageIndex].push(game);
     return pages;
   }, []);
+
+  return {
+    currentPage: 0,
+    gamePages,
+    isLastPage: gamePages.length <= 1,
+  };
+}
+
+interface PagedGames {
+  currentPage: number;
+  gamePages: GameSummary[][];
+  isLastPage: boolean;
 }
 
 /**
@@ -71,26 +83,29 @@ function getPages(games: GameSummary[], pageSize: number = 10): GameSummary[][] 
  * If there are no games to display, the EmptyGameGrid component is shown instead.
  * The component also supports pagination, loading more games as the user scrolls.
  */
-export function GameGrid({ games, isLoading, searchCallback, searchQuery }: Props): JSX.Element {
+export function GameGrid({ games, isLoading, searchCallback, term }: Props): JSX.Element {
   // Track selected item in grid
-  const [selectedItem, setSelectedItem] = useState<string | undefined>(undefined);
-  const [gamePageIndex, setGamePageIndex] = useState(0);
-  const [gamePages, setGamePages] = useState<GameSummary[][]>([]);
+  const [gamePages, setGamePages] = useState<PagedGames>({ currentPage: 0, gamePages: [], isLastPage: true });
   const [displayedGames, setDisplayedGames] = useState<GameSummary[]>([]);
 
   useEffect(() => {
     const pagedGames = getPages(games, PAGE_SIZE);
-    setDisplayedGames(pagedGames[0] ?? []);
-    setGamePages(pagedGames);
-    setGamePageIndex(0);
+    setGamePages(pagedGames); // Set total pages
+    setDisplayedGames(pagedGames.gamePages[0] ?? []); // Set to first page
   }, [games]);
 
   /**
    * Loads the next page of games and updates the displayedGames state.
    */
-  function loadPage() {
-    setGamePageIndex(gamePageIndex + 1);
-    setDisplayedGames([...displayedGames, ...gamePages[gamePageIndex + 1]]);
+  function loadMore() {
+    // Built in hasMore feature is not always respected.
+    if (gamePages.isLastPage) {
+      return;
+    }
+    const nextPageId = gamePages.currentPage + 1;
+    const isLastPage = nextPageId >= gamePages.gamePages.length - 1;
+    setGamePages({ ...gamePages, isLastPage, currentPage: nextPageId });
+    setDisplayedGames([...displayedGames, ...gamePages.gamePages[nextPageId]]);
   }
 
   return (
@@ -103,18 +118,13 @@ export function GameGrid({ games, isLoading, searchCallback, searchQuery }: Prop
       isLoading={isLoading}
       navigationTitle={DISPLAY_VALUES.searchTitle}
       pagination={{
-        hasMore: gamePageIndex < gamePages.length - 1,
+        hasMore: !gamePages.isLastPage,
         pageSize: PAGE_SIZE,
-        onLoadMore: () => {
-          loadPage();
-        },
+        onLoadMore: loadMore,
       }}
       onSearchTextChange={(search) => searchCallback({ query: search })}
-      // When the selection changes, reset the position in grid to the top
-      onSelectionChange={() => setSelectedItem(undefined)}
       searchBarPlaceholder={DISPLAY_VALUES.searchPlaceholder}
-      searchText={searchQuery}
-      selectedItemId={selectedItem}
+      searchText={term}
       throttle={true}
     >
       {displayedGames.length > 0 ? (
@@ -128,11 +138,7 @@ export function GameGrid({ games, isLoading, searchCallback, searchQuery }: Prop
           />
         ))
       ) : (
-        <EmptyGameGrid
-          isLoading={isLoading}
-          isQueryEmpty={!searchQuery || searchQuery.length == 0}
-          searchCallback={searchCallback}
-        />
+        <EmptyGameGrid isLoading={isLoading} isQueryEmpty={!term || term.length < 3} searchCallback={searchCallback} />
       )}
     </Grid>
   );

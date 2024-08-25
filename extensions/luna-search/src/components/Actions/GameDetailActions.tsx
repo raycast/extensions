@@ -1,5 +1,5 @@
 import { ActionPanel, Icon, useNavigation } from "@raycast/api";
-import { GameSummary } from "../../services";
+import { GameSummary } from "../../models";
 import { DISPLAY_VALUES } from "../../constants";
 import { SearchCallback, SearchInput } from "../..";
 import { OpenUrlAction } from "./OpenUrlAction";

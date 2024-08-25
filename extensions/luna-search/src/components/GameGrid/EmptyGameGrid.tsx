@@ -1,11 +1,8 @@
 import { Grid } from "@raycast/api";
 import { DISPLAY_VALUES, LUNA_LOGO_IMG } from "../../constants";
-import { GameSummary, LunaService } from "../../services";
-import { useEffect, useState } from "react";
 import { EmptyActions } from "../Actions";
 import { SearchCallback } from "../..";
-
-const LUNA = LunaService.getInstance();
+import { useTrendingGames } from "../../hooks";
 
 /**
  * Represents the display content for the EmptyGameGrid component,
@@ -57,15 +54,7 @@ interface Props {
  * the Raycast API, using the Luna logo as the icon.
  */
 export function EmptyGameGrid({ isLoading, isQueryEmpty, searchCallback }: Props): JSX.Element {
-  const [trending, setTrending] = useState<GameSummary[]>([]);
-
-  useEffect(() => {
-    const loadTrending = async () => {
-      const trending = await LUNA.getTrendingGames();
-      setTrending(trending);
-    };
-    loadTrending();
-  }, []);
+  const [games] = useTrendingGames();
 
   const content = getDisplayContent(!!isLoading, isQueryEmpty);
   return (
@@ -73,9 +62,9 @@ export function EmptyGameGrid({ isLoading, isQueryEmpty, searchCallback }: Props
       actions={<EmptyActions searchCallback={searchCallback} />}
       icon={{ source: LUNA_LOGO_IMG }}
       description={
-        trending.length == 0
+        games.length == 0
           ? content.description
-          : `${DISPLAY_VALUES.trendingPrefix}${trending.map((game) => game.title).join(", ")}`
+          : `${DISPLAY_VALUES.trendingPrefix}${games.map((game) => game.title).join(", ")}`
       }
       title={content.title}
     />

@@ -2,7 +2,7 @@ import { Action, Icon, useNavigation } from "@raycast/api";
 import { SearchCallback, SearchInput } from "../..";
 import { DISPLAY_VALUES } from "../../constants";
 import { GameDetail } from "../GameDetail";
-import { GameSummary } from "../../services";
+import { GameSummary } from "../../models";
 
 /**
  * Defines the shape of the props for the OpenDetailAction component.

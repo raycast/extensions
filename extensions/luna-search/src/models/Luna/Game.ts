@@ -1,4 +1,4 @@
-import { Response, Widget } from "./ReponseModel";
+import { LunaResponse, Widget } from "./Reponse";
 
 const EMPTY_JSON = "{}";
 // ID of the Widget containing game details.
@@ -21,7 +21,7 @@ export class Game {
    *
    * @param source The Response object from the Luna API.
    */
-  constructor(data: Response) {
+  constructor(data: LunaResponse) {
     const presentationData = JSON.parse(
       (
         data.pageMemberGroups.mainContent.widgets.find((widget: Widget) => widget.id === GAME_DETAILS_ID) ?? {

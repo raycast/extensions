@@ -1,68 +1,53 @@
-import { LaunchProps, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { GameSummary, LunaService } from "./services";
+import { LaunchProps } from "@raycast/api";
+import { useState } from "react";
 import { GameGrid } from "./components";
-import { DISPLAY_VALUES } from "./constants";
+import { useSearch, useTrendingGames } from "./hooks";
 
-// Create a singleton instance of the LunaService to handle game searches
-const LUNA = LunaService.getInstance();
-
+/**
+ * Defines the shape of the search input, which can include a query string and/or a flag to indicate a search for trending games.
+ */
 export interface SearchInput {
+  /**
+   * The search query string.
+   */
   query?: string;
-  isTrending?: boolean;
-}
-export type SearchCallback = (input: SearchInput) => void;
-
-export default function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
-  const [games, setGames] = useState<GameSummary[]>([]);
-  const [searchQuery, setSearchQuery] = useState<string>(props.arguments.search ?? "");
-  // Prevent loading flashes by defaulting on loading state if there is a default search
-  const [isLoading, setIsLoading] = useState<boolean>(props.arguments.search != "" || false);
 
   /**
-   * Performs a search for games on the Amazon Luna platform based on the provided query.
-   * If the query is empty, it clears the games list. Otherwise, it updates the loading state
-   * and fetches the games from the LunaService. If an error occurs, it displays a failure
-   * toast message.
-   *
-   * @param query The search query to use.
+   * A flag indicating whether to search for trending games.
    */
-  const searchGames = async (input: SearchInput): Promise<void> => {
-    const query = input.query || "";
-    setSearchQuery(query);
+  isTrending?: boolean;
+}
 
-    if (!input.query && !input.isTrending) {
-      setGames([]);
-      return;
-    }
+/**
+ * Defines a general type for the search callback function, which is used to update the search input.
+ */
+export type SearchCallback = (input: SearchInput) => void;
 
-    setIsLoading(true);
+/**
+ * The main command component for the Raycast extension.
+ * This component is responsible for managing the search functionality and rendering the appropriate game grid.
+ *
+ * @param props The launch props provided by the Raycast API, including the search arguments.
+ * @returns A JSX.Element representing the main command.
+ */
+export default function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
+  const [searchQuery, setSearchQuery] = useState<SearchInput>({ query: props.arguments.search ?? "" });
+  const [searchResults, searchLoading] = useSearch(searchQuery.query);
+  const [trending, trendingLoading] = useTrendingGames();
 
-    const loader = input.isTrending ? async () => await LUNA.getTrendingGames() : async () => await LUNA.search(query);
-    try {
-      const games = await loader();
-      setGames(games);
-    } catch (err) {
-      console.debug("Error fetching games:", err);
-      setGames([]);
-      showToast({
-        style: Toast.Style.Failure,
-        title: DISPLAY_VALUES.errorMessage,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Trigger a search if there was an inital state for the search query.
-  useEffect(() => {
-    if (searchQuery != null) {
-      searchGames({ query: searchQuery });
-    }
-  }, []);
-
-  // Render the GameGrid component, which is responsible for displaying the game results.
-  // The GameGrid component receives the games, isLoading, searchCallback, and searchQuery
-  // props from the Command component.
-  return <GameGrid games={games} isLoading={isLoading} searchCallback={searchGames} searchQuery={searchQuery} />;
+  /**
+   * Renders the appropriate game grid based on the current search input.
+   * If the isTrending flag is set, the trending games are displayed.
+   * Otherwise, the search results are displayed.
+   */
+  return searchQuery.isTrending ? (
+    <GameGrid games={trending} isLoading={trendingLoading} searchCallback={setSearchQuery} term={""} />
+  ) : (
+    <GameGrid
+      games={searchResults}
+      isLoading={searchLoading}
+      searchCallback={setSearchQuery}
+      term={searchQuery.query ?? ""}
+    />
+  );
 }

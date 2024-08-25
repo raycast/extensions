@@ -17,17 +17,19 @@
       "subtitle": "Quickly find and open Luna Games",
       "description": "Search Luna's rich catalogue of content to directly find and open games",
       "mode": "view",
-      "arguments": [{
+      "arguments": [
+        {
           "name": "search",
           "placeholder": "Search Term",
           "type": "text",
           "required": false
-      }]
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.69.1",
-    "axios": "^1.7.3"
+    "@raycast/utils": "^1.16.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

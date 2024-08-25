@@ -1,12 +1,12 @@
 import { BASE_REQUEST, DEFAULT_HEADERS, DEFAULT_TIMEOUT_S } from "./constants";
-import { Request } from "./RequestModel";
+import { Request } from "./Request";
 import { GameSummary } from "./GameSummary";
 
 /**
  * Encapsulates the logic for creating a search request to the Luna API.
  * The request includes a service token query and a timeout (defaulting to 3 seconds),
  */
-export class GetGame {
+export class GameRequest {
   readonly headers: Record<string, string>;
   readonly body: Request;
 

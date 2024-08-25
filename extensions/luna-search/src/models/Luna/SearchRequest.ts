@@ -1,6 +1,6 @@
 import { BASE_REQUEST, DEFAULT_HEADERS, DEFAULT_TIMEOUT_S, SEARCH_PAGE_TYPE } from "./constants";
-import { Request } from "./RequestModel";
-import { Response } from "./ReponseModel";
+import { Request } from "./Request";
+import { LunaResponse } from "./Reponse";
 
 /**
  * The sort order for the search query. Currently, only "RELEVANCE" is supported.
@@ -37,7 +37,7 @@ interface SearchBody extends Request {
  * The request includes the search query, a timeout (defaulting to 3 seconds),
  * and sets the page type to the SEARCH_PAGE_TYPE constant.
  */
-export class Search {
+export class SearchRequest {
   readonly headers: Record<string, string>;
   readonly body: SearchBody;
 
@@ -65,6 +65,6 @@ export class Search {
  * @param res The search response to check.
  * @returns True if the search returned no results, false otherwise.
  */
-export function isEmpty(res: Response): boolean {
+export function isEmpty(res: LunaResponse): boolean {
   return res.pageContext.pageType.includes(EMPTY_INDICATOR);
 }
