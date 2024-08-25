@@ -16,13 +16,15 @@ import {
   ITalkAssistant,
   ITalkSnippet,
 } from "./ai/type";
+import Onboarding from "./onboarding";
 import { needOnboarding } from "./type/config";
-import { Onboarding } from "./view/onboarding/start";
+import { useOnboarding } from "./hook/useOnboarding";
 
 export default function Chat(props: { conversation?: ConversationType; arguments?: { ask: string } }) {
   const { push } = useNavigation();
   const conversations = useConversations();
   const collectionsAssistant = useAssistant();
+  const hookOnboarding = useOnboarding();
   const snippets = useSnippet();
   const chats = useChat();
   const question = useQuestion({
@@ -103,6 +105,13 @@ export default function Chat(props: { conversation?: ConversationType; arguments
     }
   }, [selectedSnippet]);
 
+  if (
+    !hookOnboarding.data &&
+    (needOnboarding(collectionsAssistant.data.length) || collectionsAssistant.data.length === 0)
+  ) {
+    return <Onboarding />;
+  }
+
   const getActionPanel = (question: string) => (
     <ActionPanel>
       <Action title="Get Answer" icon={Icon.ArrowRight} onAction={() => chats.ask(question, undefined, conversation)} />
@@ -124,7 +133,7 @@ export default function Chat(props: { conversation?: ConversationType; arguments
     </ActionPanel>
   );
 
-  let getActionPanelDefault = () => (
+  const getActionPanelDefault = () => (
     <ActionPanel>
       <ActionPanel.Section title="Input">
         <Action
@@ -141,36 +150,12 @@ export default function Chat(props: { conversation?: ConversationType; arguments
           }}
         />
       </ActionPanel.Section>
-      <Action
-        title="Onboarding"
-        icon={Icon.Exclamationmark}
-        onAction={() => {
-          push(<Onboarding />);
-        }}
-      />
     </ActionPanel>
   );
-  let searchBarPlaceholder =
+  const searchBarPlaceholder =
     selectedAssistant !== undefined
       ? selectedAssistant.title + (chats.data.length > 0 ? " - Ask another question..." : " - Ask a question...")
       : "Ask a question...";
-  let noAssistant = false;
-
-  if (needOnboarding(collectionsAssistant.data.length) || collectionsAssistant.data.length === 0) {
-    getActionPanelDefault = () => (
-      <ActionPanel>
-        <Action
-          title="Onboarding"
-          icon={Icon.Exclamationmark}
-          onAction={() => {
-            push(<Onboarding />);
-          }}
-        />
-      </ActionPanel>
-    );
-    searchBarPlaceholder = "No assistant, first start onboarding to create your first assistant!";
-    noAssistant = true;
-  }
 
   return (
     <List
@@ -206,7 +191,6 @@ export default function Chat(props: { conversation?: ConversationType; arguments
         setConversation={setConversation}
         use={{ chats, conversations }}
         selectedAssistant={selectedAssistant}
-        noAssistant={noAssistant}
       />
     </List>
   );

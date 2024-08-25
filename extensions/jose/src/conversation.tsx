@@ -6,15 +6,15 @@ import { ConversationListView } from "./view/chat/conversationList";
 import { ConversationType } from "./type/conversation";
 import { ITalk } from "./ai/type";
 import { needOnboarding } from "./type/config";
-import { Onboarding } from "./view/onboarding/start";
+import Onboarding from "./onboarding";
 import { useAssistant } from "./hook/useAssistant";
-import { OnboardingEmpty } from "./view/onboarding/empty";
+import { useOnboarding } from "./hook/useOnboarding";
 
 export default function Conversation() {
   const { push } = useNavigation();
   const conversations = useConversations();
   const collectionsAssistant = useAssistant();
-
+  const hookOnboarding = useOnboarding();
   const [searchText, setSearchText] = useState<string>("");
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [conversation, setConversation] = useState<ConversationType | null>();
@@ -22,12 +22,18 @@ export default function Conversation() {
   useEffect(() => {
     setConversation(conversations.data.find((x: ConversationType) => x.conversationId === selectedConversationId));
   }, [selectedConversationId]);
-
   useEffect(() => {
     if (conversation) {
       conversations.update(conversation);
     }
   }, [conversation]);
+
+  if (
+    !hookOnboarding.data &&
+    (needOnboarding(collectionsAssistant.data.length) || collectionsAssistant.data.length === 0)
+  ) {
+    return <Onboarding />;
+  }
 
   const uniqueConversations = conversations.data.filter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -75,25 +81,8 @@ export default function Conversation() {
       </ActionPanel.Section>
     </ActionPanel>
   );
-  let searchBarPlaceholder = "Search conversation...";
-  let getAction = undefined;
-  let noAssistant = false;
-
-  if (needOnboarding(collectionsAssistant.data.length) || collectionsAssistant.data.length === 0) {
-    getAction = (
-      <ActionPanel>
-        <Action
-          title="Onboarding"
-          icon={Icon.Exclamationmark}
-          onAction={() => {
-            push(<Onboarding />);
-          }}
-        />
-      </ActionPanel>
-    );
-    searchBarPlaceholder = "No assistant, first start onboarding to create your first assistant!";
-    noAssistant = true;
-  }
+  const searchBarPlaceholder = "Search conversation...";
+  const getAction = undefined;
 
   return (
     <List
@@ -112,16 +101,12 @@ export default function Conversation() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
     >
-      {noAssistant || conversations.data.length === 0 ? (
-        noAssistant ? (
-          <OnboardingEmpty />
-        ) : (
-          <List.EmptyView
-            title="No Conversation"
-            description="Your recent conversation will be showed up here"
-            icon={Icon.Stars}
-          />
-        )
+      {conversations.data.length === 0 ? (
+        <List.EmptyView
+          title="No Conversation"
+          description="Your recent conversation will be showed up here"
+          icon={Icon.Stars}
+        />
       ) : (
         <>
           {sortedConversations && (

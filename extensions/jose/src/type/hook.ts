@@ -4,6 +4,7 @@ export interface BaseHookType<T> {
 }
 
 export type HookType<T> = BaseHookType<T[]> & BaseFunctionHookType<T>;
+export type HookOneType<T> = BaseHookType<T>;
 
 interface BaseFunctionHookType<T> {
   add: PromiseFunctionWithOneArgType<T>;

@@ -4,6 +4,7 @@ import fetch from "node-fetch";
 import { AssistantDefault, AssistantHookType } from "../type/assistant";
 import { ClearPromptSystem, ConfigurationTypeCommunicationDefault, GetApiEndpointData } from "../type/config";
 import { AssistantDefaultTemperature, ITalkAssistant } from "../ai/type";
+import { RemoveDuplicatesByField } from "../common/list";
 
 export function useAssistant(): AssistantHookType {
   const [data, setData] = useState<ITalkAssistant[]>([]);
@@ -15,7 +16,7 @@ export function useAssistant(): AssistantHookType {
     (async () => {
       const stored = await LocalStorage.getItem<string>(localStorageName);
       if (stored) {
-        setData((previous) => [...previous, ...JSON.parse(stored)]);
+        setData((previous) => RemoveDuplicatesByField([...previous, ...JSON.parse(stored)], "assistantId"));
       } else {
         if (GetApiEndpointData() !== undefined && GetApiEndpointData().assistant !== undefined) {
           await apiLoad(setData, data);
@@ -29,8 +30,10 @@ export function useAssistant(): AssistantHookType {
   }, []);
 
   useEffect(() => {
-    LocalStorage.setItem(localStorageName, JSON.stringify(data));
-  }, [data]);
+    if (!isLoading) {
+      LocalStorage.setItem(localStorageName, JSON.stringify(RemoveDuplicatesByField(data, "assistantId")));
+    }
+  }, [data, isLoading]);
 
   const reload = useCallback(async () => {
     if (GetApiEndpointData() === undefined || GetApiEndpointData().assistant === undefined) {

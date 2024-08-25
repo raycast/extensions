@@ -7,33 +7,41 @@ import { ITalkLlm } from "./ai/type";
 import { LlmFormLocal } from "./view/llm/formLocal";
 import { LlmFormApi } from "./view/llm/formApi";
 import { needOnboarding } from "./type/config";
-import { Onboarding } from "./view/onboarding/start";
+import Onboarding from "./onboarding";
 import { useAssistant } from "./hook/useAssistant";
-import { OnboardingEmpty } from "./view/onboarding/empty";
+import { useOnboarding } from "./hook/useOnboarding";
 
 export default function Llm() {
   const { push } = useNavigation();
   const collectionsLlm = useLlm();
   const collectionsAssistant = useAssistant();
+  const hookOnboarding = useOnboarding();
   const [searchText, setSearchText] = useState<string>("");
   const [selectedLlmId, setSelectedLlmId] = useState<string | null>(null);
-  const collectionsSnipppets: LlmHookType = collectionsLlm;
+  const collectionsLlms: LlmHookType = collectionsLlm;
 
   useEffect(() => {
     if (searchText != "" && searchText.length > 1) {
-      collectionsSnipppets.data = collectionsLlm.data.filter((x: ITalkLlm) => x.title.includes(searchText));
+      collectionsLlms.data = collectionsLlm.data.filter((x: ITalkLlm) => x.title.includes(searchText));
     } else {
-      collectionsSnipppets.data = collectionsLlm.data;
+      collectionsLlms.data = collectionsLlm.data;
     }
   }, [searchText]);
 
-  let getActionList = (
+  if (
+    !hookOnboarding.data &&
+    (needOnboarding(collectionsAssistant.data.length) || collectionsAssistant.data.length === 0)
+  ) {
+    return <Onboarding />;
+  }
+
+  const getActionList = (
     <ActionPanel>
       <Action
         title={"Create Llm"}
         shortcut={{ modifiers: ["cmd"], key: "c" }}
         icon={Icon.Plus}
-        onAction={() => push(<LlmFormLocal name={searchText} use={{ llms: collectionsSnipppets }} />)}
+        onAction={() => push(<LlmFormLocal name={searchText} use={{ llms: collectionsLlms }} />)}
       />
       <Action title={"Reload Llms From Api"} icon={Icon.Download} onAction={() => collectionsLlm.reload()} />
     </ActionPanel>
@@ -47,8 +55,8 @@ export default function Llm() {
           icon={Icon.Pencil}
           onAction={() =>
             llm.isLocal
-              ? push(<LlmFormLocal llm={llm} use={{ llms: collectionsSnipppets }} />)
-              : push(<LlmFormApi llm={llm} use={{ llms: collectionsSnipppets }} />)
+              ? push(<LlmFormLocal llm={llm} use={{ llms: collectionsLlms }} />)
+              : push(<LlmFormApi llm={llm} use={{ llms: collectionsLlms }} />)
           }
         />
         <Action
@@ -80,28 +88,11 @@ export default function Llm() {
       <Action title={"Reload Llms From Api"} icon={Icon.Download} onAction={() => collectionsLlm.reload()} />
     </ActionPanel>
   );
-  let searchBarPlaceholder = "Search Llm...";
-  let noAssistant = false;
-
-  if (needOnboarding(collectionsAssistant.data.length) || collectionsAssistant.data.length === 0) {
-    getActionList = (
-      <ActionPanel>
-        <Action
-          title="Onboarding"
-          icon={Icon.Exclamationmark}
-          onAction={() => {
-            push(<Onboarding />);
-          }}
-        />
-      </ActionPanel>
-    );
-    searchBarPlaceholder = "No assistant, first start onboarding to create your first assistant!";
-    noAssistant = true;
-  }
+  const searchBarPlaceholder = "Search Llm...";
 
   return (
     <List
-      isShowingDetail={collectionsSnipppets.data.length === 0 ? false : true}
+      isShowingDetail={collectionsLlms.data.length === 0 ? false : true}
       isLoading={collectionsLlm.isLoading}
       filtering={false}
       throttle={false}
@@ -112,20 +103,7 @@ export default function Llm() {
       onSearchTextChange={setSearchText}
       actions={getActionList}
     >
-      {noAssistant || collectionsSnipppets.data.length === 0 ? (
-        noAssistant ? (
-          <OnboardingEmpty />
-        ) : (
-          <List.EmptyView title="No Llms" description="Create new Llm with ⌘ + c shortcut" icon={Icon.Stars} />
-        )
-      ) : (
-        <LlmListView
-          key="Llms"
-          llms={collectionsSnipppets.data}
-          selectedLlm={selectedLlmId}
-          actionPanel={getActionItem}
-        />
-      )}
+      <LlmListView key="Llms" llms={collectionsLlms.data} selectedLlm={selectedLlmId} actionPanel={getActionItem} />
     </List>
   );
 }

@@ -91,7 +91,6 @@ export interface ChatViewPropsType {
   setConversation: SetType<ConversationType>;
   use: { chats: ChatHookType; conversations: ConversationsHookType };
   selectedAssistant: ITalkAssistant;
-  noAssistant: boolean;
 }
 
 export interface ChangeModelPropType {

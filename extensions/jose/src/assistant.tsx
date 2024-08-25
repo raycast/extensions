@@ -9,13 +9,14 @@ import { AssistantFormLocal } from "./view/assistant/formLocal";
 import { AssistantFormApi } from "./view/assistant/formApi";
 import { useLlm } from "./hook/useLlm";
 import { needOnboarding } from "./type/config";
-import { Onboarding } from "./view/onboarding/start";
-import { OnboardingEmpty } from "./view/onboarding/empty";
+import Onboarding from "./onboarding";
+import { useOnboarding } from "./hook/useOnboarding";
 
 export default function Assistant() {
   const collectionsAssistant = useAssistant();
   const collectionsLlm = useLlm();
   const collectionsSnippet = useSnippet();
+  const hookOnboarding = useOnboarding();
   const [searchText, setSearchText] = useState<string>("");
   const [selectedAssistantId, setSelectedAssistantId] = useState<string | null>(null);
   const { push } = useNavigation();
@@ -26,7 +27,14 @@ export default function Assistant() {
     }
   }, [searchText]);
 
-  let getActionList = (
+  if (
+    !hookOnboarding.data &&
+    (needOnboarding(collectionsAssistant.data.length) || collectionsAssistant.data.length === 0)
+  ) {
+    return <Onboarding />;
+  }
+
+  const getActionList = (
     <ActionPanel>
       <Action
         title={"Create Assistant"}
@@ -133,22 +141,7 @@ export default function Assistant() {
       />
     </ActionPanel>
   );
-  let searchBarPlaceholder = "Search assistant...";
-
-  if (needOnboarding(collectionsAssistant.data.length) || collectionsAssistant.data.length === 0) {
-    getActionList = (
-      <ActionPanel>
-        <Action
-          title="Onboarding"
-          icon={Icon.Exclamationmark}
-          onAction={() => {
-            push(<Onboarding />);
-          }}
-        />
-      </ActionPanel>
-    );
-    searchBarPlaceholder = "No assistant, first start onboarding to create your first assistant!";
-  }
+  const searchBarPlaceholder = "Search assistant...";
 
   return (
     <List
@@ -163,19 +156,15 @@ export default function Assistant() {
       onSearchTextChange={setSearchText}
       actions={getActionList}
     >
-      {collectionsAssistant.data.length === 0 ? (
-        <OnboardingEmpty />
-      ) : (
-        <AssistantListView
-          key="assistants"
-          title="Assistants"
-          assistants={collectionsAssistant.data}
-          snippets={collectionsSnippet.data}
-          llms={collectionsLlm.data}
-          selectedAssistant={selectedAssistantId}
-          actionPanel={getActionItem}
-        />
-      )}
+      <AssistantListView
+        key="assistants"
+        title="Assistants"
+        assistants={collectionsAssistant.data}
+        snippets={collectionsSnippet.data}
+        llms={collectionsLlm.data}
+        selectedAssistant={selectedAssistantId}
+        actionPanel={getActionItem}
+      />
     </List>
   );
 }

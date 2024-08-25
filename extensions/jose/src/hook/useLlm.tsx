@@ -4,6 +4,7 @@ import fetch from "node-fetch";
 import { LlmDefault, LlmHookType } from "../type/llm";
 import { GetApiEndpointData } from "../type/config";
 import { ITalkLlm } from "../ai/type";
+import { RemoveDuplicatesByField } from "../common/list";
 
 export function useLlm(): LlmHookType {
   const [data, setData] = useState<ITalkLlm[]>([]);
@@ -15,7 +16,7 @@ export function useLlm(): LlmHookType {
     (async () => {
       const stored = await LocalStorage.getItem<string>(localStorageName);
       if (stored) {
-        setData((previous) => [...previous, ...JSON.parse(stored)]);
+        setData((previous) => RemoveDuplicatesByField([...previous, ...JSON.parse(stored)], "key"));
       } else {
         if (GetApiEndpointData() !== undefined && GetApiEndpointData().llm !== undefined) {
           await apiLoad(setData);
@@ -29,8 +30,10 @@ export function useLlm(): LlmHookType {
   }, []);
 
   useEffect(() => {
-    LocalStorage.setItem(localStorageName, JSON.stringify(data));
-  }, [data]);
+    if (!isLoading) {
+      LocalStorage.setItem(localStorageName, JSON.stringify(RemoveDuplicatesByField(data, "key")));
+    }
+  }, [data, isLoading]);
 
   const reload = useCallback(async () => {
     if (GetApiEndpointData() === undefined || GetApiEndpointData().llm === undefined) {

@@ -9,15 +9,16 @@ import { SnippetFormLocal } from "./view/snippet/formLocal";
 import { SnippetFormApi } from "./view/snippet/formApi";
 import { useLlm } from "./hook/useLlm";
 import { needOnboarding } from "./type/config";
-import { Onboarding } from "./view/onboarding/start";
+import Onboarding from "./onboarding";
 import { useAssistant } from "./hook/useAssistant";
-import { OnboardingEmpty } from "./view/onboarding/empty";
+import { useOnboarding } from "./hook/useOnboarding";
 
 export default function Snippet() {
   const { push } = useNavigation();
   const collections = useSnippet();
   const collectionsAssistant = useAssistant();
   const collectionsLlm = useLlm();
+  const hookOnboarding = useOnboarding();
   const [searchText, setSearchText] = useState<string>("");
   const [selectedSnippetId, setSelectedSnippetId] = useState<string | null>(null);
   const collectionsSnipppets: SnippetHookType = collections;
@@ -30,7 +31,14 @@ export default function Snippet() {
     }
   }, [searchText]);
 
-  let getActionList = (
+  if (
+    !hookOnboarding.data &&
+    (needOnboarding(collectionsAssistant.data.length) || collectionsAssistant.data.length === 0)
+  ) {
+    return <Onboarding />;
+  }
+
+  const getActionList = (
     <ActionPanel>
       <Action
         title={"Create Snippet"}
@@ -109,24 +117,7 @@ export default function Snippet() {
       <Action title={"Reload Snippets From Api"} icon={Icon.Download} onAction={() => collections.reload()} />
     </ActionPanel>
   );
-  let searchBarPlaceholder = "Search Snippet...";
-  let noAssistant = false;
-
-  if (needOnboarding(collectionsAssistant.data.length) || collectionsAssistant.data.length === 0) {
-    getActionList = (
-      <ActionPanel>
-        <Action
-          title="Onboarding"
-          icon={Icon.Exclamationmark}
-          onAction={() => {
-            push(<Onboarding />);
-          }}
-        />
-      </ActionPanel>
-    );
-    searchBarPlaceholder = "No assistant, first start onboarding to create your first assistant!";
-    noAssistant = true;
-  }
+  const searchBarPlaceholder = "Search Snippet...";
 
   return (
     <List
@@ -141,12 +132,8 @@ export default function Snippet() {
       onSearchTextChange={setSearchText}
       actions={getActionList}
     >
-      {noAssistant || collectionsSnipppets.data.length === 0 ? (
-        noAssistant ? (
-          <OnboardingEmpty />
-        ) : (
-          <List.EmptyView title="No Snippets" description="Create new Snippet with ⌘ + c shortcut" icon={Icon.Stars} />
-        )
+      {collectionsSnipppets.data.length === 0 ? (
+        <List.EmptyView title="No Snippets" description="Create new Snippet with ⌘ + c shortcut" icon={Icon.Stars} />
       ) : (
         <SnippetListView
           key="Snippets"
