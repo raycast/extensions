@@ -63,7 +63,7 @@ function TabListSections(props: { tabs?: Tab[]; mutateTabs: MutatePromise<Tab[] 
     .filter(
       (tab) =>
         tab.title.toLowerCase().includes(props.searchText.toLowerCase()) ||
-        tab.url.toLowerCase().includes(props.searchText.toLowerCase())
+        tab.url.toLowerCase().includes(props.searchText.toLowerCase()),
     )
     .groupBy((tab) => tab.location)
     .value();
