@@ -63,7 +63,7 @@ export function useChat(): ChatHookType {
           : conversation.assistant.typeCommunication;
       let chatResponse: ITalk | undefined = undefined;
 
-      const llmObject = llms.data.filter((llm: ITalkLlm) => chat.llm.model === llm.key);
+      const llmObject = llms.data.filter((llm: ITalkLlm) => chat.assistant.object.model === llm.key);
       if (llmObject !== undefined) {
         chat.llm.object = llmObject[0];
       }
