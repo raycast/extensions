@@ -12,7 +12,6 @@ const preferences = getPreferenceValues<Preferences>();
 
 const visionModelName = preferences.useVisionModel ? preferences.visionModelName : "gpt-4o";
 
-
 const VISION_MODEL: Model = {
   id: visionModelName,
   updated_at: new Date().toISOString(),
