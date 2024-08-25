@@ -1,11 +1,11 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { execSync } from "child_process";
 import { useEffect, useState } from "react";
-import { createLaunchAgent } from "../lib/plist";
+import { createLaunchAgent as createLaunchAgentCommand } from "../lib/plist";
 import { getFileName } from "../lib/utils";
 import LaunchAgentDetails from "./LaunchAgentDetails";
 
-const EmptyView = () => (
+const EmptyView = ({ loadLaunchAgentsFiles }: { loadLaunchAgentsFiles: () => void }) => (
   <List.EmptyView
     icon={Icon.Multiply}
     title="No Launch Agents found"
@@ -14,7 +14,10 @@ const EmptyView = () => (
         <Action
           icon={{ source: Icon.NewDocument, tintColor: Color.Green }}
           title="Create Launch Agent"
-          onAction={createLaunchAgent}
+          onAction={() => {
+            createLaunchAgentCommand();
+            loadLaunchAgentsFiles();
+          }}
         />
       </ActionPanel>
     }
@@ -40,8 +43,7 @@ export default function LaunchAgentList() {
   };
 
   const createLaunchAgent = () => {
-    const fileName = `com.raycast.${Math.random()}`;
-    execSync(`touch ~/Library/LaunchAgents/${fileName}.plist`);
+    createLaunchAgentCommand();
     loadLaunchAgentsFiles();
   };
 
@@ -52,7 +54,7 @@ export default function LaunchAgentList() {
 
   return (
     <List navigationTitle="Search Launch Agents" searchBarPlaceholder="Search your Launch Agent" isLoading={isLoading}>
-      <EmptyView />
+      <EmptyView loadLaunchAgentsFiles={loadLaunchAgentsFiles} />
       {launchAgentsFiles.map((file, index) => (
         <List.Item
           key={index}
