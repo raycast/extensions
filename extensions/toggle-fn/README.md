@@ -8,7 +8,8 @@ Project Path: https://github.com/MrSimonC/Toggle-Mac-Function-Keys
 
 Tested with:
 
-MacOS Sonoma, 14.2.1 January 2024
-MacOS Ventura, 13.2 January 2023
-MacOS Monterey, 12.6.2, December 2022
-MacOS Big Sur, 11.4, June 2021
+macOS Sequoia developer beta 
+macOS Sonoma, 14.2.1 January 2024
+macOS Ventura, 13.2 January 2023
+macOS Monterey, 12.6.2, December 2022
+macOS Big Sur, 11.4, June 2021
