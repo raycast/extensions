@@ -2,7 +2,7 @@ import "./fetch.js";
 
 import { Action, ActionPanel, Form, getPreferenceValues, Icon } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-// @ts-ignore
+// @ts-expect-error types for this package are not exported correctly atm
 import { status as getStatus, setOptions, Status } from "cryptgeon";
 import prettyBytes from "pretty-bytes";
 import { useEffect, useState } from "react";

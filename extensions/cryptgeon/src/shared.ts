@@ -1,5 +1,5 @@
 import { Clipboard, getPreferenceValues, PopToRootType, showHUD, showToast, Toast } from "@raycast/api";
-// @ts-ignore
+// @ts-expect-error types for this package are not exported correctly atm
 import { setOptions, upload } from "cryptgeon";
 
 export type Preferences = {
