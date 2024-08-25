@@ -37,6 +37,10 @@ export default function Command() {
             if (fs.lstatSync(filePath).isDirectory()) {
               return null;
             }
+            // シンボリックリンクの場合は無視
+            if (fs.lstatSync(filePath).isSymbolicLink()) {
+              return null;
+            }
 
             const content = fs.readFileSync(filePath, "utf-8");
             return { name: fileName, path: filePath, content };
