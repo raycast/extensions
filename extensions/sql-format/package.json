@@ -5,6 +5,7 @@
   "description": "Format a SQL cluase use standard SQL format",
   "icon": "extension-icon.png",
   "author": "tonngw",
+  "contributors": ["stelo"],
   "categories": [
     "Data",
     "Developer Tools"
