@@ -1,6 +1,6 @@
 # Launch Agents Extension Changelog
 
-## [LaunchAgent creation on empty list refreshes the list] - {PR_MERGE_DATE}
+## [LaunchAgent creation on empty list refreshes the list] - 2024-08-25
 
 ## [Guarantee that the user launch agents folder exists] - 2024-08-22
 
