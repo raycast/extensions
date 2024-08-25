@@ -4,6 +4,10 @@
   "description": "Manage SABnzbd locally",
   "icon": "sabnzbdplus.png",
   "author": "jns",
+  "contributors": [
+    "xmok"
+  ],
+  "keywords": ["Applications"],
   "license": "MIT",
   "commands": [
     {
@@ -107,7 +111,6 @@
     "@raycast/api": "^1.79.0",
     "@raycast/utils": "^1.16.5",
     "dayjs": "^1.11.13",
-    "moment": "^2.29.1",
     "sabnzbd-api": "^1.5.0"
   },
   "devDependencies": {
