@@ -17,7 +17,8 @@
     "Nauxscript",
     "lin",
     "leeonfield",
-    "husniadil"
+    "husniadil",
+    "luckykong"
   ],
   "pastContributors": [
     "pomdtr",
@@ -215,6 +216,23 @@
       "required": false,
       "title": "API Endpoint",
       "placeholder": "https://api.openai.com/v1",
+      "type": "textfield"
+    },
+    {
+      "default": false,
+      "description": "Change the default vision model",
+      "label": "Change Vision Model",
+      "name": "useVisionModel",
+      "required": false,
+      "title": "Change Vision Model",
+      "type": "checkbox"
+    },
+    {
+      "description": "Custom Vision Model Name",
+      "name": "visionModelName",
+      "required": false,
+      "title": "Vision Model Name",
+      "placeholder": "gpt-4o",
       "type": "textfield"
     },
     {
