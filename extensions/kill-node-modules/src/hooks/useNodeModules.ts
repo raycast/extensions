@@ -70,12 +70,12 @@ export function useNodeModules() {
   useEffect(() => {
     const homedir = os.homedir();
     setQueue([homedir]);
-    console.debug('useNodeModules hook initialized');
+    console.debug("useNodeModules hook initialized");
   }, []);
 
   useEffect(() => {
     if (queue.length > 0 && items.length === 0) {
-      console.debug('Initial load triggered');
+      console.debug("Initial load triggered");
       loadMore();
     }
   }, [queue, items, loadMore]);

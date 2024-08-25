@@ -75,8 +75,7 @@ export default function Command() {
       searchBarAccessory={
         <List.Dropdown tooltip={"Order By"} onChange={(value) => setSortWith(value as "size" | "lastModified")}>
           <List.Dropdown.Item title="Last Modified" value="lastModified" />
-          <List.Dropdown.Item title="Size" value="size"
-           />
+          <List.Dropdown.Item title="Size" value="size" />
         </List.Dropdown>
       }
     >
