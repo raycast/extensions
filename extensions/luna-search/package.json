@@ -25,6 +25,13 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "luna-quick-access",
+      "title": "Luna Quick Access",
+      "subtitle": "Quickly access Luna Games",
+      "description": "See recently accessed and trending games in your menu bar.",
+      "mode": "menu-bar"
     }
   ],
   "dependencies": {
