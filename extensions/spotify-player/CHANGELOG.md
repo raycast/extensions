@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Add Preference to Only Show Music in Search Command] - 2024-08-26
+
+- Added a preference to only show music results in the search command for users who don't want to see podcasts and episodes.
+
 ## [Add "Remove All Searches" Action in Search Command] - 2024-08-22
 
 - Added `Remove All Searches` action to remove all search history in one click.

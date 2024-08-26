@@ -33,10 +33,17 @@ const filters = {
   episodes: "Episodes",
 };
 
+const musicOnlyIgnoredFilters = ["shows", "episodes"];
+
 type FilterValue = keyof typeof filters;
 
 function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
-  const { topView } = getPreferenceValues<Preferences.Search>();
+  let { topView } = getPreferenceValues<Preferences.Search>();
+  const { musicOnly } = getPreferenceValues<Preferences.Search>();
+
+  if (musicOnly && musicOnlyIgnoredFilters.includes(topView)) {
+    topView = "artists";
+  }
 
   const {
     data: recentSearchesData,
@@ -71,7 +78,7 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
     throttle: true,
   };
 
-  if (Boolean(searchText) === false) {
+  if (!searchText) {
     return (
       <List {...sharedProps}>
         <List.EmptyView title="What do you want to listen to?" />
@@ -146,6 +153,21 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
     { key: "episodes", component: <EpisodesSection limit={3} episodes={searchData?.episodes?.items} /> },
   ];
 
+  const searchBarAccessory = (
+    <List.Dropdown
+      tooltip="Filter search"
+      value={searchFilter}
+      onChange={(newValue) => setSearchFilter(newValue as FilterValue)}
+    >
+      {Object.entries(filters).map(
+        ([value, label]) =>
+          (!musicOnly || (musicOnly && !musicOnlyIgnoredFilters.includes(value))) && (
+            <List.Dropdown.Item key={value} title={label} value={value} />
+          ),
+      )}
+    </List.Dropdown>
+  );
+
   if (
     searchText &&
     (searchFilter === "all" || searchFilter === "tracks" || searchFilter === "playlists" || searchFilter === "episodes")
@@ -159,22 +181,14 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
         : sections.filter((section) => section.key === searchFilter);
 
     return (
-      <List
-        {...sharedProps}
-        searchBarAccessory={
-          <List.Dropdown
-            tooltip="Filter search"
-            value={searchFilter}
-            onChange={(newValue) => setSearchFilter(newValue as FilterValue)}
-          >
-            {Object.entries(filters).map(([value, label]) => (
-              <List.Dropdown.Item key={value} title={label} value={value} />
-            ))}
-          </List.Dropdown>
-        }
-      >
+      <List {...sharedProps} searchBarAccessory={searchBarAccessory}>
         {searchFilter === "all" &&
-          orderedSections.map(({ key, component }) => <Fragment key={key}>{component}</Fragment>)}
+          orderedSections.map(
+            ({ key, component }) =>
+              (!musicOnly || (musicOnly && !musicOnlyIgnoredFilters.includes(key))) && (
+                <Fragment key={key}>{component}</Fragment>
+              ),
+          )}
 
         {searchFilter === "tracks" && <TracksSection tracks={searchData?.tracks?.items} />}
         {searchFilter === "episodes" && <EpisodesSection episodes={searchData?.episodes?.items} />}
@@ -185,20 +199,7 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
   }
 
   return (
-    <Grid
-      {...sharedProps}
-      searchBarAccessory={
-        <Grid.Dropdown
-          tooltip="Filter search"
-          value={searchFilter}
-          onChange={(newValue) => setSearchFilter(newValue as FilterValue)}
-        >
-          {Object.entries(filters).map(([value, label]) => (
-            <Grid.Dropdown.Item key={value} title={label} value={value} />
-          ))}
-        </Grid.Dropdown>
-      }
-    >
+    <Grid {...sharedProps} searchBarAccessory={searchBarAccessory}>
       {searchFilter === "artists" && <ArtistsSection type="grid" columns={5} artists={searchData?.artists?.items} />}
 
       {searchFilter === "albums" && <AlbumsSection type="grid" columns={5} albums={searchData?.albums?.items} />}
