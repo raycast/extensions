@@ -13,14 +13,17 @@
   "commands": [
     {
       "name": "start-focus",
-      "title": "Focus",
+      "title": "Start Focus",
       "subtitle": "Focus",
-      "description": "Start an un-timed focus session",
-      "keywords": [
-        "start",
-        "focus"
-      ],
+      "description": "Quickly start Focus with default or single profile",
       "mode": "no-view"
+    },
+    {
+      "name": "start-focus-with-profile",
+      "title": "Start Focus with Profile",
+      "subtitle": "Focus",
+      "description": "Start Focus by selecting a profile",
+      "mode": "view"
     },
     {
       "name": "start-focus-25",
@@ -98,7 +101,7 @@
     },
     {
       "name": "stop-focus",
-      "title": "Unfocus",
+      "title": "Stop Focus",
       "subtitle": "Focus",
       "description": "Stop the current focus session",
       "keywords": [

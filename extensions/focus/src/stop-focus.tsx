@@ -1,21 +1,17 @@
-import { Toast, open } from "@raycast/api";
+import { Toast, showToast } from "@raycast/api";
 import { getInstallStatus, stopFocus } from "./utils";
 
 export default async function () {
-  const toast = new Toast({
-    title: "Stopping focus",
-    style: Toast.Style.Animated,
-  });
-
-  await toast.show();
-
   if (!(await getInstallStatus())) {
-    toast.title = "Focus is not installed";
-    toast.message = "Install Focus app from: https://heyfocus.com";
-    toast.style = Toast.Style.Failure;
-    await toast.show();
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Focus is not installed",
+      message: "Install Focus app from: https://heyfocus.com",
+    });
     return;
   }
 
+  await showToast({ style: Toast.Style.Animated, title: "Stopping focus..." });
   await stopFocus();
+  await showToast({ style: Toast.Style.Success, title: "Focus stopped" });
 }
