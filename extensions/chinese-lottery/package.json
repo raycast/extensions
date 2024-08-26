@@ -5,6 +5,9 @@
   "description": "Check the results of China Welfare Lottery and Sports Lottery",
   "icon": "lottery-cn.png",
   "author": "elonwoo",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Data",
     "News",
@@ -15,7 +18,7 @@
     {
       "name": "index",
       "title": "Chinese Lottery",
-      "subtitle": "福彩/体彩",
+      "subtitle": "Chinese Lottery",
       "description": "Check the results of China Welfare Lottery and Sports Lottery",
       "mode": "view",
       "keywords": [
