@@ -1,6 +1,6 @@
 # Search Cursor Documentation
 
-![Cursor screenshot](./metadata/sc1.jpg)
+![Cursor screenshot](./metadata/cursor-1.jpg)
 
 ## What is this extension
 

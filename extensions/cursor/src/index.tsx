@@ -6,9 +6,7 @@ import type { DocumentationEntry } from "./types/types";
 
 export default function UserSearchRoot() {
   const [search, setSearch] = useState<string>("");
-  const { isLoading, data, revalidate, error } = useFetch<DocumentationEntry[]>(
-    "https://cursor-raycast.degouville.com"
-  );
+  const { isLoading, data, error } = useFetch<DocumentationEntry[]>("https://cursor-raycast.degouville.com");
 
   return (
     <List
@@ -31,7 +29,6 @@ export default function UserSearchRoot() {
                   icon={"cursor-icon.png"}
                   url={docsItem.url || ""}
                 />
-                <Action onAction={revalidate} title="Reload Items" icon={Icon.Download} />
               </ActionPanel>
             }
           />
@@ -47,7 +44,6 @@ export default function UserSearchRoot() {
                 actions={
                   <ActionPanel>
                     <OpenSearchInBrowserAction search={search ?? ""} />
-                    <Action onAction={revalidate} title="Reload Items" icon={Icon.Download} />
                   </ActionPanel>
                 }
               />
