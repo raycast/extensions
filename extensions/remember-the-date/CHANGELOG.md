@@ -1,5 +1,10 @@
 # Remember the Date Changelog
 
+## [Add Up Next command] - 2024-04-19
+
+- Added "Up Next" Command perfect for pinning as a favorite
+- Update command icon
+
 ## [Add Menu Bar Command] - 2024-04-19
 
 - Added Menu Bar Command that shows the next upcoming event

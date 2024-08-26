@@ -25,7 +25,7 @@ export const useMoment = () => {
     keepPreviousData: true,
   });
 
-  if (error) throw error;
+  if (error) console.error("Error while fetching Moment Next", error);
 
   return {
     momentData,

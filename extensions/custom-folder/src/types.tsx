@@ -3,6 +3,7 @@ export type FolderForm = {
   output: string;
   padding: string | number;
   shades: boolean;
+  targetFolderPath?: string;
 };
 
 export type PathError = {

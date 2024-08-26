@@ -52,6 +52,15 @@
       "mode": "view",
       "preferences": [
         {
+          "title": "Filters",
+          "label": "Music Only",
+          "default": false,
+          "description": "Only show results for music. Podcasts and episodes are excluded.",
+          "name": "musicOnly",
+          "required": true,
+          "type": "checkbox"
+        },
+        {
           "title": "Top View",
           "data": [
             {

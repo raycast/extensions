@@ -2,13 +2,9 @@ import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
 import { NativePreferences } from "../types/preferences";
-import { axiosPromiseData } from "../utils/axiosPromise";
-import reclaimApi from "./useApi";
 import { ApiSchedulingLink, ApiSchedulingLinkGroups } from "./useSchedulingLinks.types";
 
 export const useSchedulingLinks = () => {
-  const { fetcher } = reclaimApi();
-
   const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
 
   const headers = useMemo(
@@ -20,52 +16,36 @@ export const useSchedulingLinks = () => {
     [apiToken]
   );
 
-  const useFetchSchedulingLinks = () =>
-    useFetch<ApiSchedulingLink>(`${apiUrl}/scheduling-link`, {
-      headers,
-      keepPreviousData: true,
-      method: "GET",
-    });
+  const {
+    data: schedulingLinks,
+    error: schedulingLinksError,
+    isLoading: schedulingLinksIsLoading,
+  } = useFetch<ApiSchedulingLink>(`${apiUrl}/scheduling-link`, {
+    headers,
+    keepPreviousData: true,
+    method: "GET",
+  });
 
-  const useSchedulingLinksGroups = () =>
-    useFetch<ApiSchedulingLinkGroups>(`${apiUrl}/scheduling-link/group`, {
-      headers,
-      keepPreviousData: true,
-      method: "GET",
-    });
+  const {
+    data: schedulingLinksGroups,
+    error: schedulingLinksGroupsError,
+    isLoading: schedulingLinksGroupsIsLoading,
+  } = useFetch<ApiSchedulingLinkGroups>(`${apiUrl}/scheduling-link/group`, {
+    headers,
+    keepPreviousData: true,
+    method: "GET",
+  });
 
-  const getSchedulingLinks = async () => {
-    try {
-      const [schedulingLinks, error] = await axiosPromiseData<ApiSchedulingLink>(
-        fetcher("/scheduling-link", {
-          method: "GET",
-        })
-      );
-      if (!schedulingLinks || error) throw error;
-      return schedulingLinks;
-    } catch (error) {
-      console.error("Error while fetching scheduling links", error);
-    }
-  };
-
-  const getSchedulingLinksGroups = async () => {
-    try {
-      const [schedulingLinksGroups, error] = await axiosPromiseData<ApiSchedulingLinkGroups>(
-        fetcher("/scheduling-link/group", {
-          method: "GET",
-        })
-      );
-      if (!schedulingLinksGroups || error) throw error;
-      return schedulingLinksGroups;
-    } catch (error) {
-      console.error("Error while fetching scheduling links groups", error);
-    }
-  };
+  if (schedulingLinksError) console.error("Error while fetching Scheduling Links", schedulingLinksError);
+  if (schedulingLinksGroupsError)
+    console.error("Error while fetching Scheduling Links Groups", schedulingLinksGroupsError);
 
   return {
-    useFetchSchedulingLinks,
-    useSchedulingLinksGroups,
-    getSchedulingLinks,
-    getSchedulingLinksGroups,
+    schedulingLinks,
+    schedulingLinksError,
+    schedulingLinksIsLoading,
+    schedulingLinksGroups,
+    schedulingLinksGroupsError,
+    schedulingLinksGroupsIsLoading,
   };
 };

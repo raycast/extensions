@@ -1,4 +1,7 @@
-# Custom Folder Changelog
+# Custom folder Changelog
+
+## [Feat Easily apply the custom icon] - 2024-08-25
+- Added the ability to easily apply the new custom icon to a target folder.
 
 ## [Feat Image shades ] - 2024-08-05
 - Added optional toggle - shading effect on the image, switching between a filled mask and shaded tones.
