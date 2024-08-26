@@ -28,19 +28,34 @@ export default function Command() {
     return cachedGoals ? JSON.parse(cachedGoals) : undefined;
   });
 
-  function fetchData() {
+  // Fetch goals with an optional delay. A delay is necessary after a datapoint
+  // submission because Beeminder takes some time to update the goal with new
+  // values based on the datapoint.
+  async function fetchData(delay = 0) {
     setIsLoading(true);
-    return fetchGoals()
-      .then((data) => {
-        // When the data changes, update the cache
+    try {
+      const fetchAndSetGoals = async () => {
+        const data = await fetchGoals();
         cache.set("goals", JSON.stringify(data));
-        setGoals(data);
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error(error);
-        setIsLoading(false);
-      });
+        setGoals(data as GoalResponse);
+      };
+
+      // Always perform an initial fetch
+      const initialFetch = fetchAndSetGoals();
+
+      // If delay > 0, perform a second fetch after the delay
+      const delayedFetch =
+        delay > 0
+          ? new Promise((resolve) => setTimeout(resolve, delay)).then(fetchAndSetGoals)
+          : Promise.resolve();
+
+      // Wait for both fetches to complete
+      await Promise.all([initialFetch, delayedFetch]);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -74,15 +89,15 @@ export default function Command() {
       async onSubmit(values) {
         try {
           await sendDatapoint(goalSlug, values.dataPoint, values.comment);
-          pop();
-          await showToast({
+          showToast({
             style: Toast.Style.Success,
             title: "Datapoint submitted",
             message: "Your datapoint was submitted successfully",
           });
-          await fetchData();
+          pop();
+          fetchData(2000);
         } catch (error) {
-          await showToast({
+          showToast({
             style: Toast.Style.Failure,
             title: "Something went wrong",
             message: "Failed to send your datapoint",
@@ -210,7 +225,7 @@ export default function Command() {
                     title="Refresh data"
                     shortcut={Keyboard.Shortcut.Common.Refresh}
                     icon={Icon.RotateClockwise}
-                    onAction={async () => await fetchData()}
+                    onAction={fetchData}
                   />
                 </ActionPanel>
               }
