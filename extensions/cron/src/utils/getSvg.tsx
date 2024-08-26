@@ -36,7 +36,7 @@ export default function SVG({
     : mapValueToColor(defCustomTheme) || Color.Green,
   fontColorAccentWeekend = defFontColorAccentWeekend.trim().length > 0
     ? defFontColorAccentWeekend
-    : mapValueToColor(defCustomTheme) || Color.Orange,
+    : mapValueToColor(defCustomTheme) || Color.SecondaryText,
   fontWeight = defFontWeight,
   fontFamily = defFontFamily,
   monthSignal = defMonthSignal,
