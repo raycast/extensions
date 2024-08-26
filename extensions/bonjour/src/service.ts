@@ -5,20 +5,24 @@ export const KEY = "services";
 export const cache = new Cache();
 
 export class HttpService extends Service {
-  static set services(value: HttpService[] | undefined) {
+  static set services(value: HttpService[]) {
     value
       ? cache.set(KEY, JSON.stringify(Object.values(value)))
       : cache.remove(KEY);
   }
 
-  static get services(): HttpService[] | undefined {
+  static get services(): HttpService[] {
     const _cache = cache.get(KEY);
 
-    return _cache
-      ? (JSON.parse(_cache) as HttpService[]).sort((a, b) => {
-          return a.name.localeCompare(b.name);
-        })
-      : undefined;
+    try {
+      return _cache
+        ? (JSON.parse(_cache) as HttpService[]).sort((a, b) => {
+            return a.name.localeCompare(b.name);
+          })
+        : [];
+    } catch {
+      return [];
+    }
   }
 
   static fetch() {
