@@ -162,7 +162,7 @@
     "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^1.0.8",
     "@types/node": "^20.10.1",
     "@types/react": "^18.3.4",
     "eslint": "^8.57.0",
