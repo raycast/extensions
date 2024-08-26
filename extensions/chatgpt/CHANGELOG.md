@@ -1,6 +1,6 @@
 # Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2024-08-26
 
 - Feature:  Support custom vision model name
 
