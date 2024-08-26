@@ -3,7 +3,6 @@ import {
   fontColorAccentWeekend as defFontColorAccentWeekend,
   fontWeight as defFontWeight,
   fontFamily as defFontFamily,
-  monthSignal as defMonthSignal,
   customTheme as defCustomTheme,
 } from "u/options";
 import { Color, environment } from "@raycast/api";
@@ -30,7 +29,7 @@ function mapValueToColor(value: string): Color | undefined {
   }
 }
 
-export default function SVG({
+export default function SVGName({
   fontColorAccent = defFontColorAccent.trim().length > 0
     ? defFontColorAccent
     : mapValueToColor(defCustomTheme) || Color.Green,
@@ -39,11 +38,8 @@ export default function SVG({
     : mapValueToColor(defCustomTheme) || Color.Orange,
   fontWeight = defFontWeight,
   fontFamily = defFontFamily,
-  monthSignal = defMonthSignal,
-  day,
   isWeekend = false,
   isToday,
-  hasEvents,
   weekDay,
 }: {
   fontWeight?: string;
@@ -69,37 +65,18 @@ export default function SVG({
     color = environment.appearance === "light" ? "#000000" : "#ffffff";
   }
 
-  const todayDeco = isToday ? `<line x1="-8" y1="6" x2="8" y2="6" />` : "";
-
-  return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 24 24">
+  return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 24 24" width="60" height="60">
           <style>
             text {
               font-family: ${fontFamily ? fontFamily : "sans-serif"};
               font-weight: ${fontWeight ? fontWeight : "normal"};
-              font-size: inherit;
               fill: ${color};
-              text-transform: uppercase;
               text-anchor: middle;
             }
-            circle {
-              position: absolute;
-            }
-            line {
-              stroke: ${color};
-              stroke-width: 2;
-              stroke-linecap: round;
-              opacity: 1;
-              position: absolute;
-              display: none;
-            }
           </style>
-        <g>
-          ${monthSignal && hasEvents ? `<circle cx="12" cy="-8" r="1" fill="#33feb4" />` : ""}
-          <text>
-            <tspan x="50%" y="50%">${day}</tspan>
-          </text>
-        </g>
-        ${todayDeco}
+        <text x="-5" y="5">
+          ${weekDay}
+        </text>
     </svg>
   `;
 }

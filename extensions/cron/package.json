@@ -1,10 +1,13 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cron",
-  "title": "Calist",
-  "description": "Calist a calendar extension, companion for calist.io",
-  "icon": "calist.png",
+  "title": "Cron",
+  "description": "A companion for Cron (cron.re)",
+  "icon": "cron.png",
   "author": "astrit",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -13,13 +16,13 @@
     {
       "name": "index",
       "title": "Calendar",
-      "description": "Calist · Calendar",
+      "description": "Cron · Calendar",
       "mode": "view"
     },
     {
       "name": "time",
       "title": "Time",
-      "description": "Calist · Time",
+      "description": "Cron · Time with two zones",
       "subtitle": "Show time",
       "mode": "view"
     }
@@ -33,15 +36,15 @@
       "data": [
         {
           "title": "Monday",
-          "value": "1"
+          "value": "monday"
         },
         {
           "title": "Sunday",
-          "value": "0"
+          "value": "sunday"
         }
       ],
       "description": "First day of week",
-      "default": "1"
+      "default": "monday"
     },
     {
       "name": "weekEnable",

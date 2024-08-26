@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useCachedState } from "@raycast/utils";
 import { getCurrentMonth, getCurrentWeek } from "u/getDate";
-import { monthViewMode, weekEnable, enableTime } from "u/options";
+import { monthViewMode, weekEnable, weekFormat, enableTime } from "u/options";
 
 type ContextType = {
   selectedMonth: number;
@@ -17,6 +17,7 @@ type ContextType = {
   thisMonth: number;
   viewMode: string;
   setViewMode: (mode: string) => void;
+  weekFormat: string;
   enableWeek: boolean;
   setEnableWeek: (enable: boolean) => void;
   enableTimer: boolean;
@@ -56,6 +57,7 @@ export function Provider({ children }: { children: React.ReactNode }) {
         thisMonth,
         viewMode,
         setViewMode,
+        weekFormat,
         enableWeek,
         setEnableWeek,
         enableTimer,
@@ -83,6 +85,7 @@ export const Context = React.createContext<ContextType>({
   thisMonth: 0,
   viewMode: monthViewMode,
   setViewMode: () => {},
+  weekFormat: weekFormat,
   enableWeek: enableTime,
   setEnableWeek: () => {},
   enableTimer: enableTime,
