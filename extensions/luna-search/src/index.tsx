@@ -32,21 +32,30 @@ export type SearchCallback = (input: SearchInput) => void;
  */
 export default function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
   const [searchQuery, setSearchQuery] = useState<SearchInput>({ query: props.arguments.search ?? "" });
-  const [searchResults, searchLoading] = useSearch(searchQuery.query);
+  const [previousSearchTerm, setPreviousSearchTerm] = useState<string | undefined>(searchQuery.query);
+  const [searchResults, searchLoading] = useSearch(searchQuery.query, previousSearchTerm);
   const [trending, trendingLoading] = useTrendingGames();
 
+  // Handle search events by recording the previous search (used by useSearch) and updating the current.
+  const searchCallback = (input: SearchInput) => {
+    // Needs to happen before setting the search.
+    if (searchQuery.query) {
+      setPreviousSearchTerm(searchQuery.query);
+    }
+    setSearchQuery(input);
+  };
   /**
    * Renders the appropriate game grid based on the current search input.
    * If the isTrending flag is set, the trending games are displayed.
    * Otherwise, the search results are displayed.
    */
   return searchQuery.isTrending ? (
-    <GameGrid games={trending} isLoading={trendingLoading} searchCallback={setSearchQuery} term={""} />
+    <GameGrid games={trending} isLoading={trendingLoading} searchCallback={searchCallback} term={""} />
   ) : (
     <GameGrid
       games={searchResults}
       isLoading={searchLoading}
-      searchCallback={setSearchQuery}
+      searchCallback={searchCallback}
       term={searchQuery.query ?? ""}
     />
   );

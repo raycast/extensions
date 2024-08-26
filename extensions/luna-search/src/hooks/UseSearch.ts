@@ -2,7 +2,7 @@ import { GameSummary, SearchRequest } from "../models";
 import { useFetch } from "@raycast/utils";
 import { parseGameSummaries } from "./utilities";
 import { useExpiringCache } from "./UseExpiringCache";
-import { LUNA_API_ROUTE } from "../constants";
+import { LUNA_API_ROUTE, MIN_SEARCH_LENGTH } from "../constants";
 
 /**
  * The configuration object for the useFetch hook when performing a search query,
@@ -10,7 +10,6 @@ import { LUNA_API_ROUTE } from "../constants";
  */
 const QUERY_CONFIG = {
   initialData: [],
-  keepPreviousData: true,
   method: "POST",
   parseResponse: (response: Response) => parseGameSummaries(WIDGET_ID, response),
 };
@@ -21,7 +20,7 @@ const QUERY_CONFIG = {
 const WIDGET_ID = "collection_grid_search";
 
 /**
- * Determines whether the search input is executable, which means it has a length of at least 3 characters.
+ * Determines whether the search input is executable, which means it has a length of at least MIN_SEARCH_LENGTH characters.
  *
  * @param search The search input string.
  * @returns true if the search input is executable, false otherwise.
@@ -30,7 +29,17 @@ function isExecutable(search?: string) {
   if (!search) {
     return false;
   }
-  return search.length >= 3;
+  return search.length >= MIN_SEARCH_LENGTH;
+}
+
+/**
+ * Determines if strings are related to each other.
+ * @param a first string to consider
+ * @param b second string to consider
+ * @returns true if the strings have the same base.
+ */
+function isRelated(a: string, b: string) {
+  return a.substring(0, MIN_SEARCH_LENGTH) === b.substring(0, MIN_SEARCH_LENGTH);
 }
 
 /**
@@ -40,10 +49,10 @@ function isExecutable(search?: string) {
  * @param search The search query to use for fetching the game summaries.
  * @returns A tuple containing the array of GameSummary instances and a boolean indicating whether the data is currently being loaded.
  */
-export function useSearch(search?: string): [GameSummary[], isLoading: boolean] {
+export function useSearch(search?: string, previousSearch?: string): [GameSummary[], isLoading: boolean] {
   const [cache] = useExpiringCache<GameSummary[]>();
-  const cachedResults = cache?.get(search ?? "");
-  const { body, headers } = new SearchRequest(search ?? "");
+  const cachedResults = search && isExecutable(search) ? cache?.get(search ?? "") : undefined;
+  const { body, headers } = new SearchRequest(search ?? "undefined");
 
   /**
    * Determines whether to execute the fetch request based on the cache state and the search input.
@@ -61,8 +70,19 @@ export function useSearch(search?: string): [GameSummary[], isLoading: boolean] 
     body: JSON.stringify(body),
     execute,
     headers,
-    onData: (games) => cache?.set(search ?? "", games),
+    // Only keep the previous data if the search is "related" to the previous.
+    keepPreviousData: isRelated(search ?? "", previousSearch ?? ""),
+    onData: (games) => {
+      if (search) {
+        cache?.set(search, games);
+      }
+    },
   });
+
+  // Bail out if the search is nonsense
+  if (!search || !isExecutable(search)) {
+    return [[], false];
+  }
 
   // Side-step fetch if the cache knows best
   if (cache && cachedResults) {

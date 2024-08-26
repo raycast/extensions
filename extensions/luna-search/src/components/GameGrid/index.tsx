@@ -138,7 +138,7 @@ export function GameGrid({ games, isLoading, searchCallback, term }: Props): JSX
           />
         ))
       ) : (
-        <EmptyGameGrid isLoading={isLoading} isQueryEmpty={!term || term.length < 3} searchCallback={searchCallback} />
+        <EmptyGameGrid isLoading={isLoading} query={term} searchCallback={searchCallback} />
       )}
     </Grid>
   );

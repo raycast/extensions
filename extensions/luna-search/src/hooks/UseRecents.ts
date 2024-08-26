@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { GameSummary } from "../models";
 import { useExpiringCache } from "./UseExpiringCache";
+import { MENU_SECTION_CAPACITY } from "../constants";
 
 /**
  * Generates an array of cache keys based on the provided limit.
@@ -33,7 +34,7 @@ const TTL_S = 60 * 60 * 24 * 7;
  * a boolean indicating whether the data is still loading, and a function to add a new game to the recently opened list.
  */
 export function useRecents(
-  limit: number = 5
+  limit: number = MENU_SECTION_CAPACITY
 ): [GameSummary[] | undefined, boolean, (game: GameSummary) => Promise<void>] {
   const keys = generateKeys(limit);
   const [cache] = useExpiringCache<GameSummary>(TTL_S);

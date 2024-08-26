@@ -1,5 +1,5 @@
 import { Grid } from "@raycast/api";
-import { DISPLAY_VALUES, LUNA_LOGO_IMG } from "../../constants";
+import { DISPLAY_VALUES, LUNA_LOGO_IMG, MIN_SEARCH_LENGTH } from "../../constants";
 import { EmptyActions } from "../Actions";
 import { SearchCallback } from "../..";
 import { useTrendingGames } from "../../hooks";
@@ -21,9 +21,12 @@ interface DisplayContent {
  * @param isQueryEmpty Whether the search query is empty.
  * @returns The DisplayContent object with the appropriate title and description.
  */
-export function getDisplayContent(isLoading: boolean, isQueryEmpty: boolean): DisplayContent {
-  if (isQueryEmpty) {
+export function getDisplayContent(isLoading: boolean, query?: string): DisplayContent {
+  if (!query || query.length === 0) {
     return { description: DISPLAY_VALUES.defaultDescription, title: DISPLAY_VALUES.defaultTitle };
+  }
+  if (query.length < MIN_SEARCH_LENGTH) {
+    return { description: DISPLAY_VALUES.tooFewCharsSearchDescription, title: DISPLAY_VALUES.tooFewCharsSearchTitle };
   }
   if (isLoading) {
     return { description: DISPLAY_VALUES.loadingDescription, title: DISPLAY_VALUES.loadingTitle };
@@ -36,7 +39,7 @@ export function getDisplayContent(isLoading: boolean, isQueryEmpty: boolean): Di
  */
 interface Props {
   isLoading?: boolean;
-  isQueryEmpty: boolean;
+  query?: string;
   searchCallback: SearchCallback;
 }
 
@@ -53,10 +56,10 @@ interface Props {
  * and query state. It then renders a List.EmptyView component from
  * the Raycast API, using the Luna logo as the icon.
  */
-export function EmptyGameGrid({ isLoading, isQueryEmpty, searchCallback }: Props): JSX.Element {
+export function EmptyGameGrid({ isLoading, query, searchCallback }: Props): JSX.Element {
   const [games] = useTrendingGames();
 
-  const content = getDisplayContent(!!isLoading, isQueryEmpty);
+  const content = getDisplayContent(!!isLoading, query);
   return (
     <Grid.EmptyView
       actions={<EmptyActions searchCallback={searchCallback} />}
