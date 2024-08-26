@@ -1,8 +1,9 @@
 # Notion Changelog
 
-## [Refactor] - 2024-07-03
+## [Refactor - No functional changes] - {PR_MERGE_DATE} - 2024-07-03
 
-- Refactor code. No Functional changes.
+- Move code around and derives more types from `@notionhq/client` (2024-07-03)
+- Standardize database and page property data formats ({PR_MERGE_DATE})
 
 ## [Seperate property managment for quicklinks] - 2024-04-22
 
