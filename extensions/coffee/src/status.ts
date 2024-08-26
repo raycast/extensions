@@ -1,4 +1,4 @@
-import { LocalStorage, LaunchProps, updateCommandMetadata } from "@raycast/api";
+import { LocalStorage, updateCommandMetadata } from "@raycast/api";
 import { Schedule, startCaffeinate, numberToDayString, stopCaffeinate } from "./utils";
 import { execSync } from "node:child_process";
 

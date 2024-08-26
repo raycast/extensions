@@ -14,9 +14,9 @@ import {
 } from "@raycast/api";
 import { useLoadStoredSchedules } from "./fetchStoredSchedule";
 import { ListActionPanel } from "./listActionPanel";
-import { Schedule, changeScheduleState, stopCaffeinate, startCaffeinate } from "./utils";
+import { Schedule, changeScheduleState, stopCaffeinate } from "./utils";
 import { extractSchedule } from "./extractSchedule";
-import { checkSchedule } from "./status"
+import { checkSchedule } from "./status";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -80,7 +80,10 @@ export default function Command() {
 
   const handlePauseSchedule = async (day: string) => {
     changeScheduleState("decaffeinate");
-    await stopCaffeinate({ menubar: true, status: true }, `Schedule for ${day.charAt(0).toUpperCase() + day.slice(1).toLowerCase()} is now paused`);
+    await stopCaffeinate(
+      { menubar: true, status: true },
+      `Schedule for ${day.charAt(0).toUpperCase() + day.slice(1).toLowerCase()} is now paused`,
+    );
   };
 
   const handleResumeSchedule = async (day: string) => {
