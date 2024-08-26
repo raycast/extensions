@@ -32,7 +32,7 @@ export default function Command() {
   );
 
   return (
-    <List isLoading={!installations && !apps && !isLoadingInstallations && !isLoadingApps}>
+    <List isLoading={!installations && !apps && isLoadingInstallations && isLoadingApps}>
       {installations?.map((installation) => {
         const app = apps?.find((app) => app.id === installation.appId);
 

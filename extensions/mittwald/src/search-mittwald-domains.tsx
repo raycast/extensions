@@ -20,7 +20,7 @@ export default function Command() {
   });
 
   return (
-    <List isLoading={!ingresses && !isLoading}>
+    <List isLoading={!ingresses && isLoading}>
       {ingresses?.map((ingress) => (
         <List.Item
           key={ingress.id}

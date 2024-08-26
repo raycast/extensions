@@ -21,7 +21,7 @@ export default function Command() {
   );
 
   return (
-    <List isLoading={!organizations && !isLoading}>
+    <List isLoading={!organizations && isLoading}>
       {organizations?.map((organizations) => (
         <List.Item
           key={organizations.customerId}

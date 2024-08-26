@@ -39,7 +39,7 @@ export default function Command() {
   });
 
   return (
-    <List isLoading={!endpoints && !isLoading}>
+    <List isLoading={!endpoints && isLoading}>
       {endpoints.map((endpoint) => (
         <List.Item
           key={`${endpoint.method}-${endpoint.path}`}
