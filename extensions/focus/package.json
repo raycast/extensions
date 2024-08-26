@@ -20,7 +20,7 @@
     },
     {
       "name": "start-focus-with-profile",
-      "title": "Start Focus With Profile",
+      "title": "Start Focus with Profile",
       "subtitle": "Focus",
       "description": "Start Focus by selecting a profile",
       "mode": "view"
