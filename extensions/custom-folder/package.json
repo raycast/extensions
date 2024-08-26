@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "custom-folder",
-  "title": "Custom folder",
+  "title": "Custom Folder",
   "description": "Customize MacOS folder icons.",
   "icon": "custom-folder-icon.png",
   "author": "phlo",
@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Customize folder",
+      "title": "Customize Folder",
       "description": "Create a custom folder image. Allows to save or directly apply.",
       "mode": "view"
     }
