@@ -1,6 +1,6 @@
 # Work Time Countdown Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2024-08-26
 
 - Fixed a bug where the menu bar icon wouldn't disappear at the end of the workday.
 - Add screenshot.
