@@ -1,6 +1,6 @@
 # Cron Changelog
 
-## Fix the day of the week is displayed incorrectly - {PR_MERGE_DATE}
+## Fix the day of the week is displayed incorrectly - 2024-08-26
 
 - Fix the day of the week is displayed incorrectly.
 
