@@ -60,7 +60,7 @@ export function useDatabaseProperties(databaseId: string | null, filter?: (value
         return databaseProperties;
       }),
     [databaseId],
-    { execute: !!databaseId },
+    { execute: !!databaseId, initialData: [] },
   );
 
   return { ...value, data: value.data ?? [] };

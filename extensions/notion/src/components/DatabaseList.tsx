@@ -27,20 +27,17 @@ export function DatabaseList({ databasePage, setRecentPage, removeRecentPage, us
   } = useCachedPromise(
     (databaseId, searchText, sort) => queryDatabase(databaseId, searchText, sort),
     [databaseId, searchText, sort],
-    { keepPreviousData: true },
+    { keepPreviousData: true, initialData: [] },
   );
   const { data: databaseProperties, isLoading: isLoadingDatabaseProperties } = useDatabaseProperties(databaseId);
+
   useEffect(() => {
     setRecentPage(databasePage);
   }, [databaseId]);
 
-  if (isLoadingDatabaseProperties) {
-    return <List isLoading />;
-  }
-
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingDatabaseProperties}
       searchBarPlaceholder="Filter pages"
       navigationTitle={databaseName}
       onSearchTextChange={setSearchText}
