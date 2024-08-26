@@ -291,7 +291,7 @@
 /extensions/create-t3-app                                           @mozzius
 /extensions/cricketcast                                             @sampoder @xmok
 /extensions/crisp                                                   @remorses
-/extensions/cron                                                    @astrit
+/extensions/cron                                                    @astrit @ridemountainpig
 /extensions/cron-description                                        @niall-maloney
 /extensions/crossbell                                               @Songkeys @hyoban
 /extensions/crunchbase                                              @qdequele
