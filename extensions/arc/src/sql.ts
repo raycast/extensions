@@ -8,7 +8,7 @@ export const historyDatabasePath = join(
   "Arc",
   "User Data",
   "Default",
-  "History"
+  "History",
 );
 
 export function getHistoryQuery(searchText?: string, limit = 100) {
