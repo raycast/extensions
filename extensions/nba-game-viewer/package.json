@@ -61,6 +61,15 @@
       "label": "Use last selected value for commands",
       "required": false,
       "default": false
+    },
+    {
+      "name": "numDaysScores",
+      "title": "Number of days of scores",
+      "description": "Number of days of scores to show in commands.",
+      "type": "textfield",
+      "label": "Number of days of scores",
+      "required": false,
+      "default": "7"
     }
   ],
   "categories": [

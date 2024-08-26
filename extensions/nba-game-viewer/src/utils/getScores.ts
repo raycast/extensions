@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getPreferenceValues } from "@raycast/api";
 
 type GetScoresArgs = {
   league: string;
@@ -6,10 +7,11 @@ type GetScoresArgs = {
 
 const getScores = async ({ league }: GetScoresArgs) => {
   const baseUrl = `https://site.api.espn.com/apis/site/v2/sports/basketball/${league}/scoreboard`;
+  const { numDaysScores } = getPreferenceValues<Preferences>();
 
   const today = new Date();
   const sevenDaysAgo = new Date(today);
-  sevenDaysAgo.setDate(today.getDate() - 7);
+  sevenDaysAgo.setDate(today.getDate() - Number(numDaysScores));
 
   const formatDate = (date: Date) => date.toISOString().split("T")[0].replace(/-/g, "");
 
