@@ -88,6 +88,13 @@
       "subtitle": "NBA & WNBA",
       "description": "Fetches NBA or WNBA league headlines from ESPN",
       "mode": "view"
+    },
+    {
+      "name": "scores",
+      "title": "View Scores",
+      "subtitle": "NBA & WNBA",
+      "description": "Fetches NBA or WNBA scores",
+      "mode": "view"
     }
   ],
   "dependencies": {

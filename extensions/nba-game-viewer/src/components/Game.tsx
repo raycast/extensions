@@ -16,7 +16,9 @@ const GameComponent = ({ game }: PropTypes) => {
       actions={
         <ActionPanel>
           {/* eslint-disable-next-line @raycast/prefer-title-case */}
-          <Action.OpenInBrowser url={game.stream} title="View Game Details on ESPN" icon={Icon.Globe} />
+          {game.stream && (
+            <Action.OpenInBrowser url={game.stream} title="View Game Details on ESPN" icon={Icon.Globe} />
+          )}
         </ActionPanel>
       }
     />
