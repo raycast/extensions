@@ -1,16 +1,19 @@
 import { Icon, getPreferenceValues, open, showHUD } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { format, isWithinInterval } from "date-fns";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { Event } from "../types/event";
 import { NativePreferences } from "../types/preferences";
+import { SmartHabit } from "../types/smart-series";
 import { axiosPromiseData } from "../utils/axiosPromise";
 import { formatDisplayEventHours, formatDisplayHours } from "../utils/dates";
 import { filterMultipleOutDuplicateEvents } from "../utils/events";
-import { parseEmojiField } from "../utils/string";
+import { stripPlannerEmojis } from "../utils/string";
 import reclaimApi from "./useApi";
+import { useCallbackSafeRef } from "./useCallbackSafeRef";
 import { ApiResponseEvents, EventActions } from "./useEvent.types";
-import { useTask } from "./useTask";
+import { useSmartHabits } from "./useSmartHabits";
+import { useTaskActions } from "./useTask";
 import { useUser } from "./useUser";
 
 export const useEvents = ({ start, end }: { start: Date; end: Date }) => {
@@ -42,7 +45,7 @@ export const useEvents = ({ start, end }: { start: Date; end: Date }) => {
     }
   );
 
-  if (error) throw error;
+  if (error) console.error("Error while fetching Events", error);
 
   return {
     events: filterMultipleOutDuplicateEvents(events),
@@ -54,30 +57,29 @@ export const useEvents = ({ start, end }: { start: Date; end: Date }) => {
 export const useEventActions = () => {
   const { fetcher } = reclaimApi();
   const { currentUser } = useUser();
-  const { handleStartTask, handleRestartTask, handleStopTask } = useTask();
+  const { startTask, restartTask, stopTask } = useTaskActions();
   const { apiUrl } = getPreferenceValues<NativePreferences>();
 
-  const showFormattedEventTitle = useCallback(
-    (event: Event, mini = false) => {
-      const meridianFormat = currentUser?.settings.format24HourTime ? "24h" : "12h";
+  const { smartHabitsByLineageIdsMap } = useSmartHabits();
 
-      const hours = mini
-        ? formatDisplayHours(new Date(event.eventStart), meridianFormat)
-        : formatDisplayEventHours({
-            start: new Date(event.eventStart),
-            end: new Date(event.eventEnd),
-            hoursFormat: meridianFormat,
-          });
+  const showFormattedEventTitle = useCallbackSafeRef((event: Event, mini = false) => {
+    const meridianFormat = currentUser?.settings.format24HourTime ? "24h" : "12h";
 
-      const realEventTitle = event.sourceDetails?.title || event.title;
-      return `${hours}  ${parseEmojiField(realEventTitle).textWithoutEmoji}`;
-    },
-    [currentUser]
-  );
+    const hours = mini
+      ? formatDisplayHours(new Date(event.eventStart), meridianFormat)
+      : formatDisplayEventHours({
+          start: new Date(event.eventStart),
+          end: new Date(event.eventEnd),
+          hoursFormat: meridianFormat,
+        });
+
+    const realEventTitle = event.sourceDetails?.title || event.title;
+    return `${hours}  ${stripPlannerEmojis(realEventTitle)}`;
+  });
 
   const handleStartHabit = async (id: string, title: string) => {
     try {
-      await showHUD("Started Habit: " + parseEmojiField(title).textWithoutEmoji);
+      await showHUD("Started Habit: " + stripPlannerEmojis(title));
       const [habit, error] = await axiosPromiseData(fetcher(`/planner/start/habit/${id}`, { method: "POST" }));
       if (!habit || error) throw error;
       return habit;
@@ -89,7 +91,7 @@ export const useEventActions = () => {
 
   const handleRestartHabit = async (id: string, title: string) => {
     try {
-      await showHUD("Restarted Habit: " + parseEmojiField(title).textWithoutEmoji);
+      await showHUD("Restarted Habit: " + stripPlannerEmojis(title));
       const [habit, error] = await axiosPromiseData(fetcher(`/planner/restart/habit/${id}`, { method: "POST" }));
       if (!habit || error) throw error;
       return habit;
@@ -101,7 +103,7 @@ export const useEventActions = () => {
 
   const handleStopHabit = async (id: string, title: string) => {
     try {
-      await showHUD("Stopped Habit: " + parseEmojiField(title).textWithoutEmoji);
+      await showHUD("Stopped Habit: " + stripPlannerEmojis(title));
       const [habit, error] = await axiosPromiseData(fetcher(`/planner/stop/habit/${id}`, { method: "POST" }));
       if (!habit || error) throw error;
 
@@ -114,7 +116,7 @@ export const useEventActions = () => {
 
   const handleStartOrRestartSmartHabit = async (lineageId: string, title: string) => {
     try {
-      await showHUD("Started Habit: " + parseEmojiField(title).textWithoutEmoji);
+      await showHUD("Started Habit: " + stripPlannerEmojis(title));
       const [habit, error] = await axiosPromiseData(
         fetcher(`/smart-habits/planner/${lineageId}/start`, { method: "POST" })
       );
@@ -129,7 +131,7 @@ export const useEventActions = () => {
 
   const handleStopSmartHabit = async (lineageId: string, title: string) => {
     try {
-      await showHUD("Stopped Habit: " + parseEmojiField(title).textWithoutEmoji);
+      await showHUD("Stopped Habit: " + stripPlannerEmojis(title));
       const [habit, error] = await axiosPromiseData(
         fetcher(`/smart-habits/planner/${lineageId}/stop`, { method: "POST" })
       );
@@ -142,17 +144,32 @@ export const useEventActions = () => {
     }
   };
 
-  const getEventActions = useCallback((event: Event): EventActions => {
+  const getEventActions = useCallbackSafeRef((event: Event): EventActions => {
     const isActive = isWithinInterval(new Date(), {
       end: new Date(event.eventEnd),
       start: new Date(event.eventStart),
     });
 
+    const smartHabit: SmartHabit | undefined = event.assist?.seriesLineageId
+      ? smartHabitsByLineageIdsMap?.[event.assist.seriesLineageId]
+      : undefined;
+
     const hasRescheduleUnstarted = currentUser?.features.assistSettings.rescheduleUnstarted;
+
     const isEventManuallyStarted = event.assist?.manuallyStarted;
-    const showStart = !isActive || (!!isActive && !!hasRescheduleUnstarted && !isEventManuallyStarted);
+
+    const showStart =
+      !isActive ||
+      (!!isActive &&
+        !!hasRescheduleUnstarted &&
+        !isEventManuallyStarted &&
+        smartHabit?.activeSeries?.rescheduleUnstartedOverride !== false);
+
     const showRestartStop =
-      !!isActive && (!hasRescheduleUnstarted || (!!hasRescheduleUnstarted && !!isEventManuallyStarted));
+      !!isActive &&
+      (!hasRescheduleUnstarted ||
+        (!!hasRescheduleUnstarted && !!isEventManuallyStarted) ||
+        (!!hasRescheduleUnstarted && smartHabit?.activeSeries?.rescheduleUnstartedOverride === false));
 
     const eventActions: EventActions = [];
 
@@ -173,7 +190,7 @@ export const useEventActions = () => {
             icon: Icon.Play,
             title: "Start",
             action: async () => {
-              event.assist?.taskId && (await handleStartTask(String(event.assist.taskId)));
+              event.assist?.taskId && (await startTask(String(event.assist.taskId)));
             },
           });
 
@@ -183,14 +200,14 @@ export const useEventActions = () => {
               icon: Icon.Rewind,
               title: "Restart",
               action: async () => {
-                event.assist?.taskId && (await handleRestartTask(String(event.assist.taskId)));
+                event.assist?.taskId && (await restartTask(String(event.assist.taskId)));
               },
             },
             {
               icon: Icon.Stop,
               title: "Stop",
               action: async () => {
-                event.assist?.taskId && (await handleStopTask(String(event.assist.taskId)));
+                event.assist?.taskId && (await stopTask(String(event.assist.taskId)));
               },
             }
           );
@@ -317,7 +334,7 @@ export const useEventActions = () => {
     });
 
     return eventActions;
-  }, []);
+  });
 
   return {
     getEventActions,

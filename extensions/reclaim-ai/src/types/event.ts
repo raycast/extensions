@@ -161,3 +161,18 @@ export interface Event {
   updated: string;
   version: string;
 }
+
+export enum EventColor {
+  NONE = "NONE",
+  LAVENDER = "LAVENDER",
+  SAGE = "SAGE",
+  GRAPE = "GRAPE",
+  FLAMINGO = "FLAMINGO",
+  BANANA = "BANANA",
+  TANGERINE = "TANGERINE",
+  PEACOCK = "PEACOCK",
+  GRAPHITE = "GRAPHITE",
+  BLUEBERRY = "BLUEBERRY",
+  BASIL = "BASIL",
+  TOMATO = "TOMATO",
+}
