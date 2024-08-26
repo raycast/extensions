@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "easydict",
   "title": "Easy Dictionary",
-  "description": "Easily look up words or translate text, support 48+ languages, support Linguee and Youdao dictionary, support OpenAI ChatGPT, DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao and Caiyun translation.",
+  "description": "Easily look up words or translate text, support 48+ languages, support Linguee and Youdao dictionary, support OpenAI, DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao and Caiyun translation.",
   "icon": "Eudic.png",
   "author": "isfeng",
   "license": "MIT",
@@ -50,12 +50,12 @@
     "baidu",
     "tencent",
     "eudic",
-    "chatgpt"
+    "openai"
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
+    "@raycast/api": "^1.68.0",
     "@vitalets/google-translate-api": "^9.1.0",
-    "axios": "^1.6.0",
+    "axios": "^1.7.4",
     "cheerio": "^1.0.0-rc.12",
     "crypto-js": "^4.2.0",
     "eventsource": "^2.0.2",
@@ -669,7 +669,7 @@
       "default": false
     },
     {
-      "title": "Display Order",
+      "title": "Service List Order",
       "name": "servicesOrder",
       "type": "textfield",
       "required": false,
@@ -686,12 +686,21 @@
       "default": ""
     },
     {
-      "title": "OpenAI API URL",
+      "title": "OpenAI Endpoint",
       "name": "openAIAPIURL",
       "type": "textfield",
       "required": false,
-      "description": "Your OpenAI API URL",
-      "default": "https://api.openai.com/v1/chat/completions"
+      "description": "Custom OpenAI API URL",
+      "default": "https://api.openai.com/v1/chat/completions",
+      "placeholder": "https://api.openai.com/v1/chat/completions"
+    },
+    {
+      "title": "OpenAI Model",
+      "name": "openAIModel",
+      "type": "textfield",
+      "required": false,
+      "description": "OpenAI Model",
+      "default": "gpt-4o-mini"
     },
     {
       "title": "DeepL Auth Key",
@@ -699,6 +708,15 @@
       "type": "textfield",
       "required": false,
       "description": "Your DeepL Auth Key",
+      "default": ""
+    },
+    {
+      "title": "DeepL API URL",
+      "name": "deepLEndpoint",
+      "type": "textfield",
+      "required": false,
+      "description": "Custom DeepL API URL",
+      "placeholder": "https://api-free.deepl.com/v2/translate",
       "default": ""
     },
     {
@@ -747,22 +765,6 @@
       "type": "textfield",
       "required": false,
       "description": "Your Volcano Access Key Secret",
-      "default": ""
-    },
-    {
-      "title": "Youdao App ID",
-      "name": "youdaoAppId",
-      "type": "textfield",
-      "required": false,
-      "description": "Your Youdao App ID",
-      "default": ""
-    },
-    {
-      "title": "Youdao App Secret",
-      "name": "youdaoAppSecret",
-      "type": "textfield",
-      "required": false,
-      "description": "Your Youdao App Secret",
       "default": ""
     },
     {

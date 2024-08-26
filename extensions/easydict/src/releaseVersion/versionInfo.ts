@@ -26,9 +26,9 @@ export class Easydict {
   static repo = "Raycast-Easydict";
 
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.9.1";
-  buildNumber = 27;
-  versionDate = "2024-01-08";
+  version = "2.9.2";
+  buildNumber = 28;
+  versionDate = "2024-08-25";
   isNeedPrompt = true;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
 
@@ -37,22 +37,14 @@ export class Easydict {
 
 ### 💎 优化
 
-- 支持自定义 OpenAI API URL，感谢 [liyaodong](https://github.com/liyaodong) 的 PR。
-- 优化了语种识别功能，添加百度语种识别为默认选项。
+- 支持 HTTP OpenAI API endpoint，感谢 [rookiezn](https://github.com/rookiezn) 的 PR https://github.com/tisfeng/Raycast-Easydict/pull/51。
+- DeepL 翻译支持阿拉伯语 AR。
+- 移除了已废弃的内置的 DeepL API key。
+- 移除了对有道翻译官方 API 的支持，现默认只使用网页 API。
 
-#### 如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)
+### 🐞 修复
 
-## 推荐
-
-我另一个免费开源项目，[Easydict](https://github.com/tisfeng/Easydict) ，一个简洁优雅的词典翻译 macOS App。开箱即用，支持离线 OCR 识别，支持有道词典，🍎 苹果系统词典，🍎 苹果系统翻译，ChatGPT，DeepL，Google，Bing，腾讯，百度，阿里，小牛，彩云和火山翻译。
-
-![iShot_2023-03-17_18.01.22_11zon-1679050206](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-03-17_18.01.22_11zon-1679050206.jpg)
-
----
-
-### ✨ New Features
-
-- Added OCR screenshot translation command, thanks to [aidevjoe](https://github.com/aidevjoe)'s PR.
+- 修复了 argument 参数可能丢失问题。https://github.com/tisfeng/Raycast-Easydict/pull/63
 `;
 
   getRepoUrl() {
