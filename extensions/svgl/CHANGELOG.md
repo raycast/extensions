@@ -1,6 +1,6 @@
 # svgl Changelog
 
-## [Update API URL] - {PR_MERGE_DATE}
+## [Update API URL] - 2024-08-26
 
 - Update API URL to `https://api.svgl.app`.
 
