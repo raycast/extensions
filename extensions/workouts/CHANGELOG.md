@@ -1,5 +1,9 @@
 # Workouts Changelog
 
+## [Added a new view on Create Activity Command success] - 2024-08-26
+
+Added a new view after successfully creating an activity
+
 ## [Enable maps] - 2024-08-06
 
 Enabled maps for everyone without the need for a personal API key
