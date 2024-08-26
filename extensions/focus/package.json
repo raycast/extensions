@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "focus",
-  "title": "Focus - Website Blocker For Mac",
+  "title": "Focus - Website Blocker for Mac",
   "description": "Raycast extension for Focus app",
   "icon": "focus-icon.png",
   "author": "ernest",
@@ -20,7 +20,7 @@
     },
     {
       "name": "start-focus-with-profile",
-      "title": "Start Focus with Profile",
+      "title": "Start Focus With Profile",
       "subtitle": "Focus",
       "description": "Start Focus by selecting a profile",
       "mode": "view"
