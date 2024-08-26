@@ -1,6 +1,6 @@
 # cPanel Changelog
 
-## [View Databases + Create Limited DNS Records] - {PR_MERGE_DATE}
+## [View Databases + Create Limited DNS Records] - 2024-08-26
 
 - View MySQL or PostgreSQL Databases
 - In Domain DNS Zone, you can create `A`, `AAAA`, `CNAME`, `TXT` records
