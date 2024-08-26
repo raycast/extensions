@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-08-26
 
 - Replaced HUD error messages with toast messages.
 - Added a list section to the `Search History` command.
