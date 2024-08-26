@@ -10,7 +10,7 @@ import { countImageTokens, countToken, estimateImagePrice, estimatePrice } from 
 
 const preferences = getPreferenceValues<Preferences>();
 
-const visionModelName: string = preferences.useVisionModel ? preferences.visionModelName ?? "gpt-4o" : "gpt-4o";
+const visionModelName: string = (preferences.useVisionModel && preferences.visionModelName) || "gpt-4o";
 
 const VISION_MODEL: Model = {
   id: visionModelName,
