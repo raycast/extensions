@@ -11,7 +11,7 @@ export function SearchResultActionPanel({
   return (
     <ActionPanel>
       <Action
-        title="Add To Download Client"
+        title="Add to Download Client"
         icon={Icon.Plus}
         onAction={() => onAction({ action: "addToDownloadClient", item })}
       />
