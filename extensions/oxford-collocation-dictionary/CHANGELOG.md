@@ -1,3 +1,3 @@
 # Oxford Collocation Dictionary Changelog
 
-## [Initial Version] - 2024-08-07
+## [Initial Version] - {PR_MERGE_DATE}
