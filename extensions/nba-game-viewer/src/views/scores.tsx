@@ -21,7 +21,14 @@ const Scores = () => {
         </List.Dropdown>
       }
     >
-      {data?.map((day) => <DayComponent key={day.date} day={day} />)}
+      {data && data.length > 0
+        ? data.map((day) => <DayComponent key={day.date} day={day} />)
+        : !isLoading && (
+            <List.EmptyView
+              title="No Scores Available"
+              description="There are no games scheduled or scores available at the moment."
+            />
+          )}
     </List>
   );
 };
