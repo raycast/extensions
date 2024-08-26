@@ -2,33 +2,39 @@ import { Action, ActionPanel, environment, Icon, Keyboard, List } from "@raycast
 import { useFetch } from "@raycast/utils";
 import { Doc } from "./types";
 import { SearchEntries } from "./search-entries";
+import { useEffect, useState } from "react";
 
 export default function SearchDocsets(): JSX.Element {
   const { data, isLoading } = useFetch<Doc[]>(`https://devdocs.io/docs/docs.json`, {});
+  const defaultDocs = ["css", "html", "http", "javascript", "dom"];
 
-  const groupByPreferredDocumentations = (docs: Doc[]) => {
-    const defaultSlugs = ["css", "html", "http", "javascript", "dom"];
+  const [documentations, setDocumentations] = useState<[Doc[], Doc[]]>([[], []]);
 
-    const preferredDocs: Doc[] = [];
-    const otherDocs: Doc[] = [];
+  useEffect(() => {
+    if (data) {
+      const preferredDocs: Doc[] = [];
+      const availableDocs: Doc[] = [];
 
-    docs.forEach((doc) => {
-      if (defaultSlugs?.find((preferredDoc) => preferredDoc === doc.slug)) {
-        preferredDocs.push(doc);
-      } else {
-        otherDocs.push(doc);
-      }
-    });
+      data.forEach((doc) => {
+        if (defaultDocs?.find((preferredDoc) => preferredDoc === doc.slug)) {
+          preferredDocs.push(doc);
+        } else {
+          availableDocs.push(doc);
+        }
+      });
 
-    return [preferredDocs, otherDocs];
-  };
-
-  const [preferredDocs, otherDocs] = groupByPreferredDocumentations(data || []);
+      setDocumentations([preferredDocs, availableDocs]);
+    }
+  }, [isLoading]);
 
   return (
     <List isLoading={isLoading}>
-      <List.Section title="Preferred">{preferredDocs?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}</List.Section>
-      <List.Section title="Available">{otherDocs?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}</List.Section>
+      <List.Section title="Preferred">
+        {documentations[0]?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}
+      </List.Section>
+      <List.Section title="Available">
+        {documentations[1]?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}
+      </List.Section>
     </List>
   );
 }
