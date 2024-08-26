@@ -1,6 +1,6 @@
-# Custom folder
+# Custom Folder
 
-Customize MacOs folder icons.
+Customize macOs folder icons.
 
 ## Features
 - Create custom folder images.
