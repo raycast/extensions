@@ -1,4 +1,4 @@
-import { Toast, LaunchProps, open } from "@raycast/api";
+import { Toast, LaunchProps } from "@raycast/api";
 import { getInstallStatus, takeBreakCustom } from "./utils";
 
 interface FocusArguments {

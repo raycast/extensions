@@ -84,7 +84,7 @@ export async function openPreferences() {
 
 export async function getProfileNames() {
   try {
-    let profileNames = await runAppleScript(`
+    const profileNames = await runAppleScript(`
       tell application "Focus"
         try
           return profile names
@@ -101,7 +101,7 @@ export async function getProfileNames() {
       return [];
     }
     // If the result is a list, it will be comma-separated
-    return profileNames.split(", ").map(name => name.trim());
+    return profileNames.split(", ").map((name) => name.trim());
   } catch (error) {
     return [];
   }
