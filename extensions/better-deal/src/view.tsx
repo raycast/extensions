@@ -4,9 +4,7 @@ import { Item } from "./index";
 
 const cache = new Cache();
 
-
 export default function Command() {
-
   const cached = cache.get("items");
   const items: Item[] = cached ? JSON.parse(cached) : [];
 
