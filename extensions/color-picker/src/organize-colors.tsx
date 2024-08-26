@@ -19,7 +19,7 @@ import { useHistory } from "./history";
 import { HistoryItem } from "./types";
 import { getFormattedColor, getPreviewColor } from "./utils";
 
-const preferences = getPreferenceValues<Preferences.OrganizeColors>();
+const preferences: Preferences.OrganizeColors = getPreferenceValues();
 
 export default function Command() {
   const { history } = useHistory();
