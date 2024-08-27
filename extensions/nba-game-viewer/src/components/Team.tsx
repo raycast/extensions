@@ -17,6 +17,7 @@ const TeamComponent = ({ team, league }: PropTypes) => {
       actions={
         <ActionPanel>
           <Action.Push title="View Roster" icon={Icon.Person} target={<Roster id={team.id} league={league} />} />
+          {/* eslint-disable-next-line @raycast/prefer-title-case */}
           <Action.OpenInBrowser title="View Team on ESPN" url={team.link} />
         </ActionPanel>
       }
