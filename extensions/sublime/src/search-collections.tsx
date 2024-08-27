@@ -2,10 +2,11 @@ import { authService } from "./utils/auth";
 import { withAccessToken } from "@raycast/utils";
 import { searchCardsInCollection, searchSublimeCards } from "./utils/api";
 import { useCardsSearch } from "./hooks/search";
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { getEntityIcon, getIconPath } from "./utils/icons";
 import { useState } from "react";
 import CardsList from "./views/list";
+import { getCardUrl } from "./utils/constants";
 
 const useSmartSearch = true;
 
@@ -48,9 +49,11 @@ function SearchCollections() {
                     actions={
                         <ActionPanel title={item.name}>
                             <Action.Push
+                                icon={Icon.AppWindowSidebarLeft}
                                 title="Show Cards"
                                 target={<CollectionCardsList collectionUuid={item.uuid} collectionTitle={item.name!} />}
                             />
+                            <Action.OpenInBrowser title="Open Collection" url={getCardUrl(item)} />
                         </ActionPanel>
                     }
                 />
