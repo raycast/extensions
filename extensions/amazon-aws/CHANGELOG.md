@@ -1,5 +1,12 @@
 # Amazon AWS Changelog
 
+## [Pipelines, DDB, CFN commands] - 2024-07-29
+
+- Pipelines: Reduced the size per page to reduce throttling: [#13304](https://github.com/raycast/extensions/issues/13304)
+- DDB: Handle pagination upfront instead of Raycast pagination. Also, adds frecency sorting.
+- DDB: Add item count to accessories and handle mutation during item update/deletion.
+- CFN: Handle pagination upfront instead of Raycast pagination. Also, adds frecency sorting.
+
 ## [S3 Command] - 2024-07-12
 
 - added reverse order option

@@ -38,7 +38,7 @@ export const fetchUnNews = async (newsType: NewsType) => {
     description: x.description,
     link: x.guid["#text"],
     pubDate: x.pubDate,
-    image: x.enclosure.url,
+    image: x?.enclosure?.url,
     source: x.source["#text"],
   })) as UnNews[];
 };

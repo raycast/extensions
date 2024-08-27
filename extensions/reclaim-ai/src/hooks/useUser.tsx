@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { Cache } from "@raycast/api";
+import { useEffect, useState } from "react";
 import { User } from "../types/user";
 import { axiosPromiseData } from "../utils/axiosPromise";
 import reclaimApi from "./useApi";
+import { useCallbackSafeRef } from "./useCallbackSafeRef";
 import { ApiResponseUser } from "./useUser.types";
-import { Cache } from "@raycast/api";
 
 const cache = new Cache();
 
@@ -20,7 +21,7 @@ const useUser = () => {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleGetUser = useCallback(async () => {
+  const handleGetUser = useCallbackSafeRef(async () => {
     try {
       const currentDate = new Date();
       if (currentDate.valueOf() - (currentCacheDate?.valueOf() || 0) < 1000 * 1800) {
@@ -42,7 +43,7 @@ const useUser = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [currentUser, currentCacheDate]);
+  });
 
   useEffect(() => {
     void handleGetUser();

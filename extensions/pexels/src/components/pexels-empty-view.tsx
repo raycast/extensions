@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Grid, Icon, List, openExtensionPreferences } from "@raycast/api";
-import React from "react";
+import { ActionPanel, Grid, List } from "@raycast/api";
 import { ActionToPexels } from "./action-to-pexels";
+import { ActionOpenPreferences } from "./action-open-preferences";
+import { layout } from "../types/preferences";
 
-export function PexelsEmptyView(props: { title: string; layout: string }) {
-  const { title, layout } = props;
+export function PexelsEmptyView(props: { title: string }) {
+  const { title } = props;
   return layout === "List" ? (
     <List.EmptyView
       title={title}
@@ -11,14 +12,7 @@ export function PexelsEmptyView(props: { title: string; layout: string }) {
       actions={
         <ActionPanel>
           <ActionToPexels />
-          <ActionPanel.Section>
-            <Action
-              icon={Icon.Gear}
-              title="Open Extension Preferences"
-              shortcut={{ modifiers: ["cmd"], key: "," }}
-              onAction={openExtensionPreferences}
-            />
-          </ActionPanel.Section>
+          <ActionOpenPreferences />
         </ActionPanel>
       }
     />
@@ -29,14 +23,7 @@ export function PexelsEmptyView(props: { title: string; layout: string }) {
       actions={
         <ActionPanel>
           <ActionToPexels />
-          <ActionPanel.Section>
-            <Action
-              icon={Icon.Gear}
-              title="Open Extension Preferences"
-              shortcut={{ modifiers: ["cmd"], key: "," }}
-              onAction={openExtensionPreferences}
-            />
-          </ActionPanel.Section>
+          <ActionOpenPreferences />
         </ActionPanel>
       }
     />

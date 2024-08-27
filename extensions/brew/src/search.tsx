@@ -48,8 +48,8 @@ export default function Main(): JSX.Element {
     });
   }, [installed]);
 
-  const formulae = filter != InstallableFilterType.casks ? results?.formulae ?? [] : [];
-  const casks = filter != InstallableFilterType.formulae ? results?.casks ?? [] : [];
+  const formulae = filter != InstallableFilterType.casks ? (results?.formulae ?? []) : [];
+  const casks = filter != InstallableFilterType.formulae ? (results?.casks ?? []) : [];
 
   return (
     <FormulaList

@@ -171,6 +171,7 @@ export default function SQS() {
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   title="Purge Queue"
                   shortcut={{ modifiers: ["ctrl"], key: "p" }}
+                  style={Action.Style.Destructive}
                   onAction={async () => {
                     await visit(queue);
                     await purgeQueue(queue, mutate);

@@ -33,10 +33,37 @@ function getName(contact: Contact) {
   return `${contact.givenName}${contact.familyName ? ` ${contact.familyName}` : ""}`;
 }
 
+async function isMessagesAppRunning() {
+  const result = await runAppleScript(
+    `
+    tell application "System Events"
+      return (count of (every process whose name is "Messages")) > 0
+    end tell
+    `,
+  );
+  return result === "true";
+}
+
+async function quitMessagesApp() {
+  await runAppleScript(
+    `
+    tell application "Messages"
+      quit
+    end tell
+    `,
+  );
+}
+
 type Values = {
   text: string;
   contact: string;
   address: string;
+};
+
+type LaunchContext = {
+  contactId: string;
+  address: string;
+  text: string;
 };
 
 export default function Command({
@@ -44,13 +71,28 @@ export default function Command({
   launchContext,
 }: LaunchProps<{
   draftValues: Values;
-  launchContext: { contactId: string; address: string; text: string };
+  launchContext: LaunchContext;
 }>) {
   const { shouldCloseMainWindow } = getPreferenceValues<{ shouldCloseMainWindow: boolean }>();
-  const { data: contacts, isLoading } = useCachedPromise(async () => {
-    const contacts = await fetchAllContacts();
-    return contacts as Contact[];
-  });
+  const { data: contacts, isLoading } = useCachedPromise(
+    async () => {
+      const contacts = await fetchAllContacts();
+      return contacts as Contact[];
+    },
+    [],
+    {
+      failureToastOptions: {
+        title: "Could not get contacts",
+        message: "Make sure you have granted Raycast access to your contacts.",
+        primaryAction: {
+          title: "Open System Preferences",
+          onAction() {
+            open("x-apple.systempreferences:com.apple.preference.security?Privacy_Contacts");
+          },
+        },
+      },
+    },
+  );
 
   const { itemProps, handleSubmit, values, reset, focus } = useForm<Values>({
     async onSubmit(values) {
@@ -59,6 +101,8 @@ export default function Command({
         showToast({ style: Toast.Style.Failure, title: "Could not send message", message: "Contact not found" });
         return;
       }
+
+      const wasMessagesRunning = await isMessagesAppRunning();
 
       const result = await runAppleScript(
         `
@@ -85,6 +129,10 @@ export default function Command({
 
         if (shouldCloseMainWindow) {
           await closeMainWindow({ clearRootSearch: true });
+        }
+
+        if (!wasMessagesRunning) {
+          await quitMessagesApp();
         }
 
         await showToast({
@@ -133,13 +181,24 @@ export default function Command({
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.SpeechBubble} title="Send Message" onSubmit={handleSubmit} />
-          <Action.CreateQuicklink
-            title="Create Messages Quicklink"
-            quicklink={{
-              link: createDeeplink(values.contact, values.address, values.text),
-              name: `Send Message to ${contacts?.find((c) => c.id === values.contact)?.givenName}`,
-            }}
-          />
+
+          <ActionPanel.Section>
+            <Action.CreateQuicklink
+              title="Create Messages Quicklink"
+              icon={{ fileIcon: "/System/Applications/Messages.app" }}
+              quicklink={{
+                link: `sms:${values.address}`,
+                name: `Send Message to ${contacts?.find((c) => c.id === values.contact)?.givenName}`,
+              }}
+            />
+            <Action.CreateQuicklink
+              title="Create Raycast Quicklink"
+              quicklink={{
+                link: createDeeplink(values.contact, values.address, values.text),
+                name: `Send Message to ${contacts?.find((c) => c.id === values.contact)?.givenName}`,
+              }}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       enableDrafts

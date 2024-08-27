@@ -1,4 +1,4 @@
-import { Toast, open } from "@raycast/api";
+import { Toast } from "@raycast/api";
 import { getInstallStatus, startFocus25 } from "./utils";
 
 export default async function () {

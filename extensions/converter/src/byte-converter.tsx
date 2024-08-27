@@ -1,13 +1,12 @@
 import { Action, ActionPanel, Form } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
-import { commonPreferences } from "./utils/common-utils";
 import { getInputItem } from "./hooks/get-input-item";
-import { convertToBytes, convert, KeyEquivalentByNumber, capitalize } from "./utils/byte-converter-utils";
+import { capitalize, convert, convertToBytes, KeyEquivalentByNumber } from "./utils/byte-converter-utils";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
 
 export default function ByteConverter() {
   const units = ["bits", "Bytes", "KB", "MB", "GB", "TB", "PB", "EB"] as const;
-  type Unit = typeof units[number];
+  type Unit = (typeof units)[number];
   type State = {
     [unit in Unit]: number;
   };
@@ -17,46 +16,46 @@ export default function ByteConverter() {
   };
 
   const [state, setState] = useState<State & SetFunctions<State>>(
-    units.reduce((acc, unit) => {
-      const capitalizedUnit = capitalize(unit);
-      const setFunctionName = `set${capitalizedUnit}`;
-      return {
-        ...acc,
-        [unit]: 0,
-        [setFunctionName]: (newValue: string) => {
-          let value = newValue || "0"; // Empty string
-          value = value.replace(/[^\d.]/g, ""); // Should only contains numbers
-          const parsedValue = parseFloat(value);
-          if (isNaN(parsedValue)) {
-            console.info(`newValue "${newValue}" is not a valid number`);
-            return;
-          }
-          console.debug(newValue, value, parsedValue);
-          const index = units.indexOf(unit);
-          const bytesValue = convertToBytes(parsedValue, index);
+    units.reduce(
+      (acc, unit) => {
+        const capitalizedUnit = capitalize(unit);
+        const setFunctionName = `set${capitalizedUnit}`;
+        return {
+          ...acc,
+          [unit]: 0,
+          [setFunctionName]: (newValue: string) => {
+            let value = newValue || "0"; // Empty string
+            value = value.replace(/[^\d.]/g, ""); // Should only contains numbers
+            const parsedValue = parseFloat(value);
+            if (isNaN(parsedValue)) {
+              return;
+            }
+            const index = units.indexOf(unit);
+            const bytesValue = convertToBytes(parsedValue, index);
 
-          setState((prevState) => {
-            const newState = { ...prevState };
-            for (let i = 0; i < index; i++) {
-              newState[units[i]] = convert(bytesValue, i);
-            }
-            newState[unit] = parsedValue;
-            for (let i = index + 1; i < units.length; i++) {
-              newState[units[i]] = convert(bytesValue, i);
-            }
-            return newState;
-          });
-        },
-      };
-    }, {} as State & SetFunctions<State>)
+            setState((prevState) => {
+              const newState = { ...prevState };
+              for (let i = 0; i < index; i++) {
+                newState[units[i]] = convert(bytesValue, i);
+              }
+              newState[unit] = parsedValue;
+              for (let i = index + 1; i < units.length; i++) {
+                newState[units[i]] = convert(bytesValue, i);
+              }
+              return newState;
+            });
+          },
+        };
+      },
+      {} as State & SetFunctions<State>,
+    ),
   );
 
   const textFields = useRef<(Form.TextField | null)[]>(Array.from({ length: units.length }));
 
   const [focusedTextFieldIndex, setFocusedTextFieldIndex] = useState<number>(0);
 
-  const { autoDetect, priorityDetection } = commonPreferences();
-  const inputItem = getInputItem(autoDetect, priorityDetection);
+  const inputItem = getInputItem();
   useEffect(() => {
     async function _fetch() {
       state["setBytes"](inputItem);

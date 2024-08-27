@@ -237,6 +237,38 @@
           "required": false,
           "title": "Weather Entity",
           "placeholder": "weather.home"
+        },
+        {
+          "name": "temperatureEntity",
+          "description": "Temperature Sensor which is used instead of the weather entity.",
+          "type": "textfield",
+          "required": false,
+          "title": "Temperature Sensor",
+          "placeholder": "Entity ID"
+        },
+        {
+          "name": "humidityEntity",
+          "description": "Humidity Sensor which is used instead of the weather entity.",
+          "type": "textfield",
+          "required": false,
+          "title": "Humidity Sensor",
+          "placeholder": "Entity ID"
+        },
+        {
+          "name": "maxHourlyForecastItems",
+          "description": "Max Hourly Forecast Items. 0 will disable the hourly forecast.",
+          "type": "textfield",
+          "required": false,
+          "title": "Max Hourly Forecast Items",
+          "placeholder": "5"
+        },
+        {
+          "name": "maxDailyForecastItems",
+          "description": "Max Daily Forecast Items. 0 will disable the daily forecast.",
+          "type": "textfield",
+          "required": false,
+          "title": "Max Daily Forecast Items",
+          "placeholder": "10"
         }
       ]
     },
@@ -440,6 +472,63 @@
           "placeholder": "weather.home"
         }
       ]
+    },
+    {
+      "name": "services",
+      "title": "Services",
+      "description": "Interact with Home Assistant Services",
+      "mode": "view"
+    },
+    {
+      "name": "runService",
+      "title": "Run Service",
+      "description": "Run a service. It accepts a context argument to launch services via Quicklinks or Deeplinks.",
+      "mode": "no-view"
+    },
+    {
+      "name": "calendar",
+      "title": "Calendar",
+      "description": "Query Calendars",
+      "mode": "view"
+    },
+    {
+      "name": "calendarmenu",
+      "title": "Calendar Menu",
+      "description": "Calendar in the menubar",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "maxRootTextLength",
+          "description": "Maximum Root Text Length. 0 disable the feature.",
+          "type": "textfield",
+          "required": false,
+          "title": "Maximum Root Text Length",
+          "placeholder": "10"
+        },
+        {
+          "name": "pastEventHandling",
+          "description": "Handling past events",
+          "type": "dropdown",
+          "required": false,
+          "title": "Past Events Handling",
+          "default": "show",
+          "data": [
+            {
+              "title": "Show",
+              "value": "show"
+            },
+            {
+              "title": "Disable",
+              "value": "disable"
+            },
+            {
+              "title": "Hide",
+              "value": "hide"
+            }
+          ]
+        }
+      ]
     }
   ],
   "preferences": [
@@ -533,7 +622,8 @@
     "Other"
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.0",
+    "@raycast-community/ui": "~0.1.1",
+    "@raycast/api": "^1.79.0",
     "@raycast/utils": "^1.5.2",
     "home-assistant-js-websocket": "^8.1.0",
     "javascript-time-ago": "^2.5.9",
@@ -544,7 +634,8 @@
     "ping": "^0.4.4",
     "plist": "^3.0.6",
     "url-join": "^4.0.1",
-    "ws": "^8.2.3"
+    "ws": "^8.2.3",
+    "yaml": "^2.4.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
@@ -554,7 +645,7 @@
     "@types/node-fetch": "^2.5.12",
     "@types/ping": "^0.4.1",
     "@types/plist": "^3.0.2",
-    "@types/react": "^18.2.27",
+    "@types/react": "^18.3.3",
     "@types/url-join": "^4.0.1",
     "@types/ws": "^8.2.0",
     "eslint": "^7.32.0",

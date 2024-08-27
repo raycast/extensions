@@ -13,6 +13,7 @@
     "Web"
   ],
   "keywords": [
+    "myip",
     "ip",
     "my ip"
   ],
@@ -135,32 +136,31 @@
       "type": "dropdown",
       "data": [
         {
-          "title": "Longitude, Latitude",
-          "value": "lonLat"
-        },
-        {
           "title": "Latitude, Longitude",
           "value": "latLon"
+        },
+        {
+          "title": "Longitude, Latitude",
+          "value": "lonLat"
         }
       ],
       "required": false,
-      "default": "lonLat"
+      "default": "latLon"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.75.1",
-    "axios": "^1.7.2",
-    "public-ip": "^6.0.2"
+    "@raycast/api": "^1.80.0",
+    "axios": "^1.7.3",
+    "public-ip": "^7.0.1",
+    "@raycast/utils": "^1.16.3"
   },
   "devDependencies": {
-    "@types/node": "~20.12.12",
-    "@types/react": "^18.3.3",
-    "@typescript-eslint/eslint-plugin": "^7.10.0",
-    "@typescript-eslint/parser": "^7.10.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "22.1.0",
+    "@types/react": "18.3.3",
     "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",

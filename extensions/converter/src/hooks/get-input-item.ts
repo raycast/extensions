@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { fetchItemInputClipboardFirst, fetchItemInputSelectedFirst } from "../utils/input-item-utils";
+import { autoDetect, priorityDetection } from "../types/preferences";
 
-export const getInputItem = (autoDetect: boolean, priorityDetection: string) => {
+export const getInputItem = () => {
   const [inputItem, setInputItem] = useState<string>("");
 
   const fetchData = useCallback(async () => {

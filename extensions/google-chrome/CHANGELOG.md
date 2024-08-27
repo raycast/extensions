@@ -1,5 +1,9 @@
 # Google Chrome Changelog
 
+## [Add Search All Command] - 2024-08-01
+
+- Add Google Chrome tabs and history, bookmarks search.
+
 ## [Fix Search History window] - 2023-12-19
 
 - Fix Search History window not opening when the app is open but no window is opened.

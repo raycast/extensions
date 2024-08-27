@@ -13,6 +13,8 @@ import {
   showHUD,
   showToast,
 } from "@raycast/api";
+import { Searcher } from "fast-fuzzy";
+import debounce from "lodash/debounce.js";
 import { titleToSlug } from "simple-icons/sdk";
 import { LaunchCommand, Supports, actions, defaultActionsOrder } from "./actions.js";
 import { cacheAssetPack, getAliases, loadCachedJson, useVersion } from "./utils.js";
@@ -28,6 +30,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
   const [itemSize, setItemSize] = useState<keyof typeof itemDisplayColumns>("small");
   const [isLoading, setIsLoading] = useState(true);
   const [icons, setIcons] = useState<IconData[]>([]);
+  const [searchString, setSearchString] = useState("");
   const version = useVersion({ launchContext });
 
   const fetchIcons = async (version: string) => {
@@ -80,6 +83,20 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
     }
   }, [version]);
 
+  const searcher = new Searcher(icons, {
+    keySelector: (icon) =>
+      [
+        icon.title,
+        icon.slug,
+        icon.aliases?.aka,
+        icon.aliases?.dup?.map((duplicate) => duplicate.title),
+        Object.values(icon.aliases?.loc ?? {}),
+      ]
+        .flat()
+        .filter(Boolean) as string[],
+  });
+  const searchResults = searchString ? searcher.search(searchString) : icons;
+
   const { defaultDetailAction = "OpenWith" } = getPreferenceValues<ExtensionPreferences>();
   const DefaultAction = actions[defaultDetailAction];
 
@@ -110,9 +127,10 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
           <Grid.Dropdown.Item title="Large" value="large" />
         </Grid.Dropdown>
       }
+      onSearchTextChange={debounce(setSearchString, 300)}
     >
       {(!isLoading || !version) &&
-        icons.map((icon) => {
+        searchResults.slice(0, 500).map((icon) => {
           const slug = icon.slug || titleToSlug(icon.title);
 
           const fileLink = `pack/simple-icons-${version}/icons/${slug}.svg`;

@@ -29,7 +29,9 @@
     "litomore",
     "dmitrii_mitrofanov",
     "j3lte",
-    "stelo"
+    "stelo",
+    "vlasischar",
+    "javalangruntimeexception"
   ],
   "categories": [
     "Developer Tools",
@@ -41,7 +43,50 @@
       "name": "my-pull-requests",
       "title": "My Pull Requests",
       "description": "List pull requests you created, participated in, or were mentioned in.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "includeAssigned",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Assigned",
+          "title": "Categories to Display",
+          "description": "Includes pull request you were assigned to in the menu list."
+        },
+        {
+          "name": "includeMentioned",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Mentioned",
+          "description": "Includes pull request you were mentioned in the menu list."
+        },
+        {
+          "name": "includeReviewRequests",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Review Requests",
+          "description": "Includes pull request you were requested to review in the menu list."
+        },
+        {
+          "name": "includeReviewed",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Reviewed",
+          "description": "Includes pull request you reviewed in the menu list."
+        },
+        {
+          "name": "includeRecentlyClosed",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Recently Closed",
+          "description": "Includes pull request you recently closed in the menu list."
+        }
+      ]
     },
     {
       "name": "search-pull-requests",
@@ -63,6 +108,33 @@
       "keywords": [
         "open issues",
         "created issues"
+      ],
+      "preferences": [
+        {
+          "name": "showAssigned",
+          "description": "Show issues assigned to you",
+          "type": "checkbox",
+          "required": false,
+          "label": "Assigned",
+          "title": "Categories to Display",
+          "default": true
+        },
+        {
+          "name": "showMentioned",
+          "description": "Show issues where you are mentioned",
+          "type": "checkbox",
+          "required": false,
+          "label": "Mentioned",
+          "default": true
+        },
+        {
+          "name": "showRecentlyClosed",
+          "description": "Show recently closed issues",
+          "type": "checkbox",
+          "required": false,
+          "label": "Recently Closed",
+          "default": false
+        }
       ]
     },
     {
@@ -81,7 +153,8 @@
       "name": "create-branch",
       "title": "Create Branch",
       "description": "Create a branch in one of your GitHub repositories",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "search-repositories",
@@ -103,9 +176,7 @@
           "type": "directory",
           "required": false,
           "title": "Clone Path",
-          "default": "~/GitHub",
-          "placeholder": "~/GitHub",
-          "description": "Path in which the repositories will be cloned."
+          "description": "Path in which the repositories will be cloned. If not specified here, you will need to select directory within a form."
         },
         {
           "name": "includeForks",
@@ -181,13 +252,15 @@
       "name": "search-discussions",
       "title": "Search Discussions",
       "description": "Search recent Discussions globally in all repositories",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "my-discussions",
       "title": "My Discussions",
       "description": "Show your Discussions",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "my-projects",
@@ -207,20 +280,45 @@
       "preferences": [
         {
           "name": "maxitems",
-          "description": "Maximum Issues shown",
+          "description": "Maximum issues shown per category.",
           "type": "textfield",
           "required": false,
-          "title": "Max. Issues",
+          "title": "Max Issues per category",
           "placeholder": "10"
         },
         {
           "name": "showtext",
-          "description": "Show Issues Count",
+          "description": "Show issues count with menu bar icon.",
           "type": "checkbox",
           "required": false,
           "label": "Show Count",
           "title": "Appearance",
           "default": true
+        },
+        {
+          "name": "showAssigned",
+          "description": "Show issues assigned to you",
+          "type": "checkbox",
+          "required": false,
+          "label": "Assigned",
+          "title": "Categories to Display",
+          "default": true
+        },
+        {
+          "name": "showMentioned",
+          "description": "Show issues where you are mentioned",
+          "type": "checkbox",
+          "required": false,
+          "label": "Mentioned",
+          "default": true
+        },
+        {
+          "name": "showRecentlyClosed",
+          "description": "Show recently closed issues",
+          "type": "checkbox",
+          "required": false,
+          "label": "Recently Closed",
+          "default": false
         }
       ]
     },
@@ -232,20 +330,12 @@
       "interval": "15m",
       "preferences": [
         {
-          "name": "includeOpen",
-          "type": "checkbox",
-          "required": false,
-          "title": "Categories to Display",
-          "default": true,
-          "label": "Opened",
-          "description": "Includes pull request you opened in the menu list."
-        },
-        {
           "name": "includeAssigned",
           "type": "checkbox",
           "required": false,
           "default": true,
           "label": "Assigned",
+          "title": "Categories to Display",
           "description": "Includes pull request you were assigned to in the menu list."
         },
         {
@@ -282,69 +372,20 @@
         },
         {
           "name": "maxitems",
-          "description": "Maximum Pull Requests shown per category.",
+          "description": "Maximum pull requests shown per category.",
           "type": "textfield",
           "required": false,
-          "title": "Max. Pull Requests per category",
+          "title": "Max Pull Requests per category",
           "placeholder": "5"
         },
         {
           "name": "showtext",
-          "description": "Show Pull Requests Count",
+          "description": "Show pull requests count with menu bar icon.",
           "type": "checkbox",
           "required": false,
           "label": "Show",
           "title": "Icon Count",
           "default": true
-        },
-        {
-          "name": "includeOpenCount",
-          "type": "checkbox",
-          "required": false,
-          "default": true,
-          "title": "Icon Count Categories",
-          "label": "Opened",
-          "description": "Includes pull request you opened in the icon counter."
-        },
-        {
-          "name": "includeAssignedCount",
-          "type": "checkbox",
-          "required": false,
-          "default": true,
-          "label": "Assigned",
-          "description": "Includes pull request you were assigned to in the icon counter."
-        },
-        {
-          "name": "includeMentionedCount",
-          "type": "checkbox",
-          "required": false,
-          "default": true,
-          "label": "Mentioned",
-          "description": "Includes pull request you were mentioned in the icon counter."
-        },
-        {
-          "name": "includeReviewRequestsCount",
-          "type": "checkbox",
-          "required": false,
-          "default": true,
-          "label": "Review Requests",
-          "description": "Includes pull request you were requested to review in the icon counter."
-        },
-        {
-          "name": "includeReviewedCount",
-          "type": "checkbox",
-          "required": false,
-          "default": false,
-          "label": "Reviewed",
-          "description": "Includes pull request you reviewed in the icon counter."
-        },
-        {
-          "name": "includeRecentlyClosedCount",
-          "type": "checkbox",
-          "required": false,
-          "default": false,
-          "label": "Recently Closed",
-          "description": "Includes pull request you recently closed in the icon counter."
         }
       ]
     }
@@ -395,13 +436,13 @@
     }
   ],
   "dependencies": {
+    "@octokit/rest": "^21.0.1",
     "@raycast/api": "^1.76.1",
     "@raycast/utils": "^1.16.0",
     "date-fns": "^3.6.0",
     "graphql-request": "^6.1.0",
     "lodash": "^4.17.21",
-    "node-fetch": "^3.3.2",
-    "octokit": "^4.0.2"
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.2",
@@ -409,9 +450,9 @@
     "@graphql-codegen/typescript-graphql-request": "^6.2.0",
     "@graphql-codegen/typescript-operations": "^4.2.1",
     "@parcel/watcher": "^2.4.1",
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/lodash": "^4.17.5",
-    "@types/node": "^20.14.5",
+    "@types/node": "^22.1.0",
     "@types/react": "^18.3.3",
     "concurrently": "^8.2.2",
     "dotenv": "^16.4.5",

@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
 import { createWriteStream } from "node:fs";
-import { access, constants, copyFile, readdir, readFile, rm } from "node:fs/promises";
+import { access, constants, copyFile, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pipeline as streamPipeline } from "node:stream/promises";
-import { Cache, Toast, environment, confirmAlert, open, showToast } from "@raycast/api";
+import {
+  Cache,
+  Clipboard,
+  Toast,
+  confirmAlert,
+  environment,
+  getPreferenceValues,
+  open,
+  showHUD,
+  showToast,
+} from "@raycast/api";
 import { execa } from "execa";
 import got, { Progress } from "got";
+import { titleToSlug } from "simple-icons/sdk";
 import { JsDelivrNpmResponse, IconData, IconJson, LaunchContext } from "./types.js";
 
 const cache = new Cache();
@@ -107,10 +118,29 @@ export const useVersion = ({ launchContext }: { launchContext?: LaunchContext })
   return version;
 };
 
-export const loadSvg = async (version: string, slug: string) => {
+export const loadSvg = async ({ version, icon, slug }: { version: string; icon: IconData; slug: string }) => {
+  const { defaultLoadSvgAction = "WithBrandColor" } = getPreferenceValues<ExtensionPreferences>();
   const svgPath = join(environment.assetsPath, "pack", `simple-icons-${version}`, "icons", `${slug}.svg`);
-  const svg = await readFile(svgPath, "utf8");
-  return { svg, path: svgPath };
+  let svg = await readFile(svgPath, "utf8");
+  const withBrandColor = defaultLoadSvgAction === "WithBrandColor";
+  if (withBrandColor) svg = svg.replace("<svg ", `<svg fill="#${icon.hex}" `);
+  return { svg, path: svgPath, withBrandColor };
+};
+
+export const copySvg = async ({ version, icon }: { version: string; icon: IconData }) => {
+  const toast = await showToast({
+    style: Toast.Style.Success,
+    title: "",
+    message: "Fetching icon...",
+  });
+  const { svg } = await loadSvg({
+    version,
+    icon,
+    slug: icon.slug || titleToSlug(icon.title),
+  });
+  toast.style = Toast.Style.Success;
+  Clipboard.copy(svg);
+  await showHUD("Copied to Clipboard");
 };
 
 export const cleanDownloadPack = async () => {
@@ -131,16 +161,26 @@ export const cleanAssetPack = async () => {
   );
 };
 
-export const makeCopyToDownload = async (version: string, slug: string) => {
-  const { path: savedPath } = await loadSvg(version, slug);
+export const makeCopyToDownload = async ({
+  version,
+  icon,
+  slug,
+}: {
+  version: string;
+  icon: IconData;
+  slug: string;
+}) => {
+  const { svg, path: savedPath, withBrandColor } = await loadSvg({ version, icon, slug });
   const tmpPath = join(tmpdir(), `${slug}.svg`);
-
   try {
-    await copyFile(savedPath, tmpPath);
+    if (withBrandColor) {
+      await writeFile(tmpPath, svg, "utf8");
+    } else {
+      await copyFile(savedPath, tmpPath);
+    }
   } catch {
     console.error("Failed to copy file");
   }
-
   return tmpPath;
 };
 

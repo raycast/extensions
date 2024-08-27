@@ -9,40 +9,52 @@ struct ContactItem: Codable {
   let emailAddresses: [String]
 }
 
-@raycast func fetchAllContacts() -> [ContactItem] {
+enum MessagesError: Error {
+  case accessDenied
+  case noContacts
+}
+
+@raycast func fetchAllContacts() async throws -> [ContactItem] {
+  let store = CNContactStore()
+
+  do {
+    let authorized = try await store.requestAccess(for: .contacts)
+    guard authorized else {
+      throw MessagesError.accessDenied
+    }
+  } catch {
+    throw MessagesError.accessDenied
+  }
+
   let keys =
     [
-      CNContactGivenNameKey, CNContactFamilyNameKey, CNContactPhoneNumbersKey,
-      CNContactEmailAddressesKey, CNContactIdentifierKey,
+      CNContactGivenNameKey,
+      CNContactFamilyNameKey,
+      CNContactPhoneNumbersKey,
+      CNContactEmailAddressesKey,
+      CNContactIdentifierKey,
     ] as [CNKeyDescriptor]
-  let store = CNContactStore()
-  let request = CNContactFetchRequest(keysToFetch: keys)
 
+  let request = CNContactFetchRequest(keysToFetch: keys)
   var contacts: [ContactItem] = []
 
   do {
-    try store.enumerateContacts(with: request) { (contact, stopPointer) in
-      var phoneNumbers = [String]()
-      var emailAddresses = [String]()
-      for phoneNumber in contact.phoneNumbers {
-        phoneNumbers.append(phoneNumber.value.stringValue)
-      }
-      for emailAddress in contact.emailAddresses {
-        emailAddresses.append(emailAddress.value as String)
-      }
+    try store.enumerateContacts(with: request) { contact, _ in
+      let phoneNumbers = contact.phoneNumbers.map { $0.value.stringValue }
+      let emailAddresses = contact.emailAddresses.map { $0.value as String }
+
       contacts.append(
         ContactItem(
-          id: contact.identifier, givenName: contact.givenName, familyName: contact.familyName,
-          phoneNumbers: phoneNumbers, emailAddresses: emailAddresses))
+          id: contact.identifier,
+          givenName: contact.givenName,
+          familyName: contact.familyName,
+          phoneNumbers: phoneNumbers,
+          emailAddresses: emailAddresses
+        ))
     }
-
   } catch {
-    print("Failed to enumerate contact")
+    throw MessagesError.noContacts
   }
 
-  let sortedContacts = contacts.sorted {
-    ($0.givenName) < ($1.givenName)
-  }
-
-  return sortedContacts
+  return contacts.sorted { $0.givenName < $1.givenName }
 }

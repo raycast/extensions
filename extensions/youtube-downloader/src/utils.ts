@@ -1,4 +1,4 @@
-import ytdl from "ytdl-core";
+import ytdl from "@distube/ytdl-core";
 import { Clipboard, getPreferenceValues, open, showHUD, Toast } from "@raycast/api";
 import { intervalToDuration, formatDuration } from "date-fns";
 import tempfile from "tempfile";

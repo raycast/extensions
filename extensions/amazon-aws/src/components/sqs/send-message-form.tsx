@@ -10,6 +10,7 @@ import {
   useNavigation,
   Clipboard,
   captureException,
+  Keyboard,
 } from "@raycast/api";
 import { MessageAttributeValue, SendMessageCommand, SendMessageCommandInput, SQSClient } from "@aws-sdk/client-sqs";
 import { Queue } from "../../sqs";
@@ -87,7 +88,7 @@ export const SendMessageForm = ({
                 toast.message = `Message ID: ${MessageId}`;
                 toast.primaryAction = {
                   title: "Copy Message ID",
-                  shortcut: { modifiers: ["cmd"], key: "c" },
+                  shortcut: Keyboard.Shortcut.Common.Copy,
                   onAction: () => Clipboard.copy(`${MessageId}`),
                 };
               })
@@ -98,7 +99,7 @@ export const SendMessageForm = ({
                 toast.message = getErrorMessage(err);
                 toast.primaryAction = {
                   title: "Retry",
-                  shortcut: { modifiers: ["cmd"], key: "r" },
+                  shortcut: Keyboard.Shortcut.Common.Refresh,
                   onAction: () => {
                     push(<SendMessageForm queue={queue} mutate={mutate} retryInitValues={values} />);
                     toast.hide();
@@ -106,7 +107,7 @@ export const SendMessageForm = ({
                 };
                 toast.secondaryAction = {
                   title: "Copy Error",
-                  shortcut: { modifiers: ["cmd"], key: "c" },
+                  shortcut: Keyboard.Shortcut.Common.Copy,
                   onAction: () => {
                     Clipboard.copy(getErrorMessage(err));
                     toast.hide();

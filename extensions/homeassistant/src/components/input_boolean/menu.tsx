@@ -1,4 +1,4 @@
-import { MenuBarSubmenu } from "@components/menu";
+import { LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { CopyEntityIDToClipboard } from "@components/state/menu";
 import { State } from "@lib/haapi";
 import { getFriendlyName } from "@lib/utils";
@@ -40,6 +40,7 @@ export function InputBooleanMenubarItem(props: { state: State }) {
       <InputBooleanToggleMenubarItem state={s} />
       <InputBooleanTurnOffMenubarItem state={s} />
       <InputBooleanTurnOnMenubarItem state={s} />
+      <LastUpdateChangeMenubarItem state={s} />
       <CopyEntityIDToClipboard state={s} />
     </MenuBarSubmenu>
   );

@@ -6,9 +6,11 @@ import {
   StravaClubActivity,
   StravaStats,
   StravaSummaryClub,
+  StravaManualActivity,
 } from "./types";
 import { OAuth } from "@raycast/api";
 import { getAccessToken, OAuthService } from "@raycast/utils";
+import { convertDurationToSeconds, convertDistanceToMeters } from "../utils";
 
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
@@ -31,7 +33,7 @@ export async function getAthleteId() {
 export const provider = new OAuthService({
   client,
   clientId: "124781",
-  scope: "activity:read_all",
+  scope: "activity:read_all,activity:write",
   authorizeUrl:
     "https://oauth.raycast.com/v1/authorize/hjLeAV3qmZrhmII7Sm4bjHk5m8OrrL_1YzG7rKKv7cwUjlNsZ5LR0sjK52gRlpeb0Tif3S9o7E8DmnkNrTGaEXMGClw62n1zFdjRkTx5_pMFKHGq1xYOaMfdDM6yK_ifszu3GuNhbg3Hfqw",
   tokenUrl:
@@ -191,6 +193,40 @@ export const getClubActivities = async (clubId: string, page = 1, pageSize = PAG
   } catch (err) {
     const error = err instanceof Error ? err.message : "An error occurred";
     console.error("getClubActivities Error:", err);
+    throw new Error(error);
+  }
+};
+
+export const createActivity = async (activityValues: StravaManualActivity) => {
+  const isTrainer = activityValues.isTrainer ? 1 : 0;
+  const isCommute = activityValues.isCommute ? 1 : 0;
+
+  try {
+    const { token } = await getAccessToken();
+    const response = await fetch("https://www.strava.com/api/v3/activities", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: activityValues.name,
+        sport_type: activityValues.sportType,
+        start_date_local: activityValues.date,
+        elapsed_time: convertDurationToSeconds(activityValues.duration),
+        description: activityValues.description,
+        distance: convertDistanceToMeters(activityValues.distance, activityValues.distanceUnit),
+        trainer: isTrainer,
+        commute: isCommute,
+      }),
+    });
+    const json = await response.json();
+    if ((json as Error).message) {
+      throw new Error((json as Error).message);
+    }
+    return true;
+  } catch (err) {
+    const error = err instanceof Error ? err.message : "An error occurred";
     throw new Error(error);
   }
 };

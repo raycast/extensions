@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon, launchCommand, LaunchType } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Icon, launchCommand, LaunchType, Keyboard } from "@raycast/api";
 import { format } from "date-fns";
 
 import { NotificationResult } from "./api/getNotifications";
@@ -242,7 +242,7 @@ function Notifications() {
                           title="Delete Notification"
                           icon={Icon.Trash}
                           style={Action.Style.Destructive}
-                          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                          shortcut={Keyboard.Shortcut.Common.Remove}
                           onAction={() => deleteNotification(notification)}
                         />
                       </ActionPanel.Section>

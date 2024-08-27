@@ -27,9 +27,15 @@ export function CopyToClipboard({
           title: `Copying ${field}...`,
         });
         try {
-          const attributeQueryParam = attribute ? `?attribute=${attribute}` : "";
-          const uri = `op://${vault_id}/${id}/${field}${attributeQueryParam}`;
-          const stdout = execFileSync(CLI_PATH, ["read", uri]);
+          let stdout;
+          if (attribute === "otp") {
+            // based on OTP-type not field name
+            stdout = execFileSync(CLI_PATH, ["item", "get", id, "--otp"]);
+          } else {
+            const attributeQueryParam = attribute ? `?attribute=${attribute}` : "";
+            const uri = `op://${vault_id}/${id}/${field}${attributeQueryParam}`;
+            stdout = execFileSync(CLI_PATH, ["read", uri]);
+          }
           await Clipboard.copy(stdout.toString().trim(), { concealed: true });
 
           toast.style = Toast.Style.Success;

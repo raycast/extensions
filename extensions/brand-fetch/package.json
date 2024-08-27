@@ -27,9 +27,9 @@
       ],
       "arguments": [
         {
-          "name": "domain",
+          "name": "query",
           "required": true,
-          "placeholder": "www.brandfetch.com",
+          "placeholder": "Type a brand name",
           "type": "text"
         }
       ]

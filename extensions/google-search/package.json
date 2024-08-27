@@ -5,6 +5,9 @@
   "description": "Google search with autosuggestions",
   "icon": "command-icon.png",
   "author": "mblode",
+  "contributors": [
+    "VBenny42"
+  ],
   "license": "MIT",
   "categories": [
     "Web"
