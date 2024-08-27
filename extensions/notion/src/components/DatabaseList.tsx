@@ -2,11 +2,13 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
-import { useDatabaseProperties } from "../hooks";
+import { useDatabaseProperties, useKanbanViewConfig } from "../hooks";
 import { queryDatabase, getPageName, Page, User } from "../utils/notion";
 
-import { DatabaseView } from "./DatabaseView";
+import { DatabaseKanbanView } from "./DatabaseKanbanView";
 import { CreatePageForm } from "./forms";
+
+import { PageListItem } from ".";
 
 type DatabaseListProps = {
   databasePage: Page;
@@ -30,6 +32,7 @@ export function DatabaseList({ databasePage, setRecentPage, removeRecentPage, us
     { keepPreviousData: true, initialData: [] },
   );
   const { data: databaseProperties, isLoading: isLoadingDatabaseProperties } = useDatabaseProperties(databaseId);
+  const { kanbanConfig } = useKanbanViewConfig(databaseId);
 
   useEffect(() => {
     setRecentPage(databasePage);
@@ -53,16 +56,30 @@ export function DatabaseList({ databasePage, setRecentPage, removeRecentPage, us
       }
       throttle
     >
-      <DatabaseView
-        databaseId={databaseId}
-        databasePages={databasePages ?? []}
-        databaseProperties={databaseProperties}
-        sort={sort}
-        mutate={mutate}
-        setRecentPage={setRecentPage}
-        removeRecentPage={removeRecentPage}
-        users={users}
-      />
+      {kanbanConfig?.active ? (
+        <DatabaseKanbanView
+          kanbanConfig={kanbanConfig}
+          databaseId={databaseId}
+          databasePages={databasePages}
+          databaseProperties={databaseProperties}
+          setRecentPage={setRecentPage}
+          removeRecentPage={removeRecentPage}
+          mutate={mutate}
+          users={users}
+        />
+      ) : (
+        databasePages?.map((p) => (
+          <PageListItem
+            key={`database-${databaseId}-page-${p.id}`}
+            page={p}
+            mutate={mutate}
+            databaseProperties={databaseProperties}
+            setRecentPage={setRecentPage}
+            removeRecentPage={removeRecentPage}
+            users={users}
+          />
+        ))
+      )}
 
       <List.EmptyView
         title="No pages found"

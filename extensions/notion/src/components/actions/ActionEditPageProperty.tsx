@@ -12,7 +12,7 @@ import {
   ReadablePropertyType,
 } from "../../utils/notion";
 
-type EditPropertyOptions = PropertyConfig<"select" | "multi_select">["options"][number] & {
+export type EditPropertyOptions = PropertyConfig<"select" | "multi_select">["options"][number] & {
   icon?: string;
 };
 
