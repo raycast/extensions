@@ -21,8 +21,10 @@ function getUserShellPath() {
   const command = `${shell} -l -i -c 'echo $PATH'`;
 
   try {
-    const path = execSync(command).toString().trim();
-    return path;
+    const PATH = execSync(command).toString().trim();
+    // Add ~/.local/bin to the PATH
+    const localBinPath = path.join(os.homedir(), ".local", "bin");
+    return `${localBinPath}:${PATH}`;
   } catch (error) {
     console.error("Error retrieving shell PATH:", error);
     return process.env.PATH || "";
@@ -159,7 +161,6 @@ export default function Command() {
         detached: true,
       });
       childProcess.unref();
-      // attachToLogsFile();
       attachToLogsFile();
       exitCode = await new Promise((resolve) => childProcess!.on("close", (code) => resolve(code || 0)));
     }
