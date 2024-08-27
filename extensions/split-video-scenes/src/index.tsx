@@ -10,10 +10,11 @@ import {
   Toast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { ChildProcess, exec, execSync } from "child_process";
+import { ChildProcess, exec, execSync, spawn } from "child_process";
+import fs from "fs";
 import os from "os";
 import path from "path";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function getUserShellPath() {
   const shell = os.userInfo().shell || "/bin/sh";
@@ -43,17 +44,34 @@ function isCommandInstalled(command: string) {
 
 let childProcess: ChildProcess | null = null;
 
+let fileStream: ChildProcess | null = null;
+const logFilePath = path.join("/tmp", "scenedetect.log");
+
 export default function Command() {
   const [logs, setLogs] = useState("");
   const [detectionMethod, setDetectionMethod] = useState("detect-content");
-  const finderItems = usePromise(() => getSelectedFinderItems(), [], {
-    onData(data) {
-      const els = data?.map((item) => item.path) || [];
-      if (els.length > 0) {
-        setFilePaths(els);
+  const finderItems = usePromise(
+    async () => {
+      try {
+        return await getSelectedFinderItems();
+      } catch (error) {
+        return [];
       }
     },
-  });
+    [],
+    {
+      onData(data) {
+        const els = data?.map((item) => item.path) || [];
+        if (els.length > 0) {
+          setFilePaths(els);
+        }
+      },
+    },
+  );
+
+  useAsyncEffect(() => {
+    return attachToLogsFile();
+  }, [setLogs]);
 
   async function handleSubmit() {
     if (!filePaths || filePaths.length === 0) {
@@ -62,13 +80,22 @@ export default function Command() {
     }
 
     if (!isCommandInstalled("scenedetect")) {
+      if (!isCommandInstalled("brew")) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Homebrew and scenedetect not installed",
+          message:
+            "Please install scenedetect first or Homebrew (so the extension can automatically install scenedetect) ",
+        });
+        return;
+      }
       const options: Alert.Options = {
         title: "scenedetect command not found",
-        message: "The command 'scenedetect' is not installed. Do you want to install it with pip now?",
+        message: "The command 'scenedetect' is not installed. Do you want to install it with pipx now?",
         primaryAction: {
           title: "Install",
           onAction: async () => {
-            const installCommand = "pip install scenedetect[opencv] --upgrade";
+            const installCommand = 'brew install pipx && pipx install "scenedetect[opencv]" --force';
             console.log(`Executing install command: ${installCommand}`);
             setLogs((prevLogs) => `Executing install command: ${installCommand}\n${prevLogs}`);
 
@@ -76,7 +103,7 @@ export default function Command() {
               childProcess.kill();
             }
             childProcess = exec(installCommand, {
-              env: { ...process.env },
+              env: { ...process.env, HOMEBREW_NO_AUTO_UPDATE: "1" },
             });
 
             childProcess.stdout?.on("data", (data) => {
@@ -99,6 +126,7 @@ export default function Command() {
 
             if (exitCode === 0) {
               setLogs("");
+              process.env.PATH = getUserShellPath();
             } else {
               showToast({ style: Toast.Style.Failure, title: "Error", message: "Failed to install command" });
             }
@@ -113,52 +141,84 @@ export default function Command() {
     }
 
     let exitCode = 0;
+
+    fs.writeFileSync(logFilePath, "");
+    const outputLogFile = fs.openSync(logFilePath, "w");
     for (const videoPath of filePaths) {
       const outputDir = path.join(path.dirname(videoPath), path.basename(videoPath, path.extname(videoPath)));
 
-      const command = `scenedetect -i "${videoPath}" -o "${outputDir}" ${detectionMethod} split-video`;
+      const command = `scenedetect -i "${videoPath}" -o "${outputDir}" ${detectionMethod} split-video; echo 'deleting log file'; rm "${logFilePath}"`;
 
       console.log(`Executing command: ${command}`);
       setLogs((prevLogs) => `Executing command: ${command}\n${prevLogs}`);
 
-      childProcess = exec(command, {
+      childProcess = spawn(command, {
         env: { ...process.env },
+        shell: true,
+        stdio: ["ignore", outputLogFile, outputLogFile],
+        detached: true,
       });
-
-      childProcess.stdout?.on("data", (data) => {
-        if (childProcess?.killed) {
-          return;
-        }
-        console.error(data.toString());
-        setLogs((prevLogs) => `${data.toString()}\n${prevLogs}`);
-      });
-
-      childProcess.stderr?.on("data", (data) => {
-        if (childProcess?.killed) {
-          return;
-        }
-        console.error(data.toString());
-        setLogs((prevLogs) => `${data.toString()}\n${prevLogs}`);
-      });
-      exitCode = await new Promise((resolve) => childProcess!.on("exit", (code) => resolve(code || 0)));
+      childProcess.unref();
+      // attachToLogsFile();
+      attachToLogsFile();
+      exitCode = await new Promise((resolve) => childProcess!.on("close", (code) => resolve(code || 0)));
     }
     if (exitCode === 0) {
       closeMainWindow();
     }
   }
 
+  async function attachToLogsFile() {
+    console.log("Attaching to logs file");
+
+    if (!fs.existsSync(logFilePath)) {
+      return;
+    }
+    if (fileStream) {
+      return;
+    }
+    const intervalId = setInterval(() => {
+      if (!fs.existsSync(logFilePath)) {
+        setLogs("");
+        console.log("Log file deleted, killing tail process");
+        if (fileStream) {
+          fileStream.kill();
+          fileStream = null;
+        }
+        clearInterval(intervalId);
+      }
+    }, 1000);
+
+    const initialContent = fs.readFileSync(logFilePath, "utf8");
+    setLogs((prevLogs) => `${initialContent}\n${prevLogs}`);
+    fileStream = spawn("tail", ["-f", logFilePath]);
+    fileStream?.stdout?.on("data", (data) => {
+      console.log(data.toString());
+      setLogs((prevLogs) => `${data.toString()}\n${prevLogs}`);
+    });
+    fileStream?.stderr?.on("data", (data) => {
+      console.log(data.toString());
+      setLogs((prevLogs) => `${data.toString()}\n${prevLogs}`);
+    });
+    await new Promise((resolve) => fileStream?.on("close", (code) => resolve(code || 0)));
+  }
+
   const [filePaths, setFilePaths] = useState(finderItems?.data?.map((x) => x.path) || []);
 
   async function handleCancel() {
+    if (fileStream) {
+      fs.unlinkSync(logFilePath);
+      fileStream.kill();
+    }
     if (!childProcess) {
       return;
     }
     childProcess.kill();
-    await new Promise((resolve) => childProcess!.on("exit", (code) => resolve(code || 0)));
+    await new Promise((resolve) => childProcess!.on("close", (code) => resolve(code || 0)));
     setLogs("");
   }
 
-  if (logs && filePaths.length > 0) {
+  if (logs) {
     return (
       <Detail
         actions={
@@ -167,7 +227,6 @@ export default function Command() {
           </ActionPanel>
         }
         isLoading={true}
-        navigationTitle="logs"
         key="markdown logs"
         markdown={"```\n" + logs + "\n```"}
       />
@@ -198,6 +257,7 @@ export default function Command() {
       <Form.Dropdown
         id="detectionMethod"
         title="Detection Method"
+        info="Threshold detects fades using frame intensity, content detects fast cuts by comparing adjacent frames, and adaptive compares frame scores to neighbors."
         value={detectionMethod}
         onChange={setDetectionMethod}
       >
@@ -207,4 +267,21 @@ export default function Command() {
       </Form.Dropdown>
     </Form>
   );
+}
+
+function useAsyncEffect(effect: () => Promise<void>, deps: object[]) {
+  const isProcessing = useRef(false);
+
+  useEffect(() => {
+    if (!isProcessing.current) {
+      isProcessing.current = true;
+      effect()
+        .catch((error) => {
+          console.error("Error in useAsyncEffect:", error);
+        })
+        .finally(() => {
+          isProcessing.current = false;
+        });
+    }
+  }, deps);
 }
