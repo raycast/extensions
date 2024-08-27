@@ -34,7 +34,7 @@
         },
         {
             "name": "search-collections",
-            "title": "Search my Collections",
+            "title": "Search My Collections",
             "description": "Search your Sublime Collections",
             "mode": "view"
         },
