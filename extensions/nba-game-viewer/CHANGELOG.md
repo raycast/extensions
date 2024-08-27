@@ -1,5 +1,9 @@
 # NBA Game Viewer Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- If `useLastValue` is not selected in preference, then default values for dropdown is picked from preference.
+
 ## [Improvements] - 2024-08-22
 
 - Adds the ability to select either the NBA or WNBA league to view games, standings, and more.
