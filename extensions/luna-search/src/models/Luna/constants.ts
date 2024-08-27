@@ -1,9 +1,4 @@
-import { Request, PageContext } from "./RequestModel";
-
-/**
- * The base URL for the Luna API endpoint.
- */
-export const API_ROUTE = "https://proxy-prod.us-east-1.tempo.digital.a2z.com/getPage";
+import { Request, PageContext } from "./Request";
 
 /**
  * The default timeout for API requests, in milliseconds.

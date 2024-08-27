@@ -1,4 +1,4 @@
-import { Widget } from "./ReponseModel";
+import { Widget } from "./Reponse";
 
 // The domain for the Luna platform
 const LUNA_DOMAIN = "https://luna.amazon.com";

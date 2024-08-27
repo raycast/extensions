@@ -1,4 +1,4 @@
-import { PageContext } from "./RequestModel";
+import { PageContext } from "./Request";
 
 /**
  * Represents the groups of page members within the Luna API response.
@@ -35,7 +35,7 @@ export interface Widget {
  * Represents the overall structure of the Luna API response.
  * The response contains a page context and a collection of page member groups.
  */
-export interface Response {
+export interface LunaResponse {
   pageContext: PageContext;
   pageMemberGroups: PageMemberGroups;
 }
