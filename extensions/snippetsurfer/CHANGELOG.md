@@ -1,5 +1,8 @@
 # SnippetSurfer Changelog
 
+## [Enhancements] - 2024-08-26
+- Make tags in markdown optional.
+
 ## [Enhancements] - 2024-08-05
 - Implement case-insensitive parsing of metadata in markdown files.
 - Handle metadata with tab characters, replacing them with spaces to prevent parsing errors.
