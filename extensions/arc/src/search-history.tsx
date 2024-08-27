@@ -1,17 +1,17 @@
 import { Icon, LaunchProps, List } from "@raycast/api";
+import { useSQL } from "@raycast/utils";
 import { useState } from "react";
-import { historyDatabasePath, getHistoryQuery } from "./sql";
+import { HistoryEntryListItem } from "./list";
+import { getHistoryQuery, historyDatabasePath } from "./sql";
 import { HistoryEntry } from "./types";
 import { VersionCheck } from "./version";
-import { HistoryEntryListItem } from "./list";
-import { useSQL } from "@raycast/utils";
 
 function SearchHistory(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
   const escapedSearchText = searchText.replace(/"/g, '""');
   const { data, isLoading, permissionView } = useSQL<HistoryEntry>(
     historyDatabasePath,
-    getHistoryQuery(escapedSearchText)
+    getHistoryQuery(escapedSearchText),
   );
 
   if (permissionView) {
@@ -26,9 +26,12 @@ function SearchHistory(props: LaunchProps) {
       onSearchTextChange={setSearchText}
     >
       <List.EmptyView icon={Icon.MagnifyingGlass} title="Nothing found ¯\_(ツ)_/¯" />
-      {data?.map((entry) => (
-        <HistoryEntryListItem key={entry.id} entry={entry} searchText={searchText} />
-      ))}
+      <List.Section
+        title="History"
+        subtitle={data ? `${data.length} ${data.length === 1 ? "entry" : "entries"}` : undefined}
+      >
+        {data?.map((entry) => <HistoryEntryListItem key={entry.id} entry={entry} searchText={searchText} />)}
+      </List.Section>
     </List>
   );
 }

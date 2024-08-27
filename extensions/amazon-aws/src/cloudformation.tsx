@@ -2,41 +2,57 @@ import {
   Action,
   ActionPanel,
   Alert,
+  captureException,
   Color,
   confirmAlert,
   Icon,
   List,
   showToast,
   Toast,
-  useNavigation,
+  Clipboard,
+  Keyboard,
 } from "@raycast/api";
 import {
   CloudFormationClient,
   DescribeStacksCommand,
-  Export,
-  ListExportsCommand,
-  ListStackResourcesCommand,
-  ListStacksCommand,
-  StackResourceSummary,
   StackSummary,
   UpdateTerminationProtectionCommand,
 } from "@aws-sdk/client-cloudformation";
-import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedState, useFrecencySorting } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { isReadyToFetch, resourceToConsoleLink } from "./util";
+import { getErrorMessage, resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
+import { useExports, useStackResources, useStacks } from "./hooks/use-cfn";
+
+enum ResourceType {
+  Stacks = "Stacks",
+  Exports = "Exports",
+}
+type SetResourceType = { setResourceType: (value: ResourceType) => void };
 
 export default function CloudFormation() {
-  const [isExportsEnabled, setExportsEnabled] = useCachedState<boolean>("aws-cfn-exports-enabled", false);
+  const [resourceType, setResourceType] = useCachedState<ResourceType>("resource-type", ResourceType.Stacks, {
+    cacheNamespace: "aws-cfn",
+  });
 
-  if (isExportsEnabled) {
-    return <CloudFormationExports setExportsEnabled={setExportsEnabled} />;
+  if (resourceType === ResourceType.Exports) {
+    return <CloudFormationExports {...{ setResourceType }} />;
   }
-  return <CloudFormationStacks setExportsEnabled={setExportsEnabled} />;
+  return <CloudFormationStacks {...{ setResourceType }} />;
 }
 
-const CloudFormationStacks = ({ setExportsEnabled }: { setExportsEnabled: (value: boolean) => void }) => {
-  const { data: stacks, error, isLoading, revalidate } = useCachedPromise(fetchStacks);
+const CloudFormationStacks = ({ setResourceType }: SetResourceType) => {
+  const { stacks, error, isLoading, mutate } = useStacks();
+
+  const {
+    data: sortedStacks,
+    visitItem: visit,
+    resetRanking,
+  } = useFrecencySorting(stacks, {
+    namespace: "aws-cfn-stacks",
+    key: (stack) => stack.StackName!,
+    sortUnvisited: (a, b) => a.StackName!.localeCompare(b.StackName!),
+  });
 
   return (
     <List
@@ -44,7 +60,7 @@ const CloudFormationStacks = ({ setExportsEnabled }: { setExportsEnabled: (value
       searchBarPlaceholder="Filter stacks by name, status or description..."
       filtering
       navigationTitle="CloudFormation Stacks"
-      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={mutate} />}
     >
       {error && (
         <List.EmptyView
@@ -53,10 +69,10 @@ const CloudFormationStacks = ({ setExportsEnabled }: { setExportsEnabled: (value
           icon={{ source: Icon.Warning, tintColor: Color.Red }}
         />
       )}
-      {!error && stacks?.length === 0 && (
+      {!error && sortedStacks.length === 0 && (
         <List.EmptyView title="No stacks found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
-      {stacks?.map((s) => (
+      {sortedStacks.map((s) => (
         <List.Item
           key={s.StackId}
           keywords={[s.StackName || "", s.StackStatus || "", s.TemplateDescription || ""]}
@@ -65,32 +81,34 @@ const CloudFormationStacks = ({ setExportsEnabled }: { setExportsEnabled: (value
           subtitle={s.TemplateDescription}
           actions={
             <ActionPanel>
-              <AwsAction.Console url={resourceToConsoleLink(s.StackId, "AWS::CloudFormation::Stack")} />
+              <AwsAction.Console
+                url={resourceToConsoleLink(s.StackId, "AWS::CloudFormation::Stack")}
+                onAction={() => visit(s)}
+              />
               <ActionPanel.Section title="Stack Actions">
                 <Action.Push
                   icon={Icon.Eye}
                   title="Show Stack Resources"
                   target={<CloudFormationStackResources stack={s} />}
                   shortcut={{ modifiers: ["ctrl"], key: "r" }}
+                  onPush={() => visit(s)}
                 />
                 <Action
                   icon={Icon.LockUnlocked}
                   title="Update Termination Protection"
                   shortcut={{ modifiers: ["ctrl"], key: "t" }}
-                  onAction={() => updateTerminationProtection(s.StackName || "")}
+                  onAction={async () => {
+                    await visit(s);
+                    await updateTerminationProtection(s.StackName || "");
+                  }}
                 />
-                <Action.CopyToClipboard title="Copy Stack ID" content={s.StackId || ""} />
-                <Action.CopyToClipboard title="Copy Stack Name" content={s.StackName || ""} />
+                <Action.CopyToClipboard title="Copy Stack ID" content={s.StackId || ""} onCopy={() => visit(s)} />
+                <Action.CopyToClipboard title="Copy Stack Name" content={s.StackName || ""} onCopy={() => visit(s)} />
+                <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => resetRanking(s)} />
               </ActionPanel.Section>
-              <ActionPanel.Section title="Other Resources">
-                <Action.Push
-                  icon={Icon.Eye}
-                  title={"Show Exports"}
-                  target={<CloudFormationExports revalidateStacks={revalidate} setExportsEnabled={setExportsEnabled} />}
-                  onPush={() => setExportsEnabled(true)}
-                  shortcut={{ modifiers: ["ctrl"], key: "e" }}
-                />
-              </ActionPanel.Section>
+              <AwsAction.SwitchResourceType
+                {...{ setResourceType, current: ResourceType.Stacks, enumType: ResourceType }}
+              />
             </ActionPanel>
           }
           accessories={[
@@ -104,7 +122,7 @@ const CloudFormationStacks = ({ setExportsEnabled }: { setExportsEnabled: (value
 };
 
 const CloudFormationStackResources = ({ stack }: { stack: StackSummary }) => {
-  const { data: resources, error, isLoading } = useCachedPromise(fetchStackResources, [stack.StackName || ""]);
+  const { resources, error, isLoading } = useStackResources(stack.StackName || "");
 
   return (
     <List
@@ -147,15 +165,18 @@ const CloudFormationStackResources = ({ stack }: { stack: StackSummary }) => {
   );
 };
 
-const CloudFormationExports = ({
-  revalidateStacks,
-  setExportsEnabled,
-}: {
-  revalidateStacks?: () => void;
-  setExportsEnabled: (value: boolean) => void;
-}) => {
-  const { data: exports, isLoading, revalidate, error } = useCachedPromise(fetchExports, []);
-  const { push, pop } = useNavigation();
+const CloudFormationExports = ({ setResourceType }: SetResourceType) => {
+  const { exports, isLoading, error, mutate } = useExports();
+
+  const {
+    data: sortedExports,
+    visitItem: visit,
+    resetRanking,
+  } = useFrecencySorting(exports, {
+    namespace: "aws-cfn-exports",
+    key: (e) => e.Name!,
+    sortUnvisited: (a, b) => a.Name!.localeCompare(b.Name!),
+  });
 
   return (
     <List
@@ -163,7 +184,7 @@ const CloudFormationExports = ({
       searchBarPlaceholder="Filter exports by name, value or stack..."
       filtering
       navigationTitle="CloudFormation Exports"
-      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={mutate} />}
     >
       {error && (
         <List.EmptyView
@@ -172,37 +193,27 @@ const CloudFormationExports = ({
           icon={{ source: Icon.Warning, tintColor: Color.Red }}
         />
       )}
-      {!error && exports?.length === 0 && (
+      {!error && sortedExports.length === 0 && (
         <List.EmptyView title="No exports found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
-      {exports?.map((e) => (
+      {sortedExports.map((e) => (
         <List.Item
           key={e.Name}
           icon={{ source: Icon.Hashtag, tintColor: Color.Purple }}
-          title={e.Value || ""}
+          title={e.Value!}
           subtitle={e.Name}
           keywords={[e.Name || "", e.ExportingStackId || "", e.Value || ""]}
           accessories={[{ tag: e.ExportingStackId?.split("/")[1] }]}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard title="Copy Export Name" content={e.Name || ""} />
-              <Action.CopyToClipboard title="Copy Export Value" content={e.Value || ""} />
-              <ActionPanel.Section title="Resource Types">
-                <Action
-                  icon={Icon.Eye}
-                  title="Show Stacks"
-                  onAction={() => {
-                    pop();
-                    if (revalidateStacks) {
-                      revalidateStacks();
-                    } else {
-                      push(<CloudFormationStacks setExportsEnabled={setExportsEnabled} />);
-                    }
-                    setExportsEnabled(false);
-                  }}
-                  shortcut={{ modifiers: ["ctrl"], key: "s" }}
-                />
+              <ActionPanel.Section>
+                <Action.CopyToClipboard title="Copy Export Name" content={e.Name || ""} onCopy={() => visit(e)} />
+                <Action.CopyToClipboard title="Copy Export Value" content={e.Value || ""} onCopy={() => visit(e)} />
+                <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => resetRanking(e)} />
               </ActionPanel.Section>
+              <AwsAction.SwitchResourceType
+                {...{ setResourceType, current: ResourceType.Exports, enumType: ResourceType }}
+              />
             </ActionPanel>
           }
         />
@@ -211,80 +222,69 @@ const CloudFormationExports = ({
   );
 };
 
-const fetchStacks = async (token?: string, stacks?: StackSummary[]): Promise<StackSummary[]> => {
-  if (!isReadyToFetch()) return [];
-  const { NextToken, StackSummaries } = await new CloudFormationClient({}).send(
-    new ListStacksCommand({ NextToken: token }),
-  );
-
-  const combinedStacks = [...(stacks || []), ...(StackSummaries || [])];
-
-  if (NextToken) {
-    return fetchStacks(NextToken, combinedStacks);
-  }
-
-  return combinedStacks.filter((stack) => stack.StackStatus !== "DELETE_COMPLETE");
-};
-
-const fetchStackResources = async (
-  stackName: string,
-  token?: string,
-  stacks?: StackResourceSummary[],
-): Promise<StackResourceSummary[]> => {
-  const { StackResourceSummaries, NextToken } = await new CloudFormationClient({}).send(
-    new ListStackResourcesCommand({ StackName: stackName, NextToken: token }),
-  );
-
-  if (NextToken) {
-    return fetchStackResources(stackName, NextToken, [...(stacks || []), ...(StackResourceSummaries || [])]);
-  }
-
-  return [...(stacks || []), ...(StackResourceSummaries || [])];
-};
-
-const fetchExports = async (token?: string, exports?: Export[]): Promise<Export[]> => {
-  const { Exports, NextToken } = await new CloudFormationClient({}).send(new ListExportsCommand({ NextToken: token }));
-
-  if (NextToken) {
-    return fetchExports(NextToken, [...(exports || []), ...(Exports || [])]);
-  }
-
-  return [...(exports || []), ...(Exports || [])];
-};
-
 const updateTerminationProtection = async (stackName: string) => {
-  const { Stacks } = await new CloudFormationClient({}).send(new DescribeStacksCommand({ StackName: stackName }));
-  const terminationProtection = !Stacks![0].EnableTerminationProtection;
-
-  await confirmAlert({
-    title: `${terminationProtection ? "Enable" : "Disable"} Termination Protection?`,
-    message: `Are you sure you want to ${terminationProtection ? "enable" : "disable"} termination protection?`,
-    icon: { source: Icon.Exclamationmark3, tintColor: Color.Red },
-    primaryAction: {
-      title: terminationProtection ? "Enable" : "Disable",
-      style: terminationProtection ? Alert.ActionStyle.Default : Alert.ActionStyle.Destructive,
-      onAction: async () => {
-        await showToast({
-          style: Toast.Style.Animated,
-          title: `${terminationProtection ? "Enabling" : "Disabling"} Termination Protection...`,
-        });
-        try {
-          await new CloudFormationClient({}).send(
-            new UpdateTerminationProtectionCommand({
-              EnableTerminationProtection: terminationProtection,
-              StackName: stackName,
-            }),
-          );
-          await showToast({
-            style: Toast.Style.Success,
-            title: `${terminationProtection ? "Enabled" : "Disabled"} Termination Protection`,
-          });
-        } catch (error) {
-          await showFailureToast(error, { title: "Failed to update termination protection" });
-        }
-      },
-    },
-  });
+  const toast = await showToast({ style: Toast.Style.Animated, title: `⏳ Getting stack details for ${stackName}` });
+  new CloudFormationClient({})
+    .send(new DescribeStacksCommand({ StackName: stackName }))
+    .then(async ({ Stacks }) => {
+      const terminationProtection = !Stacks![0].EnableTerminationProtection;
+      await confirmAlert({
+        title: `${terminationProtection ? "Enable" : "Disable"} Termination Protection?`,
+        message: `Are you sure you want to ${terminationProtection ? "enable" : "disable"} termination protection?`,
+        icon: { source: Icon.Exclamationmark3, tintColor: Color.Red },
+        primaryAction: {
+          title: terminationProtection ? "Enable" : "Disable",
+          style: terminationProtection ? Alert.ActionStyle.Default : Alert.ActionStyle.Destructive,
+          onAction: async () => {
+            toast.title = `⏳ ${terminationProtection ? "Enabling" : "Disabling"} Termination Protection`;
+            new CloudFormationClient({})
+              .send(
+                new UpdateTerminationProtectionCommand({
+                  EnableTerminationProtection: terminationProtection,
+                  StackName: stackName,
+                }),
+              )
+              .then(() => {
+                toast.style = Toast.Style.Success;
+                toast.title = `${terminationProtection ? "Enabled" : "Disabled"} Termination Protection`;
+              })
+              .catch((err) => {
+                captureException(err);
+                toast.style = Toast.Style.Failure;
+                toast.title = `❌ Failed to ${terminationProtection ? "enable" : "disable"} termination protection`;
+                toast.message = getErrorMessage(err);
+                toast.primaryAction = {
+                  title: "Retry",
+                  shortcut: Keyboard.Shortcut.Common.Refresh,
+                  onAction: () => updateTerminationProtection(stackName),
+                };
+                toast.secondaryAction = {
+                  title: "Copy Error",
+                  shortcut: Keyboard.Shortcut.Common.Copy,
+                  onAction: () => Clipboard.copy(getErrorMessage(err)),
+                };
+              });
+          },
+        },
+        dismissAction: { title: "Cancel", onAction: () => toast.hide() },
+      });
+    })
+    .catch((err) => {
+      captureException(err);
+      toast.style = Toast.Style.Failure;
+      toast.title = `❌ Failed to get stack details for ${stackName}`;
+      toast.message = getErrorMessage(err);
+      toast.primaryAction = {
+        title: "Retry",
+        shortcut: Keyboard.Shortcut.Common.Refresh,
+        onAction: () => updateTerminationProtection(stackName),
+      };
+      toast.secondaryAction = {
+        title: "Copy Error",
+        shortcut: Keyboard.Shortcut.Common.Copy,
+        onAction: () => Clipboard.copy(getErrorMessage(err)),
+      };
+    });
 };
 
 const statusToIcon = (status: string) => {

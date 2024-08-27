@@ -1,5 +1,26 @@
 # Brand Icons Changelog
 
+## [Enhancements] - 2024-08-05
+
+- Apply brand color to default copying/opening SVG
+- Add preferences for configuring default copying/opening behaviors
+- Remove a unused placeholder field from preferences
+
+## [Maintenance] - 2024-07-31
+
+- Bump dependencies
+- Use `fast-fuzzy` for searching
+- Add support for searching aliases
+- Limit memory usage with array slices
+- Fix API documentation in readme
+- Update screenshots
+
+## [Enhancements] - 2024-06-07
+
+- Optimize load time
+- Add new version prompt
+- Bump dependencies
+
 ## [New Feature] - 2024-05-24
 
 - Add offline support

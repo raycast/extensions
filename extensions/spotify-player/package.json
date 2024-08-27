@@ -27,7 +27,9 @@
     "devbear",
     "rfaccio",
     "badta5te",
-    "andyburris"
+    "andyburris",
+    "thomaslombart",
+    "rhesamu"
   ],
   "license": "MIT",
   "preferences": [
@@ -49,6 +51,15 @@
       "description": "A single unified search command. Search for artists, albums, songs, playlists, podcasts, and episodes. Use the dropdown menu to filter your search to a specific category. Each category offers contextual actions, so you can dive deeper into the search.",
       "mode": "view",
       "preferences": [
+        {
+          "title": "Filters",
+          "label": "Music Only",
+          "default": false,
+          "description": "Only show results for music. Podcasts and episodes are excluded.",
+          "name": "musicOnly",
+          "required": true,
+          "type": "checkbox"
+        },
         {
           "title": "Top View",
           "data": [
@@ -389,11 +400,26 @@
       "description": "See your queue.",
       "mode": "view",
       "disabledByDefault": true
+    },
+    {
+      "name": "generatePlaylist",
+      "title": "Generate Playlist",
+      "subtitle": "Spotify",
+      "description": "Generate a Spotify playlist using Raycast AI.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "description",
+          "placeholder": "Playlist description",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
-    "@raycast/utils": "^1.10.1",
+    "@raycast/api": "^1.75.1",
+    "@raycast/utils": "^1.16.2",
     "node-fetch": "^3.3.2",
     "oazapfts": "^4.10.0"
   },

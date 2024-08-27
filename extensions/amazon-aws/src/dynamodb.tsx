@@ -1,18 +1,27 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Image, List, showToast, Toast } from "@raycast/api";
-import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
-import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { isReadyToFetch, resourceToConsoleLink } from "./util";
-import { AwsAction } from "./components/common/action";
 import {
-  DescribeTableCommand,
-  DynamoDBClient,
-  ListTablesCommand,
-  TableDescription,
-  UpdateTableCommand,
-} from "@aws-sdk/client-dynamodb";
+  Action,
+  ActionPanel,
+  Alert,
+  captureException,
+  Color,
+  confirmAlert,
+  Icon,
+  Image,
+  List,
+  showToast,
+  Toast,
+  Clipboard,
+  Keyboard,
+} from "@raycast/api";
+import { MutatePromise, useCachedState, useFrecencySorting } from "@raycast/utils";
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { getErrorMessage, resourceToConsoleLink } from "./util";
+import { AwsAction } from "./components/common/action";
+import { DynamoDBClient, TableDescription, UpdateTableCommand } from "@aws-sdk/client-dynamodb";
 import { DeleteItemForm } from "./components/dynamodb/delete-item-form";
 import { UpdateItemForm } from "./components/dynamodb/update-item-form";
 import { QueryForm } from "./components/dynamodb/query-form";
+import { useTables } from "./hooks/use-ddb";
 
 export interface KeyElement {
   name: string;
@@ -25,16 +34,28 @@ export interface PrimaryKey {
 export type Table = TableDescription & { keys: Record<string, PrimaryKey> };
 
 export default function DynamoDb() {
-  const [isDetailsEnabled, setDetailsEnabled] = useCachedState<boolean>("aws-dynamodb-details-enabled", false);
-  const { data: tables, isLoading, error, revalidate } = useCachedPromise(fetchTables);
+  const [isDetailsEnabled, setDetailsEnabled] = useCachedState<boolean>("show-details", false, {
+    cacheNamespace: "aws-dynamodb",
+  });
+  const { tables, isLoading, error, mutate } = useTables();
+
+  const {
+    data: sortedTables,
+    resetRanking,
+    visitItem: visit,
+  } = useFrecencySorting(tables, {
+    key: (table) => table.TableName!,
+    namespace: "aws-dynamodb",
+    sortUnvisited: (a, b) => a.TableName!.localeCompare(b.TableName!),
+  });
 
   return (
     <List
       isLoading={isLoading}
-      isShowingDetail={!isLoading && !error && isDetailsEnabled}
+      isShowingDetail={!isLoading && !error && (tables || []).length > 0 && isDetailsEnabled}
       filtering
       searchBarPlaceholder="Filter tables by name, id, billing, status, gsi..."
-      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={mutate} />}
     >
       {!isLoading && error && (
         <List.EmptyView
@@ -43,10 +64,10 @@ export default function DynamoDb() {
           icon={{ source: Icon.Warning, tintColor: Color.Red }}
         />
       )}
-      {!isLoading && !error && (tables || []).length < 1 && (
+      {!isLoading && !error && sortedTables.length < 1 && (
         <List.EmptyView title="No tables found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
-      {(tables || []).map((table) => (
+      {sortedTables.map((table) => (
         <List.Item
           key={table.TableArn}
           title={table.TableName || ""}
@@ -58,7 +79,20 @@ export default function DynamoDb() {
             ...((table.GlobalSecondaryIndexes || []).map((gsi) => `${gsi.IndexName}`) || []),
           ]}
           accessories={[
-            { date: table.CreationDateTime, tooltip: "Creation Time", icon: Icon.Calendar },
+            ...(isDetailsEnabled
+              ? []
+              : [
+                  {
+                    date: table.CreationDateTime,
+                    tooltip: "Creation Time",
+                    icon: { source: Icon.Calendar, tintColor: Color.Blue },
+                  },
+                ]),
+            {
+              text: { value: (table.ItemCount ?? 0) + "", color: Color.Magenta },
+              icon: { source: Icon.Layers, tintColor: Color.Magenta },
+              tooltip: "Items",
+            },
             {
               icon:
                 table.BillingModeSummary?.BillingMode === "PAY_PER_REQUEST"
@@ -66,7 +100,7 @@ export default function DynamoDb() {
                   : { source: Icon.Bolt, tintColor: Color.Magenta },
               tooltip: table.BillingModeSummary?.BillingMode?.replaceAll("_", " "),
             },
-            { icon: statusToIcon(`${table.TableStatus}`), tooltip: table.TableStatus },
+            ...(isDetailsEnabled ? [] : [{ icon: statusToIcon(`${table.TableStatus}`), tooltip: table.TableStatus }]),
           ]}
           icon={"aws-icons/dynamodb/table.png"}
           detail={
@@ -75,10 +109,19 @@ export default function DynamoDb() {
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Label title="Table Name" text={table.TableName || ""} />
                   <List.Item.Detail.Metadata.Label title="Table Id" text={table.TableId || ""} />
-                  <List.Item.Detail.Metadata.Label title="Created at" text={table.CreationDateTime?.toISOString()} />
+                  <List.Item.Detail.Metadata.Label
+                    title="Created at"
+                    text={table.CreationDateTime?.toISOString()}
+                    icon={{ source: Icon.Calendar, tintColor: Color.Blue }}
+                  />
                   <List.Item.Detail.Metadata.Label
                     title="Table Class"
                     text={table.TableClassSummary?.TableClass ?? "STANDARD"}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title={"Items"}
+                    text={(table.ItemCount ?? 0) + ""}
+                    icon={{ source: Icon.Layers, tintColor: Color.Magenta }}
                   />
                   <List.Item.Detail.Metadata.TagList title={"Status"}>
                     <List.Item.Detail.Metadata.TagList.Item
@@ -178,38 +221,58 @@ export default function DynamoDb() {
           }
           actions={
             <ActionPanel>
-              <AwsAction.Console url={resourceToConsoleLink(table.TableName || "", "AWS::DynamoDB::Table")} />
+              <AwsAction.Console
+                url={resourceToConsoleLink(table.TableName || "", "AWS::DynamoDB::Table")}
+                onAction={() => visit(table)}
+              />
               <ActionPanel.Section title="Table Actions">
                 <Action.Push
                   title={"Update Item"}
                   shortcut={{ modifiers: ["ctrl"], key: "u" }}
                   icon={Icon.Patch}
-                  target={<UpdateItemForm table={table} />}
+                  target={<UpdateItemForm {...{ table, mutate }} />}
+                  onPush={() => visit(table)}
                 />
                 <Action.Push
                   title={"Query"}
                   shortcut={{ modifiers: ["ctrl"], key: "q" }}
                   icon={Icon.Eye}
                   target={<QueryForm table={table} />}
+                  onPush={() => visit(table)}
                 />
                 <Action.Push
                   title={"Delete Item"}
-                  shortcut={{ modifiers: ["ctrl"], key: "d" }}
-                  icon={Icon.Trash}
-                  target={<DeleteItemForm table={table} />}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                  icon={{ source: Icon.Trash, tintColor: Color.Red }}
+                  target={<DeleteItemForm {...{ table, mutate }} />}
+                  onPush={() => visit(table)}
                 />
                 <Action
-                  icon={table.DeletionProtectionEnabled ? Icon.LockUnlocked : Icon.Lock}
+                  icon={
+                    table.DeletionProtectionEnabled
+                      ? { source: Icon.LockUnlocked, tintColor: Color.Red }
+                      : { source: Icon.Lock, tintColor: Color.Green }
+                  }
                   title={table.DeletionProtectionEnabled ? "Disable Deletion Protection" : "Enable Deletion Protection"}
                   shortcut={{ modifiers: ["ctrl"], key: "t" }}
-                  onAction={() => updateDeletionProtection(table).finally(revalidate)}
+                  onAction={async () => {
+                    await visit(table);
+                    await updateDeletionProtection({ ...table, mutate });
+                  }}
                 />
-                <Action.CopyToClipboard title="Copy Table Name" content={table.TableName || ""} />
+                <Action.CopyToClipboard
+                  title="Copy Table Name"
+                  content={table.TableName || ""}
+                  onCopy={() => visit(table)}
+                />
                 <Action
                   title={`${isDetailsEnabled ? "Hide" : "Show"} Details`}
                   onAction={() => setDetailsEnabled(!isDetailsEnabled)}
                   icon={isDetailsEnabled ? Icon.EyeDisabled : Icon.Eye}
                 />
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => resetRanking(table)} />
               </ActionPanel.Section>
             </ActionPanel>
           }
@@ -218,27 +281,6 @@ export default function DynamoDb() {
     </List>
   );
 }
-
-const fetchTables = async (token?: string, accTables?: Table[]): Promise<Table[]> => {
-  if (!isReadyToFetch()) return [];
-  const { LastEvaluatedTableName, TableNames } = await new DynamoDBClient({}).send(
-    new ListTablesCommand({ ExclusiveStartTableName: token }),
-  );
-
-  const tables = await Promise.all(
-    (TableNames || []).map(async (t) => {
-      const { Table } = await new DynamoDBClient({}).send(new DescribeTableCommand({ TableName: t }));
-      return { ...Table, keys: fetchKeys(Table!) };
-    }),
-  );
-  const combinedTables = [...(accTables || []), ...(tables || [])];
-
-  if (LastEvaluatedTableName) {
-    return fetchTables(LastEvaluatedTableName, combinedTables);
-  }
-
-  return combinedTables;
-};
 
 const statusToIcon = (status: string): Image => {
   const mapping: Record<string, Image> = {
@@ -253,7 +295,11 @@ const statusToIcon = (status: string): Image => {
   return mapping[status] || { source: Icon.Warning, tintColor: Color.Orange };
 };
 
-const updateDeletionProtection = async ({ TableName, DeletionProtectionEnabled }: TableDescription) => {
+const updateDeletionProtection = async ({
+  TableName,
+  DeletionProtectionEnabled,
+  mutate,
+}: TableDescription & { mutate: MutatePromise<Table[] | undefined> }) => {
   await confirmAlert({
     title: `${DeletionProtectionEnabled ? "Disable" : "Enable"} Deletion Protection?`,
     message: `Are you sure you want to ${DeletionProtectionEnabled ? "disable" : "enable"} termination protection?`,
@@ -261,83 +307,53 @@ const updateDeletionProtection = async ({ TableName, DeletionProtectionEnabled }
     primaryAction: {
       title: DeletionProtectionEnabled ? "Disable" : "Enable",
       style: DeletionProtectionEnabled ? Alert.ActionStyle.Destructive : Alert.ActionStyle.Default,
-      onAction: async () => {
-        await showToast({
-          style: Toast.Style.Animated,
-          title: `${DeletionProtectionEnabled ? "Disabling" : "Enabling"} Deletion Protection...`,
-        });
-        try {
-          await new DynamoDBClient({}).send(
-            new UpdateTableCommand({ TableName, DeletionProtectionEnabled: !DeletionProtectionEnabled }),
-          );
-          await showToast({
-            style: Toast.Style.Success,
-            title: `${DeletionProtectionEnabled ? "Disabled" : "Enabled"} Termination Protection`,
-          });
-        } catch (error) {
-          await showFailureToast(error, { title: "Failed to update deletion protection" });
-        }
-      },
+      onAction: () => tryUpdateDeletionProtection({ TableName, DeletionProtectionEnabled, mutate }),
     },
   });
 };
 
-const fetchKeys = (table: TableDescription): Record<string, PrimaryKey> => {
-  const keys: Record<string, PrimaryKey> = {};
-  const hashKey = table.KeySchema?.find((k) => k.KeyType === "HASH")?.AttributeName || "";
-  let rangeKey = undefined;
-  if (table.KeySchema?.some((k) => k.KeyType === "RANGE")) {
-    const rangeKeyName = table.KeySchema?.find((k) => k.KeyType === "RANGE")?.AttributeName || "";
-    rangeKey = {
-      name: rangeKeyName,
-      type: table.AttributeDefinitions?.find((a) => a.AttributeName === rangeKeyName)?.AttributeType || "S",
-    };
-  }
-  keys[`${table.TableName}`] = {
-    hashKey: {
-      name: hashKey,
-      type: table.AttributeDefinitions?.find((a) => a.AttributeName === hashKey)?.AttributeType || "S",
+const tryUpdateDeletionProtection = async ({
+  TableName,
+  DeletionProtectionEnabled,
+  mutate,
+}: TableDescription & { mutate: MutatePromise<Table[] | undefined> }) => {
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: `${DeletionProtectionEnabled ? "Disabling" : "Enabling"} Deletion Protection...`,
+  });
+
+  mutate(
+    new DynamoDBClient({}).send(
+      new UpdateTableCommand({ TableName, DeletionProtectionEnabled: !DeletionProtectionEnabled }),
+    ),
+    {
+      optimisticUpdate: (tables) => {
+        if (!tables) return undefined;
+        return tables.map((t) =>
+          t.TableName !== TableName ? t : { ...t, DeletionProtectionEnabled: !DeletionProtectionEnabled },
+        );
+      },
+      shouldRevalidateAfter: false,
     },
-    rangeKey,
-  };
-
-  (table.GlobalSecondaryIndexes || []).forEach((gsi) => {
-    const gsiHashKey = gsi.KeySchema?.find((k) => k.KeyType === "HASH")?.AttributeName || "";
-    let gsiRangeKey = undefined;
-    if (gsi.KeySchema?.some((k) => k.KeyType === "RANGE")) {
-      const gsiRangeKeyName = gsi.KeySchema?.find((k) => k.KeyType === "RANGE")?.AttributeName || "";
-      gsiRangeKey = {
-        name: gsiRangeKeyName,
-        type: table.AttributeDefinitions?.find((a) => a.AttributeName === gsiRangeKeyName)?.AttributeType || "S",
+  )
+    .then(() => {
+      toast.style = Toast.Style.Success;
+      toast.title = `${DeletionProtectionEnabled ? "Disabled" : "Enabled"} Deletion Protection`;
+    })
+    .catch((err) => {
+      captureException(err);
+      toast.style = Toast.Style.Failure;
+      toast.title = `Failed to ${DeletionProtectionEnabled ? "disable" : "enable"} deletion protection`;
+      toast.message = getErrorMessage(err);
+      toast.primaryAction = {
+        title: "Retry",
+        shortcut: Keyboard.Shortcut.Common.Refresh,
+        onAction: () => tryUpdateDeletionProtection({ TableName, DeletionProtectionEnabled, mutate }),
       };
-    }
-    keys[`gsi.${gsi.IndexName}`] = {
-      hashKey: {
-        name: gsiHashKey,
-        type: table.AttributeDefinitions?.find((a) => a.AttributeName === gsiHashKey)?.AttributeType || "S",
-      },
-      rangeKey: gsiRangeKey,
-    };
-  });
-
-  (table.LocalSecondaryIndexes || []).forEach((lsi) => {
-    const lsiHashKey = lsi.KeySchema?.find((k) => k.KeyType === "HASH")?.AttributeName || "";
-    let lsiRangeKey = undefined;
-    if (lsi.KeySchema?.some((k) => k.KeyType === "RANGE")) {
-      const lsiRangeKeyName = lsi.KeySchema?.find((k) => k.KeyType === "RANGE")?.AttributeName || "";
-      lsiRangeKey = {
-        name: lsiRangeKeyName,
-        type: table.AttributeDefinitions?.find((a) => a.AttributeName === lsiRangeKeyName)?.AttributeType || "S",
+      toast.secondaryAction = {
+        title: "Copy Error",
+        shortcut: Keyboard.Shortcut.Common.Copy,
+        onAction: () => Clipboard.copy(getErrorMessage(err)),
       };
-    }
-    keys[`lsi.${lsi.IndexName}`] = {
-      hashKey: {
-        name: lsiHashKey,
-        type: table.AttributeDefinitions?.find((a) => a.AttributeName === lsiHashKey)?.AttributeType || "S",
-      },
-      rangeKey: lsiRangeKey,
-    };
-  });
-
-  return keys;
+    });
 };

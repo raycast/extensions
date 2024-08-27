@@ -1,5 +1,13 @@
 # Notion Changelog
 
+## [Quicklinks for Quick Capture Command] - 2024-08-20
+
+- Add a new action to create a Quicklink within the Quick Capture command.
+
+## [Refactor] - 2024-07-03
+
+- Refactor code. No Functional changes.
+
 ## [Seperate property managment for quicklinks] - 2024-04-22
 
 - Manage database properties visibility and order seperatly in quicklinks.

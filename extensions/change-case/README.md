@@ -3,31 +3,31 @@
 Transform a string between various cases.
 
 Included case transformations:
+
 - `camelCase`
 - `Capital Case`
-- `CONSTANT_CASE` (same as `MACRO_CASE`)
+- `CONSTANT_CASE` (aka `MACRO_CASE`)
 - `dot.case`
-- `Header-Case` (same as `Train-Case`)
-- `kebab-case` (same as `param-case`)
+- `Header-Case` (aka `Train-Case`)
 - `lower case`
 - `lower First`
-- `MACRO_CASE` (same as `CONSTANT_CASE`)
 - `no case`
-- `param-case` (same as `kebab-case`)
+- `kebab-case` (aka `param-case`)
+- `KEBAB-UPPER-CASE`
 - `PascalCase`
 - `Pascal_Snake_Case`
 - `path/case`
-- `rAndOm cAsE` (same as `SPonGE CasE`)
+- `rAndOm cAsE` (aka `sPonGE cAsE`)
 - `Sentence case`
 - `snake_case`
 - `sWAP cASE`
 - `Title Case`
 - `UPPER CASE`
 - `Upper first`
-- `SPonGE CasE` (same as `rAndOm cAsE`)
-- `Train-Case` (same as `Header-Case`)
 
-## Caveats
+## Advanced Preferences
+
+### Preserve Casing
 
 By default, cases do not automatically pre-lowercase the text. This means that an input of `THIS IS A TEST SENTENCE` does not get modified when transforming to sentence case, title case, among others. This is an intentional design choice by the author of the library that this extension uses internally, [change-case](https://github.com/blakeembrey/change-case). 
 
@@ -43,3 +43,9 @@ If you would like to pre-lowercase the text before transforming it, you can enab
 
 For more information, please see:
 - https://github.com/raycast/extensions/issues/11878
+
+### Exceptions
+
+You can add custom exceptions to the list of words that should not be modified when transforming the text to title case or sentence case. This is useful for words like `iPhone` and `NASA` that should not be lowercased when transforming text.
+
+It also always includes [these](https://github.com/blakeembrey/change-case/blob/17a27ce064572920f11f44b3686a9f9cf422e9c7/packages/title-case/src/index.ts#L20-L57) words.

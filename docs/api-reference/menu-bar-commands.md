@@ -71,11 +71,11 @@ Of course, our pull request command wouldn't be of that much use if we had to te
 
 Your root search should look similar to:
 
-![Menu Bar Command - Activate Background Refresh](../.gitbook/assets/menu-bar-activate-command.png)
+![Menu Bar Command - Activate Background Refresh](../.gitbook/assets/menu-bar-activate-command.webp)
 
 Running it once should activate it to:
 
-![Menu Bar Command - Refresh](../.gitbook/assets/menu-bar-refresh.png)
+![Menu Bar Command - Refresh](../.gitbook/assets/menu-bar-refresh.webp)
 
 ## Lifecycle
 
@@ -96,7 +96,7 @@ If your `menu-bar` command also makes use of [background refresh](../information
 
 {% hint style="info" %}
 To ease testing, commands configured to run in the background have an extra action in development mode:
-![Menu Bar Command - Run in Background](../.gitbook/assets/menu-bar-run-in-background.png)
+![Menu Bar Command - Run in Background](../.gitbook/assets/menu-bar-run-in-background.webp)
 {% endhint %}
 
 ### When the user clicks the command's icon / title in the menu bar

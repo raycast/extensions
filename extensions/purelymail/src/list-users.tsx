@@ -17,12 +17,13 @@ import { useEffect, useState } from "react";
 import { deleteUser, getUsers, modifyUser } from "./utils/api";
 import { ModifyUserRequest, Response } from "./utils/types";
 import ErrorComponent from "./components/ErrorComponent";
-import { useCachedState, useForm } from "@raycast/utils";
+import { getFavicon, useCachedState, useForm } from "@raycast/utils";
 
 export default function ListUsers() {
   const [users, setUsers] = useCachedState<string[]>("users");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [filter, setFilter] = useState("");
 
   async function getFromApi() {
     const response: Response = await getUsers();
@@ -57,12 +58,30 @@ export default function ListUsers() {
     }
   };
 
+  const filteredUsers = (!filter ? users : users?.filter((user) => user.split("@")[1] === filter)) || [];
+
   return error ? (
     <ErrorComponent error={error} />
   ) : (
-    <List isLoading={isLoading} searchBarPlaceholder="Search for user...">
-      <List.Section title={`${users?.length || 0} users`}>
-        {(users || []).map((user) => (
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search for user..."
+      searchBarAccessory={
+        <List.Dropdown tooltip="Select domain" onChange={setFilter}>
+          <List.Dropdown.Item title="All Domains" value="" icon={Icon.Dot} />
+          {Array.from(new Set(users?.map((user) => user.split("@")[1]).flat())).map((domainName) => (
+            <List.Dropdown.Item
+              key={domainName}
+              title={domainName}
+              value={domainName}
+              icon={getFavicon(`https://${domainName}`, { fallback: Icon.List })}
+            />
+          ))}
+        </List.Dropdown>
+      }
+    >
+      <List.Section title={`${filteredUsers.length} users`}>
+        {filteredUsers.map((user) => (
           <List.Item
             key={user}
             icon={Icon.Person}
@@ -74,6 +93,11 @@ export default function ListUsers() {
                   title="Modify User"
                   icon={Icon.Pencil}
                   target={<ModifyUser user={user} onUserModified={getFromApi} />}
+                />
+                <Action.CopyToClipboard
+                  title="Copy List of Users"
+                  icon={Icon.CopyClipboard}
+                  content={filteredUsers.join()}
                 />
                 {!isLoading && (
                   <ActionPanel.Section>

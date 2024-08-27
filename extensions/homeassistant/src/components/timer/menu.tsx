@@ -1,4 +1,4 @@
-import { MenuBarSubmenu } from "@components/menu";
+import { LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { CopyEntityIDToClipboard } from "@components/state/menu";
 import { getIcon } from "@components/state/utils";
 import { State } from "@lib/haapi";
@@ -39,6 +39,7 @@ export function TimerMenubarItem(props: { state: State }) {
       <TimerStartMenubarItem state={s} />
       <TimerPauseMenubarItem state={s} />
       <TimerCancelMenubarItem state={s} />
+      <LastUpdateChangeMenubarItem state={s} />
       <CopyEntityIDToClipboard state={s} />
     </MenuBarSubmenu>
   );

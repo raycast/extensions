@@ -6,13 +6,13 @@ import { ProcessDescription } from "pm2";
 import { MetaData, ProcessActions } from "./components.js";
 import {
   checkIfNeedSetup,
-  getNodeBinaryPath,
   getProcessStatusColor,
   getRaycastIcon,
   isRaycastNodeProcess,
   pm2WrapperExamplePath,
   pm2WrapperIndexPath,
   runPm2Command,
+  setupEnv,
 } from "./utils.js";
 
 export default function Main() {
@@ -22,8 +22,8 @@ export default function Main() {
 
   const loadList = async () => {
     await checkIfNeedSetup();
-    const nodeBinaryPath = getNodeBinaryPath();
-    const { stdout } = await $`${nodeBinaryPath} ${pm2WrapperIndexPath} list`;
+    setupEnv();
+    const { stdout } = await $`node ${pm2WrapperIndexPath} list`;
     const parsedList = JSON.parse(stdout);
     setList(parsedList);
     setIsLoading(false);

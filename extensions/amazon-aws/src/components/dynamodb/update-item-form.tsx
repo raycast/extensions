@@ -1,8 +1,21 @@
-import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
-import { Action, ActionPanel, Color, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { DynamoDBClient, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
+import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
+import {
+  Action,
+  ActionPanel,
+  captureException,
+  Color,
+  Form,
+  Icon,
+  showToast,
+  Toast,
+  useNavigation,
+  Clipboard,
+  Keyboard,
+} from "@raycast/api";
+import { DynamoDBClient, UpdateItemCommand, UpdateItemCommandInput } from "@aws-sdk/client-dynamodb";
 import { Table } from "../../dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
+import { getErrorMessage } from "../../util";
 
 interface UpdateItemFormValues {
   hashKey: string;
@@ -16,46 +29,81 @@ interface UpdateItemFormValues {
   expressionAttributeValues: string;
 }
 
-export const UpdateItemForm = ({ table }: { table: Table }) => {
-  const { pop } = useNavigation();
+export const UpdateItemForm = ({
+  table,
+  mutate,
+  retryInitValues,
+}: {
+  table: Table;
+  mutate: MutatePromise<Table[] | undefined>;
+  retryInitValues?: UpdateItemFormValues;
+}) => {
+  const { pop, push } = useNavigation();
   const hasRangeKey = table.KeySchema?.some((k) => k.KeyType === "RANGE");
   const tablePrimaryKey = table.keys[`${table.TableName}`];
   const { values, handleSubmit, itemProps } = useForm<UpdateItemFormValues>({
     onSubmit: async (values) => {
-      await showToast({ style: Toast.Style.Animated, title: "Updating item..." });
-      try {
-        const { ConsumedCapacity } = await new DynamoDBClient({}).send(
-          new UpdateItemCommand({
-            TableName: table.TableName,
-            ReturnConsumedCapacity: "TOTAL",
-            UpdateExpression: values.updateExpression,
-            Key: marshall({
-              [tablePrimaryKey.hashKey.name]:
-                tablePrimaryKey.hashKey.type === "N" ? Number(values.hashKey) : values.hashKey,
-              ...(hasRangeKey && {
-                [tablePrimaryKey.rangeKey!.name]:
-                  tablePrimaryKey.rangeKey!.type === "N" ? Number(values.rangeKey) : values.rangeKey,
-              }),
-            }),
-            ...(values.useConditionExpression && { ConditionExpression: values.conditionExpression }),
-            ...(values.useExpressionAttributeNames && {
-              ExpressionAttributeNames: JSON.parse(values.expressionAttributeNames),
-            }),
-            ...(values.useExpressionAttributeValues && {
-              ExpressionAttributeValues: marshall(JSON.parse(values.expressionAttributeValues)),
-            }),
+      const input: UpdateItemCommandInput = {
+        TableName: table.TableName,
+        ReturnConsumedCapacity: "TOTAL",
+        UpdateExpression: values.updateExpression,
+        Key: marshall({
+          [tablePrimaryKey.hashKey.name]:
+            tablePrimaryKey.hashKey.type === "N" ? Number(values.hashKey) : values.hashKey,
+          ...(hasRangeKey && {
+            [tablePrimaryKey.rangeKey!.name]:
+              tablePrimaryKey.rangeKey!.type === "N" ? Number(values.rangeKey) : values.rangeKey,
           }),
-        );
-        await showToast({
-          style: Toast.Style.Success,
-          title: "✅ Item updated",
-          message: `Consumed capacity: ${ConsumedCapacity?.CapacityUnits}`,
-        });
-      } catch (error) {
-        await showFailureToast(error, { title: "Failed to update item" });
-      } finally {
-        pop();
-      }
+        }),
+        ...(values.useConditionExpression && { ConditionExpression: values.conditionExpression }),
+        ...(values.useExpressionAttributeNames && {
+          ExpressionAttributeNames: JSON.parse(values.expressionAttributeNames),
+        }),
+        ...(values.useExpressionAttributeValues && {
+          ExpressionAttributeValues: marshall(JSON.parse(values.expressionAttributeValues)),
+        }),
+      };
+
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: `🚀 Updating item in table ${table.TableName}`,
+      });
+
+      mutate(new DynamoDBClient({}).send(new UpdateItemCommand(input)), {
+        optimisticUpdate: (tables) => {
+          if (!tables) return undefined;
+          return tables.map((t) => (t.TableName !== table.TableName ? t : { ...t, ItemCount: (t.ItemCount ?? 0) + 1 }));
+        },
+        shouldRevalidateAfter: false,
+      })
+        .then(({ ConsumedCapacity }) => {
+          toast.style = Toast.Style.Success;
+          toast.title = "✅ Item updated";
+          toast.message = `Consumed capacity: ${ConsumedCapacity?.CapacityUnits}`;
+        })
+        .catch((err) => {
+          captureException(err);
+          toast.style = Toast.Style.Failure;
+          toast.title = "❌ Failed to update item";
+          toast.message = getErrorMessage(err);
+          toast.primaryAction = {
+            title: "Retry",
+            shortcut: Keyboard.Shortcut.Common.Refresh,
+            onAction: () => {
+              push(<UpdateItemForm {...{ table, mutate, retryInitValues: values }} />);
+              toast.hide();
+            },
+          };
+          toast.secondaryAction = {
+            title: "Copy Error",
+            shortcut: Keyboard.Shortcut.Common.Copy,
+            onAction: () => {
+              Clipboard.copy(getErrorMessage(err));
+              toast.hide();
+            },
+          };
+        })
+        .finally(pop);
     },
     validation: {
       hashKey: (value) => {
@@ -110,7 +158,7 @@ export const UpdateItemForm = ({ table }: { table: Table }) => {
         }
       },
     },
-    initialValues: {
+    initialValues: retryInitValues || {
       useConditionExpression: false,
       useExpressionAttributeNames: false,
       useExpressionAttributeValues: false,
@@ -131,10 +179,10 @@ export const UpdateItemForm = ({ table }: { table: Table }) => {
       navigationTitle={"Update Item"}
     >
       <Form.Description
-        title={"Caution"}
-        text={"❗This will replace an already existing item if appropriate condition expression is not used."}
+        title={`❗`}
+        text={"This will replace an already existing item if appropriate condition expression is not used."}
       />
-      <Form.Description title={"Table ARN"} text={table.TableArn || ""} />
+      <Form.Description title={"Table Name"} text={`${table.TableName}`} />
       <Form.Separator />
       <Form.TextField {...itemProps.hashKey} placeholder="hash key for item..." title={tablePrimaryKey.hashKey.name} />
       {hasRangeKey && (

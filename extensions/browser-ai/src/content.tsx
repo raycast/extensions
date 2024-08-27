@@ -1,5 +1,5 @@
 import { Clipboard, Toast, showHUD, showToast } from "@raycast/api";
-import { getBrowserContent } from "./hook/utils";
+import { getBrowserContent } from "./lib/utils";
 
 export default async function Command() {
   try {

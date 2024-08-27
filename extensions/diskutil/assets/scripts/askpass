@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+
+PWD=$(osascript -e 'display dialog "To make changes to encrypted volumes, the extension needs administrator privileges to use the \"System\" keychain.\n\nEnter login password:" default answer "" with hidden answer with title "Raycast Disk Utility" with icon file "System:Library:Frameworks:SecurityInterface.framework:Versions:A:Resources:Keychain_Locked@2x.png" buttons {"Deny", "Allow"} default button "Allow"' | cut -d: -f3)
+
+BUNDLE_IDENTIFIER=$RAYCAST_BUNDLE
+if [ ! -z $BUNDLE_IDENTIFIER ] ; then
+    open -b $BUNDLE_IDENTIFIER
+fi
+
+echo $PWD

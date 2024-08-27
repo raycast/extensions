@@ -17,7 +17,7 @@ const shadcnVueDocs = [
       {
         doc: "components.json",
         name: "Components.json",
-        path: `${SHADCN_VUE.DOCS_BASE_URL}/components.json`,
+        path: `${SHADCN_VUE.DOCS_BASE_URL}/components-json`,
       },
       {
         doc: "theming",
@@ -37,7 +37,7 @@ const shadcnVueDocs = [
       {
         doc: "typography",
         name: "Typography",
-        path: `${SHADCN_VUE.DOCS_BASE_URL}/components/typography`,
+        path: `${SHADCN_VUE.DOCS_BASE_URL}/typography`,
       },
       {
         doc: "figma",
@@ -67,22 +67,22 @@ const shadcnVueDocs = [
       {
         doc: "vite",
         name: "Vite",
-        path: `${SHADCN_VUE.DOCS_BASE_URL}/vite`,
+        path: `${SHADCN_VUE.DOCS_BASE_URL}/installation/vite`,
       },
       {
         doc: "nuxt",
         name: "Nuxt",
-        path: `${SHADCN_VUE.DOCS_BASE_URL}/nuxt`,
+        path: `${SHADCN_VUE.DOCS_BASE_URL}/installation/nuxt`,
       },
       {
         doc: "astro",
         name: "Astro",
-        path: `${SHADCN_VUE.DOCS_BASE_URL}/astro`,
+        path: `${SHADCN_VUE.DOCS_BASE_URL}/installation/astro`,
       },
       {
         doc: "laravel",
         name: "Laravel",
-        path: `${SHADCN_VUE.DOCS_BASE_URL}/laravel`,
+        path: `${SHADCN_VUE.DOCS_BASE_URL}/installation/laravel`,
       },
     ],
   },
@@ -92,7 +92,7 @@ const shadcnVueDocs = [
       {
         doc: "auto-form",
         name: "Auto Form",
-        path: `${SHADCN_VUE.DOCS_BASE_URL}/auto-form`,
+        path: `${SHADCN_VUE.COMPONENTS_URL}/auto-form`,
       },
       {
         doc: "charts",
@@ -120,9 +120,9 @@ const shadcnVueDocs = [
         path: `${SHADCN_VUE.DOCS_BASE_URL}/dark-mode/astro`,
       },
       {
-        doc: "laravel",
-        name: "Laravel",
-        path: `${SHADCN_VUE.DOCS_BASE_URL}/dark-mode/laravel`,
+        doc: "vitepress",
+        name: "Vitepress",
+        path: `${SHADCN_VUE.DOCS_BASE_URL}/dark-mode/vitepress`,
       },
     ],
   },

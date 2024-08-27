@@ -8,7 +8,7 @@ Adavnced, producing process manager for Node.js.
 
 - View PM2 process list
 - Manage PM2 processes (start, stop, restart, reload, delete)
-- Run any Raycast Node.js application in PM2 through [Cross-Extension](#api)
+- Run any Raycast Node.js application in PM2 through [Cross-Extension][raycast-cross-extension-link]
 
 ## Requirements
 
@@ -47,29 +47,31 @@ Type: `RuntimeOptions`
 Optional. Use this option for specifying the runtime properties. The `nodePath` defaults to Raycast's Node.js `process.execPath`.
 The default `nodePath` can be changed from extension configuration.
 
-### Start Process Example
+### Example
+
+You can use [raycast-pm2](https://github.com/LitoMore/raycast-pm2) to easily access the API:
 
 ```typescript
 import path from "node:path";
 import { LaunchType, environment } from "@raycast/api";
-import { crossLaunchCommand } from "raycast-cross-extension";
+import { runPm2Command } from "raycast-pm2";
 
-crossLaunchCommand({
-  name: "api",
-  type: LaunchType.Background,
-  extensionName: "pm2",
-  ownerOrAuthorName: "litomore",
-  context: {
+runPm2Command(
+  {
     command: "start",
     options: {
-      script: path.join(environment.assetsPath, "path-to/your-app.js"),
-      name: "customized-process-name",
-    },
-    runtimeOptions: {
-      nodePath: "/opt/homebrew/bin/node",
+      script: path.join(environment.assetsPath, "path-to/your-script.js"),
+      name: "your-script",
     },
   },
-});
+  {},
+  {
+    name: "main",
+    type: LaunchType.UserInitiated,
+    extensionName: "pm2",
+    ownerOrAuthorName: "litomore",
+  },
+);
 ```
 
 ## Contributing

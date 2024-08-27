@@ -1,10 +1,23 @@
-import { FormValidation, showFailureToast, useForm, usePromise } from "@raycast/utils";
-import { Action, ActionPanel, Color, Detail, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { FormValidation, useCachedState, useForm, usePromise } from "@raycast/utils";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Detail,
+  Form,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+  Clipboard,
+  Keyboard,
+} from "@raycast/api";
 import { DynamoDBClient, QueryCommand, QueryCommandInput } from "@aws-sdk/client-dynamodb";
 import { Table } from "../../dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import React from "react";
-import { sortRecord } from "../../util";
+import { getErrorMessage, sortRecord } from "../../util";
 
 interface QueryFormValues {
   hashKey: string;
@@ -15,16 +28,23 @@ interface QueryFormValues {
   pageLimit: string;
   useProjectionExpression: boolean;
   projectionExpression: string;
+  isDescending: boolean;
+  isStronglyConsistent: boolean;
 }
 
 export const QueryForm = ({ table }: { table: Table }) => {
-  const { push } = useNavigation();
+  const [lastProjectionExpression, setLastProjectionExpression] = useCachedState<string>(
+    "ddb-query-last-projection-expression",
+    "",
+    { cacheNamespace: table.TableArn },
+  );
+  const { push, pop } = useNavigation();
   const { values, handleSubmit, itemProps } = useForm<QueryFormValues>({
     onSubmit: async (values) => {
       const client = new DynamoDBClient({});
       const hasRangeKey = table.keys[values.indexName].rangeKey !== undefined;
       const primaryKey = table.keys[values.indexName];
-      const input = {
+      const input: QueryCommandInput = {
         TableName: table.TableName,
         KeyConditionExpression: [
           `#${primaryKey.hashKey.name} = :${primaryKey.hashKey.name}`,
@@ -61,7 +81,11 @@ export const QueryForm = ({ table }: { table: Table }) => {
         ...(values.useProjectionExpression && { ProjectionExpression: values.projectionExpression }),
         Limit: Number(values.pageLimit),
         ...(values.indexName !== table.TableName && { IndexName: values.indexName.split(".")[1] }),
+        ScanIndexForward: !values.isDescending,
+        ConsistentRead: values.isStronglyConsistent,
+        ReturnConsumedCapacity: "TOTAL",
       };
+      setLastProjectionExpression(values.projectionExpression || "");
       push(
         <QueryResult
           table={table}
@@ -70,6 +94,7 @@ export const QueryForm = ({ table }: { table: Table }) => {
           previousConsumedCapacity={0}
           previousItemsCount={0}
           push={push}
+          pop={pop}
         />,
       );
     },
@@ -107,10 +132,13 @@ export const QueryForm = ({ table }: { table: Table }) => {
       },
     },
     initialValues: {
-      useProjectionExpression: false,
+      useProjectionExpression: lastProjectionExpression.length > 0,
+      ...(lastProjectionExpression.length > 0 && { projectionExpression: lastProjectionExpression }),
       indexName: table.TableName,
       pageLimit: "20",
       rangeKeyOperator: "=",
+      isDescending: false,
+      isStronglyConsistent: false,
     },
   });
 
@@ -128,9 +156,9 @@ export const QueryForm = ({ table }: { table: Table }) => {
       navigationTitle={"Query"}
     >
       <Form.Description
-        title={"Caution"}
+        title={"❗"}
         text={
-          "❗Use projection attributes to hide attributes which might cause rendering delays after result is loaded."
+          "Use projection attributes to hide large attributes which might cause rendering delays. Projection attribute is saved for next query."
         }
       />
       <Form.Dropdown {...itemProps.indexName} title={"Table"} info={"Select main table of one of GSI or LSI"}>
@@ -207,9 +235,22 @@ export const QueryForm = ({ table }: { table: Table }) => {
           title="Projection Expression"
         />
       )}
+      <Form.Checkbox {...itemProps.isDescending} label="Descending Order" />
+      <Form.Checkbox {...itemProps.isStronglyConsistent} label="Consistent Read" />
     </Form>
   );
 };
+
+const ErrorActionPanel = ({ pop, error }: { pop: () => void; error?: Error }) => (
+  <ActionPanel>
+    <Action title="Retry" shortcut={Keyboard.Shortcut.Common.Refresh} onAction={pop} />
+    <Action
+      title={"Copy Error"}
+      shortcut={Keyboard.Shortcut.Common.Copy}
+      onAction={() => Clipboard.copy(getErrorMessage(error))}
+    />
+  </ActionPanel>
+);
 
 const QueryResult = ({
   table,
@@ -218,12 +259,14 @@ const QueryResult = ({
   previousConsumedCapacity,
   previousItemsCount,
   push,
+  pop,
 }: {
   table: Table;
   input: QueryCommandInput;
   client: DynamoDBClient;
   previousConsumedCapacity: number;
   previousItemsCount: number;
+  pop: () => void;
   push: (component: React.ReactNode) => void;
 }) => {
   const {
@@ -232,25 +275,23 @@ const QueryResult = ({
     error,
   } = usePromise(
     async (client, input) => {
-      await showToast({ style: Toast.Style.Animated, title: `Querying table ${table.TableName}…` });
+      const toast = await showToast({ style: Toast.Style.Animated, title: `Querying table ${table.TableName}…` });
       try {
         const output = await client.send(new QueryCommand(input));
         if ((output.Items || []).length > 0) {
-          await showToast({
-            style: Toast.Style.Success,
-            title: `✅ Queried table ${table.TableName}`,
-            message: `Consumed capacity: ${output.ConsumedCapacity?.CapacityUnits}`,
-          });
+          toast.style = Toast.Style.Success;
+          toast.title = `✅ Queried table ${table.TableName}`;
+          toast.message = `Consumed capacity: ${output.ConsumedCapacity?.CapacityUnits}`;
         } else {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: `❌ Queried table ${table.TableName}`,
-            message: "No items found",
-          });
+          toast.style = Toast.Style.Failure;
+          toast.title = `❗Queried table ${table.TableName}`;
+          toast.message = "No items found";
         }
         return output;
       } catch (error) {
-        await showFailureToast(error, { title: `Failed to query table ${table.TableName}` });
+        toast.style = Toast.Style.Failure;
+        toast.title = `❌ Failed to query table ${table.TableName}`;
+        toast.message = getErrorMessage(error);
         throw error;
       }
     },
@@ -263,7 +304,7 @@ const QueryResult = ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const output: Record<string, any>[] = (queryOutput?.Items || []).map((i: any) => sortRecord(unmarshall(i))) ?? [];
   const quote =
-    "_Use projection attributes to hide attributes which might cause rendering delays after result is loaded._";
+    "_Use projection attributes to hide large attributes which might cause rendering delays. Projection attribute is saved for next query._";
   const markdown = `**Table Name:** ${input.TableName}\n\n**Items (${queryOutput?.Count})**\n\n\`\`\`json\n${JSON.stringify(output, undefined, 2)}\n\`\`\``;
   if (!isLoading && (output || []).length < 1) {
     return (
@@ -271,6 +312,7 @@ const QueryResult = ({
         <List.EmptyView
           title={`No items found in table ${table.TableName}!`}
           icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+          actions={<ErrorActionPanel {...{ pop, error }} />}
         />
       </List>
     );
@@ -282,6 +324,7 @@ const QueryResult = ({
           title={error.name}
           description={error.message}
           icon={{ source: Icon.Warning, tintColor: Color.Red }}
+          actions={<ErrorActionPanel {...{ pop, error }} />}
         />
       </List>
     );
@@ -332,6 +375,7 @@ const QueryResult = ({
                     previousConsumedCapacity={totalConsumedCapacity}
                     previousItemsCount={totalItemsCount}
                     push={push}
+                    pop={pop}
                   />,
                 )
               }

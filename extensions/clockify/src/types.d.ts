@@ -2,8 +2,10 @@
 export interface TimeEntry {
   id: string;
   projectId: string;
+  taskId: string | undefined;
   description: string;
   project: Project;
+  task: Task | undefined;
   timeInterval: {
     start: string;
     end: string;
@@ -16,6 +18,11 @@ export interface Project {
   description?: string;
   name: string;
   color: string;
+}
+
+export interface Task {
+  id: string;
+  name: string;
 }
 
 export interface FetcherArgs {

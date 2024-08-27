@@ -15,9 +15,9 @@
     "baseUrl": "./src",
     "paths": {
       "@api/*": ["./api/*"],
-      "@util/*": ["./util/*"],
-      "@hook/*": ["./hook/*"],
-      "@component/*": ["./component/*"],
+      "@utils/*": ["./utils/*"],
+      "@hooks/*": ["./hooks/*"],
+      "@components/*": ["./components/*"],
       "@/*": ["*"]
     }
   }

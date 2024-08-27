@@ -54,6 +54,7 @@
   "dependencies": {
     "@raycast/api": "^1.61.1",
     "@raycast/utils": "^1.10.0",
+    "change-case": "5.4.4",
     "fs-extra": "^11.1.1",
     "zx": "7.2.3"
   },

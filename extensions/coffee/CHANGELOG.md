@@ -1,5 +1,9 @@
 # Coffee Changelog
 
+## [Update] – 2024-07-18
+
+- Updated HUD show time to improve user experience.
+
 ## [Update] – 2024-05-24
 
 - Fixed an issue that caused the extension to crash when the `Caffeinate Status` command was disabled.

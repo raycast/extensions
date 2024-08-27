@@ -1,4 +1,4 @@
-import { MenuBarSubmenu } from "@components/menu";
+import { LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { CopyEntityIDToClipboard } from "@components/state/menu";
 import { getIcon, getStateValue } from "@components/state/utils";
 import { State } from "@lib/haapi";
@@ -68,6 +68,7 @@ export function AutomationMenubarItem(props: { state: State }) {
       <AutomationTurnOnMenubarItem state={s} />
       <AutomationTurnOffMenubarItem state={s} />
       <AutomationTriggerMenubarItem state={s} />
+      <LastUpdateChangeMenubarItem state={s} />
       <CopyEntityIDToClipboard state={s} />
     </MenuBarSubmenu>
   );

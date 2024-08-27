@@ -3,6 +3,7 @@ import dateFormat from "dateformat";
 import { Account } from "./accountEnvato";
 import { SaleItem, PayoutItem } from "./saleItem";
 import { useFetch, fullDate } from "./utils";
+import { GetData } from "./types";
 
 /*-----------------------------------*/
 /*------ INDEX
@@ -11,7 +12,7 @@ export default function Command() {
   const cache = new Cache();
   const cached = cache.get("state") ?? "";
   const stateFetch = useFetch();
-  const state = stateFetch.isLoading ? JSON.parse(cached) : stateFetch;
+  const state: GetData = stateFetch.isLoading ? JSON.parse(cached) : stateFetch;
 
   // IF EMPTY
   if (state.errors?.reason !== undefined && state.errors.empty !== true) {
@@ -22,7 +23,7 @@ export default function Command() {
 
   const statementItems: any = [];
   let resultItems = [];
-  state.statement?.results.map((item: any) => {
+  state.statement?.results.map((item) => {
     if (item.type == "Payout") {
       statementItems.push(item);
     }

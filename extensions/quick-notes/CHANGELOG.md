@@ -1,5 +1,28 @@
 # Quick Notes Changelog
 
+## [AI Summary] - 2024-08-03
+
+- Raycast Pro users can now summarize notes using AI
+- Summarize a note using `⌘ + I`
+- Clear note summary using `⌘ + ⇧ + I`
+
+## [Performance] - 2024-07-18
+
+- Reduce lag when loading and searching
+
+## [Bugfix] - 2024-06-07
+
+- Fix to respect sort when filtering by tag
+- Fix bug where search wasn't working at all
+
+## [Better Tag Management] - 2024-05-29
+
+- New quick add / remove tags using `⌘ + T`
+- Quick tag sort from dropdown in search
+- Updated new tag shortcut to `⌘ + ⇧ + T`
+- Updated filter tag to `⌘ + F`
+- Better word count in metadata to account for MD
+
 ## [Bugfix] - 2024-05-24
 
 - Remove create button on the sort action, unintended
@@ -7,7 +30,7 @@
 ## [Metadata Menu and Sort] - 2024-05-23
 
 - New note metadata menu to show tags and other details for a note using `⌘ + M`
-- Sort straight from the notes list instead of preferences using `⌘ + S`'
+- Sort straight from the notes list instead of preferences using `⌘ + S`
 - Both these new features save your settings in Cache
 - Removes sort from preferences
 

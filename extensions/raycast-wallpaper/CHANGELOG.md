@@ -1,5 +1,9 @@
 # Raycast Wallpaper Changelog
 
+## [Auto Switch Wallpaper command] - 2024-06-12
+
+- Preference for refresh intervals mirroring Apple wallpaper shuffle intervals
+
 ## [Fix typo] - 2024-05-31
 
 - Fix typo in `Set Raycast Wallpaper` command configuration.

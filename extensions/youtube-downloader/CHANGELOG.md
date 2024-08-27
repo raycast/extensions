@@ -1,5 +1,26 @@
 # YouTube Downloader Changelog
 
+## [Update package dependency] - 2024-08-12
+
+- Update the `@dustube/ytdl-core` dependency to resolve the video download failure issue.
+
+## [Fix video not found] - 2024-08-01
+
+- Update the `@dustube/ytdl-core` dependency to fix the video not found issue
+
+## [Fix Live Premiere video download] - 2024-07-30
+
+- Fix the live premiere video download issue
+
+## [Fix download failed] - 2024-07-16
+
+- Replace the `ytdl-core` with `@distube/ytdl-core` to fix the download failed issue
+
+## [Update copy the video or audio file name with the video title] - 2024-07-05
+
+- Update copy the video or audio file name with the video title
+- Fix the key rendering problem in the format dropdown
+
 ## [Fix FFmpeg v7 error] - 2024-05-26
 
 ## [Update FFmpeg installation docs] - 2024-04-17

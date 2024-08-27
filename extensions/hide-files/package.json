@@ -16,7 +16,17 @@
       "title": "Toggle Desktop Visibility",
       "icon": "toggle-desktop-visibility.png",
       "description": "Show or hide desktop files.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "hideWidgets",
+          "type": "checkbox",
+          "required": false,
+          "label": "Hide Widgets",
+          "description": "Hide widgets on the desktop.",
+          "default": true
+        }
+      ]
     },
     {
       "name": "toggle-current-window-visibility",

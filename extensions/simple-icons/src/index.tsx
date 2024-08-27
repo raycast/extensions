@@ -13,9 +13,11 @@ import {
   showHUD,
   showToast,
 } from "@raycast/api";
+import { Searcher } from "fast-fuzzy";
+import debounce from "lodash/debounce.js";
 import { titleToSlug } from "simple-icons/sdk";
 import { LaunchCommand, Supports, actions, defaultActionsOrder } from "./actions.js";
-import { cacheAssetPack, getAliases, loadCachedJson, loadVersion } from "./utils.js";
+import { cacheAssetPack, getAliases, loadCachedJson, useVersion } from "./utils.js";
 import { IconData, LaunchContext } from "./types.js";
 
 const itemDisplayColumns = {
@@ -27,16 +29,20 @@ const itemDisplayColumns = {
 export default function Command({ launchContext }: LaunchProps<{ launchContext?: LaunchContext }>) {
   const [itemSize, setItemSize] = useState<keyof typeof itemDisplayColumns>("small");
   const [isLoading, setIsLoading] = useState(true);
-  const [version, setVersion] = useState("latest");
   const [icons, setIcons] = useState<IconData[]>([]);
+  const [searchString, setSearchString] = useState("");
+  const version = useVersion({ launchContext });
 
-  const fetchIcons = async () => {
+  const fetchIcons = async (version: string) => {
+    setIsLoading(true);
+    setIcons([]);
+
     await showToast({
       style: Toast.Style.Animated,
-      title: "Loading Icons",
+      title: "",
+      message: "Loading Icons",
     });
 
-    const version = await loadVersion();
     await cacheAssetPack(version).catch(async () => {
       await showToast({
         style: Toast.Style.Failure,
@@ -53,9 +59,8 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
       slug: icon.slug || titleToSlug(icon.title),
     }));
 
-    setIsLoading(false);
     setIcons(icons);
-    setVersion(version);
+    setIsLoading(false);
 
     if (icons.length > 0) {
       await showToast({
@@ -73,8 +78,24 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
   };
 
   useEffect(() => {
-    fetchIcons();
-  }, []);
+    if (version) {
+      fetchIcons(version);
+    }
+  }, [version]);
+
+  const searcher = new Searcher(icons, {
+    keySelector: (icon) =>
+      [
+        icon.title,
+        icon.slug,
+        icon.aliases?.aka,
+        icon.aliases?.dup?.map((duplicate) => duplicate.title),
+        Object.values(icon.aliases?.loc ?? {}),
+      ]
+        .flat()
+        .filter(Boolean) as string[],
+  });
+  const searchResults = searchString ? searcher.search(searchString) : icons;
 
   const { defaultDetailAction = "OpenWith" } = getPreferenceValues<ExtensionPreferences>();
   const DefaultAction = actions[defaultDetailAction];
@@ -106,9 +127,10 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
           <Grid.Dropdown.Item title="Large" value="large" />
         </Grid.Dropdown>
       }
+      onSearchTextChange={debounce(setSearchString, 300)}
     >
-      {!isLoading &&
-        icons.map((icon) => {
+      {(!isLoading || !version) &&
+        searchResults.slice(0, 500).map((icon) => {
           const slug = icon.slug || titleToSlug(icon.title);
 
           const fileLink = `pack/simple-icons-${version}/icons/${slug}.svg`;

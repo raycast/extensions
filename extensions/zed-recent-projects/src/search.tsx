@@ -1,5 +1,6 @@
-import { ComponentType, createContext, useContext, useEffect, useState } from "react";
+import { ComponentType, createContext, useContext } from "react";
 import { List, Action, Application, getApplications, getPreferenceValues, Detail, Icon } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { existsSync } from "fs";
 import { URL } from "url";
 import { getEntry } from "./lib/entry";
@@ -27,19 +28,9 @@ function exists(p: string) {
 
 export const withZed = <P extends object>(Component: ComponentType<P>) => {
   return (props: P) => {
-    const [zed, setZed] = useState<Application>();
-    const [isLoading, setIsloading] = useState(true);
-
-    useEffect(() => {
-      getApplications()
-        .then((apps) => {
-          const zedApp = apps.find((a) => a.bundleId === getZedBundleId(zedBuild));
-          if (zedApp) {
-            setZed(zedApp);
-          }
-        })
-        .finally(() => setIsloading(false));
-    }, []);
+    const { data: zed, isLoading } = usePromise(async () =>
+      (await getApplications()).find((a) => a.bundleId === getZedBundleId(zedBuild))
+    );
 
     if (!zed) {
       return <Detail isLoading={isLoading} markdown={isLoading ? "" : `No Zed app detected`} />;

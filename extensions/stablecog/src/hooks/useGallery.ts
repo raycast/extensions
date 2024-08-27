@@ -3,9 +3,9 @@ import { itemsPerPage, scoreThreshold } from "@ts/constants";
 import { TGalleryPage } from "@ts/types";
 
 export default function useGallery({ search, token }: { search: string | undefined; token: string | undefined }): {
-  galleryPage: TGalleryPage | undefined;
-  galleryPageError: Error | undefined;
-  isLoadingGalleryPage: boolean;
+  page: TGalleryPage | undefined;
+  pageError: Error | undefined;
+  isLoadingPage: boolean;
 } {
   const endpoint = "https://api.stablecog.com/v1/gallery";
   const url = new URL(endpoint);
@@ -21,5 +21,5 @@ export default function useGallery({ search, token }: { search: string | undefin
       Authorization: `Bearer ${token}`,
     },
   });
-  return { galleryPage: data, galleryPageError: error, isLoadingGalleryPage: isLoading };
+  return { page: data, pageError: error, isLoadingPage: isLoading };
 }

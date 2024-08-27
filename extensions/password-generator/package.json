@@ -5,6 +5,9 @@
   "description": "Generates a password from 5–64 characters with options for case, special characters, and more",
   "icon": "password-generator-icon.png",
   "author": "joshuaiz",
+  "contributors": [
+    "teziovsky"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
@@ -15,26 +18,49 @@
       "name": "generate-password",
       "title": "Generate Password",
       "description": "Generates a password from 5–32 characters in length with options for case, numbers, special characters, and more.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "hideAfterCopy",
+          "description": "Hide the raycast panel after it's copied to the clipboard.",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "title": "Options",
+          "label": "Hide Raycast after copy"
+        },
+        {
+          "name": "storePasswordLength",
+          "description": "Persist the last password length between runs.",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Store password length"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
-    "prettier": "^2.5.1"
+    "@raycast/api": "^1.31.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/node": "20.11.19",
+    "@types/react": "18.2.55",
+    "@typescript-eslint/eslint-plugin": "^7.0.1",
+    "@typescript-eslint/parser": "^7.0.1",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
     "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "pull-contributions": "npx @raycast/api@latest pull-contributions"
   }
 }

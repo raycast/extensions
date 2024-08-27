@@ -1,3 +1,5 @@
+import { FieldType } from "./components/parameters.js";
+
 type DuplicateAlias = {
   title: string;
   hex?: string;
@@ -68,6 +70,8 @@ export type SimpleIcons = {
 
 export type Badge = SimpleIcons & StaticBadge & DynamicBadge & EndpointBadge;
 
+export type FieldName = keyof Omit<Badge, "$icon">;
+
 export type LaunchFromSimpleIconsContext = {
   launchFromExtensionName: string;
   icon: IconData;
@@ -77,4 +81,16 @@ export type LaunchFromColorPickerContext = {
   launchFromExtensionName: string;
   field: keyof Badge;
   hex: string;
+};
+
+export type CommandConfig = Record<
+  string,
+  { defaultBadge: Badge; parameterIds: FieldType[]; validationFields: string[] }
+>;
+
+export type OnBadgeChange = (badge: Badge) => void;
+
+export type ParameterProps = {
+  badge: Badge;
+  onChange: OnBadgeChange;
 };

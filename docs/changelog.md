@@ -1,5 +1,70 @@
 # Changelog
 
+## 1.81.0 - 2024-08-13
+
+### ✨ New
+
+- **Detail:** You can now render LaTeX in the Detail views. We support the following delimiters:
+  - Inline math: `\(...\)` and `\begin{math}...\end{math}`
+  - Display math: `\[...\]`, `$$...$$` and `\begin{equation}...\end{equation}`
+
+### 💎 Improvements
+
+- You can now pick a different command template for each command that you add in the `Create Extension` command’s form.
+- Added a new `Add Command` action for local extensions in the `Manage Extensions` command.
+
+## 1.80.0 - 2024-07-31
+
+### ✨ New
+
+- **AI:** OpenAI GPT-4o Mini can now be used in the API.
+- **Quicklinks:** `CreateQuickLink` now accepts an `icon` prop that allows you to customize the icon of your Quicklink.
+
+### 💎 Improvements
+
+- **Menu Bar Commands** now show a confirmation toast when activated or refreshed.
+
+## 1.79.0 - 2024-07-17
+
+### ✨ New
+
+- **Navigation**: Added a second argument to `useNavigation().push` to specify a callback called when the pushed view will be popped. You can use it to update the current view when it will become active again. There’s also a new `onPop` prop on `Action.Push` to do the same thing.
+
+### 💎 Improvements
+
+- When creating or forking an extension, an alert will be shown if you specify an existing folder (and thus avoid overwriting files without warning)
+
+## 1.78.0 - 2024-07-03
+
+### ✨ New
+
+- In addition to the new Custom Window Management commands, we are introducing a `WindowManagement` API to give you total control to move your windows depending on any kind of logic you can imagine.
+- You can now access the `ownerOrAuthorName` in the `environment`, useful for re-usable libraries.
+
+### 🐞 Fixes
+
+- **Pagination**: Fixed the TypeScript definition of the `onLoadMore` callback.
+
+## 1.77.0 - 2024-06-19
+
+### ✨ New
+
+- Updated React version to 18.3.1 to prepare for the next major version of React. This shouldn't impact any extensions but let us know if you find any unexpected behaviour.
+
+### 🐞 Fixes
+
+- **Menu Bar Extra**: fixed an issue where `Submenu` icons changed appearance based on Raycast's appearance, instead of the system's.
+
+## 1.76.0 - 2024-06-05
+
+### 💎 Improvements
+
+- Some companies requires all package.json’s names to be name-spaced (eg. `@foo/bar`). However, Raycast only understands names that _aren’t_ name-spaced. This prevented some people from creating internal extensions. In order to workaround this issue, you can now use the `@workaround` namespace in extension names (eg. `@workaround/bar`).
+
+### 🐞 Fixes
+
+- **Clipboard**: Fixed an issue where 2 items were added to the pasteboard when copying a file (one with the file name, and one with the file url). It now correctly adds 1 item with 2 representations.
+
 ## 1.74.0 - 2024-05-15
 
 ### ✨ New
@@ -165,7 +230,7 @@
 
 ## Introducing the Extension Issues Dashboard
 
-![](.gitbook/assets/extension-issues.png)
+![](.gitbook/assets/extension-issues.webp)
 
 The new Extension Issues Dashboard is designed to help you quickly troubleshoot and resolve issues in any of your extensions by providing real-time visibility into errors encountered by users. You can access it at https://www.raycast.com/extension-issues, or by using the new `View Issues` action.
 
@@ -523,7 +588,7 @@ The new Extension Issues Dashboard is designed to help you quickly troubleshoot 
 
 - **Grid**: the `Grid` component accepts three new props that should give extension authors more flexibility: `columns`, `fit` and `aspectRatio`.
 
-![](.gitbook/assets/grid-styled-sections.png)
+![](.gitbook/assets/grid-styled-sections.webp)
 
 - **Grid Sections** don't all have to look the same anymore! The grid `Section` component now _also_ accepts the `columns`, `fit` and `aspectRatio` props. When specified, they will override the value of the parent `Grid` component's prop.
 - **List**: The list supports a new property for configuring how sections are ordered. Setting `filtering={{ keepSectionOrder: true }}` ensures that the section order is not changed based on items' ranking values; this can be useful for use cases where a small number of fix sections should always appear in the same order when the user filters the list. We are deprecating the `enableFiltering` property.
@@ -690,7 +755,7 @@ The new Extension Issues Dashboard is designed to help you quickly troubleshoot 
 
 The `<Grid />` component's made its way to our API. It's perfect to layout media-heavy information, such as icons, images or colors. The component allows you to layout differently sized items. We designed [its API](https://developers.raycast.com/api-reference/user-interface/list) close to the `<List />` component for smooth adoption.
 
-![](.gitbook/assets/grid.png)
+![](.gitbook/assets/grid.webp)
 
 ### 🐞 Fixes
 
@@ -1015,6 +1080,6 @@ The `<Grid />` component's made its way to our API. It's perfect to layout media
 
 It's happening! We're opening up our API and store for public beta.
 
-![](.gitbook/assets/changelog-hello-world.png)
+![](.gitbook/assets/changelog-hello-world.webp)
 
 This is a big milestone for our community. We couldn't have pulled it off without our alpha testers. A massive shoutout to everybody who helped us shape the API. Now let's start building. We can't wait to see what you will come up with.

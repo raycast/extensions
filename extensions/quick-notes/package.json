@@ -53,7 +53,9 @@
     "date-fns": "^3.3.1",
     "jotai": "^2.7.0",
     "lodash": "^4.17.21",
+    "marked": "^12.0.2",
     "slugify": "^1.6.6",
+    "striptags": "^3.2.0",
     "update": "^0.7.4"
   },
   "devDependencies": {

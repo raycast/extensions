@@ -449,7 +449,7 @@
         "text": "increments the number under the cursor"
       },
       {
-        "kbd": "Ctrl + d",
+        "kbd": "Ctrl + x",
         "text": "decrements the number under the cursor"
       }
     ]

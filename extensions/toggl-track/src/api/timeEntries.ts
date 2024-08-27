@@ -1,4 +1,4 @@
-import { get, post, patch } from "@/api/togglClient";
+import { get, post, patch, remove } from "@/api/togglClient";
 import type { ToggleItem } from "@/api/types";
 
 export async function getMyTimeEntries<Meta extends boolean = false>({
@@ -53,6 +53,10 @@ export function createTimeEntry({
 
 export function stopTimeEntry({ id, workspaceId }: { id: number; workspaceId: number }) {
   return patch<{ data: TimeEntry }>(`/workspaces/${workspaceId}/time_entries/${id}/stop`, {});
+}
+
+export function removeTimeEntry(workspaceId: number, timeEntryId: number) {
+  return remove(`/workspaces/${workspaceId}/time_entries/${timeEntryId}`);
 }
 
 // https://developers.track.toggl.com/docs/api/time_entries#response

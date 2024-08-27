@@ -1,37 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Action, ActionPanel, Detail, Icon, LaunchProps, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { omitBy } from "lodash";
 import { Documentation } from "./components/actions.js";
-import { Input } from "./components/input.js";
-import { FieldType, fields } from "./components/parameters.js";
+import { fields } from "./components/parameters.js";
 import { Badge, LaunchFromSimpleIconsContext, LaunchFromColorPickerContext } from "./types.js";
-import { codeBlock } from "./utils.js";
+import { codeBlock, getCommandConfig } from "./utils.js";
 
-const defaultBadge: Badge = {
-  url: "https://gist.githubusercontent.com/LitoMore/aae8985fe6c2b4429db05570247d2a7a/raw/endpoint-badge-example",
-};
-
-const parameterIds: FieldType[] = ["Url", "Label", "Message", "Color", "LabelColor", "Logo", "Style"];
-const validationFields = ["url"];
+const { defaultBadge, parameterIds } = getCommandConfig();
 
 export default function Command({
   launchContext,
 }: LaunchProps<{ launchContext?: LaunchFromSimpleIconsContext & LaunchFromColorPickerContext }>) {
   const [badge, setBadge] = useCachedState<Badge>("endpoint-badge", defaultBadge);
-  const [input, setInput] = useState<{ title: string; value?: string }>({ title: "", value: undefined });
-  const [inputValid, setInputValid] = useState(true);
-
   const { resetOnCopy } = getPreferenceValues<Preferences>();
 
   const reset = () => {
     setBadge(defaultBadge);
-  };
-
-  const validateInput = (value: string) => {
-    if (validationFields.includes(input.title)) {
-      setInputValid(Boolean(value));
-    }
   };
 
   useEffect(() => {
@@ -44,38 +29,14 @@ export default function Command({
     }
   }, []);
 
-  useEffect(() => {
-    if (input.title) {
-      validateInput(input.value ?? "");
-    }
-  }, [input]);
-
   const urlParameters = omitBy(badge, (v, k) => !v || k.startsWith("$"));
   const query = new URLSearchParams(urlParameters as Record<string, string>).toString();
-
-  if (input.title) {
-    return (
-      <Input
-        input={input}
-        inputValid={inputValid}
-        onChange={(value) => {
-          if (validationFields.includes(input.title)) {
-            setInputValid(Boolean(value));
-          }
-        }}
-        onSubmit={(values) => {
-          setBadge({ ...badge, [input.title]: values[input.title] });
-          setInput({ title: "", value: undefined });
-        }}
-      />
-    );
-  }
 
   const badgeUrl = new URL(`https://img.shields.io/badge/endpoint`);
   badgeUrl.search = query;
 
   const parameterFields = parameterIds.map((id) => fields[id]);
-  const parameterProps = { badge, onChange: setBadge, onInput: setInput };
+  const parameterProps = { badge, onChange: setBadge };
 
   return (
     <Detail

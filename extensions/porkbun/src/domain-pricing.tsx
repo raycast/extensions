@@ -2,8 +2,8 @@ import { List, ActionPanel, Action, Icon, showToast, Toast, confirmAlert } from 
 import { useCachedState } from "@raycast/utils";
 import fetch from "node-fetch";
 import { Fragment, useEffect, useState } from "react";
-import { DomainPricing, Response } from "./utils/types";
-import { API_DOCS_URL, TLD_SVG_BASE_URL } from "./utils/constants";
+import { type DomainPricing, Response } from "./utils/types";
+import { API_DOCS_URL, API_URL, TLD_SVG_BASE_URL } from "./utils/constants";
 
 export default function DomainPricing() {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,7 +20,7 @@ export default function DomainPricing() {
       style: Toast.Style.Animated,
       title: "Fetching Domain Pricing",
     });
-    const response = await fetch("https://porkbun.com/api/json/v3/pricing/get");
+    const response = await fetch(API_URL + "pricing/get");
     const result = (await response.json()) as Response;
     if (result.status === "ERROR") {
       showToast({

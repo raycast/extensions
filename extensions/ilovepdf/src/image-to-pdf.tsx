@@ -5,24 +5,20 @@ import {
   showToast,
   getPreferenceValues,
   Toast,
-  closeMainWindow,
-  open,
   openExtensionPreferences,
 } from "@raycast/api";
 import ILovePDFApi from "@ilovepdf/ilovepdf-nodejs";
 import ImagePdfTask from "@ilovepdf/ilovepdf-js-core/tasks/ImagePdfTask";
 import ILovePDFFile from "@ilovepdf/ilovepdf-nodejs/ILovePDFFile";
 import { useState } from "react";
-import { runAppleScript } from "@raycast/utils";
 import fs from "fs";
 import path from "path";
-import { getFilePath, MaxInt32 } from "./common/utils";
+import { chooseDownloadLocation, getErrorMessage, getFilePath, handleOpenNow } from "./common/utils";
+import { Status } from "./common/types";
 
 type Values = {
   files: string[];
 };
-
-type Status = "init" | "success" | "failure";
 
 const {
   APIPublicKey: publicKey,
@@ -39,7 +35,7 @@ export default function Command() {
   async function handleSubmit(values: Values) {
     setIsLoading(true);
     if (!values.files.length) {
-      await showToast(Toast.Style.Failure, "You must select a single file", "Please select a file");
+      await showToast(Toast.Style.Failure, "You must select a single file.", "Please select a file.");
       setStatus("failure");
       setIsLoading(false);
       return;
@@ -54,23 +50,17 @@ export default function Command() {
     let destinationFile = getFilePath(directory, `${fileName}.pdf`);
 
     if (askBeforeDownload) {
-      try {
-        const script = `set file2save to POSIX path of (choose file name with prompt "Save the PDF as" default location "${directory}" default name "${path.basename(destinationFile)}")`;
-        destinationFile = await runAppleScript(script, { timeout: MaxInt32 });
-      } catch (e) {
-        console.log(e);
-        const error = e as { message: string; stderr: string };
-        setIsLoading(false);
-        if (error.stderr.includes("User cancelled")) {
-          toast.hide();
-          setStatus("init");
-          return;
-        }
-        toast.style = Toast.Style.Failure;
-        toast.title = "failure";
-        toast.message = "An error happened during selecting the saving directory";
-        setStatus("failure");
+      const finalName = await chooseDownloadLocation(
+        destinationFile,
+        "Save The PDF As",
+        setIsLoading,
+        setStatus,
+        toast,
+      );
+      if (finalName == undefined) {
+        return;
       }
+      destinationFile = finalName;
     }
 
     setDestinationFilePath(destinationFile);
@@ -86,30 +76,19 @@ export default function Command() {
       fs.writeFileSync(destinationFile, data);
       toast.style = Toast.Style.Success;
       toast.title = "success";
-      toast.message = "File converted successfully";
+      toast.message = "File converted successfully.";
       setStatus("success");
       setIsLoading(false);
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "failure";
-      toast.message = "Error happened during converting the file.";
+      toast.message = `Error happened during converting the file. Reason ${getErrorMessage(error)}`;
       setStatus("failure");
       setIsLoading(false);
-      console.log(error);
       return;
     }
 
-    if (openNow) {
-      await closeMainWindow();
-      open(destinationFile);
-    } else {
-      toast.primaryAction = {
-        title: "Open File",
-        onAction: () => {
-          open(destinationFile);
-        },
-      };
-    }
+    await handleOpenNow(openNow, destinationFile, toast);
   }
 
   return (

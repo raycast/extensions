@@ -8,7 +8,7 @@ export type Idea = {
   cover_image: string;
   vote_count: number;
   comment_count: number;
-  note_count: number;
+  note_count?: number;
   is_private: boolean;
   is_bug: boolean;
   show_in_roadmap: boolean;

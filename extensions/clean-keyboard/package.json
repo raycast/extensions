@@ -5,6 +5,9 @@
   "description": "Lock your keyboard to clean it easily.",
   "icon": "extension_icon.png",
   "author": "ike-gg",
+  "contributors": [
+    "AndersDigital"
+  ],
   "categories": [
     "Productivity",
     "Other",

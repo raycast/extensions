@@ -3,7 +3,7 @@
   "name": "remember-the-date",
   "title": "Remember the Date",
   "description": "Creates and shows the most important date which should be remembered.",
-  "icon": "countdown.png",
+  "icon": "icon.png",
   "author": "pernielsentikaer",
   "contributors": [
     "samuelkraft"
@@ -21,7 +21,8 @@
       "title": "Create Date",
       "subtitle": "Remember the Date",
       "description": "Create new date to remember",
-      "mode": "view"
+      "mode": "view",
+      "icon": "add.png"
     },
     {
       "name": "list",
@@ -35,6 +36,13 @@
       "title": "Menu Bar Days List",
       "description": "List of all dates to remember in the menu bar",
       "mode": "menu-bar",
+      "interval": "1d"
+    },
+    {
+      "name": "up-next",
+      "title": "Up Next",
+      "description": "Show the next date to remember",
+      "mode": "no-view",
       "interval": "1d"
     }
   ],

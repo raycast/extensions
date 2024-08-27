@@ -11,11 +11,13 @@ import {
   UserFieldsFragment,
 } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
+import { PR_SORT_TYPES_TO_QUERIES } from "../helpers/pull-request";
 import { getGitHubUser } from "../helpers/users";
 import { useMyPullRequests } from "../hooks/useMyPullRequests";
 
 import AddPullRequestReview from "./AddPullRequestReview";
 import PullRequestCommits from "./PullRequestCommits";
+import { SortAction, SortActionProps } from "./SortAction";
 
 export type PullRequest =
   | PullRequestFieldsFragment
@@ -36,7 +38,9 @@ export default function PullRequestActions({
   mutateList,
   mutateDetail,
   children,
-}: PullRequestActionsProps) {
+  sortQuery,
+  setSortQuery,
+}: PullRequestActionsProps & SortActionProps) {
   const { github } = getGitHubClient();
 
   async function mutate() {
@@ -235,7 +239,7 @@ export default function PullRequestActions({
 
         {viewer ? (
           <Action
-            title={isAssignedToMe ? "Un-Assign From Me" : "Assign to Me"}
+            title={isAssignedToMe ? "Unassign from Me" : "Assign to Me"}
             icon={viewerUser.icon}
             shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
             onAction={() => (isAssignedToMe ? unassignFromMe(viewer.id) : assignToMe(viewer.id))}
@@ -305,6 +309,7 @@ export default function PullRequestActions({
       </ActionPanel.Section>
 
       <ActionPanel.Section>
+        <SortAction data={PR_SORT_TYPES_TO_QUERIES} {...{ sortQuery, setSortQuery }} />
         <Action
           icon={Icon.ArrowClockwise}
           title="Refresh"
@@ -370,7 +375,7 @@ function RequestReviewSubmenu({ pullRequest, mutate }: SubmenuProps) {
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         data?.repository?.collaborators?.nodes
           ?.filter((collaborator) => !collaborator?.isViewer)
@@ -449,7 +454,7 @@ function AddAssigneeSubmenu({ pullRequest, mutate }: SubmenuProps) {
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         data?.repository?.collaborators?.nodes?.map((collaborator) => {
           if (!collaborator) {
@@ -521,7 +526,7 @@ function AddProjectSubmenu({ pullRequest, mutate }: SubmenuProps) {
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         data?.repository?.projectsV2.nodes?.map((project) => {
           if (!project) {
@@ -612,7 +617,7 @@ function SetMilestoneSubmenu({ pullRequest, mutate }: SubmenuProps) {
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         <>
           <Action title="No Milestone" onAction={() => unsetMilestone()} />
@@ -668,7 +673,7 @@ function OpenPreviewSubmenu({ pullRequest }: SubmenuProps) {
   return (
     <>
       {isLoading ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         data && (
           <Action.OpenInBrowser

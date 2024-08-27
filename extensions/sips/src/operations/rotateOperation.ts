@@ -5,7 +5,7 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-05 23:24:24
- * Last modified  : 2023-07-06 14:52:04
+ * Last modified  : 2024-06-26 21:37:46
  */
 
 import { execSync } from "child_process";
@@ -13,6 +13,7 @@ import * as fs from "fs";
 import path from "path";
 
 import {
+  execSIPSCommandOnAVIF,
   execSIPSCommandOnSVG,
   execSIPSCommandOnWebP,
   getDestinationPaths,
@@ -29,12 +30,13 @@ import {
  */
 export default async function rotate(sourcePaths: string[], degrees: number) {
   const pathStrings = '"' + sourcePaths.join('" "') + '"';
-  const newPaths = getDestinationPaths(sourcePaths);
+  const newPaths = await getDestinationPaths(sourcePaths);
 
   if (
     pathStrings.toLowerCase().includes("webp") ||
     pathStrings.toLowerCase().includes("svg") ||
-    pathStrings.toLowerCase().includes("pdf")
+    pathStrings.toLowerCase().includes("pdf") ||
+    pathStrings.toLowerCase().includes("avif")
   ) {
     // Special formats in selection -- Handle each image individually
     const resultPaths = [];
@@ -47,7 +49,10 @@ export default async function rotate(sourcePaths: string[], degrees: number) {
         resultPaths.push(await execSIPSCommandOnSVG(`sips --rotate ${degrees}`, imgPath));
       } else if (imgPath.toLowerCase().endsWith("pdf")) {
         // Rotate each page of a PDF
-        resultPaths.push(rotatePDF(imgPath, degrees));
+        resultPaths.push(await rotatePDF(imgPath, degrees));
+      } else if (imgPath.toLowerCase().endsWith("avif")) {
+        // Convert to PNG, rotate, and restore to AVIF
+        resultPaths.push(await execSIPSCommandOnAVIF(`sips --rotate ${degrees}`, imgPath));
       } else {
         // Image is not a special format, so just rotate it using SIPS
         const newPath = newPaths[sourcePaths.indexOf(imgPath)];

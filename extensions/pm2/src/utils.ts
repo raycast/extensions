@@ -13,6 +13,10 @@ export const pm2WrapperPath = path.join(environment.assetsPath, "pm2-wrapper");
 export const pm2WrapperIndexPath = path.join(pm2WrapperPath, "index.js");
 export const pm2WrapperExamplePath = path.join(pm2WrapperPath, "example.js");
 
+export const fakeToast = async (): Promise<Toast> => {
+  return new Toast({ title: "" });
+};
+
 export const setupPm2Wrapeper = async () => {
   const { nodePath, npmPath } = getPreferenceValues<Preferences>();
   await $({ cwd: pm2WrapperPath })`${nodePath} ${npmPath} ci --omit=dev`;
@@ -29,9 +33,19 @@ export const base64Encode = (str: string) => Buffer.from(str).toString("base64")
 
 export const encodeParameters = (parameters: StartOptions | Pm2Process) => base64Encode(JSON.stringify(parameters));
 
-export const getNodeBinaryPath = (runtimeOptions?: RuntimeOptions) => {
-  const { defaultNodeExecutor, nodePath } = getPreferenceValues<Preferences>();
-  return runtimeOptions?.nodePath ?? (defaultNodeExecutor === "raycastNodePath" ? raycastNodePath : nodePath);
+export const setupEnv = (options?: { runtimeOptions?: RuntimeOptions }) => {
+  const { defaultNodeExecutor, nodePath, pm2Home } = getPreferenceValues<Preferences>();
+  const nodeBinaryPath = path.dirname(
+    options?.runtimeOptions?.nodePath ?? (defaultNodeExecutor === "raycastNodePath" ? raycastNodePath : nodePath),
+  );
+
+  if (!process.env.PATH?.includes(nodeBinaryPath)) {
+    process.env.PATH = process.env.PATH ? `${process.env.PATH}:${nodeBinaryPath}` : nodeBinaryPath;
+  }
+
+  if (pm2Home) {
+    process.env.PM2_HOME = pm2Home;
+  }
 };
 
 export async function runPm2Command(
@@ -55,9 +69,12 @@ export async function runPm2Command(
     console.error("No options provided for PM2 command");
     return;
   }
-  const toast = await showToast({ title: "", message: `Running ${command} command...` });
-  const nodeBinaryPath = getNodeBinaryPath(runtimeOptions);
-  const commandLine = `PATH="$PATH:${path.dirname(nodeBinaryPath)}" '${nodeBinaryPath}' '${pm2WrapperIndexPath}' ${command} --options=${encodeParameters(options)}`;
+  setupEnv({ runtimeOptions });
+  const commandLine = `node '${pm2WrapperIndexPath}' ${command} --options=${encodeParameters(options)}`;
+  const toast =
+    environment.commandMode === "view"
+      ? await showToast({ title: "", message: `Running ${command} command...` })
+      : await fakeToast();
   try {
     await $({
       shell: true,
@@ -74,7 +91,10 @@ export async function runPm2Command(
 export const checkIfNeedSetup = async () => {
   const installed = await hasPm2WrapperInstalled();
   if (!installed) {
-    const toast = await showToast({ title: "", message: "Setting up PM2 wrappers for Raycast..." });
+    const toast =
+      environment.commandMode === "view"
+        ? await showToast({ title: "", message: "Setting up PM2 wrappers for Raycast..." })
+        : await fakeToast();
     try {
       await setupPm2Wrapeper();
       toast.style = Toast.Style.Success;

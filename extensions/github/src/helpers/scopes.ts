@@ -1,4 +1,4 @@
-import { Octokit } from "octokit";
+import { Octokit } from "@octokit/rest";
 
 /**
  *
@@ -9,7 +9,7 @@ import { Octokit } from "octokit";
  */
 export const hasRequiredScopes = async (scopes: string | string[], octokit: Octokit, andOrOr = false) => {
   const { headers } = await octokit.request("GET /user");
-  const userScopes = (headers["x-oauth-scopes"] || "").split(",").map((scope) => scope.trim());
+  const userScopes = (headers["x-oauth-scopes"] || "").split(",").map((scope: string) => scope.trim());
   const requiredScopes = Array.isArray(scopes) ? scopes : [scopes];
 
   if (andOrOr) {

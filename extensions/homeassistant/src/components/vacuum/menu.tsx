@@ -1,4 +1,4 @@
-import { MenuBarSubmenu } from "@components/menu";
+import { LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { CopyEntityIDToClipboard } from "@components/state/menu";
 import { State } from "@lib/haapi";
 import { capitalizeFirstLetter, getFriendlyName } from "@lib/utils";
@@ -123,6 +123,7 @@ export function VacuumMenubarItem(props: { state: State }) {
       <VacuumTurnOnMenubarItem state={s} />
       <VacuumTurnOffMenubarItem state={s} />
       <VacuumReturnToBaseMenubarItem state={s} />
+      <LastUpdateChangeMenubarItem state={s} />
       <CopyEntityIDToClipboard state={s} />
     </MenuBarSubmenu>
   );

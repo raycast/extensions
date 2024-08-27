@@ -1,16 +1,24 @@
+import { PurgeQueueCommand, QueueAttributeName, SQSClient } from "@aws-sdk/client-sqs";
 import {
-  GetQueueAttributesCommand,
-  ListQueuesCommand,
-  PurgeQueueCommand,
-  QueueAttributeName,
-  SQSClient,
-} from "@aws-sdk/client-sqs";
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
-import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
+  Action,
+  ActionPanel,
+  Alert,
+  captureException,
+  Color,
+  confirmAlert,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  Clipboard,
+} from "@raycast/api";
+import { MutatePromise, useCachedState, useFrecencySorting } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { isReadyToFetch, resourceToConsoleLink } from "./util";
+import { getErrorMessage, resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
 import { SendMessageForm } from "./components/sqs/send-message-form";
+import { useQueues } from "./hooks/use-sqs";
+import { useState } from "react";
 
 export interface Queue {
   queueUrl: string;
@@ -18,16 +26,31 @@ export interface Queue {
 }
 
 export default function SQS() {
-  const [isDetailsEnabled, setDetailsEnabled] = useCachedState<boolean>("aws-sqs-details-enabled", false);
-  const { data: queues, error, isLoading, revalidate } = useCachedPromise(fetchQueues);
+  const [prefixQuery, setPrefixQuery] = useState<string>("");
+  const [isDetailsEnabled, setDetailsEnabled] = useCachedState<boolean>("show-details", false, {
+    cacheNamespace: "aws-sqs",
+  });
+  const { queues, error, isLoading, mutate } = useQueues(prefixQuery);
+
+  const {
+    data: sortedQueues,
+    resetRanking,
+    visitItem: visit,
+  } = useFrecencySorting(queues, {
+    namespace: "aws-sqs-sort",
+    key: (queue: Queue) => queue.queueUrl,
+    sortUnvisited: (a, b) => a.queueUrl.localeCompare(b.queueUrl),
+  });
 
   return (
     <List
       isLoading={isLoading}
       filtering
-      isShowingDetail={queues && queues.length > 0 && isDetailsEnabled}
-      searchBarPlaceholder="Filter queues by name..."
-      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+      throttle
+      onSearchTextChange={setPrefixQuery}
+      isShowingDetail={!isLoading && !error && (queues || []).length > 0 && isDetailsEnabled}
+      searchBarPlaceholder="Search queues by name prefix (>2 characters)"
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={mutate} />}
     >
       {error && (
         <List.EmptyView
@@ -39,12 +62,11 @@ export default function SQS() {
       {!error && queues?.length === 0 && (
         <List.EmptyView title="No queues found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
-      {queues?.map((queue) => (
+      {sortedQueues.map((queue) => (
         <List.Item
-          key={queue.attributes?.QueueArn}
-          title={queue.attributes?.QueueArn?.split(":").pop() || ""}
+          key={queue.attributes!.QueueArn!}
+          title={queue.attributes!.QueueArn!.split(":").pop()!}
           icon={"aws-icons/sqs/queue.png"}
-          keywords={[queue.attributes?.QueueArn?.split(":").pop() || ""]}
           detail={
             <List.Item.Detail
               markdown={
@@ -132,48 +154,35 @@ export default function SQS() {
           }
           actions={
             <ActionPanel>
-              <AwsAction.Console url={resourceToConsoleLink(queue.queueUrl, "AWS::SQS::Queue")} />
+              <AwsAction.Console
+                url={resourceToConsoleLink(queue.queueUrl, "AWS::SQS::Queue")}
+                onAction={() => visit(queue)}
+              />
               <ActionPanel.Section title={"Queue Actions"}>
-                <Action.CopyToClipboard title="Copy Queue URL" content={queue.queueUrl} />
+                <Action.CopyToClipboard title="Copy Queue URL" content={queue.queueUrl} onCopy={() => visit(queue)} />
                 <Action.Push
-                  target={<SendMessageForm queue={queue} revalidate={revalidate} />}
+                  target={<SendMessageForm {...{ queue, mutate }} />}
                   title="Send Message"
                   icon={Icon.Message}
                   shortcut={{ modifiers: ["ctrl"], key: "m" }}
+                  onPush={() => visit(queue)}
                 />
                 <Action
-                  icon={Icon.Trash}
+                  icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   title="Purge Queue"
                   shortcut={{ modifiers: ["ctrl"], key: "p" }}
-                  onAction={() =>
-                    confirmAlert({
-                      icon: { source: Icon.Trash, tintColor: Color.Red },
-                      title: "Are you sure you want to purge the queue?",
-                      message: "This action cannot be undone.",
-                      primaryAction: {
-                        title: "Purge",
-                        style: Alert.ActionStyle.Destructive,
-                        onAction: async () => {
-                          await showToast({ style: Toast.Style.Animated, title: "🗑️ Purging queue..." });
-
-                          try {
-                            await new SQSClient({}).send(new PurgeQueueCommand({ QueueUrl: queue.queueUrl }));
-                            await showToast({ style: Toast.Style.Success, title: "✅ Queue purged" });
-                          } catch (err) {
-                            await showFailureToast(err, { title: "❌ Failed to purge queue" });
-                          } finally {
-                            revalidate();
-                          }
-                        },
-                      },
-                    })
-                  }
+                  style={Action.Style.Destructive}
+                  onAction={async () => {
+                    await visit(queue);
+                    await purgeQueue(queue, mutate);
+                  }}
                 />
                 <Action
                   title={`${isDetailsEnabled ? "Hide" : "Show"} Details`}
                   onAction={() => setDetailsEnabled(!isDetailsEnabled)}
                   icon={isDetailsEnabled ? Icon.EyeDisabled : Icon.Eye}
                 />
+                <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => resetRanking(queue)} />
               </ActionPanel.Section>
             </ActionPanel>
           }
@@ -195,29 +204,54 @@ export default function SQS() {
   );
 }
 
-const fetchQueues = async (token?: string, aggQueues?: Queue[]): Promise<Queue[]> => {
-  if (!isReadyToFetch()) return [];
-  const { NextToken, QueueUrls } = await new SQSClient({}).send(new ListQueuesCommand({ NextToken: token }));
-  const queuesPromised = (QueueUrls ?? []).map(async (url) => {
-    const attributes = await fetchQueueAttributes(url);
-    return { queueUrl: url, attributes };
+const purgeQueue = async (queue: Queue, mutate: MutatePromise<Queue[] | undefined>) =>
+  await confirmAlert({
+    icon: { source: Icon.Trash, tintColor: Color.Red },
+    title: "Are you sure you want to purge the queue?",
+    message: "This action cannot be undone.",
+    primaryAction: {
+      title: "Purge",
+      style: Alert.ActionStyle.Destructive,
+      onAction: () => tryPurgeQueue(queue, mutate),
+    },
   });
 
-  const queues = await Promise.all(queuesPromised);
-  if (NextToken) {
-    return fetchQueues(NextToken, [...(aggQueues || []), ...(queues || [])]);
-  }
+const tryPurgeQueue = async (queue: Queue, mutate: MutatePromise<Queue[] | undefined>) => {
+  const toast = await showToast({ style: Toast.Style.Animated, title: "🗑️ Purging queue..." });
+  mutate(new SQSClient({}).send(new PurgeQueueCommand({ QueueUrl: queue.queueUrl })), {
+    optimisticUpdate: (queues) => {
+      if (!queues) {
+        return;
+      }
 
-  return queues;
-};
-
-const fetchQueueAttributes = async (queueUrl: string) => {
-  const { Attributes } = await new SQSClient({}).send(
-    new GetQueueAttributesCommand({
-      QueueUrl: queueUrl,
-      AttributeNames: ["All"],
-    }),
-  );
-
-  return Attributes;
+      return queues.map((q) =>
+        q.queueUrl !== queue.queueUrl
+          ? q
+          : {
+              ...q,
+              attributes: { ...q.attributes, ApproximateNumberOfMessages: "0" },
+            },
+      );
+    },
+  })
+    .then(() => {
+      toast.style = Toast.Style.Success;
+      toast.title = "✅ Queue purged";
+    })
+    .catch((err) => {
+      captureException(err);
+      toast.style = Toast.Style.Failure;
+      toast.title = "❌ Failed to purge queue";
+      toast.message = getErrorMessage(err);
+      toast.primaryAction = {
+        title: "Retry",
+        shortcut: { modifiers: ["cmd"], key: "r" },
+        onAction: () => tryPurgeQueue(queue, mutate),
+      };
+      toast.secondaryAction = {
+        title: "Copy Error",
+        shortcut: { modifiers: ["cmd"], key: "c" },
+        onAction: () => Clipboard.copy(getErrorMessage(err)),
+      };
+    });
 };

@@ -1,4 +1,9 @@
-# Browser AI Changelog
+# Browser AI Companion Changelog
+
+## [Update] - 2024-05-31
+
+- Update Logo and name
+- Refactor code
 
 ## [Update] - 2024-05-30
 
