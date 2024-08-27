@@ -12,6 +12,6 @@ export default async (props: LaunchProps<{ arguments: Arguments.ChangeCompleteAc
     toast.title = "Changed Complete Action";
   } catch (error) {
     toast.style = Toast.Style.Failure;
-    toast.title = "Could not Change Complete Action";
+    toast.title = "Could not change Complete Action";
   }
 };

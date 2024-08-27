@@ -11,6 +11,6 @@ export default async () => {
     toast.title = "Paused Queue";
   } catch (error) {
     toast.style = Toast.Style.Failure;
-    toast.title = "Could not Pause Queue";
+    toast.title = "Could not pause Queue";
   }
 };

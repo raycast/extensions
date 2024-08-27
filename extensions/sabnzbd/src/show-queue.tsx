@@ -48,9 +48,9 @@ function SlotListItem(props: { slot: QueueSlot; slots: QueueSlot[]; mutate: Muta
   const first = slot.index == 0;
   const last = slot.index == noOfSlots;
 
-  const moveUpAction = <Action title={"Move Up"} onAction={() => onMoveUp(slot, slots, mutate)} icon={Icon.ArrowUp} />;
+  const moveUpAction = <Action title="Move Up" onAction={() => onMoveUp(slot, slots, mutate)} icon={Icon.ArrowUp} />;
   const moveDownAction = (
-    <Action title={"Move Down"} onAction={() => onMoveDown(slot, slots, mutate)} icon={Icon.ArrowDown} />
+    <Action title="Move Down" onAction={() => onMoveDown(slot, slots, mutate)} icon={Icon.ArrowDown} />
   );
 
   const DeleteAction = () => (
@@ -91,7 +91,7 @@ function SlotListItem(props: { slot: QueueSlot; slots: QueueSlot[]; mutate: Muta
       actions = (
         <ActionPanel>
           {detailAction}
-          <Action title={"Pause"} onAction={() => onPause(slot, mutate)} icon={Icon.Pause} />
+          <Action title="Pause" onAction={() => onPause(slot, mutate)} icon={Icon.Pause} />
           <DeleteAction />
         </ActionPanel>
       );
@@ -104,7 +104,7 @@ function SlotListItem(props: { slot: QueueSlot; slots: QueueSlot[]; mutate: Muta
       actions = (
         <ActionPanel>
           {detailAction}
-          <Action title={"Resume"} onAction={() => onResume(slot, mutate)} icon={Icon.Play} />
+          <Action title="Resume" onAction={() => onResume(slot, mutate)} icon={Icon.Play} />
           <DeleteAction />
         </ActionPanel>
       );
@@ -197,7 +197,7 @@ async function moveJob(slot: QueueSlot, slots: QueueSlot[], direction: "up" | "d
     toast.title = "Moved Job";
   } catch (error) {
     toast.style = Toast.Style.Failure;
-    toast.title = "Could not Move Job";
+    toast.title = "Could not move Job";
   }
 }
 
@@ -218,7 +218,7 @@ async function onDelete(slot: QueueSlot, mutate: Mutate) {
     toast.title = "Deleted Job";
   } catch (error) {
     toast.style = Toast.Style.Failure;
-    toast.title = "Could not Delete Job";
+    toast.title = "Could not delete Job";
   }
 }
 
@@ -266,6 +266,6 @@ async function onResume(slot: QueueSlot, mutate: Mutate) {
     toast.title = "Resumed Job";
   } catch (error) {
     toast.style = Toast.Style.Failure;
-    toast.title = "Could not Resume Job";
+    toast.title = "Could not resume Job";
   }
 }
