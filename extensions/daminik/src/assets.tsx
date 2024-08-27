@@ -1,7 +1,10 @@
 import { Action, ActionPanel, getPreferenceValues, Grid, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import { useState } from "react";
 
 export default function Assets() {
+  const [searchText, setSearchText] = useState("");
+
   type Category = {
     slug: string;
     title: string;
@@ -39,8 +42,9 @@ export default function Assets() {
     isLoading,
     data: assets,
     pagination,
-  } = useFetch((options) => url + `api/assets?` + new URLSearchParams({ page: String(options.page + 1) }).toString(), {
+  } = useFetch((options) => url + `api/assets?` + new URLSearchParams({ page: String(options.page + 1), s: searchText }).toString(), {
     headers: {
+      Accept: "application/json",
       Authorization: `Bearer ${api_key}`,
     },
     mapResult(result: AssetsResult) {
@@ -54,7 +58,7 @@ export default function Assets() {
   });
 
   return (
-    <Grid isLoading={isLoading} pagination={pagination} searchBarPlaceholder="Search asset">
+    <Grid isLoading={isLoading} pagination={pagination} searchBarPlaceholder="Search asset" onSearchTextChange={setSearchText} throttle>
       {assets.map((asset, assetIndex) => (
         <Grid.Item
           key={assetIndex}
