@@ -1,13 +1,13 @@
 # NBA Game Viewer Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Added a score command that shows the scores of the games that are currently in progress and the games from the last 7 days.
+
 ## [Fixes] - 2024-08-27
 
 - If `useLastValue` is not selected in preference, then default values for dropdown is picked from preference.
 - Uses bundled heart icon from raycast instead of a custom one.
-
-## [Improvements] - 2024-08-26
-
-- Added a score command that shows the scores of the games that are currently in progress and the games from the last 7 days.
 
 ## [Improvements] - 2024-08-22
 
