@@ -16,10 +16,10 @@ export default async function Command() {
 
   if (breakRunning) {
     await toast.hide();
-    await showToast({ 
-      style: Toast.Style.Failure, 
-      title: "Break already running", 
-      message: "There is an active break in progress." 
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Break already running",
+      message: "There is an active break in progress.",
     });
     return;
   }
@@ -36,18 +36,16 @@ export default async function Command() {
       await takeBreakWithProfile5(firstProfile);
     }
     await toast.hide();
-    await showToast({ 
-      style: Toast.Style.Success, 
-      title: firstProfile 
-        ? `Break started with profile: ${firstProfile} (5 minutes)` 
-        : "Break started (5 minutes)" 
+    await showToast({
+      style: Toast.Style.Success,
+      title: firstProfile ? `Break started with profile: ${firstProfile} (5 minutes)` : "Break started (5 minutes)",
     });
   } catch (error) {
     await toast.hide();
-    await showToast({ 
-      style: Toast.Style.Failure, 
-      title: "Failed to start break", 
-      message: error instanceof Error ? error.message : "An unknown error occurred" 
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to start break",
+      message: error instanceof Error ? error.message : "An unknown error occurred",
     });
   }
 }

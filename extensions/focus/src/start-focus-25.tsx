@@ -33,18 +33,16 @@ export default async function Command() {
       await startFocusWithProfile25(firstProfile);
     }
     await toast.hide();
-    await showToast({ 
-      style: Toast.Style.Success, 
-      title: firstProfile 
-        ? `Focus started with profile: ${firstProfile} (25 minutes)` 
-        : "Focus started (25 minutes)" 
+    await showToast({
+      style: Toast.Style.Success,
+      title: firstProfile ? `Focus started with profile: ${firstProfile} (25 minutes)` : "Focus started (25 minutes)",
     });
   } catch (error) {
     await toast.hide();
-    await showToast({ 
-      style: Toast.Style.Failure, 
-      title: "Failed to start Focus", 
-      message: error instanceof Error ? error.message : "An unknown error occurred" 
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to start Focus",
+      message: error instanceof Error ? error.message : "An unknown error occurred",
     });
   }
 }

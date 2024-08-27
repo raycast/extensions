@@ -48,7 +48,7 @@ export async function startFocusWithProfile25(profile: string): Promise<void> {
 
 export async function startFocusCustom(hours?: number, minutes?: number, profile?: string): Promise<boolean> {
   if (!(await isFocusRunning())) return false;
-  
+
   let totalSeconds = 0;
   if (hours !== undefined) {
     totalSeconds += hours * 60 * 60;
@@ -58,7 +58,7 @@ export async function startFocusCustom(hours?: number, minutes?: number, profile
   }
 
   if (totalSeconds === 0) {
-    return false;  // Return false if no duration is specified
+    return false; // Return false if no duration is specified
   }
 
   let url = `focus://focus?seconds=${totalSeconds}`;
@@ -150,7 +150,7 @@ export async function getProfileNames() {
 
 export async function startFocusWithProfile(profileName: string) {
   if (!(await isFocusRunning())) return;
-  await runAppleScript(`do shell script "open 'focus://focus?profile=${encodeURIComponent(profileName)}'"`)
+  await runAppleScript(`do shell script "open 'focus://focus?profile=${encodeURIComponent(profileName)}'"`);
 }
 
 export async function isFocusRunning() {

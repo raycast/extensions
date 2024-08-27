@@ -46,11 +46,11 @@ export default async function Command(props: LaunchProps<{ arguments: FocusArgum
     const success = await startFocusCustom(hours, minutes, firstProfile);
     await toast.hide();
     if (success) {
-      await showToast({ 
-        style: Toast.Style.Success, 
-        title: firstProfile 
-          ? `Focus started with profile: ${firstProfile} (${formatDuration(hours, minutes)})` 
-          : `Focus started (${formatDuration(hours, minutes)})` 
+      await showToast({
+        style: Toast.Style.Success,
+        title: firstProfile
+          ? `Focus started with profile: ${firstProfile} (${formatDuration(hours, minutes)})`
+          : `Focus started (${formatDuration(hours, minutes)})`,
       });
     } else {
       await showToast({
@@ -61,17 +61,17 @@ export default async function Command(props: LaunchProps<{ arguments: FocusArgum
     }
   } catch (error) {
     await toast.hide();
-    await showToast({ 
-      style: Toast.Style.Failure, 
-      title: "Failed to start Focus", 
-      message: error instanceof Error ? error.message : "An unknown error occurred" 
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to start Focus",
+      message: error instanceof Error ? error.message : "An unknown error occurred",
     });
   }
 }
 
 function formatDuration(hours?: number, minutes?: number): string {
   const parts = [];
-  if (hours) parts.push(`${hours} hour${hours > 1 ? 's' : ''}`);
-  if (minutes) parts.push(`${minutes} minute${minutes > 1 ? 's' : ''}`);
-  return parts.join(' ');
+  if (hours) parts.push(`${hours} hour${hours > 1 ? "s" : ""}`);
+  if (minutes) parts.push(`${minutes} minute${minutes > 1 ? "s" : ""}`);
+  return parts.join(" ");
 }

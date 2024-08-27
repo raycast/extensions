@@ -22,16 +22,16 @@ export default async function Command() {
       await stopBreakWithProfile(firstProfile);
     }
     await toast.hide();
-    await showToast({ 
-      style: Toast.Style.Success, 
-      title: "Break stopped"
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Break stopped",
     });
   } catch (error) {
     await toast.hide();
-    await showToast({ 
-      style: Toast.Style.Failure, 
-      title: "Failed to stop break", 
-      message: error instanceof Error ? error.message : "An unknown error occurred" 
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to stop break",
+      message: error instanceof Error ? error.message : "An unknown error occurred",
     });
   }
 }
