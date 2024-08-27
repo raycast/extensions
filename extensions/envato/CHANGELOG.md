@@ -1,6 +1,6 @@
 # Envato Changelog
 
-## [Update Logo] - {PR_MERGE_DATE}
+## [Update Logo] - 2024-08-27
 
 - New Envato logo
 - Lots of minor TS friendly changes
