@@ -6,5 +6,5 @@ export default async function main(props) {
   const contentType = props.arguments.type || "sentences";
   const data = await got(`http://metaphorpsum.com/${contentType}/${numSentences}`).text();
   await Clipboard.copy(data);
-  await showHUD(`Copied ${numSentences} sentence(s) to clipboard`);
+  await showHUD(`Copied ${numSentences} ${contentType} to clipboard`);
 }
