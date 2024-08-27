@@ -143,13 +143,7 @@ export async function getResellerIPInformation(ip: string) {
 }
 
 // PACKAGES
-export async function getUserPackages() {
-  return await callApi("PACKAGES_USER", "Fetching User Packages");
-}
-export async function getUserPackageInformation(packageName: string) {
-  const params = new URLSearchParams({ package: packageName });
-  return await callApi(`PACKAGES_USER?${params}`, "Fetching User Package Information");
-}
+// Moved to Hooks
 
 // DOMAINS
 export async function getDomains() {

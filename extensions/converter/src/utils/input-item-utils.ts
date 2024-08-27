@@ -19,5 +19,5 @@ export const fetchItemInputClipboardFirst = async () => {
 
 const getClipboardText = async () => {
   const content = await Clipboard.readText();
-  return typeof content == "undefined" ? "" : content;
+  return content ? content : "";
 };

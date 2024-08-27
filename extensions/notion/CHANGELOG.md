@@ -1,9 +1,13 @@
 # Notion Changelog
 
-## [Refactor - No functional changes] - {PR_MERGE_DATE} - 2024-07-03
+## [Refactor - No functional changes] - 2024-07-03 to {PR_MERGE_DATE}
 
 - Move code around and derives more types from `@notionhq/client` (2024-07-03)
 - Standardize database and page property data formats ({PR_MERGE_DATE})
+
+## [Quicklinks for Quick Capture Command] - 2024-08-20
+
+- Add a new action to create a Quicklink within the Quick Capture command.
 
 ## [Seperate property managment for quicklinks] - 2024-04-22
 

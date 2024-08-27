@@ -1,6 +1,12 @@
 # Brand Icons Changelog
 
-## [Maintenance] - {PR_MREGE_DATE}
+## [Enhancements] - 2024-08-05
+
+- Apply brand color to default copying/opening SVG
+- Add preferences for configuring default copying/opening behaviors
+- Remove a unused placeholder field from preferences
+
+## [Maintenance] - 2024-07-31
 
 - Bump dependencies
 - Use `fast-fuzzy` for searching

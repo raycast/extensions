@@ -1,5 +1,9 @@
 # Raindrop.io Extension Changelog
 
+## [Enhancements] - 2024-08-14
+
+- Added support for Orion browser.
+
 ## [Enhancements] - 2024-07-28
 
 - Added support for Vivaldi ([#13524](https://github.com/raycast/extensions/issues/13524)) and Brave browsers.

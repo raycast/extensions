@@ -290,6 +290,16 @@
     }
   },
   {
+    "name": "IconHash",
+    "displayName": "Hash",
+    "url": "https://seek-oss.github.io/braid-design-system/components/IconHash",
+    "keywords": ["hash", "tag", "pound", "#"],
+    "svgPath": {
+      "light": "./assets/icons/hash-light.svg",
+      "dark": "./assets/icons/hash-dark.svg"
+    }
+  },
+  {
     "name": "IconHeart",
     "displayName": "Heart",
     "url": "https://seek-oss.github.io/braid-design-system/components/IconHeart",

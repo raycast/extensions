@@ -1,0 +1,358 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cron",
+  "title": "Cron",
+  "description": "A companion for Cron (cron.re)",
+  "icon": "cron.png",
+  "author": "astrit",
+  "contributors": [
+    "ridemountainpig"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Calendar",
+      "description": "Cron · Calendar",
+      "mode": "view"
+    },
+    {
+      "name": "time",
+      "title": "Time",
+      "description": "Cron · Time with two zones",
+      "subtitle": "Show time",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "weekFormat",
+      "type": "dropdown",
+      "required": true,
+      "title": "First Day of Week",
+      "data": [
+        {
+          "title": "Monday",
+          "value": "monday"
+        },
+        {
+          "title": "Sunday",
+          "value": "sunday"
+        }
+      ],
+      "description": "First day of week",
+      "default": "monday"
+    },
+    {
+      "name": "weekEnable",
+      "type": "checkbox",
+      "required": true,
+      "label": "Show week column",
+      "title": "Settings",
+      "description": "Indicated if it is necessary to show week numbers",
+      "default": true
+    },
+    {
+      "name": "weekDays",
+      "type": "checkbox",
+      "required": true,
+      "label": "Show weekday names",
+      "description": "This option shows week days on top",
+      "default": true
+    },
+    {
+      "name": "monthDetails",
+      "type": "checkbox",
+      "required": true,
+      "label": "Show event count",
+      "description": "This option enabled details under each day",
+      "default": true
+    },
+    {
+      "name": "monthName",
+      "type": "checkbox",
+      "required": true,
+      "label": "Show month name",
+      "description": "This option shows months title or hides it to save space",
+      "default": true
+    },
+    {
+      "name": "monthSignal",
+      "type": "checkbox",
+      "required": true,
+      "label": "Event indicator",
+      "description": "This option shows a dot in top right corner when day has events",
+      "default": true
+    },
+    {
+      "name": "monthDropdown",
+      "type": "checkbox",
+      "required": true,
+      "label": "Enable month dropdown",
+      "description": "This option shows or hides the dropdown",
+      "default": true
+    },
+    {
+      "name": "monthViewMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Density",
+      "data": [
+        {
+          "title": "Normal",
+          "value": "normal"
+        },
+        {
+          "title": "Comfortable",
+          "value": "comfortable"
+        },
+        {
+          "title": "Compact",
+          "value": "compact"
+        }
+      ],
+      "description": "Card density",
+      "default": "compact"
+    },
+    {
+      "name": "enableTime",
+      "type": "checkbox",
+      "required": true,
+      "label": "Time",
+      "title": "Time Settings",
+      "description": "Show the time before calendar",
+      "default": true
+    },
+    {
+      "name": "enableTimeSeconds",
+      "type": "checkbox",
+      "required": false,
+      "label": "Seconds",
+      "description": "Hide seconds in time",
+      "default": true
+    },
+    {
+      "name": "enableTimeTitle",
+      "type": "checkbox",
+      "required": false,
+      "label": "Title",
+      "description": "Hide the time title before calendar",
+      "default": true
+    },
+    {
+      "name": "enableTimeFormat",
+      "type": "checkbox",
+      "required": false,
+      "label": "Time format",
+      "description": "Display time in AM/PM format",
+      "default": true
+    },
+    {
+      "name": "enableTimeSecondary",
+      "type": "textfield",
+      "required": false,
+      "label": "Second timezone title",
+      "title": "Secondary Timezone",
+      "description": "Second timezone that displays when time is enabled"
+    },
+    {
+      "name": "enableTimeSecondaryOffset",
+      "type": "textfield",
+      "required": false,
+      "label": "Second timezone offset",
+      "title": "Offset",
+      "description": "Second timezone offset in hours"
+    },
+    {
+      "name": "searchPlaceholder",
+      "type": "textfield",
+      "required": false,
+      "label": "Search custom placeholder",
+      "title": "Search Placeholder",
+      "description": "Show or hide time on search placeholder"
+    },
+    {
+      "name": "navTitle",
+      "type": "textfield",
+      "required": false,
+      "label": "Custom window title text",
+      "placeholder": "Custom title",
+      "title": "Navigation Title",
+      "description": "Show or hide time on search placeholder"
+    },
+    {
+      "name": "navDate",
+      "type": "checkbox",
+      "required": true,
+      "label": "Show date",
+      "description": "This option shows date on navigation title",
+      "default": true
+    },
+    {
+      "name": "navWeather",
+      "type": "checkbox",
+      "required": true,
+      "label": "Show weather",
+      "description": "This option shows a dot in top right corner when day has events",
+      "default": true
+    },
+    {
+      "name": "navWeek",
+      "type": "checkbox",
+      "required": true,
+      "label": "Show week number",
+      "description": "This option shows the week number on the navigation title",
+      "default": true
+    },
+    {
+      "name": "customTheme",
+      "type": "dropdown",
+      "required": false,
+      "title": "Theme",
+      "data": [
+        {
+          "title": "Default",
+          "value": "default"
+        },
+        {
+          "title": "Blue",
+          "value": "Blue"
+        },
+        {
+          "title": "Green",
+          "value": "Green"
+        },
+        {
+          "title": "Magenta",
+          "value": "Magenta"
+        },
+        {
+          "title": "Orange",
+          "value": "Orange"
+        },
+        {
+          "title": "Purple",
+          "value": "Purple"
+        },
+        {
+          "title": "Red",
+          "value": "Red"
+        },
+        {
+          "title": "Yellow",
+          "value": "Yellow"
+        }
+      ],
+      "description": "Change theme",
+      "default": "default"
+    },
+    {
+      "name": "iconsType",
+      "type": "dropdown",
+      "required": false,
+      "title": "Icon Type",
+      "data": [
+        {
+          "title": "Avatar",
+          "value": "avatar"
+        },
+        {
+          "title": "Raycast icons",
+          "value": "raycast"
+        },
+        {
+          "title": "Font",
+          "value": "glyph"
+        }
+      ],
+      "description": "Change icon type",
+      "default": "glyph"
+    },
+    {
+      "name": "fontWeight",
+      "type": "dropdown",
+      "required": false,
+      "title": "Font Weight",
+      "data": [
+        {
+          "title": "Normal",
+          "value": "normal"
+        },
+        {
+          "title": "Bold",
+          "value": "bold"
+        }
+      ],
+      "description": "Font weight",
+      "default": "normal"
+    },
+    {
+      "name": "fontFamily",
+      "type": "dropdown",
+      "required": false,
+      "title": "Font Family",
+      "data": [
+        {
+          "title": "Sans Serif",
+          "value": "sans-serif"
+        },
+        {
+          "title": "Serif",
+          "value": "serif"
+        },
+        {
+          "title": "Monospace",
+          "value": "monospace"
+        }
+      ],
+      "description": "Change font family applies to font icon type only",
+      "default": "sans-serif"
+    },
+    {
+      "name": "fontColorAccent",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "#5d18dc",
+      "title": "Current Day Color",
+      "description": "Change current day color, overrides theme color"
+    },
+    {
+      "name": "fontColorAccentWeekend",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "#ff8282",
+      "title": "Custom Color for Weekends",
+      "description": "Change Weekend color, overrides theme color"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.1",
+    "@raycast/utils": "^1.13.6",
+    "calendar": "^0.1.1",
+    "date-fns": "^3.6.0",
+    "node-fetch": "^3.3.2",
+    "uuid": "^9.0.1",
+    "weeknumber": "^1.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@ianvs/prettier-plugin-sort-imports": "^4.1.1",
+    "@types/calendar": "^0.1.2",
+    "@types/node": "20.8.10",
+    "@types/uuid": "^9.0.8",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

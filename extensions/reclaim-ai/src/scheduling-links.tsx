@@ -67,22 +67,20 @@ const ListDetailMetadataField = ({
 export default function Command() {
   const [searchText, setSearchText] = useState("");
 
-  const { useFetchSchedulingLinks, useSchedulingLinksGroups, getSchedulingLinks } = useSchedulingLinks();
+  const { schedulingLinks, schedulingLinksIsLoading, schedulingLinksGroups, schedulingLinksGroupsIsLoading } =
+    useSchedulingLinks();
 
-  const { data: schedulingLinksData, isLoading: schedulingLinksIsLoading } = useFetchSchedulingLinks();
-  const { data: schedulingLinksGroupsData, isLoading: schedulingLinksGroupsisLoading } = useSchedulingLinksGroups();
-
-  const isLoading = schedulingLinksIsLoading || schedulingLinksGroupsisLoading;
+  const isLoading = schedulingLinksIsLoading || schedulingLinksGroupsIsLoading;
 
   const { links, groups } = useMemo(
     () =>
-      !schedulingLinksData || !schedulingLinksGroupsData
+      !schedulingLinks || !schedulingLinksGroups
         ? { links: [], groups: [] }
         : {
-            links: schedulingLinksData,
-            groups: schedulingLinksGroupsData,
+            links: schedulingLinks,
+            groups: schedulingLinksGroups,
           },
-    [schedulingLinksData, schedulingLinksGroupsData]
+    [schedulingLinks, schedulingLinksGroups]
   );
 
   const { currentUser } = useUser();

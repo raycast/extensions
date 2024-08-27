@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brand-dev",
   "title": "Brand.dev",
-  "description": "An API to get a company's brand logos, colors, slogan, socials, and more.",
-  "icon": "brand-dev.png",
+  "description": "Get a company's brand logos, colors, slogan, socials, and more.",
+  "icon": "brand-dev-purple.png",
   "author": "xmok",
   "categories": [
     "Applications",
@@ -30,8 +30,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.1",
-    "@raycast/utils": "^1.16.1"
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.16.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

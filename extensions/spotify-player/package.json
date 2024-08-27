@@ -28,7 +28,8 @@
     "rfaccio",
     "badta5te",
     "andyburris",
-    "thomaslombart"
+    "thomaslombart",
+    "rhesamu"
   ],
   "license": "MIT",
   "preferences": [
@@ -50,6 +51,15 @@
       "description": "A single unified search command. Search for artists, albums, songs, playlists, podcasts, and episodes. Use the dropdown menu to filter your search to a specific category. Each category offers contextual actions, so you can dive deeper into the search.",
       "mode": "view",
       "preferences": [
+        {
+          "title": "Filters",
+          "label": "Music Only",
+          "default": false,
+          "description": "Only show results for music. Podcasts and episodes are excluded.",
+          "name": "musicOnly",
+          "required": true,
+          "type": "checkbox"
+        },
         {
           "title": "Top View",
           "data": [

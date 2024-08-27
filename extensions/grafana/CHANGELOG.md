@@ -1,5 +1,9 @@
 # Grafana Changelog
 
+## [Updates] - 2024-08-22
+
+- Use Service Account Token instead of API keys
+
 ## [New commands] - 2024-04-25
 
 - New command "Create saved query"

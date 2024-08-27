@@ -6,9 +6,7 @@ import {
   deleteUser,
   getResellerIPs,
   getResellerUserAccounts,
-  getUserConfig,
   getUserDomains,
-  getUserPackages,
   getUserUsage,
   modifyUser,
   suspendOrUnsuspendUser,
@@ -23,7 +21,6 @@ import {
   GetResellerUserAccountsResponse,
   GetUserConfigResponse,
   GetUserDomainsResponse,
-  GetUserPackagesResponse,
   GetUserUsageResponse,
   ModifyUserFormValues,
   ModifyUserRequest,
@@ -50,6 +47,7 @@ import GetSubdomainsComponent from "./components/subdomains/GetSubdomainsCompone
 import GetEmailAccountsComponent from "./components/email-accounts/GetEmailAccountsComponent";
 import ErrorComponent from "./components/ErrorComponent";
 import GetDatabasesComponent from "./components/databases/GetDatabasesComponent";
+import { useGetUserConfig, useGetUserPackages } from "./utils/hooks";
 
 export default function GetAccounts() {
   const [isLoading, setIsLoading] = useState(true);
@@ -124,7 +122,7 @@ export default function GetAccounts() {
               <Action.Push
                 title="See User Config"
                 icon={Icon.WrenchScrewdriver}
-                target={<GetUserConfig user={RESELLER_USERNAME} is_reseller={true} />}
+                target={<GetUserConfig user={RESELLER_USERNAME} />}
               />
               <ActionPanel.Section>
                 <Action.Push
@@ -273,26 +271,9 @@ function GetUserUsage({ user, is_reseller = false }: GetUserUsageProps) {
 
 type GetUserConfigProps = {
   user: string;
-  is_reseller?: boolean;
 };
-function GetUserConfig({ user, is_reseller = false }: GetUserConfigProps) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [config, setConfig] = useState<GetUserConfigResponse>();
-
-  async function getFromApi() {
-    setIsLoading(true);
-    const response = await getUserConfig(user, is_reseller);
-    if (response.error === "0") {
-      const data = response as GetUserConfigResponse;
-      setConfig(data);
-      await showToast(Toast.Style.Success, "SUCCESS", "Fetched User Config");
-    }
-    setIsLoading(false);
-  }
-
-  useEffect(() => {
-    getFromApi();
-  }, []);
+function GetUserConfig({ user }: GetUserConfigProps) {
+  const { isLoading, data: config, revalidate } = useGetUserConfig(user);
 
   return (
     <Detail
@@ -305,6 +286,17 @@ function GetUserConfig({ user, is_reseller = false }: GetUserConfigProps) {
             {Object.entries(config).map(([key, val]) => {
               if (key === "error") return;
               const title = getTitleFromKey(key);
+              if (val instanceof Array)
+                return val.length ? (
+                  <Detail.Metadata.TagList key={title} title={title}>
+                    {val.map((item) => (
+                      <Detail.Metadata.TagList.Item key={item} text={item} />
+                    ))}
+                  </Detail.Metadata.TagList>
+                ) : (
+                  <Detail.Metadata.Label key={title} title={title} icon={Icon.Minus} />
+                );
+
               const { text, icon } = getTextAndIconFromVal(val);
               return <Detail.Metadata.Label key={key} title={title} text={text} icon={icon} />;
             })}
@@ -318,7 +310,7 @@ function GetUserConfig({ user, is_reseller = false }: GetUserConfigProps) {
             <Action.Push
               title="Modify User"
               icon={Icon.Pencil}
-              target={<ModifyUser user={user} currentConfig={config} onUserModified={getFromApi} />}
+              target={<ModifyUser user={user} currentConfig={config} onUserModified={() => revalidate?.()} />}
             />
           </ActionPanel>
         )
@@ -437,7 +429,7 @@ type CreateUserProps = {
 function CreateUser({ onUserCreated }: CreateUserProps) {
   const { pop } = useNavigation();
 
-  const [packages, setPackages] = useState<string[]>();
+  const { isLoading, data: packages } = useGetUserPackages();
   const [IPs, setIPs] = useState<string[]>();
   // const [customizePackage, setCustomizePackage] = useState(false);
 
@@ -476,15 +468,6 @@ function CreateUser({ onUserCreated }: CreateUserProps) {
     },
   });
 
-  async function getPackagesFromApi() {
-    const response = await getUserPackages();
-    if (response.error === "0") {
-      const data = response as GetUserPackagesResponse;
-      const { list } = data;
-      setPackages(list);
-      await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${list.length} Packages`);
-    }
-  }
   async function getIPsFromApi() {
     const response = await getResellerIPs();
     if (response.error === "0") {
@@ -496,12 +479,12 @@ function CreateUser({ onUserCreated }: CreateUserProps) {
   }
 
   useEffect(() => {
-    getPackagesFromApi();
     getIPsFromApi();
   }, []);
 
   return (
     <Form
+      isLoading={isLoading}
       navigationTitle="Create User"
       actions={
         <ActionPanel>
@@ -584,15 +567,15 @@ function ModifyUser({ user, currentConfig, onUserModified }: ModifyUserProps) {
       udomainptr: currentConfig.domainptr === "unlimited",
       ftp: currentConfig.ftp,
       uftp: currentConfig.ftp === "unlimited",
-      aftp: currentConfig.aftp === "ON" ? true : false,
-      cgi: currentConfig.cgi === "ON" ? true : false,
+      aftp: currentConfig.aftp,
+      cgi: currentConfig.cgi,
       php: currentConfig.php === "ON" ? true : false,
       spam: currentConfig.spam === "ON" ? true : false,
-      cron: currentConfig.cron === "ON" ? true : false,
+      cron: currentConfig.cron,
       ssl: currentConfig.ssl === "ON" ? true : false,
       sysinfo: currentConfig.sysinfo === "ON" ? true : false,
       ssh: currentConfig.ssh === "ON" ? true : false,
-      dnscontrol: currentConfig.dnscontrol === "ON" ? true : false,
+      dnscontrol: currentConfig.dnscontrol,
       skin: currentConfig.skin,
       ns1: currentConfig.ns1,
       ns2: currentConfig.ns2,

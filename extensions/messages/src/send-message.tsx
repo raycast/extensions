@@ -33,10 +33,37 @@ function getName(contact: Contact) {
   return `${contact.givenName}${contact.familyName ? ` ${contact.familyName}` : ""}`;
 }
 
+async function isMessagesAppRunning() {
+  const result = await runAppleScript(
+    `
+    tell application "System Events"
+      return (count of (every process whose name is "Messages")) > 0
+    end tell
+    `,
+  );
+  return result === "true";
+}
+
+async function quitMessagesApp() {
+  await runAppleScript(
+    `
+    tell application "Messages"
+      quit
+    end tell
+    `,
+  );
+}
+
 type Values = {
   text: string;
   contact: string;
   address: string;
+};
+
+type LaunchContext = {
+  contactId: string;
+  address: string;
+  text: string;
 };
 
 export default function Command({
@@ -44,7 +71,7 @@ export default function Command({
   launchContext,
 }: LaunchProps<{
   draftValues: Values;
-  launchContext: { contactId: string; address: string; text: string };
+  launchContext: LaunchContext;
 }>) {
   const { shouldCloseMainWindow } = getPreferenceValues<{ shouldCloseMainWindow: boolean }>();
   const { data: contacts, isLoading } = useCachedPromise(
@@ -75,6 +102,8 @@ export default function Command({
         return;
       }
 
+      const wasMessagesRunning = await isMessagesAppRunning();
+
       const result = await runAppleScript(
         `
         on run argv
@@ -100,6 +129,10 @@ export default function Command({
 
         if (shouldCloseMainWindow) {
           await closeMainWindow({ clearRootSearch: true });
+        }
+
+        if (!wasMessagesRunning) {
+          await quitMessagesApp();
         }
 
         await showToast({

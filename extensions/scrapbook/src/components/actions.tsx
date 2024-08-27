@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, launchCommand, LaunchType } from "@raycast/api";
+import { Action, ActionPanel, Icon, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
 import { PostType, UserType } from "../lib/types";
 
 export function RefreshAction({ revalidate }: { revalidate: () => void }) {
@@ -10,13 +10,17 @@ export function UserCommandActions({ user }: { user: UserType }) {
     <Action
       title="View User's Posts"
       icon={Icon.Book}
-      onAction={() =>
-        launchCommand({
-          name: "search-users-posts",
-          type: LaunchType.UserInitiated,
-          context: { username: user.username },
-        })
-      }
+      onAction={() => {
+        try {
+          launchCommand({
+            name: "search-users-posts",
+            type: LaunchType.UserInitiated,
+            context: { username: user.username },
+          });
+        } catch (err) {
+          showToast({ title: "Command not enabled", style: Toast.Style.Failure });
+        }
+      }}
     />
   );
 }

@@ -48,7 +48,7 @@ const fetchLink = async (preferences: Preferences, values: FormValues, ownerIDVa
       {
         headers: {
           "Content-Type": "application/json",
-          Cookie: `__Secure-next-auth.session-token=${preferences.LinkwardenApiKey}`,
+          Authorization: `Bearer ${preferences.LinkwardenApiKey}`,
         },
       },
     );
@@ -130,19 +130,20 @@ export default () => {
     fetchBrowserPath();
   }, []);
 
-  const { data }: { data: ApiResponse | undefined } = useFetch<ApiResponse>(
-    `${preferences.LinkwardenUrl}/api/v1/tags`,
-    {
-      headers: {
-        Cookie: `__Secure-next-auth.session-token=${preferences.LinkwardenApiKey}`,
-      },
-      keepPreviousData: true,
+  const { data: tags } = useFetch(`${preferences.LinkwardenUrl}/api/v1/tags`, {
+    headers: {
+      Authorization: `Bearer ${preferences.LinkwardenApiKey}`,
     },
-  );
+    mapResult(result: ApiResponse) {
+      return {
+        data: result.response,
+      };
+    },
+    initialData: [],
+    keepPreviousData: true,
+  });
 
-  const dataArray = Array.isArray(data?.response) ? data.response : [];
-
-  const firstOwnerID = dataArray.find((tag) => tag.ownerId);
+  const firstOwnerID = tags.find((tag) => tag.ownerId);
 
   const ownerIDValue = firstOwnerID?.ownerId;
 
@@ -174,10 +175,10 @@ export default () => {
         </ActionPanel>
       }
     >
-      <Form.TextField id="url" value={browserPath} title="URL" />
+      <Form.TextField id="url" value={browserPath} title="URL" placeholder="http://example.com/" />
       <Form.TextField id="name" title="Name" placeholder="Keep default name" autoFocus />
       <Form.TagPicker {...itemProps.tagPicker} title="Tag Picker">
-        {dataArray.map((tag) => (
+        {tags.map((tag) => (
           <Form.TagPicker.Item value={tag.name} title={tag.name} key={tag.id} />
         ))}
       </Form.TagPicker>
