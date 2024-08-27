@@ -1,6 +1,5 @@
-import { LocalStorage, showToast } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
 
 import {
   fetchDatabaseProperties,
@@ -14,7 +13,8 @@ import {
   type Page,
   type DatabaseProperty,
 } from "../utils/notion";
-import { DatabaseView } from "../utils/types";
+
+export * from "./view-config";
 
 export function useUsers() {
   const value = useCachedPromise(() => fetchUsers());
@@ -64,48 +64,6 @@ export function useDatabaseProperties(databaseId: string | null, filter?: (value
   );
 
   return { ...value, data: value.data ?? [] };
-}
-
-export function useVisibleDatabasePropIds(
-  databaseId: string,
-  quicklinkProps?: string[],
-): {
-  visiblePropIds?: string[];
-  isLoading: boolean;
-  setVisiblePropIds: (value: string[]) => Promise<void> | void;
-} {
-  if (quicklinkProps) {
-    const [visiblePropIds, setVisiblePropIds] = useState(quicklinkProps);
-    return { visiblePropIds, isLoading: false, setVisiblePropIds };
-  } else {
-    const { data, isLoading, setDatabaseView } = useDatabasesView(databaseId);
-    const setVisiblePropIds = (props?: string[]) => setDatabaseView({ ...data, create_properties: props });
-    return { visiblePropIds: data.create_properties, isLoading, setVisiblePropIds };
-  }
-}
-
-export function useDatabasesView(databaseId: string) {
-  const { data, isLoading, mutate } = useCachedPromise(async () => {
-    const data = await LocalStorage.getItem<string>("DATABASES_VIEWS");
-
-    if (!data) return {};
-
-    return JSON.parse(data) as { [databaseId: string]: DatabaseView | undefined };
-  });
-
-  async function setDatabaseView(view: DatabaseView) {
-    if (!data) return;
-
-    await LocalStorage.setItem("DATABASES_VIEWS", JSON.stringify({ ...data, [databaseId]: view }));
-    mutate();
-    showToast({ title: "View updated" });
-  }
-
-  return {
-    data: data?.[databaseId] || {},
-    isLoading,
-    setDatabaseView,
-  };
 }
 
 export class RecentPage {

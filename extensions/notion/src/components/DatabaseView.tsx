@@ -1,7 +1,7 @@
 import { List, Image } from "@raycast/api";
 
+import { useKanbanViewConfig } from "../hooks";
 import { notionColorToTintColor, isType, Page, DatabaseProperty, PropertyConfig, User } from "../utils/notion";
-import type { DatabaseView } from "../utils/types";
 
 import { PageListItem } from "./PageListItem";
 import { ActionEditPageProperty } from "./actions";
@@ -10,8 +10,6 @@ type DatabaseViewProps = {
   databaseId: string;
   databasePages: Page[];
   databaseProperties: DatabaseProperty[];
-  databaseView?: DatabaseView;
-  setDatabaseView?: (view: DatabaseView) => Promise<void>;
   setRecentPage: (page: Page) => Promise<void>;
   removeRecentPage: (id: string) => Promise<void>;
   mutate: () => Promise<void>;
@@ -20,23 +18,19 @@ type DatabaseViewProps = {
 };
 
 export function DatabaseView(props: DatabaseViewProps) {
-  const {
-    databaseId,
-    databasePages,
-    databaseProperties,
-    databaseView,
-    setDatabaseView,
-    mutate,
-    setRecentPage,
-    removeRecentPage,
-    users,
-  } = props;
+  const { databaseId, databasePages, databaseProperties, mutate, setRecentPage, removeRecentPage, users } = props;
 
-  const viewType = databaseView?.type ?? "list";
-  const propertyId = databaseView?.kanban?.property_id;
-  const statusProperty = databaseProperties.find((dp) => dp.id === propertyId);
+  const { kanbanConfig } = useKanbanViewConfig(databaseId);
+  const statusProperty = kanbanConfig?.property_id
+    ? databaseProperties.find((dp) => dp.id === kanbanConfig?.property_id)
+    : undefined;
 
-  if (viewType === "list" || !propertyId || !statusProperty || !isType(statusProperty, "status", "select")) {
+  if (
+    !kanbanConfig?.active ||
+    !kanbanConfig.property_id ||
+    !statusProperty ||
+    !isType(statusProperty, "status", "select")
+  ) {
     return (
       <>
         {databasePages?.map((p) => (
@@ -45,8 +39,6 @@ export function DatabaseView(props: DatabaseViewProps) {
             page={p}
             mutate={mutate}
             databaseProperties={databaseProperties}
-            databaseView={databaseView}
-            setDatabaseView={setDatabaseView}
             setRecentPage={setRecentPage}
             removeRecentPage={removeRecentPage}
             users={users}
@@ -62,7 +54,7 @@ export function DatabaseView(props: DatabaseViewProps) {
     started_ids: startedIds = [],
     completed_ids: completedIds = [],
     canceled_ids: canceledIds = [],
-  } = databaseView?.kanban || {};
+  } = kanbanConfig || {};
 
   // Section Order: Started > Not Started > Completed > Canceled > Backlog | Other (hidden)
   const sectionIds = startedIds.concat(notStartedIds).concat(completedIds).concat(canceledIds).concat(backlogIds);
@@ -107,7 +99,7 @@ export function DatabaseView(props: DatabaseViewProps) {
   const tempSections: Record<string, Page[]> = {};
 
   databasePages.forEach((p) => {
-    const prop = Object.values(p.properties).find((x) => x.id === propertyId);
+    const prop = Object.values(p.properties).find((x) => x.id === kanbanConfig.property_id);
     let propId = "_select_null_";
 
     if (prop && (prop.type == "select" || prop.type == "status") && prop.value) propId = prop.value.id;
@@ -178,15 +170,14 @@ export function DatabaseView(props: DatabaseViewProps) {
                 databaseProperty={statusProperty}
                 options={customOptions}
                 pageId={p.id}
-                pageProperty={p.properties[propertyId]}
+                pageProperty={p.properties[kanbanConfig.property_id]}
                 icon="./icon/kanban_status_started.png"
                 shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                 mutate={mutate}
               />,
             ]}
-            databaseView={databaseView}
+            isKanban={kanbanConfig.active}
             databaseProperties={databaseProperties}
-            setDatabaseView={setDatabaseView}
             mutate={mutate}
           />
         ))}
