@@ -2,7 +2,7 @@
 
 This is a simple Raycast extension to control playback of your music on Tidal.
 
-![Tidal Controller](./tidal-controller-1.png)
+![Tidal Controller](./metadata/tidal-controller-1.png)
 
 ## Usage
 
