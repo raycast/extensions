@@ -48,7 +48,6 @@ export default function Command() {
 
   return (
     <Form
-      enableDrafts
       actions={
         <ActionPanel>
           <Action.SubmitForm
