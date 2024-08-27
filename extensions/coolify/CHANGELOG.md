@@ -1,3 +1,13 @@
 # Coolify Changelog
 
-## [Initial Version] - 2024-07-30
+## [Initial Version] - {PR_MERGE_DATE}
+
+- View Servers
+    - View Server Details
+    - View Server Resources
+- View Teams
+    - View Team Members
+- View Resources
+    - Start Resource
+    - Stop Resource
+    - Restart Resource

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "coolify",
   "title": "Coolify",
-  "description": "",
+  "description": "View Servers, Resources, Teams and more",
   "icon": "coolify.png",
   "author": "xmok",
   "categories": [
@@ -37,7 +37,13 @@
     {
       "name": "resources",
       "title": "View Resources",
-      "description": "View Resources",
+      "description": "View Resources and start,stop,redeploy",
+      "mode": "view"
+    },
+    {
+      "name": "teams",
+      "title": "View Teams",
+      "description": "View Teams and Members",
       "mode": "view"
     }
   ],
