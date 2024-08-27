@@ -1,9 +1,9 @@
 import { getPreferenceValues, showToast, Toast, Cache } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { envatoErrors, envatoUser, saleItem } from "./types";
+import { envatoErrors } from "./types";
 import Envato = require("envato");
-const token = getPreferenceValues().token;
-import { statementUser, Portfolio, GetData } from "./types";
+const token = getPreferenceValues<Preferences>().token;
+import { GetData } from "./types";
 const cache = new Cache();
 
 // DATE
@@ -26,23 +26,23 @@ export const useFetch = () => {
       // GET API
       const client = Envato !== undefined ? new Envato.Client(token) : undefined;
       const username = client !== undefined ? await client.private.getUsername() : "";
-      const userInfo = client !== undefined ? await client.user.getAccountDetails(username) : [];
-      const accountInfo = client !== undefined ? await client.private.getAccountDetails() : [];
+      const userInfo = client !== undefined ? await client.user.getAccountDetails(username) : undefined;
+      const accountInfo = client !== undefined ? await client.private.getAccountDetails() : undefined;
       const badges = client !== undefined ? await client.user.getBadges(username) : [];
-      const portfolio = client !== undefined ? await client.catalog.searchItems({ username: username }) : [];
+      const portfolio = client !== undefined ? await client.catalog.searchItems({ username: username }) : undefined;
       const email = client !== undefined ? await client.private.getEmail() : "";
       const salesInfo = client !== undefined ? await client.private.getSales() : [];
-      const statement = client !== undefined ? await client.private.getStatement({}) : [];
+      const statement = client !== undefined ? await client.private.getStatement({}) : { count: 0, results: [] };
       const salesEmpty: any = salesInfo.length === 0 ? { empty: true } : [];
 
       setState((oldState) => ({
         ...oldState,
-        sales: salesInfo as [],
-        statement: statement as statementUser,
-        user: userInfo as envatoUser,
-        badges: badges as [],
-        account: accountInfo as [],
-        portfolio: portfolio as unknown as Portfolio,
+        sales: salesInfo,
+        statement,
+        user: userInfo,
+        badges,
+        account: accountInfo,
+        portfolio,
         errors: salesEmpty as envatoErrors,
         isLoading: false,
       }));
