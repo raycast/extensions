@@ -1,5 +1,5 @@
 import { Action, ActionPanel, environment, Icon, Keyboard, List } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useFetch, useLocalStorage } from "@raycast/utils";
 import { Doc } from "./types";
 import { SearchEntries } from "./search-entries";
 import { useEffect, useState } from "react";
@@ -7,16 +7,17 @@ import { useEffect, useState } from "react";
 export default function SearchDocsets(): JSX.Element {
   const { data, isLoading } = useFetch<Doc[]>(`https://devdocs.io/docs/docs.json`, {});
   const defaultDocs = ["css", "html", "http", "javascript", "dom"];
+  const { value: docSlugs } = useLocalStorage("docs", defaultDocs);
 
   const [documentations, setDocumentations] = useState<[Doc[], Doc[]]>([[], []]);
 
   useEffect(() => {
-    if (data) {
+    if (data && docSlugs) {
       const preferredDocs: Doc[] = [];
       const availableDocs: Doc[] = [];
 
       data.forEach((doc) => {
-        if (defaultDocs?.find((preferredDoc) => preferredDoc === doc.slug)) {
+        if (docSlugs?.find((preferredDoc) => preferredDoc === doc.slug)) {
           preferredDocs.push(doc);
         } else {
           availableDocs.push(doc);
@@ -25,7 +26,7 @@ export default function SearchDocsets(): JSX.Element {
 
       setDocumentations([preferredDocs, availableDocs]);
     }
-  }, [isLoading]);
+  }, [isLoading, docSlugs]);
 
   return (
     <List isLoading={isLoading}>
