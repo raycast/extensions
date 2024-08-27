@@ -3,6 +3,7 @@
 ## [Fixes] - {PR_MERGE_DATE}
 
 - If `useLastValue` is not selected in preference, then default values for dropdown is picked from preference.
+- Uses bundled heart icon from raycast instead of a custom one.
 
 ## [Improvements] - 2024-08-22
 
