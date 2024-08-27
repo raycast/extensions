@@ -25,8 +25,8 @@ const Standings = () => {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select League and Conference"
-          storeValue={useLastValue}
           onChange={setSelectedLeagueConference}
+          {...(useLastValue ? { storeValue: true } : { defaultValue: `${league}_${conference}` })}
         >
           <List.Dropdown.Section title="NBA">
             <List.Dropdown.Item value="nba_eastern" title="NBA Eastern Conference" />

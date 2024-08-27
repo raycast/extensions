@@ -1,21 +1,30 @@
 import { Action, Icon, Keyboard } from "@raycast/api";
-import { GameSummary } from "../../services";
+import { GameSummary } from "../../models";
 import { DISPLAY_VALUES } from "../../constants";
 import { OpenUrlAction } from "./OpenUrlAction";
 import { SearchCallback } from "../..";
 import { SeeTrendingAction } from "./SeeTrendingAction";
+import { useRecents } from "../../hooks/UseRecents";
 
 /**
  * A React component that renders an Action to launch the game if a playUrl is available.
  *
- * @param url The URL to launch the game.
+ * @param game The game to launch.
  * @returns A JSX.Element representing the PlayGameAction component, or an empty fragment if no playUrl is provided.
  */
-function PlayGameAction({ url }: { url?: string }) {
-  if (!url) {
+function PlayGameAction({ game }: { game: GameSummary }) {
+  const [, , addGame] = useRecents();
+  if (!game.playUrl) {
     return <></>;
   }
-  return <OpenUrlAction icon={Icon.GameController} title={DISPLAY_VALUES.launchGame} url={url} />;
+  return (
+    <OpenUrlAction
+      icon={Icon.GameController}
+      onAction={() => addGame(game)}
+      title={DISPLAY_VALUES.launchGame}
+      url={game.playUrl}
+    />
+  );
 }
 
 /**
@@ -41,7 +50,7 @@ function CopyUrlAction({ url }: { url: string }) {
  */
 export function getCommonGameActions(game: GameSummary, searchCallback: SearchCallback): JSX.Element[] {
   return [
-    <PlayGameAction url={game.playUrl} />,
+    <PlayGameAction game={game} />,
     <CopyUrlAction url={game.rawUrl} />,
     <SeeTrendingAction searchCallback={searchCallback} />,
   ];
