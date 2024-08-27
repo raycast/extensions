@@ -190,7 +190,8 @@ export default function Command() {
     }, 1000);
 
     const initialContent = fs.readFileSync(logFilePath, "utf8");
-    setLogs((prevLogs) => `${initialContent}\n${prevLogs}`);
+    const reversedContent = initialContent.split("\n").reverse().join("\n");
+    setLogs((prevLogs) => `${reversedContent}\n${prevLogs}`);
     fileStream = spawn("tail", ["-f", logFilePath]);
     fileStream?.stdout?.on("data", (data) => {
       console.log(data.toString());
