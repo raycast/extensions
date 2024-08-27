@@ -2,7 +2,7 @@
     <img src="./assets/hashrate-no.png" width="200" height="200" />
 </p>
 
-# Hashrate.no
+# Hashrate
 
 This is a Raycast extension for [Hashrate.no](https://www.hashrate.no/).
 

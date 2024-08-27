@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hashrate-no",
-  "title": "Hashrate.no",
+  "title": "Hashrate",
   "description": "Crypto mining resources via Hashrate.no",
   "icon": "hashrate-no.png",
   "author": "xmok",
@@ -24,12 +24,14 @@
     {
       "name": "coins",
       "title": "Coins",
+      "subtitle": "Hashrate",
       "description": "Crypto Coins with Pricing and Estimates",
       "mode": "view"
     },
     {
       "name": "gpu_estimates",
       "title": "GPU Estimates",
+      "subtitle": "Hashrate",
       "description": "GPU Estimates according to Power Cost ($/kWh)",
       "mode": "view",
       "arguments": [
