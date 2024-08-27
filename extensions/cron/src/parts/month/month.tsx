@@ -13,9 +13,9 @@ export default function Month() {
   let cal;
 
   if (weekFormat === "monday") {
-    cal = new Calendar(0);
-  } else {
     cal = new Calendar(1);
+  } else {
+    cal = new Calendar(0);
   }
 
   const weeks = cal.monthDays(currentYear, currentMonth - 1);
