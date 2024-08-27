@@ -15,7 +15,31 @@
       "title": "Metaphorpsum",
       "subtitle": "Generate delightfully random sentences",
       "description": "This extension will generate two delightfully random sentences from the Metaphorpsum API.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "number",
+          "placeholder": "Number of Sentences",
+          "type": "text",
+          "required": false
+        },
+        {
+         "name": "type",
+          "type": "dropdown",
+          "placeholder": "Type",
+          "required": false,
+          "data": [
+            {
+              "title": "Sentences",
+              "value": "sentences"
+            },
+            {
+              "title": "Paragraphs",
+              "value": "paragraphs"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
