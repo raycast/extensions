@@ -43,7 +43,7 @@ export const useHistoryState = createStore<HistoryState>({
   }),
   migrate: (persistedState: any, version: number) => {
     switch (version) {
-      case 1: // Migrate from v1 to v2, add tokens to history items
+      case 2: // Migrate from v2 to v3, add tokens to history items
         persistedState.history = persistedState.history.map((history: History) => ({
           ...history,
           tokens: {
