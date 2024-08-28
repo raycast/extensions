@@ -55,8 +55,7 @@ export default function ViewHistory() {
               <Action.CopyToClipboard content={entry.uuid} />
               <Action title="Delete Entry" onAction={() => deleteEntry(entry.uuid)} />
               <Action title="Clear History" onAction={clearHistory} />
-              <Action title={`Copy or Paste All UUIDs`} onAction={copyOrPasteAllUUIDs} />{" "}
-              {/* New Action for Copy or Paste All UUIDs */}
+              <Action title="Copy or Paste All UUIDs" onAction={copyOrPasteAllUUIDs} />
             </ActionPanel>
           }
         />
