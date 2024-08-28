@@ -26,21 +26,21 @@
     {
       "name": "toggle",
       "title": "Toggle Notch",
-      "subtitle": "Toggle MacBook Notch",
+      "subtitle": "Say No to Notch",
       "description": "Disable or Enable MacBook notch.",
       "mode": "no-view"
     },
     {
       "name": "disable",
       "title": "Remove Notch",
-      "subtitle": "Hide MacBook Notch",
+      "subtitle": "Say No to Notch",
       "description": "Disable MacBook notch.",
       "mode": "no-view"
     },
     {
       "name": "enable",
       "title": "Restore Notch",
-      "subtitle": "Show MacBook Notch",
+      "subtitle": "Say No to Notch",
       "description": "Enable MacBook notch.",
       "mode": "no-view"
     }
