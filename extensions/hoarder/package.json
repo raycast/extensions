@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hoarder",
   "title": "Hoarder",
-  "description": "Manage hoarder bookmarks",
+  "description": "A self-hostable bookmark-everything app (links, notes and images) with AI-based automatic tagging and full text search",
   "icon": "hoarder-icon.png",
   "author": "kdurek",
   "license": "MIT",

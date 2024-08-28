@@ -1,8 +1,3 @@
-export type Preferences = {
-  apiUrl: string;
-  apiKey: string;
-};
-
 export type SearchResult = [
   {
     result: {

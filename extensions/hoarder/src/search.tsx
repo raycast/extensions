@@ -1,7 +1,7 @@
 import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
-import type { Preferences, SearchResult } from "./types";
+import type { SearchResult } from "./types";
 
 export default function Search() {
   const preferences: Preferences = getPreferenceValues();
