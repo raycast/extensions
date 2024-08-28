@@ -1,4 +1,4 @@
-import { ActionPanel, Form, Action } from "@raycast/api";
+import { ActionPanel, Form, Action, LocalStorage, showToast, Toast } from "@raycast/api";
 import fs from "fs";
 
 export default function Command() {
@@ -13,13 +13,27 @@ export default function Command() {
               if (!fs.existsSync(file) || !fs.lstatSync(file).isFile()) {
                 return false;
               }
-              console.log(file);
+              const contents = fs.readFileSync(file, "utf8");
+              const docString = JSON.parse(contents); //["docs"];
+              saveDocs(docString);
             }}
           />
         </ActionPanel>
       }
     >
-      <Form.FilePicker id="files" allowMultipleSelection={false} />
+      <Form.FilePicker
+        id="files"
+        allowMultipleSelection={false}
+        info="Import a JSON file from the DevDocs.io Settings page to set your preferred documentations."
+      />
     </Form>
   );
+}
+
+export async function saveDocs(docs: String) {
+  await LocalStorage.setItem("docs", JSON.stringify(docs));
+  showToast({
+    title: `Successfully imported documentation`,
+    style: Toast.Style.Success,
+  });
 }
