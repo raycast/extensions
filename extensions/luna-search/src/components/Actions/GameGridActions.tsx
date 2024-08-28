@@ -1,5 +1,5 @@
 import { ActionPanel } from "@raycast/api";
-import { GameSummary } from "../../services";
+import { GameSummary } from "../../models";
 import { SearchCallback } from "../..";
 import { OpenDetailAction } from "./OpenDetailAction";
 import { getCommonGameActions } from "./CommonGameActions";

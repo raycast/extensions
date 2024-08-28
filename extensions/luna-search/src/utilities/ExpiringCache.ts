@@ -27,6 +27,15 @@ export class ExpiringCache<T> {
   readonly cache: Cache;
   readonly ttl_s: number;
 
+  private static cacheInstance: Cache;
+
+  private static getCacheInstance(): Cache {
+    if (!this.cacheInstance) {
+      ExpiringCache.cacheInstance = new Cache();
+    }
+    return ExpiringCache.cacheInstance;
+  }
+
   /**
    * Constructs a new instance of the ExpiringCache.
    * The TTL (time-to-live) for the cache entries can be specified,
@@ -35,7 +44,7 @@ export class ExpiringCache<T> {
    * @param ttl_s The time-to-live for the cache entries, in seconds.
    */
   constructor(ttl_s = 300) {
-    this.cache = new Cache();
+    this.cache = ExpiringCache.getCacheInstance();
     this.ttl_s = ttl_s;
   }
 

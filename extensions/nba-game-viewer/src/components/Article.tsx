@@ -42,6 +42,7 @@ const ArticleComponent = ({ article, isShowingDetail, setIsShowingDetail }: Prop
             shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
             onAction={() => setIsShowingDetail(!isShowingDetail)}
           />
+          {/* eslint-disable-next-line @raycast/prefer-title-case */}
           <Action.OpenInBrowser url={article.url} title="View on ESPN" />
         </ActionPanel>
       }

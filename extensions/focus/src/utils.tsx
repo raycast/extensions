@@ -8,6 +8,29 @@ export async function getInstallStatus() {
   );
 }
 
+export async function getActiveProfileName() {
+  try {
+    const profileName = await runAppleScript(`
+      tell application "Focus"
+        try
+          set profileName to active profile name
+          if profileName is missing value then
+            return ""
+          else
+            return profileName
+          end if
+        on error
+          return ""
+        end try
+      end tell
+    `);
+    return profileName.trim();
+  } catch (error) {
+    console.error("Error in getActiveProfileName:", error);
+    return "";
+  }
+}
+
 export async function startFocus() {
   await runAppleScript('do shell script "open focus://focus"');
 }
@@ -47,9 +70,43 @@ export async function stopBreak() {
 }
 
 export async function stopFocus() {
-  await runAppleScript('do shell script "open focus://unfocus"');
+  const activeProfile = await getActiveProfileName();
+  if (activeProfile) {
+    await runAppleScript(`do shell script "open 'focus://unfocus?profile=${activeProfile}'"`);
+  } else {
+    await runAppleScript('do shell script "open focus://unfocus"');
+  }
 }
 
 export async function openPreferences() {
   await runAppleScript('do shell script "open focus://preferences"');
+}
+
+export async function getProfileNames() {
+  try {
+    const profileNames = await runAppleScript(`
+      tell application "Focus"
+        try
+          return profile names
+        on error
+          try
+            get profile names
+          on error
+            return ""
+          end try
+        end try
+      end tell
+    `);
+    if (profileNames === "") {
+      return [];
+    }
+    // If the result is a list, it will be comma-separated
+    return profileNames.split(", ").map((name) => name.trim());
+  } catch (error) {
+    return [];
+  }
+}
+
+export async function startFocusWithProfile(profileName: string) {
+  await runAppleScript(`do shell script "open 'focus://focus?profile=${profileName}'"`);
 }

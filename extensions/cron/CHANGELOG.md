@@ -1,6 +1,6 @@
 # Cron Changelog
 
-## [Detailed view] - 2024-09-29
+## [Detailed view + public holidays] - 2024-09-29
 
 1. Remove section for Weekdays to reduce the gap
 2. Integrate public holidays api to show for a certain day.
