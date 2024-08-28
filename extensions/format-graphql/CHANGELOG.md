@@ -1,6 +1,6 @@
 # Format GraphQL Changelog
 
-## [Choose to Copy or not after Format] - {PR_MERGE_DATE}
+## [Choose to Copy or not after Format] - 2024-08-28
 
 - Toasts are shown
 - New Action to "only Format"
