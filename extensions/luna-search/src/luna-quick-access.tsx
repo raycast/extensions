@@ -53,7 +53,7 @@ export default function Command() {
         <></>
       )}
       <MenuBarExtra.Section title={DISPLAY_VALUES.menu_top_title}>
-        {trendingGames.slice(0, MENU_SECTION_CAPACITY + 1).map((game) => (
+        {trendingGames.slice(0, MENU_SECTION_CAPACITY).map((game) => (
           <MenuGameItem key={game.title} game={game} />
         ))}
       </MenuBarExtra.Section>
