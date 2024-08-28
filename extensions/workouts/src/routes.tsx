@@ -122,7 +122,7 @@ function Routes() {
   return (
     <List searchBarPlaceholder="Search routes" isLoading={isLoading} pagination={pagination} throttle isShowingDetail>
       {routes?.map((route) => <Route key={route.id} route={route} isLoading={isLoading} />)}
-      {routes.length === 0 && !isLoading && <List.EmptyView title="No routes found" />}
+      {routes?.length === 0 && !isLoading && <List.EmptyView title="No routes found" />}
     </List>
   );
 }
