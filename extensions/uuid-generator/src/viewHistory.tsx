@@ -1,4 +1,14 @@
-import { ActionPanel, List, Action, getPreferenceValues, Clipboard, showToast, Toast } from "@raycast/api";
+import {
+  ActionPanel,
+  List,
+  Action,
+  getPreferenceValues,
+  Clipboard,
+  showToast,
+  Toast,
+  Icon,
+  confirmAlert,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 
 import { getHistory as fetchHistory, clearHistory as clearStoredHistory, deleteHistoryEntry } from "./uuidHistory";
@@ -10,6 +20,7 @@ interface Preferences {
 
 export default function ViewHistory() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const { defaultAction } = getPreferenceValues<Preferences>();
 
   useEffect(() => {
     async function loadHistory() {
@@ -21,8 +32,18 @@ export default function ViewHistory() {
   }, []);
 
   const clearHistory = async () => {
-    clearStoredHistory();
-    setHistory([]); // Clear the history state after clearing the stored history
+    await confirmAlert({
+      title: "Clear History",
+      icon: Icon.Trash,
+      message: "You can't undo this action. Are you sure you want to clear the history?",
+      primaryAction: {
+        title: "Clear History",
+        onAction: () => {
+          clearStoredHistory();
+          setHistory([]); // Clear the history state after clearing the stored history
+        },
+      },
+    });
   };
 
   const deleteEntry = async (uuid: string) => {
@@ -31,7 +52,6 @@ export default function ViewHistory() {
   };
 
   const copyOrPasteAllUUIDs = async () => {
-    const { defaultAction } = getPreferenceValues<Preferences>();
     const allUUIDs = history.map((entry) => entry.uuid).join("\r\n"); // Join all UUIDs with newline
 
     if (defaultAction === "copy") {
@@ -45,21 +65,46 @@ export default function ViewHistory() {
 
   return (
     <List>
-      {history.map((entry, index) => (
-        <List.Item
-          key={index}
-          title={entry.uuid}
-          subtitle={`${entry.type} | ${new Date(entry.timestamp).toLocaleString()}`} // Display type and timestamp
-          actions={
-            <ActionPanel>
-              <Action.CopyToClipboard content={entry.uuid} />
-              <Action title="Delete Entry" onAction={() => deleteEntry(entry.uuid)} />
-              <Action title="Clear History" onAction={clearHistory} />
-              <Action title="Copy or Paste All UUIDs" onAction={copyOrPasteAllUUIDs} />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {history.map((entry, index) => {
+        const date = new Date(entry.timestamp);
+
+        return (
+          <List.Item
+            key={index}
+            title={entry.uuid}
+            accessories={[
+              { tag: entry.type, tooltip: "Type", icon: Icon.Tag },
+              { date: date, tooltip: date.toLocaleString(), icon: Icon.Clock },
+            ]}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard content={entry.uuid} />
+                <Action
+                  title={`${defaultAction === "copy" ? "Copy" : "Paste"} All UUIDs`}
+                  icon={Icon.Clipboard}
+                  onAction={copyOrPasteAllUUIDs}
+                />
+                <ActionPanel.Section>
+                  <Action
+                    title="Delete Entry"
+                    onAction={() => deleteEntry(entry.uuid)}
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  />
+                  <Action
+                    title="Clear History"
+                    onAction={clearHistory}
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }
