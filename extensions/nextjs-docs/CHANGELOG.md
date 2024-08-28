@@ -1,4 +1,6 @@
-# nextjs Changelog
+# Next.js Documentation Changelog
+
+## [Fix Links with "index" leading to `404`] - {PR_MERGE_DATE}
 
 ## [Update Docs + Filter by Router] - 2024-07-24
 
