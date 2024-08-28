@@ -1,6 +1,6 @@
 # NBA Game Viewer Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-08-28
 
 - Added a score command that shows the scores of the games that are currently in progress and the games from the last 7 days.
 
