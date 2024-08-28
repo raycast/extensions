@@ -1,9 +1,10 @@
-import { ActionPanel, Action, Form, showToast, Toast, closeMainWindow, showHUD, useNavigation } from "@raycast/api";
+import { ActionPanel, Action, Form, showToast, Toast, useNavigation, showHUD, Icon } from "@raycast/api";
 import { useState } from "react";
 import { generateMeme } from "../api";
 import { ImgflipCaptionImageBox } from "../api/types";
-import copyFileToClipboard from "../lib/copyFileToClipboard";
 import { Meme } from "../types";
+import MemePreview from "./MemePreview";
+import copyFileToClipboard from "../lib/copyFileToClipboard";
 
 interface FormValues {
   capitalize: string;
@@ -13,9 +14,9 @@ interface FormValues {
 export default function MemeForm({ id, title, boxCount }: Meme) {
   const [textBoxError, setTextBoxError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
-  const { pop } = useNavigation();
+  const { push } = useNavigation();
 
-  async function onSubmit(values: FormValues) {
+  async function onSubmit(values: FormValues, preview: boolean) {
     const boxes = boxesFromFormValues(values);
 
     if (!boxes.some((box) => !!box.text)) {
@@ -31,18 +32,19 @@ export default function MemeForm({ id, title, boxCount }: Meme) {
 
       generateMeme({ id, boxes })
         .then(async (results) => {
-          copyFileToClipboard(results.url, `${title}.jpg`).then((file) => {
-            toast.hide();
-            showHUD(`Meme "${file}" copied to clipboard`);
-            closeMainWindow();
-            pop();
-          });
+          if (preview) {
+            push(<MemePreview title={title} url={results.url} />);
+          } else {
+            await copyFileToClipboard(results.url, `${title}.jpg`);
+            showHUD(`Meme "${title}" copied to clipboard`);
+          }
         })
         .catch((error) => {
           console.log(error);
           showToast(Toast.Style.Failure, "Something went wrong", error.message);
         })
         .finally(() => {
+          toast.hide();
           setIsLoading(false);
         });
     });
@@ -54,7 +56,16 @@ export default function MemeForm({ id, title, boxCount }: Meme) {
       navigationTitle={`Generate meme "${title}"`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={onSubmit} />
+          <Action.SubmitForm
+            icon={Icon.Clipboard}
+            onSubmit={(values: FormValues) => onSubmit(values, false)}
+            title="Copy to clipboard"
+          />
+          <Action.SubmitForm
+            icon={Icon.Eye}
+            onSubmit={(values: FormValues) => onSubmit(values, true)}
+            title="Preview"
+          />
         </ActionPanel>
       }
     >
