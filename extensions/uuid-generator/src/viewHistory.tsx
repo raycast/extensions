@@ -25,7 +25,8 @@ export default function ViewHistory() {
   useEffect(() => {
     async function loadHistory() {
       const historyData = await fetchHistory();
-      setHistory(historyData);
+      const reversedHistoryData = historyData.reverse();
+      setHistory(reversedHistoryData);
     }
 
     loadHistory();
