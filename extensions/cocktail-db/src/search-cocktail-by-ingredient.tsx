@@ -9,7 +9,7 @@ import OpenInBrowserAction from "./utils/open-in-browser-action";
 export default function SearchCocktailByName(props: LaunchProps<{ arguments: Arguments.SearchCocktailByIngredient }>) {
   const { ingredient } = props.arguments;
   const [searchIngredient, setSearchIngredient] = useState(ingredient);
-  const { isLoading, data: drinks } = useCocktailDB<DrinkBasicInfo>(`search.php?s=${searchIngredient}`);
+  const { isLoading, data: drinks } = useCocktailDB<DrinkBasicInfo>(`filter.php?i=${searchIngredient}`);
 
   return (
     <Grid isLoading={isLoading} throttle onSearchTextChange={setSearchIngredient} searchText={searchIngredient}>
