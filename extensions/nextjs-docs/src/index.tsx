@@ -55,24 +55,29 @@ export default function main() {
         // We remove the last item
         const last = split.pop();
         // If the last item was "index" then this was an index page else we want the whole filepath again
-        const path = (last==="index") ? split.join("/") : topic.filepath;
+        const path = last === "index" ? split.join("/") : topic.filepath;
         const url = `https://nextjs.org/docs/${path}`;
 
         return (
-        <List.Item
-          key={topic.sha}
-          keywords={topic.filepath.split("/")}
-          icon={Icon.Document}
-          title={topic.title}
-          actions={
-            <ActionPanel>
-              <Action.Push icon={Icon.Eye} title={`Browse ${topic.title}`} target={<Topic topic={topic} url={url} />} />
-              <Action.OpenInBrowser icon="command-icon.png" url={url} />
-            </ActionPanel>
-          }
-          accessories={[{ text: topic.filepath }]}
-        />
-      )})}
+          <List.Item
+            key={topic.sha}
+            keywords={topic.filepath.split("/")}
+            icon={Icon.Document}
+            title={topic.title}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  icon={Icon.Eye}
+                  title={`Browse ${topic.title}`}
+                  target={<Topic topic={topic} url={url} />}
+                />
+                <Action.OpenInBrowser icon="command-icon.png" url={url} />
+              </ActionPanel>
+            }
+            accessories={[{ text: topic.filepath }]}
+          />
+        );
+      })}
     </List>
   );
 }

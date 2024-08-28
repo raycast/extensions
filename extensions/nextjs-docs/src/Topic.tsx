@@ -5,7 +5,7 @@ import { TopicType } from "./types/GithubType";
 import { getPageFromCache, checkForUpdates } from "./services/NextjsPage";
 import { usePromise } from "@raycast/utils";
 
-const TopicDetail = (props: { topic: TopicType, url: string }) => {
+const TopicDetail = (props: { topic: TopicType; url: string }) => {
   const { isLoading, data: markdown } = usePromise(
     async () => {
       const cached_data = await getPageFromCache(props.topic);
