@@ -4,9 +4,10 @@
   "title": "NextDNS",
   "description": "Viewing and controlling NextDNS settings",
   "icon": "extension_icon.png",
-  "author": "itsmingjie",
+  "author": "pernielsentikaer",
   "contributors": [
-    "pernielsentikaer"
+    "itsmingjie",
+    "xmok"
   ],
   "categories": [
     "Developer Tools",
