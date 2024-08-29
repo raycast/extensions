@@ -1,11 +1,12 @@
 import {
   Action,
   ActionPanel,
-  closeMainWindow,
   Detail,
   Form,
   getSelectedFinderItems,
   Icon,
+  showHUD,
+  showInFinder,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -146,8 +147,9 @@ export default function Command() {
 
     fs.writeFileSync(logFilePath, "");
     const outputLogFile = fs.openSync(logFilePath, "w");
+    let outputDir = "";
     for (const videoPath of filePaths) {
-      const outputDir = path.join(path.dirname(videoPath), path.basename(videoPath, path.extname(videoPath)));
+      outputDir = path.join(path.dirname(videoPath), path.basename(videoPath, path.extname(videoPath)));
 
       const command = `scenedetect -i "${videoPath}" -o "${outputDir}" ${detectionMethod} split-video; echo 'deleting log file'; rm "${logFilePath}"`;
 
@@ -165,7 +167,8 @@ export default function Command() {
       exitCode = await new Promise((resolve) => childProcess!.on("close", (code) => resolve(code || 0)));
     }
     if (exitCode === 0) {
-      closeMainWindow();
+      await showHUD("Scenes Split Successfully");
+      await showInFinder(outputDir);
     }
   }
 
