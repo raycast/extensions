@@ -1,5 +1,12 @@
 # Cron Changelog
 
+## [Update Actions, Bug fixes] - 2024-09-29
+
+1. Prevent all dates from showing details
+2. Update all shorcuts on actions and group
+3. Fix placeholder and show full date
+4. Add new shortcut to hide and show the weekdays
+
 ## [Detailed view + public holidays] - 2024-09-29
 
 1. Remove section for Weekdays to reduce the gap

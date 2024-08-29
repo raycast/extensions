@@ -9,7 +9,6 @@ import getViewMode from "u/getViewMode";
 import Month from "@/month/month";
 import Actions from "@/actions/actions";
 import { searchPlaceholder, monthDropdown } from "u/options";
-import { getMonthName } from "u/getDate";
 import { getWeek } from "date-fns";
 import { getSelection } from "u/getSelection";
 import getMonthNumber from "u/getMonthNumber";
@@ -25,6 +24,7 @@ export default function Calendar() {
     enableWeek,
     enableTimer,
     setSelectedDay,
+    placeholder,
   } = useContext(Context);
   const [isTimerHidden, setIsTimerHidden] = useState(false);
   const setViewMode = getViewMode();
@@ -34,7 +34,7 @@ export default function Calendar() {
     day: currentDay,
   });
 
-  const placeHolder = searchPlaceholder ? searchPlaceholder : `Search ${getMonthName(currentMonth - 1)}`;
+  const PLACE_HOLDER = searchPlaceholder ? searchPlaceholder : placeholder + " ".repeat(140);
 
   useEffect(() => {
     updateCommandMetadata({ subtitle: titleCommand });
@@ -73,7 +73,7 @@ export default function Calendar() {
       columns={enableWeek ? 8 : 7}
       inset={Grid.Inset.Small}
       aspectRatio={setViewMode}
-      searchBarPlaceholder={placeHolder}
+      searchBarPlaceholder={PLACE_HOLDER}
       searchBarAccessory={monthDropdown ? <Dropdown /> : undefined}
       actions={<Actions />}
       selectedItemId={todayId}
