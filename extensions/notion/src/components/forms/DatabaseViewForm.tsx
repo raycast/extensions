@@ -1,10 +1,10 @@
 import { Form, ActionPanel, Icon, showToast, useNavigation, Action, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-import { useDatabaseProperties, useDatabases, useKanbanViewConfig, KanbanConfig } from "../../hooks";
+import { useDatabaseProperties, useKanbanViewConfig, KanbanConfig } from "../../hooks";
 import { notionColorToTintColor, DatabaseProperty, isType } from "../../utils/notion";
 
-export function DatabaseViewForm({ databaseId: presetDatabaseId }: { databaseId: string }) {
+export function DatabaseViewForm({ databaseId }: { databaseId: string }) {
   const { pop } = useNavigation();
 
   async function handleSubmit(values: Form.Values) {
@@ -23,8 +23,6 @@ export function DatabaseViewForm({ databaseId: presetDatabaseId }: { databaseId:
     pop();
   }
 
-  const { data: databases, isLoading: isLoadingDatabases } = useDatabases();
-  const [databaseId, setDatabaseId] = useState(presetDatabaseId);
   const { data: databaseProperties, isLoading: isLoadingDatabaseProperties } = useDatabaseProperties(databaseId);
   const { kanbanConfig, setKanbanConfig } = useKanbanViewConfig(databaseId);
   const [viewType, setViewType] = useState<"kanban" | "list">(kanbanConfig?.active ? "kanban" : "list");
@@ -46,7 +44,7 @@ export function DatabaseViewForm({ databaseId: presetDatabaseId }: { databaseId:
 
   return (
     <Form
-      isLoading={isLoadingDatabaseProperties || isLoadingDatabases}
+      isLoading={isLoadingDatabaseProperties}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -55,31 +53,6 @@ export function DatabaseViewForm({ databaseId: presetDatabaseId }: { databaseId:
         </ActionPanel>
       }
     >
-      {!presetDatabaseId
-        ? [
-            <Form.Dropdown id="database_id" title={"Database"} onChange={setDatabaseId}>
-              {databases?.map((d) => {
-                return (
-                  <Form.Dropdown.Item
-                    key={d.id}
-                    value={d.id}
-                    title={d.title ? d.title : "Untitled"}
-                    icon={
-                      d.icon_emoji
-                        ? d.icon_emoji
-                        : d.icon_file
-                          ? d.icon_file
-                          : d.icon_external
-                            ? d.icon_external
-                            : Icon.List
-                    }
-                  />
-                );
-              })}
-            </Form.Dropdown>,
-            <Form.Separator key="separator" />,
-          ]
-        : null}
       <Form.Dropdown
         id="type"
         title="View Type"
