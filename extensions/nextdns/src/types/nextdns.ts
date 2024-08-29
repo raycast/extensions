@@ -1,3 +1,5 @@
+import { MutatePromise } from "@raycast/utils";
+
 export type NextDNSError = {
   code: string;
   detail?: string;
@@ -19,10 +21,13 @@ export type Profile = {
   };
 };
 
+export type Mutate = MutatePromise<{ result: DomainListItem[]; profileName: string; }>;
+
 export interface DomainListProps {
-  data: { result: DomainListItem[]; profileName: string };
-  isLoading: boolean;
-  onRemoveItem: (item: DomainListItem) => Promise<void>;
+  // data: { result: DomainListItem[]; profileName: string };
+  type: "allow" | "deny";
+  // isLoading: boolean;
+  // mutate: Mutate;
 }
 
 export interface DomainSubmitValues {

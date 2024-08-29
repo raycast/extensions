@@ -1,6 +1,6 @@
 import { useFetch } from "@raycast/utils";
 import { NEXTDNS_API_BASE_URL, PREFERENCES } from "./constants";
-import { DomainListItem, Profile } from "../types/nextdns";
+import { DomainListItem, NextDNSError, Profile } from "../types/nextdns";
 import fetch, { BodyInit } from "node-fetch";
 
 const headers = {
@@ -26,8 +26,10 @@ async function makeRequest(endpoint: string, method: string = "GET", body?: Body
   }
 
   // Handle methods that might not return data
-  if (method === "PATCH" || method === "DELETE" || method === "PUT") {
-    return response.status;
+  if (method === "PATCH" || method === "DELETE" || method === "PUT" || method === "POST") {
+    if (response.status===204) return response.status;
+    const result = await response.json() as { errors: NextDNSError[] };
+    throw new Error(result.errors[0].code);
   }
 
   return response.json();
@@ -45,6 +47,7 @@ export function getDomains(props: { type: string }) {
 
       return { result: results, profileName: await getProfileName() };
     },
+    initialData: { result: [], profileName: "" }
   });
 }
 
@@ -53,7 +56,13 @@ export async function getProfileName() {
   return json?.data?.name || "Unknown";
 }
 
-export async function addDomain() {}
+export async function addSite(props: { domain: string, type: string }) {
+  const { domain, type } = props;
+  await makeRequest(`/profiles/${PREFERENCES.nextdns_profile_id}/${type}list`, "POST", {
+    id: domain,
+    active: true,
+  } as BodyInit);
+}
 
 export async function removeDomain() {}
 
