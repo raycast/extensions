@@ -252,7 +252,7 @@ export default function Command() {
         canChooseDirectories={false}
         canChooseFiles={true}
         autoFocus
-        title="Select video files"
+        title="Select Video Files"
         value={filePaths}
         onChange={setFilePaths}
       />
