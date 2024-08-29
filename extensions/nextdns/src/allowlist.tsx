@@ -5,43 +5,29 @@ import { EmptyView } from "./components/empty-view";
 import { ListItem } from "./components/list-item";
 import { ErrorView } from "./components/error-view";
 import { DomainListItem } from "./types/nextdns";
+import { removeItem } from "./libs/utils";
 
 export default function Command() {
-  const { data, isLoading, error, mutate } = getList({ type: "allow" });
+  const type = "allow";
+  const { data, isLoading, error, mutate } = getList({ type });
 
   if (error) {
     return <ErrorView />;
   }
 
-  async function removeItem(element: DomainListItem) {
-    await mutate(toggleSite({ id: element.id, type: "allow", active: !element.active }), {
-      optimisticUpdate(data: { [key: string]: DomainListItem[] } | undefined) {
-        if (!data) {
-          return {};
-        }
-
-        const updatedData = { ...data };
-        const list = updatedData.result || [];
-        const index = list.findIndex((item) => item.id === element.id);
-
-        if (index !== -1) {
-          list[index] = { ...list[index], active: !list[index].active };
-        }
-
-        return updatedData;
-      },
-    });
+  async function handleRemoveItem(element: DomainListItem) {
+    await removeItem(element, mutate);
   }
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder={`Search allowlist of ${data?.profileName} (${PREFERENCES.nextdns_profile_id})`}
+      searchBarPlaceholder={`Search ${type}list of ${data?.profileName} (${PREFERENCES.nextdns_profile_id})`}
     >
       {data && (
         <>
-          {data.result?.map((element) => (
-            <ListItem siteItem={element} onRemoveItem={(item: DomainListItem) => removeItem(item)} type="allow" />
+          {data.result?.map((element: DomainListItem) => (
+            <ListItem siteItem={element} onRemoveItem={(item: DomainListItem) => handleRemoveItem(item)} />
           ))}
 
           {Object.keys(data).length === 0 && (

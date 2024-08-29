@@ -41,9 +41,9 @@ export function getList(props: { type: string }) {
     headers: headers,
     async parseResponse(response) {
       const json = await response.json();
+      const results = json.data.map((item: DomainListItem) => ({ ...item, type: props.type }));
 
-      //TODO: add type to all elements
-      return { result: json.data as DomainListItem[], profileName: await getProfileName() };
+      return { result: results, profileName: await getProfileName() };
     },
   });
 }
@@ -57,11 +57,11 @@ export async function addSite() {}
 
 export async function removeSite() {}
 
-export async function toggleSite(props: { id: string; type: string; active: boolean }) {
-  const { id, type, active } = props;
-  const idHex = Buffer.from(id).toString("hex");
+export async function toggleSite(props: { element: DomainListItem }) {
+  const { element } = props;
+  const idHex = Buffer.from(element.id).toString("hex");
 
-  await makeRequest(`/profiles/${PREFERENCES.nextdns_profile_id}/${type}list/hex:${idHex}`, "PATCH", {
-    active,
+  await makeRequest(`/profiles/${PREFERENCES.nextdns_profile_id}/${element.type}list/hex:${idHex}`, "PATCH", {
+    active: !element.active,
   } as BodyInit);
 }

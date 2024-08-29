@@ -9,7 +9,6 @@ export function ListItem({
 }: {
   siteItem: DomainListItem;
   onRemoveItem: (item: DomainListItem) => Promise<void>;
-  type: string;
 }) {
   return (
     <List.Item

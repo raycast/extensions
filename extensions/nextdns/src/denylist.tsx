@@ -1,28 +1,36 @@
 import { List } from "@raycast/api";
-import { getList } from "./libs/api";
+import { getList, toggleSite } from "./libs/api";
 import { PREFERENCES } from "./libs/constants";
 import { EmptyView } from "./components/empty-view";
 import { ListItem } from "./components/list-item";
 import { ErrorView } from "./components/error-view";
+import { DomainListItem } from "./types/nextdns";
 
 export default function Command() {
-  const { data, isLoading, error } = getList({ type: "deny" });
+  const type = "deny";
+  const { data, isLoading, error, mutate } = getList({ type });
 
   if (error) {
     return <ErrorView />;
   }
 
+  async function handleRemoveItem(element: DomainListItem) {
+    await removeItem(element, mutate);
+  }
+
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder={`Search denylist of ${data?.profileName} (${PREFERENCES.nextdns_profile_id})`}
+      searchBarPlaceholder={`Search ${type}list of ${data?.profileName} (${PREFERENCES.nextdns_profile_id})`}
     >
       {data && (
         <>
-          {data.result?.map((element) => <ListItem id={element.id} active={element.active} type="deny" />)}
+          {data.result?.map((element: DomainListItem) => (
+            <ListItem siteItem={element} onRemoveItem={(item: DomainListItem) => handleRemoveItem(item)} />
+          ))}
 
           {Object.keys(data).length === 0 && (
-            <EmptyView title="No domains in denylist" icon={{ source: "no_view.png" }} />
+            <EmptyView title="No domains in allowlist" icon={{ source: "no_view.png" }} />
           )}
         </>
       )}

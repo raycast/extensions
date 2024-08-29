@@ -9,6 +9,7 @@ export type NextDNSError = {
 export type DomainListItem = {
   id: string;
   active: boolean;
+  type: string;
 };
 
 export type Profile = {
