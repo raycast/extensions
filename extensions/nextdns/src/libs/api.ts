@@ -1,7 +1,7 @@
 import { useFetch } from "@raycast/utils";
 import { NEXTDNS_API_BASE_URL, PREFERENCES } from "./constants";
 import { DomainListItem, Profile } from "../types/nextdns";
-import fetch from "node-fetch";
+import fetch, { BodyInit } from "node-fetch";
 
 const headers = {
   "X-Api-Key": PREFERENCES.nextdns_api_key,
@@ -9,13 +9,25 @@ const headers = {
   "Content-Type": "application/json",
 };
 
-async function fetchData(endpoint: string) {
-  const response = await fetch(`${NEXTDNS_API_BASE_URL}${endpoint}`, {
+async function makeRequest(endpoint: string, method: string = "GET", body?: BodyInit) {
+  const options: RequestInit = {
+    method,
     headers: headers,
-  });
+  };
+
+  if (body) {
+    options.body = JSON.stringify(body);
+  }
+
+  const response = await fetch(`${NEXTDNS_API_BASE_URL}${endpoint}`, options);
 
   if (!response.ok) {
     throw new Error(response.statusText);
+  }
+
+  // Handle methods that might not return data
+  if (method === "PATCH" || method === "DELETE" || method === "PUT") {
+    return response.status;
   }
 
   return response.json();
@@ -35,6 +47,19 @@ export function getList(props: { type: string }) {
 }
 
 export async function getProfileName() {
-  const json = (await fetchData(`/profiles/${PREFERENCES.nextdns_profile_id}`)) as Profile;
+  const json = (await makeRequest(`/profiles/${PREFERENCES.nextdns_profile_id}`)) as Profile;
   return json?.data?.name || "Unknown";
+}
+
+export async function addSite() {}
+
+export async function removeSite() {}
+
+export async function toggleSite(props: { id: string; type: string; active: boolean }) {
+  const { id, type, active } = props;
+  const idHex = Buffer.from(id).toString("hex");
+
+  await makeRequest(`/profiles/${PREFERENCES.nextdns_profile_id}/${type}list/hex:${idHex}`, "PATCH", {
+    active,
+  } as BodyInit);
 }

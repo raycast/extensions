@@ -1,18 +1,15 @@
-import { Icon, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { getList } from "./libs/api";
 import { PREFERENCES } from "./libs/constants";
 import { EmptyView } from "./components/empty-view";
 import { ListItem } from "./components/list-item";
+import { ErrorView } from "./components/error-view";
 
 export default function Command() {
   const { data, isLoading, error } = getList({ type: "deny" });
 
   if (error) {
-    return (
-      <List>
-        <EmptyView title="Failed to load data" icon={Icon.Warning}></EmptyView>
-      </List>
-    );
+    return <ErrorView />;
   }
 
   return (
@@ -22,7 +19,7 @@ export default function Command() {
     >
       {data && (
         <>
-          {data.result?.map((element) => <ListItem id={element.id} active={element.active} />)}
+          {data.result?.map((element) => <ListItem id={element.id} active={element.active} type="deny" />)}
 
           {Object.keys(data).length === 0 && (
             <EmptyView title="No domains in denylist" icon={{ source: "no_view.png" }} />
