@@ -6,7 +6,7 @@ import { Lottery } from "./types";
 const LOTTERY_RESULTS_URL = "https://api.2626.com.cn/api/getCaipiaoInfo";
 
 export default function Command() {
-  const { data } = useFetch<{ data: Lottery[] }>(LOTTERY_RESULTS_URL, {
+  const { data, isLoading } = useFetch<{ data: Lottery[] }>(LOTTERY_RESULTS_URL, {
     parseResponse: (response: Response) => {
       if (!response.ok) {
         throw new Error(response.statusText);
@@ -17,7 +17,7 @@ export default function Command() {
   });
 
   return (
-    <List searchBarPlaceholder="Search Lottery">
+    <List searchBarPlaceholder="Search Lottery" isLoading={isLoading}>
       {data?.data?.map((item, index) => (
         <List.Item
           key={index}
