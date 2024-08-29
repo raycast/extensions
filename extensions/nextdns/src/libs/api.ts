@@ -41,6 +41,8 @@ export function getList(props: { type: string }) {
     headers: headers,
     async parseResponse(response) {
       const json = await response.json();
+
+      //TODO: add type to all elements
       return { result: json.data as DomainListItem[], profileName: await getProfileName() };
     },
   });
