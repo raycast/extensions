@@ -1,3 +1,3 @@
 # Generate GUID
 
-Generates a random GUID
+Generate random GUID

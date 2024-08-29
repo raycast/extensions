@@ -2,11 +2,10 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "generate-guid",
   "title": "Generate GUID",
-  "description": "Generates a random GUID",
+  "description": "Generate random GUID",
   "icon": "extension-icon.png",
   "author": "cgen01",
   "categories": [
-    "Data",
     "Developer Tools"
   ],
   "license": "MIT",

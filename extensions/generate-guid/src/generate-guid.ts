@@ -1,6 +1,5 @@
-import {Clipboard, getPreferenceValues, popToRoot, showHUD, showToast, Toast} from "@raycast/api";
-import {v4 as uuidv4} from 'uuid';
-
+import { Clipboard, getPreferenceValues, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import { v4 as uuidv4 } from "uuid";
 
 export const capitalize = (value: string, lowercaseRest = false) => {
   const firstLetter = value.charAt(0).toUpperCase();
@@ -35,4 +34,4 @@ async function generateGUIDCommand() {
   }
 }
 
-export default generateGUIDCommand
+export default generateGUIDCommand;
