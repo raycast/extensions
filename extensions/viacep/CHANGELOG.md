@@ -1,6 +1,6 @@
 # ViaCEP Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2024-08-29
 
 - Fixed output formatting when certain address components are missing.
 
