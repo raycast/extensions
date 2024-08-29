@@ -1,4 +1,4 @@
-import { closeMainWindow, getSelectedFinderItems, showHUD, showInFinder, showToast, Toast } from "@raycast/api";
+import { getSelectedFinderItems, showHUD, showInFinder, showToast, Toast } from "@raycast/api";
 import { execSync, spawn } from "child_process";
 import os from "os";
 
@@ -32,6 +32,11 @@ export default async function main(props: { arguments: { start: string; end: str
     showHUD("ffmpeg is not installed");
     return;
   }
+  await showToast({
+    style: Toast.Style.Animated,
+    title: `Trimming clip`,
+  });
+
   // if neither start nor end is provided, show toast to tell user to provide start and end
   if (!start && !end) {
     await showToast({
@@ -41,19 +46,14 @@ export default async function main(props: { arguments: { start: string; end: str
     return;
   }
 
-  const items = await getSelectedFinderItems();
+  const items = await getSelectedFinderItems().catch(() => []);
   if (!items.length) {
     await showToast({
       style: Toast.Style.Failure,
-      title: `No files selected`,
+      title: `Select files in the Finder first`,
     });
     return;
   }
-
-  await showToast({
-    style: Toast.Style.Animated,
-    title: `Trimming clip`,
-  });
 
   const filePaths = items.map((item) => item.path);
 
@@ -93,7 +93,7 @@ export default async function main(props: { arguments: { start: string; end: str
   try {
     await Promise.all(promises);
 
-    closeMainWindow();
+    await showHUD("Trimming Clip Completed");
     await showInFinder(toShowInFinder);
   } catch (error) {
     console.error("One or more errors occurred during clip trimming:", error);
