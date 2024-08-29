@@ -40,4 +40,5 @@ humaans
 text-replacements
 copilot-workspace
 uploadthing
+sublime
 dub

@@ -19,7 +19,7 @@ export function Day({ type, day, hasEvents, name }: DayProps) {
   const source = getIcon({
     iconDay: day,
     iconToday: type === "today",
-    iconEvents: hasEvents === false,
+    iconEvents: hasEvents === true,
     iconWeekend: type === "saturday" || type === "sunday",
     iconName: name,
   });

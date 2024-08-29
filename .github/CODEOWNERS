@@ -144,7 +144,7 @@
 /extensions/braid                                                   @felixhabib
 /extensions/brand-dev                                               @xmok
 /extensions/brand-fetch                                             @dilutedev
-/extensions/brasileirao-serie-a                                     @willianhf
+/extensions/brasileirao-serie-a                                     @willianhf @xilopaint
 /extensions/brave                                                   @ron-myers @rgomezcasas @crisboarna @tleo19
 /extensions/brave-search                                            @VishwasShashidhar @Spl0itable @Justiniscoding
 /extensions/brave-search-with-results                               @electerious
@@ -200,6 +200,7 @@
 /extensions/chess-com                                               @joshfarrant
 /extensions/china-ip-address                                        @ErlichLiu
 /extensions/chinese-character                                       @koinzhang
+/extensions/chinese-lottery                                         @elonwoo @pernielsentikaer
 /extensions/chinese-numbers                                         @raffeyang
 /extensions/choose-a-license                                        @sandypockets @Aayush9029
 /extensions/chords-and-tabs                                         @BossElijah
@@ -585,6 +586,7 @@
 /extensions/harpoon                                                 @brrian
 /extensions/harvest                                                 @eluce2 @bchopson
 /extensions/hashnode                                                @dpnick
+/extensions/hashrate-no                                             @xmok
 /extensions/hatena-bookmark                                         @inamuu
 /extensions/hazeover                                                @ratoru
 /extensions/headlines                                               @Aayush9029 @pernielsentikaer
@@ -633,6 +635,7 @@
 /extensions/hyrule-compendium-search                                @Macko-pp
 /extensions/iata-code-decoder                                       @timrogers
 /extensions/icd10-lookup                                            @ubergraham @pernielsentikaer
+/extensions/icloud-global-pricing-comparison                        @elonwoo @elonwoo
 /extensions/iconify                                                 @Destiner @sxn @robertvanhoesel @kuddl @kevinxo328
 /extensions/iconpark                                                @koinzhang @j3lte
 /extensions/icons8                                                  @yug2005
@@ -690,7 +693,7 @@
 /extensions/jokes                                                   @xmok
 /extensions/jotoba                                                  @clnhs
 /extensions/json-editor                                             @lryong @jvrbnjak89
-/extensions/json-format                                             @Destiner @Aayush9029 @devloos @lacherogwu @AlexIsMaking @duranbe
+/extensions/json-format                                             @Destiner @Aayush9029 @devloos @lacherogwu @AlexIsMaking @jfkisafk @duranbe
 /extensions/json-to-go                                              @chyroc
 /extensions/json2ts                                                 @gon250
 /extensions/jsr                                                     @j3lte @LitoMore
@@ -1108,6 +1111,7 @@
 /extensions/promptlab                                               @SKaplanOfficial
 /extensions/protobuf2typescript                                     @7gugu
 /extensions/proton-version                                          @flavienbonvin @pernielsentikaer
+/extensions/prowlarr                                                @Elcaten
 /extensions/proxmox                                                 @CzBiX
 /extensions/public-bug-bounty-and-vulnerability-disclosure-programs @securibee
 /extensions/pubme                                                   @justspacedog
@@ -1390,6 +1394,7 @@
 /extensions/streamshare-uploader                                    @0PandaDEV
 /extensions/stretchly                                               @skyran1278
 /extensions/stripe                                                  @pradeepb28 @farisaziz12
+/extensions/sublime                                                 @phgn0
 /extensions/substack                                                @j3lte
 /extensions/summarize-youtube-video-with-ai                         @iKasch
 /extensions/summation                                               @supermamon
@@ -1507,6 +1512,7 @@
 /extensions/tuple                                                   @inxilpro
 /extensions/turso                                                   @Spioune
 /extensions/tuya-smart                                              @AndresMorelos
+/extensions/tv2---denmark                                           @mSarheed
 /extensions/tw-colorsearch                                          @magicjaqk
 /extensions/twitch                                                  @dieserRobin @Aayush9029 @suth @pernielsentikaer @MiracleXYZ @Sheraff
 /extensions/twitch-chat                                             @Aayush9029
@@ -1629,7 +1635,7 @@
 /extensions/wordreference                                           @Nass30
 /extensions/work-time-countdown                                     @thomaspaulmann @pernielsentikaer @aalhaif @krsntn
 /extensions/workflowy-inbox                                         @cameronapak
-/extensions/workouts                                                @samuelkraft @codesjedi @diannemcewan
+/extensions/workouts                                                @samuelkraft @codesjedi @pernielsentikaer @diannemcewan
 /extensions/worktrees                                               @canac
 /extensions/world-clock                                             @koinzhang
 /extensions/world-cup                                               @ismamz @djpowers @pernielsentikaer
