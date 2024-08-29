@@ -1,4 +1,8 @@
 # Focus Changelog
+## [Fix] - 2024-08-27
+- Fixed some bugs where commands would fail on V1 of the Focus app.
+- Updated error handling.
+- Renamed commands.
 
 ## [Enhancement] - 2024-08-27
 - Fixed an issue where the extension would fail to start Focus in V2.
