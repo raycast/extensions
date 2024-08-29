@@ -1,6 +1,6 @@
 # Chinese Lottery Changelog
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2024-08-29
 
 ### Added
 
