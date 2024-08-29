@@ -185,6 +185,7 @@ export default function DownloadVideo() {
                     itag: format.itag.toString(),
                     container: container,
                   })}
+                  keywords={[container, "video"]}
                   title={`${format.qualityLabel} (${
                     format.contentLength
                       ? prettyBytes(parseInt(format.contentLength) + parseInt(audioContentLength))
@@ -199,6 +200,7 @@ export default function DownloadVideo() {
           {audioFormats.map((format, index) => (
             <Form.Dropdown.Item
               key={`${format.itag}-${format.audioBitrate}-${index}`}
+              keywords={["mp3", "audio"]}
               value={JSON.stringify({ itag: format.itag.toString() } as FormatOptions)}
               title={`${format.audioBitrate}kps (${prettyBytes(parseInt(format.contentLength))})`}
               icon={Icon.Music}

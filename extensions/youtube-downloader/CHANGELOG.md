@@ -3,7 +3,7 @@
 ## [Remove empty dropdown items] - 2024-08-29
 
 - Removed empty dropdown items from the format selection to improve user experience
-- Cleaned up the format options display
+- Added mp3 keyword for audio options
 
 ## [Update package dependency] - 2024-08-12
 
