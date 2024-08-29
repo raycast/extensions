@@ -26,6 +26,31 @@ type ContextType = {
   setSelectedDay: (day: number) => void;
 };
 
+const initialContextValue: ContextType = {
+  selectedMonth: getCurrentMonth().monthNumber,
+  setSelectedMonth: () => {},
+  currentYear: 0,
+  setCurrentYear: () => {},
+  currentWeek: 0,
+  setCurrentWeek: () => {},
+  currentDay: 0,
+  setCurrentDay: () => {},
+  selectedDay: 0,
+  setSelectedDay: () => {},
+  currentMonth: 0,
+  setCurrentMonth: () => {},
+  thisMonth: 0,
+  viewMode: monthViewMode,
+  setViewMode: () => {},
+  weekFormat: weekFormat,
+  enableWeek: enableTime,
+  setEnableWeek: () => {},
+  enableTimer: enableTime,
+  setEnableTimer: () => {},
+};
+
+export const Context = React.createContext<ContextType>(initialContextValue);
+
 export function Provider({ children }: { children: React.ReactNode }) {
   const date = new Date();
   const [currentYear, setCurrentYear] = useState(date.getFullYear());
@@ -68,26 +93,3 @@ export function Provider({ children }: { children: React.ReactNode }) {
     </Context.Provider>
   );
 }
-
-export const Context = React.createContext<ContextType>({
-  selectedMonth: getCurrentMonth().monthNumber,
-  setSelectedMonth: () => {},
-  currentYear: 0,
-  setCurrentYear: () => {},
-  currentWeek: 0,
-  setCurrentWeek: () => {},
-  currentDay: 0,
-  setCurrentDay: () => {},
-  selectedDay: 0,
-  setSelectedDay: () => {},
-  currentMonth: 0,
-  setCurrentMonth: () => {},
-  thisMonth: 0,
-  viewMode: monthViewMode,
-  setViewMode: () => {},
-  weekFormat: weekFormat,
-  enableWeek: enableTime,
-  setEnableWeek: () => {},
-  enableTimer: enableTime,
-  setEnableTimer: () => {},
-});

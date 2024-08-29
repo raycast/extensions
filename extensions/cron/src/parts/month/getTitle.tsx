@@ -1,24 +1,16 @@
 import { useContext } from "react";
 import { Context } from "u/context";
-import { getDayName, getMonthName } from "u/getName";
-import { weekDays, monthName, weekEnable } from "u/options";
 
 export const getTitle = () => {
-  const { currentDay } = useContext(Context);
+  const { currentMonth, currentDay, currentYear } = useContext(Context);
 
-  if (monthName && !weekEnable) {
-    return `${getDayName(currentDay)} ${currentDay}`;
-  }
+  const date = new Date(currentYear, currentMonth - 1, currentDay);
+  const formattedDate = new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
 
-  return undefined;
-};
-
-export const getSubTitle = () => {
-  const { currentYear, currentMonth } = useContext(Context);
-
-  if (!weekDays && monthName) {
-    return `${getMonthName(currentMonth)} ${currentYear}`;
-  }
-
-  return "";
+  return formattedDate;
 };
