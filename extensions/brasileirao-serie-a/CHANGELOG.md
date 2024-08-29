@@ -1,6 +1,6 @@
 # Brasileirão Série A Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-08-29
 
 - Renamed the extension to `Brasileirão Série A`.
 - Removed an unnecessary "Stats" metadata label from the `Standings` command and updated the action title to "Show Stats" and "Hide Stats" for better clarity.
