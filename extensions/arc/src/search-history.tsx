@@ -11,7 +11,7 @@ function SearchHistory(props: LaunchProps) {
   const escapedSearchText = searchText.replace(/"/g, '""');
   const { data, isLoading, permissionView } = useSQL<HistoryEntry>(
     historyDatabasePath,
-    getHistoryQuery(escapedSearchText)
+    getHistoryQuery(escapedSearchText),
   );
 
   if (permissionView) {
@@ -26,9 +26,12 @@ function SearchHistory(props: LaunchProps) {
       onSearchTextChange={setSearchText}
     >
       <List.EmptyView icon={Icon.MagnifyingGlass} title="Nothing found ¯\_(ツ)_/¯" />
-      {data?.map((entry) => (
-        <HistoryEntryListItem key={entry.id} entry={entry} searchText={searchText} />
-      ))}
+      <List.Section
+        title="History"
+        subtitle={data ? `${data.length} ${data.length === 1 ? "entry" : "entries"}` : undefined}
+      >
+        {data?.map((entry) => <HistoryEntryListItem key={entry.id} entry={entry} searchText={searchText} />)}
+      </List.Section>
     </List>
   );
 }

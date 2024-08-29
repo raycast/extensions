@@ -1,11 +1,15 @@
 import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
 import { useListEmailAccounts, useListEmailAccountsWithDiskInfo } from "./lib/hooks";
+import { isInvalidUrl } from "./lib/utils";
+import InvalidUrl from "./lib/components/invalid-url";
 
 export default function EmailAccounts() {
+  if (isInvalidUrl()) return <InvalidUrl />;
+
   const { isLoading, data } = useListEmailAccounts();
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search email account">
       {data?.map((account) => (
         <List.Item
           key={account.email}

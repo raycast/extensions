@@ -23,7 +23,7 @@ function mapValueToColor(value: string): string | undefined {
       return "#856b00";
     case "Default":
     default:
-      return undefined;
+      return "#666666";
   }
 }
 

@@ -24,7 +24,7 @@ This is a Raycast extension for [cPanel](https://cpanel.net/) `User` level accou
 
 ## 🗒️ Notes
 
-- This extension is for ****User**** level accounts so `Reseller` and `Admin` accounts as well as `WHM` accounts are not guaranteed to work.
+- This extension is for **User** level accounts so `Reseller` and `Admin` accounts as well as `WHM` accounts are not guaranteed to work.
 
 ## 🔧 Commands
 
@@ -33,8 +33,10 @@ This is a Raycast extension for [cPanel](https://cpanel.net/) `User` level accou
 
 - Domains
     - View DNS Zone
+        - Create DNS Zone Record
 - Email Accounts
     - View Disk Information
+- Databases
     
 </details>
 
@@ -43,11 +45,14 @@ This is a Raycast extension for [cPanel](https://cpanel.net/) `User` level accou
 <details>
 <summary>Inluded cPanel Operations (Modules and Functions)</summary>
 
-| module | function | extension command |
-|--------|----------|-------------------|
+| module | function | extension command | comments |
+|--------|----------|-------------------|----------|
 | DomainInfo | list_domains | Domains |
+| DNS | mass_edit_zone | Domains > View DNS Zone > Create DNS Record | ONLY `add` limited records |
 | DNS | parse_zone | Domains > View DNS Zone |
 | Email | list_pops | Email Accounts |
 | Email | list_pops_with_disk | Email Accounts > View Disk Information |
+| Mysql | list_databases | Databases |
+| Postgresql | list_databases | Databases |
 
 </details>

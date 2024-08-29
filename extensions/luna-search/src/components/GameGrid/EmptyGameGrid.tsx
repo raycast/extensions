@@ -1,11 +1,8 @@
 import { Grid } from "@raycast/api";
-import { DISPLAY_VALUES, LUNA_LOGO_IMG } from "../../constants";
-import { GameSummary, LunaService } from "../../services";
-import { useEffect, useState } from "react";
+import { DISPLAY_VALUES, LUNA_LOGO_IMG, MIN_SEARCH_LENGTH } from "../../constants";
 import { EmptyActions } from "../Actions";
 import { SearchCallback } from "../..";
-
-const LUNA = LunaService.getInstance();
+import { useTrendingGames } from "../../hooks";
 
 /**
  * Represents the display content for the EmptyGameGrid component,
@@ -24,9 +21,12 @@ interface DisplayContent {
  * @param isQueryEmpty Whether the search query is empty.
  * @returns The DisplayContent object with the appropriate title and description.
  */
-export function getDisplayContent(isLoading: boolean, isQueryEmpty: boolean): DisplayContent {
-  if (isQueryEmpty) {
+export function getDisplayContent(isLoading: boolean, query?: string): DisplayContent {
+  if (!query || query.length === 0) {
     return { description: DISPLAY_VALUES.defaultDescription, title: DISPLAY_VALUES.defaultTitle };
+  }
+  if (query.length < MIN_SEARCH_LENGTH) {
+    return { description: DISPLAY_VALUES.tooFewCharsSearchDescription, title: DISPLAY_VALUES.tooFewCharsSearchTitle };
   }
   if (isLoading) {
     return { description: DISPLAY_VALUES.loadingDescription, title: DISPLAY_VALUES.loadingTitle };
@@ -39,7 +39,7 @@ export function getDisplayContent(isLoading: boolean, isQueryEmpty: boolean): Di
  */
 interface Props {
   isLoading?: boolean;
-  isQueryEmpty: boolean;
+  query?: string;
   searchCallback: SearchCallback;
 }
 
@@ -56,26 +56,18 @@ interface Props {
  * and query state. It then renders a List.EmptyView component from
  * the Raycast API, using the Luna logo as the icon.
  */
-export function EmptyGameGrid({ isLoading, isQueryEmpty, searchCallback }: Props): JSX.Element {
-  const [trending, setTrending] = useState<GameSummary[]>([]);
+export function EmptyGameGrid({ isLoading, query, searchCallback }: Props): JSX.Element {
+  const [games] = useTrendingGames();
 
-  useEffect(() => {
-    const loadTrending = async () => {
-      const trending = await LUNA.getTrendingGames();
-      setTrending(trending);
-    };
-    loadTrending();
-  }, []);
-
-  const content = getDisplayContent(!!isLoading, isQueryEmpty);
+  const content = getDisplayContent(!!isLoading, query);
   return (
     <Grid.EmptyView
       actions={<EmptyActions searchCallback={searchCallback} />}
       icon={{ source: LUNA_LOGO_IMG }}
       description={
-        trending.length == 0
+        games.length == 0
           ? content.description
-          : `${DISPLAY_VALUES.trendingPrefix}${trending.map((game) => game.title).join(", ")}`
+          : `${DISPLAY_VALUES.trendingPrefix}${games.map((game) => game.title).join(", ")}`
       }
       title={content.title}
     />

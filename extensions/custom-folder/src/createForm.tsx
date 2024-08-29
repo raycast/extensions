@@ -10,6 +10,7 @@ export default function CreateForm() {
     imagePath: undefined,
     outputPath: undefined,
   });
+
   const { push } = useNavigation();
   function handleSubmit(values: FolderForm) {
     const file = values.file[0];
@@ -70,6 +71,14 @@ export default function CreateForm() {
         onBlur={(event) => {
           dropPathErrorIfNeeded(event?.target?.value?.[0] || "");
         }}
+      />
+      <Form.FilePicker
+        id="targetFolderPath"
+        title="Target path"
+        allowMultipleSelection={false}
+        canChooseDirectories
+        canChooseFiles={false}
+        info={"Optional path to the folder you want to customize."}
       />
       <Form.FilePicker
         id="output"

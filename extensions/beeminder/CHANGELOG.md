@@ -1,5 +1,9 @@
 # Beeminder Changelog
 
+## [Better synchronization after submitting data] - 2024-08-23
+
+Fixes an issue where the data would not be fully refreshed after submitting a data point.
+
 ## [Update] - 2024-08-22
 
 - Adds a checkmark icon to goals with data entered today.

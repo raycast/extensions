@@ -1,24 +1,12 @@
 import { useContext } from "react";
 import { Context } from "u/context";
-import { getDayName, getMonthName, getDayNameAll } from "u/getName";
-import { weekDays, monthName } from "u/options";
-import { environment } from "@raycast/api";
+import { getDayName, getMonthName } from "u/getName";
+import { weekDays, monthName, weekEnable } from "u/options";
 
 export const getTitle = () => {
-  const { currentDay, enableWeek } = useContext(Context);
-  const dayNames = getDayNameAll();
-  const fontSize = environment.textSize;
-  const spaceCount = fontSize === "medium" ? (enableWeek ? 21 : 25) : enableWeek ? 18 : 21;
-  const space = " ".repeat(spaceCount);
-  const dayNamesString = dayNames.join(space);
-  const paddingSize = fontSize === "medium" ? 22 : 18;
-  const weekPrefix = enableWeek ? "Week".padEnd(paddingSize) : "";
+  const { currentDay } = useContext(Context);
 
-  if (weekDays) {
-    return weekPrefix + dayNamesString;
-  }
-
-  if (monthName) {
+  if (monthName && !weekEnable) {
     return `${getDayName(currentDay)} ${currentDay}`;
   }
 

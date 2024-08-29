@@ -1,5 +1,9 @@
 # svgl Changelog
 
+## [Update API URL] - 2024-08-26
+
+- Update API URL to `https://api.svgl.app`.
+
 ## [Fix copy wordmark] - 2024-04-25
 
 - Fix the incorrect URL for the copy wordmark SVG.
