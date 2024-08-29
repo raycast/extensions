@@ -18,3 +18,13 @@ export type Profile = {
     name: string;
   };
 };
+
+export interface DomainListProps {
+  data: { result: DomainListItem[]; profileName: string };
+  isLoading: boolean;
+  onRemoveItem: (item: DomainListItem) => Promise<void>;
+}
+
+export interface DomainSubmitValues {
+  domain: string;
+}

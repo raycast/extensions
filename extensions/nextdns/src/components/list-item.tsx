@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { DomainListItem } from "../types/nextdns";
+import { AddDomain } from "./add-domain";
 
 //TODO: Optimize optimistic update
 //TODO: Ensure naming, site or domain?
@@ -35,12 +36,13 @@ function Actions({
   return (
     <ActionPanel title={`Manage ${item.id}`}>
       <Action
-        title={`${item.active ? "Deactivate" : "Activate"} Site`}
+        title={`${item.active ? "Deactivate" : "Activate"} Domain`}
         icon={item.active ? Icon.XMarkCircle : Icon.CheckCircle}
         onAction={async () => {
           await onItemRemove(item);
         }}
       />
+      <Action.Push target={<AddDomain />} title="Push" />
     </ActionPanel>
   );
 }

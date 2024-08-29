@@ -1,9 +1,9 @@
 import { DomainListItem } from "../types/nextdns";
-import { toggleSite } from "./api";
+import { toggleDomain } from "./api";
 
 //TODO: FIX any
 export async function removeItem(element: DomainListItem, mutate: (data: any, options?: any) => Promise<void>) {
-  await mutate(toggleSite({ element }), {
+  await mutate(toggleDomain({ element }), {
     optimisticUpdate(data: { [key: string]: DomainListItem[] } | undefined) {
       if (!data) {
         return {};

@@ -33,7 +33,7 @@ async function makeRequest(endpoint: string, method: string = "GET", body?: Body
   return response.json();
 }
 
-export function getList(props: { type: string }) {
+export function getDomains(props: { type: string }) {
   const { type } = props;
   const endpoint = `/profiles/${PREFERENCES.nextdns_profile_id}/${type}list`;
 
@@ -53,11 +53,11 @@ export async function getProfileName() {
   return json?.data?.name || "Unknown";
 }
 
-export async function addSite() {}
+export async function addDomain() {}
 
-export async function removeSite() {}
+export async function removeDomain() {}
 
-export async function toggleSite(props: { element: DomainListItem }) {
+export async function toggleDomain(props: { element: DomainListItem }) {
   const { element } = props;
   const idHex = Buffer.from(element.id).toString("hex");
 
