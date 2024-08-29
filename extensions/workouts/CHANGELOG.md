@@ -1,6 +1,6 @@
 # Workouts Changelog
 
-## [Add Routes Command] - 2024-08-06
+## [Add Routes Command] - 2024-08-29
 
 List all your routes with the `routes` command and download them as GPX/TCX files
 
