@@ -10,7 +10,7 @@ export const DomainList: React.FC<DomainListProps> = ({ data, isLoading, onRemov
     searchBarPlaceholder={`Search allowlist of ${data.profileName} (${PREFERENCES.nextdns_profile_id}`}
   >
     {data.result?.map((element: DomainListItem) => (
-      <ListItem key={element.id} siteItem={element} onRemoveItem={onRemoveItem} />
+      <ListItem key={element.id} domainItem={element} mutate={onRemoveItem} />
     ))}
 
     {Object.keys(data).length === 0 && <EmptyView title="No domains in allowlist" icon={{ source: "no_view.png" }} />}
