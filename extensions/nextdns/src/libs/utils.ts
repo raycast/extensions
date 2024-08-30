@@ -7,6 +7,6 @@ export function getIdHex(id: string) {
 export function getIconById(id: string) {
   return {
     source: `https://favicons.nextdns.io/hex:${getIdHex(id)}@2x.png`,
-    fallback: Icon.Image,
+    fallback: Icon.Globe,
   };
 }
