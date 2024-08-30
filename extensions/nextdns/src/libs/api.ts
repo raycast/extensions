@@ -42,11 +42,11 @@ export function getLogs() {
   return useFetch(`${NEXTDNS_API_BASE_URL}${endpoint}`, {
     headers: headers,
     async parseResponse(response) {
-      const json = await response.json() as NextDNSErrorResult | NextDNSSuccessResult<Log[]>;
+      const json = (await response.json()) as NextDNSErrorResult | NextDNSSuccessResult<Log[]>;
       if ("errors" in json) throw new Error(json.errors[0].code);
       return json.data;
     },
-    initialData: []
+    initialData: [],
   });
 }
 
@@ -57,7 +57,7 @@ export function getDomains(props: { type: string }) {
   return useFetch(`${NEXTDNS_API_BASE_URL}${endpoint}`, {
     headers: headers,
     async parseResponse(response) {
-      const json = await response.json() as NextDNSErrorResult | NextDNSSuccessResult<DomainListItem[]>;
+      const json = (await response.json()) as NextDNSErrorResult | NextDNSSuccessResult<DomainListItem[]>;
       if ("errors" in json) throw new Error(json.errors[0].code);
       const results = json.data.map((item: DomainListItem) => ({ ...item, type: props.type }));
 

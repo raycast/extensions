@@ -51,12 +51,12 @@ export type Log = {
 
 export type NextDNSErrorResult = {
   errors: NextDNSError[];
-}
+};
 export type NextDNSSuccessResult<T> = {
   data: T;
   meta?: {
     pagination: {
       cursor: string | null;
-    }
-  }
-}
+    };
+  };
+};

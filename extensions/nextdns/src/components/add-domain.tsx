@@ -16,23 +16,20 @@ export default function AddDomain(props: { type: string; mutate?: Mutate | undef
       if (mutate) {
         const toast = await showToast({ style: Toast.Style.Animated, title: "Adding Domain", message: values.domain });
         try {
-          await mutate(
-            addDomain({ domain: values.domain, type }),
-            {
-              optimisticUpdate(data) {
-                const { result, profileName } = data;
+          await mutate(addDomain({ domain: values.domain, type }), {
+            optimisticUpdate(data) {
+              const { result, profileName } = data;
 
-                if (result.some((item) => item.id === values.domain)) {
-                  toast.style = Toast.Style.Failure;
-                  toast.title = "Domain already added";
-                } else {
-                  result.unshift({ id: values.domain, type, active: true });
-                }
+              if (result.some((item) => item.id === values.domain)) {
+                toast.style = Toast.Style.Failure;
+                toast.title = "Domain already added";
+              } else {
+                result.unshift({ id: values.domain, type, active: true });
+              }
 
-                return { result, profileName };
-              },
+              return { result, profileName };
             },
-          );
+          });
           toast.style = Toast.Style.Success;
           toast.title = "Added Domain";
           toast.message = values.domain;

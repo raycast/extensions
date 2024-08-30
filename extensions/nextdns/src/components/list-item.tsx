@@ -31,7 +31,7 @@ function Actions({ item, mutate }: { item: DomainListItem; mutate: Mutate }) {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: newStatus ? "Activating domain" : "Deactivating domain",
-      message: id
+      message: id,
     });
     try {
       await mutate(toggleDomain({ element: { id, type, active: newStatus } }), {
@@ -54,7 +54,7 @@ function Actions({ item, mutate }: { item: DomainListItem; mutate: Mutate }) {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Removing domain",
-      message: element.id
+      message: element.id,
     });
 
     try {
