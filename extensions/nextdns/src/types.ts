@@ -30,3 +30,21 @@ export type DomainListProps = {
 export type DomainSubmitValues = {
   domain: string;
 };
+
+export type Log = {
+  timestamp: string;
+  domain: string;
+  root: string;
+  tracker: string;
+  encrypted: boolean;
+  protocol: string;
+  clientIp: string;
+  client: string;
+  device: {
+    id: string;
+    name: string;
+    model: string;
+  };
+  status: string;
+  reasons: [];
+};

@@ -28,6 +28,13 @@
       "subtitle": "NextDNS",
       "description": "Manage your NextDNS denylist.",
       "mode": "view"
+    },
+        {
+      "name": "logs",
+      "title": "Search Logs",
+      "subtitle": "NextDNS",
+      "description": "Manage your NextDNS logs.",
+      "mode": "view"
     }
   ],
   "preferences": [

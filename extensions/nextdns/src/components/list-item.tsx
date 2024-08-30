@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast } fr
 import { removeDomain, toggleDomain } from "../libs/api";
 import { DomainListItem, Mutate } from "../types";
 import AddDomain from "./add-domain";
-import { getIcon } from "../libs/utils";
+import { getIconById } from "../libs/utils";
 
 export function ListItem(props: { domainItem: DomainListItem; mutate: Mutate }) {
   const { domainItem, mutate } = props;
@@ -10,7 +10,7 @@ export function ListItem(props: { domainItem: DomainListItem; mutate: Mutate }) 
   return (
     <List.Item
       title={`*.${domainItem.id}`}
-      icon={{ source: getIcon(domainItem), fallback: Icon.Image }}
+      icon={getIconById(domainItem.id)}
       accessories={[
         {
           tag: domainItem.active

@@ -1,9 +1,12 @@
-import { DomainListItem } from "../types";
+import { Icon } from "@raycast/api";
 
-export function getIdHex(element: DomainListItem) {
-  return Buffer.from(element.id).toString("hex");
+export function getIdHex(id: string) {
+  return Buffer.from(id).toString("hex");
 }
 
-export function getIcon(element: DomainListItem) {
-  return `https://favicons.nextdns.io/hex:${getIdHex(element)}@2x.png`;
+export function getIconById(id: string) {
+  return {
+    source: `https://favicons.nextdns.io/hex:${getIdHex(id)}@2x.png`,
+    fallback: Icon.Image,
+  };
 }

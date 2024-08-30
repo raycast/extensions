@@ -36,6 +36,18 @@ async function makeRequest(endpoint: string, method: string = "GET", body?: Body
   return response.json();
 }
 
+export function getLogs() {
+  const endpoint = `/profiles/${PREFERENCES.nextdns_profile_id}/logs`;
+
+  return useFetch(`${NEXTDNS_API_BASE_URL}${endpoint}`, {
+    headers: headers,
+    async parseResponse(response) {
+      const json = await response.json();
+      return json;
+    },
+  });
+}
+
 export function getDomains(props: { type: string }) {
   const { type } = props;
   const endpoint = `/profiles/${PREFERENCES.nextdns_profile_id}/${type}list`;
@@ -69,7 +81,7 @@ export async function removeDomain(props: { element: DomainListItem }) {
   const { element } = props;
 
   await makeRequest(
-    `/profiles/${PREFERENCES.nextdns_profile_id}/${element.type}list/hex:${getIdHex(element)}`,
+    `/profiles/${PREFERENCES.nextdns_profile_id}/${element.type}list/hex:${getIdHex(element.id)}`,
     "DELETE",
   );
 }
@@ -78,7 +90,7 @@ export async function toggleDomain(props: { element: DomainListItem }) {
   const { element } = props;
 
   await makeRequest(
-    `/profiles/${PREFERENCES.nextdns_profile_id}/${element.type}list/hex:${getIdHex(element)}`,
+    `/profiles/${PREFERENCES.nextdns_profile_id}/${element.type}list/hex:${getIdHex(element.id)}`,
     "PATCH",
     {
       active: element.active,
