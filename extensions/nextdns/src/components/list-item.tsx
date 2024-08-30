@@ -4,7 +4,7 @@ import { DomainListItem, Mutate } from "../types";
 import AddDomain from "./add-domain";
 import { getIconById } from "../libs/utils";
 
-export function ListItem(props: { domainItem: DomainListItem; mutate: Mutate; data: any }) {
+export function ListItem(props: { domainItem: DomainListItem; mutate: Mutate; data: DomainListItem[] }) {
   const { domainItem, mutate, data } = props;
 
   return (
@@ -23,7 +23,7 @@ export function ListItem(props: { domainItem: DomainListItem; mutate: Mutate; da
   );
 }
 
-function Actions({ item, mutate, data }: { item: DomainListItem; mutate: Mutate; data: any }) {
+function Actions({ item, mutate, data }: { item: DomainListItem; mutate: Mutate; data: DomainListItem[] }) {
   async function toggle(item: DomainListItem) {
     const newStatus = !item.active;
     const { id, type } = item;
