@@ -47,7 +47,7 @@ export default async () => {
       primaryAction: {
         title: "Install Cursor",
         onAction: () => open("https://www.cursor.com/"),
-      },  
+      },
     });
     return;
   }

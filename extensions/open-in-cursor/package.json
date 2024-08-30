@@ -5,9 +5,6 @@
   "description": "Open current Finder directory, selected folder or file in Cursor.",
   "icon": "icon.png",
   "author": "mjoosuf",
-  "contributors": [
-    "mjoosuf"
-  ],
   "categories": [
     "Developer Tools",
     "Productivity"
