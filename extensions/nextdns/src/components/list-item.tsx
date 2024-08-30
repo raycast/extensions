@@ -31,6 +31,7 @@ function Actions({ item, mutate }: { item: DomainListItem; mutate: Mutate }) {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: newStatus ? "Activating domain" : "Deactivating domain",
+      message: id
     });
     try {
       await mutate(toggleDomain({ element: { id, type, active: newStatus } }), {
@@ -53,14 +54,13 @@ function Actions({ item, mutate }: { item: DomainListItem; mutate: Mutate }) {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Removing domain",
+      message: element.id
     });
 
     try {
       await mutate(removeDomain({ element }), {
         optimisticUpdate(data) {
-          if (!data) return {};
-
-          const list = data?.result || [];
+          const list = data.result;
           const index = list.findIndex((item) => item.id === element.id);
 
           if (index !== -1) {

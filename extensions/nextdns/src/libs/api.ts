@@ -44,8 +44,9 @@ export function getLogs() {
     async parseResponse(response) {
       const json = await response.json() as NextDNSErrorResult | NextDNSSuccessResult<Log[]>;
       if ("errors" in json) throw new Error(json.errors[0].code);
-      return json;
+      return json.data;
     },
+    initialData: []
   });
 }
 

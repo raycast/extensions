@@ -14,7 +14,7 @@ export default function AddDomain(props: { type: string; mutate?: Mutate | undef
   const { itemProps, handleSubmit } = useForm<DomainSubmitValues>({
     async onSubmit(values) {
       if (mutate) {
-        const toast = await showToast({ style: Toast.Style.Animated, title: "Adding Domain" });
+        const toast = await showToast({ style: Toast.Style.Animated, title: "Adding Domain", message: values.domain });
         try {
           await mutate(
             addDomain({ domain: values.domain, type }).then((d) => console.log(d)),

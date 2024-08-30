@@ -8,7 +8,7 @@ export default function Logs() {
 
   return (
     <List isLoading={isLoading}>
-      {data?.data?.map((log: Log) => {
+      {data.map((log: Log) => {
         const date = new Date(log.timestamp);
         return (
           <List.Item
