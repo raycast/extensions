@@ -47,7 +47,6 @@ function CreateActivity() {
       toast.style = Toast.Style.Success;
       toast.title = "Activity saved";
       setIsSubmitted(true);
-      console.log(activity.name);
       setActivityDetails(activity);
     } catch (error) {
       toast.style = Toast.Style.Failure;
