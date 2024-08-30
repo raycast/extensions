@@ -15,7 +15,7 @@ export const DomainList: React.FC<DomainListProps> = ({ type }) => {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder={`Search ${type}list of ${data.profileName} (${PREFERENCES.nextdns_profile_id}`}
+      searchBarPlaceholder={`Search ${type}list of ${data.profileName} (${PREFERENCES.nextdns_profile_id})`}
     >
       {data.result?.map((element: DomainListItem) => (
         <ListItem key={element.id} domainItem={element} mutate={mutate} data={data.result} />
