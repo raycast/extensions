@@ -46,6 +46,7 @@ export function getLogs() {
       if ("errors" in json) throw new Error(json.errors[0].code);
       return json.data;
     },
+    failureToastOptions: { title: "Failed to get endpoint logs." },
     initialData: [],
   });
 }
