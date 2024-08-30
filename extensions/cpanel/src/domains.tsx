@@ -62,7 +62,7 @@ function ViewDNSZone({ zone }: { zone: string }) {
   const { isLoading, data = [], revalidate } = useParsedDNSZone(zone);
 
   const [type, setType] = useState("");
-  const filteredRecords = useMemo(() => data.filter((record) => !type || record.record_type === type), [type]);
+  const filteredRecords = useMemo(() => data.filter((record) => ((!type || record.record_type === type) && record.record_type!=="SOA" && record.record_type!=="NS")), [type]);
 
   return (
     <List

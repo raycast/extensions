@@ -51,8 +51,7 @@ export const useListDomains = () => useUAPI<AccountDomains>("DomainInfo", "list_
 export const useParsedDNSZone = (zone: string) => {
   const { data, ...rest } = useUAPI<DNSZoneRecord[]>("DNS", "parse_zone", { zone });
   if (data) {
-    const onlyRecords = data.filter((item): item is DNSZoneRecord & { type: "record" } => item.type === "record");
-    const filteredData = onlyRecords.filter((item) => !["SOA", "NS"].includes(item.record_type));
+    const filteredData = data.filter((item): item is DNSZoneRecord & { type: "record" } => item.type === "record");
     // decode from base64
     const parsedData = filteredData.map((item) => {
       return { ...item, dname: atob(item.dname_b64), data: item.data_b64.map((d) => atob(d)) };
