@@ -6,8 +6,7 @@
 name: Close stale issues and PRs
 
 on:
-  schedule:
-    - cron: "*/60 * * * *"
+  workflow_dispatch:
   pull_request_target:
     paths:
       - "extensions/**"
