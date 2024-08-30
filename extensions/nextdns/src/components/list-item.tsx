@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { removeDomain, toggleDomain } from "../libs/api";
 import { DomainListItem, Mutate } from "../types";
 import AddDomain from "./add-domain";
@@ -51,32 +51,47 @@ function Actions({ item, mutate, data }: { item: DomainListItem; mutate: Mutate;
   }
 
   async function removeItem(element: DomainListItem) {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Removing domain",
-      message: element.id,
-    });
+    await confirmAlert({
+      title: "Are you sure?",
+      icon: Icon.Trash,
+      message: `This will remove it from the ${element.type}list`,
+      primaryAction: {
+        title: "Remove",
+        style: Alert.ActionStyle.Destructive,
+        onAction: async () => {
+          const toast = await showToast({
+            style: Toast.Style.Animated,
+            title: "Removing domain",
+            message: element.id,
+          });
 
-    try {
-      await mutate(removeDomain({ element }), {
-        optimisticUpdate(data) {
-          const list = data.result;
-          const index = list.findIndex((item) => item.id === element.id);
+          try {
+            await mutate(removeDomain({ element }), {
+              optimisticUpdate(data) {
+                const list = data.result;
+                const index = list.findIndex((item) => item.id === element.id);
 
-          if (index !== -1) {
-            list.splice(index, 1);
+                if (index !== -1) {
+                  list.splice(index, 1);
+                }
+
+                return { ...data, result: list };
+              },
+            });
+
+            toast.style = Toast.Style.Success;
+            toast.title = "Removed domain";
+          } catch (error) {
+            toast.style = Toast.Style.Failure;
+            toast.title = `Could not remove domain`;
           }
-
-          return { ...data, result: list };
         },
-      });
-
-      toast.style = Toast.Style.Success;
-      toast.title = "Removed domain";
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = `Could not remove domain`;
-    }
+      },
+      dismissAction: {
+        title: "Cancel",
+      },
+      rememberUserChoice: true,
+    });
   }
 
   return (
