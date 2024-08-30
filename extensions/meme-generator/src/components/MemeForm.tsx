@@ -44,7 +44,6 @@ export default function MemeForm({ id, title, boxCount }: Meme) {
       })
       .catch(async (error) => {
         await generatingToast.hide();
-        console.log(error);
         showToast(Toast.Style.Failure, "Something went wrong", error.message);
       })
       .finally(async () => {
