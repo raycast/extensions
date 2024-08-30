@@ -3,6 +3,7 @@ import { ActionPanel, Action, openExtensionPreferences, showToast, Toast, Icon, 
 import { Context } from "u/context";
 import { getMonthName, getDayName } from "u/getName";
 import { getAvatarIcon } from "@raycast/utils";
+import { DayDetails } from "@/days/detail";
 
 export default function Actions({ global, day }: { global?: boolean; day?: number }) {
   const {
@@ -84,6 +85,13 @@ export default function Actions({ global, day }: { global?: boolean; day?: numbe
 
   return (
     <ActionPanel title="Navigation">
+      <ActionPanel.Section>
+        <Action.Push
+          title="Show Details"
+          icon={Icon.Calendar}
+          target={<DayDetails day={day || 0} currentMonth={currentMonth} currentYear={currentYear} />}
+        />
+      </ActionPanel.Section>
       <ActionPanel.Section>
         <Action
           title="Current Month"

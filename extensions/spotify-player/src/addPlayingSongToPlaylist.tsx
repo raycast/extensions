@@ -3,6 +3,7 @@ import {
   Action,
   ActionPanel,
   Icon,
+  LaunchProps,
   LaunchType,
   List,
   Toast,
@@ -11,7 +12,7 @@ import {
   showHUD,
   showToast,
 } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCurrentlyPlaying } from "./hooks/useCurrentlyPlaying";
 import { useMe } from "./hooks/useMe";
 import { ListOrGridSection } from "./components/ListOrGridSection";
@@ -19,8 +20,17 @@ import PlaylistItem from "./components/PlaylistItem";
 import { addToPlaylist } from "./api/addToPlaylist";
 import { useMyPlaylists } from "./hooks/useMyPlaylists";
 import { getError } from "./helpers/getError";
+import { CreateQuicklink } from "./components/CreateQuicklink";
 
-function AddToPlaylistCommand() {
+type LaunchContextData = {
+  playlistId?: string;
+};
+
+type AddToPlaylistCommandProps = {
+  playlistId?: string;
+};
+
+function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
   const [searchText, setSearchText] = useState("");
 
@@ -59,6 +69,30 @@ function AddToPlaylistCommand() {
       </List>
     );
   }
+
+  useEffect(() => {
+    if (props?.playlistId) {
+      try {
+        addToPlaylist({
+          playlistId: props.playlistId,
+          trackUris: [currentlyPlayingData.item?.uri as string],
+        });
+        const playlist = myPlaylistsData?.items?.find((p) => p.id == props.playlistId);
+        if (!playlist) {
+          showHUD("Playlist not found");
+          popToRoot();
+          return;
+        }
+        showHUD(`Added to ${playlist?.name}`);
+      } catch (err) {
+        const error = getError(err);
+        showHUD(`Error adding song to playlist: ${error.message}`);
+      }
+      popToRoot();
+      return;
+    }
+  }, []);
+
   return (
     <List
       searchBarPlaceholder="Search for Playlist"
@@ -66,12 +100,12 @@ function AddToPlaylistCommand() {
       onSearchTextChange={setSearchText}
       filtering={true}
     >
-      <ListOrGridSection type={"list"} title="Playlists">
+      <ListOrGridSection type="list" title="Playlists">
         {myPlaylistsData?.items
           ?.filter((playlist) => playlist.owner?.id === meData?.id)
           .map((playlist) => (
             <PlaylistItem
-              type={"list"}
+              type="list"
               key={playlist.id}
               playlist={playlist}
               actions={
@@ -106,6 +140,14 @@ function AddToPlaylistCommand() {
                       }
                     }}
                   />
+                  {playlist.id && (
+                    <CreateQuicklink
+                      title={`Create Quicklink to Add to ${playlist.name}`}
+                      quicklinkTitle={`Add Playing Song to ${playlist.name}`}
+                      command="addPlayingSongToPlaylist"
+                      data={{ playlistId: playlist.id }}
+                    />
+                  )}
                 </ActionPanel>
               }
             />
@@ -115,10 +157,11 @@ function AddToPlaylistCommand() {
   );
 }
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ launchContext: LaunchContextData }>) {
+  const playlistId = props?.launchContext?.playlistId;
   return (
     <View>
-      <AddToPlaylistCommand />
+      <AddToPlaylistCommand playlistId={playlistId} />
     </View>
   );
 }

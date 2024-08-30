@@ -1,12 +1,9 @@
-import { Color, Detail, Icon, showToast, Toast } from "@raycast/api";
+import { Color, Detail, Icon } from "@raycast/api";
 import { DISPLAY_VALUES, LUNA_LOGO_IMG } from "../constants";
-import { GameSummary, LunaService } from "../services";
-import { useEffect, useState } from "react";
-import { Game } from "../services/LunaService/Game";
+import { GameSummary } from "../models";
 import { SearchCallback } from "..";
 import { GameDetailActions } from "./Actions";
-
-const LUNA = LunaService.getInstance();
+import { useGame } from "../hooks/UseGame";
 
 /**
  * Defines the props for the GameDetail component.
@@ -35,7 +32,7 @@ export function optimizeImageUrl(url: string, size: number) {
  * information about a specific game.
  *
  * It receives the following props:
- * - game: The LunaGame instance to display.
+ * - game: The GameSummary instance to display details for.
  *
  * The component uses the Detail component from the Raycast API
  * to display the game's metadata, including the image, rating, and genres and more.
@@ -45,41 +42,21 @@ export function optimizeImageUrl(url: string, size: number) {
  * selected item as the argument.
  */
 export function GameDetail({ game, searchCallback }: Props): JSX.Element {
-  if (!game) return <></>;
+  const [gameDetails, isLoading] = useGame(game);
 
-  const [gameDetails, setGameDetails] = useState<Game>();
-  const [isLoading, setIsLoading] = useState<boolean>();
-
-  useEffect(() => {
-    setIsLoading(true);
-    const loadDetails = async () => {
-      try {
-        const details = await LUNA.getGameDetails(game);
-        setGameDetails(details);
-      } catch (e) {
-        console.debug("Error getting game details:", e);
-        showToast({
-          style: Toast.Style.Failure,
-          title: DISPLAY_VALUES.errorMessage,
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadDetails();
-  }, []);
+  if (!game || !gameDetails) return <Detail isLoading={isLoading} />;
 
   const img = game.imgUrl ? optimizeImageUrl(game.imgUrl, 500) : LUNA_LOGO_IMG;
+  const markdown = `
+![Game Art](${img}?raycast-width=500)
+ # ${game.title}
+
+ ${gameDetails?.description ?? ""}`;
   return (
     <Detail
       actions={<GameDetailActions game={game} searchCallback={searchCallback} />}
       isLoading={isLoading}
-      markdown={`
-![Game Art](${img}?raycast-width=500)
- # ${game.title}
-
- ${gameDetails?.description ?? ""}
- `}
+      markdown={markdown}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label

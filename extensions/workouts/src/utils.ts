@@ -1,5 +1,7 @@
-import { getPreferenceValues, environment } from "@raycast/api";
+import { getPreferenceValues, environment, showToast, Toast } from "@raycast/api";
 import { ActivityType, SportType } from "./api/types";
+import { createWriteStream } from "fs";
+import path from "path";
 
 export const formatDuration = (duration: number) => {
   return new Date(duration * 1000).toISOString().substring(11, 19);
@@ -10,7 +12,7 @@ export const formatElevationGain = (elevationGain: number) => {
   if (preferences.distance_unit === "mi") {
     return `${(elevationGain * 3.28084).toFixed(0)}ft`;
   }
-  return `${elevationGain}m`;
+  return `${Math.round(elevationGain)}m`;
 };
 
 export const formatDistance = (distance: number) => {
@@ -158,3 +160,36 @@ export function isNumber(distance: string | undefined) {
     return !(sanitizedValue === "" || isNaN(Number(sanitizedValue)));
   }
 }
+
+export const saveFileToDesktop = (
+  fileName: string,
+  fileType: "gpx" | "tcx",
+  fileStream: NodeJS.ReadableStream | null,
+) => {
+  if (fileStream) {
+    const desktopDir = process.env.HOME + "/Desktop";
+    const downloadPath = path.join(desktopDir, `${fileName}.${fileType}`);
+    const writeStream = createWriteStream(downloadPath);
+    fileStream.pipe(writeStream);
+    writeStream.on("finish", () => {
+      showToast({
+        style: Toast.Style.Success,
+        title: "Download successful",
+        message: `${fileType.toUpperCase()} file saved to your desktop`,
+      });
+    });
+    writeStream.on("error", () => {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Download failed",
+        message: `Could not save the ${fileType.toUpperCase()} file.`,
+      });
+    });
+  } else {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Download failed",
+      message: `Could not download the ${fileType.toUpperCase()} file.`,
+    });
+  }
+};

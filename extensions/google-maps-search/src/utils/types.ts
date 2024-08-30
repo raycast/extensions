@@ -2,10 +2,10 @@
  * Corresponds to Google Map's four possible modes of travel.
  */
 export enum TransportType {
-  Cycling = "c",
-  Driving = "d",
-  Transit = "t",
-  Walking = "w",
+  Cycling = "bicycling",
+  Driving = "driving",
+  Transit = "transit",
+  Walking = "walking",
 }
 
 /**
