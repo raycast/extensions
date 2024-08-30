@@ -4,7 +4,7 @@
 
 - Updated command title for clarity and to avoid confusion with the extension name.
 - Conformed command subtitle to Raycast guidelines.
-- Updated searchbar placeholder.
+- Updated search bar placeholder.
 - Updated navigation title.
 - Avoided redundancy in list item titles.
 
