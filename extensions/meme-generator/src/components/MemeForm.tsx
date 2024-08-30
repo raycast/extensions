@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Form, showToast, Toast, useNavigation, showHUD, Icon } from "@raycast/api";
+import { ActionPanel, Action, Form, showToast, Toast, useNavigation, Icon, closeMainWindow } from "@raycast/api";
 import { useState } from "react";
 import { generateMeme } from "../api";
 import { ImgflipCaptionImageBox } from "../api/types";
@@ -24,30 +24,32 @@ export default function MemeForm({ id, title, boxCount }: Meme) {
       return;
     }
 
-    showToast({
+    const generatingToast = await showToast({
       style: Toast.Style.Animated,
       title: "Generating...",
-    }).then((toast) => {
-      setIsLoading(true);
-
-      generateMeme({ id, boxes })
-        .then(async (results) => {
-          if (preview) {
-            push(<MemePreview title={title} url={results.url} />);
-          } else {
-            await copyFileToClipboard(results.url, `${title}.jpg`);
-            showHUD(`Meme "${title}" copied to clipboard`);
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-          showToast(Toast.Style.Failure, "Something went wrong", error.message);
-        })
-        .finally(() => {
-          toast.hide();
-          setIsLoading(false);
-        });
     });
+
+    setIsLoading(true);
+
+    generateMeme({ id, boxes })
+      .then(async (results) => {
+        if (preview) {
+          push(<MemePreview title={title} url={results.url} />);
+        } else {
+          await copyFileToClipboard(results.url, `${title}.jpg`);
+          await generatingToast.hide();
+          await closeMainWindow();
+          await showToast(Toast.Style.Success, `Meme "${title}" copied to clipboard`);
+        }
+      })
+      .catch(async (error) => {
+        await generatingToast.hide();
+        console.log(error);
+        showToast(Toast.Style.Failure, "Something went wrong", error.message);
+      })
+      .finally(async () => {
+        setIsLoading(false);
+      });
   }
 
   return (
@@ -59,7 +61,7 @@ export default function MemeForm({ id, title, boxCount }: Meme) {
           <Action.SubmitForm
             icon={Icon.Clipboard}
             onSubmit={(values: FormValues) => onSubmit(values, false)}
-            title="Copy to clipboard"
+            title="Generate"
           />
           <Action.SubmitForm
             icon={Icon.Eye}

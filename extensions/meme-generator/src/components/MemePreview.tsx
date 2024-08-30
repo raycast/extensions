@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, showHUD } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Detail, showToast, Toast } from "@raycast/api";
 import { useMemo } from "react";
 import copyFileToClipboard from "../lib/copyFileToClipboard";
 
@@ -7,7 +7,8 @@ export default function MemePreview({ title, url }: { title: string; url: string
 
   const onCopyAction = async () => {
     await copyFileToClipboard(url, `${title}.jpg`);
-    showHUD(`Meme "${title}" copied to clipboard`);
+    await closeMainWindow();
+    await showToast(Toast.Style.Success, `Meme "${title}" copied to clipboard`);
   };
 
   return (
