@@ -17,7 +17,7 @@ export default function AddDomain(props: { type: string; mutate?: Mutate | undef
         const toast = await showToast({ style: Toast.Style.Animated, title: "Adding Domain", message: values.domain });
         try {
           await mutate(
-            addDomain({ domain: values.domain, type }).then((d) => console.log(d)),
+            addDomain({ domain: values.domain, type }),
             {
               optimisticUpdate(data) {
                 const { result, profileName } = data;
