@@ -26,7 +26,7 @@ export default function AddDomain(props: { type: string; mutate?: Mutate | undef
                   toast.style = Toast.Style.Failure;
                   toast.title = "Domain already added";
                 } else {
-                  result.push({ id: values.domain, type, active: true });
+                  result.unshift({ id: values.domain, type, active: true });
                 }
 
                 return { result, profileName };
