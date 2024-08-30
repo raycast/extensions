@@ -4,11 +4,7 @@ import isValidDomain from "is-valid-domain";
 import { DomainListItem, DomainSubmitValues, Mutate } from "../types";
 import { addDomain } from "../libs/api";
 
-export default function AddDomain(props: {
-  type: string;
-  mutate?: Mutate | undefined;
-  data?: DomainListItem[] | undefined;
-}) {
+export default function AddDomain(props: { type: string; mutate?: Mutate; data?: DomainListItem[] }) {
   const { pop } = useNavigation();
   const { type, mutate, data } = props;
   const description =
