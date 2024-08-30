@@ -23,7 +23,7 @@ export function EmptyView(props: {
               icon={Icon.Plus}
               title="Add New Domain"
               shortcut={Keyboard.Shortcut.Common.New}
-              target={<AddDomain type={type ?? ""} mutate={mutate ?? undefined} />}
+              target={<AddDomain type={type ?? ""} mutate={mutate} />}
             />
           )}
           <ActionPanel.Section>
