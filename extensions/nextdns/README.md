@@ -15,3 +15,10 @@ You'll need to provide your NextDNS API key and profile ID in order to use the c
 
 - Allowlist management
 - Denylist management
+- View logs (Simplified)
+
+## Missing features
+
+- Add domains from log directly to allow- or denylist
+- A lot more polishing
+- A lot more features
