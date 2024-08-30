@@ -30,7 +30,7 @@ function Actions({ item, mutate }: { item: DomainListItem; mutate: Mutate }) {
 
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: newStatus ? "Activating domain" : "deactivating domain",
+      title: newStatus ? "Activating domain" : "Deactivating domain",
     });
     try {
       await mutate(toggleDomain({ element: { id, type, active: newStatus } }), {
@@ -42,7 +42,7 @@ function Actions({ item, mutate }: { item: DomainListItem; mutate: Mutate }) {
         },
       });
       toast.style = Toast.Style.Success;
-      toast.title = newStatus ? "Activated domain" : "deactivated domain";
+      toast.title = newStatus ? "Activated domain" : "Deactivated domain";
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = `Could not ${newStatus ? "activate" : "deactivate"} domain`;
