@@ -4,8 +4,8 @@ import { DomainListItem, Mutate } from "../types";
 import AddDomain from "./add-domain";
 import { getIconById } from "../libs/utils";
 
-export function ListItem(props: { domainItem: DomainListItem; mutate: Mutate }) {
-  const { domainItem, mutate } = props;
+export function ListItem(props: { domainItem: DomainListItem; mutate: Mutate; data: any }) {
+  const { domainItem, mutate, data } = props;
 
   return (
     <List.Item
@@ -18,12 +18,12 @@ export function ListItem(props: { domainItem: DomainListItem; mutate: Mutate }) 
             : { color: Color.Red, value: "Deactivated" },
         },
       ]}
-      actions={<Actions item={domainItem} mutate={mutate} />}
+      actions={<Actions item={domainItem} mutate={mutate} data={data} />}
     />
   );
 }
 
-function Actions({ item, mutate }: { item: DomainListItem; mutate: Mutate }) {
+function Actions({ item, mutate, data }: { item: DomainListItem; mutate: Mutate; data: any }) {
   async function toggle(item: DomainListItem) {
     const newStatus = !item.active;
     const { id, type } = item;
@@ -99,7 +99,7 @@ function Actions({ item, mutate }: { item: DomainListItem; mutate: Mutate }) {
         icon={Icon.Plus}
         title="Add New Domain"
         shortcut={Keyboard.Shortcut.Common.New}
-        target={<AddDomain type={item.type} mutate={mutate} />}
+        target={<AddDomain type={item.type} mutate={mutate} data={data} />}
       />
     </ActionPanel>
   );

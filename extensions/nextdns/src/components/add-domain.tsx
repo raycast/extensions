@@ -1,12 +1,16 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import isValidDomain from "is-valid-domain";
-import { DomainSubmitValues, Mutate } from "../types";
+import { DomainListItem, DomainSubmitValues, Mutate } from "../types";
 import { addDomain } from "../libs/api";
 
-export default function AddDomain(props: { type: string; mutate?: Mutate | undefined }) {
+export default function AddDomain(props: {
+  type: string;
+  mutate?: Mutate | undefined;
+  data?: DomainListItem[] | undefined;
+}) {
   const { pop } = useNavigation();
-  const { type, mutate } = props;
+  const { type, mutate, data } = props;
   const description =
     type === "allow"
       ? "Allowing a domain will automatically allow all its subdomains. Allowing takes precedence over everything else, including security features."
@@ -20,13 +24,7 @@ export default function AddDomain(props: { type: string; mutate?: Mutate | undef
             optimisticUpdate(data) {
               const { result, profileName } = data;
 
-              if (result.some((item) => item.id === values.domain)) {
-                toast.style = Toast.Style.Failure;
-                toast.title = "Domain already added";
-              } else {
-                result.unshift({ id: values.domain, type, active: true });
-              }
-
+              result.unshift({ id: values.domain, type, active: true });
               return { result, profileName };
             },
           });
@@ -44,9 +42,11 @@ export default function AddDomain(props: { type: string; mutate?: Mutate | undef
       domain(value) {
         if (!value) return "The item is required";
         if (!isValidDomain(value)) return "The item must be a valid domain";
+        if (data && data.some((item) => item.id === value)) return "Domain already added";
       },
     },
   });
+
   return (
     <Form
       actions={

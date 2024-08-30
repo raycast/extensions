@@ -18,13 +18,26 @@ export const DomainList: React.FC<DomainListProps> = ({ type }) => {
       searchBarPlaceholder={`Search ${type}list of ${data.profileName} (${PREFERENCES.nextdns_profile_id}`}
     >
       {data.result?.map((element: DomainListItem) => (
-        <ListItem key={element.id} domainItem={element} mutate={mutate} />
+        <ListItem key={element.id} domainItem={element} mutate={mutate} data={data.result} />
       ))}
 
-      {Object.keys(data).length === 0 && (
-        <EmptyView title={`No domains in ${type}list`} icon={{ source: "no_view.png" }} mutate={mutate} type={type} />
+      {Object.keys(data.result).length === 0 ? (
+        <EmptyView
+          title={`No domains in ${type}list`}
+          description="Add your first domain with ⌘+N"
+          icon={{ source: "no_view.png" }}
+          mutate={mutate}
+          type={type}
+        />
+      ) : (
+        <EmptyView
+          title="No matches found"
+          description="Refine your search query"
+          icon={{ source: "no_view.png" }}
+          mutate={mutate}
+          type={type}
+        />
       )}
-      <EmptyView title="No Results" icon={{ source: "no_view.png" }} mutate={mutate} type={type} />
     </List>
   );
 };

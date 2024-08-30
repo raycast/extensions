@@ -11,7 +11,6 @@ export function EmptyView(props: {
 }) {
   const { title, description, icon, mutate, type } = props;
 
-  //TODO: Can we clearsearchbar after running AddComain here?
   return (
     <List.EmptyView
       title={title}
