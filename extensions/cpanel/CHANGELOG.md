@@ -1,5 +1,10 @@
 # cPanel Changelog
 
+## [Enhancements] - {PR_MERGE_DATE}
+
+- Create Email Account
+- Filter DNS Zone (records) by (record) type
+
 ## [View Databases + Create Limited DNS Records] - 2024-08-26
 
 - View MySQL or PostgreSQL Databases

@@ -50,6 +50,7 @@ This is a Raycast extension for [cPanel](https://cpanel.net/) `User` level accou
 | DomainInfo | list_domains | Domains |
 | DNS | mass_edit_zone | Domains > View DNS Zone > Create DNS Record | ONLY `add` limited records |
 | DNS | parse_zone | Domains > View DNS Zone |
+| Email | add_pop | Email Accounts > Create Email Account |
 | Email | list_pops | Email Accounts |
 | Email | list_pops_with_disk | Email Accounts > View Disk Information |
 | Mysql | list_databases | Databases |

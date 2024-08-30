@@ -10,16 +10,16 @@ import {
 } from "./types";
 import { showFailureToast, useFetch } from "@raycast/utils";
 
-type useUAPIOptions = {
+type useUAPIOptions<T> = {
   execute: boolean;
   onError?: () => void;
-  onData?: () => void;
+  onData?: (data: T) => void;
 };
 export function useUAPI<T>(
   module: string,
   functionName: string,
-  params?: { [key: string]: string | number },
-  options: useUAPIOptions = { execute: true },
+  params?: Record<string, string | number | boolean>,
+  options: useUAPIOptions<T> = { execute: true },
 ) {
   const API_URL = new URL(`execute/${module}/${functionName}`, CPANEL_URL);
   if (params) Object.entries(params).forEach(([key, val]) => API_URL.searchParams.append(key, val.toString()));
@@ -39,8 +39,8 @@ export function useUAPI<T>(
       await showFailureToast(error, { title: "cPanel Error" });
       options.onError?.();
     },
-    onData() {
-      options.onData?.();
+    onData(data) {
+      options.onData?.(data);
     },
   });
   return { isLoading, data, error, revalidate };
@@ -51,7 +51,8 @@ export const useListDomains = () => useUAPI<AccountDomains>("DomainInfo", "list_
 export const useParsedDNSZone = (zone: string) => {
   const { data, ...rest } = useUAPI<DNSZoneRecord[]>("DNS", "parse_zone", { zone });
   if (data) {
-    const filteredData = data.filter((item): item is DNSZoneRecord & { type: "record" } => item.type === "record");
+    const onlyRecords = data.filter((item): item is DNSZoneRecord & { type: "record" } => item.type === "record");
+    const filteredData = onlyRecords.filter((item) => !["SOA", "NS"].includes(item.record_type));
     // decode from base64
     const parsedData = filteredData.map((item) => {
       return { ...item, dname: atob(item.dname_b64), data: item.data_b64.map((d) => atob(d)) };
@@ -62,7 +63,7 @@ export const useParsedDNSZone = (zone: string) => {
 };
 
 // EMAILS
-export const useListEmailAccounts = () => useUAPI<EmailAccount[]>("Email", "list_pops", { skip_main: 1 });
+export const useListEmailAccounts = () => useUAPI<EmailAccount[]>("Email", "list_pops", { skip_main: 0 });
 export const useListEmailAccountsWithDiskInfo = (email: string, domain: string) =>
   useUAPI<EmailAccountWithDiskInformation[]>("Email", "list_pops_with_disk", {
     email,
