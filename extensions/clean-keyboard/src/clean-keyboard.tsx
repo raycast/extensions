@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, List, Toast, Action } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { handler } from "swift:../swift/MyExecutable";
 
@@ -100,12 +100,12 @@ export default function Command() {
     );
   }
   return (
-    <List filtering={false} navigationTitle="Lock keyboard for..">
+    <List navigationTitle="Clean Keyboard" searchBarPlaceholder="Lock keyboard for">
       <List.Section title="Durations">
         {durations.map((duration) => (
           <List.Item
             key={duration.display + duration.seconds}
-            title={`Lock Keyboard for ${duration.display}`}
+            title={`${duration.display}`}
             icon={duration.icon}
             actions={
               <ActionPanel>
