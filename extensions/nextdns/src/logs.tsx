@@ -13,7 +13,6 @@ export default function Logs() {
         return (
           <List.Item
             title={log.domain}
-            key={log.id}
             icon={getIconById(log.domain)}
             accessories={[
               { tag: log.device.name, tooltip: log.device.model },
