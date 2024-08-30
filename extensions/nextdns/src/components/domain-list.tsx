@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { DomainListItem, DomainListProps } from "../types/nextdns";
+import { DomainListItem, DomainListProps } from "../types";
 import { EmptyView } from "./empty-view";
 import { ListItem } from "./list-item";
 import { PREFERENCES } from "../libs/constants";

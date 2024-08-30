@@ -1,7 +1,8 @@
 import { useFetch } from "@raycast/utils";
 import { NEXTDNS_API_BASE_URL, PREFERENCES } from "./constants";
-import { DomainListItem, NextDNSError, Profile } from "../types/nextdns";
+import { DomainListItem, NextDNSError, Profile } from "../types";
 import fetch, { BodyInit } from "node-fetch";
+import { getIdHex } from "./utils";
 
 const headers = {
   "X-Api-Key": PREFERENCES.nextdns_api_key,
@@ -66,16 +67,21 @@ export async function addDomain(props: { domain: string; type: string }) {
 
 export async function removeDomain(props: { element: DomainListItem }) {
   const { element } = props;
-  const idHex = Buffer.from(element.id).toString("hex");
 
-  await makeRequest(`/profiles/${PREFERENCES.nextdns_profile_id}/${element.type}list/hex:${idHex}`, "DELETE");
+  await makeRequest(
+    `/profiles/${PREFERENCES.nextdns_profile_id}/${element.type}list/hex:${getIdHex(element)}`,
+    "DELETE",
+  );
 }
 
 export async function toggleDomain(props: { element: DomainListItem }) {
   const { element } = props;
-  const idHex = Buffer.from(element.id).toString("hex");
 
-  await makeRequest(`/profiles/${PREFERENCES.nextdns_profile_id}/${element.type}list/hex:${idHex}`, "PATCH", {
-    active: element.active,
-  } as BodyInit);
+  await makeRequest(
+    `/profiles/${PREFERENCES.nextdns_profile_id}/${element.type}list/hex:${getIdHex(element)}`,
+    "PATCH",
+    {
+      active: element.active,
+    } as BodyInit,
+  );
 }

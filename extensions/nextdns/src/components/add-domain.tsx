@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import isValidDomain from "is-valid-domain";
-import { DomainSubmitValues, Mutate } from "../../types/nextdns";
-import { addDomain } from "../../libs/api";
+import { DomainSubmitValues, Mutate } from "../types";
+import { addDomain } from "../libs/api";
 
 export default function AddDomain(props: { type: string; mutate?: Mutate | undefined }) {
   const { pop } = useNavigation();
@@ -21,8 +21,14 @@ export default function AddDomain(props: { type: string; mutate?: Mutate | undef
             {
               optimisticUpdate(data) {
                 const { result, profileName } = data;
-                const id = values.domain + "-raycast"; // we append '-raycast' in case domain already exists which will cause duplicate key error
-                result.push({ id, type: "", active: true });
+
+                if (result.some((item) => item.id === values.domain)) {
+                  toast.style = Toast.Style.Failure;
+                  toast.title = "Domain already added";
+                } else {
+                  result.push({ id: values.domain, type, active: true });
+                }
+
                 return { result, profileName };
               },
             },
@@ -48,12 +54,10 @@ export default function AddDomain(props: { type: string; mutate?: Mutate | undef
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={Icon.Check} title="Add Site" onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.Check} title="Add Domain" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      {/* <Form.Description text={`Configuring profile "${profileName}" (${preferences.nextdns_profile_id})`} /> */}
-
       <Form.TextField title="Add a Domain" placeholder="example.com" {...itemProps.domain} />
 
       <Form.Description text={description} />

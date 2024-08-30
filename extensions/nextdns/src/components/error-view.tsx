@@ -4,7 +4,7 @@ import { EmptyView } from "./empty-view";
 export function ErrorView() {
   return (
     <List>
-      <EmptyView title="Failed to load data" icon={Icon.Warning}></EmptyView>
+      <EmptyView title="Failed to load domains" icon={Icon.Warning}></EmptyView>
     </List>
   );
 }

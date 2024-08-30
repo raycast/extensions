@@ -1,23 +1,9 @@
-import { DomainListItem } from "../types/nextdns";
-import { toggleDomain } from "./api";
+import { DomainListItem } from "../types";
 
-//TODO: FIX any
-export async function removeItem(element: DomainListItem, mutate: (data: any, options?: any) => Promise<void>) {
-  await mutate(toggleDomain({ element }), {
-    optimisticUpdate(data: { [key: string]: DomainListItem[] } | undefined) {
-      if (!data) {
-        return {};
-      }
+export function getIdHex(element: DomainListItem) {
+  return Buffer.from(element.id).toString("hex");
+}
 
-      const updatedData = { ...data };
-      const list = updatedData.result || [];
-      const index = list.findIndex((item) => item.id === element.id);
-
-      if (index !== -1) {
-        list[index] = { ...list[index], active: !list[index].active };
-      }
-
-      return updatedData;
-    },
-  });
+export function getIcon(element: DomainListItem) {
+  return `https://favicons.nextdns.io/hex:${getIdHex(element)}@2x.png`;
 }

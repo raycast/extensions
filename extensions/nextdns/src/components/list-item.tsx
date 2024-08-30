@@ -1,21 +1,23 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { removeDomain, toggleDomain } from "../libs/api";
-import { DomainListItem, Mutate } from "../types/nextdns";
-import AddDomain from "./actions/add-domain";
+import { DomainListItem, Mutate } from "../types";
+import AddDomain from "./add-domain";
+import { getIcon } from "../libs/utils";
 
-//TODO: Optimize optimistic update
-//TODO: Ensure naming, site or domain?
 export function ListItem(props: { domainItem: DomainListItem; mutate: Mutate }) {
   const { domainItem, mutate } = props;
 
   return (
     <List.Item
       title={`*.${domainItem.id}`}
-      icon={
-        domainItem.active
-          ? { source: Icon.CheckCircle, tintColor: Color.Green }
-          : { source: Icon.Circle, tintColor: Color.SecondaryText }
-      }
+      icon={{ source: getIcon(domainItem), fallback: Icon.Image }}
+      accessories={[
+        {
+          tag: domainItem.active
+            ? { color: Color.Green, value: "Activated" }
+            : { color: Color.Red, value: "Deactivated" },
+        },
+      ]}
       actions={<Actions item={domainItem} mutate={mutate} />}
     />
   );
@@ -28,7 +30,7 @@ function Actions({ item, mutate }: { item: DomainListItem; mutate: Mutate }) {
 
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: newStatus ? "Activating Domain" : "Deactivating Domain",
+      title: newStatus ? "Activating domain" : "deactivating domain",
     });
     try {
       await mutate(toggleDomain({ element: { id, type, active: newStatus } }), {
@@ -40,10 +42,40 @@ function Actions({ item, mutate }: { item: DomainListItem; mutate: Mutate }) {
         },
       });
       toast.style = Toast.Style.Success;
-      toast.title = newStatus ? "Activated Domain" : "Deactivated Domain";
+      toast.title = newStatus ? "Activated domain" : "deactivated domain";
     } catch (error) {
       toast.style = Toast.Style.Failure;
-      toast.title = `Could not ${newStatus ? "Activate" : "Deactivate"} Domain`;
+      toast.title = `Could not ${newStatus ? "activate" : "deactivate"} domain`;
+    }
+  }
+
+  async function removeItem(element: DomainListItem) {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Removing domain",
+    });
+
+    try {
+      await mutate(removeDomain({ element }), {
+        optimisticUpdate(data) {
+          if (!data) return {};
+
+          const list = data?.result || [];
+          const index = list.findIndex((item) => item.id === element.id);
+
+          if (index !== -1) {
+            list.splice(index, 1);
+          }
+
+          return { ...data, result: list };
+        },
+      });
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Removed domain";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = `Could not remove domain`;
     }
   }
 
@@ -60,7 +92,7 @@ function Actions({ item, mutate }: { item: DomainListItem; mutate: Mutate }) {
           icon={Icon.Trash}
           style={Action.Style.Destructive}
           shortcut={Keyboard.Shortcut.Common.Remove}
-          onAction={() => removeDomain({ element: item })}
+          onAction={() => removeItem(item)}
         />
       </ActionPanel.Section>
       <Action.Push

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, Image, Keyboard, List } from "@raycast/api";
-import AddDomain from "./actions/add-domain";
-import { Mutate } from "../types/nextdns";
+import AddDomain from "./add-domain";
+import { Mutate } from "../types";
 
 export function EmptyView(props: { title: string; icon: Icon | Image.ImageLike; type?: string; mutate?: Mutate }) {
   const { title, icon, mutate, type } = props;
