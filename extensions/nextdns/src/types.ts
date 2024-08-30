@@ -1,6 +1,6 @@
 import { MutatePromise } from "@raycast/utils";
 
-export type NextDNSError = {
+type NextDNSError = {
   code: string;
   detail?: string;
   source?: {
@@ -48,3 +48,15 @@ export type Log = {
   status: string;
   reasons: [];
 };
+
+export type NextDNSErrorResult = {
+  errors: NextDNSError[];
+}
+export type NextDNSSuccessResult<T> = {
+  data: T;
+  meta?: {
+    pagination: {
+      cursor: string | null;
+    }
+  }
+}

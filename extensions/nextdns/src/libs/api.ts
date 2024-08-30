@@ -1,7 +1,7 @@
 import { useFetch } from "@raycast/utils";
 import { NEXTDNS_API_BASE_URL, PREFERENCES } from "./constants";
-import { DomainListItem, NextDNSError, Profile } from "../types";
-import fetch, { BodyInit } from "node-fetch";
+import { DomainListItem, Log, NextDNSErrorResult, NextDNSSuccessResult, Profile } from "../types";
+import fetch, { RequestInit } from "node-fetch";
 import { getIdHex } from "./utils";
 
 const headers = {
@@ -10,7 +10,7 @@ const headers = {
   "Content-Type": "application/json",
 };
 
-async function makeRequest(endpoint: string, method: string = "GET", body?: BodyInit) {
+async function makeRequest(endpoint: string, method: string = "GET", body?: Record<string, string | boolean>) {
   const options: RequestInit = {
     method,
     headers: headers,
@@ -29,7 +29,7 @@ async function makeRequest(endpoint: string, method: string = "GET", body?: Body
   // Handle methods that might not return data
   if (method === "PATCH" || method === "DELETE" || method === "PUT" || method === "POST") {
     if (response.status === 204) return response.status;
-    const result = (await response.json()) as { errors: NextDNSError[] };
+    const result = (await response.json()) as NextDNSErrorResult;
     throw new Error(result.errors[0].code);
   }
 
@@ -42,7 +42,8 @@ export function getLogs() {
   return useFetch(`${NEXTDNS_API_BASE_URL}${endpoint}`, {
     headers: headers,
     async parseResponse(response) {
-      const json = await response.json();
+      const json = await response.json() as NextDNSErrorResult | NextDNSSuccessResult<Log[]>;
+      if ("errors" in json) throw new Error(json.errors[0].code);
       return json;
     },
   });
@@ -55,7 +56,8 @@ export function getDomains(props: { type: string }) {
   return useFetch(`${NEXTDNS_API_BASE_URL}${endpoint}`, {
     headers: headers,
     async parseResponse(response) {
-      const json = await response.json();
+      const json = await response.json() as NextDNSErrorResult | NextDNSSuccessResult<DomainListItem[]>;
+      if ("errors" in json) throw new Error(json.errors[0].code);
       const results = json.data.map((item: DomainListItem) => ({ ...item, type: props.type }));
 
       return { result: results, profileName: await getProfileName() };
@@ -74,7 +76,7 @@ export async function addDomain(props: { domain: string; type: string }) {
   await makeRequest(`/profiles/${PREFERENCES.nextdns_profile_id}/${type}list`, "POST", {
     id: domain,
     active: true,
-  } as BodyInit);
+  });
 }
 
 export async function removeDomain(props: { element: DomainListItem }) {
@@ -94,6 +96,6 @@ export async function toggleDomain(props: { element: DomainListItem }) {
     "PATCH",
     {
       active: element.active,
-    } as BodyInit,
+    },
   );
 }
