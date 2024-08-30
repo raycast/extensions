@@ -35,7 +35,7 @@
       "required": false,
       "title": "Display Details",
       "label": "Shortcuts",
-      "default": true
+      "default": false
     },
     {
       "name": "displayTriggers",
@@ -43,7 +43,7 @@
       "type": "checkbox",
       "required": false,
       "label": "Text Triggers",
-      "default": true
+      "default": false
     },
     {
       "name": "displayIcon",
@@ -51,7 +51,7 @@
       "type": "checkbox",
       "required": false,
       "label": "Icons",
-      "default": true
+      "default": false
     },
     {
       "name": "filterPattern",
@@ -76,7 +76,8 @@
       "type": "checkbox",
       "required": false,
       "title": "Filter Macros",
-      "label": "Show Disabled Macros"
+      "label": "Show Disabled Macros",
+      "default": false
     }
   ],
   "dependencies": {
