@@ -64,6 +64,7 @@ export function getDomains(props: { type: string }) {
 
       return { result: results, profileName: await getProfileName() };
     },
+    failureToastOptions: { title: "Failed to get domains." },
     initialData: { result: [], profileName: "" },
   });
 }
