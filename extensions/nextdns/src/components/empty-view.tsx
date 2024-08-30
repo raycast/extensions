@@ -31,7 +31,7 @@ export function EmptyView(props: {
               title="Open Extension Preferences"
               onAction={openExtensionPreferences}
               icon={Icon.Gear}
-              shortcut={{ modifiers: ["cmd"], key: "," }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
             />
           </ActionPanel.Section>
         </ActionPanel>
