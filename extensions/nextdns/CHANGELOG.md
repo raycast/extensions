@@ -3,6 +3,6 @@
 ## [Added NextDNS] - {PR_MERGE_DATE}
 
 Initial version code with:
-- allowlist management
-- denylist management
-- view logs
+- Allowlist management
+- Denylist management
+- View logs (Simplified)
