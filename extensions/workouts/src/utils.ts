@@ -141,12 +141,9 @@ export function isDurationValid(
 }
 
 export function convertDistanceToMeters(distance: string, unit: string) {
+  if (!distance) return "";
   const cleanedString = distance.trim();
   const value = parseFloat(cleanedString);
-
-  if (isNaN(value)) {
-    throw new Error("Invalid distance format");
-  }
   switch (unit) {
     case "km":
       return value * 1000;

@@ -270,7 +270,8 @@ export const createActivity = async (activityValues: StravaManualActivity) => {
     if ((json as Error).message) {
       throw new Error((json as Error).message);
     }
-    return true;
+    const activity = json as StravaActivitySummary;
+    return activity;
   } catch (err) {
     const error = err instanceof Error ? err.message : "An error occurred";
     throw new Error(error);
