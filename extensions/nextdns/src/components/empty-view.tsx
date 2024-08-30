@@ -1,7 +1,25 @@
-import { ActionPanel, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, Keyboard, List } from "@raycast/api";
+import AddDomain from "./actions/add-domain";
+import { Mutate } from "../types/nextdns";
 
-export function EmptyView(props: { title: string; icon: Icon | Image.ImageLike }) {
-  const { title, icon } = props;
+export function EmptyView(props: { title: string; icon: Icon | Image.ImageLike; type?: string; mutate?: Mutate }) {
+  const { title, icon, mutate, type } = props;
 
-  return <List.EmptyView title={title} icon={icon} actions={<ActionPanel></ActionPanel>} />;
+  //TODO: Can we clearsearchbar after running AddComain here?
+  return (
+    <List.EmptyView
+      title={title}
+      icon={icon}
+      actions={
+        <ActionPanel>
+          <Action.Push
+            icon={Icon.Plus}
+            title="Add New Domain"
+            shortcut={Keyboard.Shortcut.Common.New}
+            target={<AddDomain type={type ?? ""} mutate={mutate ?? undefined} />}
+          />
+        </ActionPanel>
+      }
+    />
+  );
 }

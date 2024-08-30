@@ -27,8 +27,8 @@ async function makeRequest(endpoint: string, method: string = "GET", body?: Body
 
   // Handle methods that might not return data
   if (method === "PATCH" || method === "DELETE" || method === "PUT" || method === "POST") {
-    if (response.status===204) return response.status;
-    const result = await response.json() as { errors: NextDNSError[] };
+    if (response.status === 204) return response.status;
+    const result = (await response.json()) as { errors: NextDNSError[] };
     throw new Error(result.errors[0].code);
   }
 
@@ -47,7 +47,7 @@ export function getDomains(props: { type: string }) {
 
       return { result: results, profileName: await getProfileName() };
     },
-    initialData: { result: [], profileName: "" }
+    initialData: { result: [], profileName: "" },
   });
 }
 
@@ -56,7 +56,7 @@ export async function getProfileName() {
   return json?.data?.name || "Unknown";
 }
 
-export async function addSite(props: { domain: string, type: string }) {
+export async function addDomain(props: { domain: string; type: string }) {
   const { domain, type } = props;
   await makeRequest(`/profiles/${PREFERENCES.nextdns_profile_id}/${type}list`, "POST", {
     id: domain,
@@ -64,13 +64,18 @@ export async function addSite(props: { domain: string, type: string }) {
   } as BodyInit);
 }
 
-export async function removeDomain() {}
+export async function removeDomain(props: { element: DomainListItem }) {
+  const { element } = props;
+  const idHex = Buffer.from(element.id).toString("hex");
+
+  await makeRequest(`/profiles/${PREFERENCES.nextdns_profile_id}/${element.type}list/hex:${idHex}`, "DELETE");
+}
 
 export async function toggleDomain(props: { element: DomainListItem }) {
   const { element } = props;
   const idHex = Buffer.from(element.id).toString("hex");
 
   await makeRequest(`/profiles/${PREFERENCES.nextdns_profile_id}/${element.type}list/hex:${idHex}`, "PATCH", {
-    active: !element.active,
+    active: element.active,
   } as BodyInit);
 }

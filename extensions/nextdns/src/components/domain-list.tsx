@@ -13,15 +13,18 @@ export const DomainList: React.FC<DomainListProps> = ({ type }) => {
     return <ErrorView />;
   }
   return (
-  <List
-    isLoading={isLoading}
-    searchBarPlaceholder={`Search ${type}list of ${data.profileName} (${PREFERENCES.nextdns_profile_id}`}
-  >
-    {data.result?.map((element: DomainListItem) => (
-      <ListItem key={element.id} siteItem={element} type={type} mutate={mutate} />
-    ))}
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder={`Search ${type}list of ${data.profileName} (${PREFERENCES.nextdns_profile_id}`}
+    >
+      {data.result?.map((element: DomainListItem) => (
+        <ListItem key={element.id} domainItem={element} mutate={mutate} />
+      ))}
 
-    {Object.keys(data).length === 0 && <EmptyView title={`No domains in ${type}list`} icon={{ source: "no_view.png" }} />}
-    <EmptyView title="No Results" icon={{ source: "no_view.png" }} />
-  </List>
-)};
+      {Object.keys(data).length === 0 && (
+        <EmptyView title={`No domains in ${type}list`} icon={{ source: "no_view.png" }} mutate={mutate} type={type} />
+      )}
+      <EmptyView title="No Results" icon={{ source: "no_view.png" }} mutate={mutate} type={type} />
+    </List>
+  );
+};
