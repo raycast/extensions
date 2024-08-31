@@ -4,7 +4,7 @@
     "title": "Shlink",
     "description": "Shorten and manage URLs using your own Shlink instance.",
     "icon": "extension-icon.png",
-    "author": "Xeretis",
+    "author": "xeretis",
     "type": "module",
     "categories": [
         "Web",
