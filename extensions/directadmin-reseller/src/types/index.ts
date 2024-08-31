@@ -305,7 +305,13 @@ export type DeleteSubdomainRequest = {
 };
 
 // DATABASES
-export type GetDatabasesResponse = ListResponse;
+export type GetDatabasesResponse = Array<{
+  database: string;
+  sizeBytes: number;
+  userCount: number;
+  tableCount: number;
+  definerIssues: number;
+}>;
 export type CreateDatabaseRequest = {
   action: "create";
   name: string;

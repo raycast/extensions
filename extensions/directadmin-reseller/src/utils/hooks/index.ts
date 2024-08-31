@@ -1,8 +1,20 @@
 import { showToast, Toast } from "@raycast/api";
 import { useJsonDirectAdmin, useLegacyDirectAdmin } from "./use-directadmin";
-import { GetUserConfigResponse, GetUserPackageInformationResponse } from "../../types";
+import { GetDatabasesResponse, GetUserConfigResponse, GetUserPackageInformationResponse } from "../../types";
 
 // LEGACY JSON
+export function useGetResellerUserAccounts(reseller: string) {
+  return useLegacyDirectAdmin<string[]>("SHOW_USERS", {
+    params: {
+      reseller,
+    },
+    animatedToastMessage: "Fetching Users",
+    async onData(data) {
+      await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${data.length} Users`);
+    },
+  });
+}
+//
 export function useGetUserPackages() {
   return useLegacyDirectAdmin<string[]>("PACKAGES_USER", {
     animatedToastMessage: "Fetching User Packages",
@@ -11,7 +23,6 @@ export function useGetUserPackages() {
     },
   });
 }
-
 export function useGetUserPackageInformation(packageName: string) {
   return useLegacyDirectAdmin<GetUserPackageInformationResponse>("PACKAGES_USER", {
     params: { package: packageName },
@@ -21,9 +32,20 @@ export function useGetUserPackageInformation(packageName: string) {
 }
 
 // NEW JSON
+//
 export function useGetUserConfig(user: string) {
   return useJsonDirectAdmin<GetUserConfigResponse>(`users/${user}/config`, {
     animatedToastMessage: "Fetching User Config",
     successToastMessage: "Fetched User Config",
+  });
+}
+// db
+export function useGetDatabases(userToImpersonate: string) {
+  return useJsonDirectAdmin<GetDatabasesResponse>("db-show/databases", {
+    animatedToastMessage: "Fetching Databases",
+    userToImpersonate,
+    async onData(data) {
+      await showToast(Toast.Style.Success, `Fetched ${data.length} Databases`);
+    },
   });
 }

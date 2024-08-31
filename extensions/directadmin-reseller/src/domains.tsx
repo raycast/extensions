@@ -7,8 +7,12 @@ import CreateNewDomainComponent from "./components/CreateNewDomainComponent";
 import GetSubdomainsComponent from "./components/subdomains/GetSubdomainsComponent";
 import GetEmailAccountsComponent from "./components/email-accounts/GetEmailAccountsComponent";
 import ErrorComponent from "./components/ErrorComponent";
+import InvalidUrlComponent from "./components/InvalidUrlComponent";
+import { isInvalidUrl } from "./utils/functions";
 
 export default function Domains() {
+  if (isInvalidUrl()) return <InvalidUrlComponent />;
+
   const [isLoading, setIsLoading] = useState(true);
   const [domains, setDomains] = useState<string[]>();
   const [error, setError] = useState<ErrorResponse>();

@@ -3,8 +3,12 @@ import { getResellerIPInformation, getResellerIPs } from "./utils/api";
 import { Action, ActionPanel, Detail, Icon, List, Toast, showToast } from "@raycast/api";
 import { ErrorResponse, GetResellerIPInformationResponse, GetResellerIPsResponse } from "./types";
 import ErrorComponent from "./components/ErrorComponent";
+import InvalidUrlComponent from "./components/InvalidUrlComponent";
+import { isInvalidUrl } from "./utils/functions";
 
 export default function ResellerIPs() {
+  if (isInvalidUrl()) return <InvalidUrlComponent />;
+
   const [isLoading, setIsLoading] = useState(true);
   const [resellerIPs, setResellerIPs] = useState<string[]>();
   const [error, setError] = useState<ErrorResponse>();

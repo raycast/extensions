@@ -1,5 +1,14 @@
 # DirectAdmin Reseller Changelog
 
+## [Enhancements] - {PR_MERGE_DATE}
+
+- Move URL check out of hook to top of components
+- Migrate folllowing endpoints to the hooks:
+    - DATABASES
+    - SHOW_USERS
+- In Database views, some detail is also shown thanks to new API
+
+
 ## [Fix Error When 0 Packages + Add Hooks] - 2024-08-16
 
 - DirectAdmin has introduced a new JSON api and added `json` support to the previous Legacy API. The API is still a WIP but we now have 2 hooks that will help us slowly migrate the endpoints to use the better JSON APIs.

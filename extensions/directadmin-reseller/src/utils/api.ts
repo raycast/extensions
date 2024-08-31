@@ -163,9 +163,9 @@ export async function deleteSubdomain(body: DeleteSubdomainRequest, userToImpers
 }
 
 // Databases
-export async function getDatabases(userToImpersonate = "") {
-  return await callApi("DATABASES", "Fetching Databases", undefined, userToImpersonate);
-}
+// export async function getDatabases(userToImpersonate = "") {
+//   return await callApi("DATABASES", "Fetching Databases", undefined, userToImpersonate);
+// }
 export async function createDatabase(body: CreateDatabaseRequest, userToImpersonate = "") {
   return await callApi("DATABASES", "Creating Database", body, userToImpersonate);
 }
