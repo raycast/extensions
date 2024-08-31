@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Alert, Color, Icon, Keyboard, List, Toast, confirmAlert, showToast } from "@raycast/api";
+import { showFailureToast, useCachedState } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { apiClient } from "./api/shlinkClient";
-import { showFailureToast } from "@raycast/utils";
 
 type ShlinkShortUrlsList = Awaited<ReturnType<typeof apiClient.listShortUrls>>;
 type ShlinkShortUrls = ShlinkShortUrlsList["data"];
@@ -27,6 +27,7 @@ export default function Command() {
     });
     const [error, setError] = useState<Error | null>(null);
     const cancelRef = useRef<AbortController | null>(null);
+    const [showQR, setShowQR] = useCachedState<boolean>("showQR", false);
 
     const loadNextPage = useCallback(async (searchText: string, nextPage: number, signal?: AbortSignal) => {
         setState((previous) => ({ ...previous, isLoading: true }));
@@ -142,6 +143,11 @@ export default function Command() {
                     ]}
                     detail={
                         <List.Item.Detail
+                            markdown={
+                                showQR
+                                    ? `![QRCode for short url](${item.shortUrl}/qr-code?roundBlockSize=true&size=200&margin=10&format=png)`
+                                    : null
+                            }
                             metadata={
                                 <List.Item.Detail.Metadata>
                                     <List.Item.Detail.Metadata.Link
@@ -233,7 +239,23 @@ export default function Command() {
                     actions={
                         <ActionPanel>
                             <Action.CopyToClipboard title={"Copy Short URL"} content={item.shortUrl} />
-                            <Action.OpenInBrowser title={"Open Short URL"} url={item.shortUrl} />
+                            <Action.CopyToClipboard
+                                title="Copy QR Code URL"
+                                content={`${item.shortUrl}/qr-code?roundBlockSize=true&size=200&margin=10&format=png`}
+                            />
+                            <Action.OpenInBrowser
+                                title={"Open Short URL"}
+                                url={item.shortUrl}
+                                shortcut={{ key: "o", modifiers: ["opt"] }}
+                            />
+                            <Action
+                                icon={{ source: Icon.AppWindowGrid3x3 }}
+                                title={showQR ? "Hide QR Code" : "Show QR Code"}
+                                onAction={() => {
+                                    setShowQR(!showQR);
+                                }}
+                                shortcut={{ key: "q", modifiers: ["opt"] }}
+                            />
                             <Action
                                 icon={{ source: Icon.Trash, tintColor: Color.Red }}
                                 title={"Delete Shortened URL"}
