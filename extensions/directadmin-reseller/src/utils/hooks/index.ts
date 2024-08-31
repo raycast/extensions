@@ -1,8 +1,31 @@
 import { showToast, Toast } from "@raycast/api";
 import { useJsonDirectAdmin, useLegacyDirectAdmin } from "./use-directadmin";
-import { GetDatabasesResponse, GetUserConfigResponse, GetUserPackageInformationResponse } from "../../types";
+import {
+  GetDatabasesResponse,
+  GetResellerIPInformationResponse,
+  GetUserConfigResponse,
+  GetUserPackageInformationResponse,
+} from "../../types";
 
 // LEGACY JSON
+export function useGetResellerIPs() {
+  return useLegacyDirectAdmin<string[]>("SHOW_RESELLER_IPS", {
+    animatedToastMessage: "Fetching Reseller IPs",
+    async onData(data) {
+      await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${data.length} Reseller IPs`);
+    },
+  });
+}
+export function useGetResellerIPInformation(ip: string) {
+  return useLegacyDirectAdmin<GetResellerIPInformationResponse>("SHOW_RESELLER_IPS", {
+    params: {
+      ip,
+    },
+    animatedToastMessage: "Fetching Reseller IP Information",
+    successToastMessage: "Fetched Reseller IP Information",
+  });
+}
+//
 export function useGetResellerUserAccounts(reseller: string) {
   return useLegacyDirectAdmin<string[]>("SHOW_USERS", {
     params: {
@@ -28,6 +51,15 @@ export function useGetUserPackageInformation(packageName: string) {
     params: { package: packageName },
     animatedToastMessage: "Fetching User Package Information",
     successToastMessage: "Fetched User Package Information",
+  });
+}
+// DOMAINS
+export function useGetDomains() {
+  return useLegacyDirectAdmin<string[]>("SHOW_DOMAINS", {
+    animatedToastMessage: "Fetching Domains",
+    async onData(data) {
+      await showToast(Toast.Style.Success, `Fetched ${data.length} Domains`);
+    },
   });
 }
 

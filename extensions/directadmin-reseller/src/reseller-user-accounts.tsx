@@ -4,7 +4,6 @@ import {
   changeUserTicketingEmail,
   createUser,
   deleteUser,
-  getResellerIPs,
   getUserDomains,
   getUserUsage,
   modifyUser,
@@ -15,7 +14,6 @@ import {
   ChangeUserAccountEmailRequest,
   ChangeUserTicketingEmailFormValues,
   CreateUserFormValues,
-  GetResellerIPsResponse,
   GetUserConfigResponse,
   GetUserDomainsResponse,
   GetUserUsageResponse,
@@ -31,6 +29,7 @@ import {
   Detail,
   Form,
   Icon,
+  Keyboard,
   List,
   Toast,
   confirmAlert,
@@ -44,7 +43,7 @@ import GetSubdomainsComponent from "./components/subdomains/GetSubdomainsCompone
 import GetEmailAccountsComponent from "./components/email-accounts/GetEmailAccountsComponent";
 import ErrorComponent from "./components/ErrorComponent";
 import GetDatabasesComponent from "./components/databases/GetDatabasesComponent";
-import { useGetResellerUserAccounts, useGetUserConfig, useGetUserPackages } from "./utils/hooks";
+import { useGetResellerIPs, useGetResellerUserAccounts, useGetUserConfig, useGetUserPackages } from "./utils/hooks";
 import InvalidUrlComponent from "./components/InvalidUrlComponent";
 
 export default function GetAccounts() {
@@ -110,7 +109,7 @@ export default function GetAccounts() {
                 title="Create User"
                 icon={Icon.Plus}
                 target={<CreateUser onUserCreated={revalidate} />}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
               />
             </ActionPanel.Section>
           </ActionPanel>
@@ -410,7 +409,7 @@ function CreateUser({ onUserCreated }: CreateUserProps) {
   const { pop } = useNavigation();
 
   const { isLoading, data: packages } = useGetUserPackages();
-  const [IPs, setIPs] = useState<string[]>();
+  const { isLoading: isLoadingIPs, data: resellerIPs = [] } = useGetResellerIPs();
   // const [customizePackage, setCustomizePackage] = useState(false);
 
   const { handleSubmit, itemProps } = useForm<CreateUserFormValues>({
@@ -448,23 +447,9 @@ function CreateUser({ onUserCreated }: CreateUserProps) {
     },
   });
 
-  async function getIPsFromApi() {
-    const response = await getResellerIPs();
-    if (response.error === "0") {
-      const data = response as GetResellerIPsResponse;
-      const { list } = data;
-      setIPs(list);
-      await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${list.length} IPs`);
-    }
-  }
-
-  useEffect(() => {
-    getIPsFromApi();
-  }, []);
-
   return (
     <Form
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingIPs}
       navigationTitle="Create User"
       actions={
         <ActionPanel>
@@ -484,7 +469,9 @@ function CreateUser({ onUserCreated }: CreateUserProps) {
         ))}
       </Form.Dropdown>
       <Form.Dropdown title="IP" {...itemProps.ip}>
-        {IPs?.map((IP) => <Form.Dropdown.Item key={IP} title={IP} value={IP} />)}
+        {resellerIPs.map((IP) => (
+          <Form.Dropdown.Item key={IP} title={IP} value={IP} />
+        ))}
       </Form.Dropdown>
       <Form.Checkbox label="Send E-mail Notification" {...itemProps.notify} />
     </Form>

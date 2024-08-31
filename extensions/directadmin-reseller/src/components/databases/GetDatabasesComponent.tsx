@@ -33,24 +33,18 @@ export default function GetDatabasesComponent({ userToImpersonate = "" }: GetDat
   return error ? (
     <ErrorComponent errorResponse={error} />
   ) : (
-    <List isLoading={isLoading} searchBarPlaceholder="Search database" isShowingDetail>
+    <List isLoading={isLoading} searchBarPlaceholder="Search database">
       <List.Section title={userToImpersonate || RESELLER_USERNAME} subtitle={`${databases.length} databases`}>
         {databases.map((db) => (
           <List.Item
             key={db.database}
             title={db.database}
+            subtitle={`${db.sizeBytes.toString()} bytes`}
             icon={Icon.Coin}
-            detail={
-              <List.Item.Detail
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="Size (bytes)" text={db.sizeBytes.toString()} />
-                    <List.Item.Detail.Metadata.Label title="Users" text={db.userCount.toString()} />
-                    <List.Item.Detail.Metadata.Label title="Tables" text={db.tableCount.toString()} />
-                  </List.Item.Detail.Metadata>
-                }
-              />
-            }
+            accessories={[
+              { tag: db.userCount.toString(), icon: Icon.TwoPeople },
+              { tag: db.tableCount.toString(), icon: Icon.AppWindowList },
+            ]}
             actions={
               <ActionPanel>
                 <Action

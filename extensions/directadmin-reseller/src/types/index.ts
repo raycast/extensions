@@ -267,7 +267,6 @@ export type GetUserPackageInformationResponse = {
 };
 
 // DOMAINS
-export type GetDomainsResponse = ListResponse;
 export type CreateNewDomainFormValues = {
   domain: string;
   bandwidth?: string;
