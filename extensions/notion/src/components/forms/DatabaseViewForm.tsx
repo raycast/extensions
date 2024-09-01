@@ -2,7 +2,7 @@ import { Form, ActionPanel, Icon, showToast, useNavigation, Action, Toast } from
 import { useEffect, useState } from "react";
 
 import { useDatabaseProperties, useKanbanViewConfig, KanbanConfig } from "../../hooks";
-import { notionColorToTintColor, DatabaseProperty, isType } from "../../utils/notion";
+import { notionColorToTintColor, DatabaseProperty } from "../../utils/notion";
 
 export function DatabaseViewForm({ databaseId }: { databaseId: string }) {
   const { pop } = useNavigation();
@@ -67,7 +67,9 @@ export function DatabaseViewForm({ databaseId }: { databaseId: string }) {
       {databaseProperties && viewType === "kanban" ? (
         <KanbanViewFormItem
           kanbanConfig={kanbanConfig}
-          properties={databaseProperties.filter((dp): dp is StatusDatabaseProperty => isType(dp, "select", "status"))}
+          properties={databaseProperties.filter(
+            (dp): dp is StatusDatabaseProperty => dp.type == "select" || dp.type == "status",
+          )}
         />
       ) : null}
     </Form>

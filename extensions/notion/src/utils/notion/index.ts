@@ -15,12 +15,6 @@ export function isReadableProperty<T extends { type: PageProperty["type"] }>(
 ): property is Extract<T, { type: ReadablePropertyType }> {
   return (readablePropertyTypes as readonly string[]).includes(property.type);
 }
-export function isType<P extends DatabaseProperty | PageProperty, T extends PageProperty["type"]>(
-  property: DatabaseProperty | PageProperty,
-  ...types: T[]
-): property is Extract<P, { type: T }> {
-  return types.includes(property.type as T);
-}
 
 export function notionColorToTintColor(notionColor: string | undefined): Color.ColorLike {
   // ordered by appearance in option configuration

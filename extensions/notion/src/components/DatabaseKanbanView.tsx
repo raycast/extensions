@@ -1,7 +1,7 @@
 import { List, showToast, Toast, useNavigation } from "@raycast/api";
 
 import { KanbanConfig } from "../hooks";
-import { Page, DatabaseProperty, User, isType, notionColorToTintColor } from "../utils/notion";
+import { Page, DatabaseProperty, User, notionColorToTintColor } from "../utils/notion";
 
 import { ActionEditPageProperty, EditPropertyOptions } from "./actions";
 import { DatabaseViewForm } from "./forms";
@@ -31,7 +31,7 @@ export function DatabaseKanbanView({
 }: DatabaseKanbanViewProps) {
   const statusProperty = databaseProperties.find((dp) => dp.id === kanbanConfig.property_id);
 
-  if (!statusProperty || !isType(statusProperty, "status", "select")) {
+  if (!statusProperty || (statusProperty.type != "status" && statusProperty.type != "select")) {
     const { push } = useNavigation();
     push(DatabaseViewForm({ databaseId }));
     showToast({ title: "Status property missing", style: Toast.Style.Failure });
@@ -50,7 +50,7 @@ export function DatabaseKanbanView({
   databasePages.forEach((page) => {
     const statusProperty = Object.values(page.properties).find((p) => p.id == kanbanConfig.property_id);
 
-    if (!statusProperty || !isType(statusProperty, "status", "select")) return; // This should never occur.
+    if (!statusProperty || (statusProperty.type != "status" && statusProperty.type != "select")) return; // This should never occur.
 
     let statusId = "_select_null_";
     if (statusProperty.value) statusId = statusProperty.value.id;
