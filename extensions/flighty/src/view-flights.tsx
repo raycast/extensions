@@ -2,7 +2,7 @@ import {List, Detail, ActionPanel, Action, Icon, Color} from '@raycast/api'
 import dayjs, {type Dayjs} from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
-import {useFlights, type Flight} from './use-flights'
+import {useFlights} from './use-flights'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)

@@ -41,7 +41,7 @@ const FlightSchema = z.object({
     arrTimeActual: TimestampSchema.nullable(),
 })
 
-export type Flight = z.infer<typeof FlightSchema>
+type Flight = z.infer<typeof FlightSchema>
 
 export function useFlights(): AsyncState<Flight[]> {
     const path = `${homedir()}/Library/Containers/com.flightyapp.flighty/Data/Documents/MainFlightyDatabase.db`
