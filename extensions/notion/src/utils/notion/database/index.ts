@@ -3,7 +3,7 @@ import type { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoint
 import { type Form, showToast, Toast } from "@raycast/api";
 import { markdownToBlocks } from "@tryfabric/martian";
 
-import { isReadableProperty, WritablePropertyType } from "..";
+import { isReadableProperty } from "..";
 import { handleError, isNotNullOrUndefined, pageMapper } from "../global";
 import { getNotionClient } from "../oauth";
 import { formValueToPropertyValue } from "../page/property";
@@ -11,7 +11,8 @@ import { standardize } from "../standardize";
 
 import { DatabaseProperty } from "./property";
 
-export type * from "./property";
+export type { PropertyConfig } from "./property";
+export type { DatabaseProperty };
 
 export async function fetchDatabase(pageId: string, silent: boolean = true) {
   try {
@@ -138,7 +139,7 @@ export async function createDatabasePage(values: Form.Values) {
     }
 
     Object.keys(props).forEach((formId) => {
-      const type = formId.match(/(?<=property::).*(?=::)/g)?.[0] as WritablePropertyType | null;
+      const type = formId.match(/(?<=property::).*(?=::)/g)?.[0] as DatabaseProperty["type"] | null;
       if (!type) return;
       const propId = formId.match(new RegExp("(?<=property::" + type + "::).*", "g"))?.[0];
       const value = values[formId];

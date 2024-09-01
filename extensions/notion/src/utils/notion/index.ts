@@ -1,4 +1,7 @@
+import { Client } from "@notionhq/client";
 import { Color, Icon } from "@raycast/api";
+
+import { UnwrapArray, UnwrapPromise } from "../types";
 
 import { DatabaseProperty } from "./database/property";
 import { PageProperty } from "./page";
@@ -6,6 +9,8 @@ import { PageProperty } from "./page";
 export * from "./database";
 export * from "./page";
 export * from "./user";
+
+export type NotionObject = UnwrapArray<UnwrapPromise<ReturnType<Client["search"]>>["results"]>;
 
 // prettier-ignore
 const readablePropertyTypes = ["title", "number", "rich_text", "url", "email", "phone_number", "date", "checkbox", "select", "multi_select", "formula", "people", "relation", "status"] as const
@@ -15,12 +20,11 @@ export function isReadableProperty<T extends { type: PageProperty["type"] }>(
 ): property is Extract<T, { type: ReadablePropertyType }> {
   return (readablePropertyTypes as readonly string[]).includes(property.type);
 }
-const readonlyPropertyTypes = ["formula"] as const;
-export type WritablePropertyType = Exclude<ReadablePropertyType, (typeof readonlyPropertyTypes)[number]>;
-export function isWritableProperty<T extends { type: ReadablePropertyType }>(
-  property: T,
-): property is Extract<T, { type: WritablePropertyType }> {
-  return !(readonlyPropertyTypes as readonly string[]).includes(property.type);
+export function isType<P extends DatabaseProperty | PageProperty, T extends PageProperty["type"]>(
+  property: DatabaseProperty | PageProperty,
+  ...types: T[]
+): property is Extract<P, { type: T }> {
+  return types.includes(property.type as T);
 }
 
 export function notionColorToTintColor(notionColor: string | undefined): Color.ColorLike {

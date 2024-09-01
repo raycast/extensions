@@ -9,6 +9,7 @@ import {
   search,
   fetchPage,
   fetchDatabase,
+  isType,
   type Page,
   type DatabaseProperty,
 } from "../utils/notion";
@@ -28,7 +29,7 @@ export function useRelations(properties: DatabaseProperty[]) {
 
       await Promise.all(
         properties.map(async (property) => {
-          if (property.type !== "relation") return null;
+          if (!isType(property, "relation")) return null;
           const relationId = property.config.database_id;
           if (!relationId) return null;
           const pages = await queryDatabase(relationId, undefined);
@@ -49,16 +50,15 @@ export function useDatabases() {
   return { ...value, data: value.data ?? [] };
 }
 
-export function useDatabaseProperties<T extends DatabaseProperty = DatabaseProperty>(
-  databaseId: string | null,
-  filter?: (value: DatabaseProperty) => value is T,
-) {
+export function useDatabaseProperties(databaseId: string | null, filter?: (value: DatabaseProperty) => boolean) {
   const value = useCachedPromise(
-    async (id) => {
-      const databaseProperties = await fetchDatabaseProperties(id);
-      if (filter) return databaseProperties.filter(filter);
-      return databaseProperties as T[];
-    },
+    (id): Promise<DatabaseProperty[]> =>
+      fetchDatabaseProperties(id).then((databaseProperties) => {
+        if (databaseProperties && filter) {
+          return databaseProperties.filter(filter);
+        }
+        return databaseProperties;
+      }),
     [databaseId],
     { execute: !!databaseId, initialData: [] },
   );

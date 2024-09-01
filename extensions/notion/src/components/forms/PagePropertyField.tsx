@@ -5,17 +5,17 @@ import {
   notionColorToTintColor,
   getPageIcon,
   Page,
-  WritableDatabaseProperty,
+  DatabaseProperty,
   User,
   PropertyConfig,
-  WritablePropertyType,
+  ReadablePropertyType,
   FormValueForDatabaseProperty,
 } from "../../utils/notion";
 
 // @ts-expect-error - Overload doesn't match, but is the function signature we want to be visisble.
 export function PagePropertyField(props: {
-  type: WritablePropertyType;
-  databaseProperty: WritableDatabaseProperty;
+  type: ReadablePropertyType;
+  databaseProperty: DatabaseProperty;
   itemProps: ReturnType<typeof useForm>["itemProps"][string];
   relationPages: Record<string, Page[]> | undefined;
   users: User[];
@@ -27,14 +27,14 @@ export function PagePropertyField({
   relationPages,
   users,
 }: {
-  [DP in WritableDatabaseProperty as DP["type"]]: {
+  [DP in DatabaseProperty as DP["type"]]: {
     type: DP["type"];
     databaseProperty: DP;
     itemProps: Form.ItemProps<FormValueForDatabaseProperty<DP["type"]>>;
     relationPages: Record<string, Page[]> | undefined;
     users: User[];
   };
-}[WritablePropertyType]) {
+}[ReadablePropertyType]) {
   // Note: `key` shouldn't be passed to a react component with the spread opperator.
   const sharedProps = { title: databaseProperty.name, placeholder: createPlaceholder(databaseProperty) };
   switch (type) {
@@ -65,6 +65,8 @@ export function PagePropertyField({
         </Form.TagPicker>
       );
     }
+    case "formula":
+      return null;
     case "title":
       return (
         <Form.TextField
@@ -106,7 +108,7 @@ function createMapOptionsFunc(Tag: typeof Form.Dropdown.Item | typeof Form.TagPi
   };
 }
 
-function createPlaceholder(property: WritableDatabaseProperty) {
+function createPlaceholder(property: DatabaseProperty) {
   let placeholder = property.type.replace(/_/g, " ");
   placeholder = placeholder.charAt(0).toUpperCase() + placeholder.slice(1);
   return placeholder;
