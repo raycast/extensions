@@ -3,7 +3,7 @@ import { Form } from "@raycast/api";
 import { markdownToRichText } from "@tryfabric/martian";
 import { subMinutes } from "date-fns";
 
-import type { ReadablePropertyType } from "..";
+import type { WritablePropertyType } from "..";
 import { getLocalTimezone } from "../global";
 import type { Standardized } from "../standardize";
 
@@ -11,14 +11,14 @@ export type PageProperty = Standardized<PageObjectResponse["properties"][string]
 
 type PagePropertyValue = CreatePageParameters["properties"][string];
 
-export function formValueToPropertyValue<T extends ReadablePropertyType>(
+export function formValueToPropertyValue<T extends WritablePropertyType>(
   type: T,
   formValue: FormValueForDatabaseProperty<T>,
 ): PagePropertyValue | undefined;
 export function formValueToPropertyValue(
   ...[type, value]: {
-    [T in ReadablePropertyType]: [type: T, value: FormValueForDatabaseProperty<T>];
-  }[ReadablePropertyType]
+    [T in WritablePropertyType]: [type: T, value: FormValueForDatabaseProperty<T>];
+  }[WritablePropertyType]
 ): PagePropertyValue | undefined {
   switch (type) {
     case "title":
@@ -42,15 +42,13 @@ export function formValueToPropertyValue(
     case "relation":
     case "people":
       return value.map((id) => ({ id }));
-    case "formula":
-      return;
     default:
       return value;
   }
 }
 
 // prettier-ignore
-export type FormValueForDatabaseProperty<T extends ReadablePropertyType> =
+export type FormValueForDatabaseProperty<T extends WritablePropertyType> =
         T extends "date" ? Date | null
       : T extends "checkbox" ? boolean
       : T extends "multi_select" | "relation" | "people" ? string[]

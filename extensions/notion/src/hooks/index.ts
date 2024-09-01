@@ -49,15 +49,16 @@ export function useDatabases() {
   return { ...value, data: value.data ?? [] };
 }
 
-export function useDatabaseProperties(databaseId: string | null, filter?: (value: DatabaseProperty) => boolean) {
+export function useDatabaseProperties<T extends DatabaseProperty = DatabaseProperty>(
+  databaseId: string | null,
+  filter?: (value: DatabaseProperty) => value is T,
+) {
   const value = useCachedPromise(
-    (id): Promise<DatabaseProperty[]> =>
-      fetchDatabaseProperties(id).then((databaseProperties) => {
-        if (databaseProperties && filter) {
-          return databaseProperties.filter(filter);
-        }
-        return databaseProperties;
-      }),
+    async (id) => {
+      const databaseProperties = await fetchDatabaseProperties(id);
+      if (filter) return databaseProperties.filter(filter);
+      return databaseProperties as T[];
+    },
     [databaseId],
     { execute: !!databaseId, initialData: [] },
   );

@@ -15,6 +15,13 @@ export function isReadableProperty<T extends { type: PageProperty["type"] }>(
 ): property is Extract<T, { type: ReadablePropertyType }> {
   return (readablePropertyTypes as readonly string[]).includes(property.type);
 }
+const readonlyPropertyTypes = ["formula"] as const;
+export type WritablePropertyType = Exclude<ReadablePropertyType, (typeof readonlyPropertyTypes)[number]>;
+export function isWritableProperty<T extends { type: ReadablePropertyType }>(
+  property: T,
+): property is Extract<T, { type: WritablePropertyType }> {
+  return !(readonlyPropertyTypes as readonly string[]).includes(property.type);
+}
 
 export function notionColorToTintColor(notionColor: string | undefined): Color.ColorLike {
   // ordered by appearance in option configuration

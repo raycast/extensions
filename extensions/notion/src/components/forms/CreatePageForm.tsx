@@ -24,7 +24,7 @@ import {
   useUsers,
   useConvertDepreciatedViewConfig,
 } from "../../hooks";
-import { createDatabasePage, DatabaseProperty } from "../../utils/notion";
+import { createDatabasePage, WritableDatabaseProperty, isWritableProperty } from "../../utils/notion";
 import { handleOnOpenPage } from "../../utils/openPage";
 import { Quicklink } from "../../utils/types";
 import { ActionSetVisibleProperties } from "../actions";
@@ -54,10 +54,7 @@ type CreatePageFormPreferences = {
   closeAfterCreate: boolean;
 };
 
-const createPropertyId = (property: DatabaseProperty) => "property::" + property.type + "::" + property.id;
-
-const NON_EDITABLE_PROPETY_TYPES = ["formula"];
-const filterNoEditableProperties = (dp: DatabaseProperty) => !NON_EDITABLE_PROPETY_TYPES.includes(dp.type);
+const createPropertyId = (property: WritableDatabaseProperty) => "property::" + property.type + "::" + property.id;
 
 export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFormProps) {
   useConvertDepreciatedViewConfig();
@@ -65,9 +62,8 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
   const preferences = getPreferenceValues<CreatePageFormPreferences>();
   const defaultValues = launchContext?.defaults ?? defaults;
   const initialDatabaseId = defaultValues?.database;
-
   const [databaseId, setDatabaseId] = useState<string | null>(initialDatabaseId ? initialDatabaseId : null);
-  const { data: databaseProperties } = useDatabaseProperties(databaseId, filterNoEditableProperties);
+  const { data: databaseProperties } = useDatabaseProperties(databaseId, isWritableProperty);
   const { visiblePropIds, setVisiblePropIds } = useVisiblePropIds(
     databaseId,
     databaseProperties,
@@ -83,7 +79,6 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
   const initialValues: Partial<CreatePageFormValues> = { database: databaseId ?? undefined };
   const validation: Parameters<typeof useForm<CreatePageFormValues>>[0]["validation"] = {};
   for (const { id, type } of databaseProperties) {
-    if (NON_EDITABLE_PROPETY_TYPES.includes(type)) continue;
     const key = "property::" + type + "::" + id;
     if (type == "title") validation[key] = FormValidation.Required;
     let value = defaultValues?.[key];
@@ -142,11 +137,11 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
     },
   });
 
-  function filterProperties(dp: DatabaseProperty) {
+  function filterProperties(dp: WritableDatabaseProperty) {
     return !visiblePropIds || visiblePropIds.includes(dp.id);
   }
 
-  function sortProperties(a: DatabaseProperty, b: DatabaseProperty) {
+  function sortProperties(a: WritableDatabaseProperty, b: WritableDatabaseProperty) {
     if (!visiblePropIds) {
       if (a.type == "title") return -1;
       if (b.type == "title") return 1;
@@ -305,7 +300,7 @@ Please note that HTML tags and thematic breaks are not supported in Notion due t
 
 function useVisiblePropIds(
   databaseId: string | null,
-  databaseProperties: DatabaseProperty[],
+  databaseProperties: WritableDatabaseProperty[],
   quicklinkProps?: string[],
 ): ReturnType<typeof useVisibleDatabasePropIds> {
   if (quicklinkProps) {
