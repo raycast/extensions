@@ -1,5 +1,9 @@
 # Mail Changelog
 
+## [Update README.md] - 2024-08-31
+
+- Update README.md
+
 ## [Fixes and Improvements] - 2024-08-14
 
 - [#13936](https://github.com/raycast/extensions/issues/13936): Fixed See Recent Messages to factor in Message Limit.
