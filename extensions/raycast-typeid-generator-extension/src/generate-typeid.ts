@@ -1,9 +1,7 @@
 import { Clipboard, LaunchProps, showHUD } from "@raycast/api";
 import { typeid } from "typeid-js";
 
-export default async function generateTypeid(
-  props: LaunchProps<{ arguments: Arguments.GenerateTypeid }>,
-) {
+export default async function generateTypeid(props: LaunchProps<{ arguments: Arguments.GenerateTypeid }>) {
   const { prefix } = props.arguments;
   const uuid = typeid(prefix).toString();
 
