@@ -16,7 +16,7 @@ export default function MemePreview({ title, url }: { title: string; url: string
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action title="Copy to clipboard" onAction={onCopyAction} />
+          <Action title="Copy to Clipboard" onAction={onCopyAction} />
         </ActionPanel>
       }
     />
