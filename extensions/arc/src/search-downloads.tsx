@@ -9,7 +9,7 @@ import { VersionCheck } from "./version";
 function SearchDownloads(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
   const escapedSearchText = searchText.replace(/"/g, '""');
-  const { data, isLoading, permissionView } = useSQL<HistoryEntry>(
+  const { data, isLoading, permissionView } = useSQL<Download>(
     historyDatabasePath,
     getDownloadQuery(escapedSearchText),
   );

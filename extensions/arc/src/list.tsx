@@ -66,12 +66,11 @@ export function DownloadListItem(props: { download: Download }) {
             title="Open File"
             onAction={async () => {
               try {
-                open(props.download.current_path);
+                await open(props.download.current_path);
               } catch (error) {
                 await showToast({
                   style: Toast.Style.Failure,
-                  title: "Error",
-                  message: `Could't open the file. The file may have been removed or moved.`,
+                  title: "Could't open the file. The file may have been removed or moved.",
                 });
               }
             }}
@@ -81,12 +80,11 @@ export function DownloadListItem(props: { download: Download }) {
             title="Show in Finder"
             onAction={async () => {
               try {
-                showInFinder(props.download.current_path);
+                await showInFinder(props.download.current_path);
               } catch (error) {
                 await showToast({
                   style: Toast.Style.Failure,
-                  title: "Error",
-                  message: `Could't open the file in Finder. The file may have been removed or moved.`,
+                  title: "Could't open the file in Finder. The file may have been removed or moved.",
                 });
               }
             }}
