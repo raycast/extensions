@@ -74,7 +74,7 @@ ${filteredHolidays.map((holiday) => `| ${holiday.name} |`).join("\n")}
 
   const svgImage = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="${SVG_WIDTH}" height="${SVG_HEIGHT}" viewBox="0 0 ${SVG_WIDTH} ${SVG_HEIGHT}">
     <g transform="translate(0,0)">
-      <rect width="${SVG_WIDTH}" height="${SVG_HEIGHT}" stroke="#fff" stroke-width="2" fill="#fff" rx="12" opacity="0.01"></rect>
+      <rect width="${SVG_WIDTH}" height="${SVG_HEIGHT}" stroke="#fff" stroke-width="2" fill="#fff" rx="12" opacity="0.03"></rect>
       <text x="${SVG_WIDTH / 2}" y="${SVG_HEIGHT / 2 + 4}" fill="#fff" font-family="sans-serif" alignment-baseline="middle" font-size="24" stroke-width="0" stroke="#000" text-anchor="middle">${formattedDate}</text>
     </g>
     </svg>
