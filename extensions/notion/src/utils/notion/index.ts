@@ -1,4 +1,7 @@
+import { Client } from "@notionhq/client";
 import { Color, Icon } from "@raycast/api";
+
+import { UnwrapArray, UnwrapPromise } from "../types";
 
 import { DatabaseProperty } from "./database/property";
 import { PageProperty } from "./page";
@@ -6,6 +9,8 @@ import { PageProperty } from "./page";
 export * from "./database";
 export * from "./page";
 export * from "./user";
+
+export type NotionObject = UnwrapArray<UnwrapPromise<ReturnType<Client["search"]>>["results"]>;
 
 // prettier-ignore
 const readablePropertyTypes = ["title", "number", "rich_text", "url", "email", "phone_number", "date", "checkbox", "select", "multi_select", "formula", "people", "relation", "status"] as const
