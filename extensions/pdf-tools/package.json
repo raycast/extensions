@@ -17,7 +17,8 @@
     "unlock",
     "encrypt",
     "decrypt",
-    "password"
+    "password",
+    "watermark"
   ],
   "commands": [
     {
