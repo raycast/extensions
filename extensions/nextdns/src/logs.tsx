@@ -15,7 +15,7 @@ export default function Logs() {
             title={log.domain}
             icon={getIconById(log.domain)}
             accessories={[
-              { tag: log.device.name, tooltip: log.device.model },
+              { tag: log.device ? log.device.name : "Unknown", tooltip: log.device ? log.device.model : "No model" },
               { date: date, tooltip: date.toLocaleDateString() },
             ]}
             actions={
