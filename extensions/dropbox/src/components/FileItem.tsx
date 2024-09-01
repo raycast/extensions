@@ -16,6 +16,7 @@ export default function FileItem(props: IFileItemProps) {
       id={file.id || file.name}
       icon={Icon.Document}
       title={file.name}
+      accessories={[{ date: new Date(file.server_modified) }]}
       actions={<ActionPanel>{previewURL && <Action.OpenInBrowser url={encodeURI(previewURL)} />}</ActionPanel>}
     />
   );
