@@ -1,6 +1,6 @@
 # Meme generator Changelog
 
-## [Added Meme Preview] - {PR_MERGE_DATE}
+## [Added Meme Preview] - 2024-09-01
 
 - Add the option to preview the generated meme
 - Update dependencies
