@@ -1,6 +1,19 @@
-import { List, showToast, ToastStyle, ActionPanel, Icon, useNavigation, Action } from '@raycast/api';
-import { useEffect, useState } from 'react';
-import { fetchCurrentLocationMode, fetchLocationId, fetchLocationModes, switchLocationMode } from './fetchDevices';
+import {
+  List,
+  showToast,
+  ToastStyle,
+  ActionPanel,
+  Icon,
+  useNavigation,
+  Action,
+} from "@raycast/api";
+import { useEffect, useState } from "react";
+import {
+  fetchCurrentLocationMode,
+  fetchLocationId,
+  fetchLocationModes,
+  switchLocationMode,
+} from "./fetchDevices";
 
 export default function ShowLocationMode() {
   const [currentMode, setCurrentMode] = useState<string | null>(null);
@@ -21,7 +34,11 @@ export default function ShowLocationMode() {
         }
 
         const currentModeData = await fetchCurrentLocationMode(); // Argument entfernt
-        if (currentModeData && currentModeData.mode && currentModeData.mode.name) {
+        if (
+          currentModeData &&
+          currentModeData.mode &&
+          currentModeData.mode.name
+        ) {
           setCurrentMode(currentModeData.mode.name); // Set current mode name
         } else {
           showToast(ToastStyle.Failure, "Current mode name not available");
@@ -31,7 +48,11 @@ export default function ShowLocationMode() {
         setModes(availableModes.map((mode: any) => mode.name)); // Typ 'any' explizit angeben
         setIsLoading(false);
       } catch (error) {
-        showToast(ToastStyle.Failure, "Failed to fetch data", (error as Error).message); // Typ 'Error' explizit angeben
+        showToast(
+          ToastStyle.Failure,
+          "Failed to fetch data",
+          (error as Error).message,
+        ); // Typ 'Error' explizit angeben
         setIsLoading(false);
       }
     }
@@ -45,7 +66,9 @@ export default function ShowLocationMode() {
       if (!locationId) return;
 
       const modes = await fetchLocationModes(); // Argument entfernt
-      const newMode = modes.find((mode: any) => mode.name.toLowerCase() === newModeName.toLowerCase()); // Typ 'any' explizit angeben
+      const newMode = modes.find(
+        (mode: any) => mode.name.toLowerCase() === newModeName.toLowerCase(),
+      ); // Typ 'any' explizit angeben
       if (newMode) {
         await switchLocationMode(newMode.id); // Argument 'locationId' entfernt
         const updatedMode = await fetchCurrentLocationMode(); // Argument 'locationId' entfernt
@@ -59,7 +82,11 @@ export default function ShowLocationMode() {
         showToast(ToastStyle.Failure, "Invalid mode name");
       }
     } catch (error) {
-      showToast(ToastStyle.Failure, "Failed to change location mode", (error as Error).message); // Typ 'Error' explizit angeben
+      showToast(
+        ToastStyle.Failure,
+        "Failed to change location mode",
+        (error as Error).message,
+      ); // Typ 'Error' explizit angeben
     }
   };
 

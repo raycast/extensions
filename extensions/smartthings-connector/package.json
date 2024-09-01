@@ -4,8 +4,10 @@
   "title": "SmartThings Connector",
   "description": "Integration with SmartThings to manage lights, scenes, and location modes.",
   "icon": "smartthings_white.png",
-  "author": "Ingo J",
-  "categories": ["Other"],
+  "author": "IngoJ",
+  "categories": [
+    "Other"
+  ],
   "license": "MIT",
   "version": "1.0.0",
   "commands": [
@@ -35,7 +37,7 @@
     },
     {
       "name": "show-all-devices",
-      "title": "Show all Devices",
+      "title": "Show All Devices",
       "description": "Displays a list of devices in the location",
       "mode": "view"
     }
@@ -56,18 +58,25 @@
       "required": true
     }
   ],
-  "tools": null,
+  "tools": [],
   "dependencies": {
     "@raycast/api": "^1.76.0",
     "axios": "^1.7.2"
   },
   "devDependencies": {
+    "@eslint/js": "^9.9.1",
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@typescript-eslint/eslint-plugin": "^8.3.0",
+    "@typescript-eslint/parser": "^8.3.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.35.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "globals": "^15.9.0",
+    "prettier": "^3.3.1",
+    "typescript": "^5.2.2",
+    "typescript-eslint": "^8.3.0"
   },
   "scripts": {
     "build": "ray build -e dist",
