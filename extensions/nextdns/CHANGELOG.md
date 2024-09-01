@@ -1,8 +1,9 @@
 # NextDNS Changelog
 
-## [Enhancement] - 2024-09-02
+## [Enhancements] - 2024-09-02
 
 - Added allowd/blocked labels in `Search Logs`
+- Added possibility to hide device in `Search Logs`
 
 ## [Fix] - 2024-09-01
 

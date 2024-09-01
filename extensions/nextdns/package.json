@@ -30,12 +30,23 @@
       "description": "Manage your NextDNS denylist.",
       "mode": "view"
     },
-        {
+    {
       "name": "logs",
       "title": "Search Logs",
       "subtitle": "NextDNS",
       "description": "Manage your NextDNS logs.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "hideDeviceNames",
+          "description": "Hide device names in list",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "title": "Options",
+          "label": "Hide device names"
+        }
+      ]
     }
   ],
   "preferences": [
