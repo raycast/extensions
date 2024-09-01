@@ -3,7 +3,6 @@ import { Grid } from "@raycast/api";
 import Actions from "@/actions/actions";
 import { v4 as AHD } from "uuid";
 import { getIcon } from "u/getIcon";
-// import { getDayName, getMonthName } from "u/getName";
 import { Context } from "u/context";
 
 interface DayProps {
@@ -28,33 +27,6 @@ export function Day({ type, day, hasEvents, name }: DayProps) {
 
   const now = new Date();
   const todayId = `SID:${now.getDate()}`;
-
-  // Item Example:
-  //   <Grid.Item
-  //   id={type === "today" ? todayId : AHID}
-  //   content={{
-  //     value: {
-  //       source: type === "empty" ? " " : source,
-  //       tintColor:
-  //         type === "week"
-  //           ? {
-  //               light: "#666666",
-  //               dark: "#666666",
-  //               adjustContrast: true,
-  //             }
-  //           : undefined,
-  //     },
-  //     tooltip:
-  //       type === "name" && day === undefined
-  //         ? name !== undefined
-  //           ? name
-  //           : "" // Use dayName for type "name"
-  //         : type !== "week" && type !== "empty" && type !== "name"
-  //           ? `${getDayName(day)} ${day}, ${getMonthName(currentMonth)} ${currentYear}`
-  //           : "",
-  //   }}
-  //   actions={<Actions global={type !== "week" && type !== "empty" && type !== "name" ? false : true} day={day} />}
-  // />
 
   return (
     <Grid.Item
