@@ -24,7 +24,7 @@
     {
       "name": "split-by-file-size",
       "title": "Split PDF by File Size",
-      "description": "Split a PDF file into multiple parts based on file size",
+      "description": "Split PDF files into multiple parts based on file size",
       "mode": "no-view",
       "arguments": [
         {
@@ -38,7 +38,7 @@
     {
       "name": "split-by-page-count",
       "title": "Split PDF by Page Count",
-      "description": "Split a PDF file into multiple parts based on the number of pages",
+      "description": "Split PDF files into multiple parts based on the number of pages",
       "mode": "no-view",
       "arguments": [
         {
@@ -66,7 +66,7 @@
     {
       "name": "protect",
       "title": "Protect PDF",
-      "description": "Protect a PDF file with a password",
+      "description": "Protect PDF files with a password",
       "mode": "no-view",
       "arguments": [
         {
@@ -84,7 +84,7 @@
     {
       "name": "unlock",
       "title": "Unlock PDF",
-      "description": "Unlock a password-protected PDF file",
+      "description": "Unlock password-protected PDF files",
       "mode": "no-view",
       "arguments": [
         {
@@ -102,7 +102,7 @@
     {
       "name": "watermark",
       "title": "Watermark PDF",
-      "description": "Add a watermark to a PDF file",
+      "description": "Add watermarks to PDF files",
       "mode": "no-view",
       "arguments": [
         {
