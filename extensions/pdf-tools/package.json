@@ -21,76 +21,6 @@
   ],
   "commands": [
     {
-      "name": "watermark",
-      "title": "Watermark PDF",
-      "description": "Add a watermark to a PDF file",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "text",
-          "type": "text",
-          "placeholder": "Watermark text",
-          "required": true
-        },
-        {
-          "name": "fontSize",
-          "type": "dropdown",
-          "placeholder": "Font size",
-          "required": false,
-          "data": [
-            {
-              "title": "Small",
-              "value": "48"
-            },
-            {
-              "title": "Medium",
-              "value": "64"
-            },
-            {
-              "title": "Large",
-              "value": "72"
-            }
-          ]
-        },
-        {
-          "name": "transparency",
-          "type": "dropdown",
-          "placeholder": "Transparency",
-          "required": false,
-          "data": [
-            {
-              "title": "Light",
-              "value": "0.125"
-            },
-            {
-              "title": "Medium",
-              "value": "0.25"
-            },
-            {
-              "title": "Dark",
-              "value": "0.5"
-            }
-          ]
-        },
-        {
-          "name": "rotation",
-          "type": "dropdown",
-          "placeholder": "Rotation",
-          "required": false,
-          "data": [
-            {
-              "title": "No Rotation",
-              "value": "0"
-            },
-            {
-              "title": "Rotate 45°",
-              "value": "45"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "name": "split-by-file-size",
       "title": "Split PDF by File Size",
       "description": "Split a PDF file into multiple parts based on file size",
@@ -164,6 +94,76 @@
           "keywords": [
             "decrypt",
             "password"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "watermark",
+      "title": "Watermark PDF",
+      "description": "Add a watermark to a PDF file",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Watermark text",
+          "required": true
+        },
+        {
+          "name": "fontSize",
+          "type": "dropdown",
+          "placeholder": "Font size",
+          "required": false,
+          "data": [
+            {
+              "title": "Small",
+              "value": "48"
+            },
+            {
+              "title": "Medium",
+              "value": "64"
+            },
+            {
+              "title": "Large",
+              "value": "72"
+            }
+          ]
+        },
+        {
+          "name": "transparency",
+          "type": "dropdown",
+          "placeholder": "Transparency",
+          "required": false,
+          "data": [
+            {
+              "title": "Light",
+              "value": "0.125"
+            },
+            {
+              "title": "Medium",
+              "value": "0.25"
+            },
+            {
+              "title": "Dark",
+              "value": "0.5"
+            }
+          ]
+        },
+        {
+          "name": "rotation",
+          "type": "dropdown",
+          "placeholder": "Rotation",
+          "required": false,
+          "data": [
+            {
+              "title": "No Rotation",
+              "value": "0"
+            },
+            {
+              "title": "Rotate 45°",
+              "value": "45"
+            }
           ]
         }
       ]
