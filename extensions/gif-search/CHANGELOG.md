@@ -1,5 +1,9 @@
 # GIF Search Changelog
 
+## [Add 'Paste GIF Markdown' action] - 2024-09-01
+
+- Added a new action to paste a Markdown-formatted link to the GIF into the front-most application
+
 ## [Better Results] - 2024-04-19
 
 - The extension now uses GIPHY Pro and Tenor v2 to have better GIF results
