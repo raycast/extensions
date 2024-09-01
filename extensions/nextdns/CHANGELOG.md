@@ -1,6 +1,6 @@
 # NextDNS Changelog
 
-## [Added NextDNS] - {PR_MERGE_DATE}
+## [Added NextDNS] - 2024-09-01
 
 Initial version code with:
 - Allowlist management
