@@ -1,6 +1,6 @@
 # Launch Agents Extension Changelog
 
-## [Add actions to list system and loaded lanch agents] - {PR_MERGE_DATE}
+## [Add actions to list system and loaded lanch agents] - 2024-09-01
 
 ## [LaunchAgent creation on empty list refreshes the list] - 2024-08-25
 
