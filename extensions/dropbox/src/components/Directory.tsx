@@ -51,7 +51,7 @@ export default function Directory(props: IDirectoryProps) {
     >
       {files.length > 0 && (
         <>
-          <List.Section title={props.parent || "/"} subtitle={`${files.length} files`}>
+          <List.Section title={query ? "Search Results" : props.parent || "/"} subtitle={`${files.length} files`}>
             {files.map((v) => {
               const isFolder = v[".tag"] === "folder";
               return isFolder ? <DirectoryItem key={v.id} file={v} /> : <FileItem key={v.id} file={v} />;
