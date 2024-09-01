@@ -1,6 +1,6 @@
 # Dad Jokes Changelog
 
-## [Add `Copy Joke` action] - {PR_MERGE_DATE}
+## [Add `Copy Joke` action] - 2024-09-01
 
 ## [Add `New Joke` action] - 2022-10-17
 
