@@ -1,12 +1,9 @@
 import { Clipboard, LaunchProps, showHUD, getPreferenceValues } from "@raycast/api";
 import { typeid } from "typeid-js";
 
-interface Preferences {
-  disableCopyToClipboard: boolean;
-  insert: boolean;
-}
-
-export default async function generateTypeid(props: LaunchProps<{ arguments: Arguments.GenerateTypeid }>) {
+export default async function generateTypeidWPrefix(
+  props: LaunchProps<{ arguments: Arguments.GenerateTypeidWPrefix }>,
+) {
   const preferences = getPreferenceValues<Preferences>();
 
   if (preferences.disableCopyToClipboard && !preferences.insert) {

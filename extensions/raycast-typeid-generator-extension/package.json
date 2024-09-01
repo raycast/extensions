@@ -11,38 +11,44 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "generate-typeid",
-      "title": "Generate TypeID",
-      "description": "Generates a new custom prefixed UUIDv7.",
+      "name": "generate-typeid-wo-prefix",
+      "title": "Generate TypeID Without Prefix",
+      "description": "Generates a base32 encoded UUIDv7.",
+      "mode": "no-view"
+    },
+    {
+      "name": "generate-typeid-w-prefix",
+      "title": "Generate TypeID with Prefix",
+      "description": "Generates a custom prefixed UUIDv7.",
       "mode": "no-view",
       "arguments": [
         {
           "name": "prefix",
           "placeholder": "Prefix",
           "type": "text",
-          "required": false
-        }
-      ],
-      "preferences": [
-        {
-          "name": "disableCopyToClipboard",
-          "type": "checkbox",
-          "title": "Copy to Clipboard",
-          "label": "Disable copying to the clipboard",
-          "defaultValue": false,
-          "description": "Copies the newly generated TypeID to the clipboard.",
-          "required": false
-        },
-        {
-          "name": "insert",
-          "type": "checkbox",
-          "title": "Auto-Paste",
-          "label": "Insert at cursor position",
-          "defaultValue": false,
-          "description": "Automatically inserts the newly generated TypeID at the cursor position.",
-          "required": false
+          "required": true
         }
       ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "disableCopyToClipboard",
+      "type": "checkbox",
+      "title": "Copy To Clipboard",
+      "label": "Disable copying to the clipboard",
+      "defaultValue": false,
+      "description": "Copies the newly generated TypeID to the clipboard.",
+      "required": false
+    },
+    {
+      "name": "insert",
+      "type": "checkbox",
+      "title": "Auto-Paste",
+      "label": "Insert at cursor position",
+      "defaultValue": false,
+      "description": "Automatically inserts the newly generated TypeID at the cursor position.",
+      "required": false
     }
   ],
   "dependencies": {
