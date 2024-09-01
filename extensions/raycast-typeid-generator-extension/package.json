@@ -22,6 +22,26 @@
           "type": "text",
           "required": false
         }
+      ],
+      "preferences": [
+        {
+          "name": "disableCopyToClipboard",
+          "type": "checkbox",
+          "title": "Copy to Clipboard",
+          "label": "Disable copying to the clipboard",
+          "defaultValue": false,
+          "description": "Copies the newly generated TypeID to the clipboard.",
+          "required": false
+        },
+        {
+          "name": "insert",
+          "type": "checkbox",
+          "title": "Auto-Paste",
+          "label": "Insert at cursor position",
+          "defaultValue": false,
+          "description": "Automatically inserts the newly generated TypeID at the cursor position.",
+          "required": false
+        }
       ]
     }
   ],
