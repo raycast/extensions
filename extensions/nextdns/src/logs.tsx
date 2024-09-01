@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { getLogs } from "./libs/api";
 import { getIconById } from "./libs/utils";
 import { Log } from "./types";
@@ -15,6 +15,14 @@ export default function Logs() {
             title={log.domain}
             icon={getIconById(log.domain)}
             accessories={[
+              {
+                tag:
+                  log.status === "blocked"
+                    ? { value: "Blocked", color: Color.Red }
+                    : log.status === "allowed"
+                      ? { value: "Allowed", color: Color.Green }
+                      : null,
+              },
               { tag: log.device ? log.device.name : "Unknown", tooltip: log.device ? log.device.model : "No model" },
               { date: date, tooltip: date.toLocaleDateString() },
             ]}
