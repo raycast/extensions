@@ -1,5 +1,9 @@
 # NextDNS Changelog
 
+## [Enhancement] - 2024-09-02
+
+- Added allowd/blocked labels in `Search Logs`
+
 ## [Fix] - 2024-09-01
 
 - Fixed a bug in the model name in `Search Logs` that caused a crash
