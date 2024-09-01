@@ -1,6 +1,9 @@
 import { showHUD, Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { uuidv7 } from "uuidv7";
 
+import { generateUuids } from "./utils/uuidUtils";
+import { UUIDType } from "./uuidHistory";
+
 interface UUIDV7Arguments {
   numberOfUUIDsToGenerate: string;
 }
@@ -30,10 +33,7 @@ export default async (props: { arguments: UUIDV7Arguments }) => {
 
     // safe?
     if (parseableNumber <= UUID_MAX_NUMBER) {
-      let uuids = Array.from(Array(parseableNumber)).map(() => uuidv7());
-      if (upperCaseLetters) {
-        uuids = uuids.map((element) => element.toUpperCase());
-      }
+      const uuids = await generateUuids(uuidv7, parseableNumber, upperCaseLetters, UUIDType.UUIDV7);
 
       if (defaultAction === "copy") {
         await Clipboard.copy(uuids.join("\r\n"));

@@ -314,7 +314,7 @@
 /extensions/cyberduck                                               @scottaglia
 /extensions/cyberpanel                                              @xmok
 /extensions/cypress-docs                                            @robertguss
-/extensions/dad-jokes                                               @pernielsentikaer @Abdulaziz-Aljadaan
+/extensions/dad-jokes                                               @pernielsentikaer @xmok @xmok
 /extensions/dash                                                    @RSO @sxn @JasonBoy
 /extensions/dash-off                                                @peduarte @xilopaint
 /extensions/dashlane                                                @dpnick
@@ -925,6 +925,7 @@
 /extensions/new-york-times                                          @Antonwy
 /extensions/next-run                                                @jonathangiardino
 /extensions/nextcloud                                               @uetchy
+/extensions/nextdns                                                 @pernielsentikaer @itsmingjie @xmok @jfkisafk
 /extensions/nextjs-docs                                             @PrasadChinwal @xmok
 /extensions/nfl-information                                         @kciarnie
 /extensions/nft-search                                              @glazec
@@ -1564,7 +1565,7 @@
 /extensions/user-agent                                              @third774
 /extensions/utm-campaign-builder                                    @vimtor
 /extensions/utm-virtual-machines                                    @alaidriel
-/extensions/uuid-generator                                          @jmaeso @GastroGeek @pernielsentikaer @LunaticMuch @hmarr
+/extensions/uuid-generator                                          @jmaeso @GastroGeek @pernielsentikaer @LunaticMuch @hmarr @harsh-devx
 /extensions/v2ex                                                    @mopig
 /extensions/v2ex-viewer                                             @daikaiyu
 /extensions/vade-mecum                                              @xilopaint
