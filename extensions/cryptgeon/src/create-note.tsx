@@ -1,7 +1,7 @@
 import "./fetch.js";
 
 import { Action, ActionPanel, Form, getPreferenceValues, Icon } from "@raycast/api";
-import { useForm } from "@raycast/utils";
+import { FormValidation, useForm } from "@raycast/utils";
 // @ts-expect-error types for this package are not exported correctly atm
 import { status as getStatus, setOptions, Status } from "cryptgeon";
 import prettyBytes from "pretty-bytes";
@@ -9,11 +9,19 @@ import { useEffect, useState } from "react";
 import { Duration } from "uhrwerk";
 import { createNote } from "./shared.js";
 
+enum NoteType {
+  Text = "text",
+  File = "file",
+}
+
+enum NoteLimit {
+  Views = "views",
+  Time = "expiration",
+}
+
 type CreateNotePayload = {
-  type: string;
   content: string;
   files: string[];
-  limit: string;
   views: string;
   expiration: Date | null;
 };
@@ -26,11 +34,14 @@ function getRelativeMinutes(date: Date): number {
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
+  const [type, setType] = useState(NoteType.Text);
+  const [limit, setLimit] = useState(NoteLimit.Views);
   const [status, setStatus] = useState<Status | null>(null);
 
   const expirationHuman = status ? new Duration(status.max_expiration, "minutes").humanize() : "...";
 
-  const { handleSubmit, itemProps, values } = useForm<CreateNotePayload>({
+  const { handleSubmit, itemProps } = useForm<CreateNotePayload>({
+    initialValues: { views: "1" },
     async onSubmit(values) {
       await createNote(values.content ?? values.files, {
         views: values.views ? Number.parseInt(values.views) : undefined,
@@ -38,14 +49,22 @@ export default function Command() {
       });
     },
     validation: {
+      files: (value) => {
+        if (type === NoteType.File && (!value || value.length === 0)) return FormValidation.Required;
+      },
+      content: (value) => {
+        if (type === NoteType.Text && !value) return FormValidation.Required;
+      },
       views: (value) => {
-        if (!value) return;
+        if (limit === NoteLimit.Time) return;
+        if (!value) return FormValidation.Required;
         const parsed = Number.parseInt(value);
         if (Number.isNaN(parsed)) return "Must be a number";
         if (parsed < 1) return "Must be greater than 0";
       },
       expiration: (value) => {
-        if (!value) return;
+        if (limit === NoteLimit.Views) return;
+        if (!(value instanceof Date)) return FormValidation.Required;
         const minutes = getRelativeMinutes(value);
         if (minutes < 1) return "Must be in the future";
         if (status && status.max_expiration < minutes) return `Must be less than ${expirationHuman}`;
@@ -66,11 +85,11 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown title="Type" defaultValue="text" {...itemProps.type}>
-        <Form.Dropdown.Item value="text" title="Text" icon={Icon.Text} />
-        <Form.Dropdown.Item value="file" title="File" icon={Icon.Document} />
+      <Form.Dropdown id="type" title="Type" value={type} onChange={(value) => setType(value as NoteType)}>
+        <Form.Dropdown.Item value={NoteType.Text} title="Text" icon={Icon.Text} />
+        <Form.Dropdown.Item value={NoteType.File} title="File" icon={Icon.Document} />
       </Form.Dropdown>
-      {values.type === "text" ? (
+      {type === NoteType.Text ? (
         <Form.TextArea {...itemProps.content} title="Content" />
       ) : (
         <Form.FilePicker {...itemProps.files} />
@@ -78,12 +97,12 @@ export default function Command() {
 
       <Form.Separator />
 
-      <Form.Dropdown {...itemProps.limit} title="Limit by" defaultValue="view">
-        <Form.Dropdown.Item value="views" title="Views" icon={Icon.Eye} />
-        <Form.Dropdown.Item value="time" title="Time" icon={Icon.Calendar} />
+      <Form.Dropdown id="limit" title="Limit by" value={limit} onChange={(limit) => setLimit(limit as NoteLimit)}>
+        <Form.Dropdown.Item value={NoteLimit.Views} title="Views" icon={Icon.Eye} />
+        <Form.Dropdown.Item value={NoteLimit.Time} title="Time" icon={Icon.Calendar} />
       </Form.Dropdown>
-      {values.limit === "views" ? (
-        <Form.TextField {...itemProps.views} defaultValue="1" />
+      {limit === NoteLimit.Views ? (
+        <Form.TextField {...itemProps.views} />
       ) : (
         <Form.DatePicker {...itemProps.expiration} title="Expiration" />
       )}
