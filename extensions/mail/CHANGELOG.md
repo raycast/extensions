@@ -1,6 +1,6 @@
 # Mail Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2024-09-02
 
 Fix an issue where a mailbox name containing a comma causes an incorrect mailbox name after string splitting.
 
