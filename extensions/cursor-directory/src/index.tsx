@@ -4,7 +4,6 @@ import { PromptsList } from "./components/PromptsList";
 // cache.set("favoritePrompts", JSON.stringify([]));
 
 export default function Command() {
-
   return (
     <>
       <PromptsList />
