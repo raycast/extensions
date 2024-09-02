@@ -9,7 +9,7 @@ axios.defaults.headers.get["Content-Type"] = "application/json; charset=utf-8";
 async function ClickUpClient<T>(
   endpoint: string,
   method?: string,
-  data?: Record<string, any>,
+  data?: Record<string, string | number>,
   headers?: AxiosRequestHeaders
 ): Promise<AxiosResponse<T>> {
   switch (method) {

@@ -1,6 +1,6 @@
 import { ActionPanel, Icon, List, Action } from "@raycast/api";
 import { useTeams } from "./hooks/useTeams";
-import { TeamSpaces } from "./views/TeamSpaces";
+import ListDocs from "./views/DocList/ListDocs";
 
 export default function Teams() {
   const { isLoading, teams } = useTeams();
@@ -9,14 +9,11 @@ export default function Teams() {
       {teams.map((team, index) => (
         <List.Item
           key={index}
-          icon={Icon.TwoPeople}
+          icon={Icon.Person}
           title={team.name}
           actions={
             <ActionPanel title="Team Actions">
-              <Action.Push
-                title="Projects Page"
-                target={<TeamSpaces teamId={team?.id ?? ""} teamName={team?.name ?? ""} />}
-              />
+              <Action.Push icon={Icon.Eye} title="Docs Page" target={<ListDocs workspaceId={team.id} />} />
             </ActionPanel>
           }
         />

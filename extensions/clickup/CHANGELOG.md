@@ -1,5 +1,9 @@
 # ClickUp Changelog
 
+## [] - {PR_MERGE_DATE}
+
+- migrate ray
+
 ## [Update] - 2024-04-17
 
 - Added ability to view folderless tasks within the Tasks Explorer command
