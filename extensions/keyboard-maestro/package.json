@@ -12,7 +12,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "list-macros",
+      "name": "list",
       "title": "List Macros",
       "subtitle": "Keyboard Maestro",
       "description": "List and quickly trigger Keyboard Maestro Macros",
