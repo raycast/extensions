@@ -1,5 +1,9 @@
 # Mail Changelog
 
+## [Fix] - 2024-09-02
+
+Fix an issue where a mailbox name containing a comma causes an incorrect mailbox name after string splitting.
+
 ## [Update README.md] - 2024-08-31
 
 - Update README.md
