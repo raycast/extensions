@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [Add Translate Command] - {PR_MERGE_DATE}
+## [Add Translate Command] - 2024-09-02
 
 More Features:
 
