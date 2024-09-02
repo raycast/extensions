@@ -38,12 +38,14 @@
     {
       "name": "create-note",
       "title": "Create Note",
+      "subtitle": "cryptgeon",
       "description": "Create and share an encrypted note",
       "mode": "view"
     },
     {
       "name": "send-encrypted-text",
       "title": "Send Encrypted Text",
+      "subtitle": "cryptgeon",
       "description": "Quickly create a once view text note",
       "mode": "no-view",
       "arguments": [
