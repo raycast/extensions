@@ -1,5 +1,11 @@
 # Cron Changelog
 
+## [Bug fixes] - 2024-10-01
+
+1. Fix the issue with the date not showing the correct day of the week
+2. Nav and Detail title
+3. Fix issue with caching nad selected id
+
 ## [Update Actions, Bug fixes] - 2024-09-29
 
 1. Prevent all dates from showing details
