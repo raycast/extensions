@@ -1,4 +1,4 @@
-import { getPreferenceValues, showHUD } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
 
 interface AddToQueueResponse {
