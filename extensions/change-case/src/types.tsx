@@ -17,8 +17,8 @@ const lowerFirst = (input: string) => {
 };
 
 const kebabUpperCase = (input: string) => {
-  const words = changeCase.split(input);
-  return words.map((word) => word.toUpperCase()).join("-");
+  const kebabCase = changeCase.kebabCase(input);
+  return kebabCase.toUpperCase();
 };
 
 const handleSmallWordsTitleCase = (input: string, sentenceCase: boolean) => {
