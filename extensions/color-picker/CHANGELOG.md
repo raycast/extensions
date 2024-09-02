@@ -1,6 +1,6 @@
 # Color Picker Changelog
 
-## [Enhancement] -  {PR_MERGE_DATE}
+## [Enhancement] -  2024-09-02
 
 - Improved the `Organize Colors` command to dynamically fetch the frontmost application and display its icon in the paste action.
 
