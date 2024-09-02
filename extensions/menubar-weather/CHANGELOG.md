@@ -1,6 +1,6 @@
 # Menubar Weather Changelog
 
-## [Update icons] - {PR_MERGE_DATE}
+## [Update icons] - 2024-09-02
 
 - Update icons for Street and Country
 
