@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import useDocs from "../../hooks/useDocs";
-import ListDocPages from "./ListDocPages";
+import { ListDocPages } from "./ListDocPages";
 
-export default function ListDocs({ workspaceId, workspaceName }: { workspaceId: string; workspaceName: string }) {
+export function ListDocs({ workspaceId, workspaceName }: { workspaceId: string; workspaceName: string }) {
   const { isLoading, docs } = useDocs(workspaceId);
 
   return (

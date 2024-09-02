@@ -1,6 +1,6 @@
 import { ActionPanel, Icon, List, Action } from "@raycast/api";
 import { useTeams } from "./hooks/useTeams";
-import ListDocs from "./views/DocList/ListDocs";
+import { ListDocs } from "./views/DocList/ListDocs";
 
 export default function Teams() {
   const { isLoading, teams } = useTeams();
