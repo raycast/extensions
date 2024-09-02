@@ -1,5 +1,8 @@
 # Change Case Changelog
 
+## [Chore] - 2024-09-02
+- Added missing contributor
+
 ## [Visual improvements] - 2024-06-07
 - Small improvement to some UI copy meant to make the lowercasing behavior for Title and Sentence Case transformations clearer.
 
