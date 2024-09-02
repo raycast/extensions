@@ -1,6 +1,6 @@
 # Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2024-09-02
 
 - Feature:  Support for certain platforms that only accept simple string formats, such as DeepSeek.
 
