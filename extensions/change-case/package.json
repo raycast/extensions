@@ -109,6 +109,22 @@
       "required": false
     },
     {
+      "name": "prefixCharacters",
+      "type": "textfield",
+      "title": "Prefix Characters",
+      "description": "Characters to retain at the beginning of the input. Eg, `_` to keep underscores in `__typename`",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "suffixCharacters",
+      "type": "textfield",
+      "title": "Suffix Characters",
+      "description": "Characters to retain at the end of the input. Eg, `_` to keep parentheses in `type_`",
+      "default": "",
+      "required": false
+    },
+    {
       "name": "CamelCase",
       "type": "checkbox",
       "title": "Enabled Transformations",
