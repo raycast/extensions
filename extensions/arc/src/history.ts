@@ -24,7 +24,7 @@ const profileHistoryDatabasePaths: {
   historyDatabasePath: string;
 }[] = [];
 
-const defaultHistoryDatabasePath = join(BASE_PATH, "Default", HISTORY_FILENAME);
+export const defaultHistoryDatabasePath = join(BASE_PATH, "Default", HISTORY_FILENAME);
 
 profileHistoryDatabasePaths.push({
   id: "Default",
