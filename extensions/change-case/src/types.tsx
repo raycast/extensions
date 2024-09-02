@@ -36,7 +36,7 @@ const sentenceCase = (input: string) => handleSmallWordsTitleCase(input, true);
 
 const titleCase = (input: string) => handleSmallWordsTitleCase(input, false);
 
-const upperCase = (input: string) => input.toUpperCase();
+const upperCase = (input: string) => changeCase.noCase(input).toUpperCase();
 
 const upperFirst = (input: string) => {
   if (input.length <= 1) {
