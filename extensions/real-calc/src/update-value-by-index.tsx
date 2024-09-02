@@ -30,7 +30,7 @@ export default function Command() {
     });
   }, []);
 
-  const { handleSubmit, itemProps, values, setValue } = useForm<FormValues>({
+  const { handleSubmit, itemProps, values, setValue, setValidationError } = useForm<FormValues>({
     validation: {
       financialValue: (value) => {
         if (!value || value === formatNumber(0, { style: "currency", currency: "BRL" })) return "Field required";
@@ -50,6 +50,20 @@ export default function Command() {
     onSubmit: handleFormSubmit,
   });
 
+  const handleFinancialValueChange = useCallback(
+    (newValue: string) => {
+      const numericValue = parseCurrency(newValue);
+      const formatted = isNaN(numericValue)
+        ? formatNumber(0, { style: "currency", currency: "BRL" })
+        : formatNumber(numericValue, { style: "currency", currency: "BRL" });
+      setFormattedValue(formatted);
+      setValue("financialValue", formatted);
+
+      setValidationError("financialValue", null);
+    },
+    [setValue, setValidationError],
+  );
+
   const { data: fetchedData, isLoading: isFetching } = useFetch<FinancialIndexData[]>(fetchUrl || "", {
     execute: !!fetchUrl,
   });
@@ -57,11 +71,6 @@ export default function Command() {
   const calculationResult = useMemo(() => {
     if (fetchedData && values.financialValue && values.startDate && values.endDate && values.priceIndex) {
       try {
-        if (!Array.isArray(fetchedData) || fetchedData.length === 0) {
-          console.log(fetchedData);
-          throw new Error("Invalid or empty data received from the API");
-        }
-
         const { financialValue, startDate, endDate, priceIndex } = values;
         const financialValueNumber = parseCurrency(financialValue);
         const startDateString = formatDate(startDate);
@@ -92,18 +101,6 @@ export default function Command() {
       setResultPushed(true);
     }
   }, [calculationResult, resultPushed, push]);
-
-  const handleFinancialValueChange = useCallback(
-    (newValue: string) => {
-      const numericValue = parseCurrency(newValue);
-      const formatted = isNaN(numericValue)
-        ? formatNumber(0, { style: "currency", currency: "BRL" })
-        : formatNumber(numericValue, { style: "currency", currency: "BRL" });
-      setFormattedValue(formatted);
-      setValue("financialValue", formatted);
-    },
-    [setValue],
-  );
 
   return (
     <Form
