@@ -59,12 +59,13 @@ function preLowercaseText(input: string, preserveCase: boolean) {
   return input;
 }
 
-function modifyCasesWrapper(input: string, c: string) {
+function modifyCasesWrapper(input: string, c: string, preserveCase: boolean) {
   const modifiedRawArr: string[] = [];
   const modifiedMarkdownArr: string[] = [];
   const lines = input.split("\n");
   for (const line of lines) {
-    const modified = functions[c](preLowercaseText(line, true));
+    // if (c == 'Title Case') console.log(preLowercaseText(line, preserveCase));
+    const modified = functions[c](preLowercaseText(line, preserveCase));
     modifiedRawArr.push(modified);
     modifiedMarkdownArr.push((modified.length === 0 ? "\u200B" : modified) + "\n");
   }
@@ -306,7 +307,7 @@ export default function Command(props: LaunchProps) {
     <List isShowingDetail={true}>
       <List.Section title="Pinned">
         {pinned?.map((key) => {
-          const modified = modifyCasesWrapper(content, key);
+          const modified = modifyCasesWrapper(content, key, preserveCase);
           return (
             <CaseItem
               key={key}
@@ -320,7 +321,7 @@ export default function Command(props: LaunchProps) {
       </List.Section>
       <List.Section title="Recent">
         {recent.map((key) => {
-          const modified = modifyCasesWrapper(content, key);
+          const modified = modifyCasesWrapper(content, key, preserveCase);
           return (
             <CaseItem
               key={key}
@@ -341,7 +342,7 @@ export default function Command(props: LaunchProps) {
               !pinned.includes(key as CaseType),
           )
           .map((key) => {
-            const modified = modifyCasesWrapper(content, key);
+            const modified = modifyCasesWrapper(content, key, preserveCase);
             return <CaseItem key={key} case={key as CaseType} modified={modified.rawText} detail={modified.markdown} />;
           })}
       </List.Section>
