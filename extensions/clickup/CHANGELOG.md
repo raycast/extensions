@@ -7,8 +7,7 @@
 - add metadata images
 
 ### Dev Notes
-- Refactor by replacing previous hooks with a `usePromise` for unified error 
-handling and loading states
+- Refactor by replacing previous hooks with a `usePromise` for unified error handling and loading states
 - Migrate ray and related
 - Improve types by minimizing use of "any"
 - `useForm` in `Capture` command
