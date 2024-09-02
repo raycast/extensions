@@ -13,7 +13,7 @@ import { fetchRooms } from "./fetchRooms";
 import { toggleLight } from "./toggleLight";
 
 interface DeviceStatus {
-  switch?: {
+  switch: {
     switch?: {
       timestamp?: string;
       value?: string;
@@ -24,6 +24,17 @@ interface DeviceStatus {
       value?: number;
     };
   };
+}
+
+interface ApiDevice {
+  deviceId: string;
+  label: string | undefined;
+  roomId: string;
+  components: Array<{ categories: Array<{ name: string }> }>;
+  status?: DeviceStatus;
+  deviceTypeName: string;
+  id: string;
+  name: string;
 }
 
 interface Device {
@@ -65,25 +76,26 @@ export default function Command() {
       );
       setRooms(roomsMap);
 
-      const lightDevices = devicesData
-        .filter(
-          (device: any): device is Device =>
-            "components" in device &&
+      const lightDevices: Device[] = (devicesData as unknown as ApiDevice[])
+        .filter((device): device is Device => {
+          return !!(
+            typeof device.deviceId === 'string' &&
+            typeof device.label === 'string' &&
+            device.roomId &&
+            device.components &&
             Array.isArray(device.components) &&
             device.components.some(
-              (component: { categories: Array<{ name: string }> }) =>
-                component.categories.some(
-                  (category: { name: string }) => category.name === "Light",
-                ),
-            ),
-        )
-        .sort((a, b) => {
-          const aTimestamp = a.status?.switch?.switch?.timestamp || "0";
-          const bTimestamp = b.status?.switch?.switch?.timestamp || "0";
-          return (
-            new Date(bTimestamp).getTime() - new Date(aTimestamp).getTime()
+              (component) =>
+                component.categories &&
+                Array.isArray(component.categories) &&
+                component.categories.some((category) => category.name === "Light")
+            )
           );
-        });
+        })
+        .map((device) => ({
+          ...device,
+          label: device.label as string,
+        }));
 
       setDevices(lightDevices);
       setFilteredDevices(lightDevices);
@@ -126,31 +138,31 @@ export default function Command() {
   }, []);
 
   const handleToggleLight = useCallback(async (device: Device) => {
-    if (device.status?.switch) {
+    if (device.status?.switch?.switch?.value) {
       const currentStatus = device.status.switch.switch.value;
       try {
         const newStatus = await toggleLight(device.deviceId, currentStatus);
-        setDevices((prevDevices: Device[]) =>
-          prevDevices.map((d: Device) =>
+        setDevices((prevDevices) =>
+          prevDevices.map((d) =>
             d.deviceId === device.deviceId
               ? {
                   ...d,
                   status: {
                     ...d.status,
                     switch: {
-                      ...d.status.switch,
-                      switch: { ...d.status.switch.switch, value: newStatus },
+                      ...d.status?.switch,
+                      switch: { ...d.status?.switch?.switch, value: newStatus },
                     },
                   },
                 }
-              : d,
-          ),
+              : d
+          )
         );
       } catch (error) {
         showToast(
           ToastStyle.Failure,
-          "Failed to toggle light",
-          (error as Error).message,
+          "Fehler beim Umschalten des Lichts",
+          (error as Error).message
         );
       }
     }

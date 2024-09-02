@@ -10,6 +10,7 @@ export interface Device {
   }>;
   id: string;
   name: string;
+  roomId: string;
   status: DeviceStatus;
 }
 

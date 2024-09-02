@@ -114,3 +114,15 @@ export async function fetchLocationId() {
     }
   }
 }
+
+export async function fetchDevicesInRoom(roomId: string) {
+  try {
+    const response = await api.get(`/devices`, {
+      params: { roomId },
+    });
+    return response.data.items;
+  } catch (error) {
+    console.error("Fehler beim Abrufen der Geräte:", (error as Error).message);
+    throw error;
+  }
+}

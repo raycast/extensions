@@ -52,7 +52,7 @@ export default function ShowScenes() {
     fetchScenes();
   }, []);
 
-  const executeScene = async (sceneId: any) => {
+  const executeScene = async (sceneId: string) => {
     try {
       await axios.post(
         `https://api.smartthings.com/v1/scenes/${sceneId}/execute`,
@@ -63,33 +63,33 @@ export default function ShowScenes() {
           },
         },
       );
-      showToast(ToastStyle.Success, "Scene Executed Successfully");
+      showToast(ToastStyle.Success, "Szene erfolgreich ausgeführt");
     } catch (error) {
       showToast(
         ToastStyle.Failure,
-        "Failed to execute scene",
-        (error as Error).message,
+        "Fehler beim Ausführen der Szene",
+        (error as Error).message
       );
     }
   };
 
-  const formatDate = (timestamp: string | undefined): string => {
-    if (!timestamp) return "Nie ausgeführt";
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return "Never executed";
     const date = new Date(timestamp);
-    return date.toLocaleString();
+    return date.toLocaleString(); // Format the date as a readable string
   };
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search Scenes...">
-      {scenes.map((scene: Scene) => (
+      {scenes.map((scene: any) => (
         <List.Item
           key={scene.sceneId}
-          title={scene.sceneName || "Unbenannte Szene"}
-          accessoryTitle={`Zuletzt ausgeführt: ${formatDate(scene.lastExecutedDate)}`}
+          title={scene.sceneName || "Unnamed Scene"}
+          accessoryTitle={`Last executed: ${formatDate(scene.lastExecutedDate)}`}
           actions={
             <ActionPanel>
               <ActionPanel.Item
-                title="Szene ausführen"
+                title="Execute Scene"
                 onAction={() => executeScene(scene.sceneId)}
               />
             </ActionPanel>
