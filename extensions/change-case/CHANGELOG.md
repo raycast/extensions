@@ -1,6 +1,12 @@
 # Change Case Changelog
 
-## [Chore] - 2024-09-02
+## [Fix logic regarding preserve casing] - 2024-09-02
+- Properly handle the logic regarding the `Preserve Casing` preference
+- Rewrote some of the documentation to make it clearer
+- Handle `KEBAB-UPPER-CASE` transform correctly
+- Add preference for prefix and suffix characters
+- Handle `Upper case` properly
+- Handle `lower case` properly
 - Added missing contributor
 
 ## [Visual improvements] - 2024-06-07
