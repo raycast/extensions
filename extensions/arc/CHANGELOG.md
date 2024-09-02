@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-09-02
 
 - Added `Search Downloads` command to search for downloads in Arc.
 
