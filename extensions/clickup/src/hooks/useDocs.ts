@@ -1,20 +1,7 @@
-import { useFetch } from "@raycast/utils";
-import preferences from "../utils/preferences";
 import { DocsResponse } from "../types/docs.dt";
+import useClickUp from "./useClickUp";
 
 export default function useDocs(workspaceId: string) {
-  const { isLoading, data } = useFetch(`https://api.clickup.com/api/v3/workspaces/${workspaceId}/docs`, {
-    headers: {
-      Authorization: preferences.token,
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    mapResult(result: DocsResponse) {
-      return {
-        data: result.docs,
-      };
-    },
-    initialData: [],
-  });
-  return { isLoading, data };
+  const { isLoading, data } = useClickUp<DocsResponse>(`/workspaces/${workspaceId}/docs`, { apiVersion: 3 });
+  return { isLoading, docs: data?.docs ?? [] };
 }

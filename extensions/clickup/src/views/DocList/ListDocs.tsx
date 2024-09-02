@@ -2,11 +2,11 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import useDocs from "../../hooks/useDocs";
 import ListDocPages from "./ListDocPages";
 
-export default function ListDocs({ workspaceId }: { workspaceId: string }) {
-  const { isLoading, data: docs } = useDocs(workspaceId);
+export default function ListDocs({ workspaceId, workspaceName }: { workspaceId: string; workspaceName: string }) {
+  const { isLoading, docs } = useDocs(workspaceId);
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search docs">
+    <List isLoading={isLoading} searchBarPlaceholder="Search docs" navigationTitle={`${workspaceName} Docs`}>
       <List.Section title={`Workspaces / ${workspaceId}`} subtitle={`${docs.length} docs`}>
         {docs.map((doc) => (
           <List.Item
@@ -18,7 +18,7 @@ export default function ListDocs({ workspaceId }: { workspaceId: string }) {
                 <Action.Push
                   icon={Icon.Eye}
                   title="Doc Pages"
-                  target={<ListDocPages workspaceId={workspaceId} docId={doc.id} />}
+                  target={<ListDocPages workspaceId={workspaceId} docId={doc.id} docName={doc.name} />}
                 />
               </ActionPanel>
             }

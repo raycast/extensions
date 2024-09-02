@@ -15,8 +15,8 @@ export interface TaskItem {
   archived: boolean;
   creator: Creator;
   assignees: AssigneesItem[];
-  watchers: any[];
-  checklists: any[];
+  watchers: string[];
+  checklists: string[];
   tags: TagsItem[];
   parent: null;
   priority: null | Priority;
@@ -24,9 +24,9 @@ export interface TaskItem {
   start_date: null;
   points: null;
   time_estimate: null | number;
-  custom_fields: any[];
+  // custom_fields?: any[];
   dependencies: DependenciesItem[];
-  linked_tasks: any[];
+  // linked_tasks: any[];
   team_id: string;
   url: string;
   permission_level: string;

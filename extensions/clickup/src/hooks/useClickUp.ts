@@ -1,16 +1,16 @@
-import { useCachedPromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { ClickUpClient } from "../utils/clickUpClient";
 import { AxiosError } from "axios";
 
-export default function useClickUp<T>(endpoint: string) {
+export default function useClickUp<T>(endpoint: string, { apiVersion }: { apiVersion: 2 | 3 } = { apiVersion: 2 }) {
   type ErrorResult = {
     err: string;
     ECODE: string;
   };
-  const { isLoading, data } = useCachedPromise(
+  const { isLoading, data } = usePromise(
     async () => {
       try {
-        const response = await ClickUpClient<T>(endpoint);
+        const response = await ClickUpClient<T>(endpoint, "GET", undefined, undefined, apiVersion);
         return response.data;
       } catch (error) {
         const result = error as AxiosError<ErrorResult>;

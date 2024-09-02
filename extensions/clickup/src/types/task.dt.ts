@@ -11,9 +11,9 @@ export interface Task {
   date_closed: null;
   archived: boolean;
   creator: Creator;
-  assignees: any[];
+  assignees: string[];
   watchers: WatchersItem[];
-  checklists: any[];
+  checklists: string[];
   tags: TagsItem[];
   parent: null;
   priority: Priority;
@@ -22,9 +22,9 @@ export interface Task {
   points: null;
   time_estimate: null;
   time_spent: number;
-  custom_fields: any[];
-  dependencies: any[];
-  linked_tasks: any[];
+  custom_fields?: CustomField;
+  // dependencies: any[];
+  // linked_tasks: any[];
   team_id: string;
   url: string;
   permission_level: string;
@@ -32,7 +32,7 @@ export interface Task {
   project: Project;
   folder: Folder;
   space: Space;
-  attachments: any[];
+  // attachments: any[];
 }
 interface Status {
   id: string;
@@ -87,4 +87,28 @@ interface Folder {
 }
 interface Space {
   id: string;
+}
+interface CustomField {
+  id: string;
+  name: string;
+  type: string;
+  type_config: {
+    single_user: boolean;
+    include_groups: boolean;
+    include_guests: boolean;
+    include_team_members: boolean;
+  };
+  date_created: string;
+  hide_from_guests: boolean;
+  value:
+    | {
+        id: number;
+        username: string;
+        email: string;
+        color: string;
+        initials: string;
+        profilePicture: string;
+      }
+    | { value: string };
+  required: boolean;
 }
