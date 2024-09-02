@@ -4,6 +4,7 @@
 
 - Added allowd/blocked labels in `Search Logs`
 - Added possibility to hide device in `Search Logs`
+- Added `Status´ command
 
 ## [Fix] - 2024-09-01
 
