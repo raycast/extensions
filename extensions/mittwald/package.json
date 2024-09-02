@@ -14,31 +14,35 @@
     {
       "name": "search-mittwald-projects",
       "title": "Search Projects",
+      "subtitle": "mittwald",
       "description": "Search mittwald projects",
       "mode": "view"
     },
     {
       "name": "search-mittwald-domains",
       "title": "Search Domains",
+      "subtitle": "mittwald",
       "description": "Search mittwald domains",
       "mode": "view"
     },
     {
       "name": "search-mittwald-organizations",
       "title": "Search Organizations",
+      "subtitle": "mittwald",
       "description": "Search mittwald organizations",
       "mode": "view"
     },
     {
       "name": "search-mittwald-apps",
       "title": "Search Apps",
+      "subtitle": "mittwald",
       "description": "Search mittwald apps",
       "mode": "view"
     },
     {
       "name": "search-mittwald-api-endpoints",
       "title": "Search API Endpoints",
-      "subtitle": "mittwald API documentation",
+      "subtitle": "mittwald",
       "description": "Search mittwald API documentation",
       "mode": "view"
     }
