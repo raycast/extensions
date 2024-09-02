@@ -1,6 +1,6 @@
 # SABnzbd Changelog
 
-## [Modernize Extension + Cache Results] - {PR_MERGE_DATE}
+## [Modernize Extension + Cache Results] - 2024-09-02
 
 ### Enhancements
 
