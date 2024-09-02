@@ -1,6 +1,6 @@
 # Changelog
 
-## Updated - 2024-09-02
+## Updated - {PR_MERGE_DATE}
 
 - Fixing an issue with Markdown parser not handling `\u` characters properly ([#12921](https://github.com/raycast/extensions/issues/12921))
 
