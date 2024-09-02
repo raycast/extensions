@@ -1,3 +1,3 @@
 # Cryptgeon Changelog
 
-## [Initial Version] - 2024-08-22
+## [Initial Version] - {PR_MERGE_DATE}
