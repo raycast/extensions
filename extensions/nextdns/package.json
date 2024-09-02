@@ -47,6 +47,14 @@
           "label": "Hide device names"
         }
       ]
+    },
+    {
+      "name": "status",
+      "title": "Current Status",
+      "description": "Shows the current NextDNS status",
+      "mode": "no-view",
+      "subtitle": "NextDNS",
+      "interval": "5m"
     }
   ],
   "preferences": [
