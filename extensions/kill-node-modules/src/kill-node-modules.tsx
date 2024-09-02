@@ -83,13 +83,15 @@ export default function Command() {
         <List.Item
           key={item.id}
           title={item.title}
-          subtitle={`Size: ${formatSize(item.size)} | Last modified: ${item.lastModified.toLocaleString()}`}
-          icon={deletingItems.has(item.id) ? Icon.Dot : Icon.Trash}
+          accessories={[{ date: item.lastModified, tooltip: item.lastModified.toLocaleString() }]}
+          subtitle={`Size: ${formatSize(item.size)}`}
+          icon={deletingItems.has(item.id) ? Icon.Dot : Icon.Folder}
           actions={
             <ActionPanel>
               <Action
                 title="Delete Node_modules"
                 icon={Icon.Trash}
+                style={Action.Style.Destructive}
                 onAction={() => handleDelete(item.id, item.title)}
               />
               <Action title="Go to Parent Folder" icon={Icon.Finder} onAction={() => handleGoToFolder(item.title)} />

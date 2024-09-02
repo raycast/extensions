@@ -15,7 +15,6 @@
     {
       "name": "kill-node-modules",
       "title": "Kill Node Modules",
-      "subtitle": "Select node_modules to delete",
       "description": "Remove selected node_modules",
       "mode": "view"
     }
