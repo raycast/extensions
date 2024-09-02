@@ -79,8 +79,8 @@ export default function Command() {
       const lightDevices: Device[] = (devicesData as unknown as ApiDevice[])
         .filter((device): device is Device => {
           return !!(
-            typeof device.deviceId === 'string' &&
-            typeof device.label === 'string' &&
+            typeof device.deviceId === "string" &&
+            typeof device.label === "string" &&
             device.roomId &&
             device.components &&
             Array.isArray(device.components) &&
@@ -88,7 +88,9 @@ export default function Command() {
               (component) =>
                 component.categories &&
                 Array.isArray(component.categories) &&
-                component.categories.some((category) => category.name === "Light")
+                component.categories.some(
+                  (category) => category.name === "Light",
+                ),
             )
           );
         })
@@ -155,14 +157,14 @@ export default function Command() {
                     },
                   },
                 }
-              : d
-          )
+              : d,
+          ),
         );
       } catch (error) {
         showToast(
           ToastStyle.Failure,
           "Fehler beim Umschalten des Lichts",
-          (error as Error).message
+          (error as Error).message,
         );
       }
     }

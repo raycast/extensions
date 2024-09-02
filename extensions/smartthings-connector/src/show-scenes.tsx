@@ -68,7 +68,7 @@ export default function ShowScenes() {
       showToast(
         ToastStyle.Failure,
         "Fehler beim Ausführen der Szene",
-        (error as Error).message
+        (error as Error).message,
       );
     }
   };
