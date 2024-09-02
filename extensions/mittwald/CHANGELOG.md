@@ -1,3 +1,3 @@
 # mittwald Changelog
 
-## [Initial Version] - 2024-08-21
+## [Initial Version] - {PR_MERGE_DATE}
