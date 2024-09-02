@@ -19,7 +19,7 @@
   "dependencies": {
     "@raycast/api": "^1.81.2",
     "@raycast/utils": "^1.16.5",
-    "cryptgeon": "^2.7.0",
+    "cryptgeon": "^2.8.1",
     "node-fetch": "^3.3.2",
     "pretty-bytes": "^6.1.1",
     "uhrwerk": "^1.1.2"

@@ -1,6 +1,5 @@
 import { Clipboard, getPreferenceValues, PopToRootType, showHUD, showToast, Toast } from "@raycast/api";
-// @ts-expect-error types for this package are not exported correctly atm
-import { setOptions, upload } from "cryptgeon";
+import { API, upload } from "cryptgeon";
 
 export type Preferences = {
   server: string;
@@ -13,7 +12,7 @@ export const text = {
 function checkAndSetServer() {
   const preferences = getPreferenceValues<Preferences>();
   try {
-    setOptions({
+    API.setOptions({
       server: preferences.server,
     });
   } catch (e) {

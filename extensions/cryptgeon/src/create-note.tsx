@@ -2,8 +2,7 @@ import "./fetch.js";
 
 import { Action, ActionPanel, Form, getPreferenceValues, Icon } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-// @ts-expect-error types for this package are not exported correctly atm
-import { status as getStatus, setOptions, Status } from "cryptgeon";
+import { API, Status } from "cryptgeon";
 import prettyBytes from "pretty-bytes";
 import { useEffect, useState } from "react";
 import { Duration } from "uhrwerk";
@@ -73,8 +72,8 @@ export default function Command() {
   });
 
   useEffect(() => {
-    setOptions({ server: preferences.server });
-    getStatus().then(setStatus);
+    API.setOptions({ server: preferences.server });
+    API.status().then(setStatus);
   }, []);
 
   return (
