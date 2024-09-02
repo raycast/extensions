@@ -133,7 +133,6 @@ export default function Command(props: LaunchProps) {
     refreshContent();
   }, []);
 
-
   const CopyToClipboard = (props: {
     case: CaseType;
     modified: string;

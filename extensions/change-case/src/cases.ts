@@ -1,5 +1,14 @@
 import * as changeCase from "change-case";
-import { lowerCase, lowerFirst, kebabUpperCase, upperCase, upperFirst, titleCase, spongeCase, swapCase } from "./customCases";
+import {
+  lowerCase,
+  lowerFirst,
+  kebabUpperCase,
+  upperCase,
+  upperFirst,
+  titleCase,
+  spongeCase,
+  swapCase,
+} from "./customCases";
 import { getPreferenceValues } from "@raycast/api";
 
 export type CaseFunction = (input: string, options?: changeCase.Options) => string;
