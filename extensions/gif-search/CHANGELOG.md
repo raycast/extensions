@@ -1,6 +1,6 @@
 # GIF Search Changelog
 
-## [Fix favorites GIFS can't be removed] - {PR_MERGE_DATE}
+## [Fix favorites GIFS can't be removed] - 2024-09-02
 
 - Fixes a bug where favorited GIFs couldn't be removed from the favorites list
 
