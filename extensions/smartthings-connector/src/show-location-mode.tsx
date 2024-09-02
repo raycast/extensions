@@ -4,7 +4,7 @@ import {
   ToastStyle,
   ActionPanel,
   Icon,
-  useNavigation,
+  // useNavigation, // Entfernen Sie diesen Import
   Action,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
@@ -14,6 +14,7 @@ import {
   fetchLocationModes,
   switchLocationMode,
 } from "./fetchDevices";
+import { LocationMode } from "./types"; // Erstellen Sie diese Datei mit den entsprechenden Typdefinitionen
 
 export default function ShowLocationMode() {
   const [currentMode, setCurrentMode] = useState<string | null>(null);
@@ -45,7 +46,7 @@ export default function ShowLocationMode() {
         }
 
         const availableModes = await fetchLocationModes(); // Argument entfernt
-        setModes(availableModes.map((mode: any) => mode.name)); // Typ 'any' explizit angeben
+        setModes(availableModes.map((mode: LocationMode) => mode.name)); // Typ 'any' explizit angeben
         setIsLoading(false);
       } catch (error) {
         showToast(
@@ -59,15 +60,14 @@ export default function ShowLocationMode() {
     fetchData();
   }, []);
 
-  const { push } = useNavigation();
-
   const handleSwitchMode = async (newModeName: string) => {
     try {
       if (!locationId) return;
 
       const modes = await fetchLocationModes(); // Argument entfernt
       const newMode = modes.find(
-        (mode: any) => mode.name.toLowerCase() === newModeName.toLowerCase(),
+        (mode: LocationMode) =>
+          mode.name.toLowerCase() === newModeName.toLowerCase(),
       ); // Typ 'any' explizit angeben
       if (newMode) {
         await switchLocationMode(newMode.id); // Argument 'locationId' entfernt

@@ -8,6 +8,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { Device, DeviceCategory } from "./types"; // Erstellen Sie diese Datei mit den entsprechenden Typdefinitionen
 
 const ICON_URLS = {
   switch: "https://api.iconify.design/material-symbols/switch.svg",
@@ -27,7 +28,7 @@ const ICON_URLS = {
 };
 
 // Funktion, um die Icon-URL basierend auf der Kategorie und Größe zu erhalten
-const getIconUrl = (category: any, size = 1) => {
+const getIconUrl = (category: DeviceCategory, size = 1): string => {
   if (!category) {
     console.warn("Category is undefined or null");
     return ICON_URLS["other"];
@@ -46,12 +47,13 @@ const getIconUrl = (category: any, size = 1) => {
 };
 
 export default function ShowAllDevices() {
-  const [devices, setDevices] = useState<{ [key: string]: any[] }>({});
-  const [filteredDevices, setFilteredDevices] = useState<{
-    [key: string]: any[];
-  }>({});
+  const [devices, setDevices] = useState<Record<DeviceCategory, Device[]>>({});
+  const [filteredDevices, setFilteredDevices] = useState<
+    Record<DeviceCategory, Device[]>
+  >({});
   const [isLoading, setIsLoading] = useState(true);
-  const [searchText, setSearchText] = useState("");
+  // Entfernen Sie die nicht verwendete Variable searchText
+  // const [searchText, setSearchText] = useState("");
   const { push } = useNavigation();
 
   useEffect(() => {
@@ -59,7 +61,7 @@ export default function ShowAllDevices() {
       try {
         const preferences = getPreferenceValues();
         const SMARTTHINGS_API_TOKEN = preferences.apiToken; // Retrieve the API token from preferences
-        const SMARTTHINGS_LOCATION_ID = preferences.locationId; // Retrieve the location ID from preferences
+        // Entfernen Sie die nicht verwendete Variable SMARTTHINGS_LOCATION_ID
 
         const response = await axios.get(
           `https://api.smartthings.com/v1/devices`,
@@ -70,10 +72,10 @@ export default function ShowAllDevices() {
           },
         );
 
-        const devicesData = response.data.items;
+        const devicesData: Device[] = response.data.items;
 
         // Sort devices by the last updated timestamp in descending order
-        devicesData.sort((a: any, b: any) => {
+        devicesData.sort((a: Device, b: Device) => {
           const aTimestamp = new Date(
             a.components[0].capabilities[0].timestamp,
           ).getTime();
@@ -89,8 +91,10 @@ export default function ShowAllDevices() {
         // Sort categories based on the latest update date of devices within each category
         const sortedCategories = Object.keys(categorizedDevices).sort(
           (categoryA, categoryB) => {
-            const latestDeviceA = (categorizedDevices as any)[categoryA][0];
-            const latestDeviceB = (categorizedDevices as any)[categoryB][0];
+            const latestDeviceA =
+              categorizedDevices[categoryA as DeviceCategory][0];
+            const latestDeviceB =
+              categorizedDevices[categoryB as DeviceCategory][0];
             if (!latestDeviceA || !latestDeviceB) return 0;
             const timestampA = new Date(
               latestDeviceA.components[0].capabilities[0].timestamp,
@@ -128,10 +132,12 @@ export default function ShowAllDevices() {
   }, []); // Empty dependency array ensures this effect runs only once after initial render
 
   // Function to categorize devices based on their categories
-  const categorizeDevices = (devices: any) => {
+  const categorizeDevices = (
+    devices: Device[],
+  ): Record<DeviceCategory, Device[]> => {
     const categorized = {};
 
-    devices.forEach((device: any) => {
+    devices.forEach((device: Device) => {
       device.components.forEach((component: any) => {
         component.categories.forEach((category: any) => {
           if (!(category.name in categorized)) {
@@ -146,7 +152,7 @@ export default function ShowAllDevices() {
   };
 
   // Function to filter devices based on search text
-  const filterDevices = (text: any) => {
+  const filterDevices = (text: string): void => {
     if (!text.trim()) {
       setFilteredDevices(devices);
       return;
@@ -157,7 +163,7 @@ export default function ShowAllDevices() {
 
     Object.keys(devices).forEach((category: string) => {
       const filteredCategoryDevices = devices[category].filter(
-        (device: any) =>
+        (device: Device) =>
           (device.label && device.label.toLowerCase().includes(lowerText)) ||
           device.components.some((component: any) =>
             component.categories.some((category: any) =>
@@ -175,17 +181,17 @@ export default function ShowAllDevices() {
     setFilteredDevices(filtered as any);
   };
 
-  // Handler for search bar text change
-  const handleSearchTextChange = (text: any) => {
-    setSearchText(text);
+  // Aktualisieren Sie die handleSearchTextChange Funktion
+  const handleSearchTextChange = (text: string): void => {
+    // Entfernen Sie setSearchText(text);
     filterDevices(text);
   };
 
   // Function to handle device selection and navigation
-  const handleDeviceSelection = (deviceId: any) => {
+  const handleDeviceSelection = (deviceId: string): void => {
     const device = Object.values(devices)
       .flat()
-      .find((device: any) => device.deviceId === deviceId);
+      .find((device: Device) => device.deviceId === deviceId);
     if (device) {
       push(<DeviceDetail device={device} />);
     }
@@ -199,14 +205,14 @@ export default function ShowAllDevices() {
       aspectRatio="16/9"
       itemSize={Grid.ItemSize.Small}
     >
-      {Object.keys(filteredDevices).map((category, index) => (
+      {Object.entries(filteredDevices).map(([category, categoryDevices]) => (
         <Grid.Section key={category} title={category}>
-          {filteredDevices[category].map((device: any, idx: any) => (
+          {categoryDevices.map((device: Device) => (
             <Grid.Item
-              key={`${device.deviceId}-${idx}`} // Ensure unique keys
+              key={device.deviceId}
               title={device.label || "Unnamed Device"}
               subtitle={device.deviceTypeName}
-              content={{ source: getIconUrl(category, 0.75) }} // Scale the icon to 75% of original size
+              content={{ source: getIconUrl(category as DeviceCategory, 0.75) }} // Scale the icon to 75% of original size
               actions={
                 <ActionPanel>
                   <ActionPanel.Item
@@ -233,7 +239,7 @@ export default function ShowAllDevices() {
 }
 
 // Komponente zum Anzeigen der Gerätedetails
-function DetailComponent({ device }: { device: any }) {
+function DetailComponent({ device }: { device: Device }) {
   return (
     <Grid.Item
       title={device.label || "Unnamed Device"}
@@ -244,7 +250,7 @@ function DetailComponent({ device }: { device: any }) {
 }
 
 // Komponente zum Rendern der Gerätedetailansicht
-function DeviceDetail({ device }: { device: any }) {
+function DeviceDetail({ device }: { device: Device }) {
   return (
     <Grid>
       <Grid.Section>

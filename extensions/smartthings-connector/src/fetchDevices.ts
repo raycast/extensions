@@ -1,5 +1,7 @@
 import axios from "axios";
 import { getPreferenceValues } from "@raycast/api";
+// Stellen Sie sicher, dass der Pfad korrekt ist
+import type { Device as ImportedDevice, DeviceStatus } from "./types.ts";
 
 const preferences = getPreferenceValues();
 const SMARTTHINGS_API_URL = "https://api.smartthings.com/v1";
@@ -19,26 +21,41 @@ async function fetchAllDeviceDetails() {
   return response.data.items;
 }
 
-async function fetchDeviceStatuses(deviceIds: string[]) {
+async function fetchDeviceStatuses(deviceIds: string[]): Promise<{
+  [key: string]: { components: { main: DeviceStatus }; roomName: string };
+}> {
   const promises = deviceIds.map((id) => api.get(`/devices/${id}/status`));
   const responses = await Promise.all(promises);
-  return responses.reduce((acc: { [key: string]: any }, res, index) => {
-    // Typ für 'acc' explizit angeben
-    acc[deviceIds[index]] = res.data as any; // Typ 'any' explizit angeben
-    return acc;
-  }, {});
+  return responses.reduce(
+    (
+      acc: {
+        [key: string]: { components: { main: DeviceStatus }; roomName: string };
+      },
+      res,
+      index,
+    ) => {
+      acc[deviceIds[index]] = res.data;
+      return acc;
+    },
+    {},
+  );
 }
 
-export async function fetchDevices() {
+interface Device extends ImportedDevice {
+  deviceId: string;
+  deviceTypeName: string;
+  // andere Eigenschaften...
+}
+
+export async function fetchDevices(): Promise<Device[]> {
   const devices = await fetchAllDeviceDetails();
-  const deviceIds = devices.map((device: any) => device.deviceId); // Typ 'any' explizit angeben
+  const deviceIds = devices.map((device: Device) => device.deviceId);
   const statuses = await fetchDeviceStatuses(deviceIds);
 
-  return devices.map((device: any) => ({
+  return devices.map((device: Device) => ({
     ...device,
-    status: (statuses[device.deviceId] as { components: { main: any } })
-      .components.main, // Typ 'any' explizit angeben
-    roomName: (statuses[device.deviceId] as { roomName: string }).roomName, // Typ 'string' explizit angeben
+    status: statuses[device.deviceId].components.main,
+    roomName: statuses[device.deviceId].roomName,
     deviceType: device.deviceTypeName,
   }));
 }
@@ -74,9 +91,12 @@ export async function switchLocationMode(modeId: string) {
     await api.put(`/locations/${SMARTTHINGS_LOCATION_ID}/modes/current`, {
       modeId,
     });
-  } catch (error: any) {
-    // Typ 'any' explizit angeben
-    throw new Error(`Failed to switch location mode: ${error.message}`);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to switch location mode: ${error.message}`);
+    } else {
+      throw new Error("Failed to switch location mode: Unknown error");
+    }
   }
 }
 

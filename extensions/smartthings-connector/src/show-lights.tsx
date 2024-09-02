@@ -12,9 +12,39 @@ import { fetchDevices } from "./fetchDevices";
 import { fetchRooms } from "./fetchRooms";
 import { toggleLight } from "./toggleLight";
 
+interface DeviceStatus {
+  switch?: {
+    switch?: {
+      timestamp?: string;
+      value?: string;
+    };
+  };
+  switchLevel?: {
+    level?: {
+      value?: number;
+    };
+  };
+}
+
+interface Device {
+  deviceId: string;
+  label: string;
+  roomId: string;
+  components: Array<{ categories: Array<{ name: string }> }>;
+  status?: DeviceStatus;
+  deviceTypeName: string;
+  id: string;
+  name: string;
+}
+
+interface Room {
+  roomId: string;
+  name: string;
+}
+
 export default function Command() {
-  const [devices, setDevices] = useState<any[]>([]); // Typ explizit auf any[] gesetzt
-  const [filteredDevices, setFilteredDevices] = useState<any[]>([]); // Typ explizit auf any[] gesetzt
+  const [devices, setDevices] = useState<Device[]>([]);
+  const [filteredDevices, setFilteredDevices] = useState<Device[]>([]);
   const [rooms, setRooms] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
@@ -26,23 +56,30 @@ export default function Command() {
         fetchDevices(),
       ]);
 
-      const roomsMap = roomsData.reduce((acc: any, room: any) => {
-        acc[room.roomId] = room.name;
-        return acc;
-      }, {});
+      const roomsMap = roomsData.reduce(
+        (acc: { [key: string]: string }, room: Room) => {
+          acc[room.roomId] = room.name;
+          return acc;
+        },
+        {},
+      );
       setRooms(roomsMap);
 
       const lightDevices = devicesData
-        .filter((device: any) =>
-          device.components.some((component: any) =>
-            component.categories.some(
-              (category: any) => category.name === "Light",
+        .filter(
+          (device: any): device is Device =>
+            "components" in device &&
+            Array.isArray(device.components) &&
+            device.components.some(
+              (component: { categories: Array<{ name: string }> }) =>
+                component.categories.some(
+                  (category: { name: string }) => category.name === "Light",
+                ),
             ),
-          ),
         )
-        .sort((a: any, b: any) => {
-          const aTimestamp = a.status?.switch?.switch?.timestamp || 0;
-          const bTimestamp = b.status?.switch?.switch?.timestamp || 0;
+        .sort((a, b) => {
+          const aTimestamp = a.status?.switch?.switch?.timestamp || "0";
+          const bTimestamp = b.status?.switch?.switch?.timestamp || "0";
           return (
             new Date(bTimestamp).getTime() - new Date(aTimestamp).getTime()
           );
@@ -51,11 +88,11 @@ export default function Command() {
       setDevices(lightDevices);
       setFilteredDevices(lightDevices);
     } catch (error) {
-      showToast(
-        ToastStyle.Failure,
-        "Failed to fetch data",
-        (error as Error).message,
-      );
+      showToast({
+        style: ToastStyle.Failure, // ToastStyle statt Toast.Style
+        title: "Failed to fetch data",
+        message: (error as Error).message,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -70,7 +107,7 @@ export default function Command() {
       setFilteredDevices(devices);
     } else {
       const filtered = devices.filter(
-        (device: any) =>
+        (device: Device) =>
           device.label.toLowerCase().includes(searchText.toLowerCase()) ||
           (rooms[device.roomId] &&
             rooms[device.roomId]
@@ -81,20 +118,20 @@ export default function Command() {
     }
   }, [searchText, devices, rooms]);
 
-  const getStatusIcon = useCallback((device: any) => {
+  const getStatusIcon = useCallback((device: Device) => {
     if (device.status?.switch?.switch?.value === "on") {
       return { source: Icon.LightBulb, tintColor: Color.Green };
     }
     return Icon.LightBulb;
   }, []);
 
-  const handleToggleLight = useCallback(async (device: any) => {
+  const handleToggleLight = useCallback(async (device: Device) => {
     if (device.status?.switch) {
       const currentStatus = device.status.switch.switch.value;
       try {
         const newStatus = await toggleLight(device.deviceId, currentStatus);
-        setDevices((prevDevices: any[]) =>
-          prevDevices.map((d: any) =>
+        setDevices((prevDevices: Device[]) =>
+          prevDevices.map((d: Device) =>
             d.deviceId === device.deviceId
               ? {
                   ...d,
@@ -119,7 +156,7 @@ export default function Command() {
     }
   }, []);
 
-  const getDetailMarkdown = useCallback((device: any) => {
+  const getDetailMarkdown = useCallback((device: Device) => {
     const switchStatus = device.status?.switch?.switch?.value || "unknown";
     const timestamp = device.status?.switch?.switch?.timestamp || "N/A";
     const level = device.status?.switchLevel?.level?.value || "N/A";
@@ -139,7 +176,7 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       isShowingDetail
     >
-      {filteredDevices.map((device: any) => (
+      {filteredDevices.map((device: Device) => (
         <List.Item
           key={device.deviceId}
           title={device.label}

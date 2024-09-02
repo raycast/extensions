@@ -8,9 +8,23 @@ import {
 import { useEffect, useState } from "react";
 import { fetchRooms, fetchDevicesInRoom } from "./fetchRooms";
 
+// Am Anfang der Datei fügen Sie diese Interfaces hinzu:
+interface Room {
+  roomId: string;
+  name: string;
+  // Fügen Sie hier weitere Eigenschaften hinzu, die ein Room haben könnte
+}
+
+interface Device {
+  deviceId: string;
+  label: string;
+  roomId: string;
+  // Fügen Sie hier weitere Eigenschaften hinzu, die ein Device haben könnte
+}
+
 export default function ShowRooms() {
-  const [rooms, setRooms] = useState([]);
-  const [devices, setDevices] = useState([]);
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [devices, setDevices] = useState<Device[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
 
@@ -21,18 +35,18 @@ export default function ShowRooms() {
         setRooms(roomsData);
 
         // Fetch devices for all rooms
-        const devicePromises = roomsData.map((room: any) =>
+        const devicePromises = roomsData.map((room: Room) =>
           fetchDevicesInRoom(room.roomId),
-        ); // Typ 'any' explizit angeben
+        );
         const devicesData = await Promise.all(devicePromises);
-        setDevices(devicesData.flat() as any); // Typ 'any' explizit angeben
+        setDevices(devicesData.flat() as Device[]);
         setIsLoading(false);
       } catch (error) {
         showToast(
           ToastStyle.Failure,
           "Failed to fetch data",
           (error as Error).message,
-        ); // Typ 'Error' explizit angeben
+        );
         setIsLoading(false);
       }
     }
@@ -47,43 +61,39 @@ export default function ShowRooms() {
       isShowingDetail
     >
       {rooms
-        .filter((room: any) =>
+        .filter((room: Room) =>
           room.name.toLowerCase().includes(searchText.toLowerCase()),
         )
-        .map(
-          (
-            room: any, // Typ 'any' explizit angeben
-          ) => (
-            <List.Item
-              key={room.roomId} // Typ 'any' explizit angeben
-              id={room.roomId} // Typ 'any' explizit angeben
-              title={room.name} // Typ 'any' explizit angeben
-              actions={
-                <ActionPanel>
-                  <CopyToClipboardAction
-                    title="Copy Room Info"
-                    content={JSON.stringify(room, null, 2)}
-                  />
-                </ActionPanel>
-              }
-              detail={
-                <List.Item.Detail
-                  markdown={
-                    devices.length > 0
-                      ? `### Devices in ${room.name}\n${devices
-                          .filter(
-                            (device: any) => device.roomId === room.roomId,
-                          )
-                          .map((device: any) => `- ${device.label}`)
-                          .join("\n")}` // Typ 'any' explizit angeben
-                      : "No devices found"
-                  }
+        .map((room: Room) => (
+          <List.Item
+            key={room.roomId}
+            id={room.roomId}
+            title={room.name}
+            actions={
+              <ActionPanel>
+                <CopyToClipboardAction
+                  title="Copy Room Info"
+                  content={JSON.stringify(room, null, 2)}
                 />
-              }
-              accessoryTitle={`${devices.filter((device: any) => device.roomId === room.roomId).length} Devices`} // Typ 'any' explizit angeben
-            />
-          ),
-        )}
+              </ActionPanel>
+            }
+            detail={
+              <List.Item.Detail
+                markdown={
+                  devices.length > 0
+                    ? `### Devices in ${room.name}\n${devices
+                        .filter(
+                          (device: Device) => device.roomId === room.roomId,
+                        )
+                        .map((device: Device) => `- ${device.label}`)
+                        .join("\n")}`
+                    : "No devices found"
+                }
+              />
+            }
+            accessoryTitle={`${devices.filter((device: Device) => device.roomId === room.roomId).length} Devices`}
+          />
+        ))}
     </List>
   );
 }

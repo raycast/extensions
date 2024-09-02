@@ -8,12 +8,19 @@ import {
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+interface Scene {
+  sceneId: string;
+  sceneName: string;
+  lastExecutedDate?: string;
+  // Fügen Sie hier weitere Eigenschaften hinzu, die eine Scene haben könnte
+}
+
 const preferences = getPreferenceValues();
 const SMARTTHINGS_API_TOKEN = preferences.apiToken; // Retrieve the API token from preferences
 const SMARTTHINGS_LOCATION_ID = preferences.locationId; // Retrieve the location ID from preferences
 
 export default function ShowScenes() {
-  const [scenes, setScenes] = useState([]);
+  const [scenes, setScenes] = useState<Scene[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -29,7 +36,8 @@ export default function ShowScenes() {
         );
 
         console.log("Fetched Scenes Payload:", response.data); // Log the payload
-        setScenes(response.data.items);
+        const scenes: Scene[] = response.data.items;
+        setScenes(scenes);
         setIsLoading(false);
       } catch (error) {
         showToast(
@@ -65,23 +73,23 @@ export default function ShowScenes() {
     }
   };
 
-  const formatDate = (timestamp: any) => {
-    if (!timestamp) return "Never executed";
+  const formatDate = (timestamp: string | undefined): string => {
+    if (!timestamp) return "Nie ausgeführt";
     const date = new Date(timestamp);
-    return date.toLocaleString(); // Format the date as a readable string
+    return date.toLocaleString();
   };
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search Scenes...">
-      {scenes.map((scene: any) => (
+      {scenes.map((scene: Scene) => (
         <List.Item
           key={scene.sceneId}
-          title={scene.sceneName || "Unnamed Scene"}
-          accessoryTitle={`Last executed: ${formatDate(scene.lastExecutedDate)}`}
+          title={scene.sceneName || "Unbenannte Szene"}
+          accessoryTitle={`Zuletzt ausgeführt: ${formatDate(scene.lastExecutedDate)}`}
           actions={
             <ActionPanel>
               <ActionPanel.Item
-                title="Execute Scene"
+                title="Szene ausführen"
                 onAction={() => executeScene(scene.sceneId)}
               />
             </ActionPanel>
