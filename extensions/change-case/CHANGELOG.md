@@ -1,5 +1,10 @@
 # Change Case Changelog
 
+## [Fix logic regarding preserve casing] - {PR_MERGE_DATE}
+- Properly handle the logic regarding the `Preserve Casing` preference
+- Rewrote some of the documentation to make it clearer
+- Handle `KEBAB-UPPER-CASE` transform correctly
+
 ## [Visual improvements] - 2024-06-07
 - Small improvement to some UI copy meant to make the lowercasing behavior for Title and Sentence Case transformations clearer.
 
