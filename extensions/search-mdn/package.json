@@ -44,6 +44,7 @@
             }
           ],
           "required": false,
+          "default": "read",
           "name": "preferredAction",
           "description": "Choose what you want to do with the result first"
         }
