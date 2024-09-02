@@ -7,7 +7,7 @@ import { SMALL_WORDS, titleCase as titleCaseLib } from "title-case";
 export type CaseFunction = (input: string) => string;
 export type CaseFunctions = Record<string, CaseFunction>;
 
-const lowerCase = (input: string) => input.toLowerCase();
+const lowerCase = (input: string) => changeCase.noCase(input).toLowerCase();
 
 const lowerFirst = (input: string) => {
   if (input.length <= 1) {
