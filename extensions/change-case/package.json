@@ -120,7 +120,7 @@
       "name": "suffixCharacters",
       "type": "textfield",
       "title": "Suffix Characters",
-      "description": "Characters to retain at the end of the input. Eg, `_` to keep parentheses in `type_`",
+      "description": "Characters to retain at the end of the input. Eg, `_` to keep underscores in `type_`",
       "default": "",
       "required": false
     },
