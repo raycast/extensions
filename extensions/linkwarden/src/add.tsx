@@ -7,27 +7,21 @@ import {
   Toast,
   getPreferenceValues,
   getFrontmostApplication,
+  List,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { FormValidation, showFailureToast, useFetch, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import axios, { AxiosError } from "axios";
 import { chromiumBrowserNames, getChromiumBrowserPath, getWebkitBrowserPath, webkitBrowserNames } from "./utils";
+import { useCollections, useTags } from "./hooks";
+import { ApiResponse } from "./interfaces";
 
 interface FormValues {
   name: string;
   url: string;
+  collection: string;
   description: string;
   tagPicker: string[];
-}
-
-interface Tag {
-  id: number;
-  name: string;
-  ownerId: number;
-}
-
-interface ApiResponse {
-  response: Tag[];
 }
 
 const fetchLink = async (preferences: Preferences, values: FormValues, ownerIDValue: number | undefined) => {
@@ -63,7 +57,7 @@ const fetchLink = async (preferences: Preferences, values: FormValues, ownerIDVa
       title: "Link posted successfully",
     });
   } catch (error) {
-    const axiosError = error as AxiosError<{ response: string }>;
+    const axiosError = error as AxiosError<ApiResponse<string>>;
     if (axiosError.response) {
       const { statusText } = axiosError.response;
       await showFailureToast(axiosError.response.data.response, { title: statusText });
@@ -110,18 +104,8 @@ export default () => {
     fetchBrowserPath();
   }, []);
 
-  const { data: tags } = useFetch(`${preferences.LinkwardenUrl}/api/v1/tags`, {
-    headers: {
-      Authorization: `Bearer ${preferences.LinkwardenApiKey}`,
-    },
-    mapResult(result: ApiResponse) {
-      return {
-        data: result.response,
-      };
-    },
-    initialData: [],
-    keepPreviousData: true,
-  });
+  const { isLoading: isLoadingTags, data: tags } = useTags();
+  const { isLoading: isLoadingCollections, data: collections } = useCollections();
 
   const firstOwnerID = tags.find((tag) => tag.ownerId);
 
@@ -140,7 +124,7 @@ export default () => {
   });
 
   return (
-    <Form
+    <Form isLoading={isLoadingTags || isLoadingCollections}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -153,6 +137,9 @@ export default () => {
       }
     >
       <Form.TextField {...itemProps.url} title="URL" placeholder="http://example.com/" />
+      <Form.Dropdown title="Collection" {...itemProps.collection}>
+        {collections.map(collection => <List.Dropdown.Item key={collection.id} icon={{ source: Icon.Folder, tintColor: collection.color }} title={`${collection.name} (${collection._count.links}) [${collection.parent?.name ? `${collection.parent.name} > ` : ""}${collection.name}]`} value={collection.id.toString()} />)}
+      </Form.Dropdown>
       <Form.TextField {...itemProps.name} title="Name" placeholder="Will be auto generated if left empty" autoFocus />
       <Form.TagPicker {...itemProps.tagPicker} title="Tag Picker" placeholder="Select...">
         {tags.map((tag) => (

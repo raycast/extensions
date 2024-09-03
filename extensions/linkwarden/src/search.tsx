@@ -13,24 +13,7 @@ import {
 import { getFavicon, useFetch } from "@raycast/utils";
 import { useState } from "react";
 import axios from "axios";
-
-interface Link {
-  id: number;
-  name: string;
-  type: string;
-  description: string;
-  url: string;
-  updatedAt: string;
-  collection: {
-    id: number;
-    name: string;
-    color: string;
-  }
-}
-
-interface ApiResponse {
-  response: Link[];
-}
+import { ApiResponse, Link } from "./interfaces";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
@@ -38,12 +21,12 @@ export default function Command() {
   const [collection, setCollection] = useState("");
 
   const { isLoading, data, revalidate } = useFetch(
-    `${preferences.LinkwardenUrl}/api/v1/links?sort=0&searchQueryString=${searchText}&searchByName=true&searchByUrl=true&searchByDescription=true&searchByTags=true&searchByTextContent=true` + (collection ? `&collection=${collection}` : ""),
+    `${preferences.LinkwardenUrl}/api/v1/links?sort=0&searchQueryString=${searchText}&searchByName=true&searchByUrl=true&searchByDescription=true&searchByTags=true&searchByTextContent=true&collection=${collection}`,
     {
       headers: {
         Authorization: `Bearer ${preferences.LinkwardenApiKey}`,
       },
-      mapResult(result: ApiResponse) {
+      mapResult(result: ApiResponse<Link[]>) {
         return {
           data: result.response,
         };
@@ -81,7 +64,9 @@ export default function Command() {
   return (
     <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText} throttle searchBarPlaceholder="Search for Links" searchBarAccessory={<List.Dropdown tooltip="Collection" onChange={setCollection}>
       <List.Dropdown.Item title="All" value="-1" />
-      {[...new Set(data.map(link => link.collection))].map(collection => <List.Dropdown.Item key={collection.id} icon={{ source: Icon.Folder, tintColor: collection.color }} title={collection.name} value={collection.id.toString()} />)}
+      {Array.from(
+  new Map(data.map(item => [item.collection.id, item.collection])).values()
+).map(collection => <List.Dropdown.Item key={collection.id} icon={{ source: Icon.Folder, tintColor: collection.color }} title={collection.name} value={collection.id.toString()} />)}
     </List.Dropdown>}>
       {!isLoading && !data.length && (
         <List.EmptyView

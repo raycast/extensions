@@ -2,9 +2,14 @@
 
 ## [Filter Links by Collection] - {PR_MERGE_DATE}
 
+### Enhancements
 - View the Date Modified and Collection of a link
 - Filter links by collection
+- You can now choose a collection when adding a link
+
+### Dev
 - Controlled validation with better error handling in `add`
+- Moved some interfaces and some `useFetch` into separate files so that in future it will be easier to pass down those hooks for mutate and repeated calls
 
 ## [Fix API Auth] - 2024-08-20
 
