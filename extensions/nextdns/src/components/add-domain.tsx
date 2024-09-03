@@ -25,12 +25,11 @@ export default function AddDomain(props: { type: string; mutate?: Mutate; data?:
             },
           });
           toast.style = Toast.Style.Success;
-          toast.title = "Added Domain";
-          toast.message = values.domain;
+          toast.title = "Added domain";
           pop();
         } catch (error) {
           toast.style = Toast.Style.Failure;
-          toast.title = "Could not Add Domain";
+          toast.title = "Could not add domain";
         }
       }
     },
