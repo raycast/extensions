@@ -1,6 +1,6 @@
 # NextDNS Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2024-09-03
 
 - Added pagination for `Search Logs`
 - Added support for adding domains to allow- and denylist from `Search Logs`
