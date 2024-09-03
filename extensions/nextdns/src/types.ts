@@ -60,3 +60,8 @@ export type NextDNSSuccessResult<T> = {
     };
   };
 };
+
+export type AddDomainActionProps = {
+  domain: string;
+  type: string;
+};
