@@ -39,9 +39,14 @@ export default function Command() {
       },
       startDate: (value) => {
         if (!value) return "Field required";
+        const today = new Date();
+        if (value > today) return "Future date not allowed";
       },
       endDate: (value) => {
         if (!value) return "Field required";
+        const today = new Date();
+        if (value > today) return "Future date not allowed";
+        if (values.startDate && value < values.startDate) return "End date before start date";
       },
       priceIndex: (value) => {
         if (!value) return "Field required";
