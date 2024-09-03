@@ -1,6 +1,6 @@
 import { Clipboard, environment, Keyboard, showToast, Toast } from "@raycast/api";
 import { searchArcPreferences } from "./preferences";
-import { HistoryEntry, Space, Tab, TabLocation } from "./types";
+import { HistoryEntry, Space, Download, Tab, TabLocation } from "./types";
 
 export function getDomain(url: string) {
   try {
@@ -15,6 +15,11 @@ export function getDomain(url: string) {
 export function getLastVisitedAt(entry: HistoryEntry) {
   const date = new Date(entry.lastVisitedAt);
   return { date, tooltip: `Last visited: ${date.toLocaleString()}` };
+}
+
+export function getDownloadedAt(entry: Download) {
+  const date = new Date(entry.download_time);
+  return { date, tooltip: `Downloaded time: ${date.toLocaleString()}` };
 }
 
 export function getSpaceTitle(space: Space) {

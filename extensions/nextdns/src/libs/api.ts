@@ -102,3 +102,29 @@ export async function toggleDomain(props: { element: DomainListItem }) {
     },
   );
 }
+
+export async function connectionStatus() {
+  try {
+    const response = await fetch("https://test.nextdns.io", {
+      method: "GET",
+      headers: {
+        "User-Agent": "curl",
+      },
+    });
+
+    if (!response.ok) {
+      return "Failed to get status from NextDNS";
+    }
+
+    const respJson = (await response.json()) as { status: string; deviceName: string; protocol: string };
+    const { status, deviceName, protocol } = respJson;
+
+    if (status === "ok") {
+      return `✅  ${deviceName} is using NextDNS via ${protocol}`;
+    } else {
+      return "❌  This device is not using NextDNS";
+    }
+  } catch (error) {
+    return "Failed to reach NextDNS.";
+  }
+}

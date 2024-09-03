@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { ActionPanel, Action, openExtensionPreferences, showToast, Toast, Icon, Image } from "@raycast/api";
 import { Context } from "u/context";
 import { getMonthName, getDayName } from "u/getName";

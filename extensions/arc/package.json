@@ -36,7 +36,8 @@
     "jayeshbhole",
     "hinzed1127",
     "osalama",
-    "geb"
+    "geb",
+    "ridemountainpig"
   ],
   "pastContributors": [
     "pomdtr",
@@ -152,6 +153,13 @@
       "title": "Search Tabs",
       "subtitle": "Arc",
       "description": "Search and select your tabs",
+      "mode": "view"
+    },
+    {
+      "name": "search-downloads",
+      "title": "Search Downloads",
+      "subtitle": "Arc",
+      "description": "Search your downloads",
       "mode": "view"
     },
     {

@@ -9,36 +9,20 @@ import getViewMode from "u/getViewMode";
 import Month from "@/month/month";
 import Actions from "@/actions/actions";
 import { searchPlaceholder, monthDropdown } from "u/options";
-import { getWeek } from "date-fns";
-import { getSelection } from "u/getSelection";
 import getMonthNumber from "u/getMonthNumber";
 
 export default function Calendar() {
-  const {
-    currentYear,
-    currentDay,
-    currentMonth,
-    setCurrentMonth,
-    setCurrentWeek,
-    setCurrentYear,
-    enableWeek,
-    enableTimer,
-    setSelectedDay,
-    placeholder,
-  } = useContext(Context);
+  const { setCurrentMonth, setCurrentYear, enableWeek, enableTimer, placeholder } = useContext(Context);
   const [isTimerHidden, setIsTimerHidden] = useState(false);
   const setViewMode = getViewMode();
 
-  const titleCommand = useTitle({
-    weather: true,
-    day: currentDay,
-  });
+  const COMMAND_META = useTitle();
 
   const PLACE_HOLDER = searchPlaceholder ? searchPlaceholder : placeholder + " ".repeat(140);
 
   useEffect(() => {
-    updateCommandMetadata({ subtitle: titleCommand });
-  }, [titleCommand]);
+    updateCommandMetadata({ subtitle: COMMAND_META });
+  }, [COMMAND_META]);
 
   const handleSearchTextChange = (searchText: string) => {
     setIsTimerHidden(searchText.length > 0);
@@ -78,9 +62,6 @@ export default function Calendar() {
       actions={<Actions />}
       selectedItemId={todayId}
       onSearchTextChange={handleSearchTextChange}
-      onSelectionChange={(id) => {
-        getSelection(id, setCurrentWeek, setSelectedDay, getWeek, currentYear, currentMonth);
-      }}
     >
       {enableTimer && !isTimerHidden && <Time />}
       <Month />
