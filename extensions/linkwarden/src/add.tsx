@@ -9,7 +9,7 @@ import {
   getFrontmostApplication,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { useFetch, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useFetch, useForm } from "@raycast/utils";
 import axios, { AxiosError } from "axios";
 import { chromiumBrowserNames, getChromiumBrowserPath, getWebkitBrowserPath, webkitBrowserNames } from "./utils";
 
@@ -31,6 +31,7 @@ interface ApiResponse {
 }
 
 const fetchLink = async (preferences: Preferences, values: FormValues, ownerIDValue: number | undefined) => {
+  await showToast(Toast.Style.Animated, "Creating link");
   try {
     const response = await axios.post(
       `${preferences.LinkwardenUrl}/api/v1/links`,
@@ -62,29 +63,10 @@ const fetchLink = async (preferences: Preferences, values: FormValues, ownerIDVa
       title: "Link posted successfully",
     });
   } catch (error) {
-    const axiosError = error as AxiosError;
-    console.error("Error posting link:", axiosError);
+    const axiosError = error as AxiosError<{ response: string }>;
     if (axiosError.response) {
-      const status = axiosError.response.status;
-      if (status === 409) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Conflict",
-          message: "A link with this URL already exists.",
-        });
-      } else if (status === 400) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Bad Request",
-          message: "The request was malformed. Please check the data and try again.",
-        });
-      } else {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to post link",
-          message: axiosError.message,
-        });
-      }
+      const { statusText } = axiosError.response;
+      await showFailureToast(axiosError.response.data.response, { title: statusText });
     } else {
       showToast({
         style: Toast.Style.Failure,
@@ -110,14 +92,12 @@ export default () => {
       } else if (chromiumBrowserNames.includes(app.name)) {
         path = await getChromiumBrowserPath(app.name);
       }
-      console.log("Browser path:", path);
       setBrowserPath(path);
 
       if (!path) {
         throw new Error("Could not fetch URL from the browser");
       }
     } catch (error) {
-      console.error("Error fetching frontmost application:", error);
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to fetch URL",
@@ -149,17 +129,14 @@ export default () => {
 
   const { itemProps, handleSubmit } = useForm<FormValues>({
     async onSubmit(values) {
-      if (!values.url) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Validation Error",
-          message: "URL cannot be empty.",
-        });
-        return;
-      }
-
       await fetchLink(preferences, values, ownerIDValue);
     },
+    initialValues: {
+      url: browserPath
+    },
+    validation: {
+      url: FormValidation.Required
+    }
   });
 
   return (
@@ -175,14 +152,14 @@ export default () => {
         </ActionPanel>
       }
     >
-      <Form.TextField id="url" value={browserPath} title="URL" placeholder="http://example.com/" />
-      <Form.TextField id="name" title="Name" placeholder="Keep default name" autoFocus />
-      <Form.TagPicker {...itemProps.tagPicker} title="Tag Picker">
+      <Form.TextField {...itemProps.url} title="URL" placeholder="http://example.com/" />
+      <Form.TextField {...itemProps.name} title="Name" placeholder="Will be auto generated if left empty" autoFocus />
+      <Form.TagPicker {...itemProps.tagPicker} title="Tag Picker" placeholder="Select...">
         {tags.map((tag) => (
           <Form.TagPicker.Item value={tag.name} title={tag.name} key={tag.id} />
         ))}
       </Form.TagPicker>
-      <Form.TextArea title="Description" id="description" placeholder="A super website..." />
+      <Form.TextArea title="Description" {...itemProps.description} placeholder="Notes, thoughts, etc." />
     </Form>
   );
 };

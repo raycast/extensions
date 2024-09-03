@@ -10,18 +10,22 @@ import {
   LaunchType,
   Keyboard,
 } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { getFavicon, useFetch } from "@raycast/utils";
 import { useState } from "react";
 import axios from "axios";
 
-// Define the type for your JSON data
 interface Link {
   id: number;
   name: string;
   type: string;
   description: string;
   url: string;
-  // Add other properties as needed
+  updatedAt: string;
+  collection: {
+    id: number;
+    name: string;
+    color: string;
+  }
 }
 
 interface ApiResponse {
@@ -31,9 +35,10 @@ interface ApiResponse {
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState("");
+  const [collection, setCollection] = useState("");
 
   const { isLoading, data, revalidate } = useFetch(
-    `${preferences.LinkwardenUrl}/api/v1/links?sort=0&searchQueryString=${searchText}&searchByName=true&searchByUrl=true&searchByDescription=true&searchByTags=true&searchByTextContent=true`,
+    `${preferences.LinkwardenUrl}/api/v1/links?sort=0&searchQueryString=${searchText}&searchByName=true&searchByUrl=true&searchByDescription=true&searchByTags=true&searchByTextContent=true` + (collection ? `&collection=${collection}` : ""),
     {
       headers: {
         Authorization: `Bearer ${preferences.LinkwardenApiKey}`,
@@ -74,7 +79,10 @@ export default function Command() {
   };
 
   return (
-    <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText} throttle>
+    <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText} throttle searchBarPlaceholder="Search for Links" searchBarAccessory={<List.Dropdown tooltip="Collection" onChange={setCollection}>
+      <List.Dropdown.Item title="All" value="-1" />
+      {[...new Set(data.map(link => link.collection))].map(collection => <List.Dropdown.Item key={collection.id} icon={{ source: Icon.Folder, tintColor: collection.color }} title={collection.name} value={collection.id.toString()} />)}
+    </List.Dropdown>}>
       {!isLoading && !data.length && (
         <List.EmptyView
           icon={Icon.Rocket}
@@ -97,10 +105,14 @@ export default function Command() {
             key={item.id}
             title={item.name}
             subtitle={item.description}
-            icon={`https://www.google.com/s2/favicons?sz=32&domain_url=${item.url}`}
+            icon={getFavicon(item.url)}
+            accessories={[
+              { tag: item.collection.name, icon: { source: Icon.Folder, tintColor: item.collection.color} },
+              { date: new Date(item.updatedAt), icon: Icon.Calendar }
+            ]}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title="Open in Browser" url={item.url} />
+                <Action.OpenInBrowser icon={getFavicon(item.url)} title="Open in Browser" url={item.url} />
                 <Action.CopyToClipboard title="Copy URL" content={item.url} />
                 <Action
                   title="Delete Link"
