@@ -24,7 +24,7 @@ export default function CardsList({
             isShowingDetail={cards && cards.length > 0}
             searchBarPlaceholder={searchBarPlaceholder}
             isLoading={isLoading}
-            filtering={!!onSearchTextChange || undefined}
+            filtering={!onSearchTextChange}
             throttle={!!onSearchTextChange}
             pagination={pagination}
             onSearchTextChange={onSearchTextChange}
