@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showToast, Toast, confirmAlert, Alert } from "@raycast/api";
 import { useNodeModules } from "./hooks/useNodeModules";
 import { useMemo, useState, useCallback } from "react";
 import fsExtra from "fs-extra";
@@ -23,26 +23,46 @@ export default function Command() {
   const [sortWith, setSortWith] = useState<"size" | "lastModified">("lastModified");
 
   const handleDelete = useCallback(async (id: string, path: string) => {
-    try {
-      if (deletingItems.has(id)) {
-        return;
+    if (
+      await confirmAlert({
+        title: "Do you really want to delete this node_modules folder?",
+        rememberUserChoice: true,
+        message: path,
+        icon: Icon.Trash,
+        primaryAction: {
+          style: Alert.ActionStyle.Destructive,
+          title: "Delete",
+        },
+      })
+    ) {
+      try {
+        if (deletingItems.has(id)) {
+          return;
+        }
+        setDeletingItems((prev) => new Set(prev).add(id));
+        await fsExtra.remove(path);
+        setDeletedItems((prev) => new Set(prev).add(id));
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Deleted successfully",
+          message: path,
+        });
+      } catch (error) {
+        console.error(`Error deleting ${path}:`, error);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to delete",
+          message: path,
+        });
       }
-      setDeletingItems((prev) => new Set(prev).add(id));
-      await fsExtra.remove(path);
-      setDeletedItems((prev) => new Set(prev).add(id));
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Deleted successfully",
-        message: path,
-      });
-    } catch (error) {
-      console.error(`Error deleting ${path}:`, error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to delete",
-        message: path,
-      });
+      return;
     }
+
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Deletion Cancelled",
+      message: path,
+    });
   }, []);
 
   const handleGoToFolder = useCallback(async (nodePath: string) => {
