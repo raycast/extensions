@@ -1,6 +1,6 @@
 # Dock Tinker Changelog
 
-## [Small Spacer] - {PR_MERGE_DATE}
+## [Small Spacer] - 2024-09-03
 
 - Add Spacer to Dock command supports small spacer.
 
