@@ -1,6 +1,6 @@
 # Porkbun Changelog
 
-## [Fix Domain Pricing Crashing] - {PR_MERGE_DATE}
+## [Fix Domain Pricing Crashing] - 2024-09-03
 
 - `Domain Pricing` command would crash if user tried to reload too many times. The "Reload Domain Pricing" action is now hidden if already fetching.
 
