@@ -1,6 +1,6 @@
-# Cryptgeon
+# cryptgeon
 
-Official Raycast extension for [Cryptgeon](https://github.com/cupcakearmy/cryptgeon).
+Official Raycast extension for [cryptgeon](https://github.com/cupcakearmy/cryptgeon).
 
 ## Features
 
