@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
-import { ListVirtualServersResponse, MessageResponse, VirtualServersInfoResponse } from "./lib/types";
+import { MessageResponse } from "./lib/types";
 import { useState } from "react";
 import generateBaseUrl from "./lib/utils/generate-base-url";
 import { useVirtualizor } from "./lib/hooks";
+import { ListVirtualServersResponse, VirtualServersInfoResponse } from "./lib/types/vps";
 
 export default function VirtualServers() {
     const [action, setAction] = useState("");
@@ -21,7 +22,7 @@ export default function VirtualServers() {
         async onData(data) {
             await showToast(Toast.Style.Success, data.done.msg, data.output);
             setAction("");
-            revalidate?.();
+            revalidate();
         },
         async onError() {
             setAction("");

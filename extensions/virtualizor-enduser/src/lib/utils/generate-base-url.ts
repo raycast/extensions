@@ -8,6 +8,7 @@ export default function generateBaseUrl() {
         return BASE_URL;
     } catch (error) {
         showFailureToast(error, {
+            title: "Invalid URL Error",
             primaryAction: {
                 title: "Open Extension Preferences",
                 async onAction() {
