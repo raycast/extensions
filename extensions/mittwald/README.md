@@ -20,20 +20,20 @@ Learn [here](https://developer.mittwald.de/de/docs/v2/api/intro/#ein-api-token-b
 
 ### Search Projects
 
-![](./media/mittwald-1.png)
+![](./metadata/mittwald-1.png)
 
 ### Search Domains
 
-![](./media/mittwald-2.png)
+![](./metadata/mittwald-2.png)
 
 ### Search Organizations
 
-![](./media/mittwald-3.png)
+![](./metadata/mittwald-3.png)
 
 ### Search Apps
 
-![](./media/mittwald-4.png)
+![](./metadata/mittwald-4.png)
 
 ### Search API Endpoints
 
-![](./media/mittwald-5.png)
+![](./metadata/mittwald-5.png)
