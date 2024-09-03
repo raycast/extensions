@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Image, List, showToast, Toast, Icon, open, showInFinder } from "@raycast/api";
 import { getFavicon, MutatePromise } from "@raycast/utils";
 import {
   CopyLinkActionSection,
@@ -7,8 +7,8 @@ import {
   OpenLinkActionSections,
   OpenSpaceAction,
 } from "./actions";
-import { HistoryEntry, Space, Suggestion, Tab } from "./types";
-import { getDomain, getLastVisitedAt, getSpaceTitle } from "./utils";
+import { HistoryEntry, Space, Download, Suggestion, Tab } from "./types";
+import { getDomain, getLastVisitedAt, getDownloadedAt, getSpaceTitle } from "./utils";
 
 export function HistoryEntryListItem(props: { entry: HistoryEntry; searchText: string }) {
   return (
@@ -44,6 +44,57 @@ export function SpaceListItem(props: { space: Space }) {
               shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
             />
           </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+export function DownloadListItem(props: { download: Download }) {
+  return (
+    <List.Item
+      icon={Icon.Document}
+      title={props.download.current_path.substring(props.download.current_path.lastIndexOf("/") + 1)}
+      subtitle={{
+        value: getDomain(props.download.tab_url),
+        tooltip: props.download.tab_url,
+      }}
+      accessories={[getDownloadedAt(props.download)]}
+      actions={
+        <ActionPanel>
+          <Action
+            title="Open File"
+            onAction={async () => {
+              try {
+                await open(props.download.current_path);
+              } catch (error) {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Could't open the file. The file may have been removed or moved.",
+                });
+              }
+            }}
+            icon={Icon.Folder}
+          />
+          <Action
+            title="Show in Finder"
+            onAction={async () => {
+              try {
+                await showInFinder(props.download.current_path);
+              } catch (error) {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Could't open the file in Finder. The file may have been removed or moved.",
+                });
+              }
+            }}
+            icon={Icon.Finder}
+          />
+          <Action.OpenInBrowser
+            title="Open Download Tab in Browser"
+            url={props.download.tab_url}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+          />
         </ActionPanel>
       }
     />

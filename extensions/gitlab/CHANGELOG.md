@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Add Projects Membership Filter] - 2024-09-03
+
+- Add project membership dropdown filter to "Search Projects"
+
 ## [Todo Menubar Fix] - 2024-07-23
 
 - [#13612](https://github.com/raycast/extensions/issues/13612): Don't show menubar item when there are no todo(s) present.
