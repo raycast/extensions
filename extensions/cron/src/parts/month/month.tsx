@@ -1,21 +1,22 @@
 import React, { useContext } from "react";
 import { Grid } from "@raycast/api";
 import { Context } from "u/context";
-import { getTitle, getSubTitle } from "@/month/getTitle";
+import { getMonthName } from "u/getName";
 import { getWeekNumber } from "u/getDate";
 import { Calendar } from "calendar";
 import { v4 as AHD } from "uuid";
 import { Day } from "@/days/days";
-import { weekDays } from "u/options";
+import { monthName } from "u/options";
 
 export default function Month() {
-  const { currentDay, currentYear, currentMonth, weekFormat, enableWeek } = useContext(Context);
+  const { currentDay, currentYear, currentMonth, weekFormat, enableWeek, isDayNames } = useContext(Context);
+
   let cal;
 
   if (weekFormat === "monday") {
-    cal = new Calendar(0);
-  } else {
     cal = new Calendar(1);
+  } else {
+    cal = new Calendar(0);
   }
 
   const weeks = cal.monthDays(currentYear, currentMonth - 1);
@@ -26,17 +27,23 @@ export default function Month() {
 
   return (
     <React.Fragment>
-      {weekDays && (
-        <Grid.Section key={"Weekday names"}>
+      <Grid.Section key={"Section Days"}>
+        {isDayNames && (
           <React.Fragment key={AHD()}>
-            {enableWeek && <Day key={AHD()} type="name" day={parseInt("Wk")} name="Nr" />}
+            {enableWeek && (
+              <Day
+                key={AHD()}
+                type="name"
+                day={parseInt("Wk")}
+                name={monthName ? getMonthName(currentMonth) : "Week"}
+              />
+            )}
             {weekdays.map((weekday) => (
               <Day key={AHD()} type="name" day={1} name={weekday} />
             ))}
           </React.Fragment>
-        </Grid.Section>
-      )}
-      <Grid.Section title={getTitle()} subtitle={getSubTitle()} key={"Section Days"}>
+        )}
+
         {weeks.map((week) => {
           const weekNumber = getWeekNumber(new Date(currentYear, currentMonth - 1, week[0] === 0 ? 1 : week[0]));
 
@@ -47,7 +54,8 @@ export default function Month() {
                 if (day === 0) {
                   return <Day key={AHD()} type="empty" day={day} />;
                 } else if (day === currentDay) {
-                  return <Day key={AHD()} day={day} type="today" hasEvents />;
+                  // return <Day key={AHD()} day={day} type="today" hasEvents />;
+                  return <Day key={AHD()} day={day} type="today" />;
                 } else if (dayIndex === 0 && weekFormat === "sunday") {
                   return <Day key={AHD()} day={day} type="sunday" />;
                 } else if (dayIndex === 6 && weekFormat === "sunday") {

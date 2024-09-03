@@ -17,17 +17,26 @@
       "subtitle": "Quickly find and open Luna Games",
       "description": "Search Luna's rich catalogue of content to directly find and open games",
       "mode": "view",
-      "arguments": [{
+      "arguments": [
+        {
           "name": "search",
           "placeholder": "Search Term",
           "type": "text",
           "required": false
-      }]
+        }
+      ]
+    },
+    {
+      "name": "luna-quick-access",
+      "title": "Luna Quick Access",
+      "subtitle": "Quickly access Luna Games",
+      "description": "See recently accessed and trending games in your menu bar.",
+      "mode": "menu-bar"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.69.1",
-    "axios": "^1.7.3"
+    "@raycast/utils": "^1.16.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

@@ -283,7 +283,7 @@ export const getMessages = async (
     return output
   `;
 
-  const response: string[] = (await runAppleScript(script)).split("$end");
+  const response: string[] = (await runAppleScript(script, { timeout: 30000 })).split("$end");
   response.pop();
 
   const newMessages: Message[] = response.map((line: string) => {

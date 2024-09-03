@@ -1,5 +1,11 @@
 # Google Gemini Changelog
 
+## [Add Translate Command] - 2024-09-02
+
+More Features:
+
+- 🔄 Translate Selected Text: Translate the selected text to any language!
+
 ## [Gemini 1.5 Update] - 2023-05-25
 
 Experience speed and performance together like never before with the brand new Gemini 1.5 Flash and Gemini 1.5 Pro models. Powered by [Gemini AI v2](https://github.com/evanzhoudev/gemini-ai), Gemini for Raycast is more powerful than ever before.

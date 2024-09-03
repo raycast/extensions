@@ -1,5 +1,9 @@
 # Changelog
 
+## Updated - 2024-09-02
+
+- Feature: Support custom preferred action
+
 ## Updated - 2024-06-19
 
 - Updated the command icon and snapshots

@@ -1,6 +1,9 @@
 import { showHUD, Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { monotonicFactory } from "ulidx";
 
+import { generateUuids } from "./utils/uuidUtils";
+import { UUIDType } from "./uuidHistory";
+
 // This is required to ensure generated ULIDs are sortable
 // https://github.com/ulid/javascript#monotonic-ulids
 const ulid = monotonicFactory();
@@ -34,10 +37,7 @@ export default async (props: { arguments: ULIDArguments }) => {
 
     // safe?
     if (parseableNumber <= ULID_MAX_NUMBER) {
-      let ulids = Array.from(Array(parseableNumber)).map(() => ulid(150000));
-      if (upperCaseLetters) {
-        ulids = ulids.map((element) => element.toUpperCase());
-      }
+      const ulids = await generateUuids(ulid, parseableNumber, upperCaseLetters, UUIDType.ULID);
 
       if (defaultAction === "copy") {
         await Clipboard.copy(ulids.join("\r\n"));

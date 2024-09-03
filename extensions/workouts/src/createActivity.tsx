@@ -1,14 +1,16 @@
-import { ActionPanel, Form, Icon, Toast, showToast, getPreferenceValues, Action } from "@raycast/api";
-import { SportType, StravaManualActivity } from "./api/types";
+import { ActionPanel, Detail, Form, Icon, Toast, showToast, getPreferenceValues, Action } from "@raycast/api";
+import { SportType, StravaActivitySummary, StravaManualActivity } from "./api/types";
 import { createActivity, provider } from "./api/client";
 import { formatSportTypesText, isDurationValid, isNumber } from "./utils";
 import { withAccessToken, useForm, FormValidation } from "@raycast/utils";
-import { useRef } from "react";
+import { useState, useRef } from "react";
 
 function CreateActivity() {
   const sportTypes = Object.values(SportType);
   const distanceUnitRef = useRef(getPreferenceValues<Preferences>().distance_unit);
   const distanceFieldTitle = "Distance (" + distanceUnitRef.current + ")";
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [activityDetails, setActivityDetails] = useState<StravaActivitySummary>();
 
   const { handleSubmit, itemProps } = useForm<StravaManualActivity>({
     onSubmit(values) {
@@ -41,14 +43,38 @@ function CreateActivity() {
       title: "Saving your activity",
     });
     try {
-      await createActivity({ ...values, distanceUnit: distanceUnitRef.current });
+      const activity = await createActivity({ ...values, distanceUnit: distanceUnitRef.current });
       toast.style = Toast.Style.Success;
       toast.title = "Activity saved";
+      setIsSubmitted(true);
+      setActivityDetails(activity);
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed creating activity";
       toast.message = String(error);
     }
+  }
+
+  if (isSubmitted && activityDetails) {
+    const stravaLink = `https://www.strava.com/activities/${activityDetails.id}/`;
+    const markdownContent = `## 🎉 Kudos!
+
+Kudos to you for logging another workout!
+
+You can now view it on Strava [here](${stravaLink}).
+
+Keep up the great work and stay active!`;
+
+    return (
+      <Detail
+        markdown={markdownContent}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="View on Strava" url={stravaLink} />
+          </ActionPanel>
+        }
+      />
+    );
   }
 
   return (

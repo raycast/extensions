@@ -107,7 +107,7 @@ export default function Command() {
       <Form.Dropdown id="TransportType" title="Transport Preference" value={mode} onChange={setMode}>
         <Form.Dropdown.Item value={TransportType.Driving} title="Driving" icon={Icon.Car} />
         <Form.Dropdown.Item value={TransportType.Transit} title="Transit" icon={Icon.Train} />
-        <Form.Dropdown.Item value={TransportType.Walking} title="Walk" icon={Icon.Footprints} />
+        <Form.Dropdown.Item value={TransportType.Walking} title="Walking" icon={Icon.Footprints} />
         <Form.Dropdown.Item value={TransportType.Cycling} title="Cycling" icon={Icon.Bike} />
       </Form.Dropdown>
     </Form>
