@@ -5,6 +5,7 @@
     "description": "Search, discover, and add cards to your library.",
     "icon": "icon.png",
     "author": "sublime.app",
+    "access": "public",
     "owner": "sublime",
     "categories": [
         "Web",
