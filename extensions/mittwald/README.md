@@ -14,7 +14,7 @@ Search mittwald mStudio and API documentation.
 
 ## How to get the mittwald API token
 
-Learn [here](https://developer.mittwald.de/de/docs/v2/api/intro/#ein-api-token-beziehen) how to generate a mittwald API token. Readonly tokens are sufficient for this extension.
+Learn [here](https://developer.mittwald.de/de/docs/v2/api/intro/#ein-api-token-beziehen) how to generate a mittwald API token. As of now a token with **write access** is required (mittwald is currently fixing this).
 
 ## Showcase
 
