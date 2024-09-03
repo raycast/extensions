@@ -101,7 +101,7 @@ export default function DomainPricing() {
           <Action.OpenInBrowser icon={Icon.Globe} title="Go to API Reference" url={`${API_DOCS_URL}Domain%20Pricing`} />
         </ActionPanel>
       }
-      searchBarPlaceholder="Search domain pricing"
+      searchBarPlaceholder="Search domain by name"
       searchBarAccessory={
         <List.Dropdown tooltip="Filter" onChange={setFilter}>
           <List.Dropdown.Item title="All" value="" />
