@@ -1,6 +1,6 @@
 # Hashnode Changelog
 
-## [Migrate API + Cache + Modernize] - {PR_MERGE_DATE}
+## [Migrate API + Cache + Modernize] - 2024-09-03
 
 - fix: extension not working as it was using deprecated API
 - `useCachedPromise` in `useStories` lets us gracefully cache the stories and prevent flickering
