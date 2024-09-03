@@ -19,7 +19,21 @@
       "title": "Add Spacer to Dock",
       "subtitle": "Dock",
       "description": "Add a movable spacer tile between icons on the Dock.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+      {
+        "name": "spacerStyle",
+        "type": "dropdown",
+        "required": false,
+        "placeholder": "Spacer",
+        "data": [
+          {
+            "title": "Small Spacer",
+            "value": "small-spacer-tile"
+          }
+        ]
+      }
+    ]
     },
     {
       "name": "restore-dock-state",
@@ -107,7 +121,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.78.1",
+    "@raycast/api": "^1.81.2",
     "run-applescript": "^7.0.0"
   },
   "devDependencies": {
