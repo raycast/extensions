@@ -10,7 +10,7 @@ const SEARCH_PAGE_SIZE = 24;
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const { data, pagination } = useFetch(
+  const { data, pagination, isLoading } = useFetch(
     (options) => {
       if (searchText) {
         return (
@@ -34,6 +34,7 @@ export default function Command() {
 
   return (
     <Grid
+      isLoading={isLoading}
       columns={8}
       inset={Grid.Inset.Medium}
       pagination={pagination}
