@@ -57,7 +57,7 @@ export default function Command() {
   const [icon, setIcon] = useState<string | null>(null);
 
   const selectDuration = (duration: Duration) => {
-    const lockToast = new Toast({ title: "Keyboard Locked" });
+    const lockToast = new Toast({ title: "Keyboard locked" });
     handler(duration.seconds);
     setTimeLeft(duration.seconds);
     setIcon(duration.icon);
@@ -82,8 +82,8 @@ export default function Command() {
       <List>
         <List.EmptyView
           icon={icon ?? "🧼"}
-          description="Press ⌃ + U at any time to unlock keyboard."
-          title={`Cleaning keyboard${timeLeft ? ` for ${timeLeft} seconds ` : ""}`}
+          description="Press ⌃ + U at any time to unlock the keyboard."
+          title={`Cleaning keyboard${timeLeft ? ` for ${timeLeft} seconds…` : ""}`}
           actions={
             <ActionPanel>
               <Action title={"Back"} onAction={() => setIsRunning(false)} />
