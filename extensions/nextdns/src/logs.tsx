@@ -2,6 +2,7 @@ import { Action, ActionPanel, getPreferenceValues, Icon, List, openCommandPrefer
 import { getLogs } from "./libs/api";
 import { getDeviceTag, getIconById, getStatusTag } from "./libs/utils";
 import { Log } from "./types";
+import AddDomainAction from "./components/actions/add-domain";
 
 export default function Logs() {
   const { data, isLoading, revalidate, pagination } = getLogs();
