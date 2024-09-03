@@ -1,6 +1,6 @@
 # Mail Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2024-09-03
 
 [#14107](https://github.com/raycast/extensions/issues/14107): Increasing the timeout for getting messages from default (10 seconds) to 30 seconds as a potential fix for loading large number of mails.
 
