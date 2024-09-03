@@ -21,7 +21,7 @@ export function ProjectSearchList(): JSX.Element {
       isLoading={isLoading}
       throttle={true}
       searchBarAccessory={
-        <List.Dropdown tooltip="Scope" onChange={setScope}>
+        <List.Dropdown tooltip="Scope" onChange={setScope} storeValue>
           <List.Dropdown.Item title="My Projects" value={ProjectScope.membership} />
           <List.Dropdown.Item title="All" value={ProjectScope.all} />
         </List.Dropdown>

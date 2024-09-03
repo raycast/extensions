@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Add Projects Membership Filter] - 2024-09-03
+## [Add Projects Membership Filter] - {PR_MERGE_DATE}
 
 - Add project membership dropdown filter to "Search Projects"
 
