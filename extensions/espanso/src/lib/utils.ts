@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "path";
 import { EspansoMatch, MultiTrigger, Label, Replacement, NormalizedEspansoMatch, EspansoConfig } from "./types";
 import YAML from "yaml";
-import { espanso } from "./espanso";
+import { espansoCli } from "./espanso";
 
 function lastUpdatedDate(file: string) {
   const { mtime } = fs.statSync(file);
@@ -98,7 +98,7 @@ export async function getEspansoConfig(): Promise<EspansoConfig> {
     match: "",
   };
 
-  const { stdout: configString } = await espanso("path");
+  const { stdout: configString } = await espansoCli("path");
 
   configString.split("\n").forEach((item) => {
     const [key, value] = item.split(":");

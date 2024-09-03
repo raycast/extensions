@@ -14,7 +14,7 @@ function execAsync(command: string): Promise<{ stdout: string; stderr: string }>
   });
 }
 
-export async function espanso(args: string) {
+export async function espansoCli(args: string) {
   const preferences = getPreferenceValues<Preferences>();
 
   const espansoPath: string = preferences.espansoPath?.length
