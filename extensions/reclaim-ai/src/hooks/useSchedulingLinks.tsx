@@ -1,8 +1,10 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast, open } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
 import { NativePreferences } from "../types/preferences";
 import { ApiSchedulingLink, ApiSchedulingLinkGroups } from "./useSchedulingLinks.types";
+import { SchedulingLink } from "../types/scheduling-link";
+import { axiosPromiseData, fetcher } from "../utils/axiosPromise";
 
 export const useSchedulingLinks = () => {
   const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
@@ -47,5 +49,36 @@ export const useSchedulingLinks = () => {
     schedulingLinksGroups,
     schedulingLinksGroupsError,
     schedulingLinksGroupsIsLoading,
+  };
+};
+
+export const useSchedulingLinkActions = (link: SchedulingLink) => {
+  const createOneOffLink = async () => {
+    const [oneOff, error] = await axiosPromiseData<SchedulingLink>(
+      fetcher("/scheduling-link/derivative", {
+        method: "POST",
+        data: {
+          parentId: link.id,
+        },
+      })
+    );
+
+    if (!error && oneOff) {
+      open(`https://app.reclaim.ai/scheduling-links?personalize=${oneOff.id}`);
+    } else {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error creating one-off link. Try using the reclaim.ai web app.",
+      });
+    }
+  };
+
+  const createShareLink = async () => {
+    open(`https://app.reclaim.ai/quick-forms/scheduling-links/${link.id}/available-times`);
+  };
+
+  return {
+    createOneOffLink,
+    createShareLink,
   };
 };
