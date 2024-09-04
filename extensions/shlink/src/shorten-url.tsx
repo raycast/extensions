@@ -1,9 +1,10 @@
-import { Form, ActionPanel, Action, Clipboard, Icon, showToast, Toast, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, Toast, showHUD, showToast } from "@raycast/api";
 import { FormValidation, useForm, usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
+
 import { apiClient } from "./api/shlinkClient";
-import isUrl from "is-url";
 import { formatISO } from "date-fns"; // The default .toISOString() format is not compatible with the API
+import isUrl from "is-url";
 
 type Values = {
     title?: string;
@@ -142,7 +143,7 @@ export default function Command() {
             {useCustomTags ? (
                 <>
                     <Form.TextField
-                        title="Custom tags"
+                        title="Custom Tags"
                         info="Comma separated list of custom tags"
                         placeholder="(Optional)"
                         storeValue={false}
@@ -163,7 +164,7 @@ export default function Command() {
                 </Form.TagPicker>
             )}
             <Form.Checkbox
-                title="Tags input mode"
+                title="Tags Input Mode"
                 label="Set custom tags instead of selecting from the list"
                 storeValue={false}
                 id="useCustomTags"
@@ -177,13 +178,13 @@ export default function Command() {
                 ))}
             </Form.Dropdown>
             <Form.TextField
-                title="Custom slug"
+                title="Custom Slug"
                 placeholder="(Optional)"
                 info="The slug to be used instead of the short code"
                 {...itemProps.customSlug}
             />
             <Form.TextField
-                title="Short code length"
+                title="Short Code Length"
                 placeholder="(Default: 5)"
                 info="The lenght of the generated short code"
                 storeValue
@@ -191,13 +192,13 @@ export default function Command() {
             />
             <Form.Separator />
             <Form.TextField
-                title="Max visits"
+                title="Max Visits"
                 info="The maximum number of allowed visits"
                 placeholder="(Optional)"
                 {...itemProps.maxVisits}
             />
-            <Form.DatePicker title="Valid since" {...itemProps.validSince} />
-            <Form.DatePicker title="Valid until" {...itemProps.validUntil} />
+            <Form.DatePicker title="Valid Since" {...itemProps.validSince} />
+            <Form.DatePicker title="Valid Until" {...itemProps.validUntil} />
             <Form.Separator />
             <Form.Checkbox
                 title="Crawlable"
@@ -206,7 +207,7 @@ export default function Command() {
                 {...itemProps.crawlable}
             />
             <Form.Checkbox
-                title="Forward query params"
+                title="Forward Query Params"
                 label="Should the query params be appended to the original URL ...?"
                 storeValue
                 {...itemProps.forwardQuery}
