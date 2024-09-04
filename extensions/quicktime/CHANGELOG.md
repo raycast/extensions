@@ -1,6 +1,6 @@
 # QuickTime Recording Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2024-09-04
 - New command to `Start Movie Recording`
 - Use Raycast `runAppleScript`
 - Add Error Handling
