@@ -112,7 +112,7 @@ export default function Command() {
         (async () => {
             const { text } = await Clipboard.read();
 
-            setValue("longUrl", text ?? "");
+            setValue("longUrl", isUrl(text) ? text : "");
         })();
     }, []);
 
