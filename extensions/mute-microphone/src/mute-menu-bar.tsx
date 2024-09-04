@@ -26,16 +26,16 @@ export default function muteMenuBar() {
   const icon = isMuted ? disabledIcon : enabledIcon;
   const menuItemText = isMuted ? "Unmute" : "Mute";
 
-  const handleToggleIconButton = async () => {
-    if (isMuted) {
-      AudioInputLevelCache.curInputLevel = AudioInputLevelCache.prevInputLevel;
-    } else {
-      AudioInputLevelCache.prevInputLevel = AudioInputLevelCache.curInputLevel;
-      AudioInputLevelCache.curInputLevel = "0";
-    }
-    await toggleSystemAudioInputLevel();
-    setIsMuted(!isMuted);
-  };
+  // const handleToggleIconButton = async () => {
+  //   if (isMuted) {
+  //     AudioInputLevelCache.curInputLevel = AudioInputLevelCache.prevInputLevel;
+  //   } else {
+  //     AudioInputLevelCache.prevInputLevel = AudioInputLevelCache.curInputLevel;
+  //     AudioInputLevelCache.curInputLevel = "0";
+  //   }
+  //   await toggleSystemAudioInputLevel();
+  //   setIsMuted(!isMuted);
+  // };
 
   if (preferences.hideIconWhenUnmuted && !isMuted) {
     return null;
@@ -44,7 +44,7 @@ export default function muteMenuBar() {
   return (
     <MenuBarExtra icon={icon} tooltip="Audio input volume">
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item title={menuItemText} onAction={handleToggleIconButton} />
+        {/* <MenuBarExtra.Item title={menuItemText} onAction={handleToggleIconButton} /> */}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item icon={Icon.Gear} title="Settings" onAction={openCommandPreferences} />
