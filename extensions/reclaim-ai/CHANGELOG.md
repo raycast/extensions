@@ -1,5 +1,8 @@
 # reclaim Changelog
 
+## [Fixes] - 2024-09-03
+- Break out separate components and hook for Scheduling Links
+
 ## [Fixes] - 2024-08-23
 - Stopped rapid-fire calls to `GET:/api/smart-habits`
     - New hook `useSyncCachedPromise`
