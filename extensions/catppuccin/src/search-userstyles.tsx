@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { List, ActionPanel, Action, showToast, ToastStyle } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import yaml from "js-yaml";
@@ -22,7 +22,7 @@ interface UserStylesYaml {
 
 export default function SearchUserStyles() {
   const { isLoading, data, revalidate } = useFetch(
-    "https://raw.githubusercontent.com/catppuccin/userstyles/main/scripts/userstyles.yml"
+    "https://raw.githubusercontent.com/catppuccin/userstyles/main/scripts/userstyles.yml",
   );
   const [searchText, setSearchText] = useState<string>("");
 
@@ -40,12 +40,9 @@ export default function SearchUserStyles() {
 
   const filteredUserStyles = useMemo(() => {
     return Object.entries(userStyles).filter(([_, userStyleDetails]) => {
-      const styleName = Array.isArray(userStyleDetails.name)
-        ? userStyleDetails.name.join(" ")
-        : userStyleDetails.name;
+      const styleName = Array.isArray(userStyleDetails.name) ? userStyleDetails.name.join(" ") : userStyleDetails.name;
       return (
-        styleName.toLowerCase().includes(searchText.toLowerCase()) ||
-        _.toLowerCase().includes(searchText.toLowerCase())
+        styleName.toLowerCase().includes(searchText.toLowerCase()) || _.toLowerCase().includes(searchText.toLowerCase())
       );
     });
   }, [userStyles, searchText]);
