@@ -1,4 +1,12 @@
-import { TodoItem, TodoSections, editingAtom, editingTagAtom, searchBarTextAtom, todoAtom } from "../atoms";
+import {
+  TodoItem,
+  TodoSections,
+  editingAtom,
+  editingTagAtom,
+  editingTagNameAtom,
+  searchBarTextAtom,
+  todoAtom,
+} from "../atoms";
 import { compare, insertIntoSection } from "../utils";
 
 import _ from "lodash";
@@ -8,6 +16,7 @@ export const useTodo = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
   const [todoSections, setTodoSections] = useAtom(todoAtom);
   const [, setEditing] = useAtom(editingAtom);
   const [, setEditingTag] = useAtom(editingTagAtom);
+  const [, setEditingTagName] = useAtom(editingTagNameAtom);
   const [, setSearchBarText] = useAtom(searchBarTextAtom);
 
   const setClone = () => {
@@ -79,7 +88,7 @@ export const useTodo = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
       sectionKey,
       index: idx,
     });
-    setSearchBarText(item.tag ?? "");
+    setEditingTagName(item.tag ?? "");
   };
 
   const setPriority = (priority?: 1 | 2 | 3) => {

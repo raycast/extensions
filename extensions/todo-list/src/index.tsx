@@ -19,7 +19,7 @@ export default function TodoList() {
       key={searchMode ? "search" : "nosearch"}
       navigationTitle={`Manage Todo List${editing !== false ? " • Editing" : searchMode ? " • Searching" : ""}`}
       onSearchTextChange={(text: string) => setSearchBarText(text)}
-      searchBarAccessory={<ListTags sectionKey="todo" />}
+      searchBarAccessory={<ListTags />}
       searchBarPlaceholder={
         searchMode
           ? "Search todos"
