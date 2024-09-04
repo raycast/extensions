@@ -1,5 +1,8 @@
 # Opsgenie Changelog
 
+[] - {PR_MERGE_DATE}
+remove prefs
+
 ## [Improve Search Handling] - 2022-08-28
 
 - Alerts and incidents can now be searched via the [Opsgenie query syntax](https://support.atlassian.com/opsgenie/docs/search-queries-for-alerts/)
