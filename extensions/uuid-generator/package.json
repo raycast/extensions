@@ -12,6 +12,10 @@
     "hmarr",
     "harsh_khandelwal"
   ],
+  "keywords": [
+    "guid",
+    "GUID"
+  ],
   "license": "MIT",
   "commands": [
     {
