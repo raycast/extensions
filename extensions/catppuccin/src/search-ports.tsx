@@ -17,7 +17,7 @@ interface PortsYaml {
 
 export default function SearchPorts() {
   const { isLoading, data, revalidate } = useFetch(
-    "https://raw.githubusercontent.com/catppuccin/catppuccin/main/resources/ports.yml"
+    "https://raw.githubusercontent.com/catppuccin/catppuccin/main/resources/ports.yml",
   );
   const [ports, setPorts] = useState<Record<string, PortDetails>>({});
   const [searchText, setSearchText] = useState<string>("");
@@ -37,7 +37,7 @@ export default function SearchPorts() {
     ? Object.entries(ports).filter(
         ([name, portDetails]) =>
           name.toLowerCase().includes(searchText.toLowerCase()) ||
-          portDetails.name.toLowerCase().includes(searchText.toLowerCase())
+          portDetails.name.toLowerCase().includes(searchText.toLowerCase()),
       )
     : Object.entries(ports);
 
