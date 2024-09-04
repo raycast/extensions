@@ -16,11 +16,10 @@ export default function Command() {
 
   const handleFormSubmit = useCallback((formValues: FormValues) => {
     setResultPushed(false);
-    const { startDate, endDate, priceIndex } = formValues;
-    const startDateString = formatDate(startDate);
+    const { endDate, priceIndex } = formValues;
     const endDateString = formatDate(endDate);
     const indexCode = getIndexCode(priceIndex);
-    const url = `http://api.bcb.gov.br/dados/serie/bcdata.sgs.${indexCode}/dados?formato=json&dataInicial=${startDateString}&dataFinal=${endDateString}&timestamp=${Date.now()}`;
+    const url = `http://api.bcb.gov.br/dados/serie/bcdata.sgs.${indexCode}/dados?formato=json&dataFinal=${endDateString}&timestamp=${Date.now()}`;
 
     setFetchUrl(url);
 

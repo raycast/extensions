@@ -51,16 +51,28 @@ export function calculateResult(
     throw new Error("Invalid or empty data");
   }
 
-  const indexes = data.map((item: FinancialIndexData) => {
+  const [startDay, startMonth, startYear] = startDate.split("/").map(Number);
+  const startDateObj = new Date(startYear, startMonth - 1, 1); // Set day to 1 to compare only month and year
+
+  // Filter data to include only elements from the start month onwards
+  const filteredData = data.filter((item) => {
+    const [, itemMonth, itemYear] = item.data.split("/").map(Number);
+    const itemDate = new Date(itemYear, itemMonth - 1, 1); // Set day to 1 to compare only month and year
+    return itemDate >= startDateObj;
+  });
+
+  if (filteredData.length === 0) {
+    throw new Error("No data available for the specified date range");
+  }
+
+  const indexes = filteredData.map((item: FinancialIndexData) => {
     if (typeof item.valor !== "string") {
       throw new Error("Invalid data format: 'valor' is not a string");
     }
     return 1 + parseFloat(item.valor) / 100;
   });
 
-  const [startDay, startMonth, startYear] = startDate.split("/").map(Number);
-  const startDateObj = new Date(startYear, startMonth - 1, startDay); // -1 because months are zero-indexed
-  const startDateDay = startDateObj.getDate();
+  const startDateDay = startDay;
   const startMonthDays = new Date(startYear, startMonth, 0).getDate();
   const startPassedDays = startMonthDays - startDateDay + 1;
   const firstIndex = Math.pow(indexes[0], startPassedDays / startMonthDays);
@@ -70,7 +82,7 @@ export function calculateResult(
   const [endDay, endMonth, endYear] = endDate.split("/").map(Number);
   const endMonthDays = new Date(endYear, endMonth, 0).getDate();
 
-  const lastIndex = data[data.length - 1].data;
+  const lastIndex = filteredData[filteredData.length - 1].data;
   const lastIndexDate = new Date(lastIndex.split("/").reverse().join("-"));
   const lastIndexMonth = lastIndexDate.getUTCMonth();
   const lastIndexYear = lastIndexDate.getUTCFullYear();
@@ -81,7 +93,7 @@ export function calculateResult(
   }
 
   const rawFactor = indexes.reduce((acc: number, curr: number) => acc * curr, 1);
-  const conversionFactor = getConversionFactor(startDateObj);
+  const conversionFactor = getConversionFactor(new Date(startYear, startMonth - 1, startDay));
   const adjustmentFactor = rawFactor / conversionFactor;
   const updatedValue = financialValue * adjustmentFactor;
 
@@ -93,7 +105,7 @@ export function calculateResult(
     priceIndex,
     adjustmentFactor: formatNumber(adjustmentFactor, { minimumFractionDigits: 10, maximumFractionDigits: 10 }),
     percentageChange: formatNumber(adjustmentFactor - 1, { style: "percent", minimumFractionDigits: 2 }),
-    data,
+    data: filteredData,
   };
 }
 
@@ -114,7 +126,7 @@ export function calculateAdjustmentFactors(
     });
 
     const [startDay, startMonth, startYear] = startDate.split("/").map(Number);
-    const startDateObj = new Date(startYear, startMonth - 1, startDay); // -1 because months are zero-indexed
+    const startDateObj = new Date(startYear, startMonth - 1, startDay);
     const startMonthDays = new Date(startYear, startMonth, 0).getDate();
     const startPassedDays = startMonthDays - startDay + 1;
 
