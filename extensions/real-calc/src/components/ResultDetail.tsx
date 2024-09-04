@@ -3,27 +3,27 @@ import { CalculationResult } from "../types";
 
 export function ResultDetail({ result }: { result: CalculationResult }) {
   const markdown = `
-# Memória de Cálculo
+# Calculation Report
 
-## Dados de Referência
+## Reference Data
 
-Índice de atualização: ${result.priceIndex}  
-Data inicial: ${result.startDate}  
-Data final: ${result.endDate}  
-Valor original: ${result.originalValue}  
+Price index: ${result.priceIndex}  
+Start date: ${result.startDate}  
+End date: ${result.endDate}  
+Original value: ${result.originalValue}  
 
-## Variação do Índice no Período
+## Index Variation in the Period
 
-Em percentual: ${result.percentageChange}  
-Em fator de multiplicação: ${result.adjustmentFactor}  
+In percentage: ${result.percentageChange}  
+In adjustment factor: ${result.adjustmentFactor}  
 
-Os valores do índice utilizados neste cálculo foram:  
+The index values used in the calculation were:
 ${result.data.map((item) => `${item.data} = ${item.valor}%`).join("; ")}  
 
-## Cálculo Final
+## Final Calculation
 
-Valor Atualizado = Valor Original * Fator = ${result.originalValue} * ${result.adjustmentFactor}  
-Valor Atualizado = ${result.updatedValue}
+Updated Value = Original Value * Factor = ${result.originalValue} * ${result.adjustmentFactor}  
+Updated Value = ${result.updatedValue}
 `;
 
   return (
