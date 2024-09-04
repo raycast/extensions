@@ -3,6 +3,7 @@
 ## [Filter Links by Collection] - {PR_MERGE_DATE}
 
 ### Enhancements
+- Updated Titles and some fields to exactly match the Linkwarden default
 - View the Date Modified and Collection of a link
 - Filter links by collection
 - You can now choose a collection when adding a link

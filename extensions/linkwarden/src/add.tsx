@@ -7,24 +7,23 @@ import {
   Toast,
   getPreferenceValues,
   getFrontmostApplication,
-  List,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import axios, { AxiosError } from "axios";
 import { chromiumBrowserNames, getChromiumBrowserPath, getWebkitBrowserPath, webkitBrowserNames } from "./utils";
 import { useCollections, useTags } from "./hooks";
-import { ApiResponse } from "./interfaces";
+import { ApiResponse, Collection } from "./interfaces";
 
 interface FormValues {
   name: string;
   url: string;
-  collection: string;
+  collectionId: string;
   description: string;
   tagPicker: string[];
 }
 
-const fetchLink = async (preferences: Preferences, values: FormValues, ownerIDValue: number | undefined) => {
+const fetchLink = async (preferences: Preferences, values: FormValues, collection: Collection) => {
   await showToast(Toast.Style.Animated, "Creating link");
   try {
     const response = await axios.post(
@@ -36,8 +35,9 @@ const fetchLink = async (preferences: Preferences, values: FormValues, ownerIDVa
         type: "url",
         tags: values.tagPicker.map((tag) => ({ name: tag })),
         collection: {
-          name: "Unorganized",
-          ownerId: ownerIDValue,
+          id: collection.id,
+          name: collection.name,
+          ownerId: collection.ownerId,
         },
       },
       {
@@ -107,24 +107,22 @@ export default () => {
   const { isLoading: isLoadingTags, data: tags } = useTags();
   const { isLoading: isLoadingCollections, data: collections } = useCollections();
 
-  const firstOwnerID = tags.find((tag) => tag.ownerId);
-
-  const ownerIDValue = firstOwnerID?.ownerId;
-
   const { itemProps, handleSubmit } = useForm<FormValues>({
     async onSubmit(values) {
-      await fetchLink(preferences, values, ownerIDValue);
+      const collection = collections.find((collection) => collection.id === Number(values.collectionId)) as Collection;
+      await fetchLink(preferences, values, collection);
     },
     initialValues: {
-      url: browserPath
+      url: browserPath,
     },
     validation: {
-      url: FormValidation.Required
-    }
+      url: FormValidation.Required,
+    },
   });
 
   return (
-    <Form isLoading={isLoadingTags || isLoadingCollections}
+    <Form
+      isLoading={isLoadingTags || isLoadingCollections}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -137,8 +135,15 @@ export default () => {
       }
     >
       <Form.TextField {...itemProps.url} title="URL" placeholder="http://example.com/" />
-      <Form.Dropdown title="Collection" {...itemProps.collection}>
-        {collections.map(collection => <List.Dropdown.Item key={collection.id} icon={{ source: Icon.Folder, tintColor: collection.color }} title={`${collection.name} (${collection._count.links}) [${collection.parent?.name ? `${collection.parent.name} > ` : ""}${collection.name}]`} value={collection.id.toString()} />)}
+      <Form.Dropdown title="Collection" {...itemProps.collectionId}>
+        {collections.map((collection) => (
+          <Form.Dropdown.Item
+            key={collection.id}
+            icon={{ source: Icon.Folder, tintColor: collection.color }}
+            title={`${collection.name} (${collection._count.links}) [${collection.parent?.name ? `${collection.parent.name} > ` : ""}${collection.name}]`}
+            value={collection.id.toString()}
+          />
+        ))}
       </Form.Dropdown>
       <Form.TextField {...itemProps.name} title="Name" placeholder="Will be auto generated if left empty" autoFocus />
       <Form.TagPicker {...itemProps.tagPicker} title="Tag Picker" placeholder="Select...">
