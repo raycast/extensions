@@ -1,4 +1,3 @@
-
 # VS Code (community tool)
 
 You can enhance your VS Code development experience by installing the [Raycast extension in the marketplace](https://marketplace.visualstudio.com/items?itemName=tonka3000.raycast). Here's a list of features provided by the extension:
