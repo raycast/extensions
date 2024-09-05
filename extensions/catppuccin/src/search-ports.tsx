@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { List, ActionPanel, Action, showToast, ToastStyle } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import yaml from "js-yaml";
 
@@ -28,7 +28,7 @@ export default function SearchPorts() {
         const parsedData = yaml.load(data) as PortsYaml;
         setPorts(parsedData.ports);
       } catch (error) {
-        showToast(ToastStyle.Failure, "Failed to parse YAML", String(error));
+        showToast(Toast.Style.Failure, "Failed to parse YAML", String(error));
       }
     }
   }, [data]);
