@@ -1,6 +1,5 @@
 import { Icon, getPreferenceValues, open, showHUD } from "@raycast/api";
 import { format, isWithinInterval } from "date-fns";
-import { useMemo } from "react";
 import { Event } from "../types/event";
 import { NativePreferences } from "../types/preferences";
 import { SmartHabit } from "../types/smart-series";
@@ -15,7 +14,6 @@ import { useTaskActions } from "./useTask";
 import { useUser } from "./useUser";
 
 export const useEvents = ({ start, end }: { start: Date; end: Date }) => {
-  const { apiUrl } = getPreferenceValues<NativePreferences>();
   const { useFetchRai } = useApi();
 
   const {
@@ -23,7 +21,7 @@ export const useEvents = ({ start, end }: { start: Date; end: Date }) => {
     error,
     isLoading,
   } = useFetchRai<ApiResponseEvents>(
-    `${apiUrl}/events?${new URLSearchParams({
+    `/events?${new URLSearchParams({
       sourceDetails: "true",
       start: format(start, "yyyy-MM-dd"),
       end: format(end, "yyyy-MM-dd"),

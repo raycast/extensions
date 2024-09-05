@@ -1,29 +1,15 @@
-import {
-  Action,
-  Detail,
-  getPreferenceValues,
-  openCommandPreferences,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
-import { NativePreferences } from "../types/preferences";
-import { fetcher, fetchPromise } from "../utils/fetcher";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
+import { NativePreferences } from "../types/preferences";
+import { fetcher, fetchPromise } from "../utils/fetcher";
 
 const useApi = () => {
-  const { apiToken } = getPreferenceValues<NativePreferences>();
+  const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
 
   // const { push } = useNavigation();
 
   if (!apiToken) {
-    // push(
-    //   <Detail
-    //     markdown={"Something is wrong with your API Token key. Check your Raycast config and set up a new token."}
-    //     actions={<Action title="Open Preferences" onAction={openCommandPreferences} />}
-    //   />
-    // );
     showToast({
       style: Toast.Style.Failure,
       title: "Something is wrong with your API Token key. Check your Raycast config and set up a new token.",
@@ -40,7 +26,7 @@ const useApi = () => {
     [apiToken]
   );
 
-  const useFetchRai = <T,>(url: RequestInfo) => useFetch<T>(url, { headers, keepPreviousData: true });
+  const useFetchRai = <T,>(url: string) => useFetch<T>(`${apiUrl}${url}`, { headers, keepPreviousData: true });
 
   return { fetcher, fetchPromise, useFetchRai };
 };

@@ -1,15 +1,13 @@
-import { getPreferenceValues, showHUD } from "@raycast/api";
-import { NativePreferences } from "../types/preferences";
+import { showHUD } from "@raycast/api";
+import { RequestInit } from "node-fetch";
 import { Task } from "../types/task";
 import useApi from "./useApi";
 import { CreateTaskProps, PlannerActionIntermediateResult } from "./useTask.types";
-import { RequestInit } from "node-fetch";
 
 export const useTasks = () => {
-  const { apiUrl } = getPreferenceValues<NativePreferences>();
   const { useFetchRai } = useApi();
 
-  const { data: tasks, error, isLoading } = useFetchRai<Task[]>(`${apiUrl}/tasks?instances=true`);
+  const { data: tasks, error, isLoading } = useFetchRai<Task[]>("/tasks?instances=true");
 
   if (error) console.error("Error while fetching Tasks", error);
 

@@ -1,24 +1,22 @@
-import { getPreferenceValues, showToast, Toast, open } from "@raycast/api";
-import { NativePreferences } from "../types/preferences";
-import { ApiSchedulingLink, ApiSchedulingLinkGroups } from "./useSchedulingLinks.types";
+import { open, showToast, Toast } from "@raycast/api";
 import { SchedulingLink } from "../types/scheduling-link";
 import useApi from "./useApi";
+import { ApiSchedulingLink, ApiSchedulingLinkGroups } from "./useSchedulingLinks.types";
 
 export const useSchedulingLinks = () => {
-  const { apiUrl } = getPreferenceValues<NativePreferences>();
   const { useFetchRai } = useApi();
 
   const {
     data: schedulingLinks,
     error: schedulingLinksError,
     isLoading: schedulingLinksIsLoading,
-  } = useFetchRai<ApiSchedulingLink>(`${apiUrl}/scheduling-link`);
+  } = useFetchRai<ApiSchedulingLink>("/scheduling-link");
 
   const {
     data: schedulingLinksGroups,
     error: schedulingLinksGroupsError,
     isLoading: schedulingLinksGroupsIsLoading,
-  } = useFetchRai<ApiSchedulingLinkGroups>(`${apiUrl}/scheduling-link/group`);
+  } = useFetchRai<ApiSchedulingLinkGroups>("/scheduling-link/group");
 
   if (schedulingLinksError) console.error("Error while fetching Scheduling Links", schedulingLinksError);
   if (schedulingLinksGroupsError)

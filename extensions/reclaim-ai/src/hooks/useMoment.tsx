@@ -1,13 +1,10 @@
-import { getPreferenceValues } from "@raycast/api";
-import { NativePreferences } from "../types/preferences";
-import { ApiResponseMoment } from "./useEvent.types";
 import useApi from "./useApi";
+import { ApiResponseMoment } from "./useEvent.types";
 
 export const useMoment = () => {
-  const { apiUrl } = getPreferenceValues<NativePreferences>();
   const { useFetchRai } = useApi();
 
-  const { data: momentData, error, isLoading } = useFetchRai<ApiResponseMoment>(`${apiUrl}/moment/next`);
+  const { data: momentData, error, isLoading } = useFetchRai<ApiResponseMoment>("/moment/next");
 
   if (error) console.error("Error while fetching Moment Next", error);
 
