@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { NativePreferences } from "../types/preferences";
 import { ApiSchedulingLink, ApiSchedulingLinkGroups } from "./useSchedulingLinks.types";
 import { SchedulingLink } from "../types/scheduling-link";
-import { axiosPromiseData, fetcher } from "../utils/axiosPromise";
+import useApi from "./useApi";
 
 export const useSchedulingLinks = () => {
   const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
@@ -54,13 +54,12 @@ export const useSchedulingLinks = () => {
 
 export const useSchedulingLinkActions = (link: SchedulingLink) => {
   const createOneOffLink = async () => {
-    const [oneOff, error] = await axiosPromiseData<SchedulingLink>(
-      fetcher("/scheduling-link/derivative", {
-        method: "POST",
-        data: {
-          parentId: link.id,
-        },
-      })
+    const { fetchPromise } = useApi();
+
+    const [oneOff, error] = await fetchPromise<SchedulingLink>(
+      "/scheduling-link/derivative",
+      { method: "POST" },
+      { parentId: link.id }
     );
 
     if (!error && oneOff) {
