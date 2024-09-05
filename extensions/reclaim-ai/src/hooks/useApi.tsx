@@ -1,6 +1,6 @@
 import { Action, Detail, getPreferenceValues, openCommandPreferences, useNavigation } from "@raycast/api";
 import { NativePreferences } from "../types/preferences";
-import { fetcher } from "../utils/axiosPromise";
+import { fetcher, fetchPromise } from "../utils/fetcher";
 
 const useApi = () => {
   const { apiToken } = getPreferenceValues<NativePreferences>();
@@ -16,7 +16,7 @@ const useApi = () => {
     );
   }
 
-  return { fetcher };
+  return { fetcher, fetchPromise };
 };
 
 export default useApi;
