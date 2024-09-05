@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Add "Start DJ" Command] - {PR_MERGE_DATE}
+## [Add "Start DJ" Command] - 2024-09-05
 
 - Added a command to start the DJ using AppleScript, because the Spotify API doesn't support it.
 
