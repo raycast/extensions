@@ -51,7 +51,7 @@ ${prompt.content}
             shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
           <Action.OpenInBrowser
-            title="Open in Cursor.directory"
+            title="Open in cursor.directory"
             icon={Icon.Link}
             url={`https://cursor.directory/${prompt.slug}`}
           />
