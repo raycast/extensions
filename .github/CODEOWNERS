@@ -264,7 +264,7 @@
 /extensions/confluence-search                                       @daviddkkim
 /extensions/connect-to-vpn                                          @rasmusbe @sato11 @stonerl @vpukhanov
 /extensions/consoledev                                              @Rawnly @aliaksandrZh
-/extensions/contentful                                              @ewgenius
+/extensions/contentful                                              @ewgenius @xmok
 /extensions/control-d                                               @httpjamesm
 /extensions/conventional-comments                                   @krzysztofzuraw
 /extensions/conventional-commits                                    @niemtec @Lucria
