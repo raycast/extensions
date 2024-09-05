@@ -1,7 +1,7 @@
 import { List, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
-import { BASEURL, HEADERS } from "./constants/preferences";
+import { BASEURL, HEADERS, PriceCurrency } from "./constants/preferences";
 import { generateUrl } from "./utils/queryGenerator";
 import { PriceSuffix, PriceType } from "./types/energyData";
 import { PriceEntry } from "./components/listPrice";
@@ -46,7 +46,7 @@ export default function Command() {
     >
       <List.Section
         title={"Today's energy prices"}
-        subtitle={`Daily Average: ${isLoading ? "Loading..." : averageCalculator(data).toFixed(2) + " " + PriceSuffix}`}
+        subtitle={`Daily Average: ${isLoading ? "Loading..." : averageCalculator(data).toFixed(2) + " " + PriceSuffix + " " + PriceCurrency}`}
       >
         {data.map((price: PriceType) => (
           <PriceEntry allData={data} price={price} average={average} key={price.time_start} />

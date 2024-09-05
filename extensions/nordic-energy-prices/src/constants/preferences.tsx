@@ -3,6 +3,8 @@ import { getPreferenceValues } from "@raycast/api";
 const preferences = getPreferenceValues();
 
 export const priceRegion: string = preferences.priceRegion;
+export const includeVAT: boolean = preferences.vat;
+export const PriceCurrency: string = includeVAT ? "Price incl. VAT" : "Price excl. VAT";
 
 export let BASEURL: string;
 switch (priceRegion) {

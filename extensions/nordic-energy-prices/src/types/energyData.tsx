@@ -48,12 +48,14 @@ export type PriceType = PriceRegionMap[typeof priceRegion];
 
 export let PriceCurrency: string;
 export let PriceSuffix: string;
+export let VAT: number;
 
 switch (priceRegion) {
   case "DK1":
   case "DK2":
     PriceCurrency = "DKK_per_kWh";
     PriceSuffix = "DKK/kWh";
+    VAT = 1.25;
     break;
   case "NO1":
   case "NO2":
@@ -62,6 +64,7 @@ switch (priceRegion) {
   case "NO5":
     PriceCurrency = "NOK_per_kWh";
     PriceSuffix = "NOK/kWh";
+    VAT = 1.25;
     break;
   case "SE1":
   case "SE2":
@@ -69,9 +72,11 @@ switch (priceRegion) {
   case "SE4":
     PriceCurrency = "SEK_per_kWh";
     PriceSuffix = "SEK/kWh";
+    VAT = 1.25;
     break;
   case "FI":
     PriceCurrency = "EUR_per_kWh";
     PriceSuffix = "€/kWh";
+    VAT = 1.24;
     break;
 }
