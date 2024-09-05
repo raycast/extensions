@@ -31,7 +31,7 @@ export async function fetchLatestBlueRate(forceRefresh = false): Promise<BlueRat
   }
 
   const response = await fetch(`${API_BASE_URL}/latest`);
-  const data = await response.json() as APIResponse;
+  const data = (await response.json()) as APIResponse;
   const latestRate: BlueRate = {
     value_sell: data.blue.value_sell,
     date: data.last_update,

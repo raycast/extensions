@@ -26,7 +26,7 @@ export async function fetchHistoricalBlueRate(date: string): Promise<BlueRate> {
   }
 
   const response = await fetch(`${API_BASE_URL}/historical?day=${date}`);
-  const data = await response.json() as APIResponse;
+  const data = (await response.json()) as APIResponse;
   const historicalRate: BlueRate = {
     value_sell: data.blue.value_sell,
     date: date,

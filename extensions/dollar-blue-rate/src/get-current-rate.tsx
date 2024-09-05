@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Clipboard } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { fetchLatestBlueRate, BlueRate } from "./fetchLatestRate";
 
@@ -26,9 +26,9 @@ export default function Command() {
 
   function handleSubmit() {
     if (latestRate) {
-      showToast({ 
-        title: "Latest Dolar Blue Rate", 
-        message: `${latestRate.value_sell} ARS as of ${new Date(latestRate.date).toLocaleString()}` 
+      showToast({
+        title: "Latest Dolar Blue Rate",
+        message: `${latestRate.value_sell} ARS as of ${new Date(latestRate.date).toLocaleString()}`,
       });
     }
   }
@@ -51,25 +51,15 @@ export default function Command() {
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
           )}
-          <Action
-            title="Refresh Rate"
-            onAction={handleRefresh}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
+          <Action title="Refresh Rate" onAction={handleRefresh} shortcut={{ modifiers: ["cmd"], key: "r" }} />
         </ActionPanel>
       }
     >
       <Form.Description text={error || "Latest Dolar Blue Rate information, updated every 15 minutes."} />
       {latestRate && (
         <>
-          <Form.Description
-            title="Rate"
-            text={`${latestRate.value_sell} ARS`}
-          />
-          <Form.Description
-            title="Date"
-            text={new Date(latestRate.date).toLocaleString()}
-          />
+          <Form.Description title="Rate" text={`${latestRate.value_sell} ARS`} />
+          <Form.Description title="Date" text={new Date(latestRate.date).toLocaleString()} />
         </>
       )}
     </Form>

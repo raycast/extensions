@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { fetchHistoricalBlueRate } from "./fetchHistoricalRate";
 import { BlueRate } from "./fetchLatestRate";
@@ -12,7 +12,7 @@ interface Arguments {
 
 export default function Command(props: { arguments: Arguments }) {
   const { year, month, day } = props.arguments;
-  
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const yesterday = new Date(today);
@@ -51,16 +51,16 @@ export default function Command(props: { arguments: Arguments }) {
 
     setIsLoading(true);
     try {
-      const formattedDate = dateToUse.toISOString().split('T')[0];
+      const formattedDate = dateToUse.toISOString().split("T")[0];
       const rate = await fetchHistoricalBlueRate(formattedDate);
       setHistoricalRate(rate);
       showToast({ style: Toast.Style.Success, title: "Historical rate fetched successfully" });
     } catch (error) {
       console.error(error);
-      showToast({ 
-        style: Toast.Style.Failure, 
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to fetch historical rate",
-        message: error instanceof Error ? error.message : "Unknown error occurred"
+        message: error instanceof Error ? error.message : "Unknown error occurred",
       });
     } finally {
       setIsLoading(false);
@@ -94,8 +94,8 @@ export default function Command(props: { arguments: Arguments }) {
           date && date > today
             ? "Cannot select future dates"
             : date && date < minDate
-            ? "Date cannot be before September 30, 2013"
-            : undefined
+              ? "Date cannot be before September 30, 2013"
+              : undefined
         }
         info="Select a date between September 30, 2013 and today to fetch historical rates"
         storeValue
