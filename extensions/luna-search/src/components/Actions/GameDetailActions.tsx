@@ -1,9 +1,10 @@
 import { ActionPanel, Icon, useNavigation } from "@raycast/api";
-import { GameSummary } from "../../services";
+import { GameSummary } from "../../models";
 import { DISPLAY_VALUES } from "../../constants";
 import { SearchCallback, SearchInput } from "../..";
 import { OpenUrlAction } from "./OpenUrlAction";
 import { getCommonGameActions } from "./CommonGameActions";
+import { useRecents } from "../../hooks/UseRecents";
 
 /**
  * Defines the props for the GameActions component.
@@ -16,11 +17,19 @@ interface Props {
 /**
  * A React component that renders an Action to open the game's URL in the browser.
  *
- * @param url The game's URL to open.
+ * @param game The game to open.
  * @returns A JSX.Element representing the OpenGameInBrowserAction component.
  */
-function OpenGameInBrowserAction({ url }: { url: string }) {
-  return <OpenUrlAction icon={Icon.Globe} title={DISPLAY_VALUES.openTitle} url={url} />;
+function OpenGameInBrowserAction({ game }: { game: GameSummary }) {
+  const [, , addGame] = useRecents();
+  return (
+    <OpenUrlAction
+      icon={Icon.Globe}
+      onAction={() => addGame(game)}
+      title={DISPLAY_VALUES.openTitle}
+      url={game.openUrl}
+    />
+  );
 }
 
 /**
@@ -53,7 +62,7 @@ export function GameDetailActions({ game, searchCallback }: Props): JSX.Element 
 
   return (
     <ActionPanel>
-      <OpenGameInBrowserAction url={game.openUrl} />
+      <OpenGameInBrowserAction game={game} />
       {...getCommonGameActions(game, onSearch)}
     </ActionPanel>
   );

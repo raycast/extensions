@@ -51,15 +51,12 @@ export const gqlRequest = async <T>(query: string): Promise<T | null> => {
 };
 
 export interface FetchProjectsQuery {
-  me: {
-    projects: ProjectEdgeGQL;
-  };
+  projects: ProjectEdgeGQL;
 }
 
 export const fetchProjects = async (): Promise<ProjectGQL[]> => {
   const res = await gqlRequest<FetchProjectsQuery>(
-    `query { 
-      me{
+    `query {
         projects{
           edges{
             node{
@@ -70,17 +67,15 @@ export const fetchProjects = async (): Promise<ProjectGQL[]> => {
               isPublic
             }
           }
-        }
       }
   }`,
   );
-  const user = res?.me;
 
-  if (user == null) {
+  if (res == null) {
     return [];
   }
 
-  const projects = [...user.projects.edges.map((p) => p.node)];
+  const projects = [...res.projects.edges.map((p) => p.node)];
 
   return projects;
 };

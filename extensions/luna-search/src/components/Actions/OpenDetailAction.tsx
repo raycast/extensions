@@ -2,7 +2,8 @@ import { Action, Icon, useNavigation } from "@raycast/api";
 import { SearchCallback, SearchInput } from "../..";
 import { DISPLAY_VALUES } from "../../constants";
 import { GameDetail } from "../GameDetail";
-import { GameSummary } from "../../services";
+import { GameSummary } from "../../models";
+import { useRecents } from "../../hooks/UseRecents";
 
 /**
  * Defines the shape of the props for the OpenDetailAction component.
@@ -27,6 +28,7 @@ interface Props {
  * @returns A JSX.Element representing the OpenDetailAction component.
  */
 export function OpenDetailAction({ game, searchCallback }: Props): JSX.Element {
+  const [, , addGame] = useRecents();
   /**
    * Retrieves the `pop` and `push` functions from the Raycast navigation API.
    * The `pop` function can be used to navigate back to the previous view, and the `push` function can be used to navigate to a new view.
@@ -49,5 +51,14 @@ export function OpenDetailAction({ game, searchCallback }: Props): JSX.Element {
    */
   const gameDetailComponent = <GameDetail game={game} searchCallback={gameDetailSearchHandler} />;
 
-  return <Action icon={Icon.Book} onAction={() => push(gameDetailComponent)} title={DISPLAY_VALUES.seeDetailsTitle} />;
+  return (
+    <Action
+      icon={Icon.Book}
+      onAction={() => {
+        addGame(game);
+        push(gameDetailComponent);
+      }}
+      title={DISPLAY_VALUES.seeDetailsTitle}
+    />
+  );
 }

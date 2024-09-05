@@ -1,8 +1,9 @@
-import React, { useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { ActionPanel, Action, openExtensionPreferences, showToast, Toast, Icon, Image } from "@raycast/api";
 import { Context } from "u/context";
 import { getMonthName, getDayName } from "u/getName";
 import { getAvatarIcon } from "@raycast/utils";
+import { DayDetails } from "@/days/detail";
 
 export default function Actions({ global, day }: { global?: boolean; day?: number }) {
   const {
@@ -14,17 +15,13 @@ export default function Actions({ global, day }: { global?: boolean; day?: numbe
     setEnableTimer,
     currentYear,
     setCurrentYear,
-    currentDay,
     setCurrentDay,
     currentMonth,
     setCurrentMonth,
+    setPlaceholder,
+    isDayNames,
+    setDayNames,
   } = useContext(Context);
-
-  const showDate = () => {
-    const dateFormated = `${getDayName(currentDay)} ${currentDay}, ${getMonthName(currentMonth)} ${currentYear}`;
-    const toast = showToast(Toast.Style.Success, dateFormated);
-    return toast;
-  };
 
   const navigateMonth = (offset: number) => {
     let newMonth = currentMonth + offset;
@@ -40,17 +37,26 @@ export default function Actions({ global, day }: { global?: boolean; day?: numbe
 
     setCurrentMonth(newMonth);
     setCurrentYear(newYear);
+    setPlaceholder(`${getMonthName(newMonth)} ${newYear}`);
   };
 
   const navigateYear = (offset: number) => {
-    setCurrentYear(currentYear + offset);
-    showDate();
+    const newYear = currentYear + offset;
+    setCurrentYear(newYear);
+    setPlaceholder(`${getMonthName(currentMonth)} ${newYear}`);
   };
 
   const resetToCurrentDate = () => {
     const now = new Date();
     setCurrentMonth(now.getMonth() + 1);
     setCurrentYear(now.getFullYear());
+    setPlaceholder(`${getMonthName(now.getMonth() + 1)} ${now.getFullYear()}`);
+  };
+
+  const resetToCurrentYear = () => {
+    const now = new Date();
+    setCurrentYear(now.getFullYear());
+    setPlaceholder(`${getMonthName(currentMonth)} ${now.getFullYear()}`);
   };
 
   const viewModes = ["compact", "normal", "comfortable"];
@@ -84,23 +90,18 @@ export default function Actions({ global, day }: { global?: boolean; day?: numbe
 
   return (
     <ActionPanel title="Navigation">
-      <ActionPanel.Section>
+      {!global && (
+        <ActionPanel.Section>
+          <Action.Push
+            title="Show Details"
+            icon={Icon.Calendar}
+            target={<DayDetails day={day || 0} currentMonth={currentMonth} currentYear={currentYear} />}
+          />
+        </ActionPanel.Section>
+      )}
+      <ActionPanel.Section title="Navigate Month">
         <Action
-          title="Current Month"
-          icon={Icon.Dot}
-          shortcut={{ modifiers: ["shift"], key: "c" }}
-          onAction={() => {
-            resetToCurrentDate();
-          }}
-        />
-        <Action
-          title="Current Year"
-          icon={Icon.RotateAntiClockwise}
-          shortcut={{ modifiers: ["shift"], key: "y" }}
-          onAction={() => showToast(Toast.Style.Success, "Current month")}
-        />
-        <Action
-          title={`Previous Month (${getMonthName(currentMonth - 1)})`}
+          title="Previous Month"
           icon={Icon.ChevronLeft}
           shortcut={{ modifiers: ["shift"], key: "arrowLeft" }}
           onAction={() => {
@@ -108,19 +109,37 @@ export default function Actions({ global, day }: { global?: boolean; day?: numbe
           }}
         />
         <Action
-          title={`Next Month (${getMonthName(currentMonth + 1)})`}
+          title="Current Month"
+          icon={Icon.Dot}
+          shortcut={{ modifiers: ["shift"], key: "enter" }}
+          onAction={() => {
+            resetToCurrentDate();
+          }}
+        />
+        <Action
+          title="Next Month"
           icon={Icon.ChevronRight}
           shortcut={{ modifiers: ["shift"], key: "arrowRight" }}
           onAction={() => {
             navigateMonth(1);
           }}
         />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Navigate Year">
         <Action
           title="Previous Year"
           icon={Icon.ChevronDown}
           shortcut={{ modifiers: ["shift"], key: "arrowDown" }}
           onAction={() => {
             navigateYear(-1);
+          }}
+        />
+        <Action
+          title="Current Year"
+          icon={Icon.Dot}
+          shortcut={{ modifiers: ["shift"], key: "space" }}
+          onAction={() => {
+            resetToCurrentYear();
           }}
         />
         <Action
@@ -136,7 +155,7 @@ export default function Actions({ global, day }: { global?: boolean; day?: numbe
         <>
           <Action.CopyToClipboard
             title="Copy Date"
-            shortcut={{ modifiers: ["ctrl"], key: "c" }}
+            shortcut={{ modifiers: ["cmd"], key: "c" }}
             content={
               day ? `${getDayName(day)} ${day}, ${getMonthName(currentMonth)} ${currentYear}` : "No date selected"
             }
@@ -164,6 +183,14 @@ export default function Actions({ global, day }: { global?: boolean; day?: numbe
           }}
         />
         <Action
+          title="Toggle Weekdays"
+          icon={Icon.Calendar}
+          shortcut={{ modifiers: ["shift"], key: "n" }}
+          onAction={() => {
+            setDayNames(!isDayNames);
+          }}
+        />
+        <Action
           title="Toggle Time"
           icon={Icon.Clock}
           shortcut={{ modifiers: ["shift"], key: "t" }}
@@ -179,9 +206,9 @@ export default function Actions({ global, day }: { global?: boolean; day?: numbe
           url="https://github.com/astrit"
         />
         <Action.OpenInBrowser
-          title="Calist"
+          title="Cron"
           icon={{ source: getAvatarIcon("C", { background: "#0e0f10", gradient: true }), mask: Image.Mask.Circle }}
-          url="https://calist.io"
+          url="https://cron.re"
         />
       </ActionPanel.Section>
       <ActionPanel.Section>

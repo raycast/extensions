@@ -3,23 +3,24 @@ import { Grid } from "@raycast/api";
 import Actions from "@/actions/actions";
 import { v4 as AHD } from "uuid";
 import { getIcon } from "u/getIcon";
-import { getDayName } from "u/getName";
 import { Context } from "u/context";
 
 interface DayProps {
-  type: "day" | "week" | "today" | "saturday" | "sunday" | "empty";
-  day: number;
+  type: "day" | "week" | "today" | "saturday" | "sunday" | "empty" | "name";
+  day: number; // Add a default value for day
   id?: number | string;
   hasEvents?: boolean;
+  name?: string;
 }
 
-export function Day({ type, day, hasEvents }: DayProps) {
+export function Day({ type, day, hasEvents, name }: DayProps) {
   const { currentYear, currentMonth } = useContext(Context);
   const source = getIcon({
     iconDay: day,
     iconToday: type === "today",
-    iconEvents: hasEvents === false,
+    iconEvents: hasEvents === true,
     iconWeekend: type === "saturday" || type === "sunday",
+    iconName: name,
   });
 
   const AHID = `SIT:${type}, SID:${day}, SIM:${currentMonth}, SIY:${currentYear} + SIU:${AHD()}`;
@@ -42,9 +43,9 @@ export function Day({ type, day, hasEvents }: DayProps) {
                 }
               : undefined,
         },
-        tooltip: type !== "week" && type !== "empty" ? `${getDayName(day)} ${day}, ${currentMonth} ${currentYear}` : "",
+        tooltip: "",
       }}
-      actions={<Actions global={type !== "week" && type !== "empty" ? false : true} day={day} />}
+      actions={<Actions global={type !== "week" && type !== "empty" && type !== "name" ? false : true} day={day} />}
     />
   );
 }

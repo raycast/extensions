@@ -36,7 +36,7 @@ export default function SVG({
     : mapValueToColor(defCustomTheme) || Color.Green,
   fontColorAccentWeekend = defFontColorAccentWeekend.trim().length > 0
     ? defFontColorAccentWeekend
-    : mapValueToColor(defCustomTheme) || Color.Orange,
+    : mapValueToColor(defCustomTheme) || Color.SecondaryText,
   fontWeight = defFontWeight,
   fontFamily = defFontFamily,
   monthSignal = defMonthSignal,
@@ -44,6 +44,7 @@ export default function SVG({
   isWeekend = false,
   isToday,
   hasEvents,
+  weekDay,
 }: {
   fontWeight?: string;
   fontFamily?: string;
@@ -54,6 +55,7 @@ export default function SVG({
   day?: number | string;
   isToday?: boolean;
   hasEvents?: boolean;
+  weekDay?: string;
 }) {
   let color;
 
@@ -61,13 +63,15 @@ export default function SVG({
     color = fontColorAccent || mapValueToColor(defCustomTheme) || Color.PrimaryText;
   } else if (isWeekend) {
     color = fontColorAccentWeekend || mapValueToColor(defCustomTheme) || Color.SecondaryText;
+  } else if (weekDay) {
+    color = Color.SecondaryText;
   } else {
     color = environment.appearance === "light" ? "#000000" : "#ffffff";
   }
 
   const todayDeco = isToday ? `<line x1="-8" y1="6" x2="8" y2="6" />` : "";
 
-  return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  version="1.1" viewBox="0 0 24 24">
+  return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 24 24">
           <style>
             text {
               font-family: ${fontFamily ? fontFamily : "sans-serif"};

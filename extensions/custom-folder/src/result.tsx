@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { base64ToFile } from "./utils/saveFile";
 import path from "path";
 import { ReplaceAction } from "./replaceAction";
-import { sanitizePngFilePath } from "./utils/verifications";
 
 export default function Result({ formValues }: { formValues: FolderForm }) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -39,7 +38,7 @@ export default function Result({ formValues }: { formValues: FolderForm }) {
       });
       return;
     }
-    base64ToFile(imageResult?.baseImage, sanitizePngFilePath(output))?.then(async (res) => {
+    base64ToFile(imageResult?.baseImage, output)?.then(async (res) => {
       if (res === "success") {
         await showToast({
           style: Toast.Style.Success,
@@ -98,7 +97,7 @@ export default function Result({ formValues }: { formValues: FolderForm }) {
         <ActionPanel>
           {formValues.targetFolderPath && formValues.targetFolderPath.length > 0 && (
             <ReplaceAction
-              iconPath={sanitizePngFilePath(`${tmpDirectory}/${imageResult?.name}`)}
+              iconPath={`${tmpDirectory}/${imageResult?.name}`}
               targetFolderPath={formValues?.targetFolderPath?.[0]}
               onAction={() => saveFile(`${tmpDirectory}/${imageResult?.name}`, "applied")}
             />

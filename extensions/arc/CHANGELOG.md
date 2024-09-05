@@ -1,5 +1,14 @@
 # Arc Changelog
 
+## [Improvements] - 2024-09-02
+
+- Added `Search Downloads` command to search for downloads in Arc.
+
+## [Improvements] - 2024-08-26
+
+- Replaced HUD error messages with toast messages.
+- Added a list section to the `Search History` command.
+
 ## [Fixes] - 2024-07-22
 
 - Fixed an issue where the `Search Arc`, `Search Spaces`, `Search Tabs`, and `Access Spaces and Favorites` commands would fail if Arc was not open.

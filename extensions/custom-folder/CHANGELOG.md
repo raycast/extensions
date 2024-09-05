@@ -1,5 +1,9 @@
 # Custom folder Changelog
 
+## [Fix First icon swap] - 2024-08-28
+- Fixed the issue with the first icon swap.
+- Now handles spaces in paths.
+
 ## [Feat Easily apply the custom icon] - 2024-08-25
 - Added the ability to easily apply the new custom icon to a target folder.
 

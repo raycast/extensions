@@ -1,5 +1,13 @@
 # Changelog
 
+## [Feature] - 2024-09-02
+
+- Feature:  Support for certain platforms that only accept simple string formats, such as DeepSeek.
+
+## [Feature] - 2024-08-26
+
+- Feature:  Support custom vision model name
+
 ## [Fix] - 2024-08-13
 
 - Fix: the image width calculation in AnswerDetailView, which previously returned undefined.

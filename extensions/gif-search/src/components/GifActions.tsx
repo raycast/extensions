@@ -82,7 +82,10 @@ export function GifActions({ item, showViewDetails, service, visitGifItem, mutat
   async function copyGif() {
     try {
       await showToast({ style: Toast.Style.Animated, title: "Copying GIF" });
-      const isInFavorites = favIds?.includes(id.toString());
+      const isInFavorites =
+        service == "favorites"
+          ? favIds?.map((favs) => favs.split(":")[1]).includes(id.toString())
+          : favIds?.includes(id.toString());
       const file = await copyFileToClipboard(item.download_url, item.download_name, isInFavorites);
       await trackUsage();
       await closeMainWindow();
@@ -155,7 +158,10 @@ export function GifActions({ item, showViewDetails, service, visitGifItem, mutat
   );
 
   let toggleFav: JSX.Element | undefined;
-  const isFav = favIds?.includes(id.toString());
+  const isFav =
+    service == "favorites"
+      ? favIds?.map((favs) => favs.split(":")[1]).includes(id.toString())
+      : favIds?.includes(id.toString());
   if (favIds) {
     toggleFav = isFav ? (
       <Action

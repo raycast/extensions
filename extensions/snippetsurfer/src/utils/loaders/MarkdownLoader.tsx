@@ -34,7 +34,7 @@ function extractMetadataContent(
 
     // Parse tags (case-insensitive)
     const tagsKey = getCaseInsensitiveKey(metadata, "tags") || "Tags";
-    const rawTags = tagsKey ? metadata[tagsKey] : [];
+    const rawTags = metadata?.[tagsKey] ?? [];
     if (!Array.isArray(rawTags) || rawTags.some((tag) => typeof tag !== "string")) {
       tags = [];
       error = new Error(`Invalid tags. All tags must be a string for ${relativePath}`);

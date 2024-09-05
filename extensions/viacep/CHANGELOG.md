@@ -1,5 +1,9 @@
 # ViaCEP Changelog
 
+## [Fixes] - 2024-08-29
+
+- Fixed output formatting when certain address components are missing.
+
 ## [Enhancements] - 2024-08-21
 
 - Dynamically fetch and display app icons for `Open in Apple Maps` and `Open in Google Maps` actions.
