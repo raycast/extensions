@@ -1,6 +1,6 @@
 # Contentful Changelog
 
-## [New `Search Users` command] - {PR_MERGE_DATE}
+## [New `Search Users` command] - 2024-09-05
 
 ## [New `Search Assets` command] - 2024-07-26
 
