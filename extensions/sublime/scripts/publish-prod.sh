@@ -8,7 +8,9 @@ npm run patch-prod
 # Setup the raycast-extensions repo
 pushd "../raycast-extensions"
 git checkout main
-git pull
+git fetch upstream
+git reset --hard upstream/main
+git push
 BRANCH_NAME="sublime-$(date +'%Y-%m-%d_%H-%M-%S')"
 git checkout -b $BRANCH_NAME
 

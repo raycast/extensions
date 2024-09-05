@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Improvements] - 2024-09-02
+
+- Added `Search Downloads` command to search for downloads in Arc.
+
 ## [Improvements] - 2024-08-26
 
 - Replaced HUD error messages with toast messages.

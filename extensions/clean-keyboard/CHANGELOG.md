@@ -7,6 +7,7 @@
 - Updated search bar placeholder.
 - Updated navigation title.
 - Avoided redundancy in list item titles.
+- Fixed the keyboard didn't unlock after the action was executed.
 
 ## [1 hour] - 2024-07-26
 

@@ -19,6 +19,14 @@ export type Space = {
   title?: string;
 };
 
+export type Download = {
+  id: number;
+  current_path: string;
+  target_path: string;
+  tab_url: string;
+  download_time: string;
+};
+
 export type NewTabSearchConfigs = {
   google: string;
   duckduckgo: string;

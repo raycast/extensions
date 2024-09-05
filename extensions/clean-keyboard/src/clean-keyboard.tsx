@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { handler } from "swift:../swift/MyExecutable";
+import { handler, stopHandler } from "swift:../swift/MyExecutable";
 
 interface Duration {
   display: string;
@@ -91,7 +91,10 @@ export default function Command() {
                 autoFocus={false}
                 title={"Unlock Keyboard"}
                 shortcut={{ modifiers: ["ctrl"], key: "u" }}
-                onAction={() => setIsRunning(false)}
+                onAction={() => {
+                  stopHandler();
+                  setIsRunning(false);
+                }}
               />
             </ActionPanel>
           }

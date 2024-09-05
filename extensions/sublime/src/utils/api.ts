@@ -70,7 +70,6 @@ export async function getActiveUserInfo(): Promise<UserInfo> {
 
 export async function searchSublimeCards(
     query: string,
-    isSmartSearch: boolean,
     restrictToLibrary: boolean,
     entityType?: string,
     orderBy?: string,
@@ -81,11 +80,9 @@ export async function searchSublimeCards(
 }> {
     const data = await fetchApi("GET", restrictToLibrary ? `feed/library/` : `feed/search/`, {
         searchParams: {
-            search: isSmartSearch ? undefined : query,
-            knn: isSmartSearch ? query : undefined,
+            knn: query, // Always use smart search
             page,
-            // Raycast pagination requires at least 10 items per page to work
-            page_size: 15,
+            page_size: 15, // Raycast pagination requires at least 10 items per page to work
             entity_type: entityType,
             order_by: orderBy,
         },
@@ -100,7 +97,6 @@ export async function searchSublimeCards(
 export async function searchCardsInCollection(
     collectionUuid: string,
     query: string,
-    isSmartSearch: boolean,
     page = 1,
 ): Promise<{
     results: SublimeCard[];
@@ -109,10 +105,8 @@ export async function searchCardsInCollection(
     const data = await fetchApi("GET", `feed/connections/`, {
         searchParams: {
             entity: collectionUuid,
-            search: isSmartSearch ? undefined : query,
-            knn: isSmartSearch ? query : undefined,
-            page,
-            // Raycast pagination requires at least 10 items per page to work
+            knn: query, // Always use smart search
+            page, // Raycast pagination requires at least 10 items per page to work
             page_size: 15,
         },
     });

@@ -90,7 +90,9 @@ export const getMailboxes = async (accountName: string): Promise<Mailbox[]> => {
 
     const mailboxes: Mailbox[] = response
       .map((line: string) => {
-        const [name, unreadCount] = line.split(",");
+        const lastCommaIndex = line.lastIndexOf(",");
+        const name = line.substring(0, lastCommaIndex);
+        const unreadCount = line.substring(lastCommaIndex + 1);
         return { name, icon: getMailboxIcon(name), unreadCount: parseInt(unreadCount) };
       })
       .sort(sortMailboxes);

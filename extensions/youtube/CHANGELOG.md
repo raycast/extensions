@@ -1,5 +1,9 @@
 # YouTube Changelog
 
+## [Chore] - 2024-09-02
+
+- Added missing contributor
+
 ## [Enhancement] - 2024-03-17
 
 - Update shortcuts for remove/clear actions to conform with Raycast's `⌃X` and `⌃⇧X` convention for such operations.

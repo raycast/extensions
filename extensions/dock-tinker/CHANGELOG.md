@@ -1,5 +1,9 @@
 # Dock Tinker Changelog
 
+## [Small Spacer] - 2024-09-03
+
+- Add Spacer to Dock command supports small spacer.
+
 ## [Reset to Confirm] - 2024-07-10
 
 - Reset Dock State command shows a confirmation dialog.

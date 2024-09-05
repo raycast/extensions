@@ -20,6 +20,14 @@ Here is a typical manifest file:
       "description": "A command to send love to each other",
       "mode": "view"
     }
+  ],
+  "attachments": [
+    {
+      "title": "Get Raycast blog posts",
+      "name": "get-raycast-blog-posts",
+      "description": "Get the latest blog posts from the Raycast blog",
+      "mode": "submenu"
+    }
   ]
 }
 ```
@@ -47,12 +55,12 @@ All Raycast related properties for an extension.
 
 ## Command properties
 
-All properties for a command.
+All properties for a [command](./terminology.md#command).
 
 | Property                                      | Description                                                                                                                                                                                                                                                                                                                                                                                                     |
 | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| name<mark style="color:red;">\*</mark>        | A unique id for the command. The name directly maps to the entry point file for the command. So a command named "index" would map to `index.ts` (or any other supported TypeScript or JavaScript file extension such as `.tsx`, `.js`, `.jsx)`.                                                                                                                                                                 |
-| title<mark style="color:red;">\*</mark>       | The display name of the command, shown to the user in Raycast.                                                                                                                                                                                                                                                                                                                                                  |
+| name<mark style="color:red;">\*</mark>        | A unique id for the command. The name directly maps to the entry point file for the command. So a command named "index" would map to `src/index.ts` (or any other supported TypeScript or JavaScript file extension such as `.tsx`, `.js`, `.jsx)`.                                                                                                                                                             |
+| title<mark style="color:red;">\*</mark>       | The display name of the command, shown to the user in the Store, Preferences, and in Raycast's root search.                                                                                                                                                                                                                                                                                                     |
 | subtitle                                      | The optional subtitle of the command in the root search. Usually, this is the service or domain that your command is associated with. You can dynamically update this property using [`updateCommandMetadata`](../api-reference/command.md#updatecommandmetadata).                                                                                                                                              |
 | description<mark style="color:red;">\*</mark> | It helps users understand what the command does. It will be displayed in the Store and in Preferences.                                                                                                                                                                                                                                                                                                          |
 | icon                                          | <p>An optional reference to an icon file in the assets folder. Use png format with a size of at least 512 x 512 pixels. To support light and dark theme, add two icons, one with <code>@dark</code> as suffix, e.g. <code>icon.png</code> and <code>icon@dark.png</code>.</p><p>If no icon is specified, the extension icon will be used.</p>                                                                   |
@@ -67,25 +75,25 @@ All properties for a command.
 
 All properties for extension or command-specific preferences. Use the [Preferences API](../api-reference/preferences.md) to access their values.
 
-| Property                                      | Description                                                                                                                                                                                                                |
-| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| name<mark style="color:red;">\*</mark>        | A unique id for the preference.                                                                                                                                                                                            |
-| title<mark style="color:red;">\*</mark>       |  <p>The display name of the preference shown in Raycast preferences.</p><p> For `"checkbox"`, `"textfield"` and `"password"`, it is shown as a section title above the respective input element.</p><p>If you want to group multiple checkboxes into a single section, set the <code>title</code> of the first checkbox and leave the <code>title</code> of the other checkboxes empty.</p>    |
-| description<mark style="color:red;">\*</mark> | It helps users understand what the preference does. It will be displayed as a tooltip when hovering over it.                                                                                                               |
-| type<mark style="color:red;">\*</mark>        | The preference type. We currently support `"textfield"` and `"password"` (for secure entry), `"checkbox"`, `"dropdown"`, `"appPicker"`, `"file"`, and `"directory"`.                                                       |
-| required<mark style="color:red;">\*</mark>    | Indicates whether the value is required and must be entered by the user before the extension is usable.                                                                                                                    |
-| placeholder                                   | Text displayed in the preference's field when no value has been input.                                                                                                                                                     |
-| default                                       | The optional default value for the field. For textfields, this is a string value; for checkboxes a boolean; for dropdowns the value of an object in the data array; for appPickers an application name, bundle ID or path. |
+| Property                                      | Description                                                                                                                                                                                                                                                                                                                                                                                |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| name<mark style="color:red;">\*</mark>        | A unique id for the preference.                                                                                                                                                                                                                                                                                                                                                            |
+| title<mark style="color:red;">\*</mark>       | <p>The display name of the preference shown in Raycast preferences.</p><p> For `"checkbox"`, `"textfield"` and `"password"`, it is shown as a section title above the respective input element.</p><p>If you want to group multiple checkboxes into a single section, set the <code>title</code> of the first checkbox and leave the <code>title</code> of the other checkboxes empty.</p> |
+| description<mark style="color:red;">\*</mark> | It helps users understand what the preference does. It will be displayed as a tooltip when hovering over it.                                                                                                                                                                                                                                                                               |
+| type<mark style="color:red;">\*</mark>        | The preference type. We currently support `"textfield"` and `"password"` (for secure entry), `"checkbox"`, `"dropdown"`, `"appPicker"`, `"file"`, and `"directory"`.                                                                                                                                                                                                                       |
+| required<mark style="color:red;">\*</mark>    | Indicates whether the value is required and must be entered by the user before the extension is usable.                                                                                                                                                                                                                                                                                    |
+| placeholder                                   | Text displayed in the preference's field when no value has been input.                                                                                                                                                                                                                                                                                                                     |
+| default                                       | The optional default value for the field. For textfields, this is a string value; for checkboxes a boolean; for dropdowns the value of an object in the data array; for appPickers an application name, bundle ID or path.                                                                                                                                                                 |
 
 Depending on the `type` of the Preference, some additional properties can be required:
 
-### Additonal properties for `checkbox` Preference
+### Additional properties for `checkbox` Preference
 
-| Property                                | Description                                                                                                                                                                                                                                                                                                                                   |
-| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| label<mark style="color:red;">\*</mark> | The label of the checkbox. Shown next to the checkbox.                                                                                                                                                                                                                                                                                        |
+| Property                                | Description                                            |
+| --------------------------------------- | ------------------------------------------------------ |
+| label<mark style="color:red;">\*</mark> | The label of the checkbox. Shown next to the checkbox. |
 
-### Additonal properties for `dropdown` Preference
+### Additional properties for `dropdown` Preference
 
 | Property                               | Description                                                                                          |
 | -------------------------------------- | ---------------------------------------------------------------------------------------------------- |
@@ -104,7 +112,7 @@ All properties for command arguments. Use the [Arguments API](./lifecycle/argume
 
 Depending on the `type` of the Argument, some additional properties can be required:
 
-### Additonal properties for `dropdown` Argument
+### Additional properties for `dropdown` Argument
 
 | Property                               | Description                                                                                          |
 | -------------------------------------- | ---------------------------------------------------------------------------------------------------- |

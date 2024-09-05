@@ -8,8 +8,6 @@ import { useState } from "react";
 import CardsList from "./views/list";
 import { getCardUrl } from "./utils/constants";
 
-const useSmartSearch = true;
-
 function SearchCollections() {
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -17,14 +15,7 @@ function SearchCollections() {
         searchQuery,
         true,
         (query, restrictToLibrary, page) =>
-            searchSublimeCards(
-                query,
-                useSmartSearch,
-                true,
-                "collection.collection",
-                !query ? "most_recent" : undefined,
-                page,
-            ),
+            searchSublimeCards(query, true, "collection.collection", !query ? "most_recent" : undefined, page),
         true,
     );
 
@@ -68,7 +59,7 @@ function CollectionCardsList({ collectionUuid, collectionTitle }: { collectionUu
     const { cards, isLoading, pagination } = useCardsSearch(
         searchQuery,
         true,
-        (query, restrictToLibrary, page) => searchCardsInCollection(collectionUuid, query, useSmartSearch, page),
+        (query, restrictToLibrary, page) => searchCardsInCollection(collectionUuid, query, page),
         true,
     );
 

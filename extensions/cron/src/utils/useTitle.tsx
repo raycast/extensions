@@ -1,32 +1,35 @@
-import { getDayName, getMonthName } from "u/getName";
-import { getCurrentDay, getCurrentMonth, getCurrentYear, getCurrentWeek } from "u/getDate";
 import { navTitle, navWeather, navWeek, navDate } from "u/options";
-
 import getWeather from "u/weather";
-interface TitleProps {
-  month?: number;
-  year?: number;
-  week?: number;
-  day?: number;
-  weather?: boolean;
-}
 
-export const useTitle = ({ month, year, week, day, weather }: TitleProps = {}) => {
-  const getDay = day || getCurrentDay().dayNumber;
-  const getMonthNumber = month || getCurrentMonth().monthNumber;
-  const getYear = navDate ? year || getCurrentYear() : "";
-  const getWeek = week || getCurrentWeek();
-  const getForecast = weather ? getWeather() : "";
+const getCurrentWeekOfYear = () => {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 1);
+  const diff = now.getTime() - start.getTime();
+  const oneDay = 1000 * 60 * 60 * 24;
+  const dayOfYear = Math.floor(diff / oneDay);
+  return Math.ceil(dayOfYear / 7);
+};
 
-  const weatherString: string = navWeather ? getForecast ?? "" : "";
-  const dateStr: string = navDate ? `${getDayName(getDay)} ${getDay}, ${getMonthName(getMonthNumber)} ${getYear}` : "";
-  const weekString: string = navWeek ? `${getWeek}` : "";
+export const useTitle = () => {
+  const WEATHER: string = navWeather ? getWeather("temperature") ?? "" : "";
 
-  const titleParts = [weatherString, dateStr, weekString].filter(Boolean);
+  const CURRENT_DAY = new Intl.DateTimeFormat("en", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date());
+
+  const CURRENT_WEEK = getCurrentWeekOfYear();
+
+  const DATE = navDate ? CURRENT_DAY : "";
+  const WEEK = navWeek ? CURRENT_WEEK : "";
+
+  const TITLE = [WEATHER, DATE, WEEK].filter(Boolean);
 
   if (navTitle) {
     return navTitle;
   } else {
-    return titleParts.join("   ·   ");
+    return TITLE.join("   ·   ");
   }
 };

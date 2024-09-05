@@ -91,3 +91,17 @@ func globalKeyEventHandler(
   handler.scheduleTimer(duration: duration ?? 15)
   handler.run()
 }
+
+@raycast func stopHandler() {
+  // Create a key down event for 'u' key with control modifier
+  let keyDownEvent = CGEvent(keyboardEventSource: nil, virtualKey: KeyCode.u.rawValue, keyDown: true)
+  keyDownEvent?.flags = .maskControl
+  keyDownEvent?.post(tap: .cghidEventTap)
+
+  usleep(10000)
+
+  // Create a key up event for 'u' key with control modifier
+  let keyUpEvent = CGEvent(keyboardEventSource: nil, virtualKey: KeyCode.u.rawValue, keyDown: false)
+  keyUpEvent?.flags = .maskControl
+  keyUpEvent?.post(tap: .cghidEventTap)
+}

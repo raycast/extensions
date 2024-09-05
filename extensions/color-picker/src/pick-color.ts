@@ -1,10 +1,10 @@
 import { Clipboard, closeMainWindow, launchCommand, LaunchType, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { callbackLaunchCommand } from "raycast-cross-extension";
+import { pickColor } from "swift:../swift/color-picker";
 import { addToHistory } from "./history";
 import { Color, PickColorCommandLaunchProps } from "./types";
 import { getFormattedColor } from "./utils";
-import { pickColor } from "swift:../swift/color-picker";
-import { showFailureToast } from "@raycast/utils";
 
 export default async function command(props: PickColorCommandLaunchProps) {
   await closeMainWindow();
