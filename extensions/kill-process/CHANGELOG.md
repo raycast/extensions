@@ -1,6 +1,6 @@
 # Kill Process Changelog
 
-## [Improvements] - 2024-09-05
+## [Improvements] - {PR_MERGE_DATE}
 
 - Adopted separate accessories for CPU and memory usage, including icons
 - Added a dropdown to the command list for sorting processes by CPU or memory usage
