@@ -15,7 +15,7 @@
     {
       "name": "open-docs",
       "title": "Open Docs",
-      "subtitle": "Catppuccin Documentation",
+      "subtitle": "Catppuccin",
       "description": "Open the Catppuccin documentation in your browser",
       "keywords": [
         "catppuccin",
@@ -30,7 +30,7 @@
     {
       "name": "search-ports",
       "title": "Search Ports",
-      "subtitle": "Catppuccin Ports",
+      "subtitle": "Catppuccin",
       "description": "Search through Catppuccin ports",
       "keywords": [
         "ports",
@@ -41,7 +41,7 @@
     {
       "name": "search-userstyles",
       "title": "Search User Styles",
-      "subtitle": "Catppuccin User Styles",
+      "subtitle": "Catppuccin",
       "description": "Search through Catppuccin user styles",
       "keywords": [
         "user",
@@ -53,7 +53,7 @@
     {
       "name": "search-mocha",
       "title": "Search Mocha",
-      "subtitle": "Catppuccin Mocha Palette",
+      "subtitle": "Catppuccin",
       "description": "Search the Catppuccin Mocha flavored palette",
       "keywords": [
         "mocha",
@@ -65,7 +65,7 @@
     {
       "name": "search-latte",
       "title": "Search Latte",
-      "subtitle": "Catppuccin Latte Palette",
+      "subtitle": "Catppuccin",
       "description": "Search the Catppuccin Latte flavored palette",
       "keywords": [
         "latte",
@@ -77,7 +77,7 @@
     {
       "name": "search-frappe",
       "title": "Search Frappe",
-      "subtitle": "Catppuccin Frappe Palette",
+      "subtitle": "Catppuccin",
       "description": "Search the Catppuccin Frappe flavored palette",
       "keywords": [
         "frappe",
@@ -89,7 +89,7 @@
     {
       "name": "search-macchiato",
       "title": "Search Macchiato",
-      "subtitle": "Catppuccin Macchiato Palette",
+      "subtitle": "Catppuccin",
       "description": "Search the Catppuccin Macchiato flavored palette",
       "keywords": [
         "macchiato",
