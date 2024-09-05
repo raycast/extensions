@@ -1,5 +1,4 @@
 import { getPreferenceValues, showHUD } from "@raycast/api";
-import { useMemo } from "react";
 import { NativePreferences } from "../types/preferences";
 import { Task } from "../types/task";
 import useApi from "./useApi";
@@ -7,26 +6,10 @@ import { CreateTaskProps, PlannerActionIntermediateResult } from "./useTask.type
 import { RequestInit } from "node-fetch";
 
 export const useTasks = () => {
-  const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
+  const { apiUrl } = getPreferenceValues<NativePreferences>();
   const { useFetchRai } = useApi();
 
-  const headers = useMemo(
-    () => ({
-      Authorization: `Bearer ${apiToken}`,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    }),
-    [apiToken]
-  );
-
-  const {
-    data: tasks,
-    error,
-    isLoading,
-  } = useFetchRai<Task[]>(`${apiUrl}/tasks?instances=true`, {
-    headers,
-    keepPreviousData: true,
-  });
+  const { data: tasks, error, isLoading } = useFetchRai<Task[]>(`${apiUrl}/tasks?instances=true`);
 
   if (error) console.error("Error while fetching Tasks", error);
 

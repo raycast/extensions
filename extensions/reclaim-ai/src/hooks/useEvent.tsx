@@ -15,18 +15,8 @@ import { useTaskActions } from "./useTask";
 import { useUser } from "./useUser";
 
 export const useEvents = ({ start, end }: { start: Date; end: Date }) => {
-  const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
+  const { apiUrl } = getPreferenceValues<NativePreferences>();
   const { useFetchRai } = useApi();
-
-
-  const headers = useMemo(
-    () => ({
-      Authorization: `Bearer ${apiToken}`,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    }),
-    [apiToken]
-  );
 
   const {
     data: events,
@@ -38,11 +28,7 @@ export const useEvents = ({ start, end }: { start: Date; end: Date }) => {
       start: format(start, "yyyy-MM-dd"),
       end: format(end, "yyyy-MM-dd"),
       allConnected: "true",
-    }).toString()}`,
-    {
-      headers,
-      keepPreviousData: true,
-    }
+    }).toString()}`
   );
 
   if (error) console.error("Error while fetching Events", error);

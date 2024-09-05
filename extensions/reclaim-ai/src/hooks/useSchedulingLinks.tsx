@@ -1,42 +1,24 @@
 import { getPreferenceValues, showToast, Toast, open } from "@raycast/api";
-import { useMemo } from "react";
 import { NativePreferences } from "../types/preferences";
 import { ApiSchedulingLink, ApiSchedulingLinkGroups } from "./useSchedulingLinks.types";
 import { SchedulingLink } from "../types/scheduling-link";
 import useApi from "./useApi";
 
 export const useSchedulingLinks = () => {
-  const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
+  const { apiUrl } = getPreferenceValues<NativePreferences>();
   const { useFetchRai } = useApi();
-
-  const headers = useMemo(
-    () => ({
-      Authorization: `Bearer ${apiToken}`,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    }),
-    [apiToken]
-  );
 
   const {
     data: schedulingLinks,
     error: schedulingLinksError,
     isLoading: schedulingLinksIsLoading,
-  } = useFetchRai<ApiSchedulingLink>(`${apiUrl}/scheduling-link`, {
-    headers,
-    keepPreviousData: true,
-    method: "GET",
-  });
+  } = useFetchRai<ApiSchedulingLink>(`${apiUrl}/scheduling-link`);
 
   const {
     data: schedulingLinksGroups,
     error: schedulingLinksGroupsError,
     isLoading: schedulingLinksGroupsIsLoading,
-  } = useFetchRai<ApiSchedulingLinkGroups>(`${apiUrl}/scheduling-link/group`, {
-    headers,
-    keepPreviousData: true,
-    method: "GET",
-  });
+  } = useFetchRai<ApiSchedulingLinkGroups>(`${apiUrl}/scheduling-link/group`);
 
   if (schedulingLinksError) console.error("Error while fetching Scheduling Links", schedulingLinksError);
   if (schedulingLinksGroupsError)
