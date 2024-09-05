@@ -20,13 +20,7 @@ export default function TodoList() {
       navigationTitle={`Manage Todo List${editing !== false ? " • Editing" : searchMode ? " • Searching" : ""}`}
       onSearchTextChange={(text: string) => setSearchBarText(text)}
       searchBarAccessory={<ListTags />}
-      searchBarPlaceholder={
-        searchMode
-          ? "Search todos"
-          : editingTag
-          ? "Type and hit enter to edit item tag"
-          : "Type and hit enter to add an item to your list"
-      }
+      searchBarPlaceholder={searchMode ? "Search todos" : "Type and hit enter to add an item to your list"}
       searchText={searchBarText}
     >
       <TodoSection sectionKey="pinned" selectedTag={selectedTag} />
