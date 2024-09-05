@@ -3,6 +3,7 @@ import {
   ActionPanel,
   clearSearchBar,
   closeMainWindow,
+  Color,
   getPreferenceValues,
   Icon,
   List,
@@ -259,8 +260,16 @@ export default function ProcessList() {
                 subtitle={subtitleString(process)}
                 icon={icon}
                 accessories={[
-                  { text: `${process.cpu.toFixed(2)}%`, icon: "cpu.svg", tooltip: "% CPU" },
-                  { text: prettyBytes(process.mem * 1024), icon: "memorychip.svg", tooltip: "Memory" },
+                  {
+                    text: `${process.cpu.toFixed(2)}%`,
+                    icon: { source: "cpu.svg", tintColor: Color.PrimaryText },
+                    tooltip: "% CPU",
+                  },
+                  {
+                    text: prettyBytes(process.mem * 1024),
+                    icon: { source: "memorychip.svg", tintColor: Color.PrimaryText },
+                    tooltip: "Memory",
+                  },
                 ]}
                 actions={
                   <ActionPanel>
