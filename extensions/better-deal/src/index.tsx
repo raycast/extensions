@@ -1,4 +1,5 @@
 import { LaunchProps, Cache, showToast, Toast, List, Icon, Action, ActionPanel } from "@raycast/api";
+import { useState, useEffect } from "react";
 
 const cache = new Cache();
 
@@ -28,13 +29,40 @@ export default function Command(props: LaunchProps) {
   const unitCost = price / quantity;
   const perUnitSize = unitSize ? price / quantity / unitSize : undefined;
 
-  const cached = cache.get("items");
-  const items: Item[] = cached ? JSON.parse(cached) : [];
+  const [items, setItems] = useState<Item[]>([]);
 
-  const newItem = { price, quantity, unitSize, unitCost, perUnitSize };
-  const updatedItems = [newItem, ...items.slice(0, 4)]; // Keep only the 5 most recent items
+  useEffect(() => {
+    const cached = cache.get("items");
+    const parsedItems: Item[] = cached ? JSON.parse(cached) : [];
+    setItems(parsedItems);
+  }, []);
 
-  cache.set("items", JSON.stringify(updatedItems));
+  const addNewItem = (newItem: Item) => {
+    setItems((prevItems) => {
+      const updatedItems = [newItem, ...prevItems].slice(0, 5); // Keep only the 5 most recent items
+      cache.set("items", JSON.stringify(updatedItems));
+      return updatedItems;
+    });
+  };
+
+  const deleteItem = (index: number) => {
+    setItems((prevItems) => {
+      const updatedItems = prevItems.filter((_, i) => i !== index);
+      cache.set("items", JSON.stringify(updatedItems));
+      return updatedItems;
+    });
+    showToast({
+      style: Toast.Style.Success,
+      title: "Record Deleted",
+      message: "The selected record has been removed.",
+    });
+  };
+
+  // Add the new item only once when the component mounts
+  useEffect(() => {
+    const newItem = { price, quantity, unitSize, unitCost, perUnitSize };
+    addNewItem(newItem);
+  }, []); // Empty dependency array ensures this runs only once
 
   return (
     <List navigationTitle="Better Deal Calculator" searchBarPlaceholder="Search Information...">
@@ -71,6 +99,24 @@ export default function Command(props: LaunchProps) {
               { text: `${item.unitCost.toFixed(2)}/item` },
               ...(item.unitSize !== undefined ? [{ text: `${item.perUnitSize?.toFixed(2)}/unit size` }] : []),
             ]}
+            actions={
+              <ActionPanel>
+                <Action title="Delete This Record" icon={Icon.Trash} onAction={() => deleteItem(index)} />
+                <Action
+                  title="Clear All Records"
+                  icon={Icon.Trash}
+                  onAction={() => {
+                    setItems([]); // Clear the items state
+                    cache.set("items", JSON.stringify([])); // Clear the cache
+                    showToast({
+                      style: Toast.Style.Success,
+                      title: "All Records Cleared",
+                      message: "All records have been removed.",
+                    });
+                  }}
+                />
+              </ActionPanel>
+            }
           />
         ))}
       </List.Section>
