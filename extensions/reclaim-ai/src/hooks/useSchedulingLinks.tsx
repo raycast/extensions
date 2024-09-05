@@ -1,5 +1,4 @@
 import { getPreferenceValues, showToast, Toast, open } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
 import { NativePreferences } from "../types/preferences";
 import { ApiSchedulingLink, ApiSchedulingLinkGroups } from "./useSchedulingLinks.types";
@@ -8,6 +7,7 @@ import useApi from "./useApi";
 
 export const useSchedulingLinks = () => {
   const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
+  const { useFetchRai } = useApi();
 
   const headers = useMemo(
     () => ({
@@ -22,7 +22,7 @@ export const useSchedulingLinks = () => {
     data: schedulingLinks,
     error: schedulingLinksError,
     isLoading: schedulingLinksIsLoading,
-  } = useFetch<ApiSchedulingLink>(`${apiUrl}/scheduling-link`, {
+  } = useFetchRai<ApiSchedulingLink>(`${apiUrl}/scheduling-link`, {
     headers,
     keepPreviousData: true,
     method: "GET",
@@ -32,7 +32,7 @@ export const useSchedulingLinks = () => {
     data: schedulingLinksGroups,
     error: schedulingLinksGroupsError,
     isLoading: schedulingLinksGroupsIsLoading,
-  } = useFetch<ApiSchedulingLinkGroups>(`${apiUrl}/scheduling-link/group`, {
+  } = useFetchRai<ApiSchedulingLinkGroups>(`${apiUrl}/scheduling-link/group`, {
     headers,
     keepPreviousData: true,
     method: "GET",

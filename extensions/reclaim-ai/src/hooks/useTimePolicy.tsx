@@ -1,11 +1,13 @@
 import { getPreferenceValues } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
 import { NativePreferences } from "../types/preferences";
 import { ApiTimePolicy } from "./useTimePolicy.types";
+import useApi from "./useApi";
 
 export const useTimePolicy = () => {
   const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
+  const { useFetchRai } = useApi();
+
 
   const headers = useMemo(
     () => ({
@@ -20,7 +22,7 @@ export const useTimePolicy = () => {
     data: timePolicies,
     error,
     isLoading,
-  } = useFetch<ApiTimePolicy>(`${apiUrl}/timeschemes`, {
+  } = useFetchRai<ApiTimePolicy>(`${apiUrl}/timeschemes`, {
     headers,
     keepPreviousData: true,
   });

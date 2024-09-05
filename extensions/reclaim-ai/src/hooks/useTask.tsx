@@ -1,5 +1,4 @@
 import { getPreferenceValues, showHUD } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
 import { NativePreferences } from "../types/preferences";
 import { Task } from "../types/task";
@@ -9,6 +8,7 @@ import { RequestInit } from "node-fetch";
 
 export const useTasks = () => {
   const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
+  const { useFetchRai } = useApi();
 
   const headers = useMemo(
     () => ({
@@ -23,7 +23,7 @@ export const useTasks = () => {
     data: tasks,
     error,
     isLoading,
-  } = useFetch<Task[]>(`${apiUrl}/tasks?instances=true`, {
+  } = useFetchRai<Task[]>(`${apiUrl}/tasks?instances=true`, {
     headers,
     keepPreviousData: true,
   });

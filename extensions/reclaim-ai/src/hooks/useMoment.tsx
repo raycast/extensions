@@ -1,11 +1,12 @@
 import { getPreferenceValues } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
 import { NativePreferences } from "../types/preferences";
 import { ApiResponseMoment } from "./useEvent.types";
+import useApi from "./useApi";
 
 export const useMoment = () => {
   const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
+  const { useFetchRai } = useApi();
 
   const headers = useMemo(
     () => ({
@@ -20,7 +21,7 @@ export const useMoment = () => {
     data: momentData,
     error,
     isLoading,
-  } = useFetch<ApiResponseMoment>(`${apiUrl}/moment/next`, {
+  } = useFetchRai<ApiResponseMoment>(`${apiUrl}/moment/next`, {
     headers,
     keepPreviousData: true,
   });
