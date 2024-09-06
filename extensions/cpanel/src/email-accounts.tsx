@@ -118,7 +118,7 @@ function CreateEmailAccount({ onAccountCreated }: { onAccountCreated: () => void
       setExecute(true);
     },
     initialValues: {
-      domain: domains?.main_domain,
+      domain: domains?.main_domain || "",
       quota: "250",
       send_welcome_email: true,
       skip_update_db: false,
@@ -140,20 +140,25 @@ function CreateEmailAccount({ onAccountCreated }: { onAccountCreated: () => void
     },
   });
 
-  const { isLoading: isCreating } = useUAPI<string>("Email", "add_pop", values, {
-    execute,
-    onError() {
-      setExecute(false);
+  const { isLoading: isCreating } = useUAPI<string>(
+    "Email",
+    "add_pop",
+    { ...values, send_welcome_email: values.send_welcome_email ? 1 : 0, skip_update_db: values.skip_update_db ? 1 : 0 },
+    {
+      execute,
+      onError() {
+        setExecute(false);
+      },
+      async onData(data) {
+        await showToast({
+          title: `Created email account`,
+          message: data,
+        });
+        onAccountCreated();
+        pop();
+      },
     },
-    async onData(data) {
-      await showToast({
-        title: `Created email account`,
-        message: data,
-      });
-      onAccountCreated();
-      pop();
-    },
-  });
+  );
 
   const isLoading = isLoadingDomains || isCreating;
 

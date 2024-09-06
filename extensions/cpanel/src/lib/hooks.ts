@@ -63,7 +63,7 @@ export const useParsedDNSZone = (zone: string) => {
 };
 
 // EMAILS
-export const useListEmailAccounts = () => useUAPI<EmailAccount[]>("Email", "list_pops", { skip_main: 0 });
+export const useListEmailAccounts = () => useUAPI<EmailAccount[]>("Email", "list_pops", { skip_main: 1 });
 export const useListEmailAccountsWithDiskInfo = (email: string, domain: string) =>
   useUAPI<EmailAccountWithDiskInformation[]>("Email", "list_pops_with_disk", {
     email,
