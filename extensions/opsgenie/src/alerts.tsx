@@ -76,11 +76,7 @@ const AlertList = () => {
 
 export default AlertList;
 
-const AlertListItem = (props: {
-  alert: Alert;
-  mutate: MutatePromise<Alert[]>;
-  isLoading: boolean;
-}) => {
+const AlertListItem = (props: { alert: Alert; mutate: MutatePromise<Alert[]>; isLoading: boolean }) => {
   const alert = props.alert;
   const { mutate, isLoading } = props;
 
@@ -111,28 +107,45 @@ const AlertListItem = (props: {
       subtitle={`${subtitle}${alert.tags && alert.tags.length > 0 ? ` [${alert.tags.join(", ")}]` : ""}`}
       icon={icon}
       keywords={[alert.status, alert.priority, ...alert.tags]}
-      accessories={[ { text: `${createdAt.toLocaleDateString()} ${createdAt.toLocaleTimeString()}` } ]}
+      accessories={[{ text: `${createdAt.toLocaleDateString()} ${createdAt.toLocaleTimeString()}` }]}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={`${preferences.url}/alert/detail/${alert.id}/details`} />
-          {!isLoading && <>
-            {alert.acknowledged ? <Action title="Unacknowledge" icon={Icon.XMarkCircle} onAction={() => unAcknowledgeAlert(alert.id, mutate)} /> : <Action title="Acknowledge" icon={Icon.CheckCircle} onAction={() => acknowledgeAlert(alert.id, mutate)} />}
-          {alert.status!=="closed" && <Action title="Close" icon={Icon.XMarkCircle} onAction={() => closeAlert(alert.id, mutate)} />}
-          <Action
-            title="Snooze for 1 Hour"
-            icon={Icon.BellDisabled}
-            onAction={() => snoozeAlert(alert.id, 1, mutate)}
-          />
-          <Action
-            title="Snooze for 1 Day"
-            icon={Icon.BellDisabled}
-            onAction={() => snoozeAlert(alert.id, 24, mutate)}
-          />
-          <Action
-            title="Snooze for 1 Week"
-            icon={Icon.BellDisabled}
-            onAction={() => snoozeAlert(alert.id, 168, mutate)}
-          /></>}
+          {!isLoading && (
+            <>
+              {alert.acknowledged ? (
+                <Action
+                  title="Unacknowledge"
+                  icon={Icon.XMarkCircle}
+                  onAction={() => unAcknowledgeAlert(alert.id, mutate)}
+                />
+              ) : (
+                <Action
+                  title="Acknowledge"
+                  icon={Icon.CheckCircle}
+                  onAction={() => acknowledgeAlert(alert.id, mutate)}
+                />
+              )}
+              {alert.status !== "closed" && (
+                <Action title="Close" icon={Icon.XMarkCircle} onAction={() => closeAlert(alert.id, mutate)} />
+              )}
+              <Action
+                title="Snooze for 1 Hour"
+                icon={Icon.BellDisabled}
+                onAction={() => snoozeAlert(alert.id, 1, mutate)}
+              />
+              <Action
+                title="Snooze for 1 Day"
+                icon={Icon.BellDisabled}
+                onAction={() => snoozeAlert(alert.id, 24, mutate)}
+              />
+              <Action
+                title="Snooze for 1 Week"
+                icon={Icon.BellDisabled}
+                onAction={() => snoozeAlert(alert.id, 168, mutate)}
+              />
+            </>
+          )}
         </ActionPanel>
       }
     />
@@ -163,7 +176,7 @@ const acknowledgeAlert = async (id: string, mutate: MutatePromise<Alert[]>): Pro
           data[index].acknowledged = true;
           return data;
         },
-        shouldRevalidateAfter: false
+        shouldRevalidateAfter: false,
       },
     );
 
@@ -199,7 +212,7 @@ const unAcknowledgeAlert = async (id: string, mutate: MutatePromise<Alert[]>): P
           data[index].acknowledged = false;
           return data;
         },
-        shouldRevalidateAfter: false
+        shouldRevalidateAfter: false,
       },
     );
 
@@ -236,7 +249,7 @@ const closeAlert = async (id: string, mutate: MutatePromise<Alert[]>): Promise<v
           data[index].status = "closed";
           return data;
         },
-        shouldRevalidateAfter: false
+        shouldRevalidateAfter: false,
       },
     );
     toast.style = Toast.Style.Success;
@@ -277,7 +290,7 @@ const snoozeAlert = async (id: string, hours: number, mutate: MutatePromise<Aler
           data[index].snoozed = true;
           return data;
         },
-        shouldRevalidateAfter: false
+        shouldRevalidateAfter: false,
       },
     );
 

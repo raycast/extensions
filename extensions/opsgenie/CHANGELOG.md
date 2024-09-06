@@ -1,9 +1,18 @@
 # Opsgenie Changelog
 
-[] - {PR_MERGE_DATE}
-remove prefs
-add unacknowldge
-hide actons while doing
+## [Add Action to `Unacknowledge Alert`] - {PR_MERGE_DATE}
+
+### Enhancements
+- Alerts can now be Unacknowledged
+- EmptyViews are shown based on your query
+- Actions are now hidden while being executed which prevents sending multiple actions e.g. 2 request to close an alert instead of one
+- Opsgenie batches some requests so e.g. after closing an alert, the alert may still be shown as "open" until you reload/retype the Raycast query; now the updated result is shown locally so you can reasonably know what the current status is without having to refresh (though fetching lastest data is always recommended)
+
+### Dev
+- Remove Preferences type
+- Imrpove Error handling and data fetching by declaring their types
+- utilize `useFetch for GET requests
+- utilize **mutate** of `useFetch` for POST requests
 
 ## [Improve Search Handling] - 2022-08-28
 

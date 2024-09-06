@@ -1,6 +1,19 @@
 # Opsgenie
 
-The Opsgenie extension can be used to access alerts and incidents from [Opsgenie](https://www.atlassian.com/software/opsgenie). The extension can also used to acknowledge, snooze and close alerts.
+The Opsgenie extension can be used to access alerts and incidents from [Opsgenie](https://www.atlassian.com/software/opsgenie). The extension can also used to acknowledge, unacknowledge, snooze and close alerts.
 
-API key management
-Add new API key
+## 🚀 Getting Started
+You will need the following:
+
+1. API URL of Opsgenie instance - this will depend on where your instance is based-
+2. API Key - for best results, you will need an "Integration" API Key:
+    - `Navigate` to your Opsgenie instance
+    - `Navigate` to **Teams**
+    - `Open` the Team
+    - `Open` **Integrations**
+    - `Click` **Add integration**
+    - `Select` "API"
+    - `Generate` the key
+    - (The options may vary so refer to https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/)
+3. Opsgenie Usernam - this is the username you want to use for alerts/incidents
+4. Opsgenie URL - this is your Opsgenie instance URL
