@@ -2,9 +2,9 @@ import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@rayca
 import { getResourceColor, isValidCoolifyUrl } from "./lib/utils";
 import useCoolify from "./lib/use-coolify";
 import { MessageResult, ResourceDetails } from "./lib/types";
-import { COOLIFY_URL } from "./lib/config";
 import InvalidUrl from "./lib/components/invalid-url";
 import { useState } from "react";
+import OpenInCoolify from "./lib/components/open-in-coolify";
 
 export default function Resources() {
   if (!isValidCoolifyUrl()) return <InvalidUrl />;
@@ -39,11 +39,7 @@ export default function Resources() {
           description="Go online to add a resource."
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                icon={Icon.Plus}
-                title="Add Resource"
-                url={new URL("servers", COOLIFY_URL).toString()}
-              />
+              <OpenInCoolify icon={Icon.Plus} title="Add Resource" url="servers" />
             </ActionPanel>
           }
         />

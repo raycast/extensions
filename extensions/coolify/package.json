@@ -17,14 +17,16 @@
       "required": true,
       "type": "textfield",
       "description": "URL of Coolify Instance",
-      "default": "https://app.coolify.io/"
+      "default": "https://app.coolify.io/",
+      "placeholder": "https://app.coolify.io/"
     },
     {
       "title": "API Token",
       "name": "api_token",
       "required": true,
       "type": "password",
-      "description": "API Token from Coolify Dashboard"
+      "description": "API Token from Coolify Dashboard",
+      "placeholder": "x|xxxx...xxxxx"
     }
   ],
   "commands": [

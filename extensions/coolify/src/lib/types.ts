@@ -11,8 +11,8 @@ export type Server = {
 };
 export type ServerDetails = {
   uuid: string;
-  description: string;
   name: string;
+  description: string;
   high_disk_usage_notification_sent: boolean;
   ip: string;
   log_drain_notification_sent: boolean;
@@ -21,14 +21,17 @@ export type ServerDetails = {
   proxy: {
     type: string;
     status: string;
+    force_stop: boolean;
+    last_saved_settings: string;
+    last_applied_settings: string;
   };
   settings: Record<string, string | number | boolean | null>;
-  // "swarm_cluster": null,
+  swarm_cluster: null;
   team_id: number;
   unreachable_count: number;
   unreachable_notification_sent: boolean;
   user: string;
-  // validation_logs: null,
+  validation_logs: null;
   created_at: string;
   updated_at: string;
 };

@@ -139,7 +139,7 @@ function ServerDetails({ server }: { server: Server }) {
   return (
     <Detail
       isLoading={isLoading}
-      markdown={`# Servers / ${server.name} \n\n \`\`\`json\n${JSON.stringify(data, null, 4)}`}
+      markdown={`# Servers / ${server.name} \n\n \`\`\`json\n${JSON.stringify(data ?? "", null, 4)}`}
     />
   );
 }

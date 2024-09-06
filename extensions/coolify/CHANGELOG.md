@@ -10,4 +10,4 @@
 - View Resources
     - Start Resource
     - Stop Resource
-    - Restart Resource
+    - Redeploy Resource
