@@ -36,7 +36,9 @@ This is a Raycast extension for [cPanel](https://cpanel.net/) `User` level accou
         - Create DNS Zone Record
 - Email Accounts
     - View Disk Information
+    - Create Email Account
 - Databases
+- Files
     
 </details>
 
@@ -53,6 +55,7 @@ This is a Raycast extension for [cPanel](https://cpanel.net/) `User` level accou
 | Email | add_pop | Email Accounts > Create Email Account |
 | Email | list_pops | Email Accounts |
 | Email | list_pops_with_disk | Email Accounts > View Disk Information |
+| Fileman | list_files | Files |
 | Mysql | list_databases | Databases |
 | Postgresql | list_databases | Databases |
 

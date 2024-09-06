@@ -75,6 +75,13 @@
           ]
         }
       ]
+    },
+    {
+      "name": "files",
+      "title": "View Files",
+      "subtitle": "cPanel",
+      "description": "View Directories and Files",
+      "mode": "view"
     }
   ],
   "dependencies": {

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, List, showToast, useNavigation } from "@raycast/api";
-import { FormValidation, getFavicon, useForm } from "@raycast/utils";
+import { FormValidation, getAvatarIcon, getFavicon, useForm } from "@raycast/utils";
 import { useListDomains, useParsedDNSZone, useUAPI } from "./lib/hooks";
 import { DEFAULT_ICON } from "./lib/constants";
 import { DNSZoneRecord } from "./lib/types";
@@ -62,7 +62,18 @@ function ViewDNSZone({ zone }: { zone: string }) {
   const { isLoading, data = [], revalidate } = useParsedDNSZone(zone);
 
   const [type, setType] = useState("");
-  const filteredRecords = useMemo(() => data.filter((record) => ((!type || record.record_type === type) && record.record_type!=="SOA" && record.record_type!=="NS")), [type]);
+  const recordsToShow = useMemo(
+    () => data.filter((record) => record.record_type !== "SOA" && record.record_type !== "NS"),
+    [data],
+  ); //filter our the record types cPanel does not show. We do not do this in hook as the records are still needed for other operations
+  const filteredRecords = useMemo(
+    () =>
+      recordsToShow.filter(
+        (record) =>
+          (!type || record.record_type === type) && record.record_type !== "SOA" && record.record_type !== "NS",
+      ),
+    [recordsToShow, type],
+  );
 
   return (
     <List
@@ -70,10 +81,17 @@ function ViewDNSZone({ zone }: { zone: string }) {
       searchBarPlaceholder="Search dns zone"
       searchBarAccessory={
         <List.Dropdown tooltip="Record Type" onChange={setType}>
-          <Form.Dropdown.Item title="All" value="" />
-          {[...new Set(data.map((record) => record.record_type))].map((type) => (
-            <List.Dropdown.Item key={type} title={type} value={type} />
-          ))}
+          <Form.Dropdown.Item icon={Icon.Dot} title={`All (${recordsToShow.length})`} value="" />
+          <Form.Dropdown.Section>
+            {[...new Set(recordsToShow.map((record) => record.record_type))].map((type) => (
+              <List.Dropdown.Item
+                key={type}
+                icon={getAvatarIcon(type)}
+                title={`${type} (${recordsToShow.filter((record) => record.record_type === type).length})`}
+                value={type}
+              />
+            ))}
+          </Form.Dropdown.Section>
         </List.Dropdown>
       }
     >

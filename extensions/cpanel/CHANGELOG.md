@@ -4,6 +4,7 @@
 
 - Create Email Account
 - Filter DNS Zone (records) by (record) type
+- View Files and Directories
 
 ## [View Databases + Create Limited DNS Records] - 2024-08-26
 

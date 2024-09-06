@@ -13,35 +13,40 @@ export default function EmailAccounts() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search email account">
-      {data?.map((account) => (
-        <List.Item
-          key={account.email}
-          title={account.email}
-          icon={{ source: account.login === "Main Account" ? DEFAULT_ICON : Icon.Envelope }}
-          subtitle={account.login}
-          accessories={[
-            { tag: { value: "INCOMING", color: account.suspended_incoming ? Color.Red : Color.Green } },
-            { tag: { value: "LOGIN", color: account.suspended_login ? Color.Red : Color.Green } },
-          ]}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="View Disk Information"
-                target={<ViewEmailAccountDiskInformation emailAccount={account.email} />}
-                icon={Icon.Coin}
-              />
-              <ActionPanel.Section>
-                <Action.Push
-                  icon={Icon.Plus}
-                  title="Create Email Account"
-                  target={<CreateEmailAccount onAccountCreated={revalidate} />}
-                  shortcut={Keyboard.Shortcut.Common.New}
-                />
-              </ActionPanel.Section>
-            </ActionPanel>
-          }
-        />
-      ))}
+      {data?.map((account) => {
+        const isMainAccount = account.login === "Main Account";
+        return (
+          <List.Item
+            key={account.email}
+            title={account.email}
+            icon={{ source: isMainAccount ? DEFAULT_ICON : Icon.Envelope }}
+            subtitle={account.login}
+            accessories={[
+              { tag: { value: "INCOMING", color: account.suspended_incoming ? Color.Red : Color.Green } },
+              { tag: { value: "LOGIN", color: account.suspended_login ? Color.Red : Color.Green } },
+            ]}
+            actions={
+              <ActionPanel>
+                {!isMainAccount && (
+                  <Action.Push
+                    title="View Disk Information"
+                    target={<ViewEmailAccountDiskInformation emailAccount={account.email} />}
+                    icon={Icon.Coin}
+                  />
+                )}
+                <ActionPanel.Section>
+                  <Action.Push
+                    icon={Icon.Plus}
+                    title="Create Email Account"
+                    target={<CreateEmailAccount onAccountCreated={revalidate} />}
+                    shortcut={Keyboard.Shortcut.Common.New}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }
