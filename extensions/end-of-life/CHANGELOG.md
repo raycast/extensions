@@ -1,6 +1,6 @@
 # End Of Life Changelog
 
-## [Fixed Warnings] - {PR_MERGE_DATE}
+## [Fixed Warnings] - 2024-09-06
 
 - Fixed warnings in React list rendering
 
