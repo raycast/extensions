@@ -1,5 +1,5 @@
 import { Media, Note } from "./interfaces";
-import Fuse from 'fuse.js';
+import Fuse from "fuse.js";
 
 /**
  * Filters a list of notes according to the input search string. If the search string is empty, all notes are returned. It will match the notes title, path and content.
@@ -34,21 +34,24 @@ export function filterNotesFuzzy(notes: Note[], input: string, byContent: boolea
   }
 
   const options = {
-    keys: ['title', 'path'],
+    keys: ["title", "path"],
     fieldNormWeight: 2.0,
     ignoreLocation: true,
     threshold: 0.3,
   };
 
   if (byContent) {
-    options.keys.push('content');
+    options.keys.push("content");
   }
 
   // Filter by each word individually, this helps with file path search
-  const words = input.trim().split(" ").map(word => word.trim());
-  let filteredNotes = notes
+  const words = input.trim().split(/\s+/);
+  let filteredNotes = notes;
+  const fuse = new Fuse(notes, options);
+
   for (const word of words) {
-    filteredNotes = new Fuse(filteredNotes, options).search(word).map(item => item.item);
+    filteredNotes = fuse.search(word).map((result) => result.item);
+    fuse.setCollection(filteredNotes);
   }
 
   return filteredNotes;
