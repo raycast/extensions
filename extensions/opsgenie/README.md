@@ -17,3 +17,14 @@ You will need the following:
     - (The options may vary so refer to https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/)
 3. Opsgenie Usernam - this is the username you want to use for alerts/incidents
 4. Opsgenie URL - this is your Opsgenie instance URL
+
+## ❔ FAQs
+
+<details>
+<summary>Q1. I snoozed an alert but it's still showing as active?</summary>
+Ans,. Ensure that you have entered the correct user in Preferences and that you have the capability to snooze as Opsgenie does not seem to know if the user is invalid.
+</details>
+<details>
+<summary>Q2. I did x and query is for NOT x - why does the item still show? e.g. "I closed an alert and the query is 'status: open'"</summary>
+Ans,. This is the same behavior as the web app.
+</details>
