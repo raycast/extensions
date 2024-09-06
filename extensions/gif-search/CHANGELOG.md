@@ -1,7 +1,6 @@
 # GIF Search Changelog
 
-
-## [Add 'Paste GIF Markdown' action] - 2024-09-03
+## [Add 'Paste GIF Markdown' action] - {PR_MERGE_DATE}
 
 - Added a new action to paste a Markdown-formatted link to the GIF into the front-most application
 
