@@ -1,13 +1,13 @@
 # Clean Keyboard Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Improvements and Fixes] - {PR_MERGE_DATE}
 
 - Updated command title for clarity and to avoid confusion with the extension name.
 - Conformed command subtitle to Raycast guidelines.
 - Updated search bar placeholder.
 - Updated navigation title.
 - Avoided redundancy in list item titles.
-- Fixed the keyboard didn't unlock after the action was executed.
+- Fixed an issue where the keyboard didn't unlock after the action was executed.
 
 ## [1 hour] - 2024-07-26
 
