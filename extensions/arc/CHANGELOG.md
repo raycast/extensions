@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [Improvements] - 2024-09-02
+## [Improvements] - {PR_MERGE_DATE}
 
 - `Search History` now searches across all Arc profiles. Results from the search display which profile they are from.
 

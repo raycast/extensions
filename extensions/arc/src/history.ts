@@ -92,10 +92,11 @@ export function useHistorySearch(
   let permissionView: JSX.Element | undefined;
   let isLoading = false;
   const data: HistoryEntry[] = [];
+  const multiProfile = profileHistoryDatabasePaths.length > 1;
 
   // Usually calling a hook within a loop is a no-no, but in this case it's ok
   // since the array we're looping over is static at runtime.
-  for (const profile of profileHistoryDatabasePaths.slice(0)) {
+  for (const profile of profileHistoryDatabasePaths) {
     const sqlResponse = useSQL<HistorySqlRow>(profile.historyDatabasePath, getHistoryQuery(escapedSearchText, limit));
 
     // If at least one data source is still loading, isLoading should be true
@@ -106,10 +107,14 @@ export function useHistorySearch(
     // Set the last required permission view
     permissionView = sqlResponse.permissionView;
 
-    // Add profile name to data returned
+    // We're only adding the profile name if there are multiple profiles,
+    // otherwise we'd waste space in the UI
+    const profileLabel = profile.name || profile.id;
+    const profileName = multiProfile ? profileLabel : undefined;
+
     const restructured = sqlResponse?.data?.map((value) => ({
       ...value,
-      profileName: profile.name || profile.id,
+      profileName,
     }));
 
     if (restructured) {
