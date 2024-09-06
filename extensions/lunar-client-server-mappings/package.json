@@ -6,7 +6,9 @@
   "icon": "icon.png",
   "author": "tuchan",
   "categories": [
-    "Data", "Developer Tools", "Web"
+    "Data",
+    "Developer Tools",
+    "Web"
   ],
   "license": "MIT",
   "commands": [

@@ -1,4 +1,15 @@
-import { ActionPanel, Action, Icon, List, showToast, getPreferenceValues, openExtensionPreferences, Detail, Toast, Clipboard } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Icon,
+  List,
+  showToast,
+  getPreferenceValues,
+  openExtensionPreferences,
+  Detail,
+  Toast,
+  Clipboard,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import fs from "fs";
@@ -54,7 +65,7 @@ type Server = {
   store?: string;
   merch?: string;
   wiki?: string;
-  
+
   socials?: Socials;
   modpack?: Modpack;
 
@@ -90,7 +101,17 @@ function getCachedData(): Server[] | null {
   return null;
 }
 
-const TagListComp = ({ title, primaryItem, items, server }: { title: string; primaryItem?: string; items?: string[]; server: Server }) => {
+const TagListComp = ({
+  title,
+  primaryItem,
+  items,
+  server,
+}: {
+  title: string;
+  primaryItem?: string;
+  items?: string[];
+  server: Server;
+}) => {
   if (!primaryItem && (!items || items.length === 0)) return null;
   return (
     <List.Item.Detail.Metadata.TagList title={title}>
@@ -102,9 +123,7 @@ const TagListComp = ({ title, primaryItem, items, server }: { title: string; pri
       )}
       {items?.map((item) => {
         if (item !== primaryItem) {
-          return (
-            <List.Item.Detail.Metadata.TagList.Item key={item} text={item} />
-          );
+          return <List.Item.Detail.Metadata.TagList.Item key={item} text={item} />;
         }
         return null;
       })}
@@ -112,12 +131,10 @@ const TagListComp = ({ title, primaryItem, items, server }: { title: string; pri
   );
 };
 
-
 const LinkComp = ({ title, link }: { title: string; link?: string }) => {
   if (!link) return null;
   return <List.Item.Detail.Metadata.Link title={title} target={link} text={link} />;
 };
-
 
 export default function Command() {
   const [termsAccepted, setTermsAccepted] = useState<boolean | null>(null);
@@ -160,11 +177,13 @@ export default function Command() {
 
   const copyJson = (server: Server) => {
     const jsonString = JSON.stringify(server, null, 2);
-    Clipboard.copy(jsonString).then(() => {
-      showToast(Toast.Style.Success, "Server JSON copied to clipboard!");
-    }).catch(() => {
-      showToast(Toast.Style.Failure, "Failed to copy JSON to clipboard.");
-    });
+    Clipboard.copy(jsonString)
+      .then(() => {
+        showToast(Toast.Style.Success, "Server JSON copied to clipboard!");
+      })
+      .catch(() => {
+        showToast(Toast.Style.Failure, "Failed to copy JSON to clipboard.");
+      });
   };
 
   if (termsAccepted === null) return null;
@@ -172,10 +191,7 @@ export default function Command() {
   return (
     <>
       {termsAccepted ? (
-        <List 
-        isLoading={loading}
-        searchBarPlaceholder="Search servers..."
-        isShowingDetail>
+        <List isLoading={loading} searchBarPlaceholder="Search servers..." isShowingDetail>
           {servers.map((server) => (
             <List.Item
               key={server.id}
@@ -183,10 +199,24 @@ export default function Command() {
               title={server.name}
               actions={
                 <ActionPanel>
-                  <Action.Open icon={Icon.Play} title="Join the Server" target={`lunarclient://play?serverAddress=${server.primaryAddress}`} />
+                  <Action.Open
+                    icon={Icon.Play}
+                    title="Join the Server"
+                    target={`lunarclient://play?serverAddress=${server.primaryAddress}`}
+                  />
                   <Action.CopyToClipboard title="Copy Address to Keyboard" content={server.primaryAddress} />
-                  <Action shortcut={{ modifiers: ["cmd"], key: "c" }} icon={Icon.Clipboard} title="Copy JSON Response" onAction={() => copyJson(server)} />
-                  <Action shortcut={{ modifiers: ["cmd"], key: "r" }} icon={Icon.ArrowClockwise} title="Refresh Data" onAction={refreshData} />
+                  <Action
+                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    icon={Icon.Clipboard}
+                    title="Copy JSON Response"
+                    onAction={() => copyJson(server)}
+                  />
+                  <Action
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    icon={Icon.ArrowClockwise}
+                    title="Refresh Data"
+                    onAction={refreshData}
+                  />
                 </ActionPanel>
               }
               detail={
@@ -195,53 +225,59 @@ export default function Command() {
                   metadata={
                     <List.Item.Detail.Metadata>
                       <List.Item.Detail.Metadata.Label title="ID" text={server.id} />
-                      {server.description && (<List.Item.Detail.Metadata.Label title="Description" text={server.description} />)}
-                      
-                      <TagListComp 
-                        title="Addresses" 
-                        primaryItem={server.primaryAddress} 
-                        items={server.addresses} 
-                        server={server} 
+                      {server.description && (
+                        <List.Item.Detail.Metadata.Label title="Description" text={server.description} />
+                      )}
+
+                      <TagListComp
+                        title="Addresses"
+                        primaryItem={server.primaryAddress}
+                        items={server.addresses}
+                        server={server}
                       />
-                    
+
                       <List.Item.Detail.Metadata.TagList title="Game Types">
                         {server.gameTypes.map((gameType) => (
                           <List.Item.Detail.Metadata.TagList.Item text={gameType} />
                         ))}
                       </List.Item.Detail.Metadata.TagList>
                       <List.Item.Detail.Metadata.TagList title="Colors">
-                        <List.Item.Detail.Metadata.TagList.Item text={server.primaryColor} color={server.primaryColor} />
-                        <List.Item.Detail.Metadata.TagList.Item text={server.secondaryColor} color={server.secondaryColor} />
+                        <List.Item.Detail.Metadata.TagList.Item
+                          text={server.primaryColor}
+                          color={server.primaryColor}
+                        />
+                        <List.Item.Detail.Metadata.TagList.Item
+                          text={server.secondaryColor}
+                          color={server.secondaryColor}
+                        />
                       </List.Item.Detail.Metadata.TagList>
                       <List.Item.Detail.Metadata.Separator />
 
-                      <TagListComp 
-                        title="Regions" 
-                        primaryItem={server.primaryRegion} 
-                        items={server.regions} 
-                        server={server} 
+                      <TagListComp
+                        title="Regions"
+                        primaryItem={server.primaryRegion}
+                        items={server.regions}
+                        server={server}
                       />
-                      <TagListComp 
-                        title="Minecraft Versions" 
-                        primaryItem={server.primaryMinecraftVersion} 
-                        items={server.minecraftVersions} 
-                        server={server} 
+                      <TagListComp
+                        title="Minecraft Versions"
+                        primaryItem={server.primaryMinecraftVersion}
+                        items={server.minecraftVersions}
+                        server={server}
                       />
-                      <TagListComp 
-                        title="Languages" 
-                        primaryItem={server.primaryLanguage} 
-                        items={server.languages} 
-                        server={server} 
+                      <TagListComp
+                        title="Languages"
+                        primaryItem={server.primaryLanguage}
+                        items={server.languages}
+                        server={server}
                       />
-                      
+
                       <LinkComp title="Website" link={server.website} />
                       <LinkComp title="Store" link={server.store} />
                       <LinkComp title="Merch" link={server.merch} />
                       <LinkComp title="Wiki" link={server.wiki} />
 
-                      {server.socials && (
-                        <List.Item.Detail.Metadata.Separator />
-                      )}
+                      {server.socials && <List.Item.Detail.Metadata.Separator />}
                       <LinkComp title="Twitter" link={server.socials?.twitter} />
                       <LinkComp title="Discord" link={server.socials?.discord} />
                       <LinkComp title="YouTube" link={server.socials?.youtube} />
@@ -252,9 +288,7 @@ export default function Command() {
                       <LinkComp title="TikTok" link={server.socials?.tiktok} />
                       <LinkComp title="Facebook" link={server.socials?.facebook} />
 
-                      {server.modpack && (
-                        <List.Item.Detail.Metadata.Separator />
-                      )}
+                      {server.modpack && <List.Item.Detail.Metadata.Separator />}
                       {server.modpack?.id && (
                         <List.Item.Detail.Metadata.Label title="Modpack ID" text={server.modpack.id} />
                       )}
@@ -265,11 +299,9 @@ export default function Command() {
                         <List.Item.Detail.Metadata.Label title="Prompt Before Launcher Join" text="Yes" />
                       )}
 
-                      {(server.inactive || server.enriched) && (
-                        <List.Item.Detail.Metadata.Separator />
-                      )}
-                      {server.inactive && (<List.Item.Detail.Metadata.Label title="Inactive" text="Yes" />)}
-                      {server.enriched && (<List.Item.Detail.Metadata.Label title="Enriched" text="Yes" />)}
+                      {(server.inactive || server.enriched) && <List.Item.Detail.Metadata.Separator />}
+                      {server.inactive && <List.Item.Detail.Metadata.Label title="Inactive" text="Yes" />}
+                      {server.enriched && <List.Item.Detail.Metadata.Label title="Enriched" text="Yes" />}
                     </List.Item.Detail.Metadata>
                   }
                 />
@@ -279,7 +311,7 @@ export default function Command() {
         </List>
       ) : (
         <Detail
-        markdown={`You need to accept Lunar Client's [Terms of Service](https://lunarclient.com/terms) to use this extension.`}
+          markdown={`You need to accept Lunar Client's [Terms of Service](https://lunarclient.com/terms) to use this extension.`}
           actions={
             <ActionPanel>
               <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
