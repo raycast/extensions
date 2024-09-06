@@ -156,6 +156,15 @@ export function GifActions({ item, showViewDetails, service, visitGifItem, mutat
       onCopy={trackUsage}
     />
   );
+  const pasteGifMarkdown = (
+    <Action.Paste
+      key="pasteGifMarkdown"
+      title="Paste GIF Markdown"
+      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+      content={`![${item.title}](${stripQParams(gif_url)})`}
+      onPaste={trackUsage}
+    />
+  );
 
   let toggleFav: JSX.Element | undefined;
   const isFav =
@@ -232,7 +241,7 @@ export function GifActions({ item, showViewDetails, service, visitGifItem, mutat
   );
 
   const actions: Array<(JSX.Element | undefined)[]> = [
-    [copyFile, copyGifUrl, copyGifMarkdown],
+    [copyFile, copyGifUrl, copyGifMarkdown, pasteGifMarkdown],
     [toggleFav, removeRecent, showViewDetails ? viewDetails : undefined],
     [copyPageUrl, openUrlInBrowser, downloadFileAction],
   ];

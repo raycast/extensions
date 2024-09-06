@@ -9,7 +9,8 @@
     "tm.wrnr",
     "j3lte",
     "samuelkraft",
-    "ridemountainpig"
+    "ridemountainpig",
+    "spookywy"
   ],
   "license": "MIT",
   "categories": [
@@ -103,6 +104,10 @@
         {
           "title": "Copy GIF Markdown",
           "value": "copyGifMarkdown"
+        },
+        {
+          "title": "Paste GIF Markdown",
+          "value": "pasteGifMarkdown"
         },
         {
           "title": "Add or Remove from Favorites",
