@@ -33,6 +33,16 @@
           "placeholder": "Max file size in MB",
           "required": true
         }
+      ],
+      "preferences": [
+        {
+          "name": "suffix",
+          "title": "Output PDF Filename Suffix",
+          "description": "Suffix for split PDF filenames (e.g., 'part')",
+          "type": "textfield",
+          "default": "part",
+          "required": false
+        }
       ]
     },
     {
@@ -46,6 +56,16 @@
           "type": "text",
           "placeholder": "Number of pages",
           "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "suffix",
+          "title": "Output PDF Filename Suffix",
+          "description": "Suffix for split PDF filenames (e.g., 'part')",
+          "type": "textfield",
+          "default": "part",
+          "required": false
         }
       ]
     },
@@ -130,12 +150,16 @@
               "value": "72"
             }
           ]
-        },
+        }
+      ],
+      "preferences": [
         {
           "name": "transparency",
+          "title": "Transparency",
+          "description": "Transparency level of the watermark",
           "type": "dropdown",
-          "placeholder": "Transparency",
-          "required": false,
+          "required": true,
+          "default": "0.25",
           "data": [
             {
               "title": "Light",
@@ -153,31 +177,23 @@
         },
         {
           "name": "rotation",
+          "title": "Rotation",
+          "description": "Rotation angle of the watermark",
           "type": "dropdown",
-          "placeholder": "Rotation",
-          "required": false,
+          "required": true,
+          "default": "45",
           "data": [
             {
               "title": "No Rotation",
               "value": "0"
             },
             {
-              "title": "Rotate 45°",
+              "title": "45°",
               "value": "45"
             }
           ]
         }
       ]
-    }
-  ],
-  "preferences": [
-    {
-      "name": "suffix",
-      "title": "Output PDF Filename Suffix",
-      "description": "Suffix for split PDF filenames (e.g., 'part')",
-      "type": "textfield",
-      "default": "part",
-      "required": false
     }
   ],
   "dependencies": {

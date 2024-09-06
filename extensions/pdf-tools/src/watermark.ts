@@ -1,17 +1,23 @@
-import { closeMainWindow, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, getPreferenceValues, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
 import path from "path";
 import { isPDFDocumentLocked, watermark } from "swift:../swift";
+
+interface Preferences {
+  transparency: string;
+  rotation: string;
+}
 
 export default async function Command(props: {
   arguments: {
     text: string;
     fontSize?: string;
-    transparency?: string;
-    rotation?: string;
   };
 }) {
   try {
-    const { text, fontSize, transparency, rotation } = props.arguments;
+    const { text, fontSize } = props.arguments;
+    const preferences = getPreferenceValues<Preferences>();
+    const transparency = parseFloat(preferences.transparency);
+    const rotation = parseInt(preferences.rotation);
 
     const selectedItems = await getSelectedFinderItems();
 
@@ -39,13 +45,7 @@ export default async function Command(props: {
         title: `Watermarking "${path.basename(item.path)}" [file ${i + 1} of ${selectedItems.length}]`,
       });
 
-      await watermark(
-        item.path,
-        text,
-        fontSize ? parseInt(fontSize) : undefined,
-        transparency ? parseFloat(transparency) : undefined,
-        rotation ? parseInt(rotation) : undefined,
-      );
+      await watermark(item.path, text, transparency, rotation, fontSize ? parseInt(fontSize) : undefined);
     }
 
     await showToast({

@@ -4,15 +4,12 @@ import PDFKit
 import RaycastSwiftMacros
 
 @raycast
-func watermark(filePath: String, text: String, fontSize: Int?, transparency: Double?, rotation: Int?) async throws {
+func watermark(filePath: String, text: String, transparency: Double, rotation: Int, fontSize: Int? = nil) async throws {
   let pdfURL = URL(fileURLWithPath: filePath)
   let pdfDocument = PDFDocument(url: pdfURL)!
   let watermarkedDocument = PDFDocument()
 
-  // Use default values if parameters are nil
   let finalFontSize = fontSize ?? 72
-  let finalTransparency = transparency ?? 0.25
-  let finalRotation = rotation ?? 45
 
   for pageIndex in 0 ..< pdfDocument.pageCount {
     guard let page = pdfDocument.page(at: pageIndex) else { continue }
@@ -30,7 +27,7 @@ func watermark(filePath: String, text: String, fontSize: Int?, transparency: Dou
       // Set up the watermark text attributes
       let attributes: [NSAttributedString.Key: Any] = [
         .font: NSFont.boldSystemFont(ofSize: CGFloat(finalFontSize)),
-        .foregroundColor: NSColor.black.withAlphaComponent(finalTransparency)
+        .foregroundColor: NSColor.black.withAlphaComponent(transparency)
       ]
 
       let attributedString = NSAttributedString(string: text, attributes: attributes)
@@ -43,7 +40,7 @@ func watermark(filePath: String, text: String, fontSize: Int?, transparency: Dou
       // Rotate and draw the watermark
       context.saveGState()
       context.translateBy(x: watermarkX + textSize.width / 2, y: watermarkY + textSize.height / 2)
-      context.rotate(by: CGFloat(finalRotation) * .pi / 180)
+      context.rotate(by: CGFloat(rotation) * .pi / 180)
       context.translateBy(x: -textSize.width / 2, y: -textSize.height / 2)
 
       attributedString.draw(at: NSPoint.zero)
