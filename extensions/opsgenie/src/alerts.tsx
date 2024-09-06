@@ -43,7 +43,7 @@ const AlertList = () => {
       onSearchTextChange={setSearchText}
       filtering={false}
       isLoading={isLoading}
-      searchBarPlaceholder="Filter alerts..."
+      searchBarPlaceholder="Filter alerts"
       throttle
     >
       {!isLoading && !alerts.length && (
@@ -68,7 +68,7 @@ const AlertList = () => {
         </>
       )}
       {alerts.map((alert) => (
-        <AlertListItem key={alert.id} alert={alert} mutate={mutate} />
+        <AlertListItem key={alert.id} alert={alert} mutate={mutate} isLoading={isLoading} />
       ))}
     </List>
   );
@@ -78,12 +78,11 @@ export default AlertList;
 
 const AlertListItem = (props: {
   alert: Alert;
-  goBackToSavedSearches?: () => Promise<void>;
   mutate: MutatePromise<Alert[]>;
+  isLoading: boolean;
 }) => {
-  const goBackToSavedSearches = props.goBackToSavedSearches;
   const alert = props.alert;
-  const mutate = props.mutate;
+  const { mutate, isLoading } = props;
 
   const createdAt = new Date(alert.createdAt);
   const subtitle = alert.acknowledged
@@ -112,12 +111,13 @@ const AlertListItem = (props: {
       subtitle={`${subtitle}${alert.tags && alert.tags.length > 0 ? ` [${alert.tags.join(", ")}]` : ""}`}
       icon={icon}
       keywords={[alert.status, alert.priority, ...alert.tags]}
-      accessoryTitle={`${createdAt.toLocaleDateString()} ${createdAt.toLocaleTimeString()}`}
+      accessories={[ { text: `${createdAt.toLocaleDateString()} ${createdAt.toLocaleTimeString()}` } ]}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={`${preferences.url}/alert/detail/${alert.id}/details`} />
-          <Action title="Acknowledge" icon={Icon.CheckCircle} onAction={() => acknowledgeAlert(alert.id, mutate)} />
-          <Action title="Close" icon={Icon.XMarkCircle} onAction={() => closeAlert(alert.id, mutate)} />
+          {!isLoading && <>
+            {alert.acknowledged ? <Action title="Unacknowledge" icon={Icon.XMarkCircle} onAction={() => unAcknowledgeAlert(alert.id, mutate)} /> : <Action title="Acknowledge" icon={Icon.CheckCircle} onAction={() => acknowledgeAlert(alert.id, mutate)} />}
+          {alert.status!=="closed" && <Action title="Close" icon={Icon.XMarkCircle} onAction={() => closeAlert(alert.id, mutate)} />}
           <Action
             title="Snooze for 1 Hour"
             icon={Icon.BellDisabled}
@@ -132,10 +132,7 @@ const AlertListItem = (props: {
             title="Snooze for 1 Week"
             icon={Icon.BellDisabled}
             onAction={() => snoozeAlert(alert.id, 168, mutate)}
-          />
-          {goBackToSavedSearches && (
-            <Action title="Show Saved Searches" icon={Icon.List} onAction={() => goBackToSavedSearches()} />
-          )}
+          /></>}
         </ActionPanel>
       }
     />
@@ -166,6 +163,7 @@ const acknowledgeAlert = async (id: string, mutate: MutatePromise<Alert[]>): Pro
           data[index].acknowledged = true;
           return data;
         },
+        shouldRevalidateAfter: false
       },
     );
 
@@ -174,6 +172,42 @@ const acknowledgeAlert = async (id: string, mutate: MutatePromise<Alert[]>): Pro
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Could not acknowledge alert";
+    toast.message = (error as Error).message;
+  }
+};
+const unAcknowledgeAlert = async (id: string, mutate: MutatePromise<Alert[]>): Promise<void> => {
+  const toast = await showToast(Toast.Style.Animated, "UnAcknowledging alert");
+  try {
+    await mutate(
+      fetch(`${preferences.apiUrl}/v2/alerts/${id}/unacknowledge`, {
+        method: "post",
+        headers: {
+          Authorization: `GenieKey ${preferences.apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user: preferences.username,
+        }),
+      }).then(async (response) => {
+        const result = (await response.json()) as ErrorResult | Result;
+        if ("message" in result) throw new Error(result.message);
+        if (!response.ok) throw new Error("An unknown error occurred");
+      }),
+      {
+        optimisticUpdate(data) {
+          const index = data.findIndex((alert) => alert.id);
+          data[index].acknowledged = false;
+          return data;
+        },
+        shouldRevalidateAfter: false
+      },
+    );
+
+    toast.style = Toast.Style.Success;
+    toast.title = "Alert was unacknowledged";
+  } catch (error) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Could not unacknowledge alert";
     toast.message = (error as Error).message;
   }
 };
@@ -202,6 +236,7 @@ const closeAlert = async (id: string, mutate: MutatePromise<Alert[]>): Promise<v
           data[index].status = "closed";
           return data;
         },
+        shouldRevalidateAfter: false
       },
     );
     toast.style = Toast.Style.Success;
@@ -242,6 +277,7 @@ const snoozeAlert = async (id: string, hours: number, mutate: MutatePromise<Aler
           data[index].snoozed = true;
           return data;
         },
+        shouldRevalidateAfter: false
       },
     );
 

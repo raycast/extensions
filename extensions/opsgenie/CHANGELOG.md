@@ -2,6 +2,8 @@
 
 [] - {PR_MERGE_DATE}
 remove prefs
+add unacknowldge
+hide actons while doing
 
 ## [Improve Search Handling] - 2022-08-28
 
