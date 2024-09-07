@@ -393,8 +393,7 @@ async function runTerminal(item: ISSHConnection) {
       await runAppleScript(scriptTerminal);
       console.log(error);
     }
-  }
-  else {
+  } else {
     await runAppleScript(scriptTerminal);
   }
 
