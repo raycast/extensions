@@ -4,8 +4,11 @@ import { exec } from 'child_process'
 import { Project, ProjectList } from './project'
 import { Directory } from './components/DirectoriesDropdown'
 
+export type PrimaryAction = 'start-development' | 'open-in-editor' | 'open-in-terminal' | 'open-url' | 'open-git-remotes'
+
 interface Preferences {
     projectsPath: string
+    primaryAction: PrimaryAction
     maxScanningLevels: number
     enableProjectsCaching: boolean
     enableProjectsGrouping: boolean

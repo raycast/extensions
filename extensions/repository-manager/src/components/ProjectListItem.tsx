@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from '@raycast/api'
+import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from '@raycast/api'
 import { Project } from '../project'
 import StartDevelopment from './StartDevelopment'
 import { OpenInEditor, OpenInTerminal, OpenUrl } from './Open'
@@ -9,6 +9,8 @@ import Config from './Config'
 import { Copy } from './Copy'
 import Cache from './Cache'
 import { Directory } from './DirectoriesDropdown'
+import { PrimaryAction } from '../helpers'
+import React from 'react'
 
 type ProjectListItemProps = {
     project: Project
@@ -16,6 +18,30 @@ type ProjectListItemProps = {
 }
 
 export default function ProjectListItem({ project, directories }: ProjectListItemProps) {
+    const preferences = getPreferenceValues()
+
+    const actionsMap: Record<PrimaryAction, JSX.Element> = {
+        'start-development': <StartDevelopment project={project} />,
+        'open-in-editor': <OpenInEditor project={project} />,
+        'open-in-terminal': <OpenInTerminal project={project} />,
+        'open-url': <OpenUrl project={project} />,
+        'open-git-remotes': <OpenGitRemotes project={project} />,
+    }
+
+    const defaultOrder: PrimaryAction[] = ['open-in-editor', 'start-development', 'open-in-terminal', 'open-url', 'open-git-remotes']
+    const primaryAction = preferences.primaryAction as PrimaryAction
+    const actionOrder = [primaryAction, ...defaultOrder.filter((action) => action !== primaryAction)]
+
+    const actions = () => {
+        return (
+            <>
+                {actionOrder.map((action) => React.cloneElement(actionsMap[action], { key: action }))}
+                <OpenUrl project={project} />
+                <OpenGitRemotes project={project} />
+            </>
+        )
+    }
+
     return (
         <List.Item
             key={project.name}
@@ -29,13 +55,7 @@ export default function ProjectListItem({ project, directories }: ProjectListIte
             ]}
             actions={
                 <ActionPanel>
-                    <ActionPanel.Section title="Open project">
-                        <StartDevelopment project={project} />
-                        <OpenInEditor project={project} />
-                        <OpenInTerminal project={project} />
-                        <OpenUrl project={project} />
-                        <OpenGitRemotes project={project} />
-                    </ActionPanel.Section>
+                    <ActionPanel.Section title="Open project">{actions()}</ActionPanel.Section>
                     <ActionPanel.Section title="Actions">
                         <Config project={project} />
                         <Copy project={project} />

@@ -32,17 +32,17 @@ export default function Command() {
                 title={`No project found in directory ${preferences.projectsPath.replace(homedir(), '~')}`}
             />
             {projectsGroupingEnabled
-                ? Object.entries(projects as GroupedProjectList).map(([directory, projects]) => {
+                ? Object.entries(projects as GroupedProjectList).map(([directory, projects], index) => {
                       return (
                           <List.Section
                               title={directory}
                               subtitle={projects.length.toString()}
-                              key={directory}
+                              key={directory + index}
                           >
-                              {projects.map((project: Project) => {
+                              {projects.map((project: Project, i) => {
                                   return (
                                       <ProjectListItem
-                                          key={project.name}
+                                          key={project.name + i}
                                           project={project}
                                           directories={directories}
                                       />
@@ -51,10 +51,10 @@ export default function Command() {
                           </List.Section>
                       )
                   })
-                : (projects as ProjectList).map((project: Project) => {
+                : (projects as ProjectList).map((project: Project, i) => {
                       return (
                           <ProjectListItem
-                              key={project.name}
+                              key={project.name + i}
                               project={project}
                               directories={directories}
                           />
