@@ -101,3 +101,19 @@ export function numberToDayString(dayIndex: number): string {
   const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   return daysOfWeek[dayIndex];
 }
+
+export function hasScheduleToday(schedule:Schedule) {
+  const currentDate = new Date();
+  const currentDayString = numberToDayString(currentDate.getDay()).toLowerCase();
+  
+  if(schedule.day === currentDayString) return true;
+  else return false;
+}
+
+export function hasNoScheduleToday(schedule:Schedule) {
+  const currentDate = new Date();
+  const currentDayString = numberToDayString(currentDate.getDay()).toLowerCase();
+  
+  if(schedule.day === currentDayString) return false;
+  else return true;
+}

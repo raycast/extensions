@@ -15,7 +15,6 @@ const dayOrder: { [key: string]: number } = {
 export function useLoadStoredSchedules(
   updateSchedules: (schedules: Schedule[]) => void,
   setIsLoading: (isLoading: boolean) => void,
-  timestamp: number,
 ) {
   useEffect(() => {
     async function loadSchedulesFromLocalStorage() {
@@ -34,5 +33,5 @@ export function useLoadStoredSchedules(
     }
 
     void loadSchedulesFromLocalStorage();
-  }, [timestamp]);
+  }, [updateSchedules]);
 }

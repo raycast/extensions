@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import { useLoadStoredSchedules } from "./fetchStoredSchedule";
 import { ListActionPanel } from "./listActionPanel";
-import { Schedule, changeScheduleState, stopCaffeinate } from "./utils";
+import { Schedule, changeScheduleState, stopCaffeinate, hasScheduleToday, hasNoScheduleToday } from "./utils";
 import { extractSchedule } from "./extractSchedule";
 import { checkSchedule } from "./status";
 
@@ -22,9 +22,8 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
-  const [lastUpdated, setLastUpdated] = useState(Date.now());
 
-  useLoadStoredSchedules(setSchedules, setIsLoading, lastUpdated);
+  useLoadStoredSchedules(setSchedules, setIsLoading);
 
   const handleSetSchedule = async () => {
     try {
@@ -40,8 +39,13 @@ export default function Command() {
         await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
       }
 
+      setSchedules((prevSchedules) => [
+        ...prevSchedules.filter((schedule) => !days.includes(schedule.day)),
+        ...newSchedules,
+      ]);
+
       await showToast(Toast.Style.Success, "Caffeination schedule set successfully.");
-      setLastUpdated(Date.now());
+      setSearchText("");
     } catch (error) {
       console.error("Failed to set schedule:", error);
       await showToast(Toast.Style.Failure, "Failed to set schedule.");
@@ -70,7 +74,10 @@ export default function Command() {
       try {
         await LocalStorage.removeItem(day);
         await showToast(Toast.Style.Success, "Schedule deleted.");
-        setLastUpdated(Date.now());
+
+        const updatedSchedules = schedules.filter(schedule => schedule.day !== day);
+        setSchedules(updatedSchedules);
+
       } catch (error) {
         console.error("Failed to delete schedule:", error);
         await showToast(Toast.Style.Failure, "Failed to delete schedule.");
@@ -108,34 +115,48 @@ export default function Command() {
       {schedules.length === 0 ? (
         <List.EmptyView
           title="No caffeination schedules yet"
-          description="To schedule, type the days and time range, then hit enter!"
+          description="To schedule, enter the days to be scheduled and time range, then hit enter!"
           icon={Icon.Calendar}
         />
       ) : (
-        <List.Section title="Current Caffeination Schedule">
-          {schedules.map((schedule, index) =>
-            schedule?.day ? (
-              <List.Item
-                key={index}
-                title={schedule.day.charAt(0).toUpperCase() + schedule.day.slice(1)}
-                subtitle={`Set from ${schedule.from} to ${schedule.to}`}
-                icon={Icon.Calendar}
-                actions={
-                  <ListActionPanel
-                    searchText={searchText}
-                    schedule={schedule}
-                    onSetScheduleAction={handleSetSchedule}
-                    onDeleteScheduleAction={handleDeleteSchedule}
-                    onPauseScheduleAction={handlePauseSchedule}
-                    onResumeScheduleAction={handleResumeSchedule}
+        <>
+          {["Today's Schedule", "Caffeination Schedule"].map((sectionTitle, index) => (
+            <List.Section
+              key={index}
+              title={sectionTitle}
+              children={schedules
+                .filter(index === 0 ? hasScheduleToday : hasNoScheduleToday)
+                .map((schedule, idx) => (
+                  <List.Item
+                    key={idx}
+                    title={schedule.day.charAt(0).toUpperCase() + schedule.day.slice(1)}
+                    accessories={[
+                      {
+                        text: schedule.IsRunning ? "Running" : schedule.IsManuallyDecafed ? "Paused" : "Scheduled",
+                        icon: schedule.IsRunning
+                          ? Icon.Play
+                          : schedule.IsManuallyDecafed
+                            ? Icon.Pause
+                            : Icon.Calendar,
+                      },
+                    ]}
+                    subtitle={`Set from ${schedule.from} to ${schedule.to}`}
+                    icon={Icon.Calendar}
+                    actions={
+                      <ListActionPanel
+                        searchText={searchText}
+                        schedule={schedule}
+                        onSetScheduleAction={handleSetSchedule}
+                        onDeleteScheduleAction={handleDeleteSchedule}
+                        onPauseScheduleAction={() => handlePauseSchedule(schedule.day)}
+                        onResumeScheduleAction={() => handleResumeSchedule(schedule.day)}
+                      />
+                    }
                   />
-                }
-              />
-            ) : (
-              <List.Item key={index} title="Invalid schedule" subtitle="Schedule data is missing or incomplete" />
-            ),
-          )}
-        </List.Section>
+                ))}
+            />
+          ))}
+        </>
       )}
     </List>
   );
