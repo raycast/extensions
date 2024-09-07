@@ -16,18 +16,6 @@
       "title": "Open in Webstorm",
       "description": "Open the selected folder or current folder in Finder in Webstorm",
       "mode": "no-view"
-    },
-    {
-      "name": "add-favorite-project",
-      "title": "Add Project to Favorites",
-      "description": "Add Android Project to Favorites",
-      "mode": "view"
-    },
-    {
-      "name": "show-favorite-projects",
-      "title": "Show Favorite Projects",
-      "description": "Show Favorite Webstorm Projects",
-      "mode": "view"
     }
   ],
   "dependencies": {
