@@ -63,7 +63,7 @@ export default function Command() {
         showToast(Toast.Style.Success, "Authenticated");
         fetchAccessories(url);
       }
-    } catch (error) {
+    } catch (error: Error) {
       handleError(error, "Authentication Failed", "Please check your username, password, or URL.");
       openExtensionPreferences();
     }
@@ -108,7 +108,7 @@ export default function Command() {
       });
 
       setAccessories(response.data);
-    } catch (error) {
+    } catch (error: Error) {
       handleError(error, "Failed to fetch accessories");
     }
   }
@@ -134,7 +134,7 @@ export default function Command() {
 
       await showToast(Toast.Style.Success, `Accessory ${newState ? "turned on" : "turned off"}`);
       await fetchAccessories(baseUrl);
-    } catch (error) {
+    } catch (error: Error) {
       handleError(error, `Failed to toggle accessory`);
     }
   }
@@ -160,7 +160,7 @@ export default function Command() {
       showToast(Toast.Style.Success, `Brightness set to ${brightness}`);
       await fetchAccessories(baseUrl);
       pop();
-    } catch (error) {
+    } catch (error: Error) {
       handleError(error, "Failed to set brightness");
     }
   }
