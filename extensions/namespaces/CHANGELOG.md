@@ -3,7 +3,7 @@
 ## [Reorder Spaces] - {PR_MERGE_DATE}
 
 ### ! Breaking Change
-- The `Delete Space` action has been changed to *⌃x* as previous shortcut is now reserved by Raycast
+- The `Delete Space` action shortcut has been changed to *⌃x* as previous shortcut is now reserved by Raycast
 
 ### Enhancements
 - Move spaces up or down (closes #14345)
