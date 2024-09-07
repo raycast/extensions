@@ -4,7 +4,9 @@
   "description": "Provides news headlines about the Netherlands from websites reporting in English",
   "icon": "nl-news.png",
   "author": "ernest",
-  "categories": ["News"],
+  "categories": [
+    "News"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -25,6 +27,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-react": "^7.35.2",
     "prettier": "2.8.8",
     "typescript": "^4.4.3"
   },
