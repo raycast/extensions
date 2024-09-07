@@ -16,7 +16,7 @@ export default function APOD() {
   });
 
   while (isLoading) {
-    return <Detail isLoading={isLoading} markdown={"## Loading Astronomy Picture of the Day"} />;
+    return <Detail isLoading={isLoading} markdown={"Loading Astronomy Picture of the Day 🔭"} />;
   }
 
   return <Apod apod={data} />;
