@@ -11,13 +11,15 @@ import Cache from './Cache'
 import { Directory } from './DirectoriesDropdown'
 import { PrimaryAction } from '../helpers'
 import React from 'react'
+import AddToFavorites from './AddToFavorites'
 
 type ProjectListItemProps = {
     project: Project
     directories: Directory[]
+    onFavoriteChange: (project: Project) => void
 }
 
-export default function ProjectListItem({ project, directories }: ProjectListItemProps) {
+export default function ProjectListItem({ project, directories, onFavoriteChange }: ProjectListItemProps) {
     const preferences = getPreferenceValues()
 
     const actionsMap: Record<PrimaryAction, JSX.Element> = {
@@ -50,6 +52,7 @@ export default function ProjectListItem({ project, directories }: ProjectListIte
             subtitle={project.description || ''}
             data-directory={project.primaryDirectory.name}
             accessories={[
+                { icon: project.isFavorite ? { source: Icon.Star, tintColor: Color.Yellow } : null, tooltip: project.isFavorite ? 'Favorite' : null },
                 { text: project.displayPath, tooltip: 'Full Path' },
                 { tag: { value: project.primaryDirectory.name, color: directories.find((conf) => conf.name === project.primaryDirectory.name)?.icon?.tintColor || Color.Orange }, tooltip: 'Main Directory' },
             ]}
@@ -57,6 +60,10 @@ export default function ProjectListItem({ project, directories }: ProjectListIte
                 <ActionPanel>
                     <ActionPanel.Section title="Open project">{actions()}</ActionPanel.Section>
                     <ActionPanel.Section title="Actions">
+                        <AddToFavorites
+                            project={project}
+                            onFavoriteChange={onFavoriteChange}
+                        />
                         <Config project={project} />
                         <Copy project={project} />
                         <Action.Push

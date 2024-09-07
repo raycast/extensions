@@ -1,5 +1,5 @@
 import fs from 'fs'
-import { getPreferenceValues, open, Cache, Color, Application, closeMainWindow, PopToRootType } from '@raycast/api'
+import { getPreferenceValues, open, Cache, Color, Application, closeMainWindow, PopToRootType, LocalStorage } from '@raycast/api'
 import { exec } from 'child_process'
 import { Project, ProjectList } from './project'
 import { Directory } from './components/DirectoriesDropdown'
@@ -71,7 +71,7 @@ const getDirectories = (path: string, depth?: number): ProjectList => {
     }
 }
 
-export function fetchProjects(): ProjectList {
+export async function fetchProjects(): Promise<ProjectList> {
     if (!preferences.enableProjectsCaching) {
         return getDirectories(preferences.projectsPath)
     }
@@ -88,7 +88,12 @@ export function fetchProjects(): ProjectList {
         cache.set('projects', JSON.stringify(projects))
     }
 
-    return projects
+    const favorites = await getFavoriteProjects()
+
+    return projects.map((project: Project) => {
+        project.isFavorite = favorites.includes(project.name)
+        return project
+    })
 }
 
 export function fetchPrimaryDirectories(projectList: ProjectList): Directory[] {
@@ -151,3 +156,21 @@ export async function openUrl(url: string): Promise<void> {
         await open(url)
     }
 }
+
+export async function getFavoriteProjects(): Promise<string[]> {
+    const favorites = await LocalStorage.getItem<string>('favorites')
+
+    return favorites ? JSON.parse(favorites) : []
+}
+
+// export async function addProjectToFavorites(project: Project): Promise<void> {
+//     const favorites = await getFavoriteProjects();
+
+//     if (favorites) {
+//         const newFavorites = [...favorites, project.name]
+//             .filter((value, index, self) => self.indexOf(value) === index);
+//         await LocalStorage.setItem("favorites", JSON.stringify(newFavorites));
+//     } else {
+//         await LocalStorage.setItem("favorites", JSON.stringify([project.name]));
+//     }
+// }
