@@ -1,4 +1,11 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  showToast,
+  Toast,
+  Icon,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import Parser from "rss-parser";
 
@@ -7,8 +14,14 @@ const parser = new Parser();
 const sources = [
   { name: "Dutch News", url: "https://www.dutchnews.nl/feed/" },
   { name: "NL Times", url: "https://nltimes.nl/feed/" },
-  { name: "IamExpat", url: "https://www.iamexpat.nl/rss/news-netherlands/news" },
-  { name: "The Guardian - Netherlands", url: "https://www.theguardian.com/world/netherlands/rss" },
+  {
+    name: "IamExpat",
+    url: "https://www.iamexpat.nl/rss/news-netherlands/news",
+  },
+  {
+    name: "The Guardian - Netherlands",
+    url: "https://www.theguardian.com/world/netherlands/rss",
+  },
 ];
 
 interface NewsItem {
@@ -37,10 +50,10 @@ function formatDate(dateString: string): string {
   } else if (diffDays < 7) {
     return `${diffDays} days ago`;
   } else {
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   }
 }
@@ -62,12 +75,16 @@ export default function Command() {
         const feed = await parser.parseURL(source.url);
         const sourceItems = feed.items.map((item) => {
           let pubDate = new Date(item.pubDate || "");
-          
+
           if (isNaN(pubDate.getTime())) {
             // If the date is invalid, try parsing it manually
-            const parts = item.pubDate?.split(' ') || [];
+            const parts = item.pubDate?.split(" ") || [];
             if (parts.length >= 5) {
-              pubDate = new Date(`${parts[1]} ${parts[2]} ${parts[3]} ${parts[4]} GMT${parts[5] || ''}`);
+              pubDate = new Date(
+                `${parts[1]} ${parts[2]} ${parts[3]} ${parts[4]} GMT${
+                  parts[5] || ""
+                }`
+              );
             }
           }
 
@@ -95,11 +112,17 @@ export default function Command() {
       }
     }
     // Sort items by publication date, latest first
-    setItems(allItems.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()));
+    setItems(
+      allItems.sort(
+        (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
+      )
+    );
     setIsLoading(false);
   }
 
-  const filteredItems = selectedSource ? items.filter((item) => item.source === selectedSource) : items;
+  const filteredItems = selectedSource
+    ? items.filter((item) => item.source === selectedSource)
+    : items;
 
   return (
     <List
@@ -108,11 +131,20 @@ export default function Command() {
         <List.Dropdown
           tooltip="Select News Source"
           storeValue={true}
-          onChange={(newValue) => setSelectedSource(newValue === "Latest Headlines" ? null : newValue)}
+          onChange={(newValue) =>
+            setSelectedSource(newValue === "Latest Headlines" ? null : newValue)
+          }
         >
-          <List.Dropdown.Item title="Latest Headlines" value="Latest Headlines" />
+          <List.Dropdown.Item
+            title="Latest Headlines"
+            value="Latest Headlines"
+          />
           {sources.map((source) => (
-            <List.Dropdown.Item key={source.name} title={source.name} value={source.name} />
+            <List.Dropdown.Item
+              key={source.name}
+              title={source.name}
+              value={source.name}
+            />
           ))}
         </List.Dropdown>
       }
