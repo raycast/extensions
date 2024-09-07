@@ -32,12 +32,13 @@ type CreatOrUpdateSpaceOptions = {
 };
 
 type SpaceFormValues = {
-  [index: string]: string | boolean;
+  // [index: string]: string | boolean;
   name: string;
   keyCode: string;
   color: string;
   icon: string;
   confetti: boolean;
+  modifiers: string[];
 };
 
 export type { Preferences, Color, ModifierMap, IconMap, Space, CreatOrUpdateSpaceOptions, SpaceFormValues };
