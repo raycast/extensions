@@ -31,7 +31,7 @@ export default async ({ launchContext }: { launchContext?: { defaultValue: strin
     const selectedFinderWindow = await getSelectedFinderWindow();
     await open(selectedFinderWindow, androidStudioApp);
     return;
-  } catch (error: any) {
+  } catch (error: Error) {
     await showToast({
       style: Toast.Style.Failure,
       title: "No Finder items or window selected",
