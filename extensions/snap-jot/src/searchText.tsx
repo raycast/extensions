@@ -1,7 +1,7 @@
 import { List, ActionPanel, Action, getPreferenceValues, Detail, Icon, showToast, Toast } from "@raycast/api";
 import fs from "node:fs";
 import path from "node:path";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 interface Preferences {
   directory: string;
@@ -20,44 +20,77 @@ interface MatchedLine {
   lineNumber: number;
 }
 
+const BATCH_SIZE = 50;
+const LOAD_DELAY = 100;
+const MAX_FILES = 10;
+
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const folderPath = preferences.directory;
   const [files, setFiles] = useState<FileContent[]>([]);
   const [searchText, setSearchText] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const hasRunEffect = useRef(false);
+
+  const processBatch = useCallback(
+    async (fileNames: string[], startIndex: number) => {
+      const batch = fileNames.slice(startIndex, startIndex + BATCH_SIZE);
+      const batchResults = await Promise.all(
+        batch.map(async (fileName) => {
+          const filePath = path.join(folderPath, fileName);
+          const stats = fs.lstatSync(filePath);
+
+          if (stats.isDirectory() || stats.isSymbolicLink()) {
+            return null;
+          }
+
+          const content = await fs.promises.readFile(filePath, "utf-8");
+          return { name: fileName, path: filePath, content };
+        }),
+      );
+
+      const validResults = batchResults.filter((file): file is FileContent => file !== null);
+      setFiles((prevFiles) => [...prevFiles, ...validResults]);
+
+      // Return the array of valid results
+      return validResults.reverse();
+    },
+    [folderPath],
+  );
+
   useEffect(() => {
-    const readFiles = () => {
+    if (hasRunEffect.current) return;
+    console.log(`Reading files from ${folderPath}`);
+    const readFiles = async () => {
       try {
-        const fileNames = fs.readdirSync(folderPath);
-        const fileContents = fileNames
-          .map((fileName) => {
-            const filePath = path.join(folderPath, fileName);
+        setIsLoading(true);
+        const fileNames = fs.readdirSync(folderPath).reverse();
 
-            // Check if the file is a directory
-            if (fs.lstatSync(filePath).isDirectory()) {
-              return null;
-            }
-            // シンボリックリンクの場合は無視
-            if (fs.lstatSync(filePath).isSymbolicLink()) {
-              return null;
-            }
+        let allFiles: FileContent[] = [];
 
-            const content = fs.readFileSync(filePath, "utf-8");
-            return { name: fileName, path: filePath, content };
-          })
-          .filter((file): file is { name: string; path: string; content: string } => file !== null); // Type guard to exclude null
+        for (let i = 0; i < Math.min(fileNames.length, MAX_FILES); i += BATCH_SIZE) {
+          const batchResults = await processBatch(fileNames, i);
+          allFiles = [...allFiles, ...batchResults]; // Collect the array of batch results
+          await new Promise((resolve) => setTimeout(resolve, LOAD_DELAY));
+          console.log(`Processed ${i + BATCH_SIZE} files`);
+        }
 
-        setFiles(fileContents);
+        setFiles(allFiles); // Set state once after processing all batches
+
+        setIsLoading(false);
       } catch (error) {
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to read directory",
           message: (error as Error).message,
         });
+        setIsLoading(false);
       }
     };
+
     readFiles();
-  }, [folderPath]);
+    hasRunEffect.current = true;
+  }, [folderPath, processBatch]);
 
   const matchedLines: MatchedLine[] = files
     .flatMap((file) => {
@@ -76,7 +109,7 @@ export default function Command() {
     .reverse();
 
   return (
-    <List searchBarPlaceholder="Search Memos" onSearchTextChange={setSearchText} throttle={true}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search Memos" onSearchTextChange={setSearchText} throttle={true}>
       {matchedLines.map((matchedLine) => (
         <List.Item
           key={`${matchedLine.filePath}-${matchedLine.lineNumber}`}
