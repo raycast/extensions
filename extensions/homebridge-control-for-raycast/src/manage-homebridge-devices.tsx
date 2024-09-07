@@ -13,7 +13,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import axios, { AxiosResponse } from "axios";
-import { Accessory } from "./types";
+import { Accessory, CustomError, LoginResponse, Preferences } from "./types";
 
 // Map accessory types to icons
 const accessoryIcons: { [key: string]: Icon } = {
@@ -25,33 +25,6 @@ const accessoryIcons: { [key: string]: Icon } = {
   HumiditySensor: Icon.Humidity,
   Default: Icon.Circle,
 };
-
-interface Preferences {
-  url: string;
-  username: string;
-  password: string;
-}
-
-interface CustomError {
-  message: string;
-  code?: number;
-  response?: {
-    status: number;
-  };
-  stack?: string;
-}
-
-interface Accessory {
-  uniqueId: string;
-  serviceName: string;
-  humanType: string;
-  serviceCharacteristics: { type: string; value: boolean | number | string }[];
-}
-
-interface LoginResponse {
-  access_token: string;
-  expires_in: number;
-}
 
 export default function Command() {
   const [accessories, setAccessories] = useState<Accessory[]>([]);

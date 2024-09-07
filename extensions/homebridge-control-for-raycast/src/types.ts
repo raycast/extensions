@@ -105,3 +105,23 @@ export interface Service {
   serviceName: string;
   characteristics: Characteristic[];
 }
+
+export interface Preferences {
+  url: string;
+  username: string;
+  password: string;
+}
+
+export interface CustomError {
+  message: string;
+  code?: number;
+  response?: {
+    status: number;
+  };
+  stack?: string;
+}
+
+export interface LoginResponse {
+  access_token: string;
+  expires_in: number;
+}

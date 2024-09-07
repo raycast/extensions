@@ -57,6 +57,7 @@
     "axios": "^1.7.7"
   },
   "devDependencies": {
+    "@types/axios": "^0.14.0",
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
