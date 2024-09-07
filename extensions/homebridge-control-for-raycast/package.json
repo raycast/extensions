@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "homebridge-control-for-raycast",
+  "title": "HomeBridge Control for Raycast",
+  "description": "Seamlessly manage your Homebridge accessories with this Raycast plugin. Instantly toggle devices on or off, and enjoy quick access to your smart home controls",
+  "icon": "extension_icon.png",
+  "author": "krishjoshi",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-homebridge-devices",
+      "title": "Homebridge",
+      "description": "Control and monitor your Homebridge-connected devices directly from Raycast.",
+      "mode": "view",
+      "arguments": [],
+      "preferences": [
+        {
+          "key": "url",
+          "title": "Homebridge URL",
+          "type": "textfield",
+          "defaultValue": "http://localhost:8581",
+          "placeholder": "http://localhost:8581",
+          "required": true,
+          "name": "url",
+          "description": "The URL of your Homebridge server. By default, Homebridge runs on port 8581."
+        },
+        {
+          "key": "username",
+          "title": "Homebridge Username",
+          "type": "textfield",
+          "defaultValue": "admin",
+          "placeholder": "admin",
+          "required": true,
+          "description": "Your Homebridge username is stored securely in your macOS Keychain.",
+          "name": "username"
+        },
+        {
+          "key": "password",
+          "title": "Homebridge Password",
+          "type": "password",
+          "defaultValue": "password",
+          "placeholder": "password",
+          "description": "Your Homebridge password is stored securely in your macOS Keychain.",
+          "secure": true,
+          "name": "password",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.16.3",
+    "axios": "^1.7.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
