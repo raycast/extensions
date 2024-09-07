@@ -56,6 +56,80 @@
       "title": "Show Messages",
       "description": "Show pop up messages when an action is performed, such as toggling play/pause. Will also show a message if the action fails for some reason. No messages will be shown (even errors) if this is disabled.",
       "default": true
+    },
+    {
+      "name": "language",
+      "label": "Choose Language",
+      "type": "dropdown",
+      "required": true,
+      "title": "Language",
+      "description": "Choose the language of the menu options.",
+      "data": [
+        {
+          "title": "Bulgarian",
+          "value": "Bulgarian"
+        },
+        {
+          "title": "Danish",
+          "value": "Danish"
+        },
+        {
+          "title": "German",
+          "value": "German"
+        },
+        {
+          "title": "English",
+          "value": "English"
+        },
+        {
+          "title": "Spanish",
+          "value": "Spanish"
+        },
+        {
+          "title": "French",
+          "value": "French"
+        },
+        {
+          "title": "Croatian",
+          "value": "Croatian"
+        },
+        {
+          "title": "Italian",
+          "value": "Italian"
+        },
+        {
+          "title": "Norwegian",
+          "value": "Norwegian"
+        },
+        {
+          "title": "Polish",
+          "value": "Polish"
+        },
+        {
+          "title": "Portuguese (Brazil)",
+          "value": "PortugueseBrazil"
+        },
+        {
+          "title": "Portuguese",
+          "value": "Portuguese"
+        },
+        {
+          "title": "Slovenian",
+          "value": "Slovenian"
+        },
+        {
+          "title": "Serbian",
+          "value": "Serbian"
+        },
+        {
+          "title": "Swedish",
+          "value": "Swedish"
+        },
+        {
+          "title": "Turkish",
+          "value": "Turkish"
+        }
+      ]
     }
   ],
   "dependencies": {
