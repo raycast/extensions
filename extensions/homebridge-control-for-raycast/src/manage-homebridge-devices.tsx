@@ -12,7 +12,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { Accessory } from "./types";
 
 // Map accessory types to icons
@@ -30,6 +30,27 @@ interface Preferences {
   url: string;
   username: string;
   password: string;
+}
+
+interface CustomError {
+  message: string;
+  code?: number;
+  response?: {
+    status: number;
+  };
+  stack?: string;
+}
+
+interface Accessory {
+  uniqueId: string;
+  serviceName: string;
+  humanType: string;
+  serviceCharacteristics: { type: string; value: boolean | number | string }[];
+}
+
+interface LoginResponse {
+  access_token: string;
+  expires_in: number;
 }
 
 export default function Command() {
@@ -63,14 +84,14 @@ export default function Command() {
         showToast(Toast.Style.Success, "Authenticated");
         fetchAccessories(url);
       }
-    } catch (error: Error) {
-      handleError(error, "Authentication Failed", "Please check your username, password, or URL.");
+    } catch (error) {
+      handleError(error as CustomError, "Authentication Failed", "Please check your username, password, or URL.");
       openExtensionPreferences();
     }
   }
 
-  async function login(url: string, username: string, password: string) {
-    const response = await axios.post(
+  async function login(url: string, username: string, password: string): Promise<LoginResponse> {
+    const response = await axios.post<LoginResponse, AxiosResponse>(
       `${url}/api/auth/login`,
       { username, password },
       { headers: { "Content-Type": "application/json", Accept: "application/json, text/plain, */*" } },
@@ -103,18 +124,19 @@ export default function Command() {
 
       setFavorites(favorites);
 
-      const response = await axios.get(`${url}/api/accessories`, {
+      const response = await axios.get<Accessory[], AxiosResponse>(`${url}/api/accessories`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       setAccessories(response.data);
-    } catch (error: Error) {
-      handleError(error, "Failed to fetch accessories");
+    } catch (error) {
+      handleError(error as CustomError, "Failed to fetch accessories");
     }
   }
 
-  function handleError(error: Error, defaultMessage: string, detailedMessage?: string) {
-    showToast(Toast.Style.Failure, defaultMessage, detailedMessage || error.message);
+  function handleError(error: CustomError, defaultMessage: string, detailedMessage?: string) {
+    const message = detailedMessage || error.message;
+    showToast(Toast.Style.Failure, defaultMessage, message);
   }
 
   async function toggleAccessoryState(accessory: Accessory, characteristicType: string) {
@@ -134,8 +156,8 @@ export default function Command() {
 
       await showToast(Toast.Style.Success, `Accessory ${newState ? "turned on" : "turned off"}`);
       await fetchAccessories(baseUrl);
-    } catch (error: Error) {
-      handleError(error, `Failed to toggle accessory`);
+    } catch (error) {
+      handleError(error as CustomError, `Failed to toggle accessory`);
     }
   }
 
@@ -160,8 +182,8 @@ export default function Command() {
       showToast(Toast.Style.Success, `Brightness set to ${brightness}`);
       await fetchAccessories(baseUrl);
       pop();
-    } catch (error: Error) {
-      handleError(error, "Failed to set brightness");
+    } catch (error) {
+      handleError(error as CustomError, "Failed to set brightness");
     }
   }
 
