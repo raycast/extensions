@@ -1,21 +1,21 @@
 import { getSelectedFinderItems, open, showHUD, showToast, Toast } from "@raycast/api";
 import {
-  getAndroidStudioApp,
+  getWebstormApp,
   getSelectedFinderWindow,
   isValidDirectoryPath,
-  showAndroidStudioAppNotInstalled,
+  showWebstormAppNotInstalled,
 } from "./common/util";
 
 export default async ({ launchContext }: { launchContext?: { defaultValue: string } }) => {
-  const androidStudioApp = await getAndroidStudioApp();
-  if (!androidStudioApp) {
-    await showAndroidStudioAppNotInstalled();
+  const webstorm = await getWebstormApp();
+  if (!webstorm) {
+    await showWebstormAppNotInstalled();
     return;
   }
   try {
     if (launchContext?.defaultValue) {
       if (isValidDirectoryPath(launchContext.defaultValue)) {
-        await open(launchContext.defaultValue, androidStudioApp);
+        await open(launchContext.defaultValue, webstorm);
       } else {
         await showHUD("Invalid Path ❌");
       }
@@ -24,14 +24,14 @@ export default async ({ launchContext }: { launchContext?: { defaultValue: strin
     const selectedFinderItems = await getSelectedFinderItems();
     if (selectedFinderItems.length) {
       for (const finderItem of selectedFinderItems) {
-        await open(finderItem.path, androidStudioApp);
+        await open(finderItem.path, webstorm);
       }
       return;
     }
     const selectedFinderWindow = await getSelectedFinderWindow();
-    await open(selectedFinderWindow, androidStudioApp);
+    await open(selectedFinderWindow, webstorm);
     return;
-  } catch (error: Error) {
+  } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
       title: "No Finder items or window selected",

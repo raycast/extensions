@@ -1,22 +1,20 @@
-import { Application, Toast, getApplications, open, showToast } from "@raycast/api";
+import { Application, getApplications, open, showToast, Toast } from "@raycast/api";
 import { exec } from "child_process";
 import fs from "fs";
 
 const asPackageName = "com.jetbrains.WebStorm";
 
-export async function getAndroidStudioApp(): Promise<Application | undefined> {
+export async function getWebstormApp(): Promise<Application | undefined> {
   const applications = await getApplications();
-  const androidStudioApplication = applications.find((app) => app.bundleId === asPackageName);
-  return androidStudioApplication;
+  return applications.find((app) => app.bundleId === asPackageName);
 }
 
 export async function getFinderApp(): Promise<Application | undefined> {
   const applications = await getApplications();
-  const finderApp = applications.find((app) => app.bundleId === "com.apple.finder");
-  return finderApp;
+  return applications.find((app) => app.bundleId === "com.apple.finder");
 }
 
-export async function showAndroidStudioAppNotInstalled() {
+export async function showWebstormAppNotInstalled() {
   await showToast({
     style: Toast.Style.Failure,
     title: "Webstorm is not installed",
@@ -29,12 +27,12 @@ export async function showAndroidStudioAppNotInstalled() {
 
 /**
  * Gets the selected Finder window.
- * @throws — An error when Finder is not the frontmost application.
+ * @throws — An error when Finder is not the frontMost application.
  * @returns A Promise that resolves with the selected Finder window's path.
  */
 export const getSelectedFinderWindow = (): Promise<string> => {
   const appleScript = `
-    if application "Finder" is running and frontmost of application "Finder" then
+    if application "Finder" is running and frontMost of application "Finder" then
       tell app "Finder"
         set finderWindow to window 1
         set finderWindowPath to (POSIX path of (target of finderWindow as alias))
