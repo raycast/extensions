@@ -1,3 +1,16 @@
 # NameSpace Changelog
 
+## [Reorder Spaces] - {PR_MERGE_DATE}
+
+### Enhancements
+- Move spaces up or down (closes #14345)
+- The "modifiers" in Space forms is now a TagPicker instead of checkboxes for better error handling
+- Update metadata imaages
+
+### Dev Notes
+- Controlled form validation through `useForm`
+- Replace `run-applescript` with Raycast's own
+- Replace `LocalStorage` util with `useLocalStorage`
+- Migrate ray and related deps
+
 ## [Initial Version] - 2022-09-27
