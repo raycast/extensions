@@ -2,6 +2,9 @@
 
 ## [Reorder Spaces] - {PR_MERGE_DATE}
 
+### ! Breaking Change
+- The `Delete Space` action has been changed to *⌃x* as previous shortcut is now reserved by Raycast
+
 ### Enhancements
 - Move spaces up or down (closes #14345)
 - The "modifiers" in Space forms is now a TagPicker instead of checkboxes for better error handling
