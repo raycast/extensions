@@ -51,7 +51,6 @@ function getResults(rawInput: string): FormattedNumber[] {
     }
 
     input = expandExponential(input);
-    const fnInput = FixedNumber.fromString(input, { decimals: 18, width: 512 });
 
     if (isWei) {
       // Convert Wei to Ether
@@ -83,7 +82,10 @@ function getResults(rawInput: string): FormattedNumber[] {
     ];
 
     for (const denom of denominations) {
-      const value = formatUnits(parseUnits(input, isWei ? 0 : 18), denom.decimals);
+      const value = formatUnits(
+        parseUnits(input, isWei ? 0 : 18),
+        denom.decimals,
+      );
       output.push({
         value,
         unit: denom.name,
@@ -93,7 +95,6 @@ function getResults(rawInput: string): FormattedNumber[] {
         }).format(parseFloat(value)),
       });
     }
-
   } catch (e) {
     showToast({
       style: Toast.Style.Failure,
