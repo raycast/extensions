@@ -52,7 +52,7 @@ export type Database = {
   users: string[];
 };
 
-export type File = {
+export type FileItem = {
   type: "dir" | "link" | "file";
   gid: number;
   path: string;

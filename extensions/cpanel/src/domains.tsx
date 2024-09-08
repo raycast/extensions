@@ -63,9 +63,10 @@ function ViewDNSZone({ zone }: { zone: string }) {
 
   const [type, setType] = useState("");
   const recordsToShow = useMemo(
+    //filter out the record types cPanel does not show. We do not do this in hook as the records are still needed for other operations
     () => data.filter((record) => record.record_type !== "SOA" && record.record_type !== "NS"),
     [data],
-  ); //filter our the record types cPanel does not show. We do not do this in hook as the records are still needed for other operations
+  );
   const filteredRecords = useMemo(
     () => recordsToShow.filter((record) => !type || record.record_type === type),
     [recordsToShow, type],

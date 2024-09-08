@@ -7,7 +7,7 @@ import {
   SuccessResponse,
   ErrorResponse,
   Database,
-  File,
+  FileItem,
 } from "./types";
 import { showFailureToast, useFetch } from "@raycast/utils";
 
@@ -19,7 +19,7 @@ type useUAPIOptions<T> = {
 export function useUAPI<T>(
   module: string,
   functionName: string,
-  params?: Record<string, string | number | boolean>,
+  params?: Record<string, string | number>,
   options: useUAPIOptions<T> = { execute: true },
 ) {
   const API_URL = new URL(`execute/${module}/${functionName}`, CPANEL_URL);
@@ -78,6 +78,6 @@ export const useListDatabases = (database_type: "Mysql" | "Postgresql") =>
 
 // FILES
 export const useListFiles = (dir: string) =>
-  useUAPI<File[]>("Fileman", "list_files", {
+  useUAPI<FileItem[]>("Fileman", "list_files", {
     dir,
   });
