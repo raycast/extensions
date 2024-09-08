@@ -65,19 +65,6 @@ ${prompt.content}
               content={`https://cursor.directory/${prompt.slug}`}
               shortcut={{ modifiers: ["cmd"], key: "y" }}
             />
-            {
-              // TODO: save to favorites
-              // remove from favorites
-            }
-            {
-              // TODO: edit a prompt
-            }
-            {/* <Action.Push */}
-            {/*   title="Create Prompt" */}
-            {/*   icon={Icon.Pencil} */}
-            {/*   target={<CreatePromptForm />} */}
-            {/* /> */}
-            {/**/}
           </ActionPanel.Section>
           <ActionPanel.Section title="Settings">
             <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />

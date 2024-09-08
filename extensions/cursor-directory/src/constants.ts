@@ -1,8 +1,6 @@
 import { environment } from "@raycast/api";
 import path from "path";
 
-export const CACHE_PROMPTS_KEY = "cursor_prompts";
-
 export const REPO_OWNER = "pontusab";
 export const REPO_NAME = "cursor.directory";
 
