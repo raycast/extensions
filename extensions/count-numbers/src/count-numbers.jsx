@@ -159,7 +159,7 @@ export default function Command() {
           </ActionPanel>
         }
       >
-        <Form.TextField id="name" title="Name" defaultValue="Counter" />
+        <Form.TextField id="name" title="Name" defaultValue={`Counter ${data.counters.length + 1}`} />
         <Form.TextField id="count" title="Count" defaultValue={"0"} />
         <Form.TextField id="increment" title="Increment" defaultValue={"1"} />
         <Form.TextField id="modulo" title="Modulo" defaultValue={"1"} />
