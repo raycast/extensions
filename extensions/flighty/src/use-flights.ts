@@ -2,6 +2,7 @@ import {useSQL, type AsyncState} from '@raycast/utils'
 import {z} from 'zod'
 import {homedir} from 'os'
 import fs from 'fs'
+import {useInstalled} from './use-installed'
 
 // schema
 const TimestampSchema = z.number().int().positive()
@@ -44,13 +45,6 @@ const FlightSchema = z.object({
 type Flight = z.infer<typeof FlightSchema>
 
 export function useFlights(): AsyncState<Flight[]> {
-    const path = `${homedir()}/Library/Containers/com.flightyapp.flighty/Data/Documents/MainFlightyDatabase.db`
-    if (!fs.existsSync(path))
-        return {
-            isLoading: false,
-            error: new Error('Flighty database not found'),
-        }
-
     const query = `
     SELECT
         Flight.id,
@@ -100,7 +94,18 @@ export function useFlights(): AsyncState<Flight[]> {
         UserFlight.importSource IS NOT "CONNECTED_FRIEND"
     `
 
+    const path = `${homedir()}/Library/Containers/com.flightyapp.flighty/Data/Documents/MainFlightyDatabase.db`
+
+    // hooks
+    const installed = useInstalled('com.flightyapp.flighty')
     const response = useSQL<Flight>(path, query)
+
+    // handle install status
+    if (installed.isLoading || installed.data === undefined) return {isLoading: true}
+    if (!installed.data) return {isLoading: false, error: new Error('Flighty is not installed. Please install it to view your flights.')}
+
+    // handle database error
+    if (!fs.existsSync(path)) return {isLoading: false, error: new Error('Unable to read Flighty data. Please restart it and try again.')}
 
     // load state
     if (response.data === undefined) return response
@@ -111,7 +116,7 @@ export function useFlights(): AsyncState<Flight[]> {
     // handle invalid data
     if (!success) {
         console.error(error)
-        return {isLoading: false, error: new Error('Parse error')}
+        return {isLoading: false, error: new Error('Parse error. Please report this issue.')}
     }
 
     // return valid data

@@ -1,4 +1,4 @@
-import {List, Detail, ActionPanel, Action, Icon, Color} from '@raycast/api'
+import {List, ActionPanel, Action, Icon, Color} from '@raycast/api'
 import dayjs, {type Dayjs} from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
@@ -12,10 +12,9 @@ const timeFormat = 'h:mma'
 
 export default function () {
     const {isLoading, error, data} = useFlights()
-    if (error) return <Detail markdown={error.message} />
 
     return (
-        <List isLoading={isLoading} navigationTitle="Flights" isShowingDetail>
+        <List isLoading={isLoading} navigationTitle="Flights" isShowingDetail={error === undefined}>
             {data?.map((flight) => {
                 const link = `https://live.flighty.app/${flight.id}`
 
@@ -147,6 +146,7 @@ export default function () {
                     />
                 )
             })}
+            {error && <List.EmptyView icon={Icon.Warning} description={error.message} />}
         </List>
     )
 }
