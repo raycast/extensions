@@ -20,126 +20,80 @@ function getResults(rawInput: string): FormattedNumber[] {
   const cleanInput = rawInput
     .replace(' ', '')
     .replace(/\n/g, '')
-    .replace(/,/g, '');
+    .replace(/,/g, '')
+    .toLowerCase();
+
   if (cleanInput === '') {
     return [];
   }
-  if (!isValidNumber(cleanInput)) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: 'Invalid input',
-      message: 'Please enter a valid number',
-    });
-    return [];
-  }
+
   const output: FormattedNumber[] = [];
   try {
-    const input = expandExponential(cleanInput);
+    let input = cleanInput;
+    let isWei = false;
+    let isEther = false;
+
+    if (input.endsWith('wei')) {
+      input = input.slice(0, -3).trim();
+      isWei = true;
+    } else if (input.endsWith('eth') || input.endsWith('ether')) {
+      input = input.replace(/(eth|ether)$/, '').trim();
+      isEther = true;
+    }
+
+    if (!isValidNumber(input)) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Invalid input',
+        message: 'Please enter a valid number',
+      });
+      return [];
+    }
+
+    input = expandExponential(input);
     const fnInput = FixedNumber.fromString(input, { decimals: 18, width: 512 });
-    let value, unit, decimals, displayNumber;
-    if (fnInput.gte(FixedNumber.fromValue(1e13))) {
-      value = formatUnits(parseUnits(input, 0), 18);
-      unit = 'ether';
-      decimals = 18;
-      displayNumber = Intl.NumberFormat('en-US', {
-        maximumFractionDigits: decimals,
-      }).format(parseFloat(value));
-      output.push({
-        value,
-        unit,
-        decimals,
-        displayNumber,
-      });
 
-      value = formatUnits(parseUnits(input, 0), 6);
-      unit = 'mwei';
-      decimals = 6;
-      displayNumber = Intl.NumberFormat('en-US', {
-        maximumFractionDigits: decimals,
-      }).format(parseFloat(value));
+    if (isWei) {
+      // Convert Wei to Ether
+      const value = formatUnits(input, 18);
       output.push({
         value,
-        unit,
-        decimals,
-        displayNumber,
+        unit: 'ether',
+        decimals: 18,
+        displayNumber: Intl.NumberFormat('en-US', {
+          maximumFractionDigits: 18,
+        }).format(parseFloat(value)),
       });
-
-      value = formatUnits(parseUnits(input, 0), 0);
-      unit = 'wei';
-      decimals = 18;
-      displayNumber = value;
+    } else if (isEther || (!isWei && !isEther)) {
+      // Convert Ether to Wei (default case or when ETH/ETHER suffix is present)
+      const value = parseUnits(input, 18).toString();
       output.push({
         value,
-        unit,
-        decimals,
-        displayNumber,
-      });
-    } else if (fnInput.lt(FixedNumber.fromValue(1))) {
-      value = formatUnits(parseUnits(input, 6), 0);
-      unit = 'mwei';
-      decimals = 6;
-      displayNumber = value;
-      output.push({
-        value,
-        unit,
-        decimals,
-        displayNumber,
-      });
-
-      value = formatUnits(parseUnits(input, 18), 0);
-      unit = 'wei';
-      decimals = 18;
-      displayNumber = value;
-      output.push({
-        value,
-        unit,
-        decimals,
-        displayNumber,
-      });
-    } else {
-      try {
-        value = formatUnits(parseUnits(input, 0), 6);
-        unit = 'mwei';
-        decimals = 6;
-        displayNumber = Intl.NumberFormat('en-US', {
-          maximumFractionDigits: decimals,
-        }).format(parseFloat(value));
-        output.push({
-          value,
-          unit,
-          decimals,
-          displayNumber,
-        });
-      } catch {
-        // Do nothing
-      }
-
-      try {
-        value = formatUnits(parseUnits(input, 6), 0);
-        unit = 'mwei';
-        decimals = 6;
-        displayNumber = value;
-        output.push({
-          value,
-          unit,
-          decimals,
-          displayNumber,
-        });
-      } catch {
-        // Do nothing
-      }
-
-      value = formatUnits(parseUnits(input, 18), 0);
-      unit = 'wei';
-      decimals = 18;
-      displayNumber = value;
-      output.push({
-        value,
-        unit,
-        decimals,
-        displayNumber,
+        unit: 'wei',
+        decimals: 0,
+        displayNumber: value,
       });
     }
+
+    // Add other denominations
+    const denominations = [
+      { name: 'gwei', decimals: 9 },
+      { name: 'mwei', decimals: 6 },
+      { name: 'kwei', decimals: 3 },
+    ];
+
+    for (const denom of denominations) {
+      const value = formatUnits(parseUnits(input, isWei ? 0 : 18), denom.decimals);
+      output.push({
+        value,
+        unit: denom.name,
+        decimals: denom.decimals,
+        displayNumber: Intl.NumberFormat('en-US', {
+          maximumFractionDigits: denom.decimals,
+        }).format(parseFloat(value)),
+      });
+    }
+
   } catch (e) {
     showToast({
       style: Toast.Style.Failure,
