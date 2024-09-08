@@ -1,0 +1,145 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "youtube-music-desktop-app-controller",
+  "title": "Youtube Music Desktop App Controller",
+  "description": "Controle Youtube Music Desktop App from Raycast",
+  "icon": "extension-icon.png",
+  "author": "muditmahajan21",
+  "license": "MIT",
+  "categories": ["Media", "Applications"],
+  "commands": [
+    {
+      "name": "ytmd",
+      "title": "YTMdesktop Setup",
+      "description": "Control Youtube Music Desktop App from Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "playPause",
+      "title": "Play/Pause",
+      "subtitle": "Play/Pause for Youtube Music Desktop App",
+      "description": "Play or pause the current track in Youtube Music Desktop App",
+      "mode": "no-view"
+    },
+    {
+      "name": "play",
+      "title": "Play",
+      "subtitle": "Play for Youtube Music Desktop App",
+      "description": "Start playing music in Youtube Music Desktop App",
+      "mode": "no-view"
+    },
+    {
+      "name": "pause",
+      "title": "Pause",
+      "subtitle": "Pause for Youtube Music Desktop App",
+      "description": "Pause the current track in Youtube Music Desktop App",
+      "mode": "no-view"
+    },
+    {
+      "name": "volumeUp",
+      "title": "Volume Up",
+      "subtitle": "Increase Volume for Youtube Music Desktop App",
+      "description": "Increase the volume in Youtube Music Desktop App",
+      "mode": "no-view"
+    },
+    {
+      "name": "volumeDown",
+      "title": "Volume Down",
+      "subtitle": "Decrease Volume for Youtube Music Desktop App",
+      "description": "Decrease the volume in Youtube Music Desktop App",
+      "mode": "no-view"
+    },
+    {
+      "name": "next",
+      "title": "Next Track",
+      "subtitle": "Next Track for Youtube Music Desktop App",
+      "description": "Skip to the next track in Youtube Music Desktop App",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous",
+      "title": "Previous Track",
+      "subtitle": "Previous Track for Youtube Music Desktop App",
+      "description": "Go back to the previous track in Youtube Music Desktop App",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggleLike",
+      "title": "Toggle Like",
+      "subtitle": "Toggle Like for Youtube Music Desktop App",
+      "description": "Like or unlike the current track in Youtube Music Desktop App",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggleDislike",
+      "title": "Toggle Dislike",
+      "subtitle": "Toggle Dislike for Youtube Music Desktop App",
+      "description": "Dislike or remove dislike for the current track in Youtube Music Desktop App",
+      "mode": "no-view"
+    },
+    {
+      "name": "shuffle",
+      "title": "Toggle Shuffle",
+      "subtitle": "Toggle Shuffle for Youtube Music Desktop App",
+      "description": "Turn shuffle on or off in Youtube Music Desktop App",
+      "mode": "no-view"
+    },
+    {
+      "name": "seekTo",
+      "title": "Seek To",
+      "subtitle": "Seek To Position for Youtube Music Desktop App",
+      "description": "Seek to a specific position in the current track in Youtube Music Desktop App",
+      "mode": "view"
+    },
+    {
+      "name": "repeatMode",
+      "title": "Set Repeat Mode",
+      "subtitle": "Set Repeat Mode for Youtube Music Desktop App",
+      "description": "Set the repeat mode in Youtube Music Desktop App",
+      "mode": "view"
+    },
+    {
+      "name": "mute",
+      "title": "Mute",
+      "subtitle": "Mute Youtube Music Desktop App",
+      "description": "Mute the audio in Youtube Music Desktop App",
+      "mode": "no-view"
+    },
+    {
+      "name": "unmute",
+      "title": "Unmute",
+      "subtitle": "Unmute Youtube Music Desktop App",
+      "description": "Unmute the audio in Youtube Music Desktop App",
+      "mode": "no-view"
+    },
+    {
+      "name": "setVolume",
+      "title": "Set Volume",
+      "subtitle": "Set Volume for Youtube Music Desktop App",
+      "description": "Set the volume to a specific level in Youtube Music Desktop App",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.82.3",
+    "@raycast/utils": "^1.16.3",
+    "node-fetch": "^3.3.2",
+    "socket.io-client": "^4.7.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
