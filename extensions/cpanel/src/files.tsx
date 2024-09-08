@@ -42,7 +42,10 @@ function Directory({ dir }: { dir: string }) {
             key={item.fullpath}
             title={item.file}
             subtitle={item.path}
-            accessories={[{ text: item.humansize }, { date: new Date(item.mtime * 1000), tooltip: `modified: ${new Date(item.mtime * 1000).toDateString()}` }]}
+            accessories={[
+              { text: item.humansize },
+              { date: new Date(item.mtime * 1000), tooltip: `modified: ${new Date(item.mtime * 1000).toDateString()}` },
+            ]}
             icon={getIcon(item)}
             actions={
               <ActionPanel title="Go To">
