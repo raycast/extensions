@@ -29,8 +29,8 @@ export default function Command() {
           key={app.id}
           icon={{ source: Icon.Dot, tintColor: app.live_url ? Color.Green : Color.Blue }}
           title={app.spec.name}
-          subtitle={app.region.slug}
-          accessories={[{ date: new Date(app.created_at) }]}
+          subtitle={app.live_url}
+          accessories={[ {tag: app.tier_slug}, { date: new Date(app.created_at) }]}
           actions={
             <ActionPanel>
               {app.live_url && <Action.OpenInBrowser title="Visit Live URL" url={app.live_url} />}
