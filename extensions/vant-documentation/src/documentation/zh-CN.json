@@ -1,0 +1,562 @@
+[
+  {
+    "title": "开发指南",
+    "items": [
+      {
+        "title": "介绍",
+        "url": "https://vant.pro/vant/#/zh-CN/home",
+        "subTitle": "轻量、可定制的移动端 Vue 组件库。"
+      },
+      {
+        "title": "快速上手",
+        "url": "https://vant.pro/vant/#/zh-CN/quickstart",
+        "subTitle": "通过本章节你可以了解到 Vant 的安装方法和基本使用姿势。"
+      },
+      {
+        "title": "进阶用法",
+        "url": "https://vant.pro/vant/#/zh-CN/advanced-usage",
+        "subTitle": "通过本章节你可以了解到 Vant 的一些进阶用法，比如组件插槽用法、多种浏览器适配方式。"
+      },
+      {
+        "title": "常见问题",
+        "url": "https://vant.pro/vant/#/zh-CN/faq",
+        "subTitle": "Vant 基于 CSS 变量提供了主题定制的能力，可以对组件样式进行统一修改，详见 ConfigProvider 全局配置 组件。"
+      },
+      {
+        "title": "更新日志",
+        "url": "https://vant.pro/vant/#/zh-CN/changelog",
+        "subTitle": "从 v4.9.0 开始，Vant 的更新日志统一发布在 GitHub 的 Releases 页面，当前页面将不再更新。"
+      },
+      {
+        "title": "4.0 更新介绍",
+        "url": "https://vant.pro/vant/#/zh-CN/release-note-v4",
+        "subTitle": "历经一年的迭代，Vant 4.0 版本已正式发布，这是 Vant 自 2017 年开源以来发布的第四个重要版本。"
+      },
+      {
+        "title": "从 v2 升级到 v3",
+        "url": "https://vant.pro/vant/#/zh-CN/migrate-from-v2",
+        "subTitle": "本文档提供了从 Vant 2 到 Vant 3 的升级指南。"
+      },
+      {
+        "title": "从 v3 升级到 v4",
+        "url": "https://vant.pro/vant/#/zh-CN/migrate-from-v3",
+        "subTitle": "本文档提供了从 Vant 3 到 Vant 4 的升级指南。"
+      },
+      {
+        "title": "贡献指南",
+        "url": "https://vant.pro/vant/#/zh-CN/contribution",
+        "subTitle": "感谢你使用 Vant。以下是关于向 Vant 提交反馈或代码的指南。在向 Vant 提交 issue 或者 PR 之前，请先花几分钟时间阅读以下内容。"
+      },
+      {
+        "title": "设计资源",
+        "url": "https://vant.pro/vant/#/zh-CN/design",
+        "subTitle": "本页面提供 Vant 的设计资源下载。"
+      },
+      {
+        "title": "国际化",
+        "url": "https://vant.pro/vant/#/zh-CN/locale",
+        "subTitle": "Vant 采用中文作为默认语言，同时支持多语言切换，请按照下方教程进行国际化设置。"
+      }
+    ]
+  },
+  {
+    "title": "基础组件",
+    "items": [
+      {
+        "title": "Button 按钮",
+        "url": "https://vant.pro/vant/#/zh-CN/button",
+        "subTitle": "按钮用于触发一个操作，如提交表单。"
+      },
+      {
+        "title": "Cell 单元格",
+        "url": "https://vant.pro/vant/#/zh-CN/cell",
+        "subTitle": "单元格为列表中的单个展示项。"
+      },
+      {
+        "title": "ConfigProvider 全局配置",
+        "url": "https://vant.pro/vant/#/zh-CN/config-provider",
+        "subTitle": "用于全局配置 Vant 组件，提供深色模式、主题定制等能力。"
+      },
+      {
+        "title": "Icon 图标",
+        "url": "https://vant.pro/vant/#/zh-CN/icon",
+        "subTitle": "基于字体的图标集，可以通过 Icon 组件使用，也可以在其他组件中通过 icon 属性引用。"
+      },
+      {
+        "title": "Image 图片",
+        "url": "https://vant.pro/vant/#/zh-CN/image",
+        "subTitle": "增强版的 img 标签，提供多种图片填充模式，支持图片懒加载、加载中提示、加载失败提示。"
+      },
+      {
+        "title": "Layout 布局",
+        "url": "https://vant.pro/vant/#/zh-CN/col",
+        "subTitle": "Layout 提供了 van-row 和 van-col 两个组件来进行行列布局。"
+      },
+      {
+        "title": "Popup 弹出层",
+        "url": "https://vant.pro/vant/#/zh-CN/popup",
+        "subTitle": "弹出层容器，用于展示弹窗、信息提示等内容，支持多个弹出层叠加展示。"
+      },
+      {
+        "title": "Space 间距",
+        "url": "https://vant.pro/vant/#/zh-CN/space",
+        "subTitle": "设置元素之间的间距。"
+      },
+      {
+        "title": "Style 内置样式",
+        "url": "https://vant.pro/vant/#/zh-CN/style",
+        "subTitle": "Vant 中默认包含了一些常用样式，可以直接通过 className 的方式使用。"
+      },
+      {
+        "title": "Toast 轻提示",
+        "url": "https://vant.pro/vant/#/zh-CN/toast",
+        "subTitle": "在页面中间弹出黑色半透明提示，用于消息通知、加载提示、操作结果提示等场景。"
+      }
+    ]
+  },
+  {
+    "title": "表单组件",
+    "items": [
+      {
+        "title": "Calendar 日历",
+        "url": "https://vant.pro/vant/#/zh-CN/calendar",
+        "subTitle": "日历组件用于选择日期或日期区间。"
+      },
+      {
+        "title": "Cascader 级联选择",
+        "url": "https://vant.pro/vant/#/zh-CN/cascader",
+        "subTitle": "级联选择框，用于多层级数据的选择，典型场景为省市区选择。"
+      },
+      {
+        "title": "Checkbox 复选框",
+        "url": "https://vant.pro/vant/#/zh-CN/checkbox",
+        "subTitle": "在一组备选项中进行多选。"
+      },
+      {
+        "title": "DatePicker 日期选择",
+        "url": "https://vant.pro/vant/#/zh-CN/date-picker",
+        "subTitle": "日期选择器，用于选择年、月、日，通常与弹出层组件配合使用。"
+      },
+      {
+        "title": "Field 输入框",
+        "url": "https://vant.pro/vant/#/zh-CN/field",
+        "subTitle": "用户可以在文本框内输入或编辑文字。"
+      },
+      {
+        "title": "Form 表单",
+        "url": "https://vant.pro/vant/#/zh-CN/form",
+        "subTitle": "用于数据录入、校验，支持输入框、单选框、复选框、文件上传等类型，需要与 Field 输入框 组件搭配使用。"
+      },
+      {
+        "title": "NumberKeyboard 数字键盘",
+        "url": "https://vant.pro/vant/#/zh-CN/number-keyboard",
+        "subTitle": "虚拟数字键盘，可以配合密码输入框组件或自定义的输入框组件使用。"
+      },
+      {
+        "title": "PasswordInput 密码输入框",
+        "url": "https://vant.pro/vant/#/zh-CN/password-input",
+        "subTitle": "带网格的输入框组件，可以用于输入密码、短信验证码等场景，通常与数字键盘组件配合使用。"
+      },
+      {
+        "title": "Picker 选择器",
+        "url": "https://vant.pro/vant/#/zh-CN/picker",
+        "subTitle": "提供多个选项集合供用户选择，支持单列选择、多列选择和级联选择，通常与弹出层组件配合使用。"
+      },
+      {
+        "title": "PickerGroup 选择器组",
+        "url": "https://vant.pro/vant/#/zh-CN/picker-group",
+        "subTitle": "用于结合多个 Picker 选择器组件，在一次交互中完成多个值的选择。"
+      },
+      {
+        "title": "Radio 单选框",
+        "url": "https://vant.pro/vant/#/zh-CN/radio",
+        "subTitle": "在一组备选项中进行单选。"
+      },
+      {
+        "title": "Rate 评分",
+        "url": "https://vant.pro/vant/#/zh-CN/rate",
+        "subTitle": "用于对事物进行评级操作。"
+      },
+      {
+        "title": "Search 搜索",
+        "url": "https://vant.pro/vant/#/zh-CN/search",
+        "subTitle": "用于搜索场景的输入框组件。"
+      },
+      {
+        "title": "Slider 滑块",
+        "url": "https://vant.pro/vant/#/zh-CN/slider",
+        "subTitle": "滑动输入条，用于在给定的范围内选择一个值。"
+      },
+      {
+        "title": "Signature 签名",
+        "url": "https://vant.pro/vant/#/zh-CN/signature",
+        "subTitle": "用于签名场景的组件，基于 Canvas 实现。请升级 vant 到 >= 4.3.0 版本来使用该组件。"
+      },
+      {
+        "title": "Stepper 步进器",
+        "url": "https://vant.pro/vant/#/zh-CN/stepper",
+        "subTitle": "步进器由增加按钮、减少按钮和输入框组成，用于在一定范围内输入、调整数字。"
+      },
+      {
+        "title": "Switch 开关",
+        "url": "https://vant.pro/vant/#/zh-CN/switch",
+        "subTitle": "用于在打开和关闭状态之间进行切换。"
+      },
+      {
+        "title": "TimePicker 时间选择",
+        "url": "https://vant.pro/vant/#/zh-CN/time-picker",
+        "subTitle": "时间选择器，通常与弹出层组件配合使用。"
+      },
+      {
+        "title": "Uploader 文件上传",
+        "url": "https://vant.pro/vant/#/zh-CN/uploader",
+        "subTitle": "用于将本地的图片或文件上传至服务器，并在上传过程中展示预览图和上传进度。目前 Uploader 组件不包含将文件上传至服务器的接口逻辑，该步骤需要自行实现。"
+      }
+    ]
+  },
+  {
+    "title": "反馈组件",
+    "items": [
+      {
+        "title": "ActionSheet 动作面板",
+        "url": "https://vant.pro/vant/#/zh-CN/action-sheet",
+        "subTitle": "底部弹起的模态面板，包含与当前情境相关的多个选项。"
+      },
+      {
+        "title": "Barrage 弹幕",
+        "url": "https://vant.pro/vant/#/zh-CN/barrage",
+        "subTitle": "实现观看视频时弹出的评论性字幕功能。请升级 vant 到 >= 4.4.0 版本来使用该组件。"
+      },
+      {
+        "title": "Dialog 弹出框",
+        "url": "https://vant.pro/vant/#/zh-CN/dialog",
+        "subTitle": "弹出模态框，常用于消息提示、消息确认，或在当前页面内完成特定的交互操作。支持组件调用和函数调用两种方式。"
+      },
+      {
+        "title": "DropdownMenu 下拉菜单",
+        "url": "https://vant.pro/vant/#/zh-CN/dropdown-menu",
+        "subTitle": "向下弹出的菜单列表。"
+      },
+      {
+        "title": "FloatingPanel 浮动面板",
+        "url": "https://vant.pro/vant/#/zh-CN/floating-panel",
+        "subTitle": "浮动在页面底部的面板，可以上下拖动来浏览内容，常用于提供额外的功能或信息。请升级 vant 到 >= 4.5.0 版本来使用该组件。"
+      },
+      {
+        "title": "FloatingBubble 浮动气泡",
+        "url": "https://vant.pro/vant/#/zh-CN/floating-bubble",
+        "subTitle": "悬浮在页面边缘的可点击气泡。请升级 vant 到 >= 4.6.0 版本来使用该组件。"
+      },
+      {
+        "title": "Loading 加载",
+        "url": "https://vant.pro/vant/#/zh-CN/loading",
+        "subTitle": "加载图标，用于表示加载中的过渡状态。"
+      },
+      {
+        "title": "Notify 消息通知",
+        "url": "https://vant.pro/vant/#/zh-CN/notify",
+        "subTitle": "在页面顶部展示消息提示，支持组件调用和函数调用两种方式。"
+      },
+      {
+        "title": "Overlay 遮罩层",
+        "url": "https://vant.pro/vant/#/zh-CN/overlay",
+        "subTitle": "创建一个遮罩层，用于强调特定的页面元素，并阻止用户进行其他操作。"
+      },
+      {
+        "title": "PullRefresh 下拉刷新",
+        "url": "https://vant.pro/vant/#/zh-CN/pull-refresh",
+        "subTitle": "用于提供下拉刷新的交互操作。"
+      },
+      {
+        "title": "ShareSheet 分享面板",
+        "url": "https://vant.pro/vant/#/zh-CN/share-sheet",
+        "subTitle": "底部弹起的分享面板，用于展示各分享渠道对应的操作按钮，不含具体的分享逻辑。"
+      },
+      {
+        "title": "SwipeCell 滑动单元格",
+        "url": "https://vant.pro/vant/#/zh-CN/swipe-cell",
+        "subTitle": "可以左右滑动来展示操作按钮的单元格组件。"
+      }
+    ]
+  },
+  {
+    "title": "展示组件",
+    "items": [
+      {
+        "title": "Badge 徽标",
+        "url": "https://vant.pro/vant/#/zh-CN/badge",
+        "subTitle": "在右上角展示徽标数字或小红点。"
+      },
+      {
+        "title": "Circle 环形进度条",
+        "url": "https://vant.pro/vant/#/zh-CN/circle",
+        "subTitle": "圆环形的进度条组件，支持进度渐变动画。"
+      },
+      {
+        "title": "Collapse 折叠面板",
+        "url": "https://vant.pro/vant/#/zh-CN/collapse",
+        "subTitle": "将一组内容放置在多个折叠面板中，点击面板的标题可以展开或收缩其内容。"
+      },
+      {
+        "title": "CountDown 倒计时",
+        "url": "https://vant.pro/vant/#/zh-CN/count-down",
+        "subTitle": "用于实时展示倒计时数值，支持毫秒精度。"
+      },
+      {
+        "title": "Divider 分割线",
+        "url": "https://vant.pro/vant/#/zh-CN/divider",
+        "subTitle": "用于将内容分隔为多个区域。"
+      },
+      {
+        "title": "Empty 空状态",
+        "url": "https://vant.pro/vant/#/zh-CN/empty",
+        "subTitle": "空状态时的占位提示。"
+      },
+      {
+        "title": "Highlight 高亮文本",
+        "url": "https://vant.pro/vant/#/zh-CN/highlight",
+        "subTitle": "高亮指定文本内容。请升级 vant 到 >= 4.8.0 版本来使用该组件。"
+      },
+      {
+        "title": "ImagePreview 图片预览",
+        "url": "https://vant.pro/vant/#/zh-CN/image-preview",
+        "subTitle": "图片放大预览，支持组件调用和函数调用两种方式。"
+      },
+      {
+        "title": "Lazyload 懒加载",
+        "url": "https://vant.pro/vant/#/zh-CN/lazyload",
+        "subTitle": "当页面需要加载大量内容时，使用懒加载可以实现延迟加载页面可视区域外的内容，从而使页面加载更流畅。"
+      },
+      {
+        "title": "List 列表",
+        "url": "https://vant.pro/vant/#/zh-CN/list",
+        "subTitle": "瀑布流滚动加载，用于展示长列表，当列表即将滚动到底部时，会触发事件并加载更多列表项。"
+      },
+      {
+        "title": "NoticeBar 通知栏",
+        "url": "https://vant.pro/vant/#/zh-CN/notice-bar",
+        "subTitle": "用于循环播放展示一组消息通知。"
+      },
+      {
+        "title": "Popover 气泡弹出框",
+        "url": "https://vant.pro/vant/#/zh-CN/popover",
+        "subTitle": "弹出式的气泡菜单。"
+      },
+      {
+        "title": "Progress 进度条",
+        "url": "https://vant.pro/vant/#/zh-CN/progress",
+        "subTitle": "用于展示操作的当前进度。"
+      },
+      {
+        "title": "RollingText 翻滚文本",
+        "url": "https://vant.pro/vant/#/zh-CN/rolling-text",
+        "subTitle": "文本翻滚动效，可以翻滚数字和其他类型文本。请升级 vant 到 >= 4.6.0 版本来使用该组件。"
+      },
+      {
+        "title": "Skeleton 骨架屏",
+        "url": "https://vant.pro/vant/#/zh-CN/skeleton",
+        "subTitle": "用于在内容加载过程中展示一组占位图形。"
+      },
+      {
+        "title": "Steps 步骤条",
+        "url": "https://vant.pro/vant/#/zh-CN/steps",
+        "subTitle": "用于展示操作流程的各个环节，让用户了解当前的操作在整体流程中的位置。"
+      },
+      {
+        "title": "Sticky 粘性布局",
+        "url": "https://vant.pro/vant/#/zh-CN/sticky",
+        "subTitle": "Sticky 组件与 CSS 中 position: sticky 属性实现的效果一致，当组件在屏幕范围内时，会按照正常的布局排列，当组件滚出屏幕范围时，始终会固定在屏幕顶部。"
+      },
+      {
+        "title": "Swipe 轮播",
+        "url": "https://vant.pro/vant/#/zh-CN/swipe",
+        "subTitle": "用于循环播放一组图片或内容。"
+      },
+      {
+        "title": "Tag 标签",
+        "url": "https://vant.pro/vant/#/zh-CN/tag",
+        "subTitle": "用于标记关键词和概括主要内容。"
+      },
+      {
+        "title": "TextEllipsis 文本省略",
+        "url": "https://vant.pro/vant/#/zh-CN/text-ellipsis",
+        "subTitle": "对长文本进行省略，支持展开/收起。请升级 vant 到 >= 4.1.0 版本来使用该组件。"
+      },
+      {
+        "title": "Watermark 水印",
+        "url": "https://vant.pro/vant/#/zh-CN/watermark",
+        "subTitle": "在页面上添加特定的文字或图案作为水印，可用于防止信息盗用。请升级 vant 到 >= 4.2.0 版本来使用该组件。"
+      }
+    ]
+  },
+  {
+    "title": "导航组件",
+    "items": [
+      {
+        "title": "ActionBar 动作栏",
+        "url": "https://vant.pro/vant/#/zh-CN/action-bar",
+        "subTitle": "用于为页面相关操作提供便捷交互。"
+      },
+      {
+        "title": "BackTop 回到顶部",
+        "url": "https://vant.pro/vant/#/zh-CN/back-top",
+        "subTitle": "返回页面顶部的操作按钮。"
+      },
+      {
+        "title": "Grid 宫格",
+        "url": "https://vant.pro/vant/#/zh-CN/grid",
+        "subTitle": "宫格可以在水平方向上把页面分隔成等宽度的区块，用于展示内容或进行页面导航。"
+      },
+      {
+        "title": "IndexBar 索引栏",
+        "url": "https://vant.pro/vant/#/zh-CN/index-bar",
+        "subTitle": "用于列表的索引分类显示和快速定位。"
+      },
+      {
+        "title": "NavBar 导航栏",
+        "url": "https://vant.pro/vant/#/zh-CN/nav-bar",
+        "subTitle": "为页面提供导航功能，常用于页面顶部。"
+      },
+      {
+        "title": "Pagination 分页",
+        "url": "https://vant.pro/vant/#/zh-CN/pagination",
+        "subTitle": "数据量过多时，采用分页的形式将数据分隔，每次只加载一个页面。"
+      },
+      {
+        "title": "Sidebar 侧边导航",
+        "url": "https://vant.pro/vant/#/zh-CN/sidebar",
+        "subTitle": "垂直展示的导航栏，用于在不同的内容区域之间进行切换。"
+      },
+      {
+        "title": "Tab 标签页",
+        "url": "https://vant.pro/vant/#/zh-CN/tab",
+        "subTitle": "选项卡组件，用于在不同的内容区域之间进行切换。"
+      },
+      {
+        "title": "Tabbar 标签栏",
+        "url": "https://vant.pro/vant/#/zh-CN/tabbar",
+        "subTitle": "底部导航栏，用于在不同页面之间进行切换。"
+      },
+      {
+        "title": "TreeSelect 分类选择",
+        "url": "https://vant.pro/vant/#/zh-CN/tree-select",
+        "subTitle": "用于从一组相关联的数据集合中进行选择。"
+      }
+    ]
+  },
+  {
+    "title": "业务组件",
+    "items": [
+      {
+        "title": "AddressEdit 地址编辑",
+        "url": "https://vant.pro/vant/#/zh-CN/address-edit",
+        "subTitle": "地址编辑组件，用于新建、更新、删除地址信息。"
+      },
+      {
+        "title": "AddressList 地址列表",
+        "url": "https://vant.pro/vant/#/zh-CN/address-list",
+        "subTitle": "展示地址信息列表。"
+      },
+      {
+        "title": "Area 省市区选择",
+        "url": "https://vant.pro/vant/#/zh-CN/area",
+        "subTitle": "省市区三级联动选择，通常与弹出层组件配合使用。"
+      },
+      {
+        "title": "Card 商品卡片",
+        "url": "https://vant.pro/vant/#/zh-CN/card",
+        "subTitle": "商品卡片，用于展示商品的图片、价格等信息。"
+      },
+      {
+        "title": "ContactCard 联系人卡片",
+        "url": "https://vant.pro/vant/#/zh-CN/contact-card",
+        "subTitle": "以卡片的形式展示联系人信息。"
+      },
+      {
+        "title": "ContactEdit 联系人编辑",
+        "url": "https://vant.pro/vant/#/zh-CN/contact-edit",
+        "subTitle": "编辑并保存联系人信息。"
+      },
+      {
+        "title": "ContactList 联系人列表",
+        "url": "https://vant.pro/vant/#/zh-CN/contact-list",
+        "subTitle": "展示联系人列表。"
+      },
+      {
+        "title": "Coupon 优惠券",
+        "url": "https://vant.pro/vant/#/zh-CN/coupon-list",
+        "subTitle": "用于优惠券的兑换和选择。"
+      },
+      {
+        "title": "SubmitBar 提交订单栏",
+        "url": "https://vant.pro/vant/#/zh-CN/submit-bar",
+        "subTitle": "用于展示订单金额与提交订单。"
+      }
+    ]
+  },
+  {
+    "title": "组合式 API",
+    "items": [
+      {
+        "title": "介绍",
+        "url": "https://vant.pro/vant/#/zh-CN/vant-use-intro",
+        "subTitle": "Vant 底层依赖了 @vant/use 包，其中内置了一系列的组合式 API。对于使用了 Vant 的项目，可以复用这些 API 进行开发。"
+      },
+      {
+        "title": "useClickAway",
+        "url": "https://vant.pro/vant/#/zh-CN/use-click-away",
+        "subTitle": "监听点击元素外部的事件。"
+      },
+      {
+        "title": "useCountDown",
+        "url": "https://vant.pro/vant/#/zh-CN/use-count-down",
+        "subTitle": "提供倒计时管理能力。"
+      },
+      {
+        "title": "useCustomFieldValue",
+        "url": "https://vant.pro/vant/#/zh-CN/use-custom-field-value",
+        "subTitle": "用于自定义 Form 组件中的表单项。"
+      },
+      {
+        "title": "useEventListener",
+        "url": "https://vant.pro/vant/#/zh-CN/use-event-listener",
+        "subTitle": "方便地进行事件绑定，在组件 mounted 和 activated 时绑定事件，unmounted 和 deactivated 时解绑事件。"
+      },
+      {
+        "title": "usePageVisibility",
+        "url": "https://vant.pro/vant/#/zh-CN/use-page-visibility",
+        "subTitle": "获取页面的可见状态。"
+      },
+      {
+        "title": "useRect",
+        "url": "https://vant.pro/vant/#/zh-CN/use-rect",
+        "subTitle": "获取元素的大小及其相对于视口的位置，等价于 Element.getBoundingClientRect。"
+      },
+      {
+        "title": "useRelation",
+        "url": "https://vant.pro/vant/#/zh-CN/use-relation",
+        "subTitle": "建立父子组件之间的关联关系，进行数据通信和方法调用，基于 provide 和 inject 实现。"
+      },
+      {
+        "title": "useScrollParent",
+        "url": "https://vant.pro/vant/#/zh-CN/use-scroll-parent",
+        "subTitle": "获取元素最近的可滚动父元素。"
+      },
+      {
+        "title": "useToggle",
+        "url": "https://vant.pro/vant/#/zh-CN/use-toggle",
+        "subTitle": "用于在 true 和 false 之间进行切换。"
+      },
+      {
+        "title": "useWindowSize",
+        "url": "https://vant.pro/vant/#/zh-CN/use-window-size",
+        "subTitle": "获取浏览器窗口的视口宽度和高度，并在窗口大小变化时自动更新。"
+      },
+      {
+        "title": "useRaf",
+        "url": "https://vant.pro/vant/#/zh-CN/use-raf",
+        "subTitle": "提供便捷的 requestAnimationFrame 的调用和取消。"
+      }
+    ]
+  }
+]
