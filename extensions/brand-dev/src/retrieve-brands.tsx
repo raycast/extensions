@@ -72,7 +72,9 @@ const { api_key } = getPreferenceValues<Preferences>();
 
 export default function RetrieveBrand(props: LaunchProps<{ arguments: Arguments.RetrieveBrands }>) {
   const { push } = useNavigation();
-  const [search, setSearch] = useState(props.arguments.search);
+  const { search } = props.arguments;
+  const [searched, setSearched] = useState(!search);
+
   const { isLoading, value: brands = [], setValue: setBrands } = useLocalStorage<BrandInStorage[]>("brands", []);
 
   async function updateBrands(newBrand: BrandInStorage) {
@@ -91,9 +93,9 @@ export default function RetrieveBrand(props: LaunchProps<{ arguments: Arguments.
 
   useEffect(() => {
     async function searchAndShow() {
+      setSearched(true);
       const brand = brands.find((b) => b.domain === search);
       if (brand) {
-        setSearch("");
         push(<ViewBrand brand={brand} />);
       } else {
         await showFailureToast("No matching brand found", {
@@ -101,14 +103,13 @@ export default function RetrieveBrand(props: LaunchProps<{ arguments: Arguments.
           primaryAction: {
             title: "Search Brand",
             onAction() {
-              setSearch("");
               push(<SearchBrand search={search} onSearched={updateBrands} />);
             },
           },
         });
       }
     }
-    if (brands.length && search) searchAndShow();
+    if (brands.length && !searched) searchAndShow();
   }, [brands]);
 
   return (
