@@ -81,9 +81,10 @@ export default function Command() {
                 setData((data) => {
                   let newData = structuredClone(data);
                   let counter = getCounter(newData);
-                  counter.count = parseInt(values.count);
-                  counter.increment = parseInt(values.increment);
-                  counter.modulo = parseInt(values.modulo);
+                  counter.name = values.name;
+                  counter.count = parseInt(values.count) || 0;
+                  counter.increment = parseInt(values.increment) || 1;
+                  counter.modulo = parseInt(values.modulo) || 1;
                   return newData;
                 });
                 pop();
@@ -92,6 +93,7 @@ export default function Command() {
           </ActionPanel>
         }
       >
+        <Form.TextField id="name" title="Name" defaultValue={counter.name} />
         <Form.TextField id="count" title="Count" defaultValue={counter.count.toString()} />
         <Form.TextField id="increment" title="Increment" defaultValue={counter.increment.toString()} />
         <Form.TextField id="modulo" title="Modulo" defaultValue={counter.modulo.toString()} />
@@ -146,9 +148,9 @@ export default function Command() {
                   newData.counters.push({
                     id: id,
                     name: values.name,
-                    count: parseInt(values.count),
-                    increment: parseInt(values.increment),
-                    modulo: parseInt(values.modulo),
+                    count: parseInt(values.count) || 0,
+                    increment: parseInt(values.increment) || 1,
+                    modulo: parseInt(values.modulo) || 1,
                   });
                   newData.currentCounter = id;
                   return newData;
