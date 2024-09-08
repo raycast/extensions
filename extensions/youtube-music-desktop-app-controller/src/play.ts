@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { closeMainWindow, showToast, Toast } from "@raycast/api";
 import { COMMANDS } from "./consts";
 import { controlYouTubeMusic } from "./utils";
 
