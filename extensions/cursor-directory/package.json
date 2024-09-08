@@ -9,6 +9,34 @@
     "Productivity",
     "Developer Tools"
   ],
+  "preferences": [
+    {
+      "name": "prompts_sort_order",
+      "title": "Prompts Sort Order",
+      "type": "dropdown",
+      "description": "Sort order of prompts",
+      "required": true,
+      "default": "desc",
+      "data": [
+        {
+          "title": "Ascending",
+          "value": "asc"
+        },
+        {
+          "title": "Descending",
+          "value": "desc"
+        }
+      ]
+    },
+    {
+      "name": "cache_interval",
+      "title": "Cache Interval in day",
+      "type": "textfield",
+      "required": true,
+      "default": "1",
+      "description": "How long should the local cache expire"
+    }
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -19,12 +47,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.81.2",
-    "@raycast/utils": "^1.16.3"
-  },
-  "devDependencies": {
     "@babel/parser": "^7.25.6",
     "@babel/types": "^7.25.6",
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.16.3",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
@@ -35,8 +64,7 @@
     "typescript": "^5.4.5"
   },
   "scripts": {
-    "update-prompts": "tsx src/updatePrompts.ts",
-    "build": "tsx src/updatePrompts.ts && ray build -e dist",
+    "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

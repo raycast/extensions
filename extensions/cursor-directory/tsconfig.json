@@ -3,7 +3,6 @@
   "include": [
     "src/**/*",
     "raycast-env.d.ts",
-    "src/updatePrompts.ts"
   ],
   "compilerOptions": {
     "lib": [

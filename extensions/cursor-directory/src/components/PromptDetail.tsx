@@ -1,5 +1,5 @@
 import { Prompt } from "../types";
-import { Action, ActionPanel, Detail, Image, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Image, Icon, openExtensionPreferences } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
 import { isImageUrl } from "../utils";
 
@@ -44,39 +44,44 @@ ${prompt.content}
       }
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard
-            title="Copy Prompt"
-            icon={Icon.Clipboard}
-            content={prompt.content}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-          />
-          <Action.OpenInBrowser
-            title="Open in cursor.directory"
-            icon={Icon.Link}
-            url={`https://cursor.directory/${prompt.slug}`}
-          />
-          {prompt.author.url && (
-            <Action.OpenInBrowser title="Open Author URL" icon={Icon.Person} url={prompt.author.url} />
-          )}
-          <Action.CopyToClipboard
-            title="Share Prompt"
-            icon={Icon.Hashtag}
-            content={`https://cursor.directory/${prompt.slug}`}
-            shortcut={{ modifiers: ["cmd"], key: "y" }}
-          />
-          {
-            // TODO: save to favorites
-            // remove from favorites
-          }
-          {
-            // TODO: edit a prompt
-          }
-          {/* <Action.Push */}
-          {/*   title="Create Prompt" */}
-          {/*   icon={Icon.Pencil} */}
-          {/*   target={<CreatePromptForm />} */}
-          {/* /> */}
-          {/**/}
+          <ActionPanel.Section title="Actions">
+            <Action.CopyToClipboard
+              title="Copy Prompt"
+              icon={Icon.Clipboard}
+              content={prompt.content}
+              shortcut={{ modifiers: ["cmd"], key: "c" }}
+            />
+            <Action.OpenInBrowser
+              title="Open in Cursor.directory"
+              icon={Icon.Link}
+              url={`https://cursor.directory/${prompt.slug}`}
+            />
+            {prompt.author.url && (
+              <Action.OpenInBrowser title="Open Author URL" icon={Icon.Person} url={prompt.author.url} />
+            )}
+            <Action.CopyToClipboard
+              title="Share Prompt"
+              icon={Icon.Hashtag}
+              content={`https://cursor.directory/${prompt.slug}`}
+              shortcut={{ modifiers: ["cmd"], key: "y" }}
+            />
+            {
+              // TODO: save to favorites
+              // remove from favorites
+            }
+            {
+              // TODO: edit a prompt
+            }
+            {/* <Action.Push */}
+            {/*   title="Create Prompt" */}
+            {/*   icon={Icon.Pencil} */}
+            {/*   target={<CreatePromptForm />} */}
+            {/* /> */}
+            {/**/}
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Settings">
+            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

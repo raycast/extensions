@@ -1,48 +1,19 @@
-import promptsData from "./data/prompts.json";
-import { Cache } from "@raycast/api";
-import { Prompt, Section } from "./types";
+import { getPreferenceValues } from "@raycast/api";
+import type { Prompt, Section } from "./types";
+import fs from "fs";
 
-const prompts = promptsData as Prompt[];
+export const getSections = (prompts: Prompt[]): Section[] => {
+  const preferences = getPreferenceValues<Preferences>();
 
-export const cache = new Cache();
-
-export const fetchPromptDetails = async (slug: string): Promise<Prompt | undefined> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const prompt = prompts.find((p) => p.slug === slug);
-      resolve(prompt);
-    }, 100);
-  });
-};
-
-export const fetchSections = async (): Promise<Section[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(getSections());
-    }, 300);
-  });
-};
-
-const getSections = (): Section[] => {
   const sections = Array.from(new Set(prompts.flatMap((prompt) => prompt.tags)));
   return sections
     .map((tag) => ({
       name: tag,
-      slugs: prompts
-        .filter((prompt) => !cache.has(prompt.slug) && prompt.tags.includes(tag))
-        .map((prompt) => prompt.slug),
+      slugs: prompts.filter((prompt) => prompt.tags.includes(tag)).map((prompt) => prompt.slug),
     }))
-    .sort((a, b) => b.slugs.length - a.slugs.length);
-};
-
-export const slugify = (str: string) => {
-  return str
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^\w-]+/g, "")
-    .replace(/--+/g, "-")
-    .replace(/^-+/, "")
-    .replace(/-+$/, "");
+    .sort((a, b) =>
+      preferences.prompts_sort_order === "desc" ? b.slugs.length - a.slugs.length : a.slugs.length - b.slugs.length,
+    );
 };
 
 export const isImageUrl = (url: string): boolean => {
@@ -54,4 +25,13 @@ export const isImageUrl = (url: string): boolean => {
     imageExtensions.includes(url.substring(url.lastIndexOf(".")).toLowerCase()) || url.endsWith(".svg");
 
   return isDataUri || isImageExtension;
+};
+
+export const getTimestamp = (filePath: string): number => {
+  const ifExists = fs.existsSync(filePath);
+  if (!ifExists) {
+    return -1; // if file not exists, return -1
+  } else {
+    return fs.statSync(filePath).mtimeMs;
+  }
 };
