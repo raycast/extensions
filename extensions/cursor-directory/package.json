@@ -41,8 +41,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Prompt Search",
-      "description": "Search system prompt from cursor.directory for Cursor Code Editor",
+      "title": "Search Prompts",
+      "description": "Search system prompts from cursor.directory for usage inside Cursor Code Editor",
       "mode": "view"
     }
   ],
