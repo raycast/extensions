@@ -41,13 +41,8 @@ export async function controlYouTubeMusic(command: string, data?: number | strin
       const text = await response.text();
       console.log("Response:", text);
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error sending command:", error);
-
-    if (error && error.code === "ECONNREFUSED") {
-      throw new Error("Youtube Music Desktop is not running or Companion Server is not running");
-    }
-
     throw new Error("Error sending command");
   }
 }
@@ -79,7 +74,7 @@ export async function requestAuthCode(): Promise<void> {
     const { code } = responseData as { code: string };
 
     await requestAuthToken(code);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error requesting auth code:", error);
     throw new Error("Error requesting auth code");
   }
@@ -110,7 +105,7 @@ async function requestAuthToken(code: string): Promise<void> {
     const { token } = responseData as { token: string };
 
     await setAuthToken(token);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error requesting auth token:", error);
     throw new Error("Error requesting auth token");
   }

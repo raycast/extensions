@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, open, Clipboard, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getAuthToken, requestAuthCode } from "./utils";
 
