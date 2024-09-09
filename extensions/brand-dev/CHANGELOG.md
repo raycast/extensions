@@ -1,6 +1,6 @@
 # Brand.dev Changelog
 
-## [Quick Search Argument] - {PR_MERGE_DATE}
+## [Quick Search Argument] - 2024-09-09
 
 You can optionally pass a brand directly via argument;
 - if found: the brand is displayed immediately
