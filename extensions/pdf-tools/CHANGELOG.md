@@ -1,6 +1,6 @@
 # PDF Tools Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-09-09
 
 - Added `Watermark PDF` command.
 
