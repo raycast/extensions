@@ -3,7 +3,14 @@ import { useState, useEffect } from "react";
 
 const cache = new Cache();
 
-export type Item = { price: number; quantity: number; unitSize?: number; unitCost: number; perUnitSize?: number };
+export type Item = {
+  price: number;
+  quantity: number;
+  unitSize?: number;
+  unitCost: number;
+  perUnitSize?: number;
+  updateTime: string;
+};
 
 export default function Command(props: LaunchProps) {
   const price = parseFloat(props.arguments.price);
@@ -60,7 +67,7 @@ export default function Command(props: LaunchProps) {
 
   // Add the new item only once when the component mounts
   useEffect(() => {
-    const newItem = { price, quantity, unitSize, unitCost, perUnitSize };
+    const newItem = { price, quantity, unitSize, unitCost, perUnitSize, updateTime: new Date().toISOString() };
     addNewItem(newItem);
   }, []); // Empty dependency array ensures this runs only once
 
@@ -71,11 +78,11 @@ export default function Command(props: LaunchProps) {
           title="Price"
           icon={Icon.BankNote}
           accessories={[{ text: `$${price.toFixed(2)} x ${quantity}` }]}
-          actions={
-            <ActionPanel>
-              <Action.Push title="Add Another Record" icon={Icon.Plus} target={<List />} />
-            </ActionPanel>
-          }
+          // actions={
+          //   <ActionPanel>
+          //     <Action.Push title="Add Another Record" icon={Icon.Plus} target={<List />} />
+          //   </ActionPanel>
+          // }
         />
         <List.Item title="Unit Cost" icon={Icon.Receipt} accessories={[{ text: `${unitCost.toFixed(2)} per item` }]} />
         {unitSize !== undefined && (
@@ -93,10 +100,10 @@ export default function Command(props: LaunchProps) {
         {items.map((item, index) => (
           <List.Item
             key={index}
-            title={`Record ${index + 1}`}
-            subtitle={`$${item.price.toFixed(2)} x ${item.quantity}`}
+            title={`$${item.price.toFixed(2)} for ${item.quantity}`}
+            subtitle={`${new Date(item.updateTime).toLocaleString()}`}
             accessories={[
-              { text: `${item.unitCost.toFixed(2)}/item` },
+              { text: `$${item.unitCost.toFixed(2)}/item` },
               ...(item.unitSize !== undefined ? [{ text: `${item.perUnitSize?.toFixed(2)}/unit size` }] : []),
             ]}
             actions={

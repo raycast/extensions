@@ -40,7 +40,7 @@
     {
       "name": "view",
       "title": "View Better Deal History",
-      "description": "View new deal to compare",
+      "description": "View previous deals for comparison",
       "mode": "view"
     }
   ],

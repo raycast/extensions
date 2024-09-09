@@ -32,15 +32,28 @@ export default function View() {
         {items.map((item, index) => (
           <List.Item
             key={index}
-            title={`Record ${index + 1}`}
-            subtitle={`$${item.price.toFixed(2)} x ${item.quantity}`}
+            title={`$${item.price.toFixed(2)} for ${item.quantity}`}
+            subtitle={`${new Date(item.updateTime).toLocaleString()}`}
             accessories={[
-              { text: `${item.unitCost.toFixed(2)}/item` },
+              { text: `$${item.unitCost.toFixed(2)}/item` },
               ...(item.unitSize !== undefined ? [{ text: `${item.perUnitSize?.toFixed(2)}/unit size` }] : []),
             ]}
             actions={
               <ActionPanel>
                 <Action title="Delete This Record" icon={Icon.Trash} onAction={() => deleteItem(index)} />
+                <Action
+                  title="Clear All Records"
+                  icon={Icon.Trash}
+                  onAction={() => {
+                    setItems([]); // Clear the items state
+                    cache.set("items", JSON.stringify([])); // Clear the cache
+                    showToast({
+                      style: Toast.Style.Success,
+                      title: "All Records Cleared",
+                      message: "All records have been removed.",
+                    });
+                  }}
+                />
               </ActionPanel>
             }
           />
