@@ -3,6 +3,7 @@
   "title": "HTML Preview",
   "description": "Preview HTML code in real-time",
   "author": "duanyongcheng",
+  "icon": "extension-icon.png",
   "categories": [
     "Developer Tools"
   ],
