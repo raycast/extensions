@@ -24,7 +24,7 @@ export default function Command(props: { arguments: CommandArguments }) {
     if (videoId) {
       checkImageExistence(videoId);
     } else {
-      showToast(Toast.Style.Failure, "Invalid YouTube URL", "Please enter a valid URLt");
+      showToast(Toast.Style.Failure, "Invalid YouTube URL", "Please enter a valid URL");
     }
   }, [videoId]);
 
