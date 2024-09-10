@@ -1,0 +1,30 @@
+{
+  "name": "html-preview",
+  "title": "HTML Preview",
+  "description": "Preview HTML code in real-time",
+  "icon": "command-icon.png",
+  "author": "Major Judge",
+  "categories": ["Developer Tools"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "html",
+      "title": "Preview HTML",
+      "description": "Enter HTML code and see the rendered result",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.2"
+  },
+  "devDependencies": {
+    "@types/node": "~20.8.0",
+    "@types/react": "^18.2.27",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}
