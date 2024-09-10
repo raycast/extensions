@@ -22,8 +22,11 @@
   "devDependencies": {
     "@types/node": "~20.8.0",
     "@types/react": "^18.2.27",
+    "@typescript-eslint/eslint-plugin": "^8.5.0",
+    "@typescript-eslint/parser": "^8.5.0",
+    "eslint-plugin-react": "^7.35.2",
     "prettier": "^3.3.3",
-    "typescript": "^5.2.2"
+    "typescript": "5.5.x"
   },
   "scripts": {
     "build": "ray build -e dist",
