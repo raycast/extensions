@@ -5,14 +5,31 @@
   <h1 align="center">Cursor Directory</h1>
 </div>
 
-Port functionalities from [cursor.directory](https://cusor.directory) for Cursor Code Editor.
+Access and search prompts from [cursor.directory](https://cursor.directory/) directly
+for usage in the Cursor Code Editor.
 
 ## Usage
 
-Simply launch Raycast and input `cursor directory` to launch the command.
+1. Launch Raycast and type `cursor directory` or `Search Prompts`
+   to execute the command.
 
-It will do the fuzzy search based on the title of prompt, and then select the prompt to view the detail or directly copy the content via Action Panel.
+2. Use fuzzy search to find prompts based on their titles.
 
-You can also type `Enter` key to open the detail page, where author information and full prompt are displayed.
+3. Select a prompt to view details or copy content via the Action Panel.
 
-Then you can copy the prompt via `Enter` key, or directly go the `cursor.directory`, share the link via Action Panel.
+4. Press `Enter` to open the detail page, displaying author information
+   and the full prompt.
+
+5. From the detail page:
+
+- Press Enter to copy the prompt.
+
+- Use the Action Panel to visit [cursor.directory](https://cursor.directory/) or share the prompt link.
+
+## Configuration
+
+Access preferences through the Action Panel or Raycast settings:
+
+- Default Sort Order: Prompts are sorted by quantity in descending order by default.
+- Cache Duration: Prompt data is cached locally for 1 day by default.
+

@@ -6,26 +6,22 @@ import { PromptDetail } from "./components/PromptDetail";
 import { fetchPrompts } from "./api";
 
 export default function Command() {
-  const { data, isLoading, error } = usePromise(() => fetchPrompts());
+  const [error, setError] = useState<Error | undefined>(undefined);
+
+  const { data, isLoading } = usePromise(async () => {
+    try {
+      return await fetchPrompts();
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error(String(err)));
+      return [];
+    }
+  });
 
   const [showingDetail, setShowingDetail] = useState<boolean>(true);
 
   useEffect(() => {
-    if (isLoading) {
-      showToast({
-        style: Toast.Style.Animated,
-        title: "Loading",
-      });
-    } else {
-      showToast({
-        style: Toast.Style.Success,
-        title: "Loaded",
-      });
-    }
-  }, [isLoading]);
-
-  useEffect(() => {
     if (error) {
+      console.error("Error fetching prompts: ", error);
       showToast({
         style: Toast.Style.Failure,
         title: "Something went wrong: ",

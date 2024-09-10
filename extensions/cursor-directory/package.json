@@ -15,7 +15,7 @@
       "title": "Prompts Sort Order",
       "type": "dropdown",
       "description": "Sort order of prompts",
-      "required": true,
+      "required": false,
       "default": "desc",
       "data": [
         {
@@ -32,9 +32,9 @@
       "name": "cache_interval",
       "title": "Cache Interval in day",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "default": "1",
-      "description": "How long should the local cache expire"
+      "description": "How many days should the local cache expire"
     }
   ],
   "license": "MIT",
@@ -60,7 +60,6 @@
     "@typescript-eslint/utils": "^8.3.0",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
-    "tsx": "^4.19.0",
     "typescript": "^5.4.5"
   },
   "scripts": {
