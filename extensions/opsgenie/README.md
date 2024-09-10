@@ -15,7 +15,7 @@ You will need the following:
     - `Select` "API"
     - `Generate` the key
     - (The options may vary so refer to https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/)
-3. Opsgenie Usernam - this is the username you want to use for alerts/incidents
+3. Opsgenie Username - this is the username you want to use for alerts/incidents
 4. Opsgenie URL - this is your Opsgenie instance URL
 
 ## ❔ FAQs
