@@ -82,6 +82,7 @@ export default function Command() {
       authorEmail: (value) => validateEmail(value || ""),
       authorURL: (value) => validateUrl(value || ""),
       outputDirectory: FormValidation.Required,
+      pluginDescription: FormValidation.Required,
     },
   });
 
@@ -107,16 +108,16 @@ export default function Command() {
       searchBarAccessory={<Form.LinkAccessory text="WPPB" target="https://wppb.me/" />}
     >
       <Form.Description text="Type your plugin details in the form below, and a custom boilerplate will be generated for you." />
-      <Form.TextField title="Plugin Name" placeholder="Plugin Name" {...itemProps.pluginName} />
-      <Form.TextField title="Plugin Slug" placeholder="Plugin Slug" {...itemProps.pluginSlug} />
-      <Form.TextField title="Plugin URL" placeholder="Plugin URL" {...itemProps.pluginURL} />
-      <Form.TextField title="Author Name" storeValue placeholder="Author Name" {...itemProps.authorName} />
-      <Form.TextField title="Author Email" storeValue placeholder="Author Email" {...itemProps.authorEmail} />
-      <Form.TextField title="Author URL" storeValue placeholder="Author URL" {...itemProps.authorURL} />
+      <Form.TextField title="Plugin Name" placeholder="My Awesome Extension" {...itemProps.pluginName} />
+      <Form.TextField title="Plugin Slug" placeholder="awesome-extension" {...itemProps.pluginSlug} />
+      <Form.TextField title="Plugin URL" placeholder="https://example.com" {...itemProps.pluginURL} />
+      <Form.TextField title="Author Name" storeValue placeholder="Jill Doe" {...itemProps.authorName} />
+      <Form.TextField title="Author Email" storeValue placeholder="jill@example.doe" {...itemProps.authorEmail} />
+      <Form.TextField title="Author URL" storeValue placeholder="https://jill.doe" {...itemProps.authorURL} />
       <Form.TextArea
         title="Plugin Description"
         placeholder="Plugin Description"
-        info="Optional"
+        info="This is my awesome extension"
         {...itemProps.pluginDescription}
       />
       <Form.FilePicker
