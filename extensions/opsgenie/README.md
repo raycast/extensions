@@ -5,7 +5,7 @@ The Opsgenie extension can be used to access alerts and incidents from [Opsgenie
 ## 🚀 Getting Started
 You will need the following:
 
-1. API URL of Opsgenie instance - this will depend on where your instance is based-
+1. API URL of Opsgenie instance - this will depend on where your instance is based, either https://api.opsgenie.com or https://api.eu.opsgenie.com
 2. API Key - for best results, you will need an "Integration" API Key:
     - `Navigate` to your Opsgenie instance
     - `Navigate` to **Teams**
