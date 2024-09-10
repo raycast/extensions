@@ -1,6 +1,6 @@
 # Pipedrive Changelog
 
-## 2024-07-10
+## [New Action] - 2024-07-10
 - Adds shortcut to copy org name (cmd + o)
 
 ## [Bug fix] - 2024-22-01
