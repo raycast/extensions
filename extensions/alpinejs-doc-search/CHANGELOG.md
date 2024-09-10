@@ -1,6 +1,6 @@
 # Alpine.js Changelog
 
-## [Cache Search Results] - {PR_MERGE_DATE}
+## [Cache Search Results] - 2024-09-10
 
 - `useCachedPromise` to cache and search
 - modernize by updating deps and improving types
