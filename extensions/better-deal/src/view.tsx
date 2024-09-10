@@ -1,4 +1,4 @@
-import { Cache, List, Icon, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { Cache, showToast, Toast, List, Icon, Action, ActionPanel, confirmAlert } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { Item } from "./index";
 
@@ -40,18 +40,27 @@ export default function View() {
             ]}
             actions={
               <ActionPanel>
-                <Action title="Delete This Record" icon={Icon.Trash} onAction={() => deleteItem(index)} />
+                <Action
+                  title="Delete This Record"
+                  icon={Icon.Trash}
+                  onAction={() => deleteItem(index)}
+                  style={Action.Style.Destructive}
+                />
                 <Action
                   title="Clear All Records"
                   icon={Icon.Trash}
-                  onAction={() => {
-                    setItems([]); // Clear the items state
-                    cache.set("items", JSON.stringify([])); // Clear the cache
-                    showToast({
-                      style: Toast.Style.Success,
-                      title: "All Records Cleared",
-                      message: "All records have been removed.",
-                    });
+                  onAction={async () => {
+                    if (await confirmAlert({ title: "Are you sure?", rememberUserChoice: true })) {
+                      setItems([]); // Clear the items state
+                      cache.set("items", JSON.stringify([])); // Clear the cache
+                      showToast({
+                        style: Toast.Style.Success,
+                        title: "All Records Cleared",
+                        message: "All records have been removed.",
+                      });
+                    } else {
+                      console.log("canceled"); // Log cancellation
+                    }
                   }}
                 />
               </ActionPanel>
