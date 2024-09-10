@@ -7,7 +7,7 @@ import { UUIDType } from "./uuidHistory";
 // don't want to cause a heap error, so cap it 😱
 const UUID_MAX_NUMBER = 10000;
 
-export default async function generatetypeid(props: LaunchProps<{ arguments: Arguments.GenerateTypeID }>) {
+export default async (props: LaunchProps<{ arguments: Arguments.GenerateTypeID }>) => {
   if (!props.arguments.numberOfUUIDsToGenerate) props.arguments.numberOfUUIDsToGenerate = "1";
 
   const { prefix, numberOfUUIDsToGenerate } = props.arguments;
@@ -62,4 +62,4 @@ export default async function generatetypeid(props: LaunchProps<{ arguments: Arg
         break;
     }
   }
-}
+};
