@@ -1,6 +1,6 @@
 # Clean Keyboard Changelog
 
-## [Improvements and Fixes] - {PR_MERGE_DATE}
+## [Improvements and Fixes] - 2024-09-10
 
 - Updated command title for clarity and to avoid confusion with the extension name.
 - Conformed command subtitle to Raycast guidelines.
