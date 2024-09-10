@@ -8,7 +8,9 @@ import { UUIDType } from "./uuidHistory";
 const UUID_MAX_NUMBER = 10000;
 
 export default async function generatetypeid(props: LaunchProps<{ arguments: Arguments.GenerateTypeID }>) {
-  const { prefix, numberOfUUIDsToGenerate = "1" } = props.arguments;
+  if (!props.arguments.numberOfUUIDsToGenerate) props.arguments.numberOfUUIDsToGenerate = "1";
+
+  const { prefix, numberOfUUIDsToGenerate } = props.arguments;
   const { upperCaseLetters, defaultAction } = getPreferenceValues<Preferences.GenerateTypeID>();
 
   try {
