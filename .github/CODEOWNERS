@@ -1011,7 +1011,7 @@
 /extensions/openvpn                                                 @benekuehn
 /extensions/openweathermap                                          @tonka3000 @larkov
 /extensions/opera                                                   @crisboarna
-/extensions/opsgenie                                                @ricoberger
+/extensions/opsgenie                                                @ricoberger @xmok
 /extensions/opslevel                                                @DuckyC
 /extensions/orion                                                   @Plonq @erics118
 /extensions/osint-web-check                                         @gksander
