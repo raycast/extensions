@@ -1,6 +1,6 @@
 # ClickUp Changelog
 
-## [Update - New Command] - {PR_MERGE_DATE}
+## [Update - New Command] - 2024-09-10
 
 - New `Docs Explorer` command - for now it shows docs and their pages
 - Add List Sections to make it more evident where you are
