@@ -17,10 +17,6 @@ export enum NamingStyle {
   UpperCase = "UPPER_CASE",
 }
 
-export function isNamingStyle(value: string): boolean {
-  return Object.values(NamingStyle).includes(value as NamingStyle);
-}
-
 export function convertStringNamingStyle(value: string): NamingStyle {
   switch (value) {
     case "camelCase":
@@ -66,10 +62,6 @@ export async function generateNameSuggestions(
   try {
     const response = await AI.ask(prompt, { model: AI.Model["OpenAI_GPT4o-mini"] });
     const suggestions = response.trim().split(",");
-
-    if (suggestions.length !== 3) {
-      throw new Error("Invalid number of suggestions received");
-    }
 
     return suggestions.map((name) => name.trim());
   } catch (error) {
