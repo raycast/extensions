@@ -2,7 +2,6 @@
   "name": "html-preview",
   "title": "HTML Preview",
   "description": "Preview HTML code in real-time",
-  "icon": "command-icon.png",
   "author": "duanyongcheng",
   "categories": [
     "Developer Tools"
