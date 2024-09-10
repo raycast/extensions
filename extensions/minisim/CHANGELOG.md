@@ -1,6 +1,6 @@
 # MiniSim Changelog
 
-## [Added Physical Device Support] - 2024-09-09
+## [Added Physical Device Support] - {PR_MERGE_DATE}
 
 - physical devices are now displayed and can be interacted with
 
