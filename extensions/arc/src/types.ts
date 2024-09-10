@@ -3,6 +3,7 @@ export type HistoryEntry = {
   url: string;
   title: string;
   lastVisitedAt: string;
+  profileName: string | undefined;
 };
 
 export type Tab = {

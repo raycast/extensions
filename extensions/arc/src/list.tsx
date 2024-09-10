@@ -19,7 +19,7 @@ export function HistoryEntryListItem(props: { entry: HistoryEntry; searchText: s
         value: getDomain(props.entry.url),
         tooltip: props.entry.url,
       }}
-      accessories={[getLastVisitedAt(props.entry)]}
+      accessories={[getLastVisitedAt(props.entry), { tag: props.entry.profileName }]}
       actions={
         <ActionPanel>
           <OpenLinkActionSections tabOrUrl={props.entry.url} searchText={props.searchText} />
