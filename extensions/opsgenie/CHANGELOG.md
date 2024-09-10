@@ -1,6 +1,6 @@
 # Opsgenie Changelog
 
-## [Add Action to `Unacknowledge Alert`] - {PR_MERGE_DATE}
+## [Add Action to `Unacknowledge Alert`] - 2024-09-10
 
 ### Enhancements
 - Alerts can now be Unacknowledged
