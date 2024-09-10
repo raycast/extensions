@@ -30,7 +30,7 @@ export default function Search() {
         .map((bookmark) => (
           <List.Item
             key={bookmark.id}
-            title={bookmark.content.title}
+            title={bookmark.content.title || bookmark.content.url}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={bookmark.content.url} />
