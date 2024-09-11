@@ -1,6 +1,6 @@
 # Image Modification Changelog
 
-## [Fix avifenc Installation] - {PR_MERGE_DATE}
+## [Fix avifenc Installation] - 2024-09-11
 
 - Fixed an issue where the `avifenc` and `avifdec` binaries were not being installed correctly
 
