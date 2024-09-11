@@ -17,7 +17,7 @@
     "rotate",
     "sips"
   ],
-  "version": "1.8.1",
+  "version": "1.8.2",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "contributors": [
@@ -513,8 +513,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.1",
-    "@raycast/utils": "^1.16.1",
+    "@raycast/api": "^1.82.1",
+    "@raycast/utils": "^1.17.0",
     "mathjs": "^11.8.2",
     "svgo": "^3.0.2",
     "tar": "^6.2.0"
