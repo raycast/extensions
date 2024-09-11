@@ -11,4 +11,3 @@ Install the [ Zeabur Docs ](https://www.raycast.com/ridemountainpig/zeabur-docs)
 ![zeabur-docs-screenshot](./metadata/zeabur-docs-1.png)
 
 ![zeabur-docs-screenshot](./metadata/zeabur-docs-2.png)
-

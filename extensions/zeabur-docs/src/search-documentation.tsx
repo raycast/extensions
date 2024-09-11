@@ -1,27 +1,26 @@
 import { List, ActionPanel, Action } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { Language, Documentation } from "./type";
 import { getLanguages, getDocumentation } from "./util";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function Command() {
   const [languages, setLanguages] = useState<Language[]>([]);
   const [documentation, setDocumentation] = useState<Documentation>({});
   const [currentLanguage, setCurrentLanguage] = useState<string>("");
 
-  useEffect(() => {
-    getLanguages().then((lang) => {
-      setLanguages(lang as Language[]);
-    });
-
-    getDocumentation().then((doc) => {
-      setDocumentation(doc as Documentation);
-    });
-  }, []);
+  const { isLoading } = useCachedPromise(async () => {
+    const lang = await getLanguages();
+    setLanguages(lang as Language[]);
+    const doc = await getDocumentation();
+    setDocumentation(doc as Documentation);
+  });
 
   const currentDoc = documentation[currentLanguage];
 
   return (
     <List
+      isLoading={isLoading}
       searchBarPlaceholder="search documentation"
       searchBarAccessory={
         <List.Dropdown
