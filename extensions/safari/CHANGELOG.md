@@ -1,6 +1,6 @@
 # Safari Changelog
 
-## [Improve] - {PR_MERGE_DATE}
+## [Improve] - 2024-09-11
 
 - Changed the behavior of the `Add to Reading List` command to add the current tab to the Reading List.
 
