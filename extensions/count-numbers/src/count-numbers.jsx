@@ -169,11 +169,12 @@ export default function Command() {
     );
   };
 
-  function incrementCount() {
+  function incrementCount(reverse = false) {
     setData((data) => {
       let newData = structuredClone(data);
       let counter = getCounter(newData);
-      counter.count += counter.increment;
+      let increment = !reverse ? counter.increment : -counter.increment;
+      counter.count += increment;
       if (counter.modulo > 1) {
         counter.count %= counter.modulo;
       }
@@ -227,6 +228,12 @@ export default function Command() {
         <ActionPanel>
           <Action icon={Icon.PlusCircle} title="Count" onAction={() => incrementCount()} />
           <Action.Push icon={Icon.Gear} title="Settings" target={<Settings />} />
+          <Action
+            icon={Icon.MinusCircle}
+            title="Decrement Count"
+            onAction={() => incrementCount(true)}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+          />
           <Action
             icon={Icon.ArrowClockwise}
             title="Reset Counter"
