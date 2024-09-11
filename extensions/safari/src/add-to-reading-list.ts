@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { closeMainWindow, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { safariAppIdentifier } from "./utils";
 
@@ -10,6 +10,7 @@ export default async function Command() {
         add reading list item theURL
       end tell
     `);
+    await closeMainWindow();
     await showToast({
       style: Toast.Style.Success,
       title: "Added to Reading List",
