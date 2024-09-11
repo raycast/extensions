@@ -1,6 +1,6 @@
 # cPanel Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2024-09-11
 
 - Create Email Account
 - Filter DNS Zone (records) by (record) type
