@@ -6,11 +6,13 @@ const cache = new Cache();
 
 export default function View() {
   const [items, setItems] = useState<Item[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const cached = cache.get("items");
     const parsedItems: Item[] = cached ? JSON.parse(cached) : [];
     setItems(parsedItems);
+    setIsLoading(false);
   }, []);
 
   const deleteItem = (index: number) => {
@@ -27,7 +29,7 @@ export default function View() {
   };
 
   return (
-    <List navigationTitle="View Records" searchBarPlaceholder="Search Information...">
+    <List isLoading={isLoading} navigationTitle="View Records" searchBarPlaceholder="Search Information...">
       <List.Section title="Previous Records">
         {items.map((item, index) => (
           <List.Item
@@ -41,7 +43,7 @@ export default function View() {
             actions={
               <ActionPanel>
                 <Action
-                  title="Delete This Record"
+                  title="Delete Record"
                   icon={Icon.Trash}
                   onAction={() => deleteItem(index)}
                   style={Action.Style.Destructive}
@@ -49,6 +51,7 @@ export default function View() {
                 <Action
                   title="Clear All Records"
                   icon={Icon.Trash}
+                  style={Action.Style.Destructive}
                   onAction={async () => {
                     if (await confirmAlert({ title: "Are you sure?", rememberUserChoice: true })) {
                       setItems([]); // Clear the items state
