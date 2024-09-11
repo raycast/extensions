@@ -116,7 +116,6 @@ export default function Command() {
       <Form.TextField title="Author URL" storeValue placeholder="https://jill.doe" {...itemProps.authorURL} />
       <Form.TextArea
         title="Plugin Description"
-        info="Plugin Description"
         placeholder="This is my awesome extension"
         {...itemProps.pluginDescription}
       />
