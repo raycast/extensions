@@ -65,7 +65,6 @@
       "title": "Grid Size",
       "description": "Set the grid size for displaying colors",
       "type": "dropdown",
-      "required": true,
       "default": "8",
       "data": [
         {
