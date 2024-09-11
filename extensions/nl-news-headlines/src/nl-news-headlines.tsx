@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, showToast, Toast, Cache, Icon, getPreferenceValues, Color, open, Clipboard } from '@raycast/api';
+import { ActionPanel, Action, List, showToast, Toast, Cache, Icon, getPreferenceValues, Color } from '@raycast/api';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import Parser from 'rss-parser';
 
@@ -149,7 +149,7 @@ const fetchNewsWithCache = async (sources: NewsSource[], language: string, page:
   const cachedData = cache.get(CACHE_KEY);
   const cachedLanguage = cache.get("currentLanguage");
 
-  let itemsMap = new Map<string, NewsItem>();
+  const itemsMap = new Map<string, NewsItem>();
 
   if (checkCacheValidity(cachedData, cachedLanguage, language)) {
     JSON.parse(cachedData!).forEach((item: NewsItem) => itemsMap.set(item.link, item));
@@ -203,7 +203,7 @@ const getLanguage = (preferenceLanguage: string): string => {
 // Main component
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const [currentLanguage, setCurrentLanguage] = useState<string>(getLanguage(preferences.language));
+  const [currentLanguage] = useState<string>(getLanguage(preferences.language));
   const [currentPage, setCurrentPage] = useState(1);
   const [items, setItems] = useState<NewsItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -238,9 +238,6 @@ export default function Command() {
     : items, [items, selectedSource]);
 
   const paginatedItems = useMemo(() => filteredItems.slice(0, currentPage * ITEMS_PER_PAGE), [filteredItems, currentPage]);
-
-  const handleOpenInBrowser = (url: string) => open(url);
-  const handleCopyLink = (url: string) => Clipboard.copy(url);
 
   useEffect(() => {
     const cachedData = cache.get(CACHE_KEY);
