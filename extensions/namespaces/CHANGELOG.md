@@ -1,6 +1,6 @@
 # NameSpace Changelog
 
-## [Reorder Spaces] - {PR_MERGE_DATE}
+## [Reorder Spaces] - 2024-09-11
 
 ### ! Breaking Change
 - The `Delete Space` action shortcut has been changed to *⌃x* as previous shortcut is now reserved by Raycast
