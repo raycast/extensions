@@ -51,52 +51,36 @@
       "mode": "view"
     },
     {
-      "name": "search-mocha",
-      "title": "Search Mocha",
+      "name": "search-palette",
+      "title": "Search Palette",
       "subtitle": "Catppuccin",
-      "description": "Search the Catppuccin Mocha flavored palette",
-      "keywords": [
-        "mocha",
-        "catppuccin",
-        "colors"
-      ],
+      "description": "Search the Catppuccin palette by flavor",
+      "keywords": ["catppuccin", "colors", "palette"],
       "mode": "view"
-    },
+    }
+  ],
+    "preferences": [
     {
-      "name": "search-latte",
-      "title": "Search Latte",
-      "subtitle": "Catppuccin",
-      "description": "Search the Catppuccin Latte flavored palette",
-      "keywords": [
-        "latte",
-        "catppuccin",
-        "colors"
-      ],
-      "mode": "view"
-    },
-    {
-      "name": "search-frappe",
-      "title": "Search Frappe",
-      "subtitle": "Catppuccin",
-      "description": "Search the Catppuccin Frappe flavored palette",
-      "keywords": [
-        "frappe",
-        "catppuccin",
-        "colors"
-      ],
-      "mode": "view"
-    },
-    {
-      "name": "search-macchiato",
-      "title": "Search Macchiato",
-      "subtitle": "Catppuccin",
-      "description": "Search the Catppuccin Macchiato flavored palette",
-      "keywords": [
-        "macchiato",
-        "catppuccin",
-        "colors"
-      ],
-      "mode": "view"
+      "name": "gridSize",
+      "title": "Grid Size",
+      "description": "Set the grid size for displaying colors",
+      "type": "dropdown",
+      "required": true,
+      "default": "8",
+      "data": [
+        {
+          "value": "8",
+          "title": "Small"
+        },
+        {
+          "value": "5",
+          "title": "Medium"
+        },
+        {
+          "value": "3",
+          "title": "Large"
+        }
+      ]
     }
   ],
   "dependencies": {
