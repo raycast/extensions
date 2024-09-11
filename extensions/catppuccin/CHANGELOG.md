@@ -1,6 +1,6 @@
 # Catppuccin Changelog
 
-## [Initial Version] - 2024-09-04
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Add `search-macchiato` command
 - Add `search-frappe` command
