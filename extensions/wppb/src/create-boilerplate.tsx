@@ -125,7 +125,7 @@ export default function Command() {
         {...itemProps.outputDirectory}
         canChooseFiles={false}
         allowMultipleSelection={false}
-        canChooseDirectories={true}
+        canChooseDirectories
       />
     </Form>
   );
