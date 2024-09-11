@@ -1,3 +1,3 @@
 # Count Numbers Changelog
 
-## [Initial Version] - 2024-09-08
+## [Initial Version] - {PR_MERGE_DATE}
