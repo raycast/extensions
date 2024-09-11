@@ -21,7 +21,6 @@ function convertHtmlToMarkdown(html: string): string {
 
 function PreviewHTML({ html }: { html: string }) {
   const markdown = convertHtmlToMarkdown(html);
-
   return (
     <Detail
       markdown={markdown}
