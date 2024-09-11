@@ -1,6 +1,6 @@
 # Linkwarden Changelog
 
-## [Filter Links by Collection] - {PR_MERGE_DATE}
+## [Filter Links by Collection] - 2024-09-11
 
 ### Enhancements
 - Updated Titles and some fields to exactly match the Linkwarden default
