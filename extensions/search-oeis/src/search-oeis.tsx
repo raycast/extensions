@@ -156,11 +156,10 @@ function SequenceDetail({ sequence }: { sequence: Sequence }) {
 ${sequence.description}
 
 **Formulas:**
-${
-  sequence.formulas && sequence.formulas.length > 0
-    ? sequence.formulas.map((f) => `- ${f.formula}`).join("\n")
-    : "No formulas available"
-}
+${sequence.formulas && sequence.formulas.length > 0
+          ? sequence.formulas.map((f) => `- ${f.formula}`).join("\n")
+          : "No formulas available"
+        }
 
 **Comments:**
 ${sequence.comments && sequence.comments.length > 0 ? sequence.comments.join("\n") : "No comments available"}
