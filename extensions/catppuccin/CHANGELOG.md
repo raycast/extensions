@@ -1,6 +1,6 @@
 # Catppuccin Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2024-09-11
 
 - Add `search-palette` command
 - Add `search-userstyles` command
