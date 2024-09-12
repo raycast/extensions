@@ -45,7 +45,9 @@ export default function Command() {
                           text={address}
                           color={address.status}
                           onAction={() => {
-                            open(`http://${address}`);
+                            if (address.available) {
+                              open(`http://${address}`);
+                            }
                           }}
                         />
                       ))}
