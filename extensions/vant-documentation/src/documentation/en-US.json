@@ -1,0 +1,562 @@
+[
+  {
+    "title": "Essentials",
+    "items": [
+      {
+        "title": "Introduction",
+        "url": "https://vant.pro/vant/#/en-US/home",
+        "subTitle": "A lightweight, customizable Vue UI library for mobile web apps."
+      },
+      {
+        "title": "Quickstart",
+        "url": "https://vant.pro/vant/#/en-US/quickstart",
+        "subTitle": "Through this chapter, you can learn how to install Vant and its basic usage."
+      },
+      {
+        "title": "Advanced Usage",
+        "url": "https://vant.pro/vant/#/en-US/advanced-usage",
+        "subTitle": "Through this chapter, you can learn about some advanced usages of Vant."
+      },
+      {
+        "title": "FAQ",
+        "url": "https://vant.pro/vant/#/en-US/faq",
+        "subTitle": "Vant provides the ability to customize the theme based on CSS variables, and can uniformly modify the component style. For details, see ConfigProvider Global Configuration component."
+      },
+      {
+        "title": "Changelog",
+        "url": "https://vant.pro/vant/#/en-US/changelog",
+        "subTitle": "From v4.9.0, Vant's changelog will be published on GitHub's Releases Page. This page will no longer be updated."
+      },
+      {
+        "title": "4.0 Release Note",
+        "url": "https://vant.pro/vant/#/en-US/release-note-v4",
+        "subTitle": "After a year of iterations, Vant 4.0 has been officially released, which is the fourth major version of Vant since it was open-sourced in 2017."
+      },
+      {
+        "title": "Upgrade from v2 to v3",
+        "url": "https://vant.pro/vant/#/en-US/migrate-from-v2",
+        "subTitle": "This document provides an upgrade guide from Vant 2 to Vant 3."
+      },
+      {
+        "title": "Upgrade from v3 to v4",
+        "url": "https://vant.pro/vant/#/en-US/migrate-from-v3",
+        "subTitle": "This document provides an upgrade guide from Vant 3 to Vant 4."
+      },
+      {
+        "title": "Contribution Guide",
+        "url": "https://vant.pro/vant/#/en-US/contribution",
+        "subTitle": "Thank you for using Vant. Below are the guidelines for submitting feedback or code to Vant. Please take a few minutes to read the following before submitting an issue or PR to Vant."
+      },
+      {
+        "title": "Design Resources",
+        "url": "https://vant.pro/vant/#/en-US/design",
+        "subTitle": "You can download Vant's design resources here."
+      },
+      {
+        "title": "Internationalization",
+        "url": "https://vant.pro/vant/#/en-US/locale",
+        "subTitle": "Vant uses Chinese as the default language. If you want to use other languages, please follow the instructions below."
+      }
+    ]
+  },
+  {
+    "title": "Basic Components",
+    "items": [
+      {
+        "title": "Button",
+        "url": "https://vant.pro/vant/#/en-US/button",
+        "subTitle": "Buttons are used to trigger an action, such as submitting a form."
+      },
+      {
+        "title": "Cell",
+        "url": "https://vant.pro/vant/#/en-US/cell",
+        "subTitle": "The cell is a single display item in the list."
+      },
+      {
+        "title": "ConfigProvider",
+        "url": "https://vant.pro/vant/#/en-US/config-provider",
+        "subTitle": "Used to configure Vant components globally, providing dark mode, theme customization and other capabilities."
+      },
+      {
+        "title": "Icon",
+        "url": "https://vant.pro/vant/#/en-US/icon",
+        "subTitle": "The font-based icon set that can be used via the Icon component or referenced in other components via the icon attribute."
+      },
+      {
+        "title": "Image",
+        "url": "https://vant.pro/vant/#/en-US/image",
+        "subTitle": "Enhanced img tag with multiple image fill modes, support for image lazy loading, loading hint, loading failure hint."
+      },
+      {
+        "title": "Layout",
+        "url": "https://vant.pro/vant/#/en-US/col",
+        "subTitle": "Quickly and easily create layouts with van-row and van-col."
+      },
+      {
+        "title": "Popup",
+        "url": "https://vant.pro/vant/#/en-US/popup",
+        "subTitle": "Used to display pop-up windows, information prompts, etc., and supports multiple pop-up layers to display."
+      },
+      {
+        "title": "Space",
+        "url": "https://vant.pro/vant/#/en-US/space",
+        "subTitle": "Set the spacing between elements."
+      },
+      {
+        "title": "Built-in style",
+        "url": "https://vant.pro/vant/#/en-US/style",
+        "subTitle": "Vant contains some common styles that can be used directly by the className."
+      },
+      {
+        "title": "Toast",
+        "url": "https://vant.pro/vant/#/en-US/toast",
+        "subTitle": "Black semi-transparent pop-up hint in the middle of the page, used for message notification, loading hint, operation result hint and other scenarios."
+      }
+    ]
+  },
+  {
+    "title": "Form Components",
+    "items": [
+      {
+        "title": "Calendar",
+        "url": "https://vant.pro/vant/#/en-US/calendar",
+        "subTitle": "Calendar component for selecting dates or date ranges."
+      },
+      {
+        "title": "Cascader",
+        "url": "https://vant.pro/vant/#/en-US/cascader",
+        "subTitle": "The cascader component is used for the selection of multi-level data. The typical scene is the selection of provinces and cities."
+      },
+      {
+        "title": "Checkbox",
+        "url": "https://vant.pro/vant/#/en-US/checkbox",
+        "subTitle": "A group of options for multiple choices."
+      },
+      {
+        "title": "DatePicker",
+        "url": "https://vant.pro/vant/#/en-US/date-picker",
+        "subTitle": "Used to select date, usually used with the Popup component."
+      },
+      {
+        "title": "Field",
+        "url": "https://vant.pro/vant/#/en-US/field",
+        "subTitle": "Field component let users enter and edit text."
+      },
+      {
+        "title": "Form",
+        "url": "https://vant.pro/vant/#/en-US/form",
+        "subTitle": "Used for data entry and verification, and supports input boxes, radio buttons, check boxes, file uploads and other types. Should be used with Field component."
+      },
+      {
+        "title": "NumberKeyboard",
+        "url": "https://vant.pro/vant/#/en-US/number-keyboard",
+        "subTitle": "The NumberKeyboard component can be used with PasswordInput component or custom input box components."
+      },
+      {
+        "title": "PasswordInput",
+        "url": "https://vant.pro/vant/#/en-US/password-input",
+        "subTitle": "The PasswordInput component is usually used with NumberKeyboard Component."
+      },
+      {
+        "title": "Picker",
+        "url": "https://vant.pro/vant/#/en-US/picker",
+        "subTitle": "The picker component is usually used with Popup Component."
+      },
+      {
+        "title": "PickerGroup",
+        "url": "https://vant.pro/vant/#/en-US/picker-group",
+        "subTitle": "Used to combine multiple Picker components, allow users to select multiple value."
+      },
+      {
+        "title": "Radio",
+        "url": "https://vant.pro/vant/#/en-US/radio",
+        "subTitle": "Single selection among multiple options."
+      },
+      {
+        "title": "Rate",
+        "url": "https://vant.pro/vant/#/en-US/rate",
+        "subTitle": "The rate component is used for rating things."
+      },
+      {
+        "title": "Search",
+        "url": "https://vant.pro/vant/#/en-US/search",
+        "subTitle": "Input box component for search scenarios."
+      },
+      {
+        "title": "Slider",
+        "url": "https://vant.pro/vant/#/en-US/slider",
+        "subTitle": "Used to select a value within a given range."
+      },
+      {
+        "title": "Signature",
+        "url": "https://vant.pro/vant/#/en-US/signature",
+        "subTitle": "Component for signature scene, based on Canvas. Please upgrade vant to >= v4.3.0 before using this component."
+      },
+      {
+        "title": "Stepper",
+        "url": "https://vant.pro/vant/#/en-US/stepper",
+        "subTitle": "The stepper component consists of an increase button, a decrease button and an input box, which are used to input and adjust numbers within a certain range."
+      },
+      {
+        "title": "Switch",
+        "url": "https://vant.pro/vant/#/en-US/switch",
+        "subTitle": "Used to switch between open and closed states."
+      },
+      {
+        "title": "TimePicker",
+        "url": "https://vant.pro/vant/#/en-US/time-picker",
+        "subTitle": "Used to select time, usually used with the Popup component."
+      },
+      {
+        "title": "Uploader",
+        "url": "https://vant.pro/vant/#/en-US/uploader",
+        "subTitle": "Used to upload a local image or file to the server and display a preview image and upload progress during the upload process. The Uploader component does not currently contain the interface logic for uploading files to the server, this step needs to be implemented by the user."
+      }
+    ]
+  },
+  {
+    "title": "Action Components",
+    "items": [
+      {
+        "title": "ActionSheet",
+        "url": "https://vant.pro/vant/#/en-US/action-sheet",
+        "subTitle": "The pop-up modal panel at the bottom contains multiple options related to the current situation."
+      },
+      {
+        "title": "Barrage",
+        "url": "https://vant.pro/vant/#/en-US/barrage",
+        "subTitle": "To realize the critical subtitle function when watching the video. Please upgrade vant to >= v4.4.0 before using this component."
+      },
+      {
+        "title": "Dialog",
+        "url": "https://vant.pro/vant/#/en-US/dialog",
+        "subTitle": "A modal box pops up on the page, which is often used for message prompts, message confirmation, or to complete specific interactive operations in the current page. It supports two methods: component call and function call."
+      },
+      {
+        "title": "DropdownMenu",
+        "url": "https://vant.pro/vant/#/en-US/dropdown-menu",
+        "subTitle": "The menu list that pops down downwards."
+      },
+      {
+        "title": "FloatingPanel",
+        "url": "https://vant.pro/vant/#/en-US/floating-panel",
+        "subTitle": "A panel that floats at the bottom of a page, which can be dragged up and down to browse content, often used to provide additional functionality or information. Please upgrade vant to >= v4.5.0 before using this component."
+      },
+      {
+        "title": "FloatingBubble",
+        "url": "https://vant.pro/vant/#/en-US/floating-bubble",
+        "subTitle": "Clickable bubbles that hover around the edge of the page. Please upgrade vant to >= v4.6.0 before using this component."
+      },
+      {
+        "title": "Loading",
+        "url": "https://vant.pro/vant/#/en-US/loading",
+        "subTitle": "Used to indicate the transition state during loading."
+      },
+      {
+        "title": "Notify",
+        "url": "https://vant.pro/vant/#/en-US/notify",
+        "subTitle": "The display message prompt is at the top of the page, and supports two methods: component call and function call."
+      },
+      {
+        "title": "Overlay",
+        "url": "https://vant.pro/vant/#/en-US/overlay",
+        "subTitle": "Create a mask layer to emphasize specific page elements and prevent users from performing other operations."
+      },
+      {
+        "title": "PullRefresh",
+        "url": "https://vant.pro/vant/#/en-US/pull-refresh",
+        "subTitle": "Used to provide interactive operations for pull-down refresh."
+      },
+      {
+        "title": "ShareSheet",
+        "url": "https://vant.pro/vant/#/en-US/share-sheet",
+        "subTitle": "A pop-up sharing panel at the bottom for displaying the action buttons corresponding to each sharing channel, without specific sharing logic."
+      },
+      {
+        "title": "SwipeCell",
+        "url": "https://vant.pro/vant/#/en-US/swipe-cell",
+        "subTitle": "Used for cell components that can slide left and right to display operation buttons."
+      }
+    ]
+  },
+  {
+    "title": "Display Components",
+    "items": [
+      {
+        "title": "Badge",
+        "url": "https://vant.pro/vant/#/en-US/badge",
+        "subTitle": "Display a small badge or a red dot to the top-right of its child."
+      },
+      {
+        "title": "Circle",
+        "url": "https://vant.pro/vant/#/en-US/circle",
+        "subTitle": "Circular progress bar component, and supports gradient color animation."
+      },
+      {
+        "title": "Collapse",
+        "url": "https://vant.pro/vant/#/en-US/collapse",
+        "subTitle": "Place a group of content in multiple collapsible panels, click the title of the panel to expand or contract its content."
+      },
+      {
+        "title": "CountDown",
+        "url": "https://vant.pro/vant/#/en-US/count-down",
+        "subTitle": "Used to display the countdown value in real time, and precision supports milliseconds."
+      },
+      {
+        "title": "Divider",
+        "url": "https://vant.pro/vant/#/en-US/divider",
+        "subTitle": "Separate content into multiple areas."
+      },
+      {
+        "title": "Empty",
+        "url": "https://vant.pro/vant/#/en-US/empty",
+        "subTitle": "Occupation reminder when empty."
+      },
+      {
+        "title": "Highlight",
+        "url": "https://vant.pro/vant/#/en-US/highlight",
+        "subTitle": "Highlight the specified text content. Please upgrade vant to >= v4.8.0 before using this component."
+      },
+      {
+        "title": "ImagePreview",
+        "url": "https://vant.pro/vant/#/en-US/image-preview",
+        "subTitle": "Used to zoom in and preview the picture, and it supports two methods: function call and component call."
+      },
+      {
+        "title": "Lazyload",
+        "url": "https://vant.pro/vant/#/en-US/lazyload",
+        "subTitle": "When the page needs to load a large amount of content, delay loading the content outside the visible area of the page to make the page load smoother."
+      },
+      {
+        "title": "List",
+        "url": "https://vant.pro/vant/#/en-US/list",
+        "subTitle": "A list component to show items and control loading status."
+      },
+      {
+        "title": "NoticeBar",
+        "url": "https://vant.pro/vant/#/en-US/notice-bar",
+        "subTitle": "Used to display a group of message notifications in a continuons loop."
+      },
+      {
+        "title": "Popover",
+        "url": "https://vant.pro/vant/#/en-US/popover",
+        "subTitle": "Used to display some content on top of another."
+      },
+      {
+        "title": "Progress",
+        "url": "https://vant.pro/vant/#/en-US/progress",
+        "subTitle": "Used to show the current progress of the operation."
+      },
+      {
+        "title": "RollingText",
+        "url": "https://vant.pro/vant/#/en-US/rolling-text",
+        "subTitle": "Rolling text animation, which can roll numbers and other types of text. Please upgrade vant to >= v4.6.0 before using this component."
+      },
+      {
+        "title": "Skeleton",
+        "url": "https://vant.pro/vant/#/en-US/skeleton",
+        "subTitle": "Used to display a set of placeholder graphics during the content loading process."
+      },
+      {
+        "title": "Steps",
+        "url": "https://vant.pro/vant/#/en-US/steps",
+        "subTitle": "Used to show the various parts of the action flow and let the user know where the current action fits into the overall flow."
+      },
+      {
+        "title": "Sticky",
+        "url": "https://vant.pro/vant/#/en-US/sticky",
+        "subTitle": "The sticky component is consistent with the effect achieved by the position: sticky property in CSS, in that when the component is within screen range, it will follow the normal layout arrangement, and when the component rolls out of screen range, it will always be fixed at the top of the screen."
+      },
+      {
+        "title": "Swipe",
+        "url": "https://vant.pro/vant/#/en-US/swipe",
+        "subTitle": "Used to loop a group of pictures or content."
+      },
+      {
+        "title": "Tag",
+        "url": "https://vant.pro/vant/#/en-US/tag",
+        "subTitle": "Used to mark keywords and summarize the main content."
+      },
+      {
+        "title": "TextEllipsis",
+        "url": "https://vant.pro/vant/#/en-US/text-ellipsis",
+        "subTitle": "Display ellipsis for long text and support for expanding or collapsing text. Please upgrade vant to >= v4.1.0 before using this component."
+      },
+      {
+        "title": "Watermark",
+        "url": "https://vant.pro/vant/#/en-US/watermark",
+        "subTitle": "Add specific text or patterns on the page as watermarks, which can be used to prevent information theft. Please upgrade vant to >= v4.2.0 before using this component."
+      }
+    ]
+  },
+  {
+    "title": "Navigation Components",
+    "items": [
+      {
+        "title": "ActionBar",
+        "url": "https://vant.pro/vant/#/en-US/action-bar",
+        "subTitle": "Used to provide convenient interaction for page-related operations."
+      },
+      {
+        "title": "BackTop",
+        "url": "https://vant.pro/vant/#/en-US/back-top",
+        "subTitle": "A button to back to top."
+      },
+      {
+        "title": "Grid",
+        "url": "https://vant.pro/vant/#/en-US/grid",
+        "subTitle": "Used to divide the page into blocks of equal width in the horizontal direction for displaying content or page navigation."
+      },
+      {
+        "title": "IndexBar",
+        "url": "https://vant.pro/vant/#/en-US/index-bar",
+        "subTitle": "Used for indexed sorting display and quick positioning of lists."
+      },
+      {
+        "title": "NavBar",
+        "url": "https://vant.pro/vant/#/en-US/nav-bar",
+        "subTitle": "Provide navigation function for the page, often used at the top of the page."
+      },
+      {
+        "title": "Pagination",
+        "url": "https://vant.pro/vant/#/en-US/pagination",
+        "subTitle": "When the amount of data is too much, use pagination to separate the data, and load only one page at a time."
+      },
+      {
+        "title": "Sidebar",
+        "url": "https://vant.pro/vant/#/en-US/sidebar",
+        "subTitle": "The vertically displayed navigation bar is used to switch between different content areas."
+      },
+      {
+        "title": "Tab",
+        "url": "https://vant.pro/vant/#/en-US/tab",
+        "subTitle": "Used to switch between different content areas."
+      },
+      {
+        "title": "Tabbar",
+        "url": "https://vant.pro/vant/#/en-US/tabbar",
+        "subTitle": "Used to switch between different pages."
+      },
+      {
+        "title": "TreeSelect",
+        "url": "https://vant.pro/vant/#/en-US/tree-select",
+        "subTitle": "Used to select from a set of related data sets."
+      }
+    ]
+  },
+  {
+    "title": "Business Components",
+    "items": [
+      {
+        "title": "AddressEdit",
+        "url": "https://vant.pro/vant/#/en-US/address-edit",
+        "subTitle": "Used to create, update, and delete receiving addresses."
+      },
+      {
+        "title": "AddressList",
+        "url": "https://vant.pro/vant/#/en-US/address-list",
+        "subTitle": "Display a list of receiving addresses."
+      },
+      {
+        "title": "Area",
+        "url": "https://vant.pro/vant/#/en-US/area",
+        "subTitle": "A three-level linkage selection of provinces and cities, usually used in conjunction with Popup component."
+      },
+      {
+        "title": "Card",
+        "url": "https://vant.pro/vant/#/en-US/card",
+        "subTitle": "Used to display product pictures, prices and other information."
+      },
+      {
+        "title": "ContactCard",
+        "url": "https://vant.pro/vant/#/en-US/contact-card",
+        "subTitle": "Display contact information in the form of cards."
+      },
+      {
+        "title": "ContactEdit",
+        "url": "https://vant.pro/vant/#/en-US/contact-edit",
+        "subTitle": "Edit and save the contact information."
+      },
+      {
+        "title": "ContactList",
+        "url": "https://vant.pro/vant/#/en-US/contact-list",
+        "subTitle": "Used to display the contact list."
+      },
+      {
+        "title": "Coupon",
+        "url": "https://vant.pro/vant/#/en-US/coupon-list",
+        "subTitle": "Used for redemption and selection of coupons."
+      },
+      {
+        "title": "SubmitBar",
+        "url": "https://vant.pro/vant/#/en-US/submit-bar",
+        "subTitle": "Used to display the order amount and submit the order."
+      }
+    ]
+  },
+  {
+    "title": "Composables",
+    "items": [
+      {
+        "title": "Intro",
+        "url": "https://vant.pro/vant/#/en-US/vant-use-intro",
+        "subTitle": "Vant provide some built-in composition APIs, you can directly use these APIs for development."
+      },
+      {
+        "title": "useClickAway",
+        "url": "https://vant.pro/vant/#/en-US/use-click-away",
+        "subTitle": "Triggers a callback when user clicks outside of the target element."
+      },
+      {
+        "title": "useCountDown",
+        "url": "https://vant.pro/vant/#/en-US/use-count-down",
+        "subTitle": "Used to manage the countdown."
+      },
+      {
+        "title": "useCustomFieldValue",
+        "url": "https://vant.pro/vant/#/en-US/use-custom-field-value",
+        "subTitle": "Used to custom Field value."
+      },
+      {
+        "title": "useEventListener",
+        "url": "https://vant.pro/vant/#/en-US/use-event-listener",
+        "subTitle": "Attaching an event when the component is mounted and activated, then removing the event when the component is unmounted and deactivated."
+      },
+      {
+        "title": "usePageVisibility",
+        "url": "https://vant.pro/vant/#/en-US/use-page-visibility",
+        "subTitle": "Get the visible state of the page."
+      },
+      {
+        "title": "useRect",
+        "url": "https://vant.pro/vant/#/en-US/use-rect",
+        "subTitle": "Get the size of an element and its position relative to the viewport, equivalent to Element.getBoundingClientRect."
+      },
+      {
+        "title": "useRelation",
+        "url": "https://vant.pro/vant/#/en-US/use-relation",
+        "subTitle": "Establish the association relationship between parent and child components, perform data communication and method invocation, based on provide and inject implementation."
+      },
+      {
+        "title": "useScrollParent",
+        "url": "https://vant.pro/vant/#/en-US/use-scroll-parent",
+        "subTitle": "Get the closest parent element that is scrollable."
+      },
+      {
+        "title": "useToggle",
+        "url": "https://vant.pro/vant/#/en-US/use-toggle",
+        "subTitle": "Used to switch between true and false."
+      },
+      {
+        "title": "useWindowSize",
+        "url": "https://vant.pro/vant/#/en-US/use-window-size",
+        "subTitle": "Get the viewport width and height of the browser window, and update it automatically when the window size changes."
+      },
+      {
+        "title": "useRaf",
+        "url": "https://vant.pro/vant/#/en-US/use-raf",
+        "subTitle": "Provide convenient call and cancellation of requestAnimationFrame."
+      }
+    ]
+  }
+]
