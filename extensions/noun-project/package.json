@@ -34,10 +34,10 @@
       "key": "publicDomain",
       "title": "Limit to Icons in the Public Domain",
       "name": "publicDomain",
-      "description": "The maximum number of results to display",
+      "description": "Outside the public domain is only available to paid subscribers.",
       "required": false,
       "type": "dropdown",
-      "defaultValue": 0,
+      "defaultValue": "1",
       "data": [
         {
           "title": "No",
