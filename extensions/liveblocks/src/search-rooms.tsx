@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List, useNavigation, confirmAlert } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, useNavigation, confirmAlert, openExtensionPreferences } from "@raycast/api";
 import { RoomData } from "@liveblocks/node";
 import { useEffect, useState } from "react";
 
@@ -40,7 +40,21 @@ export default function Command() {
   if (errorMessage) {
     return (
       <List>
-        <List.EmptyView icon={Icon.Warning} title="Whoops!" description={errorMessage} />
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Whoops!"
+          description={errorMessage}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Open Extension Preferences"
+                onAction={openExtensionPreferences}
+                icon={Icon.Gear}
+                shortcut={{ modifiers: ["cmd"], key: "," }}
+              />
+            </ActionPanel>
+          }
+        />
       </List>
     );
   }
