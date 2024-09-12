@@ -1,5 +1,8 @@
 # Beeminder Changelog
 
+## [Update] - 2024-06-08
+Changes due variable to `baremin`
+
 ## [Update] - 2023-07-16
 
 Adds support for caching goals information.

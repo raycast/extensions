@@ -12,7 +12,14 @@
   "commands": [
     {
       "name": "index",
-      "title": "Shorten URL",
+      "title": "Shorten URL Using Clipboard",
+      "subtitle": "U301.com",
+      "description": "Shorten URLs in Clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "shorten-selected-text",
+      "title": "Shorten URL Using Selected Text",
       "subtitle": "U301.com",
       "description": "Shorten selected URL to u301.com",
       "mode": "no-view"
@@ -20,22 +27,22 @@
   ],
   "preferences": [
     {
-      "name": "clipboard",
-      "title": "Shortened URL",
-      "description": "Copy to Clipboard or Paste to Current Window",
-      "type": "dropdown",
-      "required": true,
-      "default": "clipboard",
-      "data": [
-        {
-          "title": "Copy to Clipboard",
-          "value": "clipboard"
-        },
-        {
-          "title": "Paste to Current Window",
-          "value": "paste"
-        }
-      ]
+      "name": "accessToken",
+      "title": "API Key",
+      "description": "Create API Key on u301.com, or leave empty to use as an anonymous user",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "Leave empty to use as an anonymous user"
+    },
+    {
+      "name": "domainName",
+      "title": "Custom Domain Name",
+      "description": "Domain for shortened URL, API Key required if you want to use your own custom domain",
+      "type": "textfield",
+      "required": false,
+      "default": "u301.co",
+      "placeholder": "Leave empty to use default domain"
     }
   ],
   "dependencies": {

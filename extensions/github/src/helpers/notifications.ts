@@ -1,5 +1,5 @@
 import { Endpoints } from "@octokit/types";
-import { Color, Icon } from "@raycast/api";
+import { Color, Icon, Image } from "@raycast/api";
 import { format } from "date-fns";
 
 import { getGitHubClient } from "../api/githubClient";
@@ -67,7 +67,7 @@ export async function getGitHubURL(notification: Notification, userId?: string) 
   return notification.url;
 }
 
-export async function getNotificationIcon(notification: Notification) {
+export async function getNotificationIcon(notification: Notification): Promise<{ value: Image; tooltip: string }> {
   if (notification.subject.type === "PullRequest") {
     const { octokit } = getGitHubClient();
     const pullRequest = await octokit.rest.pulls.get({

@@ -11,7 +11,7 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
-      {data?.databases.map((database) => (
+      {data?.databases?.map((database) => (
         <List.Item
           key={database.id}
           title={database.name}

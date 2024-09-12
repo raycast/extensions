@@ -20,7 +20,7 @@ import {
 } from "../lib/Groups";
 import { useState } from "react";
 import { getIcon } from "../lib/icons";
-import { SORT_STRATEGY } from "../lib/constants";
+import { SORT_STRATEGY, Visibility } from "../lib/constants";
 import { usePins } from "../lib/Pins";
 
 /**
@@ -68,6 +68,7 @@ export default function GroupForm(props: { group?: Group; setGroups?: (groups: G
                   values.parentField ? values.parentField : undefined,
                   values.sortStrategyField && values.sortStrategyField != "none" ? values.sortStrategyField : undefined,
                   values.iconColorField,
+                  values.visibilityField,
                 );
                 await launchCommand({
                   name: "view-groups",
@@ -83,6 +84,7 @@ export default function GroupForm(props: { group?: Group; setGroups?: (groups: G
                   values.parentField ? values.parentField : undefined,
                   values.sortStrategyField && values.sortStrategyField != "none" ? values.sortStrategyField : undefined,
                   values.iconColorField,
+                  values.visibilityField,
                 );
               }
             }}
@@ -129,11 +131,33 @@ export default function GroupForm(props: { group?: Group; setGroups?: (groups: G
             <Form.Dropdown.Item
               key={key}
               title={key}
-              value={color as string}
+              value={color.toString()}
               icon={{ source: Icon.Circle, tintColor: color }}
             />
           );
         })}
+      </Form.Dropdown>
+
+      <Form.Dropdown
+        id="visibilityField"
+        title="Visibility"
+        info="Controls the visibility of the group and its pins in the 'View Pins' command and the menu bar dropdown."
+        defaultValue={group ? group.visibility : Visibility.VISIBLE}
+      >
+        <Form.Dropdown.Item key="visible" title="Visible" value={Visibility.VISIBLE} icon={Icon.Eye} />
+        <Form.Dropdown.Item
+          key="menubarOnly"
+          title="Show in Menubar Only"
+          value={Visibility.MENUBAR_ONLY}
+          icon={Icon.Window}
+        />
+        <Form.Dropdown.Item
+          key="raycastOnly"
+          title="Show in 'View Pins' Only"
+          value={Visibility.VIEW_PINS_ONLY}
+          icon={Icon.AppWindowList}
+        />
+        <Form.Dropdown.Item key="hidden" title="Hidden" value={Visibility.HIDDEN} icon={Icon.EyeDisabled} />
       </Form.Dropdown>
 
       <Form.Dropdown

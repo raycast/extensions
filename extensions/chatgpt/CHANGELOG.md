@@ -1,9 +1,17 @@
 # Changelog
 
+## [Fix] - 2024-07-16
+
+- Add placeholder to improve accessibility
+
+## [Feature] - 2024-06-13
+
+- Feature: Add Vision Command Capability on Clipboard Image
+- Feature: Add Vision Command Capability on Finder Image
+
 ## [Chore] - 2024-06-02
 
 - Chore: Improve README about models and vision capabilities
-
 
 ## [Fix] - 2024-05-16
 

@@ -1,26 +1,16 @@
 # Outline Search
 
-Search for documents in one or more instances of [Outline](https://www.getoutline.com), including the Cloud and Self-Managed instances.
+This extension allows you to search for documents across one or more instances of [Outline](https://www.getoutline.com), including Cloud and Self-Managed instances.
 
 ## Setup
 
-This extension interfaces with Outline's API, so you need to [grab an API key](https://www.getoutline.com/developers#section/Authentication) from your Outline instance(s). Afterward, you can configure the extension by creating and selecting a JSON file that specifies the Outline instances that you want to access in Raycast:
-
-```json
-[
-  {
-    "name": "Personal",
-    "url": "https://app.getoutline.com",
-    "apiKey": "ol_api_..."
-  },
-  {
-    "name": "Work",
-    "url": "https://outline.work.com",
-    "apiKey": "ol_api_..."
-  }
-]
-```
+To use this extension, you need to [obtain an API key](https://www.getoutline.com/developers#description/authentication) from your Outline instance(s). You can then configure the extension by adding the Outline instances you want to access through Raycast, specifying a unique name, the instance's URL, and the API key.
 
 ## Usage
 
-This extension provides a single command to search for documents across all configured Outline instances. If you specify multiple instances of Outline, you have to select in which of them you want to perform the search. The search results display the matching documents by Outline instance that you can open in your default browser.
+This extension provides two commands:
+
+1. Manage the configured Outline instances.
+2. Search for documents across some or all of the configured Outline instances. If you have multiple instances, you can select which ones to search.
+
+The search results are grouped by Outline instance and display the matching documents along with a preview. You can then choose to open the desired document in your default browser.

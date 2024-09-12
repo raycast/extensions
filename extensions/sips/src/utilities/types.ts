@@ -5,7 +5,7 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-06 14:47:41
- * Last modified  : 2023-07-06 15:48:21
+ * Last modified  : 2024-06-26 21:37:46
  */
 
 /**
@@ -67,7 +67,7 @@ export type Generator = {
     CIFilterName: string,
     width: number,
     height: number,
-    inputs: { [key: string]: unknown }
+    inputs: { [key: string]: unknown },
   ) => Promise<string>;
 
   /**

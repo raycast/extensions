@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { MutatePromise, useCachedPromise } from "@raycast/utils";
+import { MutatePromise } from "@raycast/utils";
 
 import {
   getNotificationIcon,
@@ -14,7 +14,7 @@ import NotificationActions from "./NotificationActions";
 export type Notification = NotificationsResponse["data"][0];
 
 type NotificationListItemProps = {
-  notification: Notification;
+  notification: Notification & { icon: Awaited<ReturnType<typeof getNotificationIcon>> };
   userId?: string;
   mutateList: MutatePromise<Notification[] | undefined>;
 };
@@ -22,24 +22,10 @@ type NotificationListItemProps = {
 export default function NotificationListItem({ notification, userId, mutateList }: NotificationListItemProps) {
   const updatedAt = new Date(notification.updated_at);
 
-  const { data: icon, isLoading } = useCachedPromise(
-    async (notification: Notification) => {
-      return getNotificationIcon(notification);
-    },
-    [notification],
-    {
-      keepPreviousData: true,
-    },
-  );
-
-  if (isLoading || !icon) {
-    return null;
-  }
-
   return (
     <List.Item
       icon={{
-        value: icon.value,
+        value: notification.icon.value,
         tooltip: getNotificationTypeTitle(notification),
       }}
       title={notification.subject.title}

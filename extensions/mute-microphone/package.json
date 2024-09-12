@@ -33,6 +33,24 @@
           "label": "Hide icon when unmuted",
           "default": false,
           "required": false
+        },
+        {
+          "name": "tint",
+          "description": "Select muted icon color for Menu Bar",
+          "type": "dropdown",
+          "required": false,
+          "default": "true",
+          "title": "Muted icon color",
+          "data": [
+            {
+              "title": "Red",
+              "value": "true"
+            },
+            {
+              "title": "System",
+              "value": "false"
+            }
+          ]
         }
       ]
     },

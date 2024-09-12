@@ -10,7 +10,13 @@
     "FezVrasta",
     "rcruzper",
     "thomas",
-    "arthur_fontaine"
+    "arthur_fontaine",
+    "pernielsentikaer"
+  ],
+  "keywords": [
+    "sound",
+    "manager",
+    "bluetooth"
   ],
   "license": "MIT",
   "commands": [

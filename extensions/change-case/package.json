@@ -50,8 +50,8 @@
       "type": "checkbox",
       "default": true,
       "title": "Behavior",
-      "description": "Input text is lowercased before transformations, which is intended for most but not all use cases. See the README.md for more details.",
-      "label": "Preserve Casing",
+      "description": "Uncheck this option to preserve the original case of text before applying transformation. See README for details.",
+      "label": "Lowercase text before transforming Sentence and Title Cases",
       "required": true
     },
     {
@@ -66,8 +66,8 @@
       "name": "exceptions",
       "type": "textfield",
       "title": "Title and Sentence Case Exceptions",
-      "description": "A list of words to prevent from being modified, separated by commas. This only applies to title case and sentence case.",
-      "default": "macOS, iOS, iPadOS, iPhone, watchOS, tvOS",
+      "description": "Words or phrases that should not be modified, separated by commas.",
+      "default": "iOS, iPadOS, iPhone, macOS, tvOS, watchOS",
       "placeholder": "Comma-separated list of words or phrases",
       "label": "label",
       "required": false

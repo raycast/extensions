@@ -1,5 +1,14 @@
 # Quick Notes Changelog
 
+## [Performance] - 2024-07-18
+
+- Reduce lag when loading and searching
+
+## [Bugfix] - 2024-06-07
+
+- Fix to respect sort when filtering by tag
+- Fix bug where search wasn't working at all
+
 ## [Better Tag Management] - 2024-05-29
 
 - New quick add / remove tags using `⌘ + T`

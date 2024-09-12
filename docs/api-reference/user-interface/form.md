@@ -18,7 +18,7 @@ You can take look at these two styles below under each of the supported items.
 
 Before submitting data, it is important to ensure all required form controls are filled out, in the correct format.
 
-In Raycast, validation can be fully controlled from the API. To keep the same behavior as we have natively, the proper way of usage is to validate a `value` in the `onBlur` callback, update the `error` of the item and keep track of updates with the `onChange` callback to drop the `error` value.
+In Raycast, validation can be fully controlled from the API. To keep the same behavior as we have natively, the proper way of usage is to validate a `value` in the `onBlur` callback, update the `error` of the item and keep track of updates with the `onChange` callback to drop the `error` value. The [useForm](../../utils-reference/react-hooks/useForm.md) utils hook nicely wraps this behaviour and is the recommended way to do deal with validations.
 
 ![](../../.gitbook/assets/form-validation.png)
 
@@ -27,6 +27,58 @@ Keep in mind that if the Form has any errors, the [`Action.SubmitForm`](./action
 {% endhint %}
 
 #### Example
+
+{% tabs %}
+
+{% tab title="FormValidationWithUtils.tsx" %}
+
+```tsx
+import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
+
+interface SignUpFormValues {
+  name: string;
+  password: string;
+}
+
+export default function Command() {
+  const { handleSubmit, itemProps } = useForm<SignUpFormValues>({
+    onSubmit(values) {
+      showToast({
+        style: Toast.Style.Success,
+        title: "Yay!",
+        message: `${values.name} account created`,
+      });
+    },
+    validation: {
+      name: FormValidation.Required,
+      password: (value) => {
+        if (value && value.length < 8) {
+          return "Password must be at least 8 symbols";
+        } else if (!value) {
+          return "The item is required";
+        }
+      },
+    },
+  });
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="Full Name" placeholder="Tim Cook" {...itemProps.name} />
+      <Form.PasswordField title="New Password" {...itemProps.password} />
+    </Form>
+  );
+}
+```
+
+{% endtab %}
+
+{% tab title="FormValidationWithoutUtils.tsx" %}
 
 ```typescript
 import { Form } from "@raycast/api";
@@ -53,7 +105,7 @@ export default function Command() {
       <Form.TextField
         id="nameField"
         title="Full Name"
-        placeholder="Enter your name"
+        placeholder="Tim Cook"
         error={nameError}
         onChange={dropNameErrorIfNeeded}
         onBlur={(event) => {
@@ -92,6 +144,10 @@ function validatePassword(value: string): boolean {
   return value.length >= 8;
 }
 ```
+
+{% endtab %}
+
+{% endtabs %}
 
 ## Drafts
 

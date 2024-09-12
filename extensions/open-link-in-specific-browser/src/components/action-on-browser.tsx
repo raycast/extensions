@@ -5,15 +5,16 @@ import { actionIcon, actionOnApplicationItem, actionTitle } from "../utils/open-
 import { ActionOpenPreferences } from "./action-open-preferences";
 import { ItemType } from "../types/types";
 import { openDefaultBrowserSetting } from "../utils/common-utils";
+import { MutatePromise } from "@raycast/utils";
 
 export function ActionOnBrowser(props: {
   browser: Application;
   itemInput: ItemInput;
-  setRefresh: React.Dispatch<React.SetStateAction<number>>;
   visitItem: (item: Application) => void;
   resetRanking: (item: Application) => Promise<void>;
+  mutate: MutatePromise<ItemInput, undefined>;
 }) {
-  const { browser, itemInput, setRefresh, visitItem, resetRanking } = props;
+  const { browser, itemInput, visitItem, resetRanking, mutate } = props;
 
   return (
     <ActionPanel>
@@ -21,17 +22,18 @@ export function ActionOnBrowser(props: {
         title={actionTitle(itemInput, browser.name)}
         icon={actionIcon(itemInput)}
         onAction={async () => {
-          await actionOnApplicationItem(itemInput, browser, setRefresh);
+          await actionOnApplicationItem(itemInput, browser);
           visitItem(browser);
+          await mutate();
         }}
       />
       {itemInput.type !== ItemType.NULL && (
         <Action
-          title={"Detect Link"}
-          shortcut={{ modifiers: ["cmd"], key: "d" }}
+          title={"Refresh Link"}
+          shortcut={{ modifiers: ["cmd"], key: "r" }}
           icon={Icon.Repeat}
-          onAction={() => {
-            setRefresh(Date.now());
+          onAction={async () => {
+            await mutate();
           }}
         />
       )}
@@ -43,10 +45,10 @@ export function ActionOnBrowser(props: {
         <Action
           title={"Reset Ranking"}
           icon={Icon.ArrowCounterClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={{ modifiers: ["ctrl", "cmd"], key: "r" }}
           onAction={async () => {
             await resetRanking(browser);
-            setRefresh(Date.now());
+            await mutate();
           }}
         />
 

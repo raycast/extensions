@@ -14,20 +14,20 @@ type Updates = {
 };
 
 export async function startCaffeinate(updates: Updates, hudMessage?: string, additionalArgs?: string) {
+  if (hudMessage) {
+    await showHUD(hudMessage);
+  }
   await stopCaffeinate({ menubar: false, status: false });
   exec(`/usr/bin/caffeinate ${generateArgs(additionalArgs)} || true`);
   await update(updates, true);
-  if (hudMessage) {
-    await showHUD(hudMessage);
-  }
 }
 
 export async function stopCaffeinate(updates: Updates, hudMessage?: string) {
-  execSync("/usr/bin/killall caffeinate || true");
-  await update(updates, false);
   if (hudMessage) {
     await showHUD(hudMessage);
   }
+  execSync("/usr/bin/killall caffeinate || true");
+  await update(updates, false);
 }
 
 async function update(updates: Updates, caffeinated: boolean) {

@@ -7,5 +7,5 @@ export default async function main() {
     return;
   }
 
-  open("superwhisper://settings", SUPERWHISPER_BUNDLE_ID);
+  await open("superwhisper://settings", SUPERWHISPER_BUNDLE_ID);
 }

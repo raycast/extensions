@@ -11,6 +11,7 @@ import {
   pauseInterval,
   preferences,
   resetInterval,
+  restartInterval,
 } from "../lib/intervals";
 import { FocusText, ShortBreakText, LongBreakText } from "../lib/constants";
 import { GiphyResponse, Interval, Quote } from "../lib/types";
@@ -65,6 +66,15 @@ const ActionsList = () => {
             actions={
               <ActionPanel>
                 <Action onAction={createAction(resetInterval)} title={"Reset"} />
+              </ActionPanel>
+            }
+          />
+          <List.Item
+            title="Restart Current"
+            icon={Icon.Repeat}
+            actions={
+              <ActionPanel>
+                <Action onAction={createAction(restartInterval)} title={"Restart Current"} />
               </ActionPanel>
             }
           />

@@ -1,5 +1,31 @@
 # Linear Changelog
 
+## [Document Support] - 2024-07-18
+
+- New "Search Documents" command to search documents across Linear projects and initiatives. Supports typeahead if there are too many docs.
+- New action "Show Project Documents" to look up project documents.
+
+## [Fixes] - 2024-07-08
+
+- [#10856](https://github.com/raycast/extensions/issues/10856): Typeahead search for teams while creating/editing issues and in active cycles command. Typeahead is only triggered if no. of teams is > 50.
+- [#8704](https://github.com/raycast/extensions/issues/8704): Typeahead search for users/assignees/leads in various actions and commands, getting rid of missing assignees issue. Typeahead is only triggered if no. of users is > 50.
+- [#13194](https://github.com/raycast/extensions/issues/13194): Feature to add links while creating issues and ad-hoc action to add attachments and links while viewing issues.
+- The order of teams in "Create issue" respects the order of teams in the Linear native application.
+- When using "Create issue for myself" without specifying a preferred team in settings, use first team from the sorted array of teams.
+
+## [Improved Notifications] - 2024-06-14
+
+- Added support for all types of notifications, ensuring that "Unknown Notification" no longer appear.
+
+## [Project Improvements] - 2024-06-11
+
+- Added support for all the latest Linear icons.
+- Introduced a new "See Project Updates" action.
+
+## [Action Shortcut] - 2024-06-10
+
+- Added a new shortcut in the Search Projects command: Press Cmd + Enter to open a project in Linear.
+
 ## [Improvements] - 2024-05-30
 
 - Added preference to hide redundant (Done, Canceled, Duplicate) issues across all searches

@@ -1,31 +1,39 @@
+import { useState } from "react";
 import { Action, ActionPanel, Form } from "@raycast/api";
+import { getCommandConfig } from "../utils.js";
 
 export const Input = ({
-  input,
-  inputValid,
-  onChange,
+  title,
+  value,
   onSubmit,
 }: {
-  input: { title: string; value?: string };
-  inputValid: boolean;
-  onChange: (value: string) => void;
+  title: string;
+  value?: string;
   onSubmit: (values: Form.Values) => void;
 }) => {
+  const { validationFields } = getCommandConfig();
+  const hasValidation = validationFields.includes(title);
+  const [inputValid, setInputValid] = useState(!hasValidation || Boolean(value));
+
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={`Submit ${input.title}`} onSubmit={onSubmit} />
+          <Action.SubmitForm title={`Submit ${title}`} onSubmit={onSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextField
-        id={input.title}
-        title={input.title}
-        defaultValue={input.value}
-        placeholder={`Enter your ${input.title}`}
+        id={title}
+        title={title}
+        defaultValue={value}
+        placeholder={`Enter your ${title}`}
         error={inputValid ? undefined : "This field is required"}
-        onChange={onChange}
+        onChange={(newValue) => {
+          if (hasValidation) {
+            setInputValid(Boolean(newValue));
+          }
+        }}
       />
     </Form>
   );

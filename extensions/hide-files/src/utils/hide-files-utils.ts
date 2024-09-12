@@ -105,7 +105,7 @@ export const hideFilesInFolder = async (path: string) => {
     const { name } = parse(pathStr);
     if (typeof isHidden === "undefined") {
       await showHUD(`📂 No files in ${name}`);
-      return;
+      return undefined;
     }
 
     if (isHidden) {
@@ -120,10 +120,12 @@ export const hideFilesInFolder = async (path: string) => {
       const fileSystemItems = getFilesInDirectory(pathStr);
       await putFileOnHidePanel(fileSystemItems);
     }
+    return isHidden;
   } catch (e) {
     captureException(e);
     await showHUD(`🚨 ${String(e)}`);
     console.error(String(e));
+    return undefined;
   }
 };
 
@@ -165,6 +167,36 @@ export const hideFilesSelected = async () => {
   } catch (e) {
     captureException(e);
     await showHUD(`🚨 ${String(e)}`);
+    console.error(String(e));
+  }
+};
+
+function isOverSonoma() {
+  const { stdout } = spawnSync("sw_vers", ["-productVersion"], { encoding: "utf-8" });
+  const macVersion = parseInt(stdout.trim().split(".")[0]);
+  return macVersion >= 14;
+}
+export const isWidgetVisible = () => {
+  if (isOverSonoma()) {
+    const { stdout } = spawnSync("defaults", ["read", "com.apple.WindowManager", "StandardHideWidgets"], {
+      encoding: "utf-8",
+    });
+    return stdout.trim() === "0";
+  } else {
+    return undefined;
+  }
+};
+
+export enum Visibility {
+  INVISIBLE = "true",
+  VISIBLE = "false",
+}
+export const toggleWidgetsVisibility = (visibility: Visibility) => {
+  try {
+    if (isOverSonoma()) {
+      spawnSync("defaults", ["write", "com.apple.WindowManager", "StandardHideWidgets", "-bool", visibility]);
+    }
+  } catch (e) {
     console.error(String(e));
   }
 };

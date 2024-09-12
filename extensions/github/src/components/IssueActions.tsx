@@ -10,9 +10,12 @@ import {
   UserFieldsFragment,
 } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
+import { ISSUE_SORT_TYPES_TO_QUERIES } from "../helpers/issue";
 import { getGitHubUser } from "../helpers/users";
 import { useMyIssues } from "../hooks/useMyIssues";
 import { useViewer } from "../hooks/useViewer";
+
+import { SortAction, SortActionProps } from "./SortAction";
 
 type Issue = IssueFieldsFragment | IssueDetailFieldsFragment;
 
@@ -24,7 +27,14 @@ type IssueActionsProps = {
   children?: React.ReactNode;
 };
 
-export default function IssueActions({ issue, mutateList, mutateDetail, children }: IssueActionsProps) {
+export default function IssueActions({
+  issue,
+  mutateList,
+  mutateDetail,
+  children,
+  setSortQuery,
+  sortQuery,
+}: IssueActionsProps & SortActionProps) {
   const { github } = getGitHubClient();
 
   const viewer = useViewer();
@@ -318,6 +328,7 @@ export default function IssueActions({ issue, mutateList, mutateDetail, children
       </ActionPanel.Section>
 
       <ActionPanel.Section>
+        <SortAction data={ISSUE_SORT_TYPES_TO_QUERIES} {...{ sortQuery, setSortQuery }} />
         <Action
           icon={Icon.ArrowClockwise}
           title="Refresh"

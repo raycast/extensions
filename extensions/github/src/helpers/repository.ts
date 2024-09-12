@@ -131,3 +131,17 @@ export function useHistory(searchText: string | undefined, searchFilter: string 
 
   return { data, visitRepository };
 }
+
+export const REPO_SORT_TYPES_TO_QUERIES = [
+  { title: "Last Update", value: "sort:updated-desc" },
+  { title: "Name", value: "sort:name-asc" },
+  { title: "Stars", value: "sort:stars-desc" },
+  { title: "Forks", value: "sort:forks-desc" },
+];
+export const MY_REPO_SORT_TYPES_TO_QUERIES = [
+  { title: "Last Pushed", value: "pushed_at:desc" },
+  { title: "Name", value: "name:asc" },
+  { title: "Stars", value: "stargazers:desc" },
+];
+export const REPO_DEFAULT_SORT_QUERY = REPO_SORT_TYPES_TO_QUERIES[0].value;
+export const MY_REPO_DEFAULT_SORT_QUERY = MY_REPO_SORT_TYPES_TO_QUERIES[0].value;

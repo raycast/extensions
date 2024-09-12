@@ -1,5 +1,9 @@
 # Braid Changelog
 
+## [Improvements & New Features] - 2024-06-17
+
+- Update IconPromote
+
 ## [Improvements & New Features] - 2024-04-16
 
 - Add new icons.

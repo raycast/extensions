@@ -55,11 +55,9 @@ export default function Command() {
         message: `${kind === "secondary" ? "Secondary " : ""}Fast Time entry successfully saved`,
         style: Toast.Style.Success,
       });
-      setTimeout(() => {
-        popToRoot({
-          clearSearchBar: false,
-        });
-      }, 1000);
+      popToRoot({
+        clearSearchBar: false,
+      });
     } catch (e) {
       console.log(e);
       showToast({
@@ -143,6 +141,7 @@ export default function Command() {
             <Form.Dropdown.Item key={service.id} value={service.id.toString()} title={service.name} />
           ))}
       </Form.Dropdown>
+      <Form.TextArea id="note" title={"Note"} storeValue />
     </Form>
   );
 }

@@ -1,4 +1,5 @@
 export const serviceIds = ["all", "g1", "e1", "s1", "s2", "s5", "s6"] as const;
+export const serviceIdsWithoutAll = ["g1", "e1", "s1", "s2", "s5", "s6"] as const;
 export type ServiceId = (typeof serviceIds)[number];
 
 type ServiceLogo = {

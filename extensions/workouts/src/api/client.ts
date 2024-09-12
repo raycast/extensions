@@ -71,12 +71,12 @@ export const getAthlete = async () => {
   }
 };
 
-export const getActivities = async (page = 1, pageSize = PAGE_SIZE) => {
+export const getActivities = async (page = 1, pageSize = PAGE_SIZE, after?: number) => {
   try {
     const { token } = await getAccessToken();
     const athleteId = await getAthleteId();
     const response = await fetch(
-      `https://www.strava.com/api/v3/athletes/${athleteId}/activities?page=${page}&per_page=${pageSize}&access_token=${token}`,
+      `https://www.strava.com/api/v3/athletes/${athleteId}/activities?page=${page}&per_page=${pageSize}${after ? `&after=${after}` : ""}&access_token=${token}`,
     );
     if (!response.ok) {
       if (response.status === 429) {

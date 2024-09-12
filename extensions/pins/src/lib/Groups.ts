@@ -11,7 +11,7 @@
 import { useEffect, useState } from "react";
 import { getStorage, setStorage } from "./storage";
 import { useCachedState } from "@raycast/utils";
-import { SORT_FN, SORT_STRATEGY, StorageKey } from "./constants";
+import { SORT_FN, SORT_STRATEGY, StorageKey, Visibility } from "./constants";
 import { showToast } from "@raycast/api";
 import { Pin, sortPins } from "./Pins";
 
@@ -53,12 +53,17 @@ export type Group = {
    * The date the group was created.
    */
   dateCreated?: string;
+
+  /**
+   * Where the group is visible, if at all.
+   */
+  visibility?: Visibility;
 };
 
 /**
  * The keys of an {@link Group} object.
  */
-export const GroupKeys = ["name", "icon", "id", "parent", "sortStrategy", "iconColor", "dateCreated"];
+export const GroupKeys = ["name", "icon", "id", "parent", "sortStrategy", "iconColor", "dateCreated", "visibility"];
 
 /**
  * Checks if an object is a group.
@@ -130,6 +135,7 @@ export const createNewGroup = async (
   parent?: number,
   sortStrategy?: keyof typeof SORT_STRATEGY,
   iconColor?: string,
+  visibility?: Visibility,
 ) => {
   const storedGroups = await getStorage(StorageKey.LOCAL_GROUPS);
   const newID = await getNextGroupID();
@@ -144,6 +150,7 @@ export const createNewGroup = async (
     sortStrategy: sortStrategy,
     iconColor: iconColor,
     dateCreated: new Date().toUTCString(),
+    visibility: visibility || Visibility.VISIBLE,
   });
 
   // Update the stored groups
@@ -160,6 +167,7 @@ export const createNewGroup = async (
  * @param parent The (new) parent group ID for the group.
  * @param sortStrategy The (new) sort strategy for the group.
  * @param iconColor The (new) icon color for the group.
+ * @param visibility The (new) visibility for the group.
  */
 export const modifyGroup = async (
   group: Group,
@@ -170,6 +178,7 @@ export const modifyGroup = async (
   parent?: number,
   sortStrategy?: keyof typeof SORT_STRATEGY,
   iconColor?: string,
+  visibility?: Visibility,
 ) => {
   const storedGroups = await getStorage(StorageKey.LOCAL_GROUPS);
   const newGroups: Group[] = storedGroups.map((oldGroup: Group) => {
@@ -183,6 +192,7 @@ export const modifyGroup = async (
         sortStrategy: sortStrategy,
         iconColor: iconColor,
         dateCreated: group.dateCreated || new Date().toUTCString(),
+        visibility: visibility || Visibility.VISIBLE,
       };
     } else {
       return oldGroup;
@@ -205,6 +215,7 @@ export const modifyGroup = async (
       sortStrategy: sortStrategy,
       iconColor: iconColor,
       dateCreated: new Date().toUTCString(),
+      visibility: visibility || Visibility.VISIBLE,
     });
   }
 

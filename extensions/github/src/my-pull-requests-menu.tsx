@@ -1,4 +1,5 @@
 import { Color, Icon, LaunchType, getPreferenceValues, launchCommand, open } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 
 import {
   MenuBarItem,
@@ -7,7 +8,9 @@ import {
   MenuBarSection,
   getBoundedPreferenceNumber,
 } from "./components/Menu";
+import { SortMenuBarAction } from "./components/SortAction";
 import { PullRequestFieldsFragment } from "./generated/graphql";
+import { PR_DEFAULT_SORT_QUERY, PR_SORT_TYPES_TO_QUERIES } from "./helpers/pull-request";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { SectionType, useMyPullRequests } from "./hooks/useMyPullRequests";
 
@@ -42,7 +45,10 @@ function getPullRequestStatusIcon(pr: PullRequestFieldsFragment): Icon | string 
 
 function MyPullRequestsMenu() {
   const preferences = getPreferenceValues<Preferences.MyPullRequestsMenu>();
-  const { data: sections, isLoading } = useMyPullRequests(null);
+  const [sortQuery, setSortQuery] = useCachedState<string>("sort-query", PR_DEFAULT_SORT_QUERY, {
+    cacheNamespace: "github-my-pr-menu",
+  });
+  const { data: sections, isLoading } = useMyPullRequests(null, sortQuery);
 
   function displayTitle() {
     if (displayTitlePreference() !== true) {
@@ -130,6 +136,7 @@ function MyPullRequestsMenu() {
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={() => launchMyPullRequestsCommand()}
         />
+        <SortMenuBarAction {...{ sortQuery, setSortQuery, data: PR_SORT_TYPES_TO_QUERIES }} />
         <MenuBarItemConfigureCommand />
       </MenuBarSection>
     </MenuBarRoot>

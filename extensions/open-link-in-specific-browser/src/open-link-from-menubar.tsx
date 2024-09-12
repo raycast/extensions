@@ -1,17 +1,32 @@
 import { Icon, MenuBarExtra, openCommandPreferences } from "@raycast/api";
-import { useBrowsers, useItemInput } from "./hooks/hooks";
-import React from "react";
-import { actionOnApplicationItem } from "./utils/open-link-utils";
+import React, { useMemo } from "react";
+import { actionOnApplicationItem, tooltipsContent } from "./utils/open-link-utils";
 import { useFrecencySorting } from "@raycast/utils";
+import { ItemInput } from "./utils/input-utils";
+import { useItemInput } from "./hooks/useItemInput";
+import { useBrowsers } from "./hooks/useBrowsers";
+import { truncate } from "./utils/common-utils";
+import { unsupportedBrowsers } from "./utils/constants";
 
 export default function OpenLinkInSpecificBrowser() {
-  const { itemInput } = useItemInput(0);
-  const { browsers, loading } = useBrowsers(itemInput, 0);
-  const { data, visitItem } = useFrecencySorting(browsers, { key: (browsers) => browsers.path });
+  const { data: itemInputRaw } = useItemInput();
+  const { data: browsersRaw, isLoading } = useBrowsers();
+
+  const itemInput = useMemo(() => {
+    if (!itemInputRaw) return new ItemInput();
+    return itemInputRaw;
+  }, [itemInputRaw]);
+
+  const browsers = useMemo(() => {
+    if (!browsersRaw) return [];
+    return browsersRaw.filter((browser) => browser.bundleId && unsupportedBrowsers.indexOf(browser.bundleId) === -1);
+  }, [browsersRaw]);
+
+  const { data: sortedBrowsers, visitItem } = useFrecencySorting(browsers, { key: (browsers) => browsers.path });
 
   return (
     <MenuBarExtra
-      isLoading={loading}
+      isLoading={isLoading}
       tooltip={"Open Link in Specific Browser"}
       icon={{
         source: {
@@ -20,20 +35,23 @@ export default function OpenLinkInSpecificBrowser() {
         },
       }}
     >
-      {data.map((browser) => (
+      {sortedBrowsers.map((browser) => (
         <MenuBarExtra.Item
           key={browser.path}
           title={browser.name}
           icon={{ fileIcon: browser.path }}
           onAction={async () => {
-            await actionOnApplicationItem(itemInput, browser, () => null);
+            await actionOnApplicationItem(itemInput, browser);
             await visitItem(browser);
           }}
         />
       ))}
       <MenuBarExtra.Section>
+        <MenuBarExtra.Item title={truncate(tooltipsContent(itemInput, true))} />
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          title={"Preferences"}
+          title={"Settings..."}
           icon={Icon.Gear}
           onAction={() => {
             openCommandPreferences().then();

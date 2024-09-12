@@ -1,5 +1,9 @@
 # Mozilla Firefox Changelog
 
+## [Added support for ESR profile] - 2024-06-17
+
+- Added support for ESR profile.
+
 ## [Fix] - 2024-01-06
 
 - Fixes issue (#9373) with search by browser history.

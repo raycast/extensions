@@ -1,23 +1,22 @@
-import { getPreferenceValues, Grid, Image, List } from "@raycast/api";
+import { Grid, Image, List } from "@raycast/api";
 import React, { useState } from "react";
-import { getPlaceholderImages } from "./hooks/hooks";
-import { Preferences } from "./types/preferences";
+import { usePlaceholderImages } from "./hooks/hooks";
 import { PlaceholderEmptyView } from "./components/placeholder-empty-view";
 import { ActionOnPlaceholderImage } from "./components/action-on-placeholder-image";
 import Mask = Image.Mask;
+import { columns, layout, perPage } from "./types/preferences";
 
 export default function SearchPlaceholderImages() {
-  const preferences = getPreferenceValues<Preferences>();
   const [page, setPage] = useState<number>(1);
-  const { picsumImages, isLoading } = getPlaceholderImages(page, parseInt(preferences.perPage));
+  const { picsumImages, isLoading } = usePlaceholderImages(page, parseInt(perPage));
 
-  return preferences.layout === "List" ? (
+  return layout === "List" ? (
     <List
       isShowingDetail={picsumImages.length !== 0 && !isLoading}
       isLoading={isLoading}
-      searchBarPlaceholder={"Search images"}
+      searchBarPlaceholder={"Search placeholders"}
     >
-      <PlaceholderEmptyView layout={preferences.layout} />
+      <PlaceholderEmptyView layout={layout} />
 
       {picsumImages.map((value) => {
         return (
@@ -46,29 +45,25 @@ export default function SearchPlaceholderImages() {
                 }
               />
             }
-            actions={
-              <ActionOnPlaceholderImage picsumImage={value} preferences={preferences} page={page} setPage={setPage} />
-            }
+            actions={<ActionOnPlaceholderImage picsumImage={value} page={page} setPage={setPage} />}
           />
         );
       })}
     </List>
   ) : (
-    <Grid columns={parseInt(preferences.columns)} isLoading={isLoading} searchBarPlaceholder={"Search images"}>
-      <PlaceholderEmptyView layout={preferences.layout} />
+    <Grid columns={parseInt(columns)} isLoading={isLoading} searchBarPlaceholder={"Search placeholders"}>
+      <PlaceholderEmptyView layout={layout} />
 
       {picsumImages.map((value) => {
         return (
           <Grid.Item
             key={value.download_url}
             content={{
-              value: buildGridContentImageURL(parseInt(preferences.columns), value.id),
+              value: buildGridContentImageURL(parseInt(columns), value.id),
               tooltip: value.width + " ✕ " + value.height,
             }}
             title={value.author}
-            actions={
-              <ActionOnPlaceholderImage picsumImage={value} preferences={preferences} page={page} setPage={setPage} />
-            }
+            actions={<ActionOnPlaceholderImage picsumImage={value} page={page} setPage={setPage} />}
           />
         );
       })}
@@ -79,10 +74,10 @@ export default function SearchPlaceholderImages() {
 const prefix = "https://picsum.photos/id/";
 const buildGridContentImageURL = (coloums: number, id: string) => {
   if (coloums <= 3) {
-    return prefix + id + "/500";
-  } else if (coloums <= 6) {
     return prefix + id + "/300";
+  } else if (coloums <= 6) {
+    return prefix + id + "/150";
   } else {
-    return prefix + id + "/200";
+    return prefix + id + "/100";
   }
 };

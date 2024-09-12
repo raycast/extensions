@@ -1,5 +1,9 @@
 # Prompt Explorer Extension Changelog
 
+## [Update endpoints] - 2024-05-06
+
+- Update endpoints for fetching data.
+
 ## [Refactor data fetching] - 2024-05-06
 
 - Fetch prompts & snippets from their respective APIs.

@@ -1,5 +1,11 @@
 # Brand Icons Changelog
 
+## [Enhancements] - 2024-06-07
+
+- Optimize load time
+- Add new version prompt
+- Bump dependencies
+
 ## [New Feature] - 2024-05-24
 
 - Add offline support

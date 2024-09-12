@@ -15,7 +15,7 @@ import {
 } from "@raycast/api";
 import { titleToSlug } from "simple-icons/sdk";
 import { LaunchCommand, Supports, actions, defaultActionsOrder } from "./actions.js";
-import { cacheAssetPack, getAliases, loadCachedJson, loadVersion } from "./utils.js";
+import { cacheAssetPack, getAliases, loadCachedJson, useVersion } from "./utils.js";
 import { IconData, LaunchContext } from "./types.js";
 
 const itemDisplayColumns = {
@@ -27,16 +27,19 @@ const itemDisplayColumns = {
 export default function Command({ launchContext }: LaunchProps<{ launchContext?: LaunchContext }>) {
   const [itemSize, setItemSize] = useState<keyof typeof itemDisplayColumns>("small");
   const [isLoading, setIsLoading] = useState(true);
-  const [version, setVersion] = useState("latest");
   const [icons, setIcons] = useState<IconData[]>([]);
+  const version = useVersion({ launchContext });
 
-  const fetchIcons = async () => {
+  const fetchIcons = async (version: string) => {
+    setIsLoading(true);
+    setIcons([]);
+
     await showToast({
       style: Toast.Style.Animated,
-      title: "Loading Icons",
+      title: "",
+      message: "Loading Icons",
     });
 
-    const version = await loadVersion();
     await cacheAssetPack(version).catch(async () => {
       await showToast({
         style: Toast.Style.Failure,
@@ -53,9 +56,8 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
       slug: icon.slug || titleToSlug(icon.title),
     }));
 
-    setIsLoading(false);
     setIcons(icons);
-    setVersion(version);
+    setIsLoading(false);
 
     if (icons.length > 0) {
       await showToast({
@@ -73,8 +75,10 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
   };
 
   useEffect(() => {
-    fetchIcons();
-  }, []);
+    if (version) {
+      fetchIcons(version);
+    }
+  }, [version]);
 
   const { defaultDetailAction = "OpenWith" } = getPreferenceValues<ExtensionPreferences>();
   const DefaultAction = actions[defaultDetailAction];
@@ -107,7 +111,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
         </Grid.Dropdown>
       }
     >
-      {!isLoading &&
+      {(!isLoading || !version) &&
         icons.map((icon) => {
           const slug = icon.slug || titleToSlug(icon.title);
 

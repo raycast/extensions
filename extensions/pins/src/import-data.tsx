@@ -8,7 +8,7 @@ import YAML from "yaml";
 import * as TOML from "@iarna/toml";
 import { Action, ActionPanel, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 
-import { StorageKey, SORT_STRATEGY } from "./lib/constants";
+import { StorageKey, SORT_STRATEGY, Visibility } from "./lib/constants";
 import { Group } from "./lib/Groups";
 import { Pin } from "./lib/Pins";
 import { getStorage, setStorage } from "./lib/storage";
@@ -137,6 +137,8 @@ const importCSVData = async (data: string[][], importMethod: string) => {
       const notesIndex = fieldNames.indexOf("notes");
       const tooltipIndex = fieldNames.indexOf("tooltip");
       const averageExecutionTimeIndex = fieldNames.indexOf("averageExecutionTime");
+      const visibilityIndex = fieldNames.indexOf("visibility");
+      const expirationActionIndex = fieldNames.indexOf("expirationAction");
 
       return {
         name: row[nameIndex],
@@ -161,6 +163,8 @@ const importCSVData = async (data: string[][], importMethod: string) => {
         notes: notesIndex == -1 ? undefined : row[notesIndex],
         tooltip: tooltipIndex == -1 ? undefined : row[tooltipIndex],
         averageExecutionTime: averageExecutionTimeIndex == -1 ? undefined : parseInt(row[averageExecutionTimeIndex]),
+        visibility: visibilityIndex == -1 ? undefined : (row[visibilityIndex] as Visibility),
+        expirationAction: expirationActionIndex == -1 ? undefined : row[expirationActionIndex],
       };
     });
     await importJSONData({ pins: newPins }, importMethod);
@@ -172,6 +176,7 @@ const importCSVData = async (data: string[][], importMethod: string) => {
       const iconColorIndex = fieldNames.indexOf("iconColor");
       const sortStrategyIndex = fieldNames.indexOf("sortStrategy");
       const idIndex = fieldNames.indexOf("id");
+      const visibilityIndex = fieldNames.indexOf("visibility");
 
       return {
         name: row[nameIndex],
@@ -179,6 +184,7 @@ const importCSVData = async (data: string[][], importMethod: string) => {
         iconColor: iconColorIndex == -1 ? undefined : row[iconColorIndex],
         sortStrategy: sortStrategyIndex == -1 ? undefined : (row[sortStrategyIndex] as keyof typeof SORT_STRATEGY),
         id: parseInt(row[idIndex]),
+        visibility: visibilityIndex == -1 ? undefined : (row[visibilityIndex] as Visibility),
       };
     });
     await importJSONData({ groups: newGroups }, importMethod);
@@ -223,7 +229,7 @@ const importXMLData = async (
  */
 const importDataFromFile = async (file: string, importMethod: string) => {
   const fileExtension = path.extname(file);
-  const rawData = fs.readFileSync(file).toString();
+  const rawData = fs.readFileSync(file).toString().replaceAll("]]]", "}}").replaceAll("[[[", "{{");
   if (fileExtension == ".json") {
     const data = JSON.parse(rawData.toString());
     await importJSONData(data, importMethod);

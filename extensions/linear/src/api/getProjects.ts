@@ -1,4 +1,4 @@
-import { Project, User } from "@linear/sdk";
+import { Project, ProjectUpdate, User } from "@linear/sdk";
 import { getLinearClient } from "../api/linearClient";
 
 export type ProjectResult = Pick<
@@ -113,4 +113,46 @@ export async function getRoadmaps() {
   );
 
   return data?.roadmaps.nodes;
+}
+
+export type ProjectUpdateResult = Pick<ProjectUpdate, "id" | "body" | "url" | "health" | "createdAt"> & {
+  user: Pick<User, "id" | "displayName" | "avatarUrl" | "email">;
+};
+
+const projectUpdateFragment = `
+  id
+  body
+  url
+  health
+  createdAt
+  user {
+    id
+    displayName
+    avatarUrl
+    email
+  }
+`;
+
+export async function getProjectUpdates(projectId: string) {
+  const { graphQLClient } = getLinearClient();
+
+  const { data } = await graphQLClient.rawRequest<
+    { project: { projectUpdates: { nodes: ProjectUpdateResult[] } } },
+    { projectId: string }
+  >(
+    `
+      query($projectId: String!) {
+        project(id: $projectId) {
+          projectUpdates {
+            nodes {
+              ${projectUpdateFragment}
+            }
+          }
+        }
+      }
+    `,
+    { projectId },
+  );
+
+  return data?.project.projectUpdates.nodes;
 }

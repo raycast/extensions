@@ -5,7 +5,6 @@ import { useCachedState } from "@raycast/utils";
 import useProjects from "../hooks/useProjects";
 import usePriorities from "../hooks/usePriorities";
 import useMe from "../hooks/useMe";
-import useUsers from "../hooks/useUsers";
 import useRoadmaps from "../hooks/useRoadmaps";
 
 import Project from "./Project";
@@ -18,7 +17,6 @@ export default function ProjectList() {
   const { roadmaps, isLoadingRoadmaps } = useRoadmaps();
   const { priorities, isLoadingPriorities } = usePriorities();
   const { me, isLoadingMe } = useMe();
-  const { users, isLoadingUsers } = useUsers();
 
   const filteredProjects = useMemo(() => {
     if (!projects) {
@@ -50,7 +48,7 @@ export default function ProjectList() {
 
   return (
     <List
-      isLoading={isLoadingProjects || isLoadingRoadmaps || isLoadingPriorities || isLoadingMe || isLoadingUsers}
+      isLoading={isLoadingProjects || isLoadingRoadmaps || isLoadingPriorities || isLoadingMe}
       {...(roadmaps && roadmaps.length > 0
         ? {
             searchBarAccessory: (
@@ -75,14 +73,7 @@ export default function ProjectList() {
         }
 
         return (
-          <Project
-            project={project}
-            key={project.id}
-            priorities={priorities}
-            users={users}
-            me={me}
-            mutateProjects={mutateProjects}
-          />
+          <Project project={project} key={project.id} priorities={priorities} me={me} mutateProjects={mutateProjects} />
         );
       })}
 

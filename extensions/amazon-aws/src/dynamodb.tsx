@@ -12,20 +12,15 @@ import {
   Toast,
   Clipboard,
 } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedState } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { getErrorMessage, isReadyToFetch, resourceToConsoleLink } from "./util";
+import { getErrorMessage, resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
-import {
-  DescribeTableCommand,
-  DynamoDBClient,
-  ListTablesCommand,
-  TableDescription,
-  UpdateTableCommand,
-} from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, TableDescription, UpdateTableCommand } from "@aws-sdk/client-dynamodb";
 import { DeleteItemForm } from "./components/dynamodb/delete-item-form";
 import { UpdateItemForm } from "./components/dynamodb/update-item-form";
 import { QueryForm } from "./components/dynamodb/query-form";
+import { useTables } from "./hooks/use-ddb";
 
 export interface KeyElement {
   name: string;
@@ -35,16 +30,19 @@ export interface PrimaryKey {
   hashKey: KeyElement;
   rangeKey?: KeyElement | undefined;
 }
-export type Table = TableDescription & { keys: Record<string, PrimaryKey> };
+export type Table = TableDescription & { keys: Record<string, PrimaryKey>; tableKey: string };
 
 export default function DynamoDb() {
-  const [isDetailsEnabled, setDetailsEnabled] = useCachedState<boolean>("aws-dynamodb-details-enabled", false);
-  const { data: tables, isLoading, error, revalidate } = useCachedPromise(fetchTables);
+  const [isDetailsEnabled, setDetailsEnabled] = useCachedState<boolean>("show-details", false, {
+    cacheNamespace: "aws-dynamodb",
+  });
+  const { tables, isLoading, error, revalidate, pagination } = useTables();
 
   return (
     <List
       isLoading={isLoading}
-      isShowingDetail={!isLoading && !error && isDetailsEnabled}
+      isShowingDetail={!isLoading && !error && (tables || []).length > 0 && isDetailsEnabled}
+      pagination={pagination}
       filtering
       searchBarPlaceholder="Filter tables by name, id, billing, status, gsi..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
@@ -63,7 +61,7 @@ export default function DynamoDb() {
         .sort((a, b) => `${a.TableName}`.localeCompare(`${b.TableName}`))
         .map((table) => (
           <List.Item
-            key={table.TableArn}
+            key={table.tableKey}
             title={table.TableName || ""}
             keywords={[
               table.TableName || "",
@@ -240,27 +238,6 @@ export default function DynamoDb() {
   );
 }
 
-const fetchTables = async (token?: string, accTables?: Table[]): Promise<Table[]> => {
-  if (!isReadyToFetch()) return [];
-  const { LastEvaluatedTableName, TableNames } = await new DynamoDBClient({}).send(
-    new ListTablesCommand({ ExclusiveStartTableName: token }),
-  );
-
-  const tables = await Promise.all(
-    (TableNames || []).map(async (t) => {
-      const { Table } = await new DynamoDBClient({}).send(new DescribeTableCommand({ TableName: t }));
-      return { ...Table, keys: fetchKeys(Table!) };
-    }),
-  );
-  const combinedTables = [...(accTables || []), ...(tables || [])];
-
-  if (LastEvaluatedTableName) {
-    return fetchTables(LastEvaluatedTableName, combinedTables);
-  }
-
-  return combinedTables;
-};
-
 const statusToIcon = (status: string): Image => {
   const mapping: Record<string, Image> = {
     ACTIVE: { source: Icon.CheckCircle, tintColor: Color.Green },
@@ -317,64 +294,4 @@ const updateDeletionProtection = async ({
       },
     },
   });
-};
-
-const fetchKeys = (table: TableDescription): Record<string, PrimaryKey> => {
-  const keys: Record<string, PrimaryKey> = {};
-  const hashKey = table.KeySchema?.find((k) => k.KeyType === "HASH")?.AttributeName || "";
-  let rangeKey = undefined;
-  if (table.KeySchema?.some((k) => k.KeyType === "RANGE")) {
-    const rangeKeyName = table.KeySchema?.find((k) => k.KeyType === "RANGE")?.AttributeName || "";
-    rangeKey = {
-      name: rangeKeyName,
-      type: table.AttributeDefinitions?.find((a) => a.AttributeName === rangeKeyName)?.AttributeType || "S",
-    };
-  }
-  keys[`${table.TableName}`] = {
-    hashKey: {
-      name: hashKey,
-      type: table.AttributeDefinitions?.find((a) => a.AttributeName === hashKey)?.AttributeType || "S",
-    },
-    rangeKey,
-  };
-
-  (table.GlobalSecondaryIndexes || []).forEach((gsi) => {
-    const gsiHashKey = gsi.KeySchema?.find((k) => k.KeyType === "HASH")?.AttributeName || "";
-    let gsiRangeKey = undefined;
-    if (gsi.KeySchema?.some((k) => k.KeyType === "RANGE")) {
-      const gsiRangeKeyName = gsi.KeySchema?.find((k) => k.KeyType === "RANGE")?.AttributeName || "";
-      gsiRangeKey = {
-        name: gsiRangeKeyName,
-        type: table.AttributeDefinitions?.find((a) => a.AttributeName === gsiRangeKeyName)?.AttributeType || "S",
-      };
-    }
-    keys[`gsi.${gsi.IndexName}`] = {
-      hashKey: {
-        name: gsiHashKey,
-        type: table.AttributeDefinitions?.find((a) => a.AttributeName === gsiHashKey)?.AttributeType || "S",
-      },
-      rangeKey: gsiRangeKey,
-    };
-  });
-
-  (table.LocalSecondaryIndexes || []).forEach((lsi) => {
-    const lsiHashKey = lsi.KeySchema?.find((k) => k.KeyType === "HASH")?.AttributeName || "";
-    let lsiRangeKey = undefined;
-    if (lsi.KeySchema?.some((k) => k.KeyType === "RANGE")) {
-      const lsiRangeKeyName = lsi.KeySchema?.find((k) => k.KeyType === "RANGE")?.AttributeName || "";
-      lsiRangeKey = {
-        name: lsiRangeKeyName,
-        type: table.AttributeDefinitions?.find((a) => a.AttributeName === lsiRangeKeyName)?.AttributeType || "S",
-      };
-    }
-    keys[`lsi.${lsi.IndexName}`] = {
-      hashKey: {
-        name: lsiHashKey,
-        type: table.AttributeDefinitions?.find((a) => a.AttributeName === lsiHashKey)?.AttributeType || "S",
-      },
-      rangeKey: lsiRangeKey,
-    };
-  });
-
-  return keys;
 };

@@ -9,6 +9,7 @@ export const scoreThreshold = 50;
 export const maxPromptLength = 500;
 
 export const modelIdToName = {
+  "986d447d-c38b-4218-a2c8-6e0b691f47ec": "Stable Diffusion 3",
   "b6c1372f-31a7-457c-907c-d292a6ffef97": "Luna Diffusion",
   "048b4aa3-5586-47ed-900f-f4341c96bdb2": "Stable Diffusion v1.5",
   "fc06f6ab-ed14-4186-a7c0-aaec288d4f38": "22h Diffusion",
@@ -21,6 +22,7 @@ export const modelIdToName = {
   "9fa49c00-109d-430f-9ddd-449f02e2c71a": "Kandinsky 2.2",
   "3fb1f6d9-c0d3-4ae4-adf4-77f8da78a6f7": "Waifu Diffusion XL",
   "48a7031d-43b6-4a23-9f8c-8020eb6862e4": "Ghibli Diffusion",
+  "4e54440f-ee17-4712-b4b6-0671b94d685d": "SSD-1B",
 } as const;
 
 export type TModelId = keyof typeof modelIdToName;

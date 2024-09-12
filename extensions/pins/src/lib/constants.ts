@@ -226,3 +226,27 @@ export enum Direction {
   DOWN,
   UP,
 }
+
+/**
+ * Visibility options for pins and groups.
+ */
+export enum Visibility {
+  VISIBLE = "visible",
+  MENUBAR_ONLY = "menubar_only",
+  VIEW_PINS_ONLY = "view_pins_only",
+  HIDDEN = "hidden",
+  DISABLED = "disabled",
+}
+
+/**
+ * Actions that can be taken on pins.
+ */
+export enum PinAction {
+  OPEN = "open",
+  COPY = "copy",
+  EDIT = "edit",
+  DELETE = "delete",
+  HIDE = "hide",
+  DISABLE = "disable",
+  MOVE = "move",
+}

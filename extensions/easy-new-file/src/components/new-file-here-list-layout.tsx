@@ -1,12 +1,12 @@
 import { codeFileTypes, documentFileTypes, scriptFileTypes, TemplateType } from "../types/file-type";
 import React from "react";
-import { getPreferenceValues, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { NewFileHereEmptyView } from "./new-file-here-empty-view";
 import { getDetail, isImage } from "../utils/common-utils";
 import { parse } from "path";
 import { ActionNewTemplateFileHere } from "./action-new-template-file-here";
 import { NewFileHereItem } from "./new-file-here-item";
-import { Preferences } from "../types/preferences";
+import { layout, showCode, showDocument, showScript } from "../types/preferences";
 
 export function NewFileHereListLayout(props: {
   navigationTitle: string;
@@ -16,7 +16,6 @@ export function NewFileHereListLayout(props: {
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
 }) {
   const { navigationTitle, isLoading, templateFiles, folder, setRefresh } = props;
-  const { layout, showDocument, showCode, showScript } = getPreferenceValues<Preferences>();
 
   return (
     <List
@@ -28,7 +27,7 @@ export function NewFileHereListLayout(props: {
     >
       <NewFileHereEmptyView
         layout={layout}
-        title={"No templates"}
+        title={"No Templates"}
         description={"You can add template from the Action Panel"}
         setRefresh={setRefresh}
       />

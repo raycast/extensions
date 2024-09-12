@@ -105,6 +105,14 @@ export function resetInterval() {
   cache.remove(CURRENT_INTERVAL_CACHE_KEY);
 }
 
+export function restartInterval() {
+  const currentInterval = getCurrentInterval();
+  if (currentInterval) {
+    const { type } = currentInterval;
+    createInterval(type, false); // Uses existing caching mechanism to reset interval
+  }
+}
+
 export function getCurrentInterval(): Interval | undefined {
   const result = cache.get(CURRENT_INTERVAL_CACHE_KEY);
   if (result) {

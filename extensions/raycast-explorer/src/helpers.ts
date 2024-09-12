@@ -1,6 +1,6 @@
 import { Icon, environment } from "@raycast/api";
 
-export const CONTRIBUTE_URL = "https://github.com/raycast/extensions/edit/main/extensions/raycast-explorer";
+export const CONTRIBUTE_URL = "https://github.com/raycast/ray-so";
 
 export function wrapInCodeBlock(text: string, language = "sh") {
   const backticks = "```";

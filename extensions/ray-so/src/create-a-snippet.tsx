@@ -15,7 +15,13 @@ interface Values {
 }
 interface Data {
   languages: { id: string; name: string }[];
-  themes: { id: string; name: string; iconUrl?: string; partner?: boolean }[];
+  themes: {
+    id: string;
+    name: string;
+    background: { from: string; to: string };
+    iconUrl?: string;
+    partner?: boolean;
+  }[];
   padding: number[];
 }
 const defaultSnippet: Values = {
@@ -30,7 +36,7 @@ const defaultSnippet: Values = {
 
 export default function CreateSnippet() {
   const [code, setCode] = useState<Values>(defaultSnippet);
-  const { data: data } = useFetch<Data>("https://ray.so/api/config");
+  const { data } = useFetch<Data>("https://ray.so/api/config");
   const url = `https://ray.so/#theme=${code.color}&background=${code.background}&darkMode=${code.darkMode}&padding=${
     code.padding
   }&title=${code.title || "Untitled%201"}&code=${encodeURI(code.snippet)}&language=${code.language}`;
@@ -86,6 +92,7 @@ export default function CreateSnippet() {
                   icon={{
                     source: `${theme.iconUrl}`,
                     tintColor: ["vercel", "rabbit"].includes(theme.id) ? Color.PrimaryText : undefined,
+                    fallback: getGradientIconDataURL(theme.background),
                   }}
                   value={theme.id}
                   title={theme.name}
@@ -98,7 +105,7 @@ export default function CreateSnippet() {
             !theme.partner && (
               <Form.Dropdown.Item
                 key={theme.id}
-                icon={{ source: `${theme.id}.png` }}
+                icon={{ source: getGradientIconDataURL(theme.background) }}
                 value={theme.id}
                 title={theme.name}
               />
@@ -144,4 +151,18 @@ export default function CreateSnippet() {
       </Form.Dropdown>
     </Form>
   );
+}
+
+function getGradientIconDataURL({ from, to }: Data["themes"][0]["background"]) {
+  const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1" viewBox="0 0 24 24" >
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:${from};" />
+      <stop offset="100%" style="stop-color:${to};" />
+    </linearGradient>
+  </defs>
+  <circle cx="12" cy="12" r="12" fill="url(#gradient)" />
+</svg>`;
+  return `data:image/svg+xml;base64,${btoa(svg)}`;
 }

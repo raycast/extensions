@@ -5,8 +5,9 @@ import { partition } from "lodash";
 import { useMemo, useState } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
-import NotificationListItem from "./components/NotificationListItem";
+import NotificationListItem, { Notification } from "./components/NotificationListItem";
 import RepositoriesDropdown from "./components/RepositoryDropdown";
+import { getNotificationIcon } from "./helpers/notifications";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
 
@@ -25,12 +26,17 @@ function Notifications() {
     mutate: mutateList,
   } = useCachedPromise(async () => {
     const response = await octokit.rest.activity.listNotificationsForAuthenticatedUser({ all: true });
-    return response.data;
+    return Promise.all(
+      response.data.map(async (notification: Notification) => {
+        const icon = await getNotificationIcon(notification);
+        return { ...notification, icon };
+      }),
+    );
   });
 
   const notifications = useMemo(() => {
     if (selectedRepository) {
-      return data?.filter((notification) => notification.repository.full_name === selectedRepository);
+      return data?.filter((notification: Notification) => notification.repository.full_name === selectedRepository);
     }
 
     return data;

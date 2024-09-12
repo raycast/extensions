@@ -1,5 +1,9 @@
 # Lark Changelog
 
+## [Update] - 2024-07-04
+
+- Support emoji icon
+
 ## [Update] - 2024-02-15
 
 - Support search Lark Minutes

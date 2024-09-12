@@ -1,13 +1,14 @@
 import { showHUD } from "@raycast/api";
 import { execSync } from "node:child_process";
 import { bclmPath, confirmAlertBrew } from "./utils/initBCLM";
-import { add_system_service } from "./utils/getPreference";
+import { preferences } from "./utils/getPreference";
 import { confirmAlertPersist } from "./utils/confirmAlertPersist";
 
 export async function getChargeThreshold(HUDMessage?: string) {
-  const detect_brew = await confirmAlertBrew();
-  if (typeof detect_brew === "boolean") {
-    return;
+  const detectBrew = await confirmAlertBrew();
+
+  if (!detectBrew) {
+    return; // Return if bclm is not detected and user does not confirm installation
   }
 
   const batteryLevel = execSync(`${bclmPath()} read`).toString().trim();
@@ -19,17 +20,22 @@ export async function getChargeThreshold(HUDMessage?: string) {
 }
 
 export async function setBatteryThreshold(threshold: number, HUDMessage?: string) {
-  const detect_brew = await confirmAlertBrew();
-  if (typeof detect_brew === "boolean") {
-    return;
+  const detectBrew = await confirmAlertBrew();
+
+  if (!detectBrew) {
+    return; // Return if bclm is not detected and user does not confirm installation
   }
 
   if (await confirmAlertPersist()) {
     return;
   }
 
-  const shellCommand = `${bclmPath()} write ${threshold} && ${bclmPath()} ${add_system_service() && threshold === 80 ? "persist" : "unpersist"}`;
+  const addSystemService = preferences.add_system_service;
+  const shellCommand = `${bclmPath()} write ${threshold} && ${bclmPath()} ${
+    addSystemService && threshold === 80 ? "persist" : "unpersist"
+  }`;
   await showHUD("Administrator Privileges Required");
+
   const osaCommand = `/usr/bin/osascript -e 'do shell script "${shellCommand}" with prompt "Administrator Privileges Required" with administrator privileges'`;
   try {
     execSync(osaCommand, { shell: "/bin/zsh" });

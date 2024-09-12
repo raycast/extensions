@@ -11,6 +11,7 @@ import {
   slackCreateInterval,
   slackPauseInterval,
   slackResetInterval,
+  slackRestartInterval,
 } from "../lib/slack/slackIntervals";
 
 const createAction = (action: () => Promise<void> | Promise<Interval | undefined>) => async () => {
@@ -63,6 +64,15 @@ const ActionsList = () => {
             actions={
               <ActionPanel>
                 <Action onAction={createAction(async () => slackResetInterval(token))} title={"Reset"} />
+              </ActionPanel>
+            }
+          />
+          <List.Item
+            title="Restart Current"
+            icon={Icon.Repeat}
+            actions={
+              <ActionPanel>
+                <Action onAction={createAction(async () => slackRestartInterval(token))} title={"Restart Current"} />
               </ActionPanel>
             }
           />

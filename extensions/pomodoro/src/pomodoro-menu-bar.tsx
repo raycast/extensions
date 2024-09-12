@@ -5,6 +5,7 @@ import {
   createInterval,
   getCurrentInterval,
   resetInterval,
+  restartInterval,
   pauseInterval,
   continueInterval,
   isPaused,
@@ -46,6 +47,11 @@ export default function TogglePomodoroTimer() {
     setCurrentInterval(undefined);
   }
 
+  function onRestart() {
+    restartInterval();
+    setCurrentInterval(getCurrentInterval());
+  }
+
   let icon: Image.ImageLike;
   icon = { source: "tomato-0.png", tintColor: IconTint };
   if (currentInterval) {
@@ -83,6 +89,12 @@ export default function TogglePomodoroTimer() {
             icon={Icon.Stop}
             onAction={onReset}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
+          />
+          <MenuBarExtra.Item
+            title="Restart Current"
+            icon={Icon.Repeat}
+            onAction={onRestart}
+            shortcut={{ modifiers: ["cmd"], key: "t" }}
           />
         </>
       ) : (

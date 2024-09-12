@@ -12,9 +12,10 @@ import path from "path";
 
 import { Color, Icon, List } from "@raycast/api";
 
-import { SORT_STRATEGY } from "./constants";
+import { SORT_STRATEGY, Visibility } from "./constants";
 import { Group } from "./Groups";
-import { Pin } from "./Pins";
+import { getLinkedPins, Pin } from "./Pins";
+import { pluralize } from "./utils";
 
 /**
  * Maps an amount to a color, based on the maximum amount, hinting at relative intensity.
@@ -52,6 +53,25 @@ export const addFrequencyAccessory = (pin: Pin, accessories: List.Item.Accessory
     accessories.push({
       tag: { value: pin.timesOpened.toString(), color: mapAmountToColor(pin.timesOpened, maxFrequency) },
       tooltip: `Opened ${pin.timesOpened} Time${pin.timesOpened == 1 ? "" : "s"}`,
+      icon: Icon.PlayFilled,
+    });
+  }
+};
+
+/**
+ * Adds an accessory indicating the number of linked pins to the given list of accessories.
+ * @param pin The pin to add the accessory for.
+ * @param accessories The list of accessories to add the link accessory to.
+ * @param pins The list of all pins.
+ * @param groups The list of all groups.
+ */
+export const addLinksAccessory = (pin: Pin, accessories: List.Item.Accessory[], pins: Pin[], groups: Group[]) => {
+  const linkCount = getLinkedPins(pin, pins, groups).length;
+  if (linkCount > 0) {
+    accessories.push({
+      tag: { value: linkCount.toString(), color: Color.SecondaryText },
+      tooltip: `${linkCount} Linked ${pluralize("Pin", linkCount)}`,
+      icon: Icon.Link,
     });
   }
 };
@@ -121,6 +141,26 @@ export const addApplicationAccessory = (pin: Pin, accessories: List.Item.Accesso
 };
 
 /**
+ * Adds a visibility accessory to the given list of accessories.
+ * @param pin The pin to add the accessory for.
+ * @param accessories The list of accessories to add the visibility accessory to.
+ */
+export const addVisibilityAccessory = (pin: Pin, accessories: List.Item.Accessory[], showingHidden: boolean) => {
+  if (pin.visibility === Visibility.MENUBAR_ONLY) {
+    accessories.push({ tag: { value: "Menubar Only", color: Color.Blue }, tooltip: "Visible in Menubar Only" });
+  } else if (pin.visibility === Visibility.VIEW_PINS_ONLY && showingHidden) {
+    accessories.push({
+      tag: { value: "'View Pins' Only", color: Color.Purple },
+      tooltip: "Visible in 'View Pins' Only",
+    });
+  } else if (pin.visibility === Visibility.HIDDEN) {
+    accessories.push({ tag: "Hidden", tooltip: "Hidden — Use Deeplinks to Open" });
+  } else if (pin.visibility === Visibility.DISABLED) {
+    accessories.push({ tag: { value: "Disabled", color: Color.Red }, tooltip: "Pin Disabled — Cannot be Opened" });
+  }
+};
+
+/**
  * Adds an execution visibility accessory to the given list of accessories, indicating whether the pin will execute in the background or in a new terminal tab.
  * @param pin The pin to add the accessory for.
  * @param accessories The list of accessories to add the execution visibility accessory to.
@@ -156,12 +196,14 @@ export const addTextFragmentAccessory = (pin: Pin, accessories: List.Item.Access
  * @param accessories The list of accessories to add the sorting strategy accessory to.
  */
 export const addSortingStrategyAccessory = (group: Group, accessories: List.Item.Accessory[]) => {
-  accessories.push({
-    tag: {
-      value: SORT_STRATEGY[group.sortStrategy || ("Not Set" as keyof typeof SORT_STRATEGY)],
-      color: Color.SecondaryText,
-    },
-  });
+  if (group.sortStrategy !== undefined) {
+    accessories.push({
+      tag: {
+        value: SORT_STRATEGY[group.sortStrategy],
+        color: Color.SecondaryText,
+      },
+    });
+  }
 };
 
 /**

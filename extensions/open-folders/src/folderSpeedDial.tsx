@@ -1,4 +1,4 @@
-import { open, getPreferenceValues, Grid, ActionPanel, Action } from "@raycast/api";
+import { Action, ActionPanel, Grid, getPreferenceValues, open } from "@raycast/api";
 
 const preferences = getPreferenceValues<Preferences.FolderSpeedDial>();
 
@@ -38,7 +38,7 @@ export default function Command() {
       {Array.from(directories, ([key, value]) => (
         <Grid.Item
           key={key.valueOf()}
-          title={`| ${key} | value.substring(value.lastIndexOf('/') + 1, value.length)`}
+          title={`| ${key} | ${value.substring(value.lastIndexOf("/") + 1, value.length)}`}
           content={{ fileIcon: value }}
           actions={
             <ActionPanel>
