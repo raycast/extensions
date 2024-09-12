@@ -44,9 +44,13 @@ export default function Command() {
                           key={index}
                           text={address}
                           color={address.status}
-                          onAction={() => {
-                            open(`http://${address}`);
-                          }}
+                          onAction={
+                            address.available
+                              ? () => {
+                                  open(`http://${address}`);
+                                }
+                              : undefined
+                          }
                         />
                       ))}
                     </List.Item.Detail.Metadata.TagList>

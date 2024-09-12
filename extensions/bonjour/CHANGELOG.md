@@ -1,5 +1,9 @@
 # Bonjour Changelog
 
+## [Minor Improvements] - 2024-09-12
+
+- add status indicator to menu bar
+
 ## [Improvements] - 2024-09-11
 
 - add status indicators
