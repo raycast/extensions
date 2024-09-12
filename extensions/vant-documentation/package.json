@@ -15,7 +15,6 @@
     {
       "name": "index",
       "title": "Search Vant Documentation",
-      "subtitle": "Vant",
       "description": "Search Vant documentation from Raycast",
       "mode": "view"
     }
