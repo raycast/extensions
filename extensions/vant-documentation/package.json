@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vant-documentation",
-  "title": "Searching Vant Documentation",
+  "title": "Search Vant Documentation",
   "description": "Search Vant documentation (v4)",
   "icon": "vant-icon.png",
   "author": "cai_aisen",
