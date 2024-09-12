@@ -1,6 +1,6 @@
 # Webflow Extension by Peeks Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2024-09-12
 
 - Update logos
 - "New Site" action has a shortcut
