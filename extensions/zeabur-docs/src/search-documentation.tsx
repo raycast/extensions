@@ -1,27 +1,24 @@
 import { List, ActionPanel, Action } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { Language, Documentation } from "./type";
 import { getLanguages, getDocumentation } from "./util";
-import { useState } from "react";
 
 export default function Command() {
-  const [languages, setLanguages] = useState<Language[]>([]);
-  const [documentation, setDocumentation] = useState<Documentation>({});
-  const [currentLanguage, setCurrentLanguage] = useState<string>("");
+  const [currentLanguage, setCurrentLanguage] = useCachedState<string>("language", "");
 
-  const { isLoading } = useCachedPromise(async () => {
-    const lang = await getLanguages();
-    setLanguages(lang as Language[]);
-    const doc = await getDocumentation();
-    setDocumentation(doc as Documentation);
+  const { data, isLoading } = useCachedPromise(async () => {
+    const lang = (await getLanguages()) as Language[];
+    const doc = (await getDocumentation()) as Documentation;
+
+    return { lang, doc };
   });
 
-  const currentDoc = documentation[currentLanguage];
+  const currentDoc = data?.doc[currentLanguage];
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="search documentation"
+      searchBarPlaceholder="Search documentation"
       searchBarAccessory={
         <List.Dropdown
           tooltip="Language of Zeabur Docs"
@@ -30,7 +27,7 @@ export default function Command() {
             setCurrentLanguage(value);
           }}
         >
-          {languages.map((lang: Language) => (
+          {data?.lang.map((lang: Language) => (
             <List.Dropdown.Item key={lang.locale} title={lang.text} value={lang.locale} />
           ))}
         </List.Dropdown>
