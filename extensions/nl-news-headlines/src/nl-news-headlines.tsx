@@ -49,12 +49,6 @@ const checkCacheValidity = (
   return !!cachedData && cachedLanguage === currentLanguage;
 };
 
-// Define interfaces for type safety
-interface Preferences {
-  language: string;
-  showCategories: boolean;
-}
-
 interface NewsSource {
   name: string;
   url: string;
