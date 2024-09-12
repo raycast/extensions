@@ -13,7 +13,7 @@ const LANGUAGES: Language[] = [
     value: "enUS",
   },
   {
-    label: "中文 (简体)",
+    label: "China",
     value: "zhCN",
   },
 ];
