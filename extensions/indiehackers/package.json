@@ -35,7 +35,7 @@
               "value": "newest"
             }
           ],
-          "placeholder": "TYPE"
+          "placeholder": "Type"
         }
       ]
     },
@@ -68,7 +68,7 @@
               "value": "all-time"
             }
           ],
-          "placeholder": "TIME"
+          "placeholder": "Time"
         }
       ]
     },
@@ -85,32 +85,44 @@
           "type": "dropdown",
           "data": [
             {
+              "title": "12 Startups in 12 Months",
+              "value": "12-startups-in-12-months"
+            },
+            {
               "title": "Building in Public",
               "value": "building-in-public"
+            },
+            {
+              "title": "Developers",
+              "value": "developers"
             },
             {
               "title": "Growth",
               "value": "growth"
             },
             {
-              "title": "12 Startups in 12 Months",
-              "value": "12-startups-in-12-months"
+              "title": "Ideas and Validation",
+              "value": "ideas-and-validation"
+            },
+            {
+              "title": "No-Code",
+              "value": "no-code"
             }
           ],
-          "placeholder": "POPULAR_GROUP"
+          "placeholder": "Popular Group"
         },
         {
           "name": "group_slug",
           "required": false,
           "type": "text",
-          "placeholder": "GROUP_SLUG"
+          "placeholder": "OR Group Slug"
         }
       ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.81.0",
-    "@raycast/utils": "^1.16.4",
+    "@raycast/utils": "^1.17.0",
     "rss-parser": "^3.13.0"
   },
   "devDependencies": {

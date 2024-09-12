@@ -7,7 +7,14 @@ import getGroupIcon from "./get-group-icon";
 
 export default function BrowseByGroup(props: LaunchProps<{ arguments: Arguments.BrowseByGroup }>) {
   function getRandomGroup() {
-    const groups = ["building-in-public", "growth", "12-startups-in-12-months"];
+    const groups = [
+      "12-startups-in-12-months",
+      "building-in-public",
+      "developers",
+      "growth",
+      "ideas-and-validation",
+      "no-code",
+    ];
     const random = groups[Math.floor(Math.random() * groups.length)];
     showToast(Toast.Style.Success, "Show articles in random group", random);
     return random;

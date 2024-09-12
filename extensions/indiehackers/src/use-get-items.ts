@@ -6,7 +6,7 @@ export default function useGetItems(feedUrl: string) {
   const { isLoading, data: items } = useCachedPromise(
     async (url: string) => {
       const feed = await parser.parseURL(url);
-      return feed.items
+      const filtered = feed.items
         .filter((item) => item.title)
         .map((item) => ({
           title: `${item.title}`,
@@ -16,6 +16,8 @@ export default function useGetItems(feedUrl: string) {
           categories: item.categories || [],
           isoDate: `${item.isoDate}`,
         }));
+      const unique = [...new Map(filtered.map((item) => [item.guid, item])).values()];
+      return unique;
     },
     [feedUrl],
     {

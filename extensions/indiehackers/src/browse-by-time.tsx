@@ -3,6 +3,7 @@ import { useCachedState } from "@raycast/utils";
 import { useState } from "react";
 import Items from "./items";
 import useGetItems from "./use-get-items";
+import getTimeTitle from "./get-time-title";
 
 export default function BrowseByTime(props: LaunchProps<{ arguments: Arguments.BrowseByTime }>) {
   const [time, setTime] = useState<string>(props.arguments.time);
@@ -13,14 +14,14 @@ export default function BrowseByTime(props: LaunchProps<{ arguments: Arguments.B
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search posts"
+      searchBarPlaceholder={`Search ${getTimeTitle(time as Arguments.BrowseByTime["time"])} posts`}
       isShowingDetail={isShowingDetail}
       searchBarAccessory={
         <List.Dropdown tooltip="Type" defaultValue={time} onChange={setTime}>
           <List.Dropdown.Item title="Today" value="today" />
-          <List.Dropdown.Item title="Week" value="week" />
-          <List.Dropdown.Item title="Month" value="month" />
-          <List.Dropdown.Item title="All-Time" value="all-time" />
+          <List.Dropdown.Item title="This Week" value="week" />
+          <List.Dropdown.Item title="This Month" value="month" />
+          <List.Dropdown.Item title="All Time" value="all-time" />
         </List.Dropdown>
       }
     >
