@@ -307,7 +307,7 @@ const runScript = async (props: {
 }) => {
   const { scriptPath } = props;
   console.log(scriptPath);
-  
+
   // try access it first
   if (!(await pathExists(scriptPath))) {
     console.log("Incorrect File Path");
