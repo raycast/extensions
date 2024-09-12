@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Fix copy commit tree URL action] - {PR_MERGE_DATE}
+
+- Fix the "Copy Commit Tree URL" action to ensure it correctly copies the commit Tree URL as intended.
+
 ## [Clone Repo Fixes] - 2024-08-20
 
 - [#13872](https://github.com/raycast/extensions/issues/13872): Brought back the feature for Raycast to act as a fast brower to open cloned repo.
