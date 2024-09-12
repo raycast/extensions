@@ -7,19 +7,25 @@ export const cache = new Cache();
 
 declare global {
   interface String {
+    get available(): boolean;
     get status(): Color;
   }
 }
 
 Object.defineProperties(String.prototype, {
-  status: {
+  available: {
     get: function () {
       try {
-        execSync(`curl -I http://${this}`);
-        return Color.Green;
+        return !!execSync(`curl -I http://${this}`);
       } catch {
-        return Color.Red;
+        return false;
       }
+    },
+  },
+
+  status: {
+    get: function () {
+      return this.available ? Color.Green : Color.Red;
     },
   },
 });
