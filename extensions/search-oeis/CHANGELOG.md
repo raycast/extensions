@@ -1,3 +1,3 @@
 # Search OEIS Changelog
 
-## [Initial Version] - 2024-09-01
+## [Initial Version] - {PR_MERGE_DATE}
