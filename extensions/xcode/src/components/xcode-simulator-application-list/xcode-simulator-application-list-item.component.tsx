@@ -1,5 +1,5 @@
 import { XcodeSimulatorApplication } from "../../models/xcode-simulator/xcode-simulator-application.model";
-import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { XcodeSimulatorService } from "../../services/xcode-simulator.service";
 import { XcodeSimulatorAppAction } from "../../models/xcode-simulator/xcode-simulator-app-action.model";
 import { XcodeSimulatorAppPrivacyAction } from "../../models/xcode-simulator/xcode-simulator-app-privacy-action.model";
@@ -94,6 +94,47 @@ export function XcodeSimulatorApplicationListItem(props: { application: XcodeSim
                 )
               }
               shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+            />
+            <Action
+              icon={Icon.Trash}
+              title="Delete App Data"
+              style={Action.Style.Destructive}
+              onAction={() =>
+                confirmAlert({
+                  title: "Delete App Data",
+                  message:
+                    "This will delete app container folder and app group folder without uninstalling. Are you sure you want to continue?",
+                  primaryAction: {
+                    title: "Delete",
+                    style: Alert.ActionStyle.Destructive,
+                    onAction: async () => {
+                      // Terminate the app if it's active
+                      XcodeSimulatorService.app(
+                        XcodeSimulatorAppAction.terminate,
+                        props.application.bundleIdentifier,
+                        props.application.simulator
+                      ).then();
+                      try {
+                        await XcodeSimulatorService.deleteAppFiles(
+                          props.application.sandBoxPath,
+                          props.application.appGroupPath
+                        );
+                        await showToast({
+                          title: "App data deleted",
+                          message: `${props.application.name} app data has been deleted`,
+                        });
+                      } catch (error: any) {
+                        await showToast({
+                          title: "Error Deleting app data",
+                          style: Toast.Style.Failure,
+                          message: error.message,
+                        });
+                      }
+                    },
+                  },
+                })
+              }
+              shortcut={{ modifiers: ["cmd"], key: "x" }}
             />
             <Action
               icon={Icon.Trash}
