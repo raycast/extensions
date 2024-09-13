@@ -1,5 +1,9 @@
 # Xcode Changelog
 
+## [Search Recent Projects Improvements] - {PR_MERGE_DATE}
+
+- Improved the "Search Recent Projects" command to remember the last filter option..
+
 ## [Clear SwiftUI Previews Cache] - 2024-04-03
 
 - Added "Clear SwiftUI Previews Cache" command to remove the ~/Library/Developer/Xcode/UserData/Previews directory

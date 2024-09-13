@@ -14,6 +14,7 @@ export function XcodeProjectListSearchBarAccessory(props: {
       onChange={(projectType) =>
         props.onChange(projectType ? XcodeProjectType[projectType as keyof typeof XcodeProjectType] : undefined)
       }
+      storeValue={true}
       tooltip="Filter projects by type"
     >
       <List.Dropdown.Item key="all" value={""} title="All" />
