@@ -11,8 +11,8 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
   const res = await openai.chat.completions.create({
     model: model,
     messages: [
-        { role: "system", content: prompt },
-        { role: "user", content: selectedText }
+      { role: "system", content: prompt },
+      { role: "user", content: selectedText },
     ],
   });
   const text = res.choices[0]?.message?.content?.trim() || "";
