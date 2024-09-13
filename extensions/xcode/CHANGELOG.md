@@ -2,7 +2,7 @@
 
 ## [Search Recent Projects Improvements] - {PR_MERGE_DATE}
 
-- Improved the "Search Recent Projects" command to remember the last filter option..
+- Improved the "Search Recent Projects" command to remember the last filter option
 
 ## [Clear SwiftUI Previews Cache] - 2024-04-03
 
