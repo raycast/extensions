@@ -57,7 +57,7 @@
       "description": "Toggle to show or hide category tags for news items",
       "type": "checkbox",
       "required": false,
-      "default": true,
+      "default": false,
       "label": "Show Categories"
     }
   ]
