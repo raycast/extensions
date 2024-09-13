@@ -45,9 +45,18 @@
       "type": "dropdown",
       "required": false,
       "data": [
-        { "title": "System Default", "value": "system" },
-        { "title": "Dutch", "value": "nl" },
-        { "title": "English", "value": "en" }
+        {
+          "title": "System Default",
+          "value": "system"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        }
       ],
       "default": "system"
     },
