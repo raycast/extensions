@@ -1,9 +1,10 @@
 import { showHUD, Clipboard } from "@raycast/api";
-import { addToQueue } from "./helper.js";
+import { addToQueue, isValidLink } from "./helper.js";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function main() {
   const clip = await Clipboard.readText();
-  if (clip) {
+  if (clip && isValidLink(clip)) {
     await showHUD("Sending clipboard to MeTube...");
     const response = await addToQueue(clip);
 
@@ -12,6 +13,9 @@ export default async function main() {
     } else {
       await showHUD(`❌ ${response.msg}`);
     }
+  } else if (clip && !isValidLink(clip)) {
+    showFailureToast("Clipboard does not contain a valid link", { title: "Invalid link" });
+    // await showHUD("❌ No valid link in your clipboard");
   } else {
     await showHUD("Something went wrong.");
   }
