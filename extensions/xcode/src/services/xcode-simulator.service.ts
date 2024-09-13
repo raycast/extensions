@@ -220,7 +220,7 @@ export class XcodeSimulatorService {
   }
 
   /**
-   * Deletes App Files without uninstalling the app 
+   * Deletes App Files without uninstalling the app
    * @param containerPath App Container Directory
    * @param appGroupPath App Group Directory
    */
