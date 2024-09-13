@@ -29,7 +29,7 @@ function AutomationTurnOnMenubarItem(props: { state: State }) {
   return (
     <AutomationMenubarItemBase
       state={props.state}
-      icon="power-btn.png"
+      icon="power.svg"
       title="Turn On"
       actionFunction={callAutomationTurnOnService}
       hide={props.state.state === "on"}
@@ -41,7 +41,7 @@ function AutomationTurnOffMenubarItem(props: { state: State }) {
   return (
     <AutomationMenubarItemBase
       state={props.state}
-      icon="power-btn.png"
+      icon="power-on.svg"
       title="Turn Off"
       actionFunction={callAutomationTurnOffService}
       hide={props.state.state === "off"}

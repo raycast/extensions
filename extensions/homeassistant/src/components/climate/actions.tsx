@@ -34,9 +34,8 @@ export function ClimateActionPanel(props: { state: State }) {
       <ActionPanel.Section title="Controls">
         {changeTempAllowed && (
           <ActionPanel.Submenu
-            title={`Temperature (${currentTemp || "?"})`}
-            shortcut={{ modifiers: ["cmd"], key: "t" }}
-            icon={{ source: "temperature.png", tintColor: Color.PrimaryText }}
+            title={`Set Temperature`}
+            icon={{ source: Icon.Temperature, tintColor: Color.PrimaryText }}
           >
             {temps.map((t) => (
               <Action
@@ -50,18 +49,53 @@ export function ClimateActionPanel(props: { state: State }) {
             ))}
           </ActionPanel.Submenu>
         )}
+
         {state.attributes.hvac_modes && (
-          <ActionPanel.Submenu
-            title={`Operation (${state.state})`}
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
-            icon={{ source: Icon.Gear, tintColor: Color.PrimaryText }}
-          >
+          <ActionPanel.Submenu title={`Set Operation Mode`} icon={{ source: Icon.Gear, tintColor: Color.PrimaryText }}>
             {state.attributes.hvac_modes?.map((o: string) => (
               <Action
                 key={o}
                 title={o}
                 onAction={async () => {
-                  await ha.setClimateOperation(entityID, o);
+                  await ha.setClimateOperationMode(entityID, o);
+                  popToRoot();
+                }}
+              />
+            ))}
+          </ActionPanel.Submenu>
+        )}
+
+        {state.attributes.fan_modes && (
+          <ActionPanel.Submenu
+            title={`Set Fan Mode`}
+            icon={{ source: Icon.Gear, tintColor: Color.PrimaryText }}
+            shortcut={{ modifiers: ["cmd"], key: "f" }}
+          >
+            {state.attributes.fan_modes?.map((o: string) => (
+              <Action
+                key={o}
+                title={o}
+                onAction={async () => {
+                  await ha.setClimateFanMode(entityID, o);
+                  popToRoot();
+                }}
+              />
+            ))}
+          </ActionPanel.Submenu>
+        )}
+
+        {state.attributes.swing_modes && (
+          <ActionPanel.Submenu
+            title={`Set Swing Mode`}
+            icon={{ source: Icon.Gear, tintColor: Color.PrimaryText }}
+            shortcut={{ modifiers: ["cmd"], key: "s" }}
+          >
+            {state.attributes.swing_modes?.map((o: string) => (
+              <Action
+                key={o}
+                title={o}
+                onAction={async () => {
+                  await ha.setClimateSwingMode(entityID, o);
                   popToRoot();
                 }}
               />
@@ -90,24 +124,24 @@ export function ClimateActionPanel(props: { state: State }) {
 
         {upperTemp && changeTempAllowed && (
           <Action
-            title={`Increase Temp. ${tempStep}`}
+            title={`Increase Temperature`}
             shortcut={{ modifiers: ["cmd"], key: "+" }}
             onAction={async () => {
               await ha.setClimateTemperature(entityID, upperTemp);
               setCurrentTemp(upperTemp);
             }}
-            icon={{ source: "plus.png", tintColor: Color.PrimaryText }}
+            icon={{ source: "plus.svg", tintColor: Color.PrimaryText }}
           />
         )}
         {lowerTemp && changeTempAllowed && (
           <Action
-            title={`Decrease Temp. ${tempStep}`}
+            title={`Decrease Temperature`}
             shortcut={{ modifiers: ["cmd"], key: "-" }}
             onAction={async () => {
               await ha.setClimateTemperature(entityID, lowerTemp);
               setCurrentTemp(lowerTemp);
             }}
-            icon={{ source: "minus.png", tintColor: Color.PrimaryText }}
+            icon={{ source: "minus.svg", tintColor: Color.PrimaryText }}
           />
         )}
       </ActionPanel.Section>
