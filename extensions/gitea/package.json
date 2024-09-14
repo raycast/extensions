@@ -1,0 +1,158 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gitea",
+  "title": "Gitea",
+  "description": "Manage your Gitea instance",
+  "icon": "extension-icon.png",
+  "author": "maantje",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-issue",
+      "title": "Create Issue",
+      "description": "Create issue",
+      "mode": "view"
+    },
+    {
+      "name": "search-issues",
+      "title": "Search Issues",
+      "description": "Search issues",
+      "mode": "view"
+    },
+    {
+      "name": "search-assigned-issues",
+      "title": "Search Assigned Issues",
+      "description": "Search issues assigned to you",
+      "mode": "view"
+    },
+    {
+      "name": "search-assigned-pull-requests",
+      "title": "Search Assigned Pull Requests",
+      "description": "Search pull requests assigned to you",
+      "mode": "view"
+    },
+    {
+      "name": "search-review-requested-pull-requests",
+      "title": "Search Review Requested Pull Requests",
+      "description": "Search pull requests you are requested to review",
+      "mode": "view"
+    },
+    {
+      "name": "search-pull-requests",
+      "title": "Search Pull Requests",
+      "description": "Search pull requests",
+      "mode": "view"
+    },
+    {
+      "name": "search-repositories",
+      "title": "Search Repositories",
+      "description": "Search repositories",
+      "mode": "view"
+    },
+    {
+      "name": "search-packages",
+      "title": "Search Packages",
+      "description": "Search packages",
+      "mode": "view"
+    },
+    {
+      "name": "search-organizations",
+      "title": "Search Organizations",
+      "description": "Search organizations",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.82.5",
+    "@raycast/utils": "^1.16.3",
+    "axios": "^1.7.7",
+    "zod": "^3.23.8"
+  },
+  "preferences": [
+    {
+      "title": "Instance URL",
+      "type": "textfield",
+      "name": "url",
+      "description": "URL of your Gitea instance",
+      "required": true
+    },
+    {
+      "title": "Default Organization",
+      "type": "textfield",
+      "name": "organization",
+      "description": "Default organization to use when all is not available",
+      "required": false
+    },
+    {
+      "title": "Access Token",
+      "type": "password",
+      "name": "token",
+      "description": "Enter your access token from /user/settings/applications here",
+      "required": true
+    },
+    {
+      "title": "Default Issue State",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "All",
+          "value": "all"
+        },
+        {
+          "title": "Open",
+          "value": "open"
+        },
+        {
+          "title": "Closed",
+          "value": "closed"
+        }
+      ],
+      "name": "defaultIssuesState",
+      "default": "open",
+      "description": "Default issue state when searching",
+      "required": false
+    },
+    {
+      "title": "Default Pull Requests State",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "All",
+          "value": "all"
+        },
+        {
+          "title": "Open",
+          "value": "open"
+        },
+        {
+          "title": "Closed",
+          "value": "closed"
+        }
+      ],
+      "name": "defaultPullsState",
+      "default": "open",
+      "description": "Default pulls state when searching",
+      "required": false
+    }
+  ],
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
