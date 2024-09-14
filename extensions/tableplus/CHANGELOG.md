@@ -1,5 +1,9 @@
 # TablePlus Changelog
 
+## [Update] - 2024-09-13
+
+- Show hierarhcy of the groups in the List sections (Parent group - Child group)
+
 ## [Update] - 2024-08-21
 
 - Updated Tag colors to be similar to TablePlus defaults (closes #4231)
