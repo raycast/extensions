@@ -52,7 +52,8 @@ export const PromptDetail = ({ prompt }: Props) => {
               }}
             />
             <Action.OpenInBrowser
-              title="Open in Cursor.directory"
+              // eslint-disable-next-line @raycast/prefer-title-case
+              title="Open in cursor.directory"
               icon={Icon.Link}
               url={`https://cursor.directory/${prompt.slug}`}
             />
