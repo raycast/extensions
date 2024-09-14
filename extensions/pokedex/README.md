@@ -7,7 +7,7 @@ A [Raycast](https://raycast.com/) extenstion that lets you search for a Pokémon
 
 This extension is made by [Anh Thang Bui](https://github.com/anhthang) and uses [PokéAPI](https://pokeapi.co/).
 
-![Example](./metadata/pokedex-02.png)
+![Example](./metadata/pokedex-3.png)
 
 ## Features
 
@@ -24,10 +24,12 @@ This extension is made by [Anh Thang Bui](https://github.com/anhthang) and uses 
       - Evolutions
       - Pokédex entries
       - Learnset
+      - Type effectiveness
     - Open in the Official Pokémon Website, Open in Bulbapedia.
     - Filter by Pokémon type
   - Moves
   - Abilities
+  - Weaknesses
 - [x] ⚙️ Preference
   - Pokémon details by preferred language. Supported: English (default), French, German, Italian, Japanese, Korean, Spanish, Chinese (Simplified & Traditional).
 

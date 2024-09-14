@@ -16,6 +16,7 @@ import {
 } from "../types";
 import PokemonMoves from "./move";
 import PokedexEntries from "./dex";
+import { calculateEffectiveness, typeColor } from "../utils";
 
 const { language } = getPreferenceValues();
 
@@ -32,27 +33,6 @@ enum GrowthRate {
   "Fluctuating" = 6,
 }
 
-const typeColor: { [key: string]: string } = {
-  normal: "#a8a77a",
-  fire: "#ee8130",
-  water: "#6390f0",
-  electric: "#f7d02c",
-  grass: "#7ac74c",
-  ice: "#96d9d6",
-  fighting: "#c22e28",
-  poison: "#a33ea1",
-  ground: "#e2bf65",
-  flying: "#a98ff3",
-  psychic: "#f95587",
-  bug: "#a6b91a",
-  rock: "#b6a136",
-  ghost: "#735797",
-  dragon: "#6f35fc",
-  dark: "#705746",
-  steel: "#b7b7ce",
-  fairy: "#d685ad",
-};
-
 function random(lower: number, upper: number) {
   return lower + Math.floor(Math.random() * (upper - lower + 1));
 }
@@ -62,12 +42,24 @@ export default function PokemonDetail(props: { id?: number }) {
   const [pokemon, setPokemon] = useState<PokemonV2Pokemon | undefined>(
     undefined,
   );
+  const [effectiveness, setEffectiveness] = useState<{
+    normal: string[];
+    weak: string[];
+    immune: string[];
+    resistant: string[];
+  }>({ normal: [], weak: [], immune: [], resistant: [] });
 
   useEffect(() => {
     setLoading(true);
     getPokemon(props.id || random(1, 905), Number(language))
       .then((data) => {
         setPokemon(data[0]);
+
+        const typeEffectiveness = calculateEffectiveness(
+          data[0].pokemon_v2_pokemontypes,
+        );
+        setEffectiveness(typeEffectiveness);
+
         setLoading(false);
       })
       .catch(() => {
@@ -391,6 +383,40 @@ export default function PokemonDetail(props: { id?: number }) {
                 );
               })}
             </Detail.Metadata.TagList>
+            <Detail.Metadata.Separator />
+            {effectiveness.weak.length > 0 && (
+              <Detail.Metadata.TagList title="Weak to">
+                {effectiveness.weak.map((weakness, index) => (
+                  <Detail.Metadata.TagList.Item
+                    key={index}
+                    text={weakness}
+                    color={typeColor[weakness.split(" ")[1].toLowerCase()]}
+                  />
+                ))}
+              </Detail.Metadata.TagList>
+            )}
+            {effectiveness.resistant.length > 0 && (
+              <Detail.Metadata.TagList title="Resistant to">
+                {effectiveness.resistant.map((resistance, index) => (
+                  <Detail.Metadata.TagList.Item
+                    key={index}
+                    text={resistance}
+                    color={typeColor[resistance.split(" ")[1].toLowerCase()]}
+                  />
+                ))}
+              </Detail.Metadata.TagList>
+            )}
+            {effectiveness.immune.length > 0 && (
+              <Detail.Metadata.TagList title="Immune to">
+                {effectiveness.immune.map((immunity, index) => (
+                  <Detail.Metadata.TagList.Item
+                    key={index}
+                    text={immunity}
+                    color={typeColor[immunity.toLowerCase()]}
+                  />
+                ))}
+              </Detail.Metadata.TagList>
+            )}
             <Detail.Metadata.Separator />
             {pokemon.pokemon_v2_pokemonstats.map((stat, idx) => {
               return (

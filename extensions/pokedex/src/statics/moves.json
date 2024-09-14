@@ -1033,7 +1033,7 @@
     "name": "Recover",
     "accuracy": null,
     "power": null,
-    "pp": 10,
+    "pp": 5,
     "type": "Normal",
     "damage_class": "status",
     "generation": "Generation I",
@@ -1053,7 +1053,7 @@
     "name": "Rest",
     "accuracy": null,
     "power": null,
-    "pp": 10,
+    "pp": 5,
     "type": "Psychic",
     "damage_class": "status",
     "generation": "Generation I",
@@ -1253,7 +1253,7 @@
     "name": "Soft-Boiled",
     "accuracy": null,
     "power": null,
-    "pp": 10,
+    "pp": 5,
     "type": "Normal",
     "damage_class": "status",
     "generation": "Generation I",
@@ -2043,7 +2043,7 @@
     "name": "Milk Drink",
     "accuracy": null,
     "power": null,
-    "pp": 10,
+    "pp": 5,
     "type": "Normal",
     "damage_class": "status",
     "generation": "Generation II",
@@ -3002,7 +3002,7 @@
   {
     "name": "Luster Purge",
     "accuracy": 100,
-    "power": 70,
+    "power": 95,
     "pp": 5,
     "type": "Psychic",
     "damage_class": "special",
@@ -3062,7 +3062,7 @@
   {
     "name": "Mist Ball",
     "accuracy": 100,
-    "power": 70,
+    "power": 95,
     "pp": 5,
     "type": "Psychic",
     "damage_class": "special",
@@ -3503,7 +3503,7 @@
     "name": "Slack Off",
     "accuracy": null,
     "power": null,
-    "pp": 10,
+    "pp": 5,
     "type": "Normal",
     "damage_class": "status",
     "generation": "Generation III",
@@ -4077,7 +4077,7 @@
     "type": "Fire",
     "damage_class": "physical",
     "generation": "Generation IV",
-    "short_effect": "Has a 10% chance to burn the target and a 10% chance to make the target flinch."
+    "short_effect": "Has a 10% chance to burn the target and a $effect_chance% chance to make the target flinch."
   },
   {
     "name": "Flare Blitz",
@@ -4267,7 +4267,7 @@
     "type": "Ice",
     "damage_class": "physical",
     "generation": "Generation IV",
-    "short_effect": "Has a 10% chance to freeze the target and a 10% chance to make the target flinch."
+    "short_effect": "Has a 10% chance to freeze the target and a $effect_chance% chance to make the target flinch."
   },
   {
     "name": "Ice Shard",
@@ -4613,7 +4613,7 @@
     "name": "Roost",
     "accuracy": null,
     "power": null,
-    "pp": 10,
+    "pp": 5,
     "type": "Flying",
     "damage_class": "status",
     "generation": "Generation IV",
@@ -4737,7 +4737,7 @@
     "type": "Electric",
     "damage_class": "physical",
     "generation": "Generation IV",
-    "short_effect": "Has a 10% chance to paralyze the target and a 10% chance to make the target flinch."
+    "short_effect": "Has a 10% chance to paralyze the target and a $effect_chance% chance to make the target flinch."
   },
   {
     "name": "Toxic Spikes",
@@ -6957,7 +6957,7 @@
     "type": "Fairy",
     "damage_class": "physical",
     "generation": "Generation VII",
-    "short_effect": "After inflicting damage, causes all Normal-type moves to become Electric-type for the remainder of the turn."
+    "short_effect": "Inflicts regular damage with no additional effect."
   },
   {
     "name": "Light That Burns the Sky",
@@ -7107,7 +7107,7 @@
     "type": "Electric",
     "damage_class": "physical",
     "generation": "Generation VII",
-    "short_effect": "Inflicts regular damage with no additional effect."
+    "short_effect": "After inflicting damage, causes all Normal-type moves to become Electric-type for the remainder of the turn."
   },
   {
     "name": "Pollen Puff",
@@ -7273,7 +7273,7 @@
     "name": "Shore Up",
     "accuracy": null,
     "power": null,
-    "pp": 10,
+    "pp": 5,
     "type": "Ground",
     "damage_class": "status",
     "generation": "Generation VII",
@@ -7630,6 +7630,16 @@
     "short_effect": ""
   },
   {
+    "name": "Barb Barrage",
+    "accuracy": 100,
+    "power": 60,
+    "pp": 10,
+    "type": "Poison",
+    "damage_class": "physical",
+    "generation": "Generation VIII",
+    "short_effect": ""
+  },
+  {
     "name": "Behemoth Bash",
     "accuracy": 100,
     "power": 100,
@@ -7646,6 +7656,26 @@
     "pp": 5,
     "type": "Steel",
     "damage_class": "physical",
+    "generation": "Generation VIII",
+    "short_effect": ""
+  },
+  {
+    "name": "Bitter Malice",
+    "accuracy": 100,
+    "power": 75,
+    "pp": 10,
+    "type": "Ghost",
+    "damage_class": "special",
+    "generation": "Generation VIII",
+    "short_effect": ""
+  },
+  {
+    "name": "Bleakwind Storm",
+    "accuracy": 80,
+    "power": 100,
+    "pp": 10,
+    "type": "Flying",
+    "damage_class": "special",
     "generation": "Generation VIII",
     "short_effect": ""
   },
@@ -7700,6 +7730,26 @@
     "short_effect": "Inflicts regular damage with no additional effect."
   },
   {
+    "name": "Ceaseless Edge",
+    "accuracy": 90,
+    "power": 65,
+    "pp": 15,
+    "type": "Dark",
+    "damage_class": "physical",
+    "generation": "Generation VIII",
+    "short_effect": ""
+  },
+  {
+    "name": "Chloroblast",
+    "accuracy": 95,
+    "power": 150,
+    "pp": 5,
+    "type": "Grass",
+    "damage_class": "special",
+    "generation": "Generation VIII",
+    "short_effect": ""
+  },
+  {
     "name": "Clangorous Soul",
     "accuracy": 100,
     "power": null,
@@ -7746,6 +7796,16 @@
     "pp": 15,
     "type": "Fairy",
     "damage_class": "status",
+    "generation": "Generation VIII",
+    "short_effect": ""
+  },
+  {
+    "name": "Dire Claw",
+    "accuracy": 100,
+    "power": 80,
+    "pp": 15,
+    "type": "Poison",
+    "damage_class": "physical",
     "generation": "Generation VIII",
     "short_effect": ""
   },
@@ -7808,6 +7868,16 @@
     "damage_class": "special",
     "generation": "Generation VIII",
     "short_effect": "Inflicts regular damage with no additional effect."
+  },
+  {
+    "name": "Esper Wing",
+    "accuracy": 100,
+    "power": 80,
+    "pp": 10,
+    "type": "Psychic",
+    "damage_class": "special",
+    "generation": "Generation VIII",
+    "short_effect": ""
   },
   {
     "name": "Eternabeam",
@@ -7882,7 +7952,7 @@
   {
     "name": "Glacial Lance",
     "accuracy": 100,
-    "power": 130,
+    "power": 120,
     "pp": 5,
     "type": "Ice",
     "damage_class": "physical",
@@ -7892,7 +7962,7 @@
   {
     "name": "Grassy Glide",
     "accuracy": 100,
-    "power": 70,
+    "power": 55,
     "pp": 20,
     "type": "Grass",
     "damage_class": "physical",
@@ -7908,6 +7978,26 @@
     "damage_class": "physical",
     "generation": "Generation VIII",
     "short_effect": "Lowers the target's Defense by one stage after inflicting damage."
+  },
+  {
+    "name": "Headlong Rush",
+    "accuracy": 100,
+    "power": 120,
+    "pp": 5,
+    "type": "Ground",
+    "damage_class": "physical",
+    "generation": "Generation VIII",
+    "short_effect": ""
+  },
+  {
+    "name": "Infernal Parade",
+    "accuracy": 100,
+    "power": 60,
+    "pp": 15,
+    "type": "Ghost",
+    "damage_class": "special",
+    "generation": "Generation VIII",
+    "short_effect": ""
   },
   {
     "name": "Jaw Lock",
@@ -7945,6 +8035,16 @@
     "power": null,
     "pp": 10,
     "type": "Water",
+    "damage_class": "status",
+    "generation": "Generation VIII",
+    "short_effect": ""
+  },
+  {
+    "name": "Lunar Blessing",
+    "accuracy": null,
+    "power": 0,
+    "pp": 5,
+    "type": "Psychic",
     "damage_class": "status",
     "generation": "Generation VIII",
     "short_effect": ""
@@ -8180,6 +8280,26 @@
     "short_effect": "Inflicts regular damage with no additional effect."
   },
   {
+    "name": "Mountain Gale",
+    "accuracy": 85,
+    "power": 100,
+    "pp": 10,
+    "type": "Ice",
+    "damage_class": "physical",
+    "generation": "Generation VIII",
+    "short_effect": ""
+  },
+  {
+    "name": "Mystical Power",
+    "accuracy": 90,
+    "power": 70,
+    "pp": 10,
+    "type": "Psychic",
+    "damage_class": "special",
+    "generation": "Generation VIII",
+    "short_effect": ""
+  },
+  {
     "name": "No Retreat",
     "accuracy": null,
     "power": null,
@@ -8187,7 +8307,7 @@
     "type": "Fighting",
     "damage_class": "status",
     "generation": "Generation VIII",
-    "short_effect": "Hits twice in one turn"
+    "short_effect": "Hits twice in one turn, with a 100% chance to make the target flinch."
   },
   {
     "name": "Obstruct",
@@ -8230,6 +8350,26 @@
     "short_effect": "Inflicts regular damage with no additional effect."
   },
   {
+    "name": "Power Shift",
+    "accuracy": null,
+    "power": 0,
+    "pp": 10,
+    "type": "Normal",
+    "damage_class": "status",
+    "generation": "Generation VIII",
+    "short_effect": ""
+  },
+  {
+    "name": "Psyshield Bash",
+    "accuracy": 90,
+    "power": 70,
+    "pp": 10,
+    "type": "Psychic",
+    "damage_class": "physical",
+    "generation": "Generation VIII",
+    "short_effect": ""
+  },
+  {
     "name": "Pyro Ball",
     "accuracy": 90,
     "power": 120,
@@ -8238,6 +8378,16 @@
     "damage_class": "physical",
     "generation": "Generation VIII",
     "short_effect": "Has a 10% chance to burn the target."
+  },
+  {
+    "name": "Raging Fury",
+    "accuracy": 100,
+    "power": 120,
+    "pp": 10,
+    "type": "Fire",
+    "damage_class": "physical",
+    "generation": "Generation VIII",
+    "short_effect": ""
   },
   {
     "name": "Rising Voltage",
@@ -8250,6 +8400,16 @@
     "short_effect": "Inflicts regular damage with no additional effect."
   },
   {
+    "name": "Sandsear Storm",
+    "accuracy": 80,
+    "power": 100,
+    "pp": 10,
+    "type": "Ground",
+    "damage_class": "special",
+    "generation": "Generation VIII",
+    "short_effect": ""
+  },
+  {
     "name": "Scale Shot",
     "accuracy": 90,
     "power": 25,
@@ -8257,7 +8417,7 @@
     "type": "Dragon",
     "damage_class": "physical",
     "generation": "Generation VIII",
-    "short_effect": "Inflicts regular damage with no additional effect."
+    "short_effect": "Boosts the user's Speed and lowers their Defense by one stage after inflicting damage two to five times in a row."
   },
   {
     "name": "Scorching Sands",
@@ -8278,6 +8438,16 @@
     "damage_class": "special",
     "generation": "Generation VIII",
     "short_effect": "Inflicts regular damage with no additional effect."
+  },
+  {
+    "name": "Shelter",
+    "accuracy": null,
+    "power": 0,
+    "pp": 10,
+    "type": "Steel",
+    "damage_class": "status",
+    "generation": "Generation VIII",
+    "short_effect": ""
   },
   {
     "name": "Skitter Smack",
@@ -8320,6 +8490,16 @@
     "short_effect": "Has a 100% chance to lower the target's Special Attack by one stage."
   },
   {
+    "name": "Springtide Storm",
+    "accuracy": 80,
+    "power": 100,
+    "pp": 5,
+    "type": "Fairy",
+    "damage_class": "special",
+    "generation": "Generation VIII",
+    "short_effect": ""
+  },
+  {
     "name": "Steel Beam",
     "accuracy": 95,
     "power": 140,
@@ -8338,6 +8518,16 @@
     "damage_class": "physical",
     "generation": "Generation VIII",
     "short_effect": "Inflicts regular damage with no additional effect."
+  },
+  {
+    "name": "Stone Axe",
+    "accuracy": 90,
+    "power": 65,
+    "pp": 15,
+    "type": "Rock",
+    "damage_class": "physical",
+    "generation": "Generation VIII",
+    "short_effect": ""
   },
   {
     "name": "Strange Steam",
@@ -8368,6 +8558,16 @@
     "damage_class": "physical",
     "generation": "Generation VIII",
     "short_effect": "Inflicts regular damage with no additional effect."
+  },
+  {
+    "name": "Take Heart",
+    "accuracy": null,
+    "power": 0,
+    "pp": 10,
+    "type": "Psychic",
+    "damage_class": "status",
+    "generation": "Generation VIII",
+    "short_effect": ""
   },
   {
     "name": "Tar Shot",
@@ -8420,6 +8620,16 @@
     "short_effect": "Inflicts regular damage with no additional effect."
   },
   {
+    "name": "Triple Arrows",
+    "accuracy": 100,
+    "power": 90,
+    "pp": 10,
+    "type": "Fighting",
+    "damage_class": "physical",
+    "generation": "Generation VIII",
+    "short_effect": ""
+  },
+  {
     "name": "Triple Axel",
     "accuracy": 90,
     "power": 20,
@@ -8430,13 +8640,733 @@
     "short_effect": "Inflicts regular damage with no additional effect."
   },
   {
+    "name": "Victory Dance",
+    "accuracy": null,
+    "power": 0,
+    "pp": 10,
+    "type": "Fighting",
+    "damage_class": "status",
+    "generation": "Generation VIII",
+    "short_effect": ""
+  },
+  {
+    "name": "Wave Crash",
+    "accuracy": 100,
+    "power": 120,
+    "pp": 10,
+    "type": "Water",
+    "damage_class": "physical",
+    "generation": "Generation VIII",
+    "short_effect": ""
+  },
+  {
     "name": "Wicked Blow",
     "accuracy": 100,
-    "power": 80,
+    "power": 75,
     "pp": 5,
     "type": "Dark",
     "damage_class": "physical",
     "generation": "Generation VIII",
     "short_effect": "Inflicts regular damage with no additional effect."
+  },
+  {
+    "name": "Wildbolt Storm",
+    "accuracy": 80,
+    "power": 100,
+    "pp": 10,
+    "type": "Electric",
+    "damage_class": "special",
+    "generation": "Generation VIII",
+    "short_effect": ""
+  },
+  {
+    "name": "Alluring Voice",
+    "accuracy": 100,
+    "power": 80,
+    "pp": 10,
+    "type": "Fairy",
+    "damage_class": "special",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Aqua Cutter",
+    "accuracy": 100,
+    "power": 70,
+    "pp": 20,
+    "type": "Water",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Aqua Step",
+    "accuracy": 100,
+    "power": 80,
+    "pp": 10,
+    "type": "Water",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Armor Cannon",
+    "accuracy": 100,
+    "power": 120,
+    "pp": 5,
+    "type": "Fire",
+    "damage_class": "special",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Axe Kick",
+    "accuracy": 90,
+    "power": 120,
+    "pp": 10,
+    "type": "Fighting",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Bitter Blade",
+    "accuracy": 100,
+    "power": 90,
+    "pp": 10,
+    "type": "Fire",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Blazing Torque",
+    "accuracy": 100,
+    "power": 80,
+    "pp": 10,
+    "type": "Fire",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Blood Moon",
+    "accuracy": 100,
+    "power": 140,
+    "pp": 5,
+    "type": "Normal",
+    "damage_class": "special",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Burning Bulwark",
+    "accuracy": 0,
+    "power": 0,
+    "pp": 10,
+    "type": "Fire",
+    "damage_class": "status",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Chilling Water",
+    "accuracy": 100,
+    "power": 50,
+    "pp": 20,
+    "type": "Water",
+    "damage_class": "special",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Chilly Reception",
+    "accuracy": null,
+    "power": 0,
+    "pp": 10,
+    "type": "Ice",
+    "damage_class": "status",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Collision Course",
+    "accuracy": 100,
+    "power": 100,
+    "pp": 5,
+    "type": "Fighting",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Combat Torque",
+    "accuracy": 100,
+    "power": 100,
+    "pp": 10,
+    "type": "Fighting",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Comeuppance",
+    "accuracy": 100,
+    "power": 1,
+    "pp": 10,
+    "type": "Dark",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Doodle",
+    "accuracy": 100,
+    "power": 0,
+    "pp": 10,
+    "type": "Normal",
+    "damage_class": "status",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Double Shock",
+    "accuracy": 100,
+    "power": 120,
+    "pp": 5,
+    "type": "Electric",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Dragon Cheer",
+    "accuracy": 0,
+    "power": 0,
+    "pp": 15,
+    "type": "Dragon",
+    "damage_class": "status",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Electro Drift",
+    "accuracy": 100,
+    "power": 100,
+    "pp": 5,
+    "type": "Electric",
+    "damage_class": "special",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Electro Shot",
+    "accuracy": 100,
+    "power": 130,
+    "pp": 10,
+    "type": "Electric",
+    "damage_class": "special",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Fickle Beam",
+    "accuracy": 100,
+    "power": 80,
+    "pp": 5,
+    "type": "Dragon",
+    "damage_class": "special",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Fillet Away",
+    "accuracy": null,
+    "power": 0,
+    "pp": 10,
+    "type": "Normal",
+    "damage_class": "status",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Flower Trick",
+    "accuracy": null,
+    "power": 70,
+    "pp": 10,
+    "type": "Grass",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Gigaton Hammer",
+    "accuracy": 100,
+    "power": 160,
+    "pp": 5,
+    "type": "Steel",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Glaive Rush",
+    "accuracy": 100,
+    "power": 120,
+    "pp": 5,
+    "type": "Dragon",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Hard Press",
+    "accuracy": 100,
+    "power": 0,
+    "pp": 10,
+    "type": "Steel",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Hydro Steam",
+    "accuracy": 100,
+    "power": 80,
+    "pp": 15,
+    "type": "Water",
+    "damage_class": "special",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Hyper Drill",
+    "accuracy": 100,
+    "power": 100,
+    "pp": 5,
+    "type": "Normal",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Ice Spinner",
+    "accuracy": 100,
+    "power": 80,
+    "pp": 15,
+    "type": "Ice",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Ivy Cudgel",
+    "accuracy": 100,
+    "power": 100,
+    "pp": 10,
+    "type": "Grass",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Jet Punch",
+    "accuracy": 100,
+    "power": 60,
+    "pp": 15,
+    "type": "Water",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Kowtow Cleave",
+    "accuracy": null,
+    "power": 85,
+    "pp": 10,
+    "type": "Dark",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Last Respects",
+    "accuracy": 100,
+    "power": 50,
+    "pp": 10,
+    "type": "Ghost",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Lumina Crash",
+    "accuracy": 100,
+    "power": 80,
+    "pp": 10,
+    "type": "Psychic",
+    "damage_class": "special",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Magical Torque",
+    "accuracy": 100,
+    "power": 100,
+    "pp": 10,
+    "type": "Fairy",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Make It Rain",
+    "accuracy": 100,
+    "power": 120,
+    "pp": 5,
+    "type": "Steel",
+    "damage_class": "special",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Malignant Chain",
+    "accuracy": 100,
+    "power": 100,
+    "pp": 5,
+    "type": "Poison",
+    "damage_class": "special",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Matcha Gotcha",
+    "accuracy": 90,
+    "power": 80,
+    "pp": 15,
+    "type": "Grass",
+    "damage_class": "special",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Mighty Cleave",
+    "accuracy": 100,
+    "power": 95,
+    "pp": 5,
+    "type": "Rock",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Mortal Spin",
+    "accuracy": 100,
+    "power": 30,
+    "pp": 15,
+    "type": "Poison",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Noxious Torque",
+    "accuracy": 100,
+    "power": 100,
+    "pp": 10,
+    "type": "Poison",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Order Up",
+    "accuracy": 100,
+    "power": 80,
+    "pp": 10,
+    "type": "Dragon",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Population Bomb",
+    "accuracy": 90,
+    "power": 20,
+    "pp": 10,
+    "type": "Normal",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Pounce",
+    "accuracy": 100,
+    "power": 50,
+    "pp": 20,
+    "type": "Bug",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Psyblade",
+    "accuracy": 100,
+    "power": 80,
+    "pp": 15,
+    "type": "Psychic",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Psychic Noise",
+    "accuracy": 100,
+    "power": 75,
+    "pp": 10,
+    "type": "Psychic",
+    "damage_class": "special",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Rage Fist",
+    "accuracy": 100,
+    "power": 50,
+    "pp": 10,
+    "type": "Ghost",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Raging Bull",
+    "accuracy": 100,
+    "power": 90,
+    "pp": 10,
+    "type": "Normal",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Revival Blessing",
+    "accuracy": null,
+    "power": 0,
+    "pp": 1,
+    "type": "Normal",
+    "damage_class": "status",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Ruination",
+    "accuracy": 90,
+    "power": 1,
+    "pp": 10,
+    "type": "Dark",
+    "damage_class": "special",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Salt Cure",
+    "accuracy": 100,
+    "power": 40,
+    "pp": 15,
+    "type": "Rock",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Shed Tail",
+    "accuracy": null,
+    "power": 0,
+    "pp": 10,
+    "type": "Normal",
+    "damage_class": "status",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Silk Trap",
+    "accuracy": null,
+    "power": 0,
+    "pp": 10,
+    "type": "Bug",
+    "damage_class": "status",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Snowscape",
+    "accuracy": null,
+    "power": 0,
+    "pp": 10,
+    "type": "Ice",
+    "damage_class": "status",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Spicy Extract",
+    "accuracy": null,
+    "power": 0,
+    "pp": 15,
+    "type": "Grass",
+    "damage_class": "status",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Spin Out",
+    "accuracy": 100,
+    "power": 100,
+    "pp": 5,
+    "type": "Steel",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Supercell Slam",
+    "accuracy": 95,
+    "power": 100,
+    "pp": 15,
+    "type": "Electric",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Syrup Bomb",
+    "accuracy": 85,
+    "power": 60,
+    "pp": 10,
+    "type": "Grass",
+    "damage_class": "special",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Tachyon Cutter",
+    "accuracy": 0,
+    "power": 50,
+    "pp": 10,
+    "type": "Steel",
+    "damage_class": "special",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Temper Flare",
+    "accuracy": 100,
+    "power": 75,
+    "pp": 10,
+    "type": "Fire",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Tera Blast",
+    "accuracy": 100,
+    "power": 80,
+    "pp": 10,
+    "type": "Normal",
+    "damage_class": "special",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Tera Starstorm",
+    "accuracy": 100,
+    "power": 120,
+    "pp": 5,
+    "type": "Normal",
+    "damage_class": "special",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Thunderclap",
+    "accuracy": 100,
+    "power": 70,
+    "pp": 5,
+    "type": "Electric",
+    "damage_class": "special",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Tidy Up",
+    "accuracy": null,
+    "power": 0,
+    "pp": 10,
+    "type": "Normal",
+    "damage_class": "status",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Torch Song",
+    "accuracy": 100,
+    "power": 80,
+    "pp": 10,
+    "type": "Fire",
+    "damage_class": "special",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Trailblaze",
+    "accuracy": 100,
+    "power": 50,
+    "pp": 20,
+    "type": "Grass",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Triple Dive",
+    "accuracy": 95,
+    "power": 30,
+    "pp": 10,
+    "type": "Water",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Twin Beam",
+    "accuracy": 100,
+    "power": 40,
+    "pp": 10,
+    "type": "Psychic",
+    "damage_class": "special",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Upper Hand",
+    "accuracy": 100,
+    "power": 65,
+    "pp": 15,
+    "type": "Fighting",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
+  },
+  {
+    "name": "Wicked Torque",
+    "accuracy": 100,
+    "power": 80,
+    "pp": 10,
+    "type": "Dark",
+    "damage_class": "physical",
+    "generation": "Generation IX",
+    "short_effect": ""
   }
 ]
