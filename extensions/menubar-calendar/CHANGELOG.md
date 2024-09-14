@@ -1,5 +1,9 @@
 # Menubar Calendar Changelog
 
+## [Add Title Max Length Setting] - 2024-09-14
+
+- Add setting to customize calendar evens title length in the menu bar
+
 ## [Show Calendar Events in Menubar] - 2024-07-03
 
 - Show calendar events in the menu bar
