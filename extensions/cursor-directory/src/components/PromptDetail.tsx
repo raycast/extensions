@@ -1,5 +1,5 @@
 import { Prompt } from "../types";
-import { Action, ActionPanel, Detail, Image, Icon, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Detail, Image, Icon, openExtensionPreferences, showHUD, Clipboard } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
 import { isImageUrl, processContent } from "../utils";
 
@@ -42,11 +42,14 @@ export const PromptDetail = ({ prompt }: Props) => {
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Actions">
-            <Action.CopyToClipboard
+            <Action
               title="Copy Prompt"
               icon={Icon.Clipboard}
-              content={prompt.content}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
+              onAction={async () => {
+                await Clipboard.copy(prompt.content);
+                await showHUD("Copied to clipboard, paste it into .cursorrules file");
+              }}
             />
             <Action.OpenInBrowser
               title="Open in Cursor.directory"

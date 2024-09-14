@@ -1,4 +1,15 @@
-import { List, Image, ActionPanel, Action, Icon, openExtensionPreferences, showToast, Toast } from "@raycast/api";
+import {
+  List,
+  Image,
+  ActionPanel,
+  Action,
+  Icon,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+  showHUD,
+  Clipboard,
+} from "@raycast/api";
 import { getAvatarIcon, usePromise } from "@raycast/utils";
 import { getSections, processContent } from "./utils";
 import { useState, useEffect } from "react";
@@ -107,11 +118,14 @@ export default function Command() {
                     <ActionPanel>
                       <ActionPanel.Section title="Actions">
                         <Action.Push title="View Prompt" icon={Icon.Text} target={<PromptDetail prompt={prompt!} />} />
-                        <Action.CopyToClipboard
+                        <Action
                           title="Copy Prompt"
                           icon={Icon.Clipboard}
-                          content={prompt?.content || ""}
                           shortcut={{ modifiers: ["cmd"], key: "c" }}
+                          onAction={async () => {
+                            await Clipboard.copy(prompt?.content || "");
+                            await showHUD("Copied to clipboard, paste it into .cursorrules file");
+                          }}
                         />
                         <Action
                           title="Toggle Detail"
