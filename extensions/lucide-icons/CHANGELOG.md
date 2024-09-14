@@ -1,5 +1,9 @@
 # Lucide Icons Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Introduced AI-based icon search.
+
 ## [Update] - 2024-01-14
 
 - Removed stroke red color to mantain the icons as unchanged as possible
