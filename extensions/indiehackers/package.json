@@ -19,7 +19,7 @@
       "arguments": [
         {
           "name": "type",
-          "required": true,
+          "required": false,
           "type": "dropdown",
           "data": [
             {
@@ -48,7 +48,7 @@
       "arguments": [
         {
           "name": "time",
-          "required": true,
+          "required": false,
           "type": "dropdown",
           "data": [
             {
