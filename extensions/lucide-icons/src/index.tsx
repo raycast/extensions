@@ -8,8 +8,7 @@ import { toPascalCase } from "./utils";
 
 export default function Command() {
   const { data: allIcons, isLoading: isLoadingIcons } = useFetchIcons();
-  const [color, setColor] = useCachedState<Color>("color", Color.PrimaryText);
-  const [columns, setColumns] = useCachedState<number>("size", 8);
+  const [colorName, setColorName] = useCachedState<string>("colorName", "PrimaryText");
   const [searchText, setSearchText] = useState("");
   const [manualAISearch, setManualAISearch] = useState(false);
 
@@ -44,48 +43,54 @@ export default function Command() {
     setManualAISearch(false);
   };
 
+  const color = Color[colorName as keyof typeof Color];
+
   return (
     <Grid
-      columns={columns}
+      columns={8}
       inset={Grid.Inset.Large}
       isLoading={isLoadingIcons || isAILoading}
       onSearchTextChange={handleSearchTextChange}
       throttle
+      searchBarAccessory={
+        <Grid.Dropdown tooltip="Change Color" value={colorName} onChange={(newColorName) => setColorName(newColorName)}>
+          {Object.entries(Color).map(([key, colorValue]) => (
+            <Grid.Dropdown.Item
+              key={key}
+              title={key}
+              value={key}
+              icon={{ source: Icon.Circle, tintColor: colorValue }}
+            />
+          ))}
+        </Grid.Dropdown>
+      }
     >
       {!isAILoading && iconEntries.length > 0 && (
         <Grid.Section title={isAIResultsSection ? "AI Results" : "Results"} subtitle={`${iconEntries.length}`}>
           {iconEntries.map((icon) => (
             <Grid.Item
               key={icon.name}
-              content={{ source: icon.path, tintColor: color }}
               title={icon.name}
+              content={{ source: icon.path, tintColor: color }}
               keywords={icon.keywords}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser url={icon.path} />
+                  <Action.CopyToClipboard title="Copy Name" content={icon.name} />
+                  <Action.CopyToClipboard title="Copy SVG" content={icon.content} />
                   <Action.CopyToClipboard
-                    shortcut={{
-                      modifiers: ["cmd"],
-                      key: "n",
-                    }}
-                    content={icon.name}
-                    title="Copy Name to Clipboard"
-                  />
-                  <Action.CopyToClipboard
-                    shortcut={{
-                      modifiers: ["cmd"],
-                      key: "s",
-                    }}
-                    content={icon.content}
-                    title="Copy SVG to Clipboard"
-                  />
-                  <Action.CopyToClipboard
-                    shortcut={{
-                      modifiers: ["cmd", "shift"],
-                      key: "r",
-                    }}
+                    title="Copy Component"
                     content={`<${toPascalCase(icon.name)} />`}
-                    title="Copy Component to Clipboard"
+                    shortcut={{
+                      modifiers: ["shift", "cmd"],
+                      key: "enter",
+                    }}
+                  />
+                  <Action.OpenInBrowser
+                    url={icon.path}
+                    shortcut={{
+                      modifiers: ["cmd"],
+                      key: "o",
+                    }}
                   />
                   <ActionPanel.Section>
                     {environment.canAccess(AI) && (
@@ -99,23 +104,6 @@ export default function Command() {
                         }}
                       />
                     )}
-                  </ActionPanel.Section>
-                  <ActionPanel.Section title="Preferences">
-                    <ActionPanel.Submenu title="Change Size…" icon={Icon.MagnifyingGlass}>
-                      {[4, 6, 8].map((cols) => (
-                        <Action key={cols} title={cols.toString()} onAction={() => setColumns(cols)} />
-                      ))}
-                    </ActionPanel.Submenu>
-                    <ActionPanel.Submenu title="Change Color…" icon={Icon.EyeDropper}>
-                      {Object.entries(Color).map(([key, color]) => (
-                        <Action
-                          key={color.toString()}
-                          title={key}
-                          icon={{ source: Icon.Circle, tintColor: color }}
-                          onAction={() => setColor(color as Color)}
-                        />
-                      ))}
-                    </ActionPanel.Submenu>
                   </ActionPanel.Section>
                 </ActionPanel>
               }
