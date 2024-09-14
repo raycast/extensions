@@ -1,21 +1,26 @@
 import { Clipboard, getPreferenceValues, showHUD, closeMainWindow } from "@raycast/api";
 import { homedir } from "os";
 import { format, resolveConfig } from "prettier";
-import { Preferences } from "./types";
 
 const decorateMarkdown = (parser: string, formatted: string) => {
   let codeExt = "jsx";
   switch (parser) {
-    case "babel" || "flow":
+    case "babel":
+    case "flow":
       codeExt = "jsx";
       break;
-    case "typescript" || "babel-ts":
+    case "babel-ts":
+    case "typescript":
       codeExt = "ts";
       break;
-    case "css" || "scss" || "less":
+    case "css":
+    case "scss":
+    case "less":
       codeExt = "css";
       break;
-    case "json" || "json5" || "json-stringify":
+    case "json":
+    case "json5":
+    case "json-stringify":
       codeExt = "json";
       break;
     case "html":
@@ -27,7 +32,7 @@ const decorateMarkdown = (parser: string, formatted: string) => {
 };
 
 export default async (expectedFormat: string, parser: string) => {
-  const { formatAsMarkdownCodeBlock, copyImmediately, pasteImmediately } = getPreferenceValues<Preferences>();
+  const { formatAsMarkdownCodeBlock, copyImmediately, pasteImmediately, useTabs } = getPreferenceValues<Preferences>();
 
   const text = await Clipboard.readText();
   if (!text) {
@@ -37,7 +42,7 @@ export default async (expectedFormat: string, parser: string) => {
 
   try {
     const userOptions = await resolveConfig(homedir());
-    const prettier = format(text, { ...userOptions, parser });
+    const prettier = format(text, { ...userOptions, useTabs, parser });
     const formatted = formatAsMarkdownCodeBlock ? decorateMarkdown(parser, prettier) : prettier;
 
     if (copyImmediately) {
