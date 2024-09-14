@@ -1,7 +1,7 @@
 import { Prompt } from "../types";
 import { Action, ActionPanel, Detail, Image, Icon, openExtensionPreferences } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
-import { isImageUrl } from "../utils";
+import { isImageUrl, processContent } from "../utils";
 
 interface Props {
   prompt: Prompt;
@@ -11,10 +11,7 @@ export const PromptDetail = ({ prompt }: Props) => {
   return (
     <Detail
       navigationTitle={prompt.title}
-      // TODO not looking good
-      markdown={`
-${prompt.content}
-      `}
+      markdown={processContent(prompt.content)}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label
@@ -52,7 +49,7 @@ ${prompt.content}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
             <Action.OpenInBrowser
-              title="Open in cursor.directory"
+              title="Open in Cursor.directory"
               icon={Icon.Link}
               url={`https://cursor.directory/${prompt.slug}`}
             />

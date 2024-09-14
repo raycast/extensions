@@ -1,19 +1,36 @@
-import { getPreferenceValues } from "@raycast/api";
+// import { getPreferenceValues } from "@raycast/api";
 import type { Prompt, Section } from "./types";
 import fs from "fs";
 
-export const getSections = (prompts: Prompt[]): Section[] => {
-  const preferences = getPreferenceValues<Preferences>();
-
+export const getSections = (prompts: Prompt[], sortByPopularity: boolean): Section[] => {
   const sections = Array.from(new Set(prompts.flatMap((prompt) => prompt.tags)));
-  return sections
-    .map((tag) => ({
-      name: tag,
-      slugs: prompts.filter((prompt) => prompt.tags.includes(tag)).map((prompt) => prompt.slug),
-    }))
-    .sort((a, b) =>
-      preferences.prompts_sort_order === "desc" ? b.slugs.length - a.slugs.length : a.slugs.length - b.slugs.length,
-    );
+  const sectionsWithPrompts = sections.map((tag) => ({
+    name: tag,
+    prompts: prompts.filter((prompt) => prompt.tags.includes(tag)),
+  }));
+
+  if (sortByPopularity) {
+    // Sort prompts within each section by count
+    sectionsWithPrompts.forEach((section) => {
+      section.prompts.sort((a, b) => (b.count || 0) - (a.count || 0));
+    });
+    // Sort sections by total count
+    return sectionsWithPrompts
+      .map((section) => ({
+        name: section.name,
+        slugs: section.prompts.map((prompt) => prompt.slug),
+        totalCount: section.prompts.reduce((sum, prompt) => sum + (prompt.count || 0), 0),
+      }))
+      .sort((a, b) => b.totalCount - a.totalCount);
+  } else {
+    // Sort by number of prompts in each category
+    return sectionsWithPrompts
+      .map((section) => ({
+        name: section.name,
+        slugs: section.prompts.map((prompt) => prompt.slug),
+      }))
+      .sort((a, b) => b.slugs.length - a.slugs.length);
+  }
 };
 
 export const isImageUrl = (url: string): boolean => {
@@ -34,4 +51,12 @@ export const getTimestamp = (filePath: string): number => {
   } else {
     return fs.statSync(filePath).mtimeMs;
   }
+};
+
+export const processContent = (content: string) => {
+  return content
+    .trim()
+    .split("\n")
+    .map((line) => line.trim())
+    .join("\n");
 };

@@ -1,11 +1,11 @@
 import { environment } from "@raycast/api";
 import path from "path";
 
-export const REPO_OWNER = "pontusab";
-export const REPO_NAME = "cursor.directory";
-
-export const URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/src/data/rules`;
-
-export const PATH = !environment.isDevelopment
-  ? environment.supportPath + "/prompts.json"
-  : path.join(__dirname, "..", "cursor-directory", "prompts.json");
+export const API_URL = "https://cursor.directory/api/";
+export const API_URL_POPULAR = "https://cursor.directory/api/popular/";
+export const ALL_PROMPTS_CACHE_PATH = !environment.isDevelopment
+  ? environment.supportPath + "all_prompts_cache.json"
+  : path.join(__dirname, "..", "cursor-directory", "all_prompts_cache.json");
+export const POPULAR_PROMPTS_CACHE_PATH = !environment.isDevelopment
+  ? environment.supportPath + "popular_prompts_cache.json"
+  : path.join(__dirname, "..", "cursor-directory", "popular_prompts_cache.json");

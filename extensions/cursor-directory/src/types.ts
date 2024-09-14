@@ -5,6 +5,8 @@ interface Prompt {
   libs: string[];
   content: string;
   author: Author;
+  // count of how many times the prompt has been copied on cursor.directory
+  count?: number;
 }
 
 interface Section {
@@ -18,31 +20,4 @@ interface Author {
   avatar: string;
 }
 
-interface GithubFileContent {
-  name: string;
-  path: string;
-  sha: string;
-  size: number;
-  url: string;
-  html_url: string;
-  git_url: string;
-  download_url: string;
-  type: string;
-  content: string;
-  encoding: string;
-}
-
-interface RuleObject {
-  tags?: string[];
-  title?: string;
-  slug?: string;
-  content?: string;
-  author?: {
-    name?: string;
-    url?: string;
-    avatar?: string;
-  };
-  libs?: string[];
-}
-
-export type { Prompt, Author, Section, GithubFileContent, RuleObject };
+export type { Prompt, Author, Section };

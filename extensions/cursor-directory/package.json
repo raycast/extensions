@@ -11,24 +11,6 @@
   ],
   "preferences": [
     {
-      "name": "prompts_sort_order",
-      "title": "Prompts Sort Order",
-      "type": "dropdown",
-      "description": "Sort order of prompts",
-      "required": false,
-      "default": "desc",
-      "data": [
-        {
-          "title": "Ascending",
-          "value": "asc"
-        },
-        {
-          "title": "Descending",
-          "value": "desc"
-        }
-      ]
-    },
-    {
       "name": "cache_interval",
       "title": "Cache Interval in day",
       "type": "textfield",

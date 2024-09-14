@@ -1,9 +1,4 @@
-<div align="center">
-  <picture>
-    <img alt="logo" height="128px" src="assets/extension-icon.png">
-  </picture>
-  <h1 align="center">Cursor Directory</h1>
-</div>
+# Cursor Directory
 
 Access and search prompts from [cursor.directory](https://cursor.directory/) directly
 for usage in the Cursor Code Editor.
@@ -30,6 +25,4 @@ for usage in the Cursor Code Editor.
 
 Access preferences through the Action Panel or Raycast settings:
 
-- Default Sort Order: Prompts are sorted by quantity in descending order by default.
 - Cache Duration: Prompt data is cached locally for 1 day by default.
-

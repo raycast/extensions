@@ -1,23 +1,23 @@
 import { List, Image, ActionPanel, Action, Icon, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { getAvatarIcon, usePromise } from "@raycast/utils";
-import { getSections } from "./utils";
-import { useEffect, useState } from "react";
+import { getSections, processContent } from "./utils";
+import { useState, useEffect } from "react";
 import { PromptDetail } from "./components/PromptDetail";
 import { fetchPrompts } from "./api";
 
 export default function Command() {
   const [error, setError] = useState<Error | undefined>(undefined);
+  const [showingDetail, setShowingDetail] = useState<boolean>(true);
+  const [popularOnly, setPopularOnly] = useState<boolean>(true);
 
-  const { data, isLoading } = usePromise(async () => {
+  const { data, isLoading, revalidate } = usePromise(async () => {
     try {
-      return await fetchPrompts();
+      return await fetchPrompts(popularOnly);
     } catch (err) {
       setError(err instanceof Error ? err : new Error(String(err)));
       return [];
     }
   });
-
-  const [showingDetail, setShowingDetail] = useState<boolean>(true);
 
   useEffect(() => {
     if (error) {
@@ -31,21 +31,37 @@ export default function Command() {
   }, [error]);
 
   const prompts = data || [];
-  const sections = getSections(prompts);
+
+  const sections = getSections(prompts, false);
 
   return (
-    <List isLoading={isLoading} isShowingDetail={showingDetail}>
+    <List
+      isLoading={isLoading}
+      isShowingDetail={showingDetail}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Filter Prompts"
+          storeValue={true}
+          onChange={(newValue) => {
+            setPopularOnly(newValue === "popular");
+            revalidate();
+          }}
+        >
+          <List.Dropdown.Item title="All Prompts" value="all" />
+          <List.Dropdown.Item title="Popular Prompts" value="popular" />
+        </List.Dropdown>
+      }
+    >
       {sections.length > 0 &&
         sections.map((section) => (
           <List.Section key={section.name} title={section.name}>
             {section.slugs.map((slug, index) => {
               const prompt = prompts.find((item) => item.slug === slug);
-
               const props = showingDetail
                 ? {
                     detail: (
                       <List.Item.Detail
-                        markdown={`${prompt?.content.substring(0, 200)}...`}
+                        markdown={`${processContent(prompt?.content || "").substring(0, 200)}...`}
                         isLoading={isLoading || prompt === undefined}
                         metadata={
                           <List.Item.Detail.Metadata>
@@ -103,6 +119,15 @@ export default function Command() {
                           shortcut={{ modifiers: ["cmd"], key: "d" }}
                           onAction={() => setShowingDetail(!showingDetail)}
                         />
+                        {/* <Action
+                          title={sortBy === "popularity" ? "Sort by Categories" : "Sort by Popularity"}
+                          icon={Icon.ArrowDown}
+                          shortcut={{ modifiers: ["cmd"], key: "s" }}
+                          onAction={() => {
+                            setSortBy(prev => prev === "popularity" ? "category" : "popularity");
+                            revalidate();
+                          }}
+                        /> */}
                       </ActionPanel.Section>
                       <ActionPanel.Section title="Settings">
                         <Action
