@@ -62,7 +62,7 @@ export function UseNameGenerator({ codeElementType }: NameHandlerProps) {
 
     const newStyle = convertStringNamingStyle(newValue);
     setNamingStyle(newStyle);
-    await generateNames(newStyle, false);
+    // await generateNames(newStyle, false);
   };
 
   return (
