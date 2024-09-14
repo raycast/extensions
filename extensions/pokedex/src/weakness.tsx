@@ -6,7 +6,7 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import json2md from "json2md";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { getPokemon } from "./api";
 import { PokemonV2Pokemon } from "./types";
 import PokemonDetail from "./components/detail";
@@ -14,6 +14,7 @@ import pokedex from "./statics/pokedex.json";
 import debounce from "lodash.debounce";
 import groupBy from "lodash.groupby";
 import { calculateEffectiveness, typeColor } from "./utils";
+import TypeDropdown from "./components/type_dropdown";
 
 export default function PokemonWeaknesses(props: { id: number }) {
   const { language } = getPreferenceValues();
@@ -21,6 +22,8 @@ export default function PokemonWeaknesses(props: { id: number }) {
     undefined,
   );
   const [loading, setLoading] = useState(true);
+  const [type, setType] = useState<string>("all");
+
   const [effectiveness, setEffectiveness] = useState<{
     normal: string[];
     weak: string[];
@@ -53,7 +56,13 @@ export default function PokemonWeaknesses(props: { id: number }) {
       });
   }, [selectedPokemonId]);
 
-  const displayWeaknesses = Object.entries(groupBy(pokedex, "generation")).map(
+  const pokemons = useMemo(() => {
+    return type != "all"
+      ? pokedex.filter((p) => p.types.includes(type))
+      : pokedex;
+  }, [type]);
+
+  const displayWeaknesses = Object.entries(groupBy(pokemons, "generation")).map(
     ([generation, pokemonList]) => {
       return (
         <List.Section title={generation} key={generation}>
@@ -164,6 +173,9 @@ export default function PokemonWeaknesses(props: { id: number }) {
     <List
       throttle
       searchBarPlaceholder="Search for a Pokemon"
+      searchBarAccessory={
+        <TypeDropdown type="grid" command="Pokémon" onSelectType={setType} />
+      }
       navigationTitle={`${loading ? "" : pokemonName + " | "}Weaknesses`}
       isShowingDetail={true}
       isLoading={loading}
