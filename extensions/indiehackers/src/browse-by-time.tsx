@@ -17,7 +17,11 @@ export default function BrowseByTime(props: LaunchProps<{ arguments: Arguments.B
       searchBarPlaceholder={`Search ${getTimeTitle(time)} posts`}
       isShowingDetail={isShowingDetail}
       searchBarAccessory={
-        <List.Dropdown tooltip="Type" defaultValue={time} onChange={(newTime) => setTime(newTime as Arguments.BrowseByTime["time"])}>
+        <List.Dropdown
+          tooltip="Type"
+          defaultValue={time}
+          onChange={(newTime) => setTime(newTime as Arguments.BrowseByTime["time"])}
+        >
           <List.Dropdown.Item title="Today" value="today" />
           <List.Dropdown.Item title="This Week" value="week" />
           <List.Dropdown.Item title="This Month" value="month" />
