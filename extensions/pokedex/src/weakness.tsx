@@ -16,7 +16,7 @@ import groupBy from "lodash.groupby";
 import { calculateEffectiveness, typeColor } from "./utils";
 import TypeDropdown from "./components/type_dropdown";
 
-export default function PokemonWeaknesses(props: { id: number }) {
+export default function PokemonWeaknesses() {
   const { language } = getPreferenceValues();
   const [pokemon, setPokemon] = useState<PokemonV2Pokemon | undefined>(
     undefined,
@@ -31,7 +31,7 @@ export default function PokemonWeaknesses(props: { id: number }) {
     resistant: string[];
   }>({ normal: [], weak: [], immune: [], resistant: [] });
 
-  const [selectedPokemonId, setSelectedPokemonId] = useState(props.id || 1);
+  const [selectedPokemonId, setSelectedPokemonId] = useState(1);
   const [pokemonName, setPokemonName] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -172,7 +172,7 @@ export default function PokemonWeaknesses(props: { id: number }) {
   return (
     <List
       throttle
-      searchBarPlaceholder="Search for a Pokemon"
+      searchBarPlaceholder="Search for Pokémon by name or Pokédex number"
       searchBarAccessory={
         <TypeDropdown type="grid" command="Pokémon" onSelectType={setType} />
       }

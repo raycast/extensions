@@ -23,11 +23,22 @@ export interface PokemonV2Pokemon {
   name: string;
   height: number;
   weight: number;
+  pokemon_v2_encounters: PokemonV2Encounter[];
   pokemon_v2_pokemonabilities: PokemonV2Pokemonability[];
   pokemon_v2_pokemonmoves: PokemonV2Pokemonmove[];
   pokemon_v2_pokemonstats: PokemonV2Pokemonstat[];
   pokemon_v2_pokemontypes: PokemonV2Pokemontype[];
   pokemon_v2_pokemonspecy: PokemonV2Pokemonspecy;
+}
+
+export interface PokemonV2Encounter {
+  pokemon_v2_locationarea: PokemonV2Locationarea;
+  pokemon_v2_version: PokemonV2Version;
+}
+
+export interface PokemonV2Locationarea {
+  name: string;
+  pokemon_v2_locationareanames: PokemonV2Name[];
 }
 
 export interface PokemonV2Pokemonability {

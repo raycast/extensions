@@ -3,48 +3,31 @@
   <h1 align="center">Pokédex</h1>
 </p>
 
-A [Raycast](https://raycast.com/) extenstion that lets you search for a Pokémon by name or using its National Pokédex number.
+A Raycast extension that lets you search for Pokémon by name or National Pokédex number.
 
-This extension is made by [Anh Thang Bui](https://github.com/anhthang) and uses [PokéAPI](https://pokeapi.co/).
+This extension is created by [Anh Thang Bui](https://github.com/anhthang) and utilizes data from [PokéAPI](https://pokeapi.co/).
 
 ![Example](./metadata/pokedex-3.png)
 
 ## Features
 
-1025 Pokémon Species with all alternate forms including Regional forms (Alolan, Galarian, Hisuian, Paldea), Mega Evolution, Gigantamax
-
-- [x] 🔍 Pokédex
-  - Pokémon
-    - Search for a Pokémon by name or using its National Pokédex number.
-      - Pokédex data
-      - Base stats
-      - Training
-      - Breeding
-      - Forms
-      - Evolutions
-      - Pokédex entries
-      - Learnset
-      - Type effectiveness
-    - Open in the Official Pokémon Website, Open in Bulbapedia.
-    - Filter by Pokémon type
-  - Moves
-  - Abilities
-  - Weaknesses
-- [x] ⚙️ Preference
-  - Pokémon details by preferred language. Supported: English (default), French, German, Italian, Japanese, Korean, Spanish, Chinese (Simplified & Traditional).
+* **Comprehensive Pokémon Search:** Search for all 1025 Pokémon species, including alternate forms like regional variants (Alolan, Galarian, Hisuian, Paldea), Mega Evolution, and Gigantamax.
+* **Detailed Pokédex Entries:** Access information on Pokédex data, base stats, type effectiveness, training, breeding, forms, evolutions, Pokédex entries, learnset, and locations.
+* **Actionable Links:** Open Pokémon in the Official Pokémon Website or Bulbapedia directly from the extension.
+* **Type Filtering:** Filter Pokémon by their type for a focused search.
+* **Customizable Language:** View Pokémon details in your preferred language (English, French, German, Italian, Japanese, Korean, Spanish, Chinese Simplified & Traditional).
 
 ## TODO
 
-- [ ] Egg moves
-- [ ] Sprites
-- [ ] Where to find
+* Implement support for Egg moves.
+* Integrate Pokémon sprites.
 
 ## Issues
 
-[Track here](https://github.com/anhthang/raycast-pokedex/issues) or create an issue.
+Report bugs or suggest improvements by creating an issue [here](https://github.com/anhthang/raycast-pokedex/issues).
 
 ## Credits
 
-- Pokémon type, sort icons downloaded from [Zukan](https://zukan.pokemon.co.jp/)
-- Pokémon move damage class downloaded from [Smogon](https://www.smogon.com/dex/ss/moves/)
-- Bulbapedia icon downloaded from [Bulbagarden](https://bulbagarden.net/)
+* Pokémon type and sort icons: [Zukan](https://zukan.pokemon.co.jp/)
+* Pokémon move damage class: [Smogon](https://www.smogon.com/dex/ss/moves/)
+* Bulbapedia icon: [Bulbagarden](https://bulbagarden.net/)

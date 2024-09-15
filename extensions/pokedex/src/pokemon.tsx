@@ -26,7 +26,7 @@ export default function SearchPokemon() {
   return (
     <Grid
       throttle
-      searchBarPlaceholder="Search Pokémon by name or number..."
+      searchBarPlaceholder="Search for Pokémon by name or Pokédex number"
       searchBarAccessory={
         <TypeDropdown type="grid" command="Pokémon" onSelectType={setType} />
       }

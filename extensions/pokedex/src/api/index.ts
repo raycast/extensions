@@ -22,6 +22,30 @@ export const getPokemon = async (
         name
         height
         weight
+        pokemon_v2_encounters {
+          pokemon_v2_locationarea {
+            name
+            pokemon_v2_locationareanames(where: {language_id: {_eq: $language_id}}) {
+              name
+            }
+          }
+          pokemon_v2_version {
+            id
+            name
+            pokemon_v2_versiongroup {
+              name
+              pokemon_v2_generation {
+                name
+                pokemon_v2_generationnames(where: {language_id: {_eq: 9}}) {
+                  name
+                }
+              }
+            }
+            pokemon_v2_versionnames(where: {language_id: {_eq: $language_id}}) {
+              name
+            }
+          }
+        }
         pokemon_v2_pokemonabilities {
           is_hidden
           pokemon_v2_ability {

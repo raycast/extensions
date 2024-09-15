@@ -17,6 +17,7 @@ import {
 import PokemonMoves from "./move";
 import PokedexEntries from "./dex";
 import { calculateEffectiveness, typeColor } from "../utils";
+import PokemonEncounters from "./encounter";
 
 const { language } = getPreferenceValues();
 
@@ -456,6 +457,16 @@ export default function PokemonDetail(props: { id?: number }) {
                 <PokemonMoves
                   name={nameByLang[language].name}
                   moves={pokemon.pokemon_v2_pokemonmoves}
+                />
+              }
+            />
+            <Action.Push
+              title="Where to find"
+              icon={Icon.List}
+              target={
+                <PokemonEncounters
+                  name={nameByLang[language].name}
+                  encounters={pokemon.pokemon_v2_encounters}
                 />
               }
             />
