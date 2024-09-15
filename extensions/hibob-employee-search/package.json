@@ -4,7 +4,7 @@
   "title": "HiBob Employee Search",
   "description": "Search and display employees from HiBob",
   "icon": "extension-icon.png",
-  "author": "dannymcclelland",
+  "author": "nordhealth",
   "categories": [
     "System"
   ],
