@@ -10,14 +10,12 @@ interface Prompt {
   count: number | null;
 }
 
-type PromptWithCount = Prompt & { count: number };
-
 type AllPromptsResponse = {
-  data: Prompt[];
+  data: Omit<Prompt, "count">[];
 };
 
 type PopularPromptsResponse = {
-  data: PromptWithCount[];
+  data: (Omit<Prompt, "count"> & { count: number })[];
 };
 
 type APIResponse = AllPromptsResponse | PopularPromptsResponse;
@@ -33,4 +31,4 @@ interface Author {
   avatar: string;
 }
 
-export type { Prompt, Author, Section, PromptWithCount, AllPromptsResponse, PopularPromptsResponse, APIResponse };
+export type { Prompt, Author, Section, AllPromptsResponse, PopularPromptsResponse, APIResponse };
