@@ -1,9 +1,13 @@
-import type { Prompt } from "./types";
+import type { Prompt, APIResponse, PopularPromptsResponse } from "./types";
 import { API_URL, API_URL_POPULAR, ALL_PROMPTS_CACHE_PATH, POPULAR_PROMPTS_CACHE_PATH } from "./constants";
 import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
 import fs from "fs/promises";
 import { getTimestamp } from "./utils";
+
+const isPopularPromptsResponse = (response: APIResponse): response is PopularPromptsResponse => {
+  return "data" in response && Array.isArray(response.data) && "count" in response.data[0];
+};
 
 async function fetchFromAPI(url: string): Promise<Prompt[]> {
   try {
@@ -11,16 +15,18 @@ async function fetchFromAPI(url: string): Promise<Prompt[]> {
       headers: { "User-Agent": "Raycast Extension" },
     });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    const result = (await response.json()) as { data: Prompt[] };
+    const result = (await response.json()) as APIResponse;
 
-    const data = result.data;
-
-    if (!Array.isArray(data)) {
-      console.error("API did not return an array:", data);
+    if (!Array.isArray(result.data)) {
+      console.error("API did not return an array:", result.data);
       throw new Error("Unexpected data format from API");
     }
 
-    return data as Prompt[];
+    if (isPopularPromptsResponse(result)) {
+      return result.data;
+    } else {
+      return result.data.map((prompt) => ({ ...prompt, count: null }));
+    }
   } catch (error) {
     console.error("Error fetching from API:", error);
     throw new Error("Failed to fetch data from API");

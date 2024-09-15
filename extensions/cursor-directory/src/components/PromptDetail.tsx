@@ -5,9 +5,10 @@ import { isImageUrl, processContent } from "../utils";
 
 interface Props {
   prompt: Prompt;
+  popularOnly: boolean;
 }
 
-export const PromptDetail = ({ prompt }: Props) => {
+export const PromptDetail = ({ prompt, popularOnly }: Props) => {
   return (
     <Detail
       navigationTitle={prompt.title}
@@ -24,6 +25,12 @@ export const PromptDetail = ({ prompt }: Props) => {
           />
           {prompt.author.url && (
             <Detail.Metadata.Link title="Author URL" target={prompt.author.url} text={prompt.author.url} />
+          )}
+          {popularOnly && prompt.count && (
+            <Detail.Metadata.Label
+              title="Used by"
+              text={prompt.count > 1 ? `${prompt.count} people` : `${prompt.count} person`}
+            />
           )}
           <Detail.Metadata.TagList title="Tags">
             {prompt.tags.map((tag) => (

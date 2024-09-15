@@ -6,8 +6,21 @@ interface Prompt {
   content: string;
   author: Author;
   // count of how many times the prompt has been copied on cursor.directory
-  count?: number;
+  // null if not available
+  count: number | null;
 }
+
+type PromptWithCount = Prompt & { count: number };
+
+type AllPromptsResponse = {
+  data: Prompt[];
+};
+
+type PopularPromptsResponse = {
+  data: PromptWithCount[];
+};
+
+type APIResponse = AllPromptsResponse | PopularPromptsResponse;
 
 interface Section {
   name: string;
@@ -20,4 +33,4 @@ interface Author {
   avatar: string;
 }
 
-export type { Prompt, Author, Section };
+export type { Prompt, Author, Section, PromptWithCount, AllPromptsResponse, PopularPromptsResponse, APIResponse };

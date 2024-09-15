@@ -17,6 +17,33 @@
       "required": false,
       "default": "1",
       "description": "How many days should the local cache expire"
+    },
+    {
+      "name": "show_detailed_view",
+      "title": "Show Detailed View",
+      "label": "Show detailed view in prompts list",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "description": "Show detailed view in prompts list"
+    },
+    {
+      "name": "default_prompts_list",
+      "title": "Default Prompts List",
+      "type": "dropdown",
+      "required": false,
+      "default": "popular",
+      "description": "If show all prompts or only popular ones in prompts list",
+      "data": [
+        {
+          "title": "Popular",
+          "value": "popular"
+        },
+        {
+          "title": "All",
+          "value": "all"
+        }
+      ]
     }
   ],
   "license": "MIT",
@@ -29,8 +56,6 @@
     }
   ],
   "dependencies": {
-    "@babel/parser": "^7.25.6",
-    "@babel/types": "^7.25.6",
     "@raycast/api": "^1.81.2",
     "@raycast/utils": "^1.16.3",
     "node-fetch": "^3.3.2"

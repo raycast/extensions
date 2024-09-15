@@ -9,6 +9,7 @@ import {
   Toast,
   showHUD,
   Clipboard,
+  getPreferenceValues,
 } from "@raycast/api";
 import { getAvatarIcon, usePromise } from "@raycast/utils";
 import { getSections, processContent } from "./utils";
@@ -17,9 +18,11 @@ import { PromptDetail } from "./components/PromptDetail";
 import { fetchPrompts } from "./api";
 
 export default function Command() {
+  const { show_detailed_view, default_prompts_list } = getPreferenceValues<Preferences>();
+
   const [error, setError] = useState<Error | undefined>(undefined);
-  const [showingDetail, setShowingDetail] = useState<boolean>(true);
-  const [popularOnly, setPopularOnly] = useState<boolean>(true);
+  const [showingDetail, setShowingDetail] = useState<boolean>(show_detailed_view);
+  const [popularOnly, setPopularOnly] = useState<boolean>(default_prompts_list === "popular");
 
   const { data, isLoading, revalidate } = usePromise(async () => {
     try {
@@ -52,11 +55,11 @@ export default function Command() {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter Prompts"
-          storeValue={true}
           onChange={(newValue) => {
             setPopularOnly(newValue === "popular");
             revalidate();
           }}
+          defaultValue={popularOnly ? "popular" : "all"}
         >
           <List.Dropdown.Item title="All Prompts" value="all" />
           <List.Dropdown.Item title="Popular Prompts" value="popular" />
@@ -85,6 +88,12 @@ export default function Command() {
                                 mask: Image.Mask.Circle,
                               }}
                             />
+                            {popularOnly && prompt?.count && (
+                              <List.Item.Detail.Metadata.Label
+                                title="Used by"
+                                text={prompt.count > 1 ? `${prompt.count} people` : `${prompt.count} person`}
+                              />
+                            )}
                             {prompt?.tags && prompt.tags.length > 0 && (
                               <>
                                 <List.Item.Detail.Metadata.Separator />
@@ -96,7 +105,7 @@ export default function Command() {
                               </>
                             )}
                             {prompt?.libs && prompt.libs.length > 0 && (
-                              <List.Item.Detail.Metadata.TagList title="Libs">
+                              <List.Item.Detail.Metadata.TagList title="Libraries">
                                 {prompt.libs.slice(0, 3).map((lib) => (
                                   <List.Item.Detail.Metadata.TagList.Item key={lib} text={lib} />
                                 ))}
@@ -107,7 +116,12 @@ export default function Command() {
                       />
                     ),
                   }
-                : { accessories: [{ text: prompt?.tags.join(", ") }] };
+                : {
+                    accessories: [
+                      { text: prompt?.tags.slice(0, 3).join(", ") },
+                      ...(popularOnly && prompt?.count ? [{ icon: Icon.Person, text: prompt.count.toString() }] : []),
+                    ],
+                  };
 
               return (
                 <List.Item
@@ -117,7 +131,11 @@ export default function Command() {
                   actions={
                     <ActionPanel>
                       <ActionPanel.Section title="Actions">
-                        <Action.Push title="View Prompt" icon={Icon.Text} target={<PromptDetail prompt={prompt!} />} />
+                        <Action.Push
+                          title="View Prompt"
+                          icon={Icon.Text}
+                          target={<PromptDetail prompt={prompt!} popularOnly={popularOnly} />}
+                        />
                         <Action
                           title="Copy Prompt"
                           icon={Icon.Clipboard}
@@ -128,8 +146,8 @@ export default function Command() {
                           }}
                         />
                         <Action
-                          title="Toggle Detail"
-                          icon={Icon.List}
+                          title={showingDetail ? "Show List View" : "Show Detailed View"}
+                          icon={showingDetail ? Icon.List : Icon.Text}
                           shortcut={{ modifiers: ["cmd"], key: "d" }}
                           onAction={() => setShowingDetail(!showingDetail)}
                         />

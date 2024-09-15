@@ -41,7 +41,13 @@ export const isImageUrl = (url: string): boolean => {
   const isImageExtension =
     imageExtensions.includes(url.substring(url.lastIndexOf(".")).toLowerCase()) || url.endsWith(".svg");
 
-  return isDataUri || isImageExtension;
+  // Add check for GitHub avatar URLs
+  const isGitHubAvatar = url.includes("avatars.githubusercontent.com");
+
+  // Add check for URLs with 'image' in the path or query parameters
+  const hasImageInUrl = url.toLowerCase().includes("image");
+
+  return isDataUri || isImageExtension || isGitHubAvatar || hasImageInUrl;
 };
 
 export const getTimestamp = (filePath: string): number => {

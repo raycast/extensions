@@ -21,8 +21,12 @@ for usage in the Cursor Code Editor.
 
 - Use the Action Panel to visit [cursor.directory](https://cursor.directory/) or share the prompt link.
 
+6. After copying a prompt, you can paste it into `.cursorrules` file in your project.
+
 ## Configuration
 
-Access preferences through the Action Panel or Raycast settings:
+Access preferences through the Action Panel or Raycast preferences:
 
 - Cache Duration: Prompt data is cached locally for 1 day by default.
+- Show Detailed View: Toggle the display of detailed view in prompts list.
+- Default Prompts List: Choose to show all prompts or only popular ones in prompts list at launch.
