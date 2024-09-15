@@ -4,6 +4,7 @@
 
 - Enhanced the display of climate entity states to show temperature and operating mode in separate item accessories with icons.
 - Added new fan and swing modes actions when applicable to the climate entity.
+- Added toast messages to climate actions.
 
 ## [Weather] - 2024-07-25
 
