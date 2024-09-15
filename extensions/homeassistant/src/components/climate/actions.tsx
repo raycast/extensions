@@ -1,7 +1,7 @@
 import { EntityStandardActionSections } from "@components/entity";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
-import { Action, ActionPanel, Color, Icon, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Color, Icon, showToast, Toast } from "@raycast/api";
 import { range } from "lodash-es";
 import { useState } from "react";
 
@@ -42,8 +42,17 @@ export function ClimateActionPanel(props: { state: State }) {
                 key={t.toString()}
                 title={t.toString()}
                 onAction={async () => {
-                  await ha.setClimateTemperature(entityID, t);
-                  setCurrentTemp(t);
+                  try {
+                    await ha.setClimateTemperature(entityID, t);
+                    setCurrentTemp(t);
+                    showToast({ style: Toast.Style.Success, title: "Temperature set", message: t.toString() + "°" });
+                  } catch (error) {
+                    showToast({
+                      style: Toast.Style.Failure,
+                      title: "Failed to set temperature",
+                      message: error instanceof Error ? error.message : String(error),
+                    });
+                  }
                 }}
               />
             ))}
@@ -57,8 +66,17 @@ export function ClimateActionPanel(props: { state: State }) {
                 key={o}
                 title={o}
                 onAction={async () => {
-                  await ha.setClimateOperationMode(entityID, o);
-                  popToRoot();
+                  try {
+                    await ha.setClimateOperationMode(entityID, o);
+                    await closeMainWindow();
+                    showToast({ style: Toast.Style.Success, title: "Operation Mode set", message: o });
+                  } catch (error) {
+                    showToast({
+                      style: Toast.Style.Failure,
+                      title: "Failed to set operation mode",
+                      message: error instanceof Error ? error.message : String(error),
+                    });
+                  }
                 }}
               />
             ))}
@@ -76,8 +94,16 @@ export function ClimateActionPanel(props: { state: State }) {
                 key={o}
                 title={o}
                 onAction={async () => {
-                  await ha.setClimateFanMode(entityID, o);
-                  popToRoot();
+                  try {
+                    await ha.setClimateFanMode(entityID, o);
+                    showToast({ style: Toast.Style.Success, title: "Fan Mode set", message: o });
+                  } catch (error) {
+                    showToast({
+                      style: Toast.Style.Failure,
+                      title: "Failed to set fan mode",
+                      message: error instanceof Error ? error.message : String(error),
+                    });
+                  }
                 }}
               />
             ))}
@@ -95,8 +121,16 @@ export function ClimateActionPanel(props: { state: State }) {
                 key={o}
                 title={o}
                 onAction={async () => {
-                  await ha.setClimateSwingMode(entityID, o);
-                  popToRoot();
+                  try {
+                    await ha.setClimateSwingMode(entityID, o);
+                    showToast({ style: Toast.Style.Success, title: "Swing Mode set", message: o });
+                  } catch (error) {
+                    showToast({
+                      style: Toast.Style.Failure,
+                      title: "Failed to set swing mode",
+                      message: error instanceof Error ? error.message : String(error),
+                    });
+                  }
                 }}
               />
             ))}
@@ -114,8 +148,16 @@ export function ClimateActionPanel(props: { state: State }) {
                 key={o}
                 title={o}
                 onAction={async () => {
-                  await ha.setClimatePreset(entityID, o);
-                  popToRoot();
+                  try {
+                    await ha.setClimatePreset(entityID, o);
+                    showToast({ style: Toast.Style.Success, title: "Preset set", message: o });
+                  } catch (error) {
+                    showToast({
+                      style: Toast.Style.Failure,
+                      title: "Failed to set preset",
+                      message: error instanceof Error ? error.message : String(error),
+                    });
+                  }
                 }}
               />
             ))}
@@ -125,10 +167,23 @@ export function ClimateActionPanel(props: { state: State }) {
         {upperTemp && changeTempAllowed && (
           <Action
             title={`Increase Temperature`}
-            shortcut={{ modifiers: ["cmd"], key: "+" }}
+            shortcut={{ modifiers: ["cmd"], key: "=" }}
             onAction={async () => {
-              await ha.setClimateTemperature(entityID, upperTemp);
-              setCurrentTemp(upperTemp);
+              try {
+                await ha.setClimateTemperature(entityID, upperTemp);
+                setCurrentTemp(upperTemp);
+                showToast({
+                  style: Toast.Style.Success,
+                  title: "Temperature set",
+                  message: upperTemp.toString() + "°",
+                });
+              } catch (error) {
+                showToast({
+                  style: Toast.Style.Failure,
+                  title: "Failed to increase temperature",
+                  message: error instanceof Error ? error.message : String(error),
+                });
+              }
             }}
             icon={{ source: "plus.svg", tintColor: Color.PrimaryText }}
           />
@@ -138,8 +193,21 @@ export function ClimateActionPanel(props: { state: State }) {
             title={`Decrease Temperature`}
             shortcut={{ modifiers: ["cmd"], key: "-" }}
             onAction={async () => {
-              await ha.setClimateTemperature(entityID, lowerTemp);
-              setCurrentTemp(lowerTemp);
+              try {
+                await ha.setClimateTemperature(entityID, lowerTemp);
+                setCurrentTemp(lowerTemp);
+                showToast({
+                  style: Toast.Style.Success,
+                  title: "Temperature set",
+                  message: lowerTemp.toString() + "°",
+                });
+              } catch (error) {
+                showToast({
+                  style: Toast.Style.Failure,
+                  title: "Failed to decrease temperature",
+                  message: error instanceof Error ? error.message : String(error),
+                });
+              }
             }}
             icon={{ source: "minus.svg", tintColor: Color.PrimaryText }}
           />
