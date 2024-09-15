@@ -21,19 +21,19 @@
     {
       "name": "show_detailed_view",
       "title": "Show Detailed View",
-      "label": "Show detailed view in prompts list",
+      "label": "Show detailed view in cursor rules list",
       "type": "checkbox",
       "required": false,
       "default": true,
-      "description": "Show detailed view in prompts list"
+      "description": "Show detailed view in cursor rules list"
     },
     {
-      "name": "default_prompts_list",
-      "title": "Default Prompts List",
+      "name": "default_cursor_rules_list",
+      "title": "Default Cursor Rules List",
       "type": "dropdown",
       "required": false,
       "default": "popular",
-      "description": "If show all prompts or only popular ones in prompts list",
+      "description": "If show all cursor rules or only popular ones in cursor rules list",
       "data": [
         {
           "title": "Popular",
@@ -50,8 +50,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Prompts",
-      "description": "Search system prompts from cursor.directory for usage inside Cursor Code Editor",
+      "title": "Search Cursor Rules",
+      "description": "Search cursor rules from cursor.directory for usage inside Cursor Code Editor",
       "mode": "view"
     }
   ],

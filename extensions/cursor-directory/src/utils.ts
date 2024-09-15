@@ -1,33 +1,32 @@
-// import { getPreferenceValues } from "@raycast/api";
-import type { Prompt, Section } from "./types";
+import type { CursorRule, Section } from "./types";
 import fs from "fs";
 
-export const getSections = (prompts: Prompt[], sortByPopularity: boolean): Section[] => {
-  const sections = Array.from(new Set(prompts.flatMap((prompt) => prompt.tags)));
-  const sectionsWithPrompts = sections.map((tag) => ({
+export const getSections = (cursorRules: CursorRule[], sortByPopularity: boolean): Section[] => {
+  const sections = Array.from(new Set(cursorRules.flatMap((cursorRule) => cursorRule.tags)));
+  const sectionsWithCursorRules = sections.map((tag) => ({
     name: tag,
-    prompts: prompts.filter((prompt) => prompt.tags.includes(tag)),
+    cursorRules: cursorRules.filter((cursorRule) => cursorRule.tags.includes(tag)),
   }));
 
   if (sortByPopularity) {
-    // Sort prompts within each section by count
-    sectionsWithPrompts.forEach((section) => {
-      section.prompts.sort((a, b) => (b.count || 0) - (a.count || 0));
+    // Sort cursor rules within each section by count
+    sectionsWithCursorRules.forEach((section) => {
+      section.cursorRules.sort((a, b) => (b.count || 0) - (a.count || 0));
     });
     // Sort sections by total count
-    return sectionsWithPrompts
+    return sectionsWithCursorRules
       .map((section) => ({
         name: section.name,
-        slugs: section.prompts.map((prompt) => prompt.slug),
-        totalCount: section.prompts.reduce((sum, prompt) => sum + (prompt.count || 0), 0),
+        slugs: section.cursorRules.map((cursorRule) => cursorRule.slug),
+        totalCount: section.cursorRules.reduce((sum, cursorRule) => sum + (cursorRule.count || 0), 0),
       }))
       .sort((a, b) => b.totalCount - a.totalCount);
   } else {
-    // Sort by number of prompts in each category
-    return sectionsWithPrompts
+    // Sort by number of cursor rules in each category
+    return sectionsWithCursorRules
       .map((section) => ({
         name: section.name,
-        slugs: section.prompts.map((prompt) => prompt.slug),
+        slugs: section.cursorRules.map((cursorRule) => cursorRule.slug),
       }))
       .sort((a, b) => b.slugs.length - a.slugs.length);
   }

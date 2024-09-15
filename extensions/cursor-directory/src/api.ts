@@ -1,15 +1,15 @@
-import type { Prompt, APIResponse, PopularPromptsResponse } from "./types";
-import { API_URL, API_URL_POPULAR, ALL_PROMPTS_CACHE_PATH, POPULAR_PROMPTS_CACHE_PATH } from "./constants";
+import type { CursorRule, APIResponse, PopularCursorRulesResponse } from "./types";
+import { API_URL, API_URL_POPULAR, ALL_CURSOR_RULES_CACHE_PATH, POPULAR_CURSOR_RULES_CACHE_PATH } from "./constants";
 import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
 import fs from "fs/promises";
 import { getTimestamp } from "./utils";
 
-const isPopularPromptsResponse = (response: APIResponse): response is PopularPromptsResponse => {
+const isPopularCursorRulesResponse = (response: APIResponse): response is PopularCursorRulesResponse => {
   return "data" in response && Array.isArray(response.data) && "count" in response.data[0];
 };
 
-async function fetchFromAPI(url: string): Promise<Prompt[]> {
+async function fetchFromAPI(url: string): Promise<CursorRule[]> {
   try {
     const response = await fetch(url, {
       headers: { "User-Agent": "Raycast Extension" },
@@ -22,10 +22,10 @@ async function fetchFromAPI(url: string): Promise<Prompt[]> {
       throw new Error("Unexpected data format from API");
     }
 
-    if (isPopularPromptsResponse(result)) {
+    if (isPopularCursorRulesResponse(result)) {
       return result.data;
     } else {
-      return result.data.map((prompt) => ({ ...prompt, count: null }));
+      return result.data.map((rule) => ({ ...rule, count: null }));
     }
   } catch (error) {
     console.error("Error fetching from API:", error);
@@ -33,9 +33,9 @@ async function fetchFromAPI(url: string): Promise<Prompt[]> {
   }
 }
 
-export async function fetchPrompts(popularOnly: boolean): Promise<Prompt[]> {
+export async function fetchCursorRules(popularOnly: boolean): Promise<CursorRule[]> {
   const apiUrl = popularOnly ? API_URL_POPULAR : API_URL;
-  const cachePath = popularOnly ? POPULAR_PROMPTS_CACHE_PATH : ALL_PROMPTS_CACHE_PATH;
+  const cachePath = popularOnly ? POPULAR_CURSOR_RULES_CACHE_PATH : ALL_CURSOR_RULES_CACHE_PATH;
 
   try {
     const { cache_interval } = getPreferenceValues<Preferences>();
@@ -44,18 +44,18 @@ export async function fetchPrompts(popularOnly: boolean): Promise<Prompt[]> {
     if (modified_timestamp > 0 && Date.now() - modified_timestamp < Number(cache_interval) * 1000 * 60 * 60 * 24) {
       console.debug("Using cache...");
       const data = await fs.readFile(cachePath, "utf8");
-      return JSON.parse(data) as Prompt[];
+      return JSON.parse(data) as CursorRule[];
     } else {
       console.debug("No cache found or cache expired, fetching...");
-      const prompts = await fetchFromAPI(apiUrl);
-      console.debug(`Fetched ${prompts.length} prompts from API`);
+      const cursorRules = await fetchFromAPI(apiUrl);
+      console.debug(`Fetched ${cursorRules.length} cursor rules from API`);
 
-      await fs.writeFile(cachePath, JSON.stringify(prompts, null, 2));
-      console.debug("Wrote prompts to cache file");
-      return prompts;
+      await fs.writeFile(cachePath, JSON.stringify(cursorRules, null, 2));
+      console.debug("Wrote cursor rules to cache file");
+      return cursorRules;
     }
   } catch (error) {
-    console.error("Error in fetchPrompts:", error);
-    throw new Error("Failed to fetch prompts");
+    console.error("Error in fetchCursorRules:", error);
+    throw new Error("Failed to fetch cursor rules");
   }
 }

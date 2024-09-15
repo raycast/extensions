@@ -14,19 +14,19 @@ import {
 import { getAvatarIcon, usePromise } from "@raycast/utils";
 import { getSections, processContent } from "./utils";
 import { useState, useEffect } from "react";
-import { PromptDetail } from "./components/PromptDetail";
-import { fetchPrompts } from "./api";
+import { CursorRuleDetail } from "./components/CursorRuleDetail";
+import { fetchCursorRules } from "./api";
 
 export default function Command() {
-  const { show_detailed_view, default_prompts_list } = getPreferenceValues<Preferences>();
+  const { show_detailed_view, default_cursor_rules_list } = getPreferenceValues<Preferences>();
 
   const [error, setError] = useState<Error | undefined>(undefined);
   const [showingDetail, setShowingDetail] = useState<boolean>(show_detailed_view);
-  const [popularOnly, setPopularOnly] = useState<boolean>(default_prompts_list === "popular");
+  const [popularOnly, setPopularOnly] = useState<boolean>(default_cursor_rules_list === "popular");
 
   const { data, isLoading, revalidate } = usePromise(async () => {
     try {
-      return await fetchPrompts(popularOnly);
+      return await fetchCursorRules(popularOnly);
     } catch (err) {
       setError(err instanceof Error ? err : new Error(String(err)));
       return [];
@@ -35,7 +35,7 @@ export default function Command() {
 
   useEffect(() => {
     if (error) {
-      console.error("Error fetching prompts: ", error);
+      console.error("Error fetching cursor rules: ", error);
       showToast({
         style: Toast.Style.Failure,
         title: "Something went wrong: ",
@@ -44,9 +44,9 @@ export default function Command() {
     }
   }, [error]);
 
-  const prompts = data || [];
+  const cursorRules = data || [];
 
-  const sections = getSections(prompts, false);
+  const sections = getSections(cursorRules, false);
 
   return (
     <List
@@ -54,15 +54,15 @@ export default function Command() {
       isShowingDetail={showingDetail}
       searchBarAccessory={
         <List.Dropdown
-          tooltip="Filter Prompts"
+          tooltip="Filter Cursor Rules"
           onChange={(newValue) => {
             setPopularOnly(newValue === "popular");
             revalidate();
           }}
           defaultValue={popularOnly ? "popular" : "all"}
         >
-          <List.Dropdown.Item title="All Prompts" value="all" />
-          <List.Dropdown.Item title="Popular Prompts" value="popular" />
+          <List.Dropdown.Item title="All Cursor Rules" value="all" />
+          <List.Dropdown.Item title="Popular Cursor Rules" value="popular" />
         </List.Dropdown>
       }
     >
@@ -70,43 +70,45 @@ export default function Command() {
         sections.map((section) => (
           <List.Section key={section.name} title={section.name}>
             {section.slugs.map((slug, index) => {
-              const prompt = prompts.find((item) => item.slug === slug);
+              const cursorRule = cursorRules.find((item) => item.slug === slug);
               const props = showingDetail
                 ? {
                     detail: (
                       <List.Item.Detail
-                        markdown={`${processContent(prompt?.content || "").substring(0, 200)}...`}
-                        isLoading={isLoading || prompt === undefined}
+                        markdown={`${processContent(cursorRule?.content || "").substring(0, 200)}...`}
+                        isLoading={isLoading || cursorRule === undefined}
                         metadata={
                           <List.Item.Detail.Metadata>
-                            <List.Item.Detail.Metadata.Label text={section.name} title={prompt?.title || ""} />
+                            <List.Item.Detail.Metadata.Label text={section.name} title={cursorRule?.title || ""} />
                             <List.Item.Detail.Metadata.Label
                               title="Created by"
-                              text={prompt?.author.name || ""}
+                              text={cursorRule?.author.name || ""}
                               icon={{
-                                source: prompt?.author.avatar || getAvatarIcon(prompt?.author.name || ""),
+                                source: cursorRule?.author.avatar || getAvatarIcon(cursorRule?.author.name || ""),
                                 mask: Image.Mask.Circle,
                               }}
                             />
-                            {popularOnly && prompt?.count && (
+                            {popularOnly && cursorRule?.count && (
                               <List.Item.Detail.Metadata.Label
                                 title="Used by"
-                                text={prompt.count > 1 ? `${prompt.count} people` : `${prompt.count} person`}
+                                text={
+                                  cursorRule.count > 1 ? `${cursorRule.count} people` : `${cursorRule.count} person`
+                                }
                               />
                             )}
-                            {prompt?.tags && prompt.tags.length > 0 && (
+                            {cursorRule?.tags && cursorRule.tags.length > 0 && (
                               <>
                                 <List.Item.Detail.Metadata.Separator />
                                 <List.Item.Detail.Metadata.TagList title="Tags">
-                                  {prompt.tags.slice(0, 3).map((tag) => (
+                                  {cursorRule.tags.slice(0, 3).map((tag) => (
                                     <List.Item.Detail.Metadata.TagList.Item key={tag} text={tag} />
                                   ))}
                                 </List.Item.Detail.Metadata.TagList>
                               </>
                             )}
-                            {prompt?.libs && prompt.libs.length > 0 && (
+                            {cursorRule?.libs && cursorRule.libs.length > 0 && (
                               <List.Item.Detail.Metadata.TagList title="Libraries">
-                                {prompt.libs.slice(0, 3).map((lib) => (
+                                {cursorRule.libs.slice(0, 3).map((lib) => (
                                   <List.Item.Detail.Metadata.TagList.Item key={lib} text={lib} />
                                 ))}
                               </List.Item.Detail.Metadata.TagList>
@@ -118,30 +120,32 @@ export default function Command() {
                   }
                 : {
                     accessories: [
-                      { text: prompt?.tags.slice(0, 3).join(", ") },
-                      ...(popularOnly && prompt?.count ? [{ icon: Icon.Person, text: prompt.count.toString() }] : []),
+                      { text: cursorRule?.tags.slice(0, 3).join(", ") },
+                      ...(popularOnly && cursorRule?.count
+                        ? [{ icon: Icon.Person, text: cursorRule.count.toString() }]
+                        : []),
                     ],
                   };
 
               return (
                 <List.Item
-                  key={prompt?.slug || index}
-                  title={prompt?.title || ""}
+                  key={cursorRule?.slug || index}
+                  title={cursorRule?.title || ""}
                   {...props}
                   actions={
                     <ActionPanel>
                       <ActionPanel.Section title="Actions">
                         <Action.Push
-                          title="View Prompt"
+                          title="View Cursor Rule"
                           icon={Icon.Text}
-                          target={<PromptDetail prompt={prompt!} popularOnly={popularOnly} />}
+                          target={<CursorRuleDetail cursorRule={cursorRule!} popularOnly={popularOnly} />}
                         />
                         <Action
-                          title="Copy Prompt"
+                          title="Copy Cursor Rule"
                           icon={Icon.Clipboard}
                           shortcut={{ modifiers: ["cmd"], key: "c" }}
                           onAction={async () => {
-                            await Clipboard.copy(prompt?.content || "");
+                            await Clipboard.copy(cursorRule?.content || "");
                             await showHUD("Copied to clipboard, paste it into .cursorrules file");
                           }}
                         />

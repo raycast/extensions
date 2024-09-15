@@ -1,45 +1,47 @@
-import { Prompt } from "../types";
+import { CursorRule } from "../types";
 import { Action, ActionPanel, Detail, Image, Icon, openExtensionPreferences, showHUD, Clipboard } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
 import { isImageUrl, processContent } from "../utils";
 
 interface Props {
-  prompt: Prompt;
+  cursorRule: CursorRule;
   popularOnly: boolean;
 }
 
-export const PromptDetail = ({ prompt, popularOnly }: Props) => {
+export const CursorRuleDetail = ({ cursorRule, popularOnly }: Props) => {
   return (
     <Detail
-      navigationTitle={prompt.title}
-      markdown={processContent(prompt.content)}
+      navigationTitle={cursorRule.title}
+      markdown={processContent(cursorRule.content)}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label
             title="Author"
-            text={prompt.author.name}
+            text={cursorRule.author.name}
             icon={{
-              source: (isImageUrl(prompt.author.avatar) && prompt.author.avatar) || getAvatarIcon(prompt.author.name),
+              source:
+                (isImageUrl(cursorRule.author.avatar) && cursorRule.author.avatar) ||
+                getAvatarIcon(cursorRule.author.name),
               mask: Image.Mask.Circle,
             }}
           />
-          {prompt.author.url && (
-            <Detail.Metadata.Link title="Author URL" target={prompt.author.url} text={prompt.author.url} />
+          {cursorRule.author.url && (
+            <Detail.Metadata.Link title="Author URL" target={cursorRule.author.url} text={cursorRule.author.url} />
           )}
-          {popularOnly && prompt.count && (
+          {popularOnly && cursorRule.count && (
             <Detail.Metadata.Label
               title="Used by"
-              text={prompt.count > 1 ? `${prompt.count} people` : `${prompt.count} person`}
+              text={cursorRule.count > 1 ? `${cursorRule.count} people` : `${cursorRule.count} person`}
             />
           )}
           <Detail.Metadata.TagList title="Tags">
-            {prompt.tags.map((tag) => (
+            {cursorRule.tags.map((tag) => (
               <Detail.Metadata.TagList.Item key={tag} text={tag} />
             ))}
           </Detail.Metadata.TagList>
-          {prompt.libs.length > 0 && (
+          {cursorRule.libs.length > 0 && (
             <Detail.Metadata.TagList title="Libraries">
-              {prompt.libs.map((lib) => (
+              {cursorRule.libs.map((lib) => (
                 <Detail.Metadata.TagList.Item key={lib} text={lib} />
               ))}
             </Detail.Metadata.TagList>
@@ -50,11 +52,11 @@ export const PromptDetail = ({ prompt, popularOnly }: Props) => {
         <ActionPanel>
           <ActionPanel.Section title="Actions">
             <Action
-              title="Copy Prompt"
+              title="Copy Cursor Rule"
               icon={Icon.Clipboard}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
               onAction={async () => {
-                await Clipboard.copy(prompt.content);
+                await Clipboard.copy(cursorRule.content);
                 await showHUD("Copied to clipboard, paste it into .cursorrules file");
               }}
             />
@@ -62,15 +64,15 @@ export const PromptDetail = ({ prompt, popularOnly }: Props) => {
               // eslint-disable-next-line @raycast/prefer-title-case
               title="Open in cursor.directory"
               icon={Icon.Link}
-              url={`https://cursor.directory/${prompt.slug}`}
+              url={`https://cursor.directory/${cursorRule.slug}`}
             />
-            {prompt.author.url && (
-              <Action.OpenInBrowser title="Open Author URL" icon={Icon.Person} url={prompt.author.url} />
+            {cursorRule.author.url && (
+              <Action.OpenInBrowser title="Open Author URL" icon={Icon.Person} url={cursorRule.author.url} />
             )}
             <Action.CopyToClipboard
-              title="Share Prompt"
+              title="Share Cursor Rule"
               icon={Icon.Hashtag}
-              content={`https://cursor.directory/${prompt.slug}`}
+              content={`https://cursor.directory/${cursorRule.slug}`}
               shortcut={{ modifiers: ["cmd"], key: "y" }}
             />
           </ActionPanel.Section>
