@@ -1,6 +1,6 @@
-import { LocalStorage } from "@raycast/api";
+import { getApplications, LocalStorage, open, showHUD, showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
-import { API_URL, APP, RepeatMode } from "./consts";
+import { API_ENDPOINTS, API_URL, APP, COMMAND_NOTIFICATIONS_MAP, RepeatMode } from "./consts";
 import { ApiErrorResponse } from "./types";
 
 export async function getAuthToken(): Promise<string | null> {
@@ -18,7 +18,7 @@ export async function controlYouTubeMusic(command: string, data?: number | strin
   }
 
   try {
-    const response = await fetch(`${API_URL}/command`, {
+    const response = await fetch(`${API_URL}${API_ENDPOINTS.COMMAND}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -28,6 +28,8 @@ export async function controlYouTubeMusic(command: string, data?: number | strin
     });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      showHUD(COMMAND_NOTIFICATIONS_MAP[command]);
     }
 
     const contentType = response.headers.get("content-type");
@@ -43,13 +45,17 @@ export async function controlYouTubeMusic(command: string, data?: number | strin
     }
   } catch (error: unknown) {
     console.error("Error sending command:", error);
-    throw new Error("Error sending command");
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Error",
+      message: error instanceof Error ? error.message : "An unknown error occurred",
+    });
   }
 }
 
-export async function requestAuthCode(): Promise<void> {
+export async function requestAuthCode(): Promise<{ code: string; token: string | null }> {
   try {
-    const response = await fetch(`${API_URL}/auth/requestcode`, {
+    const response = await fetch(`${API_URL}${API_ENDPOINTS.CODE_REQUEST}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -62,9 +68,8 @@ export async function requestAuthCode(): Promise<void> {
     });
     if (!response.ok) {
       console.error("Error response:", response);
-      throw new Error(`HTTP error! status: ${response}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-    // Take the code from the response and call another API to get the token while also returning the code to the UI
     const responseData: unknown = await response.json();
     if (isApiErrorResponse(responseData)) {
       console.error("Error response:", responseData);
@@ -72,17 +77,22 @@ export async function requestAuthCode(): Promise<void> {
     }
 
     const { code } = responseData as { code: string };
-
-    await requestAuthToken(code);
+    const token = await requestAuthToken(code);
+    return { code, token };
   } catch (error: unknown) {
     console.error("Error requesting auth code:", error);
-    throw new Error("Error requesting auth code");
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Error",
+      message: error instanceof Error ? error.message : "An unknown error occurred",
+    });
+    throw error;
   }
 }
 
-async function requestAuthToken(code: string): Promise<void> {
+async function requestAuthToken(code: string): Promise<string | null> {
   try {
-    const response = await fetch(`${API_URL}/auth/request`, {
+    const response = await fetch(`${API_URL}${API_ENDPOINTS.TOKEN_REQUEST}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -103,11 +113,16 @@ async function requestAuthToken(code: string): Promise<void> {
     }
 
     const { token } = responseData as { token: string };
-
     await setAuthToken(token);
+    return token;
   } catch (error: unknown) {
     console.error("Error requesting auth token:", error);
-    throw new Error("Error requesting auth token");
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Error",
+      message: error instanceof Error ? error.message : "An unknown error occurred",
+    });
+    return null;
   }
 }
 
@@ -133,4 +148,29 @@ export function getRepeatModeName(mode: RepeatMode): string {
     default:
       return "Unknown";
   }
+}
+
+async function isYTMDesktopInstalled() {
+  const applications = await getApplications();
+  return applications.some(({ bundleId }) => bundleId === APP.BUNDLE_ID);
+}
+
+export async function checkYTMDInstallation() {
+  if (!(await isYTMDesktopInstalled())) {
+    const options: Toast.Options = {
+      style: Toast.Style.Failure,
+      title: "YTMDesktop is not installed.",
+      message: `Install it from ${APP.DOWNLOAD_URL}`,
+      primaryAction: {
+        title: `Go to ${APP.DOWNLOAD_URL}`,
+        onAction: (toast) => {
+          open(APP.DOWNLOAD_URL);
+          toast.hide();
+        },
+      },
+    };
+    await showToast(options);
+    return false;
+  }
+  return true;
 }
