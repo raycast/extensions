@@ -1,6 +1,6 @@
 # JSR Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-09-16
 
 - Updated dependencies
 - Added actions to open Docs page and Github repository
