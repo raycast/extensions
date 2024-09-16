@@ -1,6 +1,6 @@
 # Anna's Archive Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2024-09-16
 
 - Update dependencies
 - Add mirrors for `.li` and `.se` domains
