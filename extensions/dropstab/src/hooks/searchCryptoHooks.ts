@@ -1,37 +1,24 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import fetch, { RequestInit } from "node-fetch";
 import { AbortError } from "node-fetch";
 import { showToast, Toast } from "@raycast/api";
 import { SearchResult, SearchState } from "../types/coinType";
 import { getNumberWithCommas } from "../utils/getNumberWithCommas";
 import { getLargeNumberString } from "../utils/getLargeNumberString";
-
-// Функция debounce с перегрузками
-function debounce<T extends unknown[]>(func: (...args: T) => void, wait: number) {
-  let timeout: NodeJS.Timeout;
-  return (...args: T) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-}
+import { useDebounce } from "./useDebounce";
 
 export function useSearch() {
   const [state, setState] = useState<SearchState>({ results: [], isLoading: true, query: "" });
+  const [searchText, setSearchText] = useState("");
+  const debouncedSearchText = useDebounce(searchText, 500); // Используем useDebounce с задержкой в 500 мс
   const cancelRef = useRef<AbortController | null>(null);
 
-  const debouncedSearch = useCallback(
-    debounce((searchText: string) => {
-      search(searchText);
-    }, 500),
-    [],
-  );
-
   useEffect(() => {
-    debouncedSearch("");
+    search(debouncedSearchText);
     return () => {
       cancelRef.current?.abort();
     };
-  }, [debouncedSearch]);
+  }, [debouncedSearchText]);
 
   async function search(searchText: string) {
     cancelRef.current?.abort();
@@ -66,7 +53,7 @@ export function useSearch() {
 
   return {
     state: state,
-    search: debouncedSearch,
+    search: setSearchText, // Возвращаем setSearchText для обновления searchText
     updateCoinData: updateCoinData,
   };
 }
