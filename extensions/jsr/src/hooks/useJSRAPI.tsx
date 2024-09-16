@@ -1,10 +1,10 @@
 import { useFetch } from "@raycast/utils";
 
-import type { Package, SearchResultDocument } from "@/types";
+import type { Package } from "@/types";
 
-const useJSRAPI = (item: SearchResultDocument) => {
-  const url = `https://api.jsr.io/scopes/${item.scope}/packages/${item.name}`;
-  return useFetch<Package>(url);
+const useJSRAPI = (item: { scope: string; name: string } | null) => {
+  const url = `https://api.jsr.io/scopes/${item?.scope}/packages/${item?.name}`;
+  return useFetch<Package>(url, { execute: !!item });
 };
 
 export default useJSRAPI;
