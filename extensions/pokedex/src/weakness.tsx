@@ -11,10 +11,11 @@ import groupBy from "lodash.groupby";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getPokemon } from "./api";
 import PokemonDetail from "./components/detail";
+import MetadataWeakness from "./components/metadata/weakness";
 import TypeDropdown from "./components/type_dropdown";
-import WeaknessesTagList from "./components/weakness_tag";
 import pokedex from "./statics/pokedex.json";
 import { PokemonV2Pokemon } from "./types";
+import { getImgUrl } from "./utils";
 
 const { language } = getPreferenceValues();
 
@@ -78,14 +79,14 @@ export default function PokemonWeaknesses() {
                           img: [
                             {
                               title: poke.name,
-                              source: `https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${pokemon?.id.toString().padStart(3, "0")}.png`,
+                              source: getImgUrl(poke.id),
                             },
                           ],
                         },
                       ])}
                       metadata={
                         <List.Item.Detail.Metadata>
-                          <WeaknessesTagList
+                          <MetadataWeakness
                             types={pokemon?.pokemon_v2_pokemontypes || []}
                           />
                         </List.Item.Detail.Metadata>

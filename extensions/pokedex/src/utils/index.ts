@@ -1,5 +1,12 @@
-import { PokemonV2Pokemontype } from "../types";
 import damageRelations from "../statics/damage_relations.json";
+import { PokemonV2Pokemontype } from "../types";
+
+export const getImgUrl = (id: number, formId?: number) => {
+  const name = formId
+    ? `${id.toString().padStart(3, "0")}_f${formId + 1}`
+    : id.toString().padStart(3, "0");
+  return `https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${name}.png`;
+};
 
 export const typeColor: { [key: string]: string } = {
   normal: "#a8a77a",

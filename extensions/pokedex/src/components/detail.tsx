@@ -1,13 +1,11 @@
 import {
   Action,
   ActionPanel,
-  Color,
   Detail,
   getPreferenceValues,
   Icon,
 } from "@raycast/api";
 import json2md from "json2md";
-import uniqBy from "lodash.uniqby";
 import { useEffect, useMemo, useState } from "react";
 import { getPokemon } from "../api";
 import {
@@ -15,12 +13,13 @@ import {
   PokemonV2Pokemonspeciesname,
   PokemonV2PokemonspecyElement,
 } from "../types";
-import { typeColor } from "../utils";
+import { getImgUrl } from "../utils";
 import PokedexEntries from "./dex";
 import PokemonEncounters from "./encounter";
 import PokemonForms from "./form";
+import MetadataPokemon from "./metadata/pokemon";
+import MetadataWeakness from "./metadata/weakness";
 import PokemonMoves from "./move";
-import WeaknessesTagList from "./weakness_tag";
 
 const { language } = getPreferenceValues();
 
@@ -100,8 +99,6 @@ export default function PokemonDetail(props: { id?: number }) {
       pokemon_v2_pokemonspeciesflavortexts,
     } = pokemon_v2_pokemonspecy;
 
-    const pkmNumber = pokemon.id.toString().padStart(3, "0");
-
     let gender;
     if (pokemon_v2_pokemonspecy.gender_rate === -1) {
       gender = "Unknown";
@@ -138,7 +135,7 @@ export default function PokemonDetail(props: { id?: number }) {
       {
         img: {
           title: nameByLang[language].name,
-          source: `https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${pkmNumber}.png`,
+          source: getImgUrl(pokemon.id),
         },
       },
       {
@@ -198,9 +195,7 @@ export default function PokemonDetail(props: { id?: number }) {
               .map((specy) => {
                 return `![${
                   specy.pokemon_v2_pokemonspeciesnames[0].name
-                }](https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${specy.id
-                  .toString()
-                  .padStart(3, "0")}.png)`;
+                }](${getImgUrl(specy.id)})`;
               })
               .join(" "),
           }),
@@ -234,43 +229,9 @@ export default function PokemonDetail(props: { id?: number }) {
               target={`https://bulbapedia.bulbagarden.net/wiki/${englishName}_(Pok%C3%A9mon)`}
             />
             <Detail.Metadata.Separator />
-            <Detail.Metadata.Label
-              title="Height"
-              text={`${pokemon.height / 10}m`}
-            />
-            <Detail.Metadata.Label
-              title="Weight"
-              text={`${pokemon.weight / 10}kg`}
-            />
-            <Detail.Metadata.TagList title="Type">
-              {pokemon.pokemon_v2_pokemontypes.map((t) => {
-                return (
-                  <Detail.Metadata.TagList.Item
-                    key={t.pokemon_v2_type.pokemon_v2_typenames[0].name}
-                    text={t.pokemon_v2_type.pokemon_v2_typenames[0].name}
-                    color={typeColor[t.pokemon_v2_type.name]}
-                  />
-                );
-              })}
-            </Detail.Metadata.TagList>
-            <Detail.Metadata.TagList title="Abilities">
-              {uniqBy(
-                pokemon.pokemon_v2_pokemonabilities,
-                (a) => a.pokemon_v2_ability.pokemon_v2_abilitynames[0].name,
-              ).map((t) => {
-                return (
-                  <Detail.Metadata.TagList.Item
-                    key={t.pokemon_v2_ability.pokemon_v2_abilitynames[0].name}
-                    text={t.pokemon_v2_ability.pokemon_v2_abilitynames[0].name}
-                    color={
-                      t.is_hidden ? Color.SecondaryText : Color.PrimaryText
-                    }
-                  />
-                );
-              })}
-            </Detail.Metadata.TagList>
+            <MetadataPokemon type="detail" pokemon={pokemon} />
             <Detail.Metadata.Separator />
-            <WeaknessesTagList
+            <MetadataWeakness
               type="detail"
               types={pokemon.pokemon_v2_pokemontypes}
             />

@@ -7,7 +7,7 @@ A Raycast extension that lets you search for Pokémon by name or National Pokéd
 
 This extension is created by [Anh Thang Bui](https://github.com/anhthang) and utilizes data from [PokéAPI](https://pokeapi.co/).
 
-![Example](./metadata/pokedex-3.png)
+![Example](./metadata/pokedex-2.png)
 
 ## Features
 
