@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { List, Toast, showToast } from "@raycast/api";
+import { Action, List, Toast, showToast } from "@raycast/api";
 
 import { packageToSearchResultDocument } from "@/lib/convert";
 
@@ -9,12 +9,47 @@ import useJSRSearch from "@/hooks/useJSRSearch";
 
 import ListItem from "@/components/ListItem";
 
+import useJSRAPI from "./hooks/useJSRAPI";
+
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [isShowingDetails, setIsShowingDetails] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selectedPackage = useMemo(() => {
+    if (!selectedId) {
+      return null;
+    }
+
+    const [scope, name] = selectedId.split("/");
+    return { scope, name };
+  }, [selectedId]);
 
   const { data, isLoading, error } = useJSRSearch(searchText);
   const { data: statsData, isLoading: statsIsLoading } = useJSRAPIStats();
+  const {
+    data: selectedPackageData,
+    error: selectedPackageError,
+    isLoading: selectedPageLoading,
+  } = useJSRAPI(selectedPackage);
+
+  const extraActions = useMemo(() => {
+    if (selectedPageLoading || selectedPackageError || !selectedPackageData) {
+      return <></>;
+    }
+    if (selectedPackageData.githubRepository?.owner && selectedPackageData.githubRepository?.name) {
+      return (
+        <>
+          <Action.OpenInBrowser
+            title="Open GitHub Repository"
+            icon={{ source: "github.svg" }}
+            url={`https://github.com/${selectedPackageData.githubRepository.owner}/${selectedPackageData.githubRepository.name}`}
+            shortcut={{ key: "g", modifiers: ["cmd", "shift"] }}
+          />
+        </>
+      );
+    }
+    return <></>;
+  }, [selectedPackageData, selectedPackageError, selectedPageLoading]);
 
   useEffect(() => {
     if (error) {
@@ -36,6 +71,7 @@ export default function Command() {
       navigationTitle="Search JSR"
       searchBarPlaceholder="Search JSR packages"
       isLoading={isLoading || (searchText === "" && statsIsLoading)}
+      onSelectionChange={setSelectedId}
     >
       {searchText === "" && statsData ? (
         <>
@@ -48,6 +84,7 @@ export default function Command() {
                   setIsShowingDetails((state) => !state);
                 }}
                 isShowingDetails={isShowingDetails}
+                extraActions={extraActions}
               />
             ))}
           </List.Section>
@@ -60,6 +97,7 @@ export default function Command() {
                   setIsShowingDetails((state) => !state);
                 }}
                 isShowingDetails={isShowingDetails}
+                extraActions={extraActions}
               />
             ))}
           </List.Section>
@@ -73,6 +111,7 @@ export default function Command() {
             setIsShowingDetails((state) => !state);
           }}
           isShowingDetails={isShowingDetails}
+          extraActions={extraActions}
         />
       ))}
       <List.EmptyView

@@ -1,5 +1,10 @@
 # JSR Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Updated dependencies
+- Added actions to open Docs page and Github repository
+
 ## [Bugfix] - 2024-07-23
 
 - Bugfix for search API, not accepting JSON, moving to FormData
