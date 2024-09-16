@@ -1,5 +1,5 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { showToast, Toast } from "@raycast/api";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { PokeAPI, PokemonV2Pokemon } from "../types";
 
 function showFailureToast() {
@@ -181,6 +181,14 @@ export const getPokemon = async (
               pokemon_v2_pokemonformnames(where: {language_id: {_eq: $language_id}}) {
                 name
                 pokemon_name
+              }
+            }
+            pokemon_v2_pokemonabilities {
+              is_hidden
+              pokemon_v2_ability {
+                pokemon_v2_abilitynames(where: {language_id: {_eq: $language_id}}) {
+                  name
+                }
               }
             }
             pokemon_v2_pokemontypes {

@@ -95,12 +95,14 @@
     "axios": "^1.7.7",
     "json2md": "^2.0.1",
     "lodash.debounce": "^4.0.8",
-    "lodash.groupby": "^4.6.0"
+    "lodash.groupby": "^4.6.0",
+    "lodash.uniqby": "^4.7.0"
   },
   "devDependencies": {
     "@types/json2md": "^1.5.4",
     "@types/lodash.debounce": "^4.0.9",
     "@types/lodash.groupby": "^4.6.9",
+    "@types/lodash.uniqby": "^4.7.9",
     "@types/node": "~22.5.5",
     "@types/react": "^18.3.5",
     "@typescript-eslint/eslint-plugin": "^7.1.0",

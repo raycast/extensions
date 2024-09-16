@@ -6,18 +6,20 @@ import {
   getPreferenceValues,
   Icon,
 } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
 import json2md from "json2md";
+import uniqBy from "lodash.uniqby";
+import { useEffect, useMemo, useState } from "react";
 import { getPokemon } from "../api";
 import {
   PokemonV2Pokemon,
   PokemonV2Pokemonspeciesname,
   PokemonV2PokemonspecyElement,
 } from "../types";
-import PokemonMoves from "./move";
-import PokedexEntries from "./dex";
 import { calculateEffectiveness, typeColor } from "../utils";
+import PokedexEntries from "./dex";
 import PokemonEncounters from "./encounter";
+import PokemonForms from "./form";
+import PokemonMoves from "./move";
 
 const { language } = getPreferenceValues();
 
@@ -81,13 +83,6 @@ export default function PokemonDetail(props: { id?: number }) {
     );
   }, [pokemon]);
 
-  const formImg = (id: number, formId: number) => {
-    const name = formId
-      ? `${id.toString().padStart(3, "0")}_f${formId + 1}`
-      : id.toString().padStart(3, "0");
-    return `https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${name}.png`;
-  };
-
   const evolutions = (species: PokemonV2PokemonspecyElement[]) => {
     const first = species.find((s) => !s.evolves_from_species_id);
     if (!first) return [];
@@ -117,89 +112,6 @@ export default function PokemonDetail(props: { id?: number }) {
     } = pokemon_v2_pokemonspecy;
 
     const pkmNumber = pokemon.id.toString().padStart(3, "0");
-
-    // excluding forms that unavailable in pokemon.com
-    let pokemons = pokemon_v2_pokemonspecy.pokemon_v2_pokemons;
-    let formNames: string[] = [];
-    let varieties: string[] = [];
-    switch (pokemon.id) {
-      case 25:
-        formNames = ["pikachu", "pikachu-gmax"];
-        break;
-      case 555:
-        formNames = ["darmanitan-standard", "darmanitan-galar-standard"];
-        break;
-      case 666:
-        varieties = [
-          "meadow",
-          "continental",
-          "garden",
-          "elegant",
-          "marine",
-          "high-plains",
-          "river",
-        ];
-        break;
-      // case 668:
-      //   // male, female
-      //   break
-      case 670:
-        formNames = ["floette"];
-        varieties = ["red"];
-        break;
-      case 671:
-        varieties = ["red"];
-        break;
-      case 676:
-        varieties = ["natural", "heart", "star", "diamond"];
-        break;
-      case 744:
-        formNames = ["rockruff"];
-        break;
-      case 774:
-        formNames = ["minior-red-meteor", "minior-red"];
-        break;
-      case 778:
-        formNames = ["mimikyu-disguised"];
-        break;
-      case 849:
-        formNames = [
-          "toxtricity-amped",
-          "toxtricity-low-key",
-          "toxtricity-amped-gmax",
-        ];
-        break;
-      case 875:
-        // eiscue-noice available in Zukan, but not in pokemon.com at the moment
-        formNames = ["eiscue-ice"];
-        break;
-      default:
-        break;
-    }
-
-    if (formNames.length) {
-      pokemons = pokemons.filter((p) => formNames.includes(p.name));
-    }
-
-    const forms: { name: string; type: string; img: string }[] = [];
-    pokemons.forEach((p, pIdx) => {
-      let pokemonForms = p.pokemon_v2_pokemonforms;
-      if (varieties.length) {
-        pokemonForms = pokemonForms.filter((f) =>
-          varieties.includes(f.form_name),
-        );
-      }
-      pokemonForms.forEach((f, fIdx) => {
-        forms.push({
-          name:
-            f.pokemon_v2_pokemonformnames[0]?.name || nameByLang[language].name,
-          type: p.pokemon_v2_pokemontypes
-            .map((n) => n.pokemon_v2_type.pokemon_v2_typenames[0].name)
-            .join(", "),
-          img: formImg(pokemon.id, pIdx + fIdx),
-        });
-      });
-    });
 
     let gender;
     if (pokemon_v2_pokemonspecy.gender_rate === -1) {
@@ -278,25 +190,6 @@ export default function PokemonDetail(props: { id?: number }) {
       {
         p: `_Egg cycles:_ ${pokemon_v2_pokemonspecy.hatch_counter}`,
       },
-      {
-        h2: forms.length > 1 ? "Forms" : "",
-      },
-      ...(forms.length > 1
-        ? forms.map((f) => {
-            return [
-              { h3: f.name },
-              { p: "_Type:_ " + f.type },
-              {
-                img: [
-                  {
-                    title: f.name,
-                    source: f.img,
-                  },
-                ],
-              },
-            ];
-          })
-        : []),
     ];
 
     if (pokemon_v2_evolutionchain?.pokemon_v2_pokemonspecies.length) {
@@ -372,7 +265,10 @@ export default function PokemonDetail(props: { id?: number }) {
               })}
             </Detail.Metadata.TagList>
             <Detail.Metadata.TagList title="Abilities">
-              {pokemon.pokemon_v2_pokemonabilities.map((t) => {
+              {uniqBy(
+                pokemon.pokemon_v2_pokemonabilities,
+                (a) => a.pokemon_v2_ability.pokemon_v2_abilitynames[0].name,
+              ).map((t) => {
                 return (
                   <Detail.Metadata.TagList.Item
                     key={t.pokemon_v2_ability.pokemon_v2_abilitynames[0].name}
@@ -447,6 +343,17 @@ export default function PokemonDetail(props: { id?: number }) {
                     pokemon.pokemon_v2_pokemonspecy
                       .pokemon_v2_pokemonspeciesflavortexts
                   }
+                />
+              }
+            />
+            <Action.Push
+              title="Forms"
+              icon={Icon.List}
+              target={
+                <PokemonForms
+                  id={pokemon.id}
+                  name={nameByLang[language].name}
+                  pokemons={pokemon.pokemon_v2_pokemonspecy.pokemon_v2_pokemons}
                 />
               }
             />

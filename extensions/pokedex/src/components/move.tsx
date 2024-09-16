@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
 import { List } from "@raycast/api";
 import json2md from "json2md";
 import groupBy from "lodash.groupby";
+import { useMemo, useState } from "react";
 import { PokemonV2Pokemonmove } from "../types";
 
 export default function PokemonMoves(props: {

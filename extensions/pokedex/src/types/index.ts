@@ -172,6 +172,7 @@ export interface PokemonV2Egggroup {
 export interface PokemonV2PokemonspecyPokemonV2Pokemon {
   name: string;
   pokemon_v2_pokemonforms: PokemonV2Pokemonform[];
+  pokemon_v2_pokemonabilities: PokemonV2Pokemonability[];
   pokemon_v2_pokemontypes: PokemonV2Pokemontype[];
 }
 

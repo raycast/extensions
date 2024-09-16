@@ -1,43 +1,40 @@
 # Pokédex Changelog
 
-## [Improvements] - 2024-09-14
-- Added Weaknesses command
+## [Pokédex Unleashed] - 2024-09-14
+- Added Weaknesses command for easy reference.
+- Introduced Type Effectiveness and Encounter Locations (experimental) to Pokémon details for more comprehensive information.
+- Reorganized Pokémon forms into an action sub-menu to display precise type and ability information.
 
-## [Improvements] - 2024-05-17
-- Fixed a coding issue with the Learnsets action
+## [Learnset Perfection] - 2024-05-17
+- Fixed a coding issue with the Learnsets action.
 
-## [Improvements] - 2024-02-27
-- Added more Gen 9 Pokémons
+## [Paldea Pioneers] - 2024-02-27
+- Expanded the Pokédex to include more Gen 9 Pokémon from the Paldea region.
 
-## [Improvements] - 2023-02-03
-- Added Gen 9 Pokémons
+## [Scarlet & Violet] - 2023-02-03
+- Added additional Gen 9 Pokémon from the Scarlet & Violet games.
 
-## [Improvements] - 2022-06-16
+## [Grid Mastery] - 2022-06-16
+- Introduced a new Grid layout for a more visually appealing and efficient experience.
+- Utilized new list item metadata to enhance information presentation.
 
-- Implemented a new Grid layout
-- Used new list item metadata
+## [Type & View] - 2022-03-12
+- Implemented type filter and split view for Moves.
+- Enhanced visual clarity with SVG icons.
+- Added a changelog to keep users informed of updates.
 
-## [Improvements] - 2022-03-12
+## [Moves & Abilities] - 2022-03-10
+- Expanded functionality with new commands: Moves and Abilities.
+- Introduced a new preference: Show preview.
+- Implemented Pokémon type filter for targeted searches.
+- Fixed Evolution chains to ensure accuracy.
 
-- Added type filter and split view for Moves
-- Added SVG icons for better rendering
-- Added changelog
+## [Pokémon Master] - 2022-03-02
+- Added 898 Pokémon Species, including all alternate forms (Alolan, Galarian, Mega Evolution, Gigantamax).
+- Enhanced Pokémon details with Training, Breeding, and Forms information.
+- Incorporated Pokémon type icons for visual representation.
+- Provided Pokémon details in multiple languages.
+- Fixed the extension icon for a more polished appearance.
 
-## [Improvements & Fixes] - 2022-03-10
-
-- Added new commands: Moves, Abilities
-- Added new preference: Show preview
-- Added Pokémon type filter
-- Fixed Evolution chains
-
-## [Improvements] - 2022-03-02
-
-- Added 898 Pokémon Species with all alternate forms, including Regional forms (Alolan, Galarian), Mega Evolution, and Gigantamax
-- Added more Pokémon details: Training, Breeding, Forms
-- Added Pokémon type icons
-- Added Pokémon details in preferred languages: English (default), French, German, Italian, Japanese, Korean, Spanish
-- Fixed extension icon
-
-## [Initial Version] - 2022-02-18
-
-- Launched the Pokédex extension with basic Pokémon information and search functionality
+## [Dex Debut] - 2022-02-18
+- Launched the initial version of the Pokédex extension with basic Pokémon information and search capabilities.

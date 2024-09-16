@@ -6,18 +6,19 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import json2md from "json2md";
-import { useEffect, useState, useCallback, useMemo } from "react";
-import { getPokemon } from "./api";
-import { PokemonV2Pokemon } from "./types";
-import PokemonDetail from "./components/detail";
-import pokedex from "./statics/pokedex.json";
 import debounce from "lodash.debounce";
 import groupBy from "lodash.groupby";
-import { calculateEffectiveness, typeColor } from "./utils";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { getPokemon } from "./api";
+import PokemonDetail from "./components/detail";
 import TypeDropdown from "./components/type_dropdown";
+import pokedex from "./statics/pokedex.json";
+import { PokemonV2Pokemon } from "./types";
+import { calculateEffectiveness, typeColor } from "./utils";
+
+const { language } = getPreferenceValues();
 
 export default function PokemonWeaknesses() {
-  const { language } = getPreferenceValues();
   const [pokemon, setPokemon] = useState<PokemonV2Pokemon | undefined>(
     undefined,
   );
@@ -85,7 +86,12 @@ export default function PokemonWeaknesses() {
                     <List.Item.Detail
                       markdown={json2md([
                         {
-                          p: `<img src="https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${String(pokemon?.id).padStart(3, "0")}.png" height="200">`,
+                          img: [
+                            {
+                              title: poke.name,
+                              source: `https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${pokemon?.id.toString().padStart(3, "0")}.png`,
+                            },
+                          ],
                         },
                       ])}
                       metadata={

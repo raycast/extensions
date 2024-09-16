@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
 import { List } from "@raycast/api";
 import json2md from "json2md";
 import groupBy from "lodash.groupby";
+import { useMemo, useState } from "react";
 import TypeDropdown from "./components/type_dropdown";
 
 import moves from "./statics/moves.json";
