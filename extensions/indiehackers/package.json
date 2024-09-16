@@ -11,6 +11,60 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "browse-posts",
+      "title": "Browse Posts",
+      "subtitle": "IndieHackers",
+      "description": "Browse IH by Time, Type or Group",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "group_slug",
+          "required": false,
+          "type": "text",
+          "placeholder": "Group Slug"
+        }
+      ],
+      "preferences": [
+        {
+          "title": "Default News",
+          "description": "Default News Type",
+          "name": "default_type",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "Type - Organic",
+              "value": "type_organic"
+            },
+            {
+              "title": "Type - Featured",
+              "value": "type_featured"
+            },
+            {
+              "title": "Type - Newest",
+              "value": "type_newest"
+            },
+            {
+              "title": "Time - Today",
+              "value": "time_today"
+            },
+            {
+              "title": "Time - This Week",
+              "value": "time_week"
+            },
+            {
+              "title": "Time - This Month",
+              "value": "time_month"
+            },
+            {
+              "title": "Time - All Time",
+              "value": "time_all-time"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "browse-by-type",
       "title": "Browse by Type",
       "subtitle": "IndieHackers",
