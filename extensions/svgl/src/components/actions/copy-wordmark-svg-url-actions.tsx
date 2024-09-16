@@ -1,4 +1,4 @@
-import { Action, Icon, Toast, showToast, Clipboard  } from "@raycast/api";
+import { Action, Icon, Toast, showToast, Clipboard } from "@raycast/api";
 import { Svg } from "../../type";
 import { useSvglExtension } from "../app-context";
 
