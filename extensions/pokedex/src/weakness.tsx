@@ -12,9 +12,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { getPokemon } from "./api";
 import PokemonDetail from "./components/detail";
 import TypeDropdown from "./components/type_dropdown";
+import WeaknessesTagList from "./components/weakness_tag";
 import pokedex from "./statics/pokedex.json";
 import { PokemonV2Pokemon } from "./types";
-import { calculateEffectiveness, typeColor } from "./utils";
 
 const { language } = getPreferenceValues();
 
@@ -24,13 +24,6 @@ export default function PokemonWeaknesses() {
   );
   const [loading, setLoading] = useState(true);
   const [type, setType] = useState<string>("all");
-
-  const [effectiveness, setEffectiveness] = useState<{
-    normal: string[];
-    weak: string[];
-    immune: string[];
-    resistant: string[];
-  }>({ normal: [], weak: [], immune: [], resistant: [] });
 
   const [selectedPokemonId, setSelectedPokemonId] = useState(1);
   const [pokemonName, setPokemonName] = useState<string | undefined>(undefined);
@@ -45,10 +38,6 @@ export default function PokemonWeaknesses() {
           fetchedPokemon.name.charAt(0).toUpperCase() +
             fetchedPokemon.name.slice(1),
         );
-        const typeEffectiveness = calculateEffectiveness(
-          fetchedPokemon.pokemon_v2_pokemontypes,
-        );
-        setEffectiveness(typeEffectiveness);
         setLoading(false);
       })
       .catch(() => {
@@ -96,49 +85,9 @@ export default function PokemonWeaknesses() {
                       ])}
                       metadata={
                         <List.Item.Detail.Metadata>
-                          {effectiveness.weak.length > 0 && (
-                            <List.Item.Detail.Metadata.TagList title="Weak to">
-                              {effectiveness.weak.map((weakness, index) => (
-                                <List.Item.Detail.Metadata.TagList.Item
-                                  key={index}
-                                  text={weakness}
-                                  color={
-                                    typeColor[
-                                      weakness.split(" ")[1].toLowerCase()
-                                    ]
-                                  }
-                                />
-                              ))}
-                            </List.Item.Detail.Metadata.TagList>
-                          )}
-                          {effectiveness.resistant.length > 0 && (
-                            <List.Item.Detail.Metadata.TagList title="Resistant to">
-                              {effectiveness.resistant.map(
-                                (resistance, index) => (
-                                  <List.Item.Detail.Metadata.TagList.Item
-                                    key={index}
-                                    text={resistance}
-                                    color={
-                                      typeColor[
-                                        resistance.split(" ")[1].toLowerCase()
-                                      ]
-                                    }
-                                  />
-                                ),
-                              )}
-                            </List.Item.Detail.Metadata.TagList>
-                          )}
-                          {effectiveness.immune.length > 0 && (
-                            <List.Item.Detail.Metadata.TagList title="Immune to">
-                              {effectiveness.immune.map((immunity, index) => (
-                                <List.Item.Detail.Metadata.TagList.Item
-                                  key={index}
-                                  text={immunity}
-                                  color={typeColor[immunity.toLowerCase()]}
-                                />
-                              ))}
-                            </List.Item.Detail.Metadata.TagList>
-                          )}
+                          <WeaknessesTagList
+                            types={pokemon?.pokemon_v2_pokemontypes || []}
+                          />
                         </List.Item.Detail.Metadata>
                       }
                     />

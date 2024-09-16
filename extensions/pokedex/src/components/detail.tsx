@@ -15,11 +15,12 @@ import {
   PokemonV2Pokemonspeciesname,
   PokemonV2PokemonspecyElement,
 } from "../types";
-import { calculateEffectiveness, typeColor } from "../utils";
+import { typeColor } from "../utils";
 import PokedexEntries from "./dex";
 import PokemonEncounters from "./encounter";
 import PokemonForms from "./form";
 import PokemonMoves from "./move";
+import WeaknessesTagList from "./weakness_tag";
 
 const { language } = getPreferenceValues();
 
@@ -45,24 +46,12 @@ export default function PokemonDetail(props: { id?: number }) {
   const [pokemon, setPokemon] = useState<PokemonV2Pokemon | undefined>(
     undefined,
   );
-  const [effectiveness, setEffectiveness] = useState<{
-    normal: string[];
-    weak: string[];
-    immune: string[];
-    resistant: string[];
-  }>({ normal: [], weak: [], immune: [], resistant: [] });
 
   useEffect(() => {
     setLoading(true);
     getPokemon(props.id || random(1, 905), Number(language))
       .then((data) => {
         setPokemon(data[0]);
-
-        const typeEffectiveness = calculateEffectiveness(
-          data[0].pokemon_v2_pokemontypes,
-        );
-        setEffectiveness(typeEffectiveness);
-
         setLoading(false);
       })
       .catch(() => {
@@ -281,39 +270,10 @@ export default function PokemonDetail(props: { id?: number }) {
               })}
             </Detail.Metadata.TagList>
             <Detail.Metadata.Separator />
-            {effectiveness.weak.length > 0 && (
-              <Detail.Metadata.TagList title="Weak to">
-                {effectiveness.weak.map((weakness, index) => (
-                  <Detail.Metadata.TagList.Item
-                    key={index}
-                    text={weakness}
-                    color={typeColor[weakness.split(" ")[1].toLowerCase()]}
-                  />
-                ))}
-              </Detail.Metadata.TagList>
-            )}
-            {effectiveness.resistant.length > 0 && (
-              <Detail.Metadata.TagList title="Resistant to">
-                {effectiveness.resistant.map((resistance, index) => (
-                  <Detail.Metadata.TagList.Item
-                    key={index}
-                    text={resistance}
-                    color={typeColor[resistance.split(" ")[1].toLowerCase()]}
-                  />
-                ))}
-              </Detail.Metadata.TagList>
-            )}
-            {effectiveness.immune.length > 0 && (
-              <Detail.Metadata.TagList title="Immune to">
-                {effectiveness.immune.map((immunity, index) => (
-                  <Detail.Metadata.TagList.Item
-                    key={index}
-                    text={immunity}
-                    color={typeColor[immunity.toLowerCase()]}
-                  />
-                ))}
-              </Detail.Metadata.TagList>
-            )}
+            <WeaknessesTagList
+              type="detail"
+              types={pokemon.pokemon_v2_pokemontypes}
+            />
             <Detail.Metadata.Separator />
             {pokemon.pokemon_v2_pokemonstats.map((stat, idx) => {
               return (

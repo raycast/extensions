@@ -1,8 +1,12 @@
-import { Color, List } from "@raycast/api";
+import { Color, Detail, List } from "@raycast/api";
 import json2md from "json2md";
 import uniqBy from "lodash.uniqby";
-import { PokemonV2PokemonspecyPokemonV2Pokemon } from "../types";
-import { calculateEffectiveness, typeColor } from "../utils";
+import {
+  PokemonV2PokemonspecyPokemonV2Pokemon,
+  PokemonV2Pokemontype,
+} from "../types";
+import { typeColor } from "../utils";
+import WeaknessesTagList from "./weakness_tag";
 
 export default function PokemonForms(props: {
   id: number;
@@ -81,15 +85,9 @@ export default function PokemonForms(props: {
 
   const forms: {
     name: string;
-    types: string[];
     img: string;
-    abilities: { name: string; is_hidden: boolean }[];
-    effectiveness: {
-      normal: string[];
-      weak: string[];
-      immune: string[];
-      resistant: string[];
-    };
+    abilities: Detail.Metadata.TagList.Item.Props[];
+    types: PokemonV2Pokemontype[];
   }[] = [];
 
   pokemons.forEach((p, pIdx) => {
@@ -102,15 +100,15 @@ export default function PokemonForms(props: {
     pokemonForms.forEach((f, fIdx) => {
       forms.push({
         name: f.pokemon_v2_pokemonformnames[0]?.name || props.name,
-        types: p.pokemon_v2_pokemontypes.map(
-          (n) => n.pokemon_v2_type.pokemon_v2_typenames[0].name,
-        ),
         img: formImg(props.id, pIdx + fIdx),
-        abilities: p.pokemon_v2_pokemonabilities.map((a) => ({
-          name: a.pokemon_v2_ability.pokemon_v2_abilitynames[0].name,
-          is_hidden: a.is_hidden,
+        types: p.pokemon_v2_pokemontypes,
+        abilities: uniqBy(
+          p.pokemon_v2_pokemonabilities,
+          (a) => a.pokemon_v2_ability.pokemon_v2_abilitynames[0].name,
+        ).map((a) => ({
+          text: a.pokemon_v2_ability.pokemon_v2_abilitynames[0].name,
+          color: a.is_hidden ? Color.SecondaryText : Color.PrimaryText,
         })),
-        effectiveness: calculateEffectiveness(p.pokemon_v2_pokemontypes),
       });
     });
   });
@@ -122,7 +120,6 @@ export default function PokemonForms(props: {
       isShowingDetail={true}
     >
       {forms.map((form) => {
-        const { effectiveness } = form;
         return (
           <List.Item
             key={form.name}
@@ -142,71 +139,39 @@ export default function PokemonForms(props: {
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.TagList title="Type">
-                      {form.types.map((type) => (
-                        <List.Item.Detail.Metadata.TagList.Item
-                          key={type}
-                          text={type}
-                          color={typeColor[type.toLowerCase()]}
-                        />
-                      ))}
-                    </List.Item.Detail.Metadata.TagList>
-                    <List.Item.Detail.Metadata.TagList title="Abilities">
-                      {uniqBy(form.abilities, (a) => a.name).map((a) => {
+                      {form.types.map((type) => {
+                        const typename =
+                          type.pokemon_v2_type.pokemon_v2_typenames[0].name;
                         return (
                           <List.Item.Detail.Metadata.TagList.Item
-                            key={a.name}
-                            text={a.name}
-                            color={
-                              a.is_hidden
-                                ? Color.SecondaryText
-                                : Color.PrimaryText
-                            }
+                            key={typename}
+                            text={typename}
+                            color={typeColor[type.pokemon_v2_type.name]}
+                          />
+                        );
+                      })}
+                    </List.Item.Detail.Metadata.TagList>
+                    <List.Item.Detail.Metadata.TagList title="Abilities">
+                      {form.abilities.map((ability) => {
+                        return (
+                          <List.Item.Detail.Metadata.TagList.Item
+                            key={ability.text}
+                            text={ability.text}
+                            color={ability.color}
                           />
                         );
                       })}
                     </List.Item.Detail.Metadata.TagList>
                     <List.Item.Detail.Metadata.Separator />
-                    {effectiveness.weak.length > 0 && (
-                      <List.Item.Detail.Metadata.TagList title="Weak to">
-                        {effectiveness.weak.map((weakness, index) => (
-                          <List.Item.Detail.Metadata.TagList.Item
-                            key={index}
-                            text={weakness}
-                            color={
-                              typeColor[weakness.split(" ")[1].toLowerCase()]
-                            }
-                          />
-                        ))}
-                      </List.Item.Detail.Metadata.TagList>
-                    )}
-                    {effectiveness.resistant.length > 0 && (
-                      <List.Item.Detail.Metadata.TagList title="Resistant to">
-                        {effectiveness.resistant.map((resistance, index) => (
-                          <List.Item.Detail.Metadata.TagList.Item
-                            key={index}
-                            text={resistance}
-                            color={
-                              typeColor[resistance.split(" ")[1].toLowerCase()]
-                            }
-                          />
-                        ))}
-                      </List.Item.Detail.Metadata.TagList>
-                    )}
-                    {effectiveness.immune.length > 0 && (
-                      <List.Item.Detail.Metadata.TagList title="Immune to">
-                        {effectiveness.immune.map((immunity, index) => (
-                          <List.Item.Detail.Metadata.TagList.Item
-                            key={index}
-                            text={immunity}
-                            color={typeColor[immunity.toLowerCase()]}
-                          />
-                        ))}
-                      </List.Item.Detail.Metadata.TagList>
-                    )}
+
+                    <WeaknessesTagList types={form.types} />
                   </List.Item.Detail.Metadata>
                 }
               />
             }
+            accessories={form.types.map((type) => ({
+              icon: `types/${type.pokemon_v2_type.name}.svg`,
+            }))}
           />
         );
       })}
