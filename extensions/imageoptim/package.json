@@ -3,7 +3,7 @@
   "name": "imageoptim",
   "title": "ImageOptim",
   "description": "Compress images with ImageOptim",
-  "icon": "extension-icon.png",
+  "icon": "imageoptim-icon.png",
   "author": "marckohlbrugge",
   "categories": [
     "Design Tools",
