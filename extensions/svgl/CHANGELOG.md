@@ -1,5 +1,9 @@
 # svgl Changelog
 
+## [Add Copy SVG URL Feature] - 2024-09-17
+
+- Add the commands `Copy SVG URL` and `Copy SVG Wordmark URL` to copy the SVG URL to the clipboard.
+
 ## [Update API URL] - 2024-08-26
 
 - Update API URL to `https://api.svgl.app`.
