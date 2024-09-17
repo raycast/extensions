@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pse-tools24",
+  "title": "PSE Tools",
+  "description": "Useful tools for QM PSEs",
+  "type": "module",
+  "icon": "config-iconfig-icon.svg",
+  "author": "dkeat",
+  "organization": "qm-pses",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "sub-list",
+      "title": "Sub Info",
+      "description": "Template for showing a static list and a detail view",
+      "mode": "view"
+    }
+      ,
+    {
+      "name": "my-ip",
+      "title": "My IP",
+      "subtitle": "Get my IP",
+      "description": "Logs your local public IPv4",
+      "mode": "no-view"
+    }
+      ],
+  "preferences": [
+    {"name": "sessCookie", "description": "Copy PHPSESSID cookie from qmops2", "type":"textfield", "required": true, "title": "PHPSESSID", "placeholder": "Copy PHPSESSID cookie from qmops2"}
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.71.4",
+    "@raycast/utils": "^1.14.0",
+    "@types/lodash": "^4.17.0",
+    "@types/node-fetch": "^2.6.11",
+    "@types/xml2js": "^0.4.14",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.3.2",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "react-devtools": "^4.28.4",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
