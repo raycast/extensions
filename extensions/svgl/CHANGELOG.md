@@ -1,6 +1,6 @@
 # svgl Changelog
 
-## [Add Copy SVG URL Feature] - {PR_MERGE_DATE}
+## [Add Copy SVG URL Feature] - 2024-09-17
 
 - Add the commands `Copy SVG URL` and `Copy SVG Wordmark URL` to copy the SVG URL to the clipboard.
 
