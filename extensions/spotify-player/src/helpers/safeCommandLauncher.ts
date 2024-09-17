@@ -6,7 +6,10 @@ export async function safeLaunchCommandInBackground(commandName: string): Promis
   } catch (error: unknown) {
     if (error instanceof Error) {
       // Check for specific error messages and handle them silently
-      if (error.message.includes("No enabled command") || error.message.includes("The operation couldn’t be completed")) {
+      if (
+        error.message.includes("No enabled command") ||
+        error.message.includes("The operation couldn’t be completed")
+      ) {
         // Log the error silently without showing HUD
         console.log("Silent Error:", error.message);
       } else {

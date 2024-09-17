@@ -22,7 +22,7 @@ export default async function Command() {
   try {
     await skipToPrevious();
     await showHUD("Skipped to previous");
-    await safeLaunchCommandInBackground("current-track")
+    await safeLaunchCommandInBackground("current-track");
   } catch (error) {
     await showHUD("Nothing is currently playing");
   }
