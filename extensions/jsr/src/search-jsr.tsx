@@ -1,36 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { Action, List, Toast, showToast } from "@raycast/api";
+import { Action, List } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 import { packageToSearchResultDocument } from "@/lib/convert";
 
-import useJSRAPIStats from "@/hooks/useJSRAPIStats";
-import useJSRSearch from "@/hooks/useJSRSearch";
+import { useStats } from "@/hooks/useJSRAPI";
+import { useJSRSearch } from "@/hooks/useJSRSearch";
+import { useSelectedPackage } from "@/hooks/useSelectedPackage";
 
 import ListItem from "@/components/ListItem";
-
-import useJSRAPI from "./hooks/useJSRAPI";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [isShowingDetails, setIsShowingDetails] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const selectedPackage = useMemo(() => {
-    if (!selectedId) {
-      return null;
-    }
-
-    const [scope, name] = selectedId.split("/");
-    return { scope, name };
-  }, [selectedId]);
-
   const { data, isLoading, error } = useJSRSearch(searchText);
-  const { data: statsData, isLoading: statsIsLoading } = useJSRAPIStats();
-  const {
-    data: selectedPackageData,
-    error: selectedPackageError,
-    isLoading: selectedPageLoading,
-  } = useJSRAPI(selectedPackage);
+  const { data: statsData, isLoading: statsIsLoading } = useStats();
+  const { selectedPackageData, selectedPackageError, selectedPageLoading, setSelectedId } = useSelectedPackage();
 
   const extraActions = useMemo(() => {
     if (selectedPageLoading || selectedPackageError || !selectedPackageData) {
@@ -54,8 +40,7 @@ export default function Command() {
   useEffect(() => {
     if (error) {
       console.error("Failed to fetch JSR search results", error);
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Error fetching JSR search results",
         message: error.message,
       });

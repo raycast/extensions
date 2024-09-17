@@ -24,6 +24,7 @@ const useSearchAPIData = () => {
     headers: {
       Agent: `Raycast/${environment.raycastVersion} ${environment.extensionName} (https://raycast.com)`,
     },
+    keepPreviousData: true,
     parseResponse: async (response) => {
       let res: SearchAPIData | null = null;
       const text = await response.text();
@@ -49,7 +50,7 @@ const useSearchAPIData = () => {
   });
 };
 
-const useJSRSearch = (queryString: string) => {
+export const useJSRSearch = (queryString: string) => {
   const query = queryString?.trim() || "";
   const { data: apiData, isLoading: isLoadingAPIData, error: apiDataError } = useSearchAPIData();
   const abortable = useRef<AbortController>();
@@ -101,5 +102,3 @@ const useJSRSearch = (queryString: string) => {
 
   return { isLoading: isLoading || isLoadingAPIData, error: dataError || apiDataError, ...rest };
 };
-
-export default useJSRSearch;
