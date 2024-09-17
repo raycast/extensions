@@ -54,7 +54,9 @@ export function UseNameGenerator({ codeElementType }: NameHandlerProps) {
   };
 
   useEffect(() => {
-    setGeneratedNames([]);
+    if (!searchText || searchText == "") {
+      setGeneratedNames([]);
+    }
   }, [searchText]);
 
   const onStyleChange = async (newValue: string) => {
