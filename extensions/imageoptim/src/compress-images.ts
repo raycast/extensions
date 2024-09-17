@@ -35,7 +35,7 @@ export default async function main() {
     console.log("Starting ImageOptim process");
     await new Promise((resolve, reject) => {
       const process = exec(`/Applications/ImageOptim.app/Contents/MacOS/ImageOptim ${escapedPaths}`, {
-        shell: true,
+        shell: "/bin/bash",
         timeout: 300000, // 5 minutes timeout
       });
 

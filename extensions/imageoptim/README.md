@@ -1,7 +1,7 @@
 # ImageOptim for Raycast
 
 <div align="center">
-  <img src="assets/extension-icon.png" width="128" height="128" alt="ImageOptim Icon">
+  <img src="media/icon.png" width="128" height="128" alt="ImageOptim Icon">
   <h1 align="center">ImageOptim</h1>
   <h4 align="center">Simple, Private, and Free Image Compression</h4>
 </div>

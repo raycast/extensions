@@ -14,6 +14,7 @@
     {
       "name": "compress-images",
       "title": "Compress Images",
+      "subtitle": "ImageOptim",
       "description": "Compress images with ImageOptim",
       "mode": "no-view"
     }
