@@ -19,8 +19,21 @@ export const ACLTitleMap: Record<ACL, string> = {
   "public-read": "Public",
 };
 
+export const getToken = () => {
+  const { token } = getPreferenceValues<Preferences.UploadFiles>();
+
+  // Our quick-copy button copies the full env var `UPLOADTHING_TOKEN='VALUE'`
+  // To improve UX, allow this to be pasted to preferences and unwrap the actual value
+  const withoutEnvWrapping = token.replace(
+    /UPLOADTHING_TOKEN\s*=\s*['"]?(.*?)['"]?$/,
+    "$1",
+  );
+
+  return withoutEnvWrapping;
+};
+
 export const getACLInfoForApp = async () => {
-  const { token } = getPreferenceValues<Preferences.UploadFromClipboard>();
+  const token = getToken();
   const { apiKey } = JSON.parse(Buffer.from(token, "base64").toString("utf-8"));
 
   const appInfo = await fetch("https://api.uploadthing.com/v7/getAppInfo", {
@@ -73,7 +86,7 @@ export const filePathsToFile = async (filePaths: string[]) => {
 };
 
 export const guardInvalidApiKey = () => {
-  const { token } = getPreferenceValues<Preferences.UploadFiles>();
+  const token = getToken();
   try {
     new UTApi({ token });
   } catch (err) {
@@ -99,8 +112,7 @@ export const guardInvalidApiKey = () => {
 };
 
 export const getSignedUrls = async (files: { key: string }[]) => {
-  const { token } = getPreferenceValues<Preferences.UploadFiles>();
-  const utapi = new UTApi({ token });
+  const utapi = new UTApi({ token: getToken() });
 
   return Promise.all(
     files.map(async (file) => {

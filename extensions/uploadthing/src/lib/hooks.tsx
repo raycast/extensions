@@ -2,7 +2,6 @@ import "./web-polyfill";
 
 import {
   Toast,
-  getPreferenceValues,
   openExtensionPreferences,
   showToast,
 } from "@raycast/api";
@@ -13,20 +12,20 @@ import { UploadedFileData } from "uploadthing/types";
 import {
   getACLInfoForApp,
   getSignedUrls,
+  getToken,
   readFilesFromClipboard,
 } from "./utils";
 import { ACL } from "@uploadthing/shared";
 
 export const useUpload = () => {
   const toast = useRef<Toast | null>(null);
-  const { token } = getPreferenceValues<Preferences.UploadFiles>();
 
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFileData[]>([]);
 
   const mutation = useMutation({
     mutationFn: async (opts: { files: UTFile[]; acl: ACL | undefined }) => {
       const { files, acl } = opts;
-      const utapi = new UTApi({ token });
+      const utapi = new UTApi({ token: getToken() });
       return await utapi.uploadFiles(files, { acl });
     },
     onMutate: async () => {
