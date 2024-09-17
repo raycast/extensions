@@ -32,9 +32,13 @@ export const getToken = () => {
   return withoutEnvWrapping;
 };
 
-export const getACLInfoForApp = async () => {
+export const getDecodedToken = () => {
   const token = getToken();
-  const { apiKey } = JSON.parse(Buffer.from(token, "base64").toString("utf-8"));
+  return JSON.parse(Buffer.from(token, "base64").toString("utf-8"));
+};
+
+export const getACLInfoForApp = async () => {
+  const { apiKey } = getDecodedToken();
 
   const appInfo = await fetch("https://api.uploadthing.com/v7/getAppInfo", {
     method: "POST",
