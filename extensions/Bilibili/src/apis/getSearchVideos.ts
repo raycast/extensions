@@ -21,7 +21,6 @@ export async function getSearchVideos(idx: number, keyword: string) {
     },
   }).json();
 
-
   if (res.code !== 0) throw new Error(res.message);
 
   return res.data.result.filter((item) => item.result_type === "video")[0].data || [];
