@@ -135,6 +135,7 @@ export const getPokemon = async (
           is_legendary
           is_mythical
           name
+          pokemon_shape_id
           pokemon_v2_pokemondexnumbers {
             pokedex_number
             pokemon_v2_pokedex {

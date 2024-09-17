@@ -104,7 +104,7 @@ export default function PokemonForms(props: {
             ?.name || props.name;
         return (
           <List.Item
-            key={form.pokemon_v2_pokemonforms[0].form_name}
+            key={idx}
             title={name}
             detail={
               <List.Item.Detail
@@ -127,9 +127,6 @@ export default function PokemonForms(props: {
                 }
               />
             }
-            accessories={form.pokemon_v2_pokemontypes.map((type) => ({
-              icon: `types/${type.pokemon_v2_type.name}.svg`,
-            }))}
           />
         );
       })}

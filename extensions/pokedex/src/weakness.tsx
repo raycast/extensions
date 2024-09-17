@@ -15,7 +15,7 @@ import MetadataWeakness from "./components/metadata/weakness";
 import TypeDropdown from "./components/type_dropdown";
 import pokedex from "./statics/pokedex.json";
 import { PokemonV2Pokemon } from "./types";
-import { getImgUrl } from "./utils";
+import { getImgUrl, typeColor } from "./utils";
 
 const { language } = getPreferenceValues();
 
@@ -65,10 +65,6 @@ export default function PokemonWeaknesses() {
                 title={`#${poke.id.toString().padStart(4, "0")}`}
                 subtitle={poke.name}
                 keywords={[poke.id.toString(), poke.name]}
-                accessories={poke.types.map((type) => ({
-                  icon: `types/${type.toLowerCase()}.svg`,
-                  tooltip: type,
-                }))}
                 detail={
                   loading ? (
                     ""
@@ -86,6 +82,17 @@ export default function PokemonWeaknesses() {
                       ])}
                       metadata={
                         <List.Item.Detail.Metadata>
+                          <List.Item.Detail.Metadata.TagList title="Type">
+                            {poke.types.map((type) => (
+                              <List.Item.Detail.Metadata.TagList.Item
+                                key={type}
+                                text={type}
+                                icon={`types/${type.toLowerCase()}.svg`}
+                                color={typeColor[type.toLowerCase()]}
+                              />
+                            ))}
+                          </List.Item.Detail.Metadata.TagList>
+
                           <MetadataWeakness
                             types={pokemon?.pokemon_v2_pokemontypes || []}
                           />

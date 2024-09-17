@@ -3,8 +3,8 @@ import json2md from "json2md";
 import groupBy from "lodash.groupby";
 import { useMemo, useState } from "react";
 import TypeDropdown from "./components/type_dropdown";
-
 import moves from "./statics/moves.json";
+import { typeColor } from "./utils";
 
 export default function Move() {
   const [type, setType] = useState<string>("all");
@@ -33,10 +33,6 @@ export default function Move() {
                   key={idx}
                   title={move.name}
                   icon={`moves/${move.damage_class || "status"}.svg`}
-                  accessories={[
-                    { text: move.type },
-                    { icon: `types/${move.type.toLowerCase()}.svg` },
-                  ]}
                   keywords={[move.name, move.short_effect]}
                   detail={
                     <List.Item.Detail
@@ -48,6 +44,13 @@ export default function Move() {
                       ])}
                       metadata={
                         <List.Item.Detail.Metadata>
+                          <List.Item.Detail.Metadata.TagList title="Type">
+                            <List.Item.Detail.Metadata.TagList.Item
+                              text={move.type}
+                              icon={`types/${move.type.toLowerCase()}.svg`}
+                              color={typeColor[move.type.toLowerCase()]}
+                            />
+                          </List.Item.Detail.Metadata.TagList>
                           <List.Item.Detail.Metadata.Label
                             title="Power"
                             text={move.power?.toString() || "-"}

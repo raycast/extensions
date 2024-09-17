@@ -1,9 +1,11 @@
 # Pokédex Changelog
 
-## [Pokédex Unleashed] - 2024-09-14
+## [Pokédex Mastery] - 2024-09-17
 - Added Weaknesses command for easy reference.
-- Introduced Type Effectiveness and Encounter Locations (experimental) to Pokémon details for more comprehensive information.
-- Reorganized Pokémon forms into an action sub-menu to display precise type and ability information.
+- Expanded Pokémon details with Shapes, Type Effectiveness, and Encounter Locations (experimental) for a more comprehensive understanding.
+- Reorganized Pokémon Forms into an action sub-menu to provide detailed type and ability information for each form.
+- Updated Type Symbols to match the latest Gen 9 designs, ensuring accuracy and visual consistency.
+- Refined the overall visual aesthetics for a more pleasing and intuitive user interface.
 
 ## [Learnset Perfection] - 2024-05-17
 - Fixed a coding issue with the Learnsets action.

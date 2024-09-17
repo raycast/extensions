@@ -13,16 +13,6 @@ export default function MetadataPokemon(props: {
     props.type === "detail" ? Detail.Metadata : List.Item.Detail.Metadata;
 
   const meta = [
-    <Metadata.Label
-      key="height"
-      title="Height"
-      text={`${pokemon.height / 10}m`}
-    />,
-    <Metadata.Label
-      key="weight"
-      title="Weight"
-      text={`${pokemon.weight / 10}kg`}
-    />,
     <Metadata.TagList key="type" title="Type">
       {pokemon.pokemon_v2_pokemontypes.map((t) => {
         return (
@@ -30,6 +20,7 @@ export default function MetadataPokemon(props: {
             key={t.pokemon_v2_type.pokemon_v2_typenames[0].name}
             text={t.pokemon_v2_type.pokemon_v2_typenames[0].name}
             color={typeColor[t.pokemon_v2_type.name]}
+            icon={`types/${t.pokemon_v2_type.name}.svg`}
           />
         );
       })}
@@ -48,6 +39,16 @@ export default function MetadataPokemon(props: {
         );
       })}
     </Metadata.TagList>,
+    <Metadata.Label
+      key="height"
+      title="Height"
+      text={`${pokemon.height / 10}m`}
+    />,
+    <Metadata.Label
+      key="weight"
+      title="Weight"
+      text={`${pokemon.weight / 10}kg`}
+    />,
   ];
 
   return meta;

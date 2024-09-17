@@ -123,6 +123,7 @@ export interface PokemonV2Pokemonspecy {
   is_legendary: boolean;
   is_mythical: boolean;
   name: string;
+  pokemon_shape_id: number;
   pokemon_v2_pokemondexnumbers: PokemonV2Pokemondexnumber[];
   pokemon_v2_evolutionchain: PokemonV2Evolutionchain;
   pokemon_v2_pokemonegggroups: PokemonV2Pokemonegggroup[];

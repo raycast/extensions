@@ -230,6 +230,12 @@ export default function PokemonDetail(props: { id?: number }) {
             />
             <Detail.Metadata.Separator />
             <MetadataPokemon type="detail" pokemon={pokemon} />
+            <Detail.Metadata.Label
+              title="Shape"
+              icon={{
+                source: `body-style/${pokemon.pokemon_v2_pokemonspecy.pokemon_shape_id}.png`,
+              }}
+            />
             <Detail.Metadata.Separator />
             <MetadataWeakness
               type="detail"
