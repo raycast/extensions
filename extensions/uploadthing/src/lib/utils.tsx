@@ -7,10 +7,24 @@ import {
   openExtensionPreferences,
   Icon,
 } from "@raycast/api";
+import { ACL } from "@uploadthing/shared";
 import { readFile } from "node:fs/promises";
 import { basename } from "node:path";
 import { fileURLToPath } from "node:url";
 import { UTApi, UTFile } from "uploadthing/server";
+
+export const ACLTitleMap: Record<ACL, string> = {
+  private: "Private",
+  "public-read": "Public",
+};
+
+export const getPreferredACL = () => {
+  const preferences = getPreferenceValues<Preferences.UploadFromClipboard>();
+  const secondaryACL: ACL =
+    preferences.acl === "public-read" ? "private" : "public-read";
+
+  return { primary: preferences.acl, secondary: secondaryACL };
+};
 
 /**
  * Read history of files from clipboard
@@ -42,12 +56,12 @@ export const filePathsToFile = async (filePaths: string[]) => {
 };
 
 export const guardInvalidApiKey = () => {
-  const { apiKey } = getPreferenceValues<Preferences.UploadFiles>();
+  const { token } = getPreferenceValues<Preferences.UploadFiles>();
   try {
-    new UTApi({ apiKey });
+    new UTApi({ token });
   } catch (err) {
     const markdown =
-      `## ${err instanceof Error ? err.message : "API key incorrect"}` +
+      `## ${err instanceof Error ? err.message : "Invalid token"}` +
       "\nPlease update it in command preferences and try again.";
 
     return (
@@ -65,4 +79,16 @@ export const guardInvalidApiKey = () => {
       />
     );
   }
+};
+
+export const getSignedUrls = async (files: { key: string }[]) => {
+  const { token } = getPreferenceValues<Preferences.UploadFiles>();
+  const utapi = new UTApi({ token });
+
+  return Promise.all(
+    files.map(async (file) => {
+      const { url } = await utapi.getSignedURL(file.key);
+      return url;
+    }),
+  );
 };

@@ -10,18 +10,20 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { UTApi, UTFile } from "uploadthing/server";
 import { UploadedFileData } from "uploadthing/types";
-import { readFilesFromClipboard } from "./utils";
+import { getSignedUrls, readFilesFromClipboard } from "./utils";
+import { ACL } from "@uploadthing/shared";
 
 export const useUpload = () => {
   const toast = useRef<Toast | null>(null);
-  const { apiKey } = getPreferenceValues<Preferences.UploadFiles>();
+  const { token } = getPreferenceValues<Preferences.UploadFiles>();
 
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFileData[]>([]);
 
   const mutation = useMutation({
-    mutationFn: async (files: UTFile[]) => {
-      const utapi = new UTApi({ apiKey });
-      return await utapi.uploadFiles(files);
+    mutationFn: async (opts: { files: UTFile[]; acl: ACL }) => {
+      const { files, acl } = opts;
+      const utapi = new UTApi({ token });
+      return await utapi.uploadFiles(files, { acl });
     },
     onMutate: async () => {
       toast.current = await showToast({
@@ -68,4 +70,18 @@ export const useClipboardFiles = () => {
   });
 
   return { files: query.data, readingClipboard: query.isPending };
+};
+
+export const useFileWithSignedUrls = (
+  files: { key: string; url: string }[],
+) => {
+  const query = useQuery({
+    queryKey: ["signed-urls"],
+    queryFn: () => getSignedUrls(files),
+  });
+
+  return files.map((file, idx) => {
+    const url = query.data?.[idx] ?? file.url;
+    return { ...file, url };
+  });
 };
