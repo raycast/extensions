@@ -1,9 +1,9 @@
 # ChatGPT Quick Actions Changelog
 
-## [Add Transform and Preview Transform commands] - 2024-09-12
+## [Add Transform and Transform Preview commands] - 2024-09-12
 
 - Add a Transform command which replaces the selected text with transformed text based on a prompt that is entered when the command is run.
-- Add a Preview Transform command which does the same as the Transform command but displays the result in a preview window instead of replacing the selected text.
+- Add a Transform Preview command which does the same as the Transform command but displays the result in a preview window instead of replacing the selected text.
 
 ## [Upgrade Open AI API from v3 to v4] - 2024-08-02
 

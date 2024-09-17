@@ -349,8 +349,8 @@
       ]
     },
     {
-      "name": "preview_transform",
-      "title": "Preview Transform",
+      "name": "transform_preview",
+      "title": "Transform Preview",
       "description": "Same as Transform, but shows the output in a preview window instead of replacing the selected text",
       "mode": "view",
       "arguments": [
@@ -363,7 +363,7 @@
       ],
       "preferences": [
         {
-          "name": "model_preview_transform",
+          "name": "model_transform_preview",
           "description": "Override the global preferred model for this command",
           "type": "dropdown",
           "required": false,
