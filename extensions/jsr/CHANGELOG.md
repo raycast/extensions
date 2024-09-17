@@ -1,5 +1,11 @@
 # JSR Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Added Version list
+- Added dependents & dependencies list
+- Removed badges from markdown (performance issues)
+
 ## [Improvements] - 2024-09-16
 
 - Updated dependencies
