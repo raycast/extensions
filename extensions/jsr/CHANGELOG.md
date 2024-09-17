@@ -1,6 +1,6 @@
 # JSR Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-09-17
 
 - Added Version list
 - Added dependents & dependencies list
