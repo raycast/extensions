@@ -16,6 +16,7 @@ import {
 } from "./lib/utils";
 import { FileGrid } from "./lib/file-grid";
 import { ACL } from "@uploadthing/shared";
+import { useEffect } from "react";
 
 const queryClient = new QueryClient();
 export default () => {
@@ -30,6 +31,22 @@ const Command = () => {
   const { upload, uploadedFiles } = useUpload();
   const { files, readingClipboard } = useClipboardFiles();
   const { primary, secondary } = getPreferredACL();
+
+  useEffect(() => {
+    if (!files) return;
+
+    if (files.length > 0) {
+      showToast(
+        Toast.Style.Success,
+        `Found ${files.length} files in your clipboard. Confirm which ones to upload.`,
+      );
+    } else {
+      showToast(
+        Toast.Style.Failure,
+        "No files found in your clipboard, select and upload.",
+      );
+    }
+  }, [files]);
 
   const handleSubmit = async (values: { files: string[] }, acl: ACL) => {
     if (values.files.length === 0) {
