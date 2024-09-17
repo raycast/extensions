@@ -6,7 +6,6 @@ import {
   getPreferenceValues,
   openExtensionPreferences,
   Icon,
-  LocalStorage,
 } from "@raycast/api";
 import { ACL } from "@uploadthing/shared";
 import { readFile } from "node:fs/promises";
@@ -48,8 +47,6 @@ export const getACLInfoForApp = async () => {
   }).then(
     (r) => r.json() as Promise<{ defaultACL: ACL; allowACLOverride: boolean }>,
   );
-
-  LocalStorage.setItem("uploadthing-app-info", JSON.stringify(appInfo));
 
   const secondaryACL: ACL | undefined = appInfo.allowACLOverride
     ? appInfo.defaultACL === "private"
