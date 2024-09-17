@@ -18,4 +18,5 @@ export const API = {
   bvidGetCid: (bvid: string) => `${BASE_API_URL}/x/player/pagelist?bvid=${bvid}`,
   conclusion: () => `${BASE_API_URL}/x/web-interface/view/conclusion/get`,
   heartbeat: () => `${BASE_API_URL}/x/click-interface/web/heartbeat`,
+  searchVideos: () => `${BASE_API_URL}/x/web-interface/search/all/v2`,
 };

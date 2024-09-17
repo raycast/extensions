@@ -1,6 +1,6 @@
 import got from "got";
 import { Cache } from "@raycast/api";
-import { encWbi } from "./tools";
+import { encWbi } from "../utils";
 import { API } from "./api";
 
 export async function getConclsion(bvid: string, cid: number, up_mid: number) {

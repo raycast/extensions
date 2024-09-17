@@ -1,6 +1,9 @@
 import { Color, Icon, List } from "@raycast/api";
+import { checkLogin } from "../apis";
 
-export function NoLoginView() {
+export function CheckLogin({ children }: { children: React.ReactNode }) {
+  if (checkLogin()) return <>{children}</>;
+
   return (
     <List>
       <List.EmptyView
