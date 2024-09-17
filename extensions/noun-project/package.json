@@ -48,6 +48,25 @@
           "value": "1"
         }
       ]
+    },
+    {
+      "key": "showUsage",
+      "title": "API Usage",
+      "name": "showUsage",
+      "description": "Show your remaining API usage limits after each search",
+      "required": false,
+      "type": "dropdown",
+      "defaultValue": "true",
+      "data": [
+        {
+          "title": "No",
+          "value": "false"
+        },
+        {
+          "title": "Yes",
+          "value": "true"
+        }
+      ]
     }
   ],
   "commands": [
@@ -63,6 +82,29 @@
           "placeholder": "Search over 5M icons",
           "type": "text",
           "required": true
+        },
+        {
+          "name": "color",
+          "placeholder": "Icon color",
+          "type": "dropdown",
+          "required": false,
+          "defaultValue": "000000",
+          "data": [
+            {
+              "title": "Black",
+              "value": "000000"
+            },
+            {
+              "title": "White",
+              "value": "FFFFFF"
+            }
+          ]
+        },
+        {
+          "name": "customColor",
+          "placeholder": "Custom Color",
+          "type": "text",
+          "required": false
         }
       ]
     }
