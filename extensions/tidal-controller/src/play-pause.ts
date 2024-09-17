@@ -1,7 +1,7 @@
 import { closeMainWindow } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
-import { runTidalCommand, showMessage } from "./util/fn";
+import { runTidalCommand, showMessage, getMenuOptions } from "./util/fn";
 
 export default async function doPlayPause() {
   await runTidalCommand(async () => {
@@ -11,12 +11,12 @@ export default async function doPlayPause() {
     const isNowPlaying = await runAppleScript(`
         tell application "System Events"
           tell process "TIDAL"
-            set menuName to name of menu item 0 of menu "Playback" of menu bar 1
-            if menuName is "Pause" then
-              click menu item "Pause" of menu "Playback" of menu bar 1
+            set menuName to name of menu item 0 of menu "${getMenuOptions().playback}" of menu bar 1
+            if menuName is "${getMenuOptions().pause}" then
+              click menu item "${getMenuOptions().pause}" of menu "${getMenuOptions().playback}" of menu bar 1
               return false
-            else if menuName is "Play" then
-              click menu item "Play" of menu "Playback" of menu bar 1
+            else if menuName is "${getMenuOptions().play}" then
+              click menu item "${getMenuOptions().play}" of menu "${getMenuOptions().playback}" of menu bar 1
               return true
             end if
           end tell
