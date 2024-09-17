@@ -10,7 +10,11 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { UTApi, UTFile } from "uploadthing/server";
 import { UploadedFileData } from "uploadthing/types";
-import { getSignedUrls, readFilesFromClipboard } from "./utils";
+import {
+  getACLInfoForApp,
+  getSignedUrls,
+  readFilesFromClipboard,
+} from "./utils";
 import { ACL } from "@uploadthing/shared";
 
 export const useUpload = () => {
@@ -20,7 +24,7 @@ export const useUpload = () => {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFileData[]>([]);
 
   const mutation = useMutation({
-    mutationFn: async (opts: { files: UTFile[]; acl: ACL }) => {
+    mutationFn: async (opts: { files: UTFile[]; acl: ACL | undefined }) => {
       const { files, acl } = opts;
       const utapi = new UTApi({ token });
       return await utapi.uploadFiles(files, { acl });
@@ -84,4 +88,13 @@ export const useFileWithSignedUrls = (
     const url = query.data?.[idx] ?? file.url;
     return { ...file, url };
   });
+};
+
+export const useAppInfo = () => {
+  const query = useQuery({
+    queryKey: ["app-info"],
+    queryFn: getACLInfoForApp,
+  });
+
+  return query.data;
 };

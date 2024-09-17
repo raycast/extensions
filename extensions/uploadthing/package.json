@@ -33,24 +33,6 @@
       "required": true,
       "title": "Token",
       "placeholder": "eyJhc...."
-    },
-    {
-      "name": "acl",
-      "description": "The default ACL to use for uploads. Note that 'private' requires a paid plan.",
-      "required": true,
-      "title": "ACL",
-      "default": "public",
-      "type": "dropdown",
-      "data": [
-        {
-          "title": "Public",
-          "value": "public-read"
-        },
-        {
-          "title": "Private",
-          "value": "private"
-        }
-      ]
     }
   ],
   "dependencies": {

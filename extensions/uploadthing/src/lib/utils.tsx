@@ -6,6 +6,7 @@ import {
   getPreferenceValues,
   openExtensionPreferences,
   Icon,
+  LocalStorage,
 } from "@raycast/api";
 import { ACL } from "@uploadthing/shared";
 import { readFile } from "node:fs/promises";
@@ -18,12 +19,28 @@ export const ACLTitleMap: Record<ACL, string> = {
   "public-read": "Public",
 };
 
-export const getPreferredACL = () => {
-  const preferences = getPreferenceValues<Preferences.UploadFromClipboard>();
-  const secondaryACL: ACL =
-    preferences.acl === "public-read" ? "private" : "public-read";
+export const getACLInfoForApp = async () => {
+  const { token } = getPreferenceValues<Preferences.UploadFromClipboard>();
+  const { apiKey } = JSON.parse(Buffer.from(token, "base64").toString("utf-8"));
 
-  return { primary: preferences.acl, secondary: secondaryACL };
+  const appInfo = await fetch("https://api.uploadthing.com/v7/getAppInfo", {
+    method: "POST",
+    headers: {
+      "x-uploadthing-api-key": apiKey,
+    },
+  }).then(
+    (r) => r.json() as Promise<{ defaultACL: ACL; allowACLOverride: boolean }>,
+  );
+
+  LocalStorage.setItem("uploadthing-app-info", JSON.stringify(appInfo));
+
+  const secondaryACL: ACL | undefined = appInfo.allowACLOverride
+    ? appInfo.defaultACL === "private"
+      ? "public-read"
+      : "private"
+    : undefined;
+
+  return { primary: appInfo.defaultACL, secondary: secondaryACL };
 };
 
 /**

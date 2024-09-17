@@ -7,13 +7,8 @@ import {
   Toast,
 } from "@raycast/api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useClipboardFiles, useUpload } from "./lib/hooks";
-import {
-  ACLTitleMap,
-  filePathsToFile,
-  getPreferredACL,
-  guardInvalidApiKey,
-} from "./lib/utils";
+import { useAppInfo, useClipboardFiles, useUpload } from "./lib/hooks";
+import { ACLTitleMap, filePathsToFile, guardInvalidApiKey } from "./lib/utils";
 import { FileGrid } from "./lib/file-grid";
 import { ACL } from "@uploadthing/shared";
 import { useEffect } from "react";
@@ -30,7 +25,7 @@ export default () => {
 const Command = () => {
   const { upload, uploadedFiles } = useUpload();
   const { files, readingClipboard } = useClipboardFiles();
-  const { primary, secondary } = getPreferredACL();
+  const appInfo = useAppInfo();
 
   useEffect(() => {
     if (!files) return;
@@ -48,7 +43,10 @@ const Command = () => {
     }
   }, [files]);
 
-  const handleSubmit = async (values: { files: string[] }, acl: ACL) => {
+  const handleSubmit = async (
+    values: { files: string[] },
+    acl: ACL | undefined,
+  ) => {
     if (values.files.length === 0) {
       showToast(Toast.Style.Failure, "Please select at least one file");
       return;
@@ -86,13 +84,15 @@ const Command = () => {
       actions={
         <ActionPanel>
           <Action.SubmitForm<{ files: string[] }>
-            title={`Upload Files (${ACLTitleMap[primary]})`}
-            onSubmit={(values) => handleSubmit(values, primary)}
+            title={`Upload Files ${appInfo ? `(${ACLTitleMap[appInfo.primary]})` : ""}`}
+            onSubmit={(values) => handleSubmit(values, appInfo?.primary)}
           />
-          <Action.SubmitForm<{ files: string[] }>
-            title={`Upload Files (${ACLTitleMap[secondary]})`}
-            onSubmit={(values) => handleSubmit(values, secondary)}
-          />
+          {appInfo?.secondary && (
+            <Action.SubmitForm<{ files: string[] }>
+              title={`Upload Files (${ACLTitleMap[appInfo.secondary]})`}
+              onSubmit={(values) => handleSubmit(values, appInfo.secondary)}
+            />
+          )}
         </ActionPanel>
       }
     >
