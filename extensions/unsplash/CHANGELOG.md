@@ -1,7 +1,5 @@
 # Unsplash Changelog
 
-<<<<<<< HEAD
-=======
 ## [Chore] - 2024-09-02
 
 - Added missing contributor
@@ -14,7 +12,6 @@
 
 - Fixed background updates not working.
 
->>>>>>> 21c422236c87493c34ba0885f5f04869d3fdf067
 ## [Breaking Changes] - 2023-03-03
 
 - Implement OAuth to access more data.
