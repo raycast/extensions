@@ -1,7 +1,6 @@
 import axios from "axios";
 import * as yaml from "js-yaml";
 import Ajv from "ajv";
-import { PortsYaml, UserStylesYaml } from "../types";
 
 type DataType = "ports" | "styles";
 

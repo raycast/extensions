@@ -3,11 +3,11 @@ import { showToast, Toast } from "@raycast/api";
 import { fetchData } from "../utils/data.util";
 import { PortsYaml, UserStylesYaml } from "../types";
 
-function isPortsYaml(data: any): data is PortsYaml {
+function isPortsYaml(data: unknown): data is PortsYaml {
   return data && typeof data === "object" && "ports" in data;
 }
 
-function isUserStylesYaml(data: any): data is UserStylesYaml {
+function isUserStylesYaml(data: unknown): data is UserStylesYaml {
   return data && typeof data === "object" && "userstyles" in data;
 }
 
