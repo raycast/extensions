@@ -83,15 +83,12 @@ const getPassword = async (
   username?: string,
 ): Promise<string | null> => {
   try {
-    const sanitizedEntryName = entryName
-      .replace(/\(/g, "")
-      .replace(/\)/g, "")
-      .trim();
+    const sanitizedEntryName = entryName.replace(/"/g, '\\"').trim();
     const sanitizedUsername = username ? username.trim() : "";
 
     const command = username
-      ? `${rbw_path} get '${sanitizedEntryName}' '${sanitizedUsername}'` // eslint-disable-line quotes
-      : `${rbw_path} get '${sanitizedEntryName}'`; // eslint-disable-line quotes
+      ? `${rbw_path} get "${sanitizedEntryName}" "${sanitizedUsername}"`
+      : `${rbw_path} get "${sanitizedEntryName}"`;
 
     const output = await runRbwCommand(command);
 
@@ -111,15 +108,12 @@ const getTotp = async (
   username?: string,
 ): Promise<string | null> => {
   try {
-    const sanitizedEntryName = entryName
-      .replace(/\(/g, "")
-      .replace(/\)/g, "")
-      .trim();
+    const sanitizedEntryName = entryName.replace(/"/g, '\\"').trim();
     const sanitizedUsername = username ? username.trim() : "";
 
     const command = username
-      ? `${rbw_path} code '${sanitizedEntryName}' '${sanitizedUsername}'` // eslint-disable-line quotes
-      : `${rbw_path} code '${sanitizedEntryName}'`; // eslint-disable-line quotes
+      ? `${rbw_path} code "${sanitizedEntryName}" "${sanitizedUsername}"`
+      : `${rbw_path} code "${sanitizedEntryName}"`;
 
     const output = await runRbwCommand(command);
 
@@ -138,9 +132,11 @@ const getTotp = async (
 const SelectEntryList = ({
   entries,
   onSelect,
+  setFilteredEntries,
 }: {
   entries: RbwEntry[];
   onSelect: (entry: RbwEntry) => void;
+  setFilteredEntries: (entries: RbwEntry[]) => void;
 }) => {
   return (
     <List
@@ -259,6 +255,7 @@ const Command = () => {
             }
             addToRecentlyUsed(entry);
           }}
+          setFilteredEntries={setFilteredEntries}
         />,
       );
     }
@@ -284,7 +281,7 @@ const Command = () => {
       } else {
         showToast({
           style: Toast.Style.Failure,
-          title: "TOPT not found",
+          title: "TOTP not found",
         });
       }
       addToRecentlyUsed(entry);
@@ -311,6 +308,7 @@ const Command = () => {
             }
             addToRecentlyUsed(entry);
           }}
+          setFilteredEntries={setFilteredEntries}
         />,
       );
     }
