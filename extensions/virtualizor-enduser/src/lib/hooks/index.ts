@@ -1,5 +1,5 @@
 import { showFailureToast, useFetch } from "@raycast/utils";
-import { CommonResponse, ErrorResponse, SuccessPaginatedResponse, SuccessResponse } from "../types";
+import { ErrorResponse, SuccessPaginatedResponse, SuccessResponse } from "../types";
 import { openExtensionPreferences } from "@raycast/api";
 import generateAPIUrl from "../utils/generate-api-url";
 
@@ -70,9 +70,14 @@ export function useVirtualizorPaginated<T>(act: string, options?: UseVirtualizor
 }
 
 async function handleParseResponse(response: Response) {
+    if (!response.ok) {
+        const result = await response.json() as {message: string};
+        throw new Error(result.message);
+    }
     const result = await response.text();
-    const data = await JSON.parse(result) as CommonResponse | SuccessResponse<unknown> | ErrorResponse;
+    const data = await JSON.parse(result) as ErrorResponse | SuccessResponse<unknown> | SuccessPaginatedResponse<unknown>;
     if ("error" in data) throw new Error(data.error[0]);
+    if (data.uid===-1) throw new Error();
     return data;
 }
 async function handleError(error: Error) {

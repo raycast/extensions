@@ -1,36 +1,38 @@
-export type CommonResponse = {
-    uid: string | -1;
-    act: string;
+type Common = {
+  act: string;
+  timezone: string;
+  timenow: string;
+  preferences: {
+    theme: string;
+    language: string;
     timezone: string;
-    timenow: string;
-    vpsid: string | 0;
-    username: string | null;
-    user_type: string | null;
-    preferences: {
-      theme: string;
-      language: string;
-      timezone: string;
-      default_enduser_timezone: string;
-    },
-    url: "index.php?";
-    rdns: {
-      pdnsid: string | null;
-    };
-    enable_2fa?: 0 | 1;
-    disable_recipes: 0 | 1;
-    check_licensepro: boolean;
-    counts?: {
-      vps: string;
-      users: string;
-      ssh_keys: string;
-      api: string;
-      euiso: string;
-      lb: string;
-      recipes: string;
-    };
-    title: string;
-    time_taken: string;
-  }
+    default_enduser_timezone: string;
+  },
+  url: "index.php?";
+  rdns: {
+    pdnsid: string | null;
+  };
+  enable_2fa?: 0 | 1;
+  disable_recipes: 0 | 1;
+  check_licensepro: boolean;
+  counts?: {
+    vps: string;
+    users: string;
+    ssh_keys: string;
+    api: string;
+    euiso: string;
+    lb: string;
+    recipes: string;
+  };
+  title: string;
+  time_taken: string;
+}
+export type CommonResponse = Common & {
+    uid: string;
+    vpsid: string;
+    username: string;
+    user_type: string;
+}
   
   type Log = {
     actid: string;
@@ -96,8 +98,16 @@ export type CommonResponse = {
   }
   export type SuccessResponse<T> = CommonResponse & T;
   export type SuccessPaginatedResponse<T> = CommonResponse & T & {page: Page};
-  export type ErrorResponse = CommonResponse & {
-    error: string[];
-    status?: number;
-    output: null;
-  };
+  export type ErrorResponse =
+  CommonResponse & {
+      error: string[];
+      status?: number;
+      output: null;
+    }
+    |
+    Common & {
+      uid: -1;
+      vpsid: 0;
+      username: null;
+      user_type: null;
+    };

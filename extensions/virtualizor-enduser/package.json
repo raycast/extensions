@@ -6,7 +6,6 @@
   "icon": "virtualizor.png",
   "author": "xmok",
   "categories": [
-    "Applications",
     "Developer Tools"
   ],
   "license": "MIT",
@@ -22,16 +21,16 @@
     {
       "name": "api_key",
       "title": "API Key",
-      "placeholder": "HS...MI",
-      "description": "",
+      "placeholder": "XXXXXXXXXXXXXXXX",
+      "description": "API Key from Virtualizor Panel",
       "required": true,
       "type": "password"
     },
     {
       "name": "api_pass",
       "title": "API Pass",
-      "placeholder": "",
-      "description": "",
+      "placeholder": "xxXX...xxx",
+      "description": "API Password from Virtualizor Panel",
       "required": true,
       "type": "password"
     }
@@ -39,20 +38,20 @@
   "commands": [
     {
       "name": "virtual-servers",
-      "title": "Virtual Servers",
-      "description": "",
+      "title": "View Virtual Servers",
+      "description": "View Virtual Server Info and Restart, Stop",
       "mode": "view"
     },
     {
       "name": "logs",
-      "title": "Logs",
-      "description": "",
+      "title": "View Logs",
+      "description": "View Instance Logs",
       "mode": "view"
     },
     {
       "name": "tasks",
-      "title": "Tasks",
-      "description": "",
+      "title": "View Tasks",
+      "description": "View Instance Tasks",
       "mode": "view"
     }
   ],
