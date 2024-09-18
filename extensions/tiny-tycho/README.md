@@ -4,7 +4,7 @@ This extension allows for easy access to the Tiny Tycho stickers. Tiny Tycho is 
 
 This sticker pack contains more than 90 unique emotions, and around 40 banners and flags, featuring multiple short phrases and popular flags from countries around the world. Tiny Tycho is based on my profile picture, which is based on me, red hair and everything.
 
-You can download Tiny Tycho in the [App Store](https://apps.apple.com/app/tiny-tycho/id6648792366) (not required, but recommended)
+You can download Tiny Tycho from the [App Store](https://apps.apple.com/app/tiny-tycho/id6648792366) (not required, but recommended)
 
 # Contributers
 
