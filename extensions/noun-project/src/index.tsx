@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react';
-import { getPreferenceValues, Detail, Grid, LaunchProps, ActionPanel, Action } from "@raycast/api";
+import { getPreferenceValues, Detail, Icon, Grid, LaunchProps, ActionPanel, Action } from "@raycast/api";
 import { IconItem } from "./utils/types";
 import { getUsageColor, normalizeHexCode } from './utils/helpers';
 import { nounProjectData } from "./utils/nounData";
 import CopyIconAction from './copyIcon';
+import CopyImageIcon from './copyImgIcon';
+import CopyReactComponent from './copyReactComponent';
+import CopyVueComponent from './copyVueComponent';
+import CopySVG from './copySvg';
 
 const publicDomain = getPreferenceValues<Preferences>().publicDomain;
 const showUsage = getPreferenceValues<Preferences>().showUsage;
@@ -75,9 +79,19 @@ export default function Command(props: LaunchProps) {
               actions={
                 <ActionPanel title="Noun Project Actions">
                   <CopyIconAction color={ color } iconName={ icon.term } iconId={ icon.id } />
-                  <Action.OpenInBrowser title="Open in Browser" url={`https://thenounproject.com${icon.permalink}`} />
+                  <CopyImageIcon color={ color } iconName={ icon.term } iconId={ icon.id } />
+                  <CopySVG color={ color } iconName={ icon.term } iconId={ icon.id } />
+                  
+                  <CopyReactComponent iconId={ icon.id } iconName={ icon.term } color={ color } />
+                  <CopyVueComponent iconId={ icon.id } iconName={ icon.term } color={ color } />
+
+                  <Action.OpenInBrowser title={`View ${icon.term} on Noun Project`} url={`https://thenounproject.com${icon.permalink}`} />
                   {icon?.collections[0]?.permalink && (
-                    <Action.OpenInBrowser title="View Collection in Browser" url={`https://thenounproject.com${icon.collections[0].permalink}`} />
+                    <Action.OpenInBrowser 
+                      icon={Icon.AppWindowGrid3x3}
+                      title={`View ${icon.collections[0].name} Collection by ${icon.creator.name} in Browser`}
+                      url={`https://thenounproject.com${icon.collections[0].permalink}`}
+                    />
                   )}
                 </ActionPanel>
               }

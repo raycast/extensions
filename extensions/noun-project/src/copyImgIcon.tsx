@@ -1,11 +1,10 @@
 import React from "react";
 import { Action, showToast, Toast, Clipboard, Icon } from "@raycast/api";
 import { nounProjectData } from "./utils/nounData";
-import { base64ToFile } from "./utils/helpers";
 import { NounProjectDownloadResponse, IconProps } from "./utils/types";
 
-const CopyIconAction: React.FC<IconProps> = ({ iconId, color = "000000", iconName }) => {
-  const downloadIcon = async () => {
+const CopyImageIcon: React.FC<IconProps> = ({ iconId, color = "000000", iconName }) => {
+  const copyIconAsInlineImage = async () => {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: `Copying ${iconName} icon...`,
@@ -15,11 +14,13 @@ const CopyIconAction: React.FC<IconProps> = ({ iconId, color = "000000", iconNam
       const { data } = await nounProjectData(`icon/${iconId}/download?color=${color}&filetype=png&size=1028`) as { data: NounProjectDownloadResponse };
 
       if (data && data.base64_encoded_file) {
-        const filePath = await base64ToFile(data.base64_encoded_file, `${iconName}-${iconId}.png`);
-        await Clipboard.copy({ file: filePath });
+        const base64Image = `data:${data.content_type};base64,${data.base64_encoded_file}`;
+        const htmlImageTag = `<img src="${base64Image}" alt="${iconName}" />`;
 
         toast.style = Toast.Style.Success;
-        toast.title = `${iconName} (#${color}) icon copied to clipboard`
+        toast.title = `${iconName} (#${color}) copied to clipboard as <img/>`;
+
+        await Clipboard.copy(htmlImageTag);
       } else {
         toast.style = Toast.Style.Failure;
         toast.title = `Failed to copy ${iconName} icon`;
@@ -31,7 +32,7 @@ const CopyIconAction: React.FC<IconProps> = ({ iconId, color = "000000", iconNam
     }
   };
 
-  return <Action icon={Icon.CopyClipboard} title={`Copy ${iconName} to Clipboard`} onAction={downloadIcon} />;
+  return <Action icon={Icon.Image} title={`Copy ${iconName} as Inline Image`} onAction={copyIconAsInlineImage} />;
 };
 
-export default CopyIconAction;
+export default CopyImageIcon;

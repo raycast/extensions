@@ -1,3 +1,10 @@
+export interface IconProps {
+  iconId: string;
+  iconName: string;
+  color?: string;
+}
+
+
 export type Creator = {
   name: string;
   permalink: string;
@@ -45,4 +52,16 @@ export interface IconsResponse {
       monthly: MonthlyUsage
     };
   }
+}
+
+
+export interface NounProjectDownloadResponse {
+  base64_encoded_file: string;
+  content_type: string;
+  usage_limits: {
+    monthly: {
+      limit: number;
+      usage: number;
+    };
+  };
 }
