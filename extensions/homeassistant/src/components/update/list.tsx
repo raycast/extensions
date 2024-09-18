@@ -69,11 +69,11 @@ export function UpdatesList(): JSX.Element {
 
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
-      <List.Section title="Updates available" subtitle={`${updateRequiredStates?.length}`}>
+      <List.Section title="Update Available" subtitle={`${updateRequiredStates?.length}`}>
         {updateRequiredStates?.map((state) => <StateListItem key={state.entity_id} state={state} />)}
         <HACSUpdateItems state={hacsState} />
       </List.Section>
-      <List.Section title="No Updates required" subtitle={`${otherStates?.length}`}>
+      <List.Section title="Up-to-Date" subtitle={`${otherStates?.length}`}>
         {otherStates?.map((state) => <StateListItem key={state.entity_id} state={state} />)}
       </List.Section>
     </List>

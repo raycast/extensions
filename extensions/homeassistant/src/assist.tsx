@@ -187,7 +187,7 @@ export default function AssistCommand(): JSX.Element {
         return { source: currentUser.picture, mask: Image.Mask.Circle };
       }
     }
-    return { source: "person.png", tintColor: Color.PrimaryText, mask: Image.Mask.Circle };
+    return { source: "account.svg", tintColor: Color.PrimaryText, mask: Image.Mask.Circle };
   };
   const isLoading = !error ? isLoadingPipeline || !conversations : false;
   return (
@@ -212,8 +212,8 @@ export default function AssistCommand(): JSX.Element {
               key={i.toString()}
               title={c.text}
               icon={{
-                value: c.author === Author.Assist ? "home-assistant.png" : userPicture(),
-                tooltip: c.author === Author.Assist ? "Assist" : currentUser?.name ?? "",
+                value: c.author === Author.Assist ? "home-assistant.svg" : userPicture(),
+                tooltip: c.author === Author.Assist ? "Assist" : (currentUser?.name ?? ""),
               }}
               accessories={[{ date: c.date }]}
               actions={
