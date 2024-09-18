@@ -6,7 +6,7 @@ By selecting shortcut extension actually runs the shortcut using AppleScript.
 
 Data is taken from: https://hotkys.com.
 
-Please see contribution guide for adding new shortcuts [here](https://github.com/solomkinmv/shortcuts-disco/blob/main/README.md#shortcuts-contribution).
+Please see contribution guide for adding new shortcuts [here](https://github.com/solomkinmv/hotkys/blob/main/README.md#shortcuts-contribution).
 
 ## Screenshots
 
