@@ -1,5 +1,9 @@
 # aerospace Changelog
 
+## Bug Fixes - 2024-09-18
+
+* Update `@iarna/toml` to `v3.0.0` which includes support for TOML 1.0.0
+
 ## [ Bug Fixes ] - 2024-05-27
 
 * Fix screenshots in README
