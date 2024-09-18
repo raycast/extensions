@@ -1,5 +1,6 @@
 import { State } from "@lib/haapi";
 import { Action, Color, List } from "@raycast/api";
+import { useWeatherForecast } from "./hooks";
 import {
   Forecast,
   getHumidityFromState,
@@ -11,7 +12,6 @@ import {
   weatherConditionToText,
   WeatherForecastType,
 } from "./utils";
-import { useWeatherForecast } from "./hooks";
 
 function WeatherTemperature({ state: s }: { state: State }) {
   const val = getTemperatureFromState(s);
@@ -21,7 +21,7 @@ function WeatherTemperature({ state: s }: { state: State }) {
   return (
     <List.Item
       title="Temperature"
-      icon={{ source: "temperature.png", tintColor: Color.PrimaryText }}
+      icon={{ source: "thermometer.svg", tintColor: Color.PrimaryText }}
       accessories={[{ text: `${val}` }]}
     />
   );

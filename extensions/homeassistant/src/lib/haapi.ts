@@ -1,17 +1,17 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
-import fetch, { Response } from "node-fetch";
-import urljoin from "url-join";
-import { getErrorMessage } from "./utils";
 import fs from "fs";
-import { pipeline } from "stream";
-import util from "util";
+import { Connection } from "home-assistant-js-websocket";
 import { Agent } from "https";
-import { getWifiSSIDSync } from "./wifi";
+import fetch, { Response } from "node-fetch";
 import * as ping from "ping";
+import { pipeline } from "stream";
 import { URL } from "url";
+import urljoin from "url-join";
+import util from "util";
 import { queryMdns } from "./mdns";
 import { generateMobileDeviceRegistration, HAMobileDeviceRegistrationResponse } from "./mobiledevice";
-import { Connection } from "home-assistant-js-websocket";
+import { getErrorMessage } from "./utils";
+import { getWifiSSIDSync } from "./wifi";
 const streamPipeline = util.promisify(pipeline);
 
 function paramString(params: { [key: string]: string }): string {
@@ -335,8 +335,16 @@ export class HomeAssistant {
     return await this.callService("climate", "set_temperature", { entity_id: entityID, temperature: value });
   }
 
-  async setClimateOperation(entityID: string, value: string) {
+  async setClimateOperationMode(entityID: string, value: string) {
     return await this.callService("climate", "set_hvac_mode", { entity_id: entityID, hvac_mode: value });
+  }
+
+  async setClimateFanMode(entityID: string, value: string) {
+    return await this.callService("climate", "set_fan_mode", { entity_id: entityID, fan_mode: value });
+  }
+
+  async setClimateSwingMode(entityID: string, value: string) {
+    return await this.callService("climate", "set_swing_mode", { entity_id: entityID, swing_mode: value });
   }
 
   async setClimatePreset(entityID: string, value: string) {
