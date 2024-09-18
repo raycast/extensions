@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "color-picker",
-      "title": "color picker",
+      "title": "Color Picker",
       "subtitle": "just a color picker",
       "description": "Jump to JustColorPicker website to adjust color values",
       "mode": "view"
@@ -33,7 +33,7 @@
     "typescript": "^5.4.5"
   },
   "scripts": {
-    "build": "ray build --skip-types -e dist -o dist",
+    "build": "npx ray build -e dist -o dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
