@@ -42,7 +42,7 @@
     {
       "name": "gainers-and-losers",
       "title": "Gainers & Losers",
-      "description": "Get the latest gainers and losers.",
+      "description": "Get the latest gainers and losers crypto data.",
       "mode": "view"
     },
     {
