@@ -39,7 +39,7 @@
     {
       "name": "defaultTerminal",
       "title": "Terminal Application",
-      "description": "Open the repository in Terminal.app",
+      "description": "Open the repository in your default terminal",
       "type": "appPicker",
       "default": "Terminal",
       "required": true,
