@@ -25,7 +25,11 @@ export default function SearchUserStyles() {
     const githubLink = `https://github.com/catppuccin/userstyles/tree/main/styles/${styleKey}`;
     const appLink = getAppLink(userStyleDetails.readme?.["app-link"]);
     // remove www http https & trailing slashes if present
-    const formattedAppLink = appLink.replace("https://", "").replace("http://", "").replace("www.", "").replace(/\/$/, "");
+    const formattedAppLink = appLink
+      .replace("https://", "")
+      .replace("http://", "")
+      .replace("www.", "")
+      .replace(/\/$/, "");
 
     return (
       <List.Item
