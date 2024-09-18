@@ -155,7 +155,6 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT3.
 
 #### Enumeration members
 
-| OpenAI_GPT3.5-turbo | GPT-3.5 Turbo is OpenAI’s fastest model, making it ideal for tasks that require quick response times with basic language processing capabilities. |
 | OpenAI_GPT4 | GPT-4 is OpenAI’s most capable model with broad general knowledge, allowing it to follow complex instructions and solve difficult problems. |
 | OpenAI_GPT4-turbo | GPT-4 Turbo from OpenAI has a big context window that fits hundreds of pages of text, making it a great choice for workloads that involve longer prompts. |
 | OpenAI_GPT4o | GPT-4o is the most advanced and fastest model from OpenAI, making it a great choice for complex everyday problems and deeper conversations. |
@@ -177,7 +176,7 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT3.
 If a model isn't available to the user, Raycast will fallback to a similar one:
 
 - `AI.Model.Anthropic_Claude_Opus` and `AI.Model.Anthropic_Claude_Sonnet` -> `AI.Model.Anthropic_Claude_Haiku`
-- `AI.Model.OpenAI_GPT4` and `AI.Model["OpenAI_GPT4-turbo"]` -> `AI.Model["OpenAI_GPT3.5-turbo"]`
+- `AI.Model.OpenAI_GPT4` and `AI.Model["OpenAI_GPT4-turbo"]` -> `AI.Model["OpenAI_GPT4o-mini"]`
 - `AI.Model["Perplexity_Llama3.1_Sonar_Large"]` and `AI.Model["Perplexity_Llama3.1_Sonar_Huge"]` -> `AI.Model["Perplexity_Llama3.1_Sonar_Small"]`
 - `AI.Model.Mistral_Large2` -> `AI.Model.Mistral_Nemo`
 
