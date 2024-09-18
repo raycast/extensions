@@ -1,6 +1,6 @@
 # ChatGPT Quick Actions Changelog
 
-## [Add Transform and Transform Preview commands] - {PR_MERGE_DATE}
+## [Add Transform and Transform Preview commands] - 2024-09-18
 
 - Add a Transform command which replaces the selected text with transformed text based on a prompt that is entered when the command is run.
 - Add a Transform Preview command which does the same as the Transform command but displays the result in a preview window instead of replacing the selected text.
