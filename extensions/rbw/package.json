@@ -25,12 +25,16 @@
     "shell-env": "^4.0.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.10.0",
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.36.1",
+    "globals": "^15.9.0",
     "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.6.0"
   },
   "scripts": {
     "build": "ray build --skip-types -e dist -o dist",

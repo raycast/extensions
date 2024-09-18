@@ -31,17 +31,23 @@ const runRbwCommand = async (command: string): Promise<string> => {
   try {
     const env = await getShellEnv();
     return new Promise((resolve, reject) => {
-      exec(`${env.SHELL || "/bin/sh"} -c '${command}'`, { env }, (error, stdout, stderr) => {
-        if (error) {
-          console.error(`Command Error: ${stderr || error.message}`);
-          reject(stderr || error.message);
-        } else {
-          resolve(stdout);
-        }
-      });
+      exec(
+        `${env.SHELL || "/bin/sh"} -c '${command}'`,
+        { env },
+        (error, stdout, stderr) => {
+          if (error) {
+            console.error(`Command Error: ${stderr || error.message}`);
+            reject(stderr || error.message);
+          } else {
+            resolve(stdout);
+          }
+        },
+      );
     });
   } catch (error) {
-    throw new Error(`Error getting shell environment: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Error getting shell environment: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 };
 
@@ -72,14 +78,20 @@ const fetchEntries = async (): Promise<RbwEntry[]> => {
   }
 };
 
-const getPassword = async (entryName: string, username?: string): Promise<string | null> => {
+const getPassword = async (
+  entryName: string,
+  username?: string,
+): Promise<string | null> => {
   try {
-    const sanitizedEntryName = entryName.replace(/"/g, "").replace(/\(/g, "[").replace(/\)/g, "]").trim();
-    const sanitizedUsername = username ? username.replace(/"/g, "").trim() : "";
+    const sanitizedEntryName = entryName
+      .replace(/\(/g, "")
+      .replace(/\)/g, "")
+      .trim();
+    const sanitizedUsername = username ? username.trim() : "";
 
     const command = username
-      ? `${rbw_path} get "${sanitizedEntryName}" "${sanitizedUsername}"`
-      : `${rbw_path} get "${sanitizedEntryName}"`;
+      ? `${rbw_path} get '${sanitizedEntryName}' '${sanitizedUsername}'` // eslint-disable-line quotes
+      : `${rbw_path} get '${sanitizedEntryName}'`; // eslint-disable-line quotes
 
     const output = await runRbwCommand(command);
 
@@ -94,14 +106,20 @@ const getPassword = async (entryName: string, username?: string): Promise<string
   }
 };
 
-const getTotp = async (entryName: string, username?: string): Promise<string | null> => {
+const getTotp = async (
+  entryName: string,
+  username?: string,
+): Promise<string | null> => {
   try {
-    const sanitizedEntryName = entryName.replace(/"/g, "").replace(/\(/g, "[").replace(/\)/g, "]").trim();
-    const sanitizedUsername = username ? username.replace(/"/g, "").trim() : "";
+    const sanitizedEntryName = entryName
+      .replace(/\(/g, "")
+      .replace(/\)/g, "")
+      .trim();
+    const sanitizedUsername = username ? username.trim() : "";
 
     const command = username
-      ? `${rbw_path} code "${sanitizedEntryName}" "${sanitizedUsername}"`
-      : `${rbw_path} code "${sanitizedEntryName}"`;
+      ? `${rbw_path} code '${sanitizedEntryName}' '${sanitizedUsername}'` // eslint-disable-line quotes
+      : `${rbw_path} code '${sanitizedEntryName}'`; // eslint-disable-line quotes
 
     const output = await runRbwCommand(command);
 
@@ -117,13 +135,23 @@ const getTotp = async (entryName: string, username?: string): Promise<string | n
 };
 
 // New component to handle the list of multiple matching entries
-const SelectEntryList = ({ entries, onSelect }: { entries: RbwEntry[]; onSelect: (entry: RbwEntry) => void }) => {
+const SelectEntryList = ({
+  entries,
+  onSelect,
+}: {
+  entries: RbwEntry[];
+  onSelect: (entry: RbwEntry) => void;
+}) => {
   return (
     <List
       navigationTitle="Select Entry"
       searchBarPlaceholder="Search for an entry..."
       onSearchTextChange={(searchText) =>
-        setFilteredEntries(entries.filter((entry) => entry.name.toLowerCase().includes(searchText.toLowerCase())))
+        setFilteredEntries(
+          entries.filter((entry) =>
+            entry.name.toLowerCase().includes(searchText.toLowerCase()),
+          ),
+        )
       }
     >
       {entries.map((entry) => (
@@ -132,7 +160,11 @@ const SelectEntryList = ({ entries, onSelect }: { entries: RbwEntry[]; onSelect:
           title={entry.name}
           actions={
             <ActionPanel>
-              <Action title="Select" icon={Icon.Checkmark} onAction={() => onSelect(entry)} />
+              <Action
+                title="Select"
+                icon={Icon.Checkmark}
+                onAction={() => onSelect(entry)}
+              />
             </ActionPanel>
           }
         />
@@ -145,7 +177,10 @@ const Command = () => {
   const [entries, setEntries] = useState<RbwEntry[]>([]);
   const [filteredEntries, setFilteredEntries] = useState<RbwEntry[]>([]);
   const [searchText, setSearchText] = useState<string>("");
-  const [recentlyUsed, setRecentlyUsed] = usePersistentState<RbwEntry[]>("recently-used", []); // eslint-disable-line @typescript-eslint/no-unused-vars
+  const [recentlyUsed, setRecentlyUsed] = usePersistentState<RbwEntry[]>( // eslint-disable-line @typescript-eslint/no-unused-vars
+    "recently-used",
+    [],
+  );
   const { push } = useNavigation();
 
   useEffect(() => {
@@ -162,11 +197,19 @@ const Command = () => {
   }, []);
 
   useEffect(() => {
-    setFilteredEntries(entries.filter((entry) => (entry.name || "").toLowerCase().includes(searchText.toLowerCase())));
+    setFilteredEntries(
+      entries.filter((entry) =>
+        (entry.name || "").toLowerCase().includes(searchText.toLowerCase()),
+      ),
+    );
   }, [searchText, entries]);
 
   const addToRecentlyUsed = (entry: RbwEntry) => {
-    setRecentlyUsed((list) => (list.find((x) => x.id === entry.id) ? list : [entry, ...list].slice(0, 10)));
+    setRecentlyUsed((list) =>
+      list.find((x) => x.id === entry.id)
+        ? list
+        : [entry, ...list].slice(0, 10),
+    );
   };
 
   const handleCopyPassword = async (entry: RbwEntry) => {
@@ -286,8 +329,16 @@ const Command = () => {
           title={entry.name}
           actions={
             <ActionPanel>
-              <Action title="Copy Password" icon={Icon.Clipboard} onAction={() => handleCopyPassword(entry)} />
-              <Action title="Copy Totp" icon={Icon.Clipboard} onAction={() => handleCopyTotp(entry)} />
+              <Action
+                title="Copy Password"
+                icon={Icon.Clipboard}
+                onAction={() => handleCopyPassword(entry)}
+              />
+              <Action
+                title="Copy Totp"
+                icon={Icon.Clipboard}
+                onAction={() => handleCopyTotp(entry)}
+              />
             </ActionPanel>
           }
         />
