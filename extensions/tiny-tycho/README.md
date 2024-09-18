@@ -7,9 +7,13 @@ This sticker pack contains more than 90 unique emotions, and around 40 banners a
 You can download Tiny Tycho in the [App Store](https://apps.apple.com/app/tiny-tycho/id6648792366) (not required, but recommended)
 
 # Contributers
+
 **Developer: Tycho Regter**
+
 - [Website](https://orangebyte.io/)
 - [GitHub](https://github.com/tychoregter)
+
 **Designer: Yume**
+
 - [Instagram](https://www.instagram.com/yume_drawing0/)
 - [X](https://x.com/Yume_drawing0)
