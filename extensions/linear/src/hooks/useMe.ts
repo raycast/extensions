@@ -1,4 +1,4 @@
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 import { useCachedPromise } from "@raycast/utils";
 
 export default function useMe() {

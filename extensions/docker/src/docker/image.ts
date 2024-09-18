@@ -20,10 +20,10 @@ export const formatImageDetailMarkdown = (image: ImageInspectInfo | undefined) =
         ['Size', formatBytes(image.Size)],
         ['OS', image.Os],
         ['Architecture', image.Architecture],
-        ['Command', markdown.inlineCode(formatImageCommand(image.Config.Cmd))],
+        ['Command', markdown.inlineCode(formatImageCommand(image.Config.Cmd ?? []))],
         ['Entrypoint', markdown.inlineCode(formatEntryPoint(image.Config.Entrypoint))],
       ]) +
-      renderEnvSection(image.Config.Env) +
+      renderEnvSection(image.Config.Env ?? []) +
       `\n`
     : '';
 
@@ -35,9 +35,9 @@ const renderEnvSection = (env: string[]) => {
   return [`\n\n## Environment`, markdown.codeBlock(env.join('\n'))].join('\n');
 };
 
-export const formatImageCommand = (cmd: string[]) => cmd.join(' ');
+const formatImageCommand = (cmd: string[]) => cmd.join(' ');
 
-export const formatEntryPoint = (entrypoint: string | string[] | undefined | null) => {
+const formatEntryPoint = (entrypoint: string | string[] | undefined | null) => {
   if (entrypoint === undefined || entrypoint === null) {
     return '-';
   } else if (Array.isArray(entrypoint)) {

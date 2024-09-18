@@ -1,21 +1,26 @@
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
-import { URLSearchParams } from "url";
+import { URL } from "url";
 import { authHeaders, BASE_URL } from "../api";
+import { useSeasons } from "./useSeasons";
 
 interface Options {
   status: Status[];
   teamId: string;
 }
 
+const matchesURL = new URL(`${BASE_URL}/matches`);
+
 export function useMatches(options: Options) {
-  const params = new URLSearchParams({ status: options.status.join(",") });
-  const { data, isLoading } = useFetch<Matches>(`${BASE_URL}/matches?${params.toString()}`, {
+  const [currentSeason] = useSeasons();
+  matchesURL.searchParams.set("status", options.status.join(","));
+  matchesURL.searchParams.set("season", currentSeason);
+  const { data, isLoading, error } = useFetch<Matches>(matchesURL.toString(), {
     headers: authHeaders,
   });
 
   const matches = useMemo(() => {
-    if (!data) {
+    if (!data || error) {
       return [];
     }
 

@@ -1,0 +1,6 @@
+raycast-env.d.ts
+node_modules
+
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift

@@ -11,24 +11,24 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useAsync } from "react-use";
 import { useEffect, useState } from "react";
 import { getOutputDevices, setOutputDevice } from "./utils";
+import { usePromise } from "@raycast/utils";
 
 export function AirPlaySelector() {
-  const { value: items, loading } = useAsync(getOutputDevices, []);
+  const { data, isLoading } = usePromise(getOutputDevices);
   const [active, setActive] = useState<string | null>(null);
 
   useEffect(() => {
-    if (items == null) return;
-    const selected = items.find((item) => item.selected);
+    if (data == null) return;
+    const selected = data.find((item) => item.selected);
     if (selected == null) return;
     setActive(selected.name);
-  }, [items]);
+  }, [data]);
 
   return (
-    <List isLoading={loading} searchBarPlaceholder="Filter by title...">
-      {items?.map((item, index) => (
+    <List isLoading={isLoading} searchBarPlaceholder="Filter by title...">
+      {data?.map((item, index) => (
         <List.Item
           key={index}
           icon={{
@@ -40,6 +40,7 @@ export function AirPlaySelector() {
           actions={
             <ActionPanel>
               <Action
+                title={`Select ${item.name}`}
                 onAction={async () => {
                   await setOutputDevice(item.name);
                   closeMainWindow({ clearRootSearch: true });
@@ -47,7 +48,6 @@ export function AirPlaySelector() {
                   showHUD(`Active output audio device set to ${item.name}`);
                   setActive(item.name);
                 }}
-                title={`Select ${item.name}`}
               />
               <Action
                 title={`Copy Device Name to Clipboard`}

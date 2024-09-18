@@ -1,14 +1,21 @@
-import { Action, ActionPanel, Clipboard, Color, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useEffect } from "react";
 import useStopwatches from "./hooks/useStopwatches";
-import RenameView from "./RenameView";
-import { formatTime, formatDateTime } from "./formatUtils";
-import { Stopwatch } from "./types";
+import { formatTime, formatDateTime } from "./backend/formatUtils";
+import { Stopwatch } from "./backend/types";
+import RenameAction from "./components/RenameAction";
 
 export default function Command() {
-  const { stopwatches, isLoading, refreshSWes, handleStartSW, handleStopSW, handlePauseSW, handleUnpauseSW } =
-    useStopwatches();
-  const { push } = useNavigation();
+  const {
+    stopwatches,
+    isLoading,
+    refreshSWes,
+    handleRestartSW,
+    handleStartSW,
+    handleStopSW,
+    handlePauseSW,
+    handleUnpauseSW,
+  } = useStopwatches();
 
   useEffect(() => {
     refreshSWes();
@@ -40,21 +47,25 @@ export default function Command() {
             actions={
               <ActionPanel>
                 {sw.lastPaused == "----" ? (
-                  <Action title="Pause Stopwatch" onAction={() => handlePauseSW(sw.swID)} />
+                  <Action title="Pause Stopwatch" icon={Icon.Pause} onAction={() => handlePauseSW(sw.swID)} />
                 ) : (
-                  <Action title="Unpause Stopwatch" onAction={() => handleUnpauseSW(sw.swID)} />
+                  <Action title="Unpause Stopwatch" icon={Icon.Play} onAction={() => handleUnpauseSW(sw.swID)} />
                 )}
-                <Action
-                  title="Rename Stopwatch"
-                  onAction={() => push(<RenameView currentName={sw.name} originalFile={"stopwatch"} ctID={sw.swID} />)}
+                <RenameAction renameLabel="Stopwatch" currentName={sw.name} originalFile={"stopwatch"} ctID={sw.swID} />
+                <Action.CopyToClipboard
+                  title="Copy Current Time"
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  content={formatTime(sw.timeElapsed)}
                 />
                 <Action
-                  title="Copy Current Time"
-                  shortcut={{ modifiers: ["opt"], key: "c" }}
-                  onAction={() => Clipboard.copy(formatTime(sw.timeElapsed))}
+                  title="Restart Stopwatch"
+                  icon={Icon.ArrowCounterClockwise}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  onAction={() => handleRestartSW(sw)}
                 />
                 <Action
                   title="Stop Stopwatch"
+                  icon={Icon.Stop}
                   shortcut={{ modifiers: ["ctrl"], key: "x" }}
                   onAction={() => handleStopSW(sw)}
                 />
@@ -69,7 +80,7 @@ export default function Command() {
           subtitle={"Press Enter to start a stopwatch"}
           actions={
             <ActionPanel>
-              <Action title="Start Stopwatch" onAction={() => handleStartSW()} />
+              <Action title="Start Stopwatch" icon={Icon.Stopwatch} onAction={() => handleStartSW({})} />
             </ActionPanel>
           }
         />

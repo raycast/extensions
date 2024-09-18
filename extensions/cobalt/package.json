@@ -1,0 +1,126 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cobalt",
+  "title": "Cobalt",
+  "description": "Download videos and audio from popular social media platforms with ease.",
+  "icon": "command-icon.png",
+  "author": "aelew",
+  "categories": [
+    "Applications",
+    "Data",
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Download Media",
+      "subtitle": "Cobalt",
+      "description": "Download video and/or audio from social media with customizable settings.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "downloadDirectory",
+      "title": "Download Directory",
+      "description": "Where Cobalt should save downloaded files.",
+      "default": "~/Downloads",
+      "type": "directory",
+      "required": true
+    },
+    {
+      "name": "apiInstanceUrl",
+      "title": "API Instance URL",
+      "description": "Want to use a different Cobalt API instance? Change your instance URL here!",
+      "placeholder": "https://api.cobalt.tools",
+      "default": "https://api.cobalt.tools",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "filenamePattern",
+      "title": "File Name Style",
+      "description": "How downloaded files should be named.\n\nClassic: Default file name pattern.\nBasic: Title and basic info in brackets.\nPretty: Title and info in brackets.\nNerdy: Title and all info in brackets.\n\nSome services don't support rich file names and will always use the classic style.",
+      "type": "dropdown",
+      "required": false,
+      "default": "classic",
+      "data": [
+        {
+          "title": "Classic",
+          "value": "classic"
+        },
+        {
+          "title": "Basic",
+          "value": "basic"
+        },
+        {
+          "title": "Pretty",
+          "value": "pretty"
+        },
+        {
+          "title": "Nerdy",
+          "value": "nerdy"
+        }
+      ]
+    },
+    {
+      "name": "notifyOnDownload",
+      "label": "Notify on Successful Download",
+      "description": "Sends you a notification when your download is complete.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "muteVideoAudio",
+      "label": "Mute Video Audio",
+      "description": "Removes the audio from video downloads when possible.",
+      "type": "checkbox",
+      "required": false
+    },
+    {
+      "name": "twitterGif",
+      "label": "Twitter: Convert GIFs to .gif",
+      "description": "Changes whether Twitter GIFs are converted to .gif or not. May reduce quality and increase file size.",
+      "type": "checkbox",
+      "required": false
+    },
+    {
+      "name": "downloadOriginalTikTokSound",
+      "label": "TikTok: Use Original Audio",
+      "description": "Downloads the original sound used in the TikTok video without any additional changes by the post's author.",
+      "type": "checkbox",
+      "required": false
+    },
+    {
+      "name": "tiktokH265",
+      "label": "TikTok: Prefer H.265/HEVC Videos",
+      "description": "Downloads 1080p videos from TikTok in H.265/HEVC format when available.",
+      "type": "checkbox",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.0",
+    "@raycast/utils": "^1.16.4",
+    "content-disposition": "^0.5.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/content-disposition": "^0.5.8",
+    "@types/node": "20.8.9",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mindnode",
+  "title": "MindNode",
+  "description": "Create Mindmap Quickly using Raycast",
+  "icon": "mindnode-icon.png",
+  "author": "thuggyduck",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new-mindmap",
+      "title": "New Mindmap",
+      "subtitle": "MindNode",
+      "description": "Create a new mindmap in the default storage location.",
+      "icon": "mindnode-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-outline",
+      "title": "New Outline",
+      "subtitle": "MindNode",
+      "description": "Create a new outline in the default storage location.",
+      "icon": "mindnode-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "quick-entry-mind",
+      "title": "Mind Quick Entry",
+      "subtitle": "MindNode",
+      "description": "Launches Quick Entry and adds the provided text as the content.",
+      "icon": "mindnode-icon.png",
+      "mode": "no-view"
+    }
+  ],
+  "categories": [
+    "Productivity", 
+    "Applications"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.62.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.6",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^8.49.0",
+    "prettier": "^3.0.3",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -8,7 +8,7 @@
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { DetectedLangModel } from "../../detectLanauge/types";
+import { DetectedLangModel } from "../../detectLanguage/types";
 
 export interface YoudaoDictionaryFormatResult {
   queryWordInfo: QueryWordInfo;
@@ -140,7 +140,7 @@ export interface YoudaoWebTranslateResultItem {
 export interface YoudaoWebDictionaryModel {
   // English --> Chinese.
   input: string;
-  lang: string; // 目标语言，eng。 eg: https://www.youdao.com/w/eng/good
+  lang: string; // 目标语言，eng。eg: https://www.youdao.com/w/eng/good
   le: string; // 目标语言，en
   meta?: Meta; // 元数据
 

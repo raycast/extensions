@@ -1,0 +1,109 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kimai",
+  "title": "Kimai",
+  "description": "Add new Kimai time log from Raycast",
+  "icon": "kimai-icon.png",
+  "author": "marinsokol",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Other"
+  ],
+  "commands": [
+    {
+      "name": "log-time",
+      "title": "Log Time",
+      "subtitle": "Kimai",
+      "description": "Add new time log linked to project and activity",
+      "mode": "view"
+    },
+    {
+      "name": "logged-hours",
+      "title": "Logged Hours Today",
+      "subtitle": "Kimai",
+      "description": "View amount of hours logged today",
+      "interval": "15m",
+      "mode": "menu-bar"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "protocol",
+      "type": "dropdown",
+      "required": false,
+      "title": "Request protocol",
+      "description": "If you are using local (self hosted) Kimai, set it to 'http', otherwise keep it as 'https'",
+      "default": "https",
+      "data": [
+        {
+          "title": "HTTPS",
+          "value": "https"
+        },
+        {
+          "title": "HTTP",
+          "value": "http"
+        }
+      ]
+    },
+    {
+      "name": "domain",
+      "type": "textfield",
+      "required": true,
+      "title": "Kimai Domain",
+      "description": "Your Kimai Base URL (e.g. 'your-organization.kimai.cloud')",
+      "placeholder": "your-organization.kimai.cloud"
+    },
+    {
+      "name": "email",
+      "type": "textfield",
+      "required": false,
+      "title": "Email",
+      "description": "Your email that you use for login in Kimai"
+    },
+    {
+      "name": "password",
+      "required": false,
+      "type": "password",
+      "title": "API Password",
+      "description": "API password is different from your login password and needs to set in your profile settings"
+    },
+    {
+      "name": "token",
+      "type": "textfield",
+      "required": false,
+      "title": "API Token",
+      "description": "API token available in your profile settings"
+    },
+    {
+      "name": "duration",
+      "type": "textfield",
+      "required": false,
+      "title": "Default time log duration (in minutes)",
+      "description": "Duration in minutes that will be used to prepopulate duration field when adding new time log"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.2",
+    "@raycast/utils": "^1.12.2",
+    "dayjs": "^1.11.10",
+    "node-fetch": "^3.3.2",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "pull": "npx @raycast/api@latest pull-contributions",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

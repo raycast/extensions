@@ -7,7 +7,7 @@ export default function GetTables() {
   const seasons = useSeasons();
 
   const [selectedSeason, setSeason] = useState<string>(
-    seasons[0]?.id.toString()
+    seasons[0]?.id.toString(),
   );
   const [showStats, setShowStats] = useState<boolean>(false);
 
@@ -119,12 +119,12 @@ export default function GetTables() {
                     icon: Icon.Goal,
                     text: `${overall.goalsFor} - ${overall.goalsAgainst}`,
                     tooltip: "Goals For - Goals Against",
-                  }
+                  },
                 );
 
                 if (next) {
                   const nextTeam = next.teams.find(
-                    (t) => t.team.shortName !== team.shortName
+                    (t) => t.team.shortName !== team.shortName,
                   );
                   accessories.push({
                     icon: {

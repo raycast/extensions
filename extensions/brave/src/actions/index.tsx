@@ -1,6 +1,6 @@
 import { runAppleScript } from "run-applescript";
-import { closeMainWindow, popToRoot } from "@raycast/api";
-import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
+import { closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
+import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
 
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
@@ -11,10 +11,11 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
 
   await checkAppInstalled();
 
+  const { browserOption } = getPreferenceValues<Preferences>();
+
   const openTabs = await runAppleScript(`
       set _output to ""
-      tell application "Brave Browser"
-        activate
+      tell application "${browserOption}"
         set _window_index to 1
         repeat with w in windows
           set _tab_index to 1
@@ -37,23 +38,33 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
     .filter((line) => line.length !== 0)
     .map((line) => Tab.parse(line));
 }
+
 export async function openNewTab({
   url,
   query,
   profileCurrent,
   profileOriginal,
   openTabInProfile,
+  newWindow,
+  incognito,
 }: {
   url?: string;
   query?: string;
   profileCurrent: string;
   profileOriginal?: string;
   openTabInProfile: SettingsProfileOpenBehaviour;
+  newWindow?: boolean;
+  incognito?: boolean;
 }): Promise<boolean | string> {
   setTimeout(() => {
     popToRoot({ clearSearchBar: true });
   }, 3000);
-  await Promise.all([closeMainWindow({ clearRootSearch: true }), checkAppInstalled()]);
+  const installed = await checkAppInstalled();
+  if (installed) {
+    closeMainWindow({ clearRootSearch: true });
+  }
+
+  const { browserOption } = getPreferenceValues<Preferences>();
 
   let script = "";
 
@@ -61,14 +72,16 @@ export async function openNewTab({
     `
     set profile to quoted form of "${profile}"
     set link to quoted form of "${url ? url : "about:blank"}"
-    do shell script "open -na 'Brave Browser' --args --profile-directory=" & profile & " " & link
+    do shell script "open -na '${browserOption}' --args --profile-directory=" & profile & " " & link
   `;
 
   switch (openTabInProfile) {
     case SettingsProfileOpenBehaviour.Default:
       script =
         `
-    tell application "Brave Browser"
+    tell application "${browserOption}"
+      ${newWindow ? "make new window" : ""}
+      ${incognito ? `make new window with properties {mode: "incognito"}` : ""}
       activate
       tell window 1
           set newTab to make new tab ` +
@@ -78,6 +91,7 @@ export async function openNewTab({
           ? 'with properties {URL:"https://www.google.com/search?q=' + query + '"}'
           : "") +
         ` 
+        ${newWindow || incognito ? "close tab 1" : ""}
       end tell
     end tell
     return true
@@ -95,9 +109,19 @@ export async function openNewTab({
   return await runAppleScript(script);
 }
 
+export async function closeTab(tabIndex: number): Promise<void> {
+  const { browserOption } = getPreferenceValues<Preferences>();
+  await runAppleScript(`tell application "${browserOption}}"
+    tell window 1
+      delete tab ${tabIndex}
+    end tell
+  end tell`);
+}
+
 export async function setActiveTab(tab: Tab): Promise<void> {
+  const { browserOption } = getPreferenceValues<Preferences>();
   await runAppleScript(`
-    tell application "Brave Browser"
+    tell application "${browserOption}"
       activate
       set index of window (${tab.windowsIndex} as number) to (${tab.windowsIndex} as number)
       set active tab index of window (${tab.windowsIndex} as number) to (${tab.tabIndex} as number)
@@ -106,11 +130,13 @@ export async function setActiveTab(tab: Tab): Promise<void> {
   `);
 }
 
-const checkAppInstalled = async () => {
+const checkAppInstalled = async (): Promise<boolean> => {
+  const { browserOption } = getPreferenceValues<Preferences>();
+
   const appInstalled = await runAppleScript(`
 set isInstalled to false
 try
-    do shell script "osascript -e 'exists application \\"Brave Browser\\"'"
+    do shell script "osascript -e 'exists application \\"${browserOption}\\"'"
     set isInstalled to true
 end try
 
@@ -118,4 +144,5 @@ return isInstalled`);
   if (appInstalled === "false") {
     throw new Error(NOT_INSTALLED_MESSAGE);
   }
+  return true;
 };

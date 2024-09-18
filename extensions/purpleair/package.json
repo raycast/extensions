@@ -26,7 +26,7 @@
         },
         {
           "name": "api_key",
-          "title": "Tempest API Key",
+          "title": "PurpleAir API Key",
           "description": "API Key is used to authenticate with PurpleAir APIs",
           "type": "password",
           "required": true
@@ -37,7 +37,7 @@
   "dependencies": {
     "@raycast/api": "^1.44.0",
     "@raycast/utils": "^1.4.11",
-    "cross-fetch": "^3.1.5",
+    "node-fetch": "^3.3.2",
     "react": "^18.2.0"
   },
   "devDependencies": {

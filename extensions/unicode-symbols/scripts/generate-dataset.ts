@@ -1,7 +1,9 @@
 import fs from "fs";
 import path from "path";
-import { Character, getBlocks, getCharacters } from "unidata";
-import { CharAlias } from "../src/dataset-manager";
+import type { Character } from "unidata";
+import { getBlocks, getCharacters } from "unidata";
+
+import type { CharAlias } from "../src/lib/dataset-manager";
 
 // Output path for the generated dataset.
 const datasetOutputPath = path.resolve(__dirname, "../assets/dataset.json");
@@ -14,9 +16,11 @@ const blockNamesToFilter = [
   "Latin-1 Supplement",
   "Latin Extended-A",
   "Latin Extended-B",
+  "Latin Extended Additional",
   "IPA Extensions",
   "Spacing Modifier Letters",
   "Combining Diacritical Marks",
+  "Greek and Coptic",
   "General Punctuation",
   "Superscripts and Subscripts",
   "Currency Symbols",
@@ -24,6 +28,7 @@ const blockNamesToFilter = [
   "Number Forms",
   "Arrows",
   "Mathematical Operators",
+  "Enclosed Alphanumerics",
   "Geometric Shapes",
   "Miscellaneous Symbols",
   "Dingbats",
@@ -31,14 +36,22 @@ const blockNamesToFilter = [
   "Braille Patterns",
   "Supplemental Arrows-B",
   "Miscellaneous Mathematical Symbols-A",
+  "Miscellaneous Mathematical Symbols-B",
   "Supplemental Mathematical Operators",
   "Miscellaneous Symbols and Arrows",
   "Mathematical Alphanumeric Symbols",
+  "Miscellaneous Technical",
+  "Private Use Area",
+  "Box Drawing",
+  "Block Elements",
+  "Emoticons",
+  "Ancient Symbols",
 ];
 
 // Specify here any additional characters and blocks to include in the dataset.
-const additionalCharacterValues = ["", "⌘", "⌥", "⏎", "⌫"];
-const additionalBlockNames = ["Miscellaneous Technical", "Private Use Area"];
+// const additionalCharacterValues = ["", "⌘", "⌥", "⏎", "⌫"];
+const additionalCharacterValues: string[] = [];
+const additionalBlockNames: string[] = [];
 const charCodeToAliases: CharAlias = {
   8313: ["superscript 9"],
   8984: ["cmd", "command"],
@@ -50,6 +63,8 @@ const charCodeToAliases: CharAlias = {
 // Grab unicode blocks and characters using https://github.com/chbrown/unidata/
 const allBlocks = getBlocks();
 const allCharacters = getCharacters();
+
+console.log(`ℹ️ Found ${allBlocks.length} unicode blocks and ${allCharacters.length} unicode characters`);
 
 // Map all unicode characters by code.
 const allCharactersByCode = allCharacters.reduce<{ [charCode: string]: Character }>((previousValue, currentValue) => {
@@ -64,7 +79,7 @@ const allCharactersByCode = allCharacters.reduce<{ [charCode: string]: Character
  * @returns Unicode characters in the given range.
  */
 function getCharactersByCodeRange(startCode: number, endCode: number) {
-  const characters = [];
+  const characters: Character[] = [];
   for (let i = startCode; i <= endCode; i++) {
     characters.push(allCharactersByCode[i]);
   }
@@ -82,7 +97,14 @@ const mapCodeToName = (char: Character): Character => {
 
 function mapCharacterToDatasetItem(char: Character) {
   const aliases = charCodeToAliases[char.code] ? charCodeToAliases[char.code] : [];
-  if (char.code) return { value: String.fromCodePoint(char.code), code: char.code, name: char.name, aliases: aliases };
+  if (char.code)
+    return {
+      value: String.fromCodePoint(char.code),
+      code: char.code,
+      name: char.name,
+      old_name: char.oldName || "",
+      aliases: aliases,
+    };
 }
 
 function sanitizeCharacters(characters: Character[]) {
@@ -90,12 +112,13 @@ function sanitizeCharacters(characters: Character[]) {
     .filter(Boolean) // Include only valid characters
     .map(mapCodeToName)
     .map(mapCharacterToDatasetItem)
-    .filter((char) => char && char.name !== "<control>"); // Exclude invisible control characters
+    .filter((char) => char && char.name !== "<control>" && char.code !== 57344); // Exclude invisible control characters and private use area character
 }
 
 // Run the dataset generation.
 (function generateDataset() {
   const filteredBlocks = allBlocks.filter((block) => blockNamesToFilter.includes(block.blockName));
+  const notIncluded = allBlocks.filter((block) => !blockNamesToFilter.includes(block.blockName));
   const additionalBlocks = allBlocks.filter((block) => additionalBlockNames.includes(block.blockName));
 
   const characters = filteredBlocks.flatMap((block) => {
@@ -103,8 +126,10 @@ function sanitizeCharacters(characters: Character[]) {
   });
 
   const additionalCharacters = sanitizeCharacters(
-    allCharacters.filter((char) => additionalCharacterValues.includes(String.fromCodePoint(char.code)))
+    allCharacters.filter((char) => additionalCharacterValues.includes(String.fromCodePoint(char.code))),
   );
+
+  console.log(`Not included: ${notIncluded.length} blocks`);
 
   const dataset = {
     blocks: [...filteredBlocks, ...additionalBlocks],

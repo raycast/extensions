@@ -1,11 +1,10 @@
+import { getPreferenceValues } from "@raycast/api";
+
 export interface Preferences {
-  preview: boolean;
-  textEdit: boolean;
-  messages: boolean;
-  terminal: boolean;
-  quickTimePlayer: boolean;
-  mail: boolean;
-  notes: boolean;
-  shortcuts: boolean;
-  tv: boolean;
+  layout: string;
+  columns: string;
+  itemInset: string;
+  refreshInterval: number;
 }
+
+export const { layout, columns, itemInset, refreshInterval } = getPreferenceValues<Preferences>();

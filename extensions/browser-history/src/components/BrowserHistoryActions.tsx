@@ -7,7 +7,7 @@ export class BrowserHistoryActions {
   public static OpenPreferences = ActionOpenPreferences;
 }
 
-function HistoryItemAction({ entry: { url } }: { entry: HistoryEntry }) {
+function HistoryItemAction({ entry: { url, browser } }: { entry: HistoryEntry }) {
   const { defaultBrowser } = getPreferenceValues<Preferences>();
   const actions = {
     [SupportedBrowsers.Chrome]: (
@@ -90,11 +90,23 @@ function HistoryItemAction({ entry: { url } }: { entry: HistoryEntry }) {
         onAction={() => openNewTab(SupportedBrowsers.Orion, url)}
       />
     ),
+    [SupportedBrowsers.Sidekick]: (
+      <ActionPanel.Item
+        title={"Open in Sidekick"}
+        icon={"sidekick-logo.png"}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+        onAction={() => openNewTab(SupportedBrowsers.Sidekick, url)}
+      />
+    ),
   };
   return (
     <ActionPanel>
       {defaultBrowser && defaultBrowser !== "Default" ? (
-        actions[defaultBrowser]
+        defaultBrowser == "Originator" ? (
+          actions[browser]
+        ) : (
+          actions[defaultBrowser]
+        )
       ) : (
         <Action.OpenInBrowser title="Open in Default Browser" url={url} />
       )}
@@ -113,6 +125,7 @@ function HistoryItemAction({ entry: { url } }: { entry: HistoryEntry }) {
         {actions[SupportedBrowsers.Opera]}
         {actions[SupportedBrowsers.Iridium]}
         {actions[SupportedBrowsers.Orion]}
+        {actions[SupportedBrowsers.Sidekick]}
       </ActionPanel.Section>
     </ActionPanel>
   );

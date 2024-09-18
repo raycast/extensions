@@ -7,7 +7,7 @@ import { GameSimple } from "../types";
 export const Search = () => {
   const [search, setSearch] = useState("");
   const [hovered, setHovered] = useState(0);
-  const { data: searchedGames } = useGamesSearch({ term: search, ready: search.length > 0 });
+  const { data: searchedGames } = useGamesSearch({ term: search, execute: search.length > 0 });
   return (
     <List
       isLoading={Boolean(search && !searchedGames?.length)}
@@ -26,7 +26,13 @@ export const SearchList = ({ searchedGames, hovered }: { searchedGames?: GameSim
   return (
     <List.Section title="Search Results">
       {searchedGames?.map((game) => (
-        <DynamicGameListItem key={game.appid} game={game} ready={hovered === game.appid} myGames={myGames} />
+        <DynamicGameListItem
+          context="Search"
+          key={game.appid}
+          game={game}
+          ready={hovered === game.appid}
+          myGames={myGames}
+        />
       ))}
     </List.Section>
   );

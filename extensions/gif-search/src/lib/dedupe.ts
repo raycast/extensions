@@ -1,16 +1,12 @@
-import type { IGif } from "../models/gif";
+export default function dedupe<T extends { id: string }>(array: T[]) {
+  const ids = new Set<string>();
 
-export default function dedupe(values: Array<IGif>) {
-  return Array.from(
-    values
-      .reduce((uniq, val: IGif) => {
-        if (uniq.get(val.id.toString())) {
-          return uniq;
-        }
+  return array.filter((item) => {
+    if (ids.has(item.id)) {
+      return false;
+    }
 
-        uniq.set(val.id.toString(), val);
-        return uniq;
-      }, new Map<string, IGif>())
-      .values()
-  );
+    ids.add(item.id);
+    return true;
+  });
 }

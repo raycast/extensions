@@ -7,5 +7,5 @@ export function RandomNote(props: { vault: Vault; showTitle: boolean }) {
   const [notes] = useNotes(vault);
   const randomNote = notes[Math.floor(Math.random() * notes.length)];
 
-  return <NoteQuickLook note={randomNote} showTitle={showTitle}></NoteQuickLook>;
+  return <NoteQuickLook note={randomNote} vault={vault} showTitle={showTitle} allNotes={notes} />;
 }

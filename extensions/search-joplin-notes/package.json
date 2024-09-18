@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "search-joplin-notes",
+  "title": "Search Joplin Notes",
+  "description": "Search and view in your joplin notes",
+  "icon": "Joplin_icon.png",
+  "author": "wisdom-plus",
+  "categories": [
+    "Applications",
+    "Productivity",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Joplin Notes",
+      "description": "search notes in joplin",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "joplin_token",
+      "type": "password",
+      "title": "Joplin Auth Token",
+      "required": true,
+      "description": "You can get this token from the Joplin desktop application, on the Web Clipper Options screen.",
+      "placeholder": "Joplin Token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.1",
+    "@raycast/utils": "^1.16.3",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.17.0",
+    "@typescript-eslint/parser": "^7.17.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

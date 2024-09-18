@@ -8,31 +8,7 @@ fragment IssueFields on Issue {
   stateReason
   updatedAt
   author {
-    ... on Bot {
-      id
-      login
-      avatarUrl(size: 64)
-    }
-    ... on User {
-      ...UserFields
-    }
-    ... on Mannequin {
-      id
-      login
-      avatarUrl(size: 64)
-    }
-    ... on Organization {
-      id
-      login
-      name
-      avatarUrl(size: 64)
-    }
-    ... on EnterpriseUserAccount {
-      id
-      login
-      name
-      avatarUrl(size: 64)
-    }
+    ...AuthorFields
   }
   linkedBranches(first: 50) {
     totalCount
@@ -62,24 +38,6 @@ fragment IssueFields on Issue {
       ... on User {
         ...UserFields
       }
-    }
-  }
-}
-
-query searchCreatedIssues(
-  $createdOpenQuery: String!
-  $createdClosedQuery: String!
-  $numberOfOpenItems: Int!
-  $numberOfClosedItems: Int!
-) {
-  createdOpen: search(query: $createdOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
-    nodes {
-      ...IssueFields
-    }
-  }
-  createdClosed: search(query: $createdClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
-    nodes {
-      ...IssueFields
     }
   }
 }
@@ -126,19 +84,6 @@ query repositoryProjectsForIssues($owner: String!, $name: String!, $issueNumber:
   }
 }
 
-query searchOpenIssues($assignedOpenQuery: String!, $mentionedOpenQuery: String!, $numberOfOpenItems: Int!) {
-  assignedOpen: search(query: $assignedOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
-    nodes {
-      ...IssueFields
-    }
-  }
-  mentionedOpen: search(query: $mentionedOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
-    nodes {
-      ...IssueFields
-    }
-  }
-}
-
 fragment IssueDetailFields on Issue {
   id
   url
@@ -150,31 +95,7 @@ fragment IssueDetailFields on Issue {
   stateReason
   updatedAt
   author {
-    ... on Bot {
-      id
-      login
-      avatarUrl(size: 64)
-    }
-    ... on User {
-      ...UserFields
-    }
-    ... on Mannequin {
-      id
-      login
-      avatarUrl(size: 64)
-    }
-    ... on Organization {
-      id
-      login
-      name
-      avatarUrl(size: 64)
-    }
-    ... on EnterpriseUserAccount {
-      id
-      login
-      name
-      avatarUrl(size: 64)
-    }
+    ...AuthorFields
   }
   labels(first: 50, orderBy: { field: NAME, direction: ASC }) {
     totalCount
@@ -189,6 +110,7 @@ fragment IssueDetailFields on Issue {
     totalCount
     nodes {
       ... on LinkedBranch {
+        id
         ref {
           name
         }

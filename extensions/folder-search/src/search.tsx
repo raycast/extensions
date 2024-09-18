@@ -17,6 +17,7 @@ import {
   confirmAlert,
   open,
   getSelectedFinderItems,
+  Keyboard,
 } from "@raycast/api";
 
 import { usePromise } from "@raycast/utils";
@@ -35,6 +36,7 @@ import {
   copyFolderToClipboard,
   maybeMoveResultToTrash,
   lastUsedSort,
+  fixDoubleConcat,
 } from "./utils";
 
 import fse from "fs-extra";
@@ -54,6 +56,16 @@ export default function Command() {
   const [searchScope, setSearchScope] = useState<string>("");
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(true);
   const [results, setResults] = useState<SpotlightSearchResult[]>([]);
+
+  // hack to fix annoying double text during fallback. Typing helloworld results in helloworldhelloworld
+  let fixedText = "";
+  useEffect(() => {
+    fixedText = fixDoubleConcat(searchText);
+
+    if (fixedText !== searchText) {
+      setSearchText(fixedText); // Update the state of searchText
+    }
+  }, [searchText]);
 
   const [plugins, setPlugins] = useState<FolderSearchPlugin[]>([]);
 
@@ -214,6 +226,22 @@ export default function Command() {
     setSelectedItemId(`result-${resultIndex.toString()}`);
   };
 
+  const movePinUp = (result: SpotlightSearchResult, resultIndex: number) => {
+    const newIndex = resultIndex - 1;
+
+    [pinnedResults[resultIndex], pinnedResults[newIndex]] = [pinnedResults[newIndex], pinnedResults[resultIndex]];
+
+    setPinnedResults([...pinnedResults]);
+  };
+
+  const movePinDown = (result: SpotlightSearchResult, resultIndex: number) => {
+    const newIndex = resultIndex + 1;
+
+    [pinnedResults[resultIndex], pinnedResults[newIndex]] = [pinnedResults[newIndex], pinnedResults[resultIndex]];
+
+    setPinnedResults([...pinnedResults]);
+  };
+
   // re-usable for results and 'pinned/favourites'
   const ListSection = (props: { title: string; results: SpotlightSearchResult[] }) => {
     return (
@@ -353,6 +381,26 @@ export default function Command() {
                   shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                   onAction={() => toggleResultPinnedStatus(result, resultIndex)}
                 />
+                {props.title === "Pinned" && (
+                  <>
+                    {resultIndex > 0 && (
+                      <Action
+                        title="Move Pin Up"
+                        icon={Icon.ArrowUpCircle}
+                        shortcut={Keyboard.Shortcut.Common.MoveUp}
+                        onAction={() => movePinUp(result, resultIndex)}
+                      />
+                    )}
+                    {resultIndex < props.results.length - 1 && (
+                      <Action
+                        title="Move Pin Down"
+                        icon={Icon.ArrowDownCircle}
+                        shortcut={Keyboard.Shortcut.Common.MoveDown}
+                        onAction={() => movePinDown(result, resultIndex)}
+                      />
+                    )}
+                  </>
+                )}
                 <ActionPanel.Section>
                   <Action.CopyToClipboard
                     title="Copy Folder"
@@ -421,6 +469,8 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search folders"
       isShowingDetail={isShowingDetail}
+      throttle={true}
+      searchText={searchText}
       selectedItemId={selectedItemId}
       searchBarAccessory={
         hasCheckedPlugins && hasCheckedPreferences ? (

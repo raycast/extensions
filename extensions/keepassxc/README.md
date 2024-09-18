@@ -22,9 +22,13 @@ There are 3 parameters required for this extension to work:
 
 ### Shortcuts
 
-- `Enter` : Copy and Paste Password
-- `Cmd`+`Enter` : Copy Password
+- `Enter` : Paste Password
+- `Shift`+`Enter` : Paste Username
+- `Option`+`Enter` : Paste TOTP
+- `Cmd`+`G` : Copy Password
 - `Cmd`+`B` : Copy Username
+- `Cmd`+`T` : Copy TOTP
+- `Shift` + `Cmd` + `U` : Open URL in Browser
 
 ## Password Security Note
 

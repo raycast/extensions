@@ -1,5 +1,5 @@
 import { Detail } from "@raycast/api";
-import type { CharacterEntity } from "crossbell.js";
+import type { CharacterEntity } from "crossbell";
 import { useCharacter } from "../apis";
 import { extractCharacterInfo } from "../utils/character";
 import { composeCharacterUrl } from "../utils/url";

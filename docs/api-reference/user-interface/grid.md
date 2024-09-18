@@ -13,7 +13,7 @@ Because its API tries to stick as closely to [List](list.md#list)'s as possible,
 - finally, replacing all usages of `List` with `Grid`.
   {% endhint %}
 
-![](../../.gitbook/assets/grid.png)
+![](../../.gitbook/assets/grid.webp)
 
 ## Search Bar
 
@@ -104,6 +104,156 @@ export default function Command() {
 Some extensions may benefit from giving users a second filtering dimension. A media file management extension may allow users to view only videos or only images, an image-searching extension may allow switching ssearch engines, etc.
 
 This is where the `searchBarAccessory` [prop](#props) is useful. Pass it a [Grid.Dropdown](#grid.dropdown) component, and it will be displayed on the right-side of the search bar. Invoke it either by using the global shortcut `⌘` `P` or by clicking on it.
+
+### Pagination
+
+{% hint style="info" %}
+Pagination requires version 1.69.0 or higher of the `@raycast/api` package.
+{% endhint %}
+
+`Grid`s have built-in support for pagination. To opt in to pagination, you need to pass it a `pagination` prop, which is an object providing 3 pieces of information:
+
+- `onLoadMore` - will be called by Raycast when the user reaches the end of the grid, either using the keyboard or the mouse. When it gets called, the extension is expected to perform an async operation which eventually can result in items being appended to the end of the grid.
+- `hasMore` - indicates to Raycast whether it _should_ call `onLoadMore` when the user reaches the end of the grid.
+- `pageSize` - indicates how many placeholder items Raycast should add to the end of the grid when it calls `onLoadMore`. Once `onLoadMore` finishes executing, the placeholder items will be replaced by the newly-added grid items.
+
+Note that extensions have access to a limited amount of memory. As your extension paginates, its memory usage will increase. Paginating extensively could lead to the extension eventually running out of memory and crashing. To protect against the extension crashing due to memory exhaustion, Raycast monitors the extension's memory usage and employs heuristics to determine whether it's safe to paginate further. If it's deemed unsafe to continue paginating, `onLoadMore` will not be triggered when the user scrolls to the bottom, regardless of the `hasMore` value. Additionally, during development, a warning will be printed in the terminal.
+
+For convenience, most of the [hooks](../../utils-reference/getting-started.md) that we provide have built-in pagination support. Here's an example of how to add pagination support to a simple command using [usePromise](../../utils-reference/react-hooks/usePromise.md), and one "from scratch".
+
+{% tabs %}
+
+{% tab title="GridWithUsePromisePagination.tsx" %}
+
+```typescript
+import { setTimeout } from "node:timers/promises";
+import { useState } from "react";
+import { Grid } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+
+export default function Command() {
+  const [searchText, setSearchText] = useState("");
+
+  const { isLoading, data, pagination } = usePromise(
+    (searchText: string) => async (options: { page: number }) => {
+      await setTimeout(200);
+      const newData = Array.from({ length: 25 }, (_v, index) => ({ index, page: options.page, text: searchText }));
+      return { data: newData, hasMore: options.page < 10 };
+    },
+    [searchText]
+  );
+
+  return (
+    <Grid isLoading={isLoading} onSearchTextChange={setSearchText} pagination={pagination}>
+      {data?.map((item) => (
+        <Grid.Item
+          key={`${item.index} ${item.page} ${item.text}`}
+          content=""
+          title={`Page: ${item.page} Item ${item.index}`}
+          subtitle={item.text}
+        />
+      ))}
+    </Grid>
+  );
+}
+```
+
+{% endtab %}
+
+{% tab title="GridWithPagination.tsx" %}
+
+```typescript
+import { setTimeout } from "node:timers/promises";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Grid } from "@raycast/api";
+
+type State = {
+  searchText: string;
+  isLoading: boolean;
+  hasMore: boolean;
+  data: {
+    index: number;
+    page: number;
+    text: string;
+  }[];
+  nextPage: number;
+};
+const pageSize = 20;
+export default function Command() {
+  const [state, setState] = useState<State>({ searchText: "", isLoading: true, hasMore: true, data: [], nextPage: 0 });
+  const cancelRef = useRef<AbortController | null>(null);
+
+  const loadNextPage = useCallback(async (searchText: string, nextPage: number, signal?: AbortSignal) => {
+    setState((previous) => ({ ...previous, isLoading: true }));
+    await setTimeout(200);
+    const newData = Array.from({ length: pageSize }, (_v, index) => ({
+      index,
+      page: nextPage,
+      text: searchText,
+    }));
+    if (signal?.aborted) {
+      return;
+    }
+    setState((previous) => ({
+      ...previous,
+      data: [...previous.data, ...newData],
+      isLoading: false,
+      hasMore: nextPage < 10,
+    }));
+  }, []);
+
+  const onLoadMore = useCallback(() => {
+    setState((previous) => ({ ...previous, nextPage: previous.nextPage + 1 }));
+  }, []);
+
+  const onSearchTextChange = useCallback(
+    (searchText: string) => {
+      if (searchText === state.searchText) return;
+      setState((previous) => ({
+        ...previous,
+        data: [],
+        nextPage: 0,
+        searchText,
+      }));
+    },
+    [state.searchText]
+  );
+
+  useEffect(() => {
+    cancelRef.current?.abort();
+    cancelRef.current = new AbortController();
+    loadNextPage(state.searchText, state.nextPage, cancelRef.current?.signal);
+    return () => {
+      cancelRef.current?.abort();
+    };
+  }, [loadNextPage, state.searchText, state.nextPage]);
+
+  return (
+    <Grid
+      isLoading={state.isLoading}
+      onSearchTextChange={onSearchTextChange}
+      pagination={{ onLoadMore, hasMore: state.hasMore, pageSize }}
+    >
+      {state.data.map((item) => (
+        <Grid.Item
+          key={`${item.index} ${item.page} ${item.text}`}
+          content=""
+          title={`Page: ${item.page} Item ${item.index}`}
+          subtitle={item.text}
+        />
+      ))}
+    </Grid>
+  );
+}
+```
+
+{% endtab %}
+
+{% endtabs %}
+
+{% hint style="warning" %}
+Pagination might not work properly if all grid items are rendered and visible at once, as `onLoadMore` won't be triggered. This typically happens when an API returns 10 results by default, all fitting within the Raycast window. To fix this, try displaying more items, like 20.
+{% endhint %}
 
 ## Examples
 
@@ -366,7 +516,7 @@ empty view alongside the other `Grid.Item`s.
 
 Note that the `EmptyView` is _never_ displayed if the `Grid`'s `isLoading` property is true and the search bar is empty.
 
-![Grid EmptyView illustration](../../.gitbook/assets/grid-empty-view.png)
+![Grid EmptyView illustration](../../.gitbook/assets/grid-empty-view.webp)
 
 #### Example
 
@@ -436,7 +586,7 @@ Sections can specify their own `columns`, `fit`, `aspectRatio` and `inset` props
 
 #### Example
 
-![](../../.gitbook/assets/grid-styled-sections.png)
+![](../../.gitbook/assets/grid-styled-sections.webp)
 
 {% tabs %}
 {% tab title="GridWithSection.tsx" %}
@@ -494,6 +644,12 @@ export default function Command() {
 <PropsTableFromJSDoc component="Grid.Section" />
 
 ## Types
+
+### Grid.Item.Accessory
+
+An interface describing an accessory view in a `Grid.Item`.
+
+![Grid.Item accessories illustration](../../.gitbook/assets/grid-item-accessories.webp)
 
 ### Grid.Inset
 

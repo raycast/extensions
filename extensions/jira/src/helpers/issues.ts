@@ -1,4 +1,5 @@
 import { Color } from "@raycast/api";
+import { FormValidation } from "@raycast/utils";
 import { format } from "date-fns";
 import { groupBy, partition } from "lodash";
 import markdownToAdf from "md-to-adf";
@@ -31,20 +32,23 @@ export function getIssueListSections(issues?: Issue[]) {
   const statusCategoryNames: Record<string, string> = {};
   for (const issue of issues) {
     const statusCategory = issue.fields.status.statusCategory;
-    statusCategoryNames[statusCategory.key] = statusCategory.name;
+    if (statusCategory) {
+      statusCategoryNames[statusCategory.key] = statusCategory.name;
+    }
   }
 
   const issuesByStatusCategoryKey = groupBy(issues, (issue) => {
-    const key = issue.fields.status.statusCategory.key;
+    const statusCategory = issue.fields.status.statusCategory;
 
-    if (statusCategoryKeyOrder.includes(key)) {
-      return issue.fields.status.statusCategory.key;
+    if (statusCategory && statusCategoryKeyOrder.includes(statusCategory.key)) {
+      return issue.fields.status.statusCategory?.key;
     }
 
     // If the status category doesn't seem to be
     // a known key, assign it to unknown by default
     return StatusCategoryKey.unknown;
   });
+
   return statusCategoryKeyOrder
     .filter((categoryKey) => {
       const issues = issuesByStatusCategoryKey[categoryKey];
@@ -61,9 +65,9 @@ export function getIssueListSections(issues?: Issue[]) {
     });
 }
 
-export function getIssueDescription(description: string) {
+export function getMarkdownFromHtml(description: string) {
   const nodeToMarkdown = new NodeHtmlMarkdown(
-    {},
+    { keepDataImages: true },
     // For some reasons, Jira doesn't wrap code blocks within a <code> block
     // but only within a <pre> block which is not recognized by NodeHtmlMarkdown.
     {
@@ -71,12 +75,7 @@ export function getIssueDescription(description: string) {
         prefix: "```\n",
         postfix: "\n```",
       },
-      // Raycast doesn't support tables in Markdown, so let's remove
-      // it from the end result.
-      table: {
-        content: "",
-      },
-    }
+    },
   );
 
   return nodeToMarkdown.translate(description);
@@ -140,14 +139,14 @@ export function getCustomFieldsForDetail(issue?: IssueDetail | null) {
   // Jira's textareas are shown in the markdown field of the Detail screen
   const [markdownFieldsKeys, metadataFieldsKeys] = partition(
     customFieldsWithValueKeys,
-    (key) => issue.schema[key].custom === CustomFieldSchema.textarea
+    (key) => issue.schema[key].custom === CustomFieldSchema.textarea,
   );
 
   const customMarkdownFields = markdownFieldsKeys.map((key) => {
     const name = issue.names[key];
     const value = issue.renderedFields[key];
 
-    return value ? `\n\n## ${name}\n\n${getIssueDescription(value)}` : null;
+    return value ? `\n\n## ${name}\n\n${getMarkdownFromHtml(value)}` : null;
   });
 
   const customMetadataFields = metadataFieldsKeys
@@ -226,10 +225,10 @@ export function getCustomFieldsForCreateIssue(issueType: IssueTypeWithCustomFiel
     };
   }, {});
 
-  const validation = customFields.reduce((acc, { key, fieldSchema }) => {
+  const validation = customFields.reduce((acc, { key, fieldSchema, required }) => {
     return {
       ...acc,
-      [key]: getCustomFieldValidation(fieldSchema),
+      [key]: getCustomFieldValidation(fieldSchema, required),
     };
   }, {});
 
@@ -251,18 +250,25 @@ export function getCustomFieldInitialValue(fieldSchema: CustomFieldSchema) {
   }
 }
 
-export function getCustomFieldValidation(fieldSchema: CustomFieldSchema) {
-  switch (fieldSchema) {
-    case CustomFieldSchema.float:
-    case CustomFieldSchema.storyPointEstimate:
-      return (value: string) => {
+export function getCustomFieldValidation(fieldSchema: CustomFieldSchema, required: boolean) {
+  return (value: string) => {
+    if (required && !value) {
+      return FormValidation.Required;
+    }
+
+    switch (fieldSchema) {
+      case CustomFieldSchema.float:
+      case CustomFieldSchema.storyPointEstimate:
         if (value && isNaN(Number(value))) {
           return "Please enter a valid number";
         }
-      };
-    default:
-      return "";
-  }
+        break;
+      default:
+        break;
+    }
+
+    return "";
+  };
 }
 
 export function getCustomFieldValue(fieldSchema: CustomFieldSchema, value: unknown) {

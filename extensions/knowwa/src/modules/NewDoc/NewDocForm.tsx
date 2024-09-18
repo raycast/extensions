@@ -11,13 +11,13 @@ import {
 import axios from "axios";
 import dayjs from "dayjs";
 import { apiUrl, baseUrl } from "../../constants/constants";
-import { Document } from "../../types/types";
+import { Template } from "../../types/types";
 
 interface Preferences {
   AccessToken: string;
 }
 
-export default function NewDocForm({ template }: { template: Document }) {
+export default function NewDocForm({ template }: { template: Template }) {
   const preferences = getPreferenceValues<Preferences>();
   const { pop } = useNavigation();
 
@@ -28,7 +28,7 @@ export default function NewDocForm({ template }: { template: Document }) {
     });
     try {
       const data = await axios.post(
-        `${apiUrl}/documents/new/${template.uuid}`,
+        `${apiUrl}/templates/${template.uuid}/documents`,
         values,
         {
           headers: {
@@ -54,7 +54,7 @@ export default function NewDocForm({ template }: { template: Document }) {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Generate New Document"
+            title="Generate new Document"
             onSubmit={(values) => submitForm(values)}
           />
         </ActionPanel>
@@ -65,7 +65,7 @@ export default function NewDocForm({ template }: { template: Document }) {
         title="Document Title"
         defaultValue={`${template.name} ${dayjs().format("YYYY-DD-MM")}`}
       />
-      {template.checklist_items?.map((elem) => (
+      {template.inputs?.map((elem) => (
         <Form.TextField
           key={elem.identifier}
           id={elem.identifier}

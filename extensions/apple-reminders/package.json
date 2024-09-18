@@ -1,0 +1,216 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "apple-reminders",
+  "title": "Apple Reminders",
+  "description": "Manage Apple Reminders.",
+  "icon": "icon.png",
+  "author": "thomaslombart",
+  "contributors": [
+    "tm.wrnr",
+    "ir4n",
+    "jondelgado",
+    "phil_s"
+  ],
+  "owner": "raycast",
+  "access": "public",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "my-reminders",
+      "title": "My Reminders",
+      "subtitle": "Apple Reminders",
+      "description": "View and complete your reminders.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "displayCompletionDate",
+          "type": "checkbox",
+          "required": false,
+          "label": "Display Completion Date",
+          "description": "When enabled, the completion date will be displayed as a list item accessory.",
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "create-reminder",
+      "title": "Create Reminder",
+      "subtitle": "Apple Reminders",
+      "description": "Create and prioritize new reminders.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "selectDefaultList",
+          "type": "checkbox",
+          "label": "Initially select the default list",
+          "description": "When enabled, the Reminders's default list will be initially selected instead of the last used list.",
+          "default": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar Reminders",
+      "icon": "icon.png",
+      "subtitle": "Apple Reminders",
+      "description": "Manage your reminders in the menu bar.",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "titleType",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Nothing",
+              "value": "nothing"
+            },
+            {
+              "title": "Count",
+              "value": "count"
+            },
+            {
+              "title": "First Reminder",
+              "value": "firstReminder"
+            }
+          ],
+          "default": "count",
+          "required": false,
+          "title": "Title",
+          "description": "Choose what you want to see next to the menu bar icon."
+        },
+        {
+          "name": "view",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Upcoming",
+              "value": "upcoming"
+            },
+            {
+              "title": "All",
+              "value": "all"
+            }
+          ],
+          "default": "today",
+          "required": false,
+          "title": "View",
+          "description": "Choose which view you want to see in your menu bar."
+        },
+        {
+          "name": "countType",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Upcoming",
+              "value": "upcoming"
+            },
+            {
+              "title": "All",
+              "value": "all"
+            }
+          ],
+          "default": "today",
+          "required": false,
+          "title": "Count",
+          "description": "Choose which count you want to see in your menu bar."
+        },
+        {
+          "name": "hideMenuBarCountWhenEmpty",
+          "type": "checkbox",
+          "label": "Hide menu bar count when empty",
+          "description": "When enabled, the number of reminders will be hidden if there are no reminders left (\"Display menu bar count\" needs to be enabled)",
+          "default": false,
+          "required": false
+        }
+      ],
+      "interval": "10m"
+    },
+    {
+      "name": "quick-add-reminder",
+      "title": "Quick Add Reminder",
+      "subtitle": "Apple Reminders",
+      "description": "Quickly add a reminder in Reminders.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "dontUseAI",
+          "type": "checkbox",
+          "label": "Don't use the AI",
+          "description": "When enabled, the reminder is simply added to your default list with the input as the title.",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": true,
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Reminder",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "notes",
+          "placeholder": "Notes",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "manage-locations",
+      "title": "Manage Locations",
+      "subtitle": "Apple Reminders",
+      "description": "Manage your saved locations.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@date-fns/utc": "^1.2.0",
+    "@raycast/api": "^1.75.1",
+    "@raycast/utils": "^1.14.0",
+    "chrono-node": "^2.7.5",
+    "date-fns": "^3.6.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/lodash": "^4.17.0",
+    "@types/node": "^20.12.4",
+    "@types/react": "^18.2.74",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^3.2.5",
+    "react": "^18.2.0",
+    "typescript": "^5.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

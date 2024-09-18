@@ -32,14 +32,12 @@ const InspectDeployment = ({ deployment, selectedTeam, username }: Props) => {
   // }, [deployment]);
 
   // @ts-expect-error Property 'id' does not exist on type 'Deployment'.
-  const url = getFetchDeploymentBuildsURL(deployment.uid || deployment.id, selectedTeam?.id, 1);
+  const url = getFetchDeploymentBuildsURL(deployment.uid || deployment.id, selectedTeam, 1);
 
   const { isLoading, data } = useFetch<{
     builds: Build[];
-    // TODO: why can't I `{ headers: FetchHeaders }` here?
   }>(url, {
-    // @ts-expect-error Type 'null' is not assignable to type 'string'.
-    headers: FetchHeaders.get("Authorization") ? [["Authorization", FetchHeaders.get("Authorization")]] : [[]],
+    headers: FetchHeaders,
   });
 
   const mostRecentBuild = data?.builds?.[0];
@@ -69,18 +67,17 @@ const InspectDeployment = ({ deployment, selectedTeam, username }: Props) => {
     // @ts-expect-error Property 'inspectorURL' does not exist on type 'Deployment'.
     if (deployment.inspectorURL) return deployment.inspectorURL;
 
-    const name = selectedTeam ? selectedTeam.name : username;
+    const teamSlug = selectedTeam?.slug || username;
 
-    if (!name) {
+    if (!teamSlug) {
       showToast({
         title: "Error",
         message: "Could not determine team or user name",
       });
       return "";
     }
-
     // @ts-expect-error Property 'id' does not exist on type 'Deployment'.
-    return getDeploymentURL(name, deployment.name, deployment.uid || deployment.id);
+    return getDeploymentURL(teamSlug, deployment.name, deployment.uid || deployment.id);
   };
 
   return (

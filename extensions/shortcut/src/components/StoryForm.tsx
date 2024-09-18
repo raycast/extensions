@@ -4,7 +4,7 @@ import { CreateStoryParams, Story, StorySlim, UpdateStory } from "@useshortcut/c
 
 import { getMemberAvatar, getMemberName, getStoryColor, StoryTypes, useFormField } from "../helpers/storyHelpers";
 import { capitalize } from "../utils/string";
-import { useGroups, useIterations, useMemberInfo, useMembers, useProjects, useWorkflows } from "../hooks";
+import { useGroups, useIterations, useMemberInfo, useMembers, useProjects, useEpics, useWorkflows } from "../hooks";
 import { sortIterationByStartDateDesc } from "../helpers/iterationHelper";
 
 export type StoryFormRawValues = {
@@ -17,6 +17,7 @@ export type StoryFormRawValues = {
   workflow_state_id?: string;
   owner_ids?: string[];
   project_id?: string;
+  epic_id?: string;
   estimate?: string;
 };
 
@@ -28,7 +29,13 @@ function processStoryFormValues(values: StoryFormRawValues) {
         [key]: null,
       };
     } else {
-      if (key === "iteration_id" || key === "project_id" || key === "workflow_state_id" || key === "estimate") {
+      if (
+        key === "iteration_id" ||
+        key === "project_id" ||
+        key === "epic_id" ||
+        key === "workflow_state_id" ||
+        key === "estimate"
+      ) {
         return {
           ...acc,
           [key]: parseInt(value as string, 10),
@@ -64,6 +71,7 @@ export default function StoryForm({
   const { data: members, isLoading: isMembersLoading } = useMembers();
   const { data: memberInfo, isLoading: isMemberInfoLoading } = useMemberInfo();
   const { data: projects, isLoading: isProjectsLoading } = useProjects();
+  const { data: epics, isLoading: isEpicsLoading } = useEpics();
   const { data: workflows, isLoading: isWorkflowsLoading } = useWorkflows();
   const { data: teams, isLoading: isTeamsLoading } = useGroups();
   const { data: iterations, isLoading: isIterationsLoading } = useIterations();
@@ -72,6 +80,7 @@ export default function StoryForm({
     isMembersLoading ||
     isMemberInfoLoading ||
     isProjectsLoading ||
+    isEpicsLoading ||
     isWorkflowsLoading ||
     isIterationsLoading ||
     isTeamsLoading;
@@ -95,6 +104,9 @@ export default function StoryForm({
 
   const defaultProjectId = story?.project_id && String(story?.project_id);
   const projectFields = useFormField(defaultProjectId || draftValues?.project_id || "");
+
+  const defaultEpicId = story?.epic_id && String(story?.epic_id);
+  const epicFields = useFormField(defaultEpicId || draftValues?.epic_id || "");
 
   const defaultEstimate = story?.estimate && String(story.estimate);
   const estimateFields = useFormField(defaultEstimate || draftValues?.estimate || "");
@@ -179,6 +191,20 @@ export default function StoryForm({
             icon={{
               source: Icon.CircleFilled,
               tintColor: project.color,
+            }}
+          />
+        ))}
+      </Form.Dropdown>
+      <Form.Dropdown id="epic_id" title="Epic" {...epicFields}>
+        <Form.Dropdown.Item title="None" value={""} key="no_epic" icon={Icon.XMarkCircleFilled} />
+
+        {epics?.map((epic) => (
+          <Form.Dropdown.Item
+            title={epic.name}
+            value={epic.id.toString()}
+            key={epic.id}
+            icon={{
+              source: Icon.CircleFilled,
             }}
           />
         ))}

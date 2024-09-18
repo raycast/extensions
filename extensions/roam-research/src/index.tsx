@@ -1,12 +1,13 @@
 import { ActionPanel, Detail, List, Action, Icon, useNavigation } from "@raycast/api";
-import { useGraphConfigCache } from "./cache";
+import { useGraphsConfig } from "./utils";
 import { NewGraph } from "./new-graph";
 import GraphList, { graphList } from "./list";
 import { GraphDetail } from "./detail";
+import { removeGraphPeerUrlFromCache } from "./roamApi";
 
 const GraphSelect = () => {
-  const [graphCache, saveGraphCache] = useGraphConfigCache();
-  if (Object.keys(graphCache).length === 0) {
+  const { graphsConfig } = useGraphsConfig();
+  if (Object.keys(graphsConfig).length === 0) {
     return (
       <List>
         <List.EmptyView icon={Icon.Tray} title="Please add graph first" />
@@ -17,13 +18,25 @@ const GraphSelect = () => {
 };
 
 export default function Command() {
-  const [graphCache, saveGraphCache] = useGraphConfigCache();
+  const { graphsConfig, removeGraphConfig } = useGraphsConfig();
+  // TODO: PROBLEM is that this does not update when we add a new graph??
+
   const { push } = useNavigation();
   return (
     <List>
-      {graphList(graphCache, (graph) => {
-        push(<GraphDetail graph={graph} />);
-      })}
+      {graphList(
+        graphsConfig,
+        {
+          onAction: (graphConfig: GraphConfig) => {
+            push(<GraphDetail graphConfig={graphConfig} />);
+          },
+          title: "Available commands",
+        },
+        (graphName) => {
+          removeGraphConfig(graphName);
+          removeGraphPeerUrlFromCache(graphName);
+        }
+      )}
       {/* <List.Item
         title="Select Graph"
         actions={
@@ -38,7 +51,7 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action.Push title="Add New Graph" target={<NewGraph />} />
-            <Action.Push title="Show Details" target={<Detail markdown="# Hey! 👋" />} />
+            {/* <Action.Push title="Show Details" target={<Detail markdown="# Hey! 👋" />} /> */}
           </ActionPanel>
         }
       />

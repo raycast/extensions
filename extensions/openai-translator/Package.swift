@@ -2,14 +2,24 @@
 import PackageDescription
 
 let package = Package(
-  name: "ocr",
+  name: "raycast-openai-translator-tool",
   platforms: [
     .macOS(.v10_15),
 ],
   targets: [
     .executableTarget(
       name: "ocr",
-      dependencies: []
+      dependencies: [],
+      sources: [
+        "main.swift",
+      ]
+    ),
+    .executableTarget(
+      name: "lang",
+      dependencies: [],
+      sources: [
+        "main.swift",
+      ]
     ),
   ]
 )

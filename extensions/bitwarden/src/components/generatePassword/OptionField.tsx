@@ -6,7 +6,7 @@ export type GeneratePasswordOptionFieldProps = {
   field: PasswordOptionField;
   option: keyof PasswordGeneratorOptions;
   defaultValue: PasswordGeneratorOptions[keyof PasswordGeneratorOptions];
-  onChange: (value: PasswordGeneratorOptions[keyof PasswordGeneratorOptions]) => void;
+  onChange: (value: PasswordGeneratorOptions[keyof PasswordGeneratorOptions]) => void | Promise<void>;
   errorMessage?: string;
 };
 
@@ -20,9 +20,9 @@ function GeneratePasswordOptionField({
   const { hint = "", label, type } = field;
   const [error, setError] = useState<string>();
 
-  const handleTextFieldChange = (value: string) => {
+  const handleTextFieldChange = async (value: string) => {
     if (isValidFieldValue(option, value)) {
-      handleChange(value);
+      await handleChange(value);
       setError(undefined);
     } else {
       setError(errorMessage);

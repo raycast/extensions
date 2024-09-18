@@ -22,7 +22,12 @@ export const TodoListItem = ({ result }: TodoListItemProps): JSX.Element => {
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Links">
-            <Action.OpenInBrowser url={todo.url} title="Open on Trello" icon={Icon.Link} />
+            <Action.OpenInBrowser
+              url={todo.url.replace("https", "trello")}
+              title="Open in Trello Desktop"
+              icon={Icon.Link}
+            />
+            <Action.OpenInBrowser url={todo.url} title="Open on Trello Web" icon={Icon.Link} />
           </ActionPanel.Section>
         </ActionPanel>
       }

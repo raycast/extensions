@@ -33,12 +33,12 @@ export default function GetTables() {
           tintColor: Color.SecondaryText,
         };
 
-        if (team.ranking === "up") {
+        if (team.rank < team.gameWeekStartingRank) {
           icon = {
             source: Icon.ChevronUpSmall,
             tintColor: Color.Green,
           };
-        } else if (team.ranking === "down") {
+        } else if (team.rank > team.gameWeekStartingRank) {
           icon = {
             source: Icon.ChevronDownSmall,
             tintColor: Color.Red,
@@ -49,7 +49,7 @@ export default function GetTables() {
           {
             text: {
               color: Color.PrimaryText,
-              value: team.points,
+              value: team.points.toString(),
             },
             icon,
             tooltip: "Points",
@@ -57,43 +57,27 @@ export default function GetTables() {
         ];
 
         if (!showStats) {
-          team.forms.reverse().forEach((form) => {
-            let tintColor = Color.SecondaryText;
-            if (form === "win") {
-              tintColor = Color.Green;
-            } else if (form === "lose") {
-              tintColor = Color.Red;
-            }
-
-            accessories.unshift({
-              icon: {
-                source: Icon.CircleFilled,
-                tintColor,
-              },
-            });
-          });
-
           accessories.unshift(
             {
               icon: Icon.SoccerBall,
-              text: team.played,
+              text: team.played.toString(),
               tooltip: "Played",
             },
             {
               icon: Icon.Goal,
-              text: `${team.goals_for} - ${team.goals_against}`,
+              text: `${team.forGoals} - ${team.againstGoals}`,
               tooltip: "Goals For - Goals Against",
-            }
+            },
           );
         }
 
         return (
           <List.Item
-            key={team.position}
-            icon={team.logo}
-            title={team.position}
-            subtitle={team.name}
-            keywords={[team.name]}
+            key={team.rank}
+            icon={team.clubIdentity.assets.logo.small}
+            title={team.clubIdentity.name}
+            // subtitle={team.name}
+            keywords={[team.clubIdentity.name, team.clubIdentity.shortName]}
             accessories={accessories}
             detail={
               <List.Item.Detail
@@ -106,31 +90,31 @@ export default function GetTables() {
                     /> */}
                     <List.Item.Detail.Metadata.Label
                       title="Played"
-                      text={team.played}
+                      text={team.played.toString()}
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Won"
-                      text={team.won}
+                      text={team.wins.toString()}
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Drawn"
-                      text={team.drawn}
+                      text={team.draws.toString()}
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Lost"
-                      text={team.lost}
+                      text={team.losses.toString()}
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Goals For"
-                      text={team.goals_for}
+                      text={team.forGoals.toString()}
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Goals Against"
-                      text={team.goals_against}
+                      text={team.againstGoals.toString()}
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Goal Difference"
-                      text={team.goal_difference}
+                      text={team.goalsDifference.toString()}
                     />
                   </List.Item.Detail.Metadata>
                 }

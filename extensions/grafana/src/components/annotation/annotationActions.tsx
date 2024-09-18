@@ -1,11 +1,13 @@
-import { ActionPanel, showToast, ToastStyle, PushAction, Color, Icon, popToRoot } from "@raycast/api";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// TODO: remove any types and be fully-type safe
+import { ActionPanel, showToast, Toast, Action, Color, Icon, popToRoot } from "@raycast/api";
 import { getErrorMessage } from "../../utils";
 import { annotationDeleteQuery } from "./queries";
 import { PatchAnnotationForm } from "./patchAnnotationForm";
 
 export function PatchAnnotationAction(props: { annotation: any }) {
   return (
-    <PushAction
+    <Action.Push
       title="Update Annotation"
       target={<PatchAnnotationForm annotation={props.annotation} />}
       icon={{ source: Icon.Text, tintColor: Color.Green }}
@@ -19,10 +21,10 @@ export function DeleteAnnotationAction(props: { annotation: any }) {
   const deleteAnnotation = async () => {
     try {
       await annotationDeleteQuery(annotation.id);
-      showToast(ToastStyle.Success, "Annotation Deleted", "Annotation deletion successful");
+      showToast(Toast.Style.Success, "Annotation Deleted", "Annotation deletion successful");
       popToRoot();
     } catch (error) {
-      showToast(ToastStyle.Failure, "Could not delete Annotation", getErrorMessage(error));
+      showToast(Toast.Style.Failure, "Could not delete Annotation", getErrorMessage(error));
     }
   };
 

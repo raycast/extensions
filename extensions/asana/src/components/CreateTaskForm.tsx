@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Form,
-  Icon,
-  useNavigation,
-  Toast,
-  getPreferenceValues,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, useNavigation, Toast, showToast } from "@raycast/api";
 import { format } from "date-fns";
 import { FormValidation, getAvatarIcon, useCachedState, useForm } from "@raycast/utils";
 import { useMemo, useEffect } from "react";
@@ -38,17 +28,7 @@ export default function CreateTaskForm(props: {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating task" });
 
       try {
-        const { signature } = getPreferenceValues<{ signature: boolean }>();
-
-        let htmlNotes = `<body>${values.description}`;
-        if (signature) {
-          if (values.description) {
-            htmlNotes += "\n--\n";
-          }
-
-          htmlNotes += `Created via <a href="https://www.raycast.com/?ref=signatureAsana">Raycast</a>`;
-        }
-        htmlNotes += "</body>";
+        const htmlNotes = `<body>${values.description}</body>`;
 
         const customFieldsEntries = Object.entries(values).filter(
           ([key, value]) => key.startsWith("field-") && value !== ""

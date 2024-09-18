@@ -1,10 +1,12 @@
-import { List, Clipboard, getPreferenceValues } from "@raycast/api";
-import { useState, useCallback, useEffect } from "react";
-import { EmptyView } from "./components/empty-view";
-import { searchBooksOnLibgen } from "./hooks/search-books-on-libgen";
-import { isEmpty } from "./utils/common-utils";
-import { BookItem } from "./components/book-item";
-import { LibgenPreferences } from "./types";
+import { useCallback, useEffect, useState } from "react";
+
+import { Clipboard, List, getPreferenceValues } from "@raycast/api";
+
+import { BookItem } from "@/components/book-item";
+import { EmptyView } from "@/components/empty-view";
+import { searchBooksOnLibgen } from "@/hooks/search-books-on-libgen";
+import type { LibgenPreferences } from "@/types";
+import { isEmpty } from "@/utils/common";
 
 export default function Command() {
   const [searchContent, setSearchContent] = useState<string>("");

@@ -1,7 +1,12 @@
-import { Icon, LaunchProps, List } from "@raycast/api";
-import { MutatePromise, useCachedPromise, useSQL } from "@raycast/utils";
+import { Icon, LaunchProps, List, getPreferenceValues } from "@raycast/api";
+import { MutatePromise, useCachedPromise } from "@raycast/utils";
+import { chain } from "lodash";
 import { useState } from "react";
-import { historyDatabasePath, getHistoryQuery } from "./sql";
+import { getTabs } from "./arc";
+import { HistoryEntryListItem, SuggestionListItem, TabListItem } from "./list";
+import { searchArcPreferences } from "./preferences";
+import { useHistorySearch } from "./history";
+import { useSuggestions } from "./suggestions";
 import { HistoryEntry, Suggestion, Tab } from "./types";
 import {
   getKey,
@@ -12,19 +17,10 @@ import {
   isLocationShown,
 } from "./utils";
 import { VersionCheck } from "./version";
-import { chain } from "lodash";
-import { getTabs } from "./arc";
-import { useSuggestions } from "./suggestions";
-import { HistoryEntryListItem, SuggestionListItem, TabListItem } from "./list";
-import { searchArcPreferences } from "./preferences";
 
 function SearchArc(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
-  const {
-    data: history,
-    isLoading: isLoadingHistory,
-    permissionView,
-  } = useSQL<HistoryEntry>(historyDatabasePath, getHistoryQuery(searchText, 25));
+  const { data: history, isLoading: isLoadingHistory, permissionView } = useHistorySearch(searchText, 25);
   const { data: tabs, isLoading: isLoadingTabs, mutate: mutateTabs } = useCachedPromise(getTabs);
   const { data: suggestions, isLoading: isLoadingSuggestions } = useSuggestions(searchText);
 
@@ -34,7 +30,7 @@ function SearchArc(props: LaunchProps) {
 
   return (
     <List
-      searchBarPlaceholder="Search history"
+      searchBarPlaceholder="Search"
       isLoading={isLoadingTabs || isLoadingHistory || isLoadingSuggestions}
       onSearchTextChange={setSearchText}
     >
@@ -63,7 +59,7 @@ function TabListSections(props: { tabs?: Tab[]; mutateTabs: MutatePromise<Tab[] 
     .filter(
       (tab) =>
         tab.title.toLowerCase().includes(props.searchText.toLowerCase()) ||
-        tab.url.toLowerCase().includes(props.searchText.toLowerCase())
+        tab.url.toLowerCase().includes(props.searchText.toLowerCase()),
     )
     .groupBy((tab) => tab.location)
     .value();
@@ -97,13 +93,22 @@ function HistoryListSection(props: { history?: HistoryEntry[]; searchText: strin
 }
 
 function SuggestionsListSection(props: { suggestions?: Suggestion[]; searchText: string }) {
-  return searchArcPreferences.showSuggestions ? (
-    <List.Section title="Suggestions">
-      {props.suggestions?.map((suggestion) => (
-        <SuggestionListItem key={suggestion.id} suggestion={suggestion} searchText={props.searchText} />
+  const { suggestions, searchText } = props;
+
+  // Lets return early if we don't want to show suggestions
+  if (!searchArcPreferences.showSuggestions) {
+    return null;
+  }
+
+  const preferences = getPreferenceValues<Preferences.Search>();
+
+  return (
+    <List.Section title="Suggestions" subtitle={preferences.engine}>
+      {suggestions?.map((suggestion) => (
+        <SuggestionListItem key={suggestion.id} suggestion={suggestion} searchText={searchText} />
       ))}
     </List.Section>
-  ) : null;
+  );
 }
 
 export default function Command(props: LaunchProps) {

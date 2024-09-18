@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { LocalStorage, Form, ActionPanel, Action, showToast, popToRoot, Icon } from "@raycast/api";
+import { LocalStorageValue } from "./types";
 
 const importData = async (data: { [x: string]: number }, importMethod: string) => {
   if (importMethod == "Merge") {
-    const entries = await LocalStorage.allItems<LocalStorage.Values>();
+    const entries = await LocalStorage.allItems<LocalStorageValue>();
 
     Object.entries(entries).forEach(([key]) => {
       if (key in data) {
@@ -84,7 +85,7 @@ const ImportDataForm = () => {
         title="Import Method"
         defaultValue="Replace"
         info={`'Merge' updates the weights of existing entries and adds any new entries with a unique name.
-      
+
 'Replace All Data' removes existing entries and adds the newly specified entries.`}
       >
         <Form.Dropdown.Item key="Merge" title="Merge" value="Merge" />

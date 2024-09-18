@@ -11,7 +11,6 @@ export interface ProfileViewProps {
 interface ProfileViewState {
   profile: Profile;
   views: Views;
-  accountType: string;
   socialMedia: SocialMediaEntry[];
   badges: Badge[];
 }
@@ -23,20 +22,18 @@ export default function ProfileView(props: ProfileViewProps) {
 
   useEffect(() => {
     (async () => {
-      const results: [Profile, Views, string, SocialMediaEntry[], Badge[]] = await Promise.all([
+      const results: [Profile, Views, SocialMediaEntry[], Badge[]] = await Promise.all([
         service.getProfile(uuid),
         service.getViews(uuid),
-        service.getAccountType(uuid),
         service.getSocialMedia(uuid),
         service.getBadges(uuid),
       ]);
 
-      const [profile, views, accountType, socialMedia, badges] = results;
+      const [profile, views, socialMedia, badges] = results;
 
       setProfile({
         profile,
         views,
-        accountType,
         socialMedia,
         badges,
       });
@@ -60,7 +57,7 @@ ${profile.profile.username_history
   .reverse()
   .map(
     (name) =>
-      `- ${name.name} | ${name.accurate === false ? "~" : ""}${name.changedAt ? name.changedAt.toLocaleString() : "-"}`
+      `- ${name.name} | ${name.accurate === false ? "~" : ""}${name.changedAt ? name.changedAt.toLocaleString() : "-"}`,
   )
   .join("\n")}
 
@@ -76,7 +73,7 @@ ${
   profile.profile.textures.capes
     ?.map(
       (cape) =>
-        `[![](https://skin.laby.net/api/render/texture/${cape.imageHash}.png?shadow=true&height=120&user=${profile.profile.uuid})](https://laby.net/cape/${cape.imageHash})`
+        `[![](https://skin.laby.net/api/render/texture/${cape.imageHash}.png?shadow=true&height=120&user=${profile.profile.uuid})](https://laby.net/cape/${cape.imageHash})`,
     )
     .join("\n") || "No capes"
 }
@@ -88,7 +85,6 @@ ${
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Views" text={profile.views.views.toFixed()} />
-          <Detail.Metadata.Label title="Account type" text={profile.accountType} />
           {profile.badges.length > 0 ? (
             <>
               <Detail.Metadata.Separator />
@@ -116,6 +112,10 @@ ${
         <ActionPanel>
           <Action.OpenInBrowser url={`https://laby.net/@${profile.profile.uuid}`} />
           <Action.CopyToClipboard title="Copy UUID" content={profile.profile.uuid} />
+          <Action.OpenInBrowser
+            title="Open Mojang API"
+            url={`https://sessionserver.mojang.com/session/minecraft/profile/${profile.profile.uuid}`}
+          />
         </ActionPanel>
       }
     />

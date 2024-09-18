@@ -1,6 +1,6 @@
 # `useSQL`
 
-Hook which executes a query on a local SQL database and returns the [AsyncState](#asyncstate) corresponding to the execution of the query. The last value will be kept between command runs.
+Hook which executes a query on a local SQL database and returns the [AsyncState](#asyncstate) corresponding to the execution of the query.
 
 ## Signature
 
@@ -13,7 +13,8 @@ function useSQL<T>(
     execute?: boolean;
     onError?: (error: Error) => void;
     onData?: (data: T) => void;
-    onWillExecute?: (args: string[]) -> void;
+    onWillExecute?: (args: string[]) => void;
+    failureToastOptions?: Partial<Pick<Toast.Options, "title" | "primaryAction" | "message">>;
   }
 ): AsyncState<T> & {
   revalidate: () => void;
@@ -37,6 +38,7 @@ Including the [usePromise](./usePromise.md)'s options:
 - `options.onError` is a function called when an execution fails. By default, it will log the error and show a generic failure toast with an action to retry.
 - `options.onData` is a function called when an execution succeeds.
 - `options.onWillExecute` is a function called when an execution will start.
+- `options.failureToastOptions` are the options to customize the title, message, and primary action of the failure toast.
 
 ### Return
 
@@ -61,7 +63,7 @@ type NoteItem = {
   title: string;
 };
 
-const Demo = () => {
+export default function Command() {
   const { isLoading, data, permissionView } = useSQL<NoteItem>(NOTES_DB, notesQuery);
 
   if (permissionView) {
@@ -75,7 +77,7 @@ const Demo = () => {
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Mutation and Optimistic Updates
@@ -97,7 +99,7 @@ type NoteItem = {
   title: string;
 };
 
-const Demo = () => {
+export default function Command() {
   const { isLoading, data, mutate, permissionView } = useFetch("https://api.example");
 
   if (permissionView) {
@@ -116,7 +118,7 @@ const Demo = () => {
           optimisticUpdate(data) {
             return data?.concat([{ id: "" + Math.random(), title: "New Title" }]);
           },
-        }
+        },
       );
       // yay, the API call worked!
       toast.style = Toast.Style.Success;
@@ -145,7 +147,7 @@ const Demo = () => {
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Types
@@ -195,6 +197,6 @@ export type MutatePromise<T> = (
     optimisticUpdate?: (data: T) => T;
     rollbackOnError?: boolean | ((data: T) => T);
     shouldRevalidateAfter?: boolean;
-  }
+  },
 ) => Promise<any>;
 ```

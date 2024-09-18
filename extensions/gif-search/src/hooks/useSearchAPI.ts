@@ -1,27 +1,19 @@
-import { AbortError, FetchError } from "node-fetch";
-import { useCallback, useRef, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 
 import { ServiceName, GIF_SERVICE } from "../preferences";
 import giphy from "../models/giphy";
 import tenor from "../models/tenor";
 import finergifs from "../models/finergifs";
-
 import dedupe from "../lib/dedupe";
 
-import type { IGif } from "../models/gif";
-
-interface FetchState {
-  term?: string;
-  items?: IGif[];
-  error?: Error;
-}
-
-export async function getAPIByServiceName(service: ServiceName, force?: boolean) {
+export async function getAPIByServiceName(service: ServiceName) {
   switch (service) {
     case GIF_SERVICE.GIPHY:
-      return await giphy(force);
+      return await giphy();
+    case GIF_SERVICE.GIPHY_CLIPS:
+      return await giphy("videos");
     case GIF_SERVICE.TENOR:
-      return await tenor(force);
+      return await tenor();
     case GIF_SERVICE.FINER_GIFS:
       return finergifs();
     case GIF_SERVICE.FAVORITES:
@@ -32,54 +24,33 @@ export async function getAPIByServiceName(service: ServiceName, force?: boolean)
   throw new Error(`Unable to find API for service "${service}"`);
 }
 
-export default function useSearchAPI({ offset = 0, limit }: { offset?: number; limit?: number }) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [results, setResults] = useState<FetchState>();
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const cancelRef = useRef<AbortController | null>(null);
+type UseSearchAPIParams = {
+  term: string;
+  service?: ServiceName;
+  offset?: number;
+  limit?: number;
+};
 
-  const search = useCallback(
-    async function search(term: string, service: ServiceName) {
-      cancelRef.current?.abort();
-      cancelRef.current = new AbortController();
-      setIsLoading(true);
+export default function useSearchAPI({ term, service, limit = 10 }: UseSearchAPIParams) {
+  return useCachedPromise(
+    (term: string, service?: ServiceName) =>
+      async ({ cursor, page }) => {
+        if (!service) {
+          return { data: [], hasMore: false };
+        }
 
-      let items: IGif[];
-      try {
         const api = await getAPIByServiceName(service);
         if (api === null) {
-          setResults({ items: [] });
-          setIsLoading(false);
-          return;
+          return { data: [], hasMore: false };
         }
 
-        if (term) {
-          items = dedupe(await api.search(term, { offset, limit }));
-        } else {
-          items = dedupe(await api.trending({ offset, limit }));
-        }
+        const { results, next } = term
+          ? await api.search(term, { limit, next: cursor, offset: page * limit })
+          : await api.trending({ limit, next: cursor, offset: page * limit });
 
-        setResults({ items, term });
-      } catch (e) {
-        console.error(e);
-        const error = e as FetchError;
-        if (e instanceof AbortError) {
-          return;
-        } else if (error.message.toLowerCase().includes("invalid authentication credentials")) {
-          error.message = "Invalid credentials, please try again.";
-          await getAPIByServiceName(service, true);
-        }
-        setResults({ error });
-      } finally {
-        setIsLoading(false);
-      }
-
-      return () => {
-        cancelRef.current?.abort();
-      };
-    },
-    [cancelRef, setIsLoading, setResults, searchTerm, results]
+        return { data: dedupe(results), hasMore: next !== "", cursor: next };
+      },
+    [term, service],
+    { keepPreviousData: true },
   );
-
-  return [results, isLoading, setSearchTerm, searchTerm, search] as const;
 }

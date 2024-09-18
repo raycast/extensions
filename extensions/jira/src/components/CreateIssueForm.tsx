@@ -1,21 +1,20 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  getPreferenceValues,
-  Icon,
-  showToast,
-  Toast,
-  Clipboard,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast, Clipboard, useNavigation } from "@raycast/api";
 import { FormValidation, useCachedPromise, useCachedState, useForm } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 
-import { createIssue, getCreateIssueMetadata, Component, Version, addAttachment, Priority } from "../api/issues";
+import {
+  createIssue,
+  getCreateIssueMetadataSummary,
+  Component,
+  Version,
+  addAttachment,
+  Priority,
+  getCreateIssueMetadata,
+} from "../api/issues";
 import { getLabels } from "../api/labels";
 import { getProjects } from "../api/projects";
 import { getUsers } from "../api/users";
+import { getProjectAvatar } from "../helpers/avatars";
 import { getErrorMessage } from "../helpers/errors";
 import { CustomFieldSchema, getCustomFieldsForCreateIssue } from "../helpers/issues";
 
@@ -39,10 +38,6 @@ export type IssueFormValues = {
   attachments: string[];
 } & Record<string, unknown>;
 
-type Preferences = {
-  signature: boolean;
-};
-
 type CreateIssueFormProps = {
   draftValues?: IssueFormValues;
   enableDrafts?: boolean;
@@ -50,9 +45,14 @@ type CreateIssueFormProps = {
 
 export default function CreateIssueForm({ draftValues, enableDrafts = true }: CreateIssueFormProps) {
   const { push } = useNavigation();
-  const { signature } = getPreferenceValues<Preferences>();
 
-  const { data: projects } = useCachedPromise(() => getProjects());
+  const [projectQuery, setProjectQuery] = useState("");
+  const { data: projects, isLoading: isLoadingProjects } = useCachedPromise(
+    (query) => getProjects(query),
+    [projectQuery],
+    { keepPreviousData: true },
+  );
+
   const { data: users } = useCachedPromise(() => getUsers());
   const { data: labels } = useCachedPromise(() => getLabels());
 
@@ -68,7 +68,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
 
       try {
-        const issue = await createIssue(values, { signature, customFields: selectedIssueType?.fields });
+        const issue = await createIssue(values, { customFields: selectedIssueType?.fields });
 
         if (issue) {
           toast.style = Toast.Style.Success;
@@ -147,16 +147,24 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
     setLastProject(values.projectId);
   }, [values.projectId]);
 
-  const { data: issueMetadata } = useCachedPromise(
-    (projectId) => getCreateIssueMetadata(projectId),
+  const { data: issueMetadataSummary } = useCachedPromise(
+    (projectId) => getCreateIssueMetadataSummary(projectId),
     [values.projectId],
-    { execute: !!values.projectId }
+    { execute: !!values.projectId },
   );
 
   const selectedProject = projects?.find((project) => project.id === values.projectId);
 
   // We only query one project in the getCreateIssueMetadata call
   // It's safe to assume the issue types will always correspond to the first element
+  const issueTypesSummary = issueMetadataSummary?.[0]?.issuetypes;
+
+  const { data: issueMetadata } = useCachedPromise(
+    (projectId, issueTypeId) => getCreateIssueMetadata(projectId, issueTypeId),
+    [values.projectId, values.issueTypeId],
+    { execute: !!values.projectId && !!values.issueTypeId },
+  );
+
   const issueTypes = issueMetadata?.[0]?.issuetypes;
 
   const selectedIssueType = issueTypes?.find((issueType) => issueType.id === values.issueTypeId);
@@ -203,26 +211,33 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
       }
       enableDrafts={enableDrafts}
     >
-      <Form.Dropdown {...itemProps.projectId} title="Project" storeValue>
+      <Form.Dropdown
+        {...itemProps.projectId}
+        title="Project"
+        isLoading={isLoadingProjects}
+        storeValue
+        onSearchTextChange={setProjectQuery}
+        throttle
+      >
         {projects?.map((project) => {
           return (
             <Form.Dropdown.Item
               key={project.id}
               value={project.id}
               title={`${project.name} (${project.key})`}
-              icon={project.avatarUrls["32x32"]}
+              icon={getProjectAvatar(project)}
             />
           );
         })}
       </Form.Dropdown>
 
       <Form.Dropdown {...itemProps.issueTypeId} title="Issue Type" storeValue>
-        {issueTypes?.map((issueType) => {
+        {issueTypesSummary?.map((issueType) => {
           return (
             <Form.Dropdown.Item
               key={issueType.id}
               value={issueType.id}
-              title={issueType.name}
+              title={issueType.name ?? "Unknown issue type"}
               icon={issueType.iconUrl}
             />
           );
@@ -256,13 +271,18 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
       <FormUserDropdown
         {...itemProps.assigneeId}
         title="Assignee"
-        autocompleteUrl={selectedIssueType?.fields.assignee.autoCompleteUrl}
+        autocompleteUrl={selectedIssueType?.fields.assignee?.autoCompleteUrl}
       />
 
       <Form.Dropdown {...itemProps.priorityId} title="Priority">
         {priorities?.map((priority) => {
           return (
-            <Form.Dropdown.Item key={priority.id} value={priority.id} title={priority.name} icon={priority.iconUrl} />
+            <Form.Dropdown.Item
+              key={priority.id}
+              value={priority.id}
+              title={priority.name ?? "Unknown priority name"}
+              icon={priority.iconUrl}
+            />
           );
         })}
       </Form.Dropdown>
@@ -280,7 +300,13 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
       {components && components.length > 0 ? (
         <Form.TagPicker {...itemProps.components} title="Components" placeholder="Start typing component name…">
           {components.map((component) => {
-            return <Form.TagPicker.Item key={component.id} title={component.name} value={component.id} />;
+            return (
+              <Form.TagPicker.Item
+                key={component.id}
+                title={component.name ?? "Unknown component name"}
+                value={component.id}
+              />
+            );
           })}
         </Form.TagPicker>
       ) : null}
@@ -288,7 +314,9 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
       {fixVersions && fixVersions.length > 0 ? (
         <Form.TagPicker {...itemProps.fixVersions} title="Fix Versions" placeholder="Start typing fix version…">
           {fixVersions.map((version) => {
-            return <Form.TagPicker.Item key={version.id} title={version.name} value={version.id} />;
+            return (
+              <Form.TagPicker.Item key={version.id} title={version.name ?? "Unknown version name"} value={version.id} />
+            );
           })}
         </Form.TagPicker>
       ) : null}

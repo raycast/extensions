@@ -8,7 +8,7 @@
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { francLangaugeDetect } from "../detectLanauge/franc";
+import { francLanguageDetect } from "../detectLanguage/franc";
 import { QueryWordInfo } from "../dictionary/youdao/types";
 import { preferredLanguages } from "../preferences";
 import { languageItemList } from "./consts";
@@ -114,7 +114,7 @@ export function getYoudaoLangCodeFromBaiduCode(baiduLangCode: string): string {
  * Todo: currently only support Chinese and English, later support other languages.
  */
 export function getYoudaoLangCodeFromAppleCode(appleLanguageTitle: string): string {
-  const francLanguage = francLangaugeDetect(appleLanguageTitle);
+  const francLanguage = francLanguageDetect(appleLanguageTitle);
   const youdaoLangCode = francLanguage.youdaoLangCode;
   console.log(`getYoudaoLangCodeFromAppleCode: ${appleLanguageTitle}, franc detect YoudaoLangCode: ${youdaoLangCode}`);
 
@@ -134,7 +134,7 @@ export function getYoudaoLangCodeFromAppleCode(appleLanguageTitle: string): stri
 /**
  * Get language item from apple Chinese title, such as "中文" --> LanguageItem
  *
- * * Note: There are two kinds of Chinese, 简体中文 and 繁体中文, but Apple only has one kind of 中文.
+ * * Note: There are two kinds of Chinese, 简体中文 and 繁体中文，but Apple only has one kind of 中文。
  */
 export function getLanguageItemFromAppleChineseTitle(chineseTitle: string): LanguageItem | undefined {
   for (const langItem of languageItemList) {

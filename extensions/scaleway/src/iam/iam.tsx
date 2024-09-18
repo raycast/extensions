@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Grid } from '@raycast/api'
 import { DataLoaderProvider } from '@scaleway/use-dataloader'
-import { APIProvider } from 'providers'
 import { APIkeys, Applications, Groups, Policies, Users } from './pages'
 
 export const IAM = () => (
@@ -20,9 +19,7 @@ export const IAM = () => (
             title="List Users"
             target={
               <DataLoaderProvider>
-                <APIProvider>
-                  <Users />
-                </APIProvider>
+                <Users />
               </DataLoaderProvider>
             }
           />
@@ -44,9 +41,7 @@ export const IAM = () => (
             title="List Applications"
             target={
               <DataLoaderProvider>
-                <APIProvider>
-                  <Applications />
-                </APIProvider>
+                <Applications />
               </DataLoaderProvider>
             }
           />
@@ -68,9 +63,7 @@ export const IAM = () => (
             title="List Groups"
             target={
               <DataLoaderProvider>
-                <APIProvider>
-                  <Groups />
-                </APIProvider>
+                <Groups />
               </DataLoaderProvider>
             }
           />
@@ -92,9 +85,7 @@ export const IAM = () => (
             title="List API Keys"
             target={
               <DataLoaderProvider>
-                <APIProvider>
-                  <APIkeys />
-                </APIProvider>
+                <APIkeys />
               </DataLoaderProvider>
             }
           />
@@ -116,9 +107,7 @@ export const IAM = () => (
             title="List Policies"
             target={
               <DataLoaderProvider>
-                <APIProvider>
-                  <Policies />
-                </APIProvider>
+                <Policies />
               </DataLoaderProvider>
             }
           />

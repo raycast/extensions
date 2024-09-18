@@ -5,6 +5,9 @@
   "description": "Append or prepend selected text to your clipboard with different separators",
   "icon": "extension-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "CyrusN"
+  ],
   "categories": [
     "Developer Tools",
     "System"
@@ -12,152 +15,195 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "append-text-to-clipboard",
-      "title": "Append Text to Clipboard",
+      "name": "append-to-clipboard",
+      "title": "Append to Clipboard",
       "icon": "append-clipboard.png",
       "description": "Append selected text to your clipboard with different separators",
       "mode": "no-view",
       "preferences": [
         {
           "name": "appendSeparator",
-          "type": "dropdown",
-          "required": true,
+          "type": "textfield",
+          "required": false,
           "title": "Append Separator",
-          "description": "Separator between text when appending text",
-          "default": "",
-          "data": [
-            {
-              "title": "No Separator",
-              "value": ""
-            },
-            {
-              "title": "⏎",
-              "value": "\n"
-            },
-            {
-              "title": "␣",
-              "value": " "
-            },
-            {
-              "title": ",",
-              "value": ","
-            },
-            {
-              "title": ".",
-              "value": "."
-            },
-            {
-              "title": ";",
-              "value": ";"
-            },
-            {
-              "title": ":",
-              "value": ":"
-            },
-            {
-              "title": "/",
-              "value": "/"
-            },
-            {
-              "title": "|",
-              "value": "|"
-            },
-            {
-              "title": "+",
-              "value": "+"
-            },
-            {
-              "title": "-",
-              "value": "-"
-            },
-            {
-              "title": "=",
-              "value": "="
-            }
-          ]
+          "description": "Separator between text when appending text. Use {newline} and {tab} for new line and tab",
+          "default": "{newline}"
+        },
+        {
+          "name": "trimBeforeAppendClipboardText",
+          "type": "checkbox",
+          "required": false,
+          "title": "Clipboard Text",
+          "label": "Trim Before Appending",
+          "description": "Trim clipboard text before appending text",
+          "default": false
+        },
+        {
+          "name": "trimBeforeAppendSelectedText",
+          "type": "checkbox",
+          "required": false,
+          "title": "Selected Text",
+          "label": "Trim Before Appending",
+          "description": "Trim selected text before appending text",
+          "default": false
+        },
+        {
+          "name": "trimAppendedText",
+          "type": "checkbox",
+          "required": false,
+          "title": "Appended Text",
+          "label": "Trim After Appending",
+          "description": "Trim appended text on the clipboard after appending text",
+          "default": false
         }
       ]
     },
     {
-      "name": "prepend-text-to-clipboard",
-      "title": "Prepend Text to Clipboard",
+      "name": "prepend-to-clipboard",
+      "title": "Prepend to Clipboard",
       "icon": "prepend-clipboard.png",
       "description": "Prepend selected text to your clipboard with different separators",
       "mode": "no-view",
       "preferences": [
         {
           "name": "appendSeparator",
-          "type": "dropdown",
-          "required": true,
+          "type": "textfield",
+          "required": false,
           "title": "Prepend Separator",
-          "description": "Separator between text when prepending text",
-          "default": "",
+          "description": "Separator between text when prepending text. Use {newline} and {tab} for new line and tab",
+          "default": "{newline}"
+        },
+        {
+          "name": "trimBeforeAppendClipboardText",
+          "type": "checkbox",
+          "required": false,
+          "title": "Clipboard Text",
+          "label": "Trim Before Prepending",
+          "description": "Trim clipboard text before appending text",
+          "default": false
+        },
+        {
+          "name": "trimBeforeAppendSelectedText",
+          "type": "checkbox",
+          "required": false,
+          "title": "Selected Text",
+          "label": "Trim Before Prepending",
+          "description": "Trim selected text before appending text",
+          "default": false
+        },
+        {
+          "name": "trimAppendedText",
+          "type": "checkbox",
+          "required": false,
+          "title": "Appended Text",
+          "label": "Trim After Prepending",
+          "description": "Trim appended text on the clipboard after appending text",
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "merge-clipboard",
+      "title": "Merge Clipboard",
+      "icon": "merge-clipboard.png",
+      "description": "Merge recent clipboard text (requires Clipboard History Extension to be enabled)",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "mergeNum",
+          "type": "dropdown",
+          "required": false,
+          "placeholder": "2",
           "data": [
             {
-              "title": "No Separator",
-              "value": ""
+              "title": "3",
+              "value": "3"
             },
             {
-              "title": "⏎",
-              "value": "\n"
+              "title": "4",
+              "value": "4"
             },
             {
-              "title": "␣",
-              "value": " "
+              "title": "5",
+              "value": "5"
             },
             {
-              "title": ",",
-              "value": ","
-            },
-            {
-              "title": ".",
-              "value": "."
-            },
-            {
-              "title": ";",
-              "value": ";"
-            },
-            {
-              "title": ":",
-              "value": ":"
-            },
-            {
-              "title": "/",
-              "value": "/"
-            },
-            {
-              "title": "|",
-              "value": "|"
-            },
-            {
-              "title": "+",
-              "value": "+"
-            },
-            {
-              "title": "-",
-              "value": "-"
-            },
-            {
-              "title": "=",
-              "value": "="
+              "title": "6",
+              "value": "6"
             }
           ]
+        },
+        {
+          "name": "mergeOrder",
+          "type": "dropdown",
+          "required": false,
+          "placeholder": "Forward",
+          "data": [
+            {
+              "title": "Backward",
+              "value": "Backward"
+            }
+          ]
+        }
+      ],
+      "preferences": [
+        {
+          "name": "appendSeparator",
+          "type": "textfield",
+          "required": false,
+          "title": "Merge Separator",
+          "description": "Separator between text when prepending text. Use {newline} and {tab} for new line and tab",
+          "default": "{newline}"
+        },
+        {
+          "title": "Actions Before Merging",
+          "label": "Trim Clipboard Text",
+          "name": "trimBeforeMerging",
+          "type": "checkbox",
+          "required": false,
+          "description": "Trim clipboard text before merging clipboard",
+          "default": false
+        },
+        {
+          "title": "Actions After Merging",
+          "label": "Trim Merged Text",
+          "name": "trimAfterMerging",
+          "type": "checkbox",
+          "required": false,
+          "description": "Trim clipboard text after merging clipboard",
+          "default": false
+        },
+        {
+          "label": "Copy Merged Text",
+          "name": "copyAfterMerging",
+          "type": "checkbox",
+          "required": false,
+          "description": "Copy merged text after merging clipboard",
+          "default": true
+        },
+        {
+          "label": "Paste Merged Text",
+          "name": "pasteAfterMerging",
+          "type": "checkbox",
+          "required": false,
+          "description": "Paste merged text after merging clipboard",
+          "default": false
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.1"
+    "@raycast/api": "^1.75.1"
   },
   "devDependencies": {
-    "@types/node": "16.10.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@types/node": "20.12.12",
+    "@types/react": "18.3.3",
+    "@typescript-eslint/eslint-plugin": "^7.10.0",
+    "@typescript-eslint/parser": "^7.10.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

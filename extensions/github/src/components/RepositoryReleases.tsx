@@ -1,6 +1,6 @@
-import { ActionPanel, Detail, Icon, List, Action } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
 
-import { ReleaseFieldsFragment, ExtendedRepositoryFieldsFragment } from "../generated/graphql";
+import { ExtendedRepositoryFieldsFragment, ReleaseFieldsFragment } from "../generated/graphql";
 import { useReleases } from "../hooks/useRepositories";
 
 export default function RepositoryReleases(props: { repository: ExtendedRepositoryFieldsFragment }) {

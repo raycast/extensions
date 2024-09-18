@@ -4,7 +4,7 @@
   "title": "Gitfox Repositories",
   "description": "Navigate and open your repositories in Gitfox.",
   "icon": "icon.png",
-  "author": "L3K0V",
+  "author": "azlekov",
   "version": "1.0.0",
   "license": "MIT",
   "categories": [
@@ -24,7 +24,8 @@
         "repositories",
         "repository",
         "repo",
-        "repos"
+        "repos",
+        "vcs"
       ],
       "mode": "view"
     }
@@ -41,22 +42,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.42.2",
-    "@raycast/utils": "^1.4.10",
+    "@raycast/api": "^1.56.3",
+    "@raycast/utils": "^1.9.0",
     "bplist-parser": "^0.3.2",
     "node-git-current-branch": "^2.0.1",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.42.0",
-    "@typescript-eslint/parser": "^5.42.0",
-    "eslint": "^8.23.0",
-    "eslint-config-prettier": "^8.5.0",
+    "@types/node": "~18.16.0",
+    "@types/react": "^18.2.18",
+    "@typescript-eslint/eslint-plugin": "^6.2.1",
+    "@typescript-eslint/parser": "^6.2.1",
+    "eslint": "^8.46.0",
+    "eslint-config-prettier": "^8.10.0",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "prettier": "^2.7.1",
-    "typescript": "^4.8.4"
+    "prettier": "^3.0.1",
+    "typescript": "^5.1.6"
   },
   "scripts": {
     "build": "ray build -e dist",

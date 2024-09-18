@@ -41,7 +41,9 @@ async function getExtensions() {
           extensionFolder: extension,
           name: packageJSON.name,
           author: packageJSON.author,
+          owner: packageJSON.owner,
           contributors: packageJSON.contributors,
+          pastContributors: packageJSON.pastContributors,
         };
       } catch (err) {
         console.log(`Skipping ${extension}`);
@@ -117,7 +119,9 @@ async function formatAuthorName(extension, raycastUsername) {
 }
 
 async function formatOwners(extension) {
-  const owners = [...new Set([extension.author, ...(extension.contributors || [])])];
+  const owners = [...new Set([extension.author, ...(extension.contributors || [])])].filter(
+    (x) => !(extension.pastContributors || []).includes(x)
+  );
   return (await Promise.all(owners.map((x) => formatAuthorName(extension, x)))).filter(Boolean).join(" ");
 }
 
@@ -133,7 +137,7 @@ async function main() {
   let CODEOWNERS = "# This file is generated. Do not modify directly.\n\n";
 
   for (const extension of extensions) {
-    extensionName2Folder[extension.name] = extension.extensionFolder;
+    extensionName2Folder[`${extension.owner || extension.author}/${extension.name}`] = extension.extensionFolder;
 
     if (extension && extension.author) {
       CODEOWNERS += `/extensions/${extension.extensionFolder}${" ".repeat(

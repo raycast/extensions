@@ -47,9 +47,10 @@ export function useVsCodeEntries(bundleId: VSCodeBundleId) {
 
   const entries: Entry[] =
     data && data.length
-      ? (JSON.parse(data[0].entries) as VsCodeEntry[])
+      ? ((JSON.parse(data[0].entries) as VsCodeEntry[])
           .filter((i) => isFolderItem(i) || isFileItem(i))
           .map((i) => getEntry(isFolderItem(i) ? i.folderUri : i.fileUri))
+          .filter((i) => !!i) as Entry[])
       : [];
 
   return { entries, isLoading };

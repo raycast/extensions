@@ -15,6 +15,7 @@
   "dependencies": {
     "@raycast/api": "^1.44.0",
     "@raycast/utils": "^1.4.14",
+    "node-fetch": "^3.3.1",
     "node-html-markdown": "^1.2.2"
   },
   "description": "Browse Feedly through Raycast",

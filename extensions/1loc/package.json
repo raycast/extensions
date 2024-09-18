@@ -1,14 +1,21 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "1loc",
-  "title": "1 LOC - JavaScript Utilities in single line of code",
+  "title": "1 LOC - JavaScript Utilities in Single Line of Code",
   "description": "Browse JavaScript Utilities from 1loc.dev",
   "icon": "command-icon.png",
   "author": "kud",
   "categories": [
     "Developer Tools"
   ],
+  "keywords": [
+    "1loc",
+    "code",
+    "JavaScript",
+    "utilities"
+  ],
   "contributors": [
+    "kgrhartlage",
     "sxn"
   ],
   "license": "MIT",
@@ -17,7 +24,7 @@
       "name": "index",
       "title": "Search JavaScript Utilities",
       "subtitle": "1 LOC",
-      "description": "Browse JavaScript Utilities from 1loc.dev",
+      "description": "Browse JavaScript utilities from 1loc.dev",
       "mode": "view"
     }
   ],
@@ -25,31 +32,32 @@
     {
       "name": "personalAccessToken",
       "type": "password",
-      "required": false,
-      "title": "Personal Access Token",
-      "description": "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token"
+      "required": true,
+      "title": "GitHub Personal Access Token",
+      "description": "Required to authenticate with GitHub. See the official documentation for more information."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
-    "axios": "0.25.0",
-    "change-case": "4.1.2",
-    "gray-matter": "4.0.3",
-    "raycast-toolkit": "^1.0.3"
+    "@raycast/api": "^1.51.2",
+    "axios": "^1.4.0",
+    "change-case": "^4.1.2",
+    "gray-matter": "^4.0.3",
+    "raycast-toolkit": "^1.0.6"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
+    "@types/react": "^18.2.6",
+    "@typescript-eslint/eslint-plugin": "^5.59.6",
+    "@typescript-eslint/parser": "^5.59.6",
+    "eslint": "^8.40.0",
+    "eslint-config-prettier": "^8.8.0",
+    "prettier": "^2.8.8",
+    "react-devtools": "^4.27.7",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
   }
 }

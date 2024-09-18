@@ -1,11 +1,14 @@
-import { Icon, ActionPanel, Action, getPreferenceValues } from "@raycast/api";
-import { downloadBook } from "../functions/download-book";
-import { BookEntry } from "../types";
-import { LibgenPreferences, BookAction } from "../types";
+import { Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
 
-export function BookActionPanel(props: { book: BookEntry }) {
-  const { book } = props;
+import { downloadBook } from "@/functions/download-book";
+import type { BookEntry, LibgenPreferences } from "@/types";
+import { BookAction } from "@/types";
 
+interface BookActionPanelProps {
+  book: BookEntry;
+}
+
+export function BookActionPanel({ book }: BookActionPanelProps) {
   const { primaryAction } = getPreferenceValues<LibgenPreferences>();
 
   const actions = [
@@ -30,7 +33,7 @@ export function BookActionPanel(props: { book: BookEntry }) {
   ];
 
   const nonPrimaryActions = actions.filter((action) => {
-    return action.key !== primaryAction;
+    return (action.key as unknown as BookAction) !== primaryAction;
   });
 
   return (

@@ -1,6 +1,6 @@
 import { List } from '@raycast/api'
-import { getPreferenceUser } from 'providers'
 import { useReducer } from 'react'
+import { getPreferenceUser } from '../../helpers/getPreferenceUser'
 import { SecretsAction } from './SecretAction'
 import { SecretDetail } from './SecretDetail'
 import { useAllZoneSecretsQuery } from './queries'

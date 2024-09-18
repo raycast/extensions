@@ -1,7 +1,6 @@
-import fetch from "node-fetch";
-import { LocalStorage, showToast, Toast } from "@raycast/api";
-import { JustWatchMedia, JustWatchMediaOffers, MediaProvider } from "./types";
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { JustWatchMedia, JustWatchMediaOffers, MediaType } from "./types";
+import { GraphQL } from "./graphQL";
 
 interface Preferences {
   flatrate?: boolean;
@@ -12,61 +11,35 @@ interface Preferences {
 
 export async function searchMedias(query: string): Promise<JustWatchMedia[]> {
   const countryCode = (await LocalStorage.getItem<string>("country_code")) || "en_CA";
-
-  const searchParams = new URLSearchParams({
-    language: "en",
-    body: JSON.stringify({
-      page_size: 8,
-      page: 1,
-      query,
-      content_types: ["show", "movie"],
-    }),
-  });
-
   const preferences = getPreferenceValues<Preferences>();
-
-  const url = `https://apis.justwatch.com/content/titles/${countryCode}/popular?${searchParams}`;
-  const providerUrl = `https://apis.justwatch.com/content/providers/locale/${countryCode}`;
-
-  const providersResponse = await fetch(providerUrl, { method: "GET" });
-
-  const providers = (await providersResponse.json()) as MediaProvider[];
-
-  providers.forEach((provider) => {
-    provider.icon_url = "https://images.justwatch.com" + provider.icon_url.replace("{profile}", "s100");
-  });
-
-  const response = await fetch(url, { method: "GET" });
-
-  if (!response.ok) {
-    await showToast(
-      Toast.Style.Failure,
-      "Couldn't get results",
-      "There was an error showing results for this search query."
-    );
-    return [];
-  }
+  const graphQL = new GraphQL();
 
   let parsedMedias: any;
 
-  await response.json().then((data: any) => {
-    parsedMedias = parseItems(data.items);
+  await graphQL.getSuggestedTitles(countryCode, query).then((data) => {
+    parsedMedias = parseItems(data);
   });
 
   function parseItems(data: any) {
     const medias: Array<JustWatchMedia> = [];
 
     data.forEach((value: any) => {
-      let thumbnail: string = value.poster;
-      thumbnail = thumbnail?.replace("{profile}", "s718");
+      let thumbnail: string = value.content.posterUrl;
+      thumbnail = thumbnail?.replace("{profile}", "s718").replace("{format}", "jpg");
+      const backdrop = thumbnail?.replace("poster", "backdrop").replace("s718", "s1440");
+
       const media: JustWatchMedia = {
         id: value.id,
-        name: value.title,
-        type: value.object_type,
-        year: value.original_release_year,
+        name: value.content.title,
+        type: value.objectType,
+        year: value.content.originalReleaseYear,
         thumbnail: `https://images.justwatch.com${thumbnail}`,
-        jw_url: `https://justwatch.com${value.full_path}`,
+        backdrop: `https://images.justwatch.com${backdrop}/name.webp`,
+        jwUrl: `https://justwatch.com${value.content.fullPath}`,
+        isMovie: value.objectType === "MOVIE",
         offers: [],
+        imdbVotes: value.content.scoring.imdbVotes,
+        imdbScore: value.content.scoring.imdbScore,
       };
 
       if (value.offers === undefined || value.offers.length === 0) {
@@ -75,21 +48,30 @@ export async function searchMedias(query: string): Promise<JustWatchMedia[]> {
       }
 
       value.offers.forEach((offer: any) => {
+        offer.monetizationType = offer.monetizationType.toLowerCase();
+
         // Search for provider against the database of providers to get the logo, full name, and more
-        const provider = providers.find((item) => item.short_name == offer.package_short_name);
+        const provider = offer.package;
 
         // if we've found it, then save it...
-
-        if (provider) {
+        if (provider.id) {
+          // if monetization type is "ads", then make it free...
+          if (offer.monetizationType === "ads") {
+            offer.monetizationType = "free";
+          }
           const mediaOffer: JustWatchMediaOffers = {
-            type: offer.monetization_type,
-            service: offer.package_short_name,
-            url: offer.package_short_name === "dnp" ? offer.urls.deeplink_web : offer.urls.standard_web,
-            seasons: offer.element_count ? offer.element_count + " seasons" : "",
-            price_amount: offer.retail_price || 0,
-            price: `${offer.retail_price} ${offer.currency}`,
-            icon: provider.icon_url,
-            name: provider.clear_name,
+            type: offer.monetizationType,
+            type_parsed: getMediaType(offer.monetizationType),
+            service: provider.clearName,
+            url: offer.deeplinkURL ? offer.deeplinkURL : offer.standardWebURL,
+            seasons: offer.elementCount === 1 ? "1 season" : offer.elementCount ? `${offer.elementCount} seasons` : "",
+            priceAmount: offer.retailPriceValue || 0,
+            priceString: offer.retailPrice || 0,
+            currency: offer.currency,
+            icon:
+              "https://images.justwatch.com" + provider.icon.replace("{profile}", "s100").replace("{format}", "png"),
+            name: provider.clearName,
+            presentationType: offer.presentationType?.toUpperCase().replace("_", ""),
           };
 
           // check preferences and ensure we show the results...
@@ -99,12 +81,13 @@ export async function searchMedias(query: string): Promise<JustWatchMedia[]> {
         }
       });
 
-      // sort by free streaming > rent > buy
-      media.offers.sort((a, b) => a.price_amount - b.price_amount);
-
-      // loop through offers and remove the duplicate ones...
       if (media.offers.length > 0) {
-        media.offers = media.offers.filter((tag, index, array) => array.findIndex((t) => t.url == tag.url) == index);
+        media.offers = sortMedia(media.offers);
+        media.offers = removeDuplicates(media.offers);
+        media.offers = removeLowerQuality(media.offers);
+        aggregateOtherOffersPrices(media.offers); // this function mutates media.offers in-place
+        media.offers = keepFirstRemoveRest(media.offers);
+        media.offers = sortMediaFinal(media.offers);
       }
 
       medias.push(media);
@@ -114,4 +97,84 @@ export async function searchMedias(query: string): Promise<JustWatchMedia[]> {
   }
 
   return parsedMedias;
+
+  function sortMedia(offers: JustWatchMediaOffers[]) {
+    return offers.sort((a, b) => {
+      const streamOrder = ["stream", "free", "rent", "buy"];
+      const orderA = streamOrder.indexOf(a.type);
+      const orderB = streamOrder.indexOf(b.type);
+
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      } else {
+        return a.presentationType.localeCompare(b.presentationType) || a.priceAmount - b.priceAmount;
+      }
+    });
+  }
+
+  function removeDuplicates(offers: JustWatchMediaOffers[]) {
+    return offers.filter(
+      (offer, index, self) =>
+        index === self.findIndex((t) => t.url === offer.url && t.priceAmount === offer.priceAmount)
+    );
+  }
+
+  function removeLowerQuality(offers: JustWatchMediaOffers[]) {
+    return offers.filter(
+      (offer, index, self) =>
+        index ===
+        self.findIndex(
+          (t) => t.service === offer.service && t.priceAmount === offer.priceAmount && t.type === offer.type
+        )
+    );
+  }
+
+  function aggregateOtherOffersPrices(offers: JustWatchMediaOffers[]) {
+    const rentOrBuyOffers = offers.filter((offer) => ["rent", "buy"].includes(offer.type));
+
+    for (const offer of rentOrBuyOffers) {
+      const otherOffers = offers.filter(
+        (o) => o.service === offer.service && o.type === offer.type && o.priceAmount !== offer.priceAmount
+      );
+
+      if (otherOffers.length > 0) {
+        offer.otherPrices = otherOffers.map(({ priceAmount, currency, seasons, presentationType }) => ({
+          priceAmount,
+          currency,
+          seasons,
+          presentationType,
+        }));
+      }
+    }
+  }
+
+  function keepFirstRemoveRest(offers: JustWatchMediaOffers[]) {
+    return offers.filter(
+      (offer, index, self) => index === self.findIndex((t) => t.service === offer.service && t.type === offer.type)
+    );
+  }
+
+  function sortMediaFinal(offers: JustWatchMediaOffers[]) {
+    return sortMedia(offers); // reusing the initial sort function
+  }
+
+  function getMediaType(type: string) {
+    if (type === MediaType.buy) {
+      return "Purchase";
+    }
+
+    if (type === MediaType.rent) {
+      return "Rent";
+    }
+
+    if (type == MediaType.stream) {
+      return "Streaming";
+    }
+
+    if (type == MediaType.free) {
+      return "Free";
+    }
+
+    return "";
+  }
 }

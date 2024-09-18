@@ -31,6 +31,12 @@ function TabListItemActions({ tab, onTabClosed }: { tab: Tab; onTabClosed?: () =
       <GoToTab tab={tab} />
       <Action.CopyToClipboard title="Copy URL" content={tab.url} />
       <CloseTab tab={tab} onTabClosed={onTabClosed} />
+      <ActionPanel.Section>
+        <Action.CreateQuicklink
+          quicklink={{ link: tab.url, name: tab.title, application: "Google Chrome" }}
+          shortcut={{ modifiers: ["cmd"], key: "s" }}
+        />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 }
@@ -84,8 +90,16 @@ function HistoryItemActions({
 
 function GoToTab(props: { tab: Tab }) {
   async function handleAction() {
-    await setActiveTab(props.tab);
-    await closeMainWindow();
+    try {
+      await setActiveTab(props.tab);
+      await closeMainWindow();
+    } catch (e) {
+      if (e instanceof Error) {
+        throw new Error("Issue with tab: '" + props.tab.sourceLine + "'\n" + e.message);
+      } else {
+        throw e;
+      }
+    }
   }
 
   return <ActionPanel.Item title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
@@ -103,7 +117,7 @@ function CloseTab(props: { tab: Tab; onTabClosed?: () => void }) {
       title="Close Tab"
       icon={{ source: Icon.XMarkCircle }}
       onAction={handleAction}
-      shortcut={{ modifiers: ["cmd"], key: "w" }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
     />
   );
 }

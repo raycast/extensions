@@ -1,0 +1,44 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-textlint-rule-aws-service-name",
+  "include": "src/.textlintrc.yaml",
+  "title": "Textlint AWS Service Name",
+  "description": "Check AWS services name typo",
+  "icon": "command-icon.png",
+  "author": "bun913",
+  "categories": [
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Textlint AWS Service Name",
+      "description": "Check and Fix AWS Service name typo",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@textlint/kernel": "^13.3.2",
+    "@textlint/textlint-plugin-markdown": "^13.3.2",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "husky": "^9.0.11",
+    "prettier": "^2.5.1",
+    "textlint": "^13.3.2",
+    "textlint-rule-aws-service-name": "^1.8.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

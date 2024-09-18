@@ -208,7 +208,7 @@ export class ClientV2 {
     const nts = await Promise.all(
       tweetsRaw.data.map(async (t) => {
         return await this.tweetV2ToTweet(t, includes);
-      })
+      }),
     );
     return nts;
   }
@@ -321,7 +321,7 @@ export interface Fetcher {
 
 export function useRefresher<T>(
   fn: (updateInline: boolean) => Promise<T>,
-  deps?: React.DependencyList | undefined
+  deps?: React.DependencyList | undefined,
 ): {
   data: T | undefined;
   error?: string;
@@ -332,7 +332,8 @@ export function useRefresher<T>(
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [timestamp, setTimestamp] = useState<Date>(new Date());
-  const depsAll = [timestamp];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const depsAll: any[] = [timestamp];
   if (deps) {
     for (const d of deps) {
       depsAll.push(d);

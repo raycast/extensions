@@ -1,5 +1,9 @@
 # Go Package Search Changelog
 
+## [Enhancement] - 2023-06-13
+
+- Now Showing Package Version
+
 ## [Enhancements] - 2022-10-04
 
 - Upgrade @raycast/api to 1.40.1

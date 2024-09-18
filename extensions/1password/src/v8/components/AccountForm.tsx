@@ -1,17 +1,16 @@
 import { Action, ActionPanel, Clipboard, Form, Icon, showToast, Toast } from "@raycast/api";
-import { useState } from "react";
 
 import { Items } from "./Items";
 import { Guide } from "./Guide";
-import { User } from "../types";
-import { op, ACCOUNT_CACHE_NAME, useOp, cache } from "../utils";
+import { signIn, useAccounts } from "../utils";
+import { useState } from "react";
 
-export function AccountForm() {
-  const [hasAccount, setHasAccount] = useState<boolean | undefined>(cache.has(ACCOUNT_CACHE_NAME));
-  const { data, error, isLoading } = useOp<User[]>(["account", "list"]);
+export function AccountForm({ reset = false }: { reset?: boolean }) {
+  const [hasAccount, setHasAccount] = useState<boolean>(false);
+  const { data, error, isLoading } = useAccounts();
 
   if (error) return <Guide />;
-  if (hasAccount) return <Items />;
+  if (!reset || hasAccount) return <Items />;
   return (
     <Form
       isLoading={isLoading}
@@ -27,7 +26,7 @@ export function AccountForm() {
               });
 
               try {
-                op(["signin", "--account", values.account]);
+                signIn(`--account ${values.account}`);
                 setHasAccount(true);
 
                 toast.style = Toast.Style.Success;

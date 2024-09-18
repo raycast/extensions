@@ -6,7 +6,7 @@ import { XcodeCodeSnippetProgrammingLanguageName } from "../../shared/xcode-code
 /**
  * Xcode Code Snippet List Item Detail
  */
-export function XcodeCodeSnippetListItemDetail(props: { codeSnippet: XcodeCodeSnippet }): JSX.Element {
+export function XcodeCodeSnippetListItemDetail(props: { codeSnippet: XcodeCodeSnippet }) {
   return (
     <List.Item.Detail
       markdown={`\`\`\`\n${props.codeSnippet.IDECodeSnippetContents}\n\`\`\``}

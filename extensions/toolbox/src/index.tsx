@@ -69,7 +69,7 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
         }, "");
         return keywordArray;
       }, [] as string[]),
-    [info.keywords]
+    [info.keywords],
   );
 
   function moveWindow(runType: RunType) {
@@ -99,7 +99,7 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
         scriptResult = await runScript(query);
         if (scriptResult.isSuccess) {
           await Clipboard.copy(scriptResult.result);
-          copyAction(pop);
+          await copyAction(pop);
         }
       }
       isClipboardScriptRunning = false;
@@ -227,7 +227,7 @@ function ResultActionView(props: { content: Result; info: Info }) {
             onAction={async () => {
               await Clipboard.copy(content.result);
               await showHUD("✅ Result Copied to Clipboard");
-              copyAction(pop);
+              await copyAction(pop);
             }}
           />
 
@@ -237,7 +237,7 @@ function ResultActionView(props: { content: Result; info: Info }) {
             onAction={async () => {
               await Clipboard.copy(content.query);
               await showHUD("✅ Query Copied to Clipboard");
-              copyAction(pop);
+              await copyAction(pop);
             }}
           />
         </ActionPanel.Section>

@@ -12,7 +12,7 @@ export type Store = {
 export const useStore = (
   sections: string[],
   queryFunc: (section: string, q?: string) => Promise<RefData[]>,
-  initialLoading?: boolean
+  initialLoading?: boolean,
 ): Store => {
   const [store, setStore] = useState(() => ({
     queryResults: Array(sections.length).fill([]),

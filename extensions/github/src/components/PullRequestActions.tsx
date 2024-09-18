@@ -1,21 +1,23 @@
-import { ActionPanel, Action, Icon, Toast, showToast, Color } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
+import { getGitHubClient } from "../api/githubClient";
 import {
   MergeableState,
-  MyPullRequestsQuery,
   PullRequestDetailsFieldsFragment,
   PullRequestFieldsFragment,
   PullRequestMergeMethod,
   UserFieldsFragment,
 } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
+import { PR_SORT_TYPES_TO_QUERIES } from "../helpers/pull-request";
 import { getGitHubUser } from "../helpers/users";
-import { getGitHubClient } from "../helpers/withGithubClient";
+import { useMyPullRequests } from "../hooks/useMyPullRequests";
 
 import AddPullRequestReview from "./AddPullRequestReview";
 import PullRequestCommits from "./PullRequestCommits";
+import { SortAction, SortActionProps } from "./SortAction";
 
 export type PullRequest =
   | PullRequestFieldsFragment
@@ -25,7 +27,7 @@ export type PullRequest =
 type PullRequestActionsProps = {
   pullRequest: PullRequest;
   viewer?: UserFieldsFragment;
-  mutateList?: MutatePromise<MyPullRequestsQuery | undefined> | MutatePromise<PullRequestFieldsFragment[] | undefined>;
+  mutateList?: MutatePromise<PullRequestFieldsFragment[] | undefined> | ReturnType<typeof useMyPullRequests>["mutate"];
   mutateDetail?: MutatePromise<PullRequest>;
   children?: React.ReactNode;
 };
@@ -36,7 +38,9 @@ export default function PullRequestActions({
   mutateList,
   mutateDetail,
   children,
-}: PullRequestActionsProps) {
+  sortQuery,
+  setSortQuery,
+}: PullRequestActionsProps & SortActionProps) {
   const { github } = getGitHubClient();
 
   async function mutate() {
@@ -172,11 +176,18 @@ export default function PullRequestActions({
 
   const isAssignedToMe = pullRequest.assignees.nodes?.some((assignee) => assignee?.isViewer);
 
+  const { isOpenInBrowser } = getPreferenceValues<Preferences>();
+
+  const openInBrowserAction = <Action.OpenInBrowser url={pullRequest.permalink} />;
+
+  const [primaryAction, secondaryAction] = isOpenInBrowser
+    ? [openInBrowserAction, children]
+    : [children, openInBrowserAction];
+
   return (
     <ActionPanel title={`#${pullRequest.number} in ${pullRequest.repository.nameWithOwner}`}>
-      {children}
-
-      <Action.OpenInBrowser url={pullRequest.permalink} />
+      {primaryAction}
+      {secondaryAction}
 
       <Action.Push
         icon={Icon.Document}
@@ -197,7 +208,7 @@ export default function PullRequestActions({
           {pullRequest.repository.mergeCommitAllowed ? (
             <Action
               title="Create Merge Commit"
-              icon={{ source: "merge.svg", tintColor: Color.PrimaryText }}
+              icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
               shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
               onAction={() => mergePullRequest(PullRequestMergeMethod.Merge)}
             />
@@ -206,7 +217,7 @@ export default function PullRequestActions({
           {pullRequest.repository.squashMergeAllowed ? (
             <Action
               title="Squash and Merge"
-              icon={{ source: "merge.svg", tintColor: Color.PrimaryText }}
+              icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
               shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }}
               onAction={() => mergePullRequest(PullRequestMergeMethod.Squash)}
             />
@@ -215,7 +226,7 @@ export default function PullRequestActions({
           {pullRequest.repository.rebaseMergeAllowed ? (
             <Action
               title="Rebase and Merge"
-              icon={{ source: "merge.svg", tintColor: Color.PrimaryText }}
+              icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
               shortcut={{ modifiers: ["opt", "shift"], key: "enter" }}
               onAction={() => mergePullRequest(PullRequestMergeMethod.Rebase)}
             />
@@ -228,7 +239,7 @@ export default function PullRequestActions({
 
         {viewer ? (
           <Action
-            title={isAssignedToMe ? "Un-Assign From Me" : "Assign to Me"}
+            title={isAssignedToMe ? "Unassign from Me" : "Assign to Me"}
             icon={viewerUser.icon}
             shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
             onAction={() => (isAssignedToMe ? unassignFromMe(viewer.id) : assignToMe(viewer.id))}
@@ -240,13 +251,15 @@ export default function PullRequestActions({
         <AddProjectSubmenu pullRequest={pullRequest} mutate={mutate} />
 
         <SetMilestoneSubmenu pullRequest={pullRequest} mutate={mutate} />
+
+        <OpenPreviewSubmenu pullRequest={pullRequest} mutate={mutate} />
       </ActionPanel.Section>
 
       <ActionPanel.Section>
         {pullRequest.closed && !pullRequest.merged ? (
           <Action
             title="Reopen Pull Request"
-            icon={{ source: "pull-request.svg", tintColor: Color.PrimaryText }}
+            icon={{ source: "pull-request-open.svg", tintColor: Color.PrimaryText }}
             onAction={() => reopenPullRequest()}
           />
         ) : null}
@@ -296,6 +309,7 @@ export default function PullRequestActions({
       </ActionPanel.Section>
 
       <ActionPanel.Section>
+        <SortAction data={PR_SORT_TYPES_TO_QUERIES} {...{ sortQuery, setSortQuery }} />
         <Action
           icon={Icon.ArrowClockwise}
           title="Refresh"
@@ -326,7 +340,7 @@ function RequestReviewSubmenu({ pullRequest, mutate }: SubmenuProps) {
       });
     },
     [pullRequest],
-    { execute: load }
+    { execute: load },
   );
 
   async function requestReview({ id, text }: { id: string; text: string }) {
@@ -361,7 +375,7 @@ function RequestReviewSubmenu({ pullRequest, mutate }: SubmenuProps) {
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         data?.repository?.collaborators?.nodes
           ?.filter((collaborator) => !collaborator?.isViewer)
@@ -400,7 +414,7 @@ function AddAssigneeSubmenu({ pullRequest, mutate }: SubmenuProps) {
       });
     },
     [pullRequest],
-    { execute: load }
+    { execute: load },
   );
 
   async function addAssignee({ id, text }: { id: string; text: string }) {
@@ -440,7 +454,7 @@ function AddAssigneeSubmenu({ pullRequest, mutate }: SubmenuProps) {
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         data?.repository?.collaborators?.nodes?.map((collaborator) => {
           if (!collaborator) {
@@ -477,7 +491,7 @@ function AddProjectSubmenu({ pullRequest, mutate }: SubmenuProps) {
       });
     },
     [pullRequest],
-    { execute: load }
+    { execute: load },
   );
 
   async function addProject({ id, text }: { id: string; text: string }) {
@@ -512,7 +526,7 @@ function AddProjectSubmenu({ pullRequest, mutate }: SubmenuProps) {
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         data?.repository?.projectsV2.nodes?.map((project) => {
           if (!project) {
@@ -545,7 +559,7 @@ function SetMilestoneSubmenu({ pullRequest, mutate }: SubmenuProps) {
       });
     },
     [pullRequest],
-    { execute: load }
+    { execute: load },
   );
 
   async function unsetMilestone() {
@@ -603,7 +617,7 @@ function SetMilestoneSubmenu({ pullRequest, mutate }: SubmenuProps) {
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         <>
           <Action title="No Milestone" onAction={() => unsetMilestone()} />
@@ -625,5 +639,51 @@ function SetMilestoneSubmenu({ pullRequest, mutate }: SubmenuProps) {
         </>
       )}
     </ActionPanel.Submenu>
+  );
+}
+
+function OpenPreviewSubmenu({ pullRequest }: SubmenuProps) {
+  const { github } = getGitHubClient();
+
+  const { data, isLoading } = useCachedPromise(
+    async (pullRequest) => {
+      const data = await github.commentsForPullRequest({
+        owner: pullRequest.repository.owner.login,
+        name: pullRequest.repository.name,
+        number: pullRequest.number,
+      });
+
+      const comments = data?.repository?.pullRequest?.comments.nodes;
+      const lastVercelComments = comments?.filter((comment) => comment?.author?.login === "vercel");
+
+      if (!lastVercelComments?.length) return undefined;
+
+      const lastVercelComment = lastVercelComments.pop()?.body;
+
+      const vercelPreviewUrl = lastVercelComment
+        ?.match(/\[Visit Preview\]\([^)]+\)/)?.[0]
+        ?.replace("[Visit Preview](", "")
+        .replace(")", "");
+
+      return vercelPreviewUrl ?? undefined;
+    },
+    [pullRequest],
+  );
+
+  return (
+    <>
+      {isLoading ? (
+        <Action title="Loading…" />
+      ) : (
+        data && (
+          <Action.OpenInBrowser
+            title="Open Vercel Preview"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+            url={data}
+            icon={{ source: "vercel.svg", tintColor: Color.PrimaryText }}
+          />
+        )
+      )}
+    </>
   );
 }

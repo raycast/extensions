@@ -3,7 +3,7 @@ import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 import { useMemo } from "react";
 
-import { MyPullRequestsQuery, PullRequestFieldsFragment, UserFieldsFragment } from "../generated/graphql";
+import { PullRequestFieldsFragment, UserFieldsFragment } from "../generated/graphql";
 import {
   getCheckStateAccessory,
   getNumberOfComments,
@@ -11,17 +11,25 @@ import {
   getPullRequestStatus,
   getReviewDecision,
 } from "../helpers/pull-request";
+import { useMyPullRequests } from "../hooks/useMyPullRequests";
 
 import PullRequestActions from "./PullRequestActions";
 import PullRequestDetail from "./PullRequestDetail";
+import { SortActionProps } from "./SortAction";
 
 type PullRequestListItemProps = {
   pullRequest: PullRequestFieldsFragment;
   viewer?: UserFieldsFragment;
-  mutateList: MutatePromise<MyPullRequestsQuery | undefined> | MutatePromise<PullRequestFieldsFragment[] | undefined>;
+  mutateList?: MutatePromise<PullRequestFieldsFragment[] | undefined> | ReturnType<typeof useMyPullRequests>["mutate"];
 };
 
-export default function PullRequestListItem({ pullRequest, viewer, mutateList }: PullRequestListItemProps) {
+export default function PullRequestListItem({
+  pullRequest,
+  viewer,
+  mutateList,
+  sortQuery,
+  setSortQuery,
+}: PullRequestListItemProps & SortActionProps) {
   const updatedAt = new Date(pullRequest.updatedAt);
 
   const numberOfComments = useMemo(() => getNumberOfComments(pullRequest), []);
@@ -75,7 +83,7 @@ export default function PullRequestListItem({ pullRequest, viewer, mutateList }:
       keywords={keywords}
       accessories={accessories}
       actions={
-        <PullRequestActions pullRequest={pullRequest} viewer={viewer} mutateList={mutateList}>
+        <PullRequestActions {...{ pullRequest, viewer, mutateList, sortQuery, setSortQuery }}>
           <Action.Push
             title="Show Details"
             icon={Icon.Sidebar}

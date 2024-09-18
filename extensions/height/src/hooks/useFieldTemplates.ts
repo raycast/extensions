@@ -1,27 +1,28 @@
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
-import { ApiFieldTemplates } from "../api/fieldTemplates";
-import { UseCachedPromiseOptions } from "../types/utils";
+
+import { getFieldTemplates } from "@/api/fieldTemplates";
+import { CachedPromiseOptionsType } from "@/types/utils";
 
 type Props = {
-  options?: UseCachedPromiseOptions<typeof ApiFieldTemplates.get>;
+  options?: CachedPromiseOptionsType<Awaited<ReturnType<typeof getFieldTemplates>>>;
 };
 
 export default function useFieldTemplates({ options }: Props = {}) {
-  const { data, error, isLoading, mutate } = useCachedPromise(ApiFieldTemplates.get, [], {
+  const { data, error, isLoading, mutate } = useCachedPromise(getFieldTemplates, [], {
     ...options,
   });
 
   const { statuses, prioritiesObj, priorities, startDate, dueDate } = useMemo(() => {
     const statuses = data?.list
       ?.find((fieldTemplate) => fieldTemplate?.standardType?.toLowerCase() === "status")
-      ?.metadata?.options?.filter((option) => !option?.deleted && !option?.archived);
+      ?.labels?.filter((label) => !label?.deleted && !label?.archived);
 
     const prioritiesObj = data?.list?.find(
-      (fieldTemplate) => fieldTemplate?.standardType?.toLowerCase() === "priority"
+      (fieldTemplate) => fieldTemplate?.standardType?.toLowerCase() === "priority",
     );
 
-    const priorities = prioritiesObj?.metadata?.options?.filter((option) => !option?.deleted && !option?.archived);
+    const priorities = prioritiesObj?.labels?.filter((label) => !label?.deleted && !label?.archived);
 
     const startDate = data?.list?.find((fieldTemplate) => fieldTemplate?.standardType === "startDate");
 

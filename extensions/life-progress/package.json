@@ -14,7 +14,8 @@
       "name": "life-progress",
       "title": "Life Progress",
       "description": "View life progress and custom Countdown Date. See how much time is left.",
-      "mode": "view"
+      "mode": "view",
+      "interval": "4h"
     }
   ],
   "preferences": [
@@ -50,6 +51,32 @@
       "label": "Birthday Every Day",
       "description": "Birthday every day!!!",
       "default": false
+    },
+    {
+      "name": "commandMetadata",
+      "title": "Command Metadata",
+      "description": "Information displayed by the Life Progress command subtitle in the main Raycast interface.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Day Progress",
+          "value": "Day"
+        },
+        {
+          "title": "Week Progress",
+          "value": "Week"
+        },
+        {
+          "title": "Month Progress",
+          "value": "Month"
+        },
+        {
+          "title": "Year Progress",
+          "value": "Year"
+        }
+      ],
+      "required": false,
+      "default": "Day"
     },
     {
       "name": "birthday",
@@ -180,17 +207,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "node-fetch": "^3.2.10"
+    "@raycast/api": "^1.66.2",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@typescript-eslint/eslint-plugin": "^6.20.0",
+    "@typescript-eslint/parser": "^6.20.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",

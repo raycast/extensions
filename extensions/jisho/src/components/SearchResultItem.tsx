@@ -18,7 +18,7 @@ export default function SearchResultItem({
   const title = searchResult.kanji || searchResult.reading;
   const onChoose = useCallback(
     () => addToHistory(SearchHistoryItems.resultItem(searchResult)),
-    [searchResult, addToHistory]
+    [searchResult, addToHistory],
   );
 
   return (

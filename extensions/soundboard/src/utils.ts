@@ -22,7 +22,7 @@ export const playSoundFromIndex = async (index: number) => {
 };
 
 export const playFile = async (item: Item) => {
-  exec(`afplay ${item.path} && $$`);
+  exec(`afplay "${item.path}" && $$`);
 };
 
 export const updateFavoriteSubtitles = async (item: Item) => {

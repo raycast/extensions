@@ -116,7 +116,7 @@ export async function createAggregateDevice(
   name: string,
   mainDeviceId: string,
   otherDeviceIds?: string[],
-  options?: { multiOutput?: boolean }
+  options?: { multiOutput?: boolean },
 ): Promise<AudioDevice> {
   await ensureBinary();
   return parseStdout(
@@ -130,8 +130,8 @@ export async function createAggregateDevice(
         name,
         mainDeviceId,
         ...(otherDeviceIds || []),
-      ].filter(Boolean)
-    )
+      ].filter(Boolean),
+    ),
   );
 }
 

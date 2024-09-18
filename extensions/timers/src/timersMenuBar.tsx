@@ -1,25 +1,36 @@
-import { Icon, MenuBarExtra, launchCommand, LaunchType } from "@raycast/api";
+import { Icon, MenuBarExtra, launchCommand, LaunchType, getPreferenceValues } from "@raycast/api";
 import { useEffect } from "react";
 import useTimers from "./hooks/useTimers";
-import { formatTime } from "./formatUtils";
+import { formatTime } from "./backend/formatUtils";
+import { Preferences, Timer } from "./backend/types";
+import { formatMenuBarIcon, formatMenuBarTitle } from "./backend/menuBarUtils";
+import useDefaultPresetVisibles from "./hooks/useDefaultPresetVisibles";
+import { shortCircuitMenuBar } from "./backend/utils";
 
 export default function Command() {
   const { timers, customTimers, isLoading, refreshTimers, handleStartTimer, handleStopTimer, handleStartCT } =
     useTimers();
+  const { defaultPresets, defaultVisibles, refreshDefaultVisibles, isLoadingVisibles } = useDefaultPresetVisibles();
+
   useEffect(() => {
     refreshTimers();
+    refreshDefaultVisibles();
     setInterval(() => {
       refreshTimers();
     }, 1000);
   }, []);
 
+  if (isLoading) {
+    refreshTimers();
+  }
+  const prefs = getPreferenceValues<Preferences>();
+  if (shortCircuitMenuBar<Timer>(timers, prefs)) return null;
+
   return (
     <MenuBarExtra
-      icon={Icon.Clock}
-      isLoading={isLoading}
-      title={
-        timers != undefined && timers?.length > 0 ? `${timers[0].name}: ~${formatTime(timers[0].timeLeft)}` : undefined
-      }
+      icon={formatMenuBarIcon(timers, prefs, Icon.Clock)}
+      isLoading={isLoading && isLoadingVisibles}
+      title={formatMenuBarTitle<Timer>(timers, prefs)}
     >
       <MenuBarExtra.Item title="Click running timer to stop" />
       {timers?.map((timer) => (
@@ -30,60 +41,38 @@ export default function Command() {
         />
       ))}
 
-      <MenuBarExtra.Separator />
-      {Object.keys(customTimers)
-        ?.sort((a, b) => {
-          return customTimers[a].timeInSeconds - customTimers[b].timeInSeconds;
-        })
-        .map((ctID) => (
-          <MenuBarExtra.Item
-            title={'Start "' + customTimers[ctID].name + '"'}
-            key={ctID}
-            onAction={() => handleStartCT(customTimers[ctID], true)}
-          />
-        ))}
+      <MenuBarExtra.Section>
+        {Object.keys(customTimers)
+          ?.sort((a, b) => {
+            return customTimers[a].timeInSeconds - customTimers[b].timeInSeconds;
+          })
+          .filter((ctID) => customTimers[ctID].showInMenuBar)
+          .map((ctID) => (
+            <MenuBarExtra.Item
+              title={'Start "' + customTimers[ctID].name + '"'}
+              key={ctID}
+              onAction={() => handleStartCT({ customTimer: customTimers[ctID], launchedFromMenuBar: true })}
+            />
+          ))}
+      </MenuBarExtra.Section>
 
-      <MenuBarExtra.Separator />
-      <MenuBarExtra.Item
-        title="Start 2 Minute Timer"
-        onAction={() => handleStartTimer(60 * 2, "2 Minute Timer", true)}
-        key="2M"
-      />
-      <MenuBarExtra.Item
-        title="Start 5 Minute Timer"
-        onAction={() => handleStartTimer(60 * 5, "5 Minute Timer", true)}
-        key="5M"
-      />
-      <MenuBarExtra.Item
-        title="Start 10 Minute Timer"
-        onAction={() => handleStartTimer(60 * 10, "10 Minute Timer", true)}
-        key="10M"
-      />
-      <MenuBarExtra.Item
-        title="Start 15 Minute Timer"
-        onAction={() => handleStartTimer(60 * 15, "15 Minute Timer", true)}
-        key="15M"
-      />
-      <MenuBarExtra.Item
-        title="Start 30 Minute Timer"
-        onAction={() => handleStartTimer(60 * 30, "30 Minute Timer", true)}
-        key="30M"
-      />
-      <MenuBarExtra.Item
-        title="Start 45 Minute Timer"
-        onAction={() => handleStartTimer(60 * 45, "45 Minute Timer", true)}
-        key="45M"
-      />
-      <MenuBarExtra.Item
-        title="Start 60 Minute Timer"
-        onAction={() => handleStartTimer(60 * 60, "60 Minute Timer", true)}
-        key="60M"
-      />
-      <MenuBarExtra.Item
-        title="Start 90 Minute Timer"
-        onAction={() => handleStartTimer(60 * 60 * 1.5, "90 Minute Timer", true)}
-        key="90M"
-      />
+      <MenuBarExtra.Section>
+        {defaultPresets
+          .filter((preset) => defaultVisibles?.[preset.key])
+          .map((defaultPreset) => (
+            <MenuBarExtra.Item
+              key={defaultPreset.key}
+              title={`Start ${defaultPreset.title}`}
+              onAction={() =>
+                handleStartTimer({
+                  timeInSeconds: defaultPreset.seconds,
+                  timerName: defaultPreset.title,
+                  launchedFromMenuBar: true,
+                })
+              }
+            />
+          ))}
+      </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Custom Timer">
         <MenuBarExtra.Item

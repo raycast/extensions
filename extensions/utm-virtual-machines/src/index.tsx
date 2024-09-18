@@ -30,7 +30,7 @@ function loadVirtualMachines(stdout: string) {
       return {
         uuid: parts[0],
         status: parts[1],
-        name: parts[2],
+        name: parts.slice(2).join(" "),
       };
     });
 }

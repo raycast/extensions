@@ -9,9 +9,10 @@ export interface Vault {
 export interface Note {
   title: string;
   path: string;
+  lastModified: Date;
   tags: string[];
   content: string;
-  starred: boolean;
+  bookmarked: boolean;
 }
 
 export interface CodeBlock {

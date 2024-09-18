@@ -1,5 +1,9 @@
 # Screenshot Changelog
 
+## [Add Capture Window To Clipboard command] - 2023-09-14
+
+- Added Capture Window To Clipboard command
+
 ## [Initial Release] - 2022-12-15
 
 - Added All in one command.

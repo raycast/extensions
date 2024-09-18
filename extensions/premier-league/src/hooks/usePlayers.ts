@@ -6,7 +6,7 @@ const usePlayers = (
   team: string,
   season: string,
   page: number,
-  terms: string
+  terms: string,
 ) => {
   const [players, setPlayers] = useState<PlayerContent[]>();
   const [lastPage, setLastPage] = useState<boolean>(false);

@@ -1,0 +1,125 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cider",
+  "title": "Cider",
+  "description": "Interact with Cider through Raycast",
+  "icon": "icon.png",
+  "author": "feyli",
+  "categories": [
+    "Applications",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "now-playing",
+      "title": "Now Playing",
+      "subtitle": "Cider",
+      "description": "Shows information about the current track",
+      "mode": "view"
+    },
+    {
+      "name": "next-track",
+      "title": "Next Track",
+      "subtitle": "Cider",
+      "description": "Skips to the next track",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous-track",
+      "title": "Previous Track",
+      "subtitle": "Cider",
+      "description": "Goes back to the previous track",
+      "mode": "no-view"
+    },
+    {
+      "name": "adjust-volume",
+      "title": "Adjust Volume",
+      "subtitle": "Cider",
+      "description": "Adjusts Cider's volume",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "volume",
+          "type": "text",
+          "placeholder": "Volume (0-100)",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "toggle-autoplay",
+      "title": "Toggle Autoplay",
+      "subtitle": "Cider",
+      "description": "Toggles autoplay in Cider",
+      "mode": "no-view"
+    },
+    {
+      "name": "add-to-library",
+      "title": "Add to Library",
+      "subtitle": "Cider",
+      "description": "Adds the current playing track to the library",
+      "mode": "no-view"
+    },
+    {
+      "name": "play-pause",
+      "title": "Play/Pause",
+      "subtitle": "Cider",
+      "description": "Alternates between play and pause in Cider",
+      "mode": "no-view"
+    },
+    {
+      "name": "seek",
+      "title": "Seek",
+      "subtitle": "Cider",
+      "description": "Seeks to a certain timestamp in Cider",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "timestamp",
+          "type": "text",
+          "placeholder": "Timestamp (mm:ss)",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "stop-playback",
+      "title": "Stop Playback",
+      "subtitle": "Cider",
+      "description": "Completely stops playing anything in Cider",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "exitOnSuccess",
+      "title": "Options",
+      "description": "Closes Raycast when a command succeeds",
+      "type": "checkbox",
+      "defaultValue": false,
+      "label": "Exit on Success",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.60.1",
+    "@raycast/utils": "^1.9.0",
+    "cross-fetch": "^4.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

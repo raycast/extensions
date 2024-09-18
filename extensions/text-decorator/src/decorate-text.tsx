@@ -1,28 +1,42 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import utd from "unicode-text-decorator";
 import { fetchInputItem } from "./utils/input-item";
-import { Clipboard, closeMainWindow, getPreferenceValues, LocalStorage, showHUD } from "@raycast/api";
-import { Preferences } from "./types/preferences";
-import { fontFamily, LocalStorageKey } from "./utils/constants";
+import {
+  Clipboard,
+  closeMainWindow,
+  launchCommand,
+  LaunchProps,
+  LaunchType,
+  showHUD,
+  updateCommandMetadata,
+} from "@raycast/api";
+import { decorate } from "./unicode-db/unicode-text-decorator";
+import { DecoratorArguments } from "./types/types";
+import { getArgument, isEmpty } from "./utils/common-utils";
+import { fontFamily } from "./utils/constants";
+import { actionAfterDecoration, fontFallback } from "./types/preferences";
 
-export default async () => {
-  const localStorage = await LocalStorage.getItem<string>(LocalStorageKey.STAR_TEXT_FONT);
-  const _starTextFont = typeof localStorage === "undefined" ? fontFamily[0].value : localStorage;
-
-  await decorateText(_starTextFont);
-  await closeMainWindow({ clearRootSearch: true });
+export default async (props: LaunchProps<{ arguments: DecoratorArguments }>) => {
+  const font_ = getArgument(props.arguments.font, `Font`);
+  if (isEmpty(font_)) {
+    await launchCommand({
+      name: "decorate-text-with-font",
+      type: LaunchType.UserInitiated,
+    });
+    await updateCommandMetadata({ subtitle: "With Font" });
+  } else {
+    await closeMainWindow();
+    await decorateText(font_);
+    await updateCommandMetadata({ subtitle: fontFamily.find((value) => value.value === font_)?.title });
+  }
 };
 
 export const decorateText = async (textFont: string) => {
-  const { actionAfterDecoration } = getPreferenceValues<Preferences>();
   const inputItem = await fetchInputItem();
-  const decoratedText = utd.decorate(inputItem, textFont, { fallback: true });
+  const decoratedText = decorate(inputItem, textFont, { fallback: fontFallback });
   if (actionAfterDecoration === "Paste") {
     await Clipboard.paste(decoratedText);
-    await showHUD(`Paste: ${decoratedText}`);
+    await showHUD(`📋 ${decoratedText}`);
   } else {
     await Clipboard.copy(decoratedText);
-    await showHUD(`Copy: ${decoratedText}`);
+    await showHUD(`📋 ${decoratedText}`);
   }
 };

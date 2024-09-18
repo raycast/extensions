@@ -22,6 +22,7 @@ export const setWallpaper = async ({ url, id, every, useHud = false, isBackgroun
 
   let toast;
 
+<<<<<<< HEAD
   if (existsSync(selectedPath)) {
     if (isBackground) return;
     toast = await displayMessage("Downloading and setting wallpaper...", useHud ? "hud" : "toast");
@@ -31,6 +32,17 @@ export const setWallpaper = async ({ url, id, every, useHud = false, isBackgroun
       "The selected path does not exist. Please select a valid path.",
       useHud ? "hud" : "toast"
     );
+=======
+  if (!isBackground) {
+    if (existsSync(selectedPath)) {
+      toast = await displayMessage("Downloading and setting wallpaper...", useHud ? "hud" : "toast");
+    } else {
+      toast = await displayMessage(
+        "The selected path does not exist. Please select a valid path.",
+        useHud ? "hud" : "toast"
+      );
+    }
+>>>>>>> 21c422236c87493c34ba0885f5f04869d3fdf067
   }
 
   const fixedPathName = selectedPath.endsWith("/")

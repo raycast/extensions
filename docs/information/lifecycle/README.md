@@ -1,6 +1,6 @@
 # Lifecycle
 
-A command is typically launched, run for a while, and then is unloaded.
+A command is typically launched, runs for a while, and then is unloaded.
 
 ## Launch
 
@@ -38,7 +38,7 @@ There are different ways to launch a command:
 
 - The user searches for the command in the root search and executes it.
 - The user registers an alias for the command and presses it.
-- Another command launches the command _via_ [`launchCommand`](../../api-reference/utilities.md).
+- Another command launches the command _via_ [`launchCommand`](../../api-reference/command.md#launchcommand).
 - The command was launched in the [background](./background-refresh.md).
 - A [Form's Draft](../../api-reference/user-interface/form.md#drafts) was saved and the user executes it.
 - A user registers the command as a [fallback command](https://manual.raycast.com/fallback-commands) and executes it when there are no results in the root search.

@@ -1,5 +1,13 @@
 # Docker Hub Changelog
 
+## [Fix] - 2023-07-28
+
+- Fixed Pull Image Shortcut ⌘+⇧+p instead of ⌘+p
+
+## [Feature] - 2023-06-12
+
+- Support Pull Image from Docker Hub
+
 ## [Enhance extension] - 2022-09-28
 
 - Support Login Docker Hub Account

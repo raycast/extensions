@@ -1,19 +1,26 @@
-import { ActionPanel, List } from "@raycast/api";
-import { getDevices } from "./services/devices";
+import { ActionPanel, List, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { Device } from "./types/device";
+import { getDevicesService } from "./core/devices/devices.service";
+import { Device } from "./core/devices/devices.model";
 
 export default function ManageBluetoothConnectionsView() {
   const [loading, setLoading] = useState(true);
   const [devices, setDevices] = useState<Device[]>([]);
 
+  const { bluetoothBackend } = getPreferenceValues<ExtensionPreferences>();
+  const devicesService = getDevicesService(bluetoothBackend);
+
+  if (!devicesService) {
+    throw new Error("Could not find 'blueutil'!");
+  }
+
   const refreshDataLoop = () => {
-    setDevices(getDevices());
+    setDevices(devicesService?.getDevices() ?? []);
     setTimeout(() => refreshDataLoop(), 300);
   };
 
   useEffect(() => {
-    setDevices(getDevices());
+    setDevices(devicesService?.getDevices() ?? []);
     setLoading(false);
     refreshDataLoop();
   }, []);

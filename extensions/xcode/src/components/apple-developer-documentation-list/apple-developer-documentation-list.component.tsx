@@ -9,7 +9,7 @@ import { AppleDeveloperDocumentationListSearchBarAccessory } from "./apple-devel
 /**
  * Apple Developer Documentation List
  */
-export function AppleDeveloperDocumentationList(): JSX.Element {
+export function AppleDeveloperDocumentationList() {
   // Use search text State
   const [searchText, setSearchText] = useState<string | undefined>(undefined);
   // Use AbortController reference

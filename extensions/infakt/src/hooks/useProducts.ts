@@ -1,20 +1,21 @@
 import { useFetch } from "@raycast/utils";
-import { ApiHeaders, ApiUrls } from "../api/helpers";
-import { ProductObject } from "../types/product";
-import { ApiPaginatedResponse, Filters, UseFetchOptions } from "../types/utils";
+
+import { ApiHeaders, ApiUrls } from "@/api/helpers";
+import { ProductObject } from "@/types/product";
+import { ApiPaginatedResponse, Filters, UseFetchOptions } from "@/types/utils";
 
 type Props = {
   filters?: Filters<ProductObject>;
   options?: UseFetchOptions<ApiPaginatedResponse<ProductObject[]>>;
 };
 
-export default function useProducts(
+export function useProducts(
   { filters, options }: Props = {
     filters: {
       limit: 100,
       offset: 0,
     },
-  }
+  },
 ) {
   const endpoint = new URL(ApiUrls.products);
   Object.entries(filters ?? {}).forEach(([key, value]) => endpoint.searchParams.append(key, String(value)));

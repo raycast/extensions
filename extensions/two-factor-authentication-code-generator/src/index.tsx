@@ -9,44 +9,16 @@ import {
   getPreferenceValues,
   LocalStorage,
   Toast,
+  confirmAlert,
+  Alert,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
 import { decode } from "hi-base32";
-import { Algorithm, Digits, generateTOTP, isValidAlgorithm, isValidDigit, Options } from "./util/totp";
-import { URL } from "url";
-
-const DEFAULT_OPTIONS: Options = {
-  digits: 6,
-  algorithm: "SHA1",
-  period: 30,
-};
+import { Algorithm, Digits, Options, parseOtpUrl } from "./util/totp";
+import { useApps } from "./util/hooks";
 
 export default function AppsView() {
-  const [apps, setApps] = useState<
-    {
-      name: string;
-      key: string;
-      code: string;
-    }[]
-  >([]);
+  const { apps, updateApps } = useApps();
   const { defaultAction } = getPreferenceValues();
-
-  useEffect(() => {
-    LocalStorage.allItems().then((_apps) => {
-      setApps(
-        Object.keys(_apps)
-          .sort((a, b) => a.localeCompare(b))
-          .map((name) => {
-            const token: { secret: string; options: Options } = parse(_apps[name]);
-            return {
-              name,
-              key: _apps[name].toString(),
-              code: generateTOTP(token.secret, token.options).toString().padStart(token.options.digits, "0"),
-            };
-          })
-      );
-    });
-  }, []);
 
   return (
     <List
@@ -56,7 +28,7 @@ export default function AppsView() {
             icon={Icon.Plus}
             title="Add App"
             target={<AddForm />}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            shortcut={{ modifiers: ["cmd"], key: "g" }}
           />
           <Action.Push
             icon={Icon.Link}
@@ -72,6 +44,23 @@ export default function AppsView() {
           title={a.name}
           subtitle={a.code}
           key={a.name}
+          accessories={[
+            {
+              icon: {
+                source:
+                  +a.percent > 75
+                    ? Icon.CircleProgress100
+                    : +a.percent > 50
+                    ? Icon.CircleProgress75
+                    : +a.percent > 25
+                    ? Icon.CircleProgress50
+                    : +a.time > 0
+                    ? Icon.CircleProgress25
+                    : Icon.Circle,
+              },
+              tooltip: a.time,
+            },
+          ]}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
@@ -92,7 +81,7 @@ export default function AppsView() {
                   icon={Icon.Plus}
                   title="Add App"
                   target={<AddForm />}
-                  shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                  shortcut={{ modifiers: ["cmd"], key: "g" }}
                 />
                 <Action.Push
                   icon={Icon.Link}
@@ -106,24 +95,16 @@ export default function AppsView() {
                   icon={Icon.Trash}
                   title="Remove App"
                   onAction={async () => {
-                    await LocalStorage.removeItem(a.name);
-
-                    LocalStorage.allItems().then((_apps) => {
-                      setApps(
-                        Object.keys(_apps)
-                          .sort((a, b) => a.localeCompare(b))
-                          .map((name) => {
-                            const token = parse(_apps[name]);
-                            return {
-                              name,
-                              key: _apps[name].toString(),
-                              code: generateTOTP(token.secret, token.options)
-                                .toString()
-                                .padStart(token.options.digits, "0"),
-                            };
-                          })
-                      );
-                    });
+                    if (
+                      await confirmAlert({
+                        title: "Remove App?",
+                        message: "Your key will be lost forever, unless you've performed a backup.",
+                        primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+                      })
+                    ) {
+                      await LocalStorage.removeItem(a.name);
+                      await updateApps();
+                    }
                   }}
                   shortcut={{
                     modifiers: ["ctrl"],
@@ -222,71 +203,15 @@ function AddAppByUrlForm() {
       return;
     }
 
-    try {
-      const parse = new URL(url);
-      if (parse.protocol != "otpauth:") {
-        showToast(Toast.Style.Failure, "Unsupported protocol " + parse.protocol);
-        return;
-      }
-      if (parse.host != "totp") {
-        showToast(Toast.Style.Failure, "Unsupported type " + parse.host + " only TOTP supported");
-        return;
-      }
+    const parse = parseOtpUrl(url);
 
-      if (!parse.pathname) {
-        showToast(Toast.Style.Failure, "Label is missing");
-        return;
-      }
-
-      const name = decodeURIComponent(parse.pathname.slice(1));
-      const searchParams = parse.searchParams;
-      const secret = searchParams.get("secret");
-      const algorithm = searchParams.get("algorithm") ? searchParams.get("algorithm") : DEFAULT_OPTIONS.algorithm;
-      const maybePeriod = searchParams.get("period");
-      const period = maybePeriod ? parseInt(maybePeriod) : DEFAULT_OPTIONS.period;
-      const digits = searchParams.get("digits") ? searchParams.get("digits") : DEFAULT_OPTIONS.digits;
-
-      if (!secret) {
-        showToast(Toast.Style.Failure, "Secret is mandatory");
-        return;
-      }
-
-      try {
-        decode.asBytes(secret);
-      } catch {
-        showToast(Toast.Style.Failure, "Invalid 2FA secret");
-        return;
-      }
-
-      if (!isValidAlgorithm(algorithm)) {
-        showToast(Toast.Style.Failure, "Unsupported hashing algorithm " + algorithm);
-        return;
-      }
-
-      if (isNaN(period)) {
-        showToast(Toast.Style.Failure, "Period should be a number");
-        return;
-      }
-
-      if (+period <= 0) {
-        showToast(Toast.Style.Failure, "Period should be positive number");
-        return;
-      }
-
-      if (!isValidDigit(digits)) {
-        showToast(Toast.Style.Failure, "Unsupported digits " + digits);
-        return;
-      }
-
-      const options: Options = { digits: digits, period: period, algorithm: algorithm };
-
-      await LocalStorage.setItem(name, JSON.stringify({ secret: secret, options: options }));
-
-      push(<AppsView />);
-    } catch (e) {
-      showToast(Toast.Style.Failure, "Unable to parse URL");
+    if (!parse.success) {
+      showToast(Toast.Style.Failure, parse.data);
       return;
     }
+
+    await LocalStorage.setItem(parse.data.name, JSON.stringify(parse.data.data));
+
     push(<AppsView />);
   };
 
@@ -305,12 +230,4 @@ function AddAppByUrlForm() {
       />
     </Form>
   );
-}
-
-function parse(value: string): { secret: string; options: Options } {
-  try {
-    return JSON.parse(value);
-  } catch (e) {
-    return { secret: value, options: DEFAULT_OPTIONS };
-  }
 }

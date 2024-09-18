@@ -13,7 +13,7 @@ interface Props {
 async function loadBraveProfiles(): Promise<BraveProfile[]> {
   const path = getLocalStatePath();
   if (!existsSync(path)) {
-    return [{ name: "Person 1", id: "Default" }];
+    return [{ name: "Default", id: "Default" }];
   }
 
   const braveState = await promises.readFile(path, "utf-8");
@@ -27,7 +27,7 @@ async function loadBraveProfiles(): Promise<BraveProfile[]> {
 export default function BraveProfileDropDown({ onProfileSelected }: Props) {
   const [selectedProfile, setSelectedProfile] = useCachedState<string>(BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID);
   const [profiles, setProfiles] = useCachedState<BraveProfile[]>(BRAVE_PROFILES_KEY, [
-    { name: "Person 1", id: DEFAULT_BRAVE_PROFILE_ID },
+    { name: "Default", id: DEFAULT_BRAVE_PROFILE_ID },
   ]);
   const { data: loadedProfiles } = useCachedPromise(loadBraveProfiles);
 

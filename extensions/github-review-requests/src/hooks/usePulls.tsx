@@ -1,43 +1,47 @@
 import usePullStore from "./usePullStore";
-import { useEffect, useState } from "react";
-import searchPullRequestsWithDependencies from "../graphql/searchPullRequestsWithDependencies";
+import { useEffect, useState, useMemo } from "react";
 import { getLogin } from "../integration/getLogin";
 import { isActionUserInitiated } from "../util";
-import { processPulls } from "../flows/processPulls";
 import { PullRequestShort } from "../types";
-import { Icon, MenuBarExtra } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
+
+const { owners } = getPreferenceValues();
 
 const usePulls = () => {
-  const { isPullStoreLoading, updatedPulls, recentlyVisitedPulls, hiddenPulls, visitPull, updatePulls } =
-    usePullStore();
+  const { isPullStoreLoading, updatedPulls, recentlyVisitedPulls, visitPull, updatePulls, fetchPulls } = usePullStore();
 
   const [isRemotePullsLoading, setIsRemotePullsLoading] = useState(true);
   const [login, setLogin] = useState("");
 
+  const userFilters: string = owners
+    ? owners
+        .split(",")
+        .map((user: string) => `user:${user.toString().trim()}`)
+        .join(" ")
+    : "";
   const exitShortcut = () => console.debug("usePulls: exitShortcut");
+  const defaultFilters: string[] = ["is:open", "draft:false", "archived:false", userFilters];
+
+  const openPulls = useMemo(
+    () =>
+      updatedPulls.map(({ owner, ...rest }) => ({
+        owner: owner.login,
+        ...rest,
+      })),
+    [updatedPulls]
+  );
 
   const runPullIteration = () =>
     Promise.resolve()
-      .then(() => console.debug("runPullIteration"))
+      .then(() => console.debug("runPullIteration >>>>>>>>>"))
       .then(() => setIsRemotePullsLoading(true))
-      .then(() =>
-        Promise.all([
-          getLogin(),
-          searchPullRequestsWithDependencies("is:open archived:false author:@me"),
-          searchPullRequestsWithDependencies("is:open archived:false commenter:@me"),
-          searchPullRequestsWithDependencies("is:open archived:false review-requested:@me"),
-        ])
-      )
-      .then(mergePulls)
-      .then(({ login, pulls }) => processPulls(login, hiddenPulls, pulls))
-      .then(updatePulls)
-      .finally(() => console.debug("runPullIteration: done"))
+      .then(() => fetchPulls(defaultFilters))
+      .then((pulls: PullRequestShort[]) => updatePulls(pulls))
+      .then(() => console.debug("<<<<<<<<< runPullIteration"))
       .finally(() => setIsRemotePullsLoading(false));
 
   useEffect(() => {
     // Run effect only after we load from store.
-    // We're most interested in the hiddenPulls
-    // to correctly filter out fresh PRs.
     if (isPullStoreLoading) {
       return;
     }
@@ -52,42 +56,13 @@ const usePulls = () => {
 
   return {
     isLoading: isPullStoreLoading || isRemotePullsLoading,
-
     login,
-
-    updatedPulls,
+    openPulls,
     recentlyVisitedPulls,
-
-    Refresh: isPullStoreLoading
-      ? () => null
-      : () => (
-          <MenuBarExtra.Item
-            title="Force Refresh"
-            onAction={runPullIteration}
-            icon={Icon.RotateClockwise}
-            shortcut={{ key: "r", modifiers: ["cmd"] }}
-          />
-        ),
-
+    isReady: !isPullStoreLoading,
     visitPull,
+    runPullIteration,
   };
 };
 
 export default usePulls;
-
-type MergePullParams = [string, PullRequestShort[], PullRequestShort[], PullRequestShort[]];
-const mergePulls = ([login, authoredPulls, commentedOnPulls, reviewRequestedPulls]: MergePullParams) => {
-  const pulls = authoredPulls.concat(commentedOnPulls, reviewRequestedPulls).filter(uniquePullRequests);
-
-  console.debug(
-    `mergePulls: merged=${pulls.length} ` +
-      `authored=${authoredPulls.length} ` +
-      `commented=${commentedOnPulls.length} ` +
-      `review-requested=${reviewRequestedPulls.length}`
-  );
-
-  return { login, pulls };
-};
-
-const uniquePullRequests = (pull: PullRequestShort, index: number, self: PullRequestShort[]) =>
-  self.findIndex(p => p.id === pull.id) === index;

@@ -17,7 +17,7 @@ export async function getPaginated<T, U>(
   getPageInfo: (x: T) => PageInfo | undefined, // This function returns the PageInfo property from a requested page result.
   reducer: (accumulator: U, currentValue: T) => U, // This function works just like Array.prototype.reduce().
   initialValue: U, // The initial value provided to the reducer.
-  pageLimit: number // Prevent heap exhaustion by specifying the maximum number of pages we are allowed to retrieve.
+  pageLimit: number, // Prevent heap exhaustion by specifying the maximum number of pages we are allowed to retrieve.
 ): Promise<U> {
   let result = initialValue;
 

@@ -1,5 +1,12 @@
 # Dash Changelog
 
+## [New Commands] - 2023-05-22
+
+- Add 2 new commands to quickly search in specific docset
+  - `Create Docset Quicklink` command
+  - `Find in Specific Dash Docset` command
+- Upgrade to latest @raycast/api
+
 ## [Cache] - 2022-03-24
 
 - Cache docsets to LocalStorage to improve loading speed

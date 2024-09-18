@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "feishu-document-creator",
+  "title": "Feishu Document Creator",
+  "description": "Create Feishu/Lark online document quickly using native Feishu/Lark URLs.",
+  "icon": "feishu-icon.png",
+  "author": "rokcso",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "飞书",
+    "feishu",
+    "Feishu",
+    "Lark",
+    "飞书云文档",
+    "飞书文档",
+    "多维表格",
+    "Docs"
+  ],
+  "commands": [
+    {
+      "name": "docx",
+      "title": "New Docs",
+      "description": "New Feishu/Lark Online Document 👉 Docs.",
+      "mode": "no-view",
+      "icon": "feishu-docx-icon.png"
+    },
+    {
+      "name": "base",
+      "title": "New Base",
+      "description": "New Feishu/Lark Online Document 👉 Base.",
+      "mode": "no-view",
+      "icon": "feishu-base-icon.png"
+    },
+    {
+      "name": "sheet",
+      "title": "New Sheet",
+      "description": "New Feishu/Lark Online Document 👉 Sheet.",
+      "mode": "no-view",
+      "icon": "feishu-sheet-icon.png"
+    },
+    {
+      "name": "mindnote",
+      "title": "New Mindnote",
+      "description": "New Feishu/Lark Online Document 👉 Mindnote.",
+      "mode": "no-view",
+      "icon": "feishu-mindnote-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "appType",
+      "description": "Select the App of Feishu/Lark you are using.",
+      "type": "dropdown",
+      "required": true,
+      "title": "App",
+      "data": [
+        {
+          "title": "Feishu",
+          "value": "feishu"
+        },
+        {
+          "title": "Lark",
+          "value": "lark"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.62.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

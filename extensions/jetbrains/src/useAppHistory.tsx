@@ -1,17 +1,31 @@
-import { Application } from "@raycast/api";
-import { AppHistory, getHistory, getJetBrainsToolboxApp, loadAppEntries, recentEntry } from "./util";
+import {
+  AppHistory,
+  ToolboxApp,
+  getHistory,
+  getJetBrainsToolboxApp,
+  getV2History,
+  loadAppEntries,
+  recentEntry,
+} from "./util";
 import { FavList } from "raycast-hooks/src/hooks/useFavorites";
 import { useFavorites, usePreferences } from "raycast-hooks";
 import { useEffect, useReducer } from "react";
 import { sortTools } from "./sortTools";
 
 function appHistorySorter(results: AppHistory[], sortOrder: string) {
-  return results.filter((app) => app.entries?.length).sort(sortTools(String(sortOrder).split(",")));
+  let order = String(sortOrder).split(",");
+  if (sortOrder === "" || order.length === 0) {
+    order = results.map((ah) => ah.title).sort();
+  }
+  return results.sort(sortTools(order));
 }
 
 function projectsReducer(state: State, action: Action): State {
   switch (action.type) {
     case "setToolboxApp":
+      if (action.results === undefined) {
+        return { ...state, toolboxApp: false, isLoading: false };
+      }
       return { ...state, toolboxApp: action.results };
     case "setHistory":
       return { ...state, history: action.results };
@@ -62,7 +76,7 @@ export interface State {
   isLoading: boolean;
   sortOrder: string;
   filter: string;
-  toolboxApp?: Application;
+  toolboxApp?: ToolboxApp | false;
   history?: AppHistory[];
   appHistory: AppHistory[];
   favourites: FavList;
@@ -71,7 +85,7 @@ export interface State {
 }
 
 export type Action =
-  | { type: "setToolboxApp"; results: Application | undefined }
+  | { type: "setToolboxApp"; results: ToolboxApp | undefined }
   | { type: "setHistory"; results: AppHistory[] }
   | { type: "setEntries"; results: AppHistory[] }
   | { type: "setSortOrder"; results: string }
@@ -91,7 +105,7 @@ export function myFavReducer(favourites: FavList, all: recentEntry[]): recentEnt
 
 export interface appHistoryReturn {
   isLoading: boolean;
-  toolboxApp: Application | undefined;
+  toolboxApp: ToolboxApp | undefined | false;
   appHistory: AppHistory[];
   myFavs: recentEntry[];
   filter: string;
@@ -108,34 +122,54 @@ export interface appHistoryReturn {
 }
 
 export function useAppHistory(): appHistoryReturn {
-  const [{ isLoading, toolboxApp, history, appHistory, myFavs, filter }, dispatch] = useReducer(
-    projectsReducer,
-    initialState
-  );
-  const [favourites, histories, setHistories, favActions] = useFavorites("history", []);
   const [{ sortOrder, screenshotMode }, prefActions] = usePreferences({ sortOrder: "", screenshotMode: false });
+  const [favourites, histories, setHistories, favActions] = useFavorites("history", []);
+  const [{ isLoading, toolboxApp, history, appHistory, myFavs, filter, ...rest }, dispatch] = useReducer(
+    projectsReducer,
+    {
+      ...initialState,
+      sortOrder: String(sortOrder),
+      favourites,
+    }
+  );
 
   useEffect(() => {
     getJetBrainsToolboxApp().then((toolboxApp) => dispatch({ type: "setToolboxApp", results: toolboxApp }));
-    getHistory().then((history) => dispatch({ type: "setHistory", results: history }));
   }, []);
 
   useEffect(() => {
-    dispatch({ type: "setSortOrder", results: String(sortOrder) });
-  }, [sortOrder]);
-
-  useEffect(() => {
-    dispatch({ type: "setFavourites", results: favourites });
-  }, [favourites]);
-
-  useEffect(() => {
-    setHistories(...appHistory.map((history) => (history?.entries ?? []).map((entry) => entry.path)));
-  }, [appHistory, filter]);
+    if (toolboxApp === undefined || toolboxApp === false) {
+      return;
+    }
+    if (toolboxApp.isV2) {
+      getV2History().then((history) => dispatch({ type: "setHistory", results: history }));
+    } else {
+      getHistory().then((history) => dispatch({ type: "setHistory", results: history }));
+    }
+  }, [toolboxApp]);
 
   useEffect(() => {
     if (history === undefined) return;
     loadAppEntries(history).then((entries) => dispatch({ type: "setEntries", results: entries }));
   }, [history]);
+
+  useEffect(() => {
+    if (sortOrder === rest.sortOrder) {
+      return;
+    }
+    dispatch({ type: "setSortOrder", results: String(sortOrder) });
+  }, [sortOrder, rest.sortOrder]);
+
+  useEffect(() => {
+    if (favourites === rest.favourites) {
+      return;
+    }
+    dispatch({ type: "setFavourites", results: favourites });
+  }, [favourites, rest.favourites]);
+
+  useEffect(() => {
+    setHistories(...appHistory.map((history) => (history?.entries ?? []).map((entry) => entry.path)));
+  }, [appHistory, filter]);
 
   return {
     isLoading: isLoading || histories.length === 0,

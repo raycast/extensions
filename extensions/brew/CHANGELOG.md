@@ -1,10 +1,61 @@
 # Brew Changelog
 
-## [Bug fix] - 2022-12-01
+## [Improvements] - 2024-07-29
+
+- Added new terminal options for Alacritty, kitty, WezTerm and Hyper.
+- Used app icons for actions to run commands in terminals.
+- Apply Destructive style to Uninstall actions.
+- Fallback to Terminal.App in case the selected terminal app is not installed.
+
+## [Improvements] - 2024-06-14
+
+- Updated dependencies
+
+## [Bug Fix] - 2024-07-03
+
+- Fix a crash that could occur when showing installed formula or cask
+
+## [Improvements] - 2024-06-24
+
+- Search now includes cask names
+
+## [Improvements] - 2024-06-24
+
+- Move formula and cask info to the metadata panel
+- Dependencies are displayed green if installed
+
+## [Improvements] - 2024-06-14
+
+- Updated dependencies
+- Updated screenshots
+- Added formula/cask name to the detail view
+
+## [Bug Fix] - 2024-05-14
+
+- Remove deprecated `--ignore-pinned` upgrade flag.
+
+## [Bug Fix] - 2024-03-22
+
+- Fixed various crashes that occurred due to missing data.
+
+## [Improvements] - 2024-03-08
+
+- Add `Warp` as an option for terminal
+- Use current terminal name for actions
+
+## [Improvements] - 2024-02-11
+
+- Add `cleanup` command
+
+## [Improvements] - 2024-01-10
+
+- Added `Quarantine` preference to enable or disable quarantine of files downloaded by brew
+
+## [Bug Fix] - 2022-12-01
 
 - Added `--ignore-pinned` flag to `brew upgrade` command to avoid problems on systems that have pinned packages installed
 
-## [Bug fix] - 2022-11-16
+## [Bug Fix] - 2022-11-16
 
 - Improved error handling for invalid json cache
 - Ensure cache is fetched only once (avoids memory errors)
@@ -14,7 +65,7 @@
 - Reduce memory requirements for the "Search" command.
 - Improve caching logic
 
-## [Updated dependencies] - 2022-11-11
+## [Updated Dependencies] - 2022-11-11
 
 - Upgraded to latest node dependencies. Should fix a memory issue.
 

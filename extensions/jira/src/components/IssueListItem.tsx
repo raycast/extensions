@@ -1,8 +1,9 @@
-import { Icon, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 
 import { Issue } from "../api/issues";
+import { getUserAvatar } from "../helpers/avatars";
 import { getStatusColor } from "../helpers/issues";
 
 import IssueActions from "./IssueActions";
@@ -16,10 +17,34 @@ export default function IssueListItem({ issue, mutate }: IssueListItemProps) {
   const updatedAt = new Date(issue.fields.updated);
   const assignee = issue.fields.assignee;
 
-  const keywords = [issue.key, issue.fields.status.name, issue.fields.issuetype.name, issue.fields.priority.name];
+  const keywords = [issue.key, issue.fields.status.name, issue.fields.issuetype.name];
+
+  if (issue.fields.priority) {
+    keywords.push(issue.fields.priority.name);
+  }
 
   if (issue.fields.assignee) {
     keywords.push(issue.fields.assignee.displayName);
+  }
+
+  const accessories = [
+    {
+      text: {
+        value: issue.fields.status.name,
+        color: issue.fields.status.statusCategory
+          ? getStatusColor(issue.fields.status.statusCategory.colorName)
+          : undefined,
+      },
+    },
+    {
+      icon: getUserAvatar(assignee),
+      tooltip: `Assignee: ${assignee ? assignee.displayName : "Unassigned"}`,
+    },
+    { date: updatedAt, tooltip: format(updatedAt, "EEEE d MMMM yyyy 'at' HH:mm") },
+  ];
+
+  if (issue.fields.priority) {
+    accessories.push({ icon: issue.fields.priority.iconUrl, tooltip: `Priority: ${issue.fields.priority.name}` });
   }
 
   return (
@@ -27,22 +52,9 @@ export default function IssueListItem({ issue, mutate }: IssueListItemProps) {
       key={issue.id}
       keywords={keywords}
       icon={{ value: issue.fields.issuetype.iconUrl, tooltip: `Issue Type: ${issue.fields.issuetype.name}` }}
-      title={issue.fields.summary}
+      title={issue.fields.summary || "Unknown issue title"}
       subtitle={issue.key}
-      accessories={[
-        {
-          text: {
-            value: issue.fields.status.name,
-            color: getStatusColor(issue.fields.status.statusCategory.colorName),
-          },
-        },
-        {
-          icon: assignee ? assignee.avatarUrls["32x32"] : Icon.Person,
-          tooltip: `Assignee: ${assignee ? assignee.displayName : "Unassigned"}`,
-        },
-        { date: updatedAt, tooltip: format(updatedAt, "EEEE d MMMM yyyy 'at' HH:mm") },
-        { icon: issue.fields.priority.iconUrl, tooltip: `Priority: ${issue.fields.priority.name}` },
-      ]}
+      accessories={accessories}
       actions={<IssueActions issue={issue} mutate={mutate} showDetailsAction={true} />}
     />
   );

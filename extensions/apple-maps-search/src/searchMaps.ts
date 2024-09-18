@@ -1,12 +1,9 @@
+import { LaunchProps } from "@raycast/api";
 import open from "open";
 import { makeSearchURL } from "./utils";
 
-interface SearchQueryArguments {
-  query: "string";
-}
-
-export default async (props: { arguments: SearchQueryArguments }) => {
+export default async (props: LaunchProps) => {
   const { query } = props.arguments;
-  const searchURL = makeSearchURL(query);
+  const searchURL = makeSearchURL(query || props.fallbackText);
   open(searchURL);
 };

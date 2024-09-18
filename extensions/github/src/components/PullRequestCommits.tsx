@@ -1,11 +1,11 @@
-import { List, Image, Action, ActionPanel } from "@raycast/api";
+import { Action, ActionPanel, Image, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { compareDesc, format } from "date-fns";
 import { useMemo } from "react";
 
+import { getGitHubClient } from "../api/githubClient";
 import { PullRequestCommitFieldsFragment } from "../generated/graphql";
 import { getCheckStateAccessory } from "../helpers/pull-request";
-import { getGitHubClient } from "../helpers/withGithubClient";
 
 import { PullRequest } from "./PullRequestActions";
 
@@ -21,7 +21,7 @@ export default function PullRequestCommits({ pullRequest }: PullRequestCommitsPr
       const commits = await github.pullRequestCommits({ nodeId: pullRequest.id });
       return commits.node as PullRequestCommitFieldsFragment;
     },
-    [pullRequest]
+    [pullRequest],
   );
 
   const sortedCommits = useMemo(() => {
@@ -79,19 +79,19 @@ export default function PullRequestCommits({ pullRequest }: PullRequestCommitsPr
 
                 <ActionPanel.Section>
                   <Action.CopyToClipboard
-                    content={commit.message}
+                    content={commit.url}
                     title="Copy Commit URL"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
                   />
 
                   <Action.CopyToClipboard
-                    content={commit.message}
+                    content={commit.oid}
                     title="Copy Commit Hash"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                   />
 
                   <Action.CopyToClipboard
-                    content={pullRequest.title}
+                    content={commit.treeUrl}
                     title="Copy Commit Tree URL"
                     shortcut={{ modifiers: ["ctrl", "shift"], key: "," }}
                   />

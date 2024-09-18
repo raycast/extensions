@@ -1,31 +1,44 @@
-import { Detail } from "@raycast/api";
 import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
 import { Bitwarden } from "~/api/bitwarden";
+import { LoadingFallback } from "~/components/LoadingFallback";
+import TroubleshootingGuide from "~/components/TroubleshootingGuide";
+import { InstalledCLINotFoundError } from "~/utils/errors";
 
 const BitwardenContext = createContext<Bitwarden | null>(null);
 
-export type BitwardenProviderProps = PropsWithChildren;
+export type BitwardenProviderProps = PropsWithChildren<{
+  loadingFallback?: JSX.Element;
+}>;
 
-export const BitwardenProvider = (props: BitwardenProviderProps) => {
-  const { children } = props;
+export const BitwardenProvider = ({ children, loadingFallback = <LoadingFallback /> }: BitwardenProviderProps) => {
   const [bitwarden, setBitwarden] = useState<Bitwarden>();
+  const [error, setError] = useState<Error>();
 
   useEffect(() => {
-    new Bitwarden().initialize().then(setBitwarden);
+    void new Bitwarden().initialize().then(setBitwarden).catch(handleBwInitError);
   }, []);
 
-  if (!bitwarden) return <Detail isLoading />;
+  function handleBwInitError(error: Error) {
+    if (error instanceof InstalledCLINotFoundError) {
+      setError(error);
+    } else {
+      throw error;
+    }
+  }
+
+  if (error) return <TroubleshootingGuide error={error} />;
+  if (!bitwarden) return loadingFallback;
 
   return <BitwardenContext.Provider value={bitwarden}>{children}</BitwardenContext.Provider>;
 };
 
 export const useBitwarden = () => {
-  const session = useContext(BitwardenContext);
-  if (session == null) {
+  const context = useContext(BitwardenContext);
+  if (context == null) {
     throw new Error("useBitwarden must be used within a BitwardenProvider");
   }
 
-  return session;
+  return context;
 };
 
 export default BitwardenContext;

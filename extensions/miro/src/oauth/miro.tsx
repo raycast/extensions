@@ -30,7 +30,7 @@ export async function authorize() {
   }
 
   const authRequest = await client.authorizationRequest({
-    endpoint: "https://miro.oauth-proxy.raycast.com/authorize",
+    endpoint: "https://miro.oauth.raycast.com/authorize",
     clientId: clientId,
     scope: "",
   });
@@ -44,7 +44,7 @@ export async function fetchTokens(
   authRequest: OAuth.AuthorizationRequest,
   authCode: string
 ): Promise<OAuth.TokenResponse> {
-  const response = await fetch("https://miro.oauth-proxy.raycast.com/token", {
+  const response = await fetch("https://miro.oauth.raycast.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -66,7 +66,7 @@ export async function fetchTokens(
 
 // Refresh tokens
 async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse> {
-  const response = await fetch("https://miro.oauth-proxy.raycast.com/refresh-token", {
+  const response = await fetch("https://miro.oauth.raycast.com/refresh-token", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

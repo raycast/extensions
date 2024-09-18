@@ -15,18 +15,16 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
     const openTabs = await runAppleScript(`
       set _output to ""
       tell application "Google Chrome"
-        set _window_index to 1
         repeat with w in windows
+          set _w_id to get id of w as inches as string
           set _tab_index to 1
           repeat with t in tabs of w
             set _title to get title of t
             set _url to get URL of t
             set _favicon to ${faviconFormula}
-            set _output to (_output & _title & "${Tab.TAB_CONTENTS_SEPARATOR}" & _url & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _window_index & "${Tab.TAB_CONTENTS_SEPARATOR}" & _tab_index & "\\n")
+            set _output to (_output & _title & "${Tab.TAB_CONTENTS_SEPARATOR}" & _url & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _w_id & "${Tab.TAB_CONTENTS_SEPARATOR}" & _tab_index & "\\n")
             set _tab_index to _tab_index + 1
           end repeat
-          set _window_index to _window_index + 1
-          if _window_index > count windows then exit repeat
         end repeat
       end tell
       return _output
@@ -76,19 +74,31 @@ export async function openNewTab({
     case SettingsProfileOpenBehaviour.Default:
       script =
         `
-    tell application "Google Chrome"
-      activate
-      tell window 1
-          set newTab to make new tab ` +
+        set winExists to false
+        tell application "Google Chrome"
+            repeat with win in every window
+                if index of win is 1 then
+                    set winExists to true
+                    exit repeat
+                end if
+            end repeat
+            
+            if not winExists then
+                make new window
+            end if
+            
+            tell window 1
+                set newTab to make new tab ` +
         (url
           ? `with properties {URL:"${url}"}`
           : query
           ? 'with properties {URL:"https://www.google.com/search?q=' + query + '"}'
           : "") +
-        ` 
-      end tell
-    end tell
-    return true
+        `
+            end tell
+        end tell
+        return true
+        
   `;
       break;
     case SettingsProfileOpenBehaviour.ProfileCurrent:
@@ -107,8 +117,9 @@ export async function setActiveTab(tab: Tab): Promise<void> {
   await runAppleScript(`
     tell application "Google Chrome"
       activate
-      set index of window (${tab.windowsIndex} as number) to (${tab.windowsIndex} as number)
-      set active tab index of window (${tab.windowsIndex} as number) to (${tab.tabIndex} as number)
+      set _wnd to first window where id is ${tab.windowsId}
+      set index of _wnd to 1
+      set active tab index of _wnd to ${tab.tabIndex}
     end tell
     return true
   `);
@@ -118,9 +129,10 @@ export async function closeActiveTab(tab: Tab): Promise<void> {
   await runAppleScript(`
     tell application "Google Chrome"
       activate
-      set index of window (${tab.windowsIndex} as number) to (${tab.windowsIndex} as number)
-      set active tab index of window (${tab.windowsIndex} as number) to (${tab.tabIndex} as number)
-      close active tab of window (${tab.windowsIndex} as number)
+      set _wnd to first window where id is ${tab.windowsId}
+      set index of _wnd to 1
+      set active tab index of _wnd to ${tab.tabIndex}
+      close active tab of _wnd
     end tell
     return true
   `);
@@ -143,3 +155,13 @@ return isInstalled`);
   }
   LocalStorage.setItem("is-installed", true);
 };
+
+export async function createNewWindow(): Promise<void> {
+  await runAppleScript(`
+    tell application "Google Chrome"
+      make new window
+      activate
+    end tell
+    return true
+  `);
+}

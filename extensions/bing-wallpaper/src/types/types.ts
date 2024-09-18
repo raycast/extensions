@@ -1,21 +1,5 @@
 export interface BingResponseData {
-  images: {
-    startdate: string;
-    fullstartdate: string;
-    enddate: string;
-    url: string;
-    urlbase: string;
-    copyright: string;
-    copyrightlink: string;
-    title: string;
-    quiz: string;
-    wp: boolean;
-    hsh: string;
-    drk: number;
-    top: number;
-    bot: number;
-    hs: undefined[];
-  }[];
+  images: BingImage[];
   tooltips: {
     loading: string;
     previous: string;

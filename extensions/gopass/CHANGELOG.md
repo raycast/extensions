@@ -1,5 +1,13 @@
 # pass Changelog
 
+## [New Additions] - 2024-06-15
+
+- Add Nix bin path.
+
+## [New Features] - 2024-03-05
+
+- Add fuzzy matching to search
+
 ## [New Additions / Fix] - 2022-09-05
 
 - Add OTP code support.

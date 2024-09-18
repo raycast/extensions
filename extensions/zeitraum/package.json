@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zeitraum",
+  "title": "Zeitraum",
+  "description": "Track time with tags to Zeitraum server",
+  "icon": "extension-icon.png",
+  "author": "tensor",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "trackCommand",
+      "title": "Track",
+      "subtitle": "Zeitraum",
+      "description": "Describe what you do using tags and start a timer",
+      "mode": "view"
+    },
+    {
+      "name": "timeSpansCommand",
+      "title": "Time Spans",
+      "subtitle": "Zeitraum",
+      "description": "List time spans and stop a previously started timers",
+      "mode": "view"
+    },
+    {
+      "name": "createPresetCommand",
+      "title": "Create Preset",
+      "subtitle": "Zeitraum",
+      "description": "Create a new preset",
+      "mode": "view"
+    },
+    {
+      "name": "presetsCommand",
+      "title": "Presets",
+      "subtitle": "Zeitraum",
+      "description": "List of presets",
+      "mode": "view"
+    },
+    {
+      "name": "createTagCommand",
+      "title": "Create Tag",
+      "subtitle": "Zeitraum",
+      "description": "Create a new tag",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.51.1",
+    "@zeitraum/client": "^0.5.5",
+    "date-fns": "^2.30.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^18.16.3",
+    "@types/react": "^18.2.2",
+    "eslint": "^8.40.0",
+    "prettier": "^2.8.8",
+    "typescript": "^5.0.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "url",
+      "description": "The URL of your Zeitraum instance",
+      "type": "textfield",
+      "required": true,
+      "title": "URL",
+      "placeholder": "https://example.com"
+    },
+    {
+      "name": "apiToken",
+      "description": "The API token of your Zeitraum instance",
+      "type": "password",
+      "required": true,
+      "title": "API Token"
+    },
+    {
+      "name": "stopPreviousRunning",
+      "description": "When creating a new time span, stop the previously running time span",
+      "type": "checkbox",
+      "required": false,
+      "title": "Stop previous time span",
+      "label": "Stop previous running"
+    }
+  ]
+}

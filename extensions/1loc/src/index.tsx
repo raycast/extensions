@@ -7,6 +7,7 @@ import RateLimitEmptyView from "./components/rate-limit-empty-view"
 
 export interface ICategory {
   name: string
+  type: "dir" | "file"
 }
 
 const { personalAccessToken } = getPreferenceValues<{ personalAccessToken?: string }>()
@@ -22,15 +23,17 @@ const useCategories = (): [ICategory[], boolean, AxiosResponse | null] => {
     const fetchCategories = async () => {
       cancelRef.current?.cancel()
       cancelRef.current = axios.CancelToken.source()
-      const url = "https://api.github.com/repositories/251039251/contents/snippets"
+      const url = "https://api.github.com/repositories/251039251/contents/contents"
       const config = {
         cancelToken: cancelRef.current?.token,
         headers: personalAccessToken ? { Authorization: `token ${personalAccessToken}` } : undefined,
       }
       try {
-        const { data } = await axios.get(url, config)
+        const { data } = await axios.get<ICategory[]>(url, config)
         if (isMounted.current) {
-          setCategories(data)
+          const filtered = data.filter((item) => item.type === "dir" && !item.name.startsWith("_"))
+
+          setCategories(filtered)
           setIsLoading(false)
         }
       } catch (e) {
@@ -53,6 +56,7 @@ const useCategories = (): [ICategory[], boolean, AxiosResponse | null] => {
       isMounted.current = false
     }
   }, [])
+
   return [categories, isLoading, response]
 }
 

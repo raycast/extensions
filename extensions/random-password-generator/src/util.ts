@@ -1,4 +1,5 @@
 import { PasswordOptions, PasswordItem } from "./interface";
+import { randomInt } from "node:crypto";
 
 let characters = "";
 let passwordLength = 0;
@@ -31,16 +32,12 @@ const setNumber = (isNumeric: boolean) => {
   return "";
 };
 
-const getRandomInteger = (min: number, max: number) => {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-};
-
 const passwordCharacters = (): string => {
   const characterList = characters;
   let password = "";
   if (characterList.length > 0) {
     for (let i = 0; i < passwordLength; i++) {
-      password += characterList[getRandomInteger(0, characterList.length - 1)];
+      password += characterList[randomInt(characterList.length)];
     }
     characters = "";
     passwordLength = 0;

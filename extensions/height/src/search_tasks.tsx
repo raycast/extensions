@@ -1,6 +1,10 @@
-import SearchTasks from "./components/SearchTasks";
-import { withHeightAuth } from "./components/withHeightAuth";
+import SearchTasks from "@/components/SearchTasks";
+import View from "@/components/View";
 
 export default function Command() {
-  return withHeightAuth(<SearchTasks />);
+  return (
+    <View>
+      <SearchTasks />
+    </View>
+  );
 }

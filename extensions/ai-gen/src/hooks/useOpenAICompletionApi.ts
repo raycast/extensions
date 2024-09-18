@@ -27,6 +27,7 @@ export default function useOpenAICompletionApi(config: { apiKey: string }) {
           // There's a bug in the openai library where the auth header isn't being set
           // Set it manually here instead
           headers: { Authorization: `Bearer ${config.apiKey}` },
+          signal: cancelRef.current.signal,
         });
 
         setChoices({ choices: data.choices });
@@ -59,6 +60,7 @@ export default function useOpenAICompletionApi(config: { apiKey: string }) {
           // There's a bug in the openai library where the auth header isn't being set
           // Set it manually here instead
           headers: { Authorization: `Bearer ${config.apiKey}` },
+          signal: cancelRef.current.signal,
         });
 
         setModels(data.data.filter(({ id, owned_by }) => id.includes(":ft")).sort((a, b) => a.created - b.created));

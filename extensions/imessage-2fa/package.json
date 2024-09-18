@@ -6,7 +6,13 @@
   "icon": "iMessage-icon.png",
   "author": "yuercl",
   "contributors": [
-    "thomas"
+    "thomas",
+    "arronhunt",
+    "ronaldheft",
+    "hitolaus"
+  ],
+  "pastContributors": [
+    "navtoj"
   ],
   "categories": [
     "Productivity"
@@ -21,19 +27,62 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "data": [
+        {
+          "title": "Days",
+          "value": "DAYS"
+        },
+        {
+          "title": "Hours",
+          "value": "HOURS"
+        },
+        {
+          "title": "Minutes",
+          "value": "MINUTES"
+        }
+      ],
+      "default": "DAYS",
+      "description": "Temporal unit type for searching iMessage",
+      "name": "lookBackUnit",
+      "required": false,
+      "title": "Search unit for 2FA",
+      "type": "dropdown"
+    },
+    {
+      "default": "1",
+      "description": "For searching iMessage from N units ago and now",
+      "name": "lookBackAmount",
+      "required": false,
+      "title": "Search amount for 2FA",
+      "type": "textfield"
+    },
+    {
+      "default": false,
+      "description": "For ignoring messages that have been seen",
+      "name": "ignoreRead",
+      "required": false,
+      "label": "Ignore already read messages",
+      "type": "checkbox"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.40.3",
-    "@raycast/utils": "^1.4.9",
+    "@raycast/api": "^1.75.1",
+    "@raycast/utils": "^1.15.0",
     "@use-it/interval": "^1.0.0"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.12",
     "@types/node": "16.10.3",
-    "@types/react": "18.0.9",
+    "@types/react": "18.3.2",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "jest": "^29.7.0",
     "prettier": "^2.5.1",
+    "ts-jest": "^29.1.2",
     "typescript": "^4.4.3"
   },
   "scripts": {
@@ -41,16 +90,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
-  },
-  "preferences": [
-    {
-      "title": "Search last days for 2FA",
-      "name": "lookBackDays",
-      "type": "textfield",
-      "required": false,
-      "description": "For searching iMessage from N days ago and now",
-      "default": "1"
-    }
-  ]
+    "publish": "ray publish",
+    "test": "jest"
+  }
 }

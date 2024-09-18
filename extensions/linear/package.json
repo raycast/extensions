@@ -3,7 +3,7 @@
   "name": "linear",
   "title": "Linear",
   "description": "Bring Linear to every corner of your Mac. Create, search, and modify your issues. Stay on top of your notifications in the menu bar.",
-  "icon": "linear.png",
+  "icon": "linear-app-icon.png",
   "owner": "linear",
   "access": "public",
   "author": "thomaslombart",
@@ -11,7 +11,10 @@
     "mathieudutour",
     "thomas",
     "peduarte",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "mil3na",
+    "clemb8",
+    "stelo"
   ],
   "categories": [
     "Productivity"
@@ -25,21 +28,12 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "signature",
-          "type": "checkbox",
-          "title": "Signature",
-          "label": "Add Raycast signature to new issues",
-          "description": "When enabled, \"Created via Raycast\" signature will be added at the bottom of the description.",
-          "required": false,
-          "default": true
-        },
-        {
           "name": "autofocusField",
           "title": "Autofocus Field",
           "type": "dropdown",
           "required": false,
           "description": "Select the field to focus automatically once the form is rendered",
-          "default": "team",
+          "default": "title",
           "data": [
             {
               "title": "Team",
@@ -64,12 +58,20 @@
               "value": "id"
             },
             {
+              "title": "Copy Issue ID as Link",
+              "value": "id-as-link"
+            },
+            {
               "title": "Copy Issue URL",
               "value": "url"
             },
             {
               "title": "Copy Issue Title",
               "value": "title"
+            },
+            {
+              "title": "Copy Issue Title as Link",
+              "value": "title-as-link"
             }
           ]
         }
@@ -83,9 +85,12 @@
     },
     {
       "name": "assigned-issues",
-      "title": "Assigned Issues",
+      "title": "My Issues",
       "description": "View and modify issues that are assigned to you.",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "assigned"
+      ]
     },
     {
       "name": "created-issues",
@@ -106,6 +111,12 @@
       "mode": "view"
     },
     {
+      "name": "search-documents",
+      "title": "Search Documents",
+      "description": "Explore documents for your Linear team.",
+      "mode": "view"
+    },
+    {
       "name": "create-project",
       "title": "Create Project",
       "description": "Create projects for your Linear team.",
@@ -123,7 +134,6 @@
       "description": "Show unread notifications in the Menu Bar.",
       "mode": "menu-bar",
       "subtitle": "Linear",
-      "icon": "linear.png",
       "interval": "15m",
       "preferences": [
         {
@@ -204,6 +214,12 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "favorites",
+      "title": "Favorites",
+      "description": "Browse through your Linear favorites.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -215,34 +231,44 @@
       "required": false
     },
     {
-        "name": "limit",
-        "title": "API Issue Limit",
-        "description": "The maximum number of issues to fetch from the Linear API at once. Be careful when changing this, as too large a number can cause you to exceed your API rate limit and/or cause heap memory errors.",
-        "type": "textfield",
-        "default": "50",
-        "required": false
+      "name": "limit",
+      "title": "API Issue Limit",
+      "description": "The maximum number of issues to fetch from the Linear API at once. Be careful when changing this, as too large a number can cause you to exceed your API rate limit and/or cause heap memory errors.",
+      "type": "textfield",
+      "default": "50",
+      "required": false
+    },
+    {
+      "name": "shouldHideRedundantIssues",
+      "type": "checkbox",
+      "title": "Advanced",
+      "label": "Hide Redundant Issues",
+      "description": "When enabled, the issues that are marked as Done, Canceled or Duplicate will not show up in search results.",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {
-    "@linear/sdk": "^2.3.0",
-    "@raycast/api": "^1.48.8",
-    "@raycast/utils": "^1.4.16",
-    "date-fns": "^2.28.0",
-    "file-type": "^18.2.0",
+    "@linear/sdk": "^26.0.0",
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.16.0",
+    "date-fns": "^3.6.0",
+    "file-type": "^19.0.0",
     "lodash": "^4.17.21",
-    "node-emoji": "^1.11.0",
+    "nanoid": "^5.0.7",
+    "node-emoji": "^2.1.3",
     "remove-markdown": "^0.5.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/lodash": "^4.14.182",
-    "@types/node-emoji": "^1.8.1",
-    "@types/object-hash": "^2.2.1",
-    "@types/remove-markdown": "^0.3.1",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.21.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/lodash": "^4.14.202",
+    "@types/node": "^22.1.0",
+    "@types/react": "^18.2.46",
+    "@types/remove-markdown": "^0.3.4",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "react": "^18.2.0",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",

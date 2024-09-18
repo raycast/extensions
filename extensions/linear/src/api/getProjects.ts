@@ -1,5 +1,5 @@
-import { Project, User } from "@linear/sdk";
-import { getLinearClient } from "../helpers/withLinearClient";
+import { Project, ProjectUpdate, User } from "@linear/sdk";
+import { getLinearClient } from "../api/linearClient";
 
 export type ProjectResult = Pick<
   Project,
@@ -58,7 +58,7 @@ export async function getProjects(teamId?: string) {
             }
           }
         }
-      `
+      `,
     );
 
     return data?.projects.nodes;
@@ -78,39 +78,51 @@ export async function getProjects(teamId?: string) {
           }
         }
       `,
-      { teamId }
+      { teamId },
     );
 
     return data?.team.projects.nodes;
   }
 }
 
-type Roadmap = {
-  id: string;
-  name: string;
-  projects: { nodes: { id: string }[] };
+export type ProjectUpdateResult = Pick<ProjectUpdate, "id" | "body" | "url" | "health" | "createdAt"> & {
+  user: Pick<User, "id" | "displayName" | "avatarUrl" | "email">;
 };
 
-export async function getRoadmaps() {
+const projectUpdateFragment = `
+  id
+  body
+  url
+  health
+  createdAt
+  user {
+    id
+    displayName
+    avatarUrl
+    email
+  }
+`;
+
+export async function getProjectUpdates(projectId: string) {
   const { graphQLClient } = getLinearClient();
 
-  const { data } = await graphQLClient.rawRequest<{ roadmaps: { nodes: Roadmap[] } }, Record<string, unknown>>(
+  const { data } = await graphQLClient.rawRequest<
+    { project: { projectUpdates: { nodes: ProjectUpdateResult[] } } },
+    { projectId: string }
+  >(
     `
-      query {
-        roadmaps {
-          nodes {
-            id
-            name
-            projects {
-              nodes {
-                id
-              }
+      query($projectId: String!) {
+        project(id: $projectId) {
+          projectUpdates {
+            nodes {
+              ${projectUpdateFragment}
             }
           }
         }
       }
-    `
+    `,
+    { projectId },
   );
 
-  return data?.roadmaps.nodes;
+  return data?.project.projectUpdates.nodes;
 }

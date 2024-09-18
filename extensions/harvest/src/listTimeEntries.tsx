@@ -12,20 +12,22 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   deleteTimeEntry,
-  getMyTimeEntries,
   newTimeEntry,
+  refreshMenuBar,
   restartTimer,
   stopTimer,
   useCompany,
+  formatHours,
+  useMyTimeEntries,
 } from "./services/harvest";
 import { HarvestTimeEntry } from "./services/responseTypes";
 import New from "./new";
 import { execSync } from "child_process";
 import { NewTimeEntryDuration, NewTimeEntryStartEnd } from "./services/requestTypes";
-import _ from "lodash";
+import { sumBy } from "lodash";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -42,34 +44,15 @@ export interface Preferences {
 }
 
 export default function Command() {
-  const [items, setItems] = useState<HarvestTimeEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [viewDate, setViewDate] = useState(new Date());
+  const [viewDate, setViewDate] = useState<Date | null>(null);
+  const { data: items, isLoading, revalidate } = useMyTimeEntries(viewDate);
+
   const [navigationTitle, setNavigationTitle] = useState("Today's Timesheet");
   const [navSubtitle, setNavSubtitle] = useState("");
   const { data: company } = useCompany();
 
-  async function init(date?: Date) {
-    if (!date) date = viewDate;
-    let timeEntries: HarvestTimeEntry[] = [];
-
-    try {
-      timeEntries = await getMyTimeEntries({ from: date, to: date });
-    } catch (error: any) {
-      if (error.isAxiosError) {
-        if (error.response?.status === 401) {
-          await showToast(
-            Toast.Style.Failure,
-            "Invalid Token",
-            "Your API token or Account ID is invalid. Go to Raycast Preferences to update it."
-          );
-        } else {
-          await showToast(Toast.Style.Failure, "Unknown Error", "Could not fetch time entries");
-        }
-      } else {
-        await showToast(Toast.Style.Failure, "Unknown Error", "Could not fetch time entries");
-      }
-    }
+  const timeEntries = useMemo(() => {
+    const timeEntries: HarvestTimeEntry[] = items;
 
     const { sortBy }: Preferences = getPreferenceValues();
     switch (sortBy) {
@@ -111,30 +94,18 @@ export default function Command() {
       }
     }
 
-    setItems(timeEntries);
-
-    const dayTotal = _.sumBy(timeEntries, "hours")?.toFixed(2) ?? "";
-    if (company?.time_format === "hours_minutes") {
-      const time = dayTotal.split(".");
-      const hour = time[0];
-      const minute = parseFloat(`0.${time[1]}`) * 60;
-      setNavSubtitle(`${hour}:${minute < 10 ? "0" : ""}${minute.toFixed(0)}`);
-    } else {
-      setNavSubtitle(dayTotal);
-    }
-
-    setIsLoading(false);
-  }
+    return timeEntries;
+  }, [items]);
 
   useEffect(() => {
-    init();
-  }, []);
+    const dayTotal = sumBy(timeEntries, "hours")?.toFixed(2) ?? "";
+    setNavSubtitle(formatHours(dayTotal, company));
+  }, [timeEntries, company]);
 
   async function changeViewDate(date: Date) {
     // const relative = dayjs(date).fromNow();
     setNavSubtitle("");
-    setItems([]);
-    setIsLoading(true);
+    // setIsLoading(true);
     if (dayjs(date).isToday()) {
       setNavigationTitle("Today's Timesheet");
     } else if (dayjs(date).isTomorrow()) {
@@ -145,7 +116,6 @@ export default function Command() {
       setNavigationTitle(dayjs(date).format("ddd, MMM D"));
     }
     setViewDate(date);
-    await init(date);
   }
 
   function ToggleTimerAction({ entry, onComplete }: { entry: HarvestTimeEntry; onComplete: () => Promise<void> }) {
@@ -172,10 +142,11 @@ export default function Command() {
       } catch {
         await showToast(Toast.Style.Failure, "Error", `Could not ${entry.is_running ? "stop" : "start"} your timer`);
       }
+      revalidate();
       await onComplete();
     }
 
-    return dayjs(viewDate).isToday() ? (
+    return dayjs(viewDate ?? undefined).isToday() ? (
       <Action title={entry.is_running ? "Stop Timer" : "Start Timer"} icon={Icon.Clock} onAction={startOrStopTimer} />
     ) : (
       <>
@@ -189,6 +160,7 @@ export default function Command() {
             param.spent_date = dayjs().format("YYYY-MM-DD");
             await newTimeEntry(param);
             await changeViewDate(new Date());
+            revalidate();
           }}
         />
         <Action
@@ -213,7 +185,11 @@ export default function Command() {
           icon={Icon.ArrowLeft}
           shortcut={{ key: "arrowLeft", modifiers: ["cmd"] }}
           onAction={() => {
-            changeViewDate(dayjs(viewDate).subtract(1, "d").toDate());
+            changeViewDate(
+              dayjs(viewDate ?? undefined)
+                .subtract(1, "d")
+                .toDate()
+            );
           }}
         />
         <Action
@@ -221,7 +197,11 @@ export default function Command() {
           icon={Icon.ArrowRight}
           shortcut={{ key: "arrowRight", modifiers: ["cmd"] }}
           onAction={() => {
-            changeViewDate(dayjs(viewDate).add(1, "d").toDate());
+            changeViewDate(
+              dayjs(viewDate ?? undefined)
+                .add(1, "d")
+                .toDate()
+            );
           }}
         />
         {!dayjs(viewDate).isToday() && (
@@ -237,6 +217,11 @@ export default function Command() {
       </>
     );
   }
+
+  const init = async () => {
+    await refreshMenuBar();
+    revalidate();
+  };
 
   return (
     <List
@@ -256,7 +241,7 @@ export default function Command() {
       }
     >
       <List.Section title={`${navigationTitle}`} subtitle={navSubtitle}>
-        {items.map((entry) => {
+        {timeEntries.map((entry) => {
           return (
             <List.Item
               id={entry.id.toString()}
@@ -264,7 +249,7 @@ export default function Command() {
               title={entry.project.name}
               accessoryTitle={`${entry.client.name}${entry.client.name && entry.task.name ? " | " : ""}${
                 entry.task.name
-              } | ${entry.hours}`}
+              } | ${formatHours(entry.hours.toFixed(2), company)}`}
               accessoryIcon={
                 entry.external_reference ? { source: entry.external_reference.service_icon_url } : undefined
               }
@@ -306,7 +291,7 @@ function NewEntryAction({
   viewDate = new Date(),
 }: {
   onSave: () => Promise<void>;
-  viewDate: Date;
+  viewDate: Date | null;
 }) {
   return (
     <Action.Push
@@ -327,7 +312,7 @@ function EditEntryAction({
 }: {
   onSave: () => Promise<void>;
   entry: HarvestTimeEntry;
-  viewDate: Date;
+  viewDate: Date | null;
 }) {
   return (
     <Action.Push
@@ -344,14 +329,15 @@ function DuplicateEntryAction({
     return;
   },
   entry,
+  viewDate,
 }: {
   onSave: () => Promise<void>;
   entry: HarvestTimeEntry;
-  viewDate: Date;
+  viewDate: Date | null;
 }) {
   return (
     <Action.Push
-      target={<New onSave={onSave} entry={{ ...entry, id: null }} />}
+      target={<New onSave={onSave} viewDate={viewDate} entry={{ ...entry, id: null }} />}
       title="Duplicate Time Entry"
       shortcut={{ key: "d", modifiers: ["cmd"] }}
       icon={Icon.Clipboard}
@@ -387,7 +373,7 @@ function DeleteEntryAction({
         }
       }}
       title="Delete Time Entry"
-      shortcut={{ key: "delete", modifiers: ["cmd"] }}
+      shortcut={{ key: "x", modifiers: ["ctrl"] }}
       icon={Icon.Trash}
     />
   );

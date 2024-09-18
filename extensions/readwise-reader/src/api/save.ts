@@ -5,6 +5,7 @@ async function save(url: string) {
   const readerAPI = "https://readwise.io/api/v3/save/";
   const body = {
     url,
+    saved_using: "raycast",
   };
 
   const headers = useDefaultHeaders();

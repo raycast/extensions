@@ -39,19 +39,19 @@ export default function Profiles(props: ProfileProps) {
                 adjustContrast: true,
               },
             }}
-            accessoryTitle="Command"
+            accessories={[{ text: "Command" }]}
             key={item.id}
             actions={
               <ActionPanel>
                 <Action
                   title="Open Command"
-                  onAction={() => {
-                    pop();
+                  onAction={async () => {
                     if (props.type == ActionType.Switch) {
-                      postAndCloseMainWindow(`switch-profile/${item.id}`);
+                      await postAndCloseMainWindow(`switch-profile/${item.id}`);
                     } else {
-                      postAndCloseMainWindow(`open-all-in-profile/${item.id}`);
+                      await postAndCloseMainWindow(`open-all-in-profile/${item.id}`);
                     }
+                    pop();
                   }}
                 />
               </ActionPanel>

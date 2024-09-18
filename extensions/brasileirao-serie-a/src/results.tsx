@@ -2,6 +2,7 @@ import { Icon, List } from "@raycast/api";
 import { format } from "date-fns";
 import { TeamsSelector } from "./components";
 import { useMatches, useSelectedTeam } from "./hooks";
+import { getTeamShortName } from "./hooks/useTeams";
 import { groupBy } from "./utils";
 
 export default function Results() {
@@ -10,7 +11,7 @@ export default function Results() {
 
   const dates = groupBy(
     data.sort((a, b) => b.utcDate.localeCompare(a.utcDate)),
-    (match) => format(new Date(match.utcDate), "EEE d MMM yyyy")
+    (match) => format(new Date(match.utcDate), "EEE d MMM yyyy"),
   );
 
   return (
@@ -25,7 +26,9 @@ export default function Results() {
                 <List.Item
                   key={match.id}
                   title={time}
-                  subtitle={`${match.homeTeam.shortName} ${match.score.fullTime.home} - ${match.score.fullTime.away} ${match.awayTeam.shortName}`}
+                  subtitle={`${getTeamShortName(match.homeTeam)} ${match.score.fullTime.home} - ${
+                    match.score.fullTime.away
+                  } ${getTeamShortName(match.awayTeam)}`}
                   icon={Icon.Clock}
                 />
               );

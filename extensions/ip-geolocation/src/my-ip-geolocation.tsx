@@ -1,18 +1,21 @@
-import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
-import React from "react";
-import { searchMyIpGeolocation } from "./hooks/hooks";
-import { IpEmptyView } from "./components/ip-empty-view";
-import { myIpListIcons } from "./utils/constants";
-import { Preferences } from "./types/preferences";
-import { isEmpty } from "./utils/common-utils";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
+import { IpEmptyView } from "./components/ip-empty-view";
+import { isEmpty } from "./utils/common-utils";
+import { myIpListIcons } from "./utils/constants";
+import { ActionOpenExtensionPreferences } from "./components/action-open-extension-preferences";
+import { useMyIpGeolocation } from "./hooks/useMyIpGeolocation";
+import { useMemo } from "react";
 
 export default function SearchIpGeolocation() {
-  const { language, showIPv6 } = getPreferenceValues<Preferences>();
-  const { ipGeolocation, loading } = searchMyIpGeolocation(language, showIPv6);
+  const { data: ipGeolocationData, isLoading } = useMyIpGeolocation();
+
+  const ipGeolocation = useMemo(() => {
+    return ipGeolocationData || [];
+  }, [ipGeolocationData]);
 
   return (
-    <List isLoading={loading} searchBarPlaceholder={"My IP Geolocation"}>
+    <List isLoading={isLoading} searchBarPlaceholder={"My IP Geolocation"}>
       <IpEmptyView title={"No Geolocation Info"} />
       {ipGeolocation.map(
         (value, index) =>
@@ -29,11 +32,14 @@ export default function SearchIpGeolocation() {
                     title={`Copy All Info`}
                     content={JSON.stringify(Object.fromEntries(ipGeolocation), null, 2)}
                   />
-                  <ActionOpenCommandPreferences />
+                  <ActionPanel.Section>
+                    <ActionOpenCommandPreferences />
+                    <ActionOpenExtensionPreferences />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />
-          )
+          ),
       )}
     </List>
   );

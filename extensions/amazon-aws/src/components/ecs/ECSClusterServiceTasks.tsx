@@ -2,8 +2,9 @@ import { Service } from "@aws-sdk/client-ecs";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { fetchTasks, getTaskUrl } from "../../actions";
 import { useCachedPromise } from "@raycast/utils";
-import { getActionOpenInBrowser, getExportResponse, getFilterPlaceholder } from "../../util";
+import { getFilterPlaceholder } from "../../util";
 import ECSClusterServiceTaskContainers from "./ECSClusterServiceTaskContainers";
+import { AwsAction } from "../common/action";
 
 function ECSClusterServiceTasks({ service }: { service: Service }) {
   const { data: tasks, isLoading } = useCachedPromise(
@@ -11,7 +12,7 @@ function ECSClusterServiceTasks({ service }: { service: Service }) {
     [service.clusterArn || "", service.serviceName || ""],
     {
       keepPreviousData: true,
-    }
+    },
   );
 
   return (
@@ -19,7 +20,6 @@ function ECSClusterServiceTasks({ service }: { service: Service }) {
       {tasks ? (
         tasks.map((task) => (
           <List.Item
-            id={task.taskDefinitionArn}
             key={task.taskDefinitionArn}
             title={task.taskArn?.split("/").pop() || ""}
             icon={Icon.Box}
@@ -49,15 +49,11 @@ function ECSClusterServiceTasks({ service }: { service: Service }) {
                 <Action.Push
                   title={"View Containers"}
                   icon={Icon.Eye}
-                  target={
-                    <ECSClusterServiceTaskContainers
-                      taskDefinitionArn={task.taskDefinitionArn || ""}
-                    ></ECSClusterServiceTaskContainers>
-                  }
+                  target={<ECSClusterServiceTaskContainers taskDefinitionArn={task.taskDefinitionArn || ""} />}
                 />
-                {getActionOpenInBrowser(getTaskUrl(task))}
+                <AwsAction.Console url={getTaskUrl(task)} />
                 <ActionPanel.Section title="Copy">
-                  {getExportResponse(task)}
+                  <AwsAction.ExportResponse response={task} />
                   <Action.CopyToClipboard
                     title="Copy Task ARN"
                     content={task.taskArn || ""}

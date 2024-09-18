@@ -1,40 +1,34 @@
-import { List, Grid, getPreferenceValues } from "@raycast/api";
+import { Grid, List, getPreferenceValues } from "@raycast/api";
+import { Preferences } from "../lib/types";
 
-export type ListType = "list";
-export type GridType = "grid";
+const { view } = getPreferenceValues<Preferences>();
 
-type ListOrGridProps = ({ layout?: ListType } & List.Props) | ({ layout?: GridType } & Grid.Props);
+type ListOrGridProps = List.Props | Grid.Props;
 export function ListOrGrid<T>(props: ListOrGridProps, context?: T) {
-  const { layout, ...rest } = props;
-  return layout === "list" ? List(rest, context) : Grid(rest, context);
+  return view === "list" ? List(props, context) : Grid(props, context);
 }
 
-type ListOrGridSectionProps =
-  | ({ layout?: ListType } & List.Section.Props)
-  | ({ layout?: GridType } & Grid.Section.Props);
+type ListOrGridSectionProps = List.Section.Props | Grid.Section.Props;
 export function ListOrGridSection<T>(props: ListOrGridSectionProps, context?: T) {
-  const { layout = "list", ...rest } = props;
-  return layout === "list" ? List.Section(rest, context) : Grid.Section(rest, context);
+  return view === "list" ? List.Section(props, context) : Grid.Section(props, context);
 }
 
-type ListOrGridEmptyViewProps =
-  | ({ layout?: ListType } & List.EmptyView.Props)
-  | ({ layout?: GridType } & Grid.EmptyView.Props);
+type ListOrGridEmptyViewProps = List.EmptyView.Props | Grid.EmptyView.Props;
 export function ListOrGridEmptyView<T>(props: ListOrGridEmptyViewProps, context?: T) {
-  const { layout = "list", ...rest } = props;
-  return layout === "list" ? List.EmptyView(rest, context) : Grid.EmptyView(rest, context);
+  return view === "list" ? List.EmptyView(props, context) : Grid.EmptyView(props, context);
 }
 
-export function getViewLayout(): ListType | GridType {
-  const pref = getPreferenceValues();
-  return pref.view;
+type ListOrGridDropdownProps = List.Dropdown.Props | Grid.Dropdown.Props;
+export function ListOrGridDropdown<T>(props: ListOrGridDropdownProps, context?: T) {
+  return view === "list" ? List.Dropdown(props, context) : Grid.Dropdown(props, context);
 }
 
-export function getGridItemSize(): Grid.ItemSize {
-  const pref = getPreferenceValues();
-  return pref.griditemsize === "small"
-    ? Grid.ItemSize.Small
-    : pref.griditemsize === "large"
-    ? Grid.ItemSize.Large
-    : Grid.ItemSize.Medium;
+type ListOrGridDropdownSectionProps = List.Dropdown.Section.Props | Grid.Dropdown.Section.Props;
+export function ListOrGridDropdownSection<T>(props: ListOrGridDropdownSectionProps, context?: T) {
+  return view === "list" ? List.Dropdown.Section(props, context) : Grid.Dropdown.Section(props, context);
+}
+
+type ListOrGridDropdownItemProps = List.Dropdown.Item.Props | Grid.Dropdown.Item.Props;
+export function ListOrGridDropdownItem<T>(props: ListOrGridDropdownItemProps, context?: T) {
+  return view === "list" ? List.Dropdown.Item(props, context) : Grid.Dropdown.Item(props, context);
 }

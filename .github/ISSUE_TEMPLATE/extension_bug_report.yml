@@ -19,6 +19,24 @@ body:
       placeholder: ex. https://raycast.com/author/extension
     validations:
       required: true
+  - type: input
+    id: raycast-version
+    attributes:
+      label: Raycast Version
+      description: |
+        Please provide the version of Raycast you are using.
+        You can find it in the Raycast menu > About Raycast.
+      placeholder: ex. 1.73.2
+    validations:
+      required: true
+  - type: input
+    id: macos-version
+    attributes:
+      label: macOS Version
+      description: |
+        Please provide the version of macOS you are using.
+        You can find it in the Apple menu > About This Mac.
+      placeholder: ex. 14.4.1
   - type: textarea
     id: description
     attributes:
@@ -38,7 +56,7 @@ body:
         3. Run '...'
         4. See error...
     validations:
-      required: false
+      required: true
   - type: textarea
     id: current-behaviour
     attributes:

@@ -1,7 +1,8 @@
 import fetch from "node-fetch";
-import { CreateProductPayload, ProductObject, UpdateProductPayload } from "../types/product";
-import { ApiErrorResponse } from "../types/utils";
-import { ApiBaseUrl, ApiHeaders, ApiUrls } from "./helpers";
+
+import { ApiBaseUrl, ApiHeaders, ApiUrls } from "@/api/helpers";
+import { CreateProductPayload, ProductObject, UpdateProductPayload } from "@/types/product";
+import { ApiErrorResponse } from "@/types/utils";
 
 export const ApiProduct = {
   async create(values: CreateProductPayload) {

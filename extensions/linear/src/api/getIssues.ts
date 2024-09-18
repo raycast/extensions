@@ -1,22 +1,52 @@
-import { Comment, Cycle, Issue, Project, Team, User, WorkflowState } from "@linear/sdk";
+import {
+  Comment,
+  Cycle,
+  Issue,
+  IssueRelation,
+  Project,
+  ProjectMilestone,
+  Team,
+  User,
+  WorkflowState,
+} from "@linear/sdk";
 import { getPreferenceValues } from "@raycast/api";
 import { LabelResult } from "./getLabels";
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 import { getPaginated, PageInfo } from "./pagination";
-
-type Preferences = {
-  limit?: string;
-};
 
 const DEFAULT_PAGE_SIZE = 50;
 const DEFAULT_LIMIT = 50;
 
+const preferences = getPreferenceValues<Preferences>();
+
 function getPageLimits() {
-  const preferences: Preferences = getPreferenceValues();
   const limit = preferences.limit ? +preferences.limit : DEFAULT_LIMIT;
   const pageSize = Math.min(DEFAULT_PAGE_SIZE, limit);
   const pageLimit = Math.floor(limit / pageSize);
   return { pageSize, pageLimit };
+}
+
+function getCompletedIssuesFilter(
+  {
+    inFilterBlock,
+    addComma,
+    inParentheses,
+  }: { inFilterBlock?: boolean; addComma?: boolean; inParentheses?: boolean } = {
+    inFilterBlock: false,
+    inParentheses: false,
+    addComma: true,
+  },
+) {
+  return !preferences.shouldHideRedundantIssues
+    ? ""
+    : [
+        ...(inParentheses ? ["("] : []),
+        ...(addComma ? [", "] : []),
+        ...(!inFilterBlock ? ["filter: { "] : []),
+        "completedAt: { null: true }, canceledAt: { null: true }",
+        ...(!inFilterBlock ? [" }"] : []),
+        ...(inParentheses ? [")"] : []),
+      ].join("");
 }
 
 export const IssueFragment = `
@@ -81,6 +111,10 @@ export const IssueFragment = `
     icon
     color
   }
+  projectMilestone {
+    id
+    name
+  }
 `;
 
 export type IssueState = Pick<WorkflowState, "id" | "type" | "name" | "color">;
@@ -116,41 +150,58 @@ export type IssueResult = Pick<
   parent?: Pick<Issue, "id" | "title" | "number"> & { state: Pick<WorkflowState, "type" | "color"> };
 } & {
   project?: Pick<Project, "id" | "name" | "icon" | "color">;
+} & {
+  projectMilestone?: Pick<ProjectMilestone, "id" | "name" | "targetDate">;
 };
 
-export async function getLastUpdatedIssues() {
+export async function getLastUpdatedIssues(after?: string) {
   const { graphQLClient } = getLinearClient();
-  const { data } = await graphQLClient.rawRequest<{ issues: { nodes: IssueResult[] } }, Record<string, unknown>>(
+  const { data } = await graphQLClient.rawRequest<
+    { issues: { nodes: IssueResult[]; pageInfo: { endCursor: string; hasNextPage: boolean } } },
+    Record<string, unknown>
+  >(
     `
-      query {
-        issues(orderBy: updatedAt) {
+      query($after: String) {
+        issues(first: 25, orderBy: updatedAt, after: $after${getCompletedIssuesFilter()}) {
           nodes {
             ${IssueFragment}
           }
-        }
-      }
-    `
-  );
-
-  return data?.issues.nodes;
-}
-
-export async function searchIssues(query: string) {
-  const { graphQLClient } = getLinearClient();
-  const { data } = await graphQLClient.rawRequest<{ issueSearch: { nodes: IssueResult[] } }, Record<string, unknown>>(
-    `
-      query($query: String!) {
-        issueSearch(query: $query) {
-          nodes {
-            ${IssueFragment}
+          pageInfo {
+            hasNextPage
+            endCursor
           }
         }
       }
     `,
-    { query }
+    { after },
   );
 
-  return data?.issueSearch.nodes;
+  return { issues: data?.issues.nodes, pageInfo: data?.issues.pageInfo };
+}
+
+export async function searchIssues(query: string, after?: string) {
+  const { graphQLClient } = getLinearClient();
+  const { data } = await graphQLClient.rawRequest<
+    { issueSearch: { nodes: IssueResult[]; pageInfo: { endCursor: string; hasNextPage: boolean } } },
+    { query: string; after?: string }
+  >(
+    `
+      query($query: String!, $after: String) {
+        issueSearch(first: 25, query: $query, after: $after${getCompletedIssuesFilter()}) {
+          nodes {
+            ${IssueFragment}
+          }
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+        }
+      }
+    `,
+    { query, after },
+  );
+
+  return { issues: data?.issueSearch.nodes, pageInfo: data?.issueSearch.pageInfo };
 }
 
 export async function getLastCreatedIssues() {
@@ -158,19 +209,19 @@ export async function getLastCreatedIssues() {
   const { data } = await graphQLClient.rawRequest<{ issues: { nodes: IssueResult[] } }, Record<string, unknown>>(
     `
       query {
-        issues(orderBy: createdAt) {
+        issues(orderBy: createdAt${getCompletedIssuesFilter()}) {
           nodes {
             ${IssueFragment}
           }
         }
       }
-    `
+    `,
   );
 
   return data?.issues.nodes;
 }
 
-export async function getAssignedIssues() {
+export async function getMyIssues() {
   const { graphQLClient } = getLinearClient();
   const { data } = await graphQLClient.rawRequest<
     { viewer: { assignedIssues: { nodes: IssueResult[] } } },
@@ -179,14 +230,14 @@ export async function getAssignedIssues() {
     `
       query {
         viewer {
-          assignedIssues(orderBy: updatedAt) {
+          assignedIssues(orderBy: updatedAt${getCompletedIssuesFilter()}) {
             nodes {
               ${IssueFragment}
             }
           }
         }
       }
-    `
+    `,
   );
 
   return data?.viewer.assignedIssues.nodes;
@@ -201,14 +252,14 @@ export async function getCreatedIssues() {
     `
       query {
         viewer {
-          createdIssues(orderBy: updatedAt) {
+          createdIssues(orderBy: updatedAt${getCompletedIssuesFilter()}) {
             nodes {
               ${IssueFragment}
             }
           }
         }
       }
-    `
+    `,
   );
 
   return data?.viewer.createdIssues.nodes;
@@ -232,7 +283,7 @@ export async function getActiveCycleIssues(cycleId?: string) {
         `
           query($cycleId: String!, $cursor: String) {
             cycle(id: $cycleId) {
-              issues(first: ${pageSize}, after: $cursor) {
+              issues(first: ${pageSize}, after: $cursor${getCompletedIssuesFilter()}) {
                 nodes {
                   ${IssueFragment}
                 }
@@ -244,12 +295,12 @@ export async function getActiveCycleIssues(cycleId?: string) {
             }
           }
         `,
-        { cycleId, cursor }
+        { cycleId, cursor },
       ),
     (r) => r.data?.cycle.issues.pageInfo,
     (accumulator: IssueResult[], currentValue) => accumulator.concat(currentValue.data?.cycle.issues.nodes || []),
     [],
-    pageLimit
+    pageLimit,
   );
 
   return nodes;
@@ -260,14 +311,38 @@ export async function getProjectIssues(projectId: string) {
   const { data } = await graphQLClient.rawRequest<{ issues: { nodes: IssueResult[] } }, Record<string, unknown>>(
     `
       query($projectId: ID) {
-        issues(filter: { project: { id: { eq: $projectId } } }) {
+        issues(filter: { project: { id: { eq: $projectId } }${getCompletedIssuesFilter({
+          inFilterBlock: true,
+          addComma: true,
+        })} } ) {
           nodes {
             ${IssueFragment}
           }
         }
       }
     `,
-    { projectId }
+    { projectId },
+  );
+
+  return data?.issues.nodes;
+}
+
+export async function getProjectMilestoneIssues(milestoneId: string) {
+  const { graphQLClient } = getLinearClient();
+  const { data } = await graphQLClient.rawRequest<{ issues: { nodes: IssueResult[] } }, Record<string, unknown>>(
+    `
+      query($milestoneId: ID) {
+        issues(filter: { projectMilestone: { id: { eq: $milestoneId } }${getCompletedIssuesFilter({
+          inFilterBlock: true,
+          addComma: true,
+        })} } ) {
+          nodes {
+            ${IssueFragment}
+          }
+        }
+      }
+    `,
+    { milestoneId },
   );
 
   return data?.issues.nodes;
@@ -282,7 +357,7 @@ export async function getSubIssues(issueId: string) {
     `
       query($issueId: String!) {
         issue(id: $issueId) {
-          children {
+          children${getCompletedIssuesFilter({ inParentheses: true })} {
             nodes {
               ${IssueFragment}
               sortOrder
@@ -291,7 +366,7 @@ export async function getSubIssues(issueId: string) {
         }
       }
     `,
-    { issueId }
+    { issueId },
   );
 
   if (!data) {
@@ -332,7 +407,7 @@ export async function getComments(issueId: string) {
         }
       }
     `,
-    { issueId }
+    { issueId },
   );
 
   if (!data) {
@@ -342,20 +417,71 @@ export async function getComments(issueId: string) {
   return data.issue.comments.nodes;
 }
 
-export type IssueDetailResult = IssueResult & Pick<Issue, "description" | "dueDate">;
+export type Attachment = {
+  id: string;
+  title: string;
+  subtitle: string;
+  source?: {
+    imageUrl?: string;
+  };
+  url: string;
+  updatedAt: string;
+};
+
+export type IssueDetailResult = IssueResult &
+  Pick<Issue, "description" | "dueDate"> & {
+    attachments?: {
+      nodes: Attachment[];
+    };
+    relations?: {
+      nodes: [
+        Pick<IssueRelation, "id" | "type"> & {
+          relatedIssue: Pick<Issue, "identifier" | "title"> & {
+            state: Pick<WorkflowState, "type" | "color">;
+          };
+        },
+      ];
+    };
+  };
 
 export async function getIssueDetail(issueId: string) {
   const { graphQLClient } = getLinearClient();
+
   const { data } = await graphQLClient.rawRequest<{ issue: IssueDetailResult }, Record<string, unknown>>(
     `
       query($issueId: String!) {
         issue(id: $issueId) {
           ${IssueFragment}
+          attachments {
+            nodes {
+              id
+              title
+              subtitle
+              source
+              url
+              updatedAt
+            }
+          }
           description
+          relations {
+            nodes {
+              id
+              type
+              relatedIssue {
+                id
+                identifier
+                title
+                state {
+                  color
+                  type
+                }
+              }
+            }
+          }
         }
       }
     `,
-    { issueId }
+    { issueId },
   );
 
   if (!data) {

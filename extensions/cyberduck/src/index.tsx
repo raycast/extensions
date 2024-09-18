@@ -51,7 +51,7 @@ export default function Command() {
 
 function ListItem(props: { entry: ConnectionEntry }) {
   const prot = props.entry.Protocol.toUpperCase();
-  const name = props.entry.Nickname || props.entry.Hostname;
+  const name = props.entry.Nickname || props.entry.Hostname || "-";
   return (
     <List.Item
       title={name}

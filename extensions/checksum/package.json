@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "checksum",
+  "title": "Checksum",
+  "description": "This Raycast extension allows you to check the checksum of a file. Simply enter the file path and the extension will calculate its checksum and compare it to a provided value. This can be useful for verifying the integrity of downloaded files or ensuring that a file has not been tampered with",
+  "icon": "command_icon.png",
+  "author": "Ek217",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "checksum",
+      "title": "Verify File Checksum",
+      "description": "Run a checksum on a specified file",
+      "mode": "view"
+    },
+    {
+      "name": "hashfile",
+      "title": "Get File Hash",
+      "description": "Calculate the hash of a specified file",
+      "mode": "view"
+    },
+    {
+      "name": "hashtext",
+      "title": "Get Text Hash",
+      "description": "Calculate the hash of a specified text",
+      "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "Show in Menubar",
+      "description": "Show the checksum extension shortcuts in the menubar",
+      "mode": "menu-bar"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.51.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "popRootAfterSubmit",
+      "description": "Pop to root after submit",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Options",
+      "label": "Pop to root after submit"
+    }
+  ]
+}

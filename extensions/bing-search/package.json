@@ -5,6 +5,9 @@
   "description": "Bing search with autosuggestions",
   "icon": "command-icon.png",
   "author": "maver1ck",
+  "contributors": [
+    "3c1u"
+  ],
   "categories": [
     "Web"
   ],
@@ -19,7 +22,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.48.9",
-    "iconv-lite": "^0.6.3",
     "nanoid": "^4.0.0",
     "node-fetch": "^3.3.0"
   },

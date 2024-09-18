@@ -1,24 +1,27 @@
-import { Form, ActionPanel, Action, Clipboard, showToast, Toast, getPreferenceValues, Icon } from "@raycast/api";
-import got from "got";
+import { Form, ActionPanel, Action, showToast, Toast, Icon, LaunchProps, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { source_languages, target_languages } from "./utils";
+import {
+  SourceLanguage,
+  TargetLanguage,
+  getSelection,
+  sendTranslateRequest,
+  source_languages,
+  target_languages,
+} from "./utils";
+import TranslationView from "./components/TranslationView";
+import transliterate from "@sindresorhus/transliterate";
 
 interface Values {
   key?: string;
-  from?: string;
-  to?: string;
+  from?: SourceLanguage | "";
+  to?: TargetLanguage;
   text?: string;
   translation?: string;
 }
 
-interface Preferences {
-  key: string;
-  pro: boolean;
-}
-
 function SwitchLanguagesAction(props: { onSwitchLanguages: () => void }) {
   return (
-    <ActionPanel.Item
+    <Action
       icon={Icon.ChevronUp}
       title="Switch Languages"
       shortcut={{ modifiers: ["ctrl"], key: "x" }}
@@ -27,68 +30,72 @@ function SwitchLanguagesAction(props: { onSwitchLanguages: () => void }) {
   );
 }
 
-const Command = () => {
-  const [key, setKey] = useState("");
-  const [pro, setPro] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [sourceText, setSourceText] = useState("");
-  const [translation, setTranslation] = useState("");
-  const [sourceLanguage, setSourceLanguage] = useState("");
-  const [targetLanguage, setTargetLanguage] = useState("EN");
+type LaunchContext = {
+  translation?: string;
+  sourceLanguage?: SourceLanguage;
+};
 
+const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
+  // Check whether component is called with an existing value for translation
+  if (props?.launchContext?.translation) {
+    const translation = props?.launchContext?.translation;
+    const sourceLanguage = props?.launchContext?.sourceLanguage;
+    return <TranslationView translation={translation} sourceLanguage={sourceLanguage} />;
+  }
+  const { defaultTargetLanguage } = getPreferenceValues<Preferences>();
+  const [loading, setLoading] = useState(false);
+  const [sourceText, setSourceText] = useState(props.fallbackText ?? "");
+  const [translation, setTranslation] = useState("");
+  const [sourceLanguage, setSourceLanguage] = useState<SourceLanguage | "">("");
+  const [targetLanguage, setTargetLanguage] = useState<TargetLanguage>(defaultTargetLanguage);
+  const [detectedSourceLanguage, setDetectedSourceLanguage] = useState<SourceLanguage>();
+
+  // set the source text to the selected text if no fallback text is provided
+  // if there is no selected text, then just leave the source text empty
   useEffect(() => {
-    (async () => {
-      const preferences: Preferences = getPreferenceValues();
-      setKey(preferences.key);
-      setPro(preferences.pro);
-    })();
+    if (props.fallbackText) return;
+    getSelection().then((content) => {
+      setSourceText(content ?? "");
+    });
   }, []);
 
   const submit = async (values: Values) => {
-    if (values.text) {
-      try {
-        setLoading(true);
-        console.log(
-          `https://api${pro ? "" : "-free"}.deepl.com/v2/translate?auth_key=${key}&text=${values.text}&target_lang=${
-            values.to
-          }${values.from ? `&source_lang=${values.from}` : ""}`
-        );
-        const response = await got(
-          `https://api${pro ? "" : "-free"}.deepl.com/v2/translate?auth_key=${key}&text=${values.text}&target_lang=${
-            values.to
-          }${values.from ? `&source_lang=${values.from}` : ""}`
-        );
-        const translation = JSON.parse(response.body).translations[0].text;
-        setLoading(false);
-        setTranslation(translation);
-        await Clipboard.copy(translation);
-        await showToast(Toast.Style.Success, "The translation was copied to your clipboard.");
-      } catch (error) {
-        setLoading(false);
-        await showToast(
-          Toast.Style.Failure,
-          "Something went wrong",
-          "Check your internet connection, API key, or you've maxed out the API."
-        );
-      }
-    }
+    if (!values.text || !values.to) return;
+    setLoading(true);
+
+    const response = await sendTranslateRequest({
+      text: values.text,
+      targetLanguage: values.to,
+      sourceLanguage: values.from && values.from.length > 0 ? values.from : undefined,
+      onTranslateAction: "none",
+    });
+
+    setLoading(false);
+
+    if (!response) return;
+
+    const { translation, detectedSourceLanguage } = response;
+    setTranslation(translation);
+    setDetectedSourceLanguage(detectedSourceLanguage);
   };
 
   const switchLanguages = async () => {
-    // No action if the source language is not set ("Detect" by default)
-    if (sourceLanguage === "") {
+    // No action if the source language is not set ("Detect" by default) and we don't have a detected source language
+    if (sourceLanguage === "" && !detectedSourceLanguage) {
       await showToast(
         Toast.Style.Failure,
         "Source language not set",
-        "Please select a source language before switching languages."
+        "Please select a source language before switching languages.",
       );
       return;
     }
 
     // Slicing to handle cases such as "EN-GB", "EN-US", "PT-PT", "PT-BR", ...
-    const newSourceValue = targetLanguage.slice(0, 2);
+    const newSourceValue = targetLanguage.slice(0, 2) as SourceLanguage;
     // Picking the first occurrence of a target language that starts with the source language (always 2 chars)
-    const newTargetValue = Object.keys(target_languages).find((key) => key.startsWith(sourceLanguage));
+    const newTargetValue = Object.keys(target_languages).find((key) =>
+      key.startsWith(detectedSourceLanguage || sourceLanguage),
+    ) as TargetLanguage;
 
     if (newTargetValue != undefined) {
       // Set the new language values
@@ -104,39 +111,75 @@ const Command = () => {
       await showToast(
         Toast.Style.Failure,
         "Something went wrong",
-        `Could not switch between ${sourceLanguage} and ${targetLanguage}`
+        `Could not switch between ${sourceLanguage} and ${targetLanguage}`,
       );
     }
   };
+
+  const _t = transliterate(translation);
+  const transliteration = _t == translation ? "" : _t;
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Translate" onSubmit={submit} />
-          <Action.OpenInBrowser title="Free API Key" url="https://www.deepl.com/pro-api" />
-          <SwitchLanguagesAction onSwitchLanguages={switchLanguages} />
+          <ActionPanel.Section>
+            <Action.SubmitForm icon={Icon.ArrowRightCircle} title="Translate" onSubmit={submit} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.CopyToClipboard
+              title="Copy Translation"
+              shortcut={{ modifiers: ["cmd"], key: "." }}
+              content={translation}
+            />
+            <Action.Paste
+              title="Paste in Frontmost App"
+              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+              content={translation}
+            />
+            <Action.CopyToClipboard
+              title="Copy Transliteration"
+              shortcut={{ modifiers: ["cmd"], key: "t" }}
+              content={transliteration}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.OpenInBrowser title="Free API Key" url="https://www.deepl.com/pro-api" />
+            <SwitchLanguagesAction onSwitchLanguages={switchLanguages} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       isLoading={loading}
     >
-      <>
-        <Form.TextArea id="text" placeholder="Enter or paste text here" value={sourceText} onChange={setSourceText} />
-        <Form.Dropdown id="from" value={sourceLanguage} onChange={setSourceLanguage} storeValue={true} title="From">
-          <Form.Dropdown.Item value="" title="Detect" />
-          {Object.entries(source_languages).map(([value, title]) => (
-            <Form.Dropdown.Item value={value} title={title} key={value} />
-          ))}
-        </Form.Dropdown>
-        <Form.Separator />
-        <Form.Dropdown id="to" value={targetLanguage} onChange={setTargetLanguage} storeValue={true} title="To">
-          {Object.entries(target_languages).map(([value, title]) => (
-            <Form.Dropdown.Item value={value} title={title} key={value} />
-          ))}
-        </Form.Dropdown>
-        <Form.TextArea id="translation" value={translation} />
-      </>
+      <Form.TextArea id="text" placeholder="Enter or paste text here" value={sourceText} onChange={setSourceText} />
+      <Form.Dropdown
+        id="from"
+        value={sourceLanguage}
+        onChange={(value) => setSourceLanguage(value as SourceLanguage)}
+        storeValue={true}
+        title="From"
+      >
+        <Form.Dropdown.Item value="" title="Detect" />
+        {Object.entries(source_languages).map(([value, title]) => (
+          <Form.Dropdown.Item value={value} title={title} key={value} />
+        ))}
+      </Form.Dropdown>
+      <Form.Separator />
+      <Form.Dropdown
+        id="to"
+        value={targetLanguage}
+        onChange={(value) => setTargetLanguage(value as TargetLanguage)}
+        storeValue={true}
+        title="To"
+      >
+        {Object.entries(target_languages).map(([value, title]) => (
+          <Form.Dropdown.Item value={value} title={title} key={value} />
+        ))}
+      </Form.Dropdown>
+      <Form.TextArea id="translation" value={translation} />
+      <Form.Description title="Transliteration" text={transliteration} />
     </Form>
   );
 };
+
 export default Command;

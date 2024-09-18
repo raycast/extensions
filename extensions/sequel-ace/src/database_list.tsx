@@ -39,11 +39,11 @@ export default function DatabaseList() {
       <List.EmptyView icon={{ source: "no-view.png" }} title="No databases found in Sequel Ace, go add one!" />
       {state &&
         state.grps?.map((item) => {
-          const subtitle = `${item.connections.length}` + ` item${item.connections.length > 1 ? "s" : ""}`;
+          const subtitle = `${item.connections.length}` + ` item${item.connections.length !== 1 ? "s" : ""}`;
           return (
             <List.Section key={item.id} title={item.name} subtitle={subtitle}>
               {item.connections.map((connection) => (
-                <ConnectionListItem key={connection.id} connection={connection} />
+                <ConnectionListItem key={connection.id} connection={connection} groupName={item.name} />
               ))}
             </List.Section>
           );
@@ -60,7 +60,7 @@ function readfavorites(sequelAceLocation: string): any[] {
   const connectionsList = plist.parse(fs.readFileSync(sequelAceLocation, "utf8")) as ReadonlyArray<plist.PlistObject>;
 
   const root = connectionsList["Favorites Root" as any];
-  const cnns = getfavorites(root["Children"] as ReadonlyArray<plist.PlistObject>, "undefined");
+  const cnns = getfavorites(root["Children"] as ReadonlyArray<plist.PlistObject>, "No Group");
   return cnns;
 }
 
@@ -76,7 +76,8 @@ function getfavorites(favorites: ReadonlyArray<plist.PlistObject>, grpName: stri
       grps.concat(getfavorites(favorite.Children as ReadonlyArray<plist.PlistObject>, favorite.Name as string, grps));
     } else {
       const conn: Connection = {
-        id: favorite.id.toString(),
+        id:
+          favorite.id?.toString() ?? favorite.name.toString() + favorite.host.toString() + favorite.database.toString(),
         colorIndex: favorite.colorIndex as number,
         name: favorite.name.toString(),
         database: favorite.database.toString(),
@@ -88,10 +89,11 @@ function getfavorites(favorites: ReadonlyArray<plist.PlistObject>, grpName: stri
   return grps;
 }
 
-function ConnectionListItem(props: { connection: Connection }) {
+function ConnectionListItem(props: { connection: Connection; groupName: string }) {
   const connection = props.connection;
+  const groupName = props.groupName;
   const accessories = [];
-  if (connection.colorIndex in tintColorsIndex) {
+  if (connection.colorIndex in tintColorsIndex && connection.colorIndex in enviromentIndex) {
     accessories.push({
       tag: {
         color: tintColorsIndex[connection.colorIndex],
@@ -110,10 +112,11 @@ function ConnectionListItem(props: { connection: Connection }) {
           <Action.OpenInBrowser
             title="Open Database"
             icon={Icon.Coin}
-            url={`sequelace://LaunchFavorite?name=${connection.name}`}
+            url={`sequelace://LaunchFavorite?name=${encodeURIComponent(connection.name)}`}
           />
         </ActionPanel>
       }
+      keywords={preferences.searchByGroupName ? [groupName] : []}
     />
   );
 }

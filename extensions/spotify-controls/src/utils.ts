@@ -1,4 +1,4 @@
-import { closeMainWindow } from "@raycast/api";
+import { Toast, closeMainWindow, getApplications, popToRoot, showHUD, showToast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 /**
@@ -37,5 +37,13 @@ export function buildScriptEnsuringSpotifyIsRunning(commandsToRunAfterSpotifyIsR
  */
 export async function runAppleScriptSilently(appleScript: string) {
   await closeMainWindow();
+
+  const applications = await getApplications();
+  const isSpotifyInstalled = applications.some((app) => app.name === "Spotify");
+  if (!isSpotifyInstalled) {
+    await showHUD("Spotify is not installed");
+    return;
+  }
+
   await runAppleScript(appleScript);
 }

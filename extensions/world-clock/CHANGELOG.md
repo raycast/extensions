@@ -1,5 +1,24 @@
 # World Clock Changelog
 
+## [Update Refresh interval] - 2024-07-30
+
+- Update the refresh interval to 10 seconds
+
+## [Update Extension Icon] - 2024-07-30
+
+- Support set avatar for starred time zones
+- Support duplicate starred time zones
+- Show the first starred time zones in the menu bar
+- Update the extension and command icons
+
+## [Update Memo Icon] - 2023-10-16
+
+- Now the Grid view will show the memo icon
+
+## [Sort Time Zones] - 2023-05-30
+
+- Starred time zones support sorting
+
 ## [Update Date Format] - 2023-01-02
 
 - Add more date formats

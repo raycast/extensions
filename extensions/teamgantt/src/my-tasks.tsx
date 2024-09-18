@@ -2,7 +2,7 @@ import { List, getPreferenceValues, Icon, ActionPanel, Action, useNavigation, To
 import { useEffect, useState } from 'react';
 import { MyPreferences, Task, TimeBlock, User } from './types';
 import { authenticate, findTasks, getCurrentTimeBlock, getCurrentUser, punchIn, punchOut } from './api';
-import { groupTasksByProject } from './utils';
+import { STATUSES, groupTasksByStatus } from './utils';
 import TaskDetails from './task-details';
 
 export default function Command() {
@@ -33,26 +33,42 @@ export default function Command() {
 
   // Find todays tasks
   useEffect(() => {
-    if (idToken) {
+    if (idToken && currentUser) {
       setIsLoading(true);
 
-      Promise.all([findTasks({ today: true, userId: String(currentUser?.id) }, idToken), getCurrentTimeBlock(idToken)])
-        .then(([tasks, timeblock]) => {
-          setTasks(tasks as Task[]);
+      Promise.all([
+        findTasks({ today: true, userId: String(currentUser.id) }, idToken),
+        findTasks({ userId: String(currentUser.id), status: 'starttwoweeks' }, idToken),
+        getCurrentTimeBlock(idToken),
+      ])
+        .then(([tasks, upcomingTasks, timeblock]) => {
+          setTasks([...(tasks as Task[]), ...(upcomingTasks as Task[])]);
           setTimeBlock(timeblock);
         })
         .finally(() => setIsLoading(false));
     }
-  }, [idToken]);
+  }, [idToken, currentUser]);
 
-  const grouped = groupTasksByProject(tasks);
-  const projectNames = Object.keys(grouped).sort((a, b) => (a > b ? 1 : -1));
+  if (!idToken) {
+    return (
+      <List navigationTitle="My Tasks" isLoading={isLoading}>
+        <List.EmptyView title="Not authenticated" />
+      </List>
+    );
+  }
+
+  const grouped = groupTasksByStatus(tasks, timeBlock?.task_id);
 
   return (
-    <List searchBarPlaceholder="Filter my tasks by name and tags" isLoading={isLoading} throttle={true}>
-      {projectNames.map((projectName, sectionIndex) => (
-        <List.Section key={`section:${sectionIndex}`} title={projectName}>
-          {grouped[projectName]?.map((task, index) => {
+    <List
+      navigationTitle="My Tasks"
+      searchBarPlaceholder="Filter my tasks by name and tags"
+      isLoading={isLoading}
+      throttle={true}
+    >
+      {STATUSES.map((status) => (
+        <List.Section key={`section:${status}`} title={status} subtitle={`${grouped[status].length} task(s)`}>
+          {grouped[status].map((task, index) => {
             const keywords = task.resources.map((res) => res.name);
             const isPunchedIn = timeBlock?.task_id === task.id;
 
@@ -62,10 +78,9 @@ export default function Command() {
                 id={String(task.id)}
                 icon={task.percent_complete === 100 ? Icon.Checkmark : Icon.Circle}
                 title={task.name}
-                subtitle={task.parent_group_name}
+                subtitle={`${task.project_name} / ${task.parent_group_name}`}
                 keywords={keywords}
-                accessoryTitle={keywords.join(', ')}
-                accessoryIcon={task.is_starred ? Icon.Star : undefined}
+                accessories={[{ text: keywords.join(', '), icon: task.is_starred ? Icon.Star : null }]}
                 actions={
                   <ActionPanel title="Actions">
                     <ActionPanel.Section title="Selected Task">
@@ -81,15 +96,20 @@ export default function Command() {
                     </ActionPanel.Section>
 
                     <ActionPanel.Section title="TimeSheets">
-                      <Action
-                        title="Punch Out"
-                        icon={Icon.Alarm}
-                        onAction={() => timeBlock && punchOut(timeBlock.id, undefined, idToken)}
-                      />
+                      {!isPunchedIn && (
+                        <Action title="Punch In" icon={Icon.Alarm} onAction={() => punchIn(task.id, idToken)} />
+                      )}
 
-                      <Action title="Punch In" icon={Icon.Alarm} onAction={() => punchIn(task.id, idToken)} />
                       {isPunchedIn && (
-                        <Action.OpenInBrowser url={`https://app.teamgantt.com/my-tasks/edit/${task.id}`} />
+                        <>
+                          <Action
+                            title="Punch Out"
+                            icon={Icon.Alarm}
+                            onAction={() => punchOut(timeBlock.id, idToken)}
+                          />
+
+                          <Action.OpenInBrowser url={`https://app.teamgantt.com/my-tasks/edit/${task.id}`} />
+                        </>
                       )}
                     </ActionPanel.Section>
                   </ActionPanel>

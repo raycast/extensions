@@ -1,9 +1,16 @@
 # Premier League Changelog
 
+## [Improvements] - 2023-12-01
+
+- Fix extension issues (date time, player awards)
+
 ## [Improvements] - 2023-02-21
+
 - Refine Fixtures & Results
+- Add more club information
 
 ## [Improvements] - 2023-02-03
+
 - Add more Standings details (played, goals for/against, form, next match)
 - Fix manager image size
 

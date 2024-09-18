@@ -1,0 +1,4 @@
+/node_modules
+/.idea
+raycast-env.d.ts
+.DS_Store

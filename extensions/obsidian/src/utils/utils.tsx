@@ -6,6 +6,7 @@ import path from "path";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
 import { createContext, useEffect, useMemo, useState } from "react";
+import { DateTime } from "luxon";
 
 import { Note, ObsidianJSON, ObsidianVaultsState, Vault, MediaState, Media, CodeBlock } from "../utils/interfaces";
 
@@ -68,8 +69,9 @@ export function getNoteFileContent(path: string, filter = false) {
 
 export function vaultPluginCheck(vaults: Vault[], plugin: string) {
   const vaultsWithoutPlugin: Vault[] = [];
+  const { configFileName } = getPreferenceValues();
   vaults = vaults.filter((vault: Vault) => {
-    const communityPluginsPath = vault.path + "/.obsidian/community-plugins.json";
+    const communityPluginsPath = `${vault.path}/${configFileName || ".obsidian"}/community-plugins.json`;
     if (!fs.existsSync(communityPluginsPath)) {
       vaultsWithoutPlugin.push(vault);
     } else {
@@ -86,7 +88,8 @@ export function vaultPluginCheck(vaults: Vault[], plugin: string) {
 }
 
 export function getUserIgnoreFilters(vault: Vault) {
-  const appJSONPath = vault.path + "/.obsidian/app.json";
+  const { configFileName } = getPreferenceValues();
+  const appJSONPath = `${vault.path}/${configFileName || ".obsidian"}/app.json`;
   if (!fs.existsSync(appJSONPath)) {
     return [];
   } else {
@@ -95,43 +98,69 @@ export function getUserIgnoreFilters(vault: Vault) {
   }
 }
 
-export function getStarredJSON(vault: Vault) {
-  const starredNotesPath = vault.path + "/.obsidian/starred.json";
-  if (!fs.existsSync(starredNotesPath)) {
-    return [];
-  } else {
-    return JSON.parse(fs.readFileSync(starredNotesPath, "utf-8"))["items"] || [];
+type BookmarkFile = { type: "file"; path: string; title: string };
+type BookMarkGroup = { type: "group"; title: string; items: BookmarkEntry[] };
+type BookmarkEntry = BookmarkFile | BookMarkGroup;
+function* flattenBookmarks(BookmarkEntry: BookmarkEntry[]): Generator<BookmarkEntry> {
+  for (const item of BookmarkEntry) {
+    if (item.type === "file") yield item;
+    if (item.type === "group" && item.items) yield* flattenBookmarks(item.items);
   }
 }
 
-export function writeToStarredJSON(vault: Vault, starredNotes: Note[]) {
-  const starredNotesPath = vault.path + "/.obsidian/starred.json";
-  fs.writeFileSync(starredNotesPath, JSON.stringify({ items: starredNotes }));
+function getBookmarkedJSON(vault: Vault): BookmarkEntry[] {
+  const { configFileName } = getPreferenceValues();
+  const bookmarkedNotesPath = `${vault.path}/${configFileName || ".obsidian"}/bookmarks.json`;
+  if (!fs.existsSync(bookmarkedNotesPath)) {
+    return [];
+  }
+  return JSON.parse(fs.readFileSync(bookmarkedNotesPath, "utf-8"))?.items || [];
 }
 
-export function getStarredNotePaths(vault: Vault) {
-  const starredNotes = getStarredJSON(vault);
-  return starredNotes.map((note: { type: string; title: string; path: string }) => note.path);
+function getBookmarkedList(vault: Vault): BookmarkEntry[] {
+  return Array.from(flattenBookmarks(getBookmarkedJSON(vault)));
 }
 
-export function starNote(vault: Vault, note: Note) {
-  const starredNotes = getStarredJSON(vault);
-  const starredNote = {
+function writeToBookmarkedJSON(vault: Vault, bookmarkedNotes: BookmarkEntry[]) {
+  const { configFileName } = getPreferenceValues();
+  const bookmarkedNotesPath = `${vault.path}/${configFileName || ".obsidian"}/bookmarks.json`;
+  fs.writeFileSync(bookmarkedNotesPath, JSON.stringify({ items: bookmarkedNotes }));
+}
+
+export function getBookmarkedNotePaths(vault: Vault) {
+  const bookmarkedNotes = getBookmarkedList(vault);
+  return (bookmarkedNotes.filter((note) => note.type === "file") as BookmarkFile[]).map((note) => note.path);
+}
+
+export function bookmarkNote(vault: Vault, note: Note) {
+  const bookmarkedNotes = getBookmarkedJSON(vault);
+  const bookmarkedNote: BookmarkFile = {
     type: "file",
     title: note.title,
     path: note.path.split(vault.path)[1].slice(1),
   };
-  starredNotes.push(starredNote);
-  writeToStarredJSON(vault, starredNotes);
+  bookmarkedNotes.push(bookmarkedNote);
+  writeToBookmarkedJSON(vault, bookmarkedNotes);
 }
 
-export function unstarNote(vault: Vault, note: Note) {
-  const starredNotes = getStarredJSON(vault);
-  const index = starredNotes.findIndex(
-    (starred: { type: string; title: string; path: string }) => starred.path === note.path.split(vault.path)[1].slice(1)
-  );
-  starredNotes.splice(index, 1);
-  writeToStarredJSON(vault, starredNotes);
+export function unbookmarkNote(vault: Vault, note: Note) {
+  const bookmarkedNotes = getBookmarkedJSON(vault);
+  const notePath = note.path.split(vault.path)[1].slice(1);
+
+  const removeBookmark = (items: BookmarkEntry[]) => {
+    const index = items.findIndex((item) => item.type === "file" && item.path === notePath);
+    if (index !== -1) {
+      items.splice(index, 1);
+    } else {
+      for (const item of items) {
+        if (item.type === "group" && item.items) {
+          removeBookmark(item.items);
+        }
+      }
+    }
+  };
+  removeBookmark(bookmarkedNotes);
+  writeToBookmarkedJSON(vault, bookmarkedNotes);
 }
 
 function getVaultNameFromPath(vaultPath: string): string {
@@ -156,6 +185,7 @@ export function parseVaults(): Vault[] {
   return vaultString
     .split(",")
     .filter((vaultPath) => vaultPath.trim() !== "")
+    .filter((vaultPath) => fs.existsSync(vaultPath))
     .map((vault) => ({ name: getVaultNameFromPath(vault.trim()), key: vault.trim(), path: vault.trim() }));
 }
 
@@ -250,38 +280,140 @@ export async function getClipboardContent() {
   return clipboardText ? clipboardText : "";
 }
 
-export async function applyTemplates(content: string) {
+async function ISO8601_week_no(dt: Date) {
+  const tdt = new Date(dt.getTime());
+  const dayn = (dt.getDay() + 6) % 7;
+  tdt.setDate(tdt.getDate() - dayn + 3);
+  const firstThursday = tdt.getTime();
+  tdt.setMonth(0, 1);
+  if (tdt.getDay() !== 4) {
+    tdt.setMonth(0, 1 + ((4 - tdt.getDay() + 7) % 7));
+  }
+  return 1 + Math.ceil((firstThursday - tdt.getTime()) / 604800000);
+}
+
+/** both content and template might have templates to apply */
+export async function applyTemplates(content: string, template = "") {
   const date = new Date();
+  const dateTime = DateTime.now();
+  const week = await ISO8601_week_no(date);
   const hours = date.getHours().toString().padStart(2, "0");
   const minutes = date.getMinutes().toString().padStart(2, "0");
   const seconds = date.getSeconds().toString().padStart(2, "0");
-
   const timestamp = Date.now().toString();
-
-  content = content.replaceAll("{time}", date.toLocaleTimeString());
-  content = content.replaceAll("{date}", date.toLocaleDateString());
-
-  content = content.replaceAll("{year}", date.getFullYear().toString());
-  content = content.replaceAll("{month}", MONTH_NUMBER_TO_STRING[date.getMonth()]);
-  content = content.replaceAll("{day}", DAY_NUMBER_TO_STRING[date.getDay()]);
-
-  content = content.replaceAll("{hour}", hours);
-  content = content.replaceAll("{minute}", minutes);
-  content = content.replaceAll("{second}", seconds);
-  content = content.replaceAll("{millisecond}", date.getMilliseconds().toString());
-
-  content = content.replaceAll("{timestamp}", timestamp);
-  content = content.replaceAll("{zettelkastenID}", timestamp);
-
   const clipboard = await getClipboardContent();
-  content = content.replaceAll("{clipboard}", clipboard);
-  content = content.replaceAll("{clip}", clipboard);
 
-  content = content.replaceAll("{\n}", "\n");
-  content = content.replaceAll("{newline}", "\n");
-  content = content.replaceAll("{nl}", "\n");
+  const preprocessed = template.includes("{content}")
+    ? template // Has {content} e.g. | {hour}:{minute} | {content} |
+    : template + content; // Does not have {content}, then add it to the end
 
-  return content;
+  return preprocessed
+    .replaceAll("{content}", content) // Replace {content} with content first so that is can be broken out
+    .replaceAll(/{.*?}/g, (match) => {
+      const key = match.slice(1, -1);
+      switch (key) {
+        case "S":
+        case "u":
+        case "SSS":
+        case "s":
+        case "ss":
+        case "uu":
+        case "uuu":
+        case "m":
+        case "mm":
+        case "h":
+        case "hh":
+        case "H":
+        case "HH":
+        case "Z":
+        case "ZZ":
+        case "ZZZ":
+        case "ZZZZ":
+        case "ZZZZZ":
+        case "z":
+        case "a":
+        case "d":
+        case "dd":
+        case "c":
+        case "ccc":
+        case "cccc":
+        case "ccccc":
+        case "E":
+        case "EEE":
+        case "EEEE":
+        case "EEEEE":
+        case "L":
+        case "LL":
+        case "LLL":
+        case "LLLL":
+        case "LLLLL":
+        case "M":
+        case "MM":
+        case "MMM":
+        case "MMMM":
+        case "MMMMM":
+        case "y":
+        case "yy":
+        case "yyyy":
+        case "yyyyyy":
+        case "G":
+        case "GG":
+        case "GGGGG":
+        case "kk":
+        case "kkkk":
+        case "W":
+        case "WW":
+        case "n":
+        case "nn":
+        case "ii":
+        case "iiii":
+        case "o":
+        case "ooo":
+        case "q":
+        case "qq":
+        case "X":
+        case "x":
+          return dateTime.toFormat(key);
+        case "content":
+          return content;
+        case "time":
+          return date.toLocaleTimeString();
+        case "date":
+          return date.toLocaleDateString();
+        case "week":
+          return week.toString().padStart(2, "0");
+        case "year":
+          return date.getFullYear().toString();
+        case "month":
+          return MONTH_NUMBER_TO_STRING[date.getMonth()];
+        case "day":
+          return DAY_NUMBER_TO_STRING[date.getDay()];
+        case "hour":
+          return hours;
+        case "minute":
+          return minutes;
+        case "second":
+          return seconds;
+        case "millisecond":
+          return date.getMilliseconds().toString();
+        case "timestamp":
+          return timestamp;
+        case "zettelkastenID":
+          return timestamp;
+        case "clipboard":
+          return clipboard;
+        case "clip":
+          return clipboard;
+        case "\n":
+          return "\n";
+        case "newline":
+          return "\n";
+        case "nl":
+          return "\n";
+        default:
+          return match;
+      }
+    });
 }
 
 export async function appendSelectedTextTo(note: Note) {
@@ -315,6 +447,7 @@ export enum ObsidianTargetType {
   DailyNote = "obsidian://advanced-uri?daily=true&vault=",
   DailyNoteAppend = "obsidian://advanced-uri?daily=true&mode=append",
   NewNote = "obsidian://new?vault=",
+  AppendTask = "obsidian://advanced-uri?mode=append&filepath=",
 }
 
 export type ObsidianTarget =
@@ -322,7 +455,15 @@ export type ObsidianTarget =
   | { type: ObsidianTargetType.OpenPath; path: string }
   | { type: ObsidianTargetType.DailyNote; vault: Vault }
   | { type: ObsidianTargetType.DailyNoteAppend; vault: Vault; text: string; heading?: string; silent?: boolean }
-  | { type: ObsidianTargetType.NewNote; vault: Vault; name: string; content?: string };
+  | { type: ObsidianTargetType.NewNote; vault: Vault; name: string; content?: string }
+  | {
+      type: ObsidianTargetType.AppendTask;
+      vault: Vault;
+      text: string;
+      path: string;
+      heading?: string;
+      silent?: boolean;
+    };
 
 export function getObsidianTarget(target: ObsidianTarget) {
   switch (target.type) {
@@ -357,6 +498,19 @@ export function getObsidianTarget(target: ObsidianTarget) {
         encodeURIComponent(target.content || "")
       );
     }
+    case ObsidianTargetType.AppendTask: {
+      const headingParam = target.heading ? "&heading=" + encodeURIComponent(target.heading) : "";
+      return (
+        ObsidianTargetType.AppendTask +
+        encodeURIComponent(target.path) +
+        "&data=" +
+        encodeURIComponent(target.text) +
+        "&vault=" +
+        encodeURIComponent(target.vault.name) +
+        headingParam +
+        (target.silent ? "&openmode=silent" : "")
+      );
+    }
     default: {
       return "";
     }
@@ -380,7 +534,7 @@ export function isNote(note: Note | undefined): note is Note {
 
 function validFile(file: string, includes: string[]) {
   for (const include of includes) {
-    if (file.includes(include)) {
+    if (include && file.includes(include)) {
       return false;
     }
   }
@@ -389,12 +543,16 @@ function validFile(file: string, includes: string[]) {
 
 export function walkFilesHelper(dirPath: string, exFolders: string[], fileEndings: string[], arrayOfFiles: string[]) {
   const files = fs.readdirSync(dirPath);
+  const { configFileName } = getPreferenceValues();
 
   arrayOfFiles = arrayOfFiles || [];
 
   for (const file of files) {
     const next = fs.statSync(dirPath + "/" + file);
-    if (next.isDirectory() && validFile(file, [".git", ".obsidian", ".trash", ".excalidraw", ".mobile"])) {
+    if (
+      next.isDirectory() &&
+      validFile(file, [".git", ".obsidian", ".trash", ".excalidraw", ".mobile", configFileName].filter(Boolean))
+    ) {
       arrayOfFiles = walkFilesHelper(dirPath + "/" + file, exFolders, fileEndings, arrayOfFiles);
     } else {
       if (
@@ -402,6 +560,7 @@ export function walkFilesHelper(dirPath: string, exFolders: string[], fileEnding
         file !== ".md" &&
         !file.includes(".excalidraw") &&
         !dirPath.includes(".obsidian") &&
+        !dirPath.includes(configFileName || ".obsidian") &&
         validFolder(dirPath, exFolders)
       ) {
         arrayOfFiles.push(path.join(dirPath, "/", file));

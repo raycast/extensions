@@ -1,5 +1,5 @@
 import { Clipboard, showHUD, showToast, Toast } from "@raycast/api";
-import { createAlias } from "./utils/create";
+import * as alias from "./api/alias";
 
 const GenerateAlias = async () => {
   const toast = await showToast({
@@ -7,12 +7,18 @@ const GenerateAlias = async () => {
     title: "Generating Alias",
   });
 
-  const newAliasEmail = await createAlias();
-  if (newAliasEmail.id?.length > 0) {
-    Clipboard.copy(newAliasEmail.email);
-    await showHUD("✅ Alias copied to clipboard");
-  } else {
-    await showHUD("❌ Alias could not be generated");
+  try {
+    const newAliasEmail = await alias.create();
+
+    if (newAliasEmail.id?.length > 0) {
+      Clipboard.copy(newAliasEmail.email);
+      await showHUD("✅ Alias copied to clipboard");
+    } else {
+      await showHUD("❌ Alias could not be generated");
+    }
+  } catch (error) {
+    console.log(">>> error", error);
+    await showHUD("❌ AnonAddy API credentials are invalid");
   }
 
   await toast.hide();

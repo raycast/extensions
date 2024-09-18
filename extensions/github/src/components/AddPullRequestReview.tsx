@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
+import { FormValidation, useForm } from "@raycast/utils";
 
+import { getGitHubClient } from "../api/githubClient";
 import { PullRequestReviewEvent } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
-import { getGitHubClient } from "../helpers/withGithubClient";
 
 import { PullRequest } from "./PullRequestActions";
 

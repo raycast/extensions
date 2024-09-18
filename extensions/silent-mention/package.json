@@ -23,6 +23,12 @@
           "placeholder": "Handle, URL or Hashtag"
         }
       ]
+    },
+    {
+      "name": "copy-zero-width-space",
+      "title": "Copy Zero Width Space",
+      "description": "Simply copy a zero width space to your clipboard.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

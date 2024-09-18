@@ -74,6 +74,12 @@ export default function HighlightDetails({
               }}
             />
           ) : null}
+          {highlight.tags.length > 0 ? (
+            <List.Item.Detail.Metadata.Label
+              title="Tags"
+              text={highlight.tags.map(({ name }) => name).join(', ')}
+            />
+          ) : null}
           {syncDate ? (
             <List.Item.Detail.Metadata.Label
               title="Synced"

@@ -1,5 +1,5 @@
-import { WindowsList } from "./components/windows";
+import { WindowsList } from "@components/window/list";
 
-export default function main(): JSX.Element {
+export default function main() {
   return <WindowsList />;
 }

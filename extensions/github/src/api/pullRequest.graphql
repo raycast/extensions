@@ -21,31 +21,7 @@ fragment PullRequestFields on PullRequest {
     name
   }
   author {
-    ... on Bot {
-      id
-      login
-      avatarUrl(size: 64)
-    }
-    ... on User {
-      ...UserFields
-    }
-    ... on Mannequin {
-      id
-      login
-      avatarUrl(size: 64)
-    }
-    ... on Organization {
-      id
-      login
-      name
-      avatarUrl(size: 64)
-    }
-    ... on EnterpriseUserAccount {
-      id
-      login
-      name
-      avatarUrl(size: 64)
-    }
+    ...AuthorFields
   }
   comments(first: 0) {
     totalCount
@@ -78,92 +54,6 @@ fragment PullRequestFields on PullRequest {
     nodes {
       ... on User {
         ...UserFields
-      }
-    }
-  }
-}
-
-query myPullRequests(
-  $createdOpenQuery: String!
-  $createdClosedQuery: String!
-  $assignedOpenQuery: String!
-  $assignedClosedQuery: String!
-  $mentionedOpenQuery: String!
-  $mentionedClosedQuery: String!
-  $reviewRequestsOpenQuery: String!
-  $reviewRequestsClosedQuery: String!
-  $reviewedByOpenQuery: String!
-  $reviewedByClosedQuery: String!
-  $numberOfOpenItems: Int!
-  $numberOfClosedItems: Int!
-) {
-  createdOpen: search(query: $createdOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
-    pullRequests: edges {
-      pullRequest: node {
-        ...PullRequestFields
-      }
-    }
-  }
-  createdClosed: search(query: $createdClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
-    pullRequests: edges {
-      pullRequest: node {
-        ...PullRequestFields
-      }
-    }
-  }
-  assignedOpen: search(query: $assignedOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
-    pullRequests: edges {
-      pullRequest: node {
-        ...PullRequestFields
-      }
-    }
-  }
-  assignedClosed: search(query: $assignedClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
-    pullRequests: edges {
-      pullRequest: node {
-        ...PullRequestFields
-      }
-    }
-  }
-  mentionedOpen: search(query: $mentionedOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
-    pullRequests: edges {
-      pullRequest: node {
-        ...PullRequestFields
-      }
-    }
-  }
-  mentionedClosed: search(query: $mentionedClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
-    pullRequests: edges {
-      pullRequest: node {
-        ...PullRequestFields
-      }
-    }
-  }
-  reviewRequestsOpen: search(query: $reviewRequestsOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
-    pullRequests: edges {
-      pullRequest: node {
-        ...PullRequestFields
-      }
-    }
-  }
-  reviewRequestsClosed: search(query: $reviewRequestsClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
-    pullRequests: edges {
-      pullRequest: node {
-        ...PullRequestFields
-      }
-    }
-  }
-  reviewedByOpen: search(query: $reviewedByOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
-    pullRequests: edges {
-      pullRequest: node {
-        ...PullRequestFields
-      }
-    }
-  }
-  reviewedByClosed: search(query: $reviewedByClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
-    pullRequests: edges {
-      pullRequest: node {
-        ...PullRequestFields
       }
     }
   }
@@ -217,31 +107,7 @@ fragment PullRequestDetailsFields on PullRequest {
     }
   }
   author {
-    ... on Bot {
-      id
-      login
-      avatarUrl(size: 64)
-    }
-    ... on User {
-      ...UserFields
-    }
-    ... on Mannequin {
-      id
-      login
-      avatarUrl(size: 64)
-    }
-    ... on Organization {
-      id
-      login
-      name
-      avatarUrl(size: 64)
-    }
-    ... on EnterpriseUserAccount {
-      id
-      login
-      name
-      avatarUrl(size: 64)
-    }
+    ...AuthorFields
   }
   comments(first: 0) {
     totalCount
@@ -274,34 +140,7 @@ fragment PullRequestDetailsFields on PullRequest {
     nodes {
       state
       author {
-        ... on Bot {
-          id
-          login
-          avatarUrl(size: 64)
-        }
-        ... on User {
-          id
-          login
-          name
-          avatarUrl(size: 64)
-        }
-        ... on Mannequin {
-          id
-          login
-          avatarUrl(size: 64)
-        }
-        ... on Organization {
-          id
-          login
-          name
-          avatarUrl(size: 64)
-        }
-        ... on EnterpriseUserAccount {
-          id
-          login
-          name
-          avatarUrl(size: 64)
-        }
+        ...AuthorFields
       }
     }
   }

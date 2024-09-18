@@ -22,6 +22,7 @@ export function DefaultForm({
         Actions || (
           <ActionPanel>
             <Action.CopyToClipboard content={outputProps.value} />
+            <Action.Paste content={outputProps.value} />
           </ActionPanel>
         )
       }

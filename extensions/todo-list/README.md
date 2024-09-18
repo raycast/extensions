@@ -18,6 +18,8 @@ An extension for creating and managing a todo list. Create and delete items, mar
   - Apply edits: <kbd>⏎</kbd>
   - Cancel editing: <kbd>⌘</kbd><kbd>⏎</kbd>
 - Delete selected item: <kbd>⌘</kbd><kbd>D</kbd>
-- Pin or unpin selected item: <kbd>⌘</kbd><kbd>P</kbd>
+- Pin or unpin selected item: <kbd>⌘</kbd><kbd>⌥</kbd><kbd>P</kbd>
+- Reset the list: <kbd>⌘</kbd><kbd>R</kbd>
+- Clear completed items: <kbd>⌘</kbd><kbd>⌥</kbd><kbd>C</kbd>
 - Delete all items: <kbd>⌘</kbd><kbd>⇧</kbd><kbd>D</kbd>
 - Switch between insert mode and search mode: <kbd>⌘</kbd><kbd>S</kbd>

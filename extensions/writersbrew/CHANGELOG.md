@@ -2,6 +2,12 @@
 
 ## [New Commands] - 2023-03-08
 
+- Added Non-AI command Uppercase
+- Added Non-AI command Lowercase
+- Added Non-AI command Titlecase
+
+## [New Commands] - 2023-03-08
+
 - Added Traditional Chinese
 - Added Simplified Chinese
 

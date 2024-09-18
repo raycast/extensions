@@ -1,15 +1,13 @@
 import { closeMainWindow } from "@raycast/api";
-import { getConnectedVPN } from "./getVPN";
-import { disconnectVPNByName } from "./toggle";
+import { getConnectedVPNSNArray } from "./getVPN";
+import { disconnectVPNBySN } from "./toggle";
 
 export default async () => {
-  const connectedVPN = await getConnectedVPN();
-  if (connectedVPN !== "") {
-    const connectedVPNList = connectedVPN.split(/\r?\n/);
-    for (const VPNName of connectedVPNList) {
-      await disconnectVPNByName(VPNName);
+  const connectedVPNSNArray = await getConnectedVPNSNArray();
+  if (connectedVPNSNArray?.length > 0) {
+    for (const sn of connectedVPNSNArray) {
+      await disconnectVPNBySN(sn);
     }
-  } else {
-    await closeMainWindow({ clearRootSearch: true });
   }
+  await closeMainWindow({ clearRootSearch: true });
 };

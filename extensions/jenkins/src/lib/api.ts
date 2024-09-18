@@ -1,4 +1,6 @@
 import fetch, { Headers, RequestInfo, RequestInit } from "node-fetch";
+import http from "http";
+import https from "https";
 
 export interface Jenkins {
   id: string;
@@ -10,6 +12,7 @@ export interface Jenkins {
   url: string;
   username: string;
   token?: string;
+  unsafeHttps: boolean;
 }
 
 export interface Job {
@@ -103,6 +106,15 @@ export class JenkinsAPI {
   }
 
   async request(url: RequestInfo, init?: RequestInit) {
+    let urlAgent;
+    if (url.toString().startsWith("http://")) {
+      urlAgent = new http.Agent({});
+    } else if (url.toString().startsWith("https://")) {
+      urlAgent = new https.Agent({ rejectUnauthorized: !this.jenkins.unsafeHttps });
+    } else {
+      return Promise.reject(new Error("Wrong scheme in URL"));
+    }
+
     let headers: Headers | undefined = undefined;
     if (this.jenkins.token) {
       headers = new Headers();
@@ -114,6 +126,7 @@ export class JenkinsAPI {
     const resp = await fetch(url, {
       headers,
       method: "GET",
+      agent: urlAgent,
       ...init,
     });
     if (!resp.ok) {

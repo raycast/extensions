@@ -1,0 +1,198 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "workouts",
+  "title": "Workouts",
+  "description": "Stay on top of your workouts from Strava",
+  "tags": [
+    "strava",
+    "activities",
+    "log",
+    "workout",
+    "exercise"
+  ],
+  "icon": "icon.png",
+  "author": "samuelkraft",
+  "contributors": [
+    "yvysunu",
+    "pernielsentikaer",
+    "dianne_mcewan"
+  ],
+  "categories": [
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "workouts",
+      "title": "Search Workouts",
+      "description": "See your recent workouts from Strava",
+      "mode": "view",
+      "keywords": [
+        "strava",
+        "activities",
+        "exercise"
+      ]
+    },
+    {
+      "name": "createActivity",
+      "title": "Create Activity",
+      "description": "Create a manual activity on Strava",
+      "mode": "view",
+      "icon": "create.png",
+      "keywords": [
+        "strava",
+        "activities",
+        "exercise"
+      ]
+    },
+    {
+      "name": "leaderboard",
+      "title": "Weekly Leaderboard",
+      "description": "See your club's weekly leaderboard",
+      "mode": "view",
+      "icon": "leaderboard-icon.png",
+      "keywords": [
+        "strava",
+        "activities",
+        "exercise"
+      ]
+    },
+    {
+      "name": "ask",
+      "title": "Ask Workout AI",
+      "description": "Ask AI about your 100 most recent workouts",
+      "mode": "view",
+      "icon": "ask-ai-icon.png",
+      "arguments": [
+        {
+          "name": "question",
+          "title": "Question",
+          "description": "Ask a question to the Workout AI",
+          "type": "text",
+          "placeholder": "Mileage this week?",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "strava",
+        "activities",
+        "exercise"
+      ]
+    },
+    {
+      "name": "routes",
+      "title": "Search Routes",
+      "description": "See your routes from Strava",
+      "icon": "routes-icon.png",
+      "mode": "view",
+      "keywords": [
+        "strava",
+        "routes",
+        "exercise"
+      ]
+    },
+    {
+      "name": "menubar-totals",
+      "title": "Workouts Totals",
+      "description": "See your total distance and time for your workouts",
+      "mode": "menu-bar",
+      "interval": "12h",
+      "icon": "stats-icon.png",
+      "preferences": [
+        {
+          "name": "primary_sport",
+          "title": "Primary Sport",
+          "description": "The sport you want to see totals for in the menu bar",
+          "type": "dropdown",
+          "default": "Run",
+          "required": true,
+          "data": [
+            {
+              "value": "Run",
+              "title": "Run"
+            },
+            {
+              "value": "Ride",
+              "title": "Ride"
+            },
+            {
+              "value": "Swim",
+              "title": "Swim"
+            }
+          ]
+        },
+        {
+          "name": "primary_stat",
+          "title": "Primary Stat",
+          "description": "The stat you want to see in the menu bar",
+          "type": "dropdown",
+          "default": "recent",
+          "required": true,
+          "data": [
+            {
+              "value": "week",
+              "title": "This week"
+            },
+            {
+              "value": "recent",
+              "title": "Last 4 weeks"
+            },
+            {
+              "value": "year",
+              "title": "This Year"
+            },
+            {
+              "value": "all",
+              "title": "All time"
+            }
+          ]
+        }
+      ],
+      "keywords": [
+        "strava",
+        "activities",
+        "exercise"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "distance_unit",
+      "title": "Distance Unit",
+      "description": "Choose unit for displaying distance",
+      "type": "dropdown",
+      "default": "km",
+      "data": [
+        {
+          "value": "km",
+          "title": "Kilometers"
+        },
+        {
+          "value": "mi",
+          "title": "Miles"
+        }
+      ],
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.71.0",
+    "@raycast/utils": "^1.15.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

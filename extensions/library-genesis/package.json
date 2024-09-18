@@ -5,6 +5,9 @@
   "description": "Search books on Library Genesis and directly download them.",
   "icon": "command-icon.png",
   "author": "yz3440",
+  "contributors": [
+    "j3lte"
+  ],
   "categories": [
     "Web"
   ],
@@ -15,6 +18,13 @@
       "title": "Search Books",
       "subtitle": "Library Genesis",
       "description": "Search books on Library Genesis.",
+      "mode": "view"
+    },
+    {
+      "name": "test-mirrors",
+      "title": "Test Mirrors",
+      "subtitle": "Library Genesis",
+      "description": "Test the availability of mirrors.",
       "mode": "view"
     }
   ],
@@ -56,7 +66,7 @@
       "description": "Force query from the specified mirror.",
       "type": "textfield",
       "default": "",
-      "placeholder": "https://libgen.li",
+      "placeholder": "https://libgen.rs",
       "required": false
     },
     {
@@ -106,6 +116,15 @@
       "required": true
     },
     {
+      "name": "allowIgnoreHTTPSErrors",
+      "title": "Ignore HTTPS Errors (Insecure) on Download",
+      "description": "Allow to ignore HTTPS errors. This is useful when you are encountering SSL errors when downloading.",
+      "type": "checkbox",
+      "default": false,
+      "label": "Ignore HTTPS errors",
+      "required": false
+    },
+    {
       "name": "searchPriority",
       "title": "Priotitize Search By",
       "description": "Prioritizes searching results by the following fields.",
@@ -147,28 +166,27 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.37.1",
-    "axios": "^1.2.1",
+    "@raycast/api": "^1.67.1",
+    "@raycast/utils": "^1.12.4",
     "cheerio": "^1.0.0-rc.12",
-    "fs-extra": "^11.1.0",
-    "libgen": "^2.1.2",
-    "node-fetch": "^3.2.8",
-    "node-html-parser": "^5.3.3",
-    "run-applescript": "^6.0.0"
+    "fs-extra": "^11.2.0",
+    "node-fetch": "^3.3.2",
+    "swr": "^2.2.5"
   },
   "devDependencies": {
-    "@types/fs-extra": "^9.0.13",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "20.11.19",
+    "@types/react": "18.2.55",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.5"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

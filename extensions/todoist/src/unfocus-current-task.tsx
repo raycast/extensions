@@ -1,4 +1,6 @@
-import { launchCommand, LaunchType, showHUD, Cache } from "@raycast/api";
+import { showHUD, Cache } from "@raycast/api";
+
+import { refreshMenuBarCommand } from "./helpers/menu-bar";
 
 const cache = new Cache();
 
@@ -8,7 +10,7 @@ const command = async () => {
   await showHUD(`👋 No more focus`);
 
   try {
-    launchCommand({ name: "menubar", type: LaunchType.UserInitiated });
+    refreshMenuBarCommand();
   } catch (error) {
     /* empty */
   }

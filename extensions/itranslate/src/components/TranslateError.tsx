@@ -7,6 +7,7 @@ import {
   getPreferenceValues,
   List,
   Icon,
+  openExtensionPreferences,
 } from "@raycast/api";
 import {
   LANG_LIST,
@@ -73,7 +74,7 @@ export function LanguageConflict() {
       }
       actions={
         <ActionPanel>
-          <Action icon={Icon.ComputerChip} title="Open iTranslate Preferences" onAction={openCommandPreferences} />
+          <Action icon={Icon.ComputerChip} title="Open iTranslate Preferences" onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     />
@@ -102,7 +103,7 @@ export function ServiceProviderMiss(props: { service: TransServiceProviderTp; di
       navigationTitle="Welcome to use iTranslate"
       actions={
         <ActionPanel>
-          <Action icon={Icon.ComputerChip} title="Open iTranslate Preferences" onAction={openCommandPreferences} />
+          <Action icon={Icon.ComputerChip} title="Open iTranslate Preferences" onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     />
@@ -127,7 +128,7 @@ export function OCRServiceProviderMiss(props: { service: OCRServiceProviderTp })
       navigationTitle="Welcome to use iTranslate"
       actions={
         <ActionPanel>
-          <Action icon={Icon.ComputerChip} title="Open iTranslate Preferences" onAction={openCommandPreferences} />
+          <Action icon={Icon.ComputerChip} title="Open Command Preferences" onAction={openCommandPreferences} />
         </ActionPanel>
       }
     />

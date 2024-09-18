@@ -7,7 +7,8 @@
   "author": "k8scat",
   "license": "MIT",
   "contributors": [
-    "tonka3000"
+    "tonka3000",
+    "BalliAsghar"
   ],
   "commands": [
     {
@@ -67,9 +68,19 @@
       "required": false,
       "title": "2FA Code",
       "description": "Code for 2FA"
+    },
+    {
+      "description": "Path to Docker socket",
+      "name": "socketPath",
+      "placeholder": "/var/run/docker.sock",
+      "required": false,
+      "title": "Socket path",
+      "default": "/var/run/docker.sock",
+      "type": "textfield"
     }
   ],
   "dependencies": {
+    "@priithaamer/dockerode": "^3.3.1-priithaamer.1",
     "@raycast/api": "^1.39.3",
     "axios": "^0.27.2",
     "axios-retry": "^3.3.1"

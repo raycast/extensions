@@ -4,32 +4,16 @@ import { getErrorMessage } from "./utils";
 import { youtube, youtube_v3 } from "@googleapis/youtube";
 import { GaxiosResponse } from "googleapis-common";
 import { convertYouTubeDuration } from "duration-iso-8601";
+import { Preferences } from "./types";
 
 function createClient(): youtube_v3.Youtube {
-  const pref = getPreferenceValues();
-  const apiKey = (pref.apikey as string) || "";
-  const client = youtube({ version: "v3", auth: apiKey });
-  return client;
+  const { apikey } = getPreferenceValues<Preferences>();
+  return youtube({ version: "v3", auth: apikey });
 }
 
 export const youtubeClient = createClient();
 
-export enum PrimaryAction {
-  Detail = "detail",
-  Browser = "browser",
-}
-
-export function getPrimaryActionPreference(): PrimaryAction {
-  const pref = getPreferenceValues();
-  const val = (pref.primaryaction as string) || undefined;
-  if (val !== PrimaryAction.Detail && val !== PrimaryAction.Browser) {
-    return PrimaryAction.Detail;
-  }
-  const result: PrimaryAction = val;
-  return result;
-}
-
-const maxPageResults = 50;
+const maxPageResults = 100;
 
 export enum SearchType {
   channel = "channel",
@@ -43,7 +27,7 @@ export interface Fetcher {
 
 export function useRefresher<T>(
   fn: (updateInline: boolean) => Promise<T>,
-  deps?: React.DependencyList | undefined
+  deps?: React.DependencyList | undefined,
 ): {
   data: T | undefined;
   error?: string;
@@ -199,10 +183,15 @@ async function fetchAndInjectVideoStats(videos: Video[]) {
   }
 }
 
+export interface SearchOptions {
+  order?: string;
+}
+
 async function search(
   query: string,
   type: SearchType,
-  channedId?: string | undefined
+  channedId?: string | undefined,
+  options?: SearchOptions,
 ): Promise<GaxiosResponse<youtube_v3.Schema$SearchListResponse>> {
   const data = await youtubeClient.search.list({
     q: query,
@@ -210,12 +199,17 @@ async function search(
     type: [type],
     maxResults: maxPageResults,
     channelId: channedId,
+    order: options?.order ?? "relevance",
   });
   return data;
 }
 
-export async function searchVideos(query: string, channedId?: string | undefined): Promise<Video[]> {
-  const data = await search(query, SearchType.video, channedId);
+export async function searchVideos(
+  query: string,
+  channedId?: string | undefined,
+  options?: SearchOptions,
+): Promise<Video[]> {
+  const data = await search(query, SearchType.video, channedId, options);
   const items = data?.data.items;
   const result: Video[] = [];
   if (items) {
@@ -246,8 +240,42 @@ export async function searchVideos(query: string, channedId?: string | undefined
   return result;
 }
 
-export async function searchChannels(query: string): Promise<Channel[]> {
-  const data = await search(query, SearchType.channel);
+export async function getVideos(videoIds: string[]): Promise<Video[]> {
+  if (videoIds.length > 0) {
+    const data = await youtubeClient.videos.list({
+      id: videoIds,
+      part: ["id", "snippet"],
+      maxResults: videoIds.length,
+    });
+    const result =
+      data?.data.items?.map(
+        (r) =>
+          ({
+            id: r.id,
+            title: r.snippet?.title || "?",
+            description: r.snippet?.description || undefined,
+            publishedAt: r.snippet?.publishedAt || "?",
+            channelId: r.snippet?.channelId || "",
+            channelTitle: r.snippet?.channelTitle || "?",
+
+            thumbnails: {
+              default: {
+                url: r.snippet?.thumbnails?.default?.url || undefined,
+              },
+              high: {
+                url: r.snippet?.thumbnails?.high?.url || undefined,
+              },
+            },
+          }) as Video,
+      ) || [];
+    await fetchAndInjectVideoStats(result);
+    return result;
+  }
+  return [];
+}
+
+export async function searchChannels(query: string, options?: SearchOptions): Promise<Channel[]> {
+  const data = await search(query, SearchType.channel, undefined, options);
   const items = data?.data.items;
   const channelIds: string[] = [];
   const result: Channel[] = [];
@@ -359,6 +387,10 @@ export async function getChannel(channelId: string): Promise<Channel | undefined
     }
   }
   return result;
+}
+
+export async function getChannels(channelIds: string[]): Promise<Channel[]> {
+  return (await Promise.all(channelIds.map((id) => getChannel(id)))).filter((x) => x !== undefined) as Channel[];
 }
 
 export async function getPlaylistVideos(playlistId: string): Promise<Video[] | undefined> {

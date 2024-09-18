@@ -1,5 +1,8 @@
-import { List, Color, Icon } from "@raycast/api";
+import { List, Color, Icon, clearLocalStorage } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { uniqBy } from "lodash";
+import { useEffect } from "react";
 
 import {
   PullRequestDetailsFieldsFragment,
@@ -9,6 +12,50 @@ import {
 } from "../generated/graphql";
 
 import { getGitHubUser } from "./users";
+
+const VISITED_PULL_REQ_KEY = "VISITED_PULL_REQUESTS";
+const VISITED_PULL_REQ_LENGTH = 10;
+
+// History was stored in `LocalStorage` before, after migration it's stored in `Cache`
+async function loadVisitedRepositories() {
+  const item = await LocalStorage.getItem<string>(VISITED_PULL_REQ_KEY);
+  if (item) {
+    const parsed = JSON.parse(item).slice(0, VISITED_PULL_REQ_LENGTH);
+    return parsed as PullRequestFieldsFragment[];
+  } else {
+    return [];
+  }
+}
+
+export function usePullReqHistory() {
+  const [history, setHistory] = useCachedState<PullRequestFieldsFragment[]>("PullReqHistory", []);
+  const [migratedHistory, setMigratedHistory] = useCachedState<boolean>("migratedPullReqHistory", false);
+
+  useEffect(() => {
+    if (!migratedHistory) {
+      loadVisitedRepositories().then((repositories) => {
+        setHistory(repositories);
+        setMigratedHistory(true);
+      });
+    }
+  }, [migratedHistory]);
+
+  function visitPullReq(pullRequest: PullRequestFieldsFragment) {
+    const visitedPullReq = [pullRequest, ...(history?.filter((item) => item.id !== pullRequest.id) ?? [])];
+    LocalStorage.setItem(VISITED_PULL_REQ_KEY, JSON.stringify(visitedPullReq));
+    const nextPullReq = visitedPullReq.slice(0, VISITED_PULL_REQ_LENGTH);
+    setHistory(nextPullReq);
+  }
+
+  function removePullReq(pullRequest: PullRequestFieldsFragment) {
+    const visitedPullReq = [...(history?.filter((item) => item.id !== pullRequest.id) ?? [])];
+    LocalStorage.setItem(VISITED_PULL_REQ_KEY, JSON.stringify(visitedPullReq));
+    const nextPullReq = visitedPullReq.slice(0, VISITED_PULL_REQ_LENGTH);
+    setHistory(nextPullReq);
+  }
+
+  return { history, visitPullReq, removePullReq };
+}
 
 export function getPullRequestStatus(pullRequest: PullRequestFieldsFragment | PullRequestDetailsFieldsFragment) {
   if (pullRequest.merged) {

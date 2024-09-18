@@ -34,7 +34,7 @@ export async function createEmojiList(options?: CreateEmojiListOptions): Promise
   return emojiList;
 }
 
-export type UnicodeVersion = "4.0" | "5.0" | "11.0" | "12.0" | "12.1" | "13.0" | "13.1" | "14.0";
+export type UnicodeVersion = "4.0" | "5.0" | "11.0" | "12.0" | "12.1" | "13.0" | "13.1" | "14.0" | "15.0" | "15.1";
 
 const LINE_REGEX = /^.*?; fully-qualified\s+# (.*?) (?:E\d+\.\d+ )?(.*)$/;
 const GROUP_REGEX = /^# group: (.*?)$/;

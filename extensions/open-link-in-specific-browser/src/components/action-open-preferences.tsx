@@ -1,19 +1,13 @@
-import { Action, ActionPanel, Icon, openCommandPreferences, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Icon, openCommandPreferences } from "@raycast/api";
 
 export function ActionOpenPreferences() {
   return (
     <ActionPanel.Section>
       <Action
         icon={Icon.Gear}
-        title="Open Command Preferences"
-        shortcut={{ modifiers: ["cmd"], key: "," }}
-        onAction={openCommandPreferences}
-      />
-      <Action
-        icon={Icon.Gear}
-        title="Open Extension Preferences"
+        title="Configure Command"
         shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
-        onAction={openExtensionPreferences}
+        onAction={openCommandPreferences}
       />
     </ActionPanel.Section>
   );

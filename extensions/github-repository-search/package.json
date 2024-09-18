@@ -29,36 +29,60 @@
       "required": false,
       "title": "GitHub Base URL",
       "description": "Optional Base URL for GitHub Enterprise (e.g. https://github.acme-inc.com/api/v3). Defaults to the public GitHub."
+    },
+    {
+      "name": "users",
+      "type": "textfield",
+      "required": false,
+      "title": "Users / Organizations to search in",
+      "description": "Limit the search to a comma-separated list of users or organizations, e.g. 'mheidinger, raycast'. Tip: Use '@me' to search only your own repositories."
+    },
+    {
+      "name": "includeForks",
+      "type": "checkbox",
+      "required": false,
+      "label": "Include Forks",
+      "description": "Include forked repositories in search results."
+    },
+    {
+      "name": "additionalFilters",
+      "type": "textfield",
+      "required": false,
+      "title": "Additional Filters",
+      "description": "Additional filters to limit the repositories search, e.g. 'language:typescript'. See https://ray.so/0XgqB6q for all filters."
     }
   ],
   "contributors": [
     "immint023",
-    "mheidinger"
+    "mheidinger",
+    "j3lte"
   ],
   "categories": [
     "Developer Tools"
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
-    "@raycast/utils": "^1.4.8",
-    "javascript-time-ago": "^2.3.9",
-    "octokit": "^1.7.0",
-    "use-debounce": "^7.0.0"
+    "@raycast/api": "^1.79.1",
+    "@raycast/utils": "^1.16.3",
+    "javascript-time-ago": "^2.5.10",
+    "octokit": "^3.1.2",
+    "use-debounce": "^9.0.0",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/node": "20.14.12",
+    "@types/react": "18.3.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx -y @raycast/api@latest publish"
   }
 }

@@ -1,5 +1,6 @@
-import { CreateDatabaseForm } from "./components";
+import { withAccessToken } from "@raycast/utils";
 
-export default function Main(): JSX.Element {
-  return <CreateDatabaseForm />;
-}
+import { CreatePageForm } from "./components/forms/CreatePageForm";
+import { notionService } from "./utils/notion/oauth";
+
+export default withAccessToken(notionService)(CreatePageForm);

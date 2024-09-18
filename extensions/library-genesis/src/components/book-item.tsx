@@ -1,9 +1,16 @@
+import { memo } from "react";
+
 import { List } from "@raycast/api";
-import { BookEntry } from "../types";
+
+import type { BookEntry } from "@/types";
+
 import { BookActionPanel } from "./book-action-panel";
 
-export function BookItem(props: { book: BookEntry }, key: number) {
-  const { book } = props;
+interface BookItemProps {
+  book: BookEntry;
+}
+
+function BookItemF({ book }: BookItemProps, key: number) {
   const markdown = `<img src="${book.coverUrl}" alt="cover" height="180"/>`;
 
   return (
@@ -50,3 +57,5 @@ export function BookItem(props: { book: BookEntry }, key: number) {
     />
   );
 }
+
+export const BookItem = memo(BookItemF);

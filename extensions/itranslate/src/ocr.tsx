@@ -207,7 +207,7 @@ export default function Command() {
         )}
         <Action
           icon={Icon.ComputerChip}
-          title="Open iTranslate Preferences"
+          title="Open Command Preferences"
           shortcut={{ modifiers: ["cmd"], key: "p" }}
           onAction={openCommandPreferences}
         />

@@ -69,8 +69,14 @@ function buildNamesAndMetadata(topic: string) {
     return base;
   }
 
-  const title = matches.length - 1 >= config.extractTitleGroup ? matches[config.extractTitleGroup] : undefined;
-  const subtitle = matches.length - 1 >= config.extractSubTitleGroup ? matches[config.extractSubTitleGroup] : undefined;
+  const title =
+    config.extractTitleGroup && matches.length - 1 >= config.extractTitleGroup
+      ? matches[config.extractTitleGroup]
+      : undefined;
+  const subtitle =
+    config.extractSubTitleGroup && matches.length - 1 >= config.extractSubTitleGroup
+      ? matches[config.extractSubTitleGroup]
+      : undefined;
 
   if (config.extractMetadataNameAndGroup) {
     for (const element of config.extractMetadataNameAndGroup) {
@@ -248,7 +254,7 @@ export default function KafkaTopics() {
                 />
                 <Action
                   icon={Icon.Info}
-                  title="Display details"
+                  title="Display Details"
                   shortcut={{ modifiers: ["cmd"], key: "i" }}
                   onAction={() => setWithDetails((withDetails) => !withDetails)}
                 />

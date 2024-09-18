@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "microsoft-teams-calling",
+  "title": "Microsoft Teams Meeting",
+  "description": "Control your meeting with the keyboard, even when Microsoft Teams is in the background. Toggle microphone, camera and background blur and send reactions.",
+  "icon": "teams.png",
+  "author": "sven",
+  "categories": [
+    "Applications",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "controlMeeting",
+      "title": "Control Meeting",
+      "description": "All available commands in one place.",
+      "mode": "view"
+    },
+    {
+      "name": "toggleMute",
+      "title": "Toggle Microphone",
+      "description": "Toggle your microphone (mute/unmute)",
+      "icon": "mute.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggleVideo",
+      "title": "Toggle Camera",
+      "description": "Toggle your camera",
+      "icon": "video.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "leaveCall",
+      "title": "Leave Call",
+      "description": "Leave the current call",
+      "icon": "leave-call.png",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiVersion",
+      "title": "Teams Version",
+      "description": "Classic Teams or New Teams",
+      "type": "dropdown",
+      "data": [
+        {"title": "Classic Teams", "value": "classic"}, 
+        {"title": "New Teams", "value": "new"}
+      ],
+      "default": "new",
+      "required": true
+    },
+    {
+      "name": "apiToken",
+      "title": "API Token (Classic Teams)",
+      "description": "Get this from your Teams client in Settings → Privacy → Manage API (Only required for Classic Teams)",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9",
+    "@raycast/utils": "^1.5.2",
+    "ws": "^8.13.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@types/ws": "^8.5.4",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

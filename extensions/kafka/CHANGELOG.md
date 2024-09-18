@@ -1,5 +1,10 @@
 # Kafka Changelog
 
+## [Macos Notification] - 2023-03-01
+
+- In configuration, you can now activate macos notification if there is lags for 
+at least one consumer with custom threshold
+
 ## [Added kafka] - 2023-03-01
 
 ### Kafka command

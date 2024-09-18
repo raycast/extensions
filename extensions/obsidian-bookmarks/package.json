@@ -2,9 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "obsidian-bookmarks",
   "title": "Obsidian Bookmarks",
-  "description": "Manage your bookmarked links with Obsidian. Save, search, and access your bookmarks.",
+  "description": "Manage your bookmarked links with Obsidian. Save, search, and access your bookmarks. Supports Safari, Arc and other Chromium-based browsers",
   "icon": "obsidian-bookmarks.png",
   "author": "dru89",
+  "contributors": [
+    "moeyua",
+    "iwex"
+  ],
   "categories": [
     "Productivity",
     "Applications",
@@ -144,6 +148,15 @@
       "description": "You can add tags to any of your bookmarks. Use this preference to include a list of (comma-separated) tags that should always be available to add to your bookmarks.",
       "type": "textfield",
       "placeholder": "home, work, fun",
+      "required": false
+    },
+    {
+      "name": "datePrefix",
+      "label": "Date Prefix",
+      "title": "Date Prefix",
+      "description": "The prefix to use for the date in the filename of your bookmarks.",
+      "type": "checkbox",
+      "default": true,
       "required": false
     }
   ]

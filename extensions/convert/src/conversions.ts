@@ -253,3 +253,13 @@ export const HSLtoRGBA = (hsl: number[]): number[] => {
   const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
   return [Math.round(255 * f(0)), Math.round(255 * f(8)), Math.round(255 * f(4)), hsl[3]];
 };
+
+export const Base64toDecode = (base64: string): string => {
+  const buff = Buffer.from(base64, "base64");
+  return buff.toString("ascii");
+};
+
+export const Base64toEncode = (base64: string): string => {
+  const buff = Buffer.from(base64);
+  return buff.toString("base64");
+};

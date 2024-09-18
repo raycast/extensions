@@ -1,0 +1,141 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "whitebit",
+  "title": "WhiteBIT Exchange",
+  "description": "WhiteBIT exchange Raycast extension",
+  "categories": ["Applications", "Finance"],
+  "version": "1.0.0",
+  "icon": "command-icon.png",
+  "author": "marco-whitebit",
+  "license": "MIT",
+  "owner": "whitebit-exchange",
+  "access": "public",
+  "commands": [
+    {
+      "name": "my_balance",
+      "title": "My Balance",
+      "description": "Display account balance",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Transactions History",
+      "description": "Display history of your deposits and withdrawals",
+      "mode": "view"
+    },
+    {
+      "name": "markets",
+      "title": "Markets",
+      "description": "Available markets",
+      "mode": "view"
+    },
+    {
+      "name": "code_apply",
+      "title": "Apply Code",
+      "description": "Apply WhiteBIT code",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "code",
+          "placeholder": "Code",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "password",
+          "placeholder": "Password",
+          "type": "password"
+        }
+      ]
+    },
+    {
+      "name": "transfer_balance",
+      "title": "Transfer Between Balances",
+      "description": "Transfer your assets between Trade & Main balance",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "ticker",
+          "placeholder": "Ticker",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "amount",
+          "placeholder": "Amount",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "code_create",
+      "title": "Create Code",
+      "description": "Create WhiteBIT code",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "ticker",
+          "placeholder": "Ticker",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "amount",
+          "placeholder": "Amount",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "passphrase",
+          "placeholder": "Password",
+          "type": "password"
+        }
+      ]
+    },
+    {
+      "name": "code_list",
+      "title": "My Codes",
+      "description": "Get WhiteBIT codes history on my account",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "title": "Token",
+      "description": "Your API token.",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "secret",
+      "title": "Sercet Key",
+      "description": "Your API secret key.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.56.1",
+    "@raycast/utils": "^1.9.1",
+    "ofetch": "^1.1.1",
+    "ufo": "^1.2.0",
+    "usehooks-ts": "^2.9.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

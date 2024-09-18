@@ -38,7 +38,7 @@ const JwtView = () => {
     const headItems = ListFromObject(header, claims);
     const dataItems = ListFromObject(data, claims);
 
-    const tokenImg = `<img alt="view token" width="720" src="data:image/svg+xml,${encodeURI(
+    const tokenImg = `<img alt="view token" width="720" src="data:image/svg+xml,${encodeURIComponent(
       renderToString(
         <TokenSvg
           {...{

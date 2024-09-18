@@ -6,7 +6,10 @@
   "icon": "command-icon.png",
   "author": "futantan",
   "contributors": [
-    "sawhney17"
+    "sawhney17",
+    "hadret",
+    "jonatan_petursson",
+    "talk2dc"
   ],
   "license": "MIT",
   "preferences": [
@@ -17,6 +20,14 @@
       "title": "Path to Graph",
       "required": true,
       "description": "Specify the path to your notes graph location"
+    },
+    {
+      "name": "taskScopes",
+      "type": "textfield",
+      "placeholder": "work,home",
+      "title": "Task Scopes",
+      "required": false,
+      "description": "Comma separated list of scopes to tag tasks with (eg. work,home,school)"
     },
     {
       "name": "insertTime",
@@ -60,23 +71,28 @@
       "subtitle": "Logseq Search",
       "description": "Search Your Logseq Database",
       "mode": "view"
+    },
+    {
+      "name": "tasks",
+      "title": "Add a Task",
+      "subtitle": "Logseq Task",
+      "description": "Add a Task to Logseq",
+      "mode": "view"
     }
   ],
   "engines": {
     "node": ">=16.10"
   },
   "dependencies": {
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "^1.75.0",
     "dayjs": "^1.11.0",
     "edn-data": "^0.2.0",
     "logseq-dateutils": "0.0.22",
     "minisearch": "^4.0.3",
-    "ramda": "^0.28.0",
     "untildify": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
-    "@types/ramda": "^0.28.7",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

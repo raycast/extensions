@@ -10,19 +10,18 @@
 
 import { LocalStorage } from "@raycast/api";
 import axios, { AxiosError } from "axios";
-import CryptoJS from "crypto-js";
 import querystring from "node:querystring";
 import qs from "qs";
 import util from "util";
 import { downloadAudio, downloadWordAudioWithURL, getWordAudioPath, playWordAudio } from "../../audio";
 import { requestCostTime } from "../../axiosConfig";
-import { userAgent, YoudaoErrorCode } from "../../consts";
+import { userAgent } from "../../consts";
 import { autoDetectLanguageItem, englishLanguageItem } from "../../language/consts";
-import { AppKeyStore, myPreferences } from "../../preferences";
-import { DicionaryType, QueryType, QueryTypeResult, RequestErrorInfo, TranslationType } from "../../types";
+import { myPreferences } from "../../preferences";
+import { DictionaryType, QueryType, QueryTypeResult, RequestErrorInfo, TranslationType } from "../../types";
 import { getTypeErrorInfo, md5 } from "../../utils";
-import { formateYoudaoWebDictionaryModel, formatYoudaoDictionaryResult } from "./formatData";
-import { QueryWordInfo, YoudaoDictionaryResult, YoudaoWebDictionaryModel, YoudaoWebTranslateResult } from "./types";
+import { formatYoudaoWebDictionaryModel } from "./formatData";
+import { QueryWordInfo, YoudaoWebDictionaryModel, YoudaoWebTranslateResult } from "./types";
 import { getYoudaoWebDictionaryLanguageId, isValidYoudaoWebTranslateLanguage } from "./utils";
 
 console.log(`enter youdao.ts`);
@@ -82,86 +81,6 @@ function getYoudaoWebCookie(): Promise<string | undefined> {
 }
 
 /**
- * Youdao translate, use official API. Cost time: 0.2s
- *
- * * Note: max length of text to translate must <= 1000, otherwise, will get error: "103	翻译文本过长"
- *
- * 有道（词典）翻译 https://ai.youdao.com/DOCSIRMA/html/自然语言翻译/API文档/文本翻译服务/文本翻译服务-API文档.html
- */
-export function requestYoudaoAPITranslate(
-  queryWordInfo: QueryWordInfo,
-  queryType?: QueryType
-): Promise<QueryTypeResult> {
-  console.log(`---> start request Youdao api dictionary`);
-
-  const type = queryType ?? DicionaryType.Youdao;
-
-  const { fromLanguage, toLanguage, word } = queryWordInfo;
-  function truncate(q: string): string {
-    const len = q.length;
-    return len <= 20 ? q : q.substring(0, 10) + len + q.substring(len - 10, len);
-  }
-  const timestamp = Math.round(new Date().getTime() / 1000);
-  const salt = timestamp;
-  const youdaoAppId = AppKeyStore.youdaoAppId;
-  const sha256Content = youdaoAppId + truncate(word) + salt + timestamp + AppKeyStore.youdaoAppSecret;
-  const sign = CryptoJS.SHA256(sha256Content).toString();
-  const url = youdaoAppId ? "https://openapi.youdao.com/api" : "https://aidemo.youdao.com/trans";
-  const params = querystring.stringify({
-    sign,
-    salt,
-    from: fromLanguage,
-    signType: "v3",
-    q: word,
-    appKey: youdaoAppId,
-    curtime: timestamp,
-    to: toLanguage,
-  });
-  // console.log(`---> youdao params: ${params}`);
-
-  return new Promise((resolve, reject) => {
-    axios
-      .post(url, params)
-      .then((response) => {
-        const youdaoResult = response.data as YoudaoDictionaryResult;
-        // console.log(`---> youdao res: ${util.inspect(youdaoResult, { depth: null })}`);
-
-        const errorInfo = getYoudaoErrorInfo(youdaoResult.errorCode);
-        const youdaoFormatResult = formatYoudaoDictionaryResult(youdaoResult);
-
-        if (!youdaoFormatResult) {
-          console.error(`---> youdao error: ${util.inspect(youdaoResult, { depth: null })}`);
-          reject(errorInfo);
-          return;
-        }
-
-        const youdaoTypeResult: QueryTypeResult = {
-          type: type,
-          result: youdaoFormatResult,
-          queryWordInfo: youdaoFormatResult.queryWordInfo,
-          translations: youdaoFormatResult.translation.split("\n"),
-        };
-        console.warn(`---> Youdao translate cost: ${response.headers[requestCostTime]} ms`);
-        resolve(youdaoTypeResult);
-      })
-      .catch((error: AxiosError) => {
-        if (error.message === "canceled") {
-          console.log(`---> youdao api dict canceled`);
-          return reject(undefined);
-        }
-
-        console.error(`---> Youdao translate error: ${error}`);
-
-        // It seems that Youdao will never reject, always resolve...
-        // ? Error: write EPROTO 6180696064:error:1425F102:SSL routines:ssl_choose_client_version:unsupported protocol:../deps/openssl/openssl/ssl/statem/statem_lib.c:1994:
-
-        const errorInfo = getTypeErrorInfo(type, error);
-        reject(errorInfo);
-      });
-  });
-}
-
-/**
  * Youdao web dictionary, unofficial API. Cost time: 0.2s
  *
  * Supported zh <--> targetLanguage, supported target language: en, fr, ja, ko
@@ -172,7 +91,7 @@ export function requestYoudaoWebDictionary(
 ): Promise<QueryTypeResult> {
   console.log(`---> start requestYoudaoWebDictionary`);
 
-  const type = queryType ?? DicionaryType.Youdao;
+  const type = queryType ?? DictionaryType.Youdao;
 
   // * Note: "fanyi" only works when responese dicts has only one item ["meta"]
   const dicts = [["web_trans", "ec", "ce", "newhh", "baike", "wikipedia_digest"]];
@@ -214,7 +133,7 @@ export function requestYoudaoWebDictionary(
         console.warn(`---> youdao web dict cost: ${res.headers[requestCostTime]} ms`);
 
         const youdaoWebModel = res.data as YoudaoWebDictionaryModel;
-        const youdaoFormatResult = formateYoudaoWebDictionaryModel(youdaoWebModel);
+        const youdaoFormatResult = formatYoudaoWebDictionaryModel(youdaoWebModel);
         const youdaoQueryWordInfo = youdaoFormatResult.queryWordInfo;
 
         if (!youdaoQueryWordInfo.hasDictionaryEntries) {
@@ -227,7 +146,7 @@ export function requestYoudaoWebDictionary(
           return resolve(youdaoTypeResult);
         }
 
-        // * Note: Youdao web dict from-to language may be incorrect, eg: 鶗鴂, so we need to update it.
+        // * Note: Youdao web dict from-to language may be incorrect, eg: 鶗鴂，so we need to update it.
         if (queryWordInfo.fromLanguage !== autoDetectLanguageItem.youdaoLangCode) {
           youdaoQueryWordInfo.fromLanguage = queryWordInfo.fromLanguage;
           youdaoQueryWordInfo.toLanguage = queryWordInfo.toLanguage;
@@ -362,51 +281,6 @@ export async function requestYoudaoWebTranslate(
         reject(errorInfo);
       });
   });
-}
-
-function getYoudaoErrorInfo(errorCode: string): RequestErrorInfo {
-  let errorMessage = "";
-  switch (errorCode) {
-    case YoudaoErrorCode.Success: {
-      errorMessage = "Success";
-      break;
-    }
-    case YoudaoErrorCode.TargetLanguageNotSupported: {
-      errorMessage = "Target language not supported";
-      break;
-    }
-    case YoudaoErrorCode.TranslatedTextTooLong: {
-      errorMessage = "Translated text too long";
-      break;
-    }
-    case YoudaoErrorCode.InvalidApplicationID: {
-      errorMessage = "Invalid application ID";
-      break;
-    }
-    case YoudaoErrorCode.InvalidSignature: {
-      errorMessage = "Invalid signature";
-      break;
-    }
-    case YoudaoErrorCode.AccessFrequencyLimited: {
-      errorMessage = "Access frequency limited";
-      break;
-    }
-    case YoudaoErrorCode.TranslationQueryFailed: {
-      errorMessage = "Translation query failed";
-      break;
-    }
-    case YoudaoErrorCode.InsufficientAccountBalance: {
-      errorMessage = "Insufficient account balance";
-      break;
-    }
-  }
-
-  const errorInfo: RequestErrorInfo = {
-    type: DicionaryType.Youdao,
-    code: errorCode,
-    message: errorMessage,
-  };
-  return errorInfo;
 }
 
 /**

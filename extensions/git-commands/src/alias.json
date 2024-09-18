@@ -1,0 +1,1406 @@
+[
+  {
+    "name": "g",
+    "command": "git",
+    "type": "show",
+    "description": "The base command for all Git commands."
+  },
+  {
+    "name": "ga",
+    "command": "git add",
+    "type": "default",
+    "description": "Add file contents to the index."
+  },
+  {
+    "name": "gaa",
+    "command": "git add --all",
+    "type": "default",
+    "description": "Add all changes (new, modified, and removed files) to the staging area."
+  },
+  {
+    "name": "gapa",
+    "command": "git add --patch",
+    "type": "default",
+    "description": "Interactively select hunks of patch to add to the index."
+  },
+  {
+    "name": "gau",
+    "command": "git add --update",
+    "type": "default",
+    "description": "Update the index just where it already has an entry matching <pathspec>."
+  },
+  {
+    "name": "gav",
+    "command": "git add --verbose",
+    "type": "default",
+    "description": "Be verbose when adding files to the index."
+  },
+  {
+    "name": "gwip",
+    "command": "git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m \"--wip-- [skip ci]\"",
+    "type": "default",
+    "description": "Save all changes to a new commit with a message indicating 'work in progress'."
+  },
+  {
+    "name": "gam",
+    "command": "git am",
+    "type": "default",
+    "description": "Apply a series of patches from a mailbox to the current branch."
+  },
+  {
+    "name": "gama",
+    "command": "git am --abort",
+    "type": "delete",
+    "description": "Abort the current patching operation and restore the pre-apply state."
+  },
+  {
+    "name": "gamc",
+    "command": "git am --continue",
+    "type": "default",
+    "description": "Resolve conflicts and resume the patching operation."
+  },
+  {
+    "name": "gamscp",
+    "command": "git am --show-current-patch",
+    "type": "show",
+    "description": "Show the current patch being applied."
+  },
+  {
+    "name": "gams",
+    "command": "git am --skip",
+    "type": "default",
+    "description": "Skip the current patch and continue applying the rest."
+  },
+  {
+    "name": "gap",
+    "command": "git apply",
+    "type": "default",
+    "description": "Apply a patch without committing it."
+  },
+  {
+    "name": "gapt",
+    "command": "git apply --3way",
+    "type": "default",
+    "description": "Attempt a three-way merge if the patch does not apply cleanly."
+  },
+  {
+    "name": "gbs",
+    "command": "git bisect",
+    "type": "show",
+    "description": "Use binary search to find the commit that introduced a bug."
+  },
+  {
+    "name": "gbsb",
+    "command": "git bisect bad",
+    "type": "default",
+    "description": "Mark the current commit as bad (containing the bug)."
+  },
+  {
+    "name": "gbsg",
+    "command": "git bisect good",
+    "type": "default",
+    "description": "Mark the current commit as good (not containing the bug)."
+  },
+  {
+    "name": "gbsr",
+    "command": "git bisect reset",
+    "type": "delete",
+    "description": "Reset bisect state and return to the original branch."
+  },
+  {
+    "name": "gbss",
+    "command": "git bisect start",
+    "type": "default",
+    "description": "Start bisect session to find the commit that introduced a bug."
+  },
+  {
+    "name": "gbl",
+    "command": "git blame -b -w",
+    "type": "show",
+    "description": "Show what revision and author last modified each line of a file."
+  },
+  {
+    "name": "gb",
+    "command": "git branch",
+    "type": "show",
+    "description": "List, create, or delete branches."
+  },
+  {
+    "name": "gbda",
+    "command": "git branch --no-color --merged | command grep -vE \"^([+*]|\\s*($(git_main_branch)|$(git_develop_branch))\\s*$)\" | command xargs git branch -d 2>/dev/null",
+    "type": "delete",
+    "description": "Delete merged branches except main and develop."
+  },
+  {
+    "name": "gbnm",
+    "command": "git branch --no-merged",
+    "type": "show",
+    "description": "List branches that have not merged into the current branch."
+  },
+  {
+    "name": "gbr",
+    "command": "git branch --remote",
+    "type": "show",
+    "description": "List remote-tracking branches."
+  },
+  {
+    "name": "gba",
+    "command": "git branch -a",
+    "type": "show",
+    "description": "List both local and remote branches."
+  },
+  {
+    "name": "gbd",
+    "command": "git branch -d",
+    "type": "delete",
+    "description": "Delete a fully merged branch."
+  },
+  {
+    "name": "gbD",
+    "command": "git branch -D",
+    "type": "delete",
+    "description": "Forcefully delete a branch, even if it has unmerged changes."
+  },
+  {
+    "name": "gco",
+    "command": "git checkout",
+    "type": "default",
+    "description": "Switch branches or restore working tree files."
+  },
+  {
+    "name": "gcor",
+    "command": "git checkout --recurse-submodules",
+    "type": "default",
+    "description": "Switch branches or restore working tree files with submodule support."
+  },
+  {
+    "name": "gcb",
+    "command": "git checkout -b",
+    "type": "default",
+    "description": "Create a new branch and switch to it."
+  },
+  {
+    "name": "gcd",
+    "command": "git checkout $(git config gitflow.branch.develop)",
+    "type": "default",
+    "description": "Switch to the develop branch."
+  },
+  {
+    "name": "gch",
+    "command": "git checkout $(git config gitflow.prefix.hotfix)",
+    "type": "default",
+    "description": "Switch to a hotfix branch."
+  },
+  {
+    "name": "gcr",
+    "command": "git checkout $(git config gitflow.prefix.release)",
+    "type": "default",
+    "description": "Switch to a release branch."
+  },
+  {
+    "name": "gcm",
+    "command": "git checkout $(git_main_branch)",
+    "type": "default",
+    "description": "Switch to the main branch."
+  },
+  {
+    "name": "gcp",
+    "command": "git cherry-pick",
+    "type": "default",
+    "description": "Cherry-pick a commit from another branch."
+  },
+  {
+    "name": "gcpa",
+    "command": "git cherry-pick --abort",
+    "type": "delete",
+    "description": "Abort the cherry-pick operation and restore the original branch state."
+  },
+  {
+    "name": "gcpc",
+    "command": "git cherry-pick --continue",
+    "type": "default",
+    "description": "Continue the cherry-pick operation after resolving conflicts."
+  },
+  {
+    "name": "gclean",
+    "command": "git clean -id",
+    "type": "delete",
+    "description": "Interactively clean the working directory."
+  },
+  {
+    "name": "gcl",
+    "command": "git clone --recurse-submodules",
+    "type": "default",
+    "description": "Clone a repository and initialize its submodules."
+  },
+  {
+    "name": "gcam",
+    "command": "git commit -a -m",
+    "type": "default",
+    "description": "Record changes to the repository with a commit message."
+  },
+  {
+    "name": "gcas",
+    "command": "git commit -a -s",
+    "type": "default",
+    "description": "Record changes to the repository with a sign-off."
+  },
+  {
+    "name": "gcasm",
+    "command": "git commit -a -s -m",
+    "type": "default",
+    "description": "Record changes to the repository with a sign-off and commit message."
+  },
+  {
+    "name": "gcmsg",
+    "command": "git commit -m",
+    "type": "default",
+    "description": "Record changes to the repository with a commit message."
+  },
+  {
+    "name": "gcs",
+    "command": "git commit -S",
+    "type": "default",
+    "description": "Record changes to the repository and sign the commit."
+  },
+  {
+    "name": "gcsm",
+    "command": "git commit -s -m",
+    "type": "default",
+    "description": "Sign the commit and add a sign-off line to the end of the commit message."
+  },
+  {
+    "name": "gcss",
+    "command": "git commit -S -s",
+    "type": "default",
+    "description": "Sign the commit and add a sign-off line to the end of the commit message."
+  },
+  {
+    "name": "gcssm",
+    "command": "git commit -S -s -m",
+    "type": "default",
+    "description": "Record changes to the repository, sign the commit, and add a sign-off line."
+  },
+  {
+    "name": "gc",
+    "command": "git commit -v",
+    "type": "default",
+    "description": "Record changes to the repository."
+  },
+  {
+    "name": "gc!",
+    "command": "git commit -v --amend",
+    "type": "default",
+    "description": "Amend the last commit with the current changes."
+  },
+  {
+    "name": "gcn",
+    "command": "git commit -v --no-edit",
+    "type": "default",
+    "description": "Record changes to the repository without editing the commit message."
+  },
+  {
+    "name": "gcn!",
+    "command": "git commit -v --no-edit --amend",
+    "type": "default",
+    "description": "Amend the last commit without editing the commit message."
+  },
+  {
+    "name": "gca",
+    "command": "git commit -v -a",
+    "type": "default",
+    "description": "Record changes to the repository (including file deletions) without staging explicitly."
+  },
+  {
+    "name": "gca!",
+    "command": "git commit -v -a --amend",
+    "type": "default",
+    "description": "Amend the last commit with the current changes, including file deletions."
+  },
+  {
+    "name": "gcan!",
+    "command": "git commit -v -a --no-edit --amend",
+    "type": "default",
+    "description": "Amend the last commit without editing the commit message."
+  },
+  {
+    "name": "gcans!",
+    "command": "git commit -v -a -s --no-edit --amend",
+    "type": "default",
+    "description": "Amend the last commit as a signed commit without editing the commit message."
+  },
+  {
+    "name": "gcf",
+    "command": "git config --list",
+    "type": "show",
+    "description": "List all Git configuration settings."
+  },
+  {
+    "name": "gd",
+    "command": "git diff",
+    "type": "show",
+    "description": "Show changes between commits, commit and working tree, etc."
+  },
+  {
+    "name": "gdca",
+    "command": "git diff --cached",
+    "type": "show",
+    "description": "Show changes between the index and the previous commit."
+  },
+  {
+    "name": "gdcw",
+    "command": "git diff --cached --word-diff",
+    "type": "show",
+    "description": "Show word diff between the index and the previous commit."
+  },
+  {
+    "name": "gds",
+    "command": "git diff --staged",
+    "type": "show",
+    "description": "Show the differences between the staged changes and the previous commit."
+  },
+  {
+    "name": "gdw",
+    "command": "git diff --word-diff",
+    "type": "show",
+    "description": "Show word diff between the working tree and the index or a tree."
+  },
+  {
+    "name": "gdup",
+    "command": "git diff @{upstream}",
+    "type": "show",
+    "description": "Show changes between the working tree and the upstream branch."
+  },
+  {
+    "name": "gdt",
+    "command": "git diff-tree --no-commit-id --name-only -r",
+    "type": "show",
+    "description": "Show changes between two tree objects (e.g., between commits and trees)."
+  },
+  {
+    "name": "gf",
+    "command": "git fetch",
+    "type": "default",
+    "description": "Download objects and refs from a remote repository."
+  },
+  {
+    "name": "gfo",
+    "command": "git fetch origin",
+    "type": "default",
+    "description": "Fetch from the origin remote repository."
+  },
+  {
+    "name": "gfl",
+    "command": "git flow",
+    "type": "show",
+    "description": "A collection of Git extensions for high-level repository operations."
+  },
+  {
+    "name": "gflf",
+    "command": "git flow feature",
+    "type": "show",
+    "description": "Manage feature branches in Git Flow."
+  },
+  {
+    "name": "gflff",
+    "command": "git flow feature finish",
+    "type": "default",
+    "description": "Finish a feature branch and merge it into the develop branch."
+  },
+  {
+    "name": "gflffc",
+    "command": "git flow feature finish ${$(git_current_branch)#feature/}",
+    "type": "default",
+    "description": "Finish the current feature branch and merge it into the develop branch."
+  },
+  {
+    "name": "gflfp",
+    "command": "git flow feature publish",
+    "type": "default",
+    "description": "Publish a feature branch to the remote repository."
+  },
+  {
+    "name": "gflfpc",
+    "command": "git flow feature publish ${$(git_current_branch)#feature/}",
+    "type": "default",
+    "description": "Publish the current feature branch to the remote repository."
+  },
+  {
+    "name": "gflfpll",
+    "command": "git flow feature pull",
+    "type": "default",
+    "description": "Pull the latest changes of a feature branch from the remote repository."
+  },
+  {
+    "name": "gflfs",
+    "command": "git flow feature start",
+    "type": "default",
+    "description": "Start a new feature branch in Git Flow."
+  },
+  {
+    "name": "gflh",
+    "command": "git flow hotfix",
+    "type": "show",
+    "description": "Manage hotfix branches in Git Flow."
+  },
+  {
+    "name": "gflhf",
+    "command": "git flow hotfix finish",
+    "type": "default",
+    "description": "Finish a hotfix branch and merge it into the main branch."
+  },
+  {
+    "name": "gflhfc",
+    "command": "git flow hotfix finish ${$(git_current_branch)#hotfix/}",
+    "type": "default",
+    "description": "Finish the current hotfix branch and merge it into the main branch."
+  },
+  {
+    "name": "gflhp",
+    "command": "git flow hotfix publish",
+    "type": "default",
+    "description": "Publish a hotfix branch to the remote repository."
+  },
+  {
+    "name": "gflhpc",
+    "command": "git flow hotfix publish ${$(git_current_branch)#hotfix/}",
+    "type": "default",
+    "description": "Publish the current hotfix branch to the remote repository."
+  },
+  {
+    "name": "gflhs",
+    "command": "git flow hotfix start",
+    "type": "default",
+    "description": "Start a new hotfix branch in Git Flow."
+  },
+  {
+    "name": "gfli",
+    "command": "git flow init",
+    "type": "default",
+    "description": "Initialize a new repository using Git Flow."
+  },
+  {
+    "name": "gflr",
+    "command": "git flow release",
+    "type": "default",
+    "description": "Manage release branches in Git Flow."
+  },
+  {
+    "name": "gflrf",
+    "command": "git flow release finish",
+    "type": "default",
+    "description": "Finish a release branch and merge it into the main and develop branches."
+  },
+  {
+    "name": "gflrfc",
+    "command": "git flow release finish ${$(git_current_branch)#release/}",
+    "type": "default",
+    "description": "Finish the current release branch and merge it into the main and develop branches."
+  },
+  {
+    "name": "gflrp",
+    "command": "git flow release publish",
+    "type": "default",
+    "description": "Publish a release branch to the remote repository."
+  },
+  {
+    "name": "gflrpc",
+    "command": "git flow release publish ${$(git_current_branch)#release/}",
+    "type": "default",
+    "description": "Publish the current release branch to the remote repository."
+  },
+  {
+    "name": "gflrs",
+    "command": "git flow release start",
+    "type": "default",
+    "description": "Start a new release branch."
+  },
+  {
+    "name": "gg",
+    "command": "git gui citool",
+    "type": "default",
+    "description": "Open a graphical commit tool to select changes for commit."
+  },
+  {
+    "name": "gga",
+    "command": "git gui citool --amend",
+    "type": "default",
+    "description": "Open a graphical commit tool to amend the last commit."
+  },
+  {
+    "name": "ghh",
+    "command": "git help",
+    "type": "show",
+    "description": "Display help information about Git commands."
+  },
+  {
+    "name": "glgg",
+    "command": "git log --graph",
+    "type": "show",
+    "description": "Show commit history with a graph of branches and merges."
+  },
+  {
+    "name": "glgga",
+    "command": "git log --graph --decorate --all",
+    "type": "show",
+    "description": "Show commit history with graph, decoration, and all references."
+  },
+  {
+    "name": "glo",
+    "command": "git log --oneline --decorate",
+    "type": "show",
+    "description": "Show commit history with one commit per line and decorations."
+  },
+  {
+    "name": "glog",
+    "command": "git log --oneline --decorate --graph",
+    "type": "show",
+    "description": "Show commit history graph with one commit per line and decorations."
+  },
+  {
+    "name": "gloga",
+    "command": "git log --oneline --decorate --graph --all",
+    "type": "show",
+    "description": "Show commit history graph with all references and decorations."
+  },
+  {
+    "name": "glg",
+    "command": "git log --stat",
+    "type": "show",
+    "description": "Show commit history with statistics."
+  },
+  {
+    "name": "glgp",
+    "command": "git log --stat -p",
+    "type": "show",
+    "description": "Show commit history with statistics and full diffs."
+  },
+  {
+    "name": "gunwip",
+    "command": "git log -n 1 | grep -q -c \"\\--wip--\" && git reset HEAD~1",
+    "type": "show",
+    "description": "Cancel the last commit if the commit message contains '--wip--'."
+  },
+  {
+    "name": "gignored",
+    "command": "git ls-files -v | grep \"^[[:lower:]]\"",
+    "type": "show",
+    "description": "List ignored files."
+  },
+  {
+    "name": "gfg",
+    "command": "git ls-files | grep",
+    "type": "show",
+    "description": "List tracked files matching a pattern."
+  },
+  {
+    "name": "gm",
+    "command": "git merge",
+    "type": "default",
+    "description": "Merge two or more development histories together."
+  },
+  {
+    "name": "gma",
+    "command": "git merge --abort",
+    "type": "delete",
+    "description": "Abort the merge operation and restore the original branch state."
+  },
+  {
+    "name": "gmom",
+    "command": "git merge origin/$(git_main_branch)",
+    "type": "default",
+    "description": "Merge changes from the main branch into the current branch."
+  },
+  {
+    "name": "gmum",
+    "command": "git merge upstream/$(git_main_branch)",
+    "type": "default",
+    "description": "Merge changes from an upstream main branch."
+  },
+  {
+    "name": "gmtl",
+    "command": "git mergetool --no-prompt",
+    "type": "default",
+    "description": "Run merge conflict resolution tool to resolve conflicts."
+  },
+  {
+    "name": "gl",
+    "command": "git pull",
+    "type": "default",
+    "description": "Fetch from and integrate with another repository or a local branch."
+  },
+  {
+    "name": "gpr",
+    "command": "git pull --rebase",
+    "type": "default",
+    "description": "Fetch from a remote branch and rebase on the current branch."
+  },
+  {
+    "name": "gup",
+    "command": "git pull --rebase",
+    "type": "default",
+    "description": "Fetch from a remote branch and rebase on the current branch."
+  },
+  {
+    "name": "gupa",
+    "command": "git pull --rebase --autostash",
+    "type": "default",
+    "description": "Fetch from a remote branch and rebase with autostash set."
+  },
+  {
+    "name": "gupav",
+    "command": "git pull --rebase --autostash -v",
+    "type": "default",
+    "description": "Fetch from a remote branch and rebase with verbose output and autostash."
+  },
+  {
+    "name": "gupv",
+    "command": "git pull --rebase -v",
+    "type": "default",
+    "description": "Fetch from a remote branch and rebase with verbose output."
+  },
+  {
+    "name": "gupom",
+    "command": "git pull --rebase origin $(git_main_branch)",
+    "type": "default",
+    "description": "Rebase the current branch onto the upstream main branch."
+  },
+  {
+    "name": "ggpull",
+    "command": "git pull origin \"$(git_current_branch)\"",
+    "type": "default",
+    "description": "Pull the current branch from the remote repository and rebase."
+  },
+  {
+    "name": "gluc",
+    "command": "git pull upstream $(git_current_branch)",
+    "type": "default",
+    "description": "Pull the current branch from an upstream repository."
+  },
+  {
+    "name": "glum",
+    "command": "git pull upstream $(git_main_branch)",
+    "type": "default",
+    "description": "Pull the main branch from an upstream repository."
+  },
+  {
+    "name": "gp",
+    "command": "git push",
+    "type": "default",
+    "description": "Update remote refs along with associated objects."
+  },
+  {
+    "name": "gpd",
+    "command": "git push --dry-run",
+    "type": "default",
+    "description": "Validate push without actually sending data."
+  },
+  {
+    "name": "gpf!",
+    "command": "git push --force",
+    "type": "default",
+    "description": "Forcefully update the remote branch without checking for diverging changes."
+  },
+  {
+    "name": "gpf",
+    "command": "git push --force-with-lease",
+    "type": "default",
+    "description": "Update the remote branch with force iff there are no divergent changes."
+  },
+  {
+    "name": "gpsup",
+    "command": "git push --set-upstream origin $(git_current_branch)",
+    "type": "default",
+    "description": "Push the current branch and set the upstream tracking branch."
+  },
+  {
+    "name": "gpv",
+    "command": "git push -v",
+    "type": "default",
+    "description": "Push to the remote repository with verbose output."
+  },
+  {
+    "name": "gpoat",
+    "command": "git push origin --all && git push origin --tags",
+    "type": "default",
+    "description": "Push all local branches and tags to the remote repository."
+  },
+  {
+    "name": "ggpush",
+    "command": "git push origin \"$(git_current_branch)\"",
+    "type": "default",
+    "description": "Push the current branch to the remote repository."
+  },
+  {
+    "name": "gpu",
+    "command": "git push upstream",
+    "type": "default",
+    "description": "Push to an upstream remote repository."
+  },
+  {
+    "name": "grb",
+    "command": "git rebase",
+    "type": "default",
+    "description": "Reapply commits on top of another base tip."
+  },
+  {
+    "name": "grba",
+    "command": "git rebase --abort",
+    "type": "delete",
+    "description": "Abort the current rebase operation and restore the original branch state."
+  },
+  {
+    "name": "grbc",
+    "command": "git rebase --continue",
+    "type": "default",
+    "description": "Continue the rebase operation after resolving conflicts."
+  },
+  {
+    "name": "grbo",
+    "command": "git rebase --onto",
+    "type": "default",
+    "description": "Rebase commits onto another base, optionally skipping some commits."
+  },
+  {
+    "name": "grbs",
+    "command": "git rebase --skip",
+    "type": "default",
+    "description": "Skip the current commit during the rebase."
+  },
+  {
+    "name": "grbi",
+    "command": "git rebase -i",
+    "type": "default",
+    "description": "Start an interactive rebase."
+  },
+  {
+    "name": "grbd",
+    "command": "git rebase $(git_develop_branch)",
+    "type": "default",
+    "description": "Rebase the current branch on top of the develop branch."
+  },
+  {
+    "name": "grbm",
+    "command": "git rebase $(git_main_branch)",
+    "type": "default",
+    "description": "Rebase the current branch on top of the main branch."
+  },
+  {
+    "name": "grbom",
+    "command": "git rebase origin/$(git_main_branch)",
+    "type": "default",
+    "description": "Rebase from the main branch of the remote repository."
+  },
+  {
+    "name": "gr",
+    "command": "git remote",
+    "type": "default",
+    "description": "Manage tracked repositories."
+  },
+  {
+    "name": "grv",
+    "command": "git remote -v",
+    "type": "show",
+    "description": "Show remote repositories and their URLs."
+  },
+  {
+    "name": "gra",
+    "command": "git remote add",
+    "type": "default",
+    "description": "Add a remote repository."
+  },
+  {
+    "name": "grrm",
+    "command": "git remote remove",
+    "type": "delete",
+    "description": "Remove a remote repository."
+  },
+  {
+    "name": "grmv",
+    "command": "git remote rename",
+    "type": "default",
+    "description": "Rename a remote repository."
+  },
+  {
+    "name": "grset",
+    "command": "git remote set-url",
+    "type": "default",
+    "description": "Change the URL of a remote repository."
+  },
+  {
+    "name": "grup",
+    "command": "git remote update",
+    "type": "default",
+    "description": "Fetch updates from all remote repositories."
+  },
+  {
+    "name": "grh",
+    "command": "git reset",
+    "type": "delete",
+    "description": "Reset the current HEAD to the specified state."
+  },
+  {
+    "name": "gru",
+    "command": "git reset --",
+    "type": "delete",
+    "description": "Reset the current HEAD to the specified state but keep changes in the working directory."
+  },
+  {
+    "name": "grhh",
+    "command": "git reset --hard",
+    "type": "delete",
+    "description": "Reset current HEAD to the specified state and discard changes in the working directory."
+  },
+  {
+    "name": "gpristine",
+    "command": "git reset --hard && git clean -dffx",
+    "type": "delete",
+    "description": "Hard reset and clean working directory."
+  },
+  {
+    "name": "groh",
+    "command": "git reset origin/$(git_current_branch) --hard",
+    "type": "delete",
+    "description": "Hard reset to the state of the remote tracking branch."
+  },
+  {
+    "name": "grs",
+    "command": "git restore",
+    "type": "default",
+    "description": "Restore files in the working tree from the index or another source."
+  },
+  {
+    "name": "grss",
+    "command": "git restore --source",
+    "type": "default",
+    "description": "Restore files from a specified source."
+  },
+  {
+    "name": "grst",
+    "command": "git restore --staged",
+    "type": "default",
+    "description": "Unstage changes from the index but keep them in the working directory."
+  },
+  {
+    "name": "grev",
+    "command": "git revert",
+    "type": "default",
+    "description": "Reverse one or more commits."
+  },
+  {
+    "name": "grm",
+    "command": "git rm",
+    "type": "delete",
+    "description": "Remove files from the working tree and from the index."
+  },
+  {
+    "name": "grmc",
+    "command": "git rm --cached",
+    "type": "delete",
+    "description": "Remove files from the index but keep them in the working directory."
+  },
+  {
+    "name": "gcount",
+    "command": "git shortlog -sn",
+    "type": "show",
+    "description": "Show the number of commits per author in descending order."
+  },
+  {
+    "name": "gsh",
+    "command": "git show",
+    "type": "show",
+    "description": "Show information about an object."
+  },
+  {
+    "name": "gstall",
+    "command": "git stash --all",
+    "type": "default",
+    "description": "Save changes in the working tree and untracked files to a new stash."
+  },
+  {
+    "name": "gstaa",
+    "command": "git stash apply",
+    "type": "default",
+    "description": "Apply the latest stash and keep it in the stash list."
+  },
+  {
+    "name": "gstc",
+    "command": "git stash clear",
+    "type": "delete",
+    "description": "Clear all stashes."
+  },
+  {
+    "name": "gstd",
+    "command": "git stash drop",
+    "type": "delete",
+    "description": "Drop the latest stash."
+  },
+  {
+    "name": "gstl",
+    "command": "git stash list",
+    "type": "show",
+    "description": "List all stashes."
+  },
+  {
+    "name": "gstp",
+    "command": "git stash pop",
+    "type": "default",
+    "description": "Apply the latest stash and drop it from the stash list."
+  },
+  {
+    "name": "gsta",
+    "command": "git stash push",
+    "type": "default",
+    "description": "Save changes in the working tree to a new stash."
+  },
+  {
+    "name": "gsts",
+    "command": "git stash show --text",
+    "type": "show",
+    "description": "Show the diff of what is stored in the stash."
+  },
+  {
+    "name": "gst",
+    "command": "git status",
+    "type": "show",
+    "description": "Show the working tree status."
+  },
+  {
+    "name": "gss",
+    "command": "git status -s",
+    "type": "show",
+    "description": "Show the working tree status in short format."
+  },
+  {
+    "name": "gsb",
+    "command": "git status -sb",
+    "type": "show",
+    "description": "Show the working tree status in a compact format."
+  },
+  {
+    "name": "gsi",
+    "command": "git submodule init",
+    "type": "default",
+    "description": "Initialize the submodules recorded in .gitmodules."
+  },
+  {
+    "name": "gsu",
+    "command": "git submodule update",
+    "type": "default",
+    "description": "Fetch and update the registered submodules."
+  },
+  {
+    "name": "gsd",
+    "command": "git svn dcommit",
+    "type": "default",
+    "description": "Commit changes to the Subversion repository."
+  },
+  {
+    "name": "git-svn-dcommit-push",
+    "command": "git svn dcommit && git push github $(git_main_branch):svntrunk",
+    "type": "default",
+    "description": "Dcommit to SVN and push to GitHub."
+  },
+  {
+    "name": "gsr",
+    "command": "git svn rebase",
+    "type": "default",
+    "description": "Rebase against upstream SVN changes."
+  },
+  {
+    "name": "gsw",
+    "command": "git switch",
+    "type": "default",
+    "description": "Switch branches or restore working tree files."
+  },
+  {
+    "name": "gswc",
+    "command": "git switch -c",
+    "type": "default",
+    "description": "Create a new branch and switch to it."
+  },
+  {
+    "name": "gswd",
+    "command": "git switch $(git_develop_branch)",
+    "type": "default",
+    "description": "Switch to the development branch."
+  },
+  {
+    "name": "gswm",
+    "command": "git switch $(git_main_branch)",
+    "type": "default",
+    "description": "Switch to the main branch."
+  },
+  {
+    "name": "gts",
+    "command": "git tag -s",
+    "type": "default",
+    "description": "Create a signed tag object."
+  },
+  {
+    "name": "gtv",
+    "command": "git tag | sort -V",
+    "type": "show",
+    "description": "List tags in version order."
+  },
+  {
+    "name": "gignore",
+    "command": "git update-index --assume-unchanged",
+    "type": "default",
+    "description": "Mark files as assume-unchanged."
+  },
+  {
+    "name": "gunignore",
+    "command": "git update-index --no-assume-unchanged",
+    "type": "default",
+    "description": "Stop ignoring changes to a file that is already tracked by Git."
+  },
+  {
+    "name": "gwt",
+    "command": "git worktree",
+    "type": "default",
+    "description": "Manage multiple working trees associated with the repository."
+  },
+  {
+    "name": "gwta",
+    "command": "git worktree add",
+    "type": "default",
+    "description": "Add a new working tree."
+  },
+  {
+    "name": "gwtls",
+    "command": "git worktree list",
+    "type": "show",
+    "description": "List all linked working trees."
+  },
+  {
+    "name": "gwtmv",
+    "command": "git worktree move",
+    "type": "default",
+    "description": "Move a working tree to a new location."
+  },
+  {
+    "name": "gwtrm",
+    "command": "git worktree remove",
+    "type": "delete",
+    "description": "Remove a working tree."
+  },
+  {
+    "name": "gbg",
+    "command": "git branch -vv | grep \": gone\\]\"",
+    "description": "Shows local branches that have been deleted on the remote repository.",
+    "type": "show"
+  },
+  {
+    "name": "gbgD",
+    "command": "git branch --no-color -vv | grep \": gone\\]\" | awk '{print $1}' | xargs git branch -D",
+    "description": "Forcefully deletes local branches that have been deleted on the remote repository.",
+    "type": "delete"
+  },
+  {
+    "name": "gbgd",
+    "command": "git branch --no-color -vv | grep \": gone\\]\" | awk '{print $1}' | xargs git branch -d",
+    "description": "Deletes local branches that have been deleted on the remote repository.",
+    "type": "delete"
+  },
+  {
+    "name": "gdct",
+    "command": "git describe --tags $(git rev-list --tags --max-count=1)",
+    "description": "Shows the description of the most recent tag.",
+    "type": "show"
+  },
+  {
+    "name": "gfa",
+    "command": "git fetch --all --prune --jobs=10",
+    "description": "Downloads all branches and the latest changes from the remote repository.",
+    "type": "default"
+  },
+  {
+    "name": "ggsup",
+    "command": "git branch --set-upstream-to=origin/$(git_current_branch)",
+    "description": "Sets the current branch to track the corresponding branch on the remote repository.",
+    "type": "default"
+  },
+  {
+    "name": "gk",
+    "command": "\\gitk --all --branches &!",
+    "description": "Opens the GitK graphical interface to visualize commit history.",
+    "type": "show"
+  },
+  {
+    "name": "gke",
+    "command": "\\gitk --all $(git log --walk-reflogs --pretty=%h) &!",
+    "description": "Opens the GitK graphical interface and shows referenced commits.",
+    "type": "show"
+  },
+  {
+    "name": "glgm",
+    "command": "git log --graph --max-count=10",
+    "description": "Shows commit history in a graphical format, limited to the last 10 commits.",
+    "type": "show"
+  },
+  {
+    "name": "glod",
+    "command": "git log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ad) %C(bold blue)<%an>%Creset'",
+    "description": "Shows commit history in a detailed and colorful graphical format.",
+    "type": "show"
+  },
+  {
+    "name": "glods",
+    "command": "git log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ad) %C(bold blue)<%an>%Creset' --date=short",
+    "description": "Shows commit history in a detailed, colorful, and short date format graphical format.",
+    "type": "show"
+  },
+  {
+    "name": "glol",
+    "command": "git log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset'",
+    "description": "Shows commit history in a detailed graphical format along with relative dates.",
+    "type": "show"
+  },
+  {
+    "name": "glola",
+    "command": "git log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset' --all",
+    "description": "Shows commit history of all branches in a detailed graphical format along with relative dates.",
+    "type": "show"
+  },
+  {
+    "name": "glols",
+    "command": "git log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset' --stat",
+    "description": "Shows commit history in a detailed graphical format along with relative dates and change statistics.",
+    "type": "show"
+  },
+  {
+    "name": "glp",
+    "command": "_git_log_prettily",
+    "description": "Custom function to show commit history in a predefined format.",
+    "type": "show"
+  },
+  {
+    "name": "gms",
+    "command": "git merge --squash",
+    "description": "Merges changes from one branch into another without creating a merge commit.",
+    "type": "default"
+  },
+  {
+    "name": "gmtlvim",
+    "command": "git mergetool --no-prompt --tool=vimdiff",
+    "description": "Opens the Git merging tool in Vimdiff mode to resolve conflicts.",
+    "type": "default"
+  },
+  {
+    "name": "gpod",
+    "command": "git push origin --delete",
+    "description": "Deletes a branch from the remote repository.",
+    "type": "delete"
+  },
+  {
+    "name": "gpsupf",
+    "command": "git push --set-upstream origin $(git_current_branch) --force-with-lease --force-if-includes",
+    "description": "Sends local changes to the remote repository and sets the corresponding branch to track.",
+    "type": "default"
+  },
+  {
+    "name": "grep",
+    "command": "grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox}",
+    "description": "Searches for patterns in files or directories, excluding common directories.",
+    "type": "show"
+  },
+  {
+    "name": "grt",
+    "command": "cd \"$(git rev-parse --show-toplevel || echo .)\"",
+    "description": "Navigates to the root directory of the current repository.",
+    "type": "default"
+  },
+  {
+    "name": "gsps",
+    "command": "git show --pretty=short --show-signature",
+    "description": "Shows detailed information about a specific commit and its digital signature, if any.",
+    "type": "show"
+  },
+  {
+    "name": "gtl",
+    "command": "gtl(){ git tag --sort=-v:refname -n --list \"${1}*\" }; noglob gtl",
+    "description": "Shows tags matching a specific pattern and sorts them in descending version order.",
+    "type": "show"
+  },
+  {
+    "name": "gupomi",
+    "command": "git pull --rebase=interactive origin $(git_main_branch)",
+    "description": "Updates the current branch by interactive rebase from the main branch of the remote repository.",
+    "type": "default"
+  },
+  {
+    "name": "gwch",
+    "command": "git whatchanged -p --abbrev-commit --pretty=medium",
+    "description": "Shows the changes made in each commit along with their summaries.",
+    "type": "show"
+  },
+  {
+    "name": "ggpnp",
+    "command": "ggl && ggp",
+    "description": "Pull changes from the remote repository for the current branch and push your changes to the remote repository.",
+    "type": "default"
+  },
+  {
+    "name": "ggpur",
+    "command": "git pull --rebase origin $(current_branch)",
+    "description": "Pull changes from the remote repository for the current branch and rebase your changes on top of it.",
+    "type": "default"
+  },
+  {
+    "name": "gbsn",
+    "command": "git bisect new",
+    "description": "Start a git bisect session to find the commit that introduced a bug",
+    "type": "default"
+  },
+  {
+    "name": "gbso",
+    "command": "git bisect old",
+    "description": "Mark a commit as not containing the bug being bisected",
+    "type": "default"
+  },
+  {
+    "name": "gbm",
+    "command": "git branch --move",
+    "description": "Rename a git branch",
+    "type": "default"
+  },
+  {
+    "name": "gccd",
+    "command": "git clone --recurse-submodules \"$@\" && cd \"$(basename $_ .git)\"",
+    "description": "Clone a Git repository recursively and change to the new directory",
+    "type": "default"
+  },
+  {
+    "name": "gdv",
+    "command": "git diff -w \"$@\" | view -",
+    "description": "Show diff output for files in the working tree through an external pager",
+    "type": "show"
+  },
+  {
+    "name": "gdnolock",
+    "command": "git diff $@ \":(exclude)package-lock.json\" \":(exclude)\\*.lock\"",
+    "description": "Show diff output excluding package-lock.json and other lock files",
+    "type": "show"
+  },
+  {
+    "name": "gprv",
+    "command": "git pull --rebase -v",
+    "description": "Pull with rebase from the remote repository verbosely",
+    "type": "default"
+  },
+  {
+    "name": "gpra",
+    "command": "git pull --rebase --autostash",
+    "description": "Pull with rebase from the remote repository, stashing local changes",
+    "type": "default"
+  },
+  {
+    "name": "gprav",
+    "command": "git pull --rebase --autostash -v",
+    "description": "Pull with rebase from remote verbosely, stashing local changes",
+    "type": "default"
+  },
+  {
+    "name": "gprom",
+    "command": "git pull --rebase origin $(git_main_branch)",
+    "description": "Pull main branch from origin with rebase",
+    "type": "default"
+  },
+  {
+    "name": "gpromi",
+    "command": "git pull --rebase=interactive origin $(git_main_branch)",
+    "description": "Interactively rebase main branch from origin",
+    "type": "default"
+  },
+  {
+    "name": "ggl",
+    "command": "git pull origin $(current_branch)",
+    "description": "Pull the current branch from origin",
+    "type": "default"
+  },
+  {
+    "name": "ggf",
+    "command": "git push --force origin $(current_branch)",
+    "description": "Force push the current branch to origin",
+    "type": "default"
+  },
+  {
+    "name": "ggfl",
+    "command": "git push --force-with-lease origin $(current_branch)",
+    "description": "Force push the current branch to origin if you have the latest changes",
+    "type": "default"
+  },
+  {
+    "name": "ggp",
+    "command": "git push origin $(current_branch)",
+    "description": "Push the current branch to origin",
+    "type": "default"
+  },
+  {
+    "name": "grhk",
+    "command": "git reset --keep",
+    "description": "Reset the index preserving working tree changes",
+    "type": "delete"
+  },
+  {
+    "name": "grhs",
+    "command": "git reset --soft",
+    "description": "Soft reset the index to a commit, keeping changes",
+    "type": "delete"
+  },
+  {
+    "name": "gstu",
+    "command": "git stash --include-untracked",
+    "description": "Stash including untracked files",
+    "type": "default"
+  },
+  {
+    "name": "gta",
+    "command": "git tag --annotate",
+    "description": "Annotate a tag with the tagger name, email, date, and message",
+    "type": "show"
+  },
+  {
+    "name": "gcB",
+    "command": "git checkout -B",
+    "type": "default",
+    "description": "Create or reset a branch to the specified commit, switching to it."
+  },
+  {
+    "name": "gcann!",
+    "command": "git commit --verbose --all --date=now --no-edit --amend",
+    "type": "default",
+    "description": "Amend the last commit with all current changes, using the current date, without editing the message."
+  },
+  {
+    "name": "gmc",
+    "command": "git merge --continue",
+    "type": "default",
+    "description": "Continue merging after resolving conflicts."
+  },
+  {
+    "name": "grf",
+    "command": "git reflog",
+    "type": "show",
+    "description": "Show a log of changes to the local repository's HEAD and branch references."
+  },
+  {
+    "name": "gwipe",
+    "command": "git reset --hard && git clean --force -df",
+    "type": "delete",
+    "description": "Hard reset the working directory and clean it by forcefully removing untracked files and directories."
+  },
+  {
+    "name": "greva",
+    "command": "git revert --abort",
+    "type": "delete",
+    "description": "Abort the revert operation, returning to the previous state before the revert began."
+  },
+  {
+    "name": "grevc",
+    "command": "git revert --continue",
+    "type": "default",
+    "description": "Continue the revert process after a merge conflict has been resolved."
+  }
+]

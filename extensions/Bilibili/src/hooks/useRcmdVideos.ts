@@ -1,10 +1,10 @@
-import { getRcmd } from "../utils";
+import { getRcmd } from "../apis";
 
 import { useState, useEffect } from "react";
 import { showToast, Toast } from "@raycast/api";
 
 export function useRcmdVideos(idx: number) {
-  const [rcmdVideos, setRcmdVideos] = useState<Bilibili.video[]>([]);
+  const [rcmdVideos, setRcmdVideos] = useState<Bilibili.Video[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

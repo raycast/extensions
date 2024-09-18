@@ -1,94 +1,101 @@
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { ActionPanel, List, Action } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 import Parser from "rss-parser";
+import { getIcon } from "./utils";
 
-const parser = new Parser({
-  customFields: {
-    item: ["author"],
-  },
-});
-
-interface State {
-  items?: Parser.Item[];
-  error?: Error;
+interface FeedItem {
+  title: string;
+  link: string;
+  pubDate: string;
+  author: string;
+  content: string;
+  contentSnippet: string;
+  id: string;
+  isoDate: string;
+  updated: string;
 }
 
 export default function Command() {
-  const [state, setState] = useState<State>({});
-
-  useEffect(() => {
-    async function fetchStories() {
-      try {
-        const feed = await parser.parseURL("https://www.producthunt.com/feed?category=undefined&count=25");
-        setState({ items: feed.items });
-      } catch (error) {
-        setState({ error: error instanceof Error ? error : new Error("Something went wrong") });
+  const { data, isLoading } = useFetch("https://www.producthunt.com/feed?category=undefined", {
+    async parseResponse(response) {
+      if (!response.ok) {
+        throw new Error(response.statusText);
       }
-    }
 
-    fetchStories();
-  }, []);
+      const data = await response.text();
 
-  if (state.error) {
-    showToast(ToastStyle.Failure, "Failed loading stories", state.error.message);
-  }
+      if (data !== undefined) {
+        const parser: Parser = new Parser({
+          customFields: {
+            item: ["updated"],
+          },
+        });
+        const feed = await parser.parseString(data as string);
+
+        feed.items.forEach((item) => {
+          console.log(item);
+        });
+
+        return { items: feed.items as FeedItem[] };
+      }
+      return { items: [] };
+    },
+  });
 
   return (
-    <List isLoading={!state.items && !state.error}>
-      {state.items?.map((item, index) => (
-        <StoryListItem key={item.guid} item={item} index={index} />
-      ))}
+    <List isLoading={isLoading}>
+      <List.EmptyView icon="no-view.png" title="No Results" />
+      {data && data.items?.map((item, index) => <StoryListItem key={item.id} item={item} index={index} />)}
     </List>
   );
 }
 
-function StoryListItem(props: { item: Parser.Item; index: number }) {
-  const icon = getIcon(props.index + 1);
-  console.log(props.item);
+function getCleanDescription(text: string): string {
+  const cleanedText = text
+    .replace(/<[^>]*>/g, "")
+    .replace(/\b(Discussion|Link)\b|\s*\|\s*/g, "")
+    .trim();
+
+  const sentences = cleanedText.split(/(?<=[.!?])\s+/);
+
+  return sentences[0] || "";
+}
+
+function StoryListItem(props: { item: FeedItem; index: number }) {
+  const { item, index } = props;
+  const date = new Date(item.updated);
+  const cleanedContent = getCleanDescription(item.content);
   return (
     <List.Item
-      icon={icon}
-      title={props.item.title ?? "No title"}
-      // @ts-expect-error there is actually an author property
-      subtitle={props.item.author ?? "No author"}
-      actions={<Actions item={props.item} />}
+      icon={getIcon(index + 1)}
+      title={item.title ?? "No title"}
+      subtitle={cleanedContent ?? "No author"}
+      keywords={[item.author]}
+      actions={<Actions item={item} />}
+      accessories={[
+        {
+          text: item.author,
+        },
+        {
+          date: date,
+          tooltip: date.toLocaleString(),
+        },
+      ]}
     />
   );
 }
 
 function Actions(props: { item: Parser.Item }) {
+  const { item } = props;
+
   return (
-    <ActionPanel title={props.item.title}>
+    <ActionPanel title={item.title}>
       <ActionPanel.Section>
-        {props.item.link && <OpenInBrowserAction url={props.item.link} />}
-        {props.item.guid && <OpenInBrowserAction url={props.item.guid} title="Open Comments in Browser" />}
-      </ActionPanel.Section>
-      <ActionPanel.Section>
-        {props.item.link && (
-          <CopyToClipboardAction
-            content={props.item.link}
-            title="Copy Link"
-            shortcut={{ modifiers: ["cmd"], key: "." }}
-          />
+        {item.link && <Action.OpenInBrowser url={item.link} />}
+        {item.link && (
+          <Action.CopyToClipboard content={item.link} title="Copy Link" shortcut={{ modifiers: ["cmd"], key: "." }} />
         )}
       </ActionPanel.Section>
     </ActionPanel>
   );
-}
-
-const iconToEmojiMap = new Map<number, string>([
-  [1, "1️⃣"],
-  [2, "2️⃣"],
-  [3, "3️⃣"],
-  [4, "4️⃣"],
-  [5, "5️⃣"],
-  [6, "6️⃣"],
-  [7, "7️⃣"],
-  [8, "8️⃣"],
-  [9, "9️⃣"],
-  [10, "🔟"],
-]);
-
-function getIcon(index: number) {
-  return iconToEmojiMap.get(index) ?? "⏺";
 }

@@ -12,6 +12,7 @@ export const HOSTING_STATUSES = Webhosting.v1alpha1.HOSTING_TRANSIENT_STATUSES.r
   }),
   {
     delivering: { source: Icon.CircleProgress100, tintColor: Color.Blue },
+    migrating: { source: Icon.CircleProgress100, tintColor: Color.Blue },
     deleting: { source: Icon.CircleProgress100, tintColor: Color.Blue },
     error: { source: Icon.CircleFilled, tintColor: Color.Red },
     locked: { source: Icon.Lock, tintColor: Color.Red },

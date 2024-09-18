@@ -1,34 +1,42 @@
-import { ActionPanel, Icon, showToast, Action, Image, Keyboard, Toast, Color } from "@raycast/api";
-import moment from "moment";
-import { useAtom } from "jotai";
-import { notionColorToTintColor, patchPage, fetchUsers } from "../../utils/notion";
-import { DatabaseProperty, DatabasePropertyOption, PagePropertyType, Page } from "../../utils/types";
-import { usersAtom } from "../../utils/state";
-import { useEffect } from "react";
+import { ActionPanel, Icon, showToast, Action, Image, Keyboard, Toast } from "@raycast/api";
+import { formatDistanceToNow } from "date-fns";
 
-/**
- * An Action to update a property of a page
- */
-export function ActionEditPageProperty(props: {
+import { useUsers } from "../../hooks";
+import {
+  getPropertyIcon,
+  notionColorToTintColor,
+  patchPage,
+  PageProperty,
+  DatabaseProperty,
+  PropertyConfig,
+  getPropertyConfig,
+} from "../../utils/notion";
+
+type EditPropertyOptions = PropertyConfig<"select" | "multi_select">["options"][number] & {
+  icon?: string;
+};
+
+export function ActionEditPageProperty({
+  databaseProperty,
+  pageId,
+  pageProperty,
+  shortcut,
+  mutate,
+  icon,
+  options,
+}: {
   databaseProperty: DatabaseProperty;
   pageId: string;
-  pageProperty?: PagePropertyType;
-  onPageUpdated: (page: Page) => void;
+  pageProperty?: PageProperty;
+  mutate: () => Promise<void>;
   shortcut?: Keyboard.Shortcut;
   icon?: Image.ImageLike;
-  customOptions?: DatabasePropertyOption[];
-}): JSX.Element | null {
-  const {
-    databaseProperty,
-    pageId,
-    pageProperty,
-    shortcut,
-    onPageUpdated,
-    icon = { source: "icon/" + databaseProperty.type + ".png", tintColor: Color.PrimaryText },
-    customOptions: options = databaseProperty.options || [],
-  } = props;
+  options?: EditPropertyOptions[];
+}) {
+  if (!icon) icon = getPropertyIcon(databaseProperty);
+  if (!options) options = getPropertyConfig(databaseProperty, ["select", "multi_select"])?.options;
 
-  const [{ value: users }, storeUsers] = useAtom(usersAtom);
+  const { data: users } = useUsers();
 
   const title = "Set " + databaseProperty.name;
 
@@ -42,15 +50,9 @@ export function ActionEditPageProperty(props: {
       showToast({
         title: "Property Updated",
       });
-      onPageUpdated?.(updatedPage);
+      mutate();
     }
   }
-
-  useEffect(() => {
-    if (databaseProperty.type === "people") {
-      fetchUsers().then((fetchedUsers) => storeUsers(fetchedUsers));
-    }
-  }, [databaseProperty.type]);
 
   switch (databaseProperty.type) {
     case "checkbox": {
@@ -58,7 +60,7 @@ export function ActionEditPageProperty(props: {
       return (
         <Action
           title={(value ? "Uncheck " : "Check ") + databaseProperty.name}
-          icon={{ source: "icon/" + databaseProperty.type + "_" + value + ".png", tintColor: Color.PrimaryText }}
+          icon={value ? Icon.Checkmark : Icon.Circle}
           shortcut={shortcut}
           onAction={() => setPageProperty({ [databaseProperty.id]: { checkbox: !value } })}
         />
@@ -69,7 +71,7 @@ export function ActionEditPageProperty(props: {
       const value = pageProperty && "select" in pageProperty ? pageProperty.select?.id : null;
       return (
         <ActionPanel.Submenu title={title} icon={icon} shortcut={shortcut}>
-          {(options as DatabasePropertyOption[])?.map((opt) => (
+          {options?.map((opt) => (
             <Action
               key={opt.id}
               icon={
@@ -94,13 +96,42 @@ export function ActionEditPageProperty(props: {
       );
     }
 
+    case "status": {
+      const value = pageProperty && "status" in pageProperty ? pageProperty.status?.id : null;
+      return (
+        <ActionPanel.Submenu title={title} icon={icon} shortcut={shortcut}>
+          {options?.map((opt) => (
+            <Action
+              key={opt.id}
+              icon={
+                (opt.icon ? opt.icon : opt.id !== "_select_null_")
+                  ? {
+                      source: opt.icon ? opt.icon : value === opt.id ? Icon.Checkmark : Icon.Circle,
+                      tintColor: notionColorToTintColor(opt.color),
+                    }
+                  : undefined
+              }
+              title={(opt.name ? opt.name : "Untitled") + (opt.icon && value === opt.id ? "  ✓" : "")}
+              onAction={() => {
+                if (opt.id && opt.id !== "_select_null_") {
+                  setPageProperty({ [databaseProperty.id]: { status: { id: opt.id } } });
+                } else {
+                  setPageProperty({ [databaseProperty.id]: { status: null } });
+                }
+              }}
+            />
+          ))}
+        </ActionPanel.Submenu>
+      );
+    }
+
     case "date": {
       const value = pageProperty && "date" in pageProperty ? pageProperty.date : null;
       return (
         <ActionPanel.Submenu title={title} icon={icon} shortcut={shortcut}>
           <ActionPanel.Submenu
-            title={value?.start ? moment(value.start).fromNow() : "No Date"}
-            icon={{ source: "icon/date_start.png", tintColor: Color.PrimaryText }}
+            title={value?.start ? formatDistanceToNow(new Date(value.start)) : "No Date"}
+            icon="icon/date_start.png"
           >
             <Action
               title="Now"
@@ -112,8 +143,8 @@ export function ActionEditPageProperty(props: {
             />
           </ActionPanel.Submenu>
           <ActionPanel.Submenu
-            title={value?.end ? moment(value.end).fromNow() : "No Date"}
-            icon={{ source: "icon/date_end.png", tintColor: Color.PrimaryText }}
+            title={value?.end ? formatDistanceToNow(new Date(value.end)) : "No Date"}
+            icon="icon/date_end.png"
           >
             <Action
               title="Now"
@@ -135,7 +166,7 @@ export function ActionEditPageProperty(props: {
       const multiSelectIds = value.map((selection) => selection.id);
       return (
         <ActionPanel.Submenu title={title} icon={icon} shortcut={shortcut}>
-          {(options as DatabasePropertyOption[])?.map((opt) => {
+          {options?.map((opt) => {
             if (!opt.id) {
               return null;
             }

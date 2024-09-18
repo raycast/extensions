@@ -1,5 +1,5 @@
 import { ApolloClient, ApolloLink, HttpLink, InMemoryCache, concat, NormalizedCacheObject } from "@apollo/client";
-import fetch from "node-fetch";
+import fetch from "cross-fetch";
 
 import { getPreferenceValues } from "@raycast/api";
 import { getHttpAgent, GitLab } from "./gitlabapi";

@@ -5,7 +5,7 @@ import { FallbackSearchSection, HistoryListSection } from "./components";
 import { useHistorySearch } from "./hooks";
 import { groupHistoryByDay } from "./utils";
 
-const Command = () => {
+export default function Command() {
   const [searchText, setSearchText] = useState<string>();
   const { data, permissionView, isLoading } = useHistorySearch(searchText);
 
@@ -24,6 +24,4 @@ const Command = () => {
       <FallbackSearchSection searchText={searchText} />
     </List>
   );
-};
-
-export default Command;
+}

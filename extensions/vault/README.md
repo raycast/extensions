@@ -1,12 +1,33 @@
-# Vault Extension
+# Vault extension
 
-The Vault extension allows you to manage your secrets from [Vault](https://www.vaultproject.io).
+> Extension to work with [vault](https://www.vaultproject.io/) secrets
 
-> Vault secures, stores, and tightly controls access to tokens, passwords, certificates, API keys, and other secrets in modern computing.
+## Configuration
 
-## Development / Testing
+| Name               | Required                     | Description                                                       |
+|--------------------|------------------------------|-------------------------------------------------------------------|
+| url                | Yes                          | -                                                                 |
+| loginMethod        | No                           | Default : ldap (available: ldap, token)                           |
+| ldap               | Only if loginMethod is ldap  | -                                                                 |
+| password           | Only if loginMethod is ldap  | -                                                                 |
+| token              | Only if loginMethod is token | -                                                                 |
+| technicalPaths     | No                           | Used to hide technical paths in results list (separated by space) |
+| favoriteNamespaces | No                           | Used quickly switch between namespaces (separated by space)       |
+| enableWrite        | No                           | Default: true - used to show write actions                        |
+| enableDelete       | No                           | Default: false - used to show delete actions                      |
 
-- Install the Vault CLI: `brew install vault`
-- Start the Vault server: `vault server -dev -dev-root-token-id="root"`
-- Create a new secret: `vault kv put secret/helloworld foo=bar`
-- Use `http://localhost:8200` as address and `root` as token in the extension to access the created secret.
+## Vault command
+
+- Login with token or ldap/password and auto-renewal of token
+- List secrets keys and search
+- Display secret
+    - with/without details
+    - list / json mode
+    - copy secret value(s)
+    - save to file
+- Create new secret version
+- Delete/undelete/destroy secret
+- Open link in UI
+- Copy token
+- Change namespace
+- Switch to favorite namespaces

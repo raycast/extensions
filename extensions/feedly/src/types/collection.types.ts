@@ -35,10 +35,10 @@ export interface Feed {
 }
 
 export enum ContentType {
-  Article = 'article',
-  Longform = 'longform'
+  Article = "article",
+  Longform = "longform",
 }
 
 export enum Language {
-  En = 'en'
+  En = "en",
 }

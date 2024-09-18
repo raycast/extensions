@@ -1,4 +1,4 @@
-import { getSelectedFinderItems, LocalStorage } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import { imgExt } from "./constants";
 import { DirectoryInfo, DirectoryType } from "./directory-info";
 import fse from "fs-extra";
@@ -10,15 +10,6 @@ export const getLocalStorage = async (key: string) => {
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
-};
-
-export const fetchSelectedFileSystemItem = async () => {
-  const _finderItems = await getSelectedFinderItems();
-  if (_finderItems.length > 0) {
-    return _finderItems;
-  } else {
-    return [];
-  }
 };
 
 export const isImage = (ext: string) => {
@@ -74,4 +65,9 @@ export const getFilesInDirectory = (pathName: string) => {
   } catch (e) {
     return fileSystemItems;
   }
+};
+
+export const timeStampToDateTime = (timeStamp: number) => {
+  const date = new Date(timeStamp);
+  return date.toLocaleString();
 };

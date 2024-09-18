@@ -4,8 +4,7 @@ import { ApiResponse } from "./types";
 
 export function getToken(): string {
   // Preference key is `apiKey` to keep it compatible with the old Bitrise extension
-  const { apiKey } = getPreferenceValues();
-  return apiKey;
+  return getPreferenceValues().apiKey;
 }
 
 export async function fetchPagedResource<T>(url: string): Promise<T[]> {
@@ -35,8 +34,12 @@ export async function fetchPagedResource<T>(url: string): Promise<T[]> {
     result.push(...apiResponse.data);
 
     nextAnchor = apiResponse.paging.next;
-    console.info(nextAnchor);
+    console.debug(
+      `Fetching next ${apiResponse.paging.page_item_limit} items ` + `of ${apiResponse.paging.total_item_count}`
+    );
   } while (nextAnchor);
+
+  console.debug(`Fetched ${result.length} items from ${url}`);
 
   return Promise.resolve(result);
 }

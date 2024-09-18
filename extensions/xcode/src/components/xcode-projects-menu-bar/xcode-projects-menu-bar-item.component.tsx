@@ -7,7 +7,7 @@ import { XcodeService } from "../../services/xcode.service";
 /**
  * Xcode Projects Menu Bar Item
  */
-export function XcodeProjectsMenuBarItem(props: { project: XcodeProject }): JSX.Element {
+export function XcodeProjectsMenuBarItem(props: { project: XcodeProject }) {
   return (
     <MenuBarExtra.Item
       icon={XcodeProjectIcon(props.project.type)}

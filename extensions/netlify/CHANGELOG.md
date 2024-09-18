@@ -1,5 +1,32 @@
 # Changelog
 
+## [View Site Environment Variables] - $2024-07-29
+
+### Enhancements
+
+- Added `Show Environment Variables` subcommand
+
+### Chore
+
+- Bump `@raycast/api` from 1.72.0 to 1.79.0
+- Bump `@raycast/utils` from 1.14.0 to 1.16.3
+
+## [Manage DNS Commands] - 2024-05-07
+
+### Enhancements
+
+- Renamed `Search Domains` (title) -> `Search Domains and Manage DNS Records`.
+    - Added `Manage DNS Records` subcommand to `View`, `Create`, `Delete` DNS Records
+
+### Chore
+
+- Bump `@raycast/api` from 1.42.0 to 1.72.0
+- Bump `@raycast/utils` from 1.4.14 to 1.14.0
+
+## [New Logo] - 2023-05-26
+
+- Updated the logo
+
 ## [New Logo] - 2023-03-07
 
 - Updated the logo to match the refreshed brand assets

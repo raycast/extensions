@@ -1,9 +1,10 @@
 import { promises, existsSync } from "fs";
 import { BookmarkDirectory, HistoryEntry, RawBookmarks, SearchResult } from "../interfaces";
 import { getBookmarksFilePath } from "../util";
-import { ReactNode, useCallback, useEffect, useState } from "react";
-import { NO_BOOKMARKS_MESSAGE, NOT_INSTALLED_MESSAGE } from "../constants";
-import { NoBookmarksError, NotInstalledError, UnknownError } from "../components";
+import { ReactNode, useEffect, useState } from "react";
+import { NOT_INSTALLED_MESSAGE, DEFAULT_BRAVE_PROFILE_ID, BRAVE_PROFILE_KEY } from "../constants";
+import { NotInstalledError, UnknownError } from "../components";
+import { useCachedState } from "@raycast/utils";
 
 function extractBookmarkFromBookmarkDirectory(bookmarkDirectory: BookmarkDirectory): HistoryEntry[] {
   const bookmarks: HistoryEntry[] = [];
@@ -36,43 +37,34 @@ const extractBookmarks = (rawBookmarks: RawBookmarks): HistoryEntry[] => {
 const getBookmarks = async (profile?: string): Promise<HistoryEntry[]> => {
   const bookmarksFilePath = getBookmarksFilePath(profile);
   if (!existsSync(bookmarksFilePath)) {
-    throw new Error(NO_BOOKMARKS_MESSAGE);
+    return [];
   }
 
   const fileBuffer = await promises.readFile(bookmarksFilePath, { encoding: "utf-8" });
   return extractBookmarks(JSON.parse(fileBuffer));
 };
 
-export function useBookmarkSearch(query?: string): SearchResult<HistoryEntry> {
+export function useBookmarkSearch(): SearchResult<HistoryEntry> {
+  const [profile] = useCachedState(BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID);
   const [data, setData] = useState<HistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [profile, setProfile] = useState<string>();
   const [errorView, setErrorView] = useState<ReactNode>();
-
-  const revalidate = useCallback(
-    (profileId: string) => {
-      setProfile(profileId);
-    },
-    [profile]
-  );
 
   useEffect(() => {
     getBookmarks(profile)
       .then((bookmarks) => {
-        setData(bookmarks.filter((bookmark) => bookmark.title.toLowerCase().includes(query?.toLowerCase() || "")));
+        setData(bookmarks);
         setIsLoading(false);
       })
       .catch((e) => {
         if (e.message === NOT_INSTALLED_MESSAGE) {
           setErrorView(<NotInstalledError />);
-        } else if (e.message === NO_BOOKMARKS_MESSAGE) {
-          setErrorView(<NoBookmarksError />);
         } else {
           setErrorView(<UnknownError />);
         }
         setIsLoading(false);
       });
-  }, [profile, query]);
+  }, [profile]);
 
-  return { errorView, isLoading, data, revalidate };
+  return { errorView, isLoading, data, profile: { name: "", id: profile as string } };
 }

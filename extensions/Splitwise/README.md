@@ -1,7 +1,8 @@
 # Splitwise
 
-View the balance of your Splitwise account and add expenses by using natural language.
-At the moment, the extension only supports expenses with friends and not with groups.
+Effortlessly create, search, and modify your expenses with the Raycast extension for Splitwise! 
+
+Seamlessly connect to your Splitwise account using its integrated API, enabling you to add expenses, as well as review or edit existing ones in no time.
 
 ### How to get the API token
 1. Register your application via https://secure.splitwise.com/apps.

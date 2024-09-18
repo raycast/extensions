@@ -107,6 +107,7 @@ export async function createTask(payload: TaskPayload) {
 type UpdateTaskPayload = Partial<{
   completed: boolean;
   assignee: string | null;
+  due_on: Date | null;
   custom_fields: Record<string, string | null>;
 }>;
 

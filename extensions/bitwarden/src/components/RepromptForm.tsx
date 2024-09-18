@@ -8,7 +8,7 @@ export type RepromptFormProps = {
 const RepromptForm = (props: RepromptFormProps) => {
   const { description, onConfirm } = props;
 
-  async function onSubmit(values: { password: string }) {
+  function onSubmit(values: { password: string }) {
     onConfirm(values.password);
   }
 

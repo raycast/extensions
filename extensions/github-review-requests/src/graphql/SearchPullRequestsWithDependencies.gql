@@ -9,10 +9,19 @@ query SearchPullRequestsWithDependencies($query: String!) {
         url
         createdAt
         updatedAt
+        reviewDecision
 
         author {
           login
           avatarUrl
+        }
+
+        repository {
+          name
+          owner {
+            login
+            avatarUrl
+          }
         }
 
         reviews(last: 1) {

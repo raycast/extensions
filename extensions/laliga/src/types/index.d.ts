@@ -292,7 +292,7 @@ export interface Round {
   type: string;
   status: string;
   gameweeks: CurrentGameweek[];
-  groups: any[];
+  groups: unknown;
   num_gameweeks?: number;
 }
 
@@ -303,4 +303,45 @@ export interface CurrentGameweek {
   shortname: string;
   date: Date;
   round?: Round;
+}
+
+export interface LaLigaMatchCommentaries {
+  total: number;
+  match_commentaries: MatchCommentary[];
+}
+
+export interface MatchCommentary {
+  id: number;
+  content: string;
+  time: number;
+  minute: number;
+  second: number;
+  period: string;
+  match_comment_kind: MatchCommentKind;
+  match: Match;
+  lineup?: Lineup;
+  lineup_ref_second?: Lineup;
+}
+
+export interface Lineup {
+  team: Match;
+  person: Person;
+  opta_id: string;
+  lde_id: number;
+}
+
+export interface Person {
+  id: number;
+}
+
+export interface Match {
+  id: number;
+  competitions?: Competition[];
+  opta_id: string;
+  lde_id: number;
+}
+
+export interface MatchCommentKind {
+  id: number;
+  name: string;
 }

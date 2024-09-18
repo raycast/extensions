@@ -1,15 +1,17 @@
-# Masked Email
+# Fastmail Masked Email
 
-Create a masked email address with Fastmail.
+Manage masked emails with Fastmail
 
-## Get Started
+## Prerequisites
 
-You need to create a [Fastmail API Token](https://app.fastmail.com/settings/security/tokens/new). This token must have the `Masked Email` capability.
+You will need to create a [Fastmail API token](https://app.fastmail.com/settings/security/tokens/new) with the `Masked Email` capability
 
 ## Features
 
-- Create Masked Email (with an optional discription)
+- Create a masked email (with an optional description and prefix)
+- Quickly create a masked email without any prompts
+- List and manage all of your masked emails
 
 ## Icon Credits
 
-`mask` by Deemak Daksina from [Noun Project](https://thenounproject.com/browse/icons/term/mask/).
+`mask` by Deemak Daksina from [Noun Project](https://thenounproject.com/browse/icons/term/mask/)

@@ -28,6 +28,7 @@ function DriverList() {
         setSelectedStanding(standings.find((standing) => standing.Driver.driverId === selectedId) || null);
       }}
     >
+      <EmptyView season={season} />
       {season && (
         <List.Section title={season}>
           {standings.map((standing) => (
@@ -55,6 +56,13 @@ function DriverList() {
       )}
     </List>
   );
+}
+
+function EmptyView({ season }: { season: string | null }) {
+  if (!season) {
+    return null;
+  }
+  return <List.EmptyView icon="empty-view.png" description="No results" />;
 }
 
 export default DriverList;

@@ -5,6 +5,9 @@
   "description": "AI generation using OpenAI's GPT-3 and DALL·E AI models",
   "icon": "open-ai-app-icon.png",
   "author": "josephschmitt",
+  "contributors": [
+    "snilan"
+  ],
   "categories": [
     "Media",
     "Fun",

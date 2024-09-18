@@ -1,6 +1,6 @@
 import { getPreferenceValues, LocalStorage } from '@raycast/api'
 import dedupe from 'dedupe'
-import { Preferences } from '../PackagListItem'
+import type { Preferences } from '../components/PackagListItem'
 
 const LOCAL_STORAGE_KEY = 'npm-history'
 
@@ -12,9 +12,8 @@ export interface HistoryItem {
 }
 export const getHistory = async (): Promise<HistoryItem[]> => {
   const { historyCount }: Preferences = getPreferenceValues()
-  const historyFromStorage = await LocalStorage.getItem<string>(
-    LOCAL_STORAGE_KEY,
-  )
+  const historyFromStorage =
+    await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY)
   const history: HistoryItem[] = JSON.parse(historyFromStorage ?? '[]')
   const historyWithoutDuplicates = dedupe(history)
 

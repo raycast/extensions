@@ -12,7 +12,9 @@ export interface TodoSections {
 
 export interface TodoItem {
   title: string;
+  tag?: string;
   completed: boolean;
+  priority?: 1 | 2 | 3;
   timeAdded: number;
 }
 
@@ -32,12 +34,12 @@ const getInitialValue = () => {
           storedTodo.push(todo);
         }
       }
-      const convertedStoredItems = {
+
+      return {
         pinned: storedPinned,
         todo: storedTodo,
         completed: storedCompleted,
       };
-      return convertedStoredItems;
     } else {
       return storedItems;
     }
@@ -61,6 +63,7 @@ export const searchModeAtom = atom(false);
 
 export const searchBarTextAtom = atom("");
 export const newTodoTextAtom = atom((get) => get(searchBarTextAtom).trim());
+export const editingTagNameAtom = atom("");
 export const editingAtom = atom<
   | false
   | {
@@ -68,3 +71,12 @@ export const editingAtom = atom<
       index: number;
     }
 >(false);
+export const editingTagAtom = atom<
+  | false
+  | {
+      sectionKey: keyof TodoSections;
+      index: number;
+    }
+>(false);
+
+export const selectedTagAtom = atom("All");

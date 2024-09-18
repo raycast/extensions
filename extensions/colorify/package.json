@@ -1,0 +1,44 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "colorify",
+  "title": "Colorify - Generate Themes From Images",
+  "description": "Takes an image (such as your wallpaper) and generates a Raycast Theme out of it!",
+  "icon": "command-icon.png",
+  "author": "EvanZhouDev",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-theme",
+      "title": "Generate Theme",
+      "subtitle": "Colorify",
+      "description": "Takes an image, and generates a one-click-downloadable Raycast theme.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@lokesh.dhakar/quantize": "^1.3.0",
+    "@raycast/api": "^1.55.1",
+    "file-type": "^18.5.0",
+    "get-pixels": "^3.3.3",
+    "image-size": "^1.0.2",
+    "jimp": "^0.22.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

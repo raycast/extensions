@@ -2,7 +2,8 @@ import { DescribeInstancesCommand, EC2Client, Instance } from "@aws-sdk/client-e
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { resourceToConsoleLink } from "./util";
+import { isReadyToFetch, resourceToConsoleLink } from "./util";
+import { AwsAction } from "./components/common/action";
 
 export default function EC2() {
   const { data: instances, error, isLoading, revalidate } = useCachedPromise(fetchEC2Instances);
@@ -27,16 +28,12 @@ function EC2Instance({ instance }: { instance: Instance }) {
 
   return (
     <List.Item
-      id={instance.InstanceId}
       key={instance.InstanceId}
       title={name || ""}
       icon={"aws-icons/ec2.png"}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open in Browser"
-            url={resourceToConsoleLink(instance.InstanceId, "AWS::EC2::Instance")}
-          />
+          <AwsAction.Console url={resourceToConsoleLink(instance.InstanceId, "AWS::EC2::Instance")} />
           <Action.CopyToClipboard title="Copy Instance ID" content={instance.InstanceId || ""} />
           {instance.PrivateIpAddress && (
             <Action.CopyToClipboard title="Copy Private IP" content={instance.PrivateIpAddress} />
@@ -52,11 +49,11 @@ function EC2Instance({ instance }: { instance: Instance }) {
 }
 
 async function fetchEC2Instances(token?: string, accInstances?: Instance[]): Promise<Instance[]> {
-  if (!process.env.AWS_PROFILE) return [];
+  if (!isReadyToFetch()) return [];
   const { NextToken, Reservations } = await new EC2Client({}).send(new DescribeInstancesCommand({ NextToken: token }));
   const instances = (Reservations || []).reduce<Instance[]>(
     (acc, reservation) => [...acc, ...(reservation.Instances || [])],
-    []
+    [],
   );
   const combinedInstances = [...(accInstances || []), ...instances];
 

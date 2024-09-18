@@ -1,6 +1,7 @@
 import { ActionPanel, List, Color, Icon, Action, Image } from "@raycast/api";
-import { agents } from "caniuse-lite";
 import * as caniuse from "caniuse-api";
+import { agents } from "caniuse-lite";
+
 import { getCanIUseLink } from "../utils";
 
 interface FeatureDetailProps {

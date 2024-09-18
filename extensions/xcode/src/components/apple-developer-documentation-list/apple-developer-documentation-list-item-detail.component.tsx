@@ -7,9 +7,7 @@ import { AppleDeveloperDocumentationEntryTypeName } from "../../shared/apple-dev
 /**
  * Apple Developer Documentation List Item Detail
  */
-export function AppleDeveloperDocumentationListItemDetail(props: {
-  entry: AppleDeveloperDocumentationEntry;
-}): JSX.Element {
+export function AppleDeveloperDocumentationListItemDetail(props: { entry: AppleDeveloperDocumentationEntry }) {
   const imageUrl = usePromise(() => fetchOpenGraphImageUrl(props.entry.url), [], {
     onError: () => Promise.resolve(),
   });

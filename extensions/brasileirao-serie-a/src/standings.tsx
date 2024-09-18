@@ -1,27 +1,28 @@
 import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { useState } from "react";
-import { useTable } from "./hooks";
+import { useSeasons, useTable } from "./hooks";
 
 export default function Standings() {
-  const [table, isLoading] = useTable();
-  const [showDetails, setShowDetails] = useState(false);
+  const [currentSeason, seasons, setCurrentSeason] = useSeasons();
+  const [table, isLoading] = useTable(currentSeason);
+  const [showStats, setshowStats] = useState(false);
 
   return (
     <List
       throttle
-      // searchBarAccessory={
-      //   <List.Dropdown tooltip="Filter by Season" value={selectedSeason} onChange={setSeason}>
-      //     <List.Dropdown.Section>
-      //       {seasons.map((season) => {
-      //         return <List.Dropdown.Item key={season.id} value={season.id.toString()} title={season.label} />;
-      //       })}
-      //     </List.Dropdown.Section>
-      //   </List.Dropdown>
-      // }
+      searchBarAccessory={
+        <List.Dropdown tooltip="Select Season" value={currentSeason} onChange={setCurrentSeason}>
+          <List.Dropdown.Section>
+            {seasons.map((season) => {
+              return <List.Dropdown.Item key={season} value={season} title={season} />;
+            })}
+          </List.Dropdown.Section>
+        </List.Dropdown>
+      }
       isLoading={isLoading}
-      isShowingDetail={showDetails}
+      isShowingDetail={showStats}
     >
-      <List.Section>
+      <List.Section title="Club">
         {table.map((entry) => {
           const { team, position, previousPosition } = entry;
 
@@ -46,8 +47,8 @@ export default function Standings() {
             <List.Item
               key={position}
               title={position.toString()}
-              subtitle={team.name}
-              keywords={[team.name, team.shortName, team.tla]}
+              subtitle={team.shortName}
+              keywords={[team.name, team.shortName]}
               icon={{
                 source: team.crest,
                 fallback: "default.png",
@@ -57,7 +58,6 @@ export default function Standings() {
                 <List.Item.Detail
                   metadata={
                     <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label title="Stats" />
                       {previousPosition && (
                         <List.Item.Detail.Metadata.Label title="Previous Position" text={previousPosition.toString()} />
                       )}
@@ -68,35 +68,6 @@ export default function Standings() {
                       <List.Item.Detail.Metadata.Label title="Goals For" text={entry.goalsFor.toString()} />
                       <List.Item.Detail.Metadata.Label title="Goals Against" text={entry.goalsAgainst.toString()} />
                       <List.Item.Detail.Metadata.Label title="Goal Difference" text={entry.goalDifference.toString()} />
-                      {/* {form && (
-                        <>
-                          <List.Item.Detail.Metadata.Separator />
-                          <List.Item.Detail.Metadata.Label title="Recent Results" />
-                          {form.reverse().map((m) => {
-                            return (
-                              <List.Item.Detail.Metadata.Label
-                                key={m.id}
-                                title={`${m.teams[0].team.name} - ${m.teams[1].team.name}`}
-                                text={`${m.teams[0].score} - ${m.teams[1].score}`}
-                              />
-                            );
-                          })}
-                        </>
-                      )}
-                      {next && (
-                        <>
-                          <List.Item.Detail.Metadata.Separator />
-                          <List.Item.Detail.Metadata.Label title="Next Fixture" />
-                          <List.Item.Detail.Metadata.Label
-                            title={`${next.teams[0].team.name} - ${next.teams[1].team.name}`}
-                            text={convertToLocalTime(next.kickoff.label)}
-                          />
-                          <List.Item.Detail.Metadata.Label
-                            title="Stadium"
-                            text={`${next.ground.name}, ${next.ground.city}`}
-                          />
-                        </>
-                      )} */}
                     </List.Item.Detail.Metadata>
                   }
                 />
@@ -104,9 +75,9 @@ export default function Standings() {
               actions={
                 <ActionPanel>
                   <Action
-                    title={showDetails ? "Hide details" : "Show details"}
+                    title={showStats ? "Hide Stats" : "Show Stats"}
                     icon={Icon.Sidebar}
-                    onAction={() => setShowDetails((prev) => !prev)}
+                    onAction={() => setshowStats((prev) => !prev)}
                   />
                 </ActionPanel>
               }

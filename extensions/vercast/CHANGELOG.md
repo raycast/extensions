@@ -1,5 +1,17 @@
 # Vercast Changelog
 
+## [2.6] - 2024-08-12
+
+- Add `Search Domains` command for quickly viewing your Domains
+
+## [2.5] - 2023-05-03
+
+- Add "Copy URL" Action to Deployments
+
+## [2.4] - 2023-04-12
+
+- Fixed persistency of the selected team
+
 ## [2.3] - 2023-03-28
 
 - Added gray dot icon for queued deployments

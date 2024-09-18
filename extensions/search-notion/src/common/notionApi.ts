@@ -77,7 +77,7 @@ export const searchResources = async (query: string): Promise<QueryResultItem[]>
         lastEditedTime: {},
         createdTime: {},
       },
-      sort: "Relevance",
+      sort: { field: "relevance" },
       source: "quick_find",
     }),
   };

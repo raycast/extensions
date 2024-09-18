@@ -8,10 +8,6 @@ export const ProfileList: FC = () => {
 
   const onSelect = useCallback(async (email: string) => {
     try {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: "Creating meeting...",
-      });
       await openMeetTabSelectedProfile(email);
 
       const meetTab = await getMeetTab();

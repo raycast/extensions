@@ -42,7 +42,7 @@ export function getOrderedStates(
     StateType.started,
     StateType.completed,
     StateType.canceled,
-  ]
+  ],
 ) {
   if (states.length === 0) {
     return [];

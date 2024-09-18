@@ -1,5 +1,5 @@
 import { ActionPanel, Color, Icon, List, Action } from '@raycast/api';
-import { usePromise } from '@raycast/utils';
+import { getFavicon, usePromise } from '@raycast/utils';
 import { useState } from 'react';
 
 import api from './utils/api';
@@ -11,6 +11,7 @@ import { Site } from './utils/interfaces';
 import { OpenOnNetlify, OpenRepo } from './components/actions';
 import DeployListView from './components/deploys';
 import TeamDropdown from './components/team-dropdown';
+import EnvListView from './components/envs';
 
 export default function Command() {
   const [query, setQuery] = useState<string>('');
@@ -64,6 +65,7 @@ export default function Command() {
         {sites.map((site) => (
           <List.Item
             key={site.id}
+            icon={getFavicon(site.ssl_url, { fallback: Icon.Link })}
             title={site.name}
             subtitle={site.account_name}
             accessories={
@@ -152,6 +154,11 @@ const SiteActions = ({
         icon={Icon.Rocket}
         title="Show Deploys"
         target={<DeployListView siteId={site.id} siteName={site.name} />}
+      />
+      <Action.Push
+        icon={Icon.MagnifyingGlass}
+        title="Show Environment Variables"
+        target={<EnvListView siteId={site.id} siteName={site.name} />}
       />
     </ActionPanel.Section>
     <ActionPanel.Section>

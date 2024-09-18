@@ -4,7 +4,7 @@ import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Issue, Project } from "../gitlabapi";
 import { daysInSeconds, showErrorToast } from "../utils";
-import { IssueListItem, IssueScope, IssueState } from "./issues";
+import { IssueListEmptyView, IssueListItem, IssueScope, IssueState } from "./issues";
 import { MyProjectsDropdown } from "./project";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -30,12 +30,14 @@ function MyIssueList(props: {
       searchBarPlaceholder="Search issues by name..."
       isLoading={props.isLoading}
       searchBarAccessory={props.searchBarAccessory}
+      throttle
     >
       <List.Section title={props.title} subtitle={issues?.length.toString() || ""}>
         {issues?.map((issue) => (
           <IssueListItem key={issue.id} issue={issue} refreshData={refresh} />
         ))}
       </List.Section>
+      <IssueListEmptyView />
     </List>
   );
 }
@@ -61,7 +63,7 @@ export function MyIssues(props: { scope: IssueScope; state: IssueState }): JSX.E
   );
 }
 
-function useMyIssues(
+export function useMyIssues(
   scope: IssueScope,
   state: IssueState,
   project: Project | undefined

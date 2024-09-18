@@ -43,7 +43,9 @@ const getBookmarks = async (profile?: string): Promise<HistoryEntry[]> => {
   return extractBookmarks(JSON.parse(fileBuffer));
 };
 
-export function useBookmarkSearch(query?: string): SearchResult<HistoryEntry> {
+export function useBookmarkSearch(
+  query?: string
+): Required<SearchResult<HistoryEntry> & { readonly errorView: ReactNode }> {
   const [data, setData] = useState<HistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [profile, setProfile] = useState<string>();
@@ -59,7 +61,13 @@ export function useBookmarkSearch(query?: string): SearchResult<HistoryEntry> {
   useEffect(() => {
     getBookmarks(profile)
       .then((bookmarks) => {
-        setData(bookmarks.filter((bookmark) => bookmark.title.toLowerCase().includes(query?.toLowerCase() || "")));
+        setData(
+          bookmarks.filter(
+            (bookmark) =>
+              bookmark.title.toLowerCase().includes(query?.toLowerCase() || "") ||
+              bookmark.url.toLowerCase().includes(query?.toLowerCase() || "")
+          )
+        );
         setIsLoading(false);
       })
       .catch((e) => {

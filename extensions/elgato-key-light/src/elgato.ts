@@ -125,7 +125,7 @@ export class KeyLight {
 
   private async updateKeyLight(
     service: RemoteService,
-    options: { brightness?: number; temperature?: number; on?: boolean }
+    options: { brightness?: number; temperature?: number; on?: boolean },
   ) {
     const url = `http://${service.referer.address}:${service.port}/elgato/lights`;
     await axios.put(url, {

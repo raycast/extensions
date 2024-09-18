@@ -48,3 +48,19 @@ export function getNetSpeed(testSequentially: boolean, execResult: string) {
 
   return network;
 }
+
+export function extractSpeedLoadingInfo(str: string): string {
+  const tempStr = str.replaceAll("responsiveness ", "").replaceAll("capacity ", "");
+  const regex = /Downlink: ([\d.]+ Mbps).*Uplink: ([\d.]+ Mbps)/;
+  const match = tempStr.match(regex);
+  if (match) {
+    const downlink = match[1] || "";
+    const uplink = match[2] || "";
+
+    if (downlink && uplink) {
+      return `Downlink: ${downlink}, Uplink: ${uplink}`;
+    }
+  }
+
+  return "Takes about 20 seconds";
+}

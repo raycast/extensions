@@ -11,6 +11,4 @@ export type TaskFormValues = {
   start_date: Date | null;
 };
 
-export default function Command(props: { draftValues?: TaskFormValues }) {
-  return withAsanaAuth(<CreateTaskForm draftValues={props.draftValues} />);
-}
+export default withAsanaAuth(CreateTaskForm);

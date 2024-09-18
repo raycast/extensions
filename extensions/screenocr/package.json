@@ -1,0 +1,185 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "screenocr",
+  "title": "ScreenOCR",
+  "description": "ScreenOCR allows you to quickly and easily extract text from screen captures via OCR, perfect for extracting text from any on-screen content. All processing is done locally on device.",
+  "icon": "command-icon.png",
+  "author": "huzef44",
+  "contributors": [
+    "anwarulislam"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "required": true,
+      "name": "primaryLanguage",
+      "title": "Primary Language",
+      "description": "Primary language for text recognition",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "🇺🇸 English (US)",
+          "value": "en-US"
+        },
+        {
+          "title": "🇫🇷 French (France)",
+          "value": "fr-FR"
+        },
+        {
+          "title": "🇮🇹 Italian (Italy)",
+          "value": "it-IT"
+        },
+        {
+          "title": "🇩🇪 German (Germany)",
+          "value": "de-DE"
+        },
+        {
+          "title": "🇪🇸 Spanish (Spain)",
+          "value": "es-ES"
+        },
+        {
+          "title": "🇧🇷 Portuguese (Brazil)",
+          "value": "pt-BR"
+        },
+        {
+          "title": "🇨🇳 Chinese (Simplified)",
+          "value": "zh-Hans"
+        },
+        {
+          "title": "🇹🇼 Chinese (Traditional)",
+          "value": "zh-Hant"
+        },
+        {
+          "title": "🇨🇳 Cantonese (Simplified)",
+          "value": "yue-Hans"
+        },
+        {
+          "title": "🇭🇰 Cantonese (Traditional)",
+          "value": "yue-Hant"
+        },
+        {
+          "title": "🇰🇷 Korean (South Korea)",
+          "value": "ko-KR"
+        },
+        {
+          "title": "🇯🇵 Japanese (Japan)",
+          "value": "ja-JP"
+        },
+        {
+          "title": "🇷🇺 Russian (Russia)",
+          "value": "ru-RU"
+        },
+        {
+          "title": "🇺🇦 Ukrainian (Ukraine)",
+          "value": "uk-UA"
+        },
+        {
+          "title": "🇹🇭 Thai (Thailand)",
+          "value": "th-TH"
+        },
+        {
+          "title": "🇻🇳 Vietnamese (Vietnam)",
+          "value": "vi-VT"
+        }
+      ]
+    },
+    {
+      "required": true,
+      "name": "ocrMode",
+      "title": "Recognition Level",
+      "description": "Affects performance and accuracy of the text recognition.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Accurate",
+          "value": "accurate"
+        },
+        {
+          "title": "Fast",
+          "value": "fast"
+        }
+      ]
+    },
+    {
+      "required": true,
+      "name": "languageCorrection",
+      "title": "Language Correction",
+      "description": "Applies language correction during the recognition process. Disabling this property returns the raw recognition results, which provides performance benefits but less accurate results.",
+      "type": "checkbox",
+      "label": "Use Language Correction",
+      "default": true
+    },
+    {
+      "required": true,
+      "name": "keepImage",
+      "title": "Keep Image in Clipboard",
+      "description": "Keep the image in the clipboard after text recognition",
+      "type": "checkbox",
+      "label": "Keep Image in Clipboard",
+      "default": false
+    },
+    {
+      "required": false,
+      "name": "ignoreLineBreaks",
+      "title": "Ignore Line Breaks",
+      "description": "Ignores Line Breaks",
+      "type": "checkbox",
+      "label": "Ignore Line Breaks",
+      "default": false
+    },
+    {
+      "required": false,
+      "name": "customWordsList",
+      "title": "Custom Words List",
+      "description": "You can improve text recognition by providing a list of words that are special to your text",
+      "type": "textfield",
+      "label": "Custom Words List"
+    }
+  ],
+  "commands": [
+    {
+      "title": "Select Recognition Languages",
+      "description": "Select Recognition Languages for ScreenOCR to recognize",
+      "name": "preferences",
+      "mode": "view"
+    },
+    {
+      "name": "recognize-text",
+      "title": "Recognize Text",
+      "description": "Detect all text from the captured screen area.",
+      "mode": "no-view"
+    },
+    {
+      "name": "recognize-text-fullscreen",
+      "title": "Recognize Text Entire Screen",
+      "description": "Detect all text from the captured screen.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.3",
+    "@raycast/utils": "^1.5.2",
+    "execa": "^7.1.1",
+    "immer": "^10.0.2",
+    "use-immer": "^0.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^5.0.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/recognize-text assets",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

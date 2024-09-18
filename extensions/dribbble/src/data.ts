@@ -16,9 +16,8 @@ export type Shot = {
   };
 };
 
-export const fetchShots = async (filter: string) => {
-  const data = await got(`https://dribbble.com/shots/${filter}`).text();
-
+export const fetchShots = async (filter: string, page: number) => {
+  const data = await got(`https://dribbble.com/shots/${filter}?page=${page}`).text();
   const document = parse(data);
   const items = document.querySelectorAll("li.shot-thumbnail");
   return items.map((item) => {

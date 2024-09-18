@@ -1,6 +1,6 @@
 import { Detail } from "@raycast/api";
-import { NoCollectionsText } from "../../constants";
+import { getNoCollectionsText } from "../../utils/messageUtils";
 
 export function NoCollectionsError() {
-  return <Detail markdown={NoCollectionsText} />;
+  return <Detail markdown={getNoCollectionsText()} />;
 }

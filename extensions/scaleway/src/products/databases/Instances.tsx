@@ -1,5 +1,5 @@
 import { List } from '@raycast/api'
-import { getPreferenceUser } from 'providers'
+import { getPreferenceUser } from 'helpers/getPreferenceUser'
 import { useReducer } from 'react'
 import { InstanceAction } from './InstanceAction'
 import { InstanceDetail } from './InstanceDetail'

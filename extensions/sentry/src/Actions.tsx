@@ -7,7 +7,7 @@ import { Issue, Organization, User } from "./types";
 export type ActionsProps = {
   issue: Issue;
   organization?: Organization;
-  mutateList?: MutatePromise<Issue[] | undefined>;
+  mutateList?: MutatePromise<Issue[]>;
   mutateDetail?: MutatePromise<Issue | undefined>;
   isDetail?: boolean;
 };
@@ -56,7 +56,7 @@ export function Actions(props: ActionsProps) {
 function AssignToAction(props: {
   issue: Issue;
   organization: Organization;
-  mutateList?: MutatePromise<Issue[] | undefined>;
+  mutateList?: MutatePromise<Issue[]>;
   mutateDetail?: MutatePromise<Issue | undefined>;
 }) {
   const { data } = useUsers(props.organization.slug, props.issue.project.id);
@@ -70,7 +70,7 @@ function AssignToAction(props: {
         await props.mutateList(updateIssue(props.issue.id, { assignedTo: user.user?.id }), {
           optimisticUpdate(data) {
             if (!data) {
-              return;
+              return [];
             }
 
             return data.map((x) => (x.id === props.issue.id ? { ...x, assignedTo: user } : x));
