@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-09-18
 
 - Enhanced the display of climate entity states to show temperature and operating mode in separate item accessories with icons.
 - Added new fan and swing modes actions when applicable to the climate entity.
