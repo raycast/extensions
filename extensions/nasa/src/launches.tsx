@@ -1,4 +1,4 @@
-import { Detail, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { ENDPOINTS, HEADERS } from "./constants/prefrences";
 import { LaunchesResponse } from "./types/launches";
@@ -15,12 +15,8 @@ export default function LAUNCHES() {
     initialData: [],
   });
 
-  while (isLoading) {
-    return <Detail isLoading={isLoading} markdown={"Loading Upcoming Launches 🚀"} />;
-  }
-
   return (
-    <List isShowingDetail>
+    <List isShowingDetail isLoading={isLoading}>
       {data.results.map((launch) => (
         <LaunchDetail launch={launch} key={launch.id} />
       ))}

@@ -1,4 +1,4 @@
-import { Detail, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { ENDPOINTS, HEADERS } from "./constants/prefrences";
 import { AstronautsResponse } from "./types/astronauts";
@@ -15,12 +15,8 @@ export default function ASTRONAUTS() {
     initialData: [],
   });
 
-  while (isLoading) {
-    return <Detail isLoading={isLoading} markdown={"Loading Astronauts in Space 🚀"} />;
-  }
-
   return (
-    <List isShowingDetail>
+    <List isShowingDetail isLoading={isLoading}>
       {data.results.map((astronaut) => (
         <AstronautDetail astronaut={astronaut} key={astronaut.id} />
       ))}

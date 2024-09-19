@@ -1,4 +1,3 @@
-import { Detail } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { ENDPOINTS, HEADERS, APIKEY } from "./constants/prefrences";
 import Apod from "./componenets/apod";
@@ -15,9 +14,5 @@ export default function APOD() {
     initialData: [],
   });
 
-  while (isLoading) {
-    return <Detail isLoading={isLoading} markdown={"Loading Astronomy Picture of the Day 🔭"} />;
-  }
-
-  return <Apod apod={data} />;
+  return <Apod isLoading={isLoading} apod={data} />;
 }

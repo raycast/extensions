@@ -1,4 +1,4 @@
-import { Detail, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { ENDPOINTS, HEADERS } from "./constants/prefrences";
 import { SpaceCraftsResponse } from "./types/spacecrafts";
@@ -15,12 +15,8 @@ export default function SPACECRAFTS() {
     initialData: [],
   });
 
-  while (isLoading) {
-    return <Detail isLoading={isLoading} markdown={"Loading Spacecrafts in Space 🚀"} />;
-  }
-
   return (
-    <List isShowingDetail>
+    <List isShowingDetail isLoading={isLoading}>
       {data.results.map((spacecraft) => (
         <SpacecraftDetail spacecraft={spacecraft} key={spacecraft.id} />
       ))}
