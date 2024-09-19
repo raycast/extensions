@@ -7,7 +7,7 @@ type Code = {
 };
 
 const strftimeCodes: { [key: string]: Code[] } = {
-  "Time": [
+  Time: [
     { directive: "%H", description: "Hour in 24h format (00-23)", example: "00, 01, ..., 23" },
     { directive: "%I", description: "Hour in 12h format (01-12)", example: "01, 02, ..., 12" },
     { directive: "%M", description: "Minute (00-59)", example: "00, 01, ..., 59" },
@@ -15,31 +15,31 @@ const strftimeCodes: { [key: string]: Code[] } = {
     { directive: "%p", description: "AM or PM designation", example: "AM, PM" },
     { directive: "%X", description: "Time representation", example: "14:55:02" },
   ],
-  "Day": [
+  Day: [
     { directive: "%a", description: "Abbreviated weekday name", example: "Sun, Mon, ..." },
     { directive: "%A", description: "Full weekday name", example: "Sunday, Monday, ..." },
     { directive: "%w", description: "Weekday as a decimal number (0-6)", example: "0, 1, ..., 6" },
     { directive: "%d", description: "Day of the month (01-31)", example: "01, 02, ..., 31" },
     { directive: "%j", description: "Day of the year (001-366)", example: "001, 002, ..., 366" },
   ],
-  "Week": [
+  Week: [
     { directive: "%U", description: "Week number, Sunday-based (00-53)", example: "00, 01, ..., 53" },
     { directive: "%W", description: "Week number, Monday-based (00-53)", example: "00, 01, ..., 53" },
   ],
-  "Month": [
+  Month: [
     { directive: "%b", description: "Abbreviated month name", example: "Jan, Feb, ..." },
     { directive: "%B", description: "Full month name", example: "January, February, ..." },
     { directive: "%m", description: "Month as a number (01-12)", example: "01, 02, ..., 12" },
   ],
-  "Year": [
+  Year: [
     { directive: "%y", description: "Year, last two digits (00-99)", example: "00, 01, ..., 99" },
     { directive: "%Y", description: "Year", example: "1970, 1988, 2001, 2013" },
   ],
-  "Timezone": [
+  Timezone: [
     { directive: "%z", description: "UTC offset", example: "+0000, -0400, +0530" },
     { directive: "%Z", description: "Timezone name or abbreviation", example: "UTC, EST, CST" },
   ],
-  "Other": [
+  Other: [
     { directive: "%c", description: "Date and time representation", example: "Tue Aug 16 21:30:00 1988" },
     { directive: "%x", description: "Date representation", example: "08/23/01, 08/23/2001" },
     { directive: "%%", description: "A % sign", example: "%" },
