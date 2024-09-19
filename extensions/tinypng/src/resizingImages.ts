@@ -4,7 +4,7 @@ import { showToast, Toast, getSelectedFinderItems, getPreferenceValues, showHUD 
 import { statSync, createReadStream, createWriteStream } from "fs";
 import fetch from "node-fetch";
 import { dirname, basename, join, extname } from "path";
-import { compressImageResponseScheme } from "./zodSchema";
+import { compressImageResponseScheme } from "./lib/zodSchema";
 import { resolveOutputPath } from "./lib/utils";
 
 const preferences = getPreferenceValues<Preferences>();
