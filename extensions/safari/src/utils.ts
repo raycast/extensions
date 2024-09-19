@@ -1,10 +1,8 @@
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import Fuse, { FuseOptionKey } from "fuse.js";
 import _ from "lodash";
 import osascript from "osascript-tag";
 import { URL } from "url";
-import Fuse, { FuseOptionKey } from "fuse.js";
-
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-
 import { HistoryItem, Tab } from "./types";
 
 type Preferences = {

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cursor-directory",
+  "title": "Cursor Directory",
+  "description": "Port functionality from cursor.directory",
+  "icon": "extension-icon.png",
+  "author": "escwxyz",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "preferences": [
+    {
+      "name": "cache_interval",
+      "title": "Cache Interval in day",
+      "type": "textfield",
+      "required": false,
+      "default": "1",
+      "description": "How many days should the local cache expire"
+    },
+    {
+      "name": "show_detailed_view",
+      "title": "Show Detailed View",
+      "label": "Show detailed view in cursor rules list",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "description": "Show detailed view in cursor rules list"
+    },
+    {
+      "name": "default_cursor_rules_list",
+      "title": "Default Cursor Rules List",
+      "type": "dropdown",
+      "required": false,
+      "default": "popular",
+      "description": "If show all cursor rules or only popular ones in cursor rules list",
+      "data": [
+        {
+          "title": "Popular",
+          "value": "popular"
+        },
+        {
+          "title": "All",
+          "value": "all"
+        }
+      ]
+    }
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Cursor Rules",
+      "description": "Search cursor rules from cursor.directory for usage inside Cursor Code Editor",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.16.3",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "@typescript-eslint/utils": "^8.3.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

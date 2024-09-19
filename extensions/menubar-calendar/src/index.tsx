@@ -11,6 +11,7 @@ import {
   showReminders,
   showSettings,
   showWeekNumber,
+  titleTruncateLength,
 } from "./types/preferences";
 import {
   extraItemIcon,
@@ -144,7 +145,7 @@ export default function Command() {
     if (event.event === null) {
       return "";
     } else {
-      return "  " + truncateMenubarTitle(event.event.title) + "  • in " + event.timeUntilEvent;
+      return "  " + truncateMenubarTitle(event.event.title, titleTruncateLength) + "  • in " + event.timeUntilEvent;
     }
   }, [calendarEventSections]);
 

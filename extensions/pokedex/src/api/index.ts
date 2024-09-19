@@ -1,5 +1,5 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { showToast, Toast } from "@raycast/api";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { PokeAPI, PokemonV2Pokemon } from "../types";
 
 function showFailureToast() {
@@ -22,6 +22,30 @@ export const getPokemon = async (
         name
         height
         weight
+        pokemon_v2_encounters {
+          pokemon_v2_locationarea {
+            name
+            pokemon_v2_locationareanames(where: {language_id: {_eq: $language_id}}) {
+              name
+            }
+          }
+          pokemon_v2_version {
+            id
+            name
+            pokemon_v2_versiongroup {
+              name
+              pokemon_v2_generation {
+                name
+                pokemon_v2_generationnames(where: {language_id: {_eq: 9}}) {
+                  name
+                }
+              }
+            }
+            pokemon_v2_versionnames(where: {language_id: {_eq: $language_id}}) {
+              name
+            }
+          }
+        }
         pokemon_v2_pokemonabilities {
           is_hidden
           pokemon_v2_ability {
@@ -111,6 +135,7 @@ export const getPokemon = async (
           is_legendary
           is_mythical
           name
+          pokemon_shape_id
           pokemon_v2_pokemondexnumbers {
             pokedex_number
             pokemon_v2_pokedex {
@@ -151,12 +176,22 @@ export const getPokemon = async (
           }
           pokemon_v2_pokemons(order_by: {id: asc}, where: {pokemon_v2_pokemonforms: {form_name: {_nin: ["totem", "starter"]}}}) {
             name
+            height
+            weight
             pokemon_v2_pokemonforms {
               form_name
               pokemon_id
               pokemon_v2_pokemonformnames(where: {language_id: {_eq: $language_id}}) {
                 name
                 pokemon_name
+              }
+            }
+            pokemon_v2_pokemonabilities {
+              is_hidden
+              pokemon_v2_ability {
+                pokemon_v2_abilitynames(where: {language_id: {_eq: $language_id}}) {
+                  name
+                }
               }
             }
             pokemon_v2_pokemontypes {

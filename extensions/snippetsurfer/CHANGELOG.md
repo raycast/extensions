@@ -1,5 +1,8 @@
 # SnippetSurfer Changelog
 
+## [Enhancements] - 2024-09-12
+- Update README
+
 ## [Enhancements] - 2024-08-26
 - Make tags in markdown optional.
 
