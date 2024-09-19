@@ -12,13 +12,15 @@ const CopyImageIcon: React.FC<IconProps> = ({ iconId, color = "000000", iconName
     });
 
     try {
-      const { data } = await nounProjectData(`icon/${iconId}/download?color=${color}&filetype=svg`) as { data: NounProjectDownloadResponse };
+      const { data } = (await nounProjectData(`icon/${iconId}/download?color=${color}&filetype=svg`)) as {
+        data: NounProjectDownloadResponse;
+      };
 
       if (data && data.base64_encoded_file) {
         const svgContent = processSVGContent(data.base64_encoded_file);
 
         // Format the component name
-        const componentName = `${iconName.replace(/\s+/g, '')}Icon`;
+        const componentName = `${iconName.replace(/\s+/g, "")}Icon`;
         const capitalizedComponentName = componentName.charAt(0).toUpperCase() + componentName.slice(1);
 
         const componentString = `

@@ -19,7 +19,7 @@ export function nounProjectData(route: string) {
   const url = "https://api.thenounproject.com/v2/" + route;
 
   return new Promise((resolve, reject) => {
-    oauth.get(url, '', '', function (e, data, res) {
+    oauth.get(url, "", "", function (e, data, res) {
       if (e) {
         console.error(e);
         reject(e);

@@ -4,6 +4,21 @@ export interface IconProps {
   color?: string;
 }
 
+export interface IconSearchData {
+  isLoading: boolean;
+  status: string;
+  data: {
+    error: Error | null;
+    generated_at: string;
+    icons: IconItem[];
+    usage_limits: {
+      monthly: {
+        limit: number;
+        usage: number;
+      };
+    };
+  };
+}
 
 export type Creator = {
   name: string;
@@ -49,11 +64,10 @@ export interface IconsResponse {
     next_page: string;
     total: number;
     usage_limits: {
-      monthly: MonthlyUsage
+      monthly: MonthlyUsage;
     };
-  }
+  };
 }
-
 
 export interface NounProjectDownloadResponse {
   base64_encoded_file: string;

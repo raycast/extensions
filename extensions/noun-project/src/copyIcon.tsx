@@ -12,14 +12,16 @@ const CopyIconAction: React.FC<IconProps> = ({ iconId, color = "000000", iconNam
     });
 
     try {
-      const { data } = await nounProjectData(`icon/${iconId}/download?color=${color}&filetype=png&size=1028`) as { data: NounProjectDownloadResponse };
+      const { data } = (await nounProjectData(`icon/${iconId}/download?color=${color}&filetype=png&size=1028`)) as {
+        data: NounProjectDownloadResponse;
+      };
 
       if (data && data.base64_encoded_file) {
         const filePath = await base64ToFile(data.base64_encoded_file, `${iconName}-${iconId}.png`);
         await Clipboard.copy({ file: filePath });
 
         toast.style = Toast.Style.Success;
-        toast.title = `${iconName} (#${color}) icon copied to clipboard`
+        toast.title = `${iconName} (#${color}) icon copied to clipboard`;
       } else {
         toast.style = Toast.Style.Failure;
         toast.title = `Failed to copy ${iconName} icon`;

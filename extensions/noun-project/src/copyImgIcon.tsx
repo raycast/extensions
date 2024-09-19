@@ -11,7 +11,9 @@ const CopyImageIcon: React.FC<IconProps> = ({ iconId, color = "000000", iconName
     });
 
     try {
-      const { data } = await nounProjectData(`icon/${iconId}/download?color=${color}&filetype=png&size=1028`) as { data: NounProjectDownloadResponse };
+      const { data } = (await nounProjectData(`icon/${iconId}/download?color=${color}&filetype=png&size=1028`)) as {
+        data: NounProjectDownloadResponse;
+      };
 
       if (data && data.base64_encoded_file) {
         const base64Image = `data:${data.content_type};base64,${data.base64_encoded_file}`;

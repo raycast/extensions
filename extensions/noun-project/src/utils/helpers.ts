@@ -18,7 +18,7 @@ export async function base64ToFile(base64: string, fileName: string): Promise<st
 /**
  * Decodes a base64 encoded SVG string, escapes special characters for use in template literals,
  * and removes the XML declaration and outer <svg> tags.
- * 
+ *
  * @param base64String - The base64 encoded SVG string.
  * @returns The cleaned SVG content.
  */
@@ -27,16 +27,16 @@ export function processSVGContent(base64String: string): string {
   const decodedSVG = atob(base64String);
 
   // Escape backticks and dollar signs for use in template literals
-  const escapedSVG = decodedSVG.replace(/`/g, '\\`').replace(/\$/g, '\\$');
+  const escapedSVG = decodedSVG.replace(/`/g, "\\`").replace(/\$/g, "\\$");
 
   // Extract the SVG content without the outer <svg> tags to use in JSX
-  const svgContent = escapedSVG.replace(/<\?xml[^>]*\?>/, '') // Remove XML declaration
-                               .replace(/<svg[^>]*>/, '')    // Remove opening <svg> tag
-                               .replace('</svg>', '');       // Remove closing </svg> tag
+  const svgContent = escapedSVG
+    .replace(/<\?xml[^>]*\?>/, "") // Remove XML declaration
+    .replace(/<svg[^>]*>/, "") // Remove opening <svg> tag
+    .replace("</svg>", ""); // Remove closing </svg> tag
 
   return svgContent;
-};
-
+}
 
 export function getUsageColor(usage: number, limit: number): string {
   if (usage >= limit) {
@@ -54,7 +54,7 @@ export function getUsageColor(usage: number, limit: number): string {
 
 export function normalizeHexCode(hex: string): string | false {
   // Remove '#' if present
-  if (hex.startsWith('#')) {
+  if (hex.startsWith("#")) {
     hex = hex.slice(1);
   }
 
