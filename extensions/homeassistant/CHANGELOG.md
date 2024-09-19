@@ -1,5 +1,9 @@
 # Home Assistant Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Corrected typos and improved the overall readability of the extension documentation and interface.
+
 ## [Update] - 2024-09-18
 
 - Enhanced the display of climate entity states to show temperature and operating mode in separate item accessories with icons.
