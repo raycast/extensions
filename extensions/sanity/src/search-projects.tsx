@@ -1,4 +1,4 @@
-import { ActionPanel, Cache, open, Icon, List, Action } from "@raycast/api";
+import { ActionPanel, Cache, Icon, List, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { client } from "./util/client";
 import { SanityProject } from "@sanity/client";
@@ -57,15 +57,18 @@ export default function SearchProjects() {
                   <Action.OpenInBrowser
                     title="Manage Project"
                     icon={Icon.Cog}
-                    url={project.organizationId
-                      ? `https://www.sanity.io/organizations/${project.organizationId}/project/${project.id}`
-                      : `https://www.sanity.io/manage/personal/project/${project.id}`}
+                    url={
+                      project.organizationId
+                        ? `https://www.sanity.io/organizations/${project.organizationId}/project/${project.id}`
+                        : `https://www.sanity.io/manage/personal/project/${project.id}`
+                    }
                   />
                 </ActionPanel>
               }
               accessories={[
                 {
-                  date: new Date(project.createdAt), tooltip: `Created At ${project.createdAt}`
+                  date: new Date(project.createdAt),
+                  tooltip: `Created At ${project.createdAt}`,
                 },
               ]}
             />
