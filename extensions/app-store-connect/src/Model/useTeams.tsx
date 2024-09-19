@@ -14,13 +14,12 @@ export type Team = z.infer<typeof teamSchema>;
 export const teamSchemas = z.array(teamSchema);
 
 export const useTeams = () => {
-
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [teams, setTeams] = useState<Team[]>([]);
   const [currentTeam, setCurrentTeam] = useState<Team | undefined>(undefined);
 
   const getTeams = async () => {
-    const teams = await LocalStorage.getItem("teams") as string | undefined;
+    const teams = (await LocalStorage.getItem("teams")) as string | undefined;
     if (teams === undefined) {
       return [];
     } else {
@@ -31,7 +30,7 @@ export const useTeams = () => {
   };
 
   const deleteTeam = async (team: Team) => {
-    const storageTeams = await LocalStorage.getItem("teams") as string | undefined;
+    const storageTeams = (await LocalStorage.getItem("teams")) as string | undefined;
     if (storageTeams === undefined) {
       return;
     }
@@ -53,7 +52,7 @@ export const useTeams = () => {
   };
 
   const addTeam = async (team: Team) => {
-    const teams = await LocalStorage.getItem("teams") as string | undefined;
+    const teams = (await LocalStorage.getItem("teams")) as string | undefined;
     if (teams === undefined) {
       const newJson = JSON.stringify([team]);
       await LocalStorage.setItem("teams", newJson);
@@ -79,8 +78,8 @@ export const useTeams = () => {
         name: teamName,
         issuerID: issuerID,
         apiKey: apiKey,
-        privateKey: privateKey
-      }
+        privateKey: privateKey,
+      };
     }
   };
   const selectCurrentTeam = async (team: Team) => {
@@ -118,6 +117,6 @@ export const useTeams = () => {
     deleteTeam,
     currentTeam,
     selectCurrentTeam,
-    removeCurrentTeam
-  }
+    removeCurrentTeam,
+  };
 };

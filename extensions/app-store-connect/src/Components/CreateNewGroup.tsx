@@ -28,16 +28,16 @@ export default function CreateNewGroup({ app, didCreateNewGroup }: Props) {
                 app: {
                   data: {
                     type: "apps",
-                    id: app.id
-                  }
-                }
+                    id: app.id,
+                  },
+                },
               },
               attributes: {
                 name: values.name,
                 isInternalGroup: values.isInternal,
-                hasAccessToAllBuilds: values.hasAccessToAllBuilds
-              }
-            }
+                hasAccessToAllBuilds: values.hasAccessToAllBuilds,
+              },
+            },
           });
           setIsLoading(false);
           showToast({
@@ -52,8 +52,7 @@ export default function CreateNewGroup({ app, didCreateNewGroup }: Props) {
               didCreateNewGroup(json.data);
             }
           }
-        }
-        catch (error) {
+        } catch (error) {
           setIsLoading(false);
           presentError(error);
         }
@@ -61,10 +60,10 @@ export default function CreateNewGroup({ app, didCreateNewGroup }: Props) {
     },
     initialValues: {
       isInternal: true,
-      hasAccessToAllBuilds: false
+      hasAccessToAllBuilds: false,
     },
     validation: {
-      name: FormValidation.Required
+      name: FormValidation.Required,
     },
   });
   return (
@@ -72,14 +71,25 @@ export default function CreateNewGroup({ app, didCreateNewGroup }: Props) {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={values.isInternal ? "Create internal group" : "Create external group"} onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title={values.isInternal ? "Create Internal Group" : "Create External Group"}
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >
       <Form.TextField title="Group name" placeholder="Enter group name" {...itemProps.name} />
-      <Form.Checkbox label="Internal" {...itemProps.isInternal} info="Check to create an internal group, otherwise an external group will be created" />
+      <Form.Checkbox
+        label="Internal"
+        {...itemProps.isInternal}
+        info="Check to create an internal group, otherwise an external group will be created"
+      />
       {itemProps.isInternal.value && (
-        <Form.Checkbox label="Has access to all builds" {...itemProps.hasAccessToAllBuilds} info="Check to give access to all builds, otherwise only builds that are in the group will be accessible. Can not be changed after the group is created." />
+        <Form.Checkbox
+          label="Has access to all builds"
+          {...itemProps.hasAccessToAllBuilds}
+          info="Check to give access to all builds, otherwise only builds that are in the group will be accessible. Can not be changed after the group is created."
+        />
       )}
     </Form>
   );

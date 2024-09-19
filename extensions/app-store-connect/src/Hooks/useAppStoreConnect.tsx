@@ -1,16 +1,14 @@
-import { useEffect, useState, useCallback, useRef } from "react";
-import { showToast, Toast, LocalStorage, Cache } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
-import { SignJWT, importPKCS8 } from 'jose';
+import { useEffect, useState, useRef } from "react";
+import { showToast, Toast, LocalStorage } from "@raycast/api";
+import { SignJWT, importPKCS8 } from "jose";
 import fetch from "node-fetch";
-
 
 type Method = "GET" | "POST" | "PATCH" | "DELETE";
 
 export class ATCError extends Error {
   constructor(
     public title: string,
-    public detail: string
+    public detail: string,
   ) {
     super(title);
     this.name = this.constructor.name;
@@ -21,24 +19,31 @@ export class ATCError extends Error {
   }
 }
 
-
 interface Pagination {
   pageSize: number;
   hasMore: boolean;
   onLoadMore: (page: number) => void;
 }
 
-export function useAppStoreConnectApi<T>(path: string | undefined, mapResponse: (response: any) => T, loadAll?: boolean): {
+interface AppStoreConnectApiResponse {
+  data: unknown;
+}
+
+export function useAppStoreConnectApi<T>(
+  path: string | undefined,
+  mapResponse: (response: AppStoreConnectApiResponse) => T,
+  loadAll?: boolean,
+): {
   isLoading: boolean;
   data: T | null;
-  error: any;
+  error: unknown;
   pagination: Pagination | undefined;
 } {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [data, setData] = useState<any | null>(null);
-  const [currentData, setCurrentData] = useState<any | null>(null);
+  const [data, setData] = useState<T | null>(null);
+  const [currentData, setCurrentData] = useState<unknown | null>(null);
 
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<unknown>(null);
   const [pagination, setPagination] = useState<Pagination | undefined>(undefined);
   const previousPath = useRef("");
 
@@ -65,19 +70,19 @@ export function useAppStoreConnectApi<T>(path: string | undefined, mapResponse: 
         setPagination({
           pageSize: 10,
           hasMore: true,
-          onLoadMore: (page) => {
+          onLoadMore: () => {
             (async () => {
               const url = json.links.next.split("https://api.appstoreconnect.apple.com/v1")[1];
               await load(url);
             })();
-          }
+          },
         });
       } else {
         if (json.meta && json.meta.paging) {
           setPagination({
             pageSize: json.meta.paging.limit,
             hasMore: false,
-            onLoadMore: (page) => { }
+            onLoadMore: () => {},
           });
         }
       }
@@ -88,14 +93,13 @@ export function useAppStoreConnectApi<T>(path: string | undefined, mapResponse: 
       setError(error);
       setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     if (path !== undefined) {
       load(path);
     }
   }, [path]);
-
 
   useEffect(() => {
     if (currentData) {
@@ -104,7 +108,7 @@ export function useAppStoreConnectApi<T>(path: string | undefined, mapResponse: 
           setData(data.concat(currentData) as T);
         }
       } else {
-        setData(currentData);
+        setData(currentData as T);
       }
     }
   }, [currentData]);
@@ -123,42 +127,25 @@ export function useAppStoreConnectApi<T>(path: string | undefined, mapResponse: 
     isLoading,
     data,
     error,
-    pagination
+    pagination,
   };
 }
 
-
-
 function decodeBase64(encodedString: string) {
   // Check if we're in a Node.js environment
-  if (typeof Buffer !== 'undefined') {
-    return Buffer.from(encodedString, 'base64').toString('utf-8');
+  if (typeof Buffer !== "undefined") {
+    return Buffer.from(encodedString, "base64").toString("utf-8");
   }
   // Check if we're in a browser environment
-  else if (typeof atob === 'function') {
+  else if (typeof atob === "function") {
     return atob(encodedString);
-  }
-  else {
-    throw new Error('Unable to decode Base64: environment not supported');
-  }
-}
-
-function base64EncodePrivateKey(privateKey: string) {
-  // Check if we're in a browser environment
-  if (typeof btoa === 'function') {
-    return btoa(privateKey);
-  }
-  // For Node.js environment
-  else if (typeof Buffer !== 'undefined') {
-    return Buffer.from(privateKey).toString('base64');
-  }
-  else {
-    throw new Error('Unable to base64 encode: environment not supported');
+  } else {
+    throw new Error("Unable to decode Base64: environment not supported");
   }
 }
 
 const getBearerToken = async () => {
-  const alg = 'ES256';
+  const alg = "ES256";
   const apiKey = await LocalStorage.getItem<string>("apiKey");
   const issuerId = await LocalStorage.getItem<string>("issuerID");
   const encoded = await LocalStorage.getItem<string>("privateKey");
@@ -170,16 +157,16 @@ const getBearerToken = async () => {
 
   const secret = await importPKCS8(privateKey, alg);
   const jwt = await new SignJWT({})
-    .setProtectedHeader({ alg, kid: apiKey, typ: 'JWT' })
+    .setProtectedHeader({ alg, kid: apiKey, typ: "JWT" })
     .setIssuedAt()
     .setIssuer(issuerId)
-    .setAudience('appstoreconnect-v1')
-    .setExpirationTime('20m')
+    .setAudience("appstoreconnect-v1")
+    .setExpirationTime("20m")
     .sign(secret);
   return jwt;
-}
+};
 
-export const fetchAppStoreConnect = async (path: string, method: Method = "GET", body?: any) => {
+export const fetchAppStoreConnect = async (path: string, method: Method = "GET", body?: unknown) => {
   const bearerToken = await getBearerToken();
   if (!bearerToken) {
     return;
@@ -188,9 +175,9 @@ export const fetchAppStoreConnect = async (path: string, method: Method = "GET",
     method: method,
     headers: {
       Authorization: "Bearer " + bearerToken,
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
-    body: body ? JSON.stringify(body) : undefined
+    body: body ? JSON.stringify(body) : undefined,
   });
   if (response && !response.ok) {
     const json = await response.json();
@@ -206,4 +193,4 @@ export const fetchAppStoreConnect = async (path: string, method: Method = "GET",
     }
   }
   return response;
-}
+};

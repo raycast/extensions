@@ -1,5 +1,4 @@
-import { z } from 'zod';
-
+import { z } from "zod";
 
 export const appSchema = z.object({
   type: z.string(),
@@ -21,7 +20,7 @@ export const appSchemas = z.array(appSchema);
 export type App = z.infer<typeof appSchema>;
 
 export const buildSchema = z.object({
-  type: z.literal('builds'),
+  type: z.literal("builds"),
   id: z.string(),
   attributes: z.object({
     version: z.string(),
@@ -33,10 +32,8 @@ export const buildSchema = z.object({
       width: z.number().int().positive(),
       height: z.number().int().positive(),
     }),
-    processingState: z.enum(['PROCESSING', 'FAILED', 'INVALID', 'VALID']),
-    buildAudienceType: z.enum(['APP_STORE_ELIGIBLE',
-      'APP_STORE_ELIGIBLE_FOR_MAC_APP_STORE'
-    ]),
+    processingState: z.enum(["PROCESSING", "FAILED", "INVALID", "VALID"]),
+    buildAudienceType: z.enum(["APP_STORE_ELIGIBLE", "APP_STORE_ELIGIBLE_FOR_MAC_APP_STORE"]),
   }),
 });
 export const buildSchemas = z.array(buildSchema);
@@ -45,17 +42,19 @@ export type Build = z.infer<typeof buildSchema>;
 export const buildSchemaWithBetaGroups = buildSchema.extend({
   relationships: z.object({
     betaGroups: z.object({
-      data: z.array(z.object({
-        type: z.string(),
-        id: z.string(),
-      }))
-    })
-  })
+      data: z.array(
+        z.object({
+          type: z.string(),
+          id: z.string(),
+        }),
+      ),
+    }),
+  }),
 });
 export const buildSchemasWithBetaGroups = z.array(buildSchemaWithBetaGroups);
 
 export const betaGroupSchema = z.object({
-  type: z.literal('betaGroups'),
+  type: z.literal("betaGroups"),
   id: z.string(),
   attributes: z.object({
     name: z.string(),
@@ -78,13 +77,46 @@ export const betaGroupsSchema = z.array(betaGroupSchema);
 export type BetaGroup = z.infer<typeof betaGroupSchema>;
 
 export const appStoreVersionSchema = z.object({
-  type: z.literal('appStoreVersions'),
+  type: z.literal("appStoreVersions"),
   id: z.string(),
   attributes: z.object({
     platform: z.string(),
     versionString: z.string(),
-    appStoreState: z.enum(['ACCEPTED', 'DEVELOPER_REJECTED', 'IN_REVIEW', 'INVALID_BINARY', 'METADATA_REJECTED', 'PENDING_APPLE_RELEASE', 'PENDING_DEVELOPER_RELEASE', 'PREPARE_FOR_SUBMISSION', 'PROCESSING_FOR_DISTRIBUTION', 'READY_FOR_DISTRIBUTION', 'READY_FOR_REVIEW', 'READY_FOR_SALE', 'REJECTED', 'REPLACED_WITH_NEW_VERSION', 'WAITING_FOR_EXPORT_COMPLIANCE', 'WAITING_FOR_REVIEW']),
-    appVersionState: z.enum(['ACCEPTED', 'DEVELOPER_REJECTED', 'IN_REVIEW', 'INVALID_BINARY', 'METADATA_REJECTED', 'PENDING_APPLE_RELEASE', 'PENDING_DEVELOPER_RELEASE', 'PREPARE_FOR_SUBMISSION', 'PROCESSING_FOR_DISTRIBUTION', 'READY_FOR_DISTRIBUTION', 'READY_FOR_REVIEW', 'REJECTED', 'REPLACED_WITH_NEW_VERSION', 'WAITING_FOR_EXPORT_COMPLIANCE', 'WAITING_FOR_REVIEW']),
+    appStoreState: z.enum([
+      "ACCEPTED",
+      "DEVELOPER_REJECTED",
+      "IN_REVIEW",
+      "INVALID_BINARY",
+      "METADATA_REJECTED",
+      "PENDING_APPLE_RELEASE",
+      "PENDING_DEVELOPER_RELEASE",
+      "PREPARE_FOR_SUBMISSION",
+      "PROCESSING_FOR_DISTRIBUTION",
+      "READY_FOR_DISTRIBUTION",
+      "READY_FOR_REVIEW",
+      "READY_FOR_SALE",
+      "REJECTED",
+      "REPLACED_WITH_NEW_VERSION",
+      "WAITING_FOR_EXPORT_COMPLIANCE",
+      "WAITING_FOR_REVIEW",
+    ]),
+    appVersionState: z.enum([
+      "ACCEPTED",
+      "DEVELOPER_REJECTED",
+      "IN_REVIEW",
+      "INVALID_BINARY",
+      "METADATA_REJECTED",
+      "PENDING_APPLE_RELEASE",
+      "PENDING_DEVELOPER_RELEASE",
+      "PREPARE_FOR_SUBMISSION",
+      "PROCESSING_FOR_DISTRIBUTION",
+      "READY_FOR_DISTRIBUTION",
+      "READY_FOR_REVIEW",
+      "REJECTED",
+      "REPLACED_WITH_NEW_VERSION",
+      "WAITING_FOR_EXPORT_COMPLIANCE",
+      "WAITING_FOR_REVIEW",
+    ]),
     copyright: z.string().nullable(),
     reviewType: z.string().nullable(),
     releaseType: z.string().nullable(),
@@ -99,12 +131,12 @@ export const preReleaseVersionSchema = z.object({
   id: z.string(),
   attributes: z.object({
     platform: z.string(),
-    version: z.string()
+    version: z.string(),
   }),
 });
 
 export const betaBuildLocalizationSchema = z.object({
-  type: z.literal('betaBuildLocalizations'),
+  type: z.literal("betaBuildLocalizations"),
   id: z.string(),
   attributes: z.object({
     whatsNew: z.string().nullable(),
@@ -112,15 +144,44 @@ export const betaBuildLocalizationSchema = z.object({
   }),
 });
 
+const externalBuildStateSchema = z.enum([
+  "PROCESSING",
+  "PROCESSING_EXCEPTION",
+  "MISSING_EXPORT_COMPLIANCE",
+  "READY_FOR_BETA_TESTING",
+  "IN_BETA_TESTING",
+  "EXPIRED",
+  "READY_FOR_BETA_SUBMISSION",
+  "IN_EXPORT_COMPLIANCE_REVIEW",
+  "WAITING_FOR_BETA_REVIEW",
+  "IN_BETA_REVIEW",
+  "BETA_REJECTED",
+  "BETA_APPROVED",
+  "SUBMITTED_FOR_BETA_REVIEW",
+  "REMOVED_FROM_BETA_REVIEW",
+]);
+
+export type ExternalBuildState = z.infer<typeof externalBuildStateSchema>;
+
 export const buildBetaDetailSchema = z.object({
-  type: z.literal('buildBetaDetails'),
+  type: z.literal("buildBetaDetails"),
   id: z.string(),
   attributes: z.object({
-    internalBuildState: z.enum(['PROCESSING', 'PROCESSING_EXCEPTION', 'MISSING_EXPORT_COMPLIANCE', 'READY_FOR_BETA_TESTING', 'IN_BETA_TESTING', 'EXPIRED', 'IN_EXPORT_COMPLIANCE_REVIEW']).optional(),
-    externalBuildState: z.enum(['PROCESSING', 'PROCESSING_EXCEPTION', 'MISSING_EXPORT_COMPLIANCE', 'READY_FOR_BETA_TESTING', 'IN_BETA_TESTING', 'EXPIRED', 'READY_FOR_BETA_SUBMISSION', 'IN_EXPORT_COMPLIANCE_REVIEW', 'WAITING_FOR_BETA_REVIEW', 'IN_BETA_REVIEW', 'BETA_REJECTED', 'BETA_APPROVED', 'SUBMITTED_FOR_BETA_REVIEW', 'REMOVED_FROM_BETA_REVIEW']).optional(),
+    internalBuildState: z
+      .enum([
+        "PROCESSING",
+        "PROCESSING_EXCEPTION",
+        "MISSING_EXPORT_COMPLIANCE",
+        "READY_FOR_BETA_TESTING",
+        "IN_BETA_TESTING",
+        "EXPIRED",
+        "IN_EXPORT_COMPLIANCE_REVIEW",
+      ])
+      .optional(),
+    externalBuildState: externalBuildStateSchema
+      .optional(),
   }),
 });
-
 
 export const buildWithBetaDetailAndBetaGroupsScehma = z.object({
   build: buildSchemaWithBetaGroups,
@@ -130,44 +191,49 @@ export const buildWithBetaDetailAndBetaGroupsScehma = z.object({
 
 export type BuildWithBetaDetailAndBetaGroups = z.infer<typeof buildWithBetaDetailAndBetaGroupsScehma>;
 
-const buildSchemaWithBetaGroupsSchema = z.object({
-  data: z.array(buildSchemaWithBetaGroups),
-  included: z.array(z.union([buildBetaDetailSchema, z.unknown()])),
+const unknownTypeSchema = z.object({
+  type: z.string(),
+  id: z.string(),
 });
 
+const buildSchemaWithBetaGroupsSchema = z.object({
+  data: z.array(buildSchemaWithBetaGroups),
+  included: z.array(z.union([buildBetaDetailSchema, unknownTypeSchema])),
+});
 
 export const buildsWithBetaDetailSchema = buildSchemaWithBetaGroupsSchema.transform((response) => {
   return response.data.map((build) => {
     return {
       build: build,
-      buildBetaDetails: response.included.find((item: any) => item.type === "buildBetaDetails" && item.id === build.id),
-      betaGroups: response.included.filter((item: any) => {
-        return item.type === "betaGroups" && build.relationships.betaGroups.data.find((bg: any) => bg.id === item.id);
+      buildBetaDetails: response.included.find((item) => item.type === "buildBetaDetails" && item.id === build.id),
+      betaGroups: response.included.filter((item) => {
+        return item.type === "betaGroups" && build.relationships.betaGroups.data.find((bg) => bg.id === item.id);
       }),
     } as BuildWithBetaDetailAndBetaGroups;
   });
 });
 
-
 export const betaTesterUsageSchema = z.object({
-  type: z.literal('appsBetaTesterUsages'),
-  dataPoints: z.array(z.object({
-    start: z.string(),
-    end: z.string(),
-    values: z.object({
-      crashCount: z.number(),
-      sessionCount: z.number(),
-      feedbackCount: z.number(),
-    })
-  })),
+  type: z.literal("appsBetaTesterUsages"),
+  dataPoints: z.array(
+    z.object({
+      start: z.string(),
+      end: z.string(),
+      values: z.object({
+        crashCount: z.number(),
+        sessionCount: z.number(),
+        feedbackCount: z.number(),
+      }),
+    }),
+  ),
   dimensions: z.object({
     betaTesters: z.object({
       data: z.object({
         type: z.string(),
         id: z.string(),
-      })
-    })
-  })
+      }),
+    }),
+  }),
 });
 
 export const betaTesterUsageSchemas = z.array(betaTesterUsageSchema);
@@ -175,22 +241,24 @@ export const betaTesterUsageSchemas = z.array(betaTesterUsageSchema);
 export type BetaTesterUsage = z.infer<typeof betaTesterUsageSchema>;
 
 export const betaBuildUsageSchema = z.object({
-  type: z.literal('betaBuildUsages'),
-  dataPoints: z.array(z.object({
-    start: z.string(),
-    end: z.string(),
-    values: z.object({
-      installCount: z.number(),
-      crashCount: z.number(),
-      sessionCount: z.number(),
-      inviteCount: z.number(),
-      feedbackCount: z.number(),
-    })
-  }))
+  type: z.literal("betaBuildUsages"),
+  dataPoints: z.array(
+    z.object({
+      start: z.string(),
+      end: z.string(),
+      values: z.object({
+        installCount: z.number(),
+        crashCount: z.number(),
+        sessionCount: z.number(),
+        inviteCount: z.number(),
+        feedbackCount: z.number(),
+      }),
+    }),
+  ),
 });
 
 export const betaTesterSchema = z.object({
-  type: z.literal('betaTesters'),
+  type: z.literal("betaTesters"),
   id: z.string(),
   attributes: z.object({
     firstName: z.string().nullable(),
@@ -202,7 +270,7 @@ export const betaTesterSchema = z.object({
 });
 
 export const userSchema = z.object({
-  type: z.literal('users'),
+  type: z.literal("users"),
   id: z.string(),
   attributes: z.object({
     username: z.string(),
@@ -211,12 +279,12 @@ export const userSchema = z.object({
     roles: z.array(z.string()),
     allAppsVisible: z.boolean(),
     provisioningAllowed: z.boolean(),
-  })
+  }),
 });
 
 export const userSchemaWithApps = z.object({
   data: z.object({
-    type: z.literal('users'),
+    type: z.literal("users"),
     id: z.string(),
     attributes: z.object({
       username: z.string(),
@@ -227,26 +295,28 @@ export const userSchemaWithApps = z.object({
       provisioningAllowed: z.boolean(),
     }),
   }),
-  included: z.array(z.object({
-    type: z.literal('apps'),
-    id: z.string(),
-    attributes: z.object({
-      name: z.string(),
-      bundleId: z.string(),
-      sku: z.string(),
-      primaryLocale: z.string(),
-      isOrEverWasMadeForKids: z.boolean(),
-      subscriptionStatusUrl: z.string().nullable(),
-      subscriptionStatusUrlVersion: z.string().nullable(),
-      subscriptionStatusUrlForSandbox: z.string().nullable(),
-      subscriptionStatusUrlVersionForSandbox: z.string().nullable(),
-      contentRightsDeclaration: z.string().nullable(),
+  included: z.array(
+    z.object({
+      type: z.literal("apps"),
+      id: z.string(),
+      attributes: z.object({
+        name: z.string(),
+        bundleId: z.string(),
+        sku: z.string(),
+        primaryLocale: z.string(),
+        isOrEverWasMadeForKids: z.boolean(),
+        subscriptionStatusUrl: z.string().nullable(),
+        subscriptionStatusUrlVersion: z.string().nullable(),
+        subscriptionStatusUrlForSandbox: z.string().nullable(),
+        subscriptionStatusUrlVersionForSandbox: z.string().nullable(),
+        contentRightsDeclaration: z.string().nullable(),
+      }),
     }),
-  }))
+  ),
 });
 
 export const userInvitationsSchema = z.object({
-  type: z.literal('userInvitations'),
+  type: z.literal("userInvitations"),
   id: z.string(),
   attributes: z.object({
     email: z.string(),
@@ -259,15 +329,19 @@ export const userInvitationsSchema = z.object({
   }),
   relationships: z.object({
     visibleApps: z.object({
-      data: z.array(z.object({
-        type: z.string(),
-        id: z.string(),
-      })).optional()
-    })
+      data: z
+        .array(
+          z.object({
+            type: z.string(),
+            id: z.string(),
+          }),
+        )
+        .optional(),
+    }),
   }),
   links: z.object({
     self: z.string(),
-  })
+  }),
 });
 
 export const userInvitationsSchemas = z.array(userInvitationsSchema);
@@ -276,18 +350,20 @@ export type UserInvitation = z.infer<typeof userInvitationsSchema>;
 export const userSchemaWithVisibleApps = userSchema.extend({
   relationships: z.object({
     visibleApps: z.object({
-      data: z.array(z.object({
-        type: z.string(),
-        id: z.string(),
-      }))
-    })
-  })
+      data: z.array(
+        z.object({
+          type: z.string(),
+          id: z.string(),
+        }),
+      ),
+    }),
+  }),
 });
 
 export type UserWithVisibleApps = z.infer<typeof userSchemaWithVisibleApps>;
 
 export const betaAppReviewDetailSchema = z.object({
-  type: z.literal('betaAppReviewDetails'),
+  type: z.literal("betaAppReviewDetails"),
   id: z.string(),
   attributes: z.object({
     contactFirstName: z.string(),
@@ -302,7 +378,7 @@ export const betaAppReviewDetailSchema = z.object({
 });
 
 export const betaLicenseAgreementSchema = z.object({
-  type: z.literal('betaLicenseAgreements'),
+  type: z.literal("betaLicenseAgreements"),
   id: z.string(),
   attributes: z.object({
     agreementText: z.string().nullable(),
@@ -318,7 +394,7 @@ export const betaAppReviewDetailsSchema = z.array(betaAppReviewDetailSchema);
 export type BetaAppReviewDetail = z.infer<typeof betaAppReviewDetailSchema>;
 
 export const betaAppLocalizationSchema = z.object({
-  type: z.literal('betaAppLocalizations'),
+  type: z.literal("betaAppLocalizations"),
   id: z.string(),
   attributes: z.object({
     description: z.string(),

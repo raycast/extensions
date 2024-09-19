@@ -5,7 +5,12 @@ import { confirmAlert, Alert } from "@raycast/api";
 import AddTeam from "./Components/AddTeam";
 
 export default function Command() {
-  const { teams: teamsFromStorage, addTeam, deleteTeam, currentTeam: currentTeamFromStorage, selectCurrentTeam, removeCurrentTeam } = useTeams();
+  const {
+    teams: teamsFromStorage,
+    deleteTeam,
+    currentTeam: currentTeamFromStorage,
+    selectCurrentTeam
+  } = useTeams();
   const [teams, setTeams] = useState<Team[]>([]);
   const [currentTeam, setCurrentTeam] = useState<Team | undefined>(undefined);
 
@@ -19,15 +24,20 @@ export default function Command() {
 
   const _deleteTeam = (team: Team) => {
     (async () => {
-      if (await confirmAlert({ title: "Are you sure?", primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive } })) {
+      if (
+        await confirmAlert({
+          title: "Are you sure?",
+          primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+        })
+      ) {
         deleteTeam(team);
       }
     })();
-  }
+  };
 
   const isCurrentTeam = (team: Team) => {
     return currentTeam?.apiKey === team.apiKey;
-  }
+  };
 
   const accessoriesForTeam = (team: Team) => {
     if (isCurrentTeam(team)) {
@@ -35,15 +45,23 @@ export default function Command() {
     } else {
       return undefined;
     }
-  }
+  };
   return (
     <List
       actions={
         <ActionPanel>
-          <Action.Push title="Add new team" icon={Icon.AddPerson} target={<AddTeam didSignIn={(team) => {
-            setTeams([...teams, team]);
-            setCurrentTeam(team);
-          }} />} />
+          <Action.Push
+            title="Add New Team"
+            icon={Icon.AddPerson}
+            target={
+              <AddTeam
+                didSignIn={(team) => {
+                  setTeams([...teams, team]);
+                  setCurrentTeam(team);
+                }}
+              />
+            }
+          />
         </ActionPanel>
       }
     >
@@ -55,20 +73,40 @@ export default function Command() {
           key={team.apiKey}
           actions={
             <ActionPanel>
-              {!isCurrentTeam(team) && <Action title="Use Team" icon={Icon.CheckCircle} onAction={() => {
-                selectCurrentTeam(team);
-                showToast({
-                  style: Toast.Style.Success,
-                  title: `Switched to ${team.name}`
-                });
-              }} />}
-              <Action.Push title="Add new team" icon={Icon.AddPerson} target={<AddTeam didSignIn={(team) => {
-                setTeams([...teams, team]);
-                selectCurrentTeam(team);
-              }} />} />
-              <Action title="Delete Team" shortcut={Keyboard.Shortcut.Common.Remove} style={Action.Style.Destructive} icon={Icon.Trash} onAction={() => {
-                _deleteTeam(team);
-              }} />
+              {!isCurrentTeam(team) && (
+                <Action
+                  title="Use Team"
+                  icon={Icon.CheckCircle}
+                  onAction={() => {
+                    selectCurrentTeam(team);
+                    showToast({
+                      style: Toast.Style.Success,
+                      title: `Switched to ${team.name}`,
+                    });
+                  }}
+                />
+              )}
+              <Action.Push
+                title="Add New Team"
+                icon={Icon.AddPerson}
+                target={
+                  <AddTeam
+                    didSignIn={(team) => {
+                      setTeams([...teams, team]);
+                      selectCurrentTeam(team);
+                    }}
+                  />
+                }
+              />
+              <Action
+                title="Delete Team"
+                shortcut={Keyboard.Shortcut.Common.Remove}
+                style={Action.Style.Destructive}
+                icon={Icon.Trash}
+                onAction={() => {
+                  _deleteTeam(team);
+                }}
+              />
             </ActionPanel>
           }
         />
@@ -76,4 +114,3 @@ export default function Command() {
     </List>
   );
 }
-

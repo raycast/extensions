@@ -7,20 +7,19 @@ import SignIn from "./Components/SignIn";
 import BetaGroupsList from "./Components/BetaGroupsList";
 
 export default function Command() {
-  const [path, setPath] = useState<string | undefined>(undefined)
+  const [path, setPath] = useState<string | undefined>(undefined);
 
   const { data, isLoading } = useAppStoreConnectApi(path, (response) => {
     return appSchemas.safeParse(response.data).data;
   });
 
-
   return (
-    <SignIn didSignIn={() => {
-      setPath("/apps")
-    }}>
-      <List
-        isLoading={isLoading}
-      >
+    <SignIn
+      didSignIn={() => {
+        setPath("/apps");
+      }}
+    >
+      <List isLoading={isLoading}>
         {data?.map((app: App) => (
           <AppItem
             id={app.id}
@@ -37,4 +36,3 @@ export default function Command() {
     </SignIn>
   );
 }
-
