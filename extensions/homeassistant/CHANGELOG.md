@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-09-19
 
 - Corrected typos and improved the overall readability of the extension documentation and interface.
 
