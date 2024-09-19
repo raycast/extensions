@@ -157,7 +157,6 @@ function SearchTable({ table }: { table: string }) {
           searchField,
           tableInfo: tableInfo,
           signal: abortController.signal,
-          exampleRows: rows.data,
           schema: schema,
         });
 
@@ -303,7 +302,6 @@ function SearchCustomQuery(args: CustomQueryList & { revalidate: () => void }) {
   const rows = useCachedPromise(
     (_connectionString, searchText, query, searchField, tableInfo, schema) => {
       return async ({ page }) => {
-        const exampleRows = rows.data;
         abortController.abort();
         abortController = new AbortController();
         incrementRequestsCount();
@@ -315,7 +313,6 @@ function SearchCustomQuery(args: CustomQueryList & { revalidate: () => void }) {
           signal: abortController.signal,
           searchField,
           tableInfo: tableInfo!,
-          exampleRows,
           schema: schema!,
         });
 

@@ -199,7 +199,6 @@ export type GenerateSearchConditionParams = {
   tableInfo?: TableInfo;
   searchField: string;
   signal: AbortSignal;
-  exampleRows: Json[];
   schema?: string;
   query?: string;
   namespace: string;
@@ -209,7 +208,6 @@ async function generateSearchCondition({
   searchField,
   searchText,
   tableInfo,
-  exampleRows,
   schema,
   query,
   namespace,
@@ -235,7 +233,6 @@ async function generateSearchCondition({
         tableInfo,
         searchText,
         databaseType: databaseType === "postgres" ? "postgres" : "mysql",
-        exampleRow: exampleRows?.[0],
         query: query || "",
         namespace,
       },
