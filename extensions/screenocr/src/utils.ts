@@ -1,7 +1,7 @@
 import { environment } from "@raycast/api";
-import { join } from "path";
 import { execa, ExecaError } from "execa";
 import { chmod } from "fs/promises";
+import { join } from "path";
 import { getUserSelectedLanguages, usePreferences } from "./hooks";
 
 const recognizeText = async (isFullScreen = false) => {

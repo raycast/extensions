@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import {
   Action,
   ActionPanel,
@@ -9,10 +8,11 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { Language } from "../../types";
-import { usePreferences } from "../../hooks";
-import supportedLanguages from "../../data/supportedLanguages";
+import { useEffect } from "react";
 import { useImmer } from "use-immer";
+import supportedLanguages from "../../data/supportedLanguages";
+import { usePreferences } from "../../hooks";
+import { Language } from "../../types";
 
 export function LanguagesManagerItem({
   language,

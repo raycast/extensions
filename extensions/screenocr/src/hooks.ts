@@ -1,6 +1,6 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
-import { Language, Preferences } from "./types";
 import supportedLanguages from "./data/supportedLanguages";
+import { Language, Preferences } from "./types";
 
 export const usePreferences = () => {
   return getPreferenceValues<Preferences>();
