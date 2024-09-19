@@ -178,8 +178,7 @@ export const buildBetaDetailSchema = z.object({
         "IN_EXPORT_COMPLIANCE_REVIEW",
       ])
       .optional(),
-    externalBuildState: externalBuildStateSchema
-      .optional(),
+    externalBuildState: externalBuildStateSchema.optional(),
   }),
 });
 

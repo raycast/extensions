@@ -1,5 +1,11 @@
 import { List, ActionPanel, Action, Icon, Color, Keyboard } from "@raycast/api";
-import { App, BuildWithBetaDetailAndBetaGroups, BetaGroup, betaBuildUsagesSchema, ExternalBuildState } from "../Model/schemas";
+import {
+  App,
+  BuildWithBetaDetailAndBetaGroups,
+  BetaGroup,
+  betaBuildUsagesSchema,
+  ExternalBuildState,
+} from "../Model/schemas";
 import BuildDetail from "./BuildDetail";
 import { useEffect } from "react";
 import { useState } from "react";
@@ -111,11 +117,13 @@ export default function BuildItem({ build, app }: BuildItemProps) {
       return name;
     });
     const betaGroupsCommaSeparatedString = betaGroupsShortCommaSeparated.join(", ");
-    const betaGroupsAccessory = [{
-      text: betaGroupsCommaSeparatedString,
-      icon: { source: Icon.TwoPeople, tintColor: Color.Blue },
-      tooltip: "Beta Groups: " + betaGroupsCommaSeparated.join(", "),
-    }] as React.ComponentProps<typeof List.Item>["accessories"];
+    const betaGroupsAccessory = [
+      {
+        text: betaGroupsCommaSeparatedString,
+        icon: { source: Icon.TwoPeople, tintColor: Color.Blue },
+        tooltip: "Beta Groups: " + betaGroupsCommaSeparated.join(", "),
+      },
+    ] as React.ComponentProps<typeof List.Item>["accessories"];
 
     let usage: React.ComponentProps<typeof List.Item>["accessories"] = [];
     if (firstBetaBuildUsage !== undefined) {

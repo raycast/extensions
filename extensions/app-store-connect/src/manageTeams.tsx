@@ -5,12 +5,7 @@ import { confirmAlert, Alert } from "@raycast/api";
 import AddTeam from "./Components/AddTeam";
 
 export default function Command() {
-  const {
-    teams: teamsFromStorage,
-    deleteTeam,
-    currentTeam: currentTeamFromStorage,
-    selectCurrentTeam
-  } = useTeams();
+  const { teams: teamsFromStorage, deleteTeam, currentTeam: currentTeamFromStorage, selectCurrentTeam } = useTeams();
   const [teams, setTeams] = useState<Team[]>([]);
   const [currentTeam, setCurrentTeam] = useState<Team | undefined>(undefined);
 

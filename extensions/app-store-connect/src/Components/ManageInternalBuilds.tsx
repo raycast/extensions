@@ -29,18 +29,15 @@ export default function ManageInternalBuilds({ app, group, didAddBuilds, didRemo
   const [buildsPath, setBuildsPath] = useState<string | undefined>(undefined);
   const [currentBuildsPath, setCurrentBuildsPath] = useState<string | undefined>(undefined);
 
-  const {
-    data: builds,
-    isLoading: isLoadingApp,
-  } = useAppStoreConnectApi(buildsPath, (response) => {
+  const { data: builds, isLoading: isLoadingApp } = useAppStoreConnectApi(buildsPath, (response) => {
     return buildsWithBetaDetailSchema.parse(response);
   });
-  const {
-    data: currentBuilds,
-    isLoading: isLoadingCurrentBuilds,
-  } = useAppStoreConnectApi(currentBuildsPath, (response) => {
-    return buildsWithBetaDetailSchema.parse(response);
-  });
+  const { data: currentBuilds, isLoading: isLoadingCurrentBuilds } = useAppStoreConnectApi(
+    currentBuildsPath,
+    (response) => {
+      return buildsWithBetaDetailSchema.parse(response);
+    },
+  );
 
   const { data: preReleaseVersions, isLoading: isLoadingPreReleaseVersions } = useAppStoreConnectApi(
     `/preReleaseVersions?filter[app]=${app.id}&sort=-version&fields[preReleaseVersions]=builds,version,platform&limit=5`,

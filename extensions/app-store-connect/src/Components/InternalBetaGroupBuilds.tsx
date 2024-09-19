@@ -27,10 +27,7 @@ export default function InternalBetaGroupBuilds({ group, app }: Props) {
 
   const [buildsPath, setBuildsPath] = useState<string | undefined>(undefined);
 
-  const {
-    data: builds,
-    isLoading: isLoadingApp,
-  } = useAppStoreConnectApi(buildsPath, (response) => {
+  const { data: builds, isLoading: isLoadingApp } = useAppStoreConnectApi(buildsPath, (response) => {
     return buildsWithBetaDetailSchema.parse(response);
   });
 

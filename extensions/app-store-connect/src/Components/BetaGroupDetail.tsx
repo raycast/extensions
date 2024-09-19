@@ -144,14 +144,7 @@ export default function BetaGroupDetail({ app, group }: Props) {
         title="Manage Builds"
         shortcut={{ modifiers: ["cmd"], key: "b" }}
         icon={Icon.Building}
-        target={
-          <ManageInternalBuilds
-            app={app}
-            group={group}
-            didAddBuilds={() => {}}
-            didRemoveBuilds={() => {}}
-          />
-        }
+        target={<ManageInternalBuilds app={app} group={group} didAddBuilds={() => {}} didRemoveBuilds={() => {}} />}
       />
     );
   };
