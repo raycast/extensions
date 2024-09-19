@@ -1,5 +1,18 @@
 # `Easydict` Changelog
 
+## [v2.9.2] - 2024-08-25
+
+### 💎 Improvement
+
+- Support HTTP OpenAI API endpoint, thanks to [rookiezn](https://github.com/rookiezn)'s PR.
+- DeepL translation supports Arabic language.
+- Removed the deprecated built-in DeepL API key.
+- Removed support for the official Youdao translation API, now only use the web API by default.
+
+### 🐞 Fixes
+
+- Fixed the issue that the argument parameter may be lost. https://github.com/tisfeng/Raycast-Easydict/pull/63
+
 ## [v2.9.1] - 2024-01-08
 
 ### 💎 Improvement
@@ -32,7 +45,7 @@
 
 ### ✨ Features
 
-- Support OpenAI ChatGPT translation.
+- Support OpenAI translation.
 
 ![OpenAI](https://user-images.githubusercontent.com/25194972/225886686-b99e5a97-6269-489d-b0bb-40be6d7d1d32.png)
 

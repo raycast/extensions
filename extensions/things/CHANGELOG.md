@@ -1,5 +1,14 @@
 # Things Changelog
 
+## [Quick ToDo Fixes] - 2024-08-19
+
+- Quick ToDo Command: Disable Automatic Date (when & deadline), List parsing when AI is not enabled in preferences/is not available via environment.
+
+## [Quick To-do Improvements] - 2024-08-05
+
+- Preference to disable date parsing for todo classification, sending all todo(s) to inbox.
+- The title input will still be parsed for assigning deadlines and list name followed with '#' (case-insensitive).
+
 ## [Fix Generate Checklist with AI] - 2024-07-30
 
 - Action to "Generate Checklist with AI" only visible if the user has access to AI.
@@ -22,7 +31,7 @@
 
 ## [Quick Add To-Do using natural language processing (NLP)] - 2023-09-05
 
-Ever wanted to add a new to-do to Things with plain, natural text? Well, it's possible now with the new `Quick Add To-Do` command. Just type in your to-do text, maybe set some notes and checklist items and you're good to go. 
+Ever wanted to add a new to-do to Things with plain, natural text? Well, it's possible now with the new `Quick Add To-Do` command. Just type in your to-do text, maybe set some notes and checklist items and you're good to go.
 
 Under the hood, it'll analyze and process your text to extract these parameters:
 - The title

@@ -27,6 +27,7 @@ export interface SearchNotePreferences extends GlobalPreferences, AppendNotePref
   showDetail: boolean;
   showMetadata: boolean;
   searchContent: boolean;
+  fuzzySearch: boolean;
 }
 
 export interface RandomNotePreferences extends GlobalPreferences, AppendNotePreferences {}

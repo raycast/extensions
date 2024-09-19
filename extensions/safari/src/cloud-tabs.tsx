@@ -1,13 +1,12 @@
+import { List } from "@raycast/api";
 import _ from "lodash";
 import { useState } from "react";
-import { List } from "@raycast/api";
-
 import { DeviceListSection, FallbackSearchSection } from "./components";
 import { useDevices } from "./hooks";
 import { Device, Tab } from "./types";
 import { search } from "./utils";
 
-const Command = () => {
+export default function Command() {
   const { devices, permissionView, refreshDevices } = useDevices();
   const [searchText, setSearchText] = useState<string>("");
 
@@ -20,7 +19,10 @@ const Command = () => {
       {_.map(devices, (device: Device) => {
         const tabs = search(
           typeof device.tabs === "undefined" ? [] : device.tabs,
-          ["title", "url"],
+          [
+            { name: "title", weight: 3 },
+            { name: "url", weight: 1 },
+          ],
           searchText,
         ) as Tab[];
         return <DeviceListSection key={device.uuid} device={device} filteredTabs={tabs} refresh={refreshDevices} />;
@@ -28,6 +30,4 @@ const Command = () => {
       <FallbackSearchSection searchText={searchText} />
     </List>
   );
-};
-
-export default Command;
+}

@@ -1,5 +1,14 @@
 # YouTube Downloader Changelog
 
+## [Remove empty dropdown items] - 2024-08-29
+
+- Removed empty dropdown items from the format selection to improve user experience
+- Added mp3 keyword for audio options
+
+## [Update package dependency] - 2024-08-12
+
+- Update the `@dustube/ytdl-core` dependency to resolve the video download failure issue.
+
 ## [Fix video not found] - 2024-08-01
 
 - Update the `@dustube/ytdl-core` dependency to fix the video not found issue

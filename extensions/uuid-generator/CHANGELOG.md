@@ -1,5 +1,9 @@
 # UUID Generator Changelog
 
+## [Added history management feature] - 2024-08-28
+
+- You can now view, clear, and delete UUID generation history
+
 ## [Added support for UUID v7] - 2023-10-02
 
 - You can now generate v7 UUIDs

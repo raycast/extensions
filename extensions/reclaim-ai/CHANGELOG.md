@@ -1,5 +1,43 @@
 # reclaim Changelog
 
+## [Fixes] - 2024-08-23
+- Stopped rapid-fire calls to `GET:/api/smart-habits`
+    - New hook `useSyncCachedPromise`
+        - Only fires promise if previous fun is done
+        - Works when multiple components mount at the same time
+
+## [Fixes] - 2024-08-23
+- Fix state management now we are using useFetch
+
+## [Fixes] - 2024-08-21
+- Add useCallbackSafeRef hook
+- Fix component wrapping that was causing UI glitch
+
+## [Fixes] - 2024-08-19
+- Fix useTask return type
+- Separate state and actions in hooks
+- Break out subcomponents in my-calendar & notications
+
+## [Fixes] - 2024-08-19
+- Correct typings in `normalize` function so that they pass `tsconfig:strict`
+
+## [Fixes] - 2024-08-16
+- Handle possibly undefined
+
+## [Update] - 2024-08-13
+- Update contributors list
+- Just strip planner emojis
+- Have smart habit actions respect unscheduleRestartedOverride setting
+- Fail useFetch API calls silently
+
+## [Update] - 2024-07-30
+- Add actions for Smart Meetings & Habits 2.0
+- Parity between Raycast actions and Omnibar Actions
+- Fix "reschedule event" to work for Tasks and use new endpoint
+- Tasks/smart habits start/stop/restart respect auto reschedule setting
+- Sort Time Schemes in Create Task form
+- Rewrite useEvent and useMoment hooks to not be fetches inside callbacks inside hooks
+
 ## [Update] - 2024-05-10
 - Cache the user object for 30 minute for a small performance benefit.
 

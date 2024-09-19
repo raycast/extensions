@@ -31,6 +31,13 @@
       "subtitle": "SupaHabits",
       "description": "List journal entries",
       "mode": "view"
+    },
+    {
+      "name": "mood",
+      "title": "Mood Tracker",
+      "subtitle": "SupaHabits",
+      "description": "Track your mood",
+      "mode": "view"
     }
   ],
   "preferences": [

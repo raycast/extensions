@@ -151,6 +151,15 @@
           ]
         },
         {
+          "title": "Title Max Length",
+          "name": "titleTruncateLength",
+          "type": "textfield",
+          "description": "Truncate length of the title",
+          "required": false,
+          "default": "60",
+          "placeholder": "60"
+        },
+        {
           "title": "Calendar Style",
           "name": "largeCalendar",
           "label": "Large Calendar",

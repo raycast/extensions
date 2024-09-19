@@ -7,9 +7,9 @@ export default function Command() {
 
   return (
     <List throttle isLoading={!standings}>
-      {standings?.map((team) => (
+      {standings?.map((team, index) => (
         <List.Item
-          key={team.position}
+          key={index}
           icon={team.logoUrl}
           title={team.position.toString()}
           subtitle={team.teamName}
@@ -23,15 +23,24 @@ export default function Command() {
             },
             ...team.lastResults.map((result) => ({
               icon: {
-                source: Icon.CircleFilled,
+                source: result === MATCH_RESULT.UNKNOWN ? Icon.QuestionMarkCircle : Icon.CircleFilled,
                 tintColor:
                   result === MATCH_RESULT.LOST
                     ? Color.Red
                     : result === MATCH_RESULT.DRAW
                       ? Color.SecondaryText
-                      : Color.Green,
+                      : result === MATCH_RESULT.WON
+                        ? Color.Green
+                        : Color.SecondaryText,
               },
-              tooltip: result === MATCH_RESULT.LOST ? "Lost" : result === MATCH_RESULT.DRAW ? "Draw" : "Won",
+              tooltip:
+                result === MATCH_RESULT.LOST
+                  ? "Lost"
+                  : result === MATCH_RESULT.DRAW
+                    ? "Draw"
+                    : result === MATCH_RESULT.WON
+                      ? "Won"
+                      : "Unknown",
             })),
             { icon: Icon.Trophy, text: team.teamPoints.toString(), tooltip: "Points" },
           ]}

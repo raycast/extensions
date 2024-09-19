@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
 import { List } from "@raycast/api";
 import json2md from "json2md";
 import groupBy from "lodash.groupby";
+import { useMemo, useState } from "react";
 import { PokemonV2Pokemonmove } from "../types";
+import { typeColor } from "../utils";
 
 export default function PokemonMoves(props: {
   name: string;
@@ -80,7 +81,7 @@ export default function PokemonMoves(props: {
                   text = move.pokemon_v2_move.pokemon_v2_machines[0]
                     ? `TM${move.pokemon_v2_move.pokemon_v2_machines[0]?.machine_number
                         .toString()
-                        .padStart(2, "0")}`
+                        .padStart(3, "0")}`
                     : "";
                 // eslint-disable-next-line no-fallthrough
                 default:
@@ -93,17 +94,7 @@ export default function PokemonMoves(props: {
                   title={move.pokemon_v2_move.pokemon_v2_movenames[0].name}
                   keywords={[move.pokemon_v2_move.pokemon_v2_movenames[0].name]}
                   icon={`moves/${move.pokemon_v2_move.pokemon_v2_movedamageclass.pokemon_v2_movedamageclassnames[0].name}.svg`}
-                  accessories={[
-                    {
-                      text,
-                    },
-                    {
-                      tooltip:
-                        move.pokemon_v2_move.pokemon_v2_type
-                          .pokemon_v2_typenames[0].name,
-                      icon: `types/${move.pokemon_v2_move.pokemon_v2_type.name}.svg`,
-                    },
-                  ]}
+                  accessories={[{ text }]}
                   detail={
                     <List.Item.Detail
                       markdown={json2md([
@@ -123,6 +114,21 @@ export default function PokemonMoves(props: {
                       ])}
                       metadata={
                         <List.Item.Detail.Metadata>
+                          <List.Item.Detail.Metadata.TagList title="Type">
+                            <List.Item.Detail.Metadata.TagList.Item
+                              text={
+                                move.pokemon_v2_move.pokemon_v2_type
+                                  .pokemon_v2_typenames[0].name
+                              }
+                              icon={`types/${move.pokemon_v2_move.pokemon_v2_type.name}.svg`}
+                              color={
+                                typeColor[
+                                  move.pokemon_v2_move.pokemon_v2_type.name
+                                ]
+                              }
+                            />
+                          </List.Item.Detail.Metadata.TagList>
+
                           <List.Item.Detail.Metadata.Label
                             title="Power"
                             text={move.pokemon_v2_move.power?.toString() || "-"}

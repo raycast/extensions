@@ -1,5 +1,9 @@
 # Unsplash Changelog
 
+## [Chore] - 2024-09-02
+
+- Added missing contributor
+
 ## [Fix] - 2023-09-22
 
 - Better handling of key and token

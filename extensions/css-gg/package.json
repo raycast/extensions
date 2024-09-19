@@ -30,6 +30,7 @@
   "dependencies": {
     "@raycast/api": "^1.38.2",
     "@raycast/utils": "^1.8.0",
+    "css.gg": "^2.1.4",
     "node-fetch": "^3.1.0",
     "react": "^18.2.0",
     "uuid": "^9.0.0"
@@ -47,6 +48,9 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

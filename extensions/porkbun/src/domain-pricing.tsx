@@ -97,10 +97,11 @@ export default function DomainPricing() {
       navigationTitle={navigationTitle}
       actions={
         <ActionPanel>
-          <Action icon={Icon.Redo} title="Reload Domain Pricing" onAction={callApi} />
+          {!isLoading && <Action icon={Icon.Redo} title="Reload Domain Pricing" onAction={callApi} />}
           <Action.OpenInBrowser icon={Icon.Globe} title="Go to API Reference" url={`${API_DOCS_URL}Domain%20Pricing`} />
         </ActionPanel>
       }
+      searchBarPlaceholder="Search domain by name"
       searchBarAccessory={
         <List.Dropdown tooltip="Filter" onChange={setFilter}>
           <List.Dropdown.Item title="All" value="" />
@@ -122,7 +123,7 @@ export default function DomainPricing() {
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={`https://porkbun.com/tld/${domain}`} />
-                <Action icon={Icon.Redo} title="Reload Domain Pricing" onAction={callApi} />
+                {!isLoading && <Action icon={Icon.Redo} title="Reload Domain Pricing" onAction={callApi} />}
                 <ActionPanel.Section>
                   <Action.OpenInBrowser
                     icon={Icon.Globe}

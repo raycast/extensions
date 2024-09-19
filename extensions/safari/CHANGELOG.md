@@ -1,5 +1,13 @@
 # Safari Changelog
 
+## [Improve] - 2024-09-11
+
+- Changed the behavior of the `Add to Reading List` command to add the current tab to the Reading List.
+
+## [Improve] - 2024-08-09
+
+- Changed fuzzy search weights
+
 ## [Fix] - 2024-07-26
 
 - Fixed bug with fuzzy search and undefined `device.tabs`

@@ -1,4 +1,4 @@
-import { captureException, showHUD } from "@raycast/api";
+import { showHUD } from "@raycast/api";
 import { getCachedEnv } from "./shell-utils";
 import { execSync } from "child_process";
 import os from "os";
@@ -34,7 +34,7 @@ export const getCurWifiInfo = async () => {
         .filter((item) => item !== null);
     }
   } catch (e) {
-    captureException("Error getting Wi-Fi info:" + e);
+    console.log(e);
     return [];
   }
 };

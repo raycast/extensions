@@ -2,6 +2,8 @@ import { ActionPanel } from "@raycast/api";
 import CopyReactComponentActions from "./actions/copy-react-component-actions";
 import CopySvgActions from "./actions/copy-svg-actions";
 import CopyWordmarkSvgActions from "./actions/copy-wordmark-svg-actions";
+import CopySvgUrlActions from "./actions/copy-svg-url-actions";
+import CopyWordmarkSvgUrlAction from "./actions/copy-wordmark-svg-url-actions";
 import SvgInfoActions from "./actions/svg-info-actions";
 import { Svg } from "../type";
 import PinSvgAction from "./actions/pin-svg-action";
@@ -22,6 +24,12 @@ const SvgAction = ({ svg, category }: SvgActionProps) => {
       </ActionPanel.Section>
       <ActionPanel.Section title="Copy React Component">
         <CopyReactComponentActions svg={svg} />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Copy SVG URL">
+        <CopySvgUrlActions svg={svg} />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Copy SVG Wordmark URL">
+        <CopyWordmarkSvgUrlAction svg={svg} />
       </ActionPanel.Section>
       <ActionPanel.Section title="Operation">
         <PinSvgAction svg={svg} />

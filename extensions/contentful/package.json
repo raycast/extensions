@@ -5,6 +5,7 @@
   "description": "Browse and search Contentful content library",
   "icon": "icon.png",
   "author": "ewgenius",
+  "contributors": ["xmok"],
   "categories": [
     "Applications",
     "Data",
@@ -25,20 +26,28 @@
       "subtitle": "Contentful",
       "description": "Search Contentful media library",
       "mode": "view"
+    },
+    {
+      "name": "search-users",
+      "title": "Search Users",
+      "subtitle": "Contentful",
+      "description": "Search Contentful users",
+      "mode": "view"
     }
   ],
   "preferences": [
     {
       "name": "space",
       "title": "Contentful Space ID",
-      "description": "Contentful space id",
+      "description": "Contentful Space ID",
       "type": "textfield",
-      "required": true
+      "required": true,
+      "placeholder": "xxxxxxxxxxxx"
     },
     {
       "name": "token",
       "title": "Contentful Management Token",
-      "description": "Contentful management token",
+      "description": "Contentful Management Token",
       "type": "password",
       "required": true
     },
@@ -48,7 +57,8 @@
       "description": "If not set, will be used 'master'",
       "type": "textfield",
       "required": false,
-      "default": "master"
+      "default": "master",
+      "placeholder": "master"
     }
   ],
   "dependencies": {

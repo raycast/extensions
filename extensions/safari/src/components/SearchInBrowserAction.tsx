@@ -1,21 +1,22 @@
-import { ActionPanel, closeMainWindow, Icon, Action } from "@raycast/api";
+import { Action, closeMainWindow, Icon } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
+import { safariAppIdentifier } from "../utils";
 
-import { executeJxa, safariAppIdentifier } from "../utils";
-
-const searchInBrowser = async (searchText?: string) => {
+async function searchInBrowser(searchText?: string) {
   if (!searchText) {
     console.error("No search text provided");
     return;
   }
 
-  executeJxa(`
-      const safari = Application("${safariAppIdentifier}");
-      safari.searchTheWeb({ for: "${searchText}" });
-      safari.activate();
+  await runAppleScript(`
+    tell application "${safariAppIdentifier}"
+      search the web for "${searchText}"
+      activate
+    end tell
   `);
-};
+}
 
-const SearchInBrowserAction = (props: { searchText?: string }) => {
+export default function SearchInBrowserAction(props: { searchText?: string }) {
   return props.searchText ? (
     <Action
       title="Search in Browser"
@@ -26,6 +27,4 @@ const SearchInBrowserAction = (props: { searchText?: string }) => {
       }}
     />
   ) : null;
-};
-
-export default SearchInBrowserAction;
+}
