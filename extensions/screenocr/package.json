@@ -161,7 +161,6 @@
   "dependencies": {
     "@raycast/api": "^1.83.1",
     "@raycast/utils": "^1.17.0",
-    "immer": "^10.1.1",
     "use-immer": "^0.9.0"
   },
   "devDependencies": {

@@ -1,7 +1,7 @@
 import { recognizeText as recognizeTextSwift } from "swift:../swift";
 import { getUserSelectedLanguages, usePreferences } from "./hooks";
 
-const recognizeText = async (isFullScreen = false) => {
+export const recognizeText = async (isFullScreen = false) => {
   const preference = usePreferences();
 
   try {
@@ -23,5 +23,3 @@ const recognizeText = async (isFullScreen = false) => {
     throw new Error("Failed to recognize text");
   }
 };
-
-export { recognizeText };
