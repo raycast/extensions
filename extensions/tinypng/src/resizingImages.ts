@@ -73,8 +73,13 @@ const _validateArguments = (args: Props["arguments"]) => {
   if (args.method === "fit" && !(args.width && args.height)) {
     throw new Error("Width and height are required for fit method");
   }
-  if (args.method === "scale" && !(args.width || args.height)) {
-    throw new Error("Width or height are required for scale method");
+  if (args.method === "scale") {
+    if (!(args.width || args.height)) {
+      throw new Error("Width or height are required for scale method");
+    }
+    if (args.width && args.height) {
+      throw new Error("You cannot specify both width and height for scale method. Only specify one of them");
+    }
   }
   if (args.method === "cover" && !(args.width && args.height)) {
     throw new Error("Width and height are required for cover method");
