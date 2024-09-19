@@ -3,7 +3,7 @@ import { mkdirSync } from "fs";
 import { showToast, Toast, getSelectedFinderItems, getPreferenceValues, showHUD } from "@raycast/api";
 import { statSync, createReadStream, createWriteStream } from "fs";
 import fetch from "node-fetch";
-import { dirname, basename, join } from "path";
+import { dirname, basename, join, extname } from "path";
 import { compressImageResponseScheme } from "./zodSchema";
 import { resolveOutputPath } from "./lib/utils";
 
@@ -149,7 +149,12 @@ const _compressAndResizeImage = async (
     }
   }
 
-  const outputPath = join(outputDir, basename(filePath));
+  let outputPath = join(outputDir, basename(filePath));
+  if (outputPath === filePath && !preferences.overwrite) {
+    const ext = extname(filePath);
+    outputPath = join(outputDir, `${basename(filePath, ext)}.resized${ext}`);
+  }
+
   const outputFileStream = createWriteStream(outputPath);
 
   await new Promise((resolve, reject) => {
