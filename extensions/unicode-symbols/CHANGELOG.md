@@ -5,6 +5,7 @@
 - Added extra characters to Superscript and Subscript set ([#14533](https://github.com/raycast/extensions/issues/14533))
   - This is purely a visual thing, doesn't change the actual character sets
   - Also added an indicator to show that this character is actually in a different set
+- Fix issue where the extension breaks on `Ancient Symbols` in List Mode ([#14562](https://github.com/raycast/extensions/issues/14562))
 - Improve search, wasn't properly filtering characters in Fuse.js
 - Updated dependencies
 
