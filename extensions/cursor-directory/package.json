@@ -11,44 +11,51 @@
   ],
   "preferences": [
     {
-      "name": "prompts_sort_order",
-      "title": "Prompts Sort Order",
-      "type": "dropdown",
-      "description": "Sort order of prompts",
-      "required": false,
-      "default": "desc",
-      "data": [
-        {
-          "title": "Ascending",
-          "value": "asc"
-        },
-        {
-          "title": "Descending",
-          "value": "desc"
-        }
-      ]
-    },
-    {
       "name": "cache_interval",
       "title": "Cache Interval in day",
       "type": "textfield",
       "required": false,
       "default": "1",
       "description": "How many days should the local cache expire"
+    },
+    {
+      "name": "show_detailed_view",
+      "title": "Show Detailed View",
+      "label": "Show detailed view in cursor rules list",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "description": "Show detailed view in cursor rules list"
+    },
+    {
+      "name": "default_cursor_rules_list",
+      "title": "Default Cursor Rules List",
+      "type": "dropdown",
+      "required": false,
+      "default": "popular",
+      "description": "If show all cursor rules or only popular ones in cursor rules list",
+      "data": [
+        {
+          "title": "Popular",
+          "value": "popular"
+        },
+        {
+          "title": "All",
+          "value": "all"
+        }
+      ]
     }
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Search Prompts",
-      "description": "Search system prompts from cursor.directory for usage inside Cursor Code Editor",
+      "title": "Search Cursor Rules",
+      "description": "Search cursor rules from cursor.directory for usage inside Cursor Code Editor",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@babel/parser": "^7.25.6",
-    "@babel/types": "^7.25.6",
     "@raycast/api": "^1.81.2",
     "@raycast/utils": "^1.16.3",
     "node-fetch": "^3.3.2"
