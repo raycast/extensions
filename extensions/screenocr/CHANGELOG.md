@@ -4,6 +4,7 @@
 
 - Migrated codebase to use new Swift macros
 - Replaced all HUDs with emojis with styled toast messages for user feedback
+- Added list section to the `Select Recognition Languages` command
 - Grouped checkbox preferences into a single section
 
 ## [Fixes & Improvements] - 2024-05-21

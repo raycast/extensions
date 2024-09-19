@@ -112,29 +112,31 @@ export const LanguagesManagerList = () => {
 
   return (
     <List>
-      {supportedLanguages?.map((language) => (
-        <LanguagesManagerItem
-          key={language.value}
-          language={language}
-          isPrimaryLanguage={
-            selectedLanguages.find((lang) => lang.value === language.value)
-              ?.isDefault ?? false
-          }
-          selected={
-            selectedLanguages.find((lang) => lang.value === language.value)
-              ? true
-              : false
-          }
-          onSelect={() => {
-            selectLanguage(language);
-            showToast(Toast.Style.Success, `Added ${language.title}`);
-          }}
-          onDelete={() => {
-            unselectLanguage(language);
-            showToast(Toast.Style.Failure, `Removed ${language.title}`);
-          }}
-        />
-      ))}
+      <List.Section title="Supported Languages">
+        {supportedLanguages?.map((language) => (
+          <LanguagesManagerItem
+            key={language.value}
+            language={language}
+            isPrimaryLanguage={
+              selectedLanguages.find((lang) => lang.value === language.value)
+                ?.isDefault ?? false
+            }
+            selected={
+              selectedLanguages.find((lang) => lang.value === language.value)
+                ? true
+                : false
+            }
+            onSelect={() => {
+              selectLanguage(language);
+              showToast(Toast.Style.Success, `Added ${language.title}`);
+            }}
+            onDelete={() => {
+              unselectLanguage(language);
+              showToast(Toast.Style.Failure, `Removed ${language.title}`);
+            }}
+          />
+        ))}
+      </List.Section>
     </List>
   );
 };
