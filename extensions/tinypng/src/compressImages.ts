@@ -5,10 +5,9 @@ import { statSync, createReadStream, createWriteStream } from "fs";
 import fetch from "node-fetch";
 import { dirname, basename, join } from "path";
 import { compressImageResponseScheme } from "./zodSchema";
-import { Preference } from "./types";
 import { resolveOutputPath } from "./lib/utils";
 
-const preferences = getPreferenceValues<Preference>();
+const preferences = getPreferenceValues<Preferences>();
 
 export default async function main() {
   let filePaths: string[];
@@ -35,7 +34,7 @@ export default async function main() {
     const totalCompressedSize = results.reduce((acc, cur) => acc + cur[0].compressedSize, 0);
 
     await showHUD(
-      `Compression successful 🎉  (-${(100 - (totalCompressedSize / totalOriginalSize) * 100).toFixed(1)}%)`
+      `Compression successful 🎉  (-${(100 - (totalCompressedSize / totalOriginalSize) * 100).toFixed(1)}%)`,
     );
   } catch (e) {
     toast.style = Toast.Style.Failure;
@@ -45,13 +44,13 @@ export default async function main() {
 }
 
 const _compressImage = async (
-  filePath: string
+  filePath: string,
 ): Promise<
   [
     {
       originalSize: number;
       compressedSize: number;
-    }
+    },
   ]
 > => {
   const { size } = statSync(filePath);

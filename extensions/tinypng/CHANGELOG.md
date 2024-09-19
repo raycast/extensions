@@ -1,5 +1,10 @@
 # TinyPNG Changelog
 
+## [Minor improvements] - {PR_MERGE_DATE}
+
+- Update dependencies
+- Make the `method` in `Resizing Images` a Dropdown instead of a Text Field
+
 ## [New Features] - 2023-04-22
 
 Enabled the ability to set the destination folder path.

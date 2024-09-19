@@ -5,10 +5,9 @@ import { statSync, createReadStream, createWriteStream } from "fs";
 import fetch from "node-fetch";
 import { dirname, basename, join } from "path";
 import { compressImageResponseScheme } from "./zodSchema";
-import { Preference } from "./types";
 import { resolveOutputPath } from "./lib/utils";
 
-const preferences = getPreferenceValues<Preference>();
+const preferences = getPreferenceValues<Preferences>();
 
 type Props = {
   arguments: {
@@ -87,13 +86,13 @@ const _validateArguments = (args: Props["arguments"]) => {
 
 const _compressAndResizeImage = async (
   filePath: string,
-  props: Props
+  props: Props,
 ): Promise<
   [
     {
       originalSize: number;
       compressedSize: number;
-    }
+    },
   ]
 > => {
   const { size } = statSync(filePath);
