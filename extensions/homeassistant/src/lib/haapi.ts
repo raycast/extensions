@@ -97,14 +97,14 @@ export class HomeAssistant {
     if (ssid) {
       console.log("Current SSID: ", ssid);
       if (!this.wifiSSIDs || this.wifiSSIDs.length <= 0) {
-        console.log("No WiFi SSIDs are specified for the internal url");
+        console.log("No Wi-Fi SSIDs are specified for the internal URL");
       }
       if (this.wifiSSIDs && this.wifiSSIDs.includes(ssid)) {
         return true;
       } else {
         console.log(
           `Current SSID (${ssid}) is not in home network list (${
-            this.wifiSSIDs && this.wifiSSIDs.length > 0 ? this.wifiSSIDs.join(", ") : "No SSIDS defined"
+            this.wifiSSIDs && this.wifiSSIDs.length > 0 ? this.wifiSSIDs.join(", ") : "No SSIDs defined"
           })`,
         );
       }
@@ -153,7 +153,7 @@ export class HomeAssistant {
       return this._nearestURL;
     }
     if (!this.url || this.url.length <= 0) {
-      throw Error("No Home Assistant Url defined");
+      throw Error("No Home Assistant URL defined");
     }
     if (this.urlInternal && this.urlInternal.length > 0) {
       if (this.isHomeSSIDActive()) {
