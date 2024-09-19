@@ -2,6 +2,7 @@
 
 ## [Improvements] - {PR_MERGE_DATE}
 
+- Migrated codebase to use new Swift macros
 - Replaced all HUDs with emojis with styled toast messages for user feedback
 - Grouped checkbox preferences into a single section
 
