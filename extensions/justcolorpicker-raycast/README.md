@@ -10,16 +10,16 @@ JustColorPicker Raycast extensions, used with [JustColorPicker](https://justcolo
 
 ### 1. Copy your color value
 
-![guide-1]('./metadata/guide-1.png')
+![color-picker-1]('./metadata/color-picker-1.png')
 
 ### 2. Paste your color value to extensions
 
-![guide-2]('./metadata/guide-2.png')
+![color-picker-2]('./metadata/color-picker-2.png')
 
 ### 3.You can see the corresponding colors, and the different units or jump to JustColorPicker Tool webside
 
-![guide-3]('./metadata/guide-3.png')
+![color-picker-3]('./metadata/color-picker-3.png')
 
 ### 4. You can choose your color by JustColorPicker Tool webside
 
-![guide-4]('./metadata/guide-4.png')
+![color-picker-4]('./metadata/color-picker-4.png')
