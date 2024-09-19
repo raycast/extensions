@@ -49,7 +49,7 @@ export function SearchIssues({ query: initialQuery }: SearchIssuesProps) {
       const singleNumberRegex = /^[0-9]+$/;
       const singleNumberMatches = query.match(singleNumberRegex);
       if (singleNumberMatches) {
-        if(cachedProject) {
+        if (cachedProject) {
           issueKeyQuery = `OR issuekey = ${cachedProject.key}-${singleNumberMatches[0]}`;
         } else {
           const allPossibleIssueKeys = projects?.map((project) => `${project.key}-${singleNumberMatches[0]}`);
