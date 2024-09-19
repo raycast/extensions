@@ -8,6 +8,8 @@ import hwbPlugin from "colord/plugins/hwb";
 
 extend([cmykPlugin, labPlugin, lchPlugin, hwbPlugin]);
 
+const baseUrl = "https://justcolorpicker.com";
+
 type ColorFormat =
   | "hsl"
   | "hwb"
@@ -202,7 +204,7 @@ function ColorListItem({ item, hex }: { item: ColorItem; hex: string }) {
       subtitle={item.value}
       detail={
         <List.Item.Detail
-          markdown={`![${hex}](http://localhost:3000/api/colorpng?raycast-width=350&raycast-height=350&c=${hex.replace("#", "")})`}
+          markdown={`![${hex}](${baseUrl}/api/colorpng?raycast-width=350&raycast-height=350&c=${hex.replace("#", "")})`}
         />
       }
       actions={
@@ -211,7 +213,7 @@ function ColorListItem({ item, hex }: { item: ColorItem; hex: string }) {
           <Action.OpenInBrowser
             title="Open in Justcolorpicker"
             shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-            url={`http://localhost:3000/en?c=${encodeURIComponent(hex)}`}
+            url={`${baseUrl}?c=${encodeURIComponent(hex)}`}
           />
         </ActionPanel>
       }
