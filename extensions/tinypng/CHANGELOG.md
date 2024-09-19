@@ -4,6 +4,7 @@
 
 - Update dependencies
 - Make the `method` in `Resizing Images` a Dropdown instead of a Text Field
+- Fix the resize method for `scale`, where width and height are not both required
 
 ## [New Features] - 2023-04-22
 

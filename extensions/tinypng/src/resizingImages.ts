@@ -119,6 +119,17 @@ const _compressAndResizeImage = async (
   // Download compressed image
   const downloadUrl = resJson.output.url;
 
+  // Resize object that is sent to the API. The width and height are optional in case of the scale method, otherwise they will both be filled.
+  const resize: { method: string; width?: number; height?: number } = {
+    method: props.arguments.method,
+  };
+  if (props.arguments.width) {
+    resize.width = Number(props.arguments.width);
+  }
+  if (props.arguments.height) {
+    resize.height = Number(props.arguments.height);
+  }
+
   const resResized = await fetch(downloadUrl, {
     method: "POST",
     headers: {
@@ -126,11 +137,7 @@ const _compressAndResizeImage = async (
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      resize: {
-        method: props.arguments.method,
-        width: Number(props.arguments.width),
-        height: Number(props.arguments.height),
-      },
+      resize,
     }),
   });
 
