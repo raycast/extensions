@@ -3,7 +3,7 @@ import path from "path";
 import type { Character } from "unidata";
 import { getBlocks, getCharacters } from "unidata";
 
-import type { CharAlias } from "../src/lib/dataset-manager";
+import type { BlockExtra, CharAlias, Character as JSONCharacter } from "../src/types";
 
 // Output path for the generated dataset.
 const datasetOutputPath = path.resolve(__dirname, "../assets/dataset.json");
@@ -61,7 +61,14 @@ const charCodeToAliases: CharAlias = {
 };
 
 // Grab unicode blocks and characters using https://github.com/chbrown/unidata/
-const allBlocks = getBlocks();
+const allBlocks = (getBlocks() as BlockExtra[]).map((block) => {
+  // We're adding some extra characters to the "Superscripts and Subscripts" block because they reside in a different block (Latin-1 Supplement).
+  if (block.blockName === "Superscripts and Subscripts") {
+    block.extra = [178, 179, 185];
+  }
+
+  return block;
+});
 const allCharacters = getCharacters();
 
 console.log(`ℹ️ Found ${allBlocks.length} unicode blocks and ${allCharacters.length} unicode characters`);
@@ -95,7 +102,7 @@ const mapCodeToName = (char: Character): Character => {
   };
 };
 
-function mapCharacterToDatasetItem(char: Character) {
+function mapCharacterToDatasetItem(char: Character): JSONCharacter | undefined {
   const aliases = charCodeToAliases[char.code] ? charCodeToAliases[char.code] : [];
   if (char.code)
     return {
@@ -107,12 +114,12 @@ function mapCharacterToDatasetItem(char: Character) {
     };
 }
 
-function sanitizeCharacters(characters: Character[]) {
+function sanitizeCharacters(characters: Character[]): JSONCharacter[] {
   return characters
     .filter(Boolean) // Include only valid characters
     .map(mapCodeToName)
     .map(mapCharacterToDatasetItem)
-    .filter((char) => char && char.name !== "<control>" && char.code !== 57344); // Exclude invisible control characters and private use area character
+    .filter((char) => char && char.name !== "<control>" && char.code !== 57344) as JSONCharacter[]; // Exclude invisible control characters and private use area character
 }
 
 // Run the dataset generation.

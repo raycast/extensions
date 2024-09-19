@@ -1,5 +1,13 @@
 # Unicode Symbols
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Added extra characters to Superscript and Subscript set ([#14533](https://github.com/raycast/extensions/issues/14533))
+  - This is purely a visual thing, doesn't change the actual character sets
+  - Also added an indicator to show that this character is actually in a different set
+- Improve search, wasn't properly filtering characters in Fuse.js
+- Updated dependencies
+
 ## [Filter irrelevant characters] - 2024-05-21
 
 - Added a filter to remove irrelevant characters from the list (#12487)

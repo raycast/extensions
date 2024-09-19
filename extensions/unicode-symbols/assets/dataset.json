@@ -53,7 +53,12 @@
     {
       "blockName": "Superscripts and Subscripts",
       "startCode": 8304,
-      "endCode": 8351
+      "endCode": 8351,
+      "extra": [
+        178,
+        179,
+        185
+      ]
     },
     {
       "blockName": "Currency Symbols",

@@ -10,3 +10,32 @@ export const upperCaseFirst = (str: string): string => {
 export const numberToHex = (number: number): string => {
   return number.toString(16).padStart(4, "0").toUpperCase();
 };
+
+/**
+ * Returns a SVG string for a square with the given value
+ * @param value The value to display in the square
+ * @param dark Should the square be dark?
+ * @returns SVG string for a square with the given value
+ */
+export const getSquareSVGString = (value: string, dark = false) => {
+  let val = value;
+  if (value === "&") {
+    val = "&amp;";
+  } else if (value === "<") {
+    val = "&lt;";
+  } else if (value === ">") {
+    val = "&gt;";
+  }
+  const textColor = dark ? "#fff" : "#000";
+  const size = 200;
+  return `
+  <svg height="${size}" width="${size}">
+    <rect fill="transparent" x="0" y="0" width="${size}" height="${size}"></rect>
+    <text x="${size / 2}" y="${
+      size / 1.3
+    }" fill="${textColor}" text-anchor="middle" alignment-baseline="central" font-size="${
+      size / 2
+    }" line-height="0" font-family="mono-space">${val}</text>
+  </svg>
+  `;
+};
