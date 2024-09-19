@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, clearSearchBar, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
 import ReminderListItem from "./components/ReminderListItem";
@@ -101,6 +101,7 @@ export default function Command() {
               title="Create Reminder"
               icon={Icon.Plus}
               target={<CreateReminderForm draftValues={draftValues} listId={listId} mutate={mutate} />}
+              onPush={() => clearSearchBar()}
             />
 
             <Action
