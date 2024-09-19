@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Grid, showToast, Toast, getPreferenceValues} from "@raycast/api";
+import { ActionPanel, Action, Grid, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import { useFetch } from "@raycast/utils";
 import { exec } from "child_process";
@@ -27,26 +27,26 @@ export default function Command() {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ 
+    body: JSON.stringify({
       query: debouncedSearchText,
       threshold: preferences.threshold,
-      top_k: preferences.topK
+      top_k: preferences.topK,
     }),
   });
 
   // Debounce function
-  const debounce = (func: (...args: any[]) => void, delay: number) => {
+  const debounce = (func: (arg: string) => void, delay: number): ((arg: string) => void) => {
     let timeoutId: NodeJS.Timeout;
-    return (...args: any[]) => {
+    return (arg: string) => {
       clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => func(...args), delay);
+      timeoutId = setTimeout(() => func(arg), delay);
     };
   };
 
   // Debounced search text setter (wait for 0.5s after user stops typing)
   const debouncedSetSearchText = useCallback(
     debounce((text: string) => setDebouncedSearchText(text), 500),
-    []
+    [],
   );
 
   useEffect(() => {
@@ -73,8 +73,7 @@ export default function Command() {
 
   const openImage = async (path: string) => {
     try {
-      const command = process.platform === 'darwin' ? 'open' :
-        process.platform === 'win32' ? 'start' : 'xdg-open';
+      const command = process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
       await execAsync(`${command} "${path}"`);
     } catch (error) {
       console.error("Error opening image:", error);
@@ -88,8 +87,12 @@ export default function Command() {
 
   const revealImageInFinder = async (path: string) => {
     try {
-      const command = process.platform === 'darwin' ? `open -R "${path}"` :
-        process.platform === 'win32' ? `explorer /select,"${path}"` : `xdg-open "${path}"`;
+      const command =
+        process.platform === "darwin"
+          ? `open -R "${path}"`
+          : process.platform === "win32"
+            ? `explorer /select,"${path}"`
+            : `xdg-open "${path}"`;
       await execAsync(command);
     } catch (error) {
       console.error("Error opening image location:", error);
@@ -117,10 +120,7 @@ export default function Command() {
           }}
           actions={
             <ActionPanel>
-              <Action
-                title="Open in Local Viewer"
-                onAction={() => openImage(image.path)}
-              />
+              <Action title="Open in Local Viewer" onAction={() => openImage(image.path)} />
               <Action
                 title="Reveal in Finder"
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
