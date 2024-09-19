@@ -13,7 +13,7 @@ export default function ConnectionCommand() {
     <List isLoading={isLoading}>
       <List.Section title="Connection">
         <List.Item
-          title="Chosen Url"
+          title="Chosen URL"
           icon={Icon.ArrowsContract}
           accessories={[
             { icon: { source: nearestURL === ha.urlInternal ? Icon.House : "", tintColor: Color.Yellow } },
@@ -21,17 +21,17 @@ export default function ConnectionCommand() {
           ]}
         />
       </List.Section>
-      <List.Section title="Urls">
-        <List.Item title="Url" icon={Icon.AtSymbol} accessories={[{ text: ha.url }]} />
-        <List.Item title="Internal Url" icon={Icon.House} accessories={[{ text: ha.urlInternal || "-" }]} />
+      <List.Section title="URLs">
+        <List.Item title="URL" icon={Icon.AtSymbol} accessories={[{ text: ha.url }]} />
+        <List.Item title="Internal URL" icon={Icon.House} accessories={[{ text: ha.urlInternal || "-" }]} />
       </List.Section>
-      <List.Section title="WiFi">
+      <List.Section title="Wi-Fi">
         <List.Item
-          title="Home WiFi SSIDs"
+          title="Home Wi-Fi SSIDs"
           icon={Icon.Network}
           accessories={[{ text: ha.wifiSSIDs?.join(",") || "undefined" }]}
         />
-        <List.Item title="Current WiFi SSID" icon={Icon.Wifi} accessories={[{ text: getWifiSSIDSync() || "-" }]} />
+        <List.Item title="Current Wi-Fi SSID" icon={Icon.Wifi} accessories={[{ text: getWifiSSIDSync() || "-" }]} />
       </List.Section>
     </List>
   );
