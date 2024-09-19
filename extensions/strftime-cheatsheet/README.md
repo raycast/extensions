@@ -1,3 +1,3 @@
-# strftime Cheatsheet
+# Strftime Cheatsheet
 
 Lookup time formatting symbols
