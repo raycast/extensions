@@ -1,5 +1,10 @@
 # ScreenOCR Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Replaced all HUDs with emojis with styled toast messages for user feedback
+- Grouped checkbox preferences into a single section
+
 ## [Fixes & Improvements] - 2024-05-21
 
 - Selecting an area for text recognition left the original image in the clipboard

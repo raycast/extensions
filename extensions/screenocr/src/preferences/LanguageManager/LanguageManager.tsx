@@ -61,7 +61,7 @@ export const LanguagesManagerList = () => {
     const primaryLanguage = {
       title:
         supportedLanguages.find(
-          (lang) => lang.value === preference.primaryLanguage
+          (lang) => lang.value === preference.primaryLanguage,
         )?.title ?? "🇺🇸 English (US)",
       value: preference.primaryLanguage,
       isDefault: true,
@@ -69,7 +69,7 @@ export const LanguagesManagerList = () => {
 
     if (typeof selectedLanguages !== "undefined") {
       const data = JSON.parse(
-        selectedLanguages as unknown as string
+        selectedLanguages as unknown as string,
       ) as Language[];
 
       setSelectedLanguages((draft) => {
@@ -94,14 +94,14 @@ export const LanguagesManagerList = () => {
   const unselectLanguage = (language: Language) => {
     setSelectedLanguages((draft) => {
       const deleteIndex = draft.findIndex(
-        (lang) => lang.value === language.value
+        (lang) => lang.value === language.value,
       );
       if (deleteIndex !== -1) {
         draft.splice(deleteIndex, 1);
       }
     });
     const updatedLanguages = selectedLanguages.filter(
-      (lang) => lang.value !== language.value
+      (lang) => lang.value !== language.value,
     );
     LocalStorage.setItem("SelectedLanguages", JSON.stringify(updatedLanguages));
   };

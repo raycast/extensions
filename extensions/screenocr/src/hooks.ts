@@ -14,7 +14,7 @@ export const getUserSelectedLanguages = async () => {
   const primaryLanguage = {
     title:
       supportedLanguages.find(
-        (lang) => lang.value === preference.primaryLanguage
+        (lang) => lang.value === preference.primaryLanguage,
       )?.title ?? "🇺🇸 English (US)",
     value: preference.primaryLanguage,
     isDefault: true,
@@ -24,7 +24,7 @@ export const getUserSelectedLanguages = async () => {
 
   if (typeof selectedLanguages !== "undefined") {
     const selectedLanguagesParsed = JSON.parse(
-      selectedLanguages as unknown as string
+      selectedLanguages as unknown as string,
     ) as Language[];
     userSelectedLanguages = selectedLanguagesParsed;
     return userSelectedLanguages;
