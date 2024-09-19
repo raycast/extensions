@@ -148,6 +148,7 @@ function SearchTable({ table }: { table: string }) {
       return async ({ page }) => {
         abortController.abort();
         abortController = new AbortController();
+        incrementRequestsCount();
 
         const res = await databaseFunctions.searchTableRowsOrCustomQuery({
           searchText,
@@ -1516,7 +1517,9 @@ const Command = () => {
     }
     const reqCount = await getRequestsCount();
     const hasLicense = data.hasLicense;
-    const needsLicense = !hasLicense && reqCount >= freeRequestsCount;
+    const availableRequests = freeRequestsCount - reqCount;
+    console.log(`Available requests: ${availableRequests}`);
+    const needsLicense = !hasLicense && availableRequests <= 0;
 
     return { hasLicense, needsLicense };
   });
