@@ -17,9 +17,7 @@ export default function LAUNCHES() {
 
   return (
     <List isShowingDetail isLoading={isLoading}>
-      {data.results.map((launch) => (
-        <LaunchDetail launch={launch} key={launch.id} />
-      ))}
+      {!isLoading && data.results.map((launch) => <LaunchDetail launch={launch} key={launch.id} />)}
     </List>
   );
 }

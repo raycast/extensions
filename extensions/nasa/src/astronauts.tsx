@@ -17,9 +17,7 @@ export default function ASTRONAUTS() {
 
   return (
     <List isShowingDetail isLoading={isLoading}>
-      {data.results.map((astronaut) => (
-        <AstronautDetail astronaut={astronaut} key={astronaut.id} />
-      ))}
+      {!isLoading && data.results.map((astronaut) => <AstronautDetail astronaut={astronaut} key={astronaut.id} />)}
     </List>
   );
 }

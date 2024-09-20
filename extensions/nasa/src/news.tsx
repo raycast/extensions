@@ -30,9 +30,7 @@ export default function GetLatestNews() {
 
   return (
     <List isShowingDetail isLoading={isLoading}>
-      {items.map((item) => (
-        <NewsListDetail item={item} key={item.link} />
-      ))}
+      {!isLoading && items.map((item) => <NewsListDetail item={item} key={item.link} />)}
     </List>
   );
 }

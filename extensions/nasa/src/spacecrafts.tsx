@@ -17,9 +17,7 @@ export default function SPACECRAFTS() {
 
   return (
     <List isShowingDetail isLoading={isLoading}>
-      {data.results.map((spacecraft) => (
-        <SpacecraftDetail spacecraft={spacecraft} key={spacecraft.id} />
-      ))}
+      {!isLoading && data.results.map((spacecraft) => <SpacecraftDetail spacecraft={spacecraft} key={spacecraft.id} />)}
     </List>
   );
 }
