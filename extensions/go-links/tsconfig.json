@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "baseUrl": ".",
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "isolatedModules": true,
+        "jsx": "react-jsx",
+        "lib": ["DOM", "DOM.Iterable", "ESNext"],
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        "noEmit": true,
+        "paths": {
+            "~/*": ["./src/*"]
+        },
+        "resolveJsonModule": true,
+        "skipLibCheck": true,
+        "strict": true,
+        "target": "ESNext",
+        "types": []
+    },
+    "include": [
+        "**/*.js",
+        "**/*.jsx",
+        "**/*.ts",
+        "**/*.tsx",
+        "raycast-env.d.ts"
+    ]
+}

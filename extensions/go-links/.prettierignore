@@ -1,0 +1,26 @@
+# editor
+/.vscode
+
+# dependencies
+/node_modules
+
+# build
+/.cache
+/build
+/dist
+/public/build
+
+# test
+/coverage
+
+# secrets
+.env*
+
+# os
+.DS_Store
+
+# raycast
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+raycast-env.d.ts
