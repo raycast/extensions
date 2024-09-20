@@ -29,9 +29,6 @@
         "@raycast/utils": "^1.17.0"
     },
     "devDependencies": {
-        "@bradgarropy/eslint-config": "^1.2.3",
-        "@bradgarropy/eslint-config-react": "^1.0.2",
-        "@bradgarropy/eslint-config-typescript": "^1.0.3",
         "@raycast/eslint-config": "^1.0.11",
         "@types/node": "20.8.10",
         "@types/react": "18.3.3",
