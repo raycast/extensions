@@ -1,5 +1,9 @@
 # World Clock Changelog
 
+## [Fix Half Hour Time Zone] - {PR_MERGE_DATE}
+
+- Fix the bug that the half-hour time zone is not included in current time
+
 ## [Update Refresh interval] - 2024-07-30
 
 - Update the refresh interval to 10 seconds
