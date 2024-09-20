@@ -194,77 +194,11 @@ function SearchTable({ table }: { table: string }) {
             detail={<List.Item.Detail metadata={tableInfo && <RowMetadata tableInfo={tableInfo} row={row} />} />}
             actions={
               <ActionPanel>
-                <Action
-                  title="Update Row"
-                  icon={Icon.Pencil}
-                  onAction={() => {
-                    push(
-                      <EditRow
-                        type="edit"
-                        revalidate={() => {
-                          rows.revalidate();
-                        }}
-                        tableInfo={tableInfo}
-                        row={row}
-                      />,
-                    );
-                  }}
-                />
+                {tableInfo && (
+                  <RowUpdatesActions revalidate={() => rows.revalidate()} tableInfo={tableInfo} row={row} />
+                )}
                 <RunTransactionQueries />
-                <Action
-                  title="Delete Row"
-                  icon={Icon.Trash}
-                  shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-                  onAction={async () => {
-                    const { deleteQueries } = await databaseFunctions.prepareTableRowDelete({
-                      allValues: tableInfo!.columns.map((col) => {
-                        return { ...col, oldValue: row[col.columnName] };
-                      }),
-                    });
 
-                    push(
-                      <DeleteRow
-                        revalidate={() => {
-                          rows.revalidate();
-                        }}
-                        deleteQueries={deleteQueries}
-                      />,
-                    );
-                  }}
-                />
-                <Action
-                  title="Insert New Row"
-                  icon={Icon.NewDocument}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
-                  onAction={() => {
-                    push(
-                      <EditRow
-                        type="insert"
-                        revalidate={() => {
-                          rows.revalidate();
-                        }}
-                        tableInfo={tableInfo}
-                      />,
-                    );
-                  }}
-                />
-                <Action
-                  title="Duplicate Row"
-                  icon={Icon.Duplicate}
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
-                  onAction={() => {
-                    push(
-                      <EditRow
-                        type="duplicate"
-                        revalidate={() => {
-                          rows.revalidate();
-                        }}
-                        row={row}
-                        tableInfo={tableInfo}
-                      />,
-                    );
-                  }}
-                />
                 <Action
                   title="View Details"
                   icon={Icon.Center}
@@ -282,13 +216,67 @@ function SearchTable({ table }: { table: string }) {
   );
 }
 
+function RowUpdatesActions({
+  revalidate,
+  tableInfo,
+  row,
+}: {
+  revalidate: () => void;
+  tableInfo: TableInfo;
+  row: Json;
+}) {
+  const { push } = useNavigation();
+  return (
+    <>
+      <Action
+        title="Update Row"
+        icon={Icon.Pencil}
+        onAction={() => {
+          push(<EditRow type="edit" revalidate={revalidate} tableInfo={tableInfo} row={row} />);
+        }}
+      />
+      <Action
+        title="Delete Row"
+        icon={Icon.Trash}
+        shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+        onAction={async () => {
+          const { deleteQueries } = await databaseFunctions.prepareTableRowDelete({
+            allValues: tableInfo.columns.map((col) => {
+              return { ...col, oldValue: row[col.columnName] };
+            }),
+          });
+
+          push(<DeleteRow revalidate={revalidate} deleteQueries={deleteQueries} />);
+        }}
+      />
+
+      <Action
+        title="Insert New Row"
+        icon={Icon.NewDocument}
+        shortcut={{ modifiers: ["cmd"], key: "n" }}
+        onAction={() => {
+          push(<EditRow type="insert" revalidate={revalidate} tableInfo={tableInfo} />);
+        }}
+      />
+      <Action
+        title="Duplicate Row"
+        icon={Icon.Duplicate}
+        shortcut={{ modifiers: ["cmd"], key: "d" }}
+        onAction={() => {
+          push(<EditRow type="duplicate" revalidate={revalidate} row={row} tableInfo={tableInfo} />);
+        }}
+      />
+    </>
+  );
+}
+
 function SearchCustomQuery(args: CustomQueryList & { revalidate: () => void }) {
   const { query, schemas, tableInfo, bestField } = args;
   const { push } = useNavigation();
   const { searchText, setSearchText } = useSearchFilter(query.slice(0, 100));
 
   const currentConnectionString = useGlobalState((x) => x.connectionString);
-  const tables = [...new Set(tableInfo.columns.map((col) => col.tableName))];
+  const tables = [...new Set(tableInfo.columns.map((col) => col.tableName).filter(isTruthy))];
   const schema = useCachedPromise(
     async (_connectionString, selectedSchemas) => {
       const schema = await databaseFunctions.getDatabaseSchema({ schemas: selectedSchemas, tables });
@@ -353,42 +341,12 @@ function SearchCustomQuery(args: CustomQueryList & { revalidate: () => void }) {
             }
             actions={
               <ActionPanel>
-                <Action
-                  title="Update Row"
-                  icon={Icon.Pencil}
-                  onAction={() => {
-                    push(
-                      <EditRow
-                        type="edit"
-                        revalidate={() => {
-                          rows.revalidate();
-                        }}
-                        tableInfo={tableInfo}
-                        row={row}
-                      />,
-                    );
+                <RowUpdatesActions
+                  revalidate={() => {
+                    rows.revalidate();
                   }}
-                />
-                <Action
-                  title="Delete Row"
-                  icon={Icon.Trash}
-                  shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-                  onAction={async () => {
-                    const { deleteQueries } = await databaseFunctions.prepareTableRowDelete({
-                      allValues: tableInfo.columns.map((col) => {
-                        return { ...col, oldValue: row[col.columnName] };
-                      }),
-                    });
-
-                    push(
-                      <DeleteRow
-                        revalidate={() => {
-                          rows.revalidate();
-                        }}
-                        deleteQueries={deleteQueries}
-                      />,
-                    );
-                  }}
+                  tableInfo={tableInfo}
+                  row={row}
                 />
                 {tables.map((tableName) => (
                   <Action
@@ -645,7 +603,7 @@ function GenerateCustomQueryForm({
       notifyError(error);
     }
   };
-  const lastSubmittedPrompt = useRef(existingQuery?.prompt || "");
+  const lastSubmittedPrompt = useRef("");
 
   const shouldSubmit = prompt && query && prompt === lastSubmittedPrompt.current;
   const onAction = shouldSubmit ? saveQuery : handleGenerateQuery;
@@ -1518,7 +1476,9 @@ const Command = () => {
     const reqCount = await getRequestsCount();
     const hasLicense = data.hasLicense;
     const availableRequests = freeRequestsCount - reqCount;
-    console.log(`Available requests: ${availableRequests}`);
+    if (!hasLicense) {
+      console.log(`Available requests: ${availableRequests}`);
+    }
     const needsLicense = !hasLicense && availableRequests <= 0;
 
     return { hasLicense, needsLicense };

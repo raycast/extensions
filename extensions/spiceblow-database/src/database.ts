@@ -498,19 +498,19 @@ function validateTableInfo(tableInfo: TableInfo) {
   }
   for (const col of tableInfo.columns) {
     if (!col.columnName) {
-      throw new Error("Column has no name");
+      console.warn(`Column has no name: ${col.columnName}`);
     }
     if (!col.schemaName) {
-      throw new Error("Column has no schema name");
+      console.warn(`Column has no schema name: ${col.columnName}`);
     }
     if (!col.tableName) {
-      throw new Error("Column has no table name");
+      console.warn(`Column has no table name: ${col.columnName}`);
+    }
+    if (!col.originalColumnName) {
+      console.warn(`No originalColumnName: ${col.columnName}`);
     }
     if (!col.type) {
       throw new Error("Column has no type");
-    }
-    if (!col.originalColumnName) {
-      throw new Error("No originalColumnName");
     }
 
     if (col.typeId == null) {
@@ -644,9 +644,6 @@ async function getTableAndColumnNamesForPostgres(fields: { tableID: number; colu
   return fields.map((field) => {
     const { tableID, columnID } = field;
     const table = tableID ? tableInfo[tableID] : undefined;
-    if (!table?.schemaName) {
-      throw new Error("Could not find schema name for table " + table?.tableName);
-    }
     const columnName = columnID ? columnNames[tableID]?.[columnID] : undefined;
     if (!columnName) {
       throw new Error("Could not find column name for table " + table?.tableName);
@@ -700,6 +697,7 @@ export async function runGeneratedQuery(sqlCode: string) {
     await client.query("SET SESSION CHARACTERISTICS AS TRANSACTION READ ONLY;");
     try {
       const result = await client.query(sqlCode);
+
       const names = await getTableAndColumnNamesForPostgres(result.fields);
 
       const tableInfo = validateTableInfo({
@@ -743,7 +741,7 @@ export async function runGeneratedQuery(sqlCode: string) {
       const [rows, fields] = await connection.query<RowDataPacket[]>(`${sqlCode}`);
       const tableInfo = validateTableInfo({
         columns: fields.map((field) => {
-          return {
+          const res = {
             columnName: field.name,
             schemaName: field.schema || "",
             originalColumnName: field.orgName,
@@ -754,6 +752,8 @@ export async function runGeneratedQuery(sqlCode: string) {
             defaultValue: null,
             isPrimaryKey: false,
           };
+
+          return res;
         }),
       });
       const bestField = getBestField(tableInfo);
@@ -1060,6 +1060,9 @@ export async function findRowsForUpdate({ allValues }: TableRowDeleteParams) {
   const tableGroups = new Map<string, (typeof allValues)[number][]>();
 
   for (const field of allValues) {
+    if (!field.schemaName || !field.tableName) {
+      continue;
+    }
     const key = `${field.schemaName}.${field.tableName}`;
     if (!tableGroups.has(key)) {
       tableGroups.set(key, []);
@@ -1268,6 +1271,9 @@ export async function executeQueries({ queries }: { queries: SQLStatement[] }) {
 export async function prepareTableRowInsert({ allValues }: { allValues: TableRowUpdateParams["allValues"] }) {
   const tableGroups = new Map<string, (typeof allValues)[number][]>();
   for (const field of allValues) {
+    if (!field.schemaName || !field.tableName) {
+      continue;
+    }
     const key = `${field.schemaName}.${field.tableName}`;
     if (!tableGroups.has(key)) {
       tableGroups.set(key, []);

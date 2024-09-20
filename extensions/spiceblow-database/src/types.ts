@@ -9,9 +9,9 @@ export type TableInfo = {
 
 export type ColumnInfo = {
   columnName: string;
-  originalColumnName: string;
-  schemaName: string;
-  tableName: string;
+  originalColumnName?: string;
+  schemaName?: string;
+  tableName?: string;
   type: string;
   typeId: number;
   isNullable: boolean;
