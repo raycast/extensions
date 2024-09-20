@@ -45,9 +45,18 @@
       "type": "dropdown",
       "required": false,
       "data": [
-        { "title": "System Default", "value": "system" },
-        { "title": "Dutch", "value": "nl" },
-        { "title": "English", "value": "en" }
+        {
+          "title": "System Default",
+          "value": "system"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        }
       ],
       "default": "system"
     },
@@ -57,7 +66,7 @@
       "description": "Toggle to show or hide category tags for news items",
       "type": "checkbox",
       "required": false,
-      "default": true,
+      "default": false,
       "label": "Show Categories"
     }
   ]
