@@ -1,9 +1,4 @@
-import type { Character, Dataset } from "@/lib/dataset-manager";
-
-export interface CharacterSet {
-  sectionTitle: string;
-  items: Character[];
-}
+import type { Character, CharacterSet, Dataset } from "@/types";
 
 /**
  * Maps an unicode characters dataset + the list of recently used characters to a section list
@@ -19,17 +14,31 @@ export function buildList(
   isFilterEmpty: boolean,
   datasetFilter: string | null,
 ): CharacterSet[] {
-  const datasetListSections = dataset.blocks.map((block) => {
-    const items: Character[] = dataset.characters.filter(
-      (character) => block.startCode <= character.code && block.endCode >= character.code,
-    );
-    const lowestScore = items.reduce((acc, item) => Math.min(acc, item.score || 1), 1);
-    return {
-      sectionTitle: block.blockName,
-      lowestScore,
-      items,
-    };
-  });
+  const datasetListSections = dataset.blocks
+    .filter((block) => !dataset.selectedBlock || block.blockName === dataset.selectedBlock.blockName)
+    .map((block) => {
+      const items: Character[] = dataset.characters
+        .filter(
+          (character) =>
+            (block.startCode <= character.code && block.endCode >= character.code) ||
+            block.extra?.includes(character.code),
+        )
+        .map((character) => {
+          if (block.extra?.includes(character.code)) {
+            return {
+              ...character,
+              isExtra: true,
+            };
+          }
+          return character;
+        });
+      const lowestScore = items.reduce((acc, item) => Math.min(acc, item.score || 1), 1);
+      return {
+        sectionTitle: block.blockName,
+        lowestScore,
+        items,
+      };
+    });
   if (recentlyUsedCharacters.length && !datasetFilter) {
     datasetListSections.unshift({
       sectionTitle: "Recently Used",
