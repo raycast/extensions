@@ -161,7 +161,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.55.0",
-    "typeid-js": "^1.0.0",
+    "typeid-js": "^1.1.0",
     "ulidx": "^2.0.0",
     "uuid": "^10.0.0"
   },
