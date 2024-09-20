@@ -1,6 +1,6 @@
 # URL Tools Changelog
 
-## [Modernize Extension] - {PR_MERGE_DATE}
+## [Modernize Extension] - 2024-09-20
 
 - Add CHANGELOG.md
 - Add README.md
