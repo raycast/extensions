@@ -1,5 +1,9 @@
 # Prompt Explorer Extension Changelog
 
+## [Add Explore Quicklinks] - {PR_MERGE_DATE}
+
+- Add command for exploring Quicklinks
+
 ## [Update endpoints] - 2024-05-06
 
 - Update endpoints for fetching data.
