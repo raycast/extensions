@@ -1,8 +1,7 @@
 import { open, Form, ActionPanel, Action, showToast, getPreferenceValues, Clipboard } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { FormValidation, useForm, usePromise } from "@raycast/utils";
 import axios from "axios";
 import CryptoJS from "crypto-js";
-import { useState } from "react";
 
 type Values = {
   title: string;
@@ -18,9 +17,6 @@ type Values = {
 type FolderListEntry = { id: string; path: string };
 
 export default function Command() {
-  const [password, setPassword] = useState("");
-  const [title, setTitle] = useState("");
-
   const { isLoading, data: folders } = usePromise(async () => {
     try {
       const res = await axios.get("https://pastefy.app/api/v2/user/folders?hide_pastes=true", {
@@ -55,41 +51,46 @@ export default function Command() {
     }
   });
 
-  async function handleSubmit(values: Values) {
-    showToast({ title: "Creating paste...", message: "Waiting for creation of paste" });
-    const paste = {
-      title: values.title,
-      content: values.content,
-      encrypted: !!(password || values.encrypted),
-      folder: values.folder || undefined,
-      visibility: values.visibility,
-      expire_at: values.expire_at?.toISOString()?.slice(0, 19)?.replace("T", " ") || undefined,
-    };
+  const { handleSubmit, itemProps } = useForm<Values>({
+    async onSubmit(values: Values) {
+      showToast({ title: "Creating paste...", message: "Waiting for creation of paste" });
+      const paste = {
+        title: values.title,
+        content: values.content,
+        encrypted: !!(values.password || values.encrypted),
+        folder: values.folder || undefined,
+        visibility: values.visibility,
+        expire_at: values.expire_at?.toISOString()?.slice(0, 19)?.replace("T", " ") || undefined,
+      };
 
-    let currentPassword = "";
+      let currentPassword = "";
 
-    if (paste.encrypted) {
-      currentPassword =
-        values.encrypted && !password
-          ? Math.random().toString(36).substring(3) + Math.random().toString(36).substring(3)
-          : password;
+      if (paste.encrypted) {
+        currentPassword =
+          values.encrypted && !values.password
+            ? Math.random().toString(36).substring(3) + Math.random().toString(36).substring(3)
+            : values.password;
 
-      paste.title = CryptoJS.AES.encrypt(paste.title, currentPassword).toString();
-      paste.content = CryptoJS.AES.encrypt(paste.content, currentPassword).toString();
-    }
+        paste.title = CryptoJS.AES.encrypt(paste.title, currentPassword).toString();
+        paste.content = CryptoJS.AES.encrypt(paste.content, currentPassword).toString();
+      }
 
-    const res = await axios.post(`https://pastefy.app/api/v2/paste`, paste, {
-      headers: {
-        Authorization: `Bearer ${getPreferenceValues().apiKey}`,
-      },
-    });
-    const pasteUrl = `https://pastefy.app/${res.data.paste.id}${currentPassword && !password ? "#" + currentPassword : ""}`;
-    await Clipboard.copy({
-      text: pasteUrl,
-    });
-    showToast({ title: "Done!", message: "Paste has been saved to clipboard" });
-    open(pasteUrl);
-  }
+      const res = await axios.post(`https://pastefy.app/api/v2/paste`, paste, {
+        headers: {
+          Authorization: `Bearer ${getPreferenceValues().apiKey}`,
+        },
+      });
+      const pasteUrl = `https://pastefy.app/${res.data.paste.id}${currentPassword && !values.password ? "#" + currentPassword : ""}`;
+      await Clipboard.copy({
+        text: pasteUrl,
+      });
+      showToast({ title: "Done!", message: "Paste has been saved to clipboard" });
+      open(pasteUrl);
+    },
+    validation: {
+      content: FormValidation.Required,
+    },
+  });
 
   return (
     <Form
@@ -99,29 +100,23 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        onChange={setTitle}
-        id="title"
-        title="Title"
-        placeholder="Title.txt (.md for markdown)"
-        defaultValue=""
-      />
+      <Form.TextField {...itemProps.title} title="Title" placeholder="Title.txt (.md for markdown)" defaultValue="" />
       <Form.TextArea
-        id="content"
-        enableMarkdown={title?.endsWith(".md")}
+        enableMarkdown={itemProps.title.value?.endsWith(".md")}
         title="Code input"
         placeholder="Enter multi-line text"
+        {...itemProps.content}
       />
       <Form.Separator />
 
       <Form.Description text="Optional Settings" />
-      <Form.Dropdown id="visibility" title="Visibility" defaultValue="UNLISTED">
+      <Form.Dropdown title="Visibility" defaultValue="UNLISTED" {...itemProps.visibility}>
         <Form.Dropdown.Item value="UNLISTED" title="Unlisted" />
         <Form.Dropdown.Item value="PUBLIC" title="Public" />
         {folders === null ? null : <Form.Dropdown.Item value="PRIVATE" title="Private" />}
       </Form.Dropdown>
-      <Form.Checkbox id="encrypted" title="Checkbox" label="Client encrypted" storeValue />
-      <Form.PasswordField onChange={setPassword} id="password" title="Password" />
+      <Form.Checkbox title="Checkbox" label="Client encrypted" storeValue {...itemProps.encrypted} />
+      <Form.PasswordField {...itemProps.password} id="password" title="Password" />
       {folders === null ? null : (
         <Form.Dropdown isLoading={isLoading} id="folder" title="Folder">
           <Form.Dropdown.Item value="" title="None" />
