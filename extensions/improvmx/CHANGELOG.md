@@ -1,6 +1,6 @@
 # ImprovMX Changelog
 
-## [Download or Filter Domain Log] - {PR_MERGE_DATE}
+## [Download or Filter Domain Log] - 2024-09-20
 
 ### Enhancements
 
