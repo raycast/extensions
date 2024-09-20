@@ -1,4 +1,8 @@
-import type { Block } from "unidata";
+export type Block = {
+  blockName: string;
+  startCode: number;
+  endCode: number;
+};
 
 export type BlockExtra = Block & {
   extra?: number[];

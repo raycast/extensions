@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
-import type { Character } from "unidata";
-import { getBlocks, getCharacters } from "unidata";
+import type { Character } from "unidata16";
+import { CharacterSetType, getCharacterBaseSet, getCharacters } from "unidata16";
 
 import type { BlockExtra, CharAlias, Character as JSONCharacter } from "../src/types";
 
@@ -11,47 +11,46 @@ const datasetOutputPath = path.resolve(__dirname, "../assets/dataset.json");
 // To avoid hitting memory limits, we retrieve only a subset of the unicode characters (mainly common symbols).
 // Only characters part of these blocks will be included in the output.
 // See https://jrgraphix.net/r/Unicode for the full list of avilable names.
-const blockNamesToFilter = [
-  "Basic Latin",
-  "Latin-1 Supplement",
-  "Latin Extended-A",
-  "Latin Extended-B",
-  "Latin Extended Additional",
-  "IPA Extensions",
-  "Spacing Modifier Letters",
-  "Combining Diacritical Marks",
-  "Greek and Coptic",
-  "General Punctuation",
-  "Superscripts and Subscripts",
-  "Currency Symbols",
-  "Letterlike Symbols",
-  "Number Forms",
-  "Arrows",
-  "Mathematical Operators",
-  "Enclosed Alphanumerics",
-  "Geometric Shapes",
-  "Miscellaneous Symbols",
-  "Dingbats",
-  "Supplemental Arrows-A",
-  "Braille Patterns",
-  "Supplemental Arrows-B",
-  "Miscellaneous Mathematical Symbols-A",
-  "Miscellaneous Mathematical Symbols-B",
-  "Supplemental Mathematical Operators",
-  "Miscellaneous Symbols and Arrows",
-  "Mathematical Alphanumeric Symbols",
-  "Miscellaneous Technical",
-  "Private Use Area",
-  "Box Drawing",
-  "Block Elements",
-  "Emoticons",
-  "Ancient Symbols",
+const Blocks = [
+  CharacterSetType.Basic_Latin,
+  CharacterSetType.Latin_1_Supplement,
+  CharacterSetType.Latin_Extended_A,
+  CharacterSetType.Latin_Extended_B,
+  CharacterSetType.Latin_Extended_Additional,
+  CharacterSetType.IPA_Extensions,
+  CharacterSetType.Spacing_Modifier_Letters,
+  CharacterSetType.Combining_Diacritical_Marks,
+  CharacterSetType.Greek_and_Coptic,
+  CharacterSetType.General_Punctuation,
+  CharacterSetType.Superscripts_and_Subscripts,
+  CharacterSetType.Currency_Symbols,
+  CharacterSetType.Letterlike_Symbols,
+  CharacterSetType.Number_Forms,
+  CharacterSetType.Arrows,
+  CharacterSetType.Mathematical_Operators,
+  CharacterSetType.Enclosed_Alphanumerics,
+  CharacterSetType.Geometric_Shapes,
+  CharacterSetType.Miscellaneous_Symbols,
+  CharacterSetType.Dingbats,
+  CharacterSetType.Supplemental_Arrows_A,
+  CharacterSetType.Braille_Patterns,
+  CharacterSetType.Supplemental_Arrows_B,
+  CharacterSetType.Miscellaneous_Mathematical_Symbols_A,
+  CharacterSetType.Miscellaneous_Mathematical_Symbols_B,
+  CharacterSetType.Supplemental_Mathematical_Operators,
+  CharacterSetType.Miscellaneous_Symbols_and_Arrows,
+  CharacterSetType.Mathematical_Alphanumeric_Symbols,
+  CharacterSetType.Miscellaneous_Technical,
+  CharacterSetType.Private_Use_Area,
+  CharacterSetType.Box_Drawing,
+  CharacterSetType.Block_Elements,
+  CharacterSetType.Emoticons,
+  CharacterSetType.Ancient_Symbols,
 ];
 
-// Specify here any additional characters and blocks to include in the dataset.
-// const additionalCharacterValues = ["", "⌘", "⌥", "⏎", "⌫"];
-const additionalCharacterValues: string[] = [];
-const additionalBlockNames: string[] = [];
+const blocks = getCharacterBaseSet(Blocks) as BlockExtra[];
+const allCharacters = getCharacters(Blocks);
+
 const charCodeToAliases: CharAlias = {
   8313: ["superscript 9"],
   8984: ["cmd", "command"],
@@ -61,7 +60,7 @@ const charCodeToAliases: CharAlias = {
 };
 
 // Grab unicode blocks and characters using https://github.com/chbrown/unidata/
-const allBlocks = (getBlocks() as BlockExtra[]).map((block) => {
+const allBlocks = blocks.map((block) => {
   // We're adding some extra characters to the "Superscripts and Subscripts" block because they reside in a different block (Latin-1 Supplement).
   if (block.blockName === "Superscripts and Subscripts") {
     block.extra = [178, 179, 185];
@@ -69,7 +68,6 @@ const allBlocks = (getBlocks() as BlockExtra[]).map((block) => {
 
   return block;
 });
-const allCharacters = getCharacters();
 
 console.log(`ℹ️ Found ${allBlocks.length} unicode blocks and ${allCharacters.length} unicode characters`);
 
@@ -124,23 +122,13 @@ function sanitizeCharacters(characters: Character[]): JSONCharacter[] {
 
 // Run the dataset generation.
 (function generateDataset() {
-  const filteredBlocks = allBlocks.filter((block) => blockNamesToFilter.includes(block.blockName));
-  const notIncluded = allBlocks.filter((block) => !blockNamesToFilter.includes(block.blockName));
-  const additionalBlocks = allBlocks.filter((block) => additionalBlockNames.includes(block.blockName));
-
-  const characters = filteredBlocks.flatMap((block) => {
+  const characters = allBlocks.flatMap((block) => {
     return sanitizeCharacters(getCharactersByCodeRange(block.startCode, block.endCode));
   });
 
-  const additionalCharacters = sanitizeCharacters(
-    allCharacters.filter((char) => additionalCharacterValues.includes(String.fromCodePoint(char.code))),
-  );
-
-  console.log(`Not included: ${notIncluded.length} blocks`);
-
   const dataset = {
-    blocks: [...filteredBlocks, ...additionalBlocks],
-    characters: [...characters, ...additionalCharacters],
+    blocks: allBlocks,
+    characters,
   };
 
   fs.writeFileSync(datasetOutputPath, JSON.stringify(dataset, null, 2));
