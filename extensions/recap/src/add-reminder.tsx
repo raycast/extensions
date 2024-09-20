@@ -1,6 +1,6 @@
 import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { getPreferenceValues } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
+import { useForm, FormValidation, useFetch } from "@raycast/utils";
 import fetch from "node-fetch";
 
 interface Preferences {
@@ -11,8 +11,21 @@ type Values = {
   prompt: string;
 };
 
+interface RemindersLeftResponse {
+  remindersLeft: number;
+}
+
 export default function Command() {
   const { accessToken } = getPreferenceValues<Preferences>();
+  const { isLoading, data, revalidate } = useFetch<RemindersLeftResponse>(
+    "https://getrecapai.vercel.app/api/get-reminders-left",
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
 
   const { handleSubmit, itemProps } = useForm<Values>({
     async onSubmit(values: Values) {
@@ -35,6 +48,7 @@ export default function Command() {
         toast.style = Toast.Style.Success;
         toast.title = "Added reminder:";
         toast.message = values.prompt;
+        revalidate();
       } catch (err) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to add reminder:";
@@ -50,14 +64,25 @@ export default function Command() {
     },
   });
 
+  if (data?.remindersLeft === 0) {
+    return (
+      <Form
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="Add More Reminders" url="https://getrecap.xyz/home" />
+          </ActionPanel>
+        }
+      >
+        <Form.Description text="You've used all your free reminders." />
+        <Form.Description text="Please add more from getrecap.xyz to continue." />
+      </Form>
+    );
+  }
+
   return (
     <Form
-      searchBarAccessory={
-        <Form.LinkAccessory
-          target="https://developers.raycast.com/api-reference/user-interface/form"
-          text="Add more reminders"
-        />
-      }
+      isLoading={isLoading}
+      searchBarAccessory={<Form.LinkAccessory target="https://getrecap.xyz/home" text="Add More Reminders" />}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Add Reminder" onSubmit={handleSubmit} />
@@ -65,7 +90,7 @@ export default function Command() {
       }
     >
       <Form.TextField title="Reminder" placeholder="What would you like to remember better?" {...itemProps.prompt} />
-      <Form.Description text="You have 9 reminders left." />
+      {data?.remindersLeft && <Form.Description text={`You have ${data.remindersLeft} reminders available.`} />}
     </Form>
   );
 }
