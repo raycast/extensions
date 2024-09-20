@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Items from "./items";
 import useGetItems from "./use-get-items";
 import getGroupIcon from "./get-group-icon";
+import groups from "./groups.json";
 
 export default function BrowsePosts(props: LaunchProps<{ arguments: Arguments.BrowsePosts }>) {
   const { group_slug } = props.arguments;
@@ -18,9 +19,9 @@ export default function BrowsePosts(props: LaunchProps<{ arguments: Arguments.Br
 
   useEffect(() => {
     if (type.startsWith("group_")) {
-      const group = type.replace("group_", "");
-      setEndpoint(`group/${group}`);
-      setSearchBarPlaceholder(`Search posts in ${group}`);
+      const group_slug = type.replace("group_", "");
+      setEndpoint(`group/${group_slug}`);
+      setSearchBarPlaceholder(`Search posts in "${groups.find((g) => g.slug === group_slug)?.name}"`);
     } else if (type.startsWith("time_")) {
       const time = type.replace("time_", "");
       setEndpoint(`top/${time}`);
@@ -44,11 +45,6 @@ export default function BrowsePosts(props: LaunchProps<{ arguments: Arguments.Br
       isShowingDetail={isShowingDetail}
       searchBarAccessory={
         <List.Dropdown tooltip="Type" defaultValue={type} onChange={setType}>
-          {group_slug && (
-            <List.Dropdown.Section title="Group">
-              <List.Dropdown.Item title={group_slug} value={`group_${group_slug}`} />
-            </List.Dropdown.Section>
-          )}
           <List.Dropdown.Section title="Time">
             <List.Dropdown.Item title="Today" value="time_today" />
             <List.Dropdown.Item title="This Week" value="time_week" />
@@ -59,6 +55,16 @@ export default function BrowsePosts(props: LaunchProps<{ arguments: Arguments.Br
             <List.Dropdown.Item title="Organic" value="type_organic" />
             <List.Dropdown.Item title="Featured" value="type_featured" />
             <List.Dropdown.Item title="Newest" value="type_newest" />
+          </List.Dropdown.Section>
+          <List.Dropdown.Section title="Group">
+            {groups.map((group) => (
+              <List.Dropdown.Item
+                key={group.name}
+                icon={getGroupIcon(group.slug)}
+                title={group.name}
+                value={`group_${group.slug}`}
+              />
+            ))}
           </List.Dropdown.Section>
         </List.Dropdown>
       }
