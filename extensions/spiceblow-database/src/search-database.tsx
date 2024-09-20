@@ -1239,53 +1239,52 @@ function EditRow({
         </ActionPanel>
       }
     >
-      {tableInfo?.columns
-        .filter((x) => {
-          const canBeUpdated = x.originalColumnName && x.tableName;
-          return canBeUpdated;
-        })
-        .map((column) => {
-          const value = databaseToStringValue(column, formValues[column.columnName]);
+      {tableInfo?.columns.map((column) => {
+        const canBeUpdated = column.originalColumnName && column.tableName;
+        const value = databaseToStringValue(column, formValues[column.columnName]);
 
-          let C = Form.TextField;
-          if (value.split("\n").length > 1) {
-            C = Form.TextArea;
+        let C = Form.TextField;
+        if (value.split("\n").length > 1) {
+          C = Form.TextArea;
+        }
+        let error = "";
+        if (requiredFields.includes(column)) {
+          if (!value) {
+            error = "This field is required";
           }
-          let error = "";
-          if (requiredFields.includes(column)) {
-            if (!value) {
-              error = "This field is required";
-            }
-          }
-          const isUpdating = changedColumns.has(column.columnName);
-          let info = "";
-          if (isUpdating) {
-            info = `will update column "${column.originalColumnName}" in table "${column.tableName}"`;
-          }
-          let placeholder = `Enter ${column.originalColumnName}`;
-          if (!requiredFields.includes(column)) {
-            const col = tableInfo.columns.find((x) => x.columnName === column.columnName);
-            if (col?.defaultValue) {
-              placeholder = `${col?.defaultValue}`;
-            } else {
-              placeholder = `null`;
-            }
-          }
+        }
+        const isUpdating = changedColumns.has(column.columnName);
+        if (isUpdating && !canBeUpdated) {
+          error = `This field cannot be updated because it has no table information`;
+        }
 
-          return (
-            <C
-              key={column.columnName}
-              id={column.columnName}
-              error={error}
-              title={column.columnName}
-              info={info}
-              placeholder={placeholder}
-              // value={value}
-              defaultValue={value || ""}
-              onChange={(newValue) => handleFieldChange(column.columnName, newValue)}
-            />
-          );
-        })}
+        let info = "";
+        if (isUpdating) {
+          info = `will update column "${column.originalColumnName}" in table "${column.tableName}"`;
+        }
+        let placeholder = `Enter ${column.originalColumnName}`;
+        if (!requiredFields.includes(column)) {
+          const col = tableInfo.columns.find((x) => x.columnName === column.columnName);
+          if (col?.defaultValue) {
+            placeholder = `${col?.defaultValue}`;
+          } else {
+            placeholder = `null`;
+          }
+        }
+
+        return (
+          <C
+            key={column.columnName}
+            id={column.columnName}
+            error={error}
+            title={column.columnName}
+            info={info}
+            placeholder={placeholder}
+            defaultValue={value || ""}
+            onChange={(newValue) => handleFieldChange(column.columnName, newValue)}
+          />
+        );
+      })}
     </Form>
   );
 }
