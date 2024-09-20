@@ -1,10 +1,10 @@
 # AI Code Namer - Raycast Extension
 
-AI Code Namer is a Raycast extension that leverages AI to help developers generate clear, descriptive, and context-appropriate names for various code elements such as variables, functions, classes, and files.
+AI Code Namer is a Raycast extension that leverages AI to help developers generate clear, descriptive, and context-appropriate names for various code elements such as variables, functions, classes, files, folders, modules, and enums.
 
 ## Features
 
-- Generate names for different code elements (variables, functions, classes, files)
+- Generate names for different code elements (variables, functions, classes, files, folders, modules, enums)
 - Support for multiple naming conventions (camelCase, PascalCase, snake_case, kebab-case, UPPER_CASE)
 - AI-powered suggestions based on your description
 - Quick copy-to-clipboard functionality

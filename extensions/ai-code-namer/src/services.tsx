@@ -17,7 +17,7 @@ export function UseNameGenerator({ codeElementType }: NameHandlerProps) {
   const [generatedNames, setGeneratedNames] = useState<string[]>([]);
   const [namingStyle, setNamingStyle] = useState<NamingStyle>(NamingStyle.CamelCase);
 
-  const generateNames = async (newNamingStyle?: NamingStyle, isEmptyVal: boolean = true) => {
+  const generateNames = async () => {
     if (searchText.length < 3) {
       return;
     }
@@ -31,11 +31,7 @@ export function UseNameGenerator({ codeElementType }: NameHandlerProps) {
     });
 
     try {
-      const names = await generateNameSuggestions(
-        codeElementType,
-        searchText,
-        isEmptyVal ? namingStyle : newNamingStyle || namingStyle,
-      );
+      const names = await generateNameSuggestions(codeElementType, searchText, namingStyle);
       setGeneratedNames(names);
       await showToast({
         style: Toast.Style.Success,
@@ -60,11 +56,8 @@ export function UseNameGenerator({ codeElementType }: NameHandlerProps) {
   }, [searchText]);
 
   const onStyleChange = async (newValue: string) => {
-    setGeneratedNames([]);
-
     const newStyle = convertStringNamingStyle(newValue);
     setNamingStyle(newStyle);
-    // await generateNames(newStyle, false);
   };
 
   return (
@@ -89,6 +82,7 @@ export function UseNameGenerator({ codeElementType }: NameHandlerProps) {
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard content={item} />
+                <Action title="Regenerate Names" onAction={generateNames} />
               </ActionPanel>
             }
           />

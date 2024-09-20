@@ -7,6 +7,9 @@ export enum CodeElementType {
   File = "File",
   Constant = "Constant",
   Type = "Type",
+  Enum = "Enum",
+  Module = "Module",
+  Folder = "Folder",
 }
 
 export enum NamingStyle {
@@ -45,7 +48,7 @@ export async function generateNameSuggestions(
   }
 
   const prompt = `As an expert programmer, generate three concise and optimized ${style} names for a ${elementType.toLowerCase()} based on this description: "${description}".
-  
+
   Guidelines:
   1. Prioritize clarity and brevity.
   2. Avoid redundant words or overly verbose names.

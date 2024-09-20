@@ -45,6 +45,24 @@
       "title": "Name File",
       "description": "Quickly generate a file name",
       "mode": "view"
+    },
+    {
+      "name": "name-module",
+      "title": "Name Module",
+      "description": "Quickly generate a module name",
+      "mode": "view"
+    },
+    {
+      "name": "name-enum",
+      "title": "Name Enum",
+      "description": "Quickly generate a enum name",
+      "mode": "view"
+    },
+    {
+      "name": "name-folder",
+      "title": "Name Folder",
+      "description": "Quickly generate a folder name",
+      "mode": "view"
     }
   ],
   "dependencies": {
