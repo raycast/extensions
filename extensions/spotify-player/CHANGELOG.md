@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Minor Fixes] - {PR_MERGE_DATE}
+## [Minor Fixes] - 2024-09-20
 
 - Fixed an issue when "Nothing is playing" popped up after commands `next`, `previous` and `like` having `Current Track` command disabled
 
