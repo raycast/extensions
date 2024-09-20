@@ -1,7 +1,7 @@
 import { closeMainWindow, open, showHUD } from "@raycast/api";
-import useApi from "./hooks/useApi";
 import { ApiResponseEvents, ApiResponseMoment } from "./hooks/useEvent.types";
 import { getOriginalEventIDFromSyncEvent } from "./utils/events";
+import { fetchPromise } from "./utils/fetcher";
 
 /**
  * This function is used to join a meeting.
@@ -16,8 +16,6 @@ import { getOriginalEventIDFromSyncEvent } from "./utils/events";
  * @returns {Promise<boolean>} - Returns a promise that resolves to a boolean indicating whether the meeting was joined successfully.
  */
 const joinMeeting = async (event: ApiResponseMoment["event"]) => {
-  const { fetchPromise } = useApi();
-
   if (!event) return false;
 
   // If event has a meeting URL, open it
@@ -46,8 +44,6 @@ const joinMeeting = async (event: ApiResponseMoment["event"]) => {
 };
 
 export default async function Command() {
-  const { fetchPromise } = useApi();
-
   await closeMainWindow();
   await showHUD("Joining meeting...");
 

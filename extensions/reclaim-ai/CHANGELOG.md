@@ -1,5 +1,8 @@
 # reclaim Changelog
 
+## [Fixes] - 2024-09-05
+- Route useFetch through useApi
+
 ## [Fixes] - 2024-09-04
 - Break out separate components and hook for Scheduling Links
 

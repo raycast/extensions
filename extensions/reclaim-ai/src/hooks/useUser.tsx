@@ -1,15 +1,13 @@
 import { Cache } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { User } from "../types/user";
-import useApi from "./useApi";
 import { useCallbackSafeRef } from "./useCallbackSafeRef";
 import { ApiResponseUser } from "./useUser.types";
+import { fetchPromise } from "../utils/fetcher";
 
 const cache = new Cache();
 
 const useUser = () => {
-  const { fetchPromise } = useApi();
-
   const cachedUserObj = cache.get("user");
   const cachedUserDate = cache.get("userDate");
 

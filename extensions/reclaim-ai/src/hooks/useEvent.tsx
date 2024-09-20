@@ -1,7 +1,5 @@
 import { Icon, getPreferenceValues, open, showHUD } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
 import { format, isWithinInterval } from "date-fns";
-import { useMemo } from "react";
 import { Event } from "../types/event";
 import { NativePreferences } from "../types/preferences";
 import { SmartHabit } from "../types/smart-series";
@@ -14,34 +12,20 @@ import { ApiResponseEvents, EventActions } from "./useEvent.types";
 import { useSmartHabits } from "./useSmartHabits";
 import { useTaskActions } from "./useTask";
 import { useUser } from "./useUser";
+import { fetchPromise } from "../utils/fetcher";
 
 export const useEvents = ({ start, end }: { start: Date; end: Date }) => {
-  const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
-
-  const headers = useMemo(
-    () => ({
-      Authorization: `Bearer ${apiToken}`,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    }),
-    [apiToken]
-  );
-
   const {
     data: events,
     error,
     isLoading,
-  } = useFetch<ApiResponseEvents>(
-    `${apiUrl}/events?${new URLSearchParams({
+  } = useApi<ApiResponseEvents>(
+    `/events?${new URLSearchParams({
       sourceDetails: "true",
       start: format(start, "yyyy-MM-dd"),
       end: format(end, "yyyy-MM-dd"),
       allConnected: "true",
-    }).toString()}`,
-    {
-      headers,
-      keepPreviousData: true,
-    }
+    }).toString()}`
   );
 
   if (error) console.error("Error while fetching Events", error);
@@ -54,7 +38,6 @@ export const useEvents = ({ start, end }: { start: Date; end: Date }) => {
 };
 
 export const useEventActions = () => {
-  const { fetchPromise } = useApi();
   const { currentUser } = useUser();
   const { startTask, restartTask, stopTask } = useTaskActions();
   const { apiUrl } = getPreferenceValues<NativePreferences>();

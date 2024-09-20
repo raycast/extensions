@@ -1,10 +1,8 @@
 import { SchedulingLinkPlanDetails, TaskPlanDetails } from "../types/plan";
-import useApi from "./useApi";
+import { fetchPromise } from "../utils/fetcher";
 import { ApiResponseInterpreter } from "./useInterpreter.types";
 
 const useInterpreter = () => {
-  const { fetchPromise } = useApi();
-
   const sendToInterpreter = async <T extends TaskPlanDetails | SchedulingLinkPlanDetails>(
     category: string,
     message: string
