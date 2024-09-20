@@ -532,7 +532,10 @@ function GenerateCustomQueryForm({
       const { data, error } = await apiClient.spiceblow.api.generateSqlQuery.post({
         prompt,
         schema: schema.data!,
-
+        previousQuery: query
+          .split("\n")
+          .filter((x) => !x.includes("```"))
+          .join("\n"),
         databaseType: getDatabaseConnectionType(currentConnectionString)!,
       });
       if (error) {
@@ -641,7 +644,6 @@ function GenerateCustomQueryForm({
   return (
     <Form
       isLoading={schema.isLoading || isLoading || schemas.isLoading}
-      enableDrafts
       actions={
         <ActionPanel>
           <Action title={!shouldSubmit ? "Generate Sql Query" : "Save Query"} onAction={onAction} />
@@ -1225,7 +1227,6 @@ function EditRow({
   return (
     <Form
       isLoading={isLoading}
-      enableDrafts
       actions={
         <ActionPanel>
           <Action.SubmitForm title={title} onSubmit={handleSubmit} />
