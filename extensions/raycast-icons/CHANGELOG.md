@@ -1,6 +1,6 @@
 # Raycast Icons Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2024-09-20
 
 - Added a loading animation to AI search.
 
