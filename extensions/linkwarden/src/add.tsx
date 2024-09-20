@@ -107,7 +107,7 @@ export default () => {
   const { isLoading: isLoadingTags, data: tags } = useTags();
   const { isLoading: isLoadingCollections, data: collections } = useCollections();
 
-  const { itemProps, handleSubmit } = useForm<FormValues>({
+  const { itemProps, handleSubmit, reset } = useForm<FormValues>({
     async onSubmit(values) {
       const collection = collections.find((collection) => collection.id === Number(values.collectionId)) as Collection;
       await fetchLink(preferences, values, collection);
@@ -119,6 +119,12 @@ export default () => {
       url: FormValidation.Required,
     },
   });
+
+  useEffect(() => {
+    if (browserPath) {
+      reset({ url: browserPath });
+    }
+  }, [browserPath, reset]);
 
   return (
     <Form

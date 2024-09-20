@@ -1,9 +1,12 @@
 # Xcode Changelog
 
-
-## [Added Delete App Data] - 2024-09-13
+## [Added Delete App Data] - {PR_MERGE_DATE}
 
 - Added delete app data command to remove the data of an app installed on a simulator without uninstalling.
+
+## [Search Recent Projects Improvements] - 2024-09-20
+
+- Improved the "Search Recent Projects" command to remember the last filter option
 
 ## [Clear SwiftUI Previews Cache] - 2024-04-03
 

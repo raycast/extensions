@@ -10,8 +10,6 @@ This extension provides news headlines about the Netherlands from websites repor
 - Switch between Dutch and English news sources
 - Filter news by source or view all headlines
 - Open news articles directly in the browser
-- Copy article links to clipboard
-- Refresh news feed on demand
 
 ## Sources
 
