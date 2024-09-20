@@ -1,6 +1,6 @@
 # TinyPNG Changelog
 
-## [Minor improvements] - {PR_MERGE_DATE}
+## [Minor improvements] - 2024-09-20
 
 - Update dependencies
 - Make the `method` in `Resizing Images` a Dropdown instead of a Text Field
