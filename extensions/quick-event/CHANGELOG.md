@@ -1,6 +1,6 @@
 # Quick Event Changelog
 
-## [Fix create event issue] - {PR_MERGE_DATE}
+## [Fix create event issue] - 2024-09-20
 
 - Fix the issue where events with quotation marks in the title cannot be created.
 
