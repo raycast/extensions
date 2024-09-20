@@ -7,7 +7,8 @@
   "icon": "command-icon.png",
   "author": "mblode",
   "contributors": [
-    "bascomb"
+    "bascomb",
+    "ridemountainpig"
   ],
   "license": "MIT",
   "commands": [

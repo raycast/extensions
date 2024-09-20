@@ -4,6 +4,10 @@
 
 - When a user searches for a number without a project selected, the extension matches the number against issue keys in all projects.
 
+## [Persist My Filters value when closing command] - 2024-09-14
+
+- Persist My Filters value when closing command allowing the command to fetch the issues for the latest selected filter when opening the command anew.
+
 ## [Fix epic autocomplete to include all epics of a selected project.] - 2024-08-14
 
 - When a user searches for an epic, the extension prioritizes retrieving search results from Current Search over History Search
