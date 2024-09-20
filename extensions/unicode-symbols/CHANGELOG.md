@@ -1,6 +1,6 @@
 # Unicode Symbols
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-09-20
 
 - Added extra characters to Superscript and Subscript set ([#14533](https://github.com/raycast/extensions/issues/14533))
   - This is purely a visual thing, doesn't change the actual character sets
