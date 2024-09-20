@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Sort menu bar reminders by due date] - {PR_MERGE_DATE}
+
+- Sort menu bar reminders by due date instead of the order they were created.
+
 ## [Change AI model for Quick Add Reminder] - 2024-05-23
 
 Now, Quick Add Reminder will use GPT-4o instead of GPT-4 Turbo. 

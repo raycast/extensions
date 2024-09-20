@@ -65,6 +65,13 @@ export default function Command() {
       }
     });
 
+    const sortByDueDate = (a: Reminder, b: Reminder) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime();
+
+    overdue.sort(sortByDueDate);
+    today.sort(sortByDueDate);
+    tomorrow.sort(sortByDueDate);
+    upcoming.sort(sortByDueDate);
+
     const sections = [
       { title: "Overdue", items: overdue },
       { title: "Today", items: today },
