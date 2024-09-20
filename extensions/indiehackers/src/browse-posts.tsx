@@ -1,4 +1,4 @@
-import { List, LaunchProps, getPreferenceValues } from "@raycast/api";
+import { List, LaunchProps, getPreferenceValues, Icon } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import Items from "./items";
@@ -46,15 +46,15 @@ export default function BrowsePosts(props: LaunchProps<{ arguments: Arguments.Br
       searchBarAccessory={
         <List.Dropdown tooltip="Type" defaultValue={type} onChange={setType}>
           <List.Dropdown.Section title="Time">
-            <List.Dropdown.Item title="Today" value="time_today" />
-            <List.Dropdown.Item title="This Week" value="time_week" />
-            <List.Dropdown.Item title="This Month" value="time_month" />
-            <List.Dropdown.Item title="All Time" value="time_all-time" />
+            <List.Dropdown.Item icon={Icon.Calendar} title="Today" value="time_today" />
+            <List.Dropdown.Item icon={Icon.Calendar} title="This Week" value="time_week" />
+            <List.Dropdown.Item icon={Icon.Calendar} title="This Month" value="time_month" />
+            <List.Dropdown.Item icon={Icon.Calendar} title="All Time" value="time_all-time" />
           </List.Dropdown.Section>
           <List.Dropdown.Section title="Type">
-            <List.Dropdown.Item title="Organic" value="type_organic" />
-            <List.Dropdown.Item title="Featured" value="type_featured" />
-            <List.Dropdown.Item title="Newest" value="type_newest" />
+            <List.Dropdown.Item icon={Icon.Leaf} title="Organic" value="type_organic" />
+            <List.Dropdown.Item icon={Icon.Leaf} title="Featured" value="type_featured" />
+            <List.Dropdown.Item icon={Icon.Leaf} title="Newest" value="type_newest" />
           </List.Dropdown.Section>
           <List.Dropdown.Section title="Group">
             {groups.map((group) => (
