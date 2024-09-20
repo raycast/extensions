@@ -1,6 +1,6 @@
 # Prompt Explorer Extension Changelog
 
-## [Add Explore Quicklinks] - {PR_MERGE_DATE}
+## [Add Explore Quicklinks] - 2024-09-20
 
 - Add command for exploring Quicklinks
 
