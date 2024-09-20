@@ -16,12 +16,12 @@
     {
       "name": "search-wallet",
       "title": "Wallet and Transaction Explorer",
-      "description": "Wallet Explorer and Transaction Explorer",
+      "description": "Wallet Explorer and Transaction Explorer.",
       "mode": "view",
       "arguments": [
         {
           "name": "startAddressOrHash",
-          "description": "Wallet or Transaction Hash",
+          "description": "Wallet or Transaction Hash.",
           "placeholder": "Enter wallet or transaction hash",
           "type": "text"
         }
