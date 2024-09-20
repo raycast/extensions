@@ -111,7 +111,7 @@ function Exchange({
       {currencyResult.conversion_rate_exchanged ? (
         <>
           <List.Section
-            title={`Pinned Exchange from ${state.amount ? parseFloat(state.amount.toFixed(4)) : 0} ${
+            title={`Pinned Exchange from ${state.amount ? formatCurrency(state.amount, state.fromCurrencyCode) : 0} ${
               currencyCode2Name[state.fromCurrencyCode]
             }`}
           >
@@ -119,7 +119,11 @@ function Exchange({
               <List.Item
                 key={index}
                 title={item.code}
-                subtitle={item.value !== Number.POSITIVE_INFINITY ? item.value.toFixed(4) : "No Currency"}
+                subtitle={
+                  item.value !== Number.POSITIVE_INFINITY
+                    ? formatCurrency(item.value, item.code)
+                    : "No Currency"
+                }
                 accessories={[{ text: currencyCode2Name[item.code], icon: Icon.Pin }]}
                 icon={{ source: getFlagEmoji(item.code.substring(0, 2)) }}
                 actions={
@@ -135,7 +139,7 @@ function Exchange({
             ))}
           </List.Section>
           <List.Section
-            title={`Exchange from ${state.amount ? parseFloat(state.amount.toFixed(4)) : 0} ${
+            title={`Exchange from ${state.amount ? formatCurrency(state.amount, state.fromCurrencyCode) : 0} ${
               currencyCode2Name[state.fromCurrencyCode]
             }`}
             subtitle={
@@ -148,7 +152,7 @@ function Exchange({
               <List.Item
                 key={index}
                 title={item.code}
-                subtitle={item.value !== Number.POSITIVE_INFINITY ? item.value.toFixed(4) : "∞"}
+                subtitle={item.value !== Number.POSITIVE_INFINITY ? formatCurrency(item.value, item.code) : "∞"}
                 accessories={[{ text: currencyCode2Name[item.code] }]}
                 icon={{ source: getFlagEmoji(item.code.substring(0, 2)) }}
                 actions={
@@ -534,6 +538,20 @@ function getFlagEmoji(countryAndRegionCode: string): string {
   let v = countryAndRegionCode.startsWith("X") ? "🇺🇳" : String.fromCodePoint(...codePoints) || "🇺🇳";
   v = countryAndRegionCode === "AN" ? "🇺🇳" : v;
   return v;
+}
+
+function formatCurrency(amount: number, currencyCode: string): string {
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currencyCode,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 4,
+    }).format(amount);
+  } catch (error) {
+    console.error(`Error formatting currency: ${error}`);
+    return amount.toString();
+  }
 }
 
 interface ExchangeState {
