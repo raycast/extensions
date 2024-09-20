@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { Toast, showToast } from "@raycast/api";
 import { exec } from "child_process";
 
 interface Task {
