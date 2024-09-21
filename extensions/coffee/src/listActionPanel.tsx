@@ -5,9 +5,9 @@ type ActionPanelProps = {
   searchText: string;
   schedule: Schedule;
   onSetScheduleAction: () => void;
-  onDeleteScheduleAction: (scheduleDay: string) => void;
-  onPauseScheduleAction: (scheduleDay: string) => void;
-  onResumeScheduleAction: (scheduleDay: string) => void;
+  onDeleteScheduleAction: (schedule: Schedule) => void;
+  onPauseScheduleAction: (schedule: Schedule) => void;
+  onResumeScheduleAction: (schedule: Schedule) => void;
 };
 
 export function ListActionPanel({
@@ -24,7 +24,7 @@ export function ListActionPanel({
       <Action
         title="Set Caffeination Schedule"
         icon={Icon.CopyClipboard}
-        shortcut={{ modifiers: ["cmd"], key: "enter" }}
+        shortcut={{ modifiers: ["cmd"], key: "s" }}
         onAction={() => onSetScheduleAction()}
       />
       <Action
@@ -32,7 +32,7 @@ export function ListActionPanel({
         style={Action.Style.Destructive}
         icon={Icon.Trash}
         shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-        onAction={() => onDeleteScheduleAction(schedule.day)}
+        onAction={() => onDeleteScheduleAction(schedule)}
       />
 
       {
@@ -40,13 +40,13 @@ export function ListActionPanel({
           <Action
             title="Resume Caffeination Schedule"
             icon={Icon.Play}
-            onAction={() => onResumeScheduleAction(schedule.day)}
+            onAction={() => onResumeScheduleAction(schedule)}
           />
         ) : (
           <Action
             title="Pause Caffeination Schedule"
             icon={Icon.Pause}
-            onAction={() => onPauseScheduleAction(schedule.day)}
+            onAction={() => onPauseScheduleAction(schedule)}
           />
         )
       }

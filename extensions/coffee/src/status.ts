@@ -1,5 +1,5 @@
 import { LocalStorage, updateCommandMetadata } from "@raycast/api";
-import { Schedule, startCaffeinate, numberToDayString, stopCaffeinate } from "./utils";
+import { Schedule, startCaffeinate, numberToDayString, getSchedule, stopCaffeinate } from "./utils";
 import { execSync } from "node:child_process";
 
 function isCaffeinateRunning(): boolean {
@@ -13,41 +13,40 @@ function isCaffeinateRunning(): boolean {
 
 async function handleScheduledCaffeinate(
   schedule: Schedule,
-  currentDate: Date,
-  currentDayString: string,
 ): Promise<boolean> {
   if (!schedule || Object.keys(schedule).length === 0) {
     return false;
   }
 
+  const currentDate = new Date();
   const [startHour, startMinute] = schedule.from.split(":").map(Number);
   const [endHour, endMinute] = schedule.to.split(":").map(Number);
   const currentHour = currentDate.getHours();
   const currentMinute = currentDate.getMinutes();
 
-  if (currentDayString === schedule.day) {
-    const isWithinSchedule =
-      (currentHour > startHour || (currentHour === startHour && currentMinute >= startMinute)) &&
-      (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute));
+  const isWithinSchedule =
+    (currentHour > startHour || (currentHour === startHour && currentMinute >= startMinute)) &&
+    (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute));
 
-    if (isWithinSchedule === false && schedule.IsRunning === true) {
-      schedule.IsRunning = false;
-      await stopCaffeinate({ menubar: true, status: true });
-      await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
-      return false;
-    }
+  // Change isRunning to false when the schedule has finished its run
+  if (isWithinSchedule === false && schedule.IsRunning === true) {
+    schedule.IsRunning = false;
+    await stopCaffeinate({ menubar: true, status: true });
+    await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
+    return false;
+  }
 
-    if (isWithinSchedule === true && schedule.IsRunning === false) {
-      const duration = (endHour - startHour) * 3600 + (endMinute - startMinute) * 60;
-      await startCaffeinate(
-        { menubar: true, status: true },
-        `Scheduled caffeination until ${schedule.to}`,
-        `-t ${duration}`,
-      );
-      schedule.IsRunning = true;
-      await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
-      return true;
-    }
+  // If the current time is within scheduled time, start caffeination
+  if (isWithinSchedule === true && schedule.IsRunning === false) {
+    const duration = (endHour - startHour) * 3600 + (endMinute - startMinute) * 60;
+    await startCaffeinate(
+      { menubar: true, status: true },
+      `Scheduled caffeination until ${schedule.to}`,
+      `-t ${duration}`,
+    );
+    schedule.IsRunning = true;
+    await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
+    return true;
   }
 
   return false;
@@ -55,12 +54,12 @@ async function handleScheduledCaffeinate(
 
 // Function to check and handle schedule
 export async function checkSchedule() {
-  const currentDate = new Date();
-  const currentDayString = numberToDayString(currentDate.getDay()).toLowerCase();
-  const schedule: Schedule = JSON.parse((await LocalStorage.getItem(currentDayString)) || "{}");
+  const schedule = await getSchedule();
+
+  if (schedule === undefined) return false;
 
   if (!schedule.IsManuallyDecafed) {
-    const isScheduled = await handleScheduledCaffeinate(schedule, currentDate, currentDayString);
+    const isScheduled = await handleScheduledCaffeinate(schedule);
     return isScheduled;
   }
 

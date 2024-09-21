@@ -67,15 +67,23 @@ function generateArgs(additionalArgs?: string) {
   return args.length > 0 ? `-${args.join("")}` : "";
 }
 
-export async function changeScheduleState(operation: string) {
+export function numberToDayString(dayIndex: number): string {
+  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  return daysOfWeek[dayIndex];
+}
+
+export async function getSchedule() {
   const currentDate = new Date();
   const currentDayString = numberToDayString(currentDate.getDay()).toLowerCase();
 
   const getSchedule: string | undefined = await LocalStorage.getItem(currentDayString);
-  if (getSchedule === undefined) return;
+  if (getSchedule === undefined) return undefined;
 
   const schedule: Schedule = JSON.parse(getSchedule);
+  return schedule;
+}
 
+export async function changeScheduleState(operation: string, schedule: Schedule) {
   switch (operation) {
     case "caffeinate": {
       schedule.IsManuallyDecafed = false;
@@ -84,7 +92,7 @@ export async function changeScheduleState(operation: string) {
       break;
     }
     case "decaffeinate": {
-      if (schedule.IsRunning === true) {
+      if (schedule.IsRunning === true || isNotTodaysSchedule(schedule)) {
         schedule.IsManuallyDecafed = true;
         schedule.IsRunning = false;
         await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
@@ -97,23 +105,18 @@ export async function changeScheduleState(operation: string) {
   }
 }
 
-export function numberToDayString(dayIndex: number): string {
-  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  return daysOfWeek[dayIndex];
-}
-
-export function hasScheduleToday(schedule:Schedule) {
+export function isTodaysSchedule(schedule: Schedule) {
   const currentDate = new Date();
   const currentDayString = numberToDayString(currentDate.getDay()).toLowerCase();
-  
-  if(schedule.day === currentDayString) return true;
+
+  if (schedule.day === currentDayString) return true;
   else return false;
 }
 
-export function hasNoScheduleToday(schedule:Schedule) {
+export function isNotTodaysSchedule(schedule: Schedule) {
   const currentDate = new Date();
   const currentDayString = numberToDayString(currentDate.getDay()).toLowerCase();
-  
-  if(schedule.day === currentDayString) return false;
+
+  if (schedule.day === currentDayString) return false;
   else return true;
 }

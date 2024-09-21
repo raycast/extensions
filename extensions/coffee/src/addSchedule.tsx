@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import { useLoadStoredSchedules } from "./fetchStoredSchedule";
 import { ListActionPanel } from "./listActionPanel";
-import { Schedule, changeScheduleState, stopCaffeinate, hasScheduleToday, hasNoScheduleToday } from "./utils";
+import { Schedule, changeScheduleState, stopCaffeinate, isTodaysSchedule, isNotTodaysSchedule } from "./utils";
 import { extractSchedule } from "./extractSchedule";
 import { checkSchedule } from "./status";
 
@@ -52,7 +52,7 @@ export default function Command() {
     }
   };
 
-  const handleDeleteSchedule = async (day: string) => {
+  const handleDeleteSchedule = async (schedule: Schedule) => {
     const deleteConfirmation = await confirmAlert({
       title: "Delete schedule",
       message: "Are you sure you wish to delete this schedule?",
@@ -72,10 +72,13 @@ export default function Command() {
 
     if (deleteConfirmation) {
       try {
-        await LocalStorage.removeItem(day);
+        if (schedule.IsRunning === true) await stopCaffeinate(
+          { menubar: true, status: true },
+        );
+        await LocalStorage.removeItem(schedule.day);
         await showToast(Toast.Style.Success, "Schedule deleted.");
 
-        const updatedSchedules = schedules.filter(schedule => schedule.day !== day);
+        const updatedSchedules = schedules.filter(scheduleItem => scheduleItem.day !== schedule.day);
         setSchedules(updatedSchedules);
 
       } catch (error) {
@@ -85,17 +88,19 @@ export default function Command() {
     }
   };
 
-  const handlePauseSchedule = async (day: string) => {
-    changeScheduleState("decaffeinate");
-    await stopCaffeinate(
-      { menubar: true, status: true },
-      `Schedule for ${day.charAt(0).toUpperCase() + day.slice(1).toLowerCase()} is now paused`,
-    );
+  const handlePauseSchedule = async (schedule: Schedule) => {
+    changeScheduleState("decaffeinate", schedule);
+    await showHUD(`Schedule for ${schedule.day.charAt(0).toUpperCase() + schedule.day.slice(1).toLowerCase()} is now paused`);
+    if (isTodaysSchedule(schedule)) {
+      await stopCaffeinate(
+        { menubar: true, status: true },
+      );
+    }
   };
 
-  const handleResumeSchedule = async (day: string) => {
-    changeScheduleState("caffeinate");
-    await showHUD(`Schedule for ${day.charAt(0).toUpperCase() + day.slice(1).toLowerCase()} is now resumed`);
+  const handleResumeSchedule = async (schedule: Schedule) => {
+    changeScheduleState("caffeinate", schedule);
+    await showHUD(`Schedule for ${schedule.day.charAt(0).toUpperCase() + schedule.day.slice(1).toLowerCase()} is now resumed`);
     await checkSchedule();
   };
 
@@ -125,7 +130,7 @@ export default function Command() {
               key={index}
               title={sectionTitle}
               children={schedules
-                .filter(index === 0 ? hasScheduleToday : hasNoScheduleToday)
+                .filter(index === 0 ? isTodaysSchedule : isNotTodaysSchedule)
                 .map((schedule, idx) => (
                   <List.Item
                     key={idx}
@@ -148,8 +153,8 @@ export default function Command() {
                         schedule={schedule}
                         onSetScheduleAction={handleSetSchedule}
                         onDeleteScheduleAction={handleDeleteSchedule}
-                        onPauseScheduleAction={() => handlePauseSchedule(schedule.day)}
-                        onResumeScheduleAction={() => handleResumeSchedule(schedule.day)}
+                        onPauseScheduleAction={() => handlePauseSchedule(schedule)}
+                        onResumeScheduleAction={() => handleResumeSchedule(schedule)}
                       />
                     }
                   />
