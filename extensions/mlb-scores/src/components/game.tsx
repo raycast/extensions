@@ -8,12 +8,16 @@ const CACHE_DIR = resolve(environment.supportPath, "cache");
 type GameProps = {
   game: FeedInterface | undefined;
 };
+
 const Game = React.memo(
   (props: GameProps) => {
     const game = props.game;
     if (!game) {
       return <Detail markdown="## Loading..." />;
     }
+    
+    const currentPlay = game.liveData.plays.currentPlay;
+    console.log(currentPlay.result);
     const linescore = game.liveData.linescore;
     const runs_inning = Array(9).fill(["X", "X"]);
     linescore.innings.forEach((inning, index) => {
@@ -65,8 +69,9 @@ ${game.gameData.status.abstractGameCode.toUpperCase() === "P" ? `Starts at: ${da
 
 ${
   game.gameData.status.abstractGameCode.toUpperCase() === "L"
-    ? `${linescore.inningState} ${linescore.currentInningOrdinal}`
-    : ""
+    ? `**${linescore.inningState} ${linescore.currentInningOrdinal}, ${currentPlay.count.outs} Out${currentPlay.count.outs > 1 ? `s` : ""}. Current Matchup:** (${currentPlay.matchup.pitchHand.code}HP) ${currentPlay.matchup.pitcher.fullName} vs ${currentPlay.matchup.batter.fullName} — 
+  ${currentPlay.count.balls} Balls - ${currentPlay.count.strikes} Strikes  
+  ${currentPlay.result.description !== undefined ? `**Latest:** ` + currentPlay.result.description : ""}` : " "
 }
 
 ${game.gameData.status.detailedState}
@@ -111,6 +116,10 @@ ${
     ? `${linescore.balls}-${linescore.strikes}, ${linescore.outs} out`
     : ""
 }
+
+---
+
+## Box Score
     `;
     return <Detail markdown={md_string} />;
   },
