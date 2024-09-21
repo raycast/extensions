@@ -1,7 +1,11 @@
-import damageRelations from "../statics/damage_relations.json";
+import { Detail } from "@raycast/api";
 import { PokemonV2Pokemontype } from "../types";
 
-export const getImgUrl = (id: number, formId?: number) => {
+export const getPixelArtImg = (id: number) => {
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/refs/heads/master/sprites/pokemon/${id}.png`;
+};
+
+export const getOfficialArtworkImg = (id: number, formId?: number) => {
   const name = formId
     ? `${id.toString().padStart(3, "0")}_f${formId + 1}`
     : id.toString().padStart(3, "0");
@@ -31,46 +35,57 @@ export const typeColor: { [key: string]: string } = {
 
 export const calculateEffectiveness = (types: PokemonV2Pokemontype[]) => {
   const effectivenessMap = new Map<string, number>();
-  Object.entries(damageRelations).forEach(([key, value]) =>
-    types.forEach((type) => {
-      if (key == type.pokemon_v2_type.name) {
-        const typeEffectiveness = value;
-        if (typeEffectiveness) {
-          value.double_damage_from.forEach((relation) => {
-            const currentFactor = effectivenessMap.get(relation.name) || 1;
-            effectivenessMap.set(relation.name, currentFactor * 2);
-          });
-          value.half_damage_from.forEach((relation) => {
-            const currentFactor = effectivenessMap.get(relation.name) || 1;
-            effectivenessMap.set(relation.name, currentFactor * 0.5);
-          });
-          value.no_damage_from.forEach((relation) => {
-            const currentFactor = effectivenessMap.get(relation.name) || 1;
-            effectivenessMap.set(relation.name, currentFactor * 0);
-          });
-        }
-      }
-    }),
-  );
+  const typeNameMap = new Map<string, string>();
 
-  const normal: string[] = [];
-  const weak: string[] = [];
-  const immune: string[] = [];
-  const resistant: string[] = [];
+  types.forEach((type) => {
+    type.pokemon_v2_type.pokemonV2TypeefficaciesByTargetTypeId.forEach(
+      (efficacy) => {
+        const relationName = efficacy.pokemon_v2_type.name;
+        const currentFactor = effectivenessMap.get(relationName) || 1;
+        effectivenessMap.set(
+          relationName,
+          (currentFactor * efficacy.damage_factor) / 100,
+        );
+        typeNameMap.set(
+          relationName,
+          efficacy.pokemon_v2_type.pokemon_v2_typenames[0].name,
+        );
+      },
+    );
+  });
 
-  effectivenessMap.forEach((factor, typeName) => {
+  const normal: Detail.Metadata.TagList.Item.Props[] = [];
+  const weak: Detail.Metadata.TagList.Item.Props[] = [];
+  const immune: Detail.Metadata.TagList.Item.Props[] = [];
+  const resistant: Detail.Metadata.TagList.Item.Props[] = [];
+
+  effectivenessMap.forEach((factor, type) => {
     if (factor > 1) {
-      weak.push(
-        `${factor}x ${typeName.charAt(0).toUpperCase() + typeName.slice(1)}`,
-      );
+      weak.push({
+        text: `${factor}x ${typeNameMap.get(type)}`,
+        color: typeColor[type],
+      });
     } else if (factor < 1 && factor > 0) {
-      resistant.push(
-        `${factor}x ${typeName.charAt(0).toUpperCase() + typeName.slice(1)}`,
-      );
+      resistant.push({
+        text: `${factor}x ${typeNameMap.get(type)}`,
+        color: typeColor[type],
+      });
     } else if (factor === 0) {
-      immune.push(`${typeName.charAt(0).toUpperCase() + typeName.slice(1)}`);
+      immune.push({
+        text: `${typeNameMap.get(type)}`,
+        color: typeColor[type],
+      });
     }
   });
 
   return { normal, weak, immune, resistant };
+};
+
+export const localeName = (
+  pokemon: { localization: { [x: string]: string }; name: string },
+  language: string | number,
+) => {
+  return pokemon.localization && pokemon.localization[language]
+    ? pokemon.localization[language]
+    : pokemon.name;
 };

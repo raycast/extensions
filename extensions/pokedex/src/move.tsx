@@ -6,7 +6,7 @@ import TypeDropdown from "./components/type_dropdown";
 import moves from "./statics/moves.json";
 import { typeColor } from "./utils";
 
-export default function Move() {
+export default function PokeMoves() {
   const [type, setType] = useState<string>("all");
 
   const generations = useMemo(() => {

@@ -1,6 +1,6 @@
 import { Detail, List } from "@raycast/api";
 import { PokemonV2Pokemontype } from "../../types";
-import { calculateEffectiveness, typeColor } from "../../utils";
+import { calculateEffectiveness } from "../../utils";
 
 export default function MetadataWeakness(props: {
   type?: string;
@@ -18,26 +18,8 @@ export default function MetadataWeakness(props: {
   if (weak.length) {
     tagList.push(
       <TagListComponent title="Weak to" key="weak">
-        {weak.map((weakness, index) => (
-          <TagListComponent.Item
-            key={index}
-            text={weakness}
-            color={typeColor[weakness.split(" ")[1].toLowerCase()]}
-          />
-        ))}
-      </TagListComponent>,
-    );
-  }
-
-  if (resistant.length) {
-    tagList.push(
-      <TagListComponent title="Resistant to" key="resistant">
-        {resistant.map((resistance, index) => (
-          <TagListComponent.Item
-            key={index}
-            text={resistance}
-            color={typeColor[resistance.split(" ")[1].toLowerCase()]}
-          />
+        {weak.map(({ text, color }, index) => (
+          <TagListComponent.Item key={index} text={text} color={color} />
         ))}
       </TagListComponent>,
     );
@@ -46,12 +28,18 @@ export default function MetadataWeakness(props: {
   if (immune.length) {
     tagList.push(
       <TagListComponent title="Immune to" key="immute">
-        {immune.map((immunity, index) => (
-          <TagListComponent.Item
-            key={index}
-            text={immunity}
-            color={typeColor[immunity.toLowerCase()]}
-          />
+        {immune.map(({ text, color }, index) => (
+          <TagListComponent.Item key={index} text={text} color={color} />
+        ))}
+      </TagListComponent>,
+    );
+  }
+
+  if (resistant.length) {
+    tagList.push(
+      <TagListComponent title="Resistant to" key="resistant">
+        {resistant.map(({ text, color }, index) => (
+          <TagListComponent.Item key={index} text={text} color={color} />
         ))}
       </TagListComponent>,
     );

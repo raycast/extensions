@@ -1,10 +1,17 @@
 # Pokédex Changelog
 
+## [Enhanced Pokédex Experience] - 2024-09-21
+- Implemented caching for faster load times and reduced API usage.
+- Added sorting options to organize the Pokédex by Pokémon name or National Pokédex number.
+- Introduced a new preference to select your preferred artwork style for Pokémon.
+- Provided full Pokémon names in supported languages.
+- Leveraged real-time data from PokéAPI for accurate type effectiveness information.
+
 ## [Pokédex Mastery] - 2024-09-17
 - Added Weaknesses command for easy reference.
-- Expanded Pokémon details with Shapes, Type Effectiveness, and Encounter Locations (experimental) for a more comprehensive understanding.
-- Reorganized Pokémon Forms into an action sub-menu to provide detailed type and ability information for each form.
-- Updated Type Symbols to match the latest Gen 9 designs, ensuring accuracy and visual consistency.
+- Expanded Pokémon details with Shapes, Type Effectiveness, and Encounter Locations.
+- Reorganized Pokémon Forms for better information presentation.
+- Updated Type Symbols to match Gen 9 designs.
 - Refined the overall visual aesthetics for a more pleasing and intuitive user interface.
 
 ## [Learnset Perfection] - 2024-05-17
@@ -26,8 +33,8 @@
 - Added a changelog to keep users informed of updates.
 
 ## [Moves & Abilities] - 2022-03-10
-- Expanded functionality with new commands: Moves and Abilities.
-- Introduced a new preference: Show preview.
+- New commands for Moves and Abilities.
+- Added a new preference to show previews.
 - Implemented Pokémon type filter for targeted searches.
 - Fixed Evolution chains to ensure accuracy.
 
