@@ -96,12 +96,26 @@ export default function Command() {
         { menubar: true, status: true },
       );
     }
+
+    // Update the state to reflect the paused schedule
+    setSchedules((prevSchedules) =>
+      prevSchedules.map((s) =>
+        s.day === schedule.day ? { ...s, IsRunning: false, IsManuallyDecafed: true } : s
+      )
+    );
   };
 
   const handleResumeSchedule = async (schedule: Schedule) => {
     changeScheduleState("caffeinate", schedule);
     await showHUD(`Schedule for ${schedule.day.charAt(0).toUpperCase() + schedule.day.slice(1).toLowerCase()} is now resumed`);
     await checkSchedule();
+
+    // Update the state to reflect the resumed schedule
+    setSchedules((prevSchedules) =>
+      prevSchedules.map((s) =>
+        s.day === schedule.day ? { ...s, IsRunning: true, IsManuallyDecafed: false } : s
+      )
+    );
   };
 
   return (
@@ -137,11 +151,13 @@ export default function Command() {
                     title={schedule.day.charAt(0).toUpperCase() + schedule.day.slice(1)}
                     accessories={[
                       {
-                        text: schedule.IsRunning ? "Running" : schedule.IsManuallyDecafed ? "Paused" : "Scheduled",
-                        icon: schedule.IsRunning
-                          ? Icon.Play
-                          : schedule.IsManuallyDecafed
-                            ? Icon.Pause
+                        text:
+                          index === 0
+                            ? (schedule.IsRunning ? "Running" : schedule.IsManuallyDecafed ? "Paused" : "Scheduled")
+                            : (schedule.IsManuallyDecafed ? "Scheduled Paused" : "Schedule"),
+                        icon:
+                          index === 0
+                            ? (schedule.IsRunning ? Icon.Play : schedule.IsManuallyDecafed ? Icon.Pause : Icon.Calendar)
                             : Icon.Calendar,
                       },
                     ]}
