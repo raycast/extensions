@@ -1,4 +1,15 @@
-import { open, Form, ActionPanel, Action, showToast, getPreferenceValues, Clipboard } from "@raycast/api";
+import {
+  open,
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  getPreferenceValues,
+  Clipboard,
+  Toast,
+  popToRoot,
+  closeMainWindow,
+} from "@raycast/api";
 import { FormValidation, useForm, usePromise } from "@raycast/utils";
 import axios from "axios";
 import CryptoJS from "crypto-js";
@@ -53,7 +64,12 @@ export default function Command() {
 
   const { handleSubmit, itemProps } = useForm<Values>({
     async onSubmit(values: Values) {
-      showToast({ title: "Creating paste...", message: "Waiting for creation of paste" });
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: `Creating paste...`,
+        message: "Waiting for creation of paste",
+      });
+
       const paste = {
         title: values.title,
         content: values.content,
@@ -84,8 +100,14 @@ export default function Command() {
       await Clipboard.copy({
         text: pasteUrl,
       });
-      showToast({ title: "Done!", message: "Paste has been saved to clipboard" });
-      open(pasteUrl);
+
+      await closeMainWindow();
+      await open(pasteUrl);
+
+      toast.title = "Done!";
+      toast.message = "Paste has been saved to clipboard";
+
+      await popToRoot();
     },
     validation: {
       content: FormValidation.Required,
@@ -100,7 +122,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField {...itemProps.title} title="Title" placeholder="Title.txt (.md for markdown)" defaultValue="" />
+      <Form.TextField {...itemProps.title} title="Title" placeholder="Title.txt (.md for markdown)" />
       <Form.TextArea
         enableMarkdown={itemProps.title.value?.endsWith(".md")}
         title="Code input"
@@ -110,7 +132,7 @@ export default function Command() {
       <Form.Separator />
 
       <Form.Description text="Optional Settings" />
-      <Form.Dropdown title="Visibility" defaultValue="UNLISTED" {...itemProps.visibility}>
+      <Form.Dropdown title="Visibility" {...itemProps.visibility}>
         <Form.Dropdown.Item value="UNLISTED" title="Unlisted" />
         <Form.Dropdown.Item value="PUBLIC" title="Public" />
         {folders === null ? null : <Form.Dropdown.Item value="PRIVATE" title="Private" />}
