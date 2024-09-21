@@ -210,19 +210,21 @@ function GlueJobDefinition({ glueJobName: glueJobName }: { glueJobName: string }
   const description = glueJobDetails?.Job?.Description
     ? glueJobDetails?.Job?.Description!.toString()
     : `No Descrtiption`;
-  console.log(glueJobDetails);
+  // console.log(glueJobDetails);
+  console.log(glueJobDetails?.Job?.Description);
   return (
     <Detail
       navigationTitle="Glue Job Definition"
       markdown={
-        `### ` + glueJobName + glueJobDetails?.Job?.Description
-          ? `\n\n${description}`
-          : "" +
-            `\n\n` +
-            `___\n**Job Definition**\n` +
-            `\`\`\`json\n` +
-            JSON.stringify(glueJobDetails?.Job, null, 2) +
-            `\`\`\``
+        `# ` +
+        glueJobName +
+        `\n\n` +
+        description +
+        `\n\n` +
+        `___\n**Job Definition**\n` +
+        `\`\`\`json\n` +
+        JSON.stringify(glueJobDetails?.Job, null, 2) +
+        `\`\`\``
       }
       isLoading={isLoading}
       actions={
