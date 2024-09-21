@@ -33,12 +33,32 @@ export async function getAll(type: LocalType) {
 export async function save(gif: IGif, service: ServiceName, type: LocalType) {
   const favs = new Set(await get(service, type));
   favs.add(gif.id.toString());
-  return await LocalStorage.setItem(getKey(service, type), JSON.stringify(Array.from(favs)));
+
+  const favoritesFavs = new Set(await get("favorites", type));
+  favoritesFavs.add(service + ":" + gif.id.toString());
+
+  return Promise.all([
+    LocalStorage.setItem(getKey(service, type), JSON.stringify(Array.from(favs))),
+    LocalStorage.setItem(getKey("favorites", type), JSON.stringify(Array.from(favoritesFavs))),
+  ]);
 }
 
 export async function remove(gif: IGif, service: ServiceName, type: LocalType) {
-  const favs = new Set(await get(service, type));
+  const favoritesFavs = new Set(await get("favorites", type));
+  let deleteFavoritesFavsService: ServiceName = service;
+  for (const favs of favoritesFavs) {
+    if (favs.split(":")[1] === gif.id.toString()) {
+      deleteFavoritesFavsService = favs.split(":")[0] as ServiceName;
+      favoritesFavs.delete(favs);
+      break;
+    }
+  }
+
+  const favs = new Set(await get(deleteFavoritesFavsService, type));
   favs.delete(gif.id.toString());
 
-  return await LocalStorage.setItem(getKey(service, type), JSON.stringify(Array.from(favs)));
+  return Promise.all([
+    LocalStorage.setItem(getKey(deleteFavoritesFavsService, type), JSON.stringify(Array.from(favs))),
+    LocalStorage.setItem(getKey("favorites", type), JSON.stringify(Array.from(favoritesFavs))),
+  ]);
 }

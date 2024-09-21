@@ -89,7 +89,7 @@ export function MediaPlayerTurnOnAction(props: { state: State }): JSX.Element | 
       title="Turn On"
       onAction={handle}
       shortcut={{ modifiers: ["cmd"], key: "o" }}
-      icon={{ source: "power-btn.png", tintColor: Color.Green }}
+      icon={{ source: "power-on.svg", tintColor: Color.PrimaryText }}
     />
   );
 }
@@ -109,7 +109,7 @@ export function MediaPlayerTurnOffAction(props: { state: State }): JSX.Element |
       title="Turn Off"
       onAction={handle}
       shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-      icon={{ source: "power-btn.png", tintColor: Color.Red }}
+      icon={{ source: "power-off.svg", tintColor: Color.PrimaryText }}
     />
   );
 }
@@ -121,20 +121,20 @@ export function MediaPlayerActionPanel(props: { state: State }) {
     <ActionPanel>
       <ActionPanel.Section title="Controls">
         <Action
-          title="Play/Pause"
+          title="Play/pause"
           onAction={async () => await ha.playPauseMedia(entityID)}
-          icon={{ source: "play-pause.jpg", tintColor: Color.PrimaryText }}
+          icon={{ source: "play-pause.svg", tintColor: Color.PrimaryText }}
         />
         <Action
           title="Play"
           onAction={async () => await ha.playMedia(entityID)}
-          icon={{ source: "play.png", tintColor: Color.PrimaryText }}
+          icon={{ source: "play.svg", tintColor: Color.PrimaryText }}
         />
         <Action
           title="Pause"
           shortcut={{ modifiers: ["cmd"], key: "p" }}
           onAction={async () => await ha.pauseMedia(entityID)}
-          icon={{ source: "pause.png", tintColor: Color.PrimaryText }}
+          icon={{ source: "pause.svg", tintColor: Color.PrimaryText }}
         />
         <Action
           title="Stop"
@@ -146,13 +146,13 @@ export function MediaPlayerActionPanel(props: { state: State }) {
           title="Next"
           shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
           onAction={async () => await ha.nextMedia(entityID)}
-          icon={{ source: "next.png", tintColor: Color.PrimaryText }}
+          icon={{ source: "skip-next.svg", tintColor: Color.PrimaryText }}
         />
         <Action
           title="Previous"
           shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
           onAction={async () => await ha.previousMedia(entityID)}
-          icon={{ source: "previous.png", tintColor: Color.PrimaryText }}
+          icon={{ source: "skip-previous.svg", tintColor: Color.PrimaryText }}
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="Volume">

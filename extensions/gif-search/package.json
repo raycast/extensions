@@ -8,7 +8,9 @@
   "contributors": [
     "tm.wrnr",
     "j3lte",
-    "samuelkraft"
+    "samuelkraft",
+    "ridemountainpig",
+    "spookywy"
   ],
   "license": "MIT",
   "categories": [
@@ -102,6 +104,10 @@
         {
           "title": "Copy GIF Markdown",
           "value": "copyGifMarkdown"
+        },
+        {
+          "title": "Paste GIF Markdown",
+          "value": "pasteGifMarkdown"
         },
         {
           "title": "Add or Remove from Favorites",

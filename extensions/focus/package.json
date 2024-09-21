@@ -13,21 +13,21 @@
   "commands": [
     {
       "name": "start-focus",
-      "title": "Start Focus",
+      "title": "Start Focus Session",
       "subtitle": "Focus",
       "description": "Quickly start Focus with default or single profile",
       "mode": "no-view"
     },
     {
       "name": "start-focus-with-profile",
-      "title": "Start Focus with Profile",
+      "title": "Start Focus Session with Profile",
       "subtitle": "Focus",
       "description": "Start Focus by selecting a profile",
       "mode": "view"
     },
     {
       "name": "start-focus-25",
-      "title": "Focus (25 Minutes)",
+      "title": "Start Focus Session - 25 Minutes",
       "subtitle": "Focus",
       "description": "Start a 25 minutes focus session.",
       "keywords": [
@@ -37,7 +37,7 @@
     },
     {
       "name": "start-focus-custom",
-      "title": "Focus (Custom Duration)",
+      "title": "Start Focus Session - Custom Duration",
       "subtitle": "Focus",
       "description": "Start a focus session with custom duration",
       "keywords": [
@@ -62,7 +62,7 @@
     },
     {
       "name": "take-break-5",
-      "title": "Take Break (5 Minutes)",
+      "title": "Break",
       "subtitle": "Focus",
       "description": "Take a 5 minutes break",
       "keywords": [
@@ -72,7 +72,7 @@
     },
     {
       "name": "take-break-custom",
-      "title": "Take Break (Custom Duration)",
+      "title": "Break - Custom Duration",
       "subtitle": "Focus",
       "description": "Take a break with custom duration",
       "keywords": [
@@ -91,7 +91,7 @@
     },
     {
       "name": "stop-break",
-      "title": "Stop Break",
+      "title": "End Break",
       "subtitle": "Focus",
       "description": "Stop break and continue the current focus session.",
       "keywords": [
@@ -101,7 +101,7 @@
     },
     {
       "name": "stop-focus",
-      "title": "Stop Focus",
+      "title": "Stop Focus Session",
       "subtitle": "Focus",
       "description": "Stop the current focus session",
       "keywords": [
@@ -112,9 +112,9 @@
     },
     {
       "name": "open-preferences",
-      "title": "Open Preferences",
+      "title": "Open Focus Preferences",
       "subtitle": "Focus",
-      "description": "Open Focus Preferences",
+      "description": "Open the Focus app Preferences",
       "keywords": [
         "preferences",
         "settings"

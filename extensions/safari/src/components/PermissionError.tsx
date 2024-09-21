@@ -18,6 +18,6 @@ const Actions = () => (
   </ActionPanel>
 );
 
-const PermissionError = () => <Detail markdown={permissionErrorMarkdown} actions={<Actions />} />;
-
-export default PermissionError;
+export default function PermissionError() {
+  return <Detail markdown={permissionErrorMarkdown} actions={<Actions />} />;
+}

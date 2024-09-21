@@ -1,6 +1,6 @@
 import { getPreferenceValues, Icon, Image, Keyboard, List } from "@raycast/api";
-import { HistoryColor, HistoryItem } from "./types";
 import ColorJS from "colorjs.io";
+import { HistoryColor, HistoryItem } from "./types";
 
 const preferences: Preferences = getPreferenceValues();
 

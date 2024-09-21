@@ -8,7 +8,7 @@ Bugs are unavoidable. Therefore it's important to have an easy way to discover a
 
 ## Console
 
-Use the `console` for simple debugging such as logging variables, function calls, or other helpful messages. All logs are shown in the terminal during [development mode](../information/tools/cli.md#development). Here are a few examples:
+Use the `console` for simple debugging such as logging variables, function calls, or other helpful messages. All logs are shown in the terminal during [development mode](../information/developer-tools/cli.md#development). Here are a few examples:
 
 ```typescript
 console.log("Hello World"); // Prints: Hello World

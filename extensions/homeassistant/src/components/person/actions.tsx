@@ -1,7 +1,7 @@
 import { EntityStandardActionSections } from "@components/entity";
 import { State } from "@lib/haapi";
-import { Action, ActionPanel } from "@raycast/api";
 import { Action as RUIAction } from "@raycast-community/ui";
+import { Action, ActionPanel } from "@raycast/api";
 
 export function PersonOpenInGoogleMapsAction({ state: s }: { state: State }) {
   if (!s.entity_id.startsWith("person")) {
@@ -15,8 +15,8 @@ export function PersonOpenInGoogleMapsAction({ state: s }: { state: State }) {
   const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
   return (
     <Action.OpenInBrowser
-      title="Open In Google Maps"
-      icon="googlemaps.png"
+      title="Open in Google Maps"
+      icon="google-maps.svg"
       shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
       url={url}
     />
@@ -45,7 +45,7 @@ export function PersonCopyUserIDAction({ state: s }: { state: State }) {
   }
   return (
     <Action.CopyToClipboard
-      title="Copy User ID"
+      title="Copy User Id"
       shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
       content={user_id}
     />
@@ -60,7 +60,7 @@ export function PersonCopyIDAction({ state: s }: { state: State }) {
   if (id === undefined) {
     return null;
   }
-  return <Action.CopyToClipboard title="Copy ID" shortcut={{ modifiers: ["cmd", "shift"], key: "i" }} content={id} />;
+  return <Action.CopyToClipboard title="Copy Id" shortcut={{ modifiers: ["cmd", "shift"], key: "i" }} content={id} />;
 }
 
 export function PersonActionPanel(props: { state: State }) {

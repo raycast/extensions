@@ -14,7 +14,8 @@
     "thomaslombart",
     "litomore",
     "samuelkraft",
-    "ridemountainpig"
+    "ridemountainpig",
+    "xilopaint"
   ],
   "categories": [
     "Design Tools"
@@ -51,7 +52,7 @@
             }
           ],
           "default": "copy",
-          "description": "The primary action to perform on a selected color.",
+          "description": "The primary action to perform on a selected color",
           "name": "primaryAction",
           "required": false,
           "title": "Primary Action",
@@ -62,7 +63,7 @@
     {
       "name": "generate-colors",
       "title": "Generate Colors",
-      "description": "Generate colors using AI.",
+      "description": "Generate colors using AI",
       "mode": "view",
       "arguments": [
         {
@@ -82,7 +83,7 @@
     {
       "name": "convert-color",
       "title": "Convert Color",
-      "description": "Convert any color to a different format.",
+      "description": "Convert any color to a different format",
       "mode": "no-view",
       "arguments": [
         {
@@ -147,7 +148,7 @@
         }
       ],
       "default": "hex",
-      "description": "The color format to use when copying/pasting colors.",
+      "description": "The color format to use when copying/pasting colors",
       "name": "colorFormat",
       "required": false,
       "title": "Color Format",
@@ -155,19 +156,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.78.1",
-    "@raycast/utils": "^1.15.0",
-    "colorjs.io": "^0.4.5",
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.16.5",
+    "colorjs.io": "^0.5.2",
     "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/node": "^20.10.1",
-    "@types/react": "^18.2.39",
-    "eslint": "^8.54.0",
-    "prettier": "^3.1.0",
+    "@types/react": "^18.3.4",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
     "react": "^18.2.0",
-    "typescript": "^5.3.2"
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",

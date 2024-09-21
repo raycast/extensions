@@ -11,7 +11,7 @@
     "xilopaint"
   ],
   "license": "MIT",
-  "description": "Home Assistant remote control. Control your house with Raycast 🚀",
+  "description": "Manage your smart home with Raycast",
   "icon": "home-assistant.png",
   "commands": [
     {
@@ -296,7 +296,7 @@
       "preferences": [
         {
           "name": "includedEntities",
-          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
           "type": "textfield",
           "required": false,
           "title": "Included Entities",
@@ -304,7 +304,7 @@
         },
         {
           "name": "excludedEntities",
-          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
           "type": "textfield",
           "required": false,
           "title": "Excluded Entities",
@@ -321,7 +321,7 @@
       "preferences": [
         {
           "name": "includedEntities",
-          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
           "type": "textfield",
           "required": false,
           "title": "Included Entities",
@@ -329,7 +329,7 @@
         },
         {
           "name": "excludedEntities",
-          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
           "type": "textfield",
           "required": false,
           "title": "Excluded Entities",
@@ -346,7 +346,7 @@
       "preferences": [
         {
           "name": "includedEntities",
-          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
           "type": "textfield",
           "required": false,
           "title": "Included Entities",
@@ -354,7 +354,7 @@
         },
         {
           "name": "excludedEntities",
-          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
           "type": "textfield",
           "required": false,
           "title": "Excluded Entities",
@@ -371,7 +371,7 @@
       "preferences": [
         {
           "name": "includedEntities",
-          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
           "type": "textfield",
           "required": false,
           "title": "Included Entities",
@@ -379,7 +379,7 @@
         },
         {
           "name": "excludedEntities",
-          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
           "type": "textfield",
           "required": false,
           "title": "Excluded Entities",
@@ -404,7 +404,7 @@
       "preferences": [
         {
           "name": "includedEntities",
-          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
           "type": "textfield",
           "required": true,
           "title": "Included Entities",
@@ -412,7 +412,7 @@
         },
         {
           "name": "excludedEntities",
-          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
           "type": "textfield",
           "required": false,
           "title": "Excluded Entities",
@@ -545,7 +545,7 @@
       "type": "textfield",
       "required": false,
       "title": "Internal Home Assistant URL (optional)",
-      "description": "URL of your Home Assistant instance in your Home Network. This url is used when the current WiFI SSID is in the SSID list of your Home WiFi or the url is pingable.",
+      "description": "URL of your Home Assistant instance in your Home Network. This url is used when the current WiFI SSID is in the SSID list of your Home Wi-Fi or the url is pingable.",
       "placeholder": "http://homeassistant.local:8123"
     },
     {
@@ -553,7 +553,7 @@
       "type": "textfield",
       "required": false,
       "title": "Home Network Detection",
-      "description": "A list of your Home Network WiFi SSIDs separated by a comma if you have multiple. The SSIDs are used to detect your Home WiFi. Only required if the Internal Home Assistant URL is set.",
+      "description": "A list of your Home Network Wi-Fi SSIDs separated by a comma if you have multiple. The SSIDs are used to detect your Home Wi-Fi. Only required if the Internal Home Assistant URL is set.",
       "placeholder": "HomeWiFi1,HomeWiFi2"
     },
     {
@@ -570,7 +570,7 @@
       "required": true,
       "title": "API Token",
       "description": "Your Home Assistant long-lived access token",
-      "placeholder": "Enter your Home Assistant long-lived access token"
+      "placeholder": "Enter your Home Assistant access token"
     },
     {
       "name": "ignorecerts",
@@ -622,36 +622,36 @@
     "Other"
   ],
   "dependencies": {
-    "@raycast-community/ui": "~0.1.1",
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.5.2",
-    "home-assistant-js-websocket": "^8.1.0",
-    "javascript-time-ago": "^2.5.9",
+    "@raycast-community/ui": "^0.1.1",
+    "@raycast/api": "^1.82.4",
+    "@raycast/utils": "^1.17.0",
+    "home-assistant-js-websocket": "^8.2.0",
+    "javascript-time-ago": "^2.5.11",
     "lodash-es": "^4.17.21",
     "multicast-dns": "^7.2.5",
-    "node-fetch": "^2.6.1",
-    "open": "^8.3.0",
+    "node-fetch": "^2.7.0",
+    "open": "^8.4.2",
     "ping": "^0.4.4",
-    "plist": "^3.0.6",
+    "plist": "^3.1.0",
     "url-join": "^4.0.1",
-    "ws": "^8.2.3",
-    "yaml": "^2.4.5"
+    "ws": "^8.18.0",
+    "yaml": "^2.5.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/lodash-es": "^4.17.6",
-    "@types/multicast-dns": "^7.2.1",
-    "@types/node": "^20.8.10",
-    "@types/node-fetch": "^2.5.12",
-    "@types/ping": "^0.4.1",
-    "@types/plist": "^3.0.2",
-    "@types/react": "^18.3.3",
-    "@types/url-join": "^4.0.1",
-    "@types/ws": "^8.2.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/lodash-es": "^4.17.12",
+    "@types/multicast-dns": "^7.2.4",
+    "@types/node": "^20.16.5",
+    "@types/node-fetch": "^2.6.11",
+    "@types/ping": "^0.4.4",
+    "@types/plist": "^3.0.5",
+    "@types/react": "^18.3.5",
+    "@types/url-join": "^4.0.3",
+    "@types/ws": "^8.5.12",
     "eslint": "^7.32.0",
-    "prettier": "^3.2.5",
+    "prettier": "^3.3.3",
     "react": "^18.2.0",
-    "typescript": "^4.3.5"
+    "typescript": "^4.9.5"
   },
   "scripts": {
     "dev": "ray develop",

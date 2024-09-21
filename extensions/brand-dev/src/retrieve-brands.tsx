@@ -4,14 +4,15 @@ import {
   Detail,
   Form,
   Icon,
+  LaunchProps,
   List,
   Toast,
   getPreferenceValues,
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { FormValidation, useFetch, useForm, useLocalStorage } from "@raycast/utils";
-import { useState } from "react";
+import { FormValidation, showFailureToast, useFetch, useForm, useLocalStorage } from "@raycast/utils";
+import { useEffect, useState } from "react";
 
 type Color = {
   hex: string;
@@ -69,8 +70,11 @@ type BrandInStorage = Brand & {
 };
 const { api_key } = getPreferenceValues<Preferences>();
 
-export default function RetrieveBrand() {
+export default function RetrieveBrand(props: LaunchProps<{ arguments: Arguments.RetrieveBrands }>) {
   const { push } = useNavigation();
+  const { search } = props.arguments;
+  const [searched, setSearched] = useState(!search);
+
   const { isLoading, value: brands = [], setValue: setBrands } = useLocalStorage<BrandInStorage[]>("brands", []);
 
   async function updateBrands(newBrand: BrandInStorage) {
@@ -86,6 +90,27 @@ export default function RetrieveBrand() {
     if (index !== -1) newBrands.splice(index, 1);
     await setBrands(newBrands);
   }
+
+  useEffect(() => {
+    async function searchAndShow() {
+      setSearched(true);
+      const brand = brands.find((b) => b.domain === search);
+      if (brand) {
+        push(<ViewBrand brand={brand} />);
+      } else {
+        await showFailureToast("No matching brand found", {
+          title: search,
+          primaryAction: {
+            title: "Search Brand",
+            onAction() {
+              push(<SearchBrand search={search} onSearched={updateBrands} />);
+            },
+          },
+        });
+      }
+    }
+    if (brands.length && !searched) searchAndShow();
+  }, [brands]);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search brand">
@@ -141,14 +166,23 @@ export default function RetrieveBrand() {
 }
 
 type SearchBrandProps = {
+  search?: string;
   onSearched: (brand: BrandInStorage) => void;
 };
-function SearchBrand({ onSearched }: SearchBrandProps) {
+function SearchBrand({ search, onSearched }: SearchBrandProps) {
   const { pop } = useNavigation();
   const [execute, setExecute] = useState(false);
+
+  useEffect(() => {
+    if (search) handleSubmit({ domain: search });
+  }, []);
+
   const { itemProps, handleSubmit, values } = useForm<{ domain: string }>({
     onSubmit() {
       setExecute(true);
+    },
+    initialValues: {
+      domain: search,
     },
     validation: {
       domain: FormValidation.Required,

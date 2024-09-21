@@ -7,19 +7,20 @@ import {
   SuccessResponse,
   ErrorResponse,
   Database,
+  FileItem,
 } from "./types";
 import { showFailureToast, useFetch } from "@raycast/utils";
 
-type useUAPIOptions = {
+type useUAPIOptions<T> = {
   execute: boolean;
   onError?: () => void;
-  onData?: () => void;
+  onData?: (data: T) => void;
 };
 export function useUAPI<T>(
   module: string,
   functionName: string,
-  params?: { [key: string]: string | number },
-  options: useUAPIOptions = { execute: true },
+  params?: Record<string, string | number>,
+  options: useUAPIOptions<T> = { execute: true },
 ) {
   const API_URL = new URL(`execute/${module}/${functionName}`, CPANEL_URL);
   if (params) Object.entries(params).forEach(([key, val]) => API_URL.searchParams.append(key, val.toString()));
@@ -39,8 +40,8 @@ export function useUAPI<T>(
       await showFailureToast(error, { title: "cPanel Error" });
       options.onError?.();
     },
-    onData() {
-      options.onData?.();
+    onData(data) {
+      options.onData?.(data);
     },
   });
   return { isLoading, data, error, revalidate };
@@ -74,3 +75,9 @@ export const useListEmailAccountsWithDiskInfo = (email: string, domain: string) 
 // DATABASES
 export const useListDatabases = (database_type: "Mysql" | "Postgresql") =>
   useUAPI<Database[]>(database_type, "list_databases");
+
+// FILES
+export const useListFiles = (dir: string) =>
+  useUAPI<FileItem[]>("Fileman", "list_files", {
+    dir,
+  });

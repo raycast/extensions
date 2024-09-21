@@ -1,5 +1,9 @@
 # put.io Changelog
 
+## [Refactor] - 2024-09-19
+
+- Updated file list item actions to use a new utility function that requires less network requests to get the relevant action URLs.
+
 ## [Enhancement] - 2024-05-05
 
 - Add VLC streaming support for both regular and MP4 streams

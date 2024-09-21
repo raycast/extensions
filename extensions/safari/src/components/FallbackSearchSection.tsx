@@ -8,8 +8,8 @@ const Actions = (props: { searchText: string }) => (
 );
 
 // TODO: Use the `actions` prop on `<List>` component after we fixed a bug
-const FallbackSearchSection = (props: { searchText?: string }) =>
-  props.searchText ? (
+export default function FallbackSearchSection(props: { searchText?: string }) {
+  return props.searchText ? (
     <List.Section title="Fallback">
       <List.Item
         key="fallback-search"
@@ -19,5 +19,4 @@ const FallbackSearchSection = (props: { searchText?: string }) =>
       />
     </List.Section>
   ) : null;
-
-export default FallbackSearchSection;
+}

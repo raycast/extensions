@@ -2,13 +2,24 @@ import { useEffect } from "react";
 import fetch from "node-fetch";
 import { useCachedState } from "@raycast/utils";
 
-export default function getWeather() {
-  const [weatherData, setWeatherData] = useCachedState<string | null>("weather-data", null);
+export default function getWeather(type: "temperature" | "wind" | "default" = "default") {
+  const [weatherData, setWeatherData] = useCachedState<string | null>(`weather-data-${type}`, null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("https://wttr.in/?format=%f+%w");
+        let format;
+        switch (type) {
+          case "temperature":
+            format = "%t";
+            break;
+          case "wind":
+            format = "%w";
+            break;
+          default:
+            format = "%t+%w";
+        }
+        const response = await fetch(`https://wttr.in/?format=${format}`);
         const data = await response.text();
         setWeatherData(data);
       } catch (error) {
@@ -19,7 +30,7 @@ export default function getWeather() {
     if (!weatherData) {
       fetchData();
     }
-  }, [weatherData]);
+  }, [weatherData, type]);
 
   return weatherData;
 }

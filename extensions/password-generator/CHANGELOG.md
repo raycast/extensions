@@ -1,5 +1,10 @@
 # Password Generator Changelog
 
+## [Update] - 2024-09-05
+
+Updated dependencies
+Updated screenshots
+
 ## [Enhancements] - 2024-06-06
 
 Add preference to store last used password length

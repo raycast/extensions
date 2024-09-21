@@ -52,6 +52,23 @@ export type Database = {
   users: string[];
 };
 
+export type FileItem = {
+  type: "dir" | "link" | "file";
+  gid: number;
+  path: string;
+  fullpath: string;
+  size: string;
+  humansize: string;
+  file: string;
+  uid: number;
+  exists: 0 | 1;
+  mtime: number;
+  mode: number;
+  ctime: number;
+  absdir: string;
+  nicemode: string;
+};
+
 export type ErrorResponse = {
   metadata: Record<string, never>;
   status: 0;

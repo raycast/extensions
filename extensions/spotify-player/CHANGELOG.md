@@ -1,5 +1,21 @@
 # Spotify Player Changelog
 
+## [Minor Fixes] - 2024-09-20
+
+- Fixed an issue when "Nothing is playing" popped up after commands `next`, `previous` and `like` having `Current Track` command disabled
+
+## [Generate Playlist Improvement] - 2024-09-06
+
+- Use GPT-4o mini instead of GPT-4o to make it faster.
+
+## [Add "Start DJ" Command] - 2024-09-05
+
+- Added a command to start the DJ using AppleScript, because the Spotify API doesn't support it.
+
+## [Quicklink to Add Playing Song to Playlist] - 2024-08-29
+
+- Adds an action to create a quicklink to add the currently playing song to a specific playlist.
+
 ## [Add Preference to Only Show Music in Search Command] - 2024-08-26
 
 - Added a preference to only show music results in the search command for users who don't want to see podcasts and episodes.

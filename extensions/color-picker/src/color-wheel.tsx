@@ -1,11 +1,11 @@
-import { Detail, showHUD, Clipboard, popToRoot, closeMainWindow, LaunchProps } from "@raycast/api";
+import { Clipboard, closeMainWindow, Detail, LaunchProps, popToRoot, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { callbackLaunchCommand, LaunchOptions } from "raycast-cross-extension";
 import { useEffect } from "react";
-import { LaunchOptions, callbackLaunchCommand } from "raycast-cross-extension";
+import { pickColor } from "swift:../swift/color-picker";
 import { addToHistory } from "./history";
 import { Color } from "./types";
 import { getFormattedColor } from "./utils";
-import { pickColor } from "swift:../swift/color-picker";
 
 export default function Command({
   launchContext = {},

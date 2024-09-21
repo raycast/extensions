@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useCachedState } from "@raycast/utils";
 import { getCurrentMonth, getCurrentWeek } from "u/getDate";
-import { monthViewMode, weekEnable, weekFormat, enableTime } from "u/options";
+import { monthViewMode, weekEnable, weekFormat, enableTime, weekDays } from "u/options";
 
 type ContextType = {
   selectedMonth: number;
@@ -24,7 +24,47 @@ type ContextType = {
   setEnableTimer: (enable: boolean) => void;
   selectedDay: number;
   setSelectedDay: (day: number) => void;
+  placeholder: string;
+  setPlaceholder: (placeholder: string) => void;
+  isDayNames: boolean;
+  setDayNames: (enable: boolean) => void;
 };
+
+const initialContextValue: ContextType = {
+  selectedMonth: getCurrentMonth().monthNumber,
+  setSelectedMonth: () => {},
+  currentYear: 0,
+  setCurrentYear: () => {},
+  currentWeek: 0,
+  setCurrentWeek: () => {},
+  currentDay: 0,
+  setCurrentDay: () => {},
+  selectedDay: 0,
+  setSelectedDay: () => {},
+  currentMonth: 0,
+  setCurrentMonth: () => {},
+  thisMonth: 0,
+  viewMode: monthViewMode,
+  setViewMode: () => {},
+  weekFormat: weekFormat,
+  enableWeek: enableTime,
+  setEnableWeek: () => {},
+  enableTimer: enableTime,
+  setEnableTimer: () => {},
+  placeholder: "",
+  setPlaceholder: () => {},
+  isDayNames: weekDays,
+  setDayNames: () => {},
+};
+
+export const Context = React.createContext<ContextType>(initialContextValue);
+
+const FULL_DATE = new Intl.DateTimeFormat("en-US", {
+  weekday: "long",
+  month: "long",
+  day: "numeric",
+  year: "numeric",
+}).format(new Date());
 
 export function Provider({ children }: { children: React.ReactNode }) {
   const date = new Date();
@@ -36,8 +76,10 @@ export function Provider({ children }: { children: React.ReactNode }) {
   const [thisMonth] = useState(date.getMonth() + 1);
   const [viewMode, setViewMode] = useCachedState("view-mode", monthViewMode);
   const [enableWeek, setEnableWeek] = useState(weekEnable);
+  const [isDayNames, setDayNames] = useState(weekDays);
   const [enableTimer, setEnableTimer] = useState(enableTime);
   const [selectedMonth, setSelectedMonth] = useCachedState("selected-month", getCurrentMonth().monthNumber);
+  const [placeholder, setPlaceholder] = useState(FULL_DATE);
 
   return (
     <Context.Provider
@@ -62,32 +104,13 @@ export function Provider({ children }: { children: React.ReactNode }) {
         setEnableWeek,
         enableTimer,
         setEnableTimer,
+        placeholder,
+        setPlaceholder,
+        isDayNames,
+        setDayNames,
       }}
     >
       {children}
     </Context.Provider>
   );
 }
-
-export const Context = React.createContext<ContextType>({
-  selectedMonth: getCurrentMonth().monthNumber,
-  setSelectedMonth: () => {},
-  currentYear: 0,
-  setCurrentYear: () => {},
-  currentWeek: 0,
-  setCurrentWeek: () => {},
-  currentDay: 0,
-  setCurrentDay: () => {},
-  selectedDay: 0,
-  setSelectedDay: () => {},
-  currentMonth: 0,
-  setCurrentMonth: () => {},
-  thisMonth: 0,
-  viewMode: monthViewMode,
-  setViewMode: () => {},
-  weekFormat: weekFormat,
-  enableWeek: enableTime,
-  setEnableWeek: () => {},
-  enableTimer: enableTime,
-  setEnableTimer: () => {},
-});

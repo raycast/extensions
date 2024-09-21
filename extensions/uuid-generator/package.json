@@ -9,7 +9,12 @@
     "GastroGeek",
     "pernielsentikaer",
     "LunaticMuch",
-    "hmarr"
+    "hmarr",
+    "harsh_khandelwal"
+  ],
+  "keywords": [
+    "guid",
+    "GUID"
   ],
   "license": "MIT",
   "commands": [
@@ -85,6 +90,12 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "viewHistory",
+      "title": "View History",
+      "description": "View the UUID history",
+      "mode": "view"
     }
   ],
   "preferences": [
