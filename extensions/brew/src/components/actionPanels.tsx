@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import {
   brewIsInstalled,
   brewInstallPath,
@@ -11,6 +11,26 @@ import { FormulaInfo } from "./formulaInfo";
 import { CaskInfo } from "./caskInfo";
 import * as Actions from "./actions";
 import { useTerminalApp } from "./runInTerminal";
+
+const DebugSection = (props: { obj: Cask | Formula }) => (
+  <ActionPanel.Section>
+    <Action.Push
+      target={
+        <Detail
+          navigationTitle="Debug Info"
+          markdown={"```\n" + JSON.stringify(props.obj, null, 2) + "\n```"}
+          actions={
+            <ActionPanel>
+              <Action.CopyToClipboard title="Copy JSON" content={JSON.stringify(props.obj, null, 2)} />
+            </ActionPanel>
+          }
+        />
+      }
+      title="Debug"
+      icon={Icon.MagnifyingGlass}
+    />
+  </ActionPanel.Section>
+);
 
 export function CaskActionPanel(props: {
   cask: Cask;
@@ -62,6 +82,8 @@ export function CaskActionPanel(props: {
           />
           <Action.CopyToClipboard title="Copy Tap Name" content={cask.tap} />
         </ActionPanel.Section>
+
+        <DebugSection obj={cask} />
       </ActionPanel>
     );
   }
@@ -156,6 +178,8 @@ export function FormulaActionPanel(props: {
             onAction={() => runCommandInTerminal(brewUninstallCommand(formula))}
           />
         </ActionPanel.Section>
+
+        <DebugSection obj={formula} />
       </ActionPanel>
     );
   }
@@ -195,6 +219,8 @@ export function FormulaActionPanel(props: {
           <Action.OpenInBrowser url={formula.homepage} />
           <Action.CopyToClipboard title="Copy URL" content={formula.homepage} />
         </ActionPanel.Section>
+
+        <DebugSection obj={formula} />
       </ActionPanel>
     );
   }
