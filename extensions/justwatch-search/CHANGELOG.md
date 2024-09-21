@@ -1,6 +1,14 @@
 # JustWatch Search Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Upgrade dependencies
+- Refactored most of the code for better readability and maintainability
+- Moved API to use `useFetch` hook, so it properly kills the request when search changes
+- Moved Country Code selection to use `useCachedState` hook, so it will properly update search when changed
+
 ## [Fix API] - 2023-06-16
+
 - Migrate JustWatch API from REST to GraphQL since REST no longer works
 
 ## [New Additions] - 2023-06-16
@@ -13,4 +21,4 @@
 
 ## [Added JustWatch Search] - 2022-03-22
 
-Initial extension code
+- Initial extension code

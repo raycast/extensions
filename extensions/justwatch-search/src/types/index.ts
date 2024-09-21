@@ -10,7 +10,7 @@ export enum MediaType {
 }
 
 export interface JustWatchMedia {
-  id: number;
+  id: string;
   name: string;
   type: string;
   year: number;
@@ -46,7 +46,6 @@ export interface OtherPrices {
 }
 
 export enum Country {
-  "" = "",
   en_US = "United States",
   de_DE = "Germany",
   pt_BR = "Brazil",
@@ -167,3 +166,38 @@ export enum Country {
   sl_SI = "Slovenia",
   it_VA = "Vatican City",
 }
+
+export type Node = {
+  id: string;
+  objectType: string;
+  objectId: number;
+  content: {
+    fullPath: string;
+    title: string;
+    originalReleaseYear: number;
+    posterUrl: string;
+    scoring: {
+      imdbScore: number;
+      imdbVotes: number;
+      tmdbPopularity: number;
+      tmdbScore: number;
+    };
+  };
+  offerCount: number;
+  offers: Array<{
+    monetizationType: string;
+    deeplinkURL: string;
+    standardWebURL: string;
+    elementCount: number;
+    retailPriceValue?: number;
+    retailPrice?: string;
+    currency: string;
+    presentationType: string;
+    package: {
+      id: string;
+      packageId: string;
+      clearName: string;
+      icon: string;
+    };
+  }>;
+};
