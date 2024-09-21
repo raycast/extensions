@@ -1,6 +1,7 @@
 import { showHUD } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { getPreferenceValues } from "@raycast/api";
+import { LanguageCode, getMenuOptionsByLanguage, MenuOptions } from "./lang";
 
 export async function checkTidalRunning(): Promise<boolean> {
   try {
@@ -28,16 +29,26 @@ export async function checkTidalRunning(): Promise<boolean> {
 export async function runTidalCommand(fn: () => Promise<void>): Promise<void> {
   const tidalRunning = await checkTidalRunning();
   if (tidalRunning) {
-    await fn();
+    try {
+      await fn();
+    } catch (err) {
+      console.error("Error running Tidal command:", err);
+      await showHUD("Tidal: Error running command! ❌\nDid you choose the right language in your settings?");
+    }
   }
 }
 
 interface Preferences {
   showMessages: boolean;
+  language: LanguageCode;
 }
 
 export function getPreferences(): Preferences {
   return getPreferenceValues<Preferences>();
+}
+
+export function getMenuOptions(): MenuOptions {
+  return getMenuOptionsByLanguage(getPreferences().language);
 }
 
 export function showMessage(message: string) {

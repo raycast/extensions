@@ -2,7 +2,7 @@
     "$schema": "https://www.raycast.com/schemas/extension.json",
     "name": "sublime",
     "title": "Sublime",
-    "description": "Search your sublime.app library and quickly save content.",
+    "description": "Search, discover, and add cards to your library.",
     "icon": "icon.png",
     "author": "sublime.app",
     "access": "public",

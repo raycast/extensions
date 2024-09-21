@@ -11,6 +11,7 @@ The PDF Tools extension for Raycast streamlines PDF manipulation tasks with comm
 - **Merge PDF Files**: Merge multiple PDF files into one.
 - **Protect PDF**: Set password protection on PDF files.
 - **Unlock PDF**: Remove password protection from PDF files.
+- **Watermark PDF**: Add watermarks to PDF files.
 
 ## Author
 

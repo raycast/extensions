@@ -1,7 +1,7 @@
 import { closeMainWindow } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
-import { runTidalCommand, showMessage } from "./util/fn";
+import { runTidalCommand, showMessage, getMenuOptions } from "./util/fn";
 
 export default async function doShuffle() {
   await runTidalCommand(async () => {
@@ -11,7 +11,7 @@ export default async function doShuffle() {
     const result = await runAppleScript(`
       tell application "System Events"
         tell process "TIDAL"
-          set shuffleMenuItem to menu item "Shuffle" of menu "Playback" of menu bar 1
+          set shuffleMenuItem to menu item "${getMenuOptions().shuffle}" of menu "${getMenuOptions().playback}" of menu bar 1
           set wasShuffled to value of attribute "AXMenuItemMarkChar" of shuffleMenuItem is not missing value
           click shuffleMenuItem
           return wasShuffled

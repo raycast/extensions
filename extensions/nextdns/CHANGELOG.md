@@ -1,10 +1,15 @@
 # NextDNS Changelog
 
+## [Enhancements] - 2024-09-03
+
+- Added pagination for `Search Logs`
+- Added support for adding domains to allow- and denylist from `Search Logs`
+
 ## [Enhancements] - 2024-09-02
 
-- Added allowd/blocked labels in `Search Logs`
+- Added allowed/blocked labels in `Search Logs`
 - Added possibility to hide device in `Search Logs`
-- Added `Status´ command
+- Added `Status` command
 
 ## [Fix] - 2024-09-01
 

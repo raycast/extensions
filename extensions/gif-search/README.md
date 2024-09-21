@@ -16,10 +16,12 @@ You can change the default action on a GIF to customize what happens when you pr
 
 1. Copy GIF (Default): Copies the GIF file itself to your Clipboard
 2. Copy GIF Link: Copies the URL to the GIF file to your Clipboard
-3. Add or Remove from Favorites
-4. View GIF Details: Opens the GIF Details view with extra metadata about the GIF
-5. Copy Page Link: Copies the URL to the page the GIF is hosted on to your Clipboard
-6. Open in Browser: Opens the URL to the page the GIF is hosted on in your browser
-7. Download GIF: Downloads the GIF in your Downloads folder
+3. Copy GIF Markdown: Copies a Markdown-formatted link to the GIF to your Clipboard
+4. Paste GIF Markdown: Pastes a Markdown-formatted link to the GIF into the front-most application
+5. Add or Remove from Favorites
+6. View GIF Details: Opens the GIF Details view with extra metadata about the GIF
+7. Copy Page Link: Copies the URL to the page the GIF is hosted on to your Clipboard
+8. Open in Browser: Opens the URL to the page the GIF is hosted on in your browser
+9. Download GIF: Downloads the GIF in your Downloads folder
 
 Whichever setting is chosen will be moved to the top of the list, making it the default action when you hit ⏎ on the GIF list item.

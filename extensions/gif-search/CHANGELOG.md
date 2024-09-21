@@ -1,5 +1,9 @@
 # GIF Search Changelog
 
+## [Add 'Paste GIF Markdown' action] - 2024-09-06
+
+- Added a new action to paste a Markdown-formatted link to the GIF into the front-most application
+
 ## [Fix favorites GIFS can't be removed] - 2024-09-02
 
 - Fixes a bug where favorited GIFs couldn't be removed from the favorites list

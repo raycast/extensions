@@ -110,6 +110,7 @@ export type BookmarksParams = {
 
 export interface FormValues {
   link: string;
+  title?: string;
   collection?: string;
   tags: string[];
   newCollection?: string;

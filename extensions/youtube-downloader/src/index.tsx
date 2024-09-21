@@ -117,12 +117,32 @@ export default function DownloadVideo() {
   }
 
   const currentFormat = JSON.parse(values.format || "{}");
-  const audioFormats = ytdl.filterFormats(formats, "audioonly").filter((format) => format.container === "mp4");
+  const audioFormats = deduplicateByKey(
+    ytdl.filterFormats(formats, "audioonly").filter((format) => format.container === "mp4"),
+    (x) => {
+      return serializeFormatOptions({
+        itag: x.itag.toString(),
+        container: x.container,
+      });
+    }
+  );
   const isSelectedAudio = currentFormat.itag === audioFormats[0]?.itag.toString();
   const audioContentLength = audioFormats[0]?.contentLength ?? "0";
-  const videoFormats = ytdl
-    .filterFormats(formats, "videoonly")
-    .filter((format) => (format.container === "mp4" && !format.colorInfo) || format.container === "webm");
+  const videoFormats = deduplicateByKey(
+    ytdl
+      .filterFormats(formats, "videoonly")
+      .filter((format) => (format.container === "mp4" && !format.colorInfo) || format.container === "webm"),
+    (x) => {
+      return serializeFormatOptions({
+        itag: x.itag.toString(),
+        container: x.container,
+      });
+    }
+  );
+
+  function serializeFormatOptions(options: FormatOptions) {
+    return JSON.stringify(options);
+  }
 
   return (
     <Form
@@ -161,7 +181,11 @@ export default function DownloadVideo() {
               .map((format, index) => (
                 <Form.Dropdown.Item
                   key={`${format.itag}-${format.quality}-${container}-${index}`}
-                  value={JSON.stringify({ itag: format.itag.toString(), container: container } as FormatOptions)}
+                  value={serializeFormatOptions({
+                    itag: format.itag.toString(),
+                    container: container,
+                  })}
+                  keywords={[container, "video"]}
                   title={`${format.qualityLabel} (${
                     format.contentLength
                       ? prettyBytes(parseInt(format.contentLength) + parseInt(audioContentLength))
@@ -176,6 +200,7 @@ export default function DownloadVideo() {
           {audioFormats.map((format, index) => (
             <Form.Dropdown.Item
               key={`${format.itag}-${format.audioBitrate}-${index}`}
+              keywords={["mp3", "audio"]}
               value={JSON.stringify({ itag: format.itag.toString() } as FormatOptions)}
               title={`${format.audioBitrate}kps (${prettyBytes(parseInt(format.contentLength))})`}
               icon={Icon.Music}
@@ -215,6 +240,18 @@ To install homebrew, visit [this link](https://brew.sh)
   `}
     />
   );
+}
+
+function deduplicateByKey<T>(array: T[], key: (x: T) => string): T[] {
+  const seen = new Set();
+  return array.filter((item) => {
+    const itemKey = key(item);
+    if (seen.has(itemKey)) {
+      return false;
+    }
+    seen.add(itemKey);
+    return true;
+  });
 }
 
 function AutoInstall({ onRefresh }: { onRefresh: () => void }) {

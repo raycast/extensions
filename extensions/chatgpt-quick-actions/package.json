@@ -6,7 +6,8 @@
   "icon": "openai-logo.png",
   "author": "alanzchen",
   "contributors": [
-    "kolacek.m"
+    "kolacek.m",
+    "JonathanAquino"
   ],
   "categories": [
     "Productivity"
@@ -263,6 +264,106 @@
       "preferences": [
         {
           "name": "model_preview",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "title": "GPT-4o",
+              "value": "gpt-4o"
+            },
+            {
+              "title": "GPT-4o mini",
+              "value": "gpt-4o-mini"
+            },
+            {
+              "title": "GPT-4",
+              "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 Turbo",
+              "value": "gpt-4-turbo"
+            },
+            {
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "transform",
+      "title": "Transform",
+      "description": "Replace selected text with ChatGPT output, based on a prompt entered when the command is run",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "e.g. beautify JSON",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "model_transform",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "title": "GPT-4o",
+              "value": "gpt-4o"
+            },
+            {
+              "title": "GPT-4o mini",
+              "value": "gpt-4o-mini"
+            },
+            {
+              "title": "GPT-4",
+              "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 Turbo",
+              "value": "gpt-4-turbo"
+            },
+            {
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "transform_preview",
+      "title": "Transform Preview",
+      "description": "Same as Transform, but shows the output in a preview window instead of replacing the selected text",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "e.g. beautify JSON",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "model_transform_preview",
           "description": "Override the global preferred model for this command",
           "type": "dropdown",
           "required": false,
