@@ -1,5 +1,9 @@
 # search joplin notes Changelog
 
+## [FIX Codes] - 2024-9-21
+
+Modify it so that the search results can be changed in the settings
+
 ## [FIX Codes] - 2024-7-29
 
 Fix searches so that they do not take more data
