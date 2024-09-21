@@ -1,6 +1,5 @@
 import { Toast, closeMainWindow, showToast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import { build } from "./preferences";
 
 const makeNewWindow = async () => {
   await runAppleScript(`
