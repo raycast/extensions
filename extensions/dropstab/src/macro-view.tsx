@@ -32,9 +32,9 @@ export default function Command() {
 
     const marketSection = `
 ### Macro Data
-${["sp500", "gold", "silver", "oil", "nvidia", "apple"]
+${["sp500", "gold", "silver", "brent", "nvidia", "apple"]
   .map((key) => {
-    const displayName = key === "oil" ? "brent" : key;
+    const displayName = key;
     const marketData = macroData[key as keyof MacroData] as MarketData;
     const change = formatChange(marketData.change_1d);
     const imageUrl = `../assets/${displayName}.png`; // Путь к изображению
