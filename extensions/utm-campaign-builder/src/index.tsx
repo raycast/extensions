@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, popToRoot, PopToRootType, showHUD } from "@raycast/api";
-import { useForm } from "@raycast/utils";
+import { Action, ActionPanel, Clipboard, Form, Icon, LaunchProps, popToRoot, showHUD } from "@raycast/api";
+import { showFailureToast, useForm } from "@raycast/utils";
 import { URL } from "url";
 
 type Values = {
@@ -29,13 +29,31 @@ function createCampaignUrl(values: Values) {
   return url.toString();
 }
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
+  let initialUrl: URL | undefined;
+  try {
+    const { utm } = props.arguments;
+    if (utm) {
+      initialUrl = new URL(utm);
+    }
+  } catch (error) {
+    showFailureToast("Invalid initial URL");
+  }
+
   const { handleSubmit, itemProps, values } = useForm<Values>({
     async onSubmit(values) {
       const url = createCampaignUrl(values);
       await Clipboard.copy(url);
       await showHUD("Copied to Clipboard");
       await popToRoot();
+    },
+    initialValues: {
+      url: initialUrl?.origin,
+      name: initialUrl?.searchParams.get("utm_campaign") ?? undefined,
+      source: initialUrl?.searchParams.get("utm_source") ?? undefined,
+      medium: initialUrl?.searchParams.get("utm_medium") ?? undefined,
+      content: initialUrl?.searchParams.get("utm_content") ?? undefined,
+      term: initialUrl?.searchParams.get("utm_term") ?? undefined,
     },
     validation: {
       url: (value) => {
