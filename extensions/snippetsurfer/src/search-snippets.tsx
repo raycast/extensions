@@ -157,7 +157,7 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {!loadSnippetsView &&
+      {!loadSnippetsView && (
         <List.EmptyView
           icon={Icon.Snippets}
           title="No Snippets."
@@ -175,7 +175,7 @@ export default function Command() {
             </ActionPanel>
           }
         />
-      }
+      )}
       {loadSnippetsView &&
         state.filteredSnippets?.map((i) => {
           return (
@@ -183,9 +183,7 @@ export default function Command() {
               id={i.id}
               key={i.id}
               title={i.name}
-              accessories={
-                [{ icon: Icon.Folder, text: (i.folder && i.folder !== "." ? i.folder : "") }]
-              }
+              accessories={[{ icon: Icon.Folder, text: i.folder && i.folder !== "." ? i.folder : "" }]}
               keywords={[i.folder, ...i.content.content.split(" ").concat(i.content.rawMetadata.split(" "))]}
               icon={Icon.Document}
               detail={<SnippetContent snippet={i} />}
