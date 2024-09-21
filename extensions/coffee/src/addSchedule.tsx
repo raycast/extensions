@@ -72,15 +72,12 @@ export default function Command() {
 
     if (deleteConfirmation) {
       try {
-        if (schedule.IsRunning === true) await stopCaffeinate(
-          { menubar: true, status: true },
-        );
+        if (schedule.IsRunning === true) await stopCaffeinate({ menubar: true, status: true });
         await LocalStorage.removeItem(schedule.day);
         await showToast(Toast.Style.Success, "Schedule deleted.");
 
-        const updatedSchedules = schedules.filter(scheduleItem => scheduleItem.day !== schedule.day);
+        const updatedSchedules = schedules.filter((scheduleItem) => scheduleItem.day !== schedule.day);
         setSchedules(updatedSchedules);
-
       } catch (error) {
         console.error("Failed to delete schedule:", error);
         await showToast(Toast.Style.Failure, "Failed to delete schedule.");
@@ -90,31 +87,29 @@ export default function Command() {
 
   const handlePauseSchedule = async (schedule: Schedule) => {
     changeScheduleState("decaffeinate", schedule);
-    await showHUD(`Schedule for ${schedule.day.charAt(0).toUpperCase() + schedule.day.slice(1).toLowerCase()} is now paused`);
+    await showHUD(
+      `Schedule for ${schedule.day.charAt(0).toUpperCase() + schedule.day.slice(1).toLowerCase()} is now paused`,
+    );
     if (isTodaysSchedule(schedule)) {
-      await stopCaffeinate(
-        { menubar: true, status: true },
-      );
+      await stopCaffeinate({ menubar: true, status: true });
     }
 
     // Update the state to reflect the paused schedule
     setSchedules((prevSchedules) =>
-      prevSchedules.map((s) =>
-        s.day === schedule.day ? { ...s, IsRunning: false, IsManuallyDecafed: true } : s
-      )
+      prevSchedules.map((s) => (s.day === schedule.day ? { ...s, IsRunning: false, IsManuallyDecafed: true } : s)),
     );
   };
 
   const handleResumeSchedule = async (schedule: Schedule) => {
     changeScheduleState("caffeinate", schedule);
-    await showHUD(`Schedule for ${schedule.day.charAt(0).toUpperCase() + schedule.day.slice(1).toLowerCase()} is now resumed`);
+    await showHUD(
+      `Schedule for ${schedule.day.charAt(0).toUpperCase() + schedule.day.slice(1).toLowerCase()} is now resumed`,
+    );
     await checkSchedule();
 
     // Update the state to reflect the resumed schedule
     setSchedules((prevSchedules) =>
-      prevSchedules.map((s) =>
-        s.day === schedule.day ? { ...s, IsRunning: true, IsManuallyDecafed: false } : s
-      )
+      prevSchedules.map((s) => (s.day === schedule.day ? { ...s, IsRunning: true, IsManuallyDecafed: false } : s)),
     );
   };
 
@@ -143,38 +138,46 @@ export default function Command() {
             <List.Section
               key={index}
               title={sectionTitle}
-              children={schedules
-                .filter(index === 0 ? isTodaysSchedule : isNotTodaysSchedule)
-                .map((schedule, idx) => (
-                  <List.Item
-                    key={idx}
-                    title={schedule.day.charAt(0).toUpperCase() + schedule.day.slice(1)}
-                    accessories={[
-                      {
-                        text:
-                          index === 0
-                            ? (schedule.IsRunning ? "Running" : schedule.IsManuallyDecafed ? "Paused" : "Scheduled")
-                            : (schedule.IsManuallyDecafed ? "Scheduled Paused" : "Schedule"),
-                        icon:
-                          index === 0
-                            ? (schedule.IsRunning ? Icon.Play : schedule.IsManuallyDecafed ? Icon.Pause : Icon.Calendar)
-                            : Icon.Calendar,
-                      },
-                    ]}
-                    subtitle={`Set from ${schedule.from} to ${schedule.to}`}
-                    icon={Icon.Calendar}
-                    actions={
-                      <ListActionPanel
-                        searchText={searchText}
-                        schedule={schedule}
-                        onSetScheduleAction={handleSetSchedule}
-                        onDeleteScheduleAction={handleDeleteSchedule}
-                        onPauseScheduleAction={() => handlePauseSchedule(schedule)}
-                        onResumeScheduleAction={() => handleResumeSchedule(schedule)}
-                      />
-                    }
-                  />
-                ))}
+              children={schedules.filter(index === 0 ? isTodaysSchedule : isNotTodaysSchedule).map((schedule, idx) => (
+                <List.Item
+                  key={idx}
+                  title={schedule.day.charAt(0).toUpperCase() + schedule.day.slice(1)}
+                  accessories={[
+                    {
+                      text:
+                        index === 0
+                          ? schedule.IsRunning
+                            ? "Running"
+                            : schedule.IsManuallyDecafed
+                              ? "Paused"
+                              : "Scheduled"
+                          : schedule.IsManuallyDecafed
+                            ? "Scheduled Paused"
+                            : "Schedule",
+                      icon:
+                        index === 0
+                          ? schedule.IsRunning
+                            ? Icon.Play
+                            : schedule.IsManuallyDecafed
+                              ? Icon.Pause
+                              : Icon.Calendar
+                          : Icon.Calendar,
+                    },
+                  ]}
+                  subtitle={`Set from ${schedule.from} to ${schedule.to}`}
+                  icon={Icon.Calendar}
+                  actions={
+                    <ListActionPanel
+                      searchText={searchText}
+                      schedule={schedule}
+                      onSetScheduleAction={handleSetSchedule}
+                      onDeleteScheduleAction={handleDeleteSchedule}
+                      onPauseScheduleAction={() => handlePauseSchedule(schedule)}
+                      onResumeScheduleAction={() => handleResumeSchedule(schedule)}
+                    />
+                  }
+                />
+              ))}
             />
           ))}
         </>

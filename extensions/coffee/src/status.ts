@@ -11,9 +11,7 @@ function isCaffeinateRunning(): boolean {
   }
 }
 
-async function handleScheduledCaffeinate(
-  schedule: Schedule,
-): Promise<boolean> {
+async function handleScheduledCaffeinate(schedule: Schedule): Promise<boolean> {
   if (!schedule || Object.keys(schedule).length === 0) {
     return false;
   }

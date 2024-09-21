@@ -35,22 +35,19 @@ export function ListActionPanel({
         onAction={() => onDeleteScheduleAction(schedule)}
       />
 
-      {
-        schedule.IsManuallyDecafed ? (
-          <Action
-            title="Resume Caffeination Schedule"
-            icon={Icon.Play}
-            onAction={() => onResumeScheduleAction(schedule)}
-          />
-        ) : (
-          <Action
-            title="Pause Caffeination Schedule"
-            icon={Icon.Pause}
-            onAction={() => onPauseScheduleAction(schedule)}
-          />
-        )
-      }
-
+      {schedule.IsManuallyDecafed ? (
+        <Action
+          title="Resume Caffeination Schedule"
+          icon={Icon.Play}
+          onAction={() => onResumeScheduleAction(schedule)}
+        />
+      ) : (
+        <Action
+          title="Pause Caffeination Schedule"
+          icon={Icon.Pause}
+          onAction={() => onPauseScheduleAction(schedule)}
+        />
+      )}
     </ActionPanel>
   );
 }
