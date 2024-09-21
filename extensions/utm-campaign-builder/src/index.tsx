@@ -29,7 +29,7 @@ function createCampaignUrl(values: Values) {
   return url.toString();
 }
 
-export default function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
+export default function Command(props: LaunchProps<{ draftValues: Values; arguments: Arguments.Index }>) {
   let initialUrl: URL | undefined;
   try {
     const { utm } = props.arguments;
@@ -48,12 +48,12 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
       await popToRoot();
     },
     initialValues: {
-      url: initialUrl?.origin,
-      name: initialUrl?.searchParams.get("utm_campaign") ?? undefined,
-      source: initialUrl?.searchParams.get("utm_source") ?? undefined,
-      medium: initialUrl?.searchParams.get("utm_medium") ?? undefined,
-      content: initialUrl?.searchParams.get("utm_content") ?? undefined,
-      term: initialUrl?.searchParams.get("utm_term") ?? undefined,
+      url: props.draftValues?.url || initialUrl?.origin,
+      name: (props.draftValues?.name || initialUrl?.searchParams.get("utm_campaign")) ?? undefined,
+      source: (props.draftValues?.source || initialUrl?.searchParams.get("utm_source")) ?? undefined,
+      medium: (props.draftValues?.medium || initialUrl?.searchParams.get("utm_medium")) ?? undefined,
+      content: (props.draftValues?.content || initialUrl?.searchParams.get("utm_content")) ?? undefined,
+      term: (props.draftValues?.term || initialUrl?.searchParams.get("utm_term")) ?? undefined,
     },
     validation: {
       url: (value) => {
@@ -82,6 +82,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
 
   return (
     <Form
+      enableDrafts
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.CopyClipboard} title="Copy to Clipboard" onSubmit={handleSubmit} />
