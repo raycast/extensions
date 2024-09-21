@@ -1,5 +1,27 @@
 # Changelog
 
+## [Feature] - 2024-09-02
+
+- Feature:  Support for certain platforms that only accept simple string formats, such as DeepSeek.
+
+## [Feature] - 2024-08-26
+
+- Feature:  Support custom vision model name
+
+## [Fix] - 2024-08-13
+
+- Fix: the image width calculation in AnswerDetailView, which previously returned undefined.
+- Update package-lock.json to fix the security vulnerability (npm audit fix)
+
+## [Fix] - 2024-08-09
+
+- Fix: An unhandled error was encountered while parsing the CSV file.
+- Chore: Update prompts.csv URL to the latest version
+
+## [Fix] - 2024-07-29
+
+- Restarting a conversation will retain the currently selected model
+
 ## [Fix] - 2024-07-16
 
 - Add placeholder to improve accessibility

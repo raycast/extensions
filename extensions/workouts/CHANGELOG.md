@@ -1,5 +1,23 @@
 # Workouts Changelog
 
+## [Added a new view on Create Activity Command success] - 2024-08-30
+
+Added a new view after successfully creating an activity
+
+## [Add Routes Command] - 2024-08-29
+
+List all your routes with the `routes` command and download them as GPX/TCX files
+
+## [Enable maps] - 2024-08-06
+
+Enabled maps for everyone without the need for a personal API key
+
+## [Add Command Keywords] - 2024-08-06
+
+## [Add Create Activity Command] - 2024-07-24
+
+Added a command to create a manual activity
+
 ## [Remember selected club] - 2024-07-02
 
 - Saved last selected club in LocalStorage for the leaderboard command

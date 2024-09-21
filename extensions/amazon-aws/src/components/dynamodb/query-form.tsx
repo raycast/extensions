@@ -11,6 +11,7 @@ import {
   Toast,
   useNavigation,
   Clipboard,
+  Keyboard,
 } from "@raycast/api";
 import { DynamoDBClient, QueryCommand, QueryCommandInput } from "@aws-sdk/client-dynamodb";
 import { Table } from "../../dynamodb";
@@ -240,6 +241,17 @@ export const QueryForm = ({ table }: { table: Table }) => {
   );
 };
 
+const ErrorActionPanel = ({ pop, error }: { pop: () => void; error?: Error }) => (
+  <ActionPanel>
+    <Action title="Retry" shortcut={Keyboard.Shortcut.Common.Refresh} onAction={pop} />
+    <Action
+      title={"Copy Error"}
+      shortcut={Keyboard.Shortcut.Common.Copy}
+      onAction={() => Clipboard.copy(getErrorMessage(error))}
+    />
+  </ActionPanel>
+);
+
 const QueryResult = ({
   table,
   input,
@@ -300,16 +312,7 @@ const QueryResult = ({
         <List.EmptyView
           title={`No items found in table ${table.TableName}!`}
           icon={{ source: Icon.Warning, tintColor: Color.Orange }}
-          actions={
-            <ActionPanel>
-              <Action title="Retry" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={pop} />
-              <Action
-                title={"Copy Error"}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
-                onAction={() => Clipboard.copy(getErrorMessage(error))}
-              />
-            </ActionPanel>
-          }
+          actions={<ErrorActionPanel {...{ pop, error }} />}
         />
       </List>
     );
@@ -321,16 +324,7 @@ const QueryResult = ({
           title={error.name}
           description={error.message}
           icon={{ source: Icon.Warning, tintColor: Color.Red }}
-          actions={
-            <ActionPanel>
-              <Action title="Retry" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={pop} />
-              <Action
-                title={"Copy Error"}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
-                onAction={() => Clipboard.copy(getErrorMessage(error))}
-              />
-            </ActionPanel>
-          }
+          actions={<ErrorActionPanel {...{ pop, error }} />}
         />
       </List>
     );

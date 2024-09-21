@@ -1,5 +1,10 @@
 # Braid Changelog
 
+## [Improvements & New Features] - 2024-08-14
+
+- Add Spread component.
+- Add IconHash.
+
 ## [Improvements & New Features] - 2024-06-17
 
 - Update IconPromote

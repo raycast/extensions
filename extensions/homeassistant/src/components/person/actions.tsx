@@ -1,9 +1,9 @@
 import { EntityStandardActionSections } from "@components/entity";
 import { State } from "@lib/haapi";
+import { Action as RUIAction } from "@raycast-community/ui";
 import { Action, ActionPanel } from "@raycast/api";
 
-export function PersonOpenInGoogleMapsAction(props: { state: State }): JSX.Element | null {
-  const s = props.state;
+export function PersonOpenInGoogleMapsAction({ state: s }: { state: State }) {
   if (!s.entity_id.startsWith("person")) {
     return null;
   }
@@ -16,15 +16,26 @@ export function PersonOpenInGoogleMapsAction(props: { state: State }): JSX.Eleme
   return (
     <Action.OpenInBrowser
       title="Open in Google Maps"
-      icon="googlemaps.png"
-      shortcut={{ modifiers: ["cmd"], key: "m" }}
+      icon="google-maps.svg"
+      shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
       url={url}
     />
   );
 }
 
-export function PersonCopyUserIDAction(props: { state: State }): JSX.Element | null {
-  const s = props.state;
+export function PersonOpenInAppleMapsAction({ state: s }: { state: State }) {
+  if (!s.entity_id.startsWith("person")) {
+    return null;
+  }
+  const lat = s.attributes.latitude as number | undefined;
+  const lon = s.attributes.longitude as number | undefined;
+  if (lat === undefined || lon === undefined) {
+    return null;
+  }
+  return <RUIAction.OpenMaps coordinates={{ lat: lat, long: lon }} shortcut={{ modifiers: ["cmd"], key: "m" }} />;
+}
+
+export function PersonCopyUserIDAction({ state: s }: { state: State }) {
   if (!s.entity_id.startsWith("person")) {
     return null;
   }
@@ -34,15 +45,14 @@ export function PersonCopyUserIDAction(props: { state: State }): JSX.Element | n
   }
   return (
     <Action.CopyToClipboard
-      title="Copy User ID"
+      title="Copy User Id"
       shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
       content={user_id}
     />
   );
 }
 
-export function PersonCopyIDAction(props: { state: State }): JSX.Element | null {
-  const s = props.state;
+export function PersonCopyIDAction({ state: s }: { state: State }) {
   if (!s.entity_id.startsWith("person")) {
     return null;
   }
@@ -50,7 +60,7 @@ export function PersonCopyIDAction(props: { state: State }): JSX.Element | null 
   if (id === undefined) {
     return null;
   }
-  return <Action.CopyToClipboard title="Copy ID" shortcut={{ modifiers: ["cmd", "shift"], key: "i" }} content={id} />;
+  return <Action.CopyToClipboard title="Copy Id" shortcut={{ modifiers: ["cmd", "shift"], key: "i" }} content={id} />;
 }
 
 export function PersonActionPanel(props: { state: State }) {
@@ -58,6 +68,7 @@ export function PersonActionPanel(props: { state: State }) {
   return (
     <ActionPanel>
       <ActionPanel.Section title="Controls">
+        <PersonOpenInAppleMapsAction state={state} />
         <PersonOpenInGoogleMapsAction state={state} />
       </ActionPanel.Section>
       <ActionPanel.Section title="Properties">

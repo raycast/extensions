@@ -3,6 +3,7 @@ import Helper from "./Helper.js";
 import Logger from "./Logger.js";
 import NamespaceFetcher from "./NamespaceFetcher.js";
 import QueryParser from "./QueryParser.js";
+import UrlProcessor from "./UrlProcessor.js";
 import countriesList from "countries-list";
 import jsyaml from "js-yaml";
 
@@ -18,6 +19,21 @@ export default class Env {
     countriesList.languages["eo"] = { name: "Esperanto", native: "Esperanto" };
     this.setToThis(env);
     this.logger = new Logger("#log");
+    this.setGit();
+  }
+
+  setGit() {
+    if (typeof GIT_INFO === "object") {
+      // eslint-disable-next-line no-undef
+      this.gitInfo = GIT_INFO;
+    } else {
+      this.gitInfo = {
+        commit: {
+          hash: "unknown",
+          date: "unknown",
+        },
+      };
+    }
   }
 
   /**
@@ -275,10 +291,10 @@ export default class Env {
 
     // Make sure language and country are in our lists.
     if (!(language in countriesList.languages)) {
-      language = "en";
+      language = this.data.config.language;
     }
     if (!country || !(country.toUpperCase() in countriesList.countries)) {
-      country = "us";
+      country = this.data.config.country;
     }
 
     // Ensure lowercase.
@@ -325,7 +341,8 @@ export default class Env {
 
     // Default namespaces.
     if (typeof this.namespaces != "object") {
-      this.namespaces = ["o", this.language, "." + this.country];
+      this.namespaces = this.data.config.namespaces;
+      this.namespaces = this.namespaces.map((namespace) => UrlProcessor.replaceVariables(namespace, this));
     }
     // Default debug.
     if (typeof this.debug != "boolean") {
@@ -342,7 +359,7 @@ export default class Env {
     let url;
     switch (this.context) {
       case "browser":
-        url = "/data.json";
+        url = `/data.json?${this.gitInfo.commit.hash}`;
         text = await Helper.fetchAsync(url, this);
         break;
       case "raycast":

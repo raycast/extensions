@@ -1,11 +1,9 @@
 import type { FC, ReactNode } from "react";
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 
-// import { clearSearchBar } from "@raycast/api";
-import type { Character } from "@/lib/dataset-manager";
 import { getFilteredDataset } from "@/lib/dataset-manager";
 import { useRecentlyUsedItems } from "@/lib/use-recently-used-items";
-import type { CharacterSet } from "@/utils/list";
+import type { Character, CharacterSet } from "@/types";
 import { buildList } from "@/utils/list";
 
 interface IListContext {
@@ -64,8 +62,8 @@ export const ListContextProvider: FC<{ children: ReactNode }> = ({ children }) =
   const loading = !addToRecentlyUsedItems || !list.length;
   const availableSets = useMemo(
     () =>
-      list
-        .map((set) => set.sectionTitle)
+      dataset.blocks
+        .map((block) => block.blockName)
         .filter((s) => s !== "Recently Used")
         .sort((a, b) => a.localeCompare(b)),
     [list],

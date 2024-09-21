@@ -28,6 +28,14 @@ export type DomainInfo = {
     billing: string;
   };
 };
+export type DNSRecord = {
+  record_id: string;
+  type: string;
+  host: string;
+  value: string;
+  ttl: string;
+  distance: number;
+};
 export type WhoisInfo = {
   domain: string;
   registered: string;
@@ -61,6 +69,52 @@ export type Price = {
 
 export type AccountBalance = {
   balance: string;
+};
+
+export type AuctionStatus = 2 | 3 | 9 | 11 | 16;
+export type Auction = {
+  id: number;
+  leaderUserId: number;
+  ownerUserId: number;
+  domainId: number;
+  domain: string;
+  statusId: AuctionStatus;
+  typeId: 1 | 3;
+  openingBid: number;
+  currentBid: number;
+  maxBid: number;
+  // "bidId": null;
+  domainCreatedOn: string;
+  auctionEndsOn: string;
+  url: string;
+};
+export type ViewAuction = Auction & {
+  authKey: string;
+  minBid: number;
+  bidder: {
+    userId: number;
+    // bidId: null,
+    userMaxBid: number;
+    proxyMaxBid: number;
+    balance: number;
+    creditLimit: number;
+    outstandingCommitments: number;
+    renewPriceThisDomain: number;
+    userInWatchlist: boolean;
+  };
+  paymentPlanMaxMonths: number;
+  errors: Array<{
+    code: number;
+    message: string;
+  }>;
+  isValid: boolean;
+  isPrivate: boolean;
+  showReserve: boolean;
+  reserve: number;
+  bidsQuantity: number;
+  visits: number;
+  clicks: number;
+  ctr: number;
 };
 
 type BaseResponse = {

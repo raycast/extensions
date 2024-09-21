@@ -18,7 +18,7 @@ export function BrightnessControlAction(props: { state: State }): JSX.Element | 
     return (
       <ActionPanel.Submenu
         title="Brightness"
-        icon={{ source: "lightbulb.png", tintColor: Color.PrimaryText }}
+        icon={{ source: "lightbulb.svg", tintColor: Color.PrimaryText }}
         shortcut={{ modifiers: ["cmd"], key: "b" }}
       >
         {brightnessValues.map((value) => (
@@ -107,14 +107,14 @@ export function ColorTempControlAction(props: { state: State }): JSX.Element | n
     return (
       <ActionPanel.Submenu
         title="Color Temperature"
-        icon={{ source: "lightbulb.png", tintColor: Color.PrimaryText }}
+        icon={{ source: "lightbulb.svg", tintColor: Color.PrimaryText }}
         shortcut={{ modifiers: ["cmd"], key: "t" }}
       >
         {brightnessValues.map((value) => (
           <Action
             key={`${value}`}
             title={`${value} K`}
-            icon={{ source: "lightbulb.png", tintColor: KtoColorLike(value) }}
+            icon={{ source: "lightbulb.svg", tintColor: KtoColorLike(value) }}
             onAction={() => handle(value)}
           />
         ))}
@@ -163,7 +163,7 @@ function ColorTempControlAddAction(props: {
       <Action
         key={`${nextK}`}
         title={`Color Temperature ${add < 0 ? "Down" : "Up"}`}
-        icon={{ source: "lightbulb.png", tintColor: Color.PrimaryText }}
+        icon={{ source: "lightbulb.svg", tintColor: Color.PrimaryText }}
         shortcut={props.shortcut}
         onAction={() => handle(nextK)}
       />
@@ -198,15 +198,15 @@ export function ColorRgbControlAction(props: { state: State }): JSX.Element | nu
   if (modes && Array.isArray(modes) && modes.includes("rgb")) {
     return (
       <ActionPanel.Submenu
-        title="Color RGB"
-        icon={{ source: "lightbulb.png", tintColor: Color.PrimaryText }}
+        title="Color Rgb"
+        icon={{ source: "lightbulb.svg", tintColor: Color.PrimaryText }}
         shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
       >
         {lightRGBColors.map((color) => (
           <Action
             key={`${color.name}`}
             title={`${color.name.charAt(0).toUpperCase()}${color.name.slice(1)}`}
-            icon={{ source: "lightbulb.png", tintColor: RGBtoColorLike(color.value) }}
+            icon={{ source: "lightbulb.svg", tintColor: RGBtoColorLike(color.value) }}
             onAction={() => handle(color.value)}
           />
         ))}
@@ -224,19 +224,19 @@ export function LightActionPanel(props: { state: State }) {
         <Action
           title="Toggle"
           onAction={async () => await ha.toggleLight(props.state.entity_id)}
-          icon={{ source: "toggle.png", tintColor: Color.PrimaryText }}
+          icon={{ source: "cached.svg", tintColor: Color.PrimaryText }}
         />
         <Action
           title="Turn On"
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={async () => await ha.turnOnLight(props.state.entity_id)}
-          icon={{ source: "power-btn.png", tintColor: Color.Green }}
+          icon={{ source: "power-on.svg", tintColor: Color.PrimaryText }}
         />
         <Action
           title="Turn Off"
           shortcut={{ modifiers: ["cmd"], key: "f" }}
           onAction={async () => await ha.turnOffLight(props.state.entity_id)}
-          icon={{ source: "power-btn.png", tintColor: Color.Red }}
+          icon={{ source: "power-off.svg", tintColor: Color.PrimaryText }}
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="Brightness">

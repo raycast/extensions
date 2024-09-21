@@ -1,12 +1,12 @@
+import type { Dispatch, SetStateAction } from "react";
 import { Action, Icon } from "@raycast/api";
-import React from "react";
-import { ImageDetail } from "./image-detail";
+import { ImageDetail } from "@/components/image-detail";
 
 export function RevealImageAction(props: {
   imageURL: string;
   size: string;
   autoRefresh?: boolean;
-  setRefresh?: React.Dispatch<React.SetStateAction<number>>;
+  setRefresh?: Dispatch<SetStateAction<number>>;
 }) {
   const { imageURL, size } = props;
   const autoRefresh = typeof props.autoRefresh === "undefined" ? false : props.autoRefresh;

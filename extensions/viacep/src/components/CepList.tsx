@@ -1,4 +1,5 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, getApplications } from "@raycast/api";
+import { getFavicon, usePromise } from "@raycast/utils";
 import { CepResponse } from "../find-cep";
 
 interface CepListProps {
@@ -7,8 +8,13 @@ interface CepListProps {
 }
 
 export default function CepList({ cepData, isLoading }: CepListProps) {
+  const { data: appleMapsApp, isLoading: isAppLoading } = usePromise(async () => {
+    const apps = await getApplications();
+    return apps.find((app) => app.bundleId === "com.apple.Maps");
+  });
+
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading || isAppLoading}>
       <List.Section title="Results" subtitle={`${cepData.length} ${cepData.length === 1 ? "CEP" : "CEPs"}`}>
         {cepData.map((data, index) => {
           const subtitle = data.complemento
@@ -24,8 +30,16 @@ export default function CepList({ cepData, isLoading }: CepListProps) {
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard title="Copy CEP" content={data.cep} />
-                  <Action.OpenInBrowser title="Open in Apple Maps" url={`maps://?q=${data.cep}`} />
-                  <Action.OpenInBrowser title="Open in Google Maps" url={`https://www.google.com/maps?q=${data.cep}`} />
+                  <Action.OpenInBrowser
+                    title="Open in Apple Maps"
+                    url={`maps://?q=${data.cep}`}
+                    icon={appleMapsApp ? { fileIcon: appleMapsApp.path } : Icon.Globe}
+                  />
+                  <Action.OpenInBrowser
+                    title="Open in Google Maps"
+                    url={`https://www.google.com/maps?q=${data.cep}`}
+                    icon={getFavicon("https://www.google.com/maps")}
+                  />
                 </ActionPanel>
               }
             />

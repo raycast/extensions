@@ -5,8 +5,14 @@
   "description": "Control Session pomodoro timers. Requires v2.6.23 or later installed: www.stayinsession.com",
   "icon": "session.png",
   "author": "jameslyons",
-  "categories": ["Applications", "Productivity"],
-  "contributors": ["pernielsentikaer"],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "contributors": [
+    "pernielsentikaer",
+    "benkates"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -14,6 +20,21 @@
       "title": "Start New Session",
       "description": "Starts a focus session in Session app",
       "mode": "no-view"
+    },
+    {
+      "name": "session-start-new-form",
+      "title": "Start Custom Session",
+      "description": "Starts a focus session in Session app with a form input. Supply a semi-colon separated list of categories in order to choose from one of them in the form (ie: \"Personal;Work;Play\" will create three dropdown options).",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "categoryList",
+          "title": "Category List",
+          "required": false,
+          "description": "Semi-colon separated list of categories to choose from in the dropdown.",
+          "type": "textfield"
+        }
+      ]
     },
     {
       "name": "session-start-previous",

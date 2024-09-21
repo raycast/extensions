@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, LaunchProps, List, LocalStorage, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, LaunchProps, List, LocalStorage, useNavigation } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { fetchLexicons, loadLexiconsFromDisk, loadSingleLexicon } from "./util/downloadLexicons";
 import { useEffect, useMemo, useState } from "react";
@@ -44,7 +44,7 @@ export default function Search(props: LaunchProps<{ arguments: Arguments.Search 
 	}, []);
 
 	useEffect(() => {
-		if (query.includes("#")) {
+		if (query?.includes("#")) {
 			const [nsid, key] = query.split("#");
 			if (lexicons[nsid]) {
 				push(<LexiconDefsList doc={lexicons[nsid]} initialSearchText={"#" + key} />);
@@ -125,6 +125,13 @@ export default function Search(props: LaunchProps<{ arguments: Arguments.Search 
 									) : null}
 									{nsid.includes("#") ? (
 										<Action.OpenInBrowser title="View on GitHub" url={linkLexicon(id)} />
+									) : null}
+									{document ? (
+										<Action.CopyToClipboard
+											title="Copy NSID"
+											content={nsid}
+											shortcut={{ modifiers: ["cmd", "ctrl"], key: "c" }}
+										/>
 									) : null}
 								</ActionPanel>
 							}

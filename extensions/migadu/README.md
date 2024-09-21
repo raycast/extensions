@@ -1,14 +1,18 @@
-# <img src="./assets/migadu.png" width="20" height="20" /> Migadu Raycast Extension
+<p align="center">
+    <img src="./assets/migadu.png" width="200" height="200" />
+</p>
+
+# Migadu Raycast Extension
 
 This is a Raycast extension for [Migadu](https://migadu.com/). With this extension, you can View, Create, Update or Delete - Mailboxes, Identities, Aliases, Rewrites in your Migadu account.
 
 ## 🚀 Getting Started
 
-1. **Install extensions**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/migadu)
+1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/migadu)
 
 2. **Get your API Key**: The first time you use the extension, you'll need to enter your Migadu API key:
 
-    a. `Sign in to your Migadu Account` at this [link](https://admin.migadu.com/public/login)
+    a. `Sign in` to your Migadu Account at [this link](https://admin.migadu.com/public/login)
 
     b. `Navigate` to [API Keys](https://admin.migadu.com/account/api/keys)
     
@@ -53,12 +57,3 @@ This extension provides the following commands:
     - Create Rewrite
     - Update Rewrite
     - Delete Rewrite
-
-## 🛠️ Installation
-
-To install this extension from the source code, follow these steps:
-
-1.  Clone this repository.
-2.  Run `npm install` to install the dependencies.
-3.  Run `npm run build` to build the extension.
-4.  Run `npm run publish` to publish the extension to Raycast store.

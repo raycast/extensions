@@ -5,33 +5,33 @@ import {
   Icon,
   getPreferenceValues,
 } from "@raycast/api";
-import { useMemo, useState } from "react";
 import groupBy from "lodash.groupby";
+import { useMemo, useState } from "react";
 import PokemonDetail from "./components/detail";
 import TypeDropdown from "./components/type_dropdown";
 
-import pokemons from "./statics/pokedex.json";
+import pokedex from "./statics/pokedex.json";
 
 const { language } = getPreferenceValues();
 
 export default function SearchPokemon() {
   const [type, setType] = useState<string>("all");
 
-  const listing = useMemo(() => {
+  const pokemons = useMemo(() => {
     return type != "all"
-      ? pokemons.filter((p) => p.types.includes(type))
-      : pokemons;
+      ? pokedex.filter((p) => p.types.includes(type))
+      : pokedex;
   }, [type]);
 
   return (
     <Grid
       throttle
-      searchBarPlaceholder="Search Pokémon by name or number..."
+      searchBarPlaceholder="Search for Pokémon by name or Pokédex number"
       searchBarAccessory={
         <TypeDropdown type="grid" command="Pokémon" onSelectType={setType} />
       }
     >
-      {Object.entries(groupBy(listing, "generation")).map(
+      {Object.entries(groupBy(pokemons, "generation")).map(
         ([generation, pokemonList]) => {
           return (
             <Grid.Section title={generation} key={generation}>

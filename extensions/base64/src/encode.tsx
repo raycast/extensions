@@ -1,14 +1,13 @@
-import { showToast, ToastStyle } from "@raycast/api";
-import { contents, update } from "./util/clipboard";
+import { Clipboard } from "@raycast/api";
+import { update } from "./util";
 import { encode } from "js-base64";
+
 export default async () => {
   try {
-    const clipboard = await contents();
+    const { text: clipboard } = await Clipboard.read();
     const encoded = encode(clipboard);
-    await update(encoded);
-  } catch (e) {
-    if (typeof e === "string") {
-      await showToast(ToastStyle.Failure, "Encode failed", e);
-    }
+    await update({ contents: encoded });
+  } catch (error) {
+    await update({ error });
   }
 };

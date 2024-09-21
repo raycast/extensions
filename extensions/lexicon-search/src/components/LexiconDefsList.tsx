@@ -27,6 +27,11 @@ export function LexiconDefsList({ doc, initialSearchText = "" }: { doc: LexiconD
 						actions={
 							<ActionPanel>
 								<Action.OpenInBrowser title="View on GitHub" url={linkLexicon(doc.id)} />
+								<Action.CopyToClipboard
+									title="Copy NSID"
+									content={doc.id}
+									shortcut={{ modifiers: ["cmd", "ctrl"], key: "c" }}
+								/>
 							</ActionPanel>
 						}
 						detail={<DefOverviewDetail def={def} lexiconName={doc.id} />}

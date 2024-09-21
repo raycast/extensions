@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./assets/brand-dev.png" width="200" height="200" />
+    <img src="./assets/brand-dev-purple.png" width="200" height="200" />
 </p>
 
 # Brand.dev
@@ -12,13 +12,13 @@ This is a Raycast extension to get a company's brand logos, colors, slogan, soci
 
 2. **Get your API Key**: The first time you use the extension, you'll need to enter your 'Brand.dev' API Key:
 
-    a. `Sign in to your Account` at [this link](https://developer.brand.dev/login)
+    a. `Sign in` to your Account at [this link](https://developer.brand.dev/login)
 
     (if you don't have an account, `Sign up` at [this link](https://developer.brand.dev/))
 
     b. `Copy` the "API Key"
   
-    c. `Enter this key` in Preferences OR at first prompt
+    c. `Enter` this key in Preferences OR at first prompt
 
 ## 🗒️ NOTE
 

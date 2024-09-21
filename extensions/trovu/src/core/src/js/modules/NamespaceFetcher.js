@@ -190,7 +190,7 @@ export default class NamespaceFetcher {
         continue;
       }
       const promise = this.env.fetch(namespaceInfo.url, {
-        cache: this.env.reload ? "reload" : "force-cache",
+        cache: this.env.reload ? "reload" : "default",
       });
       promises.push(promise);
     }
@@ -211,11 +211,11 @@ export default class NamespaceFetcher {
       }
       const response = responses.shift();
       if (!response || response.status != 200) {
-        this.env.logger.info(`Problem fetching via ${this.env.reload ? "reload" : "cache"} ${namespaceInfo.url}`);
+        this.env.logger.info(`Problem fetching via ${this.env.reload ? "reload" : "default"} ${namespaceInfo.url}`);
         namespaceInfo.shortcuts = {};
         continue;
       }
-      this.env.logger.success(`Success fetching via ${this.env.reload ? "reload" : "cache"} ${namespaceInfo.url}`);
+      this.env.logger.success(`Success fetching via ${this.env.reload ? "reload" : "default"} ${namespaceInfo.url}`);
       const text = await response.text();
       namespaceInfo.shortcuts = this.parseShortcutsFromYml(text, namespaceInfo.url);
       namespaceInfo.shortcuts = this.processShortcuts(namespaceInfo.shortcuts, namespaceInfo.name);

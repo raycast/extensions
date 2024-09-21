@@ -8,9 +8,9 @@ All updates to an extension are made through a [Pull Request](https://github.com
 
 ## Steps
 
-1) Open a terminal window
-2) Navigate to a folder where you want the repository to land
-3) Run the below commands
+1. Open a terminal window
+2. Navigate to a folder where you want the repository to land
+3. Run the below commands
 
 _There are a few things you'll need to find and insert manually in the snippet below_
 
@@ -18,7 +18,7 @@ _There are a few things you'll need to find and insert manually in the snippet b
 
 Open the PR and click on the incomming ref as shown below
 
-![](../.gitbook/assets/go-to-ref.png)
+![](../.gitbook/assets/go-to-ref.webp)
 
 Now click the code button and copy the HTTPS path from the dropdown
 
@@ -43,4 +43,4 @@ cd "extensions/${EXTENSION_NAME}"
 npm install && npm run dev
 ```
 
-4) That's it, the extension should now be attached in Raycast
+4. That's it, the extension should now be attached in Raycast

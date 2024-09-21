@@ -6,6 +6,7 @@ interface Preferences {
   menubarIconStyle: string;
   menubarItemIconStyle: string;
   showEventsInMenubar: string;
+  titleTruncateLength: number;
   largeCalendar: boolean;
   highlightCalendar: boolean;
   showWeekNumber: boolean;
@@ -23,6 +24,7 @@ export const {
   menubarIconStyle,
   menubarItemIconStyle,
   showEventsInMenubar,
+  titleTruncateLength,
   largeCalendar,
   highlightCalendar,
   showWeekNumber,

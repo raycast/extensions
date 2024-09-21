@@ -130,9 +130,9 @@ export const handleDelete = (action: () => Promise<void>, onSuccess: () => void,
     action,
     onSuccess: () => {
       onSuccess();
-      return `${loadingMessage} successfully`;
+      return `${loadingMessage} deleted`;
     },
-    onFailure: () => `${loadingMessage} failed`,
+    onFailure: () => `${loadingMessage} could not be deleted`,
     loadingMessage: `Deleting ${loadingMessage}...`,
   })();
 };

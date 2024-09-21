@@ -1,5 +1,9 @@
 # Send To Memos Changelog
 
+## [Update] - 2024-07-20
+
+- support sendMemoForm.
+
 ## [Update] - 2024-05-21
 
 - support memos@0.22.0.
