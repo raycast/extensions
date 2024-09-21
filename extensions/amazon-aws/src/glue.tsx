@@ -1,16 +1,8 @@
-import {
-  GlueClient,
-  ListJobsCommand,
-  GetJobRunsCommand,
-  JobRun,
-  GetJobCommand,
-  StartJobRunCommand,
-  GetJobCommandOutput,
-} from "@aws-sdk/client-glue";
+import { GlueClient, JobRun, GetJobCommand, StartJobRunCommand, GetJobCommandOutput } from "@aws-sdk/client-glue";
 import { Action, ActionPanel, Icon, List, Image, Color, Detail, showToast, Toast } from "@raycast/api";
 import { MutatePromise, showFailureToast, useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { isReadyToFetch, resourceToConsoleLink } from "./util";
+import { resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
 import { useGlueJobRuns, useGlueJobs } from "./hooks/use-glue";
 
@@ -94,7 +86,7 @@ function GlueJob({ job: glueJobRun, mutate }: { job: GlueJobRun; mutate: MutateP
 }
 
 function GlueJobRuns({ glueJobName: glueJobName }: { glueJobName: string }) {
-  const { jobRuns, isLoading, mutate } = useGlueJobRuns(glueJobName);
+  const { jobRuns, isLoading } = useGlueJobRuns(glueJobName);
   return (
     <List isLoading={isLoading} navigationTitle={`Glue Job Runs of ` + glueJobName} isShowingDetail>
       {jobRuns?.map((jobRun) => (
@@ -274,37 +266,4 @@ async function fetchJobDetails(glueJobName: string): Promise<GetJobCommandOutput
   const response: GetJobCommandOutput = await client.send(command);
 
   return response;
-}
-
-async function fetchJobRuns(maxResults: number, jobNames?: string[]): Promise<GlueJobRun[]> {
-  // The function should return only the latest job run result per job.
-  if (!isReadyToFetch() && jobNames) return [];
-  const jobRuns: JobRun[] = [];
-  for (const jobName of jobNames!) {
-    const { JobRuns: jobRunsResponses } = await new GlueClient({}).send(
-      new GetJobRunsCommand({ JobName: jobName, MaxResults: maxResults }),
-    );
-
-    jobRunsResponses?.map((jobRun) => {
-      const jobRunResponse: GlueJobRun = jobRun;
-      if (jobRun.JobRunState === "FAILED") {
-        jobRunResponse.icon = Icon.XMarkCircle;
-        jobRunResponse.iconTintColor = Color.Red;
-        jobRunResponse.accessoriesText = jobRun.ErrorMessage;
-      } else if (jobRun.JobRunState === "RUNNING") {
-        jobRunResponse.icon = Icon.Hourglass;
-        jobRunResponse.iconTintColor = Color.Blue;
-        jobRunResponse.accessoriesText = jobRun.JobRunState;
-      } else if (jobRun.JobRunState === "SUCCEEDED") {
-        jobRunResponse.icon = Icon.CheckCircle;
-        jobRunResponse.iconTintColor = Color.Green;
-      } else {
-        jobRunResponse.icon = Icon.QuestionMark;
-        jobRunResponse.iconTintColor = Color.SecondaryText;
-        jobRunResponse.accessoriesText = "Unknown state";
-      }
-      jobRuns.push(jobRunResponse);
-    });
-  }
-  return jobRuns;
 }

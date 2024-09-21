@@ -1,22 +1,6 @@
-import {
-  GlueClient,
-  ListJobsCommand,
-  GetJobRunsCommand,
-  JobRun,
-  GetJobCommand,
-  StartJobRunCommand,
-  GetJobCommandOutput,
-  JobMode,
-} from "@aws-sdk/client-glue";
-import { Action, ActionPanel, Icon, List, Image, Color, Detail, showToast, Toast } from "@raycast/api";
+import {  Icon,  Color,  showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { isReadyToFetch } from "../util";
-import {
-  CodePipelineClient,
-  GetPipelineStateCommand,
-  ListPipelineExecutionsCommand,
-  ListPipelinesCommand,
-} from "@aws-sdk/client-codepipeline";
 
 import {
   GlueClient,
@@ -24,6 +8,7 @@ import {
   ListJobsCommand,
 } from "@aws-sdk/client-glue";
 import { GlueJobRun } from "../glue";
+
 export const useGlueJobs = () => {
   const {
     data: jobs,
@@ -42,8 +27,6 @@ export const useGlueJobs = () => {
   return { jobs, isLoading: (!jobs && !error) || isLoading, error, mutate };
 };
 
-
-
 export const useGlueJobRuns = (jobName: string) => {
   const {
     data: jobRuns,
@@ -53,10 +36,18 @@ export const useGlueJobRuns = (jobName: string) => {
   } = useCachedPromise(
     async (name: string) => {
       const { JobRuns } = await new GlueClient({}).send(new GetJobRunsCommand({ JobName: name }));
-      return (JobRuns ?? []).map((run) => ({
-        ...run,
-        JobRunId: run.Id,
-      })) as GlueJobRun[];
+      return (JobRuns ?? []).map((run) => {
+        const jobRunResponse = {
+          ...run,
+          JobRunId: run.Id,
+        } as GlueJobRun;
+
+        if (jobRunResponse) {
+          setJobRunIcon(jobRunResponse);
+        }
+
+        return jobRunResponse;
+      });
     },
     [jobName],
     { execute: isReadyToFetch(), failureToastOptions: { title: "❌Failed to load Glue job runs" } },
@@ -78,10 +69,12 @@ const fetchGlueJobs = async (toast: Toast, nextToken?: string, aggregate?: GlueJ
         );
 
         const latestRun = JobRuns && JobRuns.length > 0 ? JobRuns[0] : undefined;
-        // return { jobName: jobName, lastestRun: latestRun } as LastestJobRun;
-        return latestRun as GlueJobRun
-      }),
-  );
+        const jobRunResponse = latestRun as GlueJobRun;
+        if (jobRunResponse) {
+          setJobRunIcon(jobRunResponse);
+        }
+        return jobRunResponse;
+      }));
 
   const agg = [...(aggregate ?? []), ...jobs];
   toast.message = `${agg.length} Glue jobs`;
@@ -94,3 +87,27 @@ const fetchGlueJobs = async (toast: Toast, nextToken?: string, aggregate?: GlueJ
   toast.message = `${agg.length} Glue jobs`;
   return agg;
 };
+
+const setJobRunIcon = (jobRun: GlueJobRun) => {
+  switch (jobRun.JobRunState) {
+    case "FAILED":
+      jobRun.icon = Icon.XMarkCircle;
+      jobRun.iconTintColor = Color.Red;
+      jobRun.accessoriesText = jobRun.ErrorMessage;
+      break;
+    case "RUNNING":
+      jobRun.icon = Icon.Hourglass;
+      jobRun.iconTintColor = Color.Blue;
+      jobRun.accessoriesText = jobRun.JobRunState;
+      break;
+    case "SUCCEEDED":
+      jobRun.icon = Icon.CheckCircle;
+      jobRun.iconTintColor = Color.Green;
+      break;
+    default:
+      jobRun.icon = Icon.QuestionMark;
+      jobRun.iconTintColor = Color.SecondaryText;
+      jobRun.accessoriesText = "Unknown state";
+  }
+};
+
