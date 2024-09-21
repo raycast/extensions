@@ -52,23 +52,22 @@ export default function ClipboardViewer() {
 
   // Function to generate an SVG representing the clipboard content
   function generateSVG(text: string): string {
-    
     const characters = text.split(""); // Split the clipboard content into characters
-    
+
     const chunkSize = 12; // Set line length to 20 characters
     const charactersChunks = splitTextIntoChunks(text, chunkSize); // Split into chunks of 20 characters
     const totalLines = charactersChunks.length;
-    
+
     // Create indices for each character
     const indicesChunks = charactersChunks.map((chunk, line) =>
-      Array.from({ length: chunk.length }, (_, i) => (i + 1 + line * chunkSize).toString().padStart(2, "0"))
+      Array.from({ length: chunk.length }, (_, i) => (i + 1 + line * chunkSize).toString().padStart(2, "0")),
     );
-    
+
     const cellWidth = 80;
     const cellHeight = 80;
     const svgWidth = totalLines > 1 ? chunkSize * cellWidth : cellWidth * characters.length;
     const svgHeight = totalLines * cellHeight * 1.5; // Two rows: one for characters and one for indices
-    
+
     const textColor = environment.theme === "dark" ? "white" : "black";
     const bgColor = environment.theme === "dark" ? "black" : "white";
     const opacity = environment.theme === "dark" ? "0.2" : "0.5";
@@ -80,20 +79,20 @@ export default function ClipboardViewer() {
     charactersChunks.forEach((chunk, line) => {
       chunk.split("").forEach((char, i) => {
         const x = i * cellWidth + cellWidth / 2;
-        const yCharacter = (line * 1.5 + 1) * (cellHeight);
-        const yIndex = line * (cellHeight*1.5) + 110 ;
-        const yBackground = (line*1.5) * cellHeight;
-        
+        const yCharacter = (line * 1.5 + 1) * cellHeight;
+        const yIndex = line * (cellHeight * 1.5) + 110;
+        const yBackground = line * 1.5 * cellHeight;
+
         // Add alternating background
-        if (i%2) {
-          svg += `<rect width="${cellWidth}" height="${cellHeight * 1.48}" x="${i*cellWidth}" y="${yBackground}" fill="${bgColor}" style="opacity:${opacity}"/>`
+        if (i % 2) {
+          svg += `<rect width="${cellWidth}" height="${cellHeight * 1.48}" x="${i * cellWidth}" y="${yBackground}" fill="${bgColor}" style="opacity:${opacity}"/>`;
         }
-    
+
         // Add clipboard characters to the first row of each chunk
         svg += `<text x="${x}" y="${yCharacter}" font-family="-apple-system, BlinkMacSystemFont" fill="${textColor}" font-size="${cellWidth / 1.5}" text-anchor="middle" alignment-baseline="middle">${char}</text>`;
-    
+
         // Add indices to the second row of each chunk
-        svg += `<text x="${x}" y="${yIndex}" font-family="-apple-system, BlinkMacSystemFont" fill="${textColor}" font-size="${cellWidth/5}" text-anchor="middle" alignment-baseline="middle" style="opacity:0.5">${indicesChunks[line][i]}</text>`;
+        svg += `<text x="${x}" y="${yIndex}" font-family="-apple-system, BlinkMacSystemFont" fill="${textColor}" font-size="${cellWidth / 5}" text-anchor="middle" alignment-baseline="middle" style="opacity:0.5">${indicesChunks[line][i]}</text>`;
       });
     });
 
@@ -102,9 +101,5 @@ export default function ClipboardViewer() {
     return svg;
   }
 
-  return (
-    <Detail
-      markdown={svgDataUri ? `![Clipboard Content](${svgDataUri})` : "No text available in clipboard"}
-    />
-  );
+  return <Detail markdown={svgDataUri ? `![Clipboard Content](${svgDataUri})` : "No text available in clipboard"} />;
 }
