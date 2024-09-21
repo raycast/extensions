@@ -1,12 +1,8 @@
-import {  Icon,  Color,  showToast, Toast } from "@raycast/api";
+import { Icon, Color, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { isReadyToFetch } from "../util";
 
-import {
-  GlueClient,
-  GetJobRunsCommand,
-  ListJobsCommand,
-} from "@aws-sdk/client-glue";
+import { GlueClient, GetJobRunsCommand, ListJobsCommand } from "@aws-sdk/client-glue";
 import { GlueJobRun } from "../glue";
 
 export const useGlueJobs = () => {
@@ -62,19 +58,17 @@ const fetchGlueJobs = async (toast: Toast, nextToken?: string, aggregate?: GlueJ
   );
 
   const jobs = await Promise.all(
-    (jobNames ?? [])
-      .map(async (jobName) => {
-        const { JobRuns } = await new GlueClient({}).send(
-          new GetJobRunsCommand({ JobName: jobName, MaxResults: 1 }),
-        );
+    (jobNames ?? []).map(async (jobName) => {
+      const { JobRuns } = await new GlueClient({}).send(new GetJobRunsCommand({ JobName: jobName, MaxResults: 1 }));
 
-        const latestRun = JobRuns && JobRuns.length > 0 ? JobRuns[0] : undefined;
-        const jobRunResponse = latestRun as GlueJobRun;
-        if (jobRunResponse) {
-          setJobRunIcon(jobRunResponse);
-        }
-        return jobRunResponse;
-      }));
+      const latestRun = JobRuns && JobRuns.length > 0 ? JobRuns[0] : undefined;
+      const jobRunResponse = latestRun as GlueJobRun;
+      if (jobRunResponse) {
+        setJobRunIcon(jobRunResponse);
+      }
+      return jobRunResponse;
+    }),
+  );
 
   const agg = [...(aggregate ?? []), ...jobs];
   toast.message = `${agg.length} Glue jobs`;
@@ -110,4 +104,3 @@ const setJobRunIcon = (jobRun: GlueJobRun) => {
       jobRun.accessoriesText = "Unknown state";
   }
 };
-
