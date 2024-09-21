@@ -1,6 +1,6 @@
 import { GlueClient, JobRun, GetJobCommand, StartJobRunCommand, GetJobCommandOutput } from "@aws-sdk/client-glue";
 import { Action, ActionPanel, Icon, List, Image, Color, Detail, showToast, Toast } from "@raycast/api";
-import { MutatePromise, showFailureToast, useCachedPromise } from "@raycast/utils";
+import { MutatePromise, showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
@@ -13,26 +13,39 @@ export interface GlueJobRun extends JobRun {
 }
 
 export default function Glue() {
+  const [isDetailsEnabled, setDetailsEnabled] = useCachedState<boolean>("show-details", false, {
+    cacheNamespace: "aws-glue",
+  });
   const { jobs, error, isLoading, mutate } = useGlueJobs();
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Filter Jobs by name..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={mutate} />}
-      isShowingDetail={!isLoading && !error}
+      isShowingDetail={!isLoading && !error && isDetailsEnabled}
     >
       {!isLoading && error && <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />}
       {!isLoading && !error && (jobs || []).length < 1 && (
         <List.EmptyView title="No Glue jobs found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
       {(jobs || []).map((job) => (
-        <GlueJob job={job} mutate={mutate} />
+        <GlueJob job={job} isDetailsEnabled={isDetailsEnabled} setDetailsEnabled={setDetailsEnabled} mutate={mutate} />
       ))}
     </List>
   );
 }
 
-function GlueJob({ job: glueJobRun, mutate }: { job: GlueJobRun; mutate: MutatePromise<GlueJobRun[] | undefined> }) {
+function GlueJob({
+  job: glueJobRun,
+  isDetailsEnabled,
+  setDetailsEnabled,
+  mutate,
+}: {
+  job: GlueJobRun;
+  isDetailsEnabled: boolean;
+  setDetailsEnabled: CallableFunction;
+  mutate: MutatePromise<GlueJobRun[] | undefined>;
+}) {
   return (
     <List.Item
       key={glueJobRun.JobName}
@@ -68,6 +81,13 @@ function GlueJob({ job: glueJobRun, mutate }: { job: GlueJobRun; mutate: MutateP
           <AwsAction.Console url={resourceToConsoleLink(glueJobRun.JobName, "AWS::Glue::JobRuns")} />
           <ActionPanel.Section title={"Copy"}>
             <Action.CopyToClipboard title="Copy Job Name" content={glueJobRun.JobName || ""} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title={"Hello Julian"}>
+            <Action
+              title={`${isDetailsEnabled ? "Hide" : "Show"} Details`}
+              onAction={() => setDetailsEnabled(!isDetailsEnabled)}
+              icon={isDetailsEnabled ? Icon.EyeDisabled : Icon.Eye}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
