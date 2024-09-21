@@ -12,34 +12,29 @@ import { MutatePromise, showFailureToast, useCachedPromise } from "@raycast/util
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { isReadyToFetch, resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
+import { useGlueJobRuns, useGlueJobs } from "./hooks/use-glue";
 
-interface GlueJobRun extends JobRun {
+export interface GlueJobRun extends JobRun {
   accessoriesText?: string;
   icon?: Icon;
   iconTintColor?: Color;
 }
 
 export default function Glue() {
-  const { data: glueJobs, error, isLoading, mutate } = useCachedPromise(fetchJobs);
-  const {
-    data: glueJobRuns,
-    isLoading: isLoadingJobRuns,
-    mutate: mutateJobRuns,
-  } = useCachedPromise(fetchJobRuns, [1, glueJobs]);
-
+  const { jobs, error, isLoading, mutate } = useGlueJobs();
   return (
     <List
-      isLoading={isLoading || isLoadingJobRuns}
+      isLoading={isLoading}
       searchBarPlaceholder="Filter Jobs by name..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={mutate} />}
       isShowingDetail={!isLoading && !error}
     >
       {!isLoading && error && <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />}
-      {!isLoading && !error && (glueJobRuns || []).length < 1 && (
+      {!isLoading && !error && (jobs || []).length < 1 && (
         <List.EmptyView title="No Glue jobs found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
-      {(glueJobRuns || []).map((job) => (
-        <GlueJob job={job} mutate={mutateJobRuns} />
+      {(jobs || []).map((job) => (
+        <GlueJob job={job} mutate={mutate} />
       ))}
     </List>
   );
@@ -56,27 +51,27 @@ function GlueJob({ job: glueJobRun, mutate }: { job: GlueJobRun; mutate: MutateP
       actions={
         <ActionPanel>
           <Action.Push
-            title="List all Job Runs"
+            title="List All Job Runs"
             icon={Icon.List}
             target={<GlueJobRuns glueJobName={glueJobRun.JobName!} />}
           />
-          <Action title="Start Run" onAction={() => RunGlueJob(glueJobRun.JobName!, mutate)} icon={Icon.Play} />
+          <Action
+            title="Start Run"
+            onAction={() => RunGlueJob(glueJobRun.JobName!, mutate)}
+            icon={Icon.Play}
+            shortcut={{ modifiers: ["ctrl"], key: "enter" }}
+          />
           <Action.Push
             title="Show Job Definition"
             icon={Icon.Info}
             target={<GlueJobDefinition glueJobName={glueJobRun.JobName!} />}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
+            shortcut={{ modifiers: ["ctrl"], key: "d" }}
           />
           <Action
             title="Refresh"
-            onAction={() =>
-              mutate(fetchJobRuns(1, [glueJobRun.JobName!]), {
-                optimisticUpdate(data) {
-                  return data;
-                },
-              })
-            }
+            onAction={() => mutate()}
             icon={Icon.RotateAntiClockwise}
+            shortcut={{ modifiers: ["ctrl"], key: "r" }}
           />
           <AwsAction.Console url={resourceToConsoleLink(glueJobRun.JobName, "AWS::Glue::JobRuns")} />
           <ActionPanel.Section title={"Copy"}>
@@ -99,10 +94,10 @@ function GlueJob({ job: glueJobRun, mutate }: { job: GlueJobRun; mutate: MutateP
 }
 
 function GlueJobRuns({ glueJobName: glueJobName }: { glueJobName: string }) {
-  const { data: glueJobRuns, isLoading: isLoadingJobRuns } = useCachedPromise(fetchJobRuns, [100, [glueJobName]]);
+  const { jobRuns, isLoading, mutate } = useGlueJobRuns(glueJobName);
   return (
-    <List isLoading={isLoadingJobRuns} navigationTitle={`Glue Job Runs of ` + glueJobName} isShowingDetail>
-      {glueJobRuns?.map((jobRun) => (
+    <List isLoading={isLoading} navigationTitle={`Glue Job Runs of ` + glueJobName} isShowingDetail>
+      {jobRuns?.map((jobRun) => (
         <List.Item
           accessories={[
             { date: jobRun.StartedOn, tooltip: "Started On" },
@@ -203,6 +198,7 @@ function GlueJobDefinition({ glueJobName: glueJobName }: { glueJobName: string }
   const description = glueJobDetails?.Job?.Description
     ? glueJobDetails?.Job?.Description!.toString()
     : `No Descrtiption`;
+  console.log(glueJobDetails);
   return (
     <Detail
       navigationTitle="Glue Job Definition"
@@ -278,18 +274,6 @@ async function fetchJobDetails(glueJobName: string): Promise<GetJobCommandOutput
   const response: GetJobCommandOutput = await client.send(command);
 
   return response;
-}
-
-async function fetchJobs(nextMarker?: string, jobs?: string[]): Promise<string[]> {
-  const { NextToken, JobNames } = await new GlueClient({}).send(new ListJobsCommand({ NextToken: nextMarker }));
-
-  const combinedJobs = [...(jobs || []), ...(JobNames || [])];
-
-  if (NextToken) {
-    return fetchJobs(NextToken, combinedJobs);
-  }
-
-  return combinedJobs;
 }
 
 async function fetchJobRuns(maxResults: number, jobNames?: string[]): Promise<GlueJobRun[]> {
