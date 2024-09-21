@@ -1,5 +1,5 @@
 import { LocalStorage, updateCommandMetadata } from "@raycast/api";
-import { Schedule, startCaffeinate, numberToDayString, getSchedule, stopCaffeinate } from "./utils";
+import { Schedule, startCaffeinate, getSchedule, stopCaffeinate } from "./utils";
 import { execSync } from "node:child_process";
 
 function isCaffeinateRunning(): boolean {
