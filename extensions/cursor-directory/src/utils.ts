@@ -1,19 +1,35 @@
-import { getPreferenceValues } from "@raycast/api";
-import type { Prompt, Section } from "./types";
+import type { CursorRule, Section } from "./types";
 import fs from "fs";
 
-export const getSections = (prompts: Prompt[]): Section[] => {
-  const preferences = getPreferenceValues<Preferences>();
+export const getSections = (cursorRules: CursorRule[], sortByPopularity: boolean): Section[] => {
+  const sections = Array.from(new Set(cursorRules.flatMap((cursorRule) => cursorRule.tags)));
+  const sectionsWithCursorRules = sections.map((tag) => ({
+    name: tag,
+    cursorRules: cursorRules.filter((cursorRule) => cursorRule.tags.includes(tag)),
+  }));
 
-  const sections = Array.from(new Set(prompts.flatMap((prompt) => prompt.tags)));
-  return sections
-    .map((tag) => ({
-      name: tag,
-      slugs: prompts.filter((prompt) => prompt.tags.includes(tag)).map((prompt) => prompt.slug),
-    }))
-    .sort((a, b) =>
-      preferences.prompts_sort_order === "desc" ? b.slugs.length - a.slugs.length : a.slugs.length - b.slugs.length,
-    );
+  if (sortByPopularity) {
+    // Sort cursor rules within each section by count
+    sectionsWithCursorRules.forEach((section) => {
+      section.cursorRules.sort((a, b) => (b.count || 0) - (a.count || 0));
+    });
+    // Sort sections by total count
+    return sectionsWithCursorRules
+      .map((section) => ({
+        name: section.name,
+        slugs: section.cursorRules.map((cursorRule) => cursorRule.slug),
+        totalCount: section.cursorRules.reduce((sum, cursorRule) => sum + (cursorRule.count || 0), 0),
+      }))
+      .sort((a, b) => b.totalCount - a.totalCount);
+  } else {
+    // Sort by number of cursor rules in each category
+    return sectionsWithCursorRules
+      .map((section) => ({
+        name: section.name,
+        slugs: section.cursorRules.map((cursorRule) => cursorRule.slug),
+      }))
+      .sort((a, b) => b.slugs.length - a.slugs.length);
+  }
 };
 
 export const isImageUrl = (url: string): boolean => {
@@ -24,7 +40,13 @@ export const isImageUrl = (url: string): boolean => {
   const isImageExtension =
     imageExtensions.includes(url.substring(url.lastIndexOf(".")).toLowerCase()) || url.endsWith(".svg");
 
-  return isDataUri || isImageExtension;
+  // Add check for GitHub avatar URLs
+  const isGitHubAvatar = url.includes("avatars.githubusercontent.com");
+
+  // Add check for URLs with 'image' in the path or query parameters
+  const hasImageInUrl = url.toLowerCase().includes("image");
+
+  return isDataUri || isImageExtension || isGitHubAvatar || hasImageInUrl;
 };
 
 export const getTimestamp = (filePath: string): number => {
@@ -34,4 +56,12 @@ export const getTimestamp = (filePath: string): number => {
   } else {
     return fs.statSync(filePath).mtimeMs;
   }
+};
+
+export const processContent = (content: string) => {
+  return content
+    .trim()
+    .split("\n")
+    .map((line) => line.trim())
+    .join("\n");
 };

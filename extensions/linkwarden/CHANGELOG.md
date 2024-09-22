@@ -1,5 +1,8 @@
 # Linkwarden Changelog
 
+## [Fix URL Field fill] - 2024-09-16
+- Fixed the URL field not being filled when run "Add website to Linkwarden" form
+
 ## [Filter Links by Collection] - 2024-09-11
 
 ### Enhancements

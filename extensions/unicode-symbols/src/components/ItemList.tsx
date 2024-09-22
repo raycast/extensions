@@ -5,7 +5,7 @@ import { List } from "@raycast/api";
 import { CharacterActionPanel } from "@/components/CharacterActionPanel";
 import DataSetSelector from "@/components/DataSetSelector";
 import { useListContext } from "@/context/ListContext";
-import { upperCaseFirst } from "@/utils/string";
+import { getFilteredSubtitle, getFilteredValue } from "@/utils/string";
 
 export const ItemList = memo(() => {
   const { list, onSearchTextChange, loading } = useListContext();
@@ -28,8 +28,8 @@ export const ItemList = memo(() => {
             return (
               <List.Item
                 key={`${item.code}-${item.name}`}
-                title={item.value}
-                subtitle={upperCaseFirst(item.name)}
+                title={getFilteredValue(item, section)}
+                subtitle={getFilteredSubtitle(item, section)}
                 accessories={accessories}
                 actions={<CharacterActionPanel item={item} />}
               />

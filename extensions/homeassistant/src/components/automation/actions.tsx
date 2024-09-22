@@ -26,7 +26,7 @@ export function AutomationTurnOnAction(props: { state: State }): JSX.Element | n
       <Action
         title="Turn On"
         onAction={() => callAutomationTurnOnService(s)}
-        icon={{ source: "power-btn.png", tintColor: Color.Green }}
+        icon={{ source: "power-on.svg", tintColor: Color.PrimaryText }}
       />
     );
   }
@@ -40,7 +40,7 @@ export function AutomationTurnOffAction(props: { state: State }): JSX.Element | 
       <Action
         title="Turn Off"
         onAction={() => callAutomationTurnOffService(s)}
-        icon={{ source: "power-btn.png", tintColor: Color.Red }}
+        icon={{ source: "power-off.svg", tintColor: Color.PrimaryText }}
       />
     );
   }

@@ -14,6 +14,7 @@ import { XcodeProject } from "../../models/xcode-project/xcode-project.model";
 export function XcodeProjectList(props: {
   navigationTitle?: string;
   searchBarPlaceholder?: string;
+  storeDropdownFilterValue?: boolean;
   projectTypeFilter?: (xcodeProjectType: XcodeProjectType) => boolean;
   actions?: (xcodeProject: XcodeProject) => [JSX.Element];
 }) {
@@ -49,6 +50,7 @@ export function XcodeProjectList(props: {
         <XcodeProjectListSearchBarAccessory
           key="search-bar-accessory"
           projectTypeFilter={props.projectTypeFilter}
+          storeDropdownFilterValue={props.storeDropdownFilterValue}
           onChange={setProjectTypeFilter}
         />
       }

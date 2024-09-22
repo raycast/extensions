@@ -1,4 +1,5 @@
 {
   "root": true,
-  "extends": ["@raycast"]
+  "extends": ["@raycast"],
+  "ignorePatterns": ["/puppeteer"]
 }

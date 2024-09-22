@@ -1,5 +1,9 @@
 # Raindrop.io Extension Changelog
 
+## [Enhancements] - 2024-09-14
+
+- Add title field ([#14363](https://github.com/raycast/extensions/issues/14363)).
+
 ## [Enhancements] - 2024-08-14
 
 - Added support for Orion browser.

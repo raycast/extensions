@@ -1,5 +1,10 @@
 # Supernotes Changelog
 
+## [Send Clipping Command] - 2024-09-17
+- Add a new "Send Clipping" command to easily send clipboard or selected text to Supernotes
+- Improve error handling for all commands
+- Improve type-safety of calls to Supernotes API
+
 ## [Color Update] - 2024-04-02
 - Add rendered markdown preview of cards
 - Fix support for card colors

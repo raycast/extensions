@@ -55,18 +55,22 @@
       "title": "Search Palette",
       "subtitle": "Catppuccin",
       "description": "Search the Catppuccin palette by flavor",
-      "keywords": ["catppuccin", "colors", "palette"],
+      "keywords": [
+        "catppuccin",
+        "colors",
+        "palette"
+      ],
       "mode": "view"
     }
   ],
-    "preferences": [
+  "preferences": [
     {
       "name": "gridSize",
       "title": "Grid Size",
       "description": "Set the grid size for displaying colors",
       "type": "dropdown",
-      "default": "8",
       "required": false,
+      "default": "8",
       "data": [
         {
           "value": "8",
@@ -87,15 +91,18 @@
     "@catppuccin/palette": "^1.2.0",
     "@raycast/api": "^1.81.2",
     "@raycast/utils": "^1.16.3",
+    "ajv": "^8.17.1",
+    "axios": "^1.7.7",
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.25",
+    "@types/react": "18.2.27",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "typescript": "^5.6.2"
   },
   "scripts": {
     "build": "ray build -e dist",
