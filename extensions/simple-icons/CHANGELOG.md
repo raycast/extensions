@@ -1,6 +1,6 @@
 # Brand Icons Changelog
 
-## [Milestone] - {PR_MERGE_DATE}
+## [Milestone] - 2024-09-22
 
 - We reached 3200+ icons!
 - Polish changelog formats
