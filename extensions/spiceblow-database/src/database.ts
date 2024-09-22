@@ -383,16 +383,23 @@ export async function searchTableRowsOrCustomQuery({
     let result;
     console.time(`query ${id}`);
     if (databaseType === "postgres") {
-      result = await postgresPool.query(finalQuery, [pageSize + 1, offset]);
-      const totalCount = offset + result.rows.length;
-      const hasMore = result.rows.length > pageSize;
-      const data = result.rows.slice(0, pageSize);
-      console.timeEnd(`query ${id}`);
-      return {
-        hasMore,
-        data,
-        totalCount,
-      };
+      const client = await postgresPool.connect();
+      try {
+        // allow GROUP BY without aggregate functions for current connection
+
+        result = await client.query(finalQuery, [pageSize + 1, offset]);
+        const totalCount = offset + result.rows.length;
+        const hasMore = result.rows.length > pageSize;
+        const data = result.rows.slice(0, pageSize);
+        console.timeEnd(`query ${id}`);
+        return {
+          hasMore,
+          data,
+          totalCount,
+        };
+      } finally {
+        client.release();
+      }
     } else {
       const connection = await mysqlPool.getConnection();
       try {
@@ -730,6 +737,7 @@ export async function runGeneratedQuery(sqlCode: string) {
         rowsCount: rows.length,
       };
     } finally {
+      await client.query("SET SESSION CHARACTERISTICS AS TRANSACTION READ WRITE;");
       client.release();
     }
   } else {
@@ -1231,6 +1239,7 @@ export async function executeQueries({ queries }: { queries: SQLStatement[] }) {
     try {
       await client.query("BEGIN");
       // SERIALIZABLE is required because all the generated queries assume values don't change during execution
+      await client.query("SET TRANSACTION READ WRITE;");
       await client.query("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;");
 
       for (const query of queries) {
