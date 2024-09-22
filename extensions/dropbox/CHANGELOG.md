@@ -1,6 +1,6 @@
 # Dropbox Changelog
 
-## [BYOK as Fallback] - {PR_MERGE_DATE}
+## [BYOK as Fallback] - 2024-09-22
 
 - Add metadata images
 - The List now shows you the current path i.e. directory you are in
