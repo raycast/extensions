@@ -82,13 +82,11 @@ function GlueJob({
           <ActionPanel.Section title={"Copy"}>
             <Action.CopyToClipboard title="Copy Job Name" content={glueJobRun.JobName || ""} />
           </ActionPanel.Section>
-          <ActionPanel.Section title={"Hello Julian"}>
-            <Action
-              title={`${isDetailsEnabled ? "Hide" : "Show"} Details`}
-              onAction={() => setDetailsEnabled(!isDetailsEnabled)}
-              icon={isDetailsEnabled ? Icon.EyeDisabled : Icon.Eye}
-            />
-          </ActionPanel.Section>
+          <Action
+            title={`${isDetailsEnabled ? "Hide" : "Show"} Details`}
+            onAction={() => setDetailsEnabled(!isDetailsEnabled)}
+            icon={isDetailsEnabled ? Icon.EyeDisabled : Icon.Eye}
+          />
         </ActionPanel>
       }
       accessories={[
@@ -123,7 +121,7 @@ function GlueJobRuns({ glueJobName: glueJobName }: { glueJobName: string }) {
           keywords={[jobRun.JobRunState || "", jobRun.ErrorMessage || "", jobRun.Id || ""]}
           actions={
             <ActionPanel>
-              <AwsAction.Console url={resourceToConsoleLink(jobRun.Id, "AWS::Glue::JobRun")} />
+              <AwsAction.Console url={resourceToConsoleLink(jobRun.JobName, "AWS::Glue::JobRun", jobRun.Id)} />
               <ActionPanel.Section title={"Copy"}>
                 <Action.CopyToClipboard title="Copy Job Run Id" content={jobRun.Id || ""} />
               </ActionPanel.Section>
@@ -210,8 +208,6 @@ function GlueJobDefinition({ glueJobName: glueJobName }: { glueJobName: string }
   const description = glueJobDetails?.Job?.Description
     ? glueJobDetails?.Job?.Description!.toString()
     : `No Descrtiption`;
-  // console.log(glueJobDetails);
-  console.log(glueJobDetails?.Job?.Description);
   return (
     <Detail
       navigationTitle="Glue Job Definition"
