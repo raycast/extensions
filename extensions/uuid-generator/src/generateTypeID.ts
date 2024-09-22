@@ -1,6 +1,5 @@
-import { showHUD, Clipboard, getPreferenceValues, showToast, Toast, LaunchProps } from "@raycast/api";
+import { Clipboard, getPreferenceValues, LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
 import { typeid } from "typeid-js";
-import { v7 as uuidV7 } from "uuid";
 
 import { generateUuids } from "./utils/uuidUtils";
 import { UUIDType } from "./uuidHistory";
@@ -8,13 +7,11 @@ import { UUIDType } from "./uuidHistory";
 // don't want to cause a heap error, so cap it 😱
 const UUID_MAX_NUMBER = 10000;
 
-export default async (props: LaunchProps<{ arguments: Arguments.GenerateV7 }>) => {
-  let { numberOfUUIDsToGenerate } = props.arguments;
-  const { upperCaseLetters, defaultAction, base32Encoding } = getPreferenceValues<Preferences.GenerateV7>();
+export default async (props: LaunchProps<{ arguments: Arguments.GenerateTypeID }>) => {
+  if (!props.arguments.numberOfUUIDsToGenerate) props.arguments.numberOfUUIDsToGenerate = "1";
 
-  if (!numberOfUUIDsToGenerate) {
-    numberOfUUIDsToGenerate = "1";
-  }
+  const { prefix, numberOfUUIDsToGenerate } = props.arguments;
+  const { upperCaseLetters, defaultAction } = getPreferenceValues<Preferences.GenerateTypeID>();
 
   try {
     const parseableNumber = parseInt(numberOfUUIDsToGenerate, 10);
@@ -25,8 +22,12 @@ export default async (props: LaunchProps<{ arguments: Arguments.GenerateV7 }>) =
 
     // safe?
     if (parseableNumber <= UUID_MAX_NUMBER) {
-      const generator = base32Encoding ? () => typeid("").toString() : uuidV7;
-      const uuids = await generateUuids(generator, parseableNumber, upperCaseLetters, UUIDType.UUIDV7);
+      const uuids = await generateUuids(
+        () => typeid(prefix).toString(),
+        parseableNumber,
+        upperCaseLetters,
+        UUIDType.TYPEID
+      );
 
       if (defaultAction === "copy") {
         await Clipboard.copy(uuids.join("\r\n"));
@@ -50,6 +51,13 @@ export default async (props: LaunchProps<{ arguments: Arguments.GenerateV7 }>) =
           style: Toast.Style.Failure,
           title: "Invalid number.",
           message: "An invalid number has been provided. Try an actual number.",
+        });
+        break;
+      case "Invalid prefix. Must be at most 63 ascii letters [a-z_]":
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid prefix.",
+          message: "Must be at most 63 ascii letters [a-z_]",
         });
         break;
     }
