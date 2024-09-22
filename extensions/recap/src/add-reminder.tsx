@@ -27,7 +27,7 @@ export default function Command() {
     },
   );
 
-  const { handleSubmit, itemProps } = useForm<Values>({
+  const { handleSubmit, itemProps, reset } = useForm<Values>({
     async onSubmit(values: Values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Adding reminder..." });
 
@@ -49,6 +49,7 @@ export default function Command() {
         toast.title = "Added reminder:";
         toast.message = values.prompt;
         revalidate();
+        reset();
       } catch (err) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to add reminder:";
