@@ -1,5 +1,9 @@
 # Battery Optimizer Changelog
 
+## [Feature] - 2024-09-22
+
+Add menu bar for Battery Optimizer to show charging threshold and enable/disable Battery Optimizer.
+
 ## [Feature] - 2024-06-17
 
 Set custom path for BCLM: Update package.json and utils.ts
