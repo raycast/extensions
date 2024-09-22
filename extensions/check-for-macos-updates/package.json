@@ -10,7 +10,7 @@
     {
       "name": "macos-updates",
       "title": "macOS Updates",
-      "description": "",
+      "description": "automatically-check-for-macOS-updates",
       "mode": "no-view"
     }
   ],
