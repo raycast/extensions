@@ -66,7 +66,7 @@ export default async function main() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Finder is not active",
-        message: "Please switch to Finder and select files"
+        message: "Please switch to Finder and select files",
       });
     } else {
       await showToast({
