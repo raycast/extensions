@@ -16,6 +16,13 @@
       "subtitle": "Mercury",
       "description": "View accounts and transactions for your Mercury Account",
       "mode": "view"
+    },
+    {
+      "name": "ai-account-summary",
+      "title": "AI Account Summary",
+      "subtitle": "Get an AI-generated summary of your accounts",
+      "description": "Fetches all accounts and transactions, and provides an AI-generated summary",
+      "mode": "view"
     }
   ],
   "preferences": [

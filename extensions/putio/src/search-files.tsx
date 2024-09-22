@@ -36,9 +36,7 @@ const SearchFiles = (props: Props) => {
       <EmptyView title={data && data?.total === 0 ? "No Results" : "Search Files"} />
 
       <List.Section title="Results" subtitle={data?.total.toString()}>
-        {data?.files.map((file) => (
-          <FileListItem key={file.id} file={file} onMutate={revalidate} />
-        ))}
+        {data?.files.map((file) => <FileListItem key={file.id} file={file} onMutate={revalidate} />)}
       </List.Section>
     </List>
   );

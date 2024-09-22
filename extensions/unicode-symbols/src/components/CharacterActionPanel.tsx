@@ -1,9 +1,10 @@
+/* eslint-disable @raycast/prefer-title-case */
 import { useMemo } from "react";
 
 import { Action, ActionPanel, Icon } from "@raycast/api";
 
 import { useListContext } from "@/context/ListContext";
-import type { Character } from "@/lib/dataset-manager";
+import type { Character } from "@/types";
 import { numberToHex } from "@/utils/string";
 
 export const CharacterActionPanel = ({ item }: { item: Character }) => {
@@ -41,11 +42,11 @@ export const CharacterActionPanel = ({ item }: { item: Character }) => {
         {recentlyUsed ? (
           <>
             <Action
-              title="Remove From Recently Used"
+              title="Remove from Recently Used"
               icon={Icon.Trash}
               onAction={() => removeFromRecentlyUsedItems(item)}
             />
-            <Action title="Remove All From Recently Used" icon={Icon.Trash} onAction={() => clearRecentlyUsedItems()} />
+            <Action title="Remove All from Recently Used" icon={Icon.Trash} onAction={() => clearRecentlyUsedItems()} />
           </>
         ) : null}
       </ActionPanel.Section>

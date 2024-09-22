@@ -296,7 +296,7 @@
       "preferences": [
         {
           "name": "includedEntities",
-          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
           "type": "textfield",
           "required": false,
           "title": "Included Entities",
@@ -304,7 +304,7 @@
         },
         {
           "name": "excludedEntities",
-          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
           "type": "textfield",
           "required": false,
           "title": "Excluded Entities",
@@ -321,7 +321,7 @@
       "preferences": [
         {
           "name": "includedEntities",
-          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
           "type": "textfield",
           "required": false,
           "title": "Included Entities",
@@ -329,7 +329,7 @@
         },
         {
           "name": "excludedEntities",
-          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
           "type": "textfield",
           "required": false,
           "title": "Excluded Entities",
@@ -346,7 +346,7 @@
       "preferences": [
         {
           "name": "includedEntities",
-          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
           "type": "textfield",
           "required": false,
           "title": "Included Entities",
@@ -354,7 +354,7 @@
         },
         {
           "name": "excludedEntities",
-          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
           "type": "textfield",
           "required": false,
           "title": "Excluded Entities",
@@ -371,7 +371,7 @@
       "preferences": [
         {
           "name": "includedEntities",
-          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
           "type": "textfield",
           "required": false,
           "title": "Included Entities",
@@ -379,7 +379,7 @@
         },
         {
           "name": "excludedEntities",
-          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
           "type": "textfield",
           "required": false,
           "title": "Excluded Entities",
@@ -404,7 +404,7 @@
       "preferences": [
         {
           "name": "includedEntities",
-          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
           "type": "textfield",
           "required": true,
           "title": "Included Entities",
@@ -412,7 +412,7 @@
         },
         {
           "name": "excludedEntities",
-          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
           "type": "textfield",
           "required": false,
           "title": "Excluded Entities",
@@ -545,7 +545,7 @@
       "type": "textfield",
       "required": false,
       "title": "Internal Home Assistant URL (optional)",
-      "description": "URL of your Home Assistant instance in your Home Network. This url is used when the current WiFI SSID is in the SSID list of your Home WiFi or the url is pingable.",
+      "description": "URL of your Home Assistant instance in your Home Network. This url is used when the current WiFI SSID is in the SSID list of your Home Wi-Fi or the url is pingable.",
       "placeholder": "http://homeassistant.local:8123"
     },
     {
@@ -553,7 +553,7 @@
       "type": "textfield",
       "required": false,
       "title": "Home Network Detection",
-      "description": "A list of your Home Network WiFi SSIDs separated by a comma if you have multiple. The SSIDs are used to detect your Home WiFi. Only required if the Internal Home Assistant URL is set.",
+      "description": "A list of your Home Network Wi-Fi SSIDs separated by a comma if you have multiple. The SSIDs are used to detect your Home Wi-Fi. Only required if the Internal Home Assistant URL is set.",
       "placeholder": "HomeWiFi1,HomeWiFi2"
     },
     {
