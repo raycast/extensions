@@ -1,6 +1,6 @@
 # Search joplin notes Changelog
 
-## [FIX Codes] - {PR_MERGE_DATE}
+## [FIX Codes] - 2024-09-22
 
 Modify it so that the search results can be changed in the settings
 
