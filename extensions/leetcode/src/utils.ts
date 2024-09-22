@@ -16,7 +16,7 @@ export function formatProblemMarkdown(problem?: Problem, date?: string) {
   if (!problem) {
     return '';
   }
-  
+
   const title = `# ${problem.questionFrontendId}. ${problem.title}`;
   const header = `${date ? `**🗓️ Date**: ${date} ` : ' '}**🧠 Difficulty**: ${problem.difficulty} | **👍 Likes**: ${
     problem.likes

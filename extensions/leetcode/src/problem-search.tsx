@@ -32,9 +32,9 @@ function ProblemDetail(props: { titleSlug: string }): JSX.Element {
     },
     mapResult(result) {
       return {
-        data: result.data.problem
-      }
-    }
+        data: result.data.problem,
+      };
+    },
   });
 
   return (
@@ -58,7 +58,7 @@ export default function Command(): JSX.Element {
   const [searchText, setSearchText] = useState<string>('');
   const [categorySlug, setCategorySlug] = useState<string>('');
   const [problems, setProblems] = useCachedState<ProblemPreview[]>('searched-problems', []);
-  
+
   const { isLoading } = useFetch<SearchProblemResponse, undefined, ProblemPreview[]>(endpoint, {
     method: 'POST',
     body: JSON.stringify({
@@ -77,8 +77,8 @@ export default function Command(): JSX.Element {
     },
     mapResult(result) {
       return {
-        data: result.data.problemsetQuestionList?.problems || []
-      }
+        data: result.data.problemsetQuestionList?.problems || [],
+      };
     },
     onData: (data) => {
       setProblems(data);
@@ -88,7 +88,8 @@ export default function Command(): JSX.Element {
   });
 
   return (
-    <List isLoading={isLoading}
+    <List
+      isLoading={isLoading}
       navigationTitle="Search LeetCode Problems"
       searchBarPlaceholder="Search LeetCode problems"
       searchBarAccessory={
@@ -100,12 +101,36 @@ export default function Command(): JSX.Element {
           }}
         >
           <List.Dropdown.Item icon="categories/all.svg" value="" title="All" />
-          <List.Dropdown.Item icon={{ source: "categories/algorithms.svg", tintColor: Color.Orange }} value="algorithms" title="Algorithms" />
-          <List.Dropdown.Item icon={{ source: "categories/database.svg", tintColor: Color.Blue }} value="database" title="Database" />
-          <List.Dropdown.Item icon={{ source: "categories/shell.svg", tintColor: Color.Green }} value="shell" title="Shell" />
-          <List.Dropdown.Item icon={{ source: "categories/concurrency.svg", tintColor: Color.Magenta }} value="concurrency" title="Concurrency" />
-          <List.Dropdown.Item icon={{ source: "categories/javascript.svg", tintColor: "#64d2ff" }} value="javascript" title="JavaScript" />
-          <List.Dropdown.Item icon={{ source: "categories/pandas.svg", tintColor: Color.Purple }} value="pandas" title="pandas" />
+          <List.Dropdown.Item
+            icon={{ source: 'categories/algorithms.svg', tintColor: Color.Orange }}
+            value="algorithms"
+            title="Algorithms"
+          />
+          <List.Dropdown.Item
+            icon={{ source: 'categories/database.svg', tintColor: Color.Blue }}
+            value="database"
+            title="Database"
+          />
+          <List.Dropdown.Item
+            icon={{ source: 'categories/shell.svg', tintColor: Color.Green }}
+            value="shell"
+            title="Shell"
+          />
+          <List.Dropdown.Item
+            icon={{ source: 'categories/concurrency.svg', tintColor: Color.Magenta }}
+            value="concurrency"
+            title="Concurrency"
+          />
+          <List.Dropdown.Item
+            icon={{ source: 'categories/javascript.svg', tintColor: '#64d2ff' }}
+            value="javascript"
+            title="JavaScript"
+          />
+          <List.Dropdown.Item
+            icon={{ source: 'categories/pandas.svg', tintColor: Color.Purple }}
+            value="pandas"
+            title="pandas"
+          />
         </List.Dropdown>
       }
       searchText={searchText}

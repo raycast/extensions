@@ -16,8 +16,8 @@ export default function Command(): JSX.Element {
     },
     mapResult(result) {
       return {
-        data: result.data.dailyChallenge
-      }
+        data: result.data.dailyChallenge,
+      };
     },
   });
 
