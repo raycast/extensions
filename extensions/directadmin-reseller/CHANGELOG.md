@@ -1,6 +1,6 @@
 # DirectAdmin Reseller Changelog
 
-## [Migrate More Endpoints + Move URL Check] - {PR_MERGE_DATE}
+## [Migrate More Endpoints + Move URL Check] - 2024-09-22
 
 - Move URL check out of hook to top of components
 - Migrate folllowing endpoints to the hooks:
