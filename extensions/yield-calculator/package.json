@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "yield-calculator",
-      "title": "Yield calculator",
+      "title": "Yield Calculator",
       "subtitle": "Calculate your APY / APR with our calculator",
       "description": "This command helps you calculate your yields. APY or APR, on multiple time frames.",
       "mode": "view"
