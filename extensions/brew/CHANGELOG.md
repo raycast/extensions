@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Improvements & Bugfix] - {PR_MERGE_DATE}
+## [Improvements & Bugfix] - 2024-09-22
 
 - Fix detail panel for tap that doesn't have a license ([#12507](https://github.com/raycast/extensions/issues/12507))
 - Add JSON Debug Info Action
