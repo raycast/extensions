@@ -1,6 +1,6 @@
 # Coolify Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2024-09-22
 
 - View Servers
     - View Server Details
