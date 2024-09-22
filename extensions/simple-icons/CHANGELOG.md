@@ -1,5 +1,11 @@
 # Brand Icons Changelog
 
+## [Milestone] - {PR_MERGE_DATE}
+
+- We reached 3200+ icons!
+- Polish changelog formats
+- Bump all dependencies to the latest version
+
 ## [Enhancements] - 2024-08-05
 
 - Apply brand color to default copying/opening SVG
@@ -48,14 +54,8 @@
 
 ## [Improvements] - 2024-03-24
 
-Now we reached 3100+ icons!
-
-### Features
-
+- Now we reached 3100+ icons!
 - Add aliases field
-
-### Chore
-
 - Update package to ESM
 - Use `got` instead of `node-fetch`
 - Bump all dependencies to the latest version
@@ -83,4 +83,4 @@ Now we reached 3100+ icons!
 
 ## [Initial Version] - 2024-01-12
 
-Over 2900 Free SVG icons for popular brands. See them all on one page at https://simpleicons.org. Contributions, corrections & requests can be made on GitHub.
+- Over 2900 Free SVG icons for popular brands. See them all on one page at https://simpleicons.org. Contributions, corrections & requests can be made on GitHub.

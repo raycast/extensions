@@ -3,7 +3,7 @@
   "name": "simple-icons",
   "title": "Brand Icons - simpleicons.org",
   "type": "module",
-  "description": "Browse, Search, and Copy 3100+ popular brand icons from Simple Icons.",
+  "description": "Browse, Search, and Copy 3200+ popular brand icons from Simple Icons.",
   "icon": "simpleicons-icon.png",
   "author": "litomore",
   "categories": [
@@ -22,7 +22,7 @@
     {
       "name": "index",
       "title": "Search Brand Icons",
-      "description": "Browse, search, and copy 3100+ free SVG icons for popular brands from Simple Icons",
+      "description": "Browse, search, and copy 3200+ free SVG icons for popular brands from Simple Icons",
       "mode": "view"
     }
   ],
@@ -83,21 +83,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.1",
-    "execa": "^9.3.0",
+    "@raycast/api": "^1.83.1",
+    "execa": "^9.4.0",
     "fast-fuzzy": "^1.12.0",
     "got": "^14.4.2",
     "lodash": "^4.17.21",
     "raycast-cross-extension": "^0.2.3",
-    "simple-icons": "^13.3.0"
+    "simple-icons": "^13.11.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/lodash": "^4.17.7",
-    "@types/node": "^22.0.0",
-    "@types/react": "^18.3.3",
-    "eslint": "^8.57.0",
+    "@types/node": "^22.5.5",
+    "@types/react": "^18.3.8",
+    "eslint": "^8.57.1",
     "prettier": "^3.3.3",
-    "typescript": "^5.5.4"
+    "typescript": "^5.6.2"
   }
 }
