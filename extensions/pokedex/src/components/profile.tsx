@@ -7,13 +7,13 @@ import {
 } from "@raycast/api";
 import json2md from "json2md";
 import { useEffect, useMemo, useState } from "react";
-import { getPokemon } from "../api";
+import { fetchPokemonWithCaching } from "../api";
 import {
   PokemonV2Pokemon,
   PokemonV2Pokemonspeciesname,
   PokemonV2PokemonspecyElement,
 } from "../types";
-import { getImgUrl } from "../utils";
+import { getOfficialArtworkImg } from "../utils";
 import PokedexEntries from "./dex";
 import PokemonEncounters from "./encounter";
 import PokemonForms from "./form";
@@ -40,7 +40,7 @@ function random(lower: number, upper: number) {
   return lower + Math.floor(Math.random() * (upper - lower + 1));
 }
 
-export default function PokemonDetail(props: { id?: number }) {
+export default function PokeProfile(props: { id?: number }) {
   const [loading, setLoading] = useState<boolean>(false);
   const [pokemon, setPokemon] = useState<PokemonV2Pokemon | undefined>(
     undefined,
@@ -48,7 +48,7 @@ export default function PokemonDetail(props: { id?: number }) {
 
   useEffect(() => {
     setLoading(true);
-    getPokemon(props.id || random(1, 905), Number(language))
+    fetchPokemonWithCaching(props.id || random(1, 905), Number(language))
       .then((data) => {
         setPokemon(data[0]);
         setLoading(false);
@@ -135,7 +135,7 @@ export default function PokemonDetail(props: { id?: number }) {
       {
         img: {
           title: nameByLang[language].name,
-          source: getImgUrl(pokemon.id),
+          source: getOfficialArtworkImg(pokemon.id),
         },
       },
       {
@@ -195,7 +195,7 @@ export default function PokemonDetail(props: { id?: number }) {
               .map((specy) => {
                 return `![${
                   specy.pokemon_v2_pokemonspeciesnames[0].name
-                }](${getImgUrl(specy.id)})`;
+                }](${getOfficialArtworkImg(specy.id)})`;
               })
               .join(" "),
           }),
@@ -257,53 +257,58 @@ export default function PokemonDetail(props: { id?: number }) {
       actions={
         pokemon && (
           <ActionPanel>
-            <Action.Push
-              title="Pokédex Entries"
-              icon={Icon.List}
-              target={
-                <PokedexEntries
-                  name={nameByLang[language].name}
-                  dex_numbers={
-                    pokemon.pokemon_v2_pokemonspecy.pokemon_v2_pokemondexnumbers
-                  }
-                  entries={
-                    pokemon.pokemon_v2_pokemonspecy
-                      .pokemon_v2_pokemonspeciesflavortexts
-                  }
-                />
-              }
-            />
-            <Action.Push
-              title="Forms"
-              icon={Icon.List}
-              target={
-                <PokemonForms
-                  id={pokemon.id}
-                  name={nameByLang[language].name}
-                  pokemons={pokemon.pokemon_v2_pokemonspecy.pokemon_v2_pokemons}
-                />
-              }
-            />
-            <Action.Push
-              title="Learnset"
-              icon={Icon.List}
-              target={
-                <PokemonMoves
-                  name={nameByLang[language].name}
-                  moves={pokemon.pokemon_v2_pokemonmoves}
-                />
-              }
-            />
-            <Action.Push
-              title="Where to find"
-              icon={Icon.List}
-              target={
-                <PokemonEncounters
-                  name={nameByLang[language].name}
-                  encounters={pokemon.pokemon_v2_encounters}
-                />
-              }
-            />
+            <ActionPanel.Section title="Information">
+              <Action.Push
+                title="Pokédex Entries"
+                icon={Icon.List}
+                target={
+                  <PokedexEntries
+                    name={nameByLang[language].name}
+                    dex_numbers={
+                      pokemon.pokemon_v2_pokemonspecy
+                        .pokemon_v2_pokemondexnumbers
+                    }
+                    entries={
+                      pokemon.pokemon_v2_pokemonspecy
+                        .pokemon_v2_pokemonspeciesflavortexts
+                    }
+                  />
+                }
+              />
+              <Action.Push
+                title="Forms"
+                icon={Icon.List}
+                target={
+                  <PokemonForms
+                    id={pokemon.id}
+                    name={nameByLang[language].name}
+                    pokemons={
+                      pokemon.pokemon_v2_pokemonspecy.pokemon_v2_pokemons
+                    }
+                  />
+                }
+              />
+              <Action.Push
+                title="Learnset"
+                icon={Icon.List}
+                target={
+                  <PokemonMoves
+                    name={nameByLang[language].name}
+                    moves={pokemon.pokemon_v2_pokemonmoves}
+                  />
+                }
+              />
+              <Action.Push
+                title="Where to Find"
+                icon={Icon.List}
+                target={
+                  <PokemonEncounters
+                    name={nameByLang[language].name}
+                    encounters={pokemon.pokemon_v2_encounters}
+                  />
+                }
+              />
+            </ActionPanel.Section>
           </ActionPanel>
         )
       }
