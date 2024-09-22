@@ -1,6 +1,6 @@
 # LeetCode Changelog
 
-## [More Problem Categories] - {PR_MERGE_DATE}
+## [More Problem Categories] - 2024-09-22
 
 - Categories now have icons
 - Add 2 problem categories:
