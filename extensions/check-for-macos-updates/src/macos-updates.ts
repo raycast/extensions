@@ -12,11 +12,12 @@ export default async function main() {
 
   try {
     // Execute the softwareupdate command with the full path
-    const { stdout } = await execPromise('/usr/sbin/softwareupdate -l');
+    const { stdout } = await execPromise("/usr/sbin/softwareupdate -l");
 
     // Check if there are updates in a more specific way
     const updateRegex = /\* Label: (.*)/g;
     const availableUpdates = [...stdout.matchAll(updateRegex)];
+    const requiresRestart = stdout.toLowerCase().includes("restart");
 
     if (availableUpdates.length > 0) {
       // Updates are available
@@ -47,10 +48,35 @@ export default async function main() {
         });
 
         try {
-          await execPromise('/usr/sbin/softwareupdate -ia');
+          await execPromise("/usr/sbin/softwareupdate -ia");
           installToast.style = Toast.Style.Success;
           installToast.title = "Updates installed successfully.";
           installToast.message = "Your macOS updates have been installed.";
+
+          // If the update requires a restart, ask the user to restart now
+          if (requiresRestart) {
+            const shouldRestart = await confirmAlert({
+              title: "Restart Required",
+              message: "The update requires a restart to complete. Do you want to restart your Mac now?",
+              primaryAction: {
+                title: "Restart",
+                style: Alert.ActionStyle.Destructive,
+              },
+              dismissAction: {
+                title: "Later",
+                style: Alert.ActionStyle.Cancel,
+              },
+            });
+
+            if (shouldRestart) {
+              // Restart the system
+              await execPromise("sudo shutdown -r now");
+            } else {
+              toast.style = Toast.Style.Success;
+              toast.title = "Restart postponed.";
+              toast.message = "Your Mac will need to restart later to complete the update.";
+            }
+          }
         } catch (installError) {
           installToast.style = Toast.Style.Failure;
           installToast.title = "Failed to install updates.";
