@@ -10,29 +10,29 @@ export default async function main() {
     return;
   }
 
-  const filePaths = (await getSelectedFinderItems()).map((f) => f.path);
-  console.log(`Selected file paths: ${filePaths.join(", ")}`);
-
-  if (filePaths.length === 0) {
-    console.log("No Finder items selected");
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "No Finder items selected",
-    });
-    return;
-  }
-
-  console.log("Showing compression start toast");
-  await showToast({
-    style: Toast.Style.Animated,
-    title: "Compressing with ImageOptim",
-  });
-
-  const escapedPaths = filePaths.map((path) => `"${path.replace(/"/g, '\\"')}"`).join(" ");
-  console.log(`Executing ImageOptim with paths: ${escapedPaths}`);
-
   try {
-    console.log("Starting ImageOptim process");
+    const filePaths = (await getSelectedFinderItems()).map((f) => f.path);
+    console.log(`Selected file paths: ${filePaths.join(", ")}`);
+
+    if (filePaths.length === 0) {
+      console.log("No Finder items selected");
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No Finder items selected",
+        message: "Please select files in Finder and try again",
+      });
+      return;
+    }
+
+    console.log("Showing compression start toast");
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Compressing with ImageOptim",
+    });
+
+    const escapedPaths = filePaths.map((path) => `"${path.replace(/"/g, '\\"')}"`).join(" ");
+    console.log(`Executing ImageOptim with paths: ${escapedPaths}`);
+
     await new Promise((resolve, reject) => {
       const process = exec(`/Applications/ImageOptim.app/Contents/MacOS/ImageOptim ${escapedPaths}`, {
         shell: "/bin/bash",
@@ -60,11 +60,20 @@ export default async function main() {
       message: "Images have been optimized",
     });
   } catch (error) {
-    console.error("Compression failed:", error);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Compression Failed",
-      message: "An error occurred during compression",
-    });
+    console.error("An error occurred:", error);
+
+    if (error instanceof Error && error.message.includes("Finder isn't the frontmost application")) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Finder is not active",
+        message: "Please switch to Finder and select files"
+      });
+    } else {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Operation Failed",
+        message: "An unexpected error occurred",
+      });
+    }
   }
 }
