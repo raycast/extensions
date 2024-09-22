@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 interface ResultItem {
@@ -9,6 +9,42 @@ interface ResultItem {
   url: string;
   subtype: "page" | "post";
 }
+
+const ItemDetails = ({ item }: { item: ResultItem }) => {
+  interface DetailItem {
+    date: string;
+    link: string;
+    title: {
+      rendered: string;
+    };
+    excerpt: {
+      rendered: string;
+      protected: boolean;
+    };
+  }
+  const { data, isLoading, error } = useFetch<DetailItem>(
+    `https://css-tricks.com/wp-json/wp/v2/${item.subtype}s/${item.id}?` +
+      new URLSearchParams({
+        context: "embed",
+        _fields: "date,link,title,excerpt",
+      }).toString(),
+  );
+
+  const markdown = isLoading
+    ? "Loading..."
+    : error
+      ? error.message
+      : data
+        ? `# ${data.title.rendered} \n\n Date: ${data.date} \n\n Type: ${item.subtype} \n\n --- \n\n ${data.excerpt.rendered}`
+        : "";
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={markdown}
+      actions={<ActionPanel>{data && <Action.OpenInBrowser url={data.link} />}</ActionPanel>}
+    />
+  );
+};
 
 const ListItem = ({ item }: { item: ResultItem }) => {
   return (
@@ -22,6 +58,7 @@ const ListItem = ({ item }: { item: ResultItem }) => {
       }
       actions={
         <ActionPanel>
+          <Action.Push icon={Icon.Eye} title="View Details" target={<ItemDetails item={item} />} />
           <Action.OpenInBrowser url={item.url} title="Open in Browser" icon={Icon.Globe} />
         </ActionPanel>
       }
@@ -33,12 +70,10 @@ const Command = () => {
   const [query, setQuery] = useState("");
 
   const { data, isLoading, error } = useFetch(
-    (options) =>
-      `https://css-tricks.com/wp-json/wp/v2/search?` +
+    `https://css-tricks.com/wp-json/wp/v2/search?` +
       new URLSearchParams({
         type: "post",
         per_page: "20",
-        page: String(options.page + 1),
         _fields: "id,title,url,subtype",
         search: query,
       }).toString(),
