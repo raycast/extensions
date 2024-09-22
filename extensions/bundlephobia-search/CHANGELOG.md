@@ -1,6 +1,6 @@
 # Bundlephobia Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2024-09-22
 - chore: bump deps
 - feat: add tree-shakeable info
 - fix: update screenshots
