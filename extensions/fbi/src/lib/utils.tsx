@@ -24,7 +24,7 @@ export function generateMarkdown(artcrime: ArtCrime | WantedPerson) {
   if (artcrime.images.length) {
     const image = artcrime.images[0];
     const alt = image.caption || artcrime.title;
-    const src = image.original || image.large || image.thumb;
+    const src = image.thumb || image.original || image.large;
     img = `![${alt}](${src})`;
   }
   return img + `\n\n ${artcrime.description}`;

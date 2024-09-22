@@ -1,4 +1,4 @@
-import { Icon, List } from "@raycast/api";
+import { getPreferenceValues, Icon, List } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import { SuccessResponse, WantedPerson } from "./lib/types";
 import { API_HEADERS, BASE_API_URL, PAGE_SIZE } from "./lib/constants";
@@ -7,6 +7,7 @@ import ImagesMetadata from "./lib/components/ImagesMetadata";
 import { useState } from "react";
 
 export default function WantedPersons() {
+  const { hide_markdown } = getPreferenceValues<Preferences.WantedPersons>();
   const [searchTitle, setSearchTitle] = useState("");
   const [total, setTotal] = useCachedState<number>("total-wanted");
   const {
@@ -47,14 +48,14 @@ export default function WantedPersons() {
       throttle
     >
       <List.Section title={`${persons.length} of ${total} Wanted Persons`}>
-        {persons.map((person) => (
+        {persons.map((person, index) => (
           <List.Item
-            key={person.uid}
+            key={person.uid + index}
             icon={person.sex === "Male" ? Icon.Male : person.sex === "Female" ? Icon.Female : Icon.QuestionMark}
             title={person.title}
             detail={
               <List.Item.Detail
-                markdown={generateMarkdown(person)}
+                markdown={hide_markdown ? undefined : generateMarkdown(person)}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Title" text={person.title} />

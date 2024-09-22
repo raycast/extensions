@@ -57,7 +57,7 @@ export default function ArtCrimes() {
                 markdown={generateMarkdown(artcrime)}
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="Crime Category" text={artcrime.crimeCategory} />
+                    <ItemWithTextOrIcon title="Crime Category" text={artcrime.crimeCategory} />
                     {artcrime.additionalData ? (
                       <List.Item.Detail.Metadata.TagList title="Additional Data">
                         {artcrime.additionalData.split(";").map((item, itemIndex) => (
@@ -72,7 +72,7 @@ export default function ArtCrimes() {
                       title="Is Stealth"
                       icon={artcrime.isStealth ? Icon.Check : Icon.Multiply}
                     />
-                    <List.Item.Detail.Metadata.Label title="ID In Agency" text={artcrime.idInAgency} />
+                    <ItemWithTextOrIcon title="ID In Agency" text={artcrime.idInAgency} />
                     <ItemWithTextOrIcon title="Maker" text={artcrime.maker} />
                     <List.Item.Detail.Metadata.Label title="Title" text={artcrime.title} />
                     <ItemWithTextOrIcon title="Materials" text={artcrime.materials} />

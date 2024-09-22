@@ -20,17 +20,28 @@
       "name": "wanted-persons",
       "title": "Wanted Persons",
       "description": "Get listing of wanted people",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "hide_markdown",
+          "label": "Hide Markdown",
+          "type": "checkbox",
+          "default": true,
+          "description": "Hide Markdown (keep checked if you do not want to see images)",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.72.1",
+    "@raycast/api": "^1.79.0",
     "@raycast/utils": "^1.15.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
+    "@types/react": "^18.3.3",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"

@@ -11,8 +11,8 @@ export type ArtCrime = {
   title: string;
   description: string;
   images: Image[];
-  crimeCategory: string;
-  maker?: string;
+  crimeCategory: string | null;
+  maker?: string | null;
   materials: string;
   measurements: string;
   period: string;
@@ -20,9 +20,9 @@ export type ArtCrime = {
   modified: string;
   publication: string;
   path: string;
-  referenceNumber: string;
-  isStealth: boolean;
-  idInAgency: string;
+  referenceNumber: string | null;
+  isStealth: boolean | null;
+  idInAgency: string | null;
   url: string;
 };
 
@@ -77,13 +77,13 @@ export type WantedPerson = {
   age_range: string | null;
   weight: string | null;
   subjects: string[];
-  // "aliases": null,
-  // "race_raw": null,
-  // "suspects": null,
+  aliases: string[] | null;
+  race_raw: string | null;
+  suspects: unknown | null;
   coordinates: string[];
-  // "hair_raw": null,
-  // "languages": null,
-  // "eyes_raw": null,
+  hair_raw: string | null;
+  languages: string[] | null;
+  eyes_raw: string | null;
   url: string;
 };
 export type SuccessResponse<T> = {
