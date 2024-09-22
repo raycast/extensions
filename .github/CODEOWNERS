@@ -1054,6 +1054,7 @@
 /extensions/passphrase-generator                                    @omBratteng @pernielsentikaer
 /extensions/password-generator                                      @joshuaiz @teziovsky @pernielsentikaer
 /extensions/password-store                                          @aetiosfokeas
+/extensions/password-strength                                       @j3lte
 /extensions/paste-as-plain-text                                     @koinzhang @pantajoe
 /extensions/paste-from-apple-books                                  @winann
 /extensions/pastebin                                                @vimtor
