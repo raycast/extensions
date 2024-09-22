@@ -1,6 +1,6 @@
 # JustWatch Search Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-09-22
 
 - Upgrade dependencies
 - Refactored most of the code for better readability and maintainability
