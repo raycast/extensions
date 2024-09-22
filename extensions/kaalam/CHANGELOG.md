@@ -1,6 +1,6 @@
 # Kaalam Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-09-22
 
 - Added ISO 8601 date format to the list
 
