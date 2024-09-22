@@ -20,9 +20,9 @@ A searchable and filterable directory of React Native libraries for Raycast.
    - Description
    - Directory score
    - GitHub stats (stars, forks, watchers, issues)
-   - NPM download statistics
+   - NPM download stats
    - Supported platforms
-   - Compatibility information
+   - Compatibility info
 
 5. Use the Action Panel to:
    - Open documentation in browser
