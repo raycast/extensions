@@ -1,6 +1,6 @@
 # CSS Tricks Changelog
 
-## [UX Improvements] - {PR_MERGE_DATE}
+## [UX Improvements] - 2024-09-23
 
 - Moved Details to List item details
 - Add preview image to details
