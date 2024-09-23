@@ -11,7 +11,11 @@ export function isReadyToFetch() {
   return isProfileSelected || isAwsVaultSessionActive;
 }
 
-export function resourceToConsoleLink(resourceId: string | undefined, resourceType: string, runId: string | undefined = undefined) {
+export function resourceToConsoleLink(
+  resourceId: string | undefined,
+  resourceType: string,
+  runId: string | undefined = undefined,
+) {
   const { AWS_REGION } = process.env;
 
   if (!resourceId) return "";
