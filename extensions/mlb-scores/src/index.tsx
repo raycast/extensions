@@ -72,6 +72,15 @@ export default function main() {
               key={item.gamePk}
               title={title}
               subtitle={subtitle}
+              accessories={[
+                {
+                  text: item.gameData.status.abstractGameCode.toUpperCase() === "F" ? "" : `${item.liveData.linescore.inningState} ${item.liveData.linescore.currentInningOrdinal}`,
+                },
+                { 
+                  text: (item.gameData.status.abstractGameCode.toUpperCase() === "L" ? item.liveData.plays?.currentPlay?.result.description : "") 
+                }
+              ]}
+              
               actions={
                 <ActionPanel>
                   <ActionPanel.Section title="Actions">

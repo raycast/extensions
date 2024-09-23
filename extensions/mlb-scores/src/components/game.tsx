@@ -17,7 +17,6 @@ const Game = React.memo(
     }
     
     const currentPlay = game.liveData.plays.currentPlay;
-    console.log(currentPlay.result);
     const linescore = game.liveData.linescore;
     const runs_inning = Array(9).fill(["X", "X"]);
     linescore.innings.forEach((inning, index) => {
@@ -69,8 +68,8 @@ ${game.gameData.status.abstractGameCode.toUpperCase() === "P" ? `Starts at: ${da
 
 ${
   game.gameData.status.abstractGameCode.toUpperCase() === "L"
-    ? `**${linescore.inningState} ${linescore.currentInningOrdinal}, ${currentPlay.count.outs} Out${currentPlay.count.outs > 1 ? `s` : ""}. Current Matchup:** (${currentPlay.matchup.pitchHand.code}HP) ${currentPlay.matchup.pitcher.fullName} vs ${currentPlay.matchup.batter.fullName} — 
-  ${currentPlay.count.balls} Balls - ${currentPlay.count.strikes} Strikes  
+    ? `**${linescore.inningState} ${linescore.currentInningOrdinal}. ${currentPlay.count.outs} Out${currentPlay.count.outs !== 1 ? `s` : ""}. 
+  ${currentPlay.count.balls} Ball${currentPlay.count.balls !== 1 ? 's' : ''}, ${currentPlay.count.strikes} Strike${currentPlay.count.strikes !== 1 ? `s` : ""}. Current Matchup:** (${currentPlay.matchup.pitchHand.code}HP) ${currentPlay.matchup.pitcher.fullName} vs ${currentPlay.matchup.batter.fullName} (${currentPlay.matchup.batSide.code}) 
   ${currentPlay.result.description !== undefined ? `**Latest:** ` + currentPlay.result.description : ""}` : " "
 }
 
