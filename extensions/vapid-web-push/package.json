@@ -1,0 +1,154 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vapid-web-push",
+  "title": "VAPID Web Push",
+  "description": "Send Web Push Notifications using VAPID keys to a given subscription.",
+  "icon": "logo.png",
+  "categories": ["Development Tools"],
+  "author": "iksnerd",
+  "license": "MIT",
+  "preferences": [
+    {
+      "key": "email",
+      "title": "Email",
+      "description": "The email address associated with the VAPID key pair.",
+      "type": "textfield",
+      "defaultValue": "",
+      "name": "email",
+      "required": true,
+      "placeholder": "me@example.com",
+      "validation": {
+        "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+        "message": "Please enter a valid email address."
+      }
+    },
+    {
+      "key": "publicKey",
+      "title": "Public Key",
+      "description": "The public key for the VAPID key pair.",
+      "type": "textfield",
+      "defaultValue": "",
+      "name": "publicKey",
+      "required": true
+    },
+    {
+      "key": "privateKey",
+      "title": "Private Key",
+      "description": "The private key for the VAPID key pair.",
+      "type": "textfield",
+      "defaultValue": "",
+      "name": "privateKey",
+      "required": true
+    },
+    {
+      "key": "endpoint",
+      "title": "Endpoint (Subscription)",
+      "description": "The endpoint of the notification subscription.",
+      "type": "textfield",
+      "defaultValue": "",
+      "name": "endpoint",
+      "required": true
+    },
+    {
+      "key": "p256dh",
+      "title": "p256dh (Subscription)",
+      "description": "The p256dh key of the notification subscription.",
+      "type": "textfield",
+      "defaultValue": "",
+      "name": "p256dh",
+      "required": true
+    },
+    {
+      "key": "auth",
+      "title": "Auth (Subscription)",
+      "description": "The auth key of the notification subscription.",
+      "type": "textfield",
+      "defaultValue": "",
+      "name": "auth",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "send-notification",
+      "title": "Send push notification",
+      "icon": "logo.png",
+      "description": "Send a push notification to the subscription.",
+      "preferences": [
+        {
+          "key": "title",
+          "title": "Title",
+          "description": "The title of the notification.",
+          "type": "textfield",
+          "defaultValue": "",
+          "name": "title",
+          "required": true
+        },
+        {
+          "key": "body",
+          "title": "Body",
+          "description": "The body of the notification.",
+          "type": "textfield",
+          "defaultValue": "",
+          "name": "body",
+          "required": true
+        }
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "setup",
+      "title": "Setup",
+      "subtitle": "VAPID keys & subscription.",
+      "icon": "logo.png",
+      "description": "To use the Web Push API, you need to generate VAPID keys. You also need to subscribe to push notifications and get a subscription object.",
+      "mode": "view"
+    },
+    {
+      "name": "generate-vapid-keys",
+      "title": "Generate VAPID keys",
+      "subtitle": "VAPID",
+      "icon": "logo.png",
+      "description": "Generate VAPID keys for Web Push Notifications.",
+      "mode": "view",
+      "preferences": [
+        {
+          "key": "email",
+          "title": "Email",
+          "description": "The email address associated with the VAPID key pair.",
+          "type": "textfield",
+          "defaultValue": "",
+          "name": "email",
+          "required": true,
+          "placeholder": "",
+          "validation": {
+            "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+            "message": "Please enter a valid email address."
+          }
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
+    "web-push": "^3.6.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.5.5",
+    "@types/react": "18.3.8",
+    "@types/web-push": "^3.6.3",
+    "eslint": "8.57.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
