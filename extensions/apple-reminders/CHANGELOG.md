@@ -4,6 +4,10 @@
 
 - Sort menu bar reminders by due date instead of the order they were created.
 
+## [Add pre-fill for the Create Reminder command with text from My Reminders search] - 2024-09-18
+
+The Create Reminder command will automatically pre-fill the title with the initial query when there are no search results in My Reminders.
+
 ## [Change AI model for Quick Add Reminder] - 2024-05-23
 
 Now, Quick Add Reminder will use GPT-4o instead of GPT-4 Turbo. 

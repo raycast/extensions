@@ -14,13 +14,9 @@ import { useEffect, useState } from "react";
 import { getHistory as fetchHistory, clearHistory as clearStoredHistory, deleteHistoryEntry } from "./uuidHistory";
 import { HistoryEntry } from "./uuidHistory";
 
-interface Preferences {
-  defaultAction: string;
-}
-
 export default function ViewHistory() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
-  const { defaultAction } = getPreferenceValues<Preferences>();
+  const { defaultAction } = getPreferenceValues<Preferences.ViewHistory>();
 
   useEffect(() => {
     async function loadHistory() {

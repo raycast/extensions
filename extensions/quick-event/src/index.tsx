@@ -32,7 +32,7 @@ export default function Command() {
       var projectCalendars = Calendar.calendars.whose({name: "${calendarName}"})
       var projectCalendar = projectCalendars[0]
       var event = Calendar.Event({
-        summary: "${item.eventTitle}", 
+        summary: "${item.eventTitle?.replace(/"/g, '\\"')}",
         startDate: eventStart, 
         endDate: eventEnd, 
         alldayEvent: ${item.isAllDay},

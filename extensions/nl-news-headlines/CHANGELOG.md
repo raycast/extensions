@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.0] - 2024-09-13
+
+### Improvement
+- Improved loading of new headlines and improved caching
+
 ## [Initial release] - 2024-09-12
 
 ### Added

@@ -1,47 +1,65 @@
-import { formatDistanceToNow, isValid } from "date-fns";
 import { useState } from "react";
 
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-import type { ResultsItem, SearchResult } from "./types";
+interface ResultItem {
+  id: number;
+  title: string;
+  url: string;
+  subtype: "page" | "post";
+}
 
-const ListItem = ({ item }: { item: ResultsItem }) => {
-  const date = item.fields.date ? new Date(Date.parse(item.fields.date)) : undefined;
-  const accessories: List.Item.Accessory[] =
-    date && isValid(date)
-      ? [
-          {
-            tag: formatDistanceToNow(date, {}),
-            icon: { source: Icon.Calendar, tintColor: Color.SecondaryText },
-          },
-        ]
-      : [];
+const ItemDetails = ({ item }: { item: ResultItem }) => {
+  interface DetailItem {
+    date: string;
+    link: string;
+    title: {
+      rendered: string;
+    };
+    excerpt: {
+      rendered: string;
+      protected: boolean;
+    };
+  }
+  const { data, isLoading, error } = useFetch<DetailItem>(
+    `https://css-tricks.com/wp-json/wp/v2/${item.subtype}s/${item.id}?` +
+      new URLSearchParams({
+        context: "embed",
+        _fields: "date,link,title,excerpt",
+      }).toString(),
+  );
 
+  const markdown = isLoading
+    ? "Loading..."
+    : error
+      ? error.message
+      : data
+        ? `# ${data.title.rendered} \n\n Date: ${data.date} \n\n Type: ${item.subtype} \n\n --- \n\n ${data.excerpt.rendered}`
+        : "";
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={markdown}
+      actions={<ActionPanel>{data && <Action.OpenInBrowser url={data.link} />}</ActionPanel>}
+    />
+  );
+};
+
+const ListItem = ({ item }: { item: ResultItem }) => {
   return (
     <List.Item
-      id={`${item.fields.post_id}`}
-      title={item.fields["title.default"]}
-      subtitle={item.highlight.content.join(" ").replace(/<[^>]*>?/gm, "")}
+      id={`${item.id}`}
+      title={item.title}
       icon={
-        item.fields.post_type === "page"
+        item.subtype === "page"
           ? { source: Icon.Document, tintColor: Color.Green }
           : { source: Icon.Bookmark, tintColor: Color.SecondaryText }
       }
-      accessories={accessories}
       actions={
         <ActionPanel>
-          {item.fields?.["permalink.url.raw"] ? (
-            <Action.OpenInBrowser
-              url={
-                item.fields["permalink.url.raw"].startsWith("http")
-                  ? item.fields["permalink.url.raw"]
-                  : `https://${item.fields["permalink.url.raw"]}`
-              }
-              title="Open in Browser"
-              icon={Icon.Globe}
-            />
-          ) : null}
+          <Action.Push icon={Icon.Eye} title="View Details" target={<ItemDetails item={item} />} />
+          <Action.OpenInBrowser url={item.url} title="Open in Browser" icon={Icon.Globe} />
         </ActionPanel>
       }
     />
@@ -51,22 +69,37 @@ const ListItem = ({ item }: { item: ResultsItem }) => {
 const Command = () => {
   const [query, setQuery] = useState("");
 
-  const { data, isLoading, error } = useFetch<SearchResult>(
-    `https://public-api.wordpress.com/rest/v1.3/sites/45537868/search?fields[0]=date&fields[1]=permalink.url.raw&fields[2]=tag.name.default&fields[3]=category.name.default&fields[4]=post_type&fields[5]=shortcode_types&fields[6]=forum.topic_resolved&fields[7]=has.image&fields[8]=image.url.raw&fields[9]=image.alt_text&highlight_fields[0]=title&highlight_fields[1]=content&highlight_fields[2]=comments&filter[bool][must][0][bool][should][0][term][post_type]=post&filter[bool][must][0][bool][should][1][term][post_type]=page&filter[bool][must][0][bool][should][2][term][post_type]=newsletters&filter[bool][must][0][bool][should][3][term][post_type]=chapters&filter[bool][must][1][bool][must_not][0][term][post_type]=attachment&query=${query}&sort=score_default&size=20`,
+  const { data, isLoading, error } = useFetch(
+    `https://css-tricks.com/wp-json/wp/v2/search?` +
+      new URLSearchParams({
+        type: "post",
+        per_page: "20",
+        _fields: "id,title,url,subtype",
+        search: query,
+      }).toString(),
     {
+      mapResult(result: ResultItem[]) {
+        return {
+          data: result,
+        };
+      },
       execute: query.length > 0,
       keepPreviousData: false,
     },
   );
 
   return (
-    <List isLoading={isLoading} searchText={query} onSearchTextChange={setQuery} throttle>
+    <List
+      isLoading={isLoading}
+      searchText={query}
+      onSearchTextChange={setQuery}
+      throttle
+      searchBarPlaceholder="Search posts and pages"
+    >
       {error && (
         <List.EmptyView title="Failed to load data" description={error.message} icon={{ source: "csstricks.svg" }} />
       )}
-      {!error && !isLoading && query.length > 0
-        ? data?.results.map((res) => <ListItem key={res.fields.post_id} item={res} />)
-        : null}
+      {!error && !isLoading && query.length > 0 ? data?.map((res) => <ListItem key={res.id} item={res} />) : null}
       {!error && (
         <List.EmptyView
           title={
