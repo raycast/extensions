@@ -7,12 +7,15 @@ import { useEffect, useState } from "react";
 export default function SearchDocsets(): JSX.Element {
   const { data, isLoading } = useFetch<Doc[]>(`https://devdocs.io/docs/docs.json`, {});
   const defaultDocs = ["css", "html", "http", "javascript", "dom"];
-  const { value: docSlugs } = useLocalStorage("docs", defaultDocs);
+  const { value: docSlugsStorage } = useLocalStorage("docs", JSON.stringify(defaultDocs));
 
   const [documentations, setDocumentations] = useState<[Doc[], Doc[]]>([[], []]);
 
   useEffect(() => {
-    if (data && docSlugs) {
+    const docSlugsObject = JSON.parse(docSlugsStorage || "{}");
+    const docSlugs = docSlugsObject["docs"] ? Array.from(docSlugsObject["docs"]?.split("/")) : [];
+
+    if (data && docSlugsObject) {
       const preferredDocs: Doc[] = [];
       const availableDocs: Doc[] = [];
 
@@ -26,7 +29,7 @@ export default function SearchDocsets(): JSX.Element {
 
       setDocumentations([preferredDocs, availableDocs]);
     }
-  }, [isLoading, docSlugs]);
+  }, [isLoading]);
 
   return (
     <List isLoading={isLoading}>
