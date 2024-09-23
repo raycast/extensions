@@ -2,7 +2,7 @@
 
 ## [chore] - 2024-09-23
 
-- pass extension ownership to the Dust team
+- transfer extension ownership to the Dust team
 
 ## [bug fixes] - 2024-07-22
 
