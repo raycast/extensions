@@ -14,8 +14,8 @@ export default function Command() {
                 return false;
               }
               const contents = fs.readFileSync(file, "utf8");
-              const docString = JSON.parse(contents); //["docs"];
-              saveDocs(docString);
+              const docString = JSON.parse(contents);
+              saveDocs(JSON.stringify(docString));
             }}
           />
         </ActionPanel>
