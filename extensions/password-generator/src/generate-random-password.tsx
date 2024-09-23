@@ -15,7 +15,6 @@ import { generatePassword } from "@/helpers/helpers";
 interface Preferences {
   hideAfterCopy: boolean;
   storePasswordLength: boolean;
-  rememberCustomFormat: boolean;
 }
 
 interface Form {
@@ -74,7 +73,6 @@ export default function Command() {
         storeValue={storePasswordLength}
       />
       <Form.Checkbox id="useNumbers" label="Use numbers?" defaultValue={true} />
-
       <Form.Checkbox id="useChars" label="Use special characters?" defaultValue={true} />
     </Form>
   );
