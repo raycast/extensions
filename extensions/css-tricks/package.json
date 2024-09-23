@@ -25,7 +25,7 @@
   "dependencies": {
     "@raycast/api": "^1.79.1",
     "@raycast/utils": "^1.17.0",
-    "date-fns": "^3.6.0"
+    "html-to-md": "^0.8.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
