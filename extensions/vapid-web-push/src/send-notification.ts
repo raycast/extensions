@@ -2,7 +2,6 @@ import webpush, { PushSubscription } from "web-push";
 import { getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { Preferences } from "./setup";
 
-
 export default async function main() {
   const preferences = getPreferenceValues<Preferences>();
   const email = preferences.email;
@@ -10,7 +9,7 @@ export default async function main() {
   const publicKey = preferences.publicKey;
   const title = preferences.title;
   const body = preferences.body;
-  
+
   webpush.setVapidDetails(`mailto:${email}`, publicKey, privateKey);
 
   await sendNotification(body, title);
@@ -29,12 +28,12 @@ async function sendNotification(message: string, title: string) {
       auth,
     },
   };
-  
+
   if (!subscription) {
     await showHUD("No subscription available");
     throw new Error("No subscription available");
   }
-  
+
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Sending notification",
@@ -49,20 +48,19 @@ async function sendNotification(message: string, title: string) {
         icon: "/icon.png",
       }),
     );
-    
+
     toast.style = Toast.Style.Success;
     toast.title = "Sent notification";
     toast.message = "Notification sent successfully";
-    
+
     await showHUD("Notification sent");
-    
+
     return { success: true };
-    
   } catch (error) {
     toast.style = Toast.Style.Success;
     toast.title = "Failed";
     toast.message = "Failed to send notification";
-    
+
     return { success: false, error: "Failed to send notification" };
   }
 }

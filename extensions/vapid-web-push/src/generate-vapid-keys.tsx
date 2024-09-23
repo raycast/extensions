@@ -1,14 +1,6 @@
-import {
-  getPreferenceValues,
-  showHUD,
-  Action,
-  Detail,
-  ActionPanel,
-  openCommandPreferences,
-} from "@raycast/api";
+import { getPreferenceValues, showHUD, Action, Detail, ActionPanel, openCommandPreferences } from "@raycast/api";
 import webpush from "web-push";
 import { Preferences } from "./setup";
-
 
 async function generateVapidKeys() {
   const preferences = getPreferenceValues<Preferences>();

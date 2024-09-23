@@ -4,7 +4,7 @@
   "title": "VAPID Web Push",
   "description": "Send Web Push Notifications using VAPID keys to a given subscription.",
   "icon": "logo.png",
-  "categories": ["Development Tools"],
+  "categories": ["Developer Tools"],
   "author": "iksnerd",
   "license": "MIT",
   "preferences": [
@@ -71,7 +71,7 @@
   "commands": [
     {
       "name": "send-notification",
-      "title": "Send push notification",
+      "title": "Send Push Notification",
       "icon": "logo.png",
       "description": "Send a push notification to the subscription.",
       "preferences": [
@@ -106,7 +106,7 @@
     },
     {
       "name": "generate-vapid-keys",
-      "title": "Generate VAPID keys",
+      "title": "Generate VAPID Keys",
       "subtitle": "VAPID",
       "icon": "logo.png",
       "description": "Generate VAPID keys for Web Push Notifications.",
@@ -120,11 +120,7 @@
           "defaultValue": "",
           "name": "email",
           "required": true,
-          "placeholder": "",
-          "validation": {
-            "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
-            "message": "Please enter a valid email address."
-          }
+          "placeholder": "me@example.com"
         }
       ]
     }

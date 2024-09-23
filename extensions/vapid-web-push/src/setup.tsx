@@ -1,10 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  getPreferenceValues,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 
 export interface Preferences {
   email: string;
@@ -19,7 +13,7 @@ export interface Preferences {
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  
+
   const preferencesString = `# Web Push Notification Preferences
     \n ### email:
    \`${preferences.email}\`
