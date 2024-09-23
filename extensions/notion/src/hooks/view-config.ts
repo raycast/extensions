@@ -41,7 +41,13 @@ export interface KanbanConfig {
 
 export function useConvertDepreciatedViewConfig() {
   useEffect(() => {
-    convertDepreciatedViewConfig();
+    const cache = new Cache();
+    const viewConfigMigrationStatus = cache.get("viewConfigMigrationStatus");
+    console.log({ viewConfigMigrationStatus });
+    if (viewConfigMigrationStatus == "complete" || viewConfigMigrationStatus == "in progress") return;
+    cache.set("viewConfigMigrationStatus", "in progress");
+    convertDepreciatedViewConfig(cache);
+    cache.set("viewConfigMigrationStatus", "complete");
   }, []);
 }
 
@@ -49,15 +55,10 @@ export function useConvertDepreciatedViewConfig() {
  * This function coverts the old view config format to the new one.
  * It should be deleted 6 months after implemention (February 2025).
  */
-async function convertDepreciatedViewConfig() {
-  const cache = new Cache();
-  const viewConfigMigrationStatus = cache.get("viewConfigMigrationStatus");
-  if (viewConfigMigrationStatus == "complete" || viewConfigMigrationStatus == "in progress") return;
-
+async function convertDepreciatedViewConfig(cache: Cache) {
   const jsonString = await LocalStorage.getItem<string>("DATABASES_VIEWS");
   if (!jsonString) return;
 
-  cache.set("viewConfigMigrationStatus", "in progress");
   const toast = await showToast({ title: "Migrating view configuration format", style: Toast.Style.Animated });
 
   try {
@@ -85,7 +86,6 @@ async function convertDepreciatedViewConfig() {
 
     toast.title = "View configurations migrated";
     toast.style = Toast.Style.Success;
-    cache.set("viewConfigMigrationStatus", "complete");
     popToRoot(); // Don't love this, but it's the only way I can think to update state. It will only run once.
   } catch (error) {
     console.warn(error);
