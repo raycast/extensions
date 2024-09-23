@@ -19,6 +19,20 @@ export default function Command(props: LaunchProps) {
 
   const [iconResponse, setIconResponse] = useState<JSX.Element>(<Detail isLoading={true} markdown="Loading..." />);
 
+  const showDetailError = (error: any) => {
+    if (!error) {
+      return;
+    }
+  
+    const baseMessage = `# Error ${error.statusCode} \n There was an error with your request. Please check your API keys in the extension settings and try again.`;
+    const unauthorizedMessage = `# Error: Unauthorized \n Your API credentials are not valid. Please try again. Get your keys at [the Noun Project developer console](https://thenounproject.com/developers/apps/).`;
+  
+    const message = (error.statusCode === 401 || error.statusCode === 403) ? unauthorizedMessage : baseMessage;
+  
+    setIconResponse(<Detail isLoading={false} markdown={message} />);
+  };
+  
+
   if (customColor.length) {
     const normalizedColor = normalizeHexCode(customColor);
     if (normalizedColor !== false) {
@@ -40,10 +54,7 @@ export default function Command(props: LaunchProps) {
       .then((response) => {
         const data = (response as IconSearchData).data;
 
-        if (data.error) {
-          setIconResponse(<Detail isLoading={false} markdown={`# Error: ${JSON.stringify(data.error)}`} />);
-          return;
-        }
+        showDetailError(data.error)
 
         setIconResponse(
           <Grid
@@ -111,7 +122,7 @@ export default function Command(props: LaunchProps) {
       })
       .catch((error) => {
         console.error("Error retrieving data:", error);
-        setIconResponse(<Detail isLoading={false} markdown={`# Error: ${JSON.stringify(error)}`} />);
+        showDetailError(error)
       });
   }, [keyword]);
 

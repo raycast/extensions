@@ -8,7 +8,10 @@ export interface IconSearchData {
   isLoading: boolean;
   status: string;
   data: {
-    error: Error | null;
+    error:{
+      statusCode?: number;
+      data: string;
+    }
     generated_at: string;
     icons: IconItem[];
     usage_limits: {
