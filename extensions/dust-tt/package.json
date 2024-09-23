@@ -4,8 +4,9 @@
   "title": "Ask Dust",
   "description": "Query dust.tt AI agents",
   "icon": "dust.png",
-  "author": "vineus",
+  "author": "albandum",
   "contributors": [
+    "vineus",
     "henry_fontanier"
   ],
   "categories": [
