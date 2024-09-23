@@ -1,5 +1,9 @@
 # Dust.tt Changelog
 
+## [Feature] - 2024-09-23
+
+- leverage user-provided email address to track API call usage
+
 ## [bug fixes] - 2024-07-22
 
 - use `agent_message_success` event as stop condition
