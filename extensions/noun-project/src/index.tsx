@@ -12,6 +12,8 @@ import CopySVG from "./copySvg";
 const publicDomain = getPreferenceValues<Preferences>().publicDomain;
 const showUsage = getPreferenceValues<Preferences>().showUsage;
 
+import { NounProjectError } from "./utils/types";
+
 export default function Command(props: LaunchProps) {
   const { keyword, customColor } = props.arguments;
   let { color } = props.arguments;
@@ -19,19 +21,18 @@ export default function Command(props: LaunchProps) {
 
   const [iconResponse, setIconResponse] = useState<JSX.Element>(<Detail isLoading={true} markdown="Loading..." />);
 
-  const showDetailError = (error: any) => {
+  const showDetailError = (error: NounProjectError) => {
     if (!error) {
       return;
     }
-  
+
     const baseMessage = `# Error ${error.statusCode} \n There was an error with your request. Please check your API keys in the extension settings and try again.`;
     const unauthorizedMessage = `# Error: Unauthorized \n Your API credentials are not valid. Please try again. Get your keys at [the Noun Project developer console](https://thenounproject.com/developers/apps/).`;
-  
-    const message = (error.statusCode === 401 || error.statusCode === 403) ? unauthorizedMessage : baseMessage;
-  
+
+    const message = error.statusCode === 401 || error.statusCode === 403 ? unauthorizedMessage : baseMessage;
+
     setIconResponse(<Detail isLoading={false} markdown={message} />);
   };
-  
 
   if (customColor.length) {
     const normalizedColor = normalizeHexCode(customColor);
@@ -54,7 +55,7 @@ export default function Command(props: LaunchProps) {
       .then((response) => {
         const data = (response as IconSearchData).data;
 
-        showDetailError(data.error)
+        showDetailError(data.error);
 
         setIconResponse(
           <Grid
@@ -122,7 +123,7 @@ export default function Command(props: LaunchProps) {
       })
       .catch((error) => {
         console.error("Error retrieving data:", error);
-        showDetailError(error)
+        showDetailError(error);
       });
   }, [keyword]);
 

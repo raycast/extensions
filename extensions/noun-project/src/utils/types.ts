@@ -4,14 +4,16 @@ export interface IconProps {
   color?: string;
 }
 
+export type NounProjectError = {
+  statusCode?: number;
+  message?: string;
+};
+
 export interface IconSearchData {
   isLoading: boolean;
   status: string;
   data: {
-    error:{
-      statusCode?: number;
-      data: string;
-    }
+    error: NounProjectError;
     generated_at: string;
     icons: IconItem[];
     usage_limits: {
