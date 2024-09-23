@@ -49,7 +49,7 @@ export default function Command() {
 
   const handleFormatChange = (value: string) => {
     if (value.trim() !== value) {
-      setFormatWarning("Warning: Your password will contain leading or trailing whitespace.");
+      setFormatWarning("Warning: Your password contains leading or trailing whitespace.");
     } else {
       setFormatWarning(null);
     }
@@ -68,11 +68,21 @@ export default function Command() {
         id="customFormat"
         title="Custom password format"
         placeholder="e.g. {word} {word:uppercase} {symbol:2} {number:4}"
-        info="Use {word} for a random uppercase or lowercase word, {word:uppercase} or {word:lowercase} for uppercase or lowercase word, {word:capitalize} for a word with the first letter capitalized, {symbol:n} for n symbols, {number:n} for n numbers, {random:n} for n random characters"
         storeValue={rememberCustomFormat}
         onChange={handleFormatChange}
+        error={formatWarning ?? undefined}
       />
-      {formatWarning && <Form.Description text={formatWarning} />}
+      <Form.Description
+        text="Format options:
+
+{word} (random uppercase or lowercase word)
+{word:uppercase} (random uppercase word)
+{word:lowercase} (random lowercase word)
+{word:capitalize} (random word, first letter capitalized)
+{symbol:n} (n number of random symbols)
+{number:n} (n number of random digits)
+{random:n} (n random characters, digits, symbols)"
+      />
     </Form>
   );
 }
