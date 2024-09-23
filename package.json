@@ -22,6 +22,14 @@
       "placeholder": "sk-xxxxxxxxxxxxxxxxxxxxxx"
     },
     {
+      "name": "userEmail",
+      "description": "The email address of your Dust user account",
+      "type": "textfield",
+      "required": true,
+      "title": "Email",
+      "placeholder": "john.doe@example.com"
+    },
+    {
       "name": "workspaceId",
       "description": "Your Dust workspace ID",
       "type": "textfield",

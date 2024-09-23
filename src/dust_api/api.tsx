@@ -24,11 +24,13 @@ function removeCiteMention(message: string) {
 
 export type DustAPICredentials = {
   apiKey: string;
+  userEmail: string;
   workspaceId: string;
 };
 
 export class DustApi {
   _credentials: DustAPICredentials;
+  _email: string;
   _conversationApiUrl: string;
 
   /**
@@ -36,6 +38,7 @@ export class DustApi {
    */
   constructor(credentials: DustAPICredentials) {
     this._credentials = credentials;
+    this._email = `${credentials.userEmail}`;
     this._conversationApiUrl = `${DUST_API_URL}/${credentials.workspaceId}/assistant/conversations`;
   }
 
@@ -64,8 +67,8 @@ export class DustApi {
           context: {
             timezone: "Europe/Paris",
             username: "raycast",
-            email: null,
             fullName: "Raycast",
+            email: this._email,
             profilePictureUrl: "https://dust.tt/static/systemavatar/helper_avatar_full.png",
           },
         },
