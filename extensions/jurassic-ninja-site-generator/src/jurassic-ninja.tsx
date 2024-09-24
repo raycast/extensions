@@ -122,6 +122,12 @@ const OPTIONS: Option[] = [
 
   // Site options
   { key: "blockxmlrpc", title: "Block XML-RPC", description: "Block access to xmlrpc.php", group: "Site" },
+  {
+    key: "dev-pool",
+    title: "Enable Sandbox Access",
+    description: "Connect directly to your WP.com sandbox",
+    group: "Site",
+  },
   { key: "content", title: "Add Content", description: "Add pre-generated content to the site", group: "Site" },
   {
     key: "subdir_multisite",
