@@ -78,7 +78,7 @@ export class DustApi {
             timezone: "Europe/Paris",
             username: this._username,
             email: this._email,
-            fullName: this._username,
+            fullName: `${this._username} - Raycast`,
             profilePictureUrl: "https://dust.tt/static/systemavatar/helper_avatar_full.png",
           },
         },
