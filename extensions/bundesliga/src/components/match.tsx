@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Detail } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import json2md from "json2md";
-import { useMatchday } from "../hooks";
+import { getMatch } from "../api";
 import { LiveBlogEntryItem, Matchday } from "../types/firebase";
 
 function convert(entry: LiveBlogEntryItem) {
@@ -73,7 +74,7 @@ function convert(entry: LiveBlogEntryItem) {
             },
             {
               ul: entry.detail.ranking.map(
-                (p) => `${p.person.name}: ${p.value}${p.unit}`
+                (p) => `${p.person.name}: ${p.value}${p.unit}`,
               ),
             },
           ];
@@ -112,13 +113,15 @@ function convert(entry: LiveBlogEntryItem) {
   }
 }
 
-export default function Matchday(props: Matchday) {
-  const entries = useMatchday(props.liveBlogUrl);
+export default function Match(props: Matchday) {
+  const liveBlogUrl = `https://webview.bundesliga.com/en/liveticker/${props.dflDatalibraryCompetitionId}/${props.dflDatalibrarySeasonId}/${props.dflDatalibraryMatchdayId}/${props.dflDatalibraryMatchId}`;
+
+  const { data: entries, isLoading } = usePromise(getMatch, [liveBlogUrl]);
 
   const dataObject: json2md.DataObject = entries
     ? [
         { h1: "Highlights" },
-        ...entries
+        Object.values(entries)
           .sort((a, b) => b.order - a.order)
           .map((entry) => convert(entry)),
       ]
@@ -126,12 +129,12 @@ export default function Matchday(props: Matchday) {
 
   return (
     <Detail
-      navigationTitle={`${props.teams.home.nameFull} - ${props.teams.away.nameFull} | ${props.matchdayLabel}`}
-      isLoading={!entries}
+      navigationTitle={`${props.teams.home.nameFull} - ${props.teams.away.nameFull} | Matchday ${props.matchday}`}
+      isLoading={isLoading}
       markdown={json2md(dataObject)}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={props.liveBlogUrl} />
+          <Action.OpenInBrowser url={liveBlogUrl} />
         </ActionPanel>
       }
     />
