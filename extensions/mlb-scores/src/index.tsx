@@ -67,6 +67,7 @@ export default function main() {
             } ${tzName}`;
             subtitle = `${date_string}, ${item.gameData.status.detailedState}`;
           }
+
           return (
             <List.Item
               key={item.gamePk}
@@ -74,17 +75,27 @@ export default function main() {
               subtitle={subtitle}
               accessories={[
                 {
-                  text: item.gameData.status.abstractGameCode.toUpperCase() === "F" ? "" : `${item.liveData.linescore.inningState} ${item.liveData.linescore.currentInningOrdinal}`,
+                  // Latest play, if available
+                  text:
+                    item.gameData.status.abstractGameCode.toUpperCase() === "L"
+                      ? item.liveData.plays?.currentPlay?.result.description
+                      : "",
                 },
-                { 
-                  text: (item.gameData.status.abstractGameCode.toUpperCase() === "L" ? item.liveData.plays?.currentPlay?.result.description : "") 
-                }
+                {
+                  // Inning indicator
+                  text:
+                    item.gameData.status.abstractGameCode.toUpperCase() === "F"
+                      ? ""
+                      : `${item.liveData.linescore.inningState === "Top" ? "▲" : "▼"} ${
+                          item.liveData.linescore.currentInningOrdinal
+                        }`,
+                },
               ]}
-              
               actions={
                 <ActionPanel>
                   <ActionPanel.Section title="Actions">
                     <Action.Push title="Show Game" target={<Game game={item} />} />
+                    <Action.OpenInBrowser title="Open in MLB" url={`https://www.mlb.com/gameday/${item.gamePk}`} />
                     <Action
                       shortcut={{ modifiers: ["cmd"], key: "r" }}
                       title="Reload"

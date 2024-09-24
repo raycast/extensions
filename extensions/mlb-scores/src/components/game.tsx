@@ -1,6 +1,7 @@
 import { environment, Detail } from "@raycast/api";
 import React from "react";
 import FeedInterface from "../interfaces/feed";
+import { Player, Batting, TeamStatsPitching } from "../interfaces/feed";
 import { resolve } from "path";
 
 const CACHE_DIR = resolve(environment.supportPath, "cache");
@@ -9,13 +10,76 @@ type GameProps = {
   game: FeedInterface | undefined;
 };
 
+const generateBoxScore = (feed: FeedInterface): string => {
+  const { gameData, liveData } = feed;
+  const { teams: gameDataTeams } = gameData;
+  const { boxscore } = liveData;
+  const { teams: boxscoreTeams } = boxscore;
+
+  const generateTeamBoxScore = (teamType: "away" | "home"): string => {
+    const team = gameDataTeams[teamType];
+    const boxscoreTeam = boxscoreTeams[teamType];
+    const players = Object.values(boxscoreTeam.players);
+
+    const batterRows = players
+      .filter((player): player is Player & { stats: { batting: Batting } } => player.stats && "batting" in player.stats)
+      .map((player) => {
+        const batting = player.stats.batting;
+        if (batting.atBats === undefined) return null;
+        return `| ${player.person.fullName} | ${player.position.abbreviation} | ${batting.atBats} | ${
+          batting.runs ?? "n/a"
+        } | ${batting.hits ?? "n/a"} | ${batting.rbi ?? "n/a"} | ${batting.baseOnBalls ?? "n/a"} | ${
+          batting.strikeOuts ?? "n/a"
+        } | ${batting.avg ?? "n/a"} |`;
+      })
+      .filter((row): row is string => row !== null)
+      .join("\n");
+
+    const pitcherRows = players
+      .filter(
+        (player): player is Player & { stats: { pitching: TeamStatsPitching } } =>
+          player.stats && "pitching" in player.stats
+      )
+      .map((player) => {
+        const pitching = player.stats.pitching;
+        if (pitching.inningsPitched === undefined) return null;
+        return `| ${player.person.fullName} | ${pitching.inningsPitched} | ${pitching.hits} | ${pitching.runs} | ${
+          pitching.earnedRuns
+        } | ${pitching.baseOnBalls} | ${pitching.strikeOuts} | ${pitching.era || "n/a"} |`;
+      })
+      .filter((row): row is string => row !== null)
+      .join("\n");
+
+    return `
+### ${team.name}
+
+#### Batting
+
+| Player | Pos | AB | R | H | RBI | BB | SO | AVG |
+|--------|-----|----|----|----|----|----|----|-----|
+${batterRows}
+
+#### Pitching
+
+| Player | IP | H | R | ER | BB | SO | ERA |
+|--------|----|----|----|----|----|----|-----|
+${pitcherRows}
+`;
+  };
+
+  return `
+${generateTeamBoxScore("away")}
+${generateTeamBoxScore("home")}
+  `.trim();
+};
+
 const Game = React.memo(
   (props: GameProps) => {
     const game = props.game;
     if (!game) {
       return <Detail markdown="## Loading..." />;
     }
-    
+
     const currentPlay = game.liveData.plays.currentPlay;
     const linescore = game.liveData.linescore;
     const runs_inning = Array(9).fill(["X", "X"]);
@@ -68,9 +132,16 @@ ${game.gameData.status.abstractGameCode.toUpperCase() === "P" ? `Starts at: ${da
 
 ${
   game.gameData.status.abstractGameCode.toUpperCase() === "L"
-    ? `**${linescore.inningState} ${linescore.currentInningOrdinal}. ${currentPlay.count.outs} Out${currentPlay.count.outs !== 1 ? `s` : ""}. 
-  ${currentPlay.count.balls} Ball${currentPlay.count.balls !== 1 ? 's' : ''}, ${currentPlay.count.strikes} Strike${currentPlay.count.strikes !== 1 ? `s` : ""}. Current Matchup:** (${currentPlay.matchup.pitchHand.code}HP) ${currentPlay.matchup.pitcher.fullName} vs ${currentPlay.matchup.batter.fullName} (${currentPlay.matchup.batSide.code}) 
-  ${currentPlay.result.description !== undefined ? `**Latest:** ` + currentPlay.result.description : ""}` : " "
+    ? `**${linescore.inningState} ${linescore.currentInningOrdinal}. ${currentPlay.count.outs} Out${
+        currentPlay.count.outs !== 1 ? `s` : ""
+      }. 
+  ${currentPlay.count.balls} Ball${currentPlay.count.balls !== 1 ? "s" : ""}, ${currentPlay.count.strikes} Strike${
+        currentPlay.count.strikes !== 1 ? `s` : ""
+      }. Current Matchup:** (${currentPlay.matchup.pitchHand.code}HP) ${currentPlay.matchup.pitcher.fullName} vs ${
+        currentPlay.matchup.batter.fullName
+      } (${currentPlay.matchup.batSide.code}) 
+  ${currentPlay.result.description !== undefined ? `**Latest:** ` + currentPlay.result.description : ""}`
+    : " "
 }
 
 ${game.gameData.status.detailedState}
@@ -110,15 +181,14 @@ ${
     ? `<img src="file://${resolve(environment.assetsPath, `${runners}.svg`).replace(" ", "%20")}" height="100" />`
     : ""
 }
-${
-  game.gameData.status.abstractGameCode.toUpperCase() === "L"
-    ? `${linescore.balls}-${linescore.strikes}, ${linescore.outs} out`
-    : ""
-}
 
 ---
 
-## Box Score
+## Box
+${generateBoxScore(game)}
+
+## Copyright
+${game.copyright}
     `;
     return <Detail markdown={md_string} />;
   },
