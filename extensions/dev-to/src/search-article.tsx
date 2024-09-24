@@ -1,17 +1,14 @@
 import { ActionPanel, List } from "@raycast/api";
 import { ArticleAction } from "./components/article-action";
 import { getArticles } from "./hooks/hooks";
-import useStore from "./utils/state";
 
 export default function SearchArticle() {
-  const { refresh } = useStore();
-
-  const { articles, loading } = getArticles(refresh, "/articles/me/published");
-  const { articles: drafts, loading: draftsLoading } = getArticles(refresh, "/articles/me/unpublished");
-  console.log("articles", articles);
-
+  const { data, isLoading, pagination } = getArticles("/articles/me/all");
+  const articles = data.filter(article => article.published);
+  const drafts = data.filter(article => !article.published);
+  
   return (
-    <List isShowingDetail isLoading={loading || draftsLoading} searchBarPlaceholder="Search your articles from dev.to">
+    <List isShowingDetail isLoading={isLoading} searchBarPlaceholder="Search your articles from dev.to" pagination={pagination}>
       <List.EmptyView title={""} description={"No article found"} />
 
       <List.Section title="Latest">
