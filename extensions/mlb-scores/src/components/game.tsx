@@ -53,15 +53,15 @@ const generateBoxScore = (feed: FeedInterface): string => {
       .join("\n");
 
     return `
-### ${team.name}
+## ${team.name}
 
-#### Batting
+### Batting (this game)
 
 | Player | Pos | AB | R | H | RBI | BB | SO | AVG |
 |--------|-----|----|----|----|----|----|----|-----|
 ${batterRows}
 
-#### Pitching
+### Pitching (this game)
 
 | Player | IP | H | R | ER | BB | SO | ERA |
 |--------|----|----|----|----|----|----|-----|
@@ -88,7 +88,6 @@ const Game = React.memo(
     if (!data || !game) {
       return <Detail markdown="## Loading..." />;
     }
-
 
     const currentPlay = game.liveData.plays.currentPlay;
     const linescore = game.liveData.linescore;
@@ -149,7 +148,7 @@ ${
         currentPlay.count.strikes !== 1 ? `s` : ""
       }. Current Matchup:** (${currentPlay.matchup.pitchHand.code}HP) ${currentPlay.matchup.pitcher.fullName} vs ${
         currentPlay.matchup.batter.fullName
-      } (${currentPlay.matchup.batSide.code}) 
+      } (${currentPlay.matchup.batSide.code})  
   ${currentPlay.result.description !== undefined ? `**Latest:** ` + currentPlay.result.description : ""}`
     : " "
 }

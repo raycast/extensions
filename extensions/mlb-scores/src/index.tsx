@@ -258,7 +258,3 @@ const sortFunc = (
     }
 	return 0;
 };
-
-// function get_data() {
-//   return games.sort(sortFunc);
-// }
