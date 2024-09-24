@@ -18,11 +18,7 @@ export default function Command() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Select Edition"
-          storeValue={true}
-          onChange={(newValue) => setSelectedEdition(newValue)}
-        >
+        <List.Dropdown tooltip="Select Edition" storeValue={true} onChange={(newValue) => setSelectedEdition(newValue)}>
           <List.Dropdown.Item title="All Editions" value="all" />
           <List.Dropdown.Item title="Edition 1" value="1" />
           <List.Dropdown.Item title="Edition 2" value="2" />
