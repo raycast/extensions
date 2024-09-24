@@ -84,7 +84,7 @@ const Details: React.FC<Result> = (r) => {
       navigationTitle="Email Result"
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Json Result" content={jsonString} />
+          <Action.CopyToClipboard title="Copy JSON Result" content={jsonString} />
           <Action.OpenInBrowser title="Sponsor Project" icon={Icon.Heart} url="https://ko-fi.com/herbertlu" />
         </ActionPanel>
       }
