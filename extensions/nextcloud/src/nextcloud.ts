@@ -3,7 +3,27 @@ import { XMLParser } from "fast-xml-parser";
 import fetch, { AbortError } from "node-fetch";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { getPreferences } from "./preferences";
+import { useFetch } from "@raycast/utils";
+import { API_HEADERS, BASE_URL } from "./config";
 type Fetcher<R> = (signal: AbortSignal) => Promise<R>;
+
+export function useNextcloudJsonArray<T>(base: string) {
+  const { isLoading, data } = useFetch(`${BASE_URL}/apps/${base}`, {
+    headers: {
+      ...API_HEADERS,
+      "OCS-APIRequest": "true",
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    mapResult(result: T[]) {
+      return {
+        data: result
+      }
+    },
+    initialData: []
+  })
+  return { isLoading, data };
+}
 
 export function useQuery<R>(fetcher: Fetcher<R>, deps: React.DependencyList = []) {
   const [state, setState] = useState<{ data: R | null; isLoading: boolean }>({ data: null, isLoading: true });

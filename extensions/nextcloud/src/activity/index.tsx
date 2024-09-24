@@ -1,7 +1,7 @@
 import { Action, ActionPanel, List } from "@raycast/api";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { capitalize } from "../utils";
-import { Activity, useActivity } from "./hooks";
+import { type Activity, useActivity } from "./hooks";
 import { getIcon } from "./utils";
 
 export function Activity() {
@@ -9,7 +9,7 @@ export function Activity() {
 
   return (
     <List isLoading={isLoading}>
-      <List.Section title="Activity" subtitle={String(activity.length)}>
+      <List.Section title="All activities" subtitle={String(activity.length)}>
         {activity.map((result) => (
           <Item key={result.activityId + result.datetime} item={result} />
         ))}
@@ -24,7 +24,7 @@ function Item({ item }: { item: Activity }) {
     <List.Item
       title={item.subject}
       subtitle={capitalize(item.objectType)}
-      accessoryTitle={relativeDate}
+      accessories={[{text: relativeDate}]}
       icon={getIcon(item.type)}
       actions={
         <ActionPanel>

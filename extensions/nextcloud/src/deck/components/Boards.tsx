@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { getPreferences } from "../../preferences";
-import { Board, useBoards } from "../hooks";
+import { type Board, useBoards } from "../hooks";
 import { Stacks } from "./Stacks";
+import { BASE_URL } from "../../config";
 
 export function Boards() {
   const { boards, isLoading } = useBoards();
@@ -18,9 +18,7 @@ export function Boards() {
 }
 
 function Board({ board }: { board: Board }) {
-  const { hostname } = getPreferences();
-
-  const boardUrl = `https://${hostname}/apps/deck/#/board/${board.id}`;
+  const boardUrl = `${BASE_URL}/apps/deck/#/board/${board.id}`;
   const color = board.color;
 
   return (

@@ -24,7 +24,7 @@ function Note({ note }: { note: Note }) {
   return (
     <List.Item
       title={note.title}
-      icon={{ source: Icon.TextDocument }}
+      icon={{ source: Icon.BlankDocument }}
       actions={
         <ActionPanel title={note.title}>
           <ActionPanel.Section>
