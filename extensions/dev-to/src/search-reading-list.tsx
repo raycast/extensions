@@ -1,25 +1,20 @@
 import { ActionPanel, Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { ReadingListItemAction } from "./components/reading-list-action";
-import { getReadingList } from "./hooks/hooks";
-import { getArticleMarkdown } from "./utils/functions";
+import { getArticleMarkdown, getReadingList } from "./hooks/hooks";
 
 export default function SearchReadingList() {
-  const { readingList, loading } = getReadingList("/readinglist");
-  console.log("articles", readingList);
-  const [bodyMarkdown, setBodyMarkdown] = useState<string>("");
-  const [detailLoading, setDetailLoading] = useState<boolean>(false);
+  const [articleId, setArticleId] = useState(0);
+  const { data: readingList, isLoading, pagination } = getReadingList();
+  const { data: bodyMarkdown, isLoading: detailLoading } = getArticleMarkdown(articleId);
 
   return (
     <List
       isShowingDetail
-      isLoading={loading || detailLoading}
-      onSelectionChange={async (id) => {
-        setDetailLoading(true);
-        setBodyMarkdown(await getArticleMarkdown(Number(id)));
-        setDetailLoading(false);
-      }}
+      isLoading={isLoading || detailLoading}
+      onSelectionChange={(id) => setArticleId(Number(id))}
       searchBarPlaceholder="Search your reading list from dev.to"
+      pagination={pagination}
     >
       <List.EmptyView title={""} description={"No article found"} />
 

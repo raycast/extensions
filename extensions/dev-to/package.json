@@ -29,7 +29,27 @@
       "name": "search-article",
       "title": "Search Article",
       "description": "List dev.to articles",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "primary-action",
+          "title": "Primary Action",
+          "description": "Choose to Prioritize Copy or Paste",
+          "type": "dropdown",
+          "default": "paste",
+          "required": true,
+          "data": [
+            {
+              "title": "Copy",
+              "value": "copy"
+            },
+            {
+              "title": "Paste",
+              "value": "paste"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "create-article",
@@ -47,8 +67,7 @@
   "dependencies": {
     "@raycast/api": "^1.79.0",
     "@raycast/utils": "^1.17.0",
-    "node-fetch": "^3.2.10",
-    "zustand": "^4.0.0"
+    "node-fetch": "^3.2.10"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
