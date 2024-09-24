@@ -8,7 +8,12 @@ export default function GetTables() {
   const [competition, setCompetition] = useState<string>("");
   const [showStats, setShowStats] = useState<boolean>(false);
 
-  const { data: standing, isLoading } = usePromise(getStandings, [competition]);
+  const { data: standing, isLoading } = usePromise(
+    async (competition) => {
+      return competition ? await getStandings(competition) : [];
+    },
+    [competition],
+  );
 
   return (
     <List
