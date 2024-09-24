@@ -1,5 +1,9 @@
 # Dust.tt Changelog
 
+## [chore] - 2024-09-23
+
+- transfer extension ownership to the Dust team
+
 ## [bug fixes] - 2024-07-22
 
 - use `agent_message_success` event as stop condition
