@@ -143,7 +143,7 @@ export async function fetchTodos(searchQuery: string = ""): Promise<Todo[]> {
 }
 
 export async function fetchProjects(): Promise<Project[]> {
-  const response = await fetch(`${apiUrl}/users/me/projects.json`, {
+  const response = await fetch(`${apiUrl}/users/me/projects.json?limit=100`, {
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,

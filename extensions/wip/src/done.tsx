@@ -42,7 +42,11 @@ export default function Command() {
         }
       });
     } else {
-      showToast({ style: Toast.Style.Failure, title: "No file found in clipboard!" });
+      if (clipboardContent.text) {
+        setSearchQuery((prevQuery) => prevQuery + clipboardContent.text);
+      } else {
+        showToast({ style: Toast.Style.Failure, title: "No file or text found in clipboard!" });
+      }
     }
   }
 
