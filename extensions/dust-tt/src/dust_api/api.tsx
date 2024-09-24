@@ -80,6 +80,7 @@ export class DustApi {
             email: this._email,
             fullName: `${this._username} - Raycast`,
             profilePictureUrl: "https://dust.tt/static/systemavatar/helper_avatar_full.png",
+            origin: "raycast",
           },
         },
       }),
