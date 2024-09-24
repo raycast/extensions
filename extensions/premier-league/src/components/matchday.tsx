@@ -5,13 +5,10 @@ import { convertToLocalTime } from "../utils";
 interface PropsType {
   matchday: string;
   matches: Content[];
-  page: number;
-  lastPage: boolean;
-  onChangePage: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export default function Matchday(props: PropsType) {
-  const { matchday, matches, page, lastPage, onChangePage } = props;
+  const { matchday, matches } = props;
 
   return (
     <List.Section key={matchday} title={matchday}>
@@ -73,15 +70,6 @@ export default function Matchday(props: PropsType) {
                 <Action.OpenInBrowser
                   url={`https://www.premierleague.com/match/${match.id}`}
                 />
-                {!lastPage && (
-                  <Action
-                    title="Load More"
-                    icon={Icon.MagnifyingGlass}
-                    onAction={() => {
-                      onChangePage(page + 1);
-                    }}
-                  />
-                )}
               </ActionPanel>
             }
           />

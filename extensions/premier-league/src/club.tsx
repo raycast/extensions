@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Detail, Grid, Icon } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import json2md from "json2md";
 import { useState } from "react";
-import { useClubs, useSeasons } from "./hooks";
+import { getClubs, getSeasons } from "./api";
 import Player from "./player";
 import { TeamTeam } from "./types";
 
@@ -76,16 +77,18 @@ function ClubProfile(props: TeamTeam) {
 }
 
 export default function Club() {
-  const seasons = useSeasons();
+  const { data: seasons = [] } = usePromise(getSeasons);
+
   const [selectedSeason, setSeason] = useState<string>(
     seasons[0]?.id.toString(),
   );
-  const clubs = useClubs(selectedSeason);
+
+  const { data: clubs, isLoading } = usePromise(getClubs, [selectedSeason]);
 
   return (
     <Grid
       throttle
-      isLoading={!clubs}
+      isLoading={isLoading}
       inset={Grid.Inset.Medium}
       searchBarAccessory={
         <Grid.Dropdown
