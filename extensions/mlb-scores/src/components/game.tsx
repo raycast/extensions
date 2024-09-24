@@ -78,7 +78,7 @@ ${generateTeamBoxScore("home")}
 const Game = React.memo(
   (props: GameProps) => {
     const { data } = useGameDataStore();
-    const [game, setGame] = useState();
+    const [game, setGame] = useState<FeedInterface | undefined>();
 
     useEffect(() => {
         if (data !== undefined) {
@@ -202,7 +202,7 @@ ${game.copyright}
     `;
     return <Detail markdown={md_string} />;
   },
-  (prev, next) => prev.game === next.game
+  (prev, next) => prev.index === next.index
 );
 
 export default Game;

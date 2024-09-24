@@ -22,28 +22,34 @@ export default function main() {
 		getEndpoint("schedule", {}) + new URLSearchParams({ sportId: "1" })
 	);
 	const [intervalCode, setIntervalCode] = useState<NodeJS.Timeout>()
-	const gamePks = scheduleData?.dates[0] ? scheduleData?.dates[0].games.map((game) => game.gamePk) : [];
-	let games: Array<[boolean, FeedInterface | undefined, Function, Error | undefined]> = [];
-	gamePks.map((gamePk) => {
-		let {
-			isLoading,
-			error,
-			data: gameData,
-			revalidate,
-		} = useFetch<FeedInterface>(getEndpoint("game", { gamePk: gamePk }));
-		games.push([isLoading, gameData, revalidate, error]);
-	});
-
-	// Code to reload data
-	useEffect(() => {
-		if (!isFirst.current && reloadData) {
-            setReloadData(false);
-			games?.map((game) => {
-				game[2]();
-			});
-			setData(games.sort(sortFunc));
-		}
-	}, [reloadData]);
+    let games: Array<[boolean, FeedInterface | undefined]>
+    // const downloadGames = () => {
+    // Code to load and reload games
+    useEffect(() => {
+        if (scheduleData === undefined) {
+            return;
+        }
+        const gamePks = scheduleData?.dates[0] ? scheduleData?.dates[0].games.map((game) => game.gamePk) : [];
+        Promise.all(gamePks.map(async (gamePk) => {
+            let gameData: FeedInterface | Error | undefined = await fetch(getEndpoint("game", { gamePk: gamePk })).then(async (res) => {
+                if (res.ok) {
+                    return await res.json() as FeedInterface;
+                }
+                return Error();
+            });
+            let isLoading = false;
+            let error: Error | undefined = undefined;
+            if (gameData instanceof Error) {
+                isLoading = false;
+                error = gameData;
+                gameData = undefined;
+            }
+            return [isLoading, gameData];
+        })).then((allGames) => {
+            games = allGames as Array<[boolean, FeedInterface | undefined]>;
+            setData(games.sort(sortFunc));
+        });
+    }, [scheduleData, reloadData]);
 
 
   // Every time data changes, recompute the setInterval
@@ -71,7 +77,7 @@ export default function main() {
   }, [data])
 
 	useEffect(() => {
-		setData(games.sort(sortFunc));
+        // downloadGames()
 		isFirst.current = false;
 	}, []);
 	useEffect(() => {
@@ -106,7 +112,7 @@ export default function main() {
 	return (
 		<List isLoading={data === undefined}>
 			{
-				(data ?? [undefined]).map((item, index) => {
+				(data).map((item, index) => {
 					if (item[1] == undefined) {
 						return <List.Item key={index} title="Loading..." />;
 					}
@@ -223,8 +229,8 @@ async function checkFileExists(file: PathLike) {
 }
 
 const sortFunc = (
-	a: [boolean, FeedInterface | undefined, Function, Error | undefined],
-	b: [boolean, FeedInterface | undefined, Function, Error | undefined]
+	a: [boolean, FeedInterface | undefined],
+	b: [boolean, FeedInterface | undefined]
 ) => {
     if (a[1] && b[1]) {
         switch (a[1].gameData.status.abstractGameCode + " " + b[1].gameData.status.abstractGameCode) {
