@@ -22,20 +22,33 @@ function removeCiteMention(message: string) {
   return message.replace(regex, "");
 }
 
+function formatUsername(email: string) {
+  return email
+    .split("@")[0]
+    .split(".")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 export type DustAPICredentials = {
   apiKey: string;
+  userEmail: string;
   workspaceId: string;
 };
 
 export class DustApi {
   _credentials: DustAPICredentials;
+  _email: string;
   _conversationApiUrl: string;
+  _username: string;
 
   /**
    * @param credentials DustAPICrededentials
    */
   constructor(credentials: DustAPICredentials) {
     this._credentials = credentials;
+    this._email = `${credentials.userEmail}`;
+    this._username = formatUsername(credentials.userEmail);
     this._conversationApiUrl = `${DUST_API_URL}/${credentials.workspaceId}/assistant/conversations`;
   }
 
@@ -63,9 +76,9 @@ export class DustApi {
           ],
           context: {
             timezone: "Europe/Paris",
-            username: "raycast",
-            email: null,
-            fullName: "Raycast",
+            username: this._username,
+            email: this._email,
+            fullName: this._username,
             profilePictureUrl: "https://dust.tt/static/systemavatar/helper_avatar_full.png",
           },
         },
