@@ -1,6 +1,8 @@
-import { Action, ActionPanel, Detail, Icon, Grid } from "@raycast/api";
+import { Action, ActionPanel, Detail, Grid, Icon } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import json2md from "json2md";
-import { useManagers, useSeasons } from "./hooks";
+import { useMemo } from "react";
+import { getManagers, getSeasons } from "./api";
 import { PlayerContent } from "./types";
 
 function PlayerProfile(props: PlayerContent) {
@@ -37,11 +39,13 @@ function PlayerProfile(props: PlayerContent) {
 }
 
 export default function Manager() {
-  const seasons = useSeasons();
-  const managers = useManagers(seasons[0]?.id.toString());
+  const { data: seasons = [] } = usePromise(getSeasons);
+  const seasonId = useMemo(() => seasons[0]?.id.toString(), [seasons]);
+
+  const { data: managers, isLoading } = usePromise(getManagers, [seasonId]);
 
   return (
-    <Grid throttle isLoading={!managers}>
+    <Grid throttle isLoading={isLoading}>
       {managers?.map((p) => {
         return (
           <Grid.Item
