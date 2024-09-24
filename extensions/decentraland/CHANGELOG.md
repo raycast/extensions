@@ -1,6 +1,6 @@
 # Decentraland Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2024-09-24
 - Loading indicator is shown while fetching
 - Change "pin" icon
 - Upcoming events are shown in addition to Live ones
