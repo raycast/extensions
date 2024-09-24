@@ -1,13 +1,15 @@
 import { environment, Detail } from "@raycast/api";
-import React from "react";
+import { useEffect, useState } from "react";
+import  React from "react";
 import FeedInterface from "../interfaces/feed";
 import { Player, Batting, TeamStatsPitching } from "../interfaces/feed";
 import { resolve } from "path";
+import useGameDataStore from "../lib/store";
 
 const CACHE_DIR = resolve(environment.supportPath, "cache");
 
 type GameProps = {
-  game: FeedInterface | undefined;
+  index: number;
 };
 
 const generateBoxScore = (feed: FeedInterface): string => {
@@ -30,7 +32,7 @@ const generateBoxScore = (feed: FeedInterface): string => {
           batting.runs ?? "n/a"
         } | ${batting.hits ?? "n/a"} | ${batting.rbi ?? "n/a"} | ${batting.baseOnBalls ?? "n/a"} | ${
           batting.strikeOuts ?? "n/a"
-        } | ${batting.avg ?? "n/a"} |`;
+        } | ${(batting.atBats ? batting.hits / batting.atBats : 0.000).toFixed(3)} |`;
       })
       .filter((row): row is string => row !== null)
       .join("\n");
@@ -45,7 +47,7 @@ const generateBoxScore = (feed: FeedInterface): string => {
         if (pitching.inningsPitched === undefined) return null;
         return `| ${player.person.fullName} | ${pitching.inningsPitched} | ${pitching.hits} | ${pitching.runs} | ${
           pitching.earnedRuns
-        } | ${pitching.baseOnBalls} | ${pitching.strikeOuts} | ${pitching.era || "n/a"} |`;
+        } | ${pitching.baseOnBalls} | ${pitching.strikeOuts} | ${pitching.runsScoredPer9 || "n/a"} |`;
       })
       .filter((row): row is string => row !== null)
       .join("\n");
@@ -75,10 +77,18 @@ ${generateTeamBoxScore("home")}
 
 const Game = React.memo(
   (props: GameProps) => {
-    const game = props.game;
-    if (!game) {
+    const { data } = useGameDataStore();
+    const [game, setGame] = useState();
+
+    useEffect(() => {
+        if (data !== undefined) {
+            setGame(data[props.index][1]);
+        }
+    }, [data]);
+    if (!data || !game) {
       return <Detail markdown="## Loading..." />;
     }
+
 
     const currentPlay = game.liveData.plays.currentPlay;
     const linescore = game.liveData.linescore;
