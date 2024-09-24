@@ -26,23 +26,28 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.EmailV
   const { isLoading, data, error } = useFetch(emailVerifierApiURL, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      emails: [
-        email
-      ]
+      emails: [email],
     }),
     mapResult(result: EmailResponse) {
       return {
-        data: result.data[0]
+        data: result.data[0],
       };
     },
     failureToastOptions: {
-      title: `❌ Verify email address failed`
-    }
-  })
-  return !data ? <Detail isLoading={isLoading} markdown={isLoading ? "Loading..." : error ? `## ERROR \n\n Something went wrong` : ""} /> : <Details {...data} />;
+      title: `❌ Verify email address failed`,
+    },
+  });
+  return !data ? (
+    <Detail
+      isLoading={isLoading}
+      markdown={isLoading ? "Loading..." : error ? `## ERROR \n\n Something went wrong` : ""}
+    />
+  ) : (
+    <Details {...data} />
+  );
 }
 
 const Details: React.FC<Result> = (r) => {
@@ -79,7 +84,7 @@ const Details: React.FC<Result> = (r) => {
       navigationTitle="Email Result"
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy JSON Result" content={jsonString} />
+          <Action.CopyToClipboard title="Copy Json Result" content={jsonString} />
           <Action.OpenInBrowser title="Sponsor Project" icon={Icon.Heart} url="https://ko-fi.com/herbertlu" />
         </ActionPanel>
       }
@@ -99,17 +104,12 @@ const Details: React.FC<Result> = (r) => {
             target="https://github.com/AfterShip/email-verifier"
             text="Aftership/email-verifier"
           />
-          <Detail.Metadata.Link
-          title="Send Email"
-          text={r.email}
-          target={`mailto:${r.email}`}
-          />
+          <Detail.Metadata.Link title="Send Email" text={r.email} target={`mailto:${r.email}`} />
         </Detail.Metadata>
       }
     />
   );
 };
-
 
 function answer(a: boolean) {
   if (a) {
