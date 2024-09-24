@@ -1,6 +1,6 @@
 # Mercado Libre Changelog
 
-## [Fixes and Improvements] - {PR_MERGE_DATE}
+## [Enhancements] - {PR_MERGE_DATE}
 
 - Added a `Show Details` action, allowing users to access detailed views of items.
 
