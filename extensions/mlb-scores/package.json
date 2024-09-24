@@ -5,6 +5,9 @@
   "description": "Shows current MLB game scores.",
   "icon": "logo.png",
   "author": "jso8910",
+  "contributors": [
+    "Rob"
+  ],
   "categories": [
     "Other"
   ],
