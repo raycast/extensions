@@ -6,6 +6,10 @@
   "icon": "icon.png",
   "author": "fratoro",
   "license": "MIT",
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
  "commands": [
     {
       "name": "start-timer",
