@@ -1,6 +1,6 @@
-import { environment, Detail } from "@raycast/api";
+import { environment, Detail, ActionPanel, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
-import  React from "react";
+import React from "react";
 import FeedInterface from "../interfaces/feed";
 import { Player, Batting, TeamStatsPitching } from "../interfaces/feed";
 import { resolve } from "path";
@@ -32,7 +32,7 @@ const generateBoxScore = (feed: FeedInterface): string => {
           batting.runs ?? "n/a"
         } | ${batting.hits ?? "n/a"} | ${batting.rbi ?? "n/a"} | ${batting.baseOnBalls ?? "n/a"} | ${
           batting.strikeOuts ?? "n/a"
-        } | ${(batting.atBats ? batting.hits / batting.atBats : 0.000).toFixed(3)} |`;
+        } | ${(batting.atBats ? batting.hits / batting.atBats : 0.0).toFixed(3)} |`;
       })
       .filter((row): row is string => row !== null)
       .join("\n");
@@ -81,9 +81,9 @@ const Game = React.memo(
     const [game, setGame] = useState<FeedInterface | undefined>();
 
     useEffect(() => {
-        if (data !== undefined) {
-            setGame(data[props.index][1]);
-        }
+      if (data !== undefined) {
+        setGame(data[props.index][1]);
+      }
     }, [data]);
     if (!data || !game) {
       return <Detail markdown="## Loading..." />;
@@ -199,7 +199,18 @@ ${generateBoxScore(game)}
 ## Copyright
 ${game.copyright}
     `;
-    return <Detail markdown={md_string} />;
+    return (
+      <Detail
+        markdown={md_string}
+        actions={
+          <ActionPanel>
+            <ActionPanel.Section title="Actions">
+              <Action.OpenInBrowser title="Open in MLB" url={`https://www.mlb.com/gameday/${game.gamePk}`} />
+            </ActionPanel.Section>
+          </ActionPanel>
+        }
+      />
+    );
   },
   (prev, next) => prev.index === next.index
 );

@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import FeedInterface from '../interfaces/feed';
+import { create } from "zustand";
+import FeedInterface from "../interfaces/feed";
 
 interface GameDataState {
   data: Array<[boolean, FeedInterface | undefined]> | undefined;
