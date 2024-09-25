@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List, Color } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, Color, getPreferenceValues } from "@raycast/api";
 
 type Code = {
   directive: string;
@@ -46,7 +46,12 @@ const strftimeCodes: { [key: string]: Code[] } = {
   ],
 };
 
+type Preferences = {
+  defaultAction: string;
+};
+
 export default function Command() {
+  const preferences = getPreferenceValues<Preferences>();
   return (
     <List isLoading={false} searchBarPlaceholder="Filter by Code, Meaning or Example...">
       {Object.entries(strftimeCodes).map(([section, directives]) => (
@@ -64,7 +69,18 @@ export default function Command() {
               }}
               actions={
                 <ActionPanel>
-                  <Action.CopyToClipboard content={directive.directive} />
+                  {preferences.defaultAction === "copy" && (
+                    <>
+                      <Action.CopyToClipboard content={directive.directive} />
+                      <Action.Paste content={directive.directive} />
+                    </>
+                  )}
+                  {preferences.defaultAction === "paste" && (
+                    <>
+                      <Action.Paste content={directive.directive} />
+                      <Action.CopyToClipboard content={directive.directive} />
+                    </>
+                  )}
                   <Action.OpenInBrowser url={getStrftimeDocsUrl()} />
                 </ActionPanel>
               }

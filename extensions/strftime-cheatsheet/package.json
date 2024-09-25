@@ -14,11 +14,31 @@
       "name": "search-format-codes",
       "title": "Search Format Codes",
       "description": "Search strftime codes, meanings and examples",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultAction",
+          "type": "dropdown",
+          "required": true,
+          "title": "Default Action",
+          "description": "The default action to perform, either Copy or Paste",
+          "default": "copy",
+          "data": [
+            {
+              "title": "Copy",
+              "value": "copy"
+            },
+            {
+              "title": "Paste",
+              "value": "paste"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.0",
+    "@raycast/api": "^1.83.1",
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
