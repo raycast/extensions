@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "justcolorpicker-raycast",
-  "title": "JustColorPicker By Raycast",
-  "description": "just a color picker",
+  "title": "JustColorPicker",
+  "description": "Just a color picker",
   "icon": "extension-icon.png",
   "author": "woods_w",
   "categories": [
@@ -14,7 +14,7 @@
     {
       "name": "color-picker",
       "title": "Color Picker",
-      "subtitle": "just a color picker",
+      "subtitle": "Just a color picker",
       "description": "Jump to JustColorPicker website to adjust color values",
       "mode": "view"
     }
