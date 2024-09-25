@@ -9,9 +9,14 @@ export class HakunaTimer {
   }
 
   async startTimer(taskId: string, projectId: string) {
-    const headers = { "X-Auth-Token": `${this.apiToken}`, "Content-Type": "application/json" };
+    const headers = {
+      "X-Auth-Token": `${this.apiToken}`,
+      "Content-Type": "application/json",
+    };
     const payload = { task_id: taskId, project_id: projectId };
-    const response = await axios.post(`${this.baseUrl}/timer`, payload, { headers });
+    const response = await axios.post(`${this.baseUrl}/timer`, payload, {
+      headers,
+    });
     return response.data;
   }
 

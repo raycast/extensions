@@ -12,7 +12,10 @@ export default async function command() {
   const timer = new HakunaTimer(preferences.apiToken);
 
   try {
-    await timer.startTimer(preferences.defaultTaskId || "", preferences.defaultProjectId || "");
+    await timer.startTimer(
+      preferences.defaultTaskId || "",
+      preferences.defaultProjectId || "",
+    );
     await showToast({
       title: "Timer started",
       message: `Task ID: ${preferences.defaultTaskId || "Not specified"}, Project ID: ${preferences.defaultProjectId || "Not specified"}`,
