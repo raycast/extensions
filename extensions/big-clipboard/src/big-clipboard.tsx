@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { showToast, Toast, Clipboard, Detail, environment } from "@raycast/api";
+import Graphemer from "graphemer";
 
 // Function to convert SVG content to Base64
 function svgToBase64(svgContent: string): string {
@@ -7,10 +8,10 @@ function svgToBase64(svgContent: string): string {
 }
 
 // Function to split text into chunks of 20 characters
-function splitTextIntoChunks(text: string, chunkSize: number): string[] {
+function splitTextIntoChunks(characters: string[], chunkSize: number): string[] {
   const chunks = [];
-  for (let i = 0; i < text.length; i += chunkSize) {
-    chunks.push(text.slice(i, i + chunkSize));
+  for (let i = 0; i < characters.length; i += chunkSize) {
+    chunks.push(characters.slice(i, i + chunkSize).join(""));
   }
   return chunks;
 }
@@ -32,7 +33,7 @@ function encodeForSVG(text: string): string {
 // - add colours for numbers + special characters
 // ✔︎ make icon https://ray.so/icon
 // - use a font that better distinguishes 0OlI1
-// - allow emoji
+// ✔︎ show emoji + stop emoji counting as too many characters
 
 export default function ClipboardViewer() {
   const [clipboardText, setClipboardText] = useState<string | null>(null);
@@ -65,10 +66,11 @@ export default function ClipboardViewer() {
 
   // Function to generate an SVG representing the clipboard content
   function generateSVG(text: string): string {
-    const characters = text.split(""); // Split the clipboard content into characters
+    const splitter = new Graphemer();
+    const characters = splitter.splitGraphemes(text);
 
     const chunkSize = 10; // Set line length to 10 characters
-    const charactersChunks = splitTextIntoChunks(text, chunkSize); // Split into chunks of 20 characters
+    const charactersChunks = splitTextIntoChunks(characters, chunkSize); // Split into chunks of 20 characters
     const totalLines = charactersChunks.length;
 
     // Create indices for each character
@@ -86,11 +88,11 @@ export default function ClipboardViewer() {
     const opacity = environment.theme === "dark" ? "0.2" : "0.5";
 
     // SVG with a viewBox attribute for scaling
-    let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svgWidth} ${svgHeight}" preserveAspectRatio="xMidYMid meet" width="${svgWidth}px"  height="${svgHeight}px"> `;
+    let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svgWidth} ${svgHeight}" preserveAspectRatio="xMidYMid meet" width="${svgWidth}px" height="${svgHeight}px"> `;
 
     // Loop over each line (chunk) of characters
     charactersChunks.forEach((chunk, line) => {
-      chunk.split("").forEach((char, i) => {
+      splitter.splitGraphemes(chunk).forEach((char, i) => {
         const encodedChar = encodeForSVG(char);
         const x = i * cellWidth + cellWidth / 2;
         const yCharacter = (line * 1.5 + 1) * cellHeight;
@@ -103,10 +105,10 @@ export default function ClipboardViewer() {
         }
 
         // Add clipboard characters to the first row of each chunk
-        svg += `<text x="${x}" y="${yCharacter}" font-family="-apple-system, BlinkMacSystemFont" fill="${textColor}" font-size="${cellWidth / 1.5}" text-anchor="middle" alignment-baseline="middle">${encodedChar}</text>`;
+        svg += `<text x="${x}" y="${yCharacter}" font-family="-apple-system, BlinkMacSystemFont, sans-serif" fill="${textColor}" font-size="${cellWidth / 1.5}" text-anchor="middle" alignment-baseline="middle">${encodedChar}</text>`;
 
         // Add indices to the second row of each chunk
-        svg += `<text x="${x}" y="${yIndex}" font-family="-apple-system, BlinkMacSystemFont" fill="${textColor}" font-size="${cellWidth / 5}" text-anchor="middle" alignment-baseline="middle" style="opacity:0.5">${indicesChunks[line][i]}</text>`;
+        svg += `<text x="${x}" y="${yIndex}" font-family="-apple-system, BlinkMacSystemFont, sans-serif" fill="${textColor}" font-size="${cellWidth / 5}" text-anchor="middle" alignment-baseline="middle" style="opacity:0.5">${indicesChunks[line][i]}</text>`;
       });
     });
 
@@ -115,5 +117,5 @@ export default function ClipboardViewer() {
     return svg;
   }
 
-  return <Detail markdown={svgDataUri ? `![Clipboard Content](${svgDataUri})` : "No text available in clipboard"} />;
+  return <Detail markdown={svgDataUri ? `![Clipboard Content](${svgDataUri})` : " "} />;
 }
