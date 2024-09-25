@@ -53,6 +53,7 @@ export default function main() {
       games = allGames as Array<[boolean, FeedInterface | undefined]>;
       setData(games.sort(sortFunc));
     });
+    setReloadData(false);
   }, [scheduleData, reloadData]);
 
   // Every time data changes, recompute the setInterval
@@ -67,7 +68,7 @@ export default function main() {
     });
     // If no games are ongoing (ie all games are either final (F) or preview (not started) (P)), 10 minute delay
     // This should also apply if there are no games
-    if (game_codes.every((val, _, __) => val === "F" || val === "P")) time_interval = 5 * 1 * 1_000;
+    if (game_codes.every((val, _, __) => val === "F" || val === "P")) time_interval = 10 * 60 * 1_000;
 
     // Clear the previous setInterval
     if (typeof intervalCode !== "undefined") clearInterval(intervalCode);
