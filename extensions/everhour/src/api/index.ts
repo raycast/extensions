@@ -97,7 +97,7 @@ export const getCurrentTimer = async (): Promise<string | null> => {
     return null;
   }
 
-  return currentTimer.task.id;
+  return currentTimer.task?.id ?? null;
 };
 
 export const startTaskTimer = async (taskId: string): Promise<{ status: string; taskName: string }> => {
