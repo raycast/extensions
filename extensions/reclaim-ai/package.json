@@ -11,7 +11,8 @@
     "clayton_knapp",
     "scottfseely",
     "sandygifford",
-    "dmkato"
+    "dmkato",
+    "marcmagn1"
   ],
   "owner": "reclaim-ai",
   "access": "public",
@@ -77,7 +78,15 @@
       "name": "quick-task",
       "title": "Quick Task",
       "description": "Quickly create a new Task to auto-schedule in your calendar",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "inputText",
+          "placeholder": "task details",
+          "required": true
+        }
+      ]
     },
     {
       "name": "my-calendar",

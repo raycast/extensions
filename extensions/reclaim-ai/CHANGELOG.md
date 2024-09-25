@@ -1,5 +1,8 @@
 # reclaim Changelog
 
+## [Update] - 2024-08-13
+- Added argument to Quick Task command 
+
 ## [Fixes] - 2024-08-23
 - Stopped rapid-fire calls to `GET:/api/smart-habits`
     - New hook `useSyncCachedPromise`

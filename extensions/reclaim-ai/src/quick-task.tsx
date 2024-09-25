@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
-import { useState } from "react";
+import { Action, ActionPanel, Icon, List, useNavigation, getPreferenceValues } from "@raycast/api";
+import { useState, useEffect } from "react";
 import useInterpreter from "./hooks/useInterpreter";
 import TaskForm from "./task-form";
 import { TaskPlanDetails } from "./types/plan";
@@ -10,13 +10,20 @@ export type ListType = {
   interpreterData: TaskPlanDetails;
 };
 
-export default function Command() {
+export default function Command(props: { arguments: { inputText: string } }) {
   const { push } = useNavigation();
   const { sendToInterpreter } = useInterpreter();
+  const { inputText } = props.arguments;
 
-  const [query, setQuery] = useState<string>("");
+  const [query, setQuery] = useState<string>(inputText || "");
   const [list, setList] = useState<ListType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (inputText) {
+      onAskTaskCreation();
+    }
+  }, [inputText]);
 
   const onAskTaskCreation = async () => {
     try {
