@@ -7,7 +7,8 @@
   "author": "albandum",
   "contributors": [
     "vineus",
-    "henry_fontanier"
+    "henry_fontanier",
+    "stang"
   ],
   "categories": [
     "Productivity"
@@ -21,6 +22,14 @@
       "required": true,
       "title": "API key",
       "placeholder": "sk-xxxxxxxxxxxxxxxxxxxxxx"
+    },
+    {
+      "name": "userEmail",
+      "description": "The email address of your Dust user account",
+      "type": "textfield",
+      "required": true,
+      "title": "Email",
+      "placeholder": "john.doe@example.com"
     },
     {
       "name": "workspaceId",
