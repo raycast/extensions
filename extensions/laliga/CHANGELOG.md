@@ -1,6 +1,7 @@
 # LaLiga Changelog
 
-## [Asynchronous Efficiency] - 2024-09-24
+## [Enhanced Standings & Performance] - 2024-09-24
+- Updated standings to always show detailed statistics, including points, goal difference, and head-to-head records.
 - Enhanced code maintainability and efficiency by utilizing the `usePromise` hook for asynchronous operations.
 
 ## [Visual Refresh] - 2024-07-29

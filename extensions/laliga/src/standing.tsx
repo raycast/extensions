@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { Color, Icon, Image, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { getStandings } from "./api";
@@ -6,7 +6,6 @@ import CompetitionDropdown from "./components/competition_dropdown";
 
 export default function GetTables() {
   const [competition, setCompetition] = useState<string>("");
-  const [showStats, setShowStats] = useState<boolean>(false);
 
   const { data: standing, isLoading } = usePromise(
     async (competition) => {
@@ -20,7 +19,7 @@ export default function GetTables() {
       throttle
       isLoading={isLoading}
       searchBarAccessory={<CompetitionDropdown selected={competition} onSelect={setCompetition} />}
-      isShowingDetail={showStats}
+      isShowingDetail={true}
     >
       {standing?.map((team) => {
         let icon: Image.ImageLike = {
@@ -46,25 +45,11 @@ export default function GetTables() {
               color: Color.PrimaryText,
               value: team.points.toString(),
             },
+          },
+          {
             icon,
-            tooltip: "Points",
           },
         ];
-
-        if (!showStats) {
-          accessories.unshift(
-            {
-              icon: Icon.SoccerBall,
-              text: team.played.toString(),
-              tooltip: "Played",
-            },
-            {
-              icon: Icon.Goal,
-              text: `${team.goals_for} - ${team.goals_against}`,
-              tooltip: "Goals For - Goals Against",
-            },
-          );
-        }
 
         return (
           <List.Item
@@ -78,7 +63,6 @@ export default function GetTables() {
               <List.Item.Detail
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="Stats" />
                     <List.Item.Detail.Metadata.Label
                       title="Previous Position"
                       text={team.previous_position.toString()}
@@ -87,23 +71,13 @@ export default function GetTables() {
                     <List.Item.Detail.Metadata.Label title="Won" text={team.won.toString()} />
                     <List.Item.Detail.Metadata.Label title="Drawn" text={team.drawn.toString()} />
                     <List.Item.Detail.Metadata.Label title="Lost" text={team.lost.toString()} />
+                    <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label title="Goals For" text={team.goals_for.toString()} />
                     <List.Item.Detail.Metadata.Label title="Goals Against" text={team.goals_against.toString()} />
                     <List.Item.Detail.Metadata.Label title="Goal Difference" text={team.goal_difference.toString()} />
                   </List.Item.Detail.Metadata>
                 }
               />
-            }
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Show Stats"
-                  icon={Icon.Sidebar}
-                  onAction={() => {
-                    setShowStats(!showStats);
-                  }}
-                />
-              </ActionPanel>
             }
           />
         );
