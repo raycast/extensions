@@ -15,11 +15,24 @@ function splitTextIntoChunks(text: string, chunkSize: number): string[] {
   return chunks;
 }
 
+// Function to encode special characters for SVG
+function encodeForSVG(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;")
+    .replace(/ /g, "␣");
+}
+
 // TODO:
-// - escape characters properly
-// - show spaces as open box ␣
+// ✔︎ escape characters properly
+// ✔︎ show spaces as open box ␣
 // - add colours for numbers + special characters
-// - make icon https://ray.so/icon
+// ✔︎ make icon https://ray.so/icon
+// - use a font that better distinguishes 0OlI1
+// - allow emoji
 
 export default function ClipboardViewer() {
   const [clipboardText, setClipboardText] = useState<string | null>(null);
@@ -54,7 +67,7 @@ export default function ClipboardViewer() {
   function generateSVG(text: string): string {
     const characters = text.split(""); // Split the clipboard content into characters
 
-    const chunkSize = 12; // Set line length to 20 characters
+    const chunkSize = 10; // Set line length to 10 characters
     const charactersChunks = splitTextIntoChunks(text, chunkSize); // Split into chunks of 20 characters
     const totalLines = charactersChunks.length;
 
@@ -78,6 +91,7 @@ export default function ClipboardViewer() {
     // Loop over each line (chunk) of characters
     charactersChunks.forEach((chunk, line) => {
       chunk.split("").forEach((char, i) => {
+        const encodedChar = encodeForSVG(char);
         const x = i * cellWidth + cellWidth / 2;
         const yCharacter = (line * 1.5 + 1) * cellHeight;
         const yIndex = line * (cellHeight * 1.5) + 110;
@@ -89,7 +103,7 @@ export default function ClipboardViewer() {
         }
 
         // Add clipboard characters to the first row of each chunk
-        svg += `<text x="${x}" y="${yCharacter}" font-family="-apple-system, BlinkMacSystemFont" fill="${textColor}" font-size="${cellWidth / 1.5}" text-anchor="middle" alignment-baseline="middle">${char}</text>`;
+        svg += `<text x="${x}" y="${yCharacter}" font-family="-apple-system, BlinkMacSystemFont" fill="${textColor}" font-size="${cellWidth / 1.5}" text-anchor="middle" alignment-baseline="middle">${encodedChar}</text>`;
 
         // Add indices to the second row of each chunk
         svg += `<text x="${x}" y="${yIndex}" font-family="-apple-system, BlinkMacSystemFont" fill="${textColor}" font-size="${cellWidth / 5}" text-anchor="middle" alignment-baseline="middle" style="opacity:0.5">${indicesChunks[line][i]}</text>`;
