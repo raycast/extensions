@@ -1,6 +1,6 @@
 # JustColorPicker
 
-just a color picker
+Just a color picker
 
 ## JustColorPicker By Raycast
 
