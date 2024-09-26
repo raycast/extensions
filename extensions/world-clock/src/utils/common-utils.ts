@@ -85,6 +85,7 @@ export const calculateDateTimeByOffset = (offset: string) => {
   const dateTime = new Date();
   dateTime.setDate(dateTime.getUTCDate());
   dateTime.setHours(dateTime.getUTCHours() + parseInt(offset));
+  dateTime.setMinutes(dateTime.getUTCMinutes() + parseInt(offset.split(":")[1]));
   return {
     date_time: dateTime.toLocaleTimeString("en-US", {
       hour12: !hour24,
