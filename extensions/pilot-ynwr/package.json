@@ -1,0 +1,225 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pilot-ynwr",
+  "title": "Pilot - Calendar, TaskManager & Journals",
+  "description": "Pilot your Calendar, TaskManager and Journals quickly and effectively through a custom Notion template.",
+  "icon": "logo_pilot.png",
+  "author": "romubuntu",
+  "categories": ["Productivity", "Design Tools","Developer Tools"],
+  "access":"public",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "pilotmenubar",
+      "title": "💻 Launch Menu Bar",
+      "subtitle": "Pilot your Notion",
+      "description": "Launch Pilot Menu Bar",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "pilot",
+      "title": "🏡 Launch Home",
+      "subtitle": "Pilot your Notion",
+      "description": "Launch Pilot Home",
+      "mode": "view"
+    },
+    {
+      "name": "taskmanager",
+      "title": "📋 Launch Task Manager",
+      "subtitle": "Pilot your Notion",
+      "description": "Launch Task Manager",
+      "mode": "view"
+    },
+    {
+      "name": "calendar",
+      "title": "🗓️ Launch Calendar",
+      "subtitle": "Pilot your Notion",
+      "description": "Launch Calendar",
+      "mode": "view"
+    },
+    {      
+    "name": "journal",
+    "title": "📔 Launch Journals",
+    "subtitle": "Pilot your Notion",
+    "description": "Launch Journal",
+    "mode": "view"
+  }
+  ],
+  "preferences": [
+    {"name": "name",
+    "title": "Your Name",
+    "description": "How I May Call You",
+    "type": "textfield",
+    "required": true
+    },
+    {"name": "gmt",
+    "description": "Your Timezone",
+    "title": "Your Timezone",
+    "type": "dropdown",
+    "required": true,
+    "data": [
+      {
+        "value": "-11",
+        "title": "Pacific/Midway"
+      },
+      {
+        "value": "-10",
+        "title": "America/Adak"
+      },
+      {
+        "value": "-09",
+        "title": "America/Anchorage/Pacific/Gambier"
+      },
+      {
+        "value": "-08",
+        "title": "America/Los_Angeles"
+      },
+      {
+        "value": "-07",
+        "title": "America/Chihuahua"
+      },
+      {
+        "value": "-06",
+        "title": "America/Chicago"
+      },
+      {
+        "value": "-05",
+        "title": "America/New_York"
+      },
+      {
+        "value": "-04",
+        "title": "America/Santiago"
+      },
+      {
+        "value": "-03",
+        "title": "America/Sao_Paulo/Buenos_Aires"
+      },
+      {
+        "value": "-02",
+        "title": "America/Noronha"
+      },
+      {
+        "value": "-01",
+        "title": "Atlantic/Cape_Verde"
+      },
+      {
+        "value": "0",
+        "title": "Europe/London"
+      },
+      {
+        "value": "01",
+        "title": "Europe/Brussels"
+      },
+      {
+        "value": "02",
+        "title": "Europe/Berlin"
+      },
+      {
+        "value": "03",
+        "title": "Europe/Minsk"
+      },
+      {
+        "value": "04",
+        "title": "Asia/Dubai"
+      },
+      {
+        "value": "05",
+        "title": "Asia/Tashkent"
+      },
+      {
+        "value": "06",
+        "title": "Asia/Dhaka"
+      },
+      {
+        "value": "07",
+        "title": "Asia/Bangkok"
+      },
+      {
+        "value": "08",
+        "title": "Asia/Hong_Kong"
+      },
+      {
+        "value": "09",
+        "title": "Asia/Tokyo"
+      },
+      {
+        "value": "10",
+        "title": "Australia/Brisbane"
+      },
+      {
+        "value": "11",
+        "title": "Asia/Vladivostok"
+      },
+      {
+        "value": "12",
+        "title": "Asia/Anadyr"
+      }
+    ]},
+    {"name": "projectAPIID",
+    "description": "Project Link of your DB in your Notion Pilot Page",
+    "title": "Project DB Link",
+    "type": "textfield",
+    "required": true
+    },
+    {"name": "eventAPIID",
+    "description": "Event Link of your DB in your Notion Pilot Page",
+    "title": "Event DB Link",
+    "type": "textfield",
+    "required": true
+    },
+    {"name": "journalAPIID",
+    "description": "Journal Link of your DB in your Notion Pilot Page",
+    "title": "Journal DB Link",
+    "type": "textfield",
+    "required": true
+    },
+    {"name": "keystoneAPIID",
+    "description": "Keystone Link of your DB in your Notion Pilot Page",
+    "title": "Keystone DB Link",
+    "type": "textfield",
+    "required": true
+    },
+    {"name": "linkAPIID",
+    "description": "Link Link of your DB in your Notion Pilot Page",
+    "title": "Link DB Link",
+    "type": "textfield",
+    "required": true
+    },
+    {"name": "timerAPIID",
+    "description": "Timer Link of your DB in your Notion Pilot Page",
+    "title": "Timer DB Link",
+    "type": "textfield",
+    "required": true
+    },
+    {"name": "todoAPIID",
+    "description": "Todo Link of your DB in your Notion Pilot Page",
+    "title": "Todo DB Link",
+    "type": "textfield",
+    "required": true
+    }
+  ],
+  "dependencies": {
+    "@notionhq/client": "^2.2.15",
+    "@raycast/api": "^1.69.3",
+    "@raycast/utils": "^1.13.3",
+    "dotenv": "^16.4.5",
+    "jotai": "^2.8.0",
+    "node-fetch": "^3.3.2",
+    "open": "^10.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
