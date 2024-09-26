@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "image-to-gif",
-  "title": "image to GIF",
-  "description": "animated image to GIF with 1s delay",
+  "title": "Image to GIF",
+  "description": "animate image to GIF with 1s delay",
   "icon": "extension-icon.png",
   "author": "lzybiasia",
   "categories": [
@@ -11,9 +11,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "image-to-gif",
-      "title": "Image to GIF",
-      "description": "",
+      "name": "animate-images",
+      "title": "Animate images",
+      "description": "animate selected image files to GIF with 1s delay",
       "mode": "no-view"
     }
   ],
