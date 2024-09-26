@@ -3,6 +3,7 @@
 ## [Add Pagination] - {PR_MERGE_DATE}
 
 - View more than 30 items from your Articles or Reading List at a time
+- In `Searcgh Reading List` the Tags are moved to `Detail` view so longer titles are more visible
 - In `Search Article` the Tags are moved to `Detail` view so longer titles are more visible
 - In `Search Article` you can choose to prioritize the "Paste" or "Copy"
 

@@ -36,7 +36,7 @@ export function ArticleAction({ article, onRevalidate }: { article: Article; onR
 
       <ActionPanel.Section title={"Copy Paste"}>
         <Action
-          title="Paste to Active App"
+          title={preference.primaryAction === "copy" ? "Copy to Clipboard" : "Paste to Active App"}
           icon={preference.primaryAction === "copy" ? Icon.Clipboard : Icon.Window}
           onAction={async () => {
             if (preference.primaryAction === "copy") {

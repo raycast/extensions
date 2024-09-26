@@ -40,13 +40,15 @@ export default function SearchReadingList() {
             id={String(id)}
             key={"article" + todoIndex}
             title={{ value: title, tooltip: title }}
-            accessories={[{ text: tags.length === 0 ? "" : tags }]}
             detail={
               <List.Item.Detail
                 markdown={`![Illustration](${cover_image})`}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Article" />
+                    <List.Item.Detail.Metadata.TagList title="Tags">
+                      {tags.split(",").map(tag => <List.Item.Detail.Metadata.TagList.Item key={tag} text={tag} />)}
+                    </List.Item.Detail.Metadata.TagList>
                     <List.Item.Detail.Metadata.Label
                       title="Comments"
                       text={String(comments_count)}

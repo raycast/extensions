@@ -15,16 +15,16 @@ export default function CreateArticle({ article, onEdit }: { article: Article | 
   const { itemProps, handleSubmit } = useForm<{
     title: string;
     body_markdown: string;
-    tag_list: string[];
+    tags: string[];
     published: string;
   }>({
     async onSubmit(values) {
       setIsLoading(true);
-      const { title, body_markdown, tag_list } = values;
+      const { title, body_markdown, tags } = values;
       const published = values.published === "true" ? true : false;
       isEdit
-        ? await createArticle(isEdit, title, published, body_markdown, tag_list, article.id)
-        : await createArticle(isEdit, title, published, body_markdown, tag_list);
+        ? await createArticle(isEdit, title, published, body_markdown, tags, article.id)
+        : await createArticle(isEdit, title, published, body_markdown, tags);
 
       setIsLoading(false);
       if (isEdit) {
@@ -35,7 +35,7 @@ export default function CreateArticle({ article, onEdit }: { article: Article | 
     initialValues: {
       title: article?.title,
       body_markdown: article?.body_markdown,
-      tag_list: article?.tag_list ?? ["tutorial"],
+      tags: article?.tag_list ?? ["tutorial"],
       published: String(Boolean(article?.published)),
     },
     validation: {
@@ -61,7 +61,7 @@ export default function CreateArticle({ article, onEdit }: { article: Article | 
     >
       <Form.TextField title={"Title"} placeholder={"How to implement..."} {...itemProps.title} />
       <Form.TextArea title={"Body"} placeholder={"React imports all the components..."} {...itemProps.body_markdown} />
-      <Form.TagPicker title="Tags" {...itemProps.tag_list}>
+      <Form.TagPicker title="Tags" {...itemProps.tags}>
         <Form.TagPicker.Item value="tutorial" title="tutorial" />
         <Form.TagPicker.Item value="react" title="react" />
         <Form.TagPicker.Item value="vue" title="vue" />
