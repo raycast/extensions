@@ -10,7 +10,7 @@
     {
       "name": "expand-video-canvas",
       "title": "Expand Video Canvas",
-      "description": "",
+      "description": "Expand different size video to 1920*1080.",
       "mode": "no-view"
     }
   ],
