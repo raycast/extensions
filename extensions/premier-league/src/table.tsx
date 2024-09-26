@@ -1,17 +1,21 @@
-import { Action, ActionPanel, List, Icon, Image, Color } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { useState } from "react";
-import { useSeasons, useTables } from "./hooks";
+import { getSeasons, getTables } from "./api";
 import { convertToLocalTime } from "./utils";
 
 export default function GetTables() {
-  const seasons = useSeasons();
+  const { data: seasons = [] } = usePromise(getSeasons);
 
-  const [selectedSeason, setSeason] = useState<string>(
-    seasons[0]?.id.toString(),
-  );
+  const [seasonId, setSeasonId] = useState<string>(seasons[0]?.id.toString());
   const [showStats, setShowStats] = useState<boolean>(false);
 
-  const tables = useTables(selectedSeason);
+  const { data: tables, isLoading } = usePromise(
+    async (season) => {
+      return season ? await getTables(season) : [];
+    },
+    [seasonId],
+  );
 
   return (
     <List
@@ -19,8 +23,8 @@ export default function GetTables() {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by Season"
-          value={selectedSeason}
-          onChange={setSeason}
+          value={seasonId}
+          onChange={setSeasonId}
         >
           <List.Dropdown.Section>
             {seasons.map((season) => {
@@ -35,10 +39,12 @@ export default function GetTables() {
           </List.Dropdown.Section>
         </List.Dropdown>
       }
-      isLoading={!tables}
+      isLoading={isLoading}
       isShowingDetail={showStats}
     >
       {tables?.map((table) => {
+        const isEnded = table.entries.every((e) => e.overall.played === 38);
+
         return (
           <List.Section key={table.gameWeek}>
             {table.entries.map((entry) => {
@@ -57,16 +63,25 @@ export default function GetTables() {
                 tintColor: Color.SecondaryText,
               };
 
-              if (position < startingPosition) {
-                icon = {
-                  source: Icon.ChevronUpSmall,
-                  tintColor: Color.Green,
-                };
-              } else if (position > startingPosition) {
-                icon = {
-                  source: Icon.ChevronDownSmall,
-                  tintColor: Color.Red,
-                };
+              if (isEnded) {
+                if (position === 1) {
+                  icon = {
+                    source: Icon.Trophy,
+                    tintColor: Color.Orange,
+                  };
+                }
+              } else {
+                if (position < startingPosition) {
+                  icon = {
+                    source: Icon.ChevronUpSmall,
+                    tintColor: Color.Green,
+                  };
+                } else if (position > startingPosition) {
+                  icon = {
+                    source: Icon.ChevronDownSmall,
+                    tintColor: Color.Red,
+                  };
+                }
               }
 
               const accessories: List.Item.Accessory[] = [
