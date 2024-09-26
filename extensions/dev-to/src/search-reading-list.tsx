@@ -47,7 +47,9 @@ export default function SearchReadingList() {
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Article" />
                     <List.Item.Detail.Metadata.TagList title="Tags">
-                      {tags.split(",").map(tag => <List.Item.Detail.Metadata.TagList.Item key={tag} text={tag} />)}
+                      {tags.split(",").map((tag) => (
+                        <List.Item.Detail.Metadata.TagList.Item key={tag} text={tag} />
+                      ))}
                     </List.Item.Detail.Metadata.TagList>
                     <List.Item.Detail.Metadata.Label
                       title="Comments"
