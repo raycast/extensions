@@ -238,7 +238,7 @@ _Data provided by Surfline_
           <Detail.Metadata.Label
             title="Rating"
             text={formatString(detailedSpot.forecast.conditions.value)}
-            icon={icon}
+            icon={{ source: icon, tintColor: tintColor }}
           />
           <Detail.Metadata.Label
             title="Wave Height"
