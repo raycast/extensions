@@ -2,7 +2,6 @@ import { getSelectedText, closeMainWindow, popToRoot, showToast, Toast } from "@
 import { checkAppInstallation } from "./utils/ApplicationInstalledCheck";
 import { CallbackUrl } from "./utils/CallbackUrlUtils";
 import { CallbackBasUrls } from "./utils/Defines";
-import Style = Toast.Style;
 
 export default async () => {
   // app installation check (shows Toast if Drafts is not installed)
