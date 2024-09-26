@@ -1,5 +1,5 @@
 import { XcodeSimulatorApplication } from "../../models/xcode-simulator/xcode-simulator-application.model";
-import { Action, ActionPanel, Alert, confirmAlert, Icon, Image, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, Image, List } from "@raycast/api";
 import { XcodeSimulatorService } from "../../services/xcode-simulator.service";
 import { XcodeSimulatorAppAction } from "../../models/xcode-simulator/xcode-simulator-app-action.model";
 import { XcodeSimulatorAppPrivacyAction } from "../../models/xcode-simulator/xcode-simulator-app-privacy-action.model";
@@ -8,6 +8,7 @@ import { XcodeSimulatorAppPrivacyServiceTypeName } from "../../shared/xcode-simu
 import { XcodeCleanupService } from "../../services/xcode-cleanup.service";
 import { XcodeSimulatorState } from "../../models/xcode-simulator/xcode-simulator-state.model";
 import { XcodeSimulatorSendPushNotificationForm } from "../xcode-simulator-list/xcode-simulator-send-push-notification-form.component";
+import { operationWithUserFeedback } from "../../shared/operation-with-user-feedback";
 
 /**
  * Xcode Simulator Application List Item
@@ -113,23 +114,20 @@ export function XcodeSimulatorApplicationListItem(props: { application: XcodeSim
                         XcodeSimulatorAppAction.terminate,
                         props.application.bundleIdentifier,
                         props.application.simulator
-                      ).then();
-                      try {
-                        await XcodeSimulatorService.deleteAppFiles(
-                          props.application.sandBoxPath,
-                          props.application.appGroupPath
-                        );
-                        await showToast({
-                          title: "App data deleted",
-                          message: `${props.application.name} app data has been deleted`,
-                        });
-                      } catch (error: any) {
-                        await showToast({
-                          title: "Error Deleting app data",
-                          style: Toast.Style.Failure,
-                          message: error.message,
-                        });
-                      }
+                      )
+                        .then()
+                        .catch(console.error);
+                      operationWithUserFeedback(
+                        "Clearing App Data...",
+                        `${props.application.name} app data has been deleted`,
+                        "Error Deleting app data",
+                        async () => {
+                          await XcodeSimulatorService.deleteAppFiles(
+                            props.application.sandBoxPath,
+                            props.application.appGroupPath
+                          );
+                        }
+                      );
                     },
                   },
                 })
