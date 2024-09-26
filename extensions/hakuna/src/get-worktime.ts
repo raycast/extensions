@@ -23,7 +23,7 @@ export default async function command() {
     const worktime = await timer.getWorktime();
     await showToast({
       style: Toast.Style.Success,
-      title: "Time balance:",
+      title: "Time Balance",
       message: `You have worked for ${worktime} today`,
     });
   } catch (error) {
