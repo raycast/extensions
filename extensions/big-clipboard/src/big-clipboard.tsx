@@ -89,10 +89,10 @@ export default function ClipboardViewer() {
       Array.from({ length: chunk.length }, (_, i) => (i + 1 + line * chunkSize).toString().padStart(2, "0")),
     );
 
-    const cellWidth = 80;
-    const cellHeight = 80;
+    const cellWidth = 120;
+    const cellHeight = 200;
     const svgWidth = totalLines > 1 ? chunkSize * cellWidth : cellWidth * characters.length;
-    const svgHeight = totalLines * cellHeight * 1.5; // Two rows: one for characters and one for indices
+    const svgHeight = totalLines * cellHeight; // Two rows: one for characters and one for indices
 
     const darkMode = environment.theme === "dark";
     const colorful = preferences.colorCode;
@@ -125,9 +125,9 @@ export default function ClipboardViewer() {
       splitter.splitGraphemes(chunk).forEach((char, i) => {
         const encodedChar = encodeForSVG(char);
         const x = i * cellWidth + cellWidth / 2;
-        const yCharacter = (line * 1.5 + 1) * cellHeight;
-        const yIndex = line * (cellHeight * 1.5) + 110;
-        const yBackground = line * 1.5 * cellHeight;
+        const yCharacter = cellHeight * (line + 1) - cellHeight / 3;
+        const yIndex = cellHeight * (line + 1) - 10;
+        const yBackground = line * cellHeight;
         const charType = checkCharacterType(char);
         const charColor = !colorful
           ? textColor
@@ -139,7 +139,7 @@ export default function ClipboardViewer() {
 
         // Add alternating background
         if (i % 2) {
-          svg += `<rect width="${cellWidth}" height="${cellHeight * 1.48}" x="${i * cellWidth}" y="${yBackground}" fill="${bgColor}" style="opacity:${opacity}"/>`;
+          svg += `<rect width="${cellWidth}" height="${cellHeight * 0.99}" x="${i * cellWidth}" y="${yBackground}" fill="${bgColor}" style="opacity:${opacity}"/>`;
         }
 
         // Add clipboard characters to the first row of each chunk
