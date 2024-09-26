@@ -28,11 +28,11 @@ const generateBoxScore = (feed: FeedInterface): string => {
       .map((player) => {
         const batting = player.stats.batting;
         if (batting.atBats === undefined) return null;
-        return `| ${player.person.fullName} | ${player.position.abbreviation} | ${batting.atBats} | ${
-          batting.runs ?? "n/a"
-        } | ${batting.hits ?? "n/a"} | ${batting.rbi ?? "n/a"} | ${batting.baseOnBalls ?? "n/a"} | ${
+        return `| ${player.person.fullName} (${player.position.abbreviation}) | ${batting.hits ?? "n/a"}/${
+          batting.atBats
+        } | ${batting.runs ?? "n/a"} | ${batting.rbi ?? "n/a"} | ${batting.baseOnBalls ?? "n/a"}/${
           batting.strikeOuts ?? "n/a"
-        } | ${(batting.atBats ? batting.hits / batting.atBats : 0.0).toFixed(3)} |`;
+        }|`;
       })
       .filter((row): row is string => row !== null)
       .join("\n");
@@ -45,9 +45,9 @@ const generateBoxScore = (feed: FeedInterface): string => {
       .map((player) => {
         const pitching = player.stats.pitching;
         if (pitching.inningsPitched === undefined) return null;
-        return `| ${player.person.fullName} | ${pitching.inningsPitched} | ${pitching.hits} | ${pitching.runs} | ${
-          pitching.earnedRuns
-        } | ${pitching.baseOnBalls} | ${pitching.strikeOuts} | ${pitching.runsScoredPer9 || "n/a"} |`;
+        return `| ${player.person.fullName} | ${pitching.inningsPitched}/${pitching.runsScoredPer9 || "n/a"} | ${
+          pitching.hits
+        }/${pitching.runs}/${pitching.earnedRuns} | ${pitching.baseOnBalls}/${pitching.strikeOuts} |`;
       })
       .filter((row): row is string => row !== null)
       .join("\n");
@@ -57,14 +57,14 @@ const generateBoxScore = (feed: FeedInterface): string => {
 
 ### Batting (this game)
 
-| Player | Pos | AB | R | H | RBI | BB | SO | AVG |
-|--------|-----|----|----|----|----|----|----|-----|
+| Player | H/AB | R | RBI | BB/SO |
+|--------|------|---|-----|-------|
 ${batterRows}
 
 ### Pitching (this game)
 
-| Player | IP | H | R | ER | BB | SO | ERA |
-|--------|----|----|----|----|----|----|-----|
+| Player | IP/ERA | H/R/ER | BB/SO |
+|--------|--------|--------|-------|
 ${pitcherRows}
 `;
   };
@@ -193,8 +193,7 @@ ${
 
 ---
 
-## Box
-${generateBoxScore(game)}
+${game.gameData.status.abstractGameCode.toUpperCase() === "L" ? `## Box  \n` + generateBoxScore(game) : ""}
 
 ## Copyright
 ${game.copyright}
@@ -202,6 +201,17 @@ ${game.copyright}
     return (
       <Detail
         markdown={md_string}
+        // metadata={
+        //   game.gameData.status.abstractGameCode.toUpperCase() === "L" ? (
+        //     <Detail.Metadata>
+        //       <Detail.Metadata.Label title="" text="3. Swinging Strike" />
+        //       <Detail.Metadata.Separator />
+        //       <Detail.Metadata.Label title="" text="2. Ball" />
+        //       <Detail.Metadata.Separator />
+        //       <Detail.Metadata.Label title="" text="1. Ball" />
+        //     </Detail.Metadata>
+        //   ) : null
+        // }
         actions={
           <ActionPanel>
             <ActionPanel.Section title="Actions">
