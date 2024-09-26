@@ -30,11 +30,19 @@ export default function ImportDocs() {
   );
 }
 
-export async function saveDocs(docs: String) {
-  await LocalStorage.setItem("docs", JSON.stringify(docs));
-  showToast({
-    title: `Successfully imported documentation`,
-    style: Toast.Style.Success,
-  });
-  popToRoot();
+export async function saveDocs(docs: string) {
+  // ensure object structure with single "docs" key
+  if (Object.keys(JSON.parse(docs))[0] === "docs") {
+    await LocalStorage.setItem("docs", JSON.stringify(docs));
+    showToast({
+      title: `Successfully imported documentation`,
+      style: Toast.Style.Success,
+    });
+    popToRoot();
+  } else {
+    showToast({
+      title: `Please check the the file input`,
+      style: Toast.Style.Failure,
+    });
+  }
 }
