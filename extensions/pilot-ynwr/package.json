@@ -5,8 +5,12 @@
   "description": "Pilot your Calendar, TaskManager and Journals quickly and effectively through a custom Notion template.",
   "icon": "logo_pilot.png",
   "author": "romubuntu",
-  "categories": ["Productivity", "Design Tools","Developer Tools"],
-  "access":"public",
+  "categories": [
+    "Productivity",
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "access": "public",
   "license": "MIT",
   "commands": [
     {
@@ -37,165 +41,175 @@
       "description": "Launch Calendar",
       "mode": "view"
     },
-    {      
-    "name": "journal",
-    "title": "📔 Launch Journals",
-    "subtitle": "Pilot your Notion",
-    "description": "Launch Journal",
-    "mode": "view"
-  }
+    {
+      "name": "journal",
+      "title": "📔 Launch Journals",
+      "subtitle": "Pilot your Notion",
+      "description": "Launch Journal",
+      "mode": "view"
+    }
   ],
   "preferences": [
-    {"name": "name",
-    "title": "Your Name",
-    "description": "How I May Call You",
-    "type": "textfield",
-    "required": true
+    {
+      "name": "name",
+      "title": "Your Name",
+      "description": "How I May Call You",
+      "type": "textfield",
+      "required": true
     },
-    {"name": "gmt",
-    "description": "Your Timezone",
-    "title": "Your Timezone",
-    "type": "dropdown",
-    "required": true,
-    "data": [
-      {
-        "value": "-11",
-        "title": "Pacific/Midway"
-      },
-      {
-        "value": "-10",
-        "title": "America/Adak"
-      },
-      {
-        "value": "-09",
-        "title": "America/Anchorage/Pacific/Gambier"
-      },
-      {
-        "value": "-08",
-        "title": "America/Los_Angeles"
-      },
-      {
-        "value": "-07",
-        "title": "America/Chihuahua"
-      },
-      {
-        "value": "-06",
-        "title": "America/Chicago"
-      },
-      {
-        "value": "-05",
-        "title": "America/New_York"
-      },
-      {
-        "value": "-04",
-        "title": "America/Santiago"
-      },
-      {
-        "value": "-03",
-        "title": "America/Sao_Paulo/Buenos_Aires"
-      },
-      {
-        "value": "-02",
-        "title": "America/Noronha"
-      },
-      {
-        "value": "-01",
-        "title": "Atlantic/Cape_Verde"
-      },
-      {
-        "value": "0",
-        "title": "Europe/London"
-      },
-      {
-        "value": "01",
-        "title": "Europe/Brussels"
-      },
-      {
-        "value": "02",
-        "title": "Europe/Berlin"
-      },
-      {
-        "value": "03",
-        "title": "Europe/Minsk"
-      },
-      {
-        "value": "04",
-        "title": "Asia/Dubai"
-      },
-      {
-        "value": "05",
-        "title": "Asia/Tashkent"
-      },
-      {
-        "value": "06",
-        "title": "Asia/Dhaka"
-      },
-      {
-        "value": "07",
-        "title": "Asia/Bangkok"
-      },
-      {
-        "value": "08",
-        "title": "Asia/Hong_Kong"
-      },
-      {
-        "value": "09",
-        "title": "Asia/Tokyo"
-      },
-      {
-        "value": "10",
-        "title": "Australia/Brisbane"
-      },
-      {
-        "value": "11",
-        "title": "Asia/Vladivostok"
-      },
-      {
-        "value": "12",
-        "title": "Asia/Anadyr"
-      }
-    ]},
-    {"name": "projectAPIID",
-    "description": "Project Link of your DB in your Notion Pilot Page",
-    "title": "Project DB Link",
-    "type": "textfield",
-    "required": true
+    {
+      "name": "gmt",
+      "description": "Your Timezone",
+      "title": "Your Timezone",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "value": "-11",
+          "title": "Pacific/Midway"
+        },
+        {
+          "value": "-10",
+          "title": "America/Adak"
+        },
+        {
+          "value": "-09",
+          "title": "America/Anchorage/Pacific/Gambier"
+        },
+        {
+          "value": "-08",
+          "title": "America/Los_Angeles"
+        },
+        {
+          "value": "-07",
+          "title": "America/Chihuahua"
+        },
+        {
+          "value": "-06",
+          "title": "America/Chicago"
+        },
+        {
+          "value": "-05",
+          "title": "America/New_York"
+        },
+        {
+          "value": "-04",
+          "title": "America/Santiago"
+        },
+        {
+          "value": "-03",
+          "title": "America/Sao_Paulo/Buenos_Aires"
+        },
+        {
+          "value": "-02",
+          "title": "America/Noronha"
+        },
+        {
+          "value": "-01",
+          "title": "Atlantic/Cape_Verde"
+        },
+        {
+          "value": "0",
+          "title": "Europe/London"
+        },
+        {
+          "value": "01",
+          "title": "Europe/Brussels"
+        },
+        {
+          "value": "02",
+          "title": "Europe/Berlin"
+        },
+        {
+          "value": "03",
+          "title": "Europe/Minsk"
+        },
+        {
+          "value": "04",
+          "title": "Asia/Dubai"
+        },
+        {
+          "value": "05",
+          "title": "Asia/Tashkent"
+        },
+        {
+          "value": "06",
+          "title": "Asia/Dhaka"
+        },
+        {
+          "value": "07",
+          "title": "Asia/Bangkok"
+        },
+        {
+          "value": "08",
+          "title": "Asia/Hong_Kong"
+        },
+        {
+          "value": "09",
+          "title": "Asia/Tokyo"
+        },
+        {
+          "value": "10",
+          "title": "Australia/Brisbane"
+        },
+        {
+          "value": "11",
+          "title": "Asia/Vladivostok"
+        },
+        {
+          "value": "12",
+          "title": "Asia/Anadyr"
+        }
+      ]
     },
-    {"name": "eventAPIID",
-    "description": "Event Link of your DB in your Notion Pilot Page",
-    "title": "Event DB Link",
-    "type": "textfield",
-    "required": true
+    {
+      "name": "projectAPIID",
+      "description": "Project Link of your DB in your Notion Pilot Page",
+      "title": "Project DB Link",
+      "type": "textfield",
+      "required": true
     },
-    {"name": "journalAPIID",
-    "description": "Journal Link of your DB in your Notion Pilot Page",
-    "title": "Journal DB Link",
-    "type": "textfield",
-    "required": true
+    {
+      "name": "eventAPIID",
+      "description": "Event Link of your DB in your Notion Pilot Page",
+      "title": "Event DB Link",
+      "type": "textfield",
+      "required": true
     },
-    {"name": "keystoneAPIID",
-    "description": "Keystone Link of your DB in your Notion Pilot Page",
-    "title": "Keystone DB Link",
-    "type": "textfield",
-    "required": true
+    {
+      "name": "journalAPIID",
+      "description": "Journal Link of your DB in your Notion Pilot Page",
+      "title": "Journal DB Link",
+      "type": "textfield",
+      "required": true
     },
-    {"name": "linkAPIID",
-    "description": "Link Link of your DB in your Notion Pilot Page",
-    "title": "Link DB Link",
-    "type": "textfield",
-    "required": true
+    {
+      "name": "keystoneAPIID",
+      "description": "Keystone Link of your DB in your Notion Pilot Page",
+      "title": "Keystone DB Link",
+      "type": "textfield",
+      "required": true
     },
-    {"name": "timerAPIID",
-    "description": "Timer Link of your DB in your Notion Pilot Page",
-    "title": "Timer DB Link",
-    "type": "textfield",
-    "required": true
+    {
+      "name": "linkAPIID",
+      "description": "Link Link of your DB in your Notion Pilot Page",
+      "title": "Link DB Link",
+      "type": "textfield",
+      "required": true
     },
-    {"name": "todoAPIID",
-    "description": "Todo Link of your DB in your Notion Pilot Page",
-    "title": "Todo DB Link",
-    "type": "textfield",
-    "required": true
+    {
+      "name": "timerAPIID",
+      "description": "Timer Link of your DB in your Notion Pilot Page",
+      "title": "Timer DB Link",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "todoAPIID",
+      "description": "Todo Link of your DB in your Notion Pilot Page",
+      "title": "Todo DB Link",
+      "type": "textfield",
+      "required": true
     }
   ],
   "dependencies": {

@@ -5,79 +5,72 @@ import { Journal, Pref, Project } from "../interfaces/itemsInterfaces";
 import { FetchActiveProjects, FetchJournals } from "./FetchFunctions";
 import { getAPIError, getAPIidFromLink } from "../tools/generalTools";
 
-
 interface ApiIDS {
-    project:string,
-    journal:string
+  project: string;
+  journal: string;
 }
 
-const cache = new Cache()
+const cache = new Cache();
 
-const useFetchJournals = (notion:Client|undefined) => {
+const useFetchJournals = (notion: Client | undefined) => {
+  //STATES
+  const [apiIDs, setApiIDs] = useState<ApiIDS | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-    //STATES
-    const [apiIDs, setApiIDs] = useState<ApiIDS|undefined>(undefined)
-    const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [journals, setJournals] = useState<Journal[] | null>([]);
 
-    const [projects, setProjects] = useState<Project[]>([])
-    const [journals, setJournals] = useState<Journal[]|null>([])
+  const getApiIDs = async () => {
+    const pref = getPreferenceValues<Pref>();
+    const newApiIDs: ApiIDS = {
+      journal: getAPIidFromLink(pref.journalAPIID),
+      project: getAPIidFromLink(pref.projectAPIID),
+    };
+    setApiIDs(newApiIDs);
+  };
 
+  useEffect(() => {
+    if (notion === undefined) return;
+    setIsLoading(true);
+    getApiIDs();
+  }, [notion]);
 
+  useEffect(() => {
+    if (apiIDs === undefined) return;
+    fetch(["all"], true);
+  }, [apiIDs]);
 
-    const getApiIDs = async() => {
-        const pref = getPreferenceValues<Pref>();
-        const newApiIDs:ApiIDS = {
-            journal:getAPIidFromLink(pref.journalAPIID),
-            project:getAPIidFromLink(pref.projectAPIID)
-        }
-        setApiIDs(newApiIDs)
+  const refresh = (targets: string[]) => {
+    setIsLoading(true);
+    fetch(targets, true);
+  };
+
+  const clearRefresh = () => {
+    cache.clear();
+    refresh(["all"]);
+  };
+
+  const fetch = async (targets: string[], forceRefresh: boolean) => {
+    if (notion === undefined) return;
+
+    const fetchedProjects = await FetchActiveProjects(targets, apiIDs?.project as string, forceRefresh, notion);
+    if (typeof fetchedProjects === "string") {
+      showToast({ title: getAPIError(fetchedProjects, "Project"), style: Toast.Style.Failure });
+      return;
     }
+    setProjects(fetchedProjects as Project[]);
 
-
-    useEffect(()=> {
-        if(notion === undefined) return
-        setIsLoading(true)
-        getApiIDs()
-    },[notion])
-
-    useEffect(()=> {
-        if(apiIDs===undefined) return
-        fetch(['all'], true)
-    },[apiIDs])
-
-    const refresh = (targets:string[]) => {
-        setIsLoading(true)
-        fetch(targets, true)
+    const fetchedJournals = await FetchJournals(targets, apiIDs?.journal as string, forceRefresh, notion);
+    if (typeof fetchedProjects === "string") {
+      showToast({ title: getAPIError(fetchedProjects, "Links"), style: Toast.Style.Failure });
+      return;
     }
+    setJournals(fetchedJournals as Journal[]);
 
-    const clearRefresh = () => {
-        cache.clear()
-        refresh(['all'])
-    }
+    setIsLoading(false);
+  };
 
-    const fetch = async (targets:string[],forceRefresh:boolean) => {
-        if(notion ===undefined) return
+  return { isLoading, clearRefresh, refresh, journals, projects };
+};
 
-        const fetchedProjects = await FetchActiveProjects(targets, apiIDs?.project as string, forceRefresh, notion)
-        if(typeof(fetchedProjects) === 'string') {
-            showToast({title: getAPIError(fetchedProjects, 'Project'), style:Toast.Style.Failure})
-            return
-        }
-        setProjects(fetchedProjects as Project[])
-
-
-        const fetchedJournals = await FetchJournals(targets, apiIDs?.journal as string, forceRefresh, notion)
-        if(typeof(fetchedProjects) === 'string') {
-            showToast({title: getAPIError(fetchedProjects, 'Links'), style:Toast.Style.Failure})
-            return
-        }
-        setJournals(fetchedJournals as Journal[])
-
-        setIsLoading(false)
-    }
-
-    return {isLoading, clearRefresh, refresh, journals, projects}
-
-}
-
-export default useFetchJournals
+export default useFetchJournals;
