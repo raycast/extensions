@@ -9,7 +9,7 @@ import {
   SubProject,
   Timer,
   Todo,
-} from "../interfaces/itemsInterfaces";
+} from "../interfaces/interfaceItems";
 import { br } from "../tools/markdownTools";
 
 interface EvntResult {

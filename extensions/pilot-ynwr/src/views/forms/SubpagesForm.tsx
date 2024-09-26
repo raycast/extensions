@@ -4,7 +4,7 @@ import { IconChecker, NameChecker, ProjectChecker } from "../../tools/formErrors
 import { ICON_LIST } from "../../data/icons";
 import { QueryAddSubpages } from "../../queriesFunctions/SubpagesQueries";
 import UseOAuth from "../../fetch/useOAuth";
-import { Project } from "../../interfaces/itemsInterfaces";
+import { Project } from "../../interfaces/interfaceItems";
 
 interface SubmitForm {
   name: string;

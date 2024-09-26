@@ -5,10 +5,10 @@ import {
   QueryDatabaseResponse,
   UpdatePageParameters,
 } from "@notionhq/client/build/src/api-endpoints";
-import { GetJournalsQuery } from "../fetch/GetQueries";
+import { GetJournalsQuery } from "../fetch/GetQuery";
 
 import { addJournalJson } from "./JournalsQueries";
-import { Pref, Project } from "../interfaces/itemsInterfaces";
+import { Pref, Project } from "../interfaces/interfaceItems";
 import { getPreferenceValues, showToast } from "@raycast/api";
 import { getAPIError, getAPIidFromLink } from "../tools/generalTools";
 import { getJournals } from "../fetch/ExportFunctions";

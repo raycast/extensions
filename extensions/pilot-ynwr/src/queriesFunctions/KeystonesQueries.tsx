@@ -1,7 +1,7 @@
 import { getPreferenceValues, showToast } from "@raycast/api";
 import { APIResponseError, Client } from "@notionhq/client";
 import { CreatePageParameters, UpdatePageParameters } from "@notionhq/client/build/src/api-endpoints";
-import { Pref } from "../interfaces/itemsInterfaces";
+import { Pref } from "../interfaces/interfaceItems";
 import { getAPIError, getAPIidFromLink } from "../tools/generalTools";
 
 const getID = async () => {

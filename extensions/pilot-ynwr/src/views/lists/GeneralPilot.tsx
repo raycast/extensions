@@ -26,7 +26,7 @@ import SubpagesForm from "../forms/SubpagesForm";
 import LinksForm from "../forms/LinksForm";
 import CalendarView from "./CalendarView";
 import TaskManagementView from "./TaskManagementView";
-import { Evnt, Keystone, Project, ProjectGP } from "../../interfaces/itemsInterfaces";
+import { Evnt, Keystone, Project, ProjectGP } from "../../interfaces/interfaceItems";
 import useFetchGeneralPilot from "../../fetch/useFetchGeneralPilot";
 import { QueryStartTimer } from "../../queriesFunctions/TimersQueries";
 import JournalView from "./JournalView";

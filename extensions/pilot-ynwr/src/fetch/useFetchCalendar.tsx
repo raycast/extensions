@@ -1,7 +1,7 @@
 import { Cache, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Client } from "@notionhq/client";
-import { Evnt, Keystone, Pref, Project } from "../interfaces/itemsInterfaces";
+import { Evnt, Keystone, Pref, Project } from "../interfaces/interfaceItems";
 
 import { FetchActiveProjects, FetchEvents, FetchKeystones } from "./FetchFunctions";
 import { getAPIError, getAPIidFromLink } from "../tools/generalTools";

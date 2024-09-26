@@ -5,7 +5,7 @@ import {
   UpdatePageParameters,
 } from "@notionhq/client/build/src/api-endpoints";
 import { Cache, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { Pref, Project } from "../interfaces/itemsInterfaces";
+import { Pref, Project } from "../interfaces/interfaceItems";
 import { getAPIError, getAPIidFromLink } from "../tools/generalTools";
 import { getTimers } from "../fetch/ExportFunctions";
 import { FetchedTodos, FetchEvents, FetchJournals, FetchKeystones } from "../fetch/FetchFunctions";

@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import UseOAuth from "../../fetch/useOAuth";
 import React, { useEffect, useState } from "react";
-import { Journal, Project } from "../../interfaces/itemsInterfaces";
+import { Journal, Project } from "../../interfaces/interfaceItems";
 import { br, code, h2, sepa } from "../../tools/markdownTools";
 import { getDayDateAndMouth, getTimesText } from "../../tools/generalTools";
 import { QueryDeleteItem } from "../../queriesFunctions/GeneralQueries";

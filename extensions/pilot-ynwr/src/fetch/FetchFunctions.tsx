@@ -7,11 +7,11 @@ import {
   GetProjectQuery,
   GetTimersQuery,
   GetTodosQuery,
-} from "./GetQueries";
+} from "./GetQuery";
 import { dataToStr, strToData } from "../tools/generalTools";
 import { QueryDatabaseParameters, QueryDatabaseResponse } from "@notionhq/client/build/src/api-endpoints";
 import { APIResponseError, Client } from "@notionhq/client";
-import { Evnt, Journal, Keystone, Link, Project, ProjectGP, Timer, Todo } from "../interfaces/itemsInterfaces";
+import { Evnt, Journal, Keystone, Link, Project, ProjectGP, Timer, Todo } from "../interfaces/interfaceItems";
 import {
   getEvents,
   getJournals,

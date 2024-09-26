@@ -1,4 +1,4 @@
-import { Journal, Keystone, Pref, Project, Todo } from "../interfaces/itemsInterfaces";
+import { Journal, Keystone, Pref, Project, Todo } from "../interfaces/interfaceItems";
 import { addJournalJson } from "./JournalsQueries";
 import { APIResponseError, Client } from "@notionhq/client";
 import {
@@ -7,7 +7,7 @@ import {
   QueryDatabaseResponse,
   UpdatePageParameters,
 } from "@notionhq/client/build/src/api-endpoints";
-import { GetJournalsQuery } from "../fetch/GetQueries";
+import { GetJournalsQuery } from "../fetch/GetQuery";
 import { getPreferenceValues, showToast } from "@raycast/api";
 import { getAPIError, getAPIidFromLink } from "../tools/generalTools";
 import { getJournals } from "../fetch/ExportFunctions";

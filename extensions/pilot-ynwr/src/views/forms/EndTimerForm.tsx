@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
 import React from "react";
-import { Project, Timer } from "../../interfaces/itemsInterfaces";
+import { Project, Timer } from "../../interfaces/interfaceItems";
 
 import { QueryStopTimer } from "../../queriesFunctions/TimersQueries";
 import UseOAuth from "../../fetch/useOAuth";

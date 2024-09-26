@@ -2,7 +2,7 @@ import { Client } from "@notionhq/client";
 
 import { useEffect, useState } from "react";
 import { FetchActiveProjects, FetchActiveTimer, FetchTodayEvents, FetchTodayKeystones } from "./FetchFunctions";
-import { Evnt, Keystone, Pref, Project, Timer } from "../interfaces/itemsInterfaces";
+import { Evnt, Keystone, Pref, Project, Timer } from "../interfaces/interfaceItems";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { getAPIError, getAPIidFromLink } from "../tools/generalTools";
 import TimezoneHook from "../tools/TimezoneHook";

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List, Toast, confirmAlert, showToast } from "@raycast/api";
 import React, { useEffect, useState } from "react";
-import { Keystone, Project, Todo } from "../../interfaces/itemsInterfaces";
+import { Keystone, Project, Todo } from "../../interfaces/interfaceItems";
 
 import { getDateAndMohth, getDateMounthAndNumber, getDayDateAndMouth, progbar } from "../../tools/generalTools";
 import UseOAuth from "../../fetch/useOAuth";

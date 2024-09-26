@@ -1,5 +1,5 @@
 import { Color, Icon } from "@raycast/api";
-import { Journal, TimeItem } from "../interfaces/itemsInterfaces";
+import { Journal, TimeItem } from "../interfaces/interfaceItems";
 
 export const getColor = (color: string) => {
   switch (color) {

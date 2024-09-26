@@ -1,4 +1,4 @@
-import { Evnt, Journal, Keystone, Todo } from "../interfaces/itemsInterfaces";
+import { Evnt, Journal, Keystone, Todo } from "../interfaces/interfaceItems";
 
 export const projectFilter = (filter: string, items: Todo[] | Keystone[] | Journal[]) => {
   if (filter === "Nothing") return items;
