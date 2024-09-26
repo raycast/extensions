@@ -17,6 +17,33 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "data": [
+        {
+          "title": "Sans Serif Font",
+          "value": "sans-serif"
+        },
+        {
+          "title": "Monospaced Font",
+          "value": "monospace"
+        }
+      ],
+      "description": "Select the type of font you want the clipboard displayed in",
+      "name": "fontStyle",
+      "required": false,
+      "title": "Font Style",
+      "type": "dropdown"
+    },
+    {
+      "name": "colorCode",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Color code numbers and symbols",
+      "description": "Help differenciate similiar characters by color coding numbers and symbols"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.83.1",
     "@raycast/utils": "^1.17.0",

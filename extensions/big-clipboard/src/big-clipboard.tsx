@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
-import { showToast, Toast, Clipboard, Detail, environment } from "@raycast/api";
+import { showToast, Toast, Clipboard, Detail, environment, getPreferenceValues } from "@raycast/api";
 import Graphemer from "graphemer";
+
+// // Define types for the preferences
+interface Preferences {
+  fontStyle: string;
+  colorCode: boolean;
+}
 
 // Function to convert SVG content to Base64
 function svgToBase64(svgContent: string): string {
@@ -16,6 +22,17 @@ function splitTextIntoChunks(characters: string[], chunkSize: number): string[] 
   return chunks;
 }
 
+// Check if character is letter, number or symbol
+function checkCharacterType(char: string): string {
+  if (/[a-zA-Z]/.test(char)) {
+    return "letter";
+  } else if (/[0-9]/.test(char)) {
+    return "number";
+  } else {
+    return "symbol";
+  }
+}
+
 // Function to encode special characters for SVG
 function encodeForSVG(text: string): string {
   return text
@@ -23,21 +40,15 @@ function encodeForSVG(text: string): string {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;")
-    .replace(/ /g, "␣");
+    .replace(/'/g, "&apos;");
 }
-
-// TODO:
-// ✔︎ escape characters properly
-// ✔︎ show spaces as open box ␣
-// - add colours for numbers + special characters
-// ✔︎ make icon https://ray.so/icon
-// - use a font that better distinguishes 0OlI1
-// ✔︎ show emoji + stop emoji counting as too many characters
 
 export default function ClipboardViewer() {
   const [clipboardText, setClipboardText] = useState<string | null>(null);
   const [svgDataUri, setSvgDataUri] = useState<string | null>(null);
+
+  // Fetch the user preferences for font style
+  const preferences = getPreferenceValues<Preferences>();
 
   useEffect(() => {
     async function fetchClipboardContent() {
@@ -66,11 +77,11 @@ export default function ClipboardViewer() {
 
   // Function to generate an SVG representing the clipboard content
   function generateSVG(text: string): string {
-    const splitter = new Graphemer();
-    const characters = splitter.splitGraphemes(text);
+    const splitter = new Graphemer(); // register Graphemer
+    const characters = splitter.splitGraphemes(text); // split text into array
 
     const chunkSize = 10; // Set line length to 10 characters
-    const charactersChunks = splitTextIntoChunks(characters, chunkSize); // Split into chunks of 20 characters
+    const charactersChunks = splitTextIntoChunks(characters, chunkSize); // Split into chunks of 10 characters
     const totalLines = charactersChunks.length;
 
     // Create indices for each character
@@ -83,12 +94,31 @@ export default function ClipboardViewer() {
     const svgWidth = totalLines > 1 ? chunkSize * cellWidth : cellWidth * characters.length;
     const svgHeight = totalLines * cellHeight * 1.5; // Two rows: one for characters and one for indices
 
-    const textColor = environment.theme === "dark" ? "white" : "black";
-    const bgColor = environment.theme === "dark" ? "black" : "white";
-    const opacity = environment.theme === "dark" ? "0.2" : "0.5";
+    const darkMode = environment.theme === "dark";
+    const colorful = preferences.colorCode;
+
+    let textColor = "black";
+    let bgColor = "white";
+    let opacity = "0.5";
+    let numColor = "#025DAE";
+    let symColor = "#CF2626";
+
+    if (darkMode) {
+      textColor = "white";
+      bgColor = "black";
+      opacity = "0.2";
+      numColor = "#56C2FF";
+      symColor = "#FF6363";
+    }
+
+    // Choose the appropriate font based on user preferences
+    const fontFamily =
+      preferences.fontStyle === "monospace"
+        ? "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
+        : "ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'";
 
     // SVG with a viewBox attribute for scaling
-    let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svgWidth} ${svgHeight}" preserveAspectRatio="xMidYMid meet" width="${svgWidth}px" height="${svgHeight}px"> `;
+    let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svgWidth} ${svgHeight}"  width="${svgWidth}px" height="${svgHeight}px"> `;
 
     // Loop over each line (chunk) of characters
     charactersChunks.forEach((chunk, line) => {
@@ -98,6 +128,14 @@ export default function ClipboardViewer() {
         const yCharacter = (line * 1.5 + 1) * cellHeight;
         const yIndex = line * (cellHeight * 1.5) + 110;
         const yBackground = line * 1.5 * cellHeight;
+        const charType = checkCharacterType(char);
+        const charColor = !colorful
+          ? textColor
+          : charType === "symbol"
+            ? symColor
+            : charType === "number"
+              ? numColor
+              : textColor;
 
         // Add alternating background
         if (i % 2) {
@@ -105,10 +143,10 @@ export default function ClipboardViewer() {
         }
 
         // Add clipboard characters to the first row of each chunk
-        svg += `<text x="${x}" y="${yCharacter}" font-family="-apple-system, BlinkMacSystemFont, sans-serif" fill="${textColor}" font-size="${cellWidth / 1.5}" text-anchor="middle" alignment-baseline="middle">${encodedChar}</text>`;
+        svg += `<text x="${x}" y="${yCharacter}" font-family="${fontFamily}" fill="${charColor}" font-size="${cellWidth / 1.5}" text-anchor="middle" alignment-baseline="middle">${encodedChar}</text>`;
 
         // Add indices to the second row of each chunk
-        svg += `<text x="${x}" y="${yIndex}" font-family="-apple-system, BlinkMacSystemFont, sans-serif" fill="${textColor}" font-size="${cellWidth / 5}" text-anchor="middle" alignment-baseline="middle" style="opacity:0.5">${indicesChunks[line][i]}</text>`;
+        svg += `<text x="${x}" y="${yIndex}" font-family="${fontFamily}" fill="${textColor}" font-size="${cellWidth / 5}" text-anchor="middle" alignment-baseline="middle" style="opacity:0.5">${indicesChunks[line][i]}</text>`;
       });
     });
 
