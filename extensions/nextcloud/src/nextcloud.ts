@@ -17,11 +17,11 @@ export function useNextcloudJsonArray<T>(base: string) {
     },
     mapResult(result: T[]) {
       return {
-        data: result
-      }
+        data: result,
+      };
     },
-    initialData: []
-  })
+    initialData: [],
+  });
   return { isLoading, data };
 }
 
@@ -116,31 +116,4 @@ export async function webdavRequest({
   // Array -> Multiple hits
   const dres = dom["d:multistatus"]["d:response"] ?? [];
   return Array.isArray(dres) ? dres : [dres];
-}
-
-export async function jsonRequest<T>({
-  signal,
-  base,
-  body,
-  method = "GET",
-}: {
-  signal: AbortSignal;
-  base: string;
-  body?: Record<string, unknown>;
-  method?: string;
-}) {
-  const { hostname, username, password } = getPreferences();
-
-  const response = await fetch(`https://${hostname}/apps/${base}`, {
-    method,
-    headers: {
-      "OCS-APIRequest": "true",
-      "User-Agent": `Raycast/${environment.raycastVersion}`,
-      "Content-Type": "application/json",
-      authorization: "Basic " + Buffer.from(username + ":" + password).toString("base64"),
-    },
-    body: body && JSON.stringify(body),
-    signal,
-  });
-  return (await response.json()) as T;
 }

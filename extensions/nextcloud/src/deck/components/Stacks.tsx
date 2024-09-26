@@ -42,7 +42,7 @@ function Card({ card, boardId }: { card: Card; boardId: number }) {
       title={card.title}
       subtitle={card.description + labels}
       icon={{ source: Icon.Circle, tintColor: overdue ? Color.Red : undefined }}
-      accessoryTitle={dueDate}
+      accessories={[{ text: dueDate }]}
       actions={
         <ActionPanel title={card.title}>
           <ActionPanel.Section>

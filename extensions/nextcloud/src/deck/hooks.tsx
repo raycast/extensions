@@ -10,7 +10,7 @@ export function useBoards() {
 }
 
 export function useStacks(boardId: number) {
-  const { data, isLoading } = useNextcloudJsonArray<Stack>(`deck/api/v1.1/boards/${boardId}/stacks`)
+  const { data, isLoading } = useNextcloudJsonArray<Stack>(`deck/api/v1.1/boards/${boardId}/stacks`);
 
   return {
     stacks: data,

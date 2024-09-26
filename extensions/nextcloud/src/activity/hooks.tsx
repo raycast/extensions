@@ -1,43 +1,59 @@
 import { XMLParser } from "fast-xml-parser";
 import { useFetch } from "@raycast/utils";
-import { API_URL, API_HEADERS } from "../config";
+import { API_HEADERS, BASE_URL } from "../config";
+import { parseLinkHeader } from "@web3-storage/parse-link-header";
 
 export function useActivity() {
-  const { isLoading, data } = useFetch(`${API_URL.ocs}/apps/activity/api/v2/activity?limit=200`, {
-    method: "GET",
-    headers: {
-      ...API_HEADERS,
-      "OCS-APIRequest": "true"
-    },
-    mapResult(result: string) {
-      const parser = new XMLParser();
-      const dom = parser.parse(result) as Response;
-      if (!("ocs" in dom)) throw new Error("Invalid response: " + result);
-      if (dom.ocs.meta.status === "failure") throw new Error(dom.ocs.meta.statuscode + ": " + dom.ocs.meta.message);
-
-      const res = dom.ocs.data;
-      const activities = res.element.map((element) => {
+  const { isLoading, data, pagination } = useFetch(
+    (options) => options.cursor || `${BASE_URL}/ocs/v2.php/apps/activity/api/v2/activity?limit=200`,
+    {
+      method: "GET",
+      headers: {
+        ...API_HEADERS,
+        "OCS-APIRequest": "true",
+      },
+      async parseResponse(response) {
+        const linkHeader = response.headers.get("Link");
+        const parsed = parseLinkHeader(linkHeader);
+        const cursor = parsed?.next.url;
+        const result = await response.text();
         return {
-          activityId: element.activity_id,
-          app: element.app,
-          type: element.type,
-          user: element.user,
-          subject: element.subject,
-          objectType: element.object_type,
-          objectName: element.object_name,
-          objects: element.objects,
-          link: element.link,
-          icon: element.icon,
-          datetime: element.datetime,
-        } as Activity;
-      });
-      return {
-        data: activities
-      };
-    },
-    initialData: []
-  });
-  return { isLoading, activity: data };
+          result,
+          cursor,
+        };
+      },
+      mapResult({ result, cursor }) {
+        const parser = new XMLParser();
+        const dom = parser.parse(result) as Response;
+        if (!("ocs" in dom)) throw new Error("Invalid response: " + result);
+        if (dom.ocs.meta.status === "failure") throw new Error(dom.ocs.meta.statuscode + ": " + dom.ocs.meta.message);
+
+        const res = dom.ocs.data;
+        const activities = res.element.map((element) => {
+          return {
+            activityId: element.activity_id,
+            app: element.app,
+            type: element.type,
+            user: element.user,
+            subject: element.subject,
+            objectType: element.object_type,
+            objectName: element.object_name,
+            objects: element.objects,
+            link: element.link,
+            icon: element.icon,
+            datetime: element.datetime,
+          } as Activity;
+        });
+        return {
+          data: activities,
+          hasMore: !!cursor,
+          cursor,
+        };
+      },
+      initialData: [],
+    }
+  );
+  return { isLoading, activity: data, pagination };
 }
 
 export interface Activity {
@@ -87,13 +103,13 @@ interface Objects {
   element: string[] | string;
 }
 
-// interface File {
-//   type: string;
-//   id: string;
-//   name: string;
-//   path: string;
-//   link: string;
-// }
+export interface File {
+  type: string;
+  id: string;
+  name: string;
+  path: string;
+  link: string;
+}
 
 interface Meta {
   status: string;

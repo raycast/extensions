@@ -5,10 +5,10 @@ import { type Activity, useActivity } from "./hooks";
 import { getIcon } from "./utils";
 
 export function Activity() {
-  const { activity, isLoading } = useActivity();
+  const { activity, isLoading, pagination } = useActivity();
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} pagination={pagination}>
       <List.Section title="All activities" subtitle={String(activity.length)}>
         {activity.map((result) => (
           <Item key={result.activityId + result.datetime} item={result} />
@@ -24,7 +24,7 @@ function Item({ item }: { item: Activity }) {
     <List.Item
       title={item.subject}
       subtitle={capitalize(item.objectType)}
-      accessories={[{text: relativeDate}]}
+      accessories={[{ text: relativeDate }]}
       icon={getIcon(item.type)}
       actions={
         <ActionPanel>
