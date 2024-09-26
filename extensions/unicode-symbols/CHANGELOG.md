@@ -1,5 +1,12 @@
 # Unicode Symbols
 
+## [More improvements] - {PR_MERGE_DATE}
+
+- Add full dataset with option in settings to enable/disable. Full Dataset contains +40.000 characters. This is only supported in Grid view.
+- Add option to copy the optional `HTML` entity of the selected character (e.g. `&amp;`)
+- Added a browser view for the character in [compart](https://www.compart.com/en/unicode/)
+- Make the JSON files smaller by renaming the fields. This does break the cache, so the cache key is renamed to `recently-used-v2`
+
 ## [Improvements] - 2024-09-20
 
 - Added extra characters to Superscript and Subscript set ([#14533](https://github.com/raycast/extensions/issues/14533))
