@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "connect-poc",
+  "title": "PDQ Connect",
+  "description": "An extension to interact with Connect",
+  "icon": "extension-icon.png",
+  "author": "mark_rood",
+  "categories": [
+    "Security",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "store-secret",
+      "title": "Authenticate",
+      "description": "Stores a secret securely",
+      "mode": "view"
+    },
+    {
+      "name": "list-devices",
+      "title": "Search Devices",
+      "description": "Ability to list devices",
+      "mode": "view"
+    },
+    {
+      "name": "list-packages",
+      "title": "Search Packages",
+      "description": "Fetch and display packages from PDQ",
+      "mode": "view"
+    },
+    {
+      "name": "createDeployment",
+      "title": "Create Deployment",
+      "description": "Create a new deployment in PDQ Connect",
+      "mode": "view"
+    },
+    {
+      "name": "list-groups",
+      "title": "Search Groups",
+      "description": "List all groups from PDQ",
+      "mode": "view"
+    },
+    {
+      "name": "getStatus",
+      "title": "Get Status",
+      "description": "Get the status of PDQ Connect services",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.16.3",
+    "axios": "^1.7.6",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "secret",
+      "type": "password",
+      "required": false,
+      "title": "Secret",
+      "description": "The stored secret",
+      "default": ""
+    }
+  ]
+}
