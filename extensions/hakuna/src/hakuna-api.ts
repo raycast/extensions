@@ -79,16 +79,28 @@ export class HakunaTimer {
 
   async getWorktime(): Promise<string> {
     const today = new Date().toISOString().split("T")[0];
-    const url = `/time_entries?start_date=${today}&end_date=${today}`;
+    const entriesUrl = `/time_entries?start_date=${today}&end_date=${today}`;
+    const timerUrl = "/timer";
 
     try {
-      const response = await this.axiosInstance.get<TimerResponse[]>(url);
-      const entries = response.data;
+      const [entriesResponse, timerResponse] = await Promise.all([
+        this.axiosInstance.get<TimerResponse[]>(entriesUrl),
+        this.axiosInstance.get<TimerResponse>(timerUrl),
+      ]);
 
-      const totalSeconds = entries.reduce(
+      const entries = entriesResponse.data;
+      const activeTimer = timerResponse.data;
+
+      let totalSeconds = entries.reduce(
         (sum, entry) => sum + entry.duration_in_seconds,
         0,
       );
+
+      // Add duration of active timer if exists
+      if (activeTimer && activeTimer.duration_in_seconds) {
+        totalSeconds += activeTimer.duration_in_seconds;
+      }
+
       const hours = Math.floor(totalSeconds / 3600);
       const minutes = Math.floor((totalSeconds % 3600) / 60);
 
