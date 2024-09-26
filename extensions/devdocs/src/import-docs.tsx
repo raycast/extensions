@@ -1,7 +1,7 @@
-import { ActionPanel, Form, Action, LocalStorage, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Form, Action, LocalStorage, showToast, Toast, popToRoot } from "@raycast/api";
 import fs from "fs";
 
-export default function Command() {
+export default function ImportDocs() {
   return (
     <Form
       actions={
@@ -36,4 +36,5 @@ export async function saveDocs(docs: String) {
     title: `Successfully imported documentation`,
     style: Toast.Style.Success,
   });
+  popToRoot();
 }
