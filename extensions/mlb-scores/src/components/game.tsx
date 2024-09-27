@@ -90,6 +90,15 @@ const Game = React.memo(
     }
 
     const currentPlay = game.liveData.plays.currentPlay;
+
+    const pitchSequence = currentPlay.playEvents
+      .filter((event) => event.isPitch)
+      .map((event, index) => ({
+        description: event.details.description,
+        index: index + 1, // Adding 1 to make it human-readable (1-based index)
+      }))
+      .reverse();
+
     const linescore = game.liveData.linescore;
     const runs_inning = Array(9).fill(["X", "X"]);
     linescore.innings.forEach((inning, index) => {
@@ -141,12 +150,7 @@ ${game.gameData.status.abstractGameCode.toUpperCase() === "P" ? `Starts at: ${da
 
 ${
   game.gameData.status.abstractGameCode.toUpperCase() === "L"
-    ? `**${linescore.inningState} ${linescore.currentInningOrdinal}. ${currentPlay.count.outs} Out${
-        currentPlay.count.outs !== 1 ? `s` : ""
-      }. 
-  ${currentPlay.count.balls} Ball${currentPlay.count.balls !== 1 ? "s" : ""}, ${currentPlay.count.strikes} Strike${
-        currentPlay.count.strikes !== 1 ? `s` : ""
-      }. Current Matchup:** (${currentPlay.matchup.pitchHand.code}HP) ${currentPlay.matchup.pitcher.fullName} vs ${
+    ? `**Current Matchup:** (${currentPlay.matchup.pitchHand.code}HP) ${currentPlay.matchup.pitcher.fullName} vs ${
         currentPlay.matchup.batter.fullName
       } (${currentPlay.matchup.batSide.code})  
   ${currentPlay.result.description !== undefined ? `**Latest:** ` + currentPlay.result.description : ""}`
@@ -201,17 +205,29 @@ ${game.copyright}
     return (
       <Detail
         markdown={md_string}
-        // metadata={
-        //   game.gameData.status.abstractGameCode.toUpperCase() === "L" ? (
-        //     <Detail.Metadata>
-        //       <Detail.Metadata.Label title="" text="3. Swinging Strike" />
-        //       <Detail.Metadata.Separator />
-        //       <Detail.Metadata.Label title="" text="2. Ball" />
-        //       <Detail.Metadata.Separator />
-        //       <Detail.Metadata.Label title="" text="1. Ball" />
-        //     </Detail.Metadata>
-        //   ) : null
-        // }
+        metadata={
+          game.gameData.status.abstractGameCode.toUpperCase() === "L" ? (
+            <Detail.Metadata>
+              <Detail.Metadata.Label
+                title="Game Details"
+                text={`${linescore.inningState} ${linescore.currentInningOrdinal}. ${currentPlay.count.outs} Out${
+                  currentPlay.count.outs !== 1 ? `s` : ""
+                }. ${currentPlay.count.balls} Ball${currentPlay.count.balls !== 1 ? "s" : ""}, ${
+                  currentPlay.count.strikes
+                } Strike${currentPlay.count.strikes !== 1 ? `s` : ""}.`}
+              />
+              {pitchSequence.map((pitch, idx) => (
+                <React.Fragment key={pitch.index}>
+                  <Detail.Metadata.Label
+                    title={idx === 0 ? "Pitch Sequence" : ""}
+                    text={`${pitch.index}. ${pitch.description}`}
+                  />
+                  <Detail.Metadata.Separator />
+                </React.Fragment>
+              ))}
+            </Detail.Metadata>
+          ) : null
+        }
         actions={
           <ActionPanel>
             <ActionPanel.Section title="Actions">
