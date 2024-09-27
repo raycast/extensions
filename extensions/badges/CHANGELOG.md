@@ -3,6 +3,7 @@
 ## [Chore] - {PR_MERGE_DATE}
 
 - Refactor duplicate codes
+- Optimize extension file size
 - Bump all denpendencies to latest
 
 ## [Enhancement] - 2024-07-09

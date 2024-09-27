@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Detail, LaunchProps } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { omitBy } from "lodash";
+import omitBy from "lodash/omitBy.js";
 import { GeneralActions } from "./components/actions.js";
 import { fields } from "./components/parameters.js";
 import { Badge, LaunchFromSimpleIconsContext, LaunchFromColorPickerContext } from "./types.js";
