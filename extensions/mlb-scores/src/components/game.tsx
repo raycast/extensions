@@ -30,7 +30,7 @@ const generateBoxScore = (feed: FeedInterface): string => {
         if (batting.atBats === undefined) return null;
         return `| ${player.person.fullName} (${player.position.abbreviation}) | ${batting.hits ?? "n/a"}/${
           batting.atBats
-        } | ${batting.runs ?? "n/a"} | ${batting.rbi ?? "n/a"} | ${batting.baseOnBalls ?? "n/a"}/${
+        } | ${batting.runs ?? "n/a"}/${batting.rbi ?? "n/a"} | ${batting.baseOnBalls ?? "n/a"}/${
           batting.strikeOuts ?? "n/a"
         }|`;
       })
@@ -57,8 +57,8 @@ const generateBoxScore = (feed: FeedInterface): string => {
 
 ### Batting (this game)
 
-| Player | H/AB | R | RBI | BB/SO |
-|--------|------|---|-----|-------|
+| Player | H/AB | R/RBI | BB/SO |
+|--------|------|-------|-------|
 ${batterRows}
 
 ### Pitching (this game)
