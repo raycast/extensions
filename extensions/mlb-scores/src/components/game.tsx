@@ -28,11 +28,11 @@ const generateBoxScore = (feed: FeedInterface): string => {
       .map((player) => {
         const batting = player.stats.batting;
         if (batting.atBats === undefined) return null;
-        return `| ${player.person.fullName} | ${player.position.abbreviation} | ${batting.atBats} | ${
-          batting.runs ?? "n/a"
-        } | ${batting.hits ?? "n/a"} | ${batting.rbi ?? "n/a"} | ${batting.baseOnBalls ?? "n/a"} | ${
+        return `| ${player.person.fullName} (${player.position.abbreviation}) | ${batting.hits ?? "n/a"}/${
+          batting.atBats
+        } | ${batting.runs ?? "n/a"}/${batting.rbi ?? "n/a"} | ${batting.baseOnBalls ?? "n/a"}/${
           batting.strikeOuts ?? "n/a"
-        } | ${(batting.atBats ? batting.hits / batting.atBats : 0.0).toFixed(3)} |`;
+        }|`;
       })
       .filter((row): row is string => row !== null)
       .join("\n");
@@ -45,9 +45,9 @@ const generateBoxScore = (feed: FeedInterface): string => {
       .map((player) => {
         const pitching = player.stats.pitching;
         if (pitching.inningsPitched === undefined) return null;
-        return `| ${player.person.fullName} | ${pitching.inningsPitched} | ${pitching.hits} | ${pitching.runs} | ${
-          pitching.earnedRuns
-        } | ${pitching.baseOnBalls} | ${pitching.strikeOuts} | ${pitching.runsScoredPer9 || "n/a"} |`;
+        return `| ${player.person.fullName} | ${pitching.inningsPitched}/${pitching.runsScoredPer9 || "n/a"} | ${
+          pitching.hits
+        }/${pitching.runs}/${pitching.earnedRuns} | ${pitching.baseOnBalls}/${pitching.strikeOuts} |`;
       })
       .filter((row): row is string => row !== null)
       .join("\n");
@@ -57,14 +57,14 @@ const generateBoxScore = (feed: FeedInterface): string => {
 
 ### Batting (this game)
 
-| Player | Pos | AB | R | H | RBI | BB | SO | AVG |
-|--------|-----|----|----|----|----|----|----|-----|
+| Player | H/AB | R/RBI | BB/SO |
+|--------|------|-------|-------|
 ${batterRows}
 
 ### Pitching (this game)
 
-| Player | IP | H | R | ER | BB | SO | ERA |
-|--------|----|----|----|----|----|----|-----|
+| Player | IP/ERA | H/R/ER | BB/SO |
+|--------|--------|--------|-------|
 ${pitcherRows}
 `;
   };
@@ -76,19 +76,31 @@ ${generateTeamBoxScore("home")}
 };
 
 const Game = React.memo((props: GameProps) => {
-  const { data } = useGameDataStore();
+  const { data, reloadData, setReloadData } = useGameDataStore();
   const [game, setGame] = useState<FeedInterface | undefined>();
 
   useEffect(() => {
     if (data !== undefined) {
       setGame(data[props.index][1]);
+      if (reloadData) {
+        setReloadData(false);
+      }
     }
-  }, [data]);
+  }, [data, props.index, reloadData, setReloadData]);
+
   if (!data || !game) {
     return <Detail markdown="## Loading..." />;
   }
 
   const currentPlay = game.liveData.plays.currentPlay;
+  const pitchSequence = currentPlay.playEvents
+    .filter((event) => event.isPitch)
+    .map((event, index) => ({
+      description: event.details.description,
+      index: index + 1, // Adding 1 to make it human-readable (1-based index)
+    }))
+    .reverse();
+
   const linescore = game.liveData.linescore;
   const runs_inning = Array(9).fill(["X", "X"]);
   linescore.innings.forEach((inning, index) => {
@@ -96,6 +108,7 @@ const Game = React.memo((props: GameProps) => {
     const home = !(index === linescore.currentInning && linescore.isTopInning) ? inning.home.runs || 0 : "X";
     runs_inning[index] = [away, home];
   });
+
   const runnerDict = game.liveData.linescore.offense;
   let runners = 0;
   ["first", "second", "third"].forEach((base, index) => {
@@ -116,6 +129,7 @@ const Game = React.memo((props: GameProps) => {
   ) {
     hw = true;
   }
+
   const d = new Date(game.gameData.datetime.dateTime);
   const tzName = d.toLocaleString("en", { timeZoneName: "short" }).split(" ").pop();
   const hrs = d.getHours() % 12;
@@ -192,24 +206,48 @@ ${
 
 ---
 
-## Box
-${generateBoxScore(game)}
+${game.gameData.status.abstractGameCode.toUpperCase() === "L" ? `## Box  \n` + generateBoxScore(game) : ""}
 
 ## Copyright
 ${game.copyright}
     `;
-  return (
-    <Detail
-      markdown={md_string}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section title="Actions">
-            <Action.OpenInBrowser title="Open in MLB" url={`https://www.mlb.com/gameday/${game.gamePk}`} />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
-    />
-  );
-});
+    return (
+      <Detail
+        markdown={md_string}
+        metadata={
+          game.gameData.status.abstractGameCode.toUpperCase() === "L" ? (
+            <Detail.Metadata>
+              <Detail.Metadata.Label
+                title="Game Details"
+                text={`${linescore.inningState} ${linescore.currentInningOrdinal}. ${currentPlay.count.outs} Out${
+                  currentPlay.count.outs !== 1 ? `s` : ""
+                }. ${currentPlay.count.balls} Ball${currentPlay.count.balls !== 1 ? "s" : ""}, ${
+                  currentPlay.count.strikes
+                } Strike${currentPlay.count.strikes !== 1 ? `s` : ""}.`}
+              />
+              {pitchSequence.map((pitch, idx) => (
+                <React.Fragment key={pitch.index}>
+                  <Detail.Metadata.Label
+                    title={idx === 0 ? "Pitch Sequence" : ""}
+                    text={`${pitch.index}. ${pitch.description}`}
+                  />
+                  <Detail.Metadata.Separator />
+                </React.Fragment>
+              ))}
+            </Detail.Metadata>
+          ) : null
+        }
+        actions={
+          <ActionPanel>
+            <ActionPanel.Section title="Actions">
+              <Action.OpenInBrowser title="Open in MLB" url={`https://www.mlb.com/gameday/${game.gamePk}`} />
+            </ActionPanel.Section>
+          </ActionPanel>
+        }
+      />
+    );
+  },
+  (prev, next) => prev.index === next.index
+);
 
 export default Game;
