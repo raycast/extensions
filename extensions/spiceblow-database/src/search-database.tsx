@@ -121,8 +121,6 @@ function useSearchFilter(id: string) {
 }
 
 function SearchTable({ table }: { table: string }) {
-  const { push } = useNavigation();
-
   const { searchText, setSearchText } = useSearchFilter(table);
   const currentConnectionString = useGlobalState((x) => x.connectionString);
   const data = useCachedPromise(
@@ -198,15 +196,6 @@ function SearchTable({ table }: { table: string }) {
                   <RowUpdatesActions revalidate={() => rows.revalidate()} tableInfo={tableInfo} row={row} />
                 )}
                 <RunTransactionQueries />
-
-                <Action
-                  title="View Details"
-                  icon={Icon.Center}
-                  shortcut={{ modifiers: ["cmd"], key: "space" }}
-                  onAction={() => {
-                    push(<RowInfo tableInfo={tableInfo} row={row} />);
-                  }}
-                />
               </ActionPanel>
             }
           />
@@ -233,6 +222,13 @@ function RowUpdatesActions({
         icon={Icon.Pencil}
         onAction={() => {
           push(<EditRow type="edit" revalidate={revalidate} tableInfo={tableInfo} row={row} />);
+        }}
+      />
+      <Action
+        title="View Details"
+        icon={Icon.Center}
+        onAction={() => {
+          push(<RowInfo tableInfo={tableInfo} row={row} />);
         }}
       />
       <Action
@@ -271,9 +267,9 @@ function RowUpdatesActions({
 }
 
 function SearchCustomQuery(args: CustomQueryList & { revalidate: () => void }) {
-  const { query, schemas, tableInfo, bestField } = args;
+  const { query, schemas, tableInfo, id, bestField } = args;
   const { push } = useNavigation();
-  const { searchText, setSearchText } = useSearchFilter(query.slice(0, 100));
+  const { searchText, setSearchText } = useSearchFilter(id);
 
   const currentConnectionString = useGlobalState((x) => x.connectionString);
   const tables = [...new Set(tableInfo.columns.map((col) => col.tableName).filter(isTruthy))];
@@ -374,14 +370,6 @@ function SearchCustomQuery(args: CustomQueryList & { revalidate: () => void }) {
                   />
                 ))}
                 <RunTransactionQueries />
-                <Action
-                  title="View Details"
-                  shortcut={{ modifiers: ["cmd"], key: "u" }}
-                  icon={Icon.Center}
-                  onAction={() => {
-                    push(<RowInfo tableInfo={tableInfo!} row={row} />);
-                  }}
-                />
                 <Action
                   title="Update Query"
                   shortcut={{ modifiers: ["cmd"], key: "u" }}
@@ -699,6 +687,7 @@ function GenerateCustomQueryForm({
 }
 
 function RowInfo({ tableInfo, row }: { tableInfo?: TableInfo; row: Json }) {
+  const { push } = useNavigation();
   return (
     <List>
       {tableInfo?.columns.map((col, idx) => {
@@ -708,9 +697,15 @@ function RowInfo({ tableInfo, row }: { tableInfo?: TableInfo; row: Json }) {
             key={idx}
             title={col.columnName || String(idx)}
             subtitle={value}
-            detail={<List.Item.Detail markdown={"```\n" + value + "\n```"} />}
             actions={
               <ActionPanel>
+                <Action
+                  title="View"
+                  icon={Icon.Goal}
+                  onAction={() => {
+                    push(<RowColumnAsMarkdown value={value} />);
+                  }}
+                />
                 <Action.CopyToClipboard title="Copy Column Value" content={value} />
               </ActionPanel>
             }
@@ -718,6 +713,19 @@ function RowInfo({ tableInfo, row }: { tableInfo?: TableInfo; row: Json }) {
         );
       })}
     </List>
+  );
+}
+
+function RowColumnAsMarkdown({ value }: { value: string }) {
+  return (
+    <Detail
+      markdown={`\`\`\`\n${value}\n\`\`\``}
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard title="Copy Value" content={value} />
+        </ActionPanel>
+      }
+    />
   );
 }
 
@@ -811,12 +819,12 @@ function SearchTables() {
     <List actions={<RunTransactionQueries />} searchBarAccessory={<DatabasesDropdown />} isLoading={tables.isLoading}>
       <List.Item
         key="add-new-custom-list"
-        title="Add New Custom List"
+        title="Add New Custom Query"
         icon={Icon.NewDocument}
         actions={
           <ActionPanel>
             <Action
-              title="Add New Custom List"
+              title="Add New Custom Query"
               onAction={() => {
                 push(
                   <GenerateCustomQueryForm
@@ -918,7 +926,7 @@ function SearchTables() {
             actions={
               <ActionPanel>
                 <Action
-                  title="View Details"
+                  title="View Rows"
                   onAction={() => {
                     push(<SearchTable table={table.schemaTable} />);
                   }}

@@ -385,8 +385,6 @@ export async function searchTableRowsOrCustomQuery({
     if (databaseType === "postgres") {
       const client = await postgresPool.connect();
       try {
-        // allow GROUP BY without aggregate functions for current connection
-
         result = await client.query(finalQuery, [pageSize + 1, offset]);
         const totalCount = offset + result.rows.length;
         const hasMore = result.rows.length > pageSize;
