@@ -77,17 +77,14 @@ ${generateTeamBoxScore("home")}
 
 const Game = React.memo(
   (props: GameProps) => {
-    const { data, reloadData, setReloadData } = useGameDataStore();
+    const { data } = useGameDataStore();
     const [game, setGame] = useState<FeedInterface | undefined>();
 
     useEffect(() => {
       if (data !== undefined) {
         setGame(data[props.index][1]);
-        if (reloadData) {
-          setReloadData(false);
-        }
       }
-    }, [data, props.index, reloadData, setReloadData]);
+    }, [data, props.index]);
 
     if (!data || !game) {
       return <Detail markdown="## Loading..." />;
