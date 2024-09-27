@@ -11,6 +11,7 @@ export default function ImportDocs() {
     onSubmit(values) {
       const contents = fs.readFileSync(values.file[0], "utf8");
       const docString = JSON.parse(contents);
+
       saveDocs(JSON.stringify(docString));
       showToast({
         style: Toast.Style.Success,
@@ -21,6 +22,11 @@ export default function ImportDocs() {
     validation: {
       file: (value) => {
         const filename = value ? value[0] : "";
+
+        if (!fs.existsSync(filename)) {
+          return "File does not exist";
+        }
+
         const contents = fs.readFileSync(filename, "utf8");
         const docString = JSON.parse(contents);
 
