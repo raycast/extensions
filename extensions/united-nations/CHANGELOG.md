@@ -1,5 +1,10 @@
 # United Nations Extension
 
+## [Chore] - {PR_MERGE_DATE}
+
+- Optimize extension file size
+- Bump all dependences to latest
+
 ## [Bugfix] - 2024-07-24
 
 - Handle possibly undefined parameter on UN News
