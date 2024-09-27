@@ -3,7 +3,7 @@
 ## [Chore] - {PR_MERGE_DATE}
 
 - Optimize extension file size
-- Bump all dependences to latest
+- Bump all dependencies to the latest
 
 ## [Bugfix] - 2024-07-24
 
