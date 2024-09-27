@@ -1,5 +1,11 @@
 # Menubar Calendar Changelog
 
+## [Open URL] - {PR_MERGE_DATE}
+
+- Press Option key to open URL in the calendar event
+- Update Calendar and Reminders UI details
+- Fix the problem of error when calling the deprecated API
+
 ## [Add Title Max Length Setting] - 2024-09-14
 
 - Add setting to customize calendar evens title length in the menu bar

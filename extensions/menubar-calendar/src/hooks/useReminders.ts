@@ -13,7 +13,8 @@ export type Reminder = {
   id: string;
   openUrl: string;
   title: string;
-  notes: string;
+  url: string | null;
+  notes: string | null;
   dueDate: string | null;
   isCompleted: boolean;
   priority: Priority;
