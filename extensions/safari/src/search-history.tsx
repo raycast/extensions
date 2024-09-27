@@ -21,7 +21,7 @@ export default function Command() {
         Array.from(groupedHistoryEntries.entries()).map(([date, entries]) => (
           <HistoryListSection key={date} title={date} entries={entries} searchText={searchText} />
         ))}
-      <FallbackSearchSection searchText={searchText} fallbackSearchType="search"/>
+      <FallbackSearchSection searchText={searchText} fallbackSearchType="search" />
     </List>
   );
 }

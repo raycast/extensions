@@ -12,7 +12,7 @@ const Actions = (props: { entry: HistoryItem; searchText?: string }) => {
     <ActionPanel>
       <ActionPanel.Section>
         <Action.OpenInBrowser url={props.entry.url} />
-        <SearchInBrowserAction searchText={props.searchText} fallbackSearchType="search"/>
+        <SearchInBrowserAction searchText={props.searchText} fallbackSearchType="search" />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <CopyUrlAction url={props.entry.url} />

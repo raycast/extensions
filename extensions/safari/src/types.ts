@@ -80,6 +80,6 @@ export interface HistoryItem {
   lastVisited: string;
 }
 
-// Preferences 
+// Preferences
 
-export type FallbackSearchType = "search" | "searchHistory"
+export type FallbackSearchType = "search" | "searchHistory";
