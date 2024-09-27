@@ -5,6 +5,7 @@ import { Entity, ExpenseParams, FriendOrGroupProps } from "./types/friends_group
 import { getFriends, getGroups, postExpense } from "./hooks/useFriends_Groups";
 import { GetCurrentUser } from "./hooks/useCurrentUser";
 import { getCurrency_code } from "./utils/utils";
+import { currencyCodes } from "./utils/constants";
 
 export default function Command() {
   const [friends, loadingFriends, revalidateFriends] = getFriends();
@@ -98,7 +99,6 @@ function FillForm(props: FriendOrGroupProps) {
 
   const defaultCurrency = String(currentUser?.default_currency);
   const { symbol: defaultSymbol, emoji: defaultEmoji } = getCurrency_code(defaultCurrency);
-  const currencyCodes = ["USD", "EUR", "GBP", "JPY", "AUD"];
 
   const { handleSubmit, itemProps } = useForm<ExpenseParams>({
     onSubmit: (values) => {
@@ -168,7 +168,7 @@ function FillForm(props: FriendOrGroupProps) {
       </Form.Dropdown>
       <Form.TextField
         title="Cost"
-        placeholder="0.00"
+        placeholder="10.00"
         {...itemProps.cost}
         info="Expense will be split equally; assumes you are the payer."
       />
