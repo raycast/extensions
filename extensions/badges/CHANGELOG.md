@@ -1,5 +1,10 @@
 # Badges Changelog
 
+## [Chore] - {PR_MERGE_DATE}
+
+- Refactor duplicate codes
+- Bump all denpendencies to latest
+
 ## [Enhancement] - 2024-07-09
 
 - Bump dependencies
