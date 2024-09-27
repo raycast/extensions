@@ -1,6 +1,6 @@
 # DevDocs Extension
 
-## [Changes] - 2024-09-24
+## [Changes] - {PR_MERGE_DATE}
 
 - Add new command to import enabled documentations from DevDocs.io
 - Split documentations into two sections: "preferred" (imported from DevDocs website); remaining sets show as "available"
