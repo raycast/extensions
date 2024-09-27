@@ -1,48 +1,52 @@
 import { ActionPanel, Form, Action, LocalStorage, showToast, Toast, popToRoot } from "@raycast/api";
+import { useForm } from "@raycast/utils";
 import fs from "fs";
 
+interface ImportFormValues {
+  file: string[];
+}
+
 export default function ImportDocs() {
+  const { handleSubmit, itemProps } = useForm<ImportFormValues>({
+    onSubmit(values) {
+      const contents = fs.readFileSync(values.file[0], "utf8");
+      const docString = JSON.parse(contents);
+      saveDocs(JSON.stringify(docString));
+      showToast({
+        style: Toast.Style.Success,
+        title: "Successfully imported documentation",
+        message: `${values.file} account created`,
+      });
+    },
+    validation: {
+      file: (value) => {
+        const filename = value ? value[0] : "";
+        if (filename && !filename.endsWith(".json")) {
+          return "Must be JSON file";
+        } else if (!filename) {
+          return "The item is required";
+        }
+      },
+    },
+  });
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Import"
-            onSubmit={(values: { files: string[] }) => {
-              const file = values.files[0];
-              if (!fs.existsSync(file) || !fs.lstatSync(file).isFile()) {
-                return false;
-              }
-              const contents = fs.readFileSync(file, "utf8");
-              const docString = JSON.parse(contents);
-              saveDocs(JSON.stringify(docString));
-            }}
-          />
+          <Action.SubmitForm title="Import" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.FilePicker
-        id="files"
         allowMultipleSelection={false}
         info="Import a JSON file from the DevDocs.io Settings page to set your preferred documentations."
+        {...itemProps.file}
       />
     </Form>
   );
 }
 
 export async function saveDocs(docs: string) {
-  // ensure object structure with single "docs" key
-  if (Object.keys(JSON.parse(docs))[0] === "docs") {
-    await LocalStorage.setItem("docs", JSON.stringify(docs));
-    showToast({
-      title: `Successfully imported documentation`,
-      style: Toast.Style.Success,
-    });
-    popToRoot();
-  } else {
-    showToast({
-      title: `Please check the the file input`,
-      style: Toast.Style.Failure,
-    });
-  }
+  await LocalStorage.setItem("docs", JSON.stringify(docs));
+  popToRoot();
 }
