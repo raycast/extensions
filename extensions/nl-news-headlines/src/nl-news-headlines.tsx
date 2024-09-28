@@ -2,10 +2,19 @@ import { ActionPanel, Action, List, showToast, Toast, Cache, Icon, getPreference
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Parser from "rss-parser";
 
+// Define Language type
+type Language = "nl" | "en";
+
 // Initialize constants and global variables
 const parser = new Parser();
 const cache = new Cache();
-const CACHE_KEY = "nl-news-headlines";
+
+// Dynamic cache key function
+const getCacheKey = (language: Language) => `news-headlines-${language}`;
+
+// Cache expiration duration (1 hour)
+const CACHE_EXPIRATION_MS = 1000 * 60 * 60; // 1 hour
+
 const MAX_ITEMS_PER_SOURCE = 50;
 const MAX_CACHED_ITEMS = 500;
 const ITEMS_PER_PAGE = 50;
@@ -28,6 +37,9 @@ const TRANSLATIONS = {
     day: "dag",
     days: "dagen",
     ago: "geleden",
+    allSources: "Alle bronnen",
+    latestHeadlines: "Laatste koppen",
+    searchPlaceholder: "Zoek in nieuwsberichten...",
   },
   en: {
     minute: "minute",
@@ -37,16 +49,15 @@ const TRANSLATIONS = {
     day: "day",
     days: "days",
     ago: "ago",
+    allSources: "All Sources",
+    latestHeadlines: "Latest Headlines",
+    searchPlaceholder: "Search headlines...",
   },
 };
 
 // Helper function to check cache validity
-const checkCacheValidity = (
-  cachedData: string | undefined,
-  cachedLanguage: string | undefined,
-  currentLanguage: string,
-): boolean => {
-  return !!cachedData && cachedLanguage === currentLanguage;
+const checkCacheValidity = (cachedData: string | undefined, cacheTimestamp: string | undefined): boolean => {
+  return !!cachedData && !!cacheTimestamp && Date.now() - parseInt(cacheTimestamp, 10) < CACHE_EXPIRATION_MS;
 };
 
 interface NewsSource {
@@ -88,6 +99,11 @@ interface FeedItem {
   categories?: string[] | { name: string }[];
 }
 
+interface Preferences {
+  language: string;
+  showCategories: boolean;
+}
+
 // Helper function to get favicon URL
 const getFaviconUrl = (url: string): string => {
   const domain = new URL(url).hostname;
@@ -95,7 +111,7 @@ const getFaviconUrl = (url: string): string => {
 };
 
 // Helper function to format date based on language
-const formatDate = (dateString: string, language: string): string => {
+const formatDate = (dateString: string, language: Language): string => {
   const date = new Date(dateString);
   const now = new Date();
   const diffTime = now.getTime() - date.getTime();
@@ -103,7 +119,7 @@ const formatDate = (dateString: string, language: string): string => {
   const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-  const t = TRANSLATIONS[language as keyof typeof TRANSLATIONS];
+  const t = TRANSLATIONS[language];
 
   if (diffMinutes < 60) {
     return `${diffMinutes} ${diffMinutes === 1 ? t.minute : t.minutes} ${t.ago}`;
@@ -154,84 +170,121 @@ const parseDate = (dateString: string): Date => {
   return new Date();
 };
 
+// Logging utility
+const logError = (message: string, error: unknown) => {
+  console.error(`[NewsExtension Error] ${message}`, error);
+  // Future Integration: Send logs to an external service like Sentry
+};
+
+// Concurrency control utility
+const promisePool = async <T, R>(tasks: T[], handler: (task: T) => Promise<R>, poolLimit: number): Promise<R[]> => {
+  const ret: R[] = [];
+  const executing = new Set<Promise<R>>();
+
+  for (const task of tasks) {
+    const p = handler(task).then((result) => {
+      ret.push(result);
+      executing.delete(p);
+      return result;
+    });
+    executing.add(p);
+
+    if (executing.size >= poolLimit) {
+      await Promise.race(executing);
+    }
+  }
+
+  await Promise.all(executing);
+  return ret;
+};
+
 // Function to fetch news with caching and improved error handling
-const fetchNewsWithCache = async (sources: NewsSource[], language: string, page: number): Promise<NewsItem[]> => {
-  const cachedData = cache.get(CACHE_KEY);
-  const cachedLanguage = cache.get("currentLanguage");
+const fetchNewsWithCache = async (sources: NewsSource[], language: Language, page: number): Promise<NewsItem[]> => {
+  const cacheKey = getCacheKey(language);
+  const cachedData = cache.get(cacheKey);
+  const cacheTimestamp = cache.get(`${cacheKey}-timestamp`);
+
+  const isCacheValid = checkCacheValidity(cachedData, cacheTimestamp);
 
   const itemsMap = new Map<string, NewsItem>();
 
-  if (checkCacheValidity(cachedData, cachedLanguage, language)) {
+  if (isCacheValid) {
     JSON.parse(cachedData!).forEach((item: NewsItem) => itemsMap.set(item.link, item));
   }
 
   const sourcesToFetch = sources.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
-  await Promise.allSettled(
-    sourcesToFetch.map(async (source) => {
+  const newItems = await promisePool(
+    sourcesToFetch,
+    async (source) => {
       try {
         const feed = await parser.parseURL(source.url);
-        feed.items.slice(0, MAX_ITEMS_PER_SOURCE).forEach((item: FeedItem) => {
-          const newsItem: NewsItem = {
-            title: item.title || "",
-            link: item.link || "",
-            pubDate: parseDate(item.pubDate || item.isoDate || "").toISOString(),
-            source: source.name,
-            favicon: getFaviconUrl(source.url),
-            category: item.categories && typeof item.categories[0] === "string" ? item.categories[0] : undefined,
-          };
-          itemsMap.set(newsItem.link, newsItem);
-        });
+        return feed.items.slice(0, MAX_ITEMS_PER_SOURCE).map((item: FeedItem) => ({
+          title: item.title?.trim() || "No Title",
+          link: item.link?.trim() || "#",
+          pubDate: parseDate(item.pubDate || item.isoDate || "").toISOString(),
+          source: source.name,
+          favicon: getFaviconUrl(source.url),
+          category: item.categories && typeof item.categories[0] === "string" ? item.categories[0] : undefined,
+        }));
       } catch (error) {
-        console.error(`Error fetching ${source.name}:`, error);
+        logError(`Error fetching ${source.name}`, error);
         showToast({
           style: Toast.Style.Failure,
           title: `Failed to fetch news from ${source.name}`,
           message: error instanceof Error ? error.message : "Unknown error",
         });
+        return [];
       }
-    }),
+    },
+    5, // Limit to 5 concurrent fetches
   );
+
+  newItems.flat().forEach((item) => itemsMap.set(item.link, item));
 
   const sortedItems = Array.from(itemsMap.values())
     .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime())
     .slice(0, MAX_CACHED_ITEMS);
 
-  cache.set(CACHE_KEY, JSON.stringify(sortedItems));
-  cache.set("currentLanguage", language);
+  cache.set(cacheKey, JSON.stringify(sortedItems));
+  cache.set(`${cacheKey}-timestamp`, Date.now().toString());
 
   return sortedItems;
 };
 
 // Function to get language based on preferences
-const getLanguage = (preferenceLanguage: string): string => {
+const getLanguage = (preferenceLanguage: string): Language => {
   if (preferenceLanguage === "system") {
     const systemLanguage = getPreferenceValues<{ language: string }>().language.toLowerCase().split("-")[0];
     return systemLanguage === "nl" ? "nl" : "en";
   }
-  return preferenceLanguage;
+  return preferenceLanguage === "nl" ? "nl" : "en";
 };
 
 // Main component
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const [currentLanguage] = useState<string>(getLanguage(preferences.language));
+  const [currentLanguage] = useState<Language>(getLanguage(preferences.language));
   const [currentPage, setCurrentPage] = useState(1);
   const [items, setItems] = useState<NewsItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
   const fetchInProgressRef = useRef(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const allSources = useMemo(() => (currentLanguage === "nl" ? dutchSources : englishSources), [currentLanguage]);
-  const showCategories = preferences.showCategories;
+  const showCategories = preferences.showCategories ?? false; // Default to false if not set
 
   const fetchNews = useCallback(
     async (forceRefresh = false, page = 1) => {
       if (fetchInProgressRef.current) return;
       fetchInProgressRef.current = true;
+      setIsRefreshing(true);
 
       try {
-        if (forceRefresh) cache.remove(CACHE_KEY);
+        const cacheKey = getCacheKey(currentLanguage);
+        if (forceRefresh) cache.remove(cacheKey);
         const newsItems = await fetchNewsWithCache(allSources, currentLanguage, page);
         setItems(newsItems);
         setCurrentPage(page);
@@ -243,10 +296,40 @@ export default function Command() {
         });
       } finally {
         fetchInProgressRef.current = false;
+        setIsRefreshing(false);
+        setIsInitialLoad(false);
       }
     },
-    [currentLanguage],
+    [currentLanguage, allSources],
   );
+
+  const loadCachedNews = useCallback(() => {
+    const cacheKey = getCacheKey(currentLanguage);
+    const cachedData = cache.get(cacheKey);
+    const cacheTimestamp = cache.get(`${cacheKey}-timestamp`);
+
+    const isCacheValid = checkCacheValidity(cachedData, cacheTimestamp);
+
+    if (isCacheValid) {
+      setItems(JSON.parse(cachedData!));
+      return true;
+    }
+    return false;
+  }, [currentLanguage]);
+
+  useEffect(() => {
+    const hasCachedNews = loadCachedNews();
+    setIsLoading(!hasCachedNews);
+
+    // Always perform a full refresh when the extension is launched
+    fetchNews(true);
+  }, [fetchNews, loadCachedNews]);
+
+  const getTitle = useCallback(() => {
+    const sourceName =
+      selectedSource || (currentLanguage === "nl" ? TRANSLATIONS.nl.allSources : TRANSLATIONS.en.allSources);
+    return currentLanguage === "nl" ? `Nieuwskoppen - ${sourceName}` : `News Headlines - ${sourceName}`;
+  }, [selectedSource, currentLanguage]);
 
   const filteredItems = useMemo(
     () => (selectedSource ? items.filter((item) => item.source === selectedSource) : items),
@@ -258,41 +341,32 @@ export default function Command() {
     [filteredItems, currentPage],
   );
 
-  useEffect(() => {
-    const cachedData = cache.get(CACHE_KEY);
-    const cachedLanguage = cache.get("currentLanguage");
-
-    if (checkCacheValidity(cachedData, cachedLanguage, currentLanguage)) {
-      setItems(JSON.parse(cachedData!));
-      setIsLoading(false);
-    } else {
-      fetchNews(true).then(() => setIsLoading(false));
-    }
-  }, [currentLanguage, fetchNews]);
-
-  const getTitle = useCallback(() => {
-    const sourceName = selectedSource || (currentLanguage === "nl" ? "Alle bronnen" : "All Sources");
-    return currentLanguage === "nl" ? `Nieuwskoppen - ${sourceName}` : `News Headlines - ${sourceName}`;
-  }, [selectedSource, currentLanguage]);
-
   return (
     <List
-      isLoading={isLoading}
-      searchBarPlaceholder={currentLanguage === "nl" ? "Zoek in nieuwsberichten..." : "Search headlines..."}
+      isLoading={isLoading && isInitialLoad}
+      searchBarPlaceholder={TRANSLATIONS[currentLanguage].searchPlaceholder}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select News Source"
           storeValue={true}
-          onChange={(newValue) => setSelectedSource(newValue === "Latest Headlines" ? null : newValue)}
+          onChange={(newValue) =>
+            setSelectedSource(newValue === TRANSLATIONS[currentLanguage].latestHeadlines ? null : newValue)
+          }
         >
-          <List.Dropdown.Item title="Latest Headlines" value="Latest Headlines" />
+          <List.Dropdown.Item
+            title={TRANSLATIONS[currentLanguage].latestHeadlines}
+            value={TRANSLATIONS[currentLanguage].latestHeadlines}
+          />
           {allSources.map((source) => (
             <List.Dropdown.Item key={source.name} title={source.name} value={source.name} />
           ))}
         </List.Dropdown>
       }
       onSelectionChange={(id) => {
-        if (id && parseInt(id) === paginatedItems.length - 1) fetchNews(false, currentPage + 1);
+        if (id && parseInt(id, 10) >= paginatedItems.length - 5) {
+          // Trigger when 5 items from the end
+          fetchNews(false, currentPage + 1);
+        }
       }}
     >
       <List.Section title={getTitle()} subtitle={filteredItems.length.toString()}>
@@ -304,13 +378,19 @@ export default function Command() {
             accessories={[
               ...(showCategories && item.category ? [{ tag: { value: item.category, color: Color.Blue } }] : []),
               { text: formatDate(item.pubDate, currentLanguage) },
+              ...(isRefreshing && index === 0 ? [{ icon: Icon.Clock }] : []),
             ]}
             icon={{ source: item.favicon }}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={item.link} />
                 <Action.CopyToClipboard content={item.link} />
-                <Action title="Refresh" onAction={() => fetchNews(true)} icon={Icon.ArrowClockwise} />
+                <Action
+                  title={isRefreshing ? "Refreshing…" : "Refresh"}
+                  onAction={() => fetchNews(true)}
+                  icon={Icon.ArrowClockwise}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                />
               </ActionPanel>
             }
           />

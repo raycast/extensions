@@ -1,32 +1,22 @@
 # Premier League Changelog
 
-## [Improvements] - 2023-12-01
+## [Seamless Pagination] - 2024-09-24
+- Incorporated the usePromise utility for seamless pagination, providing a more efficient and user-friendly experience.
 
-- Fix extension issues (date time, player awards)
+## [Data Refinements] - 2023-02-21
+- Improved accuracy and completeness of fixture and result data.
+- Added more details about Premier League clubs.
 
-## [Improvements] - 2023-02-21
+## [Standings and Manager Updates] - 2023-02-03
+-  Included played matches, goals for/against, form, and upcoming fixtures in standings details.
+-  Adjusted manager image size for optimal display.
 
-- Refine Fixtures & Results
-- Add more club information
+## [Visual Improvements] - 2022-06-14
+- Adopted a visually appealing grid layout for better organization.
+- Added descriptive metadata to list items, providing more context.
 
-## [Improvements] - 2023-02-03
+## [Core Data Introduction] - 2022-04-02
+- Introduced data for clubs, players, and managers.
 
-- Add more Standings details (played, goals for/against, form, next match)
-- Fix manager image size
-
-## [Improvements] - 2022-06-14
-
-- Using new Grid layout for some commands
-- Using new list item detail metadata
-
-## [Improvements] - 2022-04-02
-
-- Added Clubs
-- Added Players
-- Added Managers
-
-## [Initial Version] - 2022-03-24
-
-- Added Standings
-- Added Fixtures
-- Added Results
+## [Initial Release] - 2022-03-24
+- Established core functionality for standings, fixtures, and results.

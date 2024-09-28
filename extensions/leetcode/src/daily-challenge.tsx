@@ -1,14 +1,11 @@
 import { Action, ActionPanel, Detail } from '@raycast/api';
 import { useFetch } from '@raycast/utils';
-import { useState } from 'react';
 import { dailyChallengeQuery, endpoint } from './api';
 import { DailyChallenge, DailyChallengeResponse } from './types';
 import { formatProblemMarkdown } from './utils';
 
 export default function Command(): JSX.Element {
-  const [dailyChallenge, setDailyChallenge] = useState<DailyChallenge | undefined>(undefined);
-
-  const { isLoading } = useFetch<DailyChallengeResponse>(endpoint, {
+  const { isLoading, data: dailyChallenge } = useFetch<DailyChallengeResponse, undefined, DailyChallenge>(endpoint, {
     method: 'POST',
     body: JSON.stringify({
       query: dailyChallengeQuery,
@@ -17,8 +14,10 @@ export default function Command(): JSX.Element {
     headers: {
       'Content-Type': 'application/json',
     },
-    onData: (data) => {
-      setDailyChallenge(data.data.dailyChallenge);
+    mapResult(result) {
+      return {
+        data: result.data.dailyChallenge,
+      };
     },
   });
 

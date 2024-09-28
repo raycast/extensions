@@ -1,12 +1,3 @@
-interface Prompt {
-  tags: string[];
-  title: string;
-  slug: string;
-  libs: string[];
-  content: string;
-  author: Author;
-}
-
 interface Section {
   name: string;
   slugs: string[];
@@ -18,31 +9,26 @@ interface Author {
   avatar: string;
 }
 
-interface GithubFileContent {
-  name: string;
-  path: string;
-  sha: string;
-  size: number;
-  url: string;
-  html_url: string;
-  git_url: string;
-  download_url: string;
-  type: string;
+interface CursorRule {
+  tags: string[];
+  title: string;
+  slug: string;
+  libs: string[];
   content: string;
-  encoding: string;
+  author: Author;
+  // count of how many times the cursor rule has been copied on cursor.directory
+  // null if not available
+  count: number | null;
 }
 
-interface RuleObject {
-  tags?: string[];
-  title?: string;
-  slug?: string;
-  content?: string;
-  author?: {
-    name?: string;
-    url?: string;
-    avatar?: string;
-  };
-  libs?: string[];
-}
+type AllCursorRulesResponse = {
+  data: Omit<CursorRule, "count">[];
+};
 
-export type { Prompt, Author, Section, GithubFileContent, RuleObject };
+type PopularCursorRulesResponse = {
+  data: (Omit<CursorRule, "count"> & { count: number })[];
+};
+
+type APIResponse = AllCursorRulesResponse | PopularCursorRulesResponse;
+
+export type { CursorRule, Author, Section, AllCursorRulesResponse, PopularCursorRulesResponse, APIResponse };

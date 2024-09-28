@@ -212,4 +212,12 @@ export interface PokemonV2Pokemontype {
 export interface PokemonV2Type {
   name: string;
   pokemon_v2_typenames: PokemonV2Name[];
+  pokemonV2TypeefficaciesByTargetTypeId: PokemonV2Typeefficacy[];
+}
+
+export interface PokemonV2Typeefficacy {
+  damage_factor: number;
+  damage_type_id: number;
+  target_type_id: number;
+  pokemon_v2_type: PokemonV2Type;
 }

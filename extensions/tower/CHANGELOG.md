@@ -1,5 +1,9 @@
 # Tower Changelog
 
+## [New Features] - 2024-09-18
+
+- Add support for selecting a default editor and teminal app for opening repositories
+
 ## [New Features] - 2023-12-15
 
 - Add “Open in Warp” action to Tower extension

@@ -4,9 +4,11 @@
   "title": "Ask Dust",
   "description": "Query dust.tt AI agents",
   "icon": "dust.png",
-  "author": "vineus",
+  "author": "albandum",
   "contributors": [
-    "henry_fontanier"
+    "vineus",
+    "henry_fontanier",
+    "stang"
   ],
   "categories": [
     "Productivity"
@@ -20,6 +22,14 @@
       "required": true,
       "title": "API key",
       "placeholder": "sk-xxxxxxxxxxxxxxxxxxxxxx"
+    },
+    {
+      "name": "userEmail",
+      "description": "The email address of your Dust user account",
+      "type": "textfield",
+      "required": true,
+      "title": "Email",
+      "placeholder": "john.doe@example.com"
     },
     {
       "name": "workspaceId",

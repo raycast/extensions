@@ -1,7 +1,8 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import {
+  CurrentGameweek,
   LaLigaClub,
   LaLigaClubs,
   LaLigaClubSquad,
@@ -25,7 +26,7 @@ const headers = {
   "Content-Language": "en",
 };
 
-export const getCurrentGameWeek = async (competition: string) => {
+export const getCurrentGameWeek = async (competition: string): Promise<CurrentGameweek | undefined> => {
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `${endpoint}/subscriptions/${competition}/current-gameweek`,
@@ -39,7 +40,7 @@ export const getCurrentGameWeek = async (competition: string) => {
   } catch (e) {
     showFailureToast(e);
 
-    return {};
+    return undefined;
   }
 };
 

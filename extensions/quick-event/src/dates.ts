@@ -44,7 +44,7 @@ export const formatDate = (item: CalendarEvent): string => {
   } else {
     return `${formatRelativeDay(item.startDate, new Date())} from ${format(
       item.startDate,
-      getHumanTimeFormat
+      getHumanTimeFormat,
     )} to ${format(item.endDate, getHumanTimeFormat)}`;
   }
 };

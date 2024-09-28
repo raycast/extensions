@@ -1,4 +1,8 @@
-# search joplin notes Changelog
+# Search joplin notes Changelog
+
+## [FIX Codes] - 2024-09-22
+
+Modify it so that the search results can be changed in the settings
 
 ## [FIX Codes] - 2024-7-29
 
