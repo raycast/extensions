@@ -170,7 +170,7 @@ export default function Command() {
                       <Action.Push
                         title="Change values"
                         icon={Icon.Pencil}
-                        target={<ChangeValues expense={expense} />}
+                        target={<ChangeValues expense={expense} mutate={Mutate} />}
                         shortcut={Keyboard.Shortcut.Common.Edit}
                       />
                     )}

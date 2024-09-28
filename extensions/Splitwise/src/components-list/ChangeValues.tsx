@@ -7,13 +7,13 @@ import { getCurrency_code } from "../utils/utils";
 
 import { Expense } from "../types/get_expenses.types";
 
-export const ChangeValues = ({ expense }: { expense: Expense }) => {
+export const ChangeValues = ({ expense, mutate }: { expense: Expense, mutate: any }) => {
   const { pop } = useNavigation();
   const [friends] = getFriends();
   const currentUser = GetCurrentUser() as any; // FETCH CURRENT USER
   const friendsWithCurrentUser = [...friends, currentUser];
 
-  const { handleSubmit, itemProps, values, setValue, focus } = useForm<Expense | any>({
+  const { handleSubmit, itemProps } = useForm<Expense | any>({
     onSubmit: (input) => {
       const numberShares = input.owes?.length;
       const cost = Number(input.cost);
@@ -42,7 +42,7 @@ export const ChangeValues = ({ expense }: { expense: Expense }) => {
         counter++;
       });
 
-      UpdateExpense(expense.id, paramsJson).then(() => pop());
+      UpdateExpense(expense.id, paramsJson, mutate).then(() => pop());
     },
 
     initialValues: {
@@ -110,4 +110,4 @@ export const ChangeValues = ({ expense }: { expense: Expense }) => {
       </Form.TagPicker>
     </Form>
   );
-}
+};
