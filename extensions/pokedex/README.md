@@ -2,12 +2,6 @@
   <h1 align="center">Pokédex</h1>
 </p>
 
-<p align="center">
-  <a title="Install Pokédex Raycast Extension" href="https://www.raycast.com/anhthang/pokedex#install">
-    <img style="height: 64px" src="https://assets.raycast.com/anhthang/pokedex/install_button@2x.png" height="64">
-  </a>
-</p>
-
 Explore the world of Pokémon with stunning visuals and detailed information in Raycast.
 
 ![Example](./metadata/pokedex-2.png)
