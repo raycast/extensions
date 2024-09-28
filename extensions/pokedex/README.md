@@ -2,6 +2,12 @@
   <h1 align="center">Pokédex</h1>
 </p>
 
+<p align="center">
+  <a title="Install Pokédex Raycast Extension" href="https://www.raycast.com/anhthang/pokedex#install">
+    <img style="height: 64px" src="https://assets.raycast.com/anhthang/pokedex/install_button@2x.png" height="64">
+  </a>
+</p>
+
 Explore the world of Pokémon with stunning visuals and detailed information in Raycast.
 
 ![Example](./metadata/pokedex-2.png)
@@ -11,6 +17,7 @@ Explore the world of Pokémon with stunning visuals and detailed information in 
 ### Core Functionality
 * **Comprehensive Pokémon Database:** Access information on all 1025 Pokémon species, including regional variants, Mega Evolutions, and Gigantamax forms.
 * **Detailed Pokédex Entries:** Explore in-depth details about Pokédex data, stats, types, training, breeding, evolutions, learnsets, and locations.
+* **Enhanced Move Information**: Access detailed information about Pokémon moves, including base power, accuracy, PP, type, category, priority, target, and more.
 * **Quick Links:** Easily access Pokémon on the Official Pokémon Website or Bulbapedia with direct links.
 
 ### Customization Options

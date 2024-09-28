@@ -1,14 +1,15 @@
-import { List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import json2md from "json2md";
 import groupBy from "lodash.groupby";
 import orderBy from "lodash.orderby";
 import { useMemo, useState } from "react";
-import { PokemonV2Pokemonmove } from "../types";
-import { typeColor } from "../utils";
+import PokeMoves from "../move";
+import { PokemonV2Move } from "../types";
+import MoveMetadata from "./metadata/move";
 
-export default function PokemonMoves(props: {
+export default function PokemonLearnset(props: {
   name: string;
-  moves: PokemonV2Pokemonmove[];
+  moves: PokemonV2Move[];
 }) {
   const moves = props.moves.map((m) => {
     m.pokemon_v2_move.pokemon_v2_machines =
@@ -52,6 +53,14 @@ export default function PokemonMoves(props: {
         )
       : props.moves;
 
+    // split evolution moves to another section
+    moves.forEach((move) => {
+      if (move.move_learn_method_id === 1 && move.level === 0) {
+        move.pokemon_v2_movelearnmethod.pokemon_v2_movelearnmethodnames[0].name =
+          "Evolution";
+      }
+    });
+
     return groupBy(
       moves,
       (m) =>
@@ -93,6 +102,7 @@ export default function PokemonMoves(props: {
             );
             break;
           case "Egg":
+          case "Evolution":
           case "Tutor":
             sortedMoves = orderBy(
               moves,
@@ -113,7 +123,7 @@ export default function PokemonMoves(props: {
               let text;
               switch (move.move_learn_method_id) {
                 case 1:
-                  text = move.level.toString();
+                  text = move.level ? move.level.toString() : undefined;
                   break;
                 case 4:
                   text = move.pokemon_v2_move.pokemon_v2_machines[0]
@@ -135,57 +145,38 @@ export default function PokemonMoves(props: {
                   accessories={[{ text }]}
                   detail={
                     <List.Item.Detail
-                      markdown={json2md([
-                        {
-                          h1: move.pokemon_v2_move.pokemon_v2_movenames[0].name,
-                        },
-                        {
-                          p: move.pokemon_v2_move.pokemon_v2_moveeffect
-                            ?.pokemon_v2_moveeffecteffecttexts[0]
-                            ? move.pokemon_v2_move.pokemon_v2_moveeffect?.pokemon_v2_moveeffecteffecttexts[0].short_effect.replace(
-                                "$effect_chance",
-                                move.pokemon_v2_move.move_effect_chance?.toString() ??
-                                  "",
-                              )
-                            : "",
-                        },
-                      ])}
-                      metadata={
-                        <List.Item.Detail.Metadata>
-                          <List.Item.Detail.Metadata.TagList title="Type">
-                            <List.Item.Detail.Metadata.TagList.Item
-                              text={
-                                move.pokemon_v2_move.pokemon_v2_type
-                                  .pokemon_v2_typenames[0].name
-                              }
-                              icon={`types/${move.pokemon_v2_move.pokemon_v2_type.name}.svg`}
-                              color={
-                                typeColor[
-                                  move.pokemon_v2_move.pokemon_v2_type.name
-                                ]
-                              }
-                            />
-                          </List.Item.Detail.Metadata.TagList>
-
-                          <List.Item.Detail.Metadata.Label
-                            title="Power"
-                            text={move.pokemon_v2_move.power?.toString() || "-"}
-                          />
-                          <List.Item.Detail.Metadata.Label
-                            title="Accuracy"
-                            text={
-                              move.pokemon_v2_move.accuracy
-                                ? move.pokemon_v2_move.accuracy + "%"
-                                : "-"
-                            }
-                          />
-                          <List.Item.Detail.Metadata.Label
-                            title="PP"
-                            text={move.pokemon_v2_move.pp?.toString() || "-"}
-                          />
-                        </List.Item.Detail.Metadata>
+                      markdown={
+                        move.pokemon_v2_move.pokemon_v2_moveeffect
+                          ?.pokemon_v2_moveeffecteffecttexts.length
+                          ? json2md([
+                              {
+                                h1: move.pokemon_v2_move.pokemon_v2_movenames[0]
+                                  .name,
+                              },
+                              {
+                                p: move.pokemon_v2_move.pokemon_v2_moveeffect.pokemon_v2_moveeffecteffecttexts[0].short_effect.replace(
+                                  "$effect_chance",
+                                  String(
+                                    move.pokemon_v2_move.move_effect_chance,
+                                  ),
+                                ),
+                              },
+                            ])
+                          : undefined
                       }
+                      metadata={<MoveMetadata move={move.pokemon_v2_move} />}
                     />
+                  }
+                  actions={
+                    <ActionPanel>
+                      <ActionPanel.Section title="Information">
+                        <Action.Push
+                          title="View Details"
+                          icon={Icon.Sidebar}
+                          target={<PokeMoves id={move.pokemon_v2_move.id} />}
+                        />
+                      </ActionPanel.Section>
+                    </ActionPanel>
                   }
                 />
               );
