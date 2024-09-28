@@ -1,10 +1,12 @@
 import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
-import { Content } from "../types";
+import { Fixture } from "../types";
 import { convertToLocalTime } from "../utils";
+import MatchCommentary from "./commentary";
+import MatchLineups from "./lineup";
 
 interface PropsType {
   matchday: string;
-  matches: Content[];
+  matches: Fixture[];
 }
 
 export default function Matchday(props: PropsType) {
@@ -53,23 +55,36 @@ export default function Matchday(props: PropsType) {
           })
           .flat();
 
+        const subtitle =
+          match.status === "U"
+            ? `${match.teams[0].team.name} - ${match.teams[1].team.name}`
+            : `${match.teams[0].team.name} ${match.teams[0].score} - ${match.teams[1].score} ${match.teams[1].team.name}`;
+
         return (
           <List.Item
             key={match.id}
             title={time || "TBC"}
-            subtitle={
-              match.status === "U"
-                ? `${match.teams[0].team.name} - ${match.teams[1].team.name}`
-                : `${match.teams[0].team.name} ${match.teams[0].score} - ${match.teams[1].score} ${match.teams[1].team.name}`
-            }
+            subtitle={subtitle}
             icon={icon}
             accessories={accessories}
             keywords={keywords}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser
-                  url={`https://www.premierleague.com/match/${match.id}`}
-                />
+                <ActionPanel.Section title="Information">
+                  <Action.Push
+                    title="Match Commentary"
+                    icon={Icon.Message}
+                    target={<MatchCommentary match={match} title={subtitle} />}
+                  />
+                  <Action.Push
+                    title="Match Line-ups"
+                    icon={Icon.TwoPeople}
+                    target={<MatchLineups match={match} title={subtitle} />}
+                  />
+                  <Action.OpenInBrowser
+                    url={`https://www.premierleague.com/match/${match.id}`}
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
