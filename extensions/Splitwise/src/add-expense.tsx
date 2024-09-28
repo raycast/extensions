@@ -44,7 +44,7 @@ export default function Command() {
             ]}
             actions={
               <ActionPanel>
-                <Action.Push icon={Icon.Wallet} title="Add Expense" target={<FillForm friend={friend} />} />
+                <Action.Push icon={Icon.Wallet} title="Add Expense" target={<FillForm friend={friend} revalidateFriends={revalidateFriends} revalidateGroups={revalidateGroups} />} />
                 <Action
                   title="Reload"
                   icon={Icon.Repeat}
@@ -70,7 +70,7 @@ export default function Command() {
             accessories={[lastInteractionAccessory(Group)]}
             actions={
               <ActionPanel>
-                <Action.Push icon={Icon.Wallet} title="Add Expense" target={<FillForm group={Group} />} />
+                <Action.Push icon={Icon.Wallet} title="Add Expense" target={<FillForm group={Group} revalidateFriends={revalidateFriends} revalidateGroups={revalidateGroups} />} />
                 <Action
                   title="Reload"
                   icon={Icon.Repeat}

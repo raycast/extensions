@@ -38,7 +38,12 @@ export const FillForm = (props: FriendOrGroupProps) => {
                 split_equally: true,
               }),
         };
-        postExpense(paramsJson).then(() => pop());
+        // postExpense(paramsJson).then(() => pop());
+        postExpense(paramsJson).then(() => {
+            props.revalidateFriends();
+            props.revalidateGroups();
+            pop();
+            });
       },
       validation: {
         description: FormValidation.Required,
