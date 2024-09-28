@@ -1,8 +1,8 @@
-import { getPreferenceValues } from "@raycast/api";
-
-const preferences = getPreferenceValues<Preferences>();
-
-export const APIKEY = preferences.apiKey;
+// import { getPreferenceValues } from "@raycast/api";
+//
+// const preferences = getPreferenceValues<Preferences>();
+//
+// export const APIKEY = preferences.apiKey;
 const NASA_BASEURL = "https://api.nasa.gov";
 const SPACEDEVS_BASEURL = "https://ll.thespacedevs.com/2.2.0";
 

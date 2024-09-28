@@ -17,7 +17,17 @@
       "name": "apod",
       "title": "Show Astronomy Picture of the Day",
       "description": "Show the Astronomy Picture of the Day from NASA",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "apiKey",
+          "type": "password",
+          "required": true,
+          "title": "NASA API Key",
+          "description": "Get your free API key from https://api.nasa.gov",
+          "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        }
+      ]
     },
     {
       "name": "news",
@@ -42,16 +52,6 @@
       "title": "Show Upcoming Launches",
       "description": "Show the upcoming launches",
       "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "apiKey",
-      "type": "password",
-      "required": true,
-      "title": "NASA API Key",
-      "description": "Get your free API key from https://api.nasa.gov",
-      "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     }
   ],
   "dependencies": {

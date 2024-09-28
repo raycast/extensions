@@ -5,12 +5,13 @@ import Parser from "rss-parser";
 import { useState } from "react";
 import NewsListDetail from "./componenets/newsListDetail";
 import { NewsItem } from "./types/news";
+import ErrorDetail from "./componenets/error";
 
 const parser = new Parser();
 
 export default function GetLatestNews() {
   const [items, setItems] = useState<NewsItem[]>([]);
-  const { isLoading } = useFetch(ENDPOINTS.RSS, {
+  const { isLoading, error } = useFetch(ENDPOINTS.RSS, {
     async onData(data: string) {
       const feed = await parser.parseString(data);
       const items = feed.items.map((item) => ({
@@ -28,7 +29,9 @@ export default function GetLatestNews() {
     initialData: [],
   });
 
-  return (
+  return error ? (
+    <ErrorDetail error={error} />
+  ) : (
     <List isShowingDetail isLoading={isLoading}>
       {!isLoading && items.map((item) => <NewsListDetail item={item} key={item.link} />)}
     </List>
