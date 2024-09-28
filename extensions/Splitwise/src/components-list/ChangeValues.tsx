@@ -7,7 +7,7 @@ import { getCurrency_code } from "../utils/utils";
 
 import { Expense } from "../types/get_expenses.types";
 
-export const ChangeValues = ({ expense, mutate }: { expense: Expense, mutate: any }) => {
+export const ChangeValues = ({ expense, mutate }: { expense: Expense; mutate: any }) => {
   const { pop } = useNavigation();
   const [friends] = getFriends();
   const currentUser = GetCurrentUser() as any; // FETCH CURRENT USER
