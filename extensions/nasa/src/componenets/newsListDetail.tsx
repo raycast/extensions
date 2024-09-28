@@ -15,7 +15,7 @@ export default function NewsListDetail({ item }: { item: NewsItem }) {
       detail={<List.Item.Detail markdown={markdown} />}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={item.link} title={"View on NASA.gov"} />
+          <Action.OpenInBrowser url={item.link} title={"View on Nasa.gov"} />
         </ActionPanel>
       }
     />
