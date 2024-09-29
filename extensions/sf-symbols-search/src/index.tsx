@@ -174,7 +174,7 @@ const SymbolActions = (props: SymbolProps): JSX.Element => {
         key="pasteName"
         title="Paste Name"
         content={name}
-        shortcut={{ modifiers: ["shift", "cmd"], key: "v" }}
+        shortcut={{ modifiers: ["cmd"], key: "v" }}
         onPaste={() => {
           addRecentSymbol(props.symbol);
           props.refresh();
@@ -186,7 +186,7 @@ const SymbolActions = (props: SymbolProps): JSX.Element => {
         key="copyName"
         title="Copy Name"
         content={name}
-        shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
+        shortcut={{ modifiers: ["cmd"], key: "c" }}
         onCopy={() => {
           addRecentSymbol(props.symbol);
           props.refresh();
