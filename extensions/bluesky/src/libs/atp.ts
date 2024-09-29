@@ -77,6 +77,7 @@ export const getSearchPosts = async (searchTerm: string) => {
       feed: postResponse,
     };
   }
+  return null;
 };
 
 export const getTimelinePosts = async (cursor: string | null, limit = 10) => {
