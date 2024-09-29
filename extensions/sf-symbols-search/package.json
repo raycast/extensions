@@ -5,9 +5,6 @@
   "description": "Search and copy SF Symbols",
   "icon": "command-icon.png",
   "author": "peteschaffner",
-  "contributors": [
-    "atacan"
-  ],
   "license": "MIT",
   "commands": [
     {
