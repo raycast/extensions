@@ -1,5 +1,7 @@
 # Bluesky Changelog
 
+## [Fix `Search Timeline` Not Working] - {PR_MERGE_DATE}
+
 ## [Improvements] - 2023-06-26
 
 - The extension now requires a Bluesky App Password to be used.
