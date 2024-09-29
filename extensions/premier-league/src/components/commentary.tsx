@@ -72,16 +72,15 @@ export default function MatchCommentary(props: {
     });
   }
 
+  const subtitle =
+    fixture?.status === "L" ? "Live Match Commentary" : "Match Commentary";
+
   return (
     <List
       throttle
       isLoading={isLoading}
       pagination={pagination}
-      navigationTitle={
-        props.match.status === "C"
-          ? `${navigationTitle} | Match Commentary`
-          : `${navigationTitle} | Live Match Commentary`
-      }
+      navigationTitle={`${navigationTitle} | ${subtitle}`}
     >
       {fixture && (
         <List.Item
@@ -109,7 +108,7 @@ export default function MatchCommentary(props: {
         />
       )}
 
-      <List.Section title="Match Commentary">
+      <List.Section title={subtitle}>
         {data?.map((event) => {
           const filename = iconMap[event.type] || "whistle";
           const icon: Image.ImageLike = transparentIcons.includes(filename)
