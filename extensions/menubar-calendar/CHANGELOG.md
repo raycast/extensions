@@ -1,7 +1,8 @@
 # Menubar Calendar Changelog
 
-## [Open URL] - {PR_MERGE_DATE}
+## [Configure Calendar List] - {PR_MERGE_DATE}
 
+- New command Configure Calendar List: configure calendar and reminders list displayed in the menu bar
 - Press Option key to open URL in the calendar event
 - Update Calendar and Reminders UI details
 - Fix the problem of error when calling the deprecated API

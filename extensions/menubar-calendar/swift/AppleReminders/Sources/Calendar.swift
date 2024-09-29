@@ -36,8 +36,10 @@ func stringFromEventStatus(status: EKEventStatus) -> String {
 }
 
 struct KCalendar: Codable {
+    let id: String
     let title: String
     let color: String
+    let source: String
 }
 
 
@@ -93,7 +95,8 @@ func generateEventURL(for event: EKEvent) -> String {
 
         let color = calendar.cgColor?.components
         let hexColor = color != nil ? rgbaToHex(color![0], color![1], color![2]) : "#000000"
-        let calendarModel = KCalendar(title: calendar.title, color: hexColor)
+        let calendarModel = KCalendar(
+            id:calendar.calendarIdentifier,title: calendar.title, color: hexColor ,source: calendar.source.title)
 
         let calendarEventsModel = events.map {
             CalendarEvent(
@@ -118,3 +121,31 @@ func generateEventURL(for event: EKEvent) -> String {
 
     return calendarDataList
 }
+
+@raycast func getCalendarList() async throws -> [KCalendar]
+{
+    let eventStore = EKEventStore()
+
+    let granted: Bool
+    if #available(macOS 14.0, *) {
+        granted = try await eventStore.requestFullAccessToEvents()
+    } else {
+        granted = try await eventStore.requestAccess(to: .event)
+    }
+    guard granted else {
+        throw CalendarError.accessDenied
+    }
+
+    let calendars = eventStore.calendars(for: .event)
+    return calendars.map { calendar in
+        let color = calendar.cgColor?.components
+        let hexColor = color != nil ? rgbaToHex(color![0], color![1], color![2]) : "#000000"
+        return KCalendar(
+            id:calendar.calendarIdentifier,
+            title: calendar.title,
+            color: hexColor,
+            source: calendar.source.title
+        )
+    }
+}
+

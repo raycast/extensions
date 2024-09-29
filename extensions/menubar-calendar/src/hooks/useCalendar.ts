@@ -16,8 +16,10 @@ export type CalendarEvent = {
 };
 
 export type Calendar = {
+  id: string;
   title: string;
   color: string;
+  source: string;
 };
 
 export type CalendarData = {

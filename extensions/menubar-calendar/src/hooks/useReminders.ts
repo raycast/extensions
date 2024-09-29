@@ -21,15 +21,15 @@ export type Reminder = {
   completionDate: string;
   isRecurring: string;
   recurrenceRule: string;
-  list: { id: string; title: string; color: string } | null;
+  list: { id: string; title: string; color: string; isDefault: boolean } | null;
   location?: Location;
 };
 
-export type List = { id: string; title: string; color: string; isDefault: boolean };
+export type ReminderList = { id: string; title: string; color: string; isDefault: boolean };
 
 export type Data = {
   reminders: Reminder[];
-  lists: List[];
+  lists: ReminderList[];
 };
 
 export function useReminders() {

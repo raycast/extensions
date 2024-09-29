@@ -1,4 +1,16 @@
-import { Color, confirmAlert, Icon, MenuBarExtra, open, openCommandPreferences, showToast, Toast } from "@raycast/api";
+import {
+  Cache,
+  Color,
+  confirmAlert,
+  Icon,
+  launchCommand,
+  LaunchType,
+  MenuBarExtra,
+  open,
+  openCommandPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { calData, calDateTitle, calFirstColumn, calWeekTitle } from "./utils/calendar-utils";
 import { CALENDAR_APP, REMINDERS_APP, SETTINGS_APP } from "./utils/constans";
 import {
@@ -40,12 +52,13 @@ import {
   timeStampIsToday,
 } from "./utils/calendar-events-utils";
 import { format } from "date-fns";
+import { CacheKey, CCalendarList } from "./types/calendar";
 
 export default function Command() {
   const calList = calData();
 
-  const { data: calendarEvents } = useCalendar();
-  const { data: remindersEvents, isLoading, mutate } = useReminders();
+  const { data: calendarData } = useCalendar();
+  const { data: remindersData, isLoading, mutate } = useReminders();
 
   async function deleteReminder(reminder: Reminder) {
     try {
@@ -66,9 +79,21 @@ export default function Command() {
   }
 
   const reminders = useMemo(() => {
-    if (!remindersEvents) return [];
-    return remindersEvents.reminders;
-  }, [remindersEvents]);
+    if (!remindersData) return [];
+    const cache = new Cache();
+    const calendarListItemsStr = cache.get(CacheKey.CONFIGURE_LIST_ITEMS);
+    if (calendarListItemsStr) {
+      const ccListItem = JSON.parse(calendarListItemsStr) as CCalendarList[];
+      const cCalendarList = ccListItem[1].list.filter((item) => item.enabled);
+      return remindersData.reminders.filter((calendar) => {
+        if (calendar.list != null) {
+          return cCalendarList.findIndex((item) => item.id === calendar.list!.id) !== -1;
+        }
+        return true;
+      });
+    }
+    return remindersData.reminders;
+  }, [remindersData]);
 
   const reminderSections = useMemo(() => {
     const overdue: Reminder[] = [];
@@ -117,9 +142,18 @@ export default function Command() {
   }, [reminders]);
 
   const calendars = useMemo(() => {
-    if (!calendarEvents) return [];
-    return calendarEvents;
-  }, [calendarEvents]);
+    if (!calendarData) return [];
+    const cache = new Cache();
+    const calendarListItemsStr = cache.get(CacheKey.CONFIGURE_LIST_ITEMS);
+    if (calendarListItemsStr) {
+      const ccListItem = JSON.parse(calendarListItemsStr) as CCalendarList[];
+      const cCalendarList = ccListItem[0].list.filter((item) => item.enabled);
+      return calendarData.filter(
+        (calendar) => cCalendarList.findIndex((item) => item.id === calendar.calendar.id) !== -1,
+      );
+    }
+    return calendarData;
+  }, [calendarData]);
 
   const calendarEventSections = useMemo(() => {
     if (calendarView === "none") return [];
@@ -142,7 +176,7 @@ export default function Command() {
     return allCalendarEvents.sort((a, b) => a.startDate - b.startDate);
   }, [calendars]);
 
-  const eventMenubatTitle = useMemo(() => {
+  const eventMenubarTitle = useMemo(() => {
     const event = findFirstEventWithinNHours(calendarEventSections, Number(showEventsInMenubar));
     if (event.event === null) {
       return "";
@@ -174,7 +208,7 @@ export default function Command() {
   }, [calendarEventSections]);
 
   return (
-    <MenuBarExtra isLoading={isLoading} title={menubarTitle() + eventMenubatTitle} icon={menubarIcon()}>
+    <MenuBarExtra isLoading={isLoading} title={menubarTitle() + eventMenubarTitle} icon={menubarIcon()}>
       <MenuBarExtra.Item title={calDateTitle} onAction={highlightCalendar ? () => {} : undefined} />
       <MenuBarExtra.Item title={calWeekTitle()} onAction={highlightCalendar ? () => {} : undefined} />
       {calList.map((calRow, index) => (
@@ -324,6 +358,20 @@ export default function Command() {
             icon={extraItemIcon(REMINDERS_APP, Icon.BulletPoints)}
             onAction={async () => {
               await openApp(REMINDERS_APP);
+            }}
+          />
+        )}
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section>
+        {showSettings && (
+          <MenuBarExtra.Item
+            title={"Calendar List"}
+            icon={extraItemIcon(CALENDAR_APP, Icon.List)}
+            onAction={async () => {
+              await launchCommand({
+                name: "index2",
+                type: LaunchType.UserInitiated,
+              });
             }}
           />
         )}

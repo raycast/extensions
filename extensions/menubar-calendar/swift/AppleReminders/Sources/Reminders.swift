@@ -45,6 +45,29 @@ enum RemindersError: Error {
     case other
 }
 
+
+@raycast func getReminderList() async throws -> [ReminderList] {
+    let eventStore = EKEventStore()
+
+    let granted: Bool
+    if #available(macOS 14.0, *) {
+        granted = try await eventStore.requestFullAccessToReminders()
+    } else {
+        granted = try await eventStore.requestAccess(to: .reminder)
+    }
+    guard granted else {
+        throw RemindersError.accessDenied
+    }
+
+    let calendars = eventStore.calendars(for: .reminder)
+    let defaultList = eventStore.defaultCalendarForNewReminders()
+
+    let listsData = calendars.map { $0.toStruct(defaultCalendarId: defaultList?.calendarIdentifier) }
+
+    return listsData
+}
+
+
 @raycast func getData() async throws -> RemindersData {
     let eventStore = EKEventStore()
 
