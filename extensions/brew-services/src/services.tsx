@@ -1,7 +1,7 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { execaCommand } from "execa";
 import fs from "fs";
 import { cpus } from "os";
+import { runShellScript } from "./utils";
 
 export type ServiceStatus = string;
 
@@ -20,11 +20,6 @@ const brewPath: string =
     : cpus()[0].model.includes("Apple")
       ? "/opt/homebrew/bin/brew"
       : "/usr/local/bin/brew";
-
-export async function runShellScript(command: string) {
-  const { stdout } = await execaCommand(command);
-  return stdout;
-}
 
 export async function getServices(): Promise<Service[]> {
   // make sure that brewPath exists, is a file, and is executable

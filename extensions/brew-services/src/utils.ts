@@ -1,4 +1,5 @@
 import { Image, Icon, Color } from "@raycast/api";
+import { execaCommand } from "execa";
 
 export function createIcon(status: string): Image.ImageLike {
   switch (status) {
@@ -13,4 +14,9 @@ export function createIcon(status: string): Image.ImageLike {
     default:
       return { source: Icon.QuestionMark, tintColor: Color.Red };
   }
+}
+
+export async function runShellScript(command: string) {
+  const { stdout } = await execaCommand(command);
+  return stdout;
 }

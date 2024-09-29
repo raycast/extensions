@@ -6,6 +6,7 @@ import { createIcon } from "./utils";
 
 export default function Command() {
   const [services, setServices] = useState<Service[]>();
+
   useEffect(() => {
     getServices().then((service) => setServices(service));
   });
