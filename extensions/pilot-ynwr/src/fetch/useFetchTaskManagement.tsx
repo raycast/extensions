@@ -28,9 +28,9 @@ const useFetchTaskManagement = (notion: Client | undefined) => {
   const getApiIDs = async () => {
     const pref = getPreferenceValues<Pref>();
     const newApiIDS: ApiIDS = {
-      project: (pref.projectAPIID),
-      todo: (pref.todoAPIID),
-      keystone: (pref.keystoneAPIID),
+      project: pref.projectAPIID,
+      todo: pref.todoAPIID,
+      keystone: pref.keystoneAPIID,
     };
     setApiIDs(newApiIDS);
   };

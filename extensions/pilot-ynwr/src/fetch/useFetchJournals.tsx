@@ -23,8 +23,8 @@ const useFetchJournals = (notion: Client | undefined) => {
   const getApiIDs = async () => {
     const pref = getPreferenceValues<Pref>();
     const newApiIDs: ApiIDS = {
-      journal: (pref.journalAPIID),
-      project: (pref.projectAPIID),
+      journal: pref.journalAPIID,
+      project: pref.projectAPIID,
     };
     setApiIDs(newApiIDs);
   };

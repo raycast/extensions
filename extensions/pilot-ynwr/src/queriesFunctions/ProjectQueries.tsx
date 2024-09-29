@@ -11,7 +11,7 @@ import { getTimers } from "../fetch/ExportFunctions";
 import { FetchedTodos, FetchEvents, FetchJournals, FetchKeystones } from "../fetch/FetchFunctions";
 
 const getID = async () => {
-  const token = (getPreferenceValues<Pref>().projectAPIID);
+  const token = getPreferenceValues<Pref>().projectAPIID;
   return token;
 };
 
@@ -83,7 +83,7 @@ export const QueryDeleteProject = async (project: Project, cache: Cache, notion:
   if (notion === undefined) return;
 
   const qTimer: QueryDatabaseParameters = {
-    database_id: (getPreferenceValues<Pref>().timerAPIID),
+    database_id: getPreferenceValues<Pref>().timerAPIID,
     filter: {
       and: [{ property: "Projects", relation: { contains: project.id } }],
     },
@@ -91,34 +91,23 @@ export const QueryDeleteProject = async (project: Project, cache: Cache, notion:
   const resTimers = await notion?.databases.query(qTimer);
   const timers = resTimers === undefined ? [] : getTimers(resTimers);
 
-  const events = await FetchEvents(["all"], (getPreferenceValues<Pref>().eventAPIID), true, "", notion);
+  const events = await FetchEvents(["all"], getPreferenceValues<Pref>().eventAPIID, true, "", notion);
   if (typeof events === "string") {
     showToast({ title: getAPIError(events, "Events"), style: Toast.Style.Failure });
     return;
   }
-  const journals = await FetchJournals(
-    ["all"],
-    (getPreferenceValues<Pref>().journalAPIID),
-    true,
-    notion,
-  );
+  const journals = await FetchJournals(["all"], getPreferenceValues<Pref>().journalAPIID, true, notion);
   if (typeof journals === "string") {
     showToast({ title: getAPIError(journals, "Journals"), style: Toast.Style.Failure });
     return;
   }
-  const keystones = await FetchKeystones(
-    ["all"],
-    (getPreferenceValues<Pref>().keystoneAPIID),
-    true,
-    "",
-    notion,
-  );
+  const keystones = await FetchKeystones(["all"], getPreferenceValues<Pref>().keystoneAPIID, true, "", notion);
   if (typeof keystones === "string") {
     showToast({ title: getAPIError(keystones, "Keystones"), style: Toast.Style.Failure });
     return;
   }
   const links = project.links;
-  const todos = await FetchedTodos(["all"], (getPreferenceValues<Pref>().todoAPIID), true, notion);
+  const todos = await FetchedTodos(["all"], getPreferenceValues<Pref>().todoAPIID, true, notion);
   if (typeof todos === "string") {
     showToast({ title: getAPIError(todos, "Todos"), style: Toast.Style.Failure });
     return;

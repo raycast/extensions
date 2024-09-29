@@ -28,10 +28,10 @@ const useFetchMenuBar = (notion: Client | undefined) => {
   const getApiIDS = async () => {
     const pref = getPreferenceValues<Pref>();
     const newApiIDs: APIIDS = {
-      project: (pref.projectAPIID),
-      timer: (pref.timerAPIID),
-      event: (pref.eventAPIID),
-      keystone: (pref.keystoneAPIID),
+      project: pref.projectAPIID,
+      timer: pref.timerAPIID,
+      event: pref.eventAPIID,
+      keystone: pref.keystoneAPIID,
     };
     setApiIDS(newApiIDs);
   };

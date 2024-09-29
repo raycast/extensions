@@ -107,12 +107,12 @@ const useFetchGeneralPilot = (notion: Client | undefined, needRefresh: boolean) 
     const pref = getPreferenceValues<Pref>();
 
     const newApiIDs: ApiIDs = {
-      keystone: (pref.keystoneAPIID),
-      event: (pref.eventAPIID),
-      project: (pref.projectAPIID),
-      link: (pref.linkAPIID),
-      journal: (pref.journalAPIID),
-      timer: (pref.timerAPIID),
+      keystone: pref.keystoneAPIID,
+      event: pref.eventAPIID,
+      project: pref.projectAPIID,
+      link: pref.linkAPIID,
+      journal: pref.journalAPIID,
+      timer: pref.timerAPIID,
     };
     setApiIDs(newApiIDs);
     return newApiIDs;

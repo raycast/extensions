@@ -1,12 +1,7 @@
 import { Action, ActionPanel, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 import { CalItem, CalSection, Evnt, Keystone, Project, Todo } from "../../interfaces/interfaceItems";
-import {
-  getDateAndMohth,
-  getDayDateAndMouth,
-  getMounthStringByMonthNumber,
-  progbar,
-} from "../../tools/generalTools";
+import { getDateAndMohth, getDayDateAndMouth, getMounthStringByMonthNumber, progbar } from "../../tools/generalTools";
 import UseOAuth from "../../fetch/useOAuth";
 import useFetchCalendar from "../../fetch/useFetchCalendar";
 import { QueryToogleTodo } from "../../queriesFunctions/TodosQueries";

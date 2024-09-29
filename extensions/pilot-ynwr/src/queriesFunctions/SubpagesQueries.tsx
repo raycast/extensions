@@ -5,7 +5,7 @@ import { Pref } from "../interfaces/interfaceItems";
 import { getAPIError } from "../tools/generalTools";
 
 const getToken = async () => {
-  const token = (getPreferenceValues<Pref>().projectAPIID);
+  const token = getPreferenceValues<Pref>().projectAPIID;
   return token;
 };
 

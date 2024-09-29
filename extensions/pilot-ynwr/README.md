@@ -27,7 +27,7 @@ First, give us your pseudo and your timezone.
 
 Then, you will have to enter the page link of each database from the Pilot Notion page duplicated.
 
-> Find each id in your database page url from Notion : 
+> Find each id in your database page url from Notion :
 > https//www.notion.so/ [PSEUDO](can be null) / [ID NEEDED] ?v=....
 
 ### Login in to your Notion account

@@ -13,7 +13,7 @@ import { getAPIError } from "../tools/generalTools";
 import { getJournals } from "../fetch/ExportFunctions";
 
 const getToken = async () => {
-  const token = (getPreferenceValues<Pref>().todoAPIID);
+  const token = getPreferenceValues<Pref>().todoAPIID;
   return token;
 };
 
@@ -30,7 +30,7 @@ export const QueryToogleTodo = async (todo: Todo, notion: Client | undefined) =>
   const bool = !todo.checkbox;
 
   if (bool) {
-    const jouralAPIID = (getPreferenceValues<Pref>().journalAPIID);
+    const jouralAPIID = getPreferenceValues<Pref>().journalAPIID;
     const q = GetJournalsQuery(true, todo.project.name, false, today);
     const resJournal = await notion?.databases
       .query({ database_id: jouralAPIID as string, ...q } as QueryDatabaseParameters)

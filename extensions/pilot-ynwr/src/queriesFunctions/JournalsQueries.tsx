@@ -2,10 +2,10 @@ import { getPreferenceValues, showToast } from "@raycast/api";
 import { APIResponseError, Client } from "@notionhq/client";
 import { CreatePageParameters, UpdatePageParameters } from "@notionhq/client/build/src/api-endpoints";
 import { Pref } from "../interfaces/interfaceItems";
-import { getAPIError,  } from "../tools/generalTools";
+import { getAPIError } from "../tools/generalTools";
 
 const getID = async () => {
-  const token = (getPreferenceValues<Pref>().journalAPIID);
+  const token = getPreferenceValues<Pref>().journalAPIID;
   return token;
 };
 
