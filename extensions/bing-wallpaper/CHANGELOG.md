@@ -1,5 +1,9 @@
 # Bing Wallpaper Changelog
 
+## [Remove Error Dialog] - {PR_MERGE_DATE}
+
+- Remove error dialog that pops up not as expected
+
 ## [Fix error] - 2024-05-21
 
 - Fix the problem of not being able to set wallpaper
