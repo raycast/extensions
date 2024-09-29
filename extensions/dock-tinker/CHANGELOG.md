@@ -1,5 +1,12 @@
 # Dock Tinker Changelog
 
+## [New Commands] - {PR_MERGE_DATE}
+
+- New command **Toggle Dock Size** to set the icon size of Dock items in pixels.
+- New command **Toggle Hide Animation Time** to toggle the Dock hide animation time.
+- New command **Toggle Show Recents** to show recently used apps in a separate section of the Dock.
+- Remove invalid commands.
+
 ## [Small Spacer] - 2024-09-03
 
 - Add Spacer to Dock command supports small spacer.
