@@ -1,5 +1,9 @@
 # Jira Changelog
 
+## [Add ability to copy issue as formatted markdown link] - 2024-09-29
+
+- Copies current issue as a formatted markdown link in the format: `[issue.key - issue.fields.summary]`
+
 ## [Persist My Filters value when closing command] - 2024-09-14
 
 - Persist My Filters value when closing command allowing the command to fetch the issues for the latest selected filter when opening the command anew.
