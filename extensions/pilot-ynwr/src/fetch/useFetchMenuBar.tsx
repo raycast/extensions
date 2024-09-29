@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { FetchActiveProjects, FetchActiveTimer, FetchTodayEvents, FetchTodayKeystones } from "./FetchFunctions";
 import { Evnt, Keystone, Pref, Project, Timer } from "../interfaces/interfaceItems";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { getAPIError, getAPIidFromLink } from "../tools/generalTools";
+import { getAPIError } from "../tools/generalTools";
 import TimezoneHook from "../tools/TimezoneHook";
 
 interface APIIDS {
@@ -28,10 +28,10 @@ const useFetchMenuBar = (notion: Client | undefined) => {
   const getApiIDS = async () => {
     const pref = getPreferenceValues<Pref>();
     const newApiIDs: APIIDS = {
-      project: getAPIidFromLink(pref.projectAPIID),
-      timer: getAPIidFromLink(pref.timerAPIID),
-      event: getAPIidFromLink(pref.eventAPIID),
-      keystone: getAPIidFromLink(pref.keystoneAPIID),
+      project: (pref.projectAPIID),
+      timer: (pref.timerAPIID),
+      event: (pref.eventAPIID),
+      keystone: (pref.keystoneAPIID),
     };
     setApiIDS(newApiIDs);
   };

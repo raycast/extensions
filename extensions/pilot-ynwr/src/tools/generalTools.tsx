@@ -276,7 +276,7 @@ export const getAPIError = (code: string, type: string) => {
 
 export const getAPIidFromLink = (link: string) => {
   const splitLinked = link.split("/");
-  const apiID = splitLinked[3].split("?").shift();
+  const apiID = splitLinked[4].split("?").shift();
   if (apiID === undefined) {
     return "misss";
   }

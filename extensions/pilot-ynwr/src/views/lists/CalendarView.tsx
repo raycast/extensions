@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { CalItem, CalSection, Evnt, Keystone, Project, Todo } from "../../interfaces/interfaceItems";
 import {
   getDateAndMohth,
-  getDateMounthAndNumber,
   getDayDateAndMouth,
   getMounthStringByMonthNumber,
   progbar,
@@ -209,7 +208,7 @@ const CalendarView = () => {
     return (
       <List.Item
         title={item.name}
-        icon={"⌚"}
+        icon={"🤝"}
         id={"event" + item.id}
         subtitle={eventSub}
         accessories={accessories}
@@ -651,7 +650,7 @@ const filterByProject = (items: CalItem[], filter: string) => {
 };
 
 const retrieveDateInfos = (dateInfos: string, showDetail: boolean) => {
-  const date = showDetail ? getDateMounthAndNumber(dateInfos.slice(0, 10)) : getDayDateAndMouth(dateInfos.slice(0, 10));
+  const date = showDetail ? getDateAndMohth(dateInfos.slice(0, 10)) : getDayDateAndMouth(dateInfos.slice(0, 10));
   const hours = dateInfos.slice(11);
   return date + (showDetail ? "" : ", " + hours);
 };

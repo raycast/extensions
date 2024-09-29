@@ -10,7 +10,7 @@ import {
   FetchTodayEvents,
   FetchTodayKeystones,
 } from "./FetchFunctions";
-import { getAPIError, getAPIidFromLink } from "../tools/generalTools";
+import { getAPIError } from "../tools/generalTools";
 import { TE_Notion_undefined } from "../views/toasts/ErrorToasts";
 import TimezoneHook from "../tools/TimezoneHook";
 
@@ -107,12 +107,12 @@ const useFetchGeneralPilot = (notion: Client | undefined, needRefresh: boolean) 
     const pref = getPreferenceValues<Pref>();
 
     const newApiIDs: ApiIDs = {
-      keystone: getAPIidFromLink(pref.keystoneAPIID),
-      event: getAPIidFromLink(pref.eventAPIID),
-      project: getAPIidFromLink(pref.projectAPIID),
-      link: getAPIidFromLink(pref.linkAPIID),
-      journal: getAPIidFromLink(pref.journalAPIID),
-      timer: getAPIidFromLink(pref.timerAPIID),
+      keystone: (pref.keystoneAPIID),
+      event: (pref.eventAPIID),
+      project: (pref.projectAPIID),
+      link: (pref.linkAPIID),
+      journal: (pref.journalAPIID),
+      timer: (pref.timerAPIID),
     };
     setApiIDs(newApiIDs);
     return newApiIDs;

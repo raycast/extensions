@@ -164,50 +164,50 @@
     },
     {
       "name": "projectAPIID",
-      "description": "Project Link of your DB in your Notion Pilot Page",
-      "title": "Project DB Link",
+      "description": "Project ID of your DB in your Notion Pilot Page - Docs at pilot-docs.romubuntu.dev",
+      "title": "Project DB ID",
       "type": "textfield",
       "required": true
     },
     {
       "name": "eventAPIID",
-      "description": "Event Link of your DB in your Notion Pilot Page",
-      "title": "Event DB Link",
+      "description": "Event ID of your DB in your Notion Pilot Page - Docs at pilot-docs.romubuntu.dev",
+      "title": "Event DB ID",
       "type": "textfield",
       "required": true
     },
     {
       "name": "journalAPIID",
-      "description": "Journal Link of your DB in your Notion Pilot Page",
-      "title": "Journal DB Link",
+      "description": "Journal ID of your DB in your Notion Pilot Page - Docs at pilot-docs.romubuntu.dev",
+      "title": "Journal DB ID",
       "type": "textfield",
       "required": true
     },
     {
       "name": "keystoneAPIID",
-      "description": "Keystone Link of your DB in your Notion Pilot Page",
-      "title": "Keystone DB Link",
+      "description": "Keystone ID of your DB in your Notion Pilot Page - Docs at pilot-docs.romubuntu.dev",
+      "title": "Keystone DB ID",
       "type": "textfield",
       "required": true
     },
     {
       "name": "linkAPIID",
-      "description": "Link Link of your DB in your Notion Pilot Page",
-      "title": "Link DB Link",
+      "description": "Link ID of your DB in your Notion Pilot Page - Docs at pilot-docs.romubuntu.dev",
+      "title": "Link DB ID",
       "type": "textfield",
       "required": true
     },
     {
       "name": "timerAPIID",
-      "description": "Timer Link of your DB in your Notion Pilot Page",
-      "title": "Timer DB Link",
+      "description": "Timer ID of your DB in your Notion Pilot Page - Docs at pilot-docs.romubuntu.dev",
+      "title": "Timer DB ID",
       "type": "textfield",
       "required": true
     },
     {
       "name": "todoAPIID",
-      "description": "Todo Link of your DB in your Notion Pilot Page",
-      "title": "Todo DB Link",
+      "description": "Todo ID of your DB in your Notion Pilot Page - Docs at pilot-docs.romubuntu.dev",
+      "title": "Todo DB ID",
       "type": "textfield",
       "required": true
     }

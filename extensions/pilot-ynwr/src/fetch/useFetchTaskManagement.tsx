@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Client } from "@notionhq/client";
 import { Keystone, Pref, Project, Todo } from "../interfaces/interfaceItems";
 import { FetchActiveProjects, FetchedTodos, FetchKeystones } from "./FetchFunctions";
-import { getAPIError, getAPIidFromLink } from "../tools/generalTools";
+import { getAPIError } from "../tools/generalTools";
 import TimezoneHook from "../tools/TimezoneHook";
 
 interface ApiIDS {
@@ -28,9 +28,9 @@ const useFetchTaskManagement = (notion: Client | undefined) => {
   const getApiIDs = async () => {
     const pref = getPreferenceValues<Pref>();
     const newApiIDS: ApiIDS = {
-      project: getAPIidFromLink(pref.projectAPIID),
-      todo: getAPIidFromLink(pref.todoAPIID),
-      keystone: getAPIidFromLink(pref.keystoneAPIID),
+      project: (pref.projectAPIID),
+      todo: (pref.todoAPIID),
+      keystone: (pref.keystoneAPIID),
     };
     setApiIDs(newApiIDS);
   };

@@ -2,10 +2,10 @@ import { getPreferenceValues, showToast } from "@raycast/api";
 import { APIResponseError, Client } from "@notionhq/client";
 import { CreatePageParameters, UpdatePageParameters } from "@notionhq/client/build/src/api-endpoints";
 import { Pref } from "../interfaces/interfaceItems";
-import { getAPIError, getAPIidFromLink } from "../tools/generalTools";
+import { getAPIError } from "../tools/generalTools";
 
 const getID = async () => {
-  const token = getAPIidFromLink(getPreferenceValues<Pref>().eventAPIID);
+  const token = (getPreferenceValues<Pref>().eventAPIID);
   return token;
 };
 
@@ -36,7 +36,7 @@ const addEventJson = (name: string, start: string, end: string, projectID: strin
   return {
     icon: {
       type: "emoji",
-      emoji: "📋",
+      emoji: "🤝",
     },
     parent: {
       type: "database_id",

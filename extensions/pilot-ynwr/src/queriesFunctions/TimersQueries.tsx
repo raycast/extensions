@@ -10,13 +10,13 @@ import { GetJournalsQuery } from "../fetch/GetQuery";
 import { addJournalJson } from "./JournalsQueries";
 import { Pref, Project } from "../interfaces/interfaceItems";
 import { getPreferenceValues, showToast } from "@raycast/api";
-import { getAPIError, getAPIidFromLink } from "../tools/generalTools";
+import { getAPIError } from "../tools/generalTools";
 import { getJournals } from "../fetch/ExportFunctions";
 import { FetchActiveTimer } from "../fetch/FetchFunctions";
 
 const getToken = async () => {
   {
-    const token = getAPIidFromLink(getPreferenceValues<Pref>().timerAPIID);
+    const token = (getPreferenceValues<Pref>().timerAPIID);
     return token;
   }
 };
@@ -89,7 +89,7 @@ export const QueryStartTimer = async (date: string, notion: Client | undefined) 
     return showToast({ title: getAPIError(e.code as string, "Timer") });
   });
   if (notion === undefined) return;
-  await FetchActiveTimer(["all"], getAPIidFromLink(getPreferenceValues<Pref>().timerAPIID), true, notion);
+  await FetchActiveTimer(["all"], (getPreferenceValues<Pref>().timerAPIID), true, notion);
   return true;
 };
 
@@ -132,7 +132,7 @@ export const QueryStopTimer = async (
   project: Project,
   notion: Client | undefined,
 ) => {
-  const jouralAPIID = getAPIidFromLink(getPreferenceValues<Pref>().journalAPIID);
+  const jouralAPIID = (getPreferenceValues<Pref>().journalAPIID);
   const today = new Date().toISOString().slice(0, 10);
   const q = GetJournalsQuery(true, project.name, false, today);
   const resJournal = await notion?.databases
@@ -165,7 +165,7 @@ export const QueryStopTimer = async (
       });
   }
   if (notion === undefined) return;
-  await FetchActiveTimer(["all"], getAPIidFromLink(getPreferenceValues<Pref>().timerAPIID), true, notion);
+  await FetchActiveTimer(["all"], (getPreferenceValues<Pref>().timerAPIID), true, notion);
   return true;
 };
 

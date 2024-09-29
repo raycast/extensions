@@ -6,12 +6,12 @@ import {
 } from "@notionhq/client/build/src/api-endpoints";
 import { Cache, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { Pref, Project } from "../interfaces/interfaceItems";
-import { getAPIError, getAPIidFromLink } from "../tools/generalTools";
+import { getAPIError } from "../tools/generalTools";
 import { getTimers } from "../fetch/ExportFunctions";
 import { FetchedTodos, FetchEvents, FetchJournals, FetchKeystones } from "../fetch/FetchFunctions";
 
 const getID = async () => {
-  const token = getAPIidFromLink(getPreferenceValues<Pref>().projectAPIID);
+  const token = (getPreferenceValues<Pref>().projectAPIID);
   return token;
 };
 
@@ -83,7 +83,7 @@ export const QueryDeleteProject = async (project: Project, cache: Cache, notion:
   if (notion === undefined) return;
 
   const qTimer: QueryDatabaseParameters = {
-    database_id: getAPIidFromLink(getPreferenceValues<Pref>().timerAPIID),
+    database_id: (getPreferenceValues<Pref>().timerAPIID),
     filter: {
       and: [{ property: "Projects", relation: { contains: project.id } }],
     },
@@ -91,14 +91,14 @@ export const QueryDeleteProject = async (project: Project, cache: Cache, notion:
   const resTimers = await notion?.databases.query(qTimer);
   const timers = resTimers === undefined ? [] : getTimers(resTimers);
 
-  const events = await FetchEvents(["all"], getAPIidFromLink(getPreferenceValues<Pref>().eventAPIID), true, "", notion);
+  const events = await FetchEvents(["all"], (getPreferenceValues<Pref>().eventAPIID), true, "", notion);
   if (typeof events === "string") {
     showToast({ title: getAPIError(events, "Events"), style: Toast.Style.Failure });
     return;
   }
   const journals = await FetchJournals(
     ["all"],
-    getAPIidFromLink(getPreferenceValues<Pref>().journalAPIID),
+    (getPreferenceValues<Pref>().journalAPIID),
     true,
     notion,
   );
@@ -108,7 +108,7 @@ export const QueryDeleteProject = async (project: Project, cache: Cache, notion:
   }
   const keystones = await FetchKeystones(
     ["all"],
-    getAPIidFromLink(getPreferenceValues<Pref>().keystoneAPIID),
+    (getPreferenceValues<Pref>().keystoneAPIID),
     true,
     "",
     notion,
@@ -118,7 +118,7 @@ export const QueryDeleteProject = async (project: Project, cache: Cache, notion:
     return;
   }
   const links = project.links;
-  const todos = await FetchedTodos(["all"], getAPIidFromLink(getPreferenceValues<Pref>().todoAPIID), true, notion);
+  const todos = await FetchedTodos(["all"], (getPreferenceValues<Pref>().todoAPIID), true, notion);
   if (typeof todos === "string") {
     showToast({ title: getAPIError(todos, "Todos"), style: Toast.Style.Failure });
     return;
