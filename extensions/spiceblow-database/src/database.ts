@@ -119,35 +119,44 @@ export async function checkConnection(connectionString: string, databaseType: "p
     }
   }
 }
-
 export function renderColumnValue(col: ColumnInfo, value: Json) {
+  if (value === null) {
+    return "";
+  }
   let text = String(value);
+  // console.log(JSON.stringify(col, null, 2));
   if (databaseType === "postgres") {
-    if (col.type === "bytea") {
+    if (col.typeId === pgTypes.builtins.BYTEA) {
       text = "bytes";
-    } else if (col.type === "byte") {
+    } else if (col.typeId === pgTypes.builtins.CHAR) {
       text = "byte";
-    } else if (col.type === "json" || col.type === "jsonb") {
+    } else if (col.typeId === pgTypes.builtins.JSON || col.typeId === pgTypes.builtins.JSONB) {
       text = JSON.stringify(value, ellipsisReviver);
-    } else if (col.type === "xml") {
+    } else if (col.typeId === pgTypes.builtins.XML) {
       text = "XML data";
-    } else if (col.type === "tsvector") {
+    } else if (col.typeId === pgTypes.builtins.TSVECTOR) {
       text = "vector";
-    } else if (col.type === "interval") {
+    } else if (col.typeId === pgTypes.builtins.INTERVAL) {
       text = String(value);
     } else {
       text = String(value);
     }
   } else {
-    if (col.type === "blob") {
+    if (
+      col.typeId === mysql.Types.BLOB ||
+      col.typeId === mysql.Types.TINY_BLOB ||
+      col.typeId === mysql.Types.MEDIUM_BLOB ||
+      col.typeId === mysql.Types.LONG_BLOB
+    ) {
       text = "bytes";
-    } else if (col.type === "json") {
+    } else if (col.typeId === mysql.Types.JSON) {
       text = JSON.stringify(value, ellipsisReviver);
-    } else if (col.type === "xml") {
-      text = "XML data";
     } else {
       text = String(value);
     }
+  }
+  if (text.startsWith("[object Object]")) {
+    text = JSON.stringify(text, null, 2);
   }
   return text;
 }
@@ -185,6 +194,8 @@ export function isSearchableColumn(col: ColumnInfo) {
     mysql.Types.FLOAT,
     mysql.Types.DOUBLE,
     mysql.Types.ENUM,
+    mysql.Types.VAR_STRING,
+    mysql.Types.STRING,
   ];
 
   if (databaseType === "postgres") {
@@ -232,7 +243,7 @@ async function generateSearchCondition({
         schema: schema || "",
         tableInfo,
         searchText,
-        databaseType: databaseType === "postgres" ? "postgres" : "mysql",
+        databaseType: databaseType,
         query: query || "",
         namespace,
       },
@@ -998,14 +1009,32 @@ export function getFieldType(dataTypeID: number) {
         return "int";
       case mysql.Types.FLOAT:
         return "float";
+      case mysql.Types.DOUBLE:
+        return "double";
       case mysql.Types.VARCHAR:
         return "varchar";
       case mysql.Types.STRING:
         return "char";
+      case mysql.Types.VAR_STRING:
+        return "varchar";
       case mysql.Types.DATE:
         return "date";
       case mysql.Types.TIMESTAMP:
         return "timestamp";
+      case mysql.Types.DATETIME:
+        return "datetime";
+      case mysql.Types.TIME:
+        return "time";
+      case mysql.Types.TINY:
+        return "tinyint";
+      case mysql.Types.SHORT:
+        return "smallint";
+      case mysql.Types.YEAR:
+        return "year";
+      case mysql.Types.NEWDECIMAL:
+        return "decimal";
+      case mysql.Types.GEOMETRY:
+        return "geometry";
       default:
         return "datatype " + dataTypeID;
     }
@@ -1097,11 +1126,12 @@ export async function findRowsForUpdate({ allValues }: TableRowDeleteParams) {
       if (item.oldValue == null) {
         return false;
       }
+
       if (item.isPrimaryKey) {
         return true;
       }
 
-      return true;
+      return isSearchableColumn(item);
     });
     for (const [i, item] of filterable.entries()) {
       if (databaseType === "postgres") {

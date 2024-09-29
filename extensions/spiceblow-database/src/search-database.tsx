@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  Cache,
   Detail,
   Form,
   Icon,
@@ -10,7 +11,6 @@ import {
   showToast,
   Toast,
   useNavigation,
-  Cache,
 } from "@raycast/api";
 import { usePromise, withAccessToken } from "@raycast/utils";
 import { fetch } from "undici";
@@ -21,6 +21,7 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import * as databaseFunctions from "./database.js";
 import { getRequestsCount, incrementRequestsCount, notifyError } from "./raycast";
 import {
+  apiUrl,
   createBuyLink,
   generateRandomId,
   getDatabaseConnectionType,
@@ -31,7 +32,6 @@ import {
   isImageUrl,
   isTruthy,
   isValidUrl,
-  apiUrl,
   validateGoogleToken,
 } from "./utils";
 
@@ -39,6 +39,7 @@ import dedent from "string-dedent";
 import { createClient } from "./generated/client-database";
 
 import { SQLStatement } from "sql-template-strings";
+import { renderColumnValue } from "./database.js";
 import { useGlobalState } from "./state";
 import { CustomQueryList, Json, StoredDatabase, TableInfo } from "./types";
 
@@ -1178,7 +1179,7 @@ function EditRow({
     }
     const col = tableInfo.columns.find((x) => x.columnName === fieldName)!;
 
-    if (newValue !== databaseToStringValue(col, row?.[fieldName])) {
+    if (newValue !== renderColumnValue(col, row?.[fieldName])) {
       setChangedFields((prev) => new Set(prev).add(fieldName));
     } else {
       setChangedFields((prev) => {
@@ -1250,7 +1251,7 @@ function EditRow({
     >
       {tableInfo?.columns.map((column) => {
         const canBeUpdated = column.originalColumnName && column.tableName;
-        const value = databaseToStringValue(column, formValues[column.columnName]);
+        const value = renderColumnValue(column, formValues[column.columnName]);
 
         let C = Form.TextField;
         if (value.split("\n").length > 1) {
@@ -1296,19 +1297,6 @@ function EditRow({
       })}
     </Form>
   );
-}
-
-function databaseToStringValue(column: TableInfo["columns"][number], x: Json) {
-  let value: string = "";
-  if (value === null) {
-    return "";
-  }
-
-  value = String(x ?? "");
-  if (value === "[object Object]") {
-    value = JSON.stringify(x, null, 2);
-  }
-  return value;
 }
 
 function DatabasesDropdown() {
