@@ -1,5 +1,9 @@
 # Shell History Changelog
 
+## [Fix Display Error] - {PR_MERGE_DATE}
+
+- New Setting: `History Timestamp` to fix the display error of Zsh history
+
 ## [Auto Close Window] - 2024-07-11
 
 - Automatically close window after performing an action
