@@ -31,6 +31,9 @@ import { LocalStorage } from "@raycast/api";
 import { clearCache } from "../utils/cacheStore";
 import "cross-fetch/polyfill";
 import { getPreferences } from "../utils/preference";
+import FormData from "cross-fetch";
+//@ts-expect-error Incompatible FormData Types
+global.FormData = FormData; // we do this to make atproto client happy
 
 const agent = new AtpAgent({
   service: getPreferences().service,
