@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { getMatchCommentary } from "../api";
+import { getFixture, getMatchCommentary } from "../api";
 import { Fixture } from "../types";
+import { convertToLocalTime } from "../utils";
 
 const iconMap: Record<string, string> = {
   "end 1": "time-half",
@@ -22,6 +23,9 @@ export default function MatchCommentary(props: {
   match: Fixture;
   title: string;
 }) {
+  const { data: fixture, revalidate: refetch } = usePromise(getFixture, [
+    props.match.id,
+  ]);
   const { data, isLoading, pagination, revalidate } = usePromise(
     (fixtureId) =>
       async ({ page = 0 }) => {
@@ -30,6 +34,44 @@ export default function MatchCommentary(props: {
     [props.match.id],
   );
 
+  const navigationTitle =
+    !fixture || fixture.status === "U"
+      ? props.title
+      : `${fixture.teams[0].team.name} ${fixture.teams[0].score} - ${fixture.teams[1].score} ${fixture.teams[1].team.name}`;
+
+  const accessories: List.Item.Accessory[] = [];
+
+  if (fixture?.attendance) {
+    accessories.push({
+      text: fixture?.attendance?.toString(),
+      tooltip: "Attendance",
+      icon: Icon.TwoPeople,
+    });
+  }
+
+  if (fixture?.matchOfficials.length) {
+    const referee = fixture?.matchOfficials.find((o) => o.role === "MAIN");
+    const varReferee = fixture?.matchOfficials.find((o) => o.role === "VAR");
+    accessories.push(
+      {
+        text: referee?.name.display,
+        tooltip: "Referee",
+        icon: Icon.Stopwatch,
+      },
+      {
+        text: varReferee?.name.display,
+        tooltip: "VAR",
+        icon: Icon.Video,
+      },
+    );
+  }
+
+  if (fixture?.status === "U") {
+    accessories.push({
+      date: new Date(Number(fixture?.kickoff.millis)),
+    });
+  }
+
   return (
     <List
       throttle
@@ -37,50 +79,66 @@ export default function MatchCommentary(props: {
       pagination={pagination}
       navigationTitle={
         props.match.status === "C"
-          ? `${props.title} | Match Commentary`
-          : `${props.title} | Live Match Commentary`
+          ? `${navigationTitle} | Match Commentary`
+          : `${navigationTitle} | Live Match Commentary`
       }
     >
-      {data?.map((event) => {
-        const filename = iconMap[event.type] || "whistle";
-        const icon: Image.ImageLike = transparentIcons.includes(filename)
-          ? {
-              source: `match/${filename}.svg`,
-              tintColor:
-                event.type === "own goal" ? Color.Red : Color.PrimaryText,
-            }
-          : `match/${filename}.svg`;
-
-        const title = textLabelIcons.includes(event.type)
-          ? event.text
-          : `${event.time?.label}'`;
-
-        const subtitle = textLabelIcons.includes(event.type) ? "" : event.text;
-
-        return (
-          <List.Item
-            key={event.id}
-            title={title}
-            subtitle={subtitle}
-            icon={icon}
-            keywords={[title, subtitle]}
-            actions={
-              <ActionPanel>
-                {props.match.status === "L" && (
-                  <Action
-                    title="Refresh"
-                    icon={Icon.RotateClockwise}
-                    onAction={revalidate}
-                  />
-                )}
-                <Action.OpenInBrowser
-                  url={`https://www.premierleague.com/match/${props.match.id}`}
+      {fixture && (
+        <List.Item
+          title={convertToLocalTime(fixture.kickoff.label, "HH:mm") || "TBC"}
+          subtitle={`${fixture.ground.name}, ${fixture.ground.city}`}
+          icon={Icon.Clock}
+          accessories={accessories}
+          actions={
+            <ActionPanel>
+              {props.match.status === "L" && (
+                <Action
+                  title="Refresh"
+                  icon={Icon.RotateClockwise}
+                  onAction={() => {
+                    refetch();
+                    revalidate();
+                  }}
                 />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+              )}
+              <Action.OpenInBrowser
+                url={`https://www.premierleague.com/match/${props.match.id}`}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
+
+      <List.Section title="Match Commentary">
+        {data?.map((event) => {
+          const filename = iconMap[event.type] || "whistle";
+          const icon: Image.ImageLike = transparentIcons.includes(filename)
+            ? {
+                source: `match/${filename}.svg`,
+                tintColor:
+                  event.type === "own goal" ? Color.Red : Color.PrimaryText,
+              }
+            : `match/${filename}.svg`;
+
+          const title = textLabelIcons.includes(event.type)
+            ? event.text
+            : `${event.time?.label}'`;
+
+          const subtitle = textLabelIcons.includes(event.type)
+            ? ""
+            : event.text;
+
+          return (
+            <List.Item
+              key={event.id}
+              title={title}
+              subtitle={subtitle}
+              icon={icon}
+              keywords={[title, subtitle]}
+            />
+          );
+        })}
+      </List.Section>
     </List>
   );
 }

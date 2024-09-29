@@ -7,7 +7,7 @@
 - Fixed incorrect player record stats by calling the API for accurate data.
 
 ## [Seamless Pagination] - 2024-09-24
-- Incorporated the `usePromise` utility for seamless pagination, providing a more efficient and user-friendly experience.
+- Incorporated the usePromise utility for seamless pagination, providing a more efficient and user-friendly experience.
 
 ## [Data Refinements] - 2023-02-21
 - Improved accuracy and completeness of fixture and result data.
