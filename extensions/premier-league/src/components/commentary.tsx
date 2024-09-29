@@ -134,6 +134,20 @@ export default function MatchCommentary(props: {
               subtitle={subtitle}
               icon={icon}
               keywords={[title, subtitle]}
+              actions={
+                <ActionPanel>
+                  {props.match.status === "L" && (
+                    <Action
+                      title="Refresh"
+                      icon={Icon.RotateClockwise}
+                      onAction={() => {
+                        refetch();
+                        revalidate();
+                      }}
+                    />
+                  )}
+                </ActionPanel>
+              }
             />
           );
         })}
