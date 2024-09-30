@@ -24,6 +24,7 @@ import {
 
 import { getPriorityIcon, isOverdue, isToday, isTomorrow, truncate } from "./helpers";
 import { Priority, Reminder, useData } from "./hooks/useData";
+import { sortByDate } from "./hooks/useViewReminders";
 
 const REMINDERS_FILE_ICON = "/System/Applications/Reminders.app";
 
@@ -46,7 +47,10 @@ export default function Command() {
     const upcoming: Reminder[] = [];
     const other: Reminder[] = [];
 
-    reminders?.forEach((reminder: Reminder) => {
+    const { sortMenuBarRemindersByDueDate } = getPreferenceValues<Preferences.MenuBar>();
+    const sortedReminders = sortMenuBarRemindersByDueDate ? reminders.sort(sortByDate) : reminders;
+
+    sortedReminders?.forEach((reminder: Reminder) => {
       if (reminder.isCompleted) return;
 
       if (!reminder.dueDate) {
@@ -64,15 +68,6 @@ export default function Command() {
         }
       }
     });
-
-    const sortByDueDate = (a: Reminder, b: Reminder) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime();
-
-    if (getPreferenceValues()["sortMenuBarRemindersByDueDate"]) {
-      overdue.sort(sortByDueDate);
-      today.sort(sortByDueDate);
-      tomorrow.sort(sortByDueDate);
-      upcoming.sort(sortByDueDate);
-    }
 
     const sections = [
       { title: "Overdue", items: overdue },
