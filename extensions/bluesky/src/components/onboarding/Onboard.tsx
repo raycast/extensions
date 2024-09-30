@@ -3,7 +3,7 @@ import { OnboardingImageMd, OnboardingTips, OnboardingTitleMd } from "../../util
 
 const Onboard = () => {
   const { pop } = useNavigation();
-  const markdown = OnboardingTitleMd + (`\n- ${OnboardingTips.join(`\n- `)}`) + OnboardingImageMd;
+  const markdown = OnboardingTitleMd + `\n- ${OnboardingTips.join(`\n- `)}` + OnboardingImageMd;
 
   return (
     <Detail
