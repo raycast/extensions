@@ -1,6 +1,6 @@
 # Life Progress Changelog
 
-## [Refactor extension] - {PR_MERGE_DATE}
+## [Refactor extension] - 2024-09-30
 
 - Refactor extension to simplify the code and logic
 - Remove unused feature: birthday celebrations
