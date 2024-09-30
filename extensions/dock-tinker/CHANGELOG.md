@@ -1,6 +1,6 @@
 # Dock Tinker Changelog
 
-## [New Commands] - {PR_MERGE_DATE}
+## [New Commands] - 2024-09-30
 
 - New command **Toggle Dock Size** to set the icon size of Dock items in pixels.
 - New command **Toggle Hide Animation Time** to toggle the Dock hide animation time.
