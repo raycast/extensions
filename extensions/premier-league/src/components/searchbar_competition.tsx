@@ -1,10 +1,5 @@
 import { List } from "@raycast/api";
 
-interface Club {
-  title: string;
-  value: string;
-}
-
 export const competitions = [
   {
     title: "Premier League",
@@ -32,15 +27,12 @@ export const competitions = [
   },
 ];
 
-export default function SearchBarAccessory(props: {
+export default function SearchBarCompetition(props: {
   type: string;
   selected: string;
   onSelect: React.Dispatch<React.SetStateAction<string>>;
-  clubs?: Club[];
+  data: { title: string; value: string }[];
 }) {
-  const options =
-    props.type === "competition" ? competitions : props.clubs || [];
-
   return (
     <List.Dropdown
       tooltip={
@@ -51,7 +43,7 @@ export default function SearchBarAccessory(props: {
       value={props.selected}
       onChange={props.onSelect}
     >
-      {options.map(({ title, value }) => {
+      {props.data.map(({ title, value }) => {
         return <List.Dropdown.Item key={value} value={value} title={title} />;
       })}
     </List.Dropdown>
