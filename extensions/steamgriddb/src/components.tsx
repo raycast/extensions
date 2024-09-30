@@ -69,7 +69,7 @@ export const ImagePreview = ({ game }: { game: SGDBGame }) => {
             image.height.toString(),
           ]}
           title={image.author.name}
-          subtitle={`${image.style} · ${image.width}x${image.height}`}
+          subtitle={`${image.width}x${image.height}`}
           accessory={{
             icon: {
               source: image.author.avatar.toString(),
