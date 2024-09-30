@@ -15,11 +15,16 @@ export type Dataset = {
 };
 
 export type Character = {
-  code: number;
-  value: string;
-  name: string;
-  aliases: string[];
-  old_name: string;
+  /** Code */
+  c: number;
+  /** Value */
+  v: string;
+  /** Name */
+  n: string;
+  /** Aliases */
+  a: string[];
+  /** Old name */
+  o: string;
   recentlyUsed?: boolean;
   isExtra?: boolean;
   score?: number;
@@ -29,7 +34,7 @@ export type CharAlias = {
   [key: number]: string[];
 };
 
-export type CharacterSet = {
+export type CharacterSection = {
   sectionTitle: string;
   items: Character[];
 };
