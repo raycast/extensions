@@ -17,6 +17,12 @@
       "title": "Search Connection",
       "description": "Search for public transport connections in Switzerland",
       "mode": "view"
+    },
+    {
+      "name": "connection-history",
+      "title": "Connection History",
+      "description": "history of your connections",
+      "mode": "view"
     }
   ],
   "dependencies": {

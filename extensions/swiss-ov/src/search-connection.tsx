@@ -2,37 +2,9 @@ import { Form, ActionPanel, Action } from "@raycast/api";
 import { useNavigation } from "@raycast/api";
 import { Color, Icon, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import { ConnectionRequirement, OVConnection } from "./types";
 import moment = require("moment");
-
-type Values = {
-  from: string;
-  to: string;
-  isArrival: boolean;
-  date: Date;
-};
-
-type OVConnection = {
-  transfers: string;
-  duration: string;
-  from: {
-    departureTimestamp: string;
-    station: { name: string };
-    departure: string;
-    platform?: string;
-  };
-  to: {
-    arrival: string;
-    arrivalTimestamp: string;
-    station: { name: string };
-  };
-  products: string[];
-  sections: [
-    {
-      departure: { station: { name: string }; departure: string; platform?: string };
-      arrival: { station: { name: string }; arrival: string; platform?: string };
-    },
-  ];
-};
+import { useHistory } from "./hooks/useHistory";
 
 function getConnectioMarkdown(connection: OVConnection): string {
   const dateFormat = "HH:mm,  DD.MM.YYYY";
@@ -65,9 +37,15 @@ Arrival: ${moment(section.arrival.arrival).format(dateFormat)}, Plattform ${sect
 }
 
 export default function Command() {
+  return <ConnectionForm />;
+}
+
+export function ConnectionForm(requirement: { value?: ConnectionRequirement }) {
   const { push } = useNavigation();
-  function handleSubmit(values: Values) {
+  const { addHistory } = useHistory();
+  function handleSubmit(values: ConnectionRequirement) {
     push(<Connections {...values} />);
+    addHistory({ timestamp: new Date().getTime(), connection: values });
   }
 
   return (
@@ -79,19 +57,42 @@ export default function Command() {
       }
     >
       <Form.Description text={"Swiss Public Transport Connection"} />
-      <Form.TextField id="from" title="From" placeholder="From" storeValue />
-      <Form.TextField id="to" title="To" placeholder="To" storeValue />
-      <Form.Checkbox id="isArrival" title="Ankunft" label="" storeValue />
-      <Form.DatePicker id="date" title="Date" defaultValue={new Date()} />
+      <Form.TextField
+        id="from"
+        title="From"
+        placeholder="From"
+        defaultValue={requirement.value?.from ? requirement.value?.from : undefined}
+        storeValue={requirement.value?.from === undefined}
+      />
+      <Form.TextField
+        id="to"
+        title="To"
+        placeholder="To"
+        defaultValue={requirement.value?.to ? requirement.value?.to : undefined}
+        storeValue={requirement.value?.to === undefined}
+      />
+      <Form.Checkbox
+        id="isArrival"
+        title="Is Arrival"
+        label=""
+        defaultValue={requirement.value?.isArrival ? requirement.value?.isArrival : undefined}
+        storeValue={requirement.value?.isArrival === undefined}
+      />
+      <Form.DatePicker
+        id="date"
+        title="Date"
+        defaultValue={requirement.value?.date && requirement.value?.isArrival ? new Date(requirement.value?.date || new Date()) : new Date()}
+        storeValue={requirement.value?.date === undefined}
+      />
     </Form>
   );
 }
 
-function Connections(values: Values) {
+function Connections(values: ConnectionRequirement) {
   const dateFormat = "HH:mm,  DD.MM.YYYY";
 
   const { isLoading, data } = useFetch<{ connections: OVConnection[] }>(
-    `http://transport.opendata.ch/v1/connections?from=${values.from}&to=${values.to}&isArrivalTime=${values.isArrival ? 1 : 0}&time=${values.date.toISOString()}`,
+    `http://transport.opendata.ch/v1/connections?from=${values.from}&to=${values.to}&isArrivalTime=${values.isArrival ? 1 : 0}&time=${values.date?.toISOString()}`,
   );
   return (
     <List isLoading={isLoading} isShowingDetail={true}>
