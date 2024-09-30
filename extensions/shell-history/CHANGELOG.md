@@ -1,6 +1,6 @@
 # Shell History Changelog
 
-## [Fix Display Error] - {PR_MERGE_DATE}
+## [Fix Display Error] - 2024-09-30
 
 - New Setting: `History Timestamp` to fix the display error of Zsh history
 
