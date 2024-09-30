@@ -2,6 +2,8 @@
 
 ## [Fix `Search Timeline` Not Working] - {PR_MERGE_DATE}
 
+- No more animation in Onboarding screen - it might come back in the future 👀
+
 ## [Improvements] - 2023-06-26
 
 - The extension now requires a Bluesky App Password to be used.
