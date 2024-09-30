@@ -17,36 +17,39 @@ export const imageTypes: ImageType[] = [
   ImageType.Icons,
 ];
 
-export const websitePathname: Record<ImageType, string> = {
-  [ImageType.Grids]: "grid",
-  [ImageType.Heroes]: "hero",
-  [ImageType.Logos]: "logo",
-  [ImageType.Icons]: "icon",
-};
-
-export const getImageAspectRatio = (imageType: ImageType): AspectRatio => {
-  switch (imageType) {
-    case ImageType.Grids:
-      return "2/3";
-    case ImageType.Heroes:
-      return "16/9";
-    case ImageType.Logos:
-    case ImageType.Icons:
-    default:
-      return "1";
+export const imageTypeSpecs: Record<
+  ImageType,
+  {
+    aspectRatio: AspectRatio;
+    imageFit: Grid.Fit;
+    gridColumns: number;
+    websitePathname: string;
   }
-};
-
-export const getImageFit = (imageType: ImageType): Grid.Fit => {
-  switch (imageType) {
-    case ImageType.Grids:
-    case ImageType.Heroes:
-      return Grid.Fit.Fill;
-    case ImageType.Logos:
-    case ImageType.Icons:
-    default:
-      return Grid.Fit.Contain;
-  }
+> = {
+  [ImageType.Grids]: {
+    aspectRatio: "2/3",
+    gridColumns: 5,
+    imageFit: Grid.Fit.Fill,
+    websitePathname: "grid",
+  },
+  [ImageType.Heroes]: {
+    aspectRatio: "16/9",
+    gridColumns: 4,
+    imageFit: Grid.Fit.Fill,
+    websitePathname: "hero",
+  },
+  [ImageType.Logos]: {
+    aspectRatio: "1",
+    gridColumns: 5,
+    imageFit: Grid.Fit.Contain,
+    websitePathname: "logo",
+  },
+  [ImageType.Icons]: {
+    aspectRatio: "1",
+    gridColumns: 5,
+    imageFit: Grid.Fit.Contain,
+    websitePathname: "icon",
+  },
 };
 
 export const downloadImage = async (url: string) => {

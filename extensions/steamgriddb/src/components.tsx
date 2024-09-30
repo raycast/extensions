@@ -11,14 +11,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { ImageType, SGDBGame, SGDBImage } from "./types.js";
-import {
-  db,
-  downloadImage,
-  getImageAspectRatio,
-  getImageFit,
-  imageTypes,
-  websitePathname,
-} from "./utils.js";
+import { db, downloadImage, imageTypes, imageTypeSpecs } from "./utils.js";
 
 export const ImageDetail = ({ image }: { image: SGDBImage }) => {
   return <Detail markdown={`![](${image.url})`} />;
@@ -46,9 +39,10 @@ export const ImagePreview = ({ game }: { game: SGDBGame }) => {
 
   return (
     <Grid
+      columns={imageTypeSpecs[imageType].gridColumns}
       isLoading={isLoading}
-      aspectRatio={getImageAspectRatio(imageType)}
-      fit={getImageFit(imageType)}
+      aspectRatio={imageTypeSpecs[imageType].aspectRatio}
+      fit={imageTypeSpecs[imageType].imageFit}
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Select Grid Type"
@@ -102,7 +96,7 @@ export const ImagePreview = ({ game }: { game: SGDBGame }) => {
               />
               <Action.OpenInBrowser
                 shortcut={{ modifiers: ["shift"], key: "enter" }}
-                url={`https://www.steamgriddb.com/${websitePathname[imageType]}/${image.id}`}
+                url={`https://www.steamgriddb.com/${imageTypeSpecs[imageType].websitePathname}/${image.id}`}
               />
             </ActionPanel>
           }
