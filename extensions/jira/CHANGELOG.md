@@ -1,5 +1,9 @@
 # Jira Changelog
 
+## [Fix number search to include issue keys for all projects.] - 2024-09-30
+
+- When a user searches for a number without a project selected, the extension matches the number against issue keys in all projects.
+
 ## [Add ability to copy issue as formatted markdown link] - 2024-09-29
 
 - Copies current issue as a formatted markdown link in the format: `[issue.key - issue.fields.summary]`
