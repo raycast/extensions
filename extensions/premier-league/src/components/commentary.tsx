@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getFixture, getMatchCommentary } from "../api";
 import { Fixture } from "../types";
-import { convertToLocalTime } from "../utils";
+import { convertToLocalTime, getMatchStatusIcon } from "../utils";
 
 const iconMap: Record<string, string> = {
   "end 1": "time-half",
@@ -75,6 +75,17 @@ export default function MatchCommentary(props: {
   const subtitle =
     fixture?.status === "L" ? "Live Match Commentary" : "Match Commentary";
 
+  const RefreshMatch = () => (
+    <Action
+      title="Refresh"
+      icon={Icon.RotateClockwise}
+      onAction={() => {
+        refetch();
+        revalidate();
+      }}
+    />
+  );
+
   return (
     <List
       throttle
@@ -86,20 +97,11 @@ export default function MatchCommentary(props: {
         <List.Item
           title={convertToLocalTime(fixture.kickoff.label, "HH:mm") || "TBC"}
           subtitle={`${fixture.ground.name}, ${fixture.ground.city}`}
-          icon={Icon.Clock}
+          icon={getMatchStatusIcon(fixture)}
           accessories={accessories}
           actions={
             <ActionPanel>
-              {props.match.status === "L" && (
-                <Action
-                  title="Refresh"
-                  icon={Icon.RotateClockwise}
-                  onAction={() => {
-                    refetch();
-                    revalidate();
-                  }}
-                />
-              )}
+              {props.match.status === "L" && <RefreshMatch />}
               <Action.OpenInBrowser
                 url={`https://www.premierleague.com/match/${props.match.id}`}
               />
@@ -136,16 +138,7 @@ export default function MatchCommentary(props: {
               keywords={[title, subtitle]}
               actions={
                 <ActionPanel>
-                  {props.match.status === "L" && (
-                    <Action
-                      title="Refresh"
-                      icon={Icon.RotateClockwise}
-                      onAction={() => {
-                        refetch();
-                        revalidate();
-                      }}
-                    />
-                  )}
+                  {props.match.status === "L" && <RefreshMatch />}
                 </ActionPanel>
               }
             />

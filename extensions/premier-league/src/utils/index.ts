@@ -1,4 +1,7 @@
+import { Color, Icon, Image } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { format, parse } from "date-fns";
+import { Fixture } from "../types";
 
 export const awardMap: Record<string, string> = {
   CHAMPIONS: "Premier League Champion",
@@ -58,10 +61,16 @@ export const convertToLocalTime = (
 
   const time = label.replace("BST", "+01:00").replace("GMT", "+00:00");
 
-  return format(
-    parse(time, inputFormat, new Date()),
-    outputFormat || "EEE d MMM yyyy, HH:mm",
-  );
+  try {
+    return format(
+      parse(time, inputFormat, new Date()),
+      outputFormat || "EEE d MMM yyyy, HH:mm",
+    );
+  } catch (error) {
+    showFailureToast(error, { message: `Invalid time value: ${label}` });
+
+    return undefined;
+  }
 };
 
 export const getProfileImg = (optaId: string | undefined) => {
@@ -77,4 +86,19 @@ export const positionMap: Record<string, string> = {
   D: "Defenders",
   M: "Midfielders",
   F: "Forwards",
+};
+
+export const getMatchStatusIcon = (match: Fixture) => {
+  let icon: Image.ImageLike;
+  if (!match.kickoff.label) {
+    icon = { source: Icon.Clock };
+  } else if (match.status === "L") {
+    icon = { source: Icon.Livestream, tintColor: Color.Red };
+  } else if (match.status === "C") {
+    icon = { source: Icon.CheckCircle, tintColor: Color.Green };
+  } else {
+    icon = Icon.Calendar;
+  }
+
+  return icon;
 };
