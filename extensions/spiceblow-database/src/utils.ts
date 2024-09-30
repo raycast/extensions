@@ -6,7 +6,7 @@ import { Json } from "./types";
 export let apiUrl = "";
 apiUrl = "https://spiceblow.com";
 // uncomment this line for local backend development
-apiUrl = "http://localhost:8045";
+// apiUrl = "http://localhost:8045";
 
 export const ellipsisReviver = (_key: string, value: Json) => {
   const maxLength = 100;
