@@ -20,6 +20,7 @@ export type ColumnInfo = {
 };
 
 export type CustomQueryList = {
+  type: CustomQueryType;
   connectionString: string;
   query: string;
   tableInfo: TableInfo;
@@ -31,3 +32,20 @@ export type CustomQueryList = {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Json = any;
+
+export type CustomQueryType = "list" | "time-series";
+
+export type GraphData = {
+  labels: string[];
+  datasets: {
+    label: string;
+    data: number[];
+    backgroundColor?: string;
+  }[];
+};
+
+export type TimeSeriesItem = {
+  time_bucket: string;
+  category?: string;
+  count: number;
+};

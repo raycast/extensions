@@ -64,6 +64,7 @@ export declare function createClient({ url, fetch, googleToken }: { url: string;
       generateSqlQuery: {
         post: (
           body: {
+            type: "list" | "time-series";
             databaseType: "postgres" | "mysql";
             schema: string;
             prompt: string;

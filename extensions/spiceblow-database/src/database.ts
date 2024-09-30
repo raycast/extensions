@@ -661,9 +661,7 @@ async function getTableAndColumnNamesForPostgres(fields: { tableID: number; colu
     const { tableID, columnID } = field;
     const table = tableID ? tableInfo[tableID] : undefined;
     const columnName = columnID ? columnNames[tableID]?.[columnID] : undefined;
-    if (!columnName) {
-      throw new Error("Could not find column name for table " + table?.tableName);
-    }
+
     return {
       ...field,
       tableName: table?.tableName,
@@ -758,7 +756,7 @@ export async function runGeneratedQuery(sqlCode: string) {
       const [rows, fields] = await connection.query<RowDataPacket[]>(`${sqlCode}`);
       const tableInfo = validateTableInfo({
         columns: fields.map((field) => {
-          const res = {
+          const res: ColumnInfo = {
             columnName: field.name,
             schemaName: field.schema || "",
             originalColumnName: field.orgName,

@@ -16,7 +16,7 @@ import { usePromise, withAccessToken } from "@raycast/utils";
 import { fetch } from "undici";
 
 import { getAvatarIcon, OAuthService, useCachedPromise } from "@raycast/utils";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useId, useRef, useState } from "react";
 
 import * as databaseFunctions from "./database.js";
 import { getRequestsCount, incrementRequestsCount, notifyError } from "./raycast";
@@ -38,10 +38,11 @@ import {
 import dedent from "string-dedent";
 import { createClient } from "./generated/client-database";
 
+import React from "react";
 import { SQLStatement } from "sql-template-strings";
 import { renderColumnValue } from "./database.js";
 import { useGlobalState } from "./state";
-import { CustomQueryList, Json, StoredDatabase, TableInfo } from "./types";
+import { CustomQueryList, CustomQueryType, GraphData, Json, StoredDatabase, TableInfo, TimeSeriesItem } from "./types";
 
 const pageSize = 20;
 const freeRequestsCount = 10;
@@ -267,6 +268,59 @@ function RowUpdatesActions({
   );
 }
 
+const Graph = React.memo(function Graph(args: { rows: TimeSeriesItem[] }) {
+  const hash = useId();
+  if (!args.rows) {
+    return <Detail isLoading />;
+  }
+
+  const categoriesWithCount: Map<string | undefined, number> = new Map();
+  for (const row of args.rows) {
+    const category = row.category;
+    const count = categoriesWithCount.get(category) || 0;
+    categoriesWithCount.set(category, count + row.count);
+  }
+
+  const sortedCategories = Array.from(categoriesWithCount.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([category]) => category);
+
+  const max = 10;
+  const topCategories = sortedCategories.slice(0, max);
+  const removedCategories = new Set(sortedCategories.slice(max));
+
+  const categories = [...topCategories, ...(removedCategories.size > 0 ? ["others"] : [])];
+  const timeBuckets = [...new Set(args.rows.map((x) => x.time_bucket))];
+
+  const data: GraphData = {
+    labels: timeBuckets,
+
+    datasets: categories.map((category) => {
+      const rows = args.rows.filter(
+        (x) => x.category === category || (category === "others" && removedCategories.has(x.category || "others")),
+      );
+      const data = timeBuckets.map((timeBucket) => {
+        const row = rows.find((x) => x.time_bucket === timeBucket);
+        return row ? Number(row.count) : 0;
+      });
+      return {
+        label: category || "",
+        data,
+        backgroundColor: getStringColor(category || ""),
+      };
+    }),
+  };
+
+  const imageUrl = new URL(`/spiceblow/api/graph`, apiUrl);
+  const json = JSON.stringify(data);
+  imageUrl.searchParams.set("hash", hash);
+  imageUrl.searchParams.set("rows", encodeURIComponent(json));
+
+  const u = imageUrl.toString();
+
+  return <Detail markdown={`![Graph](${u})\n\n[Open Graph Image](${u})`} />;
+});
+
 function SearchCustomQuery(args: CustomQueryList & { revalidate: () => void }) {
   const { query, schemas, tableInfo, id, bestField } = args;
   const { push } = useNavigation();
@@ -293,7 +347,7 @@ function SearchCustomQuery(args: CustomQueryList & { revalidate: () => void }) {
         incrementRequestsCount();
         const res = await databaseFunctions.searchTableRowsOrCustomQuery({
           searchText,
-          pageSize,
+          pageSize: args.type === "time-series" ? 1000 : pageSize,
           page,
           query,
           signal: abortController.signal,
@@ -311,6 +365,10 @@ function SearchCustomQuery(args: CustomQueryList & { revalidate: () => void }) {
     [currentConnectionString, searchText, query, searchField, tableInfo, schema.data],
     { keepPreviousData: true },
   );
+
+  if (args.type === "time-series") {
+    return <Graph rows={rows.data} {...args} />;
+  }
 
   return (
     <List
@@ -378,6 +436,7 @@ function SearchCustomQuery(args: CustomQueryList & { revalidate: () => void }) {
                   onAction={() => {
                     push(
                       <GenerateCustomQueryForm
+                        type="list"
                         revalidate={() => {
                           rows.revalidate();
                           schema.revalidate();
@@ -444,9 +503,11 @@ function RowMetadata({ tableInfo, row }: { tableInfo: TableInfo; row: Json }) {
 function GenerateCustomQueryForm({
   existingQuery,
   revalidate,
+  type,
 }: {
   existingQuery?: CustomQueryList;
   revalidate: () => void;
+  type: CustomQueryType;
 }) {
   const currentConnectionString = useGlobalState((x) => x.connectionString);
   const databaseType = getDatabaseConnectionType(currentConnectionString);
@@ -521,6 +582,7 @@ function GenerateCustomQueryForm({
       const { data, error } = await apiClient.spiceblow.api.generateSqlQuery.post({
         prompt,
         schema: schema.data!,
+        type,
         previousQuery: query
           .split("\n")
           .filter((x) => !x.includes("```"))
@@ -566,6 +628,7 @@ function GenerateCustomQueryForm({
         throw new Error("Best field could not be found");
       }
       const queryProps: CustomQueryList = {
+        type,
         query: query
           .split("\n")
           .filter((x) => !x.includes("```"))
@@ -819,16 +882,39 @@ function SearchTables() {
   return (
     <List actions={<RunTransactionQueries />} searchBarAccessory={<DatabasesDropdown />} isLoading={tables.isLoading}>
       <List.Item
-        key="add-new-custom-list"
-        title="Add New Custom Query"
+        title="Add New Query"
         icon={Icon.NewDocument}
         actions={
           <ActionPanel>
             <Action
-              title="Add New Custom Query"
+              title="Add"
               onAction={() => {
                 push(
                   <GenerateCustomQueryForm
+                    type="list"
+                    revalidate={() => {
+                      savedQueries.revalidate();
+                      tables.revalidate();
+                    }}
+                  />,
+                );
+              }}
+            />
+            <RunTransactionQueries />
+          </ActionPanel>
+        }
+      />
+      <List.Item
+        title="Add New Graph"
+        icon={Icon.LineChart}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Add"
+              onAction={() => {
+                push(
+                  <GenerateCustomQueryForm
+                    type="time-series"
                     revalidate={() => {
                       savedQueries.revalidate();
                       tables.revalidate();
@@ -847,8 +933,17 @@ function SearchTables() {
           <List.Item
             key={`saved-query-${index}`}
             title={query.prompt}
-            icon={{ source: Icon.SaveDocument, tintColor: queryColor }}
-            accessories={[{ tag: { value: "custom query" } }]}
+            icon={{
+              source: query.type === "time-series" ? Icon.LineChart : Icon.SaveDocument,
+              tintColor: queryColor,
+            }}
+            accessories={[
+              {
+                tag: {
+                  value: query.type === "time-series" ? "graph" : "custom query",
+                },
+              },
+            ]}
             actions={
               <ActionPanel>
                 <Action
@@ -875,6 +970,7 @@ function SearchTables() {
                   onAction={() => {
                     push(
                       <GenerateCustomQueryForm
+                        type={query.type}
                         revalidate={() => {
                           savedQueries.revalidate();
                         }}
