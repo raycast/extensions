@@ -1,5 +1,9 @@
 # Toggl Track Changelog
 
+## [New Feature] - 2024-09-30
+
+- Add ability to create task for time entry form
+
 ## [Bug Fixes] - 2024-08-20
 
 - Remove seconds from optional timer in the Menu Bar, as it only updates every 10 seconds.
