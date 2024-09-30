@@ -1,6 +1,6 @@
 # Menubar Calendar Changelog
 
-## [Configure Calendar List] - {PR_MERGE_DATE}
+## [Configure Calendar List] - 2024-09-30
 
 - New command Configure Calendar List: configure calendar and reminders list displayed in the menu bar
 - Press Option key to open URL in the calendar event
