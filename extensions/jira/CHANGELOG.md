@@ -1,6 +1,6 @@
 # Jira Changelog
 
-## [Fix number search to include issue keys for all projects.] - 2024-09-19
+## [Fix number search to include issue keys for all projects.] - 2024-09-30
 
 - When a user searches for a number without a project selected, the extension matches the number against issue keys in all projects.
 
