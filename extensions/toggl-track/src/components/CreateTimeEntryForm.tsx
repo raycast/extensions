@@ -124,12 +124,14 @@ function CreateTimeEntryForm({
 
   const onTaskChange = async (taskId: string) => {
     if (taskId == "new_task") {
-      if (await confirmAlert({ title: "Create new task?", message: "Task name: " + taskSearch })) {
+      const newTaskName = taskSearch;
+      setTaskSearch("");
+      if (await confirmAlert({ title: "Create new task?", message: "Task name: " + newTaskName })) {
         const toast = await showToast(Toast.Style.Animated, "Creating task...");
         try {
           if (!selectedWorkspace) throw Error("Workspace ID is undefined.");
           if (!selectedProject) throw Error("Workspace ID is undefined.");
-          const newTask = await createTask(selectedWorkspace, selectedProject.id, taskSearch);
+          const newTask = await createTask(selectedWorkspace, selectedProject.id, newTaskName);
           revalidateTasks();
           setSelectedTask(newTask);
           toast.style = Toast.Style.Success;
@@ -219,6 +221,7 @@ function CreateTimeEntryForm({
           onChange={onTaskChange}
           value={selectedTask?.id.toString() ?? "-1"}
           onSearchTextChange={setTaskSearch}
+          onBlur={() => setTaskSearch("")}
         >
           {!isLoadingTasks && (
             <>
