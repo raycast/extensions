@@ -22,7 +22,6 @@
     "erics118",
     "hjoelh",
     "hobhouse",
-    "bkeys818",
     "jatindotdev",
     "devbear",
     "rfaccio",
@@ -30,6 +29,9 @@
     "andyburris",
     "thomaslombart",
     "rhesamu"
+  ],
+  "pastContributors": [
+    "bkeys818"
   ],
   "debug": {
     "reloadShortcut": {
