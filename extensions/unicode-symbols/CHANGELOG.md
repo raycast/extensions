@@ -1,6 +1,6 @@
 # Unicode Symbols
 
-## [More improvements] - {PR_MERGE_DATE}
+## [More improvements] - 2024-09-30
 
 - Add full dataset with option in settings to enable/disable. Full Dataset contains +40.000 characters. This is only supported in Grid view.
 - Add option to copy the optional `HTML` entity of the selected character (e.g. `&amp;`)
