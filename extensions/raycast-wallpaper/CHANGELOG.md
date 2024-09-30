@@ -1,6 +1,6 @@
 # Raycast Wallpaper Changelog
 
-## [Remove error dialog] - {PR_MERGE_DATE}
+## [Remove error dialog] - 2024-09-30
 
 - Remove error dialog that pops up not as expected
 
