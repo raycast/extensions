@@ -53,6 +53,12 @@
       "title": "Search Cursor Rules",
       "description": "Search cursor rules from cursor.directory for usage inside Cursor Code Editor",
       "mode": "view"
+    },
+    {
+      "name": "youtube",
+      "title": "Search Cursor Videos",
+      "description": "Search cursor Youtube videos curated by cursor.directory",
+      "mode": "view"
     }
   ],
   "dependencies": {

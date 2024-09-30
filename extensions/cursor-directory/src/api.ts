@@ -1,9 +1,41 @@
 import type { CursorRule, APIResponse, PopularCursorRulesResponse } from "./types";
-import { API_URL, API_URL_POPULAR, ALL_CURSOR_RULES_CACHE_PATH, POPULAR_CURSOR_RULES_CACHE_PATH } from "./constants";
+import {
+  API_URL,
+  API_URL_POPULAR,
+  ALL_CURSOR_RULES_CACHE_PATH,
+  POPULAR_CURSOR_RULES_CACHE_PATH,
+  MAX_STARRED_RULES,
+  STARRED_RULE_PREFIX,
+} from "./constants";
 import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
 import fs from "fs/promises";
 import { getTimestamp } from "./utils";
+import { LocalStorage } from "@raycast/api";
+
+export async function getStarredRules(): Promise<string[]> {
+  const allItems = await LocalStorage.allItems<string[]>();
+  console.debug("allItems:\n", allItems);
+  return Object.values(allItems);
+}
+
+export async function starRule(slug: string): Promise<void> {
+  const starredRules = await getStarredRules();
+  if (starredRules.length >= MAX_STARRED_RULES) {
+    const oldestRule = starredRules[starredRules.length - 1];
+    await LocalStorage.removeItem(`${STARRED_RULE_PREFIX}${oldestRule}`);
+  }
+  await LocalStorage.setItem(`${STARRED_RULE_PREFIX}${slug}`, slug);
+}
+
+export async function unstarRule(slug: string): Promise<void> {
+  await LocalStorage.removeItem(`${STARRED_RULE_PREFIX}${slug}`);
+}
+
+export async function isRuleStarred(slug: string): Promise<boolean> {
+  const key = `${STARRED_RULE_PREFIX}${slug}`;
+  return (await LocalStorage.getItem<string>(key)) !== undefined;
+}
 
 const isPopularCursorRulesResponse = (response: APIResponse): response is PopularCursorRulesResponse => {
   return "data" in response && Array.isArray(response.data) && "count" in response.data[0];
@@ -59,3 +91,36 @@ export async function fetchCursorRules(popularOnly: boolean): Promise<CursorRule
     throw new Error("Failed to fetch cursor rules");
   }
 }
+
+// TODO: we still need to parse TS file into valid json, unless an API endpoint is provided when there are enough videos.
+
+// const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/pontusab/cursor.directory/main/src/data/videos.ts';
+
+// export async function fetchVideosData(): Promise<Video[]> {
+//   try {
+//     const response = await fetch(GITHUB_RAW_URL);
+//     const text = await response.text();
+
+//     // console.debug(text);
+
+//     // Extract the videos array from the TypeScript code
+//     const match = text.match(/export const videos = (\[[\s\S]*?\]);/);
+//     if (!match) {
+//       throw new Error('Unable to find videos data in the file');
+//     }
+
+//     const videosString = match[1];
+//     const validJsonString = convertToValidJson(videosString);
+//     const videosData = JSON.parse(validJsonString);
+
+//     console.debug(videosData);
+
+//     // Save the data to a local cache file
+//     // await saveJsonToCache('videos', videosData);
+
+//     return videosData;
+//   } catch (error) {
+//     console.error('Error fetching videos data:', error);
+//     throw error;
+//   }
+// }

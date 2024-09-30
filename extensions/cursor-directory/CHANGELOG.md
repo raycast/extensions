@@ -1,5 +1,10 @@
 # Cursor Directory Changelog
 
+## [Features] - 2024-09-30
+
+- Allow to star and unstar cursor rules
+- Allow to search curated cursor Youtube videos
+
 ## [Refactors and Improvements] - 2024-09-15
 
 - Fetch cursor rules from API instead of github repo

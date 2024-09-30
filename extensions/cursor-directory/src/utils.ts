@@ -43,10 +43,12 @@ export const isImageUrl = (url: string): boolean => {
   // Add check for GitHub avatar URLs
   const isGitHubAvatar = url.includes("avatars.githubusercontent.com");
 
+  const isYoutubeAvatar = url.includes("yt3.ggpht.com");
+
   // Add check for URLs with 'image' in the path or query parameters
   const hasImageInUrl = url.toLowerCase().includes("image");
 
-  return isDataUri || isImageExtension || isGitHubAvatar || hasImageInUrl;
+  return isDataUri || isImageExtension || isGitHubAvatar || hasImageInUrl || isYoutubeAvatar;
 };
 
 export const getTimestamp = (filePath: string): number => {
@@ -65,3 +67,15 @@ export const processContent = (content: string) => {
     .map((line) => line.trim())
     .join("\n");
 };
+
+export function getYoutubeVideoId(url: string): string {
+  // First, split by 'embed/' to get the part after it
+  const parts = url.split("embed/");
+  if (parts.length < 2) return "";
+
+  // Then, split by '?' to remove any query parameters
+  const idPart = parts[1].split("?")[0];
+
+  // Finally, split by '/' to handle any additional path segments
+  return idPart.split("/")[0];
+}
