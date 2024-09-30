@@ -23,18 +23,18 @@ export default function ImportDocs() {
       file: (value) => {
         const filename = value ? value[0] : "";
 
-        if (!fs.existsSync(filename)) {
+        if (!filename) {
+          return "The item is required";
+        } else if (!fs.existsSync(filename)) {
           return "File does not exist";
+        } else if (!filename.endsWith(".json")) {
+          return "Must be JSON file";
         }
 
         const contents = fs.readFileSync(filename, "utf8");
         const docString = JSON.parse(contents);
 
-        if (filename && !filename.endsWith(".json")) {
-          return "Must be JSON file";
-        } else if (!filename) {
-          return "The item is required";
-        } else if (Object.keys(docString)[0] !== "docs") {
+        if (Object.keys(docString)[0] !== "docs") {
           return "Must use top-level 'docs' key";
         }
       },
