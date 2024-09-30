@@ -40,11 +40,11 @@ export async function fetchDatabases() {
       }
     });
 
-    groups.forEach((group, groupId) => {
-      const parentGroupId = parentGroups.get(groupId);
-      if (parentGroupId) {
-        const parentGroup = groups.get(parentGroupId);
-        if (parentGroup) {
+    parentGroups.forEach((parentGroupId, groupId) => {
+      const parentGroup = groups.get(parentGroupId);
+      if (parentGroup) {
+        const group = groups.get(groupId);
+        if (group) {
           group.name = `${parentGroup.name} - ${group.name}`;
         }
       }
