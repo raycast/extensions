@@ -102,6 +102,7 @@ export const calculateTimeInfoByOffset = (unixtime: number, offset: string) => {
   const dateTime = new Date(parseInt(unixtimeStr));
   dateTime.setDate(dateTime.getUTCDate());
   dateTime.setHours(dateTime.getUTCHours() + parseInt(offset));
+  dateTime.setMinutes(dateTime.getUTCMinutes() + parseInt(offset.split(":")[1]));
   //utc time
   const utc = new Date(parseInt(unixtimeStr));
   utc.setDate(utc.getDate());

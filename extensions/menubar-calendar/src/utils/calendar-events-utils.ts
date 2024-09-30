@@ -1,7 +1,8 @@
 import { captureException, Icon } from "@raycast/api";
 import { curDay } from "./calendar-utils";
 import { CalendarEvent, Status } from "../hooks/useCalendar";
-import { formatMonthDateWithWeek } from "./common-utils";
+import { extractFirstUrl, formatMonthDateWithWeek } from "./common-utils";
+import { Reminder } from "../hooks/useReminders";
 
 export function timeStampIsToday(timestamp: number, now: Date) {
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -116,4 +117,19 @@ function formatTimeUntilEvent(milliseconds: number): string {
     const remainingHours = hours % 24;
     return `${days}d${remainingHours !== 0 ? ` ${remainingHours}h` : ""}${minutes % 60 !== 0 ? ` ${minutes % 60}m` : ""}`;
   }
+}
+
+export function buildCalendarToolTip(event: CalendarEvent) {
+  const recurringIcon = event.hasRecurrenceRules ? " ♺" : "";
+  const date = "\n" + "· " + formatEventTimeMultiItemSubtitle(event.startDate, event.endDate, event.isAllDay);
+  const calendarTitle = event.calendarTitle ? "\n" + "· " + event.calendarTitle : "";
+  const eventUrl = getEventUrl(event);
+  const url = eventUrl ? "\n" + "· " + eventUrl : "";
+  const notes = event.notes ? "\n" + "· " + event.notes : "";
+  return "· " + event.title + recurringIcon + calendarTitle + date + url + notes;
+}
+
+export function getEventUrl(event: CalendarEvent | Reminder) {
+  const urlInNotes = extractFirstUrl(event.notes ?? "");
+  return event.url ? event.url : urlInNotes;
 }

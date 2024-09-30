@@ -26,14 +26,13 @@ export default function CustomTimerView(props: { arguments: CTInlineArgs }) {
       setSecErr("Seconds must be a number!");
     } else {
       if (!checkForOverlyLoudAlert()) return;
-      pop();
       const timerName = values.name ? values.name : "Untitled";
       const timeInSeconds = 3600 * Number(values.hours) + 60 * Number(values.minutes) + Number(values.seconds);
       startTimer({
         timeInSeconds: timeInSeconds,
         timerName: timerName,
         selectedSound: values.selectedSound,
-      });
+      }).then(() => pop());
       if (values.willBeSaved)
         createCustomTimer({
           name: values.name,
