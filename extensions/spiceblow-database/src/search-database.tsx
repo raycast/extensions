@@ -5,14 +5,16 @@ import {
   Detail,
   Form,
   Icon,
+  LaunchProps,
   List,
   LocalStorage,
   OAuth,
+  popToRoot,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { usePromise, withAccessToken } from "@raycast/utils";
+import { FormValidation, useForm, usePromise, withAccessToken } from "@raycast/utils";
 import { fetch } from "undici";
 
 import { getAvatarIcon, OAuthService, useCachedPromise } from "@raycast/utils";
@@ -698,7 +700,7 @@ function GenerateCustomQueryForm({
       isLoading={schema.isLoading || isLoading || schemas.isLoading}
       actions={
         <ActionPanel>
-          <Action title={!shouldSubmit ? "Generate Sql Query" : "Save Query"} onAction={onAction} />
+          <Action title={!shouldSubmit ? "Generate SQL Query" : "Save Query"} onAction={onAction} />
           {!!query && <Action title={"Save Query"} onAction={saveQuery} />}
           {/* <Action.SubmitForm title="Save Query" onSubmit={handleSubmit} /> */}
         </ActionPanel>
@@ -1037,69 +1039,70 @@ function SearchTables() {
     </List>
   );
 }
+
+interface NewDatabaseValues {
+  name: string;
+  connectionString: string;
+}
+
 function AddDatabase({ existingDatabase, revalidate }: { existingDatabase?: StoredDatabase; revalidate: () => void }) {
-  const [connectionStringCurrent, setConnectionStringText] = useState(existingDatabase?.connectionString || "");
-  const [name, setName] = useState(existingDatabase?.name || "");
-  const [nameError, setNameError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const { push } = useNavigation();
   const { setConnectionString } = useGlobalState();
-  const [connectionStringError, setConnectionStringError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  async function validate(connectionStringCurrent: string) {
-    let ok = true;
-    const dbType = getDatabaseConnectionType(connectionStringCurrent);
-
-    if (!isValidUrl(connectionStringCurrent)) {
-      setConnectionStringError("Invalid URL");
-      ok = false;
-    } else if (!dbType) {
-      setConnectionStringError("Database type not supported");
-      ok = false;
-    } else {
-      const connectionOk = await databaseFunctions.checkConnection(connectionStringCurrent, dbType);
-      if (!connectionOk) {
-        setConnectionStringError("Connection failed");
-        ok = false;
+  const { handleSubmit, itemProps } = useForm<NewDatabaseValues>({
+    initialValues: {
+      name: existingDatabase?.name || draftValues?.name || "",
+      connectionString: existingDatabase?.connectionString || draftValues?.connectionString || "",
+    },
+    async onSubmit(values) {
+      setIsLoading(true);
+      const connectionUri = databaseFunctions.fixDatabaseUri(values.connectionString);
+      try {
+        const connectionOk = await databaseFunctions.checkConnection(
+          connectionUri,
+          getDatabaseConnectionType(connectionUri)!,
+        );
+        if (!connectionOk) {
+          throw new Error("Connection failed");
+        }
+        const dbs: StoredDatabase[] = JSON.parse((await LocalStorage.getItem("databases")) || "[]");
+        const existingIndex = dbs.findIndex((db) => db.connectionString === connectionUri);
+        if (existingIndex !== -1) {
+          dbs[existingIndex] = { connectionString: connectionUri, name: values.name };
+        } else {
+          dbs.push({ connectionString: connectionUri, name: values.name });
+        }
+        await LocalStorage.setItem("databases", JSON.stringify(dbs));
+        showToast({
+          style: Toast.Style.Success,
+          title: existingIndex !== -1 ? "Database updated successfully" : "Database added successfully",
+        });
+        setConnectionString(connectionUri);
+        await revalidate();
+        push(<SearchTables />);
+      } catch (error) {
+        notifyError(error);
+      } finally {
+        setIsLoading(false);
       }
-    }
-    if (!name) {
-      setNameError("Name cannot be empty");
-      ok = false;
-    }
-
-    return ok;
-  }
-
-  const handleSubmit = async () => {
-    setIsLoading(true);
-    const connectionUri = databaseFunctions.fixDatabaseUri(connectionStringCurrent);
-    try {
-      const ok = await validate(connectionUri);
-      if (!ok) {
-        return;
-      }
-      const dbs: StoredDatabase[] = JSON.parse((await LocalStorage.getItem("databases")) || "[]");
-      const existingIndex = dbs.findIndex((db) => db.connectionString === connectionUri);
-      if (existingIndex !== -1) {
-        dbs[existingIndex] = { connectionString: connectionUri, name };
-      } else {
-        dbs.push({ connectionString: connectionUri, name });
-      }
-      await LocalStorage.setItem("databases", JSON.stringify(dbs));
-      showToast({
-        style: Toast.Style.Success,
-        title: existingIndex !== -1 ? "Database updated successfully" : "Database added successfully",
-      });
-      setConnectionString(connectionUri);
-      await revalidate();
-      push(<SearchTables />);
-    } catch (error) {
-      notifyError(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    validation: {
+      name: FormValidation.Required,
+      connectionString: (value = "") => {
+        if (!value) {
+          return "Connection string cannot be empty";
+        }
+        if (!isValidUrl(value)) {
+          return "Invalid URL";
+        }
+        const dbType = getDatabaseConnectionType(value);
+        if (!dbType) {
+          return "Database type not supported";
+        }
+      },
+    },
+  });
 
   return (
     <Form
@@ -1111,22 +1114,12 @@ function AddDatabase({ existingDatabase, revalidate }: { existingDatabase?: Stor
         </ActionPanel>
       }
     >
+      <Form.TextField {...itemProps.name} title="Database Name" placeholder="Enter a name for the database" />
       <Form.TextField
-        id="name"
-        title="Database Name"
-        placeholder="Enter a name for the database"
-        value={name}
-        error={nameError}
-        onChange={setName}
-      />
-      <Form.TextField
-        id="connectionString"
+        {...itemProps.connectionString}
         title="Connection String"
         info="The database connection string, supports Postgres and Mysql"
         placeholder="postgresql://user:password@localhost:5432/database"
-        value={connectionStringCurrent}
-        error={connectionStringError}
-        onChange={setConnectionStringText}
       />
       <Form.Description title="" text="The database url will be saved locally in Raycast encrypted storage" />
     </Form>
@@ -1556,7 +1549,10 @@ function useTableFiltering({ tableInfo }: { tableInfo?: TableInfo }) {
   return { searchField, dropdown, setSearchField, searchPlaceholder };
 }
 
-const Command = () => {
+let draftValues: NewDatabaseValues | undefined;
+
+const Command = ({ draftValues: draftValuesArg }: LaunchProps<{ draftValues?: NewDatabaseValues }>) => {
+  draftValues = draftValuesArg;
   const { connectionString, setConnectionString } = useGlobalState();
   const databases = useDatabases();
 

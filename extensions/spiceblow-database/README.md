@@ -1,6 +1,6 @@
 # Spiceblow
 
-Search and manage your SQL Database, currently supports PostgreSQL and MySQL
+Spiceblow is a Raycast extension that simplifies SQL database management for PostgreSQL and MySQL. It acts as a bridge between you and your data, allowing you to interact with your database using natural language queries. By leveraging AI, Spiceblow translates your everyday language into SQL, making it easier to search, update, and analyze your data without writing complex queries. It's like TablePlus but built into Racyast and super fast to navigate thanks to the full keyboard support Raycast provides.
 
 ## Features
 
@@ -9,5 +9,6 @@ Search and manage your SQL Database, currently supports PostgreSQL and MySQL
 - Search rows by any column or all searchable columns
 - Save custom SQL queries with full support for filtering
 - Generate custom SQL queries using AI
+- Generate stacked bar graphs of your data
 - Update, delete and duplicate your database rows
 - Run transactions to group multiple queries, for example to switch emails of user rows
