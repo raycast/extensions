@@ -1,3 +1,5 @@
+import "./initSentry";
+
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import useInterpreter from "./hooks/useInterpreter";

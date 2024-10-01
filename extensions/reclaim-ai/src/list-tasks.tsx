@@ -1,3 +1,5 @@
+import "./initSentry";
+
 import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 

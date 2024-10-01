@@ -1,3 +1,5 @@
+import "./initSentry";
+
 import { List } from "@raycast/api";
 import { addDays, differenceInHours, endOfDay, isAfter, isBefore, isWithinInterval, startOfDay } from "date-fns";
 import { useMemo, useState } from "react";

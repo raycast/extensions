@@ -1,3 +1,5 @@
+import "./initSentry";
+
 import { Action, ActionPanel, Clipboard, Form, Toast, popToRoot, showHUD, showToast } from "@raycast/api";
 import { addDays, addMinutes, setHours, setMilliseconds, setMinutes, setSeconds } from "date-fns";
 import { useEffect, useMemo, useState } from "react";

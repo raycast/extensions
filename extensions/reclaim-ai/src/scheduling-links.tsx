@@ -1,3 +1,5 @@
+import "./initSentry";
+
 import { Icon, List } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { useSchedulingLinks } from "./hooks/useSchedulingLinks";
