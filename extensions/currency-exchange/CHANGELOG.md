@@ -1,6 +1,6 @@
 # Currency Exchange Changelog
 
-## [Update] - 2024-09-20
+## [Update] - 2024-10-01
 - Add currency formating to all display
 
 ## [Upgraded dependencies] - 2023-04-11
