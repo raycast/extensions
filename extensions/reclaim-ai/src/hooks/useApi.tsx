@@ -1,10 +1,24 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 // eslint-disable-next-line no-restricted-imports
 import { useFetch } from "@raycast/utils";
-import { useMemo } from "react";
+import {
+  captureException,
+  ExclusiveEventHintOrCaptureContext,
+  startSpan, StartSpanOptions
+} from "@sentry/node";
+import { useEffect, useMemo } from "react";
 import { NativePreferences } from "../types/preferences";
 
-const useApi = <T,>(url: string) => {
+export type UseAPiOptions = {
+  errorOptions?: {
+    spanOptions?: StartSpanOptions;
+    hint?: ExclusiveEventHintOrCaptureContext;
+  };
+};
+
+const useApi = <T,>(url: string, options: UseAPiOptions = {}) => {
+  const { errorOptions } = options;
+
   const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
 
   if (!apiToken) {
@@ -24,7 +38,16 @@ const useApi = <T,>(url: string) => {
     [apiToken]
   );
 
-  return useFetch<T>(`${apiUrl}${url}`, { headers, keepPreviousData: true });
+  const result = useFetch<T>(`${apiUrl}${url}`, { headers, keepPreviousData: true });
+
+  useEffect(() => {
+    if (result.error)
+      return startSpan({ name: "useApi-call", ...errorOptions?.spanOptions }, () => {
+        captureException(result.error, errorOptions?.hint);
+      });
+  }, [result.error]);
+
+  return result;
 };
 
 export default useApi;

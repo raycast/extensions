@@ -10,7 +10,7 @@ export type FetcherOptions = {
   init?: RequestInit;
   payload?: unknown;
   errorOptions?: {
-    startSpanOptions?: StartSpanOptions;
+    spanOptions?: StartSpanOptions;
     coverageOptions?: Omit<ErrorCoverageOptions<true>, "rethrowExceptions">;
   };
 };
@@ -27,7 +27,7 @@ export const fetcher = async <T>(url: string, options: FetcherOptions = {}): Pro
 
   return (
     await errorCoverage(
-      { name: "fetcher-call", ...errorOptions?.startSpanOptions },
+      { name: "fetcher-call", ...errorOptions?.spanOptions },
       () =>
         fetch(`${apiUrl}${url}`, {
           ...init,
