@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Sort menu bar reminders by due date] - {PR_MERGE_DATE}
+## [Sort menu bar reminders by due date] - 2024-10-01
 
 - Sort menu bar reminders by due date instead of the order they were created.
 
