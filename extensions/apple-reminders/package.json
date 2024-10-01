@@ -10,7 +10,8 @@
     "ir4n",
     "jondelgado",
     "phil_s",
-    "michalzuch"
+    "michalzuch",
+    "ridemountainpig"
   ],
   "owner": "raycast",
   "access": "public",
@@ -135,6 +136,15 @@
           "description": "When enabled, the number of reminders will be hidden if there are no reminders left (\"Display menu bar count\" needs to be enabled)",
           "default": false,
           "required": false
+        },
+        {
+          "name": "sortMenuBarRemindersByDueDate",
+          "type": "checkbox",
+          "label": "Sort menu bar reminders by time",
+          "description": "When enabled, the reminders in the menu bar will be sorted by time.",
+          "default": false,
+          "required": false,
+          "title": "Sort"
         }
       ],
       "interval": "10m"
