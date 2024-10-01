@@ -50,10 +50,14 @@ export default function AddExternalBetaTester({ group, didUpdateNewTester }: Pro
             message: "Invite sent",
           });
           if (response && response.ok) {
-            const json = await response.json();
-            const invited = betaTesterSchema.safeParse(json.data);
-            if (invited.success) {
-              didUpdateNewTester(invited.data);
+            try {
+              const json = await response.json();
+              const invited = betaTesterSchema.safeParse(json.data);
+              if (invited.success) {
+                didUpdateNewTester(invited.data);
+              }
+            } catch (error) {
+              console.log(error);
             }
           }
         } catch (error) {
