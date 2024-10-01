@@ -53,8 +53,8 @@ function Forms({ workspace }: { workspace: Workspace }) {
             icon={Icon.SquareEllipsis}
             title={form.title}
             accessories={[
-              { icon: form.settings.is_public ? Icon.Eye : Icon.EyeDisabled },
-              { date: new Date(form.last_updated_at), tooltip: `Updated: ${form.last_updated_at}` },
+              form.settings.is_public ? { icon: Icon.Eye, tooltip: "Public" } : { icon: Icon.EyeDisabled, tooltip: "Private" },
+              { date: new Date(form.last_updated_at), tooltip: `Updated: ${new Date(form.last_updated_at).toLocaleDateString()}` },
             ]}
             actions={
               <ActionPanel>
@@ -160,7 +160,8 @@ function FormActions({ form }: { form: FormOverview }) {
         }}
       />
       <Action.CopyToClipboard
-        title="Copy Form Id"
+        // eslint-disable-next-line @raycast/prefer-title-case
+        title="Copy Form ID"
         content={form.id}
         shortcut={{
           modifiers: ["cmd"],
@@ -180,7 +181,7 @@ function FormActions({ form }: { form: FormOverview }) {
 }
 
 function OpenWorkspaceInAdminAction({ link }: { link: string }) {
-  return <Action.OpenInBrowser title="Open in Typeform" url={adminUrl(link)} />;
+  return <OpenInTypeform url={adminUrl(link)} />;
 }
 
 function FormResponses({ form }: { form: FormOverview }) {
@@ -203,8 +204,15 @@ function FormResponses({ form }: { form: FormOverview }) {
                 .join(`\n`)}
             />
           }
+          actions={<ActionPanel>
+            <OpenInTypeform title="View Responses in Typeform" url={`${ADMIN_FORM_BASE_URL}form/${form.id}/results#responses`} />
+          </ActionPanel>}
         />
       ))}
     </List>
   );
+}
+
+function OpenInTypeform(props: { title?: string, url: string }) {
+  return <Action.OpenInBrowser icon="tf.png" title={props.title || "Open in Typeform"} url={props.url} />
 }
