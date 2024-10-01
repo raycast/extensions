@@ -1,6 +1,6 @@
 # Bluesky Changelog
 
-## [Fix `Search Timeline` Not Working] - {PR_MERGE_DATE}
+## [Fix `Search Timeline` Not Working] - 2024-10-01
 
 - No more animation in Onboarding screen - it might come back in the future 👀
 
