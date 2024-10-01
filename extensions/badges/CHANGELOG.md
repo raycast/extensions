@@ -1,6 +1,6 @@
 # Badges Changelog
 
-## [Chore] - {PR_MERGE_DATE}
+## [Chore] - 2024-10-01
 
 - Refactor duplicate codes
 - Optimize extension file size
