@@ -109,21 +109,24 @@ export default function BuildItem({ build, app }: BuildItemProps) {
         icon: getProccessingStatusIcon(externalBuildState),
       },
     ];
-    const betaGroupsCommaSeparated = betaGroups.map((bg) => {
-      return bg.attributes.name;
-    });
-    const betaGroupsShortCommaSeparated = betaGroupsCommaSeparated.map((bg) => {
-      const name = bg.substring(0, 2).toUpperCase();
-      return name;
-    });
-    const betaGroupsCommaSeparatedString = betaGroupsShortCommaSeparated.join(", ");
-    const betaGroupsAccessory = [
-      {
-        text: betaGroupsCommaSeparatedString,
-        icon: { source: Icon.TwoPeople, tintColor: Color.Blue },
-        tooltip: "Beta Groups: " + betaGroupsCommaSeparated.join(", "),
-      },
-    ] as React.ComponentProps<typeof List.Item>["accessories"];
+    let betaGroupsAccessory: React.ComponentProps<typeof List.Item>["accessories"];
+    if (betaGroups && betaGroups.length > 0) {
+      const betaGroupsCommaSeparated = betaGroups.map((bg) => {
+        return bg.attributes?.name ?? "";
+      });
+      const betaGroupsShortCommaSeparated = betaGroupsCommaSeparated.map((bg) => {
+        const name = bg.substring(0, 2).toUpperCase();
+        return name;
+      });
+      const betaGroupsCommaSeparatedString = betaGroupsShortCommaSeparated.join(", ");
+      betaGroupsAccessory = [
+        {
+          text: betaGroupsCommaSeparatedString,
+          icon: { source: Icon.TwoPeople, tintColor: Color.Blue },
+          tooltip: "Beta Groups: " + betaGroupsCommaSeparated.join(", "),
+        },
+      ] as React.ComponentProps<typeof List.Item>["accessories"];
+    }
 
     let usage: React.ComponentProps<typeof List.Item>["accessories"] = [];
     if (firstBetaBuildUsage !== undefined) {
@@ -173,9 +176,9 @@ export default function BuildItem({ build, app }: BuildItemProps) {
       return usage?.concat(getProcessingStatusArray);
     } else {
       if (usage) {
-        return betaGroupsAccessory?.concat(usage).concat(getProcessingStatusArray);
+        return (betaGroupsAccessory ?? []).concat(usage).concat(getProcessingStatusArray);
       }
-      return betaGroupsAccessory?.concat(getProcessingStatusArray);
+      return (betaGroupsAccessory ?? []).concat(getProcessingStatusArray);
     }
   };
 
