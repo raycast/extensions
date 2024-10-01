@@ -218,14 +218,6 @@
       ],
       "default": "html",
       "required": false
-    },
-    {
-      "name": "useTabs",
-      "description": "Check to use Tabs instead of Spaces",
-      "type": "checkbox",
-      "label": "Use Tabs",
-      "default": false,
-      "required": false
     }
   ],
   "dependencies": {

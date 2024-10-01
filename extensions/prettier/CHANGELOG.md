@@ -1,6 +1,6 @@
 # Prettier Changelog
 
-## [Choose to use Tabs or Spaces] - {PR_MERGE_DATE}
+## [Maintenance Release] - {PR_MERGE_DATE}
 
 ## [New Icon] - 2023-04-25
 

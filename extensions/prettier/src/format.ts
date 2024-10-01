@@ -32,7 +32,7 @@ const decorateMarkdown = (parser: string, formatted: string) => {
 };
 
 export default async (expectedFormat: string, parser: string) => {
-  const { formatAsMarkdownCodeBlock, copyImmediately, pasteImmediately, useTabs } = getPreferenceValues<Preferences>();
+  const { formatAsMarkdownCodeBlock, copyImmediately, pasteImmediately } = getPreferenceValues<Preferences>();
 
   const text = await Clipboard.readText();
   if (!text) {
@@ -42,7 +42,7 @@ export default async (expectedFormat: string, parser: string) => {
 
   try {
     const userOptions = await resolveConfig(homedir());
-    const prettier = format(text, { ...userOptions, useTabs, parser });
+    const prettier = format(text, { ...userOptions, parser });
     const formatted = formatAsMarkdownCodeBlock ? decorateMarkdown(parser, prettier) : prettier;
 
     if (copyImmediately) {
