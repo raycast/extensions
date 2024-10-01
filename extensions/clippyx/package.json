@@ -38,7 +38,7 @@
     },
     {
       "name": "text",
-      "title": "Text content search",
+      "title": "Text Content Search",
       "description": "Serch images by text content",
       "mode": "view",
       "preferences": [

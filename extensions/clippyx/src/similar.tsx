@@ -3,24 +3,15 @@ import { useState, useEffect, useCallback } from "react";
 import { useFetch } from "@raycast/utils";
 import { exec } from "child_process";
 import { promisify } from "util";
+import { Image } from "./interface";
 
 const execAsync = promisify(exec);
-
-interface Image {
-  id: string;
-  path: string;
-}
-
-interface Preferences {
-  threshold: number;
-  topK: number;
-}
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [debouncedSearchText, setDebouncedSearchText] = useState("");
   const [images, setImages] = useState<Image[]>([]);
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.Similar>();
 
   const { isLoading, data, revalidate } = useFetch("http://localhost:23107/clip_image", {
     method: "POST",
