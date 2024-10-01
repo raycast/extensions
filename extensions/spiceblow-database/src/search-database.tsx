@@ -236,7 +236,6 @@ function RowUpdatesActions({
       <Action
         title="Delete Row"
         icon={Icon.Trash}
-        shortcut={{ modifiers: ["cmd"], key: "backspace" }}
         onAction={async () => {
           const { deleteQueries } = await databaseFunctions.prepareTableRowDelete({
             allValues: tableInfo.columns.map((col) => {
@@ -1446,7 +1445,7 @@ function DatabasesDropdown() {
 }
 
 function ManageDatabases({ revalidate }: { revalidate: () => void }) {
-  const { push } = useNavigation();
+  const { push, pop } = useNavigation();
   const databases = useDatabases();
   const state = useGlobalState();
   const { connectionString, setConnectionString } = useGlobalState();
@@ -1489,6 +1488,7 @@ function ManageDatabases({ revalidate }: { revalidate: () => void }) {
                   await LocalStorage.setItem("databases", JSON.stringify(updatedDatabases));
                   await databases.revalidate();
                   await revalidate();
+                  pop();
                 }}
               />
             </ActionPanel>
