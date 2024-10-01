@@ -1,5 +1,4 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { StartSpanOptions } from "@sentry/node";
 import fetch, { FetchError, RequestInit } from "node-fetch";
 import { NativePreferences } from "../types/preferences";
 import { errorCoverage, ErrorCoverageOptions } from "./sentry";
@@ -9,10 +8,7 @@ const { apiToken, apiUrl } = getPreferenceValues<NativePreferences>();
 export type FetcherOptions = {
   init?: RequestInit;
   payload?: unknown;
-  errorOptions?: {
-    spanOptions?: StartSpanOptions;
-    coverageOptions?: Omit<ErrorCoverageOptions<true>, "rethrowExceptions">;
-  };
+  errorOptions?: Omit<ErrorCoverageOptions<true>, "rethrowExceptions">;
 };
 
 export const fetcher = async <T>(url: string, options: FetcherOptions = {}): Promise<T> => {
@@ -27,7 +23,7 @@ export const fetcher = async <T>(url: string, options: FetcherOptions = {}): Pro
 
   return (
     await errorCoverage(
-      { name: "fetcher-call", ...errorOptions?.spanOptions },
+      { name: "fetcher-call" },
       () =>
         fetch(`${apiUrl}${url}`, {
           ...init,
@@ -39,7 +35,7 @@ export const fetcher = async <T>(url: string, options: FetcherOptions = {}): Pro
             ...init?.headers,
           },
         }).then<T>((r) => r.json()),
-      { rethrowExceptions: true, ...errorOptions?.coverageOptions }
+      { rethrowExceptions: true, ...errorOptions }
     )
   ).data;
 };
