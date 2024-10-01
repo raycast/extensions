@@ -107,7 +107,7 @@
   "dependencies": {
     "@raycast/api": "^1.52.1",
     "@raycast/utils": "^1.8.0",
-    "@sentry/node": "^8.32.0",
+    "@sentry/react": "^8.32.0",
     "date-fns": "^2.30.0"
   },
   "devDependencies": {
