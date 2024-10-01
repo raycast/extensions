@@ -1,6 +1,6 @@
 # WhatsApp Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2024-10-01
 - "Group Code" when adding a group is now **required**
 - "Edit Chat" action in `open-chat` now has a shortcut
 - Changed group icon to be `two-people`
