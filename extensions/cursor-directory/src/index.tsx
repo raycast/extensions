@@ -113,7 +113,7 @@ export default function Command() {
                         <Action
                           title="Unstar Cursor Rule"
                           icon={Icon.StarDisabled}
-                          shortcut={{ modifiers: ["cmd"], key: "u" }}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                           onAction={async () => {
                             await unstarRule(cursorRule.slug);
                             await revalidateStarredRules();
@@ -166,7 +166,7 @@ export default function Command() {
                         <Action
                           title="Star Cursor Rule"
                           icon={Icon.Star}
-                          shortcut={{ modifiers: ["cmd"], key: "s" }}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                           onAction={async () => {
                             await starRule(cursorRule.slug);
                             await revalidateStarredRules();
