@@ -181,7 +181,6 @@ function SearchTable({ table }: { table: string }) {
       onSearchTextChange={setSearchText}
       isShowingDetail
       searchBarAccessory={dropdown}
-      throttle
       actions={<RunTransactionQueries />}
       searchBarPlaceholder="Search rows..."
     >
@@ -375,7 +374,6 @@ function SearchCustomQuery(args: CustomQueryList & { revalidate: () => void }) {
       isLoading={rows.isLoading}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      throttle
       isShowingDetail
       searchBarAccessory={dropdown}
       actions={<RunTransactionQueries />}
