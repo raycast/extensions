@@ -40,6 +40,7 @@
     "got": "^14.4.2",
     "lodash": "^4.17.21",
     "mac-say": "^0.2.9",
+    "raycast-cross-extension": "^0.2.3",
     "steamgriddb": "^2.2.0"
   },
   "devDependencies": {
