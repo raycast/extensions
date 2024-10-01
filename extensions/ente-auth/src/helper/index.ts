@@ -19,13 +19,7 @@ export const listSecretsWithTOTP = (): JsonFormat[] => {
         const currentTotpTimeRemaining = totp.period - (Math.floor(Date.now() / 1000) % totp.period);
         const nextTotp = totp.generate({ timestamp: Date.now() + 30 * 1000 });
 
-        const formattedData = dataTransformer(
-          serviceName,
-          username,
-          currentTotp,
-          currentTotpTimeRemaining,
-          nextTotp,
-        );
+        const formattedData = dataTransformer(serviceName, username, currentTotp, currentTotpTimeRemaining, nextTotp);
 
         if (formattedData) {
           items.push(formattedData);
