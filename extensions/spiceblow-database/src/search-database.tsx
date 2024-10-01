@@ -665,7 +665,7 @@ function GenerateCustomQueryForm({
       !queryHasError && <Action key="save" title={"Save Query"} onAction={saveQuery} icon={Icon.SaveDocument} />,
       <Action
         key="edit"
-        title={"Edit Query"}
+        title={"Update Query"}
         onAction={() => {
           lastSubmittedPrompt.current = "";
           setPrompt((x) => x + " ");
