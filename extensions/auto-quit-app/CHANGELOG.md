@@ -1,6 +1,6 @@
 # Auto Quit App Changelog
 
-## [Increase Interval] - {PR_MERGE_DATE}
+## [Increase Interval] - 2024-10-01
 
 - Increase the minimum detection interval
 - Refactor to simplify code logic
