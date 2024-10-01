@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getPreferenceValues, Detail, Icon, Grid, LaunchProps, ActionPanel, Action } from "@raycast/api";
+import { getPreferenceValues, Detail, Icon, Grid, LaunchProps, ActionPanel, Action, Color } from "@raycast/api";
 import { IconItem, IconSearchData } from "./utils/types";
 import { getUsageColor, normalizeHexCode } from "./utils/helpers";
 import { nounProjectData } from "./utils/nounData";
@@ -83,7 +83,7 @@ export default function Command(props: LaunchProps) {
             {data.icons.map((icon: IconItem) => (
               <Grid.Item
                 key={icon.id}
-                content={icon.thumbnail_url}
+                content={{ source: icon.thumbnail_url, tintColor: Color.PrimaryText }}
                 title={icon.term}
                 subtitle={`- ${icon.creator.name}`}
                 actions={
