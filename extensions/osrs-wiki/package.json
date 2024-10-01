@@ -13,7 +13,6 @@
     {
       "name": "search-osrs-wiki",
       "title": "Search OSRS Wiki",
-      "subtitle": "query the OSRS Wiki",
       "description": "Queries the OSRS Wiki and returns links to relevant articles.",
       "mode": "view"
     }
