@@ -1,6 +1,6 @@
 # TablePlus Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-10-01
 
 - Show hierarhcy of the groups in the List sections (Parent group - Child group)
 
