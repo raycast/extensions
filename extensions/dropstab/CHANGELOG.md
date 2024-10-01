@@ -1,6 +1,6 @@
 # DropsTab Changelog
 
-## [Add Ethereum Gas Tracker, Macro View, Gainers & Losers, CEX Pairs Search] - {PR_MERGE_DATE}
+## [Add Ethereum Gas Tracker, Macro View, Gainers & Losers, CEX Pairs Search] - 2024-10-01
 
 ### Added
 
