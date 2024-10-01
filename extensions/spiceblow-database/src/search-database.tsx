@@ -936,6 +936,7 @@ function SearchTables() {
               source: query.type === "time-series" ? Icon.LineChart : Icon.SaveDocument,
               tintColor: queryColor,
             }}
+            keywords={[query.type === "time-series" ? "graph" : "custom query"]}
             accessories={[
               {
                 tag: {
