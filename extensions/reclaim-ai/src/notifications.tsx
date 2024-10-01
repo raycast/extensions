@@ -121,7 +121,18 @@ export default function Command() {
 
   const titleInfo = useMemo<TitleInfo>(() => {
     const now = new Date();
-    const eventNextNow = eventMoment?.event;
+    let eventNextNow;
+    const showNowEvent = getPreferenceValues()["showNowEvent"];
+    if (showNowEvent) {
+      const nowEvent = events?.filter((event) => {
+        const start = new Date(event.eventStart);
+        const end = new Date(event.eventEnd);
+        return isWithinInterval(now, { start, end });
+      });
+      eventNextNow = nowEvent?.[0];
+    } else {
+      eventNextNow = eventMoment?.event;
+    }
 
     if (eventNextNow) {
       const realEventTitle = eventNextNow.sourceDetails?.title || eventNextNow.title;
@@ -152,6 +163,15 @@ export default function Command() {
             minTitle: `Next: ${miniEventString} ${distanceString}`,
             nowOrNext: "NEXT",
           };
+    }
+
+    if (showNowEvent) {
+      return {
+        fullTitle: "No now events",
+        minTitle: "No now events",
+        nowOrNext: "NONE",
+        event: null,
+      };
     }
 
     return {

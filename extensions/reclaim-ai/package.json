@@ -11,7 +11,8 @@
     "clayton_knapp",
     "scottfseely",
     "sandygifford",
-    "dmkato"
+    "dmkato",
+    "ridemountainpig"
   ],
   "owner": "reclaim-ai",
   "access": "public",
@@ -71,7 +72,18 @@
       "mode": "menu-bar",
       "subtitle": "Reclaim",
       "icon": "command-icon.png",
-      "interval": "1m"
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "showNowEvent",
+          "title": "Show Now Event in Menu Bar",
+          "label": "Always show now event in the menu bar",
+          "description": "Always show now events in the menu bar",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "quick-task",

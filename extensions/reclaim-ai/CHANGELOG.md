@@ -1,5 +1,8 @@
 # reclaim Changelog
 
+## [Update] - {PR_MERGE_DATE}
+- Add the `Show Now Event in Menu Bar` configuration option for the Calendar menu bar
+
 ## [Fixes] - 2024-09-05
 - Route useFetch through useApi
 
