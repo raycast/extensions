@@ -26,8 +26,8 @@ export const listSecretsWithTOTP = (): JsonFormat[] => {
         }
       });
     });
-  } catch (err: any) {
-    if (err.message.includes("No such file or directory")) {
+  } catch (err: unknown) {
+    if (err instanceof Error && err.message.includes("No such file or directory")) {
       console.error("Database not found. Please import secrets first.");
       return [];
     }
