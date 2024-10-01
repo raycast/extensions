@@ -1,3 +1,3 @@
 # CLIPPyX Changelog
 
-## [Initial Version] - 2024-08-06
+## [Initial Version] - {PR_MERGE_DATE}
