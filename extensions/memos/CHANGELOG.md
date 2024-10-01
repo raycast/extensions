@@ -1,19 +1,14 @@
-# Send To Memos Changelog
+# Memos Changelog
 
-## [Update] - 2024-07-20
+## [Upgrade Memos] - 2024-10-01
 
-- support sendMemoForm.
+- ✨ feat: add publish action
+- ✨ feat: add mechanism to generate package-lock.json in action
 
-## [Update] - 2024-05-21
+## [Upgrade Memos] - 2024-09-11
 
-- support memos@0.22.0.
+- ✨ feat: support parallel streaming generation of memo summaries
 
-## [Update] - 2024-03-05
+## [Add Memos Extension] - 2024-09-10
 
-- fix open in browser 403.
-
-## [Update] - 2023-08-01
-
-- 0.14.0 uses a new api and the extension needs to be compatible.
-
-## [Initial Version] - 2023-02-09
+- 🎉 init: begin project

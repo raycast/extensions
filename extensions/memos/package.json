@@ -2,70 +2,95 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "memos",
   "title": "Memos",
-  "description": "Manage Your Memos",
-  "icon": "logo.png",
-  "author": "JakeYu",
+  "description": "Memos is an extension for usememos/memos",
+  "icon": "icon.png",
+  "owner": "bone-corp",
+  "author": "zrr1999",
+  "contributors": [],
   "license": "MIT",
   "commands": [
     {
-      "name": "sendMemo",
-      "title": "Send Memo",
-      "description": "Send your thoughts to Memos",
-      "mode": "no-view",
-      "subtitle": "Memos",
-      "arguments": [
+      "name": "list-memos",
+      "title": "List Memos",
+      "description": "List all memos",
+      "mode": "view"
+    },
+    {
+      "name": "open-memos",
+      "title": "Open Memos Web",
+      "description": "Jump to a memos web page",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "openAiApiKey",
+      "title": "OpenAI API Key",
+      "description": "API Key is used to authenticate with OpenAI API",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "Model is used to specify the model to use",
+      "type": "textfield",
+      "required": true,
+      "default": "gpt-4o-mini"
+    },
+    {
+      "name": "openAiBasePath",
+      "title": "OpenAI Base Path (Optional)",
+      "description": "Base Path is used to override base path with OpenAI API",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "LLM will use this language to generate content",
+      "type": "dropdown",
+      "required": true,
+      "data": [
         {
-          "name": "text",
-          "placeholder": "Text",
-          "type": "text",
-          "required": true
+          "title": "English",
+          "value": "en-US"
+        },
+        {
+          "title": "Chinese",
+          "value": "zh-CN"
         }
-      ]
+      ],
+      "default": "zh-CN"
     },
     {
-      "name": "sendMemoForm",
-      "title": "Send Memo Form",
-      "description": "Edit memo Detail",
-      "mode": "view",
-      "subtitle": "Memos",
-      "icon": "logo.png"
+      "name": "memosServerUrl",
+      "type": "textfield",
+      "title": "Memos Server URL",
+      "description": "URL is used to connect to the memos server",
+      "required": true
     },
     {
-      "name": "openMemoWebsite",
-      "title": "Open Website",
-      "description": "Open Memos Website",
-      "mode": "no-view",
-      "subtitle": "Memos",
-      "icon": "logo.png"
-    },
-    {
-      "name": "memosList",
-      "title": "Memos List",
-      "description": "Show Memos List",
-      "mode": "view",
-      "subtitle": "Memos"
+      "name": "memosServerToken",
+      "type": "textfield",
+      "title": "Memos Server Token",
+      "description": "Token is used to authenticate with the memos server",
+      "required": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.75.2",
-    "@raycast/utils": "^1.15.0",
-    "axios": "^1.3.2",
-    "form-data": "^4.0.0",
-    "mime": "^3.0.0",
-    "qs": "^6.11.0",
-    "url-parse": "^1.5.10"
+    "@raycast/api": "^1.82.0",
+    "@raycast/utils": "^1.17.0",
+    "openai": "4.58.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/mime": "^3.0.1",
-    "@types/node": "20.8.10",
-    "@types/qs": "^6.9.7",
-    "@types/react": "18.2.27",
-    "@types/url-parse": "^1.4.8",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "react-devtools": "^4.24.6",
-    "typescript": "^5.2.2"
+    "@types/node": "^18.8.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -73,23 +98,5 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  },
-  "preferences": [
-    {
-      "name": "host",
-      "description": "Your memo website domain.",
-      "placeholder": "https://demo.usememos.com",
-      "type": "textfield",
-      "required": false,
-      "title": "Host (memo >= 0.22.0)"
-    },
-    {
-      "name": "token",
-      "description": "Your token can be found in memo settings.",
-      "placeholder": "eyJh*******ZNTU",
-      "type": "textfield",
-      "required": false,
-      "title": "Token (memo >= 0.22.0)"
-    }
-  ]
+  }
 }

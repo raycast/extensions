@@ -1,15 +1,24 @@
-# Send To Memos
+# Gitmoji Commit
 
-[Raycast](https://www.raycast.com) extension for [usememos/memos](https://github.com/usememos/memos).
+[Gitmoji Commit](https://github.com/zrr1999/gitmoji) is an emoji commit messages generator.
 
-# Usage
+## Features
 
-1. Set your memos Open API / Token.
-   1. Memo < 0.15.0，You need to set up **Open API**.
-   2. Memo >= 0.15.0，You need to set up **Host** and **Token**.
-2. Use "Send Memo" to create a memo quickly.
-3. Use "Send Memo Form" to create a memo with a template.
-4. Use "Memos List" to list your memos.
+- [x] Search gitmoji by name
+- [x] Generate commit message by LLM following selected text
+- [ ] History of generated commit messages
+- [ ] Support custom emojis
+- [ ] Integrate with git diff
 
-# License
-MIT © [JakeLaoyu](https://github.com/JakeLaoyu)
+## Preferences
+
+You can customize the following preferences:
+
+- `Emoji Format`: Choose between emoji and emoji code.
+- `Copy Format`: Choose between `emoji-type` and `emoji`.
+- `Terminator`: Change the terminator of the commit message.
+- `Action`: Choose between `Copy to Clipboard` and `Paste into Editor`.
+
+## Customize
+
+You can fork this repo and change the `src/lib/types.ts` to add more gitmojis.
