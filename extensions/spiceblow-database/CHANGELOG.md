@@ -1,3 +1,3 @@
 # Search Database Changelog
 
-## [Initial Version] - 2024-08-17
+## [Initial Version] - {PR_MERGE_DATE}
