@@ -1,4 +1,4 @@
-import { Action, Icon, showHUD, Clipboard } from "@raycast/api";
+import { Action, Icon, showHUD, Clipboard, Keyboard } from "@raycast/api";
 import { CursorRule } from "../../types";
 
 interface Props {
@@ -10,7 +10,7 @@ export const CopyRuleAction = ({ cursorRule }: Props) => {
     <Action
       title="Copy Cursor Rule"
       icon={Icon.Clipboard}
-      shortcut={{ modifiers: ["cmd"], key: "c" }}
+      shortcut={Keyboard.Shortcut.Common.Copy}
       onAction={async () => {
         await Clipboard.copy(cursorRule.content);
         await showHUD("Copied to clipboard, paste it into .cursorrules file");

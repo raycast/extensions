@@ -1,4 +1,4 @@
-import { List, ActionPanel, Icon, showToast, Toast, getPreferenceValues, Action, Color } from "@raycast/api";
+import { List, ActionPanel, Icon, showToast, Toast, getPreferenceValues, Action, Color, Keyboard } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getSections } from "./utils";
 import { useState, useEffect } from "react";
@@ -113,7 +113,7 @@ export default function Command() {
                         <Action
                           title="Unstar Cursor Rule"
                           icon={Icon.StarDisabled}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                          shortcut={Keyboard.Shortcut.Common.Pin}
                           onAction={async () => {
                             await unstarRule(cursorRule.slug);
                             await revalidateStarredRules();
@@ -166,7 +166,7 @@ export default function Command() {
                         <Action
                           title="Star Cursor Rule"
                           icon={Icon.Star}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                          shortcut={Keyboard.Shortcut.Common.Pin}
                           onAction={async () => {
                             await starRule(cursorRule.slug);
                             await revalidateStarredRules();

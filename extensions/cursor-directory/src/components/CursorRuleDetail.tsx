@@ -41,7 +41,10 @@ export const CursorRuleDetail = ({ cursorRule, popularOnly }: Props) => {
               <Detail.Metadata.TagList.Item key={tag} text={tag} />
             ))}
           </Detail.Metadata.TagList>
-          {cursorRule.libs.length > 0 && (
+          {
+            // NOTE: upstream, see https://github.com/pontusab/cursor.directory/pull/90
+          }
+          {cursorRule.libs && cursorRule.libs.length > 0 && (
             <Detail.Metadata.TagList title="Libraries">
               {cursorRule.libs.map((lib) => (
                 <Detail.Metadata.TagList.Item key={lib} text={lib} />
