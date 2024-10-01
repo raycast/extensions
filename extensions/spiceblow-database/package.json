@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spiceblow-database",
-  "title": "Spiceblow - SQL Database Management",
-  "description": "Search, update, insert and delete rows in your SQL database, deeply integrated with AI",
+  "title": "Spiceblow - Sql Database Management",
+  "description": "Search, update, insert and delete rows in your Sql database, deeply integrated with AI",
   "icon": "./extension-icon.png",
   "author": "xmorse",
   "categories": [
