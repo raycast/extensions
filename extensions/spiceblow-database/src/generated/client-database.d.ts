@@ -1,4 +1,12 @@
-export declare function createClient({ url, fetch, googleToken }: { url: string; fetch?: any; googleToken: string }): {
+export declare function createClient({
+  url,
+  fetch,
+  googleToken,
+}: {
+  url: string;
+  fetch?: any;
+  googleToken: () => string;
+}): {
   spiceblow: {
     api: {
       openapi: {
@@ -41,7 +49,7 @@ export declare function createClient({ url, fetch, googleToken }: { url: string;
             query: string;
             searchText: string;
             databaseType: "postgres" | "mysql";
-            tableInfo: import("search-database/src/types").TableInfo;
+            tableInfo: import("spiceblow-database/src/types").TableInfo;
             schema?: string | undefined;
             exampleRow?: any;
             namespace?: string | undefined;
@@ -86,6 +94,21 @@ export declare function createClient({ url, fetch, googleToken }: { url: string;
               void,
               unknown
             >;
+          }>
+        >;
+      };
+      graph: {
+        get: (
+          options?:
+            | {
+                headers?: Record<string, unknown> | undefined;
+                query?: Record<string, unknown> | undefined;
+                fetch?: RequestInit | undefined;
+              }
+            | undefined,
+        ) => Promise<
+          import("spiceflow/client").SpiceflowClient.TreatyResponse<{
+            200: Response;
           }>
         >;
       };
