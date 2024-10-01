@@ -1,7 +1,9 @@
 import { CursorRule } from "../types";
-import { Action, ActionPanel, Detail, Image, Icon, openExtensionPreferences, showHUD, Clipboard } from "@raycast/api";
+import { Action, ActionPanel, Detail, Image, Icon } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
 import { isImageUrl, processContent } from "../utils";
+import { CopyRuleAction } from "./actions/CopyRuleAction";
+import { OpenPrefAction } from "./actions/OpenPrefAction";
 
 interface Props {
   cursorRule: CursorRule;
@@ -39,7 +41,10 @@ export const CursorRuleDetail = ({ cursorRule, popularOnly }: Props) => {
               <Detail.Metadata.TagList.Item key={tag} text={tag} />
             ))}
           </Detail.Metadata.TagList>
-          {cursorRule.libs.length > 0 && (
+          {
+            // NOTE: upstream, see https://github.com/pontusab/cursor.directory/pull/90
+          }
+          {cursorRule.libs && cursorRule.libs.length > 0 && (
             <Detail.Metadata.TagList title="Libraries">
               {cursorRule.libs.map((lib) => (
                 <Detail.Metadata.TagList.Item key={lib} text={lib} />
@@ -51,15 +56,7 @@ export const CursorRuleDetail = ({ cursorRule, popularOnly }: Props) => {
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Actions">
-            <Action
-              title="Copy Cursor Rule"
-              icon={Icon.Clipboard}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
-              onAction={async () => {
-                await Clipboard.copy(cursorRule.content);
-                await showHUD("Copied to clipboard, paste it into .cursorrules file");
-              }}
-            />
+            <CopyRuleAction cursorRule={cursorRule} />
             <Action.OpenInBrowser
               // eslint-disable-next-line @raycast/prefer-title-case
               title="Open in cursor.directory"
@@ -77,7 +74,7 @@ export const CursorRuleDetail = ({ cursorRule, popularOnly }: Props) => {
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Settings">
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            <OpenPrefAction />
           </ActionPanel.Section>
         </ActionPanel>
       }

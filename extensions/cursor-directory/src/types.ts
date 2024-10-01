@@ -9,6 +9,16 @@ interface Author {
   avatar: string;
 }
 
+interface Video {
+  title: string;
+  description: string;
+  url: string;
+  author: {
+    name: string;
+    image: string;
+  };
+}
+
 interface CursorRule {
   tags: string[];
   title: string;
@@ -31,4 +41,4 @@ type PopularCursorRulesResponse = {
 
 type APIResponse = AllCursorRulesResponse | PopularCursorRulesResponse;
 
-export type { CursorRule, Author, Section, AllCursorRulesResponse, PopularCursorRulesResponse, APIResponse };
+export type { CursorRule, Author, Section, AllCursorRulesResponse, PopularCursorRulesResponse, APIResponse, Video };
