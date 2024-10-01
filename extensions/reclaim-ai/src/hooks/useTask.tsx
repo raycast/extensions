@@ -19,7 +19,7 @@ export const useTasks = () => {
 
 export const useTaskActions = () => {
   const executeTaskAction = async <T,>(url: string, options?: RequestInit, payload?: unknown): Promise<T> => {
-    const [response, error] = await fetchPromise<T>(url, options, payload);
+    const [response, error] = await fetchPromise<T>(url, { init: options, payload });
     if (error) throw error;
     if (!response) throw new Error("No response");
     return response;

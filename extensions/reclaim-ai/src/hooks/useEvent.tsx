@@ -62,7 +62,7 @@ export const useEventActions = () => {
   const handleStartHabit = async (id: string, title: string) => {
     try {
       await showHUD("Started Habit: " + stripPlannerEmojis(title));
-      const [habit, error] = await fetchPromise(`/planner/start/habit/${id}`, { method: "POST" });
+      const [habit, error] = await fetchPromise(`/planner/start/habit/${id}`, { init: { method: "POST" } });
       if (!habit || error) throw error;
       return habit;
     } catch (error) {
@@ -74,7 +74,7 @@ export const useEventActions = () => {
   const handleRestartHabit = async (id: string, title: string) => {
     try {
       await showHUD("Restarted Habit: " + stripPlannerEmojis(title));
-      const [habit, error] = await fetchPromise(`/planner/restart/habit/${id}`, { method: "POST" });
+      const [habit, error] = await fetchPromise(`/planner/restart/habit/${id}`, { init: { method: "POST" } });
       if (!habit || error) throw error;
       return habit;
     } catch (error) {
@@ -86,7 +86,7 @@ export const useEventActions = () => {
   const handleStopHabit = async (id: string, title: string) => {
     try {
       await showHUD("Stopped Habit: " + stripPlannerEmojis(title));
-      const [habit, error] = await fetchPromise(`/planner/stop/habit/${id}`, { method: "POST" });
+      const [habit, error] = await fetchPromise(`/planner/stop/habit/${id}`, { init: { method: "POST" } });
       if (!habit || error) throw error;
 
       return habit;
@@ -99,7 +99,9 @@ export const useEventActions = () => {
   const handleStartOrRestartSmartHabit = async (lineageId: string, title: string) => {
     try {
       await showHUD("Started Habit: " + stripPlannerEmojis(title));
-      const [habit, error] = await fetchPromise(`/smart-habits/planner/${lineageId}/start`, { method: "POST" });
+      const [habit, error] = await fetchPromise(`/smart-habits/planner/${lineageId}/start`, {
+        init: { method: "POST" },
+      });
       if (!habit || error) throw error;
 
       return habit;
@@ -112,7 +114,9 @@ export const useEventActions = () => {
   const handleStopSmartHabit = async (lineageId: string, title: string) => {
     try {
       await showHUD("Stopped Habit: " + stripPlannerEmojis(title));
-      const [habit, error] = await fetchPromise(`/smart-habits/planner/${lineageId}/stop`, { method: "POST" });
+      const [habit, error] = await fetchPromise(`/smart-habits/planner/${lineageId}/stop`, {
+        init: { method: "POST" },
+      });
       if (!habit || error) throw error;
 
       return habit;

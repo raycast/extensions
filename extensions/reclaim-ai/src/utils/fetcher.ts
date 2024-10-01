@@ -1,10 +1,22 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { StartSpanOptions } from "@sentry/node";
 import fetch, { FetchError, RequestInit } from "node-fetch";
 import { NativePreferences } from "../types/preferences";
+import { errorCoverage, ErrorCoverageOptions } from "./sentry";
 
 const { apiToken, apiUrl } = getPreferenceValues<NativePreferences>();
 
-export const fetcher = async <T>(url: string, options?: RequestInit, payload?: unknown): Promise<T> => {
+export type FetcherOptions = {
+  init?: RequestInit;
+  payload?: unknown;
+  errorOptions?: {
+    startSpanOptions?: StartSpanOptions;
+    coverageOptions?: Omit<ErrorCoverageOptions<true>, "rethrowExceptions">;
+  };
+};
+
+export const fetcher = async <T>(url: string, options: FetcherOptions = {}): Promise<T> => {
+  const { init, payload, errorOptions } = options;
   if (!apiToken) {
     showToast({
       style: Toast.Style.Failure,
@@ -13,24 +25,30 @@ export const fetcher = async <T>(url: string, options?: RequestInit, payload?: u
     });
   }
 
-  return fetch(`${apiUrl}${url}`, {
-    ...options,
-    body: payload ? JSON.stringify(payload) : undefined,
-    headers: {
-      Authorization: `Bearer ${apiToken}`,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      ...options?.headers,
-    },
-  })
-    .then((r) => r.json())
-    .catch((e) => console.error(e));
+  return (
+    await errorCoverage(
+      { name: "fetcher-call", ...errorOptions?.startSpanOptions },
+      () =>
+        fetch(`${apiUrl}${url}`, {
+          ...init,
+          body: payload ? JSON.stringify(payload) : undefined,
+          headers: {
+            Authorization: `Bearer ${apiToken}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            ...init?.headers,
+          },
+        }).then<T>((r) => r.json()),
+      { rethrowExceptions: true, ...errorOptions?.coverageOptions }
+    )
+  ).data;
 };
+
+export type FetchPromiseOptions = FetcherOptions;
 
 export const fetchPromise = async <T>(
   url: string,
-  options?: RequestInit,
-  payload?: unknown
+  options?: FetchPromiseOptions
 ): Promise<[T, null] | [null, FetchError | undefined]> => {
   if (!apiToken) {
     showToast({
@@ -41,7 +59,7 @@ export const fetchPromise = async <T>(
   }
 
   try {
-    const result: Awaited<T> = await fetcher(url, options, payload);
+    const result: Awaited<T> = await fetcher(url, options);
     return [result, null];
   } catch (err) {
     return [null, err as FetchError];
