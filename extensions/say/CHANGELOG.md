@@ -1,6 +1,6 @@
 # Say - Text to Speech Changelog
 
-## [Chore] - {PR_MERGE_DATE}
+## [Chore] - 2024-10-02
 
 - Rename extension title
 - Bump all dependencies to the latest
