@@ -10,12 +10,12 @@ import {
 import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
 import fs from "fs/promises";
-import { getTimestamp } from "./utils";
+import { getTimestamp, parseMarkdownToRule } from "./utils";
 import { LocalStorage } from "@raycast/api";
+import path from "path";
 
 export async function getStarredRules(): Promise<string[]> {
   const allItems = await LocalStorage.allItems<string[]>();
-  console.debug("allItems:\n", allItems);
   return Object.values(allItems);
 }
 
@@ -89,6 +89,32 @@ export async function fetchCursorRules(popularOnly: boolean): Promise<CursorRule
   } catch (error) {
     console.error("Error in fetchCursorRules:", error);
     throw new Error("Failed to fetch cursor rules");
+  }
+}
+
+export async function fetchLocalRules(): Promise<CursorRule[]> {
+  const { export_directory } = getPreferenceValues<Preferences>();
+  const expandedPath = export_directory.replace(/^~/, process.env.HOME || "");
+
+  try {
+    const files = await fs.readdir(expandedPath);
+    const markdownFiles = files.filter((file) => file.endsWith(".md"));
+
+    const localRules: CursorRule[] = [];
+
+    for (const file of markdownFiles) {
+      const filePath = path.join(expandedPath, file);
+      const content = await fs.readFile(filePath, "utf-8");
+      const rule = parseMarkdownToRule(content, file);
+      if (rule) {
+        localRules.push(rule);
+      }
+    }
+
+    return localRules;
+  } catch (error) {
+    console.error("Error fetching local rules:", error);
+    return [];
   }
 }
 

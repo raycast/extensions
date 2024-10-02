@@ -2,7 +2,7 @@ import { environment } from "@raycast/api";
 import path from "path";
 
 export const API_URL = "https://cursor.directory/api/";
-export const API_URL_POPULAR = "https://cursor.directory/api/popular/";
+export const API_URL_POPULAR = API_URL + "popular/";
 export const ALL_CURSOR_RULES_CACHE_PATH = !environment.isDevelopment
   ? environment.supportPath + "all_cursor_rules_cache.json"
   : path.join(__dirname, "..", "cursor-directory", "all_cursor_rules_cache.json");

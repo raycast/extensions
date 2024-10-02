@@ -29,6 +29,7 @@ interface CursorRule {
   // count of how many times the cursor rule has been copied on cursor.directory
   // null if not available
   count: number | null;
+  isLocal: boolean;
 }
 
 type AllCursorRulesResponse = {

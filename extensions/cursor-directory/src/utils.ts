@@ -1,5 +1,7 @@
-import type { CursorRule, Section } from "./types";
+import type { Author, CursorRule, Section } from "./types";
 import fs from "fs";
+import os from "os";
+import { parse as parseYaml } from "yaml";
 
 export const getSections = (cursorRules: CursorRule[], sortByPopularity: boolean): Section[] => {
   const sections = Array.from(new Set(cursorRules.flatMap((cursorRule) => cursorRule.tags)));
@@ -40,12 +42,10 @@ export const isImageUrl = (url: string): boolean => {
   const isImageExtension =
     imageExtensions.includes(url.substring(url.lastIndexOf(".")).toLowerCase()) || url.endsWith(".svg");
 
-  // Add check for GitHub avatar URLs
   const isGitHubAvatar = url.includes("avatars.githubusercontent.com");
 
   const isYoutubeAvatar = url.includes("yt3.ggpht.com");
 
-  // Add check for URLs with 'image' in the path or query parameters
   const hasImageInUrl = url.toLowerCase().includes("image");
 
   return isDataUri || isImageExtension || isGitHubAvatar || hasImageInUrl || isYoutubeAvatar;
@@ -69,13 +69,67 @@ export const processContent = (content: string) => {
 };
 
 export function getYoutubeVideoId(url: string): string {
-  // First, split by 'embed/' to get the part after it
   const parts = url.split("embed/");
   if (parts.length < 2) return "";
 
-  // Then, split by '?' to remove any query parameters
   const idPart = parts[1].split("?")[0];
 
-  // Finally, split by '/' to handle any additional path segments
   return idPart.split("/")[0];
+}
+
+export function cursorRuleToMarkdown(cursorRule: CursorRule): string {
+  const username = os.userInfo().username;
+
+  const frontmatter = `---
+title: ${cursorRule.title}
+slug: ${cursorRule.slug}.md
+tags:
+${cursorRule.tags.map((tag) => `  - ${tag}`).join("\n")}
+libs:
+${cursorRule.libs.map((lib) => `  - ${lib}`).join("\n")}
+author:
+  name: ${username}
+  url: null
+  avatar: null
+count: null
+---
+
+`;
+
+  return frontmatter + processContent(cursorRule.content);
+}
+
+export function parseMarkdownToRule(content: string, fileName: string): CursorRule | null {
+  const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
+  const match = content.match(frontmatterRegex);
+
+  if (!match) return null;
+
+  const [, frontmatter, ruleContent] = match;
+
+  try {
+    const frontmatterData = parseYaml(frontmatter);
+
+    console.debug(frontmatterData);
+
+    const author: Author = {
+      name: typeof frontmatterData.author?.name === "string" ? frontmatterData.author.name : os.userInfo().username,
+      url: typeof frontmatterData.author?.url === "string" ? frontmatterData.author.url : "",
+      avatar: typeof frontmatterData.author?.avatar === "string" ? frontmatterData.author.avatar : "",
+    };
+
+    return {
+      title: typeof frontmatterData.title === "string" ? frontmatterData.title : fileName.replace(".md", ""),
+      slug: typeof frontmatterData.slug === "string" ? frontmatterData.slug : fileName.replace(".md", ""),
+      tags: Array.isArray(frontmatterData.tags) ? frontmatterData.tags.map(String) : [],
+      libs: Array.isArray(frontmatterData.libs) ? frontmatterData.libs.map(String) : [],
+      content: ruleContent.trim(),
+      author,
+      count: typeof frontmatterData.count === "number" ? frontmatterData.count : null,
+      isLocal: true,
+    };
+  } catch (error) {
+    console.error("Error parsing frontmatter:", error);
+    return null;
+  }
 }

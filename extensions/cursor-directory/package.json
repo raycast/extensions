@@ -44,6 +44,14 @@
           "value": "all"
         }
       ]
+    },
+    {
+      "name": "export_directory",
+      "title": "Export Directory",
+      "type": "textfield",
+      "required": false,
+      "default": "~/Documents/CursorRules",
+      "description": "The path to the directory to export cursor rules"
     }
   ],
   "license": "MIT",
@@ -64,7 +72,8 @@
   "dependencies": {
     "@raycast/api": "^1.81.2",
     "@raycast/utils": "^1.16.3",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "yaml": "^2.5.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
