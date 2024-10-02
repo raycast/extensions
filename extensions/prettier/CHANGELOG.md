@@ -1,6 +1,6 @@
 # Prettier Changelog
 
-## [Maintenance Release] - {PR_MERGE_DATE}
+## [Maintenance Release] - 2024-10-02
 
 ## [New Icon] - 2023-04-25
 
