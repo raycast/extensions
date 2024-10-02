@@ -4,9 +4,9 @@ import { List } from "@raycast/api";
 import { addDays, differenceInHours, endOfDay, isAfter, isBefore, isWithinInterval, startOfDay } from "date-fns";
 import { useMemo, useState } from "react";
 import { MyCalendarEventListSection } from "./components/MyCalendarEventListSection";
+import { withRAIErrorBoundary } from "./components/RAIErrorBoundary";
 import { useEvents } from "./hooks/useEvent";
 import { Event } from "./types/event";
-import { withRAIErrorBoundary } from "./components/RAIErrorBoundary";
 
 type EventSection = { section: string; sectionTitle: string; events: Event[] };
 
