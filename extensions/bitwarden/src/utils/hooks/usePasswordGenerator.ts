@@ -67,13 +67,13 @@ function usePasswordGenerator() {
 
   useEffect(() => void restoreStoredOptions(), []);
 
-  const generatePassword = async (passwordOptions = options) => {
+  const generatePassword = async (newOptions = options) => {
     try {
       if (state.isGenerating) abortPreviousGenerate();
       renewAbortController();
 
       dispatch({ type: "generate" });
-      const password = await bitwarden.generatePassword(passwordOptions, abortControllerRef?.current);
+      const password = await bitwarden.generatePassword(newOptions, abortControllerRef?.current);
       dispatch({ type: "setPassword", password });
     } catch (error) {
       // generate password was likely aborted
@@ -83,18 +83,14 @@ function usePasswordGenerator() {
     }
   };
 
-  const setOptionsAndGenerate = async (newOptions: PasswordGeneratorOptions) => {
-    dispatch({ type: "setOptions", options: newOptions });
-    const preparedOptions = prepareOptions(newOptions);
-    await Promise.all([
-      generatePassword(preparedOptions),
-      LocalStorage.setItem(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS, JSON.stringify(preparedOptions)),
-    ]);
-  };
-
   const regeneratePassword = async (newOptions?: PasswordGeneratorOptions) => {
     if (newOptions) {
-      await setOptionsAndGenerate(newOptions);
+      dispatch({ type: "setOptions", options: newOptions });
+      const preparedOptions = prepareOptions(newOptions);
+      await Promise.all([
+        generatePassword(preparedOptions),
+        LocalStorage.setItem(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS, JSON.stringify(preparedOptions)),
+      ]);
     } else {
       await generatePassword();
     }

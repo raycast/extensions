@@ -17,7 +17,6 @@ export const LOCAL_STORAGE_KEY = {
   VAULT_LOCK_REASON: "vaultLockReason",
   VAULT_FAVORITE_ORDER: "vaultFavoriteOrder",
   VAULT_LAST_STATUS: "lastVaultStatus",
-  CLI_VERSION: "cliVersion",
 } as const;
 
 export const VAULT_LOCK_MESSAGES = {

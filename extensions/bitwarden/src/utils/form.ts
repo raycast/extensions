@@ -37,11 +37,7 @@ type UseFormProps<T extends Form.Values> = Parameters<typeof useForm<T>>[0];
 export const useOnChangeForm = <T extends Form.Values>(
   props: Omit<UseFormProps<T>, "onSubmit"> & { onChange: UseFormProps<T>["onSubmit"] }
 ) => {
-  const useFormResult = useForm({ ...props, onSubmit: props.onChange });
-
-  useEffect(() => {
-    void useFormResult.handleSubmit(useFormResult.values);
-  }, [useFormResult.values]);
-
-  return useFormResult;
+  const result = useForm({ ...props, onSubmit: props.onChange });
+  useEffect(() => void result.handleSubmit(result.values), [result.values]);
+  return result;
 };
