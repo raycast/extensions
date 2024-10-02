@@ -13,6 +13,7 @@
     {
       "name": "caption",
       "title": "Caption Search",
+      "subtitle": "CLIPPyX",
       "description": "Search images by caption",
       "mode": "view",
       "preferences": [
@@ -39,6 +40,7 @@
     {
       "name": "text",
       "title": "Text Content Search",
+      "subtitle": "CLIPPyX",
       "description": "Serch images by text content",
       "mode": "view",
       "preferences": [
@@ -65,6 +67,7 @@
     {
       "name": "similar",
       "title": "Similar Image Search",
+      "subtitle": "CLIPPyX",
       "description": "Enter path / URL of image to search for similar images",
       "mode": "view",
       "preferences": [
