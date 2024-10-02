@@ -7,7 +7,8 @@
 - Items are now cached for a better experience
 - Added more icons for list items
 - Added a very basic view for Responses
-- Updated dependencies + remved `got`
+- Updated dependencies + removed `got`
+- Updated metadata images
 
 ## [Maintenance] - 2022-10-04
 

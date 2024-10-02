@@ -53,8 +53,13 @@ function Forms({ workspace }: { workspace: Workspace }) {
             icon={Icon.SquareEllipsis}
             title={form.title}
             accessories={[
-              form.settings.is_public ? { icon: Icon.Eye, tooltip: "Public" } : { icon: Icon.EyeDisabled, tooltip: "Private" },
-              { date: new Date(form.last_updated_at), tooltip: `Updated: ${new Date(form.last_updated_at).toLocaleDateString()}` },
+              form.settings.is_public
+                ? { icon: Icon.Eye, tooltip: "Public" }
+                : { icon: Icon.EyeDisabled, tooltip: "Private" },
+              {
+                date: new Date(form.last_updated_at),
+                tooltip: `Updated: ${new Date(form.last_updated_at).toLocaleDateString()}`,
+              },
             ]}
             actions={
               <ActionPanel>
@@ -204,15 +209,20 @@ function FormResponses({ form }: { form: FormOverview }) {
                 .join(`\n`)}
             />
           }
-          actions={<ActionPanel>
-            <OpenInTypeform title="View Responses in Typeform" url={`${ADMIN_FORM_BASE_URL}form/${form.id}/results#responses`} />
-          </ActionPanel>}
+          actions={
+            <ActionPanel>
+              <OpenInTypeform
+                title="View Responses in Typeform"
+                url={`${ADMIN_FORM_BASE_URL}form/${form.id}/results#responses`}
+              />
+            </ActionPanel>
+          }
         />
       ))}
     </List>
   );
 }
 
-function OpenInTypeform(props: { title?: string, url: string }) {
-  return <Action.OpenInBrowser icon="tf.png" title={props.title || "Open in Typeform"} url={props.url} />
+function OpenInTypeform(props: { title?: string; url: string }) {
+  return <Action.OpenInBrowser icon="tf.png" title={props.title || "Open in Typeform"} url={props.url} />;
 }
