@@ -1,8 +1,12 @@
-# Zotero Changelog
+# Search Stack Exchange Sites Changelog
+
+## [Now supports ALL Sites in Dropdown] - {PR_MERGE_DATE}
+
+- Replaced `useEffect` with a `usePromise` for cleaner site fetching
 
 ## [Enhancements] - 2023-08-04
 
-- Update search for ALL stack exchange sites
+- Update search for MORE stack exchange sites
 - Auto collect all sites and present them as list dropdown
 - Present question view as default along with its metadata
 - Add screenshots for extension details

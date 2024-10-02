@@ -148,7 +148,7 @@ ${x_data.body_markdown}
         }
       } catch (e) {
         if (!cancel) {
-          setError(e.message);
+          setError((e as Error).message);
         }
       } finally {
         if (!cancel) {

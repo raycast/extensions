@@ -98,7 +98,7 @@ const parseQuery = (q: string) => {
   return { qss, tss };
 };
 
-export const searchResources = async (q: string, site: string = "stackoverflow"): Promise<QueryResultItem[]> => {
+export const searchResources = async (q: string, site = "stackoverflow"): Promise<QueryResultItem[]> => {
   const requestOptions = {
     method: "GET",
     headers: {
@@ -131,7 +131,7 @@ export async function getSites(): Promise<SiteData[]> {
     },
   };
   async function updateCache(): Promise<SiteData[]> {
-    const query = "https://api.stackexchange.com/2.3/sites";
+    const query = "https://api.stackexchange.com/2.3/sites?pageSize=9999";
     const response = await fetch(query, requestOptions);
     if (response.status !== 200) {
       const data = (await response.json()) as { message?: unknown } | undefined;
