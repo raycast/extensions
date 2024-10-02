@@ -1,5 +1,5 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { startInactiveSpan } from "@sentry/react";
+import { startInactiveSpan } from "@sentry/node";
 import fetch, { FetchError, RequestInit } from "node-fetch";
 import { NativePreferences } from "../types/preferences";
 import { errorCoverage, redactData, ResolvableSpan, resolveSpan, upgradeAndCaptureError } from "./sentry";

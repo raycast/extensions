@@ -7,7 +7,7 @@ import {
   startInactiveSpan,
   StartSpanOptions,
   withActiveSpan,
-} from "@sentry/react";
+} from "@sentry/node";
 import { useEffect, useMemo } from "react";
 
 export type ResolvableSpan = Span | StartSpanOptions;

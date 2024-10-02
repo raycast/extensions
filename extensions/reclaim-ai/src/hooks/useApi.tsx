@@ -48,7 +48,7 @@ const useApi = <T,>(url: string, options: UseAPiOptions = {}) => {
       [apiToken]
     );
 
-    const result = useFetch<T>(`${apiUrl}${url}`, {
+    const result = useFetch<T>(`${apiUrl}${url}/blahblah`, {
       headers,
       keepPreviousData: true,
     });

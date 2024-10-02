@@ -1,7 +1,7 @@
 import "./initSentry";
 
 import { closeMainWindow, open, showHUD } from "@raycast/api";
-import { Span, startInactiveSpan } from "@sentry/react";
+import { Span, startInactiveSpan } from "@sentry/node";
 import { ApiResponseEvents, ApiResponseMoment } from "./hooks/useEvent.types";
 import { getOriginalEventIDFromSyncEvent } from "./utils/events";
 import { fetchPromise } from "./utils/fetcher";

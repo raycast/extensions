@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/react";
+import * as Sentry from "@sentry/node";
 
 export const sentryClient = Sentry.init({
   environment: "production",

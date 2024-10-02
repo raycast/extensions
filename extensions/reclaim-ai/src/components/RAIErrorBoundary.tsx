@@ -1,10 +1,12 @@
-import { ErrorBoundary, ErrorBoundaryProps } from "@sentry/react";
-import { ComponentType, FC } from "react";
+// import { ErrorBoundary, ErrorBoundaryProps } from "@sentry/node";
+import { ComponentType, FC, ReactElement } from "react";
 
-export type RAIErrorBoundaryProps = ErrorBoundaryProps;
+// export type RAIErrorBoundaryProps = ErrorBoundaryProps;
+export type RAIErrorBoundaryProps = { children?: ReactElement };
 
-export const RAIErrorBoundary: FC<RAIErrorBoundaryProps> = ({ children, ...rest }) => {
-  return <ErrorBoundary {...rest}>{children}</ErrorBoundary>;
+export const RAIErrorBoundary: FC<RAIErrorBoundaryProps> = ({ children }) => {
+  // return <ErrorBoundary {...rest}>{children}</ErrorBoundary>;
+  return <>{children}</>;
 };
 
 export const withRAIErrorBoundary = <P extends Record<string, unknown>>(
