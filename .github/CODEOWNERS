@@ -224,6 +224,7 @@
 /extensions/clipboard-formatter                                     @joshtemple
 /extensions/clipboard-utilities                                     @noidwasavailable
 /extensions/clipmenu                                                @Envl
+/extensions/clippyx                                                 @0ssamaak0
 /extensions/clockify                                                @ismamz @sxn @kuddl @azlekov
 /extensions/clojuredocs-search                                      @edblancas
 /extensions/close-finder                                            @qeude
@@ -1121,7 +1122,7 @@
 /extensions/potter-db                                               @xmok
 /extensions/power-management                                        @sasivarnan @erics118 @bbatsche @iamyeizi
 /extensions/premier-league                                          @anhthang
-/extensions/prettier                                                @aeither @jasonwaters
+/extensions/prettier                                                @aeither @jasonwaters @xmok
 /extensions/primer                                                  @colebemis
 /extensions/prism-launcher                                          @lockieluke
 /extensions/prisma-cli-commands                                     @rajmasha
