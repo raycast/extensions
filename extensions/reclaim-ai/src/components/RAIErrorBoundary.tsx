@@ -1,7 +1,6 @@
 import { ErrorBoundary, ErrorBoundaryProps } from "@sentry/react";
 import { ComponentType, FC } from "react";
 
-
 export type RAIErrorBoundaryProps = ErrorBoundaryProps;
 
 export const RAIErrorBoundary: FC<RAIErrorBoundaryProps> = ({ children, ...rest }) => {
@@ -10,7 +9,7 @@ export const RAIErrorBoundary: FC<RAIErrorBoundaryProps> = ({ children, ...rest 
 
 export const withRAIErrorBoundary = <P extends Record<string, unknown>>(
   WrappedComponent: ComponentType<P>,
-  errorBoundaryOptions: RAIErrorBoundaryProps
+  errorBoundaryOptions: RAIErrorBoundaryProps = {}
 ): FC<P> => {
   const componentDisplayName = WrappedComponent.displayName || WrappedComponent.name || "unknown";
 

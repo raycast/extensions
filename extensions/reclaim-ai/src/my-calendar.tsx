@@ -6,10 +6,11 @@ import { useMemo, useState } from "react";
 import { MyCalendarEventListSection } from "./components/MyCalendarEventListSection";
 import { useEvents } from "./hooks/useEvent";
 import { Event } from "./types/event";
+import { withRAIErrorBoundary } from "./components/RAIErrorBoundary";
 
 type EventSection = { section: string; sectionTitle: string; events: Event[] };
 
-export default function Command() {
+function Command() {
   const [searchText, setSearchText] = useState("");
   const now = new Date();
 
@@ -95,3 +96,5 @@ export default function Command() {
     </List>
   );
 }
+
+export default withRAIErrorBoundary(Command);

@@ -1,13 +1,13 @@
 import "./initSentry";
 
-import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
+import { withRAIErrorBoundary } from "./components/RAIErrorBoundary";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-
+import { useCallbackSafeRef } from "./hooks/useCallbackSafeRef";
 import { useTaskActions, useTasks } from "./hooks/useTask";
 import { useUser } from "./hooks/useUser";
 import { Task, TaskStatus } from "./types/task";
-import { TIME_BLOCK_IN_MINUTES, formatPriority, formatPriorityIcon, formatStrDuration } from "./utils/dates";
-import { useCallbackSafeRef } from "./hooks/useCallbackSafeRef";
+import { formatPriority, formatPriorityIcon, formatStrDuration, TIME_BLOCK_IN_MINUTES } from "./utils/dates";
 
 type DropdownStatus = "OPEN" | "DONE";
 
@@ -29,9 +29,10 @@ type StatusDropdownProps = {
   onStatusChange: (newValue: DropdownStatus) => void;
 };
 
+const STATUS_TYPES: readonly DropdownStatus[] = ["OPEN", "DONE"];
+
 const StatusDropdown = (props: StatusDropdownProps) => {
   const { onStatusChange } = props;
-  const statusTypes = useMemo<DropdownStatus[]>(() => ["OPEN", "DONE"], []);
 
   return (
     <List.Dropdown
@@ -39,7 +40,7 @@ const StatusDropdown = (props: StatusDropdownProps) => {
       storeValue={true}
       onChange={(value) => onStatusChange(value as DropdownStatus)}
     >
-      {statusTypes.map((statusType) => (
+      {STATUS_TYPES.map((statusType) => (
         <List.Dropdown.Item key={statusType} title={DROPDOWN_STATUS[statusType]} value={statusType} />
       ))}
     </List.Dropdown>
@@ -447,6 +448,8 @@ function TaskList() {
   );
 }
 
-export default function Command() {
+function Command() {
   return <TaskList />;
 }
+
+export default withRAIErrorBoundary(Command);

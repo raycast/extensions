@@ -4,11 +4,17 @@ import { Task } from "../types/task";
 import useApi from "./useApi";
 import { CreateTaskProps, PlannerActionIntermediateResult } from "./useTask.types";
 import { fetchPromise } from "../utils/fetcher";
+import { ResolvableSpan, useSpanWithParent } from "../utils/sentry";
 
-export const useTasks = () => {
-  const { data: tasks, error, isLoading } = useApi<Task[]>("/tasks?instances=true");
+export type UseTasksOptions = {
+  readonly sentrySpan?: ResolvableSpan;
+};
 
-  if (error) console.error("Error while fetching Tasks", error);
+export const useTasks = (options: UseTasksOptions = {}) => {
+  const { sentrySpan } = options;
+  const span = useSpanWithParent(sentrySpan, { name: "useTasks" });
+
+  const { data: tasks, error, isLoading } = useApi<Task[]>("/tasks?instances=true", { sentrySpan: span });
 
   return {
     tasks,
