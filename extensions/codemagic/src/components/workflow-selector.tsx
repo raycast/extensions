@@ -12,7 +12,7 @@ interface WorkflowSelectorProps {
 
 function WorkflowSelector({ workflows, appName, branches, defaultBranch, appId }: WorkflowSelectorProps) {
   const [selectedWorkflow, setSelectedWorkflow] = useState(workflows[0]._id);
-  const [selectedBranch, setSelectedBranch] = useState(defaultBranch); 
+  const [selectedBranch, setSelectedBranch] = useState(defaultBranch);
 
   const handleSubmit = async () => {
     try {
@@ -48,22 +48,12 @@ function WorkflowSelector({ workflows, appName, branches, defaultBranch, appId }
         </ActionPanel>
       }
     >
-      <Form.Dropdown
-        id="workflow"
-        title="Workflow"
-        value={selectedWorkflow} 
-        onChange={setSelectedWorkflow}
-      >
+      <Form.Dropdown id="workflow" title="Workflow" value={selectedWorkflow} onChange={setSelectedWorkflow}>
         {workflows.map((workflow) => (
           <Form.Dropdown.Item key={workflow._id} value={workflow._id} title={workflow.name} />
         ))}
       </Form.Dropdown>
-      <Form.Dropdown
-        id="branch"
-        title="Branch"
-        value={selectedBranch}
-        onChange={setSelectedBranch}
-      >
+      <Form.Dropdown id="branch" title="Branch" value={selectedBranch} onChange={setSelectedBranch}>
         {branches.map((branch) => (
           <Form.Dropdown.Item key={branch} value={branch} title={branch} />
         ))}
