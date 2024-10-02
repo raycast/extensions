@@ -1,6 +1,6 @@
 # DevDocs Extension
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2024-10-02
 
 - Account for settings file imports with multiple preferences set
 
