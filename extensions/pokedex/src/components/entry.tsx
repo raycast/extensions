@@ -1,17 +1,15 @@
 import { List } from "@raycast/api";
 import json2md from "json2md";
 import groupBy from "lodash.groupby";
-import {
-  PokemonV2Pokemondexnumber,
-  PokemonV2Pokemonspeciesflavortext,
-} from "../types";
+import { PokemonV2Flavortext, PokemonV2Pokemondexnumber } from "../types";
+import { nationalDexNumber } from "../utils";
 
 export default function PokedexEntries(props: {
   name: string;
   dex_numbers: PokemonV2Pokemondexnumber[];
-  entries: PokemonV2Pokemonspeciesflavortext[];
+  entries: PokemonV2Flavortext[];
 }) {
-  const dexNumber: { [name: string]: number } = {};
+  const dexNumber: Record<string, number> = {};
   props.dex_numbers.forEach((dex) => {
     dex.pokemon_v2_pokedex.pokemon_v2_pokedexversiongroups.forEach((vg) => {
       vg.pokemon_v2_versiongroup.pokemon_v2_versions.forEach((v) => {
@@ -47,9 +45,9 @@ export default function PokedexEntries(props: {
                   accessories={[
                     {
                       text: dexNumber[entry.pokemon_v2_version.name]
-                        ? `#${dexNumber[entry.pokemon_v2_version.name]
-                            .toString()
-                            .padStart(4, "0")}`
+                        ? nationalDexNumber(
+                            dexNumber[entry.pokemon_v2_version.name],
+                          )
                         : "--",
                     },
                   ]}
