@@ -85,6 +85,7 @@ export default function Command(props: LaunchProps) {
                 key={icon.id}
                 content={{ source: icon.thumbnail_url, tintColor: Color.PrimaryText }}
                 title={icon.term}
+                keywords={icon.creator.name.split(" ")}
                 subtitle={`- ${icon.creator.name}`}
                 actions={
                   <ActionPanel title="Noun Project Actions">
