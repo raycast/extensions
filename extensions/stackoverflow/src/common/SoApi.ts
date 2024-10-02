@@ -170,7 +170,7 @@ export async function getSites(): Promise<SiteData[]> {
   let ret: SiteData[] = [];
   try {
     ret = await readCache();
-    if (ret.length<=30) throw "Cache with few sites"; //temp fix to force reloading more sites - this can be removed in a future PR when most users should have ALL sites loaded
+    if (ret.length <= 30) throw "Cache with few sites"; //temp fix to force reloading more sites - this can be removed in a future PR when most users should have ALL sites loaded
   } catch {
     try {
       ret = await updateCache();
