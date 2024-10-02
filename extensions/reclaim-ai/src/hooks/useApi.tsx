@@ -13,6 +13,8 @@ export class UseApiRequestMissingApiKeyError extends UseApiRequestError {}
 const useApi = <T,>(url: string) => {
   const hint: Hint = { data: { request: `${url}` } };
 
+  let error: UseApiError | undefined;
+
   try {
     const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
 
@@ -23,7 +25,7 @@ const useApi = <T,>(url: string) => {
         message: "Something wrong with your API Token key. Check your Raycast config and set up a new token.",
       });
 
-      throw new UseApiRequestMissingApiKeyError("No API key found in configuration");
+      error = new UseApiRequestMissingApiKeyError("No API key found in configuration");
     }
 
     const headers = useMemo(
@@ -35,10 +37,13 @@ const useApi = <T,>(url: string) => {
       [apiToken]
     );
 
-    const result = useFetch<T>(`${apiUrl}${url}`, {
-      headers,
-      keepPreviousData: true,
-    });
+    const result = {
+      error,
+      ...useFetch<T>(`${apiUrl}${url}`, {
+        headers,
+        keepPreviousData: true,
+      }),
+    };
 
     useCaptureException(result.error, {
       mutate: (cause) => new UseApiResponseError("Error in response", { cause }),
