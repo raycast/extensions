@@ -1,3 +1,3 @@
 # React Native Directory Changelog
 
-## [Initial Version] - 2024-09-21
+## [Initial Version] - {PR_MERGE_DATE}
