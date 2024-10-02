@@ -18,6 +18,13 @@
       "icon": "shottr.png"
     },
     {
+      "name": "ssst",
+      "title": "Open Shottr Settings",
+      "description": "Open Shottr Settings App",
+      "mode": "no-view",
+      "icon": "settings.png"
+    },
+    {
       "name": "ssfs",
       "title": "Capture Fullscreen",
       "description": "Fullscreen Screenshot",
