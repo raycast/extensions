@@ -89,3 +89,27 @@ export const upgradeAndCaptureError = <E extends Error>(
   if (!(error instanceof base)) error = mutate(error);
   return captureInSpan(span, error as E, hint);
 };
+
+export const redactData = <T extends object>(obj: T): T | "[[REDACT FAILED]]" =>
+  obj
+    ? errorCoverage({ name: "redactData" }, () =>
+        Object.entries(obj).reduce(
+          (obj, [key, value]) => ({
+            ...obj,
+            [key]: (() => {
+              switch (typeof value) {
+                case "string":
+                  return value
+                    .split("")
+                    .map(() => "*")
+                    .join("");
+                case "object":
+                  if (value === null) return null;
+                  return redactData(value);
+              }
+            })(),
+          }),
+          obj
+        )
+      ) || "[[REDACT FAILED]]"
+    : obj;

@@ -2,7 +2,7 @@ import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { startInactiveSpan, StartSpanOptions } from "@sentry/react";
 import fetch, { FetchError, RequestInit } from "node-fetch";
 import { NativePreferences } from "../types/preferences";
-import { errorCoverage, upgradeAndCaptureError } from "./sentry";
+import { errorCoverage, redactData, upgradeAndCaptureError } from "./sentry";
 
 const { apiToken, apiUrl } = getPreferenceValues<NativePreferences>();
 
@@ -82,6 +82,7 @@ export const fetcher = async <T>(url: string, options: FetcherOptions = {}): Pro
         if (cause instanceof FetcherError) return cause;
         return new FetcherRequestPrepError("Something went wrong while preparing the request", { cause });
       },
+      hint: { data: { request: { payload: options.payload && redactData(options.payload) } } },
     }
   );
 };

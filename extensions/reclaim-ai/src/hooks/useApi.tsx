@@ -4,10 +4,12 @@ import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
 import { NativePreferences } from "../types/preferences";
 import {
+  Hint,
+  redactData,
   ResolvableSpan,
   upgradeAndCaptureError,
   useCaptureInSpan,
-  useSpanWithParent
+  useSpanWithParent,
 } from "../utils/sentry";
 
 export class UseApiError extends Error {}
@@ -22,6 +24,7 @@ export type UseAPiOptions = {
 const useApi = <T,>(url: string, options: UseAPiOptions = {}) => {
   const { sentrySpan } = options;
   const span = useSpanWithParent(sentrySpan, { name: "useApi" });
+  const hint: Hint = { data: { request: `${url}` } };
 
   try {
     const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
@@ -52,6 +55,7 @@ const useApi = <T,>(url: string, options: UseAPiOptions = {}) => {
 
     useCaptureInSpan(span, result.error, {
       mutate: (cause) => new UseApiResponseError("Error in response", { cause }),
+      hint: { ...hint, data: { ...hint.data, response: redactData(result) } },
     });
 
     return result;
@@ -60,7 +64,8 @@ const useApi = <T,>(url: string, options: UseAPiOptions = {}) => {
       span,
       error,
       UseApiError,
-      (cause) => new UseApiError("Something went wrong", { cause })
+      (cause) => new UseApiError("Something went wrong", { cause }),
+      hint
     );
   }
 };
