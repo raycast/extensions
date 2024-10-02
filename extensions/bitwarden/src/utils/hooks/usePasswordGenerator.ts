@@ -37,7 +37,7 @@ const passwordReducer = (state: GeneratorState, action: GeneratorActions): Gener
   }
 };
 
-const prepareOptions = (options: PasswordGeneratorOptions) => ({
+const prepareOptions = (options: PasswordGeneratorOptions): Required<PasswordGeneratorOptions> => ({
   lowercase: options.lowercase ?? DEFAULT_PASSWORD_OPTIONS.lowercase,
   uppercase: options.uppercase ?? DEFAULT_PASSWORD_OPTIONS.uppercase,
   number: options.number ?? DEFAULT_PASSWORD_OPTIONS.number,
@@ -60,9 +60,9 @@ function usePasswordGenerator() {
   const { abortControllerRef, renew: renewAbortController, abort: abortPreviousGenerate } = useAbortController();
 
   const restoreStoredOptions = async () => {
-    const newOptions = await getPasswordGeneratorOptions();
-    dispatch({ type: "setOptions", options: newOptions });
-    await generatePassword(newOptions);
+    const restoredOptions = await getPasswordGeneratorOptions();
+    dispatch({ type: "setOptions", options: restoredOptions });
+    await generatePassword(restoredOptions);
   };
 
   useEffect(() => void restoreStoredOptions(), []);
@@ -71,6 +71,7 @@ function usePasswordGenerator() {
     try {
       if (state.isGenerating) abortPreviousGenerate();
       renewAbortController();
+
       dispatch({ type: "generate" });
       const password = await bitwarden.generatePassword(passwordOptions, abortControllerRef?.current);
       dispatch({ type: "setPassword", password });
@@ -82,18 +83,18 @@ function usePasswordGenerator() {
     }
   };
 
-  const setOptions = async (newOptions: PasswordGeneratorOptions) => {
+  const setOptionsAndGenerate = async (newOptions: PasswordGeneratorOptions) => {
     dispatch({ type: "setOptions", options: newOptions });
     const preparedOptions = prepareOptions(newOptions);
     await Promise.all([
-      LocalStorage.setItem(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS, JSON.stringify(preparedOptions)),
       generatePassword(preparedOptions),
+      LocalStorage.setItem(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS, JSON.stringify(preparedOptions)),
     ]);
   };
 
   const regeneratePassword = async (newOptions?: PasswordGeneratorOptions) => {
     if (newOptions) {
-      await setOptions(newOptions);
+      await setOptionsAndGenerate(newOptions);
     } else {
       await generatePassword();
     }

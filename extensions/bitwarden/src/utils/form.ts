@@ -1,4 +1,6 @@
 import { Form } from "@raycast/api";
+import { useForm } from "@raycast/utils";
+import { useEffect } from "react";
 
 export const CustomValidations = {
   NumberBetween: (min: number, max: number) => {
@@ -30,3 +32,16 @@ export const stringifyBooleanItemProps = <TValue extends string>(
     itemProps.onFocus?.({ ...event, target: { ...event.target, value: event.target.value === trueValue } });
   },
 });
+
+type UseFormProps<T extends Form.Values> = Parameters<typeof useForm<T>>[0];
+export const useOnChangeForm = <T extends Form.Values>(
+  props: Omit<UseFormProps<T>, "onSubmit"> & { onChange: UseFormProps<T>["onSubmit"] }
+) => {
+  const useFormResult = useForm({ ...props, onSubmit: props.onChange });
+
+  useEffect(() => {
+    void useFormResult.handleSubmit(useFormResult.values);
+  }, [useFormResult.values]);
+
+  return useFormResult;
+};
