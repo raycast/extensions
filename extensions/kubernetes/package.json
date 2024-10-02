@@ -16,12 +16,42 @@
       "subtitle": "Kubernetes",
       "description": "List Pods in a Kubernetes cluster.",
       "mode": "view"
+    },
+    {
+      "name": "get-deployments",
+      "title": "Get Deployments",
+      "subtitle": "Kubernetes",
+      "description": "List Deployments in a Kubernetes cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-statefulsets",
+      "title": "Get StatefulSets",
+      "subtitle": "Kubernetes",
+      "description": "List StatefulSets in a Kubernetes cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-nodes",
+      "title": "Get Nodes",
+      "subtitle": "Kubernetes",
+      "description": "Get Nodes in a Kubernetes cluster.",
+      "mode": "view"
     }
-  ],
+  ,
+    {
+      "name": "get-daemonsets",
+      "title": "Get Daemonsets",
+      "subtitle": "Kubernetes",
+      "description": "List DaemonSets in a Kubernetes cluster.",
+      "mode": "view"
+    }
+      ],
   "dependencies": {
-    "@kubernetes/client-node": "^0.22.0",
-    "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0"
+    "@kubernetes/client-node": "^1.0.0",
+    "@raycast/api": "^1.88.0",
+    "@raycast/utils": "^1.17.0",
+    "js-yaml": "^4.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
