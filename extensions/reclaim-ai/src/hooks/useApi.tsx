@@ -42,7 +42,10 @@ const useApi = <T,>(url: string) => {
 
     useCaptureException(result.error, {
       mutate: (cause) => new UseApiResponseError("Error in response", { cause }),
-      hint: { ...hint, data: { ...hint.data, response: redactData(result) } },
+      hint: {
+        ...hint,
+        attachments: result.data && [{ data: JSON.stringify(redactData(result)), filename: "response.json" }],
+      },
     });
 
     return result;
