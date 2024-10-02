@@ -1,5 +1,5 @@
 import { captureException, Scope, Span, startInactiveSpan, StartSpanOptions, withActiveSpan } from "@sentry/react";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 export type ResolvableSpan = Span | StartSpanOptions;
 
@@ -9,12 +9,12 @@ export const SpanClass = SCRAPER_SPAN.constructor;
 export const resolveSpan = (span: ResolvableSpan): Span =>
   span instanceof SpanClass ? (span as Span) : startInactiveSpan(span as StartSpanOptions);
 
-export const captureInSpan = (span: ResolvableSpan, e: unknown): never => {
+export const captureInSpan = <E>(span: ResolvableSpan, e: E): E => {
   withActiveSpan(resolveSpan(span), () => {
     captureException(e);
   });
 
-  throw e;
+  return e;
 };
 
 export type ErrorCoverageWithSpanOptions<RETHROW extends boolean> = {
@@ -41,8 +41,33 @@ export function errorCoverage<T, RETHROW extends boolean>(
   }) as T;
 }
 
-export const useCaptureInSpan = (span: ResolvableSpan, error: unknown) => {
+export type UseCaptureInSpanOptions = {
+  readonly mutate?: (error: unknown) => Error;
+};
+
+export const useCaptureInSpan = (span: ResolvableSpan, error: unknown, options: UseCaptureInSpanOptions = {}) => {
+  const { mutate } = options;
   useEffect(() => {
-    if (error) captureInSpan(span, error);
+    if (error) captureInSpan(span, mutate ? mutate(error) : error);
   }, [error]);
+};
+
+export const useSpanWithFallback = (span: ResolvableSpan | undefined, fallback: ResolvableSpan): Span => {
+  const defined = span || fallback;
+  return useMemo(() => resolveSpan(defined), [defined]);
+};
+
+export const useSpanWithParent = (parent: ResolvableSpan | undefined, span: StartSpanOptions): Span => {
+  const resolvedParent = useMemo(() => parent && resolveSpan(parent), [parent]);
+  return useMemo(() => startInactiveSpan({ ...span, parentSpan: resolvedParent }), [span, resolvedParent]);
+};
+
+export const upgradeAndCaptureError = <E extends Error>(
+  span: ResolvableSpan,
+  error: unknown,
+  base: Constructor<Error>,
+  mutate: (error: unknown) => E
+): E => {
+  if (!(error instanceof base)) error = mutate(error);
+  return captureInSpan(span, error as E);
 };

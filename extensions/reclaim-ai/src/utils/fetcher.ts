@@ -2,7 +2,7 @@ import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { startInactiveSpan, StartSpanOptions } from "@sentry/react";
 import fetch, { FetchError, RequestInit } from "node-fetch";
 import { NativePreferences } from "../types/preferences";
-import { captureInSpan, errorCoverage } from "./sentry";
+import { errorCoverage, upgradeAndCaptureError } from "./sentry";
 
 const { apiToken, apiUrl } = getPreferenceValues<NativePreferences>();
 
@@ -58,11 +58,23 @@ export const fetcher = async <T>(url: string, options: FetcherOptions = {}): Pro
           ...init?.headers,
         },
       })
-        .catch((cause) => captureInSpan(span, new FetcherRequestFailedError("The request failed", { cause })))
+        .catch((error) => {
+          throw upgradeAndCaptureError(
+            span,
+            error,
+            FetcherError,
+            (cause) => new FetcherRequestFailedError("The request failed", { cause })
+          );
+        })
         .then<T>((r) => r.json())
-        .catch((cause) =>
-          captureInSpan(span, new FetcherResponseInvalidJSONError("Could not parse response JSON", { cause }))
-        );
+        .catch((error) => {
+          throw upgradeAndCaptureError(
+            span,
+            error,
+            FetcherError,
+            (cause) => new FetcherResponseInvalidJSONError("Could not parse response JSON", { cause })
+          );
+        });
     },
     {
       rethrow: true,

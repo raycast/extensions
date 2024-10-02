@@ -1,40 +1,71 @@
-import { Icon, getPreferenceValues, open, showHUD } from "@raycast/api";
+import { getPreferenceValues, Icon, open, showHUD } from "@raycast/api";
 import { format, isWithinInterval } from "date-fns";
 import { Event } from "../types/event";
 import { NativePreferences } from "../types/preferences";
 import { SmartHabit } from "../types/smart-series";
 import { formatDisplayEventHours, formatDisplayHours } from "../utils/dates";
 import { filterMultipleOutDuplicateEvents } from "../utils/events";
+import { fetchPromise } from "../utils/fetcher";
+import {
+  ResolvableSpan,
+  upgradeAndCaptureError,
+  useCaptureInSpan,
+  useSpanWithParent
+} from "../utils/sentry";
 import { stripPlannerEmojis } from "../utils/string";
-import useApi from "./useApi";
+import useApi, { UseApiError } from "./useApi";
 import { useCallbackSafeRef } from "./useCallbackSafeRef";
 import { ApiResponseEvents, EventActions } from "./useEvent.types";
 import { useSmartHabits } from "./useSmartHabits";
 import { useTaskActions } from "./useTask";
 import { useUser } from "./useUser";
-import { fetchPromise } from "../utils/fetcher";
 
-export const useEvents = ({ start, end }: { start: Date; end: Date }) => {
-  const {
-    data: events,
-    error,
-    isLoading,
-  } = useApi<ApiResponseEvents>(
-    `/events?${new URLSearchParams({
-      sourceDetails: "true",
-      start: format(start, "yyyy-MM-dd"),
-      end: format(end, "yyyy-MM-dd"),
-      allConnected: "true",
-    }).toString()}`
-  );
+export class UseEventsError extends UseApiError {}
+export class UseEventsResponseError extends UseEventsError {}
 
-  if (error) console.error("Error while fetching Events", error);
+export const useEvents = ({
+  start,
+  end,
+  sentrySpan,
+}: {
+  readonly start: Date;
+  readonly end: Date;
+  readonly sentrySpan?: ResolvableSpan;
+}) => {
+  const span = useSpanWithParent(sentrySpan, { name: "useEvents" });
 
-  return {
-    events: filterMultipleOutDuplicateEvents(events),
-    isLoading,
-    error,
-  };
+  try {
+    const {
+      data: events,
+      error,
+      isLoading,
+    } = useApi<ApiResponseEvents>(
+      `/events?${new URLSearchParams({
+        sourceDetails: "true",
+        start: format(start, "yyyy-MM-dd"),
+        end: format(end, "yyyy-MM-dd"),
+        allConnected: "true",
+      }).toString()}`,
+      { sentrySpan: span }
+    );
+
+    useCaptureInSpan(span, error, {
+      mutate: (cause) => new UseEventsResponseError("There was a problem with the response", { cause }),
+    });
+
+    return {
+      events: filterMultipleOutDuplicateEvents(events),
+      isLoading,
+      error,
+    };
+  } catch (error) {
+    throw upgradeAndCaptureError(
+      span,
+      error,
+      UseEventsError,
+      (cause) => new UseEventsError("Something went wrong", { cause })
+    );
+  }
 };
 
 export const useEventActions = () => {

@@ -3,7 +3,17 @@ import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
 import { NativePreferences } from "../types/preferences";
-import { captureInSpan, ResolvableSpan, resolveSpan, useCaptureInSpan } from "../utils/sentry";
+import {
+  ResolvableSpan,
+  upgradeAndCaptureError,
+  useCaptureInSpan,
+  useSpanWithParent
+} from "../utils/sentry";
+
+export class UseApiError extends Error {}
+export class UseApiResponseError extends UseApiError {}
+export abstract class UseApiRequestError extends UseApiError {}
+export class UseApiRequestMissingApiKeyError extends UseApiRequestError {}
 
 export type UseAPiOptions = {
   readonly sentrySpan?: ResolvableSpan;
@@ -11,7 +21,7 @@ export type UseAPiOptions = {
 
 const useApi = <T,>(url: string, options: UseAPiOptions = {}) => {
   const { sentrySpan } = options;
-  const span = useMemo(() => resolveSpan(sentrySpan || { name: "useApi" }), [sentrySpan]);
+  const span = useSpanWithParent(sentrySpan, { name: "useApi" });
 
   try {
     const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
@@ -22,6 +32,8 @@ const useApi = <T,>(url: string, options: UseAPiOptions = {}) => {
         title: "Something is wrong with your API Token key. Check your Raycast config and set up a new token.",
         message: "Something wrong with your API Token key. Check your Raycast config and set up a new token.",
       });
+
+      throw new UseApiRequestMissingApiKeyError("No API key found in configuration");
     }
 
     const headers = useMemo(
@@ -36,15 +48,20 @@ const useApi = <T,>(url: string, options: UseAPiOptions = {}) => {
     const result = useFetch<T>(`${apiUrl}${url}`, {
       headers,
       keepPreviousData: true,
-      onError: (e) => captureInSpan(span, e),
     });
 
-    useCaptureInSpan(span, result.error);
+    useCaptureInSpan(span, result.error, {
+      mutate: (cause) => new UseApiResponseError("Error in response", { cause }),
+    });
 
     return result;
-  } catch (e) {
-    captureInSpan(span, e);
-    throw e;
+  } catch (error) {
+    throw upgradeAndCaptureError(
+      span,
+      error,
+      UseApiError,
+      (cause) => new UseApiError("Something went wrong", { cause })
+    );
   }
 };
 
