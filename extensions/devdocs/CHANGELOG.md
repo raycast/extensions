@@ -1,5 +1,9 @@
 # DevDocs Extension
 
+## [Fix] - 2024-10-02
+
+- Account for settings file imports with multiple preferences set
+
 ## [Changes] - 2024-10-01
 
 - Add new command to import enabled documentations from DevDocs.io

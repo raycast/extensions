@@ -34,7 +34,7 @@ export default function ImportDocs() {
         const contents = fs.readFileSync(filename, "utf8");
         const docString = JSON.parse(contents);
 
-        if (Object.keys(docString)[0] !== "docs") {
+        if (!Object.keys(docString).includes("docs")) {
           return "Must use top-level 'docs' key";
         }
       },
