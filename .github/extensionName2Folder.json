@@ -81,6 +81,7 @@
   "smoya/asyncapi": "asyncapi",
   "chrismessina/at-profile": "at-profile",
   "joepio/atomic": "atomic",
+  "ftrstk/atproto-utilities": "atproto-utilities",
   "benvp/audio-device": "audio-device",
   "pradeepb28/audio-writer": "audio-writer",
   "guga4ka/authy": "authy",
