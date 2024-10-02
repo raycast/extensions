@@ -1,5 +1,10 @@
 # Cursor Directory Changelog
 
+## [Features & Improvements] - 2024-10-02
+
+- Add export and edit cursor rule locally
+- Minor UI improvements
+
 ## [Features] - 2024-09-30
 
 - Allow star and unstar cursor rules
