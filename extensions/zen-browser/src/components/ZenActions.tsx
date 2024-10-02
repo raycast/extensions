@@ -50,4 +50,3 @@ function ZenHistoryTab({ url }: { url: string }) {
   }
   return <ActionPanel.Item title="Open in Zen" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 }
-

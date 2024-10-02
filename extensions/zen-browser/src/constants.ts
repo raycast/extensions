@@ -21,7 +21,7 @@ export const NoBookmarksText = `
 
 [![Zen Browser](https://cdn.jsdelivr.net/gh/zen-browser/www/public/logos/zen-black.svg)]()
 `;
-      
+
 export const UnknownErrorText = `
 # 🚨Error: Something happened while trying to run your command
   

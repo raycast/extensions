@@ -42,4 +42,3 @@ function HistoryListEntry({ entry: { url, title, id, lastVisited } }: { entry: H
     />
   );
 }
-

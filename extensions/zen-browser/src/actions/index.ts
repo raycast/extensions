@@ -15,14 +15,15 @@ export async function openNewTab(queryText: string | null | undefined): Promise<
       end repeat
       tell application "System Events"
         keystroke "t" using {command down}
-        ${queryText
-      ? `keystroke "l" using {command down}
+        ${
+          queryText
+            ? `keystroke "l" using {command down}
            keystroke "a" using {command down}
            key code 51
            keystroke "${SEARCH_ENGINE[getPreferenceValues<Preferences>().searchEngine.toLowerCase()]}${queryText}"
            key code 36`
-      : ""
-    }
+            : ""
+        }
       end tell
     end tell
   `;
@@ -83,9 +84,8 @@ try
 end try
 
 return isInstalled`);
-  console.log(appInstalled)
+  console.log(appInstalled);
   if (appInstalled === "false") {
     throw new Error(NOT_INSTALLED_MESSAGE);
   }
 };
-
