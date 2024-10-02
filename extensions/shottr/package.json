@@ -3,7 +3,7 @@
   "name": "shottr",
   "title": "Shottr",
   "description": "Capture and record your screen using shottr!",
-  "icon": "extension-icon.png",
+  "icon": "main-icon.png",
   "author": "fernando_barrios",
   "categories": [
     "Applications"
@@ -14,49 +14,57 @@
       "name": "sstr",
       "title": "Open Shottr",
       "description": "Open Shottr App",
-      "mode": "no-view"
+      "mode": "no-view",
+      "icon": "shottr.png"
     },
     {
       "name": "ssfs",
       "title": "Capture Fullscreen",
       "description": "Fullscreen Screenshot",
-      "mode": "no-view"
+      "mode": "no-view",
+      "icon": "grab-fullscreen.png"
     },
     {
       "name": "ssa",
       "title": "Capture Area",
       "description": "Area Screenshot",
-      "mode": "no-view"
+      "mode": "no-view",
+      "icon": "grab-area.png"
     },
     {
       "name": "ssw",
       "title": "Capture Repeat",
       "description": "Repeat Screenshot",
-      "mode": "no-view"
+      "mode": "no-view",
+      "icon": "grab-append.png"
     },
     {
       "name": "ssrg",
       "title": "Capture Window",
       "description": "Window Screenshot",
-      "mode": "no-view"
+      "mode": "no-view",
+      "icon": "grab-window.png"
     },
     {
       "name": "sss",
       "title": "Capture Scrolling",
       "description": "Scrolling Screenshot",
-      "mode": "no-view"
+      "mode": "no-view",
+      "icon": "grab-scrolling.png"
     },
     {
       "name": "sssr",
       "title": "Capture Scrolling Reverse",
       "description": "Scrolling Reverse Screenshot",
-      "mode": "no-view"
+      "mode": "no-view",
+      "icon": "grab-scrolling-reverse.png"
     },
     {
       "name": "ssds",
       "title": "Capture Delayed",
       "description": "Delayed Screenshot",
       "mode": "no-view",
+      "icon": "grab-delayed.png",
       "arguments": [
         {
           "name": "delay",
@@ -70,31 +78,36 @@
       "name": "ssap",
       "title": "Capture Append",
       "description": "Append Screenshot",
-      "mode": "no-view"
+      "mode": "no-view",
+      "icon": "grab-append.png"
     },
     {
       "name": "sso",
       "title": "OCR",
       "description": "Optical Character Recognition",
-      "mode": "no-view"
+      "mode": "no-view",
+      "icon": "grab-ocr.png"
     },
     {
       "name": "ssc",
       "title": "Load Clipboard",
       "description": "Load from Clipboard",
-      "mode": "no-view"
+      "mode": "no-view",
+      "icon": "load-clipboard.png"
     },
     {
       "name": "ssf",
       "title": "Load File",
       "description": "Load from File",
-      "mode": "no-view"
+      "mode": "no-view",
+      "icon": "load-file.png"
     },
     {
       "name": "ssu",
       "title": "Uploads",
       "description": "Open Uploads",
-      "mode": "no-view"
+      "mode": "no-view",
+      "icon": "uploads.png"
     }
   ],
   "dependencies": {
