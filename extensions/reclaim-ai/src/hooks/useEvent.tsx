@@ -6,12 +6,7 @@ import { SmartHabit } from "../types/smart-series";
 import { formatDisplayEventHours, formatDisplayHours } from "../utils/dates";
 import { filterMultipleOutDuplicateEvents } from "../utils/events";
 import { fetchPromise } from "../utils/fetcher";
-import {
-  ResolvableSpan,
-  upgradeAndCaptureError,
-  useCaptureInSpan,
-  useSpanWithParent
-} from "../utils/sentry";
+import { ResolvableSpan, upgradeAndCaptureError, useSpanWithParent } from "../utils/sentry";
 import { stripPlannerEmojis } from "../utils/string";
 import useApi, { UseApiError } from "./useApi";
 import { useCallbackSafeRef } from "./useCallbackSafeRef";
@@ -21,7 +16,6 @@ import { useTaskActions } from "./useTask";
 import { useUser } from "./useUser";
 
 export class UseEventsError extends UseApiError {}
-export class UseEventsResponseError extends UseEventsError {}
 
 export const useEvents = ({
   start,
@@ -48,10 +42,6 @@ export const useEvents = ({
       }).toString()}`,
       { sentrySpan: span }
     );
-
-    useCaptureInSpan(span, error, {
-      mutate: (cause) => new UseEventsResponseError("There was a problem with the response", { cause }),
-    });
 
     return {
       events: filterMultipleOutDuplicateEvents(events),

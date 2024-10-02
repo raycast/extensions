@@ -1,8 +1,8 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { startInactiveSpan, StartSpanOptions } from "@sentry/react";
+import { startInactiveSpan } from "@sentry/react";
 import fetch, { FetchError, RequestInit } from "node-fetch";
 import { NativePreferences } from "../types/preferences";
-import { errorCoverage, redactData, upgradeAndCaptureError } from "./sentry";
+import { errorCoverage, redactData, ResolvableSpan, resolveSpan, upgradeAndCaptureError } from "./sentry";
 
 const { apiToken, apiUrl } = getPreferenceValues<NativePreferences>();
 
@@ -20,17 +20,16 @@ export class FetcherResponseInvalidJSONError extends FetcherRequestError {}
 export type FetcherOptions = {
   init?: RequestInit;
   payload?: unknown;
-  sentrySpan?: StartSpanOptions;
+  sentrySpan?: ResolvableSpan;
 };
 
 export const fetcher = async <T>(url: string, options: FetcherOptions = {}): Promise<T> => {
-  const span = startInactiveSpan({ name: "fetcher", ...options.sentrySpan });
+  const { init, payload, sentrySpan } = options;
+  const span = startInactiveSpan({ name: "fetcher", parentSpan: sentrySpan && resolveSpan(sentrySpan) });
 
   return errorCoverage(
     span,
     () => {
-      const { init, payload } = options;
-
       if (!apiToken) {
         showToast({
           style: Toast.Style.Failure,

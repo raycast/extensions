@@ -1,9 +1,11 @@
 import "./initSentry";
 
 import { closeMainWindow, open, showHUD } from "@raycast/api";
+import { startInactiveSpan } from "@sentry/react";
 import { ApiResponseEvents, ApiResponseMoment } from "./hooks/useEvent.types";
 import { getOriginalEventIDFromSyncEvent } from "./utils/events";
 import { fetchPromise } from "./utils/fetcher";
+import { captureInSpan } from "./utils/sentry";
 
 /**
  * This function is used to join a meeting.
@@ -46,16 +48,27 @@ const joinMeeting = async (event: ApiResponseMoment["event"]) => {
 };
 
 export default async function Command() {
-  await closeMainWindow();
+  const span = startInactiveSpan({ name: "join-meeting" });
+
+  try {
+    await closeMainWindow();
+  } catch (cause) {
+    const error = new Error("Could not close main window", { cause });
+    captureInSpan(span, error);
+    await showHUD("Something went wrong...");
+    return;
+  }
+
   await showHUD("Joining meeting...");
 
-  const [momentRequest, momentError] = await fetchPromise<ApiResponseMoment>(`/moment/next`);
+  const [momentRequest] = await fetchPromise<ApiResponseMoment>(`/moment/next`, { sentrySpan: span });
 
-  if (momentError || !momentRequest) {
-    console.error(momentError);
+  if (!momentRequest) {
+    captureInSpan(span, new Error("Moment returned empty request"));
     await showHUD("Error getting the next event");
     return;
   }
+
   // if event does not succeed, try next event
   if (!(await joinMeeting(momentRequest.event))) {
     await showHUD("No meetings found.");
