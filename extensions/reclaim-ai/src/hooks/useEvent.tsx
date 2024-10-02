@@ -6,7 +6,7 @@ import { SmartHabit } from "../types/smart-series";
 import { formatDisplayEventHours, formatDisplayHours } from "../utils/dates";
 import { filterMultipleOutDuplicateEvents } from "../utils/events";
 import { fetchPromise } from "../utils/fetcher";
-import { ResolvableSpan, upgradeAndCaptureError, useSpanWithParent } from "../utils/sentry";
+import { upgradeAndCaptureError } from "../utils/sentry";
 import { stripPlannerEmojis } from "../utils/string";
 import useApi, { UseApiError } from "./useApi";
 import { useCallbackSafeRef } from "./useCallbackSafeRef";
@@ -17,17 +17,7 @@ import { useUser } from "./useUser";
 
 export class UseEventsError extends UseApiError {}
 
-export const useEvents = ({
-  start,
-  end,
-  sentrySpan,
-}: {
-  readonly start: Date;
-  readonly end: Date;
-  readonly sentrySpan?: ResolvableSpan;
-}) => {
-  const span = useSpanWithParent(sentrySpan, { name: "useEvents" });
-
+export const useEvents = ({ start, end }: { readonly start: Date; readonly end: Date }) => {
   try {
     const {
       data: events,
@@ -39,8 +29,7 @@ export const useEvents = ({
         start: format(start, "yyyy-MM-dd"),
         end: format(end, "yyyy-MM-dd"),
         allConnected: "true",
-      }).toString()}`,
-      { sentrySpan: span }
+      }).toString()}`
     );
 
     return {
@@ -50,7 +39,6 @@ export const useEvents = ({
     };
   } catch (error) {
     throw upgradeAndCaptureError(
-      span,
       error,
       UseEventsError,
       (cause) => new UseEventsError("Something went wrong", { cause })
