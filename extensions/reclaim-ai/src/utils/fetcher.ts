@@ -2,6 +2,8 @@ import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import fetch, { FetchError, RequestInit } from "node-fetch";
 import { NativePreferences } from "../types/preferences";
 import { errorCoverage, redactData, upgradeAndCaptureError } from "./sentry";
+import { Attachment } from "@sentry/node";
+import { filterFalsy } from "./arrays";
 
 const { apiToken, apiUrl } = getPreferenceValues<NativePreferences>();
 
@@ -23,6 +25,12 @@ export type FetcherOptions = {
 
 export const fetcher = async <T>(url: string, options: FetcherOptions = {}): Promise<T> => {
   const { init, payload } = options;
+
+  const getErrorHintAttachments = (response?: string): Attachment[] =>
+    filterFalsy([
+      !!response && { filename: "response.json", data: response },
+      !!payload && { filename: "request.json", data: JSON.stringify(redactData(payload)) },
+    ]);
 
   return errorCoverage(
     () => {
@@ -57,16 +65,29 @@ export const fetcher = async <T>(url: string, options: FetcherOptions = {}): Pro
           throw upgradeAndCaptureError(
             error,
             FetcherError,
-            (cause) => new FetcherRequestFailedError("The request failed", { cause })
+            (cause) => new FetcherRequestFailedError("The request failed", { cause }),
+            { attachments: getErrorHintAttachments() }
           );
         })
-        .then<T>((r) => r.json())
-        .catch((error) => {
-          throw upgradeAndCaptureError(
-            error,
-            FetcherError,
-            (cause) => new FetcherResponseInvalidJSONError("Could not parse response JSON", { cause })
-          );
+        .then<T>(async (r) => {
+          try {
+            return r.json();
+          } catch (error) {
+            let txt: string;
+
+            try {
+              txt = await r.text();
+            } catch {
+              txt = '{message:"[[TEXT FAILED]]"}';
+            }
+
+            throw upgradeAndCaptureError(
+              error,
+              FetcherError,
+              (cause) => new FetcherResponseInvalidJSONError("Could not parse response JSON", { cause }),
+              { attachments: getErrorHintAttachments(txt) }
+            );
+          }
         });
     },
     {
@@ -75,7 +96,7 @@ export const fetcher = async <T>(url: string, options: FetcherOptions = {}): Pro
         if (cause instanceof FetcherError) return cause;
         return new FetcherRequestPrepError("Something went wrong while preparing the request", { cause });
       },
-      hint: { data: { request: { payload: options.payload && redactData(options.payload) } } },
+      hint: { attachments: getErrorHintAttachments() },
     }
   );
 };
