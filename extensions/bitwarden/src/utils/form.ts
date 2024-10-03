@@ -3,7 +3,7 @@ import { useForm } from "@raycast/utils";
 import { useEffect } from "react";
 
 export const CustomValidations = {
-  NumberBetween: (min: number, max: number) => {
+  NumberStringBetween: (min: number, max: number) => {
     return (value: string | undefined) => {
       const num = value !== "" ? Number(value) : NaN;
       if (isNaN(num) || num < min || num > max) return `Must be between ${min} and ${max}`;
@@ -37,7 +37,7 @@ type UseFormProps<T extends Form.Values> = Parameters<typeof useForm<T>>[0];
 export const useOnChangeForm = <T extends Form.Values>(
   props: Omit<UseFormProps<T>, "onSubmit"> & { onChange: UseFormProps<T>["onSubmit"] }
 ) => {
-  const result = useForm({ ...props, onSubmit: props.onChange });
-  useEffect(() => void result.handleSubmit(result.values), [result.values]);
-  return result;
+  const form = useForm({ ...props, onSubmit: props.onChange });
+  useEffect(() => void form.handleSubmit(form.values), [form.values]);
+  return form;
 };

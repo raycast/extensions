@@ -30,50 +30,27 @@ function GeneratePasswordForm() {
 
 const passwordTypeOptions: PasswordType[] = ["password", "passphrase"];
 
+type FormProps<T extends Form.Values> = ReturnType<typeof useOnChangeForm<T>>;
+
 function GeneratePasswordFormContent({ generator }: { generator: UsePasswordGeneratorResult }) {
   const { options, password, isGenerating, regeneratePassword } = generator;
 
   const cliVersion = useCliVersion();
-  const { itemProps, values, setValue } = useOnChangeForm<PasswordGeneratorOptions>({
+  const form = useOnChangeForm<PasswordGeneratorOptions>({
     onChange: regeneratePassword,
     initialValues: options,
     validation: {
-      length: CustomValidations.NumberBetween(5, 128),
-      words: CustomValidations.NumberBetween(3, 20),
+      length: CustomValidations.NumberStringBetween(5, 128),
+      words: CustomValidations.NumberStringBetween(3, 20),
       separator: CustomValidations.OneCharacter,
-      minNumber: CustomValidations.NumberBetween(0, 9),
-      minSpecial: CustomValidations.NumberBetween(0, 9),
+      minNumber: CustomValidations.NumberStringBetween(0, 9),
+      minSpecial: CustomValidations.NumberStringBetween(0, 9),
     },
   });
 
-  useEffect(() => {
-    if (!values.number && values.minNumber !== "0") {
-      setValue("minNumber", "0");
-    } else if (values.number && values.minNumber === "0") {
-      setValue("minNumber", DEFAULT_PASSWORD_OPTIONS.minNumber);
-    }
-  }, [values.number]);
+  const { values, itemProps } = form;
 
-  useEffect(() => {
-    if (values.minNumber === "") return;
-    const number = !!values.minNumber && parseInt(values.minNumber) > 0;
-    if (values.number !== number) setValue("number", number);
-  }, [values.minNumber]);
-
-  useEffect(() => {
-    if (!values.special && values.minSpecial !== "0") {
-      setValue("minSpecial", "0");
-    } else if (values.special && values.minSpecial === "0") {
-      setValue("minSpecial", DEFAULT_PASSWORD_OPTIONS.minSpecial);
-    }
-  }, [values.special]);
-
-  useEffect(() => {
-    if (values.minSpecial === "") return;
-    const special = !!values.minSpecial && parseInt(values.minSpecial) > 0;
-    if (values.special !== special) setValue("special", special);
-  }, [values.minSpecial]);
-
+  usePasswordRulesSideEffects(form);
   useOneTimePasswordHistoryWarning();
 
   return (
@@ -117,6 +94,38 @@ function GeneratePasswordFormContent({ generator }: { generator: UsePasswordGene
       )}
     </Form>
   );
+}
+
+function usePasswordRulesSideEffects(form: FormProps<PasswordGeneratorOptions>) {
+  const { values, setValue } = form;
+
+  useEffect(() => {
+    if (!values.number && values.minNumber !== "0") {
+      setValue("minNumber", "0");
+    } else if (values.number && values.minNumber === "0") {
+      setValue("minNumber", DEFAULT_PASSWORD_OPTIONS.minNumber);
+    }
+  }, [values.number]);
+
+  useEffect(() => {
+    if (values.minNumber === "" || Number.isNaN(Number(values.minNumber))) return;
+    const number = !!values.minNumber && Number(values.minNumber) > 0;
+    if (values.number !== number) setValue("number", number);
+  }, [values.minNumber]);
+
+  useEffect(() => {
+    if (!values.special && values.minSpecial !== "0") {
+      setValue("minSpecial", "0");
+    } else if (values.special && values.minSpecial === "0") {
+      setValue("minSpecial", DEFAULT_PASSWORD_OPTIONS.minSpecial);
+    }
+  }, [values.special]);
+
+  useEffect(() => {
+    if (values.minSpecial === "" || Number.isNaN(Number(values.minSpecial))) return;
+    const special = !!values.minSpecial && Number(values.minSpecial) > 0;
+    if (values.special !== special) setValue("special", special);
+  }, [values.minSpecial]);
 }
 
 export default GeneratePasswordCommand;
