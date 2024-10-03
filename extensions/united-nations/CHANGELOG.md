@@ -1,6 +1,6 @@
 # United Nations Extension
 
-## [Chore] - {PR_MERGE_DATE}
+## [Chore] - 2024-10-03
 
 - Optimize extension file size
 - Bump all dependencies to the latest
