@@ -1,5 +1,10 @@
 # Bitwarden Changelog
 
+## [Fix and New Password Generation Options] - 2024-10-02
+
+- Added Minimum numbers and Minimum special password options
+- Fixed some password options not being reflected
+
 ## [Fix] - 2024-07-25
 
 - Prevent search vault sections from changing order
