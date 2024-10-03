@@ -10,7 +10,7 @@ export const dataTransformer = (
   notes: string,
   currentTotp: string,
   currentTotpTimeRemaining: number,
-  nextTotp: string
+  nextTotp: string,
 ): JsonFormat => {
   return {
     username,
