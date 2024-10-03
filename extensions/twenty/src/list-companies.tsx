@@ -2,10 +2,11 @@ import React from "react";
 import { List, Image, Icon, ActionPanel, Action, Toast, showToast, useNavigation } from "@raycast/api";
 import { useGetCompanies } from "./hooks/use-company";
 import CreatePersonForm from "./create-people";
+import CreateCompanyForm from "./create-company";
 
 export default function ListCompanies() {
   const { push } = useNavigation();
-  const { companies, isLoading, error, revalidate } = useGetCompanies();
+  const { companies, isLoading, error } = useGetCompanies();
 
   React.useEffect(() => {
     if (error) {
@@ -50,17 +51,14 @@ export default function ListCompanies() {
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
                 />
                 <Action
-                  icon={Icon.Trash}
-                  title="Delete Company"
+                  icon={Icon.Building}
+                  title="Add Company"
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
                   onAction={() => {
-                    showToast({
-                      style: Toast.Style.Success,
-                      title: "Company deleted",
-                      message: `${company.name} has been removed.`,
-                    });
-                    revalidate();
+                    push(<CreateCompanyForm />);
                   }}
                 />
+
                 <Action
                   icon={Icon.AddPerson}
                   title="Add People"
@@ -69,14 +67,6 @@ export default function ListCompanies() {
                     push(<CreatePersonForm />);
                   }}
                 />
-                {/* <Action */}
-                {/*   icon={Icon.Pencil} */}
-                {/*   title="Edit Company" */}
-                {/*   shortcut={{ modifiers: ["cmd"], key: "u" }} */}
-                {/*   onAction={() => { */}
-                {/*     push(<UpdateCompanyForm companyId={company.id} />); */}
-                {/*   }} */}
-                {/* /> */}
               </ActionPanel>
             }
             icon={{

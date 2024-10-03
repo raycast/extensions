@@ -1,7 +1,10 @@
-import { List, Image, Icon, ActionPanel, Action } from "@raycast/api";
+import { List, Image, Icon, ActionPanel, Action, useNavigation } from "@raycast/api";
 import { useGetPeople } from "./hooks/use-people";
+import CreatePersonForm from "./create-people";
+import CreateCompanyForm from "./create-company";
 
 export default function ListPeople() {
+  const { push } = useNavigation();
   const { people } = useGetPeople();
 
   return (
@@ -13,7 +16,27 @@ export default function ListPeople() {
           subtitle="Person"
           actions={
             <ActionPanel title="#1 in raycast/extensions">
-              <Action icon={Icon.Trash} title="Delete Person" onAction={() => console.log("Close PR #1")} />
+              <Action.CopyToClipboard
+                title="Copy Person Name"
+                content={person.name.firstName}
+                shortcut={{ modifiers: ["cmd"], key: "c" }}
+              />
+              <Action
+                icon={Icon.AddPerson}
+                title="Add People"
+                shortcut={{ modifiers: ["cmd"], key: "p" }}
+                onAction={() => {
+                  push(<CreatePersonForm />);
+                }}
+              />
+              <Action
+                icon={Icon.Building}
+                title="Add Company"
+                shortcut={{ modifiers: ["cmd"], key: "o" }}
+                onAction={() => {
+                  push(<CreateCompanyForm />);
+                }}
+              />
             </ActionPanel>
           }
           icon={{
