@@ -3,8 +3,8 @@
   "name": "valheim-wiki",
   "title": "Valheim Wiki Search",
   "description": "Search the Valheim Wiki, display a preview and open the full article in your browser.",
-  "icon": "command-icon.ico",
-  "author": "constantin_pruem",
+  "icon": "command-icon.png",
+  "author": "constantin_prum",
   "categories": [
     "Media"
   ],
@@ -14,7 +14,7 @@
       "name": "index",
       "title": "Search Wiki",
       "subtitle": "Valheim",
-      "description": "",
+      "description": "Searches the Valheim Wiki",
       "mode": "view"
     }
   ],
