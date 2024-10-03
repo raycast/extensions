@@ -25,12 +25,19 @@ export default function Glue() {
       isShowingDetail={!isLoading && !error && isDetailsEnabled}
     >
       {!isLoading && error && <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />}
-      {!isLoading && !error && (jobs || []).length < 1 && (
+      {!isLoading && !error && (jobs || []).length === 0 && (
         <List.EmptyView title="No Glue jobs found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
-      {(jobs || []).map((job) => (
-        <GlueJob job={job} isDetailsEnabled={isDetailsEnabled} setDetailsEnabled={setDetailsEnabled} mutate={mutate} />
-      ))}
+      {!isLoading &&
+        !error &&
+        jobs?.map((job) => (
+          <GlueJob
+            job={job}
+            isDetailsEnabled={isDetailsEnabled}
+            setDetailsEnabled={setDetailsEnabled}
+            mutate={mutate}
+          />
+        ))}
     </List>
   );
 }
@@ -48,8 +55,8 @@ function GlueJob({
 }) {
   return (
     <List.Item
-      key={glueJobRun.JobName}
-      keywords={[glueJobRun.Id || "", glueJobRun.JobRunState || "", glueJobRun.ErrorMessage || ""]}
+      key={glueJobRun?.JobName}
+      keywords={[glueJobRun?.Id ?? "", glueJobRun?.JobRunState ?? "", glueJobRun?.ErrorMessage ?? ""]}
       icon={{ source: "aws-icons/glue.png", mask: Image.Mask.RoundedRectangle }}
       title={glueJobRun.JobName!}
       detail={<GlueJobRunDetails jobRun={glueJobRun} />}
