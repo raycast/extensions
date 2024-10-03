@@ -12,8 +12,14 @@
   "commands": [
     {
       "name": "index",
-      "title": "Get TOTP Code",
+      "title": "Get TOTP",
       "description": "Search for an Ente Auth account and copy the TOTP code to the clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "database",
+      "title": "Import Secrets",
+      "description": "Import Ente Auth secrets from a JSON file",
       "mode": "view"
     }
   ],
@@ -23,6 +29,7 @@
     "commander": "^9.0.0",
     "eslint-config-airbnb": "^19.0.4",
     "figlet": "^1.7.0",
+    "fs-extra": "^11.2.0",
     "otpauth": "^9.3.2",
     "ts-node": "^10.0.0",
     "typescript": "^4.0.0",
@@ -33,6 +40,7 @@
     "@eslint/js": "^9.9.0",
     "@raycast/eslint-config": "^1.0.8",
     "@types/figlet": "^1.5.8",
+    "@types/fs-extra": "^11.0.4",
     "@types/jest": "^29.5.12",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",

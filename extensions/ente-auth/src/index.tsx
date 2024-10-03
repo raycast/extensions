@@ -1,7 +1,9 @@
-import { getProgressIcon } from "@raycast/utils";
+import { getProgressIcon, getFavicon } from "@raycast/utils";
 import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { listSecretsWithTOTP } from "./helper";
+import { getJsonFormatFromStore } from "./helper";
+import { JsonFormat } from "./helper/types";
+import { get } from "http";
 
 // Ente colors - purple #A400B6, orange #FF9800
 const getProgressColor = (remainingTime: number) => {
@@ -11,14 +13,21 @@ const getProgressColor = (remainingTime: number) => {
 const RERENDER_INTERVAL = 1000;
 
 export default function Command() {
-  const [secrets, setSecrets] = useState(listSecretsWithTOTP());
+  const [secrets, setSecrets] = useState<JsonFormat[]>([]);
 
   useEffect(() => {
+    if (secrets.length === 0) {
+      getJsonFormatFromStore().then((data) => setSecrets(data));
+    }
+
     const interval = setInterval(() => {
-      setSecrets(listSecretsWithTOTP());
+      getJsonFormatFromStore().then((data) => setSecrets(data));
     }, RERENDER_INTERVAL);
 
-    return () => clearInterval(interval);
+    return () => {
+      setSecrets([]);
+      clearInterval(interval);
+    };
   }, []);
 
   if (secrets.length === 0) {
@@ -30,20 +39,47 @@ export default function Command() {
     );
   }
 
+  const Metadata = List.Item.Detail.Metadata;
+  const Label = Metadata.Label;
+  const Separator = Metadata.Separator;
+
   return (
-    <List navigationTitle="Get TOTP" searchBarPlaceholder="Search...">
+    <List navigationTitle="Get TOTP" searchBarPlaceholder="Search..." isShowingDetail>
       {secrets.map((item, index) => {
         return (
           <List.Item
             key={index}
             title={item.service_name}
             subtitle={item.username}
-            icon={Icon.Key}
-            keywords={[item.service_name, item.username ?? ""]}
+            icon={item.notes && /^https?:\/\//.test(item.notes) ? getFavicon(item.notes) : Icon.Key}
+            keywords={[item.service_name, item.username ?? "", ...item.tags]}
+            detail={
+              <>
+                <List.Item.Detail markdown={`#${item.current_totp_time_remaining}s`} />
+                <List.Item.Detail
+                  metadata={
+                    <Metadata>
+                      <Label title="Current" text={item.current_totp} />
+                      <Label title="Next" text={item.next_totp} />
+                      <Separator />
+                      <Label title="Username" text={item.username} />
+                      <Label title="Algorithm" text={item.algorithm} />
+                      <Label title="Digits" text={item.digits.toString()} />
+                      <Label title="Period" text={item.period} />
+                      <Separator />
+                      <Label title="Notes" text={item.notes} />
+                      <Separator />
+                      <List.Item.Detail.Metadata.TagList title="Tags">
+                        {item.tags.map((tag, index) => (
+                          <List.Item.Detail.Metadata.TagList.Item key={index} text={tag} color={"#A400B6"} />
+                        ))}
+                      </List.Item.Detail.Metadata.TagList>
+                    </Metadata>
+                  }
+                />
+              </>
+            }
             accessories={[
-              {
-                tag: item.current_totp,
-              },
               {
                 icon: {
                   source: getProgressIcon(item.current_totp_time_remaining / 30),
@@ -53,12 +89,8 @@ export default function Command() {
             ]}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard
-                  title={"Copy TOTP"}
-                  icon={getProgressIcon(item.current_totp_time_remaining)}
-                  content={item.current_totp}
-                  concealed={true}
-                />
+                <Action.CopyToClipboard title="Copy TOTP" icon={Icon.Clipboard} content={item.current_totp} />
+                <Action.CopyToClipboard title="Copy Next" icon={Icon.Key} content={item.next_totp} />
               </ActionPanel>
             }
           />

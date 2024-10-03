@@ -1,30 +1,42 @@
-import * as fs from "fs";
-import * as path from "path";
 import * as OTPAuth from "otpauth";
 import { dataTransformer } from "./transformer";
-import { ServiceData as SecretsJson, JsonFormat } from "./types";
+import { Secret, JsonFormat } from "./types";
+import { LocalStorage } from "@raycast/api";
+import { STORAGE_KEY } from "./secrets";
 
-export const DB_FILE = path.join(process.env.HOME || "", ".local", "share", "ente-totp", "db.json");
+export const getJsonFormatFromStore = async (): Promise<JsonFormat[]> => {
+  const storageStringRaw = await LocalStorage.getItem<string>(STORAGE_KEY);
+  const data: Secret[] = JSON.parse(storageStringRaw ?? "{}");
 
-export const listSecretsWithTOTP = (): JsonFormat[] => {
-  const items: JsonFormat[] = [];
+  return mapSecretsToJsonFormat(data);
+};
+
+export const mapSecretsToJsonFormat = (items: Secret[]): JsonFormat[] => {
+  const result: JsonFormat[] = [];
 
   try {
-    const data: SecretsJson = JSON.parse(fs.readFileSync(DB_FILE, "utf8"));
+    items.forEach((item) => {
+      const totp = new OTPAuth.TOTP({ secret: item.secret });
+      const currentTotp = totp.generate();
+      const currentTotpTimeRemaining = totp.period - (Math.floor(Date.now() / 1000) % totp.period);
+      const nextTotp = totp.generate({ timestamp: Date.now() + 30 * 1000 });
 
-    Object.entries(data).forEach(([serviceName, serviceData]) => {
-      serviceData.forEach(({ username, secret }) => {
-        const totp = new OTPAuth.TOTP({ secret });
-        const currentTotp = totp.generate();
-        const currentTotpTimeRemaining = totp.period - (Math.floor(Date.now() / 1000) % totp.period);
-        const nextTotp = totp.generate({ timestamp: Date.now() + 30 * 1000 });
+      const formattedData = dataTransformer(
+        item.username,
+        item.issuer,
+        item.algorithm,
+        item.digits,
+        item.period,
+        item.tags,
+        item.notes,
+        currentTotp,
+        currentTotpTimeRemaining,
+        nextTotp,
+      );
 
-        const formattedData = dataTransformer(serviceName, username, currentTotp, currentTotpTimeRemaining, nextTotp);
-
-        if (formattedData) {
-          items.push(formattedData);
-        }
-      });
+      if (formattedData) {
+        result.push(formattedData);
+      }
     });
   } catch (err: unknown) {
     if (err instanceof Error && err.message.includes("No such file or directory")) {
@@ -34,7 +46,5 @@ export const listSecretsWithTOTP = (): JsonFormat[] => {
     console.error("Error reading secrets: ", err);
   }
 
-  return items;
+  return result;
 };
-
-export type { SecretsJson };

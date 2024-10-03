@@ -1,15 +1,25 @@
 import { JsonFormat, Secret } from "./types";
 
 export const dataTransformer = (
-  serviceName: string,
   username: string,
+  serviceName: string,
+  algorithm: string,
+  digits: number,
+  period: string,
+  tags: string[],
+  notes: string,
   currentTotp: string,
   currentTotpTimeRemaining: number,
-  nextTotp: string,
+  nextTotp: string
 ): JsonFormat => {
   return {
-    service_name: serviceName.replace(/\+/g, " "),
     username,
+    service_name: serviceName.replace(/\+/g, " "),
+    algorithm,
+    digits,
+    period,
+    tags,
+    notes,
     current_totp: currentTotp,
     current_totp_time_remaining: currentTotpTimeRemaining,
     next_totp: nextTotp,
