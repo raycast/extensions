@@ -54,7 +54,7 @@ export const useGlueJobRuns = (jobName: string) => {
 
 const fetchGlueJobs = async (toast: Toast, nextToken?: string, aggregate?: GlueJobRun[]): Promise<GlueJobRun[]> => {
   const { JobNames: jobNames, NextToken: cursor } = await new GlueClient({}).send(
-    new ListJobsCommand({ NextToken: nextToken, MaxResults: 5 }),
+    new ListJobsCommand({ NextToken: nextToken, MaxResults: 25 }),
   );
 
   const jobs = await Promise.all(

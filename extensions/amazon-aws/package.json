@@ -151,6 +151,7 @@
   "dependencies": {
     "@aws-sdk/client-cloudformation": "^3.216.0",
     "@aws-sdk/client-cloudwatch-logs": "^3.226.0",
+    "@aws-sdk/client-codeartifact": "^3.664.0",
     "@aws-sdk/client-codepipeline": "^3.216.0",
     "@aws-sdk/client-dynamodb": "^3.216.0",
     "@aws-sdk/client-ec2": "^3.216.0",
