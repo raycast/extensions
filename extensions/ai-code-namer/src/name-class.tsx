@@ -1,6 +1,6 @@
-import { UseNameGenerator } from "./services";
+import { NameGenerator } from "./services";
 import { CodeElementType } from "./utils";
 
 export default function Command() {
-  return <UseNameGenerator codeElementType={CodeElementType.Class} />;
+  return <NameGenerator codeElementType={CodeElementType.Class} />;
 }

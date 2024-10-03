@@ -33,7 +33,6 @@ export function convertStringNamingStyle(value: string): NamingStyle {
     case "UPPER_CASE":
       return NamingStyle.UpperCase;
     default:
-      console.log("fuck...");
       return NamingStyle.CamelCase;
   }
 }

@@ -7,7 +7,7 @@ interface NameHandlerProps {
   codeElementType: CodeElementType;
 }
 
-export function UseNameGenerator({ codeElementType }: NameHandlerProps) {
+export function NameGenerator({ codeElementType }: NameHandlerProps) {
   if (!codeElementType) {
     return <List.EmptyView title="Error" description="Invalid code element type" />;
   }
@@ -17,8 +17,8 @@ export function UseNameGenerator({ codeElementType }: NameHandlerProps) {
   const [generatedNames, setGeneratedNames] = useState<string[]>([]);
   const [namingStyle, setNamingStyle] = useState<NamingStyle>(NamingStyle.CamelCase);
 
-  const generateNames = async () => {
-    if (searchText.length < 3) {
+  const generateNames = async (newNamingStyle?: NamingStyle, isEmptyVal: boolean = true) => {
+    if (!searchText || searchText == "") {
       return;
     }
 
@@ -31,7 +31,11 @@ export function UseNameGenerator({ codeElementType }: NameHandlerProps) {
     });
 
     try {
-      const names = await generateNameSuggestions(codeElementType, searchText, namingStyle);
+      const names = await generateNameSuggestions(
+        codeElementType,
+        searchText,
+        isEmptyVal ? namingStyle : newNamingStyle || namingStyle,
+      );
       setGeneratedNames(names);
       await showToast({
         style: Toast.Style.Success,
@@ -56,8 +60,17 @@ export function UseNameGenerator({ codeElementType }: NameHandlerProps) {
   }, [searchText]);
 
   const onStyleChange = async (newValue: string) => {
+    if (!newValue || newValue == "") {
+      return;
+    }
+
     const newStyle = convertStringNamingStyle(newValue);
-    setNamingStyle(newStyle);
+
+    if (newStyle !== namingStyle) {
+      setNamingStyle(newStyle);
+      setGeneratedNames([]);
+      await generateNames(newStyle, false);
+    }
   };
 
   return (
@@ -82,7 +95,6 @@ export function UseNameGenerator({ codeElementType }: NameHandlerProps) {
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard content={item} />
-                <Action title="Regenerate Names" onAction={generateNames} />
               </ActionPanel>
             }
           />
