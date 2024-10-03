@@ -1,7 +1,7 @@
 import { Action, ActionPanel, ImageMask, List, openExtensionPreferences } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { cancelBuild } from "./api/cancel-build";
-import { fetchApplications } from "./api/fetch-apps";
+import { fetchApplications, FetchAppState } from "./api/fetch-apps";
 import WorkflowSelector from "./components/workflow-selector";
 import { CodemagicApp } from "./interface/codemagic-apps";
 import { capitalize } from "./util/capitalise";
@@ -9,6 +9,7 @@ import { getIconForBuildStatus, statusToColor } from "./util/status-to-color";
 
 const TriggerBuildCommand = () => {
   const [groupedApplications, setGroupedApplications] = useState<Record<string, CodemagicApp[]> | null>(null);
+  const [fetchState, setFetchState] = useState<FetchAppState>(FetchAppState.SUCCESS);
   const [isLoading, setIsLoading] = useState(true);
 
   const cancellableStatuses = ["queued", "preparing", "fetching", "building", "finishing", "publishing", "testing"];
@@ -17,7 +18,8 @@ const TriggerBuildCommand = () => {
     setIsLoading(true);
     setGroupedApplications(null);
     try {
-      const apps = await fetchApplications();
+      const [state, apps] = await fetchApplications();
+      setFetchState(state);
       setGroupedApplications(apps);
     } finally {
       setIsLoading(false);
@@ -27,11 +29,41 @@ const TriggerBuildCommand = () => {
     loadApplications();
   }, []);
 
-  if (isLoading && groupedApplications === null) {
+  if (isLoading) {
     return <List isLoading={true} searchBarPlaceholder="Fetching applications..." />;
   }
 
-  if (groupedApplications === null) {
+  if (fetchState === FetchAppState.NO_CONFIGURED_APPS) {
+    return (
+      <List>
+        <List.EmptyView title="No Configured Apps" description="No apps have been configured in Codemagic." />
+      </List>
+    );
+  }
+
+  if (fetchState === FetchAppState.NO_FLUTTER_APPS) {
+    return (
+      <List>
+        <List.EmptyView
+          title="No Flutter Apps Found"
+          description="No Flutter apps or packages found in your Codemagic account."
+        />
+      </List>
+    );
+  }
+
+  if (fetchState === FetchAppState.NO_UI_SETTINGS) {
+    return (
+      <List>
+        <List.EmptyView
+          title="No UI-based Settings"
+          description="No apps are configured with UI-based settings in Codemagic."
+        />
+      </List>
+    );
+  }
+
+  if (fetchState === FetchAppState.ERROR || groupedApplications === null) {
     return (
       <List
         actions={

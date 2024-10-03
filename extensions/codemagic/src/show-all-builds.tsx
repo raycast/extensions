@@ -63,7 +63,10 @@ const ShowAllBuilds = () => {
               keywords={[build.config.name, build.branch, build.status, build.version].filter(Boolean)}
               key={build._id}
               title={`${build.config.name}`}
-              icon={{ source: app.iconUrl, mask: ImageMask.Circle }}
+              icon={{
+                source: app.iconUrl !== null ? app.iconUrl : "../assets/default-app-icon.png",
+                mask: ImageMask.Circle,
+              }}
               accessories={[
                 {
                   text: String(`${build.version ? `${build.version}` : ""}`),

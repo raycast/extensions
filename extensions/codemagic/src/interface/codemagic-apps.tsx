@@ -2,6 +2,7 @@ export interface CodemagicApp {
   _id: string;
   projectType: string;
   appName: string;
+  settingsSource: string | null;
   iconUrl: string;
   isConfigured: boolean | null;
   owner: string;
