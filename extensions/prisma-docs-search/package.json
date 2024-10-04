@@ -24,7 +24,7 @@
   "commands": [
     {
       "name": "prisma-docs-search",
-      "title": "Search",
+      "title": "Search Prisma Docs",
       "description": "Send search queries to Prisma's Docs AI and get results within Raycast",
       "keywords": [
         "Prisma",
