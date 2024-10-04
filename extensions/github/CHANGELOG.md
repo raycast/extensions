@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Fix crash when searching visited repositories] - 2024-10-04
+
+The issue causing a crash during the "Search Repositories" feature, when two or more repositories had been visited, has been resolved. This problem originated from changes in [this pull request](https://github.com/raycast/extensions/pull/13684).
+
 ## [Fix copy commit tree URL action] - 2024-09-13
 
 - Fix the "Copy Commit Tree URL" action to ensure it correctly copies the commit Tree URL as intended.
