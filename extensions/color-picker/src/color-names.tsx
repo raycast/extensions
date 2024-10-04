@@ -32,6 +32,7 @@ export default function ColorNames() {
     <List
       isLoading={isSearching}
       onSearchTextChange={setSearchString}
+      searchBarPlaceholder="Search HEX (#00ff00)"
       searchBarAccessory={
         <List.Dropdown
           tooltip="Sort colors by"
