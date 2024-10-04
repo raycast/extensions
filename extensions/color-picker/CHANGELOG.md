@@ -1,6 +1,6 @@
 # Color Picker Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2024-10-04
 
 - Add Color Names command
 - Bump all dependencies to the latest
