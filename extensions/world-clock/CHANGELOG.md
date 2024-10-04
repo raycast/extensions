@@ -1,6 +1,6 @@
 # World Clock Changelog
 
-## [Fix Star Half Hour Time Zone] - {PR_MERGE_DATE}
+## [Fix Star Half Hour Time Zone] - 2024-10-04
 
 - Fix the bug that the half-hour time zone is not included in starred time zones
 
