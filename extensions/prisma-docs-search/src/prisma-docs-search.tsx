@@ -253,6 +253,7 @@ export default function Command(
             <Action
               title="Open Preferences"
               onAction={openCommandPreferences}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
               icon={Icon.Cog}
             />
           </ActionPanel.Section>
