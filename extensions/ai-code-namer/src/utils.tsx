@@ -43,7 +43,7 @@ export async function generateNameSuggestions(
   style: string,
 ): Promise<string[]> {
   if (!environment.canAccess(AI)) {
-    throw new Error("Failed to generate name suggestions. Please try again.");
+    throw new Error("You need Raycast AI to utilize this extension");
   }
 
   const prompt = `As an expert programmer, generate three concise and optimized ${style} names for a ${elementType.toLowerCase()} based on this description: "${description}".
