@@ -11,7 +11,7 @@ raycast://extensions/<author-or-owner>/<extension-name>/<command-name>
 | Name            | Description                                                                                                                                                                                                                        | Type     |
 | :-------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
 | author-or-owner | For store extensions, it's the value of the `owner` or the `author` field in the extension's [manifest](../manifest.md). For built-in extensions (such as `Calendar`), this is always `raycast`.                                   | `string` |
-| extension-name  | For store extensions, it's the value of the extensions `name` field in the extension's [manifest](../manifest.md). For built-in extensions (such as `Calendar`), this is the "slugified" extension name; in this case `calendar`.  | `string` |
+| extension-name  | For store extensions, it's the value of the extension's `name` field in the extension's [manifest](../manifest.md). For built-in extensions (such as `Calendar`), this is the "slugified" extension name; in this case `calendar`. | `string` |
 | command-name    | For store extensions, it's the value of the command's `name` field in the extension's [manifest](../manifest.md). For built-in commands (such as `My Schedule`), this is the "slugified" command name; in this case `my-schedule`. | `string` |
 
 To make fetching a command's Deeplink easier, each command in the Raycast root now has a `Copy Deeplink` action.

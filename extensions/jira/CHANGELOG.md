@@ -1,5 +1,17 @@
 # Jira Changelog
 
+## [Fix number search to include issue keys for all projects.] - 2024-09-30
+
+- When a user searches for a number without a project selected, the extension matches the number against issue keys in all projects.
+
+## [Add ability to copy issue as formatted markdown link] - 2024-09-29
+
+- Copies current issue as a formatted markdown link in the format: `[issue.key - issue.fields.summary]`
+
+## [Persist My Filters value when closing command] - 2024-09-14
+
+- Persist My Filters value when closing command allowing the command to fetch the issues for the latest selected filter when opening the command anew.
+
 ## [Fix epic autocomplete to include all epics of a selected project.] - 2024-08-14
 
 - When a user searches for an epic, the extension prioritizes retrieving search results from Current Search over History Search

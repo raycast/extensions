@@ -27,6 +27,32 @@
       "required": true,
       "description": "You can get this token from the Joplin desktop application, on the Web Clipper Options screen.",
       "placeholder": "Joplin Token"
+    },
+    {
+      "name": "search_limit",
+      "type": "dropdown",
+      "title": "Search Display Limit",
+      "required": false,
+      "description": "The number of notes to display in the search results. Default is 9.",
+      "data": [
+        {
+          "title": "6",
+          "value": "6"
+        },
+        {
+          "title": "default 9",
+          "value": "9"
+        },
+        {
+          "title": "12",
+          "value": "12"
+        },
+        {
+          "title": "18",
+          "value": "18"
+        }
+      ],
+      "default": "9"
     }
   ],
   "dependencies": {

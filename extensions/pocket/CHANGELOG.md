@@ -1,5 +1,8 @@
 # Pocket Changelog
 
+## [Add website favicons] - 2024-08-31
+- Add website favicons to bookmarks in the `Search Bookmarks` command
+
 ## [Fix Bookmark Creation] - 2024-07-20
 - Update code to match new Pocket API requirements for bookmark creation
 

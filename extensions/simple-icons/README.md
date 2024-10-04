@@ -1,6 +1,6 @@
 # Brand Icons - simpleicons.org
 
-Browse, search, and copy 3100+ free SVG icons for popular brands from [Simple Icons](https://simpleicons.org).
+Browse, search, and copy 3200+ free SVG icons for popular brands from [Simple Icons](https://simpleicons.org).
 
 [![raycast-cross-extension-badge]][raycast-cross-extension-link]
 

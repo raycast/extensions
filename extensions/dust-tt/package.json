@@ -4,9 +4,11 @@
   "title": "Ask Dust",
   "description": "Query dust.tt AI agents",
   "icon": "dust.png",
-  "author": "vineus",
+  "author": "albandum",
   "contributors": [
-    "henry_fontanier"
+    "vineus",
+    "henry_fontanier",
+    "stang"
   ],
   "categories": [
     "Productivity"
@@ -14,12 +16,29 @@
   "license": "MIT",
   "preferences": [
     {
+      "name": "apiBaseUrl",
+      "description": "The base URL of the Dust API",
+      "type": "textfield",
+      "required": false,
+      "title": "API URL",
+      "default": "https://dust.tt/api/v1/w",
+      "placeholder": "https://dust.tt/api/v1/w"
+    },
+    {
       "name": "apiKey",
       "description": "Your Dust API key",
       "type": "password",
       "required": true,
       "title": "API key",
       "placeholder": "sk-xxxxxxxxxxxxxxxxxxxxxx"
+    },
+    {
+      "name": "userEmail",
+      "description": "The email address of your Dust user account",
+      "type": "textfield",
+      "required": true,
+      "title": "Email",
+      "placeholder": "john.doe@example.com"
     },
     {
       "name": "workspaceId",

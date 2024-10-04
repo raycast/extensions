@@ -1,5 +1,17 @@
 # Mail Changelog
 
+## [Fix] - 2024-09-03
+
+[#14107](https://github.com/raycast/extensions/issues/14107): Increasing the timeout for getting messages from default (10 seconds) to 30 seconds as a potential fix for loading large number of mails.
+
+## [Fix] - 2024-09-02
+
+Fix an issue where a mailbox name containing a comma causes an incorrect mailbox name after string splitting.
+
+## [Update README.md] - 2024-08-31
+
+- Update README.md
+
 ## [Fixes and Improvements] - 2024-08-14
 
 - [#13936](https://github.com/raycast/extensions/issues/13936): Fixed See Recent Messages to factor in Message Limit.

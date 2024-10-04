@@ -51,7 +51,7 @@ export interface CaskDependency {
 }
 
 export interface Formula extends Installable, Nameable {
-  license: string;
+  license: string | null;
   aliases: string[];
   dependencies: string[];
   build_dependencies: string[];

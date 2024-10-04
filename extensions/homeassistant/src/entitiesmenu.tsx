@@ -3,8 +3,8 @@ import { LaunchCommandMenubarItem } from "@components/menu";
 import { StateMenubarItem } from "@components/state/menu";
 import { filterViaPreferencePatterns } from "@components/state/utils";
 import { getErrorMessage } from "@lib/utils";
-import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
+import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
 
 export default function EntitiesMenuCommand() {
   const { states, error, isLoading } = useHAStates();
@@ -13,7 +13,7 @@ export default function EntitiesMenuCommand() {
 
   return (
     <MenuBarExtra
-      icon={{ source: "entity.png", tintColor: Color.PrimaryText }}
+      icon={{ source: "shape.svg", tintColor: Color.PrimaryText }}
       isLoading={isLoading}
       tooltip={"Home Assistant Entities"}
     >

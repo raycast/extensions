@@ -5,6 +5,9 @@
   "description": "Aerospace Tiling Window Manager Extension for Raycast to see and configure your shortcuts",
   "icon": "aerospace-icon.png",
   "author": "limonkufu",
+  "contributors": [
+    "AmmarCodes"
+  ],
   "categories": [
     "Productivity",
     "Applications",
@@ -43,7 +46,7 @@
     }
   ],
   "dependencies": {
-    "@iarna/toml": "^2.2.5",
+    "@iarna/toml": "^3.0.0",
     "@raycast/api": "^1.69.2",
     "@raycast/utils": "^1.15.0"
   },
@@ -64,3 +67,4 @@
     "publish": "npx @raycast/api@latest publish"
   }
 }
+

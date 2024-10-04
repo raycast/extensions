@@ -1,13 +1,13 @@
+import { List } from "@raycast/api";
 import _ from "lodash";
 import { useState } from "react";
 import { BookmarkListSection, PermissionError } from "./components";
+import BookmarksDropdown from "./components/BookmarksDropdown";
 import { useBookmarks } from "./hooks";
 import { GeneralBookmark } from "./types";
 import { search } from "./utils";
-import { List } from "@raycast/api";
-import BookmarksDropdown from "./components/BookmarksDropdown";
 
-const Command = () => {
+export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
   const [selectedFolder, setSelectedFolder] = useState<string>("All Bookmarks");
   const { bookmarks, hasPermission } = useBookmarks(false);
@@ -58,6 +58,4 @@ const Command = () => {
       })}
     </List>
   );
-};
-
-export default Command;
+}

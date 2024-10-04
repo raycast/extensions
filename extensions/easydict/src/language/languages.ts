@@ -134,7 +134,7 @@ export function getYoudaoLangCodeFromAppleCode(appleLanguageTitle: string): stri
 /**
  * Get language item from apple Chinese title, such as "中文" --> LanguageItem
  *
- * * Note: There are two kinds of Chinese, 简体中文 and 繁体中文, but Apple only has one kind of 中文.
+ * * Note: There are two kinds of Chinese, 简体中文 and 繁体中文，but Apple only has one kind of 中文。
  */
 export function getLanguageItemFromAppleChineseTitle(chineseTitle: string): LanguageItem | undefined {
   for (const langItem of languageItemList) {

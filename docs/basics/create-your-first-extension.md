@@ -27,7 +27,7 @@ Open your terminal, navigate to your extension directory and run `npm install &&
 To make changes to your extension, open the `./src/index.tsx` file in your extension directory, change the `markdown` text and save it. Then, open your command in Raycast again and see your changes.
 
 {% hint style="info" %}
-`npm run dev` starts the extension in development mode with hot reloading, error reporting and [more](../information/tools/cli.md#development).
+`npm run dev` starts the extension in development mode with hot reloading, error reporting and [more](../information/developer-tools/cli.md#development).
 {% endhint %}
 
 ## Use your extension
@@ -39,5 +39,5 @@ Now, you can press `⌃` `C` in your terminal to stop `npm run dev`. The extensi
 🎉 Congratulations! You built your first extension. Off to many more.
 
 {% hint style="info" %}
-Don't forget to run [`npm run dev`](../information/tools/cli.md#development) again when you want to change something in your extension.
+Don't forget to run [`npm run dev`](../information/developer-tools/cli.md#development) again when you want to change something in your extension.
 {% endhint %}

@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, Icon, getPreferenceValues, confirmAlert, Alert } from "@raycast/api";
 import moment from "moment";
-import { refreshMenuBar, pluralize } from "./utils";
+import { refreshCommands, pluralize } from "./utils";
 import { Item, ListItems, Preferences } from "./types";
 import { EditForm } from "./editForm";
 import { getItems, saveItems } from "./storage";
@@ -16,7 +16,7 @@ export default function Command() {
 
     await saveItems(items);
     await mutate(getFormattedList());
-    await refreshMenuBar();
+    await refreshCommands();
   }
 
   async function removeItem(item: Item) {
@@ -25,7 +25,7 @@ export default function Command() {
 
     await saveItems(items);
     await mutate(getFormattedList());
-    await refreshMenuBar();
+    await refreshCommands();
   }
 
   return (

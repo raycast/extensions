@@ -1,10 +1,11 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { execSync } from "child_process";
 import { useEffect, useState } from "react";
+import { createLaunchAgent as createLaunchAgentCommand } from "../lib/plist";
 import { getFileName } from "../lib/utils";
 import LaunchAgentDetails from "./LaunchAgentDetails";
 
-const EmptyView = () => (
+const EmptyView = ({ loadLaunchAgentsFiles }: { loadLaunchAgentsFiles: () => void }) => (
   <List.EmptyView
     icon={Icon.Multiply}
     title="No Launch Agents found"
@@ -14,8 +15,8 @@ const EmptyView = () => (
           icon={{ source: Icon.NewDocument, tintColor: Color.Green }}
           title="Create Launch Agent"
           onAction={() => {
-            const fileName = `com.raycast.${Math.random()}`;
-            execSync(`touch ~/Library/LaunchAgents/${fileName}.plist`);
+            createLaunchAgentCommand();
+            loadLaunchAgentsFiles();
           }}
         />
       </ActionPanel>
@@ -29,17 +30,20 @@ export default function LaunchAgentList() {
 
   const loadLaunchAgentsFiles = () => {
     try {
-      const launchAgentsOutput = execSync("ls ~/Library/LaunchAgents/*.plist").toString();
-      const launchAgentsFiles = launchAgentsOutput.split("\n").filter((file) => file.trim() !== "");
+      const userLaunchAgentsOutput = execSync("ls ~/Library/LaunchAgents/*.plist").toString();
+      const launchAgentsFiles = userLaunchAgentsOutput.split("\n").filter((file) => file.trim() !== "");
       setLaunchAgentsFiles(launchAgentsFiles);
     } catch (error) {
-      console.error("Error fetching launch agents files:", error);
+      if (error instanceof Error && error.message.includes("No such file or directory")) {
+        setLaunchAgentsFiles([]);
+      } else {
+        console.error("Error fetching launch agents files:", error);
+      }
     }
   };
 
   const createLaunchAgent = () => {
-    const fileName = `com.raycast.${Math.random()}`;
-    execSync(`touch ~/Library/LaunchAgents/${fileName}.plist`);
+    createLaunchAgentCommand();
     loadLaunchAgentsFiles();
   };
 
@@ -50,7 +54,7 @@ export default function LaunchAgentList() {
 
   return (
     <List navigationTitle="Search Launch Agents" searchBarPlaceholder="Search your Launch Agent" isLoading={isLoading}>
-      <EmptyView />
+      <EmptyView loadLaunchAgentsFiles={loadLaunchAgentsFiles} />
       {launchAgentsFiles.map((file, index) => (
         <List.Item
           key={index}

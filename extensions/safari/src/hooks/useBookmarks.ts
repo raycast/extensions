@@ -3,7 +3,6 @@ import { homedir } from "os";
 import { useCallback, useEffect, useState } from "react";
 import { readFile } from "simple-plist";
 import { promisify } from "util";
-
 import { Bookmark, BookmarkPListResult, GeneralBookmark, ReadingListBookmark } from "../types";
 import { getUrlDomain } from "../utils";
 
@@ -11,10 +10,10 @@ const readPlist = promisify(readFile);
 
 const PLIST_PATH = `${homedir()}/Library/Safari/Bookmarks.plist`;
 
-const extractReadingListBookmarks = (
+function extractReadingListBookmarks(
   bookmarks: BookmarkPListResult,
   readingListOnly?: boolean,
-): (ReadingListBookmark | GeneralBookmark)[] => {
+): (ReadingListBookmark | GeneralBookmark)[] {
   if (readingListOnly) {
     return _.chain(bookmarks.Children)
       .find(["Title", "com.apple.ReadingList"])
@@ -68,9 +67,9 @@ const extractReadingListBookmarks = (
   };
 
   return _.chain(flattenBookmarks(bookmarks)).value() as GeneralBookmark[];
-};
+}
 
-const useBookmarks = (readingListOnly?: boolean) => {
+export default function useBookmarks(readingListOnly?: boolean) {
   const [hasPermission, setHasPermission] = useState(true);
   const [bookmarks, setBookmarks] = useState<(ReadingListBookmark | GeneralBookmark)[]>();
 
@@ -94,6 +93,4 @@ const useBookmarks = (readingListOnly?: boolean) => {
   }, [fetchItems]);
 
   return { bookmarks, hasPermission };
-};
-
-export default useBookmarks;
+}

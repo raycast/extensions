@@ -17,7 +17,8 @@
     "Nauxscript",
     "lin",
     "leeonfield",
-    "husniadil"
+    "husniadil",
+    "luckykong"
   ],
   "pastContributors": [
     "pomdtr",
@@ -218,6 +219,23 @@
       "type": "textfield"
     },
     {
+      "default": false,
+      "description": "Change the default vision model",
+      "label": "Change Vision Model",
+      "name": "useVisionModel",
+      "required": false,
+      "title": "Change Vision Model",
+      "type": "checkbox"
+    },
+    {
+      "description": "Custom Vision Model Name",
+      "name": "visionModelName",
+      "required": false,
+      "title": "Vision Model Name",
+      "placeholder": "gpt-4o",
+      "type": "textfield"
+    },
+    {
       "name": "useProxy",
       "label": "Enable proxy for each request",
       "description": "Each request will be passed through the proxy",
@@ -306,7 +324,7 @@
   ],
   "dependencies": {
     "@nem035/gpt-3-encoder": "^1.1.7",
-    "@raycast/api": "^1.72.1",
+    "@raycast/api": "^1.81.2",
     "@raycast/utils": "^1.14.1",
     "@types/uuid": "^9.0.0",
     "cross-fetch": "^4.0.0",

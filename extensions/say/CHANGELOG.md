@@ -1,4 +1,9 @@
-# Say - Spoken Content Changelog
+# Say - Text to Speech Changelog
+
+## [Chore] - 2024-10-02
+
+- Rename extension title
+- Bump all dependencies to the latest
 
 ## [Bugfix] - 2024-06-23
 

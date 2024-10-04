@@ -3,6 +3,8 @@ import { FolderForm } from "./types";
 import { customize } from "./utils/customize";
 import { useEffect, useState } from "react";
 import { base64ToFile } from "./utils/saveFile";
+import path from "path";
+import { ReplaceAction } from "./replaceAction";
 
 export default function Result({ formValues }: { formValues: FolderForm }) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -22,9 +24,34 @@ export default function Result({ formValues }: { formValues: FolderForm }) {
     name: null,
   });
 
+  const tmpDirectory = path.resolve("/tmp");
+
   const markdown = `
   ![](${imageResult?.previewImage})
   `;
+
+  const saveFile = async (output: string, variant: "saved" | "applied") => {
+    if (!imageResult?.baseImage) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to save image",
+      });
+      return;
+    }
+    base64ToFile(imageResult?.baseImage, output)?.then(async (res) => {
+      if (res === "success") {
+        await showToast({
+          style: Toast.Style.Success,
+          title: `Image ${variant} successfully`,
+        });
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to save image",
+        });
+      }
+    });
+  };
 
   useEffect(() => {
     const fetchImage = async () => {
@@ -57,34 +84,28 @@ export default function Result({ formValues }: { formValues: FolderForm }) {
         outputPath: outputPath,
         name: fileName as string,
       });
+
       setIsLoading(false);
     };
 
-    fetchImage();
+    fetchImage().catch((error) => console.error(error));
   }, [formValues]);
 
   return (
     <Detail
       actions={
         <ActionPanel>
+          {formValues.targetFolderPath && formValues.targetFolderPath.length > 0 && (
+            <ReplaceAction
+              iconPath={`${tmpDirectory}/${imageResult?.name}`}
+              targetFolderPath={formValues?.targetFolderPath?.[0]}
+              onAction={() => saveFile(`${tmpDirectory}/${imageResult?.name}`, "applied")}
+            />
+          )}
           <Action
             title="Save Image"
             onAction={() => {
-              base64ToFile(imageResult?.baseImage, imageResult?.outputPath)
-                ?.then(async (res) => {
-                  if (res === "success") {
-                    await showToast({
-                      style: Toast.Style.Success,
-                      title: "Image saved successfully",
-                    });
-                  } else {
-                    await showToast({
-                      style: Toast.Style.Failure,
-                      title: "Failed to save image",
-                    });
-                  }
-                })
-                .then(() => popToRoot());
+              saveFile(imageResult?.outputPath as string, "saved").then(() => popToRoot());
             }}
             icon={"download-16"}
           />

@@ -1,4 +1,4 @@
-import { ActionPanel, Cache, open, Icon, List, Action } from "@raycast/api";
+import { ActionPanel, Cache, Icon, List, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { client } from "./util/client";
 import { SanityProject } from "@sanity/client";
@@ -34,7 +34,9 @@ export default function SearchProjects() {
             <List.Item
               key={project.id}
               id={project.id}
+              icon="sanity-icon.png"
               title={project.displayName}
+              subtitle={project.metadata.externalStudioHost || project.studioHost || "not deployed"}
               keywords={
                 project.metadata.externalStudioHost
                   ? [project.metadata.externalStudioHost]
@@ -45,35 +47,28 @@ export default function SearchProjects() {
               actions={
                 <ActionPanel>
                   {(project.metadata.externalStudioHost || project.studioHost) && (
-                    <Action
+                    <Action.OpenInBrowser
                       title="Open Studio"
                       icon={Icon.Link}
-                      onAction={async () => {
-                        const url = project.metadata.externalStudioHost || project.studioHost;
-
-                        if (url) {
-                          open(url);
-                        }
-                      }}
+                      url={project.metadata.externalStudioHost || `https://${project.studioHost}.sanity.studio`}
                     />
                   )}
 
-                  <Action
+                  <Action.OpenInBrowser
                     title="Manage Project"
                     icon={Icon.Cog}
-                    onAction={async () => {
-                      const url = project.organizationId
+                    url={
+                      project.organizationId
                         ? `https://www.sanity.io/organizations/${project.organizationId}/project/${project.id}`
-                        : `https://www.sanity.io/manage/personal/project/${project.id}`;
-
-                      open(url);
-                    }}
+                        : `https://www.sanity.io/manage/personal/project/${project.id}`
+                    }
                   />
                 </ActionPanel>
               }
               accessories={[
                 {
-                  text: project.metadata.externalStudioHost || project.studioHost || "not deployed",
+                  date: new Date(project.createdAt),
+                  tooltip: `Created At ${project.createdAt}`,
                 },
               ]}
             />

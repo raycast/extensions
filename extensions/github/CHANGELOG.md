@@ -1,5 +1,19 @@
 # GitHub Changelog
 
+## [Fix crash when searching visited repositories] - 2024-10-04
+
+The issue causing a crash during the "Search Repositories" feature, when two or more repositories had been visited, has been resolved. This problem originated from changes in [this pull request](https://github.com/raycast/extensions/pull/13684).
+
+## [Fix copy commit tree URL action] - 2024-09-13
+
+- Fix the "Copy Commit Tree URL" action to ensure it correctly copies the commit Tree URL as intended.
+
+## [Clone Repo Fixes] - 2024-08-20
+
+- [#13872](https://github.com/raycast/extensions/issues/13872): Brought back the feature for Raycast to act as a fast brower to open cloned repo.
+- Re-added _Clone Path_ preference without any default value this time. If no value is provided, user will need to specify directory with the form.
+- If a value for _Clone Path_ preference is specified, the old behavior of cloning the repo (or opening if it exists) is enacted.
+
 ## [Fix capitalization] - 2024-08-15
 
 - Ensured title-style capitalization in action titles.

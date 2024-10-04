@@ -1,5 +1,9 @@
 # IconPark Changelog
 
+## [Dark Theme] - 2024-08-18
+
+- Add dark theme support (show icons with light color on dark background)
+
 ## [Refactor Code] - 2024-07-04
 
 - Refactor code to optimise extended runtime performance

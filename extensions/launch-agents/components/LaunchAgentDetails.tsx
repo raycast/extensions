@@ -77,7 +77,7 @@ export default function LaunchAgentDetails({
 
   const deleteFile = () => {
     try {
-      execSync(`rm ${selectedFile}`);
+      execSync(`rm -rf ${selectedFile}`);
       showToast(Toast.Style.Success, "File Deleted", `${selectedFile} has been deleted.`);
       refreshList();
       pop();

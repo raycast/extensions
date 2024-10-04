@@ -59,3 +59,13 @@ export const unloadLaunchAgent = (filePath: string) => {
     console.error("Error unloading file:", error);
   }
 };
+
+export const createLaunchAgent = () => {
+  const userLaunchAgentsPath = "~/Library/LaunchAgents";
+  const fileName = `com.raycast.${Math.random()}`;
+
+  execSync(`mkdir -p ${userLaunchAgentsPath}`);
+  execSync(`touch ${userLaunchAgentsPath}/${fileName}.plist`);
+
+  return fileName;
+};

@@ -9,7 +9,8 @@
   "contributors": [
     "andreaselia",
     "stelo",
-    "thomaslombart"
+    "thomaslombart",
+    "srikirank"
   ],
   "license": "MIT",
   "commands": [
@@ -167,8 +168,6 @@
   "dependencies": {
     "@raycast/api": "^1.79.1",
     "@raycast/utils": "^1.16.2",
-    "chrono-node": "^2.7.6",
-    "date-fns": "^3.6.0",
     "dayjs": "^1.11.12",
     "qs": "^6.12.3"
   },

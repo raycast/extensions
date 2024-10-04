@@ -1,5 +1,16 @@
 # App Icon Generator Changelog
 
+## [1.1.0] - 2024-08-21
+
+- Added support for multiple new platforms:
+  - Android
+  - watchOS
+  - tvOS
+  - Chrome
+  - Microsoft Store
+  - Steam
+  - Epic Games Store
+
 ## [1.0.0] - 2024-08-01
 
 - Initial release of the App Icon Generator extension.

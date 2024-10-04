@@ -16,9 +16,17 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.17.0
+
+- Add a new [`createDeeplink`](./functions/createDeeplink.md) function.
+
+### v1.16.5
+
+- Fixed the bug where `failureToastOptions` did not apply for `useExec` and `useStreamJSON` hooks.
+
 ### v1.16.4
 
-- Avoid throwing an error when `useFetch` can't parse the `Content-Type` header of the response
+- Avoid throwing an error when `useFetch` can't parse the `Content-Type` header of the response.
 
 ### v1.16.3
 
@@ -38,11 +46,11 @@ npm install --save @raycast/utils
 
 ### v1.15.0
 
-- Add `useLocalStorage` hook.
+- Add [`useLocalStorage`](./react-hooks/useLocalStorage.md) hook.
 
 ### v1.14.0
 
-- Add `useStreamJSON` hook.
+- Add [`useStreamJSON`](./react-hooks/useStreamJSON.md) hook.
 
 ### v1.13.6
 
