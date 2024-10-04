@@ -75,11 +75,11 @@ function GeneratePasswordFormContent({ generator }: { generator: UsePasswordGene
           <Form.Checkbox {...itemProps.uppercase} title="Uppercase characters" label="ABCDEFGHIJLMNOPQRSTUVWXYZ" />
           <Form.Checkbox {...itemProps.lowercase} title="Lowercase characters" label="abcdefghijklmnopqrstuvwxyz" />
           <Form.Checkbox {...itemProps.number} title="Numeric characters" label="0123456789" />
-          {values.number && cliVersion >= 2023.9 && (
+          {cliVersion >= 2023.9 && values.number && (
             <Form.TextField {...itemProps.minNumber} title="Minimum numbers" placeholder="1" />
           )}
           <Form.Checkbox {...itemProps.special} title="Special characters" label="!@#$%^&*()_+-=[]{}|;:,./<>?" />
-          {values.special && cliVersion >= 2023.9 && (
+          {cliVersion >= 2023.9 && values.special && (
             <Form.TextField {...itemProps.minSpecial} title="Minimum special" placeholder="1" />
           )}
         </>
