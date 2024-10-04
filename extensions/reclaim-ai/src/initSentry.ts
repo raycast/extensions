@@ -14,7 +14,6 @@ export const sentryClient = Sentry.init({
 
 try {
   fetcher<ApiResponseUser>("/users/current").then((user) => {
-    console.log("setting user", user);
     Sentry.setUser({ email: user.email, id: user.trackingCode });
   });
 } catch (cause) {
