@@ -19,7 +19,7 @@ _Note: This extension requires a WIP account._
 - Add a hotkey in Raycast preferences for the 'Add Completed Todo' action.
 - Search for the 'Show Streak' action and hit `Shift-command-F` to pin it to your favorites.
 
-### Beta testing
+## Beta testing
 
 Want to try out the latest features? Help us improve the extension by testing it out and giving us feedback.
 
@@ -30,7 +30,7 @@ npm install
 npm run dev
 ```
 
-### Development
+## Development
 
 Bug fixes and improvements are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
