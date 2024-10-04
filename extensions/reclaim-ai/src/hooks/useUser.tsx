@@ -4,8 +4,11 @@ import { User } from "../types/user";
 import { useCallbackSafeRef } from "./useCallbackSafeRef";
 import { ApiResponseUser } from "./useUser.types";
 import { fetchPromise } from "../utils/fetcher";
+import { setUser } from "@sentry/node";
 
 const cache = new Cache();
+
+let userSet = false;
 
 const useUser = () => {
   const cachedUserObj = cache.get("user");
@@ -27,6 +30,10 @@ const useUser = () => {
       setIsLoading(true);
 
       const [user, error] = await fetchPromise<ApiResponseUser>("/users/current");
+      if (user && !userSet) {
+        userSet = true;
+        setUser({ email: user.email, id: user.trackingCode });
+      }
 
       if (!user || error) throw error;
 
