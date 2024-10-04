@@ -1,7 +1,7 @@
 import { ActionPanel, Action, Color, Icon, List, confirmAlert, Alert } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
 import { formatDistance } from "date-fns";
-import { get } from "lodash";
+import get from "lodash/get.js";
 import { ProcessDescription } from "pm2";
 import { getProcessStatusColor, getRaycastIcon, isRaycastNodeProcess, runPm2Command } from "./utils.js";
 import { ExportedKey, Pm2Process } from "./types.js";

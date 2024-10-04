@@ -5,7 +5,7 @@ import process from "node:process";
 import { Color, Icon, Image, Toast, environment, getPreferenceValues, showToast } from "@raycast/api";
 import { $ } from "execa";
 import { ProcessDescription, StartOptions } from "pm2";
-import { get } from "lodash";
+import get from "lodash/get.js";
 import { Pm2Command, Pm2Process, ProcessStatus, RuntimeOptions } from "./types.js";
 
 export const raycastNodePath = process.execPath;
