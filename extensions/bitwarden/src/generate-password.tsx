@@ -8,8 +8,6 @@ import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { useCliVersion } from "~/utils/hooks/useCliVersion";
 import { CustomValidations, stringifyBooleanItemProps, useOnChangeForm } from "~/utils/form";
 import { capitalize } from "~/utils/strings";
-import { useEffect } from "react";
-import { DEFAULT_PASSWORD_OPTIONS } from "~/constants/passwords";
 
 const FormSpace = () => <Form.Description text="" />;
 
@@ -30,8 +28,6 @@ function GeneratePasswordForm() {
 
 const passwordTypeOptions: PasswordType[] = ["password", "passphrase"];
 
-type FormProps<T extends Form.Values> = ReturnType<typeof useOnChangeForm<T>>;
-
 function GeneratePasswordFormContent({ generator }: { generator: UsePasswordGeneratorResult }) {
   const { options, password, isGenerating, regeneratePassword } = generator;
 
@@ -50,7 +46,6 @@ function GeneratePasswordFormContent({ generator }: { generator: UsePasswordGene
 
   const { values, itemProps } = form;
 
-  usePasswordRulesSideEffects(form);
   useOneTimePasswordHistoryWarning();
 
   return (
@@ -83,49 +78,17 @@ function GeneratePasswordFormContent({ generator }: { generator: UsePasswordGene
           <Form.Checkbox {...itemProps.uppercase} title="Uppercase characters" label="ABCDEFGHIJLMNOPQRSTUVWXYZ" />
           <Form.Checkbox {...itemProps.lowercase} title="Lowercase characters" label="abcdefghijklmnopqrstuvwxyz" />
           <Form.Checkbox {...itemProps.number} title="Numeric characters" label="0123456789" />
-          {cliVersion >= 2023.9 && (
-            <>
-              <Form.TextField {...itemProps.minNumber} title="Minimum numbers" placeholder="1" />
-              <Form.Checkbox {...itemProps.special} title="Special characters" label="!@#$%^&*()_+-=[]{}|;:,./<>?" />
-              <Form.TextField {...itemProps.minSpecial} title="Minimum special" placeholder="1" />
-            </>
+          {values.number && cliVersion >= 2023.9 && (
+            <Form.TextField {...itemProps.minNumber} title="Minimum numbers" placeholder="1" />
+          )}
+          <Form.Checkbox {...itemProps.special} title="Special characters" label="!@#$%^&*()_+-=[]{}|;:,./<>?" />
+          {values.special && cliVersion >= 2023.9 && (
+            <Form.TextField {...itemProps.minSpecial} title="Minimum special" placeholder="1" />
           )}
         </>
       )}
     </Form>
   );
-}
-
-function usePasswordRulesSideEffects(form: FormProps<PasswordGeneratorOptions>) {
-  const { values, setValue } = form;
-
-  useEffect(() => {
-    if (!values.number && values.minNumber !== "0") {
-      setValue("minNumber", "0");
-    } else if (values.number && values.minNumber === "0") {
-      setValue("minNumber", DEFAULT_PASSWORD_OPTIONS.minNumber);
-    }
-  }, [values.number]);
-
-  useEffect(() => {
-    if (values.minNumber === "" || Number.isNaN(Number(values.minNumber))) return;
-    const number = !!values.minNumber && Number(values.minNumber) > 0;
-    if (values.number !== number) setValue("number", number);
-  }, [values.minNumber]);
-
-  useEffect(() => {
-    if (!values.special && values.minSpecial !== "0") {
-      setValue("minSpecial", "0");
-    } else if (values.special && values.minSpecial === "0") {
-      setValue("minSpecial", DEFAULT_PASSWORD_OPTIONS.minSpecial);
-    }
-  }, [values.special]);
-
-  useEffect(() => {
-    if (values.minSpecial === "" || Number.isNaN(Number(values.minSpecial))) return;
-    const special = !!values.minSpecial && Number(values.minSpecial) > 0;
-    if (values.special !== special) setValue("special", special);
-  }, [values.minSpecial]);
 }
 
 export default GeneratePasswordCommand;
