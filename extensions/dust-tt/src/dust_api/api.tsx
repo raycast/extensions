@@ -15,28 +15,42 @@ import {
   UserMessageErrorEvent,
 } from "./conversation_events";
 
-const DUST_API_URL = "https://dust.tt/api/v1/w";
-
 function removeCiteMention(message: string) {
   const regex = / ?:cite\[[a-zA-Z0-9, ]+\]/g;
   return message.replace(regex, "");
 }
 
+function formatUsername(email: string) {
+  return email
+    .split("@")[0]
+    .split(".")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 export type DustAPICredentials = {
+  apiBaseUrl: string;
   apiKey: string;
+  userEmail: string;
   workspaceId: string;
 };
 
 export class DustApi {
   _credentials: DustAPICredentials;
+  _email: string;
   _conversationApiUrl: string;
+  _username: string;
+  _dustApiBaseUrl: string;
 
   /**
    * @param credentials DustAPICrededentials
    */
   constructor(credentials: DustAPICredentials) {
     this._credentials = credentials;
-    this._conversationApiUrl = `${DUST_API_URL}/${credentials.workspaceId}/assistant/conversations`;
+    this._email = `${credentials.userEmail}`;
+    this._username = formatUsername(credentials.userEmail);
+    this._dustApiBaseUrl = credentials.apiBaseUrl;
+    this._conversationApiUrl = `${this._dustApiBaseUrl}/${credentials.workspaceId}/assistant/conversations`;
   }
 
   async createConversation({ question, agentId = "dust" }: { question: string; agentId?: string }): Promise<{
@@ -63,10 +77,11 @@ export class DustApi {
           ],
           context: {
             timezone: "Europe/Paris",
-            username: "raycast",
-            email: null,
-            fullName: "Raycast",
+            username: this._username,
+            email: this._email,
+            fullName: this._username,
             profilePictureUrl: "https://dust.tt/static/systemavatar/helper_avatar_full.png",
+            origin: "raycast",
           },
         },
       }),
@@ -267,7 +282,7 @@ export class DustApi {
               }
               const link = ref.sourceUrl
                 ? ref.sourceUrl
-                : `${DUST_API_URL}/${ref.dataSourceWorkspaceId}/builder/data-sources/${
+                : `${this._dustApiBaseUrl}/${ref.dataSourceWorkspaceId}/builder/data-sources/${
                     ref.dataSourceId
                   }/upsert?documentId=${encodeURIComponent(ref.documentId)}`;
               if (newDoc) {
@@ -295,7 +310,7 @@ export class DustApi {
 
   async getAgents(): Promise<{ agents?: AgentConfigurationType[]; error?: string }> {
     const { apiKey, workspaceId } = this._credentials;
-    const agentsUrl = `${DUST_API_URL}/${workspaceId}/assistant/agent_configurations`;
+    const agentsUrl = `${this._dustApiBaseUrl}/${workspaceId}/assistant/agent_configurations`;
 
     const response = await fetch(agentsUrl, {
       method: "GET",

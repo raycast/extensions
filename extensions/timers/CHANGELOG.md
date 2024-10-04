@@ -1,5 +1,7 @@
 # Timers Changelog
 
+## [Fix commands finishing before timer launch due to alert] - 2024-09-24
+
 ## [Fix date formatter and residual timer files] - 2024-09-21
 
 - Fix issue where date formatter incorrectly displayed the previous month instead of the current one

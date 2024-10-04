@@ -1,25 +1,13 @@
 import { Color, List } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
 import { getMatchComments } from "../api";
-import { MatchCommentary } from "../types";
 
 export default function MatchComments(props: { slug: string; name: string }) {
-  const [comments, setComments] = useState<MatchCommentary[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    setLoading(true);
-    setComments([]);
-
-    getMatchComments(props.slug).then((data) => {
-      setComments(data);
-      setLoading(false);
-    });
-  }, [props.slug]);
+  const { data: comments, isLoading } = usePromise(getMatchComments, [props.slug]);
 
   return (
-    <List navigationTitle={`Comments | ${props.name}`} isLoading={loading}>
-      {comments.map((comment) => {
+    <List navigationTitle={`Comments | ${props.name}`} isLoading={isLoading}>
+      {comments?.map((comment) => {
         return (
           <List.Item
             key={comment.id}

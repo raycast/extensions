@@ -1,5 +1,10 @@
 # Raycast PM2
 
+## [Enhancement] - 2024-10-04
+
+- Optimize extension file size
+- Bump dependencies to the latest
+
 ## [Enhancement] - 2024-07-16
 
 - Bump dependencies

@@ -11,6 +11,7 @@ Explore the world of Pokémon with stunning visuals and detailed information in 
 ### Core Functionality
 * **Comprehensive Pokémon Database:** Access information on all 1025 Pokémon species, including regional variants, Mega Evolutions, and Gigantamax forms.
 * **Detailed Pokédex Entries:** Explore in-depth details about Pokédex data, stats, types, training, breeding, evolutions, learnsets, and locations.
+* **Enhanced Move Information**: Access detailed information about Pokémon moves, including base power, accuracy, PP, type, category, priority, target, and more.
 * **Quick Links:** Easily access Pokémon on the Official Pokémon Website or Bulbapedia with direct links.
 
 ### Customization Options

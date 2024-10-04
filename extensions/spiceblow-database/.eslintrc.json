@@ -1,0 +1,13 @@
+{
+  "root": true,
+  "extends": ["@raycast"],
+  "rules": {
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_"
+      }
+    ]
+  },
+  "ignorePatterns": ["**/generated/**"]
+}

@@ -1,4 +1,18 @@
 {
   "root": true,
-  "extends": ["@raycast"]
+  "extends": ["@raycast"],
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "@raycast/utils",
+            "importNames": ["useFetch"],
+            "message": "Use useApi instead."
+          }
+        ]
+      }
+    ]
+  }
 }

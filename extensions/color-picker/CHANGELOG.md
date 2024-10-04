@@ -1,6 +1,11 @@
 # Color Picker Changelog
 
-## [Enhancement] -  2024-09-02
+## [Enhancement] - 2024-10-04
+
+- Add Color Names command
+- Bump all dependencies to the latest
+
+## [Enhancement] - 2024-09-02
 
 - Improved the `Organize Colors` command to dynamically fetch the frontmost application and display its icon in the paste action.
 

@@ -11,5 +11,5 @@ export type LegoPartsResponse = {
   count: number | 0;
   next: string | "";
   previous: string | "";
-  results: LegoPart;
+  results: LegoPart[];
 }

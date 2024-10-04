@@ -1,5 +1,9 @@
 # Mercado Libre Changelog
 
+## [Enhancements] - 2024-09-25
+
+- Added a `Show Details` action, allowing users to access detailed views of items.
+
 ## [Fixes and Enhancements] - 2024-05-07
 
 - Improved the quality of thumbnails.

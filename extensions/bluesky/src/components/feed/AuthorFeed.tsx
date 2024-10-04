@@ -231,7 +231,7 @@ export default function AuthorFeed({ showNavDropdown, authorHandle, previousView
                         showNavDropdown={false}
                         previousViewTitle={previousViewTitle}
                         authorHandle={authorHandle}
-                      />
+                      />,
                     )
                   }
                 />

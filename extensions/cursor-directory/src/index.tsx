@@ -1,21 +1,17 @@
-import {
-  List,
-  Image,
-  ActionPanel,
-  Action,
-  Icon,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-  showHUD,
-  Clipboard,
-  getPreferenceValues,
-} from "@raycast/api";
-import { getAvatarIcon, usePromise } from "@raycast/utils";
-import { getSections, processContent } from "./utils";
+import { List, ActionPanel, Icon, showToast, Toast, getPreferenceValues, Action, Color, Keyboard } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { getSections } from "./utils";
 import { useState, useEffect } from "react";
-import { CursorRuleDetail } from "./components/CursorRuleDetail";
-import { fetchCursorRules } from "./api";
+import { fetchCursorRules, fetchLocalRules, starRule, unstarRule } from "./api";
+import { getStarredRules } from "./api";
+import { CursorRulePreview } from "./components/CursorRulePreview";
+import { CopyRuleAction } from "./components/actions/CopyRuleAction";
+import { ViewRuleAction } from "./components/actions/ViewRuleAction";
+import { OpenPrefAction } from "./components/actions/OpenPrefAction";
+import { ToggleViewAction } from "./components/actions/ToggleViewAction";
+import { ExportAndEditAction } from "./components/actions/ExportAndEditAction";
+import { CursorRule } from "./types";
+import { MAX_STARRED_RULES } from "./constants";
 
 export default function Command() {
   const { show_detailed_view, default_cursor_rules_list } = getPreferenceValues<Preferences>();
@@ -24,9 +20,39 @@ export default function Command() {
   const [showingDetail, setShowingDetail] = useState<boolean>(show_detailed_view);
   const [popularOnly, setPopularOnly] = useState<boolean>(default_cursor_rules_list === "popular");
 
-  const { data, isLoading, revalidate } = usePromise(async () => {
+  const {
+    data: remoteRules,
+    isLoading: isLoadingRemoteRules,
+    revalidate: revalidateRemoteRules,
+  } = usePromise(async () => {
     try {
       return await fetchCursorRules(popularOnly);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error(String(err)));
+      return [];
+    }
+  });
+
+  const {
+    data: localRules,
+    isLoading: isLoadingLocalRules,
+    revalidate: revalidateLocalRules,
+  } = usePromise(async () => {
+    try {
+      return await fetchLocalRules();
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error(String(err)));
+      return [];
+    }
+  });
+
+  const {
+    data: starredRulesData,
+    isLoading: isLoadingStarredRules,
+    revalidate: revalidateStarredRules,
+  } = usePromise(async () => {
+    try {
+      return await getStarredRules();
     } catch (err) {
       setError(err instanceof Error ? err : new Error(String(err)));
       return [];
@@ -44,20 +70,82 @@ export default function Command() {
     }
   }, [error]);
 
-  const cursorRules = data || [];
+  const allRules = [...(localRules || []), ...(remoteRules || [])];
 
-  const sections = getSections(cursorRules, false);
+  const starredRules = allRules.filter((rule) => starredRulesData?.includes(rule.slug));
+
+  const nonStarredRemoteRules = remoteRules?.filter((rule) => !starredRulesData?.includes(rule.slug)) || [];
+
+  const sections = getSections(nonStarredRemoteRules, popularOnly);
+
+  const renderRuleItem = (cursorRule: CursorRule, isStarred: boolean) => {
+    const props = showingDetail
+      ? {
+          detail: <CursorRulePreview cursorRule={cursorRule} popularOnly={popularOnly} />,
+        }
+      : {
+          accessories: [
+            { text: cursorRule.tags.slice(0, 3).join(", ") },
+            ...(popularOnly && cursorRule.count !== null
+              ? [{ icon: Icon.Person, text: cursorRule.count.toString() }]
+              : []),
+            { icon: cursorRule.isLocal ? { source: Icon.Circle, tintColor: Color.Blue } : Icon.CircleDisabled },
+            { icon: isStarred ? { source: Icon.Star, tintColor: Color.Yellow } : Icon.StarDisabled },
+          ],
+        };
+
+    return (
+      <List.Item
+        key={cursorRule.slug}
+        title={cursorRule.title}
+        {...props}
+        actions={
+          <ActionPanel>
+            <ActionPanel.Section title="Actions">
+              <ViewRuleAction cursorRule={cursorRule} popularOnly={popularOnly} />
+              <CopyRuleAction cursorRule={cursorRule} />
+              <ExportAndEditAction
+                cursorRule={cursorRule}
+                onAction={async () => {
+                  await revalidateLocalRules();
+                }}
+              />
+              <ToggleViewAction showingDetail={showingDetail} setShowingDetail={setShowingDetail} />
+              <Action
+                title={isStarred ? "Unstar Cursor Rule" : "Star Cursor Rule"}
+                icon={isStarred ? Icon.StarDisabled : Icon.Star}
+                shortcut={Keyboard.Shortcut.Common.Pin}
+                onAction={async () => {
+                  if (isStarred) {
+                    await unstarRule(cursorRule.slug);
+                  } else {
+                    await starRule(cursorRule.slug);
+                  }
+                  await revalidateStarredRules();
+                  await revalidateRemoteRules();
+                  await revalidateLocalRules();
+                }}
+              />
+            </ActionPanel.Section>
+            <ActionPanel.Section title="Settings">
+              <OpenPrefAction />
+            </ActionPanel.Section>
+          </ActionPanel>
+        }
+      />
+    );
+  };
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoadingRemoteRules || isLoadingLocalRules || isLoadingStarredRules}
       isShowingDetail={showingDetail}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter Cursor Rules"
           onChange={(newValue) => {
             setPopularOnly(newValue === "popular");
-            revalidate();
+            revalidateRemoteRules();
           }}
           defaultValue={popularOnly ? "popular" : "all"}
         >
@@ -66,116 +154,27 @@ export default function Command() {
         </List.Dropdown>
       }
     >
+      {starredRules.length > 0 && (
+        <List.Section title="Starred Cursor Rules" subtitle={`${starredRules.length} / ${MAX_STARRED_RULES}`}>
+          {starredRules.map((cursorRule) => {
+            return renderRuleItem(cursorRule, true);
+          })}
+        </List.Section>
+      )}
+      {localRules && localRules.length > 0 && (
+        <List.Section title="Local Cursor Rules" subtitle={`${localRules.length}`}>
+          {localRules.map((cursorRule) =>
+            renderRuleItem(cursorRule, starredRulesData?.includes(cursorRule.slug) || false),
+          )}
+        </List.Section>
+      )}
       {sections.length > 0 &&
         sections.map((section) => (
-          <List.Section key={section.name} title={section.name}>
-            {section.slugs.map((slug, index) => {
-              const cursorRule = cursorRules.find((item) => item.slug === slug);
-              const props = showingDetail
-                ? {
-                    detail: (
-                      <List.Item.Detail
-                        markdown={`${processContent(cursorRule?.content || "").substring(0, 200)}...`}
-                        isLoading={isLoading || cursorRule === undefined}
-                        metadata={
-                          <List.Item.Detail.Metadata>
-                            <List.Item.Detail.Metadata.Label text={section.name} title={cursorRule?.title || ""} />
-                            <List.Item.Detail.Metadata.Label
-                              title="Created by"
-                              text={cursorRule?.author.name || ""}
-                              icon={{
-                                source: cursorRule?.author.avatar || getAvatarIcon(cursorRule?.author.name || ""),
-                                mask: Image.Mask.Circle,
-                              }}
-                            />
-                            {popularOnly && cursorRule?.count && (
-                              <List.Item.Detail.Metadata.Label
-                                title="Used by"
-                                text={
-                                  cursorRule.count > 1 ? `${cursorRule.count} people` : `${cursorRule.count} person`
-                                }
-                              />
-                            )}
-                            {cursorRule?.tags && cursorRule.tags.length > 0 && (
-                              <>
-                                <List.Item.Detail.Metadata.Separator />
-                                <List.Item.Detail.Metadata.TagList title="Tags">
-                                  {cursorRule.tags.slice(0, 3).map((tag) => (
-                                    <List.Item.Detail.Metadata.TagList.Item key={tag} text={tag} />
-                                  ))}
-                                </List.Item.Detail.Metadata.TagList>
-                              </>
-                            )}
-                            {cursorRule?.libs && cursorRule.libs.length > 0 && (
-                              <List.Item.Detail.Metadata.TagList title="Libraries">
-                                {cursorRule.libs.slice(0, 3).map((lib) => (
-                                  <List.Item.Detail.Metadata.TagList.Item key={lib} text={lib} />
-                                ))}
-                              </List.Item.Detail.Metadata.TagList>
-                            )}
-                          </List.Item.Detail.Metadata>
-                        }
-                      />
-                    ),
-                  }
-                : {
-                    accessories: [
-                      { text: cursorRule?.tags.slice(0, 3).join(", ") },
-                      ...(popularOnly && cursorRule?.count
-                        ? [{ icon: Icon.Person, text: cursorRule.count.toString() }]
-                        : []),
-                    ],
-                  };
-
-              return (
-                <List.Item
-                  key={cursorRule?.slug || index}
-                  title={cursorRule?.title || ""}
-                  {...props}
-                  actions={
-                    <ActionPanel>
-                      <ActionPanel.Section title="Actions">
-                        <Action.Push
-                          title="View Cursor Rule"
-                          icon={Icon.Text}
-                          target={<CursorRuleDetail cursorRule={cursorRule!} popularOnly={popularOnly} />}
-                        />
-                        <Action
-                          title="Copy Cursor Rule"
-                          icon={Icon.Clipboard}
-                          shortcut={{ modifiers: ["cmd"], key: "c" }}
-                          onAction={async () => {
-                            await Clipboard.copy(cursorRule?.content || "");
-                            await showHUD("Copied to clipboard, paste it into .cursorrules file");
-                          }}
-                        />
-                        <Action
-                          title={showingDetail ? "Show List View" : "Show Detailed View"}
-                          icon={showingDetail ? Icon.List : Icon.Text}
-                          shortcut={{ modifiers: ["cmd"], key: "d" }}
-                          onAction={() => setShowingDetail(!showingDetail)}
-                        />
-                        {/* <Action
-                          title={sortBy === "popularity" ? "Sort by Categories" : "Sort by Popularity"}
-                          icon={Icon.ArrowDown}
-                          shortcut={{ modifiers: ["cmd"], key: "s" }}
-                          onAction={() => {
-                            setSortBy(prev => prev === "popularity" ? "category" : "popularity");
-                            revalidate();
-                          }}
-                        /> */}
-                      </ActionPanel.Section>
-                      <ActionPanel.Section title="Settings">
-                        <Action
-                          title="Open Extension Preferences"
-                          icon={Icon.Gear}
-                          onAction={openExtensionPreferences}
-                        />
-                      </ActionPanel.Section>
-                    </ActionPanel>
-                  }
-                />
-              );
+          <List.Section key={section.name} title={section.name} subtitle={`${section.slugs.length}`}>
+            {section.slugs.map((slug) => {
+              const cursorRule = nonStarredRemoteRules.find((item) => item.slug === slug);
+              if (!cursorRule) return null;
+              return renderRuleItem(cursorRule, starredRulesData?.includes(cursorRule.slug) || false);
             })}
           </List.Section>
         ))}
