@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "color-mapping",
+  "title": "Closest Hex Color Search",
+  "description": "Trying to remove legacy colors and raw hex values from your codebase? This extension finds the nearest approved color from a set of pre-defined values for you to use",
+  "icon": "extension-icon.png",
+  "author": "p44v9n",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "closest-hex-search",
+      "title": "Search Closest Hex Color",
+      "description": "Find the closest hex color from your Tailwind-style list",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "colorList",
+      "title": "Tailwind Color List",
+      "description": "Paste a Tailwind-style color list. Format: \"colorName\": { shade: \"#HEXVALUE\", ... }, ...",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Paste your color list here...",
+      "default": "\"tahiti\": { 100: \"#cffafe\", 200: \"#a5f3fc\", 300: \"#67e8f9\", 400: \"#22d3ee\", 500: \"#06b6d4\", 600: \"#0891b2\", 700: \"#0e7490\", 800: \"#155e75\", 900: \"#164e63\" }"
+    }
+  ]
+}
