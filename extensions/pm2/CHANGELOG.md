@@ -1,6 +1,6 @@
 # Raycast PM2
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2024-10-04
 
 - Optimize extension file size
 - Bump dependencies to the latest
