@@ -1,5 +1,15 @@
 import { useState, useEffect, useRef } from "react";
-import { ActionPanel, List, Action, Icon, showToast, Toast, getPreferenceValues, Cache, LocalStorage } from "@raycast/api";
+import {
+  ActionPanel,
+  List,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  Cache,
+  LocalStorage,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { promisify } from "node:util";
 import { exec } from "node:child_process";
@@ -86,26 +96,31 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const abortable = useRef<AbortController>();
 
-  const { isLoading, data: fonts, revalidate } = useCachedPromise(
+  const {
+    isLoading,
+    data: fonts,
+    revalidate,
+  } = useCachedPromise(
     async () => {
       const allFonts = await getFonts();
       const storedPinnedFonts = await LocalStorage.getItem<string>(PINNED_FONTS_KEY);
       const pinnedFontNames = storedPinnedFonts ? JSON.parse(storedPinnedFonts) : [];
       setPinnedFonts(pinnedFontNames);
-      return allFonts.map(font => ({ ...font, isPinned: pinnedFontNames.includes(font.name) }));
+      return allFonts.map((font) => ({ ...font, isPinned: pinnedFontNames.includes(font.name) }));
     },
     [],
     {
       abortable,
       keepPreviousData: true,
-    }
+    },
   );
 
   // Filter fonts based on search and system font preference
-  const filteredFonts = fonts?.filter((font) => {
-    const matchesSearch = font.name.toLowerCase().includes(searchText.toLowerCase());
-    return showSystemFonts ? matchesSearch : matchesSearch && !font.isSystem;
-  }) || [];
+  const filteredFonts =
+    fonts?.filter((font) => {
+      const matchesSearch = font.name.toLowerCase().includes(searchText.toLowerCase());
+      return showSystemFonts ? matchesSearch : matchesSearch && !font.isSystem;
+    }) || [];
 
   // Sort fonts with pinned fonts at the top
   const sortedFonts = [...filteredFonts].sort((a, b) => {
@@ -116,7 +131,7 @@ export default function Command() {
 
   const togglePinFont = async (font: Font) => {
     const updatedPinnedFonts = font.isPinned
-      ? pinnedFonts.filter(name => name !== font.name)
+      ? pinnedFonts.filter((name) => name !== font.name)
       : [...pinnedFonts, font.name];
 
     await LocalStorage.setItem(PINNED_FONTS_KEY, JSON.stringify(updatedPinnedFonts));
