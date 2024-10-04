@@ -1,4 +1,6 @@
 import * as Sentry from "@sentry/node";
+import { ApiResponseUser } from "./hooks/useUser.types";
+import { fetcher } from "./utils/fetcher";
 
 export const sentryClient = Sentry.init({
   environment: "production",
@@ -9,3 +11,12 @@ export const sentryClient = Sentry.init({
   // Set sampling rate for profiling - this is relative to tracesSampleRate
   profilesSampleRate: 1.0,
 });
+
+try {
+  fetcher<ApiResponseUser>("/users/current").then((user) => {
+    console.log("setting user", user);
+    Sentry.setUser({ email: user.email, id: user.trackingCode });
+  });
+} catch (cause) {
+  Sentry.captureException(new Error("Failed to get user while initing Sentry", { cause }));
+}
