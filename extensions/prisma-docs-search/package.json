@@ -47,7 +47,7 @@
           "label": "Show details about the search result by default.",
           "description": "Useful information like time to search, word count, AI's confidence level, etc. about the search results.",
           "type": "checkbox",
-          "required": true,
+          "required": false,
           "default": true
         }
       ]
