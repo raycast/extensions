@@ -1,5 +1,9 @@
 # GIF Search Changelog
 
+## [Fix Recent GIFs can't be add to favorites] - {PR_MERGE_DATE}
+
+- Fixes a bug where recent GIFs couldn't be added to favorites
+
 ## [Add 'Paste GIF Markdown' action] - 2024-09-06
 
 - Added a new action to paste a Markdown-formatted link to the GIF into the front-most application

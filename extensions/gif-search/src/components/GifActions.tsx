@@ -12,6 +12,7 @@ import downloadFile from "../lib/downloadFile";
 import { removeGifFromCache } from "../lib/cachedGifs";
 import { get, remove, save } from "../lib/localGifs";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
 
 interface GifActionsProps {
   item: IGif;
@@ -24,8 +25,14 @@ interface GifActionsProps {
 export function GifActions({ item, showViewDetails, service, visitGifItem, mutate }: GifActionsProps) {
   const { id, url, gif_url } = item;
 
-  const { data: favIds } = useCachedPromise((s) => get(s, "favs"), [service]);
+  const { data: favIds } = useCachedPromise((s) => get(s, "favs"), [service == "recents" ? "favorites" : service]);
   const { data: recentIds } = useCachedPromise((s) => get(s, "recent"), [service]);
+
+  const initialIsFav =
+    service == "favorites" || service == "recents"
+      ? favIds?.map((favs) => favs.split(":")[1]).includes(id.toString())
+      : favIds?.includes(id.toString());
+  const [isFav, setIsFav] = useState(initialIsFav);
 
   const trackUsage = async () => {
     if (service) {
@@ -83,7 +90,7 @@ export function GifActions({ item, showViewDetails, service, visitGifItem, mutat
     try {
       await showToast({ style: Toast.Style.Animated, title: "Copying GIF" });
       const isInFavorites =
-        service == "favorites"
+        service == "favorites" || service == "recents"
           ? favIds?.map((favs) => favs.split(":")[1]).includes(id.toString())
           : favIds?.includes(id.toString());
       const file = await copyFileToClipboard(item.download_url, item.download_name, isInFavorites);
@@ -167,17 +174,16 @@ export function GifActions({ item, showViewDetails, service, visitGifItem, mutat
   );
 
   let toggleFav: JSX.Element | undefined;
-  const isFav =
-    service == "favorites"
-      ? favIds?.map((favs) => favs.split(":")[1]).includes(id.toString())
-      : favIds?.includes(id.toString());
   if (favIds) {
     toggleFav = isFav ? (
       <Action
         icon={Icon.Star}
         key="toggleFav"
         title="Remove From Favorites"
-        onAction={removeFav}
+        onAction={() => {
+          removeFav();
+          setIsFav(!isFav);
+        }}
         shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
       />
     ) : (
@@ -185,7 +191,10 @@ export function GifActions({ item, showViewDetails, service, visitGifItem, mutat
         icon={Icon.Star}
         key="toggleFav"
         title="Add to Favorites"
-        onAction={addToFav}
+        onAction={() => {
+          addToFav();
+          setIsFav(!isFav);
+        }}
         shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
       />
     );
