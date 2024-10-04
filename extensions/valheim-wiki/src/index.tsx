@@ -14,7 +14,6 @@ interface Topic {
   link: string;
   key: string;
   category?: string;
-  accessories?: List.Item.Accessory[];
 }
 
 interface Category {
@@ -28,7 +27,7 @@ function CategoryDropdown(props: { categories: Category[]; onCategoryChange: (ne
 
   return (
     <List.Dropdown
-      tooltip="Select Drink Type"
+      tooltip="Select Category"
       storeValue={true}
       onChange={(newValue) => {
         onCategoryChange(newValue);
@@ -56,9 +55,6 @@ export default function Command() {
   // find all categories
   const $categories = $("table.navbox");
 
-  // new logging block
-  console.log("\n\n\n\n--------------------");
-
   // loop through all categories
   $categories.map((index, value) => {
     // replace line breaks with spaces
@@ -68,15 +64,13 @@ export default function Command() {
     const categoryTitle = $(value).find(".navbox-title-pad").text();
     const categoryKey = categoryTitle.toLowerCase().replaceAll(" ", "_");
 
-    console.log("\n\n" + categoryTitle + ":");
-
     // add category to allCategories array
     allCategories.push({
       name: categoryTitle,
       key: categoryKey,
     });
 
-    // get all links in subcategory
+    // get all links in category
     const $links = $(value).find('.hlist > a[href^="/wiki/"]');
 
     // save all topics from links to array
@@ -85,8 +79,6 @@ export default function Command() {
       const href = $(tvalue).attr("href");
       const name = $(tvalue).text();
       const key = href?.replace("/wiki/", "").toLowerCase() ?? "";
-
-      console.log(" - " + name);
 
       // check if link is not a category
       const isNotCategory = href?.includes(":") === false;
@@ -109,6 +101,7 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [filteredList, filterList] = useState(allTopics);
   const [categories] = useState<Category[]>(allCategories);
+  const [selectedCategory, setSelectedCategory] = useState("-all-");
 
   // filter conditions
   function isNameEqualSearchText(item: Topic) {
@@ -119,18 +112,26 @@ export default function Command() {
     return item.category?.toLowerCase().includes(categoryValue.toLowerCase());
   }
 
-  // filter list based on search text
-  useEffect(() => {
-    filterList(allTopics.filter((item) => isNameEqualSearchText(item)));
-  }, [searchText]);
-
-  // filter list based on category dropdown
-  const onCategoryChange = (newValue: string) => {
-    if (newValue === "-all-") {
+  // filter Topics Array based on search text and selected category
+  function filterTopics(categoryString: string) {
+    if (categoryString === "-all-") {
       filterList(allTopics.filter((item) => isNameEqualSearchText(item)));
     } else {
-      filterList(allTopics.filter((item) => isFromSelectedCategory(item, newValue) && isNameEqualSearchText(item)));
+      filterList(
+        allTopics.filter((item) => isFromSelectedCategory(item, categoryString) && isNameEqualSearchText(item)),
+      );
     }
+  }
+
+  // filter list when search text changes
+  useEffect(() => {
+    filterTopics(selectedCategory);
+  }, [searchText]);
+
+  // filter list when category dropdown changes
+  const onCategoryChange = (newValue: string) => {
+    setSelectedCategory(newValue);
+    filterTopics(newValue);
   };
 
   // render list
