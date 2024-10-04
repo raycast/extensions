@@ -1,6 +1,6 @@
 # Everhour
 
-##  [View, Start, Stop the Current Timer] - {PR_MERGE_DATE}
+##  [View, Start, Stop the Current Timer] - 2024-10-04
 
 - The `Current Timer` command allows you to view the current timer. You can also choose to "stop" timer if started or to "start" if stopped. When starting, pass in an optional comment.
 
