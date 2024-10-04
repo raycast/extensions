@@ -9,8 +9,6 @@ import { useCliVersion } from "~/utils/hooks/useCliVersion";
 import { CustomValidations, stringifyBooleanItemProps, useOnChangeForm } from "~/utils/form";
 import { capitalize } from "~/utils/strings";
 
-const FormSpace = () => <Form.Description text="" />;
-
 const GeneratePasswordCommand = () => (
   <RootErrorBoundary>
     <BitwardenProvider>
@@ -54,7 +52,6 @@ function GeneratePasswordFormContent({ generator }: { generator: UsePasswordGene
       actions={<FormActionPanel password={password} regeneratePassword={regeneratePassword} />}
     >
       <Form.Description title="🔑" text={password ?? "Generating..."} />
-      <FormSpace />
       <Form.Separator />
       <Form.Dropdown
         {...stringifyBooleanItemProps<PasswordType>(itemProps.passphrase, "passphrase", "password")}
