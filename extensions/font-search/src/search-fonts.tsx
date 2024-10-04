@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { ActionPanel, List, Action, Icon, showToast, Toast, getPreferenceValues, Cache } from "@raycast/api";
+import { useState, useEffect, useRef } from "react";
+import { ActionPanel, List, Action, Icon, showToast, Toast, getPreferenceValues, Cache, LocalStorage } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { promisify } from "node:util";
 import { exec } from "node:child_process";
 import { createFontPreviewSVG } from "./fontPreview";
@@ -7,12 +8,14 @@ import { createFontPreviewSVG } from "./fontPreview";
 const execAsync = promisify(exec);
 const cache = new Cache();
 const CACHE_KEY = "installedFonts";
+const PINNED_FONTS_KEY = "pinnedFonts";
 
 interface Font {
   name: string;
   path: string;
   isSystem: boolean;
   styles: string[];
+  isPinned?: boolean;
 }
 
 interface Preferences {
@@ -62,7 +65,9 @@ async function getFonts(): Promise<Font[]> {
       });
     });
 
-    const fonts = Array.from(fontMap.values()).filter((font) => !font.name.startsWith("."));
+    const fonts = Array.from(fontMap.values())
+      .filter((font) => !font.name.startsWith("."))
+      .sort((a, b) => a.name.localeCompare(b.name)); // Sort fonts alphabetically
 
     cache.set(CACHE_KEY, JSON.stringify(fonts));
     return fonts;
@@ -76,38 +81,48 @@ async function getFonts(): Promise<Font[]> {
 // Main command component
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const [fonts, setFonts] = useState<Font[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [showSystemFonts, setShowSystemFonts] = useState(true);
+  const [pinnedFonts, setPinnedFonts] = useState<string[]>([]);
   const preferences = getPreferenceValues<Preferences>();
+  const abortable = useRef<AbortController>();
 
-  // Load fonts function
-  const loadFonts = async (forceReload: boolean = false) => {
-    setIsLoading(true);
-    try {
-      const loadedFonts = await getFonts();
-      setFonts(loadedFonts);
-      if (forceReload) {
-        showToast({ title: "Font list reloaded", style: Toast.Style.Success });
-      }
-    } catch (error) {
-      console.error("Error loading fonts:", error);
-      showToast({ title: "Error reloading font list", style: Toast.Style.Failure });
-    } finally {
-      setIsLoading(false);
+  const { isLoading, data: fonts, revalidate } = useCachedPromise(
+    async () => {
+      const allFonts = await getFonts();
+      const storedPinnedFonts = await LocalStorage.getItem<string>(PINNED_FONTS_KEY);
+      const pinnedFontNames = storedPinnedFonts ? JSON.parse(storedPinnedFonts) : [];
+      setPinnedFonts(pinnedFontNames);
+      return allFonts.map(font => ({ ...font, isPinned: pinnedFontNames.includes(font.name) }));
+    },
+    [],
+    {
+      abortable,
+      keepPreviousData: true,
     }
-  };
-
-  // Load fonts on component mount
-  useEffect(() => {
-    loadFonts();
-  }, []);
+  );
 
   // Filter fonts based on search and system font preference
-  const filteredFonts = fonts.filter((font) => {
+  const filteredFonts = fonts?.filter((font) => {
     const matchesSearch = font.name.toLowerCase().includes(searchText.toLowerCase());
     return showSystemFonts ? matchesSearch : matchesSearch && !font.isSystem;
+  }) || [];
+
+  // Sort fonts with pinned fonts at the top
+  const sortedFonts = [...filteredFonts].sort((a, b) => {
+    if (a.isPinned && !b.isPinned) return -1;
+    if (!a.isPinned && b.isPinned) return 1;
+    return a.name.localeCompare(b.name);
   });
+
+  const togglePinFont = async (font: Font) => {
+    const updatedPinnedFonts = font.isPinned
+      ? pinnedFonts.filter(name => name !== font.name)
+      : [...pinnedFonts, font.name];
+
+    await LocalStorage.setItem(PINNED_FONTS_KEY, JSON.stringify(updatedPinnedFonts));
+    setPinnedFonts(updatedPinnedFonts);
+    revalidate();
+  };
 
   return (
     <List
@@ -126,12 +141,13 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {filteredFonts.map((font) => (
+      {sortedFonts.map((font) => (
         <FontListItem
           key={font.path}
           font={font}
           previewText={preferences.previewText}
-          onReload={() => loadFonts(true)}
+          onReload={revalidate}
+          onTogglePin={() => togglePinFont(font)}
         />
       ))}
     </List>
@@ -143,10 +159,12 @@ function FontListItem({
   font,
   previewText,
   onReload,
+  onTogglePin,
 }: {
   font: Font;
   previewText: string;
-  onReload: () => Promise<void>;
+  onReload: () => void;
+  onTogglePin: () => void;
 }) {
   const [previewSVG, setPreviewSVG] = useState<string | null>(null);
 
@@ -157,7 +175,7 @@ function FontListItem({
 
   return (
     <List.Item
-      icon={font.isSystem ? Icon.Text : Icon.QuotationMarks}
+      icon={font.isPinned ? Icon.Tack : font.isSystem ? Icon.Text : Icon.QuotationMarks}
       title={font.name}
       actions={
         <ActionPanel>
@@ -167,13 +185,18 @@ function FontListItem({
             onCopy={() => showToast({ title: "Font name copied", style: Toast.Style.Success })}
           />
           <Action.ShowInFinder path={font.path} />
+          <Action
+            title={font.isPinned ? "Unpin Font" : "Pin Font"}
+            icon={font.isPinned ? Icon.TackDisabled : Icon.Tack}
+            onAction={onTogglePin}
+          />
           <ActionPanel.Section>
             <Action
               title="Reload Font List"
               icon={Icon.ArrowClockwise}
               onAction={async () => {
                 cache.remove(CACHE_KEY);
-                await onReload();
+                onReload();
               }}
             />
           </ActionPanel.Section>
@@ -187,6 +210,7 @@ function FontListItem({
               <List.Item.Detail.Metadata.Label title="Type" text={font.isSystem ? "System Font" : "User Font"} />
               <List.Item.Detail.Metadata.Label title="Path" text={font.path} />
               <List.Item.Detail.Metadata.Label title="Styles" text={font.styles.join(", ")} />
+              <List.Item.Detail.Metadata.Label title="Pinned" text={font.isPinned ? "Yes" : "No"} />
             </List.Item.Detail.Metadata>
           }
         />
