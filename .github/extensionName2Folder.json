@@ -1449,6 +1449,7 @@
   "1weiho/svgl": "svgl",
   "kaichi/raycast-svgo": "svgo",
   "rickMcGavin/svgr": "svgr",
+  "aaron_lin/swift-command": "swift-command",
   "BProg/swift-evolution": "swift-evolution",
   "maximkrouk/swift-package-index": "swift-package-index",
   "nakajima/swift-repl": "swift-repl",
