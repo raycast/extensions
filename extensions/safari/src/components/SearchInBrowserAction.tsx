@@ -1,6 +1,7 @@
-import { Action, closeMainWindow, Icon } from "@raycast/api";
+import { Action, closeMainWindow, Icon, launchCommand, LaunchType } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { safariAppIdentifier } from "../utils";
+import { FallbackSearchType } from "../types";
 
 async function searchInBrowser(searchText?: string) {
   if (!searchText) {
@@ -16,14 +17,22 @@ async function searchInBrowser(searchText?: string) {
   `);
 }
 
-export default function SearchInBrowserAction(props: { searchText?: string }) {
+export default function SearchInBrowserAction(props: { searchText?: string; fallbackSearchType?: FallbackSearchType }) {
   return props.searchText ? (
     <Action
       title="Search in Browser"
       icon={Icon.MagnifyingGlass}
       onAction={async () => {
-        await searchInBrowser(props.searchText);
-        await closeMainWindow({ clearRootSearch: true });
+        if (props.fallbackSearchType === "search") {
+          await searchInBrowser(props.searchText);
+          await closeMainWindow({ clearRootSearch: true });
+        } else if (props.fallbackSearchType === "searchHistory") {
+          await launchCommand({
+            name: "search-history",
+            type: LaunchType.UserInitiated,
+            fallbackText: props.searchText,
+          });
+        }
       }}
     />
   ) : null;
