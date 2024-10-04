@@ -1,6 +1,6 @@
 # WIP Changelog
 
-## [Improved README] - {PR_MERGE_DATE}
+## [Improved README] - 2024-10-04
 
 - List all features
 - Add beta testing instructions
