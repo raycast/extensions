@@ -1,4 +1,5 @@
-import { ActionPanel, List, Action } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { unblockPipeline } from "../components/UnblockPipeline";
 import { BuildFragment } from "../generated/graphql";
 import { timeAgo } from "../utils/format";
 import { getStateIcon } from "../utils/states";
@@ -20,6 +21,12 @@ export function BuildListItem({ build }: BuildListItemProps) {
         <ActionPanel>
           <Action.OpenInBrowser url={build.url} />
           <Action.CopyToClipboard content={build.url} title="Copy URL" />
+          <Action
+            title="Unblock Pipeline"
+            icon="🔐"
+            shortcut={{ modifiers: ["opt", "shift"], key: "u" }}
+            onAction={() => unblockPipeline(build.pipeline.name, build.number)}
+          />
         </ActionPanel>
       }
     />

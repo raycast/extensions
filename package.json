@@ -5,6 +5,9 @@
   "description": "Search Buildkite pipelines and builds",
   "icon": "buildkite.png",
   "author": "mskelton",
+  "contributors": [
+    "bennnym"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -15,26 +18,7 @@
       "title": "Search Pipelines",
       "subtitle": "Buildkite",
       "description": "Search Buildkite pipelines in your organization.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "org",
-          "type": "textfield",
-          "required": true,
-          "title": "Organization Slug",
-          "description": "Your organization slug",
-          "placeholder": "Enter your Buildkite organization slug."
-        },
-        {
-          "name": "favoriteBranches",
-          "type": "textfield",
-          "required": false,
-          "default": "main, master",
-          "title": "Favorite Branches",
-          "description": "A comma separated list of branches to always show at the top of the build list.",
-          "placeholder": "Enter your favorite branches."
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "my-builds",
@@ -52,6 +36,23 @@
       "title": "API Token",
       "description": "Your Buildkite API access token. GraphQL API Access is required.",
       "placeholder": "Enter your Buildkite API token."
+    },
+    {
+      "name": "org",
+      "type": "textfield",
+      "required": true,
+      "title": "Organization Slug",
+      "description": "Your organization slug",
+      "placeholder": "Enter your Buildkite organization slug."
+    },
+    {
+      "name": "favoriteBranches",
+      "type": "textfield",
+      "required": false,
+      "default": "main, master",
+      "title": "Favorite Branches",
+      "description": "A comma-separated list of branches to always show at the top of the build list.",
+      "placeholder": "Enter your favorite branches."
     }
   ],
   "dependencies": {
