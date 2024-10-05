@@ -120,10 +120,10 @@
       ]
     },
     {
-      "name": "quick-capture",
-      "title": "Quick Capture Draft",
+      "name": "capture",
+      "title": "Capture Draft",
       "subtitle": "Drafts",
-      "description": "create a new draft quickly in the background",
+      "description": "create a new draft quickly in the background using the command argument",
       "mode": "no-view",
       "arguments": [
         {

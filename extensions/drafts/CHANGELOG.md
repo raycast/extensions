@@ -1,8 +1,8 @@
 # Drafts Changelog
 
-## [Add Command for Quick Capture] - 2024-10-04
+## [Add Command for Capture] - 2024-10-04
 
-- Add command to quick capture Draft from command argument
+- Add command to capture Draft from command argument
 
 ## [Add Commands for Background creation] - 2024-09-26
 

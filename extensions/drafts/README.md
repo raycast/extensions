@@ -9,7 +9,7 @@ It supports the following features as commands:
 
 Create drafts in a Raycast form with tags (either with opening it afterwards or in the background).
 
-## Quick Capture Draft
+## Capture Draft
 
 Quickly capture content from command argument into a new draft in the background.
 
