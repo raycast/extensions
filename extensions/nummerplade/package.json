@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nummerplade",
+  "title": "Nummerplade",
+  "description": "Look up info about vehicles in Denmark using either the license plate or VIN.",
+  "icon": "license-plate-icon.png",
+  "author": "mSarheed",
+  "categories": [
+    "Data",
+    "News",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-for-vehicle",
+      "title": "Search for Vehicle",
+      "description": "Search for a vehicle using the license plate or VIN",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "licensePlate",
+          "description": "The license plate of the vehicle",
+          "type": "text",
+          "required": true,
+          "placeholder": "Enter license plate or VIN"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "required": true,
+      "title": "API Key",
+      "description": "API Key from api.synsbasen.dk",
+      "type": "password"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.2",
+    "@raycast/utils": "^1.17.0",
+    "markdown-table-ts": "^1.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
