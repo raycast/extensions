@@ -1,16 +1,8 @@
 export function preprocessIngredients(input: string): string[] {
-  let processed = input.replace(/\d+(\.\d+)?%/g, "").replace(/\b\w+\s+\d+/g, (match) => match.replace(/\d+$/, ""));
-
-  function handleParentheses(str: string): string {
-    return str.replace(/\(([^()]+)\)/g, (_, content) => {
-      const items = content.split(",").map((item: string) => item.trim());
-      return "," + items.join(",") + ",";
-    });
-  }
-
-  while (processed.includes("(")) {
-    processed = handleParentheses(processed);
-  }
+  const processed = input
+    .replace(/\d+(\.\d+)?%/g, "")
+    .replace(/\b\w+\s+\d+/g, (match) => match.replace(/\d+$/, ""))
+    .replace(/:/g, ",");
 
   return processed
     .split(",")
