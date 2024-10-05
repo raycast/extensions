@@ -10,7 +10,7 @@ export const DEFAULT_MODEL: Model = {
   created_at: new Date().toISOString(),
   name: "Default",
   prompt: "You are a helpful assistant.",
-  option: "gpt-3.5-turbo",
+  option: "gpt-4o-mini",
   temperature: "1",
   pinned: false,
   vision: false,
@@ -23,7 +23,7 @@ export function useModel(): ModelHook {
   const gpt = useChatGPT();
   const proxy = useProxy();
   const { useAzure, isCustomModel } = getConfiguration();
-  const [option, setOption] = useState<Model["option"][]>(["gpt-3.5-turbo", "gpt-3.5-turbo-0301"]);
+  const [option, setOption] = useState<Model["option"][]>(["gpt-4o-mini", "chatgpt-4o-latest"]);
 
   useEffect(() => {
     if (isCustomModel) {
@@ -46,7 +46,7 @@ export function useModel(): ModelHook {
               // ignore try to parse it
             }
           }
-          setOption(models.filter((m) => m.id.startsWith("gpt")).map((x) => x.id));
+          setOption(models.map((x) => x.id));
         })
         .catch(async (err) => {
           console.error(err);

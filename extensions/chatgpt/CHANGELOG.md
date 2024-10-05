@@ -1,5 +1,11 @@
 # Changelog
 
+## [Feature] - 2024-10-06
+
+- Feature: Change all occurence of `gpt-3.5` and the like to `gpt-4o-mini`, as the latter is cheaper and more efficient.
+- Feature: Update `setOption` to include all model IDs, removing the filter for 'gpt' prefix. (To support `o1` models).
+- Chore: Remove unnecessary union type literals in `src/type.ts:Model.option`, since 'option' was already effectively a 'string'.
+
 ## [Feature] - 2024-09-02
 
 - Feature:  Support for certain platforms that only accept simple string formats, such as DeepSeek.
