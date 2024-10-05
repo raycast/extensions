@@ -1,3 +1,4 @@
+// check-ingredients.tsx
 import { List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { IngredientResult } from "./models/IngredientResult";
@@ -16,7 +17,6 @@ export default function Command() {
         setResults([]);
         return;
       }
-
       setIsLoading(true);
       const ingredients = searchText
         .split(",")
@@ -35,7 +35,6 @@ export default function Command() {
         setIsLoading(false);
       }
     };
-
     checkIngredients();
   }, [searchText]);
 

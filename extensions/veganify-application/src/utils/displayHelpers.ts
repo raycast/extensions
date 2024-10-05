@@ -1,3 +1,4 @@
+// utils/displayHelpers.ts
 import { Icon, Color, List } from "@raycast/api";
 import { IngredientResult } from "../models/IngredientResult";
 
@@ -15,11 +16,25 @@ export function getIngredientDisplay(ingredient: IngredientResult): IngredientDi
       accessories: [{ text: ingredient.error }],
     };
   }
-  if (ingredient.isVegan === true) {
+  if (ingredient.surelyVegan) {
     return {
       icon: { source: Icon.CheckCircle, tintColor: Color.Green },
+      statusText: "Surely Vegan",
+      accessories: [{ tag: { value: "Surely Vegan", color: Color.Green } }],
+    };
+  }
+  if (ingredient.isVegan === true) {
+    return {
+      icon: { source: Icon.QuestionMarkCircle, tintColor: "#2E8B57" },
       statusText: "Likely Vegan",
-      accessories: [{ tag: { value: "Likely Vegan", color: Color.Green } }],
+      accessories: [{ tag: { value: "Likely Vegan", color: "#2E8B57" } }],
+    };
+  }
+  if (ingredient.maybeVegan) {
+    return {
+      icon: { source: Icon.QuestionMark, tintColor: Color.Yellow },
+      statusText: "Maybe Vegan",
+      accessories: [{ tag: { value: "Maybe Vegan", color: Color.Yellow } }],
     };
   }
   if (ingredient.isVegan === false) {

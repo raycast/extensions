@@ -20,12 +20,19 @@ export async function checkIngredient(ingredient: string): Promise<IngredientRes
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = (await response.json()) as IngredientsCheckResponse;
-    return { name: ingredient, isVegan: data.data.vegan };
+    return {
+      name: ingredient,
+      isVegan: data.data.vegan,
+      surelyVegan: data.data.surely_vegan.includes(ingredient.toLowerCase()),
+      maybeVegan: data.data.maybe_vegan.includes(ingredient.toLowerCase()),
+    };
   } catch (error) {
     console.error(`Error checking ingredient ${ingredient}:`, error);
     return {
       name: ingredient,
       isVegan: null,
+      surelyVegan: false,
+      maybeVegan: false,
       error: error instanceof Error ? error.message : "An unknown error occurred",
     };
   }
