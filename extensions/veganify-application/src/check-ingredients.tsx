@@ -28,10 +28,7 @@ export default function Command() {
         await showToast({
           style: Toast.Style.Failure,
           title: "Error checking ingredients",
-          message:
-            error instanceof Error
-              ? error.message
-              : "An unknown error occurred",
+          message: error instanceof Error ? error.message : "An unknown error occurred",
         });
       } finally {
         setIsLoading(false);
@@ -51,9 +48,7 @@ export default function Command() {
       {searchText.trim() === "" ? (
         <EmptyList />
       ) : (
-        results.map((result, index) => (
-          <IngredientListItem key={index} ingredient={result} />
-        ))
+        results.map((result, index) => <IngredientListItem key={index} ingredient={result} />)
       )}
     </List>
   );
