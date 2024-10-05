@@ -1,10 +1,10 @@
-// check-ingredients.tsx
 import { List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { IngredientResult } from "./models/IngredientResult";
 import { IngredientListItem } from "./components/IngredientListItem";
 import { checkIngredient } from "./utils/api";
 import EmptyList from "./components/EmptyList";
+import { preprocessIngredients } from "./utils/preprocessIngredients";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -17,11 +17,10 @@ export default function Command() {
         setResults([]);
         return;
       }
+
       setIsLoading(true);
-      const ingredients = searchText
-        .split(",")
-        .map((i) => i.trim())
-        .filter(Boolean);
+      const ingredients = preprocessIngredients(searchText);
+
       try {
         const newResults = await Promise.all(ingredients.map(checkIngredient));
         setResults(newResults);
@@ -29,12 +28,16 @@ export default function Command() {
         await showToast({
           style: Toast.Style.Failure,
           title: "Error checking ingredients",
-          message: error instanceof Error ? error.message : "An unknown error occurred",
+          message:
+            error instanceof Error
+              ? error.message
+              : "An unknown error occurred",
         });
       } finally {
         setIsLoading(false);
       }
     };
+
     checkIngredients();
   }, [searchText]);
 
@@ -48,7 +51,9 @@ export default function Command() {
       {searchText.trim() === "" ? (
         <EmptyList />
       ) : (
-        results.map((result, index) => <IngredientListItem key={index} ingredient={result} />)
+        results.map((result, index) => (
+          <IngredientListItem key={index} ingredient={result} />
+        ))
       )}
     </List>
   );
