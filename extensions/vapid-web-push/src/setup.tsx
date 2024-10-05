@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { useForm, FormValidation, useLocalStorage } from "@raycast/utils";
 import { useEffect } from "react";
 
@@ -19,7 +12,6 @@ export interface NotificationProps {
 }
 
 export default function Command() {
-
   const {
     value: vapidKeys,
     setValue: setVapidKeys,
@@ -32,7 +24,7 @@ export default function Command() {
     p256dh: "",
     auth: "",
   });
-  
+
   const { handleSubmit, itemProps, setValue } = useForm<NotificationProps>({
     async onSubmit() {
       if (!itemProps.email.value) {
@@ -51,7 +43,7 @@ export default function Command() {
         });
         return;
       }
-      
+
       if (!itemProps.endpoint.value || !itemProps.p256dh.value || !itemProps.auth.value) {
         await showToast({
           style: Toast.Style.Failure,
@@ -60,7 +52,7 @@ export default function Command() {
         });
         return;
       }
-      
+
       await setVapidKeys({
         email: itemProps.email.value,
         publicKey: itemProps.publicKey.value,
@@ -81,7 +73,7 @@ export default function Command() {
         endpoint: itemProps.endpoint.value,
         p256dh: itemProps.p256dh.value,
         auth: itemProps.auth.value,
-      })
+      });
     },
     validation: {
       email: FormValidation.Required,
@@ -102,7 +94,7 @@ export default function Command() {
     setValue("p256dh", vapidKeys?.p256dh as string);
     setValue("auth", vapidKeys?.auth as string);
   }, [vapidKeys?.email, setValue]);
-  
+
   return (
     <Form
       isLoading={isLoading}

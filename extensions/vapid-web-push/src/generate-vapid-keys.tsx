@@ -13,8 +13,6 @@ async function generateVapidKeys(email: string) {
   const publicKey = vapidKeys.publicKey;
   const privateKey = vapidKeys.privateKey;
 
-
-
   await showToast({
     style: Toast.Style.Success,
     title: "VAPID keys generated",
@@ -28,7 +26,6 @@ async function generateVapidKeys(email: string) {
 }
 
 export default function Command() {
-  
   const {
     value: vapidKeys,
     setValue: setVapidKeys,
@@ -63,16 +60,14 @@ export default function Command() {
         message: markdown,
       });
 
-      await setVapidKeys(
-        {
-          email,
-          publicKey,
-          privateKey,
-          endpoint: "",
-          p256dh: "",
-          auth: "",
-        }
-      );
+      await setVapidKeys({
+        email,
+        publicKey,
+        privateKey,
+        endpoint: "",
+        p256dh: "",
+        auth: "",
+      });
       push(<Details />);
       return;
     },
@@ -81,12 +76,12 @@ export default function Command() {
     },
     initialValues: vapidKeys,
   });
-  
+
   useEffect(() => {
     if (vapidKeys?.privateKey) {
       push(<Details />);
     }
-  } , [vapidKeys?.privateKey, push]);
+  }, [vapidKeys?.privateKey, push]);
 
   return (
     <Form
@@ -95,7 +90,6 @@ export default function Command() {
       navigationTitle={"Generate VAPID Keys"}
       actions={
         <ActionPanel>
-          
           <Action.SubmitForm title="Generate Vapid Keys" onSubmit={handleSubmit} />
         </ActionPanel>
       }
@@ -106,15 +100,12 @@ export default function Command() {
 }
 
 function Details() {
-  const {
-    value: vapidKeys,
-    isLoading,
-  } = useLocalStorage("vapid-keys", {
+  const { value: vapidKeys, isLoading } = useLocalStorage("vapid-keys", {
     email: "",
     publicKey: "",
     privateKey: "",
   });
-  
+
   const markdown = `# Generated VAPID Keys for ${vapidKeys?.email}
  
   \n ### Use the following keys in your application:
@@ -123,11 +114,6 @@ function Details() {
   \n ### privateKey:
   \`${vapidKeys?.privateKey}\`
   `;
-  
-  return (
-    <Detail
-      isLoading={isLoading}
-      markdown={markdown}
-    />
-  );
+
+  return <Detail isLoading={isLoading} markdown={markdown} />;
 }

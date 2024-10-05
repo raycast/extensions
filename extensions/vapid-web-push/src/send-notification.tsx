@@ -8,10 +8,7 @@ interface NotificationFormValues {
   body: string;
 }
 export default function SendNotification() {
-  const {
-    value: vapidKeys,
-    isLoading,
-  } = useLocalStorage<NotificationProps>("vapid-keys", {
+  const { value: vapidKeys, isLoading } = useLocalStorage<NotificationProps>("vapid-keys", {
     email: "",
     publicKey: "",
     privateKey: "",
@@ -19,18 +16,16 @@ export default function SendNotification() {
     p256dh: "",
     auth: "",
   });
-  
+
   const { handleSubmit, itemProps } = useForm<NotificationFormValues>({
     async onSubmit(values) {
       if (!vapidKeys || isLoading) {
         await showHUD("No VAPID keys available");
         throw new Error("No VAPID keys available");
       }
-      
 
       webpush.setVapidDetails(`mailto:${vapidKeys.email}`, vapidKeys.publicKey, vapidKeys.privateKey);
-      
-      
+
       const subscription: PushSubscription = {
         endpoint: vapidKeys.endpoint,
         keys: {
@@ -38,7 +33,7 @@ export default function SendNotification() {
           auth: vapidKeys.auth,
         },
       };
-      
+
       console.log("Sending notification", {
         subscription,
       });
@@ -46,12 +41,12 @@ export default function SendNotification() {
         await showHUD("No subscription available");
         throw new Error("No subscription available");
       }
-      
+
       const toast = await showToast({
         style: Toast.Style.Animated,
         title: "Sending notification",
       });
-      
+
       try {
         await webpush.sendNotification(
           subscription,
@@ -59,13 +54,13 @@ export default function SendNotification() {
             title: values.title,
             body: values.body,
             icon: "/icon.png",
-          })
+          }),
         );
-        
+
         toast.style = Toast.Style.Success;
         toast.title = "Sent notification";
         toast.message = "Notification sent successfully";
-        
+
         await showHUD("Notification sent");
       } catch (error) {
         console.error("Error sending push notification:", error);
@@ -79,7 +74,7 @@ export default function SendNotification() {
       body: FormValidation.Required,
     },
   });
-  
+
   return (
     <Form
       enableDrafts={true}
