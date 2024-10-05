@@ -19,3 +19,10 @@
 VAPID keys are used to authenticate your server with the push service. They consist of a public and private key pair. The public key is used to encrypt the push message, while the private key is used to sign the message.
 
 The public key is sent to the push service when subscribing a user to push notifications. The private key is used to authenticate your server when sending push messages.
+
+## General Flow
+1. Use the Generate Vapid Keys command to generate VAPID keys or use a service like [vapidkeys.com](https://vapidkeys.com/).
+2. Subscribe to push notifications in our web app using the key generated in step 1.
+3. Paste the subscription object into the extension. (endpoint, auth, p256dh)
+4. Use the Setup command and paste the VAPID keys and subscription object.
+5. Use the Send Notification command to send a push notification.

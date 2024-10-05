@@ -1,69 +1,133 @@
-import { getPreferenceValues, showHUD, Action, Detail, ActionPanel, openCommandPreferences } from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, Detail, useNavigation } from "@raycast/api";
+import { useForm, FormValidation, useLocalStorage } from "@raycast/utils";
 import webpush from "web-push";
-import { Preferences } from "./setup";
+import { useEffect } from "react";
+import { NotificationProps } from "./setup";
 
-async function generateVapidKeys() {
-  const preferences = getPreferenceValues<Preferences>();
-  const email = preferences.email;
+interface VapidKeysFormValues {
+  email: string;
+}
 
+async function generateVapidKeys(email: string) {
   const vapidKeys = webpush.generateVAPIDKeys();
-
   const publicKey = vapidKeys.publicKey;
   const privateKey = vapidKeys.privateKey;
 
-  const preferencesString = `# Web Push Notification Preferences
-    \n ### email:
-    \`${email}\`
-    \n ### publicKey:
-    \`${publicKey}\`
-    \n ### privateKey:
-    \`${privateKey}\`
-  `;
 
-  await showHUD("VAPID keys generated");
+
+  await showToast({
+    style: Toast.Style.Success,
+    title: "VAPID keys generated",
+  });
 
   return {
-    preferences: {
-      email,
-      publicKey,
-      privateKey,
-    },
-    preferencesString,
+    email,
+    publicKey,
+    privateKey,
   };
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
-  const email = preferences.email;
-  const vapidKeys = webpush.generateVAPIDKeys();
-  const publicKey = vapidKeys.publicKey;
-  const privateKey = vapidKeys.privateKey;
+  
+  const {
+    value: vapidKeys,
+    setValue: setVapidKeys,
+    isLoading,
+  } = useLocalStorage<NotificationProps>("vapid-keys", {
+    email: "",
+    publicKey: "",
+    privateKey: "",
+    endpoint: "",
+    p256dh: "",
+    auth: "",
+  });
+  const { push } = useNavigation();
 
-  const markdown = `# Generated VAPID Keys
-  \n ### email:
-  \`${email}\`
-  \n ### publicKey:
-  \`${publicKey}\`
-  \n ### privateKey:
-  \`${privateKey}\`
-  `;
+  const { handleSubmit, itemProps } = useForm<VapidKeysFormValues>({
+    async onSubmit(values) {
+      const { email } = values;
+      const { publicKey, privateKey } = await generateVapidKeys(email);
+
+      const markdown = `# Generated VAPID Keys for ${email}
+ 
+      \n ### publicKey:
+      \`${publicKey}\`
+      \n ### privateKey:
+      \`${privateKey}\`
+      `;
+
+      // Display the generated keys in a toast or handle them as needed
+      await showToast({
+        style: Toast.Style.Success,
+        title: "VAPID Keys",
+        message: markdown,
+      });
+
+      await setVapidKeys(
+        {
+          email,
+          publicKey,
+          privateKey,
+          endpoint: "",
+          p256dh: "",
+          auth: "",
+        }
+      );
+      push(<Details />);
+      return;
+    },
+    validation: {
+      email: FormValidation.Required,
+    },
+    initialValues: vapidKeys,
+  });
+  
+  useEffect(() => {
+    if (vapidKeys?.privateKey) {
+      push(<Details />);
+    }
+  } , [vapidKeys?.privateKey, push]);
 
   return (
-    <Detail
-      markdown={markdown}
-      navigationTitle={"Web Push Notification Preferences"}
+    <Form
+      enableDrafts={true}
+      isLoading={isLoading}
+      navigationTitle={"Generate VAPID Keys"}
       actions={
         <ActionPanel>
-          <Action title="Open Command Preferences" onAction={openCommandPreferences} />
-
-          <Action
-            title={"Generate"}
-            onAction={async () => {
-              await generateVapidKeys();
-            }}
-          />
+          
+          <Action.SubmitForm title="Generate Vapid Keys" onSubmit={handleSubmit} />
         </ActionPanel>
       }
+    >
+      <Form.TextField title="Email" placeholder="Enter email" storeValue={true} {...itemProps.email} />
+    </Form>
+  );
+}
+
+function Details() {
+  const {
+    value: vapidKeys,
+    isLoading,
+  } = useLocalStorage("vapid-keys", {
+    email: "",
+    publicKey: "",
+    privateKey: "",
+  });
+  
+  const markdown = `# Generated VAPID Keys for ${vapidKeys?.email}
+ 
+  \n ### Use the following keys in your application:
+  \n ### publicKey:
+  \`${vapidKeys?.publicKey}\`
+  \n ### privateKey:
+  \`${vapidKeys?.privateKey}\`
+  `;
+  
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={markdown}
     />
   );
 }
