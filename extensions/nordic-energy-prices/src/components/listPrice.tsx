@@ -46,7 +46,6 @@ export const PriceEntry = ({
       icon={Icon.Clock}
       key={price.time_start}
       title={`${formatTime(price.time_start)} → ${formatTime(price.time_end)}`}
-      subtitle={relativeDate(price.time_start)}
       accessories={[
         {
           tag: isCheapest
