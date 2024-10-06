@@ -1,5 +1,5 @@
 import { useFetch } from "@raycast/utils";
-import { NEXTDNS_API_BASE_URL, PREFERENCES } from "./constants";
+import { ITEMLIMIT, NEXTDNS_API_BASE_URL, PREFERENCES } from "./constants";
 import { DomainListItem, Log, NextDNSErrorResult, NextDNSSuccessResult, Profile } from "../types";
 import fetch, { RequestInit } from "node-fetch";
 import { getIdHex } from "./utils";
@@ -39,16 +39,27 @@ async function makeRequest(endpoint: string, method: string = "GET", body?: Reco
 export function getLogs() {
   const endpoint = `/profiles/${PREFERENCES.nextdns_profile_id}/logs`;
 
-  return useFetch(`${NEXTDNS_API_BASE_URL}${endpoint}`, {
-    headers: headers,
-    async parseResponse(response) {
-      const json = (await response.json()) as NextDNSErrorResult | NextDNSSuccessResult<Log[]>;
-      if ("errors" in json) throw new Error(json.errors[0].code);
-      return json.data;
+  return useFetch(
+    (options) =>
+      `${NEXTDNS_API_BASE_URL}${endpoint}?${new URLSearchParams({ cursor: options.cursor, limit: ITEMLIMIT }).toString()}`,
+    {
+      mapResult(result: NextDNSSuccessResult<Log[]>) {
+        const { data, meta } = result;
+        const cursor = meta?.pagination.cursor;
+        const hasMore = cursor !== undefined;
+        return { data, hasMore, cursor };
+      },
+      async parseResponse(response) {
+        const json = (await response.json()) as NextDNSErrorResult | NextDNSSuccessResult<Log[]>;
+        if ("errors" in json) throw new Error(json.errors[0].code);
+        return json;
+      },
+      headers: headers,
+      keepPreviousData: true,
+      failureToastOptions: { title: "Failed to get endpoint logs." },
+      initialData: [],
     },
-    failureToastOptions: { title: "Failed to get endpoint logs." },
-    initialData: [],
-  });
+  );
 }
 
 export function getDomains(props: { type: string }) {
@@ -76,6 +87,7 @@ export async function getProfileName() {
 
 export async function addDomain(props: { domain: string; type: string }) {
   const { domain, type } = props;
+
   await makeRequest(`/profiles/${PREFERENCES.nextdns_profile_id}/${type}list`, "POST", {
     id: domain,
     active: true,
@@ -101,4 +113,30 @@ export async function toggleDomain(props: { element: DomainListItem }) {
       active: element.active,
     },
   );
+}
+
+export async function connectionStatus() {
+  try {
+    const response = await fetch("https://test.nextdns.io", {
+      method: "GET",
+      headers: {
+        "User-Agent": "curl",
+      },
+    });
+
+    if (!response.ok) {
+      return "Failed to get status from NextDNS";
+    }
+
+    const respJson = (await response.json()) as { status: string; deviceName: string; protocol: string };
+    const { status, deviceName, protocol } = respJson;
+
+    if (status === "ok") {
+      return `✅  ${deviceName} is using NextDNS via ${protocol}`;
+    } else {
+      return "❌  This device is not using NextDNS";
+    }
+  } catch (error) {
+    return "Failed to reach NextDNS.";
+  }
 }

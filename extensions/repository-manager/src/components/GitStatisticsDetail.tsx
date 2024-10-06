@@ -20,8 +20,8 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
     const markdown = `
 # ${project.name}
 
-## Git Status
-${isLoading ? 'Checking status...' : ''}
+## Git Statistics
+${isLoading ? 'Checking statistics...' : ''}
 - Total Commits: ${totalCommits}
 - Total Branches: ${totalBranches}
 - Total Tags: ${totalTags}

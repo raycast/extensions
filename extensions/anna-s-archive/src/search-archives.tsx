@@ -1,16 +1,18 @@
 import { useMemo, useState } from "react";
 
-import { List } from "@raycast/api";
+import { List, getPreferenceValues } from "@raycast/api";
 
 import ArchiveListItem from "@/components/ArchiveListItem";
 import { EmptyView } from "@/components/EmptyView";
 import { useArchive } from "@/hooks/use-archive";
 import { isEmpty } from "@/utils";
 
+const mirror = getPreferenceValues<Preferences>().mirror ?? "https://annas-archive.org";
+
 const Command = () => {
   const [search, setSearch] = useState("");
 
-  const { data, error, isLoading } = useArchive(`https://annas-archive.org`, search);
+  const { data, error, isLoading } = useArchive(mirror, search);
 
   const listData = useMemo(() => {
     if (!data || search.length === 0) {

@@ -1,15 +1,30 @@
-import React from "react";
-import { Application, List } from "@raycast/api";
+import React, { useMemo } from "react";
+import { List } from "@raycast/api";
 import { AutoQuitAppListItem } from "./auto-quit-app-list-item";
 import { AutoQuitAppEmptyView } from "./auto-quit-app-empty-view";
+import { useAutoQuitApps } from "../hooks/useAutoQuitApps";
+import { useDisAutoQuitApps } from "../hooks/useDisAutoQuitApps";
 
-export function AutoQuitAppListLayout(props: {
-  quitApp: Application[];
-  disQuitApp: Application[];
-  setRefresh: React.Dispatch<React.SetStateAction<number>>;
-  loading: boolean;
-}) {
-  const { quitApp, disQuitApp, setRefresh, loading } = props;
+export function AutoQuitAppListLayout() {
+  const { data: autoQuitAppsData, isLoading: autoQuitAppsIsLoading, mutate: autoQuitAppsMutate } = useAutoQuitApps();
+  const {
+    data: autoDisQuitAppsData,
+    isLoading: autoDisQuitAppsIsLoading,
+    mutate: autoDisQuitAppsMutate,
+  } = useDisAutoQuitApps();
+
+  const loading = autoQuitAppsIsLoading || autoDisQuitAppsIsLoading;
+  const quitApp = useMemo(() => {
+    return autoQuitAppsData || [];
+  }, [autoQuitAppsData]);
+  const disQuitApp = useMemo(() => {
+    return autoDisQuitAppsData || [];
+  }, [autoDisQuitAppsData]);
+
+  const setRefresh = async () => {
+    await autoQuitAppsMutate();
+    await autoDisQuitAppsMutate();
+  };
   return (
     <List isLoading={loading} searchBarPlaceholder={"Search apps"}>
       <AutoQuitAppEmptyView />

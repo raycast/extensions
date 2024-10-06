@@ -1,27 +1,16 @@
-import { showHUD, Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { showHUD, Clipboard, getPreferenceValues, showToast, Toast, LaunchProps } from "@raycast/api";
 import { v5 as uuidV5, validate as uuidValidate } from "uuid";
 
 import { generateUuids } from "./utils/uuidUtils";
 import { UUIDType } from "./uuidHistory";
 
-interface UUIDV5Arguments {
-  numberOfUUIDsToGenerate: string;
-  name: string;
-}
-
-interface Preferences {
-  upperCaseLetters: boolean;
-  uuidNamespace: string;
-  defaultAction: string;
-}
-
 // don't want to cause a heap error, so cap it 😱
 const UUID_MAX_NUMBER = 10000;
 
-export default async (props: { arguments: UUIDV5Arguments }) => {
+export default async (props: LaunchProps<{ arguments: Arguments.GenerateV5 }>) => {
   let { numberOfUUIDsToGenerate } = props.arguments;
   const { name } = props.arguments;
-  const { upperCaseLetters, uuidNamespace, defaultAction } = getPreferenceValues<Preferences>();
+  const { upperCaseLetters, uuidNamespace, defaultAction } = getPreferenceValues<Preferences.GenerateV5>();
 
   if (!numberOfUUIDsToGenerate) {
     numberOfUUIDsToGenerate = "1";

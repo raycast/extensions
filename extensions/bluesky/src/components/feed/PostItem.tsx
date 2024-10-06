@@ -91,7 +91,7 @@ export default function PostItem({
           originalPostText: post.text,
           quotedRef: { record: { uri: post.uri, cid: post.cid } },
         }}
-      />
+      />,
     );
   };
 
@@ -108,7 +108,7 @@ export default function PostItem({
           replyToText: post.text,
           replyRef: { root: { uri: post.uri, cid: post.cid }, parent: { uri: post.uri, cid: post.cid } },
         }}
-      />
+      />,
     );
   };
 
@@ -293,7 +293,7 @@ export default function PostItem({
                     showNavDropdown={false}
                     previousViewTitle={previousViewTitle}
                     authorHandle={post.createdByUser.handle}
-                  />
+                  />,
                 )
               }
             />
@@ -305,7 +305,7 @@ export default function PostItem({
                     showNavDropdown={false}
                     previousViewTitle={previousViewTitle}
                     authorHandle={post.createdByUser.handle}
-                  />
+                  />,
                 )
               }
             />

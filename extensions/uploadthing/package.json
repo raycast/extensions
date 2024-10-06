@@ -27,21 +27,21 @@
   ],
   "preferences": [
     {
-      "name": "apiKey",
-      "description": "Your API Key for UploadThing",
+      "name": "token",
+      "description": "Your UploadThing Token",
       "type": "password",
       "required": true,
-      "title": "API Key",
-      "placeholder": "sk_live_xxx"
+      "title": "Token",
+      "placeholder": "eyJhc...."
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.69.3",
     "@tanstack/react-query": "^5.28.4",
-    "@uploadthing/mime-types": "0.2.6",
-    "@uploadthing/shared": "6.3.4",
-    "undici": "^6.9.0",
-    "uploadthing": "6.6.0"
+    "@uploadthing/mime-types": "0.3.0",
+    "@uploadthing/shared": "7.0.2",
+    "undici": "^6.19.8",
+    "uploadthing": "7.0.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.8",

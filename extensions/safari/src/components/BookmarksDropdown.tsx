@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 
-const BookmarksDropdown = (props: { folderNames: string[]; onSelection: (newValue: string) => void }) => {
+export default function BookmarksDropdown(props: { folderNames: string[]; onSelection: (newValue: string) => void }) {
   return (
     <List.Dropdown
       tooltip="Select Bookmarks Folder"
@@ -17,6 +17,4 @@ const BookmarksDropdown = (props: { folderNames: string[]; onSelection: (newValu
       </List.Dropdown.Section>
     </List.Dropdown>
   );
-};
-
-export default BookmarksDropdown;
+}

@@ -1,5 +1,11 @@
 # cPanel Changelog
 
+## [Enhancements] - 2024-09-11
+
+- Create Email Account
+- Filter DNS Zone (records) by (record) type
+- View Files and Directories
+
 ## [View Databases + Create Limited DNS Records] - 2024-08-26
 
 - View MySQL or PostgreSQL Databases

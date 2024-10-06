@@ -1,5 +1,14 @@
 # reclaim Changelog
 
+## [Fixes] - 2024-09-05
+- Route useFetch through useApi
+
+## [Fixes] - 2024-09-04
+- Break out separate components and hook for Scheduling Links
+
+## [Fixes] - 2024-09-03
+- Replace axios with node-fetch
+
 ## [Fixes] - 2024-08-23
 - Stopped rapid-fire calls to `GET:/api/smart-habits`
     - New hook `useSyncCachedPromise`

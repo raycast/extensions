@@ -33,3 +33,5 @@ export type PickColorCommandLaunchProps = LaunchProps<{
     callbackLaunchOptions?: LaunchOptions;
   };
 }>;
+
+export type SortType = "platform" | "proximity";

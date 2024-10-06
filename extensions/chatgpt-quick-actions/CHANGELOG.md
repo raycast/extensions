@@ -1,5 +1,10 @@
 # ChatGPT Quick Actions Changelog
 
+## [Add Transform and Transform Preview commands] - 2024-09-18
+
+- Add a Transform command which replaces the selected text with transformed text based on a prompt that is entered when the command is run.
+- Add a Transform Preview command which does the same as the Transform command but displays the result in a preview window instead of replacing the selected text.
+
 ## [Upgrade Open AI API from v3 to v4] - 2024-08-02
 
 In Aug 2023, Open AI updated its SDK to v4 that natively supports streaming completion.

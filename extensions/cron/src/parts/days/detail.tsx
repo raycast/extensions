@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Detail, Icon } from "@raycast/api";
-import { getDayName, getMonthName } from "u/getName";
 import getWeather from "u/weather";
 import { getCurrentLocation } from "u/getLocation";
 import fetch from "node-fetch";
@@ -28,7 +27,7 @@ export function DayDetails({ day, currentMonth, currentYear }: DayDetailsProps) 
   const [location, setLocation] = useState("Loading location...");
   const [time, setTime] = useState(getCurrentTime());
   const [holidays, setHolidays] = useState<{ name: unknown; date: string }[]>([]);
-  const weather = getWeather();
+  const weather = getWeather("default");
 
   useEffect(() => {
     async function fetchLocationAndHolidays() {
@@ -88,7 +87,7 @@ ${filteredHolidays.map((holiday) => `| ${holiday.name} |`).join("\n")}
 
 ${showHolidays}
 `}
-      navigationTitle={`${getDayName(day)} ${day}, ${getMonthName(currentMonth)} ${currentYear}`}
+      navigationTitle={formattedDate}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label icon={Icon.Clock} title="Time" text={time} />

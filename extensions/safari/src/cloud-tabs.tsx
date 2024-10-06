@@ -1,14 +1,12 @@
+import { getPreferenceValues, List } from "@raycast/api";
 import _ from "lodash";
 import { useState } from "react";
-import { List } from "@raycast/api";
-
 import { DeviceListSection, FallbackSearchSection } from "./components";
 import { useDevices } from "./hooks";
 import { Device, Tab } from "./types";
 import { search } from "./utils";
-import { url } from "inspector";
 
-const Command = () => {
+export default function Command() {
   const { devices, permissionView, refreshDevices } = useDevices();
   const [searchText, setSearchText] = useState<string>("");
 
@@ -29,9 +27,7 @@ const Command = () => {
         ) as Tab[];
         return <DeviceListSection key={device.uuid} device={device} filteredTabs={tabs} refresh={refreshDevices} />;
       })}
-      <FallbackSearchSection searchText={searchText} />
+      <FallbackSearchSection searchText={searchText} fallbackSearchType={getPreferenceValues().fallbackSearchType} />
     </List>
   );
-};
-
-export default Command;
+}

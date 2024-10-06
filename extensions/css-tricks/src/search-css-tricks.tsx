@@ -1,71 +1,168 @@
-import { formatDistanceToNow, isValid } from "date-fns";
-import { useState } from "react";
+import html2md from "html-to-md";
+import { useMemo, useState } from "react";
 
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { showFailureToast, useFetch } from "@raycast/utils";
 
-import type { ResultsItem, SearchResult } from "./types";
+type ResultItem = {
+  id: number;
+  title: string;
+  url: string;
+  subtype: "page" | "post";
+};
 
-const ListItem = ({ item }: { item: ResultsItem }) => {
-  const date = item.fields.date ? new Date(Date.parse(item.fields.date)) : undefined;
-  const accessories: List.Item.Accessory[] =
-    date && isValid(date)
-      ? [
-          {
-            tag: formatDistanceToNow(date, {}),
-            icon: { source: Icon.Calendar, tintColor: Color.SecondaryText },
-          },
-        ]
-      : [];
+type DetailItem = {
+  date: string;
+  link: string;
+  title: {
+    rendered: string;
+  };
+  content: {
+    rendered: string;
+    protected: boolean;
+  };
+  excerpt: {
+    rendered: string;
+    protected: boolean;
+  };
+  jetpack_featured_media_url: string;
+};
 
+const ItemDetails = ({ item, showContent }: { item: ResultItem; showContent: boolean }) => {
+  const { data, isLoading, error } = useFetch<DetailItem>(
+    `https://css-tricks.com/wp-json/wp/v2/${item.subtype}s/${item.id}?embed`,
+  );
+
+  const title = data?.title?.rendered ? html2md(data.title.rendered) : "";
+  const text = showContent
+    ? data?.content?.rendered
+      ? html2md(data.content.rendered)
+      : ""
+    : data?.excerpt?.rendered
+      ? html2md(data.excerpt.rendered)
+      : "";
+  const dateString = data?.date ? new Date(data.date).toLocaleDateString() : "";
+  const image = useMemo(() => {
+    if (showContent) {
+      return "";
+    }
+    if (data?.jetpack_featured_media_url) {
+      let url = data.jetpack_featured_media_url;
+      if (url.includes("?")) {
+        url = url.split("?")[0].concat("?fit=300%2C150&ssl=1");
+      }
+      return `\n\n![Image](${url})`;
+    }
+    return "";
+  }, [data?.jetpack_featured_media_url, showContent]);
+
+  const markdown = isLoading
+    ? "Loading..."
+    : error
+      ? error.message
+      : data
+        ? `## ${title} ${image} \n\n Date: \`${dateString}\` \n\n Type: _${item.subtype}_ \n\n --- \n\n ${text}`
+        : "";
+  return <List.Item.Detail isLoading={isLoading} markdown={markdown} />;
+};
+
+const ListItem = ({
+  item,
+  toggleDetails,
+  showDetails,
+  toggleShowContent,
+  showContent,
+}: {
+  item: ResultItem;
+  toggleDetails: () => void;
+  showDetails: boolean;
+  toggleShowContent: () => void;
+  showContent: boolean;
+}) => {
   return (
     <List.Item
-      id={`${item.fields.post_id}`}
-      title={item.fields["title.default"]}
-      subtitle={item.highlight.content.join(" ").replace(/<[^>]*>?/gm, "")}
+      id={`${item.id}`}
+      title={html2md(item.title)}
       icon={
-        item.fields.post_type === "page"
+        item.subtype === "page"
           ? { source: Icon.Document, tintColor: Color.Green }
           : { source: Icon.Bookmark, tintColor: Color.SecondaryText }
       }
-      accessories={accessories}
       actions={
         <ActionPanel>
-          {item.fields?.["permalink.url.raw"] ? (
-            <Action.OpenInBrowser
-              url={
-                item.fields["permalink.url.raw"].startsWith("http")
-                  ? item.fields["permalink.url.raw"]
-                  : `https://${item.fields["permalink.url.raw"]}`
-              }
-              title="Open in Browser"
-              icon={Icon.Globe}
-            />
-          ) : null}
+          {showDetails ? (
+            <>
+              <Action.OpenInBrowser url={item.url} title="Open in Browser" icon={Icon.Globe} />
+              <Action
+                icon={Icon.Document}
+                title={showContent ? "Only Show Excerpt" : "Show Full Article"}
+                onAction={() => toggleShowContent()}
+              />
+              <Action icon={Icon.Eye} title="View Details" onAction={() => toggleDetails()} />
+            </>
+          ) : (
+            <>
+              <Action icon={Icon.Eye} title="View Details" onAction={() => toggleDetails()} />
+              <Action.OpenInBrowser url={item.url} title="Open in Browser" icon={Icon.Globe} />
+            </>
+          )}
         </ActionPanel>
       }
+      detail={showDetails ? <ItemDetails item={item} showContent={showContent} /> : undefined}
     />
   );
 };
 
 const Command = () => {
   const [query, setQuery] = useState("");
+  const [showDetails, setShowDetails] = useState(false);
+  const [showContent, setShowContent] = useState(false);
 
-  const { data, isLoading, error } = useFetch<SearchResult>(
-    `https://public-api.wordpress.com/rest/v1.3/sites/45537868/search?fields[0]=date&fields[1]=permalink.url.raw&fields[2]=tag.name.default&fields[3]=category.name.default&fields[4]=post_type&fields[5]=shortcode_types&fields[6]=forum.topic_resolved&fields[7]=has.image&fields[8]=image.url.raw&fields[9]=image.alt_text&highlight_fields[0]=title&highlight_fields[1]=content&highlight_fields[2]=comments&filter[bool][must][0][bool][should][0][term][post_type]=post&filter[bool][must][0][bool][should][1][term][post_type]=page&filter[bool][must][0][bool][should][2][term][post_type]=newsletters&filter[bool][must][0][bool][should][3][term][post_type]=chapters&filter[bool][must][1][bool][must_not][0][term][post_type]=attachment&query=${query}&sort=score_default&size=20`,
-    {
-      execute: query.length > 0,
-      keepPreviousData: false,
+  const url = useMemo(() => {
+    const searchParams = new URLSearchParams({
+      search: query,
+      per_page: "20",
+      _fields: "id,title,url,type,subtype",
+    });
+    return `https://css-tricks.com/wp-json/wp/v2/search?${searchParams.toString()}`;
+  }, [query]);
+
+  const { data, isLoading, error } = useFetch(url, {
+    mapResult(result: ResultItem[]) {
+      return {
+        data: result,
+      };
     },
-  );
+    execute: query.length > 0,
+    keepPreviousData: false,
+    onError(error) {
+      showFailureToast("Failed to load data", error);
+    },
+  });
 
   return (
-    <List isLoading={isLoading} searchText={query} onSearchTextChange={setQuery} throttle>
+    <List
+      isLoading={isLoading}
+      searchText={query}
+      onSearchTextChange={setQuery}
+      throttle
+      searchBarPlaceholder="Search posts and pages"
+      isShowingDetail={showDetails && query.length > 0}
+    >
       {error && (
         <List.EmptyView title="Failed to load data" description={error.message} icon={{ source: "csstricks.svg" }} />
       )}
       {!error && !isLoading && query.length > 0
-        ? data?.results.map((res) => <ListItem key={res.fields.post_id} item={res} />)
+        ? data?.map((res) => (
+            <ListItem
+              key={res.id}
+              item={res}
+              toggleDetails={() => setShowDetails((s) => !s)}
+              showDetails={showDetails && query.length > 0}
+              toggleShowContent={() => setShowContent((s) => !s)}
+              showContent={showContent}
+            />
+          ))
         : null}
       {!error && (
         <List.EmptyView

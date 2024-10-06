@@ -6,13 +6,21 @@ Query the [dust.tt](https://dust.tt/) service extention for [Raycast](https://ww
 
 You need a dust.tt account to use this extension.
 
+### API Base URL
+
+(optional) You can specify a custom API base URL if you have specific needs. Otherwise, it defaults to `https://dust.tt/api/v1/w`.
+
 ### API key
 
 You can create an API key for Dust by going to your Admin preferences, on the **Developers Tools** panel
 
+### Email
+
+The email address you use to log in your Dust workspace. It enriches metrics in the usage reports.
+
 ### Workspace ID
 
-The ID can be found in any of the workspace's pages
+The ID can be found in any of the workspace's pages. It's a string of 10 chars that comes immediately after `https://dust.tt/w/` when you're logged in your Dust workspace through the web browser.
 
 ## Commands
 
@@ -20,7 +28,7 @@ The ID can be found in any of the workspace's pages
 
 Directly ask something to the Dust or GPT-4 agent.
 
-If you ask a question with the parameter, you will get a form to add one, auto-filled with the currently selected text. 
+If you ask a question with the parameter, you will get a form to add one, auto-filled with the currently selected text.
 
 ### Ask agent
 

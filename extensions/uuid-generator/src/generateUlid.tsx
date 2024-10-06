@@ -1,4 +1,4 @@
-import { showHUD, Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { showHUD, Clipboard, getPreferenceValues, showToast, Toast, LaunchProps } from "@raycast/api";
 import { monotonicFactory } from "ulidx";
 
 import { generateUuids } from "./utils/uuidUtils";
@@ -8,21 +8,12 @@ import { UUIDType } from "./uuidHistory";
 // https://github.com/ulid/javascript#monotonic-ulids
 const ulid = monotonicFactory();
 
-interface ULIDArguments {
-  numberOfULIDsToGenerate: string;
-}
-
-interface Preferences {
-  upperCaseLetters: boolean;
-  defaultAction: string;
-}
-
 // don't want to cause a heap error, so cap it 😱
 const ULID_MAX_NUMBER = 10000;
 
-export default async (props: { arguments: ULIDArguments }) => {
+export default async (props: LaunchProps<{ arguments: Arguments.GenerateUlid }>) => {
   let { numberOfULIDsToGenerate } = props.arguments;
-  const { upperCaseLetters, defaultAction } = getPreferenceValues<Preferences>();
+  const { upperCaseLetters, defaultAction } = getPreferenceValues<Preferences.GenerateUlid>();
 
   if (!numberOfULIDsToGenerate) {
     numberOfULIDsToGenerate = "1";

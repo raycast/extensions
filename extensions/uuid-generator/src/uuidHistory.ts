@@ -11,6 +11,7 @@ export enum UUIDType {
   UUIDV5 = "uuidV5",
   UUIDV7 = "uuidV7",
   ULID = "ulid",
+  TYPEID = "typeid",
 }
 
 export const addToHistory = async (uuid: string, type: UUIDType) => {
