@@ -1,6 +1,7 @@
 import {useSQL, type AsyncState} from '@raycast/utils'
 import {z} from 'zod'
 import {homedir} from 'os'
+import dayjs from 'dayjs'
 import fs from 'fs'
 import {useInstalled} from './use-installed'
 
@@ -42,63 +43,70 @@ const FlightSchema = z.object({
     arrTimeActual: TimestampSchema.nullable(),
 })
 
-type Flight = z.infer<typeof FlightSchema>
+export type Flight = z.infer<typeof FlightSchema>
+
+const path = `${homedir()}/Library/Containers/com.flightyapp.flighty/Data/Documents/MainFlightyDatabase.db`
+const query = `
+SELECT
+    Flight.id,
+    Flight.number,
+
+    Airline.iata as airlineIata,
+    Airline.icao as airlineIcao,
+    Airline.name as airlineName,
+
+    AirportDep.iata as depAirportIata,
+    AirportDep.city as depCity,
+    AirportArr.iata as arrAirportIata,
+    AirportArr.city as arrCity,
+
+    Flight.equipmentIata as aircraftIata,
+    Flight.equipmentIcao as aircraftIcao,
+    Flight.equipmentModelName as aircraftName,
+    Flight.equipmentTailNumber as aircraftTailNumber,
+
+    Flight.distance,
+
+    AirportDep.timezoneIdentifier as depTz,
+    Flight.departureScheduleGateOriginal as depTimeOriginal,
+    Flight.departureScheduleGateEstimated as depTimeEstimated,
+    Flight.departureScheduleGateActual as depTimeActual,
+
+    AirportArr.timezoneIdentifier as arrTz,
+    Flight.arrivalScheduleGateOriginal as arrTimeOriginal,
+    Flight.arrivalScheduleGateEstimated as arrTimeEstimated,
+    Flight.arrivalScheduleGateActual as arrTimeActual
+FROM
+    UserFlight
+JOIN
+    Airline ON Airline.id = Flight.airlineId,
+    Airport as AirportDep on AirportDep.id = Flight.departureAirportId,
+    Airport as AirportArr on AirportArr.id = Flight.scheduledarrivalAirportId,
+    Flight ON Flight.id = UserFlight.flightId
+WHERE
+    Flight.deleted IS NULL
+    AND
+    UserFlight.deleted IS NULL
+    AND
+    UserFlight.isMyFlight = 1
+    AND
+    UserFlight.isRandom = 0
+    AND
+    UserFlight.importSource IS NOT "CONNECTED_FRIEND"
+`
+
+function useFlightQuery(): AsyncState<Flight[]> {
+    try {
+        return useSQL<Flight>(path, query)
+    } catch (error) {
+        return {isLoading: false, error: new Error('Unable to read Flighty data. Please restart it and try again.')}
+    }
+}
 
 export function useFlights(): AsyncState<Flight[]> {
-    const query = `
-    SELECT
-        Flight.id,
-        Flight.number,
-
-        Airline.iata as airlineIata,
-        Airline.icao as airlineIcao,
-        Airline.name as airlineName,
-
-        AirportDep.iata as depAirportIata,
-        AirportDep.city as depCity,
-        AirportArr.iata as arrAirportIata,
-        AirportArr.city as arrCity,
-
-        Flight.equipmentIata as aircraftIata,
-        Flight.equipmentIcao as aircraftIcao,
-        Flight.equipmentModelName as aircraftName,
-        Flight.equipmentTailNumber as aircraftTailNumber,
-
-        Flight.distance,
-
-        AirportDep.timezoneIdentifier as depTz,
-        Flight.departureScheduleGateOriginal as depTimeOriginal,
-        Flight.departureScheduleGateEstimated as depTimeEstimated,
-        Flight.departureScheduleGateActual as depTimeActual,
-
-        AirportArr.timezoneIdentifier as arrTz,
-        Flight.arrivalScheduleGateOriginal as arrTimeOriginal,
-        Flight.arrivalScheduleGateEstimated as arrTimeEstimated,
-        Flight.arrivalScheduleGateActual as arrTimeActual
-    FROM
-        UserFlight
-    JOIN
-        Airline ON Airline.id = Flight.airlineId,
-        Airport as AirportDep on AirportDep.id = Flight.departureAirportId,
-        Airport as AirportArr on AirportArr.id = Flight.scheduledarrivalAirportId,
-        Flight ON Flight.id = UserFlight.flightId
-    WHERE
-        Flight.deleted IS NULL
-        AND
-        UserFlight.deleted IS NULL
-        AND
-        UserFlight.isMyFlight = 1
-        AND
-        UserFlight.isRandom = 0
-        AND
-        UserFlight.importSource IS NOT "CONNECTED_FRIEND"
-    `
-
-    const path = `${homedir()}/Library/Containers/com.flightyapp.flighty/Data/Documents/MainFlightyDatabase.db`
-
     // hooks
     const installed = useInstalled('com.flightyapp.flighty')
-    const response = useSQL<Flight>(path, query)
+    const response = useFlightQuery()
 
     // handle install status
     if (installed.isLoading || installed.data === undefined) return {isLoading: true}
@@ -121,4 +129,19 @@ export function useFlights(): AsyncState<Flight[]> {
 
     // return valid data
     return {isLoading: false, data: data.toSorted((a, b) => b.depTimeOriginal - a.depTimeOriginal)}
+}
+
+export function getAllYears(allFlights: Flight[] | undefined): number[] | undefined {
+    if (!allFlights) return undefined
+
+    return allFlights.reduce((acc, flight) => {
+        const date = dayjs.unix(flight.depTimeOriginal)
+
+        // skip future flights
+        if (date.isAfter(dayjs())) return acc
+
+        const year = date.year()
+        if (!acc.includes(year)) acc.push(year)
+        return acc
+    }, [] as number[])
 }

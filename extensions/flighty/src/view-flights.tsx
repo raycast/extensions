@@ -1,8 +1,9 @@
 import {List, ActionPanel, Action, Icon, Color} from '@raycast/api'
+import {useState} from 'react'
 import dayjs, {type Dayjs} from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
-import {useFlights} from './use-flights'
+import {getAllYears, useFlights} from './use-flights'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -11,11 +12,44 @@ dayjs.extend(timezone)
 const timeFormat = 'h:mma'
 
 export default function () {
-    const {isLoading, error, data} = useFlights()
+    const {isLoading, error, data: allFlights} = useFlights()
+    const allYears = getAllYears(allFlights)
+    const [filter, setFilter] = useState<{type: 'future'} | {type: 'all'} | {type: 'year'; year: string}>({type: 'future'})
+
+    const filteredFlights = allFlights?.filter((flight) => {
+        if (filter.type === 'future') return dayjs.unix(flight.depTimeOriginal).isAfter(dayjs())
+        if (filter.type === 'all') return true
+        return dayjs.unix(flight.depTimeOriginal).year().toString() === filter.year
+    })
+
+    if (filter.type === 'future') filteredFlights?.reverse()
 
     return (
-        <List isLoading={isLoading} navigationTitle="Flights" isShowingDetail={error === undefined}>
-            {data?.map((flight) => {
+        <List
+            isLoading={isLoading}
+            navigationTitle="Flights"
+            isShowingDetail={error === undefined}
+            searchBarAccessory={
+                <List.Dropdown
+                    tooltip="Dropdown With Items"
+                    onChange={(value) => {
+                        if (value === 'future') return setFilter({type: 'future'})
+                        if (value === 'all') return setFilter({type: 'all'})
+                        return setFilter({type: 'year', year: value})
+                    }}
+                >
+                    <List.Dropdown.Section>
+                        <List.Dropdown.Item title="Upcoming" value="future" />
+                        <List.Dropdown.Item title="All" value="all" />
+                    </List.Dropdown.Section>
+
+                    <List.Dropdown.Section title="Past Flights">
+                        {allYears?.map((year) => <List.Dropdown.Item key={year} title={year.toString()} value={year.toString()} />)}
+                    </List.Dropdown.Section>
+                </List.Dropdown>
+            }
+        >
+            {filteredFlights?.map((flight) => {
                 const link = `https://live.flighty.app/${flight.id}`
 
                 const depTimeOriginal = dayjs.unix(flight.depTimeOriginal).tz(flight.depTz)
