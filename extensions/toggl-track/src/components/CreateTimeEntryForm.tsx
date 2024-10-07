@@ -1,8 +1,18 @@
-import { Action, ActionPanel, Form, Icon, Toast, clearSearchBar, showToast, useNavigation } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  Toast,
+  clearSearchBar,
+  showToast,
+  useNavigation,
+  confirmAlert,
+} from "@raycast/api";
+import { useCachedState, showFailureToast } from "@raycast/utils";
 import { useMemo, useState } from "react";
 
-import { Client, Project, Task, TimeEntry, TimeEntryMetaData, createTimeEntry } from "@/api";
+import { Client, Project, Task, TimeEntry, TimeEntryMetaData, createTimeEntry, createTask } from "@/api";
 import { useClients, useMe, useProjects, useTags, useTasks, useWorkspaces } from "@/hooks";
 
 interface CreateTimeEntryFormParams {
@@ -21,7 +31,7 @@ function CreateTimeEntryForm({
   const { workspaces, isLoadingWorkspaces } = useWorkspaces();
   const { clients, isLoadingClients } = useClients();
   const { projects, isLoadingProjects } = useProjects();
-  const { tasks, isLoadingTasks } = useTasks();
+  const { tasks, isLoadingTasks, revalidateTasks } = useTasks();
   const { tags, isLoadingTags } = useTags();
 
   const [selectedWorkspace, setSelectedWorkspace] = useCachedState("defaultWorkspace", workspaces.at(0)?.id);
@@ -36,6 +46,8 @@ function CreateTimeEntryForm({
   });
   const [selectedTags, setSelectedTags] = useState<string[]>(initialValues?.tags || []);
   const [billable, setBillable] = useState(initialValues?.billable || false);
+
+  const [taskSearch, setTaskSearch] = useState("");
 
   async function handleSubmit(values: { description: string; billable?: boolean }) {
     const workspaceId = selectedProject?.workspace_id || me?.default_workspace_id;
@@ -110,9 +122,31 @@ function CreateTimeEntryForm({
     if (project) setSelectedProject(project);
   };
 
-  const onTaskChange = (taskId: string) => {
-    const task = tasks.find((task) => task.id === parseInt(taskId));
-    setSelectedTask(task);
+  const onTaskChange = async (taskId: string) => {
+    if (taskId == "new_task") {
+      const newTaskName = taskSearch;
+      setTaskSearch("");
+      if (await confirmAlert({ title: "Create new task?", message: "Task name: " + newTaskName })) {
+        const toast = await showToast(Toast.Style.Animated, "Creating task...");
+        try {
+          if (!selectedWorkspace) throw Error("Workspace ID is undefined.");
+          if (!selectedProject) throw Error("Workspace ID is undefined.");
+          const newTask = await createTask(selectedWorkspace, selectedProject.id, newTaskName);
+          revalidateTasks();
+          setSelectedTask(newTask);
+          toast.style = Toast.Style.Success;
+          toast.title = "Created task";
+        } catch (error) {
+          await toast.hide();
+          await showFailureToast(error);
+        }
+      } else {
+        setSelectedTask(undefined);
+      }
+    } else {
+      const task = tasks.find((task) => task.id === parseInt(taskId));
+      setSelectedTask(task);
+    }
   };
 
   return (
@@ -167,7 +201,7 @@ function CreateTimeEntryForm({
       >
         {!isLoadingProjects && (
           <>
-            <Form.Dropdown.Item key="-1" value="-1" title={"No Project"} icon={{ source: Icon.Circle }} />
+            <Form.Dropdown.Item key="-1" value="-1" title={"No Project"} icon={Icon.Circle} />
             {filteredProjects.map((project) => (
               <Form.Dropdown.Item
                 key={project.id}
@@ -180,14 +214,22 @@ function CreateTimeEntryForm({
         )}
       </Form.Dropdown>
 
-      {selectedProject && filteredTasks.length > 0 && (
-        <Form.Dropdown id="task" title="Task" defaultValue={"-1"} onChange={onTaskChange}>
+      {selectedProject && (
+        <Form.Dropdown
+          id="task"
+          title="Task"
+          onChange={onTaskChange}
+          value={selectedTask?.id.toString() ?? "-1"}
+          onSearchTextChange={setTaskSearch}
+          onBlur={() => setTaskSearch("")}
+        >
           {!isLoadingTasks && (
             <>
-              <Form.Dropdown.Item value="-1" title={"No task"} icon={{ source: Icon.Circle }} />
+              <Form.Dropdown.Item value="-1" title={"No task"} icon={Icon.Circle} />
               {filteredTasks.map((task) => (
-                <Form.Dropdown.Item key={task.id} value={task.id.toString()} title={task.name} />
+                <Form.Dropdown.Item key={task.id} value={task.id.toString()} title={task.name} icon={Icon.Circle} />
               ))}
+              {taskSearch !== "" && <Form.Dropdown.Item value="new_task" title={taskSearch} icon={Icon.PlusCircle} />}
             </>
           )}
         </Form.Dropdown>
