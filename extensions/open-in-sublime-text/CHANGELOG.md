@@ -1,6 +1,6 @@
 # Open in Sublime Text Changelog
 
-## [New Command] - {PR_MERGE_DATE}
+## [New Command] - 2024-10-07
 
 - Open the clipboard content in Sublime Text.
 
