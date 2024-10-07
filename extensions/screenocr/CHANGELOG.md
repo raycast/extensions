@@ -1,6 +1,6 @@
 # ScreenOCR Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-10-07
 
 - Migrated codebase to use new Swift macros
 - Replaced all HUDs with emojis with styled toast messages for user feedback
