@@ -42,7 +42,8 @@ export const getRepostMarkdown = (displayName: string, handle: string) => {
 };
 
 export const getQuotedPostMarkdownView = async (postAuthor: string, post: ViewRecord, imageEmbeds: string[]) => {
-  const postMarkdown = (await getMarkdownText((post.value as BskyRecord).text))
+  const { text = "" } = post.value as BskyRecord;
+  const postMarkdown = (await getMarkdownText(text))
     .replace(/\n/g, "\n\n")
     .replace(/^/gm, "> ");
 
