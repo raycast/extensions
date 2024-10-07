@@ -66,8 +66,8 @@ function AirtableBaseDetailsView(isLoading: boolean, baseMetadata: AirtableBaseM
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open base in browser" url={`${baseMetadata.baseUrl}`} />
-          <Action.OpenInBrowser title="Open base API docs in browser" url={baseMetadata.apiDocsUrl} />
+          <Action.OpenInBrowser title="Open Base in Browser" url={`${baseMetadata.baseUrl}`} />
+          <Action.OpenInBrowser title="Open Base Api Docs in Browser" url={baseMetadata.apiDocsUrl} />
           <Action.CopyToClipboard title={`Copy base ID (${baseMetadata.id})`} content={baseMetadata.id} />
         </ActionPanel>
       }

@@ -1,10 +1,9 @@
 import { OAuth, getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
-import { RaycastExtensionPreferences } from "./types";
 import { URLSearchParams } from "url";
 
-const { airtableOAuthClientId, airtableUiBaseUrl } = getPreferenceValues<RaycastExtensionPreferences>();
-const scopes = ["schema.bases:read"];
+const { airtableOAuthClientId, airtableUiBaseUrl } = getPreferenceValues<Preferences>();
+const scopes = ["schema.bases:read", "data.records:read"];
 
 export const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
@@ -30,7 +29,7 @@ export async function authorize(): Promise<void> {
   const authRequest = await client.authorizationRequest({
     endpoint: `${airtableUiBaseUrl}/oauth2/v1/authorize`,
     clientId: airtableOAuthClientId,
-    scope: scopes.join(","),
+    scope: scopes.join(" "),
   });
   const { authorizationCode } = await client.authorize(authRequest);
   await client.setTokens(await fetchTokens(authRequest, authorizationCode));

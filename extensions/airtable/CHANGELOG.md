@@ -1,4 +1,6 @@
-# Changelog
+# Airtable Changelog
+
+## [`View Records` of a Base] - {PR_MERGE_DATE}
 
 ## [Update] - 2022-11-18
 
