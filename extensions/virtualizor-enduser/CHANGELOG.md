@@ -1,6 +1,6 @@
 # Virtualizor Enduser Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2024-10-07
 
 - View Virtual Server Info and Restart, Stop
 - View Instance Logs
