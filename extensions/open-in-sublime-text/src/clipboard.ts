@@ -1,5 +1,5 @@
 import { getApplications, open, showToast, Toast, Clipboard } from "@raycast/api";
-import { exec } from "child_process";
+import { runAppleScript } from "@raycast/utils";
 
 export default async () => {
   const applications = await getApplications();
@@ -19,9 +19,11 @@ export default async () => {
   }
 
   try {
-    await open(sublimeTextApplication.path);
+    const [, clipboardContent] = await Promise.all([
+      open(sublimeTextApplication.path),
+      Clipboard.readText()
+    ]);
 
-    const clipboardContent = await Clipboard.readText();
     if (!clipboardContent) {
       throw new Error("Clipboard is empty");
     }
@@ -36,11 +38,7 @@ export default async () => {
       end tell
     `;
 
-    exec(`osascript -e '${appleScript}'`, (error, stdout, stderr) => {
-      if (error || stderr) {
-        throw new Error("Could not paste clipboard content into Sublime Text");
-      }
-    });
+    await runAppleScript(appleScript);
   } catch (error: any) {
     await showToast({
       style: Toast.Style.Failure,
