@@ -8,6 +8,7 @@ import {
   ErrorResponse,
   Database,
   FileItem,
+  FileContent,
 } from "./types";
 import { showFailureToast, useFetch } from "@raycast/utils";
 
@@ -75,9 +76,17 @@ export const useListEmailAccountsWithDiskInfo = (email: string, domain: string) 
 // DATABASES
 export const useListDatabases = (database_type: "Mysql" | "Postgresql") =>
   useUAPI<Database[]>(database_type, "list_databases");
+export const useDumpDatabaseSchema = (database_type: "Mysql" | "Postgresql", dbname: string) =>
+  useUAPI<string>(database_type, "dump_database_schema", { dbname });
 
 // FILES
 export const useListFiles = (dir: string) =>
   useUAPI<FileItem[]>("Fileman", "list_files", {
     dir,
+    include_mime: 1
+  });
+export const usGetFileContent = (dir: string, file: string) =>
+  useUAPI<FileContent>("Fileman", "get_file_content", {
+    dir,
+    file
   });

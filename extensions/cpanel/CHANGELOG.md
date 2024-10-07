@@ -1,5 +1,11 @@
 # cPanel Changelog
 
+## [Files + DB - Enhancements] - {PR_MERGE_DATE}
+
+- Show or Hide "MIME Type" in `Files` via Preferences
+- View "File Content" for small files in `Files`
+- View "Database Schema" in `Databases`
+
 ## [Enhancements] - 2024-09-11
 
 - Create Email Account

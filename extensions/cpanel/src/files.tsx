@@ -1,7 +1,7 @@
 import InvalidUrl from "./lib/components/invalid-url";
-import { useListFiles } from "./lib/hooks";
+import { useListFiles, usGetFileContent } from "./lib/hooks";
 import { isInvalidUrl } from "./lib/utils";
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, getPreferenceValues, Icon, Image, List } from "@raycast/api";
 import { FileItem } from "./lib/types";
 
 function getIcon(item: FileItem): Image.ImageLike {
@@ -32,6 +32,7 @@ export default function Files() {
 }
 
 function Directory({ dir }: { dir: string }) {
+  const { show_raw_mime_type: showMime } = getPreferenceValues<Preferences.Files>();
   const { isLoading, data: files } = useListFiles(dir);
 
   return (
@@ -43,19 +44,24 @@ function Directory({ dir }: { dir: string }) {
             title={item.file}
             subtitle={item.path}
             accessories={[
+              { tag: showMime ? item.rawmimetype : "" },
               { text: item.humansize },
               { date: new Date(item.mtime * 1000), tooltip: `modified: ${new Date(item.mtime * 1000).toDateString()}` },
             ]}
             icon={getIcon(item)}
             actions={
-              <ActionPanel title="Go To">
+              <ActionPanel>
                 {item.type === "dir" && (
-                  <Action.Push
-                    icon={Icon.ArrowRight}
-                    title={"/" + item.file}
-                    target={<Directory dir={item.fullpath} />}
-                  />
+                  <ActionPanel.Section title="Go To">
+                    <Action.Push
+                      icon={Icon.ArrowRight}
+                      title={"/" + item.file}
+                      target={<Directory dir={item.fullpath} />}
+                    />
+                  </ActionPanel.Section>
                 )}
+                {item.type === "file" && <ActionPanel.Section>
+                  <Action.Push icon={Icon.Eye} title="View File" target={<ViewFile dir={item.path} file={item.file} />} /></ActionPanel.Section>}
               </ActionPanel>
             }
           />
@@ -63,4 +69,10 @@ function Directory({ dir }: { dir: string }) {
       </List.Section>
     </List>
   );
+}
+
+function ViewFile({ dir, file }: { dir: string; file: string }) {
+  const { isLoading, data } = usGetFileContent(dir, file);
+
+  return <Detail isLoading={isLoading} markdown={data?.content} />
 }

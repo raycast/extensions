@@ -67,7 +67,19 @@ export type FileItem = {
   ctime: number;
   absdir: string;
   nicemode: string;
+  rawmimetype: string;
+  rawmimename: string;
+  mimetype: string;
 };
+
+export type FileContent = {
+  from_charset: string;
+  path: string;
+  content: string;
+  filename: string;
+  dir: string;
+  to_charset: string;
+}
 
 export type ErrorResponse = {
   metadata: Record<string, never>;
