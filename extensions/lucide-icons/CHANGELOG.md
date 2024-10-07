@@ -1,6 +1,6 @@
 # Lucide Icons Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-10-07
 
 - Introduced AI-based icon search.
 - Removed the `Change Size` action and converted the `Change Color` action into a dropdown menu.
