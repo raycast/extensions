@@ -10,8 +10,9 @@ async function getAudioInputLevel() {
   return result.trim();
 }
 
-async function setAudioInputLevel(v: string) {
+export async function setAudioInputLevel(v: string) {
   await runAppleScript(`set volume input volume ${v}`);
+  AudioInputLevelCache.curInputLevel = v;
 }
 
 const toggleSystemAudioInputLevelWithPreviousLevel = async (): Promise<string> => {
