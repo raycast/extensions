@@ -123,12 +123,9 @@ export default function Command() {
       return showSystemFonts ? matchesSearch : matchesSearch && !font.isSystem;
     }) || [];
 
-  // Sort fonts with pinned fonts at the top
-  const sortedFonts = [...filteredFonts].sort((a, b) => {
-    if (a.isPinned && !b.isPinned) return -1;
-    if (!a.isPinned && b.isPinned) return 1;
-    return a.name.localeCompare(b.name);
-  });
+  // Separate pinned and unpinned fonts
+  const pinnedFilteredFonts = filteredFonts.filter((font) => font.isPinned);
+  const unpinnedFilteredFonts = filteredFonts.filter((font) => !font.isPinned);
 
   const togglePinFont = async (font: Font) => {
     const updatedPinnedFonts = font.isPinned
@@ -157,19 +154,33 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {sortedFonts.map((font) => (
-        <FontListItem
-          key={font.path}
-          font={font}
-          previewText={preferences.previewText}
-          onReload={revalidate}
-          onTogglePin={() => togglePinFont(font)}
-        />
-      ))}
+      {pinnedFilteredFonts.length > 0 && (
+        <List.Section title="Pinned">
+          {pinnedFilteredFonts.map((font) => (
+            <FontListItem
+              key={font.path}
+              font={font}
+              previewText={preferences.previewText}
+              onReload={revalidate}
+              onTogglePin={() => togglePinFont(font)}
+            />
+          ))}
+        </List.Section>
+      )}
+      <List.Section title={pinnedFilteredFonts.length > 0 ? "Other" : "All"}>
+        {unpinnedFilteredFonts.map((font) => (
+          <FontListItem
+            key={font.path}
+            font={font}
+            previewText={preferences.previewText}
+            onReload={revalidate}
+            onTogglePin={() => togglePinFont(font)}
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }
-
 // Font list item component
 function FontListItem({
   font,
