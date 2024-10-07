@@ -3,7 +3,7 @@ import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
 import { NativePreferences } from "../types/preferences";
-import { Hint, redactData, upgradeAndCaptureError, useCaptureException } from "../utils/sentry";
+import { Hint, upgradeAndCaptureError, useCaptureException } from "../utils/sentry";
 
 export class UseApiError extends Error {}
 export class UseApiResponseError extends UseApiError {}
@@ -47,10 +47,7 @@ const useApi = <T,>(url: string) => {
 
     useCaptureException(result.error, {
       mutate: (cause) => new UseApiResponseError("Error in response", { cause }),
-      hint: {
-        ...hint,
-        attachments: result.data && [{ data: JSON.stringify(redactData(result)), filename: "response.json" }],
-      },
+      hint,
     });
 
     return result;
