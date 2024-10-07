@@ -3,8 +3,8 @@ import { useCachedPromise } from "@raycast/utils"; // Import useCachedPromise
 import { cancelBuild } from "./api/cancel-build";
 import { fetchApplicationsAndRefreshBranches, FetchAppState } from "./api/fetch-apps";
 import WorkflowSelector from "./components/workflow-selector";
+import { getIconForBuildStatus, statusToColor } from "./util/build-status";
 import { capitalize } from "./util/capitalise";
-import { getIconForBuildStatus, statusToColor } from "./util/status-to-color";
 
 const TriggerBuildCommand = () => {
   const cancellableStatuses = ["queued", "preparing", "fetching", "building", "finishing", "publishing", "testing"];

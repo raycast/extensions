@@ -1,8 +1,8 @@
 import { Action, ActionPanel, ImageMask, List, openExtensionPreferences } from "@raycast/api";
 import { useFetchAllBuilds } from "./api/fetch-all-builds";
+import { getIconForBuildStatus, statusToColor } from "./util/build-status";
 import { capitalize } from "./util/capitalise";
 import { formatPlatformName } from "./util/format-platform-names";
-import { getIconForBuildStatus, statusToColor } from "./util/status-to-color";
 
 const ShowAllBuilds = () => {
   const { data: appBuilds, isLoading, error, revalidate } = useFetchAllBuilds();
