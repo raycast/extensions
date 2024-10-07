@@ -1,4 +1,3 @@
-// utils/displayHelpers.ts
 import { Icon, Color, List } from "@raycast/api";
 import { IngredientResult } from "../models/IngredientResult";
 
@@ -18,22 +17,22 @@ export function getIngredientDisplay(ingredient: IngredientResult): IngredientDi
   if (ingredient.surelyVegan) {
     return {
       icon: { source: Icon.CheckCircle, tintColor: Color.Green },
-      statusText: "Surely Vegan",
-      accessories: [{ tag: { value: "Surely Vegan", color: Color.Green } }],
-    };
-  }
-  if (ingredient.isVegan === true) {
-    return {
-      icon: { source: Icon.QuestionMarkCircle, tintColor: "#2E8B57" },
-      statusText: "Likely Vegan",
-      accessories: [{ tag: { value: "Likely Vegan", color: "#2E8B57" } }],
+      statusText: "Vegan",
+      accessories: [{ tag: { value: "Vegan", color: Color.Green } }],
     };
   }
   if (ingredient.maybeVegan) {
     return {
-      icon: { source: Icon.QuestionMark, tintColor: Color.Yellow },
-      statusText: "Maybe Vegan",
-      accessories: [{ tag: { value: "Maybe Vegan", color: Color.Yellow } }],
+      icon: { source: Icon.QuestionMark, tintColor: Color.Orange },
+      statusText: "Unknown",
+      accessories: [{ tag: { value: "Unknown", color: Color.Orange } }],
+    };
+  }
+  if (ingredient.isVegan === true) {
+    return {
+      icon: { source: Icon.CheckCircle, tintColor: Color.Green },
+      statusText: "Vegan",
+      accessories: [{ tag: { value: "Vegan", color: Color.Green } }],
     };
   }
   if (ingredient.isVegan === false) {
@@ -44,8 +43,8 @@ export function getIngredientDisplay(ingredient: IngredientResult): IngredientDi
     };
   }
   return {
-    icon: { source: Icon.QuestionMark, tintColor: Color.Yellow },
+    icon: { source: Icon.QuestionMark, tintColor: Color.Orange },
     statusText: "Unknown",
-    accessories: [{ tag: { value: "Unknown", color: Color.Yellow } }],
+    accessories: [{ tag: { value: "Unknown", color: Color.Orange } }],
   };
 }
