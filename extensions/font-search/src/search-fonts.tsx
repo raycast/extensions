@@ -205,6 +205,7 @@ function FontListItem({
             title={font.isPinned ? "Unpin Font" : "Pin Font"}
             icon={font.isPinned ? Icon.TackDisabled : Icon.Tack}
             onAction={onTogglePin}
+            shortcut={Keyboard.Shortcut.Common.Pin}
           />
           <ActionPanel.Section>
             <Action
