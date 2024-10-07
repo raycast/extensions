@@ -1,6 +1,6 @@
 # Steam Changelog
 
-## [New Feature & Chore] - {PR_MERGE_DATE}
+## [New Feature & Chore] - 2024-10-07
 
 - Add support for browsing SteamGridDB images
 - Bump all dependencies to the latest
