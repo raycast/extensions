@@ -8,6 +8,7 @@ const API_BASE_URL = "https://api.veganify.app/v0";
 export async function checkIngredient(ingredient: string): Promise<IngredientResult> {
   try {
     const response = await fetch(`${API_BASE_URL}/ingredients/${encodeURIComponent(ingredient)}?translate=true`);
+
     if (response.status === 429) {
       await showToast({
         style: Toast.Style.Failure,
@@ -16,9 +17,22 @@ export async function checkIngredient(ingredient: string): Promise<IngredientRes
       });
       throw new Error("Rate limit exceeded");
     }
+
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      if (response.status >= 500) {
+        errorMessage = "Server error. Please try again later.";
+      }
+
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error checking ingredient",
+        message: errorMessage,
+      });
+
+      throw new Error(errorMessage);
     }
+
     const data = (await response.json()) as IngredientsCheckResponse;
     return {
       name: ingredient,
@@ -28,6 +42,21 @@ export async function checkIngredient(ingredient: string): Promise<IngredientRes
     };
   } catch (error) {
     console.error(`Error checking ingredient ${ingredient}:`, error);
+
+    if (error instanceof TypeError && error.message.includes("fetch failed")) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Server unreachable",
+        message: "The server is currently unavailable. Please try again later.",
+      });
+    } else if (!(error instanceof Error) || !error.message.includes("Rate limit exceeded")) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error checking ingredient",
+        message: error instanceof Error ? error.message : "An unknown error occurred",
+      });
+    }
+
     return {
       name: ingredient,
       isVegan: null,

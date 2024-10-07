@@ -5,7 +5,7 @@ import { IngredientResult } from "../models/IngredientResult";
 interface IngredientDisplay {
   icon: { source: Icon; tintColor: Color.ColorLike };
   statusText: string;
-  accessories: List.Item.Accessory[];
+  accessories?: List.Item.Accessory[];
 }
 
 export function getIngredientDisplay(ingredient: IngredientResult): IngredientDisplay {
@@ -13,7 +13,6 @@ export function getIngredientDisplay(ingredient: IngredientResult): IngredientDi
     return {
       icon: { source: Icon.ExclamationMark, tintColor: Color.Red },
       statusText: "Error",
-      accessories: [{ text: ingredient.error }],
     };
   }
   if (ingredient.surelyVegan) {
