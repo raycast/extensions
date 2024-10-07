@@ -1,5 +1,5 @@
 import { PriceCurrency, PriceSuffix, PriceType } from "../types/energyData";
-import { formatTime, relativeDate } from "../utils/dateConverter";
+import { formatTime } from "../utils/dateConverter";
 import { priceConverter } from "../utils/priceConverter";
 import { Color, Icon, List } from "@raycast/api";
 
