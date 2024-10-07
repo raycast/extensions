@@ -1,6 +1,6 @@
 # Nextcloud Changelog
 
-## [`Show Activity` is now Paginated] - {PR_MERGE_DATE}
+## [`Show Activity` is now Paginated] - 2024-10-07
 
 ### Dev Notes
 - Replaced `jsonRequest` with a wrapped `useFetch`
