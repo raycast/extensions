@@ -19,10 +19,7 @@ export default async () => {
   }
 
   try {
-    const [, clipboardContent] = await Promise.all([
-      open(sublimeTextApplication.path),
-      Clipboard.readText()
-    ]);
+    const [, clipboardContent] = await Promise.all([open(sublimeTextApplication.path), Clipboard.readText()]);
 
     if (!clipboardContent) {
       throw new Error("Clipboard is empty");

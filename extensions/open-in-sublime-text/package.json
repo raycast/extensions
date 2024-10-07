@@ -22,7 +22,7 @@
     },
     {
       "name": "clipboard",
-      "title": "Open the clipboard content in Sublime Text",
+      "title": "Open the Clipboard Content in Sublime Text",
       "description": "Open the clipboard content in Sublime Text.",
       "mode": "no-view"
     }
