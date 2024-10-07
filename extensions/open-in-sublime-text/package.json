@@ -5,6 +5,9 @@
   "description": "Open current Finder directory, selected folder or file in Sublime Text.",
   "icon": "icon.png",
   "author": "anfalas",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -15,6 +18,12 @@
       "name": "index",
       "title": "Open in Sublime Text",
       "description": "Open current Finder directory, selected folder or file in Sublime Text.",
+      "mode": "no-view"
+    },
+    {
+      "name": "clipboard",
+      "title": "Open the clipboard content in Sublime Text",
+      "description": "Open the clipboard content in Sublime Text.",
       "mode": "no-view"
     }
   ],
