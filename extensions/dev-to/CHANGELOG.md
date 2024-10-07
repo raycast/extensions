@@ -1,6 +1,6 @@
 # dev-to Changelog
 
-## [Add Pagination] - {PR_MERGE_DATE}
+## [Add Pagination] - 2024-10-07
 
 - View more than 30 items from your Articles or Reading List at a time
 - In `Search Reading List` the Tags are moved to `Detail` view so longer titles are more visible
