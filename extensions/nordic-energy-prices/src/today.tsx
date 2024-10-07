@@ -56,9 +56,10 @@ export default function Command() {
         title={"Today's energy prices"}
         subtitle={`Daily Average: ${isLoading ? "Loading..." : average.toFixed(2) + " " + PriceSuffix + " " + PriceCurrency}`}
       >
-        {data.map((price: PriceType) => (
-          <PriceEntry allData={data} price={price} average={average} key={price.time_start} />
-        ))}
+        {!isLoading &&
+          data.map((price: PriceType) => (
+            <PriceEntry allData={data} price={price} average={average} key={price.time_start} />
+          ))}
       </List.Section>
     </List>
   );
