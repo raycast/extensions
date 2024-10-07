@@ -1,8 +1,9 @@
 import { List, showToast, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { IngredientResult } from "./models/IngredientResult";
 import { IngredientListItem } from "./components/IngredientListItem";
 import { checkIngredient } from "./utils/api";
+import { debounce } from "./utils/debounce";
 import EmptyList from "./components/EmptyList";
 import { preprocessIngredients } from "./utils/preprocessIngredients";
 
@@ -11,16 +12,14 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<IngredientResult[]>([]);
 
-  useEffect(() => {
-    const checkIngredients = async () => {
-      if (searchText.trim() === "") {
+  const debouncedCheckIngredients = useCallback(
+    debounce(async (text: string) => {
+      if (text.trim() === "") {
         setResults([]);
         return;
       }
-
       setIsLoading(true);
-      const ingredients = preprocessIngredients(searchText);
-
+      const ingredients = preprocessIngredients(text);
       try {
         const newResults = await Promise.all(ingredients.map(checkIngredient));
         setResults(newResults);
@@ -33,10 +32,14 @@ export default function Command() {
       } finally {
         setIsLoading(false);
       }
-    };
+    }, 300),
+    [],
+  );
 
-    checkIngredients();
-  }, [searchText]);
+  useEffect(() => {
+    debouncedCheckIngredients(searchText);
+    return () => debouncedCheckIngredients.cancel();
+  }, [searchText, debouncedCheckIngredients]);
 
   return (
     <List
