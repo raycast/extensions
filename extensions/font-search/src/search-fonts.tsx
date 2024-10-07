@@ -9,6 +9,7 @@ import {
   getPreferenceValues,
   Cache,
   LocalStorage,
+  Keyboard,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { promisify } from "node:util";
