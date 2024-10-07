@@ -63,7 +63,7 @@
     },
     {
       "name": "set-level",
-      "title": "Set Level Of Audio Input",
+      "title": "Set Level of Audio Input",
       "description": "Set level of audio input (microphone)",
       "mode": "no-view",
       "preferences": [
@@ -73,7 +73,8 @@
           "description": "Default level of audio input",
           "type": "textfield",
           "placeholder": "Must be a number from 0 to 100",
-          "default": "100"
+          "default": "100",
+          "required": true
         }
       ],
       "arguments": [
