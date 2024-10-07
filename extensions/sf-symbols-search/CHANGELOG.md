@@ -1,6 +1,6 @@
 # SF Symbols Changelog
 
-## [Update] - 2024-09-29
+## [Update] - {PR_MERGE_DATE}
 
 - Now the copying the symbol and the name of the symbol have different keyboard shortcuts
 - The same goes for the pasting the symbol and the name
