@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [New Feature] - {PR_MERGE_DATE}
+## [New Feature] - 2024-10-07
 
 - Add ability to create task for time entry form
 
