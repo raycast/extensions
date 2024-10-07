@@ -1418,7 +1418,8 @@
 /extensions/stashpad-docs                                           @tsmarin
 /extensions/statamic-docs                                           @andrebreia
 /extensions/static-marks-bookmarks                                  @aerobless @rudeayelo
-/extensions/steam                                                   @KevinBatdorf
+/extensions/steam                                                   @KevinBatdorf @LitoMore
+/extensions/steamgriddb                                             @LitoMore
 /extensions/stickies                                                @koinzhang
 /extensions/stock-lookup                                            @jones-sam
 /extensions/stock-tracker                                           @hmarr
