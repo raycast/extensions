@@ -1,5 +1,10 @@
 # Search npm Changelog
 
+## [Updates] - {PR_MERGE_DATE}
+
+- Hide history list when `historyCount` is zero
+- Bump all dependencies to the latest
+
 ## [Refactoring] - 2024-02-03
 
 - Bump dependecies
