@@ -1,4 +1,5 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import fetch from "node-fetch";
 import { FetchAllBuildsApiResponse, GroupedAppBuilds } from "../interface/all-builds";
 
@@ -39,4 +40,15 @@ export const fetchAllBuilds = async (): Promise<GroupedAppBuilds[] | null> => {
     toast.title = "Failed to load applications and builds";
     return null;
   }
+};
+
+export const useFetchAllBuilds = () => {
+  const { data, isLoading, error, revalidate } = useCachedPromise(fetchAllBuilds, []);
+
+  return {
+    data,
+    isLoading,
+    error,
+    revalidate,
+  };
 };

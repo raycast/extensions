@@ -1,35 +1,13 @@
 import { Action, ActionPanel, ImageMask, List, openExtensionPreferences } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { fetchAllBuilds } from "./api/fetch-all-builds";
-import { GroupedAppBuilds } from "./interface/all-builds";
+import { useFetchAllBuilds } from "./api/fetch-all-builds";
 import { capitalize } from "./util/capitalise";
 import { formatPlatformName } from "./util/format-platform-names";
 import { getIconForBuildStatus, statusToColor } from "./util/status-to-color";
 
 const ShowAllBuilds = () => {
-  const [appBuilds, setAppBuilds] = useState<GroupedAppBuilds[] | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: appBuilds, isLoading, error, revalidate } = useFetchAllBuilds();
 
-  const loadBuilds = async () => {
-    try {
-      setIsLoading(true);
-      setAppBuilds(null);
-      const groupedAppBuilds = await fetchAllBuilds();
-      setAppBuilds(groupedAppBuilds);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadBuilds();
-  }, []);
-
-  if (isLoading) {
-    return <List isLoading={true} searchBarPlaceholder="Loading builds..." />;
-  }
-
-  if (appBuilds === null) {
+  if (error || appBuilds === null) {
     return (
       <List
         actions={
@@ -55,7 +33,7 @@ const ShowAllBuilds = () => {
   }
 
   return (
-    <List isLoading={false} isShowingDetail={true}>
+    <List isLoading={isLoading} isShowingDetail={true}>
       {appBuilds.map(({ app, builds }) => (
         <List.Section key={app._id} title={app.appName}>
           {builds.map((build) => (
@@ -78,7 +56,10 @@ const ShowAllBuilds = () => {
                     <List.Item.Detail.Metadata>
                       <List.Item.Detail.Metadata.Label
                         title="Build Status"
-                        icon={{ source: getIconForBuildStatus(build.status), tintColor: statusToColor[build.status] }}
+                        icon={{
+                          source: getIconForBuildStatus(build.status),
+                          tintColor: statusToColor[build.status],
+                        }}
                         text={capitalize(build.status)}
                       />
                       <List.Item.Detail.Metadata.Separator />
@@ -133,7 +114,7 @@ const ShowAllBuilds = () => {
                     url={`https://codemagic.io/app/${build.appId}/build/${build._id}`}
                   />
                   <Action.OpenInBrowser title="View Commit on GitHub" url={build.commit.url} />
-                  <Action title="Refresh Apps" onAction={loadBuilds} />
+                  <Action title="Refresh Apps" onAction={revalidate} />
                 </ActionPanel>
               }
             />

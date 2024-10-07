@@ -1,35 +1,22 @@
 import { Action, ActionPanel, ImageMask, List, openExtensionPreferences } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils"; // Import useCachedPromise
 import { cancelBuild } from "./api/cancel-build";
-import { fetchApplications, FetchAppState } from "./api/fetch-apps";
+import { fetchApplicationsAndRefreshBranches, FetchAppState } from "./api/fetch-apps";
 import WorkflowSelector from "./components/workflow-selector";
-import { CodemagicApp } from "./interface/codemagic-apps";
 import { capitalize } from "./util/capitalise";
 import { getIconForBuildStatus, statusToColor } from "./util/status-to-color";
 
 const TriggerBuildCommand = () => {
-  const [groupedApplications, setGroupedApplications] = useState<Record<string, CodemagicApp[]> | null>(null);
-  const [fetchState, setFetchState] = useState<FetchAppState>(FetchAppState.SUCCESS);
-  const [isLoading, setIsLoading] = useState(true);
-
   const cancellableStatuses = ["queued", "preparing", "fetching", "building", "finishing", "publishing", "testing"];
 
-  const loadApplications = async () => {
-    setIsLoading(true);
-    setGroupedApplications(null);
-    try {
-      const [state, apps] = await fetchApplications();
-      setFetchState(state);
-      setGroupedApplications(apps);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  useEffect(() => {
-    loadApplications();
-  }, []);
+  const {
+    data: [fetchState, groupedApplications] = [FetchAppState.SUCCESS, null],
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise(fetchApplicationsAndRefreshBranches, []);
 
-  if (isLoading) {
+  if (!groupedApplications && isLoading) {
     return <List isLoading={true} searchBarPlaceholder="Fetching applications..." />;
   }
 
@@ -63,7 +50,7 @@ const TriggerBuildCommand = () => {
     );
   }
 
-  if (fetchState === FetchAppState.ERROR || groupedApplications === null) {
+  if (fetchState === FetchAppState.ERROR || !groupedApplications || error) {
     return (
       <List
         actions={
@@ -78,7 +65,7 @@ const TriggerBuildCommand = () => {
       >
         <List.EmptyView
           title="Is your Access Token Correct?"
-          description="Please check your API token in Raycast settings > Extensions > CodeMagic. If you need help, contact the developer."
+          description="Please check your API token in Raycast settings > Extensions > Codemagic. If you need help, contact the developer."
         />
       </List>
     );
@@ -105,7 +92,7 @@ const TriggerBuildCommand = () => {
   }
 
   return (
-    <List searchBarPlaceholder="Search applications...">
+    <List searchBarPlaceholder="Search applications..." isLoading={isLoading}>
       {Object.keys(groupedApplications).map((ownerName) => (
         <List.Section key={ownerName} title={ownerName}>
           {groupedApplications[ownerName].map((app) => {
@@ -122,7 +109,7 @@ const TriggerBuildCommand = () => {
                 text: workflowCount > 0 ? String(workflowCount) : undefined,
                 tooltip: workflowCount > 0 ? `Workflows` : undefined,
               },
-              app.lastBuild
+              app.lastBuild && app.lastBuild.status
                 ? {
                     icon: {
                       source: getIconForBuildStatus(app.lastBuild.status),
@@ -165,7 +152,7 @@ const TriggerBuildCommand = () => {
                         icon="x-mark-circle-16"
                       />
                     )}
-                    <Action title="Refresh Apps" onAction={loadApplications} />
+                    <Action title="Refresh Apps and Branches" onAction={revalidate} />
                   </ActionPanel>
                 }
               />
