@@ -1,0 +1,121 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clip-star",
+  "title": "ClipStar",
+  "description": "Clip all in one. Auto generate title, preview image, tags. Can connect to notion for synchronization.",
+  "icon": "extension-icon.svg",
+  "categories": [
+    "Web",
+    "Productivity",
+    "Applications"
+  ],
+  "author": "artsmp",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-clip",
+      "title": "Add Clip",
+      "description": "Add a new clip",
+      "mode": "view",
+      "file": "add-clip.tsx"
+    },
+    {
+      "name": "clip-gallery",
+      "title": "Clip Gallery",
+      "description": "View clips in a grid",
+      "mode": "view",
+      "file": "clip-gallery.tsx"
+    }
+  ],
+  "dependencies": {
+    "@notionhq/client": "^2.2.5",
+    "@raycast/api": "^1.82.5",
+    "@raycast/utils": "^1.16.3",
+    "@types/uuid": "^10.0.0",
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "openai": "^4.0.0",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "language",
+      "type": "dropdown",
+      "required": false,
+      "title": "Language",
+      "description": "Choose the language for the extension",
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "简体中文",
+          "value": "zh-CN"
+        }
+      ]
+    },
+    {
+      "name": "model",
+      "type": "textfield",
+      "required": false,
+      "title": "AI 模型",
+      "description": "输入要使用的 AI 模型名称（可选）",
+      "placeholder": "例如：gpt-3.5-turbo"
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "API 密钥",
+      "description": "输入您的 API 密钥（可选）"
+    },
+    {
+      "name": "baseURL",
+      "type": "textfield",
+      "required": false,
+      "title": "基础 URL",
+      "description": "输入 API 的基础 URL（可选）",
+      "placeholder": "https://api.openai.com"
+    },
+    {
+      "name": "notionToken",
+      "type": "textfield",
+      "required": false,
+      "title": "Notion Token",
+      "description": "输入 Notion Token（可选）"
+    },
+    {
+      "name": "databaseId",
+      "type": "textfield",
+      "required": false,
+      "title": "Database ID",
+      "description": "输入 Database ID（可选）"
+    },
+    {
+      "name": "tableKey",
+      "type": "textfield",
+      "required": false,
+      "title": "Table Column",
+      "description": "column order is title,url,tag,createdAt,updatedAt",
+      "default": "标题,链接地址,标签,创建时间,更新时间"
+    }
+  ]
+}
