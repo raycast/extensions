@@ -1,3 +1,3 @@
-# surf-check Changelog
+# Surf Check Changelog
 
-## [Initial Version] - 2024-08-28
+## [Initial Version] - {PR_MERGE_DATE}
