@@ -1,5 +1,5 @@
 # Veganify Changelog
 
-## [Added Veganify] - {PR_MERGE_DATE}
+## [Added Veganify] - 2024-10-08
 
 - Initial version of the Veganify extension
