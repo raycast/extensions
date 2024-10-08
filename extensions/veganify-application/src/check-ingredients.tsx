@@ -18,7 +18,6 @@ export default function Command() {
         setResults([]);
         return;
       }
-      setIsLoading(true);
       const ingredients = preprocessIngredients(text);
       try {
         const newResults = await Promise.all(ingredients.map(checkIngredient));
@@ -32,11 +31,14 @@ export default function Command() {
       } finally {
         setIsLoading(false);
       }
-    }, 300),
+    }, 800),
     [],
   );
 
   useEffect(() => {
+    if (searchText) {
+      setIsLoading(true);
+    }
     debouncedCheckIngredients(searchText);
     return () => debouncedCheckIngredients.cancel();
   }, [searchText, debouncedCheckIngredients]);
