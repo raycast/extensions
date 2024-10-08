@@ -15,6 +15,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { promisify } from "node:util";
 import { exec } from "node:child_process";
 import { createFontPreviewSVG } from "./fontPreview";
+import { sortWeights } from "./utils";
 
 const execAsync = promisify(exec);
 const cache = new Cache();
@@ -158,7 +159,7 @@ export default function Command() {
         <List.Section title="Pinned">
           {pinnedFilteredFonts.map((font) => (
             <FontListItem
-              key={font.path}
+              key={`${font.name}-${font.path}`}
               font={font}
               previewText={preferences.previewText}
               onReload={revalidate}
@@ -170,7 +171,7 @@ export default function Command() {
       <List.Section title={pinnedFilteredFonts.length > 0 ? "Other" : "All"}>
         {unpinnedFilteredFonts.map((font) => (
           <FontListItem
-            key={font.path}
+            key={`${font.name}-${font.path}`} // Updated key
             font={font}
             previewText={preferences.previewText}
             onReload={revalidate}
@@ -181,6 +182,7 @@ export default function Command() {
     </List>
   );
 }
+
 // Font list item component
 function FontListItem({
   font,
@@ -237,7 +239,7 @@ function FontListItem({
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title="Type" text={font.isSystem ? "System Font" : "User Font"} />
               <List.Item.Detail.Metadata.Label title="Path" text={font.path} />
-              <List.Item.Detail.Metadata.Label title="Styles" text={font.styles.join(", ")} />
+              <List.Item.Detail.Metadata.Label title="Styles" text={sortWeights(font.styles).join(", ")} />
               <List.Item.Detail.Metadata.Label title="Pinned" text={font.isPinned ? "Yes" : "No"} />
             </List.Item.Detail.Metadata>
           }
