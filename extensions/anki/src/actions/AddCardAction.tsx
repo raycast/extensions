@@ -11,7 +11,7 @@ import noteActions from '../api/noteActions';
 import { useCachedPromise, useForm } from '@raycast/utils';
 import deckActions from '../api/deckActions';
 import { useEffect, useMemo, useRef } from 'react';
-import { CreateCardFormValues, FieldRef, ShortcutDictionary } from '../types';
+import { AddCardCommandPreferences, CreateCardFormValues, FieldRef, ShortcutDictionary } from '../types';
 import modelActions from '../api/modelActions';
 import React from 'react';
 import { isValidFileType, transformSubmittedData } from '../util';
@@ -48,7 +48,7 @@ export default function AddCardAction({ deckName }: Props) {
     };
   }, []);
 
-  const { allow_empty_card_fields } = getPreferenceValues<Preferences>();
+  const { allow_empty_card_fields } = getPreferenceValues<AddCardCommandPreferences>();
 
   const { handleSubmit, itemProps, values, reset, focus, setValidationError } =
     useForm<CreateCardFormValues>({
