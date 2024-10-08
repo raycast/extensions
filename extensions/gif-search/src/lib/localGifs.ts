@@ -31,6 +31,10 @@ export async function getAll(type: LocalType) {
 }
 
 export async function save(gif: IGif, service: ServiceName, type: LocalType) {
+  if (service === "recents" && type === "favs") {
+    service = getRecentFavService(gif) as ServiceName;
+  }
+
   const favs = new Set(await get(service, type));
   favs.add(gif.id.toString());
 
@@ -61,4 +65,16 @@ export async function remove(gif: IGif, service: ServiceName, type: LocalType) {
     LocalStorage.setItem(getKey(deleteFavoritesFavsService, type), JSON.stringify(Array.from(favs))),
     LocalStorage.setItem(getKey("favorites", type), JSON.stringify(Array.from(favoritesFavs))),
   ]);
+}
+
+function getRecentFavService(gif: IGif) {
+  const gifUrl = gif["url"] || gif["download_url"];
+  if (!gifUrl) return "";
+
+  if (gifUrl.includes("giphy.com/gifs")) return "giphy";
+  if (gifUrl.includes("giphy.com/clips")) return "giphy-clips";
+  if (gifUrl.includes("tenor.com/view")) return "tenor";
+  if (gifUrl.includes("finergifs")) return "finergifs";
+
+  return "";
 }
