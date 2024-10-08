@@ -3,9 +3,11 @@
 ## [Enhancements] - {PR_MERGE_DATE}
 
 - Dark AND Light mode logo
-- In `Domains`, after "Adding" the list is automatically refreshed
-- In `Domains`, the "Add New Domain" action has a Keyboard Shortcut
 - A new `useResend` hook has been added in an attempt to make code cleaner
+- In `Domains`:
+    - after "Adding" the list is automatically refreshed
+    - the "Add New Domain" action has a Keyboard Shortcut
+    - the "Delete Domain" action has a Keyboard Shortcut
 
 ## [Feature] - 2024-01-28
 

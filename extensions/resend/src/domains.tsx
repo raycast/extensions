@@ -42,6 +42,7 @@ export default function Domains() {
         style: Toast.Style.Success,
       });
     }
+    revalidate();
     setIsLoading(false);
   }
 
@@ -77,7 +78,9 @@ export default function Domains() {
   ) : (
     <List isLoading={isLoading || isLoadingDomains} searchBarPlaceholder="Search domain">
       <List.Section title={title}>
-        {domains.map((item) => (
+        {domains.map((item) => {
+          const region = ADD_DOMAIN_REGIONS.find((region) => region.value === item.region);
+          return (
           <List.Item
             key={item.id}
             title={item.name}
@@ -85,24 +88,25 @@ export default function Domains() {
             subtitle={item.id}
             accessories={[
               { tag: { value: item.status, color: getStatusColor(item.status) } },
-              { icon: ADD_DOMAIN_REGIONS.find((region) => region.value === item.region)?.icon },
-              { tag: new Date(item.created_at) },
+              region ? { icon: region.icon, tooltip: region.title } : {},
+              { tag: new Date(item.created_at), tooltip: `Created: ${item.created_at}` },
             ]}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard title="Copy ID to Clipboard" content={item.id} />
                 <Action.CopyToClipboard title="Copy Name to Clipboard" content={item.name} />
                 <Action.OpenInBrowser title="View Domain in Dashboard" url={`${RESEND_URL}domains/${item.id}`} />
-                <Action
+                {item.status!=="pending" && <Action
                   title="Verify Domain"
                   icon={Icon.WrenchScrewdriver}
                   onAction={() => verifyDomainFromApi(item)}
-                />
+                />}
                 <Action
                   title="Delete Domain"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
                   onAction={() => confirmAndDelete(item)}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                 />
                 <ActionPanel.Section>
                   <Action.Push
@@ -120,7 +124,7 @@ export default function Domains() {
               </ActionPanel>
             }
           />
-        ))}
+        )})}
       </List.Section>
       {!isLoading && !isLoadingDomains && (
         <List.Section title="Actions">
