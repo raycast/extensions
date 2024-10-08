@@ -9,10 +9,6 @@ function getKey(service: ServiceName, type: LocalType) {
   return `${service}-${type}`;
 }
 
-export async function clear(service: ServiceName, type: LocalType) {
-  return await LocalStorage.removeItem(getKey(service, type));
-}
-
 export async function get(service: ServiceName, type: LocalType) {
   const favs = await LocalStorage.getItem<string>(getKey(service, type));
   const favsArr: string[] = JSON.parse(favs || "[]");
@@ -31,50 +27,26 @@ export async function getAll(type: LocalType) {
 }
 
 export async function save(gif: IGif, service: ServiceName, type: LocalType) {
-  if (service === "recents" && type === "favs") {
-    service = getRecentFavService(gif) as ServiceName;
-  }
-
-  const favs = new Set(await get(service, type));
-  favs.add(gif.id.toString());
-
-  const favoritesFavs = new Set(await get("favorites", type));
-  favoritesFavs.add(service + ":" + gif.id.toString());
-
-  return Promise.all([
-    LocalStorage.setItem(getKey(service, type), JSON.stringify(Array.from(favs))),
-    LocalStorage.setItem(getKey("favorites", type), JSON.stringify(Array.from(favoritesFavs))),
-  ]);
+  const gifs = new Set(await get(service, type));
+  gifs.add(gif.id.toString());
+  return LocalStorage.setItem(getKey(service, type), JSON.stringify(Array.from(gifs)));
 }
 
 export async function remove(gif: IGif, service: ServiceName, type: LocalType) {
-  const favoritesFavs = new Set(await get("favorites", type));
-  let deleteFavoritesFavsService: ServiceName = service;
-  for (const favs of favoritesFavs) {
-    if (favs.split(":")[1] === gif.id.toString()) {
-      deleteFavoritesFavsService = favs.split(":")[0] as ServiceName;
-      favoritesFavs.delete(favs);
-      break;
-    }
-  }
-
-  const favs = new Set(await get(deleteFavoritesFavsService, type));
-  favs.delete(gif.id.toString());
-
-  return Promise.all([
-    LocalStorage.setItem(getKey(deleteFavoritesFavsService, type), JSON.stringify(Array.from(favs))),
-    LocalStorage.setItem(getKey("favorites", type), JSON.stringify(Array.from(favoritesFavs))),
-  ]);
+  const gifs = new Set(await get(service, type));
+  console.log(gif.title, service, type);
+  gifs.delete(gif.id.toString());
+  return LocalStorage.setItem(getKey(service, type), JSON.stringify(Array.from(gifs)));
 }
 
-function getRecentFavService(gif: IGif) {
-  const gifUrl = gif["url"] || gif["download_url"];
-  if (!gifUrl) return "";
+export async function getAllFavIds(): Promise<string[]> {
+  const allFavs = await getAll("favs");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  return allFavs.flatMap(([_, ids]) => ids);
+}
 
-  if (gifUrl.includes("giphy.com/gifs")) return "giphy";
-  if (gifUrl.includes("giphy.com/clips")) return "giphy-clips";
-  if (gifUrl.includes("tenor.com/view")) return "tenor";
-  if (gifUrl.includes("finergifs")) return "finergifs";
-
-  return "";
+export async function getAllRecentIds(): Promise<string[]> {
+  const allRecents = await getAll("recent");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  return allRecents.flatMap(([_, ids]) => ids);
 }
