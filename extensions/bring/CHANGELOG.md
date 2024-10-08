@@ -1,5 +1,11 @@
 # Bring Changelog
 
+## [Enhancements] - {PR_MERGE_DATE}
+
+- Updated the rendering logic of grid items to show non-added items only when the user enters a search term.
+- Added items are now grouped by sections.
+- Introduced an empty view for when the shopping list is empty.
+
 ## [Update] - 2024-02-29
 
 - Added dropdown to select the shopping list and simplify the user interface.
