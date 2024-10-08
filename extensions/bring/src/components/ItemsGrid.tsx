@@ -16,15 +16,11 @@ export interface Item {
   specification?: string;
 }
 
-const ColorBringRed = "rgb(238, 82, 79)";
-const ColorBringGreen = "rgb(79, 171, 162)";
-
 export const ItemsGrid = ({
   list,
   sections,
   searchText,
   isLoading,
-  showAddedItemsOnTop,
   onSearchTextChange,
   onAddAction,
   onRemoveAction,
@@ -34,7 +30,6 @@ export const ItemsGrid = ({
   sections: Section[];
   searchText: string;
   isLoading: boolean;
-  showAddedItemsOnTop: boolean;
   onSearchTextChange: (text: string) => void;
   onAddAction: (item: Item, specification?: string) => void;
   onRemoveAction: (item: Item) => void;
@@ -53,22 +48,17 @@ export const ItemsGrid = ({
         title={name}
         subtitle={specification}
         accessory={{
-          icon: { source: Icon.CircleFilled, tintColor: isInPurchaseList ? ColorBringRed : ColorBringGreen },
+          icon: {
+            source: isInPurchaseList ? Icon.MinusCircleFilled : Icon.PlusCircleFilled,
+            tintColor: isInPurchaseList ? Color.Red : Color.Green,
+          },
         }}
         actions={
-          <ActionPanel title="Bring!">
+          <ActionPanel title={list.name}>
             {!isInPurchaseList ? (
-              <Action
-                title="Add to List"
-                onAction={() => onAddAction(item)}
-                icon={{ source: Icon.PlusCircle, tintColor: Color.Green }}
-              />
+              <Action title="Add to List" onAction={() => onAddAction(item)} icon={Icon.Plus} />
             ) : (
-              <Action
-                title="Remove from List"
-                onAction={() => onRemoveAction(item)}
-                icon={{ source: Icon.MinusCircle, tintColor: Color.Red }}
-              />
+              <Action title="Remove from List" onAction={() => onRemoveAction(item)} icon={Icon.Minus} />
             )}
           </ActionPanel>
         }
@@ -76,16 +66,18 @@ export const ItemsGrid = ({
     );
   }
 
-  function getAddedItems(sections: Section[]): Item[] {
-    return sections
-      .reduce((acc, value) => acc.concat(value.items), [] as Item[])
-      .filter((item) => item.isInPurchaseList);
-  }
+  const addedItems = sections.flatMap((section) => section.items.filter((item) => item.isInPurchaseList));
+
+  const addedSections = sections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => item.isInPurchaseList),
+    }))
+    .filter((section) => section.items.length > 0);
 
   return (
     <Grid
-      columns={5}
-      aspectRatio="4/3"
+      columns={6}
       searchText={searchText}
       searchBarPlaceholder="I need"
       onSearchTextChange={onSearchTextChange}
@@ -95,12 +87,27 @@ export const ItemsGrid = ({
       filtering={true}
       searchBarAccessory={DropdownComponent()}
     >
-      {showAddedItemsOnTop && getAddedItems(sections).map((item) => getGridItem(item))}
-      {sections.map(({ sectionId, name: sectionName, items }) => (
-        <Grid.Section key={sectionId} title={sectionName}>
-          {items.map((item) => getGridItem(item, [sectionName]))}
-        </Grid.Section>
-      ))}
+      {searchText.length === 0 ? (
+        addedItems.length > 0 ? (
+          addedSections.map(({ sectionId, name: sectionName, items }) => (
+            <Grid.Section key={sectionId} title={sectionName}>
+              {items.map((item) => getGridItem(item, [sectionName]))}
+            </Grid.Section>
+          ))
+        ) : (
+          <Grid.EmptyView
+            icon={Icon.CheckList}
+            title="No items added"
+            description="Search for items to add to your list"
+          />
+        )
+      ) : (
+        sections.map(({ sectionId, name: sectionName, items }) => (
+          <Grid.Section key={sectionId} title={sectionName}>
+            {items.filter((item) => !item.isInPurchaseList).map((item) => getGridItem(item, [sectionName]))}
+          </Grid.Section>
+        ))
+      )}
     </Grid>
   );
 };

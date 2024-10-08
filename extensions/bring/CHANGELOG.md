@@ -1,6 +1,7 @@
 # Bring Changelog
 
 ## [Update] - 2024-02-29
+
 - Added dropdown to select the shopping list and simplify the user interface.
 - Changed aspect ratio of the grid to 4:3.
 - Simplified the `getBringApi` login function and added error handling.
