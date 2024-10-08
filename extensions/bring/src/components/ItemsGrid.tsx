@@ -47,12 +47,7 @@ export const ItemsGrid = ({
         keywords={keywords}
         title={name}
         subtitle={specification}
-        accessory={{
-          icon: {
-            source: isInPurchaseList ? Icon.MinusCircleFilled : Icon.PlusCircleFilled,
-            tintColor: isInPurchaseList ? Color.Red : Color.Green,
-          },
-        }}
+        accessory={{ icon: isInPurchaseList ? Icon.MinusCircleFilled : Icon.PlusCircleFilled }}
         actions={
           <ActionPanel title={list.name}>
             {!isInPurchaseList ? (
