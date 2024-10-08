@@ -3,6 +3,7 @@
 ## [Now supports ALL Sites in Dropdown] - {PR_MERGE_DATE}
 
 - Replaced `useEffect` with a `usePromise` for cleaner site fetching
+- Replaced `fetch` with a `useFetch` in getDetails
 
 ## [Enhancements] - 2023-08-04
 
