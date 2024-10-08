@@ -17,3 +17,4 @@ Only thing you have to do is to set desired user's username and you'll be able t
 - List movies and images
 - Play YouTube Trailers of the selected title
 - Copy name or URL to clipboard
+- View large poster

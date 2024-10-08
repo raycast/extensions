@@ -5,7 +5,6 @@ const USERINFO_URL = "https://mustapp.com/api/users/uri";
 import { UserResponse } from "../types/UserResponse";
 import { ListResponse, Product } from "../types/ListResponse";
 import { useFetch } from "@raycast/utils";
-import { useMemo } from "react";
 
 interface WantList {
   series: Product[];
@@ -25,8 +24,6 @@ const useMust = (username: string) => {
     },
   });
 
-  const listsWant = useMemo(() => user?.lists?.want || [], [user?.lists]);
-
   // Series info fetching
   const { isLoading: isLoadingList, data: list } = useFetch<ListResponse[], unknown, WantList>(
     `https://mustapp.com/api/users/id/${user?.id}/products?embed=product`,
@@ -37,7 +34,7 @@ const useMust = (username: string) => {
         "User-Agent": "RaycastApp",
       },
       body: JSON.stringify({
-        ids: listsWant,
+        ids: user?.lists.want ?? [],
       }),
       mapResult(result) {
         const products = result.map((item) => item.product);
@@ -56,7 +53,7 @@ const useMust = (username: string) => {
         series: [],
         movies: [],
       },
-      execute: listsWant.length > 0,
+      execute: user && !isLoadingUser,
       failureToastOptions: {
         title: "List Error",
       },

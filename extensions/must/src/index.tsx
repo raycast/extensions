@@ -1,23 +1,24 @@
 import React, { useState } from "react";
-import { getPreferenceValues, ActionPanel, List, Icon, Action } from "@raycast/api";
+import { getPreferenceValues, ActionPanel, List, Icon, Action, Keyboard } from "@raycast/api";
 
 // Types
 import { Product } from "./types/ListResponse";
 
 // Hooks
 import useMust from "./hooks/useMust";
-import { getFavicon } from "@raycast/utils";
+import { useCachedState } from "@raycast/utils";
 
 const Raycast: React.FC = () => {
   const { username }: Preferences = getPreferenceValues();
   const { isLoading, list } = useMust(username);
   const [filter, setFilter] = useState("");
+  const [isShowingDetail, setIsShowingDetail] = useCachedState("show-details", false);
 
   // Render
   return (
     <List
       isLoading={isLoading}
-      isShowingDetail
+      isShowingDetail={isShowingDetail}
       searchBarPlaceholder="Search entries..."
       searchBarAccessory={
         <List.Dropdown tooltip="Filter" onChange={setFilter}>
@@ -29,32 +30,35 @@ const Raycast: React.FC = () => {
     >
       {filter !== "movies" && (
         <List.Section title="Series" subtitle={String(list?.series.length)}>
-          {list?.series.map((show) => <MustListItem key={show.id} item={show} />)}
+          {list?.series.map((show) => <MustListItem key={show.id} item={show} toggleDetails={() => setIsShowingDetail(prev => !prev)} />)}
         </List.Section>
       )}
       {filter !== "series" && (
         <List.Section title="Movies" subtitle={String(list?.movies.length)}>
-          {list?.movies.map((movie) => <MustListItem key={movie.id} item={movie} />)}
+          {list?.movies.map((movie) => <MustListItem key={movie.id} item={movie} toggleDetails={() => setIsShowingDetail(prev => !prev)} />)}
         </List.Section>
       )}
     </List>
   );
 };
 
-const MustListItem: React.FC<{ item: Product }> = ({ item }) => (
+const MustListItem: React.FC<{ item: Product, toggleDetails: () => void }> = ({ item, toggleDetails }) => {
+  const poster = `https://image.tmdb.org/t/p/w342${item.poster_file_path}`;
+  return(
   <List.Item
     title={item.title}
-    icon={`https://image.tmdb.org/t/p/w342${item.poster_file_path}`}
+    icon={poster}
     actions={
       <ActionPanel>
         <Action.OpenInBrowser url={`https://mustapp.com/p/${item.id}`} icon="command-icon.png" title="Open on Must" />
         {item.trailer_url && (
           <Action.OpenInBrowser
             url={item.trailer_url}
-            icon={getFavicon(item.trailer_url)}
+            icon="yt.png"
             title="Open Trailer on Youtube"
           />
         )}
+        <Action icon={Icon.AppWindowSidebarLeft} title="Toggle Poster" onAction={toggleDetails} shortcut={Keyboard.Shortcut.Common.ToggleQuickLook} />
 
         <Action.CopyToClipboard title="Copy Name to Clipboard" content={item.title} />
         <Action.CopyToClipboard title="Copy Must URL to Clipboard" content={`https://mustapp.com/p/${item.id}`} />
@@ -71,10 +75,10 @@ const MustListItem: React.FC<{ item: Product }> = ({ item }) => (
     ]}
     detail={
       <List.Item.Detail
-        markdown={`![Poster](https://media.mustapp.me/must/posters/w342${item.poster_file_path}.jpg)`}
+        markdown={`![Poster](${poster})`}
       />
     }
   />
-);
+)};
 
 export default Raycast;
