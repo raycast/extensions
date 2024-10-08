@@ -50,11 +50,10 @@ export default function Command() {
       searchBarPlaceholder="Enter ingredients separated by commas..."
       throttle
     >
-      {searchText.trim() === "" ? (
-        <EmptyList />
-      ) : (
-        results.map((result, index) => <IngredientListItem key={index} ingredient={result} />)
-      )}
+      <EmptyList searchText={searchText} />
+      {results.map((result, index) => (
+        <IngredientListItem key={index} ingredient={result} />
+      ))}
     </List>
   );
 }
