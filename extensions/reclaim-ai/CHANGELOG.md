@@ -1,5 +1,8 @@
 # reclaim Changelog
 
+## [Fixes] - 2024-10-08
+- Don't cache moment data, should always be up to date
+
 ## [Fixes] - 2024-09-05
 - Route useFetch through useApi
 
