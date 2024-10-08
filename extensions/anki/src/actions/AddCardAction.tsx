@@ -1,4 +1,12 @@
-import { Action, ActionPanel, Detail, Form, getPreferenceValues, showToast, Toast } from '@raycast/api';
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Form,
+  getPreferenceValues,
+  showToast,
+  Toast,
+} from '@raycast/api';
 import noteActions from '../api/noteActions';
 import { useCachedPromise, useForm } from '@raycast/utils';
 import deckActions from '../api/deckActions';
@@ -40,7 +48,7 @@ export default function AddCardAction({ deckName }: Props) {
     };
   }, []);
 
-  const { allow_empty_card_fields} = getPreferenceValues<Preferences>();
+  const { allow_empty_card_fields } = getPreferenceValues<Preferences>();
 
   const { handleSubmit, itemProps, values, reset, focus, setValidationError } =
     useForm<CreateCardFormValues>({
@@ -60,13 +68,13 @@ export default function AddCardAction({ deckName }: Props) {
 
           // Validate card fields
           if (!allow_empty_card_fields) {
-              for (const fieldName of fieldNames) {
-                  const fieldValue = values[`field_${fieldName}`];
-                  if (!fieldValue || (typeof fieldValue === 'string' && fieldValue.trim() === '')) {
-                      setValidationError(`field_${fieldName}`, `${fieldName} is required`);
-                      return;
-                  }
+            for (const fieldName of fieldNames) {
+              const fieldValue = values[`field_${fieldName}`];
+              if (!fieldValue || (typeof fieldValue === 'string' && fieldValue.trim() === '')) {
+                setValidationError(`field_${fieldName}`, `${fieldName} is required`);
+                return;
               }
+            }
           }
 
           await noteActions.addNote(createCardRequestBody);
