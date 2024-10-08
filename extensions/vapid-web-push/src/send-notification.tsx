@@ -1,14 +1,16 @@
-import { Action, ActionPanel, Form, showToast, Toast, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, showHUD, getPreferenceValues } from "@raycast/api";
 import { useForm, FormValidation, useLocalStorage } from "@raycast/utils";
 import webpush, { PushSubscription } from "web-push";
-import { NotificationProps } from "./setup";
 
 interface NotificationFormValues {
   title: string;
   body: string;
 }
+
 export default function SendNotification() {
-  const { value: vapidKeys, isLoading } = useLocalStorage<NotificationProps>("vapid-keys", {
+  const { privateKey, publicKey, email, p256dh, auth, endpoint } = getPreferenceValues<Preferences>();
+
+  const { value: vapidKeys, isLoading } = useLocalStorage<Preferences>("vapid-keys", {
     email: "",
     publicKey: "",
     privateKey: "",
@@ -24,19 +26,20 @@ export default function SendNotification() {
         throw new Error("No VAPID keys available");
       }
 
-      webpush.setVapidDetails(`mailto:${vapidKeys.email}`, vapidKeys.publicKey, vapidKeys.privateKey);
+      webpush.setVapidDetails(`mailto:${email}`, publicKey, privateKey);
 
       const subscription: PushSubscription = {
-        endpoint: vapidKeys.endpoint,
+        endpoint: endpoint,
         keys: {
-          p256dh: vapidKeys.p256dh,
-          auth: vapidKeys.auth,
+          p256dh: p256dh,
+          auth: auth,
         },
       };
 
       console.log("Sending notification", {
         subscription,
       });
+
       if (!subscription) {
         await showHUD("No subscription available");
         throw new Error("No subscription available");

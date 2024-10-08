@@ -1,10 +1,8 @@
-import { Action, ActionPanel, Form, showToast, Toast, Detail, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, Detail, useNavigation, getPreferenceValues } from "@raycast/api";
 import { useForm, FormValidation, useLocalStorage } from "@raycast/utils";
 import webpush from "web-push";
-import { useEffect } from "react";
-import { NotificationProps } from "./setup";
 
-interface VapidKeysFormValues {
+interface GenerateVapidKeysFormValues {
   email: string;
 }
 
@@ -26,21 +24,16 @@ async function generateVapidKeys(email: string) {
 }
 
 export default function Command() {
-  const {
-    value: vapidKeys,
-    setValue: setVapidKeys,
-    isLoading,
-  } = useLocalStorage<NotificationProps>("vapid-keys", {
+  const { email } = getPreferenceValues<Preferences>();
+  const { push } = useNavigation();
+
+  const { isLoading, setValue } = useLocalStorage("vapid-keys", {
     email: "",
     publicKey: "",
     privateKey: "",
-    endpoint: "",
-    p256dh: "",
-    auth: "",
   });
-  const { push } = useNavigation();
 
-  const { handleSubmit, itemProps } = useForm<VapidKeysFormValues>({
+  const { handleSubmit, itemProps } = useForm<GenerateVapidKeysFormValues>({
     async onSubmit(values) {
       const { email } = values;
       const { publicKey, privateKey } = await generateVapidKeys(email);
@@ -60,28 +53,17 @@ export default function Command() {
         message: markdown,
       });
 
-      await setVapidKeys({
-        email,
-        publicKey,
-        privateKey,
-        endpoint: "",
-        p256dh: "",
-        auth: "",
-      });
+      await setValue({ email, publicKey, privateKey });
       push(<Details />);
       return;
     },
     validation: {
       email: FormValidation.Required,
     },
-    initialValues: vapidKeys,
+    initialValues: {
+      email,
+    },
   });
-
-  useEffect(() => {
-    if (vapidKeys?.privateKey) {
-      push(<Details />);
-    }
-  }, [vapidKeys?.privateKey, push]);
 
   return (
     <Form
@@ -91,10 +73,17 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Generate Vapid Keys" onSubmit={handleSubmit} />
+          <Action title="View Generated Keys" onAction={() => push(<Details />)} />
         </ActionPanel>
       }
     >
-      <Form.TextField title="Email" placeholder="Enter email" storeValue={true} {...itemProps.email} />
+      <Form.TextField
+        defaultValue={email}
+        title="Email"
+        placeholder="Enter email"
+        storeValue={true}
+        {...itemProps.email}
+      />
     </Form>
   );
 }
@@ -105,6 +94,7 @@ function Details() {
     publicKey: "",
     privateKey: "",
   });
+  const { pop } = useNavigation();
 
   const markdown = `# Generated VAPID Keys for ${vapidKeys?.email}
  
@@ -114,6 +104,16 @@ function Details() {
   \n ### privateKey:
   \`${vapidKeys?.privateKey}\`
   `;
-
-  return <Detail isLoading={isLoading} markdown={markdown} />;
+  // ADd action to redirect to the generated keys
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={markdown}
+      actions={
+        <ActionPanel>
+          <Action title="Generate Again" onAction={() => pop()} />
+        </ActionPanel>
+      }
+    />
+  );
 }

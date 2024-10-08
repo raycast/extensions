@@ -8,6 +8,65 @@
   "author": "iksnerd",
   "license": "MIT",
   "preferences": [
+    {
+      "key": "email",
+      "title": "Email",
+      "description": "The email address associated with the VAPID key pair.",
+      "type": "textfield",
+      "defaultValue": "",
+      "name": "email",
+      "required": true,
+      "placeholder": "me@example.com",
+      "validation": {
+        "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+        "message": "Please enter a valid email address."
+      }
+    },
+    {
+      "key": "publicKey",
+      "title": "Public Key",
+      "description": "The public key for the VAPID key pair.",
+      "type": "textfield",
+      "defaultValue": "",
+      "name": "publicKey",
+      "required": true
+    },
+    {
+      "key": "privateKey",
+      "title": "Private Key",
+      "description": "The private key for the VAPID key pair.",
+      "type": "textfield",
+      "defaultValue": "",
+      "name": "privateKey",
+      "required": true
+    },
+    {
+      "key": "endpoint",
+      "title": "Endpoint (Subscription)",
+      "description": "The endpoint of the notification subscription.",
+      "type": "textfield",
+      "defaultValue": "",
+      "name": "endpoint",
+      "required": true
+    },
+    {
+      "key": "p256dh",
+      "title": "p256dh (Subscription)",
+      "description": "The p256dh key of the notification subscription.",
+      "type": "textfield",
+      "defaultValue": "",
+      "name": "p256dh",
+      "required": true
+    },
+    {
+      "key": "auth",
+      "title": "Auth (Subscription)",
+      "description": "The auth key of the notification subscription.",
+      "type": "textfield",
+      "defaultValue": "",
+      "name": "auth",
+      "required": true
+    }
   ],
   "commands": [
     {
@@ -33,7 +92,17 @@
       "icon": "logo.png",
       "description": "Generate VAPID keys for Web Push Notifications.",
       "mode": "view",
-      "preferences": []
+      "preferences": [
+        {
+          "key": "email",
+          "title": "Email",
+          "description": "The email address associated with the VAPID key pair.",
+          "type": "textfield",
+          "defaultValue": "",
+          "name": "email",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
