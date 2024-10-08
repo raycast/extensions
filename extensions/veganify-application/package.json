@@ -16,7 +16,7 @@
     {
       "name": "check-ingredients",
       "title": "Check Ingredients",
-      "subtitle": "Analyze ingredients for vegan compliance with one simple search",
+      "subtitle": "Veganify",
       "description": "Quickly determine if a specific ingredient or a list of ingredients is vegan-friendly. Get reliable results powered by the comprehensive Veganify database.",
       "mode": "view"
     }
