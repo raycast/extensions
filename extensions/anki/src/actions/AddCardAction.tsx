@@ -11,7 +11,12 @@ import noteActions from '../api/noteActions';
 import { useCachedPromise, useForm } from '@raycast/utils';
 import deckActions from '../api/deckActions';
 import { useEffect, useMemo, useRef } from 'react';
-import { AddCardCommandPreferences, CreateCardFormValues, FieldRef, ShortcutDictionary } from '../types';
+import {
+  AddCardCommandPreferences,
+  CreateCardFormValues,
+  FieldRef,
+  ShortcutDictionary,
+} from '../types';
 import modelActions from '../api/modelActions';
 import React from 'react';
 import { isValidFileType, transformSubmittedData } from '../util';
