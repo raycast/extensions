@@ -1,12 +1,6 @@
 import { useEffect, useState } from "react";
-import {
-  APIKey,
-  CreateAPIKeyRequest,
-  CreateAPIKeyRequestForm,
-  GetAPIKeysResponse,
-  GetDomainsResponse,
-} from "./utils/types";
-import { createApiKey, deleteApiKey, getApiKeys, getDomains } from "./utils/api";
+import { APIKey, CreateAPIKeyRequest, CreateAPIKeyRequestForm } from "./utils/types";
+import { createApiKey, deleteApiKey } from "./utils/api";
 import {
   Action,
   ActionPanel,
@@ -23,32 +17,21 @@ import {
 import { FormValidation, getFavicon, useForm } from "@raycast/utils";
 import { CREATE_API_KEY_PERMISSIONS, RESEND_URL } from "./utils/constants";
 import ErrorComponent from "./components/ErrorComponent";
+import { useGetAPIKeys, useGetDomains } from "./lib/hooks";
 
 export default function APIKeys() {
   const { push } = useNavigation();
-  const [isLoading, setIsLoading] = useState(true);
-  const [APIKeysResponse, setAPIKeysResponse] = useState<GetAPIKeysResponse>();
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  async function getAPIKeysFromApi() {
-    setIsLoading(true);
-    const response = await getApiKeys();
-    if (!("statusCode" in response)) {
-      const numOfKeys = response.data.length;
-      await showToast({
-        title: "Success",
-        message: `Fetched ${numOfKeys} ${numOfKeys === 1 ? "API Key" : "API Keys"}`,
-        style: Toast.Style.Success,
-      });
-      setAPIKeysResponse(response);
-    } else if (response.name === "validation_error" || response.name === "restricted_api_key") {
-      setError(response.message);
-    }
-    setIsLoading(false);
-  }
+  const { isLoading: isLoadingKeys, keys, error: errorKeys, revalidate } = useGetAPIKeys();
+
   useEffect(() => {
-    getAPIKeysFromApi();
-  }, []);
+    if (!errorKeys) return;
+    if (errorKeys.cause === "validation_error" || errorKeys.cause === "restricted_api_key") {
+      setError(errorKeys.message);
+    }
+  }, [errorKeys]);
 
   async function confirmAndDelete(item: APIKey) {
     if (
@@ -61,20 +44,20 @@ export default function APIKeys() {
       const response = await deleteApiKey(item.id);
       if (!("statusCode" in response)) {
         await showToast(Toast.Style.Success, "Deleted API Key");
-        await getAPIKeysFromApi();
+        revalidate();
       }
       setIsLoading(false);
     }
   }
 
-  const numOfKeys = APIKeysResponse && APIKeysResponse.data.length;
-  const title = APIKeysResponse && `${numOfKeys} ${numOfKeys === 1 ? "API Key" : "API Keys"}`;
+  const numOfKeys = keys.length;
+  const title = `${numOfKeys} ${numOfKeys === 1 ? "API Key" : "API Keys"}`;
   return error ? (
     <ErrorComponent error={error} />
   ) : (
-    <List isLoading={isLoading} searchBarPlaceholder="Search key">
+    <List isLoading={isLoading || isLoadingKeys} searchBarPlaceholder="Search key">
       <List.Section title={title}>
-        {APIKeysResponse?.data.map((item) => (
+        {keys.map((item) => (
           <List.Item
             key={item.id}
             title={item.name || "<NO_NAME>"}
@@ -95,9 +78,9 @@ export default function APIKeys() {
                   <Action
                     title="Create New API Key"
                     icon={Icon.Plus}
-                    onAction={() => push(<APIKeysCreate onKeyCreated={getAPIKeysFromApi} />)}
+                    onAction={() => push(<APIKeysCreate onKeyCreated={revalidate} />)}
                   />
-                  <Action title="Reload API Keys" icon={Icon.Redo} onAction={getAPIKeysFromApi} />
+                  <Action title="Reload API Keys" icon={Icon.Redo} onAction={revalidate} />
                   <Action.OpenInBrowser
                     title="View API Reference"
                     url={`${RESEND_URL}docs/api-reference/api-keys/list-api-keys`}
@@ -108,7 +91,7 @@ export default function APIKeys() {
           />
         ))}
       </List.Section>
-      {!isLoading && (
+      {!isLoading && !isLoadingKeys && (
         <List.Section title="Actions">
           <List.Item
             title="Create New API Key"
@@ -118,7 +101,7 @@ export default function APIKeys() {
                 <Action
                   title="Create New API Key"
                   icon={Icon.Plus}
-                  onAction={() => push(<APIKeysCreate onKeyCreated={getAPIKeysFromApi} />)}
+                  onAction={() => push(<APIKeysCreate onKeyCreated={revalidate} />)}
                 />
                 <Action.OpenInBrowser
                   title="View API Reference"
@@ -132,7 +115,7 @@ export default function APIKeys() {
             icon={Icon.Redo}
             actions={
               <ActionPanel>
-                <Action title="Reload API Keys" icon={Icon.Redo} onAction={getAPIKeysFromApi} />
+                <Action title="Reload API Keys" icon={Icon.Redo} onAction={revalidate} />
               </ActionPanel>
             }
           />
@@ -149,7 +132,6 @@ function APIKeysCreate({ onKeyCreated }: APIKeysCreateProps) {
   const { pop } = useNavigation();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [domainsResponse, setDomainsResponse] = useState<GetDomainsResponse>();
 
   const { handleSubmit, itemProps } = useForm<CreateAPIKeyRequestForm>({
     async onSubmit(values) {
@@ -183,27 +165,11 @@ function APIKeysCreate({ onKeyCreated }: APIKeysCreateProps) {
     },
   });
 
-  async function getDomainsFromApi() {
-    setIsLoading(true);
-    const response = await getDomains();
-    if (!("statusCode" in response)) {
-      const numOfDomains = response.data.length;
-      await showToast({
-        title: "Success",
-        message: `Fetched ${numOfDomains} ${numOfDomains === 1 ? "domain" : "domains"}`,
-        style: Toast.Style.Success,
-      });
-      setDomainsResponse(response);
-    }
-    setIsLoading(false);
-  }
-  useEffect(() => {
-    getDomainsFromApi();
-  }, []);
+  const { isLoading: isLoadingDomains, domains } = useGetDomains();
 
   return (
     <Form
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingDomains}
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Check} onSubmit={handleSubmit} />
@@ -232,7 +198,7 @@ function APIKeysCreate({ onKeyCreated }: APIKeysCreateProps) {
         {...itemProps.domain_id}
       >
         <Form.Dropdown.Item title="All domains" value="all" />
-        {domainsResponse?.data.map((domainItem) => (
+        {domains.map((domainItem) => (
           <Form.Dropdown.Item
             key={domainItem.id}
             title={domainItem.name}

@@ -1,9 +1,10 @@
 # Resend Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Maintenance Release] - {PR_MERGE_DATE}
 
 - Dark AND Light mode logo
 - A new `useResend` hook has been added in an attempt to make code cleaner
+- Update dependencies
 - In `Domains`:
     - after "Adding" the list is automatically refreshed
     - the "Add New Domain" action has a Keyboard Shortcut

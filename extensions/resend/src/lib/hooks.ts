@@ -1,7 +1,7 @@
 import { useFetch } from "@raycast/utils";
 import { API_HEADERS, API_URL } from "../utils/constants";
 import { showToast, Toast } from "@raycast/api";
-import { ErrorResponse, GetDomainsResponse } from "../utils/types";
+import { ErrorResponse, GetAPIKeysResponse, GetDomainsResponse } from "../utils/types";
 
 const useResend = <T>(
   endpoint: string,
@@ -44,4 +44,20 @@ export const useGetDomains = () => {
   });
   const domains = data?.data ?? [];
   return { domains, ...rest };
+};
+
+export const useGetAPIKeys = () => {
+  const { data, ...rest } = useResend<GetAPIKeysResponse>("api-keys", {
+    animatedToastMessage: "Fetching API Keys",
+    async onData(data) {
+      const numOfKeys = data.data.length;
+      await showToast({
+        title: "Success",
+        message: `Fetched ${numOfKeys} ${numOfKeys === 1 ? "API Key" : "API Keys"}`,
+        style: Toast.Style.Success,
+      });
+    },
+  });
+  const keys = data?.data ?? [];
+  return { keys, ...rest };
 };

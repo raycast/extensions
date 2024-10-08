@@ -27,7 +27,7 @@ export default function Domains() {
 
   useEffect(() => {
     if (!errorDomains) return;
-    if (errorDomains.name === "validation_error" || errorDomains.name === "restricted_api_key") {
+    if (errorDomains.cause === "validation_error" || errorDomains.cause === "restricted_api_key") {
       setError(errorDomains.message);
     }
   }, [errorDomains]);
@@ -81,50 +81,53 @@ export default function Domains() {
         {domains.map((item) => {
           const region = ADD_DOMAIN_REGIONS.find((region) => region.value === item.region);
           return (
-          <List.Item
-            key={item.id}
-            title={item.name}
-            icon={getFavicon(`https://${item.name}`, { fallback: Icon.Globe })}
-            subtitle={item.id}
-            accessories={[
-              { tag: { value: item.status, color: getStatusColor(item.status) } },
-              region ? { icon: region.icon, tooltip: region.title } : {},
-              { tag: new Date(item.created_at), tooltip: `Created: ${item.created_at}` },
-            ]}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard title="Copy ID to Clipboard" content={item.id} />
-                <Action.CopyToClipboard title="Copy Name to Clipboard" content={item.name} />
-                <Action.OpenInBrowser title="View Domain in Dashboard" url={`${RESEND_URL}domains/${item.id}`} />
-                {item.status!=="pending" && <Action
-                  title="Verify Domain"
-                  icon={Icon.WrenchScrewdriver}
-                  onAction={() => verifyDomainFromApi(item)}
-                />}
-                <Action
-                  title="Delete Domain"
-                  icon={Icon.Trash}
-                  style={Action.Style.Destructive}
-                  onAction={() => confirmAndDelete(item)}
-                  shortcut={Keyboard.Shortcut.Common.Remove}
-                />
-                <ActionPanel.Section>
-                  <Action.Push
-                    title="Add New Domain"
-                    icon={Icon.Plus}
-                    target={<DomainsAdd onDomainAdded={revalidate} />}
-                    shortcut={Keyboard.Shortcut.Common.New}
+            <List.Item
+              key={item.id}
+              title={item.name}
+              icon={getFavicon(`https://${item.name}`, { fallback: Icon.Globe })}
+              subtitle={item.id}
+              accessories={[
+                { tag: { value: item.status, color: getStatusColor(item.status) } },
+                region ? { icon: region.icon, tooltip: region.title } : {},
+                { tag: new Date(item.created_at), tooltip: `Created: ${item.created_at}` },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard title="Copy ID to Clipboard" content={item.id} />
+                  <Action.CopyToClipboard title="Copy Name to Clipboard" content={item.name} />
+                  <Action.OpenInBrowser title="View Domain in Dashboard" url={`${RESEND_URL}domains/${item.id}`} />
+                  {item.status !== "pending" && (
+                    <Action
+                      title="Verify Domain"
+                      icon={Icon.WrenchScrewdriver}
+                      onAction={() => verifyDomainFromApi(item)}
+                    />
+                  )}
+                  <Action
+                    title="Delete Domain"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    onAction={() => confirmAndDelete(item)}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                   />
-                  <Action title="Reload Domains" icon={Icon.Redo} onAction={revalidate} />
-                  <Action.OpenInBrowser
-                    title="View API Reference"
-                    url={`${RESEND_URL}docs/api-reference/domains/list-domains`}
-                  />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        )})}
+                  <ActionPanel.Section>
+                    <Action.Push
+                      title="Add New Domain"
+                      icon={Icon.Plus}
+                      target={<DomainsAdd onDomainAdded={revalidate} />}
+                      shortcut={Keyboard.Shortcut.Common.New}
+                    />
+                    <Action title="Reload Domains" icon={Icon.Redo} onAction={revalidate} />
+                    <Action.OpenInBrowser
+                      title="View API Reference"
+                      url={`${RESEND_URL}docs/api-reference/domains/list-domains`}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          );
+        })}
       </List.Section>
       {!isLoading && !isLoadingDomains && (
         <List.Section title="Actions">
