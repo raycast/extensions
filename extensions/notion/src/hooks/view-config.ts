@@ -2,26 +2,25 @@ import { LocalStorage, Cache, showToast, Toast, open, popToRoot } from "@raycast
 import { useCachedState } from "@raycast/utils";
 import { useEffect } from "react";
 
-export function useVisibleDatabasePropIds(
-  context: "list",
-  databaseId: string | undefined,
-): { visiblePropIds: string[]; setVisiblePropIds: (value: string[]) => void };
-export function useVisibleDatabasePropIds(
-  context: "form" | "page",
-  databaseId: string | undefined,
-  initialValue: string[],
-): { visiblePropIds: string[]; setVisiblePropIds: (value: string[]) => void };
+import type { DatabaseProperty } from "../utils/notion";
+
 export function useVisibleDatabasePropIds(
   context: "list" | "page" | "form",
   databaseId: string | undefined,
-  initialValue: string[] = [],
+  databaseProps: DatabaseProperty[],
 ) {
-  const [visiblePropIds, setVisiblePropIds] = useCachedState<string[]>(
+  const [_visiblePropIds, setVisiblePropIds] = useCachedState<string[]>(
     `visible_props-${databaseId ?? "no_database_id"}-${context}`,
-    initialValue,
   );
 
-  return { visiblePropIds, setVisiblePropIds };
+  const visiblePropIds = _visiblePropIds ?? databaseProps.map((prop) => prop.id);
+
+  return {
+    visiblePropIds,
+    hideProperty: (propertyID: string) => setVisiblePropIds(visiblePropIds.filter((id) => id != propertyID)),
+    showProperty: (propertyID: string) => setVisiblePropIds([...visiblePropIds, propertyID]),
+    setPropertyOrder: (propertyIds: string[]) => setVisiblePropIds(propertyIds),
+  };
 }
 
 export function useKanbanViewConfig(databaseId: string) {

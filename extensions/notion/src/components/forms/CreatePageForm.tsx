@@ -68,7 +68,7 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
 
   const [databaseId, setDatabaseId] = useState<string | null>(initialDatabaseId ? initialDatabaseId : null);
   const { data: databaseProperties } = useDatabaseProperties(databaseId, filterNoEditableProperties);
-  const { visiblePropIds, setVisiblePropIds } = useVisiblePropIds(
+  const { visiblePropIds, showProperty, hideProperty, setPropertyOrder } = useVisiblePropIds(
     databaseId,
     databaseProperties,
     launchContext?.visiblePropIds,
@@ -217,17 +217,13 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
               <ActionSetVisibleProperties
                 databaseProperties={databaseProperties.filter((dp) => dp.id !== "title")}
                 selectedPropertiesIds={visiblePropIds || databasePropertyIds}
-                onSelect={(propertyId) =>
-                  setVisiblePropIds(visiblePropIds ? [...visiblePropIds, propertyId] : [propertyId])
-                }
-                onUnselect={(propertyId) =>
-                  setVisiblePropIds((visiblePropIds || databasePropertyIds).filter((pid) => pid !== propertyId))
-                }
+                onSelect={showProperty}
+                onUnselect={hideProperty}
               />
               <ActionSetOrderProperties
                 databaseProperties={databaseProperties}
                 propertiesOrder={visiblePropIds || databasePropertyIds}
-                onChangeOrder={setVisiblePropIds}
+                onChangeOrder={setPropertyOrder}
               />
             </ActionPanel.Section>
           ) : null}
@@ -310,12 +306,13 @@ function useVisiblePropIds(
 ): ReturnType<typeof useVisibleDatabasePropIds> {
   if (quicklinkProps) {
     const [visiblePropIds, setVisiblePropIds] = useState<string[]>(quicklinkProps);
-    return { visiblePropIds, setVisiblePropIds };
+    return {
+      visiblePropIds,
+      hideProperty: (propertyID: string) => setVisiblePropIds(visiblePropIds.filter((id) => id != propertyID)),
+      showProperty: (propertyID: string) => setVisiblePropIds([...visiblePropIds, propertyID]),
+      setPropertyOrder: setVisiblePropIds,
+    };
   } else {
-    return useVisibleDatabasePropIds(
-      "form",
-      databaseId ?? "__no_id__",
-      databaseProperties.map((dp) => dp.id),
-    );
+    return useVisibleDatabasePropIds("form", databaseId ?? "__no_id__", databaseProperties);
   }
 }

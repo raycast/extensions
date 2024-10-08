@@ -54,7 +54,11 @@ export function PageListItem({
   mutate,
   isKanban,
 }: PageListItemProps) {
-  const { visiblePropIds, setVisiblePropIds } = useVisibleDatabasePropIds("list", page.parent_database_id);
+  const { visiblePropIds, showProperty, hideProperty } = useVisibleDatabasePropIds(
+    "list",
+    page.parent_database_id,
+    databaseProperties ?? [],
+  );
 
   const accessories: List.Item.Accessory[] = [];
 
@@ -231,8 +235,8 @@ export function PageListItem({
               <ActionSetVisibleProperties
                 databaseProperties={databaseProperties}
                 selectedPropertiesIds={visiblePropIds}
-                onSelect={(propertyId: string) => setVisiblePropIds([...visiblePropIds, propertyId])}
-                onUnselect={(propertyId: string) => setVisiblePropIds(visiblePropIds.filter((id) => id != propertyId))}
+                onSelect={showProperty}
+                onUnselect={hideProperty}
                 hideTitle
               />
             )}
