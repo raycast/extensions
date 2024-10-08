@@ -1,6 +1,6 @@
 # GIF Search Changelog
 
-## [Fix Recent GIFs can't be add to favorites] - {PR_MERGE_DATE}
+## [Fix Recent GIFs can't be add to favorites] - 2024-10-08
 
 - Fixes a bug where recent GIFs couldn't be added to favorites
 
