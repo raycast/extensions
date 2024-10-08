@@ -53,7 +53,16 @@
       "title": "Add Card",
       "subtitle": "Anki",
       "description": "Add a card to a deck in Anki",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+          {
+              "name": "allow_empty_card_fields",
+              "type": "checkbox",
+              "label": "Allow empty card fields",
+              "required": false,
+              "description": "Enabling this will allow you to create cards with empty fields"
+          }
+      ]
     },
     {
       "name": "viewStats",
