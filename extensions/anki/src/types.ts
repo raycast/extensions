@@ -1,9 +1,5 @@
 import { Form, Keyboard } from '@raycast/api';
 
-export interface AddCardCommandPreferences {
-  allow_empty_card_fields?: boolean;
-}
-
 export interface AnkiCollectionData {
   crt: number;
 }
