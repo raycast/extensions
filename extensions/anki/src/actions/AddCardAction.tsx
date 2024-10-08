@@ -172,13 +172,13 @@ export default function AddCardAction({ deckName }: Props) {
           navigationTitle="Add Card"
           isLoading={decksLoading || modelsLoading || tagsLoading}
         >
-          <Form.Dropdown {...itemProps.deckName} title="Deck" isLoading={decksLoading}>
+          <Form.Dropdown {...itemProps.deckName} title="Deck" storeValue={true} isLoading={decksLoading}>
             {decks?.map(deck => (
               <Form.Dropdown.Item key={deck.deck_id} title={deck.name} value={deck.name} />
             ))}
           </Form.Dropdown>
 
-          <Form.Dropdown {...itemProps.modelName} title="Model" isLoading={modelsLoading}>
+          <Form.Dropdown {...itemProps.modelName} title="Model" storeValue={true} isLoading={modelsLoading}>
             {models?.map(model => (
               <Form.Dropdown.Item key={model.id} title={model.name} value={model.name} />
             ))}
