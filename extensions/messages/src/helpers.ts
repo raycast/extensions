@@ -1,7 +1,7 @@
 import { Icon, Image, Color } from "@raycast/api";
 import { getAvatarIcon, runAppleScript } from "@raycast/utils";
+import { CountryCode, parsePhoneNumber } from "libphonenumber-js";
 
-import { Contact } from "./hooks/useContacts";
 import { Message } from "./hooks/useMessages";
 
 async function isMessagesAppRunning() {
@@ -137,39 +137,6 @@ export type ChatParticipant = {
   is_group: boolean;
 };
 
-export function getDisplayNameAndAvatar(
-  participant: ChatParticipant,
-  contactMap: Map<string, Contact>,
-  isFromMe = false,
-): { displayName: string; avatar: Image.ImageLike } {
-  let avatar: Image.ImageLike = Icon.Person;
-  let displayName = participant.display_name || participant.chat_identifier;
-
-  if (participant.is_group) {
-    avatar = Icon.AddPerson;
-    if (participant.display_name) {
-      displayName = participant.display_name;
-    } else if (participant.group_participants) {
-      const participants = participant.group_participants.split(",");
-      displayName = participants.map((p) => contactMap.get(p.trim())?.fullName || p.trim()).join(", ");
-    }
-  } else {
-    const contact = contactMap.get(participant.group_participants || participant.chat_identifier);
-    if (contact) {
-      displayName = contact.fullName;
-      avatar = contact.imageData
-        ? { source: `data:image/png;base64,${contact.imageData}`, mask: Image.Mask.Circle }
-        : getAvatarIcon(displayName);
-    }
-  }
-
-  if (isFromMe) {
-    avatar = { source: Icon.Reply, tintColor: Color.SecondaryText };
-  }
-
-  return { displayName, avatar };
-}
-
 export function getMessagesUrl(chat: ChatParticipant, body?: string): string {
   const addresses = chat.is_group ? chat.group_participants : chat.chat_identifier;
   const encodedBody = body ? `&body=${encodeURIComponent(body)}` : "";
@@ -226,4 +193,82 @@ export function extractOTP(text: string): string | null {
   const otpRegex = /\b\d{4,}\b/;
   const match = text.match(otpRegex);
   return match ? match[0] : null;
+}
+
+export type Contact = {
+  id: string;
+  givenName: string;
+  familyName: string;
+  phoneNumbers: { number: string; countryCode: string | null }[];
+  emailAddresses: string[];
+  imageData?: string;
+};
+
+export type ChatOrMessageInfo = {
+  chat_identifier: string;
+  is_from_me?: boolean;
+  is_group: boolean;
+  display_name?: string | null;
+  group_participants?: string | null;
+};
+
+export function createContactMap(contacts: Contact[]): Map<string, Contact> {
+  const contactMap = new Map<string, Contact>();
+
+  contacts.forEach((contact) => {
+    contact.phoneNumbers.forEach(({ number, countryCode }) => {
+      try {
+        const parsedNumber = parsePhoneNumber(number, countryCode?.toUpperCase() as CountryCode);
+        if (parsedNumber) {
+          contactMap.set(parsedNumber.format("E.164"), contact);
+        }
+      } catch (error) {
+        console.error(`Error parsing phone number ${number}:`, error);
+      }
+    });
+  });
+
+  return contactMap;
+}
+
+export function getContactOrGroupInfo(
+  info: ChatOrMessageInfo,
+  contactMap: Map<string, Contact>,
+): { displayName: string; avatar: Image.ImageLike } {
+  if (info.is_group) {
+    const avatar: Image.ImageLike = Icon.AddPerson;
+    let displayName = info.display_name || "Group Chat";
+
+    if (!info.display_name && info.group_participants) {
+      const participants = info.group_participants.split(",");
+      displayName = participants
+        .map((p) => {
+          const contact = contactMap.get(p.trim());
+          return contact ? `${contact.givenName} ${contact.familyName}`.trim() : p.trim();
+        })
+        .join(", ");
+    }
+
+    return { displayName, avatar };
+  }
+
+  const contact = contactMap.get(info.chat_identifier);
+  if (contact) {
+    const displayName = `${contact.givenName} ${contact.familyName}`.trim() || info.chat_identifier;
+
+    if (info.is_from_me) {
+      return { displayName, avatar: { source: Icon.Reply, tintColor: Color.SecondaryText } };
+    }
+
+    const avatar = contact.imageData
+      ? { source: `data:image/png;base64,${contact.imageData}`, mask: Image.Mask.Circle }
+      : getAvatarIcon(displayName);
+
+    return { displayName, avatar };
+  }
+
+  return {
+    displayName: info.chat_identifier,
+    avatar: Icon.Person,
+  };
 }
