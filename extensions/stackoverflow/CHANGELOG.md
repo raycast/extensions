@@ -1,6 +1,6 @@
 # Search Stack Exchange Sites Changelog
 
-## [Now supports ALL Sites in Dropdown] - {PR_MERGE_DATE}
+## [Now supports ALL Sites in Dropdown] - 2024-10-09
 
 - Replaced `useEffect` with a `usePromise` for cleaner site fetching
 - Replaced `fetch` with a `useFetch` in getDetails
