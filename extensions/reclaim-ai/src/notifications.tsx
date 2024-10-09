@@ -1,5 +1,13 @@
 import { LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
-import { addDays, differenceInHours, endOfDay, formatDistance, isWithinInterval, startOfDay } from "date-fns";
+import {
+  addDays,
+  differenceInMinutes,
+  differenceInHours,
+  endOfDay,
+  formatDistance,
+  isWithinInterval,
+  startOfDay,
+} from "date-fns";
 import { useMemo } from "react";
 import { MenuBarEventSection } from "./components/MenuBarEventSection";
 import { useCallbackSafeRef } from "./hooks/useCallbackSafeRef";
@@ -129,7 +137,16 @@ export default function Command() {
         const end = new Date(event.eventEnd);
         return isWithinInterval(now, { start, end });
       });
-      eventNextNow = nowEvent?.[0];
+
+      const recentNowEvent = nowEvent?.find((event) => differenceInMinutes(now, new Date(event.eventStart)) <= 5);
+
+      if (recentNowEvent) {
+        eventNextNow = recentNowEvent;
+      } else if (eventMoment?.event) {
+        eventNextNow = eventMoment.event;
+      } else if (nowEvent?.length) {
+        eventNextNow = nowEvent[0];
+      }
     } else {
       eventNextNow = eventMoment?.event;
     }
@@ -165,22 +182,13 @@ export default function Command() {
           };
     }
 
-    if (showNowEvent) {
-      return {
-        fullTitle: "No now events",
-        minTitle: "No now events",
-        nowOrNext: "NONE",
-        event: null,
-      };
-    }
-
     return {
       fullTitle: "No upcoming events",
       minTitle: "No upcoming events",
       nowOrNext: "NONE",
       event: null,
     };
-  }, [eventMoment]);
+  }, [eventMoment, events]);
 
   /********************/
   /*    useCallback   */
