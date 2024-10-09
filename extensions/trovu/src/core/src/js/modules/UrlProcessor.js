@@ -1,9 +1,9 @@
 /** @module UrlProcessor */
-import Helper from "./Helper.js";
 import CityType from "./type/city.js";
 import DateType from "./type/date.js";
 import TimeType from "./type/time.js";
 import dayjs from "dayjs";
+import escapeStringRegexp from "escape-string-regexp";
 import jsyaml from "js-yaml";
 
 /** Process a shortcut URL for redirect. */
@@ -270,7 +270,7 @@ export default class UrlProcessor {
             value = variables[varName];
             break;
         }
-        str = str.replace(new RegExp(Helper.escapeRegExp(match), "g"), value);
+        str = str.replace(new RegExp(escapeStringRegexp(match), "g"), value);
       }
     }
     return str;
