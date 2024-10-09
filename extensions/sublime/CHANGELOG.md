@@ -1,8 +1,10 @@
 # Sublime Changelog
 
-## [Internal changes] - 2024-10-09
+## [Fix Tweet Texts] - 2024-10-09
 
-We made internal API changes to make saving content more reliable!
+The text of Tweet cards now turns up correctly when searching!
+
+We also made saving content more reliable.
 
 ## [Fixed Search Results] - 2024-09-03
 
