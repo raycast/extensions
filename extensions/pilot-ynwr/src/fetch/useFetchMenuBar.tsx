@@ -2,8 +2,8 @@ import { Client } from "@notionhq/client";
 
 import { useEffect, useState } from "react";
 import { FetchActiveProjects, FetchActiveTimer, FetchTodayEvents, FetchTodayKeystones } from "./FetchFunctions";
-import { Evnt, Keystone, Pref, Project, Timer } from "../interfaces/interfaceItems";
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Evnt, Keystone, Project, Timer } from "../interfaces/interfaceItems";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { getAPIError } from "../tools/generalTools";
 import TimezoneHook from "../tools/TimezoneHook";
 
@@ -26,12 +26,16 @@ const useFetchMenuBar = (notion: Client | undefined) => {
   const { untmDate } = TimezoneHook();
 
   const getApiIDS = async () => {
-    const pref = getPreferenceValues<Pref>();
+    const pAPIID = (await LocalStorage.getItem("project")) as string;
+    const tAPIID = (await LocalStorage.getItem("timer")) as string;
+    const eAPIID = (await LocalStorage.getItem("event")) as string;
+    const kAPIID = (await LocalStorage.getItem("keystone")) as string;
+
     const newApiIDs: APIIDS = {
-      project: pref.projectAPIID,
-      timer: pref.timerAPIID,
-      event: pref.eventAPIID,
-      keystone: pref.keystoneAPIID,
+      project: pAPIID,
+      timer: tAPIID,
+      event: eAPIID,
+      keystone: kAPIID,
     };
     setApiIDS(newApiIDs);
   };

@@ -1,7 +1,7 @@
 import { Client } from "@notionhq/client";
-import { Cache, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Cache, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Evnt, Keystone, Pref, Project, ProjectGP, Timer } from "../interfaces/interfaceItems";
+import { Evnt, Keystone, Project, ProjectGP, Timer } from "../interfaces/interfaceItems";
 import {
   FetchActiveProjects,
   FetchActiveTimer,
@@ -104,15 +104,20 @@ const useFetchGeneralPilot = (notion: Client | undefined, needRefresh: boolean) 
   };
 
   const getApiIDs = async () => {
-    const pref = getPreferenceValues<Pref>();
+    const pAPIID = (await LocalStorage.getItem("project")) as string;
+    const tAPIID = (await LocalStorage.getItem("timer")) as string;
+    const eAPIID = (await LocalStorage.getItem("event")) as string;
+    const kAPIID = (await LocalStorage.getItem("keystone")) as string;
+    const jAPIID = (await LocalStorage.getItem("journal")) as string;
+    const lAPIID = (await LocalStorage.getItem("link")) as string;
 
     const newApiIDs: ApiIDs = {
-      keystone: pref.keystoneAPIID,
-      event: pref.eventAPIID,
-      project: pref.projectAPIID,
-      link: pref.linkAPIID,
-      journal: pref.journalAPIID,
-      timer: pref.timerAPIID,
+      keystone: kAPIID,
+      event: eAPIID,
+      project: pAPIID,
+      link: lAPIID,
+      journal: jAPIID,
+      timer: tAPIID,
     };
     setApiIDs(newApiIDs);
     return newApiIDs;

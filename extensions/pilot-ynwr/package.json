@@ -161,55 +161,6 @@
           "title": "Asia/Anadyr"
         }
       ]
-    },
-    {
-      "name": "projectAPIID",
-      "description": "Project ID of your DB in your Notion Pilot Page - Docs at pilot-docs.romubuntu.dev",
-      "title": "Project DB ID",
-      "type": "textfield",
-      "required": true
-    },
-    {
-      "name": "eventAPIID",
-      "description": "Event ID of your DB in your Notion Pilot Page - Docs at pilot-docs.romubuntu.dev",
-      "title": "Event DB ID",
-      "type": "textfield",
-      "required": true
-    },
-    {
-      "name": "journalAPIID",
-      "description": "Journal ID of your DB in your Notion Pilot Page - Docs at pilot-docs.romubuntu.dev",
-      "title": "Journal DB ID",
-      "type": "textfield",
-      "required": true
-    },
-    {
-      "name": "keystoneAPIID",
-      "description": "Keystone ID of your DB in your Notion Pilot Page - Docs at pilot-docs.romubuntu.dev",
-      "title": "Keystone DB ID",
-      "type": "textfield",
-      "required": true
-    },
-    {
-      "name": "linkAPIID",
-      "description": "Link ID of your DB in your Notion Pilot Page - Docs at pilot-docs.romubuntu.dev",
-      "title": "Link DB ID",
-      "type": "textfield",
-      "required": true
-    },
-    {
-      "name": "timerAPIID",
-      "description": "Timer ID of your DB in your Notion Pilot Page - Docs at pilot-docs.romubuntu.dev",
-      "title": "Timer DB ID",
-      "type": "textfield",
-      "required": true
-    },
-    {
-      "name": "todoAPIID",
-      "description": "Todo ID of your DB in your Notion Pilot Page - Docs at pilot-docs.romubuntu.dev",
-      "title": "Todo DB ID",
-      "type": "textfield",
-      "required": true
     }
   ],
   "dependencies": {

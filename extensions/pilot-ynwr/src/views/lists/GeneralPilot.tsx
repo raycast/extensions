@@ -36,6 +36,7 @@ import { QueryChangeActiveProject, QueryDeleteProject } from "../../queriesFunct
 import useToday from "../../tools/TodayHook";
 import EmptyView from "./EmptyView";
 import { ClearRefreshAction, RefreshAction } from "../actions/actions";
+import SelectDBsForm from "../forms/SelectDBsForm";
 
 const cache = new Cache();
 
@@ -419,6 +420,15 @@ const GeneralPilot = () => {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser title="Open Information & Credits" url="https://pilot.romubuntu.dev/" />
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          title={"Databases Selection"}
+          icon={"⚙️"}
+          actions={
+            <ActionPanel>
+              <Action.Push title="Open Databases Selection" target={<SelectDBsForm />} />
             </ActionPanel>
           }
         />

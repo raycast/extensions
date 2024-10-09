@@ -1,7 +1,7 @@
 import { Client } from "@notionhq/client";
-import { Cache, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Cache, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Journal, Pref, Project } from "../interfaces/interfaceItems";
+import { Journal, Project } from "../interfaces/interfaceItems";
 import { FetchActiveProjects, FetchJournals } from "./FetchFunctions";
 import { getAPIError } from "../tools/generalTools";
 
@@ -21,10 +21,11 @@ const useFetchJournals = (notion: Client | undefined) => {
   const [journals, setJournals] = useState<Journal[] | null>([]);
 
   const getApiIDs = async () => {
-    const pref = getPreferenceValues<Pref>();
+    const pAPIID = (await LocalStorage.getItem("project")) as string;
+    const jAPIID = (await LocalStorage.getItem("journal")) as string;
     const newApiIDs: ApiIDS = {
-      journal: pref.journalAPIID,
-      project: pref.projectAPIID,
+      journal: jAPIID,
+      project: pAPIID,
     };
     setApiIDs(newApiIDs);
   };

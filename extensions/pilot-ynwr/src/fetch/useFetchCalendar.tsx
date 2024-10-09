@@ -1,7 +1,7 @@
-import { Cache, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Cache, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Client } from "@notionhq/client";
-import { Evnt, Keystone, Pref, Project } from "../interfaces/interfaceItems";
+import { Evnt, Keystone, Project } from "../interfaces/interfaceItems";
 
 import { FetchActiveProjects, FetchEvents, FetchKeystones } from "./FetchFunctions";
 import { getAPIError } from "../tools/generalTools";
@@ -27,11 +27,14 @@ const useFetchCalendar = (notion: Client | undefined) => {
   const { untmDate } = TimezoneHook();
 
   const getApiIDs = async () => {
-    const pref = getPreferenceValues<Pref>();
+    const pAPIID = (await LocalStorage.getItem("project")) as string;
+    const eAPIID = (await LocalStorage.getItem("event")) as string;
+    const kAPIID = (await LocalStorage.getItem("keystone")) as string;
+
     const newApiIDS: ApiIDS = {
-      project: pref.projectAPIID,
-      event: pref.eventAPIID,
-      keystone: pref.keystoneAPIID,
+      project: pAPIID,
+      event: eAPIID,
+      keystone: kAPIID,
     };
     setApiIDs(newApiIDS);
   };
