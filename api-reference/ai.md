@@ -14,7 +14,7 @@ You can check if a user has access to the API using [`environment.canAccess(AI)`
 
 ### AI.ask
 
-Ask AI anything you want. Use this in “no-view” Commands, effects, or callbacks. In a React component, you might want to use the [`useAI` util hook](../utils-reference/react-hooks/useAI.md) instead.
+Ask AI anything you want. Use this in “no-view” Commands, effects, or callbacks. In a React component, you might want to use the [useAI util hook](../utils-reference/react-hooks/useAI.md) instead.
 
 #### Signature
 
