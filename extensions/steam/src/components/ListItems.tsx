@@ -53,8 +53,8 @@ export const DynamicGameListItem = ({
         source: ownedData?.img_icon_url
           ? `https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/${game.appid}/${ownedData.img_icon_url}.jpg`
           : gameData?.type === "game"
-          ? Icon.GameController
-          : Icon.Circle,
+            ? Icon.GameController
+            : Icon.Circle,
         tintColor: ownedData?.img_icon_url ?? iconColor,
       }}
       accessories={[{ text: notFound ? "Game not found" : gameData?.release_date?.date }]}
