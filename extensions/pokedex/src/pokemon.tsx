@@ -12,21 +12,9 @@ import { useEffect, useState } from "react";
 import PokeProfile from "./components/profile";
 import TypeDropdown from "./components/type_dropdown";
 import pokedex from "./statics/pokedex.json";
-import { getOfficialArtworkImg, getPixelArtImg, localeName } from "./utils";
+import { getContentImg, localeName, nationalDexNumber } from "./utils";
 
-const { language, artwork } = getPreferenceValues();
-let columns: number;
-
-let getContent: (id: number, formId?: number) => string;
-switch (artwork) {
-  case "pixel":
-    getContent = getPixelArtImg;
-    columns = 6;
-    break;
-  default:
-    getContent = getOfficialArtworkImg;
-    break;
-}
+const { language } = getPreferenceValues();
 
 export default function NationalPokedex() {
   const [type, setType] = useState<string>("all");
@@ -50,7 +38,7 @@ export default function NationalPokedex() {
   return (
     <Grid
       throttle
-      columns={columns}
+      columns={6}
       searchBarPlaceholder="Search for Pokémon by name or Pokédex number"
       searchBarAccessory={
         <TypeDropdown type="grid" command="Pokémon" onSelectType={setType} />
@@ -64,9 +52,9 @@ export default function NationalPokedex() {
                 return (
                   <Grid.Item
                     key={pokemon.id}
-                    content={getContent(pokemon.id)}
+                    content={getContentImg(pokemon.id)}
                     title={localeName(pokemon, language)}
-                    subtitle={`#${pokemon.id.toString().padStart(4, "0")}`}
+                    subtitle={nationalDexNumber(pokemon.id)}
                     keywords={[pokemon.id.toString(), pokemon.name]}
                     actions={
                       <ActionPanel>

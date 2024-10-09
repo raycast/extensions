@@ -23,6 +23,10 @@ for usage in the Cursor Code Editor.
 
 6. After copying a cursor rule, you can paste it into `.cursorrules` file in your project.
 
+7. You can star cursor rules to quick access them later. NOTE that the max number of starred cursor rules is 10.
+
+8. If you want to modify the cursor rule locally, you can use the "Export and Edit" action to open the cursor rule as Markdown filein Cursor for editing. But make sure to install the shell command `cursor` first. (You can install it by pressing `Cmd + Shift + P` in Cursor and search for `Install cursor command`)
+
 ## Configuration
 
 Access preferences through the Action Panel or Raycast preferences:
@@ -30,3 +34,4 @@ Access preferences through the Action Panel or Raycast preferences:
 - Cache Duration: Cursor rule data is cached locally for 1 day by default.
 - Show Detailed View: Toggle the display of detailed view in cursor rules list.
 - Default Cursor Rules List: Choose to show all cursor rules or only popular ones in cursor rules list at launch.
+- Export Directory: Set the directory to export cursor rules locally.

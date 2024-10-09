@@ -1,5 +1,9 @@
 # LeetCode Changelog
 
+## [Fixes] - 2024-10-07
+
+- Ensure proper newline handling for `<pre>` tags in problem details Markdown code blocks.
+
 ## [More Problem Categories] - 2024-09-22
 
 - Categories now have icons

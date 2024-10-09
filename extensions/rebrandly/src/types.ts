@@ -5,5 +5,7 @@ export interface BrandedLink {
   destination: string;
   shortUrl: string;
   https: boolean;
-  [key: string]: unknown;
+  favourite: boolean;
+  clicks: number;
+  createdAt: string;
 }

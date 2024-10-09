@@ -1,12 +1,19 @@
 import Contacts
 import RaycastSwiftMacros
+import SQLite
+
+struct PhoneNumber: Codable {
+  let number: String
+  let countryCode: String?
+}
 
 struct ContactItem: Codable {
   let id: String
   let givenName: String
   let familyName: String
-  let phoneNumbers: [String]
+  let phoneNumbers: [PhoneNumber]
   let emailAddresses: [String]
+  let imageData: Data?
 }
 
 enum MessagesError: Error {
@@ -33,6 +40,7 @@ enum MessagesError: Error {
       CNContactPhoneNumbersKey,
       CNContactEmailAddressesKey,
       CNContactIdentifierKey,
+      CNContactImageDataKey,
     ] as [CNKeyDescriptor]
 
   let request = CNContactFetchRequest(keysToFetch: keys)
@@ -40,8 +48,12 @@ enum MessagesError: Error {
 
   do {
     try store.enumerateContacts(with: request) { contact, _ in
-      let phoneNumbers = contact.phoneNumbers.map { $0.value.stringValue }
-      let emailAddresses = contact.emailAddresses.map { $0.value as String }
+      let phoneNumbers = contact.phoneNumbers.map { cnPhoneNumber -> PhoneNumber in
+        let number = cnPhoneNumber.value.stringValue
+        let countryCode = cnPhoneNumber.value.value(forKey: "countryCode") as? String
+        return PhoneNumber(
+          number: number, countryCode: countryCode?.isEmpty ?? true ? nil : countryCode)
+      }
 
       contacts.append(
         ContactItem(
@@ -49,7 +61,8 @@ enum MessagesError: Error {
           givenName: contact.givenName,
           familyName: contact.familyName,
           phoneNumbers: phoneNumbers,
-          emailAddresses: emailAddresses
+          emailAddresses: contact.emailAddresses.map { $0.value as String },
+          imageData: contact.imageData
         ))
     }
   } catch {

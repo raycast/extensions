@@ -1,5 +1,9 @@
 # Safari Changelog
 
+## [Improve] 2024-09-27
+
+- Adds a preference to select between different fallback search types for the `Search Tabs` command.
+
 ## [Improve] - 2024-09-11
 
 - Changed the behavior of the `Add to Reading List` command to add the current tab to the Reading List.

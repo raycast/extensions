@@ -154,6 +154,7 @@ export default function Timeline({ previousViewTitle = "" }: TimelineProps) {
       }
       searchBarPlaceholder={ViewTimelineSearchBarPlaceholder}
       searchBarAccessory={<NavigationDropdown currentViewId={1} />}
+      throttle
     >
       <List.Section title={`${SearchResults}`}>{searchPosts.map((post) => getPostItem(post))}</List.Section>
       {searchPosts.length == 0 && (

@@ -156,6 +156,7 @@ export default function Command() {
         <List.Item title={"Long Date/Time"} subtitle={`${prettyPreview(date, "F")}`} actions={<Actions type={"F"} />} />
         <List.Item title={"Relative Time"} subtitle={`${prettyPreview(date, "R")}`} actions={<Actions type={"R"} />} />
         <List.Item title={"Epoch Time"} subtitle={`${prettyPreview(date, "E")}`} actions={<Actions type={"E"} />} />
+        <List.Item title={"ISO Date/Time"} subtitle={`${prettyPreview(date, "I")}`} actions={<Actions type={"I"} />} />
       </List.Section>
     </List>
   );

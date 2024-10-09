@@ -1,5 +1,11 @@
 # Premier League Changelog
 
+## [Awards & Match Day Essentials] - 2024-09-28
+- Added live match commentary and line-up information for each fixture, providing a more immersive experience.
+- Added the "award" command to view a list of Premier League individual and team awards, including winners and statistics.
+- Updated standings to always display detailed statistics, including played matches, goals for/against, goal difference, points, and form.
+- Fixed incorrect player record stats by calling the API for accurate data.
+
 ## [Seamless Pagination] - 2024-09-24
 - Incorporated the usePromise utility for seamless pagination, providing a more efficient and user-friendly experience.
 

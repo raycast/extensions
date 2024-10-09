@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { getPreferenceValues, List } from "@raycast/api";
 import _ from "lodash";
 import { useState } from "react";
 import { DeviceListSection, FallbackSearchSection } from "./components";
@@ -27,7 +27,7 @@ export default function Command() {
         ) as Tab[];
         return <DeviceListSection key={device.uuid} device={device} filteredTabs={tabs} refresh={refreshDevices} />;
       })}
-      <FallbackSearchSection searchText={searchText} />
+      <FallbackSearchSection searchText={searchText} fallbackSearchType={getPreferenceValues().fallbackSearchType} />
     </List>
   );
 }

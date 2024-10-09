@@ -105,8 +105,8 @@
         },
         {
           "name": "picturesDirectory",
-          "title": "Pictures Directory",
-          "description": "The directory of pictures to save. Path format: /Users/Username/Downloads or ~/Downloads.",
+          "title": "Wallpaper Directory",
+          "description": "The directory of wallpaper to save.",
           "type": "directory",
           "required": false,
           "default": "~/Downloads"
@@ -173,23 +173,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.75.1",
-    "@raycast/utils": "^1.15.0",
-    "axios": "^1.7.2",
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.7.7",
     "file-url": "^4.0.0",
     "fs-extra": "^11.2.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "^20.14.2",
-    "@types/react": "^18.3.3",
-    "@types/shelljs": "^0.8.15",
-    "@typescript-eslint/eslint-plugin": "^7.11.0",
-    "@typescript-eslint/parser": "^7.11.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.7.4",
+    "@types/react": "18.3.10",
     "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2"
   },
   "scripts": {
     "build": "ray build -e dist",

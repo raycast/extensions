@@ -10,6 +10,8 @@
   ],
   "license": "MIT",
   "categories": [
+    "Data",
+    "Other",
     "Fun"
   ],
   "commands": [
@@ -144,6 +146,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
     "axios": "^1.7.7",
     "json2md": "^2.0.1",
     "lodash.debounce": "^4.0.8",
@@ -153,22 +156,22 @@
     "lodash.uniqby": "^4.7.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.11.0",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/json2md": "^1.5.4",
     "@types/lodash.debounce": "^4.0.9",
     "@types/lodash.groupby": "^4.6.9",
     "@types/lodash.orderby": "^4.6.9",
     "@types/lodash.shuffle": "^4.2.9",
     "@types/lodash.uniqby": "^4.7.9",
-    "@eslint/js": "^9.10.0",
-    "@raycast/eslint-config": "^1.0.11",
     "@types/node": "~22.5.5",
     "@types/react": "^18.3.8",
+    "eslint": "^9.11.0",
     "eslint-plugin-react": "^7.36.1",
-    "eslint": "^9.10.0",
     "prettier": "^3.3.3",
     "react-devtools": "^5.2.0",
-    "typescript-eslint": "^8.6.0",
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.2",
+    "typescript-eslint": "^8.6.0"
   },
   "scripts": {
     "build": "ray build -e dist",

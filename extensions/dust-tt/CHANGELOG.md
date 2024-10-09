@@ -1,5 +1,9 @@
 # Dust.tt Changelog
 
+## [Feature] - 2024-10-01
+
+- allow user to specify custom API URL
+
 ## [Feature] - 2024-09-24
 
 - ask user to provide email address during the setup

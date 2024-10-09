@@ -11,12 +11,13 @@ import {
 import { Notification as BskyNotification } from "@atproto/api/dist/client/types/app/bsky/notification/listNotifications";
 import { Notification } from "../types/types";
 import { NotificationReasonMapping } from "../config/notificationReasonMapping";
-import { ReasonRepost } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
+import { PostView, ReasonRepost } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
 import { ViewImage } from "@atproto/api/dist/client/types/app/bsky/embed/images";
 import { ViewRecord } from "@atproto/api/dist/client/types/app/bsky/embed/record";
 import { getMarkdownText } from "../libs/atp";
 import { getPostUrl } from "./common";
 import { getReadableDate } from "./date";
+import { ProfileViewBasic } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 
 export const getLikesUrl = (handle: string, uri: string) => {
   return `${getPostUrl(handle, uri)}/liked-by`;
@@ -78,7 +79,7 @@ ${getImageMarkdown(imageEmbeds)}
 
 ♡ [${post.likeCount}](${getLikesUrl(post.author.handle, post.uri)})    ♻ [${post.repostCount}](${getRepostsUrl(
     post.author.handle,
-    post.uri
+    post.uri,
   )})    ↓ [${post.replyCount}](${getPostUrl(post.author.handle, post.uri)})
 
 _[${postTime}](${getPostUrl(post.author.handle, post.uri)})_  ${
@@ -162,11 +163,10 @@ export const parseFeed = async (bskyFeed: AppBskyFeedDefs.FeedViewPost[]): Promi
         }
 
         if (item.reply && Object.keys(item.reply).length > 0) {
+          const author = item.reply.parent.author as ProfileViewBasic;
           postReason = {
             type: "reply",
-            authorName: item.reply.parent.author.displayName
-              ? item.reply.parent.author.displayName
-              : item.reply.parent.author.handle,
+            authorName: author.displayName ? author.displayName : author.handle,
           };
         }
 
@@ -180,20 +180,22 @@ export const parseFeed = async (bskyFeed: AppBskyFeedDefs.FeedViewPost[]): Promi
 
         if (item.reply?.root && item.reply?.root.uri !== item.reply?.parent.uri) {
           let imageEmbeds: string[] = [];
-          if (item.reply.root.embed?.$type === BlueskyImageEmbedType) {
-            imageEmbeds = (item.reply.root.embed.images as ViewImage[]).map((item: ViewImage) => item.thumb);
+          const root = item.reply.root as PostView;
+          if (root.embed?.$type === BlueskyImageEmbedType) {
+            imageEmbeds = (root.embed.images as ViewImage[]).map((item: ViewImage) => item.thumb);
           }
 
-          markdownView = markdownView + (await getPostMarkdownView(item.reply.root, imageEmbeds));
+          markdownView = markdownView + (await getPostMarkdownView(root, imageEmbeds));
         }
 
         if (item.reply?.parent) {
           let imageEmbeds: string[] = [];
-          if (item.reply.parent.embed?.$type === BlueskyImageEmbedType) {
-            imageEmbeds = (item.reply.parent.embed.images as ViewImage[]).map((item: ViewImage) => item.thumb);
+          const parent = item.reply.parent as PostView;
+          if (parent.embed?.$type === BlueskyImageEmbedType) {
+            imageEmbeds = (parent.embed.images as ViewImage[]).map((item: ViewImage) => item.thumb);
           }
 
-          markdownView = markdownView + (await getPostMarkdownView(item.reply.parent, imageEmbeds));
+          markdownView = markdownView + (await getPostMarkdownView(parent, imageEmbeds));
         }
 
         let quotedMarkdown = "";
@@ -210,7 +212,7 @@ export const parseFeed = async (bskyFeed: AppBskyFeedDefs.FeedViewPost[]): Promi
           if (embeddedPostRecord.embeds && embeddedPostRecord.embeds?.length > 0) {
             if (embeddedPostRecord.embeds[0]?.$type === BlueskyImageEmbedType) {
               embeddedPostImages = (embeddedPostRecord.embeds[0].images as ViewImage[]).map(
-                (item: ViewImage) => item.thumb
+                (item: ViewImage) => item.thumb,
               );
             }
           }
@@ -253,7 +255,7 @@ export const parseFeed = async (bskyFeed: AppBskyFeedDefs.FeedViewPost[]): Promi
           markdownView:
             repostMarkdown + markdownView + (await getPostMarkdownView(item.post, imageEmbeds)) + quotedMarkdown,
         };
-      })
+      }),
   );
 
   const uniquePosts: Post[] = [];
