@@ -152,7 +152,9 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT3.
 
 #### Enumeration members
 
-| OpenAI_GPT4 | GPT-4 is OpenAI’s most capable model with broad general knowledge, allowing it to follow complex instructions and solve difficult problems. |
+| Model | Description |
+|-------|-------------|
+| OpenAI_GPT4 | GPT-4 is OpenAI's most capable model with broad general knowledge, allowing it to follow complex instructions and solve difficult problems. |
 | OpenAI_GPT4-turbo | GPT-4 Turbo from OpenAI has a big context window that fits hundreds of pages of text, making it a great choice for workloads that involve longer prompts. |
 | OpenAI_GPT4o | GPT-4o is the most advanced and fastest model from OpenAI, making it a great choice for complex everyday problems and deeper conversations. |
 | OpenAI_GPT4o-mini | GPT-4o mini is a highly intelligent and fast model that is ideal for a variety of everyday tasks. |
