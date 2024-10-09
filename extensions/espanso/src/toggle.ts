@@ -1,9 +1,9 @@
 import { showHUD } from "@raycast/api";
-import { $ } from "zx";
+import { espansoCli } from "./lib/espanso";
 
 export default async function main() {
   try {
-    await $`espanso cmd toggle`;
+    await espansoCli("cmd toggle");
     await showHUD("Espanso toggled");
   } catch (error) {
     await showHUD(`Error: ${error}`);
