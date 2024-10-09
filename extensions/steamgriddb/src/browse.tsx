@@ -32,7 +32,9 @@ export default function Browse({
 
   const loadSteamGame = async (steamAppId: number) => {
     setIsLoading(true);
-    const game = await db.getGameBySteamAppId(steamAppId);
+    const game = await db
+      .getGameBySteamAppId(steamAppId)
+      .catch(() => undefined);
     setGame(game);
     setIsLoading(false);
   };
@@ -49,7 +51,11 @@ export default function Browse({
 
   if (steamAppId) {
     if (game) return <ImagePreview game={game} />;
-    return <List isLoading={isLoading} />;
+    return (
+      <List isLoading={isLoading}>
+        <List.EmptyView title="No SteamGridDB data found" />
+      </List>
+    );
   }
 
   return (
