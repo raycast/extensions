@@ -111,14 +111,18 @@ const getOutputTitle = (type: "transcript" | "insights" | "summary") => {
   return "";
 };
 
-const parseResult = async (json: any, type: "transcript" | "insights" | "summary", videoData?: VideoDataTypes) => {
-  let output;
+const parseResult = async (
+  json: { content: Array<{ offset: number; text: string }> | string[] },
+  type: "transcript" | "insights" | "summary",
+  videoData?: VideoDataTypes,
+) => {
+  let output: string;
   if (type === "transcript" || type === "summary") {
-    output = json.content
-      .map((chunk: { offset: number; text: string }) => `**${formatTime(chunk.offset)}**: ${chunk.text}`)
+    output = (json.content as Array<{ offset: number; text: string }>)
+      .map((chunk) => `**${formatTime(chunk.offset)}**: ${chunk.text}`)
       .join("\n\n");
   } else {
-    output = json.content.join("\n\n");
+    output = (json.content as string[]).join("\n\n");
   }
   return getOutputTitle(type) + "\n\n" + output + `\n\n<img src="${videoData?.thumbnail}">`;
 };
