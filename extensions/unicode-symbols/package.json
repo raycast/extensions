@@ -67,6 +67,24 @@
           "value": "large"
         }
       ]
+    },
+    {
+      "name": "dataSet",
+      "type": "dropdown",
+      "required": false,
+      "title": "Data Set",
+      "description": "The data set to use for the search. By default it uses the minimal data set, which contains about 5400 characters. The full set contains +40000 characters. Using this big of a dataset might impact performance. Note: In 'List View' only the minimal dataset is supported...",
+      "default": "minimal",
+      "data": [
+        {
+          "title": "Minimal",
+          "value": "minimal"
+        },
+        {
+          "title": "Full",
+          "value": "full"
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -86,10 +104,12 @@
     "unidata16": "^0.3.1"
   },
   "scripts": {
-    "prebuild": "ts-node ./scripts/generate-dataset.ts",
+    "prebuild": "npm run generate",
     "build": "ray build -e dist",
     "dev": "ray develop",
     "generate-dataset": "ts-node ./scripts/generate-dataset.ts",
+    "generate-htmlset": "ts-node ./scripts/generate-htmllist.ts",
+    "generate": "npm run generate-dataset && npm run generate-htmlset",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"

@@ -1,5 +1,10 @@
 # OpenAI Translator Changelog
 
+## [Dynamic OpenAI & Ollama Model List] - 2024-09-28
+
+- Added dynamic retrieval of OpenAI & Ollama model lists.
+- Fixed issue where custom models were lost when re-editing the provider.
+
 ## [Update OpenAI support model] - 2024-08-01
 
 - Update OpenAI support model

@@ -23,7 +23,7 @@ export default function PackageList() {
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [history, setHistory] = useCachedState<HistoryItem[]>('history', [])
   const [favorites, fetchFavorites] = useFavorites()
-  const { showLinkToSearchResultsInListView }: Preferences =
+  const { historyCount, showLinkToSearchResultsInListView }: Preferences =
     getPreferenceValues()
 
   const { isLoading, data, revalidate } = useFetch<NpmFetchResponse>(
@@ -111,22 +111,24 @@ export default function PackageList() {
         </>
       ) : (
         <>
-          {history.length ? (
-            <List.Section title="History">
-              {history.map((item, index) => {
-                return (
-                  <HistoryListItem
-                    key={`${item.term}-${item.type}-${index}`}
-                    item={item}
-                    setHistory={setHistory}
-                    setSearchTerm={setSearchTerm}
-                  />
-                )
-              })}
-            </List.Section>
-          ) : (
-            <List.EmptyView title="Type something to get started" />
-          )}
+          {Number(historyCount) > 0 ? (
+            history.length ? (
+              <List.Section title="History">
+                {history.map((item, index) => {
+                  return (
+                    <HistoryListItem
+                      key={`${item.term}-${item.type}-${index}`}
+                      item={item}
+                      setHistory={setHistory}
+                      setSearchTerm={setSearchTerm}
+                    />
+                  )
+                })}
+              </List.Section>
+            ) : (
+              <List.EmptyView title="Type something to get started" />
+            )
+          ) : null}
         </>
       )}
     </List>

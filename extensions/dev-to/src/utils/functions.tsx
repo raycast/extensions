@@ -1,14 +1,13 @@
-import { getPreferenceValues, LocalStorage, showToast, Toast, Clipboard, open, showHUD } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast, Clipboard, open, showHUD } from "@raycast/api";
 import fetch, { Headers } from "node-fetch";
 import { NewArticle } from "../types/newArticle";
-import { ArticleById } from "../types/articleById";
-import Values = LocalStorage.Values;
 
 export const commonPreferences = () => {
-  const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
+  const accessToken = getPreferenceValues<Preferences>()["access-token"];
+  const primaryAction = getPreferenceValues<Preferences.SearchArticle>()["primary-action"];
   return {
-    accessToken: preferencesMap.get("access-token"),
-    primaryAction: preferencesMap.get("primary-action"),
+    accessToken,
+    primaryAction,
   };
 };
 export const preference = commonPreferences();
@@ -25,11 +24,6 @@ export const createArticle = async (
   const METHOD = isEdit ? "PUT" : "POST";
 
   try {
-    if (title == "" || body_markdown == "") {
-      await showToast(Toast.Style.Failure, `Content cannot be empty.`);
-      return;
-    }
-
     const headers = new Headers({
       accept: "application/vnd.forem.api-v1+json",
       "Content-Type": "application/json",
@@ -51,7 +45,6 @@ export const createArticle = async (
 
     if (response.ok) {
       const result = (await response.json()) as NewArticle;
-      console.log(result);
 
       const options: Toast.Options = {
         style: Toast.Style.Success,
@@ -79,27 +72,4 @@ export const createArticle = async (
   } catch (e) {
     await showToast(Toast.Style.Failure, String(e));
   }
-};
-
-export const getArticleMarkdown = async (id: number) => {
-  try {
-    const headers = new Headers({
-      accept: "application/vnd.forem.api-v1+json",
-      "api-key": preference.accessToken,
-    });
-
-    const response = await fetch(`https://dev.to/api/articles/${id}`, {
-      method: "GET",
-      headers: headers,
-    });
-
-    if (response.ok) {
-      const result = (await response.json()) as ArticleById;
-      console.log(result);
-      return result.body_markdown;
-    }
-  } catch (err) {
-    console.error(err);
-  }
-  return "";
 };

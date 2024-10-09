@@ -139,7 +139,7 @@ async function runTerminal(item: ISSHConnection) {
   `;
   const scriptIterm = `
     -- Set this property to true to open in a new window instead of a new tab
-    property open_in_new_window : ${openIn == "newWindow"}
+      property open_in_new_window : ${openIn == "newWindow"}
 
     on new_window()
     	tell application "iTerm" to create window with default profile
@@ -285,6 +285,85 @@ async function runTerminal(item: ISSHConnection) {
   call_forward()
   `;
 
+  const scriptHyper = `
+  -- Set this property to true to open in a new window instead of a new tab
+  property open_in_new_window : ${openIn == "newWindow"}
+
+  on new_window()
+      tell application "System Events" 
+          launch application "Hyper"
+      end tell
+  end new_window
+
+  on new_tab()
+      tell application "System Events"
+          -- Check if Hyper is already running
+          set isRunning to (exists process "Hyper")
+
+          if isRunning then
+              -- If Hyper is running, bring it to the front and open a new tab
+              tell application "Hyper" to activate
+              tell application "System Events" to keystroke "t" using command down
+          else
+              -- If Hyper isn't running, launch it
+              launch application "Hyper"
+          end if
+      end tell
+  end new_tab
+
+  on call_forward()
+      tell application "Hyper" to activate
+  end call_forward
+
+  on is_running()
+      application "Hyper" is running
+  end is_running
+
+  -- Hyper doesn't have a direct equivalent to 'is processing', so we'll assume it's ready if it's running
+  on is_processing()
+      is_running()
+  end is_processing
+
+  on has_windows()
+      if not is_running() then return false
+      -- Hyper always has at least one window, so we'll just check if it's running
+      true
+  end has_windows
+
+  on send_text(custom_text)
+      tell application "System Events"
+          keystroke custom_text & return
+      end tell
+  end send_text
+
+  -- Main
+  if has_windows() then
+      if open_in_new_window then
+          new_window()
+      else
+          new_tab()
+      end if
+  else
+      -- If Hyper is not running and we tell it to create a new window, we get two
+      -- One from opening the application, and the other from the command
+      if is_running() then
+          new_window()
+      else
+          call_forward()
+      end if
+  end if 
+
+
+  -- Give Hyper some time to load 
+  repeat until has_windows()
+      delay 0.5
+  end repeat
+  delay 0.5
+
+  send_text("${command}")
+  call_forward()
+  `;
+
   if (terminal == "iTerm") {
     try {
       await runAppleScript(scriptIterm);
@@ -303,6 +382,13 @@ async function runTerminal(item: ISSHConnection) {
     try {
       await closeMainWindow(); // neccessary when alacritty already in fullscreen
       await runAppleScript(scriptAlacritty);
+    } catch (error) {
+      await runAppleScript(scriptTerminal);
+      console.log(error);
+    }
+  } else if (terminal == "Hyper") {
+    try {
+      await runAppleScript(scriptHyper);
     } catch (error) {
       await runAppleScript(scriptTerminal);
       console.log(error);

@@ -5,52 +5,40 @@ import {
   List,
   getPreferenceValues,
 } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import json2md from "json2md";
 import debounce from "lodash.debounce";
 import groupBy from "lodash.groupby";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { fetchPokemonWithCaching } from "./api";
-import MetadataWeakness from "./components/metadata/weakness";
+import WeaknessMetadata from "./components/metadata/weakness";
 import PokeProfile from "./components/profile";
 import TypeDropdown from "./components/type_dropdown";
 import pokedex from "./statics/pokedex.json";
-import { PokemonV2Pokemon, PokemonV2Pokemonspeciesname } from "./types";
-import { getOfficialArtworkImg, localeName, typeColor } from "./utils";
+import { PokemonV2Pokemonspeciesname } from "./types";
+import {
+  getOfficialArtworkImg,
+  localeName,
+  nationalDexNumber,
+  typeColor,
+} from "./utils";
 
 const { language } = getPreferenceValues();
 
-type SpeciesNameByLanguage = {
-  [lang: string]: PokemonV2Pokemonspeciesname;
-};
-
 export default function PokeWeaknesses() {
-  const [pokemon, setPokemon] = useState<PokemonV2Pokemon | undefined>(
-    undefined,
-  );
-  const [loading, setLoading] = useState(false);
   const [type, setType] = useState<string>("all");
 
   const [selectedPokemonId, setSelectedPokemonId] = useState(1);
 
-  useEffect(() => {
-    setLoading(true);
-    fetchPokemonWithCaching(selectedPokemonId, Number(language))
-      .then((data) => {
-        const fetchedPokemon = data[0];
-        setPokemon(fetchedPokemon);
-        setLoading(false);
-      })
-      .catch(() => {
-        setPokemon(undefined);
-        setLoading(false);
-      });
-  }, [selectedPokemonId]);
+  const { data: pokemon, isLoading } = usePromise(fetchPokemonWithCaching, [
+    selectedPokemonId,
+  ]);
 
   const nameByLang = useMemo(() => {
     if (!pokemon) return {};
 
     return pokemon.pokemon_v2_pokemonspecy.pokemon_v2_pokemonspeciesnames.reduce(
-      (prev: SpeciesNameByLanguage, curr) => {
+      (prev: Record<string, PokemonV2Pokemonspeciesname>, curr) => {
         prev[curr.language_id] = curr;
         return prev;
       },
@@ -73,25 +61,24 @@ export default function PokeWeaknesses() {
               <List.Item
                 key={poke.id}
                 id={poke.id.toString()}
-                title={`#${poke.id.toString().padStart(4, "0")}`}
+                title={nationalDexNumber(poke.id)}
                 subtitle={localeName(poke, language)}
                 keywords={[poke.id.toString(), poke.name]}
                 detail={
-                  loading ? (
-                    ""
-                  ) : (
-                    <List.Item.Detail
-                      markdown={json2md([
-                        {
-                          img: [
-                            {
-                              title: poke.name,
-                              source: getOfficialArtworkImg(poke.id),
-                            },
-                          ],
-                        },
-                      ])}
-                      metadata={
+                  <List.Item.Detail
+                    markdown={json2md([
+                      {
+                        img: [
+                          {
+                            title: poke.name,
+                            source: getOfficialArtworkImg(poke.id),
+                          },
+                        ],
+                      },
+                    ])}
+                    metadata={
+                      !isLoading &&
+                      pokemon && (
                         <List.Item.Detail.Metadata>
                           <List.Item.Detail.Metadata.TagList title="Type">
                             {pokemon?.pokemon_v2_pokemontypes.map((type) => (
@@ -107,13 +94,13 @@ export default function PokeWeaknesses() {
                             ))}
                           </List.Item.Detail.Metadata.TagList>
 
-                          <MetadataWeakness
+                          <WeaknessMetadata
                             types={pokemon?.pokemon_v2_pokemontypes || []}
                           />
                         </List.Item.Detail.Metadata>
-                      }
-                    />
-                  )
+                      )
+                    }
+                  />
                 }
                 actions={
                   <ActionPanel>
@@ -138,9 +125,6 @@ export default function PokeWeaknesses() {
     debounce((index: string | null) => {
       if (index) {
         setSelectedPokemonId(parseInt(index));
-        if (pokemon) {
-          setPokemon(undefined);
-        }
       }
     }, 300),
     [],
@@ -161,7 +145,7 @@ export default function PokeWeaknesses() {
         pokemon ? `${nameByLang[language].name} | Weaknesses` : "Weaknesses"
       }
       isShowingDetail={true}
-      isLoading={loading}
+      isLoading={isLoading}
       selectedItemId={String(selectedPokemonId)}
       onSelectionChange={onSelectionChange}
       children={displayWeaknesses}

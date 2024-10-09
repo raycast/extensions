@@ -6,6 +6,10 @@ Query the [dust.tt](https://dust.tt/) service extention for [Raycast](https://ww
 
 You need a dust.tt account to use this extension.
 
+### API Base URL
+
+(optional) You can specify a custom API base URL if you have specific needs. Otherwise, it defaults to `https://dust.tt/api/v1/w`.
+
 ### API key
 
 You can create an API key for Dust by going to your Admin preferences, on the **Developers Tools** panel

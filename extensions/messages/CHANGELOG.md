@@ -1,5 +1,14 @@
 # Messages Changelog
 
+## [Big Update] - 2024-10-07
+
+This big update brings you new commands and a lot of useful improvements to the extension.
+
+- **New `My Latest Messages` command**: Check in on your latest messages. Play audio messages, or open images & videos from there. Reply to these messages by yourself or using AI.
+- **New `Open Chat` command**: Quickly open your most recent chats in the Messages app. Go even faster by creating quicklinks to these recent chats.
+- **New `Unread Messages` command**: Display your unread messages in the menu bar to stay on top of them.
+- **Rework `Send Messages` command**: It uses your latest chats instead of your contacts. This now makes it possible to send SMS messages to your contacts.
+
 ## [Improvements] - 2024-08-12
 
 - Closing the Messages app if it wasn't open before to keep your dock clean.

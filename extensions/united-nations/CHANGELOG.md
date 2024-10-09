@@ -1,5 +1,10 @@
 # United Nations Extension
 
+## [Chore] - 2024-10-03
+
+- Optimize extension file size
+- Bump all dependencies to the latest
+
 ## [Bugfix] - 2024-07-24
 
 - Handle possibly undefined parameter on UN News

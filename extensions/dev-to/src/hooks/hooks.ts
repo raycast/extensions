@@ -1,80 +1,56 @@
-import { showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
 import { Article } from "../types/articles";
 import { ReadingList } from "../types/readingList";
-import fetch, { Headers } from "node-fetch";
 import { preference } from "../utils/functions";
+import { useFetch } from "@raycast/utils";
+import { DEFAULT_PER_PAGE } from "../config/constants";
+import { ArticleById } from "../types/articleById";
 
-export const refreshNumber = () => {
-  return new Date().getTime();
+const headers = {
+  accept: "application/vnd.forem.api-v1+json",
+  "api-key": preference.accessToken,
 };
 
-export const getArticles = (refresh: number, endpoint: string) => {
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  const fetchData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const headers = new Headers({
-        accept: "application/vnd.forem.api-v1+json",
-        "api-key": preference.accessToken,
-      });
-
-      const response = await fetch("https://dev.to/api" + endpoint, {
-        method: "GET",
-        headers: headers,
-      });
-
-      if (response.ok) {
-        const result = (await response.json()) as Article[];
-        console.log(result);
-        setArticles(result);
-      }
-    } catch (e) {
-      await showToast(Toast.Style.Failure, String(e));
+const usePaginated = <T>(endpoint: string) => {
+  const { data, isLoading, pagination, revalidate } = useFetch(
+    (options) =>
+      "https://dev.to/api" +
+      endpoint +
+      "?" +
+      new URLSearchParams({
+        page: String(options.page + 1),
+        per_page: String(DEFAULT_PER_PAGE),
+      }).toString(),
+    {
+      method: "GET",
+      headers,
+      mapResult(result: T[]) {
+        return {
+          data: result,
+          hasMore: result.length === DEFAULT_PER_PAGE,
+        };
+      },
+      initialData: [],
     }
-    setLoading(false);
-  }, [refresh]);
+  );
 
-  useEffect(() => {
-    void fetchData();
-  }, [fetchData]);
-
-  return { articles: articles, loading: loading };
+  return { data, isLoading, pagination, revalidate };
 };
 
-export const getReadingList = (endpoint: string) => {
-  const [readingList, setReadingList] = useState<ReadingList[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+export const getArticles = () => usePaginated<Article>("/articles/me/all");
 
-  const fetchData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const headers = new Headers({
-        accept: "application/vnd.forem.api-v1+json",
-        "api-key": preference.accessToken,
-      });
+export const getReadingList = () => usePaginated<ReadingList>("/readinglist");
 
-      const response = await fetch("https://dev.to/api" + endpoint, {
-        method: "GET",
-        headers: headers,
-      });
-
-      if (response.ok) {
-        const result = (await response.json()) as ReadingList[];
-        console.log(result);
-        setReadingList(result);
-      }
-    } catch (e) {
-      await showToast(Toast.Style.Failure, String(e));
-    }
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    void fetchData();
-  }, [fetchData]);
-
-  return { readingList: readingList, loading: loading };
+export const getArticleMarkdown = (id: number) => {
+  const { isLoading, data } = useFetch(`https://dev.to/api/articles/${id}`, {
+    method: "GET",
+    headers,
+    mapResult(result: ArticleById) {
+      return {
+        data: result.body_markdown,
+      };
+    },
+    initialData: "",
+    execute: !!id,
+  });
+  return { isLoading, data };
 };
