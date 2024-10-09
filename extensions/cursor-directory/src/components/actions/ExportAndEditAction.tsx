@@ -15,8 +15,8 @@ export const ExportAndEditAction = ({ cursorRule, onAction }: Props) => {
   const handleExportAndEdit = async () => {
     try {
       const fileName = cursorRule.isLocal ? `${cursorRule.slug}` : `${cursorRule.slug}.md`;
-      const { export_directory } = getPreferenceValues<Preferences>();
-      const expandedPath = export_directory.replace(/^~/, homedir());
+      const { exportDirectory } = getPreferenceValues<Preferences>();
+      const expandedPath = exportDirectory.replace(/^~/, homedir());
       const filePath = path.join(expandedPath, fileName);
 
       const openFile = () => {
