@@ -5,6 +5,9 @@
   "description": "AI Code Namer is a Raycast extension that leverages AI to help developers generate clear, descriptive, and context-appropriate names for various code elements such as variables, functions, classes, and files.",
   "icon": "extension-icon.png",
   "author": "HunterJi",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Developer Tools"
   ],

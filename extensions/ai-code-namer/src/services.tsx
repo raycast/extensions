@@ -95,6 +95,7 @@ export function NameGenerator({ codeElementType }: NameHandlerProps) {
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard content={item} />
+                <Action title="Regenerate Names" onAction={generateNames} />
               </ActionPanel>
             }
           />

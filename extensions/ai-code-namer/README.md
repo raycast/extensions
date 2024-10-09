@@ -30,4 +30,8 @@ Note: The extension remembers your last used naming style for each code element 
 
 If you encounter any issues or have suggestions for improvement, please file an issue on the [GitHub repository](https://github.com/hunter-ji/ai-code-namer).
 
+## Author
+
+Created by Hunter Ji. For more projects and articles, visit my blog at [hunterji.com](https://hunterji.com).
+
 Enjoy coding with clearer, more descriptive names!
