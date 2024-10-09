@@ -1,6 +1,13 @@
 import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { CodeElementType, convertStringNamingStyle, generateNameSuggestions, NamingStyle } from "./utils";
+import {
+  CodeElementType,
+  convertStringNamingStyle,
+  generateNameSuggestions,
+  NamingStyle,
+  primaryAction,
+  secondaryAction,
+} from "./utils";
 import { StyleDropdown } from "./style-dropdown";
 
 interface NameHandlerProps {
@@ -82,11 +89,11 @@ export function NameGenerator({ codeElementType }: NameHandlerProps) {
       searchBarAccessory={<StyleDropdown onStyleChange={onStyleChange} />}
       actions={
         <ActionPanel>
-          <Action title="Generate Names" onAction={generateNames} />
+          <Action title="Generate Names" onAction={generateNames} icon={Icon.Wand} />
         </ActionPanel>
       }
     >
-      <List.Section title="Generated names">
+      <List.Section title="Generated Names">
         {generatedNames.map((item) => (
           <List.Item
             key={item}
@@ -94,8 +101,9 @@ export function NameGenerator({ codeElementType }: NameHandlerProps) {
             icon={Icon.Circle}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard content={item} />
-                <Action title="Regenerate Names" onAction={generateNames} />
+                {primaryAction(item)}
+                <Action title="Regenerate Names" onAction={generateNames} icon={Icon.Wand} />
+                {secondaryAction(item)}
               </ActionPanel>
             }
           />

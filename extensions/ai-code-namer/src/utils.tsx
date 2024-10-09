@@ -1,4 +1,6 @@
-import { AI, environment } from "@raycast/api";
+import { Action, AI, getPreferenceValues } from "@raycast/api";
+
+const preferences = getPreferenceValues<Preferences>();
 
 export enum CodeElementType {
   Variable = "Variable",
@@ -42,10 +44,6 @@ export async function generateNameSuggestions(
   description: string,
   style: string,
 ): Promise<string[]> {
-  if (!environment.canAccess(AI)) {
-    throw new Error("You need Raycast AI to utilize this extension");
-  }
-
   const prompt = `As an expert programmer, generate three concise and optimized ${style} names for a ${elementType.toLowerCase()} based on this description: "${description}".
 
   Guidelines:
@@ -71,3 +69,12 @@ export async function generateNameSuggestions(
     throw new Error("Failed to generate name suggestions. Please try again.");
   }
 }
+
+const copyAction = (value: string) => <Action.CopyToClipboard content={value} />;
+const pasteAction = (value: string) => <Action.Paste content={value} />;
+
+export const primaryAction = (value: string) =>
+  preferences.defaultAction === "copy" ? copyAction(value) : pasteAction(value);
+
+export const secondaryAction = (value: string) =>
+  preferences.defaultAction === "copy" ? pasteAction(value) : copyAction(value);
