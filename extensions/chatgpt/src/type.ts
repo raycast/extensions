@@ -68,6 +68,7 @@ export type ConversationsHook = Hook<Conversation> & { update: PromiseFunctionWi
 export type QuestionHook = BaseHook<string> & { update: PromiseFunctionWithOneArg<string> };
 
 export type ModelHook = Hook<Model> & {
+  setModels: PromiseFunctionWithOneArg<Model[]>;
   update: PromiseFunctionWithOneArg<Model>;
   option: Model["option"][];
   isFetching: boolean;

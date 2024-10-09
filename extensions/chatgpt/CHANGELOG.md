@@ -1,5 +1,15 @@
 # Changelog
 
+## [Feature] - 2024-10-09
+
+- Feature: Added import/export functionality to Models to prevent potential data loss and alleviate data anxiety.
+- Feature: Introduced a new reusable import/export module, so that it can be used in other parts of the extension in the future.
+
+## [Fix] - 2024-10-09
+
+- Fix: Modified the `useModel` initialization process to update `localStorage` only after initialization is complete, preventing data overwrite. Addresses issues #8977, #14356, and #14125.
+- Chore: Removed `List.EmptyView` when the model list is empty, as the Action panel would remain empty and default models ensure the model list is not empty.
+
 ## [Feature] - 2024-10-06
 
 - Feature: Change all occurence of `gpt-3.5` and the like to `gpt-4o-mini`, as the latter is cheaper and more efficient.
