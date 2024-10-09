@@ -1,11 +1,11 @@
-import { LocalStorage } from "@raycast/api";
-import { showToast, Toast, confirmAlert, Alert, Icon } from "@raycast/api";
+import { showToast, Toast, confirmAlert, Alert, Icon, LocalStorage } from "@raycast/api";
 import { writeFile, readFile } from "fs/promises";
 import moment from "moment";
 import { homedir } from "os";
 import { join } from "path";
 
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ExportData(data: any, moduleName: string) {
 	const timestamp = moment().format("YYMMDD-HHmmss");
 	const filename = `Downloads/raycast-chatgpt-${moduleName}-${timestamp}.json`;
