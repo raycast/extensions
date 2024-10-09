@@ -1,6 +1,10 @@
 # Messages Changelog
 
-## [Big Update] - 2024-10-07
+## [Fix heap memory errors] - 2024-10-09
+
+Fixes a crash issue that could occur when the user has too many contacts.
+
+## [Big Update] - 2024-10-08
 
 This big update brings you new commands and a lot of useful improvements to the extension.
 
@@ -9,16 +13,16 @@ This big update brings you new commands and a lot of useful improvements to the 
 - **New `Unread Messages` command**: Display your unread messages in the menu bar to stay on top of them.
 - **Rework `Send Messages` command**: It uses your latest chats instead of your contacts. This now makes it possible to send SMS messages to your contacts.
 
-## [Improvements] - 2024-08-12
+## [Close the Messages app] - 2024-08-12
 
 - Closing the Messages app if it wasn't open before to keep your dock clean.
 
-## [Improvements] - 2024-07-16
+## [Quicklinks and permissions] - 2024-07-16
 
 - **Messages Quicklinks:** Users can now create address quicklinks directly in the Messages app.
 - **Permission Request:** The extension will now ask for permission to access your contacts. If permission is denied, a clear error message will be displayed.
 
-## [Improvements] - 2024-07-03
+## [Close Raycast when sending a message] - 2024-07-03
 
 - Added a preference allowing users to close Raycast when sending a message.
 - Fixed an issue where "empty" contacts were appearing in the contact list dropdown.

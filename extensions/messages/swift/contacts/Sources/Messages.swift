@@ -18,10 +18,9 @@ struct ContactItem: Codable {
 
 enum MessagesError: Error {
   case accessDenied
-  case noContacts
 }
 
-@raycast func fetchAllContacts() async throws -> [ContactItem] {
+@raycast func fetchContactsForPhoneNumbers(phoneNumbers: [String]) async throws -> [ContactItem] {
   let store = CNContactStore()
 
   do {
@@ -33,40 +32,43 @@ enum MessagesError: Error {
     throw MessagesError.accessDenied
   }
 
-  let keys =
-    [
-      CNContactGivenNameKey,
-      CNContactFamilyNameKey,
-      CNContactPhoneNumbersKey,
-      CNContactEmailAddressesKey,
-      CNContactIdentifierKey,
-      CNContactImageDataKey,
-    ] as [CNKeyDescriptor]
+  let keys = [
+    CNContactGivenNameKey,
+    CNContactFamilyNameKey,
+    CNContactPhoneNumbersKey,
+    CNContactEmailAddressesKey,
+    CNContactIdentifierKey,
+    CNContactImageDataKey,
+  ] as [CNKeyDescriptor]
 
-  let request = CNContactFetchRequest(keysToFetch: keys)
   var contacts: [ContactItem] = []
 
-  do {
-    try store.enumerateContacts(with: request) { contact, _ in
-      let phoneNumbers = contact.phoneNumbers.map { cnPhoneNumber -> PhoneNumber in
-        let number = cnPhoneNumber.value.stringValue
-        let countryCode = cnPhoneNumber.value.value(forKey: "countryCode") as? String
-        return PhoneNumber(
-          number: number, countryCode: countryCode?.isEmpty ?? true ? nil : countryCode)
-      }
+  for phoneNumber in phoneNumbers {
+    let predicate = CNContact.predicateForContacts(matching: CNPhoneNumber(stringValue: phoneNumber))
+    do {
+      let matchingContacts = try store.unifiedContacts(matching: predicate, keysToFetch: keys)
+      for contact in matchingContacts {
+        let phoneNumbers = contact.phoneNumbers.map { cnPhoneNumber -> PhoneNumber in
+          let number = cnPhoneNumber.value.stringValue
+          let countryCode = cnPhoneNumber.value.value(forKey: "countryCode") as? String
+          return PhoneNumber(
+            number: number, countryCode: countryCode?.isEmpty ?? true ? nil : countryCode)
+        }
 
-      contacts.append(
-        ContactItem(
-          id: contact.identifier,
-          givenName: contact.givenName,
-          familyName: contact.familyName,
-          phoneNumbers: phoneNumbers,
-          emailAddresses: contact.emailAddresses.map { $0.value as String },
-          imageData: contact.imageData
-        ))
+        contacts.append(
+          ContactItem(
+            id: contact.identifier,
+            givenName: contact.givenName,
+            familyName: contact.familyName,
+            phoneNumbers: phoneNumbers,
+            emailAddresses: contact.emailAddresses.map { $0.value as String },
+            imageData: contact.imageData
+          ))
+      }
+    } catch {
+      // If a specific number doesn't match, we'll just skip it
+      continue
     }
-  } catch {
-    throw MessagesError.noContacts
   }
 
   return contacts.sorted { $0.givenName < $1.givenName }
