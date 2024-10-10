@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shazam",
+  "title": "Shazam",
+  "description": "Unofficial Shazam Extension",
+  "icon": "command-icon.png",
+  "author": "antonengelhardt",
+  "version": "0.1.0",
+  "license": "MIT",
+  "categories": [
+    "Media"
+  ],
+  "commands": [
+    {
+      "name": "listen",
+      "title": "Listen",
+      "subtitle": "Start to listen and get the current title playing",
+      "description": "This command will start to listen and get the current title playing, before it will be saved to your library",
+      "mode": "view"
+    },
+    {
+      "name": "library",
+      "title": "Library",
+      "subtitle": "Most recent Shazams",
+      "description": "View your most recent Shazams",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
