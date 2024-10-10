@@ -453,6 +453,7 @@
 /extensions/evm-codes                                               @clabby
 /extensions/excalidraw                                              @slyguy5646 @pernielsentikaer
 /extensions/exif                                                    @j3lte
+/extensions/expand-video-canvas                                     @BIAsia
 /extensions/explain-command                                         @maantje
 /extensions/f1-standings                                            @csigritz @sxn @qeude @ChetanGoti @drillprop
 /extensions/facetime                                                @ron-myers
@@ -1543,6 +1544,7 @@
 /extensions/toncoin-price                                           @uqe
 /extensions/toolbox                                                 @kkange @Saafo @pernielsentikaer @Yakitrak @podlesny-j
 /extensions/toothpick                                               @VladCuciureanu @briankosw @VladCuciureanu @sxn @pernielsentikaer @rspeicher @VladCuciureanu
+/extensions/tourbox                                                 @LitoMore
 /extensions/tower                                                   @tdwesten @sebduggan
 /extensions/trackflight                                             @cojmeister
 /extensions/tradingview-controls                                    @jacksonsalopek
@@ -1572,7 +1574,7 @@
 /extensions/tynyfy                                                  @kusthi
 /extensions/type-snob                                               @sawyerh
 /extensions/type-the-alphabet                                       @Visual-Studio-Coder
-/extensions/typeform-navigator                                      @jdvr
+/extensions/typeform-navigator                                      @jdvr @xmok
 /extensions/typefully                                               @DanielFerguson @pernielsentikaer @thomaspaulmann
 /extensions/typer                                                   @yaronschwimmer
 /extensions/typescript-documentation-search                         @chezhe

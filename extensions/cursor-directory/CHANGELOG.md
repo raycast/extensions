@@ -1,5 +1,11 @@
 # Cursor Directory Changelog
 
+## [Features & Improvements] - 2024-10-09
+
+- Add integration with cursor-recent-projects extension to easily open recent projects in Cursor
+- Add auto launch recent projects preference
+- Update Videos data
+
 ## [Features & Improvements] - 2024-10-02
 
 - Add export and edit cursor rule locally

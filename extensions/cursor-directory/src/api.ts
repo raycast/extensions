@@ -70,10 +70,10 @@ export async function fetchCursorRules(popularOnly: boolean): Promise<CursorRule
   const cachePath = popularOnly ? POPULAR_CURSOR_RULES_CACHE_PATH : ALL_CURSOR_RULES_CACHE_PATH;
 
   try {
-    const { cache_interval } = getPreferenceValues<Preferences>();
+    const { cacheInterval } = getPreferenceValues<Preferences>();
     const modified_timestamp = getTimestamp(cachePath);
 
-    if (modified_timestamp > 0 && Date.now() - modified_timestamp < Number(cache_interval) * 1000 * 60 * 60 * 24) {
+    if (modified_timestamp > 0 && Date.now() - modified_timestamp < Number(cacheInterval) * 1000 * 60 * 60 * 24) {
       console.debug("Using cache...");
       const data = await fs.readFile(cachePath, "utf8");
       return JSON.parse(data) as CursorRule[];
@@ -93,8 +93,8 @@ export async function fetchCursorRules(popularOnly: boolean): Promise<CursorRule
 }
 
 export async function fetchLocalRules(): Promise<CursorRule[]> {
-  const { export_directory } = getPreferenceValues<Preferences>();
-  const expandedPath = export_directory.replace(/^~/, process.env.HOME || "");
+  const { exportDirectory } = getPreferenceValues<Preferences>();
+  const expandedPath = exportDirectory.replace(/^~/, process.env.HOME || "");
 
   try {
     const files = await fs.readdir(expandedPath);

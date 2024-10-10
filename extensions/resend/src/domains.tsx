@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { AddDomainRequest, AddDomainRequestForm, AddDomainResponse, Domain, GetDomainsResponse } from "./utils/types";
-import { addDomain, deleteDomain, getDomains, verifyDomain } from "./utils/api";
+import { AddDomainRequest, AddDomainRequestForm, AddDomainResponse, Domain } from "./utils/types";
+import { addDomain, deleteDomain, verifyDomain } from "./utils/api";
 import {
   Action,
   ActionPanel,
@@ -8,41 +8,29 @@ import {
   Color,
   Form,
   Icon,
+  Keyboard,
   List,
   Toast,
   confirmAlert,
   showToast,
-  useNavigation,
 } from "@raycast/api";
 import { FormValidation, getFavicon, useForm } from "@raycast/utils";
 import { ADD_DOMAIN_REGIONS, RESEND_URL } from "./utils/constants";
 import ErrorComponent from "./components/ErrorComponent";
+import { useGetDomains } from "./lib/hooks";
 
 export default function Domains() {
-  const { push } = useNavigation();
-  const [isLoading, setIsLoading] = useState(true);
-  const [domainsResponse, setDomainsResponse] = useState<GetDomainsResponse>();
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  async function getDomainsFromApi() {
-    setIsLoading(true);
-    const response = await getDomains();
-    if (!("statusCode" in response)) {
-      const numOfDomains = response.data.length;
-      await showToast({
-        title: "Success",
-        message: `Fetched ${numOfDomains} ${numOfDomains === 1 ? "domain" : "domains"}`,
-        style: Toast.Style.Success,
-      });
-      setDomainsResponse(response);
-    } else if (response.name === "validation_error" || response.name === "restricted_api_key") {
-      setError(response.message);
-    }
-    setIsLoading(false);
-  }
+  const { isLoading: isLoadingDomains, domains, error: errorDomains, revalidate } = useGetDomains();
+
   useEffect(() => {
-    getDomainsFromApi();
-  }, []);
+    if (!errorDomains) return;
+    if (errorDomains.cause === "validation_error" || errorDomains.cause === "restricted_api_key") {
+      setError(errorDomains.message);
+    }
+  }, [errorDomains]);
 
   async function verifyDomainFromApi(domain: Domain) {
     setIsLoading(true);
@@ -54,6 +42,7 @@ export default function Domains() {
         style: Toast.Style.Success,
       });
     }
+    revalidate();
     setIsLoading(false);
   }
 
@@ -68,7 +57,7 @@ export default function Domains() {
       const response = await deleteDomain(item.id);
       if (!("statusCode" in response)) {
         await showToast(Toast.Style.Success, "Deleted Domain");
-        await getDomainsFromApi();
+        revalidate();
       }
       setIsLoading(false);
     }
@@ -82,61 +71,76 @@ export default function Domains() {
     else return undefined;
   }
 
-  const numOfDomains = domainsResponse && domainsResponse.data.length;
-  const title = domainsResponse && `${numOfDomains} ${numOfDomains === 1 ? "domain" : "domains"}`;
+  const numOfDomains = domains.length;
+  const title = `${numOfDomains} ${numOfDomains === 1 ? "domain" : "domains"}`;
   return error ? (
     <ErrorComponent error={error} />
   ) : (
-    <List isLoading={isLoading} searchBarPlaceholder="Search domain">
+    <List isLoading={isLoading || isLoadingDomains} searchBarPlaceholder="Search domain">
       <List.Section title={title}>
-        {domainsResponse?.data.map((item) => (
-          <List.Item
-            key={item.id}
-            title={item.name}
-            icon={getFavicon(`https://${item.name}`, { fallback: Icon.Globe })}
-            subtitle={item.id}
-            accessories={[
-              { tag: { value: item.status, color: getStatusColor(item.status) } },
-              { icon: ADD_DOMAIN_REGIONS.find((region) => region.value === item.region)?.icon },
-              { tag: new Date(item.created_at) },
-            ]}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard title="Copy ID to Clipboard" content={item.id} />
-                <Action.CopyToClipboard title="Copy Name to Clipboard" content={item.name} />
-                <Action.OpenInBrowser title="View Domain in Dashboard" url={`${RESEND_URL}domains/${item.id}`} />
-                <Action
-                  title="Verify Domain"
-                  icon={Icon.WrenchScrewdriver}
-                  onAction={() => verifyDomainFromApi(item)}
-                />
-                <Action
-                  title="Delete Domain"
-                  icon={Icon.Trash}
-                  style={Action.Style.Destructive}
-                  onAction={() => confirmAndDelete(item)}
-                />
-                <ActionPanel.Section>
-                  <Action title="Add New Domain" icon={Icon.Plus} onAction={() => push(<DomainsAdd />)} />
-                  <Action title="Reload Domains" icon={Icon.Redo} onAction={getDomainsFromApi} />
-                  <Action.OpenInBrowser
-                    title="View API Reference"
-                    url={`${RESEND_URL}docs/api-reference/domains/list-domains`}
+        {domains.map((item) => {
+          const region = ADD_DOMAIN_REGIONS.find((region) => region.value === item.region);
+          return (
+            <List.Item
+              key={item.id}
+              title={item.name}
+              icon={getFavicon(`https://${item.name}`, { fallback: Icon.Globe })}
+              subtitle={item.id}
+              accessories={[
+                { tag: { value: item.status, color: getStatusColor(item.status) } },
+                region ? { icon: region.icon, tooltip: region.title } : {},
+                { tag: new Date(item.created_at), tooltip: `Created: ${item.created_at}` },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard title="Copy ID to Clipboard" content={item.id} />
+                  <Action.CopyToClipboard title="Copy Name to Clipboard" content={item.name} />
+                  <Action.OpenInBrowser title="View Domain in Dashboard" url={`${RESEND_URL}domains/${item.id}`} />
+                  {item.status !== "pending" && (
+                    <Action
+                      title="Verify Domain"
+                      icon={Icon.WrenchScrewdriver}
+                      onAction={() => verifyDomainFromApi(item)}
+                    />
+                  )}
+                  <Action
+                    title="Delete Domain"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    onAction={() => confirmAndDelete(item)}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                   />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        ))}
+                  <ActionPanel.Section>
+                    <Action.Push
+                      title="Add New Domain"
+                      icon={Icon.Plus}
+                      target={<DomainsAdd onDomainAdded={revalidate} />}
+                      shortcut={Keyboard.Shortcut.Common.New}
+                    />
+                    <Action title="Reload Domains" icon={Icon.Redo} onAction={revalidate} />
+                    <Action.OpenInBrowser
+                      title="View API Reference"
+                      url={`${RESEND_URL}docs/api-reference/domains/list-domains`}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          );
+        })}
       </List.Section>
-      {!isLoading && (
+      {!isLoading && !isLoadingDomains && (
         <List.Section title="Actions">
           <List.Item
             title="Add New Domain"
             icon={Icon.Plus}
             actions={
               <ActionPanel>
-                <Action title="Add New Domain" icon={Icon.Plus} onAction={() => push(<DomainsAdd />)} />
+                <Action.Push
+                  title="Add New Domain"
+                  icon={Icon.Plus}
+                  target={<DomainsAdd onDomainAdded={revalidate} />}
+                />
                 <Action.OpenInBrowser
                   title="View API Reference"
                   url={`${RESEND_URL}docs/api-reference/domains/create-domain`}
@@ -149,7 +153,7 @@ export default function Domains() {
             icon={Icon.Redo}
             actions={
               <ActionPanel>
-                <Action title="Reload Domains" icon={Icon.Redo} onAction={getDomainsFromApi} />
+                <Action title="Reload Domains" icon={Icon.Redo} onAction={revalidate} />
               </ActionPanel>
             }
           />
@@ -159,7 +163,7 @@ export default function Domains() {
   );
 }
 
-function DomainsAdd() {
+function DomainsAdd({ onDomainAdded }: { onDomainAdded: () => void }) {
   const [isLoading, setIsLoading] = useState(false);
   const [newDomain, setNewDomain] = useState<AddDomainResponse>();
 
@@ -174,6 +178,7 @@ function DomainsAdd() {
 
       const response = await addDomain(newDomainRequest);
       if (!("statusCode" in response)) {
+        onDomainAdded();
         setNewDomain(response);
         showToast(Toast.Style.Success, "Added Domain", response.name);
       }
