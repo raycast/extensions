@@ -1,15 +1,17 @@
 import fetch from "node-fetch";
 import {
   AirtableBaseMetadata,
+  AirtableBaseRecordsResponse,
   AirtableMetadataApiBaseDetails,
   AirtableMetadataApiBaseListResponse,
   AirtableMetadataApiBaseSchemaResponse,
-  RaycastExtensionPreferences,
+  AirtableRecord,
+  ErrorResponse,
 } from "./types";
 import { client } from "./oauth-client";
 import { getPreferenceValues, Cache } from "@raycast/api";
 
-const { airtableUiBaseUrl, airtableApiBaseUrl } = getPreferenceValues<RaycastExtensionPreferences>();
+const { airtableUiBaseUrl, airtableApiBaseUrl } = getPreferenceValues<Preferences>();
 const cache = new Cache();
 
 const FETCHED_BASES_CACHE_KEY = "fetchedBases";
@@ -94,4 +96,54 @@ export async function fetchBaseSchema(baseId: string): Promise<AirtableMetadataA
   const baseSchema = (await response.json()) as AirtableMetadataApiBaseSchemaResponse;
   cache.set(getBaseSchemaCacheKey(baseId), JSON.stringify(baseSchema));
   return baseSchema;
+}
+
+export async function fetchBaseRecords(baseId: string, tableId: string) {
+  const response = await fetch(`${airtableApiBaseUrl}/v0/${baseId}/${tableId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    if (response.headers.get("Content-Type")?.includes("application/json")) {
+      const err = (await response.json()) as ErrorResponse;
+      throw new Error(err.error.message);
+    } else {
+      throw new Error(response.statusText);
+    }
+  }
+
+  const result = (await response.json()) as AirtableBaseRecordsResponse;
+  return result.records;
+}
+
+export async function updateBaseRecord(
+  baseId: string,
+  tableId: string,
+  recordId: string,
+  fields: Record<string, string>
+) {
+  const response = await fetch(`${airtableApiBaseUrl}/v0/${baseId}/${tableId}/${recordId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
+    },
+    body: JSON.stringify({ fields }),
+  });
+
+  if (!response.ok) {
+    if (response.headers.get("Content-Type")?.includes("application/json")) {
+      const err = (await response.json()) as ErrorResponse;
+      throw new Error(err.error.message);
+    } else {
+      throw new Error(response.statusText);
+    }
+  }
+
+  const result = (await response.json()) as AirtableRecord;
+  return result;
 }
