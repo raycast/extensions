@@ -14,11 +14,11 @@ import { CursorRule } from "./types";
 import { MAX_STARRED_RULES } from "./constants";
 
 export default function Command() {
-  const { show_detailed_view, default_cursor_rules_list } = getPreferenceValues<Preferences>();
+  const { showDetailedView, defaultCursorRulesList } = getPreferenceValues<Preferences>();
 
   const [error, setError] = useState<Error | undefined>(undefined);
-  const [showingDetail, setShowingDetail] = useState<boolean>(show_detailed_view);
-  const [popularOnly, setPopularOnly] = useState<boolean>(default_cursor_rules_list === "popular");
+  const [showingDetail, setShowingDetail] = useState<boolean>(showDetailedView);
+  const [popularOnly, setPopularOnly] = useState<boolean>(defaultCursorRulesList === "popular");
 
   const {
     data: remoteRules,

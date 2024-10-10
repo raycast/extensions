@@ -110,8 +110,6 @@ export function parseMarkdownToRule(content: string, fileName: string): CursorRu
   try {
     const frontmatterData = parseYaml(frontmatter);
 
-    console.debug(frontmatterData);
-
     const author: Author = {
       name: typeof frontmatterData.author?.name === "string" ? frontmatterData.author.name : os.userInfo().username,
       url: typeof frontmatterData.author?.url === "string" ? frontmatterData.author.url : "",
