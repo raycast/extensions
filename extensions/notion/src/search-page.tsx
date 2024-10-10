@@ -3,13 +3,15 @@ import { useCachedPromise, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 
 import { PageListItem } from "./components";
-import { useRecentPages, useUsers } from "./hooks";
+import { useRecentPages, useUsers, useConvertDepreciatedViewConfig } from "./hooks";
 import { search } from "./utils/notion";
 import { notionService } from "./utils/notion/oauth";
 
 function Search() {
   const { data: recentPages, setRecentPage, removeRecentPage } = useRecentPages();
   const [searchText, setSearchText] = useState<string>("");
+
+  useConvertDepreciatedViewConfig();
 
   const { data, isLoading, pagination, mutate } = useCachedPromise(
     (searchText: string) =>
@@ -18,6 +20,7 @@ function Search() {
         return { data: pages, hasMore, cursor: nextCursor };
       },
     [searchText],
+    { keepPreviousData: true },
   );
 
   const { data: users } = useUsers();

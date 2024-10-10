@@ -22,6 +22,7 @@ import {
   useRecentPages,
   useRelations,
   useUsers,
+  useConvertDepreciatedViewConfig,
 } from "../../hooks";
 import { createDatabasePage, DatabaseProperty } from "../../utils/notion";
 import { handleOnOpenPage } from "../../utils/openPage";
@@ -29,7 +30,7 @@ import { Quicklink } from "../../utils/types";
 import { ActionSetVisibleProperties } from "../actions";
 import { ActionSetOrderProperties } from "../actions";
 
-import { createConvertToFieldFunc, FieldProps } from "./PagePropertyField";
+import { PagePropertyField } from "./PagePropertyField";
 
 export type CreatePageFormValues = {
   database: string | undefined;
@@ -59,14 +60,17 @@ const NON_EDITABLE_PROPETY_TYPES = ["formula"];
 const filterNoEditableProperties = (dp: DatabaseProperty) => !NON_EDITABLE_PROPETY_TYPES.includes(dp.type);
 
 export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFormProps) {
+  useConvertDepreciatedViewConfig();
+
   const preferences = getPreferenceValues<CreatePageFormPreferences>();
   const defaultValues = launchContext?.defaults ?? defaults;
   const initialDatabaseId = defaultValues?.database;
 
   const [databaseId, setDatabaseId] = useState<string | null>(initialDatabaseId ? initialDatabaseId : null);
   const { data: databaseProperties } = useDatabaseProperties(databaseId, filterNoEditableProperties);
-  const { visiblePropIds, setVisiblePropIds } = useVisibleDatabasePropIds(
-    databaseId || "__no_id__",
+  const { visiblePropIds, showProperty, hideProperty, setPropertyOrder } = useVisiblePropIds(
+    databaseId,
+    databaseProperties,
     launchContext?.visiblePropIds,
   );
   const { data: users } = useUsers();
@@ -173,18 +177,6 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
     });
   }
 
-  function itemPropsFor<T extends DatabaseProperty["type"]>(property: DatabaseProperty) {
-    const id = createPropertyId(property);
-    return {
-      ...(itemProps[id] as FieldProps<T>),
-      title: property.name,
-      key: id,
-      id,
-    };
-  }
-
-  const convertToField = createConvertToFieldFunc(itemPropsFor, relationPages, users);
-
   const renderSubmitAction = (type: "main" | "second") => {
     const shortcut: Keyboard.Shortcut | undefined =
       type === "second" ? { modifiers: ["cmd", "shift"], key: "enter" } : undefined;
@@ -225,17 +217,13 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
               <ActionSetVisibleProperties
                 databaseProperties={databaseProperties.filter((dp) => dp.id !== "title")}
                 selectedPropertiesIds={visiblePropIds || databasePropertyIds}
-                onSelect={(propertyId) =>
-                  setVisiblePropIds(visiblePropIds ? [...visiblePropIds, propertyId] : [propertyId])
-                }
-                onUnselect={(propertyId) =>
-                  setVisiblePropIds((visiblePropIds || databasePropertyIds).filter((pid) => pid !== propertyId))
-                }
+                onSelect={showProperty}
+                onUnselect={hideProperty}
               />
               <ActionSetOrderProperties
                 databaseProperties={databaseProperties}
                 propertiesOrder={visiblePropIds || databasePropertyIds}
-                onChangeOrder={setVisiblePropIds}
+                onChangeOrder={setPropertyOrder}
               />
             </ActionPanel.Section>
           ) : null}
@@ -275,7 +263,22 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
         </>
       )}
 
-      {databaseProperties?.filter(filterProperties).sort(sortProperties).map(convertToField)}
+      {databaseProperties
+        ?.filter(filterProperties)
+        .sort(sortProperties)
+        .map((dp) => {
+          const id = createPropertyId(dp);
+          return (
+            <PagePropertyField
+              type={dp.type}
+              databaseProperty={dp}
+              itemProps={itemProps[id]}
+              relationPages={relationPages}
+              users={users}
+              key={id}
+            />
+          );
+        })}
       <Form.Separator />
       <Form.TextArea
         {...itemProps["content"]}
@@ -294,4 +297,22 @@ Please note that HTML tags and thematic breaks are not supported in Notion due t
       />
     </Form>
   );
+}
+
+function useVisiblePropIds(
+  databaseId: string | null,
+  databaseProperties: DatabaseProperty[],
+  quicklinkProps?: string[],
+): ReturnType<typeof useVisibleDatabasePropIds> {
+  if (quicklinkProps) {
+    const [visiblePropIds, setVisiblePropIds] = useState<string[]>(quicklinkProps);
+    return {
+      visiblePropIds,
+      hideProperty: (propertyID: string) => setVisiblePropIds(visiblePropIds.filter((id) => id != propertyID)),
+      showProperty: (propertyID: string) => setVisiblePropIds([...visiblePropIds, propertyID]),
+      setPropertyOrder: setVisiblePropIds,
+    };
+  } else {
+    return useVisibleDatabasePropIds("form", databaseId ?? "__no_id__", databaseProperties);
+  }
 }
