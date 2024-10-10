@@ -9,6 +9,10 @@ It supports the following features as commands:
 
 Create drafts in a Raycast form with tags (either with opening it afterwards or in the background).
 
+## Capture Draft
+
+Quickly capture content from command argument into a new draft in the background.
+
 ## Append/Prepend to Draft
 
 Configure Drafts you often want to append / prepend text to.

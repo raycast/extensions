@@ -5,6 +5,9 @@
   "description": "integrate Raycast with Drafts app",
   "icon": "drafts-icon.png",
   "author": "FlohGro",
+  "contributors": [
+    "william_morgano"
+  ],
   "categories": [
     "Applications",
     "Productivity"
@@ -111,6 +114,21 @@
         {
           "name": "uuid",
           "placeholder": "UUID",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "capture",
+      "title": "Capture Draft",
+      "subtitle": "Drafts",
+      "description": "create a new draft quickly in the background using the command argument",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "content",
+          "placeholder": "Draft Content",
           "type": "text",
           "required": true
         }
