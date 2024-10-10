@@ -1,6 +1,6 @@
 # Resend Changelog
 
-## [Maintenance Release] - {PR_MERGE_DATE}
+## [Maintenance Release] - 2024-10-10
 
 - Dark AND Light mode logo
 - A new `useResend` hook has been added in an attempt to make code cleaner
