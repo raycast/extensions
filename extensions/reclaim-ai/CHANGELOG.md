@@ -1,5 +1,8 @@
 # reclaim Changelog
 
+## [Update] - 2024-10-02
+- Add Sentry support
+
 ## [Fixes] - 2024-09-05
 - Route useFetch through useApi
 

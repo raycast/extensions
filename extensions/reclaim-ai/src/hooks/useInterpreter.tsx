@@ -13,13 +13,10 @@ const useInterpreter = () => {
         category,
       };
 
-      const [response, error] = await fetchPromise<ApiResponseInterpreter<T>>(
-        "/interpreter/message",
-        {
-          method: "POST",
-        },
-        data
-      );
+      const [response, error] = await fetchPromise<ApiResponseInterpreter<T>>("/interpreter/message", {
+        init: { method: "POST" },
+        payload: data,
+      });
       if (!response || error) throw error;
 
       return response.interpretedPlans;

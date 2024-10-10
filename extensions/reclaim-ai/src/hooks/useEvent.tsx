@@ -1,40 +1,49 @@
-import { Icon, getPreferenceValues, open, showHUD } from "@raycast/api";
+import { getPreferenceValues, Icon, open, showHUD } from "@raycast/api";
 import { format, isWithinInterval } from "date-fns";
 import { Event } from "../types/event";
 import { NativePreferences } from "../types/preferences";
 import { SmartHabit } from "../types/smart-series";
 import { formatDisplayEventHours, formatDisplayHours } from "../utils/dates";
 import { filterMultipleOutDuplicateEvents } from "../utils/events";
+import { fetchPromise } from "../utils/fetcher";
+import { upgradeAndCaptureError } from "../utils/sentry";
 import { stripPlannerEmojis } from "../utils/string";
-import useApi from "./useApi";
+import useApi, { UseApiError } from "./useApi";
 import { useCallbackSafeRef } from "./useCallbackSafeRef";
 import { ApiResponseEvents, EventActions } from "./useEvent.types";
 import { useSmartHabits } from "./useSmartHabits";
 import { useTaskActions } from "./useTask";
 import { useUser } from "./useUser";
-import { fetchPromise } from "../utils/fetcher";
 
-export const useEvents = ({ start, end }: { start: Date; end: Date }) => {
-  const {
-    data: events,
-    error,
-    isLoading,
-  } = useApi<ApiResponseEvents>(
-    `/events?${new URLSearchParams({
-      sourceDetails: "true",
-      start: format(start, "yyyy-MM-dd"),
-      end: format(end, "yyyy-MM-dd"),
-      allConnected: "true",
-    }).toString()}`
-  );
+export class UseEventsError extends UseApiError {}
 
-  if (error) console.error("Error while fetching Events", error);
+export const useEvents = ({ start, end }: { readonly start: Date; readonly end: Date }) => {
+  try {
+    const {
+      data: events,
+      error,
+      isLoading,
+    } = useApi<ApiResponseEvents>(
+      `/events?${new URLSearchParams({
+        sourceDetails: "true",
+        start: format(start, "yyyy-MM-dd"),
+        end: format(end, "yyyy-MM-dd"),
+        allConnected: "true",
+      }).toString()}`
+    );
 
-  return {
-    events: filterMultipleOutDuplicateEvents(events),
-    isLoading,
-    error,
-  };
+    return {
+      events: filterMultipleOutDuplicateEvents(events),
+      isLoading,
+      error,
+    };
+  } catch (error) {
+    throw upgradeAndCaptureError(
+      error,
+      UseEventsError,
+      (cause) => new UseEventsError("Something went wrong", { cause })
+    );
+  }
 };
 
 export const useEventActions = () => {
@@ -62,7 +71,7 @@ export const useEventActions = () => {
   const handleStartHabit = async (id: string, title: string) => {
     try {
       await showHUD("Started Habit: " + stripPlannerEmojis(title));
-      const [habit, error] = await fetchPromise(`/planner/start/habit/${id}`, { method: "POST" });
+      const [habit, error] = await fetchPromise(`/planner/start/habit/${id}`, { init: { method: "POST" } });
       if (!habit || error) throw error;
       return habit;
     } catch (error) {
@@ -74,7 +83,7 @@ export const useEventActions = () => {
   const handleRestartHabit = async (id: string, title: string) => {
     try {
       await showHUD("Restarted Habit: " + stripPlannerEmojis(title));
-      const [habit, error] = await fetchPromise(`/planner/restart/habit/${id}`, { method: "POST" });
+      const [habit, error] = await fetchPromise(`/planner/restart/habit/${id}`, { init: { method: "POST" } });
       if (!habit || error) throw error;
       return habit;
     } catch (error) {
@@ -86,7 +95,7 @@ export const useEventActions = () => {
   const handleStopHabit = async (id: string, title: string) => {
     try {
       await showHUD("Stopped Habit: " + stripPlannerEmojis(title));
-      const [habit, error] = await fetchPromise(`/planner/stop/habit/${id}`, { method: "POST" });
+      const [habit, error] = await fetchPromise(`/planner/stop/habit/${id}`, { init: { method: "POST" } });
       if (!habit || error) throw error;
 
       return habit;
@@ -99,7 +108,9 @@ export const useEventActions = () => {
   const handleStartOrRestartSmartHabit = async (lineageId: string, title: string) => {
     try {
       await showHUD("Started Habit: " + stripPlannerEmojis(title));
-      const [habit, error] = await fetchPromise(`/smart-habits/planner/${lineageId}/start`, { method: "POST" });
+      const [habit, error] = await fetchPromise(`/smart-habits/planner/${lineageId}/start`, {
+        init: { method: "POST" },
+      });
       if (!habit || error) throw error;
 
       return habit;
@@ -112,7 +123,9 @@ export const useEventActions = () => {
   const handleStopSmartHabit = async (lineageId: string, title: string) => {
     try {
       await showHUD("Stopped Habit: " + stripPlannerEmojis(title));
-      const [habit, error] = await fetchPromise(`/smart-habits/planner/${lineageId}/stop`, { method: "POST" });
+      const [habit, error] = await fetchPromise(`/smart-habits/planner/${lineageId}/stop`, {
+        init: { method: "POST" },
+      });
       if (!habit || error) throw error;
 
       return habit;

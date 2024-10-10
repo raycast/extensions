@@ -1,12 +1,15 @@
+import "./initSentry";
+
 import { Icon, List } from "@raycast/api";
 import { useMemo, useState } from "react";
+import { ListItemDetailMetadataField } from "./components/ListItemDetailMetadataField";
+import { withRAIErrorBoundary } from "./components/RAIErrorBoundary";
+import { SchedulingLinkActionPanel } from "./components/SchedulingLinkActionPanel";
 import { useSchedulingLinks } from "./hooks/useSchedulingLinks";
 import { useUser } from "./hooks/useUser";
-import { ListItemDetailMetadataField } from "./components/ListItemDetailMetadataField";
-import { SchedulingLinkActionPanel } from "./components/SchedulingLinkActionPanel";
 import { resolveTimePolicy } from "./utils/time-policy";
 
-export default function Command() {
+function Command() {
   const [searchText, setSearchText] = useState("");
 
   const { schedulingLinks, schedulingLinksIsLoading, schedulingLinksGroups, schedulingLinksGroupsIsLoading } =
@@ -84,3 +87,5 @@ export default function Command() {
     </List>
   );
 }
+
+export default withRAIErrorBoundary(Command);

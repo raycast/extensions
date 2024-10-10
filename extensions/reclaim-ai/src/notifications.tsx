@@ -1,3 +1,5 @@
+import "./initSentry";
+
 import { LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
 import { addDays, differenceInHours, endOfDay, formatDistance, isWithinInterval, startOfDay } from "date-fns";
 import { useMemo } from "react";
@@ -11,6 +13,7 @@ import { NativePreferences } from "./types/preferences";
 import { miniDuration } from "./utils/dates";
 import { getOriginalEventIDFromSyncEvent, truncateEventSize } from "./utils/events";
 import { stripPlannerEmojis } from "./utils/string";
+import { withRAIErrorBoundary } from "./components/RAIErrorBoundary";
 
 type EventSection = { section: string; sectionTitle: string; events: Event[] };
 
@@ -21,7 +24,7 @@ type TitleInfo = {
   nowOrNext: "NOW" | "NEXT" | "NONE";
 };
 
-export default function Command() {
+function Command() {
   /********************/
   /*   custom hooks   */
   /********************/
@@ -198,3 +201,5 @@ export default function Command() {
     </MenuBarExtra>
   );
 }
+
+export default withRAIErrorBoundary(Command);
