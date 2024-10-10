@@ -87,7 +87,7 @@ function AirtableTableListItem(props: { baseMetadata: AirtableBaseMetadata; tabl
           <Action.Push
             title="Continue to Records"
             icon={Icon.List}
-            target={<AirtableBaseRecordsList baseId={baseMetadata.id} tableId={table.id} />}
+            target={<AirtableBaseRecordsList baseId={baseMetadata.id} tableId={table.id} fields={table.fields} />}
             shortcut={{ modifiers: ["cmd"], key: "v" }}
           />
           <Action.CopyToClipboard title={`Copy Table ID (${table.id})`} content={table.id} />

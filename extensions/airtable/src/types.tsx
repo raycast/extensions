@@ -44,9 +44,9 @@ export interface View {
   type: string;
 }
 
-interface AirtableRecord {
+export interface AirtableRecord {
   createdTime: string;
-  fields: Array<Record<string, string | boolean | number | string[]>>;
+  fields: Record<string, string | boolean | number | string[]>;
   id: string;
 }
 

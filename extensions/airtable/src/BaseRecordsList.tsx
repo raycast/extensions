@@ -1,8 +1,12 @@
-import { List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { fetchBaseRecords } from "./metadata-api";
+import { Action, ActionPanel, Form, Icon, List } from "@raycast/api";
+import { showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
+import { fetchBaseRecords, updateBaseRecord } from "./metadata-api";
+import { AirtableRecord, Field } from "./types";
+import { Fragment } from "react/jsx-runtime";
+import { useState } from "react";
 
-export function AirtableBaseRecordsList(props: { baseId: string; tableId: string }) {
+export function AirtableBaseRecordsList(props: { baseId: string; tableId: string; fields: Field[] }) {
+  const { baseId, tableId } = props;
   const { isLoading, data: records } = useCachedPromise(
     async () => await fetchBaseRecords(props.baseId, props.tableId),
     [],
@@ -26,8 +30,45 @@ ${Object.entries(record.fields)
   .join(`\n`)}`}
             />
           }
+          actions={<ActionPanel>
+            <Action.Push icon={Icon.Pencil} title="Update Record" target={<UpdateRecord record={record} baseId={baseId} tableId={tableId} fields={props.fields} />} />
+          </ActionPanel>}
         />
       ))}
     </List>
   );
+}
+
+function UpdateRecord(props: { baseId: string; tableId: string; record: AirtableRecord; fields: Field[] }) {
+  const { baseId, tableId, record, fields } = props;
+  const [isLoading, setIsLoading] = useState(false);
+  const stringFieldKeys = fields.filter(field => field.type==="singleLineText" || field.type==="multilineText").map(field => field.name);
+  const onlyStrings = Object.fromEntries(Object.entries(record.fields).filter(([key]) => stringFieldKeys.includes(key))) as Record<string, string>;
+
+  const { handleSubmit, itemProps } = useForm<Record<string, string>>({
+    async onSubmit(values) {
+      try {
+        setIsLoading(true);
+        await updateBaseRecord(baseId, tableId, record.id, values);
+      } catch (error) {
+        await showFailureToast(error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    initialValues: onlyStrings
+  })
+  
+  return <Form isLoading={isLoading} actions={<ActionPanel><Action.SubmitForm icon={Icon.Check} title="Update Record" onSubmit={handleSubmit} /></ActionPanel>}>
+    {fields.map(field =>
+      {
+        const common = {
+          title: field.name,
+          placholder: field.name,
+        }
+      return <Fragment key={field.id}>
+        {field.type==="singleLineText" ? <Form.TextField {...common} {...itemProps[field.name]} /> : field.type==="multilineText" ? <Form.TextArea {...common} {...itemProps[field.name]} /> : <Form.Description title={field.name} text="NOT SUPPORTED" />}
+      </Fragment>}
+    )}
+  </Form>
 }
