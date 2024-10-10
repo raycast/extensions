@@ -8,7 +8,8 @@
   "contributors": [
     "FezVrasta",
     "pernielsentikaer",
-    "j3lte"
+    "j3lte",
+    "xilopaint"
   ],
   "license": "MIT",
   "commands": [
@@ -73,7 +74,7 @@
       "type": "dropdown",
       "required": false,
       "title": "Data Set",
-      "description": "The data set to use for the search. By default it uses the minimal data set, which contains about 5400 characters. The full set contains +40000 characters. Using this big of a dataset might impact performance. Note: In 'List View' only the minimal dataset is supported...",
+      "description": "The data set to use for the search. By default it uses the minimal data set, which contains about 5400 characters. The full set contains +40000 characters. Using this big of a dataset might impact performance. Note: In 'List View' only the minimal dataset is supported.",
       "default": "minimal",
       "data": [
         {
@@ -88,7 +89,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.1",
+    "@raycast/api": "^1.84.2",
+    "@raycast/utils": "^1.17.0",
     "fuse.js": "^6.6.2",
     "js-base64": "^3.7.7"
   },
@@ -97,10 +99,10 @@
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/node": "22.5.5",
     "@types/react": "18.3.8",
-    "eslint": "^8.57.0",
+    "eslint": "^8.57.1",
     "prettier": "^3.3.3",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.2",
+    "typescript": "^5.6.3",
     "unidata16": "^0.3.1"
   },
   "scripts": {
