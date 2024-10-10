@@ -35,7 +35,7 @@ export default function ListUsers() {
         primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
       })
     ) {
-      const toast = await showToast(Toast.Style.Animated, "Deleting Routing Rule");
+      const toast = await showToast(Toast.Style.Animated, "Deleting User");
       try {
         await mutate(
           callApi("deleteUser", {
