@@ -1,10 +1,10 @@
-import { useRef, useState, useEffect, useMemo } from "react";
+import { getPreferenceValues, Grid, Icon, showToast, Toast } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { Grid, Icon, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { BringAPI, BringCustomItem, BringList, Translations, BringListInfo } from "./lib/bringAPI";
-import { getIconPlaceholder, getImageUrl, getLocaleForListFromSettings } from "./lib/helpers";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Item, ItemsGrid, Section } from "./components/ItemsGrid";
-import { getOrCreateCustomSection, getSectionsFromData, getListData, getTranslationsData } from "./lib/bringService";
+import { BringAPI, BringCustomItem, BringList, BringListInfo, Translations } from "./lib/bringAPI";
+import { getListData, getOrCreateCustomSection, getSectionsFromData, getTranslationsData } from "./lib/bringService";
+import { getIconPlaceholder, getImageUrl, getLocaleForListFromSettings } from "./lib/helpers";
 
 export default function Command() {
   const bringApiRef = useRef(new BringAPI());
@@ -145,7 +145,6 @@ export default function Command() {
         sections={sections}
         searchText={search}
         isLoading={isLoadingLists || isLoadingItems}
-        showAddedItemsOnTop={search.length === 0}
         onSearchTextChange={setSearch}
         onAddAction={addToList(selectedList)}
         onRemoveAction={removeFromList(selectedList)}
