@@ -35,6 +35,7 @@ export default function Command() {
           actions={
             <ActionPanel title={item?.title + " by " + item?.artist}>
               <Action title="Open in Apple Music" onAction={() => open(item?.appleMusicUrl.toString())} />
+              <Action.CopyToClipboard content={item?.appleMusicUrl.toString()} />
             </ActionPanel>
           }
         />
