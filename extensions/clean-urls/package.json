@@ -1,0 +1,37 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clean-urls",
+  "title": "Clean URLs",
+  "description": "Takes URLs with redacted parts and reverts them back to their cleaned versions.",
+  "icon": "command-icon.png",
+  "author": "mcsdev",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Clean URL",
+      "description": "Takes URLs with redacted parts and reverts them back to their cleaned versions.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.5",
+    "better-opn": "^3.0.2",
+    "valid-url": "^1.0.9"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
