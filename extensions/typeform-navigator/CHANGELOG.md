@@ -1,6 +1,6 @@
 # Typeform Navigator Changelog
 
-## [Caching + View Responses] - {PR_MERGE_DATE}
+## [Caching + View Responses] - 2024-10-10
 
 - Choose EU or Default API
 - Updated Typeform logo
