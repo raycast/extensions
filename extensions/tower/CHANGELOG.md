@@ -1,5 +1,9 @@
 # Tower Changelog
 
+## [New Features] - 2024-09-19
+
+- Added a new icon for the extension
+
 ## [New Features] - 2024-09-18
 
 - Add support for selecting a default editor and teminal app for opening repositories
