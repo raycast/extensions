@@ -1,3 +1,6 @@
 # Shazam Changelog
 
-## [Initial Version] - 2024-03-31
+## [Initial Version] - {PR_MERGE_DATE}
+
+- Added: Library View
+- Added: Listen View
