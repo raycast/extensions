@@ -30,8 +30,8 @@ export function SearchChannelList({ searchQuery }: { searchQuery?: string | unde
 
   useEffect(() => {
     (async () => {
-      setPinnedChannels(await getChannels(getPinnedChannels()));
-      setRecentChannels(await getChannels(getRecentChannels()));
+      setPinnedChannels(await getChannels(await getPinnedChannels()));
+      setRecentChannels(await getChannels(await getRecentChannels()));
       setLoading(false);
     })();
   }, [state]);

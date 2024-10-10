@@ -1,5 +1,9 @@
 # YouTube Changelog
 
+## [Enhancement] - {PR_MERGE_DATE}
+
+- Update the cache in the `search-videos` and `search-channels` commands to use local storage
+
 ## [Chore] - 2024-09-02
 
 - Added missing contributor
