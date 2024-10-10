@@ -14,16 +14,16 @@ export function SnippetListItem({ app, snippet }: SnippetListItemProps) {
     const preferences = getPreferences();
     const accessories = [];
 
-    if (preferences.showFolder && snippet.folder) {
-        accessories.push({ text: snippet.folder, icon: Icon.Folder });
-    }
-
     if (preferences.showTags && snippet.tags.length > 0) {
         accessories.push({ text: snippet.tags.join(", "), icon: Icon.Tag });
     }
 
     if (preferences.showLanguages && snippet.languages.length > 0) {
         accessories.push({ text: snippet.languages.join(", "), icon: Icon.Code });
+    }
+
+    if (preferences.showFolder && snippet.folder) {
+        accessories.push({ text: snippet.folder, icon: Icon.Folder });
     }
 
     return (
