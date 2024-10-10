@@ -3,7 +3,7 @@ import fetch from "node-fetch";
 import { URLSearchParams } from "url";
 
 const { airtableOAuthClientId, airtableUiBaseUrl } = getPreferenceValues<Preferences>();
-const scopes = ["schema.bases:read", "data.records:read"];
+const scopes = ["schema.bases:read", "data.records:read", "data.records:write"];
 
 export const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,

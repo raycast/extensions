@@ -120,14 +120,19 @@ export async function fetchBaseRecords(baseId: string, tableId: string) {
   return result.records;
 }
 
-export async function updateBaseRecord(baseId: string, tableId: string, recordId: string, fields: Record<string, string>) {
+export async function updateBaseRecord(
+  baseId: string,
+  tableId: string,
+  recordId: string,
+  fields: Record<string, string>
+) {
   const response = await fetch(`${airtableApiBaseUrl}/v0/${baseId}/${tableId}/${recordId}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
     },
-    body: JSON.stringify({fields})
+    body: JSON.stringify({ fields }),
   });
 
   if (!response.ok) {
