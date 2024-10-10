@@ -1,5 +1,7 @@
 # Open Changelog
 
+## [Fixed the Folder and Files Speed Dial keyboard exception] - 2024-10-09
+
 ## [Fixes the Folder and Files Speed Dial commands] - 2024-06-27
 
 - Fixed the Folder and Files Speed Dial commands to display the correct names for the folders and files.
