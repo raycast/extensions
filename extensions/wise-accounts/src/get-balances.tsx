@@ -10,13 +10,13 @@ import {
   Icon,
   openExtensionPreferences,
 } from "@raycast/api";
-import { wiseReadApiToken } from "./helpers/preferences";
+import { mainProfileId, wiseReadApiToken } from "./helpers/preferences";
 import { Balance, fetchBalances } from "./api/balances";
 import { useCachedState } from "@raycast/utils";
 import { filterPreferedBalances } from "./helpers/filterPreferedBalances";
 
 export default function Command(props: LaunchProps<{ arguments: { profileId: string } }>) {
-  const profileId = props.arguments.profileId;
+  const profileId = props.arguments.profileId?.length ? props.arguments.profileId : mainProfileId ?? "";
   const [balances, setBalances] = useCachedState<Balance[]>(`id-${profileId}-balances`);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
