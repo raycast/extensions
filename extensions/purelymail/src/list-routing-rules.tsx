@@ -38,14 +38,15 @@ export default function ListRoutingRules() {
         await mutate(
           callApi("deleteRoutingRule", {
             body: {
-              routingRuleId: ruleId
-            }
-          }), {
+              routingRuleId: ruleId,
+            },
+          }),
+          {
             optimisticUpdate(data) {
-              return data.filter(rule => rule.id!==ruleId);
-            }
-          }
-        )
+              return data.filter((rule) => rule.id !== ruleId);
+            },
+          },
+        );
         toast.style = Toast.Style.Success;
         toast.title = "Deleted Routing Rule";
         toast.message = "RULE ID: " + ruleId;

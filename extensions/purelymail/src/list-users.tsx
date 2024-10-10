@@ -24,7 +24,7 @@ import { callApi, useUsers } from "./utils/hooks";
 export default function ListUsers() {
   const [filter, setFilter] = useState("");
 
-  const { isLoading, data: users, error, revalidate, mutate } = useUsers()
+  const { isLoading, data: users, error, revalidate, mutate } = useUsers();
   const filteredUsers = !filter ? users : users.filter((user) => user.split("@")[1] === filter);
 
   const handleDelete = async (user: string) => {
@@ -40,14 +40,15 @@ export default function ListUsers() {
         await mutate(
           callApi("deleteUser", {
             body: {
-              userName: user
-            }
-          }), {
+              userName: user,
+            },
+          }),
+          {
             optimisticUpdate(data) {
-              return data.filter(u => u!==user);
-            }
-          }
-        )
+              return data.filter((u) => u !== user);
+            },
+          },
+        );
         toast.style = Toast.Style.Success;
         toast.title = "User Deleted";
         toast.message = "USER: " + user;
@@ -58,7 +59,7 @@ export default function ListUsers() {
       }
     }
   };
-  
+
   return error ? (
     <ErrorComponent error={error.message} />
   ) : (
