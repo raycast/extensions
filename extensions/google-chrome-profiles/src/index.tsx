@@ -70,7 +70,8 @@ export default function Command(props: LaunchProps) {
   const immediatelyOpenProfile = props.launchContext?.index;
   if (immediatelyOpenProfile) {
     const profile = props.launchContext?.directory;
-    openGoogleChrome(profile, "", () => showHUD("Opening profile..."));
+    const url = props.launchContext?.url || "";
+    openGoogleChrome(profile, url, () => showHUD("Opening profile..."));
     popToRoot();
     return;
   }
@@ -247,7 +248,7 @@ function ListBookmarks(props: { profile: Profile }) {
               title={tab.title}
               subtitle={tab.subtitle}
               icon={{ source: tab.iconURL, fallback: Icon.Globe }}
-              actions={<BookmarksActionPanel profileDirectory={props.profile.directory} url={tab.url} />}
+              actions={<BookmarksActionPanel profile={props.profile} url={tab.url} />}
             />
           ))}
         </List.Section>
@@ -260,7 +261,7 @@ function ListBookmarks(props: { profile: Profile }) {
               title={b.title}
               subtitle={b.subtitle}
               icon={{ source: b.iconURL, fallback: Icon.Globe }}
-              actions={<BookmarksActionPanel profileDirectory={props.profile.directory} url={b.url} />}
+              actions={<BookmarksActionPanel profile={props.profile} url={b.url} />}
             />
           ))}
         </List.Section>
@@ -273,24 +274,30 @@ function newTabUrlWithQuery(searchText: string) {
   return getPreferenceValues<Preferences>().newTabURL.replace("%query%", encodeURIComponent(searchText));
 }
 
-function BookmarksActionPanel(props: { profileDirectory: string; url: string }) {
+function BookmarksActionPanel(props: { profile: Profile; url: string }) {
+  const context = encodeURIComponent(JSON.stringify({ index: 1, directory: props.profile.directory, url: props.url }));
+  const deeplink = `raycast://extensions/frouo/${environment.extensionName}/${environment.commandName}?context=${context}`;
   return (
     <ActionPanel>
       <Action
         title="Open in Google Chrome"
         icon={Icon.Globe}
         onAction={() => {
-          openGoogleChrome(props.profileDirectory, props.url, () => showHUD("Opening bookmark..."));
+          openGoogleChrome(props.profile.directory, props.url, () => showHUD("Opening bookmark..."));
         }}
       />
       <Action
         title="Open in Background"
         icon={Icon.Globe}
         onAction={() => {
-          openGoogleChrome(props.profileDirectory, props.url, async () => {
+          openGoogleChrome(props.profile.directory, props.url, async () => {
             await showToast(Toast.Style.Success, "Opening bookmark...");
           });
         }}
+      />
+      <Action.CreateQuicklink
+        title={`Create Quicklink to ${props.profile.name} Profile`}
+        quicklink={{ name: `Open ${props.profile.name} Profile`, link: deeplink }}
       />
     </ActionPanel>
   );
