@@ -1,6 +1,6 @@
 # SteamGridDB
 
-## [Chore & Fixes] - {PR_MERGE_DATE}
+## [Chore & Fixes] - 2024-10-10
 
 - Bump all dependencies to the latest
 - Fix data handling while the game is not found
