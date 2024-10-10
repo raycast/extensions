@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.84.0 - 2024-10-09
+
+### 💎 Improvements
+
+- When running a no-view command with arguments, only clear the argument inputs instead of clearing the entire search bar (which brings the behaviour in line with other no-view commands)
+
+### 🐞 Fixes
+
+- Fixed a regression where `selectedItemId` wouldn’t be respected
+- Fixed a typo in the extension template’s build script
+
 ## 1.81.0 - 2024-08-13
 
 ### ✨ New

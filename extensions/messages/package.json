@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "messages",
   "title": "Messages",
-  "description": "Quickly send a message to one of your contacts.",
+  "description": "Quickly read your latest messages, open your chats, or send messages to your contacts.",
   "icon": "apple-messages-icon.png",
   "author": "thomaslombart",
   "contributors": [

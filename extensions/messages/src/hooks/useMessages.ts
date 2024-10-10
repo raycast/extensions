@@ -2,11 +2,11 @@ import { homedir } from "os";
 import { resolve } from "path";
 
 import { Image } from "@raycast/api";
-import { useSQL } from "@raycast/utils";
+import { useSQL, usePromise } from "@raycast/utils";
+import { fetchContactsForPhoneNumbers } from "swift:../../swift/contacts";
 
 import { decodeHexString, fuzzySearch } from "../helpers";
-import { ChatParticipant, getDisplayNameAndAvatar } from "../helpers";
-import { useContacts } from "../hooks/useContacts";
+import { ChatParticipant, createContactMap, getContactOrGroupInfo, ChatOrMessageInfo } from "../helpers";
 import { Filter } from "../my-messages";
 
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
@@ -33,8 +33,6 @@ export type Message = SQLMessage & {
 };
 
 export function useMessages(searchText?: string, filter?: Filter) {
-  const { contactMap } = useContacts();
-
   const filterClause = (() => {
     switch (filter) {
       case "unread":
@@ -54,7 +52,11 @@ export function useMessages(searchText?: string, filter?: Filter) {
     }
   })();
 
-  const { data: rawData, ...rest } = useSQL<SQLMessage>(
+  const {
+    data: rawData,
+    isLoading: isLoadingMessages,
+    ...rest
+  } = useSQL<SQLMessage>(
     DB_PATH,
     `
     SELECT
@@ -108,29 +110,52 @@ export function useMessages(searchText?: string, filter?: Filter) {
     { permissionPriming: "This is required to read your messages." },
   );
 
+  const { data, isLoading: isLoadingContacts } = usePromise(
+    async (rawMessages) => {
+      if (!rawMessages) return [];
+
+      const messages = rawMessages as SQLMessage[];
+
+      const uniqueChatIdentifiers = [...new Set(messages.map((m) => m.chat_identifier))];
+      const contacts = await fetchContactsForPhoneNumbers(uniqueChatIdentifiers);
+      const contactMap = createContactMap(contacts);
+
+      return messages.map((m) => {
+        const decodedBody = decodeHexString(m.body);
+        const messageInfo: ChatOrMessageInfo = {
+          chat_identifier: m.chat_identifier,
+          is_from_me: Boolean(m.is_from_me),
+          is_group: Boolean(m.is_group),
+          display_name: m.group_name,
+          group_participants: m.group_participants,
+        };
+
+        const { avatar, displayName } = getContactOrGroupInfo(messageInfo, contactMap);
+
+        return {
+          ...m,
+          body: decodedBody,
+          sender: m.chat_identifier,
+          senderName: displayName,
+          avatar,
+          is_from_me: Boolean(m.is_from_me),
+          is_audio_message: Boolean(m.is_audio_message),
+          is_sent: Boolean(m.is_sent),
+          is_read: m.is_sent ? true : Boolean(m.is_read),
+        };
+      });
+    },
+    [rawData],
+    { execute: !!rawData },
+  );
+
   const searchTerms = searchText
     ?.toLowerCase()
     .split(/\s+/)
     .filter((term) => term.length > 0);
 
-  const data = rawData
-    ?.map((m) => {
-      const decodedBody = decodeHexString(m.body);
-      const { displayName, avatar } = getDisplayNameAndAvatar(m, contactMap, m.is_from_me);
-
-      return {
-        ...m,
-        body: decodedBody,
-        sender: m.chat_identifier,
-        senderName: displayName,
-        avatar,
-        is_from_me: Boolean(m.is_from_me),
-        is_audio_message: Boolean(m.is_audio_message),
-        is_sent: Boolean(m.is_sent),
-        is_read: m.is_sent ? true : Boolean(m.is_read),
-      };
-    })
-    .filter((m) => {
+  const filteredData = data
+    ?.filter((m) => {
       if (!searchTerms) return true;
 
       const searchableText = [
@@ -149,5 +174,9 @@ export function useMessages(searchText?: string, filter?: Filter) {
     })
     .slice(0, 50);
 
-  return { data, ...rest };
+  return {
+    data: filteredData,
+    isLoading: isLoadingMessages || isLoadingContacts,
+    ...rest,
+  };
 }

@@ -499,6 +499,7 @@
 /extensions/focus-anchor                                            @ashleyhindle
 /extensions/focustask                                               @vojto @pernielsentikaer
 /extensions/folder-search                                           @GastroGeek @omarshahine @fengtianze @ridemountainpig
+/extensions/font-search                                             @Tnixc
 /extensions/fontawesome                                             @dutzi @GLaDO8 @DanielFerguson @ridemountainpig
 /extensions/footy-report                                            @thuoe
 /extensions/forgejo                                                 @shichen437
@@ -1413,7 +1414,7 @@
 /extensions/ssh-tunnel-manager                                      @MinatoHikari
 /extensions/st-andrews-main-library-occupancy                       @Alleluia23
 /extensions/stablecog                                               @yekta
-/extensions/stackoverflow                                           @sadanand-singh
+/extensions/stackoverflow                                           @sadanand-singh @xmok
 /extensions/stardew-valley-wiki                                     @mistah-robot @mistah-robot
 /extensions/stashpad-docs                                           @tsmarin
 /extensions/statamic-docs                                           @andrebreia
@@ -1445,6 +1446,7 @@
 /extensions/supernova                                               @JiriTrecak
 /extensions/superpassgen                                            @techvlad
 /extensions/superwhisper                                            @nchudleigh @jfkisafk
+/extensions/surf-check                                              @johnalxndr
 /extensions/surfed                                                  @hosy
 /extensions/surfs-up                                                @comoser
 /extensions/surge                                                   @ysj151215 @Hopsken

@@ -2,10 +2,10 @@ import { homedir } from "os";
 import { resolve } from "path";
 
 import { Image } from "@raycast/api";
-import { useSQL } from "@raycast/utils";
+import { usePromise, useSQL } from "@raycast/utils";
+import { fetchContactsForPhoneNumbers } from "swift:../../swift/contacts";
 
-import { fuzzySearch, getDisplayNameAndAvatar } from "../helpers";
-import { useContacts } from "../hooks/useContacts";
+import { fuzzySearch, createContactMap, getContactOrGroupInfo, ChatOrMessageInfo } from "../helpers";
 
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
 
@@ -29,8 +29,11 @@ export type Chat = SQLChat & {
 };
 
 export function useChats(searchText: string = "") {
-  const { contactMap } = useContacts();
-  const { data: rawData, ...rest } = useSQL<SQLChat>(
+  const {
+    data: rawData,
+    isLoading: isLoadingChats,
+    ...rest
+  } = useSQL<SQLChat>(
     DB_PATH,
     `
     SELECT
@@ -69,22 +72,45 @@ export function useChats(searchText: string = "") {
     { permissionPriming: "This is required to read your chats." },
   );
 
+  const { data, isLoading: isLoadingContacts } = usePromise(
+    async (rawChats) => {
+      if (!rawChats) return [];
+
+      const chats = rawChats as SQLChat[];
+
+      const uniqueChatIdentifiers = [...new Set(chats.map((c) => c.chat_identifier))];
+      const contacts = await fetchContactsForPhoneNumbers(uniqueChatIdentifiers);
+      const contactMap = createContactMap(contacts);
+
+      return chats.map((c) => {
+        const chatInfo: ChatOrMessageInfo = {
+          chat_identifier: c.chat_identifier,
+          is_group: Boolean(c.is_group),
+          display_name: c.display_name,
+          group_participants: c.group_participants,
+        };
+
+        const { avatar, displayName } = getContactOrGroupInfo(chatInfo, contactMap);
+
+        return {
+          ...c,
+          avatar,
+          displayName,
+          is_group: Boolean(c.is_group),
+        };
+      });
+    },
+    [rawData],
+    { execute: !!rawData },
+  );
+
   const searchTerms = searchText
     .toLowerCase()
     .split(/\s+/)
     .filter((term) => term.length > 0);
 
-  const data = rawData
-    ?.map((c) => {
-      const { displayName, avatar } = getDisplayNameAndAvatar(c, contactMap);
-      return {
-        ...c,
-        avatar,
-        displayName,
-        is_group: Boolean(c.is_group),
-      };
-    })
-    .filter((c) => {
+  const filteredData = data
+    ?.filter((c) => {
       if (searchTerms.length === 0) return true;
       const searchString = `${c.chat_identifier} ${c.displayName} ${c.group_participants || ""}`;
       return fuzzySearch(searchString, searchTerms);
@@ -92,7 +118,8 @@ export function useChats(searchText: string = "") {
     .slice(0, 50);
 
   return {
-    data,
+    data: filteredData,
+    isLoading: isLoadingChats || isLoadingContacts,
     ...rest,
   };
 }
