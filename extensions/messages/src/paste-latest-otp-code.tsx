@@ -1,8 +1,8 @@
 import { homedir } from "os";
 import { resolve } from "path";
 
-import { showToast, Toast, Clipboard, closeMainWindow } from "@raycast/api";
-import { executeSQL } from "@raycast/utils";
+import { showToast, Toast, Clipboard } from "@raycast/api";
+import { executeSQL, showFailureToast } from "@raycast/utils";
 
 import { extractOTP, decodeHexString } from "./helpers";
 
@@ -29,11 +29,10 @@ export default async function Command() {
     const messages = await executeSQL<{ body: string; message_date: string }>(DB_PATH, query);
 
     if (messages.length === 0) {
-      await showToast({
+      return showToast({
         style: Toast.Style.Failure,
         title: `No messages found in the last ${NUMBER_OF_MINUTES} minutes`,
       });
-      return;
     }
 
     for (const message of messages) {
@@ -41,24 +40,15 @@ export default async function Command() {
       const otp = extractOTP(decodedBody);
 
       if (otp) {
-        await Clipboard.copy(otp);
-        await closeMainWindow();
-        await showToast({
-          style: Toast.Style.Success,
-          title: `Copied "${otp}" to Clipboard`,
-        });
-        return;
+        return Clipboard.paste(otp);
       }
     }
 
-    await showToast({
+    return showToast({
       style: Toast.Style.Failure,
-      title: "No OTP codes found in recent messages",
+      title: "No OTP code found in recent messages",
     });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to copy OTP",
-    });
+    await showFailureToast(error, { title: "Failed to paste OTP code" });
   }
 }
