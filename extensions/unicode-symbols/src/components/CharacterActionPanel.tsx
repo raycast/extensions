@@ -20,7 +20,7 @@ export const CharacterActionPanel = ({ item }: { item: Character }) => {
     <ActionPanel>
       <ActionPanel.Section title="Unicode">
         <Action.Paste
-          title={`Paste Article to ${frontmostApp?.name || "Active App"}`}
+          title={`Paste Character to ${frontmostApp?.name || "Active App"}`}
           content={item.v}
           icon={frontmostApp ? { fileIcon: frontmostApp.path } : Icon.Clipboard}
           onPaste={() => addToRecentlyUsedItems(item)}
