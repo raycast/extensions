@@ -1,5 +1,9 @@
 # Messages Changelog
 
+## [Add `Paste Latest OTP Code` command] - 2024-10-11
+
+Automatically finds and pastes the most recent one-time password (OTP) from your messages.
+
 ## [Fix heap memory errors] - 2024-10-09
 
 Fixes a crash issue that could occur when the user has too many contacts.
