@@ -50,23 +50,33 @@ export default function CreateCompanyForm() {
       isLoading={creationIsLoading}
     >
       <Form.Description text="This form is to add a company in your Twenty CRM" />
-      <Form.TextField title="Company Name" {...itemProps.name} />
-      <Form.TextField title="Domain Name" {...itemProps.domainName} />
+      <Form.TextField title="Company Name" placeholder="Enter company name" {...itemProps.name} />
+      <Form.TextField
+        title="Domain Name"
+        placeholder="Enter company domain (e.g. example.com)"
+        {...itemProps.domainName}
+      />
       <Form.Separator />
-
-      <Form.TextField title="Number of Employees" {...itemProps.employees} />
-      <Form.TextField title="LinkedIn URL" {...itemProps.linkedinUrl} />
-      <Form.TextField title="X (Twitter) URL" {...itemProps.xUrl} />
-      <Form.TextField title="Annual Recurring Revenue" {...itemProps.annualRecurringRevenue} />
-      <Form.TextField title="Currency Code" {...itemProps.currencyCode} />
+      <Form.TextField title="Number of Employees" placeholder="Enter number of employees" {...itemProps.employees} />
+      <Form.TextField title="LinkedIn URL" placeholder="Enter LinkedIn URL" {...itemProps.linkedinUrl} />
+      <Form.TextField title="X (Twitter) URL" placeholder="Enter X (Twitter) URL" {...itemProps.xUrl} />
+      <Form.TextField
+        title="Annual Recurring Revenue"
+        placeholder="Enter annual recurring revenue"
+        {...itemProps.annualRecurringRevenue}
+      />
+      <Form.TextField title="Currency Code" placeholder="Enter currency code (e.g. USD)" {...itemProps.currencyCode} />
       <Form.Separator />
-
-      <Form.TextField title="Address Street 1" {...itemProps.addressStreet1} />
-      <Form.TextField title="Address Street 2" {...itemProps.addressStreet2} />
-      <Form.TextField title="City" {...itemProps.addressCity} />
-      <Form.TextField title="Postcode" {...itemProps.addressPostcode} />
-      <Form.TextField title="State" {...itemProps.addressState} />
-      <Form.TextField title="Country" {...itemProps.addressCountry} />
+      <Form.TextField title="Address Street 1" placeholder="Enter street address" {...itemProps.addressStreet1} />
+      <Form.TextField
+        title="Address Street 2"
+        placeholder="Enter additional address info (optional)"
+        {...itemProps.addressStreet2}
+      />
+      <Form.TextField title="City" placeholder="Enter city" {...itemProps.addressCity} />
+      <Form.TextField title="Postcode" placeholder="Enter postcode" {...itemProps.addressPostcode} />
+      <Form.TextField title="State" placeholder="Enter state" {...itemProps.addressState} />
+      <Form.TextField title="Country" placeholder="Enter country" {...itemProps.addressCountry} />
       <Form.Checkbox label="Ideal Customer Profile" {...itemProps.idealCustomerProfile} />
     </Form>
   );

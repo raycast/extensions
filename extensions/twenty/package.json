@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "twenty",
-  "title": "Twenty - The #1 Open-Source CRM",
+  "title": "Twenty - the #1 Open-Source CRM",
   "description": "Modern, powerful, affordable platform to manage your customer relationships",
   "icon": "logo.png",
   "author": "chrisdadev13",

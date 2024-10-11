@@ -53,14 +53,13 @@ export default function CreatePersonForm() {
       isLoading={creationIsLoading || isLoading}
     >
       <Form.Description text="This form is to add a person in your Twenty CRM" />
-      <Form.TextField title="First Name" {...itemProps.firstName} />
-      <Form.TextField title="Last Name" {...itemProps.lastName} />
-      <Form.TextField title="Email Address" {...itemProps.primaryEmail} />
+      <Form.TextField title="First Name" placeholder="Enter first name" {...itemProps.firstName} />
+      <Form.TextField title="Last Name" placeholder="Enter last name" {...itemProps.lastName} />
+      <Form.TextField title="Email Address" placeholder="Enter email address" {...itemProps.primaryEmail} />
       <Form.Separator />
-
-      <Form.TextField title="Phone Number" {...itemProps.primaryPhoneNumber} />
-      <Form.TextField title="Job Title" {...itemProps.jobTitle} />
-      <Form.TextField title="City" {...itemProps.city} />
+      <Form.TextField title="Phone Number" placeholder="Enter phone number" {...itemProps.primaryPhoneNumber} />
+      <Form.TextField title="Job Title" placeholder="Enter job title" {...itemProps.jobTitle} />
+      <Form.TextField title="City" placeholder="Enter city" {...itemProps.city} />
       <Form.Dropdown
         title="Company"
         isLoading={isLoading}
