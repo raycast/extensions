@@ -61,6 +61,15 @@
       "default": false,
       "required": false,
       "description": "Automatically launch Cursor Recent Projects after copying a rule"
+    },
+    {
+      "name": "replaceOnLaunch",
+      "title": "Replace on Launch",
+      "label": "Replace the content if .cursorrules file already exists",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "description": "Replace the content if .cursorrules file already exists"
     }
   ],
   "license": "MIT",

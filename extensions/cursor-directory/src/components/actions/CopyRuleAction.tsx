@@ -30,8 +30,7 @@ export const CopyRuleAction = ({ cursorRule }: Props) => {
       });
 
       try {
-        let { autoLaunchRecentProjects: shouldLaunch } = getPreferenceValues<Preferences>();
-
+        let shouldLaunch = getPreferenceValues<Preferences>().autoLaunchRecentProjects;
         if (!shouldLaunch) {
           shouldLaunch = await confirmAlert({
             title: "Open Recent Projects",
@@ -54,6 +53,10 @@ export const CopyRuleAction = ({ cursorRule }: Props) => {
             type: LaunchType.UserInitiated,
             extensionName: "cursor-recent-projects",
             ownerOrAuthorName: "degouville",
+            context: {
+              ruleContent: cursorRule.content,
+              replace: getPreferenceValues<Preferences>().replaceOnLaunch, // replace the content if it already exists, append otherwise
+            },
           });
         }
       } catch (error) {

@@ -1,5 +1,10 @@
 # Cursor Directory Changelog
 
+## [Features & Improvements] - 2024-10-11
+
+- Add launch context for cursor-recent-projects extension to replace or append rule content
+- Allow configure if replace or append rule content in launch context
+
 ## [Features & Improvements] - 2024-10-09
 
 - Add integration with cursor-recent-projects extension to easily open recent projects in Cursor

@@ -35,3 +35,4 @@ Access preferences through the Action Panel or Raycast preferences:
 - Default Cursor Rules List: Choose to show all cursor rules or only popular ones in cursor rules list at launch.
 - Export Directory: Set the directory to export cursor rules locally.
 - Auto launch Recent Projects: Auto launch Cursor Recent Projects after copying a rule if you have the extension installed.
+- Replace or Append Rule Content: Configure if replace or append rule content in launch context, used with `cursor-recent-projects` extension.
