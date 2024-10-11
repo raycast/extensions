@@ -3,12 +3,14 @@ import { execa } from "execa";
 import fs from "fs";
 import PQueue from "p-queue";
 import path from "path";
+import plist from "plist";
 import { useEffect, useState } from "react";
 import { getPreferences } from "../models/preferences";
 
 const BUNDLE_ID_APP_STORE = "com.renfei.SnippetsLab";
 const BUNDLE_ID_SETAPP = "com.renfei.snippetslab-setapp";
 const CLI_RELPATH = "Contents/Helpers/lab";
+const INFO_PLIST_RELPATH = "Contents/Info.plist";
 
 /**
  * A serial queue for all operations using the command-line utility.
@@ -43,6 +45,7 @@ export function useSnippetsLab() {
     const [isInitializing, setInitializing] = useState<boolean>(true);
     const [initializationError, setInitializationError] = useState<Error>();
     const [resolvedCliPath, setResolvedCliPath] = useState<string>();
+    const [appVersion, setAppVersion] = useState<string>();
 
     useEffect(() => {
         const checkCli = async () => {
@@ -76,6 +79,11 @@ export function useSnippetsLab() {
         if (!app) {
             throw new Error("SnippetsLab.app not found. Is it installed?");
         }
+
+        const infoPlistPath = path.join(app.path, INFO_PLIST_RELPATH);
+        const infoPlistContents = fs.readFileSync(infoPlistPath, "utf8");
+        const infoDictionary = plist.parse(infoPlistContents) as Readonly<plist.PlistObject>;
+        setAppVersion(infoDictionary.CFBundleShortVersionString as string);
 
         return path.join(app.path, CLI_RELPATH);
     };
@@ -133,6 +141,7 @@ export function useSnippetsLab() {
     return {
         isInitializing,
         initializationError,
+        appVersion, // undefined when using a custom CLI path in preferences.
         app: { run, open },
     };
 }

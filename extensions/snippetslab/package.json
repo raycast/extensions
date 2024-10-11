@@ -67,10 +67,22 @@
       "title": "Snippet Action: Primary",
       "description": "The first Snippet action shown in the action menu.",
       "data": [
-        {"title": "Show Snippet Details", "value": "push"},
-        {"title": "Copy to Clipboard", "value": "copy"},
-        {"title": "Open in SnippetsLab", "value": "open"},
-        {"title": "Paste to Active App", "value": "paste"}
+        {
+          "title": "Show Snippet Details",
+          "value": "push"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Open in SnippetsLab",
+          "value": "open"
+        },
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        }
       ],
       "default": "push",
       "required": false
@@ -81,10 +93,22 @@
       "title": "Snippet Action: Secondary",
       "description": "The second Snippet action shown in the action menu.",
       "data": [
-        {"title": "Show Snippet Details", "value": "push"},
-        {"title": "Copy to Clipboard", "value": "copy"},
-        {"title": "Open in SnippetsLab", "value": "open"},
-        {"title": "Paste to Active App", "value": "paste"}
+        {
+          "title": "Show Snippet Details",
+          "value": "push"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Open in SnippetsLab",
+          "value": "open"
+        },
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        }
       ],
       "default": "copy",
       "required": false
@@ -101,11 +125,14 @@
   "dependencies": {
     "@raycast/api": "^1.79.1",
     "execa": "^9.3.0",
-    "p-queue": "^8.0.1"
+    "p-queue": "^8.0.1",
+    "plist": "^3.1.0",
+    "semver": "^7.6.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.8.10",
+    "@types/plist": "^3.0.5",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
