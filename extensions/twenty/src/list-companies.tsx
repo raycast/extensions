@@ -58,7 +58,7 @@ export default function ListCompanies() {
                 <Action.Push
                   icon={Icon.AddPerson}
                   title="Add People"
-                  shortcut={{ modifiers: ["cmd"], key: "p" }}
+                  shortcut={{ modifiers: ["cmd", "ctrl"], key: "p" }}
                   target={<CreatePersonForm />}
                 />
               </ActionPanel>

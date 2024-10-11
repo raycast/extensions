@@ -7,7 +7,7 @@ export default function ListPeople() {
   const { people } = useGetPeople();
 
   return (
-    <List isShowingDetail selectedItemId="24200b57-1db3-4c48-80f1-119de6276442">
+    <List isShowingDetail>
       {people.map((person) => (
         <List.Item
           key={person.id}
@@ -23,7 +23,7 @@ export default function ListPeople() {
               <Action.Push
                 icon={Icon.AddPerson}
                 title="Add People"
-                shortcut={{ modifiers: ["cmd"], key: "p" }}
+                shortcut={{ modifiers: ["cmd", "ctrl"], key: "p" }}
                 target={<CreatePersonForm />}
               />
               <Action.Push
@@ -50,7 +50,6 @@ export default function ListPeople() {
                     title="Email Address"
                     text={person.emails.primaryEmail}
                     target={person.emails.primaryEmail}
-                    // icon={Icon.Envelope}
                   />
                   <List.Item.Detail.Metadata.Label
                     title="Phone Number"
@@ -59,13 +58,20 @@ export default function ListPeople() {
                   />
                   <List.Item.Detail.Metadata.Label title="City" text={person.city ?? "Empty"} />
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label title="Company" text={person.company.name} />
-                  <List.Item.Detail.Metadata.Label title="Job Title" text={person.jobTitle ?? "Empty"} />
-                  <List.Item.Detail.Metadata.Separator />
+                  <List.Item.Detail.Metadata.Label title="Company" text={person.company?.name ?? "Not specified"} />
+                  <List.Item.Detail.Metadata.Label
+                    title="Job Title"
+                    text={person.jobTitle && person.jobTitle.length ? person.jobTitle : "Not specified"}
+                  />
                   <List.Item.Detail.Metadata.Label
                     title="Company Address"
-                    text={person.company.address.addressStreet1 + ", " + person.company.address.addressCity}
+                    text={
+                      person.company
+                        ? `${person.company.address.addressStreet1}, ${person.company.address.addressCity}`
+                        : "Not specified"
+                    }
                   />
+                  <List.Item.Detail.Metadata.Separator />
                 </List.Item.Detail.Metadata>
               }
             />

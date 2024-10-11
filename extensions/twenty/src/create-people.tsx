@@ -1,10 +1,12 @@
-import { Action, ActionPanel, Form, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import axios from "axios";
+import axios, { isAxiosError } from "axios";
 import { useState } from "react";
 import { useAuthHeaders } from "./hooks/use-auth-headers";
 import { useGetCompanies } from "./hooks/use-company";
 import ListPeople from "./list-people";
+import { Person } from "./types";
+import ErrorView from "./error-view";
 
 interface CreatePersonFormProps {
   firstName: string;
@@ -23,14 +25,26 @@ export default function CreatePersonForm() {
   const [creationIsLoading, setCreationIsLoading] = useState(false);
 
   if (error) {
-    return <List.EmptyView title="Error" description={error.message} />;
+    return <ErrorView error={error} />;
   }
 
-  const { handleSubmit, itemProps, setValue } = useForm<CreatePersonFormProps>({
+  const { handleSubmit, itemProps } = useForm<CreatePersonFormProps>({
     async onSubmit(values) {
       if (!isLoading || !creationIsLoading) {
         setCreationIsLoading(true);
-        await createPerson(values);
+
+        const newPerson = await createPerson(values);
+
+        if ("error" in newPerson) {
+          setCreationIsLoading(false);
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to Create Person",
+            message: newPerson.error.message,
+          });
+          return;
+        }
+
         setCreationIsLoading(false);
         push(<ListPeople />);
       }
@@ -67,8 +81,6 @@ export default function CreatePersonForm() {
         onChange={(newValue) => {
           if (newValue === "load-more") {
             loadMore();
-          } else if (newValue === "no-more") {
-            setValue("companyId", "");
           }
         }}
       >
@@ -76,19 +88,17 @@ export default function CreatePersonForm() {
         {companies.map((company) => (
           <Form.Dropdown.Item title={company.name} key={company.id} value={company.id} />
         ))}
-        {
-          hasMore ? <Form.Dropdown.Item title="Load More" key="load-more" value="load-more" /> : null
-          // <Form.Dropdown.Item title="No more companies" key="no-more" value="no-more" />
-        }
+        {hasMore ? <Form.Dropdown.Item title="Load More" key="load-more" value="load-more" /> : null}
       </Form.Dropdown>
     </Form>
   );
 }
 
-const createPerson = async (values: CreatePersonFormProps) => {
+const createPerson = async (
+  values: CreatePersonFormProps,
+): Promise<{ data: Person } | { error: { message: string } }> => {
   try {
-    console.log("Creating person", values);
-    const response = await axios.post(
+    const response = await axios.post<Person>(
       "https://api.twenty.com/rest/people",
       {
         name: {
@@ -107,7 +117,7 @@ const createPerson = async (values: CreatePersonFormProps) => {
         },
         jobTitle: values.jobTitle,
         city: values.city,
-        companyId: values.companyId,
+        ...(values.companyId!.length ? { companyId: values } : {}),
         position: 0,
         createdBy: { source: "API" },
         avatarUrl: `https://api.dicebear.com/9.x/notionists/svg?seed=${values.primaryEmail}`,
@@ -123,15 +133,37 @@ const createPerson = async (values: CreatePersonFormProps) => {
         title: "Person Created",
         message: `${values.firstName} ${values.lastName} account created`,
       });
+
+      return {
+        data: response.data,
+      };
     } else {
-      throw new Error(`Unexpected response status: ${response.status}`);
+      return {
+        error: {
+          message: "An unexpected error occurred",
+        },
+      };
     }
   } catch (error) {
-    console.error("Error creating person:", error);
+    console.log(error);
     showToast({
       style: Toast.Style.Failure,
       title: "Failed to Create Person",
       message: error instanceof Error ? error.message : "An unexpected error occurred",
     });
+
+    if (isAxiosError(error)) {
+      return {
+        error: {
+          message: error.response?.data.message ?? "An unexpected error occurred",
+        },
+      };
+    } else {
+      return {
+        error: {
+          message: "An unexpected error occurred",
+        },
+      };
+    }
   }
 };

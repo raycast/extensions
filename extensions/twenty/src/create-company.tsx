@@ -1,8 +1,10 @@
-import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import axios from "axios";
 import { useState } from "react";
 import { useAuthHeaders } from "./hooks/use-auth-headers";
+import { Company } from "./types";
+import ListCompanies from "./list-companies";
 
 interface CreateCompanyFormProps {
   name: string;
@@ -22,15 +24,28 @@ interface CreateCompanyFormProps {
 }
 
 export default function CreateCompanyForm() {
-  // const { push } = useNavigation();
+  const { push } = useNavigation();
   const [creationIsLoading, setCreationIsLoading] = useState(false);
 
   const { handleSubmit, itemProps } = useForm<CreateCompanyFormProps>({
     async onSubmit(values) {
       if (!creationIsLoading) {
         setCreationIsLoading(true);
-        await createCompany(values);
+
+        const newCompany = await createCompany(values);
+
+        if ("error" in newCompany) {
+          setCreationIsLoading(false);
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to Create Company",
+            message: newCompany.error.message,
+          });
+          return;
+        }
+
         setCreationIsLoading(false);
+        push(<ListCompanies />);
       }
     },
 
@@ -82,10 +97,10 @@ export default function CreateCompanyForm() {
   );
 }
 
-const createCompany = async (values: CreateCompanyFormProps) => {
+const createCompany = async (values: CreateCompanyFormProps): Promise<Company | { error: { message: string } }> => {
   try {
     console.log("Creating company", values);
-    const response = await axios.post(
+    const response = await axios.post<Company>(
       "https://api.twenty.com/rest/companies",
       {
         name: values.name,
@@ -135,8 +150,14 @@ const createCompany = async (values: CreateCompanyFormProps) => {
         title: "Company Created",
         message: `${values.name} has been created successfully`,
       });
+
+      return response.data;
     } else {
-      throw new Error(`Unexpected response status: ${response.status}`);
+      return {
+        error: {
+          message: "An unexpected error occurred",
+        },
+      };
     }
   } catch (error) {
     console.error("Error creating company:", error);
@@ -145,5 +166,19 @@ const createCompany = async (values: CreateCompanyFormProps) => {
       title: "Failed to Create Company",
       message: error instanceof Error ? error.message : "An unexpected error occurred",
     });
+
+    if (axios.isAxiosError(error)) {
+      return {
+        error: {
+          message: error.response?.data.message ?? "An unexpected error occurred",
+        },
+      };
+    } else {
+      return {
+        error: {
+          message: "An unexpected error occurred",
+        },
+      };
+    }
   }
 };

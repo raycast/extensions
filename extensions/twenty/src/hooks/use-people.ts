@@ -17,7 +17,7 @@ interface People {
   jobTitle: string;
   avatarUrl: string;
   city: string;
-  company: {
+  company?: {
     id: string;
     name: string;
     employees: number;
