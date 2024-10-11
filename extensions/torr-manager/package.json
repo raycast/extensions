@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "torr-manager",
+  "title": "torr-manager",
+  "description": "Allows users to connect to their TorrServer, browse available torrents, and select movies directly from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "dannius",
+  "categories": [
+    "Media",
+    "Fun"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "torrserverUrl",
+      "type": "textfield",
+      "title": "Torrserver URL",
+      "description": "Enter the URL/IP to your server",
+      "defaultValue": "http://",
+      "placeholder": "http://",
+      "required": true
+    },
+    {
+      "name": "login",
+      "type": "textfield",
+      "title": "Login",
+      "description": "Enter your login",
+      "required": true
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "title": "Password",
+      "description": "Enter your password",
+      "required": true
+    },
+    {
+      "name": "mediaPlayerApp",
+      "title": "Media Player",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "IINA",
+          "value": "iina"
+        },
+        {
+          "title": "VLC Media Player",
+          "value": "vlc"
+        }
+      ],
+      "description": "Select media player app to use",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "list",
+      "title": "Show added torrents",
+      "description": "Show list of available torrents on your server",
+      "mode": "view"
+    },
+    {
+      "name": "add",
+      "title": "Add torrent",
+      "description": "Upload torrent to server",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.2",
+    "@raycast/utils": "^1.17.0",
+    "formdata-node": "^6.0.3",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
