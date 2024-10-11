@@ -55,9 +55,7 @@ export default function ListCompanies() {
                   title="Add Company"
                   shortcut={{ modifiers: ["cmd"], key: "o" }}
                   target={<CreateCompanyForm />}
-                  }}
                 />
-
                 <Action
                   icon={Icon.AddPerson}
                   title="Add People"
