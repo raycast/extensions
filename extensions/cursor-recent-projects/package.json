@@ -6,7 +6,8 @@
   "icon": "cursor-icon.png",
   "author": "degouville",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "escwxyz"
   ],
   "categories": [
     "Applications",
@@ -108,14 +109,15 @@
     "@raycast/api": "^1.83.1",
     "@raycast/utils": "^1.17.0",
     "lodash.get": "^4.4.2",
+    "raycast-cross-extension": "^0.2.3",
     "run-applescript": "^6.1.0",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
+    "@types/lodash.get": "^4.4.9",
     "@types/node": "20.12.7",
     "@types/react": "18.2.79",
-    "@types/lodash.get": "^4.4.9",
     "@types/sql.js": "^1.4.9",
     "eslint": "^8.57.1",
     "eslint-plugin-react": "^7.36.1",
