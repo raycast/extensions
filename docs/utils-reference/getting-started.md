@@ -16,6 +16,10 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.18.0
+
+- Add a new [`executeSQL](./functions/executeSQL.md) function.
+
 ### v1.17.0
 
 - Add a new [`createDeeplink`](./functions/createDeeplink.md) function.
