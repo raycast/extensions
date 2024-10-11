@@ -1,6 +1,6 @@
 # Unicode Symbols
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-10-11
 
 - Updated the paste action to dynamically show the name and icon of the frontmost application.
 
