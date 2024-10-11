@@ -50,12 +50,11 @@ export default function ListCompanies() {
                   content={company.name}
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
                 />
-                <Action
+                <Action.Push
                   icon={Icon.Building}
                   title="Add Company"
                   shortcut={{ modifiers: ["cmd"], key: "o" }}
-                  onAction={() => {
-                    push(<CreateCompanyForm />);
+                  target={<CreateCompanyForm />}
                   }}
                 />
 
