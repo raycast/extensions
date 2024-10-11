@@ -1,6 +1,6 @@
 # Raycast PM2
 
-## [Chore & Fixes] - {PR_MERGE_DATE}
+## [Chore & Fixes] - 2024-10-11
 
 - Use `nano-spawn` instead of `execa`
 - Fix child-process executors
