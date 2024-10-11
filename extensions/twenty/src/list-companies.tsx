@@ -1,11 +1,10 @@
 import React from "react";
-import { List, Image, Icon, ActionPanel, Action, Toast, showToast, useNavigation } from "@raycast/api";
+import { List, Image, Icon, ActionPanel, Action, Toast, showToast } from "@raycast/api";
 import { useGetCompanies } from "./hooks/use-company";
 import CreatePersonForm from "./create-people";
 import CreateCompanyForm from "./create-company";
 
 export default function ListCompanies() {
-  const { push } = useNavigation();
   const { companies, isLoading, error } = useGetCompanies();
 
   React.useEffect(() => {
@@ -56,13 +55,11 @@ export default function ListCompanies() {
                   shortcut={{ modifiers: ["cmd"], key: "o" }}
                   target={<CreateCompanyForm />}
                 />
-                <Action
+                <Action.Push
                   icon={Icon.AddPerson}
                   title="Add People"
                   shortcut={{ modifiers: ["cmd"], key: "p" }}
-                  onAction={() => {
-                    push(<CreatePersonForm />);
-                  }}
+                  target={<CreatePersonForm />}
                 />
               </ActionPanel>
             }
