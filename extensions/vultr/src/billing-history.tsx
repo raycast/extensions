@@ -10,7 +10,7 @@ export default function BillingHistory() {
       {data.map((history) => {
         const isInvoice = history.type === "invoice";
         const markdown = `
-| amount: | balance | date |
+| amount | balance | date |
 |---------|---------|------|
 | ${history.amount} | ${history.balance} | ${new Date(history.date).toLocaleDateString()} |`;
         return (
@@ -19,12 +19,16 @@ export default function BillingHistory() {
             icon={isInvoice ? Icon.Receipt : Icon.CreditCard}
             title={history.description}
             subtitle={history.type}
-            accessories={[{ date: new Date(history.date) }]}
+            accessories={[{ date: new Date(history.date), tooltip: history.date }]}
             detail={<List.Item.Detail markdown={markdown} />}
             actions={
               isInvoice && (
                 <ActionPanel>
-                  <Action.Push title="View Invoice Items" target={<InvoiceItems invoiceId={history.id} />} />
+                  <Action.Push
+                    icon={Icon.List}
+                    title="View Invoice Items"
+                    target={<InvoiceItems invoiceId={history.id} />}
+                  />
                 </ActionPanel>
               )
             }
@@ -47,8 +51,11 @@ function InvoiceItems({ invoiceId }: { invoiceId: number }) {
             title={item.description}
             subtitle={item.product}
             accessories={[
-              { date: { value: new Date(item.start_date), color: Color.Green } },
-              { date: { value: new Date(item.end_date), color: Color.Red } },
+              {
+                date: { value: new Date(item.start_date), color: Color.Green },
+                tooltip: `start date: ${item.start_date}`,
+              },
+              { date: { value: new Date(item.end_date), color: Color.Red }, tooltip: `end date: ${item.end_date}` },
               { text: `${item.units} ${item.unit_type} x ${item.unit_price} = ${item.total}` },
             ]}
           />

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Form, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Form, Icon, Keyboard, List, useNavigation } from "@raycast/api";
 import useVultrPaginated from "./lib/hooks/use-vultr-paginated";
 import { AddUser, type UpdateUser, User } from "./lib/types/user";
 import { FormValidation, useForm } from "@raycast/utils";
@@ -20,7 +20,7 @@ export default function Users() {
               <Action.Push
                 title="Add New User"
                 icon={Icon.AddPerson}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
                 target={<AddNewUser onUserAdded={revalidate} />}
               />
             </ActionPanel>
@@ -58,7 +58,7 @@ export default function Users() {
                 <Action.Push
                   title="Add New User"
                   icon={Icon.AddPerson}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                   target={<AddNewUser onUserAdded={revalidate} />}
                 />
               </ActionPanel.Section>
@@ -170,10 +170,7 @@ function AddNewUser({ onUserAdded }: AddNewUserProps) {
         </ActionPanel>
       }
     >
-      <Form.Description
-        title={String(isLoading)}
-        text="This will create a new https://my.vultr.com log in with limited privileges to manage your account"
-      />
+      <Form.Description text="This will create a new https://my.vultr.com log in with limited privileges to manage your account" />
       <Form.TextField title="Name" placeholder="Name" {...itemProps.name} />
       <Form.TextField title="Email" placeholder="Email" {...itemProps.email} />
       <Form.PasswordField title="Password" placeholder="hunter2" {...itemProps.password} />

@@ -6,7 +6,6 @@
   "icon": "vultr.png",
   "author": "xmok",
   "categories": [
-    "Applications",
     "Developer Tools"
   ],
   "license": "MIT",
@@ -14,7 +13,7 @@
     {
       "name": "personal_access_token",
       "title": "Personal Access Token",
-      "placeholder": "NEGQWCS...NUEQ",
+      "placeholder": "XXXXXX...XXXX",
       "required": true,
       "type": "password",
       "description": "PAT from Vultr Dashboard"
@@ -41,8 +40,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.3",
-    "@raycast/utils": "^1.16.2"
+    "@raycast/api": "^1.84.2",
+    "@raycast/utils": "^1.18.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
