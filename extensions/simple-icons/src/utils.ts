@@ -215,33 +215,21 @@ export const aiSearch = async (icons: IconData[], searchString: string) => {
 export const useSearch = ({ icons }: { icons: IconData[] }) => {
   const [searchString, setSearchString] = useState("");
   const $searchString = searchString.trim().toLowerCase();
-  const searcher = new Searcher(icons, {
-    keySelector: (icon) =>
-      [
-        icon.title,
-        icon.slug,
-        icon.aliases?.aka,
-        icon.aliases?.dup?.map((duplicate) => duplicate.title),
-        Object.values(icon.aliases?.loc ?? {}),
-      ]
-        .flat()
-        .filter(Boolean) as string[],
-  });
+  const getKeywords = (icon: IconData) =>
+    [
+      icon.title,
+      icon.slug,
+      icon.aliases?.aka,
+      icon.aliases?.dup?.map((duplicate) => duplicate.title),
+      Object.values(icon.aliases?.loc ?? {}),
+    ]
+      .flat()
+      .filter(Boolean) as string[];
+  const searcher = new Searcher(icons, { keySelector: getKeywords });
 
   const filteredIcons = $searchString
     ? enableAiSearch && hasAccessToAi
-      ? icons.filter((icon) =>
-          [
-            icon.title.toLowerCase(),
-            icon.slug,
-            icon.aliases?.aka,
-            icon.aliases?.dup?.map((duplicate) => duplicate.title),
-            Object.values(icon.aliases?.loc ?? {}),
-          ]
-            .flat()
-            .filter(Boolean)
-            .some((text = "") => text.includes($searchString)),
-        )
+      ? icons.filter((icon) => getKeywords(icon).some((text) => text.toLowerCase().includes($searchString)))
       : searcher.search($searchString)
     : icons;
 
