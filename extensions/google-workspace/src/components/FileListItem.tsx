@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { File } from "../api/getFiles";
+import { File, getFilePath } from "../api/getFiles";
 import { getFileIconLink, humanFileSize } from "../helpers/files";
 
 type FileListItemProps = {
@@ -10,11 +11,20 @@ type FileListItemProps = {
 
 export default function FileListItem({ file, email }: FileListItemProps) {
   const modifiedTime = new Date(file.modifiedTime);
+  const [filePath, setFilePath] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchFilePath = async () => {
+      const path = await getFilePath(file.id);
+      setFilePath(path);
+    };
+    fetchFilePath();
+  }, [file.id]);
 
   const accessories: List.Item.Accessory[] = [
     {
       date: new Date(modifiedTime),
-      tooltip: `Updated: ${format(modifiedTime, "EEEE d MMMM yyyy 'at' HH:mm")}`,
+      tooltip: `Updated: ${format(modifiedTime, "EEEE d MMMM yyyy 'at' HH:mm")}, File Path: ${filePath}`,
     },
   ];
 
