@@ -9,6 +9,7 @@
     "litomore"
   ],
   "crossExtensions": [
+    "litomore/protondb",
     "litomore/steamgriddb"
   ],
   "categories": [

@@ -1,5 +1,9 @@
 # Steam Changelog
 
+## [New Feature] - {PR_MERGE_DATE}
+
+- Add support for browsing ProtonDB scores
+
 ## [New Feature & Chore] - 2024-10-07
 
 - Add support for browsing SteamGridDB images
