@@ -24,7 +24,12 @@ import { titleToSlug } from "simple-icons/sdk";
 import { JsDelivrNpmResponse, IconData, IconJson, LaunchContext } from "./types.js";
 
 const cache = new Cache();
-const { defaultLoadSvgAction = "WithBrandColor", enableAiSearch } = getPreferenceValues<ExtensionPreferences>();
+
+export const {
+  defaultDetailAction = "OpenWith",
+  defaultLoadSvgAction = "WithBrandColor",
+  enableAiSearch,
+} = getPreferenceValues<ExtensionPreferences>();
 
 export const hasAccessToAi = environment.canAccess(AI);
 

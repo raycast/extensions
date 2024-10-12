@@ -10,7 +10,6 @@ import {
   LaunchProps,
   Toast,
   confirmAlert,
-  getPreferenceValues,
   open,
   showHUD,
   showToast,
@@ -18,7 +17,15 @@ import {
 import debounce from "lodash/debounce.js";
 import { titleToSlug } from "simple-icons/sdk";
 import { LaunchCommand, Supports, actions, defaultActionsOrder } from "./actions.js";
-import { cacheAssetPack, getAliases, loadCachedJson, useSearch, useVersion } from "./utils.js";
+import {
+  cacheAssetPack,
+  defaultDetailAction,
+  enableAiSearch,
+  getAliases,
+  loadCachedJson,
+  useSearch,
+  useVersion,
+} from "./utils.js";
 import { IconData, LaunchContext } from "./types.js";
 
 const itemDisplayColumns = {
@@ -84,7 +91,6 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
     }
   }, [version]);
 
-  const { defaultDetailAction = "OpenWith", enableAiSearch } = getPreferenceValues<ExtensionPreferences>();
   const DefaultAction = actions[defaultDetailAction];
 
   const restActions = defaultActionsOrder
