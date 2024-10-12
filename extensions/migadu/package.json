@@ -63,7 +63,7 @@
     {
       "name": "create-copy-anonymous-identity",
       "title": "Create Anonymous Identity (Custom Hide My Email)",
-      "description": "Creates a random identity for a mailbox and copies the email address to your clipboard. This can be used as an equivalent to Apple's Hide My Email.",
+      "description": "Creates an anonymous identity for a selected mailbox and copies the email address to your clipboard. This can be used as an equivalent to Apple's Hide My Email.",
       "mode": "view"
     }
   ],
