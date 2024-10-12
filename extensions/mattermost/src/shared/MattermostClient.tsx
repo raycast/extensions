@@ -12,14 +12,6 @@ import {
   UserProfileStatusKind,
 } from "./MattermostTypes";
 
-export interface Preference {
-  baseUrl: string;
-  authorizationType: AuthorizationType;
-  credentials: string;
-}
-
-type AuthorizationType = "logpass" | "token";
-
 axios.interceptors.request.use((config) => {
   console.log(config.url, config.params ?? config.data ?? "");
   return config;
@@ -27,14 +19,14 @@ axios.interceptors.request.use((config) => {
 
 export class MattermostClient {
   static baseUrl(): string {
-    return getPreferenceValues<Preference>().baseUrl + "/api/v4";
+    return getPreferenceValues<Preferences>().baseUrl + "/api/v4";
   }
 
   static token = "";
 
   static config(): AxiosRequestConfig {
     return {
-      baseURL: getPreferenceValues<Preference>().baseUrl + "/api/v4",
+      baseURL: getPreferenceValues<Preferences>().baseUrl + "/api/v4",
       headers: {
         Authorization: `Bearer ${this.token}`,
       },
@@ -53,7 +45,7 @@ export class MattermostClient {
   }
 
   static signIn(): Promise<void> {
-    const preference = getPreferenceValues<Preference>();
+    const preference = getPreferenceValues<Preferences>();
     const [username, password] = preference.credentials.split(":");
     return axios
       .post<UserProfile>(
@@ -75,7 +67,7 @@ export class MattermostClient {
 
   static async login(): Promise<void> {
     console.log("try login");
-    const preference = getPreferenceValues<Preference>();
+    const preference = getPreferenceValues<Preferences>();
 
     switch (preference.authorizationType) {
       case "token":

@@ -1,5 +1,10 @@
 # Mattermost Changelog
 
+## [] - {PR_MERGE_DATE}
+
+- fix: `Search Channel` not loading when ZERO channels
+- update dependencies
+
 ## [Fix] - 2023-10-03
 
 - Add re-login when sign-in token expired

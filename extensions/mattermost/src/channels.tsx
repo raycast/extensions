@@ -12,8 +12,8 @@ import {
   LocalStorage,
   openExtensionPreferences,
 } from "@raycast/api";
-import { getAvatarIcon } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { getAvatarIcon, usePromise } from "@raycast/utils";
+import { useState } from "react";
 import { DateTime } from "luxon";
 import { MattermostClient } from "./shared/MattermostClient";
 import { Channel, UserProfile } from "./shared/MattermostTypes";
@@ -57,13 +57,6 @@ interface ChannelUI {
   path: string;
 }
 
-interface Preference {
-  baseUrl: string;
-  username: string;
-  password: string;
-  teamName?: string;
-}
-
 /////////////////////////////////////////
 /////////////// Command /////////////////
 /////////////////////////////////////////
@@ -74,34 +67,26 @@ export default function Command() {
 
 function ChannelsFinderList(): JSX.Element {
   const [state, setState] = useState<State | undefined>();
-  const [loading, setLoading] = useState<boolean>(false);
-  const preference = getPreferenceValues<Preference>();
+  // const [loading, setLoading] = useState<boolean>(false);
+  const preference = getPreferenceValues<Preferences>();
 
-  useEffect(() => {
-    (async () => {
-      runAppleScriptSync('launch application "Mattermost"');
-
+  const { isLoading: loading } = usePromise(
+    async () => {
+      // runAppleScriptSync('launch application "Mattermost"');
       const cachedState = await getCachedState();
       cachedState && setState(cachedState);
 
-      setLoading(true);
-      showToast(Toast.Style.Animated, "Fetch teams...");
+      await showToast(Toast.Style.Animated, "Fetch teams...");
+      
+      const profile = await MattermostClient.getMe();
+      const teams = await MattermostClient.getTeams();
+      const teamsUI: TeamUI[] = teams.map((team) => ({ id: team.id, name: team.name }));
 
-      try {
-        const profile = await MattermostClient.getMe();
-        const teams = await MattermostClient.getTeams();
-        const teamsUI: TeamUI[] = teams.map((team) => ({ id: team.id, name: team.name }));
-
-        showToast(Toast.Style.Success, `Found ${teamsUI.length} teams`);
-        setCachedState({ profile: profile, teams: teamsUI });
-        setState({ profile: profile, teams: teamsUI });
-      } catch (error) {
-        showToast(Toast.Style.Failure, `Failed ${error}`);
-      }
-
-      setLoading(false);
-    })();
-  }, []);
+      await showToast(Toast.Style.Success, `Found ${teamsUI.length} teams`);
+      setCachedState({ profile: profile, teams: teamsUI });
+      setState({ profile: profile, teams: teamsUI });
+    }
+  )
 
   if (state?.teams.length == 1) {
     return <ChannelList team={state?.teams[0]} profile={state?.profile} />;
@@ -158,11 +143,9 @@ function ChannelsFinderList(): JSX.Element {
 
 function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
   const [team, setTeam] = useState<TeamUI>(props.team);
-  const [loading, setLoading] = useState<boolean>(false);
-  const preference = getPreferenceValues<Preference>();
+  const preference = getPreferenceValues<Preferences>();
 
   async function loadCategories(): Promise<ChannelCategoryUI[]> {
-    setLoading(true);
     showToast(Toast.Style.Animated, `Fetch ${team.name} channels...`);
 
     const [categories, channels] = await Promise.all([
@@ -180,7 +163,7 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
       directChatsMap.set(profileId, chat);
     });
 
-    const directChatProfiles = await MattermostClient.getProfilesByIds(Array.from(directChatsMap.keys()));
+    const directChatProfiles = directChatsMap.keys.length ? await MattermostClient.getProfilesByIds(Array.from(directChatsMap.keys())) : [];
     directChatProfiles.forEach((profile) => {
       const chat = directChatsMap.get(profile.id);
       if (chat == undefined) {
@@ -241,7 +224,7 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
       setCachedState(cachedState);
     }
 
-    const profilesStatuses = await MattermostClient.getProfilesStatus(Array.from(directChatsMap.keys()));
+    const profilesStatuses = directChatsMap.keys.length ? await MattermostClient.getProfilesStatus(Array.from(directChatsMap.keys())) : [];
     profilesStatuses.forEach((status) => {
       const channel = directChatsMap.get(status.user_id)!;
       const channelUI = channelsUIMap.get(channel.id)!;
@@ -265,18 +248,17 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
       })();
     });
 
-    setLoading(false);
     showToast(Toast.Style.Success, `${team.name} channels`);
 
     return categoriesUI;
   }
 
-  useEffect(() => {
-    (async () => {
+  const { isLoading: loading } = usePromise(
+    async () => {
       team.categories = await loadCategories();
       setTeam(team);
-    })();
-  }, []);
+    }
+  )
 
   async function openChannel(channel: ChannelUI) {
     console.log("select channel", channel);
