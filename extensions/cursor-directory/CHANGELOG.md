@@ -1,5 +1,12 @@
 # Cursor Directory Changelog
 
+## [Features & Improvements] - 2024-10-12
+
+- Remove integration with cursor-recent-projects extension
+- Add a new command to easily open project and automatically apply rule in Cursor
+- Improve error handling
+- Update dependencies
+
 ## [Features & Improvements] - 2024-10-11
 
 - Add launch context for cursor-recent-projects extension to replace or append rule content

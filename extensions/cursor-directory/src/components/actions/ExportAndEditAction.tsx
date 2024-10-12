@@ -1,9 +1,8 @@
 import { Action, getPreferenceValues, Icon, Keyboard, showHUD } from "@raycast/api";
 import { CursorRule } from "../../types";
-import { cursorRuleToMarkdown } from "../../utils";
+import { cursorRuleToMarkdown, expandPath } from "../../utils";
 import fs from "fs/promises";
 import path from "path";
-import { homedir } from "os";
 import { exec } from "child_process";
 
 interface Props {
@@ -16,7 +15,7 @@ export const ExportAndEditAction = ({ cursorRule, onAction }: Props) => {
     try {
       const fileName = cursorRule.isLocal ? `${cursorRule.slug}` : `${cursorRule.slug}.md`;
       const { exportDirectory } = getPreferenceValues<Preferences>();
-      const expandedPath = exportDirectory.replace(/^~/, homedir());
+      const expandedPath = expandPath(exportDirectory);
       const filePath = path.join(expandedPath, fileName);
 
       const openFile = () => {

@@ -1,7 +1,15 @@
 import type { Author, CursorRule, Section } from "./types";
-import fs from "fs";
-import os from "os";
+import fs from "fs/promises";
+import os, { homedir } from "os";
+import path from "path";
 import { parse as parseYaml } from "yaml";
+import relativeTime from "dayjs/plugin/relativeTime";
+import dayjs from "dayjs";
+
+export const getRelativeTime = (timestamp: number) => {
+  dayjs.extend(relativeTime);
+  return dayjs().to(dayjs(timestamp));
+};
 
 export const getSections = (cursorRules: CursorRule[], sortByPopularity: boolean): Section[] => {
   const sections = Array.from(new Set(cursorRules.flatMap((cursorRule) => cursorRule.tags)));
@@ -11,11 +19,10 @@ export const getSections = (cursorRules: CursorRule[], sortByPopularity: boolean
   }));
 
   if (sortByPopularity) {
-    // Sort cursor rules within each section by count
     sectionsWithCursorRules.forEach((section) => {
       section.cursorRules.sort((a, b) => (b.count || 0) - (a.count || 0));
     });
-    // Sort sections by total count
+
     return sectionsWithCursorRules
       .map((section) => ({
         name: section.name,
@@ -24,7 +31,6 @@ export const getSections = (cursorRules: CursorRule[], sortByPopularity: boolean
       }))
       .sort((a, b) => b.totalCount - a.totalCount);
   } else {
-    // Sort by number of cursor rules in each category
     return sectionsWithCursorRules
       .map((section) => ({
         name: section.name,
@@ -51,12 +57,12 @@ export const isImageUrl = (url: string): boolean => {
   return isDataUri || isImageExtension || isGitHubAvatar || hasImageInUrl || isYoutubeAvatar;
 };
 
-export const getTimestamp = (filePath: string): number => {
-  const ifExists = fs.existsSync(filePath);
-  if (!ifExists) {
-    return -1; // if file not exists, return -1
-  } else {
-    return fs.statSync(filePath).mtimeMs;
+export const getFileTimestamp = async (filePath: string): Promise<number> => {
+  try {
+    await fs.access(filePath);
+    return (await fs.stat(filePath)).mtimeMs;
+  } catch {
+    return -1;
   }
 };
 
@@ -131,3 +137,16 @@ export function parseMarkdownToRule(content: string, fileName: string): CursorRu
     return null;
   }
 }
+
+export const expandPath = (path: string) => {
+  return path.replace(/^~/, homedir());
+};
+
+export const isGitRepository = async (dirPath: string): Promise<boolean> => {
+  try {
+    await fs.access(path.join(dirPath, ".git"));
+    return true;
+  } catch {
+    return false;
+  }
+};

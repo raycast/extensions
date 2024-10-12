@@ -1,38 +1,64 @@
 # Cursor Directory
 
-Access and search cursor rules from [cursor.directory](https://cursor.directory/) directly
-for usage in the Cursor Code Editor.
+Your [cursor.directory](https://cursor.directory/) in Raycast.
 
-## Usage
+## Overview
 
-1. Launch Raycast and search `cursor directory` to execute the command.
+Cursor Directory is a powerful Raycast extension that seamlessly integrates with [cursor.directory](https://cursor.directory/), allowing users to access, search, and utilize cursor rules directly within the Cursor Code Editor. This extension streamlines the process of finding and implementing cursor rules, enhancing productivity for developers using the Cursor IDE.
 
-2. Use fuzzy search to find cursor rules based on their titles.
+## Features
 
-3. Select a cursor rule to view details or copy content.
+- **Fuzzy Search**: Quickly find cursor rules based on their titles.
+- **Detailed View**: Examine cursor rules, including author information and full rule content.
+- **One-Click Application**: Easily copy and apply cursor rules to your project's `.cursorrules` file.
+- **Starring System**: Save up to 10 favorite cursor rules for quick access.
+- **Local Modification**: Export and edit cursor rules as Markdown files within Cursor.
+- **YouTube Videos**: Access curated Cursor-related YouTube videos directly from the extension.
 
-4. Press `Enter` to open the detail page, displaying author information
-   and the full cursor rule.
+## Installation
 
-5. From the detail page:
+1. Ensure you have [Raycast](https://www.raycast.com/) installed on your system.
+2. Install the Cursor Directory extension through the [Raycast store](https://www.raycast.com/escwxyz/cursor-directory) or Raycast's store command.
 
-- Press `Enter` to copy & apply the cursor rule in the `.cursorrules` file in your project.
+## Usage Guide
 
-- Use the Action Panel to visit [cursor.directory](https://cursor.directory/) or share the cursor rule link.
+1. **Launching the Extension**:
 
-6. You can star cursor rules to quick access them later. NOTE that the max number of starred cursor rules is 10.
+   - Open Raycast and type `cursor directory` to use the commands.
 
-7. If you want to modify the cursor rule locally, you can use the "Export and Edit" action to open the cursor rule as Markdown filein Cursor for editing. But make sure to install the shell command `cursor` first. (You can install it by pressing `Cmd + Shift + P` in Cursor and search for `Install cursor command`)
+2. **Searching for Cursor Rules**:
 
-8. You can install the `degouville/cursor-recent-projects` extension to easily open recent projects in Cursor.
+   - Use the fuzzy search functionality to find rules based on their titles.
+
+3. **Toggle Detailed View**:
+
+   - Press `Cmd + D` to toggle the detailed view of a rule.
+
+4. **Copy and Apply Cursor Rules**:
+
+   - Press `Cmd + Shift + C` to copy the rule content to your clipboard.
+   - You can then choose to open recent projects to apply the rule directly, or press `Esc` to manually apply the rule to where you want.
+
+5. **Starring Rules**:
+
+   - Star up to 10 cursor rules for quick access in future sessions via `Cmd + Shift + P`.
+
+6. **Local Modification**:
+
+   - Press `Cmd + E` to open the cursor rule as a Markdown file in Cursor for editing.
+   - Note: Ensure the `cursor` shell command is installed. (Install via `Cmd + Shift + P` in Cursor, then search for "Install cursor command")
+
+7. **YouTube Videos**:
+   - Access curated Cursor-related YouTube videos directly from the extension.
 
 ## Configuration
 
-Access preferences through the Action Panel or Raycast preferences:
+Access the extension preferences through the Action Panel or Raycast preferences to customize your experience:
 
 - Cache Duration: Cursor rule data is cached locally for 1 day by default.
 - Show Detailed View: Toggle the display of detailed view in cursor rules list.
 - Default Cursor Rules List: Choose to show all cursor rules or only popular ones in cursor rules list at launch.
 - Export Directory: Set the directory to export cursor rules locally.
-- Auto launch Recent Projects: Auto launch Cursor Recent Projects after copying a rule if you have the extension installed.
-- Replace or Append Rule Content: Configure if replace or append rule content in launch context, used with `cursor-recent-projects` extension.
+- Skip Confirmation on Copy: Skip confirmation on copying a cursor rule.
+- Replace on Launch: Configure if replace or append rule content in launch context.
+- Projects Directory: Set the directory to store your projects.
