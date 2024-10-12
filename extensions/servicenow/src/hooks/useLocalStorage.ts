@@ -9,7 +9,6 @@ export type UseLocalStorageReturnValue<T> = {
   mutate: MutatePromise<T | undefined>;
 };
 
-
 export function useLocalStorage<T>(key: string, initialValue: T): UseLocalStorageReturnValue<T> {
   const {
     data: value,

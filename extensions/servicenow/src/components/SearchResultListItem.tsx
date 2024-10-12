@@ -7,6 +7,7 @@ import ResultActions from "./ResultActions";
 import Actions from "./Actions";
 
 import { Instance } from "../hooks/useInstances";
+import { Data, Field, Record } from "../types";
 
 export default function SearchResultListItem({
   result,
@@ -15,22 +16,22 @@ export default function SearchResultListItem({
   fields,
   mutateSearchResults,
 }: {
-  result: any;
-  icon: string;
+  result: Record;
+  icon: Action.Props["icon"];
   label: string;
-  fields: any;
+  fields: Field[];
   mutateSearchResults: () => Promise<void>;
 }) {
   const [selectedInstance] = useCachedState<Instance>("instance");
 
   const instanceUrl = `https://${selectedInstance?.name}.service-now.com`;
 
-  if (result.metadata.thumbnailURL)
-    icon = `${instanceUrl}/${result.metadata.thumbnailURL}`;
+  if (result.metadata.thumbnailURL) icon = `${instanceUrl}/${result.metadata.thumbnailURL}`;
 
   const dataKeys = keys(result.data);
   const accessories: List.Item.Accessory[] = [];
-  let keywords = [label, ...result.metadata.description?.split(/\s|\n/)];
+  const description = result.metadata.description?.split(/\s|\n/);
+  let keywords = [label, ...(description ?? [])];
 
   if (result.data.number) keywords.push(result.data.number.display);
   if (result.data.priority) {
@@ -64,8 +65,9 @@ export default function SearchResultListItem({
 
   keysToCheck.forEach(({ key, color }) => {
     const dataKey = dataKeys.find((dataKey) => dataKey.includes(key));
-    if (dataKey && result.data[dataKey].display) {
-      const value = result.data[dataKey].display;
+    const dataKeyResult = result.data[dataKey as keyof Data];
+    if (dataKey && dataKeyResult && dataKeyResult.display) {
+      const value = dataKeyResult.display;
       keywords = keywords.concat(value.split(/\s|\n/));
       accessories.push({
         tag: {
@@ -85,7 +87,7 @@ export default function SearchResultListItem({
       key={result.sys_id}
       title={result.metadata.title || ""}
       subtitle={result.data.number?.display}
-      icon={icon}
+      icon={icon ?? undefined}
       keywords={keywords}
       actions={
         <ActionPanel>

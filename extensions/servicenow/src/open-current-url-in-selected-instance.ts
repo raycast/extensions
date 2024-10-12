@@ -1,4 +1,4 @@
-import { BrowserExtension,  LocalStorage, showToast, Toast, open } from "@raycast/api";
+import { BrowserExtension, LocalStorage, showToast, Toast, open } from "@raycast/api";
 
 export default async () => {
   const tabs = await BrowserExtension.getTabs();
@@ -14,8 +14,7 @@ export default async () => {
   if (activeTab && activeTab.url?.includes(".service-now.com")) {
     const path = activeTab.url.split("/")[3];
     open(`https://${instanceName}.service-now.com/${path}`);
-  }
-  else{
+  } else {
     showToast(Toast.Style.Failure, "The current tab is not a ServiceNow instance");
   }
 };

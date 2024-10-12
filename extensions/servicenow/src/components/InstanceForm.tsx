@@ -1,12 +1,5 @@
 import { useMemo } from "react";
-import {
-  ActionPanel,
-  Action,
-  Form,
-  Icon,
-  useNavigation,
-  Color,
-} from "@raycast/api";
+import { ActionPanel, Action, Form, Icon, useNavigation, Color } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import crypto from "crypto";
 
@@ -19,17 +12,12 @@ type SetInstanceFormProps = {
   instance?: Instance;
 };
 
-export default function InstanceForm({
-  onSubmit,
-  instance,
-}: SetInstanceFormProps) {
+export default function InstanceForm({ onSubmit, instance }: SetInstanceFormProps) {
   const { pop } = useNavigation();
 
-  const { itemProps, values, handleSubmit } = useForm<InstanceFormValues>({
+  const { itemProps, handleSubmit } = useForm<InstanceFormValues>({
     async onSubmit(values) {
-      instance
-        ? await onSubmit({ ...instance, ...values })
-        : await onSubmit({ ...values, id: crypto.randomUUID() });
+      instance ? await onSubmit({ ...instance, ...values }) : await onSubmit({ ...values, id: crypto.randomUUID() });
       pop();
     },
     initialValues: {
@@ -62,11 +50,7 @@ export default function InstanceForm({
       isLoading={false}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            onSubmit={handleSubmit}
-            icon={Icon.SaveDocument}
-            title={"Save"}
-          />
+          <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.SaveDocument} title={"Save"} />
         </ActionPanel>
       }
     >

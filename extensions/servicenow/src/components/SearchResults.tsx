@@ -1,14 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Action,
-  ActionPanel,
-  Color,
-  environment,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, environment, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import { filter, flattenDeep, map, sumBy } from "lodash";
 
@@ -19,6 +10,7 @@ import SearchResultListItem from "./SearchResultListItem";
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import useInstances, { Instance } from "../hooks/useInstances";
 import InstanceForm from "./InstanceForm";
+import { GlobalSearchResponse, Record, SearchResult } from "../types";
 
 export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
   const { addInstance, mutate: mutateInstances } = useInstances();
@@ -26,17 +18,11 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
   const command = commandName == "search" ? "Search" : "Quickly Search";
 
   const [navigationTitle, setNavigationTitle] = useState<string>("");
-  const [filteredResults, setFilteredResults] = useState<any[]>([]);
+  const [filteredResults, setFilteredResults] = useState<SearchResult[]>([]);
   const [table] = useCachedState<string>("table", "all");
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
-  const [selectedInstance, setSelectedInstance] =
-    useCachedState<Instance>("instance");
-  const {
-    alias = "",
-    name: instanceName = "",
-    username = "",
-    password = "",
-  } = selectedInstance || {};
+  const [selectedInstance] = useCachedState<Instance>("instance");
+  const { alias = "", name: instanceName = "", username = "", password = "" } = selectedInstance || {};
 
   const instanceUrl = `https://${instanceName}.service-now.com`;
 
@@ -51,28 +37,17 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
       onError: (error) => {
         setErrorFetching(true);
         console.error(error);
-        showToast(
-          Toast.Style.Failure,
-          "Could not fetch results",
-          error.message
-        );
+        showToast(Toast.Style.Failure, "Could not fetch results", error.message);
       },
 
-      mapResult(response: any) {
+      mapResult(response: GlobalSearchResponse) {
         setErrorFetching(false);
-        const recordsWithResults = filter(
-          response.result.groups,
-          (r) => r.result_count > 0
-        );
-        const data = flattenDeep(
-          map(recordsWithResults, (r) =>
-            filter(r.search_results, (x) => x.record_count > 0)
-          )
-        );
+        const recordsWithResults = filter(response.result.groups, (r) => r.result_count > 0);
+        const data = flattenDeep(map(recordsWithResults, (r) => filter(r.search_results, (x) => x.record_count > 0)));
         return { data };
       },
       keepPreviousData: true,
-    }
+    },
   );
 
   useEffect(() => {
@@ -97,14 +72,8 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
       return;
     }
     const count = sumBy(data, (r) => r.record_count);
-    if (count == 0)
-      setNavigationTitle(
-        `${command} > ${aliasOrName} > No results found for "${searchTerm}"`
-      );
-    else
-      setNavigationTitle(
-        `${command} > ${aliasOrName} > ${count} result${count > 1 ? "s" : ""} for "${searchTerm}"`
-      );
+    if (count == 0) setNavigationTitle(`${command} > ${aliasOrName} > No results found for "${searchTerm}"`);
+    else setNavigationTitle(`${command} > ${aliasOrName} > ${count} result${count > 1 ? "s" : ""} for "${searchTerm}"`);
   }, [data, searchTerm, isLoading, errorFetching, selectedInstance]);
 
   return (
@@ -112,9 +81,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
       navigationTitle={navigationTitle}
       searchBarPlaceholder="Filter by title, description, state, category, number..."
       isLoading={isLoading}
-      searchBarAccessory={
-        data ? <TableDropdown tables={data} isLoading={isLoading} /> : undefined
-      }
+      searchBarAccessory={data ? <TableDropdown tables={data} isLoading={isLoading} /> : undefined}
     >
       {selectedInstance ? (
         errorFetching ? (
@@ -131,19 +98,14 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
         ) : data?.length && data.length > 0 ? (
           filteredResults.map((result, index) => {
             const records = result.records;
-            const { icon: iconName, color: colorName } = getTableIconAndColor(
-              result.name
-            );
-            var icon: any = {
+            const { icon: iconName, color: colorName } = getTableIconAndColor(result.name);
+            const icon: Action.Props["icon"] = {
               source: Icon[iconName as keyof typeof Icon],
               tintColor: Color[colorName as keyof typeof Color],
             };
             return (
-              <List.Section
-                key={result.name + "_" + index}
-                title={`${result.label_plural} (${result.record_count})`}
-              >
-                {records.map((record: any) => (
+              <List.Section key={result.name + "_" + index} title={`${result.label_plural} (${result.record_count})`}>
+                {records.map((record: Record) => (
                   <SearchResultListItem
                     key={record.sys_id}
                     result={record}
@@ -162,18 +124,13 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
                   title={`View all ${result.label} matches`}
                   actions={
                     <ActionPanel>
-                      <List.Dropdown.Section
-                        title={`View all ${result.label} matches`}
-                      >
+                      <List.Dropdown.Section title={`View all ${result.label} matches`}>
                         <Action.OpenInBrowser
-                          title="Open in ServiceNow"
+                          title="Open in Servicenow"
                           url={`${instanceUrl}${result.all_results_url}`}
                           icon={{ source: "servicenow.svg" }}
                         />
-                        <Action.CopyToClipboard
-                          title="Copy URL"
-                          content={`${instanceUrl}${result.all_results_url}`}
-                        />
+                        <Action.CopyToClipboard title="Copy URL" content={`${instanceUrl}${result.all_results_url}`} />
                       </List.Dropdown.Section>
                       <Actions mutate={mutate} />
                     </ActionPanel>

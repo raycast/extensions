@@ -4,11 +4,9 @@ import { useCachedState } from "@raycast/utils";
 import { uniqBy } from "lodash";
 
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
+import { SearchResult } from "../types";
 
-export default function TableDropdown(props: {
-  tables: any[] | undefined;
-  isLoading: boolean;
-}) {
+export default function TableDropdown(props: { tables: SearchResult[] | undefined; isLoading: boolean }) {
   const { tables = [], isLoading } = props;
   const [table, setTable] = useCachedState<string>("table", "all");
 

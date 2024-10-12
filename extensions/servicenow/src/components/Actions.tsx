@@ -6,8 +6,7 @@ import Instances from "./InstancesList";
 
 export default function Actions({ mutate }: { mutate: () => void }) {
   const { instances } = useInstances();
-  const [selectedInstance, setSelectedInstance] =
-    useCachedState<Instance>("instance");
+  const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
 
   return (
     <>
@@ -35,10 +34,7 @@ export default function Actions({ mutate }: { mutate: () => void }) {
             <Action
               key={instance.id}
               icon={{
-                source:
-                  selectedInstance?.id == instance.id
-                    ? Icon.CheckCircle
-                    : Icon.Circle,
+                source: selectedInstance?.id == instance.id ? Icon.CheckCircle : Icon.Circle,
                 tintColor: instance.color,
               }}
               title={instance.alias ? instance.alias : instance.name}

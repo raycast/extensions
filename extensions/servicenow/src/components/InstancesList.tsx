@@ -1,12 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  Icon,
-  List,
-  Keyboard,
-  confirmAlert,
-  LocalStorage,
-} from "@raycast/api";
+import { ActionPanel, Action, Icon, List, Keyboard, confirmAlert, LocalStorage } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
 import InstanceForm from "./InstanceForm";
@@ -15,11 +7,9 @@ import useInstances, { Instance } from "../hooks/useInstances";
 import { useEffect } from "react";
 
 export default function InstancesList() {
-  const { instances, addInstance, editInstance, deleteInstance } =
-    useInstances();
+  const { instances, addInstance, editInstance, deleteInstance } = useInstances();
 
-  const [selectedInstance, setSelectedInstance] =
-    useCachedState<Instance>("instance");
+  const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
 
   useEffect(() => {
     if (!selectedInstance && instances.length > 0) {
@@ -28,28 +18,15 @@ export default function InstancesList() {
   }, [instances, selectedInstance]);
 
   return (
-    <List
-      searchBarPlaceholder="Filter by name, alias, username..."
-      isLoading={!instances}
-    >
+    <List searchBarPlaceholder="Filter by name, alias, username..." isLoading={!instances}>
       {instances.map((instance) => {
-        const {
-          id: instanceId,
-          alias,
-          name: instanceName,
-          username,
-          password,
-          color,
-        } = instance;
+        const { id: instanceId, alias, name: instanceName, username, password, color } = instance;
         const aliasOrName = alias ? alias : instanceName;
         return (
           <List.Item
             key={instanceId}
             icon={{
-              source:
-                selectedInstance?.id == instanceId
-                  ? Icon.CheckCircle
-                  : Icon.Circle,
+              source: selectedInstance?.id == instanceId ? Icon.CheckCircle : Icon.Circle,
               tintColor: color,
             }}
             title={aliasOrName}
@@ -61,12 +38,7 @@ export default function InstancesList() {
                   <Action.Push
                     icon={Icon.Pencil}
                     title="Edit Instance Profile"
-                    target={
-                      <InstanceForm
-                        onSubmit={editInstance}
-                        instance={instance}
-                      />
-                    }
+                    target={<InstanceForm onSubmit={editInstance} instance={instance} />}
                   />
                   <Action.Push
                     icon={Icon.Plus}
@@ -108,7 +80,7 @@ export default function InstancesList() {
                   />
                   <Action.OpenInBrowser
                     icon={{ source: "servicenow.svg" }}
-                    title="Login to ServiceNow Instance"
+                    title="Login to Servicenow Instance"
                     shortcut={{ modifiers: ["cmd"], key: "l" }}
                     url={`https://${instanceName}.service-now.com/login.do?user_name=${username}&user_password=${password}&sys_action=sysverb_login`}
                   />

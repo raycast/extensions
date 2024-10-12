@@ -1,14 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  ActionPanel,
-  Action,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  Color,
-  LocalStorage,
-} from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showToast, Toast, Color, LocalStorage } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import fetch from "node-fetch";
 import { filter } from "lodash";
@@ -18,20 +9,15 @@ import InstanceForm from "./InstanceForm";
 import Actions from "./Actions";
 
 import useInstances, { Instance } from "../hooks/useInstances";
+import { HistoryResponse, HistoryResult } from "../types";
 
 export default function SearchList() {
-  const {
-    instances,
-    addInstance,
-    mutate: mutateInstances,
-    isLoading: isLoadingInstances,
-  } = useInstances();
+  const { instances, addInstance, mutate: mutateInstances, isLoading: isLoadingInstances } = useInstances();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [filteredTerms, setFilteredTerms] = useState<any[]>([]);
+  const [filteredTerms, setFilteredTerms] = useState<HistoryResult[]>([]);
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
-  const [selectedInstance, setSelectedInstance] =
-    useCachedState<Instance>("instance");
+  const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
   const {
     id: instanceId = "",
     alias = "",
@@ -52,20 +38,16 @@ export default function SearchList() {
       onError: (error) => {
         setErrorFetching(true);
         console.error(error);
-        showToast(
-          Toast.Style.Failure,
-          "Could not fetch history",
-          error.message
-        );
+        showToast(Toast.Style.Failure, "Could not fetch history", error.message);
       },
 
-      mapResult(response: any) {
+      mapResult(response: HistoryResponse) {
         setErrorFetching(false);
 
         return { data: response.result };
       },
       keepPreviousData: true,
-    }
+    },
   );
 
   async function removeAllItemsFromHistory() {
@@ -75,61 +57,57 @@ export default function SearchList() {
         title: "Removing all items from history",
       });
 
-      const promises = data.map((item: any) =>
+      const promises = data?.map((item: HistoryResult) =>
         fetch(`${instanceUrl}/api/now/table/ts_query/${item.sys_id}`, {
           method: "DELETE",
           headers: {
             Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
           },
-        })
+        }),
       );
 
-      const responses = await Promise.all(promises);
-      const success = responses.every((res) => res.ok);
+      if (promises) {
+        const responses = await Promise.all(promises);
+        const success = responses.every((res) => res.ok);
 
-      if (success) {
-        await mutate(Promise.resolve([]));
-        await showToast({
-          style: Toast.Style.Success,
-          title: `All terms removed from history`,
-        });
-      } else {
-        const failedResponses = responses.filter((res) => !res.ok);
-        const messages = failedResponses.map((res) => res.statusText);
-        await mutate(Promise.resolve([]));
-        showToast(
-          Toast.Style.Failure,
-          "Could not remove all items from history",
-          messages.join("\n")
-        );
+        if (success) {
+          await mutate(Promise.resolve([]));
+          await showToast({
+            style: Toast.Style.Success,
+            title: `All terms removed from history`,
+          });
+        } else {
+          const failedResponses = responses.filter((res) => !res.ok);
+          const messages = failedResponses.map((res) => res.statusText);
+          await mutate(Promise.resolve([]));
+          showToast(Toast.Style.Failure, "Could not remove all items from history", messages.join("\n"));
+        }
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error(error);
+
       await mutate(Promise.resolve([]));
       showToast(
         Toast.Style.Failure,
         "Could not remove all items from history",
-        error.message
+        error instanceof Error ? error.message : "",
       );
     }
   }
 
-  async function removeItemFromHistory(item: any) {
+  async function removeItemFromHistory(item: HistoryResult) {
     try {
       await showToast({
         style: Toast.Style.Animated,
         title: `Removing "${item.search_term}" from history`,
       });
 
-      const response = await fetch(
-        `${instanceUrl}/api/now/table/ts_query/${item.sys_id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
-          },
-        }
-      );
+      const response = await fetch(`${instanceUrl}/api/now/table/ts_query/${item.sys_id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+        },
+      });
 
       if (response.ok) {
         await mutate();
@@ -145,12 +123,12 @@ export default function SearchList() {
           message: response.statusText,
         });
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error(error);
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed removing term from history",
-        message: error.message,
+        message: error instanceof Error ? error.message : "",
       });
     }
   }
@@ -192,8 +170,7 @@ export default function SearchList() {
                 title={instance.alias ? instance.alias : instance.name}
                 value={instance.id}
                 icon={{
-                  source:
-                    instanceId == instance.id ? Icon.CheckCircle : Icon.Circle,
+                  source: instanceId == instance.id ? Icon.CheckCircle : Icon.Circle,
                   tintColor: instance.color,
                 }}
               />
@@ -241,7 +218,7 @@ export default function SearchList() {
             />
           ) : data?.length && data.length > 0 ? (
             <List.Section title="History">
-              {filteredTerms?.map((item: any) => (
+              {filteredTerms?.map((item: HistoryResult) => (
                 <List.Item
                   key={item.sys_id}
                   title={item.search_term}
@@ -256,11 +233,7 @@ export default function SearchList() {
                           mutate();
                           mutateInstances();
                         }}
-                        target={
-                          selectedInstance && (
-                            <SearchResults searchTerm={item.search_term} />
-                          )
-                        }
+                        target={selectedInstance && <SearchResults searchTerm={item.search_term} />}
                         title={`Search for "${item.search_term}"`}
                         icon={Icon.MagnifyingGlass}
                       />
@@ -309,10 +282,7 @@ export default function SearchList() {
           description="Add an Instance Profile to get started"
           actions={
             <ActionPanel>
-              <Action.Push
-                title="Add Instance Profile"
-                target={<InstanceForm onSubmit={addInstance} />}
-              />
+              <Action.Push title="Add Instance Profile" target={<InstanceForm onSubmit={addInstance} />} />
             </ActionPanel>
           }
         />
