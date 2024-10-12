@@ -1,6 +1,6 @@
 # aerospace Changelog
 
-## [Bug Fixes] - 2024-10-11
+## [New Feature] - 2024-10-11
 
 - Adds functionality to switch between apps in current workspace
 
