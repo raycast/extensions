@@ -1,11 +1,13 @@
 import { open, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Instance } from "./types";
 
 export default async () => {
-  const instanceName = await LocalStorage.getItem<string>("selected-instance");
-  if (!instanceName) {
+  const instance = await LocalStorage.getItem<string>("selected-instance");
+  if (!instance) {
     showToast(Toast.Style.Failure, "Instance not found", "Please create an instance profile first");
     return;
   }
 
-  open(`https://${instanceName}.service-now.com`);
+  const instanceProfile = JSON.parse(instance) as Instance;
+  open(`https://${instanceProfile.name}.service-now.com`);
 };
