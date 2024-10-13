@@ -84,7 +84,7 @@ export default function Command() {
     }
   };
 
-  const formatTitle = (title: string, lineLength: number = 12): string[] => {
+  const formatTitle = (title: string, lineLength: number = 10): string[] => {
     const words = title.split(" ");
     const formattedTitle: string[] = [];
     let currentLine = "";
