@@ -1,5 +1,9 @@
 # Remember the Date Changelog
 
+## [Add Countdown Option] - {PR_MERGE_DATE}
+
+- Added a countdown option in the preferences to display the countdown in days
+
 ## [Add Up Next command] - 2024-04-19
 
 - Added "Up Next" Command perfect for pinning as a favorite
