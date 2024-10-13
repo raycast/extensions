@@ -1,6 +1,6 @@
 # Migadu Changelog
 
-## [Add Anonymous Identity Command] - 2024-10-13
+## [Add Anonymous Identity Command] - {PR_MERGE_DATE}
 - Create new command to create anonymous identities (made to imitate Apple's Hide My Email)
 
 ## [Cache Results + Change Delete Shortcut] - 2024-08-21
