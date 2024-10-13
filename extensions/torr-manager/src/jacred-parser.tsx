@@ -40,6 +40,7 @@ export default function Command() {
       } else {
         throw new Error("Invalid response format");
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       showToast(Toast.Style.Failure, "Error", "Failed to fetch torrents");
     } finally {
@@ -77,6 +78,7 @@ export default function Command() {
       }
 
       showToast(Toast.Style.Success, "Torrent added to server");
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       showToast(Toast.Style.Failure, "Error", "Failed to add torrent");
     }

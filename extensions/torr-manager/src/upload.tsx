@@ -59,6 +59,7 @@ export default function Command() {
       }
 
       showToast(Toast.Style.Success, "Torrent added successfully");
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       showToast(Toast.Style.Failure, "Error", "Something went wrong");
     }

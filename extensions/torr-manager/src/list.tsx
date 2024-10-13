@@ -41,6 +41,7 @@ export default function Command() {
 
       const torrents = (await response.json()) as TorrentItem[];
       setItems(torrents);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       showToast(Toast.Style.Failure, "Error", "Failed to update the torrent list");
     } finally {
@@ -78,6 +79,7 @@ export default function Command() {
 
         await getList();
         showToast(Toast.Style.Success, `Removed "${itemTitle}" successfully`);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         showToast(Toast.Style.Failure, "Error", "Failed to remove the torrent");
       }
