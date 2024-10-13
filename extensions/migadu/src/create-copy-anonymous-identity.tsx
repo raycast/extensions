@@ -33,6 +33,8 @@ export default function CreateAnonymousIdentityCommand() {
     },
   );
 
+  const getFullMailbox = (address: string) => mailboxesQuery.data.find((mailbox) => mailbox.address === address);
+
   const shouldCopyRef = useRef(true);
   const { handleSubmit, setValue, itemProps, values } = useForm<FormValue>({
     initialValues: {
@@ -48,7 +50,7 @@ export default function CreateAnonymousIdentityCommand() {
       };
 
       // By definition of the drop down items, this must exist. Just in case it doesn't, show a nice error message.
-      const fullMailbox = mailboxesQuery.data.find((curr) => curr.address === mailbox);
+      const fullMailbox = getFullMailbox(mailbox);
       if (fullMailbox === undefined) {
         showFailureToast(
           "The selected mailbox doesn't seem to exist. This is likely a programming error, please file an issue on GitHub (Opt + Cmd + B).",
@@ -142,7 +144,7 @@ export default function CreateAnonymousIdentityCommand() {
         placeholder="anonymous"
         {...itemProps.local_part}
       />
-      <Form.Description text={`${values.local_part}@${values.mailbox?.split("@")[1] ?? "example.com"}`} />
+      <Form.Description text={`${values.local_part}@${getFullMailbox(values.mailbox)?.domain_name ?? "[DOMAIN]"}`} />
       <Form.Dropdown title="Destination Mailbox" storeValue {...itemProps.mailbox}>
         {mailboxesQuery.data.map((mailbox) => {
           return <Form.Dropdown.Item value={mailbox.address} key={mailbox.address} title={mailbox.address} />;
