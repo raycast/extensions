@@ -57,11 +57,14 @@ const ListEmails = () => {
                     onAction={async () => {
                       const success = await toggleAlias(alias.email, true);
 
+                      const toast = await showToast(Toast.Style.Animated, "🔄 Activating", alias.email);
                       if (success) {
-                        await showToast(Toast.Style.Success, "✅ Email activated");
+                        toast.style = Toast.Style.Success;
+                        toast.title = "✅ Email activated";
                         revalidate();
                       } else {
-                        await showToast(Toast.Style.Failure, "❌ Error activating email");
+                        toast.style = Toast.Style.Failure;
+                        toast.title = "❌ Error activating email";
                       }
                     }}
                     icon={Icon.Checkmark}
@@ -72,11 +75,14 @@ const ListEmails = () => {
                     onAction={async () => {
                       const success = await toggleAlias(alias.email, false);
 
+                      const toast = await showToast(Toast.Style.Animated, "🔄 Deactivating", alias.email);
                       if (success) {
-                        await showToast(Toast.Style.Success, "✅ Email deactivated");
+                        toast.style = Toast.Style.Success;
+                        toast.title = "✅ Email deactivated";
                         revalidate();
                       } else {
-                        await showToast(Toast.Style.Failure, "❌ Error deactivating email");
+                        toast.style = Toast.Style.Failure;
+                        toast.title = "❌ Error deactivating email";
                       }
                     }}
                     icon={Icon.XMarkCircle}
