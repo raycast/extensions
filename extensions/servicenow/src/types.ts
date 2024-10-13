@@ -68,6 +68,8 @@ export interface Data {
   price?: DataValue;
   category?: DataValue;
   priority?: DataValue;
+  u_icon?: DataValue;
+  u_workspace?: DataValue;
 }
 
 export interface DataValue {

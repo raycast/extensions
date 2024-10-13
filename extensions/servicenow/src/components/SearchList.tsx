@@ -17,7 +17,7 @@ export default function SearchList() {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filteredTerms, setFilteredTerms] = useState<HistoryResult[]>([]);
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
-  const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("");
+  const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
   const {
     id: instanceId = "",
     alias = "",

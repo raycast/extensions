@@ -81,7 +81,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
       navigationTitle={navigationTitle}
       searchBarPlaceholder="Filter by title, description, state, category, number..."
       isLoading={isLoading}
-      searchBarAccessory={data ? <TableDropdown tables={data} isLoading={isLoading} /> : undefined}
+      searchBarAccessory={data ? <TableDropdown results={data} isLoading={isLoading} /> : undefined}
     >
       {selectedInstance ? (
         errorFetching ? (
@@ -104,7 +104,10 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
               tintColor: Color[colorName as keyof typeof Color],
             };
             return (
-              <List.Section key={result.name + "_" + index} title={`${result.label_plural} (${result.record_count})`}>
+              <List.Section
+                key={result.name + "_" + index}
+                title={`${result.name == "u_documate_page" ? "Documate Pages" : result.label_plural} (${result.record_count})`}
+              >
                 {records.map((record: Record) => (
                   <SearchResultListItem
                     key={record.sys_id}
@@ -121,10 +124,12 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
                     tintColor: Color.SecondaryText,
                   }}
                   key={`${result.label}-all`}
-                  title={`View all ${result.label} matches`}
+                  title={`View all ${result.name == "u_documate_page" ? "Documate Page" : result.label} matches`}
                   actions={
                     <ActionPanel>
-                      <List.Dropdown.Section title={`View all ${result.label} matches`}>
+                      <List.Dropdown.Section
+                        title={`View all ${result.name == "u_documate_page" ? "Documate Page" : result.label} matches`}
+                      >
                         <Action.OpenInBrowser
                           title="Open in Servicenow"
                           url={`${instanceUrl}${result.all_results_url}`}

@@ -6,15 +6,15 @@ import { uniqBy } from "lodash";
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import { SearchResult } from "../types";
 
-export default function TableDropdown(props: { tables: SearchResult[] | undefined; isLoading: boolean }) {
-  const { tables = [], isLoading } = props;
+export default function TableDropdown(props: { results: SearchResult[] | undefined; isLoading: boolean }) {
+  const { results = [], isLoading } = props;
   const [table, setTable] = useCachedState<string>("table", "all");
 
   useEffect(() => {
-    if (!isLoading && !tables.find((t) => t.name === table)) {
+    if (!isLoading && !results.find((t) => t.name === table)) {
       setTable("all");
     }
-  }, [tables, isLoading, table]);
+  }, [results, isLoading, table]);
 
   return (
     <List.Dropdown
@@ -27,14 +27,14 @@ export default function TableDropdown(props: { tables: SearchResult[] | undefine
     >
       <List.Dropdown.Item key="all" title="All" value="all" icon={Icon.Globe} />
       <List.Dropdown.Section title="Tables">
-        {uniqBy(tables, "name").map((table) => {
-          const { icon, color } = getTableIconAndColor(table.name);
+        {uniqBy(results, "name").map((result) => {
+          const { icon, color } = getTableIconAndColor(result.name);
 
           return (
             <List.Dropdown.Item
-              key={table.name}
-              title={`${table.label_plural} (${table.record_count})`}
-              value={table.name}
+              key={result.name}
+              title={`${result.name == "u_documate_page" ? "Documate Pages" : result.label_plural} (${result.record_count})`}
+              value={result.name}
               icon={{
                 source: Icon[icon as keyof typeof Icon],
                 tintColor: Color[color as keyof typeof Color],

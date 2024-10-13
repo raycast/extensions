@@ -13,14 +13,15 @@ export default function quicklySearchSelectedInstance(props: LaunchProps) {
   const { instances } = useInstances();
   const [, setSelectedInstance] = useCachedState<Instance>("instance");
 
-  const instance = instances.find(
-    (i: Instance) =>
-      i.name.toLowerCase() === instanceName.toLowerCase() || i.alias?.toLowerCase() === instanceName.toLowerCase(),
-  );
-  if (instance) {
-    setSelectedInstance(instance);
-    LocalStorage.setItem("selected-instance", JSON.stringify(instance));
+  if (instanceName) {
+    const instance = instances.find(
+      (i: Instance) =>
+        i.name.toLowerCase() === instanceName.toLowerCase() || i.alias?.toLowerCase() === instanceName.toLowerCase(),
+    );
+    if (instance) {
+      setSelectedInstance(instance);
+      LocalStorage.setItem("selected-instance", JSON.stringify(instance));
+    }
   }
-
   return <SearchResults searchTerm={query} />;
 }
