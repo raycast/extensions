@@ -45,19 +45,19 @@
   "commands": [
     {
       "name": "list",
-      "title": "List torrents",
+      "title": "List Torrents",
       "description": "List available torrents from your server",
       "mode": "view"
     },
     {
       "name": "upload",
-      "title": "Upload torrent",
+      "title": "Upload Torrent",
       "description": "Upload torrent to server",
       "mode": "view"
     },
     {
       "name": "jacred-parser",
-      "title": "Search torrents",
+      "title": "Search Torrents",
       "description": "Search torrents",
       "mode": "view"
     }
