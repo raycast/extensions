@@ -4,7 +4,7 @@
   "title": "Toss a Coin",
   "description": "flip a coin from the raycast command bar",
   "mode": "no-view",
-  "icon": "extension-icon.png",
+  "icon": "extension_icon.png",
   "author": "advaith_u",
   "categories": [
     "Fun"
