@@ -70,8 +70,10 @@ export const CopyRuleAction = ({ cursorRule }: Props) => {
 
   async function openProject() {
     const context = {
-      ruleContent: cursorRule.content,
-      replace: preferences.replaceOnLaunch,
+      cursorDirectory: {
+        ruleContent: cursorRule.content,
+        replace: preferences.replaceOnLaunch,
+      },
     };
 
     if (preferences.projectsDirectory) {
@@ -96,15 +98,18 @@ export const CopyRuleAction = ({ cursorRule }: Props) => {
   );
 };
 
-async function launchCursorRecentProjects(context: { ruleContent: string; replace: boolean }) {
+async function launchCursorRecentProjects(context: { cursorDirectory: { ruleContent: string; replace: boolean } }) {
   try {
-    await crossLaunchCommand({
-      name: "index",
-      extensionName: "cursor-recent-projects",
-      ownerOrAuthorName: "degouville",
-      type: LaunchType.UserInitiated,
-      context,
-    });
+    await crossLaunchCommand(
+      {
+        name: "index",
+        extensionName: "cursor-recent-projects",
+        ownerOrAuthorName: "degouville",
+        type: LaunchType.UserInitiated,
+        context,
+      },
+      // TODO: callbackLaunchOptions
+    );
   } catch (error) {
     console.debug("Failed to launch cursor recent projects:", error);
     const shouldInstall = await confirmAlert({
