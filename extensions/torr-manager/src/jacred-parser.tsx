@@ -147,12 +147,12 @@ export default function Command() {
             }
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard title="Copy Magnet Link" content={item.magnet} />
                 <Action title="Add Torrent to Server" onAction={() => addTorrentToServer(item.title, item.magnet)} />
                 <Action
                   title={`Open in ${mediaPlayerApp!.name}`}
                   onAction={() => addTorrentToServer(item.title, item.magnet, false, true)}
                 />
+                <Action.CopyToClipboard title="Copy Magnet Link" content={item.magnet} />
               </ActionPanel>
             }
           />
