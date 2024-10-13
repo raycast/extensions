@@ -38,6 +38,7 @@ Cursor Directory is a powerful Raycast extension that seamlessly integrates with
 
    - Press `Cmd + Shift + C` to copy the rule content to your clipboard.
    - You can then choose to open recent projects to apply the rule directly, or press `Esc` to manually apply the rule to where you want.
+   - If you have configured the default `Projects Directory`, you will be using the builtin `projects` command to open projects, otherwise you will be prompted to select recent projects via `degouville/cursor-recent-projects` extension, which is also optional.
 
 5. **Starring Rules**:
 

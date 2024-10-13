@@ -35,7 +35,7 @@ interface CursorRule {
 interface Project {
   name: string;
   path: string;
-  lastAccessTime: number;
+  lastModifiedTime: number;
 }
 
 type AllCursorRulesResponse = {

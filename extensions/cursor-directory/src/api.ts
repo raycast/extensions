@@ -10,7 +10,7 @@ import {
 import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
 import fs from "fs/promises";
-import { expandPath, getFileTimestamp, parseMarkdownToRule } from "./utils";
+import { expandPath, getLastModifiedTime, parseMarkdownToRule } from "./utils";
 import { LocalStorage } from "@raycast/api";
 import path from "path";
 
@@ -71,7 +71,7 @@ export async function fetchCursorRules(popularOnly: boolean): Promise<CursorRule
 
   try {
     const { cacheInterval } = getPreferenceValues<Preferences>();
-    const modified_timestamp = await getFileTimestamp(cachePath);
+    const modified_timestamp = await getLastModifiedTime(cachePath);
 
     if (modified_timestamp > 0 && Date.now() - modified_timestamp < Number(cacheInterval) * 1000 * 60 * 60 * 24) {
       console.debug("Using cache...");

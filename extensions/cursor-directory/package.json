@@ -68,7 +68,6 @@
       "title": "Projects Directory",
       "type": "directory",
       "required": false,
-      "default": "~/Projects",
       "description": "The path to the directory to store your projects"
     },
     {
@@ -81,6 +80,7 @@
     }
   ],
   "license": "MIT",
+  "crossExtensions": ["degouville/cursor-recent-projects"],
   "commands": [
     {
       "name": "index",
@@ -97,7 +97,7 @@
     {
       "name": "projects",
       "title": "Search Cursor Projects",
-      "description": "Search projects to create .cursorrules file in Cursor",
+      "description": "Search projects to open with Cursor, creating .cursorrules file if necessary",
       "mode": "view"
     }
   ],
@@ -106,6 +106,7 @@
     "@raycast/utils": "^1.18.0",
     "dayjs": "^1.11.13",
     "node-fetch": "^3.3.2",
+    "raycast-cross-extension": "^0.2.3",
     "yaml": "^2.5.1"
   },
   "devDependencies": {
