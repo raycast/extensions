@@ -71,7 +71,7 @@ export default function Command() {
       }
 
       if (openInMediaPlayer) {
-        const data = await response.json();
+        const data = (await response.json()) as TorrentItem;
         const link = getStreamLink(data);
         open(link, mediaPlayerApp?.path);
       }
