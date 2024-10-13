@@ -19,7 +19,7 @@ export default async (props: LaunchProps) => {
     showToast(Toast.Style.Failure, "Instance not found", `No instance found with name or alias: ${instanceName}`);
     return;
   }
-  LocalStorage.setItem("selected-instance", instanceProfile.name);
+  LocalStorage.setItem("selected-instance", JSON.stringify(instanceProfile));
 
   await launchCommand({
     name: "quickly-search-selected-instance",

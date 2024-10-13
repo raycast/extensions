@@ -6,8 +6,7 @@ import ResultDetail from "./ResultDetail";
 import ResultActions from "./ResultActions";
 import Actions from "./Actions";
 
-import { Instance } from "../hooks/useInstances";
-import { Data, Field, Record } from "../types";
+import { Data, Field, Instance, Record } from "../types";
 
 export default function SearchResultListItem({
   result,

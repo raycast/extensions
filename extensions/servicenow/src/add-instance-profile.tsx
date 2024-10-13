@@ -1,7 +1,7 @@
 import InstanceForm from "./components/InstanceForm";
 import useInstances from "./hooks/useInstances";
 
-export default function quicklySearchSelectedInstance() {
+export default function addInstanceProfile() {
   const { addInstance } = useInstances();
 
   return <InstanceForm onSubmit={addInstance} />;

@@ -4,8 +4,7 @@ import { format } from "date-fns";
 
 import ResultActions from "./ResultActions";
 
-import { Instance } from "../hooks/useInstances";
-import { Field, Record, Data } from "../types";
+import { Field, Record, Data, Instance } from "../types";
 
 export default function ResultDetail({ result, fields }: { result: Record; fields: Field[] }) {
   const { commandName } = environment;

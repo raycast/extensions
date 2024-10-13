@@ -1,4 +1,4 @@
 import InstancesList from "./components/InstancesList";
-export default function Search() {
+export default function ManageInstanceProfiles() {
   return <InstancesList />;
 }

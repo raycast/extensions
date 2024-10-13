@@ -2,8 +2,7 @@ import { useMemo } from "react";
 import { ActionPanel, Action, Form, Icon, useNavigation, Color } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import crypto from "crypto";
-
-import { Instance } from "../hooks/useInstances";
+import { Instance } from "../types";
 
 type InstanceFormValues = Omit<Instance, "id">;
 

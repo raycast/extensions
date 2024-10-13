@@ -1,4 +1,26 @@
-### Enabling User Access to Search Terms
+# ServiceNow Raycast Extension
+
+## Overview
+
+The **ServiceNow Raycast Extension** allows you to easily search and explore content across your ServiceNow instances. With this extension, you can perform quick searches, manage instance profiles, and open specific instances or ServiceNow records in your browser.
+
+## Features
+
+- **Search:** View past searches, perform new queries, and switch between ServiceNow instances.
+- **Manage Instance Profiles:** Configure and manage ServiceNow instance profiles for use in search queries.
+- **Quick Search:** Search your ServiceNow instance instantly from the command window by entering a query without extra steps.
+- **Open Instances:** Open all configured instances or the currently selected instance in the browser.
+- **Open Current URL:** Open the current ServiceNow URL in a specified instance.
+
+## Setup Instructions
+
+### 1. ServiceNow Instance Profiles
+
+Before using the extension, you'll need to configure your ServiceNow instance profiles. To do this:
+
+- Use the **Manage Instance Profiles** command to add your ServiceNow instance information, including the instance name, username, and password.
+
+### 2. Enabling User Access to Search Terms
 
 To allow non-admin users to view and delete their past search terms, you'll need to install an **Update Set** in your ServiceNow instance.
 

@@ -3,8 +3,9 @@ import { useCachedState } from "@raycast/utils";
 
 import InstanceForm from "./InstanceForm";
 
-import useInstances, { Instance } from "../hooks/useInstances";
+import useInstances from "../hooks/useInstances";
 import { useEffect } from "react";
+import { Instance } from "../types";
 
 export default function InstancesList() {
   const { instances, addInstance, editInstance, deleteInstance } = useInstances();
@@ -31,7 +32,7 @@ export default function InstancesList() {
             }}
             title={aliasOrName}
             subtitle={alias ? instanceName : ""}
-            keywords={[instanceName, alias, username]}
+            keywords={[instanceName, alias ?? "", username]}
             actions={
               <ActionPanel>
                 <List.Dropdown.Section title={aliasOrName}>
@@ -68,7 +69,7 @@ export default function InstancesList() {
                   shortcut={{ modifiers: ["cmd"], key: "i" }}
                   onAction={() => {
                     setSelectedInstance(instance);
-                    LocalStorage.setItem("selected-instance", instance.name);
+                    LocalStorage.setItem("selected-instance", JSON.stringify(instance));
                   }}
                 ></Action>
                 <List.Dropdown.Section>

@@ -1,8 +1,7 @@
 import { Action, ActionPanel } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
-import { Instance } from "../hooks/useInstances";
-import { Record } from "../types";
+import { Instance, Record } from "../types";
 
 export default function ResultActions({ result, children }: { result: Record; children?: React.ReactNode }) {
   const [instance] = useCachedState<Instance>("instance");

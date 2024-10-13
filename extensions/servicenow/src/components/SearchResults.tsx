@@ -8,9 +8,9 @@ import Actions from "./Actions";
 import SearchResultListItem from "./SearchResultListItem";
 
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
-import useInstances, { Instance } from "../hooks/useInstances";
+import useInstances from "../hooks/useInstances";
 import InstanceForm from "./InstanceForm";
-import { GlobalSearchResponse, Record, SearchResult } from "../types";
+import { GlobalSearchResponse, Instance, Record, SearchResult } from "../types";
 
 export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
   const { addInstance, mutate: mutateInstances } = useInstances();

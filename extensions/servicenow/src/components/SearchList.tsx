@@ -8,8 +8,8 @@ import SearchResults from "./SearchResults";
 import InstanceForm from "./InstanceForm";
 import Actions from "./Actions";
 
-import useInstances, { Instance } from "../hooks/useInstances";
-import { HistoryResponse, HistoryResult } from "../types";
+import useInstances from "../hooks/useInstances";
+import { HistoryResponse, HistoryResult, Instance } from "../types";
 
 export default function SearchList() {
   const { instances, addInstance, mutate: mutateInstances, isLoading: isLoadingInstances } = useInstances();
@@ -17,7 +17,7 @@ export default function SearchList() {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filteredTerms, setFilteredTerms] = useState<HistoryResult[]>([]);
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
-  const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
+  const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("");
   const {
     id: instanceId = "",
     alias = "",
@@ -144,7 +144,7 @@ export default function SearchList() {
     const aux = instances.find((instance) => instance.id === newValue);
     if (aux) {
       setSelectedInstance(aux);
-      LocalStorage.setItem("selected-instance", aux.name);
+      LocalStorage.setItem("selected-instance", JSON.stringify(aux));
     }
   };
 

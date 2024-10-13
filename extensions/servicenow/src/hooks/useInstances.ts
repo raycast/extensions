@@ -1,15 +1,7 @@
 import { useCachedState } from "@raycast/utils";
 import { useLocalStorage } from "./useLocalStorage";
 import { LocalStorage } from "@raycast/api";
-
-export type Instance = {
-  id: string;
-  name: string;
-  alias: string;
-  color: string;
-  username: string;
-  password: string;
-};
+import { Instance } from "../types";
 
 const compareInstances = (a: Instance, b: Instance): number => {
   const nameA = a.alias ? a.alias : a.name;
@@ -26,7 +18,7 @@ export default function useInstances() {
     setValue([...value, instance]);
     if (value.length === 0) {
       setSelectedInstance(instance);
-      LocalStorage.setItem("selected-instance", instance.name);
+      LocalStorage.setItem("selected-instance", JSON.stringify(instance));
     }
   }
 
@@ -34,7 +26,7 @@ export default function useInstances() {
     setValue(value.map((i) => (i.id === instance.id ? instance : i)));
     if (selectedInstance?.id === instance.id) {
       setSelectedInstance(instance);
-      LocalStorage.setItem("selected-instance", instance.name);
+      LocalStorage.setItem("selected-instance", JSON.stringify(instance));
     }
   }
 
