@@ -8,6 +8,7 @@ import type { RemoveMethods } from "./db";
 import { keepSectionOrder, closeOtherWindows, terminalApp } from "./preferences";
 import { EntryType } from "./types";
 import type { EntryLike, PinMethods } from "./types";
+import type { LaunchContext } from "./integrations/types";
 import {
   filterEntriesByType,
   filterUnpinnedEntries,
@@ -28,7 +29,7 @@ import {
 import { usePinnedEntries } from "./pinned";
 import { ProjectProvider, useProject } from "./contexts/ProjectContext";
 
-export default function Command(props: LaunchProps<{ launchContext: { ruleContent?: string; replace?: boolean } }>) {
+export default function Command(props: LaunchProps<{ launchContext: LaunchContext }>) {
   const { data, isLoading, error, ...removeMethods } = useRecentEntries();
   const [type, setType] = useState<EntryType | null>(null);
   const { pinnedEntries, ...pinnedMethods } = usePinnedEntries();

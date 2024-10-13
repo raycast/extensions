@@ -1,15 +1,12 @@
 import { createContext, useContext, ReactNode } from "react";
 import { open, showHUD } from "@raycast/api";
-import { ensureCursorRulesFile, applyCursorRule } from "../integration";
+import { run } from "../integrations/cursor-directory";
 import { runAppleScriptSync } from "run-applescript";
+import { LaunchContext } from "../integrations/types";
+import { callbackLaunchCommand } from "raycast-cross-extension";
 
 interface ProjectContextType {
   openProject: (uri: string, closeOtherWindows: boolean) => Promise<void>;
-}
-
-interface LaunchContext {
-  ruleContent?: string;
-  replace?: boolean;
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
@@ -30,15 +27,19 @@ export function ProjectProvider({ children, launchContext }: { children: ReactNo
       }
       await open(uri, "Cursor");
 
-      if (launchContext?.ruleContent) {
-        try {
-          const projectDir = uri.split("file://").slice(1).join("/");
-          await ensureCursorRulesFile(projectDir);
-          await applyCursorRule(projectDir, launchContext.ruleContent, launchContext.replace ?? true);
-        } catch (error) {
-          console.error("Error applying cursor rules:", error);
-          await showHUD("Failed to apply cursor rules");
-        }
+      const { cursorDirectory, callbackLaunchOptions } = launchContext || {};
+
+      if (cursorDirectory && cursorDirectory.ruleContent) {
+        await run(uri, {
+          ruleContent: cursorDirectory.ruleContent,
+          replace: cursorDirectory.replace,
+        });
+      }
+      if (callbackLaunchOptions) {
+        callbackLaunchCommand(callbackLaunchOptions, {
+          // TODO should be determined what we want to expose
+          projectPath: uri.split("file://").slice(1).join("/"),
+        });
       }
     } catch (error) {
       console.error("Error opening project:", error);
