@@ -2,7 +2,7 @@ import { ActionPanel, Action, List, showToast, Toast, getPreferenceValues, Color
 import { useEffect, useState } from "react";
 import fetch from "node-fetch";
 import { getAuthHeaders } from "./utils";
-import { JacredParsedTorrent } from "./models";
+import { JacredParsedTorrent, TorrentItem } from "./models";
 
 export default function Command() {
   const [query, setQuery] = useState<string>("");
