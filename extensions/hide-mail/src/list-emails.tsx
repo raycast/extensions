@@ -1,26 +1,29 @@
-import { Action, ActionPanel, Clipboard, closeMainWindow, Icon, List, popToRoot, showHUD } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  closeMainWindow,
+  Icon,
+  List,
+  popToRoot,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
 
-import { useEffect, useState } from "react";
-import { emailObject, listAllAliases } from "./utils/list";
+import { listAllAliases } from "./utils/list";
 import { toggleAlias } from "./utils/toggle";
+import { useCachedPromise } from "@raycast/utils";
 
 const ListEmails = () => {
-  const [loading, setLoading] = useState(true);
-  const [filteredList, filterList] = useState<emailObject[]>([]);
-
-  useEffect(() => {
-    init();
-  }, []);
-
-  const init = async () => {
-    const allAliases = await listAllAliases();
-
-    filterList(allAliases);
-    setLoading(false);
-  };
+  const {
+    isLoading,
+    data: filteredList,
+    revalidate,
+  } = useCachedPromise(listAllAliases, [], { initialData: [], failureToastOptions: { title: "Error listing" } });
 
   return (
-    <List searchBarPlaceholder="Search emails and notes..." isLoading={loading}>
+    <List searchBarPlaceholder="Search emails and notes..." isLoading={isLoading}>
       {filteredList.map((alias) => {
         const note = alias.note || "";
         const keywords = note.split(" ");
@@ -55,9 +58,10 @@ const ListEmails = () => {
                       const success = await toggleAlias(alias.email, true);
 
                       if (success) {
-                        showHUD("✅ Email activated");
+                        await showToast(Toast.Style.Success, "✅ Email activated");
+                        revalidate();
                       } else {
-                        showHUD("❌ Error activating email");
+                        await showToast(Toast.Style.Failure, "❌ Error activating email");
                       }
                     }}
                     icon={Icon.Checkmark}
@@ -69,10 +73,10 @@ const ListEmails = () => {
                       const success = await toggleAlias(alias.email, false);
 
                       if (success) {
-                        showHUD("✅ Email deactivated");
-                        popToRoot();
+                        await showToast(Toast.Style.Success, "✅ Email deactivated");
+                        revalidate();
                       } else {
-                        showHUD("❌ Error deactivating email");
+                        await showToast(Toast.Style.Failure, "❌ Error deactivating email");
                       }
                     }}
                     icon={Icon.XMarkCircle}
