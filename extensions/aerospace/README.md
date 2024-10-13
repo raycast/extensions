@@ -8,11 +8,14 @@ It works with the existing installation of [AeroSpace](https://github.com/nikita
 
 ![menubar](./media/menubar.jpg)
 
+![switcher](./media/switcher.jpg)
+
 ## Features
 
 - View all shortcuts parsed from your config file (default: `~/.aerospace.toml`, configurable in preferences)
 - View your Aerospace configuration
 - Access your Aerospace shortcuts at a glance from the menu bar
+- Switch between apps in the current workspace
 
 ## Installation
 
@@ -25,6 +28,7 @@ It works with the existing installation of [AeroSpace](https://github.com/nikita
 - Use the `Aerospace Shortcuts` command to view all shortcuts parsed from your config file
 - Use the `Aerospace Configuration` command to view your Aerospace configuration
 - Use the `Aerospace Menubar Shortcuts` command to enable menubar shortcuts
+- Use the `Aerospace Switch Apps` command to show the app in current workspace
 
 ## Contributing
 

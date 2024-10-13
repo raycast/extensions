@@ -1,8 +1,9 @@
 # aerospace Changelog
 
-## [New Feature] - 2024-10-11
+## [New Feature] - 2024-10-13
 
 - Adds functionality to switch between apps in current workspace
+- Inspired by [ Yuriteixeira's Alfred workflow ](https://github.com/yuriteixeira/aerospace-workflow)
 
 ## [Bug Fixes] - 2024-09-18
 

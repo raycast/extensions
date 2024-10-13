@@ -3,13 +3,13 @@ import { runAppleScript } from "@raycast/utils";
 import { spawnSync } from "child_process";
 
 interface Window {
-  appName: string;
-  windowTitle?: string;
-  windowId: string;
-  appPid: string;
+  "app-name": string;
+  "window-title"?: string;
+  "window-id": number;
+  "app-pid": string;
   workspace: string;
-  bundleId: string;
-  appPath: string;
+  "app-bundle-id": string;
+  "app-path": string;
 }
 
 interface Windows extends Array<Window> {}
@@ -24,37 +24,31 @@ function getAppPath(bundleId: string) {
     encoding: "utf8",
     timeout: 15000,
   });
+  console.log(appPath.stdout.trim());
+
   return appPath.stdout.trim();
 }
 
-export function getWindows(): Windows {
+export function getWindows() {
   const aerospaceArr = spawnSync("sh", [`${environment.assetsPath}/scripts/list-windows.sh`], {
     env: env(),
     encoding: "utf8",
     timeout: 15000,
   });
-  const windows: Windows = aerospaceArr.stdout
-    .split("\n")
-    .filter(Boolean)
-    .map((app) => {
-      try {
-        const appArr = app.split(",").map((window) => {
-          //eslint-disable-next-line
-          return window.trim().replace(/\\/g, "\\\\").replace(/\"/g, '\\"').replace(/\'/g, "\\'");
-        });
-        const appParsed = JSON.parse(
-          `{ "appName": "${appArr[0]}", "windowTitle": "${appArr[1]}", "windowId": "${appArr[2]}", "appPid": "${appArr[3]}", "workspace": "${appArr[4]}", "bundleId": "${appArr[5]}" }`,
-        );
-        appParsed.appPath = getAppPath(appParsed.bundleId);
 
-        return appParsed;
-      } catch (error) {
-        console.error("Error parsing JSON:", error);
-        return null;
-      }
-    });
+  let windows: Windows = [];
+  try {
+    console.log("beforeParse", aerospaceArr.stdout);
+    const parsedWindows = JSON.parse(aerospaceArr.stdout);
+    console.log("parsed", parsedWindows);
 
-  console.log(windows);
+    windows = parsedWindows.map((window: Window) => ({
+      ...window,
+      "app-path": getAppPath(window["app-bundle-id"].toString()),
+    }));
+  } catch (error) {
+    console.error("Error parsing JSON:", error);
+  }
 
   return windows;
 }
