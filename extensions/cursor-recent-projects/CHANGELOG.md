@@ -1,4 +1,11 @@
-# Cursor Search Recent Projects Changelog
+# Cursor Changelog
+
+## [Documentations] - {PR_MERGE_DATE}
+
+- Correct extension title in readme and changelog
+- Add extension slogan below the title
+- Add a badge for the Raycast Cross-Extension Conventions
+- Add documentation for the Cross-Extension usage
 
 ## [Features] - 2024-10-11
 
