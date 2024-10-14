@@ -103,6 +103,7 @@ export const parseItems = (data: Node[]) => {
       offers: [],
       imdbVotes: value.content.scoring.imdbVotes,
       imdbScore: value.content.scoring.imdbScore,
+      imdbUrl: `https://www.imdb.com/title/${value.content.externalIds.imdbId}`,
     };
 
     if (value.offers === undefined || value.offers.length === 0) {

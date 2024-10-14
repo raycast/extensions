@@ -1,5 +1,7 @@
 # JustWatch Search Changelog
 
+## [Open in IMDB + Add Link Icons] - {PR_MERGE_DATE}
+
 ## [Improvements] - 2024-09-22
 
 - Upgrade dependencies

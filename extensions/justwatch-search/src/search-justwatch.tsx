@@ -83,7 +83,8 @@ export default function SearchJustwatch() {
                 detail={<DetailNoOffers media={media} />}
                 actions={
                   <ActionPanel>
-                    <Action.OpenInBrowser url={media.jwUrl} title={`Open in JustWatch.com`} />
+                    <Action.OpenInBrowser icon="command-icon.png" url={media.jwUrl} title={`Open in JustWatch.com`} />
+                    <Action.OpenInBrowser icon="imdb.png" url={media.imdbUrl} title={`Open in JustWatch.com`} />
                   </ActionPanel>
                 }
               />

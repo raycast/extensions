@@ -1,7 +1,3 @@
-export interface Preferences {
-  country_code: string;
-}
-
 export enum MediaType {
   stream = "flatrate",
   buy = "buy",
@@ -19,6 +15,7 @@ export interface JustWatchMedia {
   jwUrl: string;
   offers: JustWatchMediaOffers[];
   isMovie: boolean;
+  imdbUrl: string;
   imdbScore: number;
   imdbVotes: number;
 }
@@ -176,6 +173,9 @@ export type Node = {
     title: string;
     originalReleaseYear: number;
     posterUrl: string;
+    externalIds: {
+      imdbId: string;
+    };
     scoring: {
       imdbScore: number;
       imdbVotes: number;
