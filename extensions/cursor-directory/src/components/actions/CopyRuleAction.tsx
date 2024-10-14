@@ -4,12 +4,13 @@ import {
   showToast,
   Clipboard,
   Icon,
-  open,
-  LaunchType,
   confirmAlert,
   showHUD,
   Keyboard,
+  launchCommand,
+  LaunchType,
   getPreferenceValues,
+  open,
 } from "@raycast/api";
 import { CursorRule } from "../../types";
 import { crossLaunchCommand } from "raycast-cross-extension";
@@ -19,69 +20,71 @@ interface Props {
 }
 
 export const CopyRuleAction = ({ cursorRule }: Props) => {
+  const preferences = getPreferenceValues<Preferences>();
+
   async function copyAndApplyRule() {
     try {
       await Clipboard.copy(cursorRule.content);
+      await showSuccessToast();
 
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Rule Copied",
-        message: "Ready to paste into .cursorrules file",
-      });
-
-      try {
-        let { autoLaunchRecentProjects: shouldLaunch } = getPreferenceValues<Preferences>();
-
-        if (!shouldLaunch) {
-          shouldLaunch = await confirmAlert({
-            title: "Open Recent Projects",
-            message: "Do you want to open the Cursor Recent Projects extension?",
-            primaryAction: {
-              title: "Open",
-            },
-            dismissAction: {
-              title: "Cancel",
-              onAction: () => {
-                showHUD("Paste into .cursorrules file in your project");
-              },
-            },
-          });
-        }
-
-        if (shouldLaunch) {
-          await crossLaunchCommand({
-            name: "index",
-            type: LaunchType.UserInitiated,
-            extensionName: "cursor-recent-projects",
-            ownerOrAuthorName: "degouville",
-          });
-        }
-      } catch (error) {
-        const shouldInstall = await confirmAlert({
-          title: "Cursor Recent Projects Not Found",
-          message: "Would you like to install it for easier project selection?",
-          primaryAction: {
-            title: "Install",
-          },
-          dismissAction: {
-            title: "Cancel",
-            onAction: () => {
-              showHUD("Paste into .cursorrules file in your project");
-            },
-          },
-        });
-
-        if (shouldInstall) {
-          open("raycast://extensions/degouville/cursor-recent-projects");
-        }
+      if (await shouldOpenProject()) {
+        await openProject();
       }
     } catch (error) {
-      console.error("Error copying rule:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "Failed to copy rule",
-      });
+      console.debug("Failed to copy and apply rule:", error);
+      await showErrorToast();
+    } finally {
+      await Clipboard.clear();
+    }
+  }
+
+  async function showSuccessToast() {
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Rule Copied",
+      message: "Ready to paste into .cursorrules file",
+    });
+  }
+
+  async function showErrorToast() {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Error",
+      message: "Failed to copy and apply rule",
+    });
+  }
+
+  async function shouldOpenProject(): Promise<boolean> {
+    if (preferences.skipConfirmationOnCopy) return true;
+
+    return await confirmAlert({
+      title: "Open Projects",
+      message: "Do you want to open projects to apply this rule?",
+      primaryAction: { title: "Open" },
+      dismissAction: {
+        title: "Cancel",
+        onAction: () => showHUD("Paste into .cursorrules file in your project"),
+      },
+    });
+  }
+
+  async function openProject() {
+    const context = {
+      cursorDirectory: {
+        ruleContent: cursorRule.content,
+        replace: preferences.replaceOnLaunch,
+      },
+    };
+
+    if (preferences.projectsDirectory) {
+      try {
+        await launchCommand({ name: "projects", type: LaunchType.UserInitiated, context });
+      } catch (error) {
+        console.debug("Failed to launch projects command:", error);
+        await launchCursorRecentProjects(context);
+      }
+    } else {
+      await launchCursorRecentProjects(context);
     }
   }
 
@@ -94,3 +97,32 @@ export const CopyRuleAction = ({ cursorRule }: Props) => {
     />
   );
 };
+
+async function launchCursorRecentProjects(context: { cursorDirectory: { ruleContent: string; replace: boolean } }) {
+  try {
+    await crossLaunchCommand(
+      {
+        name: "index",
+        extensionName: "cursor-recent-projects",
+        ownerOrAuthorName: "degouville",
+        type: LaunchType.UserInitiated,
+        context,
+      },
+      // TODO: callbackLaunchOptions
+    );
+  } catch (error) {
+    console.debug("Failed to launch cursor recent projects:", error);
+    const shouldInstall = await confirmAlert({
+      title: "Cursor Recent Projects Not Found",
+      message: "Would you like to install it for easier project selection?",
+      primaryAction: { title: "Install" },
+      dismissAction: {
+        title: "Cancel",
+        onAction: () => showHUD("Paste into .cursorrules file in your project"),
+      },
+    });
+    if (shouldInstall) {
+      open("raycast://extensions/degouville/cursor-recent-projects");
+    }
+  }
+}

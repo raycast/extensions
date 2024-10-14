@@ -46,24 +46,41 @@
       ]
     },
     {
-      "name": "exportDirectory",
-      "title": "Export Directory",
-      "type": "textfield",
-      "required": false,
-      "default": "~/Documents/CursorRules",
-      "description": "The path to the directory to export cursor rules"
-    },
-    {
-      "name": "autoLaunchRecentProjects",
-      "title": "Auto launch Recent Projects",
-      "label": "Auto launch Cursor Recent Projects after copying a rule",
+      "name": "skipConfirmationOnCopy",
+      "title": "Skip Confirmation on Copy",
+      "label": "Skip confirmation on copying a cursor rule",
       "type": "checkbox",
       "default": false,
       "required": false,
-      "description": "Automatically launch Cursor Recent Projects after copying a rule"
+      "description": "Skip confirmation on copying a cursor rule"
+    },
+    {
+      "name": "replaceOnLaunch",
+      "title": "Replace on Launch",
+      "label": "Replace the content if .cursorrules file already exists",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "description": "Replace the content if .cursorrules file already exists"
+    },
+    {
+      "name": "projectsDirectory",
+      "title": "Projects Directory",
+      "type": "directory",
+      "required": false,
+      "description": "The path to the directory to store your projects"
+    },
+    {
+      "name": "exportDirectory",
+      "title": "Exported Cursor Rules Directory",
+      "type": "directory",
+      "required": false,
+      "default": "~/Documents/CursorRules",
+      "description": "The path to the directory to export cursor rules"
     }
   ],
   "license": "MIT",
+  "crossExtensions": ["degouville/cursor-recent-projects"],
   "commands": [
     {
       "name": "index",
@@ -76,18 +93,24 @@
       "title": "Search Cursor Videos",
       "description": "Search cursor Youtube videos curated by cursor.directory",
       "mode": "view"
+    },
+    {
+      "name": "projects",
+      "title": "Search Cursor Projects",
+      "description": "Search projects to open with Cursor, creating .cursorrules file if necessary",
+      "mode": "view"
     }
   ],
-  "crossExtensions": ["degouville/cursor-recent-projects"],
   "dependencies": {
-    "@raycast/api": "^1.81.2",
-    "@raycast/utils": "^1.16.3",
+    "@raycast/api": "^1.84.2",
+    "@raycast/utils": "^1.18.0",
+    "dayjs": "^1.11.13",
     "node-fetch": "^3.3.2",
     "raycast-cross-extension": "^0.2.3",
     "yaml": "^2.5.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
     "@typescript-eslint/utils": "^8.3.0",
