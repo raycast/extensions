@@ -1,5 +1,8 @@
 # reclaim Changelog
 
+## [Update] - 2024-10-14
+- Add the `Show Now Event in Menu Bar` configuration option for the Calendar menu bar
+
 ## [Fixes] - 2024-09-05
 - Route useFetch through useApi
 
