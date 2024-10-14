@@ -1,6 +1,6 @@
 # Ai Code Namer Changelog
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2024-10-14
 
 ### Added
 - Initial release of AI Code Namer
