@@ -45,7 +45,7 @@
   "commands": [
     {
       "name": "list",
-      "title": "List Torrents",
+      "title": "My Torrents",
       "description": "List available torrents from your server",
       "mode": "view"
     },
