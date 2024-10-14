@@ -1142,6 +1142,7 @@
 /extensions/promptlab                                               @SKaplanOfficial
 /extensions/protobuf2typescript                                     @7gugu
 /extensions/proton-version                                          @flavienbonvin @pernielsentikaer
+/extensions/protondb                                                @LitoMore
 /extensions/prowlarr                                                @Elcaten
 /extensions/proxmox                                                 @CzBiX
 /extensions/public-bug-bounty-and-vulnerability-disclosure-programs @securibee
