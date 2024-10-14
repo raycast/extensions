@@ -129,7 +129,7 @@ interface TextureSearchResult {
 }
 
 interface TextureSearchResultItem {
-    results: TextureSearchTextureItem[];
+  results: TextureSearchTextureItem[];
 }
 
 class Service {
@@ -137,7 +137,6 @@ class Service {
   cache: Cache = new Cache();
 
   constructor() {
-    //Log every request to the console
     this.client = axios.create({
       baseURL: "https://laby.net/api/",
       headers: {
@@ -286,7 +285,7 @@ class Service {
 
   async searchTextures(type: string, input: string): Promise<TextureSearchResult> {
     const params: Record<string, string> = {
-        "order": "most_used",
+      order: "most_used",
     };
 
     if (input !== "") {

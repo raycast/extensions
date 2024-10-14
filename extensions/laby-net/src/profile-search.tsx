@@ -74,12 +74,16 @@ export default function Command() {
                     content={entry.uuid}
                     shortcut={{ modifiers: ["cmd"], key: "c" }}
                   />
-                  <Action title="Remove from Search History" onAction={async () => {
-                    await service.removeSearch(entry.uuid);
-                    await service.getLatestSearches().then((res) => {
-                      setResults(res);
-                    });
-                  }} icon={Icon.Trash} />
+                  <Action
+                    title="Remove from Search History"
+                    onAction={async () => {
+                      await service.removeSearch(entry.uuid);
+                      await service.getLatestSearches().then((res) => {
+                        setResults(res);
+                      });
+                    }}
+                    icon={Icon.Trash}
+                  />
                 </ActionPanel>
               }
             />
