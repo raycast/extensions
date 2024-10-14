@@ -12,13 +12,15 @@
   "commands": [
     {
       "name": "art-crimes",
-      "title": "Art Crimes",
+      "title": "Search Art Crimes",
+      "subtitle": "FBI",
       "description": "Get listing of national art theft",
       "mode": "view"
     },
     {
       "name": "wanted-persons",
-      "title": "Wanted Persons",
+      "title": "Search Wanted Persons",
+      "subtitle": "FBI",
       "description": "Get listing of wanted people",
       "mode": "view",
       "disabledByDefault": true,
