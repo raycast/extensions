@@ -1,6 +1,6 @@
 # Link Cleaner Changelog
 
-## [Add `Instagram Reel` rule] - {PR_MERGE_DATE}
+## [Add `Instagram Reel` rule] - 2024-10-14
 
 ## [New Additions] - 2023-12-08
 
