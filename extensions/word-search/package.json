@@ -57,6 +57,15 @@
       "required": false,
       "title": "Max Results",
       "type": "textfield"
+    },
+    {
+      "name": "showDetailsByDefault",
+      "description": "Toggle this to show details by default",
+      "required": false,
+      "title": "Details",
+      "type": "checkbox",
+      "default": false,
+      "label": "Show details by default"
     }
   ],
   "commands": [

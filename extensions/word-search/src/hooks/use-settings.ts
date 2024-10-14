@@ -35,3 +35,5 @@ export const useMaxResults = () =>
     }
     return Math.max(1, Math.min(parsed, 1000));
   }, []);
+
+export const useShowDetailsByDefault = () => getPreferenceValues<Preferences>().showDetailsByDefault;
