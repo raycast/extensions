@@ -3,15 +3,15 @@ import { Cache, LocalStorage } from "@raycast/api";
 
 interface Profile {
   uuid: string;
-  username: string;
-  username_history: NameHistoryEntry[];
+  name: string;
+  name_history: NameHistoryEntry[];
   textures: Textures;
 }
 
 interface ProfileItem {
   uuid: string;
-  username: string;
-  username_history: NameHistoryEntryItem[];
+  name: string;
+  name_history: NameHistoryEntryItem[];
   textures: TexturesItem;
 }
 
@@ -23,7 +23,7 @@ interface NameHistoryEntry {
 }
 
 interface NameHistoryEntryItem {
-  username: string;
+  name: string;
   changed_at: string;
   accurate: boolean | null;
   last_seen_at: string;
@@ -75,24 +75,12 @@ interface SearchResultEntry {
 
 interface SearchResultEntryItem {
   uuid: string;
-  user_name: string;
+  name: string;
 }
 
 interface Views {
   views: number;
 }
-
-interface AccountType {
-  type: string;
-}
-
-const accountTypes: { [key: string]: string } = {
-  LEGACY: "Legacy",
-  MOJANG: "Mojang",
-  MSA: "Microsoft",
-  MIGRATED_MSA: "Migrated to Microsoft",
-  UNKNOWN: "Unknown",
-};
 
 interface SocialMediaEntry {
   name: string;
@@ -149,6 +137,7 @@ class Service {
   cache: Cache = new Cache();
 
   constructor() {
+    //Log every request to the console
     this.client = axios.create({
       baseURL: "https://laby.net/api/",
       headers: {
@@ -187,8 +176,8 @@ class Service {
     const response = await this.client.get<ProfileItem>("v3/user/" + uuid + "/profile");
     return {
       uuid: response.data.uuid,
-      username: response.data.username,
-      username_history: response.data.username_history.map((entry) => {
+      name: response.data.name,
+      name_history: response.data.name_history.map((entry) => {
         let changedAt: Date | string | null = null;
         if (entry.changed_at !== null) {
           if (entry.changed_at.length === 4) {
@@ -198,7 +187,7 @@ class Service {
           }
         }
         return {
-          name: entry.username,
+          name: entry.name,
           changedAt: changedAt,
           accurate: entry.accurate,
           lastSeenAt: new Date(entry.last_seen_at),
@@ -246,7 +235,7 @@ class Service {
     const result: SearchResultEntry[] = response.data.results.map((entry) => {
       return {
         uuid: entry.uuid,
-        userName: entry.user_name,
+        userName: entry.name,
       };
     });
 
@@ -295,7 +284,7 @@ class Service {
       params["input"] = input;
     }
 
-    const response = await this.client.get<TextureSearchResultItem>("texture/search", {
+    const response = await this.client.get<TextureSearchResultItem>("v3/search/textures", {
       params: params,
     });
     return {
