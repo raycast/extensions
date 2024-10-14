@@ -1,6 +1,6 @@
 # Bluesky Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2024-10-14
 
 - Native pagination in `Search Timeline`
 - Potential fix for quoted post in timeline not having text
