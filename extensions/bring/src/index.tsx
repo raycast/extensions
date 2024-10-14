@@ -11,6 +11,7 @@ export default function Command() {
   const [selectedList, setSelectedList] = useCachedState<BringListInfo | undefined>("selectedList");
   const [locale, setLocale] = useCachedState<string | undefined>("locale");
   const [search, setSearch] = useState<string>("");
+  const [purchaseStyle, setPurchaseStyle] = useState<string | null>(null);
 
   const { data: lists = [], isLoading: isLoadingLists } = useCachedPromise(async () => {
     const bringApi = await getBringApi();
@@ -48,7 +49,13 @@ export default function Command() {
       const locale = await bringApi.getUserSettings().then(getLocaleForListFromSettings(selectedList.listUuid));
       setLocale(locale);
 
-      return getListData(bringApi, selectedList.listUuid);
+      const userSettings = await bringApi.getUserSettings();
+      const fetchedPurchaseStyle =
+        userSettings.usersettings.find((setting) => setting.key === "purchaseStyle")?.value || "grouped";
+      setPurchaseStyle(fetchedPurchaseStyle);
+
+      const [listData, customItemsData] = await getListData(bringApi, selectedList.listUuid);
+      return [listData, customItemsData];
     },
     [selectedList],
     {
@@ -132,11 +139,12 @@ export default function Command() {
   }, [lists, selectedList, setSelectedList]);
 
   const sections = useMemo(() => {
-    const sections = getSectionsFromData(catalog, listDetail, customItems, translations);
+    if (!listDetail || !("uuid" in listDetail) || !Array.isArray(customItems)) return [];
+    const sections = getSectionsFromData(catalog, listDetail as BringList, customItems, translations);
     return addNewItemToSectionBasedOnSearch(sections, search, translations);
   }, [catalog, listDetail, customItems, translations, search]);
 
-  if (!selectedList) {
+  if (!selectedList || purchaseStyle === null) {
     return <Grid isLoading={true}></Grid>;
   } else {
     return (
@@ -149,6 +157,7 @@ export default function Command() {
         onAddAction={addToList(selectedList)}
         onRemoveAction={removeFromList(selectedList)}
         DropdownComponent={DropdownComponent}
+        purchaseStyle={purchaseStyle}
       />
     );
   }

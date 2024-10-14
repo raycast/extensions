@@ -25,6 +25,7 @@ export const ItemsGrid = ({
   onAddAction,
   onRemoveAction,
   DropdownComponent,
+  purchaseStyle,
 }: {
   list: BringListInfo;
   sections: Section[];
@@ -34,6 +35,7 @@ export const ItemsGrid = ({
   onAddAction: (item: Item, specification?: string) => void;
   onRemoveAction: (item: Item) => void;
   DropdownComponent: () => JSX.Element;
+  purchaseStyle: string;
 }) => {
   function getGridItem(item: Item, keywords?: string[]): JSX.Element {
     const { itemId, name, image, fallback, isInPurchaseList, specification } = item;
@@ -70,6 +72,18 @@ export const ItemsGrid = ({
     }))
     .filter((section) => section.items.length > 0);
 
+  const renderAddedItems = () => {
+    if (purchaseStyle === "grouped") {
+      return addedSections.map(({ sectionId, name: sectionName, items }) => (
+        <Grid.Section key={sectionId} title={sectionName}>
+          {items.map((item) => getGridItem(item, [sectionName]))}
+        </Grid.Section>
+      ));
+    } else {
+      return addedItems.map((item) => getGridItem(item));
+    }
+  };
+
   return (
     <Grid
       columns={6}
@@ -84,11 +98,7 @@ export const ItemsGrid = ({
     >
       {searchText.length === 0 ? (
         addedItems.length > 0 ? (
-          addedSections.map(({ sectionId, name: sectionName, items }) => (
-            <Grid.Section key={sectionId} title={sectionName}>
-              {items.map((item) => getGridItem(item, [sectionName]))}
-            </Grid.Section>
-          ))
+          renderAddedItems()
         ) : (
           <Grid.EmptyView
             icon={Icon.CheckList}
