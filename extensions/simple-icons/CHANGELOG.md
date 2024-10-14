@@ -1,6 +1,6 @@
 # Brand Icons Changelog
 
-## [AI & Chore] - {PR_MERGE_DATE}
+## [AI & Chore] - 2024-10-14
 
 - Add support for searching icons through AI with Raycast Pro
 - Bump all dependencies to the latest
