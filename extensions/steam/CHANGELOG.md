@@ -1,6 +1,6 @@
 # Steam Changelog
 
-## [New Feature] - {PR_MERGE_DATE}
+## [New Feature] - 2024-10-14
 
 - Add support for browsing ProtonDB scores
 
