@@ -1,6 +1,6 @@
 # Remember the Date Changelog
 
-## [Add Countdown Option] - {PR_MERGE_DATE}
+## [Add Countdown Option] - 2024-10-14
 
 - Added a countdown option in the preferences to display the countdown in days
 
