@@ -53,12 +53,12 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.Paste title="Paste Icon JSX" content={`<${item.name} />`} />
+                <Action.OpenInBrowser url={item.url} shortcut={Keyboard.Shortcut.Common.Open} />
                 <Action.CopyToClipboard
                   title="Copy Icon Name"
                   content={item.name}
                   shortcut={Keyboard.Shortcut.Common.Copy}
                 />
-                <Action.OpenInBrowser url={item.url} shortcut={Keyboard.Shortcut.Common.Open} />
               </ActionPanel>
             }
           />
