@@ -108,11 +108,13 @@ export default function Command() {
       `Schedule for ${schedule.day.charAt(0).toUpperCase() + schedule.day.slice(1).toLowerCase()} is now resumed`,
     );
 
-    await checkSchedule();
+    let isScheduled = await checkSchedule();
 
     // Update the state to reflect the resumed schedule
     setSchedules((prevSchedules) =>
-      prevSchedules.map((s) => (s.day === schedule.day ? { ...s, IsRunning: false, IsManuallyDecafed: false } : s)),
+      prevSchedules.map((s) =>
+        s.day === schedule.day ? { ...s, IsRunning: isScheduled, IsManuallyDecafed: false } : s,
+      ),
     );
   };
 
