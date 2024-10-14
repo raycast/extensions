@@ -84,7 +84,7 @@ export default function SearchJustwatch() {
                 actions={
                   <ActionPanel>
                     <Action.OpenInBrowser icon="command-icon.png" url={media.jwUrl} title={`Open in JustWatch.com`} />
-                    <Action.OpenInBrowser icon="imdb.png" url={media.imdbUrl} title={`Open in JustWatch.com`} />
+                    <Action.OpenInBrowser icon="imdb.png" url={media.imdbUrl} title={`Open in IMDB`} />
                   </ActionPanel>
                 }
               />
