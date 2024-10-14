@@ -1,11 +1,10 @@
 import { APIResponseError, Client } from "@notionhq/client";
 import { CreatePageParameters } from "@notionhq/client/build/src/api-endpoints";
-import { getPreferenceValues, showToast } from "@raycast/api";
-import { Pref } from "../interfaces/interfaceItems";
+import { LocalStorage, showToast } from "@raycast/api";
 import { getAPIError } from "../tools/generalTools";
 
 const getToken = async () => {
-  const token = getPreferenceValues<Pref>().projectAPIID;
+  const token = (await LocalStorage.getItem("project")) as string;
   return token;
 };
 

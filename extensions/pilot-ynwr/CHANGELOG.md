@@ -1,6 +1,12 @@
 # Pilot - Calendar, Task Manager & Journals | Changelog
 
 
+##  [OAUTH BUGS CORRECTION & TODAY HOOKS] - 202413-09 
+
+- Bugs correction with OAuth 
+- Add Today Hooks for MenuBar & Home to refresh when is a new today
+
+
 ## [CHANGE WAY OF LINKING DBS FROM NOTION] - 2024-10-09
 
 - Add New Form to Link Database

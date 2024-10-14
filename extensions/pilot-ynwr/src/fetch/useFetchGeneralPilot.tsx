@@ -25,7 +25,7 @@ interface ApiIDs {
 
 const cache = new Cache();
 
-const useFetchGeneralPilot = (notion: Client | undefined, needRefresh: boolean) => {
+const useFetchGeneralPilot = (notion: Client | undefined) => {
   const [apiIDsState, setApiIDs] = useState<ApiIDs | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -134,8 +134,23 @@ const useFetchGeneralPilot = (notion: Client | undefined, needRefresh: boolean) 
 
   useEffect(() => {
     if (apiIDsState === undefined) return;
-    fetch(["all"], needRefresh, apiIDsState);
+    firstFetch(apiIDsState);
   }, [apiIDsState]);
+
+  const firstFetch = async (ids: ApiIDs) => {
+    const bool = await checkForToday();
+    fetch(["all"], bool, ids);
+  };
+
+  const checkForToday = async () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const lastToday = await LocalStorage.getItem("todayMenubar");
+    if (lastToday === today) {
+      return false;
+    } else {
+      return true;
+    }
+  };
 
   return { isLoading, refresh, clearRefresh, allProjects, todayEvents, todayKeystones, gpProjects, activeTimer };
 };

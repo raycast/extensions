@@ -23,7 +23,7 @@ const EndTimerForm = ({ props }: { props: { timer: Timer; projects: Project[] } 
     const project = projects.find((project) => project.id === v.projectID);
     await QueryStopTimer(timer.id, timer?.start, now.toISOString(), project as Project, notion);
     showToast({ title: "Timer stopped successfully", style: Toast.Style.Success });
-    push(<GeneralPilot />);
+    push(<GeneralPilot notion={notion} />);
   };
 
   return (

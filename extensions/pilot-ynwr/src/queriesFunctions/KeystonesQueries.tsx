@@ -1,11 +1,10 @@
-import { getPreferenceValues, showToast } from "@raycast/api";
+import { LocalStorage, showToast } from "@raycast/api";
 import { APIResponseError, Client } from "@notionhq/client";
 import { CreatePageParameters, UpdatePageParameters } from "@notionhq/client/build/src/api-endpoints";
-import { Pref } from "../interfaces/interfaceItems";
 import { getAPIError } from "../tools/generalTools";
 
 const getID = async () => {
-  const token = getPreferenceValues<Pref>().keystoneAPIID;
+  const token = (await LocalStorage.getItem("journal")) as string;
   return token;
 };
 

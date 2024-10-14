@@ -1,9 +1,10 @@
 import "dotenv/config";
 import { OAuth } from "@raycast/api";
 import fetch from "node-fetch";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Client } from "@notionhq/client";
+import BlockUseEffectTwiceHook from "../hooks/BlockUseEffectTwiceHook";
 
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
@@ -29,7 +30,6 @@ const UseOAuth = () => {
       setNotion(initNotion);
       return;
     }
-
     //CONEXION
     const authRequest = await client.authorizationRequest({
       endpoint: "https://server.romubuntu.dev:5000/authorize",
@@ -40,16 +40,18 @@ const UseOAuth = () => {
         owner: "user",
       },
     });
-
     const { authorizationCode } = await client.authorize(authRequest);
 
     const token = await fetchTokens(authRequest, authorizationCode);
     await client.setTokens(token);
   };
 
-  useEffect(() => {
-    handleOAuth();
-  }, []);
+  // eslint-disable-next-line no-empty-pattern
+  const {} = BlockUseEffectTwiceHook(handleOAuth);
+
+  // const removeToken = async() => {
+  //   await client.removeTokens();
+  // }
 
   async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: string): Promise<OAuth.TokenResponse> {
     const body = JSON.stringify({

@@ -1,13 +1,3 @@
-export interface Pref {
-  projectAPIID: string;
-  eventAPIID: string;
-  linkAPIID: string;
-  keystoneAPIID: string;
-  timerAPIID: string;
-  journalAPIID: string;
-  todoAPIID: string;
-}
-
 export interface ProjectGP {
   project: Project;
   nextKeystone: Keystone | null;

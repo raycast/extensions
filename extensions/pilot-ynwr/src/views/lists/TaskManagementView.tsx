@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { Keystone, Project, Todo } from "../../interfaces/interfaceItems";
 
 import { getDateAndMohth, getDateMounthAndNumber, getDayDateAndMouth, progbar } from "../../tools/generalTools";
-import UseOAuth from "../../fetch/useOAuth";
 import useFetchTaskManagement from "../../fetch/useFetchTaskManagement";
 import {
   QueryAddTodo,
@@ -16,6 +15,7 @@ import { QueryDeleteItem } from "../../queriesFunctions/GeneralQueries";
 import { dateOrder, projectFilter } from "../../tools/filtersTools";
 import { ClearRefreshAction } from "../actions/actions";
 import EmptyView from "./EmptyView";
+import { Client } from "@notionhq/client";
 
 interface TodoItemProps {
   todo: Todo;
@@ -30,9 +30,8 @@ const VTEXT = {
   ak: "allkeystones",
 };
 
-const TaskManagementView = () => {
+const TaskManagementView = ({ notion }: { notion: Client | undefined }) => {
   //#region NOTION HOOKS
-  const { notion } = UseOAuth();
   const { refresh, projects, clearRefresh, isLoading, todos, keystones } = useFetchTaskManagement(notion);
 
   useEffect(() => {

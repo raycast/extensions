@@ -88,8 +88,23 @@ const useFetchMenuBar = (notion: Client | undefined) => {
 
   useEffect(() => {
     if (apiIDs === undefined) return;
-    fetch(["all"], false, apiIDs);
+    firstFetch(apiIDs);
   }, [apiIDs]);
+
+  const firstFetch = async (ids: APIIDS) => {
+    const bool = await checkForToday();
+    fetch(["all"], bool, ids);
+  };
+
+  const checkForToday = async () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const lastToday = await LocalStorage.getItem("todayMenubar");
+    if (lastToday === today) {
+      return false;
+    } else {
+      return true;
+    }
+  };
 
   return { isLoading, refresh, timer, todayEvents, todayKeystones, projects };
 };

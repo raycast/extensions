@@ -13,7 +13,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import React, { useEffect, useState } from "react";
-import UseOAuth from "../../fetch/useOAuth";
+
 import { b, br, code, h1, h2 } from "../../tools/markdownTools";
 import {
   getDateMounthAndNumber,
@@ -33,10 +33,10 @@ import JournalView from "./JournalView";
 import EndTimerForm from "../forms/EndTimerForm";
 import ProjetForm from "../forms/ProjetForm";
 import { QueryChangeActiveProject, QueryDeleteProject } from "../../queriesFunctions/ProjectQueries";
-import useToday from "../../tools/TodayHook";
 import EmptyView from "./EmptyView";
 import { ClearRefreshAction, RefreshAction } from "../actions/actions";
 import SelectDBsForm from "../forms/SelectDBsForm";
+import { Client } from "@notionhq/client";
 
 const cache = new Cache();
 
@@ -49,15 +49,13 @@ interface ProjectItemMetadataProps {
   project: Project;
 }
 
-const GeneralPilot = () => {
+const GeneralPilot = ({ notion }: { notion: Client | undefined }) => {
   const { push } = useNavigation();
   const nowDate = new Date();
 
   //#region NOTION HOOKS
-  const { notion } = UseOAuth();
-  const { needRefresh } = useToday();
   const { isLoading, refresh, clearRefresh, allProjects, todayEvents, todayKeystones, gpProjects, activeTimer } =
-    useFetchGeneralPilot(notion, needRefresh);
+    useFetchGeneralPilot(notion);
 
   useEffect(() => {
     if (isLoading) showToast({ title: "Loading...", style: Toast.Style.Animated });
@@ -317,7 +315,7 @@ const GeneralPilot = () => {
           title={"🗓️ Open Calendar"}
           actions={
             <ActionPanel>
-              <Action.Push title="Open Your Calendar" target={<CalendarView />} />
+              <Action.Push title="Open Your Calendar" target={<CalendarView notion={notion} />} />
             </ActionPanel>
           }
         />
@@ -326,7 +324,7 @@ const GeneralPilot = () => {
           title={"📋 Open Task Manager"}
           actions={
             <ActionPanel>
-              <Action.Push title="Open Your Task Manager" target={<TaskManagementView />} />
+              <Action.Push title="Open Your Task Manager" target={<TaskManagementView notion={notion} />} />
             </ActionPanel>
           }
         />
@@ -335,7 +333,7 @@ const GeneralPilot = () => {
           title={"📔 " + "Open Journal"}
           actions={
             <ActionPanel>
-              <Action.Push title="Open Your Journal" target={<JournalView />} />
+              <Action.Push title="Open Your Journal" target={<JournalView notion={notion} />} />
             </ActionPanel>
           }
         />
@@ -428,7 +426,7 @@ const GeneralPilot = () => {
           icon={"⚙️"}
           actions={
             <ActionPanel>
-              <Action.Push title="Open Databases Selection" target={<SelectDBsForm />} />
+              <Action.Push title="Open Databases Selection" target={<SelectDBsForm notion={notion} />} />
             </ActionPanel>
           }
         />

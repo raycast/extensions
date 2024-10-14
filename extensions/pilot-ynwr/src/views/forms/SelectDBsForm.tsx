@@ -1,7 +1,16 @@
-import { Action, ActionPanel, closeMainWindow, Form, LocalStorage } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Form,
+  LocalStorage,
+  PopToRootType,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import React, { useEffect, useState } from "react";
-import UseOAuth from "../../fetch/useOAuth";
 import { showFailureToast } from "@raycast/utils";
+import { Client } from "@notionhq/client";
 
 interface DB {
   id: string;
@@ -23,9 +32,7 @@ interface FormValue {
   title: string;
 }
 
-const SelectDBsForm = () => {
-  const { notion } = UseOAuth();
-
+const SelectDBsForm = ({ notion }: { notion: Client | undefined }) => {
   const [dbs, setDbs] = useState<DB[]>([]);
 
   const SearchDBs = async () => {
@@ -61,7 +68,8 @@ const SelectDBsForm = () => {
       LocalStorage.setItem(key, value);
     }
     LocalStorage.setItem("linked", true);
-    await closeMainWindow({ clearRootSearch: true });
+    await showToast({ title: "All Databases Set !", style: Toast.Style.Success });
+    await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
   };
 
   useEffect(() => {
@@ -88,7 +96,7 @@ const SelectDBsForm = () => {
       }
     >
       <Form.Description title="" text="You have to select the relevant databases from the Notion Pilot page" />
-      <Form.Description title="" text="Please, quit and go back to the form, as the dbs as loaded" />
+      <Form.Description title="" text="Please, quit and go back to the form, as the dbs are loaded" />
       <FormDropDown id={"project"} name="Projects DB" />
       <FormDropDown id={"keystone"} name="Keystones DB" />
       <FormDropDown id={"todo"} name="Todos DB" />

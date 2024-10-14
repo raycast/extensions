@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, confirmAlert, Icon, List, showToast, Toast 
 import React, { useEffect, useState } from "react";
 import { CalItem, CalSection, Evnt, Keystone, Project, Todo } from "../../interfaces/interfaceItems";
 import { getDateAndMohth, getDayDateAndMouth, getMounthStringByMonthNumber, progbar } from "../../tools/generalTools";
-import UseOAuth from "../../fetch/useOAuth";
+
 import useFetchCalendar from "../../fetch/useFetchCalendar";
 import { QueryToogleTodo } from "../../queriesFunctions/TodosQueries";
 import { QueryAddKeystone, QueryChangeDateKeystone } from "../../queriesFunctions/KeystonesQueries";
@@ -12,12 +12,13 @@ import { nameSearchFilter } from "../../tools/filtersTools";
 import TimezoneHook from "../../tools/TimezoneHook";
 import { ClearRefreshAction } from "../actions/actions";
 import EmptyView from "./EmptyView";
+import { Client } from "@notionhq/client";
 
 const ADDTIMES = { a: "15 minutes", b: "30 minutes", c: "1 hour", d: "2 hours", e: "4 hours" };
 
-const CalendarView = () => {
+const CalendarView = ({ notion }: { notion: Client | undefined }) => {
   //#region NOTION HOOK
-  const { notion } = UseOAuth();
+
   const { isLoading, refresh, clearRefresh, projects, keystones, events } = useFetchCalendar(notion);
   const { tmDate } = TimezoneHook();
 

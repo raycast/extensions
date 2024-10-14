@@ -1,5 +1,4 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
-import UseOAuth from "../../fetch/useOAuth";
 import React, { useEffect, useState } from "react";
 import { Journal, Project } from "../../interfaces/interfaceItems";
 import { br, code, h2, sepa } from "../../tools/markdownTools";
@@ -12,6 +11,7 @@ import { projectFilter } from "../../tools/filtersTools";
 import { ClearRefreshAction } from "../actions/actions";
 import EmptyView from "./EmptyView";
 import useFetchJournals from "../../fetch/useFetchJournals";
+import { Client } from "@notionhq/client";
 
 //#region INTERFACES
 interface JournalItemProps {
@@ -22,9 +22,8 @@ interface DeleteActionProps {
 }
 //#endregion
 
-const JournalView = () => {
+const JournalView = ({ notion }: { notion: Client | undefined }) => {
   //#region NOTION HOOK
-  const { notion } = UseOAuth();
   const { isLoading, projects, clearRefresh, journals, refresh } = useFetchJournals(notion);
   const { tmDate } = TimezoneHook();
 
