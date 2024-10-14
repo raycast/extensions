@@ -56,7 +56,7 @@ Supported Actions:
 - Pause/Resume Schedule
 - Delete a Schedule
 
-> 📋 **Note:** If you decaffeinate or pause a schedule, you must manually resume it for it to work the next week or any future instances.
+> 📋 **Note:** If you pause a schedule, you must manually resume it for it to work the next week or any future instances.
 
 <p align="center">
   <img src="./assets/addSchedule.png" alt="Schedule Caffeination Command">
