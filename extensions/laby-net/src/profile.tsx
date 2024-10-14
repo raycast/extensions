@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail, open } from "@raycast/api";
 import { useEffect, useState } from "react";
 import Service, { Badge, Profile, SocialMediaEntry, Views } from "./service";
 
@@ -90,7 +90,14 @@ ${
               <Detail.Metadata.Separator />
               <Detail.Metadata.TagList title="Badges">
                 {profile.badges.map((badge) => {
-                  return <Detail.Metadata.TagList.Item key={badge.uuid} text={badge.name} />;
+                  return <Detail.Metadata.TagList.Item
+                    key={badge.uuid}
+                    icon={`https://laby.net/texture/badge/${badge.uuid}.png`}
+                    text={badge.name}
+                    onAction={() => {
+                        open(`https://laby.net/badge/${badge.uuid}`);
+                    }}
+                  />;
                 })}
               </Detail.Metadata.TagList>
             </>

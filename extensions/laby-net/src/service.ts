@@ -129,7 +129,7 @@ interface TextureSearchResult {
 }
 
 interface TextureSearchResultItem {
-  textures: TextureSearchTextureItem[];
+    results: TextureSearchTextureItem[];
 }
 
 class Service {
@@ -285,19 +285,19 @@ class Service {
   }
 
   async searchTextures(type: string, input: string): Promise<TextureSearchResult> {
-    const params: any = {
-      type: type,
+    const params: Record<string, string> = {
+        "order": "most_used",
     };
 
     if (input !== "") {
       params["input"] = input;
     }
 
-    const response = await this.client.get<TextureSearchResultItem>("v3/search/textures", {
+    const response = await this.client.get<TextureSearchResultItem>(`v3/search/textures/${type.toLowerCase()}`, {
       params: params,
     });
     return {
-      textures: response.data.textures.map((texture) => {
+      textures: response.data.results.map((texture) => {
         return {
           name: texture.name,
           imageHash: texture.image_hash,
