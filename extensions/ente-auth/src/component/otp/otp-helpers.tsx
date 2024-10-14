@@ -13,20 +13,20 @@ import {
 } from "../../cache";
 import { Service } from "../../util/service";
 import { compareByDate, compareByName, toId } from "../../util/compare";
-import { AegisDB } from "../../util/AegisDB";
+import { EnteAuthDB } from "../../util/EnteAuthDB";
 
 const {
   excludeNames: excludeNamesCsv = "",
   primaryActionIsCopy,
   recentlyUsedOrder,
-  aegisDbPath,
-  aegisPassword,
+  enteAuthDbPath,
+  enteAuthPassword,
 } = getPreferenceValues<{
   excludeNames: string;
   primaryActionIsCopy: boolean;
   recentlyUsedOrder: boolean;
-  aegisDbPath: string;
-  aegisPassword: string;
+  enteAuthDbPath: string;
+  enteAuthPassword: string;
 }>();
 
 /**
@@ -40,9 +40,9 @@ export const CORRUPTED = "corrupted";
 export type setItemsFunction = (
   value:
     | ((prevState: { otpList: Service[]; isLoading: boolean }) => {
-        otpList: Service[];
-        isLoading: boolean;
-      })
+      otpList: Service[];
+      isLoading: boolean;
+    })
     | { otpList: Service[]; isLoading: boolean }
 ) => void;
 
@@ -51,13 +51,13 @@ export type setItemsFunction = (
  */
 export async function loadData(setItems: setItemsFunction): Promise<void> {
   try {
-    // load Aegis
-    const aegisDB = new AegisDB(aegisDbPath);
+    //load Ente Auth
+    const enteAuthDB = new EnteAuthDB(enteAuthDbPath);
     //Load the database
-    await aegisDB.loadDb();
+    await enteAuthDB.loadDb();
 
     //Decrypt the database
-    const db_entries = await aegisDB.decryptDb(aegisPassword);
+    const db_entries = await enteAuthDB.decryptDb(enteAuthPassword);
     const otpServices: Service[] = db_entries.map((i) => {
       return {
         id: i.uuid,
@@ -101,7 +101,7 @@ export async function checkError(otpList: Service[], isLoading: boolean) {
   if (all.length === 0) {
     confirmAlert({
       title: "No valid OTP",
-      message: "Check your Aegis Encryption Password in settings",
+      message: "Check your Ente Auth Encryption Password in settings",
       primaryAction: {
         title: "Open Preferences",
         onAction: () => openCommandPreferences(),

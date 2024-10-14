@@ -1,15 +1,16 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "aegis",
-  "title": "Aegis Authenticator",
-  "description": "Search, sync and use your Aegis 2FA database with Raycast",
-  "icon": "command-icon.png",
-  "author": "bfayers",
+  "name": "ente-auth",
+  "title": "Ente Auth Authenticator",
+  "description": "Search, sync and use your Ente Auth 2FA codes with Raycast",
+  "icon": "ente-auth-icon.ico",
+  "author": "albarin",
   "contributors": [
     "gdsmith",
     "pernielsentikaer",
     "litomore",
-    "guga4ka"
+    "guga4ka",
+    "albarin"
   ],
   "categories": [
     "Security"
@@ -17,29 +18,29 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search-aegis-otp",
+      "name": "search-ente-auth-otp",
       "title": "Search Token",
-      "subtitle": "Aegis - Android 2FA App",
-      "description": "Search OTPs in your Aegis database",
+      "subtitle": "Ente Auth 2FA App",
+      "description": "Search OTPs in your Ente Auth account",
       "mode": "view"
     }
   ],
   "preferences": [
     {
       "required": true,
-      "name": "aegisDbPath",
-      "title": "Aegis Database Path",
+      "name": "enteAuthDbPath",
+      "title": "Ente Auth Database Path",
       "type": "file",
-      "description": "Your Aegis Database",
-      "placeholder": "Enter path to your Aegis Database"
+      "description": "Your Ente Database",
+      "placeholder": "Enter path to your Ente Auth database"
     },
     {
       "required": true,
-      "name": "aegisPassword",
-      "title": "Aegis Password",
+      "name": "enteAuthPassword",
+      "title": "Ente Auth Password",
       "type": "password",
-      "description": "Your Aegis Encryption Password",
-      "placeholder": "Enter your Aegis encryption password"
+      "description": "Your Ente Auth encryption Password",
+      "placeholder": "Enter your Ente Auth encryption password"
     },
     {
       "required": false,
@@ -54,7 +55,7 @@
       "name": "primaryActionIsCopy",
       "label": "Copy as primary action, Output as secondary",
       "type": "checkbox",
-      "description": "Primary action copies pin to clipboard instead of outp utting to front application",
+      "description": "Primary action copies pin to clipboard instead of outputting to front application",
       "default": true
     },
     {

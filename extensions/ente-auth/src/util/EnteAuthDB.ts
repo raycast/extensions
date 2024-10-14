@@ -27,7 +27,7 @@ interface Data {
   db: string;
 }
 
-export class AegisDB {
+export class EnteAuthDB {
   private dbPath: string;
   private data: Data | null = null;
 

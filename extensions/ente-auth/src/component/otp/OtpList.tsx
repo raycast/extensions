@@ -33,8 +33,8 @@ export function OtpList() {
       {items.otpList.length == 0 ? (
         <List.EmptyView
           icon={Icon.SpeechBubbleImportant}
-          title={"Add Services with Aegis"}
-          description={"Then export a backup from Aegis and use it here"}
+          title={"Add Services with Ente Auth"}
+          description={"Then export a backup from Ente Auth and use it here"}
           actions={
             <ActionPanel>
               <Action
