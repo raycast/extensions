@@ -1,6 +1,6 @@
 # Laby.net Changelog
 
-## [API Adjustments] - {PR_MERGE_DATE}
+## [API Adjustments] - 2024-10-14
 - Adjust models to match the latest API changes
 - Add icon and link to profile badges
 
