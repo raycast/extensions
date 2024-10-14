@@ -87,9 +87,11 @@ export default function Command() {
 
   const handlePauseSchedule = async (schedule: Schedule) => {
     changeScheduleState("decaffeinate", schedule);
-    await showHUD(
+    await showToast(
+      Toast.Style.Success,
       `Schedule for ${schedule.day.charAt(0).toUpperCase() + schedule.day.slice(1).toLowerCase()} is now paused`,
     );
+
     if (isTodaysSchedule(schedule)) {
       await stopCaffeinate({ menubar: true, status: true });
     }
@@ -102,14 +104,16 @@ export default function Command() {
 
   const handleResumeSchedule = async (schedule: Schedule) => {
     changeScheduleState("caffeinate", schedule);
-    await showHUD(
+    await showToast(
+      Toast.Style.Success,
       `Schedule for ${schedule.day.charAt(0).toUpperCase() + schedule.day.slice(1).toLowerCase()} is now resumed`,
     );
+
     await checkSchedule();
 
     // Update the state to reflect the resumed schedule
     setSchedules((prevSchedules) =>
-      prevSchedules.map((s) => (s.day === schedule.day ? { ...s, IsRunning: true, IsManuallyDecafed: false } : s)),
+      prevSchedules.map((s) => (s.day === schedule.day ? { ...s, IsRunning: false, IsManuallyDecafed: false } : s)),
     );
   };
 
@@ -153,7 +157,7 @@ export default function Command() {
                               : "Scheduled"
                           : schedule.IsManuallyDecafed
                             ? "Scheduled Paused"
-                            : "Schedule",
+                            : "Scheduled",
                       icon:
                         index === 0
                           ? schedule.IsRunning

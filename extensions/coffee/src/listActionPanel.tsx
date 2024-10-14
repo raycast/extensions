@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import { Schedule } from "./utils";
 
 type ActionPanelProps = {
@@ -31,7 +31,7 @@ export function ListActionPanel({
         title="Delete Caffeination Schedule"
         style={Action.Style.Destructive}
         icon={Icon.Trash}
-        shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+        shortcut={Keyboard.Shortcut.Common.Remove}
         onAction={() => onDeleteScheduleAction(schedule)}
       />
 
