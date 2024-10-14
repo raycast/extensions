@@ -43,9 +43,7 @@ export const getRepostMarkdown = (displayName: string, handle: string) => {
 
 export const getQuotedPostMarkdownView = async (postAuthor: string, post: ViewRecord, imageEmbeds: string[]) => {
   const { text = "" } = post.value as BskyRecord;
-  const postMarkdown = (await getMarkdownText(text))
-    .replace(/\n/g, "\n\n")
-    .replace(/^/gm, "> ");
+  const postMarkdown = (await getMarkdownText(text)).replace(/\n/g, "\n\n").replace(/^/gm, "> ");
 
   const postTime = getReadableDate(post.indexedAt);
   const displayNameText = post.author.displayName ? `**${post.author.displayName.trim()}**` : "";
