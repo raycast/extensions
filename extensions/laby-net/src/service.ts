@@ -172,6 +172,15 @@ class Service {
     return;
   }
 
+  async removeSearch(uuid: string): Promise<void> {
+    let searches = await this.getLatestSearches();
+    searches = searches.filter((entry) => entry.uuid !== uuid);
+
+    await LocalStorage.setItem("searches", JSON.stringify(searches));
+
+    return;
+  }
+
   async getProfile(uuid: string): Promise<Profile> {
     const response = await this.client.get<ProfileItem>("v3/user/" + uuid + "/profile");
     return {
