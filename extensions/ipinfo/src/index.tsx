@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import { ActionPanel, Action, List, showToast, Toast, Form, useNavigation, LocalStorage } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
@@ -48,16 +48,11 @@ function TokenForm() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save API Token" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Save Api Token" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.PasswordField
-        id="token"
-        title="https://ipinfo.io API Token: "
-        value={token}
-        onChange={handleTokenChange}
-      />
+      <Form.PasswordField id="token" title="https://ipinfo.io API Token: " value={token} onChange={handleTokenChange} />
     </Form>
   );
 }
@@ -100,18 +95,14 @@ export default function Command(): React.ReactElement {
   }
 
   return (
-    <List
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Enter IP address..."
-      throttle
-    >
+    <List onSearchTextChange={setSearchText} searchBarPlaceholder="Enter IP address..." throttle>
       <List.Item
         title="Query IP Information"
         subtitle={searchText}
         actions={
           <ActionPanel>
             <Action
-              title="Fetch IP Info"
+              title="Fetch Ip Info"
               onAction={() => {
                 if (!/^(\d{1,3}\.){3}\d{1,3}$/.test(searchText)) {
                   showToast(Toast.Style.Failure, "Invalid IP address format");
@@ -120,10 +111,7 @@ export default function Command(): React.ReactElement {
                 fetchIPInfo(searchText);
               }}
             />
-            <Action
-              title="Set API Token"
-              onAction={() => push(<TokenForm />)}
-            />
+            <Action title="Set Api Token" onAction={() => push(<TokenForm />)} />
           </ActionPanel>
         }
       />
