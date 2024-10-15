@@ -16,6 +16,7 @@
     {
       "name": "get-insights",
       "title": "Get YouTube Insights",
+      "subtitle": "Gistly",
       "description": "Get key insights from any YouTube video.",
       "subtitle": "Gistly For YouTube",
       "mode": "view",
@@ -31,6 +32,7 @@
     {
       "name": "get-transcript",
       "title": "Get YouTube Transcript",
+      "subtitle": "Gistly",
       "description": "Get a transcript of any YouTube video.",
       "subtitle": "Gistly For YouTube",
       "mode": "view",
@@ -46,6 +48,7 @@
     {
       "name": "get-summary",
       "title": "Get YouTube Summary",
+      "subtitle": "Gistly",
       "description": "Get a timestamped summary of any YouTube video.",
       "subtitle": "Gistly For YouTube",
       "mode": "view",
