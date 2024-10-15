@@ -7,7 +7,9 @@ import HueDetail from "./hue-detail";
 
 export default function Command({
   arguments: { hueName, hueColorOne, hueColorTwo },
-}: LaunchProps<{ arguments: { hueName: string; hueColorOne: string; hueColorTwo: string } }>) {
+}: LaunchProps<{
+  arguments: { hueName: string; hueColorOne: string; hueColorTwo: string };
+}>) {
   const [hue, setHue] = useState<Hue | null>(null);
 
   const pattern = new RegExp("[a-zA-Z0-9 ]");
@@ -37,7 +39,12 @@ export default function Command({
         return false;
       }
 
-      if (!hueColorOne || !hueColorTwo || !isValidHexColor(hueColorOne) || !isValidHexColor(hueColorTwo)) {
+      if (
+        !hueColorOne ||
+        !hueColorTwo ||
+        !isValidHexColor(hueColorOne) ||
+        !isValidHexColor(hueColorTwo)
+      ) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Invalid Hex Color",
@@ -54,7 +61,10 @@ export default function Command({
   }, [hueName, hueColorOne, hueColorTwo]);
 
   const { isLoading } = useCachedPromise(async () => {
-    const hue = await generateHue(hueColorOne.replaceAll("#", ""), hueColorTwo.replaceAll("#", ""));
+    const hue = await generateHue(
+      hueColorOne.replaceAll("#", ""),
+      hueColorTwo.replaceAll("#", ""),
+    );
     setHue(hue as Hue);
   });
 

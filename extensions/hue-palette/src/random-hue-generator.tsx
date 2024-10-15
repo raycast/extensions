@@ -14,7 +14,10 @@ export default function Command() {
   const hueColorTwo = generateRandomHexColor();
 
   const { isLoading } = useCachedPromise(async () => {
-    const hue = await generateHue(hueColorOne.replaceAll("#", ""), hueColorTwo.replaceAll("#", ""));
+    const hue = await generateHue(
+      hueColorOne.replaceAll("#", ""),
+      hueColorTwo.replaceAll("#", ""),
+    );
     setHue(hue as Hue);
   });
 
@@ -23,7 +26,9 @@ export default function Command() {
       isLoading={isLoading}
       isGenerator={true}
       name={generatedName}
-      tailwind_colors_name={generatedName.toLowerCase().replaceAll(" ", "_") ?? ""}
+      tailwind_colors_name={
+        generatedName.toLowerCase().replaceAll(" ", "_") ?? ""
+      }
       tailwind_colors={hue?.tailwind_colors ?? {}}
     />
   );

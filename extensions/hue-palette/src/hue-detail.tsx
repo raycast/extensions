@@ -30,10 +30,16 @@ export default function HueDetail({
             }}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard title="Copy Hue Color to Clipboard" content={color} />
+                <Action.CopyToClipboard
+                  title="Copy Hue Color to Clipboard"
+                  content={color}
+                />
                 <Action.CopyToClipboard
                   title="Copy Tailwind Hue to Clipboard"
-                  content={`${tailwind_colors_name}:` + JSON.stringify(tailwind_colors, null, 4)}
+                  content={
+                    `${tailwind_colors_name}:` +
+                    JSON.stringify(tailwind_colors, null, 4)
+                  }
                 />
                 {isGenerator ? (
                   <Action.OpenInBrowser
