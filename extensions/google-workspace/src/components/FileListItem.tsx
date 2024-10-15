@@ -10,7 +10,7 @@ type FileListItemProps = {
 };
 
 export default function FileListItem({ file, email }: FileListItemProps) {
-  const { showFilePath } = getPreferenceValues();
+  const { displayFilePath } = getPreferenceValues();
   const modifiedTime = new Date(file.modifiedTime);
 
   const { data: filePath } = useCachedPromise(
@@ -19,7 +19,7 @@ export default function FileListItem({ file, email }: FileListItemProps) {
     },
     [file.id],
     {
-      execute: showFilePath,
+      execute: displayFilePath,
     },
   );
 
@@ -30,7 +30,7 @@ export default function FileListItem({ file, email }: FileListItemProps) {
     },
   ];
 
-  if (showFilePath && filePath) {
+  if (displayFilePath && filePath) {
     accessories.unshift({
       icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
       tooltip: filePath,

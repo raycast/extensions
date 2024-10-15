@@ -20,13 +20,13 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "showFilePath",
+      "name": "displayFilePath",
       "type": "checkbox",
       "required": false,
       "default": false,
-      "title": "Show File Path in google drive",
-      "description": "Show File Path in search and starred google drive files",
-      "label": "Show File Path"
+      "title": "Display File Path in google drive",
+      "description": "Display File Path in search and starred google drive files",
+      "label": "Display File Path"
     }
   ],
   "commands": [
