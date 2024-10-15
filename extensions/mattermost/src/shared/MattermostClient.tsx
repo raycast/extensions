@@ -54,10 +54,6 @@ export class MattermostClient {
     });
   }
 
-  // static handleError(error: AxiosError<{ "status_code": number; id: string; message: string; request_id: string }>) {
-
-  // }
-
   static async signIn(): Promise<void> {
     const preference = getPreferenceValues<Preferences>();
     const [username, password] = preference.credentials.split(":");

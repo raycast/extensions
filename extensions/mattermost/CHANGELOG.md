@@ -4,7 +4,7 @@
 
 - Fix: `Search Channel` not loading when ZERO channels (and related)
 - `signIn` function is now `async`
-- Show better error message when Authorization fails
+- Show better error message when Authorization fails (should close [#14876](https://github.com/raycast/extensions/issues/14876))
 - `usePromise` in `withAuthorization` component for better control
 - In `search-channels` you can specify in Preferences whether to launch installed Mattermost application or not
 - Fix: various typos

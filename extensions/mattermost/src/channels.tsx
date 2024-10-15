@@ -270,8 +270,12 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
     const baseDeeplink = preference.baseUrl.replace("https://", "mattermost://");
     const fullDeeplink = baseDeeplink + "/" + team.name + channel.path;
     console.log("open deeplink", fullDeeplink);
-    open(fullDeeplink);
-    closeMainWindow();
+    try {
+      await open(fullDeeplink);
+      await closeMainWindow();
+    } catch (error) {
+      await showFailureToast("Is Mattermost Running?", { title: "Error opening in Mattermost" });
+    }
   }
 
   return (
@@ -291,7 +295,11 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
                   accessories={[{ text: channel.lastTime }, { icon: channel.statusIcon }]}
                   actions={
                     <ActionPanel>
-                      <Action title="Open in Mattermost" onAction={() => openChannel(channel)} />
+                      <Action
+                        icon="mattermost-icon-rounded.png"
+                        title="Open in Mattermost"
+                        onAction={() => openChannel(channel)}
+                      />
                       <Action.CopyToClipboard content={channel.mentionName} />
                     </ActionPanel>
                   }
