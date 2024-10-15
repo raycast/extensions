@@ -128,13 +128,13 @@ export default function Command() {
       />
       {ipInfo && (
         <List.Section title="IP Information">
-          <List.Item title="IP Address" subtitle={ipInfo.ip} />
-          <List.Item title="Hostname" subtitle={ipInfo.hostname} />
-          <List.Item title="Location" subtitle={`${ipInfo.city}, ${ipInfo.region}, ${ipInfo.country}`} />
-          <List.Item title="Coordinates" subtitle={ipInfo.loc} />
-          <List.Item title="Organization" subtitle={ipInfo.org} />
-          <List.Item title="Postal Code" subtitle={ipInfo.postal} />
-          <List.Item title="Timezone" subtitle={ipInfo.timezone} />
+          <List.Item title="IP Address:" subtitle={ipInfo.ip} />
+          <List.Item title="Hostname:" subtitle={ipInfo.hostname} />
+          <List.Item title="Location:" subtitle={`${ipInfo.city}, ${ipInfo.region}, ${ipInfo.country}`} />
+          <List.Item title="Coordinates:" subtitle={ipInfo.loc} />
+          <List.Item title="Organization:" subtitle={ipInfo.org} />
+          <List.Item title="Postal Code:" subtitle={ipInfo.postal} />
+          <List.Item title="Timezone:" subtitle={ipInfo.timezone} />
         </List.Section>
       )}
     </List>
