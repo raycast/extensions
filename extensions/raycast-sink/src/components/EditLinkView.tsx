@@ -21,7 +21,7 @@ export function EditLinkView({ link, onEditSuccess }: EditLinkViewProps) {
     try {
       const updatedLink = await editLink(link.slug, url, comment);
       await showToast({ style: Toast.Style.Success, title: t.linkUpdated });
-      onEditSuccess(updatedLink);
+      onEditSuccess(updatedLink as Link);
       pop();
     } catch (error) {
       await showToast({

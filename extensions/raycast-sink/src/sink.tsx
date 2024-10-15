@@ -7,7 +7,7 @@ import { LinkListView } from "./components/LinkListView";
 import { ConfigView } from "./components/ConfigView";
 import { CreateLinkView } from "./components/CreateLinkView";
 import { queryLink, createLink } from "./utils/api";
-import { Link } from "./types";
+import { Link, CreateLinkResponse } from "./types";
 import { useConfig } from "./hooks/useConfig";
 
 function MainContent() {
@@ -25,8 +25,9 @@ function MainContent() {
     if (!query.trim()) return;
 
     try {
-      const link = await queryLink(query);
-      if (link) {
+      const result = await queryLink(query);
+      if (result && typeof result === "object" && "slug" in result) {
+        const link = result as Link;
         push(<LinkDetail link={link} onRefresh={refreshLinks} />);
       } else {
         await showToast({
@@ -54,14 +55,13 @@ function MainContent() {
 
   async function handleCreateLink(url: string, slug: string, comment?: string) {
     try {
-      const newLink = await createLink(url, slug, comment);
+      const newLink = await createLink(url, slug, comment) as CreateLinkResponse;
       await showToast({
         style: Toast.Style.Success,
         title: t.linkCreated,
         message: newLink?.link?.slug || slug,
       });
       if (newLink && newLink.link) {
-        // 跳转到新链接的详情页面
         push(<LinkDetail link={newLink.link} onRefresh={refreshLinks} />);
       }
 

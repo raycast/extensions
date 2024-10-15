@@ -30,7 +30,8 @@ export function useLinks() {
 
     while (!isComplete) {
       try {
-        const data: FetchLinksResponse = await fetchLinks(currentCursor);
+        const response = await fetchLinks(currentCursor);
+        const data = response as FetchLinksResponse; // 添加类型断言
         allLinks = [...allLinks, ...data.links];
         currentCursor = data.cursor;
         isComplete = !data.cursor || data.list_complete;

@@ -18,3 +18,7 @@ export interface Config {
   showWebsitePreview: string;
   language: string;
 }
+
+export interface CreateLinkResponse {
+  link: Link;
+}
