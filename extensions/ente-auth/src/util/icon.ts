@@ -1,28 +1,32 @@
-import { environment, getPreferenceValues } from "@raycast/api";
-import { icondir } from "../constants";
+import * as icons from 'simple-icons';
 import { Service } from "./service";
 
-const iconLookupKeys = [
-  "logo",
-  "accountType",
-  "name",
-  "issuer",
-] as (keyof Service)[];
-
-const { fallbackIconColor } = getPreferenceValues<{
-  fallbackIconColor: string;
-}>();
-
 export function icon(otp: Service) {
-  if (otp === undefined || otp.logo === null) {
-    return `${environment.assetsPath}/${icondir}/authenticator_${fallbackIconColor}.png`;
+  const simpleIcon = icons[otp.name.toLocaleLowerCase()];
+  if (simpleIcon) {
+    return svgToBase64Image(simpleIcon.svg);
   }
 
-  // otp.logo should be base64 and otp.logo_mime should be the mime type
-  if (otp.logo != null && otp.logo_mime != null) {
-    const icon = `data:${otp.logo_mime};base64,${otp.logo}`;
-    return icon;
+  return toEmojiIcon(otp.name[0]);
+}
+
+function svgToBase64Image(svgString: string) {
+  const encoder = new TextEncoder();
+  const utf8Bytes = encoder.encode(svgString);
+  const base64 = Buffer.from(utf8Bytes).toString('base64');
+
+  return `data:image/svg+xml;base64,${base64}`;
+}
+
+function toEmojiIcon(letter: string) {
+  const upperLetter = letter.toUpperCase();
+  let emoji = upperLetter;
+
+  if (upperLetter >= 'A' && upperLetter <= 'Z') {
+    emoji = String.fromCodePoint(0x1F170 + (upperLetter.charCodeAt(0) - 65));
   }
 
-  return `${environment.assetsPath}/${icondir}/authenticator_${fallbackIconColor}.png`;
+  return svgToBase64Image(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <text x="50" y="50" font-family="Arial, sans-serif" font-size="100" fill="black" text-anchor="middle" dominant-baseline="central">${emoji}</text>
+  </svg>`);
 }
