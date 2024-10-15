@@ -42,7 +42,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
 
       mapResult(response: GlobalSearchResponse) {
         setErrorFetching(false);
-        const recordsWithResults = filter(response.result.groups, (r) => r.result_count > 0);
+        const recordsWithResults = filter(response.result?.groups, (r) => r.result_count > 0);
         const data = flattenDeep(map(recordsWithResults, (r) => filter(r.search_results, (x) => x.record_count > 0)));
         return { data };
       },

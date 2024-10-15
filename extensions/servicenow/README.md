@@ -10,7 +10,7 @@ The **ServiceNow Raycast Extension** allows you to easily search and explore con
 - **Manage Instance Profiles:** Configure and manage ServiceNow instance profiles for use in search queries.
 - **Quick Search:** Search your ServiceNow instance instantly from the command window by entering a query without extra steps.
 - **Open Instances:** Open all configured instances or the currently selected instance in the browser.
-- **Open Current URL:** Open the current ServiceNow URL in a specified instance.
+- **Open Current URL:** Open the current ServiceNow URL in a specified instance. This feature requires the [Raycast Browser Extension](https://www.raycast.com/browser-extension)
 
 ## Setup Instructions
 

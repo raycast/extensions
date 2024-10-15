@@ -27,7 +27,7 @@
       "name": "quickly-search",
       "title": "Quickly Search",
       "description": "Search your ServiceNow instance instantly from the command window by entering a query, without extra steps",
-      "mode": "no-view",
+      "mode": "view",
       "arguments": [
         {
           "name": "instanceName",
