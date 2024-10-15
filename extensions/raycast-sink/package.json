@@ -55,6 +55,7 @@
       "title": "Language",
       "description": "Select your preferred language",
       "type": "dropdown",
+      "required": false,
       "data": [
         {
           "title": "English",
@@ -68,11 +69,13 @@
       "default": "en"
     },
     {
+      "label": "Show Website Preview Icon",
       "name": "showWebsitePreview",
       "title": "Show Website Preview Icon",
       "description": "Display website preview icon in the list",
       "type": "checkbox",
-      "default": true
+      "default": true,
+      "required": false
     },
     {
       "name": "host",
