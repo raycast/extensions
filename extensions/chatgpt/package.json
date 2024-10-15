@@ -18,7 +18,8 @@
     "lin",
     "leeonfield",
     "husniadil",
-    "luckykong"
+    "luckykong",
+    "smilemachine"
   ],
   "pastContributors": [
     "pomdtr",
@@ -330,6 +331,7 @@
     "cross-fetch": "^4.0.0",
     "csv-parse": "^5.5.3",
     "image-meta": "^0.2.0",
+    "moment": "^2.30.1",
     "openai": "^4.40.0",
     "proxy-agent": "^6.3.1",
     "run-applescript": "^7.0.0",

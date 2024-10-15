@@ -1,5 +1,9 @@
 # Mute microphone Changelog
 
+## [Improvements] - 2024-10-15
+
+- Option to set input level to specific value
+
 ## [Improvements] - 2024-06-23
 
 - Option to choose muted icon color for menubar

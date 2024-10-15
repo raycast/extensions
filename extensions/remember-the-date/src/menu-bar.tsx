@@ -1,10 +1,12 @@
-import { MenuBarExtra, launchCommand, LaunchType, Icon } from "@raycast/api";
+import { MenuBarExtra, launchCommand, LaunchType, Icon, getPreferenceValues } from "@raycast/api";
 import moment from "moment";
 import { useCachedPromise } from "@raycast/utils";
 import { getFormattedList } from "./list";
 
 export default function Command() {
   const { data: datesList, isLoading } = useCachedPromise(getFormattedList, []);
+  const preferences = getPreferenceValues<Preferences>();
+  const { showCountdownByDay } = preferences;
 
   if (!datesList) {
     return <MenuBarExtra isLoading={isLoading} />;
@@ -25,7 +27,9 @@ export default function Command() {
     <MenuBarExtra icon={nextDate.icon} title={untilNextDate}>
       <MenuBarExtra.Section>
         {upcomingDates.map((item) => {
-          const until = moment(item.date).fromNow();
+          const until = showCountdownByDay
+            ? moment(item.date).diff(new Date(), "days") + " days"
+            : moment(item.date).fromNow();
           return (
             <MenuBarExtra.Item
               key={item.name}

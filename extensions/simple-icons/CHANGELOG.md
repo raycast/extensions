@@ -1,5 +1,10 @@
 # Brand Icons Changelog
 
+## [AI & Chore] - 2024-10-14
+
+- Add support for searching icons through AI with Raycast Pro
+- Bump all dependencies to the latest
+
 ## [Milestone] - 2024-09-22
 
 - We reached 3200+ icons!

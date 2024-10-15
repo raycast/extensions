@@ -21,17 +21,6 @@ export default class Helper {
   }
 
   /**
-   * Escape all regular expression commands in a string.
-   *
-   * @param {string} str    - The string to escape.
-   *
-   * @return {string} str   - The escaped string.
-   */
-  static escapeRegExp(str) {
-    return str.replace(/([.*+?^=!:${}()|[\]/\\])/g, "\\$1");
-  }
-
-  /**
    * Fetch the content of a file behind an URL.
    *
    * @param {string} url    - The URL of the file to fetch.

@@ -53,15 +53,15 @@ export const DynamicGameListItem = ({
         source: ownedData?.img_icon_url
           ? `https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/${game.appid}/${ownedData.img_icon_url}.jpg`
           : gameData?.type === "game"
-          ? Icon.GameController
-          : Icon.Circle,
+            ? Icon.GameController
+            : Icon.Circle,
         tintColor: ownedData?.img_icon_url ?? iconColor,
       }}
       accessories={[{ text: notFound ? "Game not found" : gameData?.release_date?.date }]}
       actions={
         <ActionPanel>
           <Action.Push icon={Icon.Sidebar} title="View Game Details" target={<GameDetails game={game} />} />
-          <LaunchActions appid={game?.appid} />
+          <LaunchActions name={game.name} appid={game?.appid} />
           <DefaultActions />
         </ActionPanel>
       }
@@ -80,7 +80,7 @@ export const MyGamesListType = ({ game }: { game: GameDataSimple }) => (
     actions={
       <ActionPanel>
         <Action.Push icon={Icon.Sidebar} title="View Game Details" target={<GameDetails game={game} />} />
-        <LaunchActions appid={game?.appid} />
+        <LaunchActions name={game.name} appid={game?.appid} />
         <DefaultActions />
       </ActionPanel>
     }

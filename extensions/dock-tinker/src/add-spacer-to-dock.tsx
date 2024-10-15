@@ -1,13 +1,11 @@
 import { spawnSync } from "child_process";
-import { closeMainWindow, LaunchProps, showHUD } from "@raycast/api";
+import { closeMainWindow, LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
 import { getArgument, isEmpty } from "./utils/common-utils";
+import AddSpacerToDock = Arguments.AddSpacerToDock;
 
-interface SpacerArguments {
-  spacerStyle: string;
-}
-
-export default async (props: LaunchProps<{ arguments: SpacerArguments }>) => {
+export default async (props: LaunchProps<{ arguments: AddSpacerToDock }>) => {
   await closeMainWindow();
+  await showToast({ title: "Adding spacer to Dock", style: Toast.Style.Animated });
   const spacerStyle_ = getArgument(props.arguments.spacerStyle, `SpacerStyle`);
   const spacerStyle = isEmpty(spacerStyle_) ? "spacer-tile" : spacerStyle_;
   spawnSync(

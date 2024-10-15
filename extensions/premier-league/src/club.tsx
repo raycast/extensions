@@ -2,11 +2,13 @@ import { Action, ActionPanel, Detail, Grid, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import json2md from "json2md";
 import { useState } from "react";
-import { getClubs, getSeasons } from "./api";
-import Player from "./player";
-import { TeamTeam } from "./types";
+import { getClubs } from "./api";
+import SearchBarSeason from "./components/searchbar_season";
+import ClubSquad from "./components/squad";
+import { Team } from "./types";
+import { getClubLogo } from "./utils";
 
-function ClubProfile(props: TeamTeam) {
+function ClubProfile(props: Team) {
   const { metadata } = props;
   return (
     <Detail
@@ -15,7 +17,7 @@ function ClubProfile(props: TeamTeam) {
         { h1: props.name },
         {
           img: {
-            source: `https://resources.premierleague.com/premierleague/badges/${props.altIds.opta}.png`,
+            source: getClubLogo(props.altIds.opta),
           },
         },
       ])}
@@ -62,8 +64,8 @@ function ClubProfile(props: TeamTeam) {
         <ActionPanel>
           <Action.Push
             title="Squad"
-            icon={Icon.Person}
-            target={<Player club={props.club} />}
+            icon={Icon.TwoPeople}
+            target={<ClubSquad {...props.club} />}
           />
           <Action.OpenInBrowser
             url={`https://www.premierleague.com/clubs/${
@@ -76,38 +78,21 @@ function ClubProfile(props: TeamTeam) {
   );
 }
 
-export default function Club() {
-  const { data: seasons = [] } = usePromise(getSeasons);
+export default function EPLClub() {
+  const [seasonId, setSeasonId] = useState<string>();
 
-  const [selectedSeason, setSeason] = useState<string>(
-    seasons[0]?.id.toString(),
+  const { data: clubs, isLoading } = usePromise(
+    async (season) => (season ? await getClubs(season) : undefined),
+    [seasonId],
   );
-
-  const { data: clubs, isLoading } = usePromise(getClubs, [selectedSeason]);
 
   return (
     <Grid
       throttle
       isLoading={isLoading}
-      inset={Grid.Inset.Medium}
+      inset={Grid.Inset.Small}
       searchBarAccessory={
-        <Grid.Dropdown
-          tooltip="Filter by Season"
-          value={selectedSeason}
-          onChange={setSeason}
-        >
-          <Grid.Dropdown.Section>
-            {seasons.map((season) => {
-              return (
-                <Grid.Dropdown.Item
-                  key={season.id}
-                  value={season.id.toString()}
-                  title={season.label}
-                />
-              );
-            })}
-          </Grid.Dropdown.Section>
-        </Grid.Dropdown>
+        <SearchBarSeason selected={seasonId} onSelect={setSeasonId} />
       }
     >
       {clubs?.map((team) => {
@@ -117,7 +102,7 @@ export default function Club() {
             title={team.name}
             subtitle={team.grounds[0].name}
             content={{
-              source: `https://resources.premierleague.com/premierleague/badges/${team.altIds.opta}.png`,
+              source: getClubLogo(team.altIds.opta),
               fallback: "default.png",
             }}
             actions={

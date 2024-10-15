@@ -16,6 +16,15 @@
   "license": "MIT",
   "preferences": [
     {
+      "name": "apiBaseUrl",
+      "description": "The base URL of the Dust API",
+      "type": "textfield",
+      "required": false,
+      "title": "API URL",
+      "default": "https://dust.tt/api/v1/w",
+      "placeholder": "https://dust.tt/api/v1/w"
+    },
+    {
       "name": "apiKey",
       "description": "Your Dust API key",
       "type": "password",

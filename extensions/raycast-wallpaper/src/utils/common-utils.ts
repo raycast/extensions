@@ -1,9 +1,9 @@
-import { Cache, environment, getPreferenceValues, open, showInFinder, showToast, Toast } from "@raycast/api";
+import { Cache, environment, open, showInFinder, showToast, Toast } from "@raycast/api";
 import fse from "fs-extra";
 import { homedir } from "os";
-import { Preferences } from "../types/preferences";
 import { RaycastWallpaper } from "../types/types";
 import axios from "axios";
+import { picturesDirectory } from "../types/preferences";
 
 export const cache = new Cache();
 export const cachePath = environment.supportPath;
@@ -23,8 +23,7 @@ export const getThumbnailUrl = (url: string) => {
 };
 
 export const getSavedDirectory = () => {
-  const directoryPreference = getPreferenceValues<Preferences>().picturesDirectory;
-  const actualDirectory = directoryPreference;
+  const actualDirectory = picturesDirectory;
   if (isEmpty(actualDirectory) || !fse.pathExistsSync(actualDirectory)) {
     return homedir() + "/Downloads";
   }

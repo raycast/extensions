@@ -2,7 +2,7 @@ import { Detail, List } from "@raycast/api";
 import { PokemonV2Pokemontype } from "../../types";
 import { calculateEffectiveness } from "../../utils";
 
-export default function MetadataWeakness(props: {
+export default function WeaknessMetadata(props: {
   type?: string;
   types: PokemonV2Pokemontype[];
 }) {

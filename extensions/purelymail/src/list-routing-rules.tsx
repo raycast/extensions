@@ -10,39 +10,19 @@ import {
   confirmAlert,
   showToast,
   Toast,
+  Keyboard,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { getRoutingRules, deleteRoutingRule } from "./utils/api";
-import { Response, Rule } from "./utils/types";
-import { getFavicon, useCachedState } from "@raycast/utils";
+import { useState } from "react";
+import { Rule } from "./utils/types";
+import { getFavicon } from "@raycast/utils";
 import ErrorComponent from "./components/ErrorComponent";
+import { callApi, useRoutingRules } from "./utils/hooks";
 
 export default function ListRoutingRules() {
-  const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState("");
-  const [error, setError] = useState("");
-  const [rules, setRules] = useCachedState<Rule[]>("rules");
   const [isShowingDetails, setIsShowingDetails] = useState(false);
 
-  async function getFromApi() {
-    setIsLoading(true);
-    const response: Response = await getRoutingRules();
-
-    if (response.type === "error") {
-      setError(response.message);
-    } else {
-      setRules(response.result.rules);
-      await showToast({
-        title: "SUCCESS",
-        message: `Fetched ${response.result.rules?.length} rules`,
-      });
-    }
-    setIsLoading(false);
-  }
-
-  useEffect(() => {
-    getFromApi();
-  }, []);
+  const { isLoading, data: rules, error, mutate } = useRoutingRules();
 
   const handleDelete = async (ruleId: number) => {
     if (
@@ -53,14 +33,28 @@ export default function ListRoutingRules() {
         primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
       })
     ) {
-      setIsLoading(true);
-
-      const response = await deleteRoutingRule(ruleId);
-      if (response.type === "success") {
-        await showToast(Toast.Style.Success, "Rule Deleted", "RULE ID: " + ruleId);
-        await getFromApi();
+      const toast = await showToast(Toast.Style.Animated, "Deleting Routing Rule");
+      try {
+        await mutate(
+          callApi("deleteRoutingRule", {
+            body: {
+              routingRuleId: ruleId,
+            },
+          }),
+          {
+            optimisticUpdate(data) {
+              return data.filter((rule) => rule.id !== ruleId);
+            },
+          },
+        );
+        toast.style = Toast.Style.Success;
+        toast.title = "Deleted Routing Rule";
+        toast.message = "RULE ID: " + ruleId;
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = (error as Error).cause as string;
+        toast.message = (error as Error).message;
       }
-      setIsLoading(false);
     }
   };
 
@@ -104,7 +98,7 @@ export default function ListRoutingRules() {
   };
 
   return error ? (
-    <ErrorComponent error={error} />
+    <ErrorComponent error={error.message} />
   ) : (
     <List
       isLoading={isLoading}
@@ -155,7 +149,7 @@ export default function ListRoutingRules() {
                 <Action
                   title="Delete Rule"
                   icon={Icon.DeleteDocument}
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                   onAction={() => handleDelete(rule.id)}
                   style={Action.Style.Destructive}
                 />

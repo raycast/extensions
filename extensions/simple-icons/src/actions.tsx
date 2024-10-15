@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Action, Icon } from "@raycast/api";
-import { titleToSlug } from "simple-icons/sdk";
-import { copySvg, makeCopyToDownload } from "./utils.js";
-import { IconData, LaunchContext } from "./types.js";
 import { callbackLaunchCommand } from "raycast-cross-extension";
+import { titleToSlug } from "simple-icons/sdk";
+import { IconData, LaunchContext } from "./types.js";
+import { copySvg, makeCopyToDownload } from "./utils.js";
 
 type ActionProps = {
   icon: IconData;

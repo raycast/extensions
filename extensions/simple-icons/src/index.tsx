@@ -9,15 +9,23 @@ import {
   Icon,
   LaunchProps,
   Toast,
-  getPreferenceValues,
+  confirmAlert,
+  open,
   showHUD,
   showToast,
 } from "@raycast/api";
-import { Searcher } from "fast-fuzzy";
 import debounce from "lodash/debounce.js";
 import { titleToSlug } from "simple-icons/sdk";
 import { LaunchCommand, Supports, actions, defaultActionsOrder } from "./actions.js";
-import { cacheAssetPack, getAliases, loadCachedJson, useVersion } from "./utils.js";
+import {
+  cacheAssetPack,
+  defaultDetailAction,
+  enableAiSearch,
+  getAliases,
+  loadCachedJson,
+  useSearch,
+  useVersion,
+} from "./utils.js";
 import { IconData, LaunchContext } from "./types.js";
 
 const itemDisplayColumns = {
@@ -30,7 +38,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
   const [itemSize, setItemSize] = useState<keyof typeof itemDisplayColumns>("small");
   const [isLoading, setIsLoading] = useState(true);
   const [icons, setIcons] = useState<IconData[]>([]);
-  const [searchString, setSearchString] = useState("");
+  const { aiIsLoading, searchResult, setSearchString } = useSearch({ icons });
   const version = useVersion({ launchContext });
 
   const fetchIcons = async (version: string) => {
@@ -83,21 +91,6 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
     }
   }, [version]);
 
-  const searcher = new Searcher(icons, {
-    keySelector: (icon) =>
-      [
-        icon.title,
-        icon.slug,
-        icon.aliases?.aka,
-        icon.aliases?.dup?.map((duplicate) => duplicate.title),
-        Object.values(icon.aliases?.loc ?? {}),
-      ]
-        .flat()
-        .filter(Boolean) as string[],
-  });
-  const searchResults = searchString ? searcher.search(searchString) : icons;
-
-  const { defaultDetailAction = "OpenWith" } = getPreferenceValues<ExtensionPreferences>();
   const DefaultAction = actions[defaultDetailAction];
 
   const restActions = defaultActionsOrder
@@ -106,6 +99,14 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
       return actions[actionId];
     });
 
+  if (aiIsLoading && searchResult.length === 0) {
+    return (
+      <Grid isLoading={aiIsLoading}>
+        <Grid.EmptyView icon={Icon.Stars} title="Searching through AI..." />
+      </Grid>
+    );
+  }
+
   return (
     <Grid
       navigationTitle={
@@ -113,7 +114,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
       }
       columns={itemDisplayColumns[itemSize]}
       inset={Grid.Inset.Small}
-      isLoading={isLoading}
+      isLoading={isLoading || aiIsLoading}
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Grid Item Size"
@@ -128,9 +129,27 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
         </Grid.Dropdown>
       }
       onSearchTextChange={debounce(setSearchString, 300)}
+      actions={
+        enableAiSearch && icons.length > 0 && searchResult.length === 0 ? (
+          <ActionPanel>
+            <Action
+              icon={Icon.Stars}
+              title="Try AI Search"
+              onAction={async () => {
+                const confirmed = await confirmAlert({
+                  title: "Pro Feature Required",
+                  message:
+                    "This feature requires Raycast Pro subscription. Do you want to open Raycast Pro page? (You can hide this Pro feature in preferences)",
+                });
+                if (confirmed) open("https://raycast.com/pro");
+              }}
+            />
+          </ActionPanel>
+        ) : undefined
+      }
     >
-      {(!isLoading || !version) &&
-        searchResults.slice(0, 500).map((icon) => {
+      {(!isLoading || !aiIsLoading || !version) &&
+        searchResult.slice(0, 500).map((icon) => {
           const slug = icon.slug || titleToSlug(icon.title);
 
           const fileLink = `pack/simple-icons-${version}/icons/${slug}.svg`;
