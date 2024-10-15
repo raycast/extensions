@@ -1,7 +1,8 @@
 import { ActionPanel, Action, Detail, getPreferenceValues } from "@raycast/api";
 
 const LINE_BREAK = "\n\n";
-const SUBMIT_ISSUE = "https://github.com/raycast/extensions/issues/new?assignees=&labels=extension%2Cbug&template=extension_bug_report.yml&title=%5BEnte%20Auth%5D+...";
+const SUBMIT_ISSUE =
+  "https://github.com/raycast/extensions/issues/new?assignees=&labels=extension%2Cbug&template=extension_bug_report.yml&title=%5BEnte%20Auth%5D+...";
 const ENTE_CLI_INSTALLATION_URL = "https://github.com/ente-io/ente/tree/main/cli#readme";
 
 type Messages = string | number | false | 0 | "" | null | undefined;
@@ -32,6 +33,6 @@ export function showError() {
       }
     />
   );
-};
+}
 
 export default showError;
