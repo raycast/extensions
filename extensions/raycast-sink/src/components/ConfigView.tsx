@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  useNavigation,
-  showToast,
-  Toast,
-  LocalStorage,
-  Detail,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, useNavigation, showToast, Toast, LocalStorage, Detail } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { setApiConfig, checkTokenValid } from "../utils/api";
 import { useTranslation } from "../hooks/useTranslation";
@@ -37,9 +28,7 @@ export function ConfigView({ onConfigured }: ConfigViewProps) {
   const [isConfigValid, setIsConfigValid] = useState<boolean | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [originalConfig, setOriginalConfig] = useState<Config | null>(null);
-  const [lastValidatedConfig, setLastValidatedConfig] = useState<Config | null>(
-    null
-  );
+  const [lastValidatedConfig, setLastValidatedConfig] = useState<Config | null>(null);
   const [isConfigChanged, setIsConfigChanged] = useState(false);
 
   useEffect(() => {
@@ -47,17 +36,10 @@ export function ConfigView({ onConfigured }: ConfigViewProps) {
       try {
         const host = (await LocalStorage.getItem<string>("host")) || "";
         const token = (await LocalStorage.getItem<string>("token")) || "";
-        const showWebsitePreview = await LocalStorage.getItem<string>(
-          "showWebsitePreview"
-        );
-        const savedLanguage =
-          (await LocalStorage.getItem<string>("language")) || "en";
-        const savedValidationStatus = await LocalStorage.getItem<string>(
-          "configValidationStatus"
-        );
-        const savedLastValidatedConfig = await LocalStorage.getItem<string>(
-          "lastValidatedConfig"
-        );
+        const showWebsitePreview = await LocalStorage.getItem<string>("showWebsitePreview");
+        const savedLanguage = (await LocalStorage.getItem<string>("language")) || "en";
+        const savedValidationStatus = await LocalStorage.getItem<string>("configValidationStatus");
+        const savedLastValidatedConfig = await LocalStorage.getItem<string>("lastValidatedConfig");
 
         const loadedConfig = {
           host,
@@ -70,9 +52,7 @@ export function ConfigView({ onConfigured }: ConfigViewProps) {
         setLanguage(savedLanguage as "en" | "zh");
 
         if (savedLastValidatedConfig) {
-          const parsedLastValidatedConfig = JSON.parse(
-            savedLastValidatedConfig
-          );
+          const parsedLastValidatedConfig = JSON.parse(savedLastValidatedConfig);
           setLastValidatedConfig(parsedLastValidatedConfig);
 
           if (
@@ -102,37 +82,29 @@ export function ConfigView({ onConfigured }: ConfigViewProps) {
 
   useEffect(() => {
     if (originalConfig) {
-      setIsConfigChanged(
-        config.host !== originalConfig.host ||
-          config.token !== originalConfig.token
-      );
+      setIsConfigChanged(config.host !== originalConfig.host || config.token !== originalConfig.token);
     }
   }, [config, originalConfig]);
 
-  async function verifyConfiguration(
-    host: string,
-    token: string
-  ): Promise<boolean> {
+  useEffect(() => {
+    if (lastValidatedConfig) {
+      setIsConfigChanged(config.host !== lastValidatedConfig.host || config.token !== lastValidatedConfig.token);
+    }
+  }, [config, lastValidatedConfig]);
+
+  async function verifyConfiguration(host: string, token: string): Promise<boolean> {
     setIsValidating(true);
     try {
       const isValid = await checkTokenValid(host, token);
       setIsConfigValid(isValid);
-      await LocalStorage.setItem(
-        "configValidationStatus",
-        isValid ? "valid" : "invalid"
-      );
+      await LocalStorage.setItem("configValidationStatus", isValid ? "valid" : "invalid");
       const newValidatedConfig = { ...config, host, token };
       setLastValidatedConfig(newValidatedConfig);
-      await LocalStorage.setItem(
-        "lastValidatedConfig",
-        JSON.stringify(newValidatedConfig)
-      );
+      await LocalStorage.setItem("lastValidatedConfig", JSON.stringify(newValidatedConfig));
 
       await showToast({
         style: isValid ? Toast.Style.Success : Toast.Style.Failure,
-        title: isValid
-          ? t.configurationValidationSucceeded
-          : t.configurationValidationFailed,
+        title: isValid ? t.configurationValidationSucceeded : t.configurationValidationFailed,
       });
       return isValid;
     } catch (error) {
@@ -164,10 +136,7 @@ export function ConfigView({ onConfigured }: ConfigViewProps) {
     try {
       await LocalStorage.setItem("host", values.host);
       await LocalStorage.setItem("token", values.token);
-      await LocalStorage.setItem(
-        "showWebsitePreview",
-        values.showWebsitePreview.toString()
-      );
+      await LocalStorage.setItem("showWebsitePreview", values.showWebsitePreview.toString());
       await LocalStorage.setItem("language", values.language);
       if (hostChanged) {
         await setCachedLinks([]);
@@ -203,28 +172,23 @@ export function ConfigView({ onConfigured }: ConfigViewProps) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={t.saveConfiguration}
-            onSubmit={handleSubmit}
-          />
-          <Action
-            title={t.verifyConfiguration}
-            onAction={() => verifyConfiguration(config.host, config.token)}
-          />
+          <Action.SubmitForm title={t.saveConfiguration} onSubmit={handleSubmit} />
+          <Action title={t.verifyConfiguration} onAction={() => verifyConfiguration(config.host, config.token)} />
         </ActionPanel>
-      }>
+      }
+    >
       <Form.Description
         title={t.configurationStatus}
         text={
           isValidating
             ? `${t.validating} 🔄`
             : isConfigChanged
-            ? `${t.toBeValidated} ❗`
-            : isConfigValid === null
-            ? `${t.toBeValidated} ❗`
-            : isConfigValid
-            ? `${t.valid} ✅`
-            : `${t.invalid} ❌`
+              ? `${t.toBeValidated} ❗`
+              : isConfigValid === null
+                ? `${t.toBeValidated} ❗`
+                : isConfigValid
+                  ? `${t.valid} ✅`
+                  : `${t.invalid} ❌`
         }
       />
       <Form.TextField
@@ -248,7 +212,8 @@ export function ConfigView({ onConfigured }: ConfigViewProps) {
         onChange={(newValue) => {
           setConfig({ ...config, language: newValue });
           setLanguage(newValue as "en" | "zh");
-        }}>
+        }}
+      >
         <Form.Dropdown.Item value="en" title="English" />
         <Form.Dropdown.Item value="zh" title="中文" />
       </Form.Dropdown>
@@ -258,9 +223,7 @@ export function ConfigView({ onConfigured }: ConfigViewProps) {
         title={t.showWebsitePreview}
         label={t.showWebsitePreviewDescription}
         value={config.showWebsitePreview}
-        onChange={(newValue) =>
-          setConfig({ ...config, showWebsitePreview: newValue })
-        }
+        onChange={(newValue) => setConfig({ ...config, showWebsitePreview: newValue })}
       />
     </Form>
   );

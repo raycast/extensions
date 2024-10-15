@@ -12,13 +12,10 @@ async function getApiConfig() {
 }
 
 interface ExtendedRequestOptions extends https.RequestOptions {
-  body?: any;
+  body?: unknown;
 }
 
-async function fetchWithAuth(
-  path: string,
-  options: ExtendedRequestOptions = {}
-): Promise<any> {
+async function fetchWithAuth(path: string, options: ExtendedRequestOptions = {}): Promise<unknown> {
   const { host, token } = await getApiConfig();
   const url = new URL(path, host);
   return new Promise((resolve, reject) => {
@@ -44,9 +41,7 @@ async function fetchWithAuth(
             resolve(data);
           }
         } else {
-          reject(
-            new Error(`HTTP error! status: ${res.statusCode}, body: ${data}`)
-          );
+          reject(new Error(`HTTP error! status: ${res.statusCode}, body: ${data}`));
         }
       });
     });
@@ -65,9 +60,7 @@ async function fetchWithAuth(
 }
 
 export async function fetchLinks(cursor?: string) {
-  const path = cursor
-    ? `/api/link/list?cursor=${cursor}&limit=500`
-    : "/api/link/list";
+  const path = cursor ? `/api/link/list?cursor=${cursor}&limit=500` : "/api/link/list";
   return fetchWithAuth(path);
 }
 
@@ -96,10 +89,7 @@ export async function queryLink(slug: string) {
   return fetchLinkBySlug(slug);
 }
 
-export async function checkTokenValid(
-  host: string,
-  token: string
-): Promise<boolean> {
+export async function checkTokenValid(host: string, token: string): Promise<boolean> {
   const url = new URL("/api/link/list?limit=1", host);
 
   return new Promise((resolve) => {
@@ -120,17 +110,17 @@ export async function checkTokenValid(
             try {
               const response = JSON.parse(data);
               resolve("cursor" in response);
-            } catch (error) {
+            } catch {
               resolve(false);
             }
           } else {
             resolve(false);
           }
         });
-      }
+      },
     );
 
-    req.on("error", (error) => {
+    req.on("error", () => {
       resolve(false);
     });
 

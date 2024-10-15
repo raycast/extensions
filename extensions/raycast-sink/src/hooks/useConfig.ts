@@ -1,10 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  LocalStorage,
-  getPreferenceValues,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { LocalStorage, getPreferenceValues, showToast, Toast } from "@raycast/api";
 
 import { Config } from "../types";
 
@@ -37,9 +32,7 @@ export function useConfig() {
         const newConfig: Config = {
           host: (await LocalStorage.getItem<string>("host")) || "",
           token: (await LocalStorage.getItem<string>("token")) || "",
-          showWebsitePreview:
-            (await LocalStorage.getItem<string>("showWebsitePreview")) ||
-            "true",
+          showWebsitePreview: (await LocalStorage.getItem<string>("showWebsitePreview")) || "true",
           language: (await LocalStorage.getItem<string>("language")) || "en",
         };
 
@@ -74,9 +67,7 @@ export function useConfig() {
       setConfig(updatedConfig);
 
       await Promise.all(
-        Object.entries(updatedConfig).map(([key, value]) =>
-          LocalStorage.setItem(key, value.toString())
-        )
+        Object.entries(updatedConfig).map(([key, value]) => LocalStorage.setItem(key, value.toString())),
       );
     }
   };

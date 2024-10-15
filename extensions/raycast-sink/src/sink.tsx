@@ -1,14 +1,5 @@
 import { useState, useMemo } from "react";
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  showToast,
-  Toast,
-  useNavigation,
-  getPreferenceValues,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useTranslation } from "./hooks/useTranslation";
 import { useLinks } from "./hooks/useLinks";
 import { LinkDetail } from "./components/LinkDetail";
@@ -24,15 +15,10 @@ function MainContent() {
   const { t } = useTranslation();
   const { links, isLoading, refreshLinks } = useLinks();
   const { push } = useNavigation();
-  const {} = useConfig();
+  useConfig();
   const filteredLinks = useMemo(() => {
     if (!searchText) return [];
-    return links.filter(
-      (link) =>
-        link &&
-        link.slug &&
-        link.slug.toLowerCase().includes(searchText.toLowerCase())
-    );
+    return links.filter((link) => link && link.slug && link.slug.toLowerCase().includes(searchText.toLowerCase()));
   }, [links, searchText]);
 
   async function handleSearch(query: string) {
@@ -90,10 +76,7 @@ function MainContent() {
   }
 
   return (
-    <List
-      searchBarPlaceholder={t.searchSlugPlaceholder}
-      onSearchTextChange={setSearchText}
-      isLoading={isLoading}>
+    <List searchBarPlaceholder={t.searchSlugPlaceholder} onSearchTextChange={setSearchText} isLoading={isLoading}>
       {searchText ? (
         <>
           <List.Item
@@ -101,10 +84,7 @@ function MainContent() {
             title={t.searchOnline(searchText)}
             actions={
               <ActionPanel>
-                <Action
-                  title={t.search}
-                  onAction={() => handleSearch(searchText)}
-                />
+                <Action title={t.search} onAction={() => handleSearch(searchText)} />
               </ActionPanel>
             }
           />
@@ -116,10 +96,7 @@ function MainContent() {
               subtitle={link.url}
               actions={
                 <ActionPanel>
-                  <Action
-                    title={t.viewDetails}
-                    onAction={() => handleLinkSelect(link)}
-                  />
+                  <Action title={t.viewDetails} onAction={() => handleLinkSelect(link)} />
                 </ActionPanel>
               }
             />
@@ -132,10 +109,7 @@ function MainContent() {
             title={t.viewAllShortLinks}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title={t.viewAllShortLinks}
-                  target={<LinkListView />}
-                />
+                <Action.Push title={t.viewAllShortLinks} target={<LinkListView />} />
               </ActionPanel>
             }
           />
@@ -144,10 +118,7 @@ function MainContent() {
             title={t.createShortLink}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title={t.createShortLink}
-                  target={<CreateLinkView onSubmit={handleCreateLink} />}
-                />
+                <Action.Push title={t.createShortLink} target={<CreateLinkView onSubmit={handleCreateLink} />} />
               </ActionPanel>
             }
           />
@@ -156,10 +127,7 @@ function MainContent() {
             title={t.settings}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title={t.settings}
-                  target={<ConfigView onConfigured={handleConfigured} />}
-                />
+                <Action.Push title={t.settings} target={<ConfigView onConfigured={handleConfigured} />} />
               </ActionPanel>
             }
           />

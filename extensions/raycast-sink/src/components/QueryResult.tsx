@@ -1,4 +1,4 @@
-import { Detail, ActionPanel, Action, Icon } from "@raycast/api";
+import { Detail, ActionPanel, Action } from "@raycast/api";
 import { Link } from "../types";
 import { useTranslation } from "../hooks/useTranslation";
 import { useConfig } from "../hooks/useConfig";
@@ -39,15 +39,9 @@ export function QueryResult({ link, isLoading, error }: QueryResultProps) {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            url={`${BASE_URL}/${link.slug}`}
-            title={t.openShortLink}
-          />
+          <Action.OpenInBrowser url={`${BASE_URL}/${link.slug}`} title={t.openShortLink} />
           <Action.OpenInBrowser url={link.url} title={t.openTargetUrl} />
-          <Action.CopyToClipboard
-            content={`${BASE_URL}/${link.slug}`}
-            title={t.copyShortLink}
-          />
+          <Action.CopyToClipboard content={`${BASE_URL}/${link.slug}`} title={t.copyShortLink} />
         </ActionPanel>
       }
     />

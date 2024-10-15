@@ -1,13 +1,6 @@
 import React, { useState } from "react";
 import { URL } from "url";
-import {
-  Action,
-  ActionPanel,
-  Form,
-  useNavigation,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 import { useTranslation } from "../hooks/useTranslation";
 
 interface CreateLinkViewProps {
@@ -26,15 +19,9 @@ const validUrl = (url: string) => {
 export function CreateLinkView({ onSubmit }: CreateLinkViewProps) {
   const [urlError, setUrlError] = useState<string | undefined>();
   const [slugError, setSlugError] = useState<string | undefined>();
-  const [comment, setComment] = useState<string | undefined>();
-  const { pop } = useNavigation();
   const { t } = useTranslation();
 
-  async function handleSubmit(values: {
-    url: string;
-    slug: string;
-    comment?: string;
-  }) {
+  async function handleSubmit(values: { url: string; slug: string; comment?: string }) {
     if (!values.url) {
       setUrlError(t.urlRequired);
       return;
@@ -69,12 +56,10 @@ export function CreateLinkView({ onSubmit }: CreateLinkViewProps) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={t.createShortLink}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title={t.createShortLink} onSubmit={handleSubmit} />
         </ActionPanel>
-      }>
+      }
+    >
       <Form.TextField
         id="url"
         title={t.url}
@@ -89,12 +74,7 @@ export function CreateLinkView({ onSubmit }: CreateLinkViewProps) {
         error={slugError}
         onChange={() => setSlugError(undefined)}
       />
-      <Form.TextField
-        id="comment"
-        title={t.comment}
-        placeholder={t.enterComment}
-        onChange={(newValue) => setComment(newValue)}
-      />
+      <Form.TextField id="comment" title={t.comment} placeholder={t.enterComment} />
     </Form>
   );
 }

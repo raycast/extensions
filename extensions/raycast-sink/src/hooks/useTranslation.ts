@@ -1,5 +1,3 @@
-import { getPreferenceValues } from "@raycast/api";
-import { Preferences } from "../types";
 import { useState, useEffect } from "react";
 import { LocalStorage } from "@raycast/api";
 

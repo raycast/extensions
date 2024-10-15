@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  Form,
-  ActionPanel,
-  Action,
-  useNavigation,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, useNavigation, showToast, Toast } from "@raycast/api";
 import { Link } from "../types";
 import { editLink } from "../utils/api";
 import { useTranslation } from "../hooks/useTranslation";
@@ -45,20 +38,12 @@ export function EditLinkView({ link, onEditSuccess }: EditLinkViewProps) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={`${t.editLink}: ${link.slug}`}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title={`${t.editLink}: ${link.slug}`} onSubmit={handleSubmit} />
         </ActionPanel>
       }
-      isLoading={isLoading}>
-      <Form.TextField
-        id="url"
-        title={t.url}
-        value={url}
-        onChange={setUrl}
-        placeholder={t.enterUrl}
-      />
+      isLoading={isLoading}
+    >
+      <Form.TextField id="url" title={t.url} value={url} onChange={setUrl} placeholder={t.enterUrl} />
       <Form.TextField
         id="comment"
         title={t.comment}
