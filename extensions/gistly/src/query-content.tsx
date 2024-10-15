@@ -71,7 +71,7 @@ export function QueryContent({
       actions={
         videoData && (
           <ActionPanel title="Video Actions">
-            <Action.CopyToClipboard title="Copy To Clipboard" content={markdown ?? ""} />
+            <Action.CopyToClipboard title="Copy to Clipboard" content={markdown ?? ""} />
             <Action.OpenInBrowser title="Go to Video" url={videoData.video_url} />
             <Action.OpenInBrowser title="Go to Channel" url={videoData.ownerProfileUrl} />
           </ActionPanel>
