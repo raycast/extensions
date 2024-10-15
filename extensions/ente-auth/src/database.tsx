@@ -40,7 +40,7 @@ export default function Command() {
 
       const secretsList = secrets
         .slice(-5)
-        .map((secret) => `- ${(secret.issuer).replaceAll("+", " ")} - \`${secret.username}\`\n`)
+        .map((secret) => `- ${secret.issuer.replaceAll("+", " ")} - \`${secret.username}\`\n`)
         .join("");
 
       return (
@@ -52,7 +52,6 @@ export default function Command() {
           }
         />
       );
-
     } else {
       showToast(Toast.Style.Failure, "No secrets found", "Please check your export path");
     }
