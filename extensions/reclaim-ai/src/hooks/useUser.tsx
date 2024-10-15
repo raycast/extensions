@@ -7,7 +7,6 @@ import { ApiResponseUser } from "./useUser.types";
 
 const cache = new Cache();
 
-
 const useUser = () => {
   const cachedUserObj = cache.get("user");
   const cachedUserDate = cache.get("userDate");
