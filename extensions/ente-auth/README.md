@@ -15,14 +15,17 @@
 > The Ente Auth [CLI](https://github.com/ente-io/ente/tree/main/cli) is required.
 
 ## Setup
+#### Adding your account
+As explained [here](https://github.com/ente-io/ente/tree/main/cli#accounts), run:
+`ente account add` to login into an existing account. If you wish to update your account information, run the below:
+```ente account update --app auth --email <email> --dir <path>```.
 
 #### Automated
 
 Run `Import Secrets` from Raycast. This will create a `~/Documents/ente` directory and a file named `ente_auth.txt`.
 
 #### Manual
-
-As explained [here](https://help.ente.io/auth/migration-guides/export), run:
-```ente account update --app auth --email <email> --dir <path>```.
+To perform a manual import, run:
+```ente export```
 
 Or perform the same actions but through the UI as long as the file is placed in the `~/Documents/ente` folder.

@@ -2,8 +2,7 @@ import fse from "fs-extra";
 import * as OTPAuth from "otpauth";
 import { LocalStorage } from "@raycast/api";
 import { Secret } from "./types";
-
-export const STORAGE_KEY = "ente-auth-secrets";
+import { STORAGE_KEY } from "../constants/secrets";
 
 const parseSecretURL = (url: string): Secret => {
   const totp = OTPAuth.URI.parse(url);
