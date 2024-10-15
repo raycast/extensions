@@ -19,8 +19,8 @@
       "mode": "view"
     },
     {
-      "name": "create-people",
-      "title": "Create People",
+      "name": "create-person",
+      "title": "Create Person",
       "description": "Create a new contact",
       "mode": "view"
     },
