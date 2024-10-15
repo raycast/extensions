@@ -5,6 +5,12 @@
   "description": "Your cursor.directory in Raycast",
   "icon": "extension-icon.png",
   "author": "escwxyz",
+  "contributors": [
+    "litomore"
+  ],
+  "crossExtensions": [
+    "degouville/cursor-recent-projects"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
@@ -80,7 +86,6 @@
     }
   ],
   "license": "MIT",
-  "crossExtensions": ["degouville/cursor-recent-projects"],
   "commands": [
     {
       "name": "index",

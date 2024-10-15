@@ -1,5 +1,10 @@
 # Cursor Directory Changelog
 
+## [Documentations] - 2024-10-15
+
+- Add a badge for the Raycast Cross-Extension Conventions
+- Move the `crossExtensions` field to top for more visible
+
 ## [Features & Improvements] - 2024-10-12
 
 - Add a new command to easily open project and automatically apply rule in Cursor (if you have configured the default `Projects Directory`)
