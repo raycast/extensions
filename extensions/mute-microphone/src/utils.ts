@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { showHUD, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { AudioInputLevelCache } from "./audio-input-level-cache";
 
@@ -13,6 +13,7 @@ async function getAudioInputLevel() {
 export async function setAudioInputLevel(v: string) {
   await runAppleScript(`set volume input volume ${v}`);
   AudioInputLevelCache.curInputLevel = v;
+  showHUD(`Audio input set to ${v}`);
 }
 
 const toggleSystemAudioInputLevelWithPreviousLevel = async (): Promise<string> => {
