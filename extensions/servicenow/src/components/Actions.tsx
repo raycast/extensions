@@ -11,7 +11,7 @@ export default function Actions({ mutate }: { mutate: () => void }) {
 
   return (
     <>
-      <List.Dropdown.Section title="History">
+      <List.Dropdown.Section title="List">
         <Action
           icon={Icon.ArrowClockwise}
           title="Refresh"

@@ -104,3 +104,13 @@ export interface Instance {
   username: string;
   password: string;
 }
+
+export interface DBObjectsResponse {
+  result: DBObject[];
+}
+
+export interface DBObject {
+  name: string;
+  label: string;
+  super_class: string;
+}
