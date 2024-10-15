@@ -18,6 +18,17 @@
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "showFilePath",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Show File Path in google drive",
+      "description": "Show File Path in search and starred google drive files",
+      "label": "Show File Path"
+    }
+  ],
   "commands": [
     {
       "name": "create-google-document",

@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
 import { File, getFilePath } from "../api/getFiles";
 import { getFileIconLink, humanFileSize } from "../helpers/files";
@@ -10,23 +10,32 @@ type FileListItemProps = {
 };
 
 export default function FileListItem({ file, email }: FileListItemProps) {
+  const { showFilePath } = getPreferenceValues();
   const modifiedTime = new Date(file.modifiedTime);
-  const [filePath, setFilePath] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchFilePath = async () => {
-      const path = await getFilePath(file.id);
-      setFilePath(path);
-    };
-    fetchFilePath();
-  }, [file.id]);
+  const { data: filePath } = useCachedPromise(
+    async (fileId) => {
+      return (await getFilePath(fileId)) as string;
+    },
+    [file.id],
+    {
+      execute: showFilePath,
+    },
+  );
 
   const accessories: List.Item.Accessory[] = [
     {
       date: new Date(modifiedTime),
-      tooltip: `Updated: ${format(modifiedTime, "EEEE d MMMM yyyy 'at' HH:mm")}, File Path: ${filePath}`,
+      tooltip: `Updated: ${format(modifiedTime, "EEEE d MMMM yyyy 'at' HH:mm")}`,
     },
   ];
+
+  if (showFilePath && filePath) {
+    accessories.unshift({
+      icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
+      tooltip: filePath,
+    });
+  }
 
   if (file.starred) {
     accessories.unshift({
