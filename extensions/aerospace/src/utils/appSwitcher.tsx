@@ -23,35 +23,30 @@ function getAppPath(bundleId: string) {
     encoding: "utf8",
     timeout: 15000,
   });
-  console.log(appPath.stdout.trim());
 
   return appPath.stdout.trim();
 }
 // aerospace list-windows --json --workspace focused --format "%{app-name} %{window-title} %{window-id} %{app-pid} %{workspace} %{app-bundle-id}"
 
-export function getWindows() {
-  const aerospaceArr = spawnSync(
-    "aerospace",
-    [
-      "list-windows",
-      "--json",
-      "--workspace",
-      "focused",
-      "--format",
-      "%{app-name} %{window-title} %{window-id} %{app-pid} %{workspace} %{app-bundle-id}",
-    ],
-    {
-      env: env(),
-      encoding: "utf8",
-      timeout: 15000,
-    },
-  );
+export function getWindows(workspace: string) {
+  const args = [
+    "list-windows",
+    "--json",
+    ...(workspace === "focused" ? ["--workspace", "focused"] : ["--all"]),
+    "--format",
+    "%{app-name} %{window-title} %{window-id} %{app-pid} %{workspace} %{app-bundle-id}",
+  ];
+
+  const aerospaceArr = spawnSync("aerospace", args, {
+    env: env(),
+    encoding: "utf8",
+    timeout: 15000,
+  });
 
   let windows: Windows = [];
   try {
-    console.log("beforeParse", aerospaceArr.stdout);
     const parsedWindows = JSON.parse(aerospaceArr.stdout);
-    console.log("parsed", parsedWindows);
+    // console.log("parsed", parsedWindows);
 
     windows = parsedWindows.map((window: Window) => ({
       ...window,

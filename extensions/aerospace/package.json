@@ -47,9 +47,46 @@
     },
     {
       "name": "switchApps",
-      "title": "Switch Apps in Current Workspace",
-      "description": "Switch between the opens opened in the focused workspace",
-      "mode": "view"
+      "title": "Switch Apps in Workspace",
+      "description": "Switch between the apps opened",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultWorkspace",
+          "title": "Default Search",
+          "description": "Set the default workspace to search: All or focused",
+          "required": true,
+          "type": "dropdown",
+          "default": "focused",
+          "data": [
+            {
+              "title": "Focused",
+              "value": "focused"
+            },
+            {
+              "title": "All",
+              "value": "all"
+            }
+          ]
+        }
+      ],
+      "arguments": [
+        {
+          "name": "workspace",
+          "placeholder": "Focused or All",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Focused",
+              "value": "focused"
+            },
+            {
+              "title": "All",
+              "value": "all"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
