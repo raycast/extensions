@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { URL } from "url";
 import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 import { useTranslation } from "../hooks/useTranslation";
-
 interface CreateLinkViewProps {
   onSubmit: (url: string, slug: string, comment?: string) => Promise<void>;
 }

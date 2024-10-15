@@ -55,7 +55,7 @@ function MainContent() {
 
   async function handleCreateLink(url: string, slug: string, comment?: string) {
     try {
-      const newLink = await createLink(url, slug, comment) as CreateLinkResponse;
+      const newLink = (await createLink(url, slug, comment)) as CreateLinkResponse;
       await showToast({
         style: Toast.Style.Success,
         title: t.linkCreated,
@@ -64,7 +64,6 @@ function MainContent() {
       if (newLink && newLink.link) {
         push(<LinkDetail link={newLink.link} onRefresh={refreshLinks} />);
       }
-
       refreshLinks();
     } catch (error) {
       await showToast({
