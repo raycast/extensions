@@ -1,8 +1,8 @@
 import { showError } from "./components/showError";
 import { DEFAULT_EXPORT_PATH } from "./constants/ente";
 import { getSecrets, parseSecrets, storeSecrets } from "./helpers/secrets";
-import { checkEnteBinary, createEntePath, exportEnteAuthSecrets } from "./helpers/ente";
-import { popToRoot, showToast, Toast, Detail, getPreferenceValues } from "@raycast/api";
+import { showToast, Toast, Detail, getPreferenceValues } from "@raycast/api";
+import { checkEnteBinary, createEntePath, exportEnteAuthSecrets, deleteEnteExport } from "./helpers/ente";
 
 export default function Command() {
   const enteBinaryExists = checkEnteBinary();
@@ -13,7 +13,7 @@ export default function Command() {
   }
 
   try {
-    createEntePath(exportPath);
+    createEntePath(DEFAULT_EXPORT_PATH);
   } catch (error) {
     showToast(Toast.Style.Failure, "Folder creation failed");
     return <Detail markdown={`## Failed to create folder at \`${exportPath}\``} />;
@@ -30,11 +30,29 @@ export default function Command() {
     storeSecrets(secrets);
 
     if (secrets.length > 0) {
+      deleteEnteExport();
+
       showToast({
         style: Toast.Style.Success,
         title: "Secrets imported",
-        message: `${exportPath}/ente_auth.txt was imported successfully.`,
-      }).then(() => popToRoot());
+        message: `${exportPath} imported!`,
+      });
+
+      const secretsList = secrets
+        .slice(-5)
+        .map((secret) => `- ${(secret.issuer).replaceAll("+", " ")} - \`${secret.username}\`\n`)
+        .join("");
+
+      return (
+        <Detail
+          markdown={
+            `## Secrets imported from \`${exportPath}\`\n` +
+            `### ${secrets.length} secrets imported!\n` +
+            `${secretsList}`
+          }
+        />
+      );
+
     } else {
       showToast(Toast.Style.Failure, "No secrets found", "Please check your export path");
     }

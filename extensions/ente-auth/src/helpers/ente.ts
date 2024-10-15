@@ -47,3 +47,14 @@ export const exportEnteAuthSecrets = (): boolean => {
 
   return true;
 };
+
+export const deleteEnteExport = (): boolean => {
+  try {
+    fse.removeSync(`${DEFAULT_EXPORT_PATH}/ente_auth.txt`);
+  } catch (error) {
+    console.error("Error during removal:", error);
+    return false;
+  }
+
+  return true;
+};
