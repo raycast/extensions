@@ -82,8 +82,7 @@ function ChannelsFinderList(): JSX.Element {
 
     await showToast(Toast.Style.Animated, "Fetch teams...");
 
-    const profile = await MattermostClient.getMe();
-    const teams = await MattermostClient.getTeams();
+    const [profile, teams] = await Promise.all([MattermostClient.getMe(), MattermostClient.getTeams()]);
     const teamsUI: TeamUI[] = teams.map((team) => ({ id: team.id, name: team.name }));
 
     await showToast(Toast.Style.Success, `Found ${teamsUI.length} teams`);
@@ -265,12 +264,26 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
     setTeam(team);
   });
 
+  async function isMattermostRunning() {
+    const running = await runAppleScript(`
+      tell application "Mattermost"
+        if it is running then
+          return true
+        else
+          return false
+        end if
+      end tell
+    `);
+    return running == "true" ? true : false;
+  }
+
   async function openChannel(channel: ChannelUI) {
     console.log("select channel", channel);
     const baseDeeplink = preference.baseUrl.replace("https://", "mattermost://");
     const fullDeeplink = baseDeeplink + "/" + team.name + channel.path;
     console.log("open deeplink", fullDeeplink);
     try {
+      if (!(await isMattermostRunning())) throw new Error();
       await open(fullDeeplink);
       await closeMainWindow();
     } catch (error) {
