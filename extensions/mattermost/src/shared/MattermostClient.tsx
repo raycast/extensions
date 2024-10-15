@@ -16,14 +16,16 @@ axios.interceptors.request.use((config) => {
   console.log(config.url, config.params ?? config.data ?? "");
   return config;
 });
-axios.interceptors.response.use(function (response) {
-  return response;
-}, function (error: AxiosError<{ "status_code": number; id: string; message: string; request_id: string }>) {
-  const data = error.response?.data;
-  if (data) return Promise.reject(new Error(data.message));
-  return Promise.reject(error);
-});
-
+axios.interceptors.response.use(
+  function (response) {
+    return response;
+  },
+  function (error: AxiosError<{ status_code: number; id: string; message: string; request_id: string }>) {
+    const data = error.response?.data;
+    if (data) return Promise.reject(new Error(data.message));
+    return Promise.reject(error);
+  }
+);
 
 export class MattermostClient {
   static baseUrl(): string {
@@ -59,15 +61,14 @@ export class MattermostClient {
   static async signIn(): Promise<void> {
     const preference = getPreferenceValues<Preferences>();
     const [username, password] = preference.credentials.split(":");
-    const response = await axios
-      .post<UserProfile>(
-        "/users/login",
-        JSON.stringify({
-          login_id: username,
-          password: password,
-        }),
-        MattermostClient.config()
-      );
+    const response = await axios.post<UserProfile>(
+      "/users/login",
+      JSON.stringify({
+        login_id: username,
+        password: password,
+      }),
+      MattermostClient.config()
+    );
     const token = response.headers["token"];
     console.log(response.statusText);
     MattermostClient.token = token;

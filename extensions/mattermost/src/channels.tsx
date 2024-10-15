@@ -69,29 +69,27 @@ function ChannelsFinderList(): JSX.Element {
   const preference = getPreferenceValues<Preferences>();
   const { launchMattermostAppOnLoad } = getPreferenceValues<Preferences.Channels>();
 
-  const { isLoading } = usePromise(
-    async () => {
-      if (launchMattermostAppOnLoad) {
-        try {
-          await runAppleScript('launch application "Mattermost"');
-        } catch (error) {
-          await showFailureToast("Is Mattermost installed?", { title: "Error launching Mattermost" });
-        }
+  const { isLoading } = usePromise(async () => {
+    if (launchMattermostAppOnLoad) {
+      try {
+        await runAppleScript('launch application "Mattermost"');
+      } catch (error) {
+        await showFailureToast("Is Mattermost installed?", { title: "Error launching Mattermost" });
       }
-      const cachedState = await getCachedState();
-      cachedState && setState(cachedState);
-
-      await showToast(Toast.Style.Animated, "Fetch teams...");
-      
-      const profile = await MattermostClient.getMe();
-      const teams = await MattermostClient.getTeams();
-      const teamsUI: TeamUI[] = teams.map((team) => ({ id: team.id, name: team.name }));
-
-      await showToast(Toast.Style.Success, `Found ${teamsUI.length} teams`);
-      setCachedState({ profile: profile, teams: teamsUI });
-      setState({ profile: profile, teams: teamsUI });
     }
-  )
+    const cachedState = await getCachedState();
+    cachedState && setState(cachedState);
+
+    await showToast(Toast.Style.Animated, "Fetch teams...");
+
+    const profile = await MattermostClient.getMe();
+    const teams = await MattermostClient.getTeams();
+    const teamsUI: TeamUI[] = teams.map((team) => ({ id: team.id, name: team.name }));
+
+    await showToast(Toast.Style.Success, `Found ${teamsUI.length} teams`);
+    setCachedState({ profile: profile, teams: teamsUI });
+    setState({ profile: profile, teams: teamsUI });
+  });
 
   if (!isLoading && state?.teams.length == 1) {
     return <ChannelList team={state?.teams[0]} profile={state?.profile} />;
@@ -168,7 +166,9 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
       directChatsMap.set(profileId, chat);
     });
 
-    const directChatProfiles = directChatsMap.keys.length ? await MattermostClient.getProfilesByIds(Array.from(directChatsMap.keys())) : [];
+    const directChatProfiles = directChatsMap.keys.length
+      ? await MattermostClient.getProfilesByIds(Array.from(directChatsMap.keys()))
+      : [];
     directChatProfiles.forEach((profile) => {
       const chat = directChatsMap.get(profile.id);
       if (chat == undefined) {
@@ -229,7 +229,9 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
       setCachedState(cachedState);
     }
 
-    const profilesStatuses = directChatsMap.keys.length ? await MattermostClient.getProfilesStatus(Array.from(directChatsMap.keys())) : [];
+    const profilesStatuses = directChatsMap.keys.length
+      ? await MattermostClient.getProfilesStatus(Array.from(directChatsMap.keys()))
+      : [];
     profilesStatuses.forEach((status) => {
       const channel = directChatsMap.get(status.user_id)!;
       const channelUI = channelsUIMap.get(channel.id)!;
@@ -258,12 +260,10 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
     return categoriesUI;
   }
 
-  const { isLoading } = usePromise(
-    async () => {
-      team.categories = await loadCategories();
-      setTeam(team);
-    }
-  )
+  const { isLoading } = usePromise(async () => {
+    team.categories = await loadCategories();
+    setTeam(team);
+  });
 
   async function openChannel(channel: ChannelUI) {
     console.log("select channel", channel);
