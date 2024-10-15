@@ -1,6 +1,6 @@
 # Purelymail Changelog
 
-## [Confirm Password when Creating User] - {PR_MERGE_DATE}
+## [Confirm Password when Creating User] - 2024-10-15
 
 - Move some endpoints to `useCachedPromise` w/ improved `callApi` for optimistic updates
 - fix: wrong toast title when Deleting User
