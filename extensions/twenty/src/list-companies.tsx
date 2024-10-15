@@ -1,7 +1,7 @@
 import React from "react";
 import { List, Image, Icon, ActionPanel, Action, Toast, showToast } from "@raycast/api";
 import { useGetCompanies } from "./hooks/use-company";
-import CreatePersonForm from "./create-people";
+import CreatePersonForm from "./create-person";
 import CreateCompanyForm from "./create-company";
 
 export default function ListCompanies() {
@@ -72,7 +72,7 @@ export default function ListCompanies() {
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Name" text={company.name} />
-                    <List.Item.Detail.Metadata.Label title="Employees" text={company.employees.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Employees" text={company.employees?.toString() ?? "N/A"} />
                     <List.Item.Detail.Metadata.Label title="Annual Revenue" text={formattedRevenue} />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label title="Address" />

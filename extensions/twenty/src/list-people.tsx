@@ -1,6 +1,6 @@
 import { List, Image, Icon, ActionPanel, Action } from "@raycast/api";
 import { useGetPeople } from "./hooks/use-people";
-import CreatePersonForm from "./create-people";
+import CreatePersonForm from "./create-person";
 import CreateCompanyForm from "./create-company";
 
 export default function ListPeople() {
