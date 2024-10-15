@@ -316,8 +316,8 @@
 /extensions/curl                                                    @jonathangiardino @pernielsentikaer @bkeys818
 /extensions/currency-exchange                                       @xeric @daudln
 /extensions/cursor                                                  @degouville
-/extensions/cursor-directory                                        @escwxyz
-/extensions/cursor-recent-projects                                  @degouville @pernielsentikaer @escwxyz
+/extensions/cursor-directory                                        @escwxyz @LitoMore
+/extensions/cursor-recent-projects                                  @degouville @pernielsentikaer @escwxyz @LitoMore
 /extensions/curto-io-url-shortener                                  @birobirobiro
 /extensions/custom-folder                                           @Ph-lo
 /extensions/cyberchef                                               @mblode
