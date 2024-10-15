@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, List, openExtensionPreferences, useNavigation } from "@raycast/api";
 import { showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import { fetchBaseRecords, updateBaseRecord } from "./metadata-api";
 import { AirtableRecord, Field } from "./types";
@@ -13,6 +13,23 @@ export function AirtableBaseRecordsList(props: { baseId: string; tableId: string
     revalidate,
   } = useCachedPromise(async () => await fetchBaseRecords(props.baseId, props.tableId), [], {
     initialData: [],
+    onError(error) {
+      if (error.message.includes("Invalid permissions")) {
+        showFailureToast(
+          `You need the "data.records:read" and "data.records:write" scopes to manage records. Please re-authenticate.`,
+          {
+            title: "Missing Scopes",
+            primaryAction: {
+              title: "Re-authenticate",
+              async onAction(toast) {
+                await openExtensionPreferences();
+                await toast.hide();
+              },
+            },
+          }
+        );
+      } else showFailureToast(error);
+    },
   });
 
   return (
