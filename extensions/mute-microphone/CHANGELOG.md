@@ -1,6 +1,6 @@
 # Mute microphone Changelog
 
-## [Improvements] - 2024-10-07
+## [Improvements] - {PR_MERGE_DATE}
 
 - Option to set input level to specific value
 
