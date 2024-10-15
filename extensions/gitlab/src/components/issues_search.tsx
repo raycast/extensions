@@ -53,6 +53,7 @@ export function SearchMyIssues(): JSX.Element {
       searchBarAccessory={
         <List.Dropdown tooltip="Scope" onChange={setScope}>
           <List.Dropdown.Item title="Created By Me" value={IssueScope.created_by_me} />
+          <List.Dropdown.Item title="Assigned To Me" value={IssueScope.assigned_to_me} />
           <List.Dropdown.Item title="All" value={IssueScope.all} />
         </List.Dropdown>
       }
