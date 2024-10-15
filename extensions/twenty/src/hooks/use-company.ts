@@ -6,7 +6,7 @@ import { useAuthHeaders } from "./use-auth-headers";
 interface Company {
   id: string;
   name: string;
-  employees: number;
+  employees: number | null;
   address: {
     addressStreet1: string | null;
     addressStreet2: string | null;
