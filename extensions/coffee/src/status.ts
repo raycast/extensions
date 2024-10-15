@@ -37,11 +37,7 @@ async function handleScheduledCaffeinate(schedule: Schedule): Promise<boolean> {
   // If the current time is within scheduled time, start caffeination
   if (isWithinSchedule === true && schedule.IsRunning === false) {
     const duration = (endHour - startHour) * 3600 + (endMinute - startMinute) * 60;
-    await startCaffeinate(
-      { menubar: true, status: true },
-      `Scheduled caffeination until ${schedule.to}`,
-      `-t ${duration}`,
-    );
+    await startCaffeinate({ menubar: true, status: true }, undefined, `-t ${duration}`);
     schedule.IsRunning = true;
     await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
     return true;

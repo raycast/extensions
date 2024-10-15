@@ -13,7 +13,14 @@ import {
 } from "@raycast/api";
 import { useLoadStoredSchedules } from "./fetchStoredSchedule";
 import { ListActionPanel } from "./listActionPanel";
-import { Schedule, changeScheduleState, stopCaffeinate, isTodaysSchedule, isNotTodaysSchedule } from "./utils";
+import {
+  Schedule,
+  changeScheduleState,
+  stopCaffeinate,
+  isTodaysSchedule,
+  isNotTodaysSchedule,
+  numberToDayString,
+} from "./utils";
 import { extractSchedule } from "./extractSchedule";
 import { checkSchedule } from "./status";
 
@@ -38,9 +45,20 @@ export default function Command() {
         await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
       }
 
+      const currentDate = new Date();
+      const currentDayString = numberToDayString(currentDate.getDay()).toLowerCase();
+      const isScheduleRunning = await checkSchedule();
+
+      const updatedSchedules = newSchedules.map((schedule) => {
+        if (currentDayString === schedule.day) {
+          return { ...schedule, IsRunning: isScheduleRunning };
+        }
+        return schedule;
+      });
+
       setSchedules((prevSchedules) => [
         ...prevSchedules.filter((schedule) => !days.includes(schedule.day)),
-        ...newSchedules,
+        ...updatedSchedules,
       ]);
 
       await showToast(Toast.Style.Success, "Caffeination schedule set successfully.");
