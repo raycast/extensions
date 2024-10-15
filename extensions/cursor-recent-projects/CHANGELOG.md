@@ -1,6 +1,6 @@
 # Cursor Changelog
 
-## [Documentations] - {PR_MERGE_DATE}
+## [Documentations] - 2024-10-15
 
 - Correct extension title in readme and changelog
 - Add extension slogan below the title

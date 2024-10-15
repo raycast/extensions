@@ -1,6 +1,6 @@
 # Cursor Directory Changelog
 
-## [Documentations] - {PR_MERGE_DATE}
+## [Documentations] - 2024-10-15
 
 - Add a badge for the Raycast Cross-Extension Conventions
 - Move the `crossExtensions` field to top for more visible
