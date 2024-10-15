@@ -240,7 +240,7 @@ export const useSearch = ({ icons }: { icons: IconData[] }) => {
     `Please search from the data with the search keyword "${$searchString}". And return at least one icon slug in the format below:`,
     "(icon slugs only, split with comma, up to 500 items, no markdown format, don't change data structure, no addition text, no spaces, do not return non-exist slugs)",
   ].join("\n");
-  const execute = enableAiSearch && hasAccessToAi && filteredIcons.length === 0;
+  const execute = enableAiSearch && Boolean(searchString) && hasAccessToAi && filteredIcons.length === 0;
   const { data, isLoading: aiIsLoading } = useAI(searchPrompt, { execute, model: AI.Model["OpenAI_GPT4o-mini"] });
   const searchResult = execute ? icons.filter((icon) => data.split(",").includes(icon.slug)) : filteredIcons;
   return { aiIsLoading, searchResult, setSearchString };
