@@ -67,10 +67,9 @@ export default function Command() {
 function ChannelsFinderList(): JSX.Element {
   const [state, setState] = useState<State | undefined>();
   const preference = getPreferenceValues<Preferences>();
-  const { launchMattermostAppOnLoad } = getPreferenceValues<Preferences.Channels>();
 
   const { isLoading } = usePromise(async () => {
-    if (launchMattermostAppOnLoad) {
+    if (preference.deepLinkType === "application") {
       try {
         await runAppleScript('launch application "Mattermost"');
       } catch (error) {
@@ -264,26 +263,21 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
     setTeam(team);
   });
 
-  async function isMattermostRunning() {
-    const running = await runAppleScript(`
-      tell application "Mattermost"
-        if it is running then
-          return true
-        else
-          return false
-        end if
-      end tell
-    `);
-    return running == "true" ? true : false;
+  function generateBaseDeeplink() {
+    switch (preference.deepLinkType) {
+      case "browser":
+        return preference.baseUrl;
+      case "application":
+        return preference.baseUrl.replace("https://", "mattermost://");
+    }
   }
 
   async function openChannel(channel: ChannelUI) {
     console.log("select channel", channel);
-    const baseDeeplink = preference.baseUrl.replace("https://", "mattermost://");
+    const baseDeeplink = generateBaseDeeplink();
     const fullDeeplink = baseDeeplink + "/" + team.name + channel.path;
     console.log("open deeplink", fullDeeplink);
     try {
-      if (!(await isMattermostRunning())) throw new Error();
       await open(fullDeeplink);
       await closeMainWindow();
     } catch (error) {
@@ -310,7 +304,7 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
                     <ActionPanel>
                       <Action
                         icon="mattermost-icon-rounded.png"
-                        title="Open in Mattermost"
+                        title={`Open in Mattermost (${preference.deepLinkType})`}
                         onAction={() => openChannel(channel)}
                       />
                       <Action.CopyToClipboard content={channel.mentionName} />

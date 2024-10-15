@@ -21,6 +21,7 @@ This can be extracted from the browser address bar by opening the messenger in y
 
 2. If you are a member of several teams at the same time, you must explicitly specify the default team name in the extension settings
 
+3. You can choose to open deep links in browser or Mattermost application (default)
 
 ## Commands
 

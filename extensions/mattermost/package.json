@@ -25,17 +25,7 @@
       "mode": "view",
       "keywords": [
         "chat"
-      ],
-      "preferences": [
-        {
-        "name": "launchMattermostAppOnLoad",
-        "label": "Launch Mattermost Application on Load",
-        "description": "Launch Mattermost Application on Load (needs to be installed)",
-        "type": "checkbox",
-        "default": true,
-        "required": false
-      }
-    ]
+      ]
     },
     {
       "name": "set-custom-status",
@@ -93,6 +83,24 @@
       "required": false,
       "title": "Default team name",
       "type": "textfield"
+    },
+    {
+      "name": "deepLinkType",
+      "type": "dropdown",
+      "required": false,
+      "title": "Open In",
+      "data": [
+        {
+          "title": "Mattermost Application",
+          "value": "application"
+        },
+        {
+          "title": "Browser",
+          "value": "browser"
+        }
+      ],
+      "description": "How to open a deep link",
+      "default": "mattermost"
     }
   ],
   "dependencies": {
