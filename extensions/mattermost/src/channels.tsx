@@ -12,13 +12,12 @@ import {
   LocalStorage,
   openExtensionPreferences,
 } from "@raycast/api";
-import { getAvatarIcon, usePromise } from "@raycast/utils";
+import { getAvatarIcon, runAppleScript, showFailureToast, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { DateTime } from "luxon";
 import { MattermostClient } from "./shared/MattermostClient";
 import { Channel, UserProfile } from "./shared/MattermostTypes";
 import { withAuthorization } from "./shared/withAuthorization";
-import { runAppleScriptSync } from "run-applescript";
 
 async function getCachedState(): Promise<State | undefined> {
   return LocalStorage.getItem<string>("channels-state").then((cachedStateJson) =>
@@ -67,12 +66,18 @@ export default function Command() {
 
 function ChannelsFinderList(): JSX.Element {
   const [state, setState] = useState<State | undefined>();
-  // const [loading, setLoading] = useState<boolean>(false);
   const preference = getPreferenceValues<Preferences>();
+  const { launchMattermostAppOnLoad } = getPreferenceValues<Preferences.Channels>();
 
-  const { isLoading: loading } = usePromise(
+  const { isLoading } = usePromise(
     async () => {
-      // runAppleScriptSync('launch application "Mattermost"');
+      if (launchMattermostAppOnLoad) {
+        try {
+          await runAppleScript('launch application "Mattermost"');
+        } catch (error) {
+          await showFailureToast("Is Mattermost installed?", { title: "Error launching Mattermost" });
+        }
+      }
       const cachedState = await getCachedState();
       cachedState && setState(cachedState);
 
@@ -88,7 +93,7 @@ function ChannelsFinderList(): JSX.Element {
     }
   )
 
-  if (state?.teams.length == 1) {
+  if (!isLoading && state?.teams.length == 1) {
     return <ChannelList team={state?.teams[0]} profile={state?.profile} />;
   }
 
@@ -135,7 +140,7 @@ function ChannelsFinderList(): JSX.Element {
   }
 
   return (
-    <List isLoading={loading} searchBarPlaceholder="Search team">
+    <List isLoading={isLoading} searchBarPlaceholder="Search team">
       {state?.teams.length === 0 && <List.EmptyView title="You are not on any team" icon={Icon.Bubble} />}
     </List>
   );
@@ -253,7 +258,7 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
     return categoriesUI;
   }
 
-  const { isLoading: loading } = usePromise(
+  const { isLoading } = usePromise(
     async () => {
       team.categories = await loadCategories();
       setTeam(team);
@@ -270,7 +275,8 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
   }
 
   return (
-    <List isLoading={loading} searchBarPlaceholder="Search channel or user">
+    <List isLoading={isLoading} searchBarPlaceholder="Search channel or user">
+      {!isLoading && !team.categories?.length && <List.EmptyView title="No channels were found" icon={Icon.Bubble} />}
       {team.categories?.map((category) => {
         return (
           <List.Section key={category.name} title={category.name} subtitle={category.channels.length.toString()}>

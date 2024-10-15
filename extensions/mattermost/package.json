@@ -20,25 +20,35 @@
     {
       "name": "channels",
       "title": "Search Channel",
-      "subtitle": "Mattremost",
-      "description": "Search for all team directs, and channels and open them directly in your Mattremost app.",
+      "subtitle": "Mattermost",
+      "description": "Search for all team directs, and channels and open them directly in your Mattermost app.",
       "mode": "view",
       "keywords": [
         "chat"
-      ]
+      ],
+      "preferences": [
+        {
+        "name": "launchMattermostAppOnLoad",
+        "label": "Launch Mattermost Application on Load",
+        "description": "Launch Mattermost Application on Load (needs to be installed)",
+        "type": "checkbox",
+        "default": true,
+        "required": false
+      }
+    ]
     },
     {
       "name": "set-custom-status",
       "title": "Set Custom Status",
-      "subtitle": "Mattremost",
+      "subtitle": "Mattermost",
       "description": "Set custom user status.",
       "mode": "view"
     },
     {
       "name": "set-precense-status",
-      "title": "Set Precense Status",
-      "subtitle": "Mattremost",
-      "description": "Set user precense status.",
+      "title": "Set Presence Status",
+      "subtitle": "Mattermost",
+      "description": "Set user presence status.",
       "mode": "view"
     }
   ],
@@ -79,7 +89,7 @@
     {
       "name": "teamName",
       "description": "Mattermost team name that should open by default if you are on multiple teams",
-      "placeholder": "MySuperComany",
+      "placeholder": "MySuperCompany",
       "required": false,
       "title": "Default team name",
       "type": "textfield"
@@ -87,17 +97,16 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.7.1",
+    "@raycast/utils": "^1.18.0",
     "axios": "^0.26.1",
     "luxon": "^3.1.1",
-    "mattermost-redux": "5.31.2",
-    "run-applescript": "^6.0.0"
+    "mattermost-redux": "5.31.2"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
     "@types/luxon": "^3.1.0",
     "@types/node": "^20.8.10",
     "@types/react": "^18.3.3",
-    "@raycast/eslint-config": "1.0.5",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
     "react": "^18.2.0",

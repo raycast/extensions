@@ -1,9 +1,15 @@
 # Mattermost Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Enhancements] - {PR_MERGE_DATE}
 
-- fix: `Search Channel` not loading when ZERO channels
-- update dependencies
+- Fix: `Search Channel` not loading when ZERO channels (and related)
+- `signIn` function is now `async`
+- Show better error message when Authorization fails
+- `usePromise` in `withAuthorization` component for better control
+- In `search-channels` you can specify in Preferences whether to launch installed Mattermost application or not
+- Fix: various typos
+- Add an `Axios` intercept for robust error handling
+- Update dependencies
 
 ## [Fix] - 2023-10-03
 

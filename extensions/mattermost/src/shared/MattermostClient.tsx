@@ -1,5 +1,5 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import {
   UserProfile,
   Team,
@@ -16,6 +16,14 @@ axios.interceptors.request.use((config) => {
   console.log(config.url, config.params ?? config.data ?? "");
   return config;
 });
+axios.interceptors.response.use(function (response) {
+  return response;
+}, function (error: AxiosError<{ "status_code": number; id: string; message: string; request_id: string }>) {
+  const data = error.response?.data;
+  if (data) return Promise.reject(new Error(data.message));
+  return Promise.reject(error);
+});
+
 
 export class MattermostClient {
   static baseUrl(): string {
@@ -34,7 +42,7 @@ export class MattermostClient {
   }
 
   static async wakeUpSession(): Promise<boolean> {
-    return LocalStorage.getItem<string>("mattermost-token").then((token) => {
+    return await LocalStorage.getItem<string>("mattermost-token").then((token) => {
       if (token !== undefined) {
         this.token = token;
         console.log("successfull wakeup session");
@@ -44,10 +52,14 @@ export class MattermostClient {
     });
   }
 
-  static signIn(): Promise<void> {
+  // static handleError(error: AxiosError<{ "status_code": number; id: string; message: string; request_id: string }>) {
+
+  // }
+
+  static async signIn(): Promise<void> {
     const preference = getPreferenceValues<Preferences>();
     const [username, password] = preference.credentials.split(":");
-    return axios
+    const response = await axios
       .post<UserProfile>(
         "/users/login",
         JSON.stringify({
@@ -55,14 +67,12 @@ export class MattermostClient {
           password: password,
         }),
         MattermostClient.config()
-      )
-      .then((response) => {
-        const token = response.headers["token"];
-        console.log(response.statusText);
-        MattermostClient.token = token;
-        console.log("successfull login");
-        return LocalStorage.setItem("mattermost-token", token);
-      });
+      );
+    const token = response.headers["token"];
+    console.log(response.statusText);
+    MattermostClient.token = token;
+    console.log("successfull login");
+    return await LocalStorage.setItem("mattermost-token", token);
   }
 
   static async login(): Promise<void> {
