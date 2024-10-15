@@ -1,3 +1,4 @@
+import React from 'react';
 import { ActionPanel, Action, List, showToast, Toast, Form, useNavigation, LocalStorage } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
@@ -61,7 +62,7 @@ function TokenForm() {
   );
 }
 
-export default function Command() {
+export default function Command(): React.ReactElement {
   const [searchText, setSearchText] = useState("");
   const [ipInfo, setIpInfo] = useState<IPInfo | null>(null);
   const [apiToken, setApiToken] = useState<string | null>(null);
@@ -128,13 +129,13 @@ export default function Command() {
       />
       {ipInfo && (
         <List.Section title="IP Information">
-          <List.Item title="IP Address:" subtitle={ipInfo.ip} />
-          <List.Item title="Hostname:" subtitle={ipInfo.hostname} />
-          <List.Item title="Location:" subtitle={`${ipInfo.city}, ${ipInfo.region}, ${ipInfo.country}`} />
-          <List.Item title="Coordinates:" subtitle={ipInfo.loc} />
-          <List.Item title="Organization:" subtitle={ipInfo.org} />
-          <List.Item title="Postal Code:" subtitle={ipInfo.postal} />
-          <List.Item title="Timezone:" subtitle={ipInfo.timezone} />
+          <List.Item title="IP Address" subtitle={ipInfo.ip} />
+          <List.Item title="Hostname" subtitle={ipInfo.hostname} />
+          <List.Item title="Location" subtitle={`${ipInfo.city}, ${ipInfo.region}, ${ipInfo.country}`} />
+          <List.Item title="Coordinates" subtitle={ipInfo.loc} />
+          <List.Item title="Organization" subtitle={ipInfo.org} />
+          <List.Item title="Postal Code" subtitle={ipInfo.postal} />
+          <List.Item title="Timezone" subtitle={ipInfo.timezone} />
         </List.Section>
       )}
     </List>
