@@ -101,7 +101,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
 
   if (aiIsLoading && searchResult.length === 0) {
     return (
-      <Grid isLoading={aiIsLoading}>
+      <Grid isLoading={aiIsLoading} onSearchTextChange={setSearchString}>
         <Grid.EmptyView icon={Icon.Stars} title="Searching through AI..." />
       </Grid>
     );

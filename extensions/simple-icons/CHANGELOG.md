@@ -1,5 +1,9 @@
 # Brand Icons Changelog
 
+## [Fixes] - 2024-10-16
+
+- Fix the issue where AI search could not be stopped
+
 ## [AI & Chore] - 2024-10-14
 
 - Add support for searching icons through AI with Raycast Pro
