@@ -14,7 +14,8 @@
       "name": "index",
       "title": "Convert to BS",
       "description": "Converts today's date to BS",
-      "mode": "no-view"
+      "mode": "no-view",
+      "interval": "1d"
     }
   ],
   "dependencies": {
