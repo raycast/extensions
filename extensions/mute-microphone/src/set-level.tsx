@@ -6,6 +6,8 @@ import {
   launchCommand,
   LaunchType,
   openCommandPreferences,
+  showToast,
+  Toast,
 } from "@raycast/api";
 import { setAudioInputLevel } from "./utils";
 
@@ -33,8 +35,20 @@ export default async function setLevel(props: LaunchProps<{ arguments: Arguments
     assignedLevel = defaultLevel;
   }
 
-  await setAudioInputLevel(assignedLevel.toString());
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: `Setting audio input…`,
+  });
+  try {
+    await setAudioInputLevel(assignedLevel.toString());
+    toast.style = Toast.Style.Success;
+    toast.title = `Audio input set to ${assignedLevel.toString()}`;
+  } catch {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Failed to set the input level";
+  }
 
+  // showHUD(`Audio input set to ${assignedLevel.toString()}`);
   try {
     await launchCommand({ name: "mute-menu-bar", type: LaunchType.Background });
   } catch {

@@ -54,7 +54,7 @@ export default function muteMenuBar() {
         <MenuBarExtra.Item title={menuItemText} onAction={handleToggleIconButton} />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item title="Set default level" onAction={openExtensionPreferences} />
+        <MenuBarExtra.Item title="Configure default level" onAction={openExtensionPreferences} />
         <MenuBarExtra.Item icon={Icon.Gear} title="Settings" onAction={openCommandPreferences} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
