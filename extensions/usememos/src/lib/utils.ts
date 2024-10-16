@@ -10,7 +10,8 @@ function getContentHash(content: string): string {
 }
 
 export async function getSummaryStream(memo: Memo) {
-  const { openAiApiKey, openAiBasePath, model, language } = getPreferenceValues<ExtensionPreferences>();
+  const { openAiApiKey, openAiBasePath, model, language } =
+    getPreferenceValues<ExtensionPreferences>();
   const contentHash = getContentHash(memo.content);
   const cachedSummary = cache.get(`summary-${contentHash}`);
 
