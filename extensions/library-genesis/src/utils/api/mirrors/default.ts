@@ -117,26 +117,34 @@ const parseBookFromFictionTable = (row: Cheerio<Element>, libgenUrl?: string): B
   const contentCols = bookElement.children("td");
   libgenUrl = libgenUrl ? libgenUrl : DEFAULT_MIRROR.name;
 
-  const author = contentCols.eq(0).text();
-
-  const downloadUrl = contentCols.eq(5).find("a").first().attr("href") || "";
-  const md5 = downloadUrl.split("/").at(-1);
-
+  //col 1
+  const author = contentCols.eq(0).find("a").first().text();
+  // col 3
+  const titleCol = contentCols.eq(2);
+  const infoUrl = libgenUrl + titleCol.find("a").first().attr("href");
+  const title = titleCol.find("a").first().text();
+  const isbn = titleCol.find("p.catalog_identifier").first().text().replace("ISBN: ", "");
+  // col 4
+  const language = contentCols.eq(3).text();
+  // col 5
   const fileCol = contentCols.eq(4).text().trim().split("/");
   const extension = fileCol[0];
   const fileSize = fileCol[1];
+  // col 6
+  const downloadUrl = contentCols.eq(5).find("a").first().attr("href") || "";
+  const md5 = downloadUrl.split("/").at(-1);
 
-  const coverUrl = libgenUrl + `/fictioncovers/1253000/${md5?.toLowerCase()}.jpg`;
+  const coverUrl = libgenUrl + "/static/no_cover.png";
 
   const book: BookEntry = {
-    title: contentCols.eq(2).find("a").first().text(),
+    title: title,
     author: author || "N/A",
     year: "N/A",
     edition: "N/A",
     downloadUrl: downloadUrl,
-    infoUrl: libgenUrl + contentCols.eq(2).find("a").first().attr("href") || "",
+    infoUrl: infoUrl || "",
     pages: "N/A",
-    language: contentCols.eq(3).text(),
+    language: language,
     publisher: "N/A",
     fileSize: fileSize,
     extension: extension,
@@ -145,7 +153,7 @@ const parseBookFromFictionTable = (row: Cheerio<Element>, libgenUrl?: string): B
     id: "N/A",
     timeAdded: "N/A",
     timeLastModified: "N/A",
-    isbn: contentCols.eq(2).find("p.catalog_identifier").first().text().replace("ISBN: ", "") || "N/A",
+    isbn: isbn || "N/A",
   };
   return book;
 };

@@ -7,9 +7,9 @@
   2. ⚠️ do not show all the information e.g. no dates
   3. ✅ supports downloading
   4. ✅ supports opening in browser
-  5. ✅ supports book cover (if present)
+  5. ⚠️ no book cover
 - NOTE: Changing the type will not trigger the search again - you will need to re-type to get new results
-- removed `libgen.rs` as it seems to be active - may be brought back in future
+- removed `libgen.rs` as it seems to be inactive - may be brought back in future
 
 ## [Ignore HTTPS Errors] - 2024-02-17
 
