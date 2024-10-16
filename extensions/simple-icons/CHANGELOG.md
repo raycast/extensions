@@ -1,6 +1,6 @@
 # Brand Icons Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2024-10-16
 
 - Fix the issue where AI search could not be stopped
 
