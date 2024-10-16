@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react'
-import {getApplications} from '@raycast/api'
+import {getApplications, showToast, Toast, open} from '@raycast/api'
 import {type AsyncState} from '@raycast/utils'
 
 export function useInstalled(bundleId: string): AsyncState<boolean> {
@@ -15,5 +15,22 @@ export function useInstalled(bundleId: string): AsyncState<boolean> {
     }, [])
 
     if (isInstalled === null) return {isLoading: true}
+
+    // show download link
+    if (!isInstalled) {
+        showToast({
+            style: Toast.Style.Failure,
+            title: 'Flighty not installed.',
+            message: 'Install from the App Store.',
+            primaryAction: {
+                title: 'Open in App Store',
+                onAction: (toast) => {
+                    open('https://apps.apple.com/app/id1358823008')
+                    toast.hide()
+                },
+            },
+        })
+    }
+
     return {isLoading: false, data: isInstalled}
 }

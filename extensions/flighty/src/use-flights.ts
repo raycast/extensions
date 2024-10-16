@@ -134,14 +134,13 @@ export function useFlights(): AsyncState<Flight[]> {
 export function getAllYears(allFlights: Flight[] | undefined): number[] | undefined {
     if (!allFlights) return undefined
 
-    return allFlights.reduce((acc, flight) => {
+    const currentDate = dayjs()
+    const uniqueYears = new Set<number>()
+
+    for (const flight of allFlights) {
         const date = dayjs.unix(flight.depTimeOriginal)
+        if (date.isBefore(currentDate)) uniqueYears.add(date.year())
+    }
 
-        // skip future flights
-        if (date.isAfter(dayjs())) return acc
-
-        const year = date.year()
-        if (!acc.includes(year)) acc.push(year)
-        return acc
-    }, [] as number[])
+    return Array.from(uniqueYears).toSorted((a, b) => b - a)
 }
