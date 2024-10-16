@@ -8,8 +8,10 @@ export interface Link {
 }
 
 export interface Preferences {
-  language: "en" | "zh";
-  showWebsitePreview: boolean;
+  host: string;
+  token: string;
+  showWebsitePreview: string;
+  language: string;
 }
 
 export interface Config {

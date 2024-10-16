@@ -15,7 +15,6 @@ interface LinkItemProps {
 
 export function LinkItem({ link, config, onRefresh, onCleanCache }: LinkItemProps) {
   const { t } = useTranslation();
-
   const BASE_URL = config?.host;
   const showWebsitePreview = config?.showWebsitePreview === "true" ? true : false;
   const rightAccessories: List.Item.Accessory[] = [{ text: new Date(link.createdAt * 1000).toLocaleDateString() }];
@@ -35,6 +34,7 @@ export function LinkItem({ link, config, onRefresh, onCleanCache }: LinkItemProp
       actions={
         <ActionPanel>
           <Action.Push
+            icon={Icon.Paragraph}
             target={<LinkDetail link={link} onRefresh={onRefresh} />}
             title={t.viewLinkDetails || "View Link Details"}
           />

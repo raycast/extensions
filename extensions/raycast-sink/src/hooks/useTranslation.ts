@@ -1,176 +1,55 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { LocalStorage } from "@raycast/api";
-
-const translations = {
-  en: {
-    createShortLink: "Create Short Link",
-    queryShortLink: "Query Short Link",
-    viewAllShortLinks: "View All Short Links",
-    settings: "Settings",
-    linkListCount: "Link List Count",
-    searchBarPlaceholder: "Search links...",
-    noLinks: "No Links",
-    createLinkDescription: "Create a new short link",
-    saveConfiguration: "Save Configuration",
-    apiHost: "API Host",
-    apiToken: "API Token",
-    enterApiHost: "Enter API host URL",
-    enterApiToken: "Enter your API token",
-    showWebsitePreview: "Website Preview",
-    showWebsitePreviewDescription: "Show website preview icon in the link list",
-    configurationStatus: "Configuration Status",
-    notFound: "Not Found",
-    validating: "Validating",
-    notValidated: "Not Validated",
-    valid: "Valid",
-    invalid: "Invalid",
-    configurationIncomplete: "Configuration is incomplete",
-    configurationValidationSucceeded: "Configuration validation succeeded",
-    configurationValidationFailed: "Configuration validation failed",
-    configurationSaved: "Configuration saved",
-    configurationSaveFailed: "Failed to save configuration",
-    verifyConfiguration: "Verify Configuration",
-    language: "Language",
-    linkCreated: "Short link created",
-    linkCreationFailed: "Failed to create short link",
-    linkNotFound: "Link not found",
-    linkQueryFailed: "Failed to query link",
-    targetUrl: "Target URL",
-    enterTargetUrl: "Enter target URL",
-    customSlug: "Custom Slug (optional)",
-    enterCustomSlug: "Enter custom slug",
-    slug: "Slug",
-    enterSlug: "Enter slug to query",
-    errorFetchingLinks: "Error fetching links",
-    shortLink: "Short Link",
-    createdAt: "Created At",
-    updatedAt: "Updated At",
-    copyShortLink: "Copy Short Link",
-    refreshCache: "Refresh Cache",
-    refreshList: "Refresh List",
-    clearCache: "Clear Cache",
-    back: "Back",
-    searchSlugPlaceholder: "Search short link or enter slug",
-    searchOnline: (slug: string) => `Search online for "${slug}"`,
-    search: "Search",
-    viewDetails: "View Details",
-    url: "URL",
-    enterUrl: "Enter the URL to shorten",
-    urlRequired: "URL is required",
-    comment: "Comment",
-    enterComment: "Enter comment",
-    deleteLink: "Delete Link",
-    deleting: "Deleting",
-    deleteSuccess: "Delete Success",
-    deleteFailed: "Delete Failed",
-    editLink: "Edit Link",
-    updateLink: "Update Link",
-    managerUrl: "Manager URL",
-    linkUpdated: "Link updated",
-    linkUpdateFailed: "Failed to update link",
-    slugRequired: "Slug is required",
-    invalidUrl: "Invalid URL",
-    viewLinkDetails: "View Link Details",
-    openShortLink: "Open Short Link",
-    openTargetUrl: "Open Target URL",
-    toBeValidated: "To be validated",
-    error: "Error",
-  },
-  zh: {
-    createShortLink: "创建短链接",
-    queryShortLink: "查询短链接",
-    viewAllShortLinks: "查看所有短链接",
-    settings: "设置",
-    linkListCount: "链接数量",
-    searchBarPlaceholder: "搜索链接...",
-    noLinks: "没有找到链接",
-    notFound: "未找到",
-    createLinkDescription: "创建一个短链接",
-    saveConfiguration: "保存配置",
-    apiHost: "API 主机",
-    apiToken: "API 令牌",
-    enterApiHost: "输入 API 主机 URL",
-    enterApiToken: "输入您的 API 令牌",
-    showWebsitePreview: "网站图标",
-    showWebsitePreviewDescription: "在链接列表中显示网站图标",
-    configurationStatus: "配置状态",
-    validating: "验证中",
-    notValidated: "未验证",
-    valid: "有效",
-    invalid: "无效",
-    configurationIncomplete: "配置不完整",
-    configurationValidationSucceeded: "配置验证成功",
-    configurationValidationFailed: "配置验证失败",
-    configurationSaved: "配置已保存",
-    configurationSaveFailed: "保存配置失败",
-    verifyConfiguration: "验证配置",
-    language: "语言",
-    linkCreated: "短链接创建成功",
-    linkCreationFailed: "创建短链接失败",
-    linkNotFound: "未找到短链接",
-    linkQueryFailed: "查询短链接失败",
-    targetUrl: "目标 URL",
-    enterTargetUrl: "输入目标 URL",
-    customSlug: "自定义 Slug（可选）",
-    enterCustomSlug: "输入自定义 slug",
-    slug: "短链 slug",
-    enterSlug: "请输入新建短链接的标签",
-    errorFetchingLinks: "获取链接时出错",
-    shortLink: "短链接",
-    createdAt: "创建时间",
-    updatedAt: "更新时间",
-    copyShortLink: "复制短链接",
-    refreshCache: "刷新缓存",
-    refreshList: "刷新列表",
-    clearCache: "清除缓存",
-    back: "返回",
-    searchSlugPlaceholder: "搜索短链接或输入 slug",
-    searchOnline: (slug: string) => `在线搜索 "${slug}"`,
-    search: "搜索",
-    viewDetails: "查看详情",
-    url: "URL",
-    enterUrl: "输入要缩短的完整 URL",
-    urlRequired: "URL 不能为空",
-    slugRequired: "短链接不能为空",
-    comment: "备注",
-    enterComment: "输入备注",
-    deleteLink: "删除链接",
-    deleteFailed: "删除失败",
-    deleteSuccess: "删除成功",
-    deleting: "删除中",
-    editLink: "编辑链接",
-    updateLink: "更新链接",
-    managerUrl: "管理链接",
-    linkUpdated: "链接更新成功",
-    linkUpdateFailed: "链接更新失败",
-    invalidUrl: "无效的 URL",
-    viewLinkDetails: "查看链接详情",
-    openShortLink: "打开短链接",
-    openTargetUrl: "打开目标 URL",
-    toBeValidated: "待验证",
-    error: "错误",
-  },
-};
+import { translations, Language } from "../i18n";
+import { useConfig } from "./useConfig";
 
 export function useTranslation() {
-  const [language, setLanguage] = useState<"en" | "zh">("en");
+  const { config, updateConfig } = useConfig();
+  const [language, setLanguage] = useState<Language>((config?.language as Language) || "en");
+  const [t, setT] = useState(translations[language]);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
-    LocalStorage.getItem<"en" | "zh">("language").then((savedLanguage) => {
-      if (savedLanguage) {
-        setLanguage(savedLanguage);
+    const loadLanguage = async () => {
+      try {
+        const cachedLanguage = await LocalStorage.getItem<Language>("language");
+        if (cachedLanguage && cachedLanguage !== language) {
+          setLanguage(cachedLanguage);
+          setT(translations[cachedLanguage]);
+        }
+      } catch (error) {
+        console.error("Error loading language:", error);
       }
-    });
-  }, []);
+    };
 
-  const setNewLanguage = async (newLanguage: "en" | "zh") => {
-    await LocalStorage.setItem("language", newLanguage);
-    setLanguage(newLanguage);
-  };
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      loadLanguage();
+    }
+  }, [language]);
+
+  useEffect(() => {
+    if (!isInitialMount.current && config?.language && config.language !== language) {
+      setLanguage(config.language as Language);
+      setT(translations[config.language as Language]);
+    }
+  }, [config?.language]);
+
+  const changeLanguage = useCallback(
+    async (newLanguage: Language) => {
+      if (newLanguage !== language) {
+        setLanguage(newLanguage);
+        setT(translations[newLanguage]);
+        await updateConfig({ language: newLanguage });
+        await LocalStorage.setItem("language", newLanguage);
+      }
+    },
+    [language, updateConfig],
+  );
 
   return {
-    t: translations[language],
+    t,
     language,
-    setLanguage: setNewLanguage,
+    setLanguage: changeLanguage,
   };
 }

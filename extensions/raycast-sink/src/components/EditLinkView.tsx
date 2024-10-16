@@ -3,7 +3,7 @@ import { Form, ActionPanel, Action, useNavigation, showToast, Toast } from "@ray
 import { Link } from "../types";
 import { editLink } from "../utils/api";
 import { useTranslation } from "../hooks/useTranslation";
-
+import {} from "../hooks/useConfig";
 interface EditLinkViewProps {
   link: Link;
   onEditSuccess: (updatedLink: Link) => void;
@@ -38,7 +38,7 @@ export function EditLinkView({ link, onEditSuccess }: EditLinkViewProps) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={`${t.editLink}: ${link.slug}`} onSubmit={handleSubmit} />
+          <Action.SubmitForm title={`${t.editLink}:${link.slug}`} onSubmit={handleSubmit} />
         </ActionPanel>
       }
       isLoading={isLoading}

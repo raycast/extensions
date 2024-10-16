@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { setApiConfig, checkTokenValid } from "../utils/api";
 import { useTranslation } from "../hooks/useTranslation";
 import { setCachedLinks } from "../utils/cache";
-
 interface ConfigViewProps {
   onConfigured: (isConfigured: boolean) => void;
 }
@@ -17,6 +16,7 @@ interface Config {
 
 export function ConfigView({ onConfigured }: ConfigViewProps) {
   const { pop } = useNavigation();
+
   const { t, language, setLanguage } = useTranslation();
   const [config, setConfig] = useState<Config>({
     host: "",

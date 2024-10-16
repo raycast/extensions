@@ -73,7 +73,7 @@ ${managerUrl}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser url={link.url} />
+            <Action.OpenInBrowser title={t.openTargetUrl} url={link.url} />
             <Action.CopyToClipboard title={t.copyShortLink} content={shortLink} />
             <Action.Push
               title={t.editLink}

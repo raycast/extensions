@@ -1,76 +1,65 @@
-import { useState, useEffect } from "react";
-import { LocalStorage, getPreferenceValues, showToast, Toast } from "@raycast/api";
-
-import { Config } from "../types";
-
-interface Preferences {
-  host: string;
-  token: string;
-  showWebsitePreview: string;
-  language: string;
-}
-
-const CONFIG_INITIALIZED_KEY = "config_initialized";
+import { useState, useEffect, useCallback } from "react";
+import { LocalStorage, getPreferenceValues } from "@raycast/api";
+import { CONFIG_INITIALIZED_KEY } from "../constants";
+import { Config, Preferences } from "../types";
+const CONFIG_KEYS: (keyof Config)[] = ["host", "token", "showWebsitePreview", "language"];
 
 export function useConfig() {
   const [config, setConfig] = useState<Config | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const loadConfig = useCallback(async () => {
+    try {
+      const initialized = await LocalStorage.getItem(CONFIG_INITIALIZED_KEY);
 
-  useEffect(() => {
-    async function loadConfig() {
-      try {
-        const initialized = await LocalStorage.getItem(CONFIG_INITIALIZED_KEY);
-
-        if (!initialized) {
-          const preferences = getPreferenceValues<Preferences>();
-          await LocalStorage.setItem("host", preferences.host);
-          await LocalStorage.setItem("token", preferences.token);
-          await LocalStorage.setItem(CONFIG_INITIALIZED_KEY, "true");
-        }
-
-        // 从 LocalStorage 读取配置
-        const newConfig: Config = {
-          host: (await LocalStorage.getItem<string>("host")) || "",
-          token: (await LocalStorage.getItem<string>("token")) || "",
-          showWebsitePreview: (await LocalStorage.getItem<string>("showWebsitePreview")) || "true",
-          language: (await LocalStorage.getItem<string>("language")) || "en",
-        };
-
-        setConfig(newConfig);
-
-        // 检查配置是否完整
-        if (!newConfig.host || !newConfig.token) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Configuration incomplete",
-            message: "Please fill in Host and Token in the plugin settings",
-          });
-        }
-      } catch (error) {
-        console.error(":", error);
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Load config failed",
-          message: "Please check network connection or restart the app",
-        });
-      } finally {
-        setIsLoading(false);
+      if (!initialized) {
+        const preferences = getPreferenceValues<Preferences>();
+        await Promise.all([
+          LocalStorage.setItem("host", preferences.host),
+          LocalStorage.setItem("token", preferences.token),
+          LocalStorage.setItem("language", preferences.language || "en"),
+          LocalStorage.setItem("showWebsitePreview", preferences.showWebsitePreview || "true"),
+          LocalStorage.setItem(CONFIG_INITIALIZED_KEY, "true"),
+        ]);
       }
-    }
 
-    loadConfig();
+      const newConfig = (await Promise.all(
+        CONFIG_KEYS.map(async (key) => [key, await LocalStorage.getItem<string>(key)]),
+      ).then(Object.fromEntries)) as Config;
+
+      newConfig.showWebsitePreview = newConfig.showWebsitePreview || "true";
+      newConfig.language = newConfig.language || "en";
+      setConfig(newConfig);
+    } catch (error) {
+      console.error("Config validation failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  const updateConfig = async (newConfig: Partial<Config>) => {
-    if (config) {
-      const updatedConfig = { ...config, ...newConfig };
-      setConfig(updatedConfig);
+  useEffect(() => {
+    loadConfig();
+  }, [loadConfig]);
 
-      await Promise.all(
-        Object.entries(updatedConfig).map(([key, value]) => LocalStorage.setItem(key, value.toString())),
-      );
-    }
-  };
+  const updateConfig = useCallback(
+    async (newConfig: Partial<Config>) => {
+      if (config) {
+        const updatedConfig = { ...config, ...newConfig };
+        setConfig(updatedConfig);
 
-  return { config, isLoading, updateConfig };
+        await Promise.all(
+          Object.entries(updatedConfig).map(([key, value]) => LocalStorage.setItem(key, value.toString())),
+        );
+      }
+    },
+    [config],
+  );
+
+  const getConfigValue = useCallback(
+    (key: keyof Config) => {
+      return config ? config[key] : null;
+    },
+    [config],
+  );
+
+  return { config, isLoading, updateConfig, reloadConfig: loadConfig, getConfigValue };
 }
