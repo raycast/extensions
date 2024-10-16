@@ -10,7 +10,10 @@ export class UseApiResponseError extends UseApiError {}
 export abstract class UseApiRequestError extends UseApiError {}
 export class UseApiRequestMissingApiKeyError extends UseApiRequestError {}
 
-const useApi = <T,>(url: string) => {
+export type UseApiOptions<T> = Parameters<typeof useFetch<T>>[1];
+
+const useApi = <T,>(url: string, options: UseApiOptions<T> = {}) => {
+  const { headers: optionsHeaders, ...useFetchOptions } = options;
   const hint: Hint = { data: { request: `${url}` } };
 
   let error: UseApiError | undefined;
@@ -33,8 +36,9 @@ const useApi = <T,>(url: string) => {
         Authorization: `Bearer ${apiToken}`,
         "Content-Type": "application/json",
         Accept: "application/json",
+        ...optionsHeaders,
       }),
-      [apiToken]
+      [apiToken, optionsHeaders]
     );
 
     const result = {
@@ -42,6 +46,7 @@ const useApi = <T,>(url: string) => {
       ...useFetch<T>(`${apiUrl}${url}`, {
         headers,
         keepPreviousData: true,
+        ...useFetchOptions,
       }),
     };
 

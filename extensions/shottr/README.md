@@ -13,7 +13,7 @@ Shottr is a tiny and fast mac screenshot tool with annotations, beautiful backgr
 ## Table of Contents
 - [Introduction](#introduction)
 - [Installation and Setup](#installation-and-setup)
-- [Using CleanShot X](#using-cleanshot-x)
+- [Using Shottr](#using-shottr)
   - [Screen Capture Features](#screen-capture-features)
   - [Recording Features](#recording-features)
 - [Troubleshooting](#troubleshooting)

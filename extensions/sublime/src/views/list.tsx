@@ -38,18 +38,20 @@ export default function CardsList({
             {cards?.map((item) => (
                 <List.Item
                     key={item.uuid}
-                    title={item.name || item.text || item.description || item.smart_title?.[0] || ""}
+                    title={
+                        item.info?.content || item.name || item.text || item.description || item.smart_title?.[0] || ""
+                    }
                     // subtitle={item.text || item.description}
                     accessories={[{ tag: getCardType(item.entity_type) }]}
                     icon={getEntityIcon(item)}
                     detail={
                         <List.Item.Detail
                             markdown={
-                                item.thumbnail
-                                    ? `<img alt="Card image" src="${item.thumbnail}" />`
-                                    : (item.name ? `# ${item.name}\n` : "") + item.markdown
-
-                                // `> ${JSON.stringify(item, null, 2)}`
+                                (item.name ? `# ${item.name}\n` : "") +
+                                item.markdown +
+                                // Show thumbnail after text to avoid layout change
+                                (item.thumbnail ? `<img alt="Card image" src="${item.thumbnail}" />` : "")
+                                // `\n\n> ${JSON.stringify(item, null, 2)}`
                             }
                             metadata={
                                 <List.Item.Detail.Metadata>
