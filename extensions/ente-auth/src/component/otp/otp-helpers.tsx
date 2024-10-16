@@ -1,32 +1,27 @@
 import {
   Action,
-  confirmAlert,
-  getPreferenceValues,
-  open,
-  openCommandPreferences,
+  getPreferenceValues
 } from "@raycast/api";
+import * as fs from "fs/promises";
 import {
   addToCache,
   checkIfCached,
   getFromCache,
-  RECENTLY_USED,
+  RECENTLY_USED
 } from "../../cache";
-import { Service } from "../../util/service";
 import { compareByDate, compareByName, toId } from "../../util/compare";
-import { EnteAuthDB } from "../../util/EnteAuthDB";
+import { Service } from "../../util/service";
 
 const {
   excludeNames: excludeNamesCsv = "",
   primaryActionIsCopy,
   recentlyUsedOrder,
   enteAuthDbPath,
-  enteAuthPassword,
 } = getPreferenceValues<{
   excludeNames: string;
   primaryActionIsCopy: boolean;
   recentlyUsedOrder: boolean;
   enteAuthDbPath: string;
-  enteAuthPassword: string;
 }>();
 
 /**
@@ -46,31 +41,73 @@ export type setItemsFunction = (
     | { otpList: Service[]; isLoading: boolean }
 ) => void;
 
+interface TOTPParams {
+  secret: string;
+  algorithm: Algorithm;
+  digits: number;
+  period: number;
+}
+
+type Algorithm = 'sha1' | 'sha256' | 'sha512';
+
+export function parseOTPURI(uri: string): TOTPParams {
+  const url = new URL(uri);
+  const secret = url.searchParams.get('secret');
+  const algorithmStr = url.searchParams.get('algorithm')?.toLowerCase() || 'sha1';
+  const digits = parseInt(url.searchParams.get('digits') || '6', 10);
+  const period = parseInt(url.searchParams.get('period') || '30', 10);
+
+  if (!secret) {
+    throw new Error('Secret is missing from the URI');
+  }
+
+  let algorithm: Algorithm;
+  switch (algorithmStr) {
+    case 'sha1':
+    case 'sha256':
+    case 'sha512':
+      algorithm = algorithmStr;
+      break;
+    default:
+      throw new Error(`Unsupported algorithm: ${algorithmStr}`);
+  }
+
+  return { secret, algorithm, digits, period };
+}
+
+export function extractOtpIssuer(url: string): string {
+  const parsedUrl = new URL(url);
+
+  if (parsedUrl.protocol !== 'otpauth:' || parsedUrl.hostname !== 'totp') {
+    return 'Invalid OTP URL format';
+  }
+
+  const issuer = parsedUrl.searchParams.get('issuer');
+
+  if (!issuer) {
+    return 'Issuer not found in the URL';
+  }
+
+  return issuer;
+}
+
 /**
- * Loads OTP services to show, sort and exclude values from extension propertiesz
+ * Loads OTP services to show, sort and exclude values from extension properties
  */
 export async function loadData(setItems: setItemsFunction): Promise<void> {
   try {
-    //load Ente Auth
-    const enteAuthDB = new EnteAuthDB(enteAuthDbPath);
-    //Load the database
-    await enteAuthDB.loadDb();
+    const fileContent = await fs.readFile(enteAuthDbPath, "utf8");
+    const services = fileContent.trim().split("\n");
 
-    //Decrypt the database
-    const db_entries = await enteAuthDB.decryptDb(enteAuthPassword);
-    const otpServices: Service[] = db_entries.map((i) => {
+    const otpServices: Service[] = services.map((s) => {
+      const name = extractOtpIssuer(s);
+      const otp = parseOTPURI(s);
+
       return {
-        id: i.uuid,
-        name: i.name,
-        digits: i.info.digits,
-        period: i.info.period,
-        seed: i.info.secret,
-        accountType: "service",
-        issuer: i.issuer,
-        // logo: i.logo,
-        logo: i.icon,
-        logo_mime: i.icon_mime,
-        type: "service",
+        name: name,
+        digits: otp.digits,
+        period: otp.period,
+        seed: otp.secret,
       };
     });
 
@@ -82,30 +119,6 @@ export async function loadData(setItems: setItemsFunction): Promise<void> {
     setItems({
       otpList: [],
       isLoading: false,
-    });
-  }
-}
-
-/**
- *
- */
-export async function checkError(otpList: Service[], isLoading: boolean) {
-  // if (otpList.length === 0) return;
-  if (isLoading) return;
-
-  // filter out all the corrupted otp
-  const all = otpList.filter(
-    (otp) => otp.type == "service" && otp.seed != null
-  );
-  // if none of the otp are valid assume there is a problem with the password
-  if (all.length === 0) {
-    confirmAlert({
-      title: "No valid OTP",
-      message: "Check your Ente Auth Encryption Password in settings",
-      primaryAction: {
-        title: "Open Preferences",
-        onAction: () => openCommandPreferences(),
-      },
     });
   }
 }

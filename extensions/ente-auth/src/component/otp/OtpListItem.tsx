@@ -22,10 +22,10 @@ export default function OtpListItem({
   const otp =
     item.seed != null
       ? generateTOTP(item.seed, {
-          digits: item.digits,
-          period: item.period,
-          timestamp: new Date().getTime(),
-        })
+        digits: item.digits,
+        period: item.period,
+        timestamp: new Date().getTime(),
+      })
       : CORRUPTED;
   const subtitle = item.issuer || item.accountType || "";
   const subtitleDisplay =
@@ -38,7 +38,9 @@ export default function OtpListItem({
     <List.Item
       title={item.name}
       subtitle={subtitleDisplay}
-      icon={icon(item)}
+      icon={{
+        source: { light: icon(item, 'black'), dark: icon(item, 'white') },
+      }}
       keywords={[subtitle]}
       actions={
         <ActionPanel>{otpActions(otp, item.id, index, setItems)}</ActionPanel>

@@ -19,7 +19,7 @@
   "commands": [
     {
       "name": "search-ente-auth-otp",
-      "title": "Search Token",
+      "title": "Search Ente Auth Token",
       "subtitle": "Ente Auth 2FA App",
       "description": "Search OTPs in your Ente Auth account",
       "mode": "view"
@@ -33,14 +33,6 @@
       "type": "file",
       "description": "Your Ente Database",
       "placeholder": "Enter path to your Ente Auth database"
-    },
-    {
-      "required": true,
-      "name": "enteAuthPassword",
-      "title": "Ente Auth Password",
-      "type": "password",
-      "description": "Your Ente Auth encryption Password",
-      "placeholder": "Enter your Ente Auth encryption password"
     },
     {
       "required": false,

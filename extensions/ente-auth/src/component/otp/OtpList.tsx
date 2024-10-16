@@ -1,14 +1,14 @@
 import {
-  ActionPanel,
   Action,
+  ActionPanel,
   Icon,
   List,
   openExtensionPreferences,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import OtpListItems from "./OtpListItems";
 import { Service } from "../../util/service";
-import { checkError, loadData } from "./otp-helpers";
+import { loadData } from "./otp-helpers";
+import OtpListItems from "./OtpListItems";
 
 export function OtpList() {
   const [items, setItems] = useState<{
@@ -22,11 +22,6 @@ export function OtpList() {
   useEffect(() => {
     loadData(setItems);
   }, []);
-
-  // error checking
-  useEffect(() => {
-    checkError(items.otpList, items.isLoading);
-  }, [items]);
 
   return (
     <List searchBarPlaceholder="Search" isLoading={items.isLoading}>
