@@ -15,24 +15,28 @@
     {
       "name": "list-people",
       "title": "List People",
+      "subtitle": "Twenty CRM",
       "description": "View all contacts in Twenty",
       "mode": "view"
     },
     {
       "name": "create-person",
       "title": "Create Person",
+      "subtitle": "Twenty CRM",
       "description": "Create a new contact",
       "mode": "view"
     },
     {
       "name": "create-company",
       "title": "Create Company",
+      "subtitle": "Twenty CRM",
       "description": "Create a new Company",
       "mode": "view"
     },
     {
       "name": "list-companies",
       "title": "List Companies",
+      "subtitle": "Twenty CRM",
       "description": "View all companies in Twenty",
       "mode": "view"
     }
