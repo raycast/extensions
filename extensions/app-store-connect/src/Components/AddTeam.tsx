@@ -4,15 +4,75 @@ import fs from "fs";
 import { fetchAppStoreConnect } from "../Hooks/useAppStoreConnect";
 import { presentError } from "../Utils/utils";
 import { useTeams, Team } from "../Model/useTeams";
-
+import { useForm, FormValidation } from "@raycast/utils";
 interface SignInProps {
   didSignIn: (team: Team) => void;
 }
 
 export default function AddTeam({ didSignIn }: SignInProps) {
   const [isCheckConnection, setIsCheckConnection] = useState(false);
-  const { selectCurrentTeam, addTeam } = useTeams();
+  const { selectCurrentTeam, addTeam, deleteTeam, currentTeam, teams } = useTeams();
 
+  interface FormValues {
+    privateKey: string[];
+    apiKey: string;
+    issuerID: string;
+    name: string;
+  }
+
+  const { handleSubmit, itemProps } = useForm<FormValues>({
+    initialValues: {
+      privateKey: [],
+      apiKey: "",
+      issuerID: "",
+      name: "",
+    },
+    onSubmit: async (values) => {
+      const file = values.privateKey[0];
+      if (!fs.existsSync(file) || !fs.lstatSync(file).isFile()) {
+        return;
+      }
+      setIsCheckConnection(true);
+
+      try {
+        const privateKeyContent = fs.readFileSync(file, "utf8");
+        const encodedPrivateKey = base64EncodePrivateKey(privateKeyContent);
+
+        const team: Team = {
+          name: values.name,
+          issuerID: values.issuerID,
+          apiKey: values.apiKey,
+          privateKey: encodedPrivateKey,
+        };
+
+        await addTeam(team);
+        await selectCurrentTeam(team);
+        await fetchAppStoreConnect("/apps");
+        didSignIn(team);
+        showToast({
+          style: Toast.Style.Success,
+          title: "Success!",
+          message: "Added team",
+        });
+      } catch (error) {
+        if (currentTeam) {
+          await deleteTeam(currentTeam);
+          if (teams.length > 0 && currentTeam.apiKey !== teams[teams.length - 1].apiKey) {
+            selectCurrentTeam(teams[teams.length - 1]);
+          }
+        }
+        presentError(error);
+      } finally {
+        setIsCheckConnection(false);
+      }
+    },
+    validation: {
+      privateKey: FormValidation.Required,
+      apiKey: FormValidation.Required,
+      issuerID: FormValidation.Required,
+      name: FormValidation.Required,
+    },
+  });
   return (
     <Form
       searchBarAccessory={
@@ -24,61 +84,18 @@ export default function AddTeam({ didSignIn }: SignInProps) {
       isLoading={isCheckConnection}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit"
-            onSubmit={(values: { privateKey: string[]; apiKey: string; issuerID: string; name: string }) => {
-              const file = values.privateKey[0];
-              if (!fs.existsSync(file) || !fs.lstatSync(file).isFile()) {
-                return false;
-              }
-              if (values.apiKey === undefined) {
-                return false;
-              }
-              if (values.issuerID === undefined) {
-                return false;
-              }
-              (async () => {
-                setIsCheckConnection(true);
-
-                const privateKeyContent = fs.readFileSync(file, "utf8");
-
-                const encodedPrivateKey = base64EncodePrivateKey(privateKeyContent);
-
-                const team: Team = {
-                  name: values.name,
-                  issuerID: values.issuerID,
-                  apiKey: values.apiKey,
-                  privateKey: encodedPrivateKey,
-                };
-
-                try {
-                  await addTeam(team);
-                  await selectCurrentTeam(team);
-                  await fetchAppStoreConnect("/apps");
-                  didSignIn(team);
-                  showToast({
-                    style: Toast.Style.Success,
-                    title: "Success!",
-                    message: "Added team",
-                  });
-                } catch (error) {
-                  presentError(error);
-                }
-                setIsCheckConnection(false);
-              })();
-            }}
-          />
+          <Action.SubmitForm title="Add Team" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextField
-        id="name"
-        placeholder="Team name"
+        title="Team name"
+        {...itemProps.name}
         info="Name of the team, this is only used for display purposes"
       />
-      <Form.TextField id="issuerID" placeholder="Issuer ID" />
-      <Form.TextField id="apiKey" placeholder="Key ID" />
-      <Form.FilePicker id="privateKey" title="Private key" allowMultipleSelection={false} />
+      <Form.TextField {...itemProps.issuerID} title="Issuer ID" />
+      <Form.TextField {...itemProps.apiKey} title="Key ID" />
+      <Form.FilePicker {...itemProps.privateKey} title="Private key" allowMultipleSelection={false} />
     </Form>
   );
 }

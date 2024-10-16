@@ -98,6 +98,7 @@ export const useTeams = () => {
       await LocalStorage.removeItem("privateKey");
       await LocalStorage.removeItem("issuerID");
       setCurrentTeam(undefined);
+      await deleteTeam(currentTeam);
       setTeams(await getTeams());
     }
   };

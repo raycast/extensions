@@ -4,6 +4,7 @@ import fs from "fs";
 import { fetchAppStoreConnect } from "../Hooks/useAppStoreConnect";
 import { presentError } from "../Utils/utils";
 import { useTeams, Team } from "../Model/useTeams";
+import { FormValidation, useForm } from "@raycast/utils";
 
 interface SignInProps {
   children: ReactNode;
@@ -30,6 +31,54 @@ export default function SignIn({ children, didSignIn }: SignInProps) {
     })();
   }, [didSignIn, currentTeam, isLoadingTeams]);
 
+  const { handleSubmit, itemProps } = useForm<{
+    privateKey: string[];
+    apiKey: string;
+    issuerID: string;
+    name: string;
+  }>({
+    onSubmit: async (values) => {
+      const file = values.privateKey[0];
+      if (!fs.existsSync(file) || !fs.lstatSync(file).isFile()) {
+        return;
+      }
+      if (!values.apiKey || !values.issuerID) {
+        return;
+      }
+
+      setIsCheckConnection(true);
+
+      const privateKeyContent = fs.readFileSync(file, "utf8");
+      const encodedPrivateKey = base64EncodePrivateKey(privateKeyContent);
+
+      const team: Team = {
+        name: values.name,
+        issuerID: values.issuerID,
+        apiKey: values.apiKey,
+        privateKey: encodedPrivateKey,
+      };
+
+      try {
+        await addTeam(team);
+        await selectCurrentTeam(team);
+        await fetchAppStoreConnect("/apps");
+        setIsAuthenticated(true);
+        didSignIn();
+      } catch (error) {
+        removeCurrentTeam();
+        presentError(error);
+      } finally {
+        setIsCheckConnection(false);
+      }
+    },
+    validation: {
+      name: FormValidation.Required,
+      issuerID: FormValidation.Required,
+      apiKey: FormValidation.Required,
+      privateKey: FormValidation.Required,
+    },
+  });
+
   if (isLoading) {
     return <Form></Form>;
   }
@@ -42,59 +91,18 @@ export default function SignIn({ children, didSignIn }: SignInProps) {
         isLoading={isCheckConnection}
         actions={
           <ActionPanel>
-            <Action.SubmitForm
-              title="Submit"
-              onSubmit={(values: { privateKey: string[]; apiKey: string; issuerID: string; name: string }) => {
-                const file = values.privateKey[0];
-                if (!fs.existsSync(file) || !fs.lstatSync(file).isFile()) {
-                  return false;
-                }
-                if (values.apiKey === undefined) {
-                  return false;
-                }
-                if (values.issuerID === undefined) {
-                  return false;
-                }
-                (async () => {
-                  setIsCheckConnection(true);
-
-                  const privateKeyContent = fs.readFileSync(file, "utf8");
-
-                  const encodedPrivateKey = base64EncodePrivateKey(privateKeyContent);
-
-                  const team: Team = {
-                    name: values.name,
-                    issuerID: values.issuerID,
-                    apiKey: values.apiKey,
-                    privateKey: encodedPrivateKey,
-                  };
-
-                  try {
-                    await addTeam(team);
-                    await selectCurrentTeam(team);
-                    await fetchAppStoreConnect("/apps");
-                    setIsAuthenticated(true);
-                    didSignIn();
-                  } catch (error) {
-                    removeCurrentTeam();
-                    presentError(error);
-                  }
-                  setIsCheckConnection(false);
-                  setIsLoading(false);
-                })();
-              }}
-            />
+            <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
           </ActionPanel>
         }
       >
         <Form.TextField
-          id="name"
-          placeholder="Team name"
+          title="Team name"
+          {...itemProps.name}
           info="Name of the team, this is only used for display purposes"
         />
-        <Form.TextField id="issuerID" placeholder="Issuer ID" />
-        <Form.TextField id="apiKey" placeholder="API Key" />
-        <Form.FilePicker id="privateKey" title="Private key" allowMultipleSelection={false} />
+        <Form.TextField title="Issuer ID" {...itemProps.issuerID} />
+        <Form.TextField title="API Key" {...itemProps.apiKey} />
+        <Form.FilePicker title="Private Key" allowMultipleSelection={false} {...itemProps.privateKey} />
       </Form>
     );
   }

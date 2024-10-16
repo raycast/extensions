@@ -22,7 +22,7 @@ interface VersionWithPlatform {
   version: string;
 }
 
-export default function InternalBetaGroupBuilds({ group, app }: Props) {
+export default function ExternalBetaGroupBuilds({ group, app }: Props) {
   const [selectedVersion, setSelectedVersion] = useState<VersionWithPlatform | undefined>(undefined);
 
   const [buildsPath, setBuildsPath] = useState<string | undefined>(undefined);
@@ -34,7 +34,7 @@ export default function InternalBetaGroupBuilds({ group, app }: Props) {
   const { data: preReleaseVersions, isLoading: isLoadingPreReleaseVersions } = useAppStoreConnectApi(
     `/preReleaseVersions?filter[app]=${app.id}&sort=-version&fields[preReleaseVersions]=builds,version,platform&limit=5`,
     (response) => {
-      return preReleaseVersionSchemas.safeParse(response).data ?? null;
+      return preReleaseVersionSchemas.safeParse(response.data).data ?? null;
     },
   );
 

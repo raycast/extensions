@@ -30,7 +30,7 @@ export default function InternalBetaGroupTesters({ group, app, didUpdateNewTeste
   );
   const [availableUsers, setAvailableUsers] = useState<User[]>();
   const [submitIsLoading, setSubmitIsLoading] = useState(false);
-  const { handleSubmit, itemProps, setValue } = useForm<InternalBetaGroupTestersFormValues>({
+  const { handleSubmit, itemProps } = useForm<InternalBetaGroupTestersFormValues>({
     onSubmit(values) {
       setSubmitIsLoading(true);
       (async () => {
@@ -129,12 +129,8 @@ export default function InternalBetaGroupTesters({ group, app, didUpdateNewTeste
       }
     >
       <Form.TagPicker
-        id="testers"
+        {...itemProps.testers }
         title="Add Existing Testers"
-        value={itemProps.testers.value}
-        onChange={(newValue) => {
-          setValue("testers", newValue);
-        }}
       >
         {availableUsers?.map((bg) => (
           <Form.TagPicker.Item

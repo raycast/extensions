@@ -1,4 +1,5 @@
 import { ActionPanel, Form, Action, showToast, Toast, Icon } from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import {
   BuildWithBetaDetailAndBetaGroups,
@@ -24,6 +25,13 @@ type SubmitType =
   | "ADD_NEW_TESTERS"
   | "ADD_FROM_CSV";
 
+interface FormValues {
+  testersIDs: string[];
+  externalTesters: string;
+  whatToTest: string;
+  files: string[];
+}
+
 export default function AddIndividualTester({ build, app, didUpdateExistingTesters, didUpdateNewTesters }: Props) {
   const { data, isLoading } = useAppStoreConnectApi(`/builds/${build.build.id}/individualTesters`, (response) => {
     return betaTestersSchema.safeParse(response.data).data;
@@ -42,42 +50,11 @@ export default function AddIndividualTester({ build, app, didUpdateExistingTeste
     },
   );
 
-  const [testersIDs, setTestersIDs] = useState<string[]>([]);
   const [allUsersFromApp, setAllUsersFromApp] = useState<BetaTester[]>([]);
-  const [whatToTestError, setWhatToTestError] = useState<string | undefined>();
-  const [currentWhatToTest, setCurrentWhatToTest] = useState<string>("");
-  const [externalTesters, setExternalTesters] = useState<string>("");
   const [submitIsLoading, setSubmitIsLoading] = useState<boolean>(false);
-
-  function dropWhatToTestErrorIfNeeded() {
-    if (whatToTestError !== undefined) {
-      setWhatToTestError(undefined);
-    }
-  }
-
-  useEffect(() => {
-    if (!allUsers || !data) return;
-    if (data.length === 0) {
-      setAllUsersFromApp(allUsers);
-      return;
-    }
-    const usersToShow = allUsers.filter((user) => data.some((tester) => tester.id !== user.id));
-    setAllUsersFromApp(usersToShow);
-  }, [allUsers, data]);
-
-  useEffect(() => {
-    // TODO: Handle localizations
-    if (betaBuildLocalizations !== null && betaBuildLocalizations.length > 0) {
-      setCurrentWhatToTest(betaBuildLocalizations[0].attributes.whatsNew ?? "");
-    }
-  }, [betaBuildLocalizations]);
-
-  useEffect(() => {
-    dropWhatToTestErrorIfNeeded();
-  }, [currentWhatToTest]);
-
+  
   const getSubmitTitle = () => {
-    const types = getSubmitTypes();
+    const types = getSubmitTypes(itemProps.files.value, itemProps.testersIDs.value, itemProps.externalTesters.value, itemProps.whatToTest.value);
     if (types.find((type) => type === "SUBMIT_FOR_BETA_REVIEW")) {
       return "Submit for beta review";
     } else {
@@ -85,12 +62,12 @@ export default function AddIndividualTester({ build, app, didUpdateExistingTeste
     }
   };
 
-  const getSubmitTypes = (files?: string[]): SubmitType[] => {
+  const getSubmitTypes = (files?: string[], testersIDs?: string[], externalTesters?: string, currentWhatToTest?: string): SubmitType[] => {
     const types: SubmitType[] = [];
-    if (testersIDs.length > 0) {
+    if (testersIDs && testersIDs.length > 0) {
       types.push("ADD_EXISTING_TESTERS");
     }
-    if (externalTesters.length > 0) {
+    if (externalTesters && externalTesters.length > 0) {
       types.push("ADD_NEW_TESTERS");
     }
     if (
@@ -106,7 +83,7 @@ export default function AddIndividualTester({ build, app, didUpdateExistingTeste
 
     if (
       (build.buildBetaDetails.attributes.externalBuildState === "READY_FOR_BETA_SUBMISSION" &&
-        (testersIDs.length > 0 || externalTesters.length > 0)) ||
+        (testersIDs && testersIDs.length > 0 || externalTesters && externalTesters.length > 0)) ||
       (files && files.length > 0)
     ) {
       return ["SUBMIT_FOR_BETA_REVIEW"];
@@ -115,7 +92,7 @@ export default function AddIndividualTester({ build, app, didUpdateExistingTeste
     return types;
   };
 
-  const updateWhatToTest = async () => {
+  const updateWhatToTest = async (currentWhatToTest: string) => {
     setSubmitIsLoading(true);
     if (betaBuildLocalizations === null || betaBuildLocalizations.length === 0) {
       return;
@@ -134,7 +111,7 @@ export default function AddIndividualTester({ build, app, didUpdateExistingTeste
     });
   };
 
-  const addExistingUsers = async () => {
+  const addExistingUsers = async (testersIDs: string[]) => {
     setSubmitIsLoading(true);
     const usersToAdd = allUsers
       ?.filter((user) => {
@@ -162,7 +139,7 @@ export default function AddIndividualTester({ build, app, didUpdateExistingTeste
     }
   };
 
-  const addNewUsers = async () => {
+  const addNewUsers = async (externalTesters: string) => {
     if (externalTesters.length === 0) return;
     setSubmitIsLoading(true);
     const values = externalTesters.split(",").map((item) => item.trim());
@@ -277,82 +254,97 @@ export default function AddIndividualTester({ build, app, didUpdateExistingTeste
     });
   };
 
+  const { handleSubmit, setValue, itemProps } = useForm<FormValues>({
+    initialValues: {
+      testersIDs: [],
+      externalTesters: "",
+      whatToTest: "",
+      files: [],
+    },
+    onSubmit: async (values) => {
+      setSubmitIsLoading(true);
+      try {
+        if (values.whatToTest) {
+          await updateWhatToTest(values.whatToTest);
+        }
+
+        if (values.testersIDs && values.testersIDs.length > 0) {
+          await addExistingUsers(values.testersIDs);
+        }
+
+        if (values.externalTesters) {
+          await addNewUsers(values.externalTesters);
+        }
+
+        if (values.files && values.files.length > 0) {
+          const file = values.files[0];
+          if (fs.existsSync(file) && fs.lstatSync(file).isFile()) {
+            await addFromCSV(file);
+          }
+        }
+
+        if (build.buildBetaDetails.attributes.externalBuildState === "READY_FOR_BETA_SUBMISSION" &&
+            (values.testersIDs.length > 0 || values.externalTesters || values.files.length > 0)) {
+          await submitForBetaReview();
+          showToast({
+            style: Toast.Style.Success,
+            title: "Success!",
+            message: "Submitted for beta review",
+          });
+        } else {
+          showToast({
+            style: Toast.Style.Success,
+            title: "Success!",
+            message: "Updated",
+          });
+        }
+      } catch (error) {
+        presentError(error);
+      } finally {
+        setSubmitIsLoading(false);
+      }
+    },
+    validation: {
+      whatToTest: FormValidation.Required
+    },
+  });
+
+
+  useEffect(() => {
+    if (!allUsers || !data) return;
+    if (data.length === 0) {
+      setAllUsersFromApp(allUsers);
+      return;
+    }
+    const usersToShow = allUsers.filter((user) => data.some((tester) => tester.id !== user.id));
+    setAllUsersFromApp(usersToShow);
+  }, [allUsers, data]);
+
+  useEffect(() => {
+    // TODO: Handle localizations
+    if (betaBuildLocalizations !== null && betaBuildLocalizations.length > 0) {
+      setValue("whatToTest", betaBuildLocalizations[0].attributes.whatsNew ?? "")
+    }
+  }, [betaBuildLocalizations]);
+
+
+  useEffect(() => {
+    if (betaBuildLocalizations !== null && betaBuildLocalizations.length > 0) {
+      setValue("whatToTest", betaBuildLocalizations[0].attributes.whatsNew ?? "");
+    }
+  }, [betaBuildLocalizations]);
+
+
   return (
     <Form
       isLoading={isLoading || isLoadingUsers || submitIsLoading || isLoadingBetaBuildLocalizations}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={getSubmitTitle()}
-            onSubmit={(values: { files: string[]; testers: string[]; externalTesters: string; whatToTest: string }) => {
-              if (validateWhatToTest(currentWhatToTest)) {
-                const types = getSubmitTypes(values.files);
-                if (types.length === 1 && types[0] === "SUBMIT_FOR_BETA_REVIEW") {
-                  (async () => {
-                    await updateWhatToTest();
-                    await addExistingUsers();
-                    await addNewUsers();
-                    if (values.files && values.files.length > 0) {
-                      const file = values.files[0];
-                      if (fs.existsSync(file) && fs.lstatSync(file).isFile()) {
-                        await addFromCSV(file);
-                      }
-                    }
-                    await submitForBetaReview();
-                    setSubmitIsLoading(false);
-                    showToast({
-                      style: Toast.Style.Success,
-                      title: "Success!",
-                      message: "Submitted for beta review",
-                    });
-                  })();
-                } else {
-                  (async () => {
-                    try {
-                      for (const type of types) {
-                        switch (type) {
-                          case "UPDATE_WHAT_TO_TEST": {
-                            await updateWhatToTest();
-                            break;
-                          }
-                          case "ADD_EXISTING_TESTERS": {
-                            await addExistingUsers();
-                            break;
-                          }
-                          case "ADD_NEW_TESTERS": {
-                            await addNewUsers();
-                            break;
-                          }
-                          case "ADD_FROM_CSV": {
-                            const file = values.files[0];
-                            if (fs.existsSync(file) && fs.lstatSync(file).isFile()) {
-                              await addFromCSV(file);
-                            }
-                            break;
-                          }
-                        }
-                      }
-                    } catch (error) {
-                      presentError(error);
-                    }
-                  })();
-                  showToast({
-                    style: Toast.Style.Success,
-                    title: "Success!",
-                    message: "Updated build",
-                  });
-                  setSubmitIsLoading(false);
-                }
-              } else {
-                setWhatToTestError("You must specify what to test.");
-                setSubmitIsLoading(false);
-              }
-            }}
-          />
+          <Action.SubmitForm icon={Icon.Person} title={getSubmitTitle()} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TagPicker id="testers" title="Add Existing Testers" value={testersIDs} onChange={setTestersIDs}>
+      <Form.TagPicker title="Add Existing Testers" {...itemProps.testersIDs}>
         {allUsersFromApp?.map((bg) => (
           <Form.TagPicker.Item
             value={bg.id}
@@ -363,45 +355,22 @@ export default function AddIndividualTester({ build, app, didUpdateExistingTeste
         ))}
       </Form.TagPicker>
       <Form.TextArea
-        id="externalTesters"
         title="Add New Testers"
-        value={externalTesters}
-        onChange={setExternalTesters}
+        {...itemProps.externalTesters}
         placeholder="New testers in CSV format"
         info="External testers must be in the format: first name, last name, and email address. Example: John,Doe,john@example.com,Jane,Doe,jane@example.com"
       />
       <Form.FilePicker
         title="Import from CSV"
-        id="files"
+        {...itemProps.files}
         allowMultipleSelection={false}
         info="Import testers from a CSV file. The CSV file must be in the format: first name, last name, and email address"
       />
       <Form.TextArea
-        id="description"
+        {...itemProps.whatToTest}
+        title="What to test"
         placeholder="What to test"
-        error={whatToTestError}
-        value={currentWhatToTest}
-        onChange={(newValue) => setCurrentWhatToTest(newValue)}
-        onBlur={(event) => {
-          const value = event.target.value;
-          if (validateWhatToTest(value)) {
-            dropWhatToTestErrorIfNeeded();
-          } else {
-            setWhatToTestError("You must specify what to test.");
-          }
-        }}
       />
     </Form>
   );
-}
-
-function validateWhatToTest(whatToTest: string | undefined): boolean {
-  if (!whatToTest) {
-    return false;
-  }
-
-  if (whatToTest === "") {
-    return false;
-  }
-  return true;
 }

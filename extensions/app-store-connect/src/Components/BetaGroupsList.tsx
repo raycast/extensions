@@ -3,7 +3,7 @@ import { useAppStoreConnectApi, fetchAppStoreConnect } from "../Hooks/useAppStor
 import { App, betaGroupsSchema, BetaGroup } from "../Model/schemas";
 import { useEffect, useState } from "react";
 import BetaGroupDetail from "./BetaGroupDetail";
-import InternalBetaGroupBuilds from "./InternalBetaGroupBuilds";
+import ExternalBetaGroupBuilds from "./InternalBetaGroupBuilds";
 import CreateNewGroup from "./CreateNewGroup";
 import { presentError } from "../Utils/utils";
 interface BetaGroupsListProps {
@@ -120,7 +120,7 @@ export default function BetaGroupsList({ app }: BetaGroupsListProps) {
                 <Action.Push
                   title="Manage Builds"
                   icon={Icon.Building}
-                  target={<InternalBetaGroupBuilds group={betaGroup} app={app} />}
+                  target={<ExternalBetaGroupBuilds group={betaGroup} app={app} />}
                 />
                 {createNewGroupAction()}
                 {deleteGroupAction(betaGroup)}

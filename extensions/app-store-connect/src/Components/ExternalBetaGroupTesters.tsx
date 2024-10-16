@@ -184,7 +184,7 @@ export default function ExternalBetaGroupTesters({ group, app, didUpdateNewTeste
     return addedUsers;
   };
 
-  const { handleSubmit, itemProps, setValue } = useForm<ExternalBetaGroupTestersFormValues>({
+  const { handleSubmit, itemProps } = useForm<ExternalBetaGroupTestersFormValues>({
     onSubmit(values) {
       setSubmitIsLoading(true);
       (async () => {
@@ -253,12 +253,8 @@ export default function ExternalBetaGroupTesters({ group, app, didUpdateNewTeste
       }
     >
       <Form.TagPicker
-        id="testers"
+        {...itemProps.testers}
         title="Add Existing Testers"
-        value={itemProps.testers.value}
-        onChange={(newValue) => {
-          setValue("testers", newValue);
-        }}
       >
         {availableUsers?.map((bg) => (
           <Form.TagPicker.Item
@@ -270,6 +266,7 @@ export default function ExternalBetaGroupTesters({ group, app, didUpdateNewTeste
         ))}
       </Form.TagPicker>
       <Form.TextArea
+        title="Add New Testers"
         {...itemProps.externalTesters}
         placeholder="New testers in CSV format"
         info="External testers must be in the format: first name, last name, and email address. Example: John,Doe,john@example.com,Jane,Doe,jane@example.com"

@@ -1,5 +1,6 @@
 import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { useForm } from "@raycast/utils";
 import { useAppStoreConnectApi, fetchAppStoreConnect } from "../Hooks/useAppStoreConnect";
 import {
   App,
@@ -137,65 +138,70 @@ export default function ManageInternalBuilds({ app, group, didAddBuilds, didRemo
     return "Update";
   };
 
+  const { handleSubmit, itemProps } = useForm<{ builds: string[] }>({
+    onSubmit: async (values) => {
+      setSubmitIsLoading(true);
+      try {
+        const removed = currentBuilds?.filter((build) => !values.builds.includes(build.build.id));
+        const added = values.builds.filter(
+          (build) => !currentBuilds?.find((currentBuild) => currentBuild.build.id === build),
+        );
+        if (removed && removed.length > 0) {
+          for (const build of removed) {
+            await fetchAppStoreConnect(`/betaGroups/${group.id}/relationships/builds `, "DELETE", {
+              data: [
+                {
+                  type: "builds",
+                  id: build.build.id,
+                },
+              ],
+            });
+          }
+        }
+        if (added && added.length > 0) {
+          for (const build of added) {
+            const response = await fetchAppStoreConnect(`/betaGroups/${group.id}/relationships/builds `, "POST", {
+              data: [
+                {
+                  type: "builds",
+                  id: build,
+                },
+              ],
+            });
+            if (response && response.ok) {
+              try {
+                const json = await response.json();
+                const added = buildsWithBetaDetailSchema.parse(json.data);
+                didAddBuilds(added);
+              } catch (error) {
+                console.log(error);
+              }
+            }
+          }
+        }
+        await submitForBetaReview();
+        setSubmitIsLoading(false);
+        showToast({
+          style: Toast.Style.Success,
+          title: "Success!",
+          message: "Updated",
+        });
+        if (removed && removed.length > 0) {
+          didRemoveBuilds(removed);
+        }
+      } catch (error) {
+        setSubmitIsLoading(false);
+        presentError(error);
+      }
+    },
+  });
+
   return (
     <Form
       isLoading={isLoadingApp || isLoadingPreReleaseVersions || isLoadingCurrentBuilds || submitIsLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={submitTitle()}
-            onSubmit={(values: { builds: string[] }) => {
-              setSubmitIsLoading(true);
-              (async () => {
-                try {
-                  const removed = currentBuilds?.filter((build) => !values.builds.includes(build.build.id));
-                  const added = values.builds.filter(
-                    (build) => !currentBuilds?.find((currentBuild) => currentBuild.build.id === build),
-                  );
-                  if (removed && removed.length > 0) {
-                    for (const build of removed) {
-                      await fetchAppStoreConnect(`/betaGroups/${group.id}/relationships/builds `, "DELETE", {
-                        data: [
-                          {
-                            type: "builds",
-                            id: build.build.id,
-                          },
-                        ],
-                      });
-                    }
-                  }
-                  if (added && added.length > 0) {
-                    for (const build of added) {
-                      await fetchAppStoreConnect(`/betaGroups/${group.id}/relationships/builds `, "POST", {
-                        data: [
-                          {
-                            type: "builds",
-                            id: build,
-                          },
-                        ],
-                      });
-                    }
-                  }
-                  await submitForBetaReview();
-                  setSubmitIsLoading(false);
-                  showToast({
-                    style: Toast.Style.Success,
-                    title: "Success!",
-                    message: "Updated",
-                  });
-                  if (removed && removed.length > 0) {
-                    didRemoveBuilds(removed);
-                  }
-                  if (builds && added && added.length > 0) {
-                    didAddBuilds(builds.filter((build) => added.includes(build.build.id)));
-                  }
-                } catch (error) {
-                  setSubmitIsLoading(false);
-                  presentError(error);
-                }
-              })();
-            }}
-          />
+          <Action.SubmitForm title={submitTitle()} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -212,12 +218,8 @@ export default function ManageInternalBuilds({ app, group, didAddBuilds, didRemo
         ))}
       </Form.Dropdown>
       <Form.TagPicker
-        id="builds"
+        {...itemProps.builds}
         title="Select a build"
-        value={buildIDs}
-        onChange={(buildIDs) => {
-          setBuildIDs(buildIDs);
-        }}
       >
         {builds?.map((build) => (
           <Form.TagPicker.Item

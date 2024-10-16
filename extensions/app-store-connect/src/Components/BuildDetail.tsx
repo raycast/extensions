@@ -1,4 +1,5 @@
-import { ActionPanel, Form, Action, showToast, Toast, Icon, Color } from "@raycast/api";
+import { ActionPanel, Action, Form, showToast, Toast, Icon, Color } from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import {
   App,
@@ -18,6 +19,11 @@ interface BuildDetailProps {
   betaStateDidChange: (betaState: ExternalBuildState) => void;
 }
 
+interface FormValues {
+  betaGroups: string[];
+  whatToTest: string;
+}
+
 export default function BuildDetail({ build, app, groupsDidChange, betaStateDidChange }: BuildDetailProps) {
   const { data: betaGroups, isLoading: isLoadingBetaGroups } = useAppStoreConnectApi(
     `/betaGroups?filter[app]=${app.id}`,
@@ -33,36 +39,10 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
       return betaBuildLocalizationsSchema.safeParse(response.data).data ?? null;
     },
   );
-
-  const [usedGroupsIDs, setUsedGroupIDs] = useState<string[]>([]);
-  const [currentWhatToTest, setCurrentWhatToTest] = useState<string>("");
-  const [whatToTestError, setWhatToTestError] = useState<string | undefined>();
+;
   const [submitIsLoading, setSubmitIsLoading] = useState<boolean>(false);
 
-  function dropWhatToTestErrorIfNeeded() {
-    if (whatToTestError !== undefined) {
-      setWhatToTestError(undefined);
-    }
-  }
-
-  useEffect(() => {
-    if (usedGroups && betaGroups) {
-      setUsedGroupIDs(usedGroups.map((bg) => bg.id));
-    }
-  }, [usedGroups, betaGroups]);
-
-  useEffect(() => {
-    // TODO: Handle localizations
-    if (betaBuildLocalizations !== null && betaBuildLocalizations.length > 0) {
-      setCurrentWhatToTest(betaBuildLocalizations[0].attributes.whatsNew ?? "");
-    }
-  }, [betaBuildLocalizations]);
-
-  useEffect(() => {
-    dropWhatToTestErrorIfNeeded();
-  }, [currentWhatToTest]);
-
-  const getSubmitTitle = () => {
+  const getSubmitTitle = (usedGroupsIDs: string[]) => {
     const hasExternalGroups = usedGroupsIDs.find((bg) => {
       return !betaGroups?.find((bg2) => bg2.id === bg)?.attributes.isInternalGroup;
     });
@@ -75,11 +55,11 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
     }
   };
 
-  const updateWhatToTest = async () => {
+  const updateWhatToTest = async (whatToTest: string) => {
     if (betaBuildLocalizations === null || betaBuildLocalizations.length === 0) {
       return false;
     }
-    if (currentWhatToTest === betaBuildLocalizations[0].attributes.whatsNew) {
+    if (whatToTest === betaBuildLocalizations[0].attributes.whatsNew) {
       return false;
     }
     const response = await fetchAppStoreConnect(`/betaBuildLocalizations/${betaBuildLocalizations[0].id}`, "PATCH", {
@@ -87,7 +67,7 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
         type: "betaBuildLocalizations",
         id: betaBuildLocalizations[0].id,
         attributes: {
-          whatsNew: currentWhatToTest,
+          whatsNew: whatToTest,
         },
       },
     });
@@ -110,7 +90,7 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
     }
   };
 
-  const submitForBetaReview = async () => {
+  const submitForBetaReview = async (usedGroupsIDs: string[]) => {
     const containsExternalGroups = usedGroupsIDs.find((bg) => {
       const betaGroup = betaGroups?.find((bg2) => {
         return bg2.id === bg;
@@ -144,7 +124,7 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
     }
   };
 
-  const addGroupsToBuild = async () => {
+  const addGroupsToBuild = async (usedGroupsIDs: string[], betaGroups: BetaGroup[]) => {
     const newGroupIDs = usedGroupsIDs.filter((bg) => !usedGroups?.find((bg2) => bg2.id === bg));
     const newGroups = betaGroups?.filter((bg) => newGroupIDs.find((bg2) => bg2 === bg.id));
     if (newGroups) {
@@ -167,7 +147,7 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
     return false;
   };
 
-  const removeGroupsFromBuild = async () => {
+  const removeGroupsFromBuild = async (usedGroupsIDs: string[], usedGroups: BetaGroup[]) => {
     const removedGroups = usedGroups.filter((bg) => !usedGroupsIDs.find((bg2) => bg2 === bg.id));
     if (removedGroups) {
       for (const group of removedGroups) {
@@ -212,56 +192,77 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
     }
   };
 
+  const { handleSubmit, itemProps, setValue } = useForm<FormValues>({
+    initialValues: {
+      whatToTest: "",
+    },
+    onSubmit: async (values) => {
+      try {
+        if (betaGroups === null) {
+          return;
+        }
+        setSubmitIsLoading(true);
+        await updateWhatToTest(values.whatToTest);
+        const submitted = await submitForBetaReview(values.betaGroups);
+        const added = await addGroupsToBuild(values.betaGroups, betaGroups);
+        if (added) {
+          groupsDidChange(usedGroups ?? []);
+        }
+
+        const removed = await removeGroupsFromBuild(values.betaGroups, usedGroups);
+        if (removed) {
+          groupsDidChange(usedGroups ?? []);
+        }
+        if (submitted) {
+          betaStateDidChange("WAITING_FOR_BETA_REVIEW");
+          showToast({
+            style: Toast.Style.Success,
+            title: "Success!",
+            message: "Submitted for beta review",
+          });
+        } else {
+          showToast({
+            style: Toast.Style.Success,
+            title: "Success!",
+            message: "Build updated",
+          });
+        }
+      } catch (error) {
+        presentError(error);
+      } finally {
+        setSubmitIsLoading(false);
+      }
+    },
+    validation: {
+      whatToTest: FormValidation.Required,
+    }
+  });
+
+  useEffect(() => {
+    // TODO: Handle localizations
+    if (betaBuildLocalizations !== null && betaBuildLocalizations.length > 0) {
+      setValue("whatToTest", betaBuildLocalizations[0].attributes.whatsNew ?? "");
+    }
+  }, [betaBuildLocalizations]);
+
+  useEffect(() => {
+    if (usedGroups && betaGroups) {
+      setValue("betaGroups", usedGroups.map((bg) => bg.id));
+    }
+  }, [usedGroups, betaGroups]);
+
+  useEffect(() => {
+    if (betaBuildLocalizations && betaBuildLocalizations.length > 0) {
+      setValue("whatToTest", betaBuildLocalizations[0].attributes.whatsNew ?? "");
+    }
+  }, [betaBuildLocalizations]);
+
+
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={getSubmitTitle()}
-            onSubmit={() => {
-              if (validateWhatToTest(currentWhatToTest, usedGroups ?? [])) {
-                (async () => {
-                  try {
-                    if (betaGroups === null) {
-                      return;
-                    }
-                    setSubmitIsLoading(true);
-                    await updateWhatToTest();
-                    const submitted = await submitForBetaReview();
-                    const added = await addGroupsToBuild();
-                    if (added) {
-                      groupsDidChange(usedGroups ?? []);
-                    }
-
-                    const removed = await removeGroupsFromBuild();
-                    if (removed) {
-                      groupsDidChange(usedGroups ?? []);
-                    }
-                    if (submitted) {
-                      betaStateDidChange("WAITING_FOR_BETA_REVIEW");
-                      showToast({
-                        style: Toast.Style.Success,
-                        title: "Success!",
-                        message: "Submitted for beta review",
-                      });
-                    } else {
-                      showToast({
-                        style: Toast.Style.Success,
-                        title: "Success!",
-                        message: "Build updated",
-                      });
-                    }
-                    setSubmitIsLoading(false);
-                  } catch (error) {
-                    presentError(error);
-                    setSubmitIsLoading(false);
-                  }
-                })();
-              } else {
-                setWhatToTestError("You must specify what to test");
-              }
-            }}
-          />
+          <Action.SubmitForm title={getSubmitTitle(itemProps.betaGroups.value ?? [])} onSubmit={handleSubmit} />
           {!isExpired() && (
             <Action
               title="Expire"
@@ -289,7 +290,7 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
       }
       isLoading={isLoadingBetaGroups || isLoadingBetaBuildLocalizations || submitIsLoading}
     >
-      <Form.TagPicker id="betaGroups" title="Beta Groups" value={usedGroupsIDs} onChange={setUsedGroupIDs}>
+      <Form.TagPicker {...itemProps.betaGroups} id="betaGroups" title="Beta Groups">
         {betaGroups?.map((bg) => (
           <Form.TagPicker.Item
             value={bg.id}
@@ -300,19 +301,8 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
         ))}
       </Form.TagPicker>
       <Form.TextArea
-        id="description"
-        placeholder="What to test"
-        error={whatToTestError}
-        value={currentWhatToTest}
-        onChange={(newValue) => setCurrentWhatToTest(newValue)}
-        onBlur={(event) => {
-          const value = event.target.value;
-          if (validateWhatToTest(value, usedGroups)) {
-            dropWhatToTestErrorIfNeeded();
-          } else {
-            setWhatToTestError("You must specify what to test.");
-          }
-        }}
+        {...itemProps.whatToTest}
+        title="What To Test"
       />
     </Form>
   );
@@ -331,18 +321,4 @@ class ATCError extends Error {
       Error.captureStackTrace(this, ATCError);
     }
   }
-}
-
-function validateWhatToTest(whatToTest: string | undefined, usedGroups: BetaGroup[]) {
-  const notInternal = usedGroups.find((bg) => {
-    return !bg.attributes.isInternalGroup;
-  });
-  if (!whatToTest && notInternal) {
-    return false;
-  }
-
-  if (whatToTest === "" && notInternal) {
-    return false;
-  }
-  return true;
 }
