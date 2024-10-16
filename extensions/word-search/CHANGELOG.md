@@ -2,7 +2,8 @@
 
 ## [Default open details] - {PR_MERGE_DATE}
 
-- Added a preference to open details by default ([#14920](https://github.com/raycast/extensions/issues/14920))
+- Cache the 'View Details' state, keeping it open ([#14920](https://github.com/raycast/extensions/issues/14920))
+- Updated dependencies
 
 ## [Upgrades] - 2024-06-01
 
