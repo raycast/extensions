@@ -1,6 +1,6 @@
 # Coffee Changelog
 
-## [Enhancement] - 2024-09-21
+## [Enhancement] - {PR_MERGE_DATE}
 
 - Added functionality to add schedules for caffeination, allowing different schedules for different days.
 - Integrated NLP using regex to support natural language input for setting schedules
