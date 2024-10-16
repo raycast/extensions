@@ -1,5 +1,9 @@
 # Cursor Directory Changelog
 
+## [Documentation] - 2024-10-16
+
+- Remove unnecessary cursor shell installation
+
 ## [Documentations] - 2024-10-15
 
 - Add a badge for the Raycast Cross-Extension Conventions
