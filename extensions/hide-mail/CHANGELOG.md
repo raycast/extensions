@@ -1,6 +1,6 @@
 # HideMail - Email Relay Service Changelog
 
-##  [Enhancements] - {PR_MERGE_DATE}
+##  [Enhancements] - 2024-10-16
 
 - `List Emails` is now cached
 - After toggling, the command does not close and updates in place
