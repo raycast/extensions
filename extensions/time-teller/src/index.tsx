@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, List, AI, environment } from "@raycast/api";
-import { getFavicon } from "@raycast/utils";
+import { Action, ActionPanel, List, AI, popToRoot, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { setTimeout } from "timers/promises";
 
 interface Timeframe {
@@ -12,12 +12,11 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [timeframe, setTimeframe] = useState<Timeframe>({ startDate: undefined, endDate: undefined });
   const [isLoading, setIsLoading] = useState(false);
-  const hasProSubscription = environment.canAccess(AI);
 
   /**
    * Fetches and processes date information from the AI based on the current input text.
    *
-   * This effect is triggered whenever the search text changes. It waits for 1.5 seconds before
+   * This effect is triggered whenever the search text changes. It waits for 0.8 seconds before
    * querying the AI to avoid being rate limited. The AI's response is expected to be in the
    * format "startDate: YYYY-MM-DDTHH:MM:SSZ, endDate: YYYY-MM-DDTHH:MM:SSZ".
    *
@@ -28,27 +27,38 @@ export default function Command() {
      * Checks if the input text is not empty before proceeding with the data fetching process.
      * This condition ensures that unnecessary requests are not sent to the AI when the input text is empty.
      */
-    if (hasProSubscription && searchText !== "") {
+    if (searchText !== "") {
       const fetchData = async () => {
         setIsLoading(true);
         await setTimeout(800);
 
         const aiPrompt = `translate the date and give only a direct answer with the current date and the date in the text, or between the two dates in the text, format in ISO 8601 and give a string with start and end dates like "startDate: 2024-10-05T13:00:00Z, endDate: 2024-10-06T22:00:00Z": ${searchText}`;
-        const answer = await AI.ask(aiPrompt);
 
-        const dates = answer.split(", ");
-        const dateObject = dates.reduce((acc: Timeframe, date) => {
-          const [key, value] = date.split(": ");
-          acc[key as keyof Timeframe] = value;
-          return acc;
-        }, {} as Timeframe);
+        try {
+          const answer = await AI.ask(aiPrompt, {});
+          const dates = answer.split(", ");
+          const dateObject = dates.reduce((acc: Timeframe, date) => {
+            const [key, value] = date.split(": ");
+            acc[key as keyof Timeframe] = value;
+            return acc;
+          }, {} as Timeframe);
 
-        setTimeframe(dateObject);
+          setTimeframe(dateObject);
+        } catch (err: unknown) {
+          if (err instanceof Error) {
+            if (err.message === "Process cancelled") {
+              popToRoot();
+            } else {
+              showFailureToast(err);
+            }
+          }
+        }
+
         setIsLoading(false);
       };
       fetchData();
     }
-  }, [searchText, hasProSubscription]);
+  }, [searchText]);
 
   function calculateTimeframes(startDate: Date, endDate: Date) {
     // Convert the input dates to date objects if they are not already
@@ -85,22 +95,9 @@ export default function Command() {
       throttle={true}
       isLoading={isLoading}
     >
-      {/**
-       * Checks if the user has access to the AI feature.
-       * If not, displays an empty view with a message and a link to try Raycast Pro.
-       */}
-      {!hasProSubscription ? (
-        <List.EmptyView
-          icon={getFavicon("https://raycast.com")}
-          title="Ups!"
-          description="This extension needs a Raycast Pro subscription"
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser title="Try Raycast Pro" url="https://raycast.com/pro" />
-            </ActionPanel>
-          }
-        />
-      ) : (
+      <List.EmptyView icon={Icon.Clock} title="Waiting for input" description="Type a specific date or a time period" />
+
+      {timeframe.startDate !== undefined && (
         <>
           <List.Item
             title={timeframe.startDate ?? "No start date detected"}
