@@ -1,5 +1,11 @@
 # Matter Changelog
 
+## [🕹️ 1.2] - {PR_MERGE_DATE}
+
+- add `Pagination`
+- see reading time in mins
+- major `dev` changes: better types, use of hooks, and more
+
 ## [🕹️ 1.1] - 2023-02-23
 
 - now you can open articles within Matter Web for a better reading experience - thanks to [Josh Knowles](https://github.com/joshknowles)

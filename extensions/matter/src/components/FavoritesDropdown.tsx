@@ -1,9 +1,9 @@
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 
-export function FavoritesDropdown(props: any) {
-  const listOfFilterOptions: any[] = [
-    { id: "1", name: "All" },
-    { id: "2", name: "Favorites" },
+export function FavoritesDropdown(props: { filterSelection: (val: string) => void }) {
+  const listOfFilterOptions = [
+    { id: "All", icon: Icon.List },
+    { id: "Favorites", icon: Icon.Star },
   ];
 
   return (
@@ -15,8 +15,13 @@ export function FavoritesDropdown(props: any) {
       }}
     >
       <List.Dropdown.Section>
-        {listOfFilterOptions.map((drinkType) => (
-          <List.Dropdown.Item key={drinkType.id} title={drinkType.name} value={drinkType.id} />
+        {listOfFilterOptions.map((articleType) => (
+          <List.Dropdown.Item
+            key={articleType.id}
+            icon={articleType.icon}
+            title={articleType.id}
+            value={articleType.id}
+          />
         ))}
       </List.Dropdown.Section>
     </List.Dropdown>
