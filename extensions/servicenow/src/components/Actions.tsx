@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, LocalStorage } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
 import useInstances from "../hooks/useInstances";
@@ -16,7 +16,7 @@ export default function Actions({ mutate }: { mutate: () => void }) {
           icon={Icon.ArrowClockwise}
           title="Refresh"
           onAction={mutate}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
         />
       </List.Dropdown.Section>
       <List.Dropdown.Section title="Instance Profiles">

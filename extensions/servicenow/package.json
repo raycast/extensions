@@ -98,7 +98,7 @@
     {
       "name": "explore-tables",
       "title": "Explore Tables",
-      "description": "Browse and explore ServiceNow tables within a selected instance. It provides detailed table information, including table names, labels, and superclasses. Users can search through tables using specific keywords and perform actions such as opening the table in ServiceNow, viewing the schema map, or copying the table’s URL",
+      "description": "Browse and explore the tables within an instance",
       "mode": "view"
     }
   ],

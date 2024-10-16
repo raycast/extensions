@@ -37,14 +37,16 @@ export default function InstancesList() {
               <ActionPanel>
                 <List.Dropdown.Section title={aliasOrName}>
                   <Action.Push
-                    icon={Icon.Pencil}
-                    title="Edit Instance Profile"
-                    target={<InstanceForm onSubmit={editInstance} instance={instance} />}
-                  />
-                  <Action.Push
                     icon={Icon.Plus}
                     title="Add Instance Profile"
                     target={<InstanceForm onSubmit={addInstance} />}
+                    shortcut={Keyboard.Shortcut.Common.New}
+                  />
+                  <Action.Push
+                    icon={Icon.Pencil}
+                    title="Edit Instance Profile"
+                    target={<InstanceForm onSubmit={editInstance} instance={instance} />}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
                   />
                   <Action
                     title="Delete Instance Profile"
@@ -76,7 +78,7 @@ export default function InstancesList() {
                   <Action.OpenInBrowser
                     icon={{ source: "servicenow.svg" }}
                     title={"Open Instance"}
-                    shortcut={{ modifiers: ["cmd"], key: "b" }}
+                    shortcut={Keyboard.Shortcut.Common.Open}
                     url={`https://${instanceName}.service-now.com`}
                   />
                   <Action.OpenInBrowser
