@@ -248,7 +248,7 @@ export default function SearchList() {
                         />
                         <Action
                           title="Clear All Items from History"
-                          shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                          shortcut={Keyboard.Shortcut.Common.RemoveAll}
                           icon={Icon.XMarkCircleFilled}
                           style={Action.Style.Destructive}
                           onAction={removeAllItemsFromHistory}
