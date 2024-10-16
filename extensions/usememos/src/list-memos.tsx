@@ -1,18 +1,20 @@
 import { getPreferenceValues, List, ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { MemoListProps, Memo, MemoWithSummary } from "./lib/types";
+import { MemoListProps, MemoWithSummary } from "./lib/types";
 import { getSummaryStream } from "./lib/utils";
 import { useRef, useState, useEffect, useCallback } from "react";
 
 function getMemoItemsStream(memosServerUrl: string, memosServerToken: string) {
-  const { isLoading: isLoadingMemosData, data: memosData } =
-    useFetch<MemoListProps>(`${memosServerUrl}/api/v1/memos?pageSize=30`, {
+  const { isLoading: isLoadingMemosData, data: memosData } = useFetch<MemoListProps>(
+    `${memosServerUrl}/api/v1/memos?pageSize=30`,
+    {
       method: "GET",
       headers: {
         Accept: "application/json",
         Authorization: `Bearer ${memosServerToken}`,
       },
-    });
+    }
+  );
   const memos = memosData?.memos || [];
   const [memoItems, setMemoItems] = useState<{
     [key: string]: MemoWithSummary;
@@ -59,23 +61,11 @@ function MemoListItem({ memo }: { memo: MemoWithSummary }) {
           markdown={memo.content}
           metadata={
             <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label
-                title="Summary"
-                text={memo.summary}
-              />
-              <List.Item.Detail.Metadata.Label
-                title="Tags"
-                text={memo.tags.join(", ")}
-              />
+              <List.Item.Detail.Metadata.Label title="Summary" text={memo.summary} />
+              <List.Item.Detail.Metadata.Label title="Tags" text={memo.tags.join(", ")} />
               <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Label
-                title="Created At"
-                text={`${memo.createTime}`}
-              />
-              <List.Item.Detail.Metadata.Label
-                title="Updated At"
-                text={`${memo.updateTime}`}
-              />
+              <List.Item.Detail.Metadata.Label title="Created At" text={`${memo.createTime}`} />
+              <List.Item.Detail.Metadata.Label title="Updated At" text={`${memo.updateTime}`} />
             </List.Item.Detail.Metadata>
           }
         />
@@ -85,13 +75,9 @@ function MemoListItem({ memo }: { memo: MemoWithSummary }) {
 }
 
 export default function listMemos() {
-  const { memosServerUrl, memosServerToken } =
-    getPreferenceValues<Preferences.ListMemos>();
+  const { memosServerUrl, memosServerToken } = getPreferenceValues<Preferences.ListMemos>();
 
-  const { isLoading: isLoadingMemoItems, memoItems } = getMemoItemsStream(
-    memosServerUrl,
-    memosServerToken
-  );
+  const { isLoading: isLoadingMemoItems, memoItems } = getMemoItemsStream(memosServerUrl, memosServerToken);
   return (
     <List isLoading={isLoadingMemoItems} isShowingDetail={true} throttle>
       <List.Section title="Pinned">
