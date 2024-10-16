@@ -241,6 +241,7 @@ export default function SearchList() {
                       <List.Dropdown.Section title="Term">
                         <Action
                           title="Remove from History"
+                          shortcut={Keyboard.Shortcut.Common.Remove}
                           icon={Icon.XMarkCircle}
                           style={Action.Style.Destructive}
                           onAction={() => removeItemFromHistory(item)}
