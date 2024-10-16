@@ -2,10 +2,10 @@
 
 ## [Enhancement] - {PR_MERGE_DATE}
 
-- Added functionality to add schedules for caffeination, allowing different schedules for different days.
+- Implemented schedule-based caffeination, allowing different schedules for different days
 - Integrated NLP using regex to support natural language input for setting schedules
-- Added functionality to pause, resume and delete schedules
-- Added README file
+- Added pause, resume, and delete functionality for schedules
+- Created README documentation
 
 ## [Update] – 2024-07-18
 
