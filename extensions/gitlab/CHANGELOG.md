@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Add Issues Assignment Filter] - 2024-10-15
+## [Add Issues Assignment Filter] - {PR_MERGE_DATE}
 
 - Add "Assigned to Me" filter to "Search Issues"
 
