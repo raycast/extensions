@@ -4,7 +4,10 @@ import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
 import { NativePreferences } from "../types/preferences";
 
-const useApi = <T,>(url: string) => {
+export type UseApiOptions<T> = Parameters<typeof useFetch<T>>[1];
+
+const useApi = <T,>(url: string, options: UseApiOptions<T> = {}) => {
+  const { headers: optionsHeaders, ...useFetchOptions } = options;
   const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
 
   if (!apiToken) {
@@ -20,11 +23,12 @@ const useApi = <T,>(url: string) => {
       Authorization: `Bearer ${apiToken}`,
       "Content-Type": "application/json",
       Accept: "application/json",
+      ...optionsHeaders,
     }),
-    [apiToken]
+    [apiToken, optionsHeaders]
   );
 
-  return useFetch<T>(`${apiUrl}${url}`, { headers, keepPreviousData: true });
+  return useFetch<T>(`${apiUrl}${url}`, { headers, keepPreviousData: true, ...useFetchOptions });
 };
 
 export default useApi;
