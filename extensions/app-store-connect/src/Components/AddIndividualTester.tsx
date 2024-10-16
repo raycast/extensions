@@ -52,9 +52,14 @@ export default function AddIndividualTester({ build, app, didUpdateExistingTeste
 
   const [allUsersFromApp, setAllUsersFromApp] = useState<BetaTester[]>([]);
   const [submitIsLoading, setSubmitIsLoading] = useState<boolean>(false);
-  
+
   const getSubmitTitle = () => {
-    const types = getSubmitTypes(itemProps.files.value, itemProps.testersIDs.value, itemProps.externalTesters.value, itemProps.whatToTest.value);
+    const types = getSubmitTypes(
+      itemProps.files.value,
+      itemProps.testersIDs.value,
+      itemProps.externalTesters.value,
+      itemProps.whatToTest.value,
+    );
     if (types.find((type) => type === "SUBMIT_FOR_BETA_REVIEW")) {
       return "Submit for beta review";
     } else {
@@ -62,7 +67,12 @@ export default function AddIndividualTester({ build, app, didUpdateExistingTeste
     }
   };
 
-  const getSubmitTypes = (files?: string[], testersIDs?: string[], externalTesters?: string, currentWhatToTest?: string): SubmitType[] => {
+  const getSubmitTypes = (
+    files?: string[],
+    testersIDs?: string[],
+    externalTesters?: string,
+    currentWhatToTest?: string,
+  ): SubmitType[] => {
     const types: SubmitType[] = [];
     if (testersIDs && testersIDs.length > 0) {
       types.push("ADD_EXISTING_TESTERS");
@@ -83,7 +93,7 @@ export default function AddIndividualTester({ build, app, didUpdateExistingTeste
 
     if (
       (build.buildBetaDetails.attributes.externalBuildState === "READY_FOR_BETA_SUBMISSION" &&
-        (testersIDs && testersIDs.length > 0 || externalTesters && externalTesters.length > 0)) ||
+        ((testersIDs && testersIDs.length > 0) || (externalTesters && externalTesters.length > 0))) ||
       (files && files.length > 0)
     ) {
       return ["SUBMIT_FOR_BETA_REVIEW"];
@@ -283,8 +293,10 @@ export default function AddIndividualTester({ build, app, didUpdateExistingTeste
           }
         }
 
-        if (build.buildBetaDetails.attributes.externalBuildState === "READY_FOR_BETA_SUBMISSION" &&
-            (values.testersIDs.length > 0 || values.externalTesters || values.files.length > 0)) {
+        if (
+          build.buildBetaDetails.attributes.externalBuildState === "READY_FOR_BETA_SUBMISSION" &&
+          (values.testersIDs.length > 0 || values.externalTesters || values.files.length > 0)
+        ) {
           await submitForBetaReview();
           showToast({
             style: Toast.Style.Success,
@@ -305,10 +317,9 @@ export default function AddIndividualTester({ build, app, didUpdateExistingTeste
       }
     },
     validation: {
-      whatToTest: FormValidation.Required
+      whatToTest: FormValidation.Required,
     },
   });
-
 
   useEffect(() => {
     if (!allUsers || !data) return;
@@ -323,17 +334,15 @@ export default function AddIndividualTester({ build, app, didUpdateExistingTeste
   useEffect(() => {
     // TODO: Handle localizations
     if (betaBuildLocalizations !== null && betaBuildLocalizations.length > 0) {
-      setValue("whatToTest", betaBuildLocalizations[0].attributes.whatsNew ?? "")
+      setValue("whatToTest", betaBuildLocalizations[0].attributes.whatsNew ?? "");
     }
   }, [betaBuildLocalizations]);
-
 
   useEffect(() => {
     if (betaBuildLocalizations !== null && betaBuildLocalizations.length > 0) {
       setValue("whatToTest", betaBuildLocalizations[0].attributes.whatsNew ?? "");
     }
   }, [betaBuildLocalizations]);
-
 
   return (
     <Form
@@ -366,11 +375,7 @@ export default function AddIndividualTester({ build, app, didUpdateExistingTeste
         allowMultipleSelection={false}
         info="Import testers from a CSV file. The CSV file must be in the format: first name, last name, and email address"
       />
-      <Form.TextArea
-        {...itemProps.whatToTest}
-        title="What to test"
-        placeholder="What to test"
-      />
+      <Form.TextArea {...itemProps.whatToTest} title="What to test" placeholder="What to test" />
     </Form>
   );
 }

@@ -128,10 +128,7 @@ export default function InternalBetaGroupTesters({ group, app, didUpdateNewTeste
         </ActionPanel>
       }
     >
-      <Form.TagPicker
-        {...itemProps.testers }
-        title="Add Existing Testers"
-      >
+      <Form.TagPicker {...itemProps.testers} title="Add Existing Testers">
         {availableUsers?.map((bg) => (
           <Form.TagPicker.Item
             value={bg.id}

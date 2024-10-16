@@ -217,10 +217,7 @@ export default function ManageInternalBuilds({ app, group, didAddBuilds, didRemo
           <Form.Dropdown.Item key={version.id} title={platformWithVersion(version)} value={version.id} />
         ))}
       </Form.Dropdown>
-      <Form.TagPicker
-        {...itemProps.builds}
-        title="Select a build"
-      >
+      <Form.TagPicker {...itemProps.builds} title="Select a build">
         {builds?.map((build) => (
           <Form.TagPicker.Item
             key={build.build.id}

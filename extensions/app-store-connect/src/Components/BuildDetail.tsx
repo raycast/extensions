@@ -39,7 +39,6 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
       return betaBuildLocalizationsSchema.safeParse(response.data).data ?? null;
     },
   );
-;
   const [submitIsLoading, setSubmitIsLoading] = useState<boolean>(false);
 
   const getSubmitTitle = (usedGroupsIDs: string[]) => {
@@ -235,7 +234,7 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
     },
     validation: {
       whatToTest: FormValidation.Required,
-    }
+    },
   });
 
   useEffect(() => {
@@ -247,7 +246,10 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
 
   useEffect(() => {
     if (usedGroups && betaGroups) {
-      setValue("betaGroups", usedGroups.map((bg) => bg.id));
+      setValue(
+        "betaGroups",
+        usedGroups.map((bg) => bg.id),
+      );
     }
   }, [usedGroups, betaGroups]);
 
@@ -256,7 +258,6 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
       setValue("whatToTest", betaBuildLocalizations[0].attributes.whatsNew ?? "");
     }
   }, [betaBuildLocalizations]);
-
 
   return (
     <Form
@@ -300,10 +301,7 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
           />
         ))}
       </Form.TagPicker>
-      <Form.TextArea
-        {...itemProps.whatToTest}
-        title="What To Test"
-      />
+      <Form.TextArea {...itemProps.whatToTest} title="What To Test" />
     </Form>
   );
 }
