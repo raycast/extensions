@@ -17,7 +17,7 @@ To install the Coffee extension, follow these steps:
 Once installed, simply trigger the Raycast command palette and search for the desired caffeination command.
 
 <p align="center">
-  <img src="./assets/coffee.png" alt="Raycast Command Palette with Coffee Commands">
+  <img src="./metadata/coffee.png" alt="Raycast Command Palette with Coffee Commands">
 </p>
 
 ## Features ✨
@@ -32,14 +32,14 @@ Toggle between keeping your Mac caffeinated and in a decaffeinated state
 Caffeinate your Mac for a specified amount of time.
   
 <p align="center">
-  <img src="./assets/caffeinateFor.png" alt="Caffeinate For Command">
+  <img src="./metadata/caffeinateFor.png" alt="Caffeinate For Command">
 </p>
 
 ### 4. **Caffeinate While**
 Keep your Mac awake as long as a specific app is running.
   
 <p align="center">
-  <img src="./assets/caffeinateWhile.png" alt="Caffeinate While Command">
+  <img src="./metadata/caffeinateWhile.png" alt="Caffeinate While Command">
 </p>
 
 ### 5. **Schedule Caffeination**
@@ -59,7 +59,7 @@ Supported Actions:
 > 📋 **Note:** If you pause a schedule, you must manually resume it for it to work the next week or any future instances.
 
 <p align="center">
-  <img src="./assets/addSchedule.png" alt="Schedule Caffeination Command">
+  <img src="./metadata/addSchedule.png" alt="Schedule Caffeination Command">
 </p>
 
 ### 6. **Caffeination Status**
