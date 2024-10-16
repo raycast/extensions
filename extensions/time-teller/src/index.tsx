@@ -29,7 +29,7 @@ export default function Command() {
      */
     if (hasProSubscription && searchText !== "") {
       const fetchData = async () => {
-        await setTimeout(1500);
+        await setTimeout(800);
 
         const aiPrompt = `translate the date and give only a direct answer with the current date and the date in the text, or between the two dates in the text, format in ISO 8601 and give a string with start and end dates like "startDate: 2024-10-05T13:00:00Z, endDate: 2024-10-06T22:00:00Z": ${searchText}`;
         const answer = await AI.ask(aiPrompt);
