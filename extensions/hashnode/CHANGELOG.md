@@ -1,6 +1,6 @@
 # Hashnode Changelog
 
-## [Pagination 🚀 + More] - {PR_MERGE_DATE}
+## [Pagination 🚀 + More] - 2024-10-16
 
 - Empty View if no Articles Published
 - Pagination allows you to doom scroll
