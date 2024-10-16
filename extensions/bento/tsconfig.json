@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    "strict": true,
+    "esModuleInterop": true,
+    "lib": ["ES2021"],
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "target": "ES2021",
+    "jsx": "react-jsx",
+    "outDir": "dist",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}
