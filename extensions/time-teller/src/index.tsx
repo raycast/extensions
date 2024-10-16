@@ -11,6 +11,7 @@ interface Timeframe {
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [timeframe, setTimeframe] = useState<Timeframe>({ startDate: undefined, endDate: undefined });
+  const [isLoading, setIsLoading] = useState(false);
   const hasProSubscription = environment.canAccess(AI);
 
   /**
@@ -29,6 +30,7 @@ export default function Command() {
      */
     if (hasProSubscription && searchText !== "") {
       const fetchData = async () => {
+        setIsLoading(true);
         await setTimeout(800);
 
         const aiPrompt = `translate the date and give only a direct answer with the current date and the date in the text, or between the two dates in the text, format in ISO 8601 and give a string with start and end dates like "startDate: 2024-10-05T13:00:00Z, endDate: 2024-10-06T22:00:00Z": ${searchText}`;
@@ -42,6 +44,7 @@ export default function Command() {
         }, {} as Timeframe);
 
         setTimeframe(dateObject);
+        setIsLoading(false);
       };
       fetchData();
     }
@@ -80,6 +83,7 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Write a date or a time period"
       throttle={true}
+      isLoading={isLoading}
     >
       {/**
        * Checks if the user has access to the AI feature.
