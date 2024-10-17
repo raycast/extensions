@@ -45,7 +45,7 @@
       "name": "jacredParserUrl",
       "title": "Jacred parser",
       "type": "textfield",
-      "description": "It is not required, but u need it to be able to use search command",
+      "description": "URL endpoint required for enabling search",
       "required": false
     }
   ],
