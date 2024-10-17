@@ -1,8 +1,8 @@
 import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
+
 import { FormData } from "formdata-node";
 import { fileFromPath } from "formdata-node/file-from-path";
-import { getAuthHeaders, handleDomain } from "./utils";
+import { getAuthHeaders, handleDomain, timeoutFetch } from "./utils";
 import { Preferences } from "./models";
 import { useState } from "react";
 
@@ -44,8 +44,9 @@ export default function Command() {
       }
 
       const serverUrl = `${torrserverUrl}/torrent/upload`;
+      showToast(Toast.Style.Animated, "Processing...");
 
-      const response = await fetch(handleDomain(serverUrl), {
+      const response = await timeoutFetch(handleDomain(serverUrl), {
         method: "POST",
         body: formData,
         headers: {
@@ -54,14 +55,14 @@ export default function Command() {
       });
 
       if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(`Failed to upload torrent: ${response.status} ${response.statusText}\n${errorData}`);
+        showToast(Toast.Style.Failure, `Failed to upload torrent: ${response.status} ${response.statusText}`);
+        return;
       }
 
       showToast(Toast.Style.Success, "Torrent added successfully");
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      showToast(Toast.Style.Failure, "Error", "Something went wrong");
+      showToast(Toast.Style.Failure, "Error", `Could not connect to ${torrserverUrl}`);
     }
   }
 

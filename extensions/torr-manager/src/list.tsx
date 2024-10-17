@@ -1,30 +1,24 @@
 import { ActionPanel, Action, Icon, List, showToast, Toast, getPreferenceValues, confirmAlert } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useLocalStorage } from "@raycast/utils";
-import fetch from "node-fetch";
-import { getAuthHeaders, handleDomain } from "./utils";
+import { getAuthHeaders, handleDomain, timeoutFetch } from "./utils";
 import { Preferences, TorrentItem } from "./models";
 
 export default function Command() {
   const { torrserverUrl, mediaPlayerApp } = getPreferenceValues<Preferences>();
 
   const [items, setItems] = useState<TorrentItem[]>([]);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
-  const {
-    value: favorites = [],
-    setValue: setFavorites,
-    isLoading: isLoadingFavorites,
-  } = useLocalStorage<string[]>("favorites", []);
+  const { value: favorites = [], setValue: setFavorites } = useLocalStorage<string[]>("favorites", []);
 
   useEffect(() => {
     getList();
   }, [torrserverUrl]);
 
   const getList = async () => {
-    setIsRefreshing(true);
+    showToast(Toast.Style.Animated, "Processing...");
+
     try {
-      const response = await fetch(`${handleDomain(torrserverUrl)}/torrents`, {
+      const response = await timeoutFetch(`${handleDomain(torrserverUrl)}/torrents`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -36,20 +30,22 @@ export default function Command() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch updated playlist");
+        showToast(Toast.Style.Failure, "Error", `Could not get playlist from ${torrserverUrl}`);
+        return;
       }
 
       const torrents = (await response.json()) as TorrentItem[];
+      showToast(Toast.Style.Success, "Success", `${torrents.length} results`);
       setItems(torrents);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      showToast(Toast.Style.Failure, "Error", "Failed to update the torrent list");
-    } finally {
-      setIsRefreshing(false);
+      showToast(Toast.Style.Failure, "Error", `Could not connect to ${torrserverUrl}`);
     }
   };
 
   const handleRemove = async (itemTitle: string, hash: string) => {
+    showToast(Toast.Style.Animated, "Processing...");
+
     const confirmation = await confirmAlert({
       title: "Confirm Removal",
       message: `Are you sure you want to remove the torrent "${itemTitle}"?`,
@@ -58,7 +54,7 @@ export default function Command() {
 
     if (confirmation) {
       try {
-        const response = await fetch(`${handleDomain(torrserverUrl)}/torrents`, {
+        const response = await timeoutFetch(`${handleDomain(torrserverUrl)}/torrents`, {
           method: "POST",
           headers: {
             ...getAuthHeaders(),
@@ -70,7 +66,8 @@ export default function Command() {
         });
 
         if (!response.ok) {
-          throw new Error("Failed to remove the torrent");
+          showToast(Toast.Style.Failure, "Error", "Failed to remove the torrent");
+          return;
         }
 
         if (favorites.includes(hash)) {
@@ -126,7 +123,7 @@ export default function Command() {
   ];
 
   return (
-    <List isLoading={isRefreshing || isLoadingFavorites}>
+    <List>
       {sortedItems.length === 0 ? (
         <List.EmptyView title="No torrents found" />
       ) : (

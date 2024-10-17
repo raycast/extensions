@@ -1,7 +1,7 @@
 import { ActionPanel, Action, List, Icon, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
-import fetch, { RequestInit, Response } from "node-fetch";
-import { getAuthHeaders, handleDomain } from "./utils";
+
+import { getAuthHeaders, handleDomain, timeoutFetch } from "./utils";
 import { PassThrough } from "stream";
 import { Preferences } from "./models";
 
@@ -16,17 +16,6 @@ export default function TestConnectionCommand() {
   const [downloadProgress, setDownloadProgress] = useState<string>("0/100%");
   let checkInProgress = false;
 
-  const TIMEOUT_DURATION = 3000; // Timeout duration in milliseconds
-
-  const fetchWithTimeout = async (url: string, options: RequestInit): Promise<Response> => {
-    return Promise.race<Response>([
-      fetch(url, options),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Request timed out after 3 seconds")), TIMEOUT_DURATION),
-      ),
-    ]);
-  };
-
   const testConnection = async () => {
     if (checkInProgress) {
       return;
@@ -37,7 +26,7 @@ export default function TestConnectionCommand() {
     showToast(Toast.Style.Animated, "Connecting...", "Please wait...");
 
     try {
-      const response = await fetchWithTimeout(`${handleDomain(torrserverUrl)}`, {
+      const response = await timeoutFetch(`${handleDomain(torrserverUrl)}`, {
         method: "GET",
         headers: {
           ...getAuthHeaders(),
@@ -62,14 +51,13 @@ export default function TestConnectionCommand() {
         return;
       }
 
-      setConnectionStatus("Connection successful");
+      setConnectionStatus(`Connected to ${torrserverUrl}`);
       setLoginStatus("Login successful");
-      showToast(Toast.Style.Success, "Connected", "Connection successful");
 
       await testDownloadSpeed(handleDomain(torrserverUrl));
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      setConnectionStatus("Error: Could not connect to the server");
+      setConnectionStatus(`Error: Could not connect to ${torrserverUrl}`);
       setLoginStatus("-");
       setDownloadProgress("-");
       showToast(Toast.Style.Failure, "Connection Error", "Could not connect to the server");
@@ -88,7 +76,7 @@ export default function TestConnectionCommand() {
     showToast(Toast.Style.Animated, "Testing Speed", "Checking connection speed...");
 
     try {
-      const response = await fetchWithTimeout(downloadUrl, {
+      const response = await timeoutFetch(downloadUrl, {
         method: "GET",
         headers: {
           ...getAuthHeaders(),

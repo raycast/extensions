@@ -7,7 +7,6 @@ import { JacredParsedTorrent, TorrentItem } from "./models";
 export default function Command() {
   const [query, setQuery] = useState<string>("");
   const [items, setItems] = useState<JacredParsedTorrent[]>([]);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const { torrserverUrl, mediaPlayerApp, jacredParserUrl } = getPreferenceValues<Preferences>();
 
   useEffect(() => {
@@ -20,7 +19,8 @@ export default function Command() {
   }, [query]);
 
   const getList = async (query: string) => {
-    setIsRefreshing(true);
+    showToast(Toast.Style.Animated, "Processing...");
+
     if (!jacredParserUrl) {
       showToast(Toast.Style.Failure, "Error", "Jacred parser url not found");
 
@@ -40,22 +40,24 @@ export default function Command() {
       }
 
       const data = await response.json();
+
       if (Array.isArray(data)) {
         const sortedItems = data.sort((a: JacredParsedTorrent, b: JacredParsedTorrent) => b.sid - a.sid);
         setItems(sortedItems);
         showToast(Toast.Style.Success, "Success", `${sortedItems.length} results`);
       } else {
-        throw new Error("Invalid response format");
+        showToast(Toast.Style.Failure, "Error", "Invalid response");
+        return;
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       showToast(Toast.Style.Failure, "Error", "Nothing found");
-    } finally {
-      setIsRefreshing(false);
     }
   };
 
   const addTorrentToServer = async (title: string, link: string, saveToDb = true, openInMediaPlayer = false) => {
+    showToast(Toast.Style.Animated, "Processing...");
+
     try {
       const response = await fetch(`${handleDomain(torrserverUrl)}/torrents`, {
         method: "POST",
@@ -115,12 +117,7 @@ export default function Command() {
   };
 
   return (
-    <List
-      isShowingDetail
-      searchBarPlaceholder="Search torrents (min 3 characters)"
-      onSearchTextChange={setQuery}
-      isLoading={isRefreshing}
-    >
+    <List isShowingDetail searchBarPlaceholder="Search torrents (min 3 characters)" onSearchTextChange={setQuery}>
       {items.length === 0 ? (
         <List.EmptyView title="No torrents found" />
       ) : (
