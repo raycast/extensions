@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { List, ActionPanel, Action, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, useNavigation, Image } from "@raycast/api";
 import { useTranslation } from "./hooks/useTranslation";
 import { useLinks } from "./hooks/useLinks";
 import { LinkDetail } from "./components/LinkDetail";
@@ -15,7 +15,8 @@ function MainContent() {
   const { t } = useTranslation();
   const { links, isLoading, refreshLinks } = useLinks();
   const { push } = useNavigation();
-  useConfig();
+  const { config } = useConfig();
+  const showWebsitePreview = config?.showWebsitePreview === "true" ? true : false;
   const filteredLinks = useMemo(() => {
     if (!searchText) return [];
     return links.filter((link) => link && link.slug && link.slug.toLowerCase().includes(searchText.toLowerCase()));
@@ -90,9 +91,16 @@ function MainContent() {
           {filteredLinks.map((link) => (
             <List.Item
               key={link.id}
-              icon={Icon.Link}
               title={link.slug}
               subtitle={link.url}
+              icon={
+                showWebsitePreview
+                  ? {
+                      source: `https://unavatar.io/${new URL(link.url).hostname}?fallback=https://sink.cool/sink.png`,
+                      mask: Image.Mask.Circle,
+                    }
+                  : Icon.Link
+              }
               actions={
                 <ActionPanel>
                   <Action title={t.viewDetails} onAction={() => handleLinkSelect(link)} />

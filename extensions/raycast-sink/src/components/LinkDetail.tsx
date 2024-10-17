@@ -40,18 +40,18 @@ export function LinkDetail({ link, onRefresh }: LinkDetailProps) {
 
   const markdown = `
 
-## ${t.shortLink}
+## 🍞 ${t.shortLink}
 ${shortLink}
 
-## ${t.targetUrl}
+## 🔗 ${t.targetUrl}
 ${link.url}
 
-## ${t.comment}
-${link.comment || ""}
+${link.comment ? `## 💬 ${t.comment}\n${link.comment || ""}` : ""}
+
 
 ---
 
-## ${t.managerUrl}
+## 🎛️ ${t.managerUrl}
 ${managerUrl}
 
   `;
@@ -75,6 +75,7 @@ ${managerUrl}
           <ActionPanel.Section>
             <Action.OpenInBrowser title={t.openTargetUrl} url={link.url} />
             <Action.CopyToClipboard title={t.copyShortLink} content={shortLink} />
+            <Action.OpenInBrowser title={t.openManagerUrl} url={managerUrl} />
             <Action.Push
               title={t.editLink}
               icon={Icon.Pencil}
