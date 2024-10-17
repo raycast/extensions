@@ -1,14 +1,14 @@
-import { ActionPanel, Action, List, showToast, Toast, getPreferenceValues, Color, open } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, getPreferenceValues, Color, open, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fetch from "node-fetch";
-import { getAuthHeaders } from "./utils";
+import { getAuthHeaders, handleDomain } from "./utils";
 import { JacredParsedTorrent, TorrentItem } from "./models";
 
 export default function Command() {
   const [query, setQuery] = useState<string>("");
   const [items, setItems] = useState<JacredParsedTorrent[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const { torrserverUrl, mediaPlayerApp } = getPreferenceValues<Preferences>();
+  const { torrserverUrl, mediaPlayerApp, jacredParserUrl } = getPreferenceValues<Preferences>();
 
   useEffect(() => {
     if (query.length >= 3) {
@@ -23,7 +23,7 @@ export default function Command() {
     setIsRefreshing(true);
     try {
       const response = await fetch(
-        `https://jacred.xyz/api/v1.0/torrents?search=${encodeURIComponent(query)}&apikey=null`,
+        `${handleDomain(jacredParserUrl)}/api/v1.0/torrents?search=${encodeURIComponent(query)}&apikey=null`,
         {
           method: "GET",
         },
@@ -37,12 +37,13 @@ export default function Command() {
       if (Array.isArray(data)) {
         const sortedItems = data.sort((a: JacredParsedTorrent, b: JacredParsedTorrent) => b.sid - a.sid);
         setItems(sortedItems);
+        showToast(Toast.Style.Success, "Success", `${sortedItems.length} results`);
       } else {
         throw new Error("Invalid response format");
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      showToast(Toast.Style.Failure, "Error", "Failed to fetch torrents");
+      showToast(Toast.Style.Failure, "Error", "Nothing found");
     } finally {
       setIsRefreshing(false);
     }
@@ -50,7 +51,7 @@ export default function Command() {
 
   const addTorrentToServer = async (title: string, link: string, saveToDb = true, openInMediaPlayer = false) => {
     try {
-      const response = await fetch(`${torrserverUrl}/torrents`, {
+      const response = await fetch(`${handleDomain(torrserverUrl)}/torrents`, {
         method: "POST",
         headers: {
           ...getAuthHeaders(),
@@ -149,10 +150,15 @@ export default function Command() {
             }
             actions={
               <ActionPanel>
-                <Action title="Add Torrent to Server" onAction={() => addTorrentToServer(item.title, item.magnet)} />
                 <Action
                   title={`Open in ${mediaPlayerApp!.name}`}
+                  icon={{ source: Icon.Video }}
                   onAction={() => addTorrentToServer(item.title, item.magnet, false, true)}
+                />
+                <Action
+                  icon={{ source: Icon.SaveDocument }}
+                  title="Add Torrent to Server"
+                  onAction={() => addTorrentToServer(item.title, item.magnet)}
                 />
                 <Action.CopyToClipboard title="Copy Magnet Link" content={item.magnet} />
               </ActionPanel>

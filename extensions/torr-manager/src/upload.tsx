@@ -2,7 +2,7 @@ import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues } from
 import fetch from "node-fetch";
 import { FormData } from "formdata-node";
 import { fileFromPath } from "formdata-node/file-from-path";
-import { getAuthHeaders } from "./utils";
+import { getAuthHeaders, handleDomain } from "./utils";
 import { Preferences } from "./models";
 import { useState } from "react";
 
@@ -45,7 +45,7 @@ export default function Command() {
 
       const serverUrl = `${torrserverUrl}/torrent/upload`;
 
-      const response = await fetch(serverUrl, {
+      const response = await fetch(handleDomain(serverUrl), {
         method: "POST",
         body: formData,
         headers: {

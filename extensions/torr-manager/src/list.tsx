@@ -2,7 +2,7 @@ import { ActionPanel, Action, Icon, List, showToast, Toast, getPreferenceValues,
 import { useEffect, useState } from "react";
 import { useLocalStorage } from "@raycast/utils";
 import fetch from "node-fetch";
-import { getAuthHeaders } from "./utils";
+import { getAuthHeaders, handleDomain } from "./utils";
 import { Preferences, TorrentItem } from "./models";
 
 export default function Command() {
@@ -24,7 +24,7 @@ export default function Command() {
   const getList = async () => {
     setIsRefreshing(true);
     try {
-      const response = await fetch(`${torrserverUrl}/torrents`, {
+      const response = await fetch(`${handleDomain(torrserverUrl)}/torrents`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -58,7 +58,7 @@ export default function Command() {
 
     if (confirmation) {
       try {
-        const response = await fetch(`${torrserverUrl}/torrents`, {
+        const response = await fetch(`${handleDomain(torrserverUrl)}/torrents`, {
           method: "POST",
           headers: {
             ...getAuthHeaders(),
@@ -141,12 +141,13 @@ export default function Command() {
                 <Action.Open
                   title={`Open in ${mediaPlayerApp.name}`}
                   target={getStreamLink(item)}
+                  icon={{ source: Icon.Video }}
                   application={mediaPlayerApp.path}
                 />
 
                 <Action
                   title={favorites.includes(item.hash) ? "Remove from Favorites" : "Add to Favorites"}
-                  icon={favorites.includes(item.hash) ? Icon.Trash : Icon.Star}
+                  icon={favorites.includes(item.hash) ? Icon.Undo : Icon.Star}
                   onAction={() => toggleFavorite(item.hash)}
                 />
                 <Action title="Remove Torrent" icon={Icon.Trash} onAction={() => handleRemove(item.title, item.hash)} />

@@ -40,6 +40,13 @@
       "type": "appPicker",
       "description": "Select media player app to use",
       "required": true
+    },
+    {
+      "name": "jacredParserUrl",
+      "title": "Jacred parser",
+      "type": "textfield",
+      "description": "It is not required, but u need it to be able to use search command",
+      "required": true
     }
   ],
   "commands": [
@@ -59,6 +66,12 @@
       "name": "jacred-parser",
       "title": "Search Torrents",
       "description": "Search torrents",
+      "mode": "view"
+    },
+    {
+      "name": "test-connection",
+      "title": "Test Connection",
+      "description": "Test connection to your server",
       "mode": "view"
     }
   ],
