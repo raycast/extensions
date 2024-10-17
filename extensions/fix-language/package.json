@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fix-language",
+  "title": "Fix Language",
+  "description": "Switch the language input source of the text when you type and forget to change the language.",
+  "icon": "command-icon.png",
+  "author": "tin5451",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "sw",
+      "title": "Sw",
+      "subtitle": "Quick switch the selected text input source",
+      "description": "Switch the language to another (default: eng/thai)",
+      "mode": "no-view"
+    },
+    {
+      "name": "swc",
+      "title": "Swc",
+      "subtitle": "Quick switch the clipboard text input source",
+      "description": "Switch the language to another (default: eng/thai)",
+      "mode": "no-view"
+    },
+    {
+      "name": "fix-language",
+      "title": "Fix Language",
+      "subtitle": "Switch the language input source",
+      "description": "Switch the language input source",
+      "mode": "view"
+    },
+    {
+      "name": "fix-language-setting",
+      "title": "Fix Language Setting",
+      "subtitle": "Settings for fix language extension",
+      "description": "Settings for fix language extension",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.17.0",
+    "simple-keyboard-layouts": "^3.4.18"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
