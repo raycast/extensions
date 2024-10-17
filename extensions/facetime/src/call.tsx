@@ -13,6 +13,7 @@ import Style = Toast.Style;
 import open from "open";
 import { fetchAllContacts } from "swift:../swift/contacts";
 import { useCachedPromise, usePromise } from "@raycast/utils";
+import { useState } from "react";
 
 interface CommandForm {
   contact: string;
@@ -44,6 +45,8 @@ export default function Command() {
       },
     },
   );
+
+  const [searchText, setSearchText] = useState("");
 
   const storage = usePromise(() =>
     LocalStorage.getItem("call-history").then((value) => JSON.parse(value?.toString() || "{}") as Partial<Storage>),
@@ -83,20 +86,54 @@ export default function Command() {
     return <Form isLoading />;
   }
 
-  const sortedContacts = contacts?.sort((a, b) => {
-    const history = storage.data?.history || [];
+  const filteredContacts = [...(contacts ?? [])]
+    .sort((a, b) => {
+      const history = storage.data?.history || [];
 
-    const aCount = count(history, (item) => item === a.id);
-    const bCount = count(history, (item) => item === b.id);
+      const aCount = count(history, (item) => item === a.id);
+      const bCount = count(history, (item) => item === b.id);
 
-    if (aCount > bCount) {
-      return -1;
-    } else if (aCount < bCount) {
-      return 1;
-    }
+      if (aCount > bCount) {
+        return -1;
+      } else if (aCount < bCount) {
+        return 1;
+      }
 
-    return getFullName(a) === "" ? 1 : getFullName(b) === "" ? -1 : getFullName(a).localeCompare(getFullName(b));
-  });
+      return getFullName(a) === "" ? 1 : getFullName(b) === "" ? -1 : getFullName(a).localeCompare(getFullName(b));
+    })
+    .filter((contact) => {
+      const possibleContacts = [...contact.phoneNumbers, ...contact.emailAddresses];
+      return (
+        possibleContacts.some((contact) => contact.value.includes(searchText)) ||
+        getFullName(contact).includes(searchText) ||
+        contact.nickName?.includes(searchText)
+      );
+    });
+
+  const resultItems =
+    filteredContacts.length > 0 ? (
+      filteredContacts.map((contact) => (
+        <Form.Dropdown.Section
+          key={contact.id}
+          title={
+            contact.nickName ||
+            getFullName(contact) ||
+            contact.emailAddresses[0]?.value ||
+            contact.phoneNumbers[0]?.value
+          }
+        >
+          <ContactChoices contact={contact} />
+        </Form.Dropdown.Section>
+      ))
+    ) : searchText ? (
+      <Form.Dropdown.Section>
+        <Form.Dropdown.Item
+          value={searchText}
+          title={`Call ${searchText}`}
+          icon={isPhoneNumber(searchText) ? Icon.Phone : Icon.Envelope}
+        />
+      </Form.Dropdown.Section>
+    ) : undefined;
 
   return (
     <Form
@@ -106,20 +143,8 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="contact" title="Contact">
-        {sortedContacts?.map((contact) => (
-          <Form.Dropdown.Section
-            key={contact.id}
-            title={
-              contact.nickName ||
-              getFullName(contact) ||
-              contact.emailAddresses[0]?.value ||
-              contact.phoneNumbers[0]?.value
-            }
-          >
-            <ContactChoices contact={contact} />
-          </Form.Dropdown.Section>
-        ))}
+      <Form.Dropdown id="contact" title="Contact" onSearchTextChange={setSearchText}>
+        {resultItems}
       </Form.Dropdown>
 
       <Form.Checkbox id="audio" title="Audio Call" label="Audio" defaultValue={storage.data?.preferAudio || false} />
@@ -133,6 +158,12 @@ function getFullName(contact: Contact) {
 
 function count<T>(array: T[], predicate: (item: T) => boolean) {
   return array.reduce((count, item) => count + (predicate(item) ? 1 : 0), 0);
+}
+
+const phoneNumberRegex = /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/;
+
+function isPhoneNumber(value: string) {
+  return phoneNumberRegex.test(value);
 }
 
 function ContactChoices({ contact }: { contact: Contact }) {
