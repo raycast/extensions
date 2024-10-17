@@ -1,9 +1,10 @@
 import { Icon, List } from "@raycast/api";
+import { FeedType } from "../types";
 
-export function FavoritesDropdown(props: { filterSelection: (val: string) => void }) {
+export function FavoritesDropdown(props: { filterSelection: (val: FeedType) => void }) {
   const listOfFilterOptions = [
-    { id: "All", icon: Icon.List },
-    { id: "Favorites", icon: Icon.Star },
+    { name: "Queue", icon: Icon.List },
+    { name: "Favorites", icon: Icon.Star },
   ];
 
   return (
@@ -11,16 +12,16 @@ export function FavoritesDropdown(props: { filterSelection: (val: string) => voi
       tooltip="Filter articles"
       storeValue={false}
       onChange={(newValue) => {
-        props.filterSelection(newValue);
+        props.filterSelection(newValue === "Queue" ? FeedType.Queue : FeedType.Favorites);
       }}
     >
       <List.Dropdown.Section>
         {listOfFilterOptions.map((articleType) => (
           <List.Dropdown.Item
-            key={articleType.id}
+            key={articleType.name}
             icon={articleType.icon}
-            title={articleType.id}
-            value={articleType.id}
+            title={articleType.name}
+            value={articleType.name}
           />
         ))}
       </List.Dropdown.Section>

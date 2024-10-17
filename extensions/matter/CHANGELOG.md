@@ -4,7 +4,7 @@
 
 - add `Pagination`
 - see reading time in mins
-- major `dev` changes: better types, use of hooks, and more
+- `dev` changes: better types, use of hooks, and more
 
 ## [🕹️ 1.1] - 2023-02-23
 

@@ -1,24 +1,24 @@
-import { List, showToast, Toast, Image, Icon } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { List, Image, Icon } from "@raycast/api";
+import { useState } from "react";
 import { Actions } from "./components/Actions";
 import { FavoritesDropdown } from "./components/FavoritesDropdown";
 import { getQueue, getFavorites } from "./matterApi";
 import TokenErrorHandle from "./components/TokenErrorHandle";
-import { ErrorResponse, Item, Items } from "./types";
+import { ErrorResponse, FeedType, Item, Items } from "./types";
 import { showFailureToast, usePromise } from "@raycast/utils";
 
 export default function Command() {
   const [isTokenValid, setIsTokenValid] = useState<boolean>(false);
-  const [filter, setFilter] = useState<string>("All");
+  const [filter, setFilter] = useState<FeedType>(FeedType.Queue);
 
   const {
     isLoading,
     data: items,
     pagination,
   } = usePromise(
-    (articleType) => async (options) => {
+    (feedType: FeedType) => async (options) => {
       let result: Items | ErrorResponse;
-      if (articleType == "All") {
+      if (feedType === FeedType.Queue) {
         result = await getQueue(options.page + 1);
       } else {
         // If filter is set to favorites, get favorites instead
@@ -51,7 +51,7 @@ export default function Command() {
     }
   }
 
-  function filterSelection(type: string) {
+  function filterSelection(type: FeedType) {
     setFilter(type);
   }
 

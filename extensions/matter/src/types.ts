@@ -54,3 +54,8 @@ export interface ErrorResponse {
   code?: string;
   messages?: ErrorMessage[];
 }
+
+export enum FeedType {
+  "Queue" = 1,
+  "Favorites" = 2,
+}
