@@ -259,6 +259,7 @@
 /extensions/colorify                                                @EvanZhouDev
 /extensions/colorslurp                                              @Jordan-Ellis
 /extensions/commercequest                                           @skrollme
+/extensions/commit-message-formatter                                @zrr1999
 /extensions/commit-message-generator                                @rokartur
 /extensions/commitlint                                              @lardissone
 /extensions/common-directory                                        @koinzhang
@@ -1339,6 +1340,7 @@
 /extensions/sentry                                                  @thomaspaulmann @mattisssa @NoorBayari @remorses
 /extensions/sequel-ace                                              @nagauta @macbookandrew
 /extensions/serverless-framework-docs                               @yemilgr
+/extensions/servicenow                                              @robertoalvarezalonso
 /extensions/sesh                                                    @joshmedeski
 /extensions/session                                                 @jamesjlyons @pernielsentikaer @benkates
 /extensions/setapp                                                  @lardissone
