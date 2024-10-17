@@ -53,7 +53,7 @@ export default function Command() {
   const [isLoading, setisLoading] = useState(true);
 
   // Fetch data from URL
-  useFetch(index_url, { onData: (data) => parseData(data) });
+  useFetch(index_url, { onData: (data: string) => parseData(data) });
 
   // create states for search and filtered list
   const [searchText, setSearchText] = useState("");
@@ -62,11 +62,11 @@ export default function Command() {
   const [selectedCategory, setSelectedCategory] = useState("-all-");
 
   // MARK: - HTML Parsing
-  async function parseData(data: any) {
+  async function parseData(data: string) {
     let htmlString: string;
 
     try {
-      htmlString = String(data);
+      htmlString = data;
       const $ = await cheerio.load(htmlString);
 
       // find all categories
