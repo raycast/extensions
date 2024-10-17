@@ -1,8 +1,9 @@
-import type { Cheerio, Element } from "cheerio";
+import type { Cheerio, CheerioAPI, Element } from "cheerio";
 import { load } from "cheerio";
 
 import type { BookEntry } from "@/types";
 import { extractNumber } from "@/utils/common";
+import { DEFAULT_MIRROR } from "@/utils/constants";
 
 const parseBookFromTableInDetailedView = (table: Cheerio<Element>, libgenUrl?: string): BookEntry => {
   const bookElement = table.children("tbody").first();
@@ -48,7 +49,7 @@ const parseBookFromTableInDetailedView = (table: Cheerio<Element>, libgenUrl?: s
   const fileSize = contentRows.eq(9).children("td").eq(1).text().trim();
   const extension = contentRows.eq(9).children("td").eq(3).text().trim();
 
-  libgenUrl = libgenUrl ? libgenUrl : "libgen.rs";
+  libgenUrl = libgenUrl ? libgenUrl : DEFAULT_MIRROR.name;
 
   const book: BookEntry = {
     title: title,
@@ -77,6 +78,9 @@ export const parseContentIntoBooks = (content: string, libgenUrl?: string): Book
   const books: BookEntry[] = [];
   const $ = load(content);
 
+  const titleElement = $("title");
+  if (titleElement.text().includes("fiction")) return parseFiction($, libgenUrl);
+
   // get all the book elements from the page
   // the detailed page uses tables to display each book entry
   // the correct tables are direct children of the body
@@ -95,4 +99,61 @@ export const parseContentIntoBooks = (content: string, libgenUrl?: string): Book
   }
 
   return books;
+};
+
+const parseFiction = ($: CheerioAPI, libgenUrl?: string) => {
+  const books: BookEntry[] = [];
+  const bookElements = $("table.catalog tbody tr");
+  for (let i = 0; i < bookElements.length; i++) {
+    const bookElement = bookElements.eq(i);
+    const book = parseBookFromFictionTable(bookElement, libgenUrl);
+    books.push(book);
+  }
+
+  return books;
+};
+const parseBookFromFictionTable = (row: Cheerio<Element>, libgenUrl?: string): BookEntry => {
+  const bookElement = row;
+  const contentCols = bookElement.children("td");
+  libgenUrl = libgenUrl ? libgenUrl : DEFAULT_MIRROR.name;
+
+  //col 1
+  const author = contentCols.eq(0).find("a").first().text();
+  // col 3
+  const titleCol = contentCols.eq(2);
+  const infoUrl = libgenUrl + titleCol.find("a").first().attr("href");
+  const title = titleCol.find("a").first().text();
+  const isbn = titleCol.find("p.catalog_identifier").first().text().replace("ISBN: ", "");
+  // col 4
+  const language = contentCols.eq(3).text();
+  // col 5
+  const fileCol = contentCols.eq(4).text().trim().split("/");
+  const extension = fileCol[0];
+  const fileSize = fileCol[1];
+  // col 6
+  const downloadUrl = contentCols.eq(5).find("a").first().attr("href") || "";
+  const md5 = downloadUrl.split("/").at(-1);
+
+  const coverUrl = libgenUrl + "/static/no_cover.png";
+
+  const book: BookEntry = {
+    title: title,
+    author: author || "N/A",
+    year: "N/A",
+    edition: "N/A",
+    downloadUrl: downloadUrl,
+    infoUrl: infoUrl || "",
+    pages: "N/A",
+    language: language,
+    publisher: "N/A",
+    fileSize: fileSize,
+    extension: extension,
+    coverUrl: coverUrl || "",
+    md5: md5 || "N/A",
+    id: "N/A",
+    timeAdded: "N/A",
+    timeLastModified: "N/A",
+    isbn: isbn || "N/A",
+  };
+  return book;
 };
