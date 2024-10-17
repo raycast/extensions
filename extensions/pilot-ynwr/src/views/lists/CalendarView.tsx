@@ -1,34 +1,26 @@
 import { Action, ActionPanel, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { CalItem, CalSection, Evnt, Keystone, Project, Todo } from "../../interfaces/interfaceItems";
 import { getDateAndMohth, getDayDateAndMouth, getMounthStringByMonthNumber, progbar } from "../../tools/generalTools";
 
-import useFetchCalendar from "../../fetch/useFetchCalendar";
 import { QueryToogleTodo } from "../../queriesFunctions/TodosQueries";
 import { QueryAddKeystone, QueryChangeDateKeystone } from "../../queriesFunctions/KeystonesQueries";
 import { QueryAddEvent, QueryChangeDateEvent } from "../../queriesFunctions/EventsQueries";
 import { QueryDeleteItem } from "../../queriesFunctions/GeneralQueries";
-import { nameSearchFilter } from "../../tools/filtersTools";
 import TimezoneHook from "../../tools/TimezoneHook";
-import { ClearRefreshAction } from "../actions/actions";
-import EmptyView from "./EmptyView";
+import UseOAuth from "../../fetch/useOAuth";
+import useDBLinkHook from "../../hooks/DBLinkHook";
+import SelectDBsForm from "../forms/SelectDBsForm";
+import useFetchCacheCalendar from "../../fetch/useFetchCacheCalendar";
 import { Client } from "@notionhq/client";
 
 const ADDTIMES = { a: "15 minutes", b: "30 minutes", c: "1 hour", d: "2 hours", e: "4 hours" };
 
-const CalendarView = ({ notion }: { notion: Client | undefined }) => {
-  //#region NOTION HOOK
-
-  const { isLoading, refresh, clearRefresh, projects, keystones, events } = useFetchCalendar(notion);
+const CalendarView = () => {
+  const { notion } = UseOAuth();
+  const { linked } = useDBLinkHook();
+  const { isLoading, refresh, projects, keystones, events } = useFetchCacheCalendar(notion as Client, linked);
   const { tmDate } = TimezoneHook();
-
-  useEffect(() => {
-    if (isLoading) showToast({ title: "Loading...", style: Toast.Style.Animated });
-    else {
-      if (firstLoad) setFirstLoad(false);
-      showToast({ title: "Loaded !", style: Toast.Style.Success });
-    }
-  }, [isLoading]);
 
   //#endregion
 
@@ -39,8 +31,7 @@ const CalendarView = ({ notion }: { notion: Client | undefined }) => {
   const [filter, setFilter] = useState<string>("Nothing");
   const [search, setSearch] = useState<string>("");
   const [addType, setAddType] = useState<string>("Nothing");
-  const [firstLoad, setFirstLoad] = useState<boolean>(true);
-  const [showDetail, setShowDetail] = useState<boolean>(false);
+  const [showDetail, setShowDetail] = useState<boolean>(true);
   const [open, setOpen] = useState<boolean>(false);
   //#endregion
 
@@ -108,7 +99,8 @@ const CalendarView = ({ notion }: { notion: Client | undefined }) => {
   const handleToogleTodo = async (todo: Todo) => {
     showToast({ title: "Toogling Todo", style: Toast.Style.Animated });
     await QueryToogleTodo(todo, notion);
-    refresh(["keystone"]);
+    showToast({ title: "Todo Toogled !", style: Toast.Style.Success });
+    refresh();
   };
 
   const handleAddItem = (date: Date | null) => {
@@ -129,7 +121,8 @@ const CalendarView = ({ notion }: { notion: Client | undefined }) => {
     if (date === null) return;
     const projectID = projects.find((p) => p.name === filter)?.id as string;
     await QueryAddKeystone(search, date.toISOString(), projectID, [], notion);
-    refresh(["keystone"]);
+    refresh();
+    showToast({ title: "Keystone Added !", style: Toast.Style.Success });
   };
   const handleAddEvent = async (date: Date | null) => {
     showToast({ title: "Adding Event", style: Toast.Style.Animated });
@@ -138,14 +131,16 @@ const CalendarView = ({ notion }: { notion: Client | undefined }) => {
     const diff = getDiff(addTime);
     const end = new Date(date.getTime() + diff);
     await QueryAddEvent(search, date.toISOString(), end.toISOString(), projectID, notion);
-    refresh(["event"]);
+    refresh();
+    showToast({ title: "Event Added !", style: Toast.Style.Success });
   };
 
   const handleDeleteItem = async (itemID: string, type: string) => {
     if (await confirmAlert({ title: "Are you sure you want to delete this item ?" })) {
       showToast({ title: "Deleting " + type, style: Toast.Style.Animated });
       await QueryDeleteItem(itemID, notion);
-      refresh([type]);
+      refresh();
+      showToast({ title: type + " Deleted !", style: Toast.Style.Success });
     }
   };
 
@@ -166,7 +161,8 @@ const CalendarView = ({ notion }: { notion: Client | undefined }) => {
     showToast({ title: "Changing Keystone Date", style: Toast.Style.Animated });
     if (date === null) return;
     await QueryChangeDateKeystone(id, date.toISOString(), notion);
-    refresh(["keystone"]);
+    refresh();
+    showToast({ title: "Date Changed !", style: Toast.Style.Success });
   };
 
   const handleChangeDateEvent = async (date: Date | null, item: CalItem) => {
@@ -179,18 +175,14 @@ const CalendarView = ({ notion }: { notion: Client | undefined }) => {
     const endDate = new Date(date.getTime() + diff * 60000);
 
     await QueryChangeDateEvent(item.id, date.toISOString(), endDate.toISOString(), notion);
-    refresh(["event"]);
+    refresh();
+    showToast({ title: "Date Changed !", style: Toast.Style.Success });
   };
   //#endregion
 
   //#region CALENDAR AND CALITEMS
   const CalItem = ({ item }: { item: CalItem }) => {
-    if (
-      item.project.name.toLowerCase().includes(search) ||
-      item.dateInfos.toLowerCase().includes(search) ||
-      item.name.toLowerCase().includes(search)
-    )
-      return <>{item.type === "event" ? <CalItemEvent item={item} /> : <CalItemKeystone item={item} />}</>;
+    return <>{item.type === "event" ? <CalItemEvent item={item} /> : <CalItemKeystone item={item} />}</>;
   };
 
   const CalItemEvent = ({ item }: { item: CalItem }) => {
@@ -307,7 +299,6 @@ const CalendarView = ({ notion }: { notion: Client | undefined }) => {
           <ActionPanel>
             <AddElementAction />
             <RefreshAction />
-            <ClearRefreshAction clearRefresh={clearRefresh} setFirst={setFirstLoad} setShow={setShowDetail} />
           </ActionPanel>
         }
         detail={<List.Item.Detail metadata={<MyCalendarMetadata />} />}
@@ -456,15 +447,16 @@ const CalendarView = ({ notion }: { notion: Client | undefined }) => {
 
   const AddElementAction = () => {
     if (addType === "Nothing") return <></>;
-    if (search === "") return <Action style={Action.Style.Destructive} title="Enter Name Into SearchBar" />;
-    else return <Action.PickDate title={"Add New " + addType} onChange={(e) => handleAddItem(e)} />;
+    if (search === "") return <Action icon={Icon.Calendar} title="Enter Name Into SearchBar" />;
+    else
+      return <Action.PickDate icon={Icon.Calendar} title={"Add New " + addType} onChange={(e) => handleAddItem(e)} />;
   };
 
   const RefreshAction = () => {
     return (
       <Action
         title="Refresh"
-        onAction={() => refresh(["all"])}
+        onAction={() => refresh()}
         icon={Icon.ArrowCounterClockwise}
         autoFocus={false}
         shortcut={{ modifiers: ["cmd"], key: "r" }}
@@ -486,6 +478,7 @@ const CalendarView = ({ notion }: { notion: Client | undefined }) => {
     return (
       <Action.PickDate
         title="Change Date"
+        icon={Icon.Calendar}
         shortcut={{ modifiers: ["cmd"], key: "d" }}
         onChange={(e) => handleChangeDateItem(e, item as CalItem, type)}
       />
@@ -503,8 +496,9 @@ const CalendarView = ({ notion }: { notion: Client | undefined }) => {
   const calendar = calendarConverter(tmEvents as Evnt[], tmKeystones as Keystone[], filter, search);
   //#endregion
 
-  return (
+  return linked ? (
     <List
+      isLoading={isLoading}
       isShowingDetail={showDetail}
       searchBarPlaceholder={addType === "Nothing" ? "Search Keystones, Events..." : "Enter " + addType + " Name"}
       searchText={search}
@@ -512,15 +506,11 @@ const CalendarView = ({ notion }: { notion: Client | undefined }) => {
       onSelectionChange={onSelectionChanged}
       searchBarAccessory={isLoading ? <></> : <SearchBarAccessories />}
     >
-      {isLoading && firstLoad ? (
-        <EmptyView type="Calendar" />
-      ) : (
-        <>
-          <MyCalendar />
-          {addType !== "Nothing" ? <></> : <CalendarSection calendar={calendar} />}
-        </>
-      )}
+      <MyCalendar />
+      {addType !== "Nothing" ? <></> : <CalendarSection calendar={calendar} />}
     </List>
+  ) : (
+    <SelectDBsForm notion={notion} />
   );
 };
 
@@ -529,7 +519,7 @@ const calendarConverter = (events: Evnt[], keystones: Keystone[], filter: string
   const calendar: CalItem[] = [];
 
   if (events !== null)
-    nameSearchFilter(events, search).forEach((e) => {
+    filterSearchEvents(events, search).forEach((e) => {
       const event = e as Evnt;
       const item: CalItem = {
         id: event.id,
@@ -548,7 +538,7 @@ const calendarConverter = (events: Evnt[], keystones: Keystone[], filter: string
       calendar.push(item);
     });
   if (keystones !== null)
-    nameSearchFilter(keystones, search).forEach((k) => {
+    filterSearchKeystones(keystones, search).forEach((k) => {
       const keystone = k as Keystone;
       const item: CalItem = {
         id: keystone.id,
@@ -675,6 +665,37 @@ const getDiff = (addTime: string | null) => {
       break;
   }
   return min * 60000;
+};
+
+const filterSearchKeystones = (keystones: Keystone[], search: string) => {
+  if (keystones.length === 0) return [];
+  const lowerSearch = search.toLowerCase();
+  const filteredkeystones: Keystone[] = [];
+  keystones.forEach((keystone) => {
+    if (
+      keystone.name.toLowerCase().includes(lowerSearch) ||
+      keystone.project.name.toLowerCase().includes(lowerSearch) ||
+      keystone.date.includes(lowerSearch) ||
+      getDayDateAndMouth(keystone.date).toLowerCase().includes(lowerSearch)
+    )
+      filteredkeystones.push(keystone);
+  });
+  return filteredkeystones;
+};
+const filterSearchEvents = (events: Evnt[], search: string) => {
+  if (events.length === 0) return [];
+  const lowerSearch = search.toLowerCase();
+  const filteredEvents: Evnt[] = [];
+  events.forEach((event) => {
+    if (
+      event.name.toLowerCase().includes(lowerSearch) ||
+      event.project.name.toLowerCase().includes(lowerSearch) ||
+      event.start.includes(lowerSearch) ||
+      getDayDateAndMouth(event.start).toLowerCase().includes(lowerSearch)
+    )
+      filteredEvents.push(event);
+  });
+  return filteredEvents;
 };
 
 //#endregion

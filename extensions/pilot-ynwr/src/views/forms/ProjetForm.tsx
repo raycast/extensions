@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
 import React, { useState } from "react";
 import { NameChecker } from "../../tools/formErrors";
 import { ICON_LIST } from "../../data/icons";
@@ -26,6 +26,7 @@ const ProjetForm = (p: Props) => {
   const handleSubmitForm = async (values: ProjectForm) => {
     showToast({ title: "Adding Project", style: Toast.Style.Animated });
     await QueryAddProject(values.name, values.icon, notion);
+    showToast({ title: "Project Added !", style: Toast.Style.Success });
     refresh(["project"]);
     pop();
   };
@@ -42,7 +43,8 @@ const ProjetForm = (p: Props) => {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Submit"
+            icon={Icon.NewFolder}
+            title="Submit New Project"
             onSubmit={(values: ProjectForm) => {
               if (handleErrors(values)) return;
               handleSubmitForm(values);

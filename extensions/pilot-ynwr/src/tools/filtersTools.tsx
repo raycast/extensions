@@ -16,8 +16,9 @@ export const ratioTodos = (todos: Todo[]) => {
 };
 
 export const nameSearchFilter = (items: Todo[] | Keystone[] | Evnt[], search: string) => {
-  const filteredItem: { name: string }[] = [];
+  // const lowerSearch = search.toLowerCase();
   const splitSearch = search.split("");
+  const filteredItem: { name: string }[] = [];
   items.forEach((item) => {
     let bool = true;
     splitSearch.forEach((char) => {

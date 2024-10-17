@@ -261,9 +261,7 @@ export const FetchedTodos = async (targets: string[], apiID: string, forceRefres
 };
 
 export const FetchJournals = async (targets: string[], apiID: string, forceRefresh: boolean, notion: Client) => {
-  if (!(targets.includes("journal") || targets.includes("all")))
-    return (cache.has("journals") ? strToData(cache.get("journals") as string) : []) as Journal[];
-  if (forceRefresh || !cache.has("journals")) {
+  const fetch = async () => {
     const qJournal = { database_id: apiID, ...GetJournalsQuery(true, "Nothing", false, "") };
     const returnedJournals = await notion?.databases
       .query(qJournal as QueryDatabaseParameters)
@@ -276,9 +274,16 @@ export const FetchJournals = async (targets: string[], apiID: string, forceRefre
       .catch((e: APIResponseError) => {
         return e.code as string;
       });
-
     return returnedJournals;
-  } else return strToData(cache.get("journals") as string) as Journal[];
+  };
+  if (!(targets.includes("journal") || targets.includes("all")))
+    return (cache.has("journals") ? strToData(cache.get("journals") as string) : []) as Journal[];
+  if (forceRefresh || !cache.has("journals")) {
+    const journals: Journal[] | string = await fetch();
+    return journals;
+  } else {
+    return strToData(cache.get("journals") as string) as Journal[];
+  }
 };
 
 export const FetchLinks = async (targets: string[], apiID: string, forceRefresh: boolean, notion: Client) => {

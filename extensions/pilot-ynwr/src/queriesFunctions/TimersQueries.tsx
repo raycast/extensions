@@ -16,7 +16,7 @@ import { FetchActiveTimer } from "../fetch/FetchFunctions";
 
 const getToken = async () => {
   {
-    const token = (await LocalStorage.getItem("timer")) as string;
+    const token = (await LocalStorage.getItem("Timers")) as string;
     return token;
   }
 };
@@ -89,7 +89,7 @@ export const QueryStartTimer = async (date: string, notion: Client | undefined) 
     return showToast({ title: getAPIError(e.code as string, "Timer") });
   });
   if (notion === undefined) return;
-  const timerAPIID = (await LocalStorage.getItem("timer")) as string;
+  const timerAPIID = (await LocalStorage.getItem("Timers")) as string;
   await FetchActiveTimer(["all"], timerAPIID, true, notion);
   return true;
 };
@@ -133,7 +133,7 @@ export const QueryStopTimer = async (
   project: Project,
   notion: Client | undefined,
 ) => {
-  const jouralAPIID = (await LocalStorage.getItem("journal")) as string;
+  const jouralAPIID = (await LocalStorage.getItem("Journals")) as string;
   const today = new Date().toISOString().slice(0, 10);
   const q = GetJournalsQuery(true, project.name, false, today);
   const resJournal = await notion?.databases
@@ -166,7 +166,7 @@ export const QueryStopTimer = async (
       });
   }
   if (notion === undefined) return;
-  const timerAPIID = (await LocalStorage.getItem("timer")) as string;
+  const timerAPIID = (await LocalStorage.getItem("Timers")) as string;
   await FetchActiveTimer(["all"], timerAPIID, true, notion);
   return true;
 };

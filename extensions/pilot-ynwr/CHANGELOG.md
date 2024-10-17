@@ -1,7 +1,18 @@
 # Pilot - Calendar, Task Manager & Journals | Changelog
 
 
-##  [OAUTH BUGS CORRECTION & TODAY HOOKS] - 202413-09 
+##  [FLICKERING CORRECTIONS & USECACHEPROMISE] - 2024-17-09 
+
+- Use useCachePromise hooks for fetching
+- Add Icons for all actions
+- Change Action.Style.Desctructive for destructive actions only
+- Use isLoading on List instead of custom hooks
+- Flickering corrections for all views
+- Correction Toogle Todos from Menu Bar
+- Modify README.md
+
+
+##  [OAUTH BUGS CORRECTION & TODAY HOOKS] - 2024-13-09 
 
 - Bugs correction with OAuth 
 - Add Today Hooks for MenuBar & Home to refresh when is a new today

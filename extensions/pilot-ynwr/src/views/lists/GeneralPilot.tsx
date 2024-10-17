@@ -12,7 +12,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import { b, br, code, h1, h2 } from "../../tools/markdownTools";
 import {
@@ -27,15 +27,16 @@ import LinksForm from "../forms/LinksForm";
 import CalendarView from "./CalendarView";
 import TaskManagementView from "./TaskManagementView";
 import { Evnt, Keystone, Project, ProjectGP } from "../../interfaces/interfaceItems";
-import useFetchGeneralPilot from "../../fetch/useFetchGeneralPilot";
 import { QueryStartTimer } from "../../queriesFunctions/TimersQueries";
 import JournalView from "./JournalView";
 import EndTimerForm from "../forms/EndTimerForm";
 import ProjetForm from "../forms/ProjetForm";
 import { QueryChangeActiveProject, QueryDeleteProject } from "../../queriesFunctions/ProjectQueries";
-import EmptyView from "./EmptyView";
-import { ClearRefreshAction, RefreshAction } from "../actions/actions";
+import { RefreshAction } from "../actions/actions";
 import SelectDBsForm from "../forms/SelectDBsForm";
+import UseOAuth from "../../fetch/useOAuth";
+import useDBLinkHook from "../../hooks/DBLinkHook";
+import useFetchCacheHome from "../../fetch/useFetchCacheHome";
 import { Client } from "@notionhq/client";
 
 const cache = new Cache();
@@ -49,26 +50,18 @@ interface ProjectItemMetadataProps {
   project: Project;
 }
 
-const GeneralPilot = ({ notion }: { notion: Client | undefined }) => {
+const GeneralPilot = () => {
   const { push } = useNavigation();
+  const { linked } = useDBLinkHook();
   const nowDate = new Date();
 
   //#region NOTION HOOKS
-  const { isLoading, refresh, clearRefresh, allProjects, todayEvents, todayKeystones, gpProjects, activeTimer } =
-    useFetchGeneralPilot(notion);
+  const { notion } = UseOAuth();
+  const { isLoading, refresh, allProjects, todayEvents, todayKeystones, gpProjects, activeTimer } = useFetchCacheHome(
+    notion as Client,
+    linked,
+  );
 
-  useEffect(() => {
-    if (isLoading) showToast({ title: "Loading...", style: Toast.Style.Animated });
-    else {
-      if (firstLoad) {
-        setFirstLoading(false);
-      }
-      showToast({ title: "Loaded !", style: Toast.Style.Success });
-    }
-  }, [isLoading]);
-  //#endregion
-
-  const [firstLoad, setFirstLoading] = useState<boolean>(true);
   const [searchText, setSearchText] = useState<string>("");
   const [showDetail, setShowDetail] = useState<boolean>(true);
 
@@ -85,8 +78,9 @@ const GeneralPilot = ({ notion }: { notion: Client | undefined }) => {
   const handleChangeActiveProject = async (project: Project) => {
     const bool = !project.active;
     showToast({ title: bool ? "Activating Project..." : "Desactivation Project...", style: Toast.Style.Animated });
+    refresh();
     await QueryChangeActiveProject(project.id, bool, notion);
-    refresh(["project"]);
+    showToast({ title: "Done !", style: Toast.Style.Success });
   };
   const handleDeleteProject = async (project: Project) => {
     if (
@@ -96,7 +90,8 @@ const GeneralPilot = ({ notion }: { notion: Client | undefined }) => {
     ) {
       showToast({ title: "Deleting Project...", style: Toast.Style.Animated });
       await QueryDeleteProject(project, cache, notion);
-      refresh(["all"]);
+      refresh();
+      showToast({ title: "Project Deleted !", style: Toast.Style.Success });
     }
   };
   //#endregion
@@ -111,7 +106,6 @@ const GeneralPilot = ({ notion }: { notion: Client | undefined }) => {
         actions={
           <ActionPanel>
             <RefreshAction refresh={refresh} />
-            <ClearRefreshAction setFirst={setFirstLoading} setShow={setShowDetail} clearRefresh={clearRefresh} />
           </ActionPanel>
         }
         detail={
@@ -211,7 +205,7 @@ const GeneralPilot = ({ notion }: { notion: Client | undefined }) => {
         accessories={accessories}
         actions={
           <ActionPanel>
-            <Action title={!open ? "Show Commands" : "Hide Commands"} onAction={() => onOpen()} />
+            <Action icon={Icon.Eye} title={!open ? "Show Commands" : "Hide Commands"} onAction={() => onOpen()} />
             <DeleteAction project={project} />
           </ActionPanel>
         }
@@ -315,7 +309,7 @@ const GeneralPilot = ({ notion }: { notion: Client | undefined }) => {
           title={"🗓️ Open Calendar"}
           actions={
             <ActionPanel>
-              <Action.Push title="Open Your Calendar" target={<CalendarView notion={notion} />} />
+              <Action.Push icon={"🗓️"} title="Open Your Calendar" target={<CalendarView />} />
             </ActionPanel>
           }
         />
@@ -324,16 +318,20 @@ const GeneralPilot = ({ notion }: { notion: Client | undefined }) => {
           title={"📋 Open Task Manager"}
           actions={
             <ActionPanel>
-              <Action.Push title="Open Your Task Manager" target={<TaskManagementView notion={notion} />} />
+              <Action.Push
+                icon={"📋"}
+                title="Open Your Task Manager"
+                target={<TaskManagementView launchProps={undefined} />}
+              />
             </ActionPanel>
           }
         />
         <List.Item
           id="journal"
-          title={"📔 " + "Open Journal"}
+          title={"📔 Open Journal"}
           actions={
             <ActionPanel>
-              <Action.Push title="Open Your Journal" target={<JournalView notion={notion} />} />
+              <Action.Push icon={"📔"} title="Open Your Journal" target={<JournalView />} />
             </ActionPanel>
           }
         />
@@ -348,8 +346,8 @@ const GeneralPilot = ({ notion }: { notion: Client | undefined }) => {
       const r = await QueryStartTimer(date, notion);
       if (!r) showToast({ title: "Error starting timer", style: Toast.Style.Failure });
       else {
+        refresh();
         showToast({ title: "Start Timer !", style: Toast.Style.Success });
-        refresh(["timer"]);
       }
     };
     const handleStopTimer = () => {
@@ -367,7 +365,7 @@ const GeneralPilot = ({ notion }: { notion: Client | undefined }) => {
     };
 
     const isRunning = !(activeTimer === null);
-
+    if (isLoading) return <></>;
     return (
       <List.Item
         id="timer"
@@ -376,9 +374,9 @@ const GeneralPilot = ({ notion }: { notion: Client | undefined }) => {
         actions={
           <ActionPanel>
             {isRunning ? (
-              <Action title="Stop Timer" onAction={() => handleStopTimer()} />
+              <Action icon={"⏰"} title="Stop Timer" onAction={() => handleStopTimer()} />
             ) : (
-              <Action title="Start Timer" onAction={() => handleStartTimer()} />
+              <Action icon={"⏰"} title="Start Timer" onAction={() => handleStartTimer()} />
             )}
           </ActionPanel>
         }
@@ -408,7 +406,7 @@ const GeneralPilot = ({ notion }: { notion: Client | undefined }) => {
           icon={"📕"}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Open Documentation" url="https://pilot-docs.romubuntu.dev/" />
+              <Action.OpenInBrowser icon={"📕"} title="Open Documentation" url="https://pilot-docs.romubuntu.dev/" />
             </ActionPanel>
           }
         />
@@ -417,7 +415,7 @@ const GeneralPilot = ({ notion }: { notion: Client | undefined }) => {
           icon={"ℹ️"}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Open Information & Credits" url="https://pilot.romubuntu.dev/" />
+              <Action.OpenInBrowser icon={"ℹ️"} title="Open Information & Credits" url="https://pilot.romubuntu.dev/" />
             </ActionPanel>
           }
         />
@@ -426,7 +424,7 @@ const GeneralPilot = ({ notion }: { notion: Client | undefined }) => {
           icon={"⚙️"}
           actions={
             <ActionPanel>
-              <Action.Push title="Open Databases Selection" target={<SelectDBsForm notion={notion} />} />
+              <Action.Push icon={"⚙️"} title="Open Databases Selection" target={<SelectDBsForm notion={notion} />} />
             </ActionPanel>
           }
         />
@@ -437,7 +435,7 @@ const GeneralPilot = ({ notion }: { notion: Client | undefined }) => {
 
   //#endregion
 
-  return (
+  return linked ? (
     <List
       searchText={searchText}
       onSearchTextChange={setSearchText}
@@ -445,18 +443,15 @@ const GeneralPilot = ({ notion }: { notion: Client | undefined }) => {
       filtering={true}
       isShowingDetail={showDetail}
       searchBarPlaceholder="Search Projects, or Views"
+      isLoading={isLoading}
     >
-      {isLoading && firstLoad ? (
-        <EmptyView type="Dashboard" />
-      ) : (
-        <>
-          <PilotItem />
-          <ProjectsSection />
-          <ToolsSection />
-          <HelpSection />
-        </>
-      )}
+      <PilotItem />
+      <ProjectsSection />
+      <ToolsSection />
+      <HelpSection />
     </List>
+  ) : (
+    <SelectDBsForm notion={notion} />
   );
 };
 export default GeneralPilot;

@@ -2,15 +2,12 @@ import { Action, Icon } from "@raycast/api";
 
 export const ClearRefreshAction = ({
   clearRefresh,
-  setFirst,
   setShow,
 }: {
   clearRefresh: () => void;
-  setFirst: (v: boolean) => void;
   setShow: (v: boolean) => void;
 }) => {
   const action = () => {
-    setFirst(true);
     setShow(false);
     clearRefresh();
   };
@@ -18,8 +15,7 @@ export const ClearRefreshAction = ({
     <Action
       title="Clear Cache & Refresh"
       shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-      style={Action.Style.Destructive}
-      icon={Icon.ClearFormatting}
+      icon={Icon.DeleteDocument}
       onAction={() => {
         action();
       }}
@@ -31,7 +27,7 @@ export const RefreshAction = ({ refresh }: { refresh: (v: string[]) => void }) =
   return (
     <Action
       title="Refresh"
-      icon={Icon.Repeat}
+      icon={Icon.ArrowCounterClockwise}
       shortcut={{ modifiers: ["cmd"], key: "r" }}
       onAction={() => {
         refresh(["all"]);

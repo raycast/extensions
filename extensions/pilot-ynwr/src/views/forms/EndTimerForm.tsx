@@ -1,10 +1,9 @@
-import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, PopToRootType, Toast, closeMainWindow, showToast } from "@raycast/api";
 import React from "react";
 import { Project, Timer } from "../../interfaces/interfaceItems";
 
 import { QueryStopTimer } from "../../queriesFunctions/TimersQueries";
 import UseOAuth from "../../fetch/useOAuth";
-import GeneralPilot from "../lists/GeneralPilot";
 
 interface SubmitForm {
   projectID: string;
@@ -13,7 +12,6 @@ interface SubmitForm {
 
 const EndTimerForm = ({ props }: { props: { timer: Timer; projects: Project[] } }) => {
   const { projects, timer } = props;
-  const { push } = useNavigation();
 
   const { notion } = UseOAuth();
 
@@ -23,7 +21,7 @@ const EndTimerForm = ({ props }: { props: { timer: Timer; projects: Project[] } 
     const project = projects.find((project) => project.id === v.projectID);
     await QueryStopTimer(timer.id, timer?.start, now.toISOString(), project as Project, notion);
     showToast({ title: "Timer stopped successfully", style: Toast.Style.Success });
-    push(<GeneralPilot notion={notion} />);
+    await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
   };
 
   return (
@@ -31,6 +29,8 @@ const EndTimerForm = ({ props }: { props: { timer: Timer; projects: Project[] } 
       actions={
         <ActionPanel>
           <Action.SubmitForm
+            title="End Your Timer"
+            icon={Icon.Alarm}
             onSubmit={(values: SubmitForm) => {
               handleSubmit(values);
             }}

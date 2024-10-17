@@ -4,7 +4,7 @@ import { LocalStorage, showToast } from "@raycast/api";
 import { getAPIError } from "../tools/generalTools";
 
 const getToken = async () => {
-  const token = (await LocalStorage.getItem("project")) as string;
+  const token = (await LocalStorage.getItem("Projects")) as string;
   return token;
 };
 

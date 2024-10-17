@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Action, ActionPanel, Form, PopToRootType, Toast, closeMainWindow, showToast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Toast, popToRoot, showToast } from "@raycast/api";
 import { NameChecker, ProjectChecker, UrlChecker } from "../../tools/formErrors";
 
 import { QueryAddLink } from "../../queriesFunctions/LinksQueries";
@@ -41,12 +41,12 @@ const LinksForm = (p: Props) => {
     return check;
   };
 
-  const handleSubmit = async (v: SubmitForm, close: boolean) => {
+  const handleSubmit = async (v: SubmitForm) => {
     const r = await QueryAddLink(v.name, v.projectID, v.link, v.app, v.icon, notion);
     if (r) {
       showToast({ title: "Link added successfully", style: Toast.Style.Success }), p.refresh(["project"]);
     } else showToast({ title: "Error adding link", style: Toast.Style.Failure });
-    if (close) await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+    await popToRoot();
   };
 
   return (
@@ -54,10 +54,11 @@ const LinksForm = (p: Props) => {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Submit"
+            icon={Icon.Link}
+            title="Submit New Link"
             onSubmit={(values: SubmitForm) => {
               if (handleErrors(values)) return;
-              handleSubmit(values, true);
+              handleSubmit(values);
             }}
           />
         </ActionPanel>

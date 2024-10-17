@@ -13,7 +13,7 @@ import { getAPIError } from "../tools/generalTools";
 import { getJournals } from "../fetch/ExportFunctions";
 
 const getToken = async () => {
-  const token = (await LocalStorage.getItem("todo")) as string;
+  const token = (await LocalStorage.getItem("Todos")) as string;
   return token;
 };
 
@@ -25,12 +25,72 @@ export const QuerySetTodosUndoneFromJournal = async (journal: Journal, notion: C
   });
 };
 
+export const QueryToogleTodoWithJournals = async (todo: Todo, journals: Journal[], notion: Client | undefined) => {
+  const bool = !todo.checkbox;
+  const jouralAPIID = (await LocalStorage.getItem("Journals")) as string;
+
+  if (bool) {
+    if (journals.length !== 0) {
+      await notion?.pages
+        .update({
+          page_id: todo.id,
+          properties: {
+            Journals: {
+              relation: [
+                {
+                  id: journals[0].id,
+                },
+              ],
+            },
+            Checkbox: {
+              checkbox: true,
+            },
+          },
+        })
+        .catch((e: APIResponseError) => {
+          return showToast({ title: getAPIError(e.code as string, "Todo") });
+        });
+      return;
+    } else {
+      const res = await notion?.pages.create(
+        addJournalJson(
+          " ",
+          new Date().toISOString().slice(0, 10),
+          todo?.project.name,
+          todo?.project.id,
+          new Date().toISOString().slice(0, 10).toString(),
+          jouralAPIID,
+        ) as CreatePageParameters,
+      );
+      await notion?.pages
+        .update(addRelationJournalTodoJson(res?.id as string, todo?.id))
+        .catch((e: APIResponseError) => {
+          return showToast({ title: getAPIError(e.code as string, "Journal") });
+        });
+      return;
+    }
+  } else {
+    await notion?.pages.update({
+      page_id: todo.id,
+      properties: {
+        Journals: {
+          relation: [],
+        },
+        Checkbox: {
+          checkbox: false,
+        },
+      },
+    });
+    return;
+  }
+};
+
 export const QueryToogleTodo = async (todo: Todo, notion: Client | undefined) => {
   const today = new Date().toISOString().slice(0, 10);
   const bool = !todo.checkbox;
 
   if (bool) {
-    const jouralAPIID = (await LocalStorage.getItem("journal")) as string;
+    const jouralAPIID = (await LocalStorage.getItem("Journals")) as string;
     const q = GetJournalsQuery(true, todo.project.name, false, today);
     const resJournal = await notion?.databases
       .query({ database_id: jouralAPIID as string, ...q } as QueryDatabaseParameters)

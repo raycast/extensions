@@ -1,30 +1,38 @@
 import { launchCommand, LaunchType, MenuBarExtra, open, showHUD } from "@raycast/api";
-import React, { useEffect } from "react";
+import React from "react";
 import UseOAuth from "../../fetch/useOAuth";
-import useFetchMenuBar from "../../fetch/useFetchMenuBar";
+
 import { QueryStartTimer } from "../../queriesFunctions/TimersQueries";
 import { getHoursAndMin, progbar } from "../../tools/generalTools";
 import { ratioTodos } from "../../tools/filtersTools";
+import useDBLinkHook from "../../hooks/DBLinkHook";
+import useFetchCacheMenuBar from "../../fetch/useFetchCacheMenuBar";
+import { Client } from "@notionhq/client";
+import { Todo } from "../../interfaces/interfaceItems";
 
 const PilotMenuBar = () => {
   const { notion } = UseOAuth();
-  const { refresh, isLoading, projects, timer, todayEvents, todayKeystones } = useFetchMenuBar(notion);
-
-  useEffect(() => {
-    if (isLoading) showHUD("Loading");
-    else showHUD("Loaded");
-  }, [isLoading]);
+  const { linked } = useDBLinkHook();
+  const { refresh, isLoading, projects, timer, todayEvents, todayKeystones } = useFetchCacheMenuBar(
+    notion as Client,
+    linked,
+  );
 
   //#region HANDLERS
   const handleStartTimer = async () => {
-    showHUD("Starting timer");
+    showHUD("Starting Timer");
     const date = new Date().toISOString();
     await QueryStartTimer(date, notion);
-    refresh(["timer"]);
+    refresh();
+    showHUD("Timer Started !");
   };
 
-  const handleToogleTodo = async () => {
-    launchCommand({ name: "taskmanager", type: LaunchType.UserInitiated });
+  const handleToogleTodo = async (todo: Todo) => {
+    launchCommand({
+      name: "taskmanager",
+      type: LaunchType.UserInitiated,
+      context: { type: "toogleTodo", props: { todo: todo } },
+    });
   };
 
   const onStopTimer = () => {
@@ -46,6 +54,7 @@ const PilotMenuBar = () => {
 
   //#region ITEMS
   const TimerItem = () => {
+    if (isLoading) return <></>;
     if (timer !== null)
       return (
         <MenuBarExtra.Item
@@ -75,7 +84,7 @@ const PilotMenuBar = () => {
                     icon={todo.checkbox ? "✅" : "🟥"}
                     title={todo.name}
                     onAction={() => {
-                      handleToogleTodo();
+                      handleToogleTodo(todo);
                     }}
                   />
                 );
@@ -100,15 +109,14 @@ const PilotMenuBar = () => {
     );
   };
 
-  const MenuBarTitle = (loading: boolean) => {
-    if (loading) return "";
-    else {
-      const eventsIcon = todayEvents.length !== 0 ? "🗓️ " + todayEvents.length : "";
-      const keystonesIcon = todayKeystones.length !== 0 ? "📍 " + todayKeystones.length : "";
-      const timerIcon = timer !== null ? "⏰ at " + getHoursAndMin(timer?.start as string) : "";
-      if (eventsIcon.length === 0 && keystonesIcon.length === 0 && timerIcon.length === 0) return "🚀";
-      else return eventsIcon + " " + keystonesIcon + " " + timerIcon;
-    }
+  const MenuBarTitle = () => {
+    const eventsIcon = todayEvents.length !== 0 ? "🗓️ " + todayEvents.length : "";
+    const keystonesIcon = todayKeystones.length !== 0 ? "📍 " + todayKeystones.length : "";
+
+    const timerIcon =
+      timer !== null ? (Object.keys(timer).length !== 0 ? "⏰ at " + getHoursAndMin(timer?.start as string) : "") : "";
+    if (eventsIcon.length === 0 && keystonesIcon.length === 0 && timerIcon.length === 0) return "";
+    else return eventsIcon + " " + keystonesIcon + " " + timerIcon;
   };
 
   const ProjectsItem = () => {
@@ -177,18 +185,15 @@ const PilotMenuBar = () => {
 
   //#endregion
 
-  return (
-    <MenuBarExtra icon={isLoading ? "🚀" : ""} title={MenuBarTitle(isLoading)} isLoading={isLoading}>
-      {isLoading ? (
-        <MenuBarExtra.Item title="LOADING..." />
-      ) : (
-        <>
-          <CalendarItem />
-          <ProjectsItem />
-          <ToolsItem />
-        </>
-      )}
+  return linked ? (
+    <MenuBarExtra icon={"🚀"} title={MenuBarTitle()} isLoading={isLoading}>
+      {isLoading ? <MenuBarExtra.Item title="LOADING..." /> : <></>}
+      <CalendarItem />
+      <ProjectsItem />
+      <ToolsItem />
     </MenuBarExtra>
+  ) : (
+    <></>
   );
 };
 

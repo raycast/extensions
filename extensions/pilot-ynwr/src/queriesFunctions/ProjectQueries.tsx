@@ -11,7 +11,7 @@ import { getTimers } from "../fetch/ExportFunctions";
 import { FetchedTodos, FetchEvents, FetchJournals, FetchKeystones } from "../fetch/FetchFunctions";
 
 const getID = async () => {
-  const token = (await LocalStorage.getItem("journal")) as string;
+  const token = (await LocalStorage.getItem("Projects")) as string;
   return token;
 };
 
@@ -82,7 +82,7 @@ const changeActiveProjectJson = (active: boolean, id: string) => {
 export const QueryDeleteProject = async (project: Project, cache: Cache, notion: Client | undefined) => {
   if (notion === undefined) return;
 
-  const timerAPID = (await LocalStorage.getItem("timer")) as string;
+  const timerAPID = (await LocalStorage.getItem("Timers")) as string;
   const qTimer: QueryDatabaseParameters = {
     database_id: timerAPID,
     filter: {
@@ -92,26 +92,26 @@ export const QueryDeleteProject = async (project: Project, cache: Cache, notion:
   const resTimers = await notion?.databases.query(qTimer);
   const timers = resTimers === undefined ? [] : getTimers(resTimers);
 
-  const eventAPIID = (await LocalStorage.getItem("event")) as string;
+  const eventAPIID = (await LocalStorage.getItem("Events")) as string;
   const events = await FetchEvents(["all"], eventAPIID, true, "", notion);
   if (typeof events === "string") {
     showToast({ title: getAPIError(events, "Events"), style: Toast.Style.Failure });
     return;
   }
-  const journalAPIID = (await LocalStorage.getItem("journal")) as string;
+  const journalAPIID = (await LocalStorage.getItem("Journals")) as string;
   const journals = await FetchJournals(["all"], journalAPIID, true, notion);
   if (typeof journals === "string") {
     showToast({ title: getAPIError(journals, "Journals"), style: Toast.Style.Failure });
     return;
   }
-  const keystoneAPIID = (await LocalStorage.getItem("keystone")) as string;
+  const keystoneAPIID = (await LocalStorage.getItem("Keystones")) as string;
   const keystones = await FetchKeystones(["all"], keystoneAPIID, true, "", notion);
   if (typeof keystones === "string") {
     showToast({ title: getAPIError(keystones, "Keystones"), style: Toast.Style.Failure });
     return;
   }
   const links = project.links;
-  const todoAPIID = (await LocalStorage.getItem("todo")) as string;
+  const todoAPIID = (await LocalStorage.getItem("Todos")) as string;
   const todos = await FetchedTodos(["all"], todoAPIID, true, notion);
   if (typeof todos === "string") {
     showToast({ title: getAPIError(todos, "Todos"), style: Toast.Style.Failure });

@@ -5,7 +5,7 @@ import { CreatePageParameters, UpdatePageParameters } from "@notionhq/client/bui
 import { getAPIError } from "../tools/generalTools";
 
 const getID = async () => {
-  const token = (await LocalStorage.getItem("event")) as string;
+  const token = (await LocalStorage.getItem("Events")) as string;
   return token;
 };
 

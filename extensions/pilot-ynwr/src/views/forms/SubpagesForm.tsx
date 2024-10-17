@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Action, ActionPanel, Form, PopToRootType, Toast, closeMainWindow, showToast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, PopToRootType, Toast, closeMainWindow, showToast } from "@raycast/api";
 import { IconChecker, NameChecker, ProjectChecker } from "../../tools/formErrors";
 import { ICON_LIST } from "../../data/icons";
 import { QueryAddSubpages } from "../../queriesFunctions/SubpagesQueries";
@@ -55,7 +55,8 @@ const SubpagesForm = (p: Props) => {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Submit"
+            icon={Icon.NewDocument}
+            title="Submit New Page"
             onSubmit={(values: SubmitForm) => {
               if (handleErrors(values)) return;
               handleSubmit(values, true);

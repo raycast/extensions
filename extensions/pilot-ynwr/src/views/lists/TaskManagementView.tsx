@@ -1,9 +1,9 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, confirmAlert, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, LaunchProps, List, Toast, confirmAlert, showToast } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 import { Keystone, Project, Todo } from "../../interfaces/interfaceItems";
 
 import { getDateAndMohth, getDateMounthAndNumber, getDayDateAndMouth, progbar } from "../../tools/generalTools";
-import useFetchTaskManagement from "../../fetch/useFetchTaskManagement";
+
 import {
   QueryAddTodo,
   QuerySetKeystoneAndTodo,
@@ -13,8 +13,11 @@ import {
 import { QueryAddKeystone, QueryChangeDateKeystone } from "../../queriesFunctions/KeystonesQueries";
 import { QueryDeleteItem } from "../../queriesFunctions/GeneralQueries";
 import { dateOrder, projectFilter } from "../../tools/filtersTools";
-import { ClearRefreshAction } from "../actions/actions";
-import EmptyView from "./EmptyView";
+
+import UseOAuth from "../../fetch/useOAuth";
+import useDBLinkHook from "../../hooks/DBLinkHook";
+import SelectDBsForm from "../forms/SelectDBsForm";
+import useFetchCachTaskManager from "../../fetch/useFetchCachTaskManager";
 import { Client } from "@notionhq/client";
 
 interface TodoItemProps {
@@ -30,23 +33,17 @@ const VTEXT = {
   ak: "allkeystones",
 };
 
-const TaskManagementView = ({ notion }: { notion: Client | undefined }) => {
+const TaskManagementView = ({ launchProps }: { launchProps: LaunchProps | undefined }) => {
   //#region NOTION HOOKS
-  const { refresh, projects, clearRefresh, isLoading, todos, keystones } = useFetchTaskManagement(notion);
+  const { linked } = useDBLinkHook();
+  const { notion } = UseOAuth();
+  const { isLoading, projects, todos, keystones, refresh } = useFetchCachTaskManager(notion as Client, linked);
 
-  useEffect(() => {
-    if (isLoading) showToast({ title: "Loading...", style: Toast.Style.Animated });
-    else {
-      showToast({ title: "Loaded successfully", style: Toast.Style.Success });
-      if (firstLoad) setFirstLoad(false);
-    }
-  }, [isLoading]);
   //#endregion
 
   //#region STATES
   const [search, setSearch] = useState<string>("");
   const [filter, setFilter] = useState<string>("Nothing");
-  const [firstLoad, setFirstLoad] = useState<boolean>(true);
   const [showDetail, setShowDetail] = useState<boolean>(true);
   const [showDone, setShowDone] = useState<boolean>(true);
   const [addType, setAddType] = useState<string>("Nothing");
@@ -60,7 +57,7 @@ const TaskManagementView = ({ notion }: { notion: Client | undefined }) => {
   const onSelectionChange = (id: string | null) => {
     if (view === VTEXT.lk) return;
     if (id === "tm" || id?.includes("allkey") || id === "nokeylinked") setShowDetail(true);
-    else setShowDetail(false);
+    else if (id?.includes("todos")) setShowDetail(false);
   };
   const onChangeView = (e: string) => {
     if (e === VTEXT.lk) {
@@ -84,34 +81,33 @@ const TaskManagementView = ({ notion }: { notion: Client | undefined }) => {
   const handleToogleTodo = async (todo: Todo) => {
     showToast({ title: "Toogling Todo", style: Toast.Style.Animated });
     await QueryToogleTodo(todo, notion);
-    setTimeout(() => {
-      refresh(["todo", "keystone"]);
-    }, 5000);
+    refresh();
+    showToast({ title: "Todo Toogled !", style: Toast.Style.Success });
   };
   const handleAddTodo = async () => {
     showToast({ title: "Adding Todo", style: Toast.Style.Animated });
     await QueryAddTodo(projects, filter, search, notion);
-    refresh(["todo"]);
+    refresh();
+    showToast({ title: "Todo Added !", style: Toast.Style.Success });
   };
   const handleChangePickDateKeystone = async (date: Date | null, id: string) => {
     showToast({ title: "Changing Keystone Date", style: Toast.Style.Animated });
     if (date === null) return;
     await QueryChangeDateKeystone(id, date.toISOString(), notion);
-    refresh(["keystone"]);
+    refresh();
+    showToast({ title: "Date Changed !", style: Toast.Style.Success });
   };
   const handleLinkToKeystone = async (todo: Todo, keystone: Keystone) => {
     showToast({ title: "Linking Keystone and Todo", style: Toast.Style.Animated });
     await QuerySetKeystoneAndTodo(keystone as Keystone, todo, notion);
-    setTimeout(() => {
-      refresh(["todo", "keystone"]);
-    }, 5000);
+    refresh();
+    showToast({ title: "Keysytone and Todo Linked !", style: Toast.Style.Success });
   };
   const handleUnlinkKeystone = async (todo: Todo) => {
     showToast({ title: "Unlinking Todo", style: Toast.Style.Animated });
     await QueryUnlinkTodo(todo.id, notion);
-    setTimeout(() => {
-      refresh(["todo", "keystone"]);
-    }, 5000);
+    refresh();
+    showToast({ title: "Keysytone and Todo Unlinked !", style: Toast.Style.Success });
   };
 
   const handleAddKeystone = async (date: Date | null) => {
@@ -119,16 +115,16 @@ const TaskManagementView = ({ notion }: { notion: Client | undefined }) => {
     const projectID = projects.find((p) => p.name === filter)?.id;
     if (date === null || projectID === undefined) return;
     await QueryAddKeystone(search, date.toISOString(), projectID, [], notion);
-    refresh(["keystone"]);
+    refresh();
+    showToast({ title: "Keysytone Added !", style: Toast.Style.Success });
   };
 
   const handleDeleteItem = async (itemID: string) => {
     if (await confirmAlert({ title: "Are you sure you want to delete this item" })) {
       showToast({ title: "Deleting Item", style: Toast.Style.Animated });
       await QueryDeleteItem(itemID, notion);
-      setTimeout(() => {
-        refresh(["todo", "keystone"]);
-      }, 5000);
+      refresh();
+      showToast({ title: "Item Deleted !", style: Toast.Style.Success });
     }
   };
   //#endregion
@@ -138,13 +134,14 @@ const TaskManagementView = ({ notion }: { notion: Client | undefined }) => {
     const actions = (
       <ActionPanel>
         {filter === "Nothing" ? (
-          <Action title="Select a Project" style={Action.Style.Destructive} />
+          <Action icon={Icon.NewDocument} title="Select a Project" />
         ) : addType === "Nothing" ? (
-          <Action title="Select a Type" style={Action.Style.Destructive} />
+          <Action icon={Icon.NewDocument} title="Select a Type" />
         ) : search === "" ? (
-          <Action title="Enter a Name" style={Action.Style.Destructive} />
+          <Action icon={Icon.NewDocument} title="Enter a Name" />
         ) : addType === "todo" ? (
           <Action
+            icon={Icon.NewDocument}
             title={"Add New Todo"}
             onAction={() => {
               handleAddTodo();
@@ -152,6 +149,7 @@ const TaskManagementView = ({ notion }: { notion: Client | undefined }) => {
           />
         ) : addType === "keystone" ? (
           <Action.PickDate
+            icon={Icon.NewDocument}
             title={"Add New " + addType}
             onChange={(e) => {
               handleAddKeystone(e);
@@ -162,7 +160,7 @@ const TaskManagementView = ({ notion }: { notion: Client | undefined }) => {
         )}
         <ToogleVueAction />
         <RefreshAction />
-        <ClearRefreshAction clearRefresh={clearRefresh} setFirst={setFirstLoad} setShow={setShowDetail} />
+        {/* <ClearRefreshAction clearRefresh={refresh([])} setShow={setShowDetail} /> */}
       </ActionPanel>
     );
 
@@ -323,12 +321,14 @@ const TaskManagementView = ({ notion }: { notion: Client | undefined }) => {
         actions={
           <ActionPanel>
             <Action
+              icon={Icon.Link}
               title={"Link Todos"}
               onAction={() => {
                 setLinkingTodos(!linkingTodos);
               }}
             />
             <Action.PickDate
+              icon={Icon.Calendar}
               title="Change Keystone Date"
               onChange={(e) => handleChangePickDateKeystone(e, keystone.id)}
             />
@@ -482,7 +482,7 @@ const TaskManagementView = ({ notion }: { notion: Client | undefined }) => {
         shortcut={{ modifiers: ["cmd"], key: "r" }}
         icon={Icon.ArrowCounterClockwise}
         onAction={() => {
-          refresh(["all"]);
+          refresh();
         }}
       />
     );
@@ -491,36 +491,49 @@ const TaskManagementView = ({ notion }: { notion: Client | undefined }) => {
   //#endregion
 
   const filterTodos = (todos: Todo[], search: string) => {
+    const lowerSearch = search.toLowerCase();
     const filteredTodos: Todo[] = [];
     todos.forEach((todo) => {
       if (
-        todo.name.toLowerCase().includes(search) ||
-        todo.project.name.toLowerCase().includes(search) ||
-        todo.keystone.date.includes(search) ||
-        getDayDateAndMouth(todo.keystone.date).toLowerCase().includes(search) ||
-        (todo.checkbox && "done".includes(search)) ||
-        (!todo.checkbox && "undone".includes(search))
+        todo.name.toLowerCase().includes(lowerSearch) ||
+        todo.project.name.toLowerCase().includes(lowerSearch) ||
+        todo.keystone.date.includes(lowerSearch) ||
+        getDayDateAndMouth(todo.keystone.date).toLowerCase().includes(lowerSearch) ||
+        (todo.checkbox && "done".includes(lowerSearch)) ||
+        (!todo.checkbox && "undone".includes(lowerSearch))
       )
         filteredTodos.push(todo);
     });
     return filteredTodos;
   };
   const filterKeystones = (keystones: Keystone[], search: string) => {
+    const lowerSearch = search.toLowerCase();
     const filteredkeystones: Keystone[] = [];
     keystones.forEach((keystone) => {
       if (
-        keystone.name.toLowerCase().includes(search) ||
-        keystone.project.name.toLowerCase().includes(search) ||
-        keystone.date.includes(search) ||
-        getDayDateAndMouth(keystone.date).toLowerCase().includes(search)
+        keystone.name.toLowerCase().includes(lowerSearch) ||
+        keystone.project.name.toLowerCase().includes(lowerSearch) ||
+        keystone.date.includes(lowerSearch) ||
+        getDayDateAndMouth(keystone.date).toLowerCase().includes(lowerSearch)
       )
         filteredkeystones.push(keystone);
     });
     return filteredkeystones;
   };
 
-  return (
+  useEffect(() => {
+    if (notion !== undefined) {
+      if (launchProps !== undefined && launchProps.launchContext !== undefined) {
+        if (launchProps.launchContext.type === "toogleTodo") {
+          handleToogleTodo(launchProps.launchContext.props.todo);
+        }
+      }
+    }
+  }, [notion]);
+
+  return linked ? (
     <List
+      isLoading={isLoading}
       isShowingDetail={showDetail}
       searchBarPlaceholder={
         addType === "Nothing" ? "Search " + (view === VTEXT.at ? "Todos..." : "Keystones...") : "Enter New " + addType
@@ -530,23 +543,19 @@ const TaskManagementView = ({ notion }: { notion: Client | undefined }) => {
       onSelectionChange={onSelectionChange}
       searchBarAccessory={isLoading ? <></> : <SearchBarAccessories />}
     >
-      {isLoading && firstLoad ? (
-        <EmptyView type="Task Manager" />
+      <YourTaskItem />
+      {addType !== "Nothing" ? (
+        <></>
+      ) : view === VTEXT.at ? (
+        <AllTodosSection />
+      ) : view === VTEXT.ak ? (
+        <AllKeystonesSection />
       ) : (
-        <>
-          <YourTaskItem />
-          {addType !== "Nothing" ? (
-            <></>
-          ) : view === VTEXT.at ? (
-            <AllTodosSection />
-          ) : view === VTEXT.ak ? (
-            <AllKeystonesSection />
-          ) : (
-            <></>
-          )}
-        </>
+        <></>
       )}
     </List>
+  ) : (
+    <SelectDBsForm notion={notion} />
   );
 };
 

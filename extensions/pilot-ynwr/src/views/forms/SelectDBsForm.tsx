@@ -3,6 +3,7 @@ import {
   ActionPanel,
   closeMainWindow,
   Form,
+  Icon,
   LocalStorage,
   PopToRootType,
   showToast,
@@ -78,8 +79,10 @@ const SelectDBsForm = ({ notion }: { notion: Client | undefined }) => {
   }, [notion]);
 
   const FormDropDown = ({ id, name }: { id: string; name: string }) => {
+    const defaultValue = dbs.find((db) => db.title === id);
+
     return (
-      <Form.Dropdown id={id} title={name}>
+      <Form.Dropdown id={id} title={name} defaultValue={defaultValue?.id}>
         {dbs.map((db) => {
           return <Form.Dropdown.Item key={db.id} title={db.title} value={db.id} />;
         })}
@@ -91,19 +94,19 @@ const SelectDBsForm = ({ notion }: { notion: Client | undefined }) => {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit" onSubmit={SubmitForm} />
+          <Action.SubmitForm icon={Icon.Window} title="Submit Link Databases" onSubmit={SubmitForm} />
         </ActionPanel>
       }
     >
       <Form.Description title="" text="You have to select the relevant databases from the Notion Pilot page" />
       <Form.Description title="" text="Please, quit and go back to the form, as the dbs are loaded" />
-      <FormDropDown id={"project"} name="Projects DB" />
-      <FormDropDown id={"keystone"} name="Keystones DB" />
-      <FormDropDown id={"todo"} name="Todos DB" />
-      <FormDropDown id={"event"} name="Events DB" />
-      <FormDropDown id={"journal"} name="Journals DB" />
-      <FormDropDown id={"timer"} name="Timers DB" />
-      <FormDropDown id={"link"} name="Links DB" />
+      <FormDropDown id={"Projects"} name="Projects DB" />
+      <FormDropDown id={"Keystones"} name="Keystones DB" />
+      <FormDropDown id={"Todos"} name="Todos DB" />
+      <FormDropDown id={"Events"} name="Events DB" />
+      <FormDropDown id={"Journals"} name="Journals DB" />
+      <FormDropDown id={"Timers"} name="Timers DB" />
+      <FormDropDown id={"Links"} name="Links DB" />
     </Form>
   );
 };

@@ -1,11 +1,6 @@
-import UseOAuth from "./fetch/useOAuth";
-import useDBLinkHook from "./hooks/DBLinkHook";
-import SelectDBsForm from "./views/forms/SelectDBsForm";
+import { LaunchProps } from "@raycast/api";
 import TaskManagementView from "./views/lists/TaskManagementView";
 
-export default function Command() {
-  const { linked } = useDBLinkHook();
-  const { notion } = UseOAuth();
-
-  return linked ? <TaskManagementView notion={notion} /> : <SelectDBsForm notion={notion} />;
+export default function Command(p: LaunchProps) {
+  return <TaskManagementView launchProps={p} />;
 }

@@ -1,16 +1,17 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Journal, Project } from "../../interfaces/interfaceItems";
-import { br, code, h2, sepa } from "../../tools/markdownTools";
+import { br, code, h2 } from "../../tools/markdownTools";
 import { getDayDateAndMouth, getTimesText } from "../../tools/generalTools";
 import { QueryDeleteItem } from "../../queriesFunctions/GeneralQueries";
 import { QueryAddJournal, QueryAddTextJournal, QueryChangeDateJournal } from "../../queriesFunctions/JournalsQueries";
 import { QuerySetTodosUndoneFromJournal } from "../../queriesFunctions/TodosQueries";
 import TimezoneHook from "../../tools/TimezoneHook";
 import { projectFilter } from "../../tools/filtersTools";
-import { ClearRefreshAction } from "../actions/actions";
-import EmptyView from "./EmptyView";
-import useFetchJournals from "../../fetch/useFetchJournals";
+import UseOAuth from "../../fetch/useOAuth";
+import useDBLinkHook from "../../hooks/DBLinkHook";
+import SelectDBsForm from "../forms/SelectDBsForm";
+import useFetchCacheJournals from "../../fetch/useFetchCacheJournals";
 import { Client } from "@notionhq/client";
 
 //#region INTERFACES
@@ -22,25 +23,19 @@ interface DeleteActionProps {
 }
 //#endregion
 
-const JournalView = ({ notion }: { notion: Client | undefined }) => {
+const JournalView = () => {
   //#region NOTION HOOK
-  const { isLoading, projects, clearRefresh, journals, refresh } = useFetchJournals(notion);
+  const { notion } = UseOAuth();
+  const { linked } = useDBLinkHook();
+  const { isLoading, refresh, projects, journals } = useFetchCacheJournals(notion as Client, linked);
   const { tmDate } = TimezoneHook();
 
-  useEffect(() => {
-    if (isLoading) showToast({ style: Toast.Style.Animated, title: "Loading..." });
-    else {
-      if (firstLoad) setFirstLoad(false);
-      showToast({ style: Toast.Style.Success, title: "Loaded successfully" });
-    }
-  }, [isLoading]);
   //#endregion
 
   //#region STATES
   const [showDetail, setShowDetail] = useState<boolean>(true);
   const [filter, setFilter] = useState<string>("Nothing");
   const [search, setSearch] = useState<string>("");
-  const [firstLoad, setFirstLoad] = useState<boolean>(true);
   const [addTextJournal, setAddTextJournal] = useState<string | null>(null);
   //#endregion
 
@@ -66,14 +61,15 @@ const JournalView = ({ notion }: { notion: Client | undefined }) => {
     setSearch("");
     const text = journal.text + br + search;
     await QueryAddTextJournal(journal.id, text, notion);
-    refresh(["journal"]);
+    refresh();
+    showToast({ title: "Journal Added !", style: Toast.Style.Success });
   };
   const handleDeleteItem = async (journal: Journal) => {
     showToast({ title: "Deleting journal", style: Toast.Style.Animated });
     await QuerySetTodosUndoneFromJournal(journal, notion);
     await QueryDeleteItem(journal.id, notion);
-    //DELETE LES TODOS AUSSI
-    refresh(["journal"]);
+    refresh();
+    showToast({ title: "Journal Deleted !", style: Toast.Style.Success });
   };
   const handleAddJournal = async (date: Date | null) => {
     showToast({ title: "Adding journal", style: Toast.Style.Animated });
@@ -86,13 +82,15 @@ const JournalView = ({ notion }: { notion: Client | undefined }) => {
       date?.toISOString().slice(0, 10) as string,
       notion,
     );
-    refresh(["journal"]);
+    refresh();
+    showToast({ title: "Journal Added !", style: Toast.Style.Success });
   };
   const handleChangeDateItem = async (date: Date | null, journal: Journal) => {
     showToast({ title: "Changing Keystone Date", style: Toast.Style.Animated });
     if (date === null) return;
     await QueryChangeDateJournal(journal.id, date.toISOString(), notion);
-    refresh(["journal"]);
+    refresh();
+    showToast({ title: "Date Changed !", style: Toast.Style.Success });
   };
   //#endregion
 
@@ -106,12 +104,11 @@ const JournalView = ({ notion }: { notion: Client | undefined }) => {
         actions={
           <ActionPanel>
             {filter === "Nothing" ? (
-              <Action style={Action.Style.Destructive} title={"Select Project to Add Journal"} />
+              <Action icon={Icon.NewDocument} title={"Select Project to Add Journal"} />
             ) : (
-              <Action.PickDate title={"Add New Journal Page"} onChange={handleAddJournal} />
+              <Action.PickDate icon={Icon.NewDocument} title={"Add New Journal Page"} onChange={handleAddJournal} />
             )}
             <RefreshAction />
-            <ClearRefreshAction setFirst={setFirstLoad} setShow={setShowDetail} clearRefresh={clearRefresh} />
           </ActionPanel>
         }
       />
@@ -204,19 +201,19 @@ const JournalView = ({ notion }: { notion: Client | undefined }) => {
         actions={
           <ActionPanel>
             {addTextJournal === null ? (
-              <Action title="Add Text to Journal" onAction={() => onActiveAddTextJournal(journal.id)} />
+              <Action
+                icon={Icon.TextInput}
+                title="Add Text to Journal"
+                onAction={() => onActiveAddTextJournal(journal.id)}
+              />
             ) : (
               <>
                 <Action
+                  icon={Icon.TextInput}
                   title={search === "" ? "Enter New Text in Search" : "Add New Text"}
-                  style={search === "" ? Action.Style.Destructive : Action.Style.Regular}
                   onAction={search !== "" ? () => handleAddText(journal) : () => {}}
                 />
-                <Action
-                  title="Quit"
-                  style={Action.Style.Destructive}
-                  onAction={() => onActiveAddTextJournal(journal.id)}
-                />
+                <Action icon={Icon.Logout} title="Quit" onAction={() => onActiveAddTextJournal(journal.id)} />
               </>
             )}
             <ChangeDateAction journal={journal} />
@@ -253,9 +250,9 @@ const JournalView = ({ notion }: { notion: Client | undefined }) => {
     mk = h2(getDayDateAndMouth(journal.date)) + br + timeText + " " + br + journal.text + " " + br;
     let journalTodos = "";
     journal.todos.forEach((t) => {
-      journalTodos = journalTodos + code(t.name) + " " + br + " ";
+      journalTodos = journalTodos + code("✅ " + t.name) + " " + br + " ";
     });
-    mk = journal.todos.length !== 0 ? mk + sepa + br + journalTodos : mk;
+    mk = journal.todos.length !== 0 ? mk + br + journalTodos : mk;
     return mk;
   };
   //#endregion
@@ -276,13 +273,14 @@ const JournalView = ({ notion }: { notion: Client | undefined }) => {
   //#endregion
 
   const filterSearchJournals = (journals: Journal[], search: string) => {
+    const lowerSearch = search.toLowerCase();
     if (addTextJournal !== null) return journals;
     const filteredJournals: Journal[] = [];
     journals.forEach((journal) => {
       if (
-        journal.date.includes(search) ||
-        journal.project.name.toLowerCase().includes(search) ||
-        getDayDateAndMouth(journal.date).toLowerCase().includes(search)
+        journal.date.includes(lowerSearch) ||
+        journal.project.name.toLowerCase().includes(lowerSearch) ||
+        getDayDateAndMouth(journal.date).toLowerCase().includes(lowerSearch)
       )
         filteredJournals.push(journal);
     });
@@ -294,7 +292,7 @@ const JournalView = ({ notion }: { notion: Client | undefined }) => {
     return (
       <Action
         title="Refresh"
-        onAction={() => refresh(["all"])}
+        onAction={() => refresh()}
         icon={Icon.ArrowCounterClockwise}
         autoFocus={false}
         shortcut={{ modifiers: ["cmd"], key: "r" }}
@@ -316,6 +314,7 @@ const JournalView = ({ notion }: { notion: Client | undefined }) => {
   const ChangeDateAction = ({ journal }: { journal: Journal }) => {
     return (
       <Action.PickDate
+        icon={Icon.Calendar}
         title="Change Date"
         shortcut={{ modifiers: ["cmd"], key: "d" }}
         onChange={(e) => handleChangeDateItem(e, journal)}
@@ -324,9 +323,9 @@ const JournalView = ({ notion }: { notion: Client | undefined }) => {
   };
   //#endregion
 
-  return (
+  return linked ? (
     <List
-      // isLoading={isLoading}
+      isLoading={isLoading}
       isShowingDetail={showDetail}
       onSelectionChange={onChangeSelection}
       searchText={search}
@@ -336,15 +335,11 @@ const JournalView = ({ notion }: { notion: Client | undefined }) => {
       }}
       searchBarAccessory={<SearchBarAccessories />}
     >
-      {firstLoad && isLoading ? (
-        <EmptyView type="Journals" />
-      ) : (
-        <>
-          <MyJournal />
-          <JournalSection />
-        </>
-      )}
+      <MyJournal />
+      <JournalSection />
     </List>
+  ) : (
+    <SelectDBsForm notion={notion} />
   );
 };
 
