@@ -21,6 +21,12 @@ export default function Command() {
 
   const getList = async (query: string) => {
     setIsRefreshing(true);
+    if (!jacredParserUrl) {
+      showToast(Toast.Style.Failure, "Error", "Jacred parser url not found");
+
+      return;
+    }
+
     try {
       const response = await fetch(
         `${handleDomain(jacredParserUrl)}/api/v1.0/torrents?search=${encodeURIComponent(query)}&apikey=null`,

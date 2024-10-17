@@ -46,7 +46,7 @@
       "title": "Jacred parser",
       "type": "textfield",
       "description": "It is not required, but u need it to be able to use search command",
-      "required": true
+      "required": false
     }
   ],
   "commands": [
