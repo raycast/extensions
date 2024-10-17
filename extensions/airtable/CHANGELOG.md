@@ -1,6 +1,6 @@
 # Airtable Changelog
 
-## [Base Record Enhancements] - {PR_MERGE_DATE}
+## [Base Record Enhancements] - 2024-10-17
 
 - `View Records` of a Base
 - `Edit` "singleLineText" and "multilineText" fields of a record (more fields will follow in the future)
