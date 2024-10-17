@@ -1,7 +1,7 @@
 import { randomId, showToast, ToastStyle } from '@raycast/api';
 import { useState } from 'react';
 import { CalendarEvent } from './types';
-import { getEndDate, getStartDate } from './dates';
+import { getEndDate, getStartDate, preprocessQuery } from './dates';
 import osascript from 'osascript-tag';
 import Sherlock from 'sherlockjs';
 
@@ -31,7 +31,9 @@ export function useCalendar() {
       if (query.length === 0) {
         setResults([]);
       } else {
-        const parsedEvent = Sherlock.parse(query);
+        const preprocessedQuery = preprocessQuery(query);
+
+        const parsedEvent = Sherlock.parse(preprocessedQuery);
 
         const event: CalendarEvent = {
           ...parsedEvent,
