@@ -1,5 +1,9 @@
 # Drafts Changelog
 
+## [Add Command for Capture] - 2024-10-04
+
+- Add command to capture Draft from command argument
+
 ## [Add Commands for Background creation] - 2024-09-26
 
 - Add commands to create Draft in the background

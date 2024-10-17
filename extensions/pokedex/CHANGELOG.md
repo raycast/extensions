@@ -1,5 +1,9 @@
 # Pokédex Changelog
 
+## [Attackdex] - 2024-09-28
+- Refactored and incorporated additional Move information from PokéAPI, providing more comprehensive details about Pokémon moves.
+- Refactored the caching mechanism for improved reusability and efficiency.
+
 ## [Enhanced Pokédex Experience] - 2024-09-21
 - Implemented caching for faster load times and reduced API usage.
 - Added sorting options to organize the Pokédex by Pokémon name or National Pokédex number.
@@ -18,10 +22,10 @@
 - Fixed a coding issue with the Learnsets action.
 
 ## [Paldea Pioneers] - 2024-02-27
-- Expanded the Pokédex to include more Gen 9 Pokémon from the Paldea region.
+- Expanded the Pokédex to include all 1025 Pokémon species, including those from the Paldea region.
 
 ## [Scarlet & Violet] - 2023-02-03
-- Added additional Gen 9 Pokémon from the Scarlet & Violet games.
+- Added additional Gen 9 Pokémon from the Scarlet & Violet games, bringing the total to 1008 Pokémon.
 
 ## [Grid Mastery] - 2022-06-16
 - Introduced a new Grid layout for a more visually appealing and efficient experience.

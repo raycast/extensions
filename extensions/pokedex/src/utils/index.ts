@@ -1,18 +1,33 @@
-import { Detail } from "@raycast/api";
-import { PokemonV2Pokemontype } from "../types";
+import { Detail, getPreferenceValues } from "@raycast/api";
+import { PokemonV2Pokemon, PokemonV2Pokemontype } from "../types";
 
-export const getPixelArtImg = (id: number) => {
+const { artwork } = getPreferenceValues();
+
+export const nationalDexNumber = (id: number) => {
+  return `#${id.toString().padStart(4, "0")}`;
+};
+
+const getPixelArtImg = (id: number) => {
   return `https://raw.githubusercontent.com/PokeAPI/sprites/refs/heads/master/sprites/pokemon/${id}.png`;
 };
 
-export const getOfficialArtworkImg = (id: number, formId?: number) => {
-  const name = formId
-    ? `${id.toString().padStart(3, "0")}_f${formId + 1}`
+export const getOfficialArtworkImg = (id: number, order?: number) => {
+  const name = order
+    ? `${id.toString().padStart(3, "0")}_f${order + 1}`
     : id.toString().padStart(3, "0");
   return `https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${name}.png`;
 };
 
-export const typeColor: { [key: string]: string } = {
+export const getContentImg = (id: number, order?: number) => {
+  switch (artwork) {
+    case "pixel":
+      return getPixelArtImg(id);
+    default:
+      return getOfficialArtworkImg(id, order);
+  }
+};
+
+export const typeColor: Record<string, string> = {
   normal: "#949495",
   fire: "#e56c3e",
   water: "#5185c5",
@@ -82,10 +97,117 @@ export const calculateEffectiveness = (types: PokemonV2Pokemontype[]) => {
 };
 
 export const localeName = (
-  pokemon: { localization: { [x: string]: string }; name: string },
+  pokemon: { localization: Record<string, string>; name: string },
   language: string | number,
 ) => {
   return pokemon.localization && pokemon.localization[language]
     ? pokemon.localization[language]
     : pokemon.name;
+};
+
+export const filterPokemonForms = (
+  id: number,
+  pokemons: PokemonV2Pokemon[],
+) => {
+  // removes Pokemon forms without official images on pokemon.com
+  let formNames: string[] = [];
+  let varieties: string[] = [];
+  switch (id) {
+    case 25:
+      formNames = ["pikachu", "pikachu-gmax"];
+      break;
+    case 555:
+      formNames = ["darmanitan-standard", "darmanitan-galar-standard"];
+      break;
+    case 666:
+      varieties = [
+        "meadow",
+        "continental",
+        "garden",
+        "elegant",
+        "marine",
+        "high-plains",
+        "river",
+      ];
+      break;
+    // case 668:
+    //   // male, female
+    //   break
+    case 670:
+      formNames = ["floette"];
+      varieties = ["red"];
+      break;
+    case 671:
+      varieties = ["red"];
+      break;
+    case 676:
+      varieties = ["natural", "heart", "star", "diamond"];
+      break;
+    case 718:
+      formNames = [
+        "zygarde-10-power-construct",
+        "zygarde-50-power-construct",
+        "zygarde-complete",
+      ];
+      break;
+    case 744:
+      formNames = ["rockruff"];
+      break;
+    case 774:
+      formNames = ["minior-red-meteor", "minior-red"];
+      break;
+    case 778:
+      formNames = ["mimikyu-disguised"];
+      break;
+    case 845:
+      formNames = ["cramorant"];
+      break;
+    case 849:
+      formNames = [
+        "toxtricity-amped",
+        "toxtricity-low-key",
+        "toxtricity-amped-gmax",
+      ];
+      break;
+    case 875:
+      // eiscue-noice available in Zukan, but not in pokemon.com at the moment
+      formNames = ["eiscue-ice"];
+      break;
+    case 893:
+      formNames = ["zarude-dada"];
+      break;
+    case 1007:
+      formNames = ["koraidon"];
+      break;
+    case 1008:
+      formNames = ["miraidon"];
+      break;
+    default:
+      break;
+  }
+
+  if (formNames.length) {
+    pokemons = pokemons.filter((p) => formNames.includes(p.name));
+  }
+
+  const forms: PokemonV2Pokemon[] = [];
+
+  pokemons.forEach((p) => {
+    if (varieties.length) {
+      varieties.forEach((variety) => {
+        const pokemonforms = p.pokemon_v2_pokemonforms.filter(
+          (f) => f.form_name === variety,
+        );
+
+        forms.push({
+          ...p,
+          pokemon_v2_pokemonforms: pokemonforms,
+        });
+      });
+    } else {
+      forms.push(p);
+    }
+  });
+
+  return forms;
 };

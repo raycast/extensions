@@ -1,5 +1,4 @@
 import { Action, Icon } from "@raycast/api";
-import { Todo } from "../types";
 import CreateTodoForm from "./CreateTodoForm";
 
 function CreateTodoAction(props: { defaultTitle?: string; onCreate: (title: string) => void }) {

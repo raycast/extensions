@@ -65,7 +65,7 @@ export default function Command() {
       {searchText.length > 0 &&
         results.map((result) => (
           <List.Section key={result.rank} title={`${result.name} (${result.symbol})`}>
-            {favorites.map((market: MarketDetail) => (
+            {result.markets.map((market: MarketDetail) => (
               <List.Item
                 key={market.id}
                 title={`${market.base}${market.quote}`}

@@ -5,6 +5,9 @@
   "description": "Remove tracking parameters from the URL link in clipboard.",
   "icon": "command-icon.png",
   "author": "MisakiCoca",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Security",
     "Developer Tools"
@@ -19,14 +22,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.1"
+    "@raycast/api": "^1.79.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

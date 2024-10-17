@@ -1,31 +1,25 @@
 import {
   Action,
   ActionPanel,
+  Color,
   Detail,
   getPreferenceValues,
   Icon,
 } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import json2md from "json2md";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { fetchPokemonWithCaching } from "../api";
-import {
-  PokemonV2Pokemon,
-  PokemonV2Pokemonspeciesname,
-  PokemonV2PokemonspecyElement,
-} from "../types";
-import { getOfficialArtworkImg } from "../utils";
-import PokedexEntries from "./dex";
+import { PokemonV2Pokemonspeciesname, PokemonV2Pokemonspecy } from "../types";
+import { getOfficialArtworkImg, nationalDexNumber } from "../utils";
 import PokemonEncounters from "./encounter";
+import PokedexEntries from "./entry";
 import PokemonForms from "./form";
-import MetadataPokemon from "./metadata/pokemon";
-import MetadataWeakness from "./metadata/weakness";
-import PokemonMoves from "./move";
+import PokemonMetadata from "./metadata/pokemon";
+import WeaknessMetadata from "./metadata/weakness";
+import PokemonLearnset from "./pokemon_learnset";
 
 const { language } = getPreferenceValues();
-
-type SpeciesNameByLanguage = {
-  [lang: string]: PokemonV2Pokemonspeciesname;
-};
 
 enum GrowthRate {
   "Slow" = 1,
@@ -36,34 +30,16 @@ enum GrowthRate {
   "Fluctuating" = 6,
 }
 
-function random(lower: number, upper: number) {
-  return lower + Math.floor(Math.random() * (upper - lower + 1));
-}
-
-export default function PokeProfile(props: { id?: number }) {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [pokemon, setPokemon] = useState<PokemonV2Pokemon | undefined>(
-    undefined,
-  );
-
-  useEffect(() => {
-    setLoading(true);
-    fetchPokemonWithCaching(props.id || random(1, 905), Number(language))
-      .then((data) => {
-        setPokemon(data[0]);
-        setLoading(false);
-      })
-      .catch(() => {
-        setPokemon(undefined);
-        setLoading(false);
-      });
-  }, [props.id]);
+export default function PokeProfile(props: { id: number }) {
+  const { data: pokemon, isLoading } = usePromise(fetchPokemonWithCaching, [
+    props.id,
+  ]);
 
   const nameByLang = useMemo(() => {
     if (!pokemon) return {};
 
     return pokemon.pokemon_v2_pokemonspecy.pokemon_v2_pokemonspeciesnames.reduce(
-      (prev: SpeciesNameByLanguage, curr) => {
+      (prev: Record<string, PokemonV2Pokemonspeciesname>, curr) => {
         prev[curr.language_id] = curr;
         return prev;
       },
@@ -71,7 +47,7 @@ export default function PokeProfile(props: { id?: number }) {
     );
   }, [pokemon]);
 
-  const evolutions = (species: PokemonV2PokemonspecyElement[]) => {
+  const evolutions = (species: PokemonV2Pokemonspecy[]) => {
     const first = species.find((s) => !s.evolves_from_species_id);
     if (!first) return [];
 
@@ -99,22 +75,11 @@ export default function PokeProfile(props: { id?: number }) {
       pokemon_v2_pokemonspeciesflavortexts,
     } = pokemon_v2_pokemonspecy;
 
-    let gender;
-    if (pokemon_v2_pokemonspecy.gender_rate === -1) {
-      gender = "Unknown";
-    } else {
-      const male = ((8 - pokemon_v2_pokemonspecy.gender_rate) / 8) * 100;
-      const female = (pokemon_v2_pokemonspecy.gender_rate / 8) * 100;
-      gender = `${male}% male, ${female}% female`;
-    }
-
     const ev: string[] = [];
 
     const data = [
       {
-        h1: `#${pokemon.id.toString().padStart(4, "0")} ${
-          nameByLang[language].name
-        }`,
+        h1: `${nationalDexNumber(pokemon.id)} ${nameByLang[language].name}`,
       },
       {
         p: nameByLang["2"]
@@ -171,9 +136,6 @@ export default function PokeProfile(props: { id?: number }) {
           .join(", ")}`,
       },
       {
-        p: `_Gender:_ ${gender}`,
-      },
-      {
         p: `_Egg cycles:_ ${pokemon_v2_pokemonspecy.hatch_counter}`,
       },
     ];
@@ -210,7 +172,7 @@ export default function PokeProfile(props: { id?: number }) {
 
   return (
     <Detail
-      isLoading={loading}
+      isLoading={isLoading}
       navigationTitle={
         pokemon ? `${nameByLang[language].name} | Pokédex` : "Pokédex"
       }
@@ -221,7 +183,11 @@ export default function PokeProfile(props: { id?: number }) {
             <Detail.Metadata.Link
               title="Official Pokémon Website"
               text={nameByLang[language].name}
-              target={`https://www.pokemon.com/us/pokedex/${pokemon.pokemon_v2_pokemonspecy.name}`}
+              target={
+                language === "1"
+                  ? `https://zukan.pokemon.co.jp/detail/${pokemon.id}`
+                  : `https://www.pokemon.com/us/pokedex/${pokemon.pokemon_v2_pokemonspecy.name}`
+              }
             />
             <Detail.Metadata.Link
               title="Bulbapedia"
@@ -229,7 +195,23 @@ export default function PokeProfile(props: { id?: number }) {
               target={`https://bulbapedia.bulbagarden.net/wiki/${englishName}_(Pok%C3%A9mon)`}
             />
             <Detail.Metadata.Separator />
-            <MetadataPokemon type="detail" pokemon={pokemon} />
+            <PokemonMetadata type="detail" pokemon={pokemon} />
+            {pokemon.pokemon_v2_pokemonspecy.gender_rate === -1 ? (
+              <Detail.Metadata.Label title="Gender" text="Unknown" />
+            ) : (
+              <Detail.Metadata.TagList title="Gender">
+                <Detail.Metadata.TagList.Item
+                  text={`${((8 - pokemon.pokemon_v2_pokemonspecy.gender_rate) / 8) * 100}%`}
+                  icon={Icon.Male}
+                  color={Color.Blue}
+                />
+                <Detail.Metadata.TagList.Item
+                  text={`${(pokemon.pokemon_v2_pokemonspecy.gender_rate / 8) * 100}%`}
+                  icon={Icon.Female}
+                  color={Color.Magenta}
+                />
+              </Detail.Metadata.TagList>
+            )}
             <Detail.Metadata.Label
               title="Shape"
               icon={{
@@ -237,7 +219,7 @@ export default function PokeProfile(props: { id?: number }) {
               }}
             />
             <Detail.Metadata.Separator />
-            <MetadataWeakness
+            <WeaknessMetadata
               type="detail"
               types={pokemon.pokemon_v2_pokemontypes}
             />
@@ -292,7 +274,7 @@ export default function PokeProfile(props: { id?: number }) {
                 title="Learnset"
                 icon={Icon.List}
                 target={
-                  <PokemonMoves
+                  <PokemonLearnset
                     name={nameByLang[language].name}
                     moves={pokemon.pokemon_v2_pokemonmoves}
                   />
@@ -309,6 +291,23 @@ export default function PokeProfile(props: { id?: number }) {
                 }
               />
             </ActionPanel.Section>
+            {pokemon.pokemon_v2_pokemonspecy.pokemon_v2_evolutionchain
+              .pokemon_v2_pokemonspecies.length >= 2 && (
+              <ActionPanel.Section title="Evolutions">
+                {pokemon.pokemon_v2_pokemonspecy.pokemon_v2_evolutionchain.pokemon_v2_pokemonspecies.map(
+                  (specy) => {
+                    return (
+                      <Action.Push
+                        key={specy.id}
+                        title={specy.pokemon_v2_pokemonspeciesnames[0].name}
+                        icon="pokeball.svg"
+                        target={<PokeProfile id={specy.id} />}
+                      />
+                    );
+                  },
+                )}
+              </ActionPanel.Section>
+            )}
           </ActionPanel>
         )
       }

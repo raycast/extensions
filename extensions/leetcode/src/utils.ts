@@ -7,7 +7,8 @@ const html2markdown = new NodeHtmlMarkdown(
   {
     pre: {
       spaceIfRepeatingChar: true,
-      postprocess: ({ node, options: { codeFence } }) => `${codeFence}${node.textContent}${codeFence}`,
+      postprocess: ({ node, options: { codeFence } }) =>
+        `${codeFence}\n${(node.textContent || '').trim()}\n${codeFence}`,
     },
   },
 );

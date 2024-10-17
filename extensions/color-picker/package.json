@@ -75,6 +75,39 @@
       ]
     },
     {
+      "name": "color-names",
+      "title": "Color Names",
+      "description": "Get the name of a color",
+      "mode": "view",
+      "preferences": [
+        {
+          "type": "dropdown",
+          "name": "colorNamesPerGroup",
+          "required": false,
+          "title": "Color Names Per Group",
+          "description": "The number of color names to display per group",
+          "data": [
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "10",
+              "value": "10"
+            },
+            {
+              "title": "25",
+              "value": "25"
+            },
+            {
+              "title": "All",
+              "value": "Infinity"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "color-wheel",
       "title": "Color Wheel",
       "description": "Pick a color with color wheel",
@@ -156,19 +189,23 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.81.2",
-    "@raycast/utils": "^1.16.5",
+    "@raycast/api": "^1.83.2",
+    "@raycast/utils": "^1.17.0",
+    "color-namer": "^1.4.0",
     "colorjs.io": "^0.5.2",
+    "lodash": "^4.17.21",
     "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^20.10.1",
-    "@types/react": "^18.3.4",
-    "eslint": "^8.57.0",
+    "@types/color-namer": "^1.3.3",
+    "@types/lodash": "^4.17.9",
+    "@types/node": "^22.7.4",
+    "@types/react": "^18.3.11",
+    "eslint": "^8.57.1",
     "prettier": "^3.3.3",
-    "react": "^18.2.0",
-    "typescript": "^5.5.4"
+    "react": "^18.3.1",
+    "typescript": "^5.6.2"
   },
   "scripts": {
     "build": "ray build -e dist",

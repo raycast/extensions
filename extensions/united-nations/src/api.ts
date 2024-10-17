@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
-import { load } from "cheerio";
-import { XMLParser } from "fast-xml-parser";
+import { load } from "cheerio/slim";
+import XMLParser from "fast-xml-parser/src/xmlparser/XMLParser.js";
 import got from "got";
 import TurndownService from "turndown";
 import { newsFeedUrlDict } from "./constants.js";

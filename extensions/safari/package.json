@@ -14,7 +14,8 @@
     "HelloImSteven",
     "axsuul",
     "iwex",
-    "xilopaint"
+    "xilopaint",
+    "marcjulian"
   ],
   "license": "MIT",
   "commands": [
@@ -33,6 +34,25 @@
           "description": "Include iCloud tabs across all your devices",
           "default": true,
           "label": "iCloud"
+        },
+        {
+          "name": "fallbackSearchType",
+          "type": "dropdown",
+          "required": false,
+          "title": "Fallback Search",
+          "description": "Switch between Safari search and Safari search history.",
+          "label": "iCloud",
+          "default": "Search",
+          "data": [
+            {
+              "value": "search",
+              "title": "Search"
+            },
+            {
+              "value": "searchHistory",
+              "title": "Search History"
+            }
+          ]
         }
       ]
     },

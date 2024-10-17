@@ -1,5 +1,9 @@
 # Braid Changelog
 
+## [Improvements & New Features] - 2024-10-14
+
+- Add _copy to clipboard_ and _open with_ actions to `Search Docs` command.
+
 ## [Improvements & New Features] - 2024-08-14
 
 - Add Spread component.
