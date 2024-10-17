@@ -4,10 +4,10 @@ import CreatePersonForm from "./create-person";
 import CreateCompanyForm from "./create-company";
 
 export default function ListPeople() {
-  const { people } = useGetPeople();
+  const { people, isLoading } = useGetPeople();
 
   return (
-    <List isShowingDetail>
+    <List isLoading={isLoading} isShowingDetail>
       {people.map((person) => (
         <List.Item
           key={person.id}
