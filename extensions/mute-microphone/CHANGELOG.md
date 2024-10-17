@@ -1,5 +1,10 @@
 # Mute microphone Changelog
 
+## [Bugfix] - 2024-10-16
+
+- Fix overlapping toast messages
+- Improve system messages
+
 ## [Improvements] - 2024-10-15
 
 - Option to set input level to specific value
