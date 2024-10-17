@@ -49,7 +49,9 @@ fragment SuggestedTitle on MovieOrShow {
     title
     originalReleaseYear
     posterUrl
-    fullPath
+    externalIds {
+      imdbId
+    }
     scoring {
       imdbScore
       imdbVotes

@@ -104,6 +104,11 @@ export const Detail = ({ media, offer, countryCode }: Props) => {
             text={"View on JustWatch.com"}
             target={media.jwUrl}
           ></List.Item.Detail.Metadata.Link>
+          <List.Item.Detail.Metadata.Link
+            title={""}
+            text={"View on IMDB"}
+            target={media.imdbUrl}
+          ></List.Item.Detail.Metadata.Link>
         </List.Item.Detail.Metadata>
       }
     />
