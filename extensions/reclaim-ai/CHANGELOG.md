@@ -1,5 +1,8 @@
 # reclaim Changelog
 
+## [Update] - 2024-10-16
+- Add Sentry support
+
 ## [Fixes] - 2024-10-15
 - Don't cache moment data, should always be up to date
 
