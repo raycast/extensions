@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
-import { File } from "../api/getFiles";
+import { File, getFilePath } from "../api/getFiles";
 import { getFileIconLink, humanFileSize } from "../helpers/files";
 
 type FileListItemProps = {
@@ -9,7 +10,18 @@ type FileListItemProps = {
 };
 
 export default function FileListItem({ file, email }: FileListItemProps) {
+  const { displayFilePath } = getPreferenceValues();
   const modifiedTime = new Date(file.modifiedTime);
+
+  const { data: filePath } = useCachedPromise(
+    async (fileId) => {
+      return (await getFilePath(fileId)) as string;
+    },
+    [file.id],
+    {
+      execute: displayFilePath,
+    },
+  );
 
   const accessories: List.Item.Accessory[] = [
     {
@@ -17,6 +29,13 @@ export default function FileListItem({ file, email }: FileListItemProps) {
       tooltip: `Updated: ${format(modifiedTime, "EEEE d MMMM yyyy 'at' HH:mm")}`,
     },
   ];
+
+  if (displayFilePath && filePath) {
+    accessories.unshift({
+      icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
+      tooltip: filePath,
+    });
+  }
 
   if (file.starred) {
     accessories.unshift({

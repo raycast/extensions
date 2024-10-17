@@ -1,5 +1,9 @@
 # Google Workspace Changelog
 
+## [Add file path info to the file list] - {PR_MERGE_DATE}
+
+- Adds the file path information to the list of accessories.
+
 ## [Log out the user if re-authentication fails] - 2024-07-11
 
 - Automatically log out users if re-authentication fails, instead of displaying an error message.
