@@ -1,5 +1,5 @@
 import { useFetch } from "@raycast/utils";
-import { List, ActionPanel, Action, Image } from "@raycast/api";
+import { List, ActionPanel, Action, Image, Toast, showToast } from "@raycast/api";
 import * as cheerio from "cheerio";
 import { useState, useEffect } from "react";
 import DetailView from "./DetailView";
@@ -7,6 +7,10 @@ import DetailView from "./DetailView";
 // SETTINGS
 const index_url = "https://valheim.fandom.com/wiki/Valheim_Wiki";
 const root_url = "https://valheim.fandom.com";
+
+// GLOBAL ARRAYS
+const allCategories: Category[] = [];
+const allTopics: Topic[] = [];
 
 // INTERFACES
 interface Topic {
@@ -21,7 +25,7 @@ interface Category {
   key: string;
 }
 
-// CATEGORY DROPDOWN FUNCTION
+// MARK: - CATEGORY DROPDOWN FUNCTION
 function CategoryDropdown(props: { categories: Category[]; onCategoryChange: (newValue: string) => void }) {
   const { categories, onCategoryChange } = props;
 
@@ -43,66 +47,85 @@ function CategoryDropdown(props: { categories: Category[]; onCategoryChange: (ne
   );
 }
 
-// MAIN FUNCTION
+// MARK: - MAIN COMMAND
 export default function Command() {
-  const { isLoading, data } = useFetch(index_url);
-  const htmlString = String(data);
-  const $ = cheerio.load(htmlString);
+  // create isLoading state
+  const [isLoading, setisLoading] = useState(true);
 
-  const allCategories: Category[] = [];
-  const allTopics: Topic[] = [];
-
-  // find all categories
-  const $categories = $("table.navbox");
-
-  // loop through all categories
-  $categories.map((index, value) => {
-    // replace line breaks with spaces
-    $("th.navbox-group > br").replaceWith(" ");
-
-    // get category title and key
-    const categoryTitle = $(value).find(".navbox-title-pad").text();
-    const categoryKey = categoryTitle.toLowerCase().replaceAll(" ", "_");
-
-    // add category to allCategories array
-    allCategories.push({
-      name: categoryTitle,
-      key: categoryKey,
-    });
-
-    // get all links in category
-    const $links = $(value).find('.hlist > a[href^="/wiki/"]');
-
-    // save all topics from links to array
-    $links.map((index, tvalue) => {
-      // get href, name and key
-      const href = $(tvalue).attr("href");
-      const name = $(tvalue).text();
-      const key = href?.replace("/wiki/", "").toLowerCase() ?? "";
-
-      // check if link is not a category
-      const isNotCategory = href?.includes(":") === false;
-      // check if topic is already listed
-      const isAlreadyListed = allTopics.find((item) => item.name.toLowerCase() === name.toLowerCase());
-
-      // add topic to allTopics array
-      if (isNotCategory && !isAlreadyListed) {
-        allTopics.push({
-          name: name,
-          link: `${root_url}${href}`,
-          key: key,
-          category: categoryKey,
-        });
-      }
-    });
-  });
+  // Fetch data from URL
+  useFetch(index_url, { onData: (data) => parseData(data) });
 
   // create states for search and filtered list
   const [searchText, setSearchText] = useState("");
-  const [filteredList, filterList] = useState(allTopics);
-  const [categories] = useState<Category[]>(allCategories);
+  const [filteredList, setList] = useState(allTopics);
+  const [categories, setCategories] = useState<Category[]>(allCategories);
   const [selectedCategory, setSelectedCategory] = useState("-all-");
 
+  // MARK: - HTML Parsing
+  async function parseData(data: any) {
+    let htmlString: string;
+
+    try {
+      htmlString = String(data);
+      const $ = await cheerio.load(htmlString);
+
+      // find all categories
+      const $categories = $("table.navbox");
+
+      // loop through all categories
+      $categories.map((index, value) => {
+        // replace line breaks with spaces
+        $("th.navbox-group > br").replaceWith(" ");
+
+        // get category title and key
+        const categoryTitle = $(value).find(".navbox-title-pad").text();
+        const categoryKey = categoryTitle.toLowerCase().replaceAll(" ", "_");
+
+        // add category to allCategories array
+        allCategories.push({
+          name: categoryTitle,
+          key: categoryKey,
+        });
+
+        // get all links in category
+        const $links = $(value).find('.hlist > a[href^="/wiki/"]');
+
+        // save all topics from links to array
+        $links.map((index, tvalue) => {
+          // get href, name and key
+          const href = $(tvalue).attr("href");
+          const name = $(tvalue).text();
+          const key = href?.replace("/wiki/", "").toLowerCase() ?? "";
+
+          // check if link is not a category
+          const isNotCategory = href?.includes(":") === false;
+          // check if topic is already listed
+          const isAlreadyListed = allTopics.find((item) => item.name.toLowerCase() === name.toLowerCase());
+
+          // add topic to allTopics array
+          if (isNotCategory && !isAlreadyListed) {
+            allTopics.push({
+              name: name,
+              link: `${root_url}${href}`,
+              key: key,
+              category: categoryKey,
+            });
+          }
+        });
+      });
+
+      // set states
+      setCategories(allCategories);
+      setList(allTopics);
+
+      setisLoading(false);
+    } catch {
+      console.log("Error parsing data");
+      await showToast({ style: Toast.Style.Failure, title: "Error", message: "Content could not be loaded..." });
+    }
+  }
+
+  // MARK: - FILTER FUNCTIONS
   // filter conditions
   function isNameEqualSearchText(item: Topic) {
     return item.name.toLowerCase().includes(searchText.toLowerCase());
@@ -115,11 +138,9 @@ export default function Command() {
   // filter Topics Array based on search text and selected category
   function filterTopics(categoryString: string) {
     if (categoryString === "-all-") {
-      filterList(allTopics.filter((item) => isNameEqualSearchText(item)));
+      setList(allTopics.filter((item) => isNameEqualSearchText(item)));
     } else {
-      filterList(
-        allTopics.filter((item) => isFromSelectedCategory(item, categoryString) && isNameEqualSearchText(item)),
-      );
+      setList(allTopics.filter((item) => isFromSelectedCategory(item, categoryString) && isNameEqualSearchText(item)));
     }
   }
 
@@ -134,7 +155,7 @@ export default function Command() {
     filterTopics(newValue);
   };
 
-  // render list
+  // MARK: - Render list
   return (
     <List
       isShowingDetail
