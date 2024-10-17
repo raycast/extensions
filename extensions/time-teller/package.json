@@ -5,6 +5,9 @@
   "description": "The Time Teller extension uses AI to transcribe human-friendly language into a start and end date and then converts the time frame into different units.",
   "icon": "icon.png",
   "author": "ickas",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Developer Tools",
     "Other"
