@@ -43,6 +43,7 @@ export function Items() {
                 title={item.itemTitle}
                 subtitle={item.accountName}
                 accessories={[{ text: item.vaultName }]}
+                keywords={item.accountName ? [item.accountName] : []}
                 actions={
                   <ActionPanel>
                     {item.categoryUUID === "001" && item.websiteURLs?.length && (
