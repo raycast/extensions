@@ -1,6 +1,6 @@
 # Word Search Changelog
 
-## [Default open details] - {PR_MERGE_DATE}
+## [Default open details] - 2024-10-17
 
 - Cache the 'View Details' state, keeping it open ([#14920](https://github.com/raycast/extensions/issues/14920))
 - Updated dependencies
