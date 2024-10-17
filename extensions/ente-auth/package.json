@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ente-auth",
+  "title": "Ente Auth Authenticator",
+  "description": "Search, sync and use your Ente Auth 2FA codes with Raycast",
+  "icon": "ente-auth-icon.ico",
+  "author": "albarin",
+  "contributors": [
+    "gdsmith",
+    "pernielsentikaer",
+    "litomore",
+    "guga4ka",
+    "albarin"
+  ],
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-ente-auth-otp",
+      "title": "Search Ente Auth Token",
+      "subtitle": "Ente Auth 2FA App",
+      "description": "Search OTPs in your Ente Auth account",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "required": true,
+      "name": "enteAuthDbPath",
+      "title": "Ente Auth Database Path",
+      "type": "file",
+      "description": "Your Ente Database",
+      "placeholder": "Enter path to your Ente Auth database"
+    },
+    {
+      "required": false,
+      "name": "excludeNames",
+      "title": "Exclude Names",
+      "type": "textfield",
+      "description": "Names to exclude, separated by commas",
+      "placeholder": "account1, otherAccount, ..."
+    },
+    {
+      "required": false,
+      "name": "primaryActionIsCopy",
+      "label": "Copy as primary action, Output as secondary",
+      "type": "checkbox",
+      "description": "Primary action copies pin to clipboard instead of outputting to front application",
+      "default": true
+    },
+    {
+      "required": false,
+      "name": "recentlyUsedOrder",
+      "label": "Sort OTP list by recent usage",
+      "type": "checkbox",
+      "description": "This option enables different list order based on last usage of OTP",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.77.1",
+    "@raycast/utils": "^1.16.1",
+    "hi-base32": "^0.5.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^18.8.3",
+    "eslint": "^8.11.0",
+    "simple-icons": "^6.23.0",
+    "typescript": "^4.6.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "make-assets": "./make-assets.js"
+  }
+}
