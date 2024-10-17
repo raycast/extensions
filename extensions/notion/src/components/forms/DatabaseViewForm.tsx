@@ -1,47 +1,31 @@
 import { Form, ActionPanel, Icon, showToast, useNavigation, Action, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-import { useDatabaseProperties, useDatabases } from "../../hooks";
-import { notionColorToTintColor, DatabaseProperty, getPropertyConfig } from "../../utils/notion";
-import { DatabaseView } from "../../utils/types";
+import { useDatabaseProperties, useKanbanViewConfig, KanbanConfig } from "../../hooks";
+import { notionColorToTintColor, DatabaseProperty, isType } from "../../utils/notion";
 
-export function DatabaseViewForm(props: {
-  databaseId: string;
-  databaseView?: DatabaseView;
-  setDatabaseView: (databaseView: DatabaseView) => Promise<void>;
-}) {
-  const { databaseId: presetDatabaseId, databaseView, setDatabaseView } = props;
-
+export function DatabaseViewForm({ databaseId }: { databaseId: string }) {
   const { pop } = useNavigation();
 
   async function handleSubmit(values: Form.Values) {
-    const newDatabaseView = {
-      properties: databaseView?.properties ? databaseView.properties : {},
-      sort_by: databaseView?.sort_by ? databaseView.sort_by : {},
-      type: values.type ? values.type : "list",
-      name: values.name ? values.name : null,
-    } as DatabaseView;
-
-    if (values.type === "kanban") {
-      newDatabaseView.kanban = {
+    if (kanbanConfig && values["type"] == "list") setKanbanConfig({ ...kanbanConfig, active: false });
+    else {
+      setKanbanConfig({
+        active: true,
         property_id: values["kanban::property_id"],
         backlog_ids: values["kanban::backlog_ids"] ? values["kanban::backlog_ids"] : [],
         not_started_ids: values["kanban::not_started_ids"] ? values["kanban::not_started_ids"] : [],
         started_ids: values["kanban::started_ids"] ? values["kanban::started_ids"] : [],
         completed_ids: values["kanban::completed_ids"] ? values["kanban::completed_ids"] : [],
         canceled_ids: values["kanban::canceled_ids"] ? values["kanban::canceled_ids"] : [],
-      };
+      });
     }
-
-    setDatabaseView(newDatabaseView);
-
     pop();
   }
 
-  const { data: databases, isLoading: isLoadingDatabases } = useDatabases();
-  const [databaseId, setDatabaseId] = useState(presetDatabaseId);
-  const [viewType, setViewType] = useState<"kanban" | "list">(databaseView?.type ? databaseView.type : "list");
   const { data: databaseProperties, isLoading: isLoadingDatabaseProperties } = useDatabaseProperties(databaseId);
+  const { kanbanConfig, setKanbanConfig } = useKanbanViewConfig(databaseId);
+  const [viewType, setViewType] = useState<"kanban" | "list">(kanbanConfig?.active ? "kanban" : "list");
 
   useEffect(() => {
     if (databaseProperties && viewType === "kanban") {
@@ -60,7 +44,7 @@ export function DatabaseViewForm(props: {
 
   return (
     <Form
-      isLoading={isLoadingDatabaseProperties || isLoadingDatabases}
+      isLoading={isLoadingDatabaseProperties}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -69,31 +53,6 @@ export function DatabaseViewForm(props: {
         </ActionPanel>
       }
     >
-      {!presetDatabaseId
-        ? [
-            <Form.Dropdown id="database_id" title={"Database"} onChange={setDatabaseId}>
-              {databases?.map((d) => {
-                return (
-                  <Form.Dropdown.Item
-                    key={d.id}
-                    value={d.id}
-                    title={d.title ? d.title : "Untitled"}
-                    icon={
-                      d.icon_emoji
-                        ? d.icon_emoji
-                        : d.icon_file
-                          ? d.icon_file
-                          : d.icon_external
-                            ? d.icon_external
-                            : Icon.List
-                    }
-                  />
-                );
-              })}
-            </Form.Dropdown>,
-            <Form.Separator key="separator" />,
-          ]
-        : null}
       <Form.Dropdown
         id="type"
         title="View Type"
@@ -107,8 +66,8 @@ export function DatabaseViewForm(props: {
       <Form.Separator />
       {databaseProperties && viewType === "kanban" ? (
         <KanbanViewFormItem
-          databaseView={databaseView}
-          properties={databaseProperties.filter((dp) => dp.type === "select" || dp.type === "status")}
+          kanbanConfig={kanbanConfig}
+          properties={databaseProperties.filter((dp): dp is StatusDatabaseProperty => isType(dp, "select", "status"))}
         />
       ) : null}
     </Form>
@@ -123,48 +82,48 @@ const statusTypes: { [key: string]: string } = {
   canceled: "Canceled",
 };
 
-function KanbanViewFormItem(props: { properties: DatabaseProperty[]; databaseView?: DatabaseView }) {
-  const { properties, databaseView } = props;
-
+type StatusDatabaseProperty = Extract<DatabaseProperty, { type: "select" | "status" }>;
+interface KanbanViewFormItemParams {
+  properties: StatusDatabaseProperty[];
+  kanbanConfig: KanbanConfig | undefined;
+}
+function KanbanViewFormItem({ properties, kanbanConfig }: KanbanViewFormItemParams) {
   const [statusPropertyId, setStatusPropertyId] = useState<string | undefined>(
-    databaseView?.kanban?.property_id ? databaseView?.kanban?.property_id : properties[0]?.id,
+    kanbanConfig?.property_id ? kanbanConfig?.property_id : properties[0]?.id,
   );
 
   const statusProperty = properties.find((dp) => dp.id === statusPropertyId);
 
-  function getStatusState(property: DatabaseProperty | undefined) {
+  function getStatusState(property: StatusDatabaseProperty | undefined) {
     if (!property) return;
-    const propertyConfig = getPropertyConfig(property, ["status"]);
-    if (propertyConfig) {
-      const statusOptions = propertyConfig.options.filter((o) => o.id !== "_select_null_");
-      const currentConfig = databaseView?.kanban;
+    const statusOptions = property.config.options.filter((o) => o.id !== "_select_null_");
+    const currentConfig = kanbanConfig;
 
-      const defaultBacklogOpts = currentConfig ? currentConfig.backlog_ids : ["_select_null_"];
-      const defaultCompletedOpts = currentConfig
-        ? currentConfig.completed_ids
-        : statusOptions[statusOptions.length - 1]?.id
-          ? [statusOptions[statusOptions.length - 1].id!]
-          : [];
-      const defaultNotStartedOpts = currentConfig
-        ? currentConfig.not_started_ids
-        : statusOptions[0] && !defaultCompletedOpts.includes(statusOptions[0].id!)
-          ? [statusOptions[0].id!]
-          : [];
-      const defaultStartedOpts = currentConfig
-        ? currentConfig.started_ids
-        : statusOptions
-            .filter((o) => !defaultNotStartedOpts.includes(o.id!) && !defaultCompletedOpts.includes(o.id!))
-            .map((o) => o.id!);
-      const defaultCanceledOpts = currentConfig ? currentConfig.canceled_ids : [];
+    const defaultBacklogOpts = currentConfig ? currentConfig.backlog_ids : ["_select_null_"];
+    const defaultCompletedOpts = currentConfig
+      ? currentConfig.completed_ids
+      : statusOptions[statusOptions.length - 1]?.id
+        ? [statusOptions[statusOptions.length - 1].id!]
+        : [];
+    const defaultNotStartedOpts = currentConfig
+      ? currentConfig.not_started_ids
+      : statusOptions[0] && !defaultCompletedOpts.includes(statusOptions[0].id!)
+        ? [statusOptions[0].id!]
+        : [];
+    const defaultStartedOpts = currentConfig
+      ? currentConfig.started_ids
+      : statusOptions
+          .filter((o) => !defaultNotStartedOpts.includes(o.id!) && !defaultCompletedOpts.includes(o.id!))
+          .map((o) => o.id!);
+    const defaultCanceledOpts = currentConfig ? currentConfig.canceled_ids : [];
 
-      return {
-        backlog: defaultBacklogOpts,
-        not_started: defaultNotStartedOpts,
-        started: defaultStartedOpts,
-        completed: defaultCompletedOpts,
-        canceled: defaultCanceledOpts,
-      };
-    }
+    return {
+      backlog: defaultBacklogOpts,
+      not_started: defaultNotStartedOpts,
+      started: defaultStartedOpts,
+      completed: defaultCompletedOpts,
+      canceled: defaultCanceledOpts,
+    };
   }
 
   const [statusState, setStatusState] = useState<{ [key: string]: string[] }>(
@@ -223,10 +182,9 @@ function StatusTagPicker(props: {
   title: string;
   value: string[];
   onChange: (newValue: string[]) => void;
-  statusProperty: DatabaseProperty;
+  statusProperty: StatusDatabaseProperty;
 }) {
   const { id, title, statusProperty, value, onChange } = props;
-  const propertyConfig = getPropertyConfig(statusProperty, ["status"]);
 
   return (
     <Form.TagPicker
@@ -236,7 +194,7 @@ function StatusTagPicker(props: {
       value={value}
       onChange={onChange}
     >
-      {propertyConfig?.options.map((o) => {
+      {statusProperty.config.options.map((o) => {
         if (!o.id) {
           return null;
         }
