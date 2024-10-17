@@ -1,31 +1,47 @@
-import { Icon, Toast, List, showToast } from "@raycast/api";
-import { ReactNode, useEffect, useState } from "react";
+import { Icon, Toast, List, showToast, openExtensionPreferences } from "@raycast/api";
+import { ReactNode } from "react";
 import { MattermostClient } from "./MattermostClient";
+import { showFailureToast, usePromise } from "@raycast/utils";
 
 export function withAuthorization(children: ReactNode) {
-  const [authorized, setAuthorized] = useState<boolean | Error>(false);
+  const {
+    isLoading,
+    data: authorized,
+    error,
+  } = usePromise(
+    async () => {
+      const wakeUp = await MattermostClient.wakeUpSession();
+      if (wakeUp) return true;
 
-  useEffect(() => {
-    (async () => {
-      setAuthorized(await MattermostClient.wakeUpSession());
-      showToast(Toast.Style.Animated, "Authorize...");
+      await showToast(Toast.Style.Animated, "Authorize...");
+      await MattermostClient.login();
+      return true;
+    },
+    [],
+    {
+      async onData() {
+        await showToast(Toast.Style.Success, "Authorized");
+      },
+      async onError(error) {
+        await showFailureToast(error.message, {
+          title: "Authorization failed",
+          primaryAction: {
+            title: "Open Extension Preferences",
+            async onAction() {
+              await openExtensionPreferences();
+            },
+          },
+        });
+      },
+    }
+  );
 
-      try {
-        await MattermostClient.login();
-        setAuthorized(true);
-      } catch (error) {
-        showToast(Toast.Style.Failure, `Authorization failed: ${error}`);
-        setAuthorized(error as Error);
-      }
-
-      showToast(Toast.Style.Success, "Authorized");
-    })();
-  }, []);
-
-  if (authorized !== true) {
+  if (!authorized) {
     return (
-      <List isLoading={authorized == false}>
-        {authorized instanceof Error && <List.EmptyView title={authorized.message} icon={Icon.XMarkCircleFilled} />}
+      <List isLoading={isLoading}>
+        {error && (
+          <List.EmptyView title="Authorization failed" description={error.message} icon={Icon.XMarkCircleFilled} />
+        )}
       </List>
     );
   }
