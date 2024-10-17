@@ -1,8 +1,9 @@
-import { Detail, List, ActionPanel, Action, openExtensionPreferences } from "@raycast/api";
+import { List, ActionPanel, Action } from "@raycast/api";
 import { checkCapacitiesApp } from "./helpers/isCapacitiesInstalled";
 import OpenInCapacities from "./components/OpenInCapacities";
 import { useEffect } from "react";
 import { useCapacitiesStore } from "./helpers/storage";
+import ErrorView from "./components/ErrorView";
 
 export default function Command() {
   useEffect(() => {
@@ -15,16 +16,7 @@ export default function Command() {
     triggerLoading();
   }, []);
 
-  return error ? (
-    <Detail
-      markdown={error}
-      actions={
-        <ActionPanel>
-          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-        </ActionPanel>
-      }
-    />
-  ) : (
+  return error ? <ErrorView error={error} /> : (
     <List isLoading={isLoading}>
       {store?.spaces.map((space) => (
         <List.Item
