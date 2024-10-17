@@ -13,7 +13,6 @@
     {
       "name": "yield-calculator",
       "title": "Calculate Interests",
-      "subtitle": "Calculate your APY / APR with our calculator",
       "description": "This command helps you calculate your interests. APY or APR, on multiple time frames.",
       "mode": "view"
     }
