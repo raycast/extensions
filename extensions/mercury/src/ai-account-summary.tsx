@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import {
   Detail,
   showToast,
@@ -175,15 +175,15 @@ Please ensure the summary is clear and concise, using a professional tone. Do no
   prompt += `- Total Current Balance: ${formatCurrency(totalBalance)}\n`;
   prompt += `- Total Available Balance: ${formatCurrency(totalAvailableBalance)}\n`;
 
-// Filter transactions from the last 12 months
-const recentTransactions = transactions.filter((transaction) => {
-  const transactionDate = new Date(transaction.createdAt);
-  const twelveMonthsAgo = new Date();
-  twelveMonthsAgo.setFullYear(twelveMonthsAgo.getFullYear() - 1);
-  return transactionDate >= twelveMonthsAgo;
-});
+  // Filter transactions from the last 12 months
+  const recentTransactions = transactions.filter((transaction) => {
+    const transactionDate = new Date(transaction.createdAt);
+    const twelveMonthsAgo = new Date();
+    twelveMonthsAgo.setFullYear(twelveMonthsAgo.getFullYear() - 1);
+    return transactionDate >= twelveMonthsAgo;
+  });
 
-prompt += `\n**Recent Transactions (Last 12 Months):**\n`;
+  prompt += `\n**Recent Transactions (Last 12 Months):**\n`;
   recentTransactions.forEach((transaction) => {
     prompt += `- **${transaction.counterpartyName || "N/A"}**
     - Amount: ${formatCurrency(transaction.amount)} (${transaction.amount < 0 ? "Debit" : "Credit"})
@@ -200,10 +200,13 @@ prompt += `\n**Recent Transactions (Last 12 Months):**\n`;
   });
 
   // Summarize transaction statuses
-  const transactionStatusCounts = recentTransactions.reduce((counts, transaction) => {
-    counts[transaction.status] = (counts[transaction.status] || 0) + 1;
-    return counts;
-  }, {} as Record<string, number>);
+  const transactionStatusCounts = recentTransactions.reduce(
+    (counts, transaction) => {
+      counts[transaction.status] = (counts[transaction.status] || 0) + 1;
+      return counts;
+    },
+    {} as Record<string, number>,
+  );
 
   prompt += `\n**Transaction Status Summary (Last 30 Days):**\n`;
   Object.entries(transactionStatusCounts).forEach(([status, count]) => {
@@ -211,13 +214,9 @@ prompt += `\n**Recent Transactions (Last 12 Months):**\n`;
   });
 
   // Calculate total inflows and outflows
-  const totalInflows = recentTransactions
-    .filter((tx) => tx.amount > 0)
-    .reduce((sum, tx) => sum + tx.amount, 0);
+  const totalInflows = recentTransactions.filter((tx) => tx.amount > 0).reduce((sum, tx) => sum + tx.amount, 0);
 
-  const totalOutflows = recentTransactions
-    .filter((tx) => tx.amount < 0)
-    .reduce((sum, tx) => sum + tx.amount, 0);
+  const totalOutflows = recentTransactions.filter((tx) => tx.amount < 0).reduce((sum, tx) => sum + tx.amount, 0);
 
   prompt += `\n**Cash Flow Summary (Last 30 Days):**\n`;
   prompt += `- Total Inflows: ${formatCurrency(totalInflows)}\n`;
@@ -335,13 +334,9 @@ export default function AIAccountSummaryCommand() {
       return transactionDate >= thirtyDaysAgo;
     });
 
-    totalInflows = recentTransactions
-      .filter((tx) => tx.amount > 0)
-      .reduce((sum, tx) => sum + tx.amount, 0);
+    totalInflows = recentTransactions.filter((tx) => tx.amount > 0).reduce((sum, tx) => sum + tx.amount, 0);
 
-    totalOutflows = recentTransactions
-      .filter((tx) => tx.amount < 0)
-      .reduce((sum, tx) => sum + tx.amount, 0);
+    totalOutflows = recentTransactions.filter((tx) => tx.amount < 0).reduce((sum, tx) => sum + tx.amount, 0);
 
     netCashFlow = totalInflows + totalOutflows;
 
@@ -370,7 +365,8 @@ export default function AIAccountSummaryCommand() {
       isLoading={isLoading}
       markdown={summary || "No summary available."}
       metadata={
-        !isLoading && accounts.length > 0 && (
+        !isLoading &&
+        accounts.length > 0 && (
           <Detail.Metadata>
             {/* Overall Financial Health */}
             <Detail.Metadata.TagList title="Overall Financial Health">
@@ -388,7 +384,7 @@ export default function AIAccountSummaryCommand() {
             <Detail.Metadata.Separator />
 
             {/* Accounts */}
-             {accounts.map((account) => (
+            {accounts.map((account) => (
               <Detail.Metadata.Label
                 key={account.id}
                 title={`${account.nickname || account.name} (${capitalize(account.kind)} Account)`}
@@ -404,7 +400,7 @@ export default function AIAccountSummaryCommand() {
                 <Detail.Metadata.Label
                   key={transaction.id}
                   title={`${transaction.counterpartyName || "N/A"} (${capitalize(
-                    transaction.kind.replace(/([A-Z])/g, " $1")
+                    transaction.kind.replace(/([A-Z])/g, " $1"),
                   )})`}
                   text={formatCurrency(transaction.amount)}
                 />
