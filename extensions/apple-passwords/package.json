@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "apple-passwords",
+  "title": "Apple Passwords",
+  "description": "Allows you to view and copy Apple Password entries",
+  "icon": "command-icon.png",
+  "author": "bendews",
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list",
+      "title": "Apple Passwords",
+      "description": "Search your Apple Password items by URL.",
+      "keywords": [
+        "ap",
+        "apw",
+        "apple",
+        "password",
+        "login"
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "auth",
+      "title": "Authenticate Apple Passwords",
+      "description": "Authenticate the Apple Passwords Helper",
+      "keywords": [
+        "ap",
+        "apw",
+        "apple",
+        "password",
+        "auth"
+      ],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "default": "/opt/homebrew/bin/apw",
+      "description": "Enter the APW binary path",
+      "name": "cliPathAPW",
+      "placeholder": "e.g., /usr/local/bin/apw",
+      "required": false,
+      "title": "APW CLI path",
+      "type": "textfield"
+    },
+    {
+      "default": true,
+      "description": "Copy secret values instead of filling them at the cursor position",
+      "name": "copySecrets",
+      "required": false,
+      "title": "Copy secrets",
+      "label": "Copy secret values instead of filling them at the cursor position",
+      "type": "checkbox"
+    },
+    {
+      "default": "5",
+      "description": "The timeout for password values before reauthentication is needed. Set to 0 to disable.",
+      "name": "cacheTimeout",
+      "placeholder": "e.g., 5",
+      "required": false,
+      "title": "Cache Timeout (in minutes)",
+      "type": "textfield"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
+    "@types/psl": "^1.1.3",
+    "psl": "^1.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
