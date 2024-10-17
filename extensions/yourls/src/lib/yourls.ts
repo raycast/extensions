@@ -5,16 +5,11 @@ import fetch, { RequestInit } from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
 import { sanitizeUrl } from "@braintree/sanitize-url";
 
-type Preferences = {
-  signature: string;
-  api: string;
-};
-
 export const yourls = async <Response>({
   action,
   params,
   config,
-}: { action?: TAction; params?: any; config?: RequestInit } = {}) => {
+}: { action?: TAction; params?: Record<string, string>; config?: RequestInit } = {}) => {
   const preferences = getPreferenceValues<Preferences>();
   const apiURL = sanitizeUrl(preferences.api);
   const signature = preferences.signature;
