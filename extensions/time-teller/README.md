@@ -8,3 +8,6 @@ The Time Teller extension uses AI to transcribe human-friendly language into a s
 - The parsed dates are presented in ISO 8601 format;
 - Timeframe between the start and end dates in various units (e.g., milliseconds, seconds, minutes, hours, days);
 - Easily copy any calculated values or formatted dates to their clipboard.
+
+### Requirements
+- Requires Raycast AI as it utilizes AI to extract dates
