@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, getPreferenceValues, showToast, Toast, Color } from "@raycast/api";
 import { useState, useEffect } from "react";
 
 import { getAuthHeaders, handleDomain, timeoutFetch } from "./utils";
@@ -161,7 +161,11 @@ export default function TestConnectionCommand() {
         accessories={[{ text: downloadProgress || speedStatus }]}
       />
       {speedStatus.includes("completed") && (
-        <List.Item title="All checks finished" icon={Icon.CheckCircle} accessories={[{ text: averageSpeed }]} />
+        <List.Item
+          title="All checks finished"
+          icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
+          accessories={[{ text: averageSpeed }]}
+        />
       )}
     </List>
   );
