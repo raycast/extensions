@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Detail,
   showToast,
@@ -45,24 +45,7 @@ interface Transaction {
   counterpartyNickname: string | null;
   createdAt: string;
   dashboardLink: string;
-  details: {
-    address: {
-      address1: string;
-      address2: string | null;
-      city: string;
-      state: string | null;
-      postalCode: string;
-    } | null;
-    domesticWireRoutingInfo: unknown | null;
-    electronicRoutingInfo: unknown | null;
-    internationalWireRoutingInfo: unknown | null;
-    debitCardInfo: {
-      id: string;
-    } | null;
-    creditCardInfo: {
-      id: string;
-    } | null;
-  } | null;
+  details: Record<string, unknown> | null;
   estimatedDeliveryDate: string;
   failedAt: string | null;
   id: string;
@@ -85,16 +68,7 @@ interface Transaction {
   reasonForFailure: string | null;
   status: "pending" | "sent" | "cancelled" | "failed";
   feeId: string | null;
-  currencyExchangeInfo: {
-    convertedFromCurrency: string;
-    convertedToCurrency: string;
-    convertedFromAmount: number;
-    convertedToAmount: number;
-    feeAmount: number;
-    feePercentage: number;
-    exchangeRate: number;
-    feeTransactionId: string;
-  } | null;
+  currencyExchangeInfo: Record<string, unknown> | null;
   compliantWithReceiptPolicy: boolean | null;
   hasGeneratedReceipt: boolean | null;
   creditAccountPeriodId: string | null;
@@ -107,7 +81,7 @@ interface Transaction {
   }>;
 }
 
-const API_BASE_URL = "https://api.mercury.com/api/v1";
+const API_BASE_URL = "https://api.mercury.com/api/v1/";
 
 /**
  * Fetch all accounts from the Mercury API.
@@ -165,76 +139,93 @@ async function fetchAllTransactions(apiKey: string, accounts: Account[]): Promis
  * Prepare the prompt to send to Raycast AI.
  */
 function prepareDataForAI(accounts: Account[], transactions: Transaction[]): string {
-  let prompt = `You are an expert financial assistant. Based on the following account information and recent transactions, please provide a clear and concise summary. Your summary should include:
+  // Get legal business name from accounts (assuming all accounts belong to the same business)
+  const legalBusinessName = accounts[0]?.legalBusinessName || "the business";
 
-1. **Overall Financial Health**: Briefly describe the overall financial status.
-2. **Key Insights and Trends**: Highlight any patterns, trends, or noteworthy events.
-3. **Significant Transactions**: Mention any unusual or significant transactions.
-4. **Recommendations**: Provide actionable suggestions for financial improvement, if applicable.
+  let prompt = `You are an experienced financial advisor preparing a concise monthly financial briefing for "${legalBusinessName}". Based on the following detailed account information and recent transactions, please analyze the data and provide a clear, professional summary.
 
-**Please output the summary in clean and easy-to-read Markdown format, using headings and bullet points to enhance readability.**
+Your briefing should include:
 
-### Accounts:
+1. **Overall Financial Health**: Summarize the financial status, highlighting key figures and any significant changes over the month, including cash flow.
+2. **Key Observations**: Note any significant patterns, trends, or events, such as changes in balances, unusual account activity, or transaction statuses.
+3. **Significant Transactions**: Mention any noteworthy transactions, their details, and their impact on the financial status.
+4. **Recommendations**: Offer brief, actionable suggestions for financial improvement.
+
+Please ensure the summary is clear and concise, using a professional tone. Do not address the reader directly as a client. Present the information in Markdown format with appropriate headings and bullet points for readability.
+
+---
+
+**Accounts:**
 `;
-
   accounts.forEach((account) => {
     prompt += `- **${account.nickname || account.name}** (${capitalize(account.kind)} Account)
-  - Balance: ${formatCurrency(account.currentBalance)}
-  - Status: ${capitalize(account.status)}\n`;
+    - Balance: ${formatCurrency(account.currentBalance)}
+    - Available Balance: ${formatCurrency(account.availableBalance)}
+    - Status: ${capitalize(account.status)}
+    - Type: ${capitalize(account.type)}
+    - Created At: ${new Date(account.createdAt).toLocaleDateString()}
+    \n`;
   });
 
-  prompt += `\n### Recent Transactions (Last 30 Days):\n`;
+  // Calculate total balances
+  const totalBalance = accounts.reduce((sum, account) => sum + account.currentBalance, 0);
+  const totalAvailableBalance = accounts.reduce((sum, account) => sum + account.availableBalance, 0);
 
-  const recentTransactions = transactions.filter((transaction) => {
-    const transactionDate = new Date(transaction.createdAt);
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    return transactionDate >= thirtyDaysAgo;
-  });
+  prompt += `\n**Total Account Balances:**\n`;
+  prompt += `- Total Current Balance: ${formatCurrency(totalBalance)}\n`;
+  prompt += `- Total Available Balance: ${formatCurrency(totalAvailableBalance)}\n`;
 
+// Filter transactions from the last 12 months
+const recentTransactions = transactions.filter((transaction) => {
+  const transactionDate = new Date(transaction.createdAt);
+  const twelveMonthsAgo = new Date();
+  twelveMonthsAgo.setFullYear(twelveMonthsAgo.getFullYear() - 1);
+  return transactionDate >= twelveMonthsAgo;
+});
+
+prompt += `\n**Recent Transactions (Last 12 Months):**\n`;
   recentTransactions.forEach((transaction) => {
     prompt += `- **${transaction.counterpartyName || "N/A"}**
-  - Amount: ${formatCurrency(transaction.amount)} (${transaction.amount < 0 ? "Debit" : "Credit"})
-  - Date: ${transaction.createdAt.slice(0, 10)}
-  - Type: ${capitalize(transaction.kind.replace(/([A-Z])/g, " $1"))}
-`;
-    if (transaction.note) {
-      prompt += `  - Note: ${transaction.note}\n`;
-    }
-    if (transaction.externalMemo) {
-      prompt += `  - Memo: ${transaction.externalMemo}\n`;
-    }
-    if (transaction.bankDescription) {
-      prompt += `  - Bank Description: ${transaction.bankDescription}\n`;
-    }
-    if (transaction.mercuryCategory) {
-      prompt += `  - Category: ${transaction.mercuryCategory}\n`;
-    }
-    prompt += "\n";
+    - Amount: ${formatCurrency(transaction.amount)} (${transaction.amount < 0 ? "Debit" : "Credit"})
+    - Date: ${transaction.createdAt.slice(0, 10)}
+    - Type: ${capitalize(transaction.kind.replace(/([A-Z])/g, " $1"))}
+    - Status: ${capitalize(transaction.status)}
+    - Note: ${transaction.note || "N/A"}
+    - Mercury Category: ${transaction.mercuryCategory || "N/A"}
+    - Attachments: ${
+      transaction.attachments && transaction.attachments.length > 0
+        ? transaction.attachments.map((att) => att.fileName).join(", ")
+        : "None"
+    }\n`;
   });
 
-  prompt += `\n**Please provide the summary below:**`;
+  // Summarize transaction statuses
+  const transactionStatusCounts = recentTransactions.reduce((counts, transaction) => {
+    counts[transaction.status] = (counts[transaction.status] || 0) + 1;
+    return counts;
+  }, {} as Record<string, number>);
 
+  prompt += `\n**Transaction Status Summary (Last 30 Days):**\n`;
+  Object.entries(transactionStatusCounts).forEach(([status, count]) => {
+    prompt += `- ${capitalize(status)}: ${count} transactions\n`;
+  });
+
+  // Calculate total inflows and outflows
+  const totalInflows = recentTransactions
+    .filter((tx) => tx.amount > 0)
+    .reduce((sum, tx) => sum + tx.amount, 0);
+
+  const totalOutflows = recentTransactions
+    .filter((tx) => tx.amount < 0)
+    .reduce((sum, tx) => sum + tx.amount, 0);
+
+  prompt += `\n**Cash Flow Summary (Last 30 Days):**\n`;
+  prompt += `- Total Inflows: ${formatCurrency(totalInflows)}\n`;
+  prompt += `- Total Outflows: ${formatCurrency(Math.abs(totalOutflows))}\n`;
+  prompt += `- Net Cash Flow: ${formatCurrency(totalInflows + totalOutflows)}\n`;
+
+  prompt += `\n**Please provide the monthly financial briefing below:**`;
   return prompt;
-}
-
-/**
- * Format currency values.
- */
-function formatCurrency(amount: number): string {
-  return amount.toLocaleString("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
-
-/**
- * Capitalize a string.
- */
-function capitalize(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 /**
@@ -245,6 +236,7 @@ export default function AIAccountSummaryCommand() {
   const [summary, setSummary] = useState<string>("");
   const { apiKey } = getPreferenceValues<Preferences>();
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
     async function generateSummary() {
@@ -269,20 +261,22 @@ export default function AIAccountSummaryCommand() {
         // Fetch accounts and transactions
         const fetchedAccounts = await fetchAccounts(apiKey);
         setAccounts(fetchedAccounts);
-        const transactions = await fetchAllTransactions(apiKey, fetchedAccounts);
+        const fetchedTransactions = await fetchAllTransactions(apiKey, fetchedAccounts);
+        setTransactions(fetchedTransactions);
 
         // Prepare prompt
-        const prompt = prepareDataForAI(fetchedAccounts, transactions);
+        const prompt = prepareDataForAI(fetchedAccounts, fetchedTransactions);
 
         // Update the toast
         fetchingToast.title = "Generating summary...";
-        fetchingToast.message = undefined;
 
         // Use AI.ask to get the summary and stream the answer
         let aiSummary = "";
-        const answer = AI.ask(prompt, { creativity: "medium" });
+        const answer = AI.ask(prompt, {
+          creativity: "medium",
+        });
 
-        // Stream the AI answer
+        // Listen to "data" event to stream the answer
         answer.on("data", (chunk: string) => {
           aiSummary += chunk;
           setSummary(aiSummary);
@@ -298,6 +292,8 @@ export default function AIAccountSummaryCommand() {
         });
       } catch (error) {
         console.error("Error generating AI summary:", error);
+
+        // Handle error here, e.g., by showing a Toast
         await showToast({
           style: Toast.Style.Failure,
           title: "Failed to Generate Summary",
@@ -306,13 +302,6 @@ export default function AIAccountSummaryCommand() {
             title: "Retry",
             onAction: () => {
               window.location.reload();
-            },
-          },
-          secondaryAction: {
-            title: "Copy Error",
-            onAction: (toast) => {
-              navigator.clipboard.writeText(error instanceof Error ? error.stack || error.message : String(error));
-              toast.hide();
             },
           },
         });
@@ -325,49 +314,116 @@ export default function AIAccountSummaryCommand() {
     generateSummary();
   }, []);
 
+  // Calculations for financial metrics
+  let totalCurrentBalance = 0;
+  let totalAvailableBalance = 0;
+  let totalInflows = 0;
+  let totalOutflows = 0;
+  let netCashFlow = 0;
+  let significantTransactions: Transaction[] = [];
+
+  if (!isLoading && accounts.length > 0) {
+    totalCurrentBalance = accounts.reduce((sum, account) => sum + account.currentBalance, 0);
+    totalAvailableBalance = accounts.reduce((sum, account) => sum + account.availableBalance, 0);
+  }
+
+  if (!isLoading && transactions.length > 0) {
+    const recentTransactions = transactions.filter((transaction) => {
+      const transactionDate = new Date(transaction.createdAt);
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      return transactionDate >= thirtyDaysAgo;
+    });
+
+    totalInflows = recentTransactions
+      .filter((tx) => tx.amount > 0)
+      .reduce((sum, tx) => sum + tx.amount, 0);
+
+    totalOutflows = recentTransactions
+      .filter((tx) => tx.amount < 0)
+      .reduce((sum, tx) => sum + tx.amount, 0);
+
+    netCashFlow = totalInflows + totalOutflows;
+
+    significantTransactions = [...recentTransactions]
+      .sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))
+      .slice(0, 3);
+  }
+
+  // Determine Financial Health Status
+  let financialHealthStatus = "Unknown";
+  let financialHealthColor: Color.ColorLike = Color.SecondaryText;
+
+  if (totalCurrentBalance > 100000 && netCashFlow >= 0) {
+    financialHealthStatus = "Strong";
+    financialHealthColor = Color.Green;
+  } else if (totalCurrentBalance > 50000 && netCashFlow >= -5000) {
+    financialHealthStatus = "Stable";
+    financialHealthColor = Color.Orange;
+  } else {
+    financialHealthStatus = "Weak";
+    financialHealthColor = Color.Red;
+  }
+
   return (
     <Detail
       isLoading={isLoading}
       markdown={summary || "No summary available."}
-      metadata={<AccountMetadata accounts={accounts} />}
-      actions={<AccountActions accounts={accounts} />}
-    />
-  );
-}
+      metadata={
+        !isLoading && accounts.length > 0 && (
+          <Detail.Metadata>
+            {/* Overall Financial Health */}
+            <Detail.Metadata.TagList title="Overall Financial Health">
+              <Detail.Metadata.TagList.Item text={financialHealthStatus} color={financialHealthColor} />
+            </Detail.Metadata.TagList>
+            <Detail.Metadata.Label title="Total Available Balance" text={formatCurrency(totalAvailableBalance)} />
+            <Detail.Metadata.Separator />
 
-/**
- * Component to display account metadata.
- */
-function AccountMetadata({ accounts }: { accounts: Account[] }) {
-  return (
-    <Detail.Metadata>
-      <Detail.Metadata.TagList title="Accounts">
-        {accounts.map((account) => (
-          <Detail.Metadata.TagList.Item
-            key={account.id}
-            text={`${account.nickname || account.name}`}
-            icon={getAccountIcon(account.kind)}
-            color={account.kind.toLowerCase() === "checking" ? Color.Blue : Color.Green}
-          />
-        ))}
-      </Detail.Metadata.TagList>
-      <Detail.Metadata.Separator />
-      {accounts.map((account) => (
-        <Detail.Metadata.Label
-          key={account.id}
-          title={account.nickname || account.name}
-          text={formatCurrency(account.currentBalance)}
-          icon={Icon.BankNote}
-        />
-      ))}
-    </Detail.Metadata>
+            {/* Cash Flow Summary */}
+            <Detail.Metadata.TagList title="Monthly Cash Flow Summary">
+              <Detail.Metadata.TagList.Item text={formatCurrency(netCashFlow)} color={financialHealthColor} />
+            </Detail.Metadata.TagList>
+            <Detail.Metadata.Label title="Total Inflows" text={formatCurrency(totalInflows)} />
+            <Detail.Metadata.Label title="Total Outflows" text={formatCurrency(Math.abs(totalOutflows))} />
+            <Detail.Metadata.Separator />
+
+            {/* Accounts */}
+             {accounts.map((account) => (
+              <Detail.Metadata.Label
+                key={account.id}
+                title={`${account.nickname || account.name} (${capitalize(account.kind)} Account)`}
+                text={formatCurrency(account.currentBalance)}
+                icon={getAccountIcon(account.kind)}
+              />
+            ))}
+            <Detail.Metadata.Separator />
+
+            {/* Significant Transactions */}
+            {significantTransactions.length > 0 ? (
+              significantTransactions.map((transaction) => (
+                <Detail.Metadata.Label
+                  key={transaction.id}
+                  title={`${transaction.counterpartyName || "N/A"} (${capitalize(
+                    transaction.kind.replace(/([A-Z])/g, " $1")
+                  )})`}
+                  text={formatCurrency(transaction.amount)}
+                />
+              ))
+            ) : (
+              <Detail.Metadata.Label title="No significant transactions" text=" " />
+            )}
+          </Detail.Metadata>
+        )
+      }
+      actions={<AccountActions accounts={accounts} summary={summary} />}
+    />
   );
 }
 
 /**
  * Component to display actions in the action panel.
  */
-function AccountActions({ accounts }: { accounts: Account[] }) {
+function AccountActions({ accounts, summary }: { accounts: Account[]; summary: string }) {
   return (
     <ActionPanel>
       <ActionPanel.Section title="Accounts">
@@ -402,6 +458,7 @@ function AccountActions({ accounts }: { accounts: Account[] }) {
         ))}
       </ActionPanel.Section>
       <ActionPanel.Section>
+        <Action.CopyToClipboard content={summary} title="Copy Summary" />
         <Action
           title="Refresh Summary"
           icon={Icon.ArrowClockwise}
@@ -430,7 +487,7 @@ function AccountActions({ accounts }: { accounts: Account[] }) {
 }
 
 /**
- * Get icon based on account kind.
+ * Helper functions
  */
 function getAccountIcon(kind: string): Image.ImageLike {
   switch (kind.toLowerCase()) {
@@ -441,4 +498,17 @@ function getAccountIcon(kind: string): Image.ImageLike {
     default:
       return Icon.Circle;
   }
+}
+
+function formatCurrency(amount: number): string {
+  return amount.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+function capitalize(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
