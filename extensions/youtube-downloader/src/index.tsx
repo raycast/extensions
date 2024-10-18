@@ -163,6 +163,24 @@ export default function DownloadVideo() {
               handleSubmit({ ...values, copyToClipboard: true } as DownloadOptions);
             }}
           />
+          {isSelectedAudio && (
+            <>
+              <Action.SubmitForm
+                icon={Icon.Download}
+                title="Download Audio (WAV)"
+                onSubmit={(values) => {
+                  handleSubmit({ ...values, copyToClipboard: false, wav: true } as DownloadOptions);
+                }}
+              />
+              <Action.SubmitForm
+                icon={Icon.CopyClipboard}
+                title="Copy Audio (WAV)"
+                onSubmit={(values) => {
+                  handleSubmit({ ...values, copyToClipboard: true, wav: true } as DownloadOptions);
+                }}
+              />
+            </>
+          )}
         </ActionPanel>
       }
     >
