@@ -1,5 +1,9 @@
 # YouTube Downloader Changelog
 
+## [Add WAV support] - {PR_MERGE_DATE}
+
+- Added WAV support for audio downloads
+
 ## [Remove empty dropdown items] - 2024-08-29
 
 - Removed empty dropdown items from the format selection to improve user experience
