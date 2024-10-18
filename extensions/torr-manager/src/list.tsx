@@ -114,7 +114,7 @@ export default function Command() {
   const getStreamLink = (item: TorrentItem) => {
     const encodedTitle = encodeURIComponent(item.title);
 
-    return `${torrserverUrl}/stream/[${encodedTitle}] ${encodedTitle}.m3u?link=${item.hash}&m3u&fn=file.m3u`;
+    return `${handleDomain(torrserverUrl)}/stream/[${encodedTitle}] ${encodedTitle}.m3u?link=${item.hash}&m3u&fn=file.m3u`;
   };
 
   const sortedItems = [

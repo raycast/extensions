@@ -43,7 +43,7 @@ export default function Command() {
         formData.append("poster", posterUrl);
       }
 
-      const serverUrl = `${torrserverUrl}/torrent/upload`;
+      const serverUrl = `${handleDomain(torrserverUrl)}/torrent/upload`;
       showToast(Toast.Style.Animated, "Processing...");
 
       const response = await timeoutFetch(handleDomain(serverUrl), {
