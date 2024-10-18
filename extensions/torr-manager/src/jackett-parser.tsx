@@ -41,12 +41,15 @@ export default function Command() {
         params.append("Category", `${category}`);
       });
 
-      const response = await fetch(`${jackettParserUrl}/api/v2.0/indexers/all/results?${params.toString()}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${handleDomain(jackettParserUrl)}/api/v2.0/indexers/all/results?${params.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch torrents");
@@ -87,7 +90,7 @@ export default function Command() {
       formData.append("title", title);
       formData.append("save_to_db", saveToDb);
 
-      const serverUrl = `${torrserverUrl}/torrent/upload`;
+      const serverUrl = `${handleDomain(torrserverUrl)}/torrent/upload`;
       const uploadResponse = await timeoutFetch(handleDomain(serverUrl), {
         method: "POST",
         body: formData,
@@ -137,7 +140,7 @@ export default function Command() {
   const getStreamLink = (item: TorrentItem) => {
     const encodedTitle = encodeURIComponent(item.title);
 
-    return `${torrserverUrl}/stream/[${encodedTitle}] ${encodedTitle}.m3u?link=${item.hash}&m3u&fn=file.m3u`;
+    return `${handleDomain(torrserverUrl)}/stream/[${encodedTitle}] ${encodedTitle}.m3u?link=${item.hash}&m3u&fn=file.m3u`;
   };
 
   const bytesToGbText = (bytes: number): string => {
