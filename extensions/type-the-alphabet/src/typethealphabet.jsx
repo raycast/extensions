@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Icon,
-  ActionPanel,
-  Action,
-  List,
-  Detail,
-  useNavigation,
-  CopyToClipboardAction,
-} from "@raycast/api";
+import { Icon, ActionPanel, Action, List, Detail, useNavigation, CopyToClipboardAction } from "@raycast/api";
 
 function Statistics({ letterTimes, totalTime, onReset, pop }) {
   let markdown = `# Total time: ${totalTime} seconds\n\n| Letter | Time |\n| --- | --- |\n`;
