@@ -85,10 +85,9 @@ export default function Command() {
       const fileBlob = await fileResponse.blob();
 
       const formData = new FormData();
-      formData.append("save", "true");
+      formData.append("save", saveToDb);
       formData.append("file", fileBlob, title);
       formData.append("title", title);
-      formData.append("save_to_db", saveToDb);
 
       const serverUrl = `${handleDomain(torrserverUrl)}/torrent/upload`;
       const uploadResponse = await timeoutFetch(handleDomain(serverUrl), {
