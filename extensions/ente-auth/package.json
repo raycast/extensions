@@ -17,10 +17,22 @@
       "mode": "view"
     },
     {
-      "name": "database",
+      "name": "export",
+      "title": "Export Secrets",
+      "description": "Export Ente Auth secrets to a JSON file",
+      "mode": "view"
+    },
+    {
+      "name": "import",
       "title": "Import Secrets",
       "description": "Import Ente Auth secrets from a JSON file",
-      "mode": "view"
+      "mode": "no-view"
+    },
+    {
+      "name": "delete",
+      "title": "Delete Export",
+      "description": "Delete Ente Auth Exported file",
+      "mode": "no-view"
     }
   ],
   "preferences": [

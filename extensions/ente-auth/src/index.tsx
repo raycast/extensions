@@ -1,8 +1,9 @@
+import { useEffect, useState } from "react";
+import { JsonFormat } from "./helpers/types";
+import { getJsonFormatFromStore } from "./helpers";
+import { useFrecencySorting } from "@raycast/utils";
 import { getProgressIcon, getFavicon } from "@raycast/utils";
 import { ActionPanel, Action, List, Icon } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { getJsonFormatFromStore } from "./helpers";
-import { JsonFormat } from "./helpers/types";
 
 // Ente colors - purple #A400B6, orange #FF9800
 const getProgressColor = (remainingTime: number) => {
@@ -13,12 +14,19 @@ const RERENDER_INTERVAL = 1000;
 
 export default function Command() {
   const [secrets, setSecrets] = useState<JsonFormat[]>([]);
+  const { visitItem, resetRanking } = useFrecencySorting<JsonFormat>(secrets, {
+    key: (item) => item.service_name,
+  });
 
   useEffect(() => {
     if (secrets.length === 0) {
       getJsonFormatFromStore().then((data) => setSecrets(data));
     }
 
+    /**
+     * Set up an interval to re-fetch the data from the store every second.
+     * This is necessary because the data in the store can change at any time.
+     */
     const interval = setInterval(() => {
       getJsonFormatFromStore().then((data) => setSecrets(data));
     }, RERENDER_INTERVAL);
@@ -32,7 +40,6 @@ export default function Command() {
   if (secrets.length === 0) {
     return (
       <List>
-        {/* TODO: Update MSG */}
         <List.Item title={"No Secrets found"} />
       </List>
     );
@@ -66,7 +73,7 @@ export default function Command() {
                       <Label title="Digits" text={item.digits.toString()} />
                       <Label title="Period" text={item.period} />
                       <Separator />
-                      <Label title="Notes" text={item.notes} />
+                      <Metadata.Link title="Notes" target={item.notes} text={item.notes} />
                       <Separator />
                       <List.Item.Detail.Metadata.TagList title="Tags">
                         {item.tags.map((tag, index) => (
@@ -88,8 +95,32 @@ export default function Command() {
             ]}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard title="Copy TOTP" icon={Icon.Clipboard} content={item.current_totp} />
-                <Action.CopyToClipboard title="Copy Next" icon={Icon.Key} content={item.next_totp} />
+                <ActionPanel.Section title="Current">
+                  <Action.Paste
+                    title="Paste TOTP"
+                    icon={Icon.Clipboard}
+                    content={item.current_totp}
+                    onPaste={() => visitItem(item)}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Current"
+                    icon={Icon.Key}
+                    content={item.current_totp}
+                    onCopy={() => visitItem(item)}
+                  />
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Next">
+                  <Action.CopyToClipboard
+                    title="Copy Next"
+                    icon={Icon.Key}
+                    content={item.next_totp}
+                    onCopy={() => visitItem(item)}
+                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => resetRanking(item)} />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
