@@ -53,6 +53,10 @@ function GlueJob({
   setDetailsEnabled: CallableFunction;
   mutate: MutatePromise<GlueJobRun[] | undefined>;
 }) {
+  if (!glueJobRun) {
+    return null; // or return some placeholder component
+  }
+
   return (
     <List.Item
       key={glueJobRun?.JobName}
