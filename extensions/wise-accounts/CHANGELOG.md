@@ -1,6 +1,6 @@
 # Wise Accounts Changelog
 
-## Fix Business Account - {PR_MERGE_DATE}
+## Fix Business Account - 2024-10-18
 
 - Fixes error retrieving accounts when Business Account available
 - Use Main Profile ID for Get Balances default Profile ID
