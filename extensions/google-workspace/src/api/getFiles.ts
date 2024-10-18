@@ -1,4 +1,5 @@
 import { getOAuthToken } from "./googleAuth";
+import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
 
 export enum QueryTypes {
@@ -77,11 +78,14 @@ export async function getFiles(queryType: QueryTypes, scope: ScopeTypes, queryTe
   });
   const data = (await response.json()) as { files: File[] };
 
-  await Promise.all(
-    data.files.map(async (file) => {
-      file.filePath = await getFilePath(file.id);
-    }),
-  );
+  const { displayFilePath } = getPreferenceValues();
+  if (displayFilePath) {
+    await Promise.all(
+      data.files.map(async (file) => {
+        file.filePath = await getFilePath(file.id);
+      }),
+    );
+  }
 
   return data;
 }
