@@ -8,7 +8,8 @@ This mod provides several commands centered around managing the WP Bones WordPre
 
 ## Features
 
-- **Search in the WP Bones Documentation**: Search the WP Bones documentation for a specific term.
+- **Search in the WP Bones Documentation**: Search the WP Bones documentation for a specific keyword.
+- **Open the WP Bones Documentation**: Open the WP Bones documentation in your default browser.
 - **Create a New Plugin**: Create a new plugin using the WP Bones template.
 - **Menu bar commands**: Quickly access the most common commands from the menu bar. And check the latest version of WP Bones.
 
