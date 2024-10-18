@@ -32,3 +32,8 @@
   - Improved data fetching and state management for smoother performance.
   - Fixed variable scope issues to prevent reference errors.
   
+## [Interactive AI Assistant with Follow-up Questions] - 2024-10-17
+
+- Follow-up Question Capability:
+  - Introduced the ability to ask follow-up questions to the AI-generated account summary.
+  - Users can interact with the AI assistant to gain deeper insights and clarifications about their financial data.
