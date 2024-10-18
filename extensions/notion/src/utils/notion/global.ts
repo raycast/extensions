@@ -1,6 +1,8 @@
 import { isNotionClientError } from "@notionhq/client";
 import { showToast, Toast } from "@raycast/api";
 
+import { standardize } from "./standardize";
+
 import { NotionObject, Page } from ".";
 
 export function isNotNullOrUndefined<T>(input: null | undefined | T): input is T {
@@ -23,43 +25,38 @@ export function handleError<T>(err: unknown, title: string, returnValue: T): T {
   return returnValue;
 }
 
-export function pageMapper(jsonPage: NotionObject): Page {
+export function pageMapper(notionPage: NotionObject): Page {
   const page: Page = {
-    object: jsonPage.object,
-    id: jsonPage.id,
+    ...notionPage,
     title: "Untitled",
     properties: {},
-    created_by: "created_by" in jsonPage && jsonPage.created_by.object === "user" ? jsonPage.created_by.id : undefined,
-    parent_page_id: "parent" in jsonPage && "page_id" in jsonPage.parent ? jsonPage.parent.page_id : undefined,
+    created_by:
+      "created_by" in notionPage && notionPage.created_by.object === "user" ? notionPage.created_by.id : undefined,
+    parent_page_id: "parent" in notionPage && "page_id" in notionPage.parent ? notionPage.parent.page_id : undefined,
     parent_database_id:
-      "parent" in jsonPage && "database_id" in jsonPage.parent ? jsonPage.parent.database_id : undefined,
-    last_edited_time: "last_edited_time" in jsonPage ? new Date(jsonPage.last_edited_time).getTime() : undefined,
+      "parent" in notionPage && "database_id" in notionPage.parent ? notionPage.parent.database_id : undefined,
+    last_edited_time: "last_edited_time" in notionPage ? new Date(notionPage.last_edited_time).getTime() : undefined,
     last_edited_user:
-      "last_edited_by" in jsonPage && jsonPage.last_edited_by.object === "user"
-        ? jsonPage.last_edited_by.id
+      "last_edited_by" in notionPage && notionPage.last_edited_by.object === "user"
+        ? notionPage.last_edited_by.id
         : undefined,
-    icon_emoji: "icon" in jsonPage && jsonPage.icon?.type === "emoji" ? jsonPage.icon.emoji : null,
-    icon_file: "icon" in jsonPage && jsonPage.icon?.type === "file" ? jsonPage.icon.file.url : null,
-    icon_external: "icon" in jsonPage && jsonPage.icon?.type === "external" ? jsonPage.icon.external.url : null,
-    url: "url" in jsonPage ? jsonPage.url : undefined,
+    icon_emoji: "icon" in notionPage && notionPage.icon?.type === "emoji" ? notionPage.icon.emoji : null,
+    icon_file: "icon" in notionPage && notionPage.icon?.type === "file" ? notionPage.icon.file.url : null,
+    icon_external: "icon" in notionPage && notionPage.icon?.type === "external" ? notionPage.icon.external.url : null,
+    url: "url" in notionPage ? notionPage.url : undefined,
   };
 
-  if (jsonPage.object === "page" && "properties" in jsonPage) {
-    page.properties = jsonPage.properties;
-    Object.keys(jsonPage.properties).forEach((pk) => {
-      const property = jsonPage.properties[pk];
-
-      // Save page title
-      if (property.type === "title") {
-        if (property.title[0]?.plain_text) {
-          page.title = property.title[0].plain_text;
-        }
+  if (notionPage.object === "page" && "properties" in notionPage)
+    for (const key in notionPage.properties) {
+      const property = notionPage.properties[key];
+      page.properties[key] = standardize(property, "value");
+      if (property.type === "title" && property.title[0]?.plain_text) {
+        page.title = property.title[0].plain_text;
       }
-    });
-  }
+    }
 
-  if ("title" in jsonPage && jsonPage.title[0]?.plain_text) {
-    page.title = jsonPage.title[0]?.plain_text;
+  if ("title" in notionPage && notionPage.title[0]?.plain_text) {
+    page.title = notionPage.title[0]?.plain_text;
   }
 
   return page;
