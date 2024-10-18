@@ -1,5 +1,3 @@
-export { MOVIE_CATEGORIES } from "./movie-categories";
-
 export * from "./preferences";
 export * from "./torrent-item";
 export * from "./jackett-parsed-torrent";
