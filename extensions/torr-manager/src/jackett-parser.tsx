@@ -175,7 +175,7 @@ export default function Command() {
                     <List.Item.Detail.Metadata.TagList title="Stats">
                       <List.Item.Detail.Metadata.TagList.Item text={`Seeds: ${item.Seeders}`} color={Color.Green} />
                       <List.Item.Detail.Metadata.TagList.Item text={`Peers: ${item.Peers}`} color={Color.Red} />
-                      <List.Item.Detail.Metadata.TagList.Item text={`Tracker: ${item.Tracker}`} color={Color.Blue} />
+                      <List.Item.Detail.Metadata.TagList.Item text={`${item.TrackerId}`} color={Color.Blue} />
                     </List.Item.Detail.Metadata.TagList>
 
                     <List.Item.Detail.Metadata.Separator />
