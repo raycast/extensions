@@ -3,7 +3,7 @@
   "title": "Bento Email",
   "description": "Interact with Bento (bentonow.com) to add subscribers, view broadcasts, reports, and other utility features.",
   "icon": "icon.png",
-  "author": "Zachary Oakes",
+  "author": "zeromana",
   "categories": ["Developer Tools", "Productivity", "Communication"],
   "license": "MIT",
   "commands": [
@@ -105,25 +105,26 @@
       "name": "password",
       "type": "password",
       "required": true,
-      "title": "Password",
+      "title": "Secret Key",
       "description": "Your Bento Secret Key"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.84.3",
+    "@raycast/eslint-config": "^1.0.11",
     "@visx/axis": "^3.10.1",
     "@visx/curve": "^2.17.0",
+    "@visx/gradient": "^2.1.0",
+    "@visx/grid": "^2.12.2",
     "@visx/group": "^2.17.0",
     "@visx/mock-data": "^2.17.0",
     "@visx/scale": "^2.18.0",
     "@visx/shape": "^2.18.0",
+    "@visx/text": "^2.3.0",
     "@visx/tooltip": "^2.17.0",
     "axios": "^1.7.7",
-    "@visx/text": "^2.3.0",
-    "@visx/gradient": "^2.1.0",
-    "react-dom": "^17.0.2",
     "d3-time-format": "^4.1.0",
-    "@visx/grid": "^2.12.2"
+    "react-dom": "^17.0.2"
   },
   "devDependencies": {
     "@types/node": "~18.16.20",

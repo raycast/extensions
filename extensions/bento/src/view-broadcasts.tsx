@@ -1,40 +1,85 @@
-import { useEffect, useState } from "react";
-import { List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
-import { getBroadcasts, Broadcast } from "./api-client";
+import React, { useState } from "react";
+import { Action, ActionPanel, Form, useNavigation, showToast, Toast, List, Icon, Color } from "@raycast/api";
+import { guessGender, GenderResponse } from "./api-client";
 
-export default function ViewBroadcasts() {
-    const [broadcasts, setBroadcasts] = useState<Broadcast[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+interface FormValues {
+  name: string;
+}
 
-    useEffect(() => {
-        async function fetchBroadcasts() {
-            try {
-                const fetchedBroadcasts = await getBroadcasts();
-                setBroadcasts(fetchedBroadcasts);
-            } catch (error) {
-                showToast(Toast.Style.Failure, "Failed to fetch broadcasts");
-            } finally {
-                setIsLoading(false);
-            }
-        }
-        fetchBroadcasts();
-    }, []);
+export default function GuessGender() {
+  const [isLoading, setIsLoading] = useState(false);
+  const { push } = useNavigation();
 
-    return (
-        <List isLoading={isLoading}>
-            {broadcasts.map((broadcast) => (
-                <List.Item
-                    key={broadcast.id}
-                    title={broadcast.name}
-                    subtitle={`Created at: ${new Date(broadcast.created_at).toLocaleString()}`}
-                    accessories={[{ text: `Open Rate: ${(broadcast.stats.open_rate * 100).toFixed(2)}%` }]}
-                    actions={
-                        <ActionPanel>
-                            <Action.CopyToClipboard content={broadcast.share_url} title="Copy Share URL" />
-                        </ActionPanel>
-                    }
-                />
-            ))}
-        </List>
-    );
+  const handleSubmit = async (values: FormValues) => {
+    setIsLoading(true);
+    try {
+      const result = await guessGender(values.name);
+      push(<ResultView result={result} name={values.name} />);
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Form
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="name" title="Name" placeholder="Enter name to guess gender" />
+    </Form>
+  );
+}
+
+function ResultView({ result, name }: { result: GenderResponse; name: string }) {
+  const confidenceScore = Math.floor(result.confidence * 100);
+
+  const getGenderInfo = (gender: string) => {
+    return {
+      icon: {
+        source: gender === "male" ? Icon.Male : Icon.Female,
+        tintColor: gender === "male" ? Color.Blue : Color.Magenta,
+      },
+      text: gender.charAt(0).toUpperCase() + gender.slice(1),
+    };
+  };
+
+  const getConfidenceInfo = (score: number) => {
+    if (score < 50) {
+      return {
+        icon: { source: Icon.EmojiSad, tintColor: Color.Red },
+        text: `${score}% - Low confidence`,
+      };
+    } else if (score < 90) {
+      return {
+        icon: { source: Icon.EmojiSad, tintColor: Color.Yellow },
+        text: `${score}% - Medium confidence`,
+      };
+    } else {
+      return {
+        icon: { source: Icon.Emoji, tintColor: Color.Green },
+        text: `${score}% - High confidence`,
+      };
+    }
+  };
+
+  const genderInfo = getGenderInfo(result.gender);
+  const confidenceInfo = getConfidenceInfo(confidenceScore);
+
+  return (
+    <List>
+      <List.Item title={name} subtitle="Name" />
+      <List.Item icon={genderInfo.icon} title={genderInfo.text} subtitle="Gender" />
+      <List.Item icon={confidenceInfo.icon} title={confidenceInfo.text} subtitle="Confidence" />
+    </List>
+  );
 }
