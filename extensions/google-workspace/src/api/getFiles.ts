@@ -22,6 +22,7 @@ export type File = {
   modifiedTime: string;
   starred: boolean;
   parents?: string[];
+  filePath?: string;
   capabilities?: {
     canTrash: boolean;
   };
@@ -66,11 +67,26 @@ function getParams(queryType: QueryTypes, scope: ScopeTypes, queryText = "") {
   return params.toString();
 }
 
-export function getFilesURL(queryType: QueryTypes, scope: ScopeTypes, queryText = "") {
-  return `https://www.googleapis.com/drive/v3/files?${getParams(queryType, scope, queryText)}`;
+export async function getFiles(queryType: QueryTypes, scope: ScopeTypes, queryText = "") {
+  const url = `https://www.googleapis.com/drive/v3/files?${getParams(queryType, scope, queryText)}`;
+  const response = await fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getOAuthToken()}`,
+    },
+  });
+  const data = (await response.json()) as { files: File[] };
+
+  await Promise.all(
+    data.files.map(async (file) => {
+      file.filePath = await getFilePath(file.id);
+    }),
+  );
+
+  return data;
 }
 
-export async function getFilePath(fileId: string): Promise<string> {
+async function getFilePath(fileId: string): Promise<string> {
   const getFileParents = async (fileId: string) => {
     const getFileUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=name,parents`;
     const response = await fetch(getFileUrl, {
@@ -79,6 +95,7 @@ export async function getFilePath(fileId: string): Promise<string> {
         Authorization: `Bearer ${getOAuthToken()}`,
       },
     });
+
     return await response.json();
   };
 
@@ -98,6 +115,6 @@ export async function getFilePath(fileId: string): Promise<string> {
   return await getParentPath(fileId);
 }
 
-export function getStarredFilesURL() {
-  return getFilesURL(QueryTypes.starred, ScopeTypes.allDrives);
+export function getStarredFiles() {
+  return getFiles(QueryTypes.starred, ScopeTypes.allDrives);
 }

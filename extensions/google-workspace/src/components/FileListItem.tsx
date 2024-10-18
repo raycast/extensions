@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
-import { File, getFilePath } from "../api/getFiles";
+import { File } from "../api/getFiles";
 import { getFileIconLink, humanFileSize } from "../helpers/files";
 
 type FileListItemProps = {
@@ -13,16 +12,6 @@ export default function FileListItem({ file, email }: FileListItemProps) {
   const { displayFilePath } = getPreferenceValues();
   const modifiedTime = new Date(file.modifiedTime);
 
-  const { data: filePath } = useCachedPromise(
-    async (fileId) => {
-      return (await getFilePath(fileId)) as string;
-    },
-    [file.id],
-    {
-      execute: displayFilePath,
-    },
-  );
-
   const accessories: List.Item.Accessory[] = [
     {
       date: new Date(modifiedTime),
@@ -30,10 +19,10 @@ export default function FileListItem({ file, email }: FileListItemProps) {
     },
   ];
 
-  if (displayFilePath && filePath) {
+  if (displayFilePath && file.filePath) {
     accessories.unshift({
       icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
-      tooltip: filePath,
+      tooltip: file.filePath,
     });
   }
 
