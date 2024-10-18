@@ -1,4 +1,14 @@
-import { ActionPanel, Action, Icon, List, showToast, Toast, getPreferenceValues, confirmAlert } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  confirmAlert,
+  Keyboard,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useLocalStorage } from "@raycast/utils";
 import { getAuthHeaders, handleDomain, timeoutFetch } from "./utils";
@@ -8,6 +18,7 @@ export default function Command() {
   const { torrserverUrl, mediaPlayerApp } = getPreferenceValues<Preferences>();
 
   const [items, setItems] = useState<TorrentItem[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const { value: favorites = [], setValue: setFavorites } = useLocalStorage<string[]>("favorites", []);
 
   useEffect(() => {
@@ -15,6 +26,7 @@ export default function Command() {
   }, [torrserverUrl]);
 
   const getList = async () => {
+    setIsLoading(true);
     showToast(Toast.Style.Animated, "Processing...");
 
     try {
@@ -40,6 +52,8 @@ export default function Command() {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       showToast(Toast.Style.Failure, "Error", `Could not connect to ${torrserverUrl}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -50,6 +64,7 @@ export default function Command() {
       title: "Confirm Removal",
       message: `Are you sure you want to remove the torrent "${itemTitle}"?`,
       icon: Icon.Trash,
+      rememberUserChoice: true,
     });
 
     if (confirmation) {
@@ -88,7 +103,7 @@ export default function Command() {
     await setFavorites(updatedFavorites);
 
     if (showAlert) {
-      showToast(Toast.Style.Success, "Removed from Favorites", url);
+      showToast(Toast.Style.Success, "Removed from Favorites");
     }
   };
 
@@ -123,7 +138,7 @@ export default function Command() {
   ];
 
   return (
-    <List>
+    <List isLoading={isLoading} throttle>
       {sortedItems.length === 0 ? (
         <List.EmptyView title="No torrents found" />
       ) : (
@@ -145,9 +160,16 @@ export default function Command() {
                 <Action
                   title={favorites.includes(item.hash) ? "Remove from Favorites" : "Add to Favorites"}
                   icon={favorites.includes(item.hash) ? Icon.Undo : Icon.Star}
+                  shortcut={Keyboard.Shortcut.Common.Pin}
                   onAction={() => toggleFavorite(item.hash)}
                 />
-                <Action title="Remove Torrent" icon={Icon.Trash} onAction={() => handleRemove(item.title, item.hash)} />
+                <Action
+                  title="Remove Torrent"
+                  icon={Icon.Trash}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                  style={Action.Style.Destructive}
+                  onAction={() => handleRemove(item.title, item.hash)}
+                />
               </ActionPanel>
             }
           />
