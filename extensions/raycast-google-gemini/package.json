@@ -1,0 +1,329 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-google-gemini",
+  "title": "Google Gemini",
+  "description": "Use the Google Gemini API in Raycast.",
+  "icon": "command-icon.png",
+  "author": "blindfs",
+  "contributors": [
+    "blindfs",
+    "EvanZhouDev"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask-ai",
+      "title": "Ask AI",
+      "subtitle": "Google Gemini",
+      "description": "Ask Google Gemini",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "subtitle": "Google Gemini",
+      "description": "Summarize selected text",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "explain",
+      "title": "Explain",
+      "subtitle": "Google Gemini",
+      "description": "Explain selected text",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "comment",
+      "title": "Add Comments to Code",
+      "subtitle": "Google Gemini",
+      "description": "Add comments to code",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "synonym",
+      "title": "Find Synonym",
+      "subtitle": "Google Gemini",
+      "description": "Find synonym of selected word",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "image-qa",
+      "title": "Image QA",
+      "subtitle": "Google Gemini",
+      "description": "Answer question in text, given the image, from clipboard by default",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "docLink",
+          "placeholder": "Image Link",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "doc-qa",
+      "title": "Document QA",
+      "subtitle": "Google Gemini",
+      "description": "Answer question given extra context in url, url from clipboard by default",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "docLink",
+          "placeholder": "Doc Link",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-qa",
+      "title": "Search QA",
+      "subtitle": "Google Gemini",
+      "description": "Answer question based on Google search results",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "searchQuery",
+          "placeholder": "Query to Google",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "iterative-rag",
+      "title": "Iterative RAG",
+      "subtitle": "Google Gemini",
+      "description": "Answer questions based on multiple rounds of Google search and document reading",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "history",
+      "title": "Search Chat History",
+      "subtitle": "Google Gemini",
+      "description": "Search chat history",
+      "mode": "view"
+    },
+    {
+      "name": "grammar",
+      "title": "Fix Spelling and Grammar",
+      "subtitle": "Google Gemini",
+      "description": "Fix spelling and grammar of selected text",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "longer",
+      "title": "Make Longer",
+      "subtitle": "Google Gemini",
+      "description": "Make selected text longer",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "shorter",
+      "title": "Make Shorter",
+      "subtitle": "Google Gemini",
+      "description": "Make selected text shorter",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Gemini API Key",
+      "name": "apiKey",
+      "required": true,
+      "title": "Gemini API Key",
+      "type": "password"
+    },
+    {
+      "description": "Which model to use.",
+      "name": "defaultModel",
+      "title": "Model",
+      "type": "dropdown",
+      "required": false,
+      "default": "gemini-1.5-flash",
+      "data": [
+        {
+          "title": "Gemini 1.5 Pro",
+          "value": "gemini-1.5-pro"
+        },
+        {
+          "title": "Gemini 1.5 Flash",
+          "value": "gemini-1.5-flash"
+        }
+      ]
+    },
+    {
+      "description": "Search API Key",
+      "name": "searchApiKey",
+      "required": false,
+      "title": "Google Search API Key",
+      "type": "password"
+    },
+    {
+      "description": "Search Engine ID",
+      "name": "searchEngineID",
+      "required": false,
+      "title": "Google Programmable Search Engine ID",
+      "type": "textfield"
+    },
+    {
+      "description": "Whether to use mathjax-node to post-render math equations.",
+      "name": "enableMathjax",
+      "label": "Use mathjax-node for math equations",
+      "required": false,
+      "title": "Enable mathjax",
+      "type": "checkbox"
+    },
+    {
+      "description": "Whether to enable code execution during the chat.",
+      "name": "enableCodeExecution",
+      "label": "Enable code execution",
+      "required": false,
+      "title": "Enable code execution",
+      "type": "checkbox"
+    },
+    {
+      "description": "Temperature used for text generation",
+      "name": "temperature",
+      "required": false,
+      "title": "Temperature",
+      "type": "textfield",
+      "default": "0.01"
+    },
+    {
+      "description": "Choose from the top tokens that cumulate to no more than probability P",
+      "name": "topP",
+      "required": false,
+      "title": "Top P",
+      "type": "textfield",
+      "default": "0.05"
+    },
+    {
+      "description": "Choose among top K tokens each time",
+      "name": "topK",
+      "required": false,
+      "title": "Top K",
+      "type": "textfield",
+      "default": "3"
+    }
+  ],
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@raycast/api": "latest",
+    "cheerio": "latest",
+    "file-type": "latest",
+    "node-fetch": "latest"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "eslint": "latest",
+    "is-binary-path": "latest",
+    "prettier": "latest",
+    "typescript": "latest"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "postinstall": "npm --prefix assets/markdownMath install && sed -i '' 's/response.body.pipeThrough.*$/ReadableStream.from(response.body);/g' ./node_modules/@google/generative-ai/dist/index.mjs"
+  }
+}

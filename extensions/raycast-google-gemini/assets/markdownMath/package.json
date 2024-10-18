@@ -1,0 +1,15 @@
+{
+	"name": "markdown_mathjax",
+  "type": "module",
+	"version": "1.0.0",
+	"description": "replace math equations in markwon with mathjax rendered svg images",
+	"main": "index.js",
+	"scripts": {
+		"replace": "node index.js"
+	},
+	"dependencies": {
+		"mathjax-node": "latest",
+		"tree-sitter": "latest",
+		"@tree-sitter-grammars/tree-sitter-markdown": "latest"
+	}
+}
