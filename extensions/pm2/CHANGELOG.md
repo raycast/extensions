@@ -1,5 +1,11 @@
 # Raycast PM2
 
+## [Chore & Fixes] - 2024-10-11
+
+- Use `nano-spawn` instead of `execa`
+- Fix child-process executors
+- Bump all dependencies to the latest
+
 ## [Enhancement] - 2024-10-04
 
 - Optimize extension file size

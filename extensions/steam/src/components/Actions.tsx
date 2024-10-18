@@ -59,7 +59,7 @@ export const DefaultActions = () => {
   );
 };
 
-export const LaunchActions = ({ appid = 0 }) => {
+export const LaunchActions = ({ name = "", appid = 0 }) => {
   if (!appid) return null;
   return (
     <ActionPanel.Section>
@@ -85,6 +85,24 @@ export const LaunchActions = ({ appid = 0 }) => {
             },
           }).catch(() => {
             open("raycast://extensions/litomore/steamgriddb");
+          });
+        }}
+      />
+      <Action
+        icon={Icon.StarCircle}
+        // eslint-disable-next-line @raycast/prefer-title-case
+        title="View ProtonDB Scroe"
+        onAction={() => {
+          crossLaunchCommand({
+            name: "browse",
+            type: LaunchType.UserInitiated,
+            extensionName: "protondb",
+            ownerOrAuthorName: "litomore",
+            context: {
+              steamAppName: name,
+            },
+          }).catch(() => {
+            open("raycast://extensions/litomore/protondb");
           });
         }}
       />

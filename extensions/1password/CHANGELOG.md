@@ -1,5 +1,9 @@
 # 1Password Changelog
 
+## [Enhancements] - 2024-10-16
+
+- Feat: allow filtering by additional information
+
 ## [Enhancements] - 2024-08-13
 
 - Fix: multilingual OTP name can't be read

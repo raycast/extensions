@@ -23,4 +23,5 @@ Notes:
 - Search only your games
 - View details about a game
 - Filter your search
-- Browse SteamGridDB Images (requires [SteamGridDB](https://raycast.com/litomore/steamgriddb) extension)
+- Browse SteamGridDB images (requires [SteamGridDB](https://raycast.com/litomore/steamgriddb) extension)
+- Browse ProtonDB scores (requires [ProtonDB](https://raycast.com/litomore/protondb) extension)

@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "twenty",
+  "title": "Twenty - the #1 Open-Source CRM",
+  "description": "Modern, powerful, affordable platform to manage your customer relationships",
+  "icon": "logo.png",
+  "author": "chrisdadev13",
+  "categories": [
+    "Productivity",
+    "Communication",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-people",
+      "title": "List People",
+      "subtitle": "Twenty CRM",
+      "description": "View all contacts in Twenty",
+      "mode": "view"
+    },
+    {
+      "name": "create-person",
+      "title": "Create Person",
+      "subtitle": "Twenty CRM",
+      "description": "Create a new contact",
+      "mode": "view"
+    },
+    {
+      "name": "create-company",
+      "title": "Create Company",
+      "subtitle": "Twenty CRM",
+      "description": "Create a new Company",
+      "mode": "view"
+    },
+    {
+      "name": "list-companies",
+      "title": "List Companies",
+      "subtitle": "Twenty CRM",
+      "description": "View all companies in Twenty",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Enter your Twenty API Key",
+      "link": "https://app.twenty.com/settings/developers",
+      "placeholder": "Twenty API Key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.2",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.7.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

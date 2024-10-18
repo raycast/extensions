@@ -131,6 +131,17 @@ const videos: Video[] = [
         "https://yt3.ggpht.com/XKgFFRlHWCIKHRXl1JFMBRW9VpHHVRUIpuTAudnHdPXAlSWINd7rRca8fSeqFf1lwkwmIvHbuA=s48-c-k-c0x00ffffff-no-rj",
     },
   },
+  {
+    title: "Building (and deploying!) with AI-assistance using Cursor, Claude and Cloudflare",
+    url: "https://www.youtube.com/embed/oBDdcVaRhUk?si=8j-33MdX-1nHdxkR",
+    description:
+      "@rickyrobinett walks you through how to build, and deploy, an application using Cursor, Claude and Cloudflare..",
+    author: {
+      name: "Cloudflare",
+      image:
+        "https://yt3.ggpht.com/F3ahPSZ8266o3g-63hgpAYmLBxR2-Pove0uuE8OSKbcVRmuonb5wKAfCocdVrJ8bh8J315QwKA=s88-c-k-c0x00ffffff-no-rj",
+    },
+  },
 ];
 
 export default function Command() {

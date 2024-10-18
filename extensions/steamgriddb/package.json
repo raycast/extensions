@@ -36,20 +36,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.1",
-    "got": "^14.4.2",
+    "@raycast/api": "^1.84.1",
+    "got": "^14.4.3",
     "lodash": "^4.17.21",
-    "mac-say": "^0.2.9",
     "raycast-cross-extension": "^0.2.3",
     "steamgriddb": "^2.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/lodash": "^4.17.7",
-    "@types/node": "^22.5.5",
-    "@types/react": "^18.3.8",
+    "@types/lodash": "^4.17.10",
+    "@types/node": "^22.7.5",
+    "@types/react": "^18.3.11",
     "eslint": "^8.57.1",
     "prettier": "^3.3.3",
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.3"
   }
 }

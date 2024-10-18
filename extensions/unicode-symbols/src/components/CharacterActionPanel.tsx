@@ -1,13 +1,14 @@
-/* eslint-disable @raycast/prefer-title-case */
 import { useMemo } from "react";
 
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, getFrontmostApplication } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 
 import { useListContext } from "@/context/ListContext";
 import type { Character } from "@/types";
 import { numberToHex } from "@/utils/string";
 
 export const CharacterActionPanel = ({ item }: { item: Character }) => {
+  const { data: frontmostApp } = usePromise(getFrontmostApplication, []);
   const { findHtmlEntity } = useListContext();
   const html = findHtmlEntity(item.c);
 
@@ -19,8 +20,9 @@ export const CharacterActionPanel = ({ item }: { item: Character }) => {
     <ActionPanel>
       <ActionPanel.Section title="Unicode">
         <Action.Paste
-          title="Paste Character in Active App"
+          title={`Paste Character to ${frontmostApp?.name || "Active App"}`}
           content={item.v}
+          icon={frontmostApp ? { fileIcon: frontmostApp.path } : Icon.Clipboard}
           onPaste={() => addToRecentlyUsedItems(item)}
         />
         <Action.CopyToClipboard
@@ -31,6 +33,7 @@ export const CharacterActionPanel = ({ item }: { item: Character }) => {
       </ActionPanel.Section>
       <ActionPanel.Section title="Misc">
         <Action.CopyToClipboard
+          // eslint-disable-next-line @raycast/prefer-title-case
           title={`Copy "${numberToHex(item.c)}" (HEX) to Clipboard`}
           content={numberToHex(item.c)}
           onCopy={() => addToRecentlyUsedItems(item)}
@@ -38,6 +41,7 @@ export const CharacterActionPanel = ({ item }: { item: Character }) => {
         />
         {html ? (
           <Action.CopyToClipboard
+            // eslint-disable-next-line @raycast/prefer-title-case
             title={`Copy "${html}" (HTML) to Clipboard`}
             content={html}
             onCopy={() => addToRecentlyUsedItems(item)}
@@ -45,6 +49,7 @@ export const CharacterActionPanel = ({ item }: { item: Character }) => {
           />
         ) : null}
         <Action.CopyToClipboard
+          // eslint-disable-next-line @raycast/prefer-title-case
           title={`Copy "&#${item.c};" (HTML) to Clipboard`}
           content={`&#${item.c};`}
           onCopy={() => addToRecentlyUsedItems(item)}

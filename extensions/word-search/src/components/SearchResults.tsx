@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import type { LaunchProps } from "@raycast/api";
 import { Action, List } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 
 import type { SearchType, Word } from "@/types";
 import { Vocabulary } from "@/types";
@@ -43,7 +44,7 @@ export default function SearchResults(
   { helperTitle, helperDescription, useVocabulary }: extraOptions = {},
 ) {
   const [search, setSearch] = useState<string>("");
-  const [showDetails, setShowDetails] = useState<boolean>(false);
+  const [showDetails, setShowDetails] = useCachedState<boolean>("showDetails", false);
   const [vocabulary, setVocabulary] = useState<Vocabulary>(Vocabulary.English);
 
   useOptionalSelection(setSearch, typeof launchProps.fallbackText !== "undefined" && launchProps.fallbackText !== "");

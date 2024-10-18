@@ -46,11 +46,17 @@
       "description": "Check out your unread messages from the menu bar.",
       "mode": "menu-bar",
       "interval": "2m"
+    },
+    {
+      "name": "paste-latest-otp-code",
+      "title": "Paste Latest OTP Code",
+      "description": "Paste the most recent OTP code from your messages.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/utils": "^1.18.0",
     "date-fns": "^4.1.0",
     "libphonenumber-js": "^1.11.9"
   },

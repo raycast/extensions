@@ -33,11 +33,10 @@ export const useSchedulingLinks = () => {
 
 export const useSchedulingLinkActions = (link: SchedulingLink) => {
   const createOneOffLink = async () => {
-    const [oneOff, error] = await fetchPromise<SchedulingLink>(
-      "/scheduling-link/derivative",
-      { method: "POST" },
-      { parentId: link.id }
-    );
+    const [oneOff, error] = await fetchPromise<SchedulingLink>("/scheduling-link/derivative", {
+      init: { method: "POST" },
+      payload: { parentId: link.id },
+    });
 
     if (!error && oneOff) {
       open(`https://app.reclaim.ai/scheduling-links?personalize=${oneOff.id}`);

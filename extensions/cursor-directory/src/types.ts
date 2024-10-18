@@ -32,6 +32,12 @@ interface CursorRule {
   isLocal: boolean;
 }
 
+interface Project {
+  name: string;
+  path: string;
+  lastModifiedTime: number;
+}
+
 type AllCursorRulesResponse = {
   data: Omit<CursorRule, "count">[];
 };
@@ -42,4 +48,13 @@ type PopularCursorRulesResponse = {
 
 type APIResponse = AllCursorRulesResponse | PopularCursorRulesResponse;
 
-export type { CursorRule, Author, Section, AllCursorRulesResponse, PopularCursorRulesResponse, APIResponse, Video };
+export type {
+  Project,
+  CursorRule,
+  Author,
+  Section,
+  AllCursorRulesResponse,
+  PopularCursorRulesResponse,
+  APIResponse,
+  Video,
+};
