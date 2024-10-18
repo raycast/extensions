@@ -85,7 +85,13 @@ export default function Command() {
       const fileBlob = await fileResponse.blob();
 
       const formData = new FormData();
-      formData.append("save", saveToDb);
+
+      if (saveToDb) {
+        // we do not care about value, if this key exist it will be saved
+        // so do not remove this condition
+        formData.append("save", "");
+      }
+
       formData.append("file", fileBlob, title);
       formData.append("title", title);
 
