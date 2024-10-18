@@ -42,10 +42,17 @@
       "required": true
     },
     {
-      "name": "jacredParserUrl",
-      "title": "Jacred parser",
+      "name": "jackettParserUrl",
+      "title": "Jackett parser",
       "type": "textfield",
       "description": "URL endpoint required for enabling search",
+      "required": false
+    },
+    {
+      "name": "jackettApiKey",
+      "title": "Jackett api key",
+      "type": "textfield",
+      "description": "Api key required for enabling search",
       "required": false
     }
   ],
@@ -63,7 +70,7 @@
       "mode": "view"
     },
     {
-      "name": "jacred-parser",
+      "name": "jackett-parser",
       "title": "Search Torrents",
       "description": "Search torrents",
       "mode": "view"

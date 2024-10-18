@@ -1,3 +1,4 @@
 export * from "./preferences";
 export * from "./torrent-item";
-export * from "./jacred-parsed-torrent";
+export * from "./jackett-parsed-torrent";
+export * from "./torrent-categories";

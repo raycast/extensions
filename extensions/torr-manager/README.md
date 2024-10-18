@@ -15,13 +15,14 @@ The **torr-manager** extension allows users to connect to their TorrServer, brow
 - **Remove Torrents**: Delete unwanted torrents easily.
 - **Favorites**: Mark and access favorite torrents quickly.
 - **Test Connection**: Test connection to your server from Raycast.
-- **Search Torrents Across Trackers**: Add link to selfhosted [jacred-fdb](https://github.com/immisterio/jacred-fdb) parser to search for torrents across trackers and add them directly to your TorrServer from Raycast.
+- **Search Torrents Across Trackers**: Add link to selfhosted [Jackett](https://github.com/Jackett/Jackett) parser to search for torrents across trackers and add them directly to your TorrServer from Raycast.
 
 ## Requirements
 
 - **macOS**: This extension is designed to run on macOS.
 - **Raycast**: Raycast must be installed on your system. You can download it from the [Raycast official website](https://www.raycast.com).
 - **TorrServer**: You need to host your own instance of TorrServer or use a public one. The original TorrServer can be found here [https://github.com/YouROK/TorrServe](https://github.com/YouROK/TorrServe).
+- **TorrServer**: To be able to use search - need to host own instance of [Jackett](https://github.com/Jackett/Jackett).
 
 ## Installation (Development Version)
 

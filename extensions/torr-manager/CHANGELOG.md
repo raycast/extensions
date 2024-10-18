@@ -8,4 +8,4 @@
 - Functionality to upload new torrents directly from Raycast.
 - Easy removal of unwanted torrents.
 - Favorites feature for quick access to preferred torrents.
-- Search functionality across trackers using the jacred-fdb parser.
+- Search functionality across trackers using the jackett parser.
