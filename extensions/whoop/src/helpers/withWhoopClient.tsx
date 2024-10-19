@@ -10,7 +10,7 @@ provider.onAuthorize = ({ token }) => {
     Authorization: `Bearer ${token}`,
   };
 
-  api.defaults.fetch = nodeFetch as any;
+  api.defaults.fetch = nodeFetch as unknown as typeof fetch;
 
   whoopClient = api;
 };
@@ -34,7 +34,7 @@ export async function setWhoopClient() {
     Authorization: `Bearer ${accessToken}`,
   };
 
-  api.defaults.fetch = nodeFetch as any;
+  api.defaults.fetch = nodeFetch as unknown as typeof fetch;
 
   whoopClient = api;
 }
