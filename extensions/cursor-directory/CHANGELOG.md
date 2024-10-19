@@ -1,5 +1,9 @@
 # Cursor Directory Changelog
 
+## [Fix] - 2024-10-17
+
+- Fix cursor rule not applied when open project with using builtin command
+
 ## [Documentation] - 2024-10-16
 
 - Remove unnecessary cursor shell installation
