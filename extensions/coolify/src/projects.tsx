@@ -59,6 +59,7 @@ function ViewEnvironments({ project }: { project: Project }) {
             actions={
               <ActionPanel>
                 <Action.Push
+                  icon={Icon.Eye}
                   title="View Resources"
                   target={<ViewResources project={project} environment={environment} />}
                 />
@@ -73,16 +74,12 @@ function ViewEnvironments({ project }: { project: Project }) {
 
 function ViewResources({ project, environment }: { project: Project; environment: Environment }) {
   const { isLoading, data } = useCoolify<EnvironmentDetails>(`projects/${project.uuid}/${environment.name}`);
-  // const { applications=[], mariadb=[], mongodb=[], mysql=[], postgresql=[], redi=[], services=[] } = data
   const resources = useMemo(() => {
     if (!data) return [];
-    // const { applications, mariadbs, mongodbs, mysqls, postgresqls, redis, services } = data;
-    // const arrays = Object.values(data).filter(Array.isArray).flatMap(resource => ({...resource, type: }));
     const flattenedArray = Object.entries(data)
       .filter(([, val]) => Array.isArray(val))
       .flatMap(([key, val]) => (val as Resource[]).map((item) => ({ ...item, type: key })));
     return flattenedArray;
-    // Object.entries(data).filter(([, val]) => Array.isArray(val)).flatMap(([, val]) => val) : []
   }, [data]);
 
   return (
