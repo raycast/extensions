@@ -4,7 +4,7 @@
   "title": "Proxyman",
   "description": "Navigate and perform common actions in Proxyman faster",
   "icon": "proxyman-icon.png",
-  "author": "noah_tran",
+  "author": "NghiaTranUIT",
   "access": "public",
   "categories": [
     "Developer Tools",
@@ -18,9 +18,6 @@
     "System Proxy",
     "Debugging",
     "Tools"
-  ],
-  "contributors": [
-    "NghiaTranUIT"
   ],
   "license": "MIT",
   "commands": [
