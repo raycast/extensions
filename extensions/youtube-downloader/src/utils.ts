@@ -25,12 +25,12 @@ export type DownloadOptions = {
   copyToClipboard: boolean;
   startTime?: string;
   endTime?: string;
-  wav?: boolean;
 };
 
 export type FormatOptions = {
   itag: string;
   container: string;
+  wav?: boolean;
 };
 
 setFfmpegPath(preferences.ffmpegPath);
@@ -226,11 +226,11 @@ export async function downloadAudio(url: string, options: DownloadOptions) {
     const tempfilePath = tempfile();
     filePath = path.join(
       tempfilePath.substring(0, tempfilePath.lastIndexOf("/")),
-      `${sanitizeFilename(title)}${options.wav ? ".wav" : ".mp3"}`
+      `${sanitizeFilename(title)}${formatObject.wav ? ".wav" : ".mp3"}`
     );
   } else {
     filePath = unusedFilenameSync(
-      path.join(preferences.downloadPath, `${sanitizeFilename(title)}${options.wav ? ".wav" : ".mp3"}`)
+      path.join(preferences.downloadPath, `${sanitizeFilename(title)}${formatObject.wav ? ".wav" : ".mp3"}`)
     );
   }
 
@@ -249,7 +249,7 @@ export async function downloadAudio(url: string, options: DownloadOptions) {
       command.duration(endTime - startTime);
     }
 
-    if (options.wav) {
+    if (formatObject.wav) {
       command.audioCodec("pcm_s16le").format("wav");
     } else {
       command.format("mp3");
