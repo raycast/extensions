@@ -92,6 +92,13 @@
           "default": true
         }
       ]
+    },
+    {
+      "name": "account",
+      "title": "View Account",
+      "subtitle": "cPanel",
+      "description": "View Account",
+      "mode": "view"
     }
   ],
   "dependencies": {

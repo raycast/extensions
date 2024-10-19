@@ -9,6 +9,8 @@ import {
   Database,
   FileItem,
   FileContent,
+  AccountConfiguration,
+  Usage,
 } from "./types";
 import { showFailureToast, useFetch } from "@raycast/utils";
 
@@ -31,7 +33,7 @@ export function useUAPI<T>(
       Authorization: `cpanel ${CPANEL_USERNAME}:${API_TOKEN}`,
     },
     mapResult(result: ErrorResponse | SuccessResponse<T>) {
-      if (!result.status) throw result.errors;
+      if (!result.status) throw new Error(result.errors.join());
       return {
         data: result.data,
       };
@@ -47,6 +49,11 @@ export function useUAPI<T>(
   });
   return { isLoading, data, error, revalidate };
 }
+
+// ACCOUNTS
+export const useGetAccountConfiguration = () => useUAPI<AccountConfiguration>("Variables", "get_user_information");
+// RESOURCES
+export const useGetResourceUsage = () => useUAPI<Usage[]>("ResourceUsage", "get_usages");
 
 // DOMAINS
 export const useListDomains = () => useUAPI<AccountDomains>("DomainInfo", "list_domains");
@@ -83,10 +90,10 @@ export const useDumpDatabaseSchema = (database_type: "Mysql" | "Postgresql", dbn
 export const useListFiles = (dir: string) =>
   useUAPI<FileItem[]>("Fileman", "list_files", {
     dir,
-    include_mime: 1
+    include_mime: 1,
   });
 export const usGetFileContent = (dir: string, file: string) =>
   useUAPI<FileContent>("Fileman", "get_file_content", {
     dir,
-    file
+    file,
   });

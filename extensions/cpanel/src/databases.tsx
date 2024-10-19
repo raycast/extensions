@@ -17,12 +17,16 @@ export default function Databases(props: LaunchProps<{ arguments: Arguments.Data
             key={db.database}
             title={db.database}
             icon={Icon.Coin}
-            detail={
-              <List.Item.Detail markdown={`Disk Usage: ${db.disk_usage} \n\n Users: ${db.users.join()}`} />
+            detail={<List.Item.Detail markdown={`Disk Usage: ${db.disk_usage} \n\n Users: ${db.users.join()}`} />}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  icon={Icon.AppWindowGrid2x2}
+                  title="View Schema"
+                  target={<ViewDatabaseSchema dbtype={database_type} dbname={db.database} />}
+                />
+              </ActionPanel>
             }
-            actions={<ActionPanel>
-              <Action.Push icon={Icon.AppWindowGrid2x2} title="View Schema" target={<ViewDatabaseSchema dbtype={database_type} dbname={db.database} />} />
-            </ActionPanel>}
           />
         ))}
       </List.Section>
@@ -30,8 +34,8 @@ export default function Databases(props: LaunchProps<{ arguments: Arguments.Data
   );
 }
 
-function ViewDatabaseSchema({ dbtype, dbname }: { dbtype: Arguments.Databases["database_type"]; dbname: string; }) {
+function ViewDatabaseSchema({ dbtype, dbname }: { dbtype: Arguments.Databases["database_type"]; dbname: string }) {
   const { isLoading, data } = useDumpDatabaseSchema(dbtype, dbname);
 
-  return <Detail isLoading={isLoading} markdown={data} />
+  return <Detail isLoading={isLoading} markdown={data} />;
 }

@@ -60,8 +60,15 @@ function Directory({ dir }: { dir: string }) {
                     />
                   </ActionPanel.Section>
                 )}
-                {item.type === "file" && <ActionPanel.Section>
-                  <Action.Push icon={Icon.Eye} title="View File" target={<ViewFile dir={item.path} file={item.file} />} /></ActionPanel.Section>}
+                {item.type === "file" && (
+                  <ActionPanel.Section>
+                    <Action.Push
+                      icon={Icon.Eye}
+                      title="View File"
+                      target={<ViewFile dir={item.path} file={item.file} />}
+                    />
+                  </ActionPanel.Section>
+                )}
               </ActionPanel>
             }
           />
@@ -72,7 +79,8 @@ function Directory({ dir }: { dir: string }) {
 }
 
 function ViewFile({ dir, file }: { dir: string; file: string }) {
-  const { isLoading, data } = usGetFileContent(dir, file);
+  const { isLoading, data, error } = usGetFileContent(dir, file);
 
-  return <Detail isLoading={isLoading} markdown={data?.content} />
+  const markdown = isLoading ? "# Loading..." : data ? data.content : `# Error \n\n ${error}`;
+  return <Detail isLoading={isLoading} markdown={markdown} />;
 }
