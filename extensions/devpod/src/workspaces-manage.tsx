@@ -9,22 +9,22 @@ import {
   showToast,
   Image,
   useNavigation,
+  getPreferenceValues,
 } from "@raycast/api";
-import {
-  DEVPOD_PATH,
-  DevPodWorkspace,
-  DevPodWorkspaceCommand,
-  DevPodWorkspaceState,
-  DevPodWorkspaceStatus,
-} from "./devpod";
+import { DevPodWorkspace, DevPodWorkspaceCommand, DevPodWorkspaceState, DevPodWorkspaceStatus } from "./devpod";
 import React from "react";
 import { debugEnabled, formatRelativeDate } from "./util";
 import { useExec } from "@raycast/utils";
 import WorkspaceCreate from "./workspace-create";
 
+interface Preferences {
+  devPodPath: string;
+}
+
 export default function WorkspaceMenu() {
+  const { devPodPath } = getPreferenceValues<Preferences>();
   const { push } = useNavigation();
-  const { isLoading, data, error, revalidate } = useExec(DEVPOD_PATH, DevPodWorkspaceCommand.listAsJson, {
+  const { isLoading, data, error, revalidate } = useExec(devPodPath, DevPodWorkspaceCommand.listAsJson, {
     onData: (data) => {
       if (debugEnabled) {
         console.log("WorkspaceMenu.useExec.onData() - Workspaces reloaded ", data);
@@ -69,7 +69,12 @@ export default function WorkspaceMenu() {
     >
       {workspaces &&
         workspaces.map((workspace) => (
-          <WorkspaceItem key={workspace.id} reloadWorkspaces={reloadWorkspaces} workspace={workspace} />
+          <WorkspaceItem
+            key={workspace.id}
+            reloadWorkspaces={reloadWorkspaces}
+            workspace={workspace}
+            devPodPath={devPodPath}
+          />
         ))}
     </List>
   );
@@ -78,9 +83,11 @@ export default function WorkspaceMenu() {
 const WorkspaceItem = function WorkspaceItem({
   workspace,
   reloadWorkspaces,
+  devPodPath,
 }: {
   workspace: DevPodWorkspace;
   reloadWorkspaces: () => void;
+  devPodPath: string;
 }) {
   if (debugEnabled) {
     console.log(`WorkspaceItem() - id:${workspace.id}, ide:${workspace.ide.name}`);
@@ -90,7 +97,7 @@ const WorkspaceItem = function WorkspaceItem({
   const [execute, setExecute] = React.useState(false);
   const { push } = useNavigation();
 
-  useExec(DEVPOD_PATH, lifecycleCommand, {
+  useExec(devPodPath, lifecycleCommand, {
     execute,
     onData: () => {
       if (debugEnabled) {
@@ -112,10 +119,7 @@ const WorkspaceItem = function WorkspaceItem({
     },
   });
 
-  const { data, error, isLoading, revalidate } = useExec(
-    DEVPOD_PATH,
-    DevPodWorkspaceCommand.statusAsJson(workspace.id),
-  );
+  const { data, error, isLoading, revalidate } = useExec(devPodPath, DevPodWorkspaceCommand.statusAsJson(workspace.id));
 
   if (error) {
     return <List.Item title={workspace.id} subtitle={"Error while fetching status"} />;

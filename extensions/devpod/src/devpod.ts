@@ -1,5 +1,3 @@
-export const DEVPOD_PATH = process.env.HOME + "/bin/devpod"; // todo: allow user to set path
-
 export interface DevPodWorkspace {
   id: string;
   uid: string;
