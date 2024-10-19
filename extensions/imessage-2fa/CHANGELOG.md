@@ -1,8 +1,12 @@
 # Messages 2FA Changelog
 
+## [Update] - 2024-10-19
+
+- Add command for copying latest code to clipboard.
+
 ## [Update] - 2024-09-25
 
-- Add support for Portuguese auth/code references 
+- Add support for Portuguese auth/code references
 
 ## [Update] - 2024-05-28
 

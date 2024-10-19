@@ -1,9 +1,10 @@
 import { homedir } from "os";
 import { resolve } from "path";
-import { useSQL } from "@raycast/utils";
+import { executeSQL, useSQL } from "@raycast/utils";
 import { Message, Preferences, SearchType } from "./types";
 import { getPreferenceValues } from "@raycast/api";
 import { calculateLookBackMinutes } from "./utils";
+
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
 
 function getBaseQuery() {
@@ -70,4 +71,9 @@ export function useMessages(options: { searchText?: string; searchType: SearchTy
   // Clipboard.copy(query)
 
   return useSQL<Message>(DB_PATH, query);
+}
+
+export async function getMessages(options: { searchText?: string; searchType: SearchType }) {
+  const query = getQuery(options);
+  return await executeSQL<Message>(DB_PATH, query);
 }

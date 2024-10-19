@@ -15,6 +15,7 @@ export interface Preferences {
   lookBackUnit: LookBackUnitType;
   lookBackAmount?: string;
   ignoreRead: boolean;
+  showCodeInHUD?: boolean;
 }
 
 export type SearchType = "all" | "code";

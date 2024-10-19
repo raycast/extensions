@@ -9,7 +9,8 @@
     "thomas",
     "arronhunt",
     "ronaldheft",
-    "hitolaus"
+    "hitolaus",
+    "kylemh"
   ],
   "pastContributors": [
     "navtoj"
@@ -25,6 +26,13 @@
       "subtitle": "Messages",
       "description": "View messages and two factor authentication codes",
       "mode": "view"
+    },
+    {
+      "name": "copy-recent",
+      "title": "Copy Recent 2FA Code",
+      "subtitle": "Messages",
+      "description": "Add the most recent 2FA code to the clipboard",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -65,11 +73,19 @@
       "required": false,
       "label": "Ignore already read messages",
       "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Show code in HUD message.",
+      "name": "showCodeInHUD",
+      "required": false,
+      "label": "In case you are in public, the actual code is not shared as part of the HUD message. The message date is provided allowing you to determine if the correct 2FA-related message was parsed. If you are not concerned with the privacy of 2FA codes, you can enable this option to show the code in the HUD message.",
+      "type": "checkbox"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.75.1",
-    "@raycast/utils": "^1.15.0",
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.18.0",
     "@use-it/interval": "^1.0.0"
   },
   "devDependencies": {
