@@ -43,7 +43,7 @@ export default function Command() {
         tooltipData: parsedData.tooltipData,
       };
 
-      itemsRef.current = itemsRef.current.filter(item => item.id !== newItem.id);
+      itemsRef.current = itemsRef.current.filter((item) => item.id !== newItem.id);
       itemsRef.current.push(newItem);
       itemsRef.current.sort((a, b) => a.price - b.price);
     } catch (error) {
@@ -99,21 +99,22 @@ export default function Command() {
 
   const displayItems = useMemo(() => {
     const allItems = [headerRow, ...items];
-    
+
     const maxLengths = {
-      da: Math.max(...allItems.map(item => item.da.length)),
-      blobsize: Math.max(...allItems.map(item => item.blobsize.toLocaleString().length)),
-      price: Math.max(...allItems.map(item => formatPrice(item.price).length)) + 1,
-      latency: Math.max(...allItems.map(item => item.latency.toFixed(2).length)),
+      da: Math.max(...allItems.map((item) => item.da.length)),
+      blobsize: Math.max(...allItems.map((item) => item.blobsize.toLocaleString().length)),
+      price: Math.max(...allItems.map((item) => formatPrice(item.price).length)) + 1,
+      latency: Math.max(...allItems.map((item) => item.latency.toFixed(2).length)),
     };
 
-    return allItems.map(item => ({
+    return allItems.map((item) => ({
       ...item,
       da: padValue(item.da, maxLengths.da),
       blobsize: padValue(item.blobsize.toLocaleString(), maxLengths.blobsize),
-      price: item.id === "header" 
-        ? padValue(formatPrice(item.price), maxLengths.price)
-        : padValue(`$${formatPrice(item.price)}`, maxLengths.price),
+      price:
+        item.id === "header"
+          ? padValue(formatPrice(item.price), maxLengths.price)
+          : padValue(`$${formatPrice(item.price)}`, maxLengths.price),
       latency: padValue(item.latency.toFixed(2), maxLengths.latency),
     }));
   }, [items]);
