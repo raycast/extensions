@@ -1,5 +1,11 @@
 # Coolify Changelog
 
+## [Enhancements] - {PR_MERGE_DATE}
+
+- Fix issue where `Resources` command would crash if the resource type is not "application" or "service"
+- Tweaked UI of `Servers > Resources`
+- New `View Projects` command
+
 ## [Initial Version] - 2024-09-22
 
 - View Servers
