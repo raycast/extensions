@@ -6,7 +6,6 @@
   "icon": "hetrixtools.png",
   "author": "xmok",
   "categories": [
-    "Applications",
     "Developer Tools",
     "Web"
   ],
@@ -15,10 +14,11 @@
     {
       "name": "api_key",
       "title": "API Key",
+      "subtitle": "HetrixTools",
       "type": "password",
       "required": true,
       "description": "API Key from HetrixTools account",
-      "placeholder": "XXX...XXXX"
+      "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     }
   ],
   "commands": [

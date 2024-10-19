@@ -1,3 +1,3 @@
 # HetrixTools Changelog
 
-## [Initial Version] - 2024-07-17
+## [View Monitors] - {PR_MERGE_DATE}

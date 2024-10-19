@@ -12,6 +12,7 @@ export default function useHetrixTools<T>(endpoint: string) {
     {
       headers: {
         Authorization: `Bearer ${API_KEY}`,
+        "Content-Type": "application/json",
       },
       async parseResponse(response) {
         if (!response.ok) {
@@ -26,7 +27,7 @@ export default function useHetrixTools<T>(endpoint: string) {
         const data = result[key as keyof typeof result];
         return {
           data,
-          hasMore: Boolean(result.meta.pagination.next),
+          hasMore: !!result.meta.pagination.next,
         };
       },
       async onError(error) {

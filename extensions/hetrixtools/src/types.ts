@@ -1,3 +1,8 @@
+type Location = {
+  uptime_status: "up" | "down";
+  response_time: number;
+  last_check: number;
+};
 export type Monitor = {
   id: string;
   name: string;
@@ -24,11 +29,23 @@ export type Monitor = {
   monitor_status: "active" | "paused" | "disabled" | "maint" | "maint_dnd";
   uptime: number;
   uptime_incl_maint: number;
-  // "locations": {
-  // "new_york": {},
-  // "san_francisco": {},
-  // "amsterdam": {}
-  // },
+  locations: Partial<
+    Record<
+      | "new_york"
+      | "san_francisco"
+      | "dallas"
+      | "amsterdam"
+      | "london"
+      | "frankfurt"
+      | "singapore"
+      | "sydney"
+      | "sao_paulo"
+      | "tokyo"
+      | "mumbai"
+      | "moscow",
+      Location
+    >
+  >;
   ssl_expiration_date: string | null;
   ssl_expiration_warn: boolean;
   ssl_expiration_warn_days: number;
