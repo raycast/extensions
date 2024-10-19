@@ -13,7 +13,7 @@ export default function Account() {
 
   const isInfinity = (text: string | null) => !text || text === "0";
 
-  const markdown = !usages
+  const markdown = !usages.length
     ? undefined
     : `
 ## Statistics

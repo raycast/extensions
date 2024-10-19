@@ -82,5 +82,5 @@ function ViewFile({ dir, file }: { dir: string; file: string }) {
   const { isLoading, data, error } = usGetFileContent(dir, file);
 
   const markdown = isLoading ? "# Loading..." : data ? data.content : `# Error \n\n ${error}`;
-  return <Detail isLoading={isLoading} markdown={markdown} />;
+  return <Detail isLoading={isLoading} markdown={markdown} navigationTitle={`View Files > ${dir}/${file}`} />;
 }
