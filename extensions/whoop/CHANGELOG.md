@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.5] - 2024-10-19
+
+### Changed
+
+- Authentication now uses OAuthService from Raycast utilities.
+- Updated all dependencies to their latest compatible versions.
+
 ## [1.0.4] - 2024-01-18
 
 ### Changed
