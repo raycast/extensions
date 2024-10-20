@@ -19,11 +19,7 @@ export function NotInstalled({ onRefresh }: { onRefresh: () => void }) {
     <Detail
       actions={
         <ActionPanel>
-          <Action
-            title="Install Ffmpeg"
-            onAction={handleInstall}
-            shortcut={{ modifiers: [], key: "return" }}
-          />
+          <Action title="Install Ffmpeg" onAction={handleInstall} shortcut={{ modifiers: [], key: "return" }} />
         </ActionPanel>
       }
       markdown={`
