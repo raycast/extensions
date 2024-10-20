@@ -1,13 +1,10 @@
-import {
-  Action,
-  getPreferenceValues
-} from "@raycast/api";
+import { Action, getPreferenceValues } from "@raycast/api";
 import * as fs from "fs/promises";
 import {
   addToCache,
   checkIfCached,
   getFromCache,
-  RECENTLY_USED
+  RECENTLY_USED,
 } from "../../cache";
 import { compareByDate, compareByName, toId } from "../../util/compare";
 import { Service } from "../../util/service";
@@ -35,9 +32,9 @@ export const CORRUPTED = "corrupted";
 export type setItemsFunction = (
   value:
     | ((prevState: { otpList: Service[]; isLoading: boolean }) => {
-      otpList: Service[];
-      isLoading: boolean;
-    })
+        otpList: Service[];
+        isLoading: boolean;
+      })
     | { otpList: Service[]; isLoading: boolean }
 ) => void;
 
@@ -48,24 +45,25 @@ interface TOTPParams {
   period: number;
 }
 
-type Algorithm = 'sha1' | 'sha256' | 'sha512';
+type Algorithm = "sha1" | "sha256" | "sha512";
 
 export function parseOTPURI(uri: string): TOTPParams {
   const url = new URL(uri);
-  const secret = url.searchParams.get('secret');
-  const algorithmStr = url.searchParams.get('algorithm')?.toLowerCase() || 'sha1';
-  const digits = parseInt(url.searchParams.get('digits') || '6', 10);
-  const period = parseInt(url.searchParams.get('period') || '30', 10);
+  const secret = url.searchParams.get("secret");
+  const algorithmStr =
+    url.searchParams.get("algorithm")?.toLowerCase() || "sha1";
+  const digits = parseInt(url.searchParams.get("digits") || "6", 10);
+  const period = parseInt(url.searchParams.get("period") || "30", 10);
 
   if (!secret) {
-    throw new Error('Secret is missing from the URI');
+    throw new Error("Secret is missing from the URI");
   }
 
   let algorithm: Algorithm;
   switch (algorithmStr) {
-    case 'sha1':
-    case 'sha256':
-    case 'sha512':
+    case "sha1":
+    case "sha256":
+    case "sha512":
       algorithm = algorithmStr;
       break;
     default:
@@ -78,14 +76,14 @@ export function parseOTPURI(uri: string): TOTPParams {
 export function extractOtpIssuer(url: string): string {
   const parsedUrl = new URL(url);
 
-  if (parsedUrl.protocol !== 'otpauth:' || parsedUrl.hostname !== 'totp') {
-    return 'Invalid OTP URL format';
+  if (parsedUrl.protocol !== "otpauth:" || parsedUrl.hostname !== "totp") {
+    return "Invalid OTP URL format";
   }
 
-  const issuer = parsedUrl.searchParams.get('issuer');
+  const issuer = parsedUrl.searchParams.get("issuer");
 
   if (!issuer) {
-    return 'Issuer not found in the URL';
+    return "Issuer not found in the URL";
   }
 
   return issuer;
@@ -104,7 +102,9 @@ export async function loadData(setItems: setItemsFunction): Promise<void> {
       const otp = parseOTPURI(s);
 
       return {
+        id: toId(name),
         name: name,
+        type: "service",
         digits: otp.digits,
         period: otp.period,
         seed: otp.secret,

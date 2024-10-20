@@ -22,12 +22,12 @@ export default function OtpListItem({
   const otp =
     item.seed != null
       ? generateTOTP(item.seed, {
-        digits: item.digits,
-        period: item.period,
-        timestamp: new Date().getTime(),
-      })
+          digits: item.digits,
+          period: item.period,
+          timestamp: new Date().getTime(),
+        })
       : CORRUPTED;
-  const subtitle = item.issuer || item.accountType || "";
+  const subtitle = item.name || "";
   const subtitleDisplay =
     subtitle.match("authenticator") || !compareByName(subtitle, item.name)
       ? ""
@@ -39,7 +39,7 @@ export default function OtpListItem({
       title={item.name}
       subtitle={subtitleDisplay}
       icon={{
-        source: { light: icon(item, 'black'), dark: icon(item, 'white') },
+        source: { light: icon(item, "black"), dark: icon(item, "white") },
       }}
       keywords={[subtitle]}
       actions={

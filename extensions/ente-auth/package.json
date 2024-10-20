@@ -3,14 +3,13 @@
   "name": "ente-auth",
   "title": "Ente Auth Authenticator",
   "description": "Search, sync and use your Ente Auth 2FA codes with Raycast",
-  "icon": "ente-auth-icon.ico",
+  "icon": "ente-auth-icon.png",
   "author": "albarin",
   "contributors": [
     "gdsmith",
     "pernielsentikaer",
     "litomore",
-    "guga4ka",
-    "albarin"
+    "guga4ka"
   ],
   "categories": [
     "Security"
