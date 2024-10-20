@@ -16,7 +16,9 @@ export default function Command() {
     triggerLoading();
   }, []);
 
-  return error ? <ErrorView error={error} /> : (
+  return error ? (
+    <ErrorView error={error} />
+  ) : (
     <List isLoading={isLoading}>
       {store?.spaces.map((space) => (
         <List.Item

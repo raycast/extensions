@@ -7,7 +7,7 @@ import {
   Icon,
   showHUD,
   popToRoot,
-  closeMainWindow
+  closeMainWindow,
 } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { checkCapacitiesApp } from "./helpers/isCapacitiesInstalled";
@@ -45,7 +45,7 @@ export default function Command() {
         spaceId: store?.spaces.length === 1 ? store.spaces[0].id : values.spaceId,
         mdText: values.mdText,
         origin: "commandPalette",
-        noTimeStamp: values.noTimeStamp
+        noTimeStamp: values.noTimeStamp,
       };
 
       axios
@@ -71,7 +71,9 @@ export default function Command() {
     },
   });
 
-  return error ? <ErrorView error={error} /> : isLoading ? (
+  return error ? (
+    <ErrorView error={error} />
+  ) : isLoading ? (
     <Detail markdown="Saving weblink ..." isLoading />
   ) : (
     <Form
@@ -97,7 +99,12 @@ export default function Command() {
           </Form.Dropdown>
         </>
       )}
-      <Form.Checkbox label="No Timestamp" info="If checked, no time stamp will be added to the note" storeValue {...itemProps.noTimeStamp} />
+      <Form.Checkbox
+        label="No Timestamp"
+        info="If checked, no time stamp will be added to the note"
+        storeValue
+        {...itemProps.noTimeStamp}
+      />
     </Form>
   );
 }
