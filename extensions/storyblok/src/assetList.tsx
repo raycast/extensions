@@ -11,7 +11,7 @@ function getFilename(filename: string) {
 export default function AssetList(props: { spaceId: number }) {
   const data = useStoryblokDataPaginated<asset>(`spaces/${props.spaceId}/assets`);
 
-  if (data.data.length === 0) {
+  if (!data.isLoading && data.data.length === 0) {
     return (
       <Grid>
         <Grid.EmptyView title="No assets found" description="No assets found in this space." />
