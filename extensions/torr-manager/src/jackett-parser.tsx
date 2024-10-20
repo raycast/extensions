@@ -152,6 +152,18 @@ export default function Command() {
     return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} GB`;
   };
 
+  const getFormattedDate = (dateString: string) => {
+    if (!dateString) {
+      return "";
+    }
+
+    return new Date(dateString).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+    });
+  };
+
   return (
     <List isShowingDetail searchBarPlaceholder="Search torrents (min 3 characters)" onSearchTextChange={setQuery}>
       {items.length === 0 ? (
@@ -188,7 +200,7 @@ export default function Command() {
                     <List.Item.Detail.Metadata.Label title="Size" text={bytesToGbText(item.Size)} />
                     <List.Item.Detail.Metadata.Separator />
 
-                    <List.Item.Detail.Metadata.Label title="Link" text={item.Link} />
+                    <List.Item.Detail.Metadata.Label title="Publish Date" text={getFormattedDate(item.PublishDate)} />
                   </List.Item.Detail.Metadata>
                 }
               />
