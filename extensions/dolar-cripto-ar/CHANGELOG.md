@@ -14,3 +14,4 @@
 - Introduced a dedicated `handleError` function for cleaner and more effective error handling.
 - Improved the state management and revalidation logic to prevent unnecessary fetch aborts.
 - Ensured smoother and more reliable fetching of currency data by refining the use of Abort Controllers.
+- Adjusted the interval logic to ensure currency quotes are refreshed every 3 minutes, enhancing data accuracy for users.
