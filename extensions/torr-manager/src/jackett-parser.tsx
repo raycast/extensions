@@ -2,7 +2,7 @@ import { ActionPanel, Action, List, showToast, Toast, getPreferenceValues, Color
 import { useEffect, useState } from "react";
 import fetch from "node-fetch";
 import { FormData } from "formdata-node";
-import { getAuthHeaders, handleDomain, timeoutFetch } from "./utils";
+import { getAuthHeaders, getFormattedDate, handleDomain, timeoutFetch } from "./utils";
 import { JackettParsedTorrent, MOVIE_CATEGORIES, TorrentItem } from "./models";
 
 export default function Command() {
@@ -150,18 +150,6 @@ export default function Command() {
 
   const bytesToGbText = (bytes: number): string => {
     return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} GB`;
-  };
-
-  const getFormattedDate = (dateString: string) => {
-    if (!dateString) {
-      return "";
-    }
-
-    return new Date(dateString).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-    });
   };
 
   return (
