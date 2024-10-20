@@ -2,11 +2,20 @@ import { ActionPanel, Action, Icon, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 
+type Hook = Readonly<{
+  id: string;
+  title: string;
+  description: string;
+  import: string;
+  url: string;
+}>;
+
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const { isLoading, data, revalidate } = useFetch(`https://rehooks.pyr33x.ir/api/hooks?search=${searchText}`, {
+  const { isLoading, data, revalidate } = useFetch<Hook[]>(`https://rehooks.pyr33x.ir/api/hooks?search=${searchText}`, {
     keepPreviousData: true,
   });
+
   return (
     <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText} throttle>
       {(data || []).map((item) => (
