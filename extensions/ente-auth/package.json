@@ -59,8 +59,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.1",
-    "@raycast/utils": "^1.16.1",
+    "@raycast/api": "1.84.3",
+    "@raycast/utils": "1.18.0",
     "hi-base32": "^0.5.1"
   },
   "devDependencies": {
