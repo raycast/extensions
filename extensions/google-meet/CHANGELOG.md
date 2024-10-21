@@ -1,5 +1,9 @@
 # Google Meet Changelog
 
+## [Improvement] - {PR_MERGE_DATE}
+
+- Add delay before reading meeting URL from browser
+
 ## [Improvement] - 2024-07-19
 
 - Change the way to get the URL in some Chromium-based browsers

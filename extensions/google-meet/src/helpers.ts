@@ -59,8 +59,8 @@ export async function getOpenedBrowser() {
 export async function getMeetTab(): Promise<string> {
   const activeUrls = await getOpenTabs();
   const meetTab = activeUrls.split(",").find((url) => url.includes("meet.google.com"));
-  console.log(meetTab)
-  if (meetTab?.includes("/new") || meetTab === undefined) {
+  
+  if (meetTab?.includes("/new")) {
     return await getMeetTab();
   }
 
