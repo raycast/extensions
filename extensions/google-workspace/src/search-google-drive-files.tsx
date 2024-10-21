@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState } from "react";
 
@@ -16,16 +16,9 @@ function SearchGoogleDriveFiles() {
   const email = getUserEmail();
 
   const { data, isLoading } = useCachedPromise(
-    async (queryType: QueryTypes, scopeType: ScopeTypes, query: string) => {
-      try {
-        return await getFiles(queryType, scopeType, query);
-      } catch (error) {
-        console.error(error);
-        showToast({ style: Toast.Style.Failure, title: "Failed to retrieve files" });
-        throw error;
-      }
-    },
+    async (queryType: QueryTypes, scopeType: ScopeTypes, query: string) => await getFiles(queryType, scopeType, query),
     [queryType, scopeType, query],
+    { failureToastOptions: { title: "Failed to retrieve files" } },
   );
 
   return (

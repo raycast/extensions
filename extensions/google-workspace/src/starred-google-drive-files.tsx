@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 import { getStarredFiles } from "./api/getFiles";
@@ -9,14 +9,8 @@ import { getUserEmail } from "./api/googleAuth";
 function StarredGoogleDriveFiles() {
   const email = getUserEmail();
 
-  const { data, isLoading } = useCachedPromise(async () => {
-    try {
-      return await getStarredFiles();
-    } catch (error) {
-      console.error(error);
-      showToast({ style: Toast.Style.Failure, title: "Failed to retrieve files" });
-      throw error;
-    }
+  const { data, isLoading } = useCachedPromise(() => getStarredFiles(), [], {
+    failureToastOptions: { title: "Failed to retrieve starred files" },
   });
 
   return (

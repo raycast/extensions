@@ -78,7 +78,7 @@ export async function getFiles(queryType: QueryTypes, scope: ScopeTypes, queryTe
   });
   const data = (await response.json()) as { files: File[] };
 
-  const { displayFilePath } = getPreferenceValues();
+  const { displayFilePath } = getPreferenceValues<Preferences>();
   if (displayFilePath) {
     await Promise.all(
       data.files.map(async (file) => {

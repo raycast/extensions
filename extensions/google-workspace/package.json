@@ -24,9 +24,8 @@
       "type": "checkbox",
       "required": false,
       "default": false,
-      "title": "Display File Path in google drive",
-      "description": "Display File Path in search and starred google drive files",
-      "label": "Display File Path"
+      "description": "Display the file path in the search results. ⚠️ This may slow down your search results.",
+      "label": "Display file path in search results"
     }
   ],
   "commands": [
