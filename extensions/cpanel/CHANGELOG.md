@@ -1,6 +1,6 @@
 # cPanel Changelog
 
-## [Enhancements: Files & DB + New Account Command ] - {PR_MERGE_DATE}
+## [Enhancements: Files & DB + New Account Command ] - 2024-10-21
 
 - Show or Hide "MIME Type" in `Files` via Preferences
 - View "File Content" for small files in `Files`
