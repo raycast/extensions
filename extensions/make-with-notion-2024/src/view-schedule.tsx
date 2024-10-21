@@ -32,7 +32,7 @@ export default function Command() {
           storeValue={true}
           onChange={(newValue) => setShowAllEvents(newValue === "all")}
         >
-          <List.Dropdown.Item title="Upcoming Events" value="upcoming" />
+          <List.Dropdown.Item title="Current & Upcoming Events" value="upcoming" />
           <List.Dropdown.Item title="All Events" value="all" />
         </List.Dropdown>
       }

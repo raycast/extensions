@@ -45,8 +45,8 @@ export const schedule = [
   },
   {
     name: "Designing for life",
-    from: "2024-10-24T13:35:00",
-    to: "2024-10-24T14:05:00",
+    from: "2024-10-24T13:35:00-07:00",
+    to: "2024-10-24T14:05:00-07:00",
     location: "Stage 1",
     speakers: [
       {
@@ -67,8 +67,8 @@ export const schedule = [
   },
   {
     name: "Building bleeding-edge brands",
-    from: "2024-10-24T14:25:00",
-    to: "2024-10-24T14:55:00",
+    from: "2024-10-24T14:25:00-07:00",
+    to: "2024-10-24T14:55:00-07:00",
     location: "Stage 1",
     speakers: [
       {
@@ -95,8 +95,8 @@ export const schedule = [
   },
   {
     name: "Crafting beautiful tools",
-    from: "2024-10-24T15:00:00",
-    to: "2024-10-24T15:30:00",
+    from: "2024-10-24T15:00:00-07:00",
+    to: "2024-10-24T15:30:00-07:00",
     location: "Stage 1",
     speakers: [
       {
@@ -117,8 +117,8 @@ export const schedule = [
   },
   {
     name: "How to launch a Notion template business",
-    from: "2024-10-24T15:50:00",
-    to: "2024-10-24T16:20:00",
+    from: "2024-10-24T15:50:00-07:00",
+    to: "2024-10-24T16:20:00-07:00",
     location: "Stage 1",
     speakers: [
       {
@@ -133,8 +133,8 @@ export const schedule = [
   },
   {
     name: "Creating for the future",
-    from: "2024-10-24T16:25:00",
-    to: "2024-10-24T17:10:00",
+    from: "2024-10-24T16:25:00-07:00",
+    to: "2024-10-24T17:10:00-07:00",
     location: "Stage 1",
     speakers: [
       {
@@ -155,8 +155,8 @@ export const schedule = [
   },
   {
     name: "Building a meaningful life in Notion",
-    from: "2024-10-24T13:00:00",
-    to: "2024-10-24T13:30:00",
+    from: "2024-10-24T13:00:00-07:00",
+    to: "2024-10-24T13:30:00-07:00",
     location: "Stage 2",
     speakers: [
       {
@@ -177,8 +177,8 @@ export const schedule = [
   },
   {
     name: "What's next in Notion's productivity suite?",
-    from: "2024-10-24T13:35:00",
-    to: "2024-10-24T14:05:00",
+    from: "2024-10-24T13:35:00-07:00",
+    to: "2024-10-24T14:05:00-07:00",
     location: "Stage 2",
     speakers: [
       {
@@ -199,8 +199,8 @@ export const schedule = [
   },
   {
     name: "Build your dream setup in Notion",
-    from: "2024-10-24T14:25:00",
-    to: "2024-10-24T14:55:00",
+    from: "2024-10-24T14:25:00-07:00",
+    to: "2024-10-24T14:55:00-07:00",
     location: "Stage 2",
     speakers: [
       {
@@ -215,8 +215,8 @@ export const schedule = [
   },
   {
     name: "Notion as a curiosity engine",
-    from: "2024-10-24T15:00:00",
-    to: "2024-10-24T15:30:00",
+    from: "2024-10-24T15:00:00-07:00",
+    to: "2024-10-24T15:30:00-07:00",
     location: "Stage 2",
     speakers: [
       {
