@@ -1,7 +1,7 @@
 # Proxyman Changelog
 
-## Initial Release 📣 - 2024-10-15
-- Introduce some common actions in Proxyman:
+## [Initial Release 📣] - {PR_MERGE_DAGE}
+Introduce some common actions in Proxyman:
 
 - Toggle System Proxy
 - Toggle Map Local Tool
