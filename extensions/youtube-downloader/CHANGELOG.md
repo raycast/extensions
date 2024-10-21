@@ -1,6 +1,6 @@
 # YouTube Downloader Changelog
 
-## [Add WAV support] - {PR_MERGE_DATE}
+## [Add WAV support] - 2024-10-21
 
 - Added WAV support for audio downloads
 
