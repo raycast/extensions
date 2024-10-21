@@ -88,6 +88,10 @@ export default function Command() {
                   }}
                   icon={{ source: Icon.ArrowRight }}
                 />
+                <Action title="Log Linkedin message" icon={Icon.Message} onAction={async () => {
+                  await open(hubspotUrl + '?interaction=logged-linked-in-message');
+                  await closeMainWindow();
+                }} />
                 <Action
                   title="Toggle Details"
                   icon={Icon.AppWindowSidebarLeft}
@@ -97,6 +101,7 @@ export default function Command() {
                 {phone && <Action.OpenInBrowser title="Whatsapp" url={`https://wa.me/${phone}`} icon={Icon.Message} />}
                 {email && <Action.OpenInBrowser title="Send Email" url={`mailto:${email}`} />}
                 {website && <Action.OpenInBrowser title="Open Website" url={website} />}
+                
                 <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
               </ActionPanel>
             }
