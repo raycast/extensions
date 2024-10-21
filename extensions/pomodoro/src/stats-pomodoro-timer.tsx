@@ -33,10 +33,10 @@ export default function StatsPomodoro() {
   const { completedCycles, totalFocusTime, backToBackCycles } = calculateStats(data || []);
 
   const markdown = `# 🍅 Pomodoro Recap 🍅\n
-  > 📊 Statistics of your pomodoro timer - all from the begin\n
-   - You have completed **${completedCycles}** pomodoro cicle${completedCycles > 1 ? "s" : ""}. ✨\n
+  > 📊 Statistics of your pomodoro timer - all time\n
+   - You have completed **${completedCycles}** pomodoro cycle${completedCycles > 1 ? "s" : ""}. ✨\n
    - Total of **${totalFocusTime / 60}m** of focus time. ⏱️\n
-   - Top Number of back to back pomodoro cicle${backToBackCycles > 1 ? "s" : ""}: **${backToBackCycles}**. 👑\n
+   - Total back to back Pomodoro cycle${backToBackCycles > 1 ? "s" : ""}: **${backToBackCycles}**. 👑\n
     `;
 
   return <Detail isLoading={isLoading} markdown={markdown} />;
