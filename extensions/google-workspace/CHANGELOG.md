@@ -1,6 +1,6 @@
 # Google Workspace Changelog
 
-## [Add file path info to the file list] - {PR_MERGE_DATE}
+## [Add file path info to the file list] - 2024-10-21
 
 - Adds the file path information to the list of accessories.
 
