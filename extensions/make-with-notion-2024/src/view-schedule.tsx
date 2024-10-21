@@ -45,7 +45,7 @@ export default function Command() {
               icon={getEventIcon(event)}
               title={event.name}
               subtitle={`${formatTime(event.from)} - ${formatTime(event.to)}`}
-              accessories={[{ text: moment(event.from).fromNow() }]}
+              accessories={[{ text: capitalizeFirstLetter(moment(event.from).fromNow()) }]}
               actions={
                 <ActionPanel>
                   <Action.Push title="Show Details" icon={Icon.Text} target={<EventDetail event={event} />} />
@@ -93,4 +93,8 @@ function getEventIcon(event: ScheduleEvent): Icon | { source: string } {
     return { source: event.speakers[0].image };
   }
   return Icon.Calendar;
+}
+
+function capitalizeFirstLetter(string: string): string {
+  return string.charAt(0).toUpperCase() + string.slice(1);
 }
