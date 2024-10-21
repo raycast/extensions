@@ -27,9 +27,7 @@ async function getOpenTabs(): Promise<string> {
   const browserName = await getOpenedBrowser();
 
   if (browserName === "Arc") {
-    let url = await runAppleScript(getOpenedUrlForArc());
-    console.log(url);
-    return url;
+    return await runAppleScript(getOpenedUrlForArc());
   }
 
   if (browserName === "Firefox" || browserName === "Firefox Developer Edition") {
