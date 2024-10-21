@@ -1,5 +1,10 @@
 # Contentful Changelog
 
+## [`View Roles` in `Users`] - {PR_MERGE_DATE}
+
+- Add `tooltip` to Date accessories
+- Toggle between `Users` and `Roles` via `Argument`
+
 ## [New `Search Users` command] - 2024-09-05
 
 ## [New `Search Assets` command] - 2024-07-26
