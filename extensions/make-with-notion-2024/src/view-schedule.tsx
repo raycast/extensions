@@ -10,7 +10,7 @@ const userTimezone = moment.tz.guess();
 export default function Command() {
   const [showAllEvents, setShowAllEvents] = useState(false);
 
-  const filteredSchedule = showAllEvents ? schedule : schedule.filter((event) => moment(event.from).isAfter(moment()));
+  const filteredSchedule = showAllEvents ? schedule : schedule.filter((event) => moment(event.to).isAfter(moment()));
 
   const eventsByStage = filteredSchedule.reduce(
     (acc, event) => {
