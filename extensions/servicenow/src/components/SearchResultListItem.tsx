@@ -27,17 +27,21 @@ export default function SearchResultListItem({
 
   const dataKeys = keys(result.data);
   const accessories: List.Item.Accessory[] = [];
+  const title = result.metadata.title?.split(/\s|\n/);
   const description = result.metadata.description?.split(/\s|\n/);
-  let keywords = [label, ...(description ?? [])];
+  let keywords = [label, ...(title ?? []), ...(description ?? [])];
 
   let name;
   if (result.table == "u_documate_page" || result.table == "u_documate_workspace") {
+    result.record_url = `documate.do?w=${result.data.u_workspace?.value}&p=${result.sys_id}`;
     name = result.metadata.title || "Untitled page";
     const dataIcon = result.data.u_icon?.display;
     icon = {
       source: dataIcon || Icon.Document,
       tintColor: dataIcon ? null : Color.SecondaryText,
     };
+
+    keywords = keywords.concat((result.data.u_workspace?.display ?? "").split(/\s|\n/));
     accessories.push({
       tag: {
         value: result.data.u_workspace?.display,
