@@ -140,7 +140,7 @@ async function retrieveByUrl(fileManager, urlText = "") {
   // default behavior for URL
   var rawHTMLObject = await rawHTMLByURL(fileUrl);
   rawHTMLObject.content = bufferToGenerativePart(rawHTMLObject.content, "text/html");
-  return rawHTMLByURL;
+  return rawHTMLObject;
 }
 
 export const retrievalTypes = {
