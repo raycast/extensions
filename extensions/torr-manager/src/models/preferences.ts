@@ -1,8 +1,6 @@
 import { TorrentCategories } from "./torrent-categories";
 
-type CategoryPreferences = {
-  [key in keyof typeof TorrentCategories]: boolean;
-};
+type CategoryPreferences = Record<keyof typeof TorrentCategories, string>;
 
 export interface JackettPreferences extends BasePreferences, CategoryPreferences {
   jackettParserUrl: string;

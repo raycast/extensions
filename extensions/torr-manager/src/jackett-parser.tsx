@@ -205,14 +205,14 @@ export default function Command() {
             }
             actions={
               <ActionPanel>
-                {torrserverUrl && (
+                {torrserverUrl && item.Link && (
                   <Action
                     title={`Open in ${mediaPlayerApp!.name}`}
                     icon={{ source: Icon.Video }}
                     onAction={() => addTorrentToServer(item.Title, item.Link, false, true)}
                   />
                 )}
-                {torrserverUrl && (
+                {torrserverUrl && item.Link && (
                   <Action
                     icon={{ source: Icon.SaveDocument }}
                     title="Add Torrent to Server"

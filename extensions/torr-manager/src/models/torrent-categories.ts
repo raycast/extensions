@@ -49,9 +49,10 @@ export const TorrentCategories = {
   OtherMisc: 8010,
 } as const;
 
-export const TorrentCategoryTitlesWithCodes: {
-  [key in (typeof TorrentCategories)[keyof typeof TorrentCategories]]: string;
-} = {
+export const TorrentCategoryTitlesWithCodes: Record<
+  (typeof TorrentCategories)[keyof typeof TorrentCategories],
+  string
+> = {
   [TorrentCategories.Console]: "Console (1000)",
   [TorrentCategories.ConsoleNDS]: "Console/NDS (1010)",
   [TorrentCategories.ConsolePSP]: "Console/PSP (1020)",

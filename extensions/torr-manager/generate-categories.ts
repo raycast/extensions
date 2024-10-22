@@ -4,7 +4,7 @@ import { writeFileSync } from "fs";
 export const getCategoriesPreferences = () => {
   return Object.entries(TorrentCategories).map(([key, value], index) => ({
     name: key,
-    title: index === 0 ? "Select categories" : "",
+    title: index === 0 ? "Select search categories" : "",
     label: TorrentCategoryTitlesWithCodes[value],
     type: "checkbox",
     description: "Select necessary search categories",
