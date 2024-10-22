@@ -14,7 +14,7 @@ export default function ListPeople() {
           title={person.name.firstName + " " + person.name.lastName}
           subtitle="Person"
           actions={
-            <ActionPanel title="#1 in raycast/extensions">
+            <ActionPanel>
               <Action.CopyToClipboard
                 title="Copy Person Name"
                 content={person.name.firstName}

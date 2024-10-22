@@ -17,7 +17,7 @@ If you're using a self-hosted version, use the instance URL itself e.g. if your 
 
 ## How to get a Twenty API key
 
-Go to [Twenty](https://app.twenty.com/objects/people) after that:
+Go to your Twenty instance (https://app.twenty.com/ or https://<YOUR_20>.tld/) 
 
 1. Go to Settings in the sidebar on the left.
 2. Under Workspace, go to Developers. Here, you'll see a list of active keys that you or your team have created.
