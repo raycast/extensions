@@ -5,7 +5,7 @@
 <h1 align="center">Cron Manager</h1>
 
 <h3 align="center">
-Cron Manager is a Raycast extension that allows you to manage your cron jobs from a GUI.
+Cron Manager is a Raycast extension that allows you to manage your cron jobs
 </h3>
 
 ## Features
@@ -14,31 +14,29 @@ Cron Manager is a Raycast extension that allows you to manage your cron jobs fro
 
 View and search all your cron jobs.
 
-![List](metadata/cron-manager-1.png)
+![List](images/cron-manager-1.png)
 
 ### View Log Output
 
 View the output of your cron jobs.
 
-![View log output](metadata/cron-manager-2.png)
+![View log output](images/cron-manager-3.png)
 
 ### Add New Cron Jobs
 
 Quickly add new cron jobs to your system.
 
-![Add new cron job](metadata/cron-manager-4.png)
+![Add new cron job](images/cron-manager-2.png)
 
 ### Edit Cron Jobs
 
 Edit existing cron jobs.
 
-![Edit cron job](metadata/cron-manager-3.png)
+![Edit cron job](images/cron-manager-4.png)
 
 ### Delete Cron Jobs
 
 Delete cron jobs from your system.
-
-![Delete cron job](metadata/cron-manager-5.png)
 
 ## Setup
 

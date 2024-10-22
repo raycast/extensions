@@ -62,7 +62,6 @@ export function CronLogs({ job }: { job: CronJob }) {
       .filter((mail) => mail.command === job.scriptPath[0])
       .sort((a, b) => b.date.getTime() - a.date.getTime());
   }, [logsData]);
-  console.log("🚀 ~ cronMails ~ cronMails:", JSON.stringify(cronMails, null, 2));
 
   return (
     <List isShowingDetail navigationTitle={`Logs for ${job.name}`}>
@@ -80,7 +79,6 @@ export function CronLogs({ job }: { job: CronJob }) {
 export function CronForm({ job, onSubmit }: { job: CronJob | Partial<CronJob>; onSubmit: () => void }) {
   const { handleSubmit, itemProps, values } = useForm<CronJob>({
     onSubmit: async (values) => {
-      console.log("onSubmit", values);
       const cronJobEntry = `
 # Name: ${values.name}
 # Description: ${values.description}
@@ -99,8 +97,7 @@ ${values.cronExpression} ${values.scriptPath}
       `;
 
       try {
-        const result = await runAppleScript(appleScriptCommand);
-        console.log(result);
+        await runAppleScript(appleScriptCommand);
         await showToast({
           style: Toast.Style.Success,
           title: isNewJob ? "Cron job added successfully" : "Cron job updated successfully",
@@ -136,7 +133,6 @@ ${values.cronExpression} ${values.scriptPath}
         }
       },
       scriptPath: (value) => {
-        console.log("🚀 ~ CronForm ~ value:", value);
         if (!value) {
           return "Script path is required";
         }
@@ -290,8 +286,7 @@ async function handleDeleteCronJob(job: CronJob) {
     `;
 
     try {
-      const result = await runAppleScript(appleScriptCommand);
-      console.log(result);
+      await runAppleScript(appleScriptCommand);
       await showToast({
         style: Toast.Style.Success,
         title: "Cron job deleted successfully",
