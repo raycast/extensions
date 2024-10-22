@@ -34,11 +34,7 @@ export const SelectModel = ({ preferences }: { preferences: Preferences }) => {
               actions={
                 <ActionPanel>
                   <Action title="Toggle Selection" onAction={() => toggleModel(model)} />
-                  <Action.Push
-                    title="Start Chat"
-                    icon={Icon.Box}
-                    target={<NotDiamond />}
-                  />
+                  <Action.Push title="Start Chat" icon={Icon.Box} target={<NotDiamond />} />
                 </ActionPanel>
               }
             />

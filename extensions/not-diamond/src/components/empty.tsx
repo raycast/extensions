@@ -9,9 +9,7 @@ export const EmptyView = ({ preferences }: { preferences: Preferences }) => {
     <List.EmptyView
       title={selectedModels.length === 0 ? "No model selected" : "Ask Not Diamond"}
       description={
-        selectedModels.length === 0
-          ? "Select a model to use Not Diamond"
-          : "Write a message to use Not Diamond"
+        selectedModels.length === 0 ? "Select a model to use Not Diamond" : "Write a message to use Not Diamond"
       }
       icon={selectedModels.length === 0 ? Icon.Warning : Icon.QuestionMark}
       actions={

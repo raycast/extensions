@@ -7,9 +7,7 @@
   "author": "dragos_nedelcu",
   "categories": [
     "Developer Tools",
-    "Productivity",
-    "AI",
-    "Chat"
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
@@ -56,25 +54,29 @@
       "name": "googleApiKey",
       "title": "Google API Key",
       "description": "API Key from Google. Generate your own key at https://ai.google.dev/gemini-api/docs/api-key",
-      "type": "textfield"
+      "type": "textfield",
+      "required": false
     },
     {
       "name": "mistralApiKey",
       "title": "Mistral API Key",
       "description": "API Key from Mistral.ai. Generate your own key at https://console.mistral.ai/api-keys/",
-      "type": "textfield"
+      "type": "textfield",
+      "required": false
     },
     {
       "name": "cohereApiKey",
       "title": "Cohere API Key",
       "description": "API Key from Cohere.ai. Generate your own key at https://dashboard.cohere.com/",
-      "type": "textfield"
+      "type": "textfield",
+      "required": false
     },
     {
       "name": "togetherApiKey",
       "title": "Together API Key",
       "description": "API Key from Together.ai. Generate your own key at https://docs.together.ai/docs/quickstart",
-      "type": "textfield"
+      "type": "textfield",
+      "required": false
     },
     {
       "name": "tradeoff",
