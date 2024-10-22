@@ -1,5 +1,10 @@
 # NeoDB Changelog
 
+## [New Additions] - {PR_MERGE_DATE}
+
+- You can now set an optional "Preferred Language" in `Preferences`. When fetching Results, the extension will prioritize results in chosen language.
+- A new `View` command allows you to see your "Collections" and "Reviews" in NeoDB. This requires an API Token.
+
 ## [New Additions] - 2023-08-07
 
 - Add copy URL action

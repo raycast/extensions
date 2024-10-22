@@ -3,6 +3,7 @@ import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
 import { Category, Item } from "./types";
 import ItemDetail from "./ItemDetail";
 import useSearch from "./hooks/useSearch";
+import getItemTitle from "./utils/getItemTitle";
 
 interface SectionProps {
   items: Item[];
@@ -26,7 +27,7 @@ const Section: React.FC<SectionProps> = ({ items, category, aspectRatio }) => {
         <Grid.Item
           key={item.uuid}
           content={{ value: { source: item.cover_image_url }, tooltip: item.brief }}
-          title={item.display_title}
+          title={getItemTitle(item)}
           subtitle={item.brief}
           actions={
             <ActionPanel>
