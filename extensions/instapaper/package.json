@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "save-clipboard",
-      "title": "Save Clipboard",
+      "title": "Save Clipboard URL",
       "description": "Quick add links from your clipboard to Instapaper.",
       "mode": "no-view"
     }

@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
 
 export default async function () {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
 
   const { text } = await Clipboard.read();
   const toast = await showToast({
