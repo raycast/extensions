@@ -33,8 +33,6 @@ export const CopyRuleAction = ({ cursorRule }: Props) => {
     } catch (error) {
       console.debug("Failed to copy and apply rule:", error);
       await showErrorToast();
-    } finally {
-      await Clipboard.clear();
     }
   }
 
