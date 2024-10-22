@@ -21,7 +21,7 @@
   "commands": [
     {
       "name": "menu-bar",
-      "title": "WP Bones",
+      "title": "WP Bones Menu Bar",
       "subtitle": "WP Bones",
       "description": "See your WP Bones status at a glance",
       "interval": "60m",
