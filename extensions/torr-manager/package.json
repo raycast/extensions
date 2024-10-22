@@ -63,7 +63,7 @@
       "preferences": [
         {
           "name": "jackettParserUrl",
-          "title": "Jackett parser",
+          "title": "Jackett parser URL",
           "placeholder": "http://ip:port",
           "type": "textfield",
           "description": "URL endpoint required for enabling search",
