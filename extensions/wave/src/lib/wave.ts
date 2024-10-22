@@ -1,9 +1,9 @@
-import { useFetch } from "@raycast/utils";
+import {useFetch } from "@raycast/utils";
 import { Business, Currency, Customer, Edges, Invoice, Result } from "./types";
 import { API_URL } from "./config";
 import { QUERIES } from "./gql/queries";
 
-export const useGetBusinesses = (token?: string) =>
+export const useGetBusinesses = (token: string) =>
   useFetch(API_URL, {
     method: "POST",
     headers: {
@@ -22,7 +22,7 @@ export const useGetBusinesses = (token?: string) =>
     },
     initialData: [],
   });
-export const useGetBusinessInvoices = (businessId: string, token?: string) =>
+export const useGetBusinessInvoices = (businessId: string, token: string) =>
   useFetch(API_URL, {
     method: "POST",
     headers: {
@@ -45,7 +45,7 @@ export const useGetBusinessInvoices = (businessId: string, token?: string) =>
     initialData: [],
   });
 
-export const useGetBusinessCustomers = (businessId: string, token?: string) =>
+export const useGetBusinessCustomers = (businessId: string, token: string) =>
   useFetch(API_URL, {
     method: "POST",
     headers: {
@@ -68,7 +68,7 @@ export const useGetBusinessCustomers = (businessId: string, token?: string) =>
     initialData: [],
   });
 
-export const useGetBusinessProductsAndServices = (businessId: string, token?: string) =>
+export const useGetBusinessProductsAndServices = (businessId: string, token: string) =>
   useFetch(API_URL, {
     method: "POST",
     headers: {

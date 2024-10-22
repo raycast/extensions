@@ -7,13 +7,15 @@ import {
 } from "./lib/wave";
 import { Business } from "./lib/types";
 import { getInvoiceStatusColor } from "./lib/utils";
-import { useCachedState } from "@raycast/utils";
+import { getAccessToken, useCachedState, withAccessToken } from "@raycast/utils";
 import { INVOICE_STATUSES } from "./lib/config";
-import { useToken } from "./lib/oauth-client";
 import CustomerStatement from "./lib/components/customer-statement";
+import { provider } from "./lib/oauth";
 
-export default function ManageWave() {
-  const { data: token } = useToken();
+export default withAccessToken(provider)(ManageWave);
+
+function ManageWave() {
+  const { token } = getAccessToken();
   const { isLoading, data: businesses } = useGetBusinesses(token);
 
   return (
@@ -55,7 +57,7 @@ export default function ManageWave() {
 function BusinessInvoices({ business }: { business: Business }) {
   const [isShowingDetail, setIsShowingDetail] = useCachedState("details-invoices", false);
 
-  const { data: token } = useToken();
+  const { token } = getAccessToken();
   const { isLoading, data: invoices } = useGetBusinessInvoices(business.id, token);
 
   return (
@@ -127,7 +129,7 @@ ${invoice.items.map((item) => `| ${item.product.name} | ${item.quantity} | ${ite
 function BusinessCustomers({ business }: { business: Business }) {
   const [isShowingDetail, setIsShowingDetail] = useCachedState("show-customer-details", false);
 
-  const { data: token } = useToken();
+  const { token } = getAccessToken();
   const { isLoading, data: customers } = useGetBusinessCustomers(business.id, token);
 
   return (
@@ -194,7 +196,7 @@ function BusinessCustomers({ business }: { business: Business }) {
 
 function BusinessProductsAndServices({ business }: { business: Business }) {
   const [isShowingSubtitle, setIsShowingSubtitle] = useCachedState("show-products-subtitle", false);
-  const { data: token } = useToken();
+  const { token } = getAccessToken();
   const { isLoading, data: products } = useGetBusinessProductsAndServices(business.id, token);
 
   return (

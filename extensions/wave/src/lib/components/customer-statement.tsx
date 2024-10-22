@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Customer, Edges, Invoice, Result } from "../types";
-import { FormValidation, useFetch, useForm } from "@raycast/utils";
+import { FormValidation, getAccessToken, useFetch, useForm } from "@raycast/utils";
 import { Action, ActionPanel, Detail, Form, Icon, List, useNavigation } from "@raycast/api";
-import { useToken } from "../oauth-client";
 import { API_URL } from "../config";
 import { queryGetCustomerOutstandingInvoicesCustomerStatement } from "../gql/queries";
 import { formatDate, formatMoney } from "../utils";
@@ -44,7 +43,7 @@ export default function CustomerStatement({
   });
 
   const { push } = useNavigation();
-  const { data: token } = useToken();
+  const { token } = getAccessToken();
   const { isLoading } = useFetch(API_URL, {
     method: "POST",
     headers: {
