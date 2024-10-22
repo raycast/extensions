@@ -1,3 +1,5 @@
+# Bento Email Changelog
+
 ## [Type safety] - 2024-10-18
 
 Ensure all types are safe 
