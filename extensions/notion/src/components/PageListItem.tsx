@@ -1,4 +1,3 @@
-import { FormulaPropertyItemObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import {
   Action,
   ActionPanel,
@@ -295,47 +294,42 @@ export function PageListItem({
 }
 
 function getPropertyAccessory(
-  property: PageProperty | FormulaPropertyItemObjectResponse["formula"],
+  property: PageProperty | Extract<PageProperty, { type: "formula" }>["value"],
   title: string,
   users?: User[],
 ): List.Item.Accessory | List.Item.Accessory[] | undefined {
+  if (property.value === null) return;
   switch (property.type) {
     case "boolean":
-      return {
-        icon: property.boolean ? Icon.CheckCircle : Icon.Circle,
-        tooltip: `${title}: ${property.boolean ? "Checked" : "Unchecked"}`,
-      };
     case "checkbox":
       return {
-        icon: property.checkbox ? Icon.CheckCircle : Icon.Circle,
-        tooltip: `${title}: ${property.checkbox ? "Checked" : "Unchecked"}`,
+        icon: property.value ? Icon.CheckCircle : Icon.Circle,
+        tooltip: `${title}: ${property.value ? "Checked" : "Unchecked"}`,
       };
     case "date": {
-      if (!property.date) return;
-      const start = new Date(property.date.start);
+      const start = new Date(property.value.start);
       return {
         text: formatDistanceToNow(start, { addSuffix: true }),
         tooltip: `${title}: ${format(start, "EEE d MMM yyyy")}`,
       };
     }
     case "email":
-      if (!property.email) return;
-      return { text: property.email, tooltip: `${title}: ${property.email}` };
+    case "phone_number":
+    case "url":
+      return { text: property.value, tooltip: `${title}: ${property.value}` };
     case "formula":
-      if (!property.formula) return;
-      return getPropertyAccessory(property.formula, title);
+      return getPropertyAccessory(property.value, title);
     case "multi_select":
-      return property.multi_select.map((option) => {
+      return property.value.map((option) => {
         return {
           tag: { value: option.name, color: notionColorToTintColor(option.color) },
           tooltip: `${title}: ${option.name}`,
         };
       });
     case "number":
-      if (!property.number) return;
-      return { text: property.number.toString(), tooltip: `${title}: ${property.number}` };
+      return { text: property.value.toString(), tooltip: `${title}: ${property.value}` };
     case "people":
-      return property.people.map((person) => {
+      return property.value.map((person) => {
         const user = users?.find((u) => u.id === person.id);
         return {
           text: user?.name ?? "Unknown",
@@ -343,32 +337,17 @@ function getPropertyAccessory(
           tooltip: `${title}: ${user?.name ?? "Unknown"}`,
         };
       });
-    case "phone_number":
-      if (!property.phone_number) return;
-      return { text: property.phone_number, tooltip: `${title}: ${property.phone_number}` };
-    case "rich_text": {
-      const text = property.rich_text[0]?.plain_text;
-      if (!property.rich_text[0]) return;
-      return { text, tooltip: `${title}: ${text}` };
-    }
+    case "rich_text":
     case "title": {
-      const text = property.title[0]?.plain_text ?? "Untitled";
+      if (property.value.length == 0 && property.type == "rich_text") return;
+      const text = property.value[0]?.plain_text ?? "Untitled";
       return { text, tooltip: `${title}: ${text}` };
     }
-    case "url":
-      if (!property.url) return;
-      return { text: property.url, tooltip: `${title}: ${property.url}` };
     case "select":
-      if (!property.select) return;
-      return {
-        tag: { value: property.select.name, color: notionColorToTintColor(property.select.color) },
-        tooltip: `${title}: ${property.select.name}`,
-      };
     case "status":
-      if (!property.status) return;
       return {
-        tag: { value: property.status.name, color: notionColorToTintColor(property.status.color) },
-        tooltip: `${title}: ${property.status.name}`,
+        tag: { value: property.value.name, color: notionColorToTintColor(property.value.color) },
+        tooltip: `${title}: ${property.value.name}`,
       };
   }
 }

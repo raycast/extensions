@@ -81,6 +81,7 @@ export function Items({ flags }: { flags?: string[] }) {
                     : {},
                   { text: item.vault?.name },
                 ]}
+                keywords={item.additional_information ? [item.additional_information] : []}
                 actions={<ItemActionPanel account={account} item={item} actions={actionsForItem(item)} />}
               />
             ))

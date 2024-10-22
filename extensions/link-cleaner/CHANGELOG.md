@@ -1,6 +1,8 @@
 # Link Cleaner Changelog
 
-## [New Addictions] - 2023-12-08
+## [Add `Instagram Reel` rule] - 2024-10-14
+
+## [New Additions] - 2023-12-08
 
 - Add youtube rule in `src/rules.ts`
 

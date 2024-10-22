@@ -1,9 +1,18 @@
-import type { Author, CursorRule, Section } from "./types";
-import fs from "fs";
-import os from "os";
+import type { Author, CursorRule, Project, Section } from "./types";
+import fs from "fs/promises";
+import { homedir, userInfo } from "os";
+import path from "path";
 import { parse as parseYaml } from "yaml";
+import relativeTime from "dayjs/plugin/relativeTime";
+import dayjs from "dayjs";
+import { getPreferenceValues, showHUD, showToast, Toast, open } from "@raycast/api";
 
-export const getSections = (cursorRules: CursorRule[], sortByPopularity: boolean): Section[] => {
+export function getRelativeTime(timestamp: number) {
+  dayjs.extend(relativeTime);
+  return dayjs().to(dayjs(timestamp));
+}
+
+export function getSections(cursorRules: CursorRule[], sortByPopularity: boolean): Section[] {
   const sections = Array.from(new Set(cursorRules.flatMap((cursorRule) => cursorRule.tags)));
   const sectionsWithCursorRules = sections.map((tag) => ({
     name: tag,
@@ -11,11 +20,10 @@ export const getSections = (cursorRules: CursorRule[], sortByPopularity: boolean
   }));
 
   if (sortByPopularity) {
-    // Sort cursor rules within each section by count
     sectionsWithCursorRules.forEach((section) => {
       section.cursorRules.sort((a, b) => (b.count || 0) - (a.count || 0));
     });
-    // Sort sections by total count
+
     return sectionsWithCursorRules
       .map((section) => ({
         name: section.name,
@@ -24,7 +32,6 @@ export const getSections = (cursorRules: CursorRule[], sortByPopularity: boolean
       }))
       .sort((a, b) => b.totalCount - a.totalCount);
   } else {
-    // Sort by number of cursor rules in each category
     return sectionsWithCursorRules
       .map((section) => ({
         name: section.name,
@@ -32,9 +39,9 @@ export const getSections = (cursorRules: CursorRule[], sortByPopularity: boolean
       }))
       .sort((a, b) => b.slugs.length - a.slugs.length);
   }
-};
+}
 
-export const isImageUrl = (url: string): boolean => {
+export function isImageUrl(url: string): boolean {
   const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"];
 
   const isDataUri = url.startsWith("data:image/");
@@ -49,24 +56,24 @@ export const isImageUrl = (url: string): boolean => {
   const hasImageInUrl = url.toLowerCase().includes("image");
 
   return isDataUri || isImageExtension || isGitHubAvatar || hasImageInUrl || isYoutubeAvatar;
-};
+}
 
-export const getTimestamp = (filePath: string): number => {
-  const ifExists = fs.existsSync(filePath);
-  if (!ifExists) {
-    return -1; // if file not exists, return -1
-  } else {
-    return fs.statSync(filePath).mtimeMs;
+export async function getLastModifiedTime(path: string): Promise<number> {
+  try {
+    const stats = await fs.stat(path);
+    return stats.mtimeMs;
+  } catch {
+    return -1;
   }
-};
+}
 
-export const processContent = (content: string) => {
+export function processContent(content: string) {
   return content
     .trim()
     .split("\n")
     .map((line) => line.trim())
     .join("\n");
-};
+}
 
 export function getYoutubeVideoId(url: string): string {
   const parts = url.split("embed/");
@@ -78,7 +85,7 @@ export function getYoutubeVideoId(url: string): string {
 }
 
 export function cursorRuleToMarkdown(cursorRule: CursorRule): string {
-  const username = os.userInfo().username;
+  const username = userInfo().username;
 
   const frontmatter = `---
 title: ${cursorRule.title}
@@ -111,7 +118,7 @@ export function parseMarkdownToRule(content: string, fileName: string): CursorRu
     const frontmatterData = parseYaml(frontmatter);
 
     const author: Author = {
-      name: typeof frontmatterData.author?.name === "string" ? frontmatterData.author.name : os.userInfo().username,
+      name: typeof frontmatterData.author?.name === "string" ? frontmatterData.author.name : userInfo().username,
       url: typeof frontmatterData.author?.url === "string" ? frontmatterData.author.url : "",
       avatar: typeof frontmatterData.author?.avatar === "string" ? frontmatterData.author.avatar : "",
     };
@@ -130,4 +137,103 @@ export function parseMarkdownToRule(content: string, fileName: string): CursorRu
     console.error("Error parsing frontmatter:", error);
     return null;
   }
+}
+
+export function expandPath(path: string) {
+  return path.replace(/^~/, homedir());
+}
+
+export async function ensureCursorRulesFile(projectPath: string): Promise<void> {
+  const cursorRulesPath = path.join(projectPath, ".cursorrules");
+  try {
+    await fs.access(cursorRulesPath);
+  } catch {
+    await fs.writeFile(cursorRulesPath, "");
+  }
+}
+
+export async function applyCursorRule(projectPath: string, ruleContent: string, replace: boolean): Promise<void> {
+  const cursorRulesPath = path.join(projectPath, ".cursorrules");
+
+  if (replace) {
+    await fs.writeFile(cursorRulesPath, ruleContent);
+  } else {
+    await fs.appendFile(cursorRulesPath, "\n" + ruleContent);
+  }
+
+  await showHUD("Cursor rules applied successfully");
+}
+
+export async function openInCursor(path: string, successMessage?: string, callback?: () => void): Promise<void> {
+  return new Promise((resolve, reject) => {
+    try {
+      open(path, "Cursor");
+    } catch (error) {
+      console.error("Error opening with Cursor:", error);
+      reject(error);
+    } finally {
+      if (successMessage) {
+        showHUD(successMessage);
+      }
+      callback?.();
+      resolve();
+    }
+  });
+}
+
+export async function loadProjects(): Promise<Project[]> {
+  try {
+    const { projectsDirectory } = getPreferenceValues<Preferences>();
+
+    if (!projectsDirectory) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Projects directory not set",
+        message: "Please set the projects directory in the extension preferences",
+      });
+      return [];
+    }
+
+    const expandedPath = expandPath(projectsDirectory);
+    const projects = await findGitProjects(expandedPath);
+    return projects.sort((a, b) => (b.lastModifiedTime ?? 0) - (a.lastModifiedTime ?? 0));
+  } catch (error) {
+    console.error("Error loading projects:", error);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to load projects",
+      message: String(error),
+    });
+    return [];
+  }
+}
+
+async function isGitRepository(dirPath: string): Promise<boolean> {
+  try {
+    await fs.access(path.join(dirPath, ".git"));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function findGitProjects(dirPath: string, maxDepth = 3): Promise<Project[]> {
+  if (maxDepth === 0) return [];
+
+  const projects: Project[] = [];
+  const entries = await fs.readdir(dirPath, { withFileTypes: true });
+
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      const fullPath = path.join(dirPath, entry.name);
+      if (await isGitRepository(fullPath)) {
+        const lastModifiedTime = await getLastModifiedTime(fullPath);
+        projects.push({ name: entry.name, path: fullPath, lastModifiedTime });
+      } else {
+        projects.push(...(await findGitProjects(fullPath, maxDepth - 1)));
+      }
+    }
+  }
+
+  return projects;
 }

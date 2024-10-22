@@ -1,3 +1,27 @@
+export type AccountConfiguration = {
+  domain: string;
+  theme: string;
+  uid: number;
+  user: string;
+  feature: {
+    [feature: string]: "0" | "1";
+  };
+  ip: string;
+  contact_email: string;
+  dkim_enabled: "0" | "1";
+  spf_enableds: "0" | "1";
+};
+
+export type Usage = {
+  error: null;
+  description: string;
+  formatter: string | null;
+  maximum: string | null;
+  id: string;
+  url: string;
+  usage: number | string;
+};
+
 export type AccountDomains = {
   main_domain: string;
   sub_domains: string[];
@@ -67,6 +91,18 @@ export type FileItem = {
   ctime: number;
   absdir: string;
   nicemode: string;
+  rawmimetype: string;
+  rawmimename: string;
+  mimetype: string;
+};
+
+export type FileContent = {
+  from_charset: string;
+  path: string;
+  content: string;
+  filename: string;
+  dir: string;
+  to_charset: string;
 };
 
 export type ErrorResponse = {

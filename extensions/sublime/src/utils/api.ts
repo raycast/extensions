@@ -187,7 +187,7 @@ export async function saveLink(
             mark_as_favorite: isFavorite,
             mark_as_private: isPrivate,
             contributions: note ? [note] : [],
-            connections: connectedCollections.map((c) => c.uuid),
+            connect: connectedCollections.map((c) => c.uuid),
         };
 
         let response: any;
@@ -254,7 +254,7 @@ export async function saveTextEntity(
                 html,
                 mark_as_favorite: isFavorite,
                 mark_as_private: isPrivate,
-                connections: connectedCollections.map((c) => c.uuid),
+                connect: connectedCollections.map((c) => c.uuid),
                 contributions: noteHtml ? [{ entity_type: "contribution.note", html: noteHtml }] : [],
             },
         });
@@ -316,7 +316,7 @@ export async function saveFileEntity(
                 mark_as_favorite: isFavorite,
                 mark_as_private: isPrivate,
                 contributions: noteHtml ? [{ entity_type: "contribution.note", html: noteHtml }] : [],
-                connections: connectedCollections.map((c) => c.uuid),
+                connect: connectedCollections.map((c) => c.uuid),
             },
         });
         if (!entity) {

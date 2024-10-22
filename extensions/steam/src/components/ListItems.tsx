@@ -61,7 +61,7 @@ export const DynamicGameListItem = ({
       actions={
         <ActionPanel>
           <Action.Push icon={Icon.Sidebar} title="View Game Details" target={<GameDetails game={game} />} />
-          <LaunchActions appid={game?.appid} />
+          <LaunchActions name={game.name} appid={game?.appid} />
           <DefaultActions />
         </ActionPanel>
       }
@@ -80,7 +80,7 @@ export const MyGamesListType = ({ game }: { game: GameDataSimple }) => (
     actions={
       <ActionPanel>
         <Action.Push icon={Icon.Sidebar} title="View Game Details" target={<GameDetails game={game} />} />
-        <LaunchActions appid={game?.appid} />
+        <LaunchActions name={game.name} appid={game?.appid} />
         <DefaultActions />
       </ActionPanel>
     }

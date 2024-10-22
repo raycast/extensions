@@ -1,7 +1,6 @@
 import { List, ActionPanel, Icon, showToast, Toast, getPreferenceValues, Action, Color, Keyboard } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
 import { getSections } from "./utils";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { fetchCursorRules, fetchLocalRules, starRule, unstarRule } from "./api";
 import { getStarredRules } from "./api";
 import { CursorRulePreview } from "./components/CursorRulePreview";
@@ -12,6 +11,7 @@ import { ToggleViewAction } from "./components/actions/ToggleViewAction";
 import { ExportAndEditAction } from "./components/actions/ExportAndEditAction";
 import { CursorRule } from "./types";
 import { MAX_STARRED_RULES } from "./constants";
+import { usePromise } from "@raycast/utils";
 
 export default function Command() {
   const { showDetailedView, defaultCursorRulesList } = getPreferenceValues<Preferences>();
@@ -22,44 +22,36 @@ export default function Command() {
 
   const {
     data: remoteRules,
-    isLoading: isLoadingRemoteRules,
+    isLoading: isLoadingRemote,
+    error: remoteError,
     revalidate: revalidateRemoteRules,
-  } = usePromise(async () => {
-    try {
-      return await fetchCursorRules(popularOnly);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error(String(err)));
-      return [];
-    }
-  });
+  } = usePromise<(popularOnly: boolean) => Promise<CursorRule[]>>(fetchCursorRules, [popularOnly]);
 
   const {
     data: localRules,
-    isLoading: isLoadingLocalRules,
+    isLoading: isLoadingLocal,
+    error: localError,
     revalidate: revalidateLocalRules,
-  } = usePromise(async () => {
-    try {
-      return await fetchLocalRules();
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error(String(err)));
-      return [];
-    }
-  });
+  } = usePromise(fetchLocalRules, []);
 
   const {
-    data: starredRulesData,
-    isLoading: isLoadingStarredRules,
+    data: starredRules,
+    isLoading: isLoadingStarred,
+    error: starredError,
     revalidate: revalidateStarredRules,
-  } = usePromise(async () => {
-    try {
-      return await getStarredRules();
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error(String(err)));
-      return [];
-    }
-  });
+  } = usePromise(getStarredRules, []);
+
+  const handleError = useCallback((error: Error, action: string) => {
+    console.error(`Error ${action}:`, error);
+    showToast({
+      style: Toast.Style.Failure,
+      title: `Error ${action}`,
+      message: error.message,
+    });
+  }, []);
 
   useEffect(() => {
+    setError(remoteError || localError || starredError);
     if (error) {
       console.error("Error fetching cursor rules: ", error);
       showToast({
@@ -70,13 +62,19 @@ export default function Command() {
     }
   }, [error]);
 
-  const allRules = [...(localRules || []), ...(remoteRules || [])];
+  const allRules = useMemo(() => {
+    return remoteRules && localRules ? [...localRules, ...remoteRules] : [];
+  }, [localRules, remoteRules]);
 
-  const starredRules = allRules.filter((rule) => starredRulesData?.includes(rule.slug));
+  const starredRuleItems = useMemo(() => {
+    return allRules.filter((rule) => starredRules?.includes(rule.slug));
+  }, [allRules, starredRules]);
 
-  const nonStarredRemoteRules = remoteRules?.filter((rule) => !starredRulesData?.includes(rule.slug)) || [];
+  const nonStarredRemoteRules = useMemo(() => {
+    return remoteRules ? remoteRules.filter((rule) => !starredRules?.includes(rule.slug)) : [];
+  }, [remoteRules, starredRules]);
 
-  const sections = getSections(nonStarredRemoteRules, popularOnly);
+  const sections = useMemo(() => getSections(nonStarredRemoteRules, popularOnly), [nonStarredRemoteRules, popularOnly]);
 
   const renderRuleItem = (cursorRule: CursorRule, isStarred: boolean) => {
     const props = showingDetail
@@ -107,7 +105,11 @@ export default function Command() {
               <ExportAndEditAction
                 cursorRule={cursorRule}
                 onAction={async () => {
-                  await revalidateLocalRules();
+                  try {
+                    await revalidateLocalRules();
+                  } catch (error) {
+                    handleError(error as Error, "updating local rules");
+                  }
                 }}
               />
               <ToggleViewAction showingDetail={showingDetail} setShowingDetail={setShowingDetail} />
@@ -116,14 +118,16 @@ export default function Command() {
                 icon={isStarred ? Icon.StarDisabled : Icon.Star}
                 shortcut={Keyboard.Shortcut.Common.Pin}
                 onAction={async () => {
-                  if (isStarred) {
-                    await unstarRule(cursorRule.slug);
-                  } else {
-                    await starRule(cursorRule.slug);
+                  try {
+                    if (isStarred) {
+                      await unstarRule(cursorRule.slug);
+                    } else {
+                      await starRule(cursorRule.slug);
+                    }
+                    await revalidateStarredRules();
+                  } catch (error) {
+                    handleError(error as Error, "starring/unstarring cursor rule");
                   }
-                  await revalidateStarredRules();
-                  await revalidateRemoteRules();
-                  await revalidateLocalRules();
                 }}
               />
             </ActionPanel.Section>
@@ -138,14 +142,14 @@ export default function Command() {
 
   return (
     <List
-      isLoading={isLoadingRemoteRules || isLoadingLocalRules || isLoadingStarredRules}
+      isLoading={isLoadingRemote || isLoadingLocal || isLoadingStarred}
       isShowingDetail={showingDetail}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter Cursor Rules"
-          onChange={(newValue) => {
+          onChange={async (newValue) => {
             setPopularOnly(newValue === "popular");
-            revalidateRemoteRules();
+            await revalidateRemoteRules();
           }}
           defaultValue={popularOnly ? "popular" : "all"}
         >
@@ -154,30 +158,43 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {starredRules.length > 0 && (
-        <List.Section title="Starred Cursor Rules" subtitle={`${starredRules.length} / ${MAX_STARRED_RULES}`}>
-          {starredRules.map((cursorRule) => {
-            return renderRuleItem(cursorRule, true);
-          })}
-        </List.Section>
-      )}
-      {localRules && localRules.length > 0 && (
-        <List.Section title="Local Cursor Rules" subtitle={`${localRules.length}`}>
-          {localRules.map((cursorRule) =>
-            renderRuleItem(cursorRule, starredRulesData?.includes(cursorRule.slug) || false),
-          )}
-        </List.Section>
-      )}
-      {sections.length > 0 &&
-        sections.map((section) => (
-          <List.Section key={section.name} title={section.name} subtitle={`${section.slugs.length}`}>
-            {section.slugs.map((slug) => {
-              const cursorRule = nonStarredRemoteRules.find((item) => item.slug === slug);
-              if (!cursorRule) return null;
-              return renderRuleItem(cursorRule, starredRulesData?.includes(cursorRule.slug) || false);
-            })}
+      {error ? (
+        <List.EmptyView title="Something went wrong" description={error.message} icon={Icon.XMarkCircle} />
+      ) : (
+        <>
+          <List.Section title="Starred Cursor Rules" subtitle={`${starredRuleItems.length} / ${MAX_STARRED_RULES}`}>
+            {starredRuleItems.length > 0 ? (
+              starredRuleItems.map((rule) => renderRuleItem(rule, true))
+            ) : (
+              <List.Item title="No starred rules" />
+            )}
+            {isLoadingRemote && starredRuleItems.length < MAX_STARRED_RULES && (
+              <List.Item title="Loading potential starred rules..." icon={Icon.Circle} />
+            )}
           </List.Section>
-        ))}
+
+          <List.Section title="Local Cursor Rules" subtitle={localRules ? `${localRules.length}` : "0"}>
+            {localRules && localRules.length > 0 ? (
+              localRules.map((rule) => renderRuleItem(rule, starredRules?.includes(rule.slug) || false))
+            ) : (
+              <List.Item
+                title={isLoadingLocal ? "Loading local rules..." : "No local rules"}
+                icon={isLoadingLocal ? Icon.Circle : Icon.Dot}
+              />
+            )}
+          </List.Section>
+
+          {sections.length > 0 &&
+            sections.map((section) => (
+              <List.Section key={section.name} title={section.name} subtitle={`${section.slugs.length}`}>
+                {section.slugs.map((slug) => {
+                  const rule = nonStarredRemoteRules.find((item) => item.slug === slug);
+                  return rule ? renderRuleItem(rule, false) : null;
+                })}
+              </List.Section>
+            ))}
+        </>
+      )}
     </List>
   );
 }
