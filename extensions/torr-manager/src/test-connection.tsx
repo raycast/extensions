@@ -3,10 +3,10 @@ import { useState, useEffect } from "react";
 
 import { getAuthHeaders, handleDomain, timeoutFetch } from "./utils";
 import { PassThrough } from "stream";
-import { Preferences } from "./models";
+import { BasePreferences } from "./models";
 
 export default function TestConnectionCommand() {
-  const { torrserverUrl } = getPreferenceValues<Preferences>();
+  const { torrserverUrl } = getPreferenceValues<BasePreferences>();
 
   const [connectionStatus, setConnectionStatus] = useState<string>("Starting connection test...");
   const [loginStatus, setLoginStatus] = useState<string>("");

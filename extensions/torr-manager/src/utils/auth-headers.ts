@@ -1,8 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences } from "./../models";
+import { BasePreferences } from "./../models";
 
 export function getAuthHeaders() {
-  const { login, password } = getPreferenceValues<Preferences>();
+  const { login, password } = getPreferenceValues<BasePreferences>();
 
   const headers: Record<string, string> = {
     ...(login && password ? { Authorization: "Basic " + btoa(`${login}:${password}`) } : {}),

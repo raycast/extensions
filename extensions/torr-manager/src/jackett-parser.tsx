@@ -3,12 +3,17 @@ import { useEffect, useState } from "react";
 import fetch from "node-fetch";
 import { FormData } from "formdata-node";
 import { getAuthHeaders, getFormattedDate, handleDomain, timeoutFetch } from "./utils";
-import { JackettParsedTorrent, MOVIE_CATEGORIES, TorrentItem } from "./models";
+import { JackettParsedTorrent, JackettPreferences, TorrentCategories, TorrentItem } from "./models";
 
 export default function Command() {
   const [query, setQuery] = useState<string>("");
   const [items, setItems] = useState<JackettParsedTorrent[]>([]);
-  const { torrserverUrl, mediaPlayerApp, jackettParserUrl, jackettApiKey } = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<JackettPreferences>();
+  const { torrserverUrl, mediaPlayerApp, jackettParserUrl, jackettApiKey } = preferences;
+
+  const selectedCategories = Object.keys(TorrentCategories)
+    .filter((key) => preferences[key as never])
+    .map((key) => TorrentCategories[key as never]);
 
   useEffect(() => {
     if (query.length >= 3) {
@@ -37,7 +42,7 @@ export default function Command() {
         params.append("apikey", jackettApiKey);
       }
 
-      MOVIE_CATEGORIES.forEach((category) => {
+      selectedCategories.forEach((category) => {
         params.append("Category", `${category}`);
       });
 
@@ -60,6 +65,7 @@ export default function Command() {
 
       if (Array.isArray(torrents)) {
         const sortedItems = torrents.sort((a: JackettParsedTorrent, b: JackettParsedTorrent) => b.Seeders - a.Seeders);
+
         setItems(sortedItems);
         showToast(Toast.Style.Success, "", `${sortedItems.length} results`);
       } else {
@@ -165,17 +171,17 @@ export default function Command() {
               <List.Item.Detail
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="Title" />
+                    <List.Item.Detail.Metadata.TagList title="Title">
+                      <List.Item.Detail.Metadata.TagList.Item text={`${item.CategoryDesc}`} color={Color.Green} />
+                      <List.Item.Detail.Metadata.TagList.Item
+                        text={`${bytesToGbText(item.Size)}`}
+                        color={Color.Orange}
+                      />
+                    </List.Item.Detail.Metadata.TagList>
+
                     {formatTitle(item.Title).map((titleRow, index) => (
                       <List.Item.Detail.Metadata.Label key={index} title="" text={titleRow} />
                     ))}
-
-                    <List.Item.Detail.Metadata.Label title="Description" />
-                    {formatTitle(item.Description).map((titleRow, index) => (
-                      <List.Item.Detail.Metadata.Label key={index} title="" text={titleRow} />
-                    ))}
-
-                    <List.Item.Detail.Metadata.Separator />
 
                     <List.Item.Detail.Metadata.TagList title="Stats">
                       <List.Item.Detail.Metadata.TagList.Item text={`Seeds: ${item.Seeders}`} color={Color.Green} />
@@ -185,28 +191,37 @@ export default function Command() {
 
                     <List.Item.Detail.Metadata.Separator />
 
-                    <List.Item.Detail.Metadata.Label title="Size" text={bytesToGbText(item.Size)} />
+                    <List.Item.Detail.Metadata.Label title="Publish Date" text={getFormattedDate(item.PublishDate)} />
+
                     <List.Item.Detail.Metadata.Separator />
 
-                    <List.Item.Detail.Metadata.Label title="Publish Date" text={getFormattedDate(item.PublishDate)} />
+                    <List.Item.Detail.Metadata.Label title="Description" />
+                    {formatTitle(item.Description).map((titleRow, index) => (
+                      <List.Item.Detail.Metadata.Label key={index} title="" text={titleRow} />
+                    ))}
                   </List.Item.Detail.Metadata>
                 }
               />
             }
             actions={
               <ActionPanel>
-                <Action
-                  title={`Open in ${mediaPlayerApp!.name}`}
-                  icon={{ source: Icon.Video }}
-                  onAction={() => addTorrentToServer(item.Title, item.Link, false, true)}
-                />
-                <Action
-                  icon={{ source: Icon.SaveDocument }}
-                  title="Add Torrent to Server"
-                  onAction={() => addTorrentToServer(item.Title, item.Link)}
-                />
-                <Action.OpenInBrowser title="Download Torrent File" url={item.Link} />
-                <Action.CopyToClipboard title="Copy Link to Torrent" content={item.Link} />
+                {torrserverUrl && (
+                  <Action
+                    title={`Open in ${mediaPlayerApp!.name}`}
+                    icon={{ source: Icon.Video }}
+                    onAction={() => addTorrentToServer(item.Title, item.Link, false, true)}
+                  />
+                )}
+                {torrserverUrl && (
+                  <Action
+                    icon={{ source: Icon.SaveDocument }}
+                    title="Add Torrent to Server"
+                    onAction={() => addTorrentToServer(item.Title, item.Link)}
+                  />
+                )}
+                {item.Link && <Action.OpenInBrowser title="Download Torrent File" url={item.Link} />}
+                {item.Details && <Action.OpenInBrowser title="Open in Browser" url={item.Details} />}
+                {item.Link && <Action.CopyToClipboard title="Copy Link to Torrent" content={item.Link} />}
               </ActionPanel>
             }
           />

@@ -1,7 +1,7 @@
 import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { fileFromPath } from "formdata-node/file-from-path";
 import { getAuthHeaders, handleDomain, timeoutFetch } from "./utils";
-import { Preferences } from "./models";
+import { BasePreferences } from "./models";
 import { useForm, FormValidation } from "@raycast/utils";
 import { FormData } from "formdata-node";
 
@@ -12,7 +12,7 @@ interface SubmitFormValues {
 }
 
 export default function Command() {
-  const { torrserverUrl } = getPreferenceValues<Preferences>();
+  const { torrserverUrl } = getPreferenceValues<BasePreferences>();
 
   const { handleSubmit, itemProps, setValue } = useForm<SubmitFormValues>({
     onSubmit: async (values) => {

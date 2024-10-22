@@ -12,10 +12,10 @@ import {
 import { useEffect, useState } from "react";
 import { useLocalStorage } from "@raycast/utils";
 import { getAuthHeaders, handleDomain, timeoutFetch } from "./utils";
-import { Preferences, TorrentItem } from "./models";
+import { BasePreferences, TorrentItem } from "./models";
 
 export default function Command() {
-  const { torrserverUrl, mediaPlayerApp } = getPreferenceValues<Preferences>();
+  const { torrserverUrl, mediaPlayerApp } = getPreferenceValues<BasePreferences>();
 
   const [items, setItems] = useState<TorrentItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
