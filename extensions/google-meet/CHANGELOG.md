@@ -1,6 +1,6 @@
 # Google Meet Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2024-10-22
 
 - Add delay before reading meeting URL from browser
 
