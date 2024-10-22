@@ -1,6 +1,6 @@
 # Mattermost Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2024-10-22
 
 - Fix: `Search Channel` not loading when ZERO channels (and related)
 - `signIn` function is now `async`
