@@ -1,6 +1,6 @@
 # Remove Background - Powered by Mac Changelog
 
-## [Fix error toast message] - {PR_MERGE_DATE}
+## [Fix error toast message] - 2024-10-22
 
 - Fix the toast message did not appear when there was an error.
 
