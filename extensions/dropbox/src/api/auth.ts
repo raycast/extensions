@@ -2,7 +2,7 @@ import { OAuth } from "@raycast/api";
 import { URLSearchParams } from "url";
 import fetch from "node-fetch";
 
-const dbxClientID = "v02dx7xhu86xn09";
+const dbxClientID = "8tisoiv3j5fn8ts";
 export const dbxAuthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Dropbox",

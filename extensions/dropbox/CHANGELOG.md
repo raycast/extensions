@@ -1,5 +1,7 @@
 # Dropbox Changelog
 
+## [New OAuth App] - {PR_MERGE_DATE}
+
 ## [BYOK as Fallback] - 2024-09-22
 
 - Add metadata images
@@ -13,4 +15,4 @@
 
 ## [Update] - 2023-01-17
 
-- Added better DropBox authentication
+- Added better Dropbox authentication
