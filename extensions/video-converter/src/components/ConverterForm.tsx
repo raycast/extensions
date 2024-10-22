@@ -2,15 +2,12 @@ import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { convertVideo } from "../utils/converter";
 import path from "path";
 
-
-
 const ALLOWED_EXTENSIONS = [".mov", ".mp4", ".avi", ".mkv"];
 
 export function ConverterForm() {
   const handleSubmit = async (values: { videoFile: string[]; format: string }) => {
-
     const fileExtension = path.extname(values.videoFile[0]).toLowerCase();
-    
+
     if (!ALLOWED_EXTENSIONS.includes(fileExtension)) {
       await showToast({
         style: Toast.Style.Failure,
@@ -19,7 +16,6 @@ export function ConverterForm() {
       });
       return;
     }
-
 
     const toast = await showToast({
       style: Toast.Style.Animated,
