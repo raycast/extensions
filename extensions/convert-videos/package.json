@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "convert-videos",
+  "name": "video-converter",
   "title": "Video Converter",
   "description": "This extension converts video files using ffmpeg",
   "icon": "extension-icon.png",
