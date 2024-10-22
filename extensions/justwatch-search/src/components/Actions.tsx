@@ -10,8 +10,14 @@ type Props = {
 export const Actions = ({ media, offer }: Props) => {
   return (
     <ActionPanel>
-      <Action.OpenInBrowser url={offer.url} title={`Open in Browser`} />
-      <Action.OpenInBrowser url={media.jwUrl} title={`Open in JustWatch.com`} />
+      <Action.OpenInBrowser icon={offer.icon} url={offer.url} title={`Open in Browser`} />
+      <Action.OpenInBrowser icon="command-icon.png" url={media.jwUrl} title={`Open in JustWatch.com`} />
+      <Action.OpenInBrowser
+        icon="imdb.png"
+        url={media.imdbUrl}
+        title={`Open in IMDB`}
+        shortcut={{ modifiers: ["cmd"], key: "i" }}
+      />
       <Action.CopyToClipboard
         shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
         content={offer.url}

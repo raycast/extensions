@@ -11,7 +11,11 @@ export function isReadyToFetch() {
   return isProfileSelected || isAwsVaultSessionActive;
 }
 
-export function resourceToConsoleLink(resourceId: string | undefined, resourceType: string) {
+export function resourceToConsoleLink(
+  resourceId: string | undefined,
+  resourceType: string,
+  runId: string | undefined = undefined,
+) {
   const { AWS_REGION } = process.env;
 
   if (!resourceId) return "";
@@ -33,6 +37,10 @@ export function resourceToConsoleLink(resourceId: string | undefined, resourceTy
       return `${AWS_URL_BASE}/cloudformation/home?region=${AWS_REGION}#/stacks/stackinfo?stackId=${resourceId}`;
     case "AWS::Lambda::Function":
       return `${AWS_URL_BASE}/lambda/home?region=${AWS_REGION}#/functions/${resourceId}?tab=monitoring`;
+    case "AWS::Glue::JobRun":
+      return `${AWS_URL_BASE}/gluestudio/home?region=eu-central-1#/job/${resourceId}/run/${runId}`;
+    case "AWS::Glue::JobRuns":
+      return `${AWS_URL_BASE}/gluestudio/home?region=eu-central-1#/editor/job/${resourceId}/runs`;
     case "AWS::CodePipeline::Pipeline":
       return `${AWS_URL_BASE}/codesuite/codepipeline/pipelines/${resourceId}/view?region=${AWS_REGION}`;
     case "AWS::S3::Bucket":

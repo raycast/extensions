@@ -49,7 +49,6 @@ Cursor Directory is a powerful Raycast extension that seamlessly integrates with
 6. **Local Modification**:
 
    - Press `Cmd + E` to open the cursor rule as a Markdown file in Cursor for editing.
-   - Note: Ensure the `cursor` shell command is installed. (Install via `Cmd + Shift + P` in Cursor, then search for "Install cursor command")
 
 7. **YouTube Videos**:
    - Access curated Cursor-related YouTube videos directly from the extension.
