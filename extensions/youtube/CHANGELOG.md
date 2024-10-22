@@ -1,6 +1,6 @@
 # YouTube Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2024-10-22
 
 - Update the cache in the `search-videos` and `search-channels` commands to use local storage
 
