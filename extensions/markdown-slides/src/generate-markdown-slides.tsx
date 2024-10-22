@@ -20,7 +20,9 @@ const preferences = getPreferenceValues<Preferences>();
 const cache = new Cache();
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.GenerateMarkdownSlides }>) {
-  const PROMPT = `Generate a presentation in markdown format about the topic: "${props.arguments.topic}". Each slide should be separated by a horizontal ruler (---). Include the following elements in the presentation:
+  const PAGE_SEPARATOR = preferences.pageSeparator === "newline" ? "\n\n\n" : "---";
+
+  const PROMPT = `Generate a presentation in markdown format about the topic: "${props.arguments.topic}". Each slide should be separated by a ${preferences.pageSeparator} (${PAGE_SEPARATOR}). Include the following elements in the presentation:
   
   1. **Title Slide**: The title of the presentation.
   2. **Introduction Slide**: A brief introduction to the topic.
@@ -34,27 +36,27 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Genera
 
   Here's the format you should follow:
 
-  # Slide Title
+# Slide Title
 
-  Content goes here.
+Content goes here.
 
-  ---
+${PAGE_SEPARATOR}
 
-  # Next Slide Title
+# Next Slide Title
 
-  Content goes here.
+Content goes here.
 
-  ---
+${PAGE_SEPARATOR}
 
-  # Conclusion
+# Conclusion
 
-  Summary of the main points.
+Summary of the main points.
 
-  # References
+# References
 
-	1.	Reference 1
-	2.	Reference 2
-  `;
+1.	Reference 1
+2.	Reference 2
+`;
 
   const { data, isLoading } = useAI(PROMPT, {
     creativity: props.arguments.creativity || 1,

@@ -91,7 +91,7 @@ export default function Command(props: LaunchProps<{ draftValues: CreateFormValu
         placeholder="Enter content"
         info={
           "Pages are separated by " +
-          (preferences.pageSeparator === "---" ? "horizontal rule (---)" : "two line breaks")
+          (preferences.pageSeparator === "ruler" ? "horizontal rule (---)" : "three line breaks")
         }
         defaultValue={draftValues?.content}
         {...itemProps.content}

@@ -92,11 +92,11 @@
       "data": [
         {
           "title": "Horizontal Ruler (---)",
-          "value": "---"
+          "value": "ruler"
         },
         {
-          "title": "New lines (\\n\\n)",
-          "value": "\n\n"
+          "title": "New lines (\\n\\n\\n)",
+          "value": "newline"
         }
       ]
     }

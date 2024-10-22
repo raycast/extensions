@@ -25,8 +25,9 @@ const preferences = getPreferenceValues<Preferences>();
 const cache = new Cache();
 
 const DEFAULT_PATH = `index.md`;
-const PAGE_SEPARATOR = preferences.pageSeparator;
+const PAGE_SEPARATOR = preferences.pageSeparator === "newline" ? "\n\n\n" : "---";
 const PLACEHOLDER_TEXT = "No Markdown slides found. Create a new markdown file at ";
+const PLACEHOLDER_CONTENT = `# New Presentation\n\nStart writing your slides here.\n${PAGE_SEPARATOR}\nNew Page`;
 
 function editFile(filePath: string, finder = false) {
   const dir = preferences.slidesDirectory?.replace("~", process.env.HOME || "");
@@ -35,10 +36,7 @@ function editFile(filePath: string, finder = false) {
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
       }
-      fs.writeFileSync(
-        filePath.replace("~", process.env.HOME || ""),
-        "# New Presentation\n\nStart writing your slides here.\n\n---\n\nNew Page",
-      );
+      fs.writeFileSync(filePath.replace("~", process.env.HOME || ""), PLACEHOLDER_CONTENT);
     } catch (error) {
       console.error("Error writing file:", error);
       return;
