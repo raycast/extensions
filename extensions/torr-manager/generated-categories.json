@@ -1,7 +1,7 @@
 [
   {
     "name": "Console",
-    "title": "Select categories",
+    "title": "Select search categories",
     "label": "Console (1000)",
     "type": "checkbox",
     "description": "Select necessary search categories",

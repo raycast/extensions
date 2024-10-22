@@ -78,11 +78,11 @@
         },
         {
           "name": "Console",
-          "title": "Select categories",
+          "title": "Select search categories",
           "label": "Console (1000)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "ConsoleNDS",
@@ -90,7 +90,7 @@
           "label": "Console/NDS (1010)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "ConsolePSP",
@@ -98,7 +98,7 @@
           "label": "Console/PSP (1020)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "ConsoleWii",
@@ -106,7 +106,7 @@
           "label": "Console/Wii (1030)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "ConsoleXbox",
@@ -114,7 +114,7 @@
           "label": "Console/XBox (1040)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "ConsoleXbox360",
@@ -122,7 +122,7 @@
           "label": "Console/XBox 360 (1050)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "ConsolePS3",
@@ -130,7 +130,7 @@
           "label": "Console/PS3 (1080)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "ConsoleOther",
@@ -138,7 +138,7 @@
           "label": "Console/Other (1090)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "ConsolePSVita",
@@ -146,7 +146,7 @@
           "label": "Console/PS Vita (1120)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "ConsolePS4",
@@ -154,7 +154,7 @@
           "label": "Console/PS4 (1180)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "Movies",
@@ -162,7 +162,7 @@
           "label": "Movies (2000)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "MoviesForeign",
@@ -170,7 +170,7 @@
           "label": "Movies/Foreign (2010)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "MoviesOther",
@@ -178,7 +178,7 @@
           "label": "Movies/Other (2020)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "MoviesHD",
@@ -186,7 +186,7 @@
           "label": "Movies/HD (2040)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "MoviesUHD",
@@ -194,7 +194,7 @@
           "label": "Movies/UHD (2045)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "Movies3D",
@@ -202,7 +202,7 @@
           "label": "Movies/3D (2060)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "MoviesDVD",
@@ -210,7 +210,7 @@
           "label": "Movies/DVD (2070)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "Audio",
@@ -218,7 +218,7 @@
           "label": "Audio (3000)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "AudioMP3",
@@ -226,7 +226,7 @@
           "label": "Audio/MP3 (3010)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "AudioVideo",
@@ -234,7 +234,7 @@
           "label": "Audio/Video (3020)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "AudioAudiobook",
@@ -242,7 +242,7 @@
           "label": "Audio/Audiobook (3030)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "AudioLossless",
@@ -250,7 +250,7 @@
           "label": "Audio/Lossless (3040)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "PC",
@@ -258,7 +258,7 @@
           "label": "PC (4000)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "PC0Day",
@@ -266,7 +266,7 @@
           "label": "PC/0day (4010)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "PCISO",
@@ -274,7 +274,7 @@
           "label": "PC/ISO (4020)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "PCMac",
@@ -282,7 +282,7 @@
           "label": "PC/Mac (4030)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "PCMobileOther",
@@ -290,7 +290,7 @@
           "label": "PC/Mobile-Other (4040)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "PCGames",
@@ -298,7 +298,7 @@
           "label": "PC/Games (4050)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "PCMobileiOS",
@@ -306,7 +306,7 @@
           "label": "PC/Mobile-iOS (4060)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "PCMobileAndroid",
@@ -314,7 +314,7 @@
           "label": "PC/Mobile-Android (4070)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "TV",
@@ -322,7 +322,7 @@
           "label": "TV (5000)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "TVForeign",
@@ -330,7 +330,7 @@
           "label": "TV/Foreign (5020)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "TVSD",
@@ -338,7 +338,7 @@
           "label": "TV/SD (5030)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "TVHD",
@@ -346,7 +346,7 @@
           "label": "TV/HD (5040)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "TVUHD",
@@ -354,7 +354,7 @@
           "label": "TV/UHD (5045)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "TVOther",
@@ -362,7 +362,7 @@
           "label": "TV/Other (5050)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "TVSport",
@@ -370,7 +370,7 @@
           "label": "TV/Sport (5060)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "TVAnime",
@@ -378,7 +378,7 @@
           "label": "TV/Anime (5070)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "TVDocumentary",
@@ -386,7 +386,7 @@
           "label": "TV/Documentary (5080)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "XXX",
@@ -394,7 +394,7 @@
           "label": "XXX (6000)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "Books",
@@ -402,7 +402,7 @@
           "label": "Books (7000)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "BooksMags",
@@ -410,7 +410,7 @@
           "label": "Books/Mags (7010)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "BooksEBook",
@@ -418,7 +418,7 @@
           "label": "Books/EBook (7020)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "BooksComics",
@@ -426,7 +426,7 @@
           "label": "Books/Comics (7030)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "BooksTechnical",
@@ -434,7 +434,7 @@
           "label": "Books/Technical (7040)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "BooksOther",
@@ -442,7 +442,7 @@
           "label": "Books/Other (7050)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "Other",
@@ -450,7 +450,7 @@
           "label": "Other (8000)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         },
         {
           "name": "OtherMisc",
@@ -458,7 +458,7 @@
           "label": "Other/Misc (8010)",
           "type": "checkbox",
           "description": "Select necessary search categories",
-          "required": true
+          "required": false
         }
       ]
     },
