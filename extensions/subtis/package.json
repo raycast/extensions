@@ -6,7 +6,7 @@
   "author": "lndgalante",
   "license": "MIT",
   "icon": "command-icon.png",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "commands": [
     {
       "name": "index",
@@ -20,7 +20,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "deploy": "rm -rf .env.development && bun run build && npx @raycast/api@latest publish"
   },
   "dependencies": {
     "@raycast/api": "^1.84.3",
@@ -30,8 +31,8 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.11",
-    "@types/bun": "^1.1.11",
-    "@types/node": "22.7.6",
+    "@types/bun": "^1.1.12",
+    "@types/node": "22.7.8",
     "@types/node-fetch": "^2.6.11",
     "@types/react": "18.3.11",
     "typescript": "^5.6.3"
