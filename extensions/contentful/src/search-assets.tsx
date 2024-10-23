@@ -1,8 +1,9 @@
 import { useCachedPromise } from "@raycast/utils";
 import { CONTENTFUL } from "./lib/contentful";
-import { Action, ActionPanel, Grid } from "@raycast/api";
-import { CONTENTFUL_APP_URL, CONTENTFUL_LIMIT, CONTENTFUL_LOCALE, CONTENTFUL_SPACE } from "./lib/config";
+import { ActionPanel, Grid } from "@raycast/api";
+import { CONTENTFUL_LIMIT, CONTENTFUL_LINKS, CONTENTFUL_LOCALE } from "./lib/config";
 import { useState } from "react";
+import OpenInContentful from "./lib/components/open-in-contentful";
 
 export default function SearchAssets() {
   const [searchText, setSearchText] = useState("");
@@ -43,7 +44,6 @@ export default function SearchAssets() {
       onSearchTextChange={setSearchText}
     >
       {assets.map((asset) => {
-        const url = `${CONTENTFUL_APP_URL}spaces/${CONTENTFUL_SPACE}/assets/${asset.sys.id}`;
         return (
           <Grid.Item
             key={asset.sys.id}
@@ -51,7 +51,7 @@ export default function SearchAssets() {
             content={"https:" + asset.fields.file[CONTENTFUL_LOCALE].url}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser url={url} />
+                <OpenInContentful url={`${CONTENTFUL_LINKS.space}assets/${asset.sys.id}`} />
               </ActionPanel>
             }
           />
