@@ -54,7 +54,7 @@ const PilotMenuBar = () => {
 
   //#region ITEMS
   const TimerItem = () => {
-    if (isLoading) return <></>;
+    if (timer === undefined) return;
     if (timer !== null)
       return (
         <MenuBarExtra.Item

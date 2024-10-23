@@ -33,11 +33,11 @@ import EndTimerForm from "../forms/EndTimerForm";
 import ProjetForm from "../forms/ProjetForm";
 import { QueryChangeActiveProject, QueryDeleteProject } from "../../queriesFunctions/ProjectQueries";
 import { RefreshAction } from "../actions/actions";
-import SelectDBsForm from "../forms/SelectDBsForm";
 import UseOAuth from "../../fetch/useOAuth";
 import useDBLinkHook from "../../hooks/DBLinkHook";
 import useFetchCacheHome from "../../fetch/useFetchCacheHome";
 import { Client } from "@notionhq/client";
+import CheckDBDetail from "../details/CheckDBDetail";
 
 const cache = new Cache();
 
@@ -153,7 +153,7 @@ const GeneralPilot = () => {
       <List.Item.Detail.Metadata>
         <List.Item.Detail.Metadata.TagList title="📁 Project">
           <List.Item.Detail.Metadata.TagList.Item
-            text="⊕"
+            text="⊕ Add Project"
             color={Color.Green}
             onAction={() => push(<ProjetForm refresh={refresh} />)}
           />
@@ -424,7 +424,7 @@ const GeneralPilot = () => {
           icon={"⚙️"}
           actions={
             <ActionPanel>
-              <Action.Push icon={"⚙️"} title="Open Databases Selection" target={<SelectDBsForm notion={notion} />} />
+              <Action.Push icon={"⚙️"} title="Open Databases Selection" target={<CheckDBDetail notion={notion} />} />
             </ActionPanel>
           }
         />
@@ -451,7 +451,7 @@ const GeneralPilot = () => {
       <HelpSection />
     </List>
   ) : (
-    <SelectDBsForm notion={notion} />
+    <CheckDBDetail notion={notion} />
   );
 };
 export default GeneralPilot;

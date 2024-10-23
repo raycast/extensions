@@ -16,9 +16,9 @@ import { dateOrder, projectFilter } from "../../tools/filtersTools";
 
 import UseOAuth from "../../fetch/useOAuth";
 import useDBLinkHook from "../../hooks/DBLinkHook";
-import SelectDBsForm from "../forms/SelectDBsForm";
 import useFetchCachTaskManager from "../../fetch/useFetchCachTaskManager";
 import { Client } from "@notionhq/client";
+import CheckDBDetail from "../details/CheckDBDetail";
 
 interface TodoItemProps {
   todo: Todo;
@@ -555,7 +555,7 @@ const TaskManagementView = ({ launchProps }: { launchProps: LaunchProps | undefi
       )}
     </List>
   ) : (
-    <SelectDBsForm notion={notion} />
+    <CheckDBDetail notion={notion} />
   );
 };
 

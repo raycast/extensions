@@ -10,9 +10,9 @@ import TimezoneHook from "../../tools/TimezoneHook";
 import { projectFilter } from "../../tools/filtersTools";
 import UseOAuth from "../../fetch/useOAuth";
 import useDBLinkHook from "../../hooks/DBLinkHook";
-import SelectDBsForm from "../forms/SelectDBsForm";
 import useFetchCacheJournals from "../../fetch/useFetchCacheJournals";
 import { Client } from "@notionhq/client";
+import CheckDBDetail from "../details/CheckDBDetail";
 
 //#region INTERFACES
 interface JournalItemProps {
@@ -339,7 +339,7 @@ const JournalView = () => {
       <JournalSection />
     </List>
   ) : (
-    <SelectDBsForm notion={notion} />
+    <CheckDBDetail notion={notion} />
   );
 };
 

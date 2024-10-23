@@ -1,7 +1,10 @@
 # Pilot - Calendar, Task Manager & Journals | Changelog
 
+##  [AUTOMATED CONFIGURATIOn] - 2024-10-22 
 
-##  [FLICKERING CORRECTIONS & USECACHEPROMISE] - 2024-17-09 
+- Automated configuration of dbs from Notion
+
+##  [FLICKERING CORRECTIONS & USECACHEPROMISE] - 2024-10-17 
 
 - Use useCachePromise hooks for fetching
 - Add Icons for all actions
@@ -12,7 +15,7 @@
 - Modify README.md
 
 
-##  [OAUTH BUGS CORRECTION & TODAY HOOKS] - 2024-13-09 
+##  [OAUTH BUGS CORRECTION & TODAY HOOKS] - 2024-10-13 
 
 - Bugs correction with OAuth 
 - Add Today Hooks for MenuBar & Home to refresh when is a new today

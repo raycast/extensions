@@ -6,36 +6,25 @@ Pilot is a Raycast extension working with a specific Notion Template. It have fo
 
 You can a complete documentation [here](http://pilot-docs.romubuntu.dev).
 
-## Initialization
-
 ### Install Pilot on Raycast
 
 Download the Pilot extension [here](https://www.raycast.com/store), and add it to your Raycast.
 
-### Duplicate the Notion Template
-
-To use Pilot, you must have a specifi Notion template.
-Access to the template page, duplicate it and add it to your private Notion workspace.
-
-You can also directly add it to your Notion during the authentication step.
-
-> You can find the template [here](http://pilot-template.romubuntu.dev).
-
 ### Initialize your Raycast Pilot extension
 
-Enter us your pseudo and your timezone.
+Enter a pseudonyme for the extension and select your timezone.
 
-> Make sure that the timezone selected is the same as your timezone on Notion.
-
+> Make sure that the timezone selected is the same as your timezone in Notion.
 
 ### Login in to your Notion account
 
-Sign in to Notion with Raycast, and select the Pilot Notion page duplicated to be connected to the Pilot integration.
+You have to connect your Notion account to the Pilot extension. 
+Log in to Notion, authorize the Pilot integration, and duplicate the provided template to be connected to the Pilot integration.
 
-> Ensure that all your databases' pages allow the Pilot integration directly on Notion.
 
-### Propagate the databases from Notion
+### Automatic configuration
 
-Select each database from the Pilot Notion page duplicated.
+Launch any command and wait for the automatic configuration.
+If it is all good, press Enter and start using Pilot ! 
 
-> Your dbs will be automatically propagated from Notion if you have well duplicated the Notion template page, and correctlty linked it with the Pilot integration.
+> Ensure that all your children database pages from the template allow the Pilot integration directly on Notion.

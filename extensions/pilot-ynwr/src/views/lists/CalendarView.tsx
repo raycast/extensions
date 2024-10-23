@@ -10,9 +10,9 @@ import { QueryDeleteItem } from "../../queriesFunctions/GeneralQueries";
 import TimezoneHook from "../../tools/TimezoneHook";
 import UseOAuth from "../../fetch/useOAuth";
 import useDBLinkHook from "../../hooks/DBLinkHook";
-import SelectDBsForm from "../forms/SelectDBsForm";
 import useFetchCacheCalendar from "../../fetch/useFetchCacheCalendar";
 import { Client } from "@notionhq/client";
+import CheckDBDetail from "../details/CheckDBDetail";
 
 const ADDTIMES = { a: "15 minutes", b: "30 minutes", c: "1 hour", d: "2 hours", e: "4 hours" };
 
@@ -510,7 +510,7 @@ const CalendarView = () => {
       {addType !== "Nothing" ? <></> : <CalendarSection calendar={calendar} />}
     </List>
   ) : (
-    <SelectDBsForm notion={notion} />
+    <CheckDBDetail notion={notion} />
   );
 };
 
