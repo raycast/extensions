@@ -14,3 +14,9 @@ export const INVOICE_STATUSES = {
   UNPAID: "The invoice is unpaid.",
   VIEWED: "The invoice was viewed.",
 };
+
+export const HELP_LINKS = {
+  AddCustomer: "https://support.waveapps.com/hc/en-us/articles/208621786-Add-a-customer",
+  CreateInvoice: "https://support.waveapps.com/hc/en-us/articles/208621656-Create-an-invoice",
+  AddProductOrService: "https://support.waveapps.com/hc/en-us/articles/208621766-Add-a-product-or-service",
+};

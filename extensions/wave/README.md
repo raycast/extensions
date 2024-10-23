@@ -46,3 +46,14 @@ This is a Raycast extension for [Wave](https://www.waveapps.com/). It allows you
 ## 🗒️ NOTES
 
 - If you enter `Access Token` in `Preferences` this will take precedence over OAuth but you can switch to OAuth by deleting the token from Preferences
+- This extension is using Raycast's own [PKCE proxy](https://oauth.raycast.com/) so security is ensuerd.
+
+## 🖼️ Media
+
+<details>
+<summary>EmptyView</summary>
+
+<img src="./media/no-customers.png" alt="No customers" />
+<img src="./media/no-invoices.png" alt="No invoices" />
+<img src="./media/no-products-or-services.png" alt="No products or services" />
+</details>

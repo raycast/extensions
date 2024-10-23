@@ -1,19 +1,24 @@
-import {useFetch } from "@raycast/utils";
+import { getAccessToken, useFetch } from "@raycast/utils";
 import { Business, Currency, Customer, Edges, Invoice, Result } from "./types";
 import { API_URL } from "./config";
 import { QUERIES } from "./gql/queries";
 
-export const useGetBusinesses = (token: string) =>
-  useFetch(API_URL, {
+export const common = () => {
+  const { token } = getAccessToken();
+  return {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
+  };
+};
+export const useGetBusinesses = () =>
+  useFetch(API_URL, {
+    ...common(),
     body: JSON.stringify({
       query: QUERIES.getBusinesses,
     }),
-    execute: Boolean(token),
     mapResult(result: Result<{ businesses: Edges<Business> }>) {
       if ("errors" in result) throw new Error(result.errors[0].message);
       return {
@@ -22,20 +27,15 @@ export const useGetBusinesses = (token: string) =>
     },
     initialData: [],
   });
-export const useGetBusinessInvoices = (businessId: string, token: string) =>
+export const useGetBusinessInvoices = (businessId: string) =>
   useFetch(API_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
+    ...common(),
     body: JSON.stringify({
       query: QUERIES.getBusinessInvoices,
       variables: {
         businessId,
       },
     }),
-    execute: Boolean(token),
     mapResult(result: Result<{ business: { invoices: Edges<Invoice> } }>) {
       if ("errors" in result) throw new Error(result.errors[0].message);
       return {
@@ -45,20 +45,15 @@ export const useGetBusinessInvoices = (businessId: string, token: string) =>
     initialData: [],
   });
 
-export const useGetBusinessCustomers = (businessId: string, token: string) =>
+export const useGetBusinessCustomers = (businessId: string) =>
   useFetch(API_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
+    ...common(),
     body: JSON.stringify({
       query: QUERIES.getBusinessCustomers,
       variables: {
         businessId,
       },
     }),
-    execute: Boolean(token),
     mapResult(result: Result<{ business: { customers: Edges<Customer> } }>) {
       if ("errors" in result) throw new Error(result.errors[0].message);
       return {
@@ -68,20 +63,15 @@ export const useGetBusinessCustomers = (businessId: string, token: string) =>
     initialData: [],
   });
 
-export const useGetBusinessProductsAndServices = (businessId: string, token: string) =>
+export const useGetBusinessProductsAndServices = (businessId: string) =>
   useFetch(API_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
+    ...common(),
     body: JSON.stringify({
       query: QUERIES.getProducts,
       variables: {
         businessId,
       },
     }),
-    execute: Boolean(token),
     mapResult(
       result: Result<{
         business: {

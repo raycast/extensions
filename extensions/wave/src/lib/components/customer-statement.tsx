@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Customer, Edges, Invoice, Result } from "../types";
-import { FormValidation, getAccessToken, useFetch, useForm } from "@raycast/utils";
+import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { Action, ActionPanel, Detail, Form, Icon, List, useNavigation } from "@raycast/api";
 import { API_URL } from "../config";
 import { queryGetCustomerOutstandingInvoicesCustomerStatement } from "../gql/queries";
 import { formatDate, formatMoney } from "../utils";
+import { common } from "../wave";
 
 export default function CustomerStatement({
   businessId,
@@ -43,13 +44,8 @@ export default function CustomerStatement({
   });
 
   const { push } = useNavigation();
-  const { token } = getAccessToken();
   const { isLoading } = useFetch(API_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
+    ...common(),
     body: JSON.stringify({
       query: values.type === "outstanding-invoices" ? queryGetCustomerOutstandingInvoicesCustomerStatement : "",
       variables: {
