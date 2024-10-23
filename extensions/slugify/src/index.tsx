@@ -1,5 +1,5 @@
 import React from "react";
-import { List, ActionPanel, Action, Clipboard, Icon, getPreferenceValues } from "@raycast/api";
+import { List, ActionPanel, Action, Clipboard, Icon, getPreferenceValues, LaunchProps } from "@raycast/api";
 import slugify from "slugify";
 
 enum DefaultActionPreference {
@@ -36,6 +36,10 @@ type Result = {
   noLower: string;
   underscore: string;
   underscoreNoLower: string;
+  defaultStrict: string;
+  noLowerStrict: string;
+  underscoreStrict: string;
+  underscoreNoLowerStrict: string;
 };
 
 export default function Command() {
@@ -56,6 +60,10 @@ export default function Command() {
         noLower: slugify(_input, { lower: false, replacement: "-" }),
         underscore: slugify(_input, { lower: true, replacement: "_" }),
         underscoreNoLower: slugify(_input, { lower: false, replacement: "_" }),
+        defaultStrict: slugify(_input, { lower: true, replacement: "-", strict: true }),
+        noLowerStrict: slugify(_input, { lower: false, replacement: "-", strict: true }),
+        underscoreStrict: slugify(_input, { lower: true, replacement: "_", strict: true }),
+        underscoreNoLowerStrict: slugify(_input, { lower: false, replacement: "_", strict: true }),
       });
     } else {
       setResult(undefined);
@@ -74,7 +82,12 @@ export default function Command() {
         <>
           <List.Section title={`Input: ${input || clipboardText}`}>
             {Object.entries(result).map(([key, value]) => (
-              <List.Item key={key} title={value} actions={result ? _getActions({ value }) : undefined} />
+              <List.Item
+                key={key}
+                title={value}
+                accessories={[{ tag: key.includes("Strict") ? "Strict" : "" }]}
+                actions={result ? _getActions({ value }) : undefined}
+              />
             ))}
           </List.Section>
         </>
