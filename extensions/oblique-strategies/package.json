@@ -27,10 +27,55 @@
     {
       "name": "generate-new-oblique-strategy",
       "title": "Generate New Oblique Strategy",
-      "description": "Attempt to generate a new strategy using AI",
+      "description": "Let the AI give you a new strategy",
       "mode": "view"
     }
-      ],
+  ],
+  "preferences": [
+    {
+      "name": "displayMode",
+      "title": "Display Mode",
+      "description": "How do you want the strategies to be shown",
+      "type": "dropdown",
+      "required": false,
+      "default": "box",
+      "data": [
+        {
+          "title": "Box Container",
+          "value": "box"
+        },
+        { 
+          "title": "Basic Text",
+          "value": "basic"
+        },
+        { 
+          "title": "Code",
+          "value": "code"
+        },
+        {
+          "title": "H1",
+          "value": "h1"
+        },
+        {
+          "title": "H2",
+          "value": "h2"
+        },
+        {
+          "title": "H3",
+          "value": "h3"
+        }
+      ]
+    },
+    {
+      "name": "italicise",
+      "title": "Italics",
+      "description": "Italicise the text of the strategies",
+      "label": "Italicise Text",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.83.1",
     "@raycast/utils": "^1.17.0"

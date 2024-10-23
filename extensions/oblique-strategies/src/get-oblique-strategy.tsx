@@ -1,28 +1,23 @@
-import { Detail, ActionPanel, Action } from "@raycast/api";
-import obliqueStrategies from "./oblique-strategies.json";
-import { useEffect, useState } from "react";
-import type { ObliqueStrategy } from "./types";
+import { Detail, ActionPanel, Action, Icon, getPreferenceValues } from "@raycast/api";
+import { useState } from "react";
+import { getMarkdown, getRandomObliqueStrategy } from "./oblique";
+import { DisplayMode, ObliqueStrategy } from "./types";
 
-function getRandomObliqueStrategy(): ObliqueStrategy {
-  return obliqueStrategies[Math.floor(Math.random() * obliqueStrategies.length)];
-}
-
-export default function Command() {
-  const [obliqueStrategy, setObliqueStrategy] = useState(getRandomObliqueStrategy());
-
-  useEffect(() => {
-    setObliqueStrategy(getRandomObliqueStrategy());
-  }, []);
+export default function Command({ launchContext }: { launchContext: { strategy?: ObliqueStrategy } }) {
+  const preferences = getPreferenceValues<Preferences>();
+  const [obliqueStrategy, setObliqueStrategy] = useState(launchContext?.strategy || getRandomObliqueStrategy());
 
   return (
     <Detail
-      markdown={`| ${obliqueStrategy.strategy} |
-| - |
-      `}
+      markdown={getMarkdown(obliqueStrategy.strategy, preferences.displayMode as DisplayMode, preferences.italicise)}
       navigationTitle="Oblique Strategies"
       actions={
         <ActionPanel>
-          <Action title="New Strategy" onAction={() => setObliqueStrategy(getRandomObliqueStrategy())} />
+          <Action
+            title="New Strategy"
+            icon={Icon.Shuffle}
+            onAction={() => setObliqueStrategy(getRandomObliqueStrategy())}
+          />
           <Action.CopyToClipboard content={obliqueStrategy.strategy} shortcut={{ modifiers: ["cmd"], key: "c" }} />
           <Action.Paste content={obliqueStrategy.strategy} shortcut={{ modifiers: ["cmd"], key: "v" }} />
         </ActionPanel>

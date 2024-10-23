@@ -1,17 +1,25 @@
 import { useState } from "react";
-import { List, ActionPanel, Action } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, launchCommand, LaunchType } from "@raycast/api";
 import type { ObliqueStrategy } from "./types";
 import obliqueStrategies from "./oblique-strategies.json";
 
+type ExtendedStrategy = ObliqueStrategy & { firstLine: string; rest: string };
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [selectedEdition, setSelectedEdition] = useState<string>("all");
 
-  const filteredStrategies = obliqueStrategies.filter((strategy: ObliqueStrategy) => {
-    const matchesSearch = strategy.strategy.toLowerCase().includes(searchText.toLowerCase());
-    const matchesEdition = selectedEdition === "all" || strategy.edition === parseInt(selectedEdition);
-    return matchesSearch && matchesEdition;
-  });
+  const filteredStrategies = obliqueStrategies
+    .filter((strategy: ObliqueStrategy) => {
+      const matchesSearch = strategy.strategy.toLowerCase().includes(searchText.toLowerCase());
+      const matchesEdition = selectedEdition === "all" || strategy.edition === parseInt(selectedEdition);
+      return matchesSearch && matchesEdition;
+    })
+    .sort((a: ObliqueStrategy, b: ObliqueStrategy) => a.strategy.localeCompare(b.strategy))
+    .map((strategy: ObliqueStrategy) => {
+      const firstLine = strategy.strategy.split("\n")[0];
+      const rest = strategy.strategy.split("\n").slice(1).join(" ");
+      return { ...strategy, firstLine, rest };
+    });
 
   return (
     <List
@@ -27,15 +35,36 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {filteredStrategies.map((strategy: ObliqueStrategy, index: number) => (
+      {filteredStrategies.map((strategy: ExtendedStrategy, index: number) => (
         <List.Item
           key={index}
-          title={strategy.strategy}
-          accessories={[{ tag: `Edition ${strategy.edition}` }]}
+          title={strategy.firstLine}
+          subtitle={strategy.rest}
+          accessories={[{ tag: `Edition ${strategy.edition}`, tooltip: strategy.strategy }]}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard content={strategy.strategy} />
-              <Action.Paste content={strategy.strategy} />
+              <Action
+                title="View Strategy"
+                icon={Icon.MagnifyingGlass}
+                onAction={() => {
+                  launchCommand({
+                    name: "get-oblique-strategy",
+                    type: LaunchType.UserInitiated,
+                    context: { strategy },
+                  });
+                }}
+              />
+              <Action.CopyToClipboard content={strategy.strategy} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+              <Action.Paste content={strategy.strategy} shortcut={{ modifiers: ["cmd"], key: "v" }} />
+              <ActionPanel.Section>
+                <Action
+                  title="Random Strategy"
+                  icon={Icon.Shuffle}
+                  onAction={() => {
+                    launchCommand({ name: "get-oblique-strategy", type: LaunchType.UserInitiated });
+                  }}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
