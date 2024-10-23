@@ -1,5 +1,9 @@
 # Downloads Manager Changelog
 
+## [Add close window script] - {PR_MERGE_DATE}
+
+- Added a script to close the window to ensure it closes after the action is completed
+
 ## [Check Permission] - 2023-06-21
 
 - Added a check for access to the configured Downloads folder
