@@ -1,8 +1,8 @@
 import { get } from "./wiseClient";
 
-export interface CardPayment {
+export interface Transaction {
   id: string;
-  type: "CARD_PAYMENT";
+  type: keyof typeof ActivityType;
   resource: { type: string; id: string };
   title: string;
   description: string;
@@ -13,7 +13,7 @@ export interface CardPayment {
 
 interface ActivitiesResponse {
   cursor: string | null;
-  activities: CardPayment[];
+  activities: Transaction[];
 }
 
 export enum ActivityType {
@@ -47,18 +47,14 @@ export enum ActivityType {
 
 export const activityTypes = Object.keys(ActivityType) as Array<keyof typeof ActivityType>;
 
-export const fetchTodaysPayments = async (profileId: string) => {
+export const fetchTodaysTransactions = async (profileId: string) => {
   // Get the current date
   const today = new Date();
 
   // Set the time components to zero
   today.setHours(0, 0, 0, 0);
-  return await get<ActivitiesResponse>(
-    `v1/profiles/${profileId}/activities?monetaryResourceType=CARD_TRANSACTION&size=10&since=${today.toISOString()}`,
-  );
+  return await get<ActivitiesResponse>(`v1/profiles/${profileId}/activities?size=10&since=${today.toISOString()}`);
 };
 export const fetchTransactions = async (profileId: string) => {
-  return await get<ActivitiesResponse>(
-    `v1/profiles/${profileId}/activities?monetaryResourceType=CARD_TRANSACTION&size=100`,
-  );
+  return await get<ActivitiesResponse>(`v1/profiles/${profileId}/activities?size=100`);
 };

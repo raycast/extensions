@@ -1,5 +1,12 @@
 # Wise Accounts Changelog
 
+## Improve Get Transactions
+
+- Use Main Profile ID for Get Transactions default Profile ID
+- Retrieve all transactions from API (previously it only retrieve card transactions)
+- Remove filters from Get Transactions if there are not transactions with such filters
+- Add custom tags for Sent (Red ->) & Received (Green <-) transactions
+
 ## Fix Business Account - 2024-10-18
 
 - Fixes error retrieving accounts when Business Account available
