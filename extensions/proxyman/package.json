@@ -47,14 +47,16 @@
       "title": "Toggle Blocklist",
       "subtitle": "Proxyman",
       "description": "Toggle the Blocklist feature in Proxyman",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "toggle-allowlist",
       "title": "Toggle Allowlist",
       "subtitle": "Proxyman",
       "description": "Toggle the Allowlist feature in Proxyman",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "toggle-map-remote",
@@ -75,28 +77,32 @@
       "title": "Toggle External Proxy",
       "subtitle": "Proxyman",
       "description": "Toggle the External Proxy feature in Proxyman",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "toggle-socks-proxy",
       "title": "Toggle SOCKS Proxy",
       "subtitle": "Proxyman",
       "description": "Toggle the SOCKS Proxy feature in Proxyman",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "toggle-network-condition",
       "title": "Toggle Network Condition",
       "subtitle": "Proxyman",
       "description": "Toggle the Network Condition feature in Proxyman",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "toggle-ssl-proxying-list",
       "title": "Toggle SSL Proxying List",
       "subtitle": "Proxyman",
       "description": "Toggle the SSL Proxying List feature in Proxyman",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "toggle-record-traffic",
