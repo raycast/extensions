@@ -1,6 +1,9 @@
-# Dropbox Changelog
+# The Blue Cloud Changelog
 
-## [New OAuth App] - {PR_MERGE_DATE}
+## [A New Look] - {PR_MERGE_DATE}
+
+- Extension is now called "The Blue Cloud" to comply with Dropbox Branding Guidelines
+- New OAuth App
 
 ## [BYOK as Fallback] - 2024-09-22
 

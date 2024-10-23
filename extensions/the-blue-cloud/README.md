@@ -1,8 +1,12 @@
-# Dropbox
+<p align="center">
+    <img src="./assets/the-blue-cloud.png" height="150" />
+</p>
 
-Dropbox Extension, List Files, Search Files, and more.
+# The Blue Cloud
 
-By default, the Dropbox Raycast Extension uses OAuth. However, if you prefer to use your own access token e.g. if OAuth is not working, follow the steps in the next section:
+This is the **unofficial** Raycast Extension for [Dropbox](https://dropbox.com) allowing you to List Files, Search Files, and more.
+
+By default, the Extension uses OAuth. However, if you prefer to use your own access token e.g. if OAuth is not working, follow the steps in the next section:
 
 ## How to get access_token
 
