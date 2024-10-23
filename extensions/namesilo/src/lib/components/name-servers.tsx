@@ -10,7 +10,16 @@ export default function NameServers({ domain }: { domain: string }) {
   const { isLoading, data, revalidate } = useNameSilo<NameServersResponse>("listRegisteredNameServers", {
     domain,
   });
-  const nameServers = parseAsArray(data?.hosts);
+  const parsed = parseAsArray(data?.hosts);
+  // an edge case is the return being string[] so this is a dirty way to get usable object
+  // this seems to happen when NameSilo can't parse the host properly
+  const isStringArray = !JSON.stringify(parsed).includes(`"host":`);
+  const nameServers = isStringArray ? mapAsNSObj(parsed as unknown as string[]) : parsed;
+  function mapAsNSObj(data: string[]) {
+    const obj: NameServer = { host: "", ip: data[0] };
+    data.slice(1).forEach((ip, idx) => (obj[`ip${idx + 1}` as keyof typeof obj] = ip));
+    return [obj];
+  }
 
   const hasNone = !isLoading && !nameServers.length;
   return (

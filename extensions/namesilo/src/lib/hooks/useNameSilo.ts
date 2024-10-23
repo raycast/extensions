@@ -6,12 +6,10 @@ export default function useNameSilo<T>(
   operation: string,
   params?: { [key: string]: string | string[] },
   {
-    execute,
+    execute = true,
     onData,
     onError,
-  }: { execute: boolean; onData?: (data: SuccessResponse<T>["reply"]) => void; onError?: () => void } = {
-    execute: true,
-  },
+  }: { execute?: boolean; onData?: (data: SuccessResponse<T>["reply"]) => void; onError?: () => void } = {},
 ) {
   const url = generateApiUrl(operation, params);
   const { isLoading, data, error, revalidate } = useFetch(url, {

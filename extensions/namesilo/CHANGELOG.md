@@ -1,6 +1,8 @@
 # NameSilo Changelog
 
-## [View, Add, Change Name Servers + Add DNS Records] - {PR_MERGE_DATE}
+## [Manage Name Servers + Add DNS Records] - {PR_MERGE_DATE}
+
+- For each domain, you can have up to 13 Name Server IPs
 
 ## [Add Auctions + Sort Pricing by Lowest + OTE Support] - 2024-08-09
 
