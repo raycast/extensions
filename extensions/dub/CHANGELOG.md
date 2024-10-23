@@ -1,6 +1,6 @@
 # Dub Link Shortener Changelog
 
-## [Chore] - {PR_MERGE_DATE}
+## [Chore] - 2024-10-23
 
 - Bump dub sdk to v0.43.9
 - Fixed an issue where links were not loading when `link.userId` is null
