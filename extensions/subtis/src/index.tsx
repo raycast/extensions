@@ -1,25 +1,90 @@
 import { Action, ActionPanel, Form, Toast, open, showToast } from "@raycast/api";
 import { stat } from "fs/promises";
 import fetch from "node-fetch";
+import { match } from "ts-pattern";
 import WebSocket from "ws";
 import { z } from "zod";
 
-// api
-import { type SubtisSubtitle, subtitleSchema } from "@subtis/api/shared/schemas";
-
-// shared
-import { getFilenameFromPath, getMessageFromStatusCode, getVideoFileExtension } from "@subtis/shared";
-
-// types
-type Values = {
-  filePicker: string[];
-};
-
 // constants
-const isProduction = process.env.NODE_ENV === "production";
-const API_URL = isProduction ? "https://api.subt.is" : "http://localhost:58602";
+const API_URL = process.env.NODE_ENV === "production" ? "https://api.subt.is" : "http://localhost:58602";
+const VIDEO_FILE_EXTENSIONS = [
+  ".mkv",
+  ".mp4",
+  ".avi",
+  ".mov",
+  ".wmv",
+  ".flv",
+  ".webm",
+  ".vob",
+  ".m4v",
+  ".mpg",
+  ".mpeg",
+  ".3gp",
+  ".3g2",
+] as const;
+
+// helpers
+function getFilenameFromPath(path: string): string {
+  return path.split(/[\\\/]/).at(-1) as string;
+}
+
+function getMessageFromStatusCode(statusCode: number): {
+  description: string;
+  title: string;
+} {
+  return match(statusCode)
+    .with(415, () => ({
+      title: "Extensión de archivo no soportada",
+      description: "Prueba con formatos como MKV, MP4, o AVI",
+    }))
+    .with(404, () => ({
+      title: "Subtitulo no encontrado",
+      description: "Nos pondremos a buscarlo",
+    }))
+    .with(500, () => ({
+      title: "Error Inesperado",
+      description: "Estamos haciendo arreglos del servicio",
+    }))
+    .otherwise(() => ({
+      title: "Error desconocido",
+      description: "Estamos haciendo arreglos del servicio",
+    }));
+}
+
+function getVideoFileExtension(fileName: string): string | undefined {
+  return VIDEO_FILE_EXTENSIONS.find((videoFileExtension) => fileName.endsWith(videoFileExtension));
+}
 
 // schemas
+const subtitleSchema = z.object({
+  id: z.number(),
+  bytes: z.number(),
+  is_valid: z.boolean(),
+  resolution: z.string(),
+  subtitle_link: z.string(),
+  queried_times: z.number().nullable(),
+  current_season: z.number().nullable(),
+  current_episode: z.number().nullable(),
+  title_file_name: z.string(),
+  subtitle_file_name: z.string(),
+  title: z.object({
+    id: z.number(),
+    title_name: z.string(),
+    type: z.string(),
+    year: z.number(),
+    poster: z.string().nullable(),
+    backdrop: z.string().nullable(),
+  }),
+  releaseGroup: z.object({
+    id: z.number(),
+    release_group_name: z.string(),
+  }),
+  subtitleGroup: z.object({
+    id: z.number(),
+    subtitle_group_name: z.string(),
+  }),
+});
+
 const wsMessageSchema = z.object({
   total: z.number(),
   message: z.string(),
@@ -31,6 +96,8 @@ const wsOkSchema = z.object({
 
 // types
 type WsOk = z.infer<typeof wsOkSchema>;
+type SubtisSubtitle = z.infer<typeof subtitleSchema>;
+type Values = { filePicker: string[] };
 
 // helpers
 async function getPrimarySubtitle({
@@ -47,7 +114,9 @@ async function getPrimarySubtitle({
   }
 
   if (!response.ok) {
-    throw new Error("Failed to fetch primary subtitle", { cause: response.status });
+    throw new Error("Failed to fetch primary subtitle", {
+      cause: response.status,
+    });
   }
 
   const data = await response.json();
@@ -56,17 +125,26 @@ async function getPrimarySubtitle({
   fetch(`${API_URL}/v1/subtitle/metrics/download`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ titleId: primarySubtitle.title.id, subtitleId: primarySubtitle.id }),
+    body: JSON.stringify({
+      subtitleId: primarySubtitle.id,
+      titleId: primarySubtitle.title.id,
+    }),
   });
 
   return primarySubtitle;
 }
 
-export async function getAlternativeSubtitle({ fileName }: { fileName: string }): Promise<SubtisSubtitle> {
+export async function getAlternativeSubtitle({
+  fileName,
+}: {
+  fileName: string;
+}): Promise<SubtisSubtitle> {
   const response = await fetch(`${API_URL}/v1/subtitle/file/alternative/${fileName}`);
 
   if (!response.ok) {
-    throw new Error("Failed to fetch alternative subtitle", { cause: response.status });
+    throw new Error("Failed to fetch alternative subtitle", {
+      cause: response.status,
+    });
   }
 
   const data = await response.json();
@@ -75,7 +153,10 @@ export async function getAlternativeSubtitle({ fileName }: { fileName: string })
   fetch(`${API_URL}/v1/subtitle/metrics/download`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ titleId: alternativeSubtitle.title.id, subtitleId: alternativeSubtitle.id }),
+    body: JSON.stringify({
+      subtitleId: alternativeSubtitle.id,
+      titleId: alternativeSubtitle.title.id,
+    }),
   });
 
   return alternativeSubtitle;
@@ -124,7 +205,10 @@ export default function Command() {
         return;
       }
 
-      const primarySubtitle = await getPrimarySubtitle({ bytes: String(bytes), fileName });
+      const primarySubtitle = await getPrimarySubtitle({
+        bytes: String(bytes),
+        fileName,
+      });
 
       if (primarySubtitle) {
         return await downloadSubtitle(toast, primarySubtitle);
@@ -184,7 +268,10 @@ export default function Command() {
       });
 
       if (websocketData.ok === true) {
-        const primarySubtitle = await getPrimarySubtitle({ bytes: String(bytes), fileName });
+        const primarySubtitle = await getPrimarySubtitle({
+          bytes: String(bytes),
+          fileName,
+        });
 
         if (primarySubtitle) {
           return await downloadSubtitle(toast, primarySubtitle);

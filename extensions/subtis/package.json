@@ -26,6 +26,7 @@
   "dependencies": {
     "@raycast/api": "^1.84.3",
     "node-fetch": "^3.3.2",
+    "ts-pattern": "^5.5.0",
     "ws": "^8.18.0",
     "zod": "^3.23.8"
   },
