@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "meduza",
+  "title": "Meduza",
+  "description": "Every day, we bring you the most important news and feature stories from hundreds of sources in Russia and across the former Soviet Union. Our team includes some of Russia’s top professionals in news and reporting. We value our independence and strive to be a reliable, trusted outlet for verified, unbiased information about Russia and the former Soviet Union, as well as a source for sharp insights about one of the world’s most enigmatic regions",
+  "icon": "icon.png",
+  "author": "castletaste",
+  "access": "public",
+  "categories": [
+    "News"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "en",
+      "title": "Meduza",
+      "subtitle": "News",
+      "description": "Latest daily news",
+      "mode": "view"
+    },
+    {
+      "name": "ru",
+      "title": "Meduza",
+      "subtitle": "Новости",
+      "description": "Последние новости",
+      "mode": "view"
+    }
+  ],
+  "keywords": [
+    "news",
+    "russia",
+    "meduza",
+    "russian news",
+    "english news",
+    "world news",
+    "international news",
+    "independent media"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.1",
+    "@raycast/utils": "^1.16.2",
+    "rss-parser": "^3.13.0",
+    "timeago.js": "^4.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
