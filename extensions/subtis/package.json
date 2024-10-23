@@ -10,7 +10,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Buscar subtítulo",
+      "title": "Buscar Subtitulo",
       "description": "Encontra el subtítulo que buscas",
       "mode": "view"
     }
@@ -33,9 +33,11 @@
   "devDependencies": {
     "@raycast/eslint-config": "1.0.11",
     "@types/bun": "^1.1.12",
-    "@types/node": "22.7.8",
+    "@types/node": "22.7.9",
     "@types/node-fetch": "^2.6.11",
-    "@types/react": "18.3.11",
+    "@types/react": "18.3.12",
+    "eslint": "8.51.0",
+    "prettier": "^3.3.3",
     "typescript": "^5.6.3"
   }
 }

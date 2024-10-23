@@ -1,4 +1,11 @@
-import { Action, ActionPanel, Form, Toast, open, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Toast,
+  open,
+  showToast,
+} from "@raycast/api";
 import { stat } from "fs/promises";
 import fetch from "node-fetch";
 import { match } from "ts-pattern";
@@ -6,7 +13,10 @@ import WebSocket from "ws";
 import { z } from "zod";
 
 // constants
-const API_URL = process.env.NODE_ENV === "production" ? "https://api.subt.is" : "http://localhost:58602";
+const API_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://api.subt.is"
+    : "http://localhost:58602";
 const VIDEO_FILE_EXTENSIONS = [
   ".mkv",
   ".mp4",
@@ -25,7 +35,7 @@ const VIDEO_FILE_EXTENSIONS = [
 
 // helpers
 function getFilenameFromPath(path: string): string {
-  return path.split(/[\\\/]/).at(-1) as string;
+  return path.split(/[\\/]/).at(-1) as string;
 }
 
 function getMessageFromStatusCode(statusCode: number): {
@@ -52,7 +62,9 @@ function getMessageFromStatusCode(statusCode: number): {
 }
 
 function getVideoFileExtension(fileName: string): string | undefined {
-  return VIDEO_FILE_EXTENSIONS.find((videoFileExtension) => fileName.endsWith(videoFileExtension));
+  return VIDEO_FILE_EXTENSIONS.find((videoFileExtension) =>
+    fileName.endsWith(videoFileExtension),
+  );
 }
 
 // schemas
@@ -107,7 +119,9 @@ async function getPrimarySubtitle({
   bytes: string;
   fileName: string;
 }): Promise<SubtisSubtitle | null> {
-  const response = await fetch(`${API_URL}/v1/subtitle/file/name/${bytes}/${fileName}`);
+  const response = await fetch(
+    `${API_URL}/v1/subtitle/file/name/${bytes}/${fileName}`,
+  );
 
   if (response.status === 404) {
     return null;
@@ -139,7 +153,9 @@ export async function getAlternativeSubtitle({
 }: {
   fileName: string;
 }): Promise<SubtisSubtitle> {
-  const response = await fetch(`${API_URL}/v1/subtitle/file/alternative/${fileName}`);
+  const response = await fetch(
+    `${API_URL}/v1/subtitle/file/alternative/${fileName}`,
+  );
 
   if (!response.ok) {
     throw new Error("Failed to fetch alternative subtitle", {
@@ -318,7 +334,11 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.FilePicker allowMultipleSelection={false} id="filePicker" title="Buscar subtitulo para" />
+      <Form.FilePicker
+        allowMultipleSelection={false}
+        id="filePicker"
+        title="Buscar subtitulo para"
+      />
     </Form>
   );
 }
