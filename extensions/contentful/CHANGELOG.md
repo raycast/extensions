@@ -1,6 +1,6 @@
 # Contentful Changelog
 
-## [`View Roles` in `Users`] - {PR_MERGE_DATE}
+## [`View Roles` in `Users`] - 2024-10-23
 
 - Add `tooltip` to Date accessories
 - Toggle between `Users` and `Roles` via `Argument`
