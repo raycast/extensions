@@ -1,6 +1,6 @@
 # Search Documate Changelog
 
-## [Fixes & Bits] - {PR_MERGE_DATE}
+## [Fixes & Bits] - 2024-10-23
 
 - Documate pages now open directly in the editor
 - Improved search results filtering
