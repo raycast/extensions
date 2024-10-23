@@ -2,8 +2,9 @@ import { Action, ActionPanel, Icon, open, showHUD } from "@raycast/api";
 import React from "react";
 import { BingImage, DownloadedBingImage } from "../types/types";
 import { ActionOpenExtensionPreferences } from "./action-open-extension-preferences";
-import { setDownloadedWallpaper } from "../utils/common-utils";
+import { setLocalWallpaper } from "../utils/common-utils";
 import PreviewBingWallpaper from "../preview-bing-wallpaper";
+import { downloadDirectory } from "../types/preferences";
 
 export function ActionsDownloadedBingWallpaper(props: {
   index: number;
@@ -18,7 +19,7 @@ export function ActionsDownloadedBingWallpaper(props: {
         icon={Icon.Desktop}
         title={"Set Desktop Wallpaper"}
         onAction={() => {
-          setDownloadedWallpaper(bingImage.path).then(() => "");
+          setLocalWallpaper(bingImage.path).then(() => "");
         }}
       />
       <Action.ShowInFinder path={bingImage.path} />
@@ -36,6 +37,14 @@ export function ActionsDownloadedBingWallpaper(props: {
           />
         }
       />
+      <Action
+        icon={Icon.Finder}
+        title={"Open Wallpaper Folder"}
+        shortcut={{ modifiers: ["shift", "cmd"], key: "enter" }}
+        onAction={async () => {
+          await open(downloadDirectory);
+        }}
+      />
       <ActionPanel.Section>
         <Action
           icon={Icon.ArrowClockwise}
@@ -43,7 +52,7 @@ export function ActionsDownloadedBingWallpaper(props: {
           shortcut={{ modifiers: ["cmd"], key: "r" }}
           onAction={() => {
             const randomImage = downloadedImages[Math.floor(Math.random() * downloadedImages.length)];
-            setDownloadedWallpaper(randomImage.path).then(() => "");
+            setLocalWallpaper(randomImage.path).then(() => "");
           }}
         />
         <Action

@@ -1,5 +1,26 @@
 # Timers Changelog
 
+## [Fix commands finishing before timer launch due to alert] - 2024-09-24
+
+## [Fix date formatter and residual timer files] - 2024-09-21
+
+- Fix issue where date formatter incorrectly displayed the previous month instead of the current one
+- Fix issue where the "Speak Timer Name" alert sound would result in residual timer files
+- Fix issue where the "Speak Timer Name" alert sound would not respect the "Ring Continuously" setting
+- Add alert to inform the user about how to stop the alert sound when "Ring Continuously" is enabled
+
+## [Bugfixes and improvements] - 2024-07-13
+
+- Fix bug where alert sound would not play if osascript notification command failed due to lack of permissions
+- Fix bug where quicklink-root-presets would not close properly if "Automatically close window on start" was disabled
+- Add icons to "Manage Timers" and "Manage Stopwatches" command actions
+- Various code improvements
+
+## [Persistent commands, codebase cleanup] - 2024-05-19
+
+- Add preference to keep "Manage Timers" and "Manage Stopwatches" commands open on timer/stopwatch start
+- Various refactors around the codebase
+
 ## [Fix dismissTimerAlert leaving behind residual timer files] - 2024-02-02
 
 ## [Fix sorting and time subtitle in configureMenubarPresets] - 2024-01-23

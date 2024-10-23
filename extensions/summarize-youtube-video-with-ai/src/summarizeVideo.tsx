@@ -1,13 +1,16 @@
-import React from "react";
-import { Action, ActionPanel, Detail, Toast, showToast } from "@raycast/api";
-import getVideoData from "./utils/getVideoData";
-import { useEffect, useState } from "react";
+import nodeFetch from "node-fetch";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(globalThis.fetch as typeof globalThis.fetch) = nodeFetch as any;
+
 import type { LaunchProps } from "@raycast/api";
-import type { VideoDataTypes } from "./utils/getVideoData";
+import { Action, ActionPanel, Detail, Toast, showToast } from "@raycast/api";
+import { useEffect, useState } from "react";
 import ytdl from "ytdl-core";
-import getVideoTranscript from "./utils/getVideoTranscript";
 import useChatGPTSummary from "./hooks/useChatGPTSummary";
 import useRaycastAISummary from "./hooks/useRaycastAISummary";
+import type { VideoDataTypes } from "./utils/getVideoData";
+import getVideoData from "./utils/getVideoData";
+import getVideoTranscript from "./utils/getVideoTranscript";
 
 interface SummarizeVideoProps {
   video: string;

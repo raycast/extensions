@@ -1,12 +1,7 @@
 ## Description
 
-This extension is for users who switch frequently between browsers, mailbox clients or others.
-
-**Main features:**
-
-1. Specify a browser to open a **_URL_** or **_Text_** that is selected or on the clipboard.
-2. Specify the mailbox application to edit email with **_Email addresses_** or **_mailto:_** link (in the form of "mailto:hello@raycast.com") that is selected or on the clipboard.
-3. Recommend setting shortcut for this extension. For example, "Opt+l".
+Open link or search text in specific browsers.
+This extension is for users who switch frequently between browsers.
 
 Want more **Productivity** extensions? Try those. [©koinzhang](https://www.raycast.com/koinzhang)
 

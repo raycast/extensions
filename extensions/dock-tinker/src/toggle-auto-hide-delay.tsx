@@ -1,16 +1,15 @@
 import { spawnSync } from "child_process";
-import { closeMainWindow, showHUD } from "@raycast/api";
+import { closeMainWindow, LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
+import ToggleAutoHideDelay = Arguments.ToggleAutoHideDelay;
+import { getArgument, isEmpty } from "./utils/common-utils";
 
-export default async () => {
-  await closeMainWindow({ clearRootSearch: false });
-  const out = spawnSync("defaults read com.apple.Dock autohide-time-modifier", { shell: true });
-  const isTurnOn = String(out.output[1]).trim();
+export default async (props: LaunchProps<{ arguments: ToggleAutoHideDelay }>) => {
+  await closeMainWindow();
+  await showToast({ title: "Toggling auto hide delay", style: Toast.Style.Animated });
+  const delay_ = getArgument(props.arguments.delay, `AutoHideDelay`);
+  const delay = isEmpty(delay_) ? 0 : parseFloat(delay_);
 
-  if (isTurnOn === "0") {
-    spawnSync("defaults write com.apple.Dock autohide-time-modifier -float 1 && killall Dock", { shell: true });
-    await showHUD("Turn on autohide time modifier");
-  } else {
-    spawnSync("defaults write com.apple.Dock autohide-time-modifier -float 0 && killall Dock", { shell: true });
-    await showHUD("Turn off autohide time modifier");
-  }
+  spawnSync(`defaults write com.apple.dock "autohide-delay" -float "${delay}" && killall Dock`, { shell: true });
+  const message = delay === 0 ? "💻 Turn off auto-hide delay" : `💻 Set auto-hide delay to ${delay}s`;
+  await showHUD(message);
 };

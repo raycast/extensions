@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Icon, getPreferenceValues } from "@raycast/api";
 import { FormValidation, getFavicon, useForm } from "@raycast/utils";
 
-const DOMAINS: string | undefined = getPreferenceValues<Preferences>().domains;
+const DOMAINS = getPreferenceValues<Preferences>().domains;
 type Props = {
   onDomainSelected: (domain: string) => void;
 };
@@ -28,12 +28,11 @@ export default function DomainSelector({ onDomainSelected }: Props) {
       }
     >
       <Form.Dropdown title="Domain" {...itemProps.domain}>
-        {DOMAINS &&
-          DOMAINS.replaceAll(" ", "")
-            .split(",")
-            .map((domain) => (
-              <Form.Dropdown.Item value={domain} title={domain} icon={getFavicon(`https://${domain}`)} key={domain} />
-            ))}
+        {DOMAINS.replaceAll(" ", "")
+          .split(",")
+          .map((domain) => (
+            <Form.Dropdown.Item value={domain} title={domain} icon={getFavicon(`https://${domain}`)} key={domain} />
+          ))}
       </Form.Dropdown>
     </Form>
   );

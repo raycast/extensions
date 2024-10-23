@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
 import { State } from "@lib/haapi";
+import { useEffect, useState } from "react";
 
 export function useStateSearch(
   query: string | undefined,

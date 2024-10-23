@@ -29,7 +29,9 @@ export default function Command() {
       {data?.length ? (
         data.map((message) => {
           const code = extractCode(message.text);
+
           if (!code) {
+            console.debug(`got message, but no code ${message.text}`);
             return null;
           }
 

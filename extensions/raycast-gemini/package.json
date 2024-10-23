@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-gemini",
   "title": "Google Gemini",
-  "description": "Use the powerful new Google Gemini Pro models from the comfort of Raycast.",
+  "description": "Use the Google Gemini from the comfort of Raycast.",
   "icon": "gemini-icon.png",
   "author": "EvanZhouDev",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
@@ -24,6 +27,30 @@
           "placeholder": "Query",
           "type": "text",
           "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Pro",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "Gemini 1.5 Flash",
+              "value": "gemini-1.5-flash-latest"
+            }
+          ]
         }
       ]
     },
@@ -49,6 +76,30 @@
           "type": "text",
           "required": false
         }
+      ],
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Pro",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "Gemini 1.5 Flash",
+              "value": "gemini-1.5-flash-latest"
+            }
+          ]
+        }
       ]
     },
     {
@@ -65,6 +116,30 @@
           "type": "text",
           "required": false
         }
+      ],
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Pro",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "Gemini 1.5 Flash",
+              "value": "gemini-1.5-flash-latest"
+            }
+          ]
+        }
       ]
     },
     {
@@ -72,63 +147,318 @@
       "title": "Summarize",
       "description": "Summarize text",
       "icon": "summarize-icon.png",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Pro",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "Gemini 1.5 Flash",
+              "value": "gemini-1.5-flash-latest"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "explain",
       "title": "Explain",
       "description": "Explain text",
       "icon": "explain-icon.png",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Pro",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "Gemini 1.5 Flash",
+              "value": "gemini-1.5-flash-latest"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "comment",
       "title": "Add Comments to Code",
       "description": "Add comments to code",
       "icon": "code-icon.png",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Pro",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "Gemini 1.5 Flash",
+              "value": "gemini-1.5-flash-latest"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "friendly",
       "title": "Change Tone to Friendly",
       "icon": "text-icon.png",
       "description": "Change tone of selected text to friendly",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Pro",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "Gemini 1.5 Flash",
+              "value": "gemini-1.5-flash-latest"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "professional",
       "title": "Change Tone to Professional",
       "icon": "text-icon.png",
       "description": "Change tone of selected text to professional",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Pro",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "Gemini 1.5 Flash",
+              "value": "gemini-1.5-flash-latest"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "synonym",
       "title": "Find Synonym",
       "icon": "synonym-icon.png",
       "description": "Find synonym of selected word",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Pro",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "Gemini 1.5 Flash",
+              "value": "gemini-1.5-flash-latest"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "grammar",
       "title": "Fix Spelling and Grammar",
       "icon": "grammar-icon.png",
       "description": "Fix spelling and grammar of selected text",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Pro",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "Gemini 1.5 Flash",
+              "value": "gemini-1.5-flash-latest"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "longer",
       "title": "Make Longer",
       "icon": "longer-icon.png",
       "description": "Make selected text longer",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Pro",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "Gemini 1.5 Flash",
+              "value": "gemini-1.5-flash-latest"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "shorter",
       "title": "Make Shorter",
       "icon": "shorten-icon.png",
       "description": "Make selected text shorter",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Pro",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "Gemini 1.5 Flash",
+              "value": "gemini-1.5-flash-latest"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "translate",
+      "title": "Translate",
+      "icon": "translate-icon.png",
+      "description": "Translate selected text",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "TranslateLanguage",
+          "placeholder": "Translate Language",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Pro",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "Gemini 1.5 Flash",
+              "value": "gemini-1.5-flash-latest"
+            }
+          ]
+        }
+      ]
     }
   ],
   "preferences": [
@@ -138,14 +468,32 @@
       "required": true,
       "title": "Gemini API Key",
       "type": "password"
+    },
+    {
+      "description": "Which model Gemini for Raycast uses by default (unless overriden by individual commands).",
+      "name": "defaultModel",
+      "title": "Model",
+      "type": "dropdown",
+      "required": false,
+      "default": "gemini-1.5-flash-latest",
+      "data": [
+        {
+          "title": "Gemini 1.5 Pro",
+          "value": "gemini-1.5-pro-latest"
+        },
+        {
+          "title": "Gemini 1.5 Flash",
+          "value": "gemini-1.5-flash-latest"
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.62.0",
     "@raycast/utils": "^1.9.0",
-    "gemini-ai": "^1.1.0",
+    "gemini-ai": "^2.0.1",
     "jimp": "^0.22.10",
-    "node-fetch-polyfill": "^2.0.6"
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

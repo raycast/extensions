@@ -1,5 +1,14 @@
 # Bluesky Changelog
 
+## [Enhancements] - 2024-10-14
+
+- Native pagination in `Search Timeline`
+- Potential fix for quoted post in timeline not having text
+
+## [Fix `Search Timeline` Not Working] - 2024-10-01
+
+- No more animation in Onboarding screen - it might come back in the future 👀
+
 ## [Improvements] - 2023-06-26
 
 - The extension now requires a Bluesky App Password to be used.

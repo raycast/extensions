@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "color-studio-picker",
+  "title": "Color Studio Picker",
+  "description": "Helps you identify and pick colors from Automattic's Color Studio",
+  "icon": "command-icon.png",
+  "author": "Automattic_Inc",
+  "license": "MIT",
+  "categories": [
+      "Web",
+      "Design Tools",
+      "Productivity"
+   ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Pick a Color",
+      "description": "Select a color from Color Studio",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "color",
+          "type": "text",
+          "required": false,
+          "placeholder": "color"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.71.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

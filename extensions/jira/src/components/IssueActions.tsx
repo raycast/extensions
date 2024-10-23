@@ -49,7 +49,7 @@ export default function IssueActions({
   showAttachmentsAction,
 }: IssueActionsProps) {
   const { siteUrl, myself } = getJiraCredentials();
-  const issueUrl = `${siteUrl}/browse/${issue.key}`;
+  const issueUrl = `${siteUrl.startsWith("https://") ? siteUrl : `https://${siteUrl}`}/browse/${issue.key}`;
 
   async function mutateWithOptimisticUpdate({ asyncUpdate, optimisticUpdate }: MutateParams) {
     if (mutate) {
@@ -238,6 +238,12 @@ export default function IssueActions({
           title="Copy Git Branch Name"
           content={`${issue.key}-${slugify(issue.fields.summary)}`}
           shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+        />
+
+        <Action.CopyToClipboard
+          title="Copy Markdown Link"
+          content={`[${issue.key} - ${issue.fields.summary}](${issueUrl})`}
+          shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "," }}
         />
       </ActionPanel.Section>
 
@@ -455,6 +461,19 @@ function ChangeStatusSubmenu({ issue, mutate }: SubmenuProps) {
     }
   }
 
+  function formattedTitle(transition: Transition): string {
+    if (!transition.name) {
+      return "Unknown status name";
+    }
+    if (!transition.to.name) {
+      return transition.name;
+    }
+    if (transition.name === transition.to.name) {
+      return transition.name;
+    }
+    return `${transition.name} -> ${transition.to.name}`;
+  }
+
   return (
     <ActionPanel.Submenu
       title="Change Status"
@@ -473,7 +492,7 @@ function ChangeStatusSubmenu({ issue, mutate }: SubmenuProps) {
           return (
             <Action
               key={transition.id}
-              title={transition.name ?? "Unknown status name"}
+              title={formattedTitle(transition)}
               onAction={() => changeTransition(transition)}
             />
           );

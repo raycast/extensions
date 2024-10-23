@@ -1,5 +1,5 @@
 import { closeMainWindow, showHUD, showToast, Toast } from "@raycast/api";
-import { getTimers, stopTimer } from "./timerUtils";
+import { getTimers, stopTimer } from "./backend/timerBackend";
 
 export default async () => {
   const timers = getTimers();

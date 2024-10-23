@@ -1,5 +1,13 @@
 # Messages 2FA Changelog
 
+## [Update] - 2024-09-25
+
+- Add support for Portuguese auth/code references 
+
+## [Update] - 2024-05-28
+
+- Add support for Chase 2FA code pattern
+
 ## [Update] - 2024-04-12
 
 - Add unit test for regresion testing of code matching

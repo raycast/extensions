@@ -37,6 +37,7 @@ export async function getRepositoriesLazy(path: string) {
         "values.links.avatar.href",
         "values.links.clone",
         "values.description",
+        "values.created_on",
         "next",
       ].join(","),
     })

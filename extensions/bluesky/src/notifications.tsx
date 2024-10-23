@@ -77,7 +77,7 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
         return [...state, ...newNotifications];
       });
     },
-    [cursor]
+    [cursor],
   );
 
   useEffect(() => {
@@ -166,7 +166,7 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
         showNavDropdown={false}
         previousViewTitle={buildTitle(previousViewTitle, ViewNotificationsNavigationTitle)}
         authorHandle={notification.author.handle}
-      />
+      />,
     );
   };
 

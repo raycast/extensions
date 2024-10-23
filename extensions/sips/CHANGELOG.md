@@ -1,5 +1,37 @@
 # Image Modification Changelog
 
+## [Fix avifenc Installation] - 2024-09-11
+
+- Fixed an issue where the `avifenc` and `avifdec` binaries were not being installed correctly
+
+## [Lossless Setting & Improved PNG Optimization] - 2024-07-08
+
+- Added a "Lossless Conversions" setting for WebP and AVIF image operations, disabled by default
+- Improved PNG optimization by using PNGOUT
+- Fixed a bug where intermediate files were not being deleted after various operations
+
+## [AVIF, More File Managers, & Bug Fixes] - 2024-06-26
+
+- Added support for NeoFinder and HoudahSpot
+- Added support for AVIF images
+- Added support for several new conversions: PDF->SVG, PDF->WebP, SVG->PDF, SVG->WebP
+- Added ability to create QuickLinks to specific conversion and image creation operations
+- Added "Generate Image Previews" toggle for the "Create New Image" command
+- Added "JPEG Extension" setting for the "Convert Images" command
+- Added an alert for when automation permissions have not been granted
+- Fixed "Strip EXIF Data" failing when using the "Replace Original" result handling option
+- Fixed images not getting saved to the correct location when using the clipboard as the image source
+- Fixed PDF->JPEG conversion not actually using JPEG as the output format
+- Fixed "command not found" bug when optimizing WebP images
+
+## [Webp Image Quality Fix] - 2024-06-18
+
+- Fixed an issue when converting to webp degrades the quality of the image
+
+## [Bug Fix] - 2024-06-14
+
+- Fixed a bug where the "Flip Images Vertically" command flipped the images horizontally
+
 ## [WebP Hotfix] - 2024-01-29
 
 - Fixed some commands (e.g. convert) looking for WebP binaries in the wrong location

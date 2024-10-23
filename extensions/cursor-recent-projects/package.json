@@ -1,0 +1,135 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cursor-recent-projects",
+  "title": "Cursor",
+  "description": "Control Cursor, Cursor & Codium directly from Raycast - Search and open recent projects, handle extensions and commands.",
+  "icon": "cursor-icon.png",
+  "author": "degouville",
+  "contributors": [
+    "pernielsentikaer",
+    "escwxyz",
+    "litomore"
+  ],
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "cursor",
+    "vscode",
+    "claude",
+    "sonnet",
+    "opus",
+    "o1",
+    "gpt4o"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Recent Projects",
+      "subtitle": "Cursor",
+      "description": "Search and open recent projects from Cursor.",
+      "mode": "view"
+    },
+    {
+      "name": "open-with-cursor",
+      "title": "Open with Cursor",
+      "subtitle": "Cursor",
+      "description": "Opens the currently selected Finder item with Cursor.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-new-window",
+      "title": "Open New Window",
+      "subtitle": "Cursor",
+      "description": "Opens a new Cursor window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "extensions",
+      "title": "Show Installed Extensions",
+      "description": "Manage Installed Extensions",
+      "mode": "view"
+    },
+    {
+      "name": "install-extension",
+      "title": "Install Extension",
+      "description": "Install Extensions from the Cursor Marketplace",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "layout",
+      "title": "View Layout",
+      "type": "dropdown",
+      "required": false,
+      "default": "list",
+      "description": "Select the layout of the view",
+      "data": [
+        {
+          "value": "list",
+          "title": "List"
+        },
+        {
+          "value": "grid",
+          "title": "Grid"
+        }
+      ]
+    },
+    {
+      "name": "keepSectionOrder",
+      "type": "checkbox",
+      "title": "Advanced",
+      "required": false,
+      "label": "Keep Section Order",
+      "default": false,
+      "description": "Keep the order of the sections while searching folders, files, etc."
+    },
+    {
+      "name": "closeOtherWindows",
+      "type": "checkbox",
+      "title": "Usability",
+      "required": false,
+      "label": "Close Other Cursor Windows",
+      "default": false,
+      "description": "Close other Cursor windows when opening a project"
+    },
+    {
+      "name": "terminalApp",
+      "type": "appPicker",
+      "default": "com.apple.Terminal",
+      "required": false,
+      "title": "Terminal App",
+      "description": "Select which Terminal App to use when opening with a terminal"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
+    "lodash.get": "^4.4.2",
+    "raycast-cross-extension": "^0.2.3",
+    "run-applescript": "^6.1.0",
+    "tildify": "^3.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/lodash.get": "^4.4.9",
+    "@types/node": "20.12.7",
+    "@types/react": "18.2.79",
+    "@types/sql.js": "^1.4.9",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.36.1",
+    "prettier": "^2.8.8",
+    "typescript": "^5.6.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

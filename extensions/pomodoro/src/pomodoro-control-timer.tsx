@@ -11,9 +11,10 @@ import {
   pauseInterval,
   preferences,
   resetInterval,
+  restartInterval,
 } from "../lib/intervals";
 import { FocusText, ShortBreakText, LongBreakText } from "../lib/constants";
-import { GiphyResponse, Quote } from "../lib/types";
+import { GiphyResponse, Interval, Quote } from "../lib/types";
 
 const createAction = (action: () => void) => () => {
   action();
@@ -68,6 +69,15 @@ const ActionsList = () => {
               </ActionPanel>
             }
           />
+          <List.Item
+            title="Restart Current"
+            icon={Icon.Repeat}
+            actions={
+              <ActionPanel>
+                <Action onAction={createAction(restartInterval)} title={"Restart Current"} />
+              </ActionPanel>
+            }
+          />
         </>
       ) : (
         <>
@@ -109,11 +119,14 @@ const ActionsList = () => {
 
 const handleQuote = (): string => {
   let quote = { content: "You did it!", author: "Unknown" };
-  const { isLoading, data } = useFetch<Quote[]>("https://api.quotable.io/quotes/random?limit=1", {
+  const { isLoading, data } = useFetch<Quote[]>("https://zenquotes.io/api/random", {
     keepPreviousData: true,
   });
   if (!isLoading && data?.length) {
-    quote = data[0];
+    quote = {
+      content: data[0].q,
+      author: data[0].a,
+    };
   }
 
   return `> ${quote.content} \n>\n> &dash; ${quote.author}`;
@@ -124,7 +137,7 @@ const EndOfInterval = () => {
   let usingGiphy = false;
 
   if (preferences.enableConfetti) {
-    exec("open raycast://extensions/raycast/raycast/confetti", function (err, stdout, stderr) {
+    exec("open raycast://extensions/raycast/raycast/confetti", function (err) {
       if (err) {
         // handle error
         console.error(err);
@@ -203,6 +216,6 @@ const EndOfInterval = () => {
   );
 };
 
-export default function Command(props: { launchContext?: { currentInterval: string } }) {
+export default function Command(props: { launchContext?: { currentInterval?: Interval } }) {
   return props.launchContext?.currentInterval ? <EndOfInterval /> : <ActionsList />;
 }

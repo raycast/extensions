@@ -1,5 +1,5 @@
-import { Action, Image, Keyboard } from "@raycast/api";
 import { ha } from "@lib/common";
+import { Action, Image, Keyboard } from "@raycast/api";
 
 export function HAOpenUrlInAction(props: {
   url: string;
@@ -13,7 +13,7 @@ export function HAOpenUrlInAction(props: {
   const app = isCompanion ? "Companion" : "Browser";
   const action = props.action ? props.action : "Open In";
   const title = `${action} ${app}`;
-  const icon = isCompanion ? "home-assistant.png" : undefined;
+  const icon = isCompanion ? "home-assistant.svg" : undefined;
   return (
     <Action.OpenInBrowser
       url={url}

@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { Match, Round } from "./types";
-import { getMatches, getSubscriptionRounds } from "./api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import groupBy from "lodash.groupby";
+import { useState } from "react";
+import { getMatches, getSubscriptionRounds } from "./api";
 import Matchday from "./components/matchday";
+import { Match, Round } from "./types";
 
 const competitions = [
   {
@@ -29,53 +30,42 @@ const competitions = [
 ];
 
 export default function Fixture() {
-  const [fixtures, setFixtures] = useState<Match[]>();
   const [competition, setCompetition] = useState<string>("");
   const [round, setRound] = useState<Round>();
-  const [rounds, setRounds] = useState<Round[]>([]);
 
-  useEffect(() => {
-    if (competition) {
-      setRound(undefined);
-      setFixtures(undefined);
-      setRounds([]);
-
-      getSubscriptionRounds(competition).then((data) => {
-        setRounds(data);
+  const { data: rounds } = usePromise(
+    async (competition) => {
+      return competition ? await getSubscriptionRounds(competition) : [];
+    },
+    [competition],
+    {
+      onData: (data) => {
         setRound(data[0]);
-      });
-    }
-  }, [competition]);
+      },
+    },
+  );
 
-  useEffect(() => {
-    if (round) {
-      setFixtures(undefined);
-      showToast({
-        title: "Loading...",
-        style: Toast.Style.Animated,
-      });
-      const gameweeks = round.gameweeks.sort((a, b) => a.week - b.week).map((gw) => getMatches(competition, gw.week));
+  const { data: fixtures, isLoading } = usePromise(
+    async (round: Round | undefined) => {
+      const gameweeks =
+        round?.gameweeks.sort((a, b) => a.week - b.week).map((gw) => getMatches(competition, gw.week)) ?? [];
+      const data = await Promise.all(gameweeks);
 
-      Promise.all(gameweeks).then((data) => {
-        let matches: Match[] = [];
-        data.forEach((d) => {
-          matches = matches.concat(d);
-        });
-
-        setFixtures(matches);
-        showToast({
-          title: "Completed",
-          style: Toast.Style.Success,
-        });
+      let matches: Match[] = [];
+      data.forEach((d) => {
+        matches = matches.concat(d);
       });
-    }
-  }, [round]);
+
+      return matches;
+    },
+    [round],
+  );
 
   const matchday = groupBy(fixtures, "gameweek.name");
 
   const action = (
     <ActionPanel.Section title="Other Rounds">
-      {rounds.map((round) => {
+      {rounds?.map((round) => {
         return (
           <Action
             key={round.id}
@@ -95,7 +85,7 @@ export default function Fixture() {
   return (
     <List
       throttle
-      isLoading={!fixtures}
+      isLoading={isLoading}
       navigationTitle={round ? `${round.name} | ${selectedCompetition?.title}` : "Fixtures & Results"}
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by Competition" value={competition} onChange={setCompetition}>

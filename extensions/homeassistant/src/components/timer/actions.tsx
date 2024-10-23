@@ -1,7 +1,7 @@
-import { Color, Action, Icon, ActionPanel } from "@raycast/api";
-import { State } from "@lib/haapi";
-import { callTimerCancelService, callTimerPauseService, callTimerStartService, isTimerEditable } from "./utils";
 import { EntityStandardActionSections } from "@components/entity";
+import { State } from "@lib/haapi";
+import { Action, ActionPanel, Color, Icon } from "@raycast/api";
+import { callTimerCancelService, callTimerPauseService, callTimerStartService, isTimerEditable } from "./utils";
 
 export function TimerStartAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
@@ -9,7 +9,7 @@ export function TimerStartAction(props: { state: State }): JSX.Element | null {
     return null;
   }
   const title = s.state === "active" ? "Restart" : "Start";
-  const iconSource = s.state === "active" ? Icon.ArrowClockwise : "play.png";
+  const iconSource = s.state === "active" ? Icon.ArrowClockwise : "play.svg";
   return (
     <Action
       title={title}
@@ -30,7 +30,7 @@ export function TimerPauseAction(props: { state: State }): JSX.Element | null {
       title="Pause"
       shortcut={{ modifiers: ["cmd"], key: "p" }}
       onAction={() => callTimerPauseService(s)}
-      icon={{ source: "pause.png", tintColor: Color.Green }}
+      icon={{ source: "pause.svg", tintColor: Color.Green }}
     />
   );
 }

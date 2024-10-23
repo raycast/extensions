@@ -2,6 +2,7 @@ import { Alert, Color, confirmAlert, Icon, LocalStorage, showToast, Toast } from
 import { Reminder } from "../types/reminder";
 import ActionStyle = Alert.ActionStyle;
 import Style = Toast.Style;
+import { updateMenubar } from "../utils/updateMenubar";
 
 type DeleteReminderProps = {
   reminderId: string;
@@ -31,5 +32,6 @@ export async function deleteExistingReminder(props: DeleteReminderProps) {
     props.setReminders(props.existingReminders.filter((existingReminder) => existingReminder.id !== props.reminderId));
     await LocalStorage.removeItem(props.reminderId);
     await showToast(Style.Success, "Reminder deleted", "This reminder will no longer pester you!");
+    await updateMenubar();
   }
 }

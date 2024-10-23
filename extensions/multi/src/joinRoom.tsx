@@ -1,4 +1,4 @@
-import { List, Action, ActionPanel, Icon, Color, closeMainWindow, PopToRootType, popToRoot } from "@raycast/api";
+import { List, Action, ActionPanel, Icon, Image, Color, closeMainWindow, PopToRootType, popToRoot } from "@raycast/api";
 import { Room, copyCallLink, getRooms, joinRoom } from "./lib/multi";
 import { useCachedPromise } from "@raycast/utils";
 import { showMultiScriptErrorToastAndLogError } from "./lib/showMultiScriptErrorToastAndLogError";
@@ -36,14 +36,14 @@ export default function Command() {
   );
 }
 
-function getIcon(room: Room): { source: Icon; tintColor: Color } {
+function getIcon(room: Room): Image {
   return {
     source: Icon.Circle,
     tintColor: room.participants.length > 0 ? Color.Green : Color.SecondaryText,
   };
 }
 
-function getAccessories(room: Room) {
+function getAccessories(room: Room): List.Item.Accessory[] {
   return [{ text: participantsLabel(room.participants.length) }];
 }
 
@@ -55,7 +55,7 @@ function participantsLabel(count: number) {
   return `${count} participants`;
 }
 
-function getActions(room: Room) {
+function getActions(room: Room): React.ReactNode {
   return (
     <ActionPanel>
       <Action

@@ -1,5 +1,13 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Chore] - 2024-09-02
+
+- Added missing contributor
+
+## [Update] - 2024-05-31
+
+- Add keywords for VSCodium and Cursor
+
 ## [Fix] - 2023-12-27
 
 - Fix crash when there is no `metadata` in an extension manifest

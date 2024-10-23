@@ -1,5 +1,13 @@
 # zed-recent-projects Changelog
 
+## [Fixes] 2024-06-20
+
+- Fixed an issue that the same entry is shown multiple times in the recent projects list.
+
+## [Fixes] 2024-05-02
+
+- Fixed issue with query to workspaces table. The workspace_location column has been renamed to local_paths.
+
 ## [Switch to builtin Zed recent projects] - 2024-03-09
 
 - `Search Recent Projects` switched to use the builtin Zed recent projects.

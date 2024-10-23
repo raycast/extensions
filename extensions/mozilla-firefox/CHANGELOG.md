@@ -1,5 +1,13 @@
 # Mozilla Firefox Changelog
 
+## [Fix for non-standard profile names] - 2024-08-06
+
+- Fixes issue (#11920) by adding a new preference.
+
+## [Added support for ESR profile] - 2024-06-17
+
+- Added support for ESR profile.
+
 ## [Fix] - 2024-01-06
 
 - Fixes issue (#9373) with search by browser history.

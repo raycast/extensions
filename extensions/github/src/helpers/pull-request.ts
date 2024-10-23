@@ -106,12 +106,12 @@ export function getNumberOfComments(pullRequest: PullRequestFieldsFragment) {
 export function getCheckStateAccessory(commitStatusCheckRollupState: StatusState): List.Item.Accessory | null {
   switch (commitStatusCheckRollupState) {
     case "SUCCESS":
-      return { icon: { source: Icon.Check, tintColor: Color.Green }, tooltip: "Checks: Success" };
+      return { icon: Icon.Check, tooltip: "Checks: Success" };
     case "ERROR":
     case "FAILURE":
-      return { icon: { source: Icon.Xmark, tintColor: Color.Red }, tooltip: "Checks: Failure" };
+      return { icon: Icon.Xmark, tooltip: "Checks: Failure" };
     case "PENDING":
-      return { icon: { source: Icon.Clock, tintColor: Color.Orange }, tooltip: "Checks: Pending" };
+      return { icon: Icon.Clock, tooltip: "Checks: Pending" };
     default:
       return null;
   }
@@ -120,14 +120,33 @@ export function getCheckStateAccessory(commitStatusCheckRollupState: StatusState
 export function getReviewDecision(reviewDecision?: PullRequestReviewDecision | null): List.Item.Accessory | null {
   switch (reviewDecision) {
     case "REVIEW_REQUIRED":
-      return { tag: { value: "Review required", color: Color.Orange } };
+      return { tag: { value: "Review required" } };
     case "CHANGES_REQUESTED":
-      return { tag: { value: "Changes requested", color: Color.Red } };
+      return { tag: { value: "Changes requested" } };
     case "APPROVED":
       return {
-        tag: { value: "Approved", color: Color.Green },
+        tag: { value: "Approved" },
       };
     default:
       return null;
   }
 }
+
+export const PR_SORT_TYPES_TO_QUERIES = [
+  { title: "Newest", value: "sort:created-desc" },
+  { title: "Oldest", value: "sort:created-asc" },
+  { title: "Most Commented", value: "sort:comments-desc" },
+  { title: "Least Commented", value: "sort:comments-asc" },
+  { title: "Recently Updated", value: "sort:updated-desc" },
+  { title: "Least Recently Updated", value: "sort:updated-asc" },
+  { title: "Best Match", value: "sort:relevance-desc" },
+  { title: "👍", value: "sort:reactions-+1-desc" },
+  { title: "👎", value: "sort:reactions--1-desc" },
+  { title: "😄", value: "sort:reactions-smile-desc" },
+  { title: "🎉", value: "sort:reactions-tada-desc" },
+  { title: "🙁", value: "sort:reactions-thinking_face-desc" },
+  { title: "❤️", value: "sort:reactions-heart-desc" },
+  { title: "🚀", value: "sort:reactions-rocket-desc" },
+  { title: "👀", value: "sort:reactions-eyes-desc" },
+];
+export const PR_DEFAULT_SORT_QUERY = "sort:updated-desc";

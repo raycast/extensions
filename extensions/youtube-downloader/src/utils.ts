@@ -1,4 +1,4 @@
-import ytdl from "ytdl-core";
+import ytdl from "@distube/ytdl-core";
 import { Clipboard, getPreferenceValues, open, showHUD, Toast } from "@raycast/api";
 import { intervalToDuration, formatDuration } from "date-fns";
 import tempfile from "tempfile";
@@ -30,6 +30,7 @@ export type DownloadOptions = {
 export type FormatOptions = {
   itag: string;
   container: string;
+  wav?: boolean;
 };
 
 setFfmpegPath(preferences.ffmpegPath);
@@ -49,9 +50,17 @@ export async function downloadVideo(url: string, options: DownloadOptions) {
 
   const container = formatObject.container || "mp4";
   const title = info.videoDetails.title;
-  const filePath = options.copyToClipboard
-    ? tempfile(`.${container}`)
-    : unusedFilenameSync(path.join(preferences.downloadPath, `${sanitizeFilename(title)}.${container}`));
+  let filePath = "";
+
+  if (options.copyToClipboard) {
+    const tempfilePath = tempfile();
+    filePath = path.join(
+      tempfilePath.substring(0, tempfilePath.lastIndexOf("/")),
+      `${sanitizeFilename(title)}.${container}`
+    );
+  } else {
+    filePath = unusedFilenameSync(path.join(preferences.downloadPath, `${sanitizeFilename(title)}.${container}`));
+  }
 
   const videoFormat = ytdl.chooseFormat(info.formats, {
     quality: "highestvideo",
@@ -211,9 +220,19 @@ export async function downloadAudio(url: string, options: DownloadOptions) {
     return;
   }
 
-  const filePath = options.copyToClipboard
-    ? tempfile(".mp3")
-    : unusedFilenameSync(path.join(preferences.downloadPath, `${sanitizeFilename(title)}.mp3`));
+  let filePath = "";
+
+  if (options.copyToClipboard) {
+    const tempfilePath = tempfile();
+    filePath = path.join(
+      tempfilePath.substring(0, tempfilePath.lastIndexOf("/")),
+      `${sanitizeFilename(title)}${formatObject.wav ? ".wav" : ".mp3"}`
+    );
+  } else {
+    filePath = unusedFilenameSync(
+      path.join(preferences.downloadPath, `${sanitizeFilename(title)}${formatObject.wav ? ".wav" : ".mp3"}`)
+    );
+  }
 
   return new Promise((resolve) => {
     const command = ffmpeg();
@@ -230,8 +249,13 @@ export async function downloadAudio(url: string, options: DownloadOptions) {
       command.duration(endTime - startTime);
     }
 
+    if (formatObject.wav) {
+      command.audioCodec("pcm_s16le").format("wav");
+    } else {
+      command.format("mp3");
+    }
+
     command
-      .format("mp3")
       .save(filePath)
       .on("error", (err) => {
         toast.title = "Encoding Failed";

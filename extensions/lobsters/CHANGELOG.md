@@ -1,5 +1,11 @@
 # lobsters
 
+## 1.0.3 - 2024-07-16
+
+### Patch Changes
+
+- 832876c: Update avatars & nicknames due to changes in RSS structure
+
 ## 1.0.2
 
 ### Patch Changes

@@ -35,6 +35,7 @@ export interface QuickLatexPreferences {
   svgWidth: string;
   svgHeight: string;
   svgViewbox: string;
+  background: string;
 }
 
 export interface QuickLatexArguments {

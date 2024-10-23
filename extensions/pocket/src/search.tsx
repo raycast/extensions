@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, Image } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { useState } from "react";
 import { ContentType, ReadState } from "./lib/api";
 import { View } from "./lib/oauth/view";
@@ -87,7 +88,7 @@ function SearchBookmarks(props: { arguments?: SearchArguments }) {
         <List.Item
           key={bookmark.id}
           title={bookmark.title || bookmark.originalUrl}
-          icon={bookmark.type === "article" ? Icon.BlankDocument : bookmark.type === "image" ? Icon.Image : Icon.Video}
+          icon={getFavicon(bookmark.originalUrl, { mask: Image.Mask.RoundedRectangle })}
           subtitle={bookmark.author}
           accessories={[
             { icon: bookmark.favorite ? { source: Icon.Star, tintColor: Color.Yellow } : undefined },

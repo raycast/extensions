@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Application,
+  getPreferenceValues,
   Icon,
   List,
   showToast,
@@ -11,14 +12,10 @@ import { useEffect, useState } from 'react';
 
 import { OpenOnNetlify, OpenRepo } from './components/actions';
 import { getDefaultTextEditor, tildifyPath, useDiskCache } from './utils/disk';
-import {
-  formatDate,
-  getPreferences,
-  snakeCaseToTitleCase,
-} from './utils/helpers';
+import { formatDate, snakeCaseToTitleCase } from './utils/helpers';
 
 export default function Command() {
-  const { scanPath } = getPreferences();
+  const { scanPath } = getPreferenceValues<Preferences.FindLocalSites>();
 
   const [searchText, setSearchText] = useState<string>();
   const [textEditor, setTextEditor] = useState<Application | null>(null);

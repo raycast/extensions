@@ -6,15 +6,18 @@ import { handleCommandError, tryLaunchCommand } from "./core/utils";
 
 export default async function Command({ launchType }: LaunchProps) {
   const userInitiated = launchType === LaunchType.UserInitiated;
-  let state: SonosState | null;
+  let state: SonosState | null = null;
   let coordinator: SonosDevice | undefined;
 
   try {
     state = await getLatestState();
     coordinator = await getActiveCoordinator();
   } catch (error) {
-    await handleCommandError(error);
-    return;
+    const caught = await handleCommandError(error);
+
+    if (caught || !userInitiated) {
+      return;
+    }
   }
 
   if (!coordinator && userInitiated) {

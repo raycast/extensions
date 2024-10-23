@@ -5,6 +5,10 @@
   "description": "Search Vim commands",
   "icon": "vim.png",
   "author": "ajaypremshankar",
+  "contributors": [
+    "pernielsentikaer",
+    "talk2dc"
+  ],
   "license": "MIT",
   "categories": [
     "Productivity",
@@ -31,7 +35,6 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {

@@ -1,5 +1,44 @@
 # Brew Changelog
 
+## [Improvements & Bugfix] - 2024-09-22
+
+- Fix detail panel for tap that doesn't have a license ([#12507](https://github.com/raycast/extensions/issues/12507))
+- Add JSON Debug Info Action
+
+## [Improvements] - 2024-07-29
+
+- Added new terminal options for Alacritty, kitty, WezTerm and Hyper.
+- Used app icons for actions to run commands in terminals.
+- Apply Destructive style to Uninstall actions.
+- Fallback to Terminal.App in case the selected terminal app is not installed.
+
+## [Improvements] - 2024-06-14
+
+- Updated dependencies
+
+## [Bug Fix] - 2024-07-03
+
+- Fix a crash that could occur when showing installed formula or cask
+
+## [Improvements] - 2024-06-24
+
+- Search now includes cask names
+
+## [Improvements] - 2024-06-24
+
+- Move formula and cask info to the metadata panel
+- Dependencies are displayed green if installed
+
+## [Improvements] - 2024-06-14
+
+- Updated dependencies
+- Updated screenshots
+- Added formula/cask name to the detail view
+
+## [Bug Fix] - 2024-05-14
+
+- Remove deprecated `--ignore-pinned` upgrade flag.
+
 ## [Bug Fix] - 2024-03-22
 
 - Fixed various crashes that occurred due to missing data.

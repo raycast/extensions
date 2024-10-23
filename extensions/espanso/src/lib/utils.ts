@@ -1,7 +1,7 @@
 import fse from "fs-extra";
 import path from "path";
 import { $ } from "zx";
-import { EspansoMatch, MultiTrigger, Replacement, NormalizedEspansoMatch, EspansoConfig } from "./types";
+import { EspansoMatch, MultiTrigger, Label, Replacement, NormalizedEspansoMatch, EspansoConfig } from "./types";
 import YAML from "yaml";
 $.verbose = false;
 
@@ -23,13 +23,14 @@ export function getAndSortTargetFiles(espansoMatchDir: string): { file: string; 
   return matchFilesTimes.sort((a, b) => b.mtime - a.mtime);
 }
 
-export function formatMatch(espansoMatch: MultiTrigger & Replacement) {
+export function formatMatch(espansoMatch: MultiTrigger & Label & Replacement) {
   const triggerList = espansoMatch.triggers.map((trigger) => `"${trigger}"`).join(", ");
+  const labelLine = espansoMatch.label ? `\n    label: "${espansoMatch.label}"` : "";
 
   return `
-  - triggers: [${triggerList}]
+  - triggers: [${triggerList}]${labelLine}
     replace: "${espansoMatch.replace}"
-    `;
+  `;
 }
 
 export function appendMatchToFile(fileContent: string, fileName: string, espansoMatchDir: string) {
@@ -42,38 +43,50 @@ export function appendMatchToFile(fileContent: string, fileName: string, espanso
 export function getMatches(espansoMatchDir: string, options?: { packagePath: boolean }): NormalizedEspansoMatch[] {
   const finalMatches: NormalizedEspansoMatch[] = [];
 
-  const matchFiles = fse
-    .readdirSync(espansoMatchDir)
-    .filter((fileName) => (options?.packagePath ? true : path.extname(fileName).toLowerCase() === ".yml")) // Filter based on options
-    .filter((fileName) => fileName !== ".DS_Store")
-    .map((fileName) => {
-      const filePath = path.join(espansoMatchDir, fileName);
-      return options?.packagePath ? path.join(filePath, "package.yml") : filePath;
-    })
-    .filter((filePath) => !options?.packagePath || fse.statSync(filePath).isFile());
+  function readDirectory(dir: string) {
+    const items = fse.readdirSync(dir, { withFileTypes: true });
 
-  for (const matchFile of matchFiles) {
-    const content = fse.readFileSync(matchFile);
+    for (const item of items) {
+      const fullPath = path.join(dir, item.name);
 
+      if (item.isDirectory()) {
+        if (options?.packagePath) {
+          const packageFilePath = path.join(fullPath, "package.yml");
+          if (fse.existsSync(packageFilePath) && fse.statSync(packageFilePath).isFile()) {
+            processFile(packageFilePath);
+          }
+        } else {
+          readDirectory(fullPath);
+        }
+      } else if (item.isFile() && path.extname(item.name).toLowerCase() === ".yml" && item.name !== ".DS_Store") {
+        processFile(fullPath);
+      }
+    }
+  }
+
+  function processFile(filePath: string) {
+    const content = fse.readFileSync(filePath);
     const { matches = [] }: { matches?: EspansoMatch[] } = YAML.parse(content.toString()) || {};
 
     finalMatches.push(
       ...matches.flatMap((obj: EspansoMatch) => {
         if ("trigger" in obj) {
-          const { trigger, replace, label } = obj;
-          return [{ triggers: [trigger], replace, label }];
+          const { trigger, replace, form, label } = obj;
+          return [{ triggers: [trigger], replace, form, label, filePath }];
         } else if ("triggers" in obj) {
-          const { triggers, replace, label } = obj;
-          return triggers.map((trigger: string) => ({ triggers: [trigger], replace, label }));
+          const { triggers, replace, form, label } = obj;
+          return triggers.map((trigger: string) => ({ triggers: [trigger], replace, form, label, filePath }));
         } else if ("regex" in obj) {
-          const { regex, replace, label } = obj;
-          return [{ triggers: [regex], replace, label }];
+          const { regex, replace, form, label } = obj;
+          return [{ triggers: [regex], replace, form, label, filePath }];
         } else {
           return [];
         }
       }),
     );
   }
+
+  readDirectory(espansoMatchDir);
 
   return finalMatches;
 }
@@ -108,9 +121,9 @@ export const sortMatches = (matches: NormalizedEspansoMatch[]): NormalizedEspans
     if (a.label && b.label) {
       return a.label.localeCompare(b.label);
     } else if (a.label) {
-      return -1; // a has label, b does not
+      return -1;
     } else if (b.label) {
-      return 1; // b has label, a does not
+      return 1;
     } else {
       return a.triggers[0].localeCompare(b.triggers[0]);
     }

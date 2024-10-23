@@ -10,7 +10,10 @@ import {
   getCurrentCommandIdentifier,
   setCurrentCommandIdentifier,
   splitSentences,
+  parseSpeed,
 } from "../utills";
+
+type VoiceChoice = "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer";
 
 export class TextToSpeechProcessor {
   private textToSpeechQueue: string[] = [];
@@ -18,31 +21,35 @@ export class TextToSpeechProcessor {
   private isPlaying = false;
   private isConverting = false;
   private openai: OpenAI;
-  private voice: ExtensionPreferences["defaultVoice"];
-  private temperature: ExtensionPreferences["temperature"];
-  private gptModel: ExtensionPreferences["gptModel"];
+  private voice: VoiceChoice;
+  private temperature: string;
+  private speed: number;
+  private gptModel: string;
+  private directRead: boolean;
   private subtitlesToggle: boolean;
-  private outputLanguage: ExtensionPreferences["outputLanguage"];
-  private readingStyle: ExtensionPreferences["readingStyle"];
+  private outputLanguage: string;
+  private readingStyle: string;
   public onScriptGenerated?: (script: string) => void;
 
-  constructor(
-    apiKey: string,
-    voice: ExtensionPreferences["defaultVoice"],
-    temperature: ExtensionPreferences["temperature"],
-    gptModel: ExtensionPreferences["gptModel"],
-    subtitlesToggle: boolean,
-    outputLanguage: ExtensionPreferences["outputLanguage"],
-    readingStyle: ExtensionPreferences["readingStyle"],
-    onScriptGenerated?: (script: string) => void,
-  ) {
-    this.openai = new OpenAI({ apiKey });
-    this.voice = voice;
-    this.temperature = temperature;
-    this.gptModel = gptModel;
-    this.subtitlesToggle = subtitlesToggle;
-    this.outputLanguage = outputLanguage;
-    this.readingStyle = readingStyle;
+  constructor(preferences: Preferences, onScriptGenerated?: (script: string) => void) {
+    this.openai = new OpenAI({ apiKey: preferences.apiKey });
+    this.voice = preferences.defaultVoice;
+    this.temperature = preferences.temperature;
+    this.gptModel = preferences.gptModel;
+    this.subtitlesToggle = preferences.subtitlesToggle;
+    this.outputLanguage = preferences.outputLanguage;
+    this.readingStyle = preferences.readingStyle;
+    try {
+      this.speed = parseSpeed(preferences.speed);
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid speed value, using default speed.",
+        message: String(error),
+      });
+      this.speed = 1;
+    }
+    this.directRead = preferences.directRead;
     this.onScriptGenerated = onScriptGenerated;
   }
   // New method to handle text directly
@@ -89,12 +96,11 @@ export class TextToSpeechProcessor {
     // kill all afplay processes if any are running
     await stopAllProcesses();
 
-    console.log("outputLanguage: ", this.outputLanguage);
-
     try {
       let selectedText = await getSelectedText();
 
-      if (this.outputLanguage && selectedText) {
+      if (this.outputLanguage && selectedText && !this.directRead) {
+        console.log("outputLanguage: ", this.outputLanguage);
         console.log(this.outputLanguage, "Start writing script...");
 
         await showToast({
@@ -103,7 +109,7 @@ export class TextToSpeechProcessor {
           message: "Please wait while the script is being written.",
         });
 
-        const readingStyleContent = READING_STYLES_PROMPTS[this.readingStyle]; // Use the script style preference
+        const readingStyleContent = READING_STYLES_PROMPTS[this.readingStyle as keyof typeof READING_STYLES_PROMPTS]; // Use the script style preference
 
         const prompt = `
         You are an advanced AI reading assistant with these key responsibilities:
@@ -191,6 +197,7 @@ export class TextToSpeechProcessor {
             model: "tts-1",
             voice: this.voice,
             input: textPart,
+            speed: this.speed,
           });
           const buffer = Buffer.from(await mp3.arrayBuffer());
           await fs.writeFile(speechFile, buffer);

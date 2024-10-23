@@ -1,5 +1,23 @@
 # Wikipedia Changelog
 
+## [Add languages] - 2024-08-24
+
+- Add `Catalan`, `Basque`, `Galician`, `Occitan`, `Aragonese` and `Asturian` languages
+
+## [Add Danish language] - 2024-07-25
+
+- Add `Danish` language
+
+## [Contributor maintenance] - 2024-07-04
+
+- Move @JonathanWbn to list of past contributors
+
+## [Add simple english version] - 2024-05-31
+
+## [Flag update] - 2024-04-19
+
+- Update flag emoji for the `Dutch` language
+
 ## [Updates] - 2024-04-10
 
 - Update dependencies
@@ -62,7 +80,7 @@ Add categories and screenshots for the store
 - Fix page open issues caused by unescaped page title characters
 - Use native `open` Raycast utility
 
-## [Simplified Extension] - 2022-20-01
+## [Simplified Extension] - 2022-01-20
 
 Remove page preview from the extension
 

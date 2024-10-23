@@ -1,78 +1,104 @@
-import { Action, ActionPanel, Detail, Icon, List, useNavigation } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { supabase } from "./supabase";
-import { convertNotesTimeStamps } from "./lib/utils";
-import { NoteWithContent } from "./types";
-import { BlockType, LeafType, serialize } from "remark-slate";
-import { signOut } from "./auth/google";
-import Protected from "./components/protected";
+import {
+  List,
+  ActionPanel,
+  Action,
+  showToast,
+  ToastStyle,
+  LocalStorage,
+  open,
+  closeMainWindow,
+  Icon,
+} from "@raycast/api";
+import { useState, useEffect, useMemo } from "react";
 
-export default function Search() {
+const LOCAL_STORAGE_SEARCH_HISTORY_KEY = "splix-search-history";
+
+type History = {
+  search: string;
+  date: number;
+};
+
+export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const [data, setData] = useState<NoteWithContent[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [searchHistory, setSearchHistory] = useState<History[]>([]);
 
   useEffect(() => {
-    (async () => {
-      if (!searchText) return;
-      setIsLoading(true);
-      const { data, error } = await supabase.functions.invoke("search-notes", {
-        body: JSON.stringify({ input: searchText }),
-      });
-      if (error || !data?.data) {
-        setIsLoading(false);
-        return;
+    const fetchSearchHistory = async () => {
+      const history = await LocalStorage.getItem(LOCAL_STORAGE_SEARCH_HISTORY_KEY);
+      if (history) {
+        setSearchHistory(JSON.parse(history as unknown as string));
       }
-      const notes = data?.data!.map(convertNotesTimeStamps) as NoteWithContent[];
-      setData(notes);
-      setIsLoading(false);
-    })();
-  }, [searchText]);
+    };
+    fetchSearchHistory();
+  }, []);
 
-  return (
-    <Protected>
-      <List
-        isLoading={isLoading}
-        onSearchTextChange={setSearchText}
-        searchBarPlaceholder="Search for notes..."
-        throttle
-        actions={
-          <ActionPanel title="Actions">
-            <Action.OpenInBrowser title="Go to Splix.app" icon={Icon.Globe} url={"https://splix.app/dashboard"} />
-            <Action title="Sign Out" icon={Icon.Logout} onAction={signOut} />
-          </ActionPanel>
-        }
-      >
-        {(searchText.length === 0 || isLoading) && (
-          <List.EmptyView icon={Icon.MagnifyingGlass} title={"Find what you're looking for by vaugely describing it"} />
-        )}
-        <List.Section title="Results" subtitle={data.length + ""}>
-          {data.map((note) => (
-            <SearchListItem key={note.id} note={note} />
-          ))}
-        </List.Section>
-      </List>
-    </Protected>
+  function dropDuplicates(newHistory: History[]) {
+    const uniqueSearches = new Set();
+    return newHistory.filter((item) => {
+      const searchString = item.search;
+      if (uniqueSearches.has(searchString)) {
+        return false;
+      } else {
+        uniqueSearches.add(searchString);
+        return true;
+      }
+    });
+  }
+
+  const handleSearch = async (search: string) => {
+    if (search.trim() === "") {
+      await showToast(ToastStyle.Failure, "Search text cannot be empty");
+      return;
+    }
+
+    const newHistory = dropDuplicates([{ search, date: new Date().getTime() }, ...searchHistory]).slice(0, 100);
+
+    LocalStorage.setItem(LOCAL_STORAGE_SEARCH_HISTORY_KEY, JSON.stringify(newHistory));
+    setSearchHistory(newHistory);
+
+    const url = `https://splix.app/dashboard?search=${encodeURIComponent(search)}`;
+    open(url);
+    closeMainWindow();
+  };
+
+  const handleDeleteSearh = (search: string) => {
+    const newHistory = searchHistory.filter((obj) => obj.search !== search);
+    setSearchHistory(newHistory);
+    LocalStorage.setItem(LOCAL_STORAGE_SEARCH_HISTORY_KEY, JSON.stringify(newHistory));
+  };
+
+  const searchResults = useMemo(
+    () => searchHistory.filter((item) => item.search.includes(searchText)),
+    [searchHistory, searchText],
   );
-}
 
-function NoteDetailView({ note }: { note: NoteWithContent }) {
-  const markdown = (note.content as (BlockType | LeafType)[]).map((v: BlockType | LeafType) => serialize(v)).join("");
-  return <Detail markdown={markdown} />;
-}
-
-function SearchListItem({ note }: { note: NoteWithContent }) {
-  const { push } = useNavigation();
   return (
-    <List.Item
-      title={note.description}
-      accessories={[{ icon: Icon.Calendar, text: note.updatedAt.toDateString() }]}
+    <List
+      searchBarPlaceholder="Search Splix..."
+      onSearchTextChange={setSearchText}
       actions={
         <ActionPanel>
-          <Action title="View Note Content" onAction={() => push(<NoteDetailView note={note} />)} />
-          <Action.OpenInBrowser title="Go to Splix.app" icon={Icon.Globe} url={"https://splix.app/dashboard"} />
+          <Action title="Search Splix..." onAction={() => handleSearch(searchText)} />
         </ActionPanel>
       }
-    />
+    >
+      <List.EmptyView title={searchText ? "Press enter to search!" : "Previous searches will appear here."} />
+      <List.Section title="Results" subtitle={searchResults.length + ""}>
+        {searchResults.map((item, index) => (
+          <List.Item
+            icon={Icon.MagnifyingGlass}
+            key={index}
+            title={item.search}
+            accessories={[{ icon: Icon.Calendar, text: new Date(item.date).toDateString() }]}
+            actions={
+              <ActionPanel>
+                <Action icon={Icon.Globe} title="Search in Splix" onAction={() => handleSearch(item.search)} />
+                <Action icon={Icon.Trash} title="Delete Search" onAction={() => handleDeleteSearh(item.search)} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
+    </List>
   );
 }

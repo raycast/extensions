@@ -1,4 +1,4 @@
-import { getSelectedText, showToast, ToastStyle, showHUD, getPreferenceValues } from "@raycast/api";
+import { getSelectedText, showToast, showHUD, getPreferenceValues, Toast } from "@raycast/api";
 import { encodeURI } from "js-base64";
 import open from "open";
 
@@ -24,7 +24,10 @@ export default async () => {
 
   const base64Text = encodeURI(selectedText);
 
-  await showToast(ToastStyle.Animated, "Generating screenshot");
+  await showToast({
+    style: Toast.Style.Animated,
+    title: "Generating screenshot",
+  });
 
   const url = `https://ray.so/#theme=${preferences.theme}&background=${preferences.background}&darkMode=${preferences.darkMode}&padding=${preferences.padding}&code=${base64Text}`;
   open(url);

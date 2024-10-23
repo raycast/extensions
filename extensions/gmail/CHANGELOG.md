@@ -1,5 +1,11 @@
 # Gmail Changelog
 
+## [Updated image in README] - 2024-10-07
+
+## [MenuBar Improvements] - 2024-07-30
+
+- Add possibility to hide the menu if there are no unread mails
+
 ## [Fix] - 2023-12-27
 
 - Fix possible crashes

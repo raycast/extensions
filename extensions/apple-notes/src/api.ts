@@ -8,7 +8,7 @@ export async function createNote(text?: string) {
   return runAppleScript(`
     tell application "Notes"
       activate
-      set newNote to make new note at folder "Notes"
+      set newNote to make new note
       if ("${escapedText}" is not "") then
         set body of newNote to "${escapedText}"
       end if
@@ -64,4 +64,27 @@ export async function getNotePlainText(id: string) {
       return plaintext of theNote
     end tell
     `);
+}
+
+export async function setNoteBody(id: string, body: string) {
+  return runAppleScript(`
+    tell application "Notes"
+      set theNote to note id "${escapeDoubleQuotes(id)}"
+      set body of theNote to "${escapeDoubleQuotes(body)}"
+    end tell
+    `);
+}
+
+export async function getSelectedNote() {
+  return runAppleScript(`
+    tell application "Notes"
+      set selectedNotes to selection
+      if (count of selectedNotes) is 0 then
+        error "No note is currently selected"
+      else
+        set theNote to item 1 of selectedNotes
+        return id of theNote
+      end if
+    end tell
+  `);
 }

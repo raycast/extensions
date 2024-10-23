@@ -220,6 +220,16 @@ export class XcodeSimulatorService {
   }
 
   /**
+   * Deletes App Files without uninstalling the app
+   * @param containerPath App Container Directory
+   * @param appGroupPath App Group Directory
+   */
+  static async deleteAppFiles(containerPath: string, appGroupPath?: string): Promise<void> {
+    const deleteAppGroupPathPromise = appGroupPath ? execAsync(`rm -rf ${appGroupPath}`) : Promise.resolve();
+    return Promise.all([execAsync(`rm -rf ${containerPath}`), deleteAppGroupPathPromise]).then();
+  }
+
+  /**
    * Rename XcodeSimulator
    * @param xcodeSimulator The Xcode Simulator to rename
    * @param name The new simulator name

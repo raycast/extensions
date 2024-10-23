@@ -1,14 +1,14 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
-import { useState } from "react";
+import { ShowAttributesAction } from "@components/entity";
+import { useHAStates } from "@components/hooks";
+import { useStateSearch } from "@components/state/hooks";
+import { StateListItem } from "@components/state/list";
+import { PrimaryIconColor } from "@components/state/utils";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
-import { useHAStates } from "@components/hooks";
 import { getStateTooltip } from "@lib/utils";
-import { ShowAttributesAction } from "@components/entity";
-import { StateListItem } from "@components/state/list";
+import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { useState } from "react";
 import { HACSRepo } from "./utils";
-import { useStateSearch } from "@components/state/hooks";
-import { PrimaryIconColor } from "@components/state/utils";
 
 function HACSUpdateItem(props: { repo: HACSRepo | undefined; state: State }): JSX.Element | null {
   const r = props.repo;
@@ -69,11 +69,11 @@ export function UpdatesList(): JSX.Element {
 
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
-      <List.Section title="Updates available" subtitle={`${updateRequiredStates?.length}`}>
+      <List.Section title="Update Available" subtitle={`${updateRequiredStates?.length}`}>
         {updateRequiredStates?.map((state) => <StateListItem key={state.entity_id} state={state} />)}
         <HACSUpdateItems state={hacsState} />
       </List.Section>
-      <List.Section title="No Updates required" subtitle={`${otherStates?.length}`}>
+      <List.Section title="Up-to-Date" subtitle={`${otherStates?.length}`}>
         {otherStates?.map((state) => <StateListItem key={state.entity_id} state={state} />)}
       </List.Section>
     </List>

@@ -1,50 +1,49 @@
-import { Color, Icon, MenuBarExtra, getPreferenceValues, openCommandPreferences, Cache } from "@raycast/api";
-import { isLowPowerModeEnabled } from "./utils/powerManagement";
+import { Color, Icon, MenuBarExtra, getPreferenceValues, openCommandPreferences, showHUD } from "@raycast/api";
+import { isLowPowerModeEnabled, toggleLowPowerMode } from "./utils/powerManagement";
 import { useState, useEffect } from "react";
-import main from "./toggle-low-power-mode";
+import { showFailureToast, useCachedState } from "@raycast/utils";
 
-export default function lowPowerMenuBar() {
-  const cache = new Cache();
-
-  const [currentState, setCurrentState] = useState<boolean>(() => {
-    const cachedState = cache.get("currentState");
-    return cachedState === undefined ? true : Boolean(cachedState);
-  });
-
-  const isEnabled = isLowPowerModeEnabled();
+export default function lowPowerMenuBar({ launchContext }: { launchContext?: { isEnabled: boolean } }) {
+  const isEnabled = launchContext ? launchContext.isEnabled : isLowPowerModeEnabled();
   const disabledIcon = { source: Icon.BatteryDisabled, tintColor: Color.PrimaryText };
   const enabledIcon = { source: Icon.BatteryCharging, tintColor: Color.Yellow };
-  const preferences = getPreferenceValues<Preferences.LowpowerMenubar>();
+  const { hideIconWhenDisabled } = getPreferenceValues<Preferences.LowpowerMenubar>();
+  const [enabledState, setEnabled] = useCachedState<boolean>("low-power-mode-enabled");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const newValue = Boolean(isEnabled);
-        setCurrentState(newValue);
-        cache.set("currentState", newValue.toString());
-      } catch (error) {
-        console.error("Error fetching low-power-mode state:", error);
-      }
-    };
-    fetchData();
-  }, [currentState]);
+    setEnabled(isEnabled);
+    setIsLoading(false);
+  }, [isEnabled]);
 
-  if (preferences.hideIconWhenDisabled && !isEnabled) {
+  if (hideIconWhenDisabled && !isEnabled) {
     return null;
   }
 
   return (
     <MenuBarExtra
-      icon={isEnabled ? enabledIcon : disabledIcon}
-      tooltip={isEnabled ? "Low Power Mode: On" : "Low Power Mode: Off"}
+      icon={enabledState ? enabledIcon : disabledIcon}
+      tooltip={enabledState ? "Low Power Mode: On" : "Low Power Mode: Off"}
+      isLoading={isLoading}
     >
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          title={isEnabled ? "Disable" : "Enable"}
+          title={enabledState ? "Disable" : "Enable"}
           onAction={async () => {
-            await main(true);
-            const newState = isLowPowerModeEnabled();
-            setCurrentState(Boolean(newState));
+            setIsLoading(true);
+            let toggleResult;
+
+            try {
+              toggleResult = await toggleLowPowerMode();
+            } catch (error) {
+              setIsLoading(false);
+              showFailureToast(error, { title: "Could not toggle low power mode" });
+              return;
+            }
+
+            setEnabled(toggleResult);
+            setIsLoading(false);
+            showHUD(`✅ Low power mode is turned ${toggleResult ? "on" : "off"}`);
           }}
         />
       </MenuBarExtra.Section>

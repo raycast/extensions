@@ -1,5 +1,31 @@
 # Prompt Explorer Extension Changelog
 
+## [Add Explore Quicklinks] - 2024-09-20
+
+- Add command for exploring Quicklinks
+
+## [Update endpoints] - 2024-05-06
+
+- Update endpoints for fetching data.
+
+## [Refactor data fetching] - 2024-05-06
+
+- Fetch prompts & snippets from their respective APIs.
+- Fetch Preset AI Model names from Raycast backend.
+
+## [Adding prompts] - 2024-05-04
+
+- Add task list prompt.
+
+## [Fixes] - 2024-04-25
+
+- Fix icon for the `None` creativity level in the `Explore Prompts` command.
+
+## [Add Explore Presets] - 2024-04-16
+
+- Add command for exploring Presets
+- Update icons for creativity
+
 ## [Improvements] - 2024-04-16
 
 - Add browser prompts and new models

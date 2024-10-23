@@ -1,8 +1,8 @@
-import { runAppleScript } from "run-applescript";
 import { DirectoryInfo, DirectoryType } from "../types/types";
 import { isEmpty } from "./common-utils";
 import * as path from "path";
 import { Clipboard } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 
 export const copyFileByPath = async (path: string) => {
   await Clipboard.copy({ file: path });

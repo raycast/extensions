@@ -1,24 +1,38 @@
 import { ActionPanel, List, Action, Color, Icon } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { exec } from "child_process";
 import { useEffect, useState } from "react";
 
 export default function Command() {
-  const [state, setState] = useState<Device[]>([]);
-  const [query, setQuery] = useState<string | undefined>(undefined);
+  const [state, setState] = useCachedState<State[]>("state", []);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchSimulators = () => {
+    setIsLoading(true);
     exec(`xcrun simctl list --json devices`, (err, stdout) => {
       if (err != null) {
         console.log(err);
+        setIsLoading(false);
         return;
       }
       const list: SimctlList = JSON.parse(stdout);
-      const devices = Object.keys(list.devices)
-        .map((key) => {
-          return list.devices[key];
-        })
-        .flat();
+      const devices = Object.entries(list.devices).flatMap(([key, devices]) =>
+        devices
+          .filter((device) => device.isAvailable)
+          .map((device) => {
+            // e.g. com.apple.CoreSimulator.SimRuntime.watchOS-8-5
+            const os = key
+              .replaceAll("com.apple.CoreSimulator.SimRuntime.", "") // watchOS-8-5
+              .split("-"); // [watchOS, 8, 5]
+            const osName = os[0]; // watchOS
+            const osVer = os.slice(1).join("."); // 8.5
+            const runtime = `${osName} ${osVer}`; // watchOS 8.5
+
+            return { ...device, runtime };
+          }),
+      );
       setState(devices);
+      setIsLoading(false);
     });
   };
 
@@ -67,7 +81,7 @@ export default function Command() {
         title="Boot"
         icon={Icon.Power}
         onAction={() => {
-          exec(`xcrun simctl boot ${device.udid}`, (err, stdout) => {
+          exec(`xcrun simctl boot ${device.udid}`, () => {
             fetchSimulators();
           });
         }}
@@ -85,7 +99,7 @@ export default function Command() {
         icon={Icon.XMarkCircle}
         style={Action.Style.Destructive}
         onAction={() => {
-          exec(`xcrun simctl shutdown ${device.udid}`, (err, stdout) => {
+          exec(`xcrun simctl shutdown ${device.udid}`, () => {
             fetchSimulators();
           });
         }}
@@ -93,24 +107,15 @@ export default function Command() {
     );
   };
 
-  return (
-    <List
-      isLoading={state.length === 0}
-      searchBarPlaceholder="Filter by name..."
-      onSearchTextChange={(query) => setQuery(query)}
-    >
-      {state
-        .filter((device) => {
-          if (device.isAvailable == false) {
-            return false;
-          }
+  function getIcon(name: string) {
+    if (name.includes("iPhone")) return Icon.Mobile;
+    if (name.includes("iPad")) return Icon.Desktop;
+    return Icon.Devices;
+  }
 
-          if (query == null) {
-            return true;
-          }
-          const nameMatches = device.name.toLowerCase().includes(query.toLowerCase());
-          return nameMatches;
-        })
+  return (
+    <List isLoading={isLoading} searchBarPlaceholder="Filter by name or runtime...">
+      {state
         .sort((a, b) => {
           if (a.state === "Booted" && b.state !== "Booted") {
             return -1;
@@ -123,7 +128,10 @@ export default function Command() {
           return (
             <List.Item
               id={device.udid}
+              icon={getIcon(device.name)}
               title={device.name}
+              keywords={device.runtime.split(" ")}
+              subtitle={device.runtime}
               key={device.udid}
               accessories={[
                 { tag: { value: device.state, color: device.state === "Booted" ? Color.Green : Color.SecondaryText } },
@@ -133,20 +141,8 @@ export default function Command() {
                   {openAction(device)}
                   {bootAction(device)}
                   {shutdownAction(device)}
-                  <Action
-                    title="Show Data"
-                    icon={Icon.Folder}
-                    onAction={() => {
-                      exec(`open ${device.dataPath}`);
-                    }}
-                  />
-                  <Action
-                    title="Show Logs"
-                    icon={Icon.Folder}
-                    onAction={() => {
-                      exec(`open ${device.logPath}`);
-                    }}
-                  />
+                  <Action.Open title="Open Data Folder" icon={Icon.Folder} target={device.dataPath} />
+                  <Action.Open title="Open Logs Folder" icon={Icon.Folder} target={device.logPath} />
                 </ActionPanel>
               }
             />
@@ -158,7 +154,7 @@ export default function Command() {
 
 type SimctlList = {
   devices: {
-    [key: string]: Device[];
+    [key in `com.apple.CoreSimulator.SimRuntime.${string}`]: Device[];
   };
 };
 
@@ -173,4 +169,7 @@ type Device = {
   deviceTypeIdentifier: string;
   state: string; // "Booted" | "Shutdown"
   name: string;
+};
+type State = Device & {
+  runtime: string;
 };

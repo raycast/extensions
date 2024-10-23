@@ -1,20 +1,19 @@
 import { Icon, List } from "@raycast/api";
-import { Actions } from "../components/Actions";
 import { usePromise } from "@raycast/utils";
-import { calculateDiskStorage, getOSInfo, getSerialNumber } from "./SystemUtils";
 import os from "node:os";
+
+import { Actions } from "../components/Actions";
+import { calculateDiskStorage, getOSInfo, getSerialNumber } from "./SystemUtils";
 
 export default function SystemInfo() {
   return (
-    <>
-      <List.Item
-        id="info-panel"
-        title="System Info"
-        icon={Icon.Finder}
-        detail={<SystemInfoDetail />}
-        actions={<Actions />}
-      />
-    </>
+    <List.Item
+      id="info-panel"
+      title="System Info"
+      icon={Icon.Finder}
+      detail={<SystemInfoDetail />}
+      actions={<Actions />}
+    />
   );
 }
 

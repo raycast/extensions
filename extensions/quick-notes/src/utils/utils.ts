@@ -1,7 +1,10 @@
-import { environment, showToast } from "@raycast/api";
-import { Note, Tag } from "../services/atoms";
+import { environment, showToast, trash } from "@raycast/api";
+import { Note, Sort, Tag } from "../services/atoms";
 import slugify from "slugify";
 import fs from "fs";
+import { TODO_FILE_PATH } from "../services/config";
+import { marked } from "marked";
+import striptags from "striptags";
 
 export const getInitialValuesFromFile = (filepath: string): [] => {
   try {
@@ -19,6 +22,89 @@ export const getInitialValuesFromFile = (filepath: string): [] => {
   }
 };
 
+export const getSortHumanReadable = (sort: Sort): string => {
+  switch (sort) {
+    case "created":
+      return "Created At";
+    case "updated":
+      return "Updated At";
+    case "alphabetical":
+      return "Alphabetical";
+    case "tags":
+      return "Tags";
+  }
+};
+
+export const getSyncWithDirectory = async (dirPath?: string): Promise<Note[]> => {
+  if (!dirPath) {
+    return Promise.reject("No directory path");
+  }
+  if (!fs.existsSync(dirPath) || !fs.lstatSync(dirPath).isDirectory()) {
+    return Promise.reject(`Invalid Folder: ${dirPath}`);
+  }
+  return new Promise<Note[]>((resolve, reject) => {
+    const notes = getInitialValuesFromFile(TODO_FILE_PATH) as Note[];
+    fs.readdir(dirPath, (err: NodeJS.ErrnoException | null, files: string[]) => {
+      if (err) {
+        reject(`Error reading directory: ${dirPath}`);
+      } else {
+        // Filter out non-Markdown files
+        const markdownFiles = files.filter((file) => file.endsWith(".md"));
+
+        // add markdown files to Notes
+        const filePromises = markdownFiles.map((file) => {
+          const notePath = `${dirPath}/${file}`;
+          return new Promise<Note>((resolve, reject) => {
+            fs.readFile(notePath, (err: NodeJS.ErrnoException | null, data: Buffer) => {
+              if (err) {
+                reject(`Error reading file: ${file}`);
+              } else {
+                // if it's an existing note, only update the body
+                const existingNote = notes.find((note) => slugify(note.title) === file.split(".md")[0]);
+                if (existingNote) {
+                  existingNote.body = data.toString();
+                  resolve(existingNote);
+                  return;
+                }
+
+                // new note
+                const body = data.toString();
+                const title = file.split(".md")[0];
+                const createdAt = fs.statSync(notePath).birthtime;
+                const updatedAt = fs.statSync(notePath).mtime;
+                const noteData: Note = {
+                  title,
+                  body,
+                  tags: [],
+                  is_draft: false,
+                  createdAt: createdAt ?? new Date(),
+                  updatedAt: updatedAt ?? new Date(),
+                };
+                resolve(noteData);
+              }
+            });
+          });
+        });
+        Promise.all(filePromises)
+          .then((noteData) => {
+            const updatedNotes = noteData.map((note) => {
+              const newNote = notes.find((n) => n.title === note.title);
+              if (newNote) {
+                return newNote;
+              }
+              return note;
+            });
+
+            resolve(updatedNotes);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      }
+    });
+  });
+};
+
 export const exportNotes = async (filePath: string, notes: Note[]) => {
   if (!fs.existsSync(filePath) || !fs.lstatSync(filePath).isDirectory()) {
     showToast({ title: "Invalid Folder" });
@@ -28,37 +114,17 @@ export const exportNotes = async (filePath: string, notes: Note[]) => {
   await Promise.all(
     notes.map(async (note) => {
       const notePath = `${filePath}/${slugify(note.title)}.md`;
-      const noteTitle = `# ${note.title}`;
-      const noteTags = note.tags.length > 0 ? `Tags: ${note.tags.join(", ")}\n\n` : undefined;
       const noteBody = `${note.body}`;
-      const completeNote = `${noteTitle}\n\n${noteTags ?? ""}${noteBody}`;
-      await fs.promises.writeFile(notePath, completeNote);
+      await fs.promises.writeFile(notePath, noteBody);
     }),
   );
 };
 
-export const deleteNotesInFolder = (dirPath: string, filenames: string[]): Promise<void> => {
+export const deleteNotesInFolder = async (dirPath: string, filenames: string[]): Promise<void> => {
   if (!fs.existsSync(dirPath) || !fs.lstatSync(dirPath).isDirectory()) {
     return Promise.reject(`Invalid Folder: ${dirPath}`);
   }
-  return new Promise<void>((resolve, reject) => {
-    const deletionPromises = filenames.map((file) => {
-      const filePath = `${dirPath}/${slugify(file)}.md`;
-      return new Promise<void>((fileResolve, fileReject) => {
-        fs.unlink(filePath, (err: NodeJS.ErrnoException | null) => {
-          if (err) {
-            fileReject(`Error deleting file ${filePath}: ${err}`);
-          } else {
-            fileResolve();
-          }
-        });
-      });
-    });
-
-    Promise.all(deletionPromises)
-      .then(() => resolve())
-      .catch((err) => reject(err));
-  });
+  await trash(filenames.map((file) => `${dirPath}/${slugify(file)}.md`));
 };
 
 export const getOldRenamedTitles = (oldNotes: Note[], newNotes: Note[]): string[] => {
@@ -79,6 +145,29 @@ export const getDeletedNote = (oldNotes: Note[], newNotes: Note[]): Note | null 
 
 export const getDeletedTags = (oldTags: Tag[], newTags: Tag[]): Tag[] => {
   return oldTags.filter((tag) => !newTags.includes(tag));
+};
+
+export const setNoteSummary = (summary: string, createdAt?: Date) => {
+  if (!createdAt) {
+    return;
+  }
+  const notes = getInitialValuesFromFile(TODO_FILE_PATH) as Note[];
+  const note = notes.find((n) => n.createdAt === createdAt);
+  if (!note) {
+    return;
+  }
+
+  const updatedNotes = notes.map((n) => (n.createdAt === createdAt ? { ...n, summary } : n));
+  fs.writeFileSync(TODO_FILE_PATH, JSON.stringify(updatedNotes, null, 2));
+};
+
+export const clearNoteSummary = (createdAt?: Date) => {
+  if (!createdAt) {
+    return;
+  }
+  const notes = getInitialValuesFromFile(TODO_FILE_PATH) as Note[];
+  const updatedNotes = notes.map((n) => (n.createdAt === createdAt ? { ...n, summary: undefined } : n));
+  fs.writeFileSync(TODO_FILE_PATH, JSON.stringify(updatedNotes, null, 2));
 };
 
 export const colors = [
@@ -146,4 +235,20 @@ export const colors = [
 
 export const getRandomColor = () => {
   return colors[Math.floor(Math.random() * colors.length)];
+};
+
+export const getTintColor = (colorName?: string) => {
+  if (!colorName) return undefined;
+  return colors.find((c) => c.name === colorName)?.tintColor;
+};
+
+export const countWords = (markdownString: string): number => {
+  const htmlString = marked.parse(markdownString, { async: false });
+  const plainText = striptags(htmlString as string);
+  const words = plainText
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ")
+    .filter((word) => word !== "");
+  return words.length;
 };

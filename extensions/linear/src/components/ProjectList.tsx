@@ -1,31 +1,29 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { List } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
 
 import useProjects from "../hooks/useProjects";
 import usePriorities from "../hooks/usePriorities";
 import useMe from "../hooks/useMe";
-import useUsers from "../hooks/useUsers";
-import useRoadmaps from "../hooks/useRoadmaps";
 
 import Project from "./Project";
 import { ProjectResult } from "../api/getProjects";
+import { useInitiatives } from "../hooks/useInitiatives";
+import { getInitiativeIcon } from "../helpers/initiatives";
 
 export default function ProjectList() {
-  const [roadmap, setRoadmap] = useCachedState<string>("");
+  const [initiativeId, setInitiativeId] = useState<string>("");
 
   const { projects, isLoadingProjects, mutateProjects } = useProjects();
-  const { roadmaps, isLoadingRoadmaps } = useRoadmaps();
+  const { initiatives, isLoadingInitiatives } = useInitiatives();
   const { priorities, isLoadingPriorities } = usePriorities();
   const { me, isLoadingMe } = useMe();
-  const { users, isLoadingUsers } = useUsers();
 
   const filteredProjects = useMemo(() => {
     if (!projects) {
       return [];
     }
 
-    if (!roadmap || !roadmaps || roadmaps.length < 1) {
+    if (!(initiatives ?? []).length || !initiativeId.length) {
       return projects;
     }
 
@@ -39,27 +37,28 @@ export default function ProjectList() {
       {} as Record<string, ProjectResult | undefined>,
     );
 
-    const currentRoadmap = roadmaps?.find((r) => r.id === roadmap);
+    const currentInitiative = initiatives?.find((i) => i.id === initiativeId);
 
-    return (
-      currentRoadmap?.projects.nodes.map((project) => {
-        return projectsNormalizedById[project.id];
-      }) || []
-    );
-  }, [roadmap, projects, roadmaps]);
+    return (currentInitiative?.projects?.nodes ?? []).map((project) => projectsNormalizedById[project.id]);
+  }, [initiativeId, projects, initiatives]);
 
   return (
     <List
-      isLoading={isLoadingProjects || isLoadingRoadmaps || isLoadingPriorities || isLoadingMe || isLoadingUsers}
-      {...(roadmaps && roadmaps.length > 0
+      isLoading={isLoadingProjects || isLoadingInitiatives || isLoadingPriorities || isLoadingMe}
+      {...((initiatives ?? []).length > 0
         ? {
             searchBarAccessory: (
-              <List.Dropdown tooltip="Change Roadmap" onChange={setRoadmap} value={roadmap}>
+              <List.Dropdown tooltip="Change Initiative" onChange={setInitiativeId} storeValue>
                 <List.Dropdown.Item value="" title="All Projects" />
 
-                <List.Dropdown.Section>
-                  {roadmaps?.map((roadmap) => (
-                    <List.Dropdown.Item key={roadmap.id} value={roadmap.id} title={roadmap.name} />
+                <List.Dropdown.Section title="Initiatives">
+                  {initiatives?.map((initiative) => (
+                    <List.Dropdown.Item
+                      key={initiative.id}
+                      value={initiative.id}
+                      title={initiative.name}
+                      icon={getInitiativeIcon(initiative)}
+                    />
                   ))}
                 </List.Dropdown.Section>
               </List.Dropdown>
@@ -75,14 +74,7 @@ export default function ProjectList() {
         }
 
         return (
-          <Project
-            project={project}
-            key={project.id}
-            priorities={priorities}
-            users={users}
-            me={me}
-            mutateProjects={mutateProjects}
-          />
+          <Project project={project} key={project.id} priorities={priorities} me={me} mutateProjects={mutateProjects} />
         );
       })}
 

@@ -17,12 +17,14 @@
     "rotate",
     "sips"
   ],
-  "version": "1.7.0",
+  "version": "1.8.2",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "contributors": [
     "arronhunt",
-    "nakaakist"
+    "nakaakist",
+    "JUSTIVE",
+    "patomos"
   ],
   "categories": [
     "Media",
@@ -44,6 +46,14 @@
         {
           "title": "Selection In Path Finder",
           "value": "Path Finder"
+        },
+        {
+          "title": "Selection in NeoFinder",
+          "value": "NeoFinder"
+        },
+        {
+          "title": "Selection in HoudahSpot",
+          "value": "HoudahSpot"
         },
         {
           "title": "Clipboard",
@@ -85,6 +95,15 @@
         }
       ],
       "default": "replaceOriginal",
+      "required": false
+    },
+    {
+      "title": "Image Operation Settings",
+      "name": "useLosslessConversion",
+      "description": "Whether to use lossless conversion when performing operations on WebP and AVIF images.",
+      "label": "Lossless Conversions",
+      "type": "checkbox",
+      "default": false,
       "required": false
     }
   ],
@@ -142,7 +161,10 @@
         }
       ],
       "keywords": [
-        "turn"
+        "turn",
+        "revolve",
+        "pivot",
+        "spin"
       ]
     },
     {
@@ -156,6 +178,14 @@
           "label": "ASTC",
           "name": "showASTC",
           "description": "Whether to show ASTC as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "AVIF",
+          "name": "showAVIF",
+          "description": "Whether to show AVIF as a conversion option",
           "type": "checkbox",
           "default": true,
           "required": false
@@ -319,6 +349,24 @@
           "type": "checkbox",
           "default": true,
           "required": false
+        },
+        {
+          "title": "JPEG Extension",
+          "name": "jpegExtension",
+          "description": "The extension to use when converting to JPEG",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "jpg",
+              "value": "jpg"
+            },
+            {
+              "title": "jpeg",
+              "value": "jpeg"
+            }
+          ],
+          "default": "jpeg",
+          "required": false
         }
       ],
       "keywords": [
@@ -422,13 +470,35 @@
           "required": false,
           "type": "text"
         }
+      ],
+      "keywords": [
+        "compress",
+        "improve",
+        "reduce",
+        "shrink"
       ]
     },
     {
       "name": "create-image",
       "title": "Create New Image",
       "description": "Create a new image by specifying its dimensions, color, and pattern.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "label": "Generate Image Previews",
+          "name": "generatePreviews",
+          "description": "Whether to generate previews of images upon every use of the command. If disable, the command will run faster, but you'll only see static previews that won't match the color of the generated image.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        }
+      ],
+      "keywords": [
+        "generate",
+        "make",
+        "build",
+        "construct"
+      ]
     },
     {
       "name": "strip-exif",
@@ -443,23 +513,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8",
-    "@raycast/utils": "^1.4.18",
+    "@raycast/api": "^1.82.1",
+    "@raycast/utils": "^1.17.0",
     "mathjs": "^11.8.2",
-    "run-applescript": "^6.1.0",
     "svgo": "^3.0.2",
     "tar": "^6.2.0"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
     "@types/tar": "^6.1.11",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

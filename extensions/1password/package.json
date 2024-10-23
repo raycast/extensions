@@ -10,12 +10,17 @@
     "dteare",
     "pernielsentikaer",
     "cb372",
-    "Davidwalser",
     "henrik-dmg",
     "spacedog",
     "JakeMoosey",
     "superwhys",
-    "lukah"
+    "lukah",
+    "litomore",
+    "Lemon",
+    "vimtor"
+  ],
+  "past_contributors": [
+    "Davidwalser"
   ],
   "categories": [
     "Security"
@@ -47,7 +52,28 @@
         "login"
       ],
       "interval": "9m",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "vault-list",
+      "title": "My Vaults",
+      "subtitle": "1Password",
+      "description": "List of all your 1Password vaults. Then open all items related to each vault.",
+      "keywords": [
+        "1p",
+        "1password",
+        "password",
+        "login"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "generate-password",
+      "title": "Generate Password",
+      "subtitle": "1Password",
+      "description": "Generate a random password with 1Password.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -143,6 +169,15 @@
       "required": false,
       "title": "1Password CLI path",
       "type": "textfield"
+    },
+    {
+      "description": "Enter your ZSH binary path",
+      "name": "zshPath",
+      "placeholder": "e.g., /bin/zsh",
+      "required": false,
+      "title": "1Password SHELL path",
+      "type": "textfield",
+      "default": "/bin/zsh"
     }
   ],
   "dependencies": {

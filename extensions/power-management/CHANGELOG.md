@@ -1,5 +1,11 @@
 # Power Management Changelog
 
+## [More Commands] - 2024-04-20
+
+- Added commands to directly enable & disable low power mode
+- Added a low power detail command to see the status of low power mode on AC and battery power and toggle them individually
+- Cleaned up & improved UI response of menubar command
+
 ## [Improvements] - 2024-04-07
 
 - Added menubar command to see the state on the icon and also a toggle button to operate alternatively

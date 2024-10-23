@@ -10,6 +10,7 @@ import {
   slackCreateInterval,
   slackPauseInterval,
   slackResetInterval,
+  slackRestartInterval,
 } from "../lib/slack/slackIntervals";
 
 const IconTint: Color.Dynamic = {
@@ -60,6 +61,11 @@ export function TogglePomodoroTimer() {
     setCurrentInterval(undefined);
   }
 
+  async function onRestart() {
+    await slackRestartInterval(token);
+    setCurrentInterval(getCurrentInterval());
+  }
+
   let icon: Image.ImageLike;
   icon = { source: "tomato-0.png", tintColor: IconTint };
   if (currentInterval) {
@@ -97,6 +103,12 @@ export function TogglePomodoroTimer() {
             icon={Icon.Stop}
             onAction={async () => onReset()}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
+          />
+          <MenuBarExtra.Item
+            title="Restart Current"
+            icon={Icon.Repeat}
+            onAction={async () => onRestart()}
+            shortcut={{ modifiers: ["cmd"], key: "t" }}
           />
         </>
       ) : (

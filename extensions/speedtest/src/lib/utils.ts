@@ -1,11 +1,13 @@
 import sha256 from "sha256-file";
+import { ResultViewIconsListKeys, icons, speedTestResultPrettyNames } from "./speedtest-pretty-names";
+import { SpeedtestResultKeys, SpeedtestResultValueType } from "./speedtest.types";
 
-export function pingToString(ping: number | undefined): string {
-  return ping === undefined ? "?" : ping.toFixed(1) + " ms";
+export function pingToString(ping: number): string {
+  return ping === 0 ? "?" : ping.toFixed(1) + " ms";
 }
 
 export function speedToString(speed: number | undefined): string {
-  if (speed === undefined) {
+  if (speed === undefined || speed === 0) {
     return "?";
   }
   let bits = speed * 8;
@@ -30,3 +32,38 @@ export async function sha256FileHash(filename: string): Promise<string | null> {
     });
   });
 }
+
+export function percentageToString(val: number | undefined): string | undefined {
+  if (val === undefined) {
+    return undefined;
+  }
+  const v = Math.round(val * 100);
+  if (v === 100) {
+    return undefined;
+  }
+  return `${v}%`;
+}
+
+export const isObject = (value: unknown): value is object => {
+  const type = typeof value;
+  return value != null && (type == "object" || type == "function");
+};
+
+export const getPrettyName = (key: SpeedtestResultKeys) => {
+  return speedTestResultPrettyNames[key];
+};
+
+export const getPrettyValue = (value: SpeedtestResultValueType): string => {
+  if (value === undefined) {
+    return "";
+  }
+
+  if (typeof value === "boolean") {
+    return value ? "Yes" : "No";
+  }
+  return value.toString();
+};
+
+export const isResultViewIconsListKey = (k: string): k is ResultViewIconsListKeys => {
+  return k in icons;
+};

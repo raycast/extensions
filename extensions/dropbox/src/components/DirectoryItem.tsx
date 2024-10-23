@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, List, PushAction } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { files } from "dropbox";
 import Directory from "./Directory";
 
@@ -17,7 +17,11 @@ export default function DirectoryItem(props: IDirectoryItemProps) {
       title={file.name}
       actions={
         <ActionPanel>
-          <PushAction title="Open Directory" icon={Icon.ArrowRight} target={<Directory path={file.id} />} />
+          <Action.Push
+            title="Open Directory"
+            icon={Icon.ArrowRight}
+            target={<Directory path={file.id} parent={file.path_display} />}
+          />
         </ActionPanel>
       }
     />

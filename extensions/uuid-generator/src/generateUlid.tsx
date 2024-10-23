@@ -1,25 +1,19 @@
-import { showHUD, Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { showHUD, Clipboard, getPreferenceValues, showToast, Toast, LaunchProps } from "@raycast/api";
 import { monotonicFactory } from "ulidx";
+
+import { generateUuids } from "./utils/uuidUtils";
+import { UUIDType } from "./uuidHistory";
 
 // This is required to ensure generated ULIDs are sortable
 // https://github.com/ulid/javascript#monotonic-ulids
 const ulid = monotonicFactory();
 
-interface ULIDArguments {
-  numberOfULIDsToGenerate: string;
-}
-
-interface Preferences {
-  upperCaseLetters: boolean;
-  defaultAction: string;
-}
-
 // don't want to cause a heap error, so cap it 😱
 const ULID_MAX_NUMBER = 10000;
 
-export default async (props: { arguments: ULIDArguments }) => {
+export default async (props: LaunchProps<{ arguments: Arguments.GenerateUlid }>) => {
   let { numberOfULIDsToGenerate } = props.arguments;
-  const { upperCaseLetters, defaultAction } = getPreferenceValues<Preferences>();
+  const { upperCaseLetters, defaultAction } = getPreferenceValues<Preferences.GenerateUlid>();
 
   if (!numberOfULIDsToGenerate) {
     numberOfULIDsToGenerate = "1";
@@ -34,10 +28,7 @@ export default async (props: { arguments: ULIDArguments }) => {
 
     // safe?
     if (parseableNumber <= ULID_MAX_NUMBER) {
-      let ulids = Array.from(Array(parseableNumber)).map(() => ulid(150000));
-      if (upperCaseLetters) {
-        ulids = ulids.map((element) => element.toUpperCase());
-      }
+      const ulids = await generateUuids(ulid, parseableNumber, upperCaseLetters, UUIDType.ULID);
 
       if (defaultAction === "copy") {
         await Clipboard.copy(ulids.join("\r\n"));

@@ -1,5 +1,22 @@
 # GIF Search Changelog
 
+## [Fix Recent GIFs can't be add to favorites] - 2024-10-08
+
+- Fixes a bug where recent GIFs couldn't be added to favorites
+
+## [Add 'Paste GIF Markdown' action] - 2024-09-06
+
+- Added a new action to paste a Markdown-formatted link to the GIF into the front-most application
+
+## [Fix favorites GIFS can't be removed] - 2024-09-02
+
+- Fixes a bug where favorited GIFs couldn't be removed from the favorites list
+
+## [Better Results] - 2024-04-19
+
+- The extension now uses GIPHY Pro and Tenor v2 to have better GIF results
+- The codebase has largely been revamped to make it easier to maintain
+
 ## [Use native pagination] - 2024-03-12
 
 - Switched to using native pagination for better scrolling experience
@@ -14,9 +31,9 @@
 
 - Added extension keywords, making it easier to find in the store.
 
-## [Fix GIFS downloaded from Giphy at lower quality] - 2024-12-01
+## [Fix GIFS downloaded from GIPHY at lower quality] - 2024-12-01
 
-- Fixes a bug where GIFs downloaded from Giphy were of a lower quality than the original
+- Fixes a bug where GIFs downloaded from GIPHY were of a lower quality than the original
 
 ## [Infinite Scroll] - 2023-12-02
 
@@ -30,7 +47,7 @@
 
 - Remove the list layout to simplify both the extension's user experience and developer experience.
 - Add "frecency" sorting to recents and favorites so that often-used GIFs come first.
-- Add support for Giphy Clips
+- Add support for GIPHY Clips
 - Add download GIF action
 - Add action to load more GIFs
 
@@ -94,7 +111,7 @@
 
 ## [Improved Experience] - 2022-03-22
 
-- Giphy and Tenor keys no longer required, downloads shared keys by default
+- GIPHY and Tenor keys no longer required, downloads shared keys by default
 
 ## [New Customizations & New GIF Search Engine] - 2022-03-21
 

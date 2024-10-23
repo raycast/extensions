@@ -1,6 +1,6 @@
 import { LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
-import checkAdbExists, { getAppIdFromParamsOrCache, saveAppIdInCache } from "./utils";
+import { checkAdbExists, getAppIdFromParamsOrCache, saveAppIdInCache } from "./utils";
 import Style = Toast.Style;
 
 export default async function clearAppData(props: LaunchProps<{ arguments: { appId: string | undefined } }>) {

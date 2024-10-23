@@ -1,7 +1,7 @@
 import { Form, Detail, ActionPanel, Action, showToast, Toast, open, popToRoot } from "@raycast/api";
 import { useState } from "react";
-import { MemoInfoResponse, PostFileResponse, PostMemoParams, ResponseData } from "./types";
-import { getOriginUrl, getRequestUrl, getTags, postFile, sendMemo } from "./api";
+import { MemoInfoResponse, PostFileResponse, PostMemoParams } from "./types";
+import { getOriginUrl, getRequestUrl, getTags, postFile, postMemoResources, sendMemo } from "./api";
 import { VISIBILITY } from "./constant";
 
 interface FormData {
@@ -13,8 +13,7 @@ interface FormData {
 
 export default function SendMemoFormCommand(): JSX.Element {
   const { isLoading, data: existTags } = getTags();
-
-  const [nameError, setNameError] = useState<string | undefined>();
+  const [nameError, setNameError] = useState<string>();
   const [files, setFiles] = useState<string[]>([]);
   const [createdMarkdown, setCreatedMarkdown] = useState<string>();
   const [createdUrl, setCreatedUrl] = useState<string>();
@@ -26,18 +25,18 @@ export default function SendMemoFormCommand(): JSX.Element {
   }
 
   function computedCreatedUrl(data: MemoInfoResponse) {
-    const { name, id } = data;
-    const url = getRequestUrl(`/m/${name || id}`);
+    const { uid } = data;
+    const url = getRequestUrl(`/m/${uid}`);
 
     setCreatedUrl(url);
   }
 
   function computedCreatedMarkdown(data: MemoInfoResponse) {
-    const { content, resourceList } = data;
+    const { content, resources } = data;
     let markdown = content;
 
-    resourceList.forEach((resource, index) => {
-      const resourceUrl = getRequestUrl(`/o/r/${resource.id}?thumbnail=1`);
+    resources.forEach((resource, index) => {
+      const resourceUrl = getRequestUrl(`/file/${resource.name}?thumbnail=1`);
 
       if (index === 0) {
         markdown += "\n\n";
@@ -61,27 +60,6 @@ export default function SendMemoFormCommand(): JSX.Element {
       params.content += ` #${tags.join(" #")}`;
     }
 
-    if (files.length) {
-      showToast({
-        style: Toast.Style.Animated,
-        title: "Upload Files",
-      });
-
-      const postFilesPromiseArr: Promise<ResponseData<PostFileResponse> & PostFileResponse>[] = [];
-
-      files.forEach((file) => {
-        postFilesPromiseArr.push(postFile(file));
-      });
-
-      const uploadedFiles = await Promise.all(postFilesPromiseArr).catch(() => {
-        showToast(Toast.Style.Failure, "Upload Files Failed");
-      });
-
-      if (uploadedFiles) {
-        params.resourceIdList = uploadedFiles.map((file) => file.id || file.data.id);
-      }
-    }
-
     showToast({
       style: Toast.Style.Animated,
       title: "Sending Memo",
@@ -91,14 +69,44 @@ export default function SendMemoFormCommand(): JSX.Element {
       showToast(Toast.Style.Failure, "Send Memo Failed");
     });
 
-    if (res) {
+    if (res?.uid) {
+      if (files.length) {
+        await setMemoResource(res, files);
+      }
+
       showToast(Toast.Style.Success, "Send Memo Success");
-      computedCreatedMarkdown(res.data || res);
-      computedCreatedUrl(res.data || res);
+      computedCreatedMarkdown(res);
+      computedCreatedUrl(res);
 
       setTimeout(() => {
         popToRoot({ clearSearchBar: true });
       }, 5000);
+    }
+  };
+
+  const setMemoResource = async (memos: MemoInfoResponse, files: string[]) => {
+    if (files.length) {
+      showToast({
+        style: Toast.Style.Animated,
+        title: "Upload Files",
+      });
+      const postFilesPromiseArr: Promise<PostFileResponse>[] = [];
+
+      files.forEach((file) => {
+        const filename = file.split("/").pop() || "";
+        postFilesPromiseArr.push(postFile(file, filename));
+      });
+
+      const uploadedFiles = await Promise.all(postFilesPromiseArr).catch(() => {
+        showToast(Toast.Style.Failure, "Upload Files Failed");
+      });
+
+      if (uploadedFiles) {
+        await postMemoResources(memos.name, uploadedFiles).catch((err) => {
+          showToast(Toast.Style.Failure, `Upload Files Failed. ${err?.message}`);
+          throw new Error(err);
+        });
+      }
     }
   };
 
@@ -145,9 +153,11 @@ export default function SendMemoFormCommand(): JSX.Element {
       <Form.FilePicker id="files" value={files} onChange={setFiles} />
 
       <Form.TagPicker id="tags" title="Exist Tags">
-        {(existTags?.data || existTags)?.map((tag) => {
-          return <Form.TagPicker.Item key={tag} value={tag} title={tag} />;
-        })}
+        {Object.keys(existTags?.tagAmounts)
+          ?.filter((tag) => !!existTags?.tagAmounts[tag])
+          ?.map((tag) => {
+            return <Form.TagPicker.Item key={tag} value={tag} title={tag} />;
+          })}
       </Form.TagPicker>
 
       <Form.Dropdown id="visibility" title="Limit" defaultValue="PRIVATE">

@@ -7,13 +7,14 @@
   "author": "thomaslombart",
   "contributors": [
     "FezVrasta",
-    "jesperorb",
     "teziovsky",
     "rifont",
     "gavinroderick",
     "lusit",
     "literallyjustroy",
-    "mheidinger"
+    "mheidinger",
+    "mikybars",
+    "luarmr"
   ],
   "pastContributors": [
     "igor9silva"
@@ -113,7 +114,7 @@
     {
       "name": "siteUrl",
       "title": "Jira Site URL",
-      "description": "Jira Site URL",
+      "description": "Your Jira site URL (e.g foo.atlassian.net)",
       "type": "textfield",
       "required": false,
       "placeholder": "foo.atlassian.com"
@@ -133,10 +134,9 @@
       "required": false
     }
   ],
-
   "dependencies": {
     "@raycast/api": "^1.64.3",
-    "@raycast/utils": "^1.12.4",
+    "@raycast/utils": "^1.16.2",
     "date-fns": "^2.30.0",
     "filesize": "^10.1.0",
     "form-data": "^4.0.0",

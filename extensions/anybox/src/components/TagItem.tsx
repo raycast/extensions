@@ -1,6 +1,5 @@
 import { ActionPanel, Action, List, Grid, Icon, getPreferenceValues } from "@raycast/api";
 import { TagProp } from "../utilities/fetch";
-import { Preferences } from "../utilities/searchRequest";
 import SearchTag from "../searchTag";
 
 interface Props {
@@ -9,7 +8,7 @@ interface Props {
 
 export default function TagItem(props: Props) {
   const tag = props.item;
-  const preferences: Preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences.Search>();
   if (preferences.asIcons) {
     return (
       <Grid.Item

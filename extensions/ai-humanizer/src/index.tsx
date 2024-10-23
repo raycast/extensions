@@ -14,7 +14,7 @@ export default function Command() {
 
   async function humanize(text: string): Promise<string | undefined> {
     try {
-      const url = "https://aitohumanconverter.com/v3/process.php";
+      const url = "https://aitohumanconverter.com/v2/process.php";
       const data = `text=${text}`;
 
       const response = await axios.post(url, data);

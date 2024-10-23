@@ -1,10 +1,10 @@
-import { Action, Icon, Color, ActionPanel } from "@raycast/api";
-import { State } from "@lib/haapi";
-import { CameraImageDetail } from "./detail";
-import fs from "fs";
-import { ha } from "@lib/common";
-import { getVideoStreamUrlFromCamera } from "./utils";
 import { EntityStandardActionSections } from "@components/entity";
+import { ha } from "@lib/common";
+import { State } from "@lib/haapi";
+import { Action, ActionPanel, Color, Icon } from "@raycast/api";
+import fs from "fs";
+import { CameraImageDetail } from "./detail";
+import { getVideoStreamUrlFromCamera } from "./utils";
 
 export function CameraShowImageAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
@@ -35,7 +35,7 @@ export function CameraTurnOnAction(props: { state: State }): JSX.Element | null 
       title="Turn On"
       onAction={handle}
       shortcut={{ modifiers: ["cmd"], key: "o" }}
-      icon={{ source: "power-btn.png", tintColor: Color.Green }}
+      icon={{ source: "power-on.svg", tintColor: Color.PrimaryText }}
     />
   );
 }
@@ -53,7 +53,7 @@ export function CameraTurnOffAction(props: { state: State }): JSX.Element | null
       title="Turn Off"
       onAction={handle}
       shortcut={{ modifiers: ["cmd"], key: "f" }}
-      icon={{ source: "power-btn.png", tintColor: Color.Red }}
+      icon={{ source: "power.svg", tintColor: Color.PrimaryText }}
     />
   );
 }
@@ -111,7 +111,7 @@ export function CameraOpenStreamInIINAAction(props: { state: State }): JSX.Eleme
   }
   return (
     <Action.Open
-      title="Open in IINA"
+      title="Open in Iina"
       target={url}
       application="IINA"
       shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}

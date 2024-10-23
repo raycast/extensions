@@ -17,9 +17,10 @@ import {
   showHUD,
   showToast,
   Toast,
+  Keyboard,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { CaseFunction, CaseType, functions } from "./types.js";
+import { CaseType, aliases, convert, functions, modifyCasesWrapper } from "./cases.js";
 
 class NoTextError extends Error {
   constructor() {
@@ -51,18 +52,6 @@ async function readContent(preferredSource: string) {
   throw new NoTextError();
 }
 
-function modifyCasesWrapper(input: string, case_: CaseFunction) {
-  const modifiedRawArr: string[] = [];
-  const modifiedMarkdownArr: string[] = [];
-  const lines = input.split("\n");
-  for (const line of lines) {
-    const modified = case_(line);
-    modifiedRawArr.push(modified);
-    modifiedMarkdownArr.push((modified.length === 0 ? "\u200B" : modified) + "\n");
-  }
-  return { rawText: modifiedRawArr.join("\n"), markdown: modifiedMarkdownArr.join("\n") };
-}
-
 const cache = new Cache();
 
 const getPinnedCases = (): CaseType[] => {
@@ -92,12 +81,12 @@ export default function Command(props: LaunchProps) {
   if (immediatelyConvertToCase) {
     (async () => {
       const content = await readContent(preferredSource);
-      const converted = functions[immediatelyConvertToCase](content);
+      const modified = convert(content, immediatelyConvertToCase);
 
       if (preferredAction === "paste") {
-        Clipboard.paste(converted);
+        Clipboard.paste(modified);
       } else {
-        Clipboard.copy(converted);
+        Clipboard.copy(modified);
       }
 
       showHUD(`Converted to ${immediatelyConvertToCase}`);
@@ -161,9 +150,9 @@ export default function Command(props: LaunchProps) {
           showHUD("Copied to Clipboard");
           Clipboard.copy(props.modified);
           if (preferences.popToRoot) {
-            closeMainWindow();
-          } else {
             popToRoot();
+          } else {
+            closeMainWindow();
           }
         }}
       />
@@ -187,9 +176,9 @@ export default function Command(props: LaunchProps) {
           showHUD(`Pasted in ${frontmostApp.name}`);
           Clipboard.paste(props.modified);
           if (preferences.popToRoot) {
-            closeMainWindow();
-          } else {
             popToRoot();
+          } else {
+            closeMainWindow();
           }
         }}
       />
@@ -212,6 +201,7 @@ export default function Command(props: LaunchProps) {
         title={props.case}
         accessories={[{ text: props.modified }]}
         detail={<List.Item.Detail markdown={props.detail} />}
+        keywords={aliases[props.case]}
         actions={
           <ActionPanel>
             <ActionPanel.Section>
@@ -224,7 +214,7 @@ export default function Command(props: LaunchProps) {
                 <Action
                   title="Pin Case"
                   icon={Icon.Pin}
-                  shortcut={{ key: "p", modifiers: ["cmd", "shift"] }}
+                  shortcut={Keyboard.Shortcut.Common.Pin}
                   onAction={() => {
                     setPinned([props.case, ...pinned]);
                     if (props.recent) {
@@ -237,15 +227,16 @@ export default function Command(props: LaunchProps) {
                   <Action
                     title="Remove Pinned Case"
                     icon={Icon.PinDisabled}
-                    shortcut={{ key: "r", modifiers: ["cmd"] }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => {
                       setPinned(pinned.filter((c) => c !== props.case));
                     }}
                   />
                   <Action
                     title="Clear Pinned Cases"
-                    icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-                    shortcut={{ key: "r", modifiers: ["cmd", "shift"] }}
+                    style={Action.Style.Destructive}
+                    icon={{ source: Icon.XMarkCircle }}
+                    shortcut={Keyboard.Shortcut.Common.RemoveAll}
                     onAction={() => {
                       setPinned([]);
                     }}
@@ -257,7 +248,7 @@ export default function Command(props: LaunchProps) {
                   <Action
                     title="Remove Recent Case"
                     icon={Icon.XMarkCircle}
-                    shortcut={{ key: "r", modifiers: ["cmd"] }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => {
                       setRecent(recent.filter((c) => c !== props.case));
                     }}
@@ -265,7 +256,7 @@ export default function Command(props: LaunchProps) {
                   <Action
                     title="Clear Recent Cases"
                     icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-                    shortcut={{ key: "r", modifiers: ["cmd", "shift"] }}
+                    shortcut={Keyboard.Shortcut.Common.RemoveAll}
                     onAction={() => {
                       setRecent([]);
                     }}
@@ -281,7 +272,7 @@ export default function Command(props: LaunchProps) {
               <Action
                 title="Refresh Content"
                 icon={Icon.RotateAntiClockwise}
-                shortcut={{ key: "r", modifiers: ["cmd"] }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
                 onAction={refreshContent}
               />
             </ActionPanel.Section>
@@ -295,7 +286,7 @@ export default function Command(props: LaunchProps) {
     <List isShowingDetail={true}>
       <List.Section title="Pinned">
         {pinned?.map((key) => {
-          const modified = modifyCasesWrapper(content, functions[key]);
+          const modified = modifyCasesWrapper(content, key);
           return (
             <CaseItem
               key={key}
@@ -309,7 +300,7 @@ export default function Command(props: LaunchProps) {
       </List.Section>
       <List.Section title="Recent">
         {recent.map((key) => {
-          const modified = modifyCasesWrapper(content, functions[key]);
+          const modified = modifyCasesWrapper(content, key);
           return (
             <CaseItem
               key={key}
@@ -322,15 +313,15 @@ export default function Command(props: LaunchProps) {
         })}
       </List.Section>
       <List.Section title="All Cases">
-        {Object.entries(functions)
+        {Object.keys(functions)
           .filter(
-            ([key]) =>
+            (key) =>
               preferences[key.replace(/ +/g, "") as keyof ExtensionPreferences] &&
               !recent.includes(key as CaseType) &&
               !pinned.includes(key as CaseType),
           )
-          .map(([key, func]) => {
-            const modified = modifyCasesWrapper(content, func);
+          .map((key) => {
+            const modified = modifyCasesWrapper(content, key);
             return <CaseItem key={key} case={key as CaseType} modified={modified.rawText} detail={modified.markdown} />;
           })}
       </List.Section>

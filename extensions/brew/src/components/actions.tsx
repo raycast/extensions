@@ -1,4 +1,4 @@
-import { Action, Icon, showToast, Toast } from "@raycast/api";
+import { Action, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import {
   brewName,
   brewInstall,
@@ -37,7 +37,8 @@ export function FormulaUninstallAction(props: {
     <Action
       title="Uninstall"
       icon={Icon.Trash}
-      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+      shortcut={Keyboard.Shortcut.Common.Remove}
+      style={Action.Style.Destructive}
       onAction={async () => {
         const result = await uninstall(props.formula);
         props.onAction(result);
@@ -85,7 +86,7 @@ export function FormulaPinAction(props: {
     <Action
       title={isPinned ? "Unpin" : "Pin"}
       icon={Icon.Pin}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+      shortcut={Keyboard.Shortcut.Common.Pin}
       onAction={async () => {
         if (isPinned) {
           props.onAction(await unpin(props.formula));

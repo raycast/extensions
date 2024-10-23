@@ -5,3 +5,6 @@
 
 # misc
 .DS_Store
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift

@@ -1,5 +1,14 @@
 # Changelog
 
+## [Added "Convert Decimal Units" command] - 2024-09-08
+
+- Added a new command to convert between different decimal units wei and ether.
+
+## [Added "Search on Etherscan" command] - 2024-03-19
+
+- Added a new command to search for addresses, transactions, and blocks on Etherscan.
+- Improve Convert Decimal Units command which fetch input from selected text.
+
 ## [Added "Resolve Name" command] - 2024-03-19
 
 - Added a new command to resolve names using decentralized naming protocols. Currently, only ENS is supported.

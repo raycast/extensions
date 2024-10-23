@@ -560,7 +560,7 @@ export class GitLab {
   }
 
   async getProjectMember(projectId: number): Promise<User[]> {
-    const userItems: User[] = await this.fetch(`projects/${projectId}/users`).then((users) => {
+    const userItems: User[] = await this.fetch(`projects/${projectId}/users`, {}, true).then((users) => {
       return users.map((userdata: any) => ({
         id: userdata.id,
         name: userdata.name,
@@ -640,12 +640,13 @@ export class GitLab {
     });
   }
 
-  async getProjects(args = { searchText: "", searchIn: "" }): Promise<Project[]> {
+  async getProjects(args = { searchText: "", searchIn: "", membership: "true" }): Promise<Project[]> {
     const params: { [key: string]: string } = {};
     if (args.searchText) {
       params.search = args.searchText;
       params.in = args.searchIn || "title";
     }
+    params.membership = args.membership;
     const issueItems: Project[] = await this.fetch("projects", params).then((projects) => {
       return projects.map((project: any) => dataToProject(project));
     });

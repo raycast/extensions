@@ -1,7 +1,7 @@
 import {
   Action,
   ActionPanel,
-  getPreferenceValues,
+  Clipboard,
   Icon,
   List,
   LocalStorage,
@@ -12,19 +12,17 @@ import {
   Toast,
 } from "@raycast/api";
 import React, { useState } from "react";
-import { isImage } from "./utils/common-utils";
+import { isImage, timeStampToDateTime } from "./utils/common-utils";
 import { parse } from "path";
 import { DirectoryType, tagDirectoryPath, tagDirectoryType } from "./utils/directory-info";
 import { showHiddenFiles } from "./utils/hide-files-utils";
 import { LocalStorageKey } from "./utils/constants";
 import { alertDialog, getHiddenFiles, refreshNumber } from "./hooks/hooks";
-import { copyFileByPath } from "./utils/applescript-utils";
 import { ListEmptyView } from "./components/list-empty-view";
-import { Preferences } from "./types/preferences";
+import { rememberTag } from "./types/preferences";
 import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
 
 export default function Command() {
-  const { rememberTag } = getPreferenceValues<Preferences>();
   const [tag, setTag] = useState<string>("");
   const [refresh, setRefresh] = useState<number>(0);
 
@@ -67,14 +65,17 @@ export default function Command() {
               title={{
                 value: value.name,
                 tooltip: `Type: ${value.type === DirectoryType.FILE ? "File" : "Folder"}, hidden at ${new Date(
-                  value.date
+                  value.date,
                 ).toLocaleString()}`,
               }}
-              accessories={[{ text: parse(value.path).dir, tooltip: value.path }]}
+              accessories={[
+                { date: new Date(value.date), tooltip: `Hidden at ${timeStampToDateTime(value.date)}` },
+                { icon: Icon.Folder, tooltip: `${parse(value.path).dir}` },
+              ]}
               actions={
                 <ActionPanel>
                   <Action.Open
-                    title={value.type === DirectoryType.FILE ? "Open with Default App" : "Open in Finder"}
+                    title={value.type === DirectoryType.FILE ? `Open ${value.name}` : "Open in Finder"}
                     target={value.path}
                   />
                   <Action.ShowInFinder path={value.path} />
@@ -88,7 +89,7 @@ export default function Command() {
                         _localDirectory.splice(index, 1);
                         await LocalStorage.setItem(
                           LocalStorageKey.LOCAL_HIDE_DIRECTORY,
-                          JSON.stringify(_localDirectory)
+                          JSON.stringify(_localDirectory),
                         );
                         setRefresh(refreshNumber());
                         showHiddenFiles(value.path.replaceAll(" ", `" "`));
@@ -131,7 +132,7 @@ export default function Command() {
                             await LocalStorage.clear();
                             setRefresh(refreshNumber());
                             await showToast(Toast.Style.Success, "Success!", "All files have been unhidden.");
-                          }
+                          },
                         );
                       }}
                     />
@@ -143,19 +144,19 @@ export default function Command() {
                       title={"Copy File"}
                       shortcut={{ modifiers: ["cmd"], key: "." }}
                       onAction={async () => {
-                        await showHUD(`${value.name} is copied to clipboard`);
-                        await copyFileByPath(value.path);
+                        await showHUD(`📑 ${value.name} is copied to clipboard`);
+                        await Clipboard.copy({ file: value.path });
                       }}
                     />
                     <Action.CopyToClipboard
                       title={"Copy File Name"}
                       content={value.name}
-                      shortcut={{ modifiers: ["shift", "cmd"], key: "." }}
+                      shortcut={{ modifiers: ["ctrl", "cmd"], key: "." }}
                     />
                     <Action.CopyToClipboard
                       title={"Copy File Path"}
                       content={value.path}
-                      shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
+                      shortcut={{ modifiers: ["ctrl", "cmd"], key: "," }}
                     />
                   </ActionPanel.Section>
 
@@ -163,7 +164,7 @@ export default function Command() {
                 </ActionPanel>
               }
             />
-          )
+          ),
       )}
     </List>
   );

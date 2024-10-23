@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aerospace",
+  "title": "Aerospace Tiling Window Manager",
+  "description": "Aerospace Tiling Window Manager Extension for Raycast to see and configure your shortcuts",
+  "icon": "aerospace-icon.png",
+  "author": "limonkufu",
+  "contributors": [
+    "AmmarCodes"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications",
+    "System"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "configPath",
+      "type": "textfield",
+      "placeholder": "path/to/config",
+      "default": "~/.aerospace.toml",
+      "title": "Config File",
+      "required": false,
+      "description": "Specify the config file path for aerospace"
+    }
+  ],
+  "commands": [
+    {
+      "name": "showShortcuts",
+      "title": "Show Aerospace Shortcuts",
+      "description": "All of the shortcuts of the aerospace parsed from your config file",
+      "mode": "view"
+    },
+    {
+      "name": "showConfig",
+      "title": "Show Aerospace Config",
+      "description": "Show config of the aerospace",
+      "mode": "view"
+    },
+    {
+      "name": "shortcutsMenubar",
+      "title": "Enable Aerospace Menubar Shortcuts",
+      "description": "See your Aerospace shortcuts at a glance",
+      "mode": "menu-bar"
+    }
+  ],
+  "dependencies": {
+    "@iarna/toml": "^3.0.0",
+    "@raycast/api": "^1.69.2",
+    "@raycast/utils": "^1.15.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "react-devtools": "^4.28.4",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
+

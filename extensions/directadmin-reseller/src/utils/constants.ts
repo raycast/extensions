@@ -4,7 +4,7 @@ export const RESELLER_USERNAME = getPreferenceValues<Preferences>().reseller_use
 export const RESELLER_PASSWORD = getPreferenceValues<Preferences>().reseller_password;
 export const RESELLER_API_TOKEN = btoa(`${RESELLER_USERNAME}:${RESELLER_PASSWORD}`);
 
-const DIRECTADMIN_URL = getPreferenceValues<Preferences>().directadmin_url;
+export const DIRECTADMIN_URL = getPreferenceValues<Preferences>().directadmin_url;
 export const API_URL = new URL(DIRECTADMIN_URL) + "CMD_API_";
 
 export const TITLES_FOR_KEYS = {

@@ -1,6 +1,15 @@
 # Bilibili Changelog
 
-## [New Feature] - 2023-12-11
+## [New Feature] - 2024-09-10
+
+- Support search videos
+
+## [New Feature] - 2023-12-30
+
+- Support add watch later reminder into the reminder.app
+- Show all images on the first screen
+
+## [New Feature] - 2023-11-13
 
 - Support AI summary video
 

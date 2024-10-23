@@ -11,6 +11,7 @@ import {
   slackCreateInterval,
   slackPauseInterval,
   slackResetInterval,
+  slackRestartInterval,
 } from "../lib/slack/slackIntervals";
 
 const createAction = (action: () => Promise<void> | Promise<Interval | undefined>) => async () => {
@@ -66,6 +67,15 @@ const ActionsList = () => {
               </ActionPanel>
             }
           />
+          <List.Item
+            title="Restart Current"
+            icon={Icon.Repeat}
+            actions={
+              <ActionPanel>
+                <Action onAction={createAction(async () => slackRestartInterval(token))} title={"Restart Current"} />
+              </ActionPanel>
+            }
+          />
         </>
       ) : (
         <>
@@ -116,7 +126,7 @@ const EndOfInterval = () => {
   let usingGiphy = false;
 
   if (preferences.enableConfetti) {
-    exec("open raycast://extensions/raycast/raycast/confetti", function (err, stdout, stderr) {
+    exec("open raycast://extensions/raycast/raycast/confetti", function (err) {
       if (err) {
         // handle error
         console.error(err);

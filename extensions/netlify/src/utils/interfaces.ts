@@ -90,6 +90,7 @@ export interface Directory {
 }
 
 export interface Domain {
+  id: string;
   account_name: string;
   account_slug: string;
   created_at: string;
@@ -103,6 +104,35 @@ export interface Domain {
   updated_at: string;
 }
 
+export interface DNSRecord {
+  hostname: string;
+  type: string;
+  ttl: number;
+  priority: number | null;
+  weight: number | null;
+  port: number | null;
+  flag: number | null;
+  tag: string | null;
+  id: string;
+  site_id: string | null;
+  dns_zone_id: string;
+  // errors: [],
+  managed: boolean;
+  value: string;
+}
+
+export interface CreateDNSRecord {
+  type: string;
+  hostname: string;
+  value: string;
+  ttl: number | null;
+  priority: number | null;
+  weight: number | null;
+  port: number | null;
+  flag: number | null;
+  tag: string | null;
+}
+
 export interface DomainSearch {
   available: boolean;
   delegated_domain: string;
@@ -110,6 +140,34 @@ export interface DomainSearch {
   owned_by_account?: boolean;
   price: string | null;
   renewal_price: string | null;
+}
+
+type Scope = 'builds' | 'functions' | 'runtime' | 'post-processing';
+interface EnvVarValue {
+  id: string;
+  value: string;
+  context:
+    | 'all'
+    | 'dev'
+    | 'branch-deploy'
+    | 'deploy-preview'
+    | 'production'
+    | 'branch';
+  context_parameter?: string;
+  role?: string;
+}
+export interface EnvVar {
+  key: string;
+  scopes: Scope[];
+  values: EnvVarValue[];
+  is_secret: boolean;
+  updated_at: string;
+  updated_by: {
+    id: string;
+    full_name: string;
+    email: string;
+    avatar_url: string;
+  };
 }
 
 export type Framework =
@@ -150,11 +208,6 @@ export interface Member {
   pending?: boolean;
   role: Role;
   site_access: 'all' | 'selected' | 'none';
-}
-
-export interface Preferences {
-  token: string;
-  scanPath?: string;
 }
 
 export interface Reviewer {

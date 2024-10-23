@@ -6,17 +6,37 @@ import parse from "semver/functions/parse";
 import { Device } from "./types";
 const exec = promisify(defaultExec);
 
+const joinWordsWithCommasThenOr = (words: string[]): string => {
+  if (words.length === 0) {
+    return "";
+  } else if (words.length === 1) {
+    return words[0];
+  } else {
+    const lastWord = words.pop();
+    return `${words.join(", ")} or ${lastWord}`;
+  }
+};
+
 const MINIMUM_SUPPORTED_LITRA_VERSION = "0.2.0";
+const SUPPORTED_MAJOR_LITRA_VERSIONS = [0, 1];
+const ALLOWED_MAJOR_VERSIONS_STRING = joinWordsWithCommasThenOr(
+  SUPPORTED_MAJOR_LITRA_VERSIONS.map((majorVersion) => `v${majorVersion}.x`),
+);
 
 export const checkLitraVersion = async (binaryPath: string): Promise<void> => {
   const version = await getLitraVersion(binaryPath);
+  const parsedVersion = parse(version);
+
+  if (!parsedVersion) {
+    throw `The version of the \`litra\` CLI could not be detected. Please check the extension's preferences, and make sure that you're pointing to the \`litra\` CLI`;
+  }
 
   if (gte(version, MINIMUM_SUPPORTED_LITRA_VERSION)) {
-    if (parse(version)?.major != parse(MINIMUM_SUPPORTED_LITRA_VERSION)?.major) {
-      throw `You are running v${version} of the \`litra\` CLI which is too new for this Raycast extension. Please downgrade to v${MINIMUM_SUPPORTED_LITRA_VERSION} or a later version within the same major version.`;
+    if (!SUPPORTED_MAJOR_LITRA_VERSIONS.includes(parsedVersion.major)) {
+      throw `You are running v${version} of the \`litra\` CLI which is too new for this Raycast extension. Please downgrade to an earlier version - you must use at least v${MINIMUM_SUPPORTED_LITRA_VERSION}, and it must be a ${ALLOWED_MAJOR_VERSIONS_STRING} version. To download a supported version, see https://github.com/timrogers/litra-rs`;
     }
   } else {
-    throw `You are running an old version of the \`litra\` CLI, v${version}. You must be running v${MINIMUM_SUPPORTED_LITRA_VERSION} or a later version within the same major version. For details on how to install the latest version, see https://github.com/timrogers/litra-rs.`;
+    throw `You are running an old version of the \`litra\` CLI, v${version}. Please upgrade to a more recent version - you must use at least v${MINIMUM_SUPPORTED_LITRA_VERSION}, and it must be a ${ALLOWED_MAJOR_VERSIONS_STRING} version. For details on how to install the latest version, see https://github.com/timrogers/litra-rs`;
   }
 };
 

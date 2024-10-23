@@ -1,4 +1,5 @@
-import { LaunchProps, closeMainWindow, getSelectedText, open, showHUD } from "@raycast/api";
+import type { LaunchProps } from "@raycast/api";
+import { closeMainWindow, getSelectedText, open, showHUD } from "@raycast/api";
 import fetch from "cross-fetch";
 
 type WaybackArguments = {

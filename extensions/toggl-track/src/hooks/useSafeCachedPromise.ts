@@ -1,7 +1,8 @@
 import { showToast, Toast } from "@raycast/api";
 import { useCachedPromise, CachedPromiseOptions } from "@raycast/utils";
 import { FunctionReturningPromise } from "@raycast/utils/dist/types";
-import { useExtensionContext } from "../context/ExtensionContext";
+
+import { useExtensionContext } from "@/context/ExtensionContext";
 
 export const useSafeCachedPromise: typeof useCachedPromise = <T extends FunctionReturningPromise, U = undefined>(
   fn: T,

@@ -1,16 +1,16 @@
-import { Color, getPreferenceValues, showToast, Action, Toast, List, Grid, ActionPanel, Image } from "@raycast/api";
+import { EntityStandardActionSections } from "@components/entity";
+import { useHAStates } from "@components/hooks";
+import { useStateSearch } from "@components/state/hooks";
 import { State } from "@lib/haapi";
 import { getFriendlyName } from "@lib/utils";
-import { useHAStates } from "@components/hooks";
-import { EntityStandardActionSections } from "@components/entity";
-import { useImage } from "./hooks";
+import { Action, ActionPanel, Color, Grid, Image, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import {
   CameraOpenStreamInBrowserAction,
   CameraOpenStreamInIINAAction,
   CameraOpenStreamInVLCAction,
   CameraShowImageAction,
 } from "./actions";
-import { useStateSearch } from "@components/state/hooks";
+import { useImage } from "./hooks";
 
 const defaultRefreshInterval = 3000;
 
@@ -36,7 +36,7 @@ function CameraGridItem(props: { state: State }): JSX.Element {
   const s = props.state;
   const { localFilepath, imageFilepath } = useImage(s.entity_id);
   const content: Image.ImageLike =
-    s.state === "unavailable" ? { source: "video.png", tintColor: Color.Blue } : { source: localFilepath || "" };
+    s.state === "unavailable" ? { source: "video.svg", tintColor: Color.Blue } : { source: localFilepath || "" };
   const titleParts = [getFriendlyName(s)];
   if (s.state === "unavailable") {
     titleParts.push("❌");
@@ -47,8 +47,8 @@ function CameraGridItem(props: { state: State }): JSX.Element {
       return;
     }
     return motion === true
-      ? { source: "run.png", tintColor: Color.Yellow }
-      : { source: "walk.png", tintColor: Color.PrimaryText };
+      ? { source: "run.svg", tintColor: Color.Yellow }
+      : { source: "walk.svg", tintColor: Color.PrimaryText };
   };
   return (
     <Grid.Item

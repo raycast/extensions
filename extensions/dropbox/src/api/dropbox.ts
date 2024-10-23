@@ -1,8 +1,12 @@
-import { Dropbox } from "dropbox";
-import { files } from "dropbox/types/dropbox_types";
+import { Dropbox, DropboxResponseError } from "dropbox";
+import { Error as DropboxError, files } from "dropbox/types/dropbox_types";
 import { authorize } from "./auth";
+import { getPreferenceValues } from "@raycast/api";
 
 async function getDropboxClient(): Promise<Dropbox> {
+  const { dropbox_access_token } = getPreferenceValues<Preferences>();
+  if (dropbox_access_token) return new Dropbox({ accessToken: dropbox_access_token });
+
   const tokenSet = await authorize();
   if (!tokenSet) {
     throw new Error("no dropbox token");
@@ -96,22 +100,11 @@ export function getFilePreviewURL(path: string): string {
   return `https://www.dropbox.com/preview${path}`;
 }
 
-function convertError(e: any): string {
-  try {
-    if ("error" in e.error && ".tag" in e.error["error"]) {
-      return e.error["error"][".tag"];
-    }
-  } catch (_) {
-    //
+function convertError(err: unknown): string {
+  const e = err as DropboxResponseError<DropboxError<{ ".tag"?: string }>> | Error;
+  if ("error" in e) {
+    if (e.error.error[".tag"]) return e.error.error[".tag"];
   }
-
-  try {
-    if ("message" in e && e["message"]) {
-      return e["message"];
-    }
-  } catch (_) {
-    //
-  }
-
+  if (e instanceof Error) return e.message;
   return `${e}`;
 }

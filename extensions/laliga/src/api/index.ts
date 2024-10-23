@@ -1,6 +1,8 @@
+import { getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import {
+  CurrentGameweek,
   LaLigaClub,
   LaLigaClubs,
   LaLigaClubSquad,
@@ -16,10 +18,6 @@ import {
   Team,
 } from "../types";
 
-function showFailureToast() {
-  showToast(Toast.Style.Failure, "Something went wrong", "Please try again later");
-}
-
 const { apikey } = getPreferenceValues();
 
 const endpoint = "https://apim.laliga.com/public-service/api/v1";
@@ -28,7 +26,7 @@ const headers = {
   "Content-Language": "en",
 };
 
-export const getCurrentGameWeek = async (competition: string) => {
+export const getCurrentGameWeek = async (competition: string): Promise<CurrentGameweek | undefined> => {
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `${endpoint}/subscriptions/${competition}/current-gameweek`,
@@ -40,9 +38,9 @@ export const getCurrentGameWeek = async (competition: string) => {
 
     return data.gameweek;
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
-    return {};
+    return undefined;
   }
 };
 
@@ -65,7 +63,7 @@ export const getTeams = async (season: string): Promise<Team[]> => {
 
     return data.teams;
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return [];
   }
@@ -83,7 +81,7 @@ export const getTeam = async (team: string) => {
 
     return data.team;
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return undefined;
   }
@@ -101,7 +99,7 @@ export const getStandings = async (competition: string): Promise<Standing[]> => 
 
     return data.standings;
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return [];
   }
@@ -126,13 +124,17 @@ export const getMatches = async (subscriptionSlug: string, week: number): Promis
 
     return data.matches;
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return [];
   }
 };
 
 export const getSquad = async (team: string): Promise<Squad[]> => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `${endpoint}/teams/${team}/squad-manager`,
@@ -141,7 +143,7 @@ export const getSquad = async (team: string): Promise<Squad[]> => {
       offset: 0,
       orderField: "id",
       orderType: "DESC",
-      // seasonYear: "2021",
+      seasonYear: month < 6 ? year - 1 : year,
     },
     headers,
   };
@@ -151,7 +153,7 @@ export const getSquad = async (team: string): Promise<Squad[]> => {
 
     return data.squads;
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return [];
   }
@@ -169,7 +171,7 @@ export const getSubscriptionRounds = async (competition: string): Promise<Round[
 
     return data.rounds;
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return [];
   }
@@ -190,7 +192,7 @@ export const getMatchComments = async (slug: string): Promise<MatchCommentary[]>
 
     return data.match_commentaries;
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return [];
   }

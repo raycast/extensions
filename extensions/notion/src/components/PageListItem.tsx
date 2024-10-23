@@ -1,4 +1,3 @@
-import { FormulaPropertyItemObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import {
   Action,
   ActionPanel,
@@ -20,7 +19,7 @@ import {
   getPageIcon,
   notionColorToTintColor,
   Page,
-  PagePropertyType,
+  PageProperty,
   User,
 } from "../utils/notion";
 import { handleOnOpenPage } from "../utils/openPage";
@@ -31,10 +30,6 @@ import { PageDetail } from "./PageDetail";
 import { ActionEditPageProperty, ActionSetVisibleProperties } from "./actions";
 import ActionCreateQuicklink from "./actions/ActionCreateQuicklink";
 import { AppendToPageForm, CreatePageForm, DatabaseViewForm } from "./forms";
-
-function capitalize(string: string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
 
 type PageListItemProps = {
   page: Page;
@@ -102,17 +97,14 @@ export function PageListItem({
 
   const title = page.title ? page.title : "Untitled";
 
-  const { primaryAction } = getPreferenceValues<Preferences.SearchPage>();
-
-  const openInRaycastAction = {
-    page: (
+  const OpenInRaycastAction =
+    page.object == "page" ? (
       <Action.Push
         title="Preview Page"
         icon={Icon.BlankDocument}
         target={<PageDetail page={page} setRecentPage={setRecentPage} users={users} />}
       />
-    ),
-    database: (
+    ) : (
       <Action.Push
         title="Navigate to Database"
         icon={Icon.List}
@@ -125,40 +117,37 @@ export function PageListItem({
           />
         }
       />
-    ),
-  };
-
-  const { open_in } = getPreferenceValues<Preferences>();
-
-  const openInNotionAppAction = createOpenInNotionAction("App", "notion-logo.png", () =>
-    handleOnOpenPage(page, setRecentPage),
+    );
+  const OpenInAppAction = (
+    <Action title={`Open in App`} icon={"notion-logo.png"} onAction={() => handleOnOpenPage(page, setRecentPage)} />
   );
-  const openInNotionBrowserAction = createOpenInNotionAction("Browser", Icon.Globe, async () => {
-    if (!page.url) return;
-    if (open_in?.name === "Notion") {
-      open(page.url);
-    } else open(page.url, open_in);
-    await setRecentPage(page);
-    closeMainWindow();
-  });
+  const OpenInBrowserAction = (
+    <Action
+      title={`Open in Browser`}
+      icon={Icon.Globe}
+      onAction={async () => {
+        if (!page.url) return;
+        if (open_in?.name === "Notion") {
+          open(page.url);
+        } else open(page.url, open_in);
+        await setRecentPage(page);
+        closeMainWindow();
+      }}
+    />
+  );
 
-  const isDefaultNotionActionApp = open_in && open_in.name === "Notion";
-  let openInNotionDefaultAction;
-  let openInNotionAlternativeAction;
-  if (!isDefaultNotionActionApp) {
-    openInNotionDefaultAction = openInNotionBrowserAction;
-  } else {
-    openInNotionDefaultAction = isDefaultNotionActionApp ? openInNotionAppAction : openInNotionBrowserAction;
-    openInNotionAlternativeAction = isDefaultNotionActionApp ? openInNotionBrowserAction : openInNotionAppAction;
-  }
+  const { primaryAction, open_in } = getPreferenceValues<Preferences.SearchPage>();
 
-  const actions = {
-    raycast: openInRaycastAction[page.object],
-    notionDefaultOpen: openInNotionDefaultAction,
-    notionAltOpen: openInNotionAlternativeAction,
-  };
+  const OpenPageActions =
+    open_in?.name == "Notion" // Default app is Notion
+      ? primaryAction == "notion"
+        ? [OpenInAppAction, OpenInRaycastAction, OpenInBrowserAction]
+        : [OpenInRaycastAction, OpenInAppAction, OpenInBrowserAction]
+      : primaryAction == "notion"
+        ? [OpenInBrowserAction, OpenInRaycastAction]
+        : [OpenInRaycastAction, OpenInBrowserAction];
 
-  const pageWord = capitalize(page.object);
+  const pageWord = page.object.charAt(0).toUpperCase() + page.object.slice(1);
 
   return (
     <List.Item
@@ -167,9 +156,7 @@ export function PageListItem({
       actions={
         <ActionPanel>
           <ActionPanel.Section title={title}>
-            {primaryAction === "notion" ? actions["notionDefaultOpen"] : actions["raycast"]}
-            {primaryAction === "notion" ? actions["raycast"] : actions["notionDefaultOpen"]}
-            {actions["notionAltOpen"]}
+            {...OpenPageActions}
             {customActions?.map((action) => action)}
             {databaseProperties ? (
               <ActionPanel.Submenu
@@ -306,52 +293,43 @@ export function PageListItem({
   );
 }
 
-function createOpenInNotionAction(title: string, icon: Image.ImageLike | string, action: () => void) {
-  return <ActionPanel.Item title={`Open in ${title}`} icon={icon} onAction={action} />;
-}
-
 function getPropertyAccessory(
-  property: PagePropertyType | FormulaPropertyItemObjectResponse["formula"],
+  property: PageProperty | Extract<PageProperty, { type: "formula" }>["value"],
   title: string,
   users?: User[],
 ): List.Item.Accessory | List.Item.Accessory[] | undefined {
+  if (property.value === null) return;
   switch (property.type) {
     case "boolean":
-      return {
-        icon: property.boolean ? Icon.CheckCircle : Icon.Circle,
-        tooltip: `${title}: ${property.boolean ? "Checked" : "Unchecked"}`,
-      };
     case "checkbox":
       return {
-        icon: property.checkbox ? Icon.CheckCircle : Icon.Circle,
-        tooltip: `${title}: ${property.checkbox ? "Checked" : "Unchecked"}`,
+        icon: property.value ? Icon.CheckCircle : Icon.Circle,
+        tooltip: `${title}: ${property.value ? "Checked" : "Unchecked"}`,
       };
     case "date": {
-      if (!property.date) return;
-      const start = new Date(property.date.start);
+      const start = new Date(property.value.start);
       return {
         text: formatDistanceToNow(start, { addSuffix: true }),
         tooltip: `${title}: ${format(start, "EEE d MMM yyyy")}`,
       };
     }
     case "email":
-      if (!property.email) return;
-      return { text: property.email, tooltip: `${title}: ${property.email}` };
+    case "phone_number":
+    case "url":
+      return { text: property.value, tooltip: `${title}: ${property.value}` };
     case "formula":
-      if (!property.formula) return;
-      return getPropertyAccessory(property.formula, title);
+      return getPropertyAccessory(property.value, title);
     case "multi_select":
-      return property.multi_select.map((option) => {
+      return property.value.map((option) => {
         return {
           tag: { value: option.name, color: notionColorToTintColor(option.color) },
           tooltip: `${title}: ${option.name}`,
         };
       });
     case "number":
-      if (!property.number) return;
-      return { text: property.number.toString(), tooltip: `${title}: ${property.number}` };
+      return { text: property.value.toString(), tooltip: `${title}: ${property.value}` };
     case "people":
-      return property.people.map((person) => {
+      return property.value.map((person) => {
         const user = users?.find((u) => u.id === person.id);
         return {
           text: user?.name ?? "Unknown",
@@ -359,32 +337,17 @@ function getPropertyAccessory(
           tooltip: `${title}: ${user?.name ?? "Unknown"}`,
         };
       });
-    case "phone_number":
-      if (!property.phone_number) return;
-      return { text: property.phone_number, tooltip: `${title}: ${property.phone_number}` };
-    case "rich_text": {
-      const text = property.rich_text[0]?.plain_text;
-      if (!property.rich_text[0]) return;
-      return { text, tooltip: `${title}: ${text}` };
-    }
+    case "rich_text":
     case "title": {
-      const text = property.title[0]?.plain_text ?? "Untitled";
+      if (property.value.length == 0 && property.type == "rich_text") return;
+      const text = property.value[0]?.plain_text ?? "Untitled";
       return { text, tooltip: `${title}: ${text}` };
     }
-    case "url":
-      if (!property.url) return;
-      return { text: property.url, tooltip: `${title}: ${property.url}` };
     case "select":
-      if (!property.select) return;
-      return {
-        tag: { value: property.select.name, color: notionColorToTintColor(property.select.color) },
-        tooltip: `${title}: ${property.select.name}`,
-      };
     case "status":
-      if (!property.status) return;
       return {
-        tag: { value: property.status.name, color: notionColorToTintColor(property.status.color) },
-        tooltip: `${title}: ${property.status.name}`,
+        tag: { value: property.value.name, color: notionColorToTintColor(property.value.color) },
+        tooltip: `${title}: ${property.value.name}`,
       };
   }
 }

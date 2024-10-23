@@ -3,8 +3,7 @@ import { getPutioClient } from "./withPutioClient";
 
 export const fetchFiles = async (id: number) => {
   const response = await getPutioClient().Files.Query(id, {
-    streamUrl: true,
-    mp4StreamUrl: true,
+    mp4Status: true,
   });
 
   return {
