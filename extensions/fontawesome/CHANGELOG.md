@@ -1,6 +1,6 @@
 # Font Awesome Changelog
 
-## [Added primary action preference] - {PR_MERGE_DATE}
+## [Added primary action preference] - 2024-10-23
 
 - Added a primary action preference to configure the main action for the icon.
 
