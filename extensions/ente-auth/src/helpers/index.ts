@@ -6,13 +6,17 @@ import { STORAGE_KEY } from "../constants/secrets";
 
 export const getJsonFormatFromStore = async (): Promise<JsonFormat[]> => {
   const storageStringRaw = await LocalStorage.getItem<string>(STORAGE_KEY);
-  const data: Secret[] = JSON.parse(storageStringRaw ?? "{}");
+  const data: Secret[] = JSON.parse(storageStringRaw || "[]");
 
   return mapSecretsToJsonFormat(data);
 };
 
 export const mapSecretsToJsonFormat = (items: Secret[]): JsonFormat[] => {
   const result: JsonFormat[] = [];
+
+  if (!items) {
+    return [];
+  }
 
   try {
     items.forEach((item) => {

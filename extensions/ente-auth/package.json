@@ -5,6 +5,9 @@
   "description": "Get TOTP Codes from Ente Auth",
   "icon": "icon.png",
   "author": "chkpwd",
+  "contributors": [
+    "albarin"
+  ],
   "categories": [
     "Security"
   ],
