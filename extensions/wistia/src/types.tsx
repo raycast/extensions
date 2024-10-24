@@ -1,7 +1,3 @@
-export interface Preferences {
-  wistiaApiToken: string;
-}
-
 export enum MediaType {
   Video = "Video",
   Audio = "audio",
@@ -34,6 +30,11 @@ export interface WistiaProject {
   mediaCount: number;
   hashedId: string;
   medias?: WistiaMedia[];
+}
+export interface WistiaStats {
+  load_count: number;
+  play_count: number;
+  hours_watched: number;
 }
 
 export interface AccountInfo {

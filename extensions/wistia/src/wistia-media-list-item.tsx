@@ -1,14 +1,4 @@
-import {
-  copyTextToClipboard,
-  showHUD,
-  showToast,
-  ActionPanel,
-  CopyToClipboardAction,
-  ImageMask,
-  List,
-  OpenInBrowserAction,
-  ToastStyle,
-} from "@raycast/api";
+import { showHUD, showToast, ActionPanel, List, Action, Clipboard, Image, Toast } from "@raycast/api";
 
 // Local imports
 import { AccountInfo, WistiaMedia } from "./types";
@@ -22,13 +12,17 @@ interface WistiaMediaListItemProps {
 export function WistiaMediaListItem({ media, accountInfo }: WistiaMediaListItemProps) {
   return (
     <List.Item
-      icon={{ source: media.thumbnail.url, mask: ImageMask.RoundedRectangle }}
+      icon={{ source: media.thumbnail.url, mask: Image.Mask.RoundedRectangle }}
       title={media.name}
-      accessoryIcon={media.type === "Video" ? "video-16" : ""}
-      accessoryTitle={friendlyDuration(media.duration)}
       keywords={[media.hashed_id]}
       key={media.id}
       actions={<WistiaMediaListItemActions media={media} accountUrl={accountInfo.url} />}
+      accessories={[
+        {
+          icon: media.type === "Video" ? "video-16" : "",
+          text: friendlyDuration(media.duration),
+        },
+      ]}
     />
   );
 }
@@ -37,12 +31,12 @@ function WistiaMediaListItemActions({ media, accountUrl }: { media: WistiaMedia;
   return (
     <ActionPanel title={media.name}>
       <ActionPanel.Section>
-        <OpenInBrowserAction url={`${accountUrl}/medias/${media.hashed_id}`} />
+        <Action.OpenInBrowser url={`${accountUrl}/medias/${media.hashed_id}`} />
       </ActionPanel.Section>
-
       <ActionPanel.Section>
-        <CopyToClipboardAction title="Copy Share URL" content={`${accountUrl}/medias/${media.hashed_id}`} />
-        <CopyToClipboardAction title="Copy HashedId" content={media.hashed_id} />
+        <Action.CopyToClipboard title="Copy Share URL" content={`${accountUrl}/medias/${media.hashed_id}`} />
+        {/* eslint-disable-next-line @raycast/prefer-title-case */}
+        <Action.CopyToClipboard title="Copy Hashed ID" content={media.hashed_id} />
         <CopyEmbedCodeAction hashedId={media.hashed_id} accountUrl={accountUrl} />
       </ActionPanel.Section>
     </ActionPanel>
@@ -53,16 +47,18 @@ function CopyEmbedCodeAction({ hashedId, accountUrl }: { hashedId: string; accou
   async function copyEmbedCodeFor(hashedId: string) {
     if (accountUrl) {
       const embedCode = await fetchEmbedCode({ accountUrl: accountUrl, hashedId });
-      await copyTextToClipboard(embedCode.html);
+      await Clipboard.copy(embedCode.html);
       await showHUD("Copied to Clipboard");
     } else {
-      await showToast(ToastStyle.Failure, "Cannot copy embed code", "No account url found");
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Cannot copy embed code",
+        message: "No account url found",
+      });
     }
   }
 
-  return (
-    <ActionPanel.Item title="Copy Embed Code" icon="doc-on-clipboard-16" onAction={() => copyEmbedCodeFor(hashedId)} />
-  );
+  return <Action title="Copy Embed Code" icon="doc-on-clipboard-16" onAction={() => copyEmbedCodeFor(hashedId)} />;
 }
 
 function friendlyDuration(seconds: number): string {
