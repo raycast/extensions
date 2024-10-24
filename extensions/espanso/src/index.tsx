@@ -1,6 +1,5 @@
 import { Application, Detail, List, getFrontmostApplication } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { ProcessOutput } from "zx";
 import { capitalCase, kebabCase } from "change-case";
 
 import { commandNotFoundMd, noContentMd } from "./content/messages";
@@ -17,7 +16,7 @@ export default function Command() {
   const [filteredItems, setFilteredItems] = useState<FormattedMatch[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [error, setError] = useState<ProcessOutput | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [application, setApplication] = useState<Application | undefined>(undefined);
 
   useEffect(() => {
@@ -75,8 +74,9 @@ export default function Command() {
         setFilteredItems(formattedMatches);
         setCategories(["all", ...sortedCategories]);
         setIsLoading(false);
-      } catch (err) {
-        setError(err instanceof ProcessOutput ? err : null);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (err: any) {
+        setError("message" in err ? (err.message as string) : null);
         setIsLoading(false);
       }
     };
@@ -89,8 +89,8 @@ export default function Command() {
   }, [selectedCategory, items]);
 
   if (error) {
-    const notFound = /command not found/.test(error.stderr);
-    return <Detail markdown={notFound ? commandNotFoundMd : error.stderr} />;
+    const notFound = /No such file or directory/.test(error);
+    return <Detail markdown={notFound ? commandNotFoundMd : error} />;
   }
 
   if (!isLoading && items.length === 0) {
