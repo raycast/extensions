@@ -3,7 +3,7 @@
   "name": "tower",
   "title": "Tower Repositories",
   "description": "Navigate and open your repositories in Tower.",
-  "icon": "icon.png",
+  "icon": "tower-dock-icon-light.png",
   "author": "tdwesten",
   "contributors": [
     "sebduggan"
