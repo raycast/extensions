@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nhl",
+  "title": "NHL",
+  "description": "Get today's NHL games, scores, matchups, and statistics.",
+  "icon": "extension-icon.png",
+  "author": "Rob",
+  "categories": [
+    "Fun",
+    "News"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "nhl-scores",
+      "title": "NHL Scores",
+      "description": "Get the latest NHL scores",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "language",
+      "title": "Language Preference",
+      "description": "Choose between English and French",
+      "type": "dropdown",
+      "required": false,
+      "default": "default",
+      "data": [
+        {
+          "title": "English",
+          "value": "default"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        }
+      ]
+    },
+    {
+      "name": "timezone",
+      "title": "Timezone",
+      "description": "Choose your timezone",
+      "type": "dropdown",
+      "required": false,
+      "default": "America/New_York",
+      "data": [
+        {
+          "title": "Eastern",
+          "value": "America/New_York"
+        },
+        {
+          "title": "Central",
+          "value": "America/Chicago"
+        },
+        {
+          "title": "Mountain",
+          "value": "America/Denver"
+        },
+        {
+          "title": "Pacific",
+          "value": "America/Los_Angeles"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
