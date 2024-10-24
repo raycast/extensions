@@ -38,7 +38,8 @@
     "osalama",
     "geb",
     "ridemountainpig",
-    "nebbles"
+    "nebbles",
+    "alanxmay"
   ],
   "pastContributors": [
     "pomdtr",
@@ -361,10 +362,12 @@
     "@raycast/api": "^1.81.2",
     "@raycast/utils": "^1.16.5",
     "cross-fetch": "^3.1.6",
+    "fuse.js": "^7.0.0",
     "iconv-lite": "^0.6.3",
     "is-url": "^1.2.4",
     "lodash": "^4.17.21",
     "nanoid": "^4.0.0",
+    "pinyin-pro": "^3.25.0",
     "semver": "^7.3.8"
   },
   "devDependencies": {
