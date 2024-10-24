@@ -1,0 +1,1 @@
+# Seach Monokakido Dictionary Application
