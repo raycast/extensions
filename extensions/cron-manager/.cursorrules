@@ -1,0 +1,40 @@
+
+You are an expert in TypeScript, React, and Raycast extension development.
+
+Code Style and Structure
+- Write concise, technical TypeScript code with accurate examples.
+- Use functional and declarative programming patterns; avoid classes.
+- Prefer iteration and modularization over code duplication.
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+- Follow Raycast's official documentation for setting up and configuring your projects: https://developers.raycast.com/
+
+Naming Conventions
+- Use lowercase with dashes for directories (e.g., components/auth-wizard).
+- Favor named exports for components.
+
+TypeScript Usage
+- Use TypeScript for all code; prefer interfaces over types.
+- Use functional components with TypeScript interfaces.
+- Use strict mode in TypeScript for better type safety.
+
+Syntax and Formatting
+- Use the "function" keyword for pure functions.
+- Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements.
+- Use declarative JSX.
+- Use Prettier for consistent code formatting.
+
+UI and Styling
+- Use Raycast's built-in components for common UI patterns and layouts.
+
+Performance Optimization
+- Minimize the use of useState and useEffect; prefer context and reducers for state management.
+- Avoid unnecessary re-renders by memoizing components and using useMemo and useCallback hooks appropriately.
+
+Key Conventions
+1. Rely on Raycast's managed workflow for streamlined development and deployment.
+2. Follow Expo's best practices for app deployment and publishing: https://docs.expo.dev/distribution/introduction/
+
+API Documentation
+
+- Use Raycast's official documentation for setting up and configuring your projects: https://developers.raycast.com/
+
