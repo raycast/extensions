@@ -5,6 +5,7 @@ import { checkCapacitiesApp } from "./helpers/isCapacitiesInstalled";
 import axios from "axios";
 import { API_URL, useCapacitiesStore } from "./helpers/storage";
 import { ColorKey, colorValues } from "./helpers/color";
+import ErrorView from "./components/ErrorView";
 
 type Space = { title: string; id: string };
 
@@ -71,7 +72,7 @@ export default function Command() {
     checkCapacitiesApp();
   }, []);
 
-  const { store, triggerLoading } = useCapacitiesStore();
+  const { store, triggerLoading, error, isLoading: isLoadingStore } = useCapacitiesStore();
 
   useEffect(() => {
     triggerLoading();
@@ -134,9 +135,11 @@ export default function Command() {
       });
   };
 
-  return (
+  return error ? (
+    <ErrorView error={error} />
+  ) : (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingStore}
       onSearchTextChange={setSearchText}
       throttle
       searchBarAccessory={
