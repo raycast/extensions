@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useFetch } from "@raycast/utils";
 import { useAuthHeaders } from "./use-auth-headers";
+import { useApiUrl } from "./use-api-url";
 
 interface Company {
   id: string;
@@ -55,12 +56,9 @@ interface CompanyResponse {
 export function useGetCompanyDetails(companyId: string) {
   const [company, setCompany] = useState<Company | null>(null);
 
-  const { data, isLoading, error, revalidate } = useFetch<CompanyResponse>(
-    `https://api.twenty.com/rest/companies/${companyId}`,
-    {
-      headers: useAuthHeaders(),
-    },
-  );
+  const { data, isLoading, error, revalidate } = useFetch<CompanyResponse>(useApiUrl(`companies/${companyId}`), {
+    headers: useAuthHeaders(),
+  });
 
   useEffect(() => {
     if (data?.data) {

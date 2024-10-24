@@ -7,6 +7,7 @@ import { useGetCompanies } from "./hooks/use-company";
 import ListPeople from "./list-people";
 import { Person } from "./types";
 import ErrorView from "./error-view";
+import { useApiUrl } from "./hooks/use-api-url";
 
 interface CreatePersonFormProps {
   firstName: string;
@@ -99,7 +100,7 @@ const createPerson = async (
 ): Promise<{ data: Person } | { error: { message: string } }> => {
   try {
     const response = await axios.post<Person>(
-      "https://api.twenty.com/rest/people",
+      useApiUrl("people"),
       {
         name: {
           firstName: values.firstName,

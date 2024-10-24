@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { useFetch } from "@raycast/utils";
 import { useAuthHeaders } from "./use-auth-headers";
+import { useApiUrl } from "./use-api-url";
 
 // In this case, we just need this.
 interface Company {
@@ -56,7 +57,7 @@ export function useGetCompanies({ limit = 20, orderBy = "name", initialCursor }:
   const [allCompanies, setAllCompanies] = useState<Company[]>([]);
 
   const { data, isLoading, error, revalidate } = useFetch<CompaniesResponse>(
-    `https://api.twenty.com/rest/companies?limit=${limit}&order_by=${orderBy}${cursor ? `&starting_after=${cursor}` : ""}`,
+    useApiUrl(`companies?limit=${limit}&order_by=${orderBy}${cursor ? `&starting_after=${cursor}` : ""}`),
     {
       headers: useAuthHeaders(),
     },

@@ -5,6 +5,9 @@
   "description": "Modern, powerful, affordable platform to manage your customer relationships",
   "icon": "logo.png",
   "author": "chrisdadev13",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Productivity",
     "Communication",
@@ -43,6 +46,15 @@
   ],
   "preferences": [
     {
+      "name": "url",
+      "type": "textfield",
+      "required": true,
+      "title": "API URL",
+      "description": "Enter your Twenty API URL",
+      "default": "https://api.twenty.com/",
+      "placeholder": "https://api.twenty.com/"
+    },
+    {
       "name": "token",
       "type": "password",
       "required": true,
@@ -54,7 +66,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.83.2",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/utils": "^1.18.0",
     "axios": "^1.7.7"
   },
   "devDependencies": {
@@ -66,10 +78,11 @@
     "typescript": "^5.4.5"
   },
   "scripts": {
-    "build": "ray build --skip-types -e dist -o dist",
+    "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }
