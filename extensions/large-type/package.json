@@ -13,7 +13,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "enter-text",
+      "name": "index",
       "title": "Enter Text",
       "description": "Enter text to show in large type",
       "mode": "view"

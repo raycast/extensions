@@ -212,6 +212,5 @@ export default function DisplayText({ inputText }: DisplayTextProps) {
 
     return `<img width="700" height="${height}" src="data:image/svg+xml;base64,${base64Svg}" />`;
   }
-  console.log(svgDataUri);
   return <Detail markdown={svgDataUri} />;
 }
