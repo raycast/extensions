@@ -1,5 +1,10 @@
 # Arc Changelog
 
+## [Improvements] - 2024-10-24
+
+- `Search Tabs` now has fuzzy matching capabilities.
+- `Search Tabs` can searchs url.
+
 ## [Improvements] - 2024-09-10
 
 - `Search History` now searches across all Arc profiles. Results from the search display which profile they are from.
