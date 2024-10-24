@@ -42,4 +42,5 @@ copilot-workspace
 uploadthing
 sublime
 pastefy
+wp-bones
 dub
