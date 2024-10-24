@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shopify-product-search",
+  "title": "Shopify Product Search",
+  "description": "Select Product Title text and Raycast will display relevant information like SKU and inventory quantity.",
+  "icon": "extension-icon.png",
+  "author": "robinaraiders",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-products",
+      "title": "Search Products",
+      "subtitle": "Shopify",
+      "description": "Select Product Title text and Raycast will display relevant information like SKU and inventory quantity.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "accessToken",
+      "title": "Shopify Access Token",
+      "description": "Your Shopify Admin API Access Token",
+      "placeholder": "e.g shpat...",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "storeName",
+      "title": "Store Name",
+      "description": "Your Shopify store name (without .myshopify.com)",
+      "placeholder": "e.g snowboard-house",
+      "type": "textfield",
+      "required": true
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "metadata/shopify-product-search-1.png",
+      "title": "View product details including SKU and inventory levels",
+      "description": "Quickly look up product information from any selected text"
+    },
+    {
+      "path": "metadata/shopify-product-search-2.png",
+      "title": "Low stock warning indicator",
+      "description": "Visual indicators show when products are running low"
+    },
+    {
+      "path": "metadata/shopify-product-search-3.png",
+      "title": "Out of stock warning indicator",
+      "description": "Visual indicators show when products are out of stock"
+    }
+  ]
+}
