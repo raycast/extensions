@@ -5,13 +5,13 @@ import { AccountInfo, EmbedObject, WistiaApiError, WistiaMedia, WistiaProject, W
 async function fetchWistia<T>(endpoint: string) {
   const { wistiaApiToken } = getPreferenceValues<Preferences>();
   const url = "https://api.wistia.com/" + endpoint;
-  
+
   const response = await fetch(url, {
     method: "GET",
     headers: {
       Accept: "application/json",
-      Authorization: `Bearer ${wistiaApiToken}`
-    }
+      Authorization: `Bearer ${wistiaApiToken}`,
+    },
   });
 
   const result = await response.json();
@@ -27,7 +27,7 @@ export async function fetchEmbedCode({
   accountUrl: string;
   hashedId: string;
 }): Promise<EmbedObject> {
-  return fetchWistia<EmbedObject>(`oembed?url=${accountUrl}/medias/${hashedId}&embedType=async`)
+  return fetchWistia<EmbedObject>(`oembed?url=${accountUrl}/medias/${hashedId}&embedType=async`);
 }
 
 export async function fetchMedias(): Promise<WistiaMedia[]> {

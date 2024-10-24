@@ -1,7 +1,7 @@
-import { showHUD, showToast, ActionPanel, List, Action, Clipboard, Image, Toast } from "@raycast/api";
+import { showHUD, showToast, ActionPanel, List, Action, Clipboard, Image, Toast, Icon, Color } from "@raycast/api";
 
 // Local imports
-import { AccountInfo, WistiaMedia } from "./types";
+import { AccountInfo, MediaStatus, MediaType, WistiaMedia } from "./types";
 import { fetchEmbedCode } from "./api";
 
 interface WistiaMediaListItemProps {
@@ -19,8 +19,11 @@ export function WistiaMediaListItem({ media, accountInfo }: WistiaMediaListItemP
       actions={<WistiaMediaListItemActions media={media} accountUrl={accountInfo.url} />}
       accessories={[
         {
-          icon: media.type === "Video" ? "video-16" : "",
-          text: friendlyDuration(media.duration),
+          icon: getIcon(media.type),
+          text: media.duration ? friendlyDuration(media.duration) : undefined,
+        },
+        {
+          tag: { value: media.status, color: getStatusColor(media.status) },
         },
       ]}
     />
@@ -71,4 +74,33 @@ function friendlyDuration(seconds: number): string {
   }
 
   return `${minutes}m ${secondsLeft}s`;
+}
+
+function getIcon(type: MediaType) {
+  switch (type) {
+    case MediaType.Video:
+      return Icon.Video;
+    case MediaType.Image:
+      return Icon.Image;
+    case MediaType.MicrosoftOfficeDocument:
+    case MediaType.PdfDocument:
+      return Icon.Document;
+    case MediaType.Audio:
+      return Icon.Speaker;
+    default:
+      Icon.QuestionMark;
+  }
+}
+
+function getStatusColor(status: MediaStatus) {
+  switch (status) {
+    case MediaStatus.ready:
+      return Color.Green;
+    case MediaStatus.failed:
+      return Color.Red;
+    case MediaStatus.processing:
+      return Color.Blue;
+    default:
+      return undefined;
+  }
 }

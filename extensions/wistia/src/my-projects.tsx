@@ -11,8 +11,10 @@ export default function SearchProjectsCommand() {
     async () => {
       const [accountInfo, projects] = await Promise.all([fetchAccountInfo(), fetchProjects()]);
       setAccountInfo(accountInfo);
-      return  projects;
-    }, [], {
+      return projects;
+    },
+    [],
+    {
       initialData: [],
       async onError(error) {
         if (error.message === "unauthorized_credentials") {
@@ -29,15 +31,11 @@ export default function SearchProjectsCommand() {
           });
         }
       },
-    }
-  )
-
+    },
+  );
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Filter by name or hashed id"
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Filter by name or hashed id">
       {projects.map((project) => (
         <List.Item
           title={project.name ?? "No title"}
@@ -47,14 +45,18 @@ export default function SearchProjectsCommand() {
           actions={
             <ActionPanel title={project.name}>
               <Action.Push
-              icon={Icon.FilmStrip}
+                icon={Icon.FilmStrip}
                 title="Show Medias"
                 target={<ProjectMediaList hashedId={project.hashedId} accountInfo={accountInfo} />}
               />
               <Action.OpenInBrowser url={`${accountInfo?.url}/projects/${project.hashedId}`} />
               {/* eslint-disable-next-line @raycast/prefer-title-case */}
               <Action.CopyToClipboard title="Copy Hashed ID" content={project.hashedId} />
-              <Action.Push icon={Icon.LineChart} title="View Project Stats" target={<ProjectStatsDetail hashedId={project.hashedId} />} />
+              <Action.Push
+                icon={Icon.LineChart}
+                title="View Project Stats"
+                target={<ProjectStatsDetail hashedId={project.hashedId} />}
+              />
             </ActionPanel>
           }
           accessories={[
@@ -69,22 +71,29 @@ export default function SearchProjectsCommand() {
 }
 
 function ProjectMediaList({ hashedId, accountInfo }: { hashedId: string; accountInfo?: AccountInfo }) {
-  const { isLoading, data: project } = useCachedPromise(
-    async () => await fetchProjectMedias(hashedId), [], {
-      async onError(error) {
-        await showFailureToast("There was an error loading project medias", {
-          title: error.message
-        });
-      },
-    }
-  )
+  const { isLoading, data: project } = useCachedPromise(async () => await fetchProjectMedias(hashedId), [], {
+    async onError(error) {
+      await showFailureToast("There was an error loading project medias", {
+        title: error.message,
+      });
+    },
+  });
   const groupedMedias = groupBy(project?.medias, (media) => media.section);
 
   return (
     <List isLoading={isLoading}>
-      {!isLoading && project && !project.medias?.length && <List.EmptyView icon="content-library.svg" title={project.name} description="Get started by adding a video to your folder - you can always delete it later!" actions={<ActionPanel>
-        <Action.OpenInBrowser icon={Icon.Plus} title="Add Media" url={`${accountInfo?.url}/content/media`} />
-      </ActionPanel>} />}
+      {!isLoading && project && !project.medias?.length && (
+        <List.EmptyView
+          icon="content-library.svg"
+          title={project.name}
+          description="Get started by adding a video to your folder - you can always delete it later!"
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser icon={Icon.Plus} title="Add Media" url={`${accountInfo?.url}/content/media`} />
+            </ActionPanel>
+          }
+        />
+      )}
       {Object.entries(groupedMedias).map(([section, medias]) => {
         if (section === "undefined") {
           return medias.map(
@@ -105,15 +114,16 @@ function ProjectMediaList({ hashedId, accountInfo }: { hashedId: string; account
 }
 
 function ProjectStatsDetail({ hashedId }: { hashedId: string }) {
-  const {isLoading, data} = useCachedPromise(
-    async () => await fetchProjectStats(hashedId));
+  const { isLoading, data } = useCachedPromise(async () => await fetchProjectStats(hashedId));
 
-    const markdown = !data ? "" : `
+  const markdown = !data
+    ? ""
+    : `
 | - | - |
 |---|---|
 | Load Count | ${data.load_count} |
 | Play Count | ${data.play_count} |
-| Hours Wwatched | ${data.hours_watched} |`
+| Hours Watched | ${data.hours_watched} |`;
 
-    return <Detail isLoading={isLoading} markdown={markdown} />
+  return <Detail isLoading={isLoading} markdown={markdown} />;
 }

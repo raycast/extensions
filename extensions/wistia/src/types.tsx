@@ -1,13 +1,24 @@
 export enum MediaType {
   Video = "Video",
-  Audio = "audio",
+  Audio = "Audio",
+  Image = "Image",
+  PdfDocument = "PdfDocument",
+  MicrosoftOfficeDocument = "MicrosoftOfficeDocument",
+  Swf = "Swf",
+  UnknownType = "UnknownType",
+}
+export enum MediaStatus {
+  queued = "queued",
+  processing = "processing",
+  ready = "ready",
+  failed = "failed",
 }
 
 export interface WistiaMedia {
   id: number;
   name: string;
   description: string;
-  duration: number;
+  duration?: number;
   hashed_id: string;
   thumbnail: {
     url: string;
@@ -16,6 +27,7 @@ export interface WistiaMedia {
   };
   type: MediaType;
   section: string;
+  status: MediaStatus;
 }
 
 export interface EmbedObject {
