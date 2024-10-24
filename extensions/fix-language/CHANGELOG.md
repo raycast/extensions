@@ -1,3 +1,3 @@
 # fix language Changelog
 
-## [Initial Version] - 2567-08-29
+## [Initial Version] - {PR_MERGE_DATE}
