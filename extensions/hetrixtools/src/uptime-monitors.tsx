@@ -77,7 +77,7 @@ ${Object.entries(monitor.locations)
                     <List.Item.Detail.Metadata.Label
                       title="Port"
                       text={monitor.port?.toString() ?? undefined}
-                      icon={monitor.port===null ? Icon.Minus : undefined}
+                      icon={monitor.port === null ? Icon.Minus : undefined}
                     />
                     {monitor.keyword ? (
                       <List.Item.Detail.Metadata.TagList title="Keyword">
@@ -112,11 +112,15 @@ ${Object.entries(monitor.locations)
                       text={monitor.domain_expiration_date ?? undefined}
                       icon={monitor.domain_expiration_date ?? Icon.Minus}
                     />
-                    {monitor.nameservers ? <List.Item.Detail.Metadata.TagList title="Nameservers">
-                      {monitor.nameservers.map((nameserver) => (
-                        <List.Item.Detail.Metadata.TagList.Item key={nameserver} text={nameserver} />
-                      ))}
-                    </List.Item.Detail.Metadata.TagList> : <List.Item.Detail.Metadata.Label title="Nameservers" icon={Icon.Minus} />}
+                    {monitor.nameservers ? (
+                      <List.Item.Detail.Metadata.TagList title="Nameservers">
+                        {monitor.nameservers.map((nameserver) => (
+                          <List.Item.Detail.Metadata.TagList.Item key={nameserver} text={nameserver} />
+                        ))}
+                      </List.Item.Detail.Metadata.TagList>
+                    ) : (
+                      <List.Item.Detail.Metadata.Label title="Nameservers" icon={Icon.Minus} />
+                    )}
                   </List.Item.Detail.Metadata>
                 }
               />
