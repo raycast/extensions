@@ -1,0 +1,43 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "subtis",
+  "title": "Subtis",
+  "description": "El subtítulo que buscabas",
+  "author": "leonardo_galante",
+  "license": "MIT",
+  "icon": "command-icon.png",
+  "version": "0.3.5",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Buscar Subtitulo",
+      "description": "Encontra el subtítulo que buscas",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "deploy": "rm -rf .env.development && bun run build && npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.84.3",
+    "node-fetch": "^3.3.2",
+    "ts-pattern": "^5.5.0",
+    "ws": "^8.18.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.11",
+    "@types/bun": "^1.1.12",
+    "@types/node": "22.7.9",
+    "@types/node-fetch": "^2.6.11",
+    "@types/react": "18.3.12",
+    "eslint": "8.51.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  }
+}
