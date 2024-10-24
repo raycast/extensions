@@ -76,8 +76,8 @@ ${Object.entries(monitor.locations)
                     )}
                     <List.Item.Detail.Metadata.Label
                       title="Port"
-                      text={monitor.port ?? undefined}
-                      icon={monitor.port ?? Icon.Minus}
+                      text={monitor.port?.toString() ?? undefined}
+                      icon={monitor.port===null ? Icon.Minus : undefined}
                     />
                     {monitor.keyword ? (
                       <List.Item.Detail.Metadata.TagList title="Keyword">
@@ -89,7 +89,7 @@ ${Object.entries(monitor.locations)
                     <List.Item.Detail.Metadata.Label title="Timeout" text={`${monitor.timeout} seconds`} />
                     <List.Item.Detail.Metadata.Label
                       title="Checkup Frequency"
-                      text={`${monitor.check_frequency} minutes`}
+                      text={monitor.check_frequency ? `${monitor.check_frequency} minutes` : "N/A"}
                     />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label title="Resolve Address" text={monitor.resolve_address} />
@@ -112,11 +112,11 @@ ${Object.entries(monitor.locations)
                       text={monitor.domain_expiration_date ?? undefined}
                       icon={monitor.domain_expiration_date ?? Icon.Minus}
                     />
-                    <List.Item.Detail.Metadata.TagList title="Nameservers">
+                    {monitor.nameservers ? <List.Item.Detail.Metadata.TagList title="Nameservers">
                       {monitor.nameservers.map((nameserver) => (
                         <List.Item.Detail.Metadata.TagList.Item key={nameserver} text={nameserver} />
                       ))}
-                    </List.Item.Detail.Metadata.TagList>
+                    </List.Item.Detail.Metadata.TagList> : <List.Item.Detail.Metadata.Label title="Nameservers" icon={Icon.Minus} />}
                   </List.Item.Detail.Metadata>
                 }
               />
