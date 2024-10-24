@@ -143,6 +143,8 @@ export default function Command() {
       return;
     }
 
+    amount = amount.replace(/,/g, '');
+
     if (amount.trim() === '' || isNaN(Number(amount))) {
       await showToast({
         style: Toast.Style.Failure,

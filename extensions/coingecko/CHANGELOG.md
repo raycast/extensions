@@ -1,5 +1,8 @@
 # CoinGecko Changelog
 
+## [Tweaks] - 2024-10-24
+- Fix amount input to accept commas
+
 ## [Tweaks] - 2023-06-14
 - Refactor calculate command to circumvent rate limit issues
 - Handle rate limit error on calculate command
