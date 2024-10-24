@@ -1,6 +1,6 @@
 # Yourls Link Shortener Changelog
 
-## [New Logo + List Links] - {PR_MERGE_DATE}
+## [New Logo + List Links] - 2024-10-24
 
 - a new logo using the YOURLS icon
 - new command to `List Link` with stats
