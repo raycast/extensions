@@ -96,13 +96,7 @@ export function groupByDueDates(reminders: Reminder[]) {
   const allDueDates = [...new Set(upcoming.map((reminder) => getDateString(reminder.dueDate as string)))];
   allDueDates.sort();
 
-  const sections = allDueDates.map((date) => {
-    const remindersOnDate = upcoming.filter((reminder) => getDateString(reminder.dueDate as string) === date);
-    return {
-      title: displayDueDate(date),
-      reminders: remindersOnDate,
-    };
-  });
+  const sections: Section[] = [];
 
   if (overdue.length > 0) {
     sections.unshift({
@@ -110,6 +104,39 @@ export function groupByDueDates(reminders: Reminder[]) {
       reminders: overdue,
     });
   }
+
+  const today = new Date().toISOString().split("T")[0];
+  const todayReminders = upcoming.filter((reminder) => getDateString(reminder.dueDate as string) === today);
+
+  if (todayReminders.length > 0) {
+    const morning = todayReminders.filter((reminder) => {
+      const hour = new Date(reminder.dueDate as string).getHours();
+      return hour < 12;
+    });
+
+    const afternoon = todayReminders.filter((reminder) => {
+      const hour = new Date(reminder.dueDate as string).getHours();
+      return hour >= 12 && hour < 17;
+    });
+
+    const tonight = todayReminders.filter((reminder) => {
+      const hour = new Date(reminder.dueDate as string).getHours();
+      return hour >= 17;
+    });
+
+    if (morning.length > 0) sections.push({ title: "Morning", reminders: morning });
+    if (afternoon.length > 0) sections.push({ title: "Afternoon", reminders: afternoon });
+    if (tonight.length > 0) sections.push({ title: "Tonight", reminders: tonight });
+  }
+
+  const futureDates = allDueDates.filter((date) => date > today);
+  futureDates.forEach((date) => {
+    const remindersOnDate = upcoming.filter((reminder) => getDateString(reminder.dueDate as string) === date);
+    sections.push({
+      title: displayDueDate(date),
+      reminders: remindersOnDate,
+    });
+  });
 
   if (notDated.length > 0) {
     sections.push({

@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Group today's reminders by time of day] - 2024-10-21
+
+- Group today's reminders by time of day (morning, afternoon, tonight) just like in the native Reminders app.
+
 ## [Sort menu bar reminders by due date] - 2024-10-01
 
 - Sort menu bar reminders by due date instead of the order they were created.
