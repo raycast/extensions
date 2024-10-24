@@ -773,7 +773,7 @@
 /extensions/laravel-tips                                            @godruoyi
 /extensions/laravel-valet                                           @denniseilander @KevinBatdorf
 /extensions/laravel-vapor                                           @tcampbPPU
-/extensions/large-type                                              @gon250 @FezVrasta
+/extensions/large-type                                              @gon250 @FezVrasta @garrill
 /extensions/lark                                                    @tmkx
 /extensions/lark-applink                                            @chyroc
 /extensions/lastfm                                                  @eggsy
@@ -1157,6 +1157,7 @@
 /extensions/protondb                                                @LitoMore
 /extensions/prowlarr                                                @Elcaten
 /extensions/proxmox                                                 @CzBiX
+/extensions/proxyman                                                @NghiaTranUIT
 /extensions/public-bug-bounty-and-vulnerability-disclosure-programs @securibee
 /extensions/pubme                                                   @justspacedog
 /extensions/punto                                                   @red-avtovo
