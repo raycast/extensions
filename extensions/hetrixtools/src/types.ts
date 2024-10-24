@@ -16,11 +16,11 @@ export type Monitor = {
     Region: string;
     Country: string;
   };
-  port: string | null;
+  port: number | null;
   keyword: string | null;
   category: string;
   timeout: number;
-  check_frequency: 1 | 3 | 5 | 10;
+  check_frequency: 1 | 3 | 5 | 10 | null;
   contact_lists: string[];
   created_at: number;
   last_check: number;
@@ -52,12 +52,12 @@ export type Monitor = {
   domain_expiration_date: string | null;
   domain_expiration_warn: boolean;
   domain_expiration_warn_days: number;
-  nameservers: string[];
+  nameservers: string[] | null;
   nameservers_change_warn: boolean;
   public_report: boolean;
   public_target: boolean;
   max_redirects: number | null;
-  http_method: string;
+  http_method: string | null;
   accepted_http_codes: number[] | null;
   verify_ssl_certificate: boolean;
   verify_ssl_hostname: boolean;
