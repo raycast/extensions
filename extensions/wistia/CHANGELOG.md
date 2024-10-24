@@ -1,9 +1,10 @@
 # Wistia Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Data is Cached for better UX] - {PR_MERGE_DATE}
 
+- Caching through `useCachedPromise` and `useCachedState`
 - Add CHANGELOG
-- View Project States
+- View Project Stats
 - Add EmptyViews
 - Tweak error handling
 - Show all loading indicators
