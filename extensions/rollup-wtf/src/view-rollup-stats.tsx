@@ -1,5 +1,5 @@
 import { ActionPanel, Action, List } from "@raycast/api";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import EventSource from "eventsource";
 
 interface ChainData {
@@ -34,6 +34,10 @@ function padValue(value: string, width: number): string {
 export default function Command() {
   const [items, setItems] = useState<ChainData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const latestDataRef = useRef<ChainData[]>([]);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hasReceivedDataRef = useRef(false);
 
   const handleEvent = useCallback((event: MessageEvent) => {
     try {
@@ -52,16 +56,23 @@ export default function Command() {
         dps: parsedData.dps,
       };
 
-      setItems((prevItems) => {
-        const existingItemIndex = prevItems.findIndex((item) => item.id === type);
-        if (existingItemIndex !== -1) {
-          const updatedItems = [...prevItems];
-          updatedItems[existingItemIndex] = newItem;
-          return updatedItems;
-        } else {
-          return [...prevItems, newItem];
-        }
-      });
+      latestDataRef.current = latestDataRef.current.filter(item => item.id !== type);
+      latestDataRef.current.push(newItem);
+
+      hasReceivedDataRef.current = true;
+
+      // Schedule an update if one isn't already scheduled
+      if (!timeoutRef.current) {
+        timeoutRef.current = setTimeout(() => {
+          setItems(latestDataRef.current);
+          timeoutRef.current = null;
+          
+          // Only set isLoading to false if we have enough data and minimum loading time has passed
+          if (latestDataRef.current.length > 3 && !loadingTimeoutRef.current) {
+            setIsLoading(false);
+          }
+        }, 500);
+      }
     } catch (error) {
       console.error("Error processing SSE event:", error);
     }
@@ -69,10 +80,6 @@ export default function Command() {
 
   useEffect(() => {
     const eventSource = new EventSource("https://tracker-api-gdesfolyga-uw.a.run.app/sse");
-
-    eventSource.onopen = () => {
-      setIsLoading(false);
-    };
 
     eventSource.onerror = (error) => {
       console.error("SSE connection error:", error);
@@ -133,8 +140,26 @@ export default function Command() {
       eventSource.addEventListener(type, handleEvent);
     }
 
+    // Set a minimum loading time of 2 seconds
+    loadingTimeoutRef.current = setTimeout(() => {
+      loadingTimeoutRef.current = null;
+      if (latestDataRef.current.length > 3) {
+        setIsLoading(false);
+      }
+    }, 2000);
+
+    // Set a timeout to show empty state if no data is received after 5 seconds
+    const emptyStateTimeout = setTimeout(() => {
+      if (!hasReceivedDataRef.current) {
+        setIsLoading(false);
+      }
+    }, 5000);
+
     return () => {
       eventSource.close();
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
+      clearTimeout(emptyStateTimeout);
     };
   }, [handleEvent]);
 
@@ -223,40 +248,41 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
-      <List.Section title="Rollup Stats">
-        {displayItems.length === 3 && !isLoading && (
-          <List.EmptyView title="No data received" description="Waiting for data from Rollup.wtf" />
-        )}
-        {displayItems.map((item) => (
-          <List.Item
-            key={item.id}
-            title={item.title}
-            subtitle={
-              item.id === "total"
-                ? `${item.chainCount} chains`
-                : item.id === "header"
-                  ? "Block #"
-                  : item.id === "vs-ethereum"
-                    ? ""
-                    : `${item.blockNumber}`
-            }
-            accessories={[
-              { text: `${item.tps}`, tooltip: "Transactions Per Second" },
-              { text: `${item.gps}`, tooltip: "Million Gas Per Second" },
-              { text: `${item.dps}`, tooltip: "Kilobytes Per Second" },
-            ]}
-            actions={
-              item.id !== "header" && item.id !== "vs-ethereum" ? (
-                <ActionPanel>
-                  <Action.CopyToClipboard
-                    content={`${item.title}\nBlock #: ${item.blockNumber}\nTx Count: ${item.txCount}\nData Count: ${item.dataCount}\nGas Count: ${item.gasCount}\nTPS: ${item.tps.trim()}\nGPS: ${item.gps.trim()}\nDPS: ${item.dps.trim()}`}
-                  />
-                </ActionPanel>
-              ) : undefined
-            }
-          />
-        ))}
-      </List.Section>
+      {!isLoading && items.length === 0 ? (
+        <List.EmptyView title="No data received" description="Waiting for data from Rollup.wtf" />
+      ) : (
+        <List.Section title="Rollup Stats">
+          {displayItems.map((item) => (
+            <List.Item
+              key={item.id}
+              title={item.title}
+              subtitle={
+                item.id === "total"
+                  ? `${item.chainCount} chains`
+                  : item.id === "header"
+                    ? "Block #"
+                    : item.id === "vs-ethereum"
+                      ? ""
+                      : `${item.blockNumber}`
+              }
+              accessories={[
+                { text: `${item.tps}`, tooltip: "Transactions Per Second" },
+                { text: `${item.gps}`, tooltip: "Million Gas Per Second" },
+                { text: `${item.dps}`, tooltip: "Kilobytes Per Second" },
+              ]}
+              actions={
+                item.id !== "header" && item.id !== "vs-ethereum" ? (
+                  <ActionPanel>
+                    <Action.CopyToClipboard
+                      content={`${item.title}\nBlock #: ${item.blockNumber}\nTx Count: ${item.txCount}\nData Count: ${item.dataCount}\nGas Count: ${item.gasCount}\nTPS: ${item.tps.trim()}\nGPS: ${item.gps.trim()}\nDPS: ${item.dps.trim()}`}
+                    />
+                  </ActionPanel>
+                ) : undefined
+              }
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }
