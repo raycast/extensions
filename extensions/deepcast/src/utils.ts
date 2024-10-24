@@ -141,6 +141,7 @@ export async function translate(target: TargetLanguage, text?: string) {
 }
 
 export const source_languages = {
+  AR: "Arabic",
   BG: "Bulgarian",
   ZH: "Chinese",
   CS: "Czech",
@@ -174,6 +175,7 @@ export const source_languages = {
 export type SourceLanguage = keyof typeof source_languages;
 
 export const target_languages = {
+  AR: "Arabic",
   BG: "Bulgarian",
   ZH: "Chinese",
   CS: "Czech",
