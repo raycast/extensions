@@ -5,6 +5,9 @@
   "description": "Query your Storyblok spaces, stories, assets, and more.",
   "icon": "command-icon.png",
   "author": "Rob",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Data",
     "Productivity",
@@ -85,13 +88,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.2",
-    "@raycast/utils": "^1.12.0"
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.18.0",
+    "@web3-storage/parse-link-header": "^3.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
+    "@types/react": "^18.3.3",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"

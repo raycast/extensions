@@ -1,5 +1,12 @@
 # Storyblok Changelog
 
+## [Paginated Assets + `sbData` Enhancements] - {PR_MERGE_DATE}
+
+- Show `Detail` if unable to load data in `Space Details`
+- Modified `sbData` so it takes generic type which prevents us from having to _explicity cast_ using `as`
+- Fix `Copy Story ID` action in `Stories List` having wrong Title
+- `useStoryblokDataPaginated` hook allows to view >100 assets at a time in `Assets`
+
 ## [Added new regions] - 2024-06-05
 
 - Added Australia as an API region
