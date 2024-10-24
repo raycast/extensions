@@ -56,7 +56,7 @@ export default function Command() {
         dps: parsedData.dps,
       };
 
-      latestDataRef.current = latestDataRef.current.filter(item => item.id !== type);
+      latestDataRef.current = latestDataRef.current.filter((item) => item.id !== type);
       latestDataRef.current.push(newItem);
 
       hasReceivedDataRef.current = true;
@@ -66,7 +66,7 @@ export default function Command() {
         timeoutRef.current = setTimeout(() => {
           setItems(latestDataRef.current);
           timeoutRef.current = null;
-          
+
           // Only set isLoading to false if we have enough data and minimum loading time has passed
           if (latestDataRef.current.length > 3 && !loadingTimeoutRef.current) {
             setIsLoading(false);
