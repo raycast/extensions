@@ -80,7 +80,7 @@ const subtitleSchema = z.object({
   title_file_name: z.string(),
   subtitle_file_name: z.string(),
   title: z.object({
-    id: z.number(),
+    imdb_id: z.number(),
     title_name: z.string(),
     type: z.string(),
     year: z.number(),
@@ -141,7 +141,7 @@ async function getPrimarySubtitle({
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       subtitleId: primarySubtitle.id,
-      titleId: primarySubtitle.title.id,
+      titleId: primarySubtitle.title.imdb_id,
     }),
   });
 
@@ -171,7 +171,7 @@ export async function getAlternativeSubtitle({
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       subtitleId: alternativeSubtitle.id,
-      titleId: alternativeSubtitle.title.id,
+      titleId: alternativeSubtitle.title.imdb_id,
     }),
   });
 
