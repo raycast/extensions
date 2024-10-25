@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from "crypto";
 import { getPreferenceValues } from "@raycast/api";
 
 export const DNS_RECORD_TYPES = [
@@ -21,7 +21,10 @@ export const AVAILABLE_PHP_VERSIONS_FOR_WEBSITES = ["PHP 7.1", "PHP 7.2", "PHP 7
 export const ADMIN_USER = getPreferenceValues<Preferences>().adminUser;
 const ADMIN_PASS = getPreferenceValues<Preferences>().adminPass;
 const { tokenType } = getPreferenceValues<Preferences>();
-const TOKEN = tokenType==="base64" ? btoa(`${ADMIN_USER}:${ADMIN_PASS}`): crypto.createHash('sha256').update(`${ADMIN_USER}:${ADMIN_PASS}`).digest("hex");
+const TOKEN =
+  tokenType === "base64"
+    ? btoa(`${ADMIN_USER}:${ADMIN_PASS}`)
+    : crypto.createHash("sha256").update(`${ADMIN_USER}:${ADMIN_PASS}`).digest("hex");
 
 export const PANEL_URL = new URL(getPreferenceValues<Preferences>().panelUrl);
 export const API_URL = PANEL_URL + "cloudAPI/";
