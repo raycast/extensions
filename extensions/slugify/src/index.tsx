@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { List, ActionPanel, Action, Clipboard, Icon, getPreferenceValues, LaunchProps } from "@raycast/api";
+import React from "react";
+import { List, ActionPanel, Action, Clipboard, Icon, getPreferenceValues } from "@raycast/api";
 import slugify from "slugify";
 
 enum DefaultActionPreference {
@@ -42,7 +42,7 @@ export default function Command() {
   const [clipboardText, setClipboardText] = React.useState<string | undefined>(undefined);
   const [input, setInput] = React.useState(clipboardText);
   const [result, setResult] = React.useState<Result | undefined>(undefined);
-  const [strict, setStrict] = useState(true);
+  const [strict, setStrict] = React.useState(true);
 
   React.useEffect(() => {
     Clipboard.readText().then((clipboardContents) => {
@@ -81,12 +81,7 @@ export default function Command() {
         <>
           <List.Section title={`Input: ${input || clipboardText}`}>
             {Object.entries(result).map(([key, value]) => (
-              <List.Item
-                key={key}
-                title={value}
-                accessories={[{ tag: key.includes("Strict") ? "Strict" : "" }]}
-                actions={result ? _getActions({ value }) : undefined}
-              />
+              <List.Item key={key} title={value} actions={result ? _getActions({ value }) : undefined} />
             ))}
           </List.Section>
         </>
