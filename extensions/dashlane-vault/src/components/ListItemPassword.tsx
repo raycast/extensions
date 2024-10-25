@@ -16,7 +16,7 @@ type Props = {
 export const ListItemPassword = ({ item }: Props) => {
   const { isInitialLoaded } = usePasswordContext();
   const itemName = item.title ?? item.url;
-  const username = isInitialLoaded ? item.email ?? item.login ?? item.secondaryLogin : undefined;
+  const username = isInitialLoaded ? (item.email ?? item.login ?? item.secondaryLogin) : undefined;
 
   const keywords = [item.title, item.url, item.email, item.login, item.secondaryLogin].filter(Boolean);
 
@@ -54,7 +54,7 @@ export const ListItemPassword = ({ item }: Props) => {
           <SyncAction />
           {environment.isDevelopment && (
             <ActionPanel.Section title="Development">
-              <Action.CopyToClipboard title="Copy ID" content={item.id} />
+              <Action.CopyToClipboard title="Copy Id" content={item.id} />
               <Action title="Print to Console" icon={Icon.Terminal} onAction={() => console.log(item)} />
             </ActionPanel.Section>
           )}

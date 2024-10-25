@@ -20,9 +20,9 @@ export default function TotpActions({ item }: Props) {
 
   return (
     <>
-      <Action title="Copy TOTP" onAction={copyTotp} icon={Icon.Clipboard} shortcut={{ modifiers: ["cmd"], key: "t" }} />
+      <Action title="Copy Totp" onAction={copyTotp} icon={Icon.Clipboard} shortcut={{ modifiers: ["cmd"], key: "t" }} />
       <Action
-        title={currentApplication ? `Paste TOTP into ${currentApplication.name}` : "Paste TOTP"}
+        title={currentApplication ? `Paste TOTP into ${currentApplication.name}` : "Paste Totp"}
         onAction={pasteTotp}
         icon={Icon.Window}
         shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
