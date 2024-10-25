@@ -1,5 +1,5 @@
 import { getSelectedText, open, showHUD } from "@raycast/api";
-const extractUrls = require("extract-urls");
+import extractUrls from "extract-urls";
 
 export default async function main() {
   try {
