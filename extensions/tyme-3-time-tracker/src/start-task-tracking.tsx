@@ -1,6 +1,10 @@
-import { Action, ActionPanel, Icon, List, closeMainWindow, showHUD } from "@raycast/api";
-import { Task, getTasks, startTrackingTask } from "./tasks";
+import { Action, ActionPanel, Icon, List, closeMainWindow, showHUD, getPreferenceValues } from "@raycast/api";
+import { Task, getTasks, startTrackingTask, stopTracking } from "./tasks";
 import { useCachedPromise, useFrecencySorting } from "@raycast/utils";
+
+interface Preferences {
+  stopRunningTimers: boolean;
+}
 
 function getTaskPath(task: Task): string {
   return [task.category?.name, task.project.name, task.parentTask?.name]
@@ -21,6 +25,12 @@ function StartTrackerForTask() {
   const handleStartTracking = async (task: Task) => {
     closeMainWindow({ clearRootSearch: true });
     visitTask(task);
+
+    const preferences = getPreferenceValues<Preferences>();
+
+    if (preferences.stopRunningTimers) {
+      await stopTracking();
+    }
 
     const successfullyStarted = await startTrackingTask(task.id);
     showHUD(successfullyStarted ? "Started tracking task" : "Could not start tracking task");
