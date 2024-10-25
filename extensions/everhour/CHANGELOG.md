@@ -1,6 +1,6 @@
 # Everhour
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2024-10-25
 
 - Fix for issue [#14813](https://github.com/raycast/extensions/issues/14813)
   - add conditional to verify current Task has the expected time property
