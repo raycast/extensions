@@ -1,21 +1,23 @@
-import { showToast, Toast, LocalStorage } from "@raycast/api";
+import { showToast, Toast, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import langMapper from "./languageMap";
 import { createMapping } from "./languageMap";
+import { isValidLanguagePair, LanguagePreferences } from "./preferences-utils";
 
-export interface LanguageFormValues {
-  firstLang: string;
-  secondLang: string;
-}
-
-export async function saveSetting(lang: LanguageFormValues) {
-  await LocalStorage.setItem("firstLang", lang.firstLang);
-  await LocalStorage.setItem("secondLang", lang.secondLang);
-}
-
-export async function getSetting(): Promise<LanguageFormValues> {
-  const firstLang = await LocalStorage.getItem<string>("firstLang");
-  const secondLang = await LocalStorage.getItem<string>("secondLang");
-  return { firstLang: firstLang || "en", secondLang: secondLang || "th" };
+export function getSetting(): LanguagePreferences {
+  const preferences = getPreferenceValues<LanguagePreferences>();
+  if (!isValidLanguagePair(preferences.firstLang, preferences.secondLang)) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Invalid Language Selection",
+      message: "First and second languages must be different",
+      primaryAction: {
+        title: "Open Preferences",
+        onAction: () => openExtensionPreferences(),
+      },
+    });
+    return { firstLang: "en", secondLang: "th" };
+  }
+  return preferences;
 }
 
 export function showToastError(errorText: string) {
@@ -48,10 +50,11 @@ export function detectPredominantLanguage(text: string): string {
 export function getKeyboardLayoutMapperByText(text: string): Record<string, string> {
   // const lang = text.match(/[\u0E00-\u0E7F]/) ? "th" : "en";
   let lang = detectPredominantLanguage(text);
+  const setting = getSetting();
   if (lang === "mixed") {
-    lang = "en";
+    lang = setting.firstLang;
   }
-  const mapping = createMapping(langMapper[lang === "th" ? "en" : "th"], langMapper[lang]);
+  const mapping = createMapping(langMapper[lang === setting.firstLang ? setting.secondLang : setting.firstLang], langMapper[lang]);
   return mapping;
 }
 

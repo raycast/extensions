@@ -3,7 +3,7 @@
   "name": "fix-language",
   "title": "Fix Language",
   "description": "Switch the language input source of the text when you type and forget to change the language.",
-  "icon": "command-icon.png",
+  "icon": "fix-language-icon.png",
   "author": "tin5451",
   "categories": [
     "Productivity",
@@ -13,15 +13,15 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "sw",
-      "title": "Sw",
+      "name": "switch-selected-language",
+      "title": "Switch Selected Language",
       "subtitle": "Quick switch the selected text input source",
       "description": "Switch the language to another (default: eng/thai)",
       "mode": "no-view"
     },
     {
-      "name": "swc",
-      "title": "Swc",
+      "name": "switch-clipboard-language",
+      "title": "Switch Clipboard Language",
       "subtitle": "Quick switch the clipboard text input source",
       "description": "Switch the language to another (default: eng/thai)",
       "mode": "no-view"
@@ -32,13 +32,46 @@
       "subtitle": "Switch the language input source",
       "description": "Switch the language input source",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "firstLang",
+      "title": "first language",
+      "description": "Select the first language (must be different from second language)",
+      "type": "dropdown",
+      "required": true,
+      "placeholder": "select first language",
+      "default": "Thai",
+      "data": [
+        {
+          "value": "th",
+          "title": "Thai"
+        },
+        {
+          "value": "en",
+          "title": "English"
+        }
+      ]
     },
     {
-      "name": "fix-language-setting",
-      "title": "Fix Language Setting",
-      "subtitle": "Settings for fix language extension",
-      "description": "Settings for fix language extension",
-      "mode": "view"
+      "name": "secondLang",
+      "title": "second language",
+      "description": "Select the second language (must be different from first language)",
+      "type": "dropdown",
+      "required": true,
+      "placeholder": "select second language",
+      "default": "English",
+      "data": [
+        {
+          "value": "th",
+          "title": "Thai"
+        },
+        {
+          "value": "en",
+          "title": "English"
+        }
+      ]
     }
   ],
   "dependencies": {

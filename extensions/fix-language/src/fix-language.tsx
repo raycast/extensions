@@ -1,10 +1,16 @@
-import { Action, ActionPanel, Clipboard, Form } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, openExtensionPreferences } from "@raycast/api";
 import { useForm } from "@raycast/utils";
+import { LanguagePreferences, validateAndGetPreferences } from "./preferences-utils";
 import { switchLanguage } from "./common";
 import { useState } from "react";
 
 export default function FixLanguage() {
   const [result, setResult] = useState<string>("");
+  const preferences = validateAndGetPreferences();
+
+  if (!preferences) {
+    return;
+  }
 
   const { handleSubmit, itemProps } = useForm({
     onSubmit: async (values) => {
@@ -34,6 +40,10 @@ export default function FixLanguage() {
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
           )}
+          <Action
+            title="Open Preferences"
+            onAction={openExtensionPreferences}
+          />
         </ActionPanel>
       }
     >
