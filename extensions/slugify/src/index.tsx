@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { List, ActionPanel, Action, Clipboard, Icon, getPreferenceValues, LaunchProps } from "@raycast/api";
 import slugify from "slugify";
 
@@ -36,16 +36,13 @@ type Result = {
   noLower: string;
   underscore: string;
   underscoreNoLower: string;
-  defaultStrict: string;
-  noLowerStrict: string;
-  underscoreStrict: string;
-  underscoreNoLowerStrict: string;
 };
 
 export default function Command() {
   const [clipboardText, setClipboardText] = React.useState<string | undefined>(undefined);
   const [input, setInput] = React.useState(clipboardText);
   const [result, setResult] = React.useState<Result | undefined>(undefined);
+  const [strict, setStrict] = useState(true);
 
   React.useEffect(() => {
     Clipboard.readText().then((clipboardContents) => {
@@ -56,19 +53,15 @@ export default function Command() {
     const _input = input || clipboardText;
     if (_input) {
       setResult({
-        default: slugify(_input, { lower: true, replacement: "-" }),
-        noLower: slugify(_input, { lower: false, replacement: "-" }),
-        underscore: slugify(_input, { lower: true, replacement: "_" }),
-        underscoreNoLower: slugify(_input, { lower: false, replacement: "_" }),
-        defaultStrict: slugify(_input, { lower: true, replacement: "-", strict: true }),
-        noLowerStrict: slugify(_input, { lower: false, replacement: "-", strict: true }),
-        underscoreStrict: slugify(_input, { lower: true, replacement: "_", strict: true }),
-        underscoreNoLowerStrict: slugify(_input, { lower: false, replacement: "_", strict: true }),
+        default: slugify(_input, { lower: true, replacement: "-", strict }),
+        noLower: slugify(_input, { lower: false, replacement: "-", strict }),
+        underscore: slugify(_input, { lower: true, replacement: "_", strict }),
+        underscoreNoLower: slugify(_input, { lower: false, replacement: "_", strict }),
       });
     } else {
       setResult(undefined);
     }
-  }, [input, clipboardText]);
+  }, [input, clipboardText, strict]);
 
   return (
     <List
@@ -77,6 +70,12 @@ export default function Command() {
       }}
       searchBarPlaceholder={"Text to slugify"}
       isLoading={!clipboardText}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Strict" onChange={(val) => setStrict(val === "1")}>
+          <List.Dropdown.Item icon={Icon.Check} title="Strict" value={"1"} />
+          <List.Dropdown.Item icon={Icon.Xmark} title="Not Strict" value="0" />
+        </List.Dropdown>
+      }
     >
       {result ? (
         <>

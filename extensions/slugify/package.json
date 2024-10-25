@@ -29,17 +29,17 @@
       "arguments": [
         {
           "name": "strict",
-          "placeholder": "Not Strict",
+          "placeholder": "Strict",
           "required": false,
           "type": "dropdown",
           "data": [
             {
-              "title": "Strict",
-              "value": "1"
-            },
-            {
               "title": "Not Strict",
               "value": "0"
+            },
+            {
+              "title": "Strict",
+              "value": "1"
             }
           ]
         }
