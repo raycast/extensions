@@ -1,5 +1,9 @@
 # Browser History Changelog
 
+## [Add Searching by URL and Title] - 2024-10-18
+
+- Added support for searching history by URL, alongside the existing title.
+
 ## [Add Sidekick browser] - 2024-02-10
 - Added Sidekick history search support.
 

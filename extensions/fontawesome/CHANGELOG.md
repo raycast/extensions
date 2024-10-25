@@ -1,5 +1,9 @@
 # Font Awesome Changelog
 
+## [Added primary action preference] - 2024-10-23
+
+- Added a primary action preference to configure the main action for the icon.
+
 ## [Fixed the issue with the copied icon SVG] - 2024-06-26
 
 - Fixed issue with icon "Copy as SVG" copies [object Object] onto the clipboard instead of the SVG.

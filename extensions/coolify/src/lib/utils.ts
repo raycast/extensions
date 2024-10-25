@@ -20,3 +20,7 @@ export function isValidCoolifyUrl() {
 export function getResourceColor(resource: Resource | ResourceDetails) {
   return resource.status.startsWith("running:") ? Color.Green : Color.Red;
 }
+
+export function capitalizeFirstLetter(text: string) {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
