@@ -1,5 +1,6 @@
 import { ActionPanel, Form, Action, useNavigation, showToast, Toast } from "@raycast/api";
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import api from "./api";
 import moment from "moment-timezone";
 
@@ -14,20 +15,57 @@ interface Oncall {
   name: string;
 }
 
-export default function Command({ oncallId }: { oncallId: string }) {
+interface FormState {
+  oncall: string;
+  user: string;
+  desc: string;
+  startDate: Date;
+  endDate: Date;
+}
+
+interface ApiResponse {
+  oncalls: Oncall[];
+  users: User[];
+}
+
+interface CommandProps {
+  oncallId?: string;
+}
+
+export default function Command({ oncallId }: CommandProps) {
   const { pop } = useNavigation();
-  const [formState, setFormState] = useState({
+  const [formState, setFormState] = useState<FormState>({
     oncall: oncallId || "",
     user: "",
     desc: "",
     startDate: moment().toDate(),
     endDate: moment().add(1, "day").toDate(),
   });
-  const [users, setUsers] = useState<User[]>([]);
-  const [oncalls, setOncalls] = useState<Oncall[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
-  const handleInputChange = useCallback((key: string, value: Date | string) => {
+  const { data, isLoading } = useCachedPromise<() => Promise<ApiResponse>>(
+    async () => {
+      const [oncallData, userData] = await Promise.all([
+        api.oncall.allOncalls(),
+        api.users.getTeamsUsers()
+      ]);
+      return {
+        oncalls: oncallData.oncalls as Oncall[],
+        users: userData.users as User[]
+      };
+    },
+    [],
+    {
+      onError: async () => {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load data",
+          message: "Please try again later"
+        });
+      }
+    }
+  );
+
+  const handleInputChange = useCallback((key: keyof FormState, value: Date | string) => {
     setFormState((prev) => ({ ...prev, [key]: value }));
   }, []);
 
@@ -41,11 +79,21 @@ export default function Command({ oncallId }: { oncallId: string }) {
     }
   }, [formState]);
 
+  interface OverrideData {
+    oncall: string;
+    user: string;
+    desc: string;
+    startDate: string;
+    endDate: string;
+    startTime: string;
+    endTime: string;
+  }
+
   const handleSubmit = useCallback(async () => {
     try {
       validateForm();
       const { oncall, user, desc, startDate, endDate } = formState;
-      const data = {
+      const data: OverrideData = {
         oncall,
         user,
         desc,
@@ -66,31 +114,12 @@ export default function Command({ oncallId }: { oncallId: string }) {
     }
   }, [formState, validateForm, pop]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const [oncallData, userData] = await Promise.all([api.oncall.allOncalls(), api.users.getTeamsUsers()]);
-        setOncalls(oncallData.oncalls);
-        setUsers(userData.users);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load data",
-          message: "Please try again later",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
   if (isLoading) {
     return <Form isLoading={true} />;
   }
+
+  const oncalls = data?.oncalls || [];
+  const users = data?.users || [];
 
   return (
     <Form

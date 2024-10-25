@@ -1,5 +1,6 @@
 import { ActionPanel, List, Action, Icon, Color, showToast, Toast } from "@raycast/api";
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useMemo, useCallback } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import api from "./api";
 import React from "react";
 import IncidentDetailsView from "./components/IncidentViewPage";
@@ -24,11 +25,18 @@ interface Pagination {
   total: number;
 }
 
+interface IncidentResponse {
+  NACK_Incidents: Incident[];
+  ACK_Incidents: Incident[];
+  pagination: Pagination;
+}
+
 const tagProps: Record<Incident["status"], { value: string; color: Color }> = {
   NACK: { value: "Triggered", color: Color.Red },
   ACK: { value: "Acknowledged", color: Color.Blue },
   RES: { value: "Resolved", color: Color.PrimaryText },
 };
+
 const getIcon = (path: string): string => `https://cdn.spike.sh/icons/${path}`;
 const truncate = (str: string, n: number) => (str && str.length > n ? str.substring(0, n - 1) + "..." : str);
 
@@ -58,12 +66,7 @@ const IncidentListItem = React.memo(function IncidentListItem({
     });
   }
 
-  let truncateLimit = 50;
-
-  if (accessories.length > 1) {
-    // means we have both priority and severity
-    truncateLimit = 40;
-  }
+  const truncateLimit = accessories.length > 1 ? 40 : 50;
 
   return (
     <List.Item
@@ -102,81 +105,82 @@ const IncidentListItem = React.memo(function IncidentListItem({
 });
 
 export default function Command() {
-  const [incidents, setIncidents] = useState<Incident[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [pagination, setPagination] = useState<Pagination | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isLoading, error, mutate, revalidate } = useCachedPromise(
+    (page: number = 0) => api.incidents.getOpenIncidents(page),
+    [0],
+    {
+      onError: (err) => {
+        console.error("Error fetching incidents:", err);
+      },
+    },
+  );
 
-  const fetchIncidents = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const response = await api.incidents.getOpenIncidents();
-      setPagination(response.pagination);
-      setIncidents([...response.NACK_Incidents, ...response.ACK_Incidents]);
-    } catch (err) {
-      console.error("Error fetching incidents:", err);
-      setError("Failed to fetch incidents. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const updateIncidentStatus = useCallback(
+    async (incident: Incident, newStatus: "ACK" | "RES") => {
+      await mutate(Promise.resolve(), {
+        optimisticUpdate(currentData: IncidentResponse | undefined) {
+          if (!currentData) return currentData;
 
-  useEffect(() => {
-    fetchIncidents();
-  }, [fetchIncidents]);
+          const updateIncident = (incidents: Incident[]) =>
+            incidents.map((i) => (i._id === incident._id ? { ...i, status: newStatus } : i));
 
-  const updateIncidentStatus = useCallback((incident: Incident, newStatus: "ACK" | "RES") => {
-    setIncidents((prevIncidents) =>
-      prevIncidents.map((i) => (i._id === incident._id ? { ...i, status: newStatus } : i)),
-    );
-  }, []);
+          return {
+            ...currentData,
+            NACK_Incidents: updateIncident(currentData.NACK_Incidents),
+            ACK_Incidents: updateIncident(currentData.ACK_Incidents),
+          };
+        },
+      });
+    },
+    [mutate],
+  );
 
   const acknowledgeIncident = useCallback(
     async (incident: Incident) => {
       try {
         await api.incidents.acknowledgeIncident(incident);
-        updateIncidentStatus(incident, "ACK");
+        await updateIncidentStatus(incident, "ACK");
         await showToast({ style: Toast.Style.Success, title: "Incident acknowledged" });
       } catch (err) {
-        console.error("Error acknowledging incident:", err);
         await showToast({ style: Toast.Style.Failure, title: "Failed to acknowledge incident" });
+        revalidate();
       }
     },
-    [updateIncidentStatus],
+    [updateIncidentStatus, revalidate],
   );
 
   const resolveIncident = useCallback(
     async (incident: Incident) => {
       try {
         await api.incidents.resolveIncident(incident);
-        updateIncidentStatus(incident, "RES");
+        await updateIncidentStatus(incident, "RES");
         await showToast({ style: Toast.Style.Success, title: "Incident resolved" });
       } catch (err) {
-        console.error("Error resolving incident:", err);
         await showToast({ style: Toast.Style.Failure, title: "Failed to resolve incident" });
+        revalidate();
       }
     },
-    [updateIncidentStatus],
+    [updateIncidentStatus, revalidate],
   );
 
-  const triggeredIncidents = useMemo(() => incidents.filter((i) => i.status === "NACK"), [incidents]);
-  const acknowledgedIncidents = useMemo(() => incidents.filter((i) => i.status === "ACK"), [incidents]);
-
-  if (isLoading) {
-    return <List isLoading={true} />;
-  }
+  const incidents = useMemo(() => {
+    if (!data) return { triggered: [], acknowledged: [] };
+    return {
+      triggered: data.NACK_Incidents,
+      acknowledged: data.ACK_Incidents,
+    };
+  }, [data]);
 
   if (error) {
-    return <List.EmptyView title="Error" description={error} />;
+    return <List.EmptyView title="Error" description="Failed to fetch incidents. Please try again." />;
   }
 
   const incidentPagination = {
     pageSize: 20,
-    hasMore: pagination && pagination.total > incidents.length ? true : false,
+    hasMore: data?.pagination && data.pagination.total > incidents.triggered.length + incidents.acknowledged.length,
     onLoadMore: async () => {
-      const response = await api.incidents.getOpenIncidents((pagination?.currentPage ?? 0) + 1);
-      setPagination(response.pagination);
-      setIncidents([...incidents, ...response.NACK_Incidents, ...response.ACK_Incidents]);
+      const nextPage = (data?.pagination?.currentPage ?? 0) + 1;
+      await mutate(api.incidents.getOpenIncidents(nextPage));
     },
   };
 
@@ -184,12 +188,12 @@ export default function Command() {
     <List
       pagination={incidentPagination}
       isLoading={isLoading}
-      navigationTitle={`Open Incidents (${pagination?.total})`}
+      navigationTitle={`Open Incidents (${data?.pagination?.total ?? 0})`}
       searchBarPlaceholder="Search among open incidents..."
     >
-      {triggeredIncidents.length > 0 && (
-        <List.Section title="Triggered" subtitle={`${triggeredIncidents.length} items`}>
-          {triggeredIncidents.map((incident) => (
+      {incidents.triggered.length > 0 && (
+        <List.Section title="Triggered" subtitle={`${incidents.triggered.length} items`}>
+          {incidents.triggered.map((incident: Incident) => (
             <IncidentListItem
               key={incident._id}
               incident={incident}
@@ -199,9 +203,9 @@ export default function Command() {
           ))}
         </List.Section>
       )}
-      {acknowledgedIncidents.length > 0 && (
-        <List.Section title="Acknowledged" subtitle={`${acknowledgedIncidents.length} items`}>
-          {acknowledgedIncidents.map((incident) => (
+      {incidents.acknowledged.length > 0 && (
+        <List.Section title="Acknowledged" subtitle={`${incidents.acknowledged.length} items`}>
+          {incidents.acknowledged.map((incident: Incident) => (
             <IncidentListItem
               key={incident._id}
               incident={incident}

@@ -1,5 +1,6 @@
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
-import { useEffect, useState, useMemo } from "react";
+import { useMemo } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import api from "./api";
 import config from "./config";
 
@@ -13,16 +14,6 @@ interface Favorite {
   counterId?: string;
 }
 
-type EntityType = "Incident" | "Oncall" | "Escalation" | "Service" | "Integration";
-
-const iconMap: Record<EntityType, string> = {
-  Incident: "incident.png",
-  Oncall: "oncall.png",
-  Escalation: "escalation.png",
-  Service: "service.png",
-  Integration: "integration.png",
-};
-
 const getIcon = (): string | Icon => {
   return Icon.Star;
 };
@@ -35,38 +26,44 @@ function FavoriteItem({ favorite }: { favorite: Favorite }) {
       icon={getIcon()}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser icon={Icon.Globe} title="Open Favorite" url={`${config?.spike}${favorite.url}`} />
+          <Action.OpenInBrowser 
+            icon={Icon.Globe} 
+            title="Open Favorite" 
+            url={`${config?.spike}${favorite.url}`} 
+          />
         </ActionPanel>
       }
     />
   );
 }
 
-export default function Command() {
-  const [favorites, setFavorites] = useState<Favorite[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+interface FavoritesResponse {
+  favorites: Record<string, Favorite>;
+}
 
-  useEffect(() => {
-    async function fetchFavorites() {
-      try {
-        setIsLoading(true);
-        const response = await api.users.getFavorites();
-        setFavorites(Object.values(response.favorites));
-      } catch (err) {
-        setError("Failed to fetch favorites. Please try again.");
+export default function Command() {
+  const { data, isLoading, error } = useCachedPromise<() => Promise<FavoritesResponse>>(
+    async () => {
+      return await api.users.getFavorites();
+    },
+    [],
+    {
+      onError: (err) => {
         console.error("Error fetching favorites:", err);
-      } finally {
-        setIsLoading(false);
       }
     }
+  );
 
-    fetchFavorites();
-  }, []);
+  const favorites = useMemo(() => 
+    data ? Object.values(data.favorites) : [],
+    [data]
+  );
 
   const favoriteItems = useMemo(
-    () => favorites.map((favorite) => <FavoriteItem key={favorite.entityId} favorite={favorite} />),
-    [favorites],
+    () => favorites.map((favorite) => 
+      <FavoriteItem key={favorite.entityId} favorite={favorite} />
+    ),
+    [favorites]
   );
 
   if (isLoading) {
@@ -74,12 +71,20 @@ export default function Command() {
   }
 
   if (error) {
-    return <List.EmptyView title="Error" description={error} />;
+    return (
+      <List.EmptyView 
+        title="Error" 
+        description="Failed to fetch favorites. Please try again." 
+      />
+    );
   }
 
   return (
     <List>
-      <List.Section title="Favorites" subtitle={`${favorites.length} items`}>
+      <List.Section 
+        title="Favorites" 
+        subtitle={`${favorites.length} items`}
+      >
         {favoriteItems}
       </List.Section>
     </List>

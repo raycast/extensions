@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, Detail, Icon, showToast, Toast } from "@raycast/api";
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useMemo } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import api from "../api";
 import moment from "moment-timezone";
 import shortcut from "../config/shortcut";
@@ -25,6 +26,11 @@ interface Incident {
 interface GroupedIncident {
   priority?: string;
   severity?: string;
+}
+
+interface ApiResponse {
+  incident: Incident;
+  groupedIncident: GroupedIncident;
 }
 
 const statusTagProps: Record<Incident["status"], { text: string; color: Color }> = {
@@ -58,88 +64,142 @@ const linksToMarkdown = (links: Array<{ [key: string]: string }>): string =>
     .join("\n");
 
 export default function Main({ counterId }: { counterId: string }) {
-  const [incident, setIncident] = useState<Incident | null>(null);
-  const [groupedIncident, setGroupedIncident] = useState<GroupedIncident | null>(null);
-
-  const fetchIncident = useCallback(async () => {
+  const fetchIncident = async (id: string): Promise<ApiResponse> => {
     try {
-      const response = await api.incidents.getIncident(counterId);
-      setIncident(response.incident);
-      setGroupedIncident(response.groupedIncident);
+      return await api.incidents.getIncident(id);
     } catch (err) {
-      console.error("Error fetching incident:", err);
-      showToast({ style: Toast.Style.Failure, title: "Failed to fetch incident" });
+      const error = err instanceof Error ? err : new Error("An unknown error occurred");
+      await showToast({ 
+        style: Toast.Style.Failure, 
+        title: "Failed to fetch incident",
+        message: error.message 
+      });
+      throw error;
     }
-  }, [counterId]);
+  };
 
-  useEffect(() => {
-    fetchIncident();
-  }, [fetchIncident]);
+  const { data, isLoading, mutate, revalidate } = useCachedPromise<
+    typeof fetchIncident,
+    [string]
+  >(fetchIncident, [counterId], {
+    keepPreviousData: true
+  });
 
-  const updateIncidentStatus = useCallback((newStatus: "ACK" | "RES") => {
-    setIncident((prevIncident) => (prevIncident ? { ...prevIncident, status: newStatus } : null));
-  }, []);
-
-  const updateGroupedIncident = useCallback((priority: string, severity: string) => {
-    setGroupedIncident((prev) => (prev ? { ...prev, priority, severity } : null));
-  }, []);
-
-  const acknowledgeIncident = useCallback(async () => {
-    if (!incident) return;
+  const handleStatusUpdate = async (
+    action: () => Promise<void>, 
+    newStatus: "ACK" | "RES",
+    successMessage: string
+  ) => {
     try {
-      await api.incidents.acknowledgeIncident(incident);
-      updateIncidentStatus("ACK");
-      await showToast({ style: Toast.Style.Success, title: "Incident acknowledged" });
+      await action();
+      await mutate(
+        Promise.resolve(),
+        {
+          optimisticUpdate(currentData: ApiResponse | [string]) {
+            if (!currentData) return currentData;
+            return {
+              ...currentData,
+              incident: {
+                ...(currentData as ApiResponse).incident,
+                status: newStatus,
+                [`${newStatus}_at`]: new Date().toISOString()
+              }
+            };
+          }
+        }
+      );
+      await showToast({ style: Toast.Style.Success, title: successMessage });
     } catch (err) {
-      console.error("Error acknowledging incident:", err);
-      await showToast({ style: Toast.Style.Failure, title: "Failed to acknowledge incident" });
+      console.error(`Error updating incident status:`, err);
+      await showToast({ 
+        style: Toast.Style.Failure, 
+        title: `Failed to ${newStatus.toLowerCase()} incident` 
+      });
+      revalidate();
     }
-  }, [incident, updateIncidentStatus]);
+  };
 
-  const resolveIncident = useCallback(async () => {
-    if (!incident) return;
+  const handleMetadataUpdate = async (
+    action: () => Promise<void>,
+    updateFn: (current: GroupedIncident) => GroupedIncident
+  ) => {
     try {
-      await api.incidents.resolveIncident(incident);
-      updateIncidentStatus("RES");
-      await showToast({ style: Toast.Style.Success, title: "Incident resolved" });
+      await action();
+      await mutate(
+        Promise.resolve(),
+        {
+          optimisticUpdate(currentData: ApiResponse | [string]) {
+            if (!currentData) return currentData;
+            return {
+              ...currentData,
+              groupedIncident: updateFn((currentData as ApiResponse).groupedIncident)
+            };
+          }
+        }
+      );
     } catch (err) {
-      console.error("Error resolving incident:", err);
-      await showToast({ style: Toast.Style.Failure, title: "Failed to resolve incident" });
+      console.error("Error updating incident metadata:", err);
+      await showToast({ 
+        style: Toast.Style.Failure, 
+        title: "Failed to update incident" 
+      });
+      revalidate();
     }
-  }, [incident, updateIncidentStatus]);
+  };
 
-  const setSeverity = useCallback(
-    async (severity: string) => {
-      if (!incident) return;
-      await api.incidents.setSeverity([incident.counterId], severity);
-      updateGroupedIncident(groupedIncident && groupedIncident.priority ? groupedIncident.priority : "", severity);
-    },
-    [incident, groupedIncident, updateGroupedIncident],
-  );
+  const acknowledgeIncident = async () => {
+    if (!data) return;
+    await handleStatusUpdate(
+      () => api.incidents.acknowledgeIncident(data.incident),
+      "ACK",
+      "Incident acknowledged"
+    );
+  };
 
-  const removeSeverity = useCallback(async () => {
-    if (!incident) return;
-    await api.incidents.removeSeverity([incident.counterId]);
-    updateGroupedIncident(groupedIncident && groupedIncident.priority ? groupedIncident.priority : "", "");
-  }, [incident, groupedIncident, updateGroupedIncident]);
+  const resolveIncident = async () => {
+    if (!data) return;
+    await handleStatusUpdate(
+      () => api.incidents.resolveIncident(data.incident),
+      "RES",
+      "Incident resolved"
+    );
+  };
 
-  const removePriority = useCallback(async () => {
-    if (!incident) return;
-    await api.incidents.removePriority([incident.counterId]);
-    updateGroupedIncident("", groupedIncident && groupedIncident.severity ? groupedIncident.severity : "");
-  }, [incident, groupedIncident, updateGroupedIncident]);
+  const setSeverity = async (severity: string) => {
+    if (!data) return;
+    await handleMetadataUpdate(
+      () => api.incidents.setSeverity([data.incident.counterId], severity),
+      (current) => ({ ...current, severity })
+    );
+  };
 
-  const setPriority = useCallback(
-    async (priority: string) => {
-      if (!incident) return;
-      await api.incidents.setPriority([incident.counterId], priority);
-      updateGroupedIncident(priority, groupedIncident && groupedIncident.severity ? groupedIncident.severity : "");
-    },
-    [incident, groupedIncident, updateGroupedIncident],
-  );
+  const removeSeverity = async () => {
+    if (!data) return;
+    await handleMetadataUpdate(
+      () => api.incidents.removeSeverity([data.incident.counterId]),
+      (current) => ({ ...current, severity: undefined })
+    );
+  };
+
+  const setPriority = async (priority: string) => {
+    if (!data) return;
+    await handleMetadataUpdate(
+      () => api.incidents.setPriority([data.incident.counterId], priority),
+      (current) => ({ ...current, priority })
+    );
+  };
+
+  const removePriority = async () => {
+    if (!data) return;
+    await handleMetadataUpdate(
+      () => api.incidents.removePriority([data.incident.counterId]),
+      (current) => ({ ...current, priority: undefined })
+    );
+  };
 
   const markdown = useMemo(() => {
-    if (!incident) return "Loading...";
+    if (!data) return "Loading...";
+    const { incident } = data;
     return `
 # ${incident.message}
 
@@ -160,25 +220,27 @@ ${JSON.stringify(incident.resMetadata, null, 2)}
 `
     : ""
 }
-    `;
-  }, [incident]);
+    `.trim();
+  }, [data]);
 
   const metadata = useMemo(() => {
-    if (!incident) return null;
+    if (!data) return null;
+    const { incident, groupedIncident } = data;
+    
     return (
       <Detail.Metadata>
         <Detail.Metadata.TagList title="Status">
           <Detail.Metadata.TagList.Item {...statusTagProps[incident.status]} />
         </Detail.Metadata.TagList>
 
-        {groupedIncident && groupedIncident.priority && (
+        {groupedIncident?.priority && (
           <Detail.Metadata.Label
             icon={{ source: getIcon(`${groupedIncident.priority}.png`) }}
             title="Priority"
-            text="P1"
+            text={groupedIncident.priority.toUpperCase()}
           />
         )}
-        {groupedIncident && groupedIncident.severity && (
+        {groupedIncident?.severity && (
           <Detail.Metadata.Label
             title="Severity"
             text={groupedIncident.severity.toUpperCase()}
@@ -212,30 +274,55 @@ ${JSON.stringify(incident.resMetadata, null, 2)}
           />
         )}
 
-        <Detail.Metadata.Label title="Triggered at" text={moment(incident.NACK_at).format("MMM DD, YYYY h:mm A")} />
+        <Detail.Metadata.Label 
+          title="Triggered at" 
+          text={moment(incident.NACK_at).format("MMM DD, YYYY h:mm A")} 
+        />
         {incident.status !== "NACK" && incident.ACK_at && (
-          <Detail.Metadata.Label title="Acknowledged At" text={moment(incident.ACK_at).format("MMM DD, YYYY h:mm A")} />
+          <Detail.Metadata.Label 
+            title="Acknowledged At" 
+            text={moment(incident.ACK_at).format("MMM DD, YYYY h:mm A")} 
+          />
         )}
         {incident.status === "RES" && incident.RES_at && (
-          <Detail.Metadata.Label title="Resolved At" text={moment(incident.RES_at).format("MMM DD, YYYY h:mm A")} />
+          <Detail.Metadata.Label 
+            title="Resolved At" 
+            text={moment(incident.RES_at).format("MMM DD, YYYY h:mm A")} 
+          />
         )}
       </Detail.Metadata>
     );
-  }, [incident, groupedIncident]);
+  }, [data]);
 
   const actions = useMemo(() => {
-    if (!incident) return null;
+    if (!data) return null;
+    
     return (
       <ActionPanel>
-        <Action.OpenInBrowser title="Open in Spike" url={`${config?.spike}/incidents/${incident.counterId}`} />
-        <Action
-          shortcut={shortcut.ACKNOWLEDGE_INCIDENT}
-          title="Acknowledge"
-          icon={Icon.Circle}
-          onAction={acknowledgeIncident}
+        <Action.OpenInBrowser 
+          title="Open in Spike" 
+          url={`${config?.spike}/incidents/${data.incident.counterId}`} 
         />
-        <Action shortcut={shortcut.RESOLVE_INCIDENT} title="Resolve" icon={Icon.Checkmark} onAction={resolveIncident} />
-        <ActionPanel.Submenu icon={{ source: getIcon("sev2.png") }} title="Change Severity">
+        {data.incident.status === "NACK" && (
+          <Action
+            shortcut={shortcut.ACKNOWLEDGE_INCIDENT}
+            title="Acknowledge"
+            icon={Icon.Circle}
+            onAction={acknowledgeIncident}
+          />
+        )}
+        {data.incident.status !== "RES" && (
+          <Action 
+            shortcut={shortcut.RESOLVE_INCIDENT} 
+            title="Resolve" 
+            icon={Icon.Checkmark} 
+            onAction={resolveIncident} 
+          />
+        )}
+        <ActionPanel.Submenu 
+          icon={{ source: getIcon("sev2.png") }} 
+          title="Change Severity"
+        >
           {severities.map((severity) => (
             <Action
               icon={{ source: getIcon(`${severity.value}.png`) }}
@@ -244,9 +331,17 @@ ${JSON.stringify(incident.resMetadata, null, 2)}
               onAction={() => setSeverity(severity.value)}
             />
           ))}
-          <Action icon={Icon.Xmark} key="remove-severity" title="Remove Severity" onAction={() => removeSeverity()} />
+          <Action 
+            icon={Icon.XmarkCircle} 
+            key="remove-severity" 
+            title="Remove Severity" 
+            onAction={removeSeverity} 
+          />
         </ActionPanel.Submenu>
-        <ActionPanel.Submenu icon={{ source: getIcon("p2.png") }} title="Change Priority">
+        <ActionPanel.Submenu 
+          icon={{ source: getIcon("p2.png") }} 
+          title="Change Priority"
+        >
           {priorities.map((priority) => (
             <Action
               icon={{ source: getIcon(`${priority.value}.png`) }}
@@ -255,17 +350,22 @@ ${JSON.stringify(incident.resMetadata, null, 2)}
               onAction={() => setPriority(priority.value)}
             />
           ))}
-          <Action icon={Icon.Xmark} key="remove-priority" title="Remove Priority" onAction={() => removePriority()} />
+          <Action 
+            icon={Icon.XmarkCircle} 
+            key="remove-priority" 
+            title="Remove Priority" 
+            onAction={removePriority} 
+          />
         </ActionPanel.Submenu>
       </ActionPanel>
     );
-  }, [incident, acknowledgeIncident, resolveIncident, setSeverity, setPriority]);
+  }, [data]);
 
   return (
     <Detail
       markdown={markdown}
-      navigationTitle={incident ? incident.counterId : "Loading..."}
-      isLoading={!incident}
+      navigationTitle={data ? data.incident.counterId : "Loading..."}
+      isLoading={isLoading}
       metadata={metadata}
       actions={actions}
     />

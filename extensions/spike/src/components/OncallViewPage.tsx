@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, Detail, Icon } from "@raycast/api";
-import { useEffect, useState, useMemo } from "react";
+import { useMemo } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import api from "../api";
 import moment from "moment-timezone";
 import config from "../config";
@@ -30,14 +31,41 @@ interface User {
   email: string;
 }
 
+interface FetchedData {
+  spectrum: Shift[];
+  oncall: Oncall;
+  activeShift: ActiveShift;
+  nextOncallUser: User;
+}
+
 export default function OncallViewPage({ oncallId }: { oncallId: string }) {
-  const [spectrum, setSpectrum] = useState<Shift[]>([]);
-  const [oncall, setOncall] = useState<Oncall | null>(null);
-  const [activeShift, setActiveShift] = useState<ActiveShift | null>(null);
-  const [nextOncallUser, setNextOncallUser] = useState<User | null>(null);
+  const fetchOncallData = async (id: string): Promise<FetchedData> => {
+    const [spectrumResponse, oncallResponse, nextOncallResponse] = await Promise.all([
+      api.oncall.getOncallSpectrum(id, {
+        start: moment().toISOString(),
+        end: moment().add(14, "days").toISOString(),
+      }),
+      api.oncall.getOncall(id),
+      api.oncall.getWhoIsOncallNext(id),
+    ]);
+
+    return {
+      spectrum: spectrumResponse.spectrum,
+      oncall: oncallResponse.oncall,
+      activeShift: oncallResponse.activeShift,
+      nextOncallUser: nextOncallResponse.nextShift,
+    };
+  };
+
+  const { data, isLoading } = useCachedPromise<typeof fetchOncallData, [string]>(
+    fetchOncallData,
+    [oncallId]
+  );
 
   const shiftsDividedByDay = useMemo(() => {
-    return spectrum.reduce((acc: Record<string, Shift[]>, shift) => {
+    if (!data) return {};
+    
+    return data.spectrum.reduce((acc: Record<string, Shift[]>, shift: Shift) => {
       const day = moment(shift.start).format("dddd, Do MMMM");
       if (!acc[day]) {
         acc[day] = [];
@@ -45,17 +73,19 @@ export default function OncallViewPage({ oncallId }: { oncallId: string }) {
       acc[day].push(shift);
       return acc;
     }, {});
-  }, [spectrum]);
+  }, [data]);
 
   function createMarkdown(): string {
+    if (!data) return "";
+
     return `
-# ${spectrum && spectrum.length > 0 ? spectrum[0].oncallName : "Oncall Schedule"}
+# ${data.spectrum.length > 0 ? data.spectrum[0].oncallName : "Oncall Schedule"}
 
 ${Object.entries(shiftsDividedByDay)
   .map(
     ([day, shifts]) => `
 ### ${day}
-${shifts.map(createLayerMarkdown).join("\n")}
+${(shifts as Shift[]).map(createLayerMarkdown).join("\n")}
 ---
 `,
   )
@@ -67,59 +97,41 @@ ${shifts.map(createLayerMarkdown).join("\n")}
     return `\`${moment(shift.start).format("h:mm A")}\` - \`${moment(shift.end).format("h:mm A")}\`  ${shift.title} \n`;
   }
 
-  useEffect(() => {
-    async function fetchOncall() {
-      try {
-        const response = await api.oncall.getOncallSpectrum(oncallId, {
-          start: moment().toISOString(),
-          end: moment().add(14, "days").toISOString(),
-        });
-
-        const oncallResponse = await api.oncall.getOncall(oncallId);
-        const nextOncallResponse = await api.oncall.getWhoIsOncallNext(oncallId);
-
-        setNextOncallUser(nextOncallResponse.nextShift);
-        setActiveShift(oncallResponse.activeShift);
-        setOncall(oncallResponse.oncall);
-        setSpectrum(response.spectrum);
-      } catch (error) {
-        console.error("Error fetching oncall spectrum:", error);
-      }
-    }
-
-    fetchOncall();
-  }, [oncallId]);
-
   const metadata = useMemo(() => {
-    if (!activeShift) return null;
+    if (!data?.activeShift) return null;
+    
     return (
       <Detail.Metadata>
         <Detail.Metadata.TagList title="Current on-call">
           <Detail.Metadata.TagList.Item
             color={Color.Green}
-            text={`${activeShift.user.firstName} ${activeShift.user.lastName}`}
+            text={`${data.activeShift.user.firstName} ${data.activeShift.user.lastName}`}
           />
         </Detail.Metadata.TagList>
-        {nextOncallUser && (
-          <Detail.Metadata.Label title="Next on-call" text={`${nextOncallUser.firstName} ${nextOncallUser.lastName}`} />
+        {data.nextOncallUser && (
+          <Detail.Metadata.Label 
+            title="Next on-call" 
+            text={`${data.nextOncallUser.firstName} ${data.nextOncallUser.lastName}`} 
+          />
         )}
         <Detail.Metadata.Label
           title="Members"
-          text={`${oncall?.users.length ?? 0} ${oncall?.users.length === 1 ? "member" : "members"}`}
+          text={`${data.oncall?.users.length ?? 0} ${data.oncall?.users.length === 1 ? "member" : "members"}`}
         />
         <Detail.Metadata.Label
           title="Layers"
-          text={`${oncall?.layers.length ?? 0} ${oncall?.layers.length === 1 ? "layer" : "layers"}`}
+          text={`${data.oncall?.layers.length ?? 0} ${data.oncall?.layers.length === 1 ? "layer" : "layers"}`}
         />
       </Detail.Metadata>
     );
-  }, [activeShift, oncall]);
+  }, [data]);
 
   return (
     <Detail
-      navigationTitle={`${oncall ? oncall.name : "Oncall"}`}
+      navigationTitle={`${data?.oncall ? data.oncall.name : "Oncall"}`}
       markdown={createMarkdown()}
       metadata={metadata}
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.Open icon={Icon.Globe} title="Open in Spike" target={`${config!.spike}/on-calls/${oncallId}`} />
