@@ -1,3 +1,3 @@
 # Korean Date Converter
 
-한국어로 된 상대적인 날짜와 시간 표현을 날짜로 변경해줍니다. 이 라이브러리를 사용하면 "다음주 화요일", "3일 후",  등의 다양한 한국어 표현을 날짜로 쉽게 변환할 수 있습니다.
+Converts Korean relative date and time expressions into actual dates. This library enables easy conversion of various Korean date/time expressions into concrete dates. Whether you're working with expressions like "next Tuesday" (다음주 화요일), "3 days later" (3일 후), or other relative time references in Korean, this library simplifies the process of converting these natural language expressions into actual dates.
