@@ -12,38 +12,28 @@ import {
   showToast,
 } from "@raycast/api";
 import { deleteWebsite, listWebsites } from "./utils/api";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ListWebsitesResponse, Website } from "./types/websites";
 import { DEFAULT_PAGE_FOR_WEBSITES } from "./utils/constants";
 import ErrorComponent from "./components/ErrorComponent";
-import { getFavicon } from "@raycast/utils";
+import { getFavicon, useCachedPromise } from "@raycast/utils";
 import CreateWebsite from "./components/websites/CreateWebsiteComponent";
 import ChangeWebsitePHPVersion from "./components/websites/ChangeWebsitePHPVersionComponent";
 import ChangeWebsiteLinuxUserPassword from "./components/websites/ChangeWebsiteLinuxUserPasswordComponent";
 import ListChildDomains from "./components/child-domains/ListChildDomainsComponent";
 
 export default function ListWebsites() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [websites, setWebsites] = useState<Website[]>();
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-
-  async function getFromApi() {
-    const response = await listWebsites({ page: DEFAULT_PAGE_FOR_WEBSITES });
-    if (response.error_message === "None") {
-      const successResponse = response as ListWebsitesResponse;
-      const data = typeof successResponse.data === "string" ? JSON.parse(successResponse.data) : successResponse.data;
-
+  const { isLoading: isLoadingWebsites, data: websites, revalidate }= useCachedPromise(async() => {
+    const result = await listWebsites({ page: DEFAULT_PAGE_FOR_WEBSITES });
+    if (result.error_message === "None") {
+      const successResponse = result as ListWebsitesResponse;
+      const data: Website[] = typeof successResponse.data === "string" ? JSON.parse(successResponse.data) : successResponse.data;
       await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${data.length} Websites`);
-      setWebsites(data);
-    } else {
-      setError(response.error_message);
-    }
-    setIsLoading(false);
-  }
-
-  useEffect(() => {
-    getFromApi();
-  }, []);
+      return data;
+    } setError(result.error_message);
+  }, [])
 
   async function confirmAndDelete(websiteName: string) {
     if (
@@ -58,7 +48,7 @@ export default function ListWebsites() {
       const response = await deleteWebsite({ websiteName });
       if (response.error_message === "None") {
         await showToast(Toast.Style.Success, "SUCCESS", `Deleted ${websiteName} successfully`);
-        await getFromApi();
+        revalidate();
       }
     }
   }
@@ -66,9 +56,8 @@ export default function ListWebsites() {
   return error ? (
     <ErrorComponent errorMessage={error} />
   ) : (
-    <List isLoading={isLoading} isShowingDetail>
-      {websites &&
-        websites.map((website) => (
+    <List isLoading={isLoading || isLoadingWebsites} isShowingDetail>
+      {websites?.map((website) => (
           <List.Item
             key={website.domain}
             title={website.domain}
@@ -107,14 +96,14 @@ export default function ListWebsites() {
                   title="Change PHP Version"
                   icon={Icon.WrenchScrewdriver}
                   target={
-                    <ChangeWebsitePHPVersion childDomain={website.domain} onWebsitePHPVersionChanged={getFromApi} />
+                    <ChangeWebsitePHPVersion childDomain={website.domain} onWebsitePHPVersionChanged={revalidate} />
                   }
                 />
                 <Action.Push
                   title="Change Linux User Password"
                   icon={Icon.Key}
                   target={
-                    <ChangeWebsiteLinuxUserPassword domain={website.domain} onLinuxUserPasswordChanged={getFromApi} />
+                    <ChangeWebsiteLinuxUserPassword domain={website.domain} onLinuxUserPasswordChanged={revalidate} />
                   }
                 />
                 <ActionPanel.Submenu title="Go To" icon={Icon.ArrowRight}>
@@ -161,13 +150,13 @@ export default function ListWebsites() {
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
-                  <Action title="Reload Websites" icon={Icon.Redo} onAction={getFromApi} />
+                  <Action title="Reload Websites" icon={Icon.Redo} onAction={revalidate} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   <Action.Push
                     title="Create Website"
                     icon={Icon.Plus}
-                    target={<CreateWebsite onWebsiteCreated={getFromApi} />}
+                    target={<CreateWebsite onWebsiteCreated={revalidate} />}
                     shortcut={{ modifiers: ["cmd"], key: "n" }}
                   />
                 </ActionPanel.Section>
@@ -185,7 +174,7 @@ export default function ListWebsites() {
                 <Action.Push
                   title="Create Website"
                   icon={Icon.Plus}
-                  target={<CreateWebsite onWebsiteCreated={getFromApi} />}
+                  target={<CreateWebsite onWebsiteCreated={revalidate} />}
                 />
               </ActionPanel>
             }

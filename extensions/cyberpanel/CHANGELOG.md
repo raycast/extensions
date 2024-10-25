@@ -1,7 +1,10 @@
 # CyberPanel Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Update to use new API Token] - {PR_MERGE_DATE}
 
-- Update to use `crypto` token
+❗ The API Token format has changed so select the relevant one in Preferences
+- Update to use `crypto` API token
+- `List Websites` caches response
+- `List Packages` caches response
 
 ## [Initial Version] - 2023-11-04
