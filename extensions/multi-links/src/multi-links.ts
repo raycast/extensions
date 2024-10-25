@@ -5,7 +5,6 @@ export default async function main() {
   try {
     const selectedText = await getSelectedText();
     const urls = extractUrls(selectedText);
-    await showHUD(urls.join('++'));
     if (urls.length > 0) {
       for (const url of urls) {
         await open(url, "company.thebrowser.Browser");
@@ -17,4 +16,3 @@ export default async function main() {
     await showHUD(String(error));
   }
 }
-
