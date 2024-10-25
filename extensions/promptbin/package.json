@@ -1,0 +1,52 @@
+{
+  "name": "promptbin",
+  "title": "PromptBin",
+  "description": "Your Quick Access AI Prompt Database",
+  "version": "0.3",
+  "icon": "PromptBase-logo.png",
+  "author": "miltovi",
+  "categories": ["AI"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-prompt",
+      "title": "Add AI Prompt",
+      "description": "Add a new AI prompt",
+      "mode": "view"
+    },
+    {
+      "name": "view-prompts",
+      "title": "View AI Prompts",
+      "description": "View your saved AI prompts",
+      "mode": "view"
+    },
+    {
+      "name": "backup-list",
+      "title": "Manage Backups",
+      "description": "View and restore backups",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "@types/uuid": "^9.0.7",
+    "@typescript-eslint/eslint-plugin": "^6.8.0",
+    "@typescript-eslint/parser": "^6.8.0",
+    "eslint": "^8.51.0",
+    "eslint-config-prettier": "^8.10.0",
+    "prettier": "^2.8.8",
+    "typescript": "^5.2.2"
+  },
+"scripts": {
+  "build": "ray build",
+  "dev": "ray develop",
+  "fix-lint": "ray lint --fix",
+  "lint": "ray lint",
+  "publish": "ray publish"
+}
+}
