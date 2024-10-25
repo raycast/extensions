@@ -2,11 +2,13 @@
 
 The **torr-manager** extension allows users to connect to their TorrServer, browse available torrents, and select movies directly from Raycast, making torrent management seamless and efficient.
 
-<img src="/assets/readme-image-1.png" alt="Torrserver Manager" width="550"/>
+<img src="/metadata/torr-manager-1.png" alt="Torrserver Manager" width="550"/>
 
-<img src="/assets/readme-image-2.png" alt="Torrserver Manager" width="550"/>
+<img src="/metadata/torr-manager-2.png" alt="Torrserver Manager" width="550"/>
 
-<img src="/assets/readme-image-3.png" alt="Torrserver Manager" width="550"/>
+<img src="/metadata/torr-manager-3.png" alt="Torrserver Manager" width="550"/>
+
+<img src="/metadata/torr-manager-4.png" alt="Torrserver Manager" width="550"/>
 
 ## Features
 
