@@ -1,5 +1,9 @@
 # Doppler Changelog
 
+## [Added Clipboard Secret Command] - {PR_MERGE_DATE}
+
+- Added the `Share Clipboard Secret` command to create a secret from the clipboard.
+
 ## [Metadata] - {PR_MERGE_DATE}
 
 - Fix screenshot path
