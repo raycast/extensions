@@ -6,7 +6,7 @@ export type Server = {
   is_reachable: boolean;
   is_usable: boolean;
   user: string;
-  port: number;
+  port: string;
   settings: Record<string, string | number | boolean | null>;
 };
 export type ServerDetails = {
@@ -62,7 +62,7 @@ export type ResourceDetails = {
   status: string;
 } & (
   | {
-      type: "application";
+      type: "application" | "standalone-mysql";
       destination: {
         id: number;
         name: string;
@@ -149,6 +149,38 @@ export type TeamMember = {
   two_factor_confirmed_at: string | null;
   force_password_reset: boolean;
   marketing_emails: boolean;
+};
+
+export type Project = {
+  id: number;
+  uuid: string;
+  name: string;
+  default_environment: string;
+  description: string | null;
+};
+export type ProjectDetails = Project & {
+  environments: Environment[];
+  team_id: number;
+  updated_at: string;
+  created_at: string;
+};
+
+export type Environment = {
+  id: number;
+  name: string;
+  project_id: number;
+  created_at: string;
+  updated_at: string;
+  description: string | null;
+};
+export type EnvironmentDetails = Environment & {
+  applications: Resource[];
+  mariadbs: Resource[];
+  mongodbs: Resource[];
+  mysqls: Resource[];
+  postgresqls: Resource[];
+  redis: Resource[];
+  services: Resource[];
 };
 
 export type MessageResult = {
