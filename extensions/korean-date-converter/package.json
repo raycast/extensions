@@ -15,7 +15,27 @@
       "title": "Convert Date Expression",
       "subtitle": "Korean to Date",
       "description": "Convert Korean date expressions like '다음주 화요일', '3일 후' to actual dates",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "description": "The default action to perform when the date is converted",
+          "title": "Default Action",
+          "name": "defaultAction",
+          "type": "dropdown",
+          "required": true,
+          "default": "copy",
+          "data": [
+            {
+              "title": "Copy",
+              "value": "copy"
+            },
+            {
+              "title": "Paste",
+              "value": "paste"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
