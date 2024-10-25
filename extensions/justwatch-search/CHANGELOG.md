@@ -1,5 +1,10 @@
 # JustWatch Search Changelog
 
+## [Link Improvements] - 2024-10-22
+
+- Add Icon to `Open in Browser` Action to make it more evident which service will be opened
+- Add `Open in IMDB` Action
+
 ## [Improvements] - 2024-09-22
 
 - Upgrade dependencies

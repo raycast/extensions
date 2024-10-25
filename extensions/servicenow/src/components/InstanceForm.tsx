@@ -78,17 +78,8 @@ export default function InstanceForm({ onSubmit, instance }: SetInstanceFormProp
         })}
       </Form.Dropdown>
 
-      <Form.TextField
-        {...itemProps.username}
-        title="Username"
-        placeholder="Enter a username"
-        info="The minimum distance in meters from the place that would trigger the reminder"
-      />
-      <Form.PasswordField
-        {...itemProps.password}
-        title="Password"
-        info="The minimum distance in meters from the place that would trigger the reminder"
-      />
+      <Form.TextField {...itemProps.username} title="Username" placeholder="Enter a username" />
+      <Form.PasswordField {...itemProps.password} title="Password" />
     </Form>
   );
 }

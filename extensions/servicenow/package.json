@@ -4,7 +4,7 @@
   "title": "ServiceNow",
   "description": "Search and explore content across your ServiceNow instances",
   "icon": "servicenow.png",
-  "author": "ralvarezalonso",
+  "author": "robertoalvarezalonso",
   "categories": [
     "Productivity",
     "Web"
@@ -100,6 +100,26 @@
       "title": "Explore Tables",
       "description": "Browse and explore the tables within an instance",
       "mode": "view"
+    },
+    {
+      "name": "search-resources",
+      "title": "Search Resources",
+      "description": "Search across various ServiceNow resources, including documentation, blogs, guides, learning materials, and more.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "login-to-selected-instance",
+      "title": "Login to Selected Instance",
+      "description": "Logs into the selected ServiceNow instance using the credentials stored in the associated instance profile, allowing quick and easy access without manual login steps.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

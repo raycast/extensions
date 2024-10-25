@@ -47,11 +47,17 @@
       "title": "View Teams",
       "description": "View Teams and Members",
       "mode": "view"
+    },
+    {
+      "name": "projects",
+      "title": "View Projects",
+      "description": "View Projects, Environments and Resources",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.1",
-    "@raycast/utils": "^1.16.3"
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.18.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

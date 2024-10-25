@@ -30,6 +30,7 @@ export type DownloadOptions = {
 export type FormatOptions = {
   itag: string;
   container: string;
+  wav?: boolean;
 };
 
 setFfmpegPath(preferences.ffmpegPath);
@@ -223,9 +224,14 @@ export async function downloadAudio(url: string, options: DownloadOptions) {
 
   if (options.copyToClipboard) {
     const tempfilePath = tempfile();
-    filePath = path.join(tempfilePath.substring(0, tempfilePath.lastIndexOf("/")), `${sanitizeFilename(title)}.mp3`);
+    filePath = path.join(
+      tempfilePath.substring(0, tempfilePath.lastIndexOf("/")),
+      `${sanitizeFilename(title)}${formatObject.wav ? ".wav" : ".mp3"}`
+    );
   } else {
-    filePath = unusedFilenameSync(path.join(preferences.downloadPath, `${sanitizeFilename(title)}.mp3`));
+    filePath = unusedFilenameSync(
+      path.join(preferences.downloadPath, `${sanitizeFilename(title)}${formatObject.wav ? ".wav" : ".mp3"}`)
+    );
   }
 
   return new Promise((resolve) => {
@@ -243,8 +249,13 @@ export async function downloadAudio(url: string, options: DownloadOptions) {
       command.duration(endTime - startTime);
     }
 
+    if (formatObject.wav) {
+      command.audioCodec("pcm_s16le").format("wav");
+    } else {
+      command.format("mp3");
+    }
+
     command
-      .format("mp3")
       .save(filePath)
       .on("error", (err) => {
         toast.title = "Encoding Failed";
