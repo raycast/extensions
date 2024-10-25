@@ -82,7 +82,7 @@ export default function Command() {
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           icon={{
-            source: "spike-logo-white.png",
+            source: "spike-logo-black.png",
           }}
           title="Open Dashboard"
           shortcut={{ modifiers: ["cmd"], key: "o" }}

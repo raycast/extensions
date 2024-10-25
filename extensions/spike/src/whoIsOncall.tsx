@@ -99,11 +99,11 @@ const WhoIsOncall = () => {
 
   return (
     <List
-      navigationTitle="Current Active On-Call Members"
+      navigationTitle="Current On-Call Members"
       searchBarPlaceholder="Search by on-call name"
       isLoading={isLoading}
     >
-      <List.Section title="Current Active On-Call Members">
+      <List.Section title="Current On-Call Members">
         {activeShifts.map((shift, index) => (
           <RenderShiftItem key={index} item={shift} />
         ))}

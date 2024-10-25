@@ -23,8 +23,8 @@ const iconMap: Record<EntityType, string> = {
   Integration: "integration.png",
 };
 
-const getIcon = (entityType: string): string | Icon => {
-  return (iconMap[entityType as EntityType] as string) || Icon.Star;
+const getIcon = (): string | Icon => {
+  return Icon.Star;
 };
 
 function FavoriteItem({ favorite }: { favorite: Favorite }) {
@@ -32,7 +32,7 @@ function FavoriteItem({ favorite }: { favorite: Favorite }) {
     <List.Item
       title={favorite.name}
       subtitle={favorite.counterId}
-      icon={getIcon(favorite.entityType)}
+      icon={getIcon()}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser icon={Icon.Globe} title="Open Favorite" url={`${config?.spike}${favorite.url}`} />
