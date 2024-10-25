@@ -78,7 +78,7 @@ export default function Command() {
           <MenuBarExtra.Section>
             <MenuBarExtra.Item
               title="Complete Demo"
-              icon="📦"
+              icon="box.svg"
               onAction={() => {
                 open(`https://github.com/new?template_name=WPKirk&template_owner=wpbones`);
               }}

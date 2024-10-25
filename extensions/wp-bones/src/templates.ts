@@ -3,7 +3,7 @@ export default [
     name: "WPKirk-Boilerplate",
     title: "Starter Boilerplate",
     subtitle: "The most used starting point for WP Bones plugins",
-    icon: "⭐",
+    icon: "star.svg",
     shortcut: { modifiers: ["cmd", "shift"], key: "b" },
     keywords: ["starter", "routes"],
   },
@@ -18,7 +18,7 @@ export default [
     name: "WPKirk-Internationalization-Boilerplate",
     title: "Internationalization",
     subtitle: "How to localize your WP Bones plugin",
-    icon: "🌍",
+    icon: "language.svg",
     keywords: ["internationalization", "localize", "localization", "languages"],
   },
   {
@@ -72,7 +72,7 @@ export default [
     name: "WPKirk",
     title: "Complete Demo",
     subtitle: "The complete demo for WP Bones",
-    icon: "📦",
+    icon: "box.svg",
     keywords: ["demo", "routes"],
   },
 ];
