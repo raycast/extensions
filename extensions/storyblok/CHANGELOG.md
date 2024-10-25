@@ -6,6 +6,7 @@
 - Modified `sbData` so it takes generic type which prevents us from having to _explicity cast_ using `as`
 - Fix `Copy Story ID` action in `Stories List` having wrong Title
 - `useStoryblokDataPaginated` hook allows to view >100 assets at a time in `Assets`
+- Fix `Open ... JSON` commands in `Story Detail`
 
 ## [Added new regions] - 2024-06-05
 
