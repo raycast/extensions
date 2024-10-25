@@ -1,4 +1,4 @@
-import { Clipboard, getSelectedText, openExtensionPreferences, showToast, Toast } from "@raycast/api";
+import { Clipboard, getSelectedText } from "@raycast/api";
 import { validateAndGetPreferences } from "./preferences-utils";
 import { switchLanguage } from "./common";
 

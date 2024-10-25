@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Clipboard, Form, openExtensionPreferences } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { LanguagePreferences, validateAndGetPreferences } from "./preferences-utils";
+import { validateAndGetPreferences } from "./preferences-utils";
 import { switchLanguage } from "./common";
 import { useState } from "react";
 
@@ -40,10 +40,7 @@ export default function FixLanguage() {
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
           )}
-          <Action
-            title="Open Preferences"
-            onAction={openExtensionPreferences}
-          />
+          <Action title="Open Preferences" onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     >

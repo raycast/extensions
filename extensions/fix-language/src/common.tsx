@@ -54,7 +54,10 @@ export function getKeyboardLayoutMapperByText(text: string): Record<string, stri
   if (lang === "mixed") {
     lang = setting.firstLang;
   }
-  const mapping = createMapping(langMapper[lang === setting.firstLang ? setting.secondLang : setting.firstLang], langMapper[lang]);
+  const mapping = createMapping(
+    langMapper[lang === setting.firstLang ? setting.secondLang : setting.firstLang],
+    langMapper[lang],
+  );
   return mapping;
 }
 

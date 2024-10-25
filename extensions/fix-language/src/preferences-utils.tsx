@@ -8,7 +8,7 @@ export interface LanguagePreferences {
 export function validateAndGetPreferences(): LanguagePreferences | null {
   try {
     const preferences = getPreferenceValues<Preferences>();
-    
+
     if (preferences["firstLang"] === preferences["secondLang"]) {
       showToast({
         style: Toast.Style.Failure,
@@ -21,7 +21,7 @@ export function validateAndGetPreferences(): LanguagePreferences | null {
       });
       return null;
     }
-    
+
     return preferences;
   } catch (error) {
     showToast({
