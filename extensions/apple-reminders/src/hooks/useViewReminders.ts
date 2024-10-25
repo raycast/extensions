@@ -1,12 +1,13 @@
-import { Icon, Image } from "@raycast/api";
+import { Icon, Image, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { isBefore, parseISO } from "date-fns";
+import { format, isBefore, parseISO, startOfDay } from "date-fns";
 import { compareAsc } from "date-fns";
 import { partition } from "lodash";
 import React, { useMemo } from "react";
 import { getCompletedReminders } from "swift:../../swift/AppleReminders";
+const { useTimeOfDayGrouping } = getPreferenceValues<Preferences.MyReminders>();
 
-import { displayDueDate, getDateString, isOverdue, isToday } from "../helpers";
+import { displayDueDate, getDateString, isFullDay, isOverdue, isToday } from "../helpers";
 
 import { Data, Priority, Reminder } from "./useData";
 
@@ -97,40 +98,48 @@ export function groupByDueDates(reminders: Reminder[]) {
   allDueDates.sort();
 
   const sections: Section[] = [];
+  const today = format(startOfDay(new Date()), "yyyy-MM-dd");
 
-  if (overdue.length > 0) {
+  const overdueReminders = useTimeOfDayGrouping
+    ? overdue.filter((reminder) => reminder.dueDate && isBefore(reminder.dueDate, today))
+    : overdue;
+
+  if (overdueReminders.length > 0) {
     sections.unshift({
       title: "Overdue",
-      reminders: overdue,
+      reminders: overdueReminders,
     });
   }
 
-  const today = new Date().toISOString().split("T")[0];
-  const todayReminders = upcoming.filter((reminder) => getDateString(reminder.dueDate as string) === today);
+  if (useTimeOfDayGrouping) {
+    const todayReminders = dated.filter((reminder) => getDateString(reminder.dueDate as string) === today);
 
-  if (todayReminders.length > 0) {
-    const morning = todayReminders.filter((reminder) => {
-      const hour = new Date(reminder.dueDate as string).getHours();
-      return hour < 12;
-    });
+    if (todayReminders.length > 0) {
+      const allDayReminders = todayReminders.filter((reminder) => isFullDay(reminder.dueDate as string));
+      const timedReminders = todayReminders.filter((reminder) => !isFullDay(reminder.dueDate as string));
 
-    const afternoon = todayReminders.filter((reminder) => {
-      const hour = new Date(reminder.dueDate as string).getHours();
-      return hour >= 12 && hour < 17;
-    });
+      if (allDayReminders.length > 0) {
+        sections.push({ title: "Today", reminders: allDayReminders });
+      }
 
-    const tonight = todayReminders.filter((reminder) => {
-      const hour = new Date(reminder.dueDate as string).getHours();
-      return hour >= 17;
-    });
+      const morning = timedReminders.filter((reminder) => new Date(reminder.dueDate as string).getHours() < 12);
+      const afternoon = timedReminders.filter(
+        (reminder) =>
+          new Date(reminder.dueDate as string).getHours() >= 12 && new Date(reminder.dueDate as string).getHours() < 17,
+      );
+      const tonight = timedReminders.filter((reminder) => new Date(reminder.dueDate as string).getHours() >= 17);
 
-    if (morning.length > 0) sections.push({ title: "Morning", reminders: morning });
-    if (afternoon.length > 0) sections.push({ title: "Afternoon", reminders: afternoon });
-    if (tonight.length > 0) sections.push({ title: "Tonight", reminders: tonight });
+      if (morning.length > 0) sections.push({ title: "Morning", reminders: morning });
+      if (afternoon.length > 0) sections.push({ title: "Afternoon", reminders: afternoon });
+      if (tonight.length > 0) sections.push({ title: "Tonight", reminders: tonight });
+    }
   }
 
-  const futureDates = allDueDates.filter((date) => date > today);
-  futureDates.forEach((date) => {
+  const remindersOnDate = useTimeOfDayGrouping
+    ? allDueDates.filter((date) => isBefore(date, today))
+    : allDueDates.filter((date) => date);
+
+  remindersOnDate.forEach((date) => {
     const remindersOnDate = upcoming.filter((reminder) => getDateString(reminder.dueDate as string) === date);
     sections.push({
       title: displayDueDate(date),
@@ -147,6 +156,7 @@ export function groupByDueDates(reminders: Reminder[]) {
 
   return sections;
 }
+
 export function groupByPriorities(reminders: Reminder[]) {
   const priorities: { name: string; value: Priority }[] = [
     { name: "High", value: "high" },
