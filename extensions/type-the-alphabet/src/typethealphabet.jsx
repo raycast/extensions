@@ -32,7 +32,7 @@ function Statistics({ letterTimes, totalTime, bestTime, onReset, pop }) {
             }}
             icon={Icon.RotateClockwise}
           />
-          <CopyToClipboardAction title="Copy Statistics" content={markdown} />
+          <Action.CopyToClipboard title="Copy Statistics" content={markdown} />
         </ActionPanel>
       }
     />
