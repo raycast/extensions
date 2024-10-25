@@ -74,7 +74,7 @@
           "title": "Jackett api key",
           "type": "textfield",
           "description": "Api key required for enabling search",
-          "required": true
+          "required": false
         },
         {
           "name": "Console",

@@ -1,5 +1,10 @@
 # torr-manager Changelog
 
+## [Improve Parser] - {PR_MERGE_DATE}
+
+- Expanded search functionality to support both magnet links and direct links.
+- Marked jackettApiKey as optional, as not all servers require an API key.
+
 ## [Initial Version] - 2024-10-25
 
 - Connection management for TorrServer.
