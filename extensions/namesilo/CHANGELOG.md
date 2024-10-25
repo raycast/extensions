@@ -3,6 +3,8 @@
 ## [Manage Name Servers + Add DNS Records] - {PR_MERGE_DATE}
 
 - For each domain, you can have up to 13 Name Server IPs
+- Add different types of DNS Records and View them
+- Add Nameserver or Change them
 
 ## [Add Auctions + Sort Pricing by Lowest + OTE Support] - 2024-08-09
 
