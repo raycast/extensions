@@ -16,7 +16,7 @@ type Props = {
 export const ListItemPassword = ({ item }: Props) => {
   const { isInitialLoaded, visitItem, resetRanking } = usePasswordContext();
   const itemName = item.title ?? item.url;
-  const username = isInitialLoaded ? item.email ?? item.login ?? item.secondaryLogin : undefined;
+  const username = isInitialLoaded ? (item.email ?? item.login ?? item.secondaryLogin) : undefined;
 
   const keywords = [item.title, item.url, item.email, item.login, item.secondaryLogin].filter(Boolean);
 
