@@ -1,4 +1,4 @@
-import { ActionPanel, List, showToast, Action, Toast } from "@raycast/api"
+import { ActionPanel, List, showToast, Action, Toast, LocalStorage } from "@raycast/api"
 import { useEffect, useState } from "react"
 import { ErrorText } from "./exception"
 
@@ -18,11 +18,32 @@ export function SearchCommand<FilterType extends string>(
   filter?: { tooltip: string; persist?: boolean; values: { name: string; value: FilterType }[] },
   getPreliminaryResult?: (query: string) => ResultItem | undefined
 ) {
+  console.log("SearchCommand");
   const [query, setQuery] = useState("")
   const [currentFilter, setCurrentFilter] = useState(filter ? filter.values[0]?.value ?? undefined : undefined)
   const [items, setItems] = useState<ResultItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<ErrorText>()
+  const [project, setProject] = useState<string | undefined>(undefined); // Added project state
+
+  // Load the project from local storage when the component mounts
+  useEffect(() => {
+    LocalStorage.getItem<string>("project").then((storedProject) => {
+      if (storedProject) {
+        console.debug("project was just loaded from local storage: ", storedProject)
+        setProject(storedProject);
+      }
+    });
+  }, []);
+
+  // Save the project to local storage whenever it changes
+  useEffect(() => {
+    if (project) {
+      console.debug("project was just changed to: ", project)
+      LocalStorage.setItem("project", project);
+    }
+  }, [project]);
+
   useEffect(() => {
     console.debug("currentFilter", currentFilter)
     setError(undefined)
@@ -46,7 +67,7 @@ export function SearchCommand<FilterType extends string>(
       .finally(() => {
         setIsLoading(false)
       })
-  }, [query, currentFilter])
+  }, [query, currentFilter, project])
 
   const onSearchChange = (newSearch: string) => {
     const preResult = getPreliminaryResult && getPreliminaryResult(newSearch)

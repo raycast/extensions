@@ -5,6 +5,9 @@
   "description": "Search for Jira issues (more tolerant and powerful than built-in), projects, boards and filters.",
   "icon": "command-icon.png",
   "author": "sven",
+  "contributors": [
+    "quandev2"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -78,7 +81,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
+    "react-devtools": "^4.28.5",
     "typescript": "^4.4.3"
   },
   "scripts": {

@@ -32,6 +32,8 @@ interface Issues {
 }
 
 type IssueFilter = "allIssues" | "issuesInOpenSprints" | "myIssues" | "myIssuesInOpenSprints"
+const project = "DRS"
+// type Project = "DRS"
 
 const fields = "summary,issuetype,status"
 
@@ -48,7 +50,8 @@ function statusIcon(status: IssueStatus): Image {
 }
 
 function isIssueKey(query: string): boolean {
-  const issueKeyPattern = /^[a-z]+-[0-9]+$/i
+  const issueKeyPattern = /^[0-9]+$/;
+  console.log("DEBUGGER query: ", query, " - isIssueKey: ", query.match(issueKeyPattern) !== null)
   return query.match(issueKeyPattern) !== null
 }
 
@@ -98,13 +101,13 @@ function jqlForFilter(filter?: IssueFilter) {
 
 function jqlFor(query: string, filter?: IssueFilter): string {
   const filterJql = jqlForFilter(filter)
-  const queryJql = isIssueKey(query) ? `key=${query}` : buildJql(query)
+  const fullKey = `${project}-${query}`
+  const queryJql = isIssueKey(query) ? `key=${fullKey}` : buildJql(query)
   return [filterJql, queryJql].filter(Boolean).join(" AND ")
 }
 
 async function searchIssues(query: string, filter?: IssueFilter): Promise<ResultItem[]> {
   const jql = jqlFor(query, filter)
-  console.debug(jql)
 
   const result = await jiraFetchObject<Issues>(
     "/rest/api/3/search",
@@ -130,11 +133,13 @@ async function searchIssues(query: string, filter?: IssueFilter): Promise<Result
 
 function openIssueKey(query: string): ResultItem | undefined {
   if (isIssueKey(query)) {
-    return {
-      id: query,
-      url: `${jiraUrl}/browse/${query}`,
-      title: `Open issue ${query}`,
+    const fullKey = `${project}-${query}`
+    const result = {
+      id: fullKey,
+      url: `${jiraUrl}/browse/${fullKey}`,
+      title: `Open issue ${fullKey}`,
     }
+    return result
   }
 }
 
