@@ -1,5 +1,6 @@
 # iLovePDF Changelog
 
+## [Add a feature to select files from Finder] - {PR_MERGE_DATE}
 
 ## [Add Validate PDF/A Command] - 2024-07-18
 

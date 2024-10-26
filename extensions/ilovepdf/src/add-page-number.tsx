@@ -6,15 +6,17 @@ import {
   getPreferenceValues,
   Toast,
   openExtensionPreferences,
+  getSelectedFinderItems,
+  popToRoot,
 } from "@raycast/api";
 import ILovePDFApi from "@ilovepdf/ilovepdf-nodejs";
 import PageNumberTask from "@ilovepdf/ilovepdf-js-core/tasks/PageNumberTask";
 import ILovePDFFile from "@ilovepdf/ilovepdf-nodejs/ILovePDFFile";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import fs from "fs";
 import path from "path";
 import { chooseDownloadLocation, getErrorMessage, getFilePath, handleOpenNow } from "./common/utils";
-import { Status } from "./common/types";
+import { Status, Preferences } from "./common/types";
 
 type Values = {
   files: string[];
@@ -37,6 +39,7 @@ const {
   APISecretKey: secretKey,
   OpenNow: openNow,
   AskBeforeDownload: askBeforeDownload,
+  SelectFileInFinder: selectFileInFinder,
 } = getPreferenceValues<Preferences>();
 
 export default function Command() {
@@ -54,73 +57,110 @@ export default function Command() {
   const [font, setFont] = useState<string>("Arial Unicode MS");
   const [fontSize, setFontSize] = useState<string>("14");
 
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+
   async function handleSubmit(values: Values) {
     setIsLoading(true);
-    if (!values.files.length) {
+    if (!selectFileInFinder && !values.files.length) {
       await showToast(Toast.Style.Failure, "You must select a single file.", "Please select a file.");
       setStatus("failure");
       setIsLoading(false);
       return;
+    } else {
+      values.files = selectedFiles;
     }
 
     const toast = await showToast(Toast.Style.Animated, "Processing", "Adding Page Number...");
 
-    const file: string = values.files[0];
-    const fileExtension = path.extname(file);
-    const fileName = path.basename(file, fileExtension);
-    const directory = path.dirname(file);
-    let destinationFile = getFilePath(directory, `${fileName}_numbered.pdf`);
+    values.files.map(async (valueFile) => {
+      const file: string = valueFile;
+      const fileExtension = path.extname(file);
+      const fileName = path.basename(file, fileExtension);
+      const directory = path.dirname(file);
+      let destinationFile = getFilePath(directory, `${fileName}_numbered.pdf`);
 
-    if (askBeforeDownload) {
-      const finalName = await chooseDownloadLocation(
-        destinationFile,
-        "Save The PDF As",
-        setIsLoading,
-        setStatus,
-        toast,
-      );
-      if (finalName == undefined) {
+      if (askBeforeDownload) {
+        const finalName = await chooseDownloadLocation(
+          destinationFile,
+          "Save The PDF As",
+          setIsLoading,
+          setStatus,
+          toast,
+        );
+        if (finalName == undefined) {
+          return;
+        }
+        destinationFile = finalName;
+      }
+
+      setDestinationFilePath(destinationFile);
+      const instance = new ILovePDFApi(publicKey, secretKey);
+      const task = instance.newTask("pagenumber") as PageNumberTask;
+
+      try {
+        await task.start();
+        const iLovePdfFile = new ILovePDFFile(file);
+        await task.addFile(iLovePdfFile);
+        await task.process({
+          facing_pages: facingPage,
+          first_cover: firstCover,
+          text: format,
+          vertical_position: verticalPosition as VerticalPosition,
+          horizontal_position: horizontalPosition as HorizontalPosition,
+          starting_number: Number(startingNumber),
+          font_family: font as Fonts,
+          font_size: Number(fontSize),
+        });
+        const data = await task.download();
+        fs.writeFileSync(destinationFile, data);
+        toast.style = Toast.Style.Success;
+        toast.title = "success";
+        toast.message = "File processed successfully.";
+        setStatus("success");
+        setIsLoading(false);
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "failure";
+        toast.message = `Error happened during processing the file. Reason ${getErrorMessage(error)}`;
+        setStatus("failure");
+        setIsLoading(false);
         return;
       }
-      destinationFile = finalName;
-    }
 
-    setDestinationFilePath(destinationFile);
-    const instance = new ILovePDFApi(publicKey, secretKey);
-    const task = instance.newTask("pagenumber") as PageNumberTask;
-
-    try {
-      await task.start();
-      const iLovePdfFile = new ILovePDFFile(file);
-      await task.addFile(iLovePdfFile);
-      await task.process({
-        facing_pages: facingPage,
-        first_cover: firstCover,
-        text: format,
-        vertical_position: verticalPosition as VerticalPosition,
-        horizontal_position: horizontalPosition as HorizontalPosition,
-        starting_number: Number(startingNumber),
-        font_family: font as Fonts,
-        font_size: Number(fontSize),
-      });
-      const data = await task.download();
-      fs.writeFileSync(destinationFile, data);
-      toast.style = Toast.Style.Success;
-      toast.title = "success";
-      toast.message = "File processed successfully.";
-      setStatus("success");
-      setIsLoading(false);
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "failure";
-      toast.message = `Error happened during processing the file. Reason ${getErrorMessage(error)}`;
-      setStatus("failure");
-      setIsLoading(false);
-      return;
-    }
-
-    await handleOpenNow(openNow, destinationFile, toast);
+      await handleOpenNow(openNow, destinationFile, toast);
+    });
   }
+
+  useEffect(() => {
+    const fetchSelectedFinderItems = async () => {
+      setIsLoading(true);
+
+      if (selectFileInFinder) {
+        try {
+          const finderSelectedItems = await getSelectedFinderItems();
+
+          if (finderSelectedItems.length === 0) {
+            await showToast(Toast.Style.Failure, "You must select a single file.", "Please select a file.");
+            setStatus("failure");
+            popToRoot();
+            return;
+          }
+
+          setSelectedFiles(finderSelectedItems.map((item) => item.path));
+        } catch (error) {
+          await showToast(Toast.Style.Failure, "Finder Select Error", "Finder isn't the frontmost application");
+          setStatus("failure");
+          popToRoot();
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSelectedFinderItems();
+  }, []);
 
   return (
     <Form
@@ -138,7 +178,11 @@ export default function Command() {
       }
       isLoading={isLoading}
     >
-      <Form.FilePicker id="files" title="Choose a PDF" allowMultipleSelection={false} />
+      {selectFileInFinder ? (
+        <Form.Description title="Finder Selected File" text={selectedFiles.join(", ")} />
+      ) : (
+        <Form.FilePicker id="files" title="Choose a PDF" allowMultipleSelection={false} />
+      )}
       <Form.Checkbox
         id="facingPage"
         label="Facing pages"

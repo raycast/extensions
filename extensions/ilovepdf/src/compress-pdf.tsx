@@ -7,15 +7,17 @@ import {
   Toast,
   open,
   openExtensionPreferences,
+  getSelectedFinderItems,
+  popToRoot,
 } from "@raycast/api";
 import ILovePDFApi from "@ilovepdf/ilovepdf-nodejs";
 import CompressTask from "@ilovepdf/ilovepdf-js-core/tasks/CompressTask";
 import ILovePDFFile from "@ilovepdf/ilovepdf-nodejs/ILovePDFFile";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import fs from "fs";
 import path from "path";
 import { chooseDownloadLocation, getErrorMessage, getFilePath, handleOpenNow, validateFileType } from "./common/utils";
-import { Status } from "./common/types";
+import { Status, Preferences } from "./common/types";
 
 type Values = {
   files: string[];
@@ -27,6 +29,7 @@ const {
   APISecretKey: secretKey,
   OpenNow: openNow,
   AskBeforeDownload: askBeforeDownload,
+  SelectFileInFinder: selectFileInFinder,
 } = getPreferenceValues<Preferences>();
 
 function getDestinationFile(files: string[]): string {
@@ -53,14 +56,17 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [status, setStatus] = useState<Status>("init");
   const [destinationFilePath, setDestinationFilePath] = useState<string>("");
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
 
   async function handleSubmit(values: Values) {
     setIsLoading(true);
-    if (!values.files.length) {
+    if (!selectFileInFinder && !values.files.length) {
       await showToast(Toast.Style.Failure, "You must select at least a single pdf file.", "Please select a file.");
       setStatus("failure");
       setIsLoading(false);
       return;
+    } else {
+      values.files = selectedFiles;
     }
 
     const toast = await showToast(Toast.Style.Animated, "Processing", "Compressing PDF...");
@@ -127,6 +133,37 @@ export default function Command() {
     await handleOpenNow(openNow, destinationFile, toast);
   }
 
+  useEffect(() => {
+    const fetchSelectedFinderItems = async () => {
+      setIsLoading(true);
+
+      if (selectFileInFinder) {
+        try {
+          const finderSelectedItems = await getSelectedFinderItems();
+
+          if (finderSelectedItems.length === 0) {
+            await showToast(Toast.Style.Failure, "You must select at least a single pdf.", "Please select a file.");
+            setStatus("failure");
+            popToRoot();
+            return;
+          }
+
+          setSelectedFiles(finderSelectedItems.map((item) => item.path));
+        } catch (error) {
+          await showToast(Toast.Style.Failure, "Finder Select Error", "Finder isn't the frontmost application");
+          setStatus("failure");
+          popToRoot();
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSelectedFinderItems();
+  }, []);
+
   return (
     <Form
       enableDrafts
@@ -152,7 +189,11 @@ export default function Command() {
       }
       isLoading={isLoading}
     >
-      <Form.FilePicker id="files" title="Choose PDF files" allowMultipleSelection={true} />
+      {selectFileInFinder ? (
+        <Form.Description title="Finder Selected File" text={selectedFiles.join(", ")} />
+      ) : (
+        <Form.FilePicker id="files" title="Choose PDF files" allowMultipleSelection={true} />
+      )}
       <Form.Dropdown id="compression_level" title="Compression Level" defaultValue="recommended">
         <Form.Dropdown.Item value="recommended" title="Recommended" />
         <Form.Dropdown.Item value="extreme" title="Extreme" />
