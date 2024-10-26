@@ -1,6 +1,6 @@
-import { Detail, Action, ActionPanel, getPreferenceValues } from "@raycast/api";
+import { Detail, Action, ActionPanel, getPreferenceValues, Icon, Color } from "@raycast/api";
 import { sbData } from "./utils/storyblokData";
-import { ApiKey, storyDetail } from "./utils/types";
+import { apiKey, storyDetail } from "./utils/types";
 
 const preferences = getPreferenceValues<Preferences>();
 
@@ -9,17 +9,17 @@ type story = {
 };
 
 export default function StoryDetail(props: { spaceId: number; storyId: number }) {
-  const { isLoading, data: apiKeysData } = sbData<{ api_keys: ApiKey[] }>(`spaces/${props.spaceId}/api_keys`);
+  const { isLoading, data: apiKeysData } = sbData<{ api_keys: apiKey[] }>(`spaces/${props.spaceId}/api_keys`);
   const apiKeys = apiKeysData?.api_keys ?? [];
   const data = sbData<story>(`spaces/${props.spaceId}/stories/${props.storyId}`);
 
-  const storyJson = function (version: "draft" | "published", cv: string) {
+  const storyJson = function (version: "draft" | "published") {
     const access = version === "draft" ? "private" : "public";
     const apiKey = apiKeys.find(
       (key) => key.access === access && (!key.story_ids.length || key.story_ids.includes(props.storyId)),
     ); // empty array = all stories. else only allowed stories
     const token = apiKey?.token;
-    return `${preferences.apiLocation}/v2/cdn/stories/${props.storyId}?version=${version}&token=${token}&cv=${cv}`;
+    return `${preferences.apiLocation}/v2/cdn/stories/${props.storyId}?version=${version}&token=${token}`;
   };
 
   if (data.isLoading || isLoading) {
@@ -33,13 +33,15 @@ export default function StoryDetail(props: { spaceId: number; storyId: number })
             {data.data?.story.is_folder === false && (
               <>
                 <Action.OpenInBrowser
+                  icon={{ source: Icon.Globe, tintColor: Color.Yellow }}
                   title="Open Draft JSON"
-                  url={storyJson("draft", data.data.story.preview_token.timestamp)}
+                  url={storyJson("draft")}
                 />
                 {data.data.story.published && (
                   <Action.OpenInBrowser
+                    icon={{ source: Icon.Globe, tintColor: Color.Green }}
                     title="Open Published JSON"
-                    url={storyJson("published", data.data.story.preview_token.timestamp)}
+                    url={storyJson("published")}
                   />
                 )}
               </>

@@ -247,7 +247,7 @@ export type ActivityData = {
   };
 };
 
-export type ApiKey = {
+export type apiKey = {
   id: number;
   access: "private" | "public";
   branch_id: number | null;
