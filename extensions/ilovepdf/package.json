@@ -161,8 +161,8 @@
     },
     {
       "name": "SelectFileInFinder",
-      "title": "Select files in Finder and execute the command",
-      "description": "Select files in Finder and execute the command",
+      "title": "Select files in Finder",
+      "description": "Select files in Finder",
       "type": "checkbox",
       "required": false,
       "default": false,
