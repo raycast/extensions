@@ -1,6 +1,6 @@
 # NameSilo Changelog
 
-## [Manage Name Servers + Add DNS Records] - {PR_MERGE_DATE}
+## [Manage Name Servers + Add DNS Records] - 2024-10-26
 
 - For each domain, you can have up to 13 Name Server IPs
 - Add different types of DNS Records and View them
