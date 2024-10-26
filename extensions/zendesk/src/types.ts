@@ -31,14 +31,13 @@ export interface ZendeskArticle {
 }
 
 export interface ArticleFetchRes {
-  isLoading?: boolean;
-  data?: { results: ZendeskArticle[] };
-  error?: Error;
+  results: ZendeskArticle[];
 }
 
 export interface FilteredArticle {
   id?: number;
   url?: string;
+  html_url?: string;
   section?: number;
   title: string;
   body?: string;
@@ -54,7 +53,7 @@ export interface ZendeskLocale {
 }
 
 export interface LocaleFetchRes {
-  data: { locales: ZendeskLocale[] };
+  locales: ZendeskLocale[];
 }
 
 export interface FilteredLocale {
