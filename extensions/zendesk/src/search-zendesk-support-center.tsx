@@ -5,7 +5,7 @@ import { useState } from "react";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 
 // Raycast imports
-import { Action, ActionPanel, getPreferenceValues, List, Icon, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List, Icon } from "@raycast/api";
 import { showFailureToast, useFetch } from "@raycast/utils";
 
 // interface/type definitions
@@ -55,10 +55,12 @@ export default function ZendeskSearch() {
     isLoading,
     data: searchResult,
     error,
+    pagination,
   } = useFetch(
-    `https://${supportCenter}/api/v2/help_center/articles/search.json?query=${query}&locale=${
-      selectedLocale?.locale ? selectedLocale?.locale : ""
-    }`,
+    (options) =>
+      `https://${supportCenter}/api/v2/help_center/articles/search.json?query=${query}&page=${
+        options.page + 1
+      }&locale=${selectedLocale?.locale ? selectedLocale?.locale : ""}`,
     {
       keepPreviousData: true,
       mapResult(result: ArticleFetchRes) {
@@ -72,6 +74,7 @@ export default function ZendeskSearch() {
         }));
         return {
           data: results,
+          hasMore: !!result.next_page,
         };
       },
       initialData: [],
@@ -105,6 +108,7 @@ export default function ZendeskSearch() {
       isShowingDetail={isShowingDetail}
       searchBarAccessory={<LocaleDropdown />}
       throttle={true}
+      pagination={pagination}
     >
       {searchResult.length && isShowingDetail ? (
         searchResult.map((item) => {
@@ -118,13 +122,9 @@ export default function ZendeskSearch() {
               detail={<List.Item.Detail markdown={item.body} />}
               actions={
                 <ActionPanel>
-                  {/* eslint-disable-next-line @raycast/prefer-title-case */}
-                  <Action.OpenInBrowser title="Open JSON in Browser" url={item.url} />
+                  <Action.OpenInBrowser url={item.url} />
                   <Action.CopyToClipboard content={item.url} />
                   <Action.Paste content={item.url} shortcut={{ modifiers: ["cmd"], key: "." }} />
-                  {item.html_url && (
-                    <Action.OpenInBrowser url={item.html_url} shortcut={Keyboard.Shortcut.Common.Open} />
-                  )}
                 </ActionPanel>
               }
             />

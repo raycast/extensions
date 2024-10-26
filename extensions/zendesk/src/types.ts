@@ -1,4 +1,4 @@
-export interface ZendeskArticle {
+interface ZendeskArticle {
   author_id?: number;
   body?: string;
   comments_disabled?: boolean;
@@ -26,13 +26,18 @@ export interface ZendeskArticle {
 }
 
 export interface ArticleFetchRes {
+  count: number;
+  next_page: string | null;
+  page: number;
+  page_count: number;
+  per_page: number;
+  previous_page: string | null;
   results: ZendeskArticle[];
 }
 
 export interface FilteredArticle {
   id?: number;
   url?: string;
-  html_url?: string;
   section?: number;
   title: string;
   body?: string;
