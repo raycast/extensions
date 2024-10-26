@@ -190,19 +190,23 @@ export default function Command() {
     }
   };
 
-  const formatTitle = (title: string, lineLength: number = 10): string[] => {
+  const formatTitle = (title: string, maxCharsPerRow: number = 55): string[] => {
     const words = title ? title.split(" ") : ["-"];
     const formattedTitle: string[] = [];
     let currentLine = "";
 
-    words.forEach((word, index) => {
-      currentLine += word + " ";
-
-      if ((index + 1) % lineLength === 0 || index === words.length - 1) {
-        formattedTitle.push(currentLine.trim());
-        currentLine = "";
+    words.forEach((word) => {
+      if ((currentLine + word).length <= maxCharsPerRow) {
+        currentLine += (currentLine ? " " : "") + word;
+      } else {
+        formattedTitle.push(currentLine);
+        currentLine = word;
       }
     });
+
+    if (currentLine) {
+      formattedTitle.push(currentLine);
+    }
 
     return formattedTitle;
   };
