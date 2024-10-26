@@ -36,11 +36,12 @@ export default function ZendeskSearch() {
 
   const { data: locales } = useFetch(`https://${supportCenter}/api/v2/locales/`, {
     mapResult(result: LocaleFetchRes) {
+      const results: FilteredLocale[] = result.locales.map((locale) => ({
+        name: locale.name,
+        locale: locale.locale,
+      }));
       return {
-        data: result.locales.map((locale) => ({
-          name: locale.name,
-          locale: locale.locale,
-        })),
+        data: results,
       };
     },
     onData(data) {

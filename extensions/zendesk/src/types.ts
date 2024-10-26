@@ -1,8 +1,3 @@
-export interface Preferences {
-  supportCenter: string;
-  locale: string;
-}
-
 export interface ZendeskArticle {
   author_id?: number;
   body?: string;
@@ -43,7 +38,7 @@ export interface FilteredArticle {
   body?: string;
 }
 
-export interface ZendeskLocale {
+interface ZendeskLocale {
   createdAt: string;
   id: number;
   locale: string;
