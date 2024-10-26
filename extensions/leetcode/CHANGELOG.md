@@ -1,6 +1,6 @@
 # LeetCode Changelog
 
-## [Features] - {PR_MERGE_DATE}
+## [Features] - 2024-10-26
 
 - Add `Copy Problem to Clipboard` action to copy the problem as markdown to the clipboard.
 
