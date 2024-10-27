@@ -39,8 +39,7 @@ export function ConverterForm() {
           message: String(error),
         });
       }
-    })
-    
+    });
   };
 
   return (
@@ -51,12 +50,12 @@ export function ConverterForm() {
         </ActionPanel>
       }
     >
-      <Form.FilePicker id="videoFile" title="Select a video file"/>
+      <Form.FilePicker id="videoFile" title="Select a video file" />
       <Form.Dropdown id="format" title="Select output format" defaultValue="mp4">
         <Form.Dropdown.Item value="mp4" title=".mp4" />
         <Form.Dropdown.Item value="avi" title=".avi" />
         <Form.Dropdown.Item value="mkv" title=".mkv" />
-        <Form.Dropdown.Item value="mov" title=".mov" /> 
+        <Form.Dropdown.Item value="mov" title=".mov" />
       </Form.Dropdown>
     </Form>
   );
