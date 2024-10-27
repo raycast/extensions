@@ -84,7 +84,7 @@ tell application "System Events"
 						exit repeat -- exit the loop
 					end if
 				end repeat
-				set expandToggle to item (i - 1) of btMenuElements
+				set expandToggle to item (i + 1) of btMenuElements
 				set expandToggleExpanded to value of expandToggle as boolean
 				if expandToggleExpanded is false then
 					click expandToggle
