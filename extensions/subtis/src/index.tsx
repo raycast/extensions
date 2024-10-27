@@ -185,9 +185,9 @@ export async function getAlternativeSubtitle({
 
 async function downloadSubtitle(toast: Toast, subtitle: SubtisSubtitle) {
   Object.assign(toast, {
-    message: "Descargando subtitulo...",
     style: Toast.Style.Animated,
     title: "Subtitulo encontrado!",
+    message: "Descargando subtitulo...",
   });
 
   await open(subtitle.subtitle.subtitle_link);
