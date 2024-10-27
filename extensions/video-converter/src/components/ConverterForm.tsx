@@ -22,22 +22,25 @@ export function ConverterForm() {
       title: "Converting file...",
     });
 
-    try {
-      const outputPath = await convertVideo(values.videoFile[0], values.format as "mp4" | "avi" | "mkv" | "mov");
-      await toast.hide();
-      await showToast({
-        style: Toast.Style.Success,
-        title: "File converted successfully!",
-        message: `Saved as: ${outputPath}`,
-      });
-    } catch (error) {
-      await toast.hide();
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Conversion failed",
-        message: String(error),
-      });
-    }
+    values.videoFile.forEach(async (item) => {
+      try {
+        const outputPath = await convertVideo(item, values.format as "mp4" | "avi" | "mkv" | "mov");
+        await toast.hide();
+        await showToast({
+          style: Toast.Style.Success,
+          title: "File converted successfully!",
+          message: `Saved as: ${outputPath}`,
+        });
+      } catch (error) {
+        await toast.hide();
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Conversion failed",
+          message: String(error),
+        });
+      }
+    })
+    
   };
 
   return (
@@ -48,12 +51,12 @@ export function ConverterForm() {
         </ActionPanel>
       }
     >
-      <Form.FilePicker id="videoFile" title="Select a video file" allowMultipleSelection={false} />
+      <Form.FilePicker id="videoFile" title="Select a video file"/>
       <Form.Dropdown id="format" title="Select output format" defaultValue="mp4">
         <Form.Dropdown.Item value="mp4" title=".mp4" />
         <Form.Dropdown.Item value="avi" title=".avi" />
         <Form.Dropdown.Item value="mkv" title=".mkv" />
-        <Form.Dropdown.Item value="mov" title=".mov" />
+        <Form.Dropdown.Item value="mov" title=".mov" /> 
       </Form.Dropdown>
     </Form>
   );
