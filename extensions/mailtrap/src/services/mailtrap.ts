@@ -47,6 +47,7 @@ export type Email = {
     | {
         result: "error";
       };
+  human_size: string;
 };
 
 const { apiKey, accountId } = getPreferenceValues<Preferences>();

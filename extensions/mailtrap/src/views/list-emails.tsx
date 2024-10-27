@@ -46,6 +46,8 @@ export default function ListEmailsView({ inboxId }: ListEmailsViewProps) {
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Label title="Subject" text={email.subject} />
                   <List.Item.Detail.Metadata.Label title="Is Read" icon={email.is_read ? Icon.Check : Icon.Xmark} />
+                  <List.Item.Detail.Metadata.Label title="Sent At" text={email.sent_at} />
+                  <List.Item.Detail.Metadata.Label title="Size" text={email.human_size} />
                 </List.Item.Detail.Metadata>
               }
             />
