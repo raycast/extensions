@@ -1,10 +1,16 @@
 # VivaPB Changelog
 
-## [Fix/Update Verison] - 2024-10-20
+## [Fix/Update] - 2024-10-27
+
+- Remove image folder 
+- Update README 
+- Update screenshots
+  
+## [Fix/Update] - 2024-10-20
 
 - Added pictures to metadata folder
 
-## [Update Verison] - 2024-05-25
+## [Update] - 2024-05-25
 
 - Update Changelog
 
@@ -13,17 +19,17 @@
 - Fixed bugs
 - Update metadata to move to assets folder and updated README
 
-## [Fixes Version] - 2024-01-28
+## [Fix] - 2024-01-28
 
 - Changed the command no-view to view
 - Clean up code bug fixes
 
-## [Fixes Version] - 2024-01-30
+## [Fix] - 2024-01-30
 
 - Fixed code to show if Vivaldi is installed on Raycast
 - Bug fix
 
-## [Fixes Version] - 2024-01-19
+## [Fix] - 2024-01-19
 
 - Fixed the png icon image error
 - Changed the command view to no-view
