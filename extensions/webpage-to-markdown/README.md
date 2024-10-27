@@ -20,11 +20,11 @@
   <div style="display: flex; justify-content: center; gap: 20px; margin: 40px 0;">
     <div>
       <h4>Input</h3>
-      <img src="./metadata/webpage-to-markdown-3.png" alt="Input Example" width="400"/>
+      <img src="./assets/webpage-to-markdown-2.png" alt="Input Example" width="400"/>
     </div>
     <div>
       <h4>Output</h3>
-      <img src="./metadata/webpage-to-markdown-2.png" alt="Output Example" width="400"/>
+      <img src="./assets/webpage-to-markdown-1.png" alt="Output Example" width="400"/>
     </div>
   </div>
 </div>
