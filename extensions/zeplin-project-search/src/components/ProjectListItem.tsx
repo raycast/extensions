@@ -1,7 +1,8 @@
-import { ActionPanel, List, Application, getApplications, Icon, Action } from "@raycast/api";
-import { formatDistanceToNow } from "date-fns";
-import type { Project } from "../types";
+import { ActionPanel, List, Application, getApplications, Icon, Action, Keyboard, Color } from "@raycast/api";
+import { ProjectStatus, type Project } from "../types";
 import { useState, useEffect } from "react";
+import { useCachedState } from "@raycast/utils";
+import { formatDistanceToNow } from "date-fns";
 
 export default function ProjectListItem(props: {
   project: Project;
@@ -9,6 +10,7 @@ export default function ProjectListItem(props: {
   onLeave: (project: Project) => void;
   removeFromVisits?: (project: Project) => void;
 }) {
+  const [isShowingDetail, setIsShowingDetail] = useCachedState<boolean>("show-project-details");
   const { project, onVisit, onLeave, removeFromVisits } = props;
   const [desktopApp, setDesktopApp] = useState<Application>();
 
@@ -23,7 +25,7 @@ export default function ProjectListItem(props: {
       id={project.id}
       title={project.name}
       icon={project.organization?.logo || Icon.Dot}
-      subtitle={project.platform}
+      subtitle={isShowingDetail ? "" : project.platform}
       actions={
         <ActionPanel>
           {desktopApp ? (
@@ -48,18 +50,52 @@ export default function ProjectListItem(props: {
           {removeFromVisits ? (
             <Action
               icon={Icon.Trash}
-              title="Remove from Recenlty Visited Projects"
+              title="Remove from Recently Visited Projects"
               onAction={() => removeFromVisits(project)}
             />
           ) : null}
           <Action icon={Icon.ExclamationMark} title="Leave Project" onAction={() => onLeave(project)} />
+          <Action
+            icon={Icon.AppWindowSidebarLeft}
+            title="Toggle Details"
+            onAction={() => setIsShowingDetail((prev) => !prev)}
+            shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+          />
         </ActionPanel>
       }
-      accessories={[
-        {
-          text: formatDistanceToNow(project.updated * 1000),
-        },
-      ]}
+      accessories={
+        isShowingDetail
+          ? undefined
+          : [
+              {
+                tag: {
+                  value: project.status,
+                  color: project.status === ProjectStatus.Active ? Color.Green : Color.Yellow,
+                },
+              },
+              {
+                text: formatDistanceToNow(project.updated * 1000),
+              },
+            ]
+      }
+      detail={
+        <List.Item.Detail
+          markdown={`![Thumbnail](${project.thumbnail})`}
+          metadata={
+            <List.Item.Detail.Metadata>
+              <List.Item.Detail.Metadata.Label title="Members" text={project.number_of_members.toString()} />
+              <List.Item.Detail.Metadata.Label title="Screens" text={project.number_of_screens.toString()} />
+              <List.Item.Detail.Metadata.Label title="Components" text={project.number_of_components.toString()} />
+              <List.Item.Detail.Metadata.Label
+                title="Connected Components"
+                text={project.number_of_connected_components.toString()}
+              />
+              <List.Item.Detail.Metadata.Label title="Text Styles" text={project.number_of_text_styles.toString()} />
+              <List.Item.Detail.Metadata.Label title="Colors" text={project.number_of_colors.toString()} />
+            </List.Item.Detail.Metadata>
+          }
+        />
+      }
     />
   );
 }

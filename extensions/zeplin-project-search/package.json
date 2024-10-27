@@ -28,7 +28,8 @@
       "type": "password",
       "required": true,
       "title": "Personal Access Token",
-      "description": "Log in to Zeplin and click developer tab under profile to create a personal access token"
+      "description": "Log in to Zeplin and click developer tab under profile to create a personal access token",
+      "placeholder": "ey...XXX"
     }
   ],
   "dependencies": {
@@ -43,7 +44,7 @@
     "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
     "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "typescript": "^5.6.3"
   },
   "scripts": {
     "build": "ray build -e dist",
