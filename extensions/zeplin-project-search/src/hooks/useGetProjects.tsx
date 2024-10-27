@@ -1,4 +1,4 @@
-import { getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
 import { useState, useEffect } from "react";
 import { useGetCurrentUser } from "./useGetCurrentUser";
@@ -38,8 +38,18 @@ export function useGetProjects() {
           projects: updatedProjects,
         }));
       })
-      .then(() => showToast(ToastStyle.Success, "Succesfully left the project"))
-      .catch((error) => showToast(ToastStyle.Failure, error.message));
+      .then(() =>
+        showToast({
+          style: Toast.Style.Success,
+          title: "Succesfully left the project",
+        }),
+      )
+      .catch((error) =>
+        showToast({
+          style: Toast.Style.Failure,
+          title: error.message,
+        }),
+      );
   }
 
   return { projects: state.projects, isLoading: state.isLoading, leaveProject };
@@ -78,7 +88,10 @@ async function getProjects(): Promise<Project[]> {
       }
     } catch (error) {
       console.error(error);
-      showToast(ToastStyle.Failure, "Could not fetch projects");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Could not fetch projects",
+      });
     }
   }
 

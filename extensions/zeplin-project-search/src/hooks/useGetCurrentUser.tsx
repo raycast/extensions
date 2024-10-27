@@ -1,4 +1,4 @@
-import { getLocalStorageItem, getPreferenceValues, setLocalStorageItem, showToast, ToastStyle } from "@raycast/api";
+import { getPreferenceValues, showToast, LocalStorage, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import type { User } from "../types";
 import fetch from "node-fetch";
@@ -6,7 +6,7 @@ import fetch from "node-fetch";
 const CURRENT_ZEPLIN_USER_KEY = "CURRENT_ZEPLIN_USER";
 
 async function fetchCurrentUserFromLocalStorage(): Promise<User | undefined> {
-  const item = await getLocalStorageItem<string>(CURRENT_ZEPLIN_USER_KEY);
+  const item = await LocalStorage.getItem<string>(CURRENT_ZEPLIN_USER_KEY);
   if (item) {
     const user = JSON.parse(item) as User;
     return user;
@@ -15,7 +15,7 @@ async function fetchCurrentUserFromLocalStorage(): Promise<User | undefined> {
 
 async function saveCurrentUser(currentUser: User) {
   const data = JSON.stringify(currentUser);
-  await setLocalStorageItem(CURRENT_ZEPLIN_USER_KEY, data);
+  await LocalStorage.setItem(CURRENT_ZEPLIN_USER_KEY, data);
 }
 
 async function fetchCurrentUserFromAPI(): Promise<User | undefined> {
@@ -33,7 +33,10 @@ async function fetchCurrentUserFromAPI(): Promise<User | undefined> {
     return (await response.json()) as User;
   } catch (error) {
     console.error(error);
-    showToast(ToastStyle.Failure, "Could not get current user");
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Could not get current user",
+    });
   }
 }
 
