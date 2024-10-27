@@ -57,7 +57,7 @@ export default function Command() {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch torrents");
+        throw new Error();
       }
 
       const data = (await response.json()) as { Results: JackettParsedTorrent[] };
@@ -76,7 +76,7 @@ export default function Command() {
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      showToast(Toast.Style.Failure, "Error", "Nothing found");
+      showToast(Toast.Style.Failure, "Error", "Failed to fetch torrents. Check URL and API key");
     }
   };
 
