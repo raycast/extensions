@@ -6,7 +6,7 @@
   "author": "leonardo_galante",
   "license": "MIT",
   "icon": "command-icon.png",
-  "version": "0.3.5",
+  "version": "0.3.8",
   "commands": [
     {
       "name": "index",
@@ -33,7 +33,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "1.0.11",
     "@types/bun": "^1.1.12",
-    "@types/node": "22.7.9",
+    "@types/node": "22.8.1",
     "@types/node-fetch": "^2.6.11",
     "@types/react": "18.3.12",
     "eslint": "8.51.0",

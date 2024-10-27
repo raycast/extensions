@@ -69,21 +69,26 @@ function getVideoFileExtension(fileName: string): string | undefined {
 
 // schemas
 const subtitleSchema = z.object({
-  id: z.number(),
-  bytes: z.number(),
-  is_valid: z.boolean(),
-  resolution: z.string(),
-  subtitle_link: z.string(),
-  queried_times: z.number().nullable(),
-  current_season: z.number().nullable(),
-  current_episode: z.number().nullable(),
-  title_file_name: z.string(),
-  subtitle_file_name: z.string(),
+  subtitle: z.object({
+    id: z.number(),
+    bytes: z.number(),
+    is_valid: z.boolean(),
+    resolution: z.string(),
+    subtitle_link: z.string(),
+    queried_times: z.number().nullable(),
+    current_season: z.number().nullable(),
+    current_episode: z.number().nullable(),
+    title_file_name: z.string(),
+    subtitle_file_name: z.string(),
+  }),
   title: z.object({
-    imdb_id: z.number(),
+    id: z.number(),
+    imdb_id: z.string(),
     title_name: z.string(),
     type: z.string(),
     year: z.number(),
+    queried_times: z.number(),
+    searched_times: z.number(),
     poster: z.string().nullable(),
     backdrop: z.string().nullable(),
   }),
@@ -140,8 +145,8 @@ async function getPrimarySubtitle({
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      subtitleId: primarySubtitle.id,
-      titleId: primarySubtitle.title.imdb_id,
+      titleId: primarySubtitle.title.id,
+      subtitleId: primarySubtitle.subtitle.id,
     }),
   });
 
@@ -170,8 +175,8 @@ export async function getAlternativeSubtitle({
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      subtitleId: alternativeSubtitle.id,
-      titleId: alternativeSubtitle.title.imdb_id,
+      titleId: alternativeSubtitle.title.id,
+      subtitleId: alternativeSubtitle.subtitle.id,
     }),
   });
 
@@ -185,7 +190,7 @@ async function downloadSubtitle(toast: Toast, subtitle: SubtisSubtitle) {
     title: "Subtitulo encontrado!",
   });
 
-  await open(subtitle.subtitle_link);
+  await open(subtitle.subtitle.subtitle_link);
 
   Object.assign(toast, {
     message: "Encontralo en Descargas",
