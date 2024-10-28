@@ -28,6 +28,14 @@
             {
               "title": "English (en)",
               "value": "en"
+            },
+            {
+              "title": "Chinese (PRC)",
+              "value": "zh-cn"
+            },
+            {
+              "title": "Chinese (Taiwan)",
+              "value": "zh-tw"
             }
           ],
           "default": "default"
@@ -42,7 +50,7 @@
       "mode": "view"
     },
     {
-      "name": "view",
+      "name": "account",
       "title": "View Account",
       "subtitle": "NeoDB",
       "description": "View Collections and Reviews in Account",

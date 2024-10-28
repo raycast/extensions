@@ -3,7 +3,7 @@ import { useFetch } from "@raycast/utils";
 import { PaginatedResult } from "../types";
 
 const useAuthorizedPaginated = <T>(resource: string, { execute } = { execute: true }) => {
-  const { token } = getPreferenceValues<Preferences.View>();
+  const { token } = getPreferenceValues<Preferences.Account>();
 
   const { isLoading, data } = useFetch(`https://neodb.social/api/me/${resource}`, {
     headers: {

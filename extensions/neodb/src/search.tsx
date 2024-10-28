@@ -69,14 +69,18 @@ export default function Command() {
 
   return (
     <Grid throttle columns={7} isLoading={isLoading} onSearchTextChange={setSearchText}>
-      {categories.map((category) => (
-        <Section
-          key={category}
-          items={categorizedItems[category]}
-          category={category}
-          aspectRatio={aspectRatios[category]}
-        />
-      ))}
+      {!isLoading && !categories.length ? (
+        <Grid.EmptyView title="No items matching your search query." />
+      ) : (
+        categories.map((category) => (
+          <Section
+            key={category}
+            items={categorizedItems[category]}
+            category={category}
+            aspectRatio={aspectRatios[category]}
+          />
+        ))
+      )}
     </Grid>
   );
 }

@@ -5,7 +5,7 @@ import { Collection, Review } from "./types";
 import getItemTitle from "./utils/getItemTitle";
 import ItemActions from "./components/ItemActions";
 
-export default function View() {
+export default function Account() {
   const [resource, setResource] = useState("collection");
 
   const { isLoading: isLoadingCollections, data: collections } = useAuthorizedPaginated<Collection>(resource, {
@@ -39,13 +39,17 @@ const getVisibilityTag = (visibility: 0 | 1 | 2) => ({
   icon: Icon.Eye,
   tooltip: "Visibility",
 });
+const getAccessories = (item: Collection | Review) => [
+  getVisibilityTag(item.visibility),
+  { date: new Date(item.created_time) },
+];
 
 const CollectionItem = ({ collection }: { collection: Collection }) => (
   <List.Item
     icon={getCover(collection.cover)}
     title={collection.title}
     subtitle={collection.brief}
-    accessories={[getVisibilityTag(collection.visibility), { date: new Date(collection.created_time) }]}
+    accessories={getAccessories(collection)}
     actions={<ItemActions route={collection.url} />}
   />
 );
@@ -53,7 +57,7 @@ const ReviewItem = ({ review }: { review: Review }) => (
   <List.Item
     icon={Icon.Pencil}
     title={getItemTitle(review.item)}
-    accessories={[getVisibilityTag(review.visibility), { date: new Date(review.created_time) }]}
+    accessories={getAccessories(review)}
     actions={<ItemActions route={review.url} />}
   />
 );
