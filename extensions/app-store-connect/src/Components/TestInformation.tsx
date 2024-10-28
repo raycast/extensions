@@ -31,7 +31,7 @@ export default function TestInformation({ app }: TestInformationProps) {
       return betaAppReviewDetailsSchema.safeParse(response.data).data ?? null;
     },
   );
-  
+
   const { data: appLocalizations, isLoading: isLoadingAppLocalizations } = useAppStoreConnectApi(
     `/betaAppLocalizations?filter[app]=${app.id}&limit=40`,
     (response) => {
