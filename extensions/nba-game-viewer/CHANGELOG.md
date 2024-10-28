@@ -1,6 +1,6 @@
 # NBA Game Viewer Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2024-10-28
 
 - Removed year from standings to default to current season.
 
