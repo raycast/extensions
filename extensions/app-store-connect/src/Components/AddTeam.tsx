@@ -89,13 +89,13 @@ export default function AddTeam({ didSignIn }: SignInProps) {
       }
     >
       <Form.TextField
-        title="Team name"
+        title="Team Name"
         {...itemProps.name}
         info="Name of the team, this is only used for display purposes"
       />
       <Form.TextField {...itemProps.issuerID} title="Issuer ID" />
       <Form.TextField {...itemProps.apiKey} title="Key ID" />
-      <Form.FilePicker {...itemProps.privateKey} title="Private key" allowMultipleSelection={false} />
+      <Form.FilePicker {...itemProps.privateKey} title="Private Key" allowMultipleSelection={false} />
     </Form>
   );
 }
