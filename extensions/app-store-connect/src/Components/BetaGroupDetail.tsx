@@ -151,7 +151,7 @@ export default function BetaGroupDetail({ app, group }: Props) {
   const removeTesterAction = (tester: BetaTester) => {
     return (
       <Action
-        title="Remove from Group"
+        title="Remove From Group"
         style={Action.Style.Destructive}
         shortcut={Keyboard.Shortcut.Common.Remove}
         icon={Icon.Trash}
