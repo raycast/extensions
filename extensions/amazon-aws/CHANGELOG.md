@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## Lambda command - {PR_MERGE_DATE}
+## Lambda command - 2024-10-28
 
 - Add an Invoke option which allows to save, update or delete payloads and saves the result in clipboard
 
