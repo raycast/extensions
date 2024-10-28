@@ -1,6 +1,6 @@
 # Matter Changelog
 
-## [🕹️ 1.2] - {PR_MERGE_DATE}
+## [🕹️ 1.2] - 2024-10-28
 
 - add `Pagination`
 - see reading time in mins
