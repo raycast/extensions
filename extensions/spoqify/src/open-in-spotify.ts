@@ -13,7 +13,7 @@ export default async function Command() {
 `);
     return await runAppleScript(spotifyOpen);
   } catch (error) {
-    await showToast(Toast.Style.Failure, "Failed to open Spotify URL", error.message);
+    await showToast(Toast.Style.Failure, "Failed to open Spotify URL", (error as Error).message);
     return;
   }
 }
