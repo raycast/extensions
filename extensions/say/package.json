@@ -55,19 +55,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.2",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.18.0",
     "bplist-parser": "^0.3.2",
     "lodash": "^4.17.21",
-    "mac-say": "^0.2.9"
+    "mac-say": "^0.3.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/lodash": "^4.17.9",
-    "@types/node": "^22.7.4",
-    "@types/react": "^18.3.10",
+    "@types/lodash": "^4.17.12",
+    "@types/node": "^22.8.1",
+    "@types/react": "^18.3.12",
     "eslint": "^8.57.1",
     "prettier": "^3.3.3",
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.3"
   }
 }
