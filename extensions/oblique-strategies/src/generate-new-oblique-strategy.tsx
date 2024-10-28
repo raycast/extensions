@@ -1,4 +1,4 @@
-import { AI, Action, ActionPanel, Detail, Icon, environment, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, getPreferenceValues, popToRoot } from "@raycast/api";
 import { useAI } from "@raycast/utils";
 import { useState } from "react";
 import { getMarkdown } from "./oblique";
@@ -8,24 +8,23 @@ const OBLIQUE_PROMPT = `Create a new oblique strategy in the vain of Brian Eno a
 Only reply with the short suggestion, nothing else, no quotation marks. Do not start with embrace. 
 Avoid the following strategies or similar versions of them: `;
 
-const MISSING_AI_ACCESS = "You don't have AI access :(";
-
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [previousResults, setPreviousResults] = useState<string[]>([]);
   const { data, isLoading } = useAI(OBLIQUE_PROMPT + previousResults.join(", "), {
-    execute: environment.canAccess(AI),
     stream: true,
+    onError: (err) => {
+      if (err.message === "Process cancelled") {
+        popToRoot();
+        return;
+      }
+    },
   });
 
   return (
     <Detail
       isLoading={isLoading}
-      markdown={
-        environment.canAccess(AI)
-          ? getMarkdown(data, preferences.displayMode as DisplayMode, preferences.italicise)
-          : MISSING_AI_ACCESS
-      }
+      markdown={isLoading ? "" : getMarkdown(data, preferences.displayMode as DisplayMode, preferences.italicise)}
       actions={
         <ActionPanel>
           <Action
