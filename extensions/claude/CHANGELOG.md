@@ -1,5 +1,8 @@
 # Claude Changelog
 
+## [Update] - 2024-10-28
+- Feature: Added new [upgraded Claude 3.5 Sonnet](https://www.anthropic.com/news/3-5-models-and-computer-use)
+
 ## [Update] - 2024-08-22
 - Feature: 8192 token limit for Claude 3.5 Sonnet [out ot Beta](https://x.com/alexalbert__/status/1825920737326281184)
 - 
