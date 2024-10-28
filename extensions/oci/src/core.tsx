@@ -20,6 +20,11 @@ export default function Core() {
   function getInstanceColor(state: Instance.LifecycleState) {
     switch (state) {
       case core.models.Instance.LifecycleState.Running: return Color.Green;
+      case core.models.Instance.LifecycleState.Stopped: return Color.Yellow;
+      case core.models.Instance.LifecycleState.Provisioning: return Color.Blue;
+      case core.models.Instance.LifecycleState.Stopping:
+      case core.models.Instance.LifecycleState.Terminating: return Color.Orange;
+      case core.models.Instance.LifecycleState.Terminated: return Color.Red;
       default: return undefined;
     }
   }

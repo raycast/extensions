@@ -3,7 +3,7 @@
   "name": "oci",
   "title": "Oracle Cloud",
   "description": "Manage Oracle Cloud Infrastructure",
-  "icon": "red-cloud-white-bg-blue-b.png  ",
+  "icon": "red-cloud-white-bg-blue-b.png",
   "author": "xmok",
   "categories": [
     "Developer Tools"
