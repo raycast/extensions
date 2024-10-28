@@ -31,6 +31,7 @@ export default function TestInformation({ app }: TestInformationProps) {
       return betaAppReviewDetailsSchema.safeParse(response.data).data ?? null;
     },
   );
+  
   const { data: appLocalizations, isLoading: isLoadingAppLocalizations } = useAppStoreConnectApi(
     `/betaAppLocalizations?filter[app]=${app.id}&limit=40`,
     (response) => {
@@ -143,6 +144,8 @@ export default function TestInformation({ app }: TestInformationProps) {
       setValue("reviewLastName", reviewDetails[0].attributes.contactLastName);
       setValue("reviewPhone", reviewDetails[0].attributes.contactPhone);
       setValue("reviewSignInRequired", reviewDetails[0].attributes.demoAccountRequired);
+      setValue("reviewDemoAccountUsername", reviewDetails[0].attributes.demoAccountName || "");
+      setValue("reviewDemoAccountPassword", reviewDetails[0].attributes.demoAccountPassword || "");
     }
   }, [reviewDetails]);
 

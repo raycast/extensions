@@ -396,12 +396,12 @@ export const betaAppLocalizationSchema = z.object({
   type: z.literal("betaAppLocalizations"),
   id: z.string(),
   attributes: z.object({
-    description: z.string(),
+    description: z.string().nullable(),
     locale: z.string(),
     marketingUrl: z.string().nullable(),
     privacyPolicyUrl: z.string().nullable(),
     tvOsPrivacyPolicy: z.string().nullable(),
-    feedbackEmail: z.string(),
+    feedbackEmail: z.string().nullable(),
   }),
 });
 
