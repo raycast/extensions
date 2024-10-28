@@ -43,4 +43,5 @@ uploadthing
 sublime
 pastefy
 spike
+wp-bones
 dub
