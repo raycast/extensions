@@ -14,15 +14,15 @@ export default async function Command() {
     `);
     await runAppleScript(script);
   } catch (error) {
-    await showToast(Toast.Style.Failure, "Failed to get Spotify URL", error.message);
+    await showToast(Toast.Style.Failure, "Failed to get Spotify URL", (error as Error).message);
     return;
   }
 
   try {
     const text = await Clipboard.readText();
-    await open(text);
+    await open(text as string);
   } catch (error) {
-    await showToast(Toast.Style.Failure, "Failed to read from clipboard", error.message);
+    await showToast(Toast.Style.Failure, "Failed to read from clipboard", (error as Error).message);
     return;
   }
 
@@ -38,7 +38,7 @@ export default async function Command() {
     const theURL = await runAppleScript(urlScript);
     await Clipboard.copy(theURL);
   } catch (error) {
-    await showToast(Toast.Style.Failure, "Failed to get URL from Google Chrome", error.message);
+    await showToast(Toast.Style.Failure, "Failed to get URL from Google Chrome", (error as Error).message);
     return;
   }
 }
