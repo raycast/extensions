@@ -190,14 +190,9 @@ export const buildWithBetaDetailAndBetaGroupsScehma = z.object({
 
 export type BuildWithBetaDetailAndBetaGroups = z.infer<typeof buildWithBetaDetailAndBetaGroupsScehma>;
 
-const unknownTypeSchema = z.object({
-  type: z.string(),
-  id: z.string(),
-});
-
 const buildSchemaWithBetaGroupsSchema = z.object({
   data: z.array(buildSchemaWithBetaGroups),
-  included: z.array(z.union([buildBetaDetailSchema, unknownTypeSchema])),
+  included: z.array(z.union([buildBetaDetailSchema, betaGroupSchema])),
 });
 
 export const buildsWithBetaDetailSchema = buildSchemaWithBetaGroupsSchema.transform((response) => {
