@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Form, Icon, List, showToast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { FormValidation, useForm } from "@raycast/utils";
-import { getLogIconByLevel, getTextAndIconFromVal } from "./utils";
+import { getLogIconByLevel, getTextAndIconFromVal, isValidApiUrl } from "./utils";
 import ListWebDomainsComponent from "./components/list-web-domains";
 import ListDatabasesComponent from "./components/list-databases";
 import ListMailDomainsComponent from "./components/list-mail-domains";
@@ -17,8 +17,11 @@ import {
 import ErrorComponent from "./components/ErrorComponent";
 import { AddUserFormValues } from "./types/users";
 import useHestia from "./utils/hooks/useHestia";
+import InvalidUrlComponent from "./components/InvalidUrlComponent";
 
 export default function ListUsers() {
+  if (!isValidApiUrl()) return <InvalidUrlComponent />;
+
   const { isLoading, data: users, revalidate, error } = getUsers();
 
   return error ? (
@@ -85,11 +88,7 @@ export default function ListUsers() {
             icon={Icon.AddPerson}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Add User"
-                  icon={Icon.AddPerson}
-                  target={<AddUser onUserAdded={() => revalidate?.()} />}
-                />
+                <Action.Push title="Add User" icon={Icon.AddPerson} target={<AddUser onUserAdded={revalidate} />} />
               </ActionPanel>
             }
           />
@@ -268,10 +267,24 @@ type ViewUserNotificationsProps = {
   user: string;
 };
 export function ViewUserNotifications({ user }: ViewUserNotificationsProps) {
-  const { isLoading, data: notifications } = getUserNotifications(user);
+  const { isLoading, data: notifications, revalidate } = getUserNotifications(user);
+
+  const [acknowledgeId, setAcknowledgeId] = useState("");
+  const { isLoading: isAcknowledging } = useHestia<Record<string, never>>(
+    "v-acknowledge-user-notification",
+    "Acknowledging Notification(s)",
+    {
+      body: [user, acknowledgeId],
+      execute: !!acknowledgeId,
+      onData: revalidate,
+      onError() {
+        setAcknowledgeId("");
+      },
+    },
+  );
 
   return (
-    <List navigationTitle={`Users / ${user} / Notifications`} isLoading={isLoading} isShowingDetail>
+    <List navigationTitle={`Users / ${user} / Notifications`} isLoading={isLoading || isAcknowledging} isShowingDetail>
       {notifications &&
         Object.entries(notifications).map(([line, data]) => (
           <List.Item
@@ -298,9 +311,14 @@ export function ViewUserNotifications({ user }: ViewUserNotificationsProps) {
                   title={`Copy All to Clipboard as JSON`}
                   content={JSON.stringify(notifications)}
                 />
+                <Action
+                  icon={Icon.BellDisabled}
+                  title="Acknowledge Notification"
+                  onAction={() => setAcknowledgeId(line)}
+                />
               </ActionPanel>
             }
-            icon={data.ACK === "yes" ? Icon.BellDisabled : Icon.Bell}
+            icon={data.ACK === "yes" ? Icon.BellDisabled : { source: Icon.Bell, tintColor: Color.Yellow }}
           />
         ))}
     </List>
