@@ -13,30 +13,35 @@
     {
       "name": "testFlightBuilds",
       "title": "Manage Builds",
+      "subtitle": "App Store Connect",
       "description": "Show and manage builds",
       "mode": "view"
     },
     {
       "name": "testInformation",
       "title": "Edit Test Information",
+      "subtitle": "App Store Connect",
       "description": "Edit Test information",
       "mode": "view"
     },
     {
       "name": "showGroups",
       "title": "Manage Beta Groups",
+      "subtitle": "App Store Connect",
       "description": "Show and manage beta groups",
       "mode": "view"
     },
     {
       "name": "teamMembers",
       "title": "Manage Team Members",
+      "subtitle": "App Store Connect",
       "description": "Show and manage team members",
       "mode": "view"
     },
     {
       "name": "manageTeams",
       "title": "Manage Teams",
+      "subtitle": "App Store Connect",
       "description": "Show and manage teams",
       "mode": "view"
     }
