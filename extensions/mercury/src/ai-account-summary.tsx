@@ -381,79 +381,81 @@ export default function AIAccountSummaryCommand() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [conversation, setConversation] = useState<ConversationMessage[]>([]);
 
-  useEffect(() => {
-    async function generateSummary() {
-      try {
-        // Check if the user has access to Raycast AI
-        if (!environment.canAccess(AI)) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Raycast AI Not Available",
-            message: "Upgrade to Raycast Pro to use this feature.",
-          });
-          setIsLoading(false);
-          return;
-        }
-
-        // Show a loading toast
-        const fetchingToast = await showToast({
-          style: Toast.Style.Animated,
-          title: "Fetching data...",
-        });
-
-        // Fetch accounts and transactions
-        const fetchedAccounts = await fetchAccounts(apiKey);
-        setAccounts(fetchedAccounts);
-        const fetchedTransactions = await fetchAllTransactions(apiKey, fetchedAccounts);
-        setTransactions(fetchedTransactions);
-
-        // Prepare prompt
-        const prompt = prepareDataForAI(fetchedAccounts, fetchedTransactions);
-
-        // Update the toast
-        fetchingToast.title = "Generating summary...";
-
-        // Use AI.ask to get the summary
-        const initialSummary = await AI.ask(prompt, { creativity: "medium" });
-
-        // Sanitize the AI's response
-        const sanitizedSummary = sanitizeAIResponse(initialSummary);
-
-        setSummary(sanitizedSummary);
-
-        // Initialize conversation with the sanitized summary
-        setConversation([
-          {
-            role: "assistant",
-            content: sanitizedSummary,
-          },
-        ]);
-
-        await fetchingToast.hide();
-
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Summary Generated",
-        });
-      } catch (error) {
-        // Handle error here, e.g., by showing a Toast
+  async function generateSummary() {
+    try {
+      // Check if the user has access to Raycast AI
+      if (!environment.canAccess(AI)) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Failed to Generate Summary",
-          message: error instanceof Error ? error.message : String(error),
-          primaryAction: {
-            title: "Retry",
-            onAction: () => {
-              window.location.reload();
-            },
-          },
+          title: "Raycast AI Not Available",
+          message: "Upgrade to Raycast Pro to use this feature.",
         });
-        setSummary("Failed to generate summary.");
-      } finally {
         setIsLoading(false);
+        return;
       }
-    }
 
+      // Show a loading toast
+      const fetchingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Fetching data...",
+      });
+
+      // Fetch accounts and transactions
+      const fetchedAccounts = await fetchAccounts(apiKey);
+      setAccounts(fetchedAccounts);
+      const fetchedTransactions = await fetchAllTransactions(apiKey, fetchedAccounts);
+      setTransactions(fetchedTransactions);
+
+      // Prepare prompt
+      const prompt = prepareDataForAI(fetchedAccounts, fetchedTransactions);
+
+      // Update the toast
+      fetchingToast.title = "Generating summary...";
+
+      // Use AI.ask to get the summary
+      const initialSummary = await AI.ask(prompt, { creativity: "medium" });
+
+      // Sanitize the AI's response
+      const sanitizedSummary = sanitizeAIResponse(initialSummary);
+
+      setSummary(sanitizedSummary);
+
+      // Initialize conversation with the sanitized summary
+      setConversation([
+        {
+          role: "assistant",
+          content: sanitizedSummary,
+        },
+      ]);
+
+      await fetchingToast.hide();
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Summary Generated",
+      });
+    } catch (error) {
+      // Handle error here, e.g., by showing a Toast
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Generate Summary",
+        message: error instanceof Error ? error.message : String(error),
+        primaryAction: {
+          title: "Retry",
+          onAction: async (toast) => {
+            await toast.hide();
+            setIsLoading(true);
+            // Re-run your initialization logic
+            generateSummary();
+          },
+        },
+      });
+      setSummary("Failed to generate summary.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+  useEffect(() => {
     generateSummary();
   }, []);
 
@@ -646,8 +648,13 @@ ${updatedConversation
                   },
                 });
                 if (confirmed) {
-                  // Reload the command
-                  window.location.reload();
+                  setIsLoading(true);
+                  setAccounts([]);
+                  setTransactions([]);
+                  setConversation([]);
+                  setSummary("");
+                  // Re-run the initialization logic
+                  generateSummary();
                 }
               }}
             />
