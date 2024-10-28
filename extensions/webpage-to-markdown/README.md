@@ -17,16 +17,6 @@
 
   <p style="margin-top: 20px;">Transform any webpage into clean markdown. View directly in Raycast or copy to clipboard. Perfect for developers, note-takers and content-creators who need to save web content in markdown format.</p>
 
-  <div style="display: flex; justify-content: center; gap: 20px; margin: 40px 0;">
-    <div>
-      <h4>Input</h3>
-      <img src="./assets/webpage-to-markdown-2.png" alt="Input Example" width="400"/>
-    </div>
-    <div>
-      <h4>Output</h3>
-      <img src="./assets/webpage-to-markdown-1.png" alt="Output Example" width="400"/>
-    </div>
-  </div>
 </div>
 
 ## Features
@@ -48,3 +38,16 @@
 - Add YAML front matter with metadata
 - Include organized links summary at the end
 - Add Jina.ai API key for higher rate limits
+
+## Examples
+
+<table>
+  <tr>
+    <th>Input</th>
+    <th>Output</th>
+  </tr>
+  <tr>
+    <td><img src="./assets/webpage-to-markdown-2.png" alt="Input Example" width="400"/></td>
+    <td><img src="./assets/webpage-to-markdown-1.png" alt="Output Example" width="400"/></td>
+  </tr>
+</table>
