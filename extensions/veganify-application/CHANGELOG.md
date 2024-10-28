@@ -1,6 +1,6 @@
 # Veganify Changelog
 
-## [Adapated Extensions to Veganify Ingredients API v1] - {PR_MERGE_DATE}
+## [Adapated Extensions to Veganify Ingredients API v1] - 2024-10-28
 
 - Updated the extensions to use the Veganify Ingredients API v1
 - Now shows the vegan status of the ingredients in the recipe categorized in the following way:
