@@ -1,6 +1,6 @@
 # Mailtrap Changelog
 
-## [View Details of Inbox & Email] - {PR_MERGE_DATE}
+## [View Details of Inbox & Email] - 2024-10-28
 
 - Retitled command from "Copy Subject" to "List Inboxes"
 - Change the accessories in Inboxes to make it more understandable
