@@ -1,6 +1,6 @@
 # Oblique Strategies Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2024-10-28
 
 - Commands to get and search oblique strategies
 - AI command to generate new strategies
