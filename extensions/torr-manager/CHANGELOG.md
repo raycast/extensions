@@ -1,6 +1,6 @@
 # torr-manager Changelog
 
-## [Improve Parser] - {PR_MERGE_DATE}
+## [Improve Parser] - 2024-10-28
 
 - Expanded search functionality to support both magnet links and direct links.
 - Marked jackettApiKey as optional, as not all servers require an API key.
