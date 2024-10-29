@@ -24,68 +24,53 @@ interface CombinedData {
   activeOncall: { oncallData: ActiveOncall };
 }
 
-const truncate = (str: string, n: number) => 
-  (str && str.length > n ? str.substring(0, n - 1) + "..." : str);
+const truncate = (str: string, n: number) => (str && str.length > n ? str.substring(0, n - 1) + "..." : str);
 
 export default function Command() {
   const fetchData = async (): Promise<CombinedData> => {
-    const [incidents, oncall] = await Promise.all([
-      api.incidents.getOpenIncidents(1, 20),
-      api.oncall.amIOncall()
-    ]);
-    
+    const [incidents, oncall] = await Promise.all([api.incidents.getOpenIncidents(1, 20), api.oncall.amIOncall()]);
+
     return {
       incidents,
-      activeOncall: oncall
+      activeOncall: oncall,
     };
   };
 
-  const { data, isLoading } = useCachedPromise(
-    fetchData,
-    [],
-    {
-      onError: (error) => {
-        console.error("Error fetching data:", error);
+  const { data, isLoading } = useCachedPromise(fetchData, [], {
+    onError: (error) => {
+      console.error("Error fetching data:", error);
+    },
+    // Refetch data every 30 seconds
+    execute: true,
+    keepPreviousData: true,
+    initialData: {
+      incidents: {
+        NACK_Incidents: [] as Incident[],
+        ACK_Incidents: [] as Incident[],
       },
-      // Refetch data every 30 seconds
-      execute: true,
-      keepPreviousData: true,
-      initialData: {
-        incidents: { 
-          NACK_Incidents: [] as Incident[], 
-          ACK_Incidents: [] as Incident[] 
+      activeOncall: {
+        oncallData: {
+          isCurrentlyOncall: false,
         },
-        activeOncall: { 
-          oncallData: { 
-            isCurrentlyOncall: false 
-          } 
-        }
-      }
-    }
-  );
+      },
+    },
+  });
 
   const incidents = useMemo(() => {
     if (!data) return { triggered: [], acknowledged: [] };
-    
-    const allIncidents = [
-      ...data.incidents.NACK_Incidents,
-      ...data.incidents.ACK_Incidents
-    ];
-    
+
+    const allIncidents = [...data.incidents.NACK_Incidents, ...data.incidents.ACK_Incidents];
+
     return {
-      triggered: allIncidents.filter(i => i.status === "NACK"),
-      acknowledged: allIncidents.filter(i => i.status === "ACK")
+      triggered: allIncidents.filter((i) => i.status === "NACK"),
+      acknowledged: allIncidents.filter((i) => i.status === "ACK"),
     };
   }, [data]);
 
   const isOnCall = data?.activeOncall.oncallData.isCurrentlyOncall;
 
   return (
-    <MenuBarExtra 
-      isLoading={isLoading} 
-      icon="spike-logo-white.png" 
-      tooltip="Open incidents"
-    >
+    <MenuBarExtra isLoading={isLoading} icon="spike-logo-white.png" tooltip="Open incidents">
       <MenuBarExtra.Item
         icon={{
           source: isOnCall ? "green-dot.png" : "gray-dot.png",
@@ -95,14 +80,13 @@ export default function Command() {
           open(`${config?.spike}/on-calls?includes=me`);
         }}
       />
-      
+
       <MenuBarExtra.Section title={`Triggered (${incidents.triggered.length})`}>
         {incidents.triggered.map((incident) => (
           <MenuBarExtra.Item
             key={incident.counterId}
             title={
-              `[${incident.counterId}] ${truncate(incident.message, 35)}` || 
-              `[${incident.counterId}] Parsing failed`
+              `[${incident.counterId}] ${truncate(incident.message, 35)}` || `[${incident.counterId}] Parsing failed`
             }
             onAction={() => {
               open(`${config?.spike}/incidents/${incident.counterId}`);
@@ -116,8 +100,7 @@ export default function Command() {
           <MenuBarExtra.Item
             key={incident.counterId}
             title={
-              `[${incident.counterId}] ${truncate(incident.message, 35)}` || 
-              `[${incident.counterId}] Parsing failed`
+              `[${incident.counterId}] ${truncate(incident.message, 35)}` || `[${incident.counterId}] Parsing failed`
             }
             onAction={() => {
               open(`${config?.spike}/incidents/${incident.counterId}`);

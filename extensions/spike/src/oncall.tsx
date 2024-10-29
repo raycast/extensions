@@ -45,17 +45,9 @@ interface ApiResponse {
   activeOncall: ActiveOncall;
 }
 
-const RenderShiftItem = ({ 
-  item: oncall, 
-  user, 
-  isMine 
-}: { 
-  item: Oncall; 
-  user: User; 
-  isMine: boolean; 
-}) => {
+const RenderShiftItem = ({ item: oncall, user, isMine }: { item: Oncall; user: User; isMine: boolean }) => {
   const activeShift = oncall.shifts.find((shift) => shift.active);
-  
+
   return (
     <List.Item
       keywords={[oncall.name || "", oncall.idOfOnCallPerson || ""]}
@@ -73,16 +65,8 @@ const RenderShiftItem = ({
       ]}
       actions={
         <ActionPanel>
-          <Action.Push 
-            title="Show Details" 
-            icon={Icon.Info} 
-            target={<OncallViewPage oncallId={oncall._id} />} 
-          />
-          <Action.Open 
-            icon={Icon.Globe} 
-            title="Open in Spike" 
-            target={`${config!.spike}/on-calls/${oncall._id}`} 
-          />
+          <Action.Push title="Show Details" icon={Icon.Info} target={<OncallViewPage oncallId={oncall._id} />} />
+          <Action.Open icon={Icon.Globe} title="Open in Spike" target={`${config!.spike}/on-calls/${oncall._id}`} />
           <Action.Push
             title="Add Override"
             shortcut={shortcut.ADD_OVERRIDE}
@@ -96,30 +80,26 @@ const RenderShiftItem = ({
 };
 
 export default function MyOncalls() {
-  const { 
-    data, 
-    isLoading, 
-    error,
-  } = useCachedPromise<() => Promise<ApiResponse>>(
+  const { data, isLoading, error } = useCachedPromise<() => Promise<ApiResponse>>(
     async () => {
       try {
         const [oncallsResponse, userResponse, activeOncallResponse] = await Promise.all([
           api.oncall.getMyOncalls(),
           api.users.getUser(),
-          api.oncall.amIOncall()
+          api.oncall.amIOncall(),
         ]);
 
         return {
           oncalls: oncallsResponse.oncalls,
           user: userResponse,
-          activeOncall: activeOncallResponse
+          activeOncall: activeOncallResponse,
         };
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred";
         await showToast({
           style: Toast.Style.Failure,
           title: "Failed to fetch on-call schedules",
-          message: errorMessage
+          message: errorMessage,
         });
         throw err;
       }
@@ -128,16 +108,16 @@ export default function MyOncalls() {
     {
       onError: (err) => {
         console.error("Error fetching oncall data:", err);
-      }
-    }
+      },
+    },
   );
 
   if (error) {
     return (
-      <List.EmptyView 
-        icon={Icon.XMarkCircle} 
-        title="Error" 
-        description={error instanceof Error ? error.message : "Failed to load oncall data"} 
+      <List.EmptyView
+        icon={Icon.XMarkCircle}
+        title="Error"
+        description={error instanceof Error ? error.message : "Failed to load oncall data"}
       />
     );
   }
@@ -153,28 +133,18 @@ export default function MyOncalls() {
       isLoading={isLoading}
     >
       <List.Section title="My Oncalls">
-        {user && myOncalls
-          .filter(oncall => oncall.idOfOnCallPerson === user._id)
-          .map((oncall, index) => (
-            <RenderShiftItem 
-              key={`${oncall._id}-${index}`} 
-              isMine={true} 
-              item={oncall} 
-              user={user} 
-            />
-          ))
-        }
-        {user && myOncalls
-          .filter(oncall => oncall.idOfOnCallPerson !== user._id)
-          .map((oncall, index) => (
-            <RenderShiftItem 
-              key={`${oncall._id}-${index}`} 
-              isMine={false} 
-              item={oncall} 
-              user={user} 
-            />
-          ))
-        }
+        {user &&
+          myOncalls
+            .filter((oncall) => oncall.idOfOnCallPerson === user._id)
+            .map((oncall, index) => (
+              <RenderShiftItem key={`${oncall._id}-${index}`} isMine={true} item={oncall} user={user} />
+            ))}
+        {user &&
+          myOncalls
+            .filter((oncall) => oncall.idOfOnCallPerson !== user._id)
+            .map((oncall, index) => (
+              <RenderShiftItem key={`${oncall._id}-${index}`} isMine={false} item={oncall} user={user} />
+            ))}
       </List.Section>
     </List>
   );

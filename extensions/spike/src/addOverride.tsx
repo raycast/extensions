@@ -44,13 +44,10 @@ export default function Command({ oncallId }: CommandProps) {
 
   const { data, isLoading } = useCachedPromise<() => Promise<ApiResponse>>(
     async () => {
-      const [oncallData, userData] = await Promise.all([
-        api.oncall.allOncalls(),
-        api.users.getTeamsUsers()
-      ]);
+      const [oncallData, userData] = await Promise.all([api.oncall.allOncalls(), api.users.getTeamsUsers()]);
       return {
         oncalls: oncallData.oncalls as Oncall[],
-        users: userData.users as User[]
+        users: userData.users as User[],
       };
     },
     [],
@@ -59,10 +56,10 @@ export default function Command({ oncallId }: CommandProps) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Failed to load data",
-          message: "Please try again later"
+          message: "Please try again later",
         });
-      }
-    }
+      },
+    },
   );
 
   const handleInputChange = useCallback((key: keyof FormState, value: Date | string) => {

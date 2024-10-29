@@ -57,14 +57,11 @@ export default function OncallViewPage({ oncallId }: { oncallId: string }) {
     };
   };
 
-  const { data, isLoading } = useCachedPromise<typeof fetchOncallData, [string]>(
-    fetchOncallData,
-    [oncallId]
-  );
+  const { data, isLoading } = useCachedPromise<typeof fetchOncallData, [string]>(fetchOncallData, [oncallId]);
 
   const shiftsDividedByDay = useMemo(() => {
     if (!data) return {};
-    
+
     return data.spectrum.reduce((acc: Record<string, Shift[]>, shift: Shift) => {
       const day = moment(shift.start).format("dddd, Do MMMM");
       if (!acc[day]) {
@@ -99,7 +96,7 @@ ${(shifts as Shift[]).map(createLayerMarkdown).join("\n")}
 
   const metadata = useMemo(() => {
     if (!data?.activeShift) return null;
-    
+
     return (
       <Detail.Metadata>
         <Detail.Metadata.TagList title="Current on-call">
@@ -109,9 +106,9 @@ ${(shifts as Shift[]).map(createLayerMarkdown).join("\n")}
           />
         </Detail.Metadata.TagList>
         {data.nextOncallUser && (
-          <Detail.Metadata.Label 
-            title="Next on-call" 
-            text={`${data.nextOncallUser.firstName} ${data.nextOncallUser.lastName}`} 
+          <Detail.Metadata.Label
+            title="Next on-call"
+            text={`${data.nextOncallUser.firstName} ${data.nextOncallUser.lastName}`}
           />
         )}
         <Detail.Metadata.Label

@@ -12,7 +12,7 @@ export class ApiError extends Error {
     message: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public data?: any,
-    public config?: AxiosRequestConfig
+    public config?: AxiosRequestConfig,
   ) {
     super(message);
     this.name = "ApiError";
@@ -48,10 +48,7 @@ class ApiClient {
       return config;
     });
 
-    this.axiosInstance.interceptors.response.use(
-      this.handleSuccess,
-      this.handleError.bind(this)
-    );
+    this.axiosInstance.interceptors.response.use(this.handleSuccess, this.handleError.bind(this));
   }
 
   private handleSuccess(response: AxiosResponse): AxiosResponse {
@@ -64,7 +61,7 @@ class ApiClient {
         error.response.status,
         (error.response.data as ErrorResponse).message || "An error occurred",
         error.response.data,
-        error.config
+        error.config,
       );
       return this.centralErrorHandler(apiError);
     } else if (error.request) {
@@ -81,7 +78,7 @@ class ApiClient {
       auth.logout();
       await auth.authorize();
     }
-    
+
     return this.axiosInstance.request(error.config || {});
   };
 

@@ -42,18 +42,10 @@ function ShiftListItem({ shift }: { shift: Shift }) {
       title={`${shift.user.firstName} ${shift.user.lastName}`}
       subtitle={shift.user.email}
       accessories={[{ text: shift.oncall.name || "Unknown" }]}
-      keywords={[
-        `${shift.user.firstName} ${shift.user.lastName}`,
-        shift.user.email,
-        shift.oncall.name
-      ]}
+      keywords={[`${shift.user.firstName} ${shift.user.lastName}`, shift.user.email, shift.oncall.name]}
       actions={
         <ActionPanel>
-          <Action.Push
-            title="Show Details"
-            icon={Icon.Info}
-            target={<OncallViewPage oncallId={shift.oncall._id} />}
-          />
+          <Action.Push title="Show Details" icon={Icon.Info} target={<OncallViewPage oncallId={shift.oncall._id} />} />
           <Action.Open
             icon={Icon.Globe}
             title="Open in Spike"
@@ -72,9 +64,9 @@ function ShiftListItem({ shift }: { shift: Shift }) {
 }
 
 export default function WhoIsOncall() {
-  const { 
-    data: activeShifts, 
-    isLoading, 
+  const {
+    data: activeShifts,
+    isLoading,
     error,
   } = useCachedPromise(
     async () => {
@@ -97,16 +89,16 @@ export default function WhoIsOncall() {
       keepPreviousData: true,
       onError: (error) => {
         console.error("Error fetching active schedules:", error);
-      }
-    }
+      },
+    },
   );
 
   if (error) {
     return (
       <List>
-        <List.EmptyView 
-          icon={Icon.XmarkCircle} 
-          title="Error" 
+        <List.EmptyView
+          icon={Icon.XmarkCircle}
+          title="Error"
           description={error instanceof Error ? error.message : "Failed to load on-call schedules"}
         />
       </List>
@@ -114,18 +106,12 @@ export default function WhoIsOncall() {
   }
 
   return (
-    <List
-      navigationTitle="Current On-Call Members"
-      searchBarPlaceholder="Search by on-call name"
-      isLoading={isLoading}
-    >
-      <List.Section 
+    <List navigationTitle="Current On-Call Members" searchBarPlaceholder="Search by on-call name" isLoading={isLoading}>
+      <List.Section
         title="Current On-Call Members"
         subtitle={activeShifts && activeShifts.length > 0 ? `${activeShifts.length} members` : undefined}
       >
-        {activeShifts && activeShifts.map((shift: Shift) => (
-          <ShiftListItem key={shift._id} shift={shift} />
-        ))}
+        {activeShifts && activeShifts.map((shift: Shift) => <ShiftListItem key={shift._id} shift={shift} />)}
       </List.Section>
     </List>
   );

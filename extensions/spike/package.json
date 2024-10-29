@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spike",
   "title": "Spike",
-  "description": "",
+  "description": "Resolve incidents, check who is on-call, and add overrides from Raycast",
   "icon": "spike-logo.png",
   "author": "damanpreet_singh",
   "owner": "spike.sh",
@@ -41,7 +41,7 @@
     },
     {
       "name": "whoIsOnCall",
-      "title": "Who is Oncall",
+      "title": "Who Is Oncall",
       "description": "Lists every active on-call member",
       "mode": "view",
       "keywords": [

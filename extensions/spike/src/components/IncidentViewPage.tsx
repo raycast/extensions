@@ -69,51 +69,45 @@ export default function Main({ counterId }: { counterId: string }) {
       return await api.incidents.getIncident(id);
     } catch (err) {
       const error = err instanceof Error ? err : new Error("An unknown error occurred");
-      await showToast({ 
-        style: Toast.Style.Failure, 
+      await showToast({
+        style: Toast.Style.Failure,
         title: "Failed to fetch incident",
-        message: error.message 
+        message: error.message,
       });
       throw error;
     }
   };
 
-  const { data, isLoading, mutate, revalidate } = useCachedPromise<
-    typeof fetchIncident,
-    [string]
-  >(fetchIncident, [counterId], {
-    keepPreviousData: true
-  });
+  const { data, isLoading, mutate, revalidate } = useCachedPromise<typeof fetchIncident, [string]>(
+    fetchIncident,
+    [counterId],
+    {
+      keepPreviousData: true,
+    },
+  );
 
-  const handleStatusUpdate = async (
-    action: () => Promise<void>, 
-    newStatus: "ACK" | "RES",
-    successMessage: string
-  ) => {
+  const handleStatusUpdate = async (action: () => Promise<void>, newStatus: "ACK" | "RES", successMessage: string) => {
     try {
       await action();
-      await mutate(
-        Promise.resolve(),
-        {
-          optimisticUpdate(currentData: ApiResponse | [string]) {
-            if (!currentData) return currentData;
-            return {
-              ...currentData,
-              incident: {
-                ...(currentData as ApiResponse).incident,
-                status: newStatus,
-                [`${newStatus}_at`]: new Date().toISOString()
-              }
-            };
-          }
-        }
-      );
+      await mutate(Promise.resolve(), {
+        optimisticUpdate(currentData: ApiResponse | [string]) {
+          if (!currentData) return currentData;
+          return {
+            ...currentData,
+            incident: {
+              ...(currentData as ApiResponse).incident,
+              status: newStatus,
+              [`${newStatus}_at`]: new Date().toISOString(),
+            },
+          };
+        },
+      });
       await showToast({ style: Toast.Style.Success, title: successMessage });
     } catch (err) {
       console.error(`Error updating incident status:`, err);
-      await showToast({ 
-        style: Toast.Style.Failure, 
-        title: `Failed to ${newStatus.toLowerCase()} incident` 
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `Failed to ${newStatus.toLowerCase()} incident`,
       });
       revalidate();
     }
@@ -121,27 +115,24 @@ export default function Main({ counterId }: { counterId: string }) {
 
   const handleMetadataUpdate = async (
     action: () => Promise<void>,
-    updateFn: (current: GroupedIncident) => GroupedIncident
+    updateFn: (current: GroupedIncident) => GroupedIncident,
   ) => {
     try {
       await action();
-      await mutate(
-        Promise.resolve(),
-        {
-          optimisticUpdate(currentData: ApiResponse | [string]) {
-            if (!currentData) return currentData;
-            return {
-              ...currentData,
-              groupedIncident: updateFn((currentData as ApiResponse).groupedIncident)
-            };
-          }
-        }
-      );
+      await mutate(Promise.resolve(), {
+        optimisticUpdate(currentData: ApiResponse | [string]) {
+          if (!currentData) return currentData;
+          return {
+            ...currentData,
+            groupedIncident: updateFn((currentData as ApiResponse).groupedIncident),
+          };
+        },
+      });
     } catch (err) {
       console.error("Error updating incident metadata:", err);
-      await showToast({ 
-        style: Toast.Style.Failure, 
-        title: "Failed to update incident" 
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to update incident",
       });
       revalidate();
     }
@@ -149,27 +140,19 @@ export default function Main({ counterId }: { counterId: string }) {
 
   const acknowledgeIncident = async () => {
     if (!data) return;
-    await handleStatusUpdate(
-      () => api.incidents.acknowledgeIncident(data.incident),
-      "ACK",
-      "Incident acknowledged"
-    );
+    await handleStatusUpdate(() => api.incidents.acknowledgeIncident(data.incident), "ACK", "Incident acknowledged");
   };
 
   const resolveIncident = async () => {
     if (!data) return;
-    await handleStatusUpdate(
-      () => api.incidents.resolveIncident(data.incident),
-      "RES",
-      "Incident resolved"
-    );
+    await handleStatusUpdate(() => api.incidents.resolveIncident(data.incident), "RES", "Incident resolved");
   };
 
   const setSeverity = async (severity: string) => {
     if (!data) return;
     await handleMetadataUpdate(
       () => api.incidents.setSeverity([data.incident.counterId], severity),
-      (current) => ({ ...current, severity })
+      (current) => ({ ...current, severity }),
     );
   };
 
@@ -177,7 +160,7 @@ export default function Main({ counterId }: { counterId: string }) {
     if (!data) return;
     await handleMetadataUpdate(
       () => api.incidents.removeSeverity([data.incident.counterId]),
-      (current) => ({ ...current, severity: undefined })
+      (current) => ({ ...current, severity: undefined }),
     );
   };
 
@@ -185,7 +168,7 @@ export default function Main({ counterId }: { counterId: string }) {
     if (!data) return;
     await handleMetadataUpdate(
       () => api.incidents.setPriority([data.incident.counterId], priority),
-      (current) => ({ ...current, priority })
+      (current) => ({ ...current, priority }),
     );
   };
 
@@ -193,7 +176,7 @@ export default function Main({ counterId }: { counterId: string }) {
     if (!data) return;
     await handleMetadataUpdate(
       () => api.incidents.removePriority([data.incident.counterId]),
-      (current) => ({ ...current, priority: undefined })
+      (current) => ({ ...current, priority: undefined }),
     );
   };
 
@@ -226,7 +209,7 @@ ${JSON.stringify(incident.resMetadata, null, 2)}
   const metadata = useMemo(() => {
     if (!data) return null;
     const { incident, groupedIncident } = data;
-    
+
     return (
       <Detail.Metadata>
         <Detail.Metadata.TagList title="Status">
@@ -274,21 +257,12 @@ ${JSON.stringify(incident.resMetadata, null, 2)}
           />
         )}
 
-        <Detail.Metadata.Label 
-          title="Triggered at" 
-          text={moment(incident.NACK_at).format("MMM DD, YYYY h:mm A")} 
-        />
+        <Detail.Metadata.Label title="Triggered at" text={moment(incident.NACK_at).format("MMM DD, YYYY h:mm A")} />
         {incident.status !== "NACK" && incident.ACK_at && (
-          <Detail.Metadata.Label 
-            title="Acknowledged At" 
-            text={moment(incident.ACK_at).format("MMM DD, YYYY h:mm A")} 
-          />
+          <Detail.Metadata.Label title="Acknowledged At" text={moment(incident.ACK_at).format("MMM DD, YYYY h:mm A")} />
         )}
         {incident.status === "RES" && incident.RES_at && (
-          <Detail.Metadata.Label 
-            title="Resolved At" 
-            text={moment(incident.RES_at).format("MMM DD, YYYY h:mm A")} 
-          />
+          <Detail.Metadata.Label title="Resolved At" text={moment(incident.RES_at).format("MMM DD, YYYY h:mm A")} />
         )}
       </Detail.Metadata>
     );
@@ -296,13 +270,10 @@ ${JSON.stringify(incident.resMetadata, null, 2)}
 
   const actions = useMemo(() => {
     if (!data) return null;
-    
+
     return (
       <ActionPanel>
-        <Action.OpenInBrowser 
-          title="Open in Spike" 
-          url={`${config?.spike}/incidents/${data.incident.counterId}`} 
-        />
+        <Action.OpenInBrowser title="Open in Spike" url={`${config?.spike}/incidents/${data.incident.counterId}`} />
         {data.incident.status === "NACK" && (
           <Action
             shortcut={shortcut.ACKNOWLEDGE_INCIDENT}
@@ -312,17 +283,14 @@ ${JSON.stringify(incident.resMetadata, null, 2)}
           />
         )}
         {data.incident.status !== "RES" && (
-          <Action 
-            shortcut={shortcut.RESOLVE_INCIDENT} 
-            title="Resolve" 
-            icon={Icon.Checkmark} 
-            onAction={resolveIncident} 
+          <Action
+            shortcut={shortcut.RESOLVE_INCIDENT}
+            title="Resolve"
+            icon={Icon.Checkmark}
+            onAction={resolveIncident}
           />
         )}
-        <ActionPanel.Submenu 
-          icon={{ source: getIcon("sev2.png") }} 
-          title="Change Severity"
-        >
+        <ActionPanel.Submenu icon={{ source: getIcon("sev2.png") }} title="Change Severity">
           {severities.map((severity) => (
             <Action
               icon={{ source: getIcon(`${severity.value}.png`) }}
@@ -331,17 +299,9 @@ ${JSON.stringify(incident.resMetadata, null, 2)}
               onAction={() => setSeverity(severity.value)}
             />
           ))}
-          <Action 
-            icon={Icon.XmarkCircle} 
-            key="remove-severity" 
-            title="Remove Severity" 
-            onAction={removeSeverity} 
-          />
+          <Action icon={Icon.XmarkCircle} key="remove-severity" title="Remove Severity" onAction={removeSeverity} />
         </ActionPanel.Submenu>
-        <ActionPanel.Submenu 
-          icon={{ source: getIcon("p2.png") }} 
-          title="Change Priority"
-        >
+        <ActionPanel.Submenu icon={{ source: getIcon("p2.png") }} title="Change Priority">
           {priorities.map((priority) => (
             <Action
               icon={{ source: getIcon(`${priority.value}.png`) }}
@@ -350,12 +310,7 @@ ${JSON.stringify(incident.resMetadata, null, 2)}
               onAction={() => setPriority(priority.value)}
             />
           ))}
-          <Action 
-            icon={Icon.XmarkCircle} 
-            key="remove-priority" 
-            title="Remove Priority" 
-            onAction={removePriority} 
-          />
+          <Action icon={Icon.XmarkCircle} key="remove-priority" title="Remove Priority" onAction={removePriority} />
         </ActionPanel.Submenu>
       </ActionPanel>
     );

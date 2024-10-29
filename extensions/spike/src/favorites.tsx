@@ -26,11 +26,7 @@ function FavoriteItem({ favorite }: { favorite: Favorite }) {
       icon={getIcon()}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser 
-            icon={Icon.Globe} 
-            title="Open Favorite" 
-            url={`${config?.spike}${favorite.url}`} 
-          />
+          <Action.OpenInBrowser icon={Icon.Globe} title="Open Favorite" url={`${config?.spike}${favorite.url}`} />
         </ActionPanel>
       }
     />
@@ -50,20 +46,15 @@ export default function Command() {
     {
       onError: (err) => {
         console.error("Error fetching favorites:", err);
-      }
-    }
+      },
+    },
   );
 
-  const favorites = useMemo(() => 
-    data ? Object.values(data.favorites) : [],
-    [data]
-  );
+  const favorites = useMemo(() => (data ? Object.values(data.favorites) : []), [data]);
 
   const favoriteItems = useMemo(
-    () => favorites.map((favorite) => 
-      <FavoriteItem key={favorite.entityId} favorite={favorite} />
-    ),
-    [favorites]
+    () => favorites.map((favorite) => <FavoriteItem key={favorite.entityId} favorite={favorite} />),
+    [favorites],
   );
 
   if (isLoading) {
@@ -71,20 +62,12 @@ export default function Command() {
   }
 
   if (error) {
-    return (
-      <List.EmptyView 
-        title="Error" 
-        description="Failed to fetch favorites. Please try again." 
-      />
-    );
+    return <List.EmptyView title="Error" description="Failed to fetch favorites. Please try again." />;
   }
 
   return (
     <List>
-      <List.Section 
-        title="Favorites" 
-        subtitle={`${favorites.length} items`}
-      >
+      <List.Section title="Favorites" subtitle={`${favorites.length} items`}>
         {favoriteItems}
       </List.Section>
     </List>
