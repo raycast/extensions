@@ -4,6 +4,10 @@ export function CopyToClipboardAction({ title, content }: { title: string; conte
   return <Action.CopyToClipboard title={`Copy ${title}`} content={content} />;
 }
 
+export function OpenInBrowserAction({ title, url }: { title: string; url: string }) {
+  return <Action.OpenInBrowser title={title} url={url} />;
+}
+
 export function ReloadAction({ onReload }: { onReload: () => void }) {
   return <Action title="Reload" icon={Icon.ArrowClockwise} onAction={onReload} />;
 }

@@ -11,10 +11,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search-hooks",
+      "name": "index",
       "title": "Search Hooks",
       "subtitle": "Rehooks",
-      "description": "This command will get you through every available hooks in Rehooks",
+      "description": "This command will make you able to copy hooks into your clipboard",
       "mode": "view"
     }
   ],

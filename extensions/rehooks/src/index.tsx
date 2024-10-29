@@ -1,4 +1,4 @@
-import { CopyToClipboardAction, ReloadAction } from "./components/actions";
+import { CopyToClipboardAction, ReloadAction, OpenInBrowserAction } from "./components/actions";
 import { ActionPanel, List } from "@raycast/api";
 import { useSearch } from "./hooks/useSearch";
 import { useState } from "react";
@@ -9,6 +9,15 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText} throttle>
+      <List.Item
+        title="Checkout Documentaion"
+        subtitle="Rehooks"
+        actions={
+          <ActionPanel>
+            <OpenInBrowserAction title="Checkout Documentaion" url="https://rehooks.pyr33x.ir/docs" />
+          </ActionPanel>
+        }
+      />
       {(data || []).map((item) => (
         <List.Item
           key={item.id}
