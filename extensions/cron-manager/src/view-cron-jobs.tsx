@@ -14,7 +14,6 @@ import {
 import { FormValidation, runAppleScript, showFailureToast, useExec, useForm } from "@raycast/utils";
 import cronParser from "cron-parser";
 import cronstrue from "cronstrue";
-import fs from "fs";
 import { useMemo } from "react";
 
 export default function Command() {
@@ -23,7 +22,13 @@ export default function Command() {
   const cronJobs = useMemo<CronJob[]>(() => parseCronJobs(crontabData ?? ""), [crontabData]);
 
   return (
-    <List>
+    <List
+      actions={
+        <ActionPanel>
+          <Action.Push title="New Cron Job" target={<CronForm job={{}} onSubmit={revalidate} />} />
+        </ActionPanel>
+      }
+    >
       {cronJobs.map((job, index) => (
         <List.Item
           key={index}
@@ -116,7 +121,7 @@ ${values.cronExpression} ${values.scriptPath}
       name: job.name || "",
       description: job.description || "",
       cronExpression: job.cronExpression || "",
-      scriptPath: job.scriptPath || [],
+      scriptPath: job.scriptPath || "",
       parsedCronExpression: job.parsedCronExpression || "",
     },
     validation: {
@@ -135,10 +140,6 @@ ${values.cronExpression} ${values.scriptPath}
       scriptPath: (value) => {
         if (!value) {
           return "Script path is required";
-        }
-        const file = values.scriptPath[0];
-        if (!fs.existsSync(file) || !fs.lstatSync(file).isFile()) {
-          return "File does not exist";
         }
       },
     },
@@ -168,7 +169,7 @@ ${values.cronExpression} ${values.scriptPath}
       <Form.TextArea title="Description" {...itemProps.description} />
       <Form.TextField title="Cron Expression" {...itemProps.cronExpression} />
       <Form.Description title="Parsed Cron Expression" text={parsedCronExpression} />
-      <Form.FilePicker title="Script Path" allowMultipleSelection={false} {...itemProps.scriptPath} />
+      <Form.TextField title="Cron Command" placeholder="e.g. ~/path/to/script.sh" {...itemProps.scriptPath} />
     </Form>
   );
 }
@@ -178,7 +179,7 @@ export interface CronJob {
   description: string;
   cronExpression: string;
   parsedCronExpression: string;
-  scriptPath: string[];
+  scriptPath: string;
 }
 
 export function parseCronJobs(cronData: string): CronJob[] {
@@ -203,7 +204,7 @@ export function parseCronJobs(cronData: string): CronJob[] {
       if (scriptPathIndex !== -1) {
         currentJob.cronExpression = parts.slice(0, scriptPathIndex).join(" ");
         currentJob.parsedCronExpression = cronstrue.toString(currentJob.cronExpression);
-        currentJob.scriptPath = [parts.slice(scriptPathIndex).join(" ")];
+        currentJob.scriptPath = parts.slice(scriptPathIndex).join(" ");
       }
     }
   }
