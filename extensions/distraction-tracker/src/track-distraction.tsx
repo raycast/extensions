@@ -18,6 +18,7 @@ export default function Command() {
             ...values,
             feeling: values.feeling as keyof typeof feelings,
             id: randomUUID(),
+            time: values.time ?? new Date(),
           },
         ]);
         showHUD("Distraction saved", { clearRootSearch: true, popToRootType: PopToRootType.Immediate });
