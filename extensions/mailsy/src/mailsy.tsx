@@ -1,18 +1,7 @@
 import { useCallback, useEffect, useReducer, useState } from "react";
 import { htmlToMarkdown, isLoggedIn, timeAgo, withToast, removeAccount, handleAction } from "./libs/utils";
 import { createAccount, deleteAccount, getAccount, getMails, deleteMail, getMessage } from "./libs/api";
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Detail,
-  Icon,
-  List,
-  popToRoot,
-  environment,
-  showHUD,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, List, popToRoot, environment, showHUD } from "@raycast/api";
 import { useAccount } from "./hooks/useAccount";
 
 enum View {
@@ -135,44 +124,6 @@ function Mail(): JSX.Element {
                 url="https://mail.tm/"
                 icon={{ source: Icon.Globe, tintColor: Color.Blue }}
                 onOpen={() => showHUD("Login to view your account")}
-              />
-              <Action.CopyToClipboard
-                title="Copy Email"
-                content={Account?.email ?? ""}
-                icon={{ source: Icon.Envelope, tintColor: Color.Purple }}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-              />
-              <Action.CopyToClipboard
-                title="Copy Password"
-                content={Account?.password ?? ""}
-                icon={{ source: Icon.Key, tintColor: Color.Purple }}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-              />
-              <Action
-                title="Refresh"
-                icon={{ source: Icon.ArrowClockwise, tintColor: Color.Blue }}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-                onAction={() => {
-                  setRefreshKey(refreshKey + 1);
-                  showToast({
-                    title: "Refreshed",
-                    message: "Mails refreshed successfully",
-                  });
-                }}
-              />
-              <Action
-                title="Delete Account"
-                icon={{ source: Icon.Trash, tintColor: Color.Red }}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-                onAction={() =>
-                  handleAction(
-                    () => deleteAccount(),
-                    () => popToRoot(),
-                    `Deleting Account...`,
-                    `Account deleted`,
-                    `Account could not be deleted`,
-                  )
-                }
               />
             </ActionPanel>
           }
