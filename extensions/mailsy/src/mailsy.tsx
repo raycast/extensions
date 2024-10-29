@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useReducer, useState } from "react";
 import { htmlToMarkdown, isLoggedIn, timeAgo, withToast, removeAccount, handleAction } from "./libs/utils";
 import { createAccount, deleteAccount, getAccount, getMails, deleteMail, getMessage } from "./libs/api";
-import { Action, ActionPanel, Color, Detail, Icon, List, popToRoot, environment, showHUD } from "@raycast/api";
-=======
 import {
   Action,
   ActionPanel,
@@ -167,10 +165,12 @@ function Mail(): JSX.Element {
                 icon={{ source: Icon.Trash, tintColor: Color.Red }}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                 onAction={() =>
-                  handleDelete(
+                  handleAction(
                     () => deleteAccount(),
                     () => popToRoot(),
-                    "Account",
+                    `Deleting Account...`,
+                    `Account deleted`,
+                    `Account could not be deleted`,
                   )
                 }
               />
@@ -215,8 +215,6 @@ function Mail(): JSX.Element {
                       `Deleting Message...`,
                       `Message deleted`,
                       `Message could not be deleted`,
-                      () => setRefreshKey(refreshKey + 1),
-                      "Message",
                     )
                   }
                 />

@@ -145,10 +145,6 @@ export const handleAction = (
     },
     onFailure: () => failureMessage,
     loadingMessage,
-      return `${loadingMessage} deleted`;
-    },
-    onFailure: () => `${loadingMessage} could not be deleted`,
-    loadingMessage: `Deleting ${loadingMessage}...`,
   })();
 };
 
