@@ -6,8 +6,7 @@ type Hook = Readonly<{
   id: string;
   title: string;
   description: string;
-  import: string;
-  url: string;
+  content: string;
 }>;
 
 export default function Command() {
@@ -27,8 +26,7 @@ export default function Command() {
           keywords={[item.title]}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard title={`Import ${item.title}`} content={item.import} />
-              <Action.OpenInBrowser title="Open in Browser" url={item.url} />
+              <Action.CopyToClipboard title={`Import ${item.title}`} content={item.content} />
               <Action title="Reload" icon={Icon.ArrowClockwise} onAction={() => revalidate()} />
             </ActionPanel>
           }
