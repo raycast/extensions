@@ -1,6 +1,6 @@
 # Slugify Changelog
 
-## [Now Supports `Strict`] - {PR_MERGE_DATE}
+## [Now Supports `Strict`] - 2024-10-29
 
 BEFORE: `Raycast's Fun` -> `raycast's-fun`
 
