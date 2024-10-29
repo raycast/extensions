@@ -1,6 +1,6 @@
 # Browser Tabs Changelog
 
-## [Remove Zen Browser] - {PR_MERGE_DATE}
+## [Remove Zen Browser] - 2024-10-29
 
 - Remove Zen Browser as it is not supported.
 
