@@ -20,17 +20,6 @@ interface Incident {
   };
 }
 
-interface Pagination {
-  currentPage: number;
-  total: number;
-}
-
-interface IncidentResponse {
-  NACK_Incidents: Incident[];
-  ACK_Incidents: Incident[];
-  pagination: Pagination;
-}
-
 const tagProps: Record<Incident["status"], { value: string; color: Color }> = {
   NACK: { value: "Triggered", color: Color.Red },
   ACK: { value: "Acknowledged", color: Color.Blue },
@@ -68,11 +57,19 @@ const IncidentListItem = React.memo(function IncidentListItem({
 
   const truncateLimit = accessories.length > 1 ? 40 : 50;
 
+  const keywords = [
+    incident.message || "",
+    incident.counterId || "",
+    incident.status || "",
+    incident?.groupedIncident?.priority || "",
+    incident?.groupedIncident?.severity || "",
+  ].filter(Boolean); // Remove empty strings
+
   return (
     <List.Item
       title={truncate(incident.message, truncateLimit) || "Parsing failed"}
       subtitle={incident.counterId}
-      keywords={[incident.message, incident.counterId, incident.status]}
+      keywords={keywords}
       accessories={[...accessories, { tag: tagProps[incident.status] }]}
       actions={
         <ActionPanel>
@@ -105,9 +102,27 @@ const IncidentListItem = React.memo(function IncidentListItem({
 });
 
 export default function Command() {
-  const { data, isLoading, error, mutate, revalidate } = useCachedPromise(
-    (page: number = 0) => api.incidents.getOpenIncidents(page),
-    [0],
+  const {
+    data: paginatedData,
+    isLoading,
+    error,
+    mutate,
+    pagination,
+  } = useCachedPromise(
+    () => async (options: { page: number }) => {
+      const response = await api.incidents.getOpenIncidents(options.page + 1, 20);
+
+      const combinedData = [
+        ...response.NACK_Incidents.map((incident: Incident) => ({ ...incident, type: "NACK" as const })),
+        ...response.ACK_Incidents.map((incident: Incident) => ({ ...incident, type: "ACK" as const })),
+      ];
+
+      return {
+        data: combinedData,
+        hasMore: response.pagination.total > (options.page + 1) * 20,
+      };
+    },
+    [],
     {
       onError: (err) => {
         console.error("Error fetching incidents:", err);
@@ -118,17 +133,13 @@ export default function Command() {
   const updateIncidentStatus = useCallback(
     async (incident: Incident, newStatus: "ACK" | "RES") => {
       await mutate(Promise.resolve(), {
-        optimisticUpdate(currentData: IncidentResponse | undefined) {
-          if (!currentData) return currentData;
-
-          const updateIncident = (incidents: Incident[]) =>
-            incidents.map((i) => (i._id === incident._id ? { ...i, status: newStatus } : i));
-
-          return {
-            ...currentData,
-            NACK_Incidents: updateIncident(currentData.NACK_Incidents),
-            ACK_Incidents: updateIncident(currentData.ACK_Incidents),
-          };
+        optimisticUpdate(currentData: Incident[] | undefined) {
+          if (!currentData) return [];
+          // Proceed with the rest of the function
+          if (newStatus === "RES") {
+            return currentData.filter((item) => item._id !== incident._id);
+          }
+          return currentData.map((item) => (item._id === incident._id ? { ...item, status: newStatus } : item));
         },
       });
     },
@@ -143,10 +154,9 @@ export default function Command() {
         await showToast({ style: Toast.Style.Success, title: "Incident acknowledged" });
       } catch (err) {
         await showToast({ style: Toast.Style.Failure, title: "Failed to acknowledge incident" });
-        revalidate();
       }
     },
-    [updateIncidentStatus, revalidate],
+    [updateIncidentStatus],
   );
 
   const resolveIncident = useCallback(
@@ -157,43 +167,33 @@ export default function Command() {
         await showToast({ style: Toast.Style.Success, title: "Incident resolved" });
       } catch (err) {
         await showToast({ style: Toast.Style.Failure, title: "Failed to resolve incident" });
-        revalidate();
       }
     },
-    [updateIncidentStatus, revalidate],
+    [updateIncidentStatus],
   );
 
   const incidents = useMemo(() => {
-    if (!data) return { triggered: [], acknowledged: [] };
+    if (!paginatedData) return { triggered: [], acknowledged: [] };
     return {
-      triggered: data.NACK_Incidents,
-      acknowledged: data.ACK_Incidents,
+      triggered: paginatedData.filter((incident) => incident.status === "NACK"),
+      acknowledged: paginatedData.filter((incident) => incident.status === "ACK"),
     };
-  }, [data]);
+  }, [paginatedData]);
 
   if (error) {
     return <List.EmptyView title="Error" description="Failed to fetch incidents. Please try again." />;
   }
 
-  const incidentPagination = {
-    pageSize: 20,
-    hasMore: data?.pagination && data.pagination.total > incidents.triggered.length + incidents.acknowledged.length,
-    onLoadMore: async () => {
-      const nextPage = (data?.pagination?.currentPage ?? 0) + 1;
-      await mutate(api.incidents.getOpenIncidents(nextPage));
-    },
-  };
-
   return (
     <List
-      pagination={incidentPagination}
       isLoading={isLoading}
-      navigationTitle={`Open Incidents (${data?.pagination?.total ?? 0})`}
+      navigationTitle={`Open Incidents (${paginatedData?.length ?? 0})`}
       searchBarPlaceholder="Search among open incidents..."
+      pagination={pagination}
     >
       {incidents.triggered.length > 0 && (
         <List.Section title="Triggered" subtitle={`${incidents.triggered.length} items`}>
-          {incidents.triggered.map((incident: Incident) => (
+          {incidents.triggered.map((incident) => (
             <IncidentListItem
               key={incident._id}
               incident={incident}
@@ -205,7 +205,7 @@ export default function Command() {
       )}
       {incidents.acknowledged.length > 0 && (
         <List.Section title="Acknowledged" subtitle={`${incidents.acknowledged.length} items`}>
-          {incidents.acknowledged.map((incident: Incident) => (
+          {incidents.acknowledged.map((incident) => (
             <IncidentListItem
               key={incident._id}
               incident={incident}
