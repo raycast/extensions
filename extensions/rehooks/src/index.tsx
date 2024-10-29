@@ -9,15 +9,6 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText} throttle>
-      <List.Item
-        title="Checkout Documentaion"
-        subtitle="Rehooks"
-        actions={
-          <ActionPanel>
-            <OpenInBrowserAction title="Checkout Documentaion" url="https://rehooks.pyr33x.ir/docs" />
-          </ActionPanel>
-        }
-      />
       {(data || []).map((item) => (
         <List.Item
           key={item.id}

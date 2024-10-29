@@ -16,6 +16,13 @@
       "subtitle": "Rehooks",
       "description": "This command will make you able to copy hooks into your clipboard",
       "mode": "view"
+    },
+    {
+      "name": "docs",
+      "title": "Documentaion",
+      "subtitle": "Rehooks",
+      "description": "You'll access to the documentation routes",
+      "mode": "view"
     }
   ],
   "dependencies": {
