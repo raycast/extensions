@@ -1,6 +1,6 @@
 # Downloads Manager Changelog
 
-## [Add close window script] - {PR_MERGE_DATE}
+## [Add close window script] - 2024-10-29
 
 - Added a script to close the window to ensure it closes after the action is completed
 
