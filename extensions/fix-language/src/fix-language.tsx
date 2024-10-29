@@ -32,7 +32,7 @@ export default function FixLanguage() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Past to Code" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Paste to Active App" onSubmit={handleSubmit} />
           {result && (
             <Action
               title="Copy Result"
