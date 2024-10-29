@@ -6,7 +6,8 @@
   "icon": "polymarket.png",
   "author": "Osprey",
   "categories": [
-    "Productivity"
+    "News",
+    "Finance"
   ],
   "license": "MIT",
   "commands": [
