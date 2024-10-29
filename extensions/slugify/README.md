@@ -14,7 +14,7 @@
 
 ## Showcases
 
-![slugify](media/slugify-1.png)
+![slugify](metadata/slugify-1.png)
 
 
 Icon by <a href=" https://www.vectorportal.com" >Vectorportal.com</a>,  <a class="external text" href="https://creativecommons.org/licenses/by/4.0/" >CC BY</a>
