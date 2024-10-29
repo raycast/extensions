@@ -146,7 +146,7 @@ export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoPr
               shortcut={{ modifiers: ['cmd'], key: '1' }}
             />
             <Action
-              title="Focus Title"
+              title="Focus Notes"
               icon={Icon.TextInput}
               onAction={() => focus('notes')}
               shortcut={{ modifiers: ['cmd'], key: '2' }}
