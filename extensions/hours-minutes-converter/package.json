@@ -3,7 +3,7 @@
   "name": "hours-minutes-converter",
   "title": "Hours:Minutes Converter",
   "description": "Converts time from hours and minutes to decimals.",
-  "icon": "depositado-icon.svg",
+  "icon": "depositado-icon.png",
   "author": "ole_welling_ole_welling",
   "categories": [
     "Developer Tools"
