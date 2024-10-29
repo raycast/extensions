@@ -90,6 +90,7 @@ export type Game = {
   threeMinRecap?: string;
   threeMinRecapFr?: string;
   otInUse: boolean;
+  summary?: GameSummary
 };
 
 export type SortedGames = {
@@ -581,4 +582,107 @@ export type GameReports = {
   shiftChart: string;
   toiAway: string;
   toiHome: string;
+};
+
+export type Goal = {
+  situationCode: string;
+  strength: string;
+  playerId: number;
+  firstName: {
+    default: string;
+  };
+  lastName: {
+    default: string;
+  };
+  name: {
+    default: string;
+  };
+  teamAbbrev: {
+    default: string;
+  };
+  headshot: string;
+  highlightClipSharingUrl: string;
+  highlightClipSharingUrlFr: string;
+  highlightClip: number;
+  highlightClipFr: number;
+  discreteClip: number;
+  discreteClipFr: number;
+  goalsToDate: number;
+  awayScore: number;
+  homeScore: number;
+  leadingTeamAbbrev?: {
+    default: string;
+  };
+  timeInPeriod: string;
+  shotType: string;
+  goalModifier: string;
+  assists: Array<{
+    playerId: number;
+    firstName: {
+      default: string;
+    };
+    lastName: {
+      default: string;
+    };
+    name: {
+      default: string;
+    };
+    assistsToDate: number;
+  }>;
+  pptReplayUrl: string;
+  homeTeamDefendingSide: string;
+};
+
+export type Penalty = {
+  timeInPeriod: string;
+  type: string;
+  duration: number;
+  committedByPlayer: string;
+  teamAbbrev: {
+    default: string;
+  };
+  drawnBy: string;
+  descKey: string;
+};
+
+export type PeriodSummary = {
+  periodDescriptor: PeriodDescriptor;
+  goals: Goal[];
+};
+
+export type PenaltySummary = {
+  periodDescriptor: PeriodDescriptor;
+  penalties: Penalty[];
+};
+
+export type GameSummary = {
+  scoring: PeriodSummary[];
+  shootout: any[]; // Add more specific type if needed
+  threeStars: any[]; // Add more specific type if needed
+  penalties: PenaltySummary[];
+  iceSurface: {
+    awayTeam: TeamIceSurface;
+    homeTeam: TeamIceSurface;
+  };
+};
+
+export type PlayerOnIce = {
+  playerId: number;
+  name: {
+    default: string;
+    cs?: string;
+    fi?: string;
+    sk?: string;
+  };
+  sweaterNumber: number;
+  positionCode: string;
+  headshot: string;
+  totalSOI: number;
+};
+
+export type TeamIceSurface = {
+  forwards: PlayerOnIce[];
+  defensemen: PlayerOnIce[];
+  goalies: PlayerOnIce[];
+  penaltyBox: PlayerOnIce[];
 };

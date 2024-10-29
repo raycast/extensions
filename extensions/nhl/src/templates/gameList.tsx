@@ -1,10 +1,11 @@
+import React from "react";
 import { getPreferenceValues } from "@raycast/api";
 import { List, Action, ActionPanel } from "@raycast/api";
 import { Game } from "../utils/types";
 import { getOrdinalPeriod, formatLocalTime, getScoreColor } from "../utils/helpers";
 import { gameActions } from "../utils/translations";
 import { getLanguageKey } from "../utils/helpers";
-import { gameStates } from "../utils/translations";
+import { gameStates, timeStrings } from "../utils/translations";
 import GameDetail from "./gameDetail";
 import GameActions from "./gameActions";
 
@@ -33,6 +34,20 @@ function gameAccessories(game: Game) {
   }
 }
 
+const gameTime = function(game: Game) {
+  if (game.clock?.timeRemaining) {
+    return `${game.clock?.timeRemaining} ${timeStrings.timeRemainingShort[languageKey]}`;
+  } else if (game.clock?.inIntermission) {
+    return `${timeStrings.intermission[languageKey]}: ${game.clock?.timeRemaining}`;
+  } 
+  else if (game.gameState === "OFF") {
+    return formatLocalTime(game.startTimeUTC);
+  }
+  else {
+    return `${formatLocalTime(game.startTimeUTC)} ${timeStrings.gameStart[languageKey]}`;
+  }
+}
+
 export default function GameList({ title, games }: { title: string; games: Game[] }) {
   return (
     <List.Section title={title}>
@@ -43,7 +58,7 @@ export default function GameList({ title, games }: { title: string; games: Game[
               title={`${game.awayTeam.name[languageKey]} @ ${game.homeTeam.name[languageKey]}`}
               subtitle={gameAccessories(game)}
               accessories={[
-                { text: formatLocalTime(game.startTimeUTC) },
+                { text: gameTime(game) },
                 {
                   tag: { value: String(game.awayTeam.score ?? ""), color: getScoreColor(game, "Away") },
                   icon: game.awayTeam.logo,

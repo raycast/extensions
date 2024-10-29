@@ -1,3 +1,4 @@
+import React from "react";
 import { List } from "@raycast/api";
 import { getNHL } from "./utils/nhlData";
 import { ScoreboardResponse } from "./utils/types";

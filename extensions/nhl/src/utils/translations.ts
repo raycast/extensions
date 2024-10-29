@@ -1,3 +1,5 @@
+import { timeRemaining } from "./helpers";
+
 export const gameTitles = {
   today: {
     default: "Today's Games",
@@ -56,6 +58,14 @@ export const timeStrings = {
     default: "Time Remaining",
     fr: "Temps Restant",
   },
+  timeRemainingShort: {
+    default: "remaining",
+    fr: "restant",
+  },
+  gameStart: {
+    default: "Game Start",
+    fr: "Début du Match",
+  }
 }
 
 export const gameStrings = {
