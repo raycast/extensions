@@ -53,7 +53,7 @@ function AirtableBaseListItem(props: { baseMetadata: AirtableBaseMetadata }) {
             target={<AirtableBaseDetails baseMetadata={baseMetadata} />}
             shortcut={{ modifiers: ["cmd"], key: "d" }}
           />
-          <Action.OpenInBrowser title="Open API Docs in Browser" url={baseMetadata.apiDocsUrl} />
+          <Action.OpenInBrowser title="Open Api Docs in Browser" url={baseMetadata.apiDocsUrl} />
           <Action.CopyToClipboard
             title={`Copy Base ID (${baseMetadata.id})`}
             content={baseMetadata.id}
