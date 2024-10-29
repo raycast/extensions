@@ -566,10 +566,16 @@ export type Linescore = {
 };
 
 export type TeamGameStat = {
-  category: string;
+  category: GameStringCategory;
   awayValue: number | string;
   homeValue: number | string;
 };
+
+export type GameStringCategory = 'linescore' | 'sog' | 'faceoffWinningPctg' | 'powerPlay' | 'powerPlayPctg' | 'takeaways' | 'giveaways' | 'hits' | 'pim' | 'blockedShots' | 'gameStats';
+
+export type GameStrings = Record<GameStringCategory, Record<LanguageKey, string>>;
+
+export type LanguageKey = 'default' | 'fr';
 
 export type GameReports = {
   gameSummary: string;

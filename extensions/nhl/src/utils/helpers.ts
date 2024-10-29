@@ -1,10 +1,95 @@
-import { ScoreboardResponse, Game, SortedGames, Timezone, Clock, PeriodDescriptor, TeamInfo, Linescore, Period} from "./types";
-import { getPreferenceValues, Color } from "@raycast/api";
-import { timeStrings } from "./translations";
+import { ScoreboardResponse, Game, SortedGames, Timezone, Clock, PeriodDescriptor, TeamInfo, Linescore, Period, GamecenterRightRailResponse, GameStringCategory} from "./types";
+import { getPreferenceValues, Color, environment } from "@raycast/api";
+import { timeStrings, gameStrings } from "./translations";
 
 const preferences = getPreferenceValues();
 const timezone = preferences.timezone as Timezone;
 const languageKey = getLanguageKey();
+
+export function penaltiesList(game: Game) {
+  const penalties = game.summary?.penalties;
+  if (!penalties) return '';
+  let penaltyList = '## Penalties \n';
+  for (const period of penalties) {
+    penaltyList += `### ${getOrdinalPeriod(period.periodDescriptor.number)} \n`;
+    if (period.penalties.length === 0) {
+      penaltyList += 'No penalties this period. \n\n';
+    } else {
+      for (const penalty of period.penalties) {
+        penaltyList += ` - <img src="${teamLogo(penalty.teamAbbrev.default)}" width="20" height="20" /> | \`${penalty.timeInPeriod}\` | ${penalty.committedByPlayer} (${penalty.duration}:00) - ${penalty.descKey} against ${penalty.drawnBy}`
+        penaltyList += `\n`;
+      }
+    }
+  }
+  return penaltyList;
+}
+
+export function scoresList(game: Game) {
+  const scoring = game.summary?.scoring;
+  if (!scoring) return '';
+  let scores = '## Scoring \n';
+  for (const period of scoring) {
+    scores += `### ${getOrdinalPeriod(period.periodDescriptor.number)} \n`;
+    if (period.goals.length === 0) {
+      scores += 'No goals scored this period. \n\n';
+    } else {
+      for (const goal of period.goals) {
+        scores += ` - <img src="${teamLogo(goal.teamAbbrev.default)}" width="20" height="20" /> | **[${goal.homeScore} - ${goal.awayScore}](${goal.highlightClipSharingUrl})** | \`${goal.timeInPeriod}\` | ${goal.shotType} | <img src="${goal.headshot}" alt="" width="20" height="20" /> ${goal.firstName.default} ${goal.lastName.default} (${goal.goalsToDate}) ${goal.strength === 'pp' ? 'PPG' : '' }`;
+        if(goal.assists.length > 0) {
+          scores += ' | ';
+        }
+        for (const [index, assist] of goal.assists.entries()) {
+          scores += `A: ${assist.name.default} (${assist.assistsToDate})${index < goal.assists.length - 1 ? ', ' : ''}`;
+        }
+        scores += `\n`;
+      }
+    }
+  }
+  return scores;
+}
+
+
+
+export function gameSummaryStats(
+  gameSidebar: GamecenterRightRailResponse,
+  homeTeam: TeamInfo,
+  awayTeam: TeamInfo
+): string {
+  // Check if teamGameStats exists
+  if (!gameSidebar.teamGameStats) return '';
+
+  const home = homeTeam.abbrev;
+  const away = awayTeam.abbrev;
+
+  // Initialize the summary
+  let summary = `## ${gameStrings.gameStats[languageKey]}\n`;
+  summary += `| ${home} <img src="${teamLogo(home)}" width="20" height="20" /> |  | ${away} <img src="${teamLogo(away)}" width="20" height="20" /> |\n`;
+  summary += `|:---:|:---:|:---:|\n`;
+
+  // Iterate through the stats and build the summary
+  for (const stat of gameSidebar.teamGameStats) {
+    const category = stat.category as GameStringCategory;
+
+    if (typeof stat.homeValue === 'string') {
+      // If homeValue is a string, just insert it directly
+      summary += `| ${stat.homeValue} | ${gameStrings[category][languageKey]} | ${stat.awayValue} |\n`;
+    } else if (typeof stat.homeValue === 'number') {
+      if (Number.isInteger(stat.homeValue)) {
+        // If homeValue is an integer, display it as is
+        summary += `| ${stat.homeValue} | ${gameStrings[category][languageKey]} | ${stat.awayValue} |\n`;
+      } else {
+        // If homeValue is a float, format it as a percentage
+        const homeValuePercentage = (stat.homeValue * 100).toFixed(2) + '%';
+        const awayValueFormatted = typeof stat.awayValue === 'number'
+            ? (Number.isInteger(stat.awayValue) ? stat.awayValue.toString() : (stat.awayValue * 100).toFixed(2) + '%')
+            : stat.awayValue;
+        summary += `| ${homeValuePercentage} | ${gameStrings[category][languageKey]} | ${awayValueFormatted} |\n`;
+      }
+    }
+  }
+
+  return summary;
+}
 
 export function sortGames(apiResponse: ScoreboardResponse): SortedGames {
   // Create a date object in the user's timezone
@@ -47,7 +132,17 @@ export function sortGames(apiResponse: ScoreboardResponse): SortedGames {
   };
 }
 
-export function generateLineScoreTable(linescore: Linescore | undefined, awayTeam: TeamInfo, homeTeam: TeamInfo) {
+export function teamLogo(abbrev: string): string {
+  return `https://assets.nhle.com/logos/nhl/svg/${abbrev}_${environment.appearance}.svg`;
+}
+
+
+
+export function generateLineScoreTable(
+  linescore: Linescore | undefined,
+  awayTeam: TeamInfo,
+  homeTeam: TeamInfo
+): string {
   if (!linescore) return '';
   
   let lineScore = '|   ';  // Empty cell for team names column
@@ -83,7 +178,11 @@ export function generateLineScoreTable(linescore: Linescore | undefined, awayTea
   return lineScore;
 }
 
-export function generateShotsTable(shots: Period[] | undefined, awayTeam: TeamInfo, homeTeam: TeamInfo) {
+export function generateShotsTable(
+  shots: Period[] | undefined,
+  awayTeam: TeamInfo,
+  homeTeam: TeamInfo
+): string {
   if (!shots) return '';
   
   let shotsTable = '|   ';  // Empty cell for team names column
@@ -123,11 +222,18 @@ export function generateShotsTable(shots: Period[] | undefined, awayTeam: TeamIn
   return shotsTable;
 }
 
-export function teamName(team: TeamInfo, score: number | undefined, showLogo: boolean) {
+export function teamName(
+  team: TeamInfo, 
+  score: number | undefined,
+  showLogo: boolean
+): string {
   return `${team.abbrev} ${team.name[languageKey]} ${showLogo ? (`<img alt="${team.name[languageKey]}" src="${team.logo}" height="20" width="20" />` + '') : ''} ${score ? ('(' + score + ')') : ''}`;
 }
 
-export function  timeRemaining(clock: Clock | undefined, periodDescriptor: PeriodDescriptor | undefined) {
+export function timeRemaining(
+  clock: Clock | undefined,
+  periodDescriptor: PeriodDescriptor | undefined
+): string {
   let timeMarkdown = getOrdinalPeriod(periodDescriptor?.number);
 
   if(clock?.inIntermission) {

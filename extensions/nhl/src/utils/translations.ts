@@ -1,4 +1,4 @@
-import { timeRemaining } from "./helpers";
+import { GameStrings } from "./types";
 
 export const gameTitles = {
   today: {
@@ -68,13 +68,49 @@ export const timeStrings = {
   }
 }
 
-export const gameStrings = {
+export const gameStrings: GameStrings = {
   linescore: {
     default: "Line Score",
     fr: "Lignescore",
   },
-  shotsOnGoal: {
+  sog: {
     default: "Shots on Goal",
     fr: "Tirs au But",
   },
+  faceoffWinningPctg: {
+    default: "Faceoff Winning Percentage",
+    fr: "Pourcentage de Victoire de Mise au Jeu",
+  },
+  powerPlay: {
+    default: "Power Play",
+    fr: "Avantage Numérique",
+  },
+  powerPlayPctg: {
+    default: "Power Play Percentage",
+    fr: "Pourcentage de l'Avantage Numérique",
+  },
+  pim: {
+    default: "Penalty Minutes",
+    fr: "Minutes de Pénalité",
+  },
+  hits: {
+    default: "Hits",
+    fr: "Coups",
+  },
+  blockedShots: {
+    default: "Blocked Shots",
+    fr: "Tirs Bloqués",
+  },
+  giveaways: {
+    default: "Giveaways",
+    fr: "Revirements",
+  },
+  takeaways: {
+    default: "Takeaways",
+    fr: "Reprises",
+  },
+  gameStats: {
+    default: "Game Stats",
+    fr: "Statistiques du Match",
+  }
 }

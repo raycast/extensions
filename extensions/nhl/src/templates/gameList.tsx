@@ -2,7 +2,7 @@ import React from "react";
 import { getPreferenceValues } from "@raycast/api";
 import { List, Action, ActionPanel } from "@raycast/api";
 import { Game } from "../utils/types";
-import { getOrdinalPeriod, formatLocalTime, getScoreColor } from "../utils/helpers";
+import { getOrdinalPeriod, formatLocalTime, getScoreColor, teamLogo } from "../utils/helpers";
 import { gameActions } from "../utils/translations";
 import { getLanguageKey } from "../utils/helpers";
 import { gameStates, timeStrings } from "../utils/translations";
@@ -61,12 +61,12 @@ export default function GameList({ title, games }: { title: string; games: Game[
                 { text: gameTime(game) },
                 {
                   tag: { value: String(game.awayTeam.score ?? ""), color: getScoreColor(game, "Away") },
-                  icon: game.awayTeam.logo,
+                  icon: teamLogo(game.awayTeam.abbrev)
                 },
                 { text: "vs" },
                 {
                   tag: { value: String(game.homeTeam.score ?? ""), color: getScoreColor(game, "Home") },
-                  icon: game.homeTeam.logo,
+                  icon: teamLogo(game.homeTeam.abbrev)
                 },
               ]}
               actions={
