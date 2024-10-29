@@ -18,13 +18,9 @@ interface today {
 export default function Command() {
   const scoreboard = getNHL("scoreboard/now") as today;
 
-  if (scoreboard.isLoading && !scoreboard?.data.gamesByDate) {
-    return <List isLoading={true} />;
-  }
+  if (scoreboard.isLoading) return <List isLoading={true} />;
 
-  if (!scoreboard?.data) {
-    return <Unresponsive />;
-  }
+  if (!scoreboard?.data) return <Unresponsive />;
 
   const games = sortGames(scoreboard.data);
 

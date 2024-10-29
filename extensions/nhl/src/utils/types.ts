@@ -89,6 +89,7 @@ export type Game = {
   clock?: Clock;
   threeMinRecap?: string;
   threeMinRecapFr?: string;
+  otInUse: boolean;
 };
 
 export type SortedGames = {
@@ -270,6 +271,11 @@ export type GamecenterRightRailResponse = {
     homeTeamWins: number;
   };
   gameInfo: GameInfo;
+  gameVideo?: GameVideo;
+  linescore?: Linescore;
+  shotsByPeriod?: Period[];
+  teamGameStats?: TeamGameStat[];
+  gameReports?: GameReports;
   teamSeasonStats: TeamSeasonStats;
   last10Record: Last10Record;
 };
@@ -288,25 +294,32 @@ export type SeasonSeries = {
     id: number;
     abbrev: string;
     logo: string;
+    score?: number;
   };
   homeTeam: {
     id: number;
     abbrev: string;
     logo: string;
+    score?: number;
   };
   gameCenterLink: string;
 };
 
+
 export type GameInfo = {
+  referees?: Official[];
+  linesmen?: Official[];
   awayTeam: {
     headCoach: {
       default: string;
     };
+    scratches?: ScratchPlayer[];
   };
   homeTeam: {
     headCoach: {
       default: string;
     };
+    scratches?: ScratchPlayer[];
   };
 };
 
@@ -505,4 +518,67 @@ export type CurrentTeamRosterPlayer = {
     default: string;
   };
   playerSlug: string;
+};
+
+export type GameOfficials = {
+  referees: Official[];
+  linesmen: Official[];
+};
+
+export type Official = {
+  default: string;
+};
+
+export type ScratchPlayer = {
+  id: number;
+  firstName: {
+    default: string;
+    cs?: string;
+    sk?: string;
+  };
+  lastName: {
+    default: string;
+    cs?: string;
+    sk?: string;
+  };
+};
+
+export type GameVideo = {
+  threeMinRecap: number;
+  threeMinRecapFr: number;
+  condensedGame: number;
+  condensedGameFr: number;
+};
+
+export type Period = {
+  periodDescriptor: PeriodDescriptor;
+  away: number;
+  home: number;
+};
+
+export type Linescore = {
+  byPeriod: Period[];
+  totals: {
+    away: number;
+    home: number;
+  };
+};
+
+export type TeamGameStat = {
+  category: string;
+  awayValue: number | string;
+  homeValue: number | string;
+};
+
+export type GameReports = {
+  gameSummary: string;
+  eventSummary: string;
+  playByPlay: string;
+  faceoffSummary: string;
+  faceoffComparison: string;
+  rosters: string;
+  shotSummary: string;
+  shiftChart: string;
+  toiAway: string;
+  toiHome: string;
 };

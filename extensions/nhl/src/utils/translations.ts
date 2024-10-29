@@ -46,3 +46,25 @@ export const gameStates = {
     fr: "Final",
   },
 };
+
+export const timeStrings = {
+  intermission: {
+    default: "Intermission",
+    fr: "Pause",
+  },
+  timeRemaining: {
+    default: "Time Remaining",
+    fr: "Temps Restant",
+  },
+}
+
+export const gameStrings = {
+  linescore: {
+    default: "Line Score",
+    fr: "Lignescore",
+  },
+  shotsOnGoal: {
+    default: "Shots on Goal",
+    fr: "Tirs au But",
+  },
+}

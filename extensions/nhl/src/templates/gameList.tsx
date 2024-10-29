@@ -19,7 +19,11 @@ function gameAccessories(game: Game) {
     case "FUT":
       return "";
     case "CRIT":
-      return `${gameStates.crit[languageKey]}: ${game.periodDescriptor?.number}`;
+      if(game.otInUse) {
+        return `${gameStates.crit[languageKey]}: ${getOrdinalPeriod(game.periodDescriptor?.number)}`;
+      } else {
+        return `${getOrdinalPeriod(game.periodDescriptor?.number)}`;
+      }
     case "LIVE":
       return `${getOrdinalPeriod(game.periodDescriptor?.number)}`;
     case "PRE":

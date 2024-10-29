@@ -1,8 +1,10 @@
-import { ScoreboardResponse, Game, SortedGames, Timezone } from "./types";
+import { ScoreboardResponse, Game, SortedGames, Timezone, Clock, PeriodDescriptor, TeamInfo, Linescore, Period} from "./types";
 import { getPreferenceValues, Color } from "@raycast/api";
+import { timeStrings } from "./translations";
 
 const preferences = getPreferenceValues();
 const timezone = preferences.timezone as Timezone;
+const languageKey = getLanguageKey();
 
 export function sortGames(apiResponse: ScoreboardResponse): SortedGames {
   // Create a date object in the user's timezone
@@ -43,6 +45,99 @@ export function sortGames(apiResponse: ScoreboardResponse): SortedGames {
     todayGames,
     futureGames,
   };
+}
+
+export function generateLineScoreTable(linescore: Linescore | undefined, awayTeam: TeamInfo, homeTeam: TeamInfo) {
+  if (!linescore) return '';
+  
+  let lineScore = '|   ';  // Empty cell for team names column
+
+  // heading
+  linescore.byPeriod.forEach((period, index) => {
+    lineScore += `| ${index + 1} `;
+  });
+  lineScore += '| T |\n';  // Total column
+
+  // separator line - make sure there's the correct number of columns
+  lineScore += '|:---|';   // First column alignment
+  linescore.byPeriod.forEach(() => {
+    lineScore += ':---:|';  // Center alignment for period columns
+  });
+  lineScore += ':---:|';   // Center alignment for total column
+  lineScore += '\n';
+
+  // away team
+  lineScore += `| ${teamName(awayTeam, undefined, true)} | `;
+  linescore.byPeriod.forEach((period) => {
+    lineScore += `${period.away} | `;
+  });
+  lineScore += `${linescore.totals.away} |\n`;
+
+   // home team
+   lineScore += `| ${teamName(homeTeam, undefined, true)} | `;
+   linescore.byPeriod.forEach((period) => {
+     lineScore += `${period.home} | `;
+   });
+   lineScore += `${linescore.totals.home} |\n`;
+
+  return lineScore;
+}
+
+export function generateShotsTable(shots: Period[] | undefined, awayTeam: TeamInfo, homeTeam: TeamInfo) {
+  if (!shots) return '';
+  
+  let shotsTable = '|   ';  // Empty cell for team names column
+  let awayShotsTotal = 0;
+  let homeShotsTotal = 0;
+
+  // heading
+  shots.forEach((period, index) => {
+    shotsTable += `| ${index + 1} `;
+  });
+  shotsTable += '| T |\n';  // Total column
+
+  // separator line - make sure there's the correct number of columns
+  shotsTable += '|:---|';
+  shots.forEach(() => {
+    shotsTable += ':---:|';
+  });
+  shotsTable += ':---:|';
+  shotsTable += '\n';
+
+  // away team
+  shotsTable += `| ${teamName(awayTeam, undefined, true)} | `;
+  shots.forEach((period) => {
+    shotsTable += `${period.away} | `;
+    awayShotsTotal += period.away;
+  });
+  shotsTable += `${awayShotsTotal} |\n`;
+
+   // home team
+   shotsTable += `| ${teamName(homeTeam, undefined, true)} | `;
+   shots.forEach((period) => {
+     shotsTable += `${period.home} | `;
+      homeShotsTotal += period.home;
+   });
+   shotsTable += `${homeShotsTotal} |\n`;
+
+  return shotsTable;
+}
+
+export function teamName(team: TeamInfo, score: number | undefined, showLogo: boolean) {
+  return `${team.abbrev} ${team.name[languageKey]} ${showLogo ? (`<img alt="${team.name[languageKey]}" src="${team.logo}" height="20" width="20" />` + '') : ''} ${score ? ('(' + score + ')') : ''}`;
+}
+
+export function  timeRemaining(clock: Clock | undefined, periodDescriptor: PeriodDescriptor | undefined) {
+  let timeMarkdown = getOrdinalPeriod(periodDescriptor?.number);
+
+  if(clock?.inIntermission) {
+    timeMarkdown += ` ${timeStrings.intermission[languageKey]}: ${timeStrings.timeRemaining[languageKey]} ${clock?.timeRemaining}`;
+  }
+  else {
+    timeMarkdown += `: ${timeStrings.timeRemaining[languageKey]}: ${clock?.timeRemaining}`;
+  }
+
+  return timeMarkdown;
 }
 
 export function getOrdinalPeriod(num: number | undefined): string {
