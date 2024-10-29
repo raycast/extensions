@@ -14,7 +14,7 @@
     {
       "name": "polymarket",
       "title": "🇺🇸",
-      "description": "Shows current Polymarket odds - automatically updates every 90 seconds",
+      "description": "Shows current Polymarket odds for the US Election - automatically updates every 90 seconds",
       "mode": "no-view",
       "interval": "90s"
     }
