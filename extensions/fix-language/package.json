@@ -37,7 +37,7 @@
   "preferences": [
     {
       "name": "firstLang",
-      "title": "first language",
+      "title": "First Language",
       "description": "Select the first language (must be different from second language)",
       "type": "dropdown",
       "required": true,
