@@ -1,5 +1,9 @@
 # Browser Tabs Changelog
 
+## [Remove Zen Browser] - {PR_MERGE_DATE}
+
+- Remove Zen Browser as it is not supported.
+
 ## [Reverse Tabs Order] - 2024-07-10
 
 - Reverse the order of the tabs and the most recently opened tab will be at the top.
