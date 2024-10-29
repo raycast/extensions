@@ -1,13 +1,7 @@
 import { ActionPanel, Action, Icon, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import type { Hook } from "./types";
 import { useState } from "react";
-
-type Hook = Readonly<{
-  id: string;
-  title: string;
-  description: string;
-  content: string;
-}>;
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");

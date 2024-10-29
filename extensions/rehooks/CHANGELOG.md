@@ -1,5 +1,9 @@
 # Rehooks Changelog
 
+## [Updated Search Hooks] - 2024-10-29
+
+Update copy to clipboard action from `import statement of hook` to copy `hook content`.
+
 ## [New Commands] - 2024-10-20
 
 Add support for searching hooks
