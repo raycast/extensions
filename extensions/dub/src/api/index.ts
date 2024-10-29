@@ -1,3 +1,4 @@
+import { LinkSchema } from "dub/models/components/linkschema";
 import { getDubClient } from "./oauth";
 
 export const createShortLink = async ({
@@ -24,12 +25,14 @@ export const createShortLink = async ({
   });
 };
 
-export const getAllShortLinks = async () => {
+export const getAllShortLinks = async (query: string = ""): Promise<{ links: LinkSchema[]; hasMoreLinks: boolean }> => {
   const dub = getDubClient();
 
-  const { result } = await dub.links.list();
+  const links = await dub.links.list(query ? {search: query} : {})
+  
+  const hasMoreLinks = !(links?.length < 100);
 
-  return result;
+  return {links, hasMoreLinks}
 };
 
 export const deleteShortLink = async (linkId: string) => {
