@@ -34,15 +34,14 @@ async function fetchStats() {
 
   const trump = trumpData.data[0].tokens[0].price * 100;
   const harris = harrisData.data[0].tokens[0].price * 100;
-  const other = 100 - trump - harris;
 
-  stats.push(trump.toFixed(2), harris.toFixed(2), other.toFixed(2));
+  stats.push(trump.toFixed(2), harris.toFixed(2));
 
   return stats;
 }
 
 function formatCommandSubtitle(jsonStats: string[]): string {
-  return `Trump ${jsonStats[0]}% | Harris: ${jsonStats[1]}% | Other: ${jsonStats[2]}%`;
+  return `Trump ${jsonStats[0]}% | Harris: ${jsonStats[1]}%`;
 }
 
 export default async function command(): Promise<void> {
