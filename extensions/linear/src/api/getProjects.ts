@@ -85,36 +85,6 @@ export async function getProjects(teamId?: string) {
   }
 }
 
-type Roadmap = {
-  id: string;
-  name: string;
-  projects: { nodes: { id: string }[] };
-};
-
-export async function getRoadmaps() {
-  const { graphQLClient } = getLinearClient();
-
-  const { data } = await graphQLClient.rawRequest<{ roadmaps: { nodes: Roadmap[] } }, Record<string, unknown>>(
-    `
-      query {
-        roadmaps {
-          nodes {
-            id
-            name
-            projects {
-              nodes {
-                id
-              }
-            }
-          }
-        }
-      }
-    `,
-  );
-
-  return data?.roadmaps.nodes;
-}
-
 export type ProjectUpdateResult = Pick<ProjectUpdate, "id" | "body" | "url" | "health" | "createdAt"> & {
   user: Pick<User, "id" | "displayName" | "avatarUrl" | "email">;
 };

@@ -1,6 +1,7 @@
 export interface Preferences {
   beeminderApiToken: string;
   beeminderUsername: string;
+  colorProgression: string;
 }
 
 export interface DataPointFormValues {

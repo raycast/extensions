@@ -1,7 +1,11 @@
 # shell Changelog
 
+## [Add result indication] 2024-07-26
+Fix partially [issue](https://github.com/raycast/extensions/issues/13496), displaying an indicator on command finishes, with success or failure.
+
+
 ## [Fix] 2024-07-18
-Fix [issue](https://github.com/raycast/extensions/issues/13496) to avoid UI hanging on large data from `child_process`. 
+Fix [issue](https://github.com/raycast/extensions/issues/13015) to avoid UI hanging on large data from `child_process`. 
 
 ## [Fix] 2024-05-15
 Fix an [issue](https://github.com/raycast/extensions/issues/12350) where commands aren't send to iTerm2.

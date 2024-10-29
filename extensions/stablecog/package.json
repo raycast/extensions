@@ -61,12 +61,16 @@
   "preferences": [
     {
       "title": "Model",
-      "default": "Stable Diffusion 3",
+      "default": "FLUX.1",
       "type": "dropdown",
       "description": "The AI image model to use for creating images.",
       "name": "model",
       "required": false,
       "data": [
+        {
+          "title": "FLUX.1",
+          "value": "FLUX.1"
+        },
         {
           "title": "Stable Diffusion 3",
           "value": "Stable Diffusion 3"

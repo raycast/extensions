@@ -1,11 +1,12 @@
 import { CoverMenubarItem } from "@components/cover/menu";
 import { useHAStates } from "@components/hooks";
-import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "@components/menu";
+import { LaunchCommandMenubarItem } from "@components/menu";
 import { filterViaPreferencePatterns } from "@components/state/utils";
 import { getErrorMessage, getFriendlyName } from "@lib/utils";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
 
-export default function CoversMenuCommand(): JSX.Element {
+export default function CoversMenuCommand() {
   const { states, error, isLoading } = useHAStates();
   const entities = filterViaPreferencePatterns(states, ["cover.*"])?.sort((a, b) =>
     getFriendlyName(a).localeCompare(getFriendlyName(b)),
@@ -14,7 +15,7 @@ export default function CoversMenuCommand(): JSX.Element {
 
   const coversOpenCount = entities?.filter((e) => e.state === "open").length || 0;
   const coversClosedCount = entities?.filter((e) => e.state === "closed").length || 0;
-  const icon = coversOpenCount && coversOpenCount > 0 ? "cover-open.png" : "cover-close.png";
+  const icon = coversOpenCount && coversOpenCount > 0 ? "window-open.svg" : "window-closed.svg";
 
   return (
     <MenuBarExtra
@@ -25,15 +26,17 @@ export default function CoversMenuCommand(): JSX.Element {
       {header && <MenuBarExtra.Item title={header} />}
       <LaunchCommandMenubarItem
         title="Open All Covers Command"
-        name="covers"
-        type={LaunchType.UserInitiated}
+        command={{
+          name: "covers",
+          type: LaunchType.UserInitiated,
+        }}
         icon={Icon.Terminal}
       />
       <MenuBarExtra.Section title="Covers">
         {entities?.map((e) => <CoverMenubarItem key={e.entity_id} state={e} />)}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
-        <MenuBarItemConfigureCommand />
+        <RUIMenuBarExtra.ConfigureCommand />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

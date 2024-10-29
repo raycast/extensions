@@ -3,17 +3,23 @@ import { getCalendarEvents } from "swift:../../swift/AppleReminders";
 
 export type CalendarEvent = {
   title: string;
+  notes: string;
+  url: string;
   startDate: number;
   endDate: number;
   openUrl: string;
   isAllDay: boolean;
   status: string;
   color: string;
+  calendarTitle: string;
+  hasRecurrenceRules: boolean;
 };
 
 export type Calendar = {
+  id: string;
   title: string;
   color: string;
+  source: string;
 };
 
 export type CalendarData = {

@@ -1,10 +1,15 @@
-# Hide my email Changelog
+# HideMail - Email Relay Service Changelog
 
-##  [New Command] 2024-03-27
+##  [Enhancements] - 2024-10-16
+
+- `List Emails` is now cached
+- After toggling, the command does not close and updates in place
+
+##  [New Command] - 2024-03-27
 
 - Added create command to create an email with note
 
-##  [New Command] 2023-09-01
+##  [New Command] - 2023-09-01
 
 - List and search all email aliases
 - Activate and deactivate email aliases

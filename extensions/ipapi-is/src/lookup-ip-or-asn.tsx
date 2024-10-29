@@ -10,7 +10,7 @@ export default function LookupIPorASN(props: LaunchProps<{ arguments: Arguments.
 
   const ipIsASN = ip.toUpperCase().includes("AS");
   const markdownHeading =
-    (ipIsASN ? `# ASN: ${ip}` : `# IP: ${ip}`) +
+    (ipIsASN ? `# ASN: ${ip}` : `# IP: ${ip || "Your IP"}`) +
     `
 ---
 `;
@@ -103,10 +103,12 @@ export default function LookupIPorASN(props: LaunchProps<{ arguments: Arguments.
         )
       }
       actions={
-        <ActionPanel>
-          <Action.CopyToClipboard title="Copy All as JSON" content={JSON.stringify(data)} />
-          <Action title="Revalidate IP or ASN" icon={Icon.Redo} onAction={() => revalidate()} />
-        </ActionPanel>
+        !isLoading && (
+          <ActionPanel>
+            <Action.CopyToClipboard title="Copy All as JSON" content={JSON.stringify(data)} />
+            <Action title="Revalidate IP or ASN" icon={Icon.Redo} onAction={() => revalidate()} />
+          </ActionPanel>
+        )
       }
     />
   );

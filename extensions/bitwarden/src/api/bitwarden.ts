@@ -1,8 +1,8 @@
-import { Cache, environment, getPreferenceValues, LocalStorage, open, showToast, Toast } from "@raycast/api";
+import { Cache as RCCache, environment, getPreferenceValues, LocalStorage, open, showToast, Toast } from "@raycast/api";
 import { execa, ExecaChildProcess, ExecaError, ExecaReturnValue, execaSync } from "execa";
 import { existsSync, unlinkSync, writeFileSync, accessSync, constants, chmodSync } from "fs";
 import { dirname } from "path/posix";
-import { LOCAL_STORAGE_KEY, DEFAULT_SERVER_URL } from "~/constants/general";
+import { LOCAL_STORAGE_KEY, DEFAULT_SERVER_URL, CACHE_KEYS } from "~/constants/general";
 import { VaultState, VaultStatus } from "~/types/general";
 import { PasswordGeneratorOptions } from "~/types/passwords";
 import { Folder, Item } from "~/types/vault";
@@ -27,6 +27,7 @@ import { download } from "~/utils/network";
 import { captureException } from "~/utils/development";
 import { ReceivedSend, Send, SendCreatePayload, SendType } from "~/types/send";
 import { prepareSendPayload } from "~/api/bitwarden.helpers";
+import { Cache } from "~/utils/cache";
 
 type Env = {
   BITWARDENCLI_APPDATA_DIR: string;
@@ -110,7 +111,7 @@ export const cliInfo = {
       // https://github.com/bitwarden/clients/pull/2976
       // https://github.com/bitwarden/clients/pull/7338
       if (process.arch === "arm64") {
-        const cache = new Cache();
+        const cache = new RCCache();
         try {
           if (!existsSync(this.downloadedBin)) throw new Error("No downloaded bin");
           if (cache.get("downloadedBinWorks") === "true") return this.downloadedBin;
@@ -164,6 +165,7 @@ export class Bitwarden {
 
     this.initPromise = (async (): Promise<void> => {
       await this.ensureCliBinary();
+      this.cacheCliVersion();
       await this.checkServerUrl(serverUrl);
     })();
   }
@@ -219,6 +221,12 @@ export class Bitwarden {
     } finally {
       await toast.restore();
     }
+  }
+
+  private cacheCliVersion(): void {
+    void this.getVersion().then(({ error, result }) => {
+      if (!error) Cache.set(CACHE_KEYS.CLI_VERSION, result);
+    });
   }
 
   private checkCliBinIsReady(filePath: string): boolean {
@@ -313,6 +321,18 @@ export class Bitwarden {
     }
 
     return result;
+  }
+
+  async getVersion(): Promise<MaybeError<string>> {
+    try {
+      const { stdout: result } = await this.exec(["--version"], { resetVaultTimeout: false });
+      return { result };
+    } catch (execError) {
+      captureException("Failed to get cli version", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
   }
 
   async login(): Promise<MaybeError> {

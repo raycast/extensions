@@ -126,7 +126,7 @@ export const NewsDetail = ({ news }: { news: UnNews }) => {
     `## ${news.title}`,
     `*${news.source} (${new Date(news.pubDate).toLocaleString(newsLanguageCode)})*`,
     `> ${news.description}`,
-    `![](${news.image})`,
+    news.image ? `![](${news.image})` : "",
     ...(markdownContent === undefined
       ? ["> Loading content..."]
       : markdownContent.split("\n").map((line) => line.trim())),

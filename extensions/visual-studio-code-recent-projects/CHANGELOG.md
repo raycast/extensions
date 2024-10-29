@@ -1,5 +1,9 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Chore] - 2024-09-02
+
+- Added missing contributor
+
 ## [Update] - 2024-05-31
 
 - Add keywords for VSCodium and Cursor

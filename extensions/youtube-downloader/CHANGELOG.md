@@ -1,5 +1,26 @@
 # YouTube Downloader Changelog
 
+## [Add WAV support] - 2024-10-21
+
+- Added WAV support for audio downloads
+
+## [Remove empty dropdown items] - 2024-08-29
+
+- Removed empty dropdown items from the format selection to improve user experience
+- Added mp3 keyword for audio options
+
+## [Update package dependency] - 2024-08-12
+
+- Update the `@dustube/ytdl-core` dependency to resolve the video download failure issue.
+
+## [Fix video not found] - 2024-08-01
+
+- Update the `@dustube/ytdl-core` dependency to fix the video not found issue
+
+## [Fix Live Premiere video download] - 2024-07-30
+
+- Fix the live premiere video download issue
+
 ## [Fix download failed] - 2024-07-16
 
 - Replace the `ytdl-core` with `@distube/ytdl-core` to fix the download failed issue

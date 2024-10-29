@@ -43,8 +43,8 @@ export async function GetModelsName(): Promise<Map<string, string[]>> {
   const s = await GetServerClass();
   await Promise.all(
     [...s.entries()].map(async (s): Promise<void> => {
-      const tag = await s[1].OllamaApiTags().catch(async (e) => {
-        await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e });
+      const tag = await s[1].OllamaApiTags().catch(async (e: Error) => {
+        await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
         return undefined;
       });
       if (tag)
@@ -60,7 +60,7 @@ export async function GetModelsName(): Promise<Map<string, string[]>> {
 /**
  * Get Available Model for given Server.
  * @param server - Ollama Server Name.
- @ @param List of Avalibale Models.
+ * @param List of Avalibale Models.
  */
 export async function GetAvailableModel(server: string): Promise<OllamaApiTagsResponseModel[]> {
   const s = await GetOllamaServerByName(server);

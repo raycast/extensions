@@ -1,5 +1,13 @@
 # Pomodoro Changelog
 
+## [Fixed wording] - 2024-10-21
+
+Fixed wording in the Stats command
+
+## [Bugfix] - 2024-07-27
+
+Fixed issue ([#13417](https://github.com/raycast/extensions/issues/13417)) where quotes are not loaded from quotable.io. Moved to zenquotes.io
+
 ## [Enhancement] - 2024-06-07
 
 Add option to restart current interval/timer from one click in the menu bar

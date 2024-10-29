@@ -1,29 +1,21 @@
-import { jsonRequest, useQuery } from "../nextcloud";
+import { useNextcloudJsonArray } from "../nextcloud";
 
 export function useBoards() {
-  const { data, isLoading } = useQuery((signal) => getBoards(signal));
+  const { data, isLoading } = useNextcloudJsonArray<Board>("deck/api/v1.1/boards");
 
   return {
-    boards: data ?? [],
+    boards: data,
     isLoading,
   };
 }
 
 export function useStacks(boardId: number) {
-  const { data, isLoading } = useQuery(async (signal): Promise<Stack[]> => getStacks(signal, boardId), [boardId]);
+  const { data, isLoading } = useNextcloudJsonArray<Stack>(`deck/api/v1.1/boards/${boardId}/stacks`);
 
   return {
-    stacks: data ?? [],
+    stacks: data,
     isLoading,
   };
-}
-
-async function getBoards(signal: AbortSignal): Promise<Board[]> {
-  return await jsonRequest({ signal, base: "deck/api/v1.1/boards" });
-}
-
-async function getStacks(signal: AbortSignal, boardId: number): Promise<Stack[]> {
-  return await jsonRequest({ signal, base: `deck/api/v1.1/boards/${boardId}/stacks` });
 }
 
 export interface Board {

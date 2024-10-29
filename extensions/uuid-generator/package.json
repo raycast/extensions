@@ -9,7 +9,13 @@
     "GastroGeek",
     "pernielsentikaer",
     "LunaticMuch",
-    "hmarr"
+    "hmarr",
+    "harsh_khandelwal",
+    "lukas-runge"
+  ],
+  "keywords": [
+    "guid",
+    "GUID"
   ],
   "license": "MIT",
   "commands": [
@@ -70,6 +76,17 @@
           "placeholder": "1",
           "required": false
         }
+      ],
+      "preferences": [
+        {
+          "name": "base32Encoding",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "title": "Options",
+          "label": "Base32 Encoding",
+          "description": "Should letters be Base32 encoded?"
+        }
       ]
     },
     {
@@ -85,6 +102,32 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "generateTypeID",
+      "title": "Generate TypeIDs",
+      "description": "Copy generated TypeIDs to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "prefix",
+          "placeholder": "Prefix",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "numberOfUUIDsToGenerate",
+          "type": "text",
+          "placeholder": "1",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "viewHistory",
+      "title": "View History",
+      "description": "View the UUID history",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -118,14 +161,14 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.55.0",
+    "typeid-js": "^1.1.0",
     "ulidx": "^2.0.0",
-    "uuid": "^9.0.0",
-    "uuidv7": "^0.6.3"
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "^20.4.2",
-    "@types/uuid": "^9.0.2",
+    "@types/uuid": "^10.0.0",
     "eslint": "^8.45.0",
     "eslint-plugin-import": "^2.27.5",
     "react-devtools": "^4.28.0",

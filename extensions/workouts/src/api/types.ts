@@ -225,3 +225,54 @@ export type StravaClubActivity = {
   sport_type: SportType;
   workout_type: number;
 };
+
+export type StravaManualActivity = {
+  name: string;
+  sportType: string;
+  date: Date;
+  duration: string;
+  distance: string;
+  distanceUnit: string;
+  description: string;
+  isTrainer: boolean;
+  isCommute: boolean;
+};
+
+type SummaryAthlete = {
+  id: number;
+  resource_state: number;
+  firstname: string;
+  lastname: string;
+  profile: string;
+  profile_medium: string;
+  city: string;
+  state: string;
+  country: string;
+  sex: string;
+  summit: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type StravaRoute = {
+  athlete: SummaryAthlete;
+  description: string;
+  distance: number;
+  elevation_gain: number;
+  id: number;
+  id_str: string;
+  map: {
+    id: string;
+    polyline: string;
+    summary_polyline: string;
+  };
+  name: string;
+  private: boolean;
+  starred: boolean;
+  timestamp: number;
+  type: number;
+  sub_type: number;
+  created_at: string;
+  updated_at: string;
+  estimated_moving_time: number;
+};

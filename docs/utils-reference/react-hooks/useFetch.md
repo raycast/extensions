@@ -20,6 +20,7 @@ export function useFetch<V, U, T = V>(
     onError?: (error: Error) => void;
     onData?: (data: T) => void;
     onWillExecute?: (args: [string, RequestInit]) => void;
+    failureToastOptions?: Partial<Pick<Toast.Options, "title" | "primaryAction" | "message">>;
   },
 ): AsyncState<T> & {
   revalidate: () => void;
@@ -51,6 +52,7 @@ Including the [usePromise](./usePromise.md)'s options:
 - `options.onError` is a function called when an execution fails. By default, it will log the error and show a generic failure toast with an action to retry.
 - `options.onData` is a function called when an execution succeeds.
 - `options.onWillExecute` is a function called when an execution will start.
+- `options.failureToastOptions` are the options to customize the title, message, and primary action of the failure toast.
 
 ### Return
 
@@ -211,6 +213,25 @@ const { isLoading, data, pagination } = useFetch(
 );
 ```
 
+or, if your data source uses cursor-based pagination, you can return a `cursor` alongside `data` and `hasMore`, and the cursor will be passed as an argument the next time the function gets called:
+
+```ts
+const { isLoading, data, pagination } = useFetch(
+  (options) =>
+    "https://api.ycombinator.com/v0.1/companies?" +
+    new URLSearchParams({ cursor: options.cursor, q: searchText }).toString(),
+  {
+    mapResult(result: SearchResult) {
+      const { companies, nextCursor } = result;
+      const hasMore = nextCursor !== undefined;
+      return { data: companies, hasMore, cursor: nextCursor, };
+    },
+    keepPreviousData: true,
+    initialData: [],
+  },
+);
+```
+
 You'll notice that, in the second case, the hook returns an additional item: `pagination`. This can be passed to Raycast's `List` or `Grid` components in order to enable pagination.
 Another thing to notice is that `mapResult`, which is normally optional, is actually required when using pagination. Furthermore, its return type is
 
@@ -218,6 +239,7 @@ Another thing to notice is that `mapResult`, which is normally optional, is actu
 {
   data: any[],
   hasMore?: boolean;
+  cursor?: any;
 }
 ```
 

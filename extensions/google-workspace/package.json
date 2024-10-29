@@ -11,12 +11,23 @@
     "mathieudutour",
     "marcmagn1",
     "meganpearson",
-    "jbjanot"
+    "jbjanot",
+    "ridemountainpig"
   ],
   "categories": [
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "displayFilePath",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "description": "Display the file path in the search results. ⚠️ This may slow down your search results.",
+      "label": "Display file path in search results"
+    }
+  ],
   "commands": [
     {
       "name": "create-google-document",

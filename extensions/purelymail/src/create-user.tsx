@@ -31,7 +31,7 @@ export default function CreateUser(props: LaunchProps<{ arguments: DomainArgs }>
     getFromApi();
   }, []);
 
-  const { handleSubmit, itemProps } = useForm<CreateUserRequest>({
+  const { handleSubmit, itemProps } = useForm<CreateUserRequest & { confirmPassword: string }>({
     async onSubmit(values) {
       setIsLoading(true);
 
@@ -56,7 +56,15 @@ export default function CreateUser(props: LaunchProps<{ arguments: DomainArgs }>
     validation: {
       userName: FormValidation.Required,
       domainName: FormValidation.Required,
-      password: FormValidation.Required,
+      password(value) {
+        if (!value) return "The item is required";
+        if (itemProps.confirmPassword.value && itemProps.confirmPassword.value !== value)
+          return "Passwords do not match";
+      },
+      confirmPassword(value) {
+        if (!value) return "The item is required";
+        if (itemProps.password.value !== value) return "Passwords do not match";
+      },
     },
     initialValues: {
       domainName: propDomain || undefined,
@@ -92,6 +100,7 @@ export default function CreateUser(props: LaunchProps<{ arguments: DomainArgs }>
       <Form.Description text={`${itemProps.userName.value || "<USER>"}@${itemProps.domainName.value}`} />
 
       <Form.PasswordField title="Password" placeholder="Enter password" {...itemProps.password} />
+      <Form.PasswordField title="Confirm Password" placeholder="Confirm password" {...itemProps.confirmPassword} />
 
       <Form.Separator />
       <Form.TextField title="Recovery Email" placeholder="Enter Recovery Email" {...itemProps.recoveryEmail} />

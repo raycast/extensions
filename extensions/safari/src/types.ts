@@ -79,3 +79,7 @@ export interface HistoryItem {
   url: string;
   lastVisited: string;
 }
+
+// Preferences
+
+export type FallbackSearchType = "search" | "searchHistory";

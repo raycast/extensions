@@ -19,7 +19,7 @@ const config: IConfig = {
   },
   supportCustomModel: false,
   /* eslint-disable @typescript-eslint/no-unused-vars */
-  async listModels(apikey: string | undefined): Promise<IModel[]> {
+  async listModels(apikey: string | undefined, _: string | undefined): Promise<IModel[]> {
     console.log(`${this.defaultEntrypoint}?key=${apikey}`);
     // apikey is not undefined or empty or null
     if (apikey) {

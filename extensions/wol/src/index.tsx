@@ -1,148 +1,106 @@
-import { ActionPanel, Action, Icon, List, LocalStorage, Color, showToast, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
-import { PingJob, WakeData } from "./types";
+import { WakeData } from "./types";
 import { wake } from "./lib/wol";
-import CreateWakeDataForm from "./components/CreateWakeDataForm";
+import WakeDataForm from "./components/WakeDataForm";
 import { exec } from "child_process";
+import { useLocalStorage } from "@raycast/utils";
 
-type State = {
-  wakeDatasets: WakeData[];
-  liveDatasets: boolean[];
-  isLoading: boolean;
-};
+const Shortcut = Keyboard.Shortcut;
 
 export default function Command() {
-  const [state, setState] = useState<State>({
-    wakeDatasets: [],
-    liveDatasets: [],
-    isLoading: true,
-  });
+  const { value: devices = [], setValue: setDevices, isLoading } = useLocalStorage<WakeData[]>("wakeDatasets", []);
+  const [pingMap, setPingMap] = useState<Map<string, boolean>>(new Map());
 
-  useEffect(() => {
-    (async () => {
-      const storeWakeDatasets = await LocalStorage.getItem<string>("wakeDatasets");
-      if (!storeWakeDatasets) {
-        setState((previous) => ({ ...previous, isLoading: false }));
-        return;
-      }
-
-      try {
-        const wakeDatasets: WakeData[] = JSON.parse(storeWakeDatasets);
-        setState((previous) => ({ ...previous, wakeDatasets, isLoading: false }));
-      } catch (e) {
-        setState((previous) => ({ ...previous, wakeDatasets: [], isLoading: false }));
-      }
-    })();
-  }, []);
-
-  const [jobs, setJobs] = useState<PingJob[]>([]);
-
-  useEffect(() => {
-    const task = jobs.shift();
-    // final execute means the task is done
-    const final = () => setJobs([...jobs]);
-    if (task) {
-      // console.debug("pinging", task.ip, "index", task.index, "previousSameIpIndex", task.previousSameIpIndex)
-      if (task.previousSameIpIndex !== undefined) {
-        setState((previous) => {
-          // prevent duplicate ip request more than once
-          const liveDatasets = previous.liveDatasets;
-          liveDatasets[task.index] = liveDatasets[task.previousSameIpIndex!];
-          return { ...previous, liveDatasets: [...liveDatasets] };
+  const ping = useCallback(
+    (ips: string[]) => {
+      const ipSet = new Set(ips);
+      const pp = (ip: string) =>
+        new Promise<boolean>((resolve) => {
+          // https://serverfault.com/questions/200468/how-can-i-set-a-short-timeout-with-the-ping-command
+          exec(`/sbin/ping -t 1 -c 1 ${ip}`, function (err, stdout) {
+            if (err) {
+              resolve(false);
+              return;
+            }
+            resolve(stdout.includes("1 packets received"));
+          });
         });
-        final();
-        return;
-      }
-      // https://serverfault.com/questions/200468/how-can-i-set-a-short-timeout-with-the-ping-command
-      exec(`/sbin/ping -t 1 -c 1 ${task.ip}`, function (err, stdout) {
-        if (err) {
-          // console.debug(task.index, err)
-          final();
-          return;
+      (async () => {
+        const map = new Map<string, boolean>();
+        for (const ip of ipSet) {
+          const res = await pp(ip);
+          map.set(ip, res);
         }
-        setState((previous) => {
-          const liveDatasets = previous.liveDatasets;
-          liveDatasets[task.index] = stdout.includes("1 packets received");
-          return { ...previous, liveDatasets: [...liveDatasets] };
-        });
-        final();
-      });
-    }
-  }, [jobs, setJobs]);
-
-  useEffect(() => {
-    LocalStorage.setItem("wakeDatasets", JSON.stringify(state.wakeDatasets));
-
-    const pingJobs: PingJob[] = [];
-    state.wakeDatasets.forEach(async (wakeData, index) => {
-      const liveDatasets = state.liveDatasets;
-      if (!wakeData.ip) {
-        liveDatasets[index] = false;
-        setState((previous) => ({ ...previous, liveDatasets: [...liveDatasets] }));
-        return;
-      }
-      for (let i = 0; i < index; i++) {
-        if (state.wakeDatasets[i].ip === wakeData.ip) {
-          pingJobs.push({ ip: wakeData.ip, index, previousSameIpIndex: i });
-          return;
-        }
-      }
-      pingJobs.push({ ip: wakeData.ip, index });
-    });
-    setJobs(pingJobs);
-  }, [state.wakeDatasets]);
-
-  const handleCreate = useCallback(
-    (values: WakeData) => {
-      const newWakeDatasets = [...state.wakeDatasets, { ...values }];
-      setState((previous) => ({ ...previous, wakeDatasets: newWakeDatasets }));
+        setPingMap(map);
+      })();
     },
-    [state.wakeDatasets, setState],
+    [pingMap],
   );
+
+  useEffect(() => {
+    if (!devices) {
+      return;
+    }
+    const ips = devices.map((d) => d.ip);
+    ping(ips);
+  }, [devices]);
 
   const handleDelete = useCallback(
     (index: number) => {
-      const newWakeDatasets = [...state.wakeDatasets];
-      newWakeDatasets.splice(index, 1);
-      setState((previous) => ({ ...previous, wakeDatasets: newWakeDatasets }));
+      if (devices) {
+        devices.splice(index, 1);
+        setDevices([...devices]);
+      }
     },
-    [state.wakeDatasets, setState],
+    [devices],
   );
 
-  function CreateWakeAction(props: { onCreate: (values: WakeData) => void }) {
-    return (
-      <Action.Push
-        title="Add Wake Data"
-        icon={Icon.Plus}
-        shortcut={{ modifiers: ["cmd"], key: "n" }}
-        target={<CreateWakeDataForm onCreate={props.onCreate} />}
-      />
-    );
-  }
+  const handleUpdate = useCallback(
+    (index: number, value: WakeData) => {
+      devices[index] = value;
+      setDevices([...devices]);
+    },
+    [devices],
+  );
+
+  const handleCreate = useCallback(
+    (value: WakeData) => {
+      setDevices([...devices, value]);
+    },
+    [devices],
+  );
 
   return (
-    <List isLoading={state.isLoading} isShowingDetail={state.wakeDatasets.length > 0}>
+    <List isLoading={isLoading} isShowingDetail={devices.length > 0}>
       <List.EmptyView
-        title="No data found"
+        title="Add a new device"
         actions={
           <ActionPanel>
-            <CreateWakeAction onCreate={handleCreate} />
+            <Action.Push
+              title="Add Device"
+              icon={Icon.Plus}
+              shortcut={Shortcut.Common.New}
+              target={<WakeDataForm upsert={handleCreate} />}
+            />
           </ActionPanel>
         }
       />
-      {state.wakeDatasets.map((item, index) => (
+      {devices.map((item, index) => (
         <List.Item
-          key={item.name}
+          key={index}
           icon={Icon.ComputerChip}
           title={item.name}
           keywords={[item.mac, item.name]}
           accessories={[
-            {
-              tag: {
-                value: `status: ${(state.liveDatasets[index] && "online") || "offline"}`,
-                color: state.liveDatasets[index] ? Color.Green : Color.Yellow,
-              },
-            },
+            pingMap.has(item.ip)
+              ? {
+                  tag: {
+                    value: `status: ${(pingMap.get(item.ip) && "online") || "offline"}`,
+                    color: pingMap.get(item.ip) ? Color.Green : Color.Yellow,
+                  },
+                }
+              : { tag: "ping" },
           ]}
           actions={
             <ActionPanel>
@@ -154,12 +112,30 @@ export default function Command() {
                   await showToast({ title: "Order acknowledged", message: "For the Swarm" });
                 }}
               />
-              <Action.CopyToClipboard title="Copy Mac Address" content={item.mac} />
-              <CreateWakeAction onCreate={handleCreate} />
+              <Action.CopyToClipboard title="Copy MAC Address" content={item.mac} shortcut={Shortcut.Common.Copy} />
+              <Action.Push
+                title="Add Device"
+                icon={Icon.Plus}
+                shortcut={Shortcut.Common.New}
+                target={<WakeDataForm upsert={handleCreate} />}
+              />
+              <Action.Push
+                title="Modify Device"
+                icon={Icon.CircleEllipsis}
+                shortcut={Shortcut.Common.Edit}
+                target={
+                  <WakeDataForm
+                    upsert={(v) => {
+                      handleUpdate(index, v);
+                    }}
+                    initial={item}
+                  />
+                }
+              />
               <Action
-                title="Remove Wake Data"
+                title="Remove Device"
                 style={Action.Style.Destructive}
-                shortcut={Keyboard.Shortcut.Common.Remove}
+                shortcut={Shortcut.Common.Remove}
                 icon={{ source: Icon.Trash, tintColor: Color.Red }}
                 onAction={() => handleDelete(index)}
               />

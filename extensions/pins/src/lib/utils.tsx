@@ -38,12 +38,15 @@ export const runCommandSync = (command: string) => {
  * @returns A promise resolving to the output of the command as a string.
  */
 export const runCommandInTerminal = async (command: string): Promise<string> => {
-  const output = await runAppleScript(`tell application "Terminal"
+  const output = await runAppleScript(
+    `tell application "Terminal"
     try
       activate
       do script "${command.replaceAll('"', '\\"')}"
     end try
-  end tell`);
+  end tell`,
+    { timeout: 0 },
+  );
   return output;
 };
 

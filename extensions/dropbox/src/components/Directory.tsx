@@ -7,12 +7,13 @@ import DirectoryItem from "./DirectoryItem";
 
 export interface IDirectoryProps {
   path: string;
+  parent?: string;
 }
 
 export default function Directory(props: IDirectoryProps) {
   const [files, setFiles] = useState<Array<files.FileMetadataReference | files.FolderMetadataReference>>([]);
   const [loading, setLoading] = useState(true);
-  const [path, setPath] = useState(props.path);
+  const [path] = useState(props.path);
   const [query, setQuery] = useState("");
   const [cursor, setCursor] = useState("");
   const [hasMore, setHasMore] = useState(false);
@@ -50,7 +51,7 @@ export default function Directory(props: IDirectoryProps) {
     >
       {files.length > 0 && (
         <>
-          <List.Section title={"files"}>
+          <List.Section title={query ? "Search Results" : props.parent || "/"} subtitle={`${files.length} files`}>
             {files.map((v) => {
               const isFolder = v[".tag"] === "folder";
               return isFolder ? <DirectoryItem key={v.id} file={v} /> : <FileItem key={v.id} file={v} />;

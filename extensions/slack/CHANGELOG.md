@@ -1,5 +1,10 @@
 # Slack Changelog
 
+## [Adds Optional Metadata to Open Channel Command] - 2024-07-30
+
+- Now includes job title, timezone, current time, and Slack status in the list returned by the Open Channel command.
+- Adds user preferences to display this new metadata.
+
 ## [Search Messages command] - 2024-07-08
 
 - Add a new command to search through your Slack's workspace messages.

@@ -2,7 +2,7 @@
 
 Our `Form` component provides great user experience to collect some data from a user and submit it for extensions needs.
 
-![](../../.gitbook/assets/example-doppler-share-secrets.png)
+![](../../.gitbook/assets/example-doppler-share-secrets.webp)
 
 ## Two Types of Items: Controlled vs. Uncontrolled
 
@@ -20,7 +20,7 @@ Before submitting data, it is important to ensure all required form controls are
 
 In Raycast, validation can be fully controlled from the API. To keep the same behavior as we have natively, the proper way of usage is to validate a `value` in the `onBlur` callback, update the `error` of the item and keep track of updates with the `onChange` callback to drop the `error` value. The [useForm](../../utils-reference/react-hooks/useForm.md) utils hook nicely wraps this behaviour and is the recommended way to do deal with validations.
 
-![](../../.gitbook/assets/form-validation.png)
+![](../../.gitbook/assets/form-validation.webp)
 
 {% hint style="info" %}
 Keep in mind that if the Form has any errors, the [`Action.SubmitForm`](./actions.md#action.submitform) `onSubmit` callback won't be triggered.
@@ -153,7 +153,7 @@ function validatePassword(value: string): boolean {
 
 Drafts are a mechanism to preserve filled-in inputs (but not yet submitted) when an end-user exits the command. To enable this mechanism, set the `enableDrafts` prop on your Form and populate the initial values of the Form with the [top-level prop `draftValues`](../../information/lifecycle/README.md#launchprops).
 
-![](../../.gitbook/assets/form-drafts.png)
+![](../../.gitbook/assets/form-drafts.webp)
 
 {% hint style="info" %}
 
@@ -265,7 +265,7 @@ Optionally add a [Form.LinkAccessory](form.md#form.linkaccessory) in the right-h
 
 A form item with a text field for input.
 
-![](../../.gitbook/assets/form-textfield.png)
+![](../../.gitbook/assets/form-textfield.webp)
 
 #### Example
 
@@ -333,7 +333,7 @@ export default function Command() {
 
 A form item with a secure text field for password-entry in which the entered characters must be kept secret.
 
-![](../../.gitbook/assets/form-password.png)
+![](../../.gitbook/assets/form-password.webp)
 
 #### Example
 
@@ -401,7 +401,7 @@ export default function Command() {
 
 A form item with a text area for input. The item supports multiline text entry.
 
-![](../../.gitbook/assets/form-textarea.png)
+![](../../.gitbook/assets/form-textarea.webp)
 
 #### Example
 
@@ -472,7 +472,7 @@ export default function Command() {
 
 A form item with a checkbox.
 
-![](../../.gitbook/assets/form-checkbox.png)
+![](../../.gitbook/assets/form-checkbox.webp)
 
 #### Example
 
@@ -540,7 +540,7 @@ export default function Command() {
 
 A form item with a date picker.
 
-![](../../.gitbook/assets/form-datepicker.png)
+![](../../.gitbook/assets/form-datepicker.webp)
 
 #### Example
 
@@ -640,7 +640,7 @@ export default function Command() {
 
 A form item with a dropdown menu.
 
-![](../../.gitbook/assets/form-dropdown.png)
+![](../../.gitbook/assets/form-dropdown.webp)
 
 #### Example
 
@@ -793,7 +793,7 @@ export default function Command() {
 
 A form item with a tag picker that allows the user to select multiple items.
 
-![](../../.gitbook/assets/form-tagpicker.png)
+![](../../.gitbook/assets/form-tagpicker.webp)
 
 #### Example
 
@@ -905,7 +905,7 @@ export default function Command() {
 
 A form item that shows a separator line. Use for grouping and visually separating form items.
 
-![](../../.gitbook/assets/form-separator.png)
+![](../../.gitbook/assets/form-separator.webp)
 
 #### Example
 
@@ -937,9 +937,9 @@ A form item with a button to open a dialog to pick some files and/or some direct
 While the user picked some items that existed, it might be possible for them to be deleted or changed when the `onSubmit` callback is called. Hence you should always make sure that the items exist before acting on them!
 {% endhint %}
 
-![](../../.gitbook/assets/form-filepicker-multiple.png)
+![](../../.gitbook/assets/form-filepicker-multiple.webp)
 
-![Single Selection](../../.gitbook/assets/form-filepicker-single.png)
+![Single Selection](../../.gitbook/assets/form-filepicker-single.webp)
 
 #### Example
 
@@ -1080,7 +1080,7 @@ A form item with a simple text label.
 
 Do _not_ use this component to show validation messages for other form fields.
 
-![](../../.gitbook/assets/form-description.png)
+![](../../.gitbook/assets/form-description.webp)
 
 #### Example
 

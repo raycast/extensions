@@ -1,52 +1,64 @@
 import { Action, ActionPanel, getPreferenceValues, Icon, LocalStorage } from "@raycast/api";
 import { TimeInfo, Timezone } from "../types/types";
-import { Dispatch, SetStateAction } from "react";
 import { localStorageKey } from "../utils/costants";
 import { ActionToggleDetails } from "./action-toggle-details";
 import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
 import { ActionTimeInfo } from "./action-time-info";
 import EditTimeZone from "../edit-time-zone";
 import { Preferences } from "../types/preferences";
+import { addTimeZones } from "../utils/common-utils";
+import { MutatePromise } from "@raycast/utils";
 
 export function ActionOnStarredTimezone(props: {
   timeInfo: TimeInfo;
   index: number;
   starTimezones: Timezone[];
   timezone: string;
-  setRefresh: Dispatch<SetStateAction<number>>;
+  mutate: () => Promise<void>;
   showDetail: boolean;
-  setRefreshDetail: Dispatch<SetStateAction<number>>;
+  showDetailMutate: MutatePromise<boolean | undefined, boolean | undefined> | undefined;
 }) {
-  const { timeInfo, index, starTimezones, timezone, setRefresh, showDetail, setRefreshDetail } = props;
+  const { timeInfo, index, starTimezones, timezone, mutate, showDetail, showDetailMutate } = props;
   return (
     <ActionPanel>
       {timeInfo !== ({} as TimeInfo) && timeInfo.timezone === timezone && <ActionTimeInfo timeInfo={timeInfo} />}
-      <Action
-        icon={Icon.StarDisabled}
-        title={"Unstar Timezone"}
-        shortcut={{ modifiers: ["ctrl"], key: "x" }}
-        onAction={async () => {
-          if (starTimezones.some((value) => value.timezone === timezone)) {
-            const _starTimezones = [...starTimezones];
-            _starTimezones.splice(index, 1);
-            _starTimezones.forEach((value) => {
-              value.date_time = "";
-              value.unixtime = 0;
-            });
-            await LocalStorage.setItem(localStorageKey.STAR_TIMEZONE, JSON.stringify(_starTimezones)).then(() => {
-              setRefresh(Date.now());
-            });
-          }
-        }}
-      />
-      <Action.Push
-        icon={Icon.Pencil}
-        title={"Edit Timezone"}
-        shortcut={{ modifiers: ["cmd"], key: "e" }}
-        target={<EditTimeZone index={index} starTimezones={starTimezones} setRefresh={setRefresh} />}
-      />
+      <ActionPanel.Section>
+        <Action
+          icon={Icon.StarDisabled}
+          title={"Unstar Timezone"}
+          shortcut={{ modifiers: ["cmd"], key: "s" }}
+          onAction={async () => {
+            if (starTimezones.some((value) => value.timezone === timezone)) {
+              const _starTimezones = [...starTimezones];
+              _starTimezones.splice(index, 1);
+              _starTimezones.forEach((value) => {
+                value.date_time = "";
+                value.unixtime = 0;
+              });
+              await LocalStorage.setItem(localStorageKey.STAR_TIMEZONE, JSON.stringify(_starTimezones)).then(mutate);
+            }
+          }}
+        />
+        <Action.Push
+          icon={Icon.Pencil}
+          title={"Edit Timezone"}
+          shortcut={{ modifiers: ["cmd"], key: "e" }}
+          target={<EditTimeZone index={index} starTimezones={starTimezones} />}
+          onPop={() => mutate()}
+        />
+        <Action
+          icon={Icon.Duplicate}
+          title={"Duplicate Timezone"}
+          shortcut={{ modifiers: ["cmd"], key: "d" }}
+          onAction={async () => {
+            await addTimeZones(starTimezones, starTimezones[index], index);
+            await mutate();
+          }}
+        />
+      </ActionPanel.Section>
+
       {getPreferenceValues<Preferences>().itemLayout === "List" && (
-        <ActionToggleDetails showDetail={showDetail} setRefresh={setRefreshDetail} />
+        <ActionToggleDetails showDetail={showDetail} showDetailMutate={showDetailMutate} />
       )}
 
       <ActionPanel.Section>
@@ -59,9 +71,7 @@ export function ActionOnStarredTimezone(props: {
               const _starTimezones = [...starTimezones];
               const [removed] = _starTimezones.splice(index, 1);
               _starTimezones.splice(index - 1, 0, removed);
-              LocalStorage.setItem(localStorageKey.STAR_TIMEZONE, JSON.stringify(_starTimezones)).then(() => {
-                setRefresh(Date.now());
-              });
+              LocalStorage.setItem(localStorageKey.STAR_TIMEZONE, JSON.stringify(_starTimezones)).then(mutate);
             }}
           />
         )}
@@ -74,9 +84,7 @@ export function ActionOnStarredTimezone(props: {
               const _starTimezones = [...starTimezones];
               const [removed] = _starTimezones.splice(index, 1);
               _starTimezones.splice(index + 1, 0, removed);
-              LocalStorage.setItem(localStorageKey.STAR_TIMEZONE, JSON.stringify(_starTimezones)).then(() => {
-                setRefresh(Date.now());
-              });
+              LocalStorage.setItem(localStorageKey.STAR_TIMEZONE, JSON.stringify(_starTimezones)).then(mutate);
             }}
           />
         )}

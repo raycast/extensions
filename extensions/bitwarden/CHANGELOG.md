@@ -1,5 +1,18 @@
 # Bitwarden Changelog
 
+## [Fix] - 2024-10-04
+
+- Simplify number and special effects on min fields to prevent re-render loop
+
+## [Fix and New Password Generation Options] - 2024-10-02
+
+- Added Minimum numbers and Minimum special password options
+- Fixed some password options not being reflected
+
+## [Fix] - 2024-07-25
+
+- Prevent search vault sections from changing order
+
 ## [New Commands] - 2024-04-10
 
 - Added 3 Send commands (Search, Create and Receive) with delete, edit and remove password actions

@@ -1,103 +1,55 @@
 import { ha } from "@lib/common";
-import { getErrorMessage } from "@lib/utils";
-import {
-  Clipboard,
-  Icon,
-  Image,
-  Keyboard,
-  LaunchType,
-  MenuBarExtra,
-  Toast,
-  launchCommand,
-  open,
-  openCommandPreferences,
-  showHUD,
-  showToast,
-} from "@raycast/api";
-import { ReactNode } from "react";
+import { State } from "@lib/haapi";
+import { formatToHumanDateTime } from "@lib/utils";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
+import { Icon, Image, Keyboard, MenuBarExtra } from "@raycast/api";
 
-export function MenuBarItemConfigureCommand(): JSX.Element {
-  return (
-    <MenuBarExtra.Item
-      title="Configure Command"
-      shortcut={{ modifiers: ["cmd"], key: "," }}
-      icon={Icon.Gear}
-      onAction={() => openCommandPreferences()}
-    />
-  );
-}
-
-export async function copyToClipboardWithHUD(content: string | number | Clipboard.Content) {
-  await Clipboard.copy(content);
-  showHUD("Copied to Clipboard");
-}
-
-export function CopyToClipboardMenubarItem(props: { title: string; content: string; tooltip?: string }) {
-  const copyToClipboard = async () => {
+export function LastUpdateChangeMenubarItem({ state, onAction }: { state: State; onAction?: () => void }) {
+  const humanDateString = (dt: string) => {
+    const r = `${formatToHumanDateTime(dt)}`;
+    return r ? r : "?";
+  };
+  const tooltip = (dt: string) => {
     try {
-      await copyToClipboardWithHUD(props.content);
+      return `${humanDateString(dt)} (${new Date(dt).toLocaleString()})`;
     } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
+      return `${humanDateString(dt)}`;
     }
   };
   return (
-    <MenuBarExtra.Item
-      title={props.title}
-      icon={Icon.CopyClipboard}
-      onAction={copyToClipboard}
-      tooltip={props.tooltip}
-    />
+    <>
+      <MenuBarExtra.Item
+        title={"Last Change"}
+        subtitle={`${humanDateString(state.last_changed)}`}
+        icon={Icon.Clock}
+        onAction={onAction ? onAction : () => {}}
+        tooltip={`Last Change: ${tooltip(state.last_changed)}`}
+      />
+      <MenuBarExtra.Item
+        title={"Last Update"}
+        subtitle={`${humanDateString(state.last_updated)}`}
+        icon={Icon.Clock}
+        onAction={onAction ? onAction : () => {}}
+        tooltip={`Last Update: ${tooltip(state.last_updated)}`}
+      />
+    </>
   );
 }
 
-function joinNonEmpty(parts?: (string | undefined)[], separator?: string | undefined): string | undefined {
-  if (!parts || parts.length <= 0) {
-    return undefined;
-  }
-  return parts.join(separator);
-}
+export interface MenuBarSubmenuProps extends RUIMenuBarExtra.Submenu.Props {}
 
-export function MenuBarSubmenu(props: {
-  title: string;
-  subtitle?: string;
-  icon?: Image.ImageLike | undefined;
-  children?: ReactNode;
-  separator?: string;
-}): JSX.Element {
-  const sep = props.separator && props.separator.length > 0 ? props.separator : "|";
-  const title =
-    joinNonEmpty(
-      [props.title, props.subtitle && props.subtitle.length > 0 ? sep : undefined, props.subtitle].filter((e) => e),
-      " ",
-    ) || "";
+export function MenuBarSubmenu({ titleSeparator, children, ...restProps }: MenuBarSubmenuProps) {
   return (
-    <MenuBarExtra.Submenu title={title} icon={props.icon}>
-      {props.children}
-    </MenuBarExtra.Submenu>
+    <RUIMenuBarExtra.Submenu titleSeparator={titleSeparator ?? "|"} {...restProps}>
+      {children}
+    </RUIMenuBarExtra.Submenu>
   );
 }
 
-export function LaunchCommandMenubarItem(props: {
-  title: string;
-  icon?: Image.ImageLike;
-  name: string;
-  type: LaunchType;
-}) {
-  const launch = async () => {
-    try {
-      return await launchCommand({ name: props.name, type: props.type });
-    } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: getErrorMessage(error) || "Internal Error" });
-    }
-  };
-  return (
-    <MenuBarExtra.Item
-      title={props.title}
-      icon={props.icon}
-      shortcut={{ modifiers: ["cmd"], key: "o" }}
-      onAction={launch}
-    />
-  );
+export interface LaunchCommandMenubarItemProps extends RUIMenuBarExtra.LaunchCommand.Props {}
+
+export function LaunchCommandMenubarItem({ shortcut, ...restProps }: LaunchCommandMenubarItemProps) {
+  return <RUIMenuBarExtra.LaunchCommand shortcut={shortcut ?? { modifiers: ["cmd"], key: "o" }} {...restProps} />;
 }
 
 export function OpenInMenubarItem(props: {
@@ -112,12 +64,12 @@ export function OpenInMenubarItem(props: {
   const app = isCompanion ? "Companion" : "Browser";
   const action = props.action ? props.action : "Open In";
   const title = `${action} ${app}`;
-  const icon = isCompanion ? "home-assistant.png" : Icon.Globe;
+  const icon = isCompanion ? "home-assistant.svg" : Icon.Globe;
   return (
-    <MenuBarExtra.Item
+    <RUIMenuBarExtra.OpenInBrowser
+      url={url}
       title={props.title ? props.title : title}
       shortcut={props.shortcut}
-      onAction={() => open(url)}
       icon={props.icon ? props.icon : icon}
     />
   );

@@ -1,4 +1,4 @@
-# Supernotes ˣ Raycast
+# Supernotes
 
 Interact with [Supernotes](https://supernotes.app/), the knowledge management and note-taking app. Search your card library, preview your cards in Raycast and open a selected card directly in the Supernotes desktop app. You can also quickly create simple cards within Raycast.
 

@@ -7,7 +7,14 @@
   "author": "lightbody",
   "contributors": [
     "aaron_johnson",
-    "greg_reclaim"
+    "greg_reclaim",
+    "clayton_knapp",
+    "scottfseely",
+    "sandy_gifford",
+    "dmkato"
+  ],
+  "pastContributors": [
+    "ridemountainpig"
   ],
   "owner": "reclaim-ai",
   "access": "public",
@@ -67,7 +74,18 @@
       "mode": "menu-bar",
       "subtitle": "Reclaim",
       "icon": "command-icon.png",
-      "interval": "1m"
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "showNowEvent",
+          "title": "Show Now Event in Menu Bar",
+          "label": "Always show now event in the menu bar",
+          "description": "Always show now events in the menu bar",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "quick-task",
@@ -103,15 +121,17 @@
   "dependencies": {
     "@raycast/api": "^1.52.1",
     "@raycast/utils": "^1.8.0",
-    "axios": "^1.4.0",
     "date-fns": "^2.30.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
+    "@sentry/node": "^8.33.0",
     "@types/node": "18.8.3",
+    "@types/node-fetch": "^2.6.11",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",
     "prettier": "^2.8.8",
+    "react-error-boundary": "^4.0.13",
     "typescript": "^4.4.3"
   },
   "scripts": {

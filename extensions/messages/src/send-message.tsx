@@ -11,32 +11,28 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useForm, runAppleScript, useCachedPromise, FormValidation, getAvatarIcon } from "@raycast/utils";
-import { useEffect, useMemo } from "react";
-import { fetchAllContacts } from "swift:../swift/contacts";
+import { useForm, FormValidation } from "@raycast/utils";
+import { useEffect, useState } from "react";
 
-type Contact = {
-  id: string;
-  givenName: string;
-  familyName: string;
-  phoneNumbers: string[];
-  emailAddresses: string[];
-};
+import CreateMessagesQuicklink from "./components/CreateMessagesQuicklink";
+import { getMessagesUrl, sendMessage } from "./helpers";
+import { useChats } from "./hooks/useChats";
 
-function createDeeplink(contactId: string, address: string, text: string) {
+function createDeeplink(contactId: string, text: string) {
   const protocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
-  const context = encodeURIComponent(JSON.stringify({ contactId, address, text }));
+  const context = encodeURIComponent(JSON.stringify({ contactId, text }));
   return `${protocol}extensions/thomaslombart/messages/send-message?launchContext=${context}`;
-}
-
-function getName(contact: Contact) {
-  return `${contact.givenName}${contact.familyName ? ` ${contact.familyName}` : ""}`;
 }
 
 type Values = {
   text: string;
-  contact: string;
-  address: string;
+  chat: string;
+  closeMainWindow?: boolean;
+};
+
+type LaunchContext = {
+  contactId: string;
+  text: string;
 };
 
 export default function Command({
@@ -44,72 +40,47 @@ export default function Command({
   launchContext,
 }: LaunchProps<{
   draftValues: Values;
-  launchContext: { contactId: string; address: string; text: string };
+  launchContext: LaunchContext;
 }>) {
-  const { shouldCloseMainWindow } = getPreferenceValues<{ shouldCloseMainWindow: boolean }>();
-  const { data: contacts, isLoading } = useCachedPromise(
-    async () => {
-      const contacts = await fetchAllContacts();
-      return contacts as Contact[];
-    },
-    [],
-    {
-      failureToastOptions: {
-        title: "Could not get contacts",
-        message: "Make sure you have granted Raycast access to your contacts.",
-        primaryAction: {
-          title: "Open System Preferences",
-          onAction() {
-            open("x-apple.systempreferences:com.apple.preference.security?Privacy_Contacts");
-          },
-        },
-      },
-    },
-  );
+  const { shouldCloseMainWindow } = getPreferenceValues<Preferences.SendMessage>();
+  const [searchText, setSearchText] = useState("");
+  const { data: chats, isLoading, permissionView } = useChats(searchText);
+
+  // There's no way to send a message to a group chat that doesn't have any names, so we filter them out.
+  const filteredChats = chats?.filter((chat) => {
+    if (chat.is_group) return !!chat.group_name;
+    return true;
+  });
 
   const { itemProps, handleSubmit, values, reset, focus } = useForm<Values>({
     async onSubmit(values) {
-      const correspondingContact = contacts?.find((contact) => contact.id === values.contact);
-      if (!correspondingContact) {
-        showToast({ style: Toast.Style.Failure, title: "Could not send message", message: "Contact not found" });
+      const chat = filteredChats?.find((chat) => chat.guid === values.chat);
+
+      if (!chat) {
+        await showToast({ style: Toast.Style.Failure, title: "Could not find chat" });
         return;
       }
 
-      const result = await runAppleScript(
-        `
-        on run argv
-          try
-            tell application "Messages"
-              set targetBuddy to item 1 of argv
-              set targetService to id of 1st account
-              set textMessage to item 2 of argv
-              set theBuddy to participant targetBuddy of account id targetService
-              send textMessage to theBuddy
-            end tell
-            return "Success"
-          on error error_message
-            return error_message
-          end try
-        end run
-      `,
-        [values.address, values.text],
-      );
+      const result = await sendMessage({
+        address: chat.chat_identifier,
+        text: values.text,
+        service_name: chat.service_name,
+        group_name: chat.group_name,
+      });
 
       if (result === "Success") {
-        const name = getName(correspondingContact);
-
         if (shouldCloseMainWindow) {
           await closeMainWindow({ clearRootSearch: true });
         }
 
         await showToast({
           style: Toast.Style.Success,
-          title: `Sent Message to ${name}`,
+          title: `Sent Message to ${chat.displayName}`,
           message: values.text,
           primaryAction: {
-            title: `Open Chat with ${name}`,
+            title: `Open Chat in Messages`,
             onAction() {
-              open(`imessage://${values.address.replace(/\s/g, "")}`);
+              open(getMessagesUrl(chat));
             },
           },
         });
@@ -120,27 +91,26 @@ export default function Command({
       }
     },
     initialValues: {
-      contact: draftValues?.contact ?? launchContext?.contactId ?? "",
-      address: draftValues?.address ?? launchContext?.address ?? "",
+      chat: draftValues?.chat ?? launchContext?.contactId ?? "",
       text: draftValues?.text ?? launchContext?.text ?? "",
     },
     validation: {
-      contact: FormValidation.Required,
-      address: FormValidation.Required,
+      chat: FormValidation.Required,
       text: FormValidation.Required,
     },
   });
 
-  const contactAddresses = useMemo(() => {
-    const contact = contacts?.find((c) => c.id === values.contact);
-    return [...(contact?.phoneNumbers ?? []), ...(contact?.emailAddresses ?? [])];
-  }, [values.contact]);
+  const chat = filteredChats?.find((chat) => chat.guid === values.chat);
 
   useEffect(() => {
     if (launchContext?.contactId) {
       focus("text");
     }
-  }, []);
+  }, [focus, launchContext?.contactId]);
+
+  if (permissionView) {
+    return permissionView;
+  }
 
   return (
     <Form
@@ -149,47 +119,39 @@ export default function Command({
         <ActionPanel>
           <Action.SubmitForm icon={Icon.SpeechBubble} title="Send Message" onSubmit={handleSubmit} />
 
-          <ActionPanel.Section>
-            <Action.CreateQuicklink
-              title="Create Messages Quicklink"
-              icon={{ fileIcon: "/System/Applications/Messages.app" }}
-              quicklink={{
-                link: `sms:${values.address}`,
-                name: `Send Message to ${contacts?.find((c) => c.id === values.contact)?.givenName}`,
-              }}
-            />
-            <Action.CreateQuicklink
-              title="Create Raycast Quicklink"
-              quicklink={{
-                link: createDeeplink(values.contact, values.address, values.text),
-                name: `Send Message to ${contacts?.find((c) => c.id === values.contact)?.givenName}`,
-              }}
-            />
-          </ActionPanel.Section>
+          {chat ? (
+            <ActionPanel.Section>
+              <CreateMessagesQuicklink chat={chat} />
+              <Action.CreateQuicklink
+                title="Create Raycast Quicklink"
+                quicklink={{
+                  link: createDeeplink(values.chat, values.text),
+                  name: `Send Message to ${chat?.displayName}`,
+                }}
+              />
+            </ActionPanel.Section>
+          ) : null}
         </ActionPanel>
       }
       enableDrafts
     >
-      <Form.Dropdown {...itemProps.contact} title="Contact" storeValue>
-        {contacts
-          ?.filter((c) => c.givenName || c.familyName)
-          .map((contact, i) => {
-            const name = getName(contact);
-            return (
-              <Form.Dropdown.Item
-                key={i}
-                title={`${name.trim()}`}
-                icon={getAvatarIcon(name)}
-                keywords={[contact.givenName, contact.familyName, ...contact.phoneNumbers, ...contact.emailAddresses]}
-                value={contact.id}
-              />
-            );
-          })}
-      </Form.Dropdown>
-      <Form.Dropdown {...itemProps.address} title="Address" storeValue>
-        {contactAddresses?.map((address) => {
-          return <Form.Dropdown.Item key={address} title={address} value={address} />;
-        })}
+      <Form.Dropdown
+        {...itemProps.chat}
+        title="Chat"
+        isLoading={isLoading}
+        onSearchTextChange={setSearchText}
+        storeValue
+        throttle
+      >
+        {filteredChats?.map((chat) => (
+          <Form.Dropdown.Item
+            key={chat.guid}
+            title={chat.displayName}
+            icon={chat.avatar}
+            keywords={[chat.chat_identifier, ...(chat.group_participants?.split(",") ?? [])]}
+            value={chat.guid}
+          />
+        ))}
       </Form.Dropdown>
       <Form.TextArea {...itemProps.text} title="Message" />
     </Form>

@@ -58,9 +58,9 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
       },
     },
     initialValues: {
-      name: model?.name ?? "",
+      name: model?.name ?? props.name ?? "",
       temperature: model?.temperature.toString() ?? "1",
-      option: model?.option ?? "gpt-3.5-turbo",
+      option: model?.option ?? "gpt-4o-mini",
       prompt: model?.prompt ?? "You are a helpful assistant.",
       pinned: model?.pinned ?? false,
       vision: model?.vision ?? false,
@@ -70,13 +70,20 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
   const MODEL_OPTIONS = use.models.option;
 
   const { isLoading, data } = useFetch<CSVPrompt[]>(
-    "https://raw.githubusercontent.com/f/awesome-chatgpt-prompts/main/prompts.csv",
+    "https://raw.githubusercontent.com/awesome-chatgpt-prompts/awesome-chatgpt-prompts-github/awesome-chatgpt-prompts/prompts.csv",
     {
       parseResponse: async (response) => {
-        const text = await response.text();
-        return parse(text, {
-          columns: true,
-        });
+        try {
+          const text = await response.text();
+          return parse(text, {
+            columns: true,
+            skipEmptyLines: true,
+            skipRecordsWithError: true,
+            skipRecordsWithEmptyValues: true,
+          });
+        } catch (error) {
+          return [];
+        }
       },
       keepPreviousData: true,
     }

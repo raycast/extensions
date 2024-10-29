@@ -1,8 +1,11 @@
+import "./initSentry";
+
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import useInterpreter from "./hooks/useInterpreter";
 import TaskForm from "./task-form";
 import { TaskPlanDetails } from "./types/plan";
+import { withRAIErrorBoundary } from "./components/RAIErrorBoundary";
 
 export type ListType = {
   uuid: string;
@@ -10,7 +13,7 @@ export type ListType = {
   interpreterData: TaskPlanDetails;
 };
 
-export default function Command() {
+function Command() {
   const { push } = useNavigation();
   const { sendToInterpreter } = useInterpreter();
 
@@ -90,3 +93,5 @@ export default function Command() {
     </List>
   );
 }
+
+export default withRAIErrorBoundary(Command);

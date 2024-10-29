@@ -7,7 +7,7 @@ import {
   AgentActionSuccessEvent,
   AgentActionType,
   AgentErrorEvent,
-  AgentGenerationSuccessEvent,
+  AgentMessageSuccessEvent,
   DustAPIErrorResponse,
   DustDocument,
   GenerationTokensEvent,
@@ -15,28 +15,42 @@ import {
   UserMessageErrorEvent,
 } from "./conversation_events";
 
-const DUST_API_URL = "https://dust.tt/api/v1/w";
-
 function removeCiteMention(message: string) {
   const regex = / ?:cite\[[a-zA-Z0-9, ]+\]/g;
   return message.replace(regex, "");
 }
 
+function formatUsername(email: string) {
+  return email
+    .split("@")[0]
+    .split(".")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 export type DustAPICredentials = {
+  apiBaseUrl: string;
   apiKey: string;
+  userEmail: string;
   workspaceId: string;
 };
 
 export class DustApi {
   _credentials: DustAPICredentials;
+  _email: string;
   _conversationApiUrl: string;
+  _username: string;
+  _dustApiBaseUrl: string;
 
   /**
    * @param credentials DustAPICrededentials
    */
   constructor(credentials: DustAPICredentials) {
     this._credentials = credentials;
-    this._conversationApiUrl = `${DUST_API_URL}/${credentials.workspaceId}/assistant/conversations`;
+    this._email = `${credentials.userEmail}`;
+    this._username = formatUsername(credentials.userEmail);
+    this._dustApiBaseUrl = credentials.apiBaseUrl;
+    this._conversationApiUrl = `${this._dustApiBaseUrl}/${credentials.workspaceId}/assistant/conversations`;
   }
 
   async createConversation({ question, agentId = "dust" }: { question: string; agentId?: string }): Promise<{
@@ -63,10 +77,11 @@ export class DustApi {
           ],
           context: {
             timezone: "Europe/Paris",
-            username: "raycast",
-            email: null,
-            fullName: "Raycast",
+            username: this._username,
+            email: this._email,
+            fullName: this._username,
             profilePictureUrl: "https://dust.tt/static/systemavatar/helper_avatar_full.png",
+            origin: "raycast",
           },
         },
       }),
@@ -95,7 +110,7 @@ export class DustApi {
 
     if (!res.ok || !res.body) {
       console.error(`Error running streamed app: status_code=${res.status}  - message=${await res.text()}`);
-      throw new Error(`Error running streamed app: status_code=${res.status}`);
+      return null;
     }
 
     const pendingEvents: (
@@ -103,7 +118,7 @@ export class DustApi {
       | AgentErrorEvent
       | AgentActionSuccessEvent
       | GenerationTokensEvent
-      | AgentGenerationSuccessEvent
+      | AgentMessageSuccessEvent
     )[] = [];
     const parser = createParser((event) => {
       if (event.type === "event") {
@@ -137,7 +152,6 @@ export class DustApi {
       });
       reader.on("error", (err) => {
         console.error("Error reading stream", err);
-        throw err;
       });
       while (!done) {
         if (pendingEvents.length > 0) {
@@ -177,15 +191,12 @@ export class DustApi {
         });
       if (agentMessages.length === 0) {
         console.error("Failed to retrieve agent message");
-        throw new Error("Failed to retrieve agent message");
       }
       const agentMessage = agentMessages[0];
-      const streamRes = agentMessage
-        ? await this.streamAgentMessageEvents({
-            conversationId,
-            messageId: agentMessage.sId,
-          })
-        : undefined;
+      const streamRes = await this.streamAgentMessageEvents({
+        conversationId,
+        messageId: agentMessage.sId,
+      });
       if (!streamRes) {
         return;
       }
@@ -199,17 +210,20 @@ export class DustApi {
         switch (event.type) {
           case "user_message_error": {
             console.error(`User message error: code: ${event.error.code} message: ${event.error.message}`);
-            throw new Error(event.error.message, { cause: event.error.code });
+            return;
           }
           case "agent_error": {
             console.error(`Agent message error: code: ${event.error.code} message: ${event.error.message}`);
-            throw new Error(event.error.message, { cause: event.error.code });
+            return;
           }
           case "agent_action_success": {
             action = event.action;
             break;
           }
           case "generation_tokens": {
+            if (event.classification !== "tokens") {
+              continue;
+            }
             answer += event.text;
             if (lastSentDate.getTime() + 500 > new Date().getTime()) {
               continue;
@@ -219,8 +233,8 @@ export class DustApi {
             setDustAnswer(dustAnswer + "...");
             break;
           }
-          case "agent_generation_success": {
-            answer = this.processAction({ content: event.text, action, setDustDocuments });
+          case "agent_message_success": {
+            answer = this.processAction({ content: event.message.content ?? "", action, setDustDocuments });
             setDustAnswer(answer);
             if (onDone) {
               onDone(answer);
@@ -268,7 +282,7 @@ export class DustApi {
               }
               const link = ref.sourceUrl
                 ? ref.sourceUrl
-                : `${DUST_API_URL}/${ref.dataSourceWorkspaceId}/builder/data-sources/${
+                : `${this._dustApiBaseUrl}/${ref.dataSourceWorkspaceId}/builder/data-sources/${
                     ref.dataSourceId
                   }/upsert?documentId=${encodeURIComponent(ref.documentId)}`;
               if (newDoc) {
@@ -296,19 +310,14 @@ export class DustApi {
 
   async getAgents(): Promise<{ agents?: AgentConfigurationType[]; error?: string }> {
     const { apiKey, workspaceId } = this._credentials;
-    const agentsUrl = `${DUST_API_URL}/${workspaceId}/assistant/agent_configurations`;
+    const agentsUrl = `${this._dustApiBaseUrl}/${workspaceId}/assistant/agent_configurations`;
 
-    let response;
-    try {
-      response = await fetch(agentsUrl, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-        },
-      });
-    } catch (error) {
-      return { error: `Could not get agents: ${error}` };
-    }
+    const response = await fetch(agentsUrl, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+    });
     if (!response.ok) {
       return { error: `Could not get agents: ${response.statusText}` };
     }
