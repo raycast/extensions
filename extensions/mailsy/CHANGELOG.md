@@ -3,7 +3,6 @@
 ## [Fixed] - 2025-10-29
 
 - Removed unused code.
-
 ## [Changes] - 2024-10-25
 
 - Added `Logout` feature to log out of the account.
