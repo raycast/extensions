@@ -1,4 +1,4 @@
-import { CopyToClipboardAction, ReloadAction, OpenInBrowserAction } from "./components/actions";
+import { CopyToClipboardAction, ReloadAction } from "./components/actions";
 import { ActionPanel, List } from "@raycast/api";
 import { useSearch } from "./hooks/useSearch";
 import { useState } from "react";
