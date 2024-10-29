@@ -56,7 +56,7 @@
     },
     {
       "name": "secondLang",
-      "title": "second language",
+      "title": "Second Language",
       "description": "Select the second language (must be different from first language)",
       "type": "dropdown",
       "required": true,
