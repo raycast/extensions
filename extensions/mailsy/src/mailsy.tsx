@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer, useState } from "react";
-import { handleDelete, htmlToMarkdown, isLoggedIn, timeAgo, withToast } from "./libs/utils";
+import { htmlToMarkdown, isLoggedIn, timeAgo, withToast, removeAccount, handleAction } from "./libs/utils";
 import { createAccount, deleteAccount, getAccount, getMails, deleteMail, getMessage } from "./libs/api";
 import {
   Action,
@@ -86,6 +86,50 @@ function Mail(): JSX.Element {
           icon={{ source: Icon.Envelope, tintColor: Color.Purple }}
           actions={
             <ActionPanel>
+              <ActionPanel.Section title="Copy">
+                <Action.CopyToClipboard
+                  title="Copy Email"
+                  content={Account?.email ?? ""}
+                  icon={{ source: Icon.Envelope, tintColor: Color.Purple }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Password"
+                  content={Account?.password ?? ""}
+                  icon={{ source: Icon.Key, tintColor: Color.Purple }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                />
+              </ActionPanel.Section>
+              <ActionPanel.Section title="Account">
+                <Action
+                  title="Delete Account"
+                  icon={{ source: Icon.Trash, tintColor: Color.Red }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                  onAction={() =>
+                    handleAction(
+                      () => deleteAccount(),
+                      () => popToRoot(),
+                      `Deleting Account...`,
+                      `Account deleted`,
+                      `Account could not be deleted`,
+                    )
+                  }
+                />
+                <Action
+                  title="Logout"
+                  icon={{ source: Icon.Lock, tintColor: Color.Red }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                  onAction={() =>
+                    handleAction(
+                      () => removeAccount(),
+                      () => popToRoot(),
+                      `Logging out...`,
+                      `Logout successful`,
+                      `Logout failed`,
+                    )
+                  }
+                />
+              </ActionPanel.Section>
               <Action.OpenInBrowser
                 title="Open in Browser"
                 url="https://mail.tm/"
@@ -121,10 +165,12 @@ function Mail(): JSX.Element {
                 icon={{ source: Icon.Trash, tintColor: Color.Red }}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                 onAction={() =>
-                  handleDelete(
+                  handleAction(
                     () => deleteAccount(),
                     () => popToRoot(),
-                    "Account",
+                    `Deleting Account...`,
+                    `Account deleted`,
+                    `Account could not be deleted`,
                   )
                 }
               />
@@ -163,10 +209,12 @@ function Mail(): JSX.Element {
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
                   onAction={() =>
-                    handleDelete(
+                    handleAction(
                       () => deleteMail(mail.id),
-                      () => setRefreshKey(refreshKey + 1),
-                      "Message",
+                      () => setRefreshKey((prev) => prev + 1),
+                      `Deleting Message...`,
+                      `Message deleted`,
+                      `Message could not be deleted`,
                     )
                   }
                 />
