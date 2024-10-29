@@ -44,7 +44,7 @@ async function fetchGasPrice(apiKey: string): Promise<number> {
       throw new Error(`Failed to parse hex value: ${data.result}`);
     }
 
-    return priceInWei / 1e9;
+    return priceInWei / 1e6;
   } catch (error) {
     console.error("Error fetching gas price:", error);
     throw error;
@@ -87,7 +87,7 @@ export default function Command() {
     <MenuBarExtra
       icon={"base.png"}
       isLoading={gasPrice.loading}
-      title={gasPrice.price ? `${gasPrice.price.toFixed(2)} Gwei` : "Loading..."}
+      title={gasPrice.price ? `${gasPrice.price.toFixed(2)} MWei` : "Loading..."}
     >
       <MenuBarExtra.Item title="Refresh" icon={Icon.ArrowClockwise} onAction={updateGasPrice} />
       <MenuBarExtra.Item title="Settings" icon={Icon.Gear} onAction={() => openCommandPreferences()} />
