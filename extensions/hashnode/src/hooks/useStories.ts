@@ -9,19 +9,29 @@ type EdgesNode<T> = {
   edges: Array<{
     node: T;
   }>;
+  pageInfo: { hasNextPage: boolean; endCursor: string };
 };
 
 export default function useStories(type: StoryType) {
   const { username } = getPreferenceValues<Preferences>();
 
-  const { isLoading, data } = useCachedPromise(
-    async () => {
+  const { isLoading, data, pagination } = useCachedPromise(
+    () => async (options) => {
       if (type === StoryType.USER) {
-        const { user } = await gql<{ user: { posts: { nodes: Story[] } } }>(GET_USER_STORIES, { username });
-        return user.posts.nodes.map((node) => node);
+        const { user } = await gql<{
+          user: { posts: { nodes: Story[]; pageInfo: { hasNextPage: boolean; nextPage: string | null } } } | null;
+        }>(GET_USER_STORIES, { username, page: options.page + 1 });
+        return {
+          data: user?.posts.nodes.map((node) => node) ?? [],
+          hasMore: user?.posts.pageInfo.hasNextPage ?? false,
+        };
       } else {
-        const { feed } = await gql<{ feed: EdgesNode<Story> }>(GET_PUBLIC_STORIES, { type });
-        return feed.edges.map((edge) => edge.node);
+        const { feed } = await gql<{ feed: EdgesNode<Story> }>(GET_PUBLIC_STORIES, { type, after: options.cursor });
+        return {
+          data: feed.edges.map((edge) => edge.node),
+          hasMore: feed.pageInfo.hasNextPage,
+          cursor: feed.pageInfo.endCursor ?? "",
+        };
       }
     },
     [],
@@ -31,5 +41,5 @@ export default function useStories(type: StoryType) {
     },
   );
 
-  return { isLoading, data };
+  return { isLoading, data, pagination };
 }

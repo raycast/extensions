@@ -4,7 +4,7 @@ import { useShortLinks } from "@hooks/use-short-links";
 import { DUB_CO_URL } from "@utils/constants";
 import { deleteShortLink } from "@/api";
 import { MutatePromise, showFailureToast } from "@raycast/utils";
-import type { LinkSchema } from "dub/models/components";
+import type { LinkSchema } from "dub/dist/commonjs/models/components";
 import { withDubClient } from "./with-dub-client";
 
 export function SearchLinks() {
@@ -47,7 +47,16 @@ export function SearchLinks() {
         return (
           <List.Item
             key={shortUrl}
-            keywords={[domain, key, url, id, shortUrl, userId, comments ?? "", ...(tags ?? []).map((t) => t.name)]}
+            keywords={[
+              domain,
+              key,
+              url,
+              id,
+              shortUrl,
+              userId ?? "",
+              comments ?? "",
+              ...(tags ?? []).map((t) => t.name),
+            ]}
             icon={{ source: Icon.Link, tintColor: Color.Blue }}
             title={shortUrl}
             accessories={[

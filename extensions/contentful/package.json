@@ -2,10 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "contentful",
   "title": "Contentful",
-  "description": "Browse and search Contentful content library",
+  "description": "Browse and search Contentful content and assets library",
   "icon": "icon.png",
   "author": "ewgenius",
-  "contributors": ["xmok"],
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Applications",
     "Data",
@@ -29,10 +31,28 @@
     },
     {
       "name": "search-users",
-      "title": "Search Users",
+      "title": "Search Users or Roles",
       "subtitle": "Contentful",
-      "description": "Search Contentful users",
-      "mode": "view"
+      "description": "Search Contentful users or roles",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "type",
+          "type": "dropdown",
+          "required": true,
+          "placeholder": "Users or Roles",
+          "data": [
+            {
+              "title": "Users",
+              "value": "user"
+            },
+            {
+              "title": "Roles",
+              "value": "role"
+            }
+          ]
+        }
+      ]
     }
   ],
   "preferences": [
@@ -49,7 +69,8 @@
       "title": "Contentful Management Token",
       "description": "Contentful Management Token",
       "type": "password",
-      "required": true
+      "required": true,
+      "placeholder": "CFPAT-Xxx...XXx"
     },
     {
       "name": "environment",
@@ -62,8 +83,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.16.2",
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.18.0",
     "contentful-management": "^11.30.2"
   },
   "devDependencies": {
@@ -79,6 +100,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

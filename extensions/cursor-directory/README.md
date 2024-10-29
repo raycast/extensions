@@ -2,6 +2,8 @@
 
 Your [cursor.directory](https://cursor.directory/) in Raycast.
 
+[![raycast-cross-extension-badge]][raycast-cross-extension-link]
+
 ## Overview
 
 Cursor Directory is a powerful Raycast extension that seamlessly integrates with [cursor.directory](https://cursor.directory/), allowing users to access, search, and utilize cursor rules directly within the Cursor Code Editor. This extension streamlines the process of finding and implementing cursor rules, enhancing productivity for developers using the Cursor IDE.
@@ -47,7 +49,6 @@ Cursor Directory is a powerful Raycast extension that seamlessly integrates with
 6. **Local Modification**:
 
    - Press `Cmd + E` to open the cursor rule as a Markdown file in Cursor for editing.
-   - Note: Ensure the `cursor` shell command is installed. (Install via `Cmd + Shift + P` in Cursor, then search for "Install cursor command")
 
 7. **YouTube Videos**:
    - Access curated Cursor-related YouTube videos directly from the extension.
@@ -63,3 +64,6 @@ Access the extension preferences through the Action Panel or Raycast preferences
 - Skip Confirmation on Copy: Skip confirmation on copying a cursor rule.
 - Replace on Launch: Configure if replace or append rule content in launch context.
 - Projects Directory: Set the directory to store your projects.
+
+[raycast-cross-extension-badge]: https://shields.io/badge/Raycast-Cross--Extension-eee?labelColor=FF6363&logo=raycast&logoColor=fff&style=flat-square
+[raycast-cross-extension-link]: https://github.com/LitoMore/raycast-cross-extension-conventions
