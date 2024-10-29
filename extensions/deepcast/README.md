@@ -1,6 +1,6 @@
 # Deepcast
 
-Translate words, or entire sentences, into 27 different languages using DeepL.
+Translate words, or entire sentences, into 30 different languages using DeepL.
 
 ## How to get the API Token
 

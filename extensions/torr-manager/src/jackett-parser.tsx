@@ -57,14 +57,16 @@ export default function Command() {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch torrents");
+        throw new Error();
       }
 
       const data = (await response.json()) as { Results: JackettParsedTorrent[] };
       const torrents = data.Results;
 
       if (Array.isArray(torrents)) {
-        const sortedItems = torrents.sort((a: JackettParsedTorrent, b: JackettParsedTorrent) => b.Seeders - a.Seeders);
+        const sortedItems = torrents
+          .filter((item) => item.Seeders > 0)
+          .sort((a: JackettParsedTorrent, b: JackettParsedTorrent) => b.Seeders - a.Seeders);
 
         setItems(sortedItems);
         showToast(Toast.Style.Success, "", `${sortedItems.length} results`);
@@ -74,11 +76,15 @@ export default function Command() {
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      showToast(Toast.Style.Failure, "Error", "Nothing found");
+      showToast(Toast.Style.Failure, "Error", "Failed to fetch torrents. Check URL and API key");
     }
   };
 
-  const addTorrentToServer = async (title: string, link: string, saveToDb = true, openInMediaPlayer = false) => {
+  const addTorrentToServerByLink = async (
+    title: string,
+    link: string,
+    saveToDb = true,
+  ): Promise<TorrentItem | undefined> => {
     showToast(Toast.Style.Animated, "Processing...");
 
     try {
@@ -119,31 +125,88 @@ export default function Command() {
       }
 
       showToast(Toast.Style.Success, "Torrent added successfully");
-
-      if (openInMediaPlayer) {
-        const data = (await uploadResponse.json()) as TorrentItem;
-        const streamLink = getStreamLink(data);
-        open(streamLink, mediaPlayerApp?.path);
-      }
+      return (await uploadResponse.json()) as TorrentItem;
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       showToast(Toast.Style.Failure, "Error", `Failed to add torrent`);
     }
   };
 
-  const formatTitle = (title: string, lineLength: number = 10): string[] => {
+  const openInMediaPlayer = async (title: string, link: { magnet?: string; url?: string }) => {
+    let data = null;
+
+    if (link.magnet) {
+      data = await addTorrentToServerByMagnet(title, link.magnet, false);
+    } else if (link.url) {
+      data = await addTorrentToServerByLink(title, link.url, false);
+    }
+
+    if (!data || !mediaPlayerApp?.path) {
+      return;
+    }
+
+    const streamLink = getStreamLink(data);
+    open(streamLink, mediaPlayerApp?.path);
+  };
+
+  const addTorrentToServerByMagnet = async (
+    title: string,
+    link: string,
+    save = true,
+  ): Promise<TorrentItem | undefined> => {
+    showToast(Toast.Style.Animated, "Processing...");
+
+    try {
+      const params = {
+        title,
+        link,
+        save,
+        action: "add",
+      };
+
+      const serverUrl = `${handleDomain(torrserverUrl)}/torrents`;
+      const uploadResponse = await timeoutFetch(handleDomain(serverUrl), {
+        method: "POST",
+        body: JSON.stringify(params),
+        headers: {
+          ...getAuthHeaders(),
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        showToast(
+          Toast.Style.Failure,
+          `Failed to upload torrent: ${uploadResponse.status} ${uploadResponse.statusText}`,
+        );
+        return;
+      }
+
+      showToast(Toast.Style.Success, "Torrent added successfully");
+      return (await uploadResponse.json()) as TorrentItem;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      showToast(Toast.Style.Failure, "Error", `Failed to add torrent`);
+    }
+  };
+
+  const formatTitle = (title: string, maxCharsPerRow: number = 55): string[] => {
     const words = title ? title.split(" ") : ["-"];
     const formattedTitle: string[] = [];
     let currentLine = "";
 
-    words.forEach((word, index) => {
-      currentLine += word + " ";
-
-      if ((index + 1) % lineLength === 0 || index === words.length - 1) {
-        formattedTitle.push(currentLine.trim());
-        currentLine = "";
+    words.forEach((word) => {
+      if ((currentLine + word).length <= maxCharsPerRow) {
+        currentLine += (currentLine ? " " : "") + word;
+      } else {
+        formattedTitle.push(currentLine);
+        currentLine = word;
       }
     });
+
+    if (currentLine) {
+      formattedTitle.push(currentLine);
+    }
 
     return formattedTitle;
   };
@@ -173,6 +236,7 @@ export default function Command() {
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.TagList title="Title">
                       <List.Item.Detail.Metadata.TagList.Item text={`${item.CategoryDesc}`} color={Color.Green} />
+
                       <List.Item.Detail.Metadata.TagList.Item
                         text={`${bytesToGbText(item.Size)}`}
                         color={Color.Orange}
@@ -186,42 +250,53 @@ export default function Command() {
                     <List.Item.Detail.Metadata.TagList title="Stats">
                       <List.Item.Detail.Metadata.TagList.Item text={`Seeds: ${item.Seeders}`} color={Color.Green} />
                       <List.Item.Detail.Metadata.TagList.Item text={`Peers: ${item.Peers}`} color={Color.Red} />
-                      <List.Item.Detail.Metadata.TagList.Item text={`${item.TrackerId}`} color={Color.Blue} />
+                      <List.Item.Detail.Metadata.TagList.Item
+                        text={`${item.TrackerId || item.Tracker}`}
+                        color={Color.Blue}
+                      />
                     </List.Item.Detail.Metadata.TagList>
 
                     <List.Item.Detail.Metadata.Separator />
 
                     <List.Item.Detail.Metadata.Label title="Publish Date" text={getFormattedDate(item.PublishDate)} />
 
-                    <List.Item.Detail.Metadata.Separator />
+                    {item.Description && (
+                      <>
+                        <List.Item.Detail.Metadata.Separator />
 
-                    <List.Item.Detail.Metadata.Label title="Description" />
-                    {formatTitle(item.Description).map((titleRow, index) => (
-                      <List.Item.Detail.Metadata.Label key={index} title="" text={titleRow} />
-                    ))}
+                        <List.Item.Detail.Metadata.Label title="Description" />
+                        {formatTitle(item.Description).map((titleRow, index) => (
+                          <List.Item.Detail.Metadata.Label key={index} title="" text={titleRow} />
+                        ))}
+                      </>
+                    )}
                   </List.Item.Detail.Metadata>
                 }
               />
             }
             actions={
               <ActionPanel>
-                {torrserverUrl && item.Link && (
+                {torrserverUrl && (item.MagnetUri || item.Link) && (
                   <Action
                     title={`Open in ${mediaPlayerApp!.name}`}
                     icon={{ source: Icon.Video }}
-                    onAction={() => addTorrentToServer(item.Title, item.Link, false, true)}
+                    onAction={() => openInMediaPlayer(item.Title, { magnet: item.MagnetUri, url: item.Link! })}
                   />
                 )}
-                {torrserverUrl && item.Link && (
+                {torrserverUrl && (item.MagnetUri || item.Link) && (
                   <Action
                     icon={{ source: Icon.SaveDocument }}
                     title="Add Torrent to Server"
-                    onAction={() => addTorrentToServer(item.Title, item.Link)}
+                    onAction={() =>
+                      item.MagnetUri
+                        ? addTorrentToServerByMagnet(item.Title, item.MagnetUri)
+                        : addTorrentToServerByLink(item.Title, item.Link!)
+                    }
                   />
                 )}
                 {item.Link && <Action.OpenInBrowser title="Download Torrent File" url={item.Link} />}
+                {item.MagnetUri && <Action.CopyToClipboard title="Copy Magnet" content={item.MagnetUri} />}
                 {item.Details && <Action.OpenInBrowser title="Open in Browser" url={item.Details} />}
-                {item.Link && <Action.CopyToClipboard title="Copy Link to Torrent" content={item.Link} />}
               </ActionPanel>
             }
           />

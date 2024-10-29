@@ -1,8 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Icon, ActionPanel, Action, List, Detail, useNavigation, CopyToClipboardAction } from "@raycast/api";
+import {
+  Icon,
+  ActionPanel,
+  Action,
+  List,
+  Detail,
+  useNavigation,
+  CopyToClipboardAction,
+  LocalStorage,
+} from "@raycast/api";
 
-function Statistics({ letterTimes, totalTime, onReset, pop }) {
-  let markdown = `# Total time: ${totalTime} seconds\n\n| Letter | Time |\n| --- | --- |\n`;
+function Statistics({ letterTimes, totalTime, bestTime, onReset, pop }) {
+  let markdown = `# Total time: ${totalTime} seconds\n\n**Best Time: ${bestTime} seconds**\n| Letter | Time |\n| --- | --- |\n`;
 
   for (let i = 0; i < letterTimes.length; i++) {
     const letter = String.fromCharCode(65 + i);
@@ -36,8 +45,19 @@ export default function TypeAlphabet() {
   const [timer, setTimer] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [letterTimes, setLetterTimes] = useState([]);
+  const [bestTime, setBestTime] = useState(null);
 
   const { push, pop } = useNavigation();
+
+  useEffect(() => {
+    const fetchBestTime = async () => {
+      const storedBestTime = await LocalStorage.getItem("bestTime");
+      if (storedBestTime) {
+        setBestTime(parseFloat(storedBestTime));
+      }
+    };
+    fetchBestTime();
+  }, []);
 
   useEffect(() => {
     let interval = null;
@@ -61,8 +81,21 @@ export default function TypeAlphabet() {
       if (nextLetter === "Z") {
         setIsTimerRunning(false);
         setNextLetter("Success!");
+        const totalTime = timer / 100;
+        if (bestTime === null || totalTime < bestTime) {
+          setBestTime(totalTime);
+          LocalStorage.setItem("bestTime", totalTime.toFixed(3));
+        }
         setLetterTimes(newLetterTimes.map((time, i) => (i === 0 ? time : time - newLetterTimes[i - 1])));
-        push(<Statistics letterTimes={newLetterTimes} totalTime={formatTime(timer)} onReset={handleReset} pop={pop} />);
+        push(
+          <Statistics
+            letterTimes={newLetterTimes}
+            totalTime={formatTime(timer)}
+            bestTime={bestTime !== null ? bestTime.toFixed(3) : totalTime.toFixed(3)}
+            onReset={handleReset}
+            pop={pop}
+          />
+        );
       } else {
         setLetterTimes(newLetterTimes);
 
@@ -106,7 +139,9 @@ export default function TypeAlphabet() {
         title={nextLetter}
         description={`${
           currentProgress || "Typing game to see how fast you type the alphabet. Timer starts when you do :)"
-        }${isTimerRunning || nextLetter === "Success!" ? `\n${formatTime(timer)} seconds` : ""}`}
+        }${isTimerRunning || nextLetter === "Success!" ? `\n${formatTime(timer)} seconds` : ""}${
+          bestTime !== null ? `\nBest Time: ${bestTime.toFixed(3)} seconds` : ""
+        }`}
       />
     </List>
   );
