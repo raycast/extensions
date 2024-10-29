@@ -8,14 +8,16 @@ import type { LinkSchema } from "dub/dist/commonjs/models/components";
 import { withDubClient } from "./with-dub-client";
 
 export function SearchLinks() {
-  const { shortLinks, error: linksError, isLoading: isLoadingLinks, mutate } = useShortLinks();
+  const [query, setQuery] = useState<string>("");
+  const { shortLinks, error: linksError, isLoading: isLoadingLinks, mutate, supportsLinkTypeahead } = useShortLinks(query);
 
   return (
     <List
       isLoading={isLoadingLinks}
       isShowingDetail={!isLoadingLinks && !linksError && shortLinks?.length !== 0}
-      searchBarPlaceholder={"Search links by domain, url, key, comments, tags..."}
-      filtering
+      {...(!supportsLinkTypeahead
+        ? { searchBarPlaceholder: "Search links by domain, url, key, comments, tags..."}
+        : { onSearchTextChange: setQuery, searchBarPlaceholder: "Search by link tag or url...", throttle: true })}
     >
       {linksError && (
         <List.EmptyView
@@ -164,7 +166,7 @@ export function SearchLinks() {
   );
 }
 
-const deleteLink = (linkId: string, mutate: MutatePromise<LinkSchema[]>) =>
+const deleteLink = (linkId: string, mutate: MutatePromise<{ links: LinkSchema[]; hasMoreLinks: boolean }>) =>
   confirmAlert({
     title: "Delete Link",
     message: "Are you sure you want to delete this link?",
@@ -175,10 +177,13 @@ const deleteLink = (linkId: string, mutate: MutatePromise<LinkSchema[]>) =>
     },
   });
 
-const tryDeleteLink = async (linkId: string, mutate: MutatePromise<LinkSchema[]>) => {
+const tryDeleteLink = async (linkId: string, mutate: MutatePromise<{ links: LinkSchema[]; hasMoreLinks: boolean }>) => {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting link..." });
   await mutate(deleteShortLink(linkId), {
-    optimisticUpdate: (data) => data?.filter((l) => l.id !== linkId),
+    optimisticUpdate: (data) => ({
+      ...data,
+      links: data?.links.filter((l) => l.id !== linkId),
+    }),
   })
     .then(async ({ id }) => {
       toast.style = Toast.Style.Success;
