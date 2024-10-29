@@ -3,7 +3,7 @@
   "name": "evernote",
   "title": "Evernote instant search",
   "description": "Search your Evernote notes instantly using the local database of the Mac official Evernote client.",
-  "icon": "extension-icon.png",
+  "icon": "ev-icon.png",
   "author": "artpi",
   "license": "MIT",
   "commands": [
