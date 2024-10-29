@@ -48,7 +48,7 @@ export default function Command(): JSX.Element {
     const updatePrice = async () => {
       try {
         const newPrice = await fetchGasPrice(apiKey);
-        const newPriceString = `${newPrice.toFixed(0)} MWei`;
+        const newPriceString = `${newPrice.toFixed(0)}`;
 
         if (newPriceString !== cache.get(PRICE_CACHE_KEY)) {
           cache.set(PRICE_CACHE_KEY, newPriceString);
