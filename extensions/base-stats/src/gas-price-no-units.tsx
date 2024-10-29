@@ -87,7 +87,7 @@ export default function Command() {
     <MenuBarExtra
       icon={"base.png"}
       isLoading={gasPrice.loading}
-      title={gasPrice.price ? `${gasPrice.price.toFixed(0)} MWei` : "Loading..."}
+      title={gasPrice.price ? `${gasPrice.price.toFixed(0)}` : "Loading..."}
     >
       <MenuBarExtra.Item title="Refresh" icon={Icon.ArrowClockwise} onAction={updateGasPrice} />
       <MenuBarExtra.Item title="Settings" icon={Icon.Gear} onAction={() => openCommandPreferences()} />

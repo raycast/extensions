@@ -30,7 +30,14 @@
     {
       "name": "gas-price",
       "title": "Gas Price",
-      "description": "View the current Base Gas Price in your menu bar - updates every minute",
+      "description": "View the current Base Gas Price (MWei) in your menu bar - updates every minute",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "gas-price-no-units",
+      "title": "Gas Price (No Units)",
+      "description": "View the current Base Gas Price (MWei) in your menu bar - updates every minute",
       "mode": "menu-bar",
       "interval": "1m"
     }
