@@ -6,7 +6,7 @@ export default async function Command() {
   const isMullvadInstalled = await verifyIsMullvadInstalled();
   if (!isMullvadInstalled) return;
 
-  const priorStatus = execSync("mullvad status").toString().split('\n')[0];
+  const priorStatus = execSync("mullvad status").toString().split("\n")[0];
   // `mullvad reconnect` doesn't do anything if disconnected.
   let message;
   if (priorStatus === "Connected") {
@@ -15,7 +15,6 @@ export default async function Command() {
   } else {
     message = "Not Connected";
   }
-
 
   await showHUD(message, {
     clearRootSearch: true,

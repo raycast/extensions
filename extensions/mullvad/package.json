@@ -33,11 +33,11 @@
       "mode": "no-view"
     },
     {
-        "name": "disconnect",
-        "title": "Disconnect",
-        "subtitle": "Mullvad",
-        "description": "Deactivates the VPN connection.",
-        "mode": "no-view"
+      "name": "disconnect",
+      "title": "Disconnect",
+      "subtitle": "Mullvad",
+      "description": "Deactivates the VPN connection.",
+      "mode": "no-view"
     },
     {
       "name": "reconnect",
@@ -56,7 +56,7 @@
     "@types/node": "^20.8.10",
     "@types/react": "^18.2.27",
     "eslint": "8.40.0",
-    "prettier": "2.5.1",
+    "prettier": "^2.5.1",
     "react": "^18.2.0",
     "typescript": "^5.3.3"
   },

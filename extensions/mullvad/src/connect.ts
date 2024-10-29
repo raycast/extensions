@@ -5,8 +5,8 @@ import { verifyIsMullvadInstalled } from "./utils";
 export default async function Command() {
   const isMullvadInstalled = await verifyIsMullvadInstalled();
   if (!isMullvadInstalled) return;
-  
-  const priorStatus = execSync("mullvad status").toString().split('\n')[0];
+
+  const priorStatus = execSync("mullvad status").toString().split("\n")[0];
   execSync("mullvad connect");
 
   // `mullvad connect` doesn't change the relay,
