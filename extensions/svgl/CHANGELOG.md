@@ -2,7 +2,7 @@
 
 ## [Add Copy Vue & Svelte Component Feature] - {PR_MERGE_DATE}
 
-- Add the actions `Copy Vue Component` and `Copy Svelte Component` to copy the Vue and Svelte component code to the clipboard.
+- Add the actions `Copy Vue Component` and `Copy Svelte Component` to copy the Vue and Svelte component code to the clipboard. 
 
 ## [Add Copy SVG URL Feature] - 2024-09-17
 
