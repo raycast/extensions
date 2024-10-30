@@ -33,7 +33,11 @@ export const SelectModel = ({ preferences }: { preferences: Preferences }) => {
               icon={selectedModels.includes(model) ? Icon.Checkmark : Icon.Circle}
               actions={
                 <ActionPanel>
-                  <Action title="Toggle Selection" onAction={() => toggleModel(model)} />
+                  <Action
+                    title="Toggle Selection"
+                    icon={selectedModels.includes(model) ? Icon.Circle : Icon.Checkmark}
+                    onAction={() => toggleModel(model)}
+                  />
                   <Action.Push title="Start Chat" icon={Icon.Box} target={<NotDiamond />} />
                 </ActionPanel>
               }

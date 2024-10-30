@@ -32,6 +32,4 @@ In order to use this extension you will to generate an API Key from [Not Diamond
 > 
 > In order to benefit from the best results, make sure to select at least 2 models. All API Keys are optional, but you need to have at least 1 to use Not Diamond Raycast Extension.
 
-![Initial set-up](metadata/4.png)
-
 > All the preferences value will be stored locally using [Preferences API](https://developers.raycast.com/api-reference/preferences)
