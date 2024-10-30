@@ -13,10 +13,22 @@
   "commands": [
     {
       "name": "polymarket",
-      "title": "🇺🇸",
+      "title": "Election Odds",
       "description": "Shows current Polymarket odds for the US Election - automatically updates every 90 seconds",
       "mode": "no-view",
       "interval": "90s"
+    },
+    {
+      "name": "swing-states",
+      "title": "Swing States",
+      "description": "Shows current Polymarket odds for the swing states",
+      "mode": "view"
+    },
+    {
+      "name": "top-markets",
+      "title": "Top Markets",
+      "description": "Shows current top markets by 24h volume",
+      "mode": "view"
     }
   ],
   "dependencies": {
