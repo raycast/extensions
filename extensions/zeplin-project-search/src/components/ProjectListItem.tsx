@@ -54,7 +54,12 @@ export default function ProjectListItem(props: {
               onAction={() => removeFromVisits(project)}
             />
           ) : null}
-          <Action icon={Icon.ExclamationMark} title="Leave Project" onAction={() => onLeave(project)} />
+          <Action
+            icon={Icon.ExclamationMark}
+            title="Leave Project"
+            onAction={() => onLeave(project)}
+            style={Action.Style.Destructive}
+          />
           <Action
             icon={Icon.AppWindowSidebarLeft}
             title="Toggle Details"
