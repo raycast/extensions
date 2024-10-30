@@ -13,10 +13,11 @@ import WebSocket from "ws";
 import { z } from "zod";
 
 // constants
-const API_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://api.subt.is"
-    : "http://localhost:58602";
+// const API_URL =
+//   process.env.NODE_ENV === "production"
+//     ? "https://api.subt.is"
+//     : "http://localhost:58602";
+const API_URL = "https://api.subt.is";
 const VIDEO_FILE_EXTENSIONS = [
   ".mkv",
   ".mp4",
