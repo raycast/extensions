@@ -1,10 +1,11 @@
 import React from "react";
-import { Detail } from "@raycast/api";
+import { ActionPanel, Detail } from "@raycast/api";
 import { Game, GamecenterRightRailResponse} from "../utils/types";
-import { getLanguageKey, timeRemaining, teamName, generateLineScoreTable, generateShotsTable, formatLocalTime, gameSummaryStats, scoresList, penaltiesList } from "../utils/helpers";
+import { getLanguageKey, timeRemaining, teamName, generateLineScoreTable, generateShotsTable, formatLocalTime, gameSummaryStats, scoresList, penaltiesList, starsOfTheGame } from "../utils/helpers";
 import { getNHL } from "../utils/nhlData";
 import { gameStrings, timeStrings } from "../utils/translations";
 import Unresponsive from "./unresponsive";
+import GameActions from "./gameActions";
 
 const languageKey = getLanguageKey();
 
@@ -17,14 +18,6 @@ interface gameSidebar {
   data: GamecenterRightRailResponse;
   isLoading: boolean;
 }
-
-// const pastGame = function(gameLanding: gameLanding, gameSidebar: gameSidebar) {
-//   const game = gameLanding.data;
-//   const support = gameSidebar.data;
-//   return `# ${teamName(game.awayTeam, game.awayTeam.score, true)} @ ${teamName(game.homeTeam, game.homeTeam.score, true)} 
-//   \n ## ${gameStrings.linescore[languageKey]} \n ${generateLineScoreTable(support.linescore, game.awayTeam, game.homeTeam)} 
-//   \n ## ${gameStrings.sog[languageKey]} \n ${generateShotsTable(support.shotsByPeriod, game.awayTeam, game.homeTeam)} `;
-// }
 
 const gameDetails = function(gameLanding: gameLanding, gameSidebar: gameSidebar) {
   const game = gameLanding.data;
@@ -40,8 +33,18 @@ const gameDetails = function(gameLanding: gameLanding, gameSidebar: gameSidebar)
   \n ---
   \n ${penaltiesList(game)}
   \n ${gameSummaryStats(support, game.awayTeam, game.homeTeam)}
+  \n ${starsOfTheGame(game)}
   \n ## ${gameStrings.linescore[languageKey]} \n ${generateLineScoreTable(support.linescore, game.awayTeam, game.homeTeam)} 
   \n ## ${gameStrings.sog[languageKey]} \n ${generateShotsTable(support.shotsByPeriod, game.awayTeam, game.homeTeam)} `;
+}
+
+const preGameDetails = function(gameLanding: gameLanding, gameSidebar: gameSidebar) {
+  const game = gameLanding.data;
+  const support = gameSidebar.data;
+
+  return `# ${teamName(game.awayTeam, game.awayTeam.score, true)} (${game.awayTeam.record}) @ ${teamName(game.homeTeam, game.homeTeam.score, true)} (${game.homeTeam.record})
+  \n ${formatLocalTime(game.startTimeUTC)} ${timeStrings.gameStart[languageKey]}, ${game.gameDate}
+  \n ${gameSummaryStats(support, game.awayTeam, game.homeTeam)}`
 }
 
 export default function GameDetail({ game }: { game: Game }) {
@@ -57,25 +60,25 @@ export default function GameDetail({ game }: { game: Game }) {
   }
 
   switch(game.gameState) {
-    case 'LIVE':
-    case 'CRIT':
-      return (
-        <Detail
-          markdown={gameDetails(gameLanding, gameSidebar)}
-        />
-      );
     case 'FUT':
     case 'PRE':
       return (
         <Detail
-          markdown={`Future game`}
+          markdown={preGameDetails(gameLanding, gameSidebar)}
         />
       );
+    case 'LIVE':
+    case 'CRIT':
     default:
       return (
         <Detail
           markdown={gameDetails(gameLanding, gameSidebar)}
+          actions={
+            <ActionPanel>
+              <GameActions game={game} />
+            </ActionPanel>
+          }
         />
       );
-    }
+  }
 }

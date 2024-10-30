@@ -663,8 +663,8 @@ export type PenaltySummary = {
 
 export type GameSummary = {
   scoring: PeriodSummary[];
-  shootout: any[]; // Add more specific type if needed
-  threeStars: any[]; // Add more specific type if needed
+  // shootout: any[]; // Add more specific type if needed
+  threeStars?: PlayerOnIce[]; // Add more specific type if needed
   penalties: PenaltySummary[];
   iceSurface: {
     awayTeam: TeamIceSurface;
@@ -674,6 +674,7 @@ export type GameSummary = {
 
 export type PlayerOnIce = {
   playerId: number;
+  star?: number;
   name: {
     default: string;
     cs?: string;
@@ -681,9 +682,15 @@ export type PlayerOnIce = {
     sk?: string;
   };
   sweaterNumber: number;
+  sweaterNo?: number;
   positionCode: string;
+  position?: string;
+  teamAbbrev?: string;
   headshot: string;
   totalSOI: number;
+  goals?: number;
+  assists?: number;
+  points?: number;
 };
 
 export type TeamIceSurface = {

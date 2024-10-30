@@ -1,3 +1,4 @@
+import React from "react";
 import { Detail } from "@raycast/api";
 
 export default function Unresponsive() {

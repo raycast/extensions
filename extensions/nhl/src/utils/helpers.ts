@@ -1,6 +1,6 @@
 import { ScoreboardResponse, Game, SortedGames, Timezone, Clock, PeriodDescriptor, TeamInfo, Linescore, Period, GamecenterRightRailResponse, GameStringCategory} from "./types";
 import { getPreferenceValues, Color, environment } from "@raycast/api";
-import { timeStrings, gameStrings } from "./translations";
+import { timeStrings, gameStrings, playerTitleStrings } from "./translations";
 
 const preferences = getPreferenceValues();
 const timezone = preferences.timezone as Timezone;
@@ -47,8 +47,6 @@ export function scoresList(game: Game) {
   }
   return scores;
 }
-
-
 
 export function gameSummaryStats(
   gameSidebar: GamecenterRightRailResponse,
@@ -136,7 +134,19 @@ export function teamLogo(abbrev: string): string {
   return `https://assets.nhle.com/logos/nhl/svg/${abbrev}_${environment.appearance}.svg`;
 }
 
+export function starsOfTheGame(game: Game) {
+  const stars = game.summary?.threeStars;
+  if (!stars) return;
 
+  let starsContent = `## ${playerTitleStrings.starsOfTheGame[languageKey]} \n`;
+  starsContent += `| ${playerTitleStrings.photo[languageKey]} | ${playerTitleStrings.info[languageKey]} | ${playerTitleStrings.stats[languageKey]} | \n`;
+  starsContent += `| :---: | --- | --- | \n`; 
+  stars.forEach((star) => {
+    starsContent += `| &nbsp;<img alt="${star.teamAbbrev}'s ${star.name.default} ${playerTitleStrings.stats[languageKey]}" src="${star.headshot}" width="90" height="90" /> | ${star.teamAbbrev} • ${star.name.default} • ${star.sweaterNo} • ${star.position} | G: ${star.goals} A: ${star.assists} P: ${star.points} | \n`;
+  });
+
+  return starsContent;
+}
 
 export function generateLineScoreTable(
   linescore: Linescore | undefined,

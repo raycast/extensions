@@ -1,3 +1,4 @@
+import { starsOfTheGame } from "./helpers";
 import { GameStrings } from "./types";
 
 export const gameTitles = {
@@ -112,5 +113,44 @@ export const gameStrings: GameStrings = {
   gameStats: {
     default: "Game Stats",
     fr: "Statistiques du Match",
+  }
+}
+
+export const playerTitleStrings = {
+  starsOfTheGame: {
+    default: "Stars of the Game",
+    fr: "Étoiles du Match",
+  },
+  center: {
+    default: "Center",
+    fr: "Centre",
+  },
+  leftWing: {
+    default: "Left Wing",
+    fr: "Ailier Gauche",
+  },
+  rightWing: {
+    default: "Right Wing",
+    fr: "Ailier Droit",
+  },
+  defenseMan: {
+    default: "Defense Man",
+    fr: "Défenseur",
+  },
+  goalTender: {
+    default: "Goaltender",
+    fr: "Gardien",
+  },
+  photo: {
+    default: "Photo",
+    fr: "Photo",
+  },
+  info: {
+    default: "Info",
+    fr: "Info",
+  },
+  stats: {
+    default: "Stars",
+    fr: "Étoiles",
   }
 }
