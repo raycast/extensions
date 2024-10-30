@@ -36,8 +36,8 @@ export default function WorkspaceMenu() {
       }
     },
   });
-  const workspaces: DevPodWorkspace[] = React.useMemo(() => JSON.parse(data ?? "[]"), [data]);
 
+  const workspaces: DevPodWorkspace[] = React.useMemo(() => JSON.parse(data ?? "[]"), [data]);
   const reloadWorkspaces = React.useCallback(() => revalidate(), [revalidate]);
 
   return error ? (
@@ -108,7 +108,7 @@ const WorkspaceItem = function WorkspaceItem({
       // This is necessary since it takes time for the status to be updated.
       setTimeout(() => {
         revalidate();
-      }, 1000);
+      }, 2000);
     },
     onError: () => {
       if (debugEnabled) {
@@ -122,7 +122,26 @@ const WorkspaceItem = function WorkspaceItem({
   const { data, error, isLoading, revalidate } = useExec(devPodPath, DevPodWorkspaceCommand.statusAsJson(workspace.id));
 
   if (error) {
-    return <List.Item title={workspace.id} subtitle={"Error while fetching status"} />;
+    return (
+      <List.Item
+        title={workspace.id}
+        subtitle={"Error fetching status. Start to establish link."}
+        actions={
+          <ActionPanel>
+            <Action
+              key="Start"
+              title="Start"
+              shortcut={startShortcut}
+              onAction={() => {
+                setLifecycleCommand(DevPodWorkspaceCommand.up(workspace.id));
+                setExecute(true);
+                showToast({ title: "Starting...", message: "Please wait. This can up to a few minutes." });
+              }}
+            />
+          </ActionPanel>
+        }
+      />
+    );
   }
 
   if (isLoading) {
@@ -151,67 +170,15 @@ const WorkspaceItem = function WorkspaceItem({
           />
         }
         actions={
-          <ActionPanel>
-            <Action
-              key="Detail"
-              title="View Details"
-              onAction={() => push(<WorkspaceDetail workspace={workspace} status={status} />)}
-            />
-            {status.state == DevPodWorkspaceState.Stopped && (
-              <Action
-                key="Start"
-                title="Start"
-                shortcut={startShortcut}
-                onAction={() => {
-                  setLifecycleCommand(DevPodWorkspaceCommand.up(workspace.id));
-                  setExecute(true);
-                  showToast({ title: "Starting..." });
-                }}
-              />
-            )}
-            {status.state == DevPodWorkspaceState.Running && (
-              <Action
-                key="Stop"
-                title="Stop"
-                shortcut={stopShortcut}
-                onAction={() => {
-                  setLifecycleCommand(DevPodWorkspaceCommand.stop(workspace.id));
-                  setExecute(true);
-                  showToast({ title: "Stopping..." });
-                }}
-              />
-            )}
-            <Action
-              key="Delete"
-              title="Delete"
-              shortcut={deleteShortcut}
-              onAction={() => {
-                setLifecycleCommand(DevPodWorkspaceCommand.delete(workspace.id));
-                setTimeout(() => {
-                  reloadWorkspaces();
-                }, 1000);
-                setExecute(true);
-                showToast({ title: "Deleting..." });
-              }}
-            />
-            <Action
-              key="Create"
-              title="Create New Workspace"
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
-              onAction={() => {
-                push(<WorkspaceCreate />);
-              }}
-            />
-            <Action
-              key="Reload UI"
-              title="Reload List"
-              shortcut={reloadShortcut}
-              onAction={() => {
-                reloadWorkspaces();
-                showToast({ title: "Reloading..." });
-              }}
-            />
-          </ActionPanel>
+          <WorkspaceActions
+            workspace={workspace}
+            status={status}
+            setLifecycleCommand={setLifecycleCommand}
+            setExecute={setExecute}
+            reloadWorkspaces={reloadWorkspaces}
+            push={push}
+            devPodPath={devPodPath}
+          />
         }
       />
     );
@@ -223,9 +190,10 @@ const WorkspaceItem = function WorkspaceItem({
 interface WorkspaceDetailProps {
   workspace: DevPodWorkspace;
   status: DevPodWorkspaceStatus;
+  devPodPath: string;
 }
 
-function WorkspaceDetail({ workspace, status }: WorkspaceDetailProps) {
+function createWorkspaceMarkdown(workspace: DevPodWorkspace, status: DevPodWorkspaceStatus) {
   const lastUsed = formatRelativeDate(workspace.lastUsed);
   const created = formatRelativeDate(workspace.creationTimestamp);
   const markdown = `
@@ -245,7 +213,52 @@ status:
 ${JSON.stringify(status, null, 2)}
 \`\`\`
 `;
-  return <Detail markdown={markdown} />;
+  return markdown;
+}
+
+function WorkspaceDetail({ workspace, status, devPodPath }: WorkspaceDetailProps) {
+  let markdown = createWorkspaceMarkdown(workspace, status);
+
+  const { data, error, isLoading, revalidate } = useExec(devPodPath, DevPodWorkspaceCommand.logs(workspace.id), {
+    execute: true,
+  });
+
+  if (data) {
+    markdown += `
+Logs:
+\`\`\`bash
+${data}
+\`\`\`
+`;
+  }
+
+  if (error) {
+    markdown = `
+### ${workspace.id}
+There was an error while fetching logs:
+${error}
+`;
+  }
+
+  return (
+    <Detail
+      markdown={markdown}
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <Action
+            key="Reload Details"
+            title="Reload Details"
+            shortcut={reloadShortcut}
+            onAction={() => {
+              revalidate();
+              showToast({ title: "Reloading..." });
+            }}
+          />
+        </ActionPanel>
+      }
+    />
+  );
 }
 
 function statusIcon(state: DevPodWorkspaceState): Image.ImageLike {
@@ -268,3 +281,93 @@ const stopShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "s" 
 const startShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "s" };
 const reloadShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "r" };
 const deleteShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "d" };
+
+interface WorkspaceActionsProps {
+  workspace: DevPodWorkspace;
+  status: DevPodWorkspaceStatus;
+  setLifecycleCommand: (command: string[]) => void;
+  setExecute: (execute: boolean) => void;
+  reloadWorkspaces: () => void;
+  push: (component: JSX.Element) => void;
+  devPodPath: string;
+}
+
+function WorkspaceActions({
+  workspace,
+  status,
+  setLifecycleCommand,
+  setExecute,
+  reloadWorkspaces,
+  push,
+  devPodPath,
+}: WorkspaceActionsProps) {
+  return (
+    <ActionPanel>
+      <Action
+        key="Detail"
+        title="View Details"
+        onAction={() => push(<WorkspaceDetail workspace={workspace} status={status} devPodPath={devPodPath} />)}
+      />
+      {status.state == DevPodWorkspaceState.Stopped && (
+        <Action
+          key="Start"
+          title="Start"
+          shortcut={startShortcut}
+          onAction={() => {
+            setLifecycleCommand(DevPodWorkspaceCommand.up(workspace.id));
+            setExecute(true);
+            setTimeout(() => {
+              reloadWorkspaces();
+            }, 3000);
+            showToast({ title: "Starting...", message: "Please wait. This can take up to a few minutes" });
+          }}
+        />
+      )}
+      {status.state == DevPodWorkspaceState.Running && (
+        <Action
+          key="Stop"
+          title="Stop"
+          shortcut={stopShortcut}
+          onAction={() => {
+            setLifecycleCommand(DevPodWorkspaceCommand.stop(workspace.id));
+            setExecute(true);
+            setTimeout(() => {
+              reloadWorkspaces();
+            }, 3000);
+            showToast({ title: "Stopping..." });
+          }}
+        />
+      )}
+      <Action
+        key="Delete"
+        title="Delete"
+        shortcut={deleteShortcut}
+        onAction={() => {
+          setLifecycleCommand(DevPodWorkspaceCommand.delete(workspace.id));
+          setTimeout(() => {
+            reloadWorkspaces();
+          }, 3000);
+          setExecute(true);
+          showToast({ title: "Deleting...", message: "Please wait. This can take a few moments" });
+        }}
+      />
+      <Action
+        key="Create"
+        title="Create New Workspace"
+        shortcut={{ modifiers: ["cmd"], key: "c" }}
+        onAction={() => {
+          push(<WorkspaceCreate />);
+        }}
+      />
+      <Action
+        key="Reload UI"
+        title="Reload List"
+        shortcut={reloadShortcut}
+        onAction={() => {
+          reloadWorkspaces();
+          showToast({ title: "Reloading..." });
+        }}
+      />
+    </ActionPanel>
+  );
+}

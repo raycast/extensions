@@ -77,5 +77,6 @@ export const DevPodWorkspaceCommand = {
   reset: (id: string) => ["up", id, "--reset"], //  When resetting a workspace, no changes will be preserved!
   delete: (id: string) => ["delete", id],
   deleteForce: (id: string) => ["delete", id, "--force"],
+  logs: (id: string) => ["logs", "--debug", id],
   statusAsJson: (id: string) => ["status", id, "--output", "json"],
 };
