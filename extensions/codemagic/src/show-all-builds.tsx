@@ -9,27 +9,30 @@ const ShowAllBuilds = () => {
 
   if (error || appBuilds === null) {
     return (
-      <List
-        actions={
-          <ActionPanel>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-            <Action.OpenInBrowser
-              title="Contact Developer"
-              url="mailto:hi@gokul.dev?subject=Raycast%20x%20Codemagic%20extension"
-            />
-          </ActionPanel>
-        }
-      >
+      <List>
         <List.EmptyView
           title="Is your Access Token Correct?"
-          description="Please check your API token in Raycast settings > Extensions > CodeMagic. If you need help, contact the developer."
+          description="Please check your API token in Raycast settings > Extensions > Codemagic. If you need help, contact the developer."
+          actions={
+            <ActionPanel>
+              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+              <Action.OpenInBrowser
+                title="Contact Developer"
+                url="mailto:hi@gokul.dev?subject=Raycast%20x%20Codemagic%20extension"
+              />
+            </ActionPanel>
+          }
         />
       </List>
     );
   }
 
   if (!appBuilds || appBuilds.length === 0) {
-    return <List.EmptyView title="No builds found" description="No builds available to display." />;
+    return (
+      <List>
+        <List.EmptyView title="No builds found" description="No builds available to display." />
+      </List>
+    );
   }
 
   return (
