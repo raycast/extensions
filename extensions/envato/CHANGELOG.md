@@ -1,5 +1,11 @@
 # Envato Changelog
 
+## [List Purchases] - {PR_MERGE_DATE}
+
+- View your purchases
+- Add placeholder to `Preference`
+- Fix type in title of a `Command`
+
 ## [Update Logo] - 2024-08-27
 
 - New Envato logo
