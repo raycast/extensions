@@ -11,6 +11,7 @@ import {
   closeMainWindow,
   useNavigation,
   Alert,
+  LocalStorage,
 } from "@raycast/api";
 import { exec } from "child_process";
 import { ReactNode, useEffect, useState } from "react";
@@ -39,6 +40,27 @@ const commonProcesses: Process[] = [
   },
   { label: "SystemUIServer (e.g. Menu Bar)", process: "SystemUIServer", icon: Icon.ComputerChip },
 ];
+
+async function getOrder(): Promise<string[]> {
+  return JSON.parse((await LocalStorage.getItem<string>("order")) || "[]");
+}
+
+async function orderItems<T extends (string | Process)[]>(items: T): Promise<T> {
+  const order = await getOrder();
+  return items.sort((a, b) => {
+    let aIndex = order.indexOf(typeof a === "string" ? a : a.process);
+    let bIndex = order.indexOf(typeof b === "string" ? b : b.process);
+    if (aIndex === -1) aIndex = order.length;
+    if (bIndex === -1) bIndex = order.length;
+    return aIndex - bIndex;
+  });
+}
+
+async function saveLastUsedItems(process: string) {
+  const order = await getOrder();
+  const newOrder = [process, ...order.filter((i) => i !== process)];
+  await LocalStorage.setItem("order", JSON.stringify(newOrder));
+}
 
 function getAdvancedItems() {
   return new Promise<ReactNode[]>((resolve, reject) => {
@@ -104,10 +126,15 @@ async function getExePath(exe: string) {
 export default function Command() {
   const { push } = useNavigation();
 
+  const [orderedProcesses, setOrderedProcesses] = useState<Process[]>([]);
+  useEffect(() => {
+    orderItems(commonProcesses).then(setOrderedProcesses);
+  }, []);
+
   return (
-    <List>
+    <List isLoading={orderedProcesses.length === 0}>
       <List.Section title="Common">
-        {commonProcesses.map((process) => (
+        {orderedProcesses.map((process) => (
           <List.Item
             key={process.process}
             title={process.label}
@@ -125,23 +152,26 @@ export default function Command() {
           />
         ))}
       </List.Section>
-      <List.Section title="Advanced">
-        <List.Item
-          key="advanced"
-          title="Advanced Mode..."
-          icon={Icon.BulletPoints}
-          actions={
-            <ActionPanel>
-              <Action
-                title="View All Running Services"
-                onAction={async () => {
-                  push(<AdvancedList />);
-                }}
-              />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
+      {/* This condition needs to be here, otherwise focus would always be on Advanced by default */}
+      {orderedProcesses.length ? (
+        <List.Section title="Advanced">
+          <List.Item
+            key="advanced"
+            title="Advanced Mode..."
+            icon={Icon.BulletPoints}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="View All Running Services"
+                  onAction={async () => {
+                    push(<AdvancedList />);
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      ) : null}
     </List>
   );
 }
@@ -166,6 +196,8 @@ async function performAction(values: { process: Process } | { advancedMode: stri
     await showToast(Toast.Style.Failure, "No process selected");
     return;
   }
+
+  await saveLastUsedItems("process" in values ? values.process.process : values.advancedMode);
 
   clearSearchBar();
   closeMainWindow();
