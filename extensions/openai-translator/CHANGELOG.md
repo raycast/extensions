@@ -1,6 +1,6 @@
 # OpenAI Translator Changelog
 
-## [Added Recent Translate Language] - {PR_MERGE_DATE}
+## [Added Recent Translate Language] - 2024-10-30
 
 - Added the recent translation languages to the language dropdown list.
 
