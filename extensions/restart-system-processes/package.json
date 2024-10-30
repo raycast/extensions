@@ -5,6 +5,9 @@
   "description": "Restart system processes such as Finder, Dock, Menu Bar, Audio and more!",
   "icon": "main-icon.png",
   "author": "muzhen_gaming",
+  "contributors": [
+    "hrueger"
+  ],
   "categories": [
     "Productivity",
     "System",
