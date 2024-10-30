@@ -19,6 +19,17 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "useSudo",
+      "default": false,
+      "description": "This is required for some processes. See README for more info.",
+      "type": "checkbox",
+      "label": "Use sudo when running the command.",
+      "required": true,
+      "title": "Use sudo"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.80.0"
   },
