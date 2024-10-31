@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, Clipboard, Icon, Color, getPreferenceValues } from "@raycast/api";
 import React, { useState } from "react";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 
 import advancedFormat from "dayjs/plugin/advancedFormat";
 dayjs.extend(advancedFormat);
@@ -65,7 +65,7 @@ export default function main() {
   }
 
   function formatTime(time: string) {
-    let dTime;
+    let dTime: Dayjs;
     if (!isNaN(Number(time))) {
       if (time.length == 10) {
         // is unix timestamp seconds
