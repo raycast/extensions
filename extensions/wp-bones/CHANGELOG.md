@@ -1,3 +1,3 @@
 # WP Bones Changelog
 
-## [Initial Version] - 2024-10-28
+## [Initial Version] - {PR_MERGE_DATE}
