@@ -135,8 +135,8 @@ export default function Command() {
       actions={
         !question.data ? (
           <ActionPanel>
-            <PreferencesActionSection />
             {getSelectModelActionPanel(preferences)}
+            <PreferencesActionSection />
           </ActionPanel>
         ) : (
           getSendMessageActionPanel({ onAction: returnBlock, preferences, currentQuestion: question.data, answer: "" })
