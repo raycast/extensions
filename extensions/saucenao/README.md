@@ -13,7 +13,7 @@ Since SauceNAO only accepts image URLs for input, this extension relies on [File
   - Uses File.io
 - Clipboard
   - If you have an image URL in your clipboard already, it will use it directly.
-  - If you clipboard contains image data, it will upload it to File.io temporarily.
+  - If your clipboard contains image data, it will upload it to File.io temporarily.
 - URL
   - Manual URL entry direct from the Raycast search bar.
 
