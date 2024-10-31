@@ -1,9 +1,13 @@
-import { List, ActionPanel, Action, Clipboard, Icon, Color } from "@raycast/api";
+import { List, ActionPanel, Action, Clipboard, Icon, Color , getPreferenceValues} from "@raycast/api";
 import React, { useState } from "react";
 import dayjs from "dayjs";
 
+import advancedFormat from "dayjs/plugin/advancedFormat";
+dayjs.extend(advancedFormat);
+
 import localizedFormat from "dayjs/plugin/localizedFormat";
 dayjs.extend(localizedFormat);
+
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 
@@ -11,6 +15,26 @@ export default function main() {
   const [clipboardText, setClipboardText] = useState("");
   const [input, setInput] = useState<string>(clipboardText);
   const [resultList, setResultList] = useState([] as string[]);
+
+
+  const dateTimeFormats = {
+    isoDate: "YYYY-MM-DD",
+    isoDateTime: "YYYY-MM-DD HH:mm:ss",
+    formatWithMillis: "YYYY-MM-DD HH:mm:ss.SSS",
+    formatWithTimezone: "YYYY-MM-DD HH:mm:ssZ",
+    isoFormat: "YYYY-MM-DDTHH:mm:ssZ",
+    utcIsoFormat: "YYYY-MM-DDTHH:mm:ss[Z]",
+    unixTimestamp: "X",
+    unixMillis: "x",
+    localizedShortDate: "L",
+    localizedShortDateTime: "L LT",
+    localizedFullDateTime: "LLL",
+    localizedLongDateTime: "LLLL",
+    localizedTime: "LT",
+    localizedSecondsTime: "LTS"
+  };
+
+  const preferences = getPreferenceValues();
 
   React.useEffect(() => {
     Clipboard.readText().then((text) => {
@@ -57,27 +81,9 @@ export default function main() {
       dTime = dayjs(time);
     }
 
-    return [
-      // ISO 8601 or similar
-      dTime.format("YYYY-MM-DD").toString(),
-      dTime.format("YYYY-MM-DD HH:mm:ss").toString(),
-      dTime.format("YYYY-MM-DD HH:mm:ss.SSS").toString(),
-      dTime.format("YYYY-MM-DD HH:mm:ssZ").toString(),
-      dTime.format().toString(),
-      dTime.utc().format().toString(),
-
-      // Unix timestamps
-      dTime.unix().toString(),
-      dTime.valueOf().toString(),
-
-      // Localized formats
-      dTime.format("L").toString(),
-      dTime.format("L LT").toString(),
-      dTime.format("LLL").toString(),
-      dTime.format("LLLL").toString(),
-      dTime.format("LT").toString(),
-      dTime.format("LTS").toString(),
-    ];
+    return Object.entries(dateTimeFormats)
+      .filter(([key]) => preferences[key])
+      .map(([_, value]) => dTime.format(value).toString());
   }
 
   type ActionItem = {
