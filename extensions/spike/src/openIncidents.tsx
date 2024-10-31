@@ -74,7 +74,7 @@ export default function Command() {
       <MenuBarExtra.Item
         icon={{
           source: Icon.Dot,
-          tintColor: isOnCall ? Color.Green : Color.SecondaryText
+          tintColor: isOnCall ? Color.Green : Color.SecondaryText,
         }}
         title={isOnCall ? "You are on-call" : "You are not on-call"}
         onAction={() => {
