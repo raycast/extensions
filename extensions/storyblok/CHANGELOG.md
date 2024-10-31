@@ -1,6 +1,6 @@
 # Storyblok Changelog
 
-## [Paginated Assets + `sbData` Enhancements] - {PR_MERGE_DATE}
+## [Paginated Assets + `sbData` Enhancements] - 2024-10-31
 
 - Show `Detail` if unable to load data in `Space Details`
 - Modified `sbData` so it takes generic type which prevents us from having to _explicity cast_ using `as`
