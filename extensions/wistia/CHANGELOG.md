@@ -1,6 +1,6 @@
 # Wistia Changelog
 
-## [Data is Cached for better UX] - {PR_MERGE_DATE}
+## [Data is Cached for better UX] - 2024-10-31
 
 - Caching through `useCachedPromise` and `useCachedState`
 - Add CHANGELOG
