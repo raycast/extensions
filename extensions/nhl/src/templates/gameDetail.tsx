@@ -1,7 +1,18 @@
 import React from "react";
 import { ActionPanel, Detail } from "@raycast/api";
-import { Game, GamecenterRightRailResponse} from "../utils/types";
-import { getLanguageKey, timeRemaining, teamName, generateLineScoreTable, generateShotsTable, formatLocalTime, summaryStats, scoresList, penaltiesList, starsOfTheGame } from "../utils/helpers";
+import { Game, GamecenterRightRailResponse } from "../utils/types";
+import {
+  getLanguageKey,
+  timeRemaining,
+  teamName,
+  generateLineScoreTable,
+  generateShotsTable,
+  formatLocalTime,
+  summaryStats,
+  scoresList,
+  penaltiesList,
+  starsOfTheGame,
+} from "../utils/helpers";
 import { getNHL } from "../utils/nhlData";
 import { gameStrings, timeStrings } from "../utils/translations";
 import Unresponsive from "./unresponsive";
@@ -19,13 +30,14 @@ interface gameSidebar {
   isLoading: boolean;
 }
 
-const gameDetails = function(gameLanding: gameLanding, gameSidebar: gameSidebar) {
+const gameDetails = function (gameLanding: gameLanding, gameSidebar: gameSidebar) {
   const game = gameLanding.data;
   const support = gameSidebar.data;
 
-  const gameTime = game.gameState === 'OFF'
-    ? `${formatLocalTime(game.startTimeUTC)} ${timeStrings.gameStart[languageKey]}`
-    : `${timeRemaining(game.clock, game.periodDescriptor)} - ${formatLocalTime(game.startTimeUTC)} ${timeStrings.gameStart[languageKey]}`;
+  const gameTime =
+    game.gameState === "OFF"
+      ? `${formatLocalTime(game.startTimeUTC)} ${timeStrings.gameStart[languageKey]}`
+      : `${timeRemaining(game.clock, game.periodDescriptor)} - ${formatLocalTime(game.startTimeUTC)} ${timeStrings.gameStart[languageKey]}`;
 
   return `# ${teamName(game.awayTeam, game.awayTeam.score, true)} @ ${teamName(game.homeTeam, game.homeTeam.score, true)} 
   \n ${gameTime}
@@ -33,21 +45,21 @@ const gameDetails = function(gameLanding: gameLanding, gameSidebar: gameSidebar)
   \n ---
   \n ${penaltiesList(game)}
   \n ## ${gameStrings.gameStats[languageKey]}
-  \n ${summaryStats(support, game.awayTeam, game.homeTeam, 'live')}
+  \n ${summaryStats(support, game.awayTeam, game.homeTeam, "live")}
   \n ${starsOfTheGame(game)}
   \n ## ${gameStrings.linescore[languageKey]} \n ${generateLineScoreTable(support.linescore, game.awayTeam, game.homeTeam)} 
   \n ## ${gameStrings.sog[languageKey]} \n ${generateShotsTable(support.shotsByPeriod, game.awayTeam, game.homeTeam)} `;
-}
+};
 
-const preGameDetails = function(gameLanding: gameLanding, gameSidebar: gameSidebar) {
+const preGameDetails = function (gameLanding: gameLanding, gameSidebar: gameSidebar) {
   const game = gameLanding.data;
   const support = gameSidebar.data;
 
   return `# ${teamName(game.awayTeam, game.awayTeam.score, true)} (${game.awayTeam.record}) @ ${teamName(game.homeTeam, game.homeTeam.score, true)} (${game.homeTeam.record})
   \n ${formatLocalTime(game.startTimeUTC)} ${timeStrings.gameStart[languageKey]}, ${game.gameDate}
   \n ## ${gameStrings.seasonStats[languageKey]}
-  \n ${summaryStats(support, game.awayTeam, game.homeTeam, 'pre')}`
-}
+  \n ${summaryStats(support, game.awayTeam, game.homeTeam, "pre")}`;
+};
 
 export default function GameDetail({ game }: { game: Game }) {
   const gameLanding = getNHL(`gamecenter/${game.id}/landing`) as gameLanding;
@@ -56,21 +68,17 @@ export default function GameDetail({ game }: { game: Game }) {
   if (gameLanding.isLoading || gameSidebar.isLoading) {
     return <Detail isLoading={true} />;
   }
- 
+
   if (!gameLanding?.data || !gameSidebar?.data) {
     return <Unresponsive />;
   }
 
-  switch(game.gameState) {
-    case 'FUT':
-    case 'PRE':
-      return (
-        <Detail
-          markdown={preGameDetails(gameLanding, gameSidebar)}
-        />
-      );
-    case 'LIVE':
-    case 'CRIT':
+  switch (game.gameState) {
+    case "FUT":
+    case "PRE":
+      return <Detail markdown={preGameDetails(gameLanding, gameSidebar)} />;
+    case "LIVE":
+    case "CRIT":
     default:
       return (
         <Detail

@@ -20,7 +20,7 @@ function gameAccessories(game: Game) {
     case "FUT":
       return "";
     case "CRIT":
-      if(game.otInUse) {
+      if (game.otInUse) {
         return `${gameStates.crit[languageKey]}: ${getOrdinalPeriod(game.periodDescriptor?.number)}`;
       } else {
         return `${getOrdinalPeriod(game.periodDescriptor?.number)}`;
@@ -34,19 +34,17 @@ function gameAccessories(game: Game) {
   }
 }
 
-const gameTime = function(game: Game) {
+const gameTime = function (game: Game) {
   if (game.clock?.timeRemaining) {
     return `${game.clock?.timeRemaining} ${timeStrings.timeRemainingShort[languageKey]}`;
   } else if (game.clock?.inIntermission) {
     return `${timeStrings.intermission[languageKey]}: ${game.clock?.timeRemaining}`;
-  } 
-  else if (game.gameState === "OFF") {
+  } else if (game.gameState === "OFF") {
     return formatLocalTime(game.startTimeUTC);
-  }
-  else {
+  } else {
     return `${formatLocalTime(game.startTimeUTC)} ${timeStrings.gameStart[languageKey]}`;
   }
-}
+};
 
 export default function GameList({ title, games }: { title: string; games: Game[] }) {
   return (
@@ -61,12 +59,12 @@ export default function GameList({ title, games }: { title: string; games: Game[
                 { text: gameTime(game) },
                 {
                   tag: { value: String(game.awayTeam.score ?? ""), color: getScoreColor(game, "Away") },
-                  icon: teamLogo(game.awayTeam.abbrev)
+                  icon: teamLogo(game.awayTeam.abbrev),
                 },
                 { text: "vs" },
                 {
                   tag: { value: String(game.homeTeam.score ?? ""), color: getScoreColor(game, "Home") },
-                  icon: teamLogo(game.homeTeam.abbrev)
+                  icon: teamLogo(game.homeTeam.abbrev),
                 },
               ]}
               actions={

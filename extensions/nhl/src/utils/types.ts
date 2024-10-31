@@ -90,7 +90,7 @@ export type Game = {
   threeMinRecap?: string;
   threeMinRecapFr?: string;
   otInUse: boolean;
-  summary?: GameSummary
+  summary?: GameSummary;
 };
 
 export type SortedGames = {
@@ -305,7 +305,6 @@ export type SeasonSeries = {
   };
   gameCenterLink: string;
 };
-
 
 export type GameInfo = {
   referees?: Official[];
@@ -575,13 +574,33 @@ export type TeamSeasonStat = {
   category: GameStringCategory | string;
   awayValue: number;
   homeValue: number;
-}
+};
 
-export type GameStringCategory = 'linescore' | 'sog' | 'faceoffWinningPctg' | 'powerPlay' | 'powerPlayPctg' | 'takeaways' | 'giveaways' | 'hits' | 'pim' | 'blockedShots' | 'gameStats' | 'goalsForPerGamePlayed' | 'goalsAgainstPerGamePlayed' | 'ppPctg' | 'pkPctg' | 'ppPctgRank' | 'pkPctgRank' | 'faceoffWinningPctgRank' | 'goalsForPerGamePlayedRank' | 'goalsAgainstPerGamePlayedRank';
+export type GameStringCategory =
+  | "linescore"
+  | "sog"
+  | "faceoffWinningPctg"
+  | "powerPlay"
+  | "powerPlayPctg"
+  | "takeaways"
+  | "giveaways"
+  | "hits"
+  | "pim"
+  | "blockedShots"
+  | "gameStats"
+  | "goalsForPerGamePlayed"
+  | "goalsAgainstPerGamePlayed"
+  | "ppPctg"
+  | "pkPctg"
+  | "ppPctgRank"
+  | "pkPctgRank"
+  | "faceoffWinningPctgRank"
+  | "goalsForPerGamePlayedRank"
+  | "goalsAgainstPerGamePlayedRank";
 
 export type GameStrings = Record<GameStringCategory, Record<LanguageKey, string>>;
 
-export type LanguageKey = 'default' | 'fr';
+export type LanguageKey = "default" | "fr";
 
 export type GameReports = {
   gameSummary: string;

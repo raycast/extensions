@@ -6,8 +6,8 @@ export const userInterface = {
   checkBackLater: {
     default: "Please check back when the game has concluded",
     fr: "Veuillez revenir lorsque le match est terminé",
-  }
-}
+  },
+};
 
 export const gameTitles = {
   today: {
@@ -74,8 +74,8 @@ export const timeStrings = {
   gameStart: {
     default: "Game Start",
     fr: "Début du Match",
-  }
-}
+  },
+};
 
 export const gameStrings = {
   linescore: {
@@ -161,8 +161,8 @@ export const gameStrings = {
   seasonStats: {
     default: "Season Stats",
     fr: "Statistiques de la Saison",
-  }
-}
+  },
+};
 
 export const playerTitleStrings = {
   starsOfTheGame: {
@@ -200,5 +200,5 @@ export const playerTitleStrings = {
   stats: {
     default: "Stars",
     fr: "Étoiles",
-  }
-}
+  },
+};

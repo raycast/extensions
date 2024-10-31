@@ -1,4 +1,18 @@
-import { ScoreboardResponse, Game, SortedGames, Timezone, Clock, PeriodDescriptor, TeamInfo, Linescore, Period, GamecenterRightRailResponse, GameStringCategory, TeamSeasonStats, TeamSeasonStat} from "./types";
+import {
+  ScoreboardResponse,
+  Game,
+  SortedGames,
+  Timezone,
+  Clock,
+  PeriodDescriptor,
+  TeamInfo,
+  Linescore,
+  Period,
+  GamecenterRightRailResponse,
+  GameStringCategory,
+  TeamSeasonStats,
+  TeamSeasonStat,
+} from "./types";
 import { getPreferenceValues, Color, environment } from "@raycast/api";
 import { timeStrings, gameStrings, playerTitleStrings, userInterface } from "./translations";
 
@@ -8,15 +22,15 @@ const languageKey = getLanguageKey();
 
 export function penaltiesList(game: Game) {
   const penalties = game.summary?.penalties;
-  if (!penalties) return '';
-  let penaltyList = '## Penalties \n';
+  if (!penalties) return "";
+  let penaltyList = "## Penalties \n";
   for (const period of penalties) {
     penaltyList += `### ${getOrdinalPeriod(period.periodDescriptor.number)} \n`;
     if (period.penalties.length === 0) {
-      penaltyList += 'No penalties this period. \n\n';
+      penaltyList += "No penalties this period. \n\n";
     } else {
       for (const penalty of period.penalties) {
-        penaltyList += ` - <img src="${teamLogo(penalty.teamAbbrev.default)}" width="20" height="20" /> | \`${penalty.timeInPeriod}\` | ${penalty.committedByPlayer} (${penalty.duration}:00) - ${penalty.descKey} against ${penalty.drawnBy}`
+        penaltyList += ` - <img src="${teamLogo(penalty.teamAbbrev.default)}" width="20" height="20" /> | \`${penalty.timeInPeriod}\` | ${penalty.committedByPlayer} (${penalty.duration}:00) - ${penalty.descKey} against ${penalty.drawnBy}`;
         penaltyList += `\n`;
       }
     }
@@ -26,20 +40,20 @@ export function penaltiesList(game: Game) {
 
 export function scoresList(game: Game) {
   const scoring = game.summary?.scoring;
-  if (!scoring) return '';
-  let scores = '## Scoring \n';
+  if (!scoring) return "";
+  let scores = "## Scoring \n";
   for (const period of scoring) {
     scores += `### ${getOrdinalPeriod(period.periodDescriptor.number)} \n`;
     if (period.goals.length === 0) {
-      scores += 'No goals scored this period. \n\n';
+      scores += "No goals scored this period. \n\n";
     } else {
       for (const goal of period.goals) {
-        scores += ` - <img src="${teamLogo(goal.teamAbbrev.default)}" width="20" height="20" /> | **[${goal.homeScore} - ${goal.awayScore}](${goal.highlightClipSharingUrl})** | \`${goal.timeInPeriod}\` | ${goal.shotType} | <img src="${goal.headshot}" alt="" width="20" height="20" /> ${goal.firstName.default} ${goal.lastName.default} (${goal.goalsToDate}) ${goal.strength === 'pp' ? 'PPG' : '' }`;
-        if(goal.assists.length > 0) {
-          scores += ' | ';
+        scores += ` - <img src="${teamLogo(goal.teamAbbrev.default)}" width="20" height="20" /> | **[${goal.homeScore} - ${goal.awayScore}](${goal.highlightClipSharingUrl})** | \`${goal.timeInPeriod}\` | ${goal.shotType} | <img src="${goal.headshot}" alt="" width="20" height="20" /> ${goal.firstName.default} ${goal.lastName.default} (${goal.goalsToDate}) ${goal.strength === "pp" ? "PPG" : ""}`;
+        if (goal.assists.length > 0) {
+          scores += " | ";
         }
         for (const [index, assist] of goal.assists.entries()) {
-          scores += `A: ${assist.name.default} (${assist.assistsToDate})${index < goal.assists.length - 1 ? ', ' : ''}`;
+          scores += `A: ${assist.name.default} (${assist.assistsToDate})${index < goal.assists.length - 1 ? ", " : ""}`;
         }
         scores += `\n`;
       }
@@ -50,17 +64,17 @@ export function scoresList(game: Game) {
 
 export function convertTeamSeasonStatsFormat(teamSeasonStats: TeamSeasonStats): TeamSeasonStat[] {
   const result: TeamSeasonStat[] = [];
-  
+
   // Get all keys from awayTeam (could use homeTeam as well)
   const keys = Object.keys(teamSeasonStats.awayTeam);
-  
-  keys.forEach(key => {
+
+  keys.forEach((key) => {
     result.push({
       category: key,
       awayValue: teamSeasonStats.awayTeam[key],
-      homeValue: teamSeasonStats.homeTeam[key]
+      homeValue: teamSeasonStats.homeTeam[key],
     });
-});
+  });
 
   return result;
 }
@@ -69,7 +83,7 @@ export function summaryStats(
   gameSidebar: GamecenterRightRailResponse,
   homeTeam: TeamInfo,
   awayTeam: TeamInfo,
-  gameState: "live" | "pre"
+  gameState: "live" | "pre",
 ): string {
   // Check if the data we need exists
   // count for both game (live or post) as well as pre-game (teamSeasonStats)
@@ -79,7 +93,7 @@ export function summaryStats(
   let stats = gameSidebar.teamGameStats;
 
   // if this is pre-game, let's format the data into the same format as the live game data structure
-  if(gameState === "pre") {
+  if (gameState === "pre") {
     stats = convertTeamSeasonStatsFormat(gameSidebar.teamSeasonStats);
   }
 
@@ -97,23 +111,25 @@ export function summaryStats(
   for (const stat of stats) {
     const category = stat.category as GameStringCategory;
 
-    if (typeof stat.homeValue === 'string') {
+    if (typeof stat.homeValue === "string") {
       // If homeValue is a string, just insert it directly
       summary += `| ${stat.homeValue} | ${gameStrings[category][languageKey]} | ${stat.awayValue} |\n`;
-    } else if (typeof stat.homeValue === 'number') {
+    } else if (typeof stat.homeValue === "number") {
       if (Number.isInteger(stat.homeValue)) {
         // If homeValue is an integer, display it as is
         summary += `| ${stat.homeValue} | ${gameStrings[category][languageKey]} | ${stat.awayValue} |\n`;
       } else {
         // If homeValue is a float, format it as a percentage
         // for whatever reason `goalsForPerGamePlayed` is a special case. can't score 357% goals per game lol
-        if (category === 'goalsForPerGamePlayed') {
+        if (category === "goalsForPerGamePlayed") {
           summary += `| ${stat.homeValue} | ${gameStrings[category][languageKey]} | ${stat.awayValue} |\n`;
-        }
-        else {
-          const homeValuePercentage = (stat.homeValue * 100).toFixed(2) + '%';
-          const awayValueFormatted = typeof stat.awayValue === 'number'
-              ? (Number.isInteger(stat.awayValue) ? stat.awayValue.toString() : (stat.awayValue * 100).toFixed(2) + '%')
+        } else {
+          const homeValuePercentage = (stat.homeValue * 100).toFixed(2) + "%";
+          const awayValueFormatted =
+            typeof stat.awayValue === "number"
+              ? Number.isInteger(stat.awayValue)
+                ? stat.awayValue.toString()
+                : (stat.awayValue * 100).toFixed(2) + "%"
               : stat.awayValue;
           summary += `| ${homeValuePercentage} | ${gameStrings[category][languageKey]} | ${awayValueFormatted} |\n`;
         }
@@ -171,12 +187,12 @@ export function teamLogo(abbrev: string): string {
 
 export function starsOfTheGame(game: Game) {
   const stars = game.summary?.threeStars;
-  console.log(stars)
-  if (!stars?.length) return '';
+  console.log(stars);
+  if (!stars?.length) return "";
 
   let starsContent = `## ${playerTitleStrings.starsOfTheGame[languageKey]} \n`;
   starsContent += `| ${playerTitleStrings.photo[languageKey]} | ${playerTitleStrings.info[languageKey]} | ${playerTitleStrings.stats[languageKey]} | \n`;
-  starsContent += `| :---: | --- | --- | \n`; 
+  starsContent += `| :---: | --- | --- | \n`;
   stars.forEach((star) => {
     starsContent += `| &nbsp;<img alt="${star.teamAbbrev}'s ${star.name.default} ${playerTitleStrings.stats[languageKey]}" src="${star.headshot}" width="90" height="90" /> | ${star.teamAbbrev} • ${star.name.default} • ${star.sweaterNo} • ${star.position} | G: ${star.goals} A: ${star.assists} P: ${star.points} | \n`;
   });
@@ -187,25 +203,25 @@ export function starsOfTheGame(game: Game) {
 export function generateLineScoreTable(
   linescore: Linescore | undefined,
   awayTeam: TeamInfo,
-  homeTeam: TeamInfo
+  homeTeam: TeamInfo,
 ): string {
-  if (!linescore) return '';
-  
-  let lineScore = '|   ';  // Empty cell for team names column
+  if (!linescore) return "";
+
+  let lineScore = "|   "; // Empty cell for team names column
 
   // heading
   linescore.byPeriod.forEach((period, index) => {
     lineScore += `| ${index + 1} `;
   });
-  lineScore += '| T |\n';  // Total column
+  lineScore += "| T |\n"; // Total column
 
   // separator line - make sure there's the correct number of columns
-  lineScore += '|:---|';   // First column alignment
+  lineScore += "|:---|"; // First column alignment
   linescore.byPeriod.forEach(() => {
-    lineScore += ':---:|';  // Center alignment for period columns
+    lineScore += ":---:|"; // Center alignment for period columns
   });
-  lineScore += ':---:|';   // Center alignment for total column
-  lineScore += '\n';
+  lineScore += ":---:|"; // Center alignment for total column
+  lineScore += "\n";
 
   // away team
   lineScore += `| ${teamName(awayTeam, undefined, true)} | `;
@@ -214,24 +230,20 @@ export function generateLineScoreTable(
   });
   lineScore += `${linescore.totals.away} |\n`;
 
-   // home team
-   lineScore += `| ${teamName(homeTeam, undefined, true)} | `;
-   linescore.byPeriod.forEach((period) => {
-     lineScore += `${period.home} | `;
-   });
-   lineScore += `${linescore.totals.home} |\n`;
+  // home team
+  lineScore += `| ${teamName(homeTeam, undefined, true)} | `;
+  linescore.byPeriod.forEach((period) => {
+    lineScore += `${period.home} | `;
+  });
+  lineScore += `${linescore.totals.home} |\n`;
 
   return lineScore;
 }
 
-export function generateShotsTable(
-  shots: Period[] | undefined,
-  awayTeam: TeamInfo,
-  homeTeam: TeamInfo
-): string {
-  if (!shots) return '';
-  
-  let shotsTable = '|   ';  // Empty cell for team names column
+export function generateShotsTable(shots: Period[] | undefined, awayTeam: TeamInfo, homeTeam: TeamInfo): string {
+  if (!shots) return "";
+
+  let shotsTable = "|   "; // Empty cell for team names column
   let awayShotsTotal = 0;
   let homeShotsTotal = 0;
 
@@ -239,15 +251,15 @@ export function generateShotsTable(
   shots.forEach((period, index) => {
     shotsTable += `| ${index + 1} `;
   });
-  shotsTable += '| T |\n';  // Total column
+  shotsTable += "| T |\n"; // Total column
 
   // separator line - make sure there's the correct number of columns
-  shotsTable += '|:---|';
+  shotsTable += "|:---|";
   shots.forEach(() => {
-    shotsTable += ':---:|';
+    shotsTable += ":---:|";
   });
-  shotsTable += ':---:|';
-  shotsTable += '\n';
+  shotsTable += ":---:|";
+  shotsTable += "\n";
 
   // away team
   shotsTable += `| ${teamName(awayTeam, undefined, true)} | `;
@@ -257,35 +269,27 @@ export function generateShotsTable(
   });
   shotsTable += `${awayShotsTotal} |\n`;
 
-   // home team
-   shotsTable += `| ${teamName(homeTeam, undefined, true)} | `;
-   shots.forEach((period) => {
-     shotsTable += `${period.home} | `;
-      homeShotsTotal += period.home;
-   });
-   shotsTable += `${homeShotsTotal} |\n`;
+  // home team
+  shotsTable += `| ${teamName(homeTeam, undefined, true)} | `;
+  shots.forEach((period) => {
+    shotsTable += `${period.home} | `;
+    homeShotsTotal += period.home;
+  });
+  shotsTable += `${homeShotsTotal} |\n`;
 
   return shotsTable;
 }
 
-export function teamName(
-  team: TeamInfo, 
-  score: number | undefined,
-  showLogo: boolean
-): string {
-  return `${team.abbrev} ${team.name[languageKey]} ${showLogo ? (`<img alt="${team.name[languageKey]}" src="${team.logo}" height="20" width="20" />` + '') : ''} ${score ? ('(' + score + ')') : ''}`;
+export function teamName(team: TeamInfo, score: number | undefined, showLogo: boolean): string {
+  return `${team.abbrev} ${team.name[languageKey]} ${showLogo ? `<img alt="${team.name[languageKey]}" src="${team.logo}" height="20" width="20" />` + "" : ""} ${score ? "(" + score + ")" : ""}`;
 }
 
-export function timeRemaining(
-  clock: Clock | undefined,
-  periodDescriptor: PeriodDescriptor | undefined
-): string {
+export function timeRemaining(clock: Clock | undefined, periodDescriptor: PeriodDescriptor | undefined): string {
   let timeMarkdown = getOrdinalPeriod(periodDescriptor?.number);
 
-  if(clock?.inIntermission) {
+  if (clock?.inIntermission) {
     timeMarkdown += ` ${timeStrings.intermission[languageKey]}: ${timeStrings.timeRemaining[languageKey]} ${clock?.timeRemaining}`;
-  }
-  else {
+  } else {
     timeMarkdown += `: ${timeStrings.timeRemaining[languageKey]}: ${clock?.timeRemaining}`;
   }
 
