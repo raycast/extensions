@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Clipboard, Icon, Color , getPreferenceValues} from "@raycast/api";
+import { List, ActionPanel, Action, Clipboard, Icon, Color, getPreferenceValues } from "@raycast/api";
 import React, { useState } from "react";
 import dayjs from "dayjs";
 
@@ -16,7 +16,6 @@ export default function main() {
   const [input, setInput] = useState<string>(clipboardText);
   const [resultList, setResultList] = useState([] as string[]);
 
-
   const dateTimeFormats = {
     isoDate: "YYYY-MM-DD",
     isoDateTime: "YYYY-MM-DD HH:mm:ss",
@@ -31,7 +30,7 @@ export default function main() {
     localizedFullDateTime: "LLL",
     localizedLongDateTime: "LLLL",
     localizedTime: "LT",
-    localizedSecondsTime: "LTS"
+    localizedSecondsTime: "LTS",
   };
 
   const preferences = getPreferenceValues();
