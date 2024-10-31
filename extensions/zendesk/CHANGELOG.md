@@ -1,6 +1,6 @@
 # Zendesk Changelog
 
-## [Fetch More Than 25 Articles via Pagination] - {PR_MERGE_DATE}
+## [Fetch More Than 25 Articles via Pagination] - 2024-10-31
 
 - Paginate the query
 - Some refactoring of the code to use the `useFetch` hook
