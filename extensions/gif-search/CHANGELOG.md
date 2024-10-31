@@ -1,5 +1,9 @@
 # GIF Search Changelog
 
+## [Obfuscate Filename on Copy or Download] - 2024-10-31
+
+- Adds a new preference to hide the original filename when copying or downloading GIFs
+
 ## [Fix Recent GIFs can't be add to favorites] - 2024-10-08
 
 - Fixes a bug where recent GIFs couldn't be added to favorites
