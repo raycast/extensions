@@ -1,6 +1,6 @@
 import { resolve } from "path";
 import { homedir } from "os";
-import { showToast, Toast, open, getApplications } from "@raycast/api";
+import { showToast, Toast, open, getApplications, popToRoot } from "@raycast/api";
 import { useState, useEffect } from "react";
 import path from "path";
 import fs from "fs";
@@ -14,10 +14,11 @@ export default function Command() {
   );
 
   useEffect(() => {
-    getApplications().then((applications) => {
+    getApplications().then(async (applications) => {
       const isEvernoteInstalled = applications.find(({ bundleId }) => bundleId === "com.evernote.Evernote");
       if (!isEvernoteInstalled) {
-        showToast({
+        await popToRoot();
+        await showToast({
           style: Toast.Style.Failure,
           title: "Evernote client is not installed.",
           message: "Download",
@@ -35,7 +36,8 @@ export default function Command() {
         return;
       }
       if (!fs.existsSync(baseDir)) {
-        showToast({
+        await popToRoot();
+        await showToast({
           style: Toast.Style.Failure,
           title: "Cannot find Evernote database.",
           message:
