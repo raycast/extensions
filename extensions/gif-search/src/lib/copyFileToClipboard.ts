@@ -7,7 +7,7 @@ import { getObfuscateFilename } from "../preferences";
 
 export default async function copyFileToClipboard(url: string, name?: string, isFavorite?: boolean) {
   const obfuscateFilename = getObfuscateFilename();
-  const fileName = obfuscateFilename ? "gif.gif" : (name || path.basename(url));
+  const fileName = obfuscateFilename ? "gif.gif" : name || path.basename(url);
 
   // Check if the file exists in the cache - if so use it directly
   const cachedFile = await getGifFromCache(fileName);
