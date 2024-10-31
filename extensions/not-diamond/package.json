@@ -14,7 +14,6 @@
     {
       "name": "not-diamond",
       "title": "Chat Not Diamond",
-      "subtitle": "",
       "description": "Not Diamond is an AI model router that automatically determines which LLM is best-suited to respond to any query, improving LLM output quality by combining multiple LLMs into a meta-model that learns when to call each LLM. This extension answers always with the best model depending on the prompt.",
       "mode": "view"
     }
