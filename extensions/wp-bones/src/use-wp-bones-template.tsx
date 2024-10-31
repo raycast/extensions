@@ -35,7 +35,7 @@ export default function Command() {
                 url={`https://github.com/new?template_name=${item.name}&template_owner=wpbones`}
               />
               <Action.OpenInBrowser
-                title="View Source code"
+                title="View Source Code"
                 icon="github-white.png"
                 url={`https://github.com/wpbones/${item.name}`}
               />
