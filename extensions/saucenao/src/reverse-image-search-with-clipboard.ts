@@ -1,5 +1,5 @@
 import { Clipboard, showToast, Toast, open, getPreferenceValues } from "@raycast/api";
-import { uploadToFileIo, searchImage, isImageFile, isImageURL } from "./common/imageUtils"; // Import only what's necessary
+import { uploadToFileIo, searchImage, isImageFile, isImageURL } from "./common/imageUtils";
 import { execSync } from "child_process";
 import fs from "fs";
 
@@ -8,15 +8,15 @@ async function getClipboardImage() {
   try {
     const tempImagePath = "/tmp/clipboard.png";
 
-    // Save the clipboard image to a temp file (macOS example)
+    // Save the clipboard image to a temp file
     execSync(`osascript -e 'the clipboard as «class PNGf»' | sed 's/^«data PNGf//' | xxd -r -p > ${tempImagePath}`);
 
     // Check if the image file exists and is a valid image
     if (fs.existsSync(tempImagePath) && isImageFile(tempImagePath)) {
-      console.log("Image found in clipboard."); // Debugging log
+      console.log("Image found in clipboard.");
       return tempImagePath;
     } else {
-      console.log("No valid image found in clipboard temp path."); // Debugging log
+      console.log("No valid image found in clipboard temp path.");
     }
   } catch (error) {
     console.error("Failed to get image from clipboard", error);
@@ -52,10 +52,10 @@ export async function getClipboardURL() {
 }
 
 export default async function main() {
-  const { apiKey } = getPreferenceValues<{ apiKey: string }>();
+  const { apiKey } = getPreferenceValues<ExtensionPreferences>();
 
   // Step 1: Check for an image in the clipboard
-  console.log("Checking clipboard for an image..."); // Debugging log
+  console.log("Checking clipboard for an image...");
   const imagePath = await getClipboardImage();
   if (imagePath) {
     try {
@@ -78,7 +78,7 @@ export default async function main() {
   }
 
   // Step 2: If no image found, check for a valid image URL in the clipboard
-  console.log("No image found in clipboard. Checking for valid image URL..."); // Debugging log
+  console.log("No image found in clipboard. Checking for valid image URL...");
   const clipboardUrl = await getClipboardURL();
   if (clipboardUrl) {
     // If a valid image URL is found, use it directly for SauceNAO search

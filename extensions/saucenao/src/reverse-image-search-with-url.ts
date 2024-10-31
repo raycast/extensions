@@ -1,8 +1,8 @@
 import { showToast, Toast, open, getPreferenceValues } from "@raycast/api";
-import { isImageURL, searchImage } from "./common/imageUtils"; // Adjust the path as necessary
+import { isImageURL, searchImage } from "./common/imageUtils";
 
 export default async function main({ arguments: inputArgs }: { arguments: { imageUrl: string } }) {
-  const { apiKey } = getPreferenceValues<{ apiKey: string }>();
+  const { apiKey } = getPreferenceValues<ExtensionPreferences>();
   const { imageUrl } = inputArgs;
 
   // Step 1: Validate the input URL
