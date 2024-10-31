@@ -2,10 +2,6 @@ import { Action, ActionPanel, Icon, List, closeMainWindow, showHUD, getPreferenc
 import { Task, getTasks, startTrackingTask, stopTracking } from "./tasks";
 import { useCachedPromise, useFrecencySorting } from "@raycast/utils";
 
-interface Preferences {
-  stopRunningTimers: boolean;
-}
-
 function getTaskPath(task: Task): string {
   return [task.category?.name, task.project.name, task.parentTask?.name]
     .filter((segment): segment is string => segment !== undefined)
@@ -26,7 +22,7 @@ function StartTrackerForTask() {
     closeMainWindow({ clearRootSearch: true });
     visitTask(task);
 
-    const preferences = getPreferenceValues<Preferences>();
+    const preferences = getPreferenceValues<Preferences.StartTaskTracking>();
 
     if (preferences.stopRunningTimers) {
       await stopTracking();
