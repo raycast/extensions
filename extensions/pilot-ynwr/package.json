@@ -5,6 +5,7 @@
   "description": "Pilot your Calendar, TaskManager and Journals quickly and effectively through a custom Notion template.",
   "icon": "logo_pilot.png",
   "author": "romubuntu",
+  "owner":"romubuncorp",
   "categories": [
     "Productivity",
     "Design Tools",
