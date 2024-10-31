@@ -1,6 +1,6 @@
 <div align="center">
   <img
-    src="https://github.com/spikehq/raycast-extension/blob/main/assets/spike-full-logo.png"
+    src="./assets/spike-logo.png"
     width="150"
   />
 
@@ -30,7 +30,7 @@ Respond to incidents, check on-call, add overrides faster with Raycast.
 
 Spike's Raycast extension brings incident management and on-call functionalities directly into operating system. This extension allows you to manage incidents, view on-call schedules, add on-call overrides, and access your favorites without leaving your workflow.
 
-![Extension](./assets/README.png)
+![Extension](./metadata/spike-2.png)
 
 ## Features
 

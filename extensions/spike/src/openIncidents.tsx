@@ -1,4 +1,4 @@
-import { MenuBarExtra, open } from "@raycast/api";
+import { Color, Icon, MenuBarExtra, open } from "@raycast/api";
 import { useMemo } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import api from "./api";
@@ -73,7 +73,8 @@ export default function Command() {
     <MenuBarExtra isLoading={isLoading} icon="spike-logo-white.png" tooltip="Open incidents">
       <MenuBarExtra.Item
         icon={{
-          source: isOnCall ? "green-dot.png" : "gray-dot.png",
+          source: Icon.Dot,
+          tintColor: isOnCall ? Color.Green : Color.SecondaryText
         }}
         title={isOnCall ? "You are on-call" : "You are not on-call"}
         onAction={() => {
