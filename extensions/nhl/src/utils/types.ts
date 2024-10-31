@@ -275,7 +275,7 @@ export type GamecenterRightRailResponse = {
   gameVideo?: GameVideo;
   linescore?: Linescore;
   shotsByPeriod?: Period[];
-  teamGameStats?: TeamGameStat[];
+  teamGameStats?: TeamGameStat[] | TeamSeasonStat[];
   gameReports?: GameReports;
   teamSeasonStats: TeamSeasonStats;
   last10Record: Last10Record;
@@ -571,7 +571,13 @@ export type TeamGameStat = {
   homeValue: number | string;
 };
 
-export type GameStringCategory = 'linescore' | 'sog' | 'faceoffWinningPctg' | 'powerPlay' | 'powerPlayPctg' | 'takeaways' | 'giveaways' | 'hits' | 'pim' | 'blockedShots' | 'gameStats';
+export type TeamSeasonStat = {
+  category: GameStringCategory | string;
+  awayValue: number;
+  homeValue: number;
+}
+
+export type GameStringCategory = 'linescore' | 'sog' | 'faceoffWinningPctg' | 'powerPlay' | 'powerPlayPctg' | 'takeaways' | 'giveaways' | 'hits' | 'pim' | 'blockedShots' | 'gameStats' | 'goalsForPerGamePlayed' | 'goalsAgainstPerGamePlayed' | 'ppPctg' | 'pkPctg' | 'ppPctgRank' | 'pkPctgRank' | 'faceoffWinningPctgRank' | 'goalsForPerGamePlayedRank' | 'goalsAgainstPerGamePlayedRank';
 
 export type GameStrings = Record<GameStringCategory, Record<LanguageKey, string>>;
 

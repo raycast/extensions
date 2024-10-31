@@ -1,6 +1,6 @@
-import { ScoreboardResponse, Game, SortedGames, Timezone, Clock, PeriodDescriptor, TeamInfo, Linescore, Period, GamecenterRightRailResponse, GameStringCategory} from "./types";
+import { ScoreboardResponse, Game, SortedGames, Timezone, Clock, PeriodDescriptor, TeamInfo, Linescore, Period, GamecenterRightRailResponse, GameStringCategory, TeamSeasonStats, TeamSeasonStat} from "./types";
 import { getPreferenceValues, Color, environment } from "@raycast/api";
-import { timeStrings, gameStrings, playerTitleStrings } from "./translations";
+import { timeStrings, gameStrings, playerTitleStrings, userInterface } from "./translations";
 
 const preferences = getPreferenceValues();
 const timezone = preferences.timezone as Timezone;
@@ -48,24 +48,53 @@ export function scoresList(game: Game) {
   return scores;
 }
 
-export function gameSummaryStats(
+export function convertTeamSeasonStatsFormat(teamSeasonStats: TeamSeasonStats): TeamSeasonStat[] {
+  const result: TeamSeasonStat[] = [];
+  
+  // Get all keys from awayTeam (could use homeTeam as well)
+  const keys = Object.keys(teamSeasonStats.awayTeam);
+  
+  keys.forEach(key => {
+    result.push({
+      category: key,
+      awayValue: teamSeasonStats.awayTeam[key],
+      homeValue: teamSeasonStats.homeTeam[key]
+    });
+});
+
+  return result;
+}
+
+export function summaryStats(
   gameSidebar: GamecenterRightRailResponse,
   homeTeam: TeamInfo,
-  awayTeam: TeamInfo
+  awayTeam: TeamInfo,
+  gameState: "live" | "pre"
 ): string {
-  // Check if teamGameStats exists
-  if (!gameSidebar.teamGameStats) return '';
+  // Check if the data we need exists
+  // count for both game (live or post) as well as pre-game (teamSeasonStats)
+  if (!gameSidebar.teamGameStats && !gameSidebar.teamSeasonStats) return userInterface.noData[languageKey];
+
+  // set our original data
+  let stats = gameSidebar.teamGameStats;
+
+  // if this is pre-game, let's format the data into the same format as the live game data structure
+  if(gameState === "pre") {
+    stats = convertTeamSeasonStatsFormat(gameSidebar.teamSeasonStats);
+  }
+
+  if (!stats) return userInterface.noData[languageKey];
 
   const home = homeTeam.abbrev;
   const away = awayTeam.abbrev;
 
   // Initialize the summary
-  let summary = `## ${gameStrings.gameStats[languageKey]}\n`;
+  let summary = ``;
   summary += `| ${home} <img src="${teamLogo(home)}" width="20" height="20" /> |  | ${away} <img src="${teamLogo(away)}" width="20" height="20" /> |\n`;
   summary += `|:---:|:---:|:---:|\n`;
 
   // Iterate through the stats and build the summary
-  for (const stat of gameSidebar.teamGameStats) {
+  for (const stat of stats) {
     const category = stat.category as GameStringCategory;
 
     if (typeof stat.homeValue === 'string') {
@@ -77,11 +106,17 @@ export function gameSummaryStats(
         summary += `| ${stat.homeValue} | ${gameStrings[category][languageKey]} | ${stat.awayValue} |\n`;
       } else {
         // If homeValue is a float, format it as a percentage
-        const homeValuePercentage = (stat.homeValue * 100).toFixed(2) + '%';
-        const awayValueFormatted = typeof stat.awayValue === 'number'
-            ? (Number.isInteger(stat.awayValue) ? stat.awayValue.toString() : (stat.awayValue * 100).toFixed(2) + '%')
-            : stat.awayValue;
-        summary += `| ${homeValuePercentage} | ${gameStrings[category][languageKey]} | ${awayValueFormatted} |\n`;
+        // for whatever reason `goalsForPerGamePlayed` is a special case. can't score 357% goals per game lol
+        if (category === 'goalsForPerGamePlayed') {
+          summary += `| ${stat.homeValue} | ${gameStrings[category][languageKey]} | ${stat.awayValue} |\n`;
+        }
+        else {
+          const homeValuePercentage = (stat.homeValue * 100).toFixed(2) + '%';
+          const awayValueFormatted = typeof stat.awayValue === 'number'
+              ? (Number.isInteger(stat.awayValue) ? stat.awayValue.toString() : (stat.awayValue * 100).toFixed(2) + '%')
+              : stat.awayValue;
+          summary += `| ${homeValuePercentage} | ${gameStrings[category][languageKey]} | ${awayValueFormatted} |\n`;
+        }
       }
     }
   }
@@ -136,7 +171,8 @@ export function teamLogo(abbrev: string): string {
 
 export function starsOfTheGame(game: Game) {
   const stars = game.summary?.threeStars;
-  if (!stars) return;
+  console.log(stars)
+  if (!stars?.length) return '';
 
   let starsContent = `## ${playerTitleStrings.starsOfTheGame[languageKey]} \n`;
   starsContent += `| ${playerTitleStrings.photo[languageKey]} | ${playerTitleStrings.info[languageKey]} | ${playerTitleStrings.stats[languageKey]} | \n`;

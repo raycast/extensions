@@ -1,7 +1,7 @@
 import React from "react";
 import { ActionPanel, Detail } from "@raycast/api";
 import { Game, GamecenterRightRailResponse} from "../utils/types";
-import { getLanguageKey, timeRemaining, teamName, generateLineScoreTable, generateShotsTable, formatLocalTime, gameSummaryStats, scoresList, penaltiesList, starsOfTheGame } from "../utils/helpers";
+import { getLanguageKey, timeRemaining, teamName, generateLineScoreTable, generateShotsTable, formatLocalTime, summaryStats, scoresList, penaltiesList, starsOfTheGame } from "../utils/helpers";
 import { getNHL } from "../utils/nhlData";
 import { gameStrings, timeStrings } from "../utils/translations";
 import Unresponsive from "./unresponsive";
@@ -32,7 +32,8 @@ const gameDetails = function(gameLanding: gameLanding, gameSidebar: gameSidebar)
   \n ${scoresList(game)}
   \n ---
   \n ${penaltiesList(game)}
-  \n ${gameSummaryStats(support, game.awayTeam, game.homeTeam)}
+  \n ## ${gameStrings.gameStats[languageKey]}
+  \n ${summaryStats(support, game.awayTeam, game.homeTeam, 'live')}
   \n ${starsOfTheGame(game)}
   \n ## ${gameStrings.linescore[languageKey]} \n ${generateLineScoreTable(support.linescore, game.awayTeam, game.homeTeam)} 
   \n ## ${gameStrings.sog[languageKey]} \n ${generateShotsTable(support.shotsByPeriod, game.awayTeam, game.homeTeam)} `;
@@ -44,7 +45,8 @@ const preGameDetails = function(gameLanding: gameLanding, gameSidebar: gameSideb
 
   return `# ${teamName(game.awayTeam, game.awayTeam.score, true)} (${game.awayTeam.record}) @ ${teamName(game.homeTeam, game.homeTeam.score, true)} (${game.homeTeam.record})
   \n ${formatLocalTime(game.startTimeUTC)} ${timeStrings.gameStart[languageKey]}, ${game.gameDate}
-  \n ${gameSummaryStats(support, game.awayTeam, game.homeTeam)}`
+  \n ## ${gameStrings.seasonStats[languageKey]}
+  \n ${summaryStats(support, game.awayTeam, game.homeTeam, 'pre')}`
 }
 
 export default function GameDetail({ game }: { game: Game }) {

@@ -1,5 +1,13 @@
-import { starsOfTheGame } from "./helpers";
-import { GameStrings } from "./types";
+export const userInterface = {
+  noData: {
+    default: "No data available",
+    fr: "Pas de données disponibles",
+  },
+  checkBackLater: {
+    default: "Please check back when the game has concluded",
+    fr: "Veuillez revenir lorsque le match est terminé",
+  }
+}
 
 export const gameTitles = {
   today: {
@@ -69,7 +77,7 @@ export const timeStrings = {
   }
 }
 
-export const gameStrings: GameStrings = {
+export const gameStrings = {
   linescore: {
     default: "Line Score",
     fr: "Lignescore",
@@ -89,6 +97,42 @@ export const gameStrings: GameStrings = {
   powerPlayPctg: {
     default: "Power Play Percentage",
     fr: "Pourcentage de l'Avantage Numérique",
+  },
+  ppPctg: {
+    default: "Power Play Percentage",
+    fr: "Pourcentage de l'Avantage Numérique",
+  },
+  pkPctg: {
+    default: "Penalty Kill Percentage",
+    fr: "Pourcentage de Désavantage Numérique",
+  },
+  goalsForPerGamePlayed: {
+    default: "Goals For Per Game",
+    fr: "Buts Marqués Par Match",
+  },
+  goalsAgainstPerGamePlayed: {
+    default: "Goals Against Per Game",
+    fr: "Buts Contre Par Match",
+  },
+  ppPctgRank: {
+    default: "Power Play Rank",
+    fr: "Classement en Avantage Numérique",
+  },
+  pkPctgRank: {
+    default: "Penalty Kill Rank",
+    fr: "Classement en Désavantage Numérique",
+  },
+  faceoffWinningPctgRank: {
+    default: "Faceoff Win Percentage Rank",
+    fr: "Classement des Mises au Jeu",
+  },
+  goalsForPerGamePlayedRank: {
+    default: "Goals For Rank",
+    fr: "Classement des Buts Marqués",
+  },
+  goalsAgainstPerGamePlayedRank: {
+    default: "Goals Against Rank",
+    fr: "Classement des Buts Contre",
   },
   pim: {
     default: "Penalty Minutes",
@@ -113,6 +157,10 @@ export const gameStrings: GameStrings = {
   gameStats: {
     default: "Game Stats",
     fr: "Statistiques du Match",
+  },
+  seasonStats: {
+    default: "Season Stats",
+    fr: "Statistiques de la Saison",
   }
 }
 
