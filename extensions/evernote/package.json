@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "evernote",
-  "title": "Evernote instant search",
+  "title": "Evernote Instant Search",
   "description": "Search your Evernote notes instantly using the local database of the Mac official Evernote client.",
   "icon": "ev-icon.png",
   "author": "artpi",
