@@ -42,7 +42,7 @@ export default function Command() {
             setVersionStorage(version);
           }
 
-          open("https://wpbones.vercel.app/docs/release-notes");
+          open("https://wpbones.com/docs/release-notes");
           revalidate();
         }}
       />
@@ -51,7 +51,7 @@ export default function Command() {
         <MenuBarExtra.Item
           title="FAQs"
           icon={Icon.QuestionMarkCircle}
-          onAction={() => open("https://wpbones.vercel.app/docs/faqs")}
+          onAction={() => open("https://wpbones.com/docs/faqs")}
         />
       </MenuBarExtra.Section>
 
