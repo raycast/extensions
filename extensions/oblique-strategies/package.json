@@ -1,0 +1,99 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "oblique-strategies",
+  "title": "Oblique Strategies",
+  "description": "Over One Hundred Worthwhile Dilemmas by Brian Eno and Peter Schmidt",
+  "icon": "extension-icon.png",
+  "author": "dnnsmnstrr",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "get-oblique-strategy",
+      "title": "Get Oblique Strategy",
+      "description": "Show a random oblique strategy",
+      "mode": "view"
+    }
+  ,
+    {
+      "name": "search-oblique-strategies",
+      "title": "Search Oblique Strategies",
+      "description": "Find specific strategies from a list spanning all editions of Oblique Strategies",
+      "mode": "view"
+    }
+      ,
+    {
+      "name": "generate-new-oblique-strategy",
+      "title": "Generate New Oblique Strategy",
+      "description": "Let the AI give you a new strategy",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "displayMode",
+      "title": "Display Mode",
+      "description": "How do you want the strategies to be shown",
+      "type": "dropdown",
+      "required": false,
+      "default": "box",
+      "data": [
+        {
+          "title": "Box Container",
+          "value": "box"
+        },
+        { 
+          "title": "Basic Text",
+          "value": "basic"
+        },
+        { 
+          "title": "Code",
+          "value": "code"
+        },
+        {
+          "title": "H1",
+          "value": "h1"
+        },
+        {
+          "title": "H2",
+          "value": "h2"
+        },
+        {
+          "title": "H3",
+          "value": "h3"
+        }
+      ]
+    },
+    {
+      "name": "italicise",
+      "title": "Italics",
+      "description": "Italicise the text of the strategies",
+      "label": "Italicise Text",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
