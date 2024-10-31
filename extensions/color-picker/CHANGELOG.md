@@ -1,5 +1,7 @@
 # Color Picker Changelog
 
+test
+
 ## [Enhancement] - 2024-10-04
 
 - Add Color Names command
