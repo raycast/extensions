@@ -1,4 +1,9 @@
-# Dropbox Changelog
+# The Blue Cloud Changelog
+
+## [A New Look] - {PR_MERGE_DATE}
+
+- Extension is now called "The Blue Cloud" to comply with Dropbox Branding Guidelines
+- New OAuth App ID w/ streamlined OAuth via Raycast utils
 
 ## [BYOK as Fallback] - 2024-09-22
 
@@ -13,4 +18,4 @@
 
 ## [Update] - 2023-01-17
 
-- Added better DropBox authentication
+- Added better Dropbox authentication

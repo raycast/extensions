@@ -4,13 +4,17 @@ import { useEffect, useState } from "react";
 import { dbxListAnyFiles } from "../api";
 import FileItem from "./FileItem";
 import DirectoryItem from "./DirectoryItem";
+import { withAccessToken } from "@raycast/utils";
+import { provider } from "../api/oauth";
 
 export interface IDirectoryProps {
   path: string;
   parent?: string;
 }
 
-export default function Directory(props: IDirectoryProps) {
+export default withAccessToken(provider)(Directory);
+
+export function Directory(props: IDirectoryProps) {
   const [files, setFiles] = useState<Array<files.FileMetadataReference | files.FolderMetadataReference>>([]);
   const [loading, setLoading] = useState(true);
   const [path] = useState(props.path);
