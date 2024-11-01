@@ -12,6 +12,12 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "list-writing-tools",
+      "title": "List Writing Tools",
+      "description": "List all Writing Tool options in Raycast",
+      "mode": "view"
+    },
+    {
       "name": "show-writing-tools",
       "title": "Show Writing Tools",
       "description": "Show Apple Intelligence Writing Tools menu",
