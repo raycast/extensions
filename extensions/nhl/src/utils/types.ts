@@ -716,6 +716,8 @@ export type PlayerOnIce = {
   goals?: number;
   assists?: number;
   points?: number;
+  goalsAgainstAverage?: number;
+  savePctg?: number;
 };
 
 export type TeamIceSurface = {

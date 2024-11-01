@@ -187,17 +187,53 @@ export function teamLogo(abbrev: string): string {
 
 export function starsOfTheGame(game: Game) {
   const stars = game.summary?.threeStars;
-  console.log(stars);
+
   if (!stars?.length) return "";
 
   let starsContent = `## ${playerTitleStrings.starsOfTheGame[languageKey]} \n`;
   starsContent += `| ${playerTitleStrings.photo[languageKey]} | ${playerTitleStrings.info[languageKey]} | ${playerTitleStrings.stats[languageKey]} | \n`;
   starsContent += `| :---: | --- | --- | \n`;
   stars.forEach((star) => {
-    starsContent += `| &nbsp;<img alt="${star.teamAbbrev}'s ${star.name.default} ${playerTitleStrings.stats[languageKey]}" src="${star.headshot}" width="90" height="90" /> | ${star.teamAbbrev} • ${star.name.default} • ${star.sweaterNo} • ${star.position} | G: ${star.goals} A: ${star.assists} P: ${star.points} | \n`;
+    if (star.position === "G") {
+        starsContent += `| &nbsp;<img alt="${star.teamAbbrev}'s ${star.name.default} ${playerTitleStrings.stats[languageKey]}" src="${star.headshot}" width="90" height="90" /> | ${star.teamAbbrev} • ${star.name.default} • ${star.sweaterNo} • ${star.position} | GAA: ${star.goalsAgainstAverage ? star.goalsAgainstAverage.toFixed(2) : ''} SV%: ${star.savePctg ? (star.savePctg * 100).toFixed(1) : 'N/A'}% | \n`;
+    } else {
+        starsContent += `| &nbsp;<img alt="${star.teamAbbrev}'s ${star.name.default} ${playerTitleStrings.stats[languageKey]}" src="${star.headshot}" width="90" height="90" /> | ${star.teamAbbrev} • ${star.name.default} • ${star.sweaterNo} • ${star.position} | G: ${star.goals} A: ${star.assists} P: ${star.points} | \n`;
+    }
   });
 
   return starsContent;
+}
+
+export function last10Record(
+  gameSidebar: GamecenterRightRailResponse, 
+  awayTeam: TeamInfo,
+  homeTeam: TeamInfo) {
+  const record  = gameSidebar.last10Record;
+
+  function gameOutcome(gameResult: string) {
+    switch (gameResult) {
+        case 'W': return '✅';
+        case 'L': return '❌';
+        case 'OTL': return '⭕';
+        case 'SOL': return '⭕';
+        case 'OTW': return '✅';
+        case 'SOW': return '✅';
+        default: return '';
+    }
+  }
+
+  let last10 = `## Last 10 Games`
+  + `\n ### ${(teamName(awayTeam, 0, false)).trim()}: ${record.awayTeam.record}, ${record.awayTeam.streakType}${record.awayTeam.streak} \n\n`;
+  record.awayTeam.pastGameResults.forEach((game) => {
+    last10 += ` \`${game.opponentAbbrev} ${gameOutcome(game.gameResult)}\``;
+  });
+  last10 += `\n`
+  last10 += `\n ### ${(teamName(homeTeam, 0, false)).trim()}: ${record.homeTeam.record}, ${record.homeTeam.streakType}${record.homeTeam.streak} \n\n`;
+  record.homeTeam.pastGameResults.forEach((game) => {
+    last10 += ` \`${game.opponentAbbrev} ${gameOutcome(game.gameResult)}\``;
+  });
+  
+  return last10;
 }
 
 export function generateLineScoreTable(

@@ -12,6 +12,7 @@ import {
   scoresList,
   penaltiesList,
   starsOfTheGame,
+  last10Record
 } from "../utils/helpers";
 import { getNHL } from "../utils/nhlData";
 import { gameStrings, timeStrings } from "../utils/translations";
@@ -58,7 +59,8 @@ const preGameDetails = function (gameLanding: gameLanding, gameSidebar: gameSide
   return `# ${teamName(game.awayTeam, game.awayTeam.score, true)} (${game.awayTeam.record}) @ ${teamName(game.homeTeam, game.homeTeam.score, true)} (${game.homeTeam.record})
   \n ${formatLocalTime(game.startTimeUTC)} ${timeStrings.gameStart[languageKey]}, ${game.gameDate}
   \n ## ${gameStrings.seasonStats[languageKey]}
-  \n ${summaryStats(support, game.awayTeam, game.homeTeam, "pre")}`;
+  \n ${summaryStats(support, game.awayTeam, game.homeTeam, "pre")}
+  \n ${last10Record(support, game.awayTeam, game.homeTeam)}`;
 };
 
 export default function GameDetail({ game }: { game: Game }) {
