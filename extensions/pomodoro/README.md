@@ -6,9 +6,17 @@ Raycast-only implementation of pomodoro technique
 
 ### Do Not Disturb on focus
 
-You can customize the focus mode enabled by Pomodoro by editing the shortcut created by Pomodoro.
+To customize the focus mode enabled by Pomodoro, edit the shortcut created by Pomodoro.
 
 1. Open `Shortcuts`
-2. Right click in DND Pomodoro, select Edit
-3. Click on `Do Not Disturb` in the nearly last step
+2. Right click on DND Pomodoro, select Edit from the dropdown
+3. Find the step that says `Turn **Do Not Disturb** On until Turned Off` - Click on `Do Not Disturb`
 4. Select the Focus mode you want to have enabled when Pomodoro is focused
+5. Close the window and shortcuts
+
+
+---
+
+## Known Issuse
+
+- Focus (Do Not Disturb) is not enabled/disabled when starting/stopping Pomodoro from the menu bar.
