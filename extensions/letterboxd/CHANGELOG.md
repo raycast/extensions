@@ -1,6 +1,6 @@
 # letterboxd Changelog
 
-## [Fix the issue with the emoji substring] - {PR_MERGE_DATE}
+## [Fix the issue with the emoji substring] - 2024-11-01
 
 - Fix the issue with the review content emoji substring that causes an error
 
