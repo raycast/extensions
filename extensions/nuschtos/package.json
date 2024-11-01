@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nuschtos",
+  "title": "NüschtOS",
+  "description": "Search Nix Options with NüschtOS!",
+  "icon": "extension-icon.png",
+  "author": "Keyruu",
+  "categories": [
+    "Documentation",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-nuschtos",
+      "title": "Search NüschtOS",
+      "description": "Search all the options of Nix and some flakes.",
+      "mode": "view"
+    },
+    {
+      "name": "refresh-index",
+      "title": "Refresh Index",
+      "description": "Refresh the index of NüschtOS",
+      "mode": "no-view",
+      "interval": "1d"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "searchSize",
+      "title": "Search Size",
+      "description": "The number of results to show",
+      "type": "textfield",
+      "required": false,
+      "default": "10"
+    },
+    {
+      "name": "ixxPath",
+      "title": "Ixx Path",
+      "placeholder": "~/git/ixx/target/release/ixx",
+      "description": "The path to the ixx file. This is the CLI of NüschtOS and is needed for this extension to work. Currently you need to build it yourself. https://github.com/NuschtOS/ixx. Build via `cargo build --release`, then point to the `target/release/ixx` binary.",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "showDetailInList",
+      "title": "List Settings",
+      "label": "Show Detail in List",
+      "description": "Show the detail (documentation and attributes) in the list view",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.7",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2",
+    "turndown": "^7.2.0"
+  },
+  "devDependencies": {
+    "@nuschtos/fixx": "^0.0.5",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "@types/turndown": "^5.0.5",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
