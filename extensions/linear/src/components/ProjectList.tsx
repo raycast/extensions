@@ -12,8 +12,11 @@ import { getInitiativeIcon } from "../helpers/initiatives";
 
 export default function ProjectList() {
   const [initiativeId, setInitiativeId] = useState<string>("");
-
-  const { projects, isLoadingProjects, mutateProjects } = useProjects();
+  const [searchText, setSearchText] = useState<string>("");
+  const { projects, isLoadingProjects, mutateProjects, pagination } = useProjects(undefined, {
+    searchText,
+    pageSize: 20,
+  });
   const { initiatives, isLoadingInitiatives } = useInitiatives();
   const { priorities, isLoadingPriorities } = usePriorities();
   const { me, isLoadingMe } = useMe();
@@ -65,8 +68,12 @@ export default function ProjectList() {
             ),
           }
         : {})}
-      searchBarPlaceholder="Filter by project title, lead, status, or team keys"
       filtering={{ keepSectionOrder: true }}
+      onSearchTextChange={setSearchText}
+      pagination={pagination}
+      searchBarPlaceholder="Filter by project title, lead, status, or team keys"
+      searchText={searchText}
+      throttle={true}
     >
       {filteredProjects?.map((project) => {
         if (!project) {

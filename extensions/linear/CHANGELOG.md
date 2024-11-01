@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Search Projects Fixes] - {PR_MERGE_DATE}
+
+- [#15052](https://github.com/raycast/extensions/issues/15052): Fixed incomplete project list by adding pagination and utilizing search text to fetch projects directly.
+
 ## [Search Projects Fixes] - 2024-08-08
 
 - [#13882](https://github.com/raycast/extensions/issues/13882): Replaced filtering on roadmaps with filtering on initiatives, as initiatives replaced roadmaps.
