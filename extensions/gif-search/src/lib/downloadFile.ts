@@ -2,14 +2,14 @@ import { copyFileSync, createWriteStream, existsSync } from "fs";
 import fetch from "node-fetch";
 import { homedir } from "os";
 import { getGifFromCache } from "./cachedGifs";
-import { getObfuscateFilename } from "../preferences";
+import { getHideFilename } from "../preferences";
 import path from "path";
 
 const basePath = `${homedir()}/Downloads`;
 
 export default async function downloadFile(url: string, name: string) {
-  const obfuscateFilename = getObfuscateFilename();
-  const fileName = obfuscateFilename ? "gif.gif" : name || path.basename(url);
+  const hideFilename = getHideFilename();
+  const fileName = hideFilename ? "gif.gif" : name || path.basename(url);
 
   // Check if the file exists in the cache - if so use it directly
   try {

@@ -133,13 +133,13 @@
       ]
     },
     {
-      "name": "obfuscateFilename",
+      "name": "hideFilename",
       "type": "checkbox",
       "required": false,
-      "title": "Obfuscate Filename on Copy or Download",
+      "title": "Hide Filename on Copy or Download",
       "description": "Hide the original filename when copying or downloading GIFs",
       "default": false,
-      "label": "Obfuscate"
+      "label": "Hide Filename"
     }
   ],
   "dependencies": {

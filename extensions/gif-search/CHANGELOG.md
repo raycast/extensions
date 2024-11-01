@@ -1,6 +1,6 @@
 # GIF Search Changelog
 
-## [Obfuscate Filename on Copy or Download] - 2024-10-31
+## [Hide Filename on Copy or Download] - 2024-10-31
 
 - Adds a new preference to hide the original filename when copying or downloading GIFs
 
