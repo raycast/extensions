@@ -1,6 +1,6 @@
 # Uptime Kuma Changelog
 
-## [Filter Monitors By Status] - {PR_MERGE_DATE}
+## [Filter Monitors By Status] - 2024-11-01
 
 - Filter Monitors by **Status** in `List Monitors`
 - Show favicon in `Monitor Detail` URL
