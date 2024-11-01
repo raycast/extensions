@@ -306,6 +306,15 @@
       ]
     },
     {
+      "name": "enableFocusWhileFocused",
+      "type": "checkbox",
+      "description": "Enables do not disturb mode of Mac when enabled. Requires use of Shortcuts application (setup is automatic the first time)",
+      "required": true,
+      "title": "Mac - Do Not Disturb",
+      "default": false,
+      "label": "Enable Do Not Disturb mode while focused"
+    },
+    {
       "name": "completionImage",
       "type": "textfield",
       "required": false,

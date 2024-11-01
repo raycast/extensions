@@ -1,6 +1,7 @@
 import { Cache, getPreferenceValues, launchCommand, LaunchType, LocalStorage } from "@raycast/api";
 import { FocusText, LongBreakText, ShortBreakText } from "./constants";
 import { Interval, IntervalExecutor, IntervalType } from "./types";
+import { turnOnDND, turnOffDND } from "./focus";
 
 const cache = new Cache();
 
@@ -71,6 +72,9 @@ export function createInterval(type: IntervalType, isFreshStart?: boolean): Inte
   };
   cache.set(CURRENT_INTERVAL_CACHE_KEY, JSON.stringify(interval));
   saveIntervalHistory(interval).then();
+  if (type === "focus") {
+    turnOnDND();
+  }
   return interval;
 }
 
@@ -85,6 +89,7 @@ export function pauseInterval(): Interval | undefined {
     };
     cache.set(CURRENT_INTERVAL_CACHE_KEY, JSON.stringify(interval));
   }
+  turnOffDND();
   return interval;
 }
 
@@ -97,11 +102,13 @@ export function continueInterval(): Interval | undefined {
       parts,
     };
     cache.set(CURRENT_INTERVAL_CACHE_KEY, JSON.stringify(interval));
+    turnOnDND();
   }
   return interval;
 }
 
 export function resetInterval() {
+  turnOffDND();
   cache.remove(CURRENT_INTERVAL_CACHE_KEY);
 }
 
@@ -121,6 +128,7 @@ export function getCurrentInterval(): Interval | undefined {
 }
 
 export function endOfInterval(currentInterval: Interval) {
+  turnOffDND();
   try {
     currentInterval.parts[currentInterval.parts.length - 1].endAt = currentTimestamp();
     saveIntervalHistory(currentInterval).then();

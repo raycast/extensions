@@ -1,5 +1,9 @@
 # Pomodoro Changelog
 
+## [Enhancement] - 2024-10-31
+
+Offers the option to enable Apple's default Do Not Disturb mode when Pomodoro time is on "Focus" mode
+
 ## [Fixed wording] - 2024-10-21
 
 Fixed wording in the Stats command
