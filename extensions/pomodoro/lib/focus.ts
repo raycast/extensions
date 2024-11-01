@@ -2,7 +2,7 @@ import { exec } from "child_process";
 import { open, showHUD } from "@raycast/api";
 import { preferences } from "./intervals";
 
-const DNDshortcutName = `DND Raycast`;
+const DNDshortcutName = `DND Pomodoro`;
 
 function executeCommand(command: string): Promise<{ stdout: string; stderr: string }> {
   return new Promise((resolve, reject) => {
