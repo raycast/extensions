@@ -6,7 +6,8 @@
   "icon": "extension_icon.png",
   "author": "MarlburroW",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "xmok"
   ],
   "categories": [
     "System"
@@ -22,8 +23,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.60.0",
-    "@raycast/utils": "^1.10.0",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.0",
     "dayjs": "^1.11.10",
     "events": "^3.3.0",
     "immer": "^10.0.3",
@@ -32,8 +33,8 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
-    "@types/node": "^18.8.4",
-    "@types/react": "^18.2.27",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
     "prettier": "^3.0.3",
     "react": "^18.2.0",
@@ -44,6 +45,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }
