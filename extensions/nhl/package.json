@@ -12,10 +12,26 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "nhl-scores",
+      "name": "nhlScores",
       "title": "NHL Scores",
       "description": "Get the latest NHL scores",
       "mode": "view"
+    },
+    {
+      "name": "searchPlayers",
+      "title": "Search NHL Players",
+      "description": "Search for NHL players",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "name",
+          "title": "Player Name",
+          "description": "Enter the player's name",
+          "type": "text",
+          "required": true,
+          "placeholder": "Wayne Gretzky"
+        }
+      ]
     }
   ],
   "preferences": [
