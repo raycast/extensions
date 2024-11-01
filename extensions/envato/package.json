@@ -48,7 +48,7 @@
       "description": "List Purchases",
       "mode": "view"
     }
-      ],
+  ],
   "preferences": [
     {
       "name": "token",
@@ -64,8 +64,7 @@
     "@raycast/utils": "^1.18.0",
     "dateformat": "^5.0.3",
     "envato": "^3.2.0",
-    "node-html-markdown": "^1.3.0",
-    "turndown": "^7.1.2"
+    "node-html-markdown": "^1.3.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
