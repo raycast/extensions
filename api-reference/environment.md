@@ -75,7 +75,7 @@ export default async function main() {
 
 A Boolean indicating whether the user running the command has access to the API.
 
-## getSelectedFinderItems
+### getSelectedFinderItems
 
 Gets the selected items from Finder.
 
@@ -108,7 +108,7 @@ export default async function Command() {
 
 A Promise that resolves with the [selected file system items](#filesystemitem). If Finder is not the frontmost application, the promise will be rejected.
 
-## getSelectedText
+### getSelectedText
 
 Gets the selected text of the frontmost application.
 
