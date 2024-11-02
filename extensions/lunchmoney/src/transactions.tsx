@@ -64,7 +64,7 @@ function TransactionListItem({
       actions={
         <ActionPanel>
           {transaction.status != lunchMoney.TransactionStatus.CLEARED && !transaction.is_pending && (
-            <Action title="Validate" onAction={validate} />
+            <Action title="Validate" icon={Icon.CheckCircle} onAction={validate} />
           )}
           <Action.OpenInBrowser
             title="View Payee in Lunch Money"
