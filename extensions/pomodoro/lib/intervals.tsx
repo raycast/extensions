@@ -185,7 +185,7 @@ export function getNextIntervalExecutor(): IntervalExecutor {
 
 export const preferences = getPreferenceValues<Preferences>();
 export const intervalDurations: Record<IntervalType, number> = {
-  focus: parseInt(preferences.focusIntervalDuration) * 60,
-  "short-break": parseInt(preferences.shortBreakIntervalDuration) * 60,
-  "long-break": parseInt(preferences.longBreakIntervalDuration) * 60,
+  focus: parseFloat(preferences.focusIntervalDuration) * 60,
+  "short-break": parseFloat(preferences.shortBreakIntervalDuration) * 60,
+  "long-break": parseFloat(preferences.longBreakIntervalDuration) * 60,
 };

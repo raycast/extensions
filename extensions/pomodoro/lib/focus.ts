@@ -24,6 +24,7 @@ async function checkAndInstallDNDShortcuts(): Promise<boolean> {
   const shortcuts = stdout.split("\n").map((item) => item.trim());
   const isInstalled = shortcuts.includes(DNDshortcutName);
   if (!isInstalled) {
+    await showHUD("Installing Shortcut (this will only happen once)");
     const shortcutPath = `${__dirname}/assets/${DNDshortcutName}.shortcut`;
     await open(shortcutPath);
     return false;
