@@ -132,7 +132,7 @@ export default function Command() {
     );
 
     return [groupAndSortTransactions(pendingTransactions), alphabetical(transactions, (t) => t.date, "desc")];
-  }, [data?.map((t) => t.id).join(",")]);
+  }, [data?.map((t) => `${t.id}:${t.status}`).join(",")]);
 
   const onValidate = async (transaction: lunchMoney.Transaction) => {
     const toast = await showToast({

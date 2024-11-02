@@ -188,7 +188,16 @@ export const getTransactions = async (args?: TransactionsEndpointArguments): Pro
   return (await response.json()).transactions;
 };
 
-export const updateTransaction = async (transactionId: number, args: TransactionUpdate): Promise<Transaction> => {
-  const response = await client.put<Transaction>(`v1/transactions/${transactionId}`, { json: { transaction: args } });
+export type UpdateTransactionResponse = {
+  updated: boolean;
+  split?: number[];
+};
+export const updateTransaction = async (
+  transactionId: number,
+  args: TransactionUpdate,
+): Promise<UpdateTransactionResponse> => {
+  const response = await client.put<UpdateTransactionResponse>(`v1/transactions/${transactionId}`, {
+    json: { transaction: args },
+  });
   return response.json();
 };
