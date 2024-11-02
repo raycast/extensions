@@ -24,7 +24,7 @@ import { slugify } from "../helpers/string";
 
 import CreateIssueForm from "./CreateIssueForm";
 import IssueAttachments from "./IssueAttachments";
-import ChildIssues from "./IssueChildIssues";
+import IssueChildIssues from "./IssueChildIssues";
 import IssueCommentForm from "./IssueCommentForm";
 import IssueComments from "./IssueComments";
 import IssueDetail from "./IssueDetail";
@@ -34,6 +34,7 @@ type IssueActionsProps = {
   mutate?: MutatePromise<Issue[] | undefined>;
   mutateDetail?: MutatePromise<Issue | TIssueDetail | null>;
   showDetailsAction?: boolean;
+  showChildIssuesAction?: boolean;
   showAttachmentsAction?: boolean;
 };
 
@@ -47,6 +48,7 @@ export default function IssueActions({
   mutate,
   mutateDetail,
   showDetailsAction,
+  showChildIssuesAction,
   showAttachmentsAction,
 }: IssueActionsProps) {
   const { siteUrl, myself } = getJiraCredentials();
@@ -167,12 +169,14 @@ export default function IssueActions({
       </ActionPanel.Section>
 
       <ActionPanel.Section>
-        <Action.Push
-          target={<ChildIssues issue={issue} />}
-          title="Open Child Issues"
-          icon={Icon.Tree}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-        />
+        {showChildIssuesAction && (
+          <Action.Push
+            target={<IssueChildIssues issue={issue} />}
+            title="Open Child Issues"
+            icon={Icon.Tree}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+          />
+        )}
         <ChangePrioritySubmenu issue={issue} mutate={mutateWithOptimisticUpdate} />
 
         <ChangeAssigneeSubmenu issue={issue} mutate={mutateWithOptimisticUpdate} />
