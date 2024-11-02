@@ -7,7 +7,7 @@ export default async function main() {
     const urls = extractUrls(selectedText);
     if (urls.length > 0) {
       for (const url of urls) {
-        await open(url, "company.thebrowser.Browser");
+        await open(url);
       }
     } else {
       await showHUD("No URLs found");
