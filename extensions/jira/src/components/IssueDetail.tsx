@@ -50,7 +50,8 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
   const attachments = issue?.fields.attachment;
   const numberOfAttachments = attachments?.length ?? 0;
   const hasAttachments = numberOfAttachments > 0;
-
+  const hasChildIssues =
+    (issue?.fields.subtasks && issue.fields.subtasks.length > 0) || (epicIssues && epicIssues.length > 0);
   const { customMarkdownFields, customMetadataFields } = useMemo(() => getCustomFieldsForDetail(issue), [issue]);
 
   const markdown = useMemo(() => {
@@ -187,7 +188,16 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
         </Detail.Metadata>
       }
       {...(issue
-        ? { actions: <IssueActions issue={issue} showAttachmentsAction={hasAttachments} mutateDetail={mutate} /> }
+        ? {
+            actions: (
+              <IssueActions
+                issue={issue}
+                showChildIssuesAction={hasChildIssues}
+                showAttachmentsAction={hasAttachments}
+                mutateDetail={mutate}
+              />
+            ),
+          }
         : null)}
     />
   );
