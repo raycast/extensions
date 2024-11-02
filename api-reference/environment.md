@@ -45,7 +45,7 @@ export default async function Command() {
 | textSize<mark style="color:red;">*</mark> | The text size used by the Raycast application. | <code>"medium"</code> or <code>"large"</code> |
 | canAccess<mark style="color:red;">*</mark> | Returns whether the user has access to the given API. | <code>(api: unknown) => boolean</code> |
 
-## environment.canAccess
+### environment.canAccess
 
 Checks whether the user can access a specific API or not.
 
@@ -75,7 +75,7 @@ export default async function main() {
 
 A Boolean indicating whether the user running the command has access to the API.
 
-### getSelectedFinderItems
+## getSelectedFinderItems
 
 Gets the selected items from Finder.
 
@@ -108,7 +108,7 @@ export default async function Command() {
 
 A Promise that resolves with the [selected file system items](#filesystemitem). If Finder is not the frontmost application, the promise will be rejected.
 
-### getSelectedText
+## getSelectedText
 
 Gets the selected text of the frontmost application.
 
