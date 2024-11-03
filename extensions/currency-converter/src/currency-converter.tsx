@@ -101,7 +101,7 @@ async function fetchExchangeRate(baseCurrency: string): Promise<{ rate: number; 
 
     // Calculate the correct rate based on the base currency
     const rate = baseCurrency === "USD" ? data.conversion_rates.PEN : 1 / data.conversion_rates.PEN;
-    
+
     return {
       rate,
       timestamp: new Date().toISOString(),
@@ -112,7 +112,6 @@ async function fetchExchangeRate(baseCurrency: string): Promise<{ rate: number; 
     return null;
   }
 }
-
 
 // Main component
 export default function Command() {
