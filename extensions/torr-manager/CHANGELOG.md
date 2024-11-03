@@ -1,5 +1,9 @@
 # torr-manager Changelog
 
+## [Fix Database Save] - {PR_MERGE_DATE}
+
+- Fixed issue with saving torrents permanently to the database.
+
 ## [Improve Parser] - 2024-10-28
 
 - Expanded search functionality to support both magnet links and direct links.
