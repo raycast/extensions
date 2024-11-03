@@ -24,6 +24,12 @@
       "mode": "no-view"
     },
     {
+      "name": "rewrite",
+      "title": "Rewrite",
+      "description": "Rewrite the selected text",
+      "mode": "no-view"
+    },
+    {
       "name": "create-key-points",
       "title": "Create Key Points",
       "description": "Create key points from the selected text",
