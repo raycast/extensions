@@ -1,6 +1,24 @@
 import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
-import { AccountInfo, EmbedObject, Preferences, WistiaApiError, WistiaMedia, WistiaProject } from "./types";
+import { AccountInfo, EmbedObject, WistiaApiError, WistiaMedia, WistiaProject, WistiaStats } from "./types";
+
+async function fetchWistia<T>(endpoint: string) {
+  const { wistiaApiToken } = getPreferenceValues<Preferences>();
+  const url = "https://api.wistia.com/" + endpoint;
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${wistiaApiToken}`,
+    },
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) throw new Error((result as WistiaApiError).code);
+  return result as T;
+}
 
 export async function fetchEmbedCode({
   accountUrl,
@@ -9,106 +27,25 @@ export async function fetchEmbedCode({
   accountUrl: string;
   hashedId: string;
 }): Promise<EmbedObject> {
-  const preferences: Preferences = getPreferenceValues();
-  const username = "api";
-  const password = preferences.wistiaApiToken;
-  const url = `https://api.wistia.com/oembed?url=${accountUrl}/medias/${hashedId}&embedType=async`;
-  const authString = `${username}:${password}`;
-
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      Authorization: `Basic ${Buffer.from(authString).toString("base64")}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw (await response.json()) as WistiaApiError;
-  }
-
-  return (await response.json()) as EmbedObject;
+  return fetchWistia<EmbedObject>(`oembed?url=${accountUrl}/medias/${hashedId}&embedType=async`);
 }
 
 export async function fetchMedias(): Promise<WistiaMedia[]> {
-  const preferences: Preferences = getPreferenceValues();
-  const username = "api";
-  const password = preferences.wistiaApiToken;
-  const url = "https://api.wistia.com/v1/medias.json";
-  const authString = `${username}:${password}`;
-
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      Authorization: `Basic ${Buffer.from(authString).toString("base64")}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw (await response.json()) as WistiaApiError;
-  }
-
-  return (await response.json()) as WistiaMedia[];
+  return fetchWistia<WistiaMedia[]>("v1/medias.json");
 }
 
 export async function fetchAccountInfo(): Promise<AccountInfo> {
-  const preferences: Preferences = getPreferenceValues();
-  const username = "api";
-  const password = preferences.wistiaApiToken;
-  const url = "https://api.wistia.com/v1/account.json";
-  const authString = `${username}:${password}`;
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      Authorization: `Basic ${Buffer.from(authString).toString("base64")}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw (await response.json()) as WistiaApiError;
-  }
-
-  const accountInfo = (await response.json()) as AccountInfo;
-  return accountInfo;
+  return fetchWistia<AccountInfo>("v1/account.json");
 }
 
 export async function fetchProjects(): Promise<WistiaProject[]> {
-  const preferences: Preferences = getPreferenceValues();
-  const username = "api";
-  const password = preferences.wistiaApiToken;
-  const url = "https://api.wistia.com/v1/projects.json";
-  const authString = `${username}:${password}`;
-
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      Authorization: `Basic ${Buffer.from(authString).toString("base64")}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw (await response.json()) as WistiaApiError;
-  }
-
-  return (await response.json()) as WistiaProject[];
+  return fetchWistia<WistiaProject[]>("v1/projects.json");
 }
 
 export async function fetchProjectMedias(projectHashedId: string): Promise<WistiaProject> {
-  const preferences: Preferences = getPreferenceValues();
-  const username = "api";
-  const password = preferences.wistiaApiToken;
-  const url = `https://api.wistia.com/v1/projects/${projectHashedId}.json`;
-  const authString = `${username}:${password}`;
+  return fetchWistia<WistiaProject>(`v1/projects/${projectHashedId}.json`);
+}
 
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      Authorization: `Basic ${Buffer.from(authString).toString("base64")}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw (await response.json()) as WistiaApiError;
-  }
-
-  return (await response.json()) as WistiaProject;
+export async function fetchProjectStats(projectHashedId: string): Promise<WistiaStats> {
+  return fetchWistia<WistiaStats>(`v1/stats/projects/${projectHashedId}.json`);
 }

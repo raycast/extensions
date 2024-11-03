@@ -88,6 +88,12 @@ export default function SignIn({ children, didSignIn }: SignInProps) {
   } else {
     return (
       <Form
+        searchBarAccessory={
+          <Form.LinkAccessory
+            target="https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api"
+            text="Creating API Keys for App Store Connect API"
+          />
+        }
         isLoading={isCheckConnection}
         actions={
           <ActionPanel>

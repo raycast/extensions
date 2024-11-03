@@ -1,5 +1,9 @@
 # Copy Path Changelog
 
+## [Support Zen Browser] - 2024-10-29
+
+- Support Zen Browser
+
 ## [Support More Browsers] - 2024-07-04
 
 - Now that there is no browser restriction, you can try to copy the URL in any Webkit or Chromium-based browser

@@ -393,7 +393,7 @@
 /extensions/dolar-hoy                                               @GustavoCarvallo01
 /extensions/dollar-blue                                             @agusluques
 /extensions/domainr                                                 @Rawnly
-/extensions/doppler-share-secrets                                   @thomaspaulmann
+/extensions/doppler-share-secrets                                   @thomaspaulmann @ridemountainpig
 /extensions/dot-new                                                 @natterstefan @xmok
 /extensions/dot-underscore-files-cleaner                            @danulqua
 /extensions/dota-2                                                  @FlorianWendelborn
@@ -402,7 +402,7 @@
 /extensions/dotween-eases                                           @metakirby5
 /extensions/douban                                                  @crazyczy @iiwenwen
 /extensions/doutu                                                   @gaoyang
-/extensions/downloads-manager                                       @thomaspaulmann @ron-myers @infused-kim
+/extensions/downloads-manager                                       @thomaspaulmann @ron-myers @infused-kim @ridemountainpig
 /extensions/dr-news                                                 @kenanbendz @pernielsentikaer
 /extensions/drafts                                                  @FlohGro-dev @wmorgano
 /extensions/dribbble                                                @gebeto
@@ -455,6 +455,7 @@
 /extensions/ethereum-utils                                          @Destiner @jeremyHD @Phillip-Kemper
 /extensions/eudic                                                   @tears330
 /extensions/everhour                                                @farisaziz12 @ahoereth @xmok @teisenhower
+/extensions/evernote                                                @artpi
 /extensions/evil-insult                                             @j3lte
 /extensions/evm-codes                                               @clabby
 /extensions/excalidraw                                              @slyguy5646 @pernielsentikaer
@@ -846,6 +847,7 @@
 /extensions/man-pages                                               @SKaplanOfficial
 /extensions/mandarin-chinese-dictionary                             @CofCat456
 /extensions/manga-calendar                                          @MrOlivo
+/extensions/manotori                                                @xmok
 /extensions/mantine                                                 @EmilMalanczak
 /extensions/maplestory-gg                                           @LitoMore @pernielsentikaer
 /extensions/marginnote                                              @ourongxing
@@ -1039,7 +1041,7 @@
 /extensions/open-with-app                                           @fturcheti @omarshahine @pernielsentikaer @Sheraff
 /extensions/openai-gpt                                              @simicvm @DorukAkinci @EvilMouth
 /extensions/openai-speak                                            @jnchman
-/extensions/openai-translator                                       @douo @dekura @leeonfield
+/extensions/openai-translator                                       @douo @dekura @leeonfield @ridemountainpig
 /extensions/openfortivpn                                            @rafalpetryka
 /extensions/openstreetmap-search                                    @crisboarna
 /extensions/openverse                                               @dhruvkb
@@ -1396,7 +1398,7 @@
 /extensions/slack-status                                            @PitNikola @johnhampton @thomaspaulmann @pernielsentikaer @ramsaysewell
 /extensions/slackmojis                                              @timoransky
 /extensions/sleep-timer                                             @dtmzr @ThatNerdSquared @pernielsentikaer @ridemountainpig
-/extensions/slugify                                                 @unreadablename
+/extensions/slugify                                                 @unreadablename @xmok
 /extensions/sm-ms                                                   @koinzhang
 /extensions/smartthings-connector                                   @4IngoJ
 /extensions/smultron                                                @blackspike
@@ -1450,7 +1452,7 @@
 /extensions/stock-tracker                                           @hmarr
 /extensions/stockholm-public-transport                              @albingroen
 /extensions/stoicquotes                                             @rrajath
-/extensions/storyblok                                               @RobErskine
+/extensions/storyblok                                               @RobErskine @xmok
 /extensions/storybook-launcher                                      @winkerVSbecks
 /extensions/storybook-sandboxes                                     @JReinhold
 /extensions/storybook-search                                        @nakaakist
@@ -1526,7 +1528,7 @@
 /extensions/the-verge                                               @klkvsky @pernielsentikaer
 /extensions/thesaurus                                               @ABukSwienty
 /extensions/thingiverse                                             @mSarheed
-/extensions/things                                                  @loris @andreaselia @jfkisafk @thomaslombart @srikirank
+/extensions/things                                                  @loris @andreaselia @jfkisafk @thomaslombart @srikirank @vimtor
 /extensions/thrasher-magazine                                       @whitespacecode
 /extensions/threads                                                 @chrismessina
 /extensions/ticktick                                                @viduycheung @viduycheung @Alireza29675 @Yakitrak
@@ -1628,7 +1630,7 @@
 /extensions/uplabs                                                  @gebeto
 /extensions/uploadthing                                             @juliusmarminge
 /extensions/uptime                                                  @yarnaid
-/extensions/uptime-kuma                                             @MarlBurroW @pernielsentikaer
+/extensions/uptime-kuma                                             @MarlBurroW @pernielsentikaer @xmok
 /extensions/urban-dictionary                                        @pernielsentikaer @zhenpewu @xilopaint
 /extensions/url-parse                                               @YES-Lee @pernielsentikaer
 /extensions/url-shortener                                           @Visual-Studio-Coder
@@ -1703,7 +1705,7 @@
 /extensions/wireguard                                               @sbugzu
 /extensions/wise-accounts                                           @robsel118 @imvasen
 /extensions/wise-quotes                                             @HugoLiconV
-/extensions/wistia                                                  @ddoria921
+/extensions/wistia                                                  @ddoria921 @xmok
 /extensions/wol                                                     @bxb100
 /extensions/wolfram-alpha                                           @mathieudutour
 /extensions/word-count                                              @itsmingjie @koayon
@@ -1758,7 +1760,7 @@
 /extensions/zeitraum                                                @KennethWussmann
 /extensions/zen-browser                                             @Keyruu @crisboarna @grandkrav @Laptop765
 /extensions/zen-mode                                                @pradeepb28
-/extensions/zendesk                                                 @cpenned
+/extensions/zendesk                                                 @cpenned @xmok
 /extensions/zeplin-project-search                                   @dorukgunes
 /extensions/zerion                                                  @qd-qd
 /extensions/zipcodebase                                             @xmok
