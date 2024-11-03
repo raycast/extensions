@@ -74,7 +74,7 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
 
     const subtasks = issue.fields.subtasks;
     if (subtasks && subtasks.length > 0) {
-      markdown += "\n\n## Subtasks\n";
+      markdown += "\n\n## Child Issues\n";
       subtasks.forEach((subtask) => {
         markdown += `- ${subtask.key} - ${subtask.fields.summary}\n`;
       });

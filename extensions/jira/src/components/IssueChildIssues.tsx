@@ -32,7 +32,7 @@ export default function IssueChildIssues({ issue }: { issue: Issue }) {
       .filter((issue): issue is IssueDetail => issue !== null)
       .map((issue) => ({
         ...issue,
-        key: `issue-${issue.id}`, // Ensure unique keys
+        key: `${issue.key}`, // Ensure unique keys
       }));
   }, [subtasks, epicIssues]);
 
