@@ -7,7 +7,7 @@ import { XcodeSwiftPlaygroundTemplate } from "../models/swift-playground/xcode-s
 import { existsAsync, makeDirectoryAsync, removeDirectoryAsync, writeFileAsync } from "../shared/fs-async";
 import untildify from "untildify";
 import * as Path from "path";
-import { getPreferences } from "../shared/get-preferences";
+import { createSwiftPlaygroundCommandPreferences } from "../shared/preferences";
 
 /**
  * XcodeSwiftPlaygroundService
@@ -46,7 +46,7 @@ export class XcodeSwiftPlaygroundService {
    * The default location where a Swift Playground should be created
    */
   static get defaultSwiftPlaygroundLocation(): string {
-    return getPreferences().playgroundDefaultLocation;
+    return createSwiftPlaygroundCommandPreferences.playgroundDefaultLocation;
   }
 
   /**

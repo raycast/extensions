@@ -4,7 +4,7 @@ import { execAsync } from "../shared/exec-async";
 import { runAppleScript } from "../shared/run-apple-script";
 import untildify from "untildify";
 import * as Path from "path";
-import { getPreferences } from "../shared/get-preferences";
+import { searchRecentProjectsCommandPreferences } from "../shared/preferences";
 
 /**
  * XcodeProjectService
@@ -106,7 +106,7 @@ export class XcodeProjectService {
    */
   private static excludedXcodeProjectPaths(): string[] {
     // Retrieve the excluded Xcode Project paths string from preference values
-    const excludedXcodeProjectPathsString = getPreferences().excludedXcodeProjectPaths;
+    const excludedXcodeProjectPathsString = searchRecentProjectsCommandPreferences.excludedXcodeProjectPaths;
     // Check if excluded Xcode Project path string is falsy
     if (!excludedXcodeProjectPathsString) {
       // Return an empty array

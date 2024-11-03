@@ -130,6 +130,14 @@
           "title": "Excluded Xcode Project paths (comma separated)",
           "description": "A comma separated list of directory paths that should be excluded when searching for recent Xcode Projects.",
           "placeholder": "~/Backup,~/Archive/Xcode"
+        },
+        {
+          "name": "terminalApp",
+          "type": "appPicker",
+          "required": false,
+          "title": "Terminal App",
+          "description": "Select which Terminal App to use when opening with a terminal",
+          "default": "com.apple.Terminal"
         }
       ]
     },
@@ -280,8 +288,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.65.0",
-    "@raycast/utils": "^1.10.1",
+    "@raycast/api": "^1.84.10",
+    "@raycast/utils": "^1.18.0",
     "dedent": "^0.7.0",
     "node-fetch": "^3.2.10",
     "plist": "^3.0.6",
