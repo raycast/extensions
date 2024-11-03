@@ -1,4 +1,4 @@
-import { useState} from "react";
+import { useState } from "react";
 import { ActionPanel, Form, Action, showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
 import fs from "fs";
@@ -182,12 +182,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown
-        id="conversionType"
-        title="Conversion Type"
-        value={conversionType}
-        onChange={setConversionType}
-      >
+      <Form.Dropdown id="conversionType" title="Conversion Type" value={conversionType} onChange={setConversionType}>
         <Form.Dropdown.Item value="USD_TO_PEN" title="USD to PEN" />
         <Form.Dropdown.Item value="PEN_TO_USD" title="PEN to USD" />
       </Form.Dropdown>
