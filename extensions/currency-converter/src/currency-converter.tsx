@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState} from "react";
 import { ActionPanel, Form, Action, showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
 import fs from "fs";
