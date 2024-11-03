@@ -5,6 +5,7 @@
 - Filter by "Starred"
 - Create new links via a subcommand
 - Dark and light mode logos
+- Make Error response more helpful
 
 ## [Show More Links Info + Native Pagination] - 2024-10-07
 

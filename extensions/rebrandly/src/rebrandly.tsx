@@ -1,6 +1,6 @@
 import { ActionPanel, Icon, List, Action, Form, Keyboard, useNavigation } from "@raycast/api";
-import { useGetLinks } from "./hooks";
-import { getFavicon, useFetch, useForm } from "@raycast/utils";
+import { parseResponse, useGetLinks } from "./hooks";
+import { getFavicon, showFailureToast, useFetch, useForm } from "@raycast/utils";
 import { useState } from "react";
 import { API_HEADERS, API_URL } from "./config";
 
@@ -22,7 +22,7 @@ export default function Rebrandly() {
       pagination={pagination}
       searchBarAccessory={
         <List.Dropdown tooltip="Filter" onChange={setFilter}>
-          <List.Dropdown.Item icon={Icon.Circle} title="All" value="" />
+          <List.Dropdown.Item icon={Icon.Link} title="All" value="" />
           <List.Dropdown.Section>
             <List.Dropdown.Item icon={Icon.Star} title="Starred" value="starred" />
             <List.Dropdown.Item icon={Icon.StarDisabled} title="Not Starred" value="notStarred" />
@@ -57,7 +57,7 @@ export default function Rebrandly() {
               accessories={[
                 link.favourite ? { icon: Icon.Star } : {},
                 { text: `${link.clicks} clicks` },
-                { date: new Date(link.createdAt) },
+                { date: new Date(link.createdAt), tooltip: link.createdAt },
               ]}
             />
           );
@@ -70,11 +70,11 @@ export default function Rebrandly() {
 function CreateNewLink({ onCreate }: { onCreate: () => void }) {
   const { pop } = useNavigation();
   const [execute, setExecute] = useState(false);
-  type FormValues = {
+  interface FormValues {
     destination: string;
     slashtag: string;
     title: string;
-  };
+  }
   const { itemProps, handleSubmit, values } = useForm<FormValues>({
     onSubmit() {
       setExecute(true);
@@ -91,15 +91,17 @@ function CreateNewLink({ onCreate }: { onCreate: () => void }) {
     },
   });
   const { isLoading } = useFetch(API_URL + "links", {
-    headers: API_HEADERS,
     method: "POST",
+    headers: API_HEADERS,
     body: JSON.stringify(values),
     execute,
+    parseResponse,
     onData() {
       onCreate();
       pop();
     },
-    onError() {
+    async onError(error) {
+      await showFailureToast(error);
       setExecute(false);
     },
   });
