@@ -83,8 +83,9 @@ async function fetchExchangeRate(baseCurrency: string): Promise<{ rate: number; 
   // Load cached data if valid
   const cachedData = loadCache();
   if (cachedData) {
+    const rate = baseCurrency === "USD" ? cachedData.conversion_rates.PEN : 1 / cachedData.conversion_rates.PEN;
     return {
-      rate: baseCurrency === "USD" ? cachedData.conversion_rates.PEN : cachedData.conversion_rates.USD,
+      rate,
       timestamp: cachedData.timestamp,
     };
   }
@@ -98,9 +99,11 @@ async function fetchExchangeRate(baseCurrency: string): Promise<{ rate: number; 
     // Save results to cache
     saveCache(data.conversion_rates);
 
-    // Return the exchange rate based on the base currency and the current timestamp
+    // Calculate the correct rate based on the base currency
+    const rate = baseCurrency === "USD" ? data.conversion_rates.PEN : 1 / data.conversion_rates.PEN;
+    
     return {
-      rate: baseCurrency === "USD" ? data.conversion_rates.PEN : data.conversion_rates.USD,
+      rate,
       timestamp: new Date().toISOString(),
     };
   } catch (error) {
@@ -109,6 +112,7 @@ async function fetchExchangeRate(baseCurrency: string): Promise<{ rate: number; 
     return null;
   }
 }
+
 
 // Main component
 export default function Command() {
