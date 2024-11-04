@@ -1,4 +1,15 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List, open, openCommandPreferences } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getApplications,
+  getPreferenceValues,
+  Icon,
+  List,
+  open,
+  openCommandPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
@@ -12,17 +23,40 @@ export interface LogicProject {
   lastModified: Date;
 }
 
+const isLogicInstalled = async () => {
+  const apps = await getApplications();
+  return apps.some(({ bundleId }) => bundleId === "com.apple.logic10");
+};
+
 export default function Command() {
   const [projects, setProjects] = useState<LogicProject[]>([]);
   const [, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error>();
   // default location
   const preferences = getPreferenceValues<Preferences>();
+
+  isLogicInstalled().then((installed) => {
+    if (!installed) {
+      const options: Toast.Options = {
+        style: Toast.Style.Failure,
+        title: "Logic Pro is not installed.",
+        message: "Install it from: https://www.apple.com/logic-pro/",
+        primaryAction: {
+          title: "Go to https://www.apple.com/logic-pro/",
+          onAction: (toast) => {
+            open("https://www.apple.com/logic-pro/");
+            toast.hide();
+          },
+        },
+      };
+      return showToast(options);
+    }
+  });
+
   useEffect(() => {
     const location = preferences["projects-location"];
     const execAsync = promisify(exec);
     setIsLoading(true);
-    setError(undefined);
 
     execAsync(
       // `ls -A1 ${path} | grep .logicx`
