@@ -1,6 +1,6 @@
 # Rename Changelog
 
-## [Add separate options feature] - {PR_MERGE_DATE}
+## [Add separate options feature] - 2024-11-04
 
 - Add separate options feature to rename file command.
 
