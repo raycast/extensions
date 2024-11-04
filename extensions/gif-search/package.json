@@ -10,7 +10,8 @@
     "j3lte",
     "samuelkraft",
     "ridemountainpig",
-    "spookywy"
+    "spookywy",
+    "seanparkross"
   ],
   "license": "MIT",
   "categories": [
@@ -130,6 +131,15 @@
           "value": "downloadFile"
         }
       ]
+    },
+    {
+      "name": "hideFilename",
+      "type": "checkbox",
+      "required": false,
+      "title": "Hide Filename on Copy or Download",
+      "description": "Hide the original filename when copying or downloading GIFs",
+      "default": false,
+      "label": "Hide Filename"
     }
   ],
   "dependencies": {
