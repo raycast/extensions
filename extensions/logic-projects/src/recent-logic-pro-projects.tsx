@@ -57,6 +57,7 @@ export default function Command() {
     const location = preferences["projects-location"];
     const execAsync = promisify(exec);
     setIsLoading(true);
+    setError(undefined);
 
     execAsync(
       // `ls -A1 ${path} | grep .logicx`
