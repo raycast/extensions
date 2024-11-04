@@ -115,7 +115,7 @@ export default function Command() {
       searchBarPlaceholder={"Filter projects..."}
       actions={
         <ActionPanel>
-          <Action title="Open Extension Preferences" onAction={openCommandPreferences} />
+          <Action title="Open Extension Preferences" onAction={openCommandPreferences} icon={Icon.WrenchScrewdriver} />
         </ActionPanel>
       }
     >
@@ -137,11 +137,14 @@ export default function Command() {
             title={project.name}
             actions={
               <ActionPanel>
-                <Action title="Open Project" onAction={() => open(project.path)} />
-                <Action title="Open Extension Preferences" onAction={openCommandPreferences} />
+                <Action title="Open Project" onAction={() => open(project.path)} icon={Icon.Play} />
+                <Action
+                  title="Open Extension Preferences"
+                  onAction={openCommandPreferences}
+                  icon={Icon.WrenchScrewdriver}
+                />
               </ActionPanel>
             }
-            detail={<List.Item.Detail markdown={"#Hello!"} />}
           />
         );
       })}
@@ -149,7 +152,11 @@ export default function Command() {
         <List.EmptyView
           actions={
             <ActionPanel>
-              <Action title="Open Extension Preferences" onAction={openCommandPreferences} />
+              <Action
+                title="Open Extension Preferences"
+                onAction={openCommandPreferences}
+                icon={Icon.WrenchScrewdriver}
+              />
             </ActionPanel>
           }
           icon={Icon.EmojiSad}
