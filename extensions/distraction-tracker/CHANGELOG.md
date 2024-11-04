@@ -1,3 +1,3 @@
 # Distraction Tracker Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2024-11-04
