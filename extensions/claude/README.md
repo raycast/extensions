@@ -46,6 +46,7 @@ Got the answer that you wanted? Great.
 
 ## Claude 3.5
 
+- `claude-3-5-haiku-20241022`
 - `claude-3-5-sonnet-latest`
 - `claude-3-5-sonnet-20241022`
 - `claude-3-5-sonnet-20240620`
