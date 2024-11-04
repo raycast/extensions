@@ -79,6 +79,7 @@ export enum ImageColor {
   /** Mostly gray images. */
   GRAY = "Gray",
   /** Alias for `GRAY`. */
+  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
   GREY = "Gray",
   /** Mostly teal images. */
   TEAL = "Teal",

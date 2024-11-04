@@ -1,3 +1,4 @@
+/* eslint-disable no-constant-condition */
 import axios, { AxiosRequestConfig } from "axios";
 import { decode } from "html-entities";
 
@@ -106,7 +107,7 @@ export async function imageNextSearch(
   retries: number = MAX_RETRIES,
   signal?: AbortSignal,
 ): Promise<ImageSearchResult> {
-  let reqUrl = DDG_URL + next + `&vqd=${vqd}`;
+  const reqUrl = DDG_URL + next + `&vqd=${vqd}`;
   let attempt = 0;
   const config: AxiosRequestConfig = {
     headers: HEADERS,
@@ -121,7 +122,7 @@ export async function imageNextSearch(
 
     while (true) {
       try {
-        let response = await axios.get(reqUrl, config);
+        const response = await axios.get(reqUrl, config);
 
         data = response.data as DuckDuckGoSearchResponse;
         if (!data.results) throw Error("No results");
