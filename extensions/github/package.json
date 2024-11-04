@@ -111,12 +111,20 @@
       ],
       "preferences": [
         {
+          "name": "showCreated",
+          "description": "Show issues you created",
+          "type": "checkbox",
+          "required": false,
+          "label": "Created",
+          "title": "Categories to Display",
+          "default": true
+        },
+        {
           "name": "showAssigned",
           "description": "Show issues assigned to you",
           "type": "checkbox",
           "required": false,
           "label": "Assigned",
-          "title": "Categories to Display",
           "default": true
         },
         {
@@ -296,12 +304,20 @@
           "default": true
         },
         {
+          "name": "showCreated",
+          "description": "Show issues you created",
+          "type": "checkbox",
+          "required": false,
+          "label": "Created",
+          "title": "Categories to Display",
+          "default": true
+        },
+        {
           "name": "showAssigned",
           "description": "Show issues assigned to you",
           "type": "checkbox",
           "required": false,
           "label": "Assigned",
-          "title": "Categories to Display",
           "default": true
         },
         {
