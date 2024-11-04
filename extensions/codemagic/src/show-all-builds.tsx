@@ -117,7 +117,7 @@ const ShowAllBuilds = () => {
                     url={`https://codemagic.io/app/${build.appId}/build/${build._id}`}
                   />
                   <Action.OpenInBrowser title="View Commit on GitHub" url={build.commit.url} />
-                  <Action title="Refresh Apps" onAction={revalidate}  icon={Icon.Repeat}/>
+                  <Action title="Refresh Apps" onAction={revalidate} icon={Icon.Repeat} />
                 </ActionPanel>
               }
             />
