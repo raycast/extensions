@@ -1,4 +1,15 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List, open, openCommandPreferences } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getApplications,
+  getPreferenceValues,
+  Icon,
+  List,
+  open,
+  openCommandPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
@@ -12,12 +23,36 @@ export interface GarageBandProject {
   lastModified: Date;
 }
 
+const isGaragebandInstalled = async () => {
+  const apps = await getApplications();
+  return apps.some(({ bundleId }) => bundleId === "com.apple.garageband10");
+};
+
 export default function Command() {
   const [projects, setProjects] = useState<GarageBandProject[]>([]);
   const [, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error>();
   // default location
   const preferences = getPreferenceValues<Preferences>();
+
+  isGaragebandInstalled().then((installed) => {
+    if (!installed) {
+      const options: Toast.Options = {
+        style: Toast.Style.Failure,
+        title: "Garageband is not installed.",
+        message: "Install it from: https://www.apple.com/mac/garageband/",
+        primaryAction: {
+          title: "Go to https://www.apple.com/mac/garageband/",
+          onAction: (toast) => {
+            open("https://www.apple.com/mac/garageband/");
+            toast.hide();
+          },
+        },
+      };
+      return showToast(options);
+    }
+  });
+
   useEffect(() => {
     const location = preferences["projects-location"];
     const execAsync = promisify(exec);
