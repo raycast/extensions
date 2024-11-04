@@ -7,6 +7,7 @@ import StatusIssueList from "./StatusIssueList";
 
 export default function IssueChildIssues({ issue }: { issue: Issue }) {
   const { mutate: mutateEpicIssues } = useEpicIssues(issue?.id ?? "");
+
   // Only create JQL if there are subtask
   const subtaskJql = useMemo(() => {
     if (!issue.fields.subtasks?.length) return "";
@@ -14,7 +15,11 @@ export default function IssueChildIssues({ issue }: { issue: Issue }) {
     return `issue in (${subtaskIds.join(",")})`;
   }, [issue.fields.subtasks]);
 
-  const { issues: subtasks, isLoading: isLoadingSubtasks, mutate: mutateSubtasks } = useIssues(
+  const {
+    issues: subtasks,
+    isLoading: isLoadingSubtasks,
+    mutate: mutateSubtasks,
+  } = useIssues(
     subtaskJql || "issue = null", // Provide valid JQL even when no subtasks
   );
 
@@ -37,15 +42,17 @@ export default function IssueChildIssues({ issue }: { issue: Issue }) {
 
   const isLoading = isLoadingSubtasks || isLoadingEpicIssues;
 
-  return <StatusIssueList 
-    issues={childIssues} 
-    isLoading={isLoading} 
-    mutate={async (data) => {
-      if (isEpic) {
-        return mutateEpicIssues(data);
-      }
-      // For subtasks, we need to mutate the subtasks data
-      return mutateSubtasks(data);
-    }} 
-  />;
+  return (
+    <StatusIssueList
+      issues={childIssues}
+      isLoading={isLoading}
+      mutate={async (data) => {
+        if (isEpic) {
+          return mutateEpicIssues(data);
+        }
+        // For subtasks, we need to mutate the subtasks data
+        return mutateSubtasks(data);
+      }}
+    />
+  );
 }
