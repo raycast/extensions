@@ -1,4 +1,4 @@
-# torr-manager Changelog
+# Torr Manager Changelog
 
 ## [Fix Database Save] - {PR_MERGE_DATE}
 
