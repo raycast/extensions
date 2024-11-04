@@ -16,8 +16,8 @@ export default function Command() {
       titles: string[];
     }[]
   >([]);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null); // 新增错误消息状态
-  const { push } = useNavigation(); // 使用导航功能
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // update error message
+  const { push } = useNavigation();
   const { pop } = useNavigation();
   useEffect(() => {
     const fetchPaths = async () => {
@@ -25,7 +25,7 @@ export default function Command() {
         const selectedItems = await getSelectedFinderItems();
         const validItems = selectedItems
           .map((item) => ({
-            path: item.path, // 只保留文件名
+            path: item.path, // only keep file name
             status: "",
             completed: false,
             needManualMatch: false,
@@ -36,7 +36,7 @@ export default function Command() {
           .filter((item) => item.path.endsWith(".mp4") || item.path.endsWith(".mkv"));
         setItems(validItems);
       } catch (error) {
-        setErrorMessage("没有获取到选择的文件"); // 设置错误消息
+        setErrorMessage("Cannot find files"); // update error message
       }
     };
 
@@ -46,31 +46,28 @@ export default function Command() {
   const handleGenerateDanmu = async (index: number) => {
     if (items[index].completed) return;
     const newItems = [...items];
-    newItems[index].status = "正在生成弹幕...";
-    setItems(newItems); // 更新状态
+    newItems[index].status = "Generating Danmu...";
+    setItems(newItems); // update status
 
     try {
       const data = await danmuGenerator(newItems[index].path);
       if (data[0] === true) {
-        newItems[index].status = "弹幕生成完成！一共生成弹幕" + data[3] + "条";
+        newItems[index].status = "Danmu Generation Completed! " + data[3] + " Danmu Loaded";
         newItems[index].completed = true;
       } else {
-        newItems[index].status = "手动选择弹幕池";
+        newItems[index].status = "Manual Select in Danmu Pool";
         newItems[index].needManualMatch = true;
         newItems[index].nfoTitle = data[3];
 
-        // 确保 ids 和 titles 是数组
-        console.log(data[2]);
-        console.log(data[1]);
-        newItems[index].titles = Array.isArray(data[1]) ? data[1] : []; // 确保是数组
-        newItems[index].ids = Array.isArray(data[2]) ? data[2] : []; // 确保是数组
+        newItems[index].titles = Array.isArray(data[1]) ? data[1] : [];
+        newItems[index].ids = Array.isArray(data[2]) ? data[2] : [];
       }
     } catch (error) {
-      newItems[index].status = "弹幕生成失败";
-      setErrorMessage(`生成失败: ${String(error)}`);
+      newItems[index].status = "Danmu Generation Failed";
+      setErrorMessage(`Fail: ${String(error)}`);
     }
 
-    setItems([...newItems]); // 确保创建新的数组引用
+    setItems([...newItems]);
   };
 
   const handleGenerateDanmuWithIDInput = async (index: number) => {
@@ -79,7 +76,7 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action.SubmitForm
-              title="根据ID进行匹配"
+              title="Match with ID"
               onSubmit={(values) => handleGenerateDanmuWithID(index, values["ID"])}
             />
           </ActionPanel>
@@ -93,57 +90,55 @@ export default function Command() {
   const handleGenerateDanmuWithID = async (index: number, episodeID: string) => {
     pop();
     const newItems = [...items];
-    newItems[index].status = "正在生成弹幕...";
-    setItems(newItems); // 更新状态
-    console.log(index, episodeID);
+    newItems[index].status = "Generating Danmu...";
+    setItems(newItems);
     try {
       const data = await danmuGeneratorWithID(episodeID, newItems[index].path);
       if (data[0] === true) {
-        newItems[index].status = "弹幕生成完成！一共生成弹幕" + data[1] + "条";
+        newItems[index].status = "Danmu Generation Completed! " + data[1] + " Danmu Loaded";
         newItems[index].completed = true;
       } else {
-        newItems[index].status = "弹幕生成失败";
+        newItems[index].status = "Danmu Generation Failed";
       }
     } catch (error) {
-      newItems[index].status = "弹幕生成失败";
-      setErrorMessage(`生成失败: ${String(error)}`);
+      newItems[index].status = "Danmu Generation Failed";
+      setErrorMessage(`Fail: ${String(error)}`);
     }
 
-    setItems([...newItems]); // 确保创建新的数组引用
+    setItems([...newItems]);
   };
 
   const handleManualMatch = (index: number) => {
     const item = items[index];
     const newItems = [...items];
-    // 确保 ids 和 titles 是数组
     if (!Array.isArray(item.ids) || !Array.isArray(item.titles)) {
-      showToast(Toast.Style.Failure, "没有可用的 ID 和标题");
+      showToast(Toast.Style.Failure, "Cannot Find Matched ID and Title");
       return;
     }
-    // 创建一个新的页面来显示 nfoTitle 和 ID、标题的选择列表
+
     push(
       <List>
         <List.Item
-          title={item.nfoTitle} // 显示 nfoTitle
-          subtitle="NFO中提取到的标题" // 提示用户选择
+          title={item.nfoTitle} // show nfoTitle
+          subtitle="Title Extracted from NFO" // prompt user to select
           icon="title1.png"
         />
         {item.ids.map((id, i) => (
           <List.Item
             key={i}
-            title={item.titles[i]} // 显示标题
-            subtitle={`ID: ${id}`} // 显示 ID
+            title={item.titles[i]}
+            subtitle={`ID: ${id}`}
             icon="dot.png"
             actions={
               <ActionPanel>
                 <Action
-                  title={`选择 ${item.titles[i]}`}
+                  title={`Select ${item.titles[i]}`}
                   onAction={async () => {
-                    await manualMatch(id, item.path); // 根据选择的 ID 执行 manualMatch
+                    await manualMatch(id, item.path); 
                     newItems[index].needManualMatch = false;
-                    showToast(Toast.Style.Success, `已选择 ${item.titles[i]}`);
-                    handleGenerateDanmu(index); // 重新生成弹幕
-                    pop(); // 返回到主页面
+                    showToast(Toast.Style.Success, `Selected ${item.titles[i]}`);
+                    handleGenerateDanmu(index);
+                    pop();
                   }}
                 />
               </ActionPanel>
@@ -157,43 +152,40 @@ export default function Command() {
   const handleManualSearch = async (index: number) => {
     const item = items[index];
     const newItems = [...items];
-    newItems[index].status = "正在搜索弹幕池...";
-    setItems(newItems); // 更新状态
+    newItems[index].status = "Searching Danmu Pool...";
+    setItems(newItems);
     const data = await manualSearch(item.path);
     newItems[index].nfoTitle = data[2];
 
-    // 确保 ids 和 titles 是数组
-    newItems[index].ids = Array.isArray(data[1][1]) ? data[1][1] : []; // 确保是数组
-    newItems[index].titles = Array.isArray(data[1][0]) ? data[1][0] : []; // 确保是数组
+    newItems[index].ids = Array.isArray(data[1][1]) ? data[1][1] : [];
+    newItems[index].titles = Array.isArray(data[1][0]) ? data[1][0] : [];
 
-    // 确保 ids 和 titles 是数组
     if (!Array.isArray(item.ids) || !Array.isArray(item.titles)) {
-      showToast(Toast.Style.Failure, "没有可用的 ID 和标题");
+      showToast(Toast.Style.Failure, "Cannot Find Matched ID and Title");
       return;
     }
 
-    // 创建一个新的页面来显示 nfoTitle 和 ID、标题的选择列表
     push(
       <List>
         <List.Item
-          title={item.nfoTitle} // 显示 nfoTitle
-          subtitle="NFO中提取到的标题" // 提示用户选择
+          title={item.nfoTitle} // Show nfoTitle
+          subtitle="Title Extracted from NFO" // 提示用户选择
           icon="title1.png"
         />
         {item.ids.map((id, i) => (
           <List.Item
             key={i}
-            title={item.titles[i]} // 显示标题
-            subtitle={`ID: ${id}`} // 显示 ID
+            title={item.titles[i]}
+            subtitle={`ID: ${id}`}
             icon="dot.png"
             actions={
               <ActionPanel>
                 <Action
-                  title={`选择 ${item.titles[i]}`}
+                  title={`Select ${item.titles[i]}`}
                   onAction={async () => {
-                    showToast(Toast.Style.Success, `已选择 ${item.titles[i]}`);
-                    handleGenerateDanmuWithID(index, id); // 重新生成弹幕
-                    pop(); // 返回到主页面
+                    showToast(Toast.Style.Success, `Selected ${item.titles[i]}`);
+                    handleGenerateDanmuWithID(index, id); 
+                    pop();
                   }}
                 />
               </ActionPanel>
@@ -205,18 +197,18 @@ export default function Command() {
   };
 
   const clearErrorMessage = () => {
-    setErrorMessage(null); // 清除错误消息
+    setErrorMessage(null);
   };
 
   return (
     <List isLoading={items.length === 0}>
       {errorMessage && (
         <List.Item
-          title="错误"
+          title="Error"
           subtitle={errorMessage}
           actions={
             <ActionPanel>
-              <Action title="关闭" onAction={clearErrorMessage} />
+              <Action title="Close" onAction={clearErrorMessage} />
             </ActionPanel>
           }
         />
@@ -224,18 +216,18 @@ export default function Command() {
       {items.map((item, index) => (
         <List.Item
           key={index}
-          icon={item.completed ? "done1.png" : "dot.png"} // 根据完成状态更改图标
-          title={path.basename(item.path)} // 显示文件名
+          icon={item.completed ? "done1.png" : "dot.png"}
+          title={path.basename(item.path)}
           subtitle={item.status}
           actions={
             <ActionPanel>
               {item.needManualMatch ? (
-                <Action title="查看详情" onAction={() => handleManualMatch(index)} />
+                <Action title="Details" onAction={() => handleManualMatch(index)} />
               ) : (
                 <>
-                  {item.completed ? null : <Action title="生成弹幕" onAction={() => handleGenerateDanmu(index)} />}
-                  <Action title="手动搜索弹幕ID" onAction={() => handleManualSearch(index)} />
-                  <Action title="手动指定弹幕ID" onAction={() => handleGenerateDanmuWithIDInput(index)} />
+                  {item.completed ? null : <Action title="Generate Danmu" onAction={() => handleGenerateDanmu(index)} />}
+                  <Action title="Manual Search ID" onAction={() => handleManualSearch(index)} />
+                  <Action title="Manual Assign ID" onAction={() => handleGenerateDanmuWithIDInput(index)} />
                 </>
               )}
             </ActionPanel>

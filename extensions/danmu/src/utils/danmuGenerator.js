@@ -5,8 +5,6 @@ import axios from "axios";
 import crypto from "crypto";
 import path from "path";
 import chardet from "chardet";
-// 移除未使用的 `json` 变量
-// import { json } from 'stream/consumers';
 
 const pathToFfmpeg = `${environment.assetsPath}/ffmpeg`;
 const pathToFfprobe = `${environment.assetsPath}/ffprobe`;
@@ -14,13 +12,12 @@ const pathToFfprobe = `${environment.assetsPath}/ffprobe`;
 const addExecutePermission = (filePath) => {
   fs.chmod(filePath, 0o755, (err) => {
     if (err) {
-      console.error(`无法为 ${filePath} 添加执行权限:`, err);
+      console.error(`Cannot Adding Execution Privileges: ${filePath}`, err);
     } else {
-      console.log(`成功为 ${filePath} 添加执行权限`);
+      console.log(`Adding Execution Privileges: ${filePath}`);
     }
   });
 };
-// 添加执行权限
 addExecutePermission(pathToFfmpeg);
 addExecutePermission(pathToFfprobe);
 
@@ -45,45 +42,42 @@ function calculateMd5OfFirst16MB(filePath) {
   });
 }
 
-// 获取视频时长
+// Get video duration
 function getVideoDuration(filePath) {
   const command = [
     "-v",
-    "error", // 只显示错误信息
+    "error",
     "-show_entries",
-    "format=duration", // 只显示时长信息
+    "format=duration",
     "-of",
-    "default=noprint_wrappers=1:nokey=1", // 输出格式设置
-    filePath, // 输入文件路径
+    "default=noprint_wrappers=1:nokey=1",
+    filePath,
   ];
 
   try {
-    const durationStr = execFileSync(pathToFfprobe, command, { encoding: "utf-8" }); // 执行 ffprobe 命令
-    const duration = parseFloat(durationStr.trim()); // 转换为浮点数
-    // 转为整数并返回
-    return Math.round(duration); // 返回时长（秒）
+    const durationStr = execFileSync(pathToFfprobe, command, { encoding: "utf-8" });
+    const duration = parseFloat(durationStr.trim());
+    
+    return Math.round(duration);
   } catch (error) {
-    console.error(`处理文件 ${filePath} 时出错: ${error.message}`);
-    return null; // 返回 null 表示失败
+    return null; // return null if failed
   }
 }
 
-// 获取文件大小
 function getFileSize(filePath) {
   return fs.statSync(filePath).size;
 }
 
-// 从 NFO 文件获取标题
 function getTitleFromNfo(filePath) {
   const nfoFile = path.join(path.dirname(filePath), `${path.basename(filePath, path.extname(filePath))}.nfo`);
   if (fs.existsSync(nfoFile)) {
     const nfoContent = fs.readFileSync(nfoFile, "utf-8");
     const titleMatch = nfoContent.match(/<title>(.*)<\/title>/);
     if (titleMatch) {
-      console.log("从 NFO 文件获取标题 - " + titleMatch[1]);
+      console.log("Extract title from NFO - " + titleMatch[1]);
       return titleMatch[1];
     } else {
-      console.error("未找到标题 - " + filePath);
+      console.error("cannot find title - " + filePath);
       return null;
     }
   }
