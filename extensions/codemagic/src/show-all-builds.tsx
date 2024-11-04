@@ -1,4 +1,4 @@
-import { Action, ActionPanel, ImageMask, List, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Icon, ImageMask, List, openExtensionPreferences } from "@raycast/api";
 import { useFetchAllBuilds } from "./api/fetch-all-builds";
 import { getIconForBuildStatus, statusToColor } from "./util/build-status";
 import { capitalize } from "./util/capitalise";
@@ -15,7 +15,7 @@ const ShowAllBuilds = () => {
           description="Please check your API token in Raycast settings > Extensions > Codemagic. If you need help, contact the developer."
           actions={
             <ActionPanel>
-              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} icon={Icon.Gear} />
               <Action.OpenInBrowser
                 title="Contact Developer"
                 url="mailto:hi@gokul.dev?subject=Raycast%20x%20Codemagic%20extension"
@@ -117,7 +117,7 @@ const ShowAllBuilds = () => {
                     url={`https://codemagic.io/app/${build.appId}/build/${build._id}`}
                   />
                   <Action.OpenInBrowser title="View Commit on GitHub" url={build.commit.url} />
-                  <Action title="Refresh Apps" onAction={revalidate} />
+                  <Action title="Refresh Apps" onAction={revalidate}  icon={Icon.Repeat}/>
                 </ActionPanel>
               }
             />

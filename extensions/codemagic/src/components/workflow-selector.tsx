@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { triggerBuild } from "../api/trigger-build";
 
@@ -37,7 +37,7 @@ function WorkflowSelector({ workflows, appName, branches, defaultBranch, appId }
       navigationTitle={appName}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Trigger Build" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Trigger Build" onSubmit={handleSubmit} icon={Icon.Check} />
           {workflows.map((workflow) => (
             <Action.OpenInBrowser
               key={workflow._id}

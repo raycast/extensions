@@ -1,4 +1,4 @@
-import { Action, ActionPanel, ImageMask, List, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, ImageMask, List, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils"; // Import useCachedPromise
 import { cancelBuild } from "./api/cancel-build";
 import { fetchApplicationsAndRefreshBranches, FetchAppState } from "./api/fetch-apps";
@@ -55,7 +55,7 @@ const TriggerBuildCommand = () => {
       <List
         actions={
           <ActionPanel>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} icon={Icon.Gear} />
             <Action.OpenInBrowser
               title="Contact Developer"
               url="mailto:hi@gokul.dev?subject=Raycast%20x%20Codemagic%20extension"
@@ -133,6 +133,7 @@ const TriggerBuildCommand = () => {
                   <ActionPanel>
                     <Action.Push
                       title="Continue"
+                      icon={Icon.ArrowRight}
                       target={
                         <WorkflowSelector
                           appId={app._id}
@@ -143,16 +144,16 @@ const TriggerBuildCommand = () => {
                         />
                       }
                     />
+                    <Action title="Refresh Apps and Branches" onAction={revalidate} icon={Icon.Repeat} />
                     {app.lastBuild && cancellableStatuses.includes(app.lastBuild.status) && (
                       <Action
                         title="Cancel Build"
                         onAction={async () => {
                           await cancelBuild(app.lastBuild!._id);
                         }}
-                        icon="x-mark-circle-16"
+                        icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
                       />
                     )}
-                    <Action title="Refresh Apps and Branches" onAction={revalidate} />
                   </ActionPanel>
                 }
               />
