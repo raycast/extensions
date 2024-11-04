@@ -13,12 +13,14 @@
     {
       "name": "trigger-build",
       "title": "Trigger Build",
+      "subtitle": "Codemagic",
       "description": "You can browse and trigger a build for a specific application and branch.",
       "mode": "view"
     },
     {
       "name": "show-all-builds",
       "title": "Show All Builds",
+      "subtitle": "Codemagic",
       "description": "You can browse all builds, get details on metadata, and view artifacts.",
       "mode": "view"
     }
