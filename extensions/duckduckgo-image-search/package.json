@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "duckduckgo-image-search",
+  "title": "DuckDuckGo Image Search",
+  "description": "Search Images inside Raycast by DuckDuckGo Image!",
+  "icon": "extension-icon.png",
+  "author": "jag-k",
+  "categories": [
+    "Data",
+    "Media",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-image",
+      "title": "Search Image",
+      "subtitle": "DuckDuckGo Image",
+      "description": "Find any image using DuckDuckGo Image Search",
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Moderate Search",
+          "name": "moderate",
+          "description": "Moderate the search results",
+          "type": "checkbox",
+          "default": false,
+          "required": false,
+          "label": "Moderate Search"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.8",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.7.7",
+    "html-entities": "^2.5.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.14.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/duckduckgo-images-api": "^1.0.3",
+    "@types/mime-types": "^2.1.4",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.37.2",
+    "globals": "^15.12.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.13.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
