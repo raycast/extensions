@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Improved options for My Issues] - {PR_MERGE_DATE}
+## [Improved options for My Issues] - 2024-11-04
 
 - My Issues Command + Menu Bar: Add a preference that allows showing or hiding issues opened by the user from searches. On by default.
 
