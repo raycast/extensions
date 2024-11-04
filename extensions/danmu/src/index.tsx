@@ -134,7 +134,7 @@ export default function Command() {
                 <Action
                   title={`Select ${item.titles[i]}`}
                   onAction={async () => {
-                    await manualMatch(id, item.path); 
+                    await manualMatch(id, item.path);
                     newItems[index].needManualMatch = false;
                     showToast(Toast.Style.Success, `Selected ${item.titles[i]}`);
                     handleGenerateDanmu(index);
@@ -184,7 +184,7 @@ export default function Command() {
                   title={`Select ${item.titles[i]}`}
                   onAction={async () => {
                     showToast(Toast.Style.Success, `Selected ${item.titles[i]}`);
-                    handleGenerateDanmuWithID(index, id); 
+                    handleGenerateDanmuWithID(index, id);
                     pop();
                   }}
                 />
@@ -225,7 +225,9 @@ export default function Command() {
                 <Action title="Details" onAction={() => handleManualMatch(index)} />
               ) : (
                 <>
-                  {item.completed ? null : <Action title="Generate Danmu" onAction={() => handleGenerateDanmu(index)} />}
+                  {item.completed ? null : (
+                    <Action title="Generate Danmu" onAction={() => handleGenerateDanmu(index)} />
+                  )}
                   <Action title="Manual Search ID" onAction={() => handleManualSearch(index)} />
                   <Action title="Manual Assign ID" onAction={() => handleGenerateDanmuWithIDInput(index)} />
                 </>

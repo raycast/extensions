@@ -57,7 +57,7 @@ function getVideoDuration(filePath) {
   try {
     const durationStr = execFileSync(pathToFfprobe, command, { encoding: "utf-8" });
     const duration = parseFloat(durationStr.trim());
-    
+
     return Math.round(duration);
   } catch (error) {
     return null; // return null if failed
