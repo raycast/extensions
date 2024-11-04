@@ -1,7 +1,7 @@
-import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 
-import { getIssues, type Issue, type IssueDetail } from "../api/issues";
+import { type Issue, type IssueDetail } from "../api/issues";
+import useIssues, { useEpicIssues } from "../hooks/useIssues";
 
 import StatusIssueList from "./StatusIssueList";
 
@@ -39,16 +39,4 @@ export default function IssueChildIssues({ issue }: { issue: Issue }) {
   const isLoading = isLoadingSubtasks || isLoadingEpicIssues;
 
   return <StatusIssueList issues={childIssues} isLoading={isLoading} mutate={isEpic ? mutateEpicIssues : mutate} />;
-}
-
-// Updated hooks file
-export function useEpicIssues(epicKey: string, options?: Record<string, unknown>) {
-  const jql = epicKey ? `parent = ${epicKey}` : "issue = null"; // Provide valid JQL when no epic key
-  const { data: issues, isLoading, mutate } = useCachedPromise((jql) => getIssues({ jql }), [jql], options);
-  return { issues, isLoading, mutate };
-}
-
-export function useIssues(jql: string, options?: Record<string, unknown>) {
-  const { data: issues, isLoading, mutate } = useCachedPromise((jql) => getIssues({ jql }), [jql], options);
-  return { issues, isLoading, mutate };
 }
