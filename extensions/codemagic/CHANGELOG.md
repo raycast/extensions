@@ -1,6 +1,6 @@
 # Codemagic Changelog
 
-## [Hello World] - {PR_MERGE_DATE}
+## [Hello World] - 2024-11-04
 
 - Hello World
     - Added Support for Triggering Builds
