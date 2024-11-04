@@ -1,13 +1,5 @@
 # Jira Changelog
 
-## Add ability to open child issues on a new screen. - 2024-11-01
-
-- When a user opens the action panel, the option to show child issues is now available.
-
-## Add ability to see child issues on issue detail view. - 2024-11-01
-
-- When a user opens an issue, the extension now shows subtasks and issues related to the epic in the issue detail view.
-
 ## [Fix number search to include issue keys for all projects.] - 2024-09-30
 
 - When a user searches for a number without a project selected, the extension matches the number against issue keys in all projects.
