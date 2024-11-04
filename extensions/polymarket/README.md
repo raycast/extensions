@@ -1,3 +1,4 @@
-# Dashboard
+# Polymarket
 
-Keep an eye on your startup's growth. Get started [here](https://www.raycast.com/templates/dashboard).
+Shows the current stats and market prices for Polymarket.com via their public API.
+
