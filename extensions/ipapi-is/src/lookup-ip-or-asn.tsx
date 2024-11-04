@@ -36,7 +36,7 @@ export default function LookupIPorASN(props: LaunchProps<{ arguments: Arguments.
           key={key}
           title="Country"
           text={val.toString()}
-          icon={`https://flagsapi.com/${val.toString().toUpperCase()}/flat/64.png`}
+          icon={{ source: `https://flagsapi.com/${val.toString().toUpperCase()}/flat/64.png`, fallback: Icon.Map }}
         />
       );
     else if (item.type === "string" || item.type === "number")
@@ -85,7 +85,7 @@ export default function LookupIPorASN(props: LaunchProps<{ arguments: Arguments.
               // 1st we fetch this field from our constants
               const item = getItemTypeAndTitle(key);
               // 2nd we change the type to object for the items that are objects
-              if (["asn", "location", "company", "datacenter"].includes(key) && !Number(val)) item.type = "object";
+              if (["asn", "location", "company", "datacenter", "vpn", "abuse"].includes(key) && !Number(val)) item.type = "object";
 
               if (item.type === "object") {
                 const title = item.title.toUpperCase();

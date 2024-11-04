@@ -28,16 +28,17 @@ type Company = {
 };
 type ASN = {
   asn: number;
+  abuser_score: string;
   descr: string;
   country: string;
   active: boolean;
-  org: string;
-  domain: string;
-  abuse: string;
-  type: CompanyOrAsnType;
-  created: string;
-  updated: string;
-  rir: string;
+  org?: string;
+  domain?: string;
+  abuse?: string | string[];
+  type?: CompanyOrAsnType;
+  created?: string;
+  updated?: string;
+  rir?: string;
   whois: string;
   route?: string;
 };
@@ -56,6 +57,20 @@ type Location = {
   is_dst: boolean;
   other?: string[];
 };
+type VPN = {
+  region: string;
+  last_seen: number;
+  type: string;
+  service: string;
+  url: string;
+};
+type Abuse = {
+  name: string;
+  address: string;
+  country?: string;
+  email: string;
+  phone: string;
+}
 
 type ASNRespones = ASN & {
   elapsed_ms: number;
@@ -77,6 +92,8 @@ type IPResponse = {
   company?: Company;
   asn?: ASN;
   location?: Location;
+  vpn?: VPN;
+  abuse?: Abuse;
   elapsed_ms: number;
 };
 export type SuccessResponse = IPResponse | ASNRespones;

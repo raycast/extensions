@@ -7,6 +7,7 @@ export const typesAndTitles = {
   org: { type: "string", title: "Organization" },
   domain: { type: "link", title: "Domain" },
   abuse: { type: "email", title: "Abuse" },
+  abuser_score: { type: "string", title: "Abuser Score" },
   type: { type: "string", title: "Type" },
   created: { type: "string", title: "Created" },
   updated: { type: "string", title: "Updated" },
