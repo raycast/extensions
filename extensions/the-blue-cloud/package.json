@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "dropbox",
-  "title": "Dropbox",
-  "description": "Dropbox Extension, List Files, Search Files, and more",
-  "icon": "dropbox.png",
+  "name": "the-blue-cloud",
+  "title": "The Blue Cloud",
+  "description": "List and Search Files using the Raycast Extension for Dropbox",
+  "icon": "the-blue-cloud.png",
   "author": "chyroc",
   "contributors": [
     "xmok"
@@ -28,8 +28,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.84.6",
+    "@raycast/utils": "^1.18.0",
     "dropbox": "^10.34.0",
     "dropbox-v2-api": "^2.5.2",
     "node-fetch": "^3.3.0"
@@ -47,6 +47,8 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

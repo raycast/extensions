@@ -1,18 +1,6 @@
-import { Dropbox, DropboxResponseError } from "dropbox";
+import { DropboxResponseError } from "dropbox";
 import { Error as DropboxError, files } from "dropbox/types/dropbox_types";
-import { authorize } from "./auth";
-import { getPreferenceValues } from "@raycast/api";
-
-async function getDropboxClient(): Promise<Dropbox> {
-  const { dropbox_access_token } = getPreferenceValues<Preferences>();
-  if (dropbox_access_token) return new Dropbox({ accessToken: dropbox_access_token });
-
-  const tokenSet = await authorize();
-  if (!tokenSet) {
-    throw new Error("no dropbox token");
-  }
-  return new Dropbox({ accessToken: tokenSet.accessToken });
-}
+import { getDropboxClient } from "./oauth";
 
 export interface ListFileResp {
   entries: Array<files.FileMetadataReference | files.FolderMetadataReference>;
@@ -29,7 +17,14 @@ export async function dbxListAnyFiles(req: { path: string; query: string; cursor
       return await dbxListFilesContinue(req.cursor);
     } else {
       if (req.query) {
-        return await dbxSearchFiles(req.query);
+        // EDGE CASE: searching for ' ' (space) causes 400 Error
+        if (req.query === " ")
+          return {
+            entries: [],
+            cursor: "",
+            has_more: false,
+          };
+        return await dbxSearchFiles(req.query === " " ? "" : req.query);
       }
       return await dbxListFiles(req.path);
     }
@@ -39,7 +34,7 @@ export async function dbxListAnyFiles(req: { path: string; query: string; cursor
 }
 
 export async function dbxListFiles(path: string): Promise<ListFileResp> {
-  const dbx = await getDropboxClient();
+  const dbx = getDropboxClient();
   const resp = await dbx.filesListFolder({
     path: path,
     include_deleted: false,
@@ -52,7 +47,7 @@ export async function dbxListFiles(path: string): Promise<ListFileResp> {
 }
 
 export async function dbxListFilesContinue(cursor: string): Promise<ListFileResp> {
-  const dbx = await getDropboxClient();
+  const dbx = getDropboxClient();
   const resp = await dbx.filesListFolderContinue({
     cursor: cursor,
   });
@@ -64,7 +59,7 @@ export async function dbxListFilesContinue(cursor: string): Promise<ListFileResp
 }
 
 export async function dbxSearchFiles(query: string): Promise<ListFileResp> {
-  const dbx = await getDropboxClient();
+  const dbx = getDropboxClient();
   const resp = await dbx.filesSearchV2({
     query: query,
     include_highlights: false,
@@ -73,7 +68,7 @@ export async function dbxSearchFiles(query: string): Promise<ListFileResp> {
 }
 
 export async function dbxSearchFilesContinue(cursor: string): Promise<ListFileResp> {
-  const dbx = await getDropboxClient();
+  const dbx = getDropboxClient();
   const resp = await dbx.filesSearchContinueV2({
     cursor: cursor,
   });
@@ -101,8 +96,9 @@ export function getFilePreviewURL(path: string): string {
 }
 
 function convertError(err: unknown): string {
-  const e = err as DropboxResponseError<DropboxError<{ ".tag"?: string }>> | Error;
+  const e = err as DropboxResponseError<string | DropboxError<{ ".tag"?: string }>> | Error;
   if ("error" in e) {
+    if (typeof e.error === "string") return e.error;
     if (e.error.error[".tag"]) return e.error.error[".tag"];
   }
   if (e instanceof Error) return e.message;
