@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, ImageMask, List, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Icon, ImageMask, List, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils"; // Import useCachedPromise
 import { cancelBuild } from "./api/cancel-build";
 import { fetchApplicationsAndRefreshBranches, FetchAppState } from "./api/fetch-apps";
@@ -151,7 +151,8 @@ const TriggerBuildCommand = () => {
                         onAction={async () => {
                           await cancelBuild(app.lastBuild!._id);
                         }}
-                        icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+                        style={Action.Style.Destructive}
+                        icon={Icon.Xmark}
                       />
                     )}
                   </ActionPanel>
