@@ -7,11 +7,14 @@ export default async function Command() {
   if (!isMullvadInstalled) return;
 
   const priorStatus = execSync("mullvad status").toString().split("\n")[0];
-  execSync("mullvad connect");
-
-  // `mullvad connect` doesn't change the relay,
-  // so if the status is anything except 'Disconnected' we can assume that nothing has changed.
-  const message = priorStatus === "Disconnected" ? "Connected" : "Already Connected";
+  // `mullvad reconnect` doesn't do anything if disconnected.
+  let message;
+  if (priorStatus === "Connected") {
+    execSync("mullvad reconnect");
+    message = "Reconnected";
+  } else {
+    message = "Not Connected";
+  }
 
   await showHUD(message, {
     clearRootSearch: true,
