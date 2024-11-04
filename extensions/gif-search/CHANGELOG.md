@@ -2,7 +2,7 @@
 
 ## [Hide Filename on Copy or Download] - 2024-10-31
 
-- Adds a new preference to hide the original filename when copying or downloading GIFs
+- Adds a new preference to hide the original GIF filename when copying or downloading GIFs
 
 ## [Fix Recent GIFs can't be add to favorites] - 2024-10-08
 
