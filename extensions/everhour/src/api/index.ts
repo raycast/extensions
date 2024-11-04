@@ -41,7 +41,7 @@ export const getRecentTasks = async (userId = "me"): Promise<Task[]> => {
   }
 
   const aggregatedTasks = timeRecords.reduce((agg: { [key: string]: Task }, { time, task }: TimeRecordResp) => {
-    if (!task) return agg;
+    if (!task || !task.time) return agg;
     const { id, name, projects, time: taskTime } = task;
     const { total = 0 } = taskTime;
     if (!agg[id]) {

@@ -1,8 +1,13 @@
 # Amazon AWS Changelog
 
+## Lambda command - 2024-10-28
+
+- Add an Invoke option which allows to save, update or delete payloads and saves the result in clipboard
+
 ## [Glue command] - 2024-10-21
 
 - Add Glue command to list Glue jobs, job runs, job definitions and to trigger a job run [#13316](https://github.com/raycast/extensions/pull/13316)
+
 ## [Pipelines, DDB, CFN commands] - 2024-07-29
 
 - Pipelines: Reduced the size per page to reduce throttling: [#13304](https://github.com/raycast/extensions/issues/13304)

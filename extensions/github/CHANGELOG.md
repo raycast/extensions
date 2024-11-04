@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Improved options for My Issues] - 2024-11-04
+
+- My Issues Command + Menu Bar: Add a preference that allows showing or hiding issues opened by the user from searches. On by default.
+
 ## [Fix crash when searching visited repositories] - 2024-10-04
 
 The issue causing a crash during the "Search Repositories" feature, when two or more repositories had been visited, has been resolved. This problem originated from changes in [this pull request](https://github.com/raycast/extensions/pull/13684).
