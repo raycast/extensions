@@ -7,8 +7,10 @@ import StatusIssueList from "./StatusIssueList";
 
 export default function IssueChildIssues({ issue }: { issue: Issue }) {
   const { mutate } = useIssues("assignee = currentUser() AND statusCategory != Done ORDER BY updated DESC");
-
-  // Only create JQL if there are subtasks
+  const { mutate: mutateEpicIssues } = useEpicIssues(
+    "assignee = currentUser() AND statusCategory != Done ORDER BY updated DESC",
+  );
+  // Only create JQL if there are subtask
   const subtaskJql = useMemo(() => {
     if (!issue.fields.subtasks?.length) return "";
     const subtaskIds = issue.fields.subtasks.map((subtask) => subtask.id);
@@ -38,7 +40,7 @@ export default function IssueChildIssues({ issue }: { issue: Issue }) {
 
   const isLoading = isLoadingSubtasks || isLoadingEpicIssues;
 
-  return <StatusIssueList issues={childIssues} isLoading={isLoading} mutate={mutate} />;
+  return <StatusIssueList issues={childIssues} isLoading={isLoading} mutate={isEpic ? mutateEpicIssues : mutate} />;
 }
 
 // Updated hooks file
