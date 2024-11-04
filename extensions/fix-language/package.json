@@ -15,14 +15,12 @@
     {
       "name": "switch-selected-language",
       "title": "Switch Selected Language",
-      "subtitle": "Quick switch the selected text input source",
       "description": "Switch the language to another (default: eng/thai)",
       "mode": "no-view"
     },
     {
       "name": "switch-clipboard-language",
       "title": "Switch Clipboard Language",
-      "subtitle": "Quick switch the clipboard text input source",
       "description": "Switch the language to another (default: eng/thai)",
       "mode": "no-view"
     },
