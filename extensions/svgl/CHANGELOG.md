@@ -1,6 +1,6 @@
 # svgl Changelog
 
-## [Add Copy Vue & Svelte Component Feature] - {PR_MERGE_DATE}
+## [Add Copy Vue & Svelte Component Feature] - 2024-11-04
 
 - Add the actions `Copy Vue Component` and `Copy Svelte Component` to copy the Vue and Svelte component code to the clipboard.
 
