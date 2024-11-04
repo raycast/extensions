@@ -47,19 +47,27 @@ This extension uses the RCSB PDB GraphQL API to fetch protein structure informat
 3. Search for "Protein Structure Viewer"
 4. Click Install
 
-## Screenshots
+## Commands
 
-Open Protein Structure Viewer Extension
-![assets/view1.png](assets/view1.png)
+### Search Protein
+Search for protein structures using their PDB ID. This command provides a search interface where you can enter a 4-character PDB ID (e.g., "1AKE") to view detailed information about the protein structure.
+View [Screenshot #1](assets/view1.png) and [Screenshot #2](assets/view2.png)
 
-Search for protein
-![assets/view2.png](assets/view2.png)
+### Open in PDB
+Quickly open the protein structure page in the RCSB PDB website. This command takes you directly to the official entry page where you can view the 3D structure, download files, and access additional information.
+View [Screenshot](assets/view3.png)
 
-View protein details
-![assets/view3.png](assets/view3.png)
+### Copy PDB URL
+Copy the URL of the protein structure page to your clipboard. Useful for sharing links to specific protein structures with others.
+View [Screenshot](assets/view4.png)
 
-Quick actions
-![assets/view4.png](assets/view4.png)
+### Copy PDB ID
+Copy the 4-character PDB ID to your clipboard. Helpful when you need to reference the protein structure in other tools or publications.
+View [Screenshot](assets/view4.png)
+
+### Copy PDB Title
+Copy full title of the protein structure to your clipboard. The title typically includes information about the protein name, organism, and experimental conditions.
+[View Screenshot](assets/view4.png)
 
 ## License
 MIT License
