@@ -19,7 +19,8 @@
     "leeonfield",
     "husniadil",
     "luckykong",
-    "smilemachine"
+    "smilemachine",
+    "midnite"
   ],
   "pastContributors": [
     "pomdtr",
@@ -120,6 +121,21 @@
           "type": "text",
           "required": false,
           "placeholder": "What is it?"
+        }
+      ]
+    },
+    {
+      "name": "search",
+      "title": "Search",
+      "subtitle": "ChatGPT",
+      "description": "Opens ChatGPT in app or browser your search",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Ask ChatGPT...",
+          "required": false
         }
       ]
     }
