@@ -11,6 +11,14 @@ export const userInterface = {
     default: "Loading...",
     fr: "Chargement...",
   },
+  searchPlayers: {
+    default: "Search Players",
+    fr: "Rechercher des Joueurs",
+  },
+  biography: {
+    default: "Biography",
+    fr: "Biographie",
+  }
 };
 
 export const gameTitles = {
@@ -170,6 +178,10 @@ export const gameStrings = {
     default: "Season Stats",
     fr: "Statistiques de la Saison",
   },
+  playoffs: {
+    default: "Playoffs",
+    fr: "Séries Éliminatoires",
+  }
 };
 
 export const playerTitleStrings = {

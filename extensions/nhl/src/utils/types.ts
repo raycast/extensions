@@ -777,6 +777,9 @@ export interface PlayerDetailResponse {
   playerSlug: string;
   inTop100AllTime: number;
   inHHOF: number;
+  teamCommonName:{
+    default?: string;
+  }
   draftDetails?: {
     year: number,
     teamAbbrev: string,
@@ -787,6 +790,10 @@ export interface PlayerDetailResponse {
   featuredStats: {
     season: number;
     regularSeason: {
+      subSeason: PlayerStats;
+      career: PlayerStats;
+    };
+    playoffs: {
       subSeason: PlayerStats;
       career: PlayerStats;
     };
@@ -801,4 +808,14 @@ export interface PlayerDetailResponse {
   last5Games: Last5Game[];
   seasonTotals: SeasonTotal[];
   awards: Award[];
+}
+
+export type PlayerBio = {
+  items: {
+    fields: {
+      homebaseId: string;
+      playerId: string;
+      biography: string;
+    }
+  }[]
 }
