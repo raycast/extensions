@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shell-optimizer",
+  "title": "Shell Optimizer",
+  "description": "Optimize your shell configuration for better performance",
+  "version": "1.0.0",
+  "license": "MIT",
+  "icon": "command-icon.png",
+  "author": "Reza Pex",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "keywords": [
+    "shell",
+    "optimization",
+    "performance",
+    "zsh",
+    "bash"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.55.2",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@raycast/utils": "^1.0.0",
+    "@types/node": "^18.8.3",
+    "@types/react": "^18.0.9",
+    "typescript": "^4.7.4",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "prettier": "^2.8.8"
+  },
+  "commands": [
+    {
+      "name": "optimize-shell",
+      "title": "Optimize Shell",
+      "description": "Analyze and optimize your shell configuration",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "shellType",
+      "type": "dropdown",
+      "required": true,
+      "title": "Shell Type",
+      "description": "Select your shell type",
+      "data": [
+        {
+          "title": "Zsh",
+          "value": "zsh"
+        },
+        {
+          "title": "Bash",
+          "value": "bash"
+        }
+      ],
+      "default": "zsh"
+    },
+    {
+      "name": "backupLocation",
+      "type": "textfield",
+      "required": false,
+      "title": "Backup Location",
+      "description": "Directory to store shell configuration backups",
+      "default": "~/.shellopt/backups"
+    }
+  ]
+}
