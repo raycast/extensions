@@ -26,7 +26,6 @@ function getAppPath(bundleId: string) {
 
   return appPath.stdout.trim();
 }
-// aerospace list-windows --json --workspace focused --format "%{app-name} %{window-title} %{window-id} %{app-pid} %{workspace} %{app-bundle-id}"
 
 export function getWindows(workspace: string) {
   const args = [
