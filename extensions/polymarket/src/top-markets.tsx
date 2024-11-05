@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
 import fetch from "node-fetch";
 import { useState, useEffect } from "react";
 
@@ -150,7 +150,7 @@ export default function Command() {
           accessories={[{ text: `24h Vol: ${formatVolumeWithSuffix(ticker.volume24hr)}` }]}
           actions={
             <ActionPanel>
-              <Action.Push title="View Markets" target={<MarketList ticker={ticker} />} />
+              <Action.Push title="View Markets" target={<MarketList ticker={ticker} icon={Icon.AppWindowList} />} />
               <Action.CopyToClipboard
                 title="Copy Market Info"
                 content={`${ticker.title}\n24h Volume: ${formatVolumeWithSuffix(ticker.volume24hr)}\nMarkets: ${ticker.markets.length}`}
