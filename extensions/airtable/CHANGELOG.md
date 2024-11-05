@@ -1,6 +1,6 @@
 # Airtable Changelog
 
-## [Update OAuth ID] - {PR_MERGE_DATE}
+## [Update OAuth ID] - 2024-11-05
 
 - Switched to a different Airtable OAuth app with the proper scopes
 - ❗ Existing users may need to re-authenticate
