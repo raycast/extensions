@@ -150,7 +150,7 @@ export default function Command() {
           accessories={[{ text: `24h Vol: ${formatVolumeWithSuffix(ticker.volume24hr)}` }]}
           actions={
             <ActionPanel>
-              <Action.Push title="View Markets" target={<MarketList ticker={ticker} icon={Icon.AppWindowList} />} />
+              <Action.Push title="View Markets" target={<MarketList ticker={ticker} />} icon={Icon.AppWindowList} />
               <Action.CopyToClipboard
                 title="Copy Market Info"
                 content={`${ticker.title}\n24h Volume: ${formatVolumeWithSuffix(ticker.volume24hr)}\nMarkets: ${ticker.markets.length}`}
