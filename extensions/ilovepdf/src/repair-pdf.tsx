@@ -6,8 +6,6 @@ import {
   getPreferenceValues,
   Toast,
   openExtensionPreferences,
-  getSelectedFinderItems,
-  popToRoot,
 } from "@raycast/api";
 import ILovePDFApi from "@ilovepdf/ilovepdf-nodejs";
 import RepairTask from "@ilovepdf/ilovepdf-js-core/tasks/RepairTask";
@@ -16,7 +14,8 @@ import { useState, useEffect } from "react";
 import fs from "fs";
 import path from "path";
 import { chooseDownloadLocation, getErrorMessage, getFilePath, handleOpenNow } from "./common/utils";
-import { Status, Preferences } from "./common/types";
+import { Status } from "./common/types";
+import { useFetchSelectedFinderItems } from "./hook/use-fetch-selected-finder-items";
 
 type Values = {
   files: string[];
@@ -36,6 +35,18 @@ export default function Command() {
   const [destinationFilePath, setDestinationFilePath] = useState<string>("");
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
 
+  const {
+    isLoading: isFinderLoading,
+    selectedFiles: finderSelectedFiles,
+    status: fetchStatus,
+  } = useFetchSelectedFinderItems(selectFileInFinder);
+
+  useEffect(() => {
+    setIsLoading(isFinderLoading);
+    setSelectedFiles(finderSelectedFiles);
+    setStatus(fetchStatus);
+  }, [isFinderLoading, finderSelectedFiles, fetchStatus]);
+
   async function handleSubmit(values: Values) {
     setIsLoading(true);
     if (!selectFileInFinder && !values.files.length) {
@@ -49,7 +60,7 @@ export default function Command() {
 
     const toast = await showToast(Toast.Style.Animated, "Processing", "Repairing PDF...");
 
-    values.files.map(async (valueFile) => {
+    for (const valueFile of values.files) {
       const file: string = valueFile;
       const fileExtension = path.extname(file);
       const fileName = path.basename(file, fileExtension);
@@ -93,43 +104,12 @@ export default function Command() {
         toast.message = `Failed to repair the PDF. Reason ${getErrorMessage(error)}`;
         setStatus("failure");
         setIsLoading(false);
-        return;
+        break;
       }
 
       await handleOpenNow(openNow, destinationFile, toast);
-    });
+    }
   }
-
-  useEffect(() => {
-    const fetchSelectedFinderItems = async () => {
-      setIsLoading(true);
-
-      if (selectFileInFinder) {
-        try {
-          const finderSelectedItems = await getSelectedFinderItems();
-
-          if (finderSelectedItems.length === 0) {
-            await showToast(Toast.Style.Failure, "You must select a single file.", "Please select a file.");
-            setStatus("failure");
-            popToRoot();
-            return;
-          }
-
-          setSelectedFiles(finderSelectedItems.map((item) => item.path));
-        } catch (error) {
-          await showToast(Toast.Style.Failure, "Finder Select Error", "Finder isn't the frontmost application");
-          setStatus("failure");
-          popToRoot();
-        } finally {
-          setIsLoading(false);
-        }
-      } else {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSelectedFinderItems();
-  }, []);
 
   return (
     <Form
@@ -149,7 +129,7 @@ export default function Command() {
     >
       <Form.Description text="Upload a corrupt PDF and we will try to fix it. Depending on how much the PDF is damaged we will be able to recover it partially or completely." />
       {selectFileInFinder ? (
-        <Form.Description title="Finder Selected File" text={selectedFiles.join(", ")} />
+        <Form.Description title="Finder Selected File" text={selectedFiles.join("\n")} />
       ) : (
         <Form.FilePicker id="files" title="Choose a PDF" allowMultipleSelection={false} />
       )}
