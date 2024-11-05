@@ -149,6 +149,25 @@ export default function OptimizeShell() {
       });
     }
 
+    if (metrics.historySize > 1000000) {
+      // 1MB
+      suggestions.push({
+        title: "Large History File",
+        description: "Consider optimizing shell history settings",
+        severity: "medium",
+        action: async () => await optimizeHistory(),
+      });
+    }
+
+    if (metrics.completionCount > 50) {
+      suggestions.push({
+        title: "Many Completion Scripts",
+        description: "Consider optimizing completion settings",
+        severity: "low",
+        action: async () => await optimizeCompletions(),
+      });
+    }
+
     setSuggestions(suggestions);
   }
 
