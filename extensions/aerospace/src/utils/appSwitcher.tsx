@@ -45,7 +45,6 @@ export function getWindows(workspace: string) {
   let windows: Windows = [];
   try {
     const parsedWindows = JSON.parse(aerospaceArr.stdout);
-    // console.log("parsed", parsedWindows);
 
     windows = parsedWindows.map((window: Window) => ({
       ...window,
