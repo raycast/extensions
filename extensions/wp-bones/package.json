@@ -2,10 +2,11 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wp-bones",
   "title": "WP Bones",
-  "description": "Create the WP Bones classes",
+  "description": "Create the WP Bones classes.",
   "icon": "extension-icon.png",
   "author": "Undolog",
   "owner": "undolog",
+  "access": "public",
   "categories": [
     "Developer Tools"
   ],
