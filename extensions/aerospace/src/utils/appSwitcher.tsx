@@ -58,8 +58,6 @@ export function getWindows(workspace: string) {
 }
 
 export function focusWindow(windowId: string): void {
-  // const command = `/opt/homebrew/bin/aerospace focus --window-id ${windowId}`;
-  // runAppleScript(` do shell script "${command}" `);
   spawnSync("aerospace", ["focus", "--window-id", `${windowId}`], {
     env: env(),
     encoding: "utf8",
