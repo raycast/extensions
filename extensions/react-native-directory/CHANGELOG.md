@@ -1,6 +1,6 @@
 # React Native Directory Changelog
 
-## [Improvements] - 2024-10-21
+## [Improvements] - {PR_MERGE_DATE}
 
 - Added expo installation copy action
 - Added "Old Architecture" compatibility tag
