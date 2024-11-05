@@ -13,13 +13,13 @@ export default function Command(props: LaunchProps<{ draftValues: Values; argume
   const { handleSubmit, itemProps } = useForm<Values>({
     onSubmit({ query }) {
       const params = new URLSearchParams({
-        q: query
+        q: query,
       });
       popToRoot();
-      open(`https://chatgpt.com/?hints=search&q=${params.get('q')}`);
+      open(`https://chatgpt.com/?hints=search&q=${params.get("q")}`);
     },
     initialValues: {
-      query: props.draftValues?.query ?? props.fallbackText ?? ""
+      query: props.draftValues?.query ?? props.fallbackText ?? "",
     },
     validation: {
       query: (value) => (value && value.length > 0 ? null : "Query cannot be empty"),
@@ -29,14 +29,14 @@ export default function Command(props: LaunchProps<{ draftValues: Values; argume
   // Handle direct query from command bar
   if (props.arguments.query) {
     handleSubmit({
-      query: props.arguments.query
+      query: props.arguments.query,
     });
     return null;
   }
 
   if (props.fallbackText) {
     handleSubmit({
-      query: props.fallbackText
+      query: props.fallbackText,
     });
     return null;
   }
