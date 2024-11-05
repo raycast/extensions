@@ -7,6 +7,10 @@ export const userInterface = {
     default: "Please check back when the game has concluded",
     fr: "Veuillez revenir lorsque le match est terminé",
   },
+  loading: {
+    default: "Loading...",
+    fr: "Chargement...",
+  },
 };
 
 export const gameTitles = {
@@ -75,6 +79,10 @@ export const timeStrings = {
     default: "Game Start",
     fr: "Début du Match",
   },
+  lastPlayed: {
+    default: "Last Played",
+    fr: "Dernier Match",
+  }
 };
 
 export const gameStrings = {
@@ -201,4 +209,56 @@ export const playerTitleStrings = {
     default: "Stars",
     fr: "Étoiles",
   },
+  age: {
+    default: "Age",
+    fr: "Âge",
+  },
+  born: {
+    default: "Born",
+    fr: "Né",
+  },
+  height: {
+    default: "Height",
+    fr: "Taille",
+  },
+  weight: {
+    default: "Weight",
+    fr: "Poids",
+  },
+  birthplace: {
+    default: "Birthplace",
+    fr: "Lieu de Naissance",
+  },
+  birthdate: {
+    default: "Birthdate",
+    fr: "Date de Naissance",
+  },
+  shoots: {
+    default: "Shoots",
+    fr: "Tire",
+  },
+  catches: {
+    default: "Catches",
+    fr: "Attrape",
+  },
+  draft: {
+    default: "Draft",
+    fr: "Repêché",
+  },
+  overall: {
+    default: "Overall",
+    fr: "Total",
+  },
+  round: {
+    default: "R",
+    fr: "R",
+  },
+  pick: {
+    default: "P",
+    fr: "C",
+  },
+  career: {
+    default: "Career",
+    fr: "Carrière",
+  }
 };

@@ -30,6 +30,24 @@
           "type": "text",
           "required": true,
           "placeholder": "Wayne Gretzky"
+        },
+        {
+          "name": "playerType",
+          "title": "Player Type",
+          "type": "dropdown",
+          "required": false,
+          "default": "true",
+          "placeholder": "Active",
+          "data": [
+            {
+              "title": "Active",
+              "value": "true"
+            },
+            {
+              "title": "All",
+              "value": "false"
+            }
+          ]
         }
       ]
     }

@@ -38,6 +38,43 @@ export function penaltiesList(game: Game) {
   return penaltyList;
 }
 
+export function getFlagEmoji(countryCode: string): string {
+  const codePoints = countryCode
+    .toUpperCase()
+    .split('')
+    .slice(0, 2)
+    .map(char => 127397 + char.charCodeAt(0));
+
+  return String.fromCodePoint(...codePoints);
+}
+
+export function calculateAge(birthdateString: string): number {
+  const today = new Date();
+  const birthdate = new Date(birthdateString);
+  
+  let age = today.getFullYear() - birthdate.getFullYear();
+  const monthDifference = today.getMonth() - birthdate.getMonth();
+  const dayDifference = today.getDate() - birthdate.getDate();
+
+  // Adjust age if the current date is before the birthday in the current year
+  if (monthDifference < 0 || (monthDifference === 0 && dayDifference < 0)) {
+    age--;
+  }
+
+  return age;
+}
+
+export function convertInchesToFeetAndInches(inches: number): string {
+  if (inches < 0) {
+      throw new Error('Inches cannot be negative');
+  }
+
+  const feet = Math.floor(inches / 12);
+  const remainingInches = inches % 12;
+
+  return `${feet}' ${remainingInches}"`;
+}
+
 export function scoresList(game: Game) {
   const scoring = game.summary?.scoring;
   if (!scoring) return "";
@@ -182,6 +219,7 @@ export function sortGames(apiResponse: ScoreboardResponse): SortedGames {
 }
 
 export function teamLogo(abbrev: string): string {
+  if (!abbrev) return "";
   return `https://assets.nhle.com/logos/nhl/svg/${abbrev}_${environment.appearance}.svg`;
 }
 

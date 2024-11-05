@@ -3,6 +3,11 @@ export type Timezone = {
   timezone: "America/New_York" | "America/Chicago" | "America/Denver" | "America/Los_Angeles";
 };
 
+export type LocalizedString = {
+  default: string;
+  [key: string]: string; // Allows for additional localized strings
+};
+
 export type TeamInfo = {
   id: number;
   name: {
@@ -414,10 +419,14 @@ export type FeaturedStats = {
   };
 };
 
-export type PlayerStats = {
+type BasePlayerStats = {
+  gamesPlayed: number;
+};
+
+// Type for skater-specific stats
+export type SkaterStats = BasePlayerStats & {
   assists: number;
   gameWinningGoals: number;
-  gamesPlayed: number;
   goals: number;
   otGoals: number;
   pim: number;
@@ -430,6 +439,19 @@ export type PlayerStats = {
   shorthandedPoints: number;
   shots: number;
 };
+
+// Type for goalie-specific stats
+export type GoalieStats = BasePlayerStats & {
+  goalsAgainstAvg: number;
+  losses: number;
+  savePctg: number;
+  shutouts: number;
+  ties: number;
+  wins: number;
+};
+
+// Union type for player stats
+export type PlayerStats = SkaterStats | GoalieStats;
 
 export type CareerTotals = {
   regularSeason: PlayerStats & {
@@ -705,7 +727,7 @@ export type PlayerOnIce = {
     cs?: string;
     fi?: string;
     sk?: string;
-  };
+  } | string;
   sweaterNumber: number;
   sweaterNo?: number;
   positionCode: string;
@@ -718,6 +740,12 @@ export type PlayerOnIce = {
   points?: number;
   goalsAgainstAverage?: number;
   savePctg?: number;
+  height?: string;
+  lastSeasonId?: string;
+  lastTeamAbbrev?: string;
+  weightInPounds?: number;
+  birthCity?: string;
+  birthCountry?: string;
 };
 
 export type TeamIceSurface = {
@@ -726,3 +754,51 @@ export type TeamIceSurface = {
   goalies: PlayerOnIce[];
   penaltyBox: PlayerOnIce[];
 };
+
+// Define the main PlayerDetailResponse type based on the provided structure
+export interface PlayerDetailResponse {
+  playerId: number;
+  isActive: boolean;
+  firstName: LocalizedString;
+  lastName: LocalizedString;
+  sweaterNumber: number;
+  position: string;
+  headshot: string;
+  heroImage: string;
+  heightInInches: number;
+  heightInCentimeters: number;
+  weightInPounds: number;
+  weightInKilograms: number;
+  birthDate: string;
+  birthCity: LocalizedString;
+  birthStateProvince: LocalizedString;
+  birthCountry: string;
+  shootsCatches: string;
+  playerSlug: string;
+  inTop100AllTime: number;
+  inHHOF: number;
+  draftDetails?: {
+    year: number,
+    teamAbbrev: string,
+    round: number,
+    pickInRound: number,
+    overallPick: number 
+  }
+  featuredStats: {
+    season: number;
+    regularSeason: {
+      subSeason: PlayerStats;
+      career: PlayerStats;
+    };
+  };
+  careerTotals: {
+    regularSeason: PlayerStats;
+    playoffs: PlayerStats;
+  };
+  shopLink: string;
+  twitterLink: string;
+  watchLink: string;
+  last5Games: Last5Game[];
+  seasonTotals: SeasonTotal[];
+  awards: Award[];
+}
