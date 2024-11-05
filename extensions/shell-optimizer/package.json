@@ -29,15 +29,18 @@
     "react": "^18.2.0"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-plugin": "^1.0.14",
     "@raycast/utils": "^1.0.0",
-    "@raycast/eslint-config": "^1.0.6",
+    "@rushstack/eslint-patch": "^1.10.4",
     "@types/node": "^18.8.3",
     "@types/react": "^18.0.9",
-    "typescript": "^4.7.4",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "prettier": "^2.8.8"
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.7.4"
   },
   "commands": [
     {
