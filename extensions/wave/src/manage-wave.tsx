@@ -167,7 +167,7 @@ function BusinessCustomers({ business }: { business: Business }) {
             return (
               <List.Item
                 key={customer.id}
-                icon={Icon.Person}
+                icon="no-user.png"
                 title={customer.name}
                 subtitle={isShowingDetail ? undefined : `${customer.firstName} ${customer.lastName}`}
                 accessories={
@@ -185,11 +185,15 @@ function BusinessCustomers({ business }: { business: Business }) {
                           title="Modified At"
                           text={new Date(customer.modifiedAt).toISOString()}
                         />
-                        <List.Item.Detail.Metadata.Link
-                          title="Website"
-                          text={customer.website}
-                          target={customer.website}
-                        />
+                        {customer.website ? (
+                          <List.Item.Detail.Metadata.Link
+                            title="Website"
+                            text={customer.website}
+                            target={customer.website}
+                          />
+                        ) : (
+                          <List.Item.Detail.Metadata.Label title="Website" icon={Icon.Minus} />
+                        )}
                       </List.Item.Detail.Metadata>
                     }
                   />

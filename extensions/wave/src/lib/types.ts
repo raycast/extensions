@@ -77,15 +77,15 @@ export type Invoice = {
 export type Customer = {
   id: string;
   name: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  website: string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  website: string | null;
   currency: {
     code: string;
     name: string;
     symbol: string;
-  };
+  } | null;
   createdAt: string;
   modifiedAt: string;
   overdueAmount: {
