@@ -464,14 +464,22 @@ export type CareerTotals = {
   };
 };
 
-export type Last5Game = {
-  assists: number;
+// Base type for common properties
+type Last5GameBase = {
   gameDate: string;
   gameId: number;
   gameTypeId: number;
-  goals: number;
   homeRoadFlag: string;
   opponentAbbrev: string;
+  teamAbbrev: string;
+  toi: string;
+};
+
+// Skater specific properties
+export type Last5GameSkater = Last5GameBase & {
+  type: "skater";
+  assists: number;
+  goals: number;
   pim: number;
   plusMinus: number;
   points: number;
@@ -479,18 +487,27 @@ export type Last5Game = {
   shifts: number;
   shorthandedGoals: number;
   shots: number;
-  teamAbbrev: string;
-  toi: string;
 };
 
-export type SeasonTotal = {
-  assists: number;
+// Goalie specific properties
+export type Last5GameGoalie = Last5GameBase & {
+  type: "goalie";
+  decision?: string;
+  gamesStarted: number;
+  goalsAgainst: number;
+  penaltyMins: number;
+  savePctg: number;
+  shotsAgainst: number;
+};
+
+// Union type that can be either a skater or goalie
+export type Last5Game = Last5GameSkater | Last5GameGoalie;
+
+// Common properties for both types
+type BaseSeasonTotal = {
   gameTypeId: number;
   gamesPlayed: number;
-  goals: number;
   leagueAbbrev: string;
-  pim?: number;
-  points: number;
   season: number;
   sequence: number;
   teamName: {
@@ -500,6 +517,7 @@ export type SeasonTotal = {
     fi?: string;
     sk?: string;
     sv?: string;
+    fr?: string;
   };
   teamCommonName?: {
     default: string;
@@ -508,7 +526,21 @@ export type SeasonTotal = {
     fi?: string;
     sk?: string;
     sv?: string;
+    fr?: string;
   };
+  teamPlaceNameWithPreposition?: {
+    default: string;
+    fr?: string;
+  };
+};
+
+// Skater specific properties
+export type SkaterSeasonTotal = BaseSeasonTotal & {
+  type: "skater";
+  assists: number;
+  goals: number;
+  points: number;
+  pim?: number;
   gameWinningGoals?: number;
   plusMinus?: number;
   powerPlayGoals?: number;
@@ -521,6 +553,28 @@ export type SeasonTotal = {
   powerPlayPoints?: number;
   shorthandedPoints?: number;
 };
+
+// Goalie specific properties
+export type GoalieSeasonTotal = BaseSeasonTotal & {
+  type: "goalie";
+  gamesStarted?: number;
+  goalsAgainst?: number;
+  goalsAgainstAvg: number;
+  losses: number;
+  otLosses?: number;
+  savePctg: number;
+  shotsAgainst?: number;
+  shutouts: number;
+  timeOnIce?: string;
+  wins: number;
+  assists?: number;
+  goals?: number;
+  pim?: number;
+  ties?: number;
+};
+
+// Combined type
+export type SeasonTotal = SkaterSeasonTotal | GoalieSeasonTotal;
 
 export type Award = {
   trophy: {
@@ -722,12 +776,14 @@ export type GameSummary = {
 export type PlayerOnIce = {
   playerId: number;
   star?: number;
-  name: {
-    default: string;
-    cs?: string;
-    fi?: string;
-    sk?: string;
-  } | string;
+  name:
+    | {
+        default: string;
+        cs?: string;
+        fi?: string;
+        sk?: string;
+      }
+    | string;
   sweaterNumber: number;
   sweaterNo?: number;
   positionCode: string;
@@ -777,16 +833,16 @@ export interface PlayerDetailResponse {
   playerSlug: string;
   inTop100AllTime: number;
   inHHOF: number;
-  teamCommonName:{
+  teamCommonName: {
     default?: string;
-  }
+  };
   draftDetails?: {
-    year: number,
-    teamAbbrev: string,
-    round: number,
-    pickInRound: number,
-    overallPick: number 
-  }
+    year: number;
+    teamAbbrev: string;
+    round: number;
+    pickInRound: number;
+    overallPick: number;
+  };
   featuredStats: {
     season: number;
     regularSeason: {
@@ -816,6 +872,6 @@ export type PlayerBio = {
       homebaseId: string;
       playerId: string;
       biography: string;
-    }
-  }[]
-}
+    };
+  }[];
+};

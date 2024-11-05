@@ -12,6 +12,8 @@ import {
   GameStringCategory,
   TeamSeasonStats,
   TeamSeasonStat,
+  PlayerOnIce,
+  TeamStats,
 } from "./types";
 import { getPreferenceValues, Color, environment } from "@raycast/api";
 import { timeStrings, gameStrings, playerTitleStrings, userInterface } from "./translations";
@@ -41,9 +43,9 @@ export function penaltiesList(game: Game) {
 export function getFlagEmoji(countryCode: string): string {
   const codePoints = countryCode
     .toUpperCase()
-    .split('')
+    .split("")
     .slice(0, 2)
-    .map(char => 127397 + char.charCodeAt(0));
+    .map((char) => 127397 + char.charCodeAt(0));
 
   return String.fromCodePoint(...codePoints);
 }
@@ -51,7 +53,7 @@ export function getFlagEmoji(countryCode: string): string {
 export function calculateAge(birthdateString: string): number {
   const today = new Date();
   const birthdate = new Date(birthdateString);
-  
+
   let age = today.getFullYear() - birthdate.getFullYear();
   const monthDifference = today.getMonth() - birthdate.getMonth();
   const dayDifference = today.getDate() - birthdate.getDate();
@@ -66,7 +68,7 @@ export function calculateAge(birthdateString: string): number {
 
 export function convertInchesToFeetAndInches(inches: number): string {
   if (inches < 0) {
-      throw new Error('Inches cannot be negative');
+    throw new Error("Inches cannot be negative");
   }
 
   const feet = Math.floor(inches / 12);
@@ -102,8 +104,11 @@ export function scoresList(game: Game) {
 export function convertTeamSeasonStatsFormat(teamSeasonStats: TeamSeasonStats): TeamSeasonStat[] {
   const result: TeamSeasonStat[] = [];
 
-  // Get all keys from awayTeam (could use homeTeam as well)
-  const keys = Object.keys(teamSeasonStats.awayTeam);
+  // Define the keys type to match TeamStats properties
+  type TeamStatsKeys = keyof TeamStats;
+
+  // Type assertion for the keys
+  const keys = Object.keys(teamSeasonStats.awayTeam) as TeamStatsKeys[];
 
   keys.forEach((key) => {
     result.push({
@@ -231,46 +236,52 @@ export function starsOfTheGame(game: Game) {
   let starsContent = `## ${playerTitleStrings.starsOfTheGame[languageKey]} \n`;
   starsContent += `| ${playerTitleStrings.photo[languageKey]} | ${playerTitleStrings.info[languageKey]} | ${playerTitleStrings.stats[languageKey]} | \n`;
   starsContent += `| :---: | --- | --- | \n`;
-  stars.forEach((star) => {
+  stars.forEach((star: PlayerOnIce) => {
+    const playerName = typeof star.name === "string" ? star.name : star.name.default;
     if (star.position === "G") {
-        starsContent += `| &nbsp;<img alt="${star.teamAbbrev}'s ${star.name.default} ${playerTitleStrings.stats[languageKey]}" src="${star.headshot}" width="90" height="90" /> | ${star.teamAbbrev} • ${star.name.default} • ${star.sweaterNo} • ${star.position} | GAA: ${star.goalsAgainstAverage ? star.goalsAgainstAverage.toFixed(2) : ''} SV%: ${star.savePctg ? (star.savePctg * 100).toFixed(1) : 'N/A'}% | \n`;
+      starsContent += `| &nbsp;<img alt="${star.teamAbbrev}'s ${playerName} ${playerTitleStrings.stats[languageKey]}" src="${star.headshot}" width="90" height="90" /> | ${star.teamAbbrev} • ${playerName} • ${star.sweaterNo} • ${star.position} | GAA: ${star.goalsAgainstAverage ? star.goalsAgainstAverage.toFixed(2) : ""} SV%: ${star.savePctg ? (star.savePctg * 100).toFixed(1) : "N/A"}% | \n`;
     } else {
-        starsContent += `| &nbsp;<img alt="${star.teamAbbrev}'s ${star.name.default} ${playerTitleStrings.stats[languageKey]}" src="${star.headshot}" width="90" height="90" /> | ${star.teamAbbrev} • ${star.name.default} • ${star.sweaterNo} • ${star.position} | G: ${star.goals} A: ${star.assists} P: ${star.points} | \n`;
+      starsContent += `| &nbsp;<img alt="${star.teamAbbrev}'s ${playerName} ${playerTitleStrings.stats[languageKey]}" src="${star.headshot}" width="90" height="90" /> | ${star.teamAbbrev} • ${playerName} • ${star.sweaterNo} • ${star.position} | G: ${star.goals} A: ${star.assists} P: ${star.points} | \n`;
     }
   });
 
   return starsContent;
 }
 
-export function last10Record(
-  gameSidebar: GamecenterRightRailResponse, 
-  awayTeam: TeamInfo,
-  homeTeam: TeamInfo) {
-  const record  = gameSidebar.last10Record;
+export function last10Record(gameSidebar: GamecenterRightRailResponse, awayTeam: TeamInfo, homeTeam: TeamInfo) {
+  const record = gameSidebar.last10Record;
 
   function gameOutcome(gameResult: string) {
     switch (gameResult) {
-        case 'W': return '✅';
-        case 'L': return '❌';
-        case 'OTL': return '⭕';
-        case 'SOL': return '⭕';
-        case 'OTW': return '✅';
-        case 'SOW': return '✅';
-        default: return '';
+      case "W":
+        return "✅";
+      case "L":
+        return "❌";
+      case "OTL":
+        return "⭕";
+      case "SOL":
+        return "⭕";
+      case "OTW":
+        return "✅";
+      case "SOW":
+        return "✅";
+      default:
+        return "";
     }
   }
 
-  let last10 = `## Last 10 Games`
-  + `\n ### ${(teamName(awayTeam, 0, false)).trim()}: ${record.awayTeam.record}, ${record.awayTeam.streakType}${record.awayTeam.streak} \n\n`;
+  let last10 =
+    `## Last 10 Games` +
+    `\n ### ${teamName(awayTeam, 0, false).trim()}: ${record.awayTeam.record}, ${record.awayTeam.streakType}${record.awayTeam.streak} \n\n`;
   record.awayTeam.pastGameResults.forEach((game) => {
     last10 += ` \`${game.opponentAbbrev} ${gameOutcome(game.gameResult)}\``;
   });
-  last10 += `\n`
-  last10 += `\n ### ${(teamName(homeTeam, 0, false)).trim()}: ${record.homeTeam.record}, ${record.homeTeam.streakType}${record.homeTeam.streak} \n\n`;
+  last10 += `\n`;
+  last10 += `\n ### ${teamName(homeTeam, 0, false).trim()}: ${record.homeTeam.record}, ${record.homeTeam.streakType}${record.homeTeam.streak} \n\n`;
   record.homeTeam.pastGameResults.forEach((game) => {
     last10 += ` \`${game.opponentAbbrev} ${gameOutcome(game.gameResult)}\``;
   });
-  
+
   return last10;
 }
 
@@ -440,4 +451,14 @@ export function getLanguageKey() {
   const language = preferences.language as "default" | "fr";
   const languageKey = language === "fr" ? "fr" : "default";
   return languageKey;
+}
+
+export function formatSeason(season: number): string {
+  const seasonStr = season.toString();
+  return `${seasonStr.slice(2, 4)}-${seasonStr.slice(6, 8)}`;
+}
+
+export function formatPercentage(value: number | undefined): string {
+  if (!value) return "-";
+  return `${(value * 100).toFixed(2)}%`;
 }

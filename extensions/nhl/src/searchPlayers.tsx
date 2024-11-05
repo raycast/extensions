@@ -14,19 +14,18 @@ interface Player {
 
 export default function Command(props: LaunchProps) {
   const { name } = props.arguments;
-  const playerType = props.arguments.playerType || 'true';
+  const playerType = props.arguments.playerType || "true";
 
-  const {isLoading, data} = useFetch(`https://search.d3.nhle.com/api/v1/search/player?culture=en-us&limit=100&q=${name}*&active=${playerType}`) as Player;
+  const { isLoading, data } = useFetch(
+    `https://search.d3.nhle.com/api/v1/search/player?culture=en-us&limit=100&q=${name}*&active=${playerType}`,
+  ) as Player;
 
-  if (isLoading) return <List isLoading={true} />
+  if (isLoading) return <List isLoading={true} />;
 
-  if (!data) return <Unresponsive />
+  if (!data) return <Unresponsive />;
 
   return (
-    <List
-      filtering={true}
-      navigationTitle={userInterface.searchPlayers[getLanguageKey()]}
-    >
+    <List filtering={true} navigationTitle={userInterface.searchPlayers[getLanguageKey()]}>
       {data.map((player) => (
         <PlayerListItem key={player.playerId} player={player} />
       ))}

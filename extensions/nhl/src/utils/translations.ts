@@ -18,6 +18,10 @@ export const userInterface = {
   biography: {
     default: "Biography",
     fr: "Biographie",
+  },
+  seasonLeague: {
+    default: "Season/League",
+    fr: "Saison/Ligue",
   }
 };
 
@@ -90,6 +94,10 @@ export const timeStrings = {
   lastPlayed: {
     default: "Last Played",
     fr: "Dernier Match",
+  },
+  last5Games: {
+    default: "Last 5 Games",
+    fr: "5 Derniers Matchs",
   }
 };
 
@@ -181,7 +189,7 @@ export const gameStrings = {
   playoffs: {
     default: "Playoffs",
     fr: "Séries Éliminatoires",
-  }
+  },
 };
 
 export const playerTitleStrings = {
@@ -272,5 +280,5 @@ export const playerTitleStrings = {
   career: {
     default: "Career",
     fr: "Carrière",
-  }
+  },
 };

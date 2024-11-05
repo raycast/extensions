@@ -1,154 +1,273 @@
 import React from "react";
 import { ActionPanel, Action, Detail } from "@raycast/api";
 import { getNHL } from "../utils/nhlData";
-import { PlayerDetailResponse, GoalieStats, SkaterStats, PlayerBio } from "../utils/types";
+import {
+  PlayerDetailResponse,
+  GoalieStats,
+  SkaterStats,
+  PlayerBio,
+  Last5Game,
+  Last5GameGoalie,
+  Last5GameSkater,
+  SeasonTotal,
+  GoalieSeasonTotal,
+  SkaterSeasonTotal,
+} from "../utils/types";
 import { userInterface } from "../utils/translations";
 import { convertInchesToFeetAndInches, getFlagEmoji, getLanguageKey, calculateAge } from "../utils/helpers";
-import { playerTitleStrings, gameStrings } from "../utils/translations";
+import { playerTitleStrings, gameStrings, gameActions, timeStrings } from "../utils/translations";
 import Unresponsive from "./unresponsive";
 import { useFetch } from "@raycast/utils";
 
 const lang = getLanguageKey();
 
 type Player = {
-	data: PlayerDetailResponse;
-	isLoading: boolean;
-}
+  data: PlayerDetailResponse;
+  isLoading: boolean;
+};
 
 type PlayerBioResponse = {
-	data: PlayerBio;
-	isLoading: boolean;
-}
+  data: PlayerBio;
+  isLoading: boolean;
+};
 
 // Type guard for GoalieStats
-function isGoalieStats(stats: GoalieStats | SkaterStats): stats is GoalieStats {
-  return 'goalsAgainstAvg' in stats;
+function isGoalieStats(stats: GoalieStats | SkaterStats | Last5Game | SeasonTotal): stats is GoalieStats {
+  return "savePctg" in stats || "wins" in stats;
 }
 
 // Type guard for SkaterStats
-function isSkaterStats(stats: GoalieStats | SkaterStats): stats is SkaterStats {
-  return 'assists' in stats;
+function isSkaterStats(stats: GoalieStats | SkaterStats | Last5Game | SeasonTotal): stats is SkaterStats {
+  return "assists" in stats;
 }
 
-const summaryStats = function(
-	player: PlayerDetailResponse, 
-	stats?: GoalieStats | SkaterStats | null,
-	title?: string,
+const summaryStats = function (
+  player: PlayerDetailResponse,
+  stats?: GoalieStats | SkaterStats | null,
+  title?: string,
 ): string {
-	if (!stats || !player || !title) return '';
+  if (!stats || !player || !title) return "";
 
-	let table = `${title} \n`;
+  let table = `${title} \n`;
 
-	if (player.position === 'G' && isGoalieStats(stats)) {
-			table += `| GP | W | L | SO | GAA | SV% |\n`;
-			table += `|---|---|---|---|---|---|\n`;
-			table += `| ${stats.gamesPlayed ?? 0} | ${stats.wins ?? 0} | ${stats.losses ?? 0} | ${stats.shutouts ?? 0} | ${
-					stats.goalsAgainstAvg ? stats.goalsAgainstAvg.toFixed(3) : '0.000'
-			} | ${
-					stats.savePctg ? (100 * stats.savePctg).toFixed(2) : '0.00'
-			}% |`;
-	}
-	else if (isSkaterStats(stats)) {
-			// Skater stats
-			table += `| GP | G | A | P | +/- |\n`;
-			table += `|---|---|---|---|---|\n`;
-			table += `| ${stats.gamesPlayed ?? '-'} | ${stats.goals ?? '-'} | ${stats.assists ?? '-'} | ${stats.points ?? '-'} | ${
-					stats.plusMinus ?? '-'
-			} |`;
-	}
+  if (player.position === "G" && isGoalieStats(stats)) {
+    table += `| GP | W | L | SO | GAA | SV% |\n`;
+    table += `|---|---|---|---|---|---|\n`;
+    table += `| ${stats.gamesPlayed ?? 0} | ${stats.wins ?? 0} | ${stats.losses ?? 0} | ${stats.shutouts ?? 0} | ${
+      stats.goalsAgainstAvg ? stats.goalsAgainstAvg.toFixed(3) : "0.000"
+    } | ${stats.savePctg ? (100 * stats.savePctg).toFixed(2) : "0.00"}% |`;
+  } else if (isSkaterStats(stats)) {
+    // Skater stats
+    table += `| GP | G | A | P | +/- |\n`;
+    table += `|---|---|---|---|---|\n`;
+    table += `| ${stats.gamesPlayed ?? "-"} | ${stats.goals ?? "-"} | ${stats.assists ?? "-"} | ${stats.points ?? "-"} | ${
+      stats.plusMinus ?? "-"
+    } |`;
+  }
 
-	return table;
-}
+  return table;
+};
+
+const careerStats = function (player: PlayerDetailResponse, title: string): string {
+  if (!player || !title) return "";
+
+  // loop through career stats to get some basic info about our players
+  const careerStats = player.seasonTotals;
+  let isSkater = true; // if they are a skater or a goalie
+  let isInNHL = false; // if they've had a year in professional hockey
+  for (const year of careerStats) {
+    if (isGoalieStats(year)) {
+      // if they have goalie stats, they are a goalie
+      isSkater = false;
+    }
+    if (year.leagueAbbrev === "NHL" || year.leagueAbbrev === "AHL") {
+      isInNHL = true; // if they have a year in the NHL or AHL, they are in the NHL
+    }
+  }
+
+  if (!isInNHL) return "";
+  let table = `## ${title} \n`;
+
+  if (isSkater) {
+    // Skater stats
+    table += `| ${userInterface.seasonLeague[lang]} | GP/G/A/P/+- | PIM/PPG/SGH | S/S%/FO% | \n`;
+    table += `|---|---|---|---|\n`;
+    const reversedStats = [...careerStats].reverse();
+    reversedStats
+      .filter((stat): stat is SkaterSeasonTotal => isSkaterStats(stat))
+      .map((stat) => {
+        table += `| ${stat.season.toString().slice(2, 4)}-${stat.season.toString().slice(6, 8)} ${stat.leagueAbbrev}, ${stat.teamName.default} | ${stat.gamesPlayed ?? "-"} / ${stat.goals ?? "-"} / ${stat.assists ?? "-"} / ${stat.points ?? "-"} / ${stat.plusMinus ?? "-"} | ${stat.pim ?? "-"} / ${stat.powerPlayGoals ?? "-"} / ${stat.shorthandedGoals ?? "-"} | ${stat.shots ?? "-"} / ${stat.shootingPctg ? (stat.shootingPctg * 100).toFixed(2) + "%" : "-"} / ${stat.faceoffWinningPctg ? (100 * stat.faceoffWinningPctg).toFixed(2) + "%" : "-"} |\n`;
+      });
+  } else if (!isSkater) {
+    // goalie stats
+    table += `| ${userInterface.seasonLeague[lang]} | GP/GS | W/L/T | SA/GAA/SV% | \n`;
+    table += `|---|---|---|---|\n`;
+    const reversedStats = [...careerStats].reverse();
+    reversedStats
+      .filter((stat): stat is GoalieSeasonTotal => isGoalieStats(stat))
+      .map((stat) => {
+        table += `| ${stat.season.toString().slice(2, 4)}-${stat.season.toString().slice(6, 8)} ${stat.leagueAbbrev}, ${stat.teamName.default} | ${stat.gamesPlayed ?? "-"} / ${stat.gamesStarted ?? "-"} | ${stat.wins ?? "-"} / ${stat.losses ?? "-"} / ${stat.ties ?? "-"} | ${stat.shotsAgainst ?? "-"} / ${stat.goalsAgainstAvg.toFixed(2) ?? "-"} / ${(100 * stat.savePctg).toFixed(2)}% |\n`;
+      });
+  }
+
+  return table;
+};
+
+const last5Games = function (stats: Last5Game[]): string {
+  if (!stats) return "";
+
+  function dateFormat(stat: Last5Game): string {
+    let date = `[${stat.gameDate} ${stat.homeRoadFlag === "H" ? "vs" : "@"} ${stat.opponentAbbrev}](https://www.nhl.com/gamecenter/${stat.gameId})`;
+
+    if ("decision" in stat) {
+      date += ` (${stat.decision})`;
+    }
+
+    return date;
+  }
+
+  let table = `## ${timeStrings.last5Games[lang]} \n`;
+  if (isGoalieStats(stats[0])) {
+    const goalieStats = stats as Last5GameGoalie[];
+    table += "| Date | SA/GA | SV%| TOI | \n";
+    table += "|---|---|---|---|\n";
+    goalieStats.map((stat) => {
+      table += `| ${dateFormat(stat)} | ${stat.shotsAgainst} / ${stat.goalsAgainst} | ${stat.savePctg ? (100 * stat.savePctg).toFixed(2) : "0.00"}% | ${stat.toi} |\n`;
+    });
+  } else if (isSkaterStats(stats[0])) {
+    const skateStats = stats as Last5GameSkater[];
+    table += "| Date | G/A/P/+- | PIM/PPG/SGH | SHIFT/TOI | \n";
+    table += "|---|---|---|---|\n";
+    skateStats.map((stat) => {
+      table += `| ${dateFormat(stat)} | ${stat.goals} / ${stat.assists} / ${stat.points} / ${stat.plusMinus} | ${stat.pim} / ${stat.powerPlayGoals} / ${stat.shorthandedGoals} | ${stat.shifts} / ${stat.toi} |\n`;
+    });
+  }
+
+  return table;
+};
 
 export default function PlayerDetail({ id }: { id: number }) {
-	const playerData = getNHL(`player/${id}/landing`) as Player;
-	const playerBio = useFetch(`https://forge-dapi.d3.nhle.com/v2/content/en-us/players?tags.slug=playerid-${id}`) as PlayerBioResponse;
+  const playerData = getNHL(`player/${id}/landing`) as Player;
+  const playerBio = useFetch(
+    `https://forge-dapi.d3.nhle.com/v2/content/en-us/players?tags.slug=playerid-${id}`,
+  ) as PlayerBioResponse;
 
-	if (playerData.isLoading || playerBio.isLoading) return <Detail isLoading={true} markdown={userInterface.loading[getLanguageKey()]}/>;
+  if (playerData.isLoading || playerBio.isLoading)
+    return <Detail isLoading={true} markdown={userInterface.loading[getLanguageKey()]} />;
 
-	if (!playerData.data && !playerBio.data) return <Unresponsive />;
+  if (!playerData.data && !playerBio.data) return <Unresponsive />;
 
-	const player = playerData.data;
-	const heroImage = player?.heroImage ? `![](${player.heroImage})` : '';
+  const player = playerData.data;
+  const heroImage = player?.heroImage ? `![](${player.heroImage})` : "";
 
-	let playerMarkdown = `# ${player.firstName?.default} ${player.lastName?.default} ${player.sweaterNumber ? `#${player.sweaterNumber}` : ''}, ${player.position} <img src="${player.headshot}" width="50" height="50" /> ${player.inHHOF ? '<img src="https://assets.nhle.com/badges/hockey_hof.svg" width="50" height="50" />' : ''} ${player.inTop100AllTime ? '<img src="https://assets.nhle.com/badges/100_greatest_players.svg" width="50" height="50">' : ''} \n --- \n ${heroImage} \n `;
-	
-	// Last season
-	if( player.featuredStats?.regularSeason?.subSeason) {
-		playerMarkdown += summaryStats(player, player.featuredStats?.regularSeason?.subSeason, ((player.featuredStats.season).toString().slice(-4) + ' ' + gameStrings.seasonStats[lang])) + '\n\n';
-	}
+  let playerMarkdown = `# ${player.firstName?.default} ${player.lastName?.default} ${player.sweaterNumber ? `#${player.sweaterNumber}` : ""}, ${player.position} <img src="${player.headshot}" width="50" height="50" /> ${player.inHHOF ? '<img src="https://assets.nhle.com/badges/hockey_hof.svg" width="50" height="50" />' : ""} ${player.inTop100AllTime ? '<img src="https://assets.nhle.com/badges/100_greatest_players.svg" width="50" height="50">' : ""} \n --- \n ${heroImage} \n `;
 
-	// Career
-	playerMarkdown += summaryStats(player, player.featuredStats?.regularSeason?.career, playerTitleStrings.career[lang]) + '\n\n';
+  // Last season
+  if (player.featuredStats?.regularSeason?.subSeason) {
+    playerMarkdown +=
+      summaryStats(
+        player,
+        player.featuredStats?.regularSeason?.subSeason,
+        player.featuredStats.season.toString().slice(-4) + " " + gameStrings.seasonStats[lang],
+      ) + "\n\n";
+  }
 
-	// Last playoff appearance
-	if( player.featuredStats?.regularSeason?.subSeason) {
-		playerMarkdown += summaryStats(player, player.featuredStats?.playoffs?.subSeason, ((player.featuredStats.season).toString().slice(-4) + ' ' + gameStrings.playoffs[lang])) + '\n\n';
-	}
+  // Career summary
+  playerMarkdown +=
+    summaryStats(player, player.featuredStats?.regularSeason?.career, playerTitleStrings.career[lang]) + "\n\n";
 
-	// Career Playoffs
-	playerMarkdown += summaryStats(player, player.featuredStats?.playoffs?.career, (playerTitleStrings.career[lang] + ' ' + gameStrings.playoffs[lang])) + '\n\n';
+  // Last playoff appearance
+  if (player.featuredStats?.regularSeason?.subSeason) {
+    playerMarkdown +=
+      summaryStats(
+        player,
+        player.featuredStats?.playoffs?.subSeason,
+        player.featuredStats.season.toString().slice(-4) + " " + gameStrings.playoffs[lang],
+      ) + "\n\n";
+  }
 
-	// Player Bio
-	if(playerBio.data.items[0] && playerBio.data.items[0].fields.biography) {
-		playerMarkdown += `## ${userInterface.biography[lang]} \n ${playerBio.data.items[0].fields.biography} \n\n`;
-	}
+  // Career Playoffs
+  playerMarkdown +=
+    summaryStats(
+      player,
+      player.featuredStats?.playoffs?.career,
+      playerTitleStrings.career[lang] + " " + gameStrings.playoffs[lang],
+    ) + "\n\n";
 
+  // last 5 games
+  playerMarkdown += last5Games(player.last5Games) + "\n\n";
 
-	const birthday = function(player: PlayerDetailResponse): string {
-		let birthday = '';
-		birthday += player.birthDate ? `${player.birthDate}` : '';
+  // Career Stats
+  playerMarkdown += careerStats(player, playerTitleStrings.career[lang]) + "\n\n";
 
-		if (player.isActive) {
-			birthday += ` (${playerTitleStrings.age[lang]}: ${calculateAge(player.birthDate)})`;
-		}
+  // Player Bio
+  if (playerBio.data.items[0] && playerBio.data.items[0].fields.biography) {
+    playerMarkdown += `## ${userInterface.biography[lang]} \n ${playerBio.data.items[0].fields.biography} \n\n`;
+  }
 
-		return birthday
-	}
+  const birthday = function (player: PlayerDetailResponse): string {
+    let birthday = "";
+    birthday += player.birthDate ? `${player.birthDate}` : "";
 
-	const shootsOrCatches = (player: PlayerDetailResponse): string => {
-		if (!player.shootsCatches) return '';
-	
-		const key = player.position === 'G' ? 'catches' : 'shoots';
-		return playerTitleStrings[key][lang];
-	};
+    if (player.isActive) {
+      birthday += ` (${playerTitleStrings.age[lang]}: ${calculateAge(player.birthDate)})`;
+    }
 
-	const draftInfo = function(player: PlayerDetailResponse): string {
-		const draft = player?.draftDetails;
+    return birthday;
+  };
 
-		if(!draft) return '';
+  const shootsOrCatches = (player: PlayerDetailResponse): string => {
+    if (!player.shootsCatches) return "";
 
-		return `${draft.year}, ${draft.teamAbbrev} (${draft.overallPick} ${playerTitleStrings.overall[lang]}), ${playerTitleStrings.round[lang]}${draft.round}, ${playerTitleStrings.pick[lang]}${draft.pickInRound}`;
-	}
+    const key = player.position === "G" ? "catches" : "shoots";
+    return playerTitleStrings[key][lang];
+  };
+
+  const draftInfo = function (player: PlayerDetailResponse): string {
+    const draft = player?.draftDetails;
+
+    if (!draft) return "";
+
+    return `${draft.year}, ${draft.teamAbbrev} (${draft.overallPick} ${playerTitleStrings.overall[lang]}), ${playerTitleStrings.round[lang]}${draft.round}, ${playerTitleStrings.pick[lang]}${draft.pickInRound}`;
+  };
 
   return (
     <Detail
-			actions={
-				<ActionPanel>
-					<Action.OpenInBrowser url={`https://www.nhl.com/${(player.teamCommonName.default)?.toLowerCase()}/player/${player.firstName.default}-${player.lastName.default}-${player.playerId}`} />
-				</ActionPanel>
-			}
-			metadata={
-				<Detail.Metadata>
-					<Detail.Metadata.Label title={playerTitleStrings.birthplace[lang]} text={`${player.birthCity.default ? `${player.birthCity.default},` :''} ${player.birthCountry ? `${player.birthCountry} ${getFlagEmoji(player.birthCountry)}`: ''}`}/>
-					{player.heightInInches && 
-						<Detail.Metadata.Label title={playerTitleStrings.height[lang]} text={convertInchesToFeetAndInches(player.heightInInches)}/> 
-					}
-					{player.weightInPounds && 
-						<Detail.Metadata.Label title={playerTitleStrings.weight[lang]} text={`${player.weightInPounds} lb`}/>
-					}
-					{player.birthDate &&
-						<Detail.Metadata.Label title={playerTitleStrings.birthdate[lang]} text={birthday(player)} />
-					}
-					{player.shootsCatches && 
-						<Detail.Metadata.Label title={shootsOrCatches(player)} text={player.shootsCatches} />
-					}
-					{player.draftDetails && 
-						<Detail.Metadata.Label title={playerTitleStrings.draft[lang]} text={draftInfo(player)} />
-					}
-				</Detail.Metadata>
-			}
-			markdown={playerMarkdown} 
-		/>
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser
+            title={gameActions.gameCenter[lang]}
+            url={`https://www.nhl.com/${player.teamCommonName.default?.toLowerCase()}/player/${player.firstName.default}-${player.lastName.default}-${player.playerId}`}
+          />
+        </ActionPanel>
+      }
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label
+            title={playerTitleStrings.birthplace[lang]}
+            text={`${player.birthCity.default ? `${player.birthCity.default},` : ""} ${player.birthCountry ? `${player.birthCountry} ${getFlagEmoji(player.birthCountry)}` : ""}`}
+          />
+          {player.heightInInches && (
+            <Detail.Metadata.Label
+              title={playerTitleStrings.height[lang]}
+              text={convertInchesToFeetAndInches(player.heightInInches)}
+            />
+          )}
+          {player.weightInPounds && (
+            <Detail.Metadata.Label title={playerTitleStrings.weight[lang]} text={`${player.weightInPounds} lb`} />
+          )}
+          {player.birthDate && (
+            <Detail.Metadata.Label title={playerTitleStrings.birthdate[lang]} text={birthday(player)} />
+          )}
+          {player.shootsCatches && (
+            <Detail.Metadata.Label title={shootsOrCatches(player)} text={player.shootsCatches} />
+          )}
+          {player.draftDetails && (
+            <Detail.Metadata.Label title={playerTitleStrings.draft[lang]} text={draftInfo(player)} />
+          )}
+        </Detail.Metadata>
+      }
+      markdown={playerMarkdown}
+    />
   );
 }
