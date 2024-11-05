@@ -47,7 +47,7 @@
     <th>Output</th>
   </tr>
   <tr>
-    <td><img src="./assets/webpage-to-markdown-2.png" alt="Input Example" width="400"/></td>
-    <td><img src="./assets/webpage-to-markdown-1.png" alt="Output Example" width="400"/></td>
+    <td><img src="./metadata/webpage-to-markdown-2.png" alt="Input Example" width="400"/></td>
+    <td><img src="./metadata/webpage-to-markdown-1.png" alt="Output Example" width="400"/></td>
   </tr>
 </table>

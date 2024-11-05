@@ -18,7 +18,6 @@ export default function Command(props: { arguments: Arguments }) {
         setMarkdown("# Converting webpage to Markdown...\n\n> Loading content from: " + props.arguments.url);
 
         const response = await fetchJinaMarkdown(props.arguments.url, preferences);
-
         const { markdown: processedMarkdown, metadata: newMetadata } = processMarkdownContent(
           response.data.content,
           response.data.title,
@@ -41,7 +40,19 @@ export default function Command(props: { arguments: Arguments }) {
         setMarkdown(finalMarkdown);
       } catch (error) {
         console.error("Error converting URL:", error);
-        setMarkdown(`# Error\n\n${error}`);
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        setMarkdown(
+          [
+            "# Unable to Convert Webpage",
+            "",
+            errorMessage,
+            "",
+            "Please make sure:",
+            "- The URL starts with http:// or https://",
+            "- The webpage is publicly accessible",
+            "- The URL points to a valid webpage",
+          ].join("\n"),
+        );
       } finally {
         setIsLoading(false);
       }
