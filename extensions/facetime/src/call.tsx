@@ -130,7 +130,7 @@ export default function Command() {
         <Form.Dropdown.Item
           value={searchText}
           title={`Call ${searchText}`}
-          icon={isPhoneNumber(searchText) ? Icon.Phone : Icon.Envelope}
+          icon={searchText.includes('@') ? Icon.Envelope : Icon.Phone}
         />
       </Form.Dropdown.Section>
     ) : undefined;
@@ -158,12 +158,6 @@ function getFullName(contact: Contact) {
 
 function count<T>(array: T[], predicate: (item: T) => boolean) {
   return array.reduce((count, item) => count + (predicate(item) ? 1 : 0), 0);
-}
-
-const phoneNumberRegex = /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/;
-
-function isPhoneNumber(value: string) {
-  return phoneNumberRegex.test(value);
 }
 
 function ContactChoices({ contact }: { contact: Contact }) {
