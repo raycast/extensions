@@ -130,7 +130,7 @@ export default function Command() {
         <Form.Dropdown.Item
           value={searchText}
           title={`Call ${searchText}`}
-          icon={searchText.includes('@') ? Icon.Envelope : Icon.Phone}
+          icon={!searchText.includes("@") && !/[^\d-+ ]/.test(searchText) ? Icon.Phone : Icon.Envelope}
         />
       </Form.Dropdown.Section>
     ) : undefined;
