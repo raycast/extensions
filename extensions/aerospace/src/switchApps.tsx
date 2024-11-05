@@ -44,7 +44,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Switch
     return [...new Set(workspaces)];
   }, [windows]);
 
-  console.log("Unique workspaces:", uniqueWorkspaces);
 
   const navigationTitle =
     workspace === "focused" ? `Windows in Workspace ${windows[0]?.workspace || ""}` : "Windows in All Workspaces";
