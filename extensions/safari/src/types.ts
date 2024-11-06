@@ -47,11 +47,13 @@ export interface ReadingListBookmark {
 }
 
 // Tabs
-
-export interface Tab {
+export interface LooseTab {
   uuid: string;
   title: string;
   url: string;
+}
+
+export interface Tab extends LooseTab {
   is_local: boolean;
 }
 

@@ -1,5 +1,12 @@
 # Safari Changelog
 
+## [Update] - 2024-11-06
+
+- feature: Add `pinyin` support for searching tab
+- improve:
+  - add cache for formatted string
+  - reduce re-render times for `CloudTabs`
+
 ## [Improve] 2024-09-27
 
 - Adds a preference to select between different fallback search types for the `Search Tabs` command.
