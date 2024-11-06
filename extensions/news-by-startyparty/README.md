@@ -1,6 +1,15 @@
-# startyparty news
+# News by StartParty
 
-Displays news articles from [startyparty.dev](https://startyparty.dev). It's updated every five or so minutes.
+Displays news articles from [startyparty.dev](https://startyparty.dev). Covers `tech`, `web dev`, `data science`, `engineering`, `science` and `web design`. It's updated every five or so minutes.
 
-![image](https://github.com/user-attachments/assets/d128a836-5b81-4bfa-b97c-8f8663147cc2)
-![image](https://github.com/user-attachments/assets/e882abe3-7677-43d5-a1ed-5517b2a91ad7)
+![Metadata-1](https://github.com/user-attachments/assets/6ae663ad-519d-43da-ab7e-52666727c190)
+![Metadata-2](https://github.com/user-attachments/assets/6f11d401-6d7d-41c6-82f5-e7007371a0a5)
+![Metadata-3](https://github.com/user-attachments/assets/fdd01293-627b-4849-a2a6-5c73821705db)
+
+## Copying
+
+Hit `⌘` + `C` to copy the current selection's URL to your clipboard.
+
+## Opening
+
+Hit `return` to open the current selection's URL in your default browser.
