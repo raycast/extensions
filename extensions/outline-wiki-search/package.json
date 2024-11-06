@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "outline-wiki-search",
+  "title": "Outline Wiki Search",
+  "description": "Quickly search and access your Outline wiki documents directly from Raycast",
+  "icon": "extension-icon.png",
+  "author": "DavidAtOkam",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-outline",
+      "title": "Search Outline",
+      "description": "Search for documents in Outline Wiki",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "outlineUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Outline URL",
+      "description": "The URL of your Outline Wiki instance",
+      "placeholder": "https://your-outline-instance.com"
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your Outline API token",
+      "placeholder": "Enter your API token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.82.5",
+    "@raycast/utils": "^1.16.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
