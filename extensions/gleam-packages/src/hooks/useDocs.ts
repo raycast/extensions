@@ -44,7 +44,7 @@ function moduleDocs(name: string, module: ModuleInterface, docURL: string): Docs
         name,
         type: "Module",
         documentation: module.documentation.join("\n"),
-        url: `${url}${name}.html`,
+        url: `${url}`,
       },
     ],
     types: Object.entries(module.types).map(([n, t]) => ({
