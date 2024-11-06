@@ -3,8 +3,7 @@ import { WorkflowDefinition, ICON_BY_TYPE, getWorkflowDefinition } from "./workf
 import { useEffect, useRef, useState } from "react";
 import WorkflowEngine, { StepState, Progress } from "./workflow-engine";
 
-
-const STATUS_CONFIG: Record<StepState, { icon: Icon, color: Color, text: string}> = {
+const STATUS_CONFIG: Record<StepState, { icon: Icon; color: Color; text: string }> = {
   WAITING: {
     icon: Icon.Circle,
     color: Color.Blue,
@@ -25,15 +24,9 @@ const STATUS_CONFIG: Record<StepState, { icon: Icon, color: Color, text: string}
     color: Color.Red,
     text: "Failed",
   },
-} as const ;
+} as const;
 
-function WorkflowProgress({
-  workflow,
-  progress,
-}: {
-  workflow: WorkflowDefinition;
-  progress: Progress;
-}) {
+function WorkflowProgress({ workflow, progress }: { workflow: WorkflowDefinition; progress: Progress }) {
   const completedSteps = progress.filter((s) => s.state === "COMPLETED").length;
   const runningStepIndex = progress.findIndex((s) => s.state === "RUNNING");
 
@@ -91,8 +84,8 @@ export default function Command(props: { arguments: { uuid: string } }) {
     let workflowEngine: WorkflowEngine | undefined = undefined;
 
     const onProgress = (progress: Progress) => {
-      setProgress([ ...progress ]);
-    }
+      setProgress([...progress]);
+    };
 
     const onComplete = async () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -102,7 +95,7 @@ export default function Command(props: { arguments: { uuid: string } }) {
 
     async function initialize() {
       console.log(isInitialized.current);
-      if(isInitialized.current) return;
+      if (isInitialized.current) return;
 
       const uuid = props.arguments.uuid;
       const def = await getWorkflowDefinition(uuid);
@@ -112,7 +105,7 @@ export default function Command(props: { arguments: { uuid: string } }) {
 
         workflowEngine = new WorkflowEngine(def);
 
-        workflowEngine.on("progress", onProgress)
+        workflowEngine.on("progress", onProgress);
         workflowEngine.on("complete", onComplete);
         workflowEngine.start();
       }
@@ -123,10 +116,10 @@ export default function Command(props: { arguments: { uuid: string } }) {
     initialize();
     isInitialized.current = true;
 
-    return  () => {
+    return () => {
       workflowEngine?.removeListener("progress", onProgress);
       workflowEngine?.removeListener("complete", onComplete);
-    }
+    };
   }, [props.arguments.uuid]);
 
   if (isLoading) return <List isLoading={true} />;

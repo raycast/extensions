@@ -55,7 +55,7 @@ async function getPackageJsonFiles() {
 export function useExtensions() {
   const [installedExtensions, setInstalledExtensions] = useState<ExtensionMetadata[]>([]);
 
-  const { isLoading, data, error } = usePromise(async () => {
+  const { isLoading } = usePromise(async () => {
     const files = await getPackageJsonFiles();
     let result = await Promise.all(
       files.map(async (file) => {

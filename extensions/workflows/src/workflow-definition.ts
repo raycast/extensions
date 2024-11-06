@@ -45,13 +45,9 @@ export async function getWorkflowDefinitions(): Promise<WorkflowDefinition[]> {
             const content = await fs.readFile(path.join(definitionsPath, file), "utf-8");
             return readWorkflowDefinition(content);
           }),
-      )
+      ),
     )
-    .then(results => 
-      results
-        .filter(res => res.status === "fulfilled")
-        .map(res => res.value)
-    )
+    .then((results) => results.filter((res) => res.status === "fulfilled").map((res) => res.value))
     .catch((error) => {
       console.error("Error reading workflow definitions:", error);
       return [];
@@ -77,7 +73,7 @@ export function readWorkflowDefinition(json: string): WorkflowDefinition {
   // Validate that all steps have required properties
   for (const step of parsed.steps) {
     step.type ||= STEP_TYPES.EMPTY;
-    step.title ||= "No title"
+    step.title ||= "No title";
 
     // Validate step type
     if (!Object.values(STEP_TYPES).includes(step.type)) {
@@ -185,7 +181,7 @@ export type StepDefinition =
   | OpenStepDefinition
   | OpenDeeplinkStepDefinition
   | AskAiDefinition
-  | RunAppleScript 
+  | RunAppleScript
   | LaunchCommandDefinition;
 
 /* --- Icons --------------------------- */

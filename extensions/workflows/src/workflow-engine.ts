@@ -1,19 +1,18 @@
 import { Clipboard, launchCommand, AI, open, getSelectedText, BrowserExtension } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { StepDefinition, STEP_TYPES, WorkflowDefinition } from "./workflow-definition";
-import {EventEmitterAsyncResource} from "node:events";
-
+import { EventEmitterAsyncResource } from "node:events";
 
 /**
  * @description will replace the `{Dynamic Placeholders}`
  */
 export async function interpolate(toInterpolate: string, escapeForJson: boolean = false) {
-  const escape = (str: string = "") => escapeForJson ? JSON.stringify(str).slice(1, -1) : str;
+  const escape = (str: string = "") => (escapeForJson ? JSON.stringify(str).slice(1, -1) : str);
 
   let result = toInterpolate;
 
   /**
-   * @description Will check if `toInterpolate` has the `searchValue`, 
+   * @description Will check if `toInterpolate` has the `searchValue`,
    * if so it replaces that with the outcome of the `resolver`.
    */
   async function doInterpolate(searchValue: string, resolver: () => Promise<string | undefined>) {
@@ -29,7 +28,7 @@ export async function interpolate(toInterpolate: string, escapeForJson: boolean 
   await doInterpolate("{browser-content-html}", () => BrowserExtension.getContent({ format: "html" }));
   await doInterpolate("{browser-content-markdown}", () => BrowserExtension.getContent({ format: "markdown" }));
   await doInterpolate("{browser-content-text}", () => BrowserExtension.getContent({ format: "text" }));
-  
+
   return result;
 }
 
@@ -64,9 +63,7 @@ export async function runStep(step: StepDefinition): Promise<void> {
     }
 
     case STEP_TYPES.LAUNCH_COMMAND: {
-      const stepArgs = JSON.parse(
-        await interpolate(JSON.stringify(step.arguments), true)
-      );
+      const stepArgs = JSON.parse(await interpolate(JSON.stringify(step.arguments), true));
 
       await launchCommand({
         ownerOrAuthorName: step.ownerOrAuthorName,
@@ -82,7 +79,7 @@ export async function runStep(step: StepDefinition): Promise<void> {
 }
 
 export type StepState = "WAITING" | "RUNNING" | "COMPLETED" | "FAILED";
-export type StepWithState = { step: StepDefinition, state: StepState, error?: Error};
+export type StepWithState = { step: StepDefinition; state: StepState; error?: Error };
 export type Progress = StepWithState[];
 
 export default class WorkflowEngine extends EventEmitterAsyncResource {
@@ -91,7 +88,7 @@ export default class WorkflowEngine extends EventEmitterAsyncResource {
   constructor(private workflow: WorkflowDefinition) {
     super();
 
-    this.progress = workflow.steps.map(step => ({ step, state: "WAITING" }));
+    this.progress = workflow.steps.map((step) => ({ step, state: "WAITING" }));
   }
 
   async start() {
@@ -106,10 +103,10 @@ export default class WorkflowEngine extends EventEmitterAsyncResource {
         await runStep(step);
         this.progress[i].state = "COMPLETED";
         this.emit("progress", this.progress, step, i);
-      } catch(error) {
+      } catch (error) {
         console.error(error);
         this.progress[i].state = "FAILED";
-        this.progress[i].error = new Error("Something went wrong.")
+        this.progress[i].error = new Error("Something went wrong.");
         this.emit("progress", this.progress, step, i);
       }
 

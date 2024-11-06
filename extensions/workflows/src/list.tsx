@@ -139,7 +139,7 @@ export default function Command() {
               <Action
                 title="Run Workflow (with Progress)"
                 icon={Icon.Play}
-                shortcut={{ key: "enter", modifiers: [ "shift", "cmd" ]}}
+                shortcut={{ key: "enter", modifiers: ["shift", "cmd"] }}
                 onAction={() => {
                   launchCommand({
                     name: "run-visual",
@@ -186,7 +186,7 @@ export default function Command() {
                   link: `raycast://extensions/Remco/workflows/run?arguments=%7B%22uuid%22%3A%22${item.uuid}%22%7D`,
                   application: "raycast",
                   name: `Run ${item.title}`,
-                  icon: item.icon in (Icon as any) ? Icon[item.icon as keyof typeof Icon] : Icon.Play,
+                  icon: item.icon in (Icon as any) ? Icon[item.icon as keyof typeof Icon] : Icon.Play, // eslint-disable-line @typescript-eslint/no-explicit-any
                 }}
               />
               <Action.CreateQuicklink
@@ -194,7 +194,7 @@ export default function Command() {
                   link: `raycast://extensions/Remco/workflows/run-visual?arguments=%7B%22uuid%22%3A%22${item.uuid}%22%7D`,
                   application: "raycast",
                   name: `Run ${item.title}`,
-                  icon: item.icon in (Icon as any) ? Icon[item.icon as keyof typeof Icon] : Icon.Play,
+                  icon: item.icon in (Icon as any) ? Icon[item.icon as keyof typeof Icon] : Icon.Play, // eslint-disable-line @typescript-eslint/no-explicit-any
                 }}
               />
               <Action

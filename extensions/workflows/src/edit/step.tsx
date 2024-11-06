@@ -12,8 +12,7 @@ import {
 
 import { useExtensions } from "../search-manifest";
 
-const explainPlaceholders =
-`
+const explainPlaceholders = `
 Has support for Dynamic Placeholders:
  - {clipboard}
  - {selected-text}
@@ -87,19 +86,21 @@ export default function EditStep({
       <Form.TextField title="Title" {...itemProps.title} />
 
       <Form.Dropdown title="Type" {...itemProps.type}>
-        {
-          Object.entries(STEP_TYPES)
-            .filter(([k]) => k !== STEP_TYPES.EMPTY)
-            .map(([key, value]) => (
-              <Form.Dropdown.Item key={key} value={value} title={TITLE_BY_TYPE[value]} icon={ICON_BY_TYPE[value]} />
-            ))
-        }
+        {Object.entries(STEP_TYPES)
+          .filter(([k]) => k !== STEP_TYPES.EMPTY)
+          .map(([key, value]) => (
+            <Form.Dropdown.Item key={key} value={value} title={TITLE_BY_TYPE[value]} icon={ICON_BY_TYPE[value]} />
+          ))}
       </Form.Dropdown>
 
       <Form.Separator />
 
-      {["ASK_AI", "APPLE_SCRIPT"].includes(values.type) && <Form.TextArea title="Argument" {...itemProps.argument} info={explainPlaceholders}/>}
-      {["OPEN", "OPEN_DEEPLINK"].includes(values.type) && <Form.TextField title="Argument" {...itemProps.argument} info={explainPlaceholders}/>}
+      {["ASK_AI", "APPLE_SCRIPT"].includes(values.type) && (
+        <Form.TextArea title="Argument" {...itemProps.argument} info={explainPlaceholders} />
+      )}
+      {["OPEN", "OPEN_DEEPLINK"].includes(values.type) && (
+        <Form.TextField title="Argument" {...itemProps.argument} info={explainPlaceholders} />
+      )}
 
       {values.type === "ASK_AI" && <Form.Checkbox label="Write to Clipboard" {...itemProps.writeToClipboard} />}
 
