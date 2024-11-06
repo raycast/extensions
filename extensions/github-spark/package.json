@@ -14,15 +14,7 @@
       "name": "create-new-spark",
       "title": "Create New Spark",
       "description": "Create a new micro app with GitHub Spark",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "topic",
-          "type": "text",
-          "placeholder": "Describe your idea...",
-          "required": true
-        }
-      ]
+      "mode": "view"
     }
   ],
   "dependencies": {
