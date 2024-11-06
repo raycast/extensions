@@ -42,7 +42,7 @@ const providers = [
 
 export default function Command() {
   const [selectedModelId, setSelectedModelId] = useState<string>("sonnet-3.5");
-  const [descriptionError, setDescriptionError] = useState<string | null>(null);
+  const [descriptionError, setDescriptionError] = useState<string | undefined>();
 
   async function handleSubmit(values: { description: string; model: string; generateVariants?: boolean }) {
     if (!values.description) {
@@ -60,7 +60,7 @@ export default function Command() {
 
   function dropDescriptionErrorIfNeeded() {
     if (descriptionError && descriptionError.length > 0) {
-      setDescriptionError(null);
+      setDescriptionError(undefined);
     }
   }
 
