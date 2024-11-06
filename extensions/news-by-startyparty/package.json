@@ -1,0 +1,40 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "news-by-startyparty",
+  "title": "News By StartyParty",
+  "description": "Read the latest tech, science, design and web dev stories from startyparty.dev.",
+  "icon": "icon.png",
+  "author": "arbitrarily",
+  "contributors": [],
+  "categories": [
+    "News",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "news",
+      "title": "News By StartyParty",
+      "description": "Read the latest tech, science, design and web dev stories from startyparty.dev.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.47.3",
+    "@raycast/utils": "^1.4.16"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "5.15.0",
+    "@typescript-eslint/parser": "5.15.0",
+    "eslint": "8.11.0",
+    "eslint-config-prettier": "8.5.0",
+    "eslint-plugin-react-hooks": "4.3.0",
+    "react-devtools": "^4.24.1",
+    "typescript": "4.6.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}
