@@ -1,5 +1,10 @@
 # News By StartyParty Changelog
 
+## [Added metadata] - 2024-11-06
+
+- Added metadata images to the readme
+- update changelog and readme
+
 ## [Added timestamps] - 2024-11-06
 
 - Added timestamps to the news
