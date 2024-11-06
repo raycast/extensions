@@ -1,10 +1,10 @@
 # Jira Changelog
 
-## Fixed issue with child issues not updating ui - 2024-11-4
+## [Fixed issue with child issues not updating UI] - 2024-11-04
 
 - Resolved an issue where the child’s status updates were not reflected in the user interface upon changing their status.
 
-## Added Child Issues support - 2024-11-2
+## [Added Child Issues support] - 2024-11-02
 
 - Implemented the ability to view and manage child-related issues within the issue detail view, as well as a new component that provides a comprehensive list of all current issue child issues.
 
