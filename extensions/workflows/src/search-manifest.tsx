@@ -20,7 +20,16 @@ export type ExtensionMetadata = {
   link: string;
   raw: string;
   json: object;
-  commands: object[];
+  commands: {
+    title: string;
+    name: string;
+    arguments: {
+      required: boolean;
+      name: string;
+      placeholder: string;
+      description: string;
+    }[];
+  }[];
 };
 
 import fs from "fs/promises";

@@ -126,10 +126,12 @@ export const STEP_TYPES = {
   ASK_AI: "ASK_AI",
 } as const;
 
-export type StepTypes = (typeof STEP_TYPES)[keyof typeof STEP_TYPES];
+export type StepType = keyof typeof STEP_TYPES;
+
+export const isStepType = (value: string): value is StepType => value in STEP_TYPES;
 
 type SharedStepDefinition = {
-  type: StepTypes;
+  type: StepType;
   title: string;
 };
 
@@ -193,7 +195,7 @@ export const ICON_BY_TYPE = {
   ASK_AI: Icon.Stars,
   LAUNCH_COMMAND: Icon.Play,
   APPLE_SCRIPT: Icon.CodeBlock,
-} as Record<StepTypes, string>;
+} as Record<StepType, string>;
 
 export const TITLE_BY_TYPE = {
   EMPTY: "Empty",
@@ -202,4 +204,4 @@ export const TITLE_BY_TYPE = {
   ASK_AI: "Ask AI",
   LAUNCH_COMMAND: "Launch Raycast Command",
   APPLE_SCRIPT: "Run Apple Script",
-} as Record<StepTypes, string>;
+} as Record<StepType, string>;

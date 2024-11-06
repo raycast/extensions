@@ -33,17 +33,16 @@ export default function EditStep({
 
   const { pop } = useNavigation();
 
-  const { handleSubmit, itemProps, values } = useForm<StepDefinition & { type: string }>({
+  const { handleSubmit, itemProps, values } = useForm<StepDefinition>({
     initialValues: step,
     onSubmit: (values) => {
       if (values.type === "LAUNCH_COMMAND") {
-        // Merge the command arguments with the form values
         onSubmit({
           ...values,
           arguments: commandArguments,
         } as LaunchCommandDefinition);
       } else {
-        onSubmit(values);
+        if (values.type in STEP_TYPES) onSubmit(values);
       }
 
       showToast({
@@ -85,26 +84,42 @@ export default function EditStep({
     >
       <Form.TextField title="Title" {...itemProps.title} />
 
-      <Form.Dropdown title="Type" {...itemProps.type}>
+      {/*
+       * Yeah so this is needed because Dropdown always returns a string,
+       * we know it is a StepType, because thats all thats in its children.
+       * It is not possible to create typeguards because onBlur and onFocus use a declared
+       * FormEvent-type that is not exported so we cannot use that as handler-type.
+       */}
+      <Form.Dropdown
+        title="Type"
+        {...itemProps.type}
+        onChange={itemProps.type.onChange as Parameters<typeof Form.Dropdown>[0]["onChange"]}
+        onBlur={itemProps.type.onBlur as Parameters<typeof Form.Dropdown>[0]["onBlur"]}
+        onFocus={itemProps.type.onFocus as Parameters<typeof Form.Dropdown>[0]["onFocus"]}
+      >
         {Object.entries(STEP_TYPES)
           .filter(([k]) => k !== STEP_TYPES.EMPTY)
-          .map(([key, value]) => (
-            <Form.Dropdown.Item key={key} value={value} title={TITLE_BY_TYPE[value]} icon={ICON_BY_TYPE[value]} />
+          .map(([, value]) => (
+            <Form.Dropdown.Item key={value} value={value} title={TITLE_BY_TYPE[value]} icon={ICON_BY_TYPE[value]} />
           ))}
       </Form.Dropdown>
 
       <Form.Separator />
 
-      {["ASK_AI", "APPLE_SCRIPT"].includes(values.type) && (
-        <Form.TextArea title="Argument" {...itemProps.argument} info={explainPlaceholders} />
-      )}
-      {["OPEN", "OPEN_DEEPLINK"].includes(values.type) && (
-        <Form.TextField title="Argument" {...itemProps.argument} info={explainPlaceholders} />
+      {"argument" in itemProps && (
+        <>
+          {["ASK_AI", "APPLE_SCRIPT"].includes(values.type) && (
+            <Form.TextArea title="Argument" {...itemProps.argument} info={explainPlaceholders} />
+          )}
+          {["OPEN", "OPEN_DEEPLINK"].includes(values.type) && (
+            <Form.TextField title="Argument" {...itemProps.argument} info={explainPlaceholders} />
+          )}
+        </>
       )}
 
-      {values.type === "ASK_AI" && <Form.Checkbox label="Write to Clipboard" {...itemProps.writeToClipboard} />}
+      {"writeToClipboard" in itemProps && <Form.Checkbox label="Write to Clipboard" {...itemProps.writeToClipboard} />}
 
-      {values.type === "LAUNCH_COMMAND" && (
+      {"extensionName" in itemProps && (
         <>
           <Form.Dropdown title="Extension name" {...itemProps.extensionName}>
             {installedExtensions.map((extension) => (
