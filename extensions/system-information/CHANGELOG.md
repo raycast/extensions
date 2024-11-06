@@ -1,5 +1,9 @@
 # System Information Changelog
 
+## [macOS Sequoia Support + Running Processes] - 2024-10-28
+
+- New "Running Processes" section, with searchability and quitting processes.
+
 ## [Bug fixes & enhancements] - 2024-06-11
 
 - A Mac with Apple Silicon running macOS Monterey or later is required.
