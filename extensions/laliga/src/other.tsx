@@ -6,10 +6,16 @@ import { getMatches, getSubscriptionRounds } from "./api";
 import Matchday from "./components/matchday";
 import { Match, Round } from "./types";
 
+const date = new Date();
+const currentYear = date.getFullYear();
+const currentMonth = date.getMonth();
+
+const year = currentMonth >= 6 ? currentYear : currentYear - 1;
+
 const competitions = [
   {
     title: "Copa del Rey",
-    value: "copa-del-rey-2022",
+    value: `copa-del-rey-${year}`,
   },
   // {
   //   title: "Copa de la Reina",
@@ -17,20 +23,20 @@ const competitions = [
   // },
   {
     title: "Champions League",
-    value: "champions-league-2022",
+    value: `champions-league-${year}`,
   },
   {
     title: "Eupora League",
-    value: "europa-league-2022",
+    value: `europa-league-${year}`,
   },
   {
     title: "Conference League",
-    value: "europa-conference-league-2022",
+    value: `europa-conference-league-${year}`,
   },
 ];
 
-export default function Fixture() {
-  const [competition, setCompetition] = useState<string>("");
+export default function OtherCompetitions() {
+  const [competition, setCompetition] = useState<string>(competitions[0].value);
   const [round, setRound] = useState<Round>();
 
   const { data: rounds } = usePromise(
@@ -48,7 +54,9 @@ export default function Fixture() {
   const { data: fixtures, isLoading } = usePromise(
     async (round: Round | undefined) => {
       const gameweeks =
-        round?.gameweeks.sort((a, b) => a.week - b.week).map((gw) => getMatches(competition, gw.week)) ?? [];
+        round?.gameweeks
+          .sort((a, b) => a.week - b.week)
+          .map((gw) => getMatches(competition, gw.week)) ?? [];
       const data = await Promise.all(gameweeks);
 
       let matches: Match[] = [];
@@ -86,17 +94,38 @@ export default function Fixture() {
     <List
       throttle
       isLoading={isLoading}
-      navigationTitle={round ? `${round.name} | ${selectedCompetition?.title}` : "Fixtures & Results"}
+      navigationTitle={
+        round
+          ? `${round.name} | ${selectedCompetition?.title}`
+          : "Fixtures & Results"
+      }
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter by Competition" value={competition} onChange={setCompetition}>
+        <List.Dropdown
+          tooltip="Filter by Competition"
+          value={competition}
+          onChange={setCompetition}
+        >
           {competitions.map((c) => {
-            return <List.Dropdown.Item key={c.value} value={c.value} title={c.title} />;
+            return (
+              <List.Dropdown.Item
+                key={c.value}
+                value={c.value}
+                title={c.title}
+              />
+            );
           })}
         </List.Dropdown>
       }
     >
       {Object.entries(matchday).map(([roundname, matches]) => {
-        return <Matchday key={roundname} name={roundname} matches={matches} action={action} />;
+        return (
+          <Matchday
+            key={roundname}
+            name={roundname}
+            matches={matches}
+            action={action}
+          />
+        );
       })}
     </List>
   );
