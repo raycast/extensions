@@ -1,6 +1,6 @@
 # Apple Intelligence Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2024-11-06
 
 Introducing the Apple Intelligence extension for Raycast!
 
