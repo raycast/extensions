@@ -106,7 +106,7 @@ export default function Command() {
       />
 
       <Form.FilePicker
-        title="Select source folder"
+        title="Select Source Folder"
         id="source_folder"
         allowMultipleSelection={false}
         canChooseDirectories
