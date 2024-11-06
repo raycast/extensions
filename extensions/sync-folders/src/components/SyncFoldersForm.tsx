@@ -96,7 +96,7 @@ export function SyncFoldersForm(props: SyncFoldersFormProps) {
         {...itemProps.source_folder}
       />
       <Form.FilePicker
-        title="Select dest folder"
+        title="Select Dest Folder"
         allowMultipleSelection={false}
         canChooseDirectories
         canChooseFiles={false}
