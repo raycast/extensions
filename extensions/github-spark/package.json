@@ -3,7 +3,7 @@
   "name": "github-spark",
   "title": "GitHub Spark",
   "description": "Turn your ideas into personalized apps with GitHub Spark",
-  "icon": "extension-icon.png",
+  "icon": "icon.png",
   "author": "cole",
   "categories": [
     "Fun"
