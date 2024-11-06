@@ -89,7 +89,7 @@ export function SyncFoldersForm(props: SyncFoldersFormProps) {
       <Form.TextField title="Name" placeholder="Enter a name" {...itemProps.name} />
 
       <Form.FilePicker
-        title="Select source folder"
+        title="Select Source Folder"
         allowMultipleSelection={false}
         canChooseDirectories
         canChooseFiles={false}
