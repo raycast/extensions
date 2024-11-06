@@ -22,7 +22,11 @@ export const userInterface = {
   seasonLeague: {
     default: "Season/League",
     fr: "Saison/Ligue",
-  }
+  },
+  awards: {
+    default: "Awards",
+    fr: "Récompenses",
+  },
 };
 
 export const gameTitles = {
@@ -98,7 +102,7 @@ export const timeStrings = {
   last5Games: {
     default: "Last 5 Games",
     fr: "5 Derniers Matchs",
-  }
+  },
 };
 
 export const gameStrings = {

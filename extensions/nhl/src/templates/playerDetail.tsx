@@ -12,6 +12,7 @@ import {
   SeasonTotal,
   GoalieSeasonTotal,
   SkaterSeasonTotal,
+  Award,
 } from "../utils/types";
 import { userInterface } from "../utils/translations";
 import { convertInchesToFeetAndInches, getFlagEmoji, getLanguageKey, calculateAge } from "../utils/helpers";
@@ -96,7 +97,7 @@ const careerStats = function (player: PlayerDetailResponse, title: string): stri
     reversedStats
       .filter((stat): stat is SkaterSeasonTotal => isSkaterStats(stat))
       .map((stat) => {
-        table += `| ${stat.season.toString().slice(2, 4)}-${stat.season.toString().slice(6, 8)} ${stat.leagueAbbrev}, ${stat.teamName.default} | ${stat.gamesPlayed ?? "-"} / ${stat.goals ?? "-"} / ${stat.assists ?? "-"} / ${stat.points ?? "-"} / ${stat.plusMinus ?? "-"} | ${stat.pim ?? "-"} / ${stat.powerPlayGoals ?? "-"} / ${stat.shorthandedGoals ?? "-"} | ${stat.shots ?? "-"} / ${stat.shootingPctg ? (stat.shootingPctg * 100).toFixed(2) + "%" : "-"} / ${stat.faceoffWinningPctg ? (100 * stat.faceoffWinningPctg).toFixed(2) + "%" : "-"} |\n`;
+        table += `| ${stat.season.toString().slice(2, 4)}-${stat.season.toString().slice(6, 8)} ${stat.leagueAbbrev}, ${stat.teamName.default} | ${stat.gamesPlayed ?? "-"}/${stat.goals ?? "-"}/${stat.assists ?? "-"}/${stat.points ?? "-"}/${stat.plusMinus ?? "-"} | ${stat.pim ?? "-"}/${stat.powerPlayGoals ?? "-"}/${stat.shorthandedGoals ?? "-"} | ${stat.shots ?? "-"}/${stat.shootingPctg ? (stat.shootingPctg * 100).toFixed(2) + "%" : "-"}/${stat.faceoffWinningPctg ? (100 * stat.faceoffWinningPctg).toFixed(2) + "%" : "-"} |\n`;
       });
   } else if (!isSkater) {
     // goalie stats
@@ -139,11 +140,29 @@ const last5Games = function (stats: Last5Game[]): string {
     table += "| Date | G/A/P/+- | PIM/PPG/SGH | SHIFT/TOI | \n";
     table += "|---|---|---|---|\n";
     skateStats.map((stat) => {
-      table += `| ${dateFormat(stat)} | ${stat.goals} / ${stat.assists} / ${stat.points} / ${stat.plusMinus} | ${stat.pim} / ${stat.powerPlayGoals} / ${stat.shorthandedGoals} | ${stat.shifts} / ${stat.toi} |\n`;
+      table += `| ${dateFormat(stat)} | ${stat.goals}/${stat.assists}/${stat.points}/${stat.plusMinus} | ${stat.pim}/${stat.powerPlayGoals}/${stat.shorthandedGoals} | ${stat.shifts}/${stat.toi} |\n`;
     });
   }
 
   return table;
+};
+
+const awardsTable = function (player: PlayerDetailResponse): string {
+  const awards = player.awards;
+
+  if (!awards) return "";
+
+  let awardString = `## ${userInterface.awards[lang]} \n`;
+  awards.map((award: Award) => {
+    awardString += `| ${award.trophy[lang]} | GP |\n`;
+    awardString += `|---|---|\n`;
+    award.seasons.map((season) => {
+      awardString += `| ${season.seasonId.toString().slice(0, 4)}-${season.seasonId.toString().slice(4, 8)} | ${season.gamesPlayed} |\n`;
+    });
+    awardString += `\n\n`;
+  });
+
+  return awardString;
 };
 
 export default function PlayerDetail({ id }: { id: number }) {
@@ -200,6 +219,9 @@ export default function PlayerDetail({ id }: { id: number }) {
   // Career Stats
   playerMarkdown += careerStats(player, playerTitleStrings.career[lang]) + "\n\n";
 
+  // Awards
+  playerMarkdown += awardsTable(player) + "\n\n";
+
   // Player Bio
   if (playerBio.data.items[0] && playerBio.data.items[0].fields.biography) {
     playerMarkdown += `## ${userInterface.biography[lang]} \n ${playerBio.data.items[0].fields.biography} \n\n`;
@@ -231,6 +253,30 @@ export default function PlayerDetail({ id }: { id: number }) {
     return `${draft.year}, ${draft.teamAbbrev} (${draft.overallPick} ${playerTitleStrings.overall[lang]}), ${playerTitleStrings.round[lang]}${draft.round}, ${playerTitleStrings.pick[lang]}${draft.pickInRound}`;
   };
 
+  const awardMetadata = function (player: PlayerDetailResponse) {
+    if (!player.awards) return null;
+
+    const awardTimes = function (award: Award) {
+      let awardString = award.trophy[lang].replace("Trophy", "").replace("Award", "").trim();
+
+      const times = award.seasons.length;
+
+      if (times > 1) {
+        awardString += ` x${times}`;
+      }
+
+      return awardString;
+    };
+
+    return (
+      <Detail.Metadata.TagList title={userInterface.awards[lang]}>
+        {player.awards.map((award: Award) => (
+          <Detail.Metadata.TagList.Item key={award.trophy[lang]} text={awardTimes(award)} />
+        ))}
+      </Detail.Metadata.TagList>
+    );
+  };
+
   return (
     <Detail
       actions={
@@ -243,6 +289,7 @@ export default function PlayerDetail({ id }: { id: number }) {
       }
       metadata={
         <Detail.Metadata>
+          {player.awards && awardMetadata(player)}
           <Detail.Metadata.Label
             title={playerTitleStrings.birthplace[lang]}
             text={`${player.birthCity.default ? `${player.birthCity.default},` : ""} ${player.birthCountry ? `${player.birthCountry} ${getFlagEmoji(player.birthCountry)}` : ""}`}

@@ -582,6 +582,7 @@ export type Award = {
   };
   seasons: {
     seasonId: number;
+    gamesPlayed: number;
   }[];
 };
 
