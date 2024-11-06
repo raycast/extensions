@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "news-by-startyparty",
   "title": "News By StartyParty",
-  "description": "Read the latest tech, science, design and web dev stories from startyparty.dev.",
+  "description": "Read the latest tech, science, design and web dev stories from thouands of publishers from startyparty.dev.",
   "icon": "icon.png",
   "author": "arbitrarily",
   "contributors": [],
@@ -15,7 +15,13 @@
     {
       "name": "news",
       "title": "News By StartyParty",
-      "description": "Read the latest tech, science, design and web dev stories from startyparty.dev.",
+      "description": "Read the latest tech, science, design and web dev stories from thouands of publishers from startyparty.dev.",
+      "mode": "view"
+    },
+    {
+      "name": "startyparty",
+      "title": "News By StartyParty",
+      "description": "Read the latest tech, science, design and web dev stories from thouands of publishers from startyparty.dev.",
       "mode": "view"
     }
   ],

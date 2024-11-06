@@ -2,15 +2,23 @@
 
 ## [Added metadata] - 2024-11-06
 
-- Added metadata images to the readme
-- update changelog and readme
+- More metadata descriptions
+- Added Additional trigger commands
+- Broke Commands out into separate files
+- Added metadata images to the README
+- Update Changelog and README
+- Added subtitle to command
 
 ## [Added timestamps] - 2024-11-06
 
 - Added timestamps to the news
-- increase the number of posts to 75
-- removed unused code and dependencies
+- Update Changelog and README
+- Update Changelog and README
+
+## [comments] - 2024-11-05
+
+- Added comments to application
 
 ## [initial] - 2024-11-04
 
-Initial version code
+- Initial version code
