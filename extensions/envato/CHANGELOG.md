@@ -1,6 +1,6 @@
 # Envato Changelog
 
-## [List Purchases] - {PR_MERGE_DATE}
+## [List Purchases] - 2024-11-06
 
 - View your purchases
 - Add placeholder to `Preference`
