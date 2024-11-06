@@ -51,7 +51,7 @@ export default function Command() {
     }
 
     await open(
-      `https://spark-staging.githubnext.com/new/${encodeURIComponent(values.description)}?${new URLSearchParams({
+      `https://spark.githubnext.com/new/${encodeURIComponent(values.description)}?${new URLSearchParams({
         model: values.model,
         generateVariants: values.generateVariants ? "true" : "false",
       }).toString()}`,
