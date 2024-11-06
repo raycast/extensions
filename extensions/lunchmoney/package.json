@@ -13,6 +13,7 @@
     {
       "name": "transactions",
       "title": "Transactions",
+      "subtitle": "Lunch Money",
       "description": "View Transactions",
       "mode": "view"
     }
