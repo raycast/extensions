@@ -3,13 +3,12 @@ import Fuse, { FuseOptionKey } from "fuse.js";
 import _ from "lodash";
 import osascript from "osascript-tag";
 import { URL } from "url";
-import { pinyinSupport, LanguageAdaptor } from './lang-adaptor';
+import { pinyinSupport, LanguageAdaptor } from "./lang-adaptor";
 import { HistoryItem, LooseTab, Tab } from "./types";
 
 type Preferences = {
   safariAppIdentifier: string;
 };
-
 
 export const { safariAppIdentifier }: Preferences = getPreferenceValues();
 
@@ -74,7 +73,7 @@ export const getTitle = (tab: Tab) => _.truncate(tab.title, { length: 75 });
 export const plural = (count: number, string: string) => `${count} ${string}${count > 1 ? "s" : ""}`;
 
 const langAdaptor = new LanguageAdaptor();
-const langHandlers = [pinyinSupport()]
+const langHandlers = [pinyinSupport()];
 
 export const search = function (collection: LooseTab[], keys: Array<FuseOptionKey<object>>, searchText: string) {
   langHandlers.forEach((handler) => {
@@ -85,13 +84,12 @@ export const search = function (collection: LooseTab[], keys: Array<FuseOptionKe
     return collection;
   }
 
-
   const _formatPerf = performance.now();
   const formattedCollection = collection.map((item) => {
     return {
       ...item,
-      title_formatted: langAdaptor.formatString(searchText, item.title, { id: item.uuid })
-    }
+      title_formatted: langAdaptor.formatString(searchText, item.title, { id: item.uuid }),
+    };
   });
   const _formatCost = performance.now() - _formatPerf;
 
@@ -99,12 +97,12 @@ export const search = function (collection: LooseTab[], keys: Array<FuseOptionKe
   const result = new Fuse(formattedCollection, { keys, threshold: 0.35 }).search(searchText).map((x) => x.item);
   const _searchCost = performance.now() - _searchPerf;
 
-  if (process.env.NODE_ENV === 'development') {
-    console.log('searchText', searchText);
+  if (process.env.NODE_ENV === "development") {
+    console.log("searchText", searchText);
     console.log(`format cost ${_formatCost}ms`);
     console.log(`search cost ${_searchCost}ms`);
     // console.log('formatted collection', formattedCollection);
-    console.log('result size', result.length);
+    console.log("result size", result.length);
   }
   return result;
 };

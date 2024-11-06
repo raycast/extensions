@@ -1,4 +1,4 @@
-import { LRUCache } from 'lru-cache';
+import { LRUCache } from "lru-cache";
 
 export interface LanguageHandler {
   name: string;
@@ -24,8 +24,8 @@ export class LanguageAdaptor {
   private formatStringWithLang(id: string, userInput: string, target: string, lang: string): string {
     const cache = this.langCache.get(lang)!;
     if (cache.has(id)) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('cache hit', id);
+      if (process.env.NODE_ENV === "development") {
+        console.log("cache hit", id);
       }
       return cache.get(id)!;
     }
@@ -64,14 +64,13 @@ export class LanguageAdaptor {
 
     if (this.langHandlers.size > 0) {
       const { lang, id } = config;
-      if (typeof lang !== 'undefined') {
+      if (typeof lang !== "undefined") {
         formatted = this.formatStringWithLang(id, userInput, target, lang);
       } else {
-        formatted = Array.from(this.langHandlers.keys())
-          .reduce(
-            (formatted, lang) => this.formatStringWithLang(id, userInput, formatted, lang),
-            target,
-          );
+        formatted = Array.from(this.langHandlers.keys()).reduce(
+          (formatted, lang) => this.formatStringWithLang(id, userInput, formatted, lang),
+          target,
+        );
       }
     }
 

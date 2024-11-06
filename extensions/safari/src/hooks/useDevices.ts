@@ -60,11 +60,14 @@ export default function useDevices() {
   const devices = useRef<Device[]>([]);
   const permissionView = useRef<JSX.Element | null>(null);
 
-  const localDevice: Device = useMemo(() => ({
-    uuid: "local",
-    name: `${deviceName} ★`,
-    tabs: localTabs.data || [],
-  }), [deviceName, localTabs.data]);
+  const localDevice: Device = useMemo(
+    () => ({
+      uuid: "local",
+      name: `${deviceName} ★`,
+      tabs: localTabs.data || [],
+    }),
+    [deviceName, localTabs.data],
+  );
 
   useLayoutEffect(() => {
     const preferences = getPreferenceValues();
@@ -84,7 +87,7 @@ export default function useDevices() {
       devices.current = [localDevice, ...remoteDevices];
       permissionView.current = remoteTabs.permissionView || null;
     }
-  }, [localTabs, remoteTabs, deviceName])
+  }, [localTabs, remoteTabs, deviceName]);
 
   return { devices, permissionView, refreshDevices: localTabs.revalidate };
 }
