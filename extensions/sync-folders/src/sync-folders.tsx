@@ -122,7 +122,7 @@ export default function Command() {
         }}
       />
       <Form.FilePicker
-        title="Select dest folder"
+        title="Select Dest Folder"
         id="dest_folder"
         allowMultipleSelection={false}
         canChooseDirectories
