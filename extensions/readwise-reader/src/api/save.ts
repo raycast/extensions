@@ -37,8 +37,6 @@ async function saveWithRateLimit(url: string, author?: string): Promise<Response
   return response;
 }
 
-
-
 export async function saveURL(url: string, author?: string) {
   if (!isValid(url)) {
     throw new Error("Invalid URL");

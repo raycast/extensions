@@ -14,10 +14,7 @@ const rateLimit = 20;
 function savingToast(urls: string) {
   const urlList = extractURLs(urls);
 
-  const title =
-    urlList.length > rateLimit
-      ? "Saving to Readwise...(may take a few minutes)"
-      : "Saving to Readwise...";
+  const title = urlList.length > rateLimit ? "Saving to Readwise...(may take a few minutes)" : "Saving to Readwise...";
   return new Toast({
     style: Toast.Style.Animated,
     title,
