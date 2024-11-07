@@ -18,6 +18,12 @@
       "mode": "view"
     },
     {
+      "name": "nhlStandings",
+      "title": "NHL Standings",
+      "description": "Get the latest NHL standings",
+      "mode": "view"
+    },
+    {
       "name": "searchPlayers",
       "title": "Search NHL Players",
       "description": "Search for NHL players",

@@ -22,6 +22,10 @@ const preferences = getPreferenceValues();
 const timezone = preferences.timezone as Timezone;
 const languageKey = getLanguageKey();
 
+export function getCurrentDate(): string {
+  return new Date().toISOString().split("T")[0];
+}
+
 export function penaltiesList(game: Game) {
   const penalties = game.summary?.penalties;
   if (!penalties) return "";
