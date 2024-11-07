@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "description": "Connects to user-defined network servers and folders",
   "icon": "extension-icon.png",
-  "author": "Gui Nascimento",
+  "author": "guibyui",
   "license": "MIT",
   "commands": [
     {
