@@ -64,21 +64,21 @@ Summary of the main points.
     creativity: Number(props.arguments.creativity) || 1,
     model: AI.Model.OpenAI_GPT4o,
   });
-  const [toastState, setToast] = useState<Toast | null>(null)
+  const [toastState, setToast] = useState<Toast | null>(null);
   async function handleStatusUpdate() {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Generating Presentation",
     });
-    setToast(toast)
+    setToast(toast);
   }
   useEffect(() => {
     if (isLoading) {
-      handleStatusUpdate()
+      handleStatusUpdate();
     } else {
-      toastState?.hide()
+      toastState?.hide();
     }
-  }, [isLoading])
+  }, [isLoading]);
 
   function createSlides() {
     const fileName = `${props.arguments.topic.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.md`;
@@ -102,12 +102,14 @@ Summary of the main points.
     <Detail
       isLoading={isLoading}
       markdown={data}
-      actions={!isLoading && (
-        <ActionPanel>
-          <Action title="Create Presentation" onAction={createSlides} icon={Icon.NewDocument} />
-          <Action.CopyToClipboard content={data} shortcut={{ modifiers: ["cmd"], key: "c" }} />
-        </ActionPanel>
-      )}
+      actions={
+        !isLoading && (
+          <ActionPanel>
+            <Action title="Create Presentation" onAction={createSlides} icon={Icon.NewDocument} />
+            <Action.CopyToClipboard content={data} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+          </ActionPanel>
+        )
+      }
     />
   );
 }

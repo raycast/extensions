@@ -27,7 +27,8 @@ const cache = new Cache();
 
 const DEFAULT_PATH = `index.md`;
 const PAGE_SEPARATOR = preferences.pageSeparator === "newline" ? "\n\n\n" : "---";
-const PLACEHOLDER_TEXT = "No Markdown slides found. Create a new markdown file at ";
+const PLACEHOLDER_TEXT = "No Markdown slides found. Create a new markdown file at `";
+const PLACEHOLDER_DESCRIPTION = "`? \n\n> You can customize the slides directory in the extension settings";
 const PLACEHOLDER_CONTENT = `# New Presentation\n\nStart writing your slides here.\n${PAGE_SEPARATOR}\nNew Page`;
 
 async function editFile(filePath: string, finder = false) {
@@ -196,7 +197,7 @@ export default function Command({ launchContext }: { launchContext: { file?: str
       const parsedSlides = parseMarkdownToSlides(markdown);
       console.log(parsedSlides);
       setSlides(parsedSlides);
-    } else if (markdown === null) setSlides([PLACEHOLDER_TEXT + selectedFilePath]);
+    } else if (markdown === null) setSlides([PLACEHOLDER_TEXT + selectedFilePath + PLACEHOLDER_DESCRIPTION]);
   }, [markdown]);
 
   useEffect(() => {
