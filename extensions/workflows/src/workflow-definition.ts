@@ -130,6 +130,12 @@ export type StepType = keyof typeof STEP_TYPES;
 
 export const isStepType = (value: string): value is StepType => value in STEP_TYPES;
 
+export function isSpecificStepType<T extends StepType>(value: string | undefined, arr: T[]): value is T {
+  if (value === undefined) return false;
+  if (!isStepType(value)) return false;
+  return arr.includes(value as T);
+}
+
 type SharedStepDefinition = {
   type: StepType;
   title: string;

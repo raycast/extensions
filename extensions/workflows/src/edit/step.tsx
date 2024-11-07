@@ -8,6 +8,7 @@ import {
   LaunchCommandDefinition,
   ICON_BY_TYPE,
   TITLE_BY_TYPE,
+  isSpecificStepType,
 } from "../workflow-definition";
 
 import { useExtensions } from "../search-manifest";
@@ -20,6 +21,12 @@ Has support for Dynamic Placeholders:
  - {browser-content-markdown}
  - {browser-content-text}
 `;
+
+type AssumeType<FormItem, Type> = Type extends string
+  ? FormItem extends { type: Partial<Form.ItemProps<Type>> }
+    ? FormItem
+    : never
+  : never;
 
 export default function EditStep({
   step,
@@ -106,22 +113,35 @@ export default function EditStep({
 
       <Form.Separator />
 
-      {"argument" in itemProps && (
-        <>
-          {["ASK_AI", "APPLE_SCRIPT"].includes(values.type) && (
-            <Form.TextArea title="Argument" {...itemProps.argument} info={explainPlaceholders} />
-          )}
-          {["OPEN", "OPEN_DEEPLINK"].includes(values.type) && (
-            <Form.TextField title="Argument" {...itemProps.argument} info={explainPlaceholders} />
-          )}
-        </>
+      {isSpecificStepType(itemProps.type.value, ["ASK_AI", "APPLE_SCRIPT"]) && (
+        <Form.TextArea
+          title="Argument"
+          {...(itemProps as AssumeType<typeof itemProps, typeof itemProps.type.value>).argument}
+          info={explainPlaceholders}
+        />
       )}
 
-      {"writeToClipboard" in itemProps && <Form.Checkbox label="Write to Clipboard" {...itemProps.writeToClipboard} />}
+      {isSpecificStepType(itemProps.type.value, ["OPEN", "OPEN_DEEPLINK"]) && (
+        <Form.TextField
+          title="Argument"
+          {...(itemProps as AssumeType<typeof itemProps, typeof itemProps.type.value>).argument}
+          info={explainPlaceholders}
+        />
+      )}
 
-      {"extensionName" in itemProps && (
+      {isSpecificStepType(itemProps.type.value, ["ASK_AI"]) && (
+        <Form.Checkbox
+          label="Write to Clipboard"
+          {...(itemProps as AssumeType<typeof itemProps, typeof itemProps.type.value>).writeToClipboard}
+        />
+      )}
+
+      {isSpecificStepType(itemProps.type.value, ["LAUNCH_COMMAND"]) && (
         <>
-          <Form.Dropdown title="Extension name" {...itemProps.extensionName}>
+          <Form.Dropdown
+            title="Extension name"
+            {...(itemProps as AssumeType<typeof itemProps, typeof itemProps.type.value>).extensionName}
+          >
             {installedExtensions.map((extension) => (
               <Form.Dropdown.Item
                 key={extension.name}
@@ -134,7 +154,10 @@ export default function EditStep({
 
           {extension && (
             <>
-              <Form.Dropdown title="Command" {...itemProps.commandName}>
+              <Form.Dropdown
+                title="Command"
+                {...(itemProps as AssumeType<typeof itemProps, typeof itemProps.type.value>).commandName}
+              >
                 {extension.commands.map((command) => (
                   <Form.Dropdown.Item key={command.name} value={command.name} title={command.title} />
                 ))}

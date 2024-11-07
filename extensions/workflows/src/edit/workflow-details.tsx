@@ -76,7 +76,7 @@ export default function EditWorkflowDetails({
         }}
       >
         {Object.entries(Icon).map(([k, v]) => (
-          <Form.Dropdown.Item value={v} title={k} icon={Icon[k]} />
+          <Form.Dropdown.Item key={k} value={v} title={k} icon={v} />
         ))}
       </Form.Dropdown>
     </Form>

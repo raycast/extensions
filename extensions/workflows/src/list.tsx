@@ -13,6 +13,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+
 import path from "node:path";
 import { useEffect, useState } from "react";
 import {
@@ -21,6 +22,7 @@ import {
   createEmptyWorkflow,
   deleteWorkflow,
   writeWorkflowDefinition,
+  TITLE_BY_TYPE,
 } from "./workflow-definition";
 import EditWorkflow from "./edit/workflow";
 import EditWorkflowDetails from "./edit/workflow-details";
@@ -99,6 +101,7 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
+      isShowingDetail={false}
       actions={
         <ActionPanel>
           <Action
@@ -116,6 +119,21 @@ export default function Command() {
           icon={item.icon}
           title={item.title}
           subtitle={item.description}
+          detail={
+            <List.Item.Detail
+              metadata={
+                <List.Item.Detail.Metadata>
+                  {item.steps.map((step) => (
+                    <>
+                      <List.Item.Detail.Metadata.Label title="Title" text={step.title} />
+                      <List.Item.Detail.Metadata.Label title="Type" text={TITLE_BY_TYPE[step.type]} />
+                      <List.Item.Detail.Metadata.Separator />
+                    </>
+                  ))}
+                </List.Item.Detail.Metadata>
+              }
+            />
+          }
           actions={
             <ActionPanel>
               <Action.Push

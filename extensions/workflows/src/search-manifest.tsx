@@ -21,6 +21,7 @@ export type ExtensionMetadata = {
   raw: string;
   json: object;
   commands: {
+    description: string | { value?: string | null | undefined; tooltip?: string | null | undefined } | undefined;
     title: string;
     name: string;
     arguments: {
