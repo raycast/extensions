@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Cache,
   Detail,
+  getDefaultApplication,
   getPreferenceValues,
   Icon,
   launchCommand,
@@ -13,7 +14,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import fs from "fs";
 import { Marp } from "@marp-team/marp-core";
 
@@ -29,7 +30,7 @@ const PAGE_SEPARATOR = preferences.pageSeparator === "newline" ? "\n\n\n" : "---
 const PLACEHOLDER_TEXT = "No Markdown slides found. Create a new markdown file at ";
 const PLACEHOLDER_CONTENT = `# New Presentation\n\nStart writing your slides here.\n${PAGE_SEPARATOR}\nNew Page`;
 
-function editFile(filePath: string, finder = false) {
+async function editFile(filePath: string, finder = false) {
   const dir = preferences.slidesDirectory?.replace("~", process.env.HOME || "");
   if (!fs.existsSync(filePath)) {
     try {
@@ -46,7 +47,8 @@ function editFile(filePath: string, finder = false) {
   if (finder) {
     showInFinder(filePath);
   } else {
-    open(filePath);
+    const application = await getDefaultApplication(filePath);
+    open(filePath, application);
   }
   popToRoot();
 }
@@ -158,26 +160,53 @@ function Slide({ slide, slides, nextSlide, prevSlide, filePath }: SlideProps) {
 export default function Command({ launchContext }: { launchContext: { file?: string } }) {
   const selectedFilePath =
     preferences.slidesDirectory + "/" + (launchContext?.file || cache.get("selectedSlides") || DEFAULT_PATH);
-  let markdown = PLACEHOLDER_TEXT + selectedFilePath;
-  try {
-    markdown = fs.readFileSync(selectedFilePath, "utf-8");
-    // Strip potential frontmatter
-    if (markdown.startsWith("---")) {
-      const endOfFrontmatter = markdown.indexOf("---", 3);
-      if (endOfFrontmatter !== -1) {
-        markdown = markdown.slice(endOfFrontmatter + 3).trim();
-      }
-    }
-  } catch (error) {
-    console.log(error);
-    showToast({
-      style: Toast.Style.Failure,
-      title: "File not found",
-      message: "Tried to open file at: " + selectedFilePath,
-    });
-  }
-  const slides = parseMarkdownToSlides(markdown);
+  const [markdown, setMarkdown] = useState<string | null>("");
+  const [showPagination, setShowPagination] = useState(false);
+  const [slides, setSlides] = useState<string[]>([""]);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    try {
+      let markdownContent = fs.readFileSync(selectedFilePath, "utf-8");
+      // Strip potential frontmatter
+      if (markdownContent.startsWith("---")) {
+        if (markdownContent.includes("paginate: true")) {
+          setShowPagination(true);
+        }
+        const endOfFrontmatter = markdownContent.indexOf("---", 3);
+        if (endOfFrontmatter !== -1) {
+          markdownContent = markdownContent.slice(endOfFrontmatter + 3).trim();
+        }
+      }
+      console.log(markdownContent);
+      setMarkdown(markdownContent);
+    } catch (error) {
+      console.log(error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "File not found",
+        message: "Tried to open file at: " + selectedFilePath,
+      });
+      setMarkdown(null);
+    }
+  }, [selectedFilePath]);
+
+  useEffect(() => {
+    if (markdown) {
+      const parsedSlides = parseMarkdownToSlides(markdown);
+      console.log(parsedSlides);
+      setSlides(parsedSlides);
+    } else if (markdown === null) setSlides([PLACEHOLDER_TEXT + selectedFilePath]);
+  }, [markdown]);
+
+  useEffect(() => {
+    if (showPagination) {
+      const pageNumber = currentSlide + 1;
+      showToast({
+        title: "Slide " + pageNumber + "/" + slides.length,
+      });
+    }
+  }, [currentSlide]);
 
   const nextSlide = (skip = false) => {
     if (skip) {

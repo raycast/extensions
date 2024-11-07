@@ -15,6 +15,7 @@ import {
 import { useAI } from "@raycast/utils";
 import fs from "fs";
 import path from "path";
+import { useEffect, useState } from "react";
 
 const preferences = getPreferenceValues<Preferences>();
 const cache = new Cache();
@@ -26,12 +27,13 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Genera
   
   1. **Title Slide**: The title of the presentation.
   2. **Introduction Slide**: A brief introduction to the topic.
-  3. **Content Slides**: At least three content slides covering key points, statistics, or arguments related to the topic. Use bullet points for clarity.
+  3. **Content Slides**: Up to three content slides covering key points, statistics, or arguments related to the topic. Use bullet points for clarity.
   4. **Conclusion Slide**: A summary of the main points discussed and any final thoughts.
-  5. **References Slide**: A slide listing any sources or references used in the presentation. If you include links, be very sure that they will actually be available.
+  5. **References Slide**: A slide listing any sources or references used in the presentation. If you include links, be very sure that they will actually be available. Never link to a page that does not exist!
   
   Make sure to format the text appropriately for Marp, using headers for slide titles and bullet points for lists. 
   Do not output anything other than the presentation content and do not add a markdown code block around the content.
+  Keep the content on topic and avoid generating irrelevant or nonexistent sentences/words!
   You can add more than two main slides, but only if it is really necessary to explain something with more context.
 
   Here's the format you should follow:
@@ -59,9 +61,24 @@ Summary of the main points.
 `;
 
   const { data, isLoading } = useAI(PROMPT, {
-    creativity: props.arguments.creativity || 1,
+    creativity: Number(props.arguments.creativity) || 1,
     model: AI.Model.OpenAI_GPT4o,
   });
+  const [toastState, setToast] = useState<Toast | null>(null);
+  async function handleStatusUpdate() {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Generating Presentation",
+    });
+    setToast(toast);
+  }
+  useEffect(() => {
+    if (isLoading) {
+      handleStatusUpdate();
+    } else {
+      toastState?.hide();
+    }
+  }, [isLoading]);
 
   function createSlides() {
     const fileName = `${props.arguments.topic.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.md`;
@@ -86,10 +103,12 @@ Summary of the main points.
       isLoading={isLoading}
       markdown={data}
       actions={
-        <ActionPanel title="#1 in raycast/extensions">
-          <Action title="Create Presentation" onAction={createSlides} icon={Icon.NewDocument} />
-          <Action.CopyToClipboard content={data} shortcut={{ modifiers: ["cmd"], key: "c" }} />
-        </ActionPanel>
+        !isLoading && (
+          <ActionPanel>
+            <Action title="Create Presentation" onAction={createSlides} icon={Icon.NewDocument} />
+            <Action.CopyToClipboard content={data} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+          </ActionPanel>
+        )
       }
     />
   );

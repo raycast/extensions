@@ -49,25 +49,17 @@
           "placeholder": "Creativity",
           "data": [
             {
-              "title": "None",
-              "value": "none"
+                "title": "Low Creativity",
+                "value": "0"
             },
             {
-                "title": "Low",
-                "value": "low"
+                "title": "Default Creativity",
+                "value": "1"
             },
             {
-                "title": "Medium",
-                "value": "medium"
-            },
-            {
-                "title": "High",
-                "value": "high"
-            },
-            {
-                "title": "Maximum",
-                "value": "maximum"
-            }      
+                "title": "High Creativity",
+                "value": "2"
+            }  
           ]
         }
       ]  

@@ -59,6 +59,7 @@ export default function Command(props: LaunchProps<{ draftValues: CreateFormValu
 
   const { handleSubmit, itemProps } = useForm<CreateFormValues>({
     onSubmit: createSlidesFile,
+    initialValues: draftValues,
     validation: {
       title: FormValidation.Required,
     },
@@ -80,12 +81,7 @@ export default function Command(props: LaunchProps<{ draftValues: CreateFormValu
       }
     >
       <Form.Description text="Create a new markdown slides presentation" />
-      <Form.TextField
-        title="Title"
-        placeholder="Enter presentation title"
-        defaultValue={draftValues?.title}
-        {...itemProps.title}
-      />
+      <Form.TextField title="Title" placeholder="Enter presentation title" {...itemProps.title} />
       <Form.TextArea
         title="Content"
         placeholder="Enter content"
@@ -93,14 +89,12 @@ export default function Command(props: LaunchProps<{ draftValues: CreateFormValu
           "Pages are separated by " +
           (preferences.pageSeparator === "ruler" ? "horizontal rule (---)" : "three line breaks")
         }
-        defaultValue={draftValues?.content}
         {...itemProps.content}
       />
       <Form.Separator />
       <Form.Description title="Export Options" text="Used when generating a printable HTML presentation" />
       <Form.Dropdown
         title="Theme"
-        defaultValue={draftValues?.content || "default"}
         info="Choose a built-in theme for the exported presentation. Check the linked documentation above for more information and styling options."
         {...itemProps.theme}
       >
