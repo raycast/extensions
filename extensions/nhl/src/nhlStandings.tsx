@@ -52,6 +52,7 @@ const renderDivision = (team: TeamStanding[], division: string) => {
         <List.Item
           key={standing.teamAbbrev.default}
           title={standing.teamName[languageKey]}
+					icon={teamLogo(standing.teamAbbrev.default)}
           accessories={[
             { text: "GP:" + standing.gamesPlayed },
             { text: "W:" + standing.wins },
@@ -62,8 +63,7 @@ const renderDivision = (team: TeamStanding[], division: string) => {
             { text: "ROW:" + standing.regulationPlusOtWins },
             { text: "GF:" + standing.goalFor },
             { text: "GA:" + standing.goalAgainst },
-            { text: "GD:" + standing.goalDifferential },
-            { icon: teamLogo(standing.teamAbbrev.default) },
+            { text: "GD:" + standing.goalDifferential }
           ]}
           actions={
             <ActionPanel>
