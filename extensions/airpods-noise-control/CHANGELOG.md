@@ -1,5 +1,9 @@
 # AirPods Noise Control Changelog
 
+## [Bug Fix] - {PR_MERGE_DATE}
+
+- Fixed incorrect sound menu expand toggle index computation on macOS Sequoia
+
 ## [Improvements] - 2024-03-09
 - Typo fixed.
 - Added current mode in the subtitle of both commands.

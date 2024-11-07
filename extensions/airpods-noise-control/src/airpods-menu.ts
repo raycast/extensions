@@ -1,11 +1,13 @@
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { Prefs } from "./type";
 import { updateCommandMetadata } from "@raycast/api";
+import { isSequoia } from "./utils";
 
 export async function execAirPodsMenu(
   { airpodsIndex, soundLoc, ccLoc, optionOne, optionTwo }: Prefs,
   toggleOption = "",
 ): Promise<string | null> {
+  const expandToggleIndex = isSequoia() ? "(i + 1)" : "(i - 1)";
   const script = `
 set AirPodsIndex to ${airpodsIndex}
 set ToggleOption to "${toggleOption}"
@@ -84,7 +86,7 @@ tell application "System Events"
 						exit repeat -- exit the loop
 					end if
 				end repeat
-				set expandToggle to item (i + 1) of btMenuElements
+				set expandToggle to item ${expandToggleIndex} of btMenuElements
 				set expandToggleExpanded to value of expandToggle as boolean
 				if expandToggleExpanded is false then
 					click expandToggle
