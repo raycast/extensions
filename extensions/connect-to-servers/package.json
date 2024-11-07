@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "connect-to-servers",
+  "title": "Connect to Servers",
+  "version": "1.0.0",
+  "description": "Connects to user-defined network servers and folders",
+  "icon": "extension-icon.png",
+  "author": "Gui Nascimento",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Connect to Servers",
+      "description": "Auto connect to servers",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "server1",
+      "type": "textfield",
+      "title": "Server 1 Address",
+      "description": "Enter the address for the first server",
+      "placeholder": "smb://0.0.0.0/folder"
+    },
+    {
+      "name": "server2",
+      "type": "textfield",
+      "title": "Server 2 Address",
+      "description": "Enter the address for the second server",
+      "placeholder": "smb://0.0.0.0/folder"
+    }
+  ]
+}
