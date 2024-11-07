@@ -157,7 +157,7 @@ export default function Command() {
               actions={
                 <ActionPanel title="Start Sync">
                   <Action.SubmitForm
-                    style={Action.Style.Destructive}
+                    style={Action.Style.Regular}
                     title={`Sync ${name}`}
                     icon={Icon.Repeat}
                     onSubmit={() => handleRunSyncFolders(id)}

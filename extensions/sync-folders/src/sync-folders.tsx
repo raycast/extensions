@@ -68,7 +68,7 @@ export default function Command() {
         <ActionPanel>
           <Action.SubmitForm
             title="Start Sync"
-            style={Action.Style.Destructive}
+            style={Action.Style.Regular}
             onSubmit={async (values: SyncUpFormValues) => {
               const source_folder = values.source_folder[0];
               const dest_folder = values.dest_folder[0];
