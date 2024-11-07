@@ -25,8 +25,8 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Genera
 
   const PROMPT = `Generate a presentation in markdown format about the topic: "${props.arguments.topic}". Each slide should be separated by a ${preferences.pageSeparator} (${PAGE_SEPARATOR}). Include the following elements in the presentation:
   
-  1. **Title Slide**: The title of the presentation.
-  2. **Introduction Slide**: A brief introduction to the topic.
+  1. **Title Slide**: The title of the presentation with a brief description.
+  2. **Overview Slide**: A quick overview of the topics in this presentatiion.
   3. **Content Slides**: Up to three content slides covering key points, statistics, or arguments related to the topic. Use bullet points for clarity.
   4. **Conclusion Slide**: A summary of the main points discussed and any final thoughts.
   5. **References Slide**: A slide listing any sources or references used in the presentation. If you include links, be very sure that they will actually be available. Never link to a page that does not exist!
@@ -64,21 +64,21 @@ Summary of the main points.
     creativity: Number(props.arguments.creativity) || 1,
     model: AI.Model.OpenAI_GPT4o,
   });
-  const [toastState, setToast] = useState<Toast | null>(null);
+  const [toastState, setToast] = useState<Toast | null>(null)
   async function handleStatusUpdate() {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Generating Presentation",
     });
-    setToast(toast);
+    setToast(toast)
   }
   useEffect(() => {
     if (isLoading) {
-      handleStatusUpdate();
+      handleStatusUpdate()
     } else {
-      toastState?.hide();
+      toastState?.hide()
     }
-  }, [isLoading]);
+  }, [isLoading])
 
   function createSlides() {
     const fileName = `${props.arguments.topic.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.md`;
@@ -102,14 +102,12 @@ Summary of the main points.
     <Detail
       isLoading={isLoading}
       markdown={data}
-      actions={
-        !isLoading && (
-          <ActionPanel>
-            <Action title="Create Presentation" onAction={createSlides} icon={Icon.NewDocument} />
-            <Action.CopyToClipboard content={data} shortcut={{ modifiers: ["cmd"], key: "c" }} />
-          </ActionPanel>
-        )
-      }
+      actions={!isLoading && (
+        <ActionPanel>
+          <Action title="Create Presentation" onAction={createSlides} icon={Icon.NewDocument} />
+          <Action.CopyToClipboard content={data} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+        </ActionPanel>
+      )}
     />
   );
 }
