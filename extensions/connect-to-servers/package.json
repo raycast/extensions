@@ -41,14 +41,16 @@
       "type": "textfield",
       "title": "Server 1 Address",
       "description": "Enter the address for the first server",
-      "placeholder": "smb://0.0.0.0/folder"
+      "placeholder": "smb://0.0.0.0/folder",
+      "required": true
     },
     {
       "name": "server2",
       "type": "textfield",
       "title": "Server 2 Address",
       "description": "Enter the address for the second server",
-      "placeholder": "smb://0.0.0.0/folder"
+      "placeholder": "smb://0.0.0.0/folder",
+      "required": true
     }
   ]
 }
