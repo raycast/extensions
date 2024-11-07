@@ -50,7 +50,7 @@ export default function Command() {
       },
       primaryAction: {
         title: "Sync",
-        style: Alert.ActionStyle.Destructive,
+        style: Alert.ActionStyle.Default,
         onAction: () => {
           runSyncFolders(id as string);
           closeMainWindow();
@@ -79,7 +79,7 @@ export default function Command() {
       },
       primaryAction: {
         title: "Sync",
-        style: Alert.ActionStyle.Destructive,
+        style: Alert.ActionStyle.Default,
         onAction: () => {
           syncFolders?.forEach(({ id }) => runSyncFolders(id as string));
           closeMainWindow();
@@ -115,7 +115,7 @@ export default function Command() {
       },
       primaryAction: {
         title: "Sync",
-        style: Alert.ActionStyle.Destructive,
+        style: Alert.ActionStyle.Default,
         onAction: () => {
           syncFoldersWithoutDelete?.forEach(({ id }) => runSyncFolders(id as string));
           closeMainWindow();
@@ -146,7 +146,7 @@ export default function Command() {
       },
       primaryAction: {
         title: "Sync",
-        style: Alert.ActionStyle.Destructive,
+        style: Alert.ActionStyle.Default,
         onAction: () => {
           syncFoldersWithDelete?.forEach(({ id }) => runSyncFolders(id as string));
           closeMainWindow();
