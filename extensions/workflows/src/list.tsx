@@ -200,6 +200,7 @@ export default function Command() {
                 }
               />
               <Action.CreateQuicklink
+                title="Create a Quicklink to Run the Workflow"
                 quicklink={{
                   link: `raycast://extensions/Remco/workflows/run?arguments=%7B%22uuid%22%3A%22${item.uuid}%22%7D`,
                   application: "raycast",
@@ -208,6 +209,7 @@ export default function Command() {
                 }}
               />
               <Action.CreateQuicklink
+                title="Create a Quicklink to Run the Workflow (with Progress)"
                 quicklink={{
                   link: `raycast://extensions/Remco/workflows/run-visual?arguments=%7B%22uuid%22%3A%22${item.uuid}%22%7D`,
                   application: "raycast",
