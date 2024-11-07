@@ -1,5 +1,9 @@
 # News By StartyParty CHANGELOG
 
+## [Added raycast feed] - 2024-11-07
+
+- optimized api route
+
 ## [Added metadata] - 2024-11-06
 
 - More metadata descriptions

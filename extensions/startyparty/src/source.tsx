@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 // API URL
-const API_URL = "https://marko.tech/api/news";
+const API_URL = "https://marko.tech/api/raycast";
 
 // Define the response and post types to match the expected API response structure
 interface Response {
