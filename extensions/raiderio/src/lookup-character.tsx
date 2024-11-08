@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, Cache, showToast, launchCommand, LaunchType } from "@raycast/api";
+import { Form, ActionPanel, Action, Cache, showToast, launchCommand, LaunchType, Keyboard, Icon } from "@raycast/api";
 import { REALMS } from "./constants";
 import { useState } from "react";
 
@@ -8,7 +8,18 @@ export default function Command() {
   const [name, setName] = useState("");
   const [realm, setRealm] = useState("");
 
-  function addToFavorites() {
+  const openFavorites = async () => {
+    try {
+      await launchCommand({ name: "favorite-characters", type: LaunchType.UserInitiated });
+    } catch (error) {
+      console.error(error);
+      showToast({
+        title: "Favorite Characters command is disabled",
+      });
+    }
+  };
+
+  const addToFavorites = () => {
     const cachedFavorites = cache.get("favorites");
     const favorites: Array<{ name: string; realm: string }> = cachedFavorites ? JSON.parse(cachedFavorites) : [];
     if (
@@ -18,13 +29,13 @@ export default function Command() {
       showToast({
         title: `Character ${name} on ${realm} added to favorites!`,
       });
-      launchCommand({ name: "favorite-characters", type: LaunchType.UserInitiated });
+      openFavorites();
     } else {
       showToast({
         title: `Character ${name} is already a favorite`,
       });
     }
-  }
+  };
 
   return (
     <Form
@@ -34,10 +45,16 @@ export default function Command() {
             title="Open RaiderIO Profile"
             url={`https://raider.io/characters/us/${realm}/${name}`}
           />
-          <Action title="Add to Favorites" onAction={addToFavorites} />
           <Action
+            icon={Icon.Star}
+            title="Add to Favorites"
+            onAction={addToFavorites}
+            shortcut={Keyboard.Shortcut.Common.Pin}
+          />
+          <Action
+            icon={Icon.Stars}
             title="Open Favorites"
-            onAction={() => launchCommand({ name: "favorite-characters", type: LaunchType.UserInitiated })}
+            onAction={openFavorites}
             shortcut={{ modifiers: ["shift"], key: "f" }}
           />
         </ActionPanel>

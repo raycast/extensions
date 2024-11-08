@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, Cache, showToast, confirmAlert } from "@raycast/api";
+import { Action, ActionPanel, List, Cache, showToast, confirmAlert, Icon } from "@raycast/api";
 import prettyMilliseconds from "pretty-ms";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -12,7 +12,6 @@ const cachedFavorites = cache.get("favorites");
 
 export default function Command() {
   const [charactersData, setCharactersData] = useCachedState<Record<string, CharacterData>>("characters-data", {});
-  console.log("charactersData", charactersData);
   const [isLoading, setIsLoading] = useState(false);
 
   const [favorites, setFavorites] = useState<Array<{ name: string; realm: string }>>(
@@ -88,12 +87,14 @@ export default function Command() {
                   shortcut={{ modifiers: ["shift"], key: "w" }}
                 />
                 <Action
+                  icon={Icon.Trash}
                   title="Remove from Favorites"
                   onAction={() => removeFromFavorites(favorite.realm, favorite.name)}
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
                 />
                 {data && (
                   <Action.Push
+                    icon={Icon.Eye}
                     title="View Recent Runs"
                     target={<LatestRuns data={data} />}
                     shortcut={{ modifiers: ["shift"], key: "r" }}
