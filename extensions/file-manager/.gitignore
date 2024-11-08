@@ -9,5 +9,9 @@ raycast-env.d.ts
 .swiftpm
 compiled_raycast_swift
 
+# Icon must end with two \r
+Icon
+
+
 # misc
 .DS_Store
