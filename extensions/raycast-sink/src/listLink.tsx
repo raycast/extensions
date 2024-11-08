@@ -20,13 +20,17 @@ export default function LinkListView() {
   const filteredLinks = useMemo(() => {
     if (!searchText) return links;
 
-    // sort by weight
-    const weighted = links
-      .filter((link) => link && link.slug && link.slug.toLowerCase().includes(searchText.toLowerCase()))
+    const validLinks = links.filter(
+      (link): link is Link => link != null && typeof link === "object" && "id" in link && "slug" in link,
+    );
+
+    const weighted = validLinks
+      .filter((link) => link.slug.toLowerCase().includes(searchText.toLowerCase()))
       .map((link) => {
         const slug = link.slug.toLowerCase();
         const search = searchText.toLowerCase();
         let weight = 0;
+
         if (slug === search) {
           weight = 3;
         } else if (slug.startsWith(search)) {
@@ -107,7 +111,7 @@ export default function LinkListView() {
         />
       )}
       <List.Section title={listTitle}>
-        {filteredLinks.map((link) => (
+        {(searchText ? filteredLinks : validLinks).map((link) => (
           <LinkItem
             key={link.id}
             link={link}
