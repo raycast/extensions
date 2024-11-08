@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Search Projects Fixes] - {PR_MERGE_DATE}
+## [Search Projects Fixes] - 2024-11-08
 
 - [#15052](https://github.com/raycast/extensions/issues/15052): Fixed incomplete project list by adding pagination and utilizing search text to fetch projects directly.
 
