@@ -31,7 +31,7 @@ Before using API you need to enable API and whitelist the IPs you will be using.
 
 1. METHOD 1 (recommended)
     - `ssh` into your HestiaCP instance
-    - use HestiaCP CLI to run `v-add-access-key admin '*' Raycast` (AS ADMIN) (this will grant all API permissions and add a commnt as 'Raycast')
+    - use HestiaCP CLI to run `v-add-access-key admin '*' Raycast` (AS ADMIN) (this will grant all API permissions and add a comment as 'Raycast')
     - finally, `copy` the Access Keys (they will be output on the terminal)
     
 2. METHOD 2 (this method is not recommended as it does not grant all API permissions athough you could use Method 2 to generate the key and then use CLI from METHOD 1 to grant all permissions)
@@ -53,7 +53,7 @@ If you get a *self-signed certificate* error, you need to fix the SSL of your in
 
 | cmd | included | commments |
 |-----|----------|-----------|
-| v-acknowledge-user-notification | ❌ | - |
+| v-acknowledge-user-notification | ✅ | - |
 | v-add-access-key | ❌ | - |
 | v-add-backup-host | ❌ | - |
 | v-add-cron-hestia-autoupdate | ❌ | - |

@@ -1,8 +1,9 @@
 # HestiaCP Admin Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Acknowledge Notifications] - {PR_MERGE_DATE}
 
-- Move URL check out of hook to top of componnts to make hook less complex
 - **Acknowledge** Notifications in `User Notifications`
+- Show notification as proper markdown in `markdown`
+- Move URL check out of hook to top of components to make hook less complex
 
 ## [Initial Version] - 2024-07-16

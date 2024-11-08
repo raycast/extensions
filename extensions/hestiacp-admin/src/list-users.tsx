@@ -18,6 +18,7 @@ import ErrorComponent from "./components/ErrorComponent";
 import { AddUserFormValues } from "./types/users";
 import useHestia from "./utils/hooks/useHestia";
 import InvalidUrlComponent from "./components/InvalidUrlComponent";
+import { NodeHtmlMarkdown } from "node-html-markdown";
 
 export default function ListUsers() {
   if (!isValidApiUrl()) return <InvalidUrlComponent />;
@@ -292,7 +293,7 @@ export function ViewUserNotifications({ user }: ViewUserNotificationsProps) {
             title={line}
             detail={
               <List.Item.Detail
-                markdown={data.NOTICE}
+                markdown={NodeHtmlMarkdown.translate(data.NOTICE)}
                 metadata={
                   <List.Item.Detail.Metadata>
                     {Object.entries(data).map(([key, val]) => {
@@ -311,11 +312,13 @@ export function ViewUserNotifications({ user }: ViewUserNotificationsProps) {
                   title={`Copy All to Clipboard as JSON`}
                   content={JSON.stringify(notifications)}
                 />
-                <Action
-                  icon={Icon.BellDisabled}
-                  title="Acknowledge Notification"
-                  onAction={() => setAcknowledgeId(line)}
-                />
+                {!data.ACK && (
+                  <Action
+                    icon={Icon.BellDisabled}
+                    title="Acknowledge Notification"
+                    onAction={() => setAcknowledgeId(line)}
+                  />
+                )}
               </ActionPanel>
             }
             icon={data.ACK === "yes" ? Icon.BellDisabled : { source: Icon.Bell, tintColor: Color.Yellow }}
