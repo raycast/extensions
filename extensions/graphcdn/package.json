@@ -27,6 +27,7 @@
       "type": "password",
       "required": true,
       "title": "Personal access token",
+      "placeholder": "XX...XXX",
       "description": "See the extension's README for instructions about how to create an access token",
       "link": "https://stellate.co/app/settings/access-tokens"
     }
@@ -43,12 +44,14 @@
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
     "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "typescript": "^5.6.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

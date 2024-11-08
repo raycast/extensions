@@ -1,25 +1,26 @@
-import {
-  List,
-  Icon,
-} from "@raycast/api";
+import { List, Icon, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getOrgs, getServices } from "./api";
 
 export default function Command() {
-  
   const { isLoading: isLoadingOrganizations, data: orgs } = useCachedPromise(
     async () => {
       const result = await getOrgs();
-      return result.organizations.edges.map(edge => edge.node);
-    }, [], {
+      return result.organizations.edges.map((edge) => edge.node);
+    },
+    [],
+    {
       keepPreviousData: true,
-      initialData: []
+      initialData: [],
+      failureToastOptions: {
+        title: "Could not fetch the GraphCDN organizations",
+      },
     }
-  )
+  );
 
   const { isLoading: isLoadingServices, data: services } = useCachedPromise(
     async () => {
-    const allServices = (
+      const allServices = (
         await Promise.all(
           orgs.map(async (org) => {
             const result = await getServices(org.slug);
@@ -27,13 +28,18 @@ export default function Command() {
           })
         )
       ).flat();
-    return allServices;
-    }, [], {
+      return allServices;
+    },
+    [],
+    {
       keepPreviousData: true,
       initialData: [],
-      execute: !!orgs.length
+      execute: !!orgs.length,
+      failureToastOptions: {
+        title: "Could not fetch the GraphCDN services",
+      },
     }
-  )
+  );
 
   const isLoading = isLoadingOrganizations || isLoadingServices;
 
@@ -49,6 +55,16 @@ export default function Command() {
                 icon={Icon.Dot}
                 title={service.name}
                 subtitle={service.cdnEndpoint}
+                accessories={[{ text: `${(service.metrics.summary.cacheHitRate * 100).toFixed(2)}% Cache hit rate` }]}
+                actions={
+                  <ActionPanel>
+                    <Action.OpenInBrowser
+                      icon="command-icon.png"
+                      title="Open Dashboard"
+                      url={`https://stellate.co/app/org/${org.slug}/services/${service.name}`}
+                    />
+                  </ActionPanel>
+                }
               />
             ))}
         </List.Section>
