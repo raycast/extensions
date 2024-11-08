@@ -832,6 +832,7 @@
 /extensions/lucky-surf                                              @Popalay
 /extensions/luna-search                                             @relevantsam
 /extensions/lunatask                                                @posthardcode
+/extensions/lunchmoney                                              @johnoppenheimer
 /extensions/lyne                                                    @ruiaureliano
 /extensions/lyrics                                                  @ajzbc
 /extensions/m3o                                                     @andreaselia
@@ -930,6 +931,7 @@
 /extensions/mullvad                                                 @0x46616c6b @SebKranz @svenhofman
 /extensions/multi                                                   @fbarbat @fbarbat @pernielsentikaer
 /extensions/multi-force                                             @Decoder22
+/extensions/multi-links                                             @wrick17
 /extensions/multilinks                                              @abhisheksatre
 /extensions/multipass                                               @davibe @pernielsentikaer
 /extensions/multiviewer                                             @secustor
@@ -984,6 +986,7 @@
 /extensions/nordic-energy-prices                                    @mSarheed @pernielsentikaer
 /extensions/norwegian-public-transport                              @rosvik
 /extensions/nos-news                                                @Joran-Dob
+/extensions/not-diamond                                             @dragos199993
 /extensions/note-in-google-doc                                      @mnttnm
 /extensions/noteplan-3                                              @shakedlokits @lukerandall @pr1mal
 /extensions/notion                                                  @HenriChabrand @mathieudutour @metakirby5 @thomaslombart @erics118 @bkeys818 @AlexIsMaking @Yakitrak @tleo19 @dariuszpaluch @zsidnam
@@ -1090,6 +1093,7 @@
 /extensions/paste-from-apple-books                                  @winann
 /extensions/pastebin                                                @vimtor
 /extensions/pastefy                                                 @JulianFun123
+/extensions/pdb-explorer                                            @mattgra
 /extensions/pdf-tools                                               @xilopaint
 /extensions/pdfsearch                                               @kevin-pek @xilopaint
 /extensions/pera-explorer                                           @akgunberk
@@ -1137,6 +1141,7 @@
 /extensions/podcasts-now                                            @cloudy9101
 /extensions/pokedex                                                 @anhthang @miguel-felix1
 /extensions/polished                                                @LekoArts
+/extensions/polymarket                                              @0xOsprey
 /extensions/pomodoro                                                @KELiON @pernielsentikaer @brodelp @susonthapa @mikikiv @MartinGonzalez @Nathanjms @cchalop1 @haydencbarnes @j3lte
 /extensions/popicons                                                @lucaschultz
 /extensions/porkbun                                                 @xmok @djpowers
@@ -1213,6 +1218,7 @@
 /extensions/rateyourmusic-search                                    @romaincabirol
 /extensions/ratio-calculator                                        @Justiniscoding
 /extensions/ray-so                                                  @gt-codes @RSO @dgrzedzielski @emlez @samuelkraft @benoitgrelard @sdorra
+/extensions/raycast-apple-intelligence                              @EvanZhouDev
 /extensions/raycast-arcade                                          @EvanZhouDev
 /extensions/raycast-bard-ai                                         @EvanZhouDev @Visual-Studio-Coder
 /extensions/raycast-create-remix                                    @nuno
@@ -1286,7 +1292,7 @@
 /extensions/rescuetime-focus-session-trigger                        @tuortheblessed @RobErskine
 /extensions/resend                                                  @xmok @AlexIsMaking
 /extensions/resmo                                                   @ozgunarslantas
-/extensions/restart-system-processes                                @XInTheDark
+/extensions/restart-system-processes                                @XInTheDark @hrueger
 /extensions/restore-photo                                           @peduarte
 /extensions/retool                                                  @andre347
 /extensions/retrac                                                  @Skarf4U
@@ -1767,7 +1773,7 @@
 /extensions/zen-browser                                             @Keyruu @crisboarna @grandkrav @Laptop765
 /extensions/zen-mode                                                @pradeepb28
 /extensions/zendesk                                                 @cpenned @xmok
-/extensions/zeplin-project-search                                   @dorukgunes
+/extensions/zeplin-project-search                                   @dorukgunes @xmok
 /extensions/zerion                                                  @qd-qd
 /extensions/zipcodebase                                             @xmok
 /extensions/zipper-run                                              @arielconti10 @pernielsentikaer
