@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { URL } from "url";
-import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { useTranslation } from "./hooks/useTranslation";
-interface CreateLinkViewProps {
-  onSubmit: (url: string, slug: string, comment?: string) => Promise<void>;
-}
+import { createLink } from "./utils/api";
+import { LinkDetail } from "./components/LinkDetail";
+import { CreateLinkResponse } from "./types";
+import { useLinks } from "./hooks/useLinks";
 
 const validUrl = (url: string) => {
   try {
@@ -15,10 +16,12 @@ const validUrl = (url: string) => {
   }
 };
 
-export default function CreateLinkView({ onSubmit }: CreateLinkViewProps) {
+export default function CreateLinkView() {
   const [urlError, setUrlError] = useState<string | undefined>();
   const [slugError, setSlugError] = useState<string | undefined>();
   const { t } = useTranslation();
+  const { push } = useNavigation();
+  const { refreshLinks } = useLinks();
 
   async function handleSubmit(values: { url: string; slug: string; comment?: string }) {
     if (!values.url) {
@@ -36,12 +39,17 @@ export default function CreateLinkView({ onSubmit }: CreateLinkViewProps) {
     }
 
     try {
-      await onSubmit(values.url, values.slug, values.comment);
+      const newLink = (await createLink(values.url, values.slug, values.comment)) as CreateLinkResponse;
       await showToast({
         style: Toast.Style.Success,
         title: t.linkCreated,
-        message: values.slug,
+        message: newLink?.link?.slug || values.slug,
       });
+
+      if (newLink && newLink.link) {
+        push(<LinkDetail link={newLink.link} onRefresh={refreshLinks} />);
+      }
+      refreshLinks();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
