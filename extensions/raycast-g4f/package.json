@@ -1,0 +1,840 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-g4f",
+  "version": "4.2.1",
+  "title": "GPT4Free",
+  "description": "Use GPT-4 for FREE, on Raycast - no API Key required.",
+  "icon": "gpt-icon.png",
+  "author": "muzhen_gaming",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "askAI",
+      "title": "Ask AI",
+      "description": "Ask GPT a question",
+      "icon": "gpt-icon.png",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "aiChat",
+      "title": "AI Chat",
+      "description": "Chat with GPT",
+      "icon": "chat-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "askAboutSelectedText",
+      "title": "Ask About Selected Text",
+      "description": "Ask GPT about selected text",
+      "icon": "clipboard-icon.png",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "askAboutScreenContent",
+      "title": "Ask About Screen Content",
+      "description": "Ask GPT about screen content",
+      "icon": "screen-icon.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "askAboutBrowserTab",
+      "title": "Ask About Browser Tab",
+      "description": "Ask GPT about browser tab",
+      "icon": "screen-icon.png",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "disabledByDefault": true
+    },
+    {
+      "name": "continue",
+      "title": "Continue Text",
+      "description": "Generate completion of text",
+      "icon": "text-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "description": "Summarize text",
+      "icon": "summarize-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "explain",
+      "title": "Explain",
+      "description": "Explain text",
+      "icon": "explain-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "fixCode",
+      "title": "Fix Code",
+      "description": "Fix errors and bugs in code",
+      "icon": "code-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "format",
+      "title": "Format Text",
+      "description": "Fix formatting of text",
+      "icon": "grammar-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "friendly",
+      "title": "Change Tone to Friendly",
+      "description": "Change tone of text to friendly",
+      "icon": "text-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "professional",
+      "title": "Change Tone to Professional",
+      "description": "Change tone of text to professional",
+      "icon": "text-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "paraphrase",
+      "title": "Paraphrase",
+      "description": "Paraphrase text",
+      "icon": "text-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "synonyms",
+      "title": "Find Synonyms",
+      "description": "Find synonyms of word/phrase",
+      "icon": "synonym-icon.png",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "word/phrase",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "translate",
+      "title": "Translate",
+      "description": "Translate text to another language",
+      "icon": "translate-icon.png",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "translateUseDefaultLanguage",
+          "label": "Always Use Default Language",
+          "description": "Always translate to the default language, skipping the language selection form.",
+          "required": false,
+          "type": "checkbox",
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "improve",
+      "title": "Improve Writing",
+      "description": "Improve writing of text",
+      "icon": "grammar-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "longer",
+      "title": "Make Longer",
+      "description": "Make text longer",
+      "icon": "longer-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "shorter",
+      "title": "Make Shorter",
+      "description": "Make text shorter",
+      "icon": "shorten-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "genImage",
+      "title": "Generate Images",
+      "description": "Generate images from a text prompt",
+      "icon": "image-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "customAICommands",
+      "title": "Custom AI Commands",
+      "description": "Run and manage custom AI commands",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "checkForUpdates",
+      "title": "Check for Updates",
+      "description": "Check for extension updates from the official GitHub source",
+      "icon": "update-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "manageCustomAPIs",
+      "title": "Manage Custom APIs",
+      "description": "Manage custom API settings",
+      "icon": "box-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "manageAIPresets",
+      "title": "Manage AI Presets",
+      "description": "Manage AI presets",
+      "icon": "preset-icon.png",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "gptProvider",
+      "title": "Default Provider",
+      "description": "The default provider and model used in this extension.",
+      "required": false,
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Nexra (gpt-4o)",
+          "value": "NexraGPT4o"
+        },
+        {
+          "title": "Nexra (gpt-4-32k)",
+          "value": "NexraGPT4"
+        },
+        {
+          "title": "Nexra (chatgpt)",
+          "value": "NexraChatGPT"
+        },
+        {
+          "title": "Nexra (Bing)",
+          "value": "NexraBing"
+        },
+        {
+          "title": "Nexra (llama-3.1)",
+          "value": "NexraLlama31"
+        },
+        {
+          "title": "Nexra (gemini-1.0-pro)",
+          "value": "NexraGeminiPro"
+        },
+        {
+          "title": "DeepInfra (meta-llama-3.2-90b-vision)",
+          "value": "DeepInfraLlama32_90B_Vision"
+        },
+        {
+          "title": "DeepInfra (meta-llama-3.2-11b-vision)",
+          "value": "DeepInfraLlama32_11B_Vision"
+        },
+        {
+          "title": "DeepInfra (meta-llama-3.1-405b)",
+          "value": "DeepInfraLlama31_405B"
+        },
+        {
+          "title": "DeepInfra (meta-llama-3.1-70b)",
+          "value": "DeepInfraLlama31_70B"
+        },
+        {
+          "title": "DeepInfra (meta-llama-3.1-8b)",
+          "value": "DeepInfraLlama31_8B"
+        },
+        {
+          "title": "DeepInfra (llama-3.1-nemotron-70b)",
+          "value": "DeepInfraLlama31Nemotron70B"
+        },
+        {
+          "title": "DeepInfra (WizardLM-2-8x22B)",
+          "value": "DeepInfraWizardLM2_8x22B"
+        },
+        {
+          "title": "DeepInfra (Mixtral-8x7B)",
+          "value": "DeepInfraMixtral_8x7B"
+        },
+        {
+          "title": "DeepInfra (Qwen2.5-72B)",
+          "value": "DeepInfraQwen25_72B"
+        },
+        {
+          "title": "DeepInfra (Mistral-7B)",
+          "value": "DeepInfraMistral_7B"
+        },
+        {
+          "title": "DeepInfra (openchat-3.6-8b)",
+          "value": "DeepInfraOpenChat36_8B"
+        },
+        {
+          "title": "DeepInfra (meta-llama-3-70b)",
+          "value": "DeepInfraLlama3_70B"
+        },
+        {
+          "title": "DeepInfra (meta-llama-3-8b)",
+          "value": "DeepInfraLlama3_8B"
+        },
+        {
+          "title": "DeepInfra (gemma-2-27b)",
+          "value": "DeepInfraGemma2_27B"
+        },
+        {
+          "title": "Blackbox (custom-model)",
+          "value": "Blackbox"
+        },
+        {
+          "title": "Blackbox (llama-3.1-405b)",
+          "value": "BlackboxLlama31_405B"
+        },
+        {
+          "title": "Blackbox (llama-3.1-70b)",
+          "value": "BlackboxLlama31_70B"
+        },
+        {
+          "title": "Blackbox (gemini-1.5-flash)",
+          "value": "BlackboxGemini15Flash"
+        },
+        {
+          "title": "Blackbox (gpt-4o)",
+          "value": "BlackboxGPT4o"
+        },
+        {
+          "title": "Blackbox (claude-3.5-sonnet)",
+          "value": "BlackboxClaude35Sonnet"
+        },
+        {
+          "title": "Blackbox (gemini-pro)",
+          "value": "BlackboxGeminiPro"
+        },
+        {
+          "title": "DuckDuckGo (gpt-4o-mini)",
+          "value": "DuckDuckGo_GPT4oMini"
+        },
+        {
+          "title": "DuckDuckGo (claude-3-haiku)",
+          "value": "DuckDuckGo_Claude3Haiku"
+        },
+        {
+          "title": "DuckDuckGo (meta-llama-3.1-70b)",
+          "value": "DuckDuckGo_Llama31_70B"
+        },
+        {
+          "title": "DuckDuckGo (mixtral-8x7b)",
+          "value": "DuckDuckGo_Mixtral_8x7B"
+        },
+        {
+          "title": "BestIM (gpt-4o-mini)",
+          "value": "BestIM_GPT4oMini"
+        },
+        {
+          "title": "Rocks (claude-3.5-sonnet)",
+          "value": "RocksClaude35Sonnet"
+        },
+        {
+          "title": "Rocks (claude-3-opus)",
+          "value": "RocksClaude3Opus"
+        },
+        {
+          "title": "Rocks (chatgpt-4o-latest)",
+          "value": "RocksChatGPT4oLatest"
+        },
+        {
+          "title": "Rocks (gpt-4o)",
+          "value": "RocksGPT4o"
+        },
+        {
+          "title": "Rocks (gpt-4)",
+          "value": "RocksGPT4"
+        },
+        {
+          "title": "Rocks (WizardLM-2-8x22B)",
+          "value": "RocksWizardLM2_8x22B"
+        },
+        {
+          "title": "Rocks (llama-3.1-405b)",
+          "value": "RocksLlama31_405B"
+        },
+        {
+          "title": "Rocks (llama-3.1-70b)",
+          "value": "RocksLlama31_70B"
+        },
+        {
+          "title": "ChatgptFree (gpt-4o-mini)",
+          "value": "ChatgptFree"
+        },
+        {
+          "title": "PizzaGPT (gpt-4o-mini)",
+          "value": "PizzaGPT"
+        },
+        {
+          "title": "Meta AI (meta-llama-3.1)",
+          "value": "MetaAI"
+        },
+        {
+          "title": "Replicate (mixtral-8x7b)",
+          "value": "ReplicateMixtral_8x7B"
+        },
+        {
+          "title": "Replicate (meta-llama-3.1-405b)",
+          "value": "ReplicateLlama31_405B"
+        },
+        {
+          "title": "Replicate (meta-llama-3-70b)",
+          "value": "ReplicateLlama3_70B"
+        },
+        {
+          "title": "Replicate (meta-llama-3-8b)",
+          "value": "ReplicateLlama3_8B"
+        },
+        {
+          "title": "Phind (Phind Instant)",
+          "value": "Phind"
+        },
+        {
+          "title": "Google Gemini (requires API Key)",
+          "value": "GoogleGemini"
+        },
+        {
+          "title": "GPT4Free Local API",
+          "value": "G4FLocal"
+        },
+        {
+          "title": "Ollama Local API",
+          "value": "OllamaLocal"
+        },
+        {
+          "title": "Custom OpenAI-compatible API",
+          "value": "CustomOpenAI"
+        }
+      ],
+      "default": "NexraGPT4o"
+    },
+    {
+      "name": "webSearch",
+      "title": "Web Search",
+      "description": "Allow GPT to search the web for information.",
+      "required": false,
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Disabled",
+          "value": "off"
+        },
+        {
+          "title": "Automatic",
+          "value": "auto"
+        },
+        {
+          "title": "Balanced",
+          "value": "balanced"
+        },
+        {
+          "title": "Always",
+          "value": "always"
+        }
+      ],
+      "default": "off"
+    },
+    {
+      "name": "smartChatNaming",
+      "title": "Features",
+      "label": "Enable Smart Chat Naming",
+      "description": "Automatically rename chat sessions based on the messages you send.",
+      "required": false,
+      "type": "checkbox",
+      "default": false
+    },
+    {
+      "name": "autoCheckForUpdates",
+      "label": "Automatically Check for Updates",
+      "description": "Automatically check for updates from the official GitHub source.",
+      "required": false,
+      "type": "checkbox",
+      "default": true
+    },
+    {
+      "name": "persistentStorage",
+      "label": "Enable Persistent Storage",
+      "description": "Enable more persistent storage of the extension's data. Do not use if you have sensitive data.",
+      "required": false,
+      "type": "checkbox",
+      "default": false
+    },
+    {
+      "name": "useCursorIcon",
+      "label": "Enable Cursor Icon",
+      "description": "Show a cursor icon when the response is loading.",
+      "required": false,
+      "type": "checkbox",
+      "default": true
+    },
+    {
+      "name": "codeInterpreter",
+      "label": "Enable Code Interpreter (BETA)",
+      "description": "Allows GPT to interpret and run Python code locally, based on your queries. Use at your own risk!",
+      "required": false,
+      "type": "checkbox",
+      "default": false
+    },
+    {
+      "name": "devMode",
+      "label": "Enable Developer Mode",
+      "description": "Enable developer mode for more extensive logging. Do not enable this.",
+      "required": false,
+      "type": "checkbox",
+      "default": false
+    },
+    {
+      "name": "GeminiAPIKeys",
+      "title": "Google Gemini API Keys",
+      "description": "Optional. Only used if Gemini provider is selected. Multiple keys are supported - separate them with commas.",
+      "required": false,
+      "type": "password",
+      "default": ""
+    },
+    {
+      "name": "inactiveDuration",
+      "title": "Delete Inactive Chats After...",
+      "description": "Duration of inactivity before chat is deleted.",
+      "required": false,
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Disabled",
+          "value": "0"
+        },
+        {
+          "title": "6 Hours",
+          "value": "6"
+        },
+        {
+          "title": "1 Day",
+          "value": "24"
+        },
+        {
+          "title": "3 Days",
+          "value": "72"
+        },
+        {
+          "title": "1 Week",
+          "value": "168"
+        },
+        {
+          "title": "1 Month",
+          "value": "720"
+        },
+        {
+          "title": "6 Months",
+          "value": "4320"
+        }
+      ],
+      "default": "0"
+    },
+    {
+      "name": "defaultLanguage",
+      "title": "Default Language",
+      "description": "The default language used in AI commands.",
+      "required": false,
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "🇬🇧 English",
+          "value": "English"
+        },
+        {
+          "title": "🇫🇷 French",
+          "value": "French"
+        },
+        {
+          "title": "🇨🇳 Chinese",
+          "value": "Chinese"
+        },
+        {
+          "title": "🇮🇹 Italian",
+          "value": "Italian"
+        },
+        {
+          "title": "🇩🇪 German",
+          "value": "German"
+        },
+        {
+          "title": "🇪🇸 Spanish",
+          "value": "Spanish"
+        },
+        {
+          "title": "🇵🇹 Portuguese",
+          "value": "Portuguese"
+        },
+        {
+          "title": "🇷🇺 Russian",
+          "value": "Russian"
+        },
+        {
+          "title": "🇻🇳 Vietnamese",
+          "value": "Vietnamese"
+        },
+        {
+          "title": "🇮🇳 Hindi",
+          "value": "Hindi"
+        },
+        {
+          "title": "🇦🇪 Arabic",
+          "value": "Arabic"
+        },
+        {
+          "title": "🇦🇱 Albanian",
+          "value": "Albanian"
+        },
+        {
+          "title": "🇪🇹 Amharic",
+          "value": "Amharic"
+        },
+        {
+          "title": "🇦🇲 Armenian",
+          "value": "Armenian"
+        },
+        {
+          "title": "🇧🇩 Bengali",
+          "value": "Bengali"
+        },
+        {
+          "title": "🇧🇦 Bosnian",
+          "value": "Bosnian"
+        },
+        {
+          "title": "🇧🇬 Bulgarian",
+          "value": "Bulgarian"
+        },
+        {
+          "title": "🇲🇲 Burmese",
+          "value": "Burmese"
+        },
+        {
+          "title": "🇪🇸 Catalan",
+          "value": "Catalan"
+        },
+        {
+          "title": "🇭🇷 Croatian",
+          "value": "Croatian"
+        },
+        {
+          "title": "🇨🇿 Czech",
+          "value": "Czech"
+        },
+        {
+          "title": "🇩🇰 Danish",
+          "value": "Danish"
+        },
+        {
+          "title": "🇳🇱 Dutch",
+          "value": "Dutch"
+        },
+        {
+          "title": "🇪🇪 Estonian",
+          "value": "Estonian"
+        },
+        {
+          "title": "🇫🇮 Finnish",
+          "value": "Finnish"
+        },
+        {
+          "title": "🇬🇪 Georgian",
+          "value": "Georgian"
+        },
+        {
+          "title": "🇬🇷 Greek",
+          "value": "Greek"
+        },
+        {
+          "title": "🇮🇳 Gujarati",
+          "value": "Gujarati"
+        },
+        {
+          "title": "🇭🇺 Hungarian",
+          "value": "Hungarian"
+        },
+        {
+          "title": "🇮🇸 Icelandic",
+          "value": "Icelandic"
+        },
+        {
+          "title": "🇮🇩 Indonesian",
+          "value": "Indonesian"
+        },
+        {
+          "title": "🇯🇵 Japanese",
+          "value": "Japanese"
+        },
+        {
+          "title": "🇮🇳 Kannada",
+          "value": "Kannada"
+        },
+        {
+          "title": "🇰🇿 Kazakh",
+          "value": "Kazakh"
+        },
+        {
+          "title": "🇰🇷 Korean",
+          "value": "Korean"
+        },
+        {
+          "title": "🇱🇻 Latvian",
+          "value": "Latvian"
+        },
+        {
+          "title": "🇱🇹 Lithuanian",
+          "value": "Lithuanian"
+        },
+        {
+          "title": "🇲🇰 Macedonian",
+          "value": "Macedonian"
+        },
+        {
+          "title": "🇲🇾 Malay",
+          "value": "Malay"
+        },
+        {
+          "title": "🇮🇳 Malayalam",
+          "value": "Malayalam"
+        },
+        {
+          "title": "🇮🇳 Marathi",
+          "value": "Marathi"
+        },
+        {
+          "title": "🇲🇳 Mongolian",
+          "value": "Mongolian"
+        },
+        {
+          "title": "🇳🇴 Norwegian",
+          "value": "Norwegian"
+        },
+        {
+          "title": "🇮🇷 Persian",
+          "value": "Persian"
+        },
+        {
+          "title": "🇵🇱 Polish",
+          "value": "Polish"
+        },
+        {
+          "title": "🇵🇰 Punjabi",
+          "value": "Punjabi"
+        },
+        {
+          "title": "🇷🇴 Romanian",
+          "value": "Romanian"
+        },
+        {
+          "title": "🇷🇸 Serbian",
+          "value": "Serbian"
+        },
+        {
+          "title": "🇸🇰 Slovak",
+          "value": "Slovak"
+        },
+        {
+          "title": "🇸🇮 Slovenian",
+          "value": "Slovenian"
+        },
+        {
+          "title": "🇸🇴 Somali",
+          "value": "Somali"
+        },
+        {
+          "title": "🇸🇪 Swedish",
+          "value": "Swedish"
+        },
+        {
+          "title": "🇵🇭 Tagalog",
+          "value": "Tagalog"
+        },
+        {
+          "title": "🇮🇳 Tamil",
+          "value": "Tamil"
+        },
+        {
+          "title": "🇮🇳 Telugu",
+          "value": "Telugu"
+        },
+        {
+          "title": "🇹🇭 Thai",
+          "value": "Thai"
+        },
+        {
+          "title": "🇹🇷 Turkish",
+          "value": "Turkish"
+        },
+        {
+          "title": "🇺🇦 Ukrainian",
+          "value": "Ukrainian"
+        },
+        {
+          "title": "🇵🇰 Urdu",
+          "value": "Urdu"
+        }
+      ],
+      "default": "English"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "duck-duck-scrape": "^2.2.5",
+    "fetch-to-curl": "^0.6.0",
+    "g4f-image": "^1.2.0",
+    "gemini-g4f": "^12.3.10-beta.1",
+    "lodash.throttle": "^4.1.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^20.14.14",
+    "@types/react": "^18.3.3",
+    "eslint": "^7.32.0",
+    "prettier": "^2.8.8",
+    "react": "^18.3.1",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

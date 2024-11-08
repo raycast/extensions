@@ -1,0 +1,9 @@
+{
+  "root": true,
+  "extends": ["@raycast"],
+  "rules": {
+    // disable the prefer-title-case rule in @raycast/recommended plugin
+    // as it breaks strings like "Send to GPT" -> "Send to Gpt"
+    "@raycast/prefer-title-case": "off"
+  }
+}
