@@ -3,7 +3,7 @@ import { showToast, Toast } from "@raycast/api";
 import { IngredientResult } from "../models/IngredientResult";
 import { IngredientsCheckResponse } from "../models/IngredientsCheckResponse";
 
-const API_BASE_URL = "https://api.veganify.app/v0";
+const API_BASE_URL = "https://api.veganify.app/v1";
 
 export async function checkIngredient(ingredient: string): Promise<IngredientResult> {
   try {
@@ -38,7 +38,9 @@ export async function checkIngredient(ingredient: string): Promise<IngredientRes
       name: ingredient,
       isVegan: data.data.vegan,
       surelyVegan: data.data.surely_vegan.includes(ingredient.toLowerCase()),
-      maybeVegan: data.data.maybe_vegan.includes(ingredient.toLowerCase()),
+      maybeNotVegan: data.data.maybe_not_vegan.includes(ingredient.toLowerCase()),
+      notVegan: data.data.not_vegan.includes(ingredient.toLowerCase()),
+      unknown: data.data.unknown.includes(ingredient.toLowerCase()),
     };
   } catch (error) {
     console.error(`Error checking ingredient ${ingredient}:`, error);
@@ -61,7 +63,9 @@ export async function checkIngredient(ingredient: string): Promise<IngredientRes
       name: ingredient,
       isVegan: null,
       surelyVegan: false,
-      maybeVegan: false,
+      maybeNotVegan: false,
+      notVegan: false,
+      unknown: false,
       error: error instanceof Error ? error.message : "An unknown error occurred",
     };
   }

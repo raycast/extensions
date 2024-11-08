@@ -14,10 +14,12 @@ import { checkCapacitiesApp } from "./helpers/isCapacitiesInstalled";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { API_URL, axiosErrorHandler, useCapacitiesStore } from "./helpers/storage";
+import ErrorView from "./components/ErrorView";
 
 interface SaveToDailyNoteBody {
   spaceId: string;
   mdText: string;
+  noTimeStamp: boolean;
 }
 
 export default function Command() {
@@ -26,7 +28,7 @@ export default function Command() {
     checkCapacitiesApp();
   }, []);
 
-  const { store, triggerLoading, isLoading: storeIsLoading } = useCapacitiesStore();
+  const { store, triggerLoading, isLoading: storeIsLoading, error } = useCapacitiesStore();
 
   useEffect(() => {
     triggerLoading();
@@ -43,6 +45,7 @@ export default function Command() {
         spaceId: store?.spaces.length === 1 ? store.spaces[0].id : values.spaceId,
         mdText: values.mdText,
         origin: "commandPalette",
+        noTimeStamp: values.noTimeStamp,
       };
 
       axios
@@ -68,7 +71,9 @@ export default function Command() {
     },
   });
 
-  return isLoading ? (
+  return error ? (
+    <ErrorView error={error} />
+  ) : isLoading ? (
     <Detail markdown="Saving weblink ..." isLoading />
   ) : (
     <Form
@@ -79,7 +84,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextArea title="Note" {...itemProps.mdText} />
+      <Form.TextArea title="Note" placeholder="Daily Note" {...itemProps.mdText} />
       {store && store.spaces.length > 1 && (
         <>
           <Form.Dropdown
@@ -94,6 +99,12 @@ export default function Command() {
           </Form.Dropdown>
         </>
       )}
+      <Form.Checkbox
+        label="No Timestamp"
+        info="If checked, no time stamp will be added to the note"
+        storeValue
+        {...itemProps.noTimeStamp}
+      />
     </Form>
   );
 }

@@ -10,8 +10,8 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { AvgPing, Heartbeat, HeartbeatList, Monitor, Uptime, UptimeKuma } from "./modules/UptimeKuma";
+import { useEffect, useMemo, useState } from "react";
+import { AvgPing, Heartbeat, HeartbeatList, Monitor, MonitorStatus, Uptime, UptimeKuma } from "./modules/UptimeKuma";
 import { useCachedState } from "@raycast/utils";
 import useAppStore from "./utils/store";
 import { getAccessories, getMonitorStatusColor, getMonitorStatusIcon } from "./utils/display";
@@ -110,8 +110,37 @@ export function ListMonitors() {
     initCommand();
   }, []);
 
+  const [filter, setFilter] = useState("");
+  const filteredMonitors = useMemo(
+    () =>
+      !filter
+        ? monitors
+        : monitors.filter((monitor) => {
+            const [type, val] = filter.split("=", 2);
+            if (type === "status")
+              return monitor.heartbeat?.status === MonitorStatus[val as keyof typeof MonitorStatus];
+          }),
+    [monitors, filter],
+  );
+
   return (
-    <List isLoading={isLoading}>
+    <List
+      isLoading={isLoading}
+      searchBarAccessory={
+        !monitors.length ? undefined : (
+          <List.Dropdown tooltip="Filter" onChange={setFilter}>
+            <List.Dropdown.Item title="All" value="" />
+            <List.Dropdown.Section title="Status">
+              {Object.keys(MonitorStatus)
+                .filter((key) => isNaN(Number(key))) // Filter out numeric keys
+                .map((key) => (
+                  <List.Dropdown.Item key={key} title={key} value={`status=${key}`} />
+                ))}
+            </List.Dropdown.Section>
+          </List.Dropdown>
+        )
+      }
+    >
       {kuma_error.length > 0 ? (
         <List.EmptyView
           title="Error"
@@ -126,7 +155,7 @@ export function ListMonitors() {
       ) : (
         <List.EmptyView title="No Results" icon="noview.png" />
       )}
-      {monitors.map((monitor) => (
+      {filteredMonitors.map((monitor) => (
         <List.Item
           id={monitor.id.toString()}
           key={monitor.id}

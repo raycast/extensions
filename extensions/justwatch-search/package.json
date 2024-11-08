@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "rishabswift",
   "contributors": [
-    "j3lte"
+    "j3lte",
+    "xmok"
   ],
   "license": "MIT",
   "categories": [
@@ -22,8 +23,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.84.2",
+    "@raycast/utils": "^1.18.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

@@ -7,8 +7,10 @@ import { usePromise } from "@raycast/utils";
 import { homedir } from "os";
 import { OpenPrefAction } from "./components/actions/OpenPrefAction";
 
-export default function Command(props: LaunchProps<{ launchContext: { ruleContent?: string; replace?: boolean } }>) {
-  const { ruleContent, replace } = props.launchContext ?? {};
+export default function Command(
+  props: LaunchProps<{ launchContext: { cursorDirectory?: { ruleContent: string; replace?: boolean } } }>,
+) {
+  const { cursorDirectory } = props.launchContext ?? {};
 
   const {
     data: projects,
@@ -33,9 +35,10 @@ export default function Command(props: LaunchProps<{ launchContext: { ruleConten
     await showHUD("Opening project...");
     await openInCursor(project.path, "Project opened successfully");
 
-    if (ruleContent) {
+    if (cursorDirectory && cursorDirectory.ruleContent) {
+      console.debug("Applying cursor rule");
       await ensureCursorRulesFile(project.path);
-      await applyCursorRule(project.path, ruleContent, replace ?? true);
+      await applyCursorRule(project.path, cursorDirectory.ruleContent, cursorDirectory.replace ?? true);
     }
   }
 

@@ -13,6 +13,9 @@ const month = date.getMonth() + 1;
 const year = date.getFullYear();
 export const fullDate = `${day}, ${month}, ${year}`;
 
+// ENVATO
+export const envato = new Envato.Client(token);
+
 /*-----------------------------------*/
 /*------ FETCH
 /*-----------------------------------*/

@@ -4,7 +4,7 @@
 
 # Coolify Raycast Extension
 
-This is a Raycast extension for [Coolify](https://coolify.io/). With this extension you can view Servers, Server Details, Resources, Teams, Team Members and more in your Coolify instance.
+This is a Raycast extension for [Coolify](https://coolify.io/). With this extension you can view Servers, Server Details, Resources, Teams, Team Members, Projects, Environments and more in your Coolify instance.
 
 ## 🚀 Getting Started
 
@@ -14,4 +14,4 @@ This is a Raycast extension for [Coolify](https://coolify.io/). With this extens
 
     a. The URL of your Coolify instance (w/ Port) (e.g. https://app.coolify.io/)
 
-    b. API Token (check Coolify Docs for up-to-date method (https://coolify.io/docs/api-reference/authorization)
+    b. API Token (check Coolify Docs for up-to-date method (https://coolify.io/docs/api-reference/authorization))
