@@ -10,13 +10,12 @@ interface LinkItemProps {
   config: Config;
   onRefresh: () => void;
   onCleanCache: () => void;
-  updateConfig: (newConfig: Partial<Config>) => void;
 }
 
 export function LinkItem({ link, config, onRefresh, onCleanCache }: LinkItemProps) {
   const { t } = useTranslation();
   const BASE_URL = config?.host;
-  const showWebsitePreview = config?.showWebsitePreview === "true" ? true : false;
+  const showWebsitePreview = config?.showWebsitePreview ? true : false;
   const rightAccessories: List.Item.Accessory[] = [{ text: new Date(link.createdAt * 1000).toLocaleDateString() }];
   return (
     <List.Item

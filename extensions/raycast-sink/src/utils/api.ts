@@ -1,10 +1,11 @@
 import https from "https";
 import { URL } from "url";
-import { LocalStorage } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
+import { Preferences } from "../types";
 
 async function getApiConfig() {
-  const host = await LocalStorage.getItem<string>("host");
-  const token = await LocalStorage.getItem<string>("token");
+  const preferences = getPreferenceValues<Preferences>();
+  const { host, token } = preferences;
   if (!host || !token) {
     throw new Error("API configuration is not initialized");
   }
@@ -126,11 +127,6 @@ export async function checkTokenValid(host: string, token: string): Promise<bool
 
     req.end();
   });
-}
-
-export function setApiConfig(config: { host: string; token: string }) {
-  LocalStorage.setItem("host", config.host);
-  LocalStorage.setItem("token", config.token);
 }
 
 export async function deleteLink(slug: string): Promise<void> {

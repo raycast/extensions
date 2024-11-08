@@ -66,8 +66,8 @@ ${managerUrl}
             <Detail.Metadata.TagList.Item text={link.slug} color={"#eed535"} />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title={t.createdAt} text={new Date(link.createdAt).toLocaleString()} />
-          <Detail.Metadata.Label title={t.updatedAt} text={new Date(link.updatedAt).toLocaleString()} />
+          <Detail.Metadata.Label title={t.createdAt} text={new Date(link.createdAt * 1000).toLocaleString()} />
+          <Detail.Metadata.Label title={t.updatedAt} text={new Date(link.updatedAt * 1000).toLocaleString()} />
         </Detail.Metadata>
       }
       actions={

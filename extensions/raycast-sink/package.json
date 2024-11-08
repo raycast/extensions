@@ -12,9 +12,15 @@
   "author": "luolei",
   "commands": [
     {
-      "name": "sink",
-      "title": "Sink",
-      "description": "Search, create, and manage your short links with Sink",
+      "name": "listLink",
+      "title": "Link List",
+      "description": "List all your short links",
+      "mode": "view"
+    },
+    {
+      "name": "createLink",
+      "title": "Create Link",
+      "description": "Create a new short link",
       "mode": "view"
     }
   ],
@@ -39,14 +45,6 @@
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
-  "attachments": [
-    {
-      "title": "Get Raycast blog posts",
-      "name": "get-raycast-blog-posts",
-      "description": "Get the latest blog posts from the Raycast blog",
-      "mode": "submenu"
-    }
-  ],
   "preferences": [
     {
       "name": "language",
@@ -82,7 +80,7 @@
       "title": "API Host",
       "description": "Enter the API host UR",
       "placeholder": "https://your-sink-instance.com",
-      "default": "https://sink.cool"
+      "default": ""
     },
     {
       "name": "token",
@@ -91,7 +89,7 @@
       "title": "API Token",
       "description": "Enter your API token",
       "placeholder": "Enter your Sink API authentication token",
-      "default": "SinkCool"
+      "default": ""
     }
   ]
 }

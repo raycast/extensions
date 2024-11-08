@@ -25,18 +25,16 @@ export function useLinks() {
     let currentCursor: string | undefined = undefined;
     let isComplete = false;
 
-    // 首先清理掉缓存
     await setCachedLinks([]);
 
     while (!isComplete) {
       try {
         const response = await fetchLinks(currentCursor);
-        const data = response as FetchLinksResponse; // 添加类型断言
+        const data = response as FetchLinksResponse;
         allLinks = [...allLinks, ...data.links];
         currentCursor = data.cursor;
         isComplete = !data.cursor || data.list_complete;
       } catch (error) {
-        console.error("Error fetching links:", error);
         await showToast({
           style: Toast.Style.Failure,
           title: t.errorFetchingLinks,
