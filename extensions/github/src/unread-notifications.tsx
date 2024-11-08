@@ -37,11 +37,11 @@ function UnreadNotifications() {
     const response = await octokit.activity.listNotificationsForAuthenticatedUser();
     return Promise.all(
       response.data.map(async (notification: Notification) => {
-        let icon;
+        let icon: { value: Image; tooltip: string };
         try {
           icon = await getNotificationIcon(notification);
         } catch (error) {
-          icon = getGitHubIcon();
+          icon = { value: Icon.Warning, tooltip: "Could not load icon" };
         }
         return { ...notification, icon };
       }),
