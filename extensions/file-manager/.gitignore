@@ -9,16 +9,11 @@ raycast-env.d.ts
 .swiftpm
 compiled_raycast_swift
 
-# Icon must end with two \r
-^Icon\?
-
-
 # misc
 .DS_Store
 
 
-### Windows ###
-
+# ---- Windows ----
 # Windows thumbnail cache files
 Thumbs.db
 Thumbs.db:encryptable
@@ -44,8 +39,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-### macOS ###
-
+# ---- macOS ----
 # General
 .DS_Store
 .AppleDouble
@@ -73,3 +67,24 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# ---- MicrosoftOffice ----
+*.tmp
+
+# Word temporary
+~$*.doc*
+
+# Word Auto Backup File
+Backup of *.doc*
+
+# Excel temporary
+~$*.xls*
+
+# Excel Backup File
+*.xlk
+
+# PowerPoint temporary
+~$*.ppt*
+
+# Visio autosave temporary files
+*.~vsd*
