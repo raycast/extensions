@@ -66,6 +66,11 @@ export default async function main() {
 
     switch (preferences.displayMode) {
       case "hud":
+        if (preferences.defaultAction === "copy") {
+          Clipboard.copy(prompt.english);
+        } else {
+          Clipboard.paste(prompt.english);
+        }
         await showHUD(prompt.english || "");
         break;
       case "toast": {
