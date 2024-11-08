@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bitbucket-power",
+  "title": "Bitbucket",
+  "description": "Lists the pipelines",
+  "icon": "icon.png",
+  "author": "kmizzi",
+  "owner": "sku-io",
+  "access": "public",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "pipelines",
+      "title": "Bitbucket Pipelines",
+      "description": "List 5 Most Recent Pipelines",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "textfield",
+      "name": "accessToken",
+      "description": "Bitbucket Access Token",
+      "required": true,
+      "title": "Access Token"
+    },
+    {
+      "type": "textfield",
+      "name": "workspace",
+      "description": "Bitbucket Workspace",
+      "required": true,
+      "title": "Workspace",
+      "placeholder": "https://bitucket.org/<workspace>"
+    },
+    {
+      "type": "textfield",
+      "name": "repositorySlug",
+      "description": "Bitbucket Repository",
+      "required": true,
+      "title": "Repository",
+      "placeholder": "https://bitucket.org/<workspace>/<repository>"
+    },
+    {
+      "type": "textfield",
+      "name": "testStepNumber",
+      "description": "Pipeline Step # that runs Tests (to retrieve the Test Report)",
+      "required": false,
+      "title": "Step # that runs tests"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.1",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.7.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
