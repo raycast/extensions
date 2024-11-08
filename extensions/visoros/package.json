@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "visoros",
+  "title": "VisorOS",
+  "description": "Autonomus Assistant inside Raycast",
+  "icon": "extension-icon.png",
+  "author": "pythonpete32",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask-visor",
+      "title": "Ask Visor",
+      "subtitle": "ask visor to do something",
+      "description": "Gives your assistant a task",
+      "mode": "view"
+    },
+    {
+      "name": "voice-note",
+      "title": "Voice Note",
+      "subtitle": "Record and transcribe voice notes",
+      "description": "Record audio and get text transcription",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "openaiApiKey",
+      "type": "password",
+      "required": true,
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API key for using GPT and Whisper APIs",
+      "placeholder": "sk-..."
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.84.10",
+    "@raycast/utils": "^1.17.0",
+    "openai": "^4.71.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "packageManager": "pnpm@9.12.3"
+}
