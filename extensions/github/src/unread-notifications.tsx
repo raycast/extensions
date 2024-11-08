@@ -41,7 +41,7 @@ function UnreadNotifications() {
         try {
           icon = await getNotificationIcon(notification);
         } catch (error) {
-          icon = { value: Icon.Warning, tooltip: "Could not load icon" };
+          icon = { value: { source: Icon.Warning, tintColor: Color.Red }, tooltip: "Could not load icon" };
         }
         return { ...notification, icon };
       }),
