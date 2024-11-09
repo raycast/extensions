@@ -59,16 +59,19 @@ export default function TogglePomodoroTimer() {
     icon = { source: `tomato-${progressInTenth}.png`, tintColor: IconTint };
   }
 
-  const title = preferences.enableTimeOnMenuBar
-    ? currentInterval
-      ? secondsToTime(currentInterval.length - duration(currentInterval))
-      : "--:--"
-    : undefined;
+  const timeLeft = currentInterval ? secondsToTime(currentInterval.length - duration(currentInterval)) : "--:--";
+
+  const title = preferences.enableTimeOnMenuBar ? timeLeft : undefined;
+
+  setTimeout(() => {
+    setCurrentInterval(getCurrentInterval());
+  }, 1000);
 
   return (
-    <MenuBarExtra icon={icon} title={title} tooltip={"Pomodoro"}>
+    <MenuBarExtra icon={icon} title={title} tooltip={`Pomodoro ${timeLeft}`}>
       {currentInterval ? (
         <>
+          <MenuBarExtra.Item title={timeLeft as string} icon={Icon.Alarm} />
           {isPaused(currentInterval) ? (
             <MenuBarExtra.Item
               title="Continue"

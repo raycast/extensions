@@ -1,5 +1,9 @@
 # Pomodoro Changelog
 
+## [Enhancement] - 2024-11-08
+
+Show accurate time remaining as a menubar item and when hovering on the menubar icon.
+
 ## [Enhancement] - 2024-10-31
 
 Offers the option to enable Apple's default Do Not Disturb mode when Pomodoro timer is on "Focus" mode
