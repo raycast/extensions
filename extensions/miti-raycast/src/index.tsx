@@ -27,7 +27,13 @@ export default function Command() {
           Array.isArray(data[nepaliDay - 1].eventDetails) &&
           data[nepaliDay - 1].eventDetails.length > 0 &&
           data[nepaliDay - 1].eventDetails.map(
-            (event: any, index: number) =>
+            (
+              event: {
+                title: { np: string };
+                isHoliday: boolean;
+              },
+              index: number,
+            ) =>
               event.title?.np && (
                 <MenuBarExtra.Item
                   key={`event-${index}`}

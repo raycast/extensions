@@ -8,13 +8,9 @@ import { captureException } from "@raycast/api";
 const calThinSpace = replaceWithThinSpace(" ");
 const calFourPerEmSpaceDivider = replaceWithFourPerEmSpace(" ");
 
-const CalTitleStartPadding = largeCalendar
-  ? calThinSpace.repeat(7) + calFourPerEmSpaceDivider.repeat(1)
-  : calThinSpace.repeat(5) + calFourPerEmSpaceDivider.repeat(4);
 const CalTitleSpace = largeCalendar
   ? calThinSpace.repeat(4) + calThinSpace.repeat(5) + calFourPerEmSpaceDivider
   : calThinSpace.repeat(5) + calFourPerEmSpaceDivider;
-const CalDayStartPadding = calThinSpace.repeat(3) + calFourPerEmSpaceDivider.repeat(2);
 const CalDaySpace = largeCalendar
   ? calThinSpace.repeat(4) + calThinSpace.repeat(4) + calFourPerEmSpaceDivider.repeat(2)
   : calThinSpace.repeat(4) + calFourPerEmSpaceDivider.repeat(2);

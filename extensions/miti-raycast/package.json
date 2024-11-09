@@ -1,10 +1,10 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "miti-raycast",
-  "title": "Miti - The Nepali Calendar",
+  "title": "Miti - the Nepali Calendar",
   "description": "Show Nepali calendar and events in the menu bar.",
-  "icon": "miti.png",
-  "author": "ParajuliBkrm",
+  "icon": "miti-logo.png",
+  "author": "parajulibkrm",
   "license": "MIT",
   "categories": [
     "Applications",
