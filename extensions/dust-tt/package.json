@@ -9,7 +9,7 @@
     "vineus",
     "henry_fontanier",
     "stang",
-    "fraggle"
+    "sebastien_flory"
   ],
   "categories": [
     "Productivity"
@@ -37,7 +37,7 @@
       "name": "apiUrl",
       "description": "Dust Api URL (advanced)",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "title": "API URL (advanced)",
       "placeholder": "https://dust.tt",
       "default": "https://dust.tt"
@@ -46,7 +46,7 @@
       "name": "oauthClientID",
       "description": "Dust oauth client ID (advanced)",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "title": "OAuth client ID (advanced)",
       "placeholder": "5k7C1Mj9QpoT9DKSDOvdJt8pwC0DkWZR",
       "default": "5k7C1Mj9QpoT9DKSDOvdJt8pwC0DkWZR"
@@ -55,7 +55,7 @@
       "name": "oauthDomain",
       "description": "Dust oauth domain (advanced)",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "title": "OAuth domain (advanced)",
       "placeholder": "https://dust-tt.us.auth0.com",
       "default": "https://dust-tt.us.auth0.com"

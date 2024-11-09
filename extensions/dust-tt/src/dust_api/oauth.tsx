@@ -1,4 +1,4 @@
-// Polyfill for fetch so that Dust client can rely on the Stream API that the raycast fetch doesn't support
+// Polyfill for fetch so that Dust client can rely on the Stream API that the raycast cross-fetch doesn't support
 import { fetch, Headers, Request, Response } from "undici";
 
 // @ts-expect-error there are some diff in the unidi types but it works
