@@ -151,7 +151,7 @@ function getResults(query: string): LabeledDate[] {
     }
   }
 
-  let results: LabeledDate[] = [];
+  const results: LabeledDate[] = [];
 
   // Try parsing as Nepali Date
   const nepaliDate = parseNepaliDate(query, now);
@@ -259,7 +259,7 @@ export default function Command() {
       searchBarPlaceholder="Enter a date (AD YYYY-MM-DD or BS YYYY-MM-DD)"
     >
       <List.EmptyView title="Invalid Date" description="Failed to parse your date in AD or BS format." />
-      {results.map(({ date, label, human, isNepali, nepaliDate, isConverted }) => {
+      {results.map(({ date, human, isNepali, nepaliDate, isConverted }) => {
         let title;
         let subtitle = "";
 
