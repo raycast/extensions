@@ -1,6 +1,6 @@
 # Rebrandly Changelog
 
-## [Update Logo + Create Link] - {PR_MERGE_DATE}
+## [Update Logo + Create Link] - 2024-11-09
 
 - Filter by "Starred"
 - Create new links via a subcommand
