@@ -46,7 +46,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.84.12",
+    "@raycast/api": "^1.85.1",
     "@raycast/utils": "^1.18.0",
     "@types/lodash.groupby": "^4.6.9",
     "axios": "^1.7.7",

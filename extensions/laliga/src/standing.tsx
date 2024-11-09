@@ -60,7 +60,7 @@ function PreviousNextMatches(props: {
         key="kickoff"
         title="Kick Off"
         text={
-          next[0].time
+          next[0].date
             ? formatDate(next[0].date, "eee dd.MM.yyyy HH:mm")
             : "TBC"
         }
