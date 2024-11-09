@@ -1,3 +1,3 @@
 # Gleam Packages
 
-search for Gleam packages
+Search for Gleam packages
