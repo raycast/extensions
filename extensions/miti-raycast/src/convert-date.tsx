@@ -252,7 +252,6 @@ function getSortedFormats({ human }: Pick<LabeledDate, "human">): DateFormatter[
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const results = useMemo(() => getResults(searchText), [searchText]);
-  console.log(results.map((x) => x.date.toISOString()));
   return (
     <List
       searchText={searchText}

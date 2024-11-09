@@ -1,14 +1,8 @@
-# Menubar Calendar
+# Miti - The Nepali Calendar
 
-Show calendar and reminders in the menu bar.
+Show Nepali calendar and events in the menu bar.
 
-✨For Calendar, you can:
+Includes two commands:
 
-- Click on the event to open it in Calendar.
-- Press **`⌥`** to open url in the calendar event.
-
-✨For Reminders, you can:
-
-- Left-click on the reminder to open it in Reminder.
-- Right-click on the reminder to complete it.
-- Press **`⌥`** to delete it.
+- `Convert Date` - Convert AD date to BS date and vice versa.
+- `Calendar` - Show Nepali calendar and events in the menu bar.
