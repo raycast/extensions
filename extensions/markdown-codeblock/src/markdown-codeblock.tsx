@@ -8,7 +8,8 @@ type Item = {
   keywords: string[];
 };
 
-async function paste(codeblockTag: string, item: Item) {
+async function paste(item: Item) {
+  const [codeblockTag = ""] = item.keywords;
   const copiedText = await Clipboard.readText();
   if (!copiedText) return;
 
@@ -99,7 +100,7 @@ export default function Command() {
               <Action
                 title="Paste in Active App"
                 onAction={async () => {
-                  await paste(item.keywords[0], item);
+                  await paste(item);
                   await popToRoot({ clearSearchBar: true });
                 }}
               />
