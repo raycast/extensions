@@ -1,0 +1,317 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "miti-raycast",
+  "title": "Miti - The Nepali Calendar",
+  "description": "Show Nepali calendar and events in the menu bar.",
+  "icon": "miti.png",
+  "author": "ParajuliBkrm",
+  "license": "MIT",
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Productivity",
+    "System"
+  ],
+  "keywords": [
+    "calendar",
+    "reminders",
+    "date",
+    "ical",
+    "cal",
+    "year",
+    "month",
+    "week",
+    "day"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Miti Menubar Nepali Calendar",
+      "subtitle": "Calendar",
+      "description": "Show calendar and reminders in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "title": "Week Start",
+          "name": "weekStart",
+          "type": "dropdown",
+          "description": "Start day of the week",
+          "required": false,
+          "default": "1",
+          "data": [
+            {
+              "title": "Monday",
+              "value": "1"
+            },
+            {
+              "title": "Sunday",
+              "value": "0"
+            }
+          ]
+        },
+        {
+          "title": "Menubar Style",
+          "name": "menubarStyle",
+          "type": "dropdown",
+          "description": "Show calendar icon and date in the menu bar",
+          "required": false,
+          "default": "iconOnly",
+          "data": [
+            {
+              "title": "Icon and Date",
+              "value": "both"
+            },
+            {
+              "title": "Icon Only",
+              "value": "iconOnly"
+            },
+            {
+              "title": "Date Only",
+              "value": "dateOnly"
+            }
+          ]
+        },
+        {
+          "title": "Menubar Icon Style",
+          "name": "menubarIconStyle",
+          "type": "dropdown",
+          "description": "Show different icon style in the menu bar",
+          "required": false,
+          "default": "Day",
+          "data": [
+            {
+              "title": "Day",
+              "value": "Day"
+            },
+            {
+              "title": "Calendar",
+              "value": "Calendar"
+            }
+          ]
+        },
+        {
+          "title": "Menubar Item Icon Style",
+          "name": "menubarItemIconStyle",
+          "type": "dropdown",
+          "description": "Show different icon style in the menu bar item",
+          "required": false,
+          "default": "Raycast",
+          "data": [
+            {
+              "title": "Raycast",
+              "value": "Raycast"
+            },
+            {
+              "title": "Native",
+              "value": "Native"
+            },
+            {
+              "title": "None",
+              "value": "None"
+            }
+          ]
+        },
+        {
+          "title": "Calendar Style",
+          "name": "largeCalendar",
+          "label": "Large Calendar",
+          "type": "checkbox",
+          "description": "Large calendar for more visibility",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "highlightCalendar",
+          "label": "Highlight Calendar",
+          "type": "checkbox",
+          "description": "Highlight calendar for more visibility",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "dateFormat",
+          "title": "Date Fromat",
+          "type": "dropdown",
+          "description": "Choose the time format to display.",
+          "required": false,
+          "default": "macOS",
+          "data": [
+            {
+              "title": "Default",
+              "value": "macOS"
+            },
+            {
+              "title": "MM/dd/yyyy",
+              "value": "MM/dd/yyyy"
+            },
+            {
+              "title": "dd/MM/yyyy",
+              "value": "dd/MM/yyyy"
+            },
+            {
+              "title": "yyyy/MM/dd",
+              "value": "yyyy/MM/dd"
+            },
+            {
+              "title": "yyyy-MM-dd",
+              "value": "yyyy-MM-dd"
+            },
+            {
+              "title": "dd.MM.yyyy",
+              "value": "dd.MM.yyyy"
+            }
+          ]
+        },
+        {
+          "name": "calendarView",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Upcoming",
+              "value": "upcoming"
+            },
+            {
+              "title": "All",
+              "value": "all"
+            }
+          ],
+          "default": "today",
+          "required": false,
+          "title": "Calendar View",
+          "description": "Choose which calendar events you want to see in your menu bar."
+        },
+        {
+          "title": "Extra Items",
+          "name": "showCalendar",
+          "label": "Show Calendar",
+          "type": "checkbox",
+          "description": "Show Calendar in the menu bar item",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "showReminders",
+          "label": "Show Reminders",
+          "type": "checkbox",
+          "description": "Show Reminders in the menu bar item",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "showSettings",
+          "label": "Show Settings",
+          "type": "checkbox",
+          "description": "Show Settings in the menu bar item",
+          "required": false,
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "convert-date",
+      "title": "Convert Date",
+      "subtitle": "Convert Between Bikram Sambat and Gregorian Date",
+      "description": "Converts data between Nepali and English Calendars",
+      "mode": "view",
+      "keywords": [
+        "date",
+        "epoch",
+        "unix",
+        "seconds",
+        "milliseconds",
+        "iso",
+        "timestamp",
+        "convert"
+      ],
+      "preferences": [
+        {
+          "name": "defaultFormat",
+          "title": "Preferred Machine Format",
+          "description": "Default machine-readable output format to use when converting a human-readable date",
+          "type": "dropdown",
+          "default": "human",
+          "required": false,
+          "data": [
+            {
+              "title": "Unix Timestamp (ms)",
+              "value": "unix-ms"
+            },
+            {
+              "title": "Unix Timestamp (seconds)",
+              "value": "unix-s"
+            },
+            {
+              "title": "ISO Date",
+              "value": "iso"
+            },
+            {
+              "title": "Human Readable",
+              "value": "human"
+            },
+            {
+              "title": "Nepali Date",
+              "value": "nepali"
+            }
+          ]
+        },
+        {
+          "name": "copyAction",
+          "title": "Copy Action",
+          "description": "Action to take when copying the converted date",
+          "type": "dropdown",
+          "default": "both",
+          "required": false,
+          "data": [
+            {
+              "title": "Copy to clipboard",
+              "value": "copy"
+            },
+            {
+              "title": "Paste to frontmost app",
+              "value": "paste"
+            },
+            {
+              "title": "Copy and paste to frontmost app",
+              "value": "both"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
+    "chrono-node": "^2.7.7",
+    "en": "link:javascript-time-ago/locale/en",
+    "javascript-time-ago": "^2.5.11",
+    "nepali-datetime": "^1.2.1",
+    "unicode-text-decorator": "^0.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/calendar": "^0.1.4",
+    "@types/node": "22.7.3",
+    "@types/react": "18.3.9",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
