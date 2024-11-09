@@ -47,6 +47,12 @@
       "description": "Shows the stats of the Pomodoro timer"
     },
     {
+      "name": "install-pomodoro-dnd-shortcut",
+      "title": "Install Pomodoro DND Shortcut",
+      "mode": "no-view",
+      "description": "Installs/Verifys the Do Not Disturb shortcut necessary for enabling Do Not Disturb mode on Mac. Requires Shortcuts application. Enable 'Do Not Disturb while focused' in preferences to use this feature."
+    },
+    {
       "name": "slack-pomodoro-menu-bar",
       "title": "Slack Pomodoro in Menu Bar",
       "subtitle": "Control timers from menu-bar and updates Slack status",
@@ -314,7 +320,7 @@
       "type": "checkbox",
       "description": "Enables do not disturb mode of Mac when enabled. Requires use of Shortcuts application (setup is automatic the first time)",
       "required": true,
-      "title": "Mac - Do Not Disturb",
+      "title": "Do Not Disturb while focused",
       "default": false,
       "label": "Enable Do Not Disturb mode while focused"
     },

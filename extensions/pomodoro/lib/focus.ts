@@ -19,24 +19,7 @@ function executeCommand(command: string): Promise<{ stdout: string; stderr: stri
   });
 }
 
-async function checkAndInstallDNDShortcuts(): Promise<boolean> {
-  const { stdout } = await executeCommand("shortcuts list");
-  const shortcuts = stdout.split("\n").map((item) => item.trim());
-  const isInstalled = shortcuts.includes(DNDshortcutName);
-  if (!isInstalled) {
-    await showHUD("Installing Shortcut (this will only happen once)");
-    const shortcutPath = `${__dirname}/assets/${DNDshortcutName}.shortcut`;
-    await open(shortcutPath);
-    return false;
-  }
-  return true;
-}
-
 export async function turnOnDND() {
-  const isInstalled = await checkAndInstallDNDShortcuts();
-  if (!isInstalled) {
-    return;
-  }
   await executeCommand(`echo "on" | shortcuts run "${DNDshortcutName}"`);
   const isOn = await getDNDStatus();
   if (isOn) {
@@ -45,8 +28,6 @@ export async function turnOnDND() {
 }
 
 export async function turnOffDND() {
-  const isInstalled = await checkAndInstallDNDShortcuts();
-  if (!isInstalled) return;
   await executeCommand(`echo "off" | shortcuts run "${DNDshortcutName}"`);
   const isOn = await getDNDStatus();
   if (!isOn) {
@@ -57,4 +38,17 @@ export async function turnOffDND() {
 export async function getDNDStatus() {
   const { stdout } = await executeCommand(`echo "status" | shortcuts run "${DNDshortcutName}" | cat`);
   return stdout !== "";
+}
+
+export async function checkAndInstallDNDShortcuts(): Promise<boolean> {
+  const { stdout } = await executeCommand("shortcuts list");
+  const shortcuts = stdout.split("\n").map((item) => item.trim());
+  const isInstalled = shortcuts.includes(DNDshortcutName);
+  if (!isInstalled) {
+    await showHUD("Installing Shortcut (this will only happen once)");
+    const shortcutPath = `${__dirname}/assets/${DNDshortcutName}.shortcut`;
+    await open(shortcutPath);
+    return false;
+  }
+  return true;
 }
