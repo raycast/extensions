@@ -564,6 +564,7 @@
 /extensions/gitlab-docs                                             @saschaeggi
 /extensions/gitmoji                                                 @ricoberger @DannySeidel
 /extensions/gitpod                                                  @henit-chobisa @Palanikannan1437 @henit-chobisa @pernielsentikaer @henit-chobisa
+/extensions/gleam-packages                                          @ryanmiville
 /extensions/global-media-key                                        @douo
 /extensions/glyph-search                                            @gbougakov
 /extensions/gmail                                                   @tonka3000
