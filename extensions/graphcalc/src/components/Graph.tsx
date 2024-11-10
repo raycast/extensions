@@ -164,7 +164,7 @@ const Graph: React.FC<GraphProps> = ({ expression, onGraphLoaded }) => {
           : svgRendered
             ? `## Graph of ${expression}\n\n<img src="data:image/svg+xml;utf8,${encodeURIComponent(
                 renderGraphToSVG(expression, chartData),
-              )}" alt="Graph" />`
+              )}?t=${new Date().getTime()}" alt="Graph" />`
             : ""
       }
     />
