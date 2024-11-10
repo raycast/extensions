@@ -9,7 +9,7 @@
 
 - Fixing empty state flicker issue
 - Removing History from the graph view
-- Fixing controll state on List
+- Fixing control state on List
 
 ## [Fixing colors] - 2024-11-9
 
