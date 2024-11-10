@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Color, Detail, Toast, showToast } from "@raycast/api";
+import { Color, Detail, Toast, showToast, environment } from "@raycast/api";
 import { evaluate } from "mathjs";
 import {
   XYPlot,
@@ -63,7 +63,7 @@ function renderGraphToSVG(
               data={chartData}
               style={{
                 stroke: Color.Yellow,
-                strokeWidth: 2,
+                strokeWidth: 3,
                 fill: "transparent",
               }}
             />
@@ -164,7 +164,7 @@ const Graph: React.FC<GraphProps> = ({ expression, onGraphLoaded }) => {
           : svgRendered
             ? `## Graph of ${expression}\n\n<img src="data:image/svg+xml;utf8,${encodeURIComponent(
                 renderGraphToSVG(expression, chartData),
-              )}?t=${new Date().getTime()}" alt="Graph" />`
+              )}?t=${environment.appearance}" alt="Graph" />`
             : ""
       }
     />
