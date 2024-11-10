@@ -74,6 +74,44 @@ fetch-youtube-transcript/
 - `dev`: Starts the development server
 - `lint`: Runs code quality checks
 
+## 🚨 Troubleshooting
+
+### GitHub Actions Build Issues
+
+If you encounter npm errors during GitHub Actions builds (particularly with `@types/ytdl-core`), follow these steps:
+
+1. **Package Resolution Error**
+   If you see an error like `npm error 404 Not Found - GET https://registry.npmjs.org/@types%2Fytdl-core`, try:
+   - Clear npm cache in your GitHub Actions workflow:
+     ```yaml
+     - name: Clear npm cache
+       run: npm cache clean --force
+     ```
+   - Ensure your workflow has proper registry access:
+     ```yaml
+     - name: Setup Node.js
+       uses: actions/setup-node@v3
+       with:
+         node-version: '20'
+         registry-url: 'https://registry.npmjs.org'
+     ```
+
+2. **Dependencies Installation**
+   - Run npm install with legacy peer deps:
+     ```yaml
+     - name: Install Dependencies
+       run: npm install --legacy-peer-deps
+     ```
+
+3. **Package Lock Issues**
+   - If issues persist, try removing package-lock.json and running a fresh install:
+     ```yaml
+     - name: Clean Install
+       run: |
+         rm -f package-lock.json
+         npm install
+     ```
+
 ## 🌱 What We Learned
 
 Through developing this extension, we gained insights into:
