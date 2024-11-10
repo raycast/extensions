@@ -1,5 +1,10 @@
 # Railway Changelog
 
+## [Fix Action Links] - {PR_MERGE_DATE}
+
+- Fixed broken links in the actions
+- Changed default action link to Architecture (the default page of Railway)
+
 ## [Enable Team Projects] - 2024-08-26
 
 - Added support for Team Projects, depending on the API Token you will see the team projects or your personal projects
