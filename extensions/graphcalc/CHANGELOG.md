@@ -10,3 +10,7 @@
 - Fixing empty state flicker issue
 - Removing History from the graph view
 - Fixing controll state on List
+
+## [Fixing colors] - 2024-11-9
+
+- Color fixes for graph, darkmode was not easy to read

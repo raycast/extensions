@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Detail, Toast, showToast } from "@raycast/api";
+import { Color, Detail, Toast, showToast } from "@raycast/api";
 import { evaluate } from "mathjs";
 import {
   XYPlot,
@@ -42,19 +42,30 @@ function renderGraphToSVG(
     return ReactDOMServer.renderToStaticMarkup(
       <svg viewBox="0 0 920 400" xmlns="http://www.w3.org/2000/svg">
         <g transform="translate(40,150)">
-          <rect
-            width="920"
-            height="400"
-            style={{ fill: "transparent", stroke: "#000000" }}
-          />
-          <XYPlot width={920} height={400} style={{ color: "#000000" }}>
-            <HorizontalGridLines style={{ stroke: "#e0e0e0" }} />
-            <VerticalGridLines style={{ stroke: "#e0e0e0" }} />
-            <XAxis style={{ stroke: "#777777" }} />
-            <YAxis style={{ stroke: "#777777" }} />
+          <XYPlot width={920} height={400}>
+            <HorizontalGridLines style={{ stroke: Color.SecondaryText }} />
+            <VerticalGridLines style={{ stroke: Color.SecondaryText }} />
+            <XAxis
+              style={{
+                line: { stroke: Color.PrimaryText },
+                ticks: { stroke: Color.PrimaryText },
+                text: { fill: Color.PrimaryText },
+              }}
+            />
+            <YAxis
+              style={{
+                line: { stroke: Color.PrimaryText },
+                ticks: { stroke: Color.PrimaryText },
+                text: { fill: Color.PrimaryText },
+              }}
+            />
             <LineSeries
               data={chartData}
-              style={{ stroke: "#F5B041", strokeWidth: 2, fill: "transparent" }}
+              style={{
+                stroke: Color.Yellow,
+                strokeWidth: 2,
+                fill: "transparent",
+              }}
             />
           </XYPlot>
         </g>
