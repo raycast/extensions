@@ -28,7 +28,7 @@ const FillCheckout = () => {
 
   return (
     <List>
-      <List.Section key={"favorites"} title={"Favorites"}>
+      <List.Section key="favorites" title="Favorites">
         {favoriteCards.slice(0, 3).map((card) => {
           return (
             <Card
