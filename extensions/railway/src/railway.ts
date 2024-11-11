@@ -7,7 +7,7 @@ export const railwayWebUrl = "https://railway.app";
 export const projectUrl = (projectId: string, page?: string): string =>
   `${railwayWebUrl}/project/${projectId}/${page ?? ""}`;
 
-const token = getPreferenceValues().railwayApiKey;
+const token = getPreferenceValues<Preferences>().railwayApiKey;
 
 interface ProjectGQL {
   id: string;

@@ -2,8 +2,11 @@
 
 ## [Fix Action Links] - {PR_MERGE_DATE}
 
-- Fixed broken links in the actions
-- Changed default action link to Architecture (the default page of Railway)
+- Fixed broken links in the actions, new actions are:
+  - Project Architecture (default action)
+  - Project Settings (CMD + s)
+  - Project Observability (CMD + o)
+  - Project Logs (CMD + l)
 
 ## [Enable Team Projects] - 2024-08-26
 
