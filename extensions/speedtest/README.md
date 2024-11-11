@@ -4,11 +4,8 @@
     width="50"
   />
 
-  <h1>
-    Speedtest
-  </h1>
+Unlock the true potential of your internet connection with Raycast's Speedtest extension. Powered by [speedtest.net](https://speedtest.net) 🚀, this tool gives you the lowdown on your network's performance in seconds.
 
-Speedtest via [speedtest.net](https://speedtest.net) 🚀.
 
   <p>
     <a href="https://www.raycast.com/tonka3000/speedtest">
@@ -43,10 +40,35 @@ Speedtest via [speedtest.net](https://speedtest.net) 🚀.
   </p>
 </div>
 
-## Features
 
-- Perform Speedtest via speedtest.net official CLI
-- Automatically download speedtest.net CLI
+## **Key Features**
+
+* Precise internet speed tests using the official [speedtest.net CLI](https://www.speedtest.net/apps/cli)  
+* Automatic CLI download and setup  
+* Comprehensive metrics: Download speed, upload speed, latency, and jitter
+
+## **Why Raycast Speedtest?**
+
+Your internet speed can make or break your productivity. Whether it’s video calls, streaming 4K content, or online gaming, knowing your network performance is crucial.
+
+Raycast Speedtest gives you the real-time data you need to:
+
+* Optimize your home network setup  
+* Troubleshoot connectivity issues  
+* Ensure you're getting the bandwidth you're paying for from your ISP
+
+## **Tech Specs**
+
+* Measures download and upload speeds in Mbps  
+* Calculates latency and jitter for a complete network profile  
+* Supports both Wi-Fi and broadband connections
+
+## **How to Get Started**
+
+1. Install the Raycast Speedtest extension  
+2. Fire up Raycast and type "speedtest"  
+3. Watch as your network stats come to life
+
 
 ## ⚠️ Speedtest.net CLI license agreements ⚠️
 
@@ -61,3 +83,22 @@ So by starting the command you accept the license agreements from above. If you 
 ## Showcases
 
 ![speedtest](https://user-images.githubusercontent.com/3163807/140621645-6e885f09-a5f5-4506-a085-b0841ab754a6.png)
+
+
+## **FAQs**
+
+### **What's a good speed test result?** 
+
+It depends on your needs, but for smooth 4K streaming and lag-free gaming, aim for at least 25 Mbps download and 3 Mbps upload.
+
+### **How often should I run a speed test?**
+
+Run tests regularly to track your network performance over time. Pro tip: Test during peak and off-peak hours to see how your ISP holds up.
+
+### **Can I test my VPN speed?**
+
+Absolutely\! Raycast Speedtest works seamlessly with VPNs, helping you find the fastest server for your needs.
+
+### **Will this work with my gigabit connection?**
+
+You bet\! Raycast Speedtest can handle even the beefiest broadband connections.
