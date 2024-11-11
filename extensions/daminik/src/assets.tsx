@@ -42,23 +42,33 @@ export default function Assets() {
     isLoading,
     data: assets,
     pagination,
-  } = useFetch((options) => url + `api/assets?` + new URLSearchParams({ page: String(options.page + 1), s: searchText }).toString(), {
-    headers: {
-      Accept: "application/json",
-      Authorization: `Bearer ${api_key}`,
+  } = useFetch(
+    (options) =>
+      url + `api/assets?` + new URLSearchParams({ page: String(options.page + 1), s: searchText }).toString(),
+    {
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${api_key}`,
+      },
+      mapResult(result: AssetsResult) {
+        return {
+          data: result.assets,
+          hasMore: result.page !== result.pages,
+        };
+      },
+      initialData: [],
+      keepPreviousData: true,
     },
-    mapResult(result: AssetsResult) {
-      return {
-        data: result.assets,
-        hasMore: result.page !== result.pages,
-      };
-    },
-    initialData: [],
-    keepPreviousData: true,
-  });
+  );
 
   return (
-    <Grid isLoading={isLoading} pagination={pagination} searchBarPlaceholder="Search asset" onSearchTextChange={setSearchText} throttle>
+    <Grid
+      isLoading={isLoading}
+      pagination={pagination}
+      searchBarPlaceholder="Search asset"
+      onSearchTextChange={setSearchText}
+      throttle
+    >
       {assets.map((asset, assetIndex) => (
         <Grid.Item
           key={assetIndex}
