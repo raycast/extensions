@@ -18,7 +18,7 @@ const getApiUrl = (region: ClockifyRegion): string => {
     default:
       return `https://api.clockify.me/api/v1`;
   }
-}
+};
 
 export const isInProgress = (entry: TimeEntry) => !entry?.timeInterval?.end;
 
