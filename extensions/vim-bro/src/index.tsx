@@ -1,12 +1,13 @@
-import { List } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Clipboard, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
+
 import commandsRaw from "./commands.json";
 import { Command, CommandGroup } from "./types";
 import { searchKeywordInCommandGroups } from "./utils";
 
 export default function CommandSearch() {
   const commandGroups = commandsRaw as CommandGroup[];
-
+  
   const [searchText, setSearchText] = useState("");
   const [filteredList, setFilteredList] = useState(commandGroups);
 
@@ -32,6 +33,21 @@ export default function CommandSearch() {
                   key={command.kbd}
                   title={command.kbd}
                   subtitle={command.text[0].toUpperCase() + command.text.slice(1)}
+                  actions={
+                    <ActionPanel>
+                      <Action
+                        title="Copy Command"
+                        icon={Icon.Clipboard}
+                        onAction={async () => {
+                          await Clipboard.copy(command.kbd);
+                          await showToast({
+                            title: "Copied to Clipboard",
+                            message: command.kbd,
+                          });
+                        }}
+                      />
+                    </ActionPanel>
+                  }
                 />
               );
             })}
