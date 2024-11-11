@@ -30,9 +30,3 @@ export interface UserStylesYaml {
 export interface Preferences {
   gridSize: string;
 }
-
-export interface ColorDetails {
-  hex: string;
-  rgb: { r: number; g: number; b: number };
-  hsl: { h: number; s: number; l: number };
-}

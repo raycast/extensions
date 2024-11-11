@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
 import { Grid, ActionPanel, Action, getPreferenceValues } from "@raycast/api";
 import { flavors } from "@catppuccin/palette";
-import { Preferences, ColorDetails } from "./types";
+import { Preferences } from "./types";
+import type { CatppuccinFlavor } from "@catppuccin/palette";
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -12,19 +13,16 @@ export default function SearchPalette() {
   const flavorOptions = Object.keys(flavors);
   const [selectedFlavor, setSelectedFlavor] = useState<string>(flavorOptions[0] || "mocha");
 
-  const flavorColors = useMemo<Record<string, ColorDetails>>(() => {
-    const flavor = flavors[selectedFlavor];
-    return flavor ? flavor.colors : {};
+  const flavorColors = useMemo<CatppuccinFlavor>(() => {
+    return flavors[selectedFlavor];
   }, [selectedFlavor]);
 
-  const colorEntries = useMemo(() => Object.entries(flavorColors), [flavorColors]);
-
   const filteredColors = useMemo(() => {
-    if (!searchText) return colorEntries;
+    if (!searchText) return flavorColors.colorEntries;
 
     const lowerSearchText = searchText.toLowerCase();
-    return colorEntries.filter(([name]) => name.toLowerCase().includes(lowerSearchText));
-  }, [searchText, colorEntries]);
+    return flavorColors.colorEntries.filter(([name]) => name.toLowerCase().includes(lowerSearchText));
+  }, [searchText, flavorColors.colorEntries]);
 
   const gridSize = parseInt(preferences.gridSize, 10);
   const columns = isNaN(gridSize) || gridSize <= 0 ? 8 : gridSize;
@@ -32,7 +30,6 @@ export default function SearchPalette() {
   return (
     <Grid
       columns={columns}
-      inset={Grid.Inset.Large}
       searchBarPlaceholder="Search colors..."
       onSearchTextChange={setSearchText}
       searchBarAccessory={
@@ -43,15 +40,11 @@ export default function SearchPalette() {
         </Grid.Dropdown>
       }
     >
-      {filteredColors.map(([colorName, colorDetails]) => {
-        const hex = colorDetails.hex ?? "#000000";
-        const { r = 0, g = 0, b = 0 } = colorDetails.rgb || {};
-        const { h = 0, s = 0, l = 0 } = colorDetails.hsl || {};
-
+      {filteredColors.map(([identifier, { rgb, hsl, hex, name }]) => {
         return (
           <Grid.Item
-            key={colorName}
-            title={colorName}
+            key={identifier}
+            title={name}
             subtitle={hex}
             content={{
               color: {
@@ -63,11 +56,13 @@ export default function SearchPalette() {
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard content={hex} title="Copy HEX" />
-                <Action.CopyToClipboard content={`rgb(${r}, ${g}, ${b})`} title="Copy RGB" />
+                <Action.CopyToClipboard content={`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`} title="Copy RGB" />
                 <Action.CopyToClipboard
-                  content={`hsl(${h.toFixed(2)}, ${(s * 100).toFixed(2)}%, ${(l * 100).toFixed(2)}%)`}
+                  content={`hsl(${hsl.h.toFixed(2)}, ${(hsl.s * 100).toFixed(2)}%, ${(hsl.l * 100).toFixed(2)}%)`}
                   title="Copy HSL"
                 />
+                <Action.CopyToClipboard content={name} title="Copy Name" />
+                <Action.CopyToClipboard content={identifier} title="Copy Identifier" />
               </ActionPanel>
             }
           />
