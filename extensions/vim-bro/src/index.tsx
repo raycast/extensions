@@ -7,7 +7,7 @@ import { searchKeywordInCommandGroups } from "./utils";
 
 export default function CommandSearch() {
   const commandGroups = commandsRaw as CommandGroup[];
-  
+
   const [searchText, setSearchText] = useState("");
   const [filteredList, setFilteredList] = useState(commandGroups);
 
