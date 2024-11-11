@@ -40,9 +40,9 @@
     },
     {
       "name": "search-userstyles",
-      "title": "Search User Styles",
+      "title": "Search Userstyles",
       "subtitle": "Catppuccin",
-      "description": "Search through Catppuccin user styles",
+      "description": "Search through Catppuccin userstyles",
       "keywords": [
         "user",
         "styles",
