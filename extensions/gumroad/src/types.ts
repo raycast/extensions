@@ -2,7 +2,7 @@ export type SalesResponse = {
   success: boolean;
   next_page_url: string;
   next_page_key: string;
-  sales: Sale[];
+  sales: Sale[] | undefined;
 };
 
 export type ProductsResponse = {

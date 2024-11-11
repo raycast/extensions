@@ -11,14 +11,19 @@ const TOKEN_PARAM = `access_token=${token}`;
 
 export default function Command() {
   const [pageUrl, setPageUrl] = useState<string>(`${BASE_URL}${SALES_ENDPOINT}?${TOKEN_PARAM}`);
-  const [sales, setSales] = useState<Sale[]>([]);
+  const [sales, setSales] = useState<Sale[] | undefined>(undefined);
   const [productId, setProductId] = useState<string>("");
-  const { data: salesData, isLoading: isLoadingSales, revalidate } = useFetch<SalesResponse>(pageUrl);
+  const {
+    data: salesData,
+    isLoading: isLoadingSales,
+    revalidate,
+    error: errorSales,
+  } = useFetch<SalesResponse>(pageUrl);
   const { data: productsData } = useFetch<ProductsResponse>(`${BASE_URL}${PRODUCTS_ENDPOINT}?${TOKEN_PARAM}`);
 
   useEffect(() => {
     if (salesData?.sales && !isLoadingSales) {
-      setSales([...sales, ...salesData.sales]);
+      setSales(sales ? [...sales, ...salesData.sales] : salesData.sales);
     }
   }, [salesData]);
 
@@ -42,7 +47,7 @@ export default function Command() {
 
   return (
     <List
-      isLoading={isLoadingSales || sales.length === 0}
+      isLoading={(isLoadingSales || sales === undefined) && !errorSales}
       searchBarAccessory={
         <List.Dropdown tooltip={"Select Product"} value={productId} onChange={onProductChange}>
           <List.Dropdown.Section title="Products">
@@ -54,7 +59,7 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {sales.map((sale) => (
+      {sales?.map((sale) => (
         <List.Item
           key={sale.id}
           title={sale.product_name}
@@ -68,12 +73,12 @@ export default function Command() {
           ]}
           actions={
             <ActionPanel>
-              <Action.Push title="Show Details" target={<SaleDetails sale={sale} />} />
+              <Action.Push title="Show Details" target={<SaleDetails sale={sale} />} icon={Icon.Sidebar} />
             </ActionPanel>
           }
         />
       ))}
-      {sales.length > 0 && salesData?.next_page_url && (
+      {sales && sales?.length > 0 && salesData?.next_page_url && (
         <List.Item
           title="Load More"
           icon={{ source: Icon.Ellipsis, tintColor: Color.PrimaryText }}

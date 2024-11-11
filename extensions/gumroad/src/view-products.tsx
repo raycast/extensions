@@ -28,7 +28,7 @@ export default function Command() {
           ]}
           actions={
             <ActionPanel>
-              <Action.Push title="Show Details" target={<ProductDetails product={product} />} />
+              <Action.Push title="Show Details" target={<ProductDetails product={product} />} icon={Icon.Sidebar} />
               <Action.OpenInBrowser url={product.short_url} />
             </ActionPanel>
           }

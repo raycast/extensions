@@ -11,3 +11,7 @@ export const formatNumber = (number: string): string => {
 export const removeParentheses = (str: string): string => {
   return str.replace(/[()]/g, "");
 };
+
+export const removeProtocol = (url: string): string => {
+  return url.replace(/(^\w+:|^)\/\//, "");
+};
