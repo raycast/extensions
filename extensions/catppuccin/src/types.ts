@@ -4,6 +4,7 @@ export interface PortDetails {
   categories?: string[];
   icon?: string;
   color?: string;
+  alias?: string;
 }
 
 export interface UserStyleDetails {
@@ -25,14 +26,4 @@ export interface PortsYaml {
 
 export interface UserStylesYaml {
   userstyles: Record<string, UserStyleDetails>;
-}
-
-export interface Preferences {
-  gridSize: string;
-}
-
-export interface ColorDetails {
-  hex: string;
-  rgb: { r: number; g: number; b: number };
-  hsl: { h: number; s: number; l: number };
 }

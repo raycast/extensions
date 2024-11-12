@@ -9,3 +9,15 @@ export interface BrandedLink {
   clicks: number;
   createdAt: string;
 }
+
+export interface ErrorResponse {
+  property?: string;
+  message: string;
+  code: string;
+  source?: string;
+  errors?: Array<{
+    code: string;
+    property: string;
+    message: string;
+  }>;
+}
