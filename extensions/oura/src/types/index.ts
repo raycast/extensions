@@ -137,10 +137,10 @@ export interface ResilienceResponse {
           stress: number;
         };
         level: string;
-      }
-    ]
+      },
+    ];
     next_token: string;
-  }
+  };
 }
 
 export interface StressResponse {
@@ -154,8 +154,8 @@ export interface StressResponse {
         stress_high: number;
         recovery_high: number;
         day_summary: string;
-      }
-    ]
+      },
+    ];
     next_token: string;
-  }
+  };
 }

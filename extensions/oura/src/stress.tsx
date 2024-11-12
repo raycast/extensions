@@ -9,9 +9,7 @@ export default function Command() {
   const stress = oura(`usercollection/daily_stress?start_date=${getDate(-14)}&end_date=${getDate()}`) as StressResponse;
 
   if (stress.isLoading) {
-    return (
-      <List isLoading={stress.isLoading}/>
-    );
+    return <List isLoading={stress.isLoading} />;
   }
 
   if (stress.error) {
@@ -29,26 +27,32 @@ export default function Command() {
   const sToday = stress?.data?.data[0];
   if (!stress.isLoading) {
     updateCommandMetadata({
-      subtitle: `Stress: ${sToday.day_summary} | Stress High: ${minutesFormatted(sToday.stress_high/60)} | Recovery High: ${minutesFormatted(sToday.recovery_high/60)}`,
+      subtitle: `Stress: ${sToday.day_summary} | Stress High: ${minutesFormatted(sToday.stress_high / 60)} | Recovery High: ${minutesFormatted(sToday.recovery_high / 60)}`,
     });
   }
 
-	const stressDays = [...stress.data.data].reverse();
+  const stressDays = [...stress.data.data].reverse();
 
   return (
     <List isLoading={stress.isLoading}>
       {stressDays.map((stress) => (
-				<List.Item 
-					key={stress.day} 
-					title={`Stress: ${stress.day}`} 
-					subtitle={stress.day_summary}
-					accessories={[
-						{ text: "Time in"},
-						{ text: {value: `Stress: ${minutesFormatted(stress.stress_high/60)}`, color: Color.Red}, icon: Icon.Heartbeat },
-						{ text: {value: `Recovery: ${minutesFormatted(stress.recovery_high/60)}`, color: Color.Green}, icon: Icon.Heart },
-					]} 
-				/>
-			))}
+        <List.Item
+          key={stress.day}
+          title={`Stress: ${stress.day}`}
+          subtitle={stress.day_summary}
+          accessories={[
+            { text: "Time in" },
+            {
+              text: { value: `Stress: ${minutesFormatted(stress.stress_high / 60)}`, color: Color.Red },
+              icon: Icon.Heartbeat,
+            },
+            {
+              text: { value: `Recovery: ${minutesFormatted(stress.recovery_high / 60)}`, color: Color.Green },
+              icon: Icon.Heart,
+            },
+          ]}
+        />
+      ))}
     </List>
   );
 }
