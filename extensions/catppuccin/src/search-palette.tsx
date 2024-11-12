@@ -1,20 +1,18 @@
+/* eslint-disable @raycast/prefer-title-case */
 import { useState, useMemo } from "react";
-import { Grid, ActionPanel, Action, getPreferenceValues } from "@raycast/api";
-import { flavors } from "@catppuccin/palette";
-import { Preferences } from "./types";
+import { Grid, ActionPanel, Action } from "@raycast/api";
 import type { CatppuccinFlavor } from "@catppuccin/palette";
-
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+import { getGridSize } from "./utils/preferences.util";
+import { getAllFlavors, getFlavorColors, capitalize, type FlavorName } from "./utils/palette.util";
 
 export default function SearchPalette() {
-  const preferences = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState<string>("");
 
-  const flavorOptions = Object.keys(flavors);
-  const [selectedFlavor, setSelectedFlavor] = useState<string>(flavorOptions[0] || "mocha");
+  const flavorOptions = getAllFlavors();
+  const [selectedFlavor, setSelectedFlavor] = useState<FlavorName>(flavorOptions[0] || "mocha");
 
   const flavorColors = useMemo<CatppuccinFlavor>(() => {
-    return flavors[selectedFlavor];
+    return getFlavorColors(selectedFlavor);
   }, [selectedFlavor]);
 
   const filteredColors = useMemo(() => {
@@ -24,8 +22,11 @@ export default function SearchPalette() {
     return flavorColors.colorEntries.filter(([name]) => name.toLowerCase().includes(lowerSearchText));
   }, [searchText, flavorColors.colorEntries]);
 
-  const gridSize = parseInt(preferences.gridSize, 10);
-  const columns = isNaN(gridSize) || gridSize <= 0 ? 8 : gridSize;
+  const columns = getGridSize();
+
+  const handleFlavorChange = (newValue: string) => {
+    setSelectedFlavor(newValue as FlavorName);
+  };
 
   return (
     <Grid
@@ -33,7 +34,7 @@ export default function SearchPalette() {
       searchBarPlaceholder="Search colors..."
       onSearchTextChange={setSearchText}
       searchBarAccessory={
-        <Grid.Dropdown tooltip="Select Flavor" storeValue onChange={setSelectedFlavor}>
+        <Grid.Dropdown tooltip="Select Flavor" storeValue onChange={handleFlavorChange}>
           {flavorOptions.map((flavor) => (
             <Grid.Dropdown.Item key={flavor} value={flavor} title={capitalize(flavor)} />
           ))}

@@ -85,6 +85,32 @@
           "title": "Large"
         }
       ]
+    },
+    {
+      "name": "flavor",
+      "type": "dropdown",
+      "required": false,
+      "title": "Catppuccin Flavor",
+      "description": "Select your favorite Catppuccin flavor to default to",
+      "default": "mocha",
+      "data": [
+        {
+          "title": "Mocha",
+          "value": "mocha"
+        },
+        {
+          "title": "Macchiato",
+          "value": "macchiato"
+        },
+        {
+          "title": "Frappe",
+          "value": "frappe"
+        },
+        {
+          "title": "Latte",
+          "value": "latte"
+        }
+      ]
     }
   ],
   "dependencies": {

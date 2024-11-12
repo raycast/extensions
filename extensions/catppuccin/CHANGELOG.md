@@ -1,10 +1,14 @@
 # Catppuccin Changelog
 
-## [Search Palette Improvements] - 2024-11-11
+## [Stability Changes & Major Visual Improvements] - 2024-11-11
 
+- Add icons to both `search-ports` and `search-userstyles` commands
+- Add flavor to preferences (used for icons), defaults to `mocha`
+- Add copy name and copy identifier actions to `search-palette`
+- Display color names as grid item titles in `search-palette`
+- Move preference functionality into it's own utility
+- Move palette functionality into it's own utility
 - Remove grid item inset around palette colors
-- Display color names as grid item titles
-- Add copy name and identifier actions
 - Update README
 
 ## [Stability Changes & Minor Visual Improvements] - 2024-09-18

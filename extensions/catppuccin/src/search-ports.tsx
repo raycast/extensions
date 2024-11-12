@@ -1,17 +1,16 @@
 import { ActionPanel, Action, List } from "@raycast/api";
 import { SearchList } from "./components/SearchList";
-
-interface PortDetails {
-  name: string;
-  platform?: string | string[];
-  categories?: string[];
-  icon?: string;
-  color?: string;
-}
+import { getDefaultIcon, getIcon } from "./utils/icons.util";
+import { PortDetails } from "./types";
 
 export default function SearchPorts() {
+  const getGithubLink = (portName: string, portDetails: PortDetails) => {
+    const repoSlug = portDetails.alias || portName;
+    return `https://github.com/catppuccin/${repoSlug}`;
+  };
+
   const renderItem = (portName: string, portDetails: PortDetails) => {
-    const githubLink = `https://github.com/catppuccin/${portName}`;
+    const githubLink = getGithubLink(portName, portDetails);
     const platform = Array.isArray(portDetails.platform)
       ? portDetails.platform.join(", ")
       : portDetails.platform || "Unknown Platform";
@@ -27,6 +26,10 @@ export default function SearchPorts() {
             <Action.OpenInBrowser url={githubLink} title="Open GitHub" />
           </ActionPanel>
         }
+        icon={{
+          value: portDetails.icon ? getIcon(portDetails.icon, portDetails.color) : getDefaultIcon(portDetails.color),
+          tooltip: portName,
+        }}
       />
     );
   };
