@@ -30,26 +30,16 @@ export default function ClubProfile(team: Team) {
           />
 
           <Detail.Metadata.TagList title="Club Colors">
-            <Detail.Metadata.TagList.Item
-              text={team.color}
-              color={team.color}
-            />
+            <Detail.Metadata.TagList.Item text={team.color} color={team.color} />
             {team.color_secondary && (
-              <Detail.Metadata.TagList.Item
-                text={team.color_secondary}
-                color={team.color_secondary}
-              />
+              <Detail.Metadata.TagList.Item text={team.color_secondary} color={team.color_secondary} />
             )}
           </Detail.Metadata.TagList>
 
           <Detail.Metadata.Label title="President" text={club.president} />
           <Detail.Metadata.Label title="Stadium" text={venue.name} />
 
-          <Detail.Metadata.Link
-            title="Official Website"
-            text={club.web}
-            target={club.web}
-          />
+          <Detail.Metadata.Link title="Official Website" text={club.web} target={club.web} />
           <Detail.Metadata.Separator />
           {club.twitter && (
             <Detail.Metadata.Link
@@ -58,32 +48,14 @@ export default function ClubProfile(team: Team) {
               target={`https://twitter.com/${club.twitter.replace("@", "")}`}
             />
           )}
-          {club.facebook && (
-            <Detail.Metadata.Link
-              title="Facebook"
-              text={club.facebook}
-              target={club.facebook}
-            />
-          )}
-          {club.instagram && (
-            <Detail.Metadata.Link
-              title="Instagram"
-              text={club.instagram}
-              target={club.instagram}
-            />
-          )}
+          {club.facebook && <Detail.Metadata.Link title="Facebook" text={club.facebook} target={club.facebook} />}
+          {club.instagram && <Detail.Metadata.Link title="Instagram" text={club.instagram} target={club.instagram} />}
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
-          <Action.Push
-            title="Squad"
-            icon={Icon.TwoPeople}
-            target={<ClubSquad {...team} />}
-          />
-          <Action.OpenInBrowser
-            url={`https://www.laliga.com/en-GB/clubs/${team.slug}`}
-          />
+          <Action.Push title="Squad" icon={Icon.TwoPeople} target={<ClubSquad {...team} />} />
+          <Action.OpenInBrowser url={`https://www.laliga.com/en-GB/clubs/${team.slug}`} />
         </ActionPanel>
       }
     />

@@ -5,6 +5,9 @@
   "description": "A comprehensive extension for tracking La Liga matches, standings, and club information.",
   "icon": "icon.png",
   "author": "anhthang",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "categories": [
     "Fun"
@@ -69,7 +72,11 @@
     "typescript-eslint": "^8.13.0"
   },
   "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop"
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
