@@ -1,9 +1,9 @@
 /* eslint-disable @raycast/prefer-title-case */
 import { useState, useMemo } from "react";
 import { Grid, ActionPanel, Action } from "@raycast/api";
-import type { CatppuccinFlavor } from "@catppuccin/palette";
+import type { CatppuccinFlavor, FlavorName } from "@catppuccin/palette";
 import { getGridSize } from "./utils/preferences.util";
-import { getAllFlavors, getFlavorColors, capitalize, type FlavorName } from "./utils/palette.util";
+import { getAllFlavors, getFlavorColors, capitalize } from "./utils/palette.util";
 
 export default function SearchPalette() {
   const [searchText, setSearchText] = useState<string>("");

@@ -1,8 +1,5 @@
-import type { CatppuccinFlavor } from "@catppuccin/palette";
+import type { CatppuccinFlavor, FlavorName } from "@catppuccin/palette";
 import { flavors } from "@catppuccin/palette";
-
-export type CatppuccinFlavors = typeof flavors;
-export type FlavorName = keyof CatppuccinFlavors;
 
 export const getAllFlavors = (): FlavorName[] => Object.keys(flavors) as FlavorName[];
 

@@ -37,9 +37,10 @@ export const getIcon = (iconName: string, color: ColorInput = "#FFFFFF"): Image.
   const formattedColor = formatColor(color);
 
   // check if icon ends .svg indiciating that it must be grabbed from the website repo
+  // using known hash
   if (normalizedIconName.endsWith(".svg")) {
     return {
-      source: `https://raw.githubusercontent.com/catppuccin/website/refs/heads/main/src/icons/ports/${normalizedIconName}`,
+      source: `https://raw.githubusercontent.com/catppuccin/website/69e2f3ee385279ea34e84c2c42703ed997eab40c/src/icons/ports/${normalizedIconName}`,
       tintColor: formattedColor,
     };
   }

@@ -2,7 +2,7 @@ import { ActionPanel, Action, List } from "@raycast/api";
 import { SearchList } from "./components/SearchList";
 import { isValidUrl } from "./utils/data.util";
 import { getDefaultIcon, getIcon } from "./utils/icons.util";
-import { UserStyleDetails } from "./types";
+import type { UserStyleDetails } from "./types";
 
 const getAppLink = (appLink?: string | string[]) => {
   if (!appLink) return undefined;

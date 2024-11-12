@@ -1,7 +1,7 @@
 import { ActionPanel, Action, List } from "@raycast/api";
 import { SearchList } from "./components/SearchList";
 import { getDefaultIcon, getIcon } from "./utils/icons.util";
-import { PortDetails } from "./types";
+import type { PortDetails } from "./types";
 
 export default function SearchPorts() {
   const getGithubLink = (portName: string, portDetails: PortDetails) => {
