@@ -45,7 +45,7 @@ export default async function Command() {
 | textSize<mark style="color:red;">*</mark> | The text size used by the Raycast application. | <code>"medium"</code> or <code>"large"</code> |
 | canAccess<mark style="color:red;">*</mark> | Returns whether the user has access to the given API. | <code>(api: unknown) => boolean</code> |
 
-## environment.canAccess
+### environment.canAccess
 
 Checks whether the user can access a specific API or not.
 
