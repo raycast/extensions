@@ -579,6 +579,7 @@ export type SeasonTotal = SkaterSeasonTotal | GoalieSeasonTotal;
 export type Award = {
   trophy: {
     default: string;
+    fr: string;
   };
   seasons: {
     seasonId: number;
