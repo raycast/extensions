@@ -14,8 +14,3 @@ To customize the focus mode enabled by Pomodoro, edit the shortcut created by Po
 4. Select the Focus mode you want to have enabled when Pomodoro is focused
 5. Close the window and shortcuts
 
----
-
-## Known Issuse
-
-- Focus (Do Not Disturb) is not enabled/disabled when starting/stopping Pomodoro from the menu bar.
