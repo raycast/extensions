@@ -41,7 +41,11 @@ export const getIcon = (iconName: string, color: ColorInput = "#FFFFFF"): Image.
   if (normalizedIconName.endsWith(".svg")) {
     return {
       source: `https://raw.githubusercontent.com/catppuccin/website/69e2f3ee385279ea34e84c2c42703ed997eab40c/src/icons/ports/${normalizedIconName}`,
-      tintColor: formattedColor,
+      tintColor: {
+        light: formattedColor,
+        dark: formattedColor,
+        adjustContrast: false,
+      }
     };
   }
 
