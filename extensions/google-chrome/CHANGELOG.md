@@ -1,5 +1,9 @@
 # Google Chrome Changelog
 
+## [Fix Search All Command Bookmark Not Working] - 2024-11-12
+
+- Fix Search All Command Bookmark Seciton Returns opentabs instead of bookmark
+
 ## [Add Search All Command] - 2024-08-01
 
 - Add Google Chrome tabs and history, bookmarks search.
