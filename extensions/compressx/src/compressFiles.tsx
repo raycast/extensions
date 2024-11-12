@@ -1,4 +1,13 @@
-import { showToast, Toast, getSelectedFinderItems, ActionPanel, Action, Form, popToRoot, LocalStorage } from "@raycast/api";
+import {
+  showToast,
+  Toast,
+  getSelectedFinderItems,
+  ActionPanel,
+  Action,
+  Form,
+  popToRoot,
+  LocalStorage,
+} from "@raycast/api";
 import { exec } from "child_process";
 import { checkCompressXInstallation } from "./utils/checkInstall";
 import { useState, useEffect } from "react";
@@ -16,12 +25,12 @@ export default function Command() {
     checkCompressXInstallation().then(setIsInstalled);
     getSelectedFinderItems().then((items) => {
       if (items.length > 0) {
-        const paths = items.map(item => item.path);
+        const paths = items.map((item) => item.path);
         setSelectedFiles(paths);
-        
+
         // Determine file types
         const types = new Set<"video" | "image">();
-        paths.forEach(filePath => {
+        paths.forEach((filePath) => {
           const ext = path.extname(filePath).toLowerCase();
           if (ext.match(/\.(mp4|mov|avi|mkv|webm)$/)) {
             types.add("video");
@@ -32,7 +41,7 @@ export default function Command() {
         setFileTypes(types);
       }
     });
-    
+
     // Load saved preferences
     LocalStorage.getItem<string>("savedQuality").then((savedQuality) => {
       if (savedQuality) setQuality(savedQuality);
@@ -71,7 +80,7 @@ export default function Command() {
     try {
       const paths = selectedFiles.join("|");
       let url = `compressx://open?path=${paths}&quality=${values.quality}`;
-      
+
       // Add format parameters if they exist
       if (values.videoFormat && fileTypes.has("video")) {
         url += `&videoFormat=${values.videoFormat}`;
@@ -79,9 +88,9 @@ export default function Command() {
       if (values.imageFormat && fileTypes.has("image")) {
         url += `&imageFormat=${values.imageFormat}`;
       }
-      
+
       exec(`open "${url}"`);
-      
+
       // Save user preferences
       await LocalStorage.setItem("savedQuality", values.quality);
       if (values.videoFormat) {
@@ -90,7 +99,7 @@ export default function Command() {
       if (values.imageFormat) {
         await LocalStorage.setItem("savedImageFormat", values.imageFormat);
       }
-      
+
       await showToast({
         style: Toast.Style.Success,
         title: "Sent to CompressX for compressing",
@@ -132,24 +141,14 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown 
-        id="quality" 
-        title="Quality" 
-        value={quality}
-        onChange={setQuality}
-      >
+      <Form.Dropdown id="quality" title="Quality" value={quality} onChange={setQuality}>
         {qualityOptions.map((option) => (
           <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
         ))}
       </Form.Dropdown>
 
       {fileTypes.has("video") && (
-        <Form.Dropdown 
-          id="videoFormat" 
-          title="Video Format" 
-          value={videoFormat}
-          onChange={setVideoFormat}
-        >
+        <Form.Dropdown id="videoFormat" title="Video Format" value={videoFormat} onChange={setVideoFormat}>
           {videoFormatOptions.map((option) => (
             <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
           ))}
@@ -157,19 +156,14 @@ export default function Command() {
       )}
 
       {fileTypes.has("image") && (
-        <Form.Dropdown 
-          id="imageFormat" 
-          title="Image Format" 
-          value={imageFormat}
-          onChange={setImageFormat}
-        >
+        <Form.Dropdown id="imageFormat" title="Image Format" value={imageFormat} onChange={setImageFormat}>
           {imageFormatOptions.map((option) => (
             <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
           ))}
         </Form.Dropdown>
       )}
 
-      <Form.Description text={`Selected ${selectedFiles.length} file${selectedFiles.length > 1 ? 's' : ''}`} />
+      <Form.Description text={`Selected ${selectedFiles.length} file${selectedFiles.length > 1 ? "s" : ""}`} />
     </Form>
   );
 }
