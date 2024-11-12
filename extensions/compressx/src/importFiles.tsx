@@ -8,17 +8,14 @@ export default async function main() {
     return;
   }
 
-  let filePaths: string[];
-
   try {
-    filePaths = (await getSelectedFinderItems()).map((f) => f.path);
-    for (const path of filePaths) {
-      const url = `compressx://open?path=file://${path}`;
-      exec(`open "${url}"`);
-    }
+    const filePaths = (await getSelectedFinderItems()).map((f) => f.path);
+    const paths = filePaths.join("|");
+    const url = `compressx://import?path=${paths}`;
+    exec(`open "${url}"`);
     await showToast({
       style: Toast.Style.Success,
-      title: "Compressing with CompressX",
+      title: "imported into CompressX",
     });
   } catch (e) {
     await showToast({
