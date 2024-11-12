@@ -5,6 +5,9 @@
   "description": "Manage USB-connected Logitech Litra Glow, Litra Beam and Litra Beam LX lights from Raycast",
   "icon": "command-icon.png",
   "author": "timrogers",
+  "contributors": [
+    "amaechler"
+  ],
   "categories": [
     "Productivity"
   ],
