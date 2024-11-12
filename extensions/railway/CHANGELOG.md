@@ -1,6 +1,6 @@
 # Railway Changelog
 
-## [Fix Action Links] - {PR_MERGE_DATE}
+## [Fix Action Links] - 2024-11-12
 
 - Fixed broken links in the actions, new actions are:
   - Project Architecture (default action)
