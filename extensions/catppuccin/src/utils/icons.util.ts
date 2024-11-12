@@ -45,7 +45,7 @@ export const getIcon = (iconName: string, color: ColorInput = "#FFFFFF"): Image.
         light: formattedColor,
         dark: formattedColor,
         adjustContrast: false,
-      }
+      },
     };
   }
 
