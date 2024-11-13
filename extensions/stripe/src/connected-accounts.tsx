@@ -1,6 +1,4 @@
-import React from "react";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import get from "lodash/get";
 import omit from "lodash/omit";
 import { useStripeApi, useStripeDashboard } from "./hooks";
 import { convertTimestampToDate, titleCase, resolveMetadataValue } from "./utils";
@@ -16,6 +14,7 @@ type ConnectedAccountResp = {
   business_profile: any;
   capabilities: any;
   default_currency: string;
+  email: string;
   company: {
     address: {
       city: string | null;
@@ -29,7 +28,6 @@ type ConnectedAccountResp = {
   individual: {
     first_name: string;
     last_name: string;
-    email: string;
     dob: {
       day: number;
       month: number;
@@ -61,9 +59,9 @@ const resolveConnectedAccount = ({
   cancelled_at,
   ...rest
 }: ConnectedAccountResp): ConnectedAccount => {
-  const { month, year, day } = get(rest, "individual.dob", {});
+  const { month, year, day } = rest.individual?.dob ?? {};
   const dateOfBirth = day && month && year ? `${day}/${month}/${year}` : "";
-  const { city, country, line1, postal_code, state } = get(rest, "company.address", {});
+  const { city, country, line1, postal_code, state } = rest.company?.address ?? {};
   const companyAddress = [line1, city, state, postal_code, country].filter(Boolean).join(", ");
 
   return {
@@ -74,10 +72,10 @@ const resolveConnectedAccount = ({
     cancelled_at: convertTimestampToDate(cancelled_at),
     dob: dateOfBirth,
     company_address: companyAddress,
-    capabilities: Object.keys(get(rest, "capabilities", {})).join(", "),
-    first_name: titleCase(get(rest, "individual.first_name", "")),
-    last_name: titleCase(get(rest, "individual.last_name", "")),
-    email: get(rest, "email", ""),
+    capabilities: Object.keys(rest.capabilities ?? {}).join(", "),
+    first_name: titleCase(rest.individual?.first_name ?? ""),
+    last_name: titleCase(rest.individual?.last_name ?? ""),
+    email: rest?.email ?? "",
   };
 };
 

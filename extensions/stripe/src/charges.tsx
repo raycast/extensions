@@ -1,6 +1,4 @@
-import React from "react";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import get from "lodash/get";
 import omit from "lodash/omit";
 import { useStripeApi, useStripeDashboard } from "./hooks";
 import { STRIPE_ENDPOINTS } from "./enums";
@@ -80,9 +78,10 @@ const resolveCharge = ({
   ...rest
 }: ChargeResp): Charge => {
   const uppercaseCurrency = currency.toUpperCase();
-  const billingDetails = get(rest, "billing_details", {});
-  const billingAddressObj = get(billingDetails, "address", {});
-  const paymentMethodDetails = get(rest, "payment_method_details.card", {});
+  const billingDetails = rest.billing_details ?? {};
+  const billingAddressObj = billingDetails.address ?? {};
+  const paymentMethodDetails = rest.payment_method_details ?? {};
+  const paymentMethodCard = paymentMethodDetails.card ?? {};
   const { city, country, line1, postal_code, state } = billingAddressObj;
   const billingAddress = [line1, city, state, postal_code, country].filter(Boolean).join(", ");
 
@@ -95,16 +94,16 @@ const resolveCharge = ({
     description,
     created_at: convertTimestampToDate(created),
     billing_address: billingAddress,
-    billing_email: get(billingDetails, "email", ""),
-    billing_name: get(billingDetails, "name", ""),
-    payment_method_type: get(paymentMethodDetails, "type", ""),
-    payment_method_brand: get(paymentMethodDetails, "brand", ""),
-    payment_method_last4: get(paymentMethodDetails, "last4", ""),
-    payment_method_exp_month: get(paymentMethodDetails, "exp_month", ""),
-    payment_method_exp_year: get(paymentMethodDetails, "exp_year", ""),
-    payment_method_network: get(paymentMethodDetails, "network", ""),
-    payment_method_three_d_secure: get(paymentMethodDetails, "three_d_secure", false),
-    payment_method_country: get(paymentMethodDetails, "country", ""),
+    billing_email: billingDetails.email ?? "",
+    billing_name: billingDetails.name ?? "",
+    payment_method_type: paymentMethodDetails.type ?? "",
+    payment_method_brand: paymentMethodCard.brand ?? "",
+    payment_method_last4: paymentMethodCard.last4 ?? "",
+    payment_method_exp_month: String(paymentMethodCard.exp_month ?? ""),
+    payment_method_exp_year: String(paymentMethodCard.exp_year ?? ""),
+    payment_method_network: paymentMethodCard.network ?? "",
+    payment_method_three_d_secure: paymentMethodCard.three_d_secure ?? false,
+    payment_method_country: paymentMethodCard.country ?? "",
   };
 };
 
