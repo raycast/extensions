@@ -1,6 +1,6 @@
 # Twenty - The #1 Open-Source CRM Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2024-11-13
 
 - Show Loading Indicator in `List People`
 - Now supports self-hosted Twenty
