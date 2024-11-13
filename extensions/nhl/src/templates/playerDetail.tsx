@@ -175,7 +175,7 @@ const awardsTable = function (player: PlayerDetailResponse): string {
 
   let awardString = `## ${userInterface.awards[lang]} \n`;
   awards.map((award: Award) => {
-    awardString += `| ${award.trophy[lang]} | GP | +/- |\n`;
+    awardString += `| ${award.trophy.default} | GP | +/- |\n`;
     awardString += `|---|---|---|\n`;
     award.seasons.map((season) => {
       awardString += `| ${season.seasonId.toString().slice(0, 4)}-${season.seasonId.toString().slice(4, 8)} | ${season.gamesPlayed} | ${season.plusMinus} |\n`;
@@ -189,16 +189,16 @@ const awardsTable = function (player: PlayerDetailResponse): string {
 const awardMetadata = function (player: PlayerDetailResponse) {
   if (!player.awards) return null;
 
-  const awardTimes = (award) => {
-    const baseName = award.trophy[lang].replace(/Trophy|Award/g, "").trim();
-    const suffix = award.seasons.length > 1 ? ` x${award.seasons.length}` : "";
+  const awardTimes = (award: Award) => {
+    const baseName = award.trophy.default.replace(/Trophy|Award/g, "").trim();
+    const suffix = award.seasons.length > 1 ? ` 𐔧${award.seasons.length}` : "";
     return `${baseName}${suffix}`;
   };
 
   return (
     <Detail.Metadata.TagList title={userInterface.awards[lang]}>
       {player.awards.map((award: Award) => (
-        <Detail.Metadata.TagList.Item key={award.trophy[lang]} text={awardTimes(award)} />
+        <Detail.Metadata.TagList.Item key={award.trophy.default} text={awardTimes(award)} />
       ))}
     </Detail.Metadata.TagList>
   );
