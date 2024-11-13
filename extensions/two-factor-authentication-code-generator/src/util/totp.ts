@@ -60,7 +60,7 @@ export function generateTOTP(key: string, options: Options): number {
   return code;
 }
 
-export function parse(value: string): { secret: string; options: Options, lastTimeUsed?: number } {
+export function parse(value: string): { secret: string; options: Options; lastTimeUsed?: number } {
   try {
     return JSON.parse(value);
   } catch (e) {

@@ -22,10 +22,10 @@ export default function AppsView() {
   const { defaultAction } = getPreferenceValues();
 
   const updateLastTimeUsed = async (a: App) => {
-    const item = await LocalStorage.getItem(a.name)
-    const updated = {...parse(item as string), lastTimeUsed: new Date().getTime()}
-    await LocalStorage.setItem(a.name, JSON.stringify(updated))
-  }
+    const item = await LocalStorage.getItem(a.name);
+    const updated = { ...parse(item as string), lastTimeUsed: new Date().getTime() };
+    await LocalStorage.setItem(a.name, JSON.stringify(updated));
+  };
 
   return (
     <List
@@ -164,7 +164,10 @@ function AddForm() {
 
     const options: Options = { digits: values.digits, period: values.period, algorithm: values.algorithm };
 
-    await LocalStorage.setItem(values.name, JSON.stringify({ secret: values.secret, options: options, lastTimeUsed: new Date().getTime() }));
+    await LocalStorage.setItem(
+      values.name,
+      JSON.stringify({ secret: values.secret, options: options, lastTimeUsed: new Date().getTime() })
+    );
 
     push(<AppsView />);
   };

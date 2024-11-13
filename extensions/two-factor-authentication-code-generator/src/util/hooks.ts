@@ -23,13 +23,13 @@ export function useApps(options?: UseAppsOptions) {
     setApps(
       Object.keys(_apps)
         .sort((a, b) => {
-          const parsedA = parse(_apps[a]).lastTimeUsed ?? 1
-          const parsedB = parse(_apps[b]).lastTimeUsed ?? 1
-          const timeComparison = parsedB - parsedA
-          return timeComparison === 0 ? a.localeCompare(b) : timeComparison
+          const parsedA = parse(_apps[a]).lastTimeUsed ?? 1;
+          const parsedB = parse(_apps[b]).lastTimeUsed ?? 1;
+          const timeComparison = parsedB - parsedA;
+          return timeComparison === 0 ? a.localeCompare(b) : timeComparison;
         })
         .map((name) => {
-          const token: { secret: string; options: Options, lastTimeUsed?: number } = parse(_apps[name]);
+          const token: { secret: string; options: Options; lastTimeUsed?: number } = parse(_apps[name]);
           return {
             name,
             key: _apps[name].toString(),
