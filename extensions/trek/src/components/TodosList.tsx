@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, Color, useNavigation, Toast, showToast, confirmAlert } from "@raycast/api";
+import { Action, ActionPanel, List, Color, useNavigation, Toast, showToast, confirmAlert, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { fetchTodosFromList, markComplete, trashTodo } from "../oauth/auth";
 import { htmlToMarkdown } from "../utils/markdown";
@@ -57,8 +57,8 @@ export default function TodosList({
       {data?.map((todo, index) => (
         <List.Item
           key={`${todo.id}-${index}`}
-          title={todo.title}
-          accessories={[...(todo.due_on ? [{ date: new Date(todo.due_on) }] : [])]}
+          title={todo.title.slice(0, 27) + (todo.title.length > 27 ? "..." : "")}
+          accessories={[...(todo.due_on ? [{ icon: Icon.Calendar, date: new Date(todo.due_on) }] : [])]}
           detail={
             <List.Item.Detail
               markdown={`### ${todo.title}\n\n\n${
@@ -79,6 +79,10 @@ export default function TodosList({
                           : Color.SecondaryText,
                     }}
                   />
+
+                  {todo.due_on && (
+                    <List.Item.Detail.Metadata.Label title="Due Date" text={format(new Date(todo.due_on), "PPP")} />
+                  )}
 
                   {todo.parent && (
                     <List.Item.Detail.Metadata.Link
@@ -106,22 +110,19 @@ export default function TodosList({
                     <List.Item.Detail.Metadata.Label title="Starts" text={format(new Date(todo.starts_on), "PPP")} />
                   )}
 
-                  {todo.due_on && (
-                    <List.Item.Detail.Metadata.Label title="Due Date" text={format(new Date(todo.due_on), "PPP")} />
-                  )}
-
-                  <List.Item.Detail.Metadata.Separator />
-
                   {todo.assignees.length > 0 && (
-                    <List.Item.Detail.Metadata.TagList title="Assignees">
-                      {todo.assignees.map((assignee) => (
-                        <List.Item.Detail.Metadata.TagList.Item
-                          key={assignee.id}
-                          text={assignee.name}
-                          icon={{ source: assignee.avatar_url }}
-                        />
-                      ))}
-                    </List.Item.Detail.Metadata.TagList>
+                    <>
+                      <List.Item.Detail.Metadata.Separator />
+                      <List.Item.Detail.Metadata.TagList title="Assignees">
+                        {todo.assignees.map((assignee) => (
+                          <List.Item.Detail.Metadata.TagList.Item
+                            key={assignee.id}
+                            text={assignee.name}
+                            icon={{ source: assignee.avatar_url }}
+                          />
+                        ))}
+                      </List.Item.Detail.Metadata.TagList>
+                    </>
                   )}
 
                   {todo.completion_subscribers.length > 0 && (
@@ -152,7 +153,10 @@ export default function TodosList({
           }
           actions={
             <ActionPanel>
-              <Action.Push title="View Comments" target={<TodoComments todo={todo} />} />
+              <Action.Push
+                title="View Comments"
+                target={<TodoComments todo={todo} accountId={accountId} projectId={projectId} />}
+              />
               <Action.OpenInBrowser title="Open Todo" url={todo.app_url} />
               {todo.description && (
                 <Action.CopyToClipboard

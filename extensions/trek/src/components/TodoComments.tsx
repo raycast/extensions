@@ -7,9 +7,11 @@ import { htmlToMarkdown } from "../utils/markdown";
 
 interface TodoDetailProps {
   todo: BasecampTodo;
+  accountId: string;
+  projectId: number;
 }
 
-export function TodoComments({ todo }: TodoDetailProps) {
+export function TodoComments({ todo, accountId, projectId }: TodoDetailProps) {
   const [comments, setComments] = useState<BasecampComment[]>([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
   const { pop } = useNavigation();
@@ -21,7 +23,7 @@ export function TodoComments({ todo }: TodoDetailProps) {
         const fetchedComments = await fetchComments(todo.comments_url);
         fetchedComments.forEach((comment) => {
           console.log("Fetched comment:", {
-            content: comment.content,
+            content: htmlToMarkdown(comment.content),
           });
         });
         setComments(fetchedComments);
@@ -50,13 +52,9 @@ export function TodoComments({ todo }: TodoDetailProps) {
     }
   };
 
-  const handleMarkComplete = async () => {
-    const accountId = todo.bucket.id;
-    const projectId = todo.bucket.id;
-    const todoId = todo.id;
-
+  const handleMarkComplete = async (todo: BasecampTodo) => {
     try {
-      await markComplete(accountId.toString(), projectId, todoId);
+      await markComplete(accountId, projectId, todo.id);
       await showToast(Toast.Style.Success, "Todo marked as complete");
       pop();
     } catch (error) {
@@ -87,7 +85,11 @@ export function TodoComments({ todo }: TodoDetailProps) {
             }
           />
           <Action.OpenInBrowser url={todo.app_url} />
-          <Action title="Mark as Complete" onAction={handleMarkComplete} />
+          <Action
+            title="Mark Todo Complete"
+            onAction={() => handleMarkComplete(todo)}
+            shortcut={{ modifiers: ["cmd"], key: "e" }}
+          />
         </ActionPanel>
       }
     >
@@ -95,13 +97,14 @@ export function TodoComments({ todo }: TodoDetailProps) {
         <List.Item
           key={comment.id}
           title={`Comment by ${comment.creator.name}`}
-          subtitle={format(new Date(comment.created_at), "PPP 'at' pp")}
+          accessories={[{ icon: Icon.Calendar, date: new Date(comment.created_at) }]}
           detail={
             <List.Item.Detail
-              markdown={`<img src="${comment.creator.avatar_url}" width="20" height="20" style="border-radius: 50%; vertical-align: middle;"> **${comment.creator.name}**
+              markdown={`<img src="${comment.creator.avatar_url}" width="20" height="20" style="vertical-align: middle;"> **${comment.creator.name}**
 *${format(new Date(comment.created_at), "PPP 'at' pp")}*
 
-${htmlToMarkdown(comment.content)}`}
+${htmlToMarkdown(comment.content)}
+`}
             />
           }
           actions={
@@ -122,8 +125,8 @@ ${htmlToMarkdown(comment.content)}`}
               />
               <Action.OpenInBrowser url={todo.app_url} />
               <Action
-                title="Mark as Complete"
-                onAction={handleMarkComplete}
+                title="Mark Todo Complete"
+                onAction={() => handleMarkComplete(todo)}
                 shortcut={{ modifiers: ["cmd"], key: "e" }}
               />
             </ActionPanel>

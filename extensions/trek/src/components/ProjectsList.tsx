@@ -11,11 +11,19 @@ interface ProjectsListProps {
 export default function ProjectsList({ accountId, accountName }: ProjectsListProps) {
   const { isLoading, data, pagination } = usePromise(
     (accountId: string) => async (options: { page: number }) => {
-      const response = await fetchProjects(accountId, options.page);
-      return {
-        data: response.data,
-        hasMore: response.nextPage !== null,
-      };
+      try {
+        const response = await fetchProjects(accountId, options.page);
+        return {
+          data: response.data,
+          hasMore: response.nextPage !== null,
+        };
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+        return {
+          data: [],
+          hasMore: false,
+        };
+      }
     },
     [accountId],
   );

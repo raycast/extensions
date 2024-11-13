@@ -2,6 +2,33 @@ import TurndownService from "turndown";
 
 const turndown = new TurndownService();
 
+// Add custom rule for Basecamp mentions
+turndown.addRule("basecampMention", {
+  filter: (node) => {
+    return (
+      node.nodeName === "BC-ATTACHMENT" && node.getAttribute("content-type") === "application/vnd.basecamp.mention"
+    );
+  },
+  replacement: (content, node) => {
+    const figure = node.querySelector("figure");
+    if (!figure) return content;
+
+    // const img = figure.querySelector("img");
+    const figcaption = figure.querySelector("figcaption");
+    const name = figcaption?.textContent?.trim() || "";
+
+    // TODO: Figure out how to properly handle inline images if possible in raycast
+    // if (img) {
+    //   img.setAttribute("width", "16");
+    //   img.setAttribute("height", "16");
+    //   img.setAttribute("style", "vertical-align: middle; margin-right: 4px;");
+    //   return img.outerHTML + `**@${name}** `;
+    // }
+
+    return `**@${name}** `;
+  },
+});
+
 // Basic CommonMark parsing rules
 const commonMarkRules = {
   // Headers
@@ -57,7 +84,10 @@ function encodeHtmlEntities(str: string): string {
 export function htmlToMarkdown(html: string): string {
   if (!html) return "";
 
-  return turndown.turndown(html);
+  // Clean up any excessive whitespace in the HTML
+  const cleanHtml = html.replace(/\s+/g, " ").trim();
+
+  return turndown.turndown(cleanHtml);
 }
 
 // Cant find any active projects doing this, so that's why this exists
