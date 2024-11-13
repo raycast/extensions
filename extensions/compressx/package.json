@@ -11,7 +11,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "compressFiles",
+      "name": "compressVideo",
       "title": "Compress Files",
       "subtitle": "CompressX",
       "description": "Compress selected files with CompressX",
