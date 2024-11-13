@@ -5,6 +5,9 @@
   "description": "Preview and manage markdown presentations",
   "icon": "extension-icon.png",
   "author": "dnnsmnstrr",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Productivity",
     "Media"
@@ -16,15 +19,13 @@
       "title": "Preview Markdown Slides",
       "description": "View a preview of the selected markdown slide presentation",
       "mode": "view"
-    }
-  ,
+    },
     {
       "name": "select-markdown-presentation",
       "title": "Select Markdown Presentation",
       "description": "Searches the slides directory for markdown files and presents a list of available presentations",
       "mode": "view"
-    }
-  ,
+    },
     {
       "name": "create-markdown-presentation",
       "title": "Create Markdown Presentation",
@@ -49,20 +50,20 @@
           "placeholder": "Creativity",
           "data": [
             {
-                "title": "Low Creativity",
-                "value": "0"
+              "title": "Low Creativity",
+              "value": "0"
             },
             {
-                "title": "Default Creativity",
-                "value": "1"
+              "title": "Default Creativity",
+              "value": "1"
             },
             {
-                "title": "High Creativity",
-                "value": "2"
-            }  
+              "title": "High Creativity",
+              "value": "2"
+            }
           ]
         }
-      ]  
+      ]
     }
   ],
   "preferences": [
@@ -94,9 +95,9 @@
     }
   ],
   "dependencies": {
+    "@marp-team/marp-core": "^4.0.0",
     "@raycast/api": "^1.84.2",
-    "@raycast/utils": "^1.17.0",
-    "@marp-team/marp-core": "^4.0.0"
+    "@raycast/utils": "^1.18.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

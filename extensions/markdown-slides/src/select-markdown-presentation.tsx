@@ -8,32 +8,40 @@ import {
   LaunchType,
   launchCommand,
   Color,
+  Keyboard,
 } from "@raycast/api";
 import path from "path";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { editFile, getIcon, getMarkdownFiles, MarkdownFile } from "./slides";
+import { useCachedState } from "@raycast/utils";
 
 const preferences = getPreferenceValues<Preferences>();
 const cache = new Cache();
 
 export default function Command() {
   const slidesDir = preferences.slidesDirectory.replace("~", process.env.HOME || "");
-  const [markdownFiles, setMarkdownFiles] = useState<MarkdownFile[]>([]);
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [markdownFiles, setMarkdownFiles] = useCachedState<MarkdownFile[]>("markdownFiles", []);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [selectedFile, setSelectedFile] = useCachedState<string | null>("selectedFile", null);
 
   useEffect(() => {
+    setIsLoading(true);
     setMarkdownFiles(getMarkdownFiles(slidesDir));
     const cachedFile = cache.get("selectedSlides");
     setSelectedFile(cachedFile as string | null);
+    setIsLoading(false);
   }, [slidesDir]);
 
   const refreshFiles = () => {
+    setIsLoading(true);
     setMarkdownFiles(getMarkdownFiles(slidesDir));
+    setIsLoading(false);
   };
 
   return (
     <List
       isShowingDetail
+      isLoading={isLoading}
       actions={
         !markdownFiles.length ? (
           <ActionPanel>
@@ -106,11 +114,7 @@ export default function Command() {
               />
               <Action.OpenWith path={file.path} />
               <Action.ShowInFinder path={file.path} shortcut={{ modifiers: ["cmd"], key: "f" }} />
-              <Action.Trash
-                paths={file.path}
-                onTrash={refreshFiles}
-                shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-              />
+              <Action.Trash paths={file.path} onTrash={refreshFiles} shortcut={Keyboard.Shortcut.Common.Remove} />
               <ActionPanel.Section>
                 <Action.ShowInFinder
                   title="Open Slides Directory"
