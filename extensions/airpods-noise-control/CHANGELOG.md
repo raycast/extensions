@@ -3,6 +3,7 @@
 ## [Bug Fix] - {PR_MERGE_DATE}
 
 - Fixed incorrect sound menu expand toggle index computation on macOS Sequoia
+- Gracefully handle AppleScript runtime errors
 
 ## [Improvements] - 2024-03-09
 - Typo fixed.

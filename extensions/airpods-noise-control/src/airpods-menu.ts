@@ -123,25 +123,38 @@ tell application "System Events"
 end tell
   `;
 
-  const res = await runAppleScript<string>(script);
-  switch (res) {
-    case "sound-not-found": {
-      showFailureToast("", { title: "Sound not found. Check Localization!" });
-      return null;
+  try {
+    const result = await runAppleScript<string>(script);
+
+    switch (result) {
+      case "sound-not-found": {
+        await showFailureToast("", {
+          title: "Sound not found. Check Localization!",
+        });
+
+        return null;
+      }
+      case "control-center-not-found": {
+        await showFailureToast("", {
+          title: "Control Center not found. Check Localization!",
+        });
+
+        return null;
+      }
+      case "airpods-not-connected": {
+        await showFailureToast("", { title: "AirPods not connected!" });
+
+        return null;
+      }
+      default: {
+        await updateCommandMetadata({ subtitle: `Mode: ${result}` });
+
+        return result;
+      }
     }
-    case "control-center-not-found": {
-      showFailureToast("", {
-        title: "Control Center not found. Check Localization!",
-      });
-      return null;
-    }
-    case "airpods-not-connected": {
-      showFailureToast("", { title: "AirPods not connected!" });
-      return null;
-    }
-    default: {
-      await updateCommandMetadata({ subtitle: `Mode: ${res}` });
-      return res;
-    }
+  } catch (error) {
+    await showFailureToast(error, { title: "Could not run AppleScript" });
+
+    return null;
   }
 }
