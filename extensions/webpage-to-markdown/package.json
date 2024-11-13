@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "webpage-to-markdown",
-      "title": "Webpage to markdown",
+      "title": "Webpage to Markdown",
       "subtitle": "Convert a webpage to markdown format",
       "description": "Converts webpage to markdown format using Jina AI",
       "mode": "view",
