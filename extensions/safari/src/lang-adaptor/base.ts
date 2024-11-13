@@ -77,3 +77,5 @@ export class LanguageAdaptor {
     return formatted;
   }
 }
+
+export const langAdaptor = new LanguageAdaptor();

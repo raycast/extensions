@@ -1,7 +1,7 @@
 import pinyin from "pinyin";
-import { LanguageAdaptor, LanguageHandler } from "./base";
+import { LanguageHandler } from "./base";
 
-class PinyinHandler implements LanguageHandler {
+export class PinyinHandler implements LanguageHandler {
   name = "pinyin";
 
   static readonly chineseChar = "[\\u4e00-\\u9fa5]+";
@@ -28,13 +28,4 @@ class PinyinHandler implements LanguageHandler {
       return text;
     }
   }
-}
-
-export function pinyinSupport() {
-  const pinyinHandler = new PinyinHandler();
-  return {
-    install(adaptor: LanguageAdaptor) {
-      adaptor.registerLang("pinyin", pinyinHandler);
-    },
-  };
 }

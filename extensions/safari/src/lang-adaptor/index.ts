@@ -1,2 +1,2 @@
 export * from "./pinyin";
-export { LanguageAdaptor } from "./base";
+export { langAdaptor, LanguageAdaptor } from "./base";

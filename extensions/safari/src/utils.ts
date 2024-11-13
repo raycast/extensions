@@ -3,8 +3,8 @@ import Fuse, { FuseOptionKey } from "fuse.js";
 import _ from "lodash";
 import osascript from "osascript-tag";
 import { URL } from "url";
-import { pinyinSupport, LanguageAdaptor } from "./lang-adaptor";
-import { HistoryItem, LooseTab, Tab } from "./types";
+import { langAdaptor, PinyinHandler } from "./lang-adaptor";
+import { HistoryItem, Tab } from "./types";
 
 type Preferences = {
   safariAppIdentifier: string;
@@ -72,13 +72,12 @@ export const getTitle = (tab: Tab) => _.truncate(tab.title, { length: 75 });
 
 export const plural = (count: number, string: string) => `${count} ${string}${count > 1 ? "s" : ""}`;
 
-const langAdaptor = new LanguageAdaptor();
-const langHandlers = [pinyinSupport()];
+function installLangHandlers() {
+  langAdaptor.registerLang(PinyinHandler.name, new PinyinHandler());
+}
 
-export const search = function (collection: LooseTab[], keys: Array<FuseOptionKey<object>>, searchText: string) {
-  langHandlers.forEach((handler) => {
-    handler.install(langAdaptor);
-  });
+export const search = function (collection: Tab[], keys: Array<FuseOptionKey<object>>, searchText: string) {
+  installLangHandlers();
 
   if (!searchText) {
     return collection;
