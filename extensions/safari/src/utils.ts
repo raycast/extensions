@@ -4,7 +4,7 @@ import _ from "lodash";
 import osascript from "osascript-tag";
 import { URL } from "url";
 import { langAdaptor, PinyinHandler } from "./lang-adaptor";
-import { HistoryItem, Tab } from "./types";
+import { HistoryItem, LooseTab } from "./types";
 
 type Preferences = {
   safariAppIdentifier: string;
@@ -68,7 +68,7 @@ export const formatDate = (date: string) =>
     day: "numeric",
   });
 
-export const getTitle = (tab: Tab) => _.truncate(tab.title, { length: 75 });
+export const getTitle = (tab: LooseTab) => _.truncate(tab.title, { length: 75 });
 
 export const plural = (count: number, string: string) => `${count} ${string}${count > 1 ? "s" : ""}`;
 
@@ -76,7 +76,7 @@ function installLangHandlers() {
   langAdaptor.registerLang(PinyinHandler.name, new PinyinHandler());
 }
 
-export const search = function (collection: Tab[], keys: Array<FuseOptionKey<object>>, searchText: string) {
+export const search = function (collection: LooseTab[], keys: Array<FuseOptionKey<object>>, searchText: string) {
   installLangHandlers();
 
   if (!searchText) {
