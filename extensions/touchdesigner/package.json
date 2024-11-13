@@ -3,7 +3,7 @@
   "name": "touchdesigner",
   "title": "TouchdDesigner",
   "description": "TouchdDesigner Operators",
-  "icon": "extension-icon.jpg",
+  "icon": "extension-icon.png",
   "author": "menard",
   "categories": [
     "Productivity"
@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "td",
-      "title": "td",
+      "title": "Td",
       "subtitle": "TouchDesigner Operators",
       "description": "Search TOPs, CHOPs, DATs, etc",
       "mode": "view"
