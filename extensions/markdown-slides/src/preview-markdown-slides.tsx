@@ -14,7 +14,7 @@ import {
 import { useEffect, useState } from "react";
 import fs from "fs";
 import { Marp } from "@marp-team/marp-core";
-import { editFile, parseMarkdownToSlides, PLACEHOLDER_DESCRIPTION, PLACEHOLDER_TEXT } from "./slides";
+import { DEFAULT_PATH, editFile, parseMarkdownToSlides, PLACEHOLDER_DESCRIPTION, PLACEHOLDER_TEXT } from "./slides";
 
 const preferences = getPreferenceValues<Preferences>();
 const cache = new Cache();
