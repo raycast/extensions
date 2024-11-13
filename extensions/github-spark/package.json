@@ -5,6 +5,8 @@
   "description": "Turn your ideas into personalized apps with GitHub Spark",
   "icon": "icon.png",
   "author": "cole",
+  "owner": "github-next",
+  "access": "public",
   "categories": [
     "Fun"
   ],
