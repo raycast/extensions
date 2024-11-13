@@ -1,4 +1,4 @@
-import { MenuBarExtra, showToast, Toast } from "@raycast/api";
+import { MenuBarExtra, showToast, Toast, environment, LaunchType } from "@raycast/api";
 import { NetworkService, normalizeHardwarePort, openNetworkSettings, useNetworkServices } from "./network-services";
 
 export default function Command() {
@@ -10,7 +10,14 @@ export default function Command() {
     otherServices,
     getActionForService,
     hideInvalidDevices,
+    fetchServiceStatus,
   } = useNetworkServices();
+
+  // Check the launch type to determine if it's a background refresh
+  if (environment.launchType === LaunchType.Background) {
+    // Perform background refresh logic
+    refreshNetworkStatus();
+  }
 
   if (error) {
     showToast(Toast.Style.Failure, "Something went wrong", error.message);
@@ -52,6 +59,13 @@ export default function Command() {
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );
+
+  function refreshNetworkStatus() {
+    // Refresh the status of each service
+    [...favoriteServices, ...otherServices, ...(!hideInvalidDevices ? invalidServices : [])].forEach((service) => {
+      fetchServiceStatus(service);
+    });
+  }
 
   function NetworkServiceItem({ service }: { service: NetworkService }) {
     const actionDetails = getActionForService(service);
