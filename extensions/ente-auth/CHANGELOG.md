@@ -1,5 +1,8 @@
 # Ente Auth Changelog
 
+## [Bug fix] - 2024-11-13
+- Added PR-15036 changes contributed by albarin
+
 ## [New Additions] - 2024-11-13
 
 - Add the ability to change preferred actions; e.g. (paste or copy on enter)
