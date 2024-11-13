@@ -1,6 +1,6 @@
 # Next.js Documentation Changelog
 
-## [Persist Selected Next Router] - {PR_MERGE_DATE}
+## [Persist Selected Next Router] - 2024-11-13
 
 ## [Fix Links with "index" leading to `404`] - 2024-08-29
 
