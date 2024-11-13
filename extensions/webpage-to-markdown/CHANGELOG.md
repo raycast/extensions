@@ -1,6 +1,6 @@
 # Webpage to Markdown Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2024-11-13
 
 - Convert webpages to markdown using Jina.ai
 - View metadata (word count, reading time)
