@@ -1,0 +1,36 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "search-files-by-tag",
+  "title": "Search Files By Tag",
+  "description": "Search File By Tag",
+  "icon": "command-icon.png",
+  "author": "yansq",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Files by tag",
+      "description": "Template for showing a static list and a detail view",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.61.2",
+    "@raycast/utils": "^1.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
