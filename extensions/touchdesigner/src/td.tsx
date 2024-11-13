@@ -23,9 +23,11 @@ interface OperatorFamily {
   types?: Record<string, string[]>;
 }
 
+/*
 interface OperatorData {
   operators: Record<string, OperatorFamily>;
 }
+*/
 
 // Constants
 const BASE_DOC_URL = "https://derivative.ca/UserGuide";
@@ -38,10 +40,10 @@ const ICONS: Readonly<Record<string, string>> = {
   DEFAULT: "⚡",
 } as const;
 
-// Debug logging utility
-const debug = (message: string, data?: any) => {
+// Debug logging utility with proper typing
+const debug = (message: string, data?: unknown): void => {
   if (environment.isDevelopment) {
-    console.log(`[Debug] ${message}`, data || '');
+    console.log(`[Debug] ${message}`, data ?? '');
   }
 };
 
@@ -128,7 +130,7 @@ const processOperators = (
       });
     }
   } catch (error) {
-    debug('Error processing operators:', error);
+    debug('Error processing operators:', error instanceof Error ? error.message : 'Unknown error');
   }
 
   return operators;
@@ -149,7 +151,7 @@ export default function Command() {
       operators = operators.sort((a, b) => a.title.localeCompare(b.title));
       debug('Processed operators count:', operators.length);
     } catch (error) {
-      debug('Error in operator processing:', error);
+      debug('Error in operator processing:', error instanceof Error ? error.message : 'Unknown error');
       operators = [];
     }
 
