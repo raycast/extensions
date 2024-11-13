@@ -64,6 +64,16 @@ export type GamesByDate = {
   games: Game[];
 };
 
+export type Schedule = {
+  games: Game[];
+  previousMonth: `${number}-${number}`;
+  currentMonth: `${number}-${number}`;
+  nextMonth: `${number}-${number}`;
+  calendarUrl: string;
+  clubTimezone: "US/Eastern" | "US/Central" | "US/Mountain" | "US/Pacific"; // Add other timezones as needed
+  clubUTCOffset: `-${number}${number}:${number}${number}`;
+};
+
 export type Game = {
   id: number;
   season: number;
@@ -776,9 +786,10 @@ export type GameSummary = {
 };
 
 export type PlayerOnIce = {
-  playerId: number;
+  id?: number;
+  playerId?: number | string;
   star?: number;
-  name:
+  name?:
     | {
         default: string;
         cs?: string;
@@ -786,24 +797,44 @@ export type PlayerOnIce = {
         sk?: string;
       }
     | string;
-  sweaterNumber: number;
+  firstName?: {
+    default: string;
+  };
+  lastName?: {
+    default: string;
+  };
+  sweaterNumber?: number;
   sweaterNo?: number;
   positionCode: string;
   position?: string;
+  teamId?: string;
   teamAbbrev?: string;
-  headshot: string;
-  totalSOI: number;
+  lastTeamId?: string;
+  lastTeamAbbrev?: string;
+  lastSeasonId?: string;
+  headshot?: string;
+  totalSOI?: number;
   goals?: number;
   assists?: number;
   points?: number;
   goalsAgainstAverage?: number;
   savePctg?: number;
   height?: string;
-  lastSeasonId?: string;
-  lastTeamAbbrev?: string;
+  heightInInches?: number;
+  heightInCentimeters?: number;
   weightInPounds?: number;
-  birthCity?: string;
+  weightInKilograms?: number;
+  birthCity?:
+    | string
+    | {
+        default: string;
+        sv?: string;
+      };
+  birthStateProvince?: string;
   birthCountry?: string;
+  birthDate?: string;
+  shootsCatches?: string;
+  active?: boolean;
 };
 
 export type TeamIceSurface = {

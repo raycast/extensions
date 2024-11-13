@@ -1,12 +1,15 @@
 import React from "react";
-import { ActionPanel, Action, List } from "@raycast/api";
+import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import { getNHL } from "./utils/nhlData";
 import { StandingsResponse, TeamStanding } from "./utils/types";
 import { getLanguageKey, getCurrentDate, teamLogo } from "./utils/helpers";
+import TeamRoster from "./templates/teamRoster";
+import TeamSchedule from "./templates/teamSchedule";
 
 import Unresponsive from "./templates/unresponsive";
+import { gameActions } from "./utils/translations";
 
-const languageKey = getLanguageKey();
+const lang = getLanguageKey();
 
 interface today {
   data: StandingsResponse;
@@ -51,8 +54,8 @@ const renderDivision = (team: TeamStanding[], division: string) => {
       {team.map((standing) => (
         <List.Item
           key={standing.teamAbbrev.default}
-          title={standing.teamName[languageKey]}
-					icon={teamLogo(standing.teamAbbrev.default)}
+          title={standing.teamName[lang]}
+          icon={teamLogo(standing.teamAbbrev.default)}
           accessories={[
             { text: "GP:" + standing.gamesPlayed },
             { text: "W:" + standing.wins },
@@ -63,10 +66,20 @@ const renderDivision = (team: TeamStanding[], division: string) => {
             { text: "ROW:" + standing.regulationPlusOtWins },
             { text: "GF:" + standing.goalFor },
             { text: "GA:" + standing.goalAgainst },
-            { text: "GD:" + standing.goalDifferential }
+            { text: "GD:" + standing.goalDifferential },
           ]}
           actions={
             <ActionPanel>
+              <Action.Push
+                title={gameActions.viewRoster[lang]}
+                icon={Icon.PersonLines}
+                target={<TeamRoster team={standing.teamAbbrev.default} season={standing.seasonId} />}
+              />
+              <Action.Push
+                title={gameActions.viewSchedule[lang]}
+                icon={Icon.Calendar}
+                target={<TeamSchedule team={standing.teamAbbrev.default} />}
+              />
               <Action.OpenInBrowser url={`https://nhl.com/${standing.teamCommonName.default.toLowerCase()}`} />
             </ActionPanel>
           }

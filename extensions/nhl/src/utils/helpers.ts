@@ -229,7 +229,9 @@ export function sortGames(apiResponse: ScoreboardResponse): SortedGames {
 
 export function teamLogo(abbrev: string): string {
   if (!abbrev) return "";
-  return `https://assets.nhle.com/logos/nhl/svg/${abbrev}_${environment.appearance}.svg`;
+  // return local logos for now
+  return `team-logos/${abbrev}_${environment.appearance}.svg`;
+  //return `https://assets.nhle.com/logos/nhl/svg/${abbrev}_${environment.appearance}.svg`;
 }
 
 export function starsOfTheGame(game: Game) {

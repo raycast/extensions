@@ -61,6 +61,14 @@ export const gameActions = {
     default: "Three Min Recap",
     fr: "Résumé de Trois Minutes",
   },
+  viewRoster: {
+    default: "View Roster",
+    fr: "Voir l'Équipe",
+  },
+  viewSchedule: {
+    default: "View Schedule",
+    fr: "Voir le Calendrier",
+  },
 };
 
 export const gameStates = {
@@ -284,5 +292,17 @@ export const playerTitleStrings = {
   career: {
     default: "Career",
     fr: "Carrière",
+  },
+  forwards: {
+    default: "Forwards",
+    fr: "Attaquants",
+  },
+  defensemen: {
+    default: "Defensemen",
+    fr: "Défenseurs",
+  },
+  goalies: {
+    default: "Goalies",
+    fr: "Gardiens",
   },
 };
