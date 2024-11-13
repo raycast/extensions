@@ -9,8 +9,11 @@ export type TError = {
 
 export type TCreateShortUrlParams = {
   url: string;
-  keyword: string;
-  title: string;
+  keyword?: string;
+  title?: string;
+};
+export type TGetStatsParams = {
+  limit: string;
 };
 
 export type GetCreateShortUrlResponse = {
@@ -28,4 +31,23 @@ export type GetCreateShortUrlResponse = {
   };
   title: string;
   shorturl: string;
+};
+
+export type GetStatsResponse = {
+  links: {
+    [key in `link_${number}`]: {
+      shorturl: string;
+      url: string;
+      title: string;
+      timestamp: string;
+      ip: string;
+      clicks: string;
+    };
+  };
+  stats: {
+    total_links: string;
+    total_clicks: string;
+  };
+  statusCode: 200;
+  message: "success";
 };

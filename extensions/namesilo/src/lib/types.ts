@@ -28,6 +28,7 @@ export type DomainInfo = {
     billing: string;
   };
 };
+
 export type DNSRecord = {
   record_id: string;
   type: string;
@@ -36,6 +37,14 @@ export type DNSRecord = {
   ttl: string;
   distance: number;
 };
+export type AddDNSRecord = {
+  rrtype: string;
+  rrhost: string;
+  rrvalue: string;
+  rrdistance?: string;
+  rrttl: string;
+};
+
 export type WhoisInfo = {
   domain: string;
   registered: string;
@@ -115,6 +124,44 @@ export type ViewAuction = Auction & {
   visits: number;
   clicks: number;
   ctr: number;
+};
+
+type NameServerOptionalIPs = {
+  ip2?: string;
+  ip3?: string;
+  ip4?: string;
+  ip5?: string;
+  ip6?: string;
+  ip7?: string;
+  ip8?: string;
+  ip9?: string;
+  ip10?: string;
+  ip11?: string;
+  ip12?: string;
+  ip13?: string;
+};
+export type NameServer = {
+  host: string;
+  ip: string;
+} & NameServerOptionalIPs;
+export type AddNameServer = {
+  new_host: string;
+  ip1: string;
+} & NameServerOptionalIPs;
+export type ChangeNameServer = {
+  ns1: string;
+  ns2: string;
+  ns3?: string;
+  ns4?: string;
+  ns5?: string;
+  ns6?: string;
+  ns7?: string;
+  ns8?: string;
+  ns9?: string;
+  ns10?: string;
+  ns11?: string;
+  ns12?: string;
+  ns13?: string;
 };
 
 type BaseResponse = {

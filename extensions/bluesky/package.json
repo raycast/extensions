@@ -20,6 +20,7 @@
       "title": "Bluesky Service URL",
       "description": "Service URL",
       "default": "https://bsky.social",
+      "placeholder": "https://bsky.social",
       "name": "service",
       "required": true
     },
@@ -28,6 +29,7 @@
       "title": "Bluesky Email or Handle",
       "description": "Your Bluesky email or handle",
       "name": "accountId",
+      "placeholder": "bsky.app",
       "required": true
     },
     {
@@ -35,6 +37,7 @@
       "title": "App Password",
       "description": "Your App Password",
       "name": "password",
+      "placeholder": "xxxx-xxxx-xxxx-xxxx",
       "required": true
     }
   ],
@@ -101,7 +104,7 @@
     }
   ],
   "dependencies": {
-    "@atproto/api": "^0.13.8",
+    "@atproto/api": "^0.13.15",
     "@atproto/uri": "^0.1.1",
     "@raycast/api": "^1.83.1",
     "@raycast/utils": "^1.17.0",
@@ -122,6 +125,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -1,5 +1,17 @@
 # reclaim Changelog
 
+## [Fixes] - 2024-10-25
+- Don't hardcode task category to "work"
+
+## [Update] - 2024-10-16
+- Add Sentry support
+
+## [Fixes] - 2024-10-15
+- Don't cache moment data, should always be up to date
+
+## [Update] - 2024-10-14
+- Add the `Show Now Event in Menu Bar` configuration option for the Calendar menu bar
+
 ## [Fixes] - 2024-09-05
 - Route useFetch through useApi
 

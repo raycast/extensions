@@ -1,5 +1,9 @@
 # Google Tasks Changelog
 
+## [Update] - 2024-11-05
+
+- Changed `⌘ + I` to `⌘ + E` to keep the standard from editing in raycast
+
 ## [Sort tasks by due date] - 2023-07-23
 
 ## [Update] - 2023-05-12

@@ -12,13 +12,12 @@ import {
   LocalStorage,
   openExtensionPreferences,
 } from "@raycast/api";
-import { getAvatarIcon } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { getAvatarIcon, runAppleScript, showFailureToast, usePromise } from "@raycast/utils";
+import { useState } from "react";
 import { DateTime } from "luxon";
 import { MattermostClient } from "./shared/MattermostClient";
 import { Channel, UserProfile } from "./shared/MattermostTypes";
 import { withAuthorization } from "./shared/withAuthorization";
-import { runAppleScriptSync } from "run-applescript";
 
 async function getCachedState(): Promise<State | undefined> {
   return LocalStorage.getItem<string>("channels-state").then((cachedStateJson) =>
@@ -57,13 +56,6 @@ interface ChannelUI {
   path: string;
 }
 
-interface Preference {
-  baseUrl: string;
-  username: string;
-  password: string;
-  teamName?: string;
-}
-
 /////////////////////////////////////////
 /////////////// Command /////////////////
 /////////////////////////////////////////
@@ -74,36 +66,30 @@ export default function Command() {
 
 function ChannelsFinderList(): JSX.Element {
   const [state, setState] = useState<State | undefined>();
-  const [loading, setLoading] = useState<boolean>(false);
-  const preference = getPreferenceValues<Preference>();
+  const preference = getPreferenceValues<Preferences>();
 
-  useEffect(() => {
-    (async () => {
-      runAppleScriptSync('launch application "Mattermost"');
-
-      const cachedState = await getCachedState();
-      cachedState && setState(cachedState);
-
-      setLoading(true);
-      showToast(Toast.Style.Animated, "Fetch teams...");
-
+  const { isLoading } = usePromise(async () => {
+    if (preference.deepLinkType === "application") {
       try {
-        const profile = await MattermostClient.getMe();
-        const teams = await MattermostClient.getTeams();
-        const teamsUI: TeamUI[] = teams.map((team) => ({ id: team.id, name: team.name }));
-
-        showToast(Toast.Style.Success, `Found ${teamsUI.length} teams`);
-        setCachedState({ profile: profile, teams: teamsUI });
-        setState({ profile: profile, teams: teamsUI });
+        await runAppleScript('launch application "Mattermost"');
       } catch (error) {
-        showToast(Toast.Style.Failure, `Failed ${error}`);
+        await showFailureToast("Is Mattermost installed?", { title: "Error launching Mattermost" });
       }
+    }
+    const cachedState = await getCachedState();
+    cachedState && setState(cachedState);
 
-      setLoading(false);
-    })();
-  }, []);
+    await showToast(Toast.Style.Animated, "Fetch teams...");
 
-  if (state?.teams.length == 1) {
+    const [profile, teams] = await Promise.all([MattermostClient.getMe(), MattermostClient.getTeams()]);
+    const teamsUI: TeamUI[] = teams.map((team) => ({ id: team.id, name: team.name }));
+
+    await showToast(Toast.Style.Success, `Found ${teamsUI.length} teams`);
+    setCachedState({ profile: profile, teams: teamsUI });
+    setState({ profile: profile, teams: teamsUI });
+  });
+
+  if (!isLoading && state?.teams.length == 1) {
     return <ChannelList team={state?.teams[0]} profile={state?.profile} />;
   }
 
@@ -150,7 +136,7 @@ function ChannelsFinderList(): JSX.Element {
   }
 
   return (
-    <List isLoading={loading} searchBarPlaceholder="Search team">
+    <List isLoading={isLoading} searchBarPlaceholder="Search team">
       {state?.teams.length === 0 && <List.EmptyView title="You are not on any team" icon={Icon.Bubble} />}
     </List>
   );
@@ -158,11 +144,9 @@ function ChannelsFinderList(): JSX.Element {
 
 function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
   const [team, setTeam] = useState<TeamUI>(props.team);
-  const [loading, setLoading] = useState<boolean>(false);
-  const preference = getPreferenceValues<Preference>();
+  const preference = getPreferenceValues<Preferences>();
 
   async function loadCategories(): Promise<ChannelCategoryUI[]> {
-    setLoading(true);
     showToast(Toast.Style.Animated, `Fetch ${team.name} channels...`);
 
     const [categories, channels] = await Promise.all([
@@ -180,7 +164,9 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
       directChatsMap.set(profileId, chat);
     });
 
-    const directChatProfiles = await MattermostClient.getProfilesByIds(Array.from(directChatsMap.keys()));
+    const directChatProfiles = directChatsMap.keys.length
+      ? await MattermostClient.getProfilesByIds(Array.from(directChatsMap.keys()))
+      : [];
     directChatProfiles.forEach((profile) => {
       const chat = directChatsMap.get(profile.id);
       if (chat == undefined) {
@@ -241,7 +227,9 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
       setCachedState(cachedState);
     }
 
-    const profilesStatuses = await MattermostClient.getProfilesStatus(Array.from(directChatsMap.keys()));
+    const profilesStatuses = directChatsMap.keys.length
+      ? await MattermostClient.getProfilesStatus(Array.from(directChatsMap.keys()))
+      : [];
     profilesStatuses.forEach((status) => {
       const channel = directChatsMap.get(status.user_id)!;
       const channelUI = channelsUIMap.get(channel.id)!;
@@ -265,30 +253,41 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
       })();
     });
 
-    setLoading(false);
     showToast(Toast.Style.Success, `${team.name} channels`);
 
     return categoriesUI;
   }
 
-  useEffect(() => {
-    (async () => {
-      team.categories = await loadCategories();
-      setTeam(team);
-    })();
-  }, []);
+  const { isLoading } = usePromise(async () => {
+    team.categories = await loadCategories();
+    setTeam(team);
+  });
+
+  function generateBaseDeeplink() {
+    switch (preference.deepLinkType) {
+      case "browser":
+        return preference.baseUrl;
+      case "application":
+        return preference.baseUrl.replace("https://", "mattermost://");
+    }
+  }
 
   async function openChannel(channel: ChannelUI) {
     console.log("select channel", channel);
-    const baseDeeplink = preference.baseUrl.replace("https://", "mattermost://");
+    const baseDeeplink = generateBaseDeeplink();
     const fullDeeplink = baseDeeplink + "/" + team.name + channel.path;
     console.log("open deeplink", fullDeeplink);
-    open(fullDeeplink);
-    closeMainWindow();
+    try {
+      await open(fullDeeplink);
+      await closeMainWindow();
+    } catch (error) {
+      await showFailureToast("Is Mattermost Running?", { title: "Error opening in Mattermost" });
+    }
   }
 
   return (
-    <List isLoading={loading} searchBarPlaceholder="Search channel or user">
+    <List isLoading={isLoading} searchBarPlaceholder="Search channel or user">
+      {!isLoading && !team.categories?.length && <List.EmptyView title="No channels were found" icon={Icon.Bubble} />}
       {team.categories?.map((category) => {
         return (
           <List.Section key={category.name} title={category.name} subtitle={category.channels.length.toString()}>
@@ -303,7 +302,11 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
                   accessories={[{ text: channel.lastTime }, { icon: channel.statusIcon }]}
                   actions={
                     <ActionPanel>
-                      <Action title="Open in Mattermost" onAction={() => openChannel(channel)} />
+                      <Action
+                        icon="mattermost-icon-rounded.png"
+                        title={`Open in Mattermost (${preference.deepLinkType})`}
+                        onAction={() => openChannel(channel)}
+                      />
                       <Action.CopyToClipboard content={channel.mentionName} />
                     </ActionPanel>
                   }

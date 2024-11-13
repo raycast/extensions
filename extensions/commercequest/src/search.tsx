@@ -57,7 +57,7 @@ function fetchItems(searchText: string, filterItemType: string) {
   searchParams.append("expand", "-body");
   searchParams.append("expand", "insertUser");
 
-  return useFetch("https://commercequest.space/api/v2/search?" + searchParams, {
+  return useFetch("https://forum.commercequest.space/api/v2/search?" + searchParams, {
     parseResponse: parseFetchResponse,
     keepPreviousData: true,
   });

@@ -1,4 +1,5 @@
 import { Event } from "../types/event";
+import { Falsy } from "../types/types";
 
 export const sortEvents = (a: Partial<Event>, b: Partial<Event>) => {
   if (a.eventStart === undefined || b.eventStart === undefined) {
@@ -66,3 +67,10 @@ export const makeOrderedListComparator = <T>(
     return numComparator(iA === undefined ? Infinity : iA, iB === undefined ? Infinity : iB);
   };
 };
+
+/**
+ * Equivilant of [].filter(i => !!i) but correctly removes falsy values from from the type
+ * @param items An array of items
+ * @returns The same array without falsy values
+ */
+export const filterFalsy = <T>(items?: readonly T[]) => (items?.filter((i) => !!i) || []) as Exclude<T, Falsy>[];

@@ -6,7 +6,9 @@
   "icon": "icon.png",
   "author": "pernielsentikaer",
   "contributors": [
-    "samuelkraft"
+    "samuelkraft",
+    "ridemountainpig",
+    "aryan_thatte"
   ],
   "license": "MIT",
   "keywords": [
@@ -55,6 +57,15 @@
       "title": "Show the date",
       "description": "Should the date be visible in the list",
       "label": "Yes, show date in the list"
+    },
+    {
+      "name": "showCountdownByDay",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Countdown unit",
+      "description": "Show the countdown in days.",
+      "label": "Show the countdown in days"
     }
   ],
   "categories": [

@@ -1,0 +1,149 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "servicenow",
+  "title": "ServiceNow",
+  "description": "Search and explore content across your ServiceNow instances",
+  "icon": "servicenow.png",
+  "author": "robertoalvarezalonso",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search",
+      "description": "View past searches, perform new queries, and switch between ServiceNow instances",
+      "mode": "view"
+    },
+    {
+      "name": "manage-instance-profiles",
+      "title": "Manage Instance Profiles",
+      "description": "Configure and manage your ServiceNow instance profiles for use in search queries",
+      "mode": "view"
+    },
+    {
+      "name": "quickly-search",
+      "title": "Quickly Search",
+      "description": "Search your ServiceNow instance instantly from the command window by entering a query, without extra steps",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "instanceName",
+          "placeholder": "Instance name or alias",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "quickly-search-selected-instance",
+      "title": "Quickly Search in Selected Instance",
+      "description": "Search your selected ServiceNow instance instantly from the command window by entering a query, without extra steps",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "open-all-instances",
+      "title": "Open All Instances",
+      "description": "Open all configured ServiceNow instances in the browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-selected-instance",
+      "title": "Open Selected Instance",
+      "description": "Open the currently selected ServiceNow instance in the browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-current-url",
+      "title": "Open Current URL",
+      "description": "Open the current ServiceNow URL in the specified instance",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "instanceName",
+          "placeholder": "Instance name or alias",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "open-current-url-in-selected-instance",
+      "title": "Open Current URL in Selected Instance",
+      "description": "Open the current ServiceNow URL in the selected instance",
+      "mode": "no-view"
+    },
+    {
+      "name": "add-instance-profile",
+      "title": "Add Instance Profile",
+      "description": "Add a new instance profile for your searches",
+      "mode": "view"
+    },
+    {
+      "name": "explore-tables",
+      "title": "Explore Tables",
+      "description": "Browse and explore the tables within an instance",
+      "mode": "view"
+    },
+    {
+      "name": "search-resources",
+      "title": "Search Resources",
+      "description": "Search across various ServiceNow resources, including documentation, blogs, guides, learning materials, and more.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "login-to-selected-instance",
+      "title": "Login to Selected Instance",
+      "description": "Logs into the selected ServiceNow instance using the credentials stored in the associated instance profile, allowing quick and easy access without manual login steps.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
+    "date-fns": "^4.1.0",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/lodash": "^4.17.7",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

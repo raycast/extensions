@@ -1,5 +1,13 @@
 # YouTube Downloader Changelog
 
+## [Fixed bug #15306] - 2024-11-11
+
+- Fixed the highest quality bug
+
+## [Add WAV support] - 2024-10-21
+
+- Added WAV support for audio downloads
+
 ## [Remove empty dropdown items] - 2024-08-29
 
 - Removed empty dropdown items from the format selection to improve user experience

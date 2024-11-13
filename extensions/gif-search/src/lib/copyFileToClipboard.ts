@@ -3,9 +3,11 @@ import path from "path";
 import { runAppleScript } from "@raycast/utils";
 import tempy, { FileOptions } from "tempy";
 import { getGifFromCache, saveGifToCache } from "./cachedGifs";
+import { getHideFilename } from "../preferences";
 
 export default async function copyFileToClipboard(url: string, name?: string, isFavorite?: boolean) {
-  const fileName = name || path.basename(url);
+  const hideFilename = getHideFilename();
+  const fileName = hideFilename ? "gif.gif" : name || path.basename(url);
 
   // Check if the file exists in the cache - if so use it directly
   const cachedFile = await getGifFromCache(fileName);
@@ -27,7 +29,7 @@ export default async function copyFileToClipboard(url: string, name?: string, is
 
   let tempyOpt: FileOptions;
   if (name) {
-    tempyOpt = { name };
+    tempyOpt = { name: fileName };
   } else {
     tempyOpt = { extension: ".gif" };
   }
