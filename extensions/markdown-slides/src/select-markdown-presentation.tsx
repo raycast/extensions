@@ -7,45 +7,18 @@ import {
   getPreferenceValues,
   LaunchType,
   launchCommand,
-  Toast,
-  showToast,
+  Color,
 } from "@raycast/api";
-import fs from "fs";
 import path from "path";
 import { useState, useEffect } from "react";
-
-interface Preferences {
-  slidesDirectory: string;
-}
+import { editFile, getIcon, getMarkdownFiles, MarkdownFile } from "./slides";
 
 const preferences = getPreferenceValues<Preferences>();
 const cache = new Cache();
 
-function getMarkdownFiles(directory: string): string[] {
-  if (!fs.existsSync(directory)) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Directory not found",
-      message: "Configured slides path: " + directory,
-      primaryAction: {
-        title: "Create Directory",
-        onAction() {
-          if (!fs.existsSync(directory)) {
-            fs.mkdirSync(directory, { recursive: true });
-            showToast({ title: "Created slides directory" });
-          }
-        },
-      },
-    });
-    return [];
-  }
-  const files = fs.readdirSync(directory);
-  return files.filter((file) => path.extname(file).toLowerCase() === ".md");
-}
-
 export default function Command() {
   const slidesDir = preferences.slidesDirectory.replace("~", process.env.HOME || "");
-  const [markdownFiles, setMarkdownFiles] = useState<string[]>([]);
+  const [markdownFiles, setMarkdownFiles] = useState<MarkdownFile[]>([]);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
   useEffect(() => {
@@ -60,6 +33,7 @@ export default function Command() {
 
   return (
     <List
+      isShowingDetail
       actions={
         !markdownFiles.length ? (
           <ActionPanel>
@@ -77,26 +51,63 @@ export default function Command() {
     >
       {markdownFiles.map((file) => (
         <List.Item
-          key={file}
-          icon={file === selectedFile ? Icon.Checkmark : Icon.Document}
-          title={path.basename(file, ".md")}
-          subtitle={file}
-          accessories={file === selectedFile ? [{ icon: Icon.Star, tooltip: "Selected File" }] : []}
+          key={file.path}
+          icon={getIcon(file.icon as keyof typeof Icon)}
+          title={file.headline || path.basename(file.path, ".md")}
+          subtitle={file.name}
+          accessories={
+            file.name === selectedFile
+              ? [{ icon: { tintColor: Color.Yellow, source: Icon.Star }, tooltip: "Selected File" }]
+              : []
+          }
+          detail={
+            <List.Item.Detail
+              markdown={file.content}
+              metadata={
+                <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.Label title="File" text={file.name} />
+                  <List.Item.Detail.Metadata.Label
+                    title="Created At"
+                    text={new Date(file.creationTime).toLocaleDateString()}
+                  />
+                  <List.Item.Detail.Metadata.Label title="Page Count" text={String(file.pageCount)} />
+                  {file.icon && (
+                    <List.Item.Detail.Metadata.Label
+                      title="Icon"
+                      text={String(file.icon)}
+                      icon={getIcon(file.icon as keyof typeof Icon)}
+                    />
+                  )}
+                  {file.isPaginated && <List.Item.Detail.Metadata.Label title="Pagination" text="Enabled" />}
+                </List.Item.Detail.Metadata>
+              }
+            />
+          }
           actions={
             <ActionPanel>
               <Action
                 title="Select File"
                 icon={Icon.Download}
                 onAction={() => {
-                  cache.set("selectedSlides", file);
-                  setSelectedFile(file);
-                  launchCommand({ name: "preview-markdown-slides", type: LaunchType.UserInitiated, context: { file } });
+                  cache.set("selectedSlides", file.name);
+                  setSelectedFile(file.path);
+                  launchCommand({
+                    name: "preview-markdown-slides",
+                    type: LaunchType.UserInitiated,
+                    context: { file: file.name },
+                  });
                 }}
               />
-              <Action.OpenWith path={path.join(slidesDir, file)} />
-              <Action.ShowInFinder path={path.join(slidesDir, file)} shortcut={{ modifiers: ["cmd"], key: "f" }} />
+              <Action
+                title={"Edit File"}
+                icon={Icon.Pencil}
+                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                onAction={() => editFile(file.path)}
+              />
+              <Action.OpenWith path={file.path} />
+              <Action.ShowInFinder path={file.path} shortcut={{ modifiers: ["cmd"], key: "f" }} />
               <Action.Trash
-                paths={path.join(slidesDir, file)}
+                paths={file.path}
                 onTrash={refreshFiles}
                 shortcut={{ modifiers: ["cmd"], key: "backspace" }}
               />

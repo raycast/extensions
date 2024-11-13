@@ -3,60 +3,21 @@ import {
   ActionPanel,
   Cache,
   Detail,
-  getDefaultApplication,
   getPreferenceValues,
   Icon,
   launchCommand,
   LaunchType,
   open,
-  popToRoot,
-  showInFinder,
   showToast,
   Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fs from "fs";
 import { Marp } from "@marp-team/marp-core";
+import { editFile, parseMarkdownToSlides, PLACEHOLDER_DESCRIPTION, PLACEHOLDER_TEXT } from "./slides";
 
-interface Preferences {
-  slidesDirectory: string;
-  pageSeparator: string;
-}
 const preferences = getPreferenceValues<Preferences>();
 const cache = new Cache();
-
-const DEFAULT_PATH = `index.md`;
-const PAGE_SEPARATOR = preferences.pageSeparator === "newline" ? "\n\n\n" : "---";
-const PLACEHOLDER_TEXT = "No Markdown slides found. Create a new markdown file at `";
-const PLACEHOLDER_DESCRIPTION = "`? \n\n> You can customize the slides directory in the extension settings";
-const PLACEHOLDER_CONTENT = `# New Presentation\n\nStart writing your slides here.\n${PAGE_SEPARATOR}\nNew Page`;
-
-async function editFile(filePath: string, finder = false) {
-  const dir = preferences.slidesDirectory?.replace("~", process.env.HOME || "");
-  if (!fs.existsSync(filePath)) {
-    try {
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-      fs.writeFileSync(filePath.replace("~", process.env.HOME || ""), PLACEHOLDER_CONTENT);
-    } catch (error) {
-      console.error("Error writing file:", error);
-      return;
-    }
-  }
-
-  if (finder) {
-    showInFinder(filePath);
-  } else {
-    const application = await getDefaultApplication(filePath);
-    open(filePath, application);
-  }
-  popToRoot();
-}
-
-function parseMarkdownToSlides(markdown: string): string[] {
-  return markdown.split(PAGE_SEPARATOR).map((slide) => slide.trim());
-}
 
 interface SlideProps {
   slide: string;
@@ -135,8 +96,8 @@ function Slide({ slide, slides, nextSlide, prevSlide, filePath }: SlideProps) {
             shortcut={{ modifiers: ["cmd"], key: "e" }}
             onAction={() => editFile(filePath)}
           />
-          <Action.ShowInFinder path={filePath} />
-          <Action.OpenWith path={filePath} />
+          <Action.ShowInFinder path={filePath} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
+          <Action.OpenWith path={filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
           <Action
             title="Select File"
             icon={Icon.Folder}
@@ -179,10 +140,8 @@ export default function Command({ launchContext }: { launchContext: { file?: str
           markdownContent = markdownContent.slice(endOfFrontmatter + 3).trim();
         }
       }
-      console.log(markdownContent);
       setMarkdown(markdownContent);
     } catch (error) {
-      console.log(error);
       showToast({
         style: Toast.Style.Failure,
         title: "File not found",
@@ -195,7 +154,6 @@ export default function Command({ launchContext }: { launchContext: { file?: str
   useEffect(() => {
     if (markdown) {
       const parsedSlides = parseMarkdownToSlides(markdown);
-      console.log(parsedSlides);
       setSlides(parsedSlides);
     } else if (markdown === null) setSlides([PLACEHOLDER_TEXT + selectedFilePath + PLACEHOLDER_DESCRIPTION]);
   }, [markdown]);

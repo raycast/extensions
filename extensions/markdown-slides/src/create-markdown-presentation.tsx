@@ -1,59 +1,10 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  getPreferenceValues,
-  Cache,
-  launchCommand,
-  LaunchType,
-  Toast,
-  LaunchProps,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, getPreferenceValues, LaunchProps } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
-import fs from "fs";
-import path from "path";
-
-type CreateFormValues = {
-  title: string;
-  content: string;
-  theme: string;
-  paginate: boolean;
-};
-
-interface Preferences {
-  slidesDirectory: string;
-  pageSeparator: string;
-}
+import { CreateFormValues, createSlidesFile } from "./slides";
 
 const preferences = getPreferenceValues<Preferences>();
-const cache = new Cache();
 
-function createSlidesFile(values: CreateFormValues) {
-  const { title, theme, paginate } = values;
-  let content = values.content;
-  const fileName = `${title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.md`;
-  const filePath = path.join(preferences.slidesDirectory.replace("~", process.env.HOME || ""), fileName);
-
-  if (!content.startsWith("---")) {
-    content = `---\nmarp:true\ntheme: ${theme}\npaginate: ${paginate ? "true" : "false"}\n---\n\n` + content;
-  }
-
-  try {
-    const dir = path.dirname(filePath);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    fs.writeFileSync(filePath, content);
-    cache.set("selectedSlides", fileName);
-    launchCommand({ name: "preview-markdown-slides", type: LaunchType.UserInitiated, context: { file: fileName } });
-    showToast({ title: "Presentation created", message: `File saved as ${fileName}` });
-  } catch (error) {
-    console.error("Error writing file:", error);
-    showToast({ title: "Error", message: "Failed to create presentation", style: Toast.Style.Failure });
-  }
-}
-
+const MARP_DOCS = "https://github.com/marp-team/marp-core/tree/main/themes";
 export default function Command(props: LaunchProps<{ draftValues: CreateFormValues }>) {
   const { draftValues } = props;
 
@@ -68,12 +19,7 @@ export default function Command(props: LaunchProps<{ draftValues: CreateFormValu
   return (
     <Form
       enableDrafts
-      searchBarAccessory={
-        <Form.LinkAccessory
-          target="https://github.com/marp-team/marp-core/tree/main/themes"
-          text="Marp Theming Documentation"
-        />
-      }
+      searchBarAccessory={<Form.LinkAccessory target={MARP_DOCS} text="Marp Theming Documentation" />}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create File" onSubmit={handleSubmit} />
