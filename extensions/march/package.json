@@ -16,6 +16,7 @@
       "subtitle": "Add Item",
       "description": "Quickly add an item to March Inbox",
       "mode": "view",
+      "icon": "extension-icon.png",
       "arguments": [
         {
           "name": "title",
