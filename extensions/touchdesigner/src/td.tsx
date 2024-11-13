@@ -2,6 +2,8 @@ import React, { useMemo } from "react";
 import { ActionPanel, Action, List, environment } from "@raycast/api";
 import { operatorData } from "./tdOperators";
 
+
+
 // Better typed interfaces
 interface Operator {
   id: string;
@@ -23,11 +25,7 @@ interface OperatorFamily {
   types?: Record<string, string[]>;
 }
 
-/*
-interface OperatorData {
-  operators: Record<string, OperatorFamily>;
-}
-*/
+ 
 
 // Constants
 const BASE_DOC_URL = "https://derivative.ca/UserGuide";
@@ -43,39 +41,35 @@ const ICONS: Readonly<Record<string, string>> = {
 // Debug logging utility with proper typing
 const debug = (message: string, data?: unknown): void => {
   if (environment.isDevelopment) {
-    console.log(`[Debug] ${message}`, data ?? '');
+    console.log(`[Debug] ${message}`, data ?? "");
   }
 };
 
 // Utility functions
 const sanitizeOperatorName = (name: string): string => {
-  debug('Sanitizing operator name:', name);
-  if (!name || typeof name !== 'string') {
-    debug('Invalid operator name:', name);
-    return '';
+  debug("Sanitizing operator name:", name);
+  if (!name || typeof name !== "string") {
+    debug("Invalid operator name:", name);
+    return "";
   }
-  return name.trim().replace(/\s+/g, '_');
+  return name.trim().replace(/\s+/g, "_");
 };
 
 const createUrl = (family: string, operatorName: string): string => {
   const sanitizedName = sanitizeOperatorName(operatorName);
   const url = `${BASE_DOC_URL}/${sanitizedName}_${family}`;
-  debug('Created URL:', url);
+  debug("Created URL:", url);
   return url;
 };
 
 const getFamilyIcon = (family: string): string => {
   const icon = ICONS[family] || ICONS.DEFAULT;
-  debug('Selected icon for family:', { family, icon });
+  debug("Selected icon for family:", { family, icon });
   return icon;
 };
 
-const createOperatorEntry = (
-  family: string,
-  title: string,
-  subtitle: string,
-): Operator => {
-  debug('Creating operator entry:', { family, title, subtitle });
+const createOperatorEntry = (family: string, title: string, subtitle: string): Operator => {
+  debug("Creating operator entry:", { family, title, subtitle });
   return {
     id: `${family}-${title}`,
     title,
@@ -85,32 +79,25 @@ const createOperatorEntry = (
   };
 };
 
-const processOperators = (
-  family: string,
-  data: OperatorFamily,
-): Operator[] => {
-  debug('Processing operators for family:', family);
+const processOperators = (family: string, data: OperatorFamily): Operator[] => {
+  debug("Processing operators for family:", family);
   const operators: Operator[] = [];
 
   try {
     // Process regular operators
     if (Array.isArray(data.operators)) {
-      data.operators.forEach(op => {
-        if (typeof op === 'string') {
-          operators.push(
-            createOperatorEntry(family, op, `${family} | ${data.description}`)
-          );
+      data.operators.forEach((op) => {
+        if (typeof op === "string") {
+          operators.push(createOperatorEntry(family, op, `${family} | ${data.description}`));
         }
       });
     }
 
     // Process sweet_16 operators
     if (Array.isArray(data.sweet_16)) {
-      data.sweet_16.forEach(op => {
-        if (op && typeof op.name === 'string') {
-          operators.push(
-            createOperatorEntry(family, op.name, `${family} Sweet 16 | ${op.purpose}`)
-          );
+      data.sweet_16.forEach((op) => {
+        if (op && typeof op.name === "string") {
+          operators.push(createOperatorEntry(family, op.name, `${family} Sweet 16 | ${op.purpose}`));
         }
       });
     }
@@ -119,18 +106,16 @@ const processOperators = (
     if (data.types) {
       Object.entries(data.types).forEach(([type, ops]) => {
         if (Array.isArray(ops)) {
-          ops.forEach(op => {
-            if (typeof op === 'string') {
-              operators.push(
-                createOperatorEntry(family, op, `${family} ${type} | ${data.description}`)
-              );
+          ops.forEach((op) => {
+            if (typeof op === "string") {
+              operators.push(createOperatorEntry(family, op, `${family} ${type} | ${data.description}`));
             }
           });
         }
       });
     }
   } catch (error) {
-    debug('Error processing operators:', error instanceof Error ? error.message : 'Unknown error');
+    debug("Error processing operators:", error instanceof Error ? error.message : "Unknown error");
   }
 
   return operators;
@@ -138,9 +123,9 @@ const processOperators = (
 
 export default function Command() {
   const allOperators = useMemo(() => {
-    debug('Starting operator processing');
+    debug("Starting operator processing");
     let operators: Operator[] = [];
-    
+
     try {
       Object.entries(operatorData.operators).forEach(([family, data]) => {
         const familyOperators = processOperators(family, data);
@@ -149,9 +134,9 @@ export default function Command() {
 
       // Sort operators by title for better UX
       operators = operators.sort((a, b) => a.title.localeCompare(b.title));
-      debug('Processed operators count:', operators.length);
+      debug("Processed operators count:", operators.length);
     } catch (error) {
-      debug('Error in operator processing:', error instanceof Error ? error.message : 'Unknown error');
+      debug("Error in operator processing:", error instanceof Error ? error.message : "Unknown error");
       operators = [];
     }
 
@@ -159,42 +144,30 @@ export default function Command() {
   }, []);
 
   // Memoize ActionPanel to prevent unnecessary rerenders
-  const operatorActions = useMemo(() => (item: Operator) => (
-    <ActionPanel>
-      <Action.OpenInBrowser
-        title="Open Documentation"
-        url={item.url}
-      />
-      <Action.CopyToClipboard 
-        title="Copy Operator Name"
-        content={item.title} 
-      />
-      <Action.CopyToClipboard 
-        title="Copy Documentation URL"
-        content={item.url} 
-      />
-    </ActionPanel>
-  ), []);
+  const operatorActions = useMemo(
+    () => (item: Operator) => (
+      <ActionPanel>
+        <Action.OpenInBrowser title="Open Documentation" url={item.url} />
+        <Action.CopyToClipboard title="Copy Operator Name" content={item.title} />
+        <Action.CopyToClipboard title="Copy Documentation URL" content={item.url} />
+      </ActionPanel>
+    ),
+    [],
+  );
 
   // Early return if no operators found
   if (!allOperators.length) {
-    debug('No operators found');
+    debug("No operators found");
     return (
       <List>
-        <List.EmptyView 
-          title="No operators found"
-          description="Please check your data source"
-        />
+        <List.EmptyView title="No operators found" description="Please check your data source" />
       </List>
     );
   }
 
-  debug('Rendering operator list');
+  debug("Rendering operator list");
   return (
-    <List
-      searchBarPlaceholder="Search TouchDesigner operators..."
-      enableFiltering
-    >
+    <List searchBarPlaceholder="Search TouchDesigner operators..." enableFiltering>
       {allOperators.map((item) => (
         <List.Item
           key={item.id}
