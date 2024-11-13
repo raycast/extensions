@@ -1,4 +1,3 @@
-import React from "react";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import capitalize from "lodash/capitalize";
 import get from "lodash/get";

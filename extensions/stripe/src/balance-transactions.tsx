@@ -1,4 +1,3 @@
-import React from "react";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { convertAmount, convertTimestampToDate, titleCase } from "./utils";
 import { useStripeApi } from "./hooks";

@@ -1,4 +1,3 @@
-import React from "react";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import snakeCase from "lodash/snakeCase";
 import { useStripeApi, useStripeDashboard } from "./hooks";
