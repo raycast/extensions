@@ -1,6 +1,6 @@
 # Oura Changelog
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.0] - 2024-11-13
 - Added Oura Stress command: Get the last two week's resilience and contributing factors.
 - Added Oura Resilience command: Get the last two week's stress data: stress high, recovery high, and day summary.
 - Updated typo in `minutedFormatted()` function to `minutesFormatted()`
