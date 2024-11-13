@@ -1,5 +1,11 @@
 # Bluesky Changelog
 
+## [Fixes] - 2024-11-13
+
+- Fix `Timeline` not loading due to error in `parser` (ref: [Issue #15318](https://github.com/raycast/extensions/issues/15318))
+- Fix `My Recent Posts` not loading due to error in `parser` (ref: [Issue #15323](https://github.com/raycast/extensions/issues/15323))
+- Add placeholders to extension `Preferences`
+
 ## [Enhancements] - 2024-10-14
 
 - Native pagination in `Search Timeline`
