@@ -11,7 +11,6 @@ interface EditMemoProps {
 interface FormValues {
   title: string;
   content: string;
-  tags?: string;
 }
 
 export default function Command({ memo }: EditMemoProps) {
@@ -81,7 +80,6 @@ export default function Command({ memo }: EditMemoProps) {
     >
       <Form.TextField {...itemProps.title} title="Title" placeholder="Enter memo title" />
       <Form.TextArea {...itemProps.content} title="Content" placeholder="Enter memo content" enableMarkdown />
-      <Form.TextField {...itemProps.tags} title="Tags" placeholder="Enter tags separated by commas" />
     </Form>
   );
 }
