@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
-import { modelIdToName, schedulerIdToName } from "@ts/constants";
+import { modelIdToName } from "@ts/constants";
 import { saveImage } from "@ts/helpers";
 import { TOutput } from "@ts/types";
 
@@ -35,14 +35,6 @@ function GalleryItemDetail({ item }: { item: TOutput }) {
           <Detail.Metadata.Label
             title="Guidance Scale"
             text={item.generation.guidance_scale.toLocaleString()}
-          ></Detail.Metadata.Label>
-          <Detail.Metadata.Label
-            title="Inference Steps"
-            text={item.generation.inference_steps.toLocaleString()}
-          ></Detail.Metadata.Label>
-          <Detail.Metadata.Label
-            title="Scheduler"
-            text={schedulerIdToName[item.generation.scheduler_id]}
           ></Detail.Metadata.Label>
           <Detail.Metadata.Label
             title="Width"

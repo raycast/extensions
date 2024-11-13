@@ -1,4 +1,4 @@
-import { captureException, getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { execa, execaCommand } from "execa";
 import { safeParse } from "valibot";
@@ -10,6 +10,7 @@ import {
   MasterPasswordMissingError,
   ParseError,
   TimeoutError,
+  captureException,
   getErrorAction,
   getErrorString,
 } from "@/helper/error";

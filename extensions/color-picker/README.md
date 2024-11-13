@@ -13,6 +13,7 @@ A simple system-wide color picker. The color picker can be triggered with a stan
 - Pick a color using AI
 - Pick a color with color wheel
 - Convert any color to a different format
+- Get the color name for a hex code
 
 ## API
 

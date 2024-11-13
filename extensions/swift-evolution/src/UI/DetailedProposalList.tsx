@@ -50,6 +50,24 @@ function MetadataAuthors(props: { proposal: ProposalDataModel }) {
   );
 }
 
+function MetadataReviewManagers(props: { proposal: ProposalDataModel }) {
+  const proposal = props.proposal;
+  return (
+    <>
+      {proposal.reviewManagers.map((author, index) => {
+        return (
+          <List.Item.Detail.Metadata.Link
+            title={index === 0 ? `Review Manager${proposal.reviewManagers.length > 1 ? "s" : ""}` : ""}
+            target={author.link}
+            text={author.name}
+            key={author.name}
+          />
+        );
+      })}
+    </>
+  );
+}
+
 function MetadataImplementations(props: { proposal: ProposalDataModel }) {
   const proposal = props.proposal;
   return (
@@ -79,12 +97,7 @@ function Metadata(props: { proposal: ProposalDataModel }) {
       {props.proposal.swiftVersion ? <MetadataSwiftVersion proposal={proposal} /> : <></>}
       <List.Item.Detail.Metadata.Separator key={"separator1"} />
       <MetadataAuthors key={"authors"} proposal={proposal} />
-      <List.Item.Detail.Metadata.Link
-        key={"reviewmanager"}
-        title={"Review Manager"}
-        target={proposal.reviewManagerProfileLink}
-        text={proposal.reviewManagerName}
-      />
+      <MetadataReviewManagers key={"reviewmanagers"} proposal={proposal} />
       <List.Item.Detail.Metadata.Separator key={"separator2"} />
       {props.proposal.implementations.length > 0 ? <MetadataImplementations proposal={proposal} /> : <></>}
     </List.Item.Detail.Metadata>

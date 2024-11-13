@@ -40,3 +40,9 @@ humaans
 text-replacements
 copilot-workspace
 uploadthing
+sublime
+pastefy
+wp-bones
+spike
+github-spark
+dub

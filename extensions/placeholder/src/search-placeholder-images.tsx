@@ -1,10 +1,10 @@
+import { useState } from "react";
 import { Grid, Image, List } from "@raycast/api";
-import React, { useState } from "react";
-import { usePlaceholderImages } from "./hooks/hooks";
-import { PlaceholderEmptyView } from "./components/placeholder-empty-view";
-import { ActionOnPlaceholderImage } from "./components/action-on-placeholder-image";
-import Mask = Image.Mask;
-import { columns, layout, perPage } from "./types/preferences";
+import usePlaceholderImages from "@/hooks/use-placeholder-images";
+import { ActionOnPlaceholderImage } from "@/components/action-on-placeholder-image";
+import { PlaceholderEmptyView } from "@/components/placeholder-empty-view";
+import { columns, layout, perPage } from "@/utils/preferences";
+import { buildGridContentImageURL, prefix } from "@/utils/urls";
 
 export default function SearchPlaceholderImages() {
   const [page, setPage] = useState<number>(1);
@@ -24,7 +24,7 @@ export default function SearchPlaceholderImages() {
             key={value.download_url}
             icon={{
               source: prefix + value.id + "/64/64",
-              mask: Mask.RoundedRectangle,
+              mask: Image.Mask.RoundedRectangle,
               fallback: { light: "picsum-icon.png", dark: "picsum-icon@dark.png" },
             }}
             title={{ value: value.author, tooltip: "Author" }}
@@ -70,14 +70,3 @@ export default function SearchPlaceholderImages() {
     </Grid>
   );
 }
-
-const prefix = "https://picsum.photos/id/";
-const buildGridContentImageURL = (coloums: number, id: string) => {
-  if (coloums <= 3) {
-    return prefix + id + "/300";
-  } else if (coloums <= 6) {
-    return prefix + id + "/150";
-  } else {
-    return prefix + id + "/100";
-  }
-};

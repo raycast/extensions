@@ -6,7 +6,8 @@
   "icon": "yabai-icon-512px.png",
   "author": "krzysztoff1",
   "contributors": [
-    "rubentsirunyan"
+    "rubentsirunyan",
+    "webdesus"
   ],
   "categories": [
     "Developer Tools",
@@ -27,6 +28,18 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "screens-menu-bar",
+      "title": "Show Current Screen",
+      "description": "Update the status information about the currently selected screen.",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "windows-list-current-space",
+      "title": "Windows List by Current Space",
+      "description": "Show the application of the current space.",
+      "mode": "view"
     },
     {
       "name": "toggle",

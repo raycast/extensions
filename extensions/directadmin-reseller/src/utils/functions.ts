@@ -1,5 +1,11 @@
 import { Icon } from "@raycast/api";
-import { TITLES_FOR_KEYS } from "./constants";
+import {
+  DIRECTADMIN_URL,
+  RESELLER_API_TOKEN,
+  RESELLER_PASSWORD,
+  RESELLER_USERNAME,
+  TITLES_FOR_KEYS,
+} from "./constants";
 
 function splitAndTitleCase(text: string) {
   const words = text.split("_");
@@ -11,15 +17,43 @@ export function getTitleFromKey(key: string) {
   return TITLES_FOR_KEYS[key as keyof typeof TITLES_FOR_KEYS] || splitAndTitleCase(key);
 }
 
-export function getTextAndIconFromVal(val: string) {
+export function getTextAndIconFromVal(val: string | boolean) {
   let icon = undefined;
   let text = undefined;
-  if (!val) icon = Icon.Minus;
-  else {
-    const uppercase = val.toUpperCase();
-    if (uppercase === "ON" || uppercase === "YES") icon = Icon.Check;
-    else if (uppercase === "OFF" || uppercase === "NO") icon = Icon.Multiply;
-    else text = val;
+
+  const uppercase = val.toString().toUpperCase();
+  switch (uppercase) {
+    case "ON":
+    case "YES":
+    case "TRUE":
+      icon = Icon.Check;
+      break;
+
+    case "OFF":
+    case "NO":
+    case "FALSE":
+      icon = Icon.Xmark;
+      break;
+
+    default:
+      text = val.toString();
+      break;
   }
+
   return { text, icon };
+}
+
+export function generateApiToken(userToImpersonate = "") {
+  return userToImpersonate === ""
+    ? RESELLER_API_TOKEN
+    : btoa(`${RESELLER_USERNAME}|${userToImpersonate}:${RESELLER_PASSWORD}`);
+}
+
+export function isInvalidUrl() {
+  try {
+    new URL(DIRECTADMIN_URL);
+    return false;
+  } catch (error) {
+    return true;
+  }
 }

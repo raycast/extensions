@@ -3,7 +3,7 @@
   "name": "simple-icons",
   "title": "Brand Icons - simpleicons.org",
   "type": "module",
-  "description": "Browse, Search, and Copy 3100+ popular brand icons from Simple Icons.",
+  "description": "Browse, Search, and Copy 3200+ popular brand icons from Simple Icons.",
   "icon": "simpleicons-icon.png",
   "author": "litomore",
   "categories": [
@@ -22,7 +22,7 @@
     {
       "name": "index",
       "title": "Search Brand Icons",
-      "description": "Browse, search, and copy 3100+ free SVG icons for popular brands from Simple Icons",
+      "description": "Browse, search, and copy 3200+ free SVG icons for popular brands from Simple Icons",
       "mode": "view"
     }
   ],
@@ -32,7 +32,6 @@
       "title": "Default detail action",
       "description": "The default action when viewing detail of an item",
       "required": false,
-      "placeholder": "open-with",
       "type": "dropdown",
       "data": [
         {
@@ -64,21 +63,51 @@
           "title": "Copy unpkg link"
         }
       ]
+    },
+    {
+      "name": "defaultLoadSvgAction",
+      "title": "Default action for copying/opening SVG",
+      "description": "The default action when copying/opening SVG",
+      "required": false,
+      "type": "dropdown",
+      "data": [
+        {
+          "value": "WithBrandColor",
+          "title": "With Brand Color"
+        },
+        {
+          "value": "PureSvg",
+          "title": "Pure SVG (no color specified)"
+        }
+      ]
+    },
+    {
+      "name": "enableAiSearch",
+      "title": "Enable AI search",
+      "label": "Enabled",
+      "description": "Enable AI on searching icons",
+      "required": false,
+      "type": "checkbox",
+      "default": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.76.0",
-    "execa": "^9.2.0",
-    "got": "^14.4.1",
-    "raycast-cross-extension": "^0.2.2",
-    "simple-icons": "^12.1.0"
+    "@raycast/api": "^1.84.2",
+    "@raycast/utils": "^1.18.0",
+    "execa": "^9.4.0",
+    "fast-fuzzy": "^1.12.0",
+    "got": "^14.4.3",
+    "lodash": "^4.17.21",
+    "raycast-cross-extension": "^0.2.3",
+    "simple-icons": "^13.13.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.14.2",
-    "@types/react": "^18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.1",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/lodash": "^4.17.10",
+    "@types/node": "^22.7.5",
+    "@types/react": "^18.3.11",
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
   }
 }

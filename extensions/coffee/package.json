@@ -10,7 +10,8 @@
     "GastroGeek",
     "pernielsentikaer",
     "oasaleh",
-    "xilopaint"
+    "xilopaint",
+    "ridemountainpig"
   ],
   "license": "MIT",
   "commands": [
@@ -89,11 +90,17 @@
       ]
     },
     {
+      "name": "addSchedule",
+      "title": "Schedule Caffeination",
+      "description": "Schedule caffeination",
+      "mode": "view"
+    },
+    {
       "name": "status",
       "title": "Caffeinate Status",
       "description": "Show the current caffeination status",
       "mode": "no-view",
-      "interval": "1m"
+      "interval": "15s"
     }
   ],
   "preferences": [

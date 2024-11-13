@@ -8,7 +8,10 @@
   "author": "loris",
   "contributors": [
     "andreaselia",
-    "thomaslombart"
+    "stelo",
+    "thomaslombart",
+    "srikirank",
+    "vimtor"
   ],
   "license": "MIT",
   "commands": [
@@ -103,6 +106,14 @@
           "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
           "default": true,
           "required": false
+        },
+        {
+          "name": "dontUseAI",
+          "type": "checkbox",
+          "label": "Don't use AI",
+          "description": "When enabled, the todo is simply added to your inbox with the input as the title.",
+          "default": false,
+          "required": false
         }
       ],
       "arguments": [
@@ -156,22 +167,23 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.0",
-    "@raycast/utils": "^1.9.0",
-    "dayjs": "^1.11.9",
-    "qs": "^6.11.2"
+    "@raycast/api": "^1.79.1",
+    "@raycast/utils": "^1.16.2",
+    "dayjs": "^1.11.12",
+    "qs": "^6.12.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "^18.17.4",
-    "@types/qs": "^6.9.7",
-    "@types/react": "^17.0.64",
-    "eslint": "^7.32.0",
-    "react-devtools": "^4.28.0",
-    "typescript": "^4.9.5"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^22.0.0",
+    "@types/qs": "^6.9.15",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "typescript": "^5.5.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }

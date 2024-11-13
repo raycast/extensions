@@ -1,5 +1,3 @@
-import { PasswordHistory } from "~/types/passwords";
-
 export interface Item {
   object: "item";
   id: string;
@@ -124,6 +122,11 @@ export enum UriMatch {
 export interface Uris {
   match: UriMatch | null;
   uri: string | null;
+}
+
+export interface PasswordHistory {
+  lastUsedDate: string;
+  password: string;
 }
 
 export interface SecureNote {

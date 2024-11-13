@@ -1,5 +1,20 @@
 # Mailsy Changelog
 
+## [Fixed] - 2025-10-29
+
+- Removed unused code.
+
+## [Changes] - 2024-10-25
+
+- Added `Logout` feature to log out of the account.
+- Removed the `Refresh` feature.
+
+## [Features] - 2024-07-22
+
+- Functionality for opening an Account in the browser.
+- Ability to copy password to clipboard.
+- Ability to Refresh the Inbox.
+
 ## [Features] - 2023-12-18
 
 - Added `Quick Look` feature to view the mail.

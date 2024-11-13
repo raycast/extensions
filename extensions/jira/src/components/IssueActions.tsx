@@ -239,6 +239,12 @@ export default function IssueActions({
           content={`${issue.key}-${slugify(issue.fields.summary)}`}
           shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
         />
+
+        <Action.CopyToClipboard
+          title="Copy Markdown Link"
+          content={`[${issue.key} - ${issue.fields.summary}](${issueUrl})`}
+          shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "," }}
+        />
       </ActionPanel.Section>
 
       <ActionPanel.Section>

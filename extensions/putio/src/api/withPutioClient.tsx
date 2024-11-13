@@ -1,8 +1,9 @@
-import { getPreferenceValues, showToast } from "@raycast/api";
+import { showToast } from "@raycast/api";
 import { Detail } from "@raycast/api";
 import { useState, useMemo } from "react";
 import PutioAPI, { IAccountInfo } from "@putdotio/api-client";
 import { localizeError, localizedErrorToToastOptions } from "./localizeError";
+import { getAuthToken } from "../utils";
 
 let putioClient: PutioAPI | null = null;
 let accountInfo: IAccountInfo | null = null;
@@ -12,7 +13,7 @@ export const withPutioClient = (component: JSX.Element) => {
 
   useMemo(() => {
     (async function () {
-      const { token } = getPreferenceValues<Preferences>();
+      const token = getAuthToken();
       putioClient = new PutioAPI({ clientID: 6311 });
       putioClient.setToken(token);
 

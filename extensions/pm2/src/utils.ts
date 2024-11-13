@@ -3,9 +3,9 @@ import path from "node:path";
 import { access, constants } from "node:fs/promises";
 import process from "node:process";
 import { Color, Icon, Image, Toast, environment, getPreferenceValues, showToast } from "@raycast/api";
-import { $ } from "execa";
+import spawn from "nano-spawn";
 import { ProcessDescription, StartOptions } from "pm2";
-import { get } from "lodash";
+import get from "lodash/get.js";
 import { Pm2Command, Pm2Process, ProcessStatus, RuntimeOptions } from "./types.js";
 
 export const raycastNodePath = process.execPath;
@@ -19,7 +19,7 @@ export const fakeToast = async (): Promise<Toast> => {
 
 export const setupPm2Wrapeper = async () => {
   const { nodePath, npmPath } = getPreferenceValues<Preferences>();
-  await $({ cwd: pm2WrapperPath })`${nodePath} ${npmPath} ci --omit=dev`;
+  await spawn(nodePath, [npmPath, "ci", "--omit=dev"], { cwd: pm2WrapperPath, shell: true });
 };
 
 export const hasPm2WrapperInstalled = async () => {
@@ -33,9 +33,19 @@ export const base64Encode = (str: string) => Buffer.from(str).toString("base64")
 
 export const encodeParameters = (parameters: StartOptions | Pm2Process) => base64Encode(JSON.stringify(parameters));
 
-export const getNodeBinaryPath = (runtimeOptions?: RuntimeOptions) => {
-  const { defaultNodeExecutor, nodePath } = getPreferenceValues<Preferences>();
-  return runtimeOptions?.nodePath ?? (defaultNodeExecutor === "raycastNodePath" ? raycastNodePath : nodePath);
+export const setupEnv = (options?: { runtimeOptions?: RuntimeOptions }) => {
+  const { defaultNodeExecutor, nodePath, pm2Home } = getPreferenceValues<Preferences>();
+  const nodeBinaryPath = path.dirname(
+    options?.runtimeOptions?.nodePath ?? (defaultNodeExecutor === "raycastNodePath" ? raycastNodePath : nodePath),
+  );
+
+  if (!process.env.PATH?.includes(nodeBinaryPath)) {
+    process.env.PATH = process.env.PATH ? `${process.env.PATH}:${nodeBinaryPath}` : nodeBinaryPath;
+  }
+
+  if (pm2Home) {
+    process.env.PM2_HOME = pm2Home;
+  }
 };
 
 export async function runPm2Command(
@@ -59,22 +69,21 @@ export async function runPm2Command(
     console.error("No options provided for PM2 command");
     return;
   }
-  const nodeBinaryPath = getNodeBinaryPath(runtimeOptions);
-  const commandLine = `PATH="$PATH:${path.dirname(nodeBinaryPath)}" '${nodeBinaryPath}' '${pm2WrapperIndexPath}' ${command} --options=${encodeParameters(options)}`;
+  setupEnv({ runtimeOptions });
+  const commands = [pm2WrapperIndexPath, command, `--options=${encodeParameters(options)}`];
   const toast =
     environment.commandMode === "view"
       ? await showToast({ title: "", message: `Running ${command} command...` })
       : await fakeToast();
   try {
-    await $({
-      shell: true,
+    await spawn("node", [pm2WrapperIndexPath, command, `--options=${encodeParameters(options)}`], {
       cwd: path.dirname(pm2WrapperIndexPath),
-    })(commandLine);
+    });
     toast.style = Toast.Style.Success;
     toast.message = `Operation done`;
   } catch (error) {
     toast.style = Toast.Style.Failure;
-    toast.message = error?.toString() ?? `Fail to execute '${commandLine}'`;
+    toast.message = error?.toString() ?? `Fail to execute 'node ${commands.join(" ")}'`;
   }
 }
 

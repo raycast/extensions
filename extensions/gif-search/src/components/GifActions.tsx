@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, showToast, Toast, showInFinder, open, closeMainWindow } from "@raycast/api";
 import path from "path";
 
-import { getDefaultAction, ServiceName } from "../preferences";
+import { getDefaultAction } from "../preferences";
 
 import { GifDetails } from "./GifDetails";
 import { IGif } from "../models/gif";
@@ -10,22 +10,27 @@ import copyFileToClipboard from "../lib/copyFileToClipboard";
 import stripQParams from "../lib/stripQParams";
 import downloadFile from "../lib/downloadFile";
 import { removeGifFromCache } from "../lib/cachedGifs";
-import { get, remove, save } from "../lib/localGifs";
+import { getAllFavIds, getAllRecentIds, remove, save } from "../lib/localGifs";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { getServiceFromUrl } from "../lib/getServiceFromUrl";
 
 interface GifActionsProps {
   item: IGif;
   showViewDetails: boolean;
-  service?: ServiceName;
   visitGifItem?: (gif: IGif) => void;
   mutate: () => Promise<void>;
 }
 
-export function GifActions({ item, showViewDetails, service, visitGifItem, mutate }: GifActionsProps) {
+export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifActionsProps) {
   const { id, url, gif_url } = item;
 
-  const { data: favIds } = useCachedPromise((s) => get(s, "favs"), [service]);
-  const { data: recentIds } = useCachedPromise((s) => get(s, "recent"), [service]);
+  const service = getServiceFromUrl(item);
+
+  const { data: favIds } = useCachedPromise(getAllFavIds);
+  const { data: recentIds } = useCachedPromise(getAllRecentIds);
+
+  const isInFavorites = favIds?.includes(id);
+  const isInRecents = recentIds?.includes(id);
 
   const trackUsage = async () => {
     if (service) {
@@ -82,7 +87,7 @@ export function GifActions({ item, showViewDetails, service, visitGifItem, mutat
   async function copyGif() {
     try {
       await showToast({ style: Toast.Style.Animated, title: "Copying GIF" });
-      const isInFavorites = favIds?.includes(id.toString());
+      const isInFavorites = favIds?.includes(id);
       const file = await copyFileToClipboard(item.download_url, item.download_name, isInFavorites);
       await trackUsage();
       await closeMainWindow();
@@ -153,11 +158,19 @@ export function GifActions({ item, showViewDetails, service, visitGifItem, mutat
       onCopy={trackUsage}
     />
   );
+  const pasteGifMarkdown = (
+    <Action.Paste
+      key="pasteGifMarkdown"
+      title="Paste GIF Markdown"
+      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+      content={`![${item.title}](${stripQParams(gif_url)})`}
+      onPaste={trackUsage}
+    />
+  );
 
   let toggleFav: JSX.Element | undefined;
-  const isFav = favIds?.includes(id.toString());
   if (favIds) {
-    toggleFav = isFav ? (
+    toggleFav = isInFavorites ? (
       <Action
         icon={Icon.Star}
         key="toggleFav"
@@ -176,8 +189,7 @@ export function GifActions({ item, showViewDetails, service, visitGifItem, mutat
     );
   }
 
-  const isRecent = recentIds?.includes(id.toString());
-  const removeRecent = isRecent ? (
+  const removeRecent = isInRecents ? (
     <Action
       icon={Icon.Clock}
       key="removeRecent"
@@ -192,7 +204,7 @@ export function GifActions({ item, showViewDetails, service, visitGifItem, mutat
       icon={Icon.Eye}
       key="viewDetails"
       title="View GIF Details"
-      target={<GifDetails item={item} service={service} mutate={mutate} />}
+      target={<GifDetails item={item} mutate={mutate} />}
       shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
       onPush={trackUsage}
     />
@@ -226,7 +238,7 @@ export function GifActions({ item, showViewDetails, service, visitGifItem, mutat
   );
 
   const actions: Array<(JSX.Element | undefined)[]> = [
-    [copyFile, copyGifUrl, copyGifMarkdown],
+    [copyFile, copyGifUrl, copyGifMarkdown, pasteGifMarkdown],
     [toggleFav, removeRecent, showViewDetails ? viewDetails : undefined],
     [copyPageUrl, openUrlInBrowser, downloadFileAction],
   ];

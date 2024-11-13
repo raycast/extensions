@@ -1,52 +1,57 @@
-export const WEB_IDES = [
-  {
-    title: "GitHub Dev",
-    baseUrl: "https://github.dev/",
-  },
-  {
-    title: "VSCode Dev",
-    baseUrl: "https://vscode.dev/github/",
-  },
-  {
-    title: "CodeSandbox",
-    baseUrl: `https://codesandbox.io/s/github/`,
-  },
-  {
-    title: "Repl.it",
-    baseUrl: `https://repl.it/github/`,
-  },
-  {
-    title: "Gitpod",
-    baseUrl: `https://gitpod.io/#https://github.com/`,
-  },
-  {
-    title: "Glitch",
-    baseUrl: "https://glitch.com/edit/#!/import/github/",
-  },
-  {
-    title: "Sourcegraph",
-    baseUrl: `https://sourcegraph.com/github.com/`,
-  },
-  {
-    title: "VSCode Remote Repositories",
-    baseUrl: "vscode://GitHub.remotehub/open?url=https://github.com/",
-    icon: "vscode.svg",
-  },
-];
-
 import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 
-import { LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Color, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { useEffect } from "react";
 
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 
 import { getErrorMessage } from "./errors";
 
-const VISITED_REPOSITORIES_KEY = "VISITED_REPOSITORIES";
+export const WEB_IDES = [
+  {
+    title: "github.dev",
+    baseUrl: "https://github.dev/",
+    icon: { source: "github-dev.svg", tintColor: Color.PrimaryText },
+  },
+  {
+    title: "VS Code for the Web",
+    baseUrl: "https://vscode.dev/github/",
+    icon: { source: "vscode.svg", tintColor: Color.PrimaryText },
+  },
+  {
+    title: "CodeSandbox",
+    baseUrl: `https://codesandbox.io/s/github/`,
+    icon: { source: "codesandbox.svg", tintColor: Color.PrimaryText },
+  },
+  {
+    title: "Replit",
+    baseUrl: `https://repl.it/github/`,
+    icon: { source: "replit.svg", tintColor: Color.PrimaryText },
+  },
+  {
+    title: "Gitpod",
+    baseUrl: `https://gitpod.io/#https://github.com/`,
+    icon: { source: "gitpod.svg", tintColor: Color.PrimaryText },
+  },
+  {
+    title: "Glitch",
+    baseUrl: "https://glitch.com/edit/#!/import/github/",
+    icon: { source: "glitch.svg", tintColor: Color.PrimaryText },
+  },
+  {
+    title: "Sourcegraph",
+    baseUrl: `https://sourcegraph.com/github.com/`,
+    icon: { source: "sourcegraph.svg", tintColor: Color.PrimaryText },
+  },
+  {
+    title: "VS Code Remote Repositories",
+    baseUrl: "vscode://GitHub.remotehub/open?url=https://github.com/",
+    icon: { source: "vscode.svg", tintColor: Color.PrimaryText },
+  },
+];
+
 const VISITED_REPOSITORIES_LENGTH = 25;
 
 export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment) {
@@ -90,29 +95,8 @@ export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment)
   toast.style = Toast.Style.Success;
 }
 
-// History was stored in `LocalStorage` before, after migration it's stored in `Cache`
-async function loadVisitedRepositories() {
-  const item = await LocalStorage.getItem<string>(VISITED_REPOSITORIES_KEY);
-  if (item) {
-    const parsed = JSON.parse(item);
-    return parsed as ExtendedRepositoryFieldsFragment[];
-  } else {
-    return [];
-  }
-}
-
 export function useHistory(searchText: string | undefined, searchFilter: string | null) {
   const [history, setHistory] = useCachedState<ExtendedRepositoryFieldsFragment[]>("history", []);
-  const [migratedHistory, setMigratedHistory] = useCachedState<boolean>("migratedHistory", false);
-
-  useEffect(() => {
-    if (!migratedHistory) {
-      loadVisitedRepositories().then((repositories) => {
-        setHistory(repositories);
-        setMigratedHistory(true);
-      });
-    }
-  }, [migratedHistory]);
 
   function visitRepository(repository: ExtendedRepositoryFieldsFragment) {
     const nextRepositories = [repository, ...(history?.filter((item) => item.id !== repository.id) ?? [])].slice(

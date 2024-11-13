@@ -1,5 +1,9 @@
 # Simple Reminder Changelog
 
+## [Documentation] - 2024-07-22
+
+- Update documentation to reflect new features (recurrent reminders and menu bar command) of the extension 
+
 ## [Fix] - 2024-06-26
 
 - Fix issue with reminders in the menu bar not presenting the time they are going to trigger
