@@ -115,7 +115,8 @@
   "dependencies": {
     "@raycast/api": "^1.38.2",
     "@raycast/utils": "^1.0.7",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "stripe": "^17.3.1"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.182",
