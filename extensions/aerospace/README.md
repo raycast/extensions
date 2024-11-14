@@ -4,18 +4,18 @@ Aerospace is a tiling window management extension for Raycast.
 
 It works with the existing installation of [AeroSpace](https://github.com/nikitabobko/AeroSpace)
 
-![shortcuts](./media/shortcuts.png)
+![shortcuts](./metadata/aerospace-1.png)
 
-![menubar](./media/menubar.jpg)
+![menubar](./metadata/aerospace-2.jpg)
 
-![switcher](./media/switcher.jpg)
+![switcher](./metadata/aerospace-3.png)
 
 ## Features
 
 - View all shortcuts parsed from your config file (default: `~/.aerospace.toml`, configurable in preferences)
 - View your Aerospace configuration
 - Access your Aerospace shortcuts at a glance from the menu bar
-- Switch between apps in the current workspace
+- Switch between apps in the focused or all workspace(s)
 
 ## Installation
 
