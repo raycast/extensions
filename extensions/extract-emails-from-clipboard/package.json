@@ -4,8 +4,7 @@
   "title": "Extract Emails from Clipboard",
   "description": "Quickly extract email addresses from any text in your clipboard. Automatically formats with commas, with an option for space-separated format using ⌘↩.",
   "icon": "extension-icon.png",
-  "author": "Alex Vasquez",
-  "owner": "digisavvy",
+  "author": "digisavvy",
   "access": "public",
   "categories": [
     "Productivity",
