@@ -9,14 +9,14 @@
   "commands": [
     {
       "name": "move-to-previous-desktop",
-      "title": "move to previous desktop",
-      "description": "",
+      "title": "Move to Previous Desktop",
+      "description": "Move current window to previous desktop",
       "mode": "no-view"
     },
     {
       "name": "move-to-next-desktop",
-      "title": "move to next desktop",
-      "description": "",
+      "title": "Move to Next Desktop",
+      "description": "Move current window to next desktop",
       "mode": "no-view"
     }
   ],
