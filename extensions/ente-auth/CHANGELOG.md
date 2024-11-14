@@ -1,5 +1,8 @@
 # Ente Auth Changelog
 
+## [Update Readme] - 2024-11-14
+- Fix a typo in the readme
+
 ## [Bug fix] - 2024-11-13
 - Added PR-15036 changes contributed by albarin
 

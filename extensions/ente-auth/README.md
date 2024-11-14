@@ -16,10 +16,6 @@
 > The Ente Auth [CLI](https://github.com/ente-io/ente/tree/main/cli) is required.
 
 ## Setup
-#### Adding your account
-As explained [here](https://github.com/ente-io/ente/tree/main/cli#accounts), run:
-`ente account add` to login into an existing account. If you wish to update your account information, run the below:
-```ente account update --app auth --email <email> --dir <path>```.
 
 #### Adding your account
 
