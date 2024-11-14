@@ -6,12 +6,6 @@ import useIssues, { useEpicIssues } from "../hooks/useIssues";
 import StatusIssueList from "./StatusIssueList";
 
 export default function IssueChildIssues({ issue }: { issue: Issue }) {
-  const {
-    mutate: mutateEpicIssues,
-    issues: epicIssues,
-    isLoading: isLoadingEpicIssues,
-  } = useEpicIssues(issue?.id ?? "");
-
   // Only create JQL if there are subtask
   const subtaskJql = useMemo(() => {
     if (!issue.fields.subtasks?.length) return "";
@@ -28,6 +22,13 @@ export default function IssueChildIssues({ issue }: { issue: Issue }) {
   );
 
   const isEpic = issue.fields.issuetype?.name === "Epic";
+  const {
+    mutate: mutateEpicIssues,
+    issues: epicIssues,
+    isLoading: isLoadingEpicIssues,
+  } = useEpicIssues(
+    isEpic ? issue.id : "", // Only fetch epic issues for epics
+  );
 
   // Memoize the combined and filtered child issues
   const childIssues = useMemo(() => {
