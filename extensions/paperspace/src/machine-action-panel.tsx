@@ -17,7 +17,7 @@ export const MachineActionPanel: FC<{ machine: Machine }> = ({ machine }) => {
       <ActionPanel.Section>
         {isUsable(machine) && machine.state !== "restarting" && (
           <Action
-            title="Toggle Start/Stop"
+            title="Toggle Start/stop"
             icon={Icon.Power}
             onAction={toggleMachine(machine)}
             shortcut={{ modifiers: [], key: "enter" }}
