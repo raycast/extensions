@@ -1,6 +1,6 @@
 # HestiaCP Admin Changelog
 
-## [Acknowledge Notifications] - {PR_MERGE_DATE}
+## [Acknowledge Notifications] - 2024-11-14
 
 - **Acknowledge** Notifications in `User Notifications`
 - Show notification as proper markdown in `markdown`
