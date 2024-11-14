@@ -5,6 +5,7 @@ export default async function main() {
   try {
     await moveWindowToSpace("prev");
   } catch (error) {
-    showToast({ title: "Could not move window", message: error.message, style: Toast.Style.Failure });
+    const message = (error as Error).message;
+    showToast({ title: "Could not move window", message: message, style: Toast.Style.Failure });
   }
 }
