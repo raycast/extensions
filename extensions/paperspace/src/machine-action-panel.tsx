@@ -17,7 +17,8 @@ export const MachineActionPanel: FC<{ machine: Machine }> = ({ machine }) => {
       <ActionPanel.Section>
         {isUsable(machine) && machine.state !== "restarting" && (
           <Action
-            title="Toggle Start/stop"
+            // eslint-disable-next-line @raycast/prefer-title-case
+            title="Toggle Start/Stop"
             icon={Icon.Power}
             onAction={toggleMachine(machine)}
             shortcut={{ modifiers: [], key: "enter" }}
