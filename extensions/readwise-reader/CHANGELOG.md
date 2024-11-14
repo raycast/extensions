@@ -1,7 +1,6 @@
 # Readwise Reader Changelog
 
-## [Add save multiple links] - 2024-11-7
-
+## [Add save multiple links] - {PR_MERGE_DATE}
 - Add `Save Links` command
 
 ## [Improve README] - 2023-05-31
