@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { showToast, Toast } from "@raycast/api";
 import { Link } from "../types";
 import { fetchLinks } from "../utils/api";
@@ -12,28 +12,28 @@ interface FetchLinksResponse {
 }
 
 export function useLinks() {
-  const [links, setLinks] = useState<Link[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const { t } = useTranslation();
 
   async function cleanCache() {
     await setCachedLinks([]);
   }
 
-  async function fetchAllLinks() {
+  const { data, isLoading, revalidate } = useCachedPromise(async () => {
     let allLinks: Link[] = [];
     let currentCursor: string | undefined = undefined;
     let isComplete = false;
 
-    await setCachedLinks([]);
+    const cachedLinks = await getCachedLinks();
+    if (cachedLinks && cachedLinks.length > 0) {
+      return cachedLinks;
+    }
 
     while (!isComplete) {
       try {
-        const response = await fetchLinks(currentCursor);
-        const data = response as FetchLinksResponse;
-        allLinks = [...allLinks, ...data.links];
-        currentCursor = data.cursor;
-        isComplete = !data.cursor || data.list_complete;
+        const response = (await fetchLinks(currentCursor)) as FetchLinksResponse;
+        allLinks = [...allLinks, ...response.links];
+        currentCursor = response.cursor;
+        isComplete = !response.cursor || response.list_complete;
       } catch (error) {
         await showToast({
           style: Toast.Style.Failure,
@@ -44,23 +44,19 @@ export function useLinks() {
       }
     }
 
-    setLinks(allLinks);
     await setCachedLinks(allLinks);
-    setIsLoading(false);
-  }
-
-  useEffect(() => {
-    async function loadLinks() {
-      const cachedLinks = await getCachedLinks();
-      if (cachedLinks && cachedLinks.length > 0) {
-        setLinks(cachedLinks);
-        setIsLoading(false);
-      } else {
-        await fetchAllLinks();
-      }
-    }
-    loadLinks();
+    return allLinks;
   }, []);
 
-  return { links, isLoading, refreshLinks: fetchAllLinks, cleanCache };
+  const refreshLinks = async () => {
+    await cleanCache();
+    await revalidate();
+  };
+
+  return {
+    links: data ?? [],
+    isLoading,
+    refreshLinks,
+    cleanCache,
+  };
 }

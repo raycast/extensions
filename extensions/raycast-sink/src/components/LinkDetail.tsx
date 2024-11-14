@@ -1,40 +1,54 @@
-import { Detail, ActionPanel, Action, Icon, useNavigation, showToast } from "@raycast/api";
+import { Detail, ActionPanel, Action, Toast, Icon, useNavigation, showToast } from "@raycast/api";
 import { Link } from "../types";
 import { useTranslation } from "../hooks/useTranslation";
 import { deleteLink } from "../utils/api";
 import { EditLinkView } from "./EditLinkView";
 import { useConfig } from "../hooks/useConfig";
+import { SLUG_LABEL_COLOR } from "../constants";
+import { queryLink } from "../utils/api";
+import { useState } from "react";
 
 interface LinkDetailProps {
   link: Link;
   onRefresh: () => void;
 }
 
-export function LinkDetail({ link, onRefresh }: LinkDetailProps) {
+export function LinkDetail({ link: initialLink, onRefresh }: LinkDetailProps) {
   const { pop } = useNavigation();
   const { t } = useTranslation();
   const { config } = useConfig();
+  const [link, setLink] = useState(initialLink);
+
   const managerUrl = `${config?.host}/dashboard/link??slug=${link.slug}`;
   const shortLink = `${config?.host}/${link.slug}`;
-  const handleEditSuccess = () => {
-    onRefresh();
+
+  const handleEditSuccess = async () => {
+    const toast = await showToast({ title: t.linkUpdating, style: Toast.Style.Animated });
+    try {
+      const updatedLink = (await queryLink(link.slug)) as Link;
+      setLink(updatedLink);
+      onRefresh();
+      toast.style = Toast.Style.Success;
+      toast.title = t.linkUpdated;
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = t.linkQueryFailed;
+      toast.message = String(error);
+    }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
+    const toast = await showToast({ title: t.linkDeleting, style: Toast.Style.Animated });
     try {
-      deleteLink(link.slug).then(() => {
-        onRefresh();
-        pop();
-        showToast({
-          title: t.deleteSuccess,
-          message: t.deleteSuccess,
-        });
-      });
+      await deleteLink(link.slug);
+      toast.style = Toast.Style.Success;
+      toast.title = t.deleteSuccess;
+      toast.message = t.deleteSuccess;
+      pop();
+      onRefresh();
     } catch (error) {
-      showToast({
-        title: t.deleteFailed,
-        message: t.deleteFailed,
-      });
+      toast.style = Toast.Style.Failure;
+      toast.message = String(error);
     }
   };
 
@@ -63,7 +77,7 @@ ${managerUrl}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.TagList title={t.slug}>
-            <Detail.Metadata.TagList.Item text={link.slug} color={"#eed535"} />
+            <Detail.Metadata.TagList.Item text={link.slug} color={SLUG_LABEL_COLOR} />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title={t.createdAt} text={new Date(link.createdAt * 1000).toLocaleString()} />

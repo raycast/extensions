@@ -84,7 +84,7 @@
     },
     {
       "name": "token",
-      "type": "textfield",
+      "type": "password",
       "required": true,
       "title": "API Token",
       "description": "Enter your API token",

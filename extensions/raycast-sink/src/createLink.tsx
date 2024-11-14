@@ -1,63 +1,50 @@
-import React, { useState } from "react";
-import { URL } from "url";
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
 import { useTranslation } from "./hooks/useTranslation";
 import { createLink } from "./utils/api";
 import { LinkDetail } from "./components/LinkDetail";
 import { CreateLinkResponse } from "./types";
 import { useLinks } from "./hooks/useLinks";
+import { validUrl } from "./utils/url";
 
-const validUrl = (url: string) => {
-  try {
-    new URL(url);
-    return true;
-  } catch (error) {
-    return false;
-  }
-};
+interface FormValues {
+  url: string;
+  slug: string;
+  comment?: string;
+}
 
 export default function CreateLinkView() {
-  const [urlError, setUrlError] = useState<string | undefined>();
-  const [slugError, setSlugError] = useState<string | undefined>();
   const { t } = useTranslation();
   const { push } = useNavigation();
   const { refreshLinks } = useLinks();
 
-  async function handleSubmit(values: { url: string; slug: string; comment?: string }) {
-    if (!values.url) {
-      setUrlError(t.urlRequired);
-      return;
-    }
-    if (!values.slug) {
-      setSlugError(t.slugRequired);
-      return;
-    }
+  const { handleSubmit, itemProps } = useForm<FormValues>({
+    validation: {
+      url: (value) => {
+        if (!value) return t.urlRequired;
+        if (!validUrl(value)) return t.invalidUrl;
+      },
+      slug: FormValidation.Required,
+    },
+    async onSubmit(values) {
+      const toast = await showToast({ title: t.linkCreating, style: Toast.Style.Animated });
+      try {
+        const newLink = (await createLink(values.url, values.slug, values.comment)) as CreateLinkResponse;
 
-    if (!validUrl(values.url)) {
-      setUrlError(t.invalidUrl);
-      return;
-    }
-
-    try {
-      const newLink = (await createLink(values.url, values.slug, values.comment)) as CreateLinkResponse;
-      await showToast({
-        style: Toast.Style.Success,
-        title: t.linkCreated,
-        message: newLink?.link?.slug || values.slug,
-      });
-
-      if (newLink && newLink.link) {
-        push(<LinkDetail link={newLink.link} onRefresh={refreshLinks} />);
+        if (newLink && newLink.link) {
+          toast.style = Toast.Style.Success;
+          toast.title = t.linkCreated;
+          toast.message = newLink?.link?.slug || values.slug;
+          push(<LinkDetail link={newLink.link} onRefresh={refreshLinks} />);
+          refreshLinks();
+        }
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = t.linkCreationFailed;
+        toast.message = String(error);
       }
-      refreshLinks();
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: t.linkCreationFailed,
-        message: String(error),
-      });
-    }
-  }
+    },
+  });
 
   return (
     <Form
@@ -67,21 +54,9 @@ export default function CreateLinkView() {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="url"
-        title={t.url}
-        placeholder={t.enterUrl}
-        error={urlError}
-        onChange={() => setUrlError(undefined)}
-      />
-      <Form.TextField
-        id="slug"
-        title={t.slug}
-        placeholder={t.enterSlug}
-        error={slugError}
-        onChange={() => setSlugError(undefined)}
-      />
-      <Form.TextField id="comment" title={t.comment} placeholder={t.enterComment} />
+      <Form.TextField {...itemProps.url} title={t.url} placeholder={t.enterUrl} />
+      <Form.TextField {...itemProps.slug} title={t.slug} placeholder={t.enterNewLinkSlug} />
+      <Form.TextField {...itemProps.comment} title={t.comment} placeholder={t.enterComment} />
     </Form>
   );
 }

@@ -12,8 +12,8 @@ import { useNavigation } from "@raycast/api";
 
 export default function LinkListView() {
   const { links, isLoading: isLinksLoading, refreshLinks, cleanCache } = useLinks();
-  const { t } = useTranslation();
   const { config, isLoading: isConfigLoading } = useConfig();
+  const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
   const { push } = useNavigation();
 
@@ -48,34 +48,37 @@ export default function LinkListView() {
   }, [links, searchText]);
 
   async function handleSearch(query: string) {
+    const toast = await showToast({ title: t.linkSearching(query), style: Toast.Style.Animated });
     if (!query.trim()) return;
     try {
       const result = await queryLink(query);
       if (result && typeof result === "object" && "slug" in result) {
+        toast.style = Toast.Style.Success;
+        toast.title = t.linkFound(query);
         const link = result as Link;
         push(<LinkDetail link={link} onRefresh={refreshLinks} />);
       } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: t.linkNotFound,
-          message: query,
-        });
+        toast.style = Toast.Style.Failure;
+        toast.title = t.linkNotFound;
+        toast.message = query;
       }
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: t.linkQueryFailed,
-        message: String(error),
-      });
+      toast.style = Toast.Style.Failure;
+      toast.title = t.linkQueryFailed;
+      toast.message = String(error);
     }
   }
 
   if (isLinksLoading || isConfigLoading || !config) {
-    <List.EmptyView
-      title={t.loadingLinks || "Loading"}
-      description={t.loadingLinksDescription || "Your links are on the way"}
-      icon={Icon.AirplaneLanding}
-    />;
+    return (
+      <List>
+        <List.EmptyView
+          title={t.loadingLinks || "Loading"}
+          description={t.loadingLinksDescription || "Your links are on the way"}
+          icon={Icon.AirplaneLanding}
+        />
+      </List>
+    );
   }
   const validLinks = links.filter((link): link is Link => link != null && typeof link === "object" && "id" in link);
   const listTitle = searchText
