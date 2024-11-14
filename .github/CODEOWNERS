@@ -860,6 +860,7 @@
 /extensions/markdown-blog-manager                                   @pyronaur
 /extensions/markdown-image-to-html                                  @qeude @daniellacoste
 /extensions/markdown-reference                                      @codedbyjordan
+/extensions/markdown-slides                                         @dnnsmnstrr @pernielsentikaer
 /extensions/markdown-table-generator                                @Visual-Studio-Coder
 /extensions/markdown-this                                           @aravindballa
 /extensions/markdown-to-jira                                        @theo-brlle
