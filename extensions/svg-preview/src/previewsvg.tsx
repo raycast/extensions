@@ -1,12 +1,4 @@
-import {
-  Detail,
-  ActionPanel,
-  Action,
-  Clipboard,
-  showToast,
-  Toast,
-  environment,
-} from "@raycast/api";
+import { Detail, ActionPanel, Action, Clipboard, showToast, Toast, environment } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { writeFileSync, readFileSync } from "fs";
 import { join } from "path";
@@ -111,6 +103,7 @@ ${preview.svgCode}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard
+            // eslint-disable-next-line @raycast/prefer-title-case
             title="复制 SVG 源代码"
             content={preview.svgCode}
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
