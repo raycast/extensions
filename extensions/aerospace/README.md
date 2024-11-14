@@ -6,7 +6,7 @@ It works with the existing installation of [AeroSpace](https://github.com/nikita
 
 ![shortcuts](./metadata/aerospace-1.png)
 
-![menubar](./metadata/aerospace-2.jpg)
+![menubar](./media/menubar.jpg)
 
 ![switcher](./metadata/aerospace-3.png)
 
