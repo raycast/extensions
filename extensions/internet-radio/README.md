@@ -48,3 +48,7 @@ You can use the import and export capabilities of the extension to share sets of
 - [Classical Music Stations](https://gist.github.com/SKaplanOfficial/ff7b8dd2c877f8aaee2e3e3c8d49a0f9)
 - [Hawaiian Music Stations](https://gist.github.com/SKaplanOfficial/40b689444fe2362902ed220a76f9066b)
 - [Movie Soundtrack Stations](https://raw.githubusercontent.com/SKaplanOfficial/internet-radio/main/station-sets/genre-soundtracks.json)
+
+## Troubleshooting
+
+If the Music app is not playing a station, go to System Settings > Privacy and Security > Automation > Raycast > and make sure both Music and System Events are enabled.
