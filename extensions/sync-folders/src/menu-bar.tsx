@@ -159,12 +159,12 @@ export default function Command() {
     <MenuBarExtra isLoading={isLoading} icon={`extension-icon.svg`} tooltip="Sync Folders">
       {syncFoldersWithoutDelete && syncFoldersWithoutDelete.length > 0 && (
         <MenuBarExtra.Section title="Sync Folders without Delete">
-          {syncFoldersWithoutDelete.map(({ id, name, last_sync }) => (
+          {syncFoldersWithoutDelete.map(({ id, icon, name, last_sync }) => (
             <MenuBarExtra.Item
               key={id}
               title={`⇅ ${name as string}`}
               subtitle={` ⋯ Last Sync: ${lastSyncDate(last_sync)}`}
-              icon="folders-green.svg"
+              icon={{ source: icon ? Icon[icon as keyof typeof Icon] : Icon.Folder, tintColor: Color.Green }}
               onAction={() => handleRunSyncFolders(id as string)}
             />
           ))}
@@ -173,12 +173,12 @@ export default function Command() {
 
       {syncFoldersWithDelete && syncFoldersWithDelete.length > 0 && (
         <MenuBarExtra.Section title="Sync Folders with Delete">
-          {syncFoldersWithDelete.map(({ id, name, last_sync }) => (
+          {syncFoldersWithDelete.map(({ id, icon, name, last_sync }) => (
             <MenuBarExtra.Item
               key={id}
               title={`⇅ ${name as string}`}
               subtitle={` ⋯ Last Sync: ${lastSyncDate(last_sync)}`}
-              icon="folders-orange.svg"
+              icon={{ source: icon ? Icon[icon as keyof typeof Icon] : Icon.Folder, tintColor: Color.Orange }}
               onAction={() => handleRunSyncFolders(id as string)}
             />
           ))}
