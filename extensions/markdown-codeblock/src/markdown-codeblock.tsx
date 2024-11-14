@@ -81,7 +81,11 @@ export default function Command() {
   }, [recentlyUsed]);
 
   function handleFiltering(searchText: string) {
-    const filteredItems = LIST_ITEMS.filter((item) => item.keywords.some((keyword) => keyword.includes(searchText)));
+    const filteredItems = LIST_ITEMS.filter(
+      (item) =>
+        item.keywords.some((keyword) => keyword.includes(searchText.toLowerCase())) ||
+        item.title.toLowerCase().includes(searchText.toLowerCase()),
+    );
     const sortedItems = sortBySearchRelevance(filteredItems, searchText);
     setItems(sortedItems);
   }
