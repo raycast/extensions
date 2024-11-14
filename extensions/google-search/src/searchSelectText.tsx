@@ -1,7 +1,7 @@
 import { getSelectedText, showToast, Toast, closeMainWindow, popToRoot, open, LocalStorage } from "@raycast/api";
 import { nanoid } from "nanoid";
 import { getSearchHistory } from "./utils/handleResults";
-import { SearchResult, HISTORY_KEY, Preferences } from "./utils/types";
+import { SearchResult, HISTORY_KEY } from "./utils/types";
 
 export default async function Command() {
   try {
