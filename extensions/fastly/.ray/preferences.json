@@ -1,0 +1,27 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fastly",
+  "title": "Fastly",
+  "description": "Manage your Fastly services",
+  "icon": "command-icon.png",
+  "author": "JonathanSpeek",
+  "categories": ["Developer Tools"],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "Fastly API Token",
+      "description": "Your Fastly API token from https://manage.fastly.com/account/personal/tokens",
+      "placeholder": "Enter your personal Fastly API token"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Manage Services",
+      "description": "List and manage your Fastly services",
+      "mode": "view"
+    }
+  ]
+}
