@@ -1,5 +1,5 @@
-import { Form, ActionPanel, Action, showToast, Toast, popToRoot } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
+import { Form, ActionPanel, Action, showToast, popToRoot } from "@raycast/api";
+import { useForm, FormValidation, showFailureToast } from "@raycast/utils";
 import { MemoStorage } from "./storage/memo-storage";
 
 interface CreateMemoForm {
@@ -13,15 +13,13 @@ export default function Command() {
       try {
         await MemoStorage.createMemo(values.title, values.desc);
         await showToast({
-          style: Toast.Style.Success,
-          title: "Memo saved successfully",
+          title: "Memo Saved",
+          message: "Your memo has been saved successfully",
         });
         await popToRoot();
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast(error, {
           title: "Failed to save memo",
-          message: error instanceof Error ? error.message : "Unknown error occurred",
         });
       }
     },

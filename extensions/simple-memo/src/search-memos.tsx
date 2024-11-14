@@ -1,10 +1,10 @@
-import { ActionPanel, List, Action, Icon, showToast } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, showToast, confirmAlert } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { MemoStorage } from "./storage/memo-storage";
 import { Memo } from "./storage/types";
-import { format } from "date-fns";
 import CreateMemo from "./create-memo";
 import EditMemo from "./edit-memo";
+import { showFailureToast } from "@raycast/utils";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -20,7 +20,7 @@ export default function Command() {
       const loadedMemos = await MemoStorage.getAllMemos();
       setMemos(loadedMemos);
     } catch (error) {
-      showToast({
+      showFailureToast(error, {
         title: "Error loading memos",
       });
     } finally {
@@ -36,9 +36,29 @@ export default function Command() {
         title: "Memo deleted successfully",
       });
     } catch (error) {
-      showToast({
+      showFailureToast(error, {
         title: "Error deleting memo",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
+      });
+    }
+  }
+
+  async function handleDeleteAllMemos() {
+    // Show confirmation alert
+    if (await confirmAlert({ title: "Are you sure you want to delete all memos?" })) {
+      try {
+        await MemoStorage.deleteAllMemos(); // Assuming this method exists
+        setMemos([]); // Clear the memos state
+        showToast({
+          title: "All memos deleted successfully",
+        });
+      } catch (error) {
+        showFailureToast(error, {
+          title: "Error deleting all memos",
+        });
+      }
+    } else {
+      showToast({
+        title: "Deletion canceled",
       });
     }
   }
@@ -61,15 +81,9 @@ export default function Command() {
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label title="Content type" text="Text" />
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label
-                    title="Created"
-                    text={format(new Date(memo.createdAt), "MMM dd, yyyy 'at' h:mm:ss a")}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Created" text={new Date(memo.createdAt).toLocaleString()} />
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label
-                    title="Updated"
-                    text={format(new Date(memo.updatedAt), "MMM dd, yyyy 'at' h:mm:ss a")}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Updated" text={new Date(memo.updatedAt).toLocaleString()} />
                 </List.Item.Detail.Metadata>
               }
             />
@@ -102,6 +116,12 @@ export default function Command() {
                   style={Action.Style.Destructive}
                   onAction={() => handleDeleteMemo(memo.id)}
                   shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                />
+                <Action
+                  title="Delete All Memos"
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  onAction={handleDeleteAllMemos}
                 />
               </ActionPanel.Section>
             </ActionPanel>

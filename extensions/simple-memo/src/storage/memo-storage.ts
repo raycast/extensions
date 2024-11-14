@@ -73,6 +73,15 @@ export class MemoStorage {
     }
   }
 
+  static async deleteAllMemos(): Promise<void> {
+    try {
+      await LocalStorage.setItem(STORAGE_KEY, JSON.stringify([]));
+    } catch (error) {
+      console.error("Error deleting all memos:", error);
+      throw new Error("Failed to delete all memos");
+    }
+  }
+
   static async getMemoById(id: string): Promise<Memo | undefined> {
     try {
       const memos = await this.getAllMemos();

@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Form, useNavigation, Icon, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, useNavigation, Icon, popToRoot, showToast } from "@raycast/api";
 import { useState } from "react";
 import { MemoStorage } from "./storage/memo-storage";
 import { Memo } from "./storage/types";
-import { useForm } from "@raycast/utils";
+import { showFailureToast, useForm } from "@raycast/utils";
 
 interface EditMemoProps {
   memo: Memo;
@@ -30,15 +30,13 @@ export default function Command({ memo }: EditMemoProps) {
 
         await MemoStorage.updateMemo(memo.id, updatedMemo);
         await showToast({
-          style: Toast.Style.Success,
-          title: "Memo updated successfully",
+          title: "Memo Updated",
+          message: "Your memo has been updated successfully",
         });
         await popToRoot();
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast(error, {
           title: "Failed to update memo",
-          message: error instanceof Error ? error.message : "Unknown error occurred",
         });
       } finally {
         setIsLoading(false);

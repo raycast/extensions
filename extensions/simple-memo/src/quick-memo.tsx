@@ -1,6 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
 import { MemoStorage } from "./storage/memo-storage";
 import { format } from "date-fns";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function Command(props: { arguments: { content: string } }) {
   function generateMemoTitle(content: string): string {
@@ -33,16 +34,12 @@ export default async function Command(props: { arguments: { content: string } })
 
     // Show success message
     await showToast({
-      style: Toast.Style.Success,
       title: "Memo Saved",
       message: "Your memo has been saved successfully",
     });
   } catch (error) {
-    console.error("Error saving memo:", error);
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(error, {
       title: "Error Saving Memo",
-      message: error instanceof Error ? error.message : "An unknown error occurred",
     });
   }
 }
