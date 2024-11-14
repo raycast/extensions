@@ -114,6 +114,19 @@ export default function Command() {
           </ActionPanel>
         }
       />
+      <List.Item
+        icon={Icon.RotateClockwise}
+        title="Track past habit"
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser
+              title="Track past habit"
+              url="https://www.supahabits.com/dashboard/past-habits"
+              shortcut={{ modifiers: ["cmd"], key: "h" }}
+            />
+          </ActionPanel>
+        }
+      />
     </List>
   );
 }
