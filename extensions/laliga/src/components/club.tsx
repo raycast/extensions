@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
-import { format } from "date-fns";
+import { formatDate } from "date-fns";
 import json2md from "json2md";
 import { Team } from "../types";
 import ClubSquad from "./squad";
@@ -26,7 +26,7 @@ export default function ClubProfile(team: Team) {
         <Detail.Metadata>
           <Detail.Metadata.Label
             title="Year of foundation"
-            text={team.foundation ? format(new Date(team.foundation), "yyyy") : ""}
+            text={team.foundation ? formatDate(team.foundation, "yyyy") : ""}
           />
 
           <Detail.Metadata.TagList title="Club Colors">

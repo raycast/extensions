@@ -1,15 +1,16 @@
-import { ActionPanel, Action, Color, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
-import { useState, useEffect, useRef, useCallback } from "react";
-import fetch, { AbortError } from "node-fetch";
+import { ActionPanel, Action, Color, getPreferenceValues, List, Icon } from "@raycast/api";
+import { useState } from "react";
 import { URL } from "node:url";
+import { useFetch } from "@raycast/utils";
 
 export default function Command() {
-  const { state, search } = useSearch();
+  const [searchText, setSearchText] = useState("");
+  const state = useSearch(searchText);
 
   return (
     <List
       isLoading={state.isLoading}
-      onSearchTextChange={search}
+      onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search nix packages..."
       throttle
       isShowingDetail
@@ -57,9 +58,13 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title="Name" text={searchResult.name} />
               <List.Item.Detail.Metadata.Label title="Version" text={searchResult.version} />
-              {searchResult.homepage.map((url) => (
-                <List.Item.Detail.Metadata.Link key={url} title="Homepage" target={url} text={new URL(url).host} />
-              ))}
+              {searchResult.homepage.map((url, idx) =>
+                url ? (
+                  <List.Item.Detail.Metadata.Link key={url} title="Homepage" target={url} text={new URL(url).host} />
+                ) : (
+                  <List.Item.Detail.Metadata.Label key={idx} title="Homepage" icon={Icon.Minus} />
+                )
+              )}
               {searchResult.source && (
                 <List.Item.Detail.Metadata.Link
                   title="Source"
@@ -101,60 +106,8 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   );
 }
 
-function useSearch() {
-  const [state, setState] = useState<SearchState>({ results: [], isLoading: true });
-  const cancelRef = useRef<AbortController | null>(null);
-
-  const search = useCallback(
-    async function search(searchText: string) {
-      cancelRef.current?.abort();
-      cancelRef.current = new AbortController();
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: true,
-      }));
-      try {
-        const results = await performSearch(searchText, cancelRef.current.signal);
-        setState((oldState) => ({
-          ...oldState,
-          results: results,
-          isLoading: false,
-        }));
-      } catch (error) {
-        setState((oldState) => ({
-          ...oldState,
-          isLoading: false,
-        }));
-
-        if (error instanceof AbortError) {
-          return;
-        }
-
-        console.error("search error", error);
-        showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(error) });
-      }
-    },
-    [cancelRef, setState]
-  );
-
-  useEffect(() => {
-    search("");
-    return () => {
-      cancelRef.current?.abort();
-    };
-  }, []);
-
-  return {
-    state: state,
-    search: search,
-  };
-}
-
-async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
-  if (searchText.length === 0) return [];
-
-  const { searchSize, branchName } = getPreferenceValues();
-
+function useSearch(searchText: string) {
+  const { searchSize, branchName } = getPreferenceValues<Preferences>();
   const queryFields = [
     "package_attr_name^9",
     "package_attr_name.edge^9",
@@ -181,10 +134,10 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
     "flake_name_reverse^0.4",
     "flake_name_reverse.edge^0.4",
   ];
-
   const reversedSearchText = [...searchText].reverse().join("");
+
   const query = {
-    size: Math.trunc(searchSize),
+    size: Math.trunc(+searchSize),
     sort: [{ _score: "desc" }, { package_attr_name: "desc" }, { package_pversion: "desc" }],
     query: {
       bool: {
@@ -225,83 +178,87 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
     },
   };
 
-  const response = await fetch(
+  const { isLoading, data } = useFetch(
     `https://nixos-search-7-1733963800.us-east-1.bonsaisearch.net/latest-42-nixos-${branchName}/_search`,
     {
-      method: "post",
-      signal: signal,
+      method: "POST",
       headers: {
         Authorization: "Basic YVdWU0FMWHBadjpYOGdQSG56TDUyd0ZFZWt1eHNmUTljU2g=",
         "Content-Type": "application/json",
       },
       body: JSON.stringify(query),
+      async parseResponse(response) {
+        const json = (await response.json()) as
+          | {
+              hits: {
+                hits: {
+                  _id: string;
+                  _source: {
+                    package_pname: string;
+                    package_attr_name: string;
+                    package_attr_set: string;
+                    package_outputs: string[];
+                    package_default_output: string | null;
+                    package_description: string | null;
+                    package_homepage: string[];
+                    package_pversion: string;
+                    package_platforms: string[];
+                    package_position: string;
+                    package_license: { fullName: string; url: string | null }[];
+                  };
+                }[];
+              };
+            }
+          | { error: { reason: string }; status: number }
+          | { code: string; message: string };
+
+        if ("code" in json) {
+          throw new Error(json.message);
+        } else if ("error" in json) {
+          throw new Error(json.error.reason);
+        } else if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+
+        return json.hits.hits.map(({ _source: result, _id: id }) => {
+          return {
+            id,
+            name: result.package_pname,
+            attrName: result.package_attr_name,
+            description: result.package_description,
+            version: result.package_pversion,
+            homepage: result.package_homepage,
+            source:
+              result.package_position &&
+              `https://github.com/NixOS/nixpkgs/blob/nixos-unstable/${result.package_position.replace(
+                /:([0-9]+)$/,
+                ""
+              )}`,
+            outputs: result.package_outputs,
+            defaultOutput: result.package_default_output,
+            platforms: result.package_platforms.filter((platform) =>
+              ["x86_64-linux", "aarch64-linux", "i686-linux", "x86_64-darwin", "aarch64-darwin"].includes(platform)
+            ),
+            licenses: result.package_license.map((license) => {
+              let url: string | null;
+              try {
+                url = license.url ?? new URL(license.fullName).href;
+              } catch {
+                url = null;
+              }
+              return { name: license.fullName, url };
+            }),
+          };
+        });
+      },
+      initialData: [],
+      execute: searchText.length > 0,
+      failureToastOptions: {
+        title: "Could not perform search",
+      },
     }
   );
-
-  const json = (await response.json()) as
-    | {
-        hits: {
-          hits: {
-            _id: string;
-            _source: {
-              package_pname: string;
-              package_attr_name: string;
-              package_attr_set: string;
-              package_outputs: string[];
-              package_default_output: string | null;
-              package_description: string | null;
-              package_homepage: string[];
-              package_pversion: string;
-              package_platforms: string[];
-              package_position: string;
-              package_license: { fullName: string; url: string | null }[];
-            };
-          }[];
-        };
-      }
-    | { error: { reason: string }; status: number }
-    | { code: string; message: string };
-
-  if ("code" in json) {
-    throw new Error(json.message);
-  } else if ("error" in json) {
-    throw new Error(json.error.reason);
-  } else if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-
-  return json.hits.hits.map(({ _source: result, _id: id }) => {
-    return {
-      id,
-      name: result.package_pname,
-      attrName: result.package_attr_name,
-      description: result.package_description,
-      version: result.package_pversion,
-      homepage: result.package_homepage,
-      source:
-        result.package_position &&
-        `https://github.com/NixOS/nixpkgs/blob/nixos-unstable/${result.package_position.replace(/:([0-9]+)$/, "")}`,
-      outputs: result.package_outputs,
-      defaultOutput: result.package_default_output,
-      platforms: result.package_platforms.filter((platform) =>
-        ["x86_64-linux", "aarch64-linux", "i686-linux", "x86_64-darwin", "aarch64-darwin"].includes(platform)
-      ),
-      licenses: result.package_license.map((license) => {
-        let url: string | null;
-        try {
-          url = license.url ?? new URL(license.fullName).href;
-        } catch {
-          url = null;
-        }
-        return { name: license.fullName, url };
-      }),
-    };
-  });
-}
-
-interface SearchState {
-  results: SearchResult[];
-  isLoading: boolean;
+  return { isLoading, results: !searchText.length ? [] : data };
 }
 
 interface SearchResult {
