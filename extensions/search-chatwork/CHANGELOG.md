@@ -1,5 +1,15 @@
 # Chatwork Search Changelog
 
+## [Enhancements] - {PR_MERGE_DATE}
+
+- _Cache_ "Rooms" with the help of `useCachedPromise`
+- Make _OAuth_ more robust with the use of OAuth Util
+- Add **Room** icon and accessories
+<!-- - Show `EmptyView` when no rooms -->
+
+### Dev Notes
+- Replace `for` with `map` in Rooms
+
 ## [Added Room Search] - 2023-06-22
 
 - Added room search command 
