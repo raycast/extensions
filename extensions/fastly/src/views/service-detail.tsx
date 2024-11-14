@@ -132,25 +132,26 @@ ${stats.shield ? `- **Shield Hits**: ${formatNumber(stats.shield)}` : ""}
 - **Created**: ${new Date(service.created_at).toLocaleString()}
 - **Last Updated**: ${new Date(service.updated_at).toLocaleString()}
 
-${details?.versions
-      ? `
+${
+  details?.versions
+    ? `
 ## Version History
 ${details.versions
-        .sort((a: Version, b: Version) => b.number - a.number)
-        .slice(0, 5)
-        .map((version: Version) => {
-          const status: string[] = [];
-          if (version.active) status.push("Active");
-          if (version.staging) status.push("Staging");
-          if (version.testing) status.push("Testing");
-          if (version.locked) status.push("Locked");
+  .sort((a: Version, b: Version) => b.number - a.number)
+  .slice(0, 5)
+  .map((version: Version) => {
+    const status: string[] = [];
+    if (version.active) status.push("Active");
+    if (version.staging) status.push("Staging");
+    if (version.testing) status.push("Testing");
+    if (version.locked) status.push("Locked");
 
-          return `- **Version ${version.number}**: ${status.join(", ") || "No status"} (${new Date(version.updated_at).toLocaleDateString()})`;
-        })
-        .join("\n")}
+    return `- **Version ${version.number}**: ${status.join(", ") || "No status"} (${new Date(version.updated_at).toLocaleDateString()})`;
+  })
+  .join("\n")}
 `
-      : ""
-    }
+    : ""
+}
 
 ${renderStats()}
 `;

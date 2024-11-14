@@ -1,7 +1,7 @@
 import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { inviteTeamMember } from "./api";
-import { FastlyRole } from './types';
+import { FastlyRole } from "./types";
 
 export default function InviteTeamMember() {
   const [isLoading, setIsLoading] = useState(false);
