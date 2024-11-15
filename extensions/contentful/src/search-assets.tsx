@@ -48,7 +48,11 @@ export default function SearchAssets() {
           <Grid.Item
             key={asset.sys.id}
             title={asset.fields.title[CONTENTFUL_LOCALE] || "Untitled"}
-            content={!asset.fields.file ? { source: "untitled.svg", tintColor: Color.SecondaryText} : `https:${asset.fields.file[CONTENTFUL_LOCALE].url}`}
+            content={
+              !asset.fields.file
+                ? { source: "untitled.svg", tintColor: Color.SecondaryText }
+                : `https:${asset.fields.file[CONTENTFUL_LOCALE].url}`
+            }
             actions={
               <ActionPanel>
                 <OpenInContentful url={`${CONTENTFUL_LINKS.space}assets/${asset.sys.id}`} />

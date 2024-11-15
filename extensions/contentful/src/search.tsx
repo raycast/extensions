@@ -10,6 +10,7 @@ type ContentfulContentEntry = EntryProps<KeyValueMap>;
 type ContentfulEntryStatus = "archived" | "published" | "draft" | "changed";
 
 function getEntryStatus(entry: ContentfulContentEntry): ContentfulEntryStatus {
+  // reference: https://www.contentful.com/developers/docs/tutorials/general/determine-entry-asset-state/
   if (!entry.sys.publishedVersion) return "draft";
   if (entry.sys.archivedVersion) return "archived";
   if (!!entry.sys.publishedVersion && entry.sys.version >= entry.sys.publishedVersion + 2) return "changed";
