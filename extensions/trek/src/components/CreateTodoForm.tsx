@@ -16,17 +16,17 @@ interface CreateTodoFormValues {
 }
 
 export default function CreateTodoForm({
-  isLoading,
   accountId,
   projectId,
   todoListId,
   onSuccess,
+  isLoading,
 }: {
-  isLoading: boolean;
   accountId: string;
   projectId: number;
   todoListId: number;
   onSuccess: () => void;
+  isLoading?: boolean;
 }) {
   const [projectPeople, setProjectPeople] = useState<BasecampPerson[]>([]);
   const [isLoadingProjectPeople, setIsLoadingProjectPeople] = useState(false);
