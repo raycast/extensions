@@ -50,15 +50,8 @@ export async function fetchLinks(cursor?: string) {
   return fetchWithAuth(path);
 }
 
-export async function fetchLinkBySlug(slug: string) {
-  try {
-    return await fetchWithAuth(`/api/link/query?slug=${slug}`);
-  } catch (error) {
-    if (error instanceof Error && error.message.includes("404")) {
-      return null;
-    }
-    throw error;
-  }
+export async function queryLink(slug: string) {
+  return fetchWithAuth(`/api/link/query?slug=${slug}`);
 }
 
 export async function createLink(url: string, slug?: string, comment?: string) {
@@ -66,10 +59,6 @@ export async function createLink(url: string, slug?: string, comment?: string) {
     method: "POST",
     body: { url, slug, comment },
   });
-}
-
-export async function queryLink(slug: string) {
-  return fetchLinkBySlug(slug);
 }
 
 export async function deleteLink(slug: string): Promise<void> {
@@ -84,4 +73,8 @@ export async function editLink(slug: string, url: string, comment?: string) {
     method: "PUT",
     body: { slug, url, comment },
   });
+}
+
+export async function statsCounter(id: string) {
+  return fetchWithAuth(`/api/stats/counters?id=${id}`);
 }
