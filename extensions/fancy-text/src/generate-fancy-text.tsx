@@ -1,5 +1,5 @@
 import React from "react";
-import { List, Action, ActionPanel, Icon, Keyboard, getPreferenceValues } from "@raycast/api";
+import { List, Action, ActionPanel, Icon, Keyboard, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import fonts from "./fonts.json";
 
@@ -92,14 +92,17 @@ export default function Command() {
         accessories={[{ text: font.fontName }]}
         actions={
           <ActionPanel>
-            {defaultAction === "copy" ? copyAction : pasteAction}
-            {defaultAction === "copy" ? pasteAction : copyAction}
-            <Action
-              title={isPinned ? "Unpin Font" : "Pin Font"}
-              icon={isPinned ? Icon.PinDisabled : Icon.Pin}
-              onAction={() => togglePin(font.fontName)}
-              shortcut={Keyboard.Shortcut.Common.Pin}
-            />
+            <ActionPanel.Section>
+              {defaultAction === "copy" ? copyAction : pasteAction}
+              {defaultAction === "copy" ? pasteAction : copyAction}
+              <Action
+                title={isPinned ? "Unpin Font" : "Pin Font"}
+                icon={isPinned ? Icon.PinDisabled : Icon.Pin}
+                onAction={() => togglePin(font.fontName)}
+                shortcut={Keyboard.Shortcut.Common.Pin}
+              />
+            </ActionPanel.Section>
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           </ActionPanel>
         }
       />
