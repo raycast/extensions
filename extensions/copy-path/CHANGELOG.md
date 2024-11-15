@@ -1,5 +1,9 @@
 # Copy Path Changelog
 
+## [Add Preference: Use tilde for home directory] - {PR_MERGE_DATE}
+
+- Add Preference _Use tilde for home directory_: Use a tilde for the home directory in the copied path.
+
 ## [Support Zen Browser] - 2024-10-29
 
 - Support Zen Browser
