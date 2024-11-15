@@ -1,4 +1,14 @@
-import { ActionPanel, Action, List, Clipboard, LocalStorage, popToRoot } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  Clipboard,
+  LocalStorage,
+  popToRoot,
+  getSelectedText,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { LIST_ITEMS } from "./constants";
 
@@ -8,15 +18,17 @@ type Item = {
   keywords: string[];
 };
 
-async function paste(item: Item) {
+async function paste(item: Item, text?: string) {
+  if (!text?.trim()) {
+    showToast({ title: "No text selected to paste.", style: Toast.Style.Failure });
+    return;
+  }
+
   const [codeblockTag = ""] = item.keywords;
-  const copiedText = await Clipboard.readText();
-  if (!copiedText) return;
-
-  const codeblock = `\`\`\`${codeblockTag}\n${copiedText}\n\`\`\``;
+  const codeblock = `\`\`\`${codeblockTag}\n${text}\n\`\`\``;
   await Clipboard.paste(codeblock);
-
   await updateLastUsed(item);
+  await popToRoot({ clearSearchBar: true });
 }
 
 async function updateLastUsed(item: Item) {
@@ -58,29 +70,32 @@ function sortBySearchRelevance(items: Item[], searchText: string) {
 
 export default function Command() {
   const [items, setItems] = useState<Item[]>([]);
-  const [recentlyUsed, setRecentlyUsed] = useState<Record<string, number>>({});
+  const [recentlyUsed, setRecentlyUsed] = useState<Record<string, number> | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    async function loadData() {
+    async function loadRecentlyUsed() {
       const recentData = await LocalStorage.getItem<string>("recentlyUsed");
       setRecentlyUsed(recentData ? JSON.parse(recentData) : {});
     }
 
-    loadData();
+    loadRecentlyUsed();
   }, []);
 
   useEffect(() => {
-    if (Object.keys(recentlyUsed).length === 0) return;
+    if (!recentlyUsed) return;
     const sortedItems = LIST_ITEMS.sort((a, b) => {
       const aLastUsed = recentlyUsed[a.title] || 0;
       const bLastUsed = recentlyUsed[b.title] || 0;
       return bLastUsed - aLastUsed;
     });
 
-    setItems(sortedItems);
+    setItems([...sortedItems]);
+    setIsLoading(false);
   }, [recentlyUsed]);
 
   function handleFiltering(searchText: string) {
+    if (!searchText) return;
     const filteredItems = LIST_ITEMS.filter(
       (item) =>
         item.keywords.some((keyword) => keyword.includes(searchText.toLowerCase())) ||
@@ -91,10 +106,10 @@ export default function Command() {
   }
 
   return (
-    <List onSearchTextChange={handleFiltering}>
+    <List isLoading={isLoading} onSearchTextChange={handleFiltering}>
       {items.map((item, i) => (
         <List.Item
-          key={i}
+          key={`${item.title}-${i}`}
           icon={{ source: item.icon }}
           title={item.title}
           subtitle={item.keywords.join(", ")}
@@ -102,10 +117,15 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action
-                title="Paste in Active App"
+                title="Paste Clipboard in Active App"
                 onAction={async () => {
-                  await paste(item);
-                  await popToRoot({ clearSearchBar: true });
+                  await paste(item, await Clipboard.readText());
+                }}
+              />
+              <Action
+                title="Paste Selected Text in Active App"
+                onAction={async () => {
+                  await paste(item, await getSelectedText());
                 }}
               />
             </ActionPanel>
