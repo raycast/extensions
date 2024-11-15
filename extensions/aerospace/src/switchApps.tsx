@@ -21,24 +21,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Switch
     console.log({ updatedWindows });
   }, []);
 
-  const [error, setError] = useState<Error>();
-
-  useEffect(() => {
-    setTimeout(() => {
-      setError(new Error("Booom 💥"));
-    }, 20000);
-  }, []);
-
-  useEffect(() => {
-    if (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Something went wrong",
-        message: error.message,
-      });
-    }
-  }, [error]);
-
   const uniqueWorkspaces = useMemo(() => {
     const workspaces = windows.map((window) => window.workspace);
     return [...new Set(workspaces)];
