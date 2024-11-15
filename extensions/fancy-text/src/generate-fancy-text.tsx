@@ -1,5 +1,5 @@
 import React from "react";
-import { List, Action, ActionPanel, Icon } from "@raycast/api";
+import { List, Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import fonts from "./fonts.json";
 
@@ -93,6 +93,7 @@ export default function Command() {
               title={isPinned ? "Unpin Font" : "Pin Font"}
               icon={isPinned ? Icon.PinDisabled : Icon.Pin}
               onAction={() => togglePin(font.fontName)}
+              shortcut={Keyboard.Shortcut.Common.Pin}
             />
           </ActionPanel>
         }
