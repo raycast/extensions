@@ -1,6 +1,6 @@
-import { Action, ActionPanel, LaunchProps, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Action, ActionPanel, LaunchProps, List, getPreferenceValues } from "@raycast/api";
 import { Windows, focusWindow, getWindows } from "./utils/appSwitcher";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useCachedState } from "@raycast/utils";
 
 interface Preferences {
